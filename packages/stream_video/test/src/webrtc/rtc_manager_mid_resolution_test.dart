@@ -3,10 +3,13 @@ import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 class _FakeMediaStreamTrack extends Fake implements rtc.MediaStreamTrack {
-  _FakeMediaStreamTrack(this.id);
+  _FakeMediaStreamTrack(this.id, this.kind);
 
   @override
   final String? id;
+
+  @override
+  final String? kind;
 }
 
 class _FakeSender extends Fake implements rtc.RTCRtpSender {
@@ -17,10 +20,14 @@ class _FakeSender extends Fake implements rtc.RTCRtpSender {
 }
 
 class _FakeTransceiver extends Fake implements rtc.RTCRtpTransceiver {
-  _FakeTransceiver({required this.mid, String? trackId})
-    : sender = _FakeSender(
-        trackId == null ? null : _FakeMediaStreamTrack(trackId),
-      );
+  _FakeTransceiver({
+    required this.mid,
+    String? trackId,
+    String kind = 'video',
+    bool hasTrack = true,
+  }) : sender = _FakeSender(
+         hasTrack ? _FakeMediaStreamTrack(trackId, kind) : null,
+       );
 
   @override
   final String mid;
@@ -75,11 +82,10 @@ void main() {
   group('resolveTrackMid', () {
     test('prefers the live transceiver mid over the SDP', () {
       final mid = resolveTrackMid(
-        trackId: videoTrackId,
-        kind: 'video',
+        transceiver: _FakeTransceiver(mid: '', trackId: videoTrackId),
         liveTransceivers: [
           _FakeTransceiver(mid: '7', trackId: videoTrackId),
-          _FakeTransceiver(mid: '0', trackId: audioTrackId),
+          _FakeTransceiver(mid: '0', trackId: audioTrackId, kind: 'audio'),
         ],
         sdp: _sdp(audioTrackId: audioTrackId, videoTrackId: videoTrackId),
       );
@@ -89,8 +95,7 @@ void main() {
 
     test('falls back to the SDP when the live mid is not assigned yet', () {
       final mid = resolveTrackMid(
-        trackId: videoTrackId,
-        kind: 'video',
+        transceiver: _FakeTransceiver(mid: '', trackId: videoTrackId),
         liveTransceivers: [_FakeTransceiver(mid: '', trackId: videoTrackId)],
         sdp: _sdp(audioTrackId: audioTrackId, videoTrackId: videoTrackId),
       );
@@ -100,8 +105,11 @@ void main() {
 
     test('falls back to the SDP when the track has no live transceiver', () {
       final mid = resolveTrackMid(
-        trackId: audioTrackId,
-        kind: 'audio',
+        transceiver: _FakeTransceiver(
+          mid: '',
+          trackId: audioTrackId,
+          kind: 'audio',
+        ),
         liveTransceivers: [_FakeTransceiver(mid: '3', trackId: videoTrackId)],
         sdp: _sdp(audioTrackId: audioTrackId, videoTrackId: videoTrackId),
       );
@@ -120,8 +128,7 @@ void main() {
       expect(sdp.split('a=msid:stream-id $videoTrackId').length - 1, 2);
 
       final mid = resolveTrackMid(
-        trackId: videoTrackId,
-        kind: 'video',
+        transceiver: _FakeTransceiver(mid: '', trackId: videoTrackId),
         liveTransceivers: const [],
         sdp: sdp,
       );
@@ -131,8 +138,7 @@ void main() {
 
     test('returns null when no m-section carries the track msid', () {
       final mid = resolveTrackMid(
-        trackId: videoTrackId,
-        kind: 'video',
+        transceiver: _FakeTransceiver(mid: '', trackId: videoTrackId),
         liveTransceivers: const [],
         sdp: _sdp(
           audioTrackId: audioTrackId,
@@ -146,9 +152,8 @@ void main() {
 
     test('returns null when the msid matches an m-section of another kind', () {
       final mid = resolveTrackMid(
-        trackId: videoTrackId,
         // The track is video, but only the audio m-section carries its msid.
-        kind: 'video',
+        transceiver: _FakeTransceiver(mid: '', trackId: videoTrackId),
         liveTransceivers: const [],
         sdp: _sdp(
           audioTrackId: videoTrackId,
@@ -162,8 +167,17 @@ void main() {
 
     test('returns null when the track has no id', () {
       final mid = resolveTrackMid(
-        trackId: null,
-        kind: 'video',
+        transceiver: _FakeTransceiver(mid: ''),
+        liveTransceivers: [_FakeTransceiver(mid: '3', trackId: videoTrackId)],
+        sdp: _sdp(audioTrackId: audioTrackId, videoTrackId: videoTrackId),
+      );
+
+      expect(mid, isNull);
+    });
+
+    test('returns null when the sender has no track', () {
+      final mid = resolveTrackMid(
+        transceiver: _FakeTransceiver(mid: '', hasTrack: false),
         liveTransceivers: [_FakeTransceiver(mid: '3', trackId: videoTrackId)],
         sdp: _sdp(audioTrackId: audioTrackId, videoTrackId: videoTrackId),
       );
@@ -173,8 +187,7 @@ void main() {
 
     test('returns null when there is no SDP and no live mid', () {
       final mid = resolveTrackMid(
-        trackId: videoTrackId,
-        kind: 'video',
+        transceiver: _FakeTransceiver(mid: '', trackId: videoTrackId),
         liveTransceivers: [_FakeTransceiver(mid: '', trackId: videoTrackId)],
         sdp: null,
       );
@@ -184,13 +197,47 @@ void main() {
 
     test('returns null instead of throwing on malformed SDP', () {
       final mid = resolveTrackMid(
-        trackId: videoTrackId,
-        kind: 'video',
+        transceiver: _FakeTransceiver(mid: '', trackId: videoTrackId),
         liveTransceivers: const [],
         sdp: 'not an sdp at all',
       );
 
       expect(mid, isNull);
+    });
+
+    group('after the sender track was replaced', () {
+      // `RtcLocalTrack.recreate` (unmute-with-restart, camera facing/parameter
+      // change) attaches a fresh clone to the sender without updating the
+      // transceiver cache, so the cached track id goes stale. Resolution must
+      // follow the sender's current track, otherwise every lookup misses and
+      // the track is dropped from the announce.
+      const staleTrackId = 'stale-clone-id';
+      const currentTrackId = 'current-clone-id';
+
+      test('matches the live transceiver by the current track id', () {
+        final mid = resolveTrackMid(
+          transceiver: _FakeTransceiver(mid: '', trackId: currentTrackId),
+          liveTransceivers: [
+            _FakeTransceiver(mid: '7', trackId: currentTrackId),
+          ],
+          sdp: _sdp(audioTrackId: audioTrackId, videoTrackId: staleTrackId),
+        );
+
+        expect(mid, '7');
+      });
+
+      test('matches the SDP msid by the current track id', () {
+        final mid = resolveTrackMid(
+          transceiver: _FakeTransceiver(mid: '', trackId: currentTrackId),
+          liveTransceivers: [
+            _FakeTransceiver(mid: '', trackId: currentTrackId),
+          ],
+          // A freshly created offer names the clone that is attached now.
+          sdp: _sdp(audioTrackId: audioTrackId, videoTrackId: currentTrackId),
+        );
+
+        expect(mid, '3');
+      });
     });
   });
 }

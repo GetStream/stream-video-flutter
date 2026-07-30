@@ -613,15 +613,19 @@ class RtcManager extends Disposable {
   }
 }
 
-/// Returns the negotiated mid for [trackId] from [liveTransceivers] or, if absent,
-/// from the offer [sdp] for media type [kind]. Returns null if unresolved.
+/// Returns the negotiated mid for the track attached to [transceiver] from
+/// [liveTransceivers] or, if absent, from the offer [sdp]. Returns null if
+/// unresolved.
 @visibleForTesting
 String? resolveTrackMid({
-  required String? trackId,
-  required String? kind,
+  required rtc.RTCRtpTransceiver transceiver,
   required List<rtc.RTCRtpTransceiver> liveTransceivers,
   required String? sdp,
 }) {
+  final sentTrack = transceiver.sender.track;
+  final trackId = sentTrack?.id;
+  final kind = sentTrack?.kind;
+
   if (trackId == null) return null;
 
   // 1. Authoritative: the current transceiver's mid, matched by track id.
@@ -760,9 +764,12 @@ extension PublisherRtcManager on RtcManager {
   }) {
     final track = transceiverCache.track;
 
+    // The track actually attached to the sender — the one named in the SDP.
+    final sentTrackId =
+        transceiverCache.transceiver.sender.track?.id ?? track.mediaTrack.id;
+
     final mid = resolveTrackMid(
-      trackId: track.mediaTrack.id,
-      kind: track.mediaTrack.kind,
+      transceiver: transceiverCache.transceiver,
       liveTransceivers: liveTransceivers,
       sdp: sdp,
     );
@@ -771,11 +778,12 @@ extension PublisherRtcManager on RtcManager {
       _logger.w(
         () =>
             '[transceiverToTrackInfo] could not resolve mid for track '
-            '${track.mediaTrack.id} (${track.trackType}); skipping announce',
+            '$sentTrackId (${track.trackType}); skipping announce',
       );
 
       publisher?.tracer.trace(TraceTag.trackMidUnresolved, {
-        'trackId': track.mediaTrack.id,
+        'trackId': sentTrackId,
+        'cachedTrackId': track.mediaTrack.id,
         'trackType': track.trackType.toString(),
         'publishOptionId': transceiverCache.publishOption.id,
         'liveTransceiverCount': liveTransceivers.length,
@@ -792,7 +800,7 @@ extension PublisherRtcManager on RtcManager {
           audioSettings.hifiAudioEnabled;
 
       return RtcTrackInfo(
-        trackId: track.mediaTrack.id,
+        trackId: sentTrackId,
         trackType: track.trackType,
         publishOptionId: transceiverCache.publishOption.id,
         mid: mid,
@@ -810,7 +818,7 @@ extension PublisherRtcManager on RtcManager {
       );
 
       return RtcTrackInfo(
-        trackId: track.mediaTrack.id,
+        trackId: sentTrackId,
         trackType: track.trackType,
         publishOptionId: transceiverCache.publishOption.id,
         mid: mid,
