@@ -221,4 +221,59 @@ void main() {
       });
     });
   });
+
+  // The watchdog is not the path that matters in practice: the publisher's
+  // `onRenegotiationNeeded` callback and `RtcManager`'s forced renegotiations
+  // both invoke negotiation fire-and-forget, and the rollback returns the
+  // publisher to `stable`, where the watchdog sees nothing to recover.
+  group('a fire-and-forget renegotiation', () {
+    test('escalates rather than leaving the track unpublished', () async {
+      final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
+      final session = _buildTestSession(
+        onReconnectionNeeded: (pc, strategy) => reconnects.add((pc, strategy)),
+      );
+
+      final wires = _wireStalledPublisher(session, sendingTrack: true);
+
+      await session.negotiateOrRecover(wires.publisher);
+
+      verify(wires.publisher.rollbackLocalDescription).called(1);
+      expect(reconnects, hasLength(1));
+      expect(reconnects.single.$1, same(wires.publisher));
+      expect(reconnects.single.$2, SfuReconnectionStrategy.fast);
+    });
+
+    test('does not escalate when there was nothing to announce', () async {
+      final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
+      final session = _buildTestSession(
+        onReconnectionNeeded: (pc, strategy) => reconnects.add((pc, strategy)),
+      );
+
+      final wires = _wireStalledPublisher(session, sendingTrack: false);
+
+      await session.negotiateOrRecover(wires.publisher);
+
+      verify(wires.publisher.rollbackLocalDescription).called(1);
+      expect(reconnects, isEmpty);
+    });
+
+    test('does not escalate on a failure that recovers on its own', () async {
+      final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
+      final session = _buildTestSession(
+        onReconnectionNeeded: (pc, strategy) => reconnects.add((pc, strategy)),
+      );
+
+      final wires = _wireStalledPublisher(session, sendingTrack: true);
+
+      // A dropped SFU socket fails the negotiation too, but the reconnect it
+      // triggers on its own is the one that matters — escalating here would
+      // stack a second one on top.
+      session.sfuWS.connectionState = ConnectionState.disconnected;
+
+      await session.negotiateOrRecover(wires.publisher);
+
+      verifyNever(wires.publisher.rollbackLocalDescription);
+      expect(reconnects, isEmpty);
+    });
+  });
 }
