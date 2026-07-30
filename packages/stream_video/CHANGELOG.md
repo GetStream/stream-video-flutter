@@ -3,6 +3,7 @@
 ### 🐞 Fixed
 
 - Fixed an issue where republishing could reuse a cached publisher transceiver without renegotiating.
+- Fixed a `FormatException` when sending requests if the application name (or other device/app info) contains non-ASCII characters. Values included in the `X-Stream-Client` header are now sanitized to valid header characters.
 
 ## 1.4.2
 

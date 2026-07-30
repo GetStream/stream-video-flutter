@@ -48,7 +48,7 @@ class SfuWebSocket extends StreamWebSocket implements HealthListener {
           .toString();
     }
     final finalWsEndpoint =
-        '$sfuWsEndpoint?X-Stream-Client=$xStreamClientHeader&attempt=${++sessionSeq}&cid=$cid&user_id=$userId&api_key=$apiKey&user_session_id=$sessionId';
+        '$sfuWsEndpoint?X-Stream-Client=${Uri.encodeQueryComponent(xStreamClientHeader)}&attempt=${++sessionSeq}&cid=$cid&user_id=$userId&api_key=$apiKey&user_session_id=$sessionId';
     streamLog.i(tag, () => '<factory> wsEndpoint: $wsEndpoint');
     streamLog.i(tag, () => '<factory> sfuWsEndpoint: $sfuWsEndpoint');
     streamLog.i(tag, () => '<factory> finalWsEndpoint: $finalWsEndpoint');
