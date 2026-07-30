@@ -46,9 +46,6 @@ class TransceiverManager {
   final List<TransceiverCache> _transceivers = [];
   final List<TrackLayersCache> _layers = [];
 
-  /// An array maintaining the order how transceivers were added to the peer connection.
-  final List<RTCRtpTransceiver> _transceiverOrder = [];
-
   /// Adds a transceiver to the cache.
   void add(
     RtcLocalTrack track,
@@ -64,8 +61,6 @@ class TransceiverManager {
         trackPublishOptions: trackPublishOptions,
       ),
     );
-
-    _transceiverOrder.add(transceiver);
   }
 
   /// Gets the transceiver for the given publish option.
@@ -139,11 +134,6 @@ class TransceiverManager {
       final mid = info.mid;
       if (mid != null && mid.isNotEmpty) item.negotiatedMid = mid;
     }
-  }
-
-  /// Init index of the transceiver in the cache.
-  int indexOf(RTCRtpTransceiver transceiver) {
-    return _transceiverOrder.indexOf(transceiver);
   }
 
   /// Gets cached video layers for the given track.
