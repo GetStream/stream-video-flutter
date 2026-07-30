@@ -14,6 +14,7 @@ class TransceiverCache {
     required this.transceiver,
     required this.trackPublishOptions,
     this.negotiated = false,
+    this.negotiatedMid,
   });
 
   RtcLocalTrack track;
@@ -25,9 +26,12 @@ class TransceiverCache {
   /// publisher negotiation.
   bool negotiated;
 
+  /// The mid announced in the last negotiation the SFU acknowledged.
+  String? negotiatedMid;
+
   @override
   String toString() {
-    return 'TransceiverCache{mediaTrackId: ${track.mediaTrack.id}, publishOption: ${publishOption.id},${publishOption.codec}, sender.track.enabled: ${transceiver.sender.track?.enabled}, negotiated: $negotiated}';
+    return 'TransceiverCache{mediaTrackId: ${track.mediaTrack.id}, publishOption: ${publishOption.id},${publishOption.codec}, sender.track.enabled: ${transceiver.sender.track?.enabled}, negotiated: $negotiated, negotiatedMid: $negotiatedMid}';
   }
 }
 
@@ -128,7 +132,12 @@ class TransceiverManager {
                 info.trackId,
       );
 
-      item?.negotiated = true;
+      if (item == null) continue;
+
+      item.negotiated = true;
+
+      final mid = info.mid;
+      if (mid != null && mid.isNotEmpty) item.negotiatedMid = mid;
     }
   }
 

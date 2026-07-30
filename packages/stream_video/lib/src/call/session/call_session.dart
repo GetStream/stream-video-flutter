@@ -1129,7 +1129,7 @@ class CallSession extends Disposable {
 
         // Announcing a subset would leave the omitted m-lines sending media the
         // SFU cannot map, so drop the whole offer. Failing here lets the caller
-        // recover — the publisher watchdog escalates to a rejoin.
+        // recover — the publisher watchdog escalates to a reconnect.
         await pc.rollbackLocalDescription();
 
         return Result<void>.error(

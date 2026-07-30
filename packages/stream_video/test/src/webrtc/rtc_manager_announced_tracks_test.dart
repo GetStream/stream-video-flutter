@@ -4,6 +4,7 @@ import 'package:stream_video/src/call/stats/tracer.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_codec.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_publish_options.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
+import 'package:stream_video/src/webrtc/model/rtc_tracks_info.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/rtc_track/rtc_local_track.dart';
@@ -60,6 +61,26 @@ SfuPublishOptions _option(int id) {
     id: id,
     codec: _testCodec,
     trackType: SfuTrackType.audio,
+  );
+}
+
+/// The announce the SFU acknowledged for [option], as `markNegotiated` sees it.
+RtcTrackInfo _announced(
+  SfuPublishOptions option, {
+  required String trackId,
+  required String mid,
+}) {
+  return RtcTrackInfo(
+    trackId: trackId,
+    trackType: option.trackType,
+    publishOptionId: option.id,
+    mid: mid,
+    layers: const [],
+    codec: option.codec,
+    muted: false,
+    dtx: false,
+    stereo: false,
+    red: false,
   );
 }
 
@@ -242,6 +263,27 @@ void main() {
       expect(announced.single.mid, '4');
     });
 
+    test('falls back to the last acknowledged mid when the peer connection '
+        'is gone and the transceiver reports none', () async {
+      final wires = buildManager();
+      final option = _option(1);
+
+      // What a native rejoin actually looks like: the cached transceiver's mid
+      // was captured before it had one and is never refreshed, so the mid
+      // recorded when the SFU acknowledged the announce is all that is left.
+      cacheTrack(wires.manager, option: option, trackId: 'track-a');
+      wires.manager.transceiversManager.markNegotiated([
+        _announced(option, trackId: 'track-a', mid: '2'),
+      ]);
+
+      stubPeerConnection(wires.pc, failing: true);
+
+      final announced = await wires.manager.getAnnouncedTracksForReconnect();
+
+      expect(announced.single.trackId, 'track-a');
+      expect(announced.single.mid, '2');
+    });
+
     test('drops a track that never negotiated a mid', () async {
       final wires = buildManager();
       cacheTrack(wires.manager, option: _option(1), trackId: 'track-a');
@@ -250,5 +292,31 @@ void main() {
 
       expect(await wires.manager.getAnnouncedTracksForReconnect(), isEmpty);
     });
+
+    test(
+      'still describes a track published before the publisher died',
+      () async {
+        final wires = buildManager();
+        final option = _option(1);
+        cacheTrack(wires.manager, option: option, trackId: 'track-a');
+
+        // Publish: the mid resolves off the live publisher and the SFU
+        // acknowledges the announce.
+        stubPeerConnection(
+          wires.pc,
+          liveTransceivers: [_transceiver(trackId: 'track-a', mid: '2')],
+        );
+
+        final announced = await wires.manager.getAnnouncedTracks();
+        wires.manager.transceiversManager.markNegotiated(announced!);
+
+        // The publisher then goes away and a rejoin has to describe it.
+        stubPeerConnection(wires.pc, failing: true);
+
+        final reported = await wires.manager.getAnnouncedTracksForReconnect();
+
+        expect(reported.single.mid, '2');
+      },
+    );
   });
 }

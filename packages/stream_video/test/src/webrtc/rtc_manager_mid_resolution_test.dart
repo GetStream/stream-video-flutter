@@ -200,7 +200,8 @@ void main() {
 
     test('falls back to the mid on the given transceiver as a last resort', () {
       // Both live sources are unavailable — a rejoin reading the previous
-      // session's publisher, which is already closed.
+      // session's publisher, which is already closed. Only web gets this far
+      // with a usable mid; see the `lastKnownMid` group for native.
       final mid = resolveTrackMid(
         transceiver: _FakeTransceiver(mid: '4', trackId: videoTrackId),
         liveTransceivers: const [],
@@ -285,6 +286,82 @@ void main() {
       );
 
       expect(mid, isNull);
+    });
+
+    group('lastKnownMid', () {
+      // On the native implementations `RTCRtpTransceiver.mid` is a snapshot
+      // taken at `addTransceiver` time — before a mid exists — and is never
+      // updated, so the cached transceiver reports an empty mid for its whole
+      // life. Every source but the last acknowledged announce is therefore
+      // gone by the time a rejoin describes a closed publisher.
+      test('resolves a closed native publisher that nothing else '
+          'describes', () {
+        final mid = resolveTrackMid(
+          transceiver: _FakeTransceiver(mid: '', trackId: videoTrackId),
+          liveTransceivers: const [],
+          sdp: null,
+          lastKnownMid: '3',
+        );
+
+        expect(mid, '3');
+      });
+
+      test('is ignored while the publisher can still be read', () {
+        final mid = resolveTrackMid(
+          transceiver: _FakeTransceiver(mid: '', trackId: videoTrackId),
+          liveTransceivers: [_FakeTransceiver(mid: '7', trackId: videoTrackId)],
+          sdp: null,
+          // Stale: the m-line moved since the SFU acknowledged it.
+          lastKnownMid: '3',
+        );
+
+        expect(mid, '7');
+      });
+
+      test('loses to the SDP, which describes the offer being announced', () {
+        final mid = resolveTrackMid(
+          transceiver: _FakeTransceiver(mid: '', trackId: videoTrackId),
+          liveTransceivers: const [],
+          sdp: _sdp(audioTrackId: audioTrackId, videoTrackId: videoTrackId),
+          lastKnownMid: '1',
+        );
+
+        expect(mid, '3');
+      });
+
+      test('loses to the mid on the given transceiver, which is live on '
+          'web', () {
+        final mid = resolveTrackMid(
+          transceiver: _FakeTransceiver(mid: '4', trackId: videoTrackId),
+          liveTransceivers: const [],
+          sdp: null,
+          lastKnownMid: '1',
+        );
+
+        expect(mid, '4');
+      });
+
+      test('is not consulted for a track with no id', () {
+        final mid = resolveTrackMid(
+          transceiver: _FakeTransceiver(mid: '', hasTrack: false),
+          liveTransceivers: const [],
+          sdp: null,
+          lastKnownMid: '3',
+        );
+
+        expect(mid, isNull);
+      });
+
+      test('returns null when it is empty', () {
+        final mid = resolveTrackMid(
+          transceiver: _FakeTransceiver(mid: '', trackId: videoTrackId),
+          liveTransceivers: const [],
+          sdp: null,
+          lastKnownMid: '',
+        );
+
+        expect(mid, isNull);
+      });
     });
 
     group('after the sender track was replaced', () {

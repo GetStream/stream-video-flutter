@@ -617,13 +617,15 @@ class RtcManager extends Disposable {
 }
 
 /// Returns the negotiated mid for the track attached to [transceiver] from
-/// [liveTransceivers] or, if absent, from the offer [sdp]. Returns null if
+/// [liveTransceivers] or, if absent, from the offer [sdp], falling back to
+/// [lastKnownMid] once the publisher is no longer reachable. Returns null if
 /// unresolved.
 @visibleForTesting
 String? resolveTrackMid({
   required rtc.RTCRtpTransceiver transceiver,
   required List<rtc.RTCRtpTransceiver> liveTransceivers,
   required String? sdp,
+  String? lastKnownMid,
 }) {
   final sentTrack = transceiver.sender.track;
   final trackId = sentTrack?.id;
@@ -661,11 +663,18 @@ String? resolveTrackMid({
     }
   }
 
-  // 3. Last resort: the mid carried by the transceiver we were handed.
+  // 3. The mid carried by the transceiver we were handed. Live on web; on the
+  //    native implementations it is a snapshot taken at `addTransceiver` time —
+  //    before a mid was assigned — and never updated, so it is empty there.
   final cachedMid = _midOf(transceiver);
   if (cachedMid != null) return cachedMid;
 
-  // 4. Unresolved — do NOT fall back to a positional/canonical index.
+  // 4. Last resort: the mid of the last announce the SFU acknowledged. This is
+  //    all that is left once the publisher is closed, which is the normal state
+  //    when a rejoin builds `ReconnectDetails` from the previous session.
+  if (lastKnownMid != null && lastKnownMid.isNotEmpty) return lastKnownMid;
+
+  // 5. Unresolved — do NOT fall back to a positional/canonical index.
   return null;
 }
 
@@ -770,7 +779,9 @@ extension PublisherRtcManager on RtcManager {
   /// Best-effort, unlike [getAnnouncedTracks]: this runs against the previous
   /// session, whose peer connection is often already closed, and there is no
   /// offer to roll back. Aborting a reconnect over an unresolved mid is worse
-  /// than reporting what we do know, so unresolved tracks are dropped.
+  /// than reporting what we do know, so unresolved tracks are dropped. With the
+  /// publisher gone the mid usually comes from [TransceiverCache.negotiatedMid],
+  /// i.e. the last announce the SFU acknowledged.
   Future<List<RtcTrackInfo>> getAnnouncedTracksForReconnect({
     String? sdp,
   }) async {
@@ -817,6 +828,7 @@ extension PublisherRtcManager on RtcManager {
       transceiver: transceiverCache.transceiver,
       liveTransceivers: liveTransceivers,
       sdp: sdp,
+      lastKnownMid: transceiverCache.negotiatedMid,
     );
 
     if (mid == null) {
@@ -833,6 +845,7 @@ extension PublisherRtcManager on RtcManager {
         'publishOptionId': transceiverCache.publishOption.id,
         'liveTransceiverCount': liveTransceivers.length,
         'hasSdp': sdp != null,
+        'negotiated': transceiverCache.negotiated,
       });
 
       return null;

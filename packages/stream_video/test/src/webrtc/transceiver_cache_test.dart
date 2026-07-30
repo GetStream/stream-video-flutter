@@ -58,12 +58,16 @@ RtcLocalTrack _localTrack(String mediaTrackId) {
 
 /// Builds the announced track info for [option] and [mediaTrackId], matching
 /// what `getAnnouncedTracks` sends to the SFU.
-RtcTrackInfo _trackInfo(String mediaTrackId, SfuPublishOptions option) {
+RtcTrackInfo _trackInfo(
+  String mediaTrackId,
+  SfuPublishOptions option, {
+  String mid = '0',
+}) {
   return RtcTrackInfo(
     trackId: mediaTrackId,
     trackType: option.trackType,
     publishOptionId: option.id,
-    mid: '0',
+    mid: mid,
     layers: const [],
     codec: option.codec,
     muted: false,
@@ -241,6 +245,74 @@ void main() {
       ]);
 
       expect(manager.get(videoOption)!.negotiated, isFalse);
+    });
+  });
+
+  group('TransceiverCache.negotiatedMid', () {
+    test('is null until an announce is acknowledged', () {
+      final manager = TransceiverManager();
+      final option = _option(1, SfuTrackType.video);
+
+      manager.add(
+        _localTrack('media-1'),
+        option,
+        _transceiverWithTrack(_mediaTrack('media-1')),
+        const RtcTrackPublishOptions(),
+      );
+
+      expect(manager.get(option)!.negotiatedMid, isNull);
+    });
+
+    test('records the mid the SFU acknowledged', () {
+      final manager = TransceiverManager();
+      final option = _option(1, SfuTrackType.video);
+
+      manager.add(
+        _localTrack('media-1'),
+        option,
+        _transceiverWithTrack(_mediaTrack('media-1')),
+        const RtcTrackPublishOptions(),
+      );
+
+      manager.markNegotiated([_trackInfo('media-1', option, mid: '3')]);
+
+      expect(manager.get(option)!.negotiatedMid, '3');
+    });
+
+    test('keeps the last acknowledged mid when a later announce carries '
+        'none', () {
+      final manager = TransceiverManager();
+      final option = _option(1, SfuTrackType.video);
+
+      manager.add(
+        _localTrack('media-1'),
+        option,
+        _transceiverWithTrack(_mediaTrack('media-1')),
+        const RtcTrackPublishOptions(),
+      );
+
+      manager.markNegotiated([_trackInfo('media-1', option, mid: '3')]);
+      // An empty mid is not an answer — overwriting would throw away the only
+      // value a closed publisher can still be described by.
+      manager.markNegotiated([_trackInfo('media-1', option, mid: '')]);
+
+      expect(manager.get(option)!.negotiatedMid, '3');
+    });
+
+    test('is not recorded for an announce that matches no transceiver', () {
+      final manager = TransceiverManager();
+      final option = _option(1, SfuTrackType.video);
+
+      manager.add(
+        _localTrack('media-1'),
+        option,
+        _transceiverWithTrack(_mediaTrack('media-1')),
+        const RtcTrackPublishOptions(),
+      );
+
+      manager.markNegotiated([_trackInfo('media-other', option, mid: '3')]);
+
+      expect(manager.get(option)!.negotiatedMid, isNull);
     });
   });
 }
