@@ -553,7 +553,15 @@ class CallSession extends Disposable {
       final publisher = rtcManager?.publisher;
       if (publisher != null) {
         _logger.v(() => '[fastReconnect] triggering publisher renegotiation');
-        await _onRenegotiationNeeded(publisher);
+        final renegotiation = await _onRenegotiationNeeded(publisher);
+        if (renegotiation is Failure) {
+          _logger.w(
+            () =>
+                '[fastReconnect] publisher renegotiation failed: '
+                '${renegotiation.error}',
+          );
+          result = renegotiation;
+        }
       }
 
       final remoteTracks = rtcManager!.tracks.values
@@ -620,7 +628,8 @@ class CallSession extends Disposable {
 
         // Signaling stall: local offer created but SetPublisher never completed,
         // leaving the peer connection wedged in `have-local-offer`. Negotiation
-        // won't resume on its own, so renegotiate and rejoin if recovery fails.
+        // won't resume on its own, so renegotiate and fall back to a reconnect
+        // if the recovery fails.
         final signalingState = publisher.pc.signalingState;
         if (signalingState ==
             rtc.RTCSignalingState.RTCSignalingStateHaveLocalOffer) {
@@ -640,9 +649,9 @@ class CallSession extends Disposable {
             _logger.w(
               () =>
                   '[publisherConnectionCheck] recovery renegotiation failed '
-                  '(${result.getErrorOrNull()}) — triggering rejoin',
+                  '(${result.getErrorOrNull()}) — triggering fast reconnect',
             );
-            onReconnectionNeeded(publisher, SfuReconnectionStrategy.rejoin);
+            onReconnectionNeeded(publisher, SfuReconnectionStrategy.fast);
           }
           return;
         }
@@ -1097,7 +1106,7 @@ class CallSession extends Disposable {
       return Result.error('SFU WS is not connected');
     }
 
-    await _negotiationLock.synchronized(() async {
+    return _negotiationLock.synchronized(() async {
       _logger.d(() => '[negotiate] type: ${pc.type}');
 
       final offer = await pc.createOffer();
@@ -1114,7 +1123,14 @@ class CallSession extends Disposable {
         _logger.w(
           () => '[negotiate] rejected(tracksInfo is empty): $tracksInfo',
         );
-        return pc.rollbackLocalDescription();
+
+        // Nothing to publish is a no-op, not a negotiation failure — but a
+        // failed rollback leaves the publisher wedged in `have-local-offer`,
+        // which is.
+        final rollback = await pc.rollbackLocalDescription();
+        if (rollback.isFailure) return rollback;
+
+        return const Result.success(null);
       }
 
       _logger.v(() => '[negotiate] announcing tracks: $tracksInfo');
@@ -1130,7 +1146,10 @@ class CallSession extends Disposable {
 
         if (pubResult is! Success<sfu.SetPublisherResponse>) {
           _logger.w(() => '[negotiate] #setPublisher; failed: $pubResult');
-          return pc.rollbackLocalDescription();
+          await pc.rollbackLocalDescription();
+          return Result<void>.error(
+            'SetPublisher failed: ${pubResult.getErrorOrNull()}',
+          );
         }
 
         if (pubResult.data.hasSdp()) {
@@ -1139,15 +1158,21 @@ class CallSession extends Disposable {
             _logger.w(
               () => '[negotiate] #setRemoteAnswer; failed: $ansResult',
             );
+            return Result<void>.error(
+              'Failed to set remote answer: ${ansResult.getErrorOrNull()}',
+            );
           }
         }
+
+        rtcManager?.transceiversManager.markNegotiated(tracksInfo);
+
+        return const Result.success(null);
       } catch (e, stk) {
         _logger.e(() => '[negotiate] failed: $e\n$stk');
-        return pc.rollbackLocalDescription();
+        await pc.rollbackLocalDescription();
+        return Result.failure(VideoErrors.compose(e, stk));
       }
     });
-
-    return const Result.success(null);
   }
 
   Future<void> _onRemoteTrackReceived(

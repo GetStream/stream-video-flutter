@@ -3,6 +3,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 
 import '../sfu/data/models/sfu_publish_options.dart';
 import '../sfu/data/models/sfu_track_type.dart';
+import 'model/rtc_tracks_info.dart';
 import 'rtc_track/rtc_track.dart';
 import 'rtc_track/rtc_track_publish_options.dart';
 
@@ -12,6 +13,7 @@ class TransceiverCache {
     required this.publishOption,
     required this.transceiver,
     required this.trackPublishOptions,
+    this.negotiated = false,
   });
 
   RtcLocalTrack track;
@@ -19,9 +21,13 @@ class TransceiverCache {
   RTCRtpTransceiver transceiver;
   RtcTrackPublishOptions trackPublishOptions;
 
+  /// Whether the SFU has acknowledged this transceiver through a completed
+  /// publisher negotiation.
+  bool negotiated;
+
   @override
   String toString() {
-    return 'TransceiverCache{mediaTrackId: ${track.mediaTrack.id}, publishOption: ${publishOption.id},${publishOption.codec}, sender.track.enabled: ${transceiver.sender.track?.enabled}}';
+    return 'TransceiverCache{mediaTrackId: ${track.mediaTrack.id}, publishOption: ${publishOption.id},${publishOption.codec}, sender.track.enabled: ${transceiver.sender.track?.enabled}, negotiated: $negotiated}';
   }
 }
 
@@ -108,6 +114,20 @@ class TransceiverManager {
   /// Provides all the items in the cache.
   List<TransceiverCache> items() {
     return _transceivers;
+  }
+
+  /// Marks the cached transceivers that were part of [announced] as negotiated,
+  /// i.e. acknowledged by the SFU after a completed negotiation.
+  void markNegotiated(Iterable<RtcTrackInfo> announced) {
+    for (final info in announced) {
+      final item = find(
+        (c) =>
+            c.publishOption.id == info.publishOptionId &&
+            c.track.mediaTrack.id == info.trackId,
+      );
+
+      item?.negotiated = true;
+    }
   }
 
   /// Init index of the transceiver in the cache.
