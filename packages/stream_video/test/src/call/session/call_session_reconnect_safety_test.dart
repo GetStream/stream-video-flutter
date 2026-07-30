@@ -246,8 +246,8 @@ void main() {
     });
 
     test(
-      'renegotiates and escalates to rejoin when the publisher is wedged in '
-      '"have-local-offer" after the delay',
+      'renegotiates and asks for a fast reconnect when the publisher is wedged '
+      'in "have-local-offer" after the delay',
       () {
         fakeAsync((async) {
           final reconnects =
@@ -273,10 +273,13 @@ void main() {
             ..flushMicrotasks();
 
           // The recovery renegotiation cannot complete (no SFU connection in
-          // the test), so the watchdog falls back to a full rejoin.
+          // the test), so the watchdog falls back to a fast reconnect. It does
+          // not ask for a rejoin directly — the reconnect loop escalates to one
+          // once the fast attempts are exhausted or a peer connection is
+          // unhealthy.
           expect(reconnects, hasLength(1));
           expect(reconnects.single.$1, same(wires.publisher));
-          expect(reconnects.single.$2, SfuReconnectionStrategy.rejoin);
+          expect(reconnects.single.$2, SfuReconnectionStrategy.fast);
         });
       },
     );

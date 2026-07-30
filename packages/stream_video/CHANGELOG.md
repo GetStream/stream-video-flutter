@@ -3,6 +3,9 @@
 ### 🐞 Fixed
 
 - Fixed the publisher announcing a stale track `mid` after a renegotiation or publish retry. It's now resolved from the current peer-connection state so the SFU can reliably match the track to its media.
+- Serialized remote-description and ICE-candidate handling so a candidate arriving mid-negotiation can no longer be dropped.
+- Fixed an issue where republishing could reuse a cached publisher transceiver without renegotiating.
+- Fixed a `FormatException` when sending requests if the application name (or other device/app info) contains non-ASCII characters. Values included in the `X-Stream-Client` header are now sanitized to valid header characters.
 
 ## 1.4.2
 
