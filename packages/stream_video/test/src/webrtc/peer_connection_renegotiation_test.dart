@@ -109,9 +109,23 @@ class _FakeRtcPeerConnection extends Fake implements rtc.RTCPeerConnection {
   /// lets a test hold the operation "in flight" while another one is issued.
   Completer<void>? setRemoteDescriptionGate;
 
+  /// When non-null, [getRemoteDescription] samples the current remote
+  /// description immediately but only *delivers* it once this completes.
+  ///
+  /// This models the real platform-channel round trip: the native side answers
+  /// with whatever it sees at call time, and that answer can reach Dart long
+  /// after an interleaved `setRemoteDescription` has finished — so the caller
+  /// resumes holding a stale `null`.
+  Completer<void>? getRemoteDescriptionGate;
+
   @override
-  Future<rtc.RTCSessionDescription?> getRemoteDescription() async =>
-      _remoteDescription;
+  Future<rtc.RTCSessionDescription?> getRemoteDescription() async {
+    final sampled = _remoteDescription;
+    if (getRemoteDescriptionGate != null) {
+      await getRemoteDescriptionGate!.future;
+    }
+    return sampled;
+  }
 
   @override
   Future<void> setRemoteDescription(
@@ -459,14 +473,14 @@ void main() {
         rtc.RTCSessionDescription('sdp', 'offer');
 
     test(
-      'a candidate that arrives while setRemoteDescription is in flight is '
-      'applied exactly once and never stranded',
+      'a candidate issued while setRemoteDescription is in flight waits for it '
+      'and is then applied directly, exactly once',
       () async {
         final pc = _FakeRtcPeerConnection();
         final sp = _build(pc: pc, type: StreamPeerType.subscriber);
 
-        // Hold setRemoteDescription open so addIceCandidate is issued
-        // concurrently, then release it.
+        // Hold setRemoteDescription open so addIceCandidate is issued while it
+        // is still in flight, then release it.
         final gate = Completer<void>();
         pc.setRemoteDescriptionGate = gate;
 
@@ -476,16 +490,65 @@ void main() {
         final addFuture = sp.addIceCandidate(candidate);
 
         gate.complete();
-        final results = await Future.wait([setFuture, addFuture]);
+        final setResult = await setFuture;
+        final addResult = await addFuture;
 
-        expect(results[0].isSuccess, isTrue);
-        expect(results[1].isSuccess, isTrue);
+        expect(setResult.isSuccess, isTrue);
+        expect(
+          addResult.getDataOrNull(),
+          AddIceCandidateResult.added,
+          reason:
+              'setRemoteDescription was issued first, so it runs first: by the '
+              'time the candidate is handled the remote description exists and '
+              'it needs no buffering',
+        );
+        expect(pc.addedCandidates, [candidate]);
+      },
+    );
+
+    test(
+      'a candidate whose remote-description read resolves after the flush is '
+      'not stranded',
+      () async {
+        final pc = _FakeRtcPeerConnection();
+        final sp = _build(pc: pc, type: StreamPeerType.subscriber);
+
+        // This is the stall: addIceCandidate samples a null remote description,
+        // and that answer only comes back after setRemoteDescription has
+        // already drained the buffer. Unserialized, the candidate lands in a
+        // buffer nobody will flush again and the subscriber never connects.
+        final gate = Completer<void>();
+        pc.getRemoteDescriptionGate = gate;
+
+        final candidate = rtc.RTCIceCandidate('cand', 'mid', 0);
+
+        final addFuture = sp.addIceCandidate(candidate);
+        // Let the read actually be issued (and sample null) before the remote
+        // description is set.
+        await pumpEventQueue();
+
+        final setFuture = sp.setRemoteDescription(offer());
+        // Give setRemoteDescription every chance to run to completion while the
+        // candidate is still parked on the read.
+        await pumpEventQueue();
+
+        gate.complete();
+        final addResult = await addFuture;
+        final setResult = await setFuture;
+
+        expect(setResult.isSuccess, isTrue);
+        expect(
+          addResult.getDataOrNull(),
+          AddIceCandidateResult.buffered,
+          reason: 'the read returned null, so the candidate had to be buffered',
+        );
         expect(
           pc.addedCandidates,
           [candidate],
           reason:
-              'the candidate must be applied exactly once regardless of which '
-              'operation acquires the lock first',
+              'a candidate buffered on a stale null read must still reach the '
+              'peer connection — setRemoteDescription and addIceCandidate are '
+              'serialized so the flush cannot run past it',
         );
       },
     );
