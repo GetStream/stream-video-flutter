@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:synchronized/synchronized.dart';
@@ -46,6 +47,11 @@ const _tag = 'SV:CallSession';
 const _debounceDuration = Duration(milliseconds: 200);
 const _migrationCompleteEventTimeout = Duration(seconds: 7);
 const _publisherConnectionCheckDelay = Duration(seconds: 15);
+
+class _UnresolvedTrackMidError extends VideoError {
+  const _UnresolvedTrackMidError()
+    : super(message: 'Could not resolve the mid of every published track');
+}
 
 class CallSession extends Disposable {
   CallSession({
@@ -360,7 +366,7 @@ class CallSession extends Disposable {
                 clientEventRetryCount: clientEventRetryCount,
               )
               ..onSubscriberIceCandidate = _onLocalIceCandidate
-              ..onRenegotiationNeeded = _onRenegotiationNeeded
+              ..onRenegotiationNeeded = negotiateOrRecover
               ..onReconnectionNeeded = onReconnectionNeeded
               ..onRemoteTrackReceived = _onRemoteTrackReceived;
       } else {
@@ -391,7 +397,7 @@ class CallSession extends Disposable {
               ..onLocalTrackMuted = _onLocalTrackMuted
               ..onLocalTrackPublished = _onLocalTrackPublished
               ..onReconnectionNeeded = onReconnectionNeeded
-              ..onRenegotiationNeeded = _onRenegotiationNeeded
+              ..onRenegotiationNeeded = negotiateOrRecover
               ..onRemoteTrackReceived = _onRemoteTrackReceived;
       }
 
@@ -980,21 +986,11 @@ class CallSession extends Disposable {
       // HTTP call.
       _logger.i(() => '[onIceRestart] triggering publisher renegotiation');
       unawaited(
-        _onRenegotiationNeeded(publisher)
-            .then((result) {
-              if (result.isFailure) {
-                _logger.w(
-                  () =>
-                      '[onIceRestart] publisher renegotiation failed: '
-                      '${result.getErrorOrNull()}',
-                );
-              }
-            })
-            .catchError((Object e, StackTrace stk) {
-              _logger.e(
-                () => '[onIceRestart] publisher renegotiation error: $e\n$stk',
-              );
-            }),
+        negotiateOrRecover(publisher).catchError((Object e, StackTrace stk) {
+          _logger.e(
+            () => '[onIceRestart] publisher renegotiation error: $e\n$stk',
+          );
+        }),
       );
     } else if (peerType == StreamPeerType.subscriber) {
       final subscriber = rtcManager?.subscriber;
@@ -1117,7 +1113,24 @@ class CallSession extends Disposable {
       }
 
       final sdp = offer.data.sdp;
-      final tracksInfo = await rtcManager?.getAnnouncedTracks(sdp: sdp) ?? [];
+      final manager = rtcManager;
+      final tracksInfo = manager == null
+          ? const <RtcTrackInfo>[]
+          : await manager.getAnnouncedTracks(sdp: sdp);
+
+      if (tracksInfo == null) {
+        _logger.w(
+          () => '[negotiate] rejected(unresolved track mid); rolling back',
+        );
+
+        // Announcing a subset would leave the omitted m-lines sending media the
+        // SFU cannot map, so drop the whole offer. The rollback returns the
+        // publisher to `stable`, which [startPublisherConnectionCheck] reads as
+        // healthy, so the failure is typed for [negotiateOrRecover] to escalate.
+        await pc.rollbackLocalDescription();
+
+        return const Result.failure(_UnresolvedTrackMidError());
+      }
 
       if (tracksInfo.isEmpty) {
         _logger.w(
@@ -1173,6 +1186,26 @@ class CallSession extends Disposable {
         return Result.failure(VideoErrors.compose(e, stk));
       }
     });
+  }
+
+  /// Runs publisher negotiation as fire-and-forget for renegotiation triggers.
+  /// Only a track mid resolution failure escalates (triggers fast reconnect).
+  @visibleForTesting
+  Future<void> negotiateOrRecover(StreamPeerConnection pc) async {
+    // Awaiting this means `_negotiationLock` has been released by the time we
+    // reach `onReconnectionNeeded`, so the reconnect cannot re-enter it.
+    final result = await _onRenegotiationNeeded(pc);
+    if (result is! Failure) return;
+
+    _logger.w(() => '[negotiate] renegotiation failed: ${result.error}');
+
+    if (result.error is! _UnresolvedTrackMidError || _isLeavingOrClosed) return;
+
+    _logger.w(
+      () => '[negotiate] unresolved track mid — triggering fast reconnect',
+    );
+
+    onReconnectionNeeded(pc, SfuReconnectionStrategy.fast);
   }
 
   Future<void> _onRemoteTrackReceived(

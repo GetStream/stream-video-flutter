@@ -14,6 +14,7 @@ class TransceiverCache {
     required this.transceiver,
     required this.trackPublishOptions,
     this.negotiated = false,
+    this.negotiatedMid,
   });
 
   RtcLocalTrack track;
@@ -25,9 +26,12 @@ class TransceiverCache {
   /// publisher negotiation.
   bool negotiated;
 
+  /// The mid announced in the last negotiation the SFU acknowledged.
+  String? negotiatedMid;
+
   @override
   String toString() {
-    return 'TransceiverCache{mediaTrackId: ${track.mediaTrack.id}, publishOption: ${publishOption.id},${publishOption.codec}, sender.track.enabled: ${transceiver.sender.track?.enabled}, negotiated: $negotiated}';
+    return 'TransceiverCache{mediaTrackId: ${track.mediaTrack.id}, publishOption: ${publishOption.id},${publishOption.codec}, sender.track.enabled: ${transceiver.sender.track?.enabled}, negotiated: $negotiated, negotiatedMid: $negotiatedMid}';
   }
 }
 
@@ -41,9 +45,6 @@ class TrackLayersCache {
 class TransceiverManager {
   final List<TransceiverCache> _transceivers = [];
   final List<TrackLayersCache> _layers = [];
-
-  /// An array maintaining the order how transceivers were added to the peer connection.
-  final List<RTCRtpTransceiver> _transceiverOrder = [];
 
   /// Adds a transceiver to the cache.
   void add(
@@ -60,8 +61,6 @@ class TransceiverManager {
         trackPublishOptions: trackPublishOptions,
       ),
     );
-
-    _transceiverOrder.add(transceiver);
   }
 
   /// Gets the transceiver for the given publish option.
@@ -123,16 +122,18 @@ class TransceiverManager {
       final item = find(
         (c) =>
             c.publishOption.id == info.publishOptionId &&
-            c.track.mediaTrack.id == info.trackId,
+            c.publishOption.trackType == info.trackType &&
+            (c.transceiver.sender.track?.id ?? c.track.mediaTrack.id) ==
+                info.trackId,
       );
 
-      item?.negotiated = true;
-    }
-  }
+      if (item == null) continue;
 
-  /// Init index of the transceiver in the cache.
-  int indexOf(RTCRtpTransceiver transceiver) {
-    return _transceiverOrder.indexOf(transceiver);
+      item.negotiated = true;
+
+      final mid = info.mid;
+      if (mid != null && mid.isNotEmpty) item.negotiatedMid = mid;
+    }
   }
 
   /// Gets cached video layers for the given track.
