@@ -52,10 +52,6 @@ const _tag = 'SV:RtcManager';
 
 /// How long [PublisherRtcManager.getAnnouncedTracks] waits for in-flight
 /// transceiver creations before giving up on the current negotiation.
-///
-/// `addTransceiver` is a sub-100ms platform call in practice; anything near
-/// this is wedged, and a wedged publisher recovers through a reconnect rather
-/// than by waiting longer.
 const _pendingTransceiverSettleTimeout = Duration(seconds: 5);
 
 class RtcManager extends Disposable {
