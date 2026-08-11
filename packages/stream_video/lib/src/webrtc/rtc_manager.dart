@@ -9,6 +9,7 @@ import 'package:webrtc_interface/webrtc_interface.dart';
 
 import '../../stream_video.dart';
 import '../call/state/call_state_notifier.dart';
+import '../call/stats/trace_tag.dart';
 import '../errors/video_error_composer.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
@@ -216,13 +217,16 @@ class RtcManager extends Disposable {
     required String iceCandidate,
   }) async {
     final candidate = RtcIceCandidateParser.fromJsonString(iceCandidate);
+    final Result<AddIceCandidateResult>? result;
     if (peerType == StreamPeerType.publisher) {
-      return publisher?.addIceCandidate(candidate) ??
-          failureWithError('no publisher created');
+      result = await publisher?.addIceCandidate(candidate);
+      if (result == null) return failureWithError('no publisher created');
     } else if (peerType == StreamPeerType.subscriber) {
-      return subscriber.addIceCandidate(candidate);
+      result = await subscriber.addIceCandidate(candidate);
+    } else {
+      return failureWithError('unexpected peerType: $peerType');
     }
-    return failureWithError('unexpected peerType: $peerType');
+    return result.map((_) => none);
   }
 
   void _onRemoteTrack(StreamPeerConnection pc, rtc.RTCTrackEvent event) {
@@ -611,6 +615,82 @@ class RtcManager extends Disposable {
   }
 }
 
+/// Returns the negotiated mid for the track attached to [transceiver] from
+/// [liveTransceivers] or, if absent, from the offer [sdp], falling back to
+/// [lastKnownMid] once the publisher is no longer reachable. Returns null if
+/// unresolved.
+@visibleForTesting
+String? resolveTrackMid({
+  required rtc.RTCRtpTransceiver transceiver,
+  required List<rtc.RTCRtpTransceiver> liveTransceivers,
+  required String? sdp,
+  String? lastKnownMid,
+}) {
+  final sentTrack = transceiver.sender.track;
+  final trackId = sentTrack?.id;
+  final kind = sentTrack?.kind;
+
+  if (trackId == null) return null;
+
+  // 1. Authoritative: the current transceiver's mid, matched by track id.
+  final live = liveTransceivers.firstWhereOrNull(
+    (t) => t.sender.track?.id == trackId,
+  );
+  if (live != null) {
+    final liveMid = _midOf(live);
+    if (liveMid != null) return liveMid;
+  }
+
+  // 2. Fallback: the m-section for this track in the current offer SDP.
+  //    Searched in reverse so a recycled m-line (the same track re-attached to
+  //    a later m-section) wins over the stale one it replaced.
+  if (sdp != null) {
+    try {
+      final media = (parse(sdp)['media'] as List?)
+          ?.cast<Map<String, dynamic>>()
+          .reversed
+          .firstWhereOrNull(
+            (m) =>
+                (kind == null || m['type'] == kind) &&
+                ((m['msid'] as String?)?.contains(trackId) ?? false),
+          );
+
+      final mid = media?['mid'];
+      if (mid != null) return mid.toString();
+    } catch (_) {
+      // Malformed SDP — treat as unresolved.
+    }
+  }
+
+  // 3. The mid carried by the transceiver we were handed. Live on web; on the
+  //    native implementations it is a snapshot taken at `addTransceiver` time —
+  //    before a mid was assigned — and never updated, so it is empty there.
+  final cachedMid = _midOf(transceiver);
+  if (cachedMid != null) return cachedMid;
+
+  // 4. Last resort: the mid of the last announce the SFU acknowledged. This is
+  //    all that is left once the publisher is closed, which is the normal state
+  //    when a rejoin builds `ReconnectDetails` from the previous session.
+  if (lastKnownMid != null && lastKnownMid.isNotEmpty) return lastKnownMid;
+
+  // 5. Unresolved — do NOT fall back to a positional/canonical index.
+  return null;
+}
+
+/// The mid of [transceiver], or null when it has none yet.
+///
+/// Reading `mid` is not safe on every platform: on web it null-asserts through
+/// to the JS transceiver, so it throws for one that has never been negotiated
+/// rather than reporting an empty mid the way the native implementations do.
+String? _midOf(rtc.RTCRtpTransceiver transceiver) {
+  try {
+    final mid = transceiver.mid;
+    return mid.isEmpty ? null : mid;
+  } catch (_) {
+    return null;
+  }
+}
+
 extension PublisherRtcManager on RtcManager {
   List<RtcLocalTrack> getPublisherTracks() {
     return [...tracks.values.whereType<RtcLocalTrack>()];
@@ -633,50 +713,79 @@ extension PublisherRtcManager on RtcManager {
     return track;
   }
 
-  String extractMid(
-    rtc.RTCRtpTransceiver transceiver,
-    int transceiverInitIndex,
-    String? sdp,
-  ) {
-    if (transceiver.mid.isNotEmpty) return transceiver.mid;
-    if (sdp == null) return '';
+  /// The transceivers currently on the publisher peer connection.
+  ///
+  /// Never throws as it would abort a renegotiation (leaving the
+  /// publisher in `have-local-offer`) or a whole reconnect.
+  Future<List<rtc.RTCRtpTransceiver>> _liveTransceivers() async {
+    final pc = publisher?.pc;
+    if (pc == null) return const [];
 
-    final track = transceiver.sender.track;
-    if (track == null) {
-      return '';
+    try {
+      return await pc.getTransceivers();
+    } catch (e, stk) {
+      _logger.w(() => '[liveTransceivers] failed: $e\n$stk');
+      return const [];
     }
-
-    final parsedSdp = parse(sdp);
-    final media = (parsedSdp['media'] as List?)
-        ?.cast<Map<String, dynamic>>()
-        .reversed
-        .firstWhereOrNull(
-          (m) =>
-              m['type'] == track.kind &&
-              ((m['msid'] as String?)?.contains(track.id!) ?? true),
-        );
-
-    if (media != null && media['mid'] != null) return media['mid'].toString();
-    if (transceiverInitIndex == -1) return '';
-    return transceiverInitIndex.toString();
   }
 
-  Future<List<RtcTrackInfo>> getAnnouncedTracks({String? sdp}) async {
-    final finalSdp = sdp ?? (await publisher?.pc.getLocalDescription())?.sdp;
+  /// The SDP of the publisher's local description, or null when unavailable.
+  ///
+  /// Never throws as it would abort a renegotiation (leaving the
+  /// publisher in `have-local-offer`) or a whole reconnect.
+  Future<String?> _localSdp() async {
+    final pc = publisher?.pc;
+    if (pc == null) return null;
+
+    try {
+      return (await pc.getLocalDescription())?.sdp;
+    } catch (e, stk) {
+      _logger.w(() => '[localSdp] failed: $e\n$stk');
+      return null;
+    }
+  }
+
+  /// The tracks to announce in `SetPublisher`, or null when the mid of at least
+  /// one sending transceiver could not be resolved.
+  ///
+  /// All-or-nothing on purpose: announcing a subset commits an offer whose
+  /// omitted m-lines keep sending media the SFU cannot map, and the SFU may read
+  /// a missing entry as an unpublish of a track that was working. A null tells
+  /// the caller to roll the offer back and retry instead. An empty list is a
+  /// different answer — nothing is sending, which is a legitimate no-op.
+  Future<List<RtcTrackInfo>?> getAnnouncedTracks({String? sdp}) async {
+    final finalSdp = sdp ?? await _localSdp();
+    final liveTransceivers = await _liveTransceivers();
     final infos = <RtcTrackInfo>[];
 
     for (final item in transceiversManager.items()) {
       if (item.transceiver.sender.track == null) continue;
-      infos.add(_transceiverToTrackInfo(item, sdp: finalSdp));
+      final info = _transceiverToTrackInfo(
+        item,
+        sdp: finalSdp,
+        liveTransceivers: liveTransceivers,
+      );
+
+      if (info == null) return null;
+      infos.add(info);
     }
 
     return infos;
   }
 
+  /// The tracks to report in `ReconnectDetails`.
+  ///
+  /// Best-effort, unlike [getAnnouncedTracks]: this runs against the previous
+  /// session, whose peer connection is often already closed, and there is no
+  /// offer to roll back. Aborting a reconnect over an unresolved mid is worse
+  /// than reporting what we do know, so unresolved tracks are dropped. With the
+  /// publisher gone the mid usually comes from [TransceiverCache.negotiatedMid],
+  /// i.e. the last announce the SFU acknowledged.
   Future<List<RtcTrackInfo>> getAnnouncedTracksForReconnect({
     String? sdp,
   }) async {
-    final finalSdp = sdp ?? (await publisher?.pc.getLocalDescription())?.sdp;
+    final finalSdp = sdp ?? await _localSdp();
+    final liveTransceivers = await _liveTransceivers();
     final infos = <RtcTrackInfo>[];
 
     for (final publishOption in publishOptions) {
@@ -687,21 +796,59 @@ extension PublisherRtcManager on RtcManager {
       );
 
       if (item?.transceiver.sender.track == null) continue;
-      infos.add(_transceiverToTrackInfo(item!, sdp: finalSdp));
+      final info = _transceiverToTrackInfo(
+        item!,
+        sdp: finalSdp,
+        liveTransceivers: liveTransceivers,
+      );
+
+      if (info == null) {
+        continue;
+      }
+
+      infos.add(info);
     }
 
     return infos;
   }
 
-  RtcTrackInfo _transceiverToTrackInfo(
+  RtcTrackInfo? _transceiverToTrackInfo(
     TransceiverCache transceiverCache, {
+    required List<rtc.RTCRtpTransceiver> liveTransceivers,
     String? sdp,
   }) {
     final track = transceiverCache.track;
 
-    final transceiverInitialIndex = transceiversManager.indexOf(
-      transceiverCache.transceiver,
+    // The track actually attached to the sender — the one named in the SDP.
+    final sentTrackId =
+        transceiverCache.transceiver.sender.track?.id ?? track.mediaTrack.id;
+
+    final mid = resolveTrackMid(
+      transceiver: transceiverCache.transceiver,
+      liveTransceivers: liveTransceivers,
+      sdp: sdp,
+      lastKnownMid: transceiverCache.negotiatedMid,
     );
+
+    if (mid == null) {
+      _logger.w(
+        () =>
+            '[transceiverToTrackInfo] could not resolve mid for track '
+            '$sentTrackId (${track.trackType}); skipping announce',
+      );
+
+      publisher?.tracer.trace(TraceTag.trackMidUnresolved, {
+        'trackId': sentTrackId,
+        'cachedTrackId': track.mediaTrack.id,
+        'trackType': track.trackType.toString(),
+        'publishOptionId': transceiverCache.publishOption.id,
+        'liveTransceiverCount': liveTransceivers.length,
+        'hasSdp': sdp != null,
+        'negotiated': transceiverCache.negotiated,
+      });
+
+      return null;
+    }
 
     if (track is RtcLocalAudioTrack) {
       final audioSettings = stateManager.callState.settings.audio;
@@ -710,14 +857,10 @@ extension PublisherRtcManager on RtcManager {
           audioSettings.hifiAudioEnabled;
 
       return RtcTrackInfo(
-        trackId: track.mediaTrack.id,
+        trackId: sentTrackId,
         trackType: track.trackType,
         publishOptionId: transceiverCache.publishOption.id,
-        mid: extractMid(
-          transceiverCache.transceiver,
-          transceiverInitialIndex,
-          sdp,
-        ),
+        mid: mid,
         layers: [],
         codec: transceiverCache.publishOption.codec,
         muted: !(transceiverCache.transceiver.sender.track?.enabled ?? false),
@@ -732,14 +875,10 @@ extension PublisherRtcManager on RtcManager {
       );
 
       return RtcTrackInfo(
-        trackId: track.mediaTrack.id,
+        trackId: sentTrackId,
         trackType: track.trackType,
         publishOptionId: transceiverCache.publishOption.id,
-        mid: extractMid(
-          transceiverCache.transceiver,
-          transceiverInitialIndex,
-          sdp,
-        ),
+        mid: mid,
         dtx: false,
         red: false,
         stereo: false,
@@ -810,6 +949,8 @@ extension PublisherRtcManager on RtcManager {
     tracks[audioTrack.trackId] = audioTrack;
     var updatedTrack = audioTrack.copyWith(stopTrackOnMute: stopTrackOnMute);
 
+    var needsRenegotiation = false;
+
     for (final option in publishOptions) {
       if (option.trackType != audioTrack.trackType) continue;
 
@@ -818,7 +959,8 @@ extension PublisherRtcManager on RtcManager {
       final mediaTrackClone = await audioTrack.mediaTrack.clone();
       final trackToPublish = audioTrack.copyWith(mediaTrack: mediaTrackClone);
 
-      final cachedTransceiver = transceiversManager.get(option)?.transceiver;
+      final cachedBundle = transceiversManager.get(option);
+      final cachedTransceiver = cachedBundle?.transceiver;
       if (cachedTransceiver == null) {
         final transceiverResult = await _addTransceiver(
           trackToPublish,
@@ -853,6 +995,13 @@ extension PublisherRtcManager on RtcManager {
           trackPublishOptions: publishOptions,
         );
 
+        // Reusing a transceiver via replaceTrack does not fire
+        // onRenegotiationNeeded. If its previous negotiation never reached the
+        // SFU, the SFU still doesn't know about it, so force a renegotiation.
+        if (cachedBundle != null && !cachedBundle.negotiated) {
+          needsRenegotiation = true;
+        }
+
         _logger.v(
           () => '[publishAudioTrack] cached transceiver: $cachedTransceiver',
         );
@@ -861,6 +1010,10 @@ extension PublisherRtcManager on RtcManager {
       updatedTrack = updatedTrack.copyWith(
         clonedTracks: [...updatedTrack.clonedTracks, mediaTrackClone],
       );
+    }
+
+    if (needsRenegotiation) {
+      _forceRenegotiation('[publishAudioTrack]');
     }
 
     // Notify listeners.
@@ -900,6 +1053,8 @@ extension PublisherRtcManager on RtcManager {
       );
     }
 
+    var needsRenegotiation = false;
+
     for (final option in publishOptions) {
       if (option.trackType != videoTrack.trackType) continue;
 
@@ -908,7 +1063,8 @@ extension PublisherRtcManager on RtcManager {
       final mediaTrackClone = await videoTrack.mediaTrack.clone();
       final trackToPublish = videoTrack.copyWith(mediaTrack: mediaTrackClone);
 
-      final cachedTransceiver = transceiversManager.get(option)?.transceiver;
+      final cachedBundle = transceiversManager.get(option);
+      final cachedTransceiver = cachedBundle?.transceiver;
       if (cachedTransceiver == null) {
         final transceiverResult = await _addTransceiver(
           trackToPublish,
@@ -935,6 +1091,13 @@ extension PublisherRtcManager on RtcManager {
 
         transceiversManager.update(option, track: trackToPublish);
 
+        // Reusing a transceiver via replaceTrack does not fire
+        // onRenegotiationNeeded. If its previous negotiation never reached the
+        // SFU, the SFU still doesn't know about it, so force a renegotiation.
+        if (cachedBundle != null && !cachedBundle.negotiated) {
+          needsRenegotiation = true;
+        }
+
         _logger.v(
           () => '[publishVideoTrack] cached transceiver: $cachedTransceiver',
         );
@@ -943,6 +1106,10 @@ extension PublisherRtcManager on RtcManager {
       updatedTrack = updatedTrack.copyWith(
         clonedTracks: [...updatedTrack.clonedTracks, mediaTrackClone],
       );
+    }
+
+    if (needsRenegotiation) {
+      _forceRenegotiation('[publishVideoTrack]');
     }
 
     // Notify listeners.
@@ -999,6 +1166,39 @@ extension PublisherRtcManager on RtcManager {
         scalabilityMode: highestLayer.scalabilityMode,
       ),
     ];
+  }
+
+  /// Explicitly triggers a publisher renegotiation.
+  void _forceRenegotiation(String tag) {
+    final pub = publisher;
+    if (pub == null) return;
+
+    if (pub.isReconnecting) {
+      _logger.v(
+        () => '$tag skipping forced renegotiation — reconnect in progress',
+      );
+      return;
+    }
+
+    _logger.v(
+      () =>
+          '$tag forcing renegotiation for a reused transceiver the SFU never '
+          'acknowledged',
+    );
+
+    pub.onRenegotiationNeeded?.call(pub);
+  }
+
+  /// Forces a publisher renegotiation if any transceiver sending [trackId]
+  /// was never acknowledged by the SFU.
+  void _renegotiateIfUnacknowledged(String trackId, String tag) {
+    final hasUnacknowledged = transceiversManager
+        .findAll((t) => t.track.trackId == trackId)
+        .any((t) => t.transceiver.sender.track != null && !t.negotiated);
+
+    if (hasUnacknowledged) {
+      _forceRenegotiation(tag);
+    }
   }
 
   Future<Result<rtc.RTCRtpTransceiver>> _addTransceiver(
@@ -1182,6 +1382,7 @@ extension PublisherRtcManager on RtcManager {
       tracks[trackId] = updatedTrack;
       onLocalTrackMuted?.call(updatedTrack, false);
 
+      _renegotiateIfUnacknowledged(trackId, '[unmuteTrack]');
       return Result.success(updatedTrack);
     }
 
@@ -1189,6 +1390,7 @@ extension PublisherRtcManager on RtcManager {
     track.enable();
     onLocalTrackMuted?.call(track, false);
 
+    _renegotiateIfUnacknowledged(trackId, '[unmuteTrack]');
     return Result.success(track);
   }
 

@@ -31,6 +31,15 @@
   - `UserToken.jwt(String rawValue)` named factory has been replaced by the default `UserToken(String rawValue)` constructor. Replace `UserToken.jwt('...')` with `UserToken('...')`.
   - `UserToken` validation changed: the new constructor throws `ArgumentError` (always) instead of `assert` (debug-only) when the JWT is missing a `user_id` claim.
 
+## 1.4.3
+
+### 🐞 Fixed
+
+- Fixed the publisher announcing a stale track `mid` after a renegotiation or publish retry. It's now resolved from the current peer-connection state so the SFU can reliably match the track to its media.
+- Serialized remote-description and ICE-candidate handling so a candidate arriving mid-negotiation can no longer be dropped.
+- Fixed an issue where republishing could reuse a cached publisher transceiver without renegotiating.
+- Fixed a `FormatException` when sending requests if the application name (or other device/app info) contains non-ASCII characters. Values included in the `X-Stream-Client` header are now sanitized to valid header characters.
+
 ## 1.4.2
 
 ### ✅ Added
@@ -66,7 +75,6 @@
 - Fixed `X-Stream-Client` header and SFU `ClientDetails` being sent with stale or incomplete device/app info.
 - Fixed incoming calls being locally rejected after accept when the coordinator WebSocket event arrived before the HTTP response ([#1254](https://github.com/GetStream/stream-video-flutter/issues/1254)).
 - Fixed an Android crash when the push notification `TransparentActivity` is recreated with a null intent action (e.g. after process death or restore from recents) ([#1256](https://github.com/GetStream/stream-video-flutter/pull/1256)).
-
 
 ## 1.4.0
 

@@ -9,7 +9,6 @@ import '../call/stats/tracer.dart';
 import '../sfu/data/models/sfu_codec.dart';
 import '../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../sfu/data/models/sfu_track_type.dart';
-import '../utils/none.dart';
 import '../utils/result.dart';
 import 'model/stats/rtc_codec.dart';
 import 'model/stats/rtc_inbound_rtp_video_stream.dart';
@@ -471,19 +470,25 @@ class TracedStreamPeerConnection extends StreamPeerConnection {
   }
 
   @override
-  Future<Result<None>> addIceCandidate(rtc.RTCIceCandidate candidate) async {
+  Future<Result<AddIceCandidateResult>> addIceCandidate(
+    rtc.RTCIceCandidate candidate,
+  ) async {
     tracer.trace(TraceTag.addIceCandidate, candidate.toMap());
 
     final result = await super.addIceCandidate(candidate);
 
-    if (result.isSuccess) {
-      tracer.trace(TraceTag.addIceCandidateSuccess, null);
-    } else {
-      tracer.trace(
+    result.when(
+      success: (outcome) => tracer.trace(
+        outcome == AddIceCandidateResult.buffered
+            ? TraceTag.addIceCandidatePending
+            : TraceTag.addIceCandidateSuccess,
+        null,
+      ),
+      failure: (error) => tracer.trace(
         TraceTag.addIceCandidateError,
-        result.getErrorOrNull()?.toString(),
-      );
-    }
+        error.toString(),
+      ),
+    );
 
     return result;
   }

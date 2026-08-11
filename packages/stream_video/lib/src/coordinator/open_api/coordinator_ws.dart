@@ -16,7 +16,7 @@ String _buildUrl(String baseUrl, String apiKey) {
   return '$baseUrl'
       '?api_key=$apiKey'
       '&stream-auth-type=jwt'
-      '&X-Stream-Client=$xStreamClientHeader';
+      '&X-Stream-Client=${Uri.encodeQueryComponent(xStreamClientHeader)}';
 }
 
 class CoordinatorWebSocket {

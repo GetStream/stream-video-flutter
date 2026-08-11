@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../../../globals.dart';
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../stream_video.dart';
@@ -42,8 +44,7 @@ class SfuWebSocket {
     }
 
     final finalWsEndpoint =
-        '$sfuWsEndpoint?X-Stream-Client=$xStreamClientHeader&attempt=${++sessionSeq}&cid=$cid&user_id=$userId&api_key=$apiKey&user_session_id=$sessionId';
-
+        '$sfuWsEndpoint?X-Stream-Client=${Uri.encodeQueryComponent(xStreamClientHeader)}&attempt=${++sessionSeq}&cid=$cid&user_id=$userId&api_key=$apiKey&user_session_id=$sessionId';
     streamLog.i(tag, () => '<factory> wsEndpoint: $wsEndpoint');
     streamLog.i(tag, () => '<factory> sfuWsEndpoint: $sfuWsEndpoint');
     streamLog.i(tag, () => '<factory> finalWsEndpoint: $finalWsEndpoint');
@@ -83,6 +84,13 @@ class SfuWebSocket {
 
   late final StreamWebSocketClient _client;
   String get url => _client.options.url;
+
+  /// The underlying socket client.
+  ///
+  /// Exposed so tests can drive its connection state directly — they never
+  /// establish a real socket.
+  @visibleForTesting
+  StreamWebSocketClient get client => _client;
 
   SharedEmitter<SfuEvent> get events => _events;
   final _events = MutableSharedEmitter<SfuEvent>();
