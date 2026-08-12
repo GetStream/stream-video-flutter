@@ -1,3 +1,7 @@
+## 1.4.3
+
+- Updated `stream_video` dependency to [`1.4.3`](https://pub.dev/packages/stream_video/changelog).
+
 ## 1.4.2
 
 - Increased minimum Flutter version to 3.38.1.

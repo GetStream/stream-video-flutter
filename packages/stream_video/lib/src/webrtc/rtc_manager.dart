@@ -49,6 +49,10 @@ typedef OnRemoteTrackReceived =
 
 const _tag = 'SV:RtcManager';
 
+/// How long [PublisherRtcManager.getAnnouncedTracks] waits for in-flight
+/// transceiver creations before giving up on the current negotiation.
+const _pendingTransceiverSettleTimeout = Duration(seconds: 5);
+
 class RtcManager extends Disposable {
   RtcManager({
     required this.sessionId,
@@ -86,6 +90,40 @@ class RtcManager extends Disposable {
   final StreamPeerConnectionFactory pcFactory;
 
   final transceiversManager = TransceiverManager();
+
+  bool _isDisposing = false;
+
+  /// Publishes that have claimed a `(trackType, publishOptionId)` and are
+  /// still creating their transceiver.
+  final _pendingTransceivers = <TransceiverKey, Future<void>>{};
+
+  /// Track creations (`getUserMedia` and the publish that follows) in flight
+  /// per track type, so a double "enable" opens the camera once instead of
+  /// twice.
+  final _pendingTrackCreations =
+      <SfuTrackType, Future<Result<RtcLocalTrack>>>{};
+
+  /// Runs [create] as the single in-flight creation for [trackType], returning
+  /// the already-running one when there is one.
+  Future<Result<RtcLocalTrack>> _singleFlightCreate(
+    SfuTrackType trackType,
+    Future<Result<RtcLocalTrack>> Function() create,
+  ) {
+    final inFlight = _pendingTrackCreations[trackType];
+    if (inFlight != null) {
+      _logger.i(
+        () =>
+            '[createTrack] $trackType is already being created; '
+            'joining the in-flight request instead of acquiring media again',
+      );
+      return inFlight;
+    }
+
+    final pending = create();
+    _pendingTrackCreations[trackType] = pending;
+
+    return pending.whenComplete(() => _pendingTrackCreations.remove(trackType));
+  }
 
   List<SfuPublishOptions> publishOptions;
   AudioConstraints _defaultAudioConstraints = const AudioConstraints();
@@ -406,6 +444,23 @@ class RtcManager extends Disposable {
       final mediaTrackClone = await item.track.mediaTrack.clone();
       final trackToPublish = item.track.copyWith(mediaTrack: mediaTrackClone);
 
+      // Cloning suspended; a publish may have taken this key in the meantime.
+      var pending = _pendingTransceivers[publishOption.transceiverKey];
+      while (pending != null) {
+        await pending;
+        pending = _pendingTransceivers[publishOption.transceiverKey];
+      }
+
+      if (transceiversManager.has(publishOption)) {
+        _logger.v(
+          () =>
+              '[onPublishOptionsChanged] $trackType with codec: '
+              '${publishOption.codec.name} was published while preparing',
+        );
+        await mediaTrackClone.stop();
+        continue;
+      }
+
       final result = await _addTransceiver(
         trackToPublish,
         publishOption,
@@ -442,6 +497,12 @@ class RtcManager extends Disposable {
       // it is safe to stop the track here, it is a clone
       await item.transceiver.sender.track?.stop();
       await _updateTransceiver(item.transceiver, null, publishOption.trackType);
+
+      // Stopping the transceiver releases its m-line for reuse. Dropping the
+      // cache entry without it leaves the m-line on the peer connection with
+      // nobody owning it.
+      await _stopTransceiver(item.transceiver);
+      transceiversManager.remove(publishOption);
     }
   }
 
@@ -554,6 +615,7 @@ class RtcManager extends Disposable {
   @override
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
+    _isDisposing = true;
 
     await _screenSharingStartedSubscription?.cancel();
     _screenSharingStartedSubscription = null;
@@ -746,14 +808,38 @@ extension PublisherRtcManager on RtcManager {
   }
 
   /// The tracks to announce in `SetPublisher`, or null when the mid of at least
-  /// one sending transceiver could not be resolved.
+  /// one sending transceiver that is part of the offer could not be resolved.
   ///
   /// All-or-nothing on purpose: announcing a subset commits an offer whose
   /// omitted m-lines keep sending media the SFU cannot map, and the SFU may read
   /// a missing entry as an unpublish of a track that was working. A null tells
   /// the caller to roll the offer back and retry instead. An empty list is a
   /// different answer — nothing is sending, which is a legitimate no-op.
+  ///
+  /// A transceiver whose track is absent from the offer entirely (a publish
+  /// that landed while this negotiation was preparing) is skipped, not failed
+  /// its own queued negotiation announces it right after.
   Future<List<RtcTrackInfo>?> getAnnouncedTracks({String? sdp}) async {
+    // Wait for all pending transceivers to settle before announcing tracks.
+    //
+    // Bounded on purpose: this runs inside the negotiation lock with the offer
+    // already applied locally, so waiting forever on a wedged platform call
+    // would hold that lock open.
+    try {
+      await _settlePendingTransceivers().timeout(
+        _pendingTransceiverSettleTimeout,
+      );
+    } on TimeoutException {
+      _logger.w(
+        () =>
+            '[getAnnouncedTracks] pending transceivers did not settle within '
+            '$_pendingTransceiverSettleTimeout; failing the announce so the '
+            'offer is rolled back',
+      );
+
+      return null;
+    }
+
     final finalSdp = sdp ?? await _localSdp();
     final liveTransceivers = await _liveTransceivers();
     final infos = <RtcTrackInfo>[];
@@ -766,11 +852,24 @@ extension PublisherRtcManager on RtcManager {
         liveTransceivers: liveTransceivers,
       );
 
-      if (info == null) return null;
+      if (info == null) {
+        // A publish that landed after this offer was created is announced by
+        // its own queued negotiation, not this one.
+        if (_isMidFlightPublish(item, finalSdp)) continue;
+        return null;
+      }
       infos.add(info);
     }
 
     return infos;
+  }
+
+  /// Waits out every in-flight transceiver creation, so the cache reflects
+  /// what the peer connection is actually sending.
+  Future<void> _settlePendingTransceivers() async {
+    while (_pendingTransceivers.isNotEmpty) {
+      await Future.wait(_pendingTransceivers.values.toList());
+    }
   }
 
   /// The tracks to report in `ReconnectDetails`.
@@ -787,13 +886,12 @@ extension PublisherRtcManager on RtcManager {
     final finalSdp = sdp ?? await _localSdp();
     final liveTransceivers = await _liveTransceivers();
     final infos = <RtcTrackInfo>[];
+    final seenKeys = <TransceiverKey>{};
 
     for (final publishOption in publishOptions) {
-      final item = transceiversManager.find(
-        (c) =>
-            c.publishOption.id == publishOption.id &&
-            c.publishOption.trackType == publishOption.trackType,
-      );
+      if (!seenKeys.add(publishOption.transceiverKey)) continue;
+
+      final item = transceiversManager.get(publishOption);
 
       if (item?.transceiver.sender.track == null) continue;
       final info = _transceiverToTrackInfo(
@@ -802,14 +900,37 @@ extension PublisherRtcManager on RtcManager {
         liveTransceivers: liveTransceivers,
       );
 
-      if (info == null) {
-        continue;
-      }
+      if (info == null) continue;
 
       infos.add(info);
     }
 
     return infos;
+  }
+
+  /// True when [sdp] carries no m-line for [transceiverCache] — a publish that
+  /// landed after the offer was created.
+  ///
+  /// Absence is proven against every id the transceiver has ever sent, not just
+  /// the current one. An m-line is named by whichever id its sender held at
+  /// `createOffer` time, so a `replaceTrack` that landed afterwards leaves the
+  /// offer naming an older id while the m-line is very much part of it. Matching
+  /// only the current id would read that as a late publish and quietly drop a
+  /// track [getAnnouncedTracks] is contractually required to fail on instead.
+  bool _isMidFlightPublish(TransceiverCache transceiverCache, String? sdp) {
+    if (sdp == null) return false;
+    if (transceiverCache.negotiated) return false;
+
+    final currentTrackId = transceiverCache.transceiver.sender.track?.id;
+    final candidateIds = <String>{
+      ...transceiverCache.sentTrackIds,
+      if (currentTrackId != null) currentTrackId,
+    };
+
+    // Unknown track ids — cannot prove absence, stay conservative.
+    if (candidateIds.isEmpty) return false;
+
+    return !candidateIds.any(sdp.contains);
   }
 
   RtcTrackInfo? _transceiverToTrackInfo(
@@ -831,6 +952,16 @@ extension PublisherRtcManager on RtcManager {
     );
 
     if (mid == null) {
+      if (_isMidFlightPublish(transceiverCache, sdp)) {
+        _logger.v(
+          () =>
+              '[transceiverToTrackInfo] track $sentTrackId '
+              '(${track.trackType}) is not part of the current offer yet; '
+              'deferring to its own negotiation',
+        );
+        return null;
+      }
+
       _logger.w(
         () =>
             '[transceiverToTrackInfo] could not resolve mid for track '
@@ -959,6 +1090,15 @@ extension PublisherRtcManager on RtcManager {
       final mediaTrackClone = await audioTrack.mediaTrack.clone();
       final trackToPublish = audioTrack.copyWith(mediaTrack: mediaTrackClone);
 
+      // Another publish may have claimed this key and still be waiting on the
+      // platform. Let it settle, then re-read: whoever claimed first creates
+      // the sender, everyone else reuses it through `replaceTrack` below.
+      var pending = _pendingTransceivers[option.transceiverKey];
+      while (pending != null) {
+        await pending;
+        pending = _pendingTransceivers[option.transceiverKey];
+      }
+
       final cachedBundle = transceiversManager.get(option);
       final cachedTransceiver = cachedBundle?.transceiver;
       if (cachedTransceiver == null) {
@@ -1016,6 +1156,16 @@ extension PublisherRtcManager on RtcManager {
       _forceRenegotiation('[publishAudioTrack]');
     }
 
+    if (_isDisposing) {
+      _logger.w(
+        () =>
+            '[publishAudioTrack] disposed mid-publish; discarding '
+            '${updatedTrack.trackId}',
+      );
+      await updatedTrack.stop();
+      return Result.error('RtcManager was disposed while publishing');
+    }
+
     // Notify listeners.
     onLocalTrackPublished?.call(updatedTrack);
     tracks[updatedTrack.trackId] = updatedTrack;
@@ -1062,6 +1212,15 @@ extension PublisherRtcManager on RtcManager {
       // in the SDP, matching the JS SDK pattern.
       final mediaTrackClone = await videoTrack.mediaTrack.clone();
       final trackToPublish = videoTrack.copyWith(mediaTrack: mediaTrackClone);
+
+      // Another publish may have claimed this key and still be waiting on the
+      // platform. Let it settle, then re-read: whoever claimed first creates
+      // the sender, everyone else reuses it through `replaceTrack` below.
+      var pending = _pendingTransceivers[option.transceiverKey];
+      while (pending != null) {
+        await pending;
+        pending = _pendingTransceivers[option.transceiverKey];
+      }
 
       final cachedBundle = transceiversManager.get(option);
       final cachedTransceiver = cachedBundle?.transceiver;
@@ -1110,6 +1269,16 @@ extension PublisherRtcManager on RtcManager {
 
     if (needsRenegotiation) {
       _forceRenegotiation('[publishVideoTrack]');
+    }
+
+    if (_isDisposing) {
+      _logger.w(
+        () =>
+            '[publishVideoTrack] disposed mid-publish; discarding '
+            '${updatedTrack.trackId}',
+      );
+      await updatedTrack.stop();
+      return Result.error('RtcManager was disposed while publishing');
     }
 
     // Notify listeners.
@@ -1201,17 +1370,64 @@ extension PublisherRtcManager on RtcManager {
     }
   }
 
+  /// Creates the sender for [publishOptions], claiming its
+  /// `(trackType, publishOptionId)` for the duration.
+  ///
+  /// Deliberately **not** `async`: everything up to the claim runs in the same
+  /// synchronous step as the caller's cache lookup, so no other publish can
+  /// slip between "this key is free" and "this key is mine".
   Future<Result<rtc.RTCRtpTransceiver>> _addTransceiver(
     RtcLocalTrack track,
     SfuPublishOptions publishOptions,
     RtcTrackPublishOptions trackPublishOptions,
-  ) async {
+  ) {
     if (publisher == null) {
       return failureWithError(
         'Publisher is not created, cannot add transceiver',
       );
     }
 
+    // The SFU rejects a publisher that announces the same key twice, so a
+    // second sender must never exist — not even briefly. Callers check the
+    // cache and wait out [_pendingTransceivers] before getting here, so this
+    // is a backstop; failing is the honest answer, since the caller's track
+    // would not be the one on the wire.
+    final key = publishOptions.transceiverKey;
+    if (transceiversManager.has(publishOptions) ||
+        _pendingTransceivers.containsKey(key)) {
+      _logger.e(
+        () =>
+            '[addTransceiver] duplicate publish for trackType: '
+            '${publishOptions.trackType}, publishOptionId: '
+            '${publishOptions.id} — rejecting',
+      );
+
+      return Future.value(
+        Result.error(
+          'Already publishing trackType: ${publishOptions.trackType} with '
+          'publishOptionId: ${publishOptions.id}',
+        ),
+      );
+    }
+
+    final claim = Completer<void>();
+    _pendingTransceivers[key] = claim.future;
+
+    return _createTransceiver(
+      track,
+      publishOptions,
+      trackPublishOptions,
+    ).whenComplete(() {
+      _pendingTransceivers.remove(key);
+      claim.complete();
+    });
+  }
+
+  Future<Result<rtc.RTCRtpTransceiver>> _createTransceiver(
+    RtcLocalTrack track,
+    SfuPublishOptions publishOptions,
+    RtcTrackPublishOptions trackPublishOptions,
+  ) async {
     Result<rtc.RTCRtpTransceiver>? transceiverResult;
 
     _logger.v(
@@ -1255,12 +1471,29 @@ extension PublisherRtcManager on RtcManager {
     if (transceiverResult is Failure) return transceiverResult;
 
     final transceiver = transceiverResult.getDataOrNull()!;
-    transceiversManager.add(
+
+    final cached = transceiversManager.add(
       track,
       publishOptions,
       transceiver,
       trackPublishOptions,
     );
+
+    if (!cached) {
+      _logger.e(
+        () =>
+            '[addTransceiver] cache already holds trackType: '
+            '${publishOptions.trackType}, publishOptionId: '
+            '${publishOptions.id} — discarding the sender just created',
+      );
+
+      await _stopTransceiver(transceiver);
+
+      return Result.error(
+        'Already publishing trackType: ${publishOptions.trackType} with '
+        'publishOptionId: ${publishOptions.id}',
+      );
+    }
 
     return Result.success(transceiver);
   }
@@ -1278,6 +1511,15 @@ extension PublisherRtcManager on RtcManager {
         track.trackType,
         trackPublishOptions ?? const RtcTrackPublishOptions(),
       );
+    }
+  }
+
+  /// Stops [transceiver] so its m-line becomes recyclable.
+  Future<void> _stopTransceiver(RTCRtpTransceiver transceiver) async {
+    try {
+      await transceiver.stop();
+    } catch (e, stk) {
+      _logger.w(() => '[stopTransceiver] failed: $e\n$stk');
     }
   }
 
@@ -1345,7 +1587,9 @@ extension PublisherRtcManager on RtcManager {
     return Result.success(track);
   }
 
-  Future<Result<RtcLocalTrack>> unmuteTrack({required String trackId}) async {
+  Future<Result<RtcLocalTrack>> unmuteTrack({
+    required String trackId,
+  }) async {
     final track = tracks[trackId];
     if (track == null) {
       _logger.w(() => 'unmuteTrack: track not found');
@@ -1748,7 +1992,28 @@ extension RtcManagerTrackHelper on RtcManager {
     required bool enabled,
     MediaConstraints? constraints,
   }) async {
-    final track = getPublisherTrackByType(trackType);
+    var track = getPublisherTrackByType(trackType);
+
+    // Wait out an in-flight creation before deciding anything.
+    //
+    // Screen share is left out on the enable side: it deliberately creates a
+    // fresh track every time so a new screen can be picked, and waiting here
+    // would queue a second picker behind the one still on screen.
+    final awaitsCreation =
+        track == null && (!enabled || trackType != SfuTrackType.screenShare);
+
+    if (awaitsCreation) {
+      final inFlight = _pendingTrackCreations[trackType];
+      if (inFlight != null) {
+        _logger.i(
+          () =>
+              '[setTrackEnabled] $trackType is still being created; '
+              'waiting for it before applying enabled: $enabled',
+        );
+        await inFlight;
+        track = getPublisherTrackByType(trackType);
+      }
+    }
 
     // Track found, mute/unmute it.
     if (track != null) {
@@ -1814,7 +2079,29 @@ extension RtcManagerTrackHelper on RtcManager {
     return track;
   }
 
+  /// Acquires media for [trackType] and publishes it.
+  ///
+  /// Collapsed per track type: a second "enable" arriving while the first is
+  /// still in `getUserMedia` joins it rather than opening the camera or
+  /// microphone a second time. That is the window the duplicate-publish bug
+  /// came through — `tracks` is only populated once acquisition returns, so
+  /// until then every caller sees "nothing published yet". A joining caller's
+  /// [constraints] are ignored, which matches what it would have observed had
+  /// it arrived a moment later and found the track already published.
   Future<Result<RtcLocalTrack>> _createAndPublishTrack({
+    required SfuTrackType trackType,
+    MediaConstraints? constraints,
+  }) {
+    return _singleFlightCreate(
+      trackType,
+      () => _acquireAndPublishTrack(
+        trackType: trackType,
+        constraints: constraints,
+      ),
+    );
+  }
+
+  Future<Result<RtcLocalTrack>> _acquireAndPublishTrack({
     required SfuTrackType trackType,
     MediaConstraints? constraints,
   }) async {

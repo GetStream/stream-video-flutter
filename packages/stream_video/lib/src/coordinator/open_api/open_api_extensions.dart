@@ -600,6 +600,7 @@ extension CallSessionResponseExt on open.CallSessionResponse {
       participantsCountByRole: participantsCountByRole,
       rejectedBy: rejectedBy,
       acceptedBy: acceptedBy,
+      missedBy: missedBy,
       startedAt: startedAt,
       endedAt: endedAt,
       liveStartedAt: liveStartedAt,

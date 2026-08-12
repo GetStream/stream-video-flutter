@@ -425,7 +425,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       StreamVideoPushNotificationPlatform.instance.endCall(uuid);
 
   @override
-  Future<void> endCallByCid(String cid) async {
+  Future<void> endCallByCid(String cid, {bool silent = false}) async {
     final activeCalls = await this.activeCalls();
     final calls = activeCalls
         .where((call) => call.callCid == cid && call.uuid != null)
@@ -434,9 +434,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     // If multiple native ringing calls are stacked with identical metadata,
     // ending by callCid may not be sufficient; fall back to endAllCalls.
     if (activeCalls.length == calls.length) {
+      if (silent) RingingEventBroadcaster().suppressEvent();
       await endAllCalls();
     } else {
       for (final call in calls) {
+        if (silent) RingingEventBroadcaster().suppressEvent();
         await endCall(call.uuid!);
       }
     }

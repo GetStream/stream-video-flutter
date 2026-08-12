@@ -118,6 +118,7 @@ void main() {
 
     final track = MockRtcLocalTrack();
     when(() => track.trackId).thenReturn(_trackId);
+    when(() => track.trackType).thenReturn(SfuTrackType.audio);
     when(() => track.stopTrackOnMute).thenReturn(false);
     when(() => track.mediaTrack).thenReturn(mediaTrack);
     manager.tracks[_trackId] = track;

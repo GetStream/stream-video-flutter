@@ -226,6 +226,130 @@ void main() {
 
       expect(announced?.single.mid, '5');
     });
+
+    test(
+      'skips a publish that landed after the offer was created instead of '
+      'failing the announce — its own queued negotiation announces it',
+      () async {
+        final wires = buildManager();
+        // track-a is part of the offer; track-b was published concurrently
+        // while this negotiation was preparing (its m-line is absent).
+        cacheTrack(wires.manager, option: _option(1), trackId: 'track-a');
+        cacheTrack(wires.manager, option: _option(2), trackId: 'track-b');
+
+        stubPeerConnection(
+          wires.pc,
+          liveTransceivers: [_transceiver(trackId: 'track-a', mid: '0')],
+        );
+
+        final announced = await wires.manager.getAnnouncedTracks(
+          sdp: [
+            'v=0\r\n',
+            'o=- 1 2 IN IP4 127.0.0.1\r\n',
+            's=-\r\n',
+            't=0 0\r\n',
+            'm=audio 9 UDP/TLS/RTP/SAVPF 111\r\n',
+            'c=IN IP4 0.0.0.0\r\n',
+            'a=mid:0\r\n',
+            'a=sendonly\r\n',
+            'a=msid:stream-id track-a\r\n',
+          ].join(),
+        );
+
+        expect(announced, isNotNull);
+        expect(announced!.single.trackId, 'track-a');
+      },
+    );
+
+    test(
+      'fails the announce for a track the SFU already acknowledged, even when '
+      'the offer does not name it — dropping it would read as an unpublish',
+      () async {
+        final wires = buildManager();
+        cacheTrack(wires.manager, option: _option(1), trackId: 'track-a');
+        cacheTrack(wires.manager, option: _option(2), trackId: 'track-b');
+
+        // track-b was announced and acknowledged, but the ack carried no mid,
+        // so there is no negotiatedMid to fall back on. It is a live sender —
+        // absence from the offer must not be read as a mid-flight publish.
+        wires.manager.transceiversManager.markNegotiated([
+          _announced(_option(2), trackId: 'track-b', mid: ''),
+        ]);
+
+        stubPeerConnection(
+          wires.pc,
+          liveTransceivers: [_transceiver(trackId: 'track-a', mid: '0')],
+        );
+
+        final announced = await wires.manager.getAnnouncedTracks(
+          sdp: [
+            'v=0\r\n',
+            'o=- 1 2 IN IP4 127.0.0.1\r\n',
+            's=-\r\n',
+            't=0 0\r\n',
+            'm=audio 9 UDP/TLS/RTP/SAVPF 111\r\n',
+            'c=IN IP4 0.0.0.0\r\n',
+            'a=mid:0\r\n',
+            'a=sendonly\r\n',
+            'a=msid:stream-id track-a\r\n',
+          ].join(),
+        );
+
+        expect(announced, isNull);
+      },
+    );
+
+    test(
+      'fails the announce when a republish swapped the track after the offer '
+      'was created — the m-line is in the offer under the id it replaced',
+      () async {
+        final wires = buildManager();
+        final option = _option(1);
+        cacheTrack(wires.manager, option: option, trackId: 'clone-0');
+
+        // The republish path: `replaceTrack` swaps a fresh clone onto the same
+        // sender, and the cache follows it. Nothing is negotiated yet, so there
+        // is no negotiatedMid to fall back on either.
+        final swappedMedia = _MockMediaStreamTrack();
+        when(() => swappedMedia.id).thenReturn('clone-1');
+        when(() => swappedMedia.kind).thenReturn('audio');
+        when(() => swappedMedia.enabled).thenReturn(true);
+
+        final swapped = _MockLocalAudioTrack();
+        when(() => swapped.trackId).thenReturn('track-clone-1');
+        when(() => swapped.trackType).thenReturn(SfuTrackType.audio);
+        when(() => swapped.mediaTrack).thenReturn(swappedMedia);
+
+        final cached = wires.manager.transceiversManager.get(option)!;
+        final sender = cached.transceiver.sender;
+        when(() => sender.track).thenReturn(swappedMedia);
+        wires.manager.transceiversManager.update(option, track: swapped);
+
+        // The sender now holds clone-1, while the offer — created before the
+        // swap — still names clone-0 on the very m-line this sender owns.
+        stubPeerConnection(
+          wires.pc,
+          liveTransceivers: [_transceiver(trackId: 'clone-1')],
+        );
+
+        final announced = await wires.manager.getAnnouncedTracks(
+          sdp: [
+            'v=0\r\n',
+            'o=- 1 2 IN IP4 127.0.0.1\r\n',
+            's=-\r\n',
+            't=0 0\r\n',
+            'm=audio 9 UDP/TLS/RTP/SAVPF 111\r\n',
+            'c=IN IP4 0.0.0.0\r\n',
+            'a=sendonly\r\n',
+            'a=msid:stream-id clone-0\r\n',
+          ].join(),
+        );
+
+        // Skipping it would commit an offer whose m-line keeps sending media
+        // the SFU was never told about. Roll back and retry instead.
+        expect(announced, isNull);
+      },
+    );
   });
 
   group('getAnnouncedTracksForReconnect', () {
@@ -318,6 +442,30 @@ void main() {
         final reported = await wires.manager.getAnnouncedTracksForReconnect();
 
         expect(reported.single.mid, '2');
+      },
+    );
+
+    test(
+      'announces a track once even when publishOptions repeats the same '
+      'option — a duplicate (trackType, publishOptionId) would collide on '
+      'the SFU',
+      () async {
+        final wires = buildManager();
+        final option = _option(1);
+        cacheTrack(wires.manager, option: option, trackId: 'track-a');
+
+        // A duplicated option list must not produce a duplicated announce.
+        wires.manager.publishOptions = [option, option];
+
+        stubPeerConnection(
+          wires.pc,
+          liveTransceivers: [_transceiver(trackId: 'track-a', mid: '0')],
+        );
+
+        final reported = await wires.manager.getAnnouncedTracksForReconnect();
+
+        expect(reported, hasLength(1));
+        expect(reported.single.trackId, 'track-a');
       },
     );
   });

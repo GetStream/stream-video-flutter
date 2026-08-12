@@ -84,9 +84,9 @@ void main() {
       final option = _option(1, SfuTrackType.video);
 
       manager.add(
-        _MockLocalTrack(),
+        _localTrack('media-1'),
         option,
-        _transceiverWithTrack(_MockMediaStreamTrack()),
+        _transceiverWithTrack(_mediaTrack('media-1')),
         const RtcTrackPublishOptions(),
       );
 
@@ -313,6 +313,139 @@ void main() {
       manager.markNegotiated([_trackInfo('media-other', option, mid: '3')]);
 
       expect(manager.get(option)!.negotiatedMid, isNull);
+    });
+  });
+
+  group('TransceiverManager uniqueness', () {
+    test(
+      'add rejects a second transceiver with the same '
+      '(trackType, publishOptionId) — the SFU supports one track per type',
+      () {
+        final manager = TransceiverManager();
+        final option = _option(1, SfuTrackType.video);
+
+        expect(
+          manager.add(
+            _localTrack('media-1'),
+            option,
+            _transceiverWithTrack(_mediaTrack('media-1')),
+            const RtcTrackPublishOptions(),
+          ),
+          isTrue,
+        );
+
+        expect(
+          manager.add(
+            _localTrack('media-2'),
+            option,
+            _transceiverWithTrack(_mediaTrack('media-2')),
+            const RtcTrackPublishOptions(),
+          ),
+          isFalse,
+          reason: 'the caller has to dispose of the sender it just created',
+        );
+
+        // The incumbent is untouched — a rejected add must not half-replace it.
+        expect(manager.items(), hasLength(1));
+        expect(manager.get(option)!.track.mediaTrack.id, 'media-1');
+        expect(manager.get(option)!.sentTrackIds, {'media-1'});
+      },
+    );
+
+    test('allows the same publishOptionId across different track types', () {
+      final manager = TransceiverManager();
+
+      manager.add(
+        _localTrack('media-audio'),
+        _option(1, SfuTrackType.audio),
+        _transceiverWithTrack(_mediaTrack('media-audio')),
+        const RtcTrackPublishOptions(),
+      );
+      manager.add(
+        _localTrack('media-video'),
+        _option(1, SfuTrackType.video),
+        _transceiverWithTrack(_mediaTrack('media-video')),
+        const RtcTrackPublishOptions(),
+      );
+
+      expect(manager.items(), hasLength(2));
+    });
+
+    test('remove drops the entry and returns it', () {
+      final manager = TransceiverManager();
+      final option = _option(1, SfuTrackType.video);
+
+      manager.add(
+        _localTrack('media-1'),
+        option,
+        _transceiverWithTrack(_mediaTrack('media-1')),
+        const RtcTrackPublishOptions(),
+      );
+
+      final removed = manager.remove(option);
+
+      expect(removed, isNotNull);
+      expect(removed!.track.mediaTrack.id, 'media-1');
+      expect(manager.has(option), isFalse);
+      expect(manager.items(), isEmpty);
+
+      // The slot is publishable again after removal.
+      manager.add(
+        _localTrack('media-2'),
+        option,
+        _transceiverWithTrack(_mediaTrack('media-2')),
+        const RtcTrackPublishOptions(),
+      );
+      expect(manager.get(option)!.track.mediaTrack.id, 'media-2');
+    });
+
+    test('remove of an absent entry returns null', () {
+      final manager = TransceiverManager();
+
+      expect(manager.remove(_option(1, SfuTrackType.video)), isNull);
+    });
+  });
+
+  group('TransceiverCache.sentTrackIds', () {
+    test('accumulates every track the transceiver has sent', () {
+      final manager = TransceiverManager();
+      final option = _option(1, SfuTrackType.video);
+
+      manager.add(
+        _localTrack('clone-0'),
+        option,
+        _transceiverWithTrack(_mediaTrack('clone-0')),
+        const RtcTrackPublishOptions(),
+      );
+
+      // Each republish swaps in a fresh clone via `replaceTrack`. An offer
+      // created before the swap still names the id it replaced, so the history
+      // is what identifies the m-line as this transceiver's.
+      manager.update(option, track: _localTrack('clone-1'));
+      manager.update(option, track: _localTrack('clone-2'));
+
+      final entry = manager.get(option)!;
+      expect(entry.track.mediaTrack.id, 'clone-2');
+      expect(entry.sentTrackIds, {'clone-0', 'clone-1', 'clone-2'});
+    });
+
+    test('an update that carries no track leaves the history alone', () {
+      final manager = TransceiverManager();
+      final option = _option(1, SfuTrackType.video);
+
+      manager.add(
+        _localTrack('clone-0'),
+        option,
+        _transceiverWithTrack(_mediaTrack('clone-0')),
+        const RtcTrackPublishOptions(),
+      );
+
+      manager.update(
+        option,
+        trackPublishOptions: const RtcTrackPublishOptions(),
+      );
+
+      expect(manager.get(option)!.sentTrackIds, {'clone-0'});
     });
   });
 }
