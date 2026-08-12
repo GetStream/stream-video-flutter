@@ -1122,6 +1122,9 @@ class StreamVideo extends Disposable {
   Future<CallMetadata?> _getCallForRingingEvent(StreamCallCid callCid) async {
     final connectResult = await connect(
       includeUserDetails: _options.includeUserDetailsForAutoConnect,
+      // The device is registered already, otherwise the push wouldn't have been
+      // delivered. Registering it is not this flow's concern.
+      registerPushDevice: false,
     );
 
     if (connectResult.isFailure) {

@@ -35,8 +35,13 @@ class CallSessionData extends Equatable {
   @override
   List<Object?> get props => [
     id,
+    participants,
+    participantsCountByRole,
+    rejectedBy,
+    acceptedBy,
+    missedBy,
     startedAt,
-    liveStartedAt,
+    endedAt,
     liveStartedAt,
     liveEndedAt,
     timerEndsAt,
