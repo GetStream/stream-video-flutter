@@ -116,8 +116,25 @@ _wireStalledPublisher(
   when(pc.getTransceivers).thenAnswer((_) async => const []);
   when(pc.getLocalDescription).thenAnswer((_) async => null);
 
+  // The offer names the sending track (so it is part of this negotiation —
+  // not a publish that landed mid-flight) but carries no a=mid for it, which
+  // makes the mid genuinely unresolvable.
   when(publisher.createOffer).thenAnswer(
-    (_) async => Result.success(rtc.RTCSessionDescription('v=0\r\n', 'offer')),
+    (_) async => Result.success(
+      rtc.RTCSessionDescription(
+        [
+          'v=0\r\n',
+          'o=- 1 2 IN IP4 127.0.0.1\r\n',
+          's=-\r\n',
+          't=0 0\r\n',
+          'm=audio 9 UDP/TLS/RTP/SAVPF 111\r\n',
+          'c=IN IP4 0.0.0.0\r\n',
+          'a=sendonly\r\n',
+          'a=msid:stream-id media-track-id\r\n',
+        ].join(),
+        'offer',
+      ),
+    ),
   );
   when(publisher.rollbackLocalDescription).thenAnswer(
     (_) async => const Result.success(null),
