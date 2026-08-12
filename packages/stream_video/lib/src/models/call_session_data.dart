@@ -12,6 +12,7 @@ class CallSessionData extends Equatable {
     this.participantsCountByRole = const {},
     this.rejectedBy = const {},
     this.acceptedBy = const {},
+    this.missedBy = const {},
     this.startedAt,
     this.liveStartedAt,
     this.endedAt,
@@ -24,6 +25,7 @@ class CallSessionData extends Equatable {
   final Map<Role, int> participantsCountByRole;
   final Map<String, DateTime> rejectedBy;
   final Map<String, DateTime> acceptedBy;
+  final Map<String, DateTime> missedBy;
   final DateTime? startedAt;
   final DateTime? endedAt;
   final DateTime? liveStartedAt;

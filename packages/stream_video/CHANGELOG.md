@@ -2,6 +2,7 @@
 
 ### 🐞 Fixed
 
+- Fixed the incoming call UI (CallKit on iOS) ringing for a call whose ringing flow was already resolved before the push was delivered.
 - Fixed the publisher announcing a stale track `mid` after a renegotiation or publish retry. It's now resolved from the current peer-connection state so the SFU can reliably match the track to its media.
 - Serialized remote-description and ICE-candidate handling so a candidate arriving mid-negotiation can no longer be dropped.
 - Fixed an issue where republishing could reuse a cached publisher transceiver without renegotiating.
