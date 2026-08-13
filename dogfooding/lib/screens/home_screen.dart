@@ -15,7 +15,6 @@ import '../core/model/environment.dart';
 import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
 import '../router/routes.dart';
-import '../theme/app_palette.dart';
 import '../utils/assets.dart';
 import '../utils/consts.dart';
 import '../utils/loading_dialog.dart';
@@ -206,6 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
     assert(currentUser != null, 'User must be logged in to access home screen');
 
     final theme = Theme.of(context);
+    final colorScheme = StreamTheme.of(context).colorScheme;
     final size = MediaQuery.sizeOf(context);
     final isHorizontal = size.width > size.height || size.height < 600;
     final width = math.min(size.width, kMaxWidthRegularScreen);
@@ -224,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Text(
         '[Video Calling]',
         style: theme.textTheme.headlineMedium?.apply(
-          color: AppColorPalette.appGreen,
+          color: colorScheme.accentSuccess,
         ),
       ),
     ];
@@ -283,7 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   'a QR code.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.apply(
-                    color: AppColorPalette.secondaryText,
+                    color: colorScheme.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 36),
@@ -330,6 +330,8 @@ class _JoinForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = StreamTheme.of(context).colorScheme;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -344,19 +346,19 @@ class _JoinForm extends StatelessWidget {
                 autocorrect: false,
                 enableSuggestions: false,
                 decoration: InputDecoration(
-                  enabledBorder: const OutlineInputBorder(
+                  enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(
-                      color: AppColorPalette.secondaryText,
+                      color: colorScheme.textSecondary,
                     ),
-                    borderRadius: BorderRadius.all(Radius.circular(36)),
+                    borderRadius: const BorderRadius.all(Radius.circular(36)),
                   ),
                   border: const OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(36)),
                   ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   isDense: true,
-                  hintStyle: const TextStyle(
-                    color: AppColorPalette.secondaryText,
+                  hintStyle: TextStyle(
+                    color: colorScheme.textSecondary,
                   ),
                   hintText: 'Enter call id',
                   // suffix button to generate a random call id

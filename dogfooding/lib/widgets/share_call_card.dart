@@ -6,7 +6,6 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
-import '../theme/app_palette.dart';
 import 'stream_button.dart';
 
 class ShareCallWelcomeCard extends StatefulWidget {
@@ -24,6 +23,7 @@ class _ShareCallWelcomeCardState extends State<ShareCallWelcomeCard> {
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
+    final colorScheme = StreamTheme.of(context).colorScheme;
 
     return Align(
       alignment: Alignment.bottomCenter,
@@ -31,7 +31,7 @@ class _ShareCallWelcomeCardState extends State<ShareCallWelcomeCard> {
         padding: const EdgeInsets.all(24),
         child: Container(
           decoration: BoxDecoration(
-            color: AppColorPalette.buttonSecondary,
+            color: colorScheme.backgroundSurface,
             borderRadius: BorderRadius.circular(16),
           ),
           constraints: const BoxConstraints(maxWidth: 600),
@@ -49,7 +49,7 @@ class _ShareCallWelcomeCardState extends State<ShareCallWelcomeCard> {
             ),
             trailing: Icon(
               _isExpanded ? Icons.expand_more : Icons.expand_less,
-              color: Colors.white,
+              color: colorScheme.textPrimary,
             ),
             childrenPadding: const EdgeInsets.all(16),
             onExpansionChanged: (value) => setState(() => _isExpanded = value),
@@ -91,6 +91,7 @@ class _ShareCardContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
+    final colorScheme = StreamTheme.of(context).colorScheme;
     final callUrl = _appPreferences.environment.getJoinUrl(callId: callId);
 
     return Column(
@@ -98,7 +99,7 @@ class _ShareCardContent extends StatelessWidget {
       children: [
         if (callUrl != null) ...[
           StreamButton.active(
-            icon: const Icon(Icons.person_add_alt_1, color: Colors.white),
+            icon: const Icon(Icons.person_add_alt_1),
             label: 'Share link with others',
             onPressed: () async {
               await SharePlus.instance.share(
@@ -114,7 +115,7 @@ class _ShareCardContent extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         StreamButton.tertiary(
-          icon: const Icon(Icons.copy_all, color: Colors.white),
+          icon: const Icon(Icons.copy_all),
           label: 'Call id: $callId',
           onPressed: () async {
             await Clipboard.setData(ClipboardData(text: callId));
@@ -124,7 +125,7 @@ class _ShareCardContent extends StatelessWidget {
                 SnackBar(
                   content: Row(
                     children: [
-                      const Icon(Icons.check, color: AppColorPalette.appGreen),
+                      Icon(Icons.check, color: colorScheme.accentSuccess),
                       const SizedBox(width: 8),
                       Text(
                         'Call ID copied to clipboard',

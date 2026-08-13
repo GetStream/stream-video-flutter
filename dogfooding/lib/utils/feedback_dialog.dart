@@ -5,7 +5,6 @@ import 'package:flutter_rating_stars/flutter_rating_stars.dart';
 import 'package:go_router/go_router.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../theme/app_palette.dart';
 import '../widgets/stream_button.dart';
 import 'assets.dart';
 
@@ -68,6 +67,8 @@ class __FeedbackRatingContentState extends State<_FeedbackRatingContent> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = StreamTheme.of(context).colorScheme;
+
     return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -88,7 +89,7 @@ class __FeedbackRatingContentState extends State<_FeedbackRatingContent> {
                 StreamVideoTheme.of(
                   context,
                 ).textTheme.footnote.apply(
-                  color: AppColorPalette.secondaryText,
+                  color: colorScheme.textSecondary,
                 ),
           ),
           const SizedBox(height: 32),
@@ -106,15 +107,15 @@ class __FeedbackRatingContentState extends State<_FeedbackRatingContent> {
             maxValueVisibility: false,
             valueLabelVisibility: false,
             animationDuration: const Duration(milliseconds: 1000),
-            starColor: AppColorPalette.appGreen,
+            starColor: colorScheme.accentSuccess,
           ),
           const SizedBox(height: 16),
           TextField(
             controller: textController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               hintText: 'Tell us more about your experience',
-              hintStyle: TextStyle(color: AppColorPalette.secondaryText),
-              border: OutlineInputBorder(),
+              hintStyle: TextStyle(color: colorScheme.textSecondary),
+              border: const OutlineInputBorder(),
             ),
             textInputAction: TextInputAction.done,
             onSubmitted: (value) {

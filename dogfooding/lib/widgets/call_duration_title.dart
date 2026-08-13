@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../theme/app_palette.dart';
-
 class CallDurationTitle extends StatefulWidget {
   const CallDurationTitle({super.key, required this.call});
 
@@ -16,10 +14,11 @@ class _CallDurationTitleState extends State<CallDurationTitle> {
   @override
   Widget build(BuildContext context) {
     final videoTheme = StreamVideoTheme.of(context);
+    final colorScheme = StreamTheme.of(context).colorScheme;
 
     return Container(
       decoration: BoxDecoration(
-        color: videoTheme.callControlsTheme.optionBackgroundColor,
+        color: colorScheme.backgroundSurface,
         borderRadius: BorderRadius.circular(20),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -32,15 +31,15 @@ class _CallDurationTitleState extends State<CallDurationTitle> {
             text: TextSpan(
               text: duration.inMinutes.toString().padLeft(2, '0'),
               style: videoTheme.textTheme.bodyBold.copyWith(
-                color: AppColorPalette.secondaryText,
+                color: colorScheme.textSecondary,
               ),
               children: <TextSpan>[
                 TextSpan(
                   text:
                       ':${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: AppColorPalette.primaryText,
+                    color: colorScheme.textPrimary,
                   ),
                 ),
               ],

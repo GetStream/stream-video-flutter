@@ -1,27 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../theme/app_palette.dart';
+enum _StreamButtonVariant { active, primary, tertiary }
 
 class StreamButton extends StatelessWidget {
-  const StreamButton({
-    super.key,
+  const StreamButton._({
     required this.label,
-    required this.backgroundColor,
-    this.borderColor,
+    required _StreamButtonVariant variant,
     this.icon,
     this.onPressed,
-  });
+  }) : _variant = variant;
 
   factory StreamButton.active({
     required String label,
     required VoidCallback? onPressed,
     Widget? icon,
   }) {
-    return StreamButton(
+    return StreamButton._(
       label: label,
       icon: icon,
       onPressed: onPressed,
-      backgroundColor: AppColorPalette.primary,
+      variant: _StreamButtonVariant.active,
     );
   }
 
@@ -30,11 +29,11 @@ class StreamButton extends StatelessWidget {
     required VoidCallback onPressed,
     Widget? icon,
   }) {
-    return StreamButton(
+    return StreamButton._(
       label: label,
       icon: icon,
       onPressed: onPressed,
-      backgroundColor: AppColorPalette.buttonSecondary,
+      variant: _StreamButtonVariant.primary,
     );
   }
 
@@ -43,32 +42,50 @@ class StreamButton extends StatelessWidget {
     required VoidCallback onPressed,
     Widget? icon,
   }) {
-    return StreamButton(
+    return StreamButton._(
       label: label,
       icon: icon,
       onPressed: onPressed,
-      backgroundColor: AppColorPalette.backgroundColor,
-      borderColor: const Color(0xFF323B44),
+      variant: _StreamButtonVariant.tertiary,
     );
   }
 
   final String label;
   final Widget? icon;
   final VoidCallback? onPressed;
-  final Color backgroundColor;
-  final Color? borderColor;
+  final _StreamButtonVariant _variant;
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = StreamTheme.of(context).colorScheme;
+
+    final (backgroundColor, foregroundColor, borderColor) = switch (_variant) {
+      _StreamButtonVariant.active => (
+        colorScheme.brand,
+        colorScheme.textOnAccent,
+        null,
+      ),
+      _StreamButtonVariant.primary => (
+        colorScheme.backgroundSurface,
+        colorScheme.textPrimary,
+        null,
+      ),
+      _StreamButtonVariant.tertiary => (
+        colorScheme.backgroundApp,
+        colorScheme.textPrimary,
+        colorScheme.borderDefault,
+      ),
+    };
+
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         elevation: 1,
-        // fixedSize: const Size.fromHeight(56),
         backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
         padding: const EdgeInsets.symmetric(horizontal: 4),
         shape: RoundedRectangleBorder(
           side: borderColor != null
-              ? BorderSide(color: borderColor!)
+              ? BorderSide(color: borderColor)
               : BorderSide.none,
           borderRadius: BorderRadius.circular(36),
         ),
@@ -79,14 +96,16 @@ class StreamButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (icon != null) ...[icon!, const SizedBox(width: 12)],
+            if (icon != null) ...[
+              IconTheme.merge(
+                data: IconThemeData(color: foregroundColor),
+                child: icon!,
+              ),
+              const SizedBox(width: 12),
+            ],
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.white,
-                // fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 16, color: foregroundColor),
             ),
           ],
         ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../theme/app_palette.dart';
 import 'device_list.dart';
 
 class UserActionsAvatar extends StatelessWidget {
@@ -11,14 +10,16 @@ class UserActionsAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = StreamTheme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.all(8),
       child: MenuAnchor(
-        style: const MenuStyle(
+        style: MenuStyle(
           alignment: Alignment.bottomRight,
-          padding: WidgetStatePropertyAll(EdgeInsets.all(8)),
+          padding: const WidgetStatePropertyAll(EdgeInsets.all(8)),
           backgroundColor: WidgetStatePropertyAll(
-            AppColorPalette.buttonSecondary,
+            colorScheme.backgroundSurface,
           ),
         ),
         builder:

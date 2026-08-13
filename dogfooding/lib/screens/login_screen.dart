@@ -13,7 +13,6 @@ import '../app/user_auth_controller.dart';
 import '../core/model/environment.dart';
 import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
-import '../theme/app_palette.dart';
 import '../utils/assets.dart';
 import '../utils/consts.dart';
 import '../utils/loading_dialog.dart';
@@ -218,10 +217,11 @@ class _LoginScreenState extends State<LoginScreen> {
     final size = MediaQuery.sizeOf(context);
     final width = math.min(size.width, kMaxWidthRegularScreen);
     final theme = Theme.of(context);
+    final colorScheme = StreamTheme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColorPalette.backgroundColor,
+        backgroundColor: colorScheme.backgroundApp,
         actions: [
           if (!kIsProd)
             EnvironmentSwitcher(
@@ -252,7 +252,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     '[Video Calling]',
                     style: theme.textTheme.headlineMedium?.apply(
-                      color: AppColorPalette.appGreen,
+                      color: colorScheme.accentSuccess,
                     ),
                   ),
                   const SizedBox(height: 48),
@@ -261,7 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: TextField(
                       controller: _usernameController,
                       style: theme.textTheme.bodyMedium?.apply(
-                        color: Colors.white,
+                        color: colorScheme.textPrimary,
                       ),
                       decoration: InputDecoration(
                         labelText: 'Enter Username',
@@ -278,10 +278,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: StreamButton.active(
                       label: 'Sign up with username',
-                      icon: const Icon(
-                        Icons.person_outline,
-                        color: Colors.white,
-                      ),
+                      icon: const Icon(Icons.person_outline),
                       onPressed: _loginWithUsername,
                     ),
                   ),

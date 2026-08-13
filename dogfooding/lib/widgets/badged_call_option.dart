@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../theme/app_palette.dart';
-
 class BadgedCallOption extends StatelessWidget {
   const BadgedCallOption({
     super.key,
@@ -32,11 +30,13 @@ class Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = StreamTheme.of(context).colorScheme;
+
     return Container(
       width: 18,
       padding: const EdgeInsets.all(2),
-      decoration: const BoxDecoration(
-        color: AppColorPalette.appGreen,
+      decoration: BoxDecoration(
+        color: colorScheme.accentSuccess,
         shape: BoxShape.circle,
       ),
       child: Center(

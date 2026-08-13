@@ -3,7 +3,6 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../app/user_auth_controller.dart';
 import '../di/injector.dart';
-import '../theme/app_palette.dart';
 import 'stats_battery_chart.dart';
 import 'stats_latency_chart.dart';
 import 'stats_thermal_chart.dart';
@@ -328,12 +327,13 @@ class StatsItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
+    final colorScheme = StreamTheme.of(context).colorScheme;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: AppColorPalette.buttonSecondary,
+        color: colorScheme.backgroundSurface,
       ),
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -345,7 +345,7 @@ class StatsItem extends StatelessWidget {
                 Text(
                   title,
                   style: theme.textTheme.footnote.apply(
-                    color: AppColorPalette.secondaryText,
+                    color: colorScheme.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 4),

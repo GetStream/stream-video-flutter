@@ -7,7 +7,6 @@ import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../dogfooding_app_channel.dart';
-import '../../theme/app_palette.dart';
 import '../../utils/consts.dart';
 import '../../utils/feedback_dialog.dart';
 import 'audio_output_menu_item.dart';
@@ -124,10 +123,12 @@ class _SettingsMenuState extends State<SettingsMenu> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = StreamTheme.of(context).colorScheme;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColorPalette.backgroundColor,
-        borderRadius: BorderRadius.only(
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundApp,
+        borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(16),
           topRight: Radius.circular(16),
         ),
@@ -147,6 +148,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
   }
 
   List<Widget> _buildMenuItems() {
+    final colorScheme = StreamTheme.of(context).colorScheme;
     final incomingVideoQuality = getIncomingVideoQuality(
       widget.call.dynascaleManager.incomingVideoSettings,
     );
@@ -264,7 +266,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
             incomingVideoQuality.name,
             style: TextStyle(
               color: incomingVideoQuality != IncomingVideoQuality.auto
-                  ? AppColorPalette.appGreen
+                  ? colorScheme.accentSuccess
                   : null,
             ),
           ),
@@ -287,6 +289,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
   }
 
   List<Widget> _buildAudioOutputsMenu() {
+    final colorScheme = StreamTheme.of(context).colorScheme;
     return [
       GestureDetector(
         onTap: () {
@@ -306,7 +309,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
               icon: Icons.multitrack_audio,
               label: device.label,
               color: _audioOutputDevice?.id == device.id
-                  ? AppColorPalette.appGreen
+                  ? colorScheme.accentSuccess
                   : null,
               onPressed: () {
                 _setAudioOutput(device);
@@ -324,6 +327,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
   }
 
   List<Widget> _buildAudioInputsMenu() {
+    final colorScheme = StreamTheme.of(context).colorScheme;
     return [
       GestureDetector(
         onTap: () {
@@ -343,7 +347,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
               icon: Icons.multitrack_audio,
               label: device.label,
               color: widget.call.state.value.audioInputDevice?.id == device.id
-                  ? AppColorPalette.appGreen
+                  ? colorScheme.accentSuccess
                   : null,
               onPressed: () {
                 widget.call.setAudioInputDevice(device);
@@ -357,6 +361,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
   }
 
   List<Widget> _buildVideoInputsMenu() {
+    final colorScheme = StreamTheme.of(context).colorScheme;
     return [
       GestureDetector(
         onTap: () {
@@ -376,7 +381,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
               icon: Icons.camera_alt,
               label: device.label,
               color: widget.call.state.value.videoInputDevice?.id == device.id
-                  ? AppColorPalette.appGreen
+                  ? colorScheme.accentSuccess
                   : null,
               onPressed: () {
                 widget.call.setVideoInputDevice(device);
@@ -556,6 +561,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
   }
 
   List<Widget> _buildIncomingQualityMenu() {
+    final colorScheme = StreamTheme.of(context).colorScheme;
     return [
       GestureDetector(
         onTap: () {
@@ -579,7 +585,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
                         widget.call.dynascaleManager.incomingVideoSettings,
                       ) ==
                       quality
-                  ? AppColorPalette.appGreen
+                  ? colorScheme.accentSuccess
                   : null,
               onPressed: () {
                 if (quality == IncomingVideoQuality.off) {

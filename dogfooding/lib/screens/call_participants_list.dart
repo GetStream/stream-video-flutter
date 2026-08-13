@@ -15,6 +15,7 @@ class CallParticipantsList extends StatelessWidget {
   Widget build(BuildContext context) {
     final streamVideoTheme = StreamVideoTheme.of(context);
     final textTheme = streamVideoTheme.textTheme;
+    final colorScheme = StreamTheme.of(context).colorScheme;
 
     return StreamBuilder<CallState>(
       initialData: call.state.value,
@@ -32,14 +33,14 @@ class CallParticipantsList extends StatelessWidget {
           appBar: AppBar(
             title: Text(
               'Participants (${participants.length})',
-              style: textTheme.title3.apply(color: Colors.white),
+              style: textTheme.title3.apply(color: colorScheme.textPrimary),
             ),
             centerTitle: true,
-            foregroundColor: Colors.white,
+            foregroundColor: colorScheme.textPrimary,
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             actions: [
               IconButton(
-                icon: const Icon(Icons.close, color: Colors.white),
+                icon: Icon(Icons.close, color: colorScheme.textPrimary),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -91,10 +92,7 @@ class CallParticipantsList extends StatelessWidget {
                         // share sheet can be anchored to the button.
                         child: Builder(
                           builder: (buttonContext) => StreamButton.tertiary(
-                            icon: const Icon(
-                              Icons.link,
-                              color: Colors.white,
-                            ),
+                            icon: const Icon(Icons.link),
                             label: 'Share link',
                             onPressed: () => _shareLink(buttonContext),
                           ),
@@ -103,10 +101,7 @@ class CallParticipantsList extends StatelessWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: StreamButton.active(
-                          icon: const Icon(
-                            Icons.person_add_alt_1,
-                            color: Colors.white,
-                          ),
+                          icon: const Icon(Icons.person_add_alt_1),
                           label: 'Add member',
                           onPressed: () => _showAddMemberDialog(context),
                         ),
