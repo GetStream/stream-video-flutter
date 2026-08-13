@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart' as chat;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter_l10n.dart';
 
@@ -252,7 +251,8 @@ class _StreamDogFoodingAppContentState
     return MaterialApp.router(
       title: kAppName,
       routerConfig: _router,
-      theme: _buildTheme(Brightness.dark),
+      theme: _buildTheme(Brightness.light),
+      darkTheme: _buildTheme(Brightness.dark),
       supportedLocales: const [Locale('en'), Locale('nl')],
       localizationsDelegates: [
         CustomVideoLocalizationsNL.delegate,
@@ -267,23 +267,33 @@ class _StreamDogFoodingAppContentState
   ThemeData _buildTheme(Brightness brightness) {
     final baseTheme = ThemeData(brightness: brightness);
     final baseTextTheme = GoogleFonts.interTextTheme(baseTheme.textTheme);
-    final textTheme = StreamVideoTheme.dark().textTheme;
-    const colorTheme = StreamColorTheme.dark();
+    final coreTheme = switch (brightness) {
+      .light => StreamTheme.light(),
+      .dark => StreamTheme.dark(),
+    };
+    final videoTheme = switch (brightness) {
+      .light => StreamVideoTheme.light(),
+      .dark => StreamVideoTheme.dark(),
+    };
+
+    final textTheme = videoTheme.textTheme;
+    // const colorTheme = StreamColorTheme.dark();
+    final colorScheme = coreTheme.colorScheme;
 
     return baseTheme.copyWith(
-      scaffoldBackgroundColor: AppColorPalette.backgroundColor,
+      scaffoldBackgroundColor: colorScheme.backgroundApp,
       colorScheme: ColorScheme.fromSwatch().copyWith(
-        primary: AppColorPalette.primary,
+        primary: colorScheme.brand,
       ),
-      inputDecorationTheme: const InputDecorationTheme(
-        labelStyle: TextStyle(color: Colors.white),
+      inputDecorationTheme: InputDecorationTheme(
+        labelStyle: TextStyle(color: colorScheme.textPrimary),
       ),
       bottomSheetTheme: baseTheme.bottomSheetTheme.copyWith(
-        backgroundColor: Colors.black,
-        dragHandleColor: Colors.white,
+        backgroundColor: colorScheme.backgroundElevation0,
+        dragHandleColor: colorScheme.textPrimary,
       ),
       extensions: <ThemeExtension<dynamic>>[
-        chat.StreamTheme.dark(),
+        StreamTheme.dark(),
         StreamVideoTheme.dark().copyWith(
           callControlsTheme: StreamCallControlsThemeData(
             callReactions: const [

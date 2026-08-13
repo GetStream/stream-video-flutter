@@ -2031,10 +2031,10 @@ packages:
     dependency: transitive
     description:
       name: stream_core_flutter
-      sha256: "7e52703881aed7987331f5aad478b25aeb965348c893e1be8f046ad39e90d993"
+      sha256: "734374defbf291bdb8be79b690bea11d4a0cdc9e9396468cb2e7441817e5e523"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.0"
+    version: "0.4.1"
   stream_transform:
     dependency: transitive
     description:
