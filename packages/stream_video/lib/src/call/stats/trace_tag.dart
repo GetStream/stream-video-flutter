@@ -100,6 +100,7 @@ abstract class TraceTag {
       'audioProcessingStateChanged';
   static const String enumerateDevices =
       'navigator.mediaDevices.enumeratedevices';
+  static const String setSinkId = 'navigator.mediaDevices.setSinkId';
   static const String pauseAudioPlayout =
       'navigator.mediaDevices.pauseAudioPlayout';
   static const String resumeAudioPlayout =
@@ -111,4 +112,12 @@ abstract class TraceTag {
   static const String getDisplayMedia =
       'navigator.mediaDevices.getDisplayMedia';
   static const String getUserMedia = 'navigator.mediaDevices.getUserMedia';
+
+  // Remote audio playback (web only).
+  static const String resumeAudio = 'resumeAudio';
+  static const String mediaPlaybackPaused = 'mediaPlayback.paused';
+  static const String mediaPlaybackBlocked = 'mediaPlayback.blocked';
+  static const String mediaPlaybackRecovered = 'mediaPlayback.recovered';
+  static const String mediaPlaybackRecoverGiveUp =
+      'mediaPlayback.recover.giveUp';
 }

@@ -11,6 +11,7 @@ import '../../call/stats/trace_tag.dart';
 import '../../call/stats/tracer.dart';
 import '../../errors/video_error_composer.dart';
 import '../../utils/extensions.dart';
+import '../rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 
 abstract class InterruptionEvent {}
 
@@ -57,6 +58,9 @@ class RtcMediaDeviceNotifier {
     rtc.navigator.mediaDevices.ondevicechange = _onDeviceChange;
     // Triggers the initial device change event to get the devices list.
     _onDeviceChange(null);
+
+    // Routes remote audio playback traces (web only).
+    rtc_audio.setAudioTraceHandler(_tracer.trace);
 
     _listenForAudioProcessingStateChanges();
     _listenForSpeechActivityChanges();
@@ -295,6 +299,19 @@ class RtcMediaDeviceNotifier {
     _tracer.trace(TraceTag.resumeAudioPlayout, null);
     return rtc.Helper.resumeAudioPlayout();
   }
+
+  /// Whether the browser's autoplay policy is currently blocking playback of at
+  /// least one remote audio track.
+  ///
+  /// Web only; always `false` on other platforms.
+  bool get isAudioPlaybackBlocked => rtc_audio.isAudioPlaybackBlocked;
+
+  /// Retries playback of the remote audio elements the browser's autoplay
+  /// policy blocked. Must be called from within a user gesture (e.g. a button
+  /// tap) for the browser to allow it.
+  ///
+  /// Web only; a no-op on other platforms.
+  Future<void> resumeAudioPlayback() => rtc_audio.resumeAudioPlayback();
 
   /// Regains Android audio focus if it was lost.
   ///

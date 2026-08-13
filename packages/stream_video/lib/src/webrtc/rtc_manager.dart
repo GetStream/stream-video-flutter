@@ -1867,10 +1867,10 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<None>> setAudioOutputDevice({
     required RtcMediaDevice device,
   }) async {
-    // Get all remote audio tracks.
-    final audioTracks = tracks.values.whereType<RtcRemoteTrack>().where(
-      (it) => it.trackType == SfuTrackType.audio,
-    );
+    final audioTracks = tracks.values
+        .whereType<RtcRemoteTrack>()
+        .where((it) => it.trackType == SfuTrackType.audio)
+        .toList();
 
     // If the platform is web, set the sink id for all remote audio tracks
     // to the selected device.
@@ -1886,7 +1886,7 @@ extension RtcManagerTrackHelper on RtcManager {
       }
 
       for (final audioTrack in audioTracks) {
-        final updatedTrack = audioTrack.setSinkId(device.id);
+        final updatedTrack = await audioTrack.setSinkId(device.id);
         tracks[updatedTrack.trackId] = updatedTrack;
       }
 
