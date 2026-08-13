@@ -1,3 +1,14 @@
+## Upcoming
+
+### ✅ Added
+
+- [Web] Added `RtcMediaDeviceNotifier.instance.isAudioPlaybackBlocked` and `RtcMediaDeviceNotifier.instance.resumeAudioPlayback()` to detect and recover from remote audio playback blocked by the browser's autoplay policy.
+
+### 🐞 Fixed
+
+- [Web] Fixed remote audio staying silent for the rest of the call after the browser's autoplay policy blocked playback, or after an audio element paused on its own (for example when a Bluetooth headset switches profile as the microphone is unmuted). Playback is now started explicitly, watched, and retried with a backoff, instead of relying on the element's `autoplay` attribute and failing with no indication.
+- [Web] Fixed the selected audio output device being lost when a remote participant unmuted.
+
 ## 1.4.3
 
 ### 🐞 Fixed
