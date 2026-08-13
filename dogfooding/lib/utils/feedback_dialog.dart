@@ -5,7 +5,6 @@ import 'package:flutter_rating_stars/flutter_rating_stars.dart';
 import 'package:go_router/go_router.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../widgets/stream_button.dart';
 import 'assets.dart';
 
 Future<void> showFeedbackDialog(
@@ -15,6 +14,7 @@ Future<void> showFeedbackDialog(
   return showDialog<void>(
     context: context,
     builder: (BuildContext context) {
+      final colorScheme = StreamTheme.of(context).colorScheme;
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Scaffold(
@@ -28,7 +28,7 @@ Future<void> showFeedbackDialog(
                     vertical: 32,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.black87,
+                    color: colorScheme.backgroundElevation1,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: _FeedbackRatingContent(call),
@@ -37,7 +37,7 @@ Future<void> showFeedbackDialog(
                   right: 0,
                   top: 0,
                   child: IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    icon: Icon(Icons.close, color: colorScheme.textPrimary),
                     onPressed: () => hideFeedbackDialog(context),
                   ),
                 ),
@@ -121,13 +121,12 @@ class __FeedbackRatingContentState extends State<_FeedbackRatingContent> {
             onSubmitted: (value) {
               FocusManager.instance.primaryFocus?.unfocus();
             },
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: colorScheme.textPrimary),
             maxLines: 3,
           ),
           const SizedBox(height: 32),
-          StreamButton.active(
-            label: 'Submit Feedback',
-            icon: const Icon(Icons.feedback, color: Colors.white),
+          StreamButton(
+            iconLeft: const Icon(Icons.feedback),
             onPressed: value > 0
                 ? () async {
                     final result = await widget.call.collectUserFeedback(
@@ -155,6 +154,7 @@ class __FeedbackRatingContentState extends State<_FeedbackRatingContent> {
                     );
                   }
                 : null,
+            child: const Text('Submit Feedback'),
           ),
         ],
       ),

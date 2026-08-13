@@ -19,7 +19,6 @@ import '../utils/assets.dart';
 import '../utils/consts.dart';
 import '../utils/loading_dialog.dart';
 import '../widgets/environment_switcher.dart';
-import '../widgets/stream_button.dart';
 import '../widgets/user_actions_avatar.dart';
 import 'qr_code_scanner.dart';
 
@@ -168,12 +167,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 alignment: Alignment.centerRight,
                 child: SizedBox(
                   width: 150,
-                  child: StreamButton.active(
-                    label: 'Call',
-                    icon: const Icon(
-                      Icons.video_camera_front,
-                      color: Colors.white,
-                    ),
+                  child: StreamButton(
+                    iconLeft: const Icon(Icons.video_camera_front),
                     onPressed: () {
                       Navigator.of(context).pop();
                       _getOrCreateCall(
@@ -183,6 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             .toList(),
                       );
                     },
+                    child: const Text('Call'),
                   ),
                 ),
               ),
@@ -295,16 +291,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   currentEnvironment: _appPreferences.environment,
                 ),
                 const SizedBox(height: 24),
-                StreamButton.primary(
-                  label: 'Start New Call',
-                  icon: const Icon(Icons.video_call, color: Colors.white),
-                  onPressed: _getOrCreateCall,
+                SizedBox(
+                  width: double.infinity,
+                  child: StreamButton(
+                    iconLeft: const Icon(Icons.video_call),
+                    onPressed: _getOrCreateCall,
+                    child: const Text('Start New Call'),
+                  ),
                 ),
                 const SizedBox(height: 8),
-                StreamButton.tertiary(
-                  label: 'Direct Call',
-                  icon: const Icon(Icons.person, color: Colors.white),
-                  onPressed: () => _directCall(context),
+                SizedBox(
+                  width: double.infinity,
+                  child: StreamButton(
+                    style: StreamButtonStyle.secondary,
+                    type: StreamButtonType.outline,
+                    iconLeft: const Icon(Icons.person),
+                    onPressed: () => _directCall(context),
+                    child: const Text('Direct Call'),
+                  ),
                 ),
               ],
             ),
@@ -373,10 +377,11 @@ class _JoinForm extends StatelessWidget {
               valueListenable: callIdController,
               builder: (context, value, _) {
                 final hasText = value.text.isNotEmpty;
-                return StreamButton.active(
-                  label: 'Join call',
-                  icon: const Icon(Icons.login, color: Colors.white),
+                return StreamButton(
+                  type: StreamButtonType.ghost,
+                  iconLeft: const Icon(Icons.login),
                   onPressed: hasText ? onJoinPressed : () {},
+                  child: const Text('Join call'),
                 );
               },
             ),
@@ -450,14 +455,16 @@ class _JoinForm extends StatelessWidget {
               ),
               buttonPadding: const EdgeInsets.all(16),
               actions: [
-                StreamButton.tertiary(
-                  label: 'Cancel',
+                StreamButton(
+                  style: StreamButtonStyle.secondary,
+                  type: StreamButtonType.outline,
                   onPressed: Navigator.of(context).pop,
+                  child: const Text('Cancel'),
                 ),
                 const SizedBox(height: 8),
-                StreamButton.active(
-                  label: 'Logout',
+                StreamButton(
                   onPressed: onLogoutPressed,
+                  child: const Text('Logout'),
                 ),
               ],
             );

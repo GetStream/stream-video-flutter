@@ -6,7 +6,8 @@
 /// related helpers built on top of `package:stream_video/stream_video.dart`.
 library stream_video_flutter;
 
-export 'package:stream_core_flutter/core.dart' show StreamTheme;
+export 'package:stream_core_flutter/core.dart'
+    hide StreamIcons, StreamTextTheme;
 export 'package:stream_video/stream_video.dart';
 
 export 'src/call_background/background_service.dart';

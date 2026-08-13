@@ -289,6 +289,9 @@ class _CallScreenState extends State<CallScreen> {
                           backgroundColor: _moreMenuVisible
                               ? colorScheme.brand
                               : colorScheme.backgroundSurface,
+                          iconColor: _moreMenuVisible
+                              ? colorScheme.textOnAccent
+                              : null,
                           onPressed: () {
                             toggleMoreMenu(context);
                           },
@@ -314,7 +317,8 @@ class _CallScreenState extends State<CallScreen> {
                         ),
                         ToggleCameraOption(
                           call: call,
-                          disabledCameraBackgroundColor: colorScheme.accentError,
+                          disabledCameraBackgroundColor:
+                              colorScheme.accentError,
                         ),
                         const Spacer(),
                         PartialCallStateBuilder(

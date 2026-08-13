@@ -4,7 +4,6 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
-import '../widgets/stream_button.dart';
 
 class CallParticipantsList extends StatelessWidget {
   const CallParticipantsList({super.key, required this.call});
@@ -91,19 +90,21 @@ class CallParticipantsList extends StatelessWidget {
                         // Builder provides the button's own context so the
                         // share sheet can be anchored to the button.
                         child: Builder(
-                          builder: (buttonContext) => StreamButton.tertiary(
-                            icon: const Icon(Icons.link),
-                            label: 'Share link',
+                          builder: (buttonContext) => StreamButton(
+                            style: StreamButtonStyle.secondary,
+                            type: StreamButtonType.outline,
+                            iconLeft: const Icon(Icons.link),
                             onPressed: () => _shareLink(buttonContext),
+                            child: const Text('Share link'),
                           ),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: StreamButton.active(
-                          icon: const Icon(Icons.person_add_alt_1),
-                          label: 'Add member',
+                        child: StreamButton(
+                          iconLeft: const Icon(Icons.person_add_alt_1),
                           onPressed: () => _showAddMemberDialog(context),
+                          child: const Text('Add member'),
                         ),
                       ),
                     ],
@@ -196,14 +197,11 @@ class CallParticipantsList extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: SizedBox(
                   width: 150,
-                  child: StreamButton.active(
-                    label: 'Add',
-                    icon: const Icon(
-                      Icons.person_add_alt_1,
-                      color: Colors.white,
-                    ),
+                  child: StreamButton(
+                    iconLeft: const Icon(Icons.person_add_alt_1),
                     onPressed: () =>
                         Navigator.of(context).pop(controller.text.trim()),
+                    child: const Text('Add'),
                   ),
                 ),
               ),

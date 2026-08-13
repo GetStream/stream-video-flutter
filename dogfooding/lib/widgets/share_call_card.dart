@@ -6,7 +6,6 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
-import 'stream_button.dart';
 
 class ShareCallWelcomeCard extends StatefulWidget {
   const ShareCallWelcomeCard({required this.callId, super.key});
@@ -98,14 +97,14 @@ class _ShareCardContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (callUrl != null) ...[
-          StreamButton.active(
-            icon: const Icon(Icons.person_add_alt_1),
-            label: 'Share link with others',
+          StreamButton(
+            iconLeft: const Icon(Icons.person_add_alt_1),
             onPressed: () async {
               await SharePlus.instance.share(
                 ShareParams(uri: Uri.parse(callUrl)),
               );
             },
+            child: const Text('Share link with others'),
           ),
           const SizedBox(height: 16),
         ],
@@ -114,9 +113,10 @@ class _ShareCardContent extends StatelessWidget {
           style: theme.textTheme.body,
         ),
         const SizedBox(height: 8),
-        StreamButton.tertiary(
-          icon: const Icon(Icons.copy_all),
-          label: 'Call id: $callId',
+        StreamButton(
+          style: StreamButtonStyle.secondary,
+          type: StreamButtonType.outline,
+          iconLeft: const Icon(Icons.copy_all),
           onPressed: () async {
             await Clipboard.setData(ClipboardData(text: callId));
 
@@ -139,6 +139,7 @@ class _ShareCardContent extends StatelessWidget {
               );
             }
           },
+          child: Text('Call id: $callId'),
         ),
         if (callUrl != null) ...[
           Padding(

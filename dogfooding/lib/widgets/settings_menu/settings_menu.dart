@@ -173,6 +173,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
                 child: IgnorePointer(
                   child: CallControlOption(
                     icon: Text(e.icon, textAlign: TextAlign.center),
+                    iconColor: colorScheme.brand,
                     onPressed: () {},
                     padding: EdgeInsets.zero,
                   ),

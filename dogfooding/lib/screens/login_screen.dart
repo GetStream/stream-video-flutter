@@ -17,7 +17,6 @@ import '../utils/assets.dart';
 import '../utils/consts.dart';
 import '../utils/loading_dialog.dart';
 import '../widgets/environment_switcher.dart';
-import '../widgets/stream_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -276,10 +275,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: StreamButton.active(
-                      label: 'Sign up with username',
-                      icon: const Icon(Icons.person_outline),
+                    child: StreamButton(
+                      iconLeft: const Icon(Icons.person_outline),
                       onPressed: _loginWithUsername,
+                      child: const Text('Sign up with username'),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -312,9 +311,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: StreamButton.tertiary(
+                    child: StreamButton(
+                      style: StreamButtonStyle.secondary,
+                      type: StreamButtonType.outline,
                       onPressed: _loginAsGuest,
-                      label: 'Join As Guest',
+                      child: const Text('Join As Guest'),
                     ),
                   ),
                   FutureBuilder<PackageInfo>(
@@ -367,14 +368,15 @@ class GoogleLoginButton extends StatelessWidget {
       return Text('Google SignIn is not supported on $currentPlatform.');
     }
 
-    return StreamButton.primary(
-      onPressed: onPressed,
-      label: 'Continue with Google',
-      icon: SvgPicture.asset(
+    return StreamButton(
+      style: StreamButtonStyle.secondary,
+      iconLeft: SvgPicture.asset(
         googleLogoAsset,
         width: 24,
         semanticsLabel: 'Google Logo',
       ),
+      onPressed: onPressed,
+      child: const Text('Continue with Google'),
     );
   }
 }
