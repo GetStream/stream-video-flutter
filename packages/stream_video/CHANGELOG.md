@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🐞 Fixed
+
+- [Web] Fixed the microphone not being published when Opus RED was enabled for the call, leaving the participant inaudible to everyone while their microphone still appeared active. Opus DTX and RED are no longer munged into the SDP. Both are negotiated by signalling them to the SFU with the published tracks.
+
 ## 1.4.3
 
 ### 🐞 Fixed
