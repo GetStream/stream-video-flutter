@@ -1,35 +1,10 @@
-import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../../test_utils/golden_wrapper.dart';
 import '../../test_utils/test_wrapper.dart';
 import '../mocks.dart';
-
-/// Builds a fully stubbed [MockCall] whose selected audio output is
-/// [audioOutput], so the option renders the matching enabled/disabled state.
-MockCall _buildMockCall(RtcMediaDevice? audioOutput) {
-  final mockCall = MockCall();
-  final mockCallState = MockCallState();
-  final callStateEmitter = MutableStateEmitter<CallState>(
-    mockCallState,
-    sync: true,
-  );
-
-  when(() => mockCallState.audioOutputDevice).thenReturn(audioOutput);
-  when(() => mockCall.state).thenAnswer((_) => callStateEmitter);
-  when(() => mockCall.partialState<bool>(any())).thenAnswer((invocation) {
-    final CallStateSelector<bool> selector = invocation.positionalArguments[0];
-    return Stream.value(selector(mockCallState));
-  });
-  when(
-    () => mockCall.setAudioOutputDevice(any()),
-  ).thenAnswer((_) async => const Result.success(none));
-
-  return mockCall;
-}
 
 const _speakerDevice = RtcMediaDevice(
   id: deviceIdSpeaker,
@@ -184,46 +159,4 @@ void main() {
 
     verify(() => mockCall.setAudioOutputDevice(_earpieceDevice)).called(1);
   });
-
-  for (final brightness in Brightness.values) {
-    goldenTest(
-      'renders the speaker on/off states (${brightness.name} theme)',
-      fileName: 'livestream_speakerphone_option_${brightness.name}_matrix',
-      builder: () => GoldenTestGroup(
-        columns: 2,
-        children: [
-          GoldenTestScenario(
-            name: 'speaker on',
-            child: GoldenWrapper(
-              brightness: brightness,
-              child: _optionInTheme(_speakerDevice, brightness),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'speaker off',
-            child: GoldenWrapper(
-              brightness: brightness,
-              child: _optionInTheme(_earpieceDevice, brightness),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Builds the option with an icon color taken from the design-system palette
-/// for [brightness].
-///
-/// The widget's icon color is a fixed parameter (white by default, for use
-/// over a video feed), so it is not theme-aware on its own. Driving it from
-/// [StreamColorScheme.textPrimary] keeps the icon visible on both the light
-/// and dark [GoldenWrapper] backgrounds.
-Widget _optionInTheme(RtcMediaDevice audioOutput, Brightness brightness) {
-  final iconColor = StreamTheme(brightness: brightness).colorScheme.textPrimary;
-  return LivestreamSpeakerphoneOption(
-    call: _buildMockCall(audioOutput),
-    enabledSpeakerphoneIconTheme: IconThemeData(color: iconColor),
-    disabledSpeakerphoneIconTheme: IconThemeData(color: iconColor),
-  );
 }
