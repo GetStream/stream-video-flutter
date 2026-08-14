@@ -10,9 +10,12 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
 
   return AlchemistConfig.runWithConfig(
     config: AlchemistConfig(
-      platformGoldensConfig: PlatformGoldensConfig(
-        enabled: !isRunningInCi,
-      ),
+      // CI goldens (platform-agnostic rendering) only run on CI, and
+      // platform goldens (host-specific rendering) only run locally. This
+      // keeps CI deterministic while still letting developers eyeball
+      // realistic renders on their own machine.
+      ciGoldensConfig: CiGoldensConfig(enabled: isRunningInCi),
+      platformGoldensConfig: PlatformGoldensConfig(enabled: !isRunningInCi),
     ),
     run: testMain,
   );
