@@ -62,7 +62,23 @@ class RtcMediaDeviceNotifier {
     _listenForSpeechActivityChanges();
   }
 
-  static final instance = RtcMediaDeviceNotifier._internal();
+  static RtcMediaDeviceNotifier? _instance;
+
+  /// The shared [RtcMediaDeviceNotifier] instance.
+  ///
+  /// Created lazily on first access so that platform channels are only
+  /// touched when the notifier is actually used.
+  // ignore: prefer_constructors_over_static_methods, lazy singleton accessor
+  static RtcMediaDeviceNotifier get instance =>
+      _instance ??= RtcMediaDeviceNotifier._internal();
+
+  /// Overrides the shared [instance], for testing.
+  ///
+  /// Pass `null` to restore the default lazily-created instance. Always
+  /// reset the override (e.g. in `tearDown`) to avoid leaking a mock between
+  /// tests.
+  @visibleForTesting
+  static set instance(RtcMediaDeviceNotifier? notifier) => _instance = notifier;
 
   Stream<List<RtcMediaDevice>> get onDeviceChange => _devicesController.stream;
   final _devicesController = BehaviorSubject<List<RtcMediaDevice>>();
