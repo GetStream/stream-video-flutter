@@ -5,7 +5,7 @@ inputs:
   flutter-version:
     description: "The Flutter version to install. Leave empty to use the latest for the channel."
     required: false
-    default: "3.44.1"
+    default: "3.47.0"
   flutter-channel:
     description: "The Flutter channel to install."
     required: false

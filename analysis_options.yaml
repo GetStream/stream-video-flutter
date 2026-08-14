@@ -22,6 +22,12 @@ analyzer:
     - packages/stream_video/lib/open_api/**
     - packages/stream_video/lib/protobuf/**
     - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   rules:
