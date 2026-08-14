@@ -56,11 +56,15 @@ void main() {
   setUp(() {
     mockCall = MockCall();
     mockCallState = MockCallState();
-    callStateEmitter = MutableStateEmitter<CallState>(mockCallState, sync: true);
+    callStateEmitter = MutableStateEmitter<CallState>(
+      mockCallState,
+      sync: true,
+    );
 
     when(() => mockCall.state).thenAnswer((_) => callStateEmitter);
     when(() => mockCall.partialState<bool>(any())).thenAnswer((invocation) {
-      final CallStateSelector<bool> selector = invocation.positionalArguments[0];
+      final CallStateSelector<bool> selector =
+          invocation.positionalArguments[0];
       return Stream.value(selector(mockCallState));
     });
     when(
@@ -92,31 +96,37 @@ void main() {
     expect(find.byIcon(Icons.volume_off_rounded), findsNothing);
   });
 
-  testWidgets('shows the volume_off icon when the earpiece is the audio output', (
-    tester,
-  ) async {
-    when(() => mockCallState.audioOutputDevice).thenReturn(_earpieceDevice);
+  testWidgets(
+    'shows the volume_off icon when the earpiece is the audio output',
+    (
+      tester,
+    ) async {
+      when(() => mockCallState.audioOutputDevice).thenReturn(_earpieceDevice);
 
-    await tester.pumpWidget(
-      TestWrapper(child: LivestreamSpeakerphoneOption(call: mockCall)),
-    );
+      await tester.pumpWidget(
+        TestWrapper(child: LivestreamSpeakerphoneOption(call: mockCall)),
+      );
 
-    expect(find.byIcon(Icons.volume_off_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.volume_up_rounded), findsNothing);
-  });
+      expect(find.byIcon(Icons.volume_off_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.volume_up_rounded), findsNothing);
+    },
+  );
 
-  testWidgets('shows the volume_off icon when there is no audio output device', (
-    tester,
-  ) async {
-    when(() => mockCallState.audioOutputDevice).thenReturn(null);
+  testWidgets(
+    'shows the volume_off icon when there is no audio output device',
+    (
+      tester,
+    ) async {
+      when(() => mockCallState.audioOutputDevice).thenReturn(null);
 
-    await tester.pumpWidget(
-      TestWrapper(child: LivestreamSpeakerphoneOption(call: mockCall)),
-    );
+      await tester.pumpWidget(
+        TestWrapper(child: LivestreamSpeakerphoneOption(call: mockCall)),
+      );
 
-    expect(find.byIcon(Icons.volume_off_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.volume_up_rounded), findsNothing);
-  });
+      expect(find.byIcon(Icons.volume_off_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.volume_up_rounded), findsNothing);
+    },
+  );
 
   testWidgets(
     'tapping without any available audio outputs does not change the device',
