@@ -8,7 +8,6 @@ import '../../latency/latency_service.dart';
 import '../../location/location_service.dart';
 import '../../models/call_received_data.dart';
 import '../../telemetry/client_event_reporter.dart';
-import '../../token/token_manager.dart';
 import '../models/coordinator_connection_state.dart';
 import '../models/coordinator_models.dart';
 import 'coordinator_ws.dart';
@@ -57,7 +56,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     interceptors: _buildInterceptors(
       apiKey: _apiKey,
       getToken: () async {
-        final tokenResult = await _tokenManager.getToken();
+        final tokenResult = await _tokenManager.getTokenAsResult();
         if (tokenResult is! Success<UserToken>) {
           throw (tokenResult as Failure).videoError;
         }

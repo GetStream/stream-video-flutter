@@ -1,11 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_core/stream_core.dart' show UserToken;
+import 'package:stream_core/stream_core.dart' show TokenManager, UserToken;
 import 'package:stream_video/open_api/video/coordinator/api.dart';
 import 'package:stream_video/src/errors/video_error.dart';
 import 'package:stream_video/src/retry/retry_manager.dart';
 import 'package:stream_video/src/retry/retry_policy.dart';
-import 'package:stream_video/src/token/token_manager.dart';
 import 'package:stream_video/src/utils/result.dart';
 
 class MockTokenManager extends Mock implements TokenManager {}
@@ -44,13 +43,14 @@ void main() {
 
     setUp(() {
       tokenManager = MockTokenManager();
+      when(() => tokenManager.usesStaticProvider).thenReturn(false);
     });
 
     test('refreshes token and retries on 401', () async {
       var callCount = 0;
 
       when(() => tokenManager.refreshToken()).thenAnswer(
-        (_) async => Result.success(_token),
+        (_) async => _token,
       );
 
       final manager = RpcRetryManager(
@@ -73,7 +73,7 @@ void main() {
 
     test('retries only once on repeated 401', () async {
       when(() => tokenManager.refreshToken()).thenAnswer(
-        (_) async => Result.success(_token),
+        (_) async => _token,
       );
 
       final manager = RpcRetryManager(
@@ -129,7 +129,7 @@ void main() {
       var callCount = 0;
 
       when(() => tokenManager.refreshToken()).thenAnswer(
-        (_) async => Result.success(_token),
+        (_) async => _token,
       );
 
       const policy = RetryPolicy(

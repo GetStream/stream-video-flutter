@@ -6,8 +6,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_core/stream_core.dart'
-    hide LifecycleState, TokenManager, TokenProvider;
+import 'package:stream_core/stream_core.dart' hide LifecycleState;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:uuid/uuid.dart';
 
@@ -59,7 +58,6 @@ import 'retry/retry_policy.dart';
 import 'telemetry/client_event_reporter.dart';
 import 'telemetry/client_event_transport.dart';
 import 'token/token.dart';
-import 'token/token_manager.dart';
 import 'utils/cancelable_operation.dart';
 import 'utils/future.dart';
 import 'utils/none.dart';
@@ -183,6 +181,68 @@ class StreamVideo extends Disposable {
           )
         : const ClientEventReporter.noOp();
 
+    // Once a guest is created, its access token is reused for the lifetime
+    // of the client: creating a guest again would mint a new server-side
+    // identity, so an expired guest token cannot be refreshed.
+    UserToken? guestToken;
+
+    final tokenProvider = switch (user.type) {
+      UserType.regular => _regularTokenProvider(userToken, tokenLoader),
+      // An anonymous token may carry a caller-supplied JWT (e.g. a
+      // call-restricted token granting access to a closed livestream).
+      UserType.anonymous => TokenProvider.static(
+        UserToken.anonymous(userId: user.id, rawValue: userToken ?? ''),
+      ),
+      // The guest loader only dereferences `_client` when a token is actually
+      // requested, after this constructor has assigned it.
+      UserType.guest => TokenProvider.dynamic((userId) async {
+        final existingToken = guestToken;
+        if (existingToken != null) return existingToken;
+
+        final result = await _client.loadGuest(
+          id: userId,
+          name: user.originalName,
+          image: user.image,
+          custom: {
+            for (final MapEntry(:key, :value) in user.custom.entries)
+              if (value != null) key: value,
+          },
+        );
+        if (result is! Success<GuestCreatedData>) {
+          throw (result as Failure).videoError;
+        }
+        final updatedUser = result.data.user;
+        final updatedInfo = updatedUser.toUserInfo();
+        _state.user.value = User(
+          id: updatedInfo.id,
+          name: updatedInfo.name.isEmpty ? null : updatedInfo.name,
+          image: updatedInfo.image,
+          role: updatedInfo.role,
+          teams: updatedInfo.teams,
+          custom: updatedInfo.extraData,
+          type: user.type,
+        );
+        return guestToken = UserToken(result.data.accessToken);
+      }),
+    };
+
+    final initialToken = user.type == UserType.regular && tokenLoader != null
+        ? userToken?.let(UserToken.new)
+        : null;
+
+    _tokenManager = TokenManager(
+      userId: user.id,
+      tokenProvider: tokenProvider,
+      initialToken: initialToken,
+      onTokenUpdated: onTokenUpdated,
+    );
+
+    // The initial token is served from the cache without a load, so notify
+    // about it explicitly.
+    if (initialToken != null && onTokenUpdated != null) {
+      unawaited(onTokenUpdated(initialToken));
+    }
+
     _client = buildCoordinatorClient(
       user: user,
       apiKey: apiKey,
@@ -216,37 +276,10 @@ class StreamVideo extends Disposable {
       webrtcInitializationCompleter.complete();
     }
 
-    final tokenProvider = switch (user.type) {
-      UserType.regular => TokenProvider.from(
-        userToken?.let(UserToken.new),
-        tokenLoader,
-        onTokenUpdated,
-      ),
-      UserType.anonymous => TokenProvider.static(
-        UserToken.anonymous(),
-        onTokenUpdated: onTokenUpdated,
-      ),
-      UserType.guest => TokenProvider.dynamic((userId) async {
-        final result = await _client.loadGuest(id: userId);
-        if (result is! Success<GuestCreatedData>) {
-          throw (result as Failure).videoError;
-        }
-        final updatedUser = result.data.user;
-        final updatedInfo = updatedUser.toUserInfo();
-        _state.user.value = User(
-          id: updatedInfo.id,
-          name: updatedInfo.name.isEmpty ? null : updatedInfo.name,
-          image: updatedInfo.image,
-          role: updatedInfo.role,
-          teams: updatedInfo.teams,
-          custom: updatedInfo.extraData,
-          type: user.type,
-        );
-        return result.data.accessToken;
-      }, onTokenUpdated: onTokenUpdated),
-    };
-
-    _tokenManager.setTokenProvider(user.id, tokenProvider: tokenProvider);
+    // Pre-warm the token cache, mirroring the eager fetch previously
+    // triggered by setting the token provider. Failures surface later,
+    // when the token is actually needed.
+    unawaited(_tokenManager.getTokenAsResult());
 
     _setupLogger(options.logPriority, options.logHandlerFunction);
 
@@ -278,6 +311,23 @@ class StreamVideo extends Disposable {
             }
           }),
     );
+  }
+
+  /// Builds the token provider for a regular user from the [userToken] and
+  /// [tokenLoader] combination.
+  static TokenProvider _regularTokenProvider(
+    String? userToken,
+    TokenLoader? tokenLoader,
+  ) {
+    if (tokenLoader != null) {
+      return TokenProvider.dynamic(
+        (userId) async => UserToken(await tokenLoader(userId)),
+      );
+    }
+    if (userToken != null) {
+      return TokenProvider.static(UserToken(userToken));
+    }
+    throw ArgumentError('Either `userToken` or `tokenLoader` must be set');
   }
 
   static final InstanceHolder _instanceHolder = InstanceHolder();
@@ -314,7 +364,7 @@ class StreamVideo extends Disposable {
   @internal
   Completer<void> webrtcInitializationCompleter = Completer();
 
-  final _tokenManager = TokenManager();
+  late final TokenManager _tokenManager;
   final _subscriptions = Subscriptions();
 
   late final CoordinatorClient _client;
@@ -329,7 +379,7 @@ class StreamVideo extends Disposable {
   /// Resolves the current user token for the telemetry transport's auth
   /// interceptor, mirroring the coordinator client's authentication.
   Future<UserToken> _clientEventToken() async {
-    final tokenResult = await _tokenManager.getToken();
+    final tokenResult = await _tokenManager.getTokenAsResult();
     if (tokenResult is! Success<UserToken>) {
       throw (tokenResult as Failure).videoError;
     }
@@ -426,7 +476,7 @@ class StreamVideo extends Disposable {
 
     if (_connectionState.isConnected) {
       _logger.w(() => '[connect] rejected (already connected)');
-      final token = _tokenManager.getCachedToken();
+      final token = _tokenManager.peekToken();
       if (token == null) {
         return failureWithError(
           '[connect] userToken is null in Connected state',
@@ -438,7 +488,7 @@ class StreamVideo extends Disposable {
     _connectionState = ConnectionState.connecting(_state.currentUser.id);
 
     // guest user will be updated when token gets fetched
-    final tokenResult = await _tokenManager.getToken();
+    final tokenResult = await _tokenManager.getTokenAsResult();
     if (tokenResult is! Success<UserToken>) {
       _logger.e(() => '[connect] token fetching failed: $tokenResult');
       _connectionState = ConnectionState.failed(
@@ -1173,7 +1223,7 @@ class StreamVideo extends Disposable {
     String cid,
     CallRingingState ringingState,
   ) async {
-    final incomingCall = _state.incomingCall.valueOrNull;
+    final incomingCall = _state.incomingCall.value;
     if (incomingCall == null || incomingCall.callCid.value != cid) return;
 
     _logger.d(
@@ -1187,7 +1237,7 @@ class StreamVideo extends Disposable {
       ),
     );
 
-    if (_state.incomingCall.valueOrNull == incomingCall) {
+    if (_state.incomingCall.value == incomingCall) {
       _state.incomingCall.value = null;
     }
   }

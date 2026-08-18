@@ -6,7 +6,6 @@ import '../../../globals.dart';
 import '../../../stream_video.dart';
 import '../../telemetry/client_event_reporter.dart';
 import '../../telemetry/client_event_types.dart';
-import '../../token/token_manager.dart';
 import 'coordinator_message_codec.dart';
 
 var _seq = 0;
@@ -114,7 +113,9 @@ class CoordinatorWebSocket {
 
   Future<void> _authenticateUser() async {
     _logger.i(() => '[authenticateUser] url: ${_client.options.url}');
-    final tokenResult = await tokenManager.getToken(refresh: _refreshToken);
+    final tokenResult = _refreshToken
+        ? await tokenManager.refreshTokenAsResult()
+        : await tokenManager.getTokenAsResult();
     final userToken = tokenResult.getDataOrNull();
     if (userToken == null) {
       _logger.e(

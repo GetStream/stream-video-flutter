@@ -30,6 +30,18 @@
   - `UserType.authenticated` has been renamed to `UserType.regular`.
   - `UserToken.jwt(String rawValue)` named factory has been replaced by the default `UserToken(String rawValue)` constructor. Replace `UserToken.jwt('...')` with `UserToken('...')`.
   - `UserToken` validation changed: the new constructor throws `ArgumentError` (always) instead of `assert` (debug-only) when the JWT is missing a `user_id` claim.
+- `TokenManager` and `TokenProvider` are now provided by `stream_core`. Two behavioural changes follow:
+  - A static token whose `user_id` claim does not match the connected user's id now fails fast with an `ArgumentError` instead of being rejected later by the server.
+  - `onTokenUpdated` for a static token now fires when the token is first used (and after refreshes) instead of once at client construction; for an initial token combined with a `tokenLoader` it fires at construction.
+
+### ✅ Added
+
+- Anonymous users can now carry a token: pass `userToken` together with a `UserType.anonymous` user to send call-restricted tokens (e.g. for closed livestreams).
+
+### 🐞 Fixed
+
+- Guest users are now created with their `name`, `image`, and `custom` data. Previously only the id was sent and the profile fields were silently dropped.
+- An expired guest access token no longer re-creates the guest (which minted a new server-side identity mid-session). The token from the initial guest creation is reused.
 
 ## 1.4.3
 

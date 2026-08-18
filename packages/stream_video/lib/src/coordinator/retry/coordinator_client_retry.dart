@@ -3,7 +3,6 @@ import '../../../stream_video.dart';
 import '../../errors/video_error.dart';
 import '../../models/call_received_data.dart';
 import '../../retry/retry_manager.dart';
-import '../../token/token_manager.dart';
 import '../models/coordinator_models.dart';
 
 class CoordinatorClientRetry extends CoordinatorClient {
