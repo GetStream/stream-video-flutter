@@ -1,7 +1,7 @@
 import 'dart:async';
 
-/// Chat channel type used for the in-call chat when a custom environment does
-/// not configure one.
+/// Chat channel type used for the in-call chat
+/// when a custom environment does not configure one.
 const String kDefaultMessageChannelType = 'messaging';
 
 /// If you want to use dogfooding with your own environment, you can provide a custom environment loader here.
