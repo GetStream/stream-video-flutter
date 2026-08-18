@@ -1987,12 +1987,13 @@ packages:
     source: hosted
     version: "10.2.0"
   stream_core:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: stream_core
-      sha256: fc0af8f8510cf48be414a088891b9e60353a4df65d0a78ec9d895f6b3a2b6881
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/stream_core"
+      ref: "31ca84f0885eccea9ad6114719499e6f523991b0"
+      resolved-ref: "31ca84f0885eccea9ad6114719499e6f523991b0"
+      url: "https://github.com/GetStream/stream-core-flutter.git"
+    source: git
     version: "0.4.0"
   stream_core_flutter:
     dependency: transitive
@@ -2019,13 +2020,12 @@ packages:
     source: hosted
     version: "2.1.1"
   stream_webrtc_flutter:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: stream_webrtc_flutter
-      sha256: "347b3da665bdb5d82dfec1d033b8ea2c8e163048e5d2cbe4779f7f1c85a657b3"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.1"
+      path: "../webrtc-flutter"
+      relative: true
+    source: path
+    version: "3.0.2"
   string_scanner:
     dependency: transitive
     description:

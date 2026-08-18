@@ -1,9 +1,5 @@
 name: update_goldens
 
-env:
-  FLUTTER_CHANNEL: stable
-  FLUTTER_VERSION: 3.44.1
-
 on: workflow_dispatch
 
 permissions:
@@ -21,20 +17,10 @@ jobs:
           token: ${{ secrets.BOT_GITHUB_API_TOKEN }}
 
       - name: 🐦 Install Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          cache: true
-          channel: ${{ env.FLUTTER_CHANNEL }}
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+        uses: ./.github/actions/setup-flutter
 
-      - name: 🛠️ Install Tools
-        run: flutter pub global activate melos
-
-      - name: 🧹 Clean Workspace
-        run: melos postclean
-
-      - name: 🔧 Bootstrap Workspace
-        run: melos bootstrap --verbose
+      - name: 🛠️ Install Melos
+        uses: ./.github/actions/setup-melos
 
       - name: ⚙️ Prepare Environment
         run: melos run generate:all

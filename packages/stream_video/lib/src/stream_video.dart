@@ -1173,7 +1173,7 @@ class StreamVideo extends Disposable {
     String cid,
     CallRingingState ringingState,
   ) async {
-    final incomingCall = _state.incomingCall.valueOrNull;
+    final incomingCall = _state.incomingCall.value;
     if (incomingCall == null || incomingCall.callCid.value != cid) return;
 
     _logger.d(
@@ -1187,7 +1187,7 @@ class StreamVideo extends Disposable {
       ),
     );
 
-    if (_state.incomingCall.valueOrNull == incomingCall) {
+    if (_state.incomingCall.value == incomingCall) {
       _state.incomingCall.value = null;
     }
   }

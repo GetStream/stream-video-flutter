@@ -1163,7 +1163,7 @@ extension PublisherRtcManager on RtcManager {
             '${updatedTrack.trackId}',
       );
       await updatedTrack.stop();
-      return Result.error('RtcManager was disposed while publishing');
+      return failureWithError('RtcManager was disposed while publishing');
     }
 
     // Notify listeners.
@@ -1278,7 +1278,7 @@ extension PublisherRtcManager on RtcManager {
             '${updatedTrack.trackId}',
       );
       await updatedTrack.stop();
-      return Result.error('RtcManager was disposed while publishing');
+      return failureWithError('RtcManager was disposed while publishing');
     }
 
     // Notify listeners.
@@ -1382,8 +1382,10 @@ extension PublisherRtcManager on RtcManager {
     RtcTrackPublishOptions trackPublishOptions,
   ) {
     if (publisher == null) {
-      return failureWithError(
-        'Publisher is not created, cannot add transceiver',
+      return Future.value(
+        failureWithError<rtc.RTCRtpTransceiver>(
+          'Publisher is not created, cannot add transceiver',
+        ),
       );
     }
 
@@ -1403,7 +1405,7 @@ extension PublisherRtcManager on RtcManager {
       );
 
       return Future.value(
-        Result.error(
+        failureWithError<rtc.RTCRtpTransceiver>(
           'Already publishing trackType: ${publishOptions.trackType} with '
           'publishOptionId: ${publishOptions.id}',
         ),
@@ -1489,7 +1491,7 @@ extension PublisherRtcManager on RtcManager {
 
       await _stopTransceiver(transceiver);
 
-      return Result.error(
+      return failureWithError(
         'Already publishing trackType: ${publishOptions.trackType} with '
         'publishOptionId: ${publishOptions.id}',
       );
