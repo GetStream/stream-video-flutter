@@ -1,3 +1,24 @@
+## Upcoming (next major)
+
+### ⚠️ Breaking
+
+- Call control buttons (`CallControlOption` and the widgets built on it) are now rendered with the shared `StreamButton` from `stream_core_flutter` using the secondary button style, instead of a raw Material `ElevatedButton`. Their appearance is now driven by the button styling in `StreamTheme` rather than by `StreamCallControlsThemeData`'s `optionElevation`/`optionShape`/`optionPadding`, so buttons that relied on those values may look slightly different. The legacy `padding` is translated into a fixed circle diameter to preserve the prominence of larger buttons (e.g. incoming/outgoing accept/decline), and icons render at the button's default icon size.
+- You must now provide a `StreamTheme` to your app for the Stream Video UI components to be styled correctly. Add it as a `ThemeData` extension on the `MaterialApp` you wrap the Stream Video widgets with:
+
+  ```dart
+  MaterialApp(
+    theme: ThemeData(brightness: Brightness.light).copyWith(
+      extensions: [
+        StreamTheme.light(),
+        StreamVideoTheme.light(),
+      ],
+    ),
+    // ...
+  );
+  ```
+
+  When no `StreamTheme` is found in the widget tree, components fall back to a default theme derived from the ambient `Brightness`, so add your own `StreamTheme` to control their look.
+
 ## 1.4.2
 
 ### ✅ Added
