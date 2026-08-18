@@ -15,6 +15,12 @@ typedef TokenLoader = Future<String> Function(String userId);
 /// Result-based convenience wrappers around [TokenManager], bridging its
 /// throwing API to the [Result] flow used across the Video SDK.
 extension TokenManagerResultExtension on TokenManager {
+  /// Refreshes the cached token by loading a new one from the provider.
+  Future<UserToken> refreshToken() {
+    expireToken(); // Clear the cached token
+    return getToken(); // Load a new token from the provider
+  }
+
   /// Returns the token as a [Result], composing any thrown error into a
   /// [Result.failure].
   Future<Result<UserToken>> getTokenAsResult() async {

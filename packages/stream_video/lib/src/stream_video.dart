@@ -226,22 +226,11 @@ class StreamVideo extends Disposable {
       }),
     };
 
-    final initialToken = user.type == UserType.regular && tokenLoader != null
-        ? userToken?.let(UserToken.new)
-        : null;
-
     _tokenManager = TokenManager(
       userId: user.id,
       tokenProvider: tokenProvider,
-      initialToken: initialToken,
       onTokenUpdated: onTokenUpdated,
     );
-
-    // The initial token is served from the cache without a load, so notify
-    // about it explicitly.
-    if (initialToken != null && onTokenUpdated != null) {
-      unawaited(onTokenUpdated(initialToken));
-    }
 
     _client = buildCoordinatorClient(
       user: user,
@@ -320,9 +309,17 @@ class StreamVideo extends Disposable {
     TokenLoader? tokenLoader,
   ) {
     if (tokenLoader != null) {
-      return TokenProvider.dynamic(
-        (userId) async => UserToken(await tokenLoader(userId)),
-      );
+      // When both are provided, the token is served on the first load and
+      // the loader takes over once it expires.
+      var initialToken = userToken?.let(UserToken.new);
+      return TokenProvider.dynamic((userId) async {
+        final token = initialToken;
+        if (token != null) {
+          initialToken = null;
+          return token;
+        }
+        return UserToken(await tokenLoader(userId));
+      });
     }
     if (userToken != null) {
       return TokenProvider.static(UserToken(userToken));

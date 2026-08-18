@@ -49,7 +49,7 @@ void main() {
     test('refreshes token and retries on 401', () async {
       var callCount = 0;
 
-      when(() => tokenManager.refreshToken()).thenAnswer(
+      when(() => tokenManager.getToken()).thenAnswer(
         (_) async => _token,
       );
 
@@ -68,11 +68,11 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       expect(callCount, 2);
-      verify(() => tokenManager.refreshToken()).called(1);
+      verify(() => tokenManager.getToken()).called(1);
     });
 
     test('retries only once on repeated 401', () async {
-      when(() => tokenManager.refreshToken()).thenAnswer(
+      when(() => tokenManager.getToken()).thenAnswer(
         (_) async => _token,
       );
 
@@ -88,7 +88,7 @@ void main() {
       expect(result.isFailure, isTrue);
       // 1st call → 401 → refresh → 2nd call → 401 → no more auth retries
       // then normal retries continue up to rpcMaxRetries
-      verify(() => tokenManager.refreshToken()).called(1);
+      verify(() => tokenManager.getToken()).called(1);
     });
 
     test('does not refresh token on non-401 4xx errors', () async {
@@ -106,7 +106,7 @@ void main() {
 
       expect(result.isFailure, isTrue);
       expect(callCount, 1); // 403 is not retryable, fails immediately
-      verifyNever(() => tokenManager.refreshToken());
+      verifyNever(() => tokenManager.getToken());
     });
 
     test('does not attempt refresh without tokenManager', () async {
@@ -128,7 +128,7 @@ void main() {
     test('auth retry does not consume a regular retry slot', () async {
       var callCount = 0;
 
-      when(() => tokenManager.refreshToken()).thenAnswer(
+      when(() => tokenManager.getToken()).thenAnswer(
         (_) async => _token,
       );
 
@@ -154,7 +154,7 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       expect(callCount, 3);
-      verify(() => tokenManager.refreshToken()).called(1);
+      verify(() => tokenManager.getToken()).called(1);
     });
 
     test('retries 5xx errors normally without token refresh', () async {
@@ -176,7 +176,7 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       expect(callCount, 3);
-      verifyNever(() => tokenManager.refreshToken());
+      verifyNever(() => tokenManager.getToken());
     });
   });
 }
