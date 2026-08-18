@@ -1,5 +1,9 @@
 import 'dart:async';
 
+/// Chat channel type used for the in-call chat when a custom environment does
+/// not configure one.
+const String kDefaultMessageChannelType = 'messaging';
+
 /// If you want to use dogfooding with your own environment, you can provide a custom environment loader here.
 /// This will allow you to use your own tokens and API key.
 ///
@@ -9,17 +13,23 @@ import 'dart:async';
 ///
 /// ```dart
 /// final customEnvironmentLoader = CustomEnvironmentLoader(
-///     tokenLoader: (userId) => '{USER_TOKEN}', apiKey
+///     tokenLoader: (userId) => '{USER_TOKEN}',
 ///     apiKey: '{API_KEY}');
 /// ```
 class CustomEnvironmentLoader {
   const CustomEnvironmentLoader({
     required this.tokenLoader,
     required this.apiKey,
+    this.messageChannelType = kDefaultMessageChannelType,
   });
 
   final FutureOr<String> Function(String) tokenLoader;
   final String apiKey;
+
+  /// Chat channel type used for the in-call chat.
+  ///
+  /// Defaults to `messaging`, which exists on every Stream app.
+  final String messageChannelType;
 }
 
 // Replace this with your own implementation.
