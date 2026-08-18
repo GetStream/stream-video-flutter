@@ -40,7 +40,7 @@ String _buildUrl(String baseUrl, String apiKey) {
 class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
   CoordinatorWebSocket(
     String url, {
-    Iterable<String>? protocols,
+    super.protocols,
     required this.apiKey,
     required this.userInfo,
     required this.tokenManager,
@@ -50,7 +50,6 @@ class CoordinatorWebSocket extends StreamWebSocket implements HealthListener {
     this.clientEventReporter = const ClientEventReporter.noOp(),
   }) : super(
          _buildUrl(url, apiKey),
-         protocols: protocols,
          tag: '$_tag-${++_seq}',
        ) {
     onConnectionStateUpdated = (event) {

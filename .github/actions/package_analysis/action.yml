@@ -3,9 +3,10 @@ name: Package Analysis
 runs:
   using: "composite"
   steps:
-    - name: "Install Tools"
-      shell: bash
-      run: flutter pub global activate melos
+    - name: "Install Melos"
+      uses: ./.github/actions/setup-melos
+      with:
+        bootstrap: false # Custom bootstrap below (excludes dogfooding).
 
     - name: "Bootstrap Workspace"
       shell: bash

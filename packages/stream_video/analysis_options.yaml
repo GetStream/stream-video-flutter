@@ -10,3 +10,9 @@ analyzer:
     - lib/open_api/**
     - lib/protobuf/**
     - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
