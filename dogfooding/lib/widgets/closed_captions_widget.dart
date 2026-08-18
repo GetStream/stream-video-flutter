@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../theme/app_palette.dart';
-
 class ClosedCaptionsWidget extends StatelessWidget {
   const ClosedCaptionsWidget({
     super.key,
@@ -21,6 +19,8 @@ class ClosedCaptionsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = StreamTheme.of(context).colorScheme;
+
     return StreamBuilder(
       stream: call.closedCaptions,
       builder: (context, snapshot) {
@@ -52,8 +52,8 @@ class ClosedCaptionsWidget extends StatelessWidget {
                       children: [
                         TextSpan(
                           text: '${caption.user.name}: ',
-                          style: const TextStyle(
-                            color: AppColorPalette.secondaryText,
+                          style: TextStyle(
+                            color: colorScheme.textSecondary,
                             fontSize: 16,
                           ),
                         ),

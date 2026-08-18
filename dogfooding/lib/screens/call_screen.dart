@@ -16,7 +16,6 @@ import '../core/repos/app_preferences.dart';
 import '../core/repos/user_chat_repository.dart';
 import '../di/injector.dart';
 import '../router/routes.dart';
-import '../theme/app_palette.dart';
 import '../utils/feedback_dialog.dart';
 import '../widgets/badged_call_option.dart';
 import '../widgets/call_duration_title.dart';
@@ -278,17 +277,21 @@ class _CallScreenState extends State<CallScreen> {
                 );
               },
               callControlsWidgetBuilder: (BuildContext context, Call call) {
+                final colorScheme = StreamTheme.of(context).colorScheme;
                 return Container(
                   padding: const EdgeInsets.only(top: 16, left: 8, bottom: 8),
-                  color: Colors.black,
+                  color: colorScheme.backgroundElevation0,
                   child: SafeArea(
                     child: Row(
                       children: [
                         CallControlOption(
                           icon: const Icon(Icons.more_vert),
                           backgroundColor: _moreMenuVisible
-                              ? AppColorPalette.primary
-                              : AppColorPalette.buttonSecondary,
+                              ? colorScheme.brand
+                              : colorScheme.backgroundSurface,
+                          iconColor: _moreMenuVisible
+                              ? colorScheme.textOnAccent
+                              : null,
                           onPressed: () {
                             toggleMoreMenu(context);
                           },
@@ -299,8 +302,7 @@ class _CallScreenState extends State<CallScreen> {
                             useiOSBroadcastExtension: true,
                             captureScreenAudio: true,
                           ),
-                          enabledScreenShareBackgroundColor:
-                              AppColorPalette.primary,
+                          enabledScreenShareBackgroundColor: colorScheme.brand,
                           disabledScreenShareIcon: Icons.screen_share,
                           desktopScreenSelectorBuilder:
                               // ignore: avoid_redundant_argument_values
@@ -311,11 +313,12 @@ class _CallScreenState extends State<CallScreen> {
                         ToggleMicrophoneOption(
                           call: call,
                           disabledMicrophoneBackgroundColor:
-                              AppColorPalette.appRed,
+                              colorScheme.accentError,
                         ),
                         ToggleCameraOption(
                           call: call,
-                          disabledCameraBackgroundColor: AppColorPalette.appRed,
+                          disabledCameraBackgroundColor:
+                              colorScheme.accentError,
                         ),
                         const Spacer(),
                         PartialCallStateBuilder(

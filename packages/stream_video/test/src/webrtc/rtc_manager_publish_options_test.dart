@@ -14,6 +14,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import '../call/fixtures/call_test_helpers.dart';
 import '../call/fixtures/data.dart';
 
+// ignore: missing_override_of_must_be_overridden
 class _MockTracedStreamPeerConnection extends Mock
     implements TracedStreamPeerConnection {}
 

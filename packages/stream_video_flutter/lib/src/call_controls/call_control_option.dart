@@ -47,31 +47,28 @@ class CallControlOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamCallControlsTheme.of(context);
+    // Translate the legacy padding into a circle diameter so callers that
+    // requested larger buttons (e.g. incoming/outgoing accept/decline) keep
+    // their prominence. Icons render at the button's default 20px icon size.
+    final resolvedPadding = padding?.resolve(
+      Directionality.maybeOf(context) ?? TextDirection.ltr,
+    );
+    final diameter = resolvedPadding == null
+        ? null
+        : 20 + resolvedPadding.vertical;
 
-    Color? iconColor;
-    if (onPressed != null) {
-      iconColor = this.iconColor ?? theme.optionIconColor;
-    } else {
-      iconColor = disabledIconColor ?? theme.inactiveOptionIconColor;
-    }
-
-    return ElevatedButton(
+    return StreamButton.icon(
+      icon: icon,
       onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        elevation: elevation ?? theme.optionElevation,
-        backgroundColor: backgroundColor ?? theme.optionBackgroundColor,
-        shape: shape ?? theme.optionShape,
-        padding: padding ?? theme.optionPadding,
-        visualDensity: VisualDensity.comfortable,
-        disabledBackgroundColor:
-            disabledBackgroundColor ?? theme.inactiveOptionBackgroundColor,
-      ),
-      child: IconTheme.merge(
-        data: IconThemeData(
-          color: iconColor,
-        ),
-        child: icon,
+      style: StreamButtonStyle.secondary,
+      isFloating: (elevation ?? 0) > 0,
+      themeStyle: StreamButtonThemeStyle.from(
+        backgroundColor: backgroundColor,
+        disabledBackgroundColor: disabledBackgroundColor,
+        foregroundColor: iconColor,
+        disabledForegroundColor: disabledIconColor,
+        shape: shape,
+        fixedSize: diameter == null ? null : Size.square(diameter),
       ),
     );
   }

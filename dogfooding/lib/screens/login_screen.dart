@@ -13,12 +13,10 @@ import '../app/user_auth_controller.dart';
 import '../core/model/environment.dart';
 import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
-import '../theme/app_palette.dart';
 import '../utils/assets.dart';
 import '../utils/consts.dart';
 import '../utils/loading_dialog.dart';
 import '../widgets/environment_switcher.dart';
-import '../widgets/stream_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -188,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       await authController.login(user, environment);
-    } catch (e, _) {
+    } catch (e) {
       if (mounted) hideLoadingIndicator(context);
       _showSnackBar('Error: $e');
     } finally {
@@ -218,10 +216,11 @@ class _LoginScreenState extends State<LoginScreen> {
     final size = MediaQuery.sizeOf(context);
     final width = math.min(size.width, kMaxWidthRegularScreen);
     final theme = Theme.of(context);
+    final colorScheme = StreamTheme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColorPalette.backgroundColor,
+        backgroundColor: colorScheme.backgroundApp,
         actions: [
           if (!kIsProd)
             EnvironmentSwitcher(
@@ -252,7 +251,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     '[Video Calling]',
                     style: theme.textTheme.headlineMedium?.apply(
-                      color: AppColorPalette.appGreen,
+                      color: colorScheme.accentSuccess,
                     ),
                   ),
                   const SizedBox(height: 48),
@@ -261,7 +260,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: TextField(
                       controller: _usernameController,
                       style: theme.textTheme.bodyMedium?.apply(
-                        color: Colors.white,
+                        color: colorScheme.textPrimary,
                       ),
                       decoration: InputDecoration(
                         labelText: 'Enter Username',
@@ -276,13 +275,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: StreamButton.active(
-                      label: 'Sign up with username',
-                      icon: const Icon(
-                        Icons.person_outline,
-                        color: Colors.white,
-                      ),
+                    child: StreamButton(
+                      iconLeft: const Icon(Icons.person_outline),
                       onPressed: _loginWithUsername,
+                      child: const Text('Sign up with username'),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -315,9 +311,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: StreamButton.tertiary(
+                    child: StreamButton(
+                      style: StreamButtonStyle.secondary,
+                      type: StreamButtonType.outline,
                       onPressed: _loginAsGuest,
-                      label: 'Join As Guest',
+                      child: const Text('Join As Guest'),
                     ),
                   ),
                   FutureBuilder<PackageInfo>(
@@ -370,14 +368,15 @@ class GoogleLoginButton extends StatelessWidget {
       return Text('Google SignIn is not supported on $currentPlatform.');
     }
 
-    return StreamButton.primary(
-      onPressed: onPressed,
-      label: 'Continue with Google',
-      icon: SvgPicture.asset(
+    return StreamButton(
+      style: StreamButtonStyle.secondary,
+      iconLeft: SvgPicture.asset(
         googleLogoAsset,
         width: 24,
         semanticsLabel: 'Google Logo',
       ),
+      onPressed: onPressed,
+      child: const Text('Continue with Google'),
     );
   }
 }

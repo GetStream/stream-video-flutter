@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart' as chat;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter_l10n.dart';
 
@@ -14,7 +13,6 @@ import '../core/model/environment.dart';
 import '../di/injector.dart';
 import '../router/router.dart';
 import '../router/routes.dart';
-import '../theme/app_palette.dart';
 import '../utils/consts.dart';
 import 'custom_video_localizations.dart';
 import 'firebase_messaging_handler.dart';
@@ -252,7 +250,8 @@ class _StreamDogFoodingAppContentState
     return MaterialApp.router(
       title: kAppName,
       routerConfig: _router,
-      theme: _buildTheme(Brightness.dark),
+      theme: _buildTheme(Brightness.light),
+      darkTheme: _buildTheme(Brightness.dark),
       supportedLocales: const [Locale('en'), Locale('nl')],
       localizationsDelegates: [
         CustomVideoLocalizationsNL.delegate,
@@ -267,24 +266,33 @@ class _StreamDogFoodingAppContentState
   ThemeData _buildTheme(Brightness brightness) {
     final baseTheme = ThemeData(brightness: brightness);
     final baseTextTheme = GoogleFonts.interTextTheme(baseTheme.textTheme);
-    final textTheme = StreamVideoTheme.dark().textTheme;
-    const colorTheme = StreamColorTheme.dark();
+    final coreTheme = switch (brightness) {
+      .light => StreamTheme.light(),
+      .dark => StreamTheme.dark(),
+    };
+    final videoTheme = switch (brightness) {
+      .light => StreamVideoTheme.light(),
+      .dark => StreamVideoTheme.dark(),
+    };
+
+    final textTheme = videoTheme.textTheme;
+    final colorScheme = coreTheme.colorScheme;
 
     return baseTheme.copyWith(
-      scaffoldBackgroundColor: AppColorPalette.backgroundColor,
+      scaffoldBackgroundColor: colorScheme.backgroundApp,
       colorScheme: ColorScheme.fromSwatch().copyWith(
-        primary: AppColorPalette.primary,
+        primary: colorScheme.brand,
       ),
-      inputDecorationTheme: const InputDecorationTheme(
-        labelStyle: TextStyle(color: Colors.white),
+      inputDecorationTheme: InputDecorationTheme(
+        labelStyle: TextStyle(color: colorScheme.textPrimary),
       ),
       bottomSheetTheme: baseTheme.bottomSheetTheme.copyWith(
-        backgroundColor: Colors.black,
-        dragHandleColor: Colors.white,
+        backgroundColor: colorScheme.backgroundElevation0,
+        dragHandleColor: colorScheme.textPrimary,
       ),
       extensions: <ThemeExtension<dynamic>>[
-        chat.StreamTheme.dark(),
-        StreamVideoTheme.dark().copyWith(
+        coreTheme,
+        videoTheme.copyWith(
           callControlsTheme: StreamCallControlsThemeData(
             callReactions: const [
               CallReactionData(
@@ -318,27 +326,25 @@ class _StreamDogFoodingAppContentState
                 icon: '✋',
               ),
             ],
-            backgroundColor: colorTheme.barsBg,
+            backgroundColor: colorScheme.backgroundElevation0,
             spacing: 4,
-            optionIconColor: Colors.white,
-            optionBackgroundColor: AppColorPalette.buttonSecondary,
-            inactiveOptionBackgroundColor:
-                // ignore: deprecated_member_use
-                colorTheme.overlay.withOpacity(0.4),
+            optionIconColor: colorScheme.textPrimary,
+            optionBackgroundColor: colorScheme.backgroundSurface,
+            inactiveOptionBackgroundColor: colorScheme.backgroundOverlayDark,
             optionPadding: const EdgeInsets.all(14),
           ),
           userAvatarTheme: StreamUserAvatarThemeData(
             borderRadius: BorderRadius.circular(20),
-            initialsTextStyle: const TextStyle(
+            initialsTextStyle: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: AppColorPalette.primary,
+              color: colorScheme.brand,
             ),
-            initialsBackground: AppColorPalette.avatarBackground,
+            initialsBackground: colorScheme.brand.shade100,
           ),
           lobbyViewTheme: StreamLobbyViewThemeData(
-            backgroundColor: AppColorPalette.backgroundColor,
-            cardBackgroundColor: AppColorPalette.buttonSecondary,
+            backgroundColor: colorScheme.backgroundApp,
+            cardBackgroundColor: colorScheme.backgroundSurface,
             userAvatarTheme: StreamUserAvatarThemeData(
               constraints: const BoxConstraints.tightFor(
                 height: 100,
@@ -346,15 +352,15 @@ class _StreamDogFoodingAppContentState
               ),
               borderRadius: const BorderRadius.all(Radius.circular(50)),
               initialsTextStyle: textTheme.title1.copyWith(
-                color: AppColorPalette.primary,
+                color: colorScheme.brand,
               ),
-              initialsBackground: AppColorPalette.avatarBackground,
+              initialsBackground: colorScheme.brand.shade100,
             ),
           ),
           callParticipantTheme: StreamCallParticipantThemeData(
             borderRadius: const BorderRadius.all(Radius.circular(16)),
-            speakerBorderColor: colorTheme.accentPrimary,
-            backgroundColor: AppColorPalette.buttonSecondary,
+            speakerBorderColor: colorScheme.accentPrimary,
+            backgroundColor: colorScheme.backgroundSurface,
             userAvatarTheme: StreamUserAvatarThemeData(
               constraints: const BoxConstraints.tightFor(
                 height: 100,
@@ -362,16 +368,16 @@ class _StreamDogFoodingAppContentState
               ),
               borderRadius: const BorderRadius.all(Radius.circular(50)),
               initialsTextStyle: textTheme.title1.copyWith(
-                color: const Color(0xFF005FFF),
+                color: colorScheme.brand,
               ),
-              initialsBackground: AppColorPalette.avatarBackground,
-              selectionColor: colorTheme.accentPrimary,
+              initialsBackground: colorScheme.brand.shade100,
+              selectionColor: colorScheme.accentPrimary,
             ),
-            audioLevelIndicatorColor: colorTheme.accentPrimary,
+            audioLevelIndicatorColor: colorScheme.accentPrimary,
             participantLabelTextStyle: textTheme.footnote.copyWith(
-              color: Colors.white,
+              color: colorScheme.textOnAccent,
             ),
-            disabledMicrophoneColor: Colors.white,
+            disabledMicrophoneColor: colorScheme.textOnAccent,
             connectionLevelActiveColor: const Color(0xFF00FF00),
             participantsGridPadding: const EdgeInsets.all(4),
             participantsGridMainAxisSpacing: 4,
@@ -381,10 +387,12 @@ class _StreamDogFoodingAppContentState
       ],
       textTheme: baseTextTheme.copyWith(
         bodyLarge: baseTextTheme.bodyLarge?.copyWith(
-          color: Colors.white,
+          color: colorScheme.textPrimary,
           fontWeight: FontWeight.bold,
         ),
-        bodyMedium: baseTextTheme.bodyMedium?.copyWith(color: Colors.white),
+        bodyMedium: baseTextTheme.bodyMedium?.copyWith(
+          color: colorScheme.textPrimary,
+        ),
       ),
     );
   }

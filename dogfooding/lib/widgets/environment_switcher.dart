@@ -4,7 +4,6 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import '../core/model/environment.dart';
 import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
-import '../theme/app_palette.dart';
 
 class EnvironmentSwitcher extends StatefulWidget {
   const EnvironmentSwitcher({
@@ -34,6 +33,7 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
   @override
   Widget build(BuildContext context) {
     final streamVideoTheme = StreamVideoTheme.of(context);
+    final colorScheme = StreamTheme.of(context).colorScheme;
 
     return Padding(
       padding: const EdgeInsets.all(8),
@@ -43,23 +43,26 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
             margin: const EdgeInsets.symmetric(vertical: 4),
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             decoration: BoxDecoration(
-              border: Border.all(color: AppColorPalette.appGreen, width: 0.5),
+              border: Border.all(
+                color: colorScheme.accentSuccess,
+                width: 0.5,
+              ),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
               child: Text(
                 selectedEnvironment.displayName,
                 style: streamVideoTheme.textTheme.footnoteBold.apply(
-                  color: AppColorPalette.appGreen,
+                  color: colorScheme.accentSuccess,
                 ),
               ),
             ),
           ),
           MenuAnchor(
-            style: const MenuStyle(
+            style: MenuStyle(
               alignment: Alignment.bottomLeft,
               backgroundColor: WidgetStatePropertyAll(
-                AppColorPalette.backgroundColor,
+                colorScheme.backgroundApp,
               ),
             ),
             alignmentOffset: const Offset(-70, 0),
@@ -100,7 +103,7 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: selectedEnvironment == env
-                                ? AppColorPalette.appGreen
+                                ? colorScheme.accentSuccess
                                 : Colors.white,
                           ),
                           borderRadius: BorderRadius.circular(4),
@@ -111,7 +114,7 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: selectedEnvironment == env
-                                  ? AppColorPalette.appGreen
+                                  ? colorScheme.accentSuccess
                                   : Colors.white,
                             ),
                           ),
@@ -135,19 +138,20 @@ class EnvironmentBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final streamVideoTheme = StreamVideoTheme.of(context);
+    final colorScheme = StreamTheme.of(context).colorScheme;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       decoration: BoxDecoration(
-        border: Border.all(color: AppColorPalette.appGreen, width: 0.5),
+        border: Border.all(color: colorScheme.accentSuccess, width: 0.5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Center(
         child: Text(
           currentEnvironment.displayName,
           style: streamVideoTheme.textTheme.footnoteBold.apply(
-            color: AppColorPalette.appGreen,
+            color: colorScheme.accentSuccess,
           ),
         ),
       ),

@@ -101,27 +101,27 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
         }
         return false;
       },
-      builder: (_, enabled) => IconButton(
-        icon: enabled
-            ? IconTheme(
-                data: widget.enabledSpeakerphoneIconTheme,
-                child: const Icon(
-                  Icons.volume_up_rounded,
-                ),
-              )
-            : IconTheme(
-                data: widget.disabledSpeakerphoneIconTheme,
-                child: const Icon(
-                  Icons.volume_off_rounded,
-                ),
-              ),
-        onPressed: () async {
-          try {
-            await _setSpeakerphoneEnabled(enabled: !enabled);
-          } catch (_) {}
-        },
-        padding: const EdgeInsets.all(16),
-      ),
+      builder: (_, enabled) {
+        final iconTheme = enabled
+            ? widget.enabledSpeakerphoneIconTheme
+            : widget.disabledSpeakerphoneIconTheme;
+        return StreamButton.icon(
+          icon: Icon(
+            enabled ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+          ),
+          style: StreamButtonStyle.secondary,
+          type: StreamButtonType.ghost,
+          size: StreamButtonSize.large,
+          themeStyle: StreamButtonThemeStyle.from(
+            foregroundColor: iconTheme.color,
+          ),
+          onPressed: () async {
+            try {
+              await _setSpeakerphoneEnabled(enabled: !enabled);
+            } catch (_) {}
+          },
+        );
+      },
     );
   }
 }

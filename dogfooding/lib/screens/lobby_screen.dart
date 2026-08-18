@@ -3,14 +3,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../app/user_auth_controller.dart';
 import '../di/injector.dart';
 import '../utils/assets.dart';
-import '../widgets/stream_button.dart';
 
 class LobbyScreen extends StatefulWidget {
   const LobbyScreen({
@@ -53,12 +51,6 @@ class _LobbyScreenState extends State<LobbyScreen> {
       _handleDeviceChange,
     );
     unawaited(_deviceNotifier.enumerateDevices());
-    Permission.microphone.isGranted.then(
-      (value) => setState(() => _hasMicrophonePermission = value),
-    );
-    Permission.camera.isGranted.then(
-      (value) => setState(() => _hasCameraPermission = value),
-    );
   }
 
   void joinCallPressed() {
@@ -215,9 +207,21 @@ class _LobbyScreenState extends State<LobbyScreen> {
                   key: ValueKey(_cameraTrack),
                   call: widget.call,
                   initialCameraDevice: _selectedVideoInputDevice,
-                  onMicrophoneTrackSet: (track) => _microphoneTrack = track,
+                  onMicrophoneTrackSet: (track) {
+                    _microphoneTrack = track;
+
+                    // A non-null track means getUserMedia succeeded, so we
+                    // have permission and device labels are now populated.
+                    if (track != null && !_hasMicrophonePermission) {
+                      setState(() => _hasMicrophonePermission = true);
+                    }
+                  },
                   onCameraTrackSet: (track) {
                     _cameraTrack = track;
+
+                    if (track != null && !_hasCameraPermission) {
+                      setState(() => _hasCameraPermission = true);
+                    }
 
                     if (track != null && _blurEnabled) {
                       _videoEffectsManager.applyBackgroundBlurFilter(
@@ -266,32 +270,27 @@ class _LobbyScreenState extends State<LobbyScreen> {
                     if (_hasMicrophonePermission)
                       Tooltip(
                         message: 'Select audio input device',
-                        child: CallControlOption(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          icon: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 220),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.mic_rounded),
-                                const SizedBox(width: 4),
-                                Flexible(
-                                  child: Text(
-                                    _selectedAudioInputDevice?.label ??
-                                        'Default',
-                                    style: textTheme.body,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 220),
+                          child: StreamButton(
+                            style: StreamButtonStyle.secondary,
+                            iconLeft: const Icon(Icons.mic_rounded),
+                            themeStyle: .new(
+                              shape: WidgetStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                              ],
+                              ),
+                            ),
+                            onPressed: _audioInputDevices.isEmpty
+                                ? null
+                                : () => _showAudioInputPicker(context),
+                            child: Text(
+                              _selectedAudioInputDevice?.label ?? 'Default',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          onPressed: _audioInputDevices.isEmpty
-                              ? null
-                              : () => _showAudioInputPicker(context),
                         ),
                       ),
                     if (_hasMicrophonePermission || _hasCameraPermission)
@@ -299,32 +298,27 @@ class _LobbyScreenState extends State<LobbyScreen> {
                     if (_hasCameraPermission)
                       Tooltip(
                         message: 'Select video input device',
-                        child: CallControlOption(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          icon: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 220),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.videocam_rounded),
-                                const SizedBox(width: 4),
-                                Flexible(
-                                  child: Text(
-                                    _selectedVideoInputDevice?.label ??
-                                        'Default',
-                                    style: textTheme.body,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 220),
+                          child: StreamButton(
+                            style: StreamButtonStyle.secondary,
+                            iconLeft: const Icon(Icons.videocam_rounded),
+                            themeStyle: .new(
+                              shape: WidgetStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                              ],
+                              ),
+                            ),
+                            onPressed: _videoInputDevices.isEmpty
+                                ? null
+                                : () => _showVideoInputPicker(context),
+                            child: Text(
+                              _selectedVideoInputDevice?.label ?? 'Default',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          onPressed: _videoInputDevices.isEmpty
-                              ? null
-                              : () => _showVideoInputPicker(context),
                         ),
                       ),
                   ],
@@ -360,9 +354,12 @@ class _LobbyScreenState extends State<LobbyScreen> {
                               ],
                             ),
                             const SizedBox(height: 16),
-                            StreamButton.active(
-                              label: 'Start a test call',
-                              onPressed: joinCallPressed,
+                            SizedBox(
+                              width: double.infinity,
+                              child: StreamButton(
+                                onPressed: joinCallPressed,
+                                child: const Text('Start a test call'),
+                              ),
                             ),
                           ],
                         ),
