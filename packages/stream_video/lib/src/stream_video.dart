@@ -40,6 +40,7 @@ import 'logger/impl/tagged_logger.dart';
 import 'logger/stream_log.dart';
 import 'models/audio_configuration_policy.dart';
 import 'models/call_cid.dart';
+import 'models/call_metadata.dart';
 import 'models/call_preferences.dart';
 import 'models/call_received_data.dart';
 import 'models/call_ringing_data.dart';
@@ -338,6 +339,7 @@ class StreamVideo extends Disposable {
   final Map<String, bool> _mutedCameraByStateChange = {};
   final Map<String, bool> _mutedAudioByStateChange = {};
   final Map<String, Timer> _incomingAutoRejectTimers = {};
+  final Set<String> _handledIncomingCallCids = {};
 
   /// Returns the current user.
   UserInfo get currentUser => _state.currentUser.toUserInfo();
@@ -872,6 +874,11 @@ class StreamVideo extends Disposable {
     observeCallDeclinedRingingEvent()?.addTo(ringingEventSubscriptions);
     observeCallEndedRingingEvent()?.addTo(ringingEventSubscriptions);
 
+    // The incoming call event can be emitted before this call (terminated state), in which case it
+    // isn't delivered to the subscription above at all, so incoming calls that
+    // are already displayed are picked up here.
+    unawaited(verifyDisplayedIncomingCalls());
+
     return ringingEventSubscriptions;
   }
 
@@ -994,13 +1001,195 @@ class StreamVideo extends Disposable {
     final cid = event.data.callCid;
     if (uuid == null || cid == null) return;
 
-    final consumeResult = await consumeIncomingCall(uuid: uuid, cid: cid);
+    return _handleIncomingCall(uuid: uuid, cid: cid);
+  }
+
+  /// Verifies the incoming calls that are currently displayed by the OS.
+  ///
+  /// On iOS the incoming call UI is reported to CallKit as soon as the VoIP push
+  /// is received, which happens before the app is started when it was
+  /// terminated. The [ActionCallIncoming] event is then emitted while the app is
+  /// still setting up, before it subscribes to ringing events, and is missed
+  /// (the ringing events are broadcast, they are not replayed). Displayed calls
+  /// are therefore verified directly, so a ringing flow that was already
+  /// resolved is dismissed instead of ringing until the native timeout.
+  ///
+  /// Called automatically by [observeCoreRingingEvents].
+  Future<void> verifyDisplayedIncomingCalls() async {
+    final manager = pushNotificationManager;
+    if (manager == null) return;
+
+    final displayedCalls = await manager.activeCalls();
+    _logger.d(
+      () => '[verifyDisplayedIncomingCalls] calls: $displayedCalls',
+    );
+
+    for (final displayedCall in displayedCalls) {
+      final uuid = displayedCall.uuid;
+      final cid = displayedCall.callCid;
+      if (uuid == null || cid == null) continue;
+
+      // Answered calls are handled by the accept flow.
+      if (displayedCall.isAccepted) continue;
+
+      await _handleIncomingCall(uuid: uuid, cid: cid);
+    }
+  }
+
+  Future<void> _handleIncomingCall({
+    required String uuid,
+    required String cid,
+  }) async {
+    // The same call can be reported by the incoming call event and by the
+    // displayed calls verification at the same time.
+    if (!_handledIncomingCallCids.add(cid)) {
+      _logger.v(() => '[handleIncomingCall] already handling: $cid');
+      return;
+    }
+
+    try {
+      await _verifyAndConsumeIncomingCall(uuid: uuid, cid: cid);
+    } finally {
+      _handledIncomingCallCids.remove(cid);
+    }
+  }
+
+  Future<void> _verifyAndConsumeIncomingCall({
+    required String uuid,
+    required String cid,
+  }) async {
+    // The incoming call UI is already on screen at this point on iOS where the OS
+    // requires the CallKit call to be reported as soon as the VoIP push is
+    // received. Verify the call is still ringing and dismiss it if it isn't.
+    final callCid = StreamCallCid(cid: cid);
+    final metadata = await _getCallForRingingEvent(callCid);
+
+    if (metadata == null) {
+      // The state couldn't be verified. Keep ringing instead of dismissing a
+      // call that might still be valid, consumeIncomingCall retries the fetch.
+      _logger.w(
+        () => '[verifyIncomingCall] could not verify ringing state: $cid',
+      );
+    } else {
+      final ringingState = metadata.ringingStateFor(_state.currentUser.id);
+
+      if (!ringingState.isRinging) {
+        // Never end the native call when it's already being answered on this
+        // device (in the app or on the native call screen while the state was
+        // still being verified), as that would tear down the ongoing call.
+        if (await _isAnsweredOnThisDevice(cid)) {
+          _logger.d(
+            () =>
+                '[verifyIncomingCall] call is no longer ringing ($ringingState) '
+                'but is answered on this device, keeping it: $cid',
+          );
+          return;
+        }
+
+        _logger.d(
+          () =>
+              '[verifyIncomingCall] call is no longer ringing ($ringingState), '
+              'dismissing incoming call UI: $cid',
+        );
+
+        // Silently, as the ringing flow is already resolved and the native end
+        // must not be reported back as a decline/ended action.
+        await pushNotificationManager?.endCallByCid(cid, silent: true);
+
+        _cancelIncomingAutoRejectTimerByCid(cid);
+        await _resolveStaleIncomingCall(cid, ringingState);
+        return;
+      }
+    }
+
+    final consumeResult = await consumeIncomingCall(
+      uuid: uuid,
+      cid: cid,
+      metadata: metadata,
+    );
 
     final incomingCall = consumeResult.getDataOrNull();
     if (incomingCall == null) return;
 
     final timeout = incomingCall.state.value.settings.ring.autoRejectTimeout;
     _startIncomingAutoRejectTimer(incomingCall, timeout);
+  }
+
+  /// Fetches the call state used to decide whether the incoming call UI should
+  /// stay on screen. Returns `null` when the state can't be established.
+  ///
+  /// The push is often delivered while the client is still starting up (cold
+  /// start after the app was terminated), and `getCall` only waits for the
+  /// coordinator connection, it doesn't establish it. Connecting first is what
+  /// makes the check work in that case instead of timing out and leaving a
+  /// resolved call ringing.
+  Future<CallMetadata?> _getCallForRingingEvent(StreamCallCid callCid) async {
+    final connectResult = await connect(
+      includeUserDetails: _options.includeUserDetailsForAutoConnect,
+      // The device is registered already, otherwise the push wouldn't have been
+      // delivered. Registering it is not this flow's concern.
+      registerPushDevice: false,
+    );
+
+    if (connectResult.isFailure) {
+      _logger.e(
+        () =>
+            '[getCallForRingingEvent] failed to connect: '
+            '${connectResult.getErrorOrNull()}',
+      );
+      return null;
+    }
+
+    final callResult = await _client.getCall(callCid: callCid);
+    if (callResult is! Success<CallReceivedData>) {
+      _logger.e(
+        () =>
+            '[getCallForRingingEvent] failed to get call: '
+            '${callResult.getErrorOrNull()}',
+      );
+      return null;
+    }
+
+    return callResult.data.metadata;
+  }
+
+  /// Whether the call is already being answered on this device, either in the
+  /// app or on the native call screen.
+  Future<bool> _isAnsweredOnThisDevice(String cid) async {
+    if (activeCalls.any((call) => call.callCid.value == cid)) return true;
+
+    // The native call is marked as accepted from the moment it's answered on the
+    // native call screen, before the call is joined in the app.
+    final nativeCalls = await pushNotificationManager?.activeCalls();
+    return nativeCalls?.any(
+          (call) => call.callCid == cid && call.isAccepted,
+        ) ??
+        false;
+  }
+
+  /// Brings the in-app incoming call in sync with a ringing flow that turned
+  /// out to be already resolved.
+  Future<void> _resolveStaleIncomingCall(
+    String cid,
+    CallRingingState ringingState,
+  ) async {
+    final incomingCall = _state.incomingCall.value;
+    if (incomingCall == null || incomingCall.callCid.value != cid) return;
+
+    _logger.d(
+      () => '[resolveStaleIncomingCall] cid: $cid, state: $ringingState',
+    );
+
+    await incomingCall.leave(
+      reason: DisconnectReason.rejected(
+        byUserId: _state.currentUser.id,
+        reason: ringingState.toReason(),
+      ),
+    );
+
+    if (_state.incomingCall.value == incomingCall) {
+      _state.incomingCall.value = null;
+    }
   }
 
   Future<void> _onCallDecline(ActionCallDecline event) async {
@@ -1204,44 +1393,24 @@ class StreamVideo extends Disposable {
         return CallRingingState.ended;
       },
       success: (success) {
-        final callData = success.data;
-
-        if (callData.metadata.session.acceptedBy.containsKey(
+        final state = success.data.metadata.ringingStateFor(
           _state.currentUser.id,
-        )) {
-          _logger.d(() => '[getCallRingingState] call already accepted');
-          return CallRingingState.accepted;
-        }
-
-        if (callData.metadata.session.rejectedBy.containsKey(
-          _state.currentUser.id,
-        )) {
-          _logger.d(() => '[getCallRingingState] call already rejected');
-          return CallRingingState.rejected;
-        }
-
-        final otherMembers = callData.metadata.members.keys.toList()
-          ..remove(_state.currentUser.id);
-        if (callData.metadata.session.rejectedBy.keys.toSet().containsAll(
-          otherMembers,
-        )) {
-          _logger.d(
-            () =>
-                '[getCallRingingState] call already rejected by all other members',
-          );
-          return CallRingingState.rejected;
-        }
-
-        return CallRingingState.ringing;
+        );
+        _logger.d(() => '[getCallRingingState] state: $state');
+        return state;
       },
     );
   }
 
   /// Consumes incoming voIP call and returns the [Call] object.
+  ///
+  /// Pass [metadata] when the caller already fetched the call state to avoid
+  /// requesting it a second time.
   Future<Result<Call>> consumeIncomingCall({
     required String uuid,
     required String cid,
     CallPreferences? preferences,
+    CallMetadata? metadata,
   }) async {
     _logger.d(() => '[consumeIncomingCall] uuid: $uuid, cid: $cid');
     final manager = pushNotificationManager;
@@ -1261,16 +1430,22 @@ class StreamVideo extends Disposable {
     }
 
     final callCid = StreamCallCid(cid: cid);
-    final callResult = await _client.getCall(callCid: callCid);
-    if (callResult is! Success<CallReceivedData>) {
-      return callResult as Failure;
+
+    var callMetadata = metadata;
+    if (callMetadata == null) {
+      final callResult = await _client.getCall(callCid: callCid);
+      if (callResult is! Success<CallReceivedData>) {
+        return callResult as Failure;
+      }
+
+      callMetadata = callResult.data.metadata;
     }
 
     final call = _makeCallFromRinging(
       data: CallRingingData(
         callCid: callCid,
         ringing: true,
-        metadata: callResult.data.metadata,
+        metadata: callMetadata,
       ),
       preferences: preferences ?? _options.defaultCallPreferences,
     );

@@ -16,13 +16,12 @@ String _buildUrl(String baseUrl, String apiKey) {
   return '$baseUrl'
       '?api_key=$apiKey'
       '&stream-auth-type=jwt'
-      '&X-Stream-Client=$xStreamClientHeader';
+      '&X-Stream-Client=${Uri.encodeQueryComponent(xStreamClientHeader)}';
 }
 
 class CoordinatorWebSocket {
   CoordinatorWebSocket(
     String url, {
-    Iterable<String>? protocols,
     required this.apiKey,
     required this.userInfo,
     required this.tokenManager,
@@ -34,7 +33,7 @@ class CoordinatorWebSocket {
     final wsUrl = _buildUrl(url, apiKey);
 
     _client = StreamWebSocketClient(
-      options: WebSocketOptions(url: wsUrl, protocols: protocols),
+      options: WebSocketOptions(url: wsUrl),
       messageCodec: CoordinatorMessageCodec(
         onTokenError: () => _refreshToken = true,
       ),

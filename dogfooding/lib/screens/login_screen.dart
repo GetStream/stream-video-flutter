@@ -186,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       await authController.login(user, environment);
-    } catch (e, _) {
+    } catch (e) {
       if (mounted) hideLoadingIndicator(context);
       _showSnackBar('Error: $e');
     } finally {

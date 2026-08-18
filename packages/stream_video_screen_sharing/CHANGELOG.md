@@ -1,3 +1,7 @@
+## 1.4.3
+
+- Minor bug fixes and improvements
+
 ## 1.4.2
 
 - Increased minimum Flutter version to 3.38.1.

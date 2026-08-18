@@ -19,6 +19,8 @@ workspace:
 dev_dependencies:
   lints: ^6.0.0
   melos: ^8.1.0
+  path: ^1.9.0
+  yaml: ^3.1.3
 
 dependency_overrides:
   cli_util: ^0.5.1
@@ -51,10 +53,16 @@ melos:
         stream_core_flutter: ^0.4.1
         stream_chat_flutter: ^10.0.0
         stream_webrtc_flutter: ^3.0.1
-        stream_video_flutter: ^1.4.2
-        stream_video_noise_cancellation: ^1.4.2
-        stream_video_push_notification: ^1.4.2
-        stream_video_screen_sharing: ^1.4.2
+        stream_video: ^1.4.3
+        stream_video_filters: ^1.4.3
+        stream_video_flutter: ^1.4.3
+        stream_video_noise_cancellation: ^1.4.3
+        stream_video_push_notification: ^1.4.3
+        stream_video_screen_sharing: ^1.4.3
+
+      hooks:
+        # Keep streamVideoVersion in globals.dart in sync with the pubspec version.
+        post: melos run version:update
 
   scripts:
     postclean:
@@ -115,11 +123,19 @@ melos:
 
     lint:pub:
       run: |
-        melos exec -c 5 --no-private --ignore="*example*" -- \
-              flutter pub publish --dry-run
-      description: |
-        Run `pub publish --dry-run` in all packages.
-         - Note: you can also rely on your IDEs Dart Analysis / Issues window.
+        melos exec -c 1 --no-published --no-private --order-dependents -- \
+              "flutter pub publish -n"
+      description: Dry-run `pub publish` for every publishable package (pre-publish gate).
+
+    release:pub:
+      run: |
+        melos exec -c 1 --no-published --no-private --order-dependents -- \
+              "flutter pub publish -f"
+      description: Publish every publishable package to pub.dev, in dependency order.
+
+    version:update:
+      run: dart run tools/generate_version.dart
+      description: Sync streamVideoVersion in globals.dart and the dogfooding app version with the pubspec version.
 
     generate:all:
       run: melos run generate:dart && melos run generate:flutter
