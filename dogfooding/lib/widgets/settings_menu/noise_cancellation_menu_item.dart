@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../../theme/app_palette.dart';
 import 'standard_action_menu_item.dart';
 
 class NoiseCancellationMenuItem extends StatefulWidget {
@@ -20,6 +19,8 @@ class _NoiseCancellationMenuItemState extends State<NoiseCancellationMenuItem> {
     return StreamBuilder(
       stream: widget.call.state,
       builder: (context, snapshot) {
+        final colorScheme = StreamTheme.of(context).colorScheme;
+
         if (snapshot.hasData) {
           final callState = snapshot.data;
 
@@ -41,7 +42,7 @@ class _NoiseCancellationMenuItemState extends State<NoiseCancellationMenuItem> {
                   callState.isAudioProcessing ? 'On' : 'Off',
                   style: TextStyle(
                     color: callState.isAudioProcessing
-                        ? AppColorPalette.appGreen
+                        ? colorScheme.accentSuccess
                         : null,
                   ),
                 ),

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../theme/app_palette.dart';
-
 class BadgedCallOption extends StatelessWidget {
   const BadgedCallOption({
     super.key,
@@ -15,36 +13,18 @@ class BadgedCallOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        callControlOption,
-        if (badgeCount != null)
-          Positioned(top: 0, right: 8, child: Badge(count: badgeCount!)),
-      ],
-    );
-  }
-}
+    final count = badgeCount;
+    if (count == null) return callControlOption;
 
-class Badge extends StatelessWidget {
-  const Badge({super.key, required this.count});
+    final colorScheme = StreamTheme.of(context).colorScheme;
 
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 18,
-      padding: const EdgeInsets.all(2),
-      decoration: const BoxDecoration(
-        color: AppColorPalette.appGreen,
-        shape: BoxShape.circle,
+    return StreamBadgeNotificationTheme(
+      data: StreamBadgeNotificationThemeData(
+        primaryBackgroundColor: colorScheme.accentSuccess,
       ),
-      child: Center(
-        child: Text(
-          count.toString(),
-          textAlign: TextAlign.center,
-          style: const TextStyle(color: Colors.black, fontSize: 10),
-        ),
+      child: StreamBadgeNotification(
+        label: count.toString(),
+        child: callControlOption,
       ),
     );
   }

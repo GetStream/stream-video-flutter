@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video_filters/video_effects_manager.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../dogfooding_app_channel.dart';
-import '../../theme/app_palette.dart';
 
 const _iconSize = 40.0;
 
@@ -110,6 +110,8 @@ class _FilterIconWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = StreamTheme.of(context).colorScheme;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -126,8 +128,8 @@ class _FilterIconWrapper extends StatelessWidget {
         child: Container(
           height: _iconSize,
           width: _iconSize,
-          decoration: const BoxDecoration(
-            color: AppColorPalette.buttonSecondary,
+          decoration: BoxDecoration(
+            color: colorScheme.backgroundSurface,
             shape: BoxShape.circle,
           ),
           child: Center(child: child),

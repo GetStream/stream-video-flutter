@@ -1,7 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-
-import '../theme/app_palette.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class StatsBatteryChart extends StatelessWidget {
   const StatsBatteryChart({super.key, required this.batteryLevelHistory});
@@ -10,6 +9,7 @@ class StatsBatteryChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = StreamTheme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.all(8),
       child: LineChart(
@@ -62,14 +62,14 @@ class StatsBatteryChart extends StatelessWidget {
               gradient: LinearGradient(
                 colors: [
                   ColorTween(
-                    begin: AppColorPalette.appGreen,
+                    begin: colorScheme.accentSuccess,
                     // ignore: deprecated_member_use
-                    end: AppColorPalette.appGreen.withOpacity(0.5),
+                    end: colorScheme.accentSuccess.withOpacity(0.5),
                   ).lerp(0.2)!,
                   ColorTween(
-                    begin: AppColorPalette.appGreen,
+                    begin: colorScheme.accentSuccess,
                     // ignore: deprecated_member_use
-                    end: AppColorPalette.appGreen.withOpacity(0.5),
+                    end: colorScheme.accentSuccess.withOpacity(0.5),
                   ).lerp(0.2)!,
                 ],
               ),
@@ -83,19 +83,19 @@ class StatsBatteryChart extends StatelessWidget {
                 gradient: LinearGradient(
                   colors: [
                     ColorTween(
-                          begin: AppColorPalette.appGreen,
+                          begin: colorScheme.accentSuccess,
                           end:
                               // ignore: deprecated_member_use
-                              AppColorPalette.appGreen.withOpacity(0.5),
+                              colorScheme.accentSuccess.withOpacity(0.5),
                         )
                         .lerp(0.2)!
                         // ignore: deprecated_member_use
                         .withOpacity(0.1),
                     ColorTween(
-                          begin: AppColorPalette.appGreen,
+                          begin: colorScheme.accentSuccess,
                           end:
                               // ignore: deprecated_member_use
-                              AppColorPalette.appGreen.withOpacity(0.5),
+                              colorScheme.accentSuccess.withOpacity(0.5),
                         )
                         .lerp(0.2)!
                         // ignore: deprecated_member_use

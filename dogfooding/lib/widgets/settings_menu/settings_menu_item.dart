@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../theme/app_palette.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class SettingsMenuItem extends StatelessWidget {
   const SettingsMenuItem({super.key, required this.child, this.onPressed});
@@ -10,12 +9,14 @@ class SettingsMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = StreamTheme.of(context).colorScheme;
+
     return InkWell(
       onTap: onPressed,
       child: Container(
         constraints: const BoxConstraints(minHeight: 40),
         decoration: BoxDecoration(
-          color: AppColorPalette.buttonSecondary,
+          color: colorScheme.backgroundSurface,
           borderRadius: BorderRadius.circular(16),
         ),
         padding: const EdgeInsets.all(8),

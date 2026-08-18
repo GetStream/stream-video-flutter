@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../../theme/app_palette.dart';
 import 'standard_action_menu_item.dart';
 
 class ChooseAudioOutputMenuItem extends StatelessWidget {
@@ -19,6 +18,8 @@ class ChooseAudioOutputMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = StreamTheme.of(context).colorScheme;
+
     return Column(
       children: [
         const SizedBox(height: 16),
@@ -35,8 +36,8 @@ class ChooseAudioOutputMenuItem extends StatelessWidget {
                     textAlign: TextAlign.end,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColorPalette.secondaryText,
+                    style: TextStyle(
+                      color: colorScheme.textSecondary,
                     ),
                   ),
                 ),
@@ -60,6 +61,7 @@ class ToggleAudioOutputMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = StreamTheme.of(context).colorScheme;
     final enabled = audioOutputDevice.id.equalsIgnoreCase(deviceIdSpeaker);
 
     return Column(
@@ -78,7 +80,7 @@ class ToggleAudioOutputMenuItem extends StatelessWidget {
           },
           trailing: Text(
             enabled ? 'On' : 'Off',
-            style: TextStyle(color: enabled ? AppColorPalette.appGreen : null),
+            style: TextStyle(color: enabled ? colorScheme.accentSuccess : null),
           ),
         ),
       ],

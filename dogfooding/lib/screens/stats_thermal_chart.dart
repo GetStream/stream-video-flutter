@@ -1,7 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-
-import '../theme/app_palette.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 class StatsThermalChart extends StatelessWidget {
   const StatsThermalChart({super.key, required this.thermalSeverityHistory});
@@ -14,6 +13,7 @@ class StatsThermalChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = StreamTheme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.all(8),
       child: BarChart(
@@ -60,8 +60,8 @@ class StatsThermalChart extends StatelessWidget {
                         top: Radius.circular(4),
                       ),
                       color: Color.lerp(
-                        AppColorPalette.appGreen,
-                        AppColorPalette.appRed,
+                        colorScheme.accentSuccess,
+                        colorScheme.accentError,
                         (entry.$2.clamp(0, _maxSeverity)) / _maxSeverity,
                       ),
                       backDrawRodData: BackgroundBarChartRodData(
