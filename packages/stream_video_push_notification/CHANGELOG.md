@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🐞 Fixed
+
+- [Android] Fixed the incoming call ringtone being silently muted on Android 17. The ringtone is now played from a `phoneCall` foreground service, which Android 17's background audio hardening requires for audio played while no activity is visible.
+
 ## 1.4.3
 
 ### 🐞 Fixed

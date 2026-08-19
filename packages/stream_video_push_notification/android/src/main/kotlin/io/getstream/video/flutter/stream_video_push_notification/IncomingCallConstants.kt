@@ -26,6 +26,13 @@ object IncomingCallConstants {
     const val ACTION_CALL_UNHELD = "io.getstream.video.ACTION_CALL_UNHELD"
     const val ACTION_CALL_CONNECTED = "io.getstream.video.ACTION_CALL_CONNECTED"
 
+    /** Internal action that runs [IncomingCallNotificationService] as a foreground service while ringing. */
+    const val ACTION_CALL_RINGING = "io.getstream.video.ACTION_CALL_RINGING"
+
+    // Polyfill for a Build.VERSION_CODES value not yet available at the current compileSdk.
+    // TODO: delete once compileSdk covers it, replacing usages with the real constant.
+    const val SDK_INT_CINNAMON_BUN = 37 // Build.VERSION_CODES.CINNAMON_BUN - needs compileSdk 37
+
 
     const val EXTRA_CALL_INCOMING_DATA = "EXTRA_CALL_INCOMING_DATA"
 
