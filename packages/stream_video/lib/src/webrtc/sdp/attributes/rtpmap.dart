@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 
-import '../codec/sdp_codec.dart';
 import '../sdp.dart';
 
 /// Represents 'rtpmap' attribute
@@ -29,11 +28,6 @@ class Rtpmap extends Equatable {
     clockRate,
     encodingParameters,
   ];
-}
-
-extension RtpmapUtils on Rtpmap {
-  bool hasCodec(SdpCodec codec) =>
-      encodingName.toUpperCase() == codec.alias.toUpperCase();
 }
 
 extension RtpmapSdpUtils on SdpLine {

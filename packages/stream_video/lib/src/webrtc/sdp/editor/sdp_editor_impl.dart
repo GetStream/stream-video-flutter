@@ -4,24 +4,15 @@ import 'package:meta/meta.dart';
 
 import '../../../logger/impl/tagged_logger.dart';
 import '../../../platform_detector/platform_detector.dart';
-import '../codec/sdp_codec.dart';
 import '../policy/sdp_policy.dart';
 import '../sdp.dart';
 import 'action/sdp_edit_action_factory.dart';
-import 'rule/rule_set_opus_dtx_enabled.dart';
-import 'rule/rule_set_opus_red_enabled.dart';
 import 'rule/rule_toggle.dart';
 import 'rule/sdp_munging_rule.dart';
 import 'sdp_editor.dart';
 
 @internal
 class NoOpSdpEditor implements SdpEditor {
-  @override
-  set opusDtxEnabled(bool value) {}
-
-  @override
-  set opusRedEnabled(bool value) {}
-
   @override
   String? edit(Sdp? sdp) {
     return sdp?.value;
@@ -41,26 +32,6 @@ class SdpEditorImpl implements SdpEditor {
   late final internalRules = _createRules();
 
   PlatformType get platform => CurrentPlatform.type;
-
-  @override
-  set opusDtxEnabled(bool value) {
-    for (final toggle in internalRules) {
-      if (toggle.rule is SetOpusDtxEnabledRule) {
-        toggle.enabled = value;
-        break;
-      }
-    }
-  }
-
-  @override
-  set opusRedEnabled(bool value) {
-    for (final toggle in internalRules) {
-      if (toggle.rule is SetOpusRedEnabledRule) {
-        toggle.enabled = value;
-        break;
-      }
-    }
-  }
 
   @override
   String? edit(Sdp? sdp) {
@@ -126,26 +97,9 @@ extension on StringBuffer {
 
 List<SdpRuleToggle> _createRules() {
   return <SdpRuleToggle>[
-    SdpRuleToggle(
-      enabled: false,
-      rule: const SdpMungingRule.prioritizeCodec(
-        platforms: [PlatformType.android],
-        types: [SdpType.localOffer],
-        codec: VideoCodec.vp8,
-      ),
-    ),
-    SdpRuleToggle(
-      rule: const SdpMungingRule.setOpusDtxEnabled(
-        enabled: false,
-        types: [SdpType.localOffer],
-      ),
-    ),
-    SdpRuleToggle(
-      rule: const SdpMungingRule.setOpusRedEnabled(
-        enabled: false,
-        types: [SdpType.localOffer],
-      ),
-    ),
+    // Opus DTX/RED are negotiated by signalling `dtx`/`red` in the published
+    // TrackInfo (see RtcManager), matching the JS SDK. They must not be munged
+    // into the SDP.
     SdpRuleToggle(
       enabled: true,
       rule: const SdpMungingRule.mirrorSpropStereo(

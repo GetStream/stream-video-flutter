@@ -558,11 +558,6 @@ class Call {
     if (status is CallStatusDisconnected) {
       await _clear('status-disconnected');
     }
-
-    _sessionFactory.sdpEditor.opusDtxEnabled =
-        state.settings.audio.opusDtxEnabled;
-    _sessionFactory.sdpEditor.opusRedEnabled =
-        state.settings.audio.redundantCodingEnabled;
   }
 
   StreamSubscription<NativeWebRtcEvent> _onNativeWebRtcEvent() {
