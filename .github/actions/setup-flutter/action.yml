@@ -1,0 +1,38 @@
+name: Setup Flutter
+description: "Installs Flutter (with caching) using the repo's default version and channel."
+
+inputs:
+  flutter-version:
+    description: "The Flutter version to install. Leave empty to use the latest for the channel."
+    required: false
+    default: "3.47.0"
+  flutter-channel:
+    description: "The Flutter channel to install."
+    required: false
+    default: "stable"
+  cache:
+    description: "Whether to cache the Flutter SDK."
+    required: false
+    default: "true"
+  java-version:
+    description: "Java version to set up (needed for Android builds). Leave empty to skip Java setup."
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: ☕ Set up Java
+      if: ${{ inputs.java-version != '' }}
+      uses: actions/setup-java@v5
+      with:
+        distribution: "zulu"
+        java-version: ${{ inputs.java-version }}
+
+    - name: 🐦 Install Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        cache: ${{ inputs.cache }}
+        channel: ${{ inputs.flutter-channel }}
+        flutter-version: ${{ inputs.flutter-version }}
+        cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
