@@ -183,22 +183,20 @@ Future<void> resumeAudioPlayback() async {
 
 /// Cached result of [checkIfAudioOutputChangeSupported].
 ///
-/// Probing creates a detached `<audio>` element and invokes `setSinkId` on it,
-/// so it is done once per page instead of once per track.
+/// Probing creates a detached `<audio>` element, so it is done once per page
+/// instead of once per track.
 bool? _audioOutputChangeSupported;
 
 bool checkIfAudioOutputChangeSupported() {
   final cached = _audioOutputChangeSupported;
   if (cached != null) return cached;
 
+  // Detect the capability by looking the method up rather than calling it:
+  // `setSinkId` returns a promise, so invoking it would route audio and leave
+  // a rejection unhandled instead of reporting support.
   final element = web.document.createElement('audio');
-
-  try {
-    element.callMethod('setSinkId'.toJS, 'default'.toJS);
-    return _audioOutputChangeSupported = true;
-  } catch (_) {
-    return _audioOutputChangeSupported = false;
-  }
+  return _audioOutputChangeSupported =
+      element.hasProperty('setSinkId'.toJS).toDart;
 }
 
 web.HTMLDivElement findOrCreateAudioContainer() {
