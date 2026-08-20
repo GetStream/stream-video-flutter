@@ -34,7 +34,21 @@ class RtcRemoteTrack extends RtcTrack {
     // Start the audio player if it's an audio track.
     if (isAudioTrack) {
       rtc_audio_api.startAudio(trackId, mediaTrack);
-      if (audioSinkId != null) await setSinkId(audioSinkId!);
+
+      final sinkId = audioSinkId;
+      if (sinkId != null) {
+        // Best effort: the device may be gone since it was selected, and that
+        // must not stop the track from starting — playback then stays on the
+        // browser's default output.
+        try {
+          await setSinkId(sinkId);
+        } catch (e) {
+          streamLog.w(
+            _tag,
+            () => 'Could not restore sink id $sinkId for track $trackId: $e',
+          );
+        }
+      }
     }
   }
 
@@ -69,6 +83,7 @@ class RtcRemoteTrack extends RtcTrack {
     rtc.MediaStream? mediaStream,
     rtc.MediaStreamTrack? mediaTrack,
     RtcVideoDimension? videoDimension,
+    rtc.RTCRtpTransceiver? transceiver,
     String? audioSinkId,
   }) {
     return RtcRemoteTrack(
@@ -77,6 +92,7 @@ class RtcRemoteTrack extends RtcTrack {
       mediaStream: mediaStream ?? this.mediaStream,
       mediaTrack: mediaTrack ?? this.mediaTrack,
       videoDimension: videoDimension ?? this.videoDimension,
+      transceiver: transceiver ?? this.transceiver,
       audioSinkId: audioSinkId ?? this.audioSinkId,
     );
   }
@@ -91,6 +107,8 @@ class RtcRemoteTrack extends RtcTrack {
 const _audioTag = 'SV:RtcRemoteAudioTrack';
 
 extension RtcRemoteAudioTrackHardwareExt on RtcRemoteTrack {
+  /// Routes this track's audio to the output device [id] and returns a copy
+  /// carrying it.
   Future<RtcRemoteTrack> setSinkId(String id) async {
     if (!isAudioTrack) return this;
 

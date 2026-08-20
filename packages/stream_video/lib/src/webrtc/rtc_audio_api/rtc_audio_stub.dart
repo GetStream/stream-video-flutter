@@ -25,6 +25,8 @@ Future<void> resumeAudioPlayback() {
 
 bool get isAudioPlaybackBlocked => throw UnimplementedError();
 
+bool get isAudioPlaybackStalled => throw UnimplementedError();
+
 bool checkIfAudioOutputChangeSupported() {
   throw UnimplementedError();
 }

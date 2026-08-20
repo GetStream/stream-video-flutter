@@ -306,9 +306,16 @@ class RtcMediaDeviceNotifier {
   /// Web only; always `false` on other platforms.
   bool get isAudioPlaybackBlocked => rtc_audio.isAudioPlaybackBlocked;
 
+  /// Whether playback of at least one remote audio track stopped and the SDK's
+  /// automatic recovery gave up on it.
+  ///
+  /// Web only; always `false` on other platforms.
+  bool get isAudioPlaybackStalled => rtc_audio.isAudioPlaybackStalled;
+
   /// Retries playback of the remote audio elements the browser's autoplay
-  /// policy blocked. Must be called from within a user gesture (e.g. a button
-  /// tap) for the browser to allow it.
+  /// policy blocked, plus any element whose automatic recovery gave up. Must be
+  /// called from within a user gesture (e.g. a button tap) for the browser to
+  /// allow it.
   ///
   /// Web only; a no-op on other platforms.
   Future<void> resumeAudioPlayback() => rtc_audio.resumeAudioPlayback();

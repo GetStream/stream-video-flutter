@@ -20,9 +20,6 @@ const _tag = 'SV:RtcAudioWeb';
 /// Number of consecutive playback recovery attempts before giving up.
 const _maxRecoveryAttempts = 10;
 
-/// `HTMLMediaElement.HAVE_CURRENT_DATA`.
-const _haveCurrentData = 2;
-
 /// Signature of the sink the web audio layer reports playback traces to.
 typedef AudioTraceHandler = void Function(String tag, Object? data);
 
@@ -40,9 +37,19 @@ final _watchdogs = <String, _AudioPlaybackWatchdog>{};
 /// Track ids whose audio element the browser's autoplay policy is blocking.
 final _blockedTrackIds = <String>{};
 
+/// Track ids whose playback recovery exhausted its retry budget. Kept separate
+/// from [_blockedTrackIds] so an exhausted track doesn't make the SDK claim the
+/// autoplay policy is blocking audio, while still leaving a way back in via
+/// [resumeAudioPlayback].
+final _stalledTrackIds = <String>{};
+
 /// Whether the browser's autoplay policy is currently blocking playback of at
 /// least one remote audio element.
 bool get isAudioPlaybackBlocked => _blockedTrackIds.isNotEmpty;
+
+/// Whether playback of at least one remote audio element stopped and automatic
+/// recovery gave up on it.
+bool get isAudioPlaybackStalled => _stalledTrackIds.isNotEmpty;
 
 void startAudio(String id, rtc.MediaStreamTrack track) {
   if (track is! MediaStreamTrackWeb) return;
@@ -71,6 +78,7 @@ void startAudio(String id, rtc.MediaStreamTrack track) {
 void stopAudio(String id) {
   _watchdogs.remove(id)?.dispose();
   _blockedTrackIds.remove(id);
+  _stalledTrackIds.remove(id);
 
   final audioElement = web.document.getElementById(audioPrefix + id);
   if (audioElement != null) {
@@ -81,6 +89,8 @@ void stopAudio(String id) {
   }
 }
 
+/// Applies the audio output device [deviceId] to the audio element of track
+/// [id].
 Future<void> setSinkId(String id, String deviceId) async {
   if (!checkIfAudioOutputChangeSupported()) {
     streamLog.w(
@@ -92,22 +102,42 @@ Future<void> setSinkId(String id, String deviceId) async {
       'deviceId': deviceId,
       'error': 'unsupported',
     });
-    return;
+    throw UnsupportedError(
+      'Audio output device change is not supported on this browser.',
+    );
   }
 
   final audioElement = web.document.getElementById(audioPrefix + id);
-  if (audioElement is! web.HTMLAudioElement ||
-      !audioElement.hasProperty('setSinkId'.toJS).toDart) {
+  if (audioElement is! web.HTMLAudioElement) {
+    // Not a failure: the element is created when the track starts, and
+    // `start()` applies the sink id the caller is about to record.
     streamLog.w(
       _tag,
-      () => 'No audio element to set sink id on for track $id',
+      () =>
+          'No audio element for track $id yet, sink id $deviceId will be '
+          'applied when the track starts',
     );
     _trace(TraceTag.setSinkId, {
       'trackId': id,
       'deviceId': deviceId,
-      'error': 'noElement',
+      'deferred': true,
     });
     return;
+  }
+
+  if (!audioElement.hasProperty('setSinkId'.toJS).toDart) {
+    streamLog.w(
+      _tag,
+      () => 'Audio element for track $id does not support setSinkId',
+    );
+    _trace(TraceTag.setSinkId, {
+      'trackId': id,
+      'deviceId': deviceId,
+      'error': 'unsupported',
+    });
+    throw UnsupportedError(
+      'Audio output device change is not supported on this browser.',
+    );
   }
 
   try {
@@ -121,29 +151,53 @@ Future<void> setSinkId(String id, String deviceId) async {
       'deviceId': deviceId,
       'error': '$e',
     });
+
+    rethrow;
   }
 }
 
 /// Retries playback of every remote audio element the browser's autoplay policy
-/// blocked. Must be called from within a user gesture.
+/// blocked, plus any element whose automatic recovery gave up. Must be called
+/// from within a user gesture.
 Future<void> resumeAudioPlayback() async {
-  _trace(TraceTag.resumeAudio, {'blockedTracks': _blockedTrackIds.length});
+  _trace(TraceTag.resumeAudio, {
+    'blockedTracks': _blockedTrackIds.length,
+    'stalledTracks': _stalledTrackIds.length,
+  });
 
-  final blocked = List<String>.from(_blockedTrackIds);
-  for (final trackId in blocked) {
-    _blockedTrackIds.remove(trackId);
-    await _watchdogs[trackId]?.play();
+  final pending = {
+    ..._blockedTrackIds,
+    ..._stalledTrackIds,
+  }.where(_watchdogs.containsKey).toSet();
+
+  _blockedTrackIds.removeAll(pending);
+  _stalledTrackIds.removeAll(pending);
+
+  final retries = <Future<void>>[];
+  for (final trackId in pending) {
+    retries.add(_watchdogs[trackId]!.resume());
   }
+
+  await Future.wait(retries);
 }
 
+/// Cached result of [checkIfAudioOutputChangeSupported].
+///
+/// Probing creates a detached `<audio>` element and invokes `setSinkId` on it,
+/// so it is done once per page instead of once per track.
+bool? _audioOutputChangeSupported;
+
 bool checkIfAudioOutputChangeSupported() {
+  final cached = _audioOutputChangeSupported;
+  if (cached != null) return cached;
+
   final element = web.document.createElement('audio');
 
   try {
     element.callMethod('setSinkId'.toJS, 'default'.toJS);
-    return true;
+    return _audioOutputChangeSupported = true;
   } catch (_) {
-    return false;
+    return _audioOutputChangeSupported = false;
   }
 }
 
@@ -156,6 +210,19 @@ web.HTMLDivElement findOrCreateAudioContainer() {
     ..style.display = 'none';
   web.document.body?.append(div);
   return div as web.HTMLDivElement;
+}
+
+/// Returns true if [error] is a `NotAllowedError` from the browser's autoplay policy.
+///
+/// This usually means the user hasn't interacted with the page yet (requires "user activation").
+/// Detected by checking for a `DOMException` with name `"NotAllowedError"`—via JS interop or in the error string.
+bool _isNotAllowedError(Object error) {
+  if (error is jsutil.JSObject) {
+    final name = error.getProperty<jsutil.JSString?>('name'.toJS)?.toDart;
+    if (name != null) return name == 'NotAllowedError';
+  }
+
+  return '$error'.contains('NotAllowedError');
 }
 
 /// Watches a single remote audio element and tries to recover playback when it
@@ -208,6 +275,17 @@ class _AudioPlaybackWatchdog {
     element.removeEventListener('playing', _onPlaying);
   }
 
+  /// Retries playback after a user gesture.
+  Future<void> resume() {
+    if (_disposed) return Future.value();
+
+    _pendingTimer?.cancel();
+    _pendingTimer = null;
+    _attempt = 0;
+
+    return play();
+  }
+
   Future<void> play() async {
     if (_disposed) return;
     _attempt += 1;
@@ -215,6 +293,7 @@ class _AudioPlaybackWatchdog {
     try {
       await element.play().toDart;
       _blockedTrackIds.remove(trackId);
+      _stalledTrackIds.remove(trackId);
     } catch (e) {
       if (_disposed) return;
 
@@ -227,7 +306,7 @@ class _AudioPlaybackWatchdog {
 
       // The autoplay policy will keep rejecting until a user gesture, so stop
       // burning attempts and wait for [resumeAudioPlayback].
-      if ('$e'.contains('NotAllowedError')) {
+      if (_isNotAllowedError(e)) {
         if (_blockedTrackIds.add(trackId)) {
           _trace(TraceTag.mediaPlaybackBlocked, {
             'trackId': trackId,
@@ -243,8 +322,14 @@ class _AudioPlaybackWatchdog {
           'trackId': trackId,
           'kind': 'audio',
           'attempts': _attempt,
+          'readyState': element.readyState,
           'error': '$e',
         });
+
+        // Stop retrying this outage, but re-arm the watchdog.
+        _stalledTrackIds.add(trackId);
+        _degraded = false;
+        _attempt = 0;
         return;
       }
 
@@ -253,6 +338,7 @@ class _AudioPlaybackWatchdog {
   }
 
   void _handlePlaying() {
+    _stalledTrackIds.remove(trackId);
     if (_blockedTrackIds.remove(trackId)) {
       streamLog.i(_tag, () => 'Audio playback unblocked for track $trackId');
     }
@@ -290,6 +376,7 @@ class _AudioPlaybackWatchdog {
       'trackId': trackId,
       'kind': 'audio',
       'reason': reason,
+      'readyState': element.readyState,
     });
 
     _scheduleRecovery();
@@ -319,7 +406,6 @@ class _AudioPlaybackWatchdog {
     if (element.srcObject == null) return 'noSrc';
     if (element.ended) return 'ended';
     if (_blockedTrackIds.contains(trackId)) return 'blocked';
-    if (element.readyState < _haveCurrentData) return 'notReady';
     if (!element.paused) return 'notPaused';
     return null;
   }

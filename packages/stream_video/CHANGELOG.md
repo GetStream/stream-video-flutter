@@ -1,13 +1,15 @@
 ## Upcoming
 
-### ✅ Added
+### 🔄 Changed
 
-- [Web] Added `RtcMediaDeviceNotifier.instance.isAudioPlaybackBlocked` and `RtcMediaDeviceNotifier.instance.resumeAudioPlayback()` to detect and recover from remote audio playback blocked by the browser's autoplay policy.
+- [Web] `RtcRemoteTrack.setSinkId` is now asynchronous (`Future<RtcRemoteTrack>` instead of `RtcRemoteTrack`) and throws when the browser cannot route the track to the requested device.
 
 ### 🐞 Fixed
 
 - [Web] Fixed remote audio staying silent for the rest of the call after the browser's autoplay policy blocked playback, or after an audio element paused on its own (for example when a Bluetooth headset switches profile as the microphone is unmuted). Playback is now started explicitly, watched, and retried with a backoff, instead of relying on the element's `autoplay` attribute and failing with no indication.
 - [Web] Fixed the selected audio output device being lost when a remote participant unmuted.
+- [Web] Fixed `Call.setAudioOutputDevice` reporting success when the browser rejected the device or did not support output selection at all.
+- [Web] Fixed `Call.setAudioOutputDevice` leaving playback split across two output devices when one remote track rejected the switch. Every track is now switched, and the selection is only rejected when no track could take the device.
 - [Web] Fixed the microphone not being published when Opus RED was enabled for the call, leaving the participant inaudible to everyone while their microphone still appeared active. Opus DTX and RED are no longer munged into the SDP. Both are negotiated by signalling them to the SFU with the published tracks.
 
 ## 1.4.3

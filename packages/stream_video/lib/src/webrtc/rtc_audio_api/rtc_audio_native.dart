@@ -29,6 +29,9 @@ Future<void> resumeAudioPlayback() async {
 /// Always `false`: only browsers block playback via an autoplay policy.
 bool get isAudioPlaybackBlocked => false;
 
+/// Always `false`: playback recovery is a web-only concern.
+bool get isAudioPlaybackStalled => false;
+
 bool checkIfAudioOutputChangeSupported() {
   // On native platforms, we assume audio output change is supported.
   return true;
