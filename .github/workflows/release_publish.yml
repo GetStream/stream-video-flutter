@@ -29,13 +29,10 @@ jobs:
         uses: dart-lang/setup-dart@v1
 
       - name: 🐦 Install Flutter
-        uses: subosito/flutter-action@v2
+        uses: ./.github/actions/setup-flutter
 
-      - name: 📦 Install Tools
-        run: flutter pub global activate melos
-
-      - name: 🔧 Bootstrap Workspace
-        run: melos bootstrap --verbose
+      - name: 📦 Install Melos
+        uses: ./.github/actions/setup-melos
 
       - name: 🌵 Dry Run
         run: melos run lint:pub

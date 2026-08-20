@@ -203,7 +203,7 @@ Future<Result<T>> runCatchingResult<T>(
   FutureOr<Result<T>> Function() fn,
 ) async {
   try {
-    return fn();
+    return await fn();
   } catch (e, stackTrace) {
     return Result.errorWithCause(e.toString(), e, stackTrace);
   }

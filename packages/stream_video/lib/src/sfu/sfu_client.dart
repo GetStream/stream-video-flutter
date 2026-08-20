@@ -119,7 +119,7 @@ class SfuClient {
     try {
       _tracer.trace(TraceTag.sendAnswer, request.toJson());
 
-      return _executeWithRetry<sfu.SendAnswerResponse>(
+      return await _executeWithRetry<sfu.SendAnswerResponse>(
         call: () => _client.sendAnswer(_withAuthHeaders(), request),
       );
     } catch (e, stk) {
@@ -134,7 +134,7 @@ class SfuClient {
     try {
       _tracer.trace(TraceTag.iceTrickle, request.toJson());
 
-      return _executeWithRetry<sfu.ICETrickleResponse>(
+      return await _executeWithRetry<sfu.ICETrickleResponse>(
         call: () => _client.iceTrickle(_withAuthHeaders(), request),
       );
     } catch (e, stk) {
@@ -149,7 +149,7 @@ class SfuClient {
     try {
       _tracer.trace(TraceTag.iceRestart, request.toJson());
 
-      return _executeWithRetry<sfu.ICERestartResponse>(
+      return await _executeWithRetry<sfu.ICERestartResponse>(
         call: () => _client.iceRestart(_withAuthHeaders(), request),
       );
     } catch (e, stk) {
@@ -298,7 +298,7 @@ class SfuClient {
     sfu.SendStatsRequest request,
   ) async {
     try {
-      return _executeWithRetry<sfu.SendStatsResponse>(
+      return await _executeWithRetry<sfu.SendStatsResponse>(
         call: () => _client.sendStats(_withAuthHeaders(), request),
       );
     } catch (e, stk) {

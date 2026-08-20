@@ -1,0 +1,24 @@
+name: Setup Melos
+description: "Installs Melos and bootstraps the workspace. Assumes Flutter is already installed (see the setup-flutter action)."
+
+inputs:
+  melos-version:
+    description: "The Melos version to install. Leave empty to use the latest."
+    required: false
+    default: "8.1.0"
+  bootstrap:
+    description: "Whether to run `melos bootstrap` after installing Melos."
+    required: false
+    default: "true"
+
+runs:
+  using: "composite"
+  steps:
+    - name: 📦 Install Melos
+      shell: bash
+      run: flutter pub global activate melos ${{ inputs.melos-version }}
+
+    - name: 🔧 Bootstrap Workspace
+      if: ${{ inputs.bootstrap == 'true' }}
+      shell: bash
+      run: melos bootstrap --verbose
