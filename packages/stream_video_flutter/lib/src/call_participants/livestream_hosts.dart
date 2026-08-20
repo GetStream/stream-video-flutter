@@ -15,7 +15,7 @@ enum LivestreamScreenShareMode {
   grid,
 }
 
-/// Widget that renders all the [StreamCallParticipant], based on the number
+/// Widget that renders all the [StreamParticipantTile], based on the number
 /// of hosts in a call.
 class StreamLivestreamHosts extends StatefulWidget {
   StreamLivestreamHosts({
@@ -56,7 +56,7 @@ class StreamLivestreamHosts extends StatefulWidget {
     Call call,
     CallParticipantState host,
   ) {
-    return StreamCallParticipant(
+    return StreamParticipantTile(
       key: ValueKey(
         '${host.uniqueParticipantKey}-livehost-video',
       ),

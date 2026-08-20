@@ -204,7 +204,7 @@ class _LivestreamContentState extends State<LivestreamContent> {
           allCallParticipants.where((e) => e.isVideoEnabled).toList();
 
   CallParticipantBuilder get _defaultParticipantBuilder =>
-      (context, call, participant) => StreamCallParticipant(
+      (context, call, participant) => StreamParticipantTile(
         key: ValueKey(
           '${participant.uniqueParticipantKey}-livecontent-video',
         ),

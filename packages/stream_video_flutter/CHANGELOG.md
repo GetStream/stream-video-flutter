@@ -1,5 +1,33 @@
 ## Upcoming (next major)
 
+### ✅ Added
+
+- Added component factory support, so the Stream Video UI components can be replaced app-wide instead of threading widget builders through the widget tree. Register the components you want to replace with `streamVideoComponentBuilders` and wrap your app in a `StreamComponentFactory`:
+
+  ```dart
+  MaterialApp(
+    builder: (context, child) => StreamComponentFactory(
+      builders: StreamComponentBuilders(
+        extensions: streamVideoComponentBuilders(
+          // Decorate the default, or return your own widget entirely.
+          participantTile: (context, props) => DefaultStreamParticipantTile(
+            props: props.copyWith(showParticipantLabel: false),
+          ),
+        ),
+      ),
+      child: child!,
+    ),
+    // ...
+  );
+  ```
+
+  Every component follows the same shape: `StreamX` resolves the registered builder and falls back to `DefaultX`, which holds the default implementation. The parameters of `StreamX` are carried in a `StreamXProps`, exposed as `StreamX.props`, so a custom builder can read them and `copyWith` them to decorate the default rather than reimplement it.
+- Added `StreamParticipantTile`, the participant tile as a replaceable component: register a `participantTile` builder to replace it, or use `DefaultStreamParticipantTile` for the default implementation.
+
+### ⚠️ Deprecated
+
+- `StreamCallParticipant` is deprecated in favour of `StreamParticipantTile`, matching the component name in the design system. It takes the same parameters and now only wraps `DefaultStreamParticipantTile`. Run `dart fix --apply` to migrate your call sites.
+
 ### ⚠️ Breaking
 
 - Call control buttons (`CallControlOption` and the widgets built on it) are now rendered with the shared `StreamButton` from `stream_core_flutter` using the secondary button style, instead of a raw Material `ElevatedButton`. Their appearance is now driven by the button styling in `StreamTheme` rather than by `StreamCallControlsThemeData`'s `optionElevation`/`optionShape`/`optionPadding`, so buttons that relied on those values may look slightly different. The legacy `padding` is translated into a fixed circle diameter to preserve the prominence of larger buttons (e.g. incoming/outgoing accept/decline), and icons render at the button's default icon size.

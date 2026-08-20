@@ -39,10 +39,10 @@ typedef CallParticipantFilter<T> = bool Function(T element);
 /// Comparator used to sort the participants.
 typedef CallParticipantSort<T> = Comparator<T>;
 
-/// Widget that renders all the [StreamCallParticipant], based on the number
+/// Widget that renders all the [StreamParticipantTile], based on the number
 /// of people in a call.
 class StreamCallParticipants extends StatefulWidget {
-  /// Creates a new instance of [StreamCallParticipant].
+  /// Creates a new instance of [StreamCallParticipants].
   StreamCallParticipants({
     super.key,
     required this.call,
@@ -97,7 +97,7 @@ class StreamCallParticipants extends StatefulWidget {
     Call call,
     CallParticipantState participant,
   ) {
-    return StreamCallParticipant(
+    return StreamParticipantTile(
       // We use the sessionId as the key to map the state to the participant.
       key: Key(participant.uniqueParticipantKey),
       call: call,
