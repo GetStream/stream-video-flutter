@@ -8,6 +8,7 @@
 
 - [Web] Fixed remote audio staying silent for the rest of the call after the browser's autoplay policy blocked playback, or after an audio element paused on its own (for example when a Bluetooth headset switches profile as the microphone is unmuted). Playback is now started explicitly, watched, and retried with a backoff, instead of relying on the element's `autoplay` attribute and failing with no indication.
 - [Web] Fixed the selected audio output device being lost when a remote participant unmuted.
+- [Web] Fixed the microphone not being published when Opus RED was enabled for the call, leaving the participant inaudible to everyone while their microphone still appeared active. Opus DTX and RED are no longer munged into the SDP. Both are negotiated by signalling them to the SFU with the published tracks.
 
 ## 1.4.3
 
