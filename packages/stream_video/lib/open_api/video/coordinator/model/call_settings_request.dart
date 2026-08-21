@@ -16,6 +16,7 @@ class CallSettingsRequest {
     this.audio,
     this.backstage,
     this.broadcasting,
+    this.encryption,
     this.frameRecording,
     this.geofencing,
     this.individualRecording,
@@ -54,6 +55,14 @@ class CallSettingsRequest {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   BroadcastSettingsRequest? broadcasting;
+
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  EncryptionSettingsRequest? encryption;
 
   ///
   /// Please note: This property should have been non-nullable! Since the specification file
@@ -166,6 +175,7 @@ class CallSettingsRequest {
           other.audio == audio &&
           other.backstage == backstage &&
           other.broadcasting == broadcasting &&
+          other.encryption == encryption &&
           other.frameRecording == frameRecording &&
           other.geofencing == geofencing &&
           other.individualRecording == individualRecording &&
@@ -186,6 +196,7 @@ class CallSettingsRequest {
       (audio == null ? 0 : audio!.hashCode) +
       (backstage == null ? 0 : backstage!.hashCode) +
       (broadcasting == null ? 0 : broadcasting!.hashCode) +
+      (encryption == null ? 0 : encryption!.hashCode) +
       (frameRecording == null ? 0 : frameRecording!.hashCode) +
       (geofencing == null ? 0 : geofencing!.hashCode) +
       (individualRecording == null ? 0 : individualRecording!.hashCode) +
@@ -202,7 +213,7 @@ class CallSettingsRequest {
 
   @override
   String toString() =>
-      'CallSettingsRequest[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, frameRecording=$frameRecording, geofencing=$geofencing, individualRecording=$individualRecording, ingress=$ingress, limits=$limits, rawRecording=$rawRecording, recording=$recording, ring=$ring, screensharing=$screensharing, session=$session, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
+      'CallSettingsRequest[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, encryption=$encryption, frameRecording=$frameRecording, geofencing=$geofencing, individualRecording=$individualRecording, ingress=$ingress, limits=$limits, rawRecording=$rawRecording, recording=$recording, ring=$ring, screensharing=$screensharing, session=$session, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -220,6 +231,11 @@ class CallSettingsRequest {
       json[r'broadcasting'] = this.broadcasting;
     } else {
       json[r'broadcasting'] = null;
+    }
+    if (this.encryption != null) {
+      json[r'encryption'] = this.encryption;
+    } else {
+      json[r'encryption'] = null;
     }
     if (this.frameRecording != null) {
       json[r'frame_recording'] = this.frameRecording;
@@ -307,6 +323,7 @@ class CallSettingsRequest {
         audio: AudioSettingsRequest.fromJson(json[r'audio']),
         backstage: BackstageSettingsRequest.fromJson(json[r'backstage']),
         broadcasting: BroadcastSettingsRequest.fromJson(json[r'broadcasting']),
+        encryption: EncryptionSettingsRequest.fromJson(json[r'encryption']),
         frameRecording:
             FrameRecordingSettingsRequest.fromJson(json[r'frame_recording']),
         geofencing: GeofenceSettingsRequest.fromJson(json[r'geofencing']),

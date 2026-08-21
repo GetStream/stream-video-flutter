@@ -19,6 +19,7 @@ class CallSettings extends Equatable {
     this.backstage = const StreamBackstageSettings(),
     this.geofencing = const StreamGeofencingSettings(),
     this.limits = const StreamLimitsSettings(),
+    this.encryption = const StreamEncryptionSettings(),
     this.session = const StreamSessionSettings(),
     this.frameRecording = const StreamFrameRecordingSettings(),
     this.individualRecording = const StreamIndividualRecordingSettings(),
@@ -36,6 +37,10 @@ class CallSettings extends Equatable {
   final StreamBackstageSettings backstage;
   final StreamGeofencingSettings geofencing;
   final StreamLimitsSettings limits;
+
+  /// Whether this call permits end-to-end encryption.
+  final StreamEncryptionSettings encryption;
+
   final StreamSessionSettings session;
   final StreamFrameRecordingSettings frameRecording;
   final StreamIndividualRecordingSettings individualRecording;
@@ -58,6 +63,7 @@ class CallSettings extends Equatable {
     StreamBackstageSettings? backstage,
     StreamGeofencingSettings? geofencing,
     StreamLimitsSettings? limits,
+    StreamEncryptionSettings? encryption,
     StreamSessionSettings? session,
     StreamFrameRecordingSettings? frameRecording,
     StreamIndividualRecordingSettings? individualRecording,
@@ -75,6 +81,7 @@ class CallSettings extends Equatable {
       backstage: backstage ?? this.backstage,
       geofencing: geofencing ?? this.geofencing,
       limits: limits ?? this.limits,
+      encryption: encryption ?? this.encryption,
       session: session ?? this.session,
       frameRecording: frameRecording ?? this.frameRecording,
       individualRecording: individualRecording ?? this.individualRecording,
@@ -235,6 +242,25 @@ class StreamBackstageSettings extends AbstractSettings {
       enabled: enabled,
       joinAheadTimeSeconds: joinAheadTimeSeconds,
     );
+  }
+}
+
+/// Whether a call permits end-to-end encryption.
+///
+/// A client that attaches an `EncryptionManager` joins with `e2ee: true`; the
+/// server rejects that join unless the call's mode allows it.
+class StreamEncryptionSettings extends AbstractSettings {
+  const StreamEncryptionSettings({
+    this.mode = StreamEncryptionMode.disabled,
+  });
+
+  final StreamEncryptionMode mode;
+
+  @override
+  List<Object?> get props => [mode];
+
+  EncryptionSettingsRequest toOpenDto() {
+    return EncryptionSettingsRequest(mode: mode.toOpenDto());
   }
 }
 
@@ -998,6 +1024,51 @@ enum FrameRecordingSettingsMode {
         return FrameRecordingSettingsMode.autoOn;
       default:
         return FrameRecordingSettingsMode.disabled;
+    }
+  }
+}
+
+/// Encryption modes a call can be configured with.
+enum StreamEncryptionMode {
+  /// Clients may join encrypted or unencrypted.
+  available,
+
+  /// Encryption is off; joining with `e2ee: true` is rejected.
+  disabled,
+
+  /// Encryption is expected; server-side recording, transcription and
+  /// broadcasting are unavailable because the SFU only sees opaque frames.
+  autoOn;
+
+  @override
+  String toString() => name;
+
+  EncryptionSettingsRequestModeEnum toOpenDto() {
+    switch (this) {
+      case StreamEncryptionMode.available:
+        return EncryptionSettingsRequestModeEnum.available;
+      case StreamEncryptionMode.disabled:
+        return EncryptionSettingsRequestModeEnum.disabled;
+      case StreamEncryptionMode.autoOn:
+        return EncryptionSettingsRequestModeEnum.autoOn;
+    }
+  }
+
+  /// Parses a wire value.
+  ///
+  /// Accepts the hyphenated wire spelling `auto-on` as well as the enum name,
+  /// and falls back to [StreamEncryptionMode.disabled] for anything else so an
+  /// unknown future mode never reads as "encryption is on".
+  static StreamEncryptionMode fromString(String value) {
+    switch (value) {
+      case 'available':
+        return StreamEncryptionMode.available;
+      case 'auto-on':
+      case 'autoOn':
+        return StreamEncryptionMode.autoOn;
+      case 'disabled':
+      default:
+        return StreamEncryptionMode.disabled;
     }
   }
 }

@@ -66,6 +66,7 @@ class CallState extends Equatable {
       custom: const {},
       isVideoModerated: false,
       isAudioSuspended: false,
+      isE2eeEnabled: false,
     );
   }
 
@@ -109,6 +110,7 @@ class CallState extends Equatable {
     required this.custom,
     required this.isVideoModerated,
     required this.isAudioSuspended,
+    required this.isE2eeEnabled,
   });
 
   final CallPreferences preferences;
@@ -154,6 +156,9 @@ class CallState extends Equatable {
 
   /// Whether audio tracks have been suspended for this call.
   final bool isAudioSuspended;
+
+  /// Whether the SFU reports this call as end-to-end encrypted.
+  final bool isE2eeEnabled;
 
   String get callId => callCid.id;
 
@@ -228,6 +233,7 @@ class CallState extends Equatable {
     Map<String, Object>? custom,
     bool? isVideoModerated,
     bool? isAudioSuspended,
+    bool? isE2eeEnabled,
   }) {
     return CallState._(
       preferences: preferences ?? this.preferences,
@@ -272,6 +278,7 @@ class CallState extends Equatable {
       custom: custom ?? this.custom,
       isVideoModerated: isVideoModerated ?? this.isVideoModerated,
       isAudioSuspended: isAudioSuspended ?? this.isAudioSuspended,
+      isE2eeEnabled: isE2eeEnabled ?? this.isE2eeEnabled,
     );
   }
 
@@ -347,6 +354,7 @@ class CallState extends Equatable {
     custom,
     isVideoModerated,
     isAudioSuspended,
+    isE2eeEnabled,
   ];
 
   @override
@@ -356,6 +364,7 @@ class CallState extends Equatable {
         ' sessionId: $sessionId, isRecording: $isRecording,'
         ' isVideoModerated: $isVideoModerated,'
         ' isAudioSuspended: $isAudioSuspended,'
+        ' isE2eeEnabled: $isE2eeEnabled,'
         ' settings: $settings, egress: $egress, '
         ' videoInputDevice: $videoInputDevice,'
         ' audioInputDevice: $audioInputDevice,'

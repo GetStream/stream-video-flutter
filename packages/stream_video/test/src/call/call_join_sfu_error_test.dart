@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_video/src/errors/video_error.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
@@ -72,6 +71,7 @@ void main() {
               migratingFromList: any(named: 'migratingFromList'),
               video: any(named: 'video'),
               membersLimit: any(named: 'membersLimit'),
+              e2ee: any(named: 'e2ee'),
             ),
           ).called(1);
 
@@ -154,6 +154,7 @@ void main() {
                 migratingFromList: any(named: 'migratingFromList'),
                 video: any(named: 'video'),
                 membersLimit: any(named: 'membersLimit'),
+                e2ee: any(named: 'e2ee'),
               ),
               () => localSession.start(
                 reconnectDetails: any(named: 'reconnectDetails'),
@@ -172,6 +173,7 @@ void main() {
                 migratingFromList: any(named: 'migratingFromList'),
                 video: any(named: 'video'),
                 membersLimit: any(named: 'membersLimit'),
+                e2ee: any(named: 'e2ee'),
               ),
               () => localSession.start(
                 reconnectDetails: any(named: 'reconnectDetails'),
@@ -190,6 +192,7 @@ void main() {
                 migratingFromList: any(named: 'migratingFromList'),
                 video: any(named: 'video'),
                 membersLimit: any(named: 'membersLimit'),
+                e2ee: any(named: 'e2ee'),
               ),
               () => localSession.start(
                 reconnectDetails: any(named: 'reconnectDetails'),
@@ -254,6 +257,7 @@ void main() {
               migratingFromList: any(named: 'migratingFromList'),
               video: any(named: 'video'),
               membersLimit: any(named: 'membersLimit'),
+              e2ee: any(named: 'e2ee'),
             ),
             () => mockCallSession.start(
               reconnectDetails: any(named: 'reconnectDetails'),
@@ -282,6 +286,7 @@ void main() {
               migratingFromList: any(named: 'migratingFromList'),
               video: any(named: 'video'),
               membersLimit: any(named: 'membersLimit'),
+              e2ee: any(named: 'e2ee'),
             ),
             () => mockCallSession.start(
               reconnectDetails: any(named: 'reconnectDetails'),
@@ -354,6 +359,7 @@ void main() {
               migratingFromList: any(named: 'migratingFromList'),
               video: any(named: 'video'),
               membersLimit: any(named: 'membersLimit'),
+              e2ee: any(named: 'e2ee'),
             ),
           ).called(1);
 

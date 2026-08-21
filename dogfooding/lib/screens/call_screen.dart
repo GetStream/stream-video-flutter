@@ -21,6 +21,7 @@ import '../utils/feedback_dialog.dart';
 import '../widgets/badged_call_option.dart';
 import '../widgets/call_duration_title.dart';
 import '../widgets/closed_captions_widget.dart';
+import '../widgets/e2ee_key_notification.dart';
 import '../widgets/settings_menu/settings_menu.dart';
 import '../widgets/share_call_card.dart';
 
@@ -32,11 +33,15 @@ class CallScreen extends StatefulWidget {
     required this.call,
     this.connectOptions,
     this.videoEffectsManager,
+    this.encryptionKey,
   });
 
   final Call call;
   final CallConnectOptions? connectOptions;
   final StreamVideoEffectsManager? videoEffectsManager;
+
+  /// The passphrase [call]'s shared key was derived from.
+  final String? encryptionKey;
 
   @override
   State<CallScreen> createState() => _CallScreenState();
@@ -44,6 +49,8 @@ class CallScreen extends StatefulWidget {
 
 class _CallScreenState extends State<CallScreen> {
   late final _userChatRepo = locator.get<UserChatRepository>();
+
+  late String? _encryptionKey = widget.encryptionKey;
   late final _videoEffectsManager =
       widget.videoEffectsManager ?? StreamVideoEffectsManager(widget.call);
 
@@ -201,6 +208,14 @@ class _CallScreenState extends State<CallScreen> {
                         ClosedCaptionsWidget(call: call),
                       ],
                     ),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: E2eeKeyNotification(
+                        call: call,
+                        onKeyApplied: (key) =>
+                            setState(() => _encryptionKey = key),
+                      ),
+                    ),
                     if (_moreMenuVisible) ...[
                       GestureDetector(
                         onTap: () => setState(() => _moreMenuVisible = false),
@@ -244,7 +259,10 @@ class _CallScreenState extends State<CallScreen> {
                           call: call,
                           selector: (state) => state.otherParticipants.isEmpty,
                           builder: (context, isEmpty) => isEmpty
-                              ? ShareCallWelcomeCard(callId: call.id)
+                              ? ShareCallWelcomeCard(
+                                  call: call,
+                                  encryptionKey: _encryptionKey,
+                                )
                               : const SizedBox.shrink(),
                         ),
                       ),

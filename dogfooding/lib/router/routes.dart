@@ -36,22 +36,33 @@ class LoginRoute extends GoRouteData with $LoginRoute {
 class LobbyRoute extends GoRouteData with $LobbyRoute {
   const LobbyRoute({required this.$extra});
 
-  final Call $extra;
+  final ({Call call, bool callExists, String? encryptionKey}) $extra;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return LobbyScreen(
-      call: $extra,
-      onJoinCallPressed: (connectOptions, effectsManager) {
-        // Navigate to the call screen.
-        CallRoute(
-          $extra: (
-            call: $extra,
-            connectOptions: connectOptions,
-            effectsManager: effectsManager,
-          ),
-        ).replace(context);
-      },
+      call: $extra.call,
+      callExists: $extra.callExists,
+      initialEncryptionKey: $extra.encryptionKey,
+      onJoinCallPressed:
+          ({
+            required call,
+            required connectOptions,
+            required effectsManager,
+            encryptionKey,
+          }) {
+            // Navigate to the call screen.
+            CallRoute(
+              $extra: (
+                call: call,
+                connectOptions: connectOptions,
+                effectsManager: effectsManager,
+                // The passphrase the lobby settled on, so the call screen can
+                // put it in the invite it offers.
+                encryptionKey: encryptionKey,
+              ),
+            ).replace(context);
+          },
     );
   }
 }
@@ -78,6 +89,7 @@ class CallRoute extends GoRouteData with $CallRoute {
     Call call,
     CallConnectOptions? connectOptions,
     StreamVideoEffectsManager? effectsManager,
+    String? encryptionKey,
   })
   $extra;
 
@@ -87,6 +99,7 @@ class CallRoute extends GoRouteData with $CallRoute {
       call: $extra.call,
       connectOptions: $extra.connectOptions,
       videoEffectsManager: $extra.effectsManager,
+      encryptionKey: $extra.encryptionKey,
     );
   }
 }

@@ -15,6 +15,7 @@ import '../di/injector.dart';
 import '../router/router.dart';
 import '../router/routes.dart';
 import '../theme/app_palette.dart';
+import '../utils/call_lookup.dart';
 import '../utils/consts.dart';
 import 'custom_video_localizations.dart';
 import 'firebase_messaging_handler.dart';
@@ -114,6 +115,7 @@ class _StreamDogFoodingAppContentState
               call: call,
               connectOptions: null,
               effectsManager: null,
+              encryptionKey: null,
             );
 
             _router.push(CallRoute($extra: extra).location, extra: extra);
@@ -140,6 +142,7 @@ class _StreamDogFoodingAppContentState
               call: callToJoin,
               connectOptions: null,
               effectsManager: null,
+              encryptionKey: null,
             );
 
             _router.push(CallRoute($extra: extra).location, extra: extra);
@@ -156,6 +159,7 @@ class _StreamDogFoodingAppContentState
             call: call,
             connectOptions: null,
             effectsManager: null,
+            encryptionKey: null,
           );
 
           _router.push(CallRoute($extra: extra).location, extra: extra);
@@ -226,10 +230,25 @@ class _StreamDogFoodingAppContentState
     try {
       final streamVideo = locator.get<StreamVideo>();
       final call = streamVideo.makeCall(callType: kCallType, id: callId);
+      final encryptionKey = uri.queryParameters['encryption_key'];
 
-      await call.getOrCreate();
+      // A link can point at a call that was never created — the lobby creates
+      // it, with the encryption mode chosen there.
+      final lookup = await lookupCallExists(call);
+      if (lookup is Failure) {
+        debugPrint('Error looking up call $callId: ${lookup.error}');
+        return;
+      }
 
-      await _router.push<void>(LobbyRoute($extra: call).location, extra: call);
+      final extra = (
+        call: call,
+        callExists: (lookup as Success<bool>).data,
+        encryptionKey: encryptionKey,
+      );
+      await _router.push<void>(
+        LobbyRoute($extra: extra).location,
+        extra: extra,
+      );
     } catch (e, stk) {
       debugPrint('Error joining or creating call: $e');
       debugPrint(stk.toString());

@@ -169,6 +169,11 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
     );
   }
 
+  /// Records whether the SFU considers this call end-to-end encrypted.
+  void sfuE2eeEnabledUpdated(bool isE2eeEnabled) {
+    state = state.copyWith(isE2eeEnabled: isE2eeEnabled);
+  }
+
   void sfuPinsUpdated(
     List<SfuPin> pins,
   ) {

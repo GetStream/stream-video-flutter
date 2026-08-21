@@ -478,6 +478,10 @@ class ApiClient {
           return EgressResponse.fromJson(value);
         case 'EndCallResponse':
           return EndCallResponse.fromJson(value);
+        case 'EncryptionSettingsRequest':
+          return EncryptionSettingsRequest.fromJson(value);
+        case 'EncryptionSettingsResponse':
+          return EncryptionSettingsResponse.fromJson(value);
         case 'FeedsPreferencesResponse':
           return FeedsPreferencesResponse.fromJson(value);
         case 'FileUploadConfig':

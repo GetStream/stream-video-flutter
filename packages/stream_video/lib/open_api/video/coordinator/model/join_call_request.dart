@@ -15,6 +15,7 @@ class JoinCallRequest {
   JoinCallRequest({
     this.create,
     this.data,
+    this.e2ee,
     this.hintHighScaleLivestreamPublisher,
     required this.location,
     this.membersLimit,
@@ -41,6 +42,15 @@ class JoinCallRequest {
   /// Consider adding a "default:" property in the specification file to hide this note.
   ///
   CallRequest? data;
+
+  /// the encryption mode the client intends to use for this join; the join is rejected if it does not match the call's encryption configuration
+  ///
+  /// Please note: This property should have been non-nullable! Since the specification file
+  /// does not include a default value (using the "default:" property), however, the generated
+  /// source code must fall back to having a nullable type.
+  /// Consider adding a "default:" property in the specification file to hide this note.
+  ///
+  bool? e2ee;
 
   /// if true, the participant will be marked as publsihing to large audience
   ///
@@ -105,6 +115,7 @@ class JoinCallRequest {
       other is JoinCallRequest &&
           other.create == create &&
           other.data == data &&
+          other.e2ee == e2ee &&
           other.hintHighScaleLivestreamPublisher ==
               hintHighScaleLivestreamPublisher &&
           other.location == location &&
@@ -120,6 +131,7 @@ class JoinCallRequest {
       // ignore: unnecessary_parenthesis
       (create == null ? 0 : create!.hashCode) +
       (data == null ? 0 : data!.hashCode) +
+      (e2ee == null ? 0 : e2ee!.hashCode) +
       (hintHighScaleLivestreamPublisher == null
           ? 0
           : hintHighScaleLivestreamPublisher!.hashCode) +
@@ -133,7 +145,7 @@ class JoinCallRequest {
 
   @override
   String toString() =>
-      'JoinCallRequest[create=$create, data=$data, hintHighScaleLivestreamPublisher=$hintHighScaleLivestreamPublisher, location=$location, membersLimit=$membersLimit, migratingFrom=$migratingFrom, migratingFromList=$migratingFromList, notify=$notify, ring=$ring, video=$video]';
+      'JoinCallRequest[create=$create, data=$data, e2ee=$e2ee, hintHighScaleLivestreamPublisher=$hintHighScaleLivestreamPublisher, location=$location, membersLimit=$membersLimit, migratingFrom=$migratingFrom, migratingFromList=$migratingFromList, notify=$notify, ring=$ring, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
@@ -146,6 +158,11 @@ class JoinCallRequest {
       json[r'data'] = this.data;
     } else {
       json[r'data'] = null;
+    }
+    if (this.e2ee != null) {
+      json[r'e2ee'] = this.e2ee;
+    } else {
+      json[r'e2ee'] = null;
     }
     if (this.hintHighScaleLivestreamPublisher != null) {
       json[r'hint_high_scale_livestream_publisher'] =
@@ -204,6 +221,7 @@ class JoinCallRequest {
       return JoinCallRequest(
         create: mapValueOfType<bool>(json, r'create'),
         data: CallRequest.fromJson(json[r'data']),
+        e2ee: mapValueOfType<bool>(json, r'e2ee'),
         hintHighScaleLivestreamPublisher:
             mapValueOfType<bool>(json, r'hint_high_scale_livestream_publisher'),
         location: mapValueOfType<String>(json, r'location')!,

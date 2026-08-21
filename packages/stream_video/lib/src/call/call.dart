@@ -281,6 +281,22 @@ class Call {
 
   CallCredentials? _credentials;
   CallSession? _session;
+
+  /// End-to-end encryption for this call, set via [setE2EEManager].
+  EncryptionManager? _e2eeManager;
+
+  /// Logs `e2ee.*` diagnostics for [_e2eeManager].
+  StreamSubscription<E2eeEvent>? _e2eeEventsSubscription;
+
+  /// Tracks which [EncryptionManager] is attached to which [Call] via `callCid`.
+  /// Each manager must be mapped to just one call, and vice versa; both mappings are weak to allow cleanup.
+  static final Map<String, _E2eeClaim> _e2eeClaims = <String, _E2eeClaim>{};
+
+  /// Drops every recorded claim. Tests share one cid across cases, and the
+  /// registry outlives them.
+  @visibleForTesting
+  static void resetE2EEClaims() => _e2eeClaims.clear();
+
   CallSession? get callSession => _session;
   CallSession? _previousSession;
   StreamPeerConnectionFactory? _pcFactory;
@@ -979,6 +995,139 @@ class Call {
     }
   }
 
+  /// The end-to-end encryption manager attached via [setE2EEManager].
+  /// `null` when the call is unencrypted.
+  EncryptionManager? get e2eeManager => _e2eeManager;
+
+  /// Turns on end-to-end encryption for this call.
+  /// Must run **before** [join]. The call's encryption mode must allow it.
+  ///
+  /// [EncryptionManager] takes raw key bytes — 16 for AES-128, 32 for
+  /// AES-256 — and has no opinion on how participants agreed on them. Deriving
+  /// them from a passphrase, or distributing them over your own channel, is up
+  /// to the app.
+  ///
+  /// ```dart
+  /// final e2ee = EncryptionManager.create(userId: client.currentUser.id);
+  /// await e2ee.setSharedKey(0, sharedKeyBytes);
+  ///
+  /// await call.setE2EEManager(e2ee);
+  /// await call.join(create: true);
+  /// ```
+  ///
+  /// The manager is released and disposed when the call is left, so a fresh
+  /// one is needed per call.
+  Future<void> setE2EEManager(EncryptionManager manager) async {
+    if (_session?.rtcManager != null) {
+      throw StateError(
+        'setE2EEManager must be called before join(): this call already has '
+        'peer connections, and attaching now would leave the session '
+        'half-encrypted.',
+      );
+    }
+
+    if (manager.isDisposed) {
+      throw StateError(
+        'setE2EEManager was given a disposed EncryptionManager; it can no '
+        'longer hold keys or attach transforms. Create a new one.',
+      );
+    }
+
+    final claimant = _e2eeClaims[callCid.value]?.call.target;
+    if (claimant != null &&
+        !identical(claimant, this) &&
+        !identical(claimant._e2eeManager, manager)) {
+      throw StateError(
+        'Another Call instance for $callCid already has a different '
+        'EncryptionManager. Two managers on one call means two key stores, so '
+        'peers can only decrypt one of them. Reuse that Call, or release its '
+        'manager with clearE2EEManager() (or leave()) first.',
+      );
+    }
+
+    _e2eeClaims.removeWhere((_, claim) => claim.call.target == null);
+    for (final entry in _e2eeClaims.entries) {
+      if (entry.key == callCid.value) continue;
+      if (identical(entry.value.manager.target, manager)) {
+        throw StateError(
+          'This EncryptionManager is already attached to call ${entry.key}. '
+          'Keys live on the manager, so sharing one between calls makes them '
+          'overwrite each other. Create a separate manager for $callCid.',
+        );
+      }
+    }
+
+    _logger.i(() => '[setE2EEManager] userId: ${manager.userId}');
+    _e2eeClaims[callCid.value] = _E2eeClaim(this, manager);
+    _e2eeManager = manager;
+
+    await _e2eeEventsSubscription?.cancel();
+    _e2eeEventsSubscription = manager.events.listen(
+      _onE2eeEvent,
+      onError: (Object e) => _logger.w(() => '[e2ee] event stream error: $e'),
+    );
+  }
+
+  /// Detaches the E2EE manager, so later joins are unencrypted again.
+  ///
+  /// Set [dispose] to `false` to keep the native manager alive, which is what
+  /// makes the hand-off work: [setE2EEManager] accepts it on another call
+  /// once this one has released it.
+  ///
+  /// ```dart
+  /// await callA.clearE2EEManager(dispose: false);
+  /// await callB.setE2EEManager(e2ee); // same keys, no re-derivation
+  /// ```
+  ///
+  /// Does nothing when no manager is attached.
+  Future<void> clearE2EEManager({bool dispose = true}) async {
+    final manager = _e2eeManager;
+    if (manager == null) return;
+
+    if (dispose && _session?.rtcManager != null) {
+      _logger.w(
+        () =>
+            '[clearE2EEManager] disposing while peer connections are still '
+            'up; this call will stop decrypting. Leave first.',
+      );
+    }
+
+    _logger.i(() => '[clearE2EEManager] dispose: $dispose');
+
+    _e2eeManager = null;
+
+    if (identical(_e2eeClaims[callCid.value]?.call.target, this)) {
+      _e2eeClaims.remove(callCid.value);
+    }
+
+    await _e2eeEventsSubscription?.cancel();
+    _e2eeEventsSubscription = null;
+
+    if (dispose) {
+      await manager.dispose().catchError((Object e) {
+        _logger.w(() => '[clearE2EEManager] dispose failed: $e');
+      });
+    }
+  }
+
+  void _onE2eeEvent(E2eeEvent event) {
+    switch (event.type) {
+      case E2eeEventType.missingKey:
+      case E2eeEventType.decryptionFailed:
+      case E2eeEventType.encryptionFailed:
+      case E2eeEventType.unsupportedVersion:
+      case E2eeEventType.decryptionStalled:
+        _logger.e(() => '[e2ee] $event');
+      case E2eeEventType.unencryptedFrame:
+        _logger.w(() => '[e2ee] $event');
+      case E2eeEventType.decryptionResumed:
+      case E2eeEventType.keyState:
+      case E2eeEventType.perfReport:
+      case null:
+        _logger.d(() => '[e2ee] $event');
+    }
+  }
+
   /// Joins the call.
   ///
   /// - [connectOptions]: optional initial call configuration
@@ -1305,6 +1454,7 @@ class Call {
         streamVideo: _streamVideo,
         statsOptions: _sfuStatsOptions!,
         pcFactory: _ensurePcFactory(),
+        e2eeManager: _e2eeManager,
         leftoverTraceRecords:
             _previousSession
                 ?.getTrace()
@@ -1545,6 +1695,7 @@ class Call {
       video: video,
       membersLimit: membersLimit,
       hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
+      e2ee: _e2eeManager != null,
     );
 
     if (joinResult is! Success<CoordinatorJoined>) {
@@ -1639,6 +1790,7 @@ class Call {
   /// - [frameRecording]: Frame recording settings for the call.
   /// - [individualRecording]: Individual recording settings for the call.
   /// - [rawRecording]: Raw recording settings for the call.
+  /// - [encryption]: Whether the call permits end-to-end encryption.
   Future<Result<CallMetadata>> update({
     Map<String, Object>? custom,
     DateTime? startsAt,
@@ -1657,6 +1809,7 @@ class Call {
     StreamIndividualRecordingSettings? individualRecording,
     StreamRawRecordingSettings? rawRecording,
     StreamIngressSettings? ingress,
+    StreamEncryptionSettings? encryption,
   }) {
     return _coordinatorClient.updateCall(
       callCid: callCid,
@@ -1677,6 +1830,7 @@ class Call {
       individualRecording: individualRecording,
       rawRecording: rawRecording,
       ingress: ingress,
+      encryption: encryption,
     );
   }
 
@@ -2492,6 +2646,7 @@ class Call {
     }
 
     await dynascaleManager.dispose();
+    await clearE2EEManager();
 
     await _streamVideo.state.removeActiveCall(this);
     if (_streamVideo.state.outgoingCall.valueOrNull?.callCid == callCid) {
@@ -3041,6 +3196,7 @@ class Call {
     StreamFrameRecordingSettings? frameRecording,
     StreamIndividualRecordingSettings? individualRecording,
     StreamRawRecordingSettings? rawRecording,
+    StreamEncryptionSettings? encryption,
     Map<String, Object> custom = const {},
   }) async {
     final settingsOverride = CallSettingsRequest(
@@ -3059,6 +3215,7 @@ class Call {
       frameRecording: frameRecording?.toOpenDto(),
       individualRecording: individualRecording?.toOpenDto(),
       rawRecording: rawRecording?.toOpenDto(),
+      encryption: encryption?.toOpenDto(),
     );
 
     final aggregatedMembers = [
@@ -4335,4 +4492,17 @@ class SessionConnectionFailure {
   });
 
   final VideoError error;
+}
+
+/// One call cid's claim on an [EncryptionManager], held weakly.
+///
+/// Both sides weak, so a claim never keeps either alive. [call] going null is
+/// what makes a claim stale.
+class _E2eeClaim {
+  _E2eeClaim(Call call, EncryptionManager manager)
+    : call = WeakReference(call),
+      manager = WeakReference(manager);
+
+  final WeakReference<Call> call;
+  final WeakReference<EncryptionManager> manager;
 }
