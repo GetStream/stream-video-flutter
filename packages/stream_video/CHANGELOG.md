@@ -1,5 +1,11 @@
 ## Upcoming
 
+### ✅ Added
+
+- Added end-to-end encryption. Attach an `EncryptionManager` to the call with `Call.setE2EEManager` before joining, and release it with `Call.clearE2EEManager`. Ask for encryption when the call is created, through `StreamEncryptionSettings`, and read `CallState.isE2eeEnabled` to see whether the SFU considers the call encrypted. Available on Android, iOS and macOS, so check `EncryptionManager.isSupported` before using it.
+  - Keys are yours to distribute. The SDK takes raw key bytes and never sends them anywhere, so getting the same key to everyone on the call is your app's job. See [the documentation](TODO) for the ways to do that.
+  - Listen to `call.e2eeManager?.events` for key state and decryption failures. That is how you tell a wrong key apart from a broken call.
+
 ### 🐞 Fixed
 
 - [Web] Fixed the microphone not being published when Opus RED was enabled for the call, leaving the participant inaudible to everyone while their microphone still appeared active. Opus DTX and RED are no longer munged into the SDP. Both are negotiated by signalling them to the SFU with the published tracks.
