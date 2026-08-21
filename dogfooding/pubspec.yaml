@@ -30,6 +30,7 @@ dependencies:
   google_fonts: ^8.0.2
   google_sign_in: ^7.2.0
   http: ^1.5.0
+  marionette_flutter: ^0.6.0
   mobile_scanner: ^7.1.0
   package_info_plus: ">=9.0.0 <11.0.0"
   path_provider: ^2.1.5
