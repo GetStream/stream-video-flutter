@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:stream_core_flutter/core.dart';
 
 /// The visual treatment of a [StreamSelectInput]'s field.
 enum StreamSelectInputType {
@@ -26,11 +26,11 @@ enum StreamSelectInputType {
 /// 2px ring. Note that the ring paints 1px *outside* the field, so a caller
 /// that clips this widget — or packs fields edge to edge — will clip it.
 ///
-/// This is a dogfooding-local component; it is meant to move into
-/// stream_core_flutter alongside `StreamContextMenuAnchor` once the new lobby
-/// component is finalized. The density deliberately follows [StreamTextInput]
-/// rather than the (denser) web spec, so a select and a text input in the same
-/// form line up.
+/// This is a design-system candidate: it lives in this SDK until the component
+/// is finalized and can graduate to stream_core_flutter, alongside
+/// `StreamContextMenuAnchor`. The density deliberately follows
+/// [StreamTextInput] rather than the (denser) web spec, so a select and a text
+/// input in the same form line up.
 class StreamSelectInput extends StatefulWidget {
   /// Creates a select field.
   const StreamSelectInput({

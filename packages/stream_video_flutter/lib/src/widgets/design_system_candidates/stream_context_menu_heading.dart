@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:stream_core_flutter/core.dart';
 
 /// The heading of a section inside a [StreamContextMenu], e.g. "Microphone".
 ///
@@ -7,7 +7,8 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 /// row height and the horizontal inset of a menu item, but the label is
 /// tertiary instead of primary and the row is not interactive.
 ///
-/// This is a dogfooding-local component; it is meant to move into the SDK.
+/// This is a design-system candidate: it lives in this SDK until the
+/// component is finalized and can graduate to stream_core_flutter.
 class StreamContextMenuHeading extends StatelessWidget {
   /// Creates a context menu heading.
   const StreamContextMenuHeading({super.key, required this.label});

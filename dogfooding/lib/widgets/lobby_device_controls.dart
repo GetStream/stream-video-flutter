@@ -3,11 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import 'input/stream_select_input.dart';
-import 'menu/stream_context_menu_anchor.dart';
-import 'menu/stream_context_menu_heading.dart';
-import 'menu/stream_radio_indicator.dart';
-
 /// The audio and camera device pickers shown on the lobby screen.
 ///
 /// Owns device discovery (see [RtcMediaDeviceNotifier]) and renders a

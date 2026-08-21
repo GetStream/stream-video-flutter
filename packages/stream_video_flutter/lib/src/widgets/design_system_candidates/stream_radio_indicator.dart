@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:stream_core_flutter/core.dart';
 
 /// A non-interactive radio button, marking the selected entry of a group.
 ///
@@ -11,7 +11,8 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 /// system: a 20px circle with a checkmark rather than a dot, and it owns its
 /// own tap target, which a row-selected menu item does not want.
 ///
-/// This is a dogfooding-local component; it is meant to move into the SDK.
+/// This is a design-system candidate: it lives in this SDK until the
+/// component is finalized and can graduate to stream_core_flutter.
 class StreamRadioIndicator extends StatelessWidget {
   /// Creates a radio indicator.
   const StreamRadioIndicator({super.key, required this.selected});

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:stream_core_flutter/core.dart';
 
 import 'stream_context_menu_heading.dart';
 
@@ -14,7 +14,8 @@ import 'stream_context_menu_heading.dart';
 /// [StreamContextMenu] sizes itself to its widest child, so labels that can be
 /// arbitrarily long need [TextOverflow.ellipsis] to truncate rather than wrap.
 ///
-/// This is a dogfooding-local component; it is meant to move into the SDK.
+/// This is a design-system candidate: it lives in this SDK until the
+/// component is finalized and can graduate to stream_core_flutter.
 class StreamContextMenuAnchor extends StatelessWidget {
   /// Creates a menu anchor hosting a [StreamContextMenu].
   const StreamContextMenuAnchor({
