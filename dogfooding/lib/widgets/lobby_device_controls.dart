@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import 'input/stream_select_input.dart';
 import 'menu/stream_context_menu_anchor.dart';
 import 'menu/stream_context_menu_heading.dart';
 import 'menu/stream_radio_indicator.dart';
@@ -10,12 +11,12 @@ import 'menu/stream_radio_indicator.dart';
 /// The audio and camera device pickers shown on the lobby screen.
 ///
 /// Owns device discovery (see [RtcMediaDeviceNotifier]) and renders a
-/// [StreamContextMenuAnchor] per pill: the audio pill picks both the
-/// microphone and the speaker, the camera pill picks the video input.
-/// Selection itself is controlled by the parent, which needs it to build the
-/// `CallConnectOptions` on join.
+/// [StreamSelectInput] per field: the audio field picks both the microphone
+/// and the speaker, the camera field picks the video input. Selection itself is
+/// controlled by the parent, which needs it to build the `CallConnectOptions`
+/// on join.
 ///
-/// Pills for devices we have no permission for stay visible but are disabled,
+/// Fields for devices we have no permission for stay visible but are disabled,
 /// so the lobby layout does not shift once permission is granted.
 class LobbyDeviceControls extends StatefulWidget {
   const LobbyDeviceControls({
@@ -176,7 +177,7 @@ class _DeviceMenuSection {
   final ValueChanged<RtcMediaDevice?> onDeviceSelected;
 }
 
-/// A pill button that opens a menu of device [sections], separated by dividers.
+/// A select field that opens a menu of device [sections], separated by dividers.
 class _DeviceMenuAnchor extends StatefulWidget {
   const _DeviceMenuAnchor({
     required this.enabled,
@@ -186,13 +187,13 @@ class _DeviceMenuAnchor extends StatefulWidget {
     required this.sections,
   });
 
-  /// Whether the pill can be pressed to open the menu.
+  /// Whether the field can be pressed to open the menu.
   final bool enabled;
 
   final String tooltip;
   final IconData icon;
 
-  /// The text on the pill, or `null` to show the system default.
+  /// The text on the field, or `null` to show the placeholder.
   final String? label;
 
   final List<_DeviceMenuSection> sections;
@@ -214,8 +215,6 @@ class _DeviceMenuAnchorState extends State<_DeviceMenuAnchor> {
 
   @override
   Widget build(BuildContext context) {
-    final icons = context.streamIcons;
-
     return StreamContextMenuAnchor(
       controller: _menuController,
       alignmentOffset: const Offset(0, 8),
@@ -247,11 +246,11 @@ class _DeviceMenuAnchorState extends State<_DeviceMenuAnchor> {
           message: widget.tooltip,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 220),
-            child: StreamButton(
-              style: .secondary,
-              type: .outline,
-              iconLeft: Icon(widget.icon),
-              iconRight: Icon(_isOpen ? icons.caretUp : icons.caretDown),
+            child: StreamSelectInput(
+              leading: Icon(widget.icon),
+              value: widget.label,
+              hintText: 'Default',
+              expanded: _isOpen,
               onPressed: widget.enabled
                   ? () {
                       if (controller.isOpen) {
@@ -261,11 +260,6 @@ class _DeviceMenuAnchorState extends State<_DeviceMenuAnchor> {
                       }
                     }
                   : null,
-              child: Text(
-                widget.label ?? 'Default',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
             ),
           ),
         );
