@@ -48,8 +48,8 @@ class AppInjector {
 
     // Repositories
     locator.registerSingleton(
-      // ignore: avoid_redundant_argument_values
-      const TokenService(customEnvironmentLoader: customEnvironmentLoader),
+      // ignore: prefer_const_constructors, avoid_redundant_argument_values
+      TokenService(customEnvironmentLoader: customEnvironmentLoader),
     );
 
     locator.registerFactoryParam<UserAuthRepository, User, TokenResponse>((
