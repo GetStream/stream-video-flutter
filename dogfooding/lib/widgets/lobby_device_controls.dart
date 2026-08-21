@@ -3,18 +3,25 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import 'menu/stream_context_menu_anchor.dart';
+import 'menu/stream_context_menu_heading.dart';
+import 'menu/stream_radio_indicator.dart';
+
 /// The audio and camera device pickers shown on the lobby screen.
 ///
 /// Owns device discovery (see [RtcMediaDeviceNotifier]) and renders a
-/// [MenuAnchor] per pill: the audio pill picks both the microphone and the
-/// speaker, the camera pill picks the video input. Selection itself is
-/// controlled by the parent, which needs it to build the `CallConnectOptions`
-/// on join.
+/// [StreamContextMenuAnchor] per pill: the audio pill picks both the
+/// microphone and the speaker, the camera pill picks the video input.
+/// Selection itself is controlled by the parent, which needs it to build the
+/// `CallConnectOptions` on join.
+///
+/// Pills for devices we have no permission for stay visible but are disabled,
+/// so the lobby layout does not shift once permission is granted.
 class LobbyDeviceControls extends StatefulWidget {
   const LobbyDeviceControls({
     super.key,
-    required this.showMicrophone,
-    required this.showCamera,
+    required this.microphoneEnabled,
+    required this.cameraEnabled,
     required this.selectedAudioInput,
     required this.selectedAudioOutput,
     required this.selectedVideoInput,
@@ -23,14 +30,14 @@ class LobbyDeviceControls extends StatefulWidget {
     required this.onVideoInputSelected,
   });
 
-  /// Whether the microphone picker is shown.
+  /// Whether the microphone picker can be opened.
   ///
   /// Device labels are only populated once `getUserMedia` succeeded, so the
   /// parent gates this on having microphone permission.
-  final bool showMicrophone;
+  final bool microphoneEnabled;
 
-  /// Whether the camera picker is shown.
-  final bool showCamera;
+  /// Whether the camera picker can be opened.
+  final bool cameraEnabled;
 
   /// The selected audio input, or `null` for the system default.
   final RtcMediaDevice? selectedAudioInput;
@@ -95,50 +102,61 @@ class _LobbyDeviceControlsState extends State<LobbyDeviceControls> {
   @override
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
+    final spacing = context.streamSpacing;
 
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 12,
-      runSpacing: 12,
-      children: [
-        if (widget.showMicrophone)
-          _DeviceMenuAnchor(
-            tooltip: 'Select audio devices',
-            icon: icons.voiceFill,
-            label: widget.selectedAudioInput?.label,
-            sections: [
-              _DeviceMenuSection(
-                heading: 'Microphone',
-                devices: _audioInputDevices,
-                selectedDevice: widget.selectedAudioInput,
-                onDeviceSelected: widget.onAudioInputSelected,
-              ),
-              // Platforms that route audio themselves (iOS, Android) report no
-              // output devices; there is nothing to pick from there.
-              if (_audioOutputDevices.isNotEmpty)
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 400),
+      child: Row(
+        spacing: spacing.xs,
+        mainAxisAlignment: .center,
+        children: [
+          Expanded(
+            child: _DeviceMenuAnchor(
+              enabled: widget.microphoneEnabled,
+              tooltip: widget.microphoneEnabled
+                  ? 'Select audio devices'
+                  : 'Microphone permission is required to select audio devices',
+              icon: icons.voiceFill,
+              label: widget.selectedAudioInput?.label,
+              sections: [
                 _DeviceMenuSection(
-                  heading: 'Speaker',
-                  devices: _audioOutputDevices,
-                  selectedDevice: widget.selectedAudioOutput,
-                  onDeviceSelected: widget.onAudioOutputSelected,
+                  heading: 'Microphone',
+                  devices: _audioInputDevices,
+                  selectedDevice: widget.selectedAudioInput,
+                  onDeviceSelected: widget.onAudioInputSelected,
                 ),
-            ],
+                // Platforms that route audio themselves (iOS, Android) report no
+                // output devices; there is nothing to pick from there.
+                if (_audioOutputDevices.isNotEmpty)
+                  _DeviceMenuSection(
+                    heading: 'Speaker',
+                    devices: _audioOutputDevices,
+                    selectedDevice: widget.selectedAudioOutput,
+                    onDeviceSelected: widget.onAudioOutputSelected,
+                  ),
+              ],
+            ),
           ),
-        if (widget.showCamera)
-          _DeviceMenuAnchor(
-            tooltip: 'Select video input device',
-            icon: icons.videoFill,
-            label: widget.selectedVideoInput?.label,
-            sections: [
-              _DeviceMenuSection(
-                heading: 'Camera',
-                devices: _videoInputDevices,
-                selectedDevice: widget.selectedVideoInput,
-                onDeviceSelected: widget.onVideoInputSelected,
-              ),
-            ],
+          Expanded(
+            child: _DeviceMenuAnchor(
+              enabled: widget.cameraEnabled,
+              tooltip: widget.cameraEnabled
+                  ? 'Select video input device'
+                  : 'Camera permission is required to select a video device',
+              icon: icons.videoFill,
+              label: widget.selectedVideoInput?.label,
+              sections: [
+                _DeviceMenuSection(
+                  heading: 'Camera',
+                  devices: _videoInputDevices,
+                  selectedDevice: widget.selectedVideoInput,
+                  onDeviceSelected: widget.onVideoInputSelected,
+                ),
+              ],
+            ),
           ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -161,11 +179,15 @@ class _DeviceMenuSection {
 /// A pill button that opens a menu of device [sections], separated by dividers.
 class _DeviceMenuAnchor extends StatefulWidget {
   const _DeviceMenuAnchor({
+    required this.enabled,
     required this.tooltip,
     required this.icon,
     required this.label,
     required this.sections,
   });
+
+  /// Whether the pill can be pressed to open the menu.
+  final bool enabled;
 
   final String tooltip;
   final IconData icon;
@@ -194,56 +216,32 @@ class _DeviceMenuAnchorState extends State<_DeviceMenuAnchor> {
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
 
-    return MenuAnchor(
+    return StreamContextMenuAnchor(
       controller: _menuController,
       alignmentOffset: const Offset(0, 8),
       onOpen: () => setState(() => _isOpen = true),
       onClose: () {
         if (mounted) setState(() => _isOpen = false);
       },
-      // Neutralize MenuAnchor's own Material panel so that StreamContextMenu
-      // supplies the whole surface: background, border, radius and elevation.
-      style: const MenuStyle(
-        backgroundColor: WidgetStatePropertyAll(Colors.transparent),
-        shadowColor: WidgetStatePropertyAll(Colors.transparent),
-        surfaceTintColor: WidgetStatePropertyAll(Colors.transparent),
-        elevation: WidgetStatePropertyAll(0),
-        padding: WidgetStatePropertyAll(EdgeInsets.zero),
+      menuChildren: StreamContextMenuAction.sectioned(
+        sections: [
+          for (final section in widget.sections)
+            [
+              StreamContextMenuHeading(label: Text(section.heading)),
+              _DeviceMenuItem(
+                label: 'System default',
+                selected: section.selectedDevice == null,
+                onTap: () => _select(section, null),
+              ),
+              for (final device in section.devices)
+                _DeviceMenuItem(
+                  label: device.label.isNotEmpty ? device.label : device.id,
+                  selected: device.id == section.selectedDevice?.id,
+                  onTap: () => _select(section, device),
+                ),
+            ],
+        ],
       ),
-      menuChildren: [
-        ConstrainedBox(
-          // StreamContextMenu sizes itself to its widest child, so bound it:
-          // device labels can be arbitrarily long.
-          constraints: const BoxConstraints(
-            minWidth: 200,
-            maxWidth: 320,
-            maxHeight: 360,
-          ),
-          child: StreamContextMenu(
-            children: StreamContextMenuAction.sectioned(
-              sections: [
-                for (final section in widget.sections)
-                  [
-                    _MenuHeading(section.heading),
-                    _DeviceMenuItem(
-                      label: 'System default',
-                      selected: section.selectedDevice == null,
-                      onTap: () => _select(section, null),
-                    ),
-                    for (final device in section.devices)
-                      _DeviceMenuItem(
-                        label: device.label.isNotEmpty
-                            ? device.label
-                            : device.id,
-                        selected: device.id == section.selectedDevice?.id,
-                        onTap: () => _select(section, device),
-                      ),
-                  ],
-              ],
-            ),
-          ),
-        ),
-      ],
       builder: (context, controller, child) {
         return Tooltip(
           message: widget.tooltip,
@@ -254,13 +252,15 @@ class _DeviceMenuAnchorState extends State<_DeviceMenuAnchor> {
               type: .outline,
               iconLeft: Icon(widget.icon),
               iconRight: Icon(_isOpen ? icons.caretUp : icons.caretDown),
-              onPressed: () {
-                if (controller.isOpen) {
-                  controller.close();
-                } else {
-                  controller.open();
-                }
-              },
+              onPressed: widget.enabled
+                  ? () {
+                      if (controller.isOpen) {
+                        controller.close();
+                      } else {
+                        controller.open();
+                      }
+                    }
+                  : null,
               child: Text(
                 widget.label ?? 'Default',
                 maxLines: 1,
@@ -290,73 +290,8 @@ class _DeviceMenuItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamContextMenuAction<void>(
       onTap: onTap,
-      leading: _RadioIndicator(selected: selected),
+      leading: StreamRadioIndicator(selected: selected),
       label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
-    );
-  }
-}
-
-/// The section heading of a menu, e.g. "Microphone".
-class _MenuHeading extends StatelessWidget {
-  const _MenuHeading(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final spacing = context.streamSpacing;
-    final colorScheme = context.streamColorScheme;
-    final textTheme = context.streamTextTheme;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.xs + spacing.xxs,
-        vertical: spacing.xs,
-      ),
-      child: Text(
-        text,
-        style: textTheme.captionEmphasis.copyWith(
-          color: colorScheme.textTertiary,
-        ),
-      ),
-    );
-  }
-}
-
-/// A radio button indicator. The design system has no radio component yet, so
-/// this mirrors the `Radio Button` component from the design.
-class _RadioIndicator extends StatelessWidget {
-  const _RadioIndicator({required this.selected});
-
-  final bool selected;
-
-  static const _size = 16.0;
-  static const _indicatorSize = 8.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.streamColorScheme;
-
-    return Container(
-      width: _size,
-      height: _size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: selected ? colorScheme.accentPrimary : null,
-        border: selected ? null : Border.all(color: colorScheme.borderDefault),
-      ),
-      child: selected
-          ? Center(
-              child: Container(
-                width: _indicatorSize,
-                height: _indicatorSize,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colorScheme.textOnAccent,
-                ),
-              ),
-            )
-          : null,
     );
   }
 }

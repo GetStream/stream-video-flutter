@@ -197,8 +197,8 @@ class _LobbyScreenState extends State<LobbyScreen> {
                 ),
                 const SizedBox(height: 12),
                 LobbyDeviceControls(
-                  showMicrophone: _hasMicrophonePermission,
-                  showCamera: _hasCameraPermission,
+                  microphoneEnabled: _hasMicrophonePermission,
+                  cameraEnabled: _hasCameraPermission,
                   selectedAudioInput: _selectedAudioInputDevice,
                   selectedAudioOutput: _selectedAudioOutputDevice,
                   selectedVideoInput: _selectedVideoInputDevice,
