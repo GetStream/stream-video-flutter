@@ -6,6 +6,7 @@ import '../../../globals.dart';
 import '../../../stream_video.dart';
 import '../../telemetry/client_event_reporter.dart';
 import '../../telemetry/client_event_types.dart';
+import '../../token/token_manager_extension.dart';
 import 'coordinator_message_codec.dart';
 
 var _seq = 0;

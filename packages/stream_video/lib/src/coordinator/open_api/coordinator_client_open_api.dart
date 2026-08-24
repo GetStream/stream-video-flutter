@@ -8,6 +8,7 @@ import '../../latency/latency_service.dart';
 import '../../location/location_service.dart';
 import '../../models/call_received_data.dart';
 import '../../telemetry/client_event_reporter.dart';
+import '../../token/token_manager_extension.dart';
 import '../models/coordinator_connection_state.dart';
 import '../models/coordinator_models.dart';
 import 'coordinator_ws.dart';

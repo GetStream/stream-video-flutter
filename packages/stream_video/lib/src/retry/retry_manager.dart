@@ -2,7 +2,7 @@ import 'package:stream_core/stream_core.dart' show TokenManager;
 
 import '../../open_api/video/coordinator/api.dart';
 import '../errors/video_error.dart';
-import '../token/token.dart';
+import '../token/token_manager_extension.dart';
 import '../utils/result.dart';
 import 'retry_policy.dart';
 

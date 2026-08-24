@@ -58,6 +58,7 @@ import 'retry/retry_policy.dart';
 import 'telemetry/client_event_reporter.dart';
 import 'telemetry/client_event_transport.dart';
 import 'token/token.dart';
+import 'token/token_manager_extension.dart';
 import 'utils/cancelable_operation.dart';
 import 'utils/future.dart';
 import 'utils/none.dart';
@@ -73,6 +74,15 @@ const _idAppState = 2;
 
 const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com';
 const _defaultCoordinatorWsUrl = 'wss://video.stream-io-api.com/video/connect';
+
+/// Creates a server-side guest user, returning its data and access token.
+typedef GuestUserCreator =
+    Future<Result<GuestCreatedData>> Function({
+      required String id,
+      String? name,
+      String? image,
+      required Map<String, Object> custom,
+    });
 
 /// Handler function used for logging.
 typedef LogHandlerFunction =
@@ -181,50 +191,16 @@ class StreamVideo extends Disposable {
           )
         : const ClientEventReporter.noOp();
 
-    // Once a guest is created, its access token is reused for the lifetime
-    // of the client: creating a guest again would mint a new server-side
-    // identity, so an expired guest token cannot be refreshed.
-    UserToken? guestToken;
-
-    final tokenProvider = switch (user.type) {
-      UserType.regular => _regularTokenProvider(userToken, tokenLoader),
-      // An anonymous token may carry a caller-supplied JWT (e.g. a
-      // call-restricted token granting access to a closed livestream).
-      UserType.anonymous => TokenProvider.static(
-        UserToken.anonymous(userId: user.id, rawValue: userToken ?? ''),
-      ),
-      // The guest loader only dereferences `_client` when a token is actually
-      // requested, after this constructor has assigned it.
-      UserType.guest => TokenProvider.dynamic((userId) async {
-        final existingToken = guestToken;
-        if (existingToken != null) return existingToken;
-
-        final result = await _client.loadGuest(
-          id: userId,
-          name: user.originalName,
-          image: user.image,
-          custom: {
-            for (final MapEntry(:key, :value) in user.custom.entries)
-              if (value != null) key: value,
-          },
-        );
-        if (result is! Success<GuestCreatedData>) {
-          throw (result as Failure).videoError;
-        }
-        final updatedUser = result.data.user;
-        final updatedInfo = updatedUser.toUserInfo();
-        _state.user.value = User(
-          id: updatedInfo.id,
-          name: updatedInfo.name.isEmpty ? null : updatedInfo.name,
-          image: updatedInfo.image,
-          role: updatedInfo.role,
-          teams: updatedInfo.teams,
-          custom: updatedInfo.extraData,
-          type: user.type,
-        );
-        return guestToken = UserToken(result.data.accessToken);
-      }),
-    };
+    final tokenProvider = buildTokenProvider(
+      user,
+      userToken: userToken,
+      tokenLoader: tokenLoader,
+      // The guest creator only dereferences `_client` when a token is
+      // actually requested, after this constructor has assigned it.
+      createGuest: ({required id, name, image, required custom}) =>
+          _client.loadGuest(id: id, name: name, image: image, custom: custom),
+      onGuestUserUpdated: (updatedUser) => _state.user.value = updatedUser,
+    );
 
     _tokenManager = TokenManager(
       userId: user.id,
@@ -266,8 +242,8 @@ class StreamVideo extends Disposable {
     }
 
     // Pre-warm the token cache, mirroring the eager fetch previously
-    // triggered by setting the token provider. Failures surface later,
-    // when the token is actually needed.
+    // triggered by setting the token provider. Failures are logged by
+    // getTokenAsResult and surface later, when the token is actually needed.
     unawaited(_tokenManager.getTokenAsResult());
 
     _setupLogger(options.logPriority, options.logHandlerFunction);
@@ -300,6 +276,64 @@ class StreamVideo extends Disposable {
             }
           }),
     );
+  }
+
+  /// Builds the token provider matching the [user] type from the [userToken]
+  /// and [tokenLoader] combination.
+  ///
+  /// For [UserType.guest], [createGuest] creates the server-side guest user
+  /// and [onGuestUserUpdated] receives the server-assigned guest user.
+  @visibleForTesting
+  static TokenProvider buildTokenProvider(
+    User user, {
+    String? userToken,
+    TokenLoader? tokenLoader,
+    required GuestUserCreator createGuest,
+    required void Function(User updatedUser) onGuestUserUpdated,
+  }) {
+    // Once a guest is created, its access token is reused for the lifetime
+    // of the client: creating a guest again would mint a new server-side
+    // identity, so an expired guest token cannot be refreshed.
+    UserToken? guestToken;
+
+    return switch (user.type) {
+      UserType.regular => _regularTokenProvider(userToken, tokenLoader),
+      // An anonymous token may carry a caller-supplied JWT (e.g. a
+      // call-restricted token granting access to a closed livestream).
+      UserType.anonymous => TokenProvider.static(
+        UserToken.anonymous(userId: user.id, rawValue: userToken ?? ''),
+      ),
+      UserType.guest => TokenProvider.dynamic((userId) async {
+        final existingToken = guestToken;
+        if (existingToken != null) return existingToken;
+
+        final result = await createGuest(
+          id: userId,
+          name: user.originalName,
+          image: user.image,
+          custom: {
+            for (final MapEntry(:key, :value) in user.custom.entries)
+              if (value != null) key: value,
+          },
+        );
+        if (result is! Success<GuestCreatedData>) {
+          throw (result as Failure).videoError;
+        }
+        final updatedInfo = result.data.user.toUserInfo();
+        onGuestUserUpdated(
+          User(
+            id: updatedInfo.id,
+            name: updatedInfo.name.isEmpty ? null : updatedInfo.name,
+            image: updatedInfo.image,
+            role: updatedInfo.role,
+            teams: updatedInfo.teams,
+            custom: updatedInfo.extraData,
+            type: user.type,
+          ),
+        );
+        return guestToken = UserToken(result.data.accessToken);
+      }),
+    };
   }
 
   /// Builds the token provider for a regular user from the [userToken] and
@@ -473,13 +507,10 @@ class StreamVideo extends Disposable {
 
     if (_connectionState.isConnected) {
       _logger.w(() => '[connect] rejected (already connected)');
-      final token = _tokenManager.peekToken();
-      if (token == null) {
-        return failureWithError(
-          '[connect] userToken is null in Connected state',
-        );
-      }
-      return Result.success(token);
+      // The cache can be briefly empty while a token refresh is in flight;
+      // getToken serves the cached token when present and otherwise waits
+      // for the refresh instead of failing.
+      return _tokenManager.getTokenAsResult();
     }
 
     _connectionState = ConnectionState.connecting(_state.currentUser.id);

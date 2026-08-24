@@ -30,9 +30,10 @@
   - `UserType.authenticated` has been renamed to `UserType.regular`.
   - `UserToken.jwt(String rawValue)` named factory has been replaced by the default `UserToken(String rawValue)` constructor. Replace `UserToken.jwt('...')` with `UserToken('...')`.
   - `UserToken` validation changed: the new constructor throws `ArgumentError` (always) instead of `assert` (debug-only) when the JWT is missing a `user_id` claim.
-- `TokenManager` and `TokenProvider` are now provided by `stream_core`. Two behavioural changes follow:
+- `TokenManager` and `TokenProvider` are now provided by `stream_core`. Three behavioural changes follow:
   - A static token whose `user_id` claim does not match the connected user's id now fails fast with an `ArgumentError` instead of being rejected later by the server.
-  - `onTokenUpdated` for a static token now fires when the token is first used (and after refreshes) instead of once at client construction; for an initial token combined with a `tokenLoader` it fires at construction.
+  - `OnTokenUpdated` changed from `Future<void> Function(UserToken)` to `void Function(UserToken)` and is **no longer awaited**. Async callbacks still compile (and can still be passed), but the SDK does not wait for them anymore — a token is no longer guaranteed to be persisted by the callback before the SDK starts using it.
+  - `onTokenUpdated` for a static token now fires when the token is first used (and after refreshes) instead of once at client construction.
 
 ### ✅ Added
 

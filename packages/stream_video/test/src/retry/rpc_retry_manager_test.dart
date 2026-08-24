@@ -68,7 +68,11 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       expect(callCount, 2);
-      verify(() => tokenManager.getToken()).called(1);
+      // A refresh expires the cached token before loading a fresh one.
+      verifyInOrder([
+        () => tokenManager.expireToken(),
+        () => tokenManager.getToken(),
+      ]);
     });
 
     test('retries only once on repeated 401', () async {
@@ -88,6 +92,7 @@ void main() {
       expect(result.isFailure, isTrue);
       // 1st call → 401 → refresh → 2nd call → 401 → no more auth retries
       // then normal retries continue up to rpcMaxRetries
+      verify(() => tokenManager.expireToken()).called(1);
       verify(() => tokenManager.getToken()).called(1);
     });
 
@@ -106,6 +111,30 @@ void main() {
 
       expect(result.isFailure, isTrue);
       expect(callCount, 1); // 403 is not retryable, fails immediately
+      verifyNever(() => tokenManager.expireToken());
+      verifyNever(() => tokenManager.getToken());
+    });
+
+    test('does not refresh the token for static providers on 401', () async {
+      var callCount = 0;
+
+      when(() => tokenManager.usesStaticProvider).thenReturn(true);
+
+      final manager = RpcRetryManager(
+        _noDelayPolicy,
+        tokenManager: tokenManager,
+      );
+
+      final result = await manager.execute(() async {
+        callCount++;
+        return _httpError<String>(401, 'Unauthorized');
+      });
+
+      expect(result.isFailure, isTrue);
+      // 401 stays retryable, but no refresh is attempted: a static provider
+      // can only return the same token again.
+      expect(callCount, 3);
+      verifyNever(() => tokenManager.expireToken());
       verifyNever(() => tokenManager.getToken());
     });
 
@@ -154,7 +183,10 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       expect(callCount, 3);
-      verify(() => tokenManager.getToken()).called(1);
+      verifyInOrder([
+        () => tokenManager.expireToken(),
+        () => tokenManager.getToken(),
+      ]);
     });
 
     test('retries 5xx errors normally without token refresh', () async {
@@ -176,6 +208,7 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       expect(callCount, 3);
+      verifyNever(() => tokenManager.expireToken());
       verifyNever(() => tokenManager.getToken());
     });
   });
