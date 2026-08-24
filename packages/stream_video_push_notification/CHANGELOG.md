@@ -1,3 +1,9 @@
+## 1.4.3
+
+### 🐞 Fixed
+
+- Fixed the incoming call UI (CallKit on iOS) ringing for a call whose ringing flow was already resolved before the push was delivered.
+
 ## 1.4.2
 
 - Increased minimum Flutter version to 3.38.1.

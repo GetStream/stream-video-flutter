@@ -1,0 +1,37 @@
+name: update_goldens
+
+on: workflow_dispatch
+
+permissions:
+  contents: write
+
+jobs:
+  update_goldens:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          # Bot token so the pushed commit can re-trigger CI on the branch.
+          token: ${{ secrets.BOT_GITHUB_API_TOKEN }}
+
+      - name: 🐦 Install Flutter
+        uses: ./.github/actions/setup-flutter
+
+      - name: 🛠️ Install Melos
+        uses: ./.github/actions/setup-melos
+
+      - name: ⚙️ Prepare Environment
+        run: melos run generate:all
+
+      - name: 🖼️ Update Goldens
+        run: melos run update:goldens
+
+      - name: 📤 Commit Changes
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: update goldens"
+          file_pattern: "**/test/**/goldens/**/*.png"
+          commit_user_name: "Stream SDK Bot"
+          commit_user_email: "60655709+Stream-SDK-Bot@users.noreply.github.com"

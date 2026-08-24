@@ -98,7 +98,10 @@ abstract class PushNotificationManager {
   /// Ends the call.
   ///
   /// [cid] is the call id for the call.
-  Future<void> endCallByCid(String cid);
+  /// When [silent] is `true`, the resulting native events (decline/ended) are
+  /// suppressed. Use it when the ringing flow is already resolved and ending
+  /// the native call must not trigger the decline/ended handling again.
+  Future<void> endCallByCid(String cid, {bool silent = false});
 
   /// Ends all ongoing calls.
   Future<void> endAllCalls();

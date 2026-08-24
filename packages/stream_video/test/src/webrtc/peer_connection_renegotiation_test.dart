@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -91,6 +93,57 @@ class _FakeRtcPeerConnection extends Fake implements rtc.RTCPeerConnection {
   @override
   rtc.RTCIceConnectionState? get iceConnectionState =>
       stubbedIceConnectionState;
+
+  // --- Remote description / ICE candidate plumbing ------------------------
+
+  rtc.RTCSessionDescription? _remoteDescription;
+
+  /// Every candidate that reached [addCandidate] successfully, in order.
+  final addedCandidates = <rtc.RTCIceCandidate>[];
+
+  /// When non-null, [addCandidate] throws for this exact candidate. Used to
+  /// simulate a partial flush failure.
+  rtc.RTCIceCandidate? failOnCandidate;
+
+  /// When non-null, [setRemoteDescription] blocks on this until completed —
+  /// lets a test hold the operation "in flight" while another one is issued.
+  Completer<void>? setRemoteDescriptionGate;
+
+  /// When non-null, [getRemoteDescription] samples the current remote
+  /// description immediately but only *delivers* it once this completes.
+  ///
+  /// This models the real platform-channel round trip: the native side answers
+  /// with whatever it sees at call time, and that answer can reach Dart long
+  /// after an interleaved `setRemoteDescription` has finished — so the caller
+  /// resumes holding a stale `null`.
+  Completer<void>? getRemoteDescriptionGate;
+
+  @override
+  Future<rtc.RTCSessionDescription?> getRemoteDescription() async {
+    final sampled = _remoteDescription;
+    if (getRemoteDescriptionGate != null) {
+      await getRemoteDescriptionGate!.future;
+    }
+    return sampled;
+  }
+
+  @override
+  Future<void> setRemoteDescription(
+    rtc.RTCSessionDescription description,
+  ) async {
+    if (setRemoteDescriptionGate != null) {
+      await setRemoteDescriptionGate!.future;
+    }
+    _remoteDescription = description;
+  }
+
+  @override
+  Future<void> addCandidate(rtc.RTCIceCandidate candidate) async {
+    if (failOnCandidate != null && identical(candidate, failOnCandidate)) {
+      throw Exception('addCandidate failed for $candidate');
+    }
+    addedCandidates.add(candidate);
+  }
 }
 
 StreamPeerConnection _build({
@@ -413,6 +466,176 @@ void main() {
       expect(received.single.$1, same(sp));
       expect(received.single.$2, same(candidate));
     });
+  });
+
+  group('StreamPeerConnection ICE candidate buffering', () {
+    rtc.RTCSessionDescription offer() =>
+        rtc.RTCSessionDescription('sdp', 'offer');
+
+    test(
+      'a candidate issued while setRemoteDescription is in flight waits for it '
+      'and is then applied directly, exactly once',
+      () async {
+        final pc = _FakeRtcPeerConnection();
+        final sp = _build(pc: pc, type: StreamPeerType.subscriber);
+
+        // Hold setRemoteDescription open so addIceCandidate is issued while it
+        // is still in flight, then release it.
+        final gate = Completer<void>();
+        pc.setRemoteDescriptionGate = gate;
+
+        final candidate = rtc.RTCIceCandidate('cand', 'mid', 0);
+
+        final setFuture = sp.setRemoteDescription(offer());
+        final addFuture = sp.addIceCandidate(candidate);
+
+        gate.complete();
+        final setResult = await setFuture;
+        final addResult = await addFuture;
+
+        expect(setResult.isSuccess, isTrue);
+        expect(
+          addResult.getDataOrNull(),
+          AddIceCandidateResult.added,
+          reason:
+              'setRemoteDescription was issued first, so it runs first: by the '
+              'time the candidate is handled the remote description exists and '
+              'it needs no buffering',
+        );
+        expect(pc.addedCandidates, [candidate]);
+      },
+    );
+
+    test(
+      'a candidate whose remote-description read resolves after the flush is '
+      'not stranded',
+      () async {
+        final pc = _FakeRtcPeerConnection();
+        final sp = _build(pc: pc, type: StreamPeerType.subscriber);
+
+        // This is the stall: addIceCandidate samples a null remote description,
+        // and that answer only comes back after setRemoteDescription has
+        // already drained the buffer. Unserialized, the candidate lands in a
+        // buffer nobody will flush again and the subscriber never connects.
+        final gate = Completer<void>();
+        pc.getRemoteDescriptionGate = gate;
+
+        final candidate = rtc.RTCIceCandidate('cand', 'mid', 0);
+
+        final addFuture = sp.addIceCandidate(candidate);
+        // Let the read actually be issued (and sample null) before the remote
+        // description is set.
+        await pumpEventQueue();
+
+        final setFuture = sp.setRemoteDescription(offer());
+        // Give setRemoteDescription every chance to run to completion while the
+        // candidate is still parked on the read.
+        await pumpEventQueue();
+
+        gate.complete();
+        final addResult = await addFuture;
+        final setResult = await setFuture;
+
+        expect(setResult.isSuccess, isTrue);
+        expect(
+          addResult.getDataOrNull(),
+          AddIceCandidateResult.buffered,
+          reason: 'the read returned null, so the candidate had to be buffered',
+        );
+        expect(
+          pc.addedCandidates,
+          [candidate],
+          reason:
+              'a candidate buffered on a stale null read must still reach the '
+              'peer connection — setRemoteDescription and addIceCandidate are '
+              'serialized so the flush cannot run past it',
+        );
+      },
+    );
+
+    test(
+      'a candidate that fails to apply during the flush does not fail '
+      'setRemoteDescription, and the rest of the buffer still applies',
+      () async {
+        final pc = _FakeRtcPeerConnection();
+        final sp = _build(pc: pc, type: StreamPeerType.subscriber);
+
+        final c1 = rtc.RTCIceCandidate('c1', 'mid', 0);
+        final c2 = rtc.RTCIceCandidate('c2', 'mid', 0);
+        final c3 = rtc.RTCIceCandidate('c3', 'mid', 0);
+
+        // Remote description not set yet -> all three buffer.
+        for (final c in [c1, c2, c3]) {
+          final r = await sp.addIceCandidate(c);
+          expect(r.getDataOrNull(), AddIceCandidateResult.buffered);
+        }
+        expect(pc.addedCandidates, isEmpty);
+
+        // c2 is permanently invalid: it throws on every addCandidate attempt.
+        pc.failOnCandidate = c2;
+        final flush = await sp.setRemoteDescription(offer());
+
+        expect(
+          flush.isSuccess,
+          isTrue,
+          reason:
+              'the remote description was applied — a bad candidate must not '
+              'turn that into a Failure, or onSubscriberOffer skips the answer '
+              'and negotiation stalls',
+        );
+        expect(
+          pc.addedCandidates,
+          [c1, c3],
+          reason: 'c2 failing must not stop c3 from being applied',
+        );
+      },
+    );
+
+    test(
+      'a candidate that failed the flush is dropped, so it cannot poison '
+      'later renegotiations',
+      () async {
+        final pc = _FakeRtcPeerConnection();
+        final sp = _build(pc: pc, type: StreamPeerType.subscriber);
+
+        final bad = rtc.RTCIceCandidate('bad', 'mid', 0);
+        await sp.addIceCandidate(bad);
+
+        // `bad` keeps throwing for the whole lifetime of the connection.
+        pc.failOnCandidate = bad;
+
+        expect((await sp.setRemoteDescription(offer())).isSuccess, isTrue);
+        expect(pc.addedCandidates, isEmpty);
+
+        // Renegotiation: the dropped candidate must not be retried, so nothing
+        // throws and the answer path stays healthy.
+        expect((await sp.setRemoteDescription(offer())).isSuccess, isTrue);
+        expect((await sp.setRemoteDescription(offer())).isSuccess, isTrue);
+        expect(pc.addedCandidates, isEmpty);
+      },
+    );
+
+    test(
+      'candidates buffered before the remote description are each applied '
+      'exactly once',
+      () async {
+        final pc = _FakeRtcPeerConnection();
+        final sp = _build(pc: pc, type: StreamPeerType.subscriber);
+
+        final c1 = rtc.RTCIceCandidate('c1', 'mid', 0);
+        final c2 = rtc.RTCIceCandidate('c2', 'mid', 0);
+
+        await sp.addIceCandidate(c1);
+        await sp.addIceCandidate(c2);
+
+        await sp.setRemoteDescription(offer());
+        expect(pc.addedCandidates, [c1, c2]);
+
+        // A later renegotiation must not re-flush an already-drained buffer.
+        await sp.setRemoteDescription(offer());
+        expect(pc.addedCandidates, [c1, c2]);
+      },
+    );
   });
 
   group('StreamPeerConnection.dispose', () {

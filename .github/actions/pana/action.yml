@@ -32,12 +32,7 @@ runs:
           yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_filters/pubspec.yaml
 
     - name: Install Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        cache: true
-        channel: stable
-        flutter-version: "3.x"
-        cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+      uses: ./.github/actions/setup-flutter
 
     - name: Install Pana
       working-directory: ${{ inputs.working_directory }}
@@ -48,7 +43,7 @@ runs:
       working-directory: ${{ inputs.working_directory }}
       shell: bash
       run: |
-        PANA=$(pana . --no-warning); PANA_SCORE=$(echo $PANA | sed -n "s/.*Points: \([0-9]*\)\/\([0-9]*\)./\1\/\2/p")
+        PANA=$(pana . --no-warning --project-root "${{ github.workspace }}"); PANA_SCORE=$(echo $PANA | sed -n "s/.*Points: \([0-9]*\)\/\([0-9]*\)./\1\/\2/p")
         echo "Score: $PANA_SCORE"
         IFS='/'; read -a SCORE_ARR <<< "$PANA_SCORE"; SCORE=SCORE_ARR[0];
         if (( $SCORE < ${{inputs.min_score}} )); then echo "The minimum score of ${{inputs.min_score}} was not met!"; exit 1; fi

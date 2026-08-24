@@ -5,6 +5,21 @@
 - Speaking-while-muted detection (`SpeakingWhileMutedRecognition`) now works on iOS, macOS and web (previously Android-only). On iOS/macOS it requires muting with `stopTrackOnMute: false`. Check the [cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/speaking-while-muted/) for details and per-platform requirements.
 - Added an optional `stopTrackOnMute` parameter to `Call.setMicrophoneEnabled`. The default (`true`, unchanged) stops and releases the audio track on mute; `false` keeps the track alive and sends silence instead. See the [documentation](https://getstream.io/video/docs/flutter/guides/camera-and-microphone/microphone-and-audio/) for the trade-offs.
 
+### 🐞 Fixed
+
+- [Web] Fixed the microphone not being published when Opus RED was enabled for the call, leaving the participant inaudible to everyone while their microphone still appeared active. Opus DTX and RED are no longer munged into the SDP. Both are negotiated by signalling them to the SFU with the published tracks.
+
+## 1.4.3
+
+### 🐞 Fixed
+
+- Fixed duplicate publisher tracks: concurrent enable/publish calls of the same type (e.g. a double camera enable racing the join flow) could create two senders for the same track type, which the SFU rejects with a forced rejoin loop. A publish now claims its `(trackType, publishOptionId)` before creating the sender, so a concurrent one reuses that sender instead of adding a second, and a repeated enable joins the media acquisition already in flight rather than opening the camera twice.
+- Fixed the incoming call UI (CallKit on iOS) ringing for a call whose ringing flow was already resolved before the push was delivered.
+- Fixed the publisher announcing a stale track `mid` after a renegotiation or publish retry. It's now resolved from the current peer-connection state so the SFU can reliably match the track to its media.
+- Serialized remote-description and ICE-candidate handling so a candidate arriving mid-negotiation can no longer be dropped.
+- Fixed an issue where republishing could reuse a cached publisher transceiver without renegotiating.
+- Fixed a `FormatException` when sending requests if the application name (or other device/app info) contains non-ASCII characters. Values included in the `X-Stream-Client` header are now sanitized to valid header characters.
+
 ## 1.4.2
 
 ### ✅ Added

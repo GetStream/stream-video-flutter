@@ -4,6 +4,17 @@
 
 - Added an optional `stopTrackOnMute` parameter to `ToggleMicrophoneOption`, passed through to `Call.setMicrophoneEnabled`. Set it to `false` to keep the audio track alive on mute — required on iOS/macOS for [speaking-while-muted detection](https://getstream.io/video/docs/flutter/ui-cookbook/speaking-while-muted/).
 
+## 1.4.3
+
+### 🐞 Fixed
+
+- Fixed duplicate publisher tracks: concurrent enable/publish calls of the same type (e.g. a double camera enable racing the join flow) could create two senders for the same track type, which the SFU rejects with a forced rejoin loop. A publish now claims its `(trackType, publishOptionId)` before creating the sender, so a concurrent one reuses that sender instead of adding a second, and a repeated enable joins the media acquisition already in flight rather than opening the camera twice.
+- Fixed the incoming call UI (CallKit on iOS) ringing for a call whose ringing flow was already resolved before the push was delivered.
+- Fixed the publisher announcing a stale track `mid` after a renegotiation or publish retry. It's now resolved from the current peer-connection state so the SFU can reliably match the track to its media.
+- Serialized remote-description and ICE-candidate handling so a candidate arriving mid-negotiation can no longer be dropped.
+- Fixed an issue where republishing could reuse a cached publisher transceiver without renegotiating.
+- Fixed a `FormatException` when sending requests if the application name (or other device/app info) contains non-ASCII characters. Values included in the `X-Stream-Client` header are now sanitized to valid header characters.
+
 ## 1.4.2
 
 ### ✅ Added
@@ -448,7 +459,7 @@ This release removes the dependency on `flutter_callkit_incoming`, resulting in 
 
 🔄 Partial State Updates:
 
-For a more detailed explanation check [the dedicated documentation](https://github.com/GetStream/stream-video-flutter/blob/main/packages/stream_video_flutter/docs/partial_state_update_changes.md).
+For a more detailed explanation check [the dedicated documentation](https://github.com/GetStream/stream-video-flutter/blob/main/packages/stream_video_flutter/doc/partial_state_update_changes.md).
 
 - Added `call.partialState` for more specific and efficient state updates.
 - Added callbacks in `StreamCallContainer`, `StreamCallContent`, `StreamIncomingCallContent`, and others that no longer return a state.

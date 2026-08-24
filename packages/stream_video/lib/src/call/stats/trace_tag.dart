@@ -31,6 +31,7 @@ abstract class TraceTag {
   static const String publisherConnectionCheckStalled =
       'publisherConnectionCheck.stalled';
   static const String callLeave = 'call.leaveReason';
+  static const String trackMidUnresolved = 'trackMid.unresolved';
   static const String trackPublished = 'trackPublished';
   static const String trackUnpublished = 'trackUnpublished';
   static const String changePublishQuality = 'changePublishQuality';
@@ -88,6 +89,7 @@ abstract class TraceTag {
   static const String setLocalDescriptionError = 'setLocalDescription.error';
   static const String addIceCandidate = 'addIceCandidate';
   static const String addIceCandidateSuccess = 'addIceCandidate.success';
+  static const String addIceCandidatePending = 'addIceCandidate.pending';
   static const String addIceCandidateError = 'addIceCandidate.error';
 
   // Peer connection factory
