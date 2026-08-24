@@ -300,25 +300,26 @@ class RtcMediaDeviceNotifier {
     return rtc.Helper.resumeAudioPlayout();
   }
 
-  /// Whether the browser's autoplay policy is currently blocking playback of at
-  /// least one remote audio track.
+  /// Emits whenever the browser's autoplay policy starts or stops blocking
+  /// remote audio playback.
   ///
-  /// Web only; always `false` on other platforms.
-  bool get isAudioPlaybackBlocked => rtc_audio.isAudioPlaybackBlocked;
-
-  /// Whether playback of at least one remote audio track stopped and the SDK's
-  /// automatic recovery gave up on it.
-  ///
-  /// Web only; always `false` on other platforms.
-  bool get isAudioPlaybackStalled => rtc_audio.isAudioPlaybackStalled;
+  /// The remote audio elements are page-global, so this reflects playback
+  /// across every call running on the page. Consumed by [Call] to keep
+  /// [CallState.isWebAudioPlaybackBlocked] up to date; integrators observe
+  /// `call.state` instead.
+  @internal
+  Stream<bool> get webAudioPlaybackBlockedChanges =>
+      rtc_audio.audioPlaybackBlockedChanges;
 
   /// Retries playback of the remote audio elements the browser's autoplay
-  /// policy blocked, plus any element whose automatic recovery gave up. Must be
-  /// called from within a user gesture (e.g. a button tap) for the browser to
-  /// allow it.
+  /// policy blocked. Must be called from within a user gesture (e.g. a button
+  /// tap) for the browser to allow it.
   ///
-  /// Web only; a no-op on other platforms.
-  Future<void> resumeAudioPlayback() => rtc_audio.resumeAudioPlayback();
+  /// Observe [CallState.isWebAudioPlaybackBlocked] to know when it is needed.
+  ///
+  /// Web only; a no-op on other platforms. Unrelated to [resumeAudioPlayout],
+  /// which unmutes playout paused via [pauseAudioPlayout].
+  Future<void> resumeWebAudioPlayback() => rtc_audio.resumeAudioPlayback();
 
   /// Regains Android audio focus if it was lost.
   ///

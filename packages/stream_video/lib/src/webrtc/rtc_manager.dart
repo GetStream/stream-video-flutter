@@ -1893,6 +1893,11 @@ extension RtcManagerTrackHelper on RtcManager {
 
       await Future.wait(
         audioTracks.map((audioTrack) async {
+          if (audioTrack.audioSinkId == device.id) {
+            applied.add(audioTrack);
+            return;
+          }
+
           try {
             applied.add(await audioTrack.setSinkId(device.id));
           } catch (e, stk) {

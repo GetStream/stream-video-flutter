@@ -1,8 +1,14 @@
 ## Upcoming
 
+### ✅ Added
+
+- [Web] Added `CallState.isWebAudioPlaybackBlocked`, which reports whether the browser's autoplay policy is blocking playback of remote audio. Observe it through `call.state` to show a "tap to enable sound" affordance the moment playback is blocked. Always `false` on every other platform.
+- [Web] Added `RtcMediaDeviceNotifier.resumeWebAudioPlayback()`, which retries playback of the blocked remote audio elements. Call it from within a user gesture (e.g. a button tap) so the browser allows playback. A no-op on every other platform. Unrelated to the existing `resumeAudioPlayout()`, which unmutes playout paused via `pauseAudioPlayout()`.
+
 ### 🔄 Changed
 
 - [Web] `RtcRemoteTrack.setSinkId` is now asynchronous (`Future<RtcRemoteTrack>` instead of `RtcRemoteTrack`) and throws when the browser cannot route the track to the requested device.
+- [Web] `RtcRemoteTrack.stop` takes an optional `disposeWebAudioPlayer` flag (defaults to `true`, no effect on native). Pass `false` when the track may resume on the same transceiver, to keep its `<audio>` element and the selected output device.
 
 ### 🐞 Fixed
 
@@ -10,6 +16,7 @@
 - [Web] Fixed the selected audio output device being lost when a remote participant unmuted.
 - [Web] Fixed `Call.setAudioOutputDevice` reporting success when the browser rejected the device or did not support output selection at all.
 - [Web] Fixed `Call.setAudioOutputDevice` leaving playback split across two output devices when one remote track rejected the switch. Every track is now switched, and the selection is only rejected when no track could take the device.
+- Fixed `RtcRemoteTrack.copyWith` dropping the `transceiver`. Any copy of a remote track lost its transceiver, which silently turned the `removeTrack` in `unpublishTrack` into a no-op.
 - [Web] Fixed the microphone not being published when Opus RED was enabled for the call, leaving the participant inaudible to everyone while their microphone still appeared active. Opus DTX and RED are no longer munged into the SDP. Both are negotiated by signalling them to the SFU with the published tracks.
 
 ## 1.4.3

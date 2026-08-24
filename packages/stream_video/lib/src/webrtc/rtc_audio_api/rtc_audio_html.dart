@@ -6,6 +6,7 @@ import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 
 import 'package:dart_webrtc/src/media_stream_track_impl.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:web/web.dart' as web;
 
@@ -45,11 +46,31 @@ final _stalledTrackIds = <String>{};
 
 /// Whether the browser's autoplay policy is currently blocking playback of at
 /// least one remote audio element.
-bool get isAudioPlaybackBlocked => _blockedTrackIds.isNotEmpty;
+///
+/// Seeded so a listener that subscribes after playback was already blocked
+/// (e.g. a second call joining the page) gets the current value.
+final _blockedController = BehaviorSubject<bool>.seeded(false);
 
-/// Whether playback of at least one remote audio element stopped and automatic
-/// recovery gave up on it.
-bool get isAudioPlaybackStalled => _stalledTrackIds.isNotEmpty;
+/// Emits whenever the autoplay policy starts or stops blocking remote audio.
+///
+/// The audio elements are page-global, so this reflects remote playback across
+/// every call running on the page.
+///
+/// A track whose recovery gave up ([_stalledTrackIds]) is deliberately not
+/// reported: it is internal retry bookkeeping, the watchdog re-arms itself, and
+/// [resumeAudioPlayback] retries those elements too.
+Stream<bool> get audioPlaybackBlockedChanges => _blockedController.stream;
+
+/// Publishes the current blocked state, if it changed.
+///
+/// Called after every mutation of [_blockedTrackIds]: the set is the mechanism,
+/// this is how the rest of the SDK finds out about it without polling.
+void _notifyBlocked() {
+  final blocked = _blockedTrackIds.isNotEmpty;
+  if (blocked == _blockedController.value) return;
+
+  _blockedController.add(blocked);
+}
 
 void startAudio(String id, rtc.MediaStreamTrack track) {
   if (track is! MediaStreamTrackWeb) return;
@@ -79,6 +100,7 @@ void stopAudio(String id) {
   _watchdogs.remove(id)?.dispose();
   _blockedTrackIds.remove(id);
   _stalledTrackIds.remove(id);
+  _notifyBlocked();
 
   final audioElement = web.document.getElementById(audioPrefix + id);
   if (audioElement != null) {
@@ -109,13 +131,15 @@ Future<void> setSinkId(String id, String deviceId) async {
 
   final audioElement = web.document.getElementById(audioPrefix + id);
   if (audioElement is! web.HTMLAudioElement) {
-    // Not a failure: the element is created when the track starts, and
-    // `start()` applies the sink id the caller is about to record.
+    // Not a failure: the element is created when the track starts, and every
+    // site that starts a track re-applies the selected output immediately
+    // after, via `_applyCurrentAudioOutputDevice` in `call_session.dart`, which
+    // re-derives the device from call state.
     streamLog.w(
       _tag,
       () =>
           'No audio element for track $id yet, sink id $deviceId will be '
-          'applied when the track starts',
+          're-applied once the track starts',
     );
     _trace(TraceTag.setSinkId, {
       'trackId': id,
@@ -172,6 +196,7 @@ Future<void> resumeAudioPlayback() async {
 
   _blockedTrackIds.removeAll(pending);
   _stalledTrackIds.removeAll(pending);
+  _notifyBlocked();
 
   final retries = <Future<void>>[];
   for (final trackId in pending) {
@@ -195,8 +220,9 @@ bool checkIfAudioOutputChangeSupported() {
   // `setSinkId` returns a promise, so invoking it would route audio and leave
   // a rejection unhandled instead of reporting support.
   final element = web.document.createElement('audio');
-  return _audioOutputChangeSupported =
-      element.hasProperty('setSinkId'.toJS).toDart;
+  return _audioOutputChangeSupported = element
+      .hasProperty('setSinkId'.toJS)
+      .toDart;
 }
 
 web.HTMLDivElement findOrCreateAudioContainer() {
@@ -235,7 +261,7 @@ class _AudioPlaybackWatchdog {
     _onPauseOrSuspend = ((web.Event event) {
       _handlePauseOrSuspend(event.type);
     }).toJS;
-    _onPlaying = ((web.Event _) => _handlePlaying()).toJS;
+    _onPlaying = ((web.Event _) => _markPlaying()).toJS;
 
     element.addEventListener('pause', _onPauseOrSuspend);
     element.addEventListener('suspend', _onPauseOrSuspend);
@@ -290,8 +316,7 @@ class _AudioPlaybackWatchdog {
 
     try {
       await element.play().toDart;
-      _blockedTrackIds.remove(trackId);
-      _stalledTrackIds.remove(trackId);
+      _markPlaying();
     } catch (e) {
       if (_disposed) return;
 
@@ -306,11 +331,12 @@ class _AudioPlaybackWatchdog {
       // burning attempts and wait for [resumeAudioPlayback].
       if (_isNotAllowedError(e)) {
         if (_blockedTrackIds.add(trackId)) {
-          _trace(TraceTag.mediaPlaybackBlocked, {
+          _trace(TraceTag.audioPlaybackBlocked, {
             'trackId': trackId,
             'kind': 'audio',
             'error': '$e',
           });
+          _notifyBlocked();
         }
         return;
       }
@@ -324,7 +350,8 @@ class _AudioPlaybackWatchdog {
           'error': '$e',
         });
 
-        // Stop retrying this outage, but re-arm the watchdog.
+        // Stop retrying this outage, but re-arm the watchdog. Not reported
+        // outwards: the autoplay policy isn't what stopped playback here.
         _stalledTrackIds.add(trackId);
         _degraded = false;
         _attempt = 0;
@@ -335,14 +362,21 @@ class _AudioPlaybackWatchdog {
     }
   }
 
-  void _handlePlaying() {
+  /// Records that playback is running again and re-arms the watchdog.
+  ///
+  /// Called both when `play()` resolves and when the element fires `playing`,
+  /// because either can be the one to observe the recovery. Doing it in only
+  /// one of them can leave [_degraded] latched with no timer armed, which
+  /// silently swallows every later `pause`/`suspend`.
+  void _markPlaying() {
     _stalledTrackIds.remove(trackId);
     if (_blockedTrackIds.remove(trackId)) {
       streamLog.i(_tag, () => 'Audio playback unblocked for track $trackId');
     }
+    _notifyBlocked();
 
     if (_degraded) {
-      _trace(TraceTag.mediaPlaybackRecovered, {
+      _trace(TraceTag.mediaPlaybackRecoverSuccess, {
         'trackId': trackId,
         'kind': 'audio',
         'attempts': _attempt,
@@ -389,6 +423,10 @@ class _AudioPlaybackWatchdog {
         _tag,
         () => 'Recovery skipped for track $trackId ($skipReason)',
       );
+
+      // There is nothing to recover, so leave the machine re-armed. A latched
+      // [_degraded] with no timer pending would swallow every later outage.
+      _degraded = false;
       return;
     }
 

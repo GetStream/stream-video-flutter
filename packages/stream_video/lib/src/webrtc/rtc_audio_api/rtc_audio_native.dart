@@ -2,6 +2,9 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 typedef AudioTraceHandler = void Function(String tag, Object? data);
 
+/// Never emits: only browsers block playback via an autoplay policy.
+Stream<bool> get audioPlaybackBlockedChanges => const Stream.empty();
+
 void setAudioTraceHandler(AudioTraceHandler? handler) {
   // We don't need to do anything here, because there is no audio tracing on native platforms.
 }
@@ -25,12 +28,6 @@ Future<void> resumeAudioPlayback() async {
   // We don't need to do anything here, because there is no autoplay policy
   // blocking playback on native platforms.
 }
-
-/// Always `false`: only browsers block playback via an autoplay policy.
-bool get isAudioPlaybackBlocked => false;
-
-/// Always `false`: playback recovery is a web-only concern.
-bool get isAudioPlaybackStalled => false;
 
 bool checkIfAudioOutputChangeSupported() {
   // On native platforms, we assume audio output change is supported.

@@ -66,6 +66,7 @@ class CallState extends Equatable {
       custom: const {},
       isVideoModerated: false,
       isAudioSuspended: false,
+      isWebAudioPlaybackBlocked: false,
     );
   }
 
@@ -109,6 +110,7 @@ class CallState extends Equatable {
     required this.custom,
     required this.isVideoModerated,
     required this.isAudioSuspended,
+    required this.isWebAudioPlaybackBlocked,
   });
 
   final CallPreferences preferences;
@@ -154,6 +156,15 @@ class CallState extends Equatable {
 
   /// Whether audio tracks have been suspended for this call.
   final bool isAudioSuspended;
+
+  /// Whether the browser's autoplay policy is blocking playback of remote
+  /// audio. Playback resumes only once
+  /// `RtcMediaDeviceNotifier.instance.resumeWebAudioPlayback()` is called from
+  /// within a user gesture, so show a "tap to enable sound" affordance while
+  /// this is `true`.
+  ///
+  /// Web only; always `false` on every other platform.
+  final bool isWebAudioPlaybackBlocked;
 
   String get callId => callCid.id;
 
@@ -228,6 +239,7 @@ class CallState extends Equatable {
     Map<String, Object>? custom,
     bool? isVideoModerated,
     bool? isAudioSuspended,
+    bool? isWebAudioPlaybackBlocked,
   }) {
     return CallState._(
       preferences: preferences ?? this.preferences,
@@ -272,6 +284,8 @@ class CallState extends Equatable {
       custom: custom ?? this.custom,
       isVideoModerated: isVideoModerated ?? this.isVideoModerated,
       isAudioSuspended: isAudioSuspended ?? this.isAudioSuspended,
+      isWebAudioPlaybackBlocked:
+          isWebAudioPlaybackBlocked ?? this.isWebAudioPlaybackBlocked,
     );
   }
 
@@ -347,6 +361,7 @@ class CallState extends Equatable {
     custom,
     isVideoModerated,
     isAudioSuspended,
+    isWebAudioPlaybackBlocked,
   ];
 
   @override
@@ -356,6 +371,7 @@ class CallState extends Equatable {
         ' sessionId: $sessionId, isRecording: $isRecording,'
         ' isVideoModerated: $isVideoModerated,'
         ' isAudioSuspended: $isAudioSuspended,'
+        ' isWebAudioPlaybackBlocked: $isWebAudioPlaybackBlocked,'
         ' settings: $settings, egress: $egress, '
         ' videoInputDevice: $videoInputDevice,'
         ' audioInputDevice: $audioInputDevice,'
