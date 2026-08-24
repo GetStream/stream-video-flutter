@@ -6,11 +6,14 @@ import 'package:stream_video/stream_video.dart';
 
 /// Builds an unsigned JWT with the given [userId] claim, sufficient for
 /// [UserToken]'s unverified parsing.
-String _fakeJwt(String userId) {
+///
+/// [jti] distinguishes two tokens minted for the same user, so tests can tell
+/// which of them a provider returned.
+String _fakeJwt(String userId, {String? jti}) {
   String encode(Map<String, dynamic> json) =>
       base64Url.encode(utf8.encode(jsonEncode(json))).replaceAll('=', '');
   final header = encode({'alg': 'HS256', 'typ': 'JWT'});
-  final payload = encode({'user_id': userId});
+  final payload = encode({'user_id': userId, if (jti != null) 'jti': jti});
   final signature = encode({'sig': 'fake'});
   return '$header.$payload.$signature';
 }
@@ -99,8 +102,8 @@ void main() {
       test(
         'serves userToken on the first load, then hands off to tokenLoader',
         () async {
-          final initialToken = _fakeJwt('user-1');
-          final loaderToken = _fakeJwt('user-1');
+          final initialToken = _fakeJwt('user-1', jti: 'initial');
+          final loaderToken = _fakeJwt('user-1', jti: 'loaded');
           var loaderCalls = 0;
           final provider = build(
             userToken: initialToken,

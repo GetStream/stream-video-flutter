@@ -12,10 +12,19 @@ final _logger = taggedLogger(tag: 'SV:TokenManager');
 /// package barrel. Note that if [TokenManager] ever gains instance members
 /// with these names, they will silently shadow this extension.
 extension TokenManagerResultExtension on TokenManager {
-  /// Refreshes the cached token by loading a new one from the provider.
+  /// Discards the cached token and loads a fresh one from the provider.
+  ///
+  /// [TokenManager] serializes loads and only holds a cached token while no
+  /// load is in flight, so the returned token is always the result of a
+  /// provider fetch that started at or after this call — never the token that
+  /// was just expired. Concurrent refreshes are therefore safe, though each
+  /// one arriving after a completed refresh costs one more provider fetch.
+  ///
+  /// A provider that returns the same value on every load (a static token, or
+  /// the memoized guest token) still yields that same token back.
   Future<UserToken> refreshToken() {
-    expireToken(); // Clear the cached token
-    return getToken(); // Load a new token from the provider
+    expireToken();
+    return getToken();
   }
 
   /// Returns the token as a [Result], composing any thrown error into a

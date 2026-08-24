@@ -31,18 +31,18 @@
   - `UserToken.jwt(String rawValue)` named factory has been replaced by the default `UserToken(String rawValue)` constructor. Replace `UserToken.jwt('...')` with `UserToken('...')`.
   - `UserToken` validation changed: the new constructor throws `ArgumentError` (always) instead of `assert` (debug-only) when the JWT is missing a `user_id` claim.
 - `TokenManager` and `TokenProvider` are now provided by `stream_core`. Three behavioural changes follow:
-  - A static token whose `user_id` claim does not match the connected user's id now fails fast with an `ArgumentError` instead of being rejected later by the server.
-  - `OnTokenUpdated` changed from `Future<void> Function(UserToken)` to `void Function(UserToken)` and is **no longer awaited**. Async callbacks still compile (and can still be passed), but the SDK does not wait for them anymore — a token is no longer guaranteed to be persisted by the callback before the SDK starts using it.
-  - `onTokenUpdated` for a static token now fires when the token is first used (and after refreshes) instead of once at client construction.
+  - A static token whose `user_id` claim does not match the connected user's id is now rejected locally with an `ArgumentError` on first use, instead of being rejected later by the server.
+  - `OnTokenUpdated` changed from `Future<void> Function(UserToken)` to `void Function(UserToken)` and is **no longer awaited**. Async callbacks still compile, but the SDK may start using a token before your callback has persisted it.
+  - `onTokenUpdated` for a static token now fires on first token use and after every refresh, instead of once at client construction.
 
 ### ✅ Added
 
-- Anonymous users can now carry a token: pass `userToken` together with a `UserType.anonymous` user to send call-restricted tokens (e.g. for closed livestreams).
+- Anonymous users can now carry a token: pass `userToken` with a `UserType.anonymous` user to send call-restricted tokens (e.g. for closed livestreams).
 
 ### 🐞 Fixed
 
-- Guest users are now created with their `name`, `image`, and `custom` data. Previously only the id was sent and the profile fields were silently dropped.
-- An expired guest access token no longer re-creates the guest (which minted a new server-side identity mid-session). The token from the initial guest creation is reused.
+- Guest users are now created with their `name`, `image`, and `custom` data — previously only the id was sent.
+- An expired guest token no longer re-creates the guest, which minted a new server-side identity mid-session. The token from the initial guest creation is reused.
 
 ## 1.4.3
 
