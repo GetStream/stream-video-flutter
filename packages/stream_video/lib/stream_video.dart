@@ -61,6 +61,7 @@ export 'src/utils/none.dart';
 export 'src/utils/result.dart';
 export 'src/utils/string.dart';
 export 'src/utils/subscriptions.dart';
+export 'src/webrtc/e2ee/call_encryption_key.dart';
 export 'src/webrtc/media/media_constraints.dart';
 export 'src/webrtc/model/rtc_video_dimension.dart';
 export 'src/webrtc/model/rtc_video_parameters.dart';

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
@@ -59,4 +60,12 @@ Future<Uint8List> deriveKeyFromPassphrase(
   );
 
   return Uint8List.fromList(await derived.extractBytes());
+}
+
+/// A throwaway key for joining an encrypted call this device has no key for.
+Uint8List randomEncryptionKey({int bytes = 16}) {
+  final random = Random.secure();
+  return Uint8List.fromList(
+    List<int>.generate(bytes, (_) => random.nextInt(256)),
+  );
 }

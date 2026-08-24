@@ -2,9 +2,8 @@
 
 ### ✅ Added
 
-- Added end-to-end encryption. Attach an `EncryptionManager` to the call with `Call.setE2EEManager` before joining, and release it with `Call.clearE2EEManager`. Ask for encryption when the call is created, through `StreamEncryptionSettings`, and read `CallState.isE2eeEnabled` to see whether the SFU considers the call encrypted. Available on Android, iOS and macOS, so check `EncryptionManager.isSupported` before using it.
-  - Keys are yours to distribute. The SDK takes raw key bytes and never sends them anywhere, so getting the same key to everyone on the call is your app's job. See [the documentation](TODO) for the ways to do that.
-  - Listen to `call.e2eeManager?.events` for key state and decryption failures. That is how you tell a wrong key apart from a broken call.
+- Added end-to-end encryption support: attach an `EncryptionManager` with `Call.setE2EEManager` before joining, request encryption at call creation with `StreamEncryptionSettings`, and read `CallState.isE2eeEnabled` to check whether it is in effect. Available on Android, iOS and macOS. See the [documentation](https://getstream.io/video/docs/flutter/guides/e2ee-encryption/) for details.
+- Added `CallPreferences.encryptionKeyResolver`, which supplies the key for calls your app does not join itself, such as those answered from a ringing notification. See the [documentation](https://getstream.io/video/docs/flutter/guides/e2ee-encryption/#ringing-calls) for details.
 
 ### 🐞 Fixed
 

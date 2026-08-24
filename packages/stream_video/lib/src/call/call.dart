@@ -45,6 +45,7 @@ import '../utils/none.dart';
 import '../utils/result.dart';
 import '../utils/standard.dart';
 import '../utils/subscriptions.dart';
+import '../webrtc/e2ee/call_encryption_key.dart';
 import '../webrtc/media/media_constraints.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
 import '../webrtc/model/rtc_video_parameters.dart';
@@ -1068,6 +1069,100 @@ class Call {
     );
   }
 
+  /// Builds and attaches an [EncryptionManager] from the app's key resolver,
+  /// for a call that does not have one yet.
+  Future<Result<None>> _resolveE2EEManager() async {
+    // An explicitly attached manager wins.
+    if (_e2eeManager != null) return const Result.success(none);
+
+    final required =
+        state.value.settings.encryption.mode == StreamEncryptionMode.autoOn;
+
+    final resolve = state.value.preferences.encryptionKeyResolver;
+    if (resolve == null) {
+      if (!required) return const Result.success(none);
+
+      return Result.error(
+        'This call requires end-to-end encryption, but no key was available. '
+        'Attach a manager with setE2EEManager() before join(), or set '
+        'encryptionKeyResolver on StreamVideoOptions.',
+      );
+    }
+
+    final CallEncryptionKey? key;
+    try {
+      key = await resolve(
+        CallEncryptionKeyRequest(
+          callCid: callCid,
+          encryptionMode: state.value.settings.encryption.mode,
+        ),
+      );
+    } catch (e, stk) {
+      _logger.e(() => '[resolveE2EE] resolver threw: $e; $stk');
+      return Result.error('The encryption key resolver failed: $e');
+    }
+
+    if (key == null) {
+      if (!required) {
+        _logger.d(() => '[resolveE2EE] no key, joining unencrypted');
+        return const Result.success(none);
+      }
+
+      return Result.error(
+        'This call requires end-to-end encryption, but the key resolver '
+        'returned null for $callCid.',
+      );
+    }
+
+    if (!EncryptionManager.isSupported) {
+      return Result.error(
+        'A key was provided for $callCid, but end-to-end encryption is not '
+        'available on this platform.',
+      );
+    }
+
+    final userId = _stateManager.callState.currentUserId;
+
+    try {
+      final manager = EncryptionManager.create(
+        userId: userId,
+        algorithm: key.algorithm,
+      );
+
+      try {
+        switch (key) {
+          case SharedCallEncryptionKey(:final keyIndex, :final bytes):
+            await manager.setSharedKey(keyIndex, bytes);
+        }
+
+        // A concurrent join, or a setE2EEManager the app made while the
+        // resolver was still running, may have attached one already. That one
+        // holds the keys the session will use, so this is the surplus manager
+        // and it is the one that has to give its handle back.
+        if (_e2eeManager != null) {
+          _logger.d(() => '[resolveE2EE] a manager was attached meanwhile');
+          await manager.dispose().catchError((Object _) {});
+          return const Result.success(none);
+        }
+
+        await setE2EEManager(manager);
+      } catch (_) {
+        await manager.dispose().catchError((Object _) {});
+        rethrow;
+      }
+
+      _logger.i(
+        () =>
+            '[resolveE2EE] attached, keyIndex: ${key!.keyIndex}, '
+            'algorithm: ${key.algorithm.name}',
+      );
+      return const Result.success(none);
+    } catch (e, stk) {
+      _logger.e(() => '[resolveE2EE] failed: $e; $stk');
+      return Result.error('Could not set up end-to-end encryption: $e');
+    }
+  }
+
   /// Detaches the E2EE manager, so later joins are unencrypted again.
   ///
   /// Set [dispose] to `false` to keep the native manager alive, which is what
@@ -1184,6 +1279,14 @@ class Call {
         _logger.e(() => '[join] timed out waiting for ongoing connect');
         return Result.error('timed out waiting for ongoing connect');
       }
+    }
+
+    // Before the call is marked active, because a call that cannot get its key
+    // is not going to be joined and should not look like it is being.
+    final e2eeResult = await _resolveE2EEManager();
+    if (e2eeResult is Failure) {
+      _logger.e(() => '[join] rejected: ${e2eeResult.error.message}');
+      return e2eeResult;
     }
 
     await _streamVideo.state.setActiveCall(this);

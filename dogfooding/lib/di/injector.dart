@@ -16,6 +16,7 @@ import '../core/repos/token_service.dart';
 import '../core/repos/user_auth_repository.dart';
 import '../core/repos/user_chat_repository.dart';
 import '../log_config.dart';
+import '../utils/ringing_encryption.dart';
 
 GetIt locator = GetIt.instance;
 
@@ -164,6 +165,9 @@ StreamVideo _initStreamVideo(
       logPriority: Priority.debug,
       keepConnectionsAliveWhenInBackground: true,
       audioProcessor: NoiseCancellationAudioProcessor(),
+      defaultCallPreferences: DefaultCallPreferences(
+        encryptionKeyResolver: resolveRingingEncryptionKey,
+      ),
     ),
     pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(
       iosPushProvider: const StreamVideoPushProvider.apn(name: 'flutter-apn'),
