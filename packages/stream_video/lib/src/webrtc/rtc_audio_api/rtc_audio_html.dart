@@ -199,9 +199,6 @@ Future<void> resumeAudioPlayback() async {
     'recoveringTracks': recovering.length,
   });
 
-  _blockedTrackIds.removeAll(pending);
-  _notifyBlocked();
-
   final retries = <Future<void>>[];
   for (final trackId in pending) {
     retries.add(_watchdogs[trackId]!.resume());

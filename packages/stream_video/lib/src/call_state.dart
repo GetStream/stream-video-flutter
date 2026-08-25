@@ -158,10 +158,9 @@ class CallState extends Equatable {
   final bool isAudioSuspended;
 
   /// Whether the browser's autoplay policy is blocking playback of remote
-  /// audio. Playback resumes only once
-  /// `RtcMediaDeviceNotifier.instance.resumeWebAudioPlayback()` is called from
-  /// within a user gesture, so show a "tap to enable sound" affordance while
-  /// this is `true`.
+  /// audio. Playback resumes only once `Call.resumeWebAudioPlayback()` is
+  /// called from within a user gesture, so show a "tap to enable sound"
+  /// affordance while this is `true`.
   ///
   /// Web only; always `false` on every other platform.
   final bool isWebAudioPlaybackBlocked;

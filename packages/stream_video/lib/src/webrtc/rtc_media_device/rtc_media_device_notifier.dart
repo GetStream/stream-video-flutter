@@ -316,6 +316,8 @@ class RtcMediaDeviceNotifier {
   /// tap) for the browser to allow it.
   ///
   /// Observe [CallState.isWebAudioPlaybackBlocked] to know when it is needed.
+  /// Within a call, prefer `Call.resumeWebAudioPlayback()`, which forwards
+  /// here; this entry point exists for code that has no `Call` at hand.
   ///
   /// Web only; a no-op on other platforms. Unrelated to [resumeAudioPlayout],
   /// which unmutes playout paused via [pauseAudioPlayout].

@@ -100,7 +100,6 @@ abstract class TraceTag {
       'audioProcessingStateChanged';
   static const String enumerateDevices =
       'navigator.mediaDevices.enumeratedevices';
-  static const String setSinkId = 'navigator.mediaDevices.setSinkId';
   static const String pauseAudioPlayout =
       'navigator.mediaDevices.pauseAudioPlayout';
   static const String resumeAudioPlayout =
@@ -130,4 +129,6 @@ abstract class TraceTag {
   /// count as a sustained outage; retries continue at the capped interval.
   static const String mediaPlaybackRecoverStalled =
       'mediaPlayback.recover.stalled';
+
+  static const String setSinkId = 'setSinkId';
 }
