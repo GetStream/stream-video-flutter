@@ -125,6 +125,9 @@ abstract class TraceTag {
   static const String audioPlaybackBlocked = 'audioPlaybackBlocked';
   static const String mediaPlaybackRecoverSuccess =
       'mediaPlayback.recover.success';
-  static const String mediaPlaybackRecoverGiveUp =
-      'mediaPlayback.recover.giveUp';
+
+  /// Reported once when playback recovery has failed enough times in a row to
+  /// count as a sustained outage; retries continue at the capped interval.
+  static const String mediaPlaybackRecoverStalled =
+      'mediaPlayback.recover.stalled';
 }

@@ -18,7 +18,8 @@ const audioPrefix = 'stream_audio_';
 
 const _tag = 'SV:RtcAudioWeb';
 
-/// Number of consecutive playback recovery attempts before giving up.
+/// Number of consecutive failed recovery attempts after which the outage is
+/// reported as sustained.
 const _maxRecoveryAttempts = 10;
 
 /// Signature of the sink the web audio layer reports playback traces to.
@@ -38,12 +39,6 @@ final _watchdogs = <String, _AudioPlaybackWatchdog>{};
 /// Track ids whose audio element the browser's autoplay policy is blocking.
 final _blockedTrackIds = <String>{};
 
-/// Track ids whose playback recovery exhausted its retry budget. Kept separate
-/// from [_blockedTrackIds] so an exhausted track doesn't make the SDK claim the
-/// autoplay policy is blocking audio, while still leaving a way back in via
-/// [resumeAudioPlayback].
-final _stalledTrackIds = <String>{};
-
 /// Whether the browser's autoplay policy is currently blocking playback of at
 /// least one remote audio element.
 ///
@@ -56,9 +51,9 @@ final _blockedController = BehaviorSubject<bool>.seeded(false);
 /// The audio elements are page-global, so this reflects remote playback across
 /// every call running on the page.
 ///
-/// A track whose recovery gave up ([_stalledTrackIds]) is deliberately not
-/// reported: it is internal retry bookkeeping, the watchdog re-arms itself, and
-/// [resumeAudioPlayback] retries those elements too.
+/// Only the autoplay policy is reported here: it is the one failure the app can
+/// do something about, by calling [resumeAudioPlayback] from a gesture. Every
+/// other playback failure is retried indefinitely by the watchdog instead.
 Stream<bool> get audioPlaybackBlockedChanges => _blockedController.stream;
 
 /// Publishes the current blocked state, if it changed.
@@ -99,7 +94,6 @@ void startAudio(String id, rtc.MediaStreamTrack track) {
 void stopAudio(String id) {
   _watchdogs.remove(id)?.dispose();
   _blockedTrackIds.remove(id);
-  _stalledTrackIds.remove(id);
   _notifyBlocked();
 
   final audioElement = web.document.getElementById(audioPrefix + id);
@@ -119,11 +113,14 @@ Future<void> setSinkId(String id, String deviceId) async {
       _tag,
       () => 'Audio output device change is not supported on this browser.',
     );
-    _trace(TraceTag.setSinkId, {
-      'trackId': id,
-      'deviceId': deviceId,
-      'error': 'unsupported',
-    });
+    if (!_tracedOutputChangeUnsupported) {
+      _tracedOutputChangeUnsupported = true;
+      _trace(TraceTag.setSinkId, {
+        'trackId': id,
+        'deviceId': deviceId,
+        'error': 'unsupported',
+      });
+    }
     throw UnsupportedError(
       'Audio output device change is not supported on this browser.',
     );
@@ -181,21 +178,28 @@ Future<void> setSinkId(String id, String deviceId) async {
 }
 
 /// Retries playback of every remote audio element the browser's autoplay policy
-/// blocked, plus any element whose automatic recovery gave up. Must be called
-/// from within a user gesture.
+/// blocked, plus any element currently waiting on a recovery backoff. Must be
+/// called from within a user gesture.
+///
+/// Recovering elements are included because the gesture may be exactly what
+/// they were missing, and retrying now beats waiting out the backoff.
 Future<void> resumeAudioPlayback() async {
-  _trace(TraceTag.resumeAudio, {
-    'blockedTracks': _blockedTrackIds.length,
-    'stalledTracks': _stalledTrackIds.length,
-  });
+  final recovering = _watchdogs.entries
+      .where((entry) => entry.value.isRecovering)
+      .map((entry) => entry.key)
+      .toList();
 
   final pending = {
-    ..._blockedTrackIds,
-    ..._stalledTrackIds,
-  }.where(_watchdogs.containsKey).toSet();
+    ..._blockedTrackIds.where(_watchdogs.containsKey),
+    ...recovering,
+  };
+
+  _trace(TraceTag.resumeAudio, {
+    'blockedTracks': _blockedTrackIds.length,
+    'recoveringTracks': recovering.length,
+  });
 
   _blockedTrackIds.removeAll(pending);
-  _stalledTrackIds.removeAll(pending);
   _notifyBlocked();
 
   final retries = <Future<void>>[];
@@ -205,6 +209,11 @@ Future<void> resumeAudioPlayback() async {
 
   await Future.wait(retries);
 }
+
+/// Whether the "this browser can't switch audio output" trace was already
+/// reported. The capability is page-global and cached, so tracing it per track
+/// would repeat one fact once per participant.
+bool _tracedOutputChangeUnsupported = false;
 
 /// Cached result of [checkIfAudioOutputChangeSupported].
 ///
@@ -287,6 +296,10 @@ class _AudioPlaybackWatchdog {
   /// emitting a trace each.
   bool _degraded = false;
 
+  /// Whether this element is in the middle of an unresolved outage, so a user
+  /// gesture should retry it right away instead of letting the backoff run.
+  bool get isRecovering => !_disposed && _degraded;
+
   void dispose() {
     if (_disposed) return;
     _disposed = true;
@@ -320,12 +333,17 @@ class _AudioPlaybackWatchdog {
     } catch (e) {
       if (_disposed) return;
 
-      streamLog.w(
-        _tag,
-        () =>
-            'Playing audio for track $trackId failed '
-            '(attempt $_attempt): $e',
-      );
+      String failureMessage() =>
+          'Playing audio for track $trackId failed (attempt $_attempt): $e';
+
+      // Past the sustained threshold this repeats every 5s for as long as the
+      // track lives. The outage is already on record — one warning run and one
+      // [TraceTag.mediaPlaybackRecoverStalled] — so the rest is verbose.
+      if (_attempt <= _maxRecoveryAttempts) {
+        streamLog.w(_tag, failureMessage);
+      } else {
+        streamLog.v(_tag, failureMessage);
+      }
 
       // The autoplay policy will keep rejecting until a user gesture, so stop
       // burning attempts and wait for [resumeAudioPlayback].
@@ -341,21 +359,18 @@ class _AudioPlaybackWatchdog {
         return;
       }
 
-      if (_attempt >= _maxRecoveryAttempts) {
-        _trace(TraceTag.mediaPlaybackRecoverGiveUp, {
+      // Report the outage as sustained once, then keep retrying at the backoff
+      // cap. Stopping here would be terminal: the element stays paused, so no
+      // further `pause`/`suspend` arrives to re-enter recovery, and nothing is
+      // surfaced to the app to prompt a [resumeAudioPlayback] call either.
+      if (_attempt == _maxRecoveryAttempts) {
+        _trace(TraceTag.mediaPlaybackRecoverStalled, {
           'trackId': trackId,
           'kind': 'audio',
           'attempts': _attempt,
           'readyState': element.readyState,
           'error': '$e',
         });
-
-        // Stop retrying this outage, but re-arm the watchdog. Not reported
-        // outwards: the autoplay policy isn't what stopped playback here.
-        _stalledTrackIds.add(trackId);
-        _degraded = false;
-        _attempt = 0;
-        return;
       }
 
       _scheduleRecovery();
@@ -369,7 +384,6 @@ class _AudioPlaybackWatchdog {
   /// one of them can leave [_degraded] latched with no timer armed, which
   /// silently swallows every later `pause`/`suspend`.
   void _markPlaying() {
-    _stalledTrackIds.remove(trackId);
     if (_blockedTrackIds.remove(trackId)) {
       streamLog.i(_tag, () => 'Audio playback unblocked for track $trackId');
     }
