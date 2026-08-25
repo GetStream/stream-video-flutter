@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/errors/video_error.dart';
+import 'package:stream_video/src/token/token_provider_factory.dart';
 import 'package:stream_video/stream_video.dart';
 
 /// Builds an unsigned JWT with the given [userId] claim, sufficient for
@@ -57,7 +58,7 @@ void main() {
 
     group('regular user', () {
       TokenProvider build({String? userToken, TokenLoader? tokenLoader}) {
-        return StreamVideo.buildTokenProvider(
+        return buildTokenProvider(
           const User(id: 'user-1'),
           userToken: userToken,
           tokenLoader: tokenLoader,
@@ -126,7 +127,7 @@ void main() {
 
     group('anonymous user', () {
       test('builds a static anonymous token for the user id', () async {
-        final provider = StreamVideo.buildTokenProvider(
+        final provider = buildTokenProvider(
           const User.anonymous(),
           createGuest: _FakeGuestCreator(
             Result.success(_guestData('unused')),
@@ -142,7 +143,7 @@ void main() {
       });
 
       test('passes a caller-supplied token through as the raw value', () async {
-        final provider = StreamVideo.buildTokenProvider(
+        final provider = buildTokenProvider(
           const User.anonymous(),
           userToken: 'call-restricted-jwt',
           createGuest: _FakeGuestCreator(
@@ -163,7 +164,7 @@ void main() {
         final creator = _FakeGuestCreator(
           Result.success(_guestData('server-guest-1')),
         );
-        final provider = StreamVideo.buildTokenProvider(
+        final provider = buildTokenProvider(
           const User.guest('local-guest'),
           createGuest: creator.call,
           onGuestUserUpdated: noUserUpdate,
@@ -181,7 +182,7 @@ void main() {
         final creator = _FakeGuestCreator(
           Result.success(_guestData('server-guest-1')),
         );
-        final provider = StreamVideo.buildTokenProvider(
+        final provider = buildTokenProvider(
           const User(
             id: 'local-guest',
             name: 'Guest Name',
@@ -210,7 +211,7 @@ void main() {
           ),
         );
         User? updatedUser;
-        final provider = StreamVideo.buildTokenProvider(
+        final provider = buildTokenProvider(
           const User.guest('local-guest'),
           createGuest: creator.call,
           onGuestUserUpdated: (user) => updatedUser = user,
@@ -228,7 +229,7 @@ void main() {
         final creator = _FakeGuestCreator(
           failureWithError('guest creation failed'),
         );
-        final provider = StreamVideo.buildTokenProvider(
+        final provider = buildTokenProvider(
           const User.guest('local-guest'),
           createGuest: creator.call,
           onGuestUserUpdated: noUserUpdate,

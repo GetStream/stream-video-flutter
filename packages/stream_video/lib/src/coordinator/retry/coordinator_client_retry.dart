@@ -14,10 +14,18 @@ class CoordinatorClientRetry extends CoordinatorClient {
        _retryManager = RpcRetryManager(
          retryPolicy,
          tokenManager: tokenManager,
-       );
+       ),
+       _unauthenticatedRetryManager = RpcRetryManager(retryPolicy);
 
   final CoordinatorClient _delegate;
   final RpcRetryManager _retryManager;
+
+  /// Retry manager for calls that do not authenticate with the managed user
+  /// token, so a 401 must not trigger a token refresh. For guest creation
+  /// this is load-bearing: it runs inside [TokenManager]'s non-reentrant
+  /// token-load lock, and a refresh would re-enter [TokenManager.getToken]
+  /// and deadlock the client.
+  final RpcRetryManager _unauthenticatedRetryManager;
 
   final _logger = taggedLogger(tag: 'SV:CoordinatorClientRetry');
 
@@ -846,7 +854,9 @@ class CoordinatorClientRetry extends CoordinatorClient {
     String? image,
     Map<String, Object> custom = const {},
   }) {
-    return _retryManager.execute(
+    // loadGuest authenticates with its own anonymous token, not the managed
+    // user token — see [_unauthenticatedRetryManager].
+    return _unauthenticatedRetryManager.execute(
       () => _delegate.loadGuest(
         id: id,
         name: name,

@@ -43,6 +43,7 @@
 
 - Guest users are now created with their `name`, `image`, and `custom` data — previously only the id was sent.
 - An expired guest token no longer re-creates the guest, which minted a new server-side identity mid-session. The token from the initial guest creation is reused.
+- Fixed a potential permanent hang when guest creation received a 401: the guest-creation call authenticates with its own anonymous token, so it no longer attempts a user-token refresh — which re-entered the token loading already in progress.
 
 ## 1.4.3
 

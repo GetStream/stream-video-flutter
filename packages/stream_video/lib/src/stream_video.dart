@@ -45,7 +45,6 @@ import 'models/call_received_data.dart';
 import 'models/call_ringing_data.dart';
 import 'models/call_status.dart';
 import 'models/disconnect_reason.dart';
-import 'models/guest_created_data.dart';
 import 'models/multi_call_audio_policy.dart';
 import 'models/push_device.dart';
 import 'models/push_provider.dart';
@@ -59,6 +58,7 @@ import 'telemetry/client_event_reporter.dart';
 import 'telemetry/client_event_transport.dart';
 import 'token/token.dart';
 import 'token/token_manager_extension.dart';
+import 'token/token_provider_factory.dart';
 import 'utils/cancelable_operation.dart';
 import 'utils/future.dart';
 import 'utils/none.dart';
@@ -74,15 +74,6 @@ const _idAppState = 2;
 
 const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com';
 const _defaultCoordinatorWsUrl = 'wss://video.stream-io-api.com/video/connect';
-
-/// Creates a server-side guest user, returning its data and access token.
-typedef GuestUserCreator =
-    Future<Result<GuestCreatedData>> Function({
-      required String id,
-      String? name,
-      String? image,
-      required Map<String, Object> custom,
-    });
 
 /// Handler function used for logging.
 typedef LogHandlerFunction =
@@ -276,89 +267,6 @@ class StreamVideo extends Disposable {
             }
           }),
     );
-  }
-
-  /// Builds the token provider matching the [user] type from the [userToken]
-  /// and [tokenLoader] combination.
-  ///
-  /// For [UserType.guest], [createGuest] creates the server-side guest user
-  /// and [onGuestUserUpdated] receives the server-assigned guest user.
-  @visibleForTesting
-  static TokenProvider buildTokenProvider(
-    User user, {
-    String? userToken,
-    TokenLoader? tokenLoader,
-    required GuestUserCreator createGuest,
-    required void Function(User updatedUser) onGuestUserUpdated,
-  }) {
-    // Once a guest is created, its access token is reused for the lifetime
-    // of the client: creating a guest again would mint a new server-side
-    // identity, so an expired guest token cannot be refreshed.
-    UserToken? guestToken;
-
-    return switch (user.type) {
-      UserType.regular => _regularTokenProvider(userToken, tokenLoader),
-      // An anonymous token may carry a caller-supplied JWT (e.g. a
-      // call-restricted token granting access to a closed livestream).
-      UserType.anonymous => TokenProvider.static(
-        UserToken.anonymous(userId: user.id, rawValue: userToken ?? ''),
-      ),
-      UserType.guest => TokenProvider.dynamic((userId) async {
-        final existingToken = guestToken;
-        if (existingToken != null) return existingToken;
-
-        final result = await createGuest(
-          id: userId,
-          name: user.originalName,
-          image: user.image,
-          custom: {
-            for (final MapEntry(:key, :value) in user.custom.entries)
-              if (value != null) key: value,
-          },
-        );
-        if (result is! Success<GuestCreatedData>) {
-          throw (result as Failure).videoError;
-        }
-        final updatedInfo = result.data.user.toUserInfo();
-        onGuestUserUpdated(
-          User(
-            id: updatedInfo.id,
-            name: updatedInfo.name.isEmpty ? null : updatedInfo.name,
-            image: updatedInfo.image,
-            role: updatedInfo.role,
-            teams: updatedInfo.teams,
-            custom: updatedInfo.extraData,
-            type: user.type,
-          ),
-        );
-        return guestToken = UserToken(result.data.accessToken);
-      }),
-    };
-  }
-
-  /// Builds the token provider for a regular user from the [userToken] and
-  /// [tokenLoader] combination.
-  static TokenProvider _regularTokenProvider(
-    String? userToken,
-    TokenLoader? tokenLoader,
-  ) {
-    if (tokenLoader != null) {
-      // When both are provided, the token is served on the first load and
-      // the loader takes over once it expires.
-      var initialToken = userToken?.let(UserToken.new);
-      return TokenProvider.dynamic((userId) async {
-        final token = initialToken;
-        if (token != null) {
-          initialToken = null;
-          return token;
-        }
-        return UserToken(await tokenLoader(userId));
-      });
-    }
-    if (userToken != null) {
-      return TokenProvider.static(UserToken(userToken));
-    }
-    throw ArgumentError('Either `userToken` or `tokenLoader` must be set');
   }
 
   static final InstanceHolder _instanceHolder = InstanceHolder();

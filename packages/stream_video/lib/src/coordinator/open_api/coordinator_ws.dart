@@ -113,7 +113,10 @@ class CoordinatorWebSocket {
 
   Future<void> _authenticateUser() async {
     _logger.i(() => '[authenticateUser] url: ${_client.options.url}');
-    final tokenResult = _refreshToken
+    // Mirrors the RpcRetryManager guard: a static provider can only return
+    // the same token again, so refreshing it is pointless.
+    final shouldRefresh = _refreshToken && !tokenManager.usesStaticProvider;
+    final tokenResult = shouldRefresh
         ? await tokenManager.refreshTokenAsResult()
         : await tokenManager.getTokenAsResult();
     final userToken = tokenResult.getDataOrNull();
