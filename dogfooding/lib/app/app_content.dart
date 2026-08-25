@@ -35,8 +35,10 @@ class _StreamDogFoodingAppContentState
 
   /// The component builders that customise the Stream Video UI components.
   ///
-  /// Built once so its identity stays stable across rebuilds, otherwise every
-  /// widget depending on the [StreamComponentFactory] rebuilds on each frame.
+  /// Built once so its identity stays stable across rebuilds: a newly created
+  /// [StreamComponentBuilders] is never equal to the previous one, so building
+  /// it inline would rebuild every widget depending on the
+  /// [StreamComponentFactory] every time the surrounding widget rebuilds.
   late final _componentBuilders = StreamComponentBuilders(
     extensions: [
       ...streamVideoComponentBuilders(

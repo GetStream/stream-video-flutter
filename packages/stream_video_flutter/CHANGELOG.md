@@ -5,20 +5,31 @@
 - Added component factory support, so the Stream Video UI components can be replaced app-wide instead of threading widget builders through the widget tree. Register the components you want to replace with `streamVideoComponentBuilders` and wrap your app in a `StreamComponentFactory`:
 
   ```dart
-  MaterialApp(
-    builder: (context, child) => StreamComponentFactory(
-      builders: StreamComponentBuilders(
-        extensions: streamVideoComponentBuilders(
-          // Decorate the default, or return your own widget entirely.
-          participantTile: (context, props) => DefaultStreamParticipantTile(
-            props: props.copyWith(showParticipantLabel: false),
-          ),
+  class _MyAppState extends State<MyApp> {
+    // Build the builders once and hold on to them: a newly created
+    // StreamComponentBuilders is never equal to the previous one, so building
+    // it inline rebuilds every Stream component below the factory whenever the
+    // surrounding widget rebuilds.
+    late final _componentBuilders = StreamComponentBuilders(
+      extensions: streamVideoComponentBuilders(
+        // Decorate the default, or return your own widget entirely.
+        participantTile: (context, props) => DefaultStreamParticipantTile(
+          props: props.copyWith(showParticipantLabel: false),
         ),
       ),
-      child: child!,
-    ),
-    // ...
-  );
+    );
+
+    @override
+    Widget build(BuildContext context) {
+      return MaterialApp(
+        builder: (context, child) => StreamComponentFactory(
+          builders: _componentBuilders,
+          child: child!,
+        ),
+        // ...
+      );
+    }
+  }
   ```
 
   Every component follows the same shape: `StreamX` resolves the registered builder and falls back to `DefaultX`, which holds the default implementation. The parameters of `StreamX` are carried in a `StreamXProps`, exposed as `StreamX.props`, so a custom builder can read them and `copyWith` them to decorate the default rather than reimplement it.
