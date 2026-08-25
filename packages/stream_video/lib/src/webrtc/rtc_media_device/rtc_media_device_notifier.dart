@@ -11,6 +11,7 @@ import '../../call/stats/trace_tag.dart';
 import '../../call/stats/tracer.dart';
 import '../../errors/video_error_composer.dart';
 import '../../utils/extensions.dart';
+import '../rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 
 abstract class InterruptionEvent {}
 
@@ -57,6 +58,9 @@ class RtcMediaDeviceNotifier {
     rtc.navigator.mediaDevices.ondevicechange = _onDeviceChange;
     // Triggers the initial device change event to get the devices list.
     _onDeviceChange(null);
+
+    // Routes remote audio playback traces (web only).
+    rtc_audio.setAudioTraceHandler(_tracer.trace);
 
     _listenForAudioProcessingStateChanges();
     _listenForSpeechActivityChanges();
@@ -295,6 +299,29 @@ class RtcMediaDeviceNotifier {
     _tracer.trace(TraceTag.resumeAudioPlayout, null);
     return rtc.Helper.resumeAudioPlayout();
   }
+
+  /// Emits whenever the browser's autoplay policy starts or stops blocking
+  /// remote audio playback.
+  ///
+  /// The remote audio elements are page-global, so this reflects playback
+  /// across every call running on the page. Consumed by [Call] to keep
+  /// [CallState.isWebAudioPlaybackBlocked] up to date; integrators observe
+  /// `call.state` instead.
+  @internal
+  Stream<bool> get webAudioPlaybackBlockedChanges =>
+      rtc_audio.audioPlaybackBlockedChanges;
+
+  /// Retries playback of the remote audio elements the browser's autoplay
+  /// policy blocked. Must be called from within a user gesture (e.g. a button
+  /// tap) for the browser to allow it.
+  ///
+  /// Observe [CallState.isWebAudioPlaybackBlocked] to know when it is needed.
+  /// Within a call, prefer `Call.resumeWebAudioPlayback()`, which forwards
+  /// here; this entry point exists for code that has no `Call` at hand.
+  ///
+  /// Web only; a no-op on other platforms. Unrelated to [resumeAudioPlayout],
+  /// which unmutes playout paused via [pauseAudioPlayout].
+  Future<void> resumeWebAudioPlayback() => rtc_audio.resumeAudioPlayback();
 
   /// Regains Android audio focus if it was lost.
   ///
