@@ -209,6 +209,24 @@ void main() {
       expect(call.e2eeManager, same(e2ee));
     });
 
+    test('refuses a second, different manager on the same call', () async {
+      final call = createTestCall();
+      final other = MockEncryptionManager();
+      when(() => other.userId).thenReturn('test-user');
+      when(() => other.isDisposed).thenReturn(false);
+      when(
+        () => other.events,
+      ).thenAnswer((_) => const Stream<E2eeEvent>.empty());
+
+      await call.setE2EEManager(e2ee);
+
+      // Overwriting would drop the first manager while it still holds a
+      // native key store: nothing else references it, so the handle leaks.
+      expect(() => call.setE2EEManager(other), throwsA(isA<StateError>()));
+      expect(call.e2eeManager, same(e2ee));
+      verifyNever(() => e2ee.dispose());
+    });
+
     test('refuses a disposed manager', () async {
       final call = createTestCall();
       when(() => e2ee.isDisposed).thenReturn(true);

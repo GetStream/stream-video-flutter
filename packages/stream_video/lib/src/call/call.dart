@@ -1034,6 +1034,16 @@ class Call {
       );
     }
 
+    final current = _e2eeManager;
+    if (current != null && !identical(current, manager)) {
+      throw StateError(
+        'This call already has a different EncryptionManager. Overwriting it '
+        'would drop the current one while it still holds a native key store, '
+        'so release it first: clearE2EEManager() to dispose it, or '
+        'clearE2EEManager(dispose: false) to hand it to another call.',
+      );
+    }
+
     final claimant = _e2eeClaims[callCid.value]?.call.target;
     if (claimant != null &&
         !identical(claimant, this) &&
