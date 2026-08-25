@@ -191,6 +191,11 @@ class StreamVideo extends Disposable {
       createGuest: ({required id, name, image, required custom}) =>
           _client.loadGuest(id: id, name: name, image: image, custom: custom),
       onGuestUserUpdated: (updatedUser) => _state.user.value = updatedUser,
+      // Promote the provider to a static one so `usesStaticProvider`
+      // reports the guest token for what it is — fixed for the lifetime of
+      // the client.
+      onGuestTokenCreated: (token) =>
+          _tokenManager.tokenProvider = GuestTokenProvider(token),
     );
 
     _tokenManager = TokenManager(

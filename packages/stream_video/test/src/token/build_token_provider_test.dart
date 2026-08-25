@@ -55,6 +55,7 @@ class _FakeGuestCreator {
 void main() {
   group('buildTokenProvider', () {
     void noUserUpdate(User _) {}
+    void noTokenCreated(UserToken _) {}
 
     group('regular user', () {
       TokenProvider build({String? userToken, TokenLoader? tokenLoader}) {
@@ -66,6 +67,7 @@ void main() {
             Result.success(_guestData('unused')),
           ).call,
           onGuestUserUpdated: noUserUpdate,
+          onGuestTokenCreated: noTokenCreated,
         );
       }
 
@@ -133,6 +135,7 @@ void main() {
             Result.success(_guestData('unused')),
           ).call,
           onGuestUserUpdated: noUserUpdate,
+          onGuestTokenCreated: noTokenCreated,
         );
 
         final token = await provider.loadToken('!anon');
@@ -150,6 +153,7 @@ void main() {
             Result.success(_guestData('unused')),
           ).call,
           onGuestUserUpdated: noUserUpdate,
+          onGuestTokenCreated: noTokenCreated,
         );
 
         final token = await provider.loadToken('!anon');
@@ -168,6 +172,7 @@ void main() {
           const User.guest('local-guest'),
           createGuest: creator.call,
           onGuestUserUpdated: noUserUpdate,
+          onGuestTokenCreated: noTokenCreated,
         );
 
         final first = await provider.loadToken('local-guest');
@@ -192,6 +197,7 @@ void main() {
           ),
           createGuest: creator.call,
           onGuestUserUpdated: noUserUpdate,
+          onGuestTokenCreated: noTokenCreated,
         );
 
         await provider.loadToken('local-guest');
@@ -215,6 +221,7 @@ void main() {
           const User.guest('local-guest'),
           createGuest: creator.call,
           onGuestUserUpdated: (user) => updatedUser = user,
+          onGuestTokenCreated: noTokenCreated,
         );
 
         await provider.loadToken('local-guest');
@@ -225,6 +232,57 @@ void main() {
         expect(updatedUser?.type, UserType.guest);
       });
 
+      test('reports the created token once for provider promotion', () async {
+        final creator = _FakeGuestCreator(
+          Result.success(_guestData('server-guest-1')),
+        );
+        final createdTokens = <UserToken>[];
+        final provider = buildTokenProvider(
+          const User.guest('local-guest'),
+          createGuest: creator.call,
+          onGuestUserUpdated: noUserUpdate,
+          onGuestTokenCreated: createdTokens.add,
+        );
+
+        final token = await provider.loadToken('local-guest');
+        await provider.loadToken('local-guest'); // memoized, no re-creation
+
+        expect(createdTokens, [token]);
+        expect(token.userId, 'server-guest-1');
+      });
+
+      test('promotes the manager provider to static after creation', () async {
+        final creator = _FakeGuestCreator(
+          Result.success(_guestData('server-guest-1')),
+        );
+        late TokenManager manager;
+        final provider = buildTokenProvider(
+          const User.guest('local-guest'),
+          createGuest: creator.call,
+          onGuestUserUpdated: noUserUpdate,
+          onGuestTokenCreated: (token) =>
+              manager.tokenProvider = GuestTokenProvider(token),
+        );
+        manager = TokenManager(
+          userId: 'local-guest',
+          tokenProvider: provider,
+        );
+
+        final token = await manager.getToken();
+
+        // The refresh guards (RpcRetryManager, coordinator WS) key off this.
+        expect(manager.usesStaticProvider, isTrue);
+        expect(manager.peekToken(), token);
+
+        // Even an unguarded expire + reload serves the same token — the
+        // GuestTokenProvider skips the user-id validation that the
+        // server-assigned guest id would otherwise fail against the
+        // manager's locally-requested id.
+        manager.expireToken();
+        expect(await manager.getToken(), token);
+        expect(creator.calls, hasLength(1));
+      });
+
       test('throws when guest creation fails', () {
         final creator = _FakeGuestCreator(
           failureWithError('guest creation failed'),
@@ -233,6 +291,7 @@ void main() {
           const User.guest('local-guest'),
           createGuest: creator.call,
           onGuestUserUpdated: noUserUpdate,
+          onGuestTokenCreated: noTokenCreated,
         );
 
         expect(
