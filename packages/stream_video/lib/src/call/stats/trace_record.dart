@@ -60,7 +60,14 @@ class TraceRecord {
 extension TraceRecordListExtension on List<TraceRecord> {
   /// Converts a list of trace records to JSON string
   String toJsonString() {
-    final list = map((r) => r.toList()).toList();
-    return json.encode(list);
+    return json.encode(toJsonPayload());
+  }
+
+  /// The records as plain, isolate-sendable lists.
+  ///
+  /// Separated from [toJsonString] so the encode itself can be handed to
+  /// another isolate — see `encodeStatsJson`.
+  List<List<dynamic>> toJsonPayload() {
+    return map((r) => r.toList()).toList();
   }
 }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/services.dart';
@@ -20,6 +19,7 @@ import '../../webrtc/rtc_media_device/rtc_media_device.dart';
 import '../../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../session/call_session.dart';
 import '../state/call_state_notifier.dart';
+import 'stats_json_encoder.dart';
 import 'trace_record.dart';
 import 'trace_tag.dart';
 import 'tracer.dart';
@@ -262,15 +262,28 @@ class SfuStatsReporter {
           ]);
         }
 
+        // Serializing the full stats blobs is the most expensive thing this
+        // tick does, and none of it needs the UI isolate. Hand all three
+        // encodes to workers and let them run concurrently.
+        final (publisherStats, subscriberStats, rtcStats) = await (
+          publisherStatsBundle == null
+              ? Future<String?>.value()
+              : encodeStatsJson(publisherStatsBundle.rawStats),
+          subscriberStatsBundle == null
+              ? Future<String?>.value()
+              : encodeStatsJson(subscriberStatsBundle.rawStats),
+          encodeStatsJson(
+            [...traces.expand((trace) => trace.snapshot)].toJsonPayload(),
+          ),
+        ).wait;
+
+        if (_shouldSkipSfuStats) return;
+
         try {
           final request = sfu.SendStatsRequest(
             sessionId: callSession.sessionId,
-            publisherStats: publisherStatsBundle == null
-                ? null
-                : jsonEncode(publisherStatsBundle.rawStats),
-            subscriberStats: subscriberStatsBundle == null
-                ? null
-                : jsonEncode(subscriberStatsBundle.rawStats),
+            publisherStats: publisherStats,
+            subscriberStats: subscriberStats,
             sdkVersion: streamVideoVersion,
             sdk: streamSdkName,
             android: androidState,
@@ -289,9 +302,7 @@ class SfuStatsReporter {
               connectionTimeMs,
               reconnectionStrategy,
             ),
-            rtcStats: [
-              ...traces.expand((trace) => trace.snapshot),
-            ].toJsonString(),
+            rtcStats: rtcStats,
             encodeStats: encodeStats,
             decodeStats: decodeStats,
             unifiedSessionId: unifiedSessionId,

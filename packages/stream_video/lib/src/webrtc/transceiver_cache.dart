@@ -95,7 +95,15 @@ class TransceiverManager {
 
   /// Gets the transceiver for the given track type and publish option id.
   RTCRtpTransceiver? getWith(SfuTrackType trackType, int publishOptionId) {
-    return _transceivers[(trackType, publishOptionId)]?.transceiver;
+    return getBundleWith(trackType, publishOptionId)?.transceiver;
+  }
+
+  /// Gets the cached bundle for the given track type and publish option id.
+  TransceiverCache? getBundleWith(
+    SfuTrackType trackType,
+    int publishOptionId,
+  ) {
+    return _transceivers[(trackType, publishOptionId)];
   }
 
   /// Updates the cached bundle for the given publish option.

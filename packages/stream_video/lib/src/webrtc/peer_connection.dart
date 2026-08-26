@@ -13,9 +13,8 @@ import '../sfu/data/models/sfu_error.dart';
 import '../sfu/sfu_client.dart';
 import '../utils/result.dart';
 import '../utils/standard.dart';
-import 'model/stats/rtc_printable_stats.dart';
-import 'model/stats/rtc_stats.dart';
 import 'model/stats/rtc_stats_mapper.dart';
+import 'model/stats/rtc_stats_snapshot.dart';
 import 'peer_type.dart';
 import 'sdp/editor/sdp_editor.dart';
 import 'sdp/sdp.dart';
@@ -567,29 +566,9 @@ class StreamPeerConnection extends Disposable {
     onRenegotiationNeeded?.call(this);
   }
 
-  Future<
-    ({
-      List<RtcStats> rtcStats,
-      RtcPrintableStats printable,
-      List<Map<String, dynamic>> rawStats,
-    })
-  >
-  getStats() async {
-    final stats = await pc.getStats();
-
-    final rtcPrintableStats = stats.toPrintableRtcStats();
-    final rawStats = stats.toRawStats();
-    final rtcStats = stats
-        .map((report) => report.toRtcStats())
-        .where((element) => element != null)
-        .cast<RtcStats>()
-        .toList();
-
-    return (
-      rtcStats: rtcStats,
-      printable: rtcPrintableStats,
-      rawStats: rawStats,
-    );
+  Future<RtcStatsSnapshot> getStats() async {
+    final reports = await pc.getStats();
+    return RtcStatsSnapshot(reports.toRawStats());
   }
 
   @override

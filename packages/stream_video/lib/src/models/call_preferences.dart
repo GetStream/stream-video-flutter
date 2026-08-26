@@ -29,6 +29,10 @@ abstract class CallPreferences {
   ///
   /// This controls how frequently metrics like bandwidth, latency, and
   /// quality statistics are collected and reported.
+  ///
+  /// Collection is skipped entirely on ticks where nothing observes the result,
+  /// so this interval is an upper bound on the work rather than a guarantee it
+  /// happens. Set it to [Duration.zero] to disable the reporter outright.
   Duration get callStatsReportingInterval;
 
   /// Whether to automatically drop the call if the user is alone
@@ -115,6 +119,10 @@ class DefaultCallPreferences implements CallPreferences {
   ///
   /// This controls how frequently metrics like bandwidth, latency, and
   /// quality statistics are collected and reported.
+  ///
+  /// Collection is skipped entirely on ticks where nothing observes the result,
+  /// so this interval is an upper bound on the work rather than a guarantee it
+  /// happens. Set it to [Duration.zero] to disable the reporter outright.
   ///
   /// Defaults to 2 seconds.
   @override

@@ -3,40 +3,51 @@ import 'package:meta/meta.dart';
 import '../webrtc/model/stats/rtc_outbound_rtp_video_stream.dart';
 import '../webrtc/model/stats/rtc_printable_stats.dart';
 import '../webrtc/model/stats/rtc_stats.dart';
+import '../webrtc/model/stats/rtc_stats_snapshot.dart';
 import '../webrtc/peer_type.dart';
 
 @immutable
 class PeerConnectionStatsBundle {
   const PeerConnectionStatsBundle({
     required this.peerType,
-    required this.printable,
-    required this.raw,
-    required this.stats,
-  });
+    required RtcStatsSnapshot snapshot,
+  }) : _snapshot = snapshot;
+
+  /// A bundle for a peer connection that does not exist (yet).
+  PeerConnectionStatsBundle.empty(this.peerType)
+    : _snapshot = RtcStatsSnapshot.empty();
 
   final StreamPeerType peerType;
-  final List<RtcStats> stats;
-  final RtcPrintableStats printable;
-  final List<Map<String, dynamic>> raw;
+  final RtcStatsSnapshot _snapshot;
+
+  /// The reports as plain maps.
+  List<Map<String, dynamic>> get raw => _snapshot.rawStats;
+
+  /// The reports as typed models. Derived from [raw] on first access.
+  List<RtcStats> get stats => _snapshot.rtcStats;
+
+  /// The human-readable dump. Derived from [raw] on first access — reading it
+  /// is what makes the SDK pay for formatting it.
+  RtcPrintableStats get printable => _snapshot.printable;
 
   @override
   String toString() {
-    return 'CallStats{peerType: $peerType, printable: $printable, raw: $raw}';
+    return 'CallStats{peerType: $peerType, raw: $raw}';
   }
 
+  // Equality deliberately ignores `stats` and `printable`: both are pure
+  // functions of `raw`, so comparing them adds nothing but would force the
+  // lazy views to materialize.
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is PeerConnectionStatsBundle &&
           runtimeType == other.runtimeType &&
           peerType == other.peerType &&
-          printable == other.printable &&
-          stats == other.stats &&
           raw == other.raw;
 
   @override
-  int get hashCode =>
-      peerType.hashCode ^ printable.hashCode ^ raw.hashCode ^ stats.hashCode;
+  int get hashCode => peerType.hashCode ^ raw.hashCode;
 }
 
 class CallMetrics {

@@ -45,6 +45,13 @@ class MediaFrameReporter {
     _audioTrackId ??= trackId;
   }
 
+  /// Whether [onSubscriberStats] would still act on a stats tick.
+  ///
+  /// Once the first audio frame has been reported this is a one-shot that has
+  /// already fired, so callers can stop collecting stats on its behalf.
+  bool get needsSubscriberStats =>
+      !_audioReported && !_disposed && _audioTrackId != null;
+
   /// Fed the subscriber's periodic WebRTC stats; reports `FirstAudioFrame` the
   /// first time inbound audio packets are seen.
   void onSubscriberStats(List<RtcStats> stats) {

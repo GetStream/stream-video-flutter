@@ -28,9 +28,12 @@ const _tag = 'SV:StatsMapper';
 const _space = ' ';
 const _lineFeed = '\n';
 
-Map<String, RtcCodec> codecs = <String, RtcCodec>{};
-
 extension RtcStatsMapper on List<rtc.StatsReport> {
+  /// Flattens the platform reports into plain maps.
+  ///
+  /// This is the single conversion point out of `rtc.StatsReport`: every other
+  /// view of a stats tick (the typed models, the printable dump) is derived
+  /// from the maps this produces, so each report is only walked once.
   List<Map<String, dynamic>> toRawStats() {
     final rawStats = <Map<String, dynamic>>[];
 
@@ -45,8 +48,31 @@ extension RtcStatsMapper on List<rtc.StatsReport> {
 
     return rawStats;
   }
+}
+
+extension RtcRawStatsMapper on List<Map<String, dynamic>> {
+  List<RtcStats> toRtcStats() {
+    final rtcStats = <RtcStats>[];
+
+    for (final report in this) {
+      final stats = report.toRtcStats();
+      if (stats != null) rtcStats.add(stats);
+    }
+
+    return rtcStats;
+  }
 
   RtcPrintableStats toPrintableRtcStats() {
+    // Scoped to this dump rather than shared process-wide: the codec reports
+    // that the RTP entries reference arrive in this same list.
+    final codecs = <String, RtcCodec>{};
+    for (final report in this) {
+      if (RtcReportType.fromAlias(report['type'] as String? ?? '') ==
+          RtcReportType.codec) {
+        report.extractCodec(codecs);
+      }
+    }
+
     final remoteStat = StringBuffer();
     final localStat = StringBuffer();
 
@@ -54,14 +80,15 @@ extension RtcStatsMapper on List<rtc.StatsReport> {
 
     for (final report in this) {
       try {
-        final reportType = RtcReportType.fromAlias(report.type);
+        final reportType = RtcReportType.fromAlias(
+          report['type'] as String? ?? '',
+        );
         switch (reportType) {
           case RtcReportType.codec:
-            report.extractCodec(codecs);
+            // Already collected in the pre-pass above.
             break;
           case RtcReportType.candidatePair:
-            final json = report.toJson();
-            candidatePair = RtcIceCandidatePair.fromJson(json);
+            candidatePair = RtcIceCandidatePair.fromJson(report);
             break;
           case RtcReportType.remoteCandidate:
             if (candidatePair != null) {
@@ -103,19 +130,19 @@ extension RtcStatsMapper on List<rtc.StatsReport> {
   }
 }
 
-extension StatsReportX on rtc.StatsReport {
+extension RtcRawStatX on Map<String, dynamic> {
   RtcStats? toRtcStats() {
-    final type = RtcReportType.fromAlias(this.type);
+    final type = RtcReportType.fromAlias(this['type'] as String? ?? '');
 
-    final kindValue = values[RtcKind.propertyName];
+    final String? kindValue = this[RtcKind.propertyName];
     final kind = kindValue != null ? RtcKind.fromAlias(kindValue) : null;
 
-    final sourceValue = values[RtcSource.propertyName];
+    final bool? sourceValue = this[RtcSource.propertyName];
     final source = sourceValue != null
         ? RtcSource.fromValue(sourceValue)
         : null;
 
-    final json = toJson();
+    final json = this;
 
     switch (type) {
       case RtcReportType.codec:
@@ -194,17 +221,8 @@ extension StatsReportX on rtc.StatsReport {
     }
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'type': type,
-      'timestamp': timestamp,
-      ...values,
-    };
-  }
-
   void extractCodec(Map<String, RtcCodec> codecs) {
-    final json = toJson();
+    final json = this;
     RtcCodec.fromJson(json)?.also((codec) {
       final codecId = codec.id;
       if (codecId != null) {
@@ -217,7 +235,7 @@ extension StatsReportX on rtc.StatsReport {
     StringBuffer localStat,
     RtcIceCandidatePair candidatePair,
   ) {
-    final json = toJson();
+    final json = this;
     final localCandidate = RtcIceCandidate.fromJson(json);
     if (localCandidate != null &&
         localCandidate.id == candidatePair.localCandidateId) {
@@ -233,7 +251,7 @@ extension StatsReportX on rtc.StatsReport {
     StringBuffer remoteStat,
     RtcIceCandidatePair candidatePair,
   ) {
-    final json = toJson();
+    final json = this;
     final remoteCandidate = RtcIceCandidate.fromJson(json);
     if (remoteCandidate != null &&
         remoteCandidate.id == candidatePair.remoteCandidateId) {
@@ -249,8 +267,8 @@ extension StatsReportX on rtc.StatsReport {
     StringBuffer remoteStat,
     Map<String, RtcCodec> codecs,
   ) {
-    final json = toJson();
-    final String? propValue = values[RtcMediaType.propertyName];
+    final json = this;
+    final String? propValue = this[RtcMediaType.propertyName];
     if (propValue == null) {
       return;
     }
@@ -286,8 +304,8 @@ extension StatsReportX on rtc.StatsReport {
     StringBuffer localStat,
     Map<String, RtcCodec> codecs,
   ) {
-    final json = toJson();
-    final String? propValue = values[RtcMediaType.propertyName];
+    final json = this;
+    final String? propValue = this[RtcMediaType.propertyName];
     if (propValue == null) {
       return;
     }
@@ -323,8 +341,8 @@ extension StatsReportX on rtc.StatsReport {
     required StringBuffer remoteStat,
     required StringBuffer localStat,
   }) {
-    final bool? sourceValue = values[RtcSource.propertyName];
-    final String? kindAlias = values[RtcKind.propertyName];
+    final bool? sourceValue = this[RtcSource.propertyName];
+    final String? kindAlias = this[RtcKind.propertyName];
     if (sourceValue == null || kindAlias == null) {
       return;
     }
@@ -342,7 +360,7 @@ extension StatsReportX on rtc.StatsReport {
   }
 
   void extractTrackRemoteAudio(StringBuffer remoteStat) {
-    final json = toJson();
+    final json = this;
     final rtcBase = RtcMediaStreamTrackRemoteAudio.fromJson(json);
     if (rtcBase != null) {
       remoteStat
@@ -358,7 +376,7 @@ extension StatsReportX on rtc.StatsReport {
   }
 
   void extractTrackRemoteVideo(StringBuffer remoteStat) {
-    final json = toJson();
+    final json = this;
     final rtcBase = RtcMediaStreamTrackRemoteVideo.fromJson(json);
     if (rtcBase != null) {
       remoteStat
@@ -374,7 +392,7 @@ extension StatsReportX on rtc.StatsReport {
   }
 
   void extractTrackLocalAudio(StringBuffer localStat) {
-    final json = toJson();
+    final json = this;
     final rtcBase = RtcMediaStreamTrackLocalAudio.fromJson(json);
     if (rtcBase != null) {
       localStat
@@ -390,7 +408,7 @@ extension StatsReportX on rtc.StatsReport {
   }
 
   void extractTrackLocalVideo(StringBuffer localStat) {
-    final json = toJson();
+    final json = this;
     final rtcBase = RtcMediaStreamTrackLocalVideo.fromJson(json);
     if (rtcBase != null) {
       localStat
@@ -409,8 +427,8 @@ extension StatsReportX on rtc.StatsReport {
     StringBuffer localStat,
     Map<String, RtcCodec> codecs,
   ) {
-    final json = toJson();
-    final String? propValue = values[RtcKind.propertyName];
+    final json = this;
+    final String? propValue = this[RtcKind.propertyName];
     if (propValue == null) {
       return;
     }
@@ -437,8 +455,8 @@ extension StatsReportX on rtc.StatsReport {
     StringBuffer localStat,
     Map<String, RtcCodec> codecs,
   ) {
-    final json = toJson();
-    final String? propValue = values[RtcKind.propertyName];
+    final json = this;
+    final String? propValue = this[RtcKind.propertyName];
     if (propValue == null) {
       return;
     }

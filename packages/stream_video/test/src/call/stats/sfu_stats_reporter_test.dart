@@ -6,6 +6,7 @@ import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart'
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/call/stats/sfu_stats_reporter.dart';
 import 'package:stream_video/src/call/stats/tracer.dart';
+import 'package:stream_video/src/webrtc/model/stats/rtc_stats_snapshot.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
 import 'package:stream_video/stream_video.dart';
@@ -20,21 +21,10 @@ class FakeSubscriber extends Fake implements TracedStreamPeerConnection {
   final Tracer tracer = Tracer('subscriber');
 
   @override
-  Future<
-    ({
-      List<RtcStats> rtcStats,
-      RtcPrintableStats printable,
-      List<Map<String, dynamic>> rawStats,
-    })
-  >
-  getStats() async {
-    return (
-      rtcStats: <RtcStats>[],
-      printable: const RtcPrintableStats(local: '', remote: ''),
-      rawStats: <Map<String, dynamic>>[
-        {'type': 'test'},
-      ],
-    );
+  Future<RtcStatsSnapshot> getStats() async {
+    return RtcStatsSnapshot(<Map<String, dynamic>>[
+      {'type': 'test'},
+    ]);
   }
 }
 

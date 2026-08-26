@@ -1761,6 +1761,9 @@ class Call {
                   .callState
                   .preferences
                   .callStatsReportingInterval,
+              shouldCollect: () =>
+                  _stats.hasListeners ||
+                  (session.rtcManager?.needsSubscriberStats ?? false),
             )
             .listen(
               (stats) {

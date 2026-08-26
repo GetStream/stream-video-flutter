@@ -11,7 +11,6 @@ import '../../webrtc/model/stats/rtc_codec.dart';
 import '../../webrtc/model/stats/rtc_ice_candidate_pair.dart';
 import '../../webrtc/model/stats/rtc_inbound_rtp_video_stream.dart';
 import '../../webrtc/model/stats/rtc_outbound_rtp_video_stream.dart';
-import '../../webrtc/model/stats/rtc_printable_stats.dart';
 import '../../webrtc/peer_type.dart';
 import '../../webrtc/rtc_manager.dart';
 
@@ -42,16 +41,34 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
   >
   run({
     Duration interval = const Duration(seconds: 10),
+    bool Function()? shouldCollect,
   }) {
-    return Stream.periodic(interval, (tick) => (collectStats(), tick)).asyncMap(
-      (data) async {
-        final stats = await data.$1;
-        if (!mounted) return stats;
+    // A non-positive interval disables stats collection entirely.
+    if (interval <= Duration.zero) {
+      return const Stream.empty();
+    }
 
-        unawaited(_processStats(stats, data.$2));
-        return stats;
-      },
-    );
+    var tick = 0;
+    // `asyncExpand` keeps ticks serialized, so a slow `getStats()` round trip
+    // delays the next tick instead of stacking up behind it.
+    return Stream<void>.periodic(interval).asyncExpand((_) async* {
+      if (!mounted) return;
+
+      // Collecting stats means two `getStats()` round trips per tick, each
+      // walking every report. Skip it outright when the result has nowhere to
+      // go: nothing subscribed to this reporter, nothing subscribed to the
+      // stream we feed, and first-frame telemetry already satisfied.
+      if (!hasListeners && !(shouldCollect?.call() ?? true)) return;
+
+      final stats = await collectStats();
+      if (!mounted) {
+        yield stats;
+        return;
+      }
+
+      unawaited(_processStats(stats, tick++));
+      yield stats;
+    });
   }
 
   Future<
@@ -61,23 +78,19 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
     })
   >
   collectStats() async {
-    final publisherStatsBundle = await rtcManager.publisher?.getStats();
-    final subscriberStatsBundle = await rtcManager.subscriber.getStats();
+    final publisherSnapshot = await rtcManager.publisher?.getStats();
+    final subscriberSnapshot = await rtcManager.subscriber.getStats();
 
-    final publisherStats = PeerConnectionStatsBundle(
-      peerType: StreamPeerType.publisher,
-      stats: publisherStatsBundle?.rtcStats ?? [],
-      printable:
-          publisherStatsBundle?.printable ??
-          const RtcPrintableStats(local: '', remote: ''),
-      raw: publisherStatsBundle?.rawStats ?? [],
-    );
+    final publisherStats = publisherSnapshot == null
+        ? PeerConnectionStatsBundle.empty(StreamPeerType.publisher)
+        : PeerConnectionStatsBundle(
+            peerType: StreamPeerType.publisher,
+            snapshot: publisherSnapshot,
+          );
 
     final subscriberStats = PeerConnectionStatsBundle(
       peerType: StreamPeerType.subscriber,
-      stats: subscriberStatsBundle.rtcStats,
-      printable: subscriberStatsBundle.printable,
-      raw: subscriberStatsBundle.rawStats,
+      snapshot: subscriberSnapshot,
     );
 
     return (

@@ -19,7 +19,7 @@ SfuPublishOptions _decode(sfu_models.PublishOption option) {
   );
 
   final decoded = sfu_events.SfuEvent.fromBuffer(event.writeToBuffer());
-  final mapped = decoded.toDomain()! as SfuChangePublishOptionsEvent;
+  final mapped = decoded.toDomain() as SfuChangePublishOptionsEvent;
   return mapped.publishOptions.single;
 }
 

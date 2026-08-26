@@ -7,12 +7,18 @@
 
 ### 🔄 Changed
 
+- Stats collection no longer runs when nothing observes the result. `StatsReporter` skips the whole tick — two `getStats()` round trips, each walking every report — unless something is subscribed to `Call.stats`, something is subscribed to the reporter itself, or first-frame telemetry still needs a sample. Setting `CallPreferences.callStatsReportingInterval` to `Duration.zero` now disables the reporter outright.
+- A stats tick is parsed once instead of three times. The platform reports are flattened into plain maps in a single walk, and the typed models and the human-readable dump are both derived from those maps on first access. The dump in particular used to be string-formatted on every tick of both reporters even when no log or diagnostics listener existed; it is now only built if something reads it.
+- The SFU stats reporter serializes its payloads off the UI isolate. Both peer-connection stats blobs and the RTC trace snapshot are encoded concurrently via `compute` instead of blocking the UI isolate with three `jsonEncode` calls per tick.
+- Stats ticks no longer overlap: a tick that outlives its interval delays the next one rather than stacking behind it.
+
 - [Web] `RtcRemoteTrack.setSinkId` is now asynchronous (`Future<RtcRemoteTrack>` instead of `RtcRemoteTrack`) and throws when the browser cannot route the track to the requested device.
 - [Web] `RtcRemoteTrack.stop` takes an optional `disposeWebAudioPlayer` flag (defaults to `true`, no effect on native). Pass `false` when the track may resume on the same transceiver, to keep its `<audio>` element and the selected output device.
 
 ### 🐞 Fixed
 
 - Fixed the publish-option fallbacks being dead code, which left the SDK silently dependent on the SFU populating every optional field. `fps`, `bitrate`, `maxSpatialLayers` and `maxTemporalLayers` arrive as proto3 scalars, so an omitted field decoded as `0` rather than `null` and every `?? default` downstream was unreachable. An SFU that omitted `maxSpatialLayers` would have published **zero** encodings, and one that omitted `fps` would have set `maxFramerate: 0` on every layer. Absent fields now map to `null`, and an explicit `0` falls back to the documented default (30 fps, 3 spatial/temporal layers, preset bitrate) instead of being published verbatim.
+- Fixed the publisher's SVC/simulcast branch in `onPublishQualityChanged` depending on the stats reporter having collected at least once: the codec in use now falls back to the codec the sender negotiated, so an SFU quality change is handled the same way regardless of stats cadence.
 - Fixed `SfuPublishOptions.toDTO()` dropping `degradationPreference`, so the preference was lost whenever publish options were sent back to the SFU (for example on rejoin).
 - [Web] Fixed remote audio staying silent for the rest of the call after the browser's autoplay policy blocked playback, or after an audio element paused on its own (for example when a Bluetooth headset switches profile as the microphone is unmuted). Playback is now started explicitly, watched, and retried with a backoff, instead of relying on the element's `autoplay` attribute and failing with no indication.
 - [Web] Fixed the selected audio output device being lost when a remote participant unmuted.

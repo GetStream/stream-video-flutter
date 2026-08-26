@@ -39,6 +39,11 @@ class MutableSharedEmitterImpl<T> extends MutableSharedEmitter<T> {
 
   final PublishSubject<T> _shared;
 
+  /// Whether anything is currently subscribed to this emitter.
+  ///
+  /// Lets producers skip work whose only purpose is to feed this stream.
+  bool get hasListeners => _shared.hasListener;
+
   @override
   Future<dynamic> close() {
     return _shared.close();

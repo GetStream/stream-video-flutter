@@ -199,6 +199,10 @@ class RtcManager extends Disposable {
     _mediaFrameReporter?.onSubscriberStats(stats);
   }
 
+  /// Whether first-frame telemetry still needs periodic subscriber stats.
+  bool get needsSubscriberStats =>
+      _mediaFrameReporter?.needsSubscriberStats ?? false;
+
   StreamSubscription<ScreenSharingStartedEvent>?
   _screenSharingStartedSubscription;
 
@@ -518,9 +522,11 @@ class RtcManager extends Disposable {
           '[onPublishQualityChanged] Update publish quality, requested layers by SFU: $enabledLayers',
     );
 
-    final sender = transceiversManager
-        .getWith(videoSender.trackType, videoSender.publishOptionId)
-        ?.sender;
+    final transceiverCache = transceiversManager.getBundleWith(
+      videoSender.trackType,
+      videoSender.publishOptionId,
+    );
+    final sender = transceiverCache?.transceiver.sender;
 
     if (sender == null) {
       _logger.w(() => '[onPublishQualityChanged] no video sender found.');
@@ -536,11 +542,16 @@ class RtcManager extends Disposable {
       return;
     }
 
-    final usesSvcCodec = codecInUse != null && codecs.isSvcCodec(codecInUse);
+    // `codecInUse` is read from the stats reporter, which only has a value once
+    // it has actually collected. Fall back to the codec this sender negotiated,
+    // so which branch we take below never depends on a diagnostics poller
+    // having run.
+    final codec = codecInUse ?? transceiverCache?.publishOption.codec.name;
+    final usesSvcCodec = codec != null && codecs.isSvcCodec(codec);
 
     _logger.i(
       () =>
-          '[onPublishQualityChanged] Codec in use: $codecInUse, uses SVC: $usesSvcCodec',
+          '[onPublishQualityChanged] Codec in use: $codec, uses SVC: $usesSvcCodec',
     );
 
     var changed = false;
