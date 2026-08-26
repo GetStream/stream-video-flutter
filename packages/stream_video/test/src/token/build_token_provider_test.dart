@@ -16,9 +16,14 @@ String _fakeJwt(String userId) {
   return '$header.$payload.$signature';
 }
 
-GuestCreatedData _guestData(String id, {String? name, String? image}) {
+GuestCreatedData _guestData(
+  String id, {
+  String? name,
+  String? image,
+  String? accessToken,
+}) {
   return GuestCreatedData(
-    accessToken: _fakeJwt(id),
+    accessToken: accessToken ?? _fakeJwt(id),
     duration: '10ms',
     user: UserResponseData(
       id: id,
@@ -229,6 +234,47 @@ void main() {
       expect(updatedUser?.name, 'Server Name');
       expect(updatedUser?.image, 'img');
       expect(updatedUser?.type, UserType.guest);
+    });
+
+    test('caches the first token and notifies onTokenUpdated', () async {
+      final creator = _FakeGuestCreator(
+        Result.success(_guestData('server-guest-1')),
+      );
+      final updates = <UserToken>[];
+      final manager = TokenManager.unconfigured(onTokenUpdated: updates.add);
+
+      final result = await establishGuestSession(
+        tokenManager: manager,
+        user: const User.guest('local-guest'),
+        createGuest: creator.call,
+        onGuestUserUpdated: noUserUpdate,
+      );
+
+      // Served through the manager, so a guest's first token is cached and
+      // announced like every other user's.
+      expect(manager.peekToken(), result.getDataOrNull());
+      expect(updates, [result.getDataOrNull()]);
+    });
+
+    test('rejects an unreadable token without handing it over', () async {
+      final creator = _FakeGuestCreator(
+        Result.success(_guestData('server-guest-1', accessToken: 'not-a-jwt')),
+      );
+      final manager = TokenManager.unconfigured();
+      User? updatedUser;
+
+      final result = await establishGuestSession(
+        tokenManager: manager,
+        user: const User.guest('local-guest'),
+        createGuest: creator.call,
+        onGuestUserUpdated: (user) => updatedUser = user,
+      );
+
+      expect(result, isA<Failure>());
+      expect(manager.userId, isNull);
+      // The client keeps the identity it asked for, so a retry creates the
+      // guest it meant to instead of one for the server-assigned id.
+      expect(updatedUser, isNull);
     });
 
     test('returns the failure and leaves the manager unconfigured', () async {

@@ -1,26 +1,31 @@
 import 'package:stream_core/stream_core.dart'
     as core
-    show StreamLogHandler, StreamLogPriority, StreamLogger;
+    show StreamLogConfig, StreamLogHandler, StreamLogPriority, StreamLogger;
 
 import 'logger_api.dart';
 import 'stream_log.dart';
 
-/// Forwards `stream_core`'s own log records (e.g. the WebSocket client) into
-/// the video logger, admitting records at [logPriority] and above — core's
-/// logger is silent unless a handler is installed.
+/// Forwards `stream_core`'s own log records — the WebSocket client, engine,
+/// health monitor and authentication handler this SDK runs on — into the video
+/// logger, admitting records at [logPriority] and above. Core's logger is
+/// silent until something installs a handler.
 void installCoreLogBridge(Priority logPriority) {
-  core.StreamLogger.handler = core.StreamLogHandler.from(
-    (record) => StreamLog().log(
-      record.priority.toVideoPriority(),
-      record.tag,
-      () => [
-        record.message,
-        if (record.error != null) 'error: ${record.error}',
-        if (record.stackTrace != null) '${record.stackTrace}',
-      ].join('; '),
+  core.StreamLogger.configure(
+    core.StreamLogConfig(
+      priority: logPriority.toCoreLogPriority(),
+      handler: core.StreamLogHandler.from(
+        (record) => StreamLog().log(
+          record.priority.toVideoPriority(),
+          record.tag,
+          () => [
+            record.message,
+            if (record.error != null) 'error: ${record.error}',
+            if (record.stackTrace != null) '${record.stackTrace}',
+          ].join('; '),
+        ),
+      ),
     ),
   );
-  core.StreamLogger.priority = logPriority.toCoreLogPriority();
 }
 
 extension on Priority {

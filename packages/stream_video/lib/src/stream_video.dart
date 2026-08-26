@@ -59,8 +59,8 @@ import 'retry/retry_policy.dart';
 import 'telemetry/client_event_reporter.dart';
 import 'telemetry/client_event_transport.dart';
 import 'token/token.dart';
-import 'token/token_manager_extension.dart';
 import 'token/token_provider_factory.dart';
+import 'token/token_source.dart';
 import 'utils/cancelable_operation.dart';
 import 'utils/future.dart';
 import 'utils/none.dart';
@@ -186,9 +186,13 @@ class StreamVideo extends Disposable {
 
     if (user.type == UserType.guest) {
       // A guest's identity is assigned by the server, so the manager starts
-      // without one and is pointed at the created guest on first token use
-      // (see [_ensureToken]).
+      // without one and is pointed at the created guest by the first caller
+      // that needs a token (see [_establishGuestSession]).
       _tokenManager = TokenManager.unconfigured(onTokenUpdated: onTokenUpdated);
+      _tokens = TokenSource(
+        _tokenManager,
+        establishSession: _establishGuestSession,
+      );
     } else {
       _tokenManager = TokenManager(
         userId: user.id,
@@ -199,12 +203,13 @@ class StreamVideo extends Disposable {
         ),
         onTokenUpdated: onTokenUpdated,
       );
+      _tokens = TokenSource(_tokenManager);
     }
 
     _client = buildCoordinatorClient(
       user: user,
       apiKey: apiKey,
-      tokenManager: _tokenManager,
+      tokenSource: _tokens,
       latencySettings: _options.latencySettings,
       retryPolicy: _options.retryPolicy,
       rpcUrl: _options.coordinatorRpcUrl,
@@ -236,8 +241,9 @@ class StreamVideo extends Disposable {
 
     // Pre-warm the token cache, mirroring the eager fetch previously
     // triggered by setting the token provider. Failures are logged by
-    // getTokenAsResult and surface later, when the token is actually needed.
-    unawaited(_ensureToken());
+    // getToken and surface later, when the token is actually needed — the
+    // caller that needs one then establishes the session itself.
+    unawaited(_tokens.getToken());
 
     _setupLogger(options.logPriority, options.logHandlerFunction);
 
@@ -307,32 +313,23 @@ class StreamVideo extends Disposable {
 
   late final TokenManager _tokenManager;
 
-  /// The in-flight guest session creation, shared between concurrent callers
-  /// so a second caller arriving mid-exchange cannot mint a guest of its own.
-  Future<Result<UserToken>>? _guestSessionOperation;
+  /// Every token this client authenticates with comes from here, so a guest's
+  /// identity is established by whichever caller needs a token first rather
+  /// than only by [connect].
+  late final TokenSource _tokens;
 
-  /// Returns a token, first establishing the guest session when this client
-  /// belongs to a guest whose server-side identity does not exist yet.
+  /// Creates this client's guest and adopts the identity the server assigns.
   ///
-  /// Guest creation failures are not sticky: the next call retries.
-  Future<Result<UserToken>> _ensureToken() {
-    if (_tokenManager.userId != null) return _tokenManager.getTokenAsResult();
-
-    return _guestSessionOperation ??= _establishGuestSession();
-  }
-
-  Future<Result<UserToken>> _establishGuestSession() async {
-    try {
-      return await establishGuestSession(
-        tokenManager: _tokenManager,
-        user: _state.user.value,
-        createGuest: ({required id, name, image, required custom}) =>
-            _client.loadGuest(id: id, name: name, image: image, custom: custom),
-        onGuestUserUpdated: (updatedUser) => _state.user.value = updatedUser,
-      );
-    } finally {
-      _guestSessionOperation = null;
-    }
+  /// Called by [_tokens] alone, which shares one exchange between concurrent
+  /// callers and retries after a failure.
+  Future<Result<UserToken>> _establishGuestSession() {
+    return establishGuestSession(
+      tokenManager: _tokenManager,
+      user: _state.user.value,
+      createGuest: ({required id, name, image, required custom}) =>
+          _client.loadGuest(id: id, name: name, image: image, custom: custom),
+      onGuestUserUpdated: (updatedUser) => _state.user.value = updatedUser,
+    );
   }
 
   final _subscriptions = Subscriptions();
@@ -349,7 +346,7 @@ class StreamVideo extends Disposable {
   /// Resolves the current user token for the telemetry transport's auth
   /// interceptor, mirroring the coordinator client's authentication.
   Future<UserToken> _clientEventToken() async {
-    final tokenResult = await _ensureToken();
+    final tokenResult = await _tokens.getToken();
     if (tokenResult is! Success<UserToken>) {
       throw (tokenResult as Failure).videoError;
     }
@@ -449,13 +446,14 @@ class StreamVideo extends Disposable {
       // The cache can be briefly empty while a token refresh is in flight;
       // getToken serves the cached token when present and otherwise waits
       // for the refresh instead of failing.
-      return _ensureToken();
+      return _tokens.getToken();
     }
 
     _connectionState = ConnectionState.connecting(_state.currentUser.id);
 
-    // Guests get their server-assigned identity established here.
-    final tokenResult = await _ensureToken();
+    // Establishes a guest's server-assigned identity, unless a request that
+    // needed a token got there first.
+    final tokenResult = await _tokens.getToken();
     if (tokenResult is! Success<UserToken>) {
       _logger.e(() => '[connect] token fetching failed: $tokenResult');
       _connectionState = ConnectionState.failed(
@@ -1504,7 +1502,7 @@ CoordinatorClient buildCoordinatorClient({
   required String rpcUrl,
   required String wsUrl,
   required String apiKey,
-  required TokenManager tokenManager,
+  required TokenSource tokenSource,
   required RetryPolicy retryPolicy,
   required LatencySettings latencySettings,
   required InternetConnection networkMonitor,
@@ -1516,10 +1514,10 @@ CoordinatorClient buildCoordinatorClient({
 
   return CoordinatorClientRetry(
     retryPolicy: retryPolicy,
-    tokenManager: tokenManager,
+    tokenSource: tokenSource,
     delegate: CoordinatorClientOpenApi(
       apiKey: apiKey,
-      tokenManager: tokenManager,
+      tokenSource: tokenSource,
       latencyService: LatencyService(settings: latencySettings),
       retryPolicy: retryPolicy,
       rpcUrl: rpcUrl,

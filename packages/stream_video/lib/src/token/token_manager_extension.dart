@@ -20,8 +20,9 @@ extension TokenManagerResultExtension on TokenManager {
   /// was just expired. Concurrent refreshes are therefore safe, though each
   /// one arriving after a completed refresh costs one more provider fetch.
   ///
-  /// A provider that returns the same value on every load (a static token, or
-  /// the memoized guest token) still yields that same token back.
+  /// A provider that returns the same value on every load — a static token,
+  /// including the one a guest session installs — still yields that same token
+  /// back.
   Future<UserToken> refreshToken() {
     expireToken();
     return getToken();

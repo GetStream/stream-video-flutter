@@ -1,8 +1,6 @@
-import 'package:stream_core/stream_core.dart' show TokenManager;
-
 import '../../open_api/video/coordinator/api.dart';
 import '../errors/video_error.dart';
-import '../token/token_manager_extension.dart';
+import '../token/token_source.dart';
 import '../utils/result.dart';
 import 'retry_policy.dart';
 
@@ -16,11 +14,11 @@ typedef OnFailure<T> =
 class RpcRetryManager {
   const RpcRetryManager(
     this.policy, {
-    this.tokenManager,
+    this.tokenSource,
   });
 
   final RetryPolicy policy;
-  final TokenManager? tokenManager;
+  final TokenSource? tokenSource;
 
   Future<Result<T>> execute<T>(
     Delegate<T> delegate, [
@@ -43,10 +41,10 @@ class RpcRetryManager {
       // On 401, refresh the token once and retry immediately. Skipped for
       // static providers, which can only return the same token again.
       if (result.isFailure && !authRefreshed && _isAuthError(result)) {
-        final tokenManager = this.tokenManager;
-        if (tokenManager != null && !tokenManager.usesStaticProvider) {
+        final tokenSource = this.tokenSource;
+        if (tokenSource != null && !tokenSource.usesStaticProvider) {
           authRefreshed = true;
-          final refreshResult = await tokenManager.refreshTokenAsResult();
+          final refreshResult = await tokenSource.refreshToken();
           if (refreshResult.isSuccess) {
             // Prevent infinite loop of retries if the token refresh provides invalid token.
             continue;

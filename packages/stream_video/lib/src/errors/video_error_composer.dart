@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:stream_core/stream_core.dart' show StreamDioExceptionExtension;
 import 'package:tart/tart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -42,7 +43,7 @@ mixin VideoErrors {
         stackTrace: stackTrace,
       );
     } else if (exception is DioException) {
-      final apiError = _streamApiErrorOf(exception);
+      final apiError = exception.apiError ?? _streamApiErrorOf(exception);
       return VideoErrorWithCause(
         message: apiError?.message ?? exception.message ?? exception.toString(),
         cause: apiError ?? exception,
@@ -62,9 +63,10 @@ mixin VideoErrors {
     }
   }
 
-  /// Extracts a typed [StreamApiError] from the Stream error envelope carried by
-  /// a [DioException] response body, or `null` for transport-level failures
-  /// (timeouts, connection errors) that have no parseable error payload.
+  /// Extracts a typed [StreamApiError] from the `{"error": ...}` envelope
+  /// carried by a [DioException] response body, or `null` for a body that is
+  /// not one — including the transport-level failures (timeouts, connection
+  /// errors) that carry no payload at all.
   static StreamApiError? _streamApiErrorOf(DioException exception) {
     final data = exception.response?.data;
 

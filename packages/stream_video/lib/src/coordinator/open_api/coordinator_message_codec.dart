@@ -10,15 +10,15 @@ import 'package:stream_core/stream_core.dart'
 
 import '../models/coordinator_events.dart';
 import 'error/open_api_error.dart';
-import 'error/open_api_error_code.dart';
 import 'event/open_api_event.dart';
 import 'open_api_mapper_extensions.dart';
 
 /// A thin [WsEvent] wrapper produced by [CoordinatorMessageCodec].
 /// Carries the decoded [CoordinatorEvent]
 /// [healthCheckInfo] is non-null only for events that act as pong signals
+/// [error] is non-null only for API errors reported by the server
 final class CoordinatorWsEvent extends WsEvent {
-  const CoordinatorWsEvent(this.event, {this.healthCheckInfo});
+  const CoordinatorWsEvent(this.event, {this.healthCheckInfo, this.error});
 
   /// `null` indicates the message was suppressed (not a domain event).
   final CoordinatorEvent? event;
@@ -26,21 +26,22 @@ final class CoordinatorWsEvent extends WsEvent {
   @override
   final HealthCheckInfo? healthCheckInfo;
 
+  /// The API error the server reported, if this message was one.
+  ///
+  /// Read by the socket client, which closes the connection with it, so the
+  /// next authentication attempt is told why the server refused this one.
+  @override
+  final Object? error;
+
   static const suppressed = CoordinatorWsEvent(null);
 }
 
 /// Encodes/decodes messages between the coordinator WebSocket wire format
 /// (JSON) and [CoordinatorWsEvent].
 ///
-/// [onTokenError] is invoked when the server sends an API error whose code
-/// indicates an expired or invalid token, allowing the caller to schedule a
-/// token refresh before the next connection attempt.
 class CoordinatorMessageCodec
     implements WebSocketMessageCodec<WsEvent, WsRequest> {
-  const CoordinatorMessageCodec({this.onTokenError});
-
-  /// Called when the server reports a token-related API error.
-  final void Function()? onTokenError;
+  const CoordinatorMessageCodec();
 
   @override
   Object encode(WsRequest message) {
@@ -62,13 +63,9 @@ class CoordinatorMessageCodec
       return CoordinatorWsEvent.suppressed;
     }
 
-    // API error — notify caller for token refresh.
     final dtoError = OpenApiError.fromJson(jsonMap);
     if (dtoError != null) {
-      if (OpenApiErrorCode.tokenRelated.contains(dtoError.apiError.code)) {
-        onTokenError?.call();
-      }
-      return CoordinatorWsEvent.suppressed;
+      return CoordinatorWsEvent(null, error: dtoError.apiError);
     }
 
     final dtoEvent = OpenApiEvent.fromJson(jsonMap);

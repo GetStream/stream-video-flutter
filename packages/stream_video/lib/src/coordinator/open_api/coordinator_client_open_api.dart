@@ -8,7 +8,7 @@ import '../../latency/latency_service.dart';
 import '../../location/location_service.dart';
 import '../../models/call_received_data.dart';
 import '../../telemetry/client_event_reporter.dart';
-import '../../token/token_manager_extension.dart';
+import '../../token/token_source.dart';
 import '../models/coordinator_connection_state.dart';
 import '../models/coordinator_models.dart';
 import 'coordinator_ws.dart';
@@ -22,7 +22,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required String rpcUrl,
     required String wsUrl,
     required String apiKey,
-    required TokenManager tokenManager,
+    required TokenSource tokenSource,
     required LatencyService latencyService,
     required RetryPolicy retryPolicy,
     this.isAnonymous = false,
@@ -31,7 +31,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }) : _rpcUrl = rpcUrl,
        _wsUrl = wsUrl,
        _apiKey = apiKey,
-       _tokenManager = tokenManager,
+       _tokenSource = tokenSource,
        _latencyService = latencyService,
        _retryPolicy = retryPolicy,
        _networkStateProvider = networkStateProvider,
@@ -41,7 +41,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   final String _rpcUrl;
   final String _apiKey;
   final String _wsUrl;
-  final TokenManager _tokenManager;
+  final TokenSource _tokenSource;
   // ignore: unused_field
   final LatencyService _latencyService;
   final RetryPolicy _retryPolicy;
@@ -57,7 +57,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     interceptors: _buildInterceptors(
       apiKey: _apiKey,
       getToken: () async {
-        final tokenResult = await _tokenManager.getTokenAsResult();
+        final tokenResult = await _tokenSource.getToken();
         if (tokenResult is! Success<UserToken>) {
           throw (tokenResult as Failure).videoError;
         }
@@ -248,7 +248,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       _wsUrl,
       apiKey: _apiKey,
       userInfo: user,
-      tokenManager: _tokenManager,
+      tokenSource: _tokenSource,
       includeUserDetails: includeUserDetails,
       networkStateProvider: _networkStateProvider,
       retryPolicy: _retryPolicy,

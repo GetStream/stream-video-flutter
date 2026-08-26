@@ -7,7 +7,7 @@ import '../../../stream_video.dart';
 import '../../errors/video_error.dart';
 import '../../telemetry/client_event_reporter.dart';
 import '../../telemetry/client_event_types.dart';
-import '../../token/token_manager_extension.dart';
+import '../../token/token_source.dart';
 import 'coordinator_message_codec.dart';
 
 var _seq = 0;
@@ -25,7 +25,7 @@ class CoordinatorWebSocket {
     String url, {
     required this.apiKey,
     required this.userInfo,
-    required this.tokenManager,
+    required this.tokenSource,
     this.includeUserDetails = false,
     this.clientEventReporter = const ClientEventReporter.noOp(),
     NetworkStateProvider? networkStateProvider,
@@ -34,6 +34,7 @@ class CoordinatorWebSocket {
     _wsUrl = _buildUrl(url, apiKey);
 
     _client = StreamWebSocketClient(
+      tag: _tag,
       optionsBuilder: () => WebSocketOptions(url: _wsUrl),
       messageCodec: const CoordinatorMessageCodec(),
       onAuthenticate: _authenticateUser,
@@ -46,6 +47,7 @@ class CoordinatorWebSocket {
         : null;
 
     _recoveryHandler = ConnectionRecoveryHandler(
+      tag: '$_tag:Recovery',
       client: _client,
       networkStateProvider: networkStateProvider,
       retryStrategy: _retryStrategy,
@@ -59,7 +61,7 @@ class CoordinatorWebSocket {
 
   final String apiKey;
   final UserInfo userInfo;
-  final TokenManager tokenManager;
+  final TokenSource tokenSource;
   final bool includeUserDetails;
 
   /// Reports the `CoordinatorWS` telemetry stage, which follows this socket's
@@ -124,7 +126,7 @@ class CoordinatorWebSocket {
     // the token the server just refused, so the credentials cannot change.
     // Throwing fails the attempt for good (AuthenticationFailed) instead of
     // reconnecting with the same dead token.
-    if (tokenRefused && tokenManager.usesStaticProvider) {
+    if (tokenRefused && tokenSource.usesStaticProvider) {
       _logger.e(
         () =>
             '[authenticateUser] token refused and cannot be refreshed '
@@ -138,8 +140,8 @@ class CoordinatorWebSocket {
     }
 
     final tokenResult = tokenRefused
-        ? await tokenManager.refreshTokenAsResult()
-        : await tokenManager.getTokenAsResult();
+        ? await tokenSource.refreshToken()
+        : await tokenSource.getToken();
     final userToken = tokenResult.getDataOrNull();
     if (userToken == null) {
       _logger.e(

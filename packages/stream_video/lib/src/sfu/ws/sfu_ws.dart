@@ -61,12 +61,12 @@ class SfuWebSocket {
   SfuWebSocket._({
     required this.sessionSeq,
     required this.sessionId,
-    required String url,
+    required this.url,
     Iterable<String>? protocols,
   }) {
     _logger.i(() => '<init> sessionId: $sessionId');
-    _url = url;
     _client = StreamWebSocketClient(
+      tag: '$_tag-$sessionSeq',
       optionsBuilder: () => WebSocketOptions(url: url, protocols: protocols),
       messageCodec: const SfuMessageCodec(),
       pingRequestBuilder: ([_]) => SfuWsRequest(
@@ -83,10 +83,9 @@ class SfuWebSocket {
 
   final int sessionSeq;
   final String sessionId;
+  final String url;
 
   late final StreamWebSocketClient _client;
-  late final String _url;
-  String get url => _url;
 
   /// The underlying socket client.
   ///

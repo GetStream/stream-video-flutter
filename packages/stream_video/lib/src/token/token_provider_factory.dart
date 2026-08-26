@@ -3,6 +3,7 @@ import 'package:stream_core/stream_core.dart';
 import '../errors/video_error_composer.dart';
 import '../models/models.dart';
 import 'token.dart';
+import 'token_manager_extension.dart';
 
 /// Creates a server-side guest user, returning its data and access token.
 ///
@@ -46,7 +47,9 @@ TokenProvider buildTokenProvider(
 /// assigned identity, loading tokens from a static provider holding the
 /// guest's access token. Guest tokens use a static provider and can't be refreshed.
 ///
-/// [onGuestUserUpdated] receives the server-assigned guest user.
+/// [onGuestUserUpdated] receives the server-assigned guest user, and is not
+/// called for a guest whose access token cannot be parsed: the client keeps
+/// the identity it asked for, so a retry creates the guest it meant to.
 Future<Result<UserToken>> establishGuestSession({
   required TokenManager tokenManager,
   required User user,
@@ -65,6 +68,15 @@ Future<Result<UserToken>> establishGuestSession({
 
   if (result is! Success<GuestCreatedData>) return result as Failure;
 
+  // Parsed before anything is handed over: a token that cannot be read leaves
+  // neither the client nor the manager holding the created guest's identity.
+  final UserToken token;
+  try {
+    token = UserToken(result.data.accessToken);
+  } catch (e, stk) {
+    return Result.failure(VideoErrors.compose(e, stk));
+  }
+
   final updatedInfo = result.data.user.toUserInfo();
   onGuestUserUpdated(
     User(
@@ -78,16 +90,12 @@ Future<Result<UserToken>> establishGuestSession({
     ),
   );
 
-  try {
-    final token = UserToken(result.data.accessToken);
-    tokenManager.setTokenProvider(
-      token.userId,
-      tokenProvider: TokenProvider.static(token),
-    );
-    return Result.success(token);
-  } catch (e, stk) {
-    return Result.failure(VideoErrors.compose(e, stk));
-  }
+  tokenManager.setTokenProvider(
+    token.userId,
+    tokenProvider: TokenProvider.static(token),
+  );
+
+  return tokenManager.getTokenAsResult();
 }
 
 /// Builds the token provider for a regular user from the [userToken] and
