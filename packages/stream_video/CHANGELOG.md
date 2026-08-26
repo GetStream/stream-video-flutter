@@ -10,6 +10,7 @@
 
 ### 🔄 Changed
 
+- The periodic stats reporter now asks the platform for only the report types the SDK parses, instead of the full report. On Android that skips boxing and marshalling thousands of values per tick that were decoded and thrown away. The SFU stats reporter still collects the complete report — its payload is forwarded verbatim and is unchanged on the wire.
 - `StreamVideoOptions.muteVideoWhenInBackground` now defaults to `true` on Android and `false` elsewhere, instead of `false` everywhere. Nothing stops the camera when an Android app is backgrounded, so it kept capturing and encoding behind the lock screen. iOS is unchanged: the OS already stops capture in the background unless multitasking camera access is enabled, and enabling this there also removes the local participant's video from the iOS picture-in-picture view. Pass an explicit `true`/`false` to override.
 - Background muting now also triggers on the `hidden` lifecycle state, not just `paused`. iOS and desktop can settle in `hidden`, where a camera left running costs exactly the same.
 - On returning to the foreground, the camera and microphone are only restored if they are still off. Previously a track the user re-enabled while backgrounded — from a picture-in-picture view, say — was overridden on resume.

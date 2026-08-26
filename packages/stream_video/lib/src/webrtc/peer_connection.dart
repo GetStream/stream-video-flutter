@@ -13,6 +13,7 @@ import '../sfu/data/models/sfu_error.dart';
 import '../sfu/sfu_client.dart';
 import '../utils/result.dart';
 import '../utils/standard.dart';
+import 'model/stats/rtc_report_type.dart';
 import 'model/stats/rtc_stats_mapper.dart';
 import 'model/stats/rtc_stats_snapshot.dart';
 import 'peer_type.dart';
@@ -566,8 +567,16 @@ class StreamPeerConnection extends Disposable {
     onRenegotiationNeeded?.call(this);
   }
 
-  Future<RtcStatsSnapshot> getStats() async {
-    final reports = await pc.getStats();
+  /// Collects a stats snapshot.
+  ///
+  /// [parsedOnly] restricts the platform to the report types the SDK actually
+  /// parses, so it never builds — and the platform channel never carries —
+  /// reports nothing will read. Leave it false for the SFU reporter, which
+  /// forwards the complete report verbatim and must not have it trimmed.
+  Future<RtcStatsSnapshot> getStats({bool parsedOnly = false}) async {
+    final reports = parsedOnly
+        ? await pc.getFilteredStats(RtcReportType.consumedTypes)
+        : await pc.getStats();
     return RtcStatsSnapshot(reports.toRawStats());
   }
 

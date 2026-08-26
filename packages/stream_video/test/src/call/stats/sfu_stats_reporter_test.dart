@@ -21,7 +21,7 @@ class FakeSubscriber extends Fake implements TracedStreamPeerConnection {
   final Tracer tracer = Tracer('subscriber');
 
   @override
-  Future<RtcStatsSnapshot> getStats() async {
+  Future<RtcStatsSnapshot> getStats({bool parsedOnly = false}) async {
     return RtcStatsSnapshot(<Map<String, dynamic>>[
       {'type': 'test'},
     ]);

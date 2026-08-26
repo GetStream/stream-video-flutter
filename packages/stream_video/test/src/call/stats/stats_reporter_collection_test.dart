@@ -13,10 +13,12 @@ class _MockRtcManager extends Mock implements RtcManager {}
 class _CountingPeerConnection extends Fake
     implements TracedStreamPeerConnection {
   int calls = 0;
+  bool? lastParsedOnly;
 
   @override
-  Future<RtcStatsSnapshot> getStats() async {
+  Future<RtcStatsSnapshot> getStats({bool parsedOnly = false}) async {
     calls++;
+    lastParsedOnly = parsedOnly;
     return RtcStatsSnapshot(const [
       {'id': 'RTCCodec_1', 'type': 'codec', 'mimeType': 'video/H264'},
     ]);
@@ -115,6 +117,9 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 120));
 
       expect(subscriber.calls, greaterThan(0));
+      // Nothing here forwards the raw report on, so only the parsed types are
+      // requested from the platform.
+      expect(subscriber.lastParsedOnly, isTrue);
     });
 
     test('collects when the reporter itself has listeners', () async {

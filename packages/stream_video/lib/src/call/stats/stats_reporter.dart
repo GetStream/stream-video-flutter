@@ -78,8 +78,14 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
     })
   >
   collectStats() async {
-    final publisherSnapshot = await rtcManager.publisher?.getStats();
-    final subscriberSnapshot = await rtcManager.subscriber.getStats();
+    // Nothing here forwards the raw report anywhere, so ask the platform for
+    // only the types we parse.
+    final publisherSnapshot = await rtcManager.publisher?.getStats(
+      parsedOnly: true,
+    );
+    final subscriberSnapshot = await rtcManager.subscriber.getStats(
+      parsedOnly: true,
+    );
 
     final publisherStats = publisherSnapshot == null
         ? PeerConnectionStatsBundle.empty(StreamPeerType.publisher)
