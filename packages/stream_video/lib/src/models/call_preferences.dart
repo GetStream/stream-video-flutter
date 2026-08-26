@@ -35,6 +35,14 @@ abstract class CallPreferences {
   /// happens. Set it to [Duration.zero] to disable the reporter outright.
   Duration get callStatsReportingInterval;
 
+  /// Whether the camera adapts its capture format during a call.
+  ///
+  /// When true, capture is stepped down to the largest layer the SFU still
+  /// wants, and throttled further as the device heats up. When false the camera
+  /// captures at its initial configuration for the whole call regardless of
+  /// device pressure or what is actually being published.
+  bool get adaptiveCaptureEnabled;
+
   /// Whether to automatically drop the call if the user is alone
   /// in the ringing flow.
   ///
@@ -73,6 +81,7 @@ class DefaultCallPreferences implements CallPreferences {
     this.networkAvailabilityTimeout = const Duration(minutes: 5),
     this.reactionAutoDismissTime = const Duration(seconds: 5),
     this.callStatsReportingInterval = const Duration(seconds: 2),
+    this.adaptiveCaptureEnabled = true,
     this.dropIfAloneInRingingFlow = true,
     this.clientPublishOptions,
     this.closedCaptionsVisibilityDurationMs = 2700,
@@ -127,6 +136,17 @@ class DefaultCallPreferences implements CallPreferences {
   /// Defaults to 2 seconds.
   @override
   final Duration callStatsReportingInterval;
+
+  /// Whether the camera adapts its capture format during a call.
+  ///
+  /// When true, capture is stepped down to the largest layer the SFU still
+  /// wants, and throttled further as the device heats up. When false the camera
+  /// captures at its initial configuration for the whole call regardless of
+  /// device pressure or what is actually being published.
+  ///
+  /// Defaults to true.
+  @override
+  final bool adaptiveCaptureEnabled;
 
   /// Whether to automatically drop the call if the user is alone
   /// in the ringing flow.

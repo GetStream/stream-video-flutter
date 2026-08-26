@@ -2,11 +2,14 @@
 
 ### ✅ Added
 
+- Added `CallPreferences.adaptiveCaptureEnabled` (defaults to `true`). When enabled, the camera adapts during the call instead of capturing at its initial configuration from the first frame to the last: capture is reconfigured to the largest layer the SFU still wants whenever publish quality changes, and on iOS the plugin additionally throttles frame rate and resolution as the device heats up. Set it to `false` to restore the previous fixed-capture behaviour.
+
 - [Web] Added `CallState.isWebAudioPlaybackBlocked`, which reports whether the browser's autoplay policy is blocking playback of remote audio. Observe it through `call.state` to show a "tap to enable sound" affordance the moment playback is blocked. Always `false` on every other platform.
 - [Web] Added `RtcMediaDeviceNotifier.resumeWebAudioPlayback()`, which retries playback of the blocked remote audio elements. Call it from within a user gesture (e.g. a button tap) so the browser allows playback. A no-op on every other platform. Unrelated to the existing `resumeAudioPlayout()`, which unmutes playout paused via `pauseAudioPlayout()`.
 
 ### 🔄 Changed
 
+- `onPublishQualityChanged` now reconfigures the camera, not just the sender's encoding flags. When the SFU deactivates the top simulcast layers, the camera used to keep producing full-resolution frames that the encoder then downscaled for every remaining layer on every frame — so we kept paying to capture layers nobody wanted. The applied format is persisted into the track's constraints, so a mute/unmute cycle (which recreates the track) does not silently throw the adaptation away.
 - Stats collection no longer runs when nothing observes the result. `StatsReporter` skips the whole tick — two `getStats()` round trips, each walking every report — unless something is subscribed to `Call.stats`, something is subscribed to the reporter itself, or first-frame telemetry still needs a sample. Setting `CallPreferences.callStatsReportingInterval` to `Duration.zero` now disables the reporter outright.
 - A stats tick is parsed once instead of three times. The platform reports are flattened into plain maps in a single walk, and the typed models and the human-readable dump are both derived from those maps on first access. The dump in particular used to be string-formatted on every tick of both reporters even when no log or diagnostics listener existed; it is now only built if something reads it.
 - The SFU stats reporter serializes its payloads off the UI isolate. Both peer-connection stats blobs and the RTC trace snapshot are encoded concurrently via `compute` instead of blocking the UI isolate with three `jsonEncode` calls per tick.

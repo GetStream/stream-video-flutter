@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
@@ -622,6 +623,122 @@ class RtcManager extends Disposable {
       () =>
           '[onPublishQualityChanged] Update publish quality, enabled rids: ${activeLayers.map((e) => e.rid)}',
     );
+
+    await _updateCaptureQuality(
+      trackType: videoSender.trackType,
+      activeLayers: activeLayers,
+    );
+  }
+
+  /// Shrinks the camera to the largest layer the SFU still wants.
+  ///
+  /// Flipping the encoder's `active` flags alone leaves the camera producing
+  /// full-resolution frames that the encoder then has to downscale for every
+  /// layer, every frame — so when the SFU deactivates the top layers we keep
+  /// paying for capturing them.
+  Future<void> _updateCaptureQuality({
+    required SfuTrackType trackType,
+    required List<RTCRtpEncoding> activeLayers,
+  }) async {
+    if (!_adaptiveCaptureEnabled || activeLayers.isEmpty) return;
+
+    final track = getPublisherTrackByType(trackType);
+    if (track is! RtcLocalCameraTrack) return;
+
+    final constraints = track.mediaConstraints;
+    final baseDimension = constraints.params.dimension;
+
+    // Encodings carry a downscale factor rather than dimensions, so the largest
+    // still-active layer is the one with the smallest factor.
+    final smallestDownscale = activeLayers
+        .map((e) => e.scaleResolutionDownBy ?? 1.0)
+        .where((factor) => factor >= 1.0)
+        .fold<double>(double.infinity, min);
+
+    if (!smallestDownscale.isFinite) return;
+
+    final targetWidth = (baseDimension.width / smallestDownscale).round();
+    final targetHeight = (baseDimension.height / smallestDownscale).round();
+
+    final baseFramerate = constraints.params.encoding.maxFramerate;
+    final targetFramerate = activeLayers
+        .map((e) => e.maxFramerate ?? 0)
+        .where((fps) => fps > 0)
+        .fold<int>(0, max);
+
+    await setCaptureFormat(
+      track: track,
+      width: targetWidth,
+      height: targetHeight,
+      fps: targetFramerate > 0 ? targetFramerate : baseFramerate,
+      reason: 'publish quality changed',
+    );
+  }
+
+  bool get _adaptiveCaptureEnabled =>
+      stateManager.callState.preferences.adaptiveCaptureEnabled;
+
+  /// Tells the plugin whether to throttle the camera under thermal pressure.
+  ///
+  /// Not supported on every platform; a rejection is not an error.
+  Future<void> _applySystemPressureMonitoring() async {
+    try {
+      await rtc.Helper.setCameraSystemPressureMonitoringEnabled(
+        _adaptiveCaptureEnabled,
+      );
+    } catch (e) {
+      _logger.v(() => '[applySystemPressureMonitoring] unsupported: $e');
+    }
+  }
+
+  /// Reconfigures the running camera without recreating the track.
+  ///
+  /// The applied format is persisted into the track's [CameraConstraints]
+  /// because `stopTrackOnMute` recreates the track from those constraints on
+  /// unmute — without this, the first mute/unmute cycle silently throws the
+  /// adaptation away.
+  Future<void> setCaptureFormat({
+    required RtcLocalCameraTrack track,
+    required int width,
+    required int height,
+    required int fps,
+    String? reason,
+  }) async {
+    if (width <= 0 || height <= 0 || fps <= 0) return;
+
+    final current = track.mediaConstraints;
+    if (current.params.dimension.width == width &&
+        current.params.dimension.height == height &&
+        current.params.encoding.maxFramerate == fps) {
+      return;
+    }
+
+    try {
+      final applied = await rtc.Helper.setCaptureFormat(
+        track.mediaTrack,
+        width: width,
+        height: height,
+        fps: fps,
+      );
+
+      _logger.i(
+        () =>
+            '[setCaptureFormat] ${reason ?? 'requested'}: ${width}x$height@$fps '
+            '(applied: $applied)',
+      );
+
+      final updated = track.copyWith(
+        mediaConstraints: current.copyWith(
+          params: current.params.copyWith(
+            dimension: RtcVideoDimension(width: width, height: height),
+            encoding: current.params.encoding.copyWith(maxFramerate: fps),
+          ),
+        ),
+      );
+      tracks[updated.trackId] = updated;
+    } catch (e, stk) {
+      _logger.w(() => '[setCaptureFormat] failed: $e; $stk');
+    }
   }
 
   @override
@@ -1688,6 +1805,11 @@ extension PublisherRtcManager on RtcManager {
     }
 
     try {
+      // Applied before the camera opens: the plugin attaches its thermal
+      // observer while starting capture, so toggling this afterwards would not
+      // take effect until the next getUserMedia.
+      await _applySystemPressureMonitoring();
+
       final nativeFactory = await pcFactory.ensureNativeFactory();
       final videoTrack = await RtcLocalTrack.camera(
         trackIdPrefix: publisherId!,
