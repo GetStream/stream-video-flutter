@@ -911,7 +911,7 @@ class CallSession extends Disposable {
       return;
     }
 
-    await track.stop();
+    await track.stop(disposeWebAudioPlayer: false);
   }
 
   Future<void> _onPublishQualityChanged(

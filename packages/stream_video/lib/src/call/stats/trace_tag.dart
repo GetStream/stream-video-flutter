@@ -111,4 +111,24 @@ abstract class TraceTag {
   static const String getDisplayMedia =
       'navigator.mediaDevices.getDisplayMedia';
   static const String getUserMedia = 'navigator.mediaDevices.getUserMedia';
+
+  // Remote audio playback (web only). Names match the JS SDK's tags for the
+  // same events, so both SDKs report into the same dashboards. That is why they
+  // carry no `navigator.mediaDevices.` prefix: these are not device operations.
+  //
+  // [resumeAudio] retries playback the browser's autoplay policy blocked, and
+  // is unrelated to [resumeAudioPlayout] above, which unmutes playout paused
+  // via [pauseAudioPlayout].
+  static const String resumeAudio = 'resumeAudio';
+  static const String mediaPlaybackPaused = 'mediaPlayback.paused';
+  static const String audioPlaybackBlocked = 'audioPlaybackBlocked';
+  static const String mediaPlaybackRecoverSuccess =
+      'mediaPlayback.recover.success';
+
+  /// Reported once when playback recovery has failed enough times in a row to
+  /// count as a sustained outage; retries continue at the capped interval.
+  static const String mediaPlaybackRecoverStalled =
+      'mediaPlayback.recover.stalled';
+
+  static const String setSinkId = 'setSinkId';
 }

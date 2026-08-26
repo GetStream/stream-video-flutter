@@ -94,6 +94,7 @@ const _idAwait = 7;
 const _idFastReconnectTimeout = 8;
 const _idReconnect = 9;
 const _idNativeWebRtc = 10;
+const _idAudioPlayback = 11;
 
 const _tag = 'SV:Call';
 int _callSeq = 1;
@@ -482,6 +483,7 @@ class Call {
       _observeReconnectEvents();
       _observeUserId();
       _observeNativeWebRtcEventStream();
+      _observeWebAudioPlaybackBlocked();
 
       _logger.v(() => '[_init] initialized');
       _initialized = true;
@@ -492,6 +494,20 @@ class Call {
     _subscriptions.add(
       _idNativeWebRtc,
       _onNativeWebRtcEvent(),
+    );
+  }
+
+  /// Mirrors the browser's autoplay-policy blocking, reported by the web audio
+  /// layer, into [CallState] — so the app can show a "tap to enable sound"
+  /// affordance and call
+  /// `RtcMediaDeviceNotifier.instance.resumeWebAudioPlayback()` from the
+  /// gesture.
+  void _observeWebAudioPlaybackBlocked() {
+    _subscriptions.add(
+      _idAudioPlayback,
+      _rtcMediaDeviceNotifier.webAudioPlaybackBlockedChanges.listen((blocked) {
+        _stateManager.rtcSetWebAudioPlaybackBlocked(isBlocked: blocked);
+      }),
     );
   }
 
