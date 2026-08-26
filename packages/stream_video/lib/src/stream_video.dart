@@ -33,9 +33,11 @@ import 'lifecycle/lifecycle_state.dart';
 import 'lifecycle/lifecycle_utils.dart'
     if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart'
     as lifecycle;
+import 'logger/core_log_bridge.dart';
 import 'logger/impl/console_logger.dart';
 import 'logger/impl/external_logger.dart';
 import 'logger/impl/tagged_logger.dart';
+import 'logger/logger_api.dart';
 import 'logger/stream_log.dart';
 import 'models/audio_configuration_policy.dart';
 import 'models/call_cid.dart';
@@ -182,27 +184,22 @@ class StreamVideo extends Disposable {
           )
         : const ClientEventReporter.noOp();
 
-    final tokenProvider = buildTokenProvider(
-      user,
-      userToken: userToken,
-      tokenLoader: tokenLoader,
-      // The guest creator only dereferences `_client` when a token is
-      // actually requested, after this constructor has assigned it.
-      createGuest: ({required id, name, image, required custom}) =>
-          _client.loadGuest(id: id, name: name, image: image, custom: custom),
-      onGuestUserUpdated: (updatedUser) => _state.user.value = updatedUser,
-      // Promote the provider to a static one so `usesStaticProvider`
-      // reports the guest token for what it is — fixed for the lifetime of
-      // the client.
-      onGuestTokenCreated: (token) =>
-          _tokenManager.tokenProvider = GuestTokenProvider(token),
-    );
-
-    _tokenManager = TokenManager(
-      userId: user.id,
-      tokenProvider: tokenProvider,
-      onTokenUpdated: onTokenUpdated,
-    );
+    if (user.type == UserType.guest) {
+      // A guest's identity is assigned by the server, so the manager starts
+      // without one and is pointed at the created guest on first token use
+      // (see [_ensureToken]).
+      _tokenManager = TokenManager.unconfigured(onTokenUpdated: onTokenUpdated);
+    } else {
+      _tokenManager = TokenManager(
+        userId: user.id,
+        tokenProvider: buildTokenProvider(
+          user,
+          userToken: userToken,
+          tokenLoader: tokenLoader,
+        ),
+        onTokenUpdated: onTokenUpdated,
+      );
+    }
 
     _client = buildCoordinatorClient(
       user: user,
@@ -240,7 +237,7 @@ class StreamVideo extends Disposable {
     // Pre-warm the token cache, mirroring the eager fetch previously
     // triggered by setting the token provider. Failures are logged by
     // getTokenAsResult and surface later, when the token is actually needed.
-    unawaited(_tokenManager.getTokenAsResult());
+    unawaited(_ensureToken());
 
     _setupLogger(options.logPriority, options.logHandlerFunction);
 
@@ -309,6 +306,35 @@ class StreamVideo extends Disposable {
   Completer<void> webrtcInitializationCompleter = Completer();
 
   late final TokenManager _tokenManager;
+
+  /// The in-flight guest session creation, shared between concurrent callers
+  /// so a second caller arriving mid-exchange cannot mint a guest of its own.
+  Future<Result<UserToken>>? _guestSessionOperation;
+
+  /// Returns a token, first establishing the guest session when this client
+  /// belongs to a guest whose server-side identity does not exist yet.
+  ///
+  /// Guest creation failures are not sticky: the next call retries.
+  Future<Result<UserToken>> _ensureToken() {
+    if (_tokenManager.userId != null) return _tokenManager.getTokenAsResult();
+
+    return _guestSessionOperation ??= _establishGuestSession();
+  }
+
+  Future<Result<UserToken>> _establishGuestSession() async {
+    try {
+      return await establishGuestSession(
+        tokenManager: _tokenManager,
+        user: _state.user.value,
+        createGuest: ({required id, name, image, required custom}) =>
+            _client.loadGuest(id: id, name: name, image: image, custom: custom),
+        onGuestUserUpdated: (updatedUser) => _state.user.value = updatedUser,
+      );
+    } finally {
+      _guestSessionOperation = null;
+    }
+  }
+
   final _subscriptions = Subscriptions();
 
   late final CoordinatorClient _client;
@@ -323,7 +349,7 @@ class StreamVideo extends Disposable {
   /// Resolves the current user token for the telemetry transport's auth
   /// interceptor, mirroring the coordinator client's authentication.
   Future<UserToken> _clientEventToken() async {
-    final tokenResult = await _tokenManager.getTokenAsResult();
+    final tokenResult = await _ensureToken();
     if (tokenResult is! Success<UserToken>) {
       throw (tokenResult as Failure).videoError;
     }
@@ -423,13 +449,13 @@ class StreamVideo extends Disposable {
       // The cache can be briefly empty while a token refresh is in flight;
       // getToken serves the cached token when present and otherwise waits
       // for the refresh instead of failing.
-      return _tokenManager.getTokenAsResult();
+      return _ensureToken();
     }
 
     _connectionState = ConnectionState.connecting(_state.currentUser.id);
 
-    // guest user will be updated when token gets fetched
-    final tokenResult = await _tokenManager.getTokenAsResult();
+    // Guests get their server-assigned identity established here.
+    final tokenResult = await _ensureToken();
     if (tokenResult is! Success<UserToken>) {
       _logger.e(() => '[connect] token fetching failed: $tokenResult');
       _connectionState = ConnectionState.failed(
@@ -1514,6 +1540,8 @@ void _setupLogger(Priority logPriority, LogHandlerFunction logHandlerFunction) {
       const ConsoleStreamLogger(),
       ExternalStreamLogger(logHandlerFunction),
     ]);
+
+    installCoreLogBridge(logPriority);
   }
 }
 

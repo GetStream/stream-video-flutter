@@ -65,8 +65,9 @@ class SfuWebSocket {
     Iterable<String>? protocols,
   }) {
     _logger.i(() => '<init> sessionId: $sessionId');
+    _url = url;
     _client = StreamWebSocketClient(
-      options: WebSocketOptions(url: url, protocols: protocols),
+      optionsBuilder: () => WebSocketOptions(url: url, protocols: protocols),
       messageCodec: const SfuMessageCodec(),
       pingRequestBuilder: ([_]) => SfuWsRequest(
         sfu_events.SfuRequest(
@@ -84,7 +85,8 @@ class SfuWebSocket {
   final String sessionId;
 
   late final StreamWebSocketClient _client;
-  String get url => _client.options.url;
+  late final String _url;
+  String get url => _url;
 
   /// The underlying socket client.
   ///
@@ -216,6 +218,26 @@ class SfuWebSocket {
             url: url,
             reason: const DisconnectionReason(
               closeReason: 'Unhealthy connection',
+            ),
+          ),
+        );
+      case ConnectTimeout():
+        _events.emit(
+          SfuSocketDisconnected(
+            sessionId: sessionId,
+            url: url,
+            reason: const DisconnectionReason(
+              closeReason: 'Connection attempt timed out',
+            ),
+          ),
+        );
+      case AuthenticationFailed():
+        _events.emit(
+          SfuSocketFailed(
+            sessionId: sessionId,
+            url: url,
+            error: VideoErrors.compose(
+              source.error ?? 'SFU WS authentication failed',
             ),
           ),
         );

@@ -1727,7 +1727,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         options: BaseOptions(baseUrl: _rpcUrl),
         interceptors: _buildInterceptors(
           apiKey: _apiKey,
-          getToken: () => UserToken.anonymous(userId: id),
+          getToken: UserToken.anonymous,
           getConnectionId: () => _ws?.connectionId,
         ),
       );

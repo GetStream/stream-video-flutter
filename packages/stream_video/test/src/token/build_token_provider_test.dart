@@ -7,14 +7,11 @@ import 'package:stream_video/stream_video.dart';
 
 /// Builds an unsigned JWT with the given [userId] claim, sufficient for
 /// [UserToken]'s unverified parsing.
-///
-/// [jti] distinguishes two tokens minted for the same user, so tests can tell
-/// which of them a provider returned.
-String _fakeJwt(String userId, {String? jti}) {
+String _fakeJwt(String userId) {
   String encode(Map<String, dynamic> json) =>
       base64Url.encode(utf8.encode(jsonEncode(json))).replaceAll('=', '');
   final header = encode({'alg': 'HS256', 'typ': 'JWT'});
-  final payload = encode({'user_id': userId, if (jti != null) 'jti': jti});
+  final payload = encode({'user_id': userId});
   final signature = encode({'sig': 'fake'});
   return '$header.$payload.$signature';
 }
@@ -54,20 +51,12 @@ class _FakeGuestCreator {
 
 void main() {
   group('buildTokenProvider', () {
-    void noUserUpdate(User _) {}
-    void noTokenCreated(UserToken _) {}
-
     group('regular user', () {
       TokenProvider build({String? userToken, TokenLoader? tokenLoader}) {
         return buildTokenProvider(
           const User(id: 'user-1'),
           userToken: userToken,
           tokenLoader: tokenLoader,
-          createGuest: _FakeGuestCreator(
-            Result.success(_guestData('unused')),
-          ).call,
-          onGuestUserUpdated: noUserUpdate,
-          onGuestTokenCreated: noTokenCreated,
         );
       }
 
@@ -105,8 +94,8 @@ void main() {
       test(
         'serves userToken on the first load, then hands off to tokenLoader',
         () async {
-          final initialToken = _fakeJwt('user-1', jti: 'initial');
-          final loaderToken = _fakeJwt('user-1', jti: 'loaded');
+          final initialToken = _fakeJwt('user-1');
+          final loaderToken = _fakeJwt('user-1');
           var loaderCalls = 0;
           final provider = build(
             userToken: initialToken,
@@ -128,177 +117,136 @@ void main() {
     });
 
     group('anonymous user', () {
-      test('builds a static anonymous token for the user id', () async {
-        final provider = buildTokenProvider(
-          const User.anonymous(),
-          createGuest: _FakeGuestCreator(
-            Result.success(_guestData('unused')),
-          ).call,
-          onGuestUserUpdated: noUserUpdate,
-          onGuestTokenCreated: noTokenCreated,
-        );
+      test('builds a static anonymous token', () async {
+        final provider = buildTokenProvider(const User.anonymous());
 
-        final token = await provider.loadToken('!anon');
+        final token = await provider.loadToken(User.anonymousUserId);
 
         expect(token.authType, AuthType.anonymous);
-        expect(token.userId, '!anon');
+        expect(token.userId, User.anonymousUserId);
         expect(token.rawValue, isEmpty);
       });
 
       test('passes a caller-supplied token through as the raw value', () async {
+        final restrictedToken = _fakeJwt(User.anonymousUserId);
         final provider = buildTokenProvider(
           const User.anonymous(),
-          userToken: 'call-restricted-jwt',
-          createGuest: _FakeGuestCreator(
-            Result.success(_guestData('unused')),
-          ).call,
-          onGuestUserUpdated: noUserUpdate,
-          onGuestTokenCreated: noTokenCreated,
+          userToken: restrictedToken,
         );
 
-        final token = await provider.loadToken('!anon');
+        final token = await provider.loadToken(User.anonymousUserId);
 
         expect(token.authType, AuthType.anonymous);
-        expect(token.rawValue, 'call-restricted-jwt');
+        expect(token.rawValue, restrictedToken);
       });
     });
 
     group('guest user', () {
-      test('creates the guest once and reuses its token', () async {
-        final creator = _FakeGuestCreator(
-          Result.success(_guestData('server-guest-1')),
-        );
-        final provider = buildTokenProvider(
-          const User.guest('local-guest'),
-          createGuest: creator.call,
-          onGuestUserUpdated: noUserUpdate,
-          onGuestTokenCreated: noTokenCreated,
-        );
-
-        final first = await provider.loadToken('local-guest');
-        final second = await provider.loadToken('local-guest');
-
-        expect(creator.calls, hasLength(1));
-        expect(first.userId, 'server-guest-1');
-        expect(second, first);
-      });
-
-      test('passes profile fields, filtering null custom values', () async {
-        final creator = _FakeGuestCreator(
-          Result.success(_guestData('server-guest-1')),
-        );
-        final provider = buildTokenProvider(
-          const User(
-            id: 'local-guest',
-            name: 'Guest Name',
-            image: 'https://image.url',
-            type: UserType.guest,
-            custom: {'color': 'green', 'empty': null},
-          ),
-          createGuest: creator.call,
-          onGuestUserUpdated: noUserUpdate,
-          onGuestTokenCreated: noTokenCreated,
-        );
-
-        await provider.loadToken('local-guest');
-
-        expect(creator.calls.single, {
-          'id': 'local-guest',
-          'name': 'Guest Name',
-          'image': 'https://image.url',
-          'custom': {'color': 'green'},
-        });
-      });
-
-      test('notifies about the server-assigned guest user', () async {
-        final creator = _FakeGuestCreator(
-          Result.success(
-            _guestData('server-guest-1', name: 'Server Name', image: 'img'),
-          ),
-        );
-        User? updatedUser;
-        final provider = buildTokenProvider(
-          const User.guest('local-guest'),
-          createGuest: creator.call,
-          onGuestUserUpdated: (user) => updatedUser = user,
-          onGuestTokenCreated: noTokenCreated,
-        );
-
-        await provider.loadToken('local-guest');
-
-        expect(updatedUser?.id, 'server-guest-1');
-        expect(updatedUser?.name, 'Server Name');
-        expect(updatedUser?.image, 'img');
-        expect(updatedUser?.type, UserType.guest);
-      });
-
-      test('reports the created token once for provider promotion', () async {
-        final creator = _FakeGuestCreator(
-          Result.success(_guestData('server-guest-1')),
-        );
-        final createdTokens = <UserToken>[];
-        final provider = buildTokenProvider(
-          const User.guest('local-guest'),
-          createGuest: creator.call,
-          onGuestUserUpdated: noUserUpdate,
-          onGuestTokenCreated: createdTokens.add,
-        );
-
-        final token = await provider.loadToken('local-guest');
-        await provider.loadToken('local-guest'); // memoized, no re-creation
-
-        expect(createdTokens, [token]);
-        expect(token.userId, 'server-guest-1');
-      });
-
-      test('promotes the manager provider to static after creation', () async {
-        final creator = _FakeGuestCreator(
-          Result.success(_guestData('server-guest-1')),
-        );
-        late TokenManager manager;
-        final provider = buildTokenProvider(
-          const User.guest('local-guest'),
-          createGuest: creator.call,
-          onGuestUserUpdated: noUserUpdate,
-          onGuestTokenCreated: (token) =>
-              manager.tokenProvider = GuestTokenProvider(token),
-        );
-        manager = TokenManager(
-          userId: 'local-guest',
-          tokenProvider: provider,
-        );
-
-        final token = await manager.getToken();
-
-        // The refresh guards (RpcRetryManager, coordinator WS) key off this.
-        expect(manager.usesStaticProvider, isTrue);
-        expect(manager.peekToken(), token);
-
-        // Even an unguarded expire + reload serves the same token — the
-        // GuestTokenProvider skips the user-id validation that the
-        // server-assigned guest id would otherwise fail against the
-        // manager's locally-requested id.
-        manager.expireToken();
-        expect(await manager.getToken(), token);
-        expect(creator.calls, hasLength(1));
-      });
-
-      test('throws when guest creation fails', () {
-        final creator = _FakeGuestCreator(
-          failureWithError('guest creation failed'),
-        );
-        final provider = buildTokenProvider(
-          const User.guest('local-guest'),
-          createGuest: creator.call,
-          onGuestUserUpdated: noUserUpdate,
-          onGuestTokenCreated: noTokenCreated,
-        );
-
+      test('throws — guests are configured via establishGuestSession', () {
         expect(
-          () => provider.loadToken('local-guest'),
-          throwsA(isA<VideoError>()),
+          () => buildTokenProvider(const User.guest('local-guest')),
+          throwsArgumentError,
         );
       });
+    });
+  });
+
+  group('establishGuestSession', () {
+    void noUserUpdate(User _) {}
+
+    test('points the manager at the server-assigned identity', () async {
+      final creator = _FakeGuestCreator(
+        Result.success(_guestData('server-guest-1')),
+      );
+      final manager = TokenManager.unconfigured();
+
+      final result = await establishGuestSession(
+        tokenManager: manager,
+        user: const User.guest('local-guest'),
+        createGuest: creator.call,
+        onGuestUserUpdated: noUserUpdate,
+      );
+
+      final token = result.getDataOrNull();
+      expect(token, isNotNull);
+      expect(token!.userId, 'server-guest-1');
+      expect(manager.userId, 'server-guest-1');
+
+      // The guards (RpcRetryManager, coordinator WS) key off this: the guest
+      // token is fixed for the lifetime of the client.
+      expect(manager.usesStaticProvider, isTrue);
+      expect(await manager.getToken(), token);
+
+      // Even an unguarded expire + reload serves the same token instead of
+      // re-creating the guest.
+      manager.expireToken();
+      expect(await manager.getToken(), token);
+      expect(creator.calls, hasLength(1));
+    });
+
+    test('passes profile fields, filtering null custom values', () async {
+      final creator = _FakeGuestCreator(
+        Result.success(_guestData('server-guest-1')),
+      );
+
+      await establishGuestSession(
+        tokenManager: TokenManager.unconfigured(),
+        user: const User(
+          id: 'local-guest',
+          name: 'Guest Name',
+          image: 'https://image.url',
+          type: UserType.guest,
+          custom: {'color': 'green', 'empty': null},
+        ),
+        createGuest: creator.call,
+        onGuestUserUpdated: noUserUpdate,
+      );
+
+      expect(creator.calls.single, {
+        'id': 'local-guest',
+        'name': 'Guest Name',
+        'image': 'https://image.url',
+        'custom': {'color': 'green'},
+      });
+    });
+
+    test('notifies about the server-assigned guest user', () async {
+      final creator = _FakeGuestCreator(
+        Result.success(
+          _guestData('server-guest-1', name: 'Server Name', image: 'img'),
+        ),
+      );
+      User? updatedUser;
+
+      await establishGuestSession(
+        tokenManager: TokenManager.unconfigured(),
+        user: const User.guest('local-guest'),
+        createGuest: creator.call,
+        onGuestUserUpdated: (user) => updatedUser = user,
+      );
+
+      expect(updatedUser?.id, 'server-guest-1');
+      expect(updatedUser?.name, 'Server Name');
+      expect(updatedUser?.image, 'img');
+      expect(updatedUser?.type, UserType.guest);
+    });
+
+    test('returns the failure and leaves the manager unconfigured', () async {
+      final creator = _FakeGuestCreator(
+        failureWithError('guest creation failed'),
+      );
+      final manager = TokenManager.unconfigured();
+
+      final result = await establishGuestSession(
+        tokenManager: manager,
+        user: const User.guest('local-guest'),
+        createGuest: creator.call,
+        onGuestUserUpdated: noUserUpdate,
+      );
+
+      expect(result, isA<Failure>());
+      expect((result as Failure).videoError, isA<VideoError>());
+      expect(manager.userId, isNull);
     });
   });
 }

@@ -5,7 +5,8 @@
 ///
 library stream_video;
 
-export 'package:stream_core/stream_core.dart' hide LifecycleState;
+export 'package:stream_core/stream_core.dart'
+    hide LifecycleState, StreamLogger;
 
 export 'open_api/video/coordinator/api.dart' hide Role, User;
 export 'open_api/video/coordinator_legacy_enums.dart';
@@ -25,6 +26,7 @@ export 'src/coordinator/models/coordinator_events.dart';
 export 'src/logger/impl/console_logger.dart';
 export 'src/logger/impl/file_logger.dart';
 export 'src/logger/impl/tagged_logger.dart';
+export 'src/logger/logger_api.dart';
 export 'src/logger/stream_log.dart';
 export 'src/models/audio_configuration_policy.dart';
 export 'src/models/models.dart';

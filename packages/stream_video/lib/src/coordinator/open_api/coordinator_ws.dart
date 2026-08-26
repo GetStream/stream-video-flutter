@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../globals.dart';
 import '../../../stream_video.dart';
+import '../../errors/video_error.dart';
 import '../../telemetry/client_event_reporter.dart';
 import '../../telemetry/client_event_types.dart';
 import '../../token/token_manager_extension.dart';
@@ -30,14 +31,12 @@ class CoordinatorWebSocket {
     NetworkStateProvider? networkStateProvider,
     RetryPolicy? retryPolicy,
   }) {
-    final wsUrl = _buildUrl(url, apiKey);
+    _wsUrl = _buildUrl(url, apiKey);
 
     _client = StreamWebSocketClient(
-      options: WebSocketOptions(url: wsUrl),
-      messageCodec: CoordinatorMessageCodec(
-        onTokenError: () => _refreshToken = true,
-      ),
-      onConnectionEstablished: _authenticateUser,
+      optionsBuilder: () => WebSocketOptions(url: _wsUrl),
+      messageCodec: const CoordinatorMessageCodec(),
+      onAuthenticate: _authenticateUser,
       pingRequestBuilder: ([info]) =>
           HealthCheckPingEvent(connectionId: info?.connectionId),
     );
@@ -70,6 +69,7 @@ class CoordinatorWebSocket {
   late final StreamWebSocketClient _client;
   late final ConnectionRecoveryHandler _recoveryHandler;
   late final RetryStrategy? _retryStrategy;
+  late final String _wsUrl;
 
   SharedEmitter<CoordinatorEvent> get events => _events;
   final _events = MutableSharedEmitter<CoordinatorEvent>();
@@ -77,7 +77,6 @@ class CoordinatorWebSocket {
   String? _userId;
   String? _connectionId;
 
-  bool _refreshToken = false;
   bool _isReconnecting = false;
 
   final _uuid = const Uuid();
@@ -111,12 +110,34 @@ class CoordinatorWebSocket {
 
   Future<void> dispose() => _recoveryHandler.dispose();
 
-  Future<void> _authenticateUser() async {
-    _logger.i(() => '[authenticateUser] url: ${_client.options.url}');
+  Future<void> _authenticateUser(
+    WsRequestSender send,
+    StreamApiError? previousError,
+  ) async {
+    _logger.i(
+      () => '[authenticateUser] url: $_wsUrl, previousError: $previousError',
+    );
+
+    final tokenRefused = previousError?.isTokenExpiredError ?? false;
+
     // Mirrors the RpcRetryManager guard: a static provider can only return
-    // the same token again, so refreshing it is pointless.
-    final shouldRefresh = _refreshToken && !tokenManager.usesStaticProvider;
-    final tokenResult = shouldRefresh
+    // the token the server just refused, so the credentials cannot change.
+    // Throwing fails the attempt for good (AuthenticationFailed) instead of
+    // reconnecting with the same dead token.
+    if (tokenRefused && tokenManager.usesStaticProvider) {
+      _logger.e(
+        () =>
+            '[authenticateUser] token refused and cannot be refreshed '
+            '(static token provider)',
+      );
+      throw const VideoError(
+        message:
+            'WS auth token refused and cannot be refreshed '
+            '(static token provider)',
+      );
+    }
+
+    final tokenResult = tokenRefused
         ? await tokenManager.refreshTokenAsResult()
         : await tokenManager.getTokenAsResult();
     final userToken = tokenResult.getDataOrNull();
@@ -129,10 +150,10 @@ class CoordinatorWebSocket {
       );
       return;
     }
-    final token = userToken.rawValue;
-    _client.send(
+
+    final sent = send(
       CoordinatorAuthRequest(
-        token: token,
+        token: userToken.rawValue,
         userId: userInfo.id,
         name: includeUserDetails ? userInfo.name : null,
         image: includeUserDetails ? userInfo.image : null,
@@ -141,6 +162,11 @@ class CoordinatorWebSocket {
             : <String, dynamic>{},
       ),
     );
+
+    if (sent is Failure) {
+      _logger.e(() => '[authenticateUser] sending credentials failed: $sent');
+      throw sent.videoError;
+    }
   }
 
   void _onWsEvent(WsEvent wsEvent) {
@@ -150,7 +176,6 @@ class CoordinatorWebSocket {
 
     if (event is CoordinatorConnectedEvent) {
       _logger.i(() => '[onWsEvent] connected: ${event.connectionId}');
-      _refreshToken = false;
       _userId ??= event.userId;
       _connectionId ??= event.connectionId;
 
