@@ -2,6 +2,7 @@
 
 ### ✅ Added
 
+- Added `StreamVideoOptions.shouldKeepCameraEnabledInBackground`, consulted before the camera is turned off for a background transition. Return `true` to keep it running — for example while the app is in picture-in-picture, or while an Android foreground service keeps the call alive, where the user can still see the video and expects their camera to work. `stream_video_flutter` ships a ready-made implementation covering both cases.
 - Added `CallPreferences.adaptiveCaptureEnabled` (defaults to `true`). When enabled, the camera adapts during the call instead of capturing at its initial configuration from the first frame to the last: capture is reconfigured to the largest layer the SFU still wants whenever publish quality changes, and on iOS the plugin additionally throttles frame rate and resolution as the device heats up. Set it to `false` to restore the previous fixed-capture behaviour.
 
 - [Web] Added `CallState.isWebAudioPlaybackBlocked`, which reports whether the browser's autoplay policy is blocking playback of remote audio. Observe it through `call.state` to show a "tap to enable sound" affordance the moment playback is blocked. Always `false` on every other platform.
@@ -9,6 +10,9 @@
 
 ### 🔄 Changed
 
+- `StreamVideoOptions.muteVideoWhenInBackground` now defaults to `true` on Android and `false` elsewhere, instead of `false` everywhere. Nothing stops the camera when an Android app is backgrounded, so it kept capturing and encoding behind the lock screen. iOS is unchanged: the OS already stops capture in the background unless multitasking camera access is enabled, and enabling this there also removes the local participant's video from the iOS picture-in-picture view. Pass an explicit `true`/`false` to override.
+- Background muting now also triggers on the `hidden` lifecycle state, not just `paused`. iOS and desktop can settle in `hidden`, where a camera left running costs exactly the same.
+- On returning to the foreground, the camera and microphone are only restored if they are still off. Previously a track the user re-enabled while backgrounded — from a picture-in-picture view, say — was overridden on resume.
 - `onPublishQualityChanged` now reconfigures the camera, not just the sender's encoding flags. When the SFU deactivates the top simulcast layers, the camera used to keep producing full-resolution frames that the encoder then downscaled for every remaining layer on every frame — so we kept paying to capture layers nobody wanted. The applied format is persisted into the track's constraints, so a mute/unmute cycle (which recreates the track) does not silently throw the adaptation away.
 - Stats collection no longer runs when nothing observes the result. `StatsReporter` skips the whole tick — two `getStats()` round trips, each walking every report — unless something is subscribed to `Call.stats`, something is subscribed to the reporter itself, or first-frame telemetry still needs a sample. Setting `CallPreferences.callStatsReportingInterval` to `Duration.zero` now disables the reporter outright.
 - A stats tick is parsed once instead of three times. The platform reports are flattened into plain maps in a single walk, and the typed models and the human-readable dump are both derived from those maps on first access. The dump in particular used to be string-formatted on every tick of both reporters even when no log or diagnostics listener existed; it is now only built if something reads it.
@@ -20,6 +24,7 @@
 
 ### 🐞 Fixed
 
+- Fixed the background mute bookkeeping never being cleaned up, leaking one map entry per call joined for the lifetime of the client.
 - Fixed the publish-option fallbacks being dead code, which left the SDK silently dependent on the SFU populating every optional field. `fps`, `bitrate`, `maxSpatialLayers` and `maxTemporalLayers` arrive as proto3 scalars, so an omitted field decoded as `0` rather than `null` and every `?? default` downstream was unreachable. An SFU that omitted `maxSpatialLayers` would have published **zero** encodings, and one that omitted `fps` would have set `maxFramerate: 0` on every layer. Absent fields now map to `null`, and an explicit `0` falls back to the documented default (30 fps, 3 spatial/temporal layers, preset bitrate) instead of being published verbatim.
 - Fixed the publisher's SVC/simulcast branch in `onPublishQualityChanged` depending on the stats reporter having collected at least once: the codec in use now falls back to the codec the sender negotiated, so an SFU quality change is handled the same way regardless of stats cadence.
 - Fixed `SfuPublishOptions.toDTO()` dropping `degradationPreference`, so the preference was lost whenever publish options were sent back to the SFU (for example on rejoin).

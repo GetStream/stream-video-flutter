@@ -576,19 +576,29 @@ class StreamVideo extends Disposable {
     try {
       final activeCalls = _state.activeCalls.value;
       _state.appLifecycleState.value = state;
+      _pruneBackgroundMuteState(activeCalls);
 
-      if (state.isPaused) {
+      // `paused` is the reliable background signal on Android, but iOS and
+      // desktop can settle in `hidden` instead — and a camera left running
+      // there costs exactly the same.
+      final isBackgrounded = state.isPaused || state.isHidden;
+
+      if (isBackgrounded) {
         for (final activeCall in activeCalls) {
-          activeCall.traceSessionLog('device.stateChange', 'paused');
+          activeCall.traceSessionLog('device.stateChange', state.name);
         }
 
         // Handle app paused state
         if (activeCalls.isEmpty &&
+            state.isPaused &&
             !_options.keepConnectionsAliveWhenInBackground) {
           _logger.i(() => '[onAppState] close connection');
           _subscriptions.cancel(_idEvents);
           await _client.closeConnection();
         } else if (activeCalls.isNotEmpty) {
+          final keepCameraEnabled =
+              await _shouldKeepCameraEnabledInBackground();
+
           for (final activeCall in activeCalls) {
             final callState = activeCall.state.value;
             final isVideoEnabled =
@@ -596,15 +606,17 @@ class StreamVideo extends Disposable {
             final isAudioEnabled =
                 callState.localParticipant?.isAudioEnabled ?? false;
 
-            if (_options.muteVideoWhenInBackground && isVideoEnabled) {
+            if (_options.muteVideoWhenInBackground &&
+                isVideoEnabled &&
+                !keepCameraEnabled) {
               await activeCall.setCameraEnabled(enabled: false);
               _mutedCameraByStateChange[activeCall.callCid.value] = true;
-              _logger.v(() => 'Muted camera track since app was paused.');
+              _logger.v(() => 'Muted camera track since app was backgrounded.');
             }
             if (_options.muteAudioWhenInBackground && isAudioEnabled) {
               await activeCall.setMicrophoneEnabled(enabled: false);
               _mutedAudioByStateChange[activeCall.callCid.value] = true;
-              _logger.v(() => 'Muted audio track since app was paused.');
+              _logger.v(() => 'Muted audio track since app was backgrounded.');
             }
           }
         }
@@ -617,26 +629,66 @@ class StreamVideo extends Disposable {
         for (final activeCall in activeCalls) {
           activeCall.traceSessionLog('device.stateChange', 'resumed');
 
+          final callState = activeCall.state.value;
           final wasCameraMuted =
               _mutedCameraByStateChange[activeCall.callCid.value] ?? false;
-          if (wasCameraMuted) {
+
+          // Only restore what we turned off. If the camera came back on while
+          // backgrounded — the user tapped unmute in a picture-in-picture view,
+          // say — there is nothing to restore, and re-enabling it would
+          // override a choice the user has already made.
+          if (wasCameraMuted &&
+              !(callState.localParticipant?.isVideoEnabled ?? false)) {
             await activeCall.setCameraEnabled(enabled: true);
-            _mutedCameraByStateChange[activeCall.callCid.value] = false;
             _logger.v(() => 'Unmuted camera track since app was unpaused.');
           }
+          _mutedCameraByStateChange[activeCall.callCid.value] = false;
 
           final wasAudioMuted =
               _mutedAudioByStateChange[activeCall.callCid.value] ?? false;
-          if (wasAudioMuted) {
+          if (wasAudioMuted &&
+              !(callState.localParticipant?.isAudioEnabled ?? false)) {
             await activeCall.setMicrophoneEnabled(enabled: true);
-            _mutedAudioByStateChange[activeCall.callCid.value] = false;
             _logger.v(() => 'Unmuted audio track since app was unpaused.');
           }
+          _mutedAudioByStateChange[activeCall.callCid.value] = false;
         }
       }
     } catch (e) {
       _logger.e(() => '[onAppState] failed: $e');
     }
+  }
+
+  /// Whether the camera should keep capturing through a background transition.
+  ///
+  /// A failing hook must not leave the camera running, so an error is treated
+  /// as "no reason to keep it on".
+  Future<bool> _shouldKeepCameraEnabledInBackground() async {
+    final shouldKeep = _options.shouldKeepCameraEnabledInBackground;
+    if (shouldKeep == null) return false;
+
+    try {
+      return await shouldKeep();
+    } catch (e) {
+      _logger.w(() => '[onAppState] keep-camera-enabled check failed: $e');
+      return false;
+    }
+  }
+
+  /// Drops background-mute bookkeeping for calls that have ended.
+  ///
+  /// The entries are keyed by call cid and were never removed, so they
+  /// accumulated for the lifetime of the client — one per call joined.
+  void _pruneBackgroundMuteState(List<Call> activeCalls) {
+    if (_mutedCameraByStateChange.isEmpty && _mutedAudioByStateChange.isEmpty) {
+      return;
+    }
+
+    final activeCids = activeCalls.map((c) => c.callCid.value).toSet();
+    _mutedCameraByStateChange.removeWhere(
+      (cid, _) => !activeCids.contains(cid),
+    );
+    _mutedAudioByStateChange.removeWhere((cid, _) => !activeCids.contains(cid));
   }
 
   StreamSubscription<Call?> listenActiveCall(
@@ -1541,8 +1593,9 @@ class StreamVideoOptions {
     this.audioProcessor,
     this.logPriority = Priority.none,
     this.logHandlerFunction = _defaultLogHandler,
-    this.muteVideoWhenInBackground = false,
+    bool? muteVideoWhenInBackground,
     this.muteAudioWhenInBackground = false,
+    this.shouldKeepCameraEnabledInBackground,
     this.autoConnect = true,
     this.includeUserDetailsForAutoConnect = true,
     this.keepConnectionsAliveWhenInBackground = false,
@@ -1555,7 +1608,8 @@ class StreamVideoOptions {
     )
     this.androidAudioConfiguration,
     AudioConfigurationPolicy? audioConfigurationPolicy,
-  }) : audioConfigurationPolicy = androidAudioConfiguration == null
+  }) : _muteVideoWhenInBackground = muteVideoWhenInBackground,
+       audioConfigurationPolicy = androidAudioConfiguration == null
            ? audioConfigurationPolicy ?? const BroadcasterAudioPolicy()
            : CustomAudioPolicy(androidConfiguration: androidAudioConfiguration);
 
@@ -1575,7 +1629,33 @@ class StreamVideoOptions {
 
   final AudioProcessor? audioProcessor;
 
-  final bool muteVideoWhenInBackground;
+  final bool? _muteVideoWhenInBackground;
+
+  /// Whether to turn the camera off while the app is in the background.
+  ///
+  /// Defaults to `true` on Android and `false` everywhere else. On Android
+  /// nothing stops the camera when the app is backgrounded, so without this it
+  /// keeps capturing and encoding behind the lock screen. On iOS the OS already
+  /// stops capture in the background unless multitasking camera access is
+  /// enabled, and turning this on additionally disables that access — which
+  /// removes the local participant's video from the iOS picture-in-picture
+  /// view — so it stays opt-in there.
+  ///
+  /// Overridden per-background-event by [shouldKeepCameraEnabledInBackground].
+  bool get muteVideoWhenInBackground =>
+      _muteVideoWhenInBackground ?? CurrentPlatform.isAndroid;
+
+  /// Consulted before turning the camera off for a background transition.
+  ///
+  /// Return `true` to keep it running — for example while the app is in
+  /// picture-in-picture, or while an Android foreground service is keeping the
+  /// call alive, where the user can still see the video and expects their
+  /// camera to work.
+  ///
+  /// `stream_video_flutter` exposes a ready-made implementation covering both
+  /// cases; see `StreamBackgroundService.shouldKeepCameraEnabledInBackground`.
+  final Future<bool> Function()? shouldKeepCameraEnabledInBackground;
+
   final bool muteAudioWhenInBackground;
   final bool autoConnect;
   final bool includeUserDetailsForAutoConnect;

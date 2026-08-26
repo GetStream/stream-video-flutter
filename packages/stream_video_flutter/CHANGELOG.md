@@ -2,6 +2,7 @@
 
 ### ✅ Added
 
+- Added `StreamBackgroundService.shouldKeepCameraEnabledInBackground`, a ready-made `StreamVideoOptions.shouldKeepCameraEnabledInBackground` that keeps the camera running while the app is in picture-in-picture or while an Android foreground service is keeping the call alive.
 - Added `filterQuality` to `StreamVideoRenderer`, `VideoTrackRenderer`, `StreamCallParticipant` and `StreamCallParticipantThemeData`, so the sampling quality used to scale video tiles can be overridden per widget or per theme.
 
 ### 🔄 Changed

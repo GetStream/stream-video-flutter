@@ -5,6 +5,7 @@ import 'package:rxdart/transformers.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../stream_video_flutter_background.dart';
+import '../call_screen/call_content/picture_in_picture/android_pip_manager.dart';
 import 'model/notification_options.dart';
 import 'model/notification_payload.dart';
 import 'model/service_type.dart';
@@ -34,6 +35,34 @@ class StreamBackgroundService {
   }
 
   StreamBackgroundService._();
+
+  /// A ready-made [StreamVideoOptions.shouldKeepCameraEnabledInBackground].
+  ///
+  /// Reports the two situations where the camera should keep capturing even
+  /// though the app is backgrounded, because the user can still see the video
+  /// and expects their own camera to work:
+  ///
+  /// * the app is in picture-in-picture;
+  /// * an Android foreground service is keeping the call alive.
+  ///
+  /// Pass it when creating the client:
+  ///
+  /// ```dart
+  /// StreamVideo(
+  ///   apiKey,
+  ///   options: StreamVideoOptions(
+  ///     shouldKeepCameraEnabledInBackground:
+  ///         StreamBackgroundService.shouldKeepCameraEnabledInBackground,
+  ///   ),
+  /// );
+  /// ```
+  static Future<bool> shouldKeepCameraEnabledInBackground() async {
+    if (!CurrentPlatform.isAndroid) return false;
+
+    if (AndroidPipManager.instance().isInPictureInPictureMode) return true;
+
+    return StreamVideoFlutterBackground.isServiceRunning(ServiceType.call);
+  }
 
   static final StreamBackgroundService _instance = StreamBackgroundService._();
   static final Subscriptions _subscriptions = Subscriptions();
