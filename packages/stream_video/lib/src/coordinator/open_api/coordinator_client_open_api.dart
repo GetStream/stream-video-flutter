@@ -124,6 +124,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
                 connectionId: event.connectionId,
                 closeCode: event.closeCode,
                 closeReason: event.closeReason,
+                apiError: event.apiError,
               );
             }
             _events.emit(event);

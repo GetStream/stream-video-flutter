@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:stream_core/stream_core.dart' show StreamApiError;
 
 sealed class CoordinatorConnectionState extends Equatable {
   const CoordinatorConnectionState();
@@ -19,12 +20,14 @@ sealed class CoordinatorConnectionState extends Equatable {
     String? connectionId,
     int? closeCode,
     String? closeReason,
+    StreamApiError? apiError,
   }) {
     return CoordinatorDisconnected(
       userId: userId,
       connectionId: connectionId,
       closeCode: closeCode,
       closeReason: closeReason,
+      apiError: apiError,
     );
   }
 
@@ -69,6 +72,7 @@ class CoordinatorDisconnected extends CoordinatorConnectionState {
     this.connectionId,
     this.closeCode,
     this.closeReason,
+    this.apiError,
   });
 
   final String? userId;
@@ -76,8 +80,17 @@ class CoordinatorDisconnected extends CoordinatorConnectionState {
   final int? closeCode;
   final String? closeReason;
 
+  /// The error the server reported before closing, when it sent one.
+  final StreamApiError? apiError;
+
   @override
-  List<Object?> get props => [userId, connectionId, closeCode, closeReason];
+  List<Object?> get props => [
+    userId,
+    connectionId,
+    closeCode,
+    closeReason,
+    apiError,
+  ];
 
   @override
   String toString() => 'Disconnected{userId: $userId}';

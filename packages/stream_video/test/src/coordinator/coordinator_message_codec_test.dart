@@ -45,10 +45,23 @@ void main() {
       expect((error! as StreamApiError).isInvalidTokenError, isTrue);
     });
 
-    test('surfaces an error unrelated to the token too', () {
+    test('surfaces a rejected API key as the event error', () {
+      final event = codec.decode(_apiErrorMessage(2));
+
+      final error = event.error;
+      expect(error, isA<StreamApiError>());
+      expect((error! as StreamApiError).isInvalidTokenError, isTrue);
+    });
+
+    // The socket client closes the connection with any error it is handed, so
+    // an error that says nothing about the credentials must stay suppressed —
+    // otherwise a working connection is dropped over an error about a single
+    // request.
+    test('suppresses an error unrelated to the credentials', () {
       final event = codec.decode(_apiErrorMessage(17));
 
-      expect(event.error, isA<StreamApiError>());
+      expect(event.event, isNull);
+      expect(event.error, isNull);
     });
 
     test('decodes a domain event without an error', () {

@@ -94,7 +94,10 @@ void main() {
         establishGate.complete();
         final results = await Future.wait(pending);
 
-        expect(results.map((it) => it.getDataOrNull()), everyElement(guestToken));
+        expect(
+          results.map((it) => it.getDataOrNull()),
+          everyElement(guestToken),
+        );
         // One exchange, so a second caller cannot mint a session of its own.
         expect(establishCalls, 1);
       });

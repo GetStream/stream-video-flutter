@@ -142,20 +142,15 @@ class CoordinatorWebSocket {
     final tokenResult = tokenRefused
         ? await tokenSource.refreshToken()
         : await tokenSource.getToken();
-    final userToken = tokenResult.getDataOrNull();
-    if (userToken == null) {
-      _logger.e(
-        () => '[authenticateUser] token fetch failed — disconnecting to retry',
-      );
-      unawaited(
-        _client.disconnect(source: const DisconnectionSource.systemInitiated()),
-      );
-      return;
+
+    if (tokenResult is! Success<UserToken>) {
+      _logger.e(() => '[authenticateUser] token fetch failed: $tokenResult');
+      throw (tokenResult as Failure).videoError;
     }
 
     final sent = send(
       CoordinatorAuthRequest(
-        token: userToken.rawValue,
+        token: tokenResult.data.rawValue,
         userId: userInfo.id,
         name: includeUserDetails ? userInfo.name : null,
         image: includeUserDetails ? userInfo.image : null,
@@ -212,6 +207,9 @@ class CoordinatorWebSocket {
     final source = state.source;
     final wsException = source is ServerInitiated ? source.error : null;
 
+    final apiError = wsException?.apiError;
+    final wsReason = wsException?.reason;
+
     _events.emit(
       CoordinatorDisconnectedEvent(
         userId: _userId,
@@ -219,9 +217,10 @@ class CoordinatorWebSocket {
         closeCode: wsException != null && wsException.code != 0
             ? wsException.code
             : null,
-        closeReason: wsException != null && wsException.reason != 'Unknown'
-            ? wsException.reason
-            : null,
+        closeReason: wsReason != null && wsReason != 'Unknown'
+            ? wsReason
+            : apiError?.message,
+        apiError: apiError,
       ),
     );
     _userId = null;

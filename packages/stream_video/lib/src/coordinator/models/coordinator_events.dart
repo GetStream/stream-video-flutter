@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
+import 'package:stream_core/stream_core.dart' show StreamApiError;
 
 import '../../models/call_cid.dart';
 import '../../models/call_created_data.dart';
@@ -42,6 +43,7 @@ class CoordinatorDisconnectedEvent extends CoordinatorEvent {
     this.userId,
     this.closeCode,
     this.closeReason,
+    this.apiError,
   });
 
   final String? connectionId;
@@ -49,8 +51,20 @@ class CoordinatorDisconnectedEvent extends CoordinatorEvent {
   final int? closeCode;
   final String? closeReason;
 
+  /// The error the server reported before closing, when it sent one.
+  ///
+  /// A refused token is reported this way rather than as a close code, so for
+  /// a connection the server rejected this is the only description of why.
+  final StreamApiError? apiError;
+
   @override
-  List<Object?> get props => [connectionId, userId, closeCode, closeReason];
+  List<Object?> get props => [
+    connectionId,
+    userId,
+    closeCode,
+    closeReason,
+    apiError,
+  ];
 }
 
 /// Fired when web socket reconnected.
