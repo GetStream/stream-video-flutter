@@ -45,7 +45,8 @@ melos:
         package_info_plus: ">=9.0.0 <11.0.0"
         share_plus: ^13.0.0
         stream_chat_flutter: ^10.0.0
-        stream_webrtc_flutter: ^3.0.1
+        stream_webrtc_flutter: 
+          path: /Users/renefloor/Documents/github/webrtc-flutter
         stream_video: ^1.4.3
         stream_video_filters: ^1.4.3
         stream_video_flutter: ^1.4.3

@@ -1997,11 +1997,10 @@ packages:
   stream_webrtc_flutter:
     dependency: transitive
     description:
-      name: stream_webrtc_flutter
-      sha256: "347b3da665bdb5d82dfec1d033b8ea2c8e163048e5d2cbe4779f7f1c85a657b3"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.1"
+      path: "/Users/renefloor/Documents/github/webrtc-flutter"
+      relative: false
+    source: path
+    version: "3.0.2"
   string_scanner:
     dependency: transitive
     description:
