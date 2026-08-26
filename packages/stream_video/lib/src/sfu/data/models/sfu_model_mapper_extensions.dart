@@ -123,6 +123,7 @@ extension SfuAudioBitrateMapper on SfuAudioBitrate {
 
 extension SfuPublishOptionsMapper on SfuPublishOptions {
   sfu_models.PublishOption toDTO() {
+    final videoDimension = this.videoDimension;
     return sfu_models.PublishOption(
       trackType: trackType.toDTO(),
       codec: codec.toDTO(),
@@ -131,15 +132,46 @@ extension SfuPublishOptionsMapper on SfuPublishOptions {
       bitrate: bitrate,
       fps: fps,
       id: id,
-      videoDimension: sfu_models.VideoDimension(
-        width: videoDimension?.width,
-        height: videoDimension?.height,
-      ),
+      // Left absent when we have no dimension, rather than sent as an explicit
+      // 0x0 — the generated setter marks the field present either way.
+      videoDimension: videoDimension == null
+          ? null
+          : sfu_models.VideoDimension(
+              width: videoDimension.width,
+              height: videoDimension.height,
+            ),
       useSingleLayer: useSingleLayer,
       audioBitrateProfiles: audioBitrateProfiles
           ?.map((it) => it.toDTO())
           .toList(),
+      degradationPreference: degradationPreference?.toDTO(),
     );
+  }
+}
+
+extension RtcDegradationPreferenceMapper on RTCDegradationPreference {
+  sfu_enums.DegradationPreference toDTO() {
+    switch (this) {
+      // ignore: deprecated_member_use
+      case RTCDegradationPreference.DISABLED:
+        return sfu_enums
+            .DegradationPreference
+            .DEGRADATION_PREFERENCE_UNSPECIFIED;
+      case RTCDegradationPreference.BALANCED:
+        return sfu_enums.DegradationPreference.DEGRADATION_PREFERENCE_BALANCED;
+      case RTCDegradationPreference.MAINTAIN_FRAMERATE:
+        return sfu_enums
+            .DegradationPreference
+            .DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE;
+      case RTCDegradationPreference.MAINTAIN_RESOLUTION:
+        return sfu_enums
+            .DegradationPreference
+            .DEGRADATION_PREFERENCE_MAINTAIN_RESOLUTION;
+      case RTCDegradationPreference.MAINTAIN_FRAMERATE_AND_RESOLUTION:
+        return sfu_enums
+            .DegradationPreference
+            .DEGRADATION_PREFERENCE_MAINTAIN_FRAMERATE_AND_RESOLUTION;
+    }
   }
 }
 

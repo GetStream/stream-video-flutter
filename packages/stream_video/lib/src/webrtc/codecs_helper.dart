@@ -31,6 +31,19 @@ class RTCRtpEncodingWithDimensions extends rtc.RTCRtpEncoding {
   final double height;
 }
 
+/// The number of spatial/temporal layers to fall back to when the SFU does not
+/// specify one.
+const _defaultLayerCount = 3;
+
+/// Returns [value] when it is a usable positive number, and `null` otherwise.
+///
+/// The publish options arrive from proto3 scalar fields, where an omitted value
+/// decodes as `0` rather than as absent. The mapper restores `null` for fields
+/// the SFU never sent, but a `0` that was explicitly sent is just as unusable
+/// here — a zero framerate, bitrate or layer count would be published verbatim.
+/// Both cases collapse to "fall back to the default".
+int? _positiveOrNull(int? value) => value != null && value > 0 ? value : null;
+
 /// Determines the most optimal video layers for the given track.
 List<RTCRtpEncodingWithDimensions> findOptimalVideoLayers({
   required RtcVideoDimension dimensions,
@@ -39,16 +52,36 @@ List<RTCRtpEncodingWithDimensions> findOptimalVideoLayers({
   final optimalVideoLayers = <RTCRtpEncodingWithDimensions>[];
   const defaultVideoPreset = RtcVideoParametersPresets.h720_16x9;
 
+  final publishDimension = publishOptions.videoDimension;
+  final targetDimension =
+      publishDimension != null &&
+          publishDimension.width > 0 &&
+          publishDimension.height > 0
+      ? publishDimension
+      : defaultVideoPreset.dimension;
+
   final maxBitrate = getComputedMaxBitrate(
-    publishOptions.videoDimension ?? defaultVideoPreset.dimension,
-    publishOptions.bitrate ?? defaultVideoPreset.encoding.maxBitrate,
+    targetDimension,
+    _positiveOrNull(publishOptions.bitrate) ??
+        defaultVideoPreset.encoding.maxBitrate,
     dimensions.width,
     dimensions.height,
   );
 
   final svcCodec = isSvcCodec(publishOptions.codec.name);
-  final maxSpatialLayers = publishOptions.maxSpatialLayers ?? 3;
-  final maxTemporalLayers = publishOptions.maxTemporalLayers ?? 3;
+  final maxFramerate =
+      _positiveOrNull(publishOptions.fps) ??
+      defaultVideoPreset.encoding.maxFramerate;
+
+  // Clamped to the number of available rids: a larger value would overflow the
+  // `sublist` below, and a zero/absent value would yield an empty rid list and
+  // therefore no encodings at all.
+  final maxSpatialLayers = min(
+    _positiveOrNull(publishOptions.maxSpatialLayers) ?? _defaultLayerCount,
+    _defaultLayerCount,
+  );
+  final maxTemporalLayers =
+      _positiveOrNull(publishOptions.maxTemporalLayers) ?? _defaultLayerCount;
 
   var downscaleFactor = 1;
   var bitrateFactor = 1;
@@ -58,7 +91,7 @@ List<RTCRtpEncodingWithDimensions> findOptimalVideoLayers({
     final layer = RTCRtpEncodingWithDimensions(
       rid: rid,
       maxBitrate: (maxBitrate / bitrateFactor).round(),
-      maxFramerate: publishOptions.fps,
+      maxFramerate: maxFramerate,
       width: dimensions.width / downscaleFactor,
       height: dimensions.height / downscaleFactor,
     );

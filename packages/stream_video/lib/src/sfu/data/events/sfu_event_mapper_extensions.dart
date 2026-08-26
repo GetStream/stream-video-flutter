@@ -369,9 +369,11 @@ extension SfuAudioBitrateExtension on sfu_models.AudioBitrateProfile {
 
 extension SfuAudioBitrateExtension2 on sfu_models.AudioBitrate {
   SfuAudioBitrate toDomain() {
+    // Proto3 scalar: absent decodes as `0`, so gate on presence to keep the
+    // model's `int?` meaningful. See the note on `PublishOption.toDomain`.
     return SfuAudioBitrate(
       profile: profile.toDomain(),
-      bitrate: bitrate,
+      bitrate: hasBitrate() ? bitrate : null,
     );
   }
 }
@@ -524,18 +526,27 @@ extension on sfu_events.VideoLayerSetting {
 
 extension on sfu_models.PublishOption {
   SfuPublishOptions toDomain() {
+    // `fps`, `maxSpatialLayers`, `maxTemporalLayers` and `bitrate` are proto3
+    // scalars, so the generated getters return `0` rather than `null` when the
+    // SFU omits them. Mapping that `0` straight through would make every
+    // null-coalescing fallback downstream dead code. The generated `has*`
+    // accessors report whether the field was actually present on the wire
+    // (proto3 never serializes zero-valued scalars), so use them to restore the
+    // `int?` semantics the domain model declares.
     return SfuPublishOptions(
       id: id,
       codec: codec.toDomain(),
-      videoDimension: RtcVideoDimension(
-        width: videoDimension.width,
-        height: videoDimension.height,
-      ),
+      videoDimension: hasVideoDimension()
+          ? RtcVideoDimension(
+              width: videoDimension.width,
+              height: videoDimension.height,
+            )
+          : null,
       trackType: trackType.toDomain(),
-      maxSpatialLayers: maxSpatialLayers,
-      maxTemporalLayers: maxTemporalLayers,
-      bitrate: bitrate,
-      fps: fps,
+      maxSpatialLayers: hasMaxSpatialLayers() ? maxSpatialLayers : null,
+      maxTemporalLayers: hasMaxTemporalLayers() ? maxTemporalLayers : null,
+      bitrate: hasBitrate() ? bitrate : null,
+      fps: hasFps() ? fps : null,
       useSingleLayer: useSingleLayer,
       audioBitrateProfiles: audioBitrateProfiles
           .map((it) => it.toDomain())

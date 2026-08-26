@@ -12,6 +12,8 @@
 
 ### 🐞 Fixed
 
+- Fixed the publish-option fallbacks being dead code, which left the SDK silently dependent on the SFU populating every optional field. `fps`, `bitrate`, `maxSpatialLayers` and `maxTemporalLayers` arrive as proto3 scalars, so an omitted field decoded as `0` rather than `null` and every `?? default` downstream was unreachable. An SFU that omitted `maxSpatialLayers` would have published **zero** encodings, and one that omitted `fps` would have set `maxFramerate: 0` on every layer. Absent fields now map to `null`, and an explicit `0` falls back to the documented default (30 fps, 3 spatial/temporal layers, preset bitrate) instead of being published verbatim.
+- Fixed `SfuPublishOptions.toDTO()` dropping `degradationPreference`, so the preference was lost whenever publish options were sent back to the SFU (for example on rejoin).
 - [Web] Fixed remote audio staying silent for the rest of the call after the browser's autoplay policy blocked playback, or after an audio element paused on its own (for example when a Bluetooth headset switches profile as the microphone is unmuted). Playback is now started explicitly, watched, and retried with a backoff, instead of relying on the element's `autoplay` attribute and failing with no indication.
 - [Web] Fixed the selected audio output device being lost when a remote participant unmuted.
 - [Web] Fixed `Call.setAudioOutputDevice` reporting success when the browser rejected the device or did not support output selection at all.
