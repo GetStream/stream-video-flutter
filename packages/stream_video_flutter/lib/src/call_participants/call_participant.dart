@@ -31,6 +31,7 @@ class StreamCallParticipant extends StatelessWidget {
     required this.participant,
     this.rendererScopePrefix,
     this.videoFit,
+    this.filterQuality,
     this.backgroundColor,
     this.borderRadius,
     this.userAvatarTheme,
@@ -61,6 +62,11 @@ class StreamCallParticipant extends StatelessWidget {
 
   /// The fit of the [VideoRenderer] widget
   final VideoFit? videoFit;
+
+  /// The sampling quality used to scale the participant's video.
+  ///
+  /// See [VideoTrackRenderer.filterQuality].
+  final FilterQuality? filterQuality;
 
   /// The background color of the call participant.
   final Color? backgroundColor;
@@ -130,6 +136,7 @@ class StreamCallParticipant extends StatelessWidget {
     final theme = StreamCallParticipantTheme.of(context);
 
     final videoFit = this.videoFit ?? theme.videoFit;
+    final filterQuality = this.filterQuality ?? theme.filterQuality;
     final backgroundColor = this.backgroundColor ?? theme.backgroundColor;
     final borderRadius = this.borderRadius ?? theme.borderRadius;
     final userAvatarTheme = this.userAvatarTheme ?? theme.userAvatarTheme;
@@ -214,6 +221,7 @@ class StreamCallParticipant extends StatelessWidget {
                       );
                     },
                     videoFit: videoFit,
+                    filterQuality: filterQuality,
                   ),
                   if (participant.reaction != null)
                     Align(

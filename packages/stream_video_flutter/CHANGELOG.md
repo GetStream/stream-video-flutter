@@ -1,3 +1,13 @@
+## Upcoming
+
+### ✅ Added
+
+- Added `filterQuality` to `StreamVideoRenderer`, `VideoTrackRenderer`, `StreamCallParticipant` and `StreamCallParticipantThemeData`, so the sampling quality used to scale video tiles can be overridden per widget or per theme.
+
+### 🔄 Changed
+
+- Video tiles now render with `FilterQuality.low` instead of `FilterQuality.medium`. `medium` enables mipmapping, which Flutter regenerates every time the texture contents change — for video that is every frame, on every tile, with the 720p self-view drawn as a small picture-in-picture being the worst case. `low` is bilinear filtering and matches the underlying `RTCVideoView` default; video's temporal noise makes the difference hard to see. Set `filterQuality` back to `FilterQuality.medium` on the renderer or the participant theme to restore the old behaviour.
+
 ## 1.4.3
 
 ### 🐞 Fixed

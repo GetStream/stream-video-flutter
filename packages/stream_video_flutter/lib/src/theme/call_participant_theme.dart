@@ -11,6 +11,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
   /// Creates a new instance of [StreamCallParticipantThemeData].
   const StreamCallParticipantThemeData({
     this.videoFit,
+    this.filterQuality = defaultVideoFilterQuality,
     this.backgroundColor = const Color(0xffB4B7BB),
     this.borderRadius = BorderRadius.zero,
     this.userAvatarTheme = const StreamUserAvatarThemeData(
@@ -53,6 +54,13 @@ class StreamCallParticipantThemeData with Diagnosticable {
   /// When `null`, [defaultVideoFit] is used, which resolves to
   /// [VideoFit.adaptive] on web and desktop and [VideoFit.cover] on mobile.
   final VideoFit? videoFit;
+
+  /// The sampling quality used to scale participant video.
+  ///
+  /// Defaults to [defaultVideoFilterQuality] ([FilterQuality.low]). Anything
+  /// above it enables mipmapping, which for video is regenerated on every
+  /// frame of every tile.
+  final FilterQuality filterQuality;
 
   /// The background color of the call participant.
   final Color backgroundColor;
@@ -118,6 +126,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
   /// new values.
   StreamCallParticipantThemeData copyWith({
     VideoFit? videoFit,
+    FilterQuality? filterQuality,
     Color? backgroundColor,
     BorderRadius? borderRadius,
     StreamUserAvatarThemeData? userAvatarTheme,
@@ -141,6 +150,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
   }) {
     return StreamCallParticipantThemeData(
       videoFit: videoFit ?? this.videoFit,
+      filterQuality: filterQuality ?? this.filterQuality,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       borderRadius: borderRadius ?? this.borderRadius,
       userAvatarTheme: userAvatarTheme ?? this.userAvatarTheme,
@@ -189,6 +199,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
   ) {
     return StreamCallParticipantThemeData(
       videoFit: t < 0.5 ? videoFit : other.videoFit,
+      filterQuality: t < 0.5 ? filterQuality : other.filterQuality,
       backgroundColor: Color.lerp(backgroundColor, other.backgroundColor, t)!,
       borderRadius: BorderRadius.lerp(borderRadius, other.borderRadius, t)!,
       userAvatarTheme: userAvatarTheme.lerp(other.userAvatarTheme, t),
@@ -275,6 +286,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
   @override
   int get hashCode => Object.hash(
     videoFit,
+    filterQuality,
     backgroundColor,
     borderRadius,
     userAvatarTheme,
@@ -309,6 +321,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
     }
     return other is StreamCallParticipantThemeData &&
         other.videoFit == videoFit &&
+        other.filterQuality == filterQuality &&
         other.backgroundColor == backgroundColor &&
         other.borderRadius == borderRadius &&
         other.userAvatarTheme == userAvatarTheme &&
@@ -339,6 +352,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('videoFit', videoFit))
+      ..add(DiagnosticsProperty('filterQuality', filterQuality))
       ..add(DiagnosticsProperty('backgroundColor', backgroundColor))
       ..add(DiagnosticsProperty('borderRadius', borderRadius))
       ..add(DiagnosticsProperty('userAvatarTheme', userAvatarTheme))
@@ -443,6 +457,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
     if (other == null) return this;
     return copyWith(
       videoFit: other.videoFit,
+      filterQuality: other.filterQuality,
       backgroundColor: other.backgroundColor,
       borderRadius: other.borderRadius,
       userAvatarTheme: other.userAvatarTheme,

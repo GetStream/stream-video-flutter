@@ -17,6 +17,7 @@ class StreamVideoRenderer extends StatefulWidget {
     required this.videoTrackType,
     this.placeholderBuilder = _defaultPlaceholderBuilder,
     this.videoFit,
+    this.filterQuality = defaultVideoFilterQuality,
     this.onSizeChanged,
     this.persistTrackIfNotVisible = false,
     this.rendererScopePrefix,
@@ -39,6 +40,11 @@ class StreamVideoRenderer extends StatefulWidget {
   /// When `null`, [defaultVideoFit] is used, which resolves to
   /// [VideoFit.adaptive] on web and desktop and [VideoFit.cover] on mobile.
   final VideoFit? videoFit;
+
+  /// The sampling quality used to scale the video texture.
+  ///
+  /// See [VideoTrackRenderer.filterQuality].
+  final FilterQuality filterQuality;
 
   /// Called when the size of the widget changes.
   final ValueSetter<Size>? onSizeChanged;
@@ -158,6 +164,7 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
         '${widget.rendererScopePrefix ?? ''}${widget.participant.uniqueParticipantKey}-${widget.videoTrackType}-renderer',
       ),
       videoFit: widget.videoFit,
+      filterQuality: widget.filterQuality,
       videoTrack: videoTrack,
       mirror: mirror,
       placeholderBuilder: widget.placeholderBuilder,
@@ -267,6 +274,14 @@ VideoFit get defaultVideoFit {
   return VideoFit.adaptive;
 }
 
+/// The [FilterQuality] used for participant video when none is explicitly set.
+///
+/// [FilterQuality.low] is bilinear filtering, and matches the underlying
+/// `RTCVideoView` default. Anything above it enables mipmapping, which is
+/// regenerated whenever the texture contents change — i.e. every frame, on
+/// every tile.
+const defaultVideoFilterQuality = FilterQuality.low;
+
 /// A widget that renders a single video track.
 class VideoTrackRenderer extends StatefulWidget {
   /// Creates a new instance of [VideoTrackRenderer].
@@ -275,6 +290,7 @@ class VideoTrackRenderer extends StatefulWidget {
     required this.videoTrack,
     this.mirror = false,
     this.videoFit,
+    this.filterQuality = defaultVideoFilterQuality,
     this.placeholderBuilder = _defaultPlaceholderBuilder,
   });
 
@@ -289,6 +305,14 @@ class VideoTrackRenderer extends StatefulWidget {
   /// When `null`, [defaultVideoFit] is used, which resolves to
   /// [VideoFit.adaptive] on web and desktop and [VideoFit.cover] on mobile.
   final VideoFit? videoFit;
+
+  /// The sampling quality used to scale the video texture.
+  ///
+  /// Defaults to [defaultVideoFilterQuality] ([FilterQuality.low]). Raising
+  /// this to [FilterQuality.medium] or above makes Flutter generate mipmaps,
+  /// which for video means regenerating them for every tile on every frame —
+  /// a per-frame GPU cost that video's temporal noise makes hard to see.
+  final FilterQuality filterQuality;
 
   /// A builder for the placeholder.
   final WidgetBuilder placeholderBuilder;
@@ -349,7 +373,7 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
           _videoRenderer,
           mirror: widget.mirror,
           objectFit: _getVideoViewObjectFit(videoFit, value),
-          filterQuality: FilterQuality.medium,
+          filterQuality: widget.filterQuality,
           placeholderBuilder: widget.placeholderBuilder,
         );
       },
