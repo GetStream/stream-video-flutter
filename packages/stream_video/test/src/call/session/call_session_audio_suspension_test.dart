@@ -307,6 +307,59 @@ void main() {
       expect(track.startCalled, isTrue);
     });
 
+    test(
+      'leaves the local microphone unstarted when it was muted during the '
+      'suspension',
+      () async {
+        // A local microphone track published while audio was suspended is
+        // recorded as neverStarted (the normal path under
+        // MultiCallAudioPolicy.suspendIncoming). Starting it only re-enables
+        // it, so a mute that arrived in the meantime must still win.
+        final session = _buildTestSession(
+          callStateManager: _stateManagerWithLocalAudio(enabled: false),
+        );
+        final mockRtcManager = MockRtcManager();
+        final track = _buildLocalAudioTrack(enabled: false);
+
+        when(
+          () => mockRtcManager.tracks,
+        ).thenReturn({track.trackId: track});
+        session.rtcManager = mockRtcManager;
+
+        await session.resumeSuspendedAudioTracks({
+          track.trackId: SuspendedTrackState.neverStarted,
+        });
+
+        expect(
+          track.mediaTrack.enabled,
+          isFalse,
+          reason: 'resuming must not put a muted microphone on air',
+        );
+      },
+    );
+
+    test(
+      'starts the local microphone that was not muted during the suspension',
+      () async {
+        final session = _buildTestSession(
+          callStateManager: _stateManagerWithLocalAudio(enabled: true),
+        );
+        final mockRtcManager = MockRtcManager();
+        final track = _buildLocalAudioTrack(enabled: false);
+
+        when(
+          () => mockRtcManager.tracks,
+        ).thenReturn({track.trackId: track});
+        session.rtcManager = mockRtcManager;
+
+        await session.resumeSuspendedAudioTracks({
+          track.trackId: SuspendedTrackState.neverStarted,
+        });
+
+        expect(track.mediaTrack.enabled, isTrue);
+      },
+    );
+
     test('does not touch wasDisabled audio tracks', () async {
       final session = _buildTestSession();
       final mockRtcManager = MockRtcManager();
