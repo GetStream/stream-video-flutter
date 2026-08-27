@@ -37,11 +37,6 @@ env:
   APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
   APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
   FASTLANE_APPLE_ID: ${{ secrets.FASTLANE_APPLE_ID }}
-  # fastlane runs `xcodebuild -showBuildSettings` before building and allows it
-  # 3 seconds by default. That call has to load the Swift package graph, which
-  # for this project is ~57 packages (Firebase, gRPC, StreamWebRTC, and every
-  # Flutter plugin) and takes over a minute on a cold runner — so the default
-  # times out and the build fails before compiling anything.
   FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 120
 
 concurrency:
