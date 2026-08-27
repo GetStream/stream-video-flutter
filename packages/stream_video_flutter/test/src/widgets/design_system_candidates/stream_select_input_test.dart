@@ -1,21 +1,20 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import '../../../test_utils/goldens.dart';
+import '../../../test_utils/test_wrapper.dart';
+
 void main() {
   final colorScheme = StreamTheme.light().colorScheme;
 
-  // The field reads its colors off StreamTheme, so pin the light theme rather
-  // than relying on StreamTheme.of's brightness fallback.
-  Widget wrap(Widget child) => MaterialApp(
-    theme: ThemeData(
-      extensions: <ThemeExtension<dynamic>>[StreamTheme.light()],
-    ),
-    home: Scaffold(
-      body: Center(child: SizedBox(width: 256, child: child)),
-    ),
+  // The field reads its colors off StreamTheme, and TestWrapper installs the
+  // light one, rather than relying on StreamTheme.of's brightness fallback.
+  Widget wrap(Widget child) => TestWrapper(
+    child: Center(child: SizedBox(width: 256, child: child)),
   );
 
   BorderSide? sideOfWidth(WidgetTester tester, double width) {
@@ -156,4 +155,99 @@ void main() {
 
     expect(border(tester)?.color, Colors.transparent);
   });
+
+  for (final brightness in Brightness.values) {
+    streamGoldenTest(
+      "StreamSelectInput renders the design's type by state matrix",
+      fileName: 'stream_select_input',
+      brightness: brightness,
+      builder: () => GoldenTestGroup(
+        columns: 2,
+        scenarioConstraints: const BoxConstraints.tightFor(width: 220),
+        children: [
+          GoldenTestScenario(
+            name: 'placeholder',
+            child: StreamSelectInput(hintText: 'Default', onPressed: () {}),
+          ),
+          GoldenTestScenario(
+            name: 'value with leading icon',
+            child: Builder(
+              builder: (context) => StreamSelectInput(
+                leading: Icon(context.streamIcons.voiceFill),
+                value: 'MacBook Pro Microphone',
+                onPressed: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'label',
+            child: StreamSelectInput(
+              labelText: 'Microphone',
+              value: 'Jabra Evolve2 65',
+              onPressed: () {},
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'expanded',
+            child: StreamSelectInput(
+              value: 'Jabra Evolve2 65',
+              expanded: true,
+              onPressed: () {},
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'error with helper text',
+            child: StreamSelectInput(
+              value: 'Jabra Evolve2 65',
+              helperText: 'This device is no longer available',
+              helperState: StreamHelperState.error,
+              onPressed: () {},
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'disabled',
+            child: const StreamSelectInput(hintText: 'Default'),
+          ),
+          GoldenTestScenario(
+            name: 'ghost',
+            child: StreamSelectInput(
+              type: StreamSelectInputType.ghost,
+              value: 'Jabra Evolve2 65',
+              onPressed: () {},
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'overflowing value',
+            child: StreamSelectInput(
+              value: 'Studio Display Microphone (Conference Room, 4th floor)',
+              onPressed: () {},
+            ),
+          ),
+        ],
+      ),
+    );
+
+    streamGoldenTest(
+      // Hover draws the same ring in a different color, so this covers the
+      // geometry of both: 2px, painted 1px outside the field.
+      'StreamSelectInput draws the focus ring outside the field',
+      fileName: 'stream_select_input_focused',
+      brightness: brightness,
+      constraints: const BoxConstraints.tightFor(width: 260, height: 80),
+      // Tab both focuses the field and switches the focus highlight strategy
+      // to the traditional one, which is what makes the ring visible — Flutter
+      // suppresses it while the last interaction was a touch, as it is in a
+      // freshly pumped widget test.
+      pumpBeforeTest: (tester) async {
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pumpAndSettle();
+      },
+      builder: () => Center(
+        child: SizedBox(
+          width: 220,
+          child: StreamSelectInput(value: 'Jabra Evolve2 65', onPressed: () {}),
+        ),
+      ),
+    );
+  }
 }
