@@ -124,7 +124,10 @@ class StreamPeerConnectionFactory {
   }
 
   /// Whether ADM-level microphone mute is available on this platform.
-  static bool get isAppleAdmMicrophoneMuteSupported =>
+  ///
+  /// An instance member rather than a static so tests can exercise the
+  /// ADM-level mute branch on any host.
+  bool get isAppleAdmMicrophoneMuteSupported =>
       rtc.NativePeerConnectionFactory.isAdmMicrophoneMuteSupported;
 
   /// Mutes / unmutes microphone capture at the audio-device-module level

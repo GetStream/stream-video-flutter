@@ -327,14 +327,39 @@ class RtcManager extends Disposable {
   ) async {
     _defaultAudioConstraints = constraints;
 
-    final localAudioTracks = tracks.values.whereType<RtcLocalAudioTrack>();
+    // Only live tracks are cycled. An already-muted track must stay muted —
+    // unmuting it here would put the user back on air behind their back, and
+    // on iOS/macOS also clear the ADM mute. It picks the new constraints up
+    // from [_defaultAudioConstraints] when it is recreated on unmute.
+    final liveTracks = tracks.values
+        .whereType<RtcLocalAudioTrack>()
+        .where((it) => it.mediaTrack.enabled)
+        .toList();
 
-    for (final track in localAudioTracks) {
-      await muteTrack(trackId: track.trackId, stopTrackOnMute: true);
-    }
+    // The cycle has to stop and recreate the track for the new constraints to
+    // take effect, so it forces [stopTrackOnMute] regardless of the track's
+    // own setting.
+    final stopTrackOnMuteByTrackId = {
+      for (final track in liveTracks) track.trackId: track.stopTrackOnMute,
+    };
 
-    for (final track in localAudioTracks) {
-      await unmuteTrack(trackId: track.trackId);
+    try {
+      for (final track in liveTracks) {
+        await muteTrack(trackId: track.trackId, stopTrackOnMute: true);
+      }
+
+      for (final track in liveTracks) {
+        await unmuteTrack(trackId: track.trackId);
+      }
+    } finally {
+      // Restored even if the cycle failed part-way: leaving the forced flag
+      // behind would silently downgrade the mute strategy for the rest of the
+      // call.
+      for (final entry in stopTrackOnMuteByTrackId.entries) {
+        final track = tracks[entry.key];
+        if (track is! RtcLocalAudioTrack) continue;
+        tracks[entry.key] = track.copyWith(stopTrackOnMute: entry.value);
+      }
     }
   }
 
@@ -1623,9 +1648,12 @@ extension PublisherRtcManager on RtcManager {
       return Result.error('Track is not local');
     }
 
-    // Lift the ADM-level mute applied for soft-muted (not stopped) audio
-    // tracks on iOS/macOS.
-    if (!track.stopTrackOnMute && _isAppleAdmMuteSupported(track)) {
+    // Lift any ADM-level mute on iOS/macOS. Deliberately not gated on
+    // [stopTrackOnMute]: a soft mute (ADM muted) followed by a hard mute
+    // leaves the ADM muted, and the recreate path below neither clears it nor
+    // goes through publishAudioTrack's reconcile — which would leave a live,
+    // published track with capture silenced inside the ADM.
+    if (_isAppleAdmMuteSupported(track)) {
       await _setAppleAdmMicrophoneMuted(false);
     }
 
@@ -1669,7 +1697,7 @@ extension PublisherRtcManager on RtcManager {
   /// Returns true if [track] should use ADM-level mute.
   /// Audio tracks on iOS / macOS only.
   bool _isAppleAdmMuteSupported(RtcLocalTrack track) =>
-      StreamPeerConnectionFactory.isAppleAdmMicrophoneMuteSupported &&
+      pcFactory.isAppleAdmMicrophoneMuteSupported &&
       track.trackType == SfuTrackType.audio;
 
   Future<void> _setAppleAdmMicrophoneMuted(bool muted) async {
@@ -1942,7 +1970,15 @@ extension RtcManagerTrackHelper on RtcManager {
         .getTransceiversForTrack(track.trackId)
         .toList();
 
-    final updatedTrack = await track.selectAudioInput(transceivers, device);
+    final RtcLocalAudioTrack updatedTrack;
+    try {
+      updatedTrack = await track.selectAudioInput(transceivers, device);
+    } finally {
+      // Switching the input restarts capture, which drops the ADM mute.
+      // Reconciled on failure too.
+      await reconcileAppleAdmMicrophoneMute();
+    }
+
     tracks[updatedTrack.trackId] = updatedTrack;
 
     return Result.success(updatedTrack);

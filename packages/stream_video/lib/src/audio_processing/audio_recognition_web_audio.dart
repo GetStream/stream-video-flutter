@@ -35,6 +35,10 @@ class AudioRecognitionWebAudio implements AudioRecognition {
   bool _isSpeaking = false;
   bool _started = false;
 
+  /// Guards against queuing a fresh `resume()` on every detection tick while
+  /// an earlier one is still pending.
+  bool _resumeInFlight = false;
+
   /// Bumped on every [stop] so an in-flight [start] can detect it was
   /// cancelled while awaiting `getUserMedia`.
   int _generation = 0;
@@ -80,8 +84,19 @@ class AudioRecognitionWebAudio implements AudioRecognition {
     final analyser = audioContext.createAnalyser()..fftSize = config.fftSize;
     source.connect(analyser);
 
+    // Detection can starts outside a user gesture (a moderator mute, or
+    // a participant who joined muted), so autoplay policies can hand back a
+    // suspended context, and sampling one only ever yields silence.
+    _resumeIfSuspended(audioContext);
+
     final frequencyData = Uint8List(analyser.frequencyBinCount).toJS;
     _detectionTimer = Timer.periodic(config.detectionInterval, (_) {
+      // Re-checked every tick rather than only at start: the browser suspends
+      // contexts on its own (page backgrounded, audio interruption), and a
+      // context that goes back to suspended mid-call would otherwise read as
+      // permanent silence.
+      _resumeIfSuspended(audioContext);
+
       analyser.getByteFrequencyData(frequencyData);
 
       var maxByte = 0;
@@ -111,11 +126,37 @@ class AudioRecognitionWebAudio implements AudioRecognition {
     });
   }
 
+  /// Asks a suspended context to resume, without waiting for it.
+  ///
+  /// Deliberately never awaited. A context blocked by the autoplay policy
+  /// leaves `resume()`'s promise pending until the document gets a user
+  /// gesture — Chrome does not reject it — so awaiting would stall [start],
+  /// and with it every start/stop transition queued behind it. Left pending,
+  /// the same promise is what resumes detection once a gesture does arrive.
+  void _resumeIfSuspended(web.AudioContext audioContext) {
+    if (_resumeInFlight) return;
+    if (audioContext.state != 'suspended') return;
+
+    _resumeInFlight = true;
+    _resume(audioContext).ignore();
+  }
+
+  Future<void> _resume(web.AudioContext audioContext) async {
+    try {
+      await audioContext.resume().toDart;
+    } catch (e) {
+      _logger.w(() => 'Failed to resume audio context: $e');
+    } finally {
+      _resumeInFlight = false;
+    }
+  }
+
   @override
   Future<void> stop() async {
     if (!_started) return;
     _started = false;
     _generation++;
+    _resumeInFlight = false;
 
     _detectionTimer?.cancel();
     _detectionTimer = null;

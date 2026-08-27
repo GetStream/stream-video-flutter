@@ -192,6 +192,64 @@ void main() {
       },
     );
 
+    test(
+      'Test unmuting while a device-change restart is in flight '
+      'leaves detection stopped',
+      () async {
+        final blockedStop = Completer<void>();
+        var stopCalls = 0;
+        when(() => audioRecognition.stop()).thenAnswer((_) {
+          stopCalls++;
+          // The restart's teardown hangs, so the unmute below lands while the
+          // previous capture is still being torn down.
+          return stopCalls == 1 ? blockedStop.future : Future<void>.value();
+        });
+
+        final sut = SpeakingWhileMutedRecognition(
+          call: call,
+          audioRecognition: audioRecognition,
+        );
+
+        callStateStreamController.add(
+          createCallState(isAudioEnabled: false, audioInputDeviceId: 'mic-a'),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        verify(
+          () => audioRecognition.start(
+            onSoundStateChanged: any(named: 'onSoundStateChanged'),
+          ),
+        ).called(1);
+
+        // Switching microphone starts a restart, which blocks in stop().
+        callStateStreamController.add(
+          createCallState(isAudioEnabled: false, audioInputDeviceId: 'mic-b'),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        // The user unmutes before that teardown completes.
+        callStateStreamController.add(
+          createCallState(isAudioEnabled: true, audioInputDeviceId: 'mic-b'),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        // Let the teardown finish and the restart resume.
+        blockedStop.complete();
+        await Future<void>.delayed(Duration.zero);
+
+        // Detection must not come back up: the user is unmuted, so restarting
+        // would flag ordinary speech as "speaking while muted" and, on web,
+        // hold a second getUserMedia capture open for the rest of the call.
+        verifyNever(
+          () => audioRecognition.start(
+            onSoundStateChanged: any(named: 'onSoundStateChanged'),
+          ),
+        );
+
+        await sut.dispose();
+      },
+    );
+
     test('Test disconnecting from call', () async {
       final sut = SpeakingWhileMutedRecognition(
         call: call,

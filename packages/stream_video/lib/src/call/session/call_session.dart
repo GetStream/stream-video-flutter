@@ -1253,6 +1253,15 @@ class CallSession extends Disposable {
     onSuspendedAudioTrackRecorded(track.trackId);
   }
 
+  /// Whether [track] is the local microphone track and the SDK currently
+  /// considers it muted.
+  bool _isMutedLocalMicrophoneTrack(RtcTrack track) {
+    if (track is! RtcLocalTrack) return false;
+    if (track.trackType != SfuTrackType.audio) return false;
+
+    return !(stateManager.callState.localParticipant?.isAudioEnabled ?? false);
+  }
+
   /// Resumes audio tracks that were suspended or arrived during suspension.
   Future<void> resumeSuspendedAudioTracks(
     Map<String, SuspendedTrackState> priorStates,
@@ -1268,6 +1277,21 @@ class CallSession extends Disposable {
       if (prior == null) continue;
       switch (prior) {
         case SuspendedTrackState.wasEnabled:
+          // [priorStates] is a snapshot taken when audio was suspended; the
+          // user may have muted the microphone since. Re-enabling then would
+          // put a live capture back on air while the SDK, the SFU and the UI
+          // all still say muted — and on iOS/macOS the ADM reconcile that
+          // follows would read the enabled track and lift the ADM mute too,
+          // turning a silent mismatch into a genuinely hot microphone.
+          if (_isMutedLocalMicrophoneTrack(track)) {
+            _logger.d(
+              () =>
+                  '[resumeSuspendedAudioTracks] track ${entry.key} was muted '
+                  'during the suspension, leaving disabled',
+            );
+            continue;
+          }
+
           track.enable();
           _logger.d(
             () => '[resumeSuspendedAudioTracks] re-enabled track ${entry.key}',

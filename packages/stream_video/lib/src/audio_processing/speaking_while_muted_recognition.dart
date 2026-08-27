@@ -91,7 +91,22 @@ class SpeakingWhileMutedRecognition
   final Call call;
   late final AudioRecognition _audioRecognition;
   StreamSubscription<void>? _callStateSubscription;
-  bool _isActive = false;
+
+  /// Whether detection *should* be running, per the most recent call state.
+  ///
+  /// Updated synchronously by [start] / [_stop]; [_isRunning] catches up
+  /// asynchronously once the queued transition runs.
+  bool _shouldRun = false;
+
+  /// Whether [_audioRecognition] is actually running right now.
+  bool _isRunning = false;
+
+  /// Serializes transitions so overlapping call-state events cannot interleave
+  /// (e.g. an unmute arriving while a device-change restart is still tearing
+  /// the previous capture down).
+  Future<void> _transitions = Future<void>.value();
+
+  bool _disposed = false;
 
   /// The selected audio input reported by the most recent call-state event.
   String? _lastSeenAudioInputDeviceId;
@@ -118,7 +133,7 @@ class SpeakingWhileMutedRecognition
           if (state.isAudioEnabled) {
             _stop();
           } else if (state.canSendAudio) {
-            if (_isActive &&
+            if (_shouldRun &&
                 state.audioInputDeviceId != _activeAudioInputDeviceId) {
               // The selected microphone changed while detecting — restart so
               // detection follows the new device.
@@ -136,9 +151,43 @@ class SpeakingWhileMutedRecognition
   ///
   /// If you want to start the audio detection when the user joins a call muted, you can use the [start] method.
   /// If detection is already active, this method does nothing.
-  Future<void> start() async {
-    if (_isActive) return;
-    _isActive = true;
+  Future<void> start() {
+    _shouldRun = true;
+    return _enqueue(_applyShouldRun);
+  }
+
+  Future<void> _stop() {
+    _shouldRun = false;
+    return _enqueue(_applyShouldRun);
+  }
+
+  /// Tears the current capture down and brings it back up on the newly
+  /// selected device.
+  ///
+  /// Both halves run inside a single queued transition, and the second half
+  /// re-reads [_shouldRun] rather than starting unconditionally — so an unmute
+  /// arriving while the old capture is still stopping wins, instead of being
+  /// overwritten by a detection that should no longer be running.
+  Future<void> _restart() {
+    _shouldRun = true;
+    return _enqueue(() async {
+      await _stopRecognition();
+      await _applyShouldRun();
+    });
+  }
+
+  /// Brings [_audioRecognition] in line with [_shouldRun].
+  Future<void> _applyShouldRun() async {
+    if (_shouldRun && !_disposed) {
+      await _startRecognition();
+    } else {
+      await _stopRecognition();
+    }
+  }
+
+  Future<void> _startRecognition() async {
+    if (_isRunning) return;
+    _isRunning = true;
     _activeAudioInputDeviceId = _lastSeenAudioInputDeviceId;
     try {
       await _audioRecognition.start(
@@ -149,25 +198,35 @@ class SpeakingWhileMutedRecognition
         },
       );
     } catch (e, trace) {
-      _isActive = false;
+      _isRunning = false;
       _logger.e(() => 'Error starting audio recognition: $e\n$trace');
     }
   }
 
-  Future<void> _stop() async {
-    if (!_isActive) return;
-    _isActive = false;
+  Future<void> _stopRecognition() async {
+    if (!_isRunning) return;
+    _isRunning = false;
     state = const SpeakingWhileMutedState._(isSpeakingWhileMuted: false);
-    await _audioRecognition.stop();
+    try {
+      await _audioRecognition.stop();
+    } catch (e, trace) {
+      _logger.e(() => 'Error stopping audio recognition: $e\n$trace');
+    }
   }
 
-  Future<void> _restart() async {
-    await _stop();
-    await start();
+  /// Chains [action] after any transition that is still in flight.
+  Future<void> _enqueue(Future<void> Function() action) {
+    final next = _transitions.then((_) => action());
+    // Keep the chain usable even if a transition blows up.
+    _transitions = next.catchError((Object _) {});
+    return next;
   }
 
   @override
   Future<void> dispose() async {
+    // Prevents a queued transition from restarting detection after disposal.
+    _disposed = true;
+    _shouldRun = false;
     await _callStateSubscription?.cancel();
     await _audioRecognition.dispose();
     super.dispose();

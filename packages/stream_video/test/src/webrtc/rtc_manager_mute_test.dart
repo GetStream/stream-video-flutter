@@ -1,5 +1,3 @@
-import 'dart:io' show Platform;
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
@@ -52,6 +50,9 @@ void main() {
   setUp(() {
     pcFactory = _MockStreamPeerConnectionFactory();
     when(
+      () => pcFactory.isAppleAdmMicrophoneMuteSupported,
+    ).thenReturn(true);
+    when(
       () => pcFactory.setAppleAdmMicrophoneMuted(any()),
     ).thenAnswer((_) async {});
     when(
@@ -93,11 +94,8 @@ void main() {
 
   group(
     'RtcManager audio mute on Apple platforms (ADM-level mute)',
-    // The ADM-level mute path is gated on CurrentPlatform.isIos/isMacOS;
-    // running the suite on a macOS host exercises the same branch iOS takes.
-    skip: !Platform.isMacOS
-        ? 'ADM-level mute branch only runs on Apple platforms'
-        : false,
+    // The ADM-level mute path is gated on the factory reporting ADM support,
+    // which is stubbed above so the branch runs on any host (including CI).
     () {
       test('default mute keeps the legacy stop-and-release behavior', () async {
         final mediaTrack = _FakeMediaStreamTrack(kind: 'audio');
@@ -159,6 +157,42 @@ void main() {
         // No recreation happened — the original track was simply re-enabled.
         expect(mediaTrack.enabled, isTrue);
         expect(mediaTrack.stopCallCount, 0);
+      });
+
+      test('unmute lifts the ADM mute when a soft mute was followed by '
+          'a hard mute', () async {
+        final mediaTrack = _FakeMediaStreamTrack(kind: 'audio');
+        final track = addAudioTrack(
+          mediaTrack: mediaTrack,
+          mediaStream: _FakeMediaStream(),
+        );
+
+        // A soft mute puts the ADM into the muted state...
+        await rtcManager.muteTrack(
+          trackId: track.trackId,
+          stopTrackOnMute: false,
+        );
+        verify(() => pcFactory.setAppleAdmMicrophoneMuted(true)).called(1);
+
+        // ...and a hard mute (moderator mute, CallKit, backgrounding) then
+        // stops the track without clearing it.
+        await rtcManager.muteTrack(
+          trackId: track.trackId,
+          stopTrackOnMute: true,
+        );
+
+        // Unmute now takes the recreate branch, which needs a real platform
+        // getMedia. That part is not exercisable here and does not matter: what
+        // matters is that the ADM mute is lifted whichever branch unmute takes.
+        // Otherwise the recreated track ends up live and published with capture
+        // still silenced inside the ADM, with no in-call way to recover.
+        try {
+          await rtcManager.unmuteTrack(trackId: track.trackId);
+        } catch (_) {
+          // Track recreation needs the platform plugin; ignore.
+        }
+
+        verify(() => pcFactory.setAppleAdmMicrophoneMuted(false)).called(1);
       });
 
       test('soft-mute behavior sticks for subsequent default mutes', () async {
@@ -381,6 +415,127 @@ void main() {
         expect(result.isSuccess, isTrue);
         expect(result.getDataOrNull()!.stopTrackOnMute, isFalse);
       });
+
+      test('switching microphone re-applies the ADM mute', () async {
+        final mediaTrack = _FakeMediaStreamTrack(kind: 'audio');
+        final track = addAudioTrack(
+          mediaTrack: mediaTrack,
+          mediaStream: _FakeMediaStream(),
+        );
+
+        await rtcManager.muteTrack(
+          trackId: track.trackId,
+          stopTrackOnMute: false,
+        );
+
+        // Selecting another input restarts capture, which drops the ADM mute.
+        when(
+          () => pcFactory.isAppleAdmMicrophoneMuted(),
+        ).thenAnswer((_) async => false);
+
+        try {
+          await rtcManager.setAudioInputDevice(
+            device: SampleCallData.defaultMediaDevice,
+          );
+        } catch (_) {
+          // Selecting an input needs the platform plugin; the reconcile that
+          // follows it is what this test is about.
+        }
+
+        // Without the reconcile the ADM stays unmuted and Apple's muted-talker
+        // detection is disarmed for the rest of the mute.
+        verify(() => pcFactory.setAppleAdmMicrophoneMuted(true)).called(2);
+      });
+
+      test(
+        'changing audio constraints preserves the soft-mute opt-in',
+        () async {
+          final mediaTrack = _FakeMediaStreamTrack(kind: 'audio');
+          final track = addAudioTrack(
+            mediaTrack: mediaTrack,
+            mediaStream: _FakeMediaStream(),
+          );
+          rtcManager.tracks[track.trackId] = track.copyWith(
+            stopTrackOnMute: false,
+          );
+
+          // The cycle has to stop and recreate the track, so it forces
+          // stopTrackOnMute — but only for the cycle.
+          try {
+            await rtcManager.changeDefaultAudioConstraints(
+              const AudioConstraints(),
+            );
+          } catch (_) {
+            // Track recreation needs the platform plugin.
+          }
+
+          expect(
+            (rtcManager.tracks[track.trackId]! as RtcLocalAudioTrack)
+                .stopTrackOnMute,
+            isFalse,
+            reason: 'a forced hard mute must not become the new preference',
+          );
+        },
+      );
+
+      test(
+        'changing audio constraints leaves an already-muted track muted',
+        () async {
+          final mediaTrack = _FakeMediaStreamTrack(kind: 'audio');
+          final track = addAudioTrack(
+            mediaTrack: mediaTrack,
+            mediaStream: _FakeMediaStream(),
+          );
+
+          await rtcManager.muteTrack(
+            trackId: track.trackId,
+            stopTrackOnMute: false,
+          );
+          clearInteractions(pcFactory);
+
+          await rtcManager.changeDefaultAudioConstraints(
+            const AudioConstraints(),
+          );
+
+          expect(
+            mediaTrack.enabled,
+            isFalse,
+            reason: 'a muted user must not be put back on air by a profile '
+                'change',
+          );
+          verifyNever(() => pcFactory.setAppleAdmMicrophoneMuted(false));
+        },
+      );
+
+      test(
+        'platforms without ADM-level mute stop the track even when '
+        'stopTrackOnMute is false',
+        () async {
+          when(
+            () => pcFactory.isAppleAdmMicrophoneMuteSupported,
+          ).thenReturn(false);
+
+          final mediaTrack = _FakeMediaStreamTrack(kind: 'audio');
+          final track = addAudioTrack(
+            mediaTrack: mediaTrack,
+            mediaStream: _FakeMediaStream(),
+          );
+
+          await rtcManager.muteTrack(
+            trackId: track.trackId,
+            stopTrackOnMute: false,
+          );
+
+          verifyNever(() => pcFactory.setAppleAdmMicrophoneMuted(any()));
+          expect(mediaTrack.enabled, isFalse);
+          expect(
+            mediaTrack.stopCallCount,
+            0,
+            reason: 'stopTrackOnMute: false still keeps the track alive; '
+                'only the ADM leg is skipped',
+          );
+        },
+      );
 
       test('ADM mute failure still leaves the track muted', () async {
         when(

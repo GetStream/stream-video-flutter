@@ -20,6 +20,8 @@
 - [Web] Fixed `Call.setAudioOutputDevice` leaving playback split across two output devices when one remote track rejected the switch. The switch is now attempted for every remote audio track, the tracks that accept it are updated, and the selection is only rejected when every track rejected the device.
 - Fixed `RtcRemoteTrack.copyWith` dropping the `transceiver`, so a remote track lost it as soon as a copy was made — which on web happens every time an audio output device is applied to the track.
 - [Web] Fixed the microphone not being published when Opus RED was enabled for the call, leaving the participant inaudible to everyone while their microphone still appeared active. Opus DTX and RED are no longer munged into the SDP. Both are negotiated by signalling them to the SFU with the published tracks.
+- Fixed `Call.setAudioBitrateProfile` unmuting already-muted participants. Muted tracks now stay muted and update constraints on next unmute.
+- Fixed `Call.suspendAudio()` resume unintentionally unmuting users who muted while audio was suspended. Resume now preserves mute state.
 
 ## 1.4.3
 
