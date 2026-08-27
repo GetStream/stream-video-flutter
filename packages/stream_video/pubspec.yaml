@@ -34,7 +34,9 @@ dependencies:
   sdp_transform: ^0.3.2
   state_notifier: ^1.0.0
   stream_webrtc_flutter:
-    path: /Users/renefloor/Documents/github/webrtc-flutter
+    git:
+      url: https://github.com/GetStream/webrtc-flutter.git
+      ref: 1b56708155c1df8df70c04696781a9f93908500f
   synchronized: ^3.1.0
   system_info2: ^4.0.0
   tart: ^0.6.0

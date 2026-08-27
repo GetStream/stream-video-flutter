@@ -1997,9 +1997,11 @@ packages:
   stream_webrtc_flutter:
     dependency: transitive
     description:
-      path: "/Users/renefloor/Documents/github/webrtc-flutter"
-      relative: false
-    source: path
+      path: "."
+      ref: "1b56708155c1df8df70c04696781a9f93908500f"
+      resolved-ref: "1b56708155c1df8df70c04696781a9f93908500f"
+      url: "https://github.com/GetStream/webrtc-flutter.git"
+    source: git
     version: "3.0.2"
   string_scanner:
     dependency: transitive

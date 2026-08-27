@@ -18,7 +18,9 @@ dependencies:
   plugin_platform_interface: ^2.0.2
   stream_video: ^1.4.3
   stream_webrtc_flutter:
-    path: /Users/renefloor/Documents/github/webrtc-flutter
+    git:
+      url: https://github.com/GetStream/webrtc-flutter.git
+      ref: 1b56708155c1df8df70c04696781a9f93908500f
 
 dev_dependencies:
   flutter_lints: ^6.0.0
