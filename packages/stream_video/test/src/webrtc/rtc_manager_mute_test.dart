@@ -500,7 +500,8 @@ void main() {
           expect(
             mediaTrack.enabled,
             isFalse,
-            reason: 'a muted user must not be put back on air by a profile '
+            reason:
+                'a muted user must not be put back on air by a profile '
                 'change',
           );
           verifyNever(() => pcFactory.setAppleAdmMicrophoneMuted(false));
@@ -531,7 +532,8 @@ void main() {
           expect(
             mediaTrack.stopCallCount,
             0,
-            reason: 'stopTrackOnMute: false still keeps the track alive; '
+            reason:
+                'stopTrackOnMute: false still keeps the track alive; '
                 'only the ADM leg is skipped',
           );
         },
