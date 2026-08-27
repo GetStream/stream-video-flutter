@@ -19,6 +19,10 @@
 
   When no `StreamTheme` is found in the widget tree, components fall back to a default theme derived from the ambient `Brightness`, so add your own `StreamTheme` to control their look.
 
+### ✅ Added
+
+- Added `StreamSelectInput`, `StreamContextMenuAnchor`, `StreamContextMenuHeading` and `StreamRadioIndicator`. These are design-system candidates: they implement components from the Stream design system that `stream_core_flutter` does not ship yet, and live in `src/widgets/design_system_candidates` until they graduate to core. `StreamSelectInput` is the select field (label, leading widget, value or placeholder, caret) with the design's hover/focus rings and disabled, error and active states; `StreamContextMenuAnchor` anchors a `StreamContextMenu` to a widget and sizes its items like the design's menu; `StreamContextMenuHeading` labels a section inside such a menu; `StreamRadioIndicator` marks the selected entry of a group.
+
 ## 1.4.3
 
 ### 🐞 Fixed
