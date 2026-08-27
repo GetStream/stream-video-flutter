@@ -167,9 +167,9 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
 
   @override
   Widget build(BuildContext context) {
-    final streamVideoTheme = StreamVideoTheme.of(context);
-    final textTheme = streamVideoTheme.textTheme;
-    final colorTheme = streamVideoTheme.colorTheme;
+    final textTheme = context.streamTextTheme;
+    final colorTheme = context.streamColorScheme;
+    final spacing = context.streamSpacing;
 
     final theme = StreamLobbyViewTheme.of(context);
     final backgroundColor = widget.backgroundColor ?? theme.backgroundColor;
@@ -184,6 +184,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
         .nonNulls
         .map((e) => e.toUserInfo())
         .toList();
+        
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
@@ -191,10 +192,11 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          IconButton(
+          StreamButton.icon(
+            style: .secondary,
+            type: .ghost,
             icon: Icon(
-              Icons.close,
-              color: colorTheme.textHighEmphasis,
+              context.streamIcons.leave,
             ),
             onPressed: () async {
               if (widget.onCloseTap != null) {
@@ -209,21 +211,16 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: spacing.md),
             child: Column(
               children: [
                 Text(
                   'Before Joining',
-                  style: textTheme.title3.copyWith(
-                    fontSize: 28,
-                    color: colorTheme.textHighEmphasis,
-                  ),
+                  style: textTheme.headingMd,
                 ),
                 Text(
                   'Setup your audio and video',
-                  style: textTheme.title3.copyWith(
-                    color: colorTheme.textLowEmphasis,
-                  ),
+                  style: textTheme.headingMd,
                 ),
                 const SizedBox(height: 16),
                 StreamLobbyVideo(
@@ -252,7 +249,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
                               ),
                               child: Text(
                                 'You are about to join a call. ${participants.length} more people are in the call.',
-                                style: textTheme.title3,
+                                style: textTheme.headingSm,
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -272,7 +269,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
                               onPressed: onJoinCallPressed,
                               child: Text(
                                 'Join Call',
-                                style: textTheme.title3Bold.copyWith(
+                                style: textTheme.headingSm.copyWith(
                                   color: Colors.white,
                                 ),
                               ),
