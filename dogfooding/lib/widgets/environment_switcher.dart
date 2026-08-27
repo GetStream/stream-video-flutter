@@ -72,7 +72,9 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
                   MenuController controller,
                   Widget? child,
                 ) {
-                  return IconButton(
+                  return StreamButton.icon(
+                    style: .secondary,
+                    type: .ghost,
                     onPressed: () {
                       if (controller.isOpen) {
                         controller.close();
@@ -80,7 +82,7 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
                         controller.open();
                       }
                     },
-                    icon: const Icon(Icons.settings, color: Colors.white),
+                    icon: Icon(context.streamIcons.settings),
                   );
                 },
             menuChildren: [
@@ -104,7 +106,7 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
                           border: Border.all(
                             color: selectedEnvironment == env
                                 ? colorScheme.accentSuccess
-                                : Colors.white,
+                                : colorScheme.textSecondary,
                           ),
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -115,7 +117,7 @@ class _EnvironmentSwitcherState extends State<EnvironmentSwitcher> {
                             style: TextStyle(
                               color: selectedEnvironment == env
                                   ? colorScheme.accentSuccess
-                                  : Colors.white,
+                                  : colorScheme.textSecondary,
                             ),
                           ),
                         ),
