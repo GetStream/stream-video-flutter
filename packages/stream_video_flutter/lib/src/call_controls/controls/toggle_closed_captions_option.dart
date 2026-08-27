@@ -47,12 +47,7 @@ class ToggleClosedCaptionsOption extends StatelessWidget {
         icon: enabled
             ? Icon(enabledClosedCaptionIcon)
             : Icon(disabledClosedCaptionIcon),
-        iconColor: enabled
-            ? enabledClosedCaptionIconColor
-            : disabledClosedCaptionIconColor,
-        backgroundColor: enabled
-            ? enabledClosedCaptionBackgroundColor
-            : disabledClosedCaptionBackgroundColor,
+        state: enabled ? .on : .off,
         onPressed: () {
           if (!enabled) {
             call.startClosedCaptions();

@@ -10,7 +10,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.call,
     this.showBackButton = true,
     this.showLeaveCallAction = true,
-    this.elevation = 1,
+    this.elevation = 0,
     this.backgroundColor,
     this.onBackPressed,
     this.onLeaveCallTap,
@@ -59,6 +59,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
+    final colors = context.streamColorScheme;
 
     final leadingWidget =
         leading ??
@@ -82,7 +83,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: elevation,
       leading: leadingWidget,
       leadingWidth: leadingWidth,
-      backgroundColor: backgroundColor ?? theme.colorTheme.barsBg,
+      backgroundColor: backgroundColor ?? colors.backgroundApp,
       centerTitle: true,
       actions:
           actions ??

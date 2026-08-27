@@ -286,12 +286,7 @@ class _CallScreenState extends State<CallScreen> {
                       children: [
                         CallControlOption(
                           icon: const Icon(Icons.more_vert),
-                          backgroundColor: _moreMenuVisible
-                              ? colorScheme.brand
-                              : colorScheme.backgroundSurface,
-                          iconColor: _moreMenuVisible
-                              ? colorScheme.textOnAccent
-                              : null,
+                          state: _moreMenuVisible ? .positive : .on,
                           onPressed: () {
                             toggleMoreMenu(context);
                           },
