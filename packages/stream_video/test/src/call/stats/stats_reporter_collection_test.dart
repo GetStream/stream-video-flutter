@@ -122,6 +122,64 @@ void main() {
       expect(subscriber.lastParsedOnly, isTrue);
     });
 
+    test(
+      'collects while something is subscribed to the metrics stream',
+      () async {
+        // Regression: the stats UI subscribes via `statsReporter.stream`, not
+        // `addListener`. `StateNotifier.stream` feeds a controller that
+        // `hasListeners` does not report, so the gate used to consider the
+        // reporter unobserved, skip every tick, and never publish a value —
+        // leaving the stats screen on a spinner for the whole call.
+        final reporter = buildReporter();
+        addTearDown(reporter.dispose);
+
+        final received = <CallMetrics?>[];
+        final streamSub = reporter.stream.listen(received.add);
+        addTearDown(streamSub.cancel);
+
+        final subscription = reporter
+            .run(
+              interval: const Duration(milliseconds: 10),
+              shouldCollect: () => false,
+            )
+            .listen((_) {});
+        addTearDown(subscription.cancel);
+
+        await Future<void>.delayed(const Duration(milliseconds: 120));
+
+        expect(subscriber.calls, greaterThan(0));
+        expect(received, isNotEmpty);
+        expect(reporter.currentMetrics, isNotNull);
+      },
+    );
+
+    test(
+      'stops collecting once the metrics stream subscriber cancels',
+      () async {
+        final reporter = buildReporter();
+        addTearDown(reporter.dispose);
+
+        final streamSub = reporter.stream.listen((_) {});
+
+        final subscription = reporter
+            .run(
+              interval: const Duration(milliseconds: 10),
+              shouldCollect: () => false,
+            )
+            .listen((_) {});
+        addTearDown(subscription.cancel);
+
+        await Future<void>.delayed(const Duration(milliseconds: 60));
+        expect(subscriber.calls, greaterThan(0));
+
+        await streamSub.cancel();
+        final callsAtCancel = subscriber.calls;
+
+        await Future<void>.delayed(const Duration(milliseconds: 120));
+        expect(subscriber.calls, callsAtCancel);
+      },
+    );
+
     test('collects when the reporter itself has listeners', () async {
       final reporter = buildReporter();
       addTearDown(reporter.dispose);

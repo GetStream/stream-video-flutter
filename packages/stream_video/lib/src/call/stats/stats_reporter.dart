@@ -33,6 +33,48 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
 
   CallMetrics? get currentMetrics => state;
 
+  StreamController<CallMetrics?>? _metricsController;
+  RemoveListener? _removeMetricsForwarder;
+
+  /// A broadcast stream of the collected metrics.
+  ///
+  /// Overridden so that subscribing to it registers a real listener on this
+  /// notifier. `StateNotifier.stream` feeds a separate controller that
+  /// [hasListeners] does not report, so a subscriber would be invisible to the
+  /// collection gate in [run] — and collection would be skipped for a UI that
+  /// is actively watching, leaving it waiting for a value forever.
+  @override
+  Stream<CallMetrics?> get stream {
+    // Closed in `dispose`; the lint cannot follow the assignment to the field.
+    // ignore: close_sinks
+    final controller = _metricsController ??=
+        StreamController<CallMetrics?>.broadcast(
+          onListen: () {
+            // Registered only while somebody is subscribed, so `hasListeners`
+            // is true exactly when there is a subscriber to feed.
+            _removeMetricsForwarder ??= addListener(
+              (metrics) => _metricsController?.add(metrics),
+              fireImmediately: false,
+            );
+          },
+          onCancel: () {
+            _removeMetricsForwarder?.call();
+            _removeMetricsForwarder = null;
+          },
+        );
+
+    return controller.stream;
+  }
+
+  @override
+  void dispose() {
+    _removeMetricsForwarder?.call();
+    _removeMetricsForwarder = null;
+    unawaited(_metricsController?.close());
+    _metricsController = null;
+    super.dispose();
+  }
+
   Stream<
     ({
       PeerConnectionStatsBundle publisherStatsBundle,
