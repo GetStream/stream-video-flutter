@@ -37,7 +37,6 @@ class ClosedCaptionsWidget extends StatelessWidget {
             duration: const Duration(milliseconds: 300),
             height: !call.state.value.isCaptioning ? 0 : height,
             // ignore: deprecated_member_use
-            color: Colors.black.withOpacity(0.5),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             child: ListView.separated(
               reverse: true,
@@ -59,9 +58,9 @@ class ClosedCaptionsWidget extends StatelessWidget {
                         ),
                         TextSpan(
                           text: caption.text.trim(),
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
                             fontSize: 16,
+                            color: colorScheme.textPrimary,
                           ),
                         ),
                       ],

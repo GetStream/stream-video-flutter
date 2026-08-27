@@ -30,9 +30,14 @@ class _ShareCallWelcomeCardState extends State<ShareCallWelcomeCard> {
         padding: const EdgeInsets.all(24),
         child: Container(
           decoration: BoxDecoration(
-            color: colorScheme.backgroundSurface,
+            color: colorScheme.backgroundElevation1,
             borderRadius: BorderRadius.circular(16),
           ),
+          foregroundDecoration: BoxDecoration(
+            border: Border.all(color: colorScheme.borderDefault),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          clipBehavior: .antiAlias,
           constraints: const BoxConstraints(maxWidth: 600),
           child: ExpansionTile(
             title: Padding(
