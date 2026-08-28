@@ -2,6 +2,26 @@
 
 ### ✅ Added
 
+- Redesigned the participant tile onto the design system, and split its theme into one per component. The tile is now a 20px-radius surface with two toolbars: the overflow button and any live reaction at the top, the participant's name and connection quality at the bottom. `StreamParticipantTileTheme`, `StreamParticipantLabelTheme`, `StreamConnectionQualityIndicatorTheme` and `StreamCallParticipantsGridTheme` replace `StreamCallParticipantThemeData`; each has all-nullable properties, merges with the ambient theme instead of replacing it, and leaves defaults to the widget, which derives them from `StreamTheme`.
+- Added an overflow menu to the participant tile. Supply `actions`, or `actionsBuilder` for a menu that depends on the participant, and the SDK renders them; supply nothing and the button is not drawn at all. `StreamParticipantTileAction` is an icon, a label and a callback, so what an action does — pinning, muting, blocking, removing — stays with the integrator:
+
+  ```dart
+  StreamParticipantTile(
+    call: call,
+    participant: participant,
+    actionsBuilder: (context, participant) => [
+      StreamParticipantTileAction(
+        icon: context.streamIcons.pin,
+        label: participant.isPinned ? 'Unpin' : 'Pin',
+        onPressed: () => call.setParticipantPinnedLocally(
+          sessionId: participant.sessionId,
+          pinned: !participant.isPinned,
+        ),
+      ),
+    ],
+  )
+  ```
+- Added `participantLabel` and `connectionQualityIndicator` to `streamVideoComponentBuilders`, so both can be replaced app-wide. `StreamParticipantLabel` and `StreamConnectionQualityIndicator` are exported for the first time, along with `StreamAudioIndicator`.
 - Added component factory support, so the Stream Video UI components can be replaced app-wide instead of threading widget builders through the widget tree. Register the components you want to replace with `streamVideoComponentBuilders` and wrap your app in a `StreamComponentFactory`:
 
   ```dart
@@ -37,10 +57,22 @@
 
 ### ⚠️ Deprecated
 
+- `StreamCallParticipantThemeData` and `StreamCallParticipantTheme` are deprecated. Their properties now live in `StreamParticipantTileThemeData`, `StreamParticipantLabelThemeData`, `StreamConnectionQualityIndicatorThemeData` and `StreamCallParticipantsGridThemeData`. A theme passed to `StreamVideoTheme(callParticipantTheme: ...)` is still applied — in full, so a tile styled the old way keeps looking the way it did. Stop passing it to pick up the redesign, and pass a theme in the new shape to replace it outright. The translation runs in that factory only: setting `callParticipantTheme` through `copyWith`, or wrapping a subtree in the `StreamCallParticipantTheme` widget, changes the field without restyling anything.
 - `StreamCallParticipant` is deprecated in favour of `StreamParticipantTile`, matching the component name in the design system. It takes the same parameters and now only wraps `DefaultStreamParticipantTile`. Run `dart fix --apply` to migrate your call sites.
 
 ### ⚠️ Breaking
 
+- The participant tile follows the redesigned design system. Its corner radius is 20 (was 0 on mobile and 12 on desktop), the speaking outline is 2px (was 4px), a tile showing no video draws a hairline over a subtle surface instead of a solid grey fill, the placeholder avatar is 80px with a white ring, and the name and connection quality indicator share one 56px toolbar along the bottom.
+- The participant name can no longer overlap the connection quality indicator. The two were independent `Stack` children aligned to opposite corners; they are now laid out in a single row, so a long name ellipsizes rather than running underneath. As a consequence `StreamCallParticipantThemeData.participantLabelAlignment` and `connectionLevelAlignment` no longer have any effect, and the same parameters on `StreamCallParticipant` are accepted and ignored. Run `dart fix --apply` to drop them.
+- The tile now sheds chrome on tiles too small to carry it, rather than overflowing: the name goes first, then the name pill, then the connection quality indicator. A spotlight thumbnail or a floating self-view will show less than a full-size tile does.
+- The sound indicator is always visible and animates only while the participant is speaking. A microphone icon is drawn only when they are muted — there is no unmuted icon, and `enabledMicrophoneColor` on `StreamCallParticipant` therefore has no effect. Run `dart fix --apply` to drop it.
+- The connection quality indicator colors each level apart — `accentError`, `accentWarning`, `accentSuccess` — where it previously painted every lit bar one color. `connectionLevelActiveColor` maps onto all three, so an app that set it still gets one flat color.
+- `StreamParticipantTile`'s visual parameters (`backgroundColor`, `borderRadius`, `userAvatarTheme`, `speakerBorder*`, `participantLabel*`, `audioLevelIndicatorColor`, `*MicrophoneColor`, `pausedVideoIndicatorColor`, `connectionLevel*`) are replaced by a single `style:` taking a `StreamParticipantTileStyle`. `StreamParticipantTile` was introduced in this same unreleased version, so there is no deprecation period; `StreamCallParticipant` keeps its full parameter list.
+- `StreamVideoTheme.callParticipantTheme` is nullable and no longer populated by `fromColorAndTextTheme`. Reading it returns `null` unless an app set one.
+- The participants grid reads its `padding`, `mainAxisSpacing` and `crossAxisSpacing` from `StreamCallParticipantsGridThemeData` rather than taking them from the participant theme through `StreamCallParticipants`.
+- `StreamCallParticipantThemeData.copyWith` accepted `showDominantSpeakerBorder`, `dominantSpeakerBorderThickness` and `dominantSpeakerBorderColor` for fields named `showSpeakerBorder`, `speakerBorderThickness` and `speakerBorderColor`, so the field names — the only names discoverable from the class — were a compile error. The parameters now match the fields. Run `dart fix --apply`.
+- `StreamCallParticipantThemeData.merge` dropped `pausedVideoIndicatorColor`, and `StreamVideoTheme.merge` dropped `callControlsTheme` and `localVideoTheme`. All three are fixed, so themes that set those values now take effect where they previously did not.
+- Requires the `StreamColorScheme.backgroundOverlayDarkStrong` color added in `stream_core_flutter`.
 - Call control buttons (`CallControlOption` and the widgets built on it) are now rendered with the shared `StreamButton` from `stream_core_flutter` instead of a raw Material `ElevatedButton`, and are styled by state rather than by colour. `CallControlOption` now takes a `state` — `CallControlState.on` (the default), `off`, `positive`, `negative` or `disabled` — next to `icon` and `onPressed`, and its per-button styling parameters (`iconColor`, `disabledIconColor`, `backgroundColor`, `disabledBackgroundColor`, `elevation`, `shape`, `padding`) are removed. Appearance now comes from the button styling in `StreamTheme` rather than from `StreamCallControlsThemeData`'s `optionElevation`/`optionShape`/`optionPadding` and `optionOff*` colours, so controls that relied on those look different: every control is now the same size — the accept/decline buttons of the incoming and outgoing call controls are no longer enlarged — an `off` control uses the destructive style instead of a custom colour, and a `disabled` control additionally shows an error badge.
 - The colour parameters on the built-in toggle options — `enabled*IconColor`, `disabled*IconColor`, `enabled*BackgroundColor` and `disabled*BackgroundColor` on `ToggleCameraOption`, `ToggleMicrophoneOption`, `ToggleRecordingOption`, `ToggleClosedCaptionsOption` and `ToggleScreenShareOption` — are still accepted but no longer have any effect. Each option now passes a `CallControlState` down instead, so its colours come from the theme's button styling.
 - `StreamCallContentThemeData.callContentBackgroundColor` is now nullable and defaults to `null`, which resolves to the design system's `backgroundApp` colour instead of the hard-coded `0xFF272A30`. Set it explicitly to keep a fixed background.

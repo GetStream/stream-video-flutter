@@ -611,12 +611,12 @@ never committed from a local run.
 - [x] **Phase 1** — bug fixes: legacy `copyWith` param names, `merge` dropping `pausedVideoIndicatorColor`, `StreamVideoTheme.merge` self-merge + missing `localVideoTheme`
 - [x] **Phase 2** — codegen setup (`theme_extensions_builder`, plus a `build.yaml` scoping it to `lib/`+`test/`)
 - [x] **Phase 3** — five new `@themeGen` themes under `src/theme/components/`
-- [ ] **Phase 4** — legacy bridge (`StreamVideoTheme` wiring done)
+- [x] **Phase 4** — legacy bridge (factory only; `copyWith` and the deprecated widget are documented as inert)
 - [~] **Phase 5** — label + connection indicator done (triples, slots, exported). Remaining: `StreamUserAvatar`, placeholder, video-renderer triples + their slots
 - [x] **Phase 6** — the tile: new layout, density ladder, no-overlap toolbar
 - [x] **Phase 7** — more menu (`StreamParticipantTileAction`, `actionsBuilder`)
 - [ ] **Phase 8** — floating self-view + call sites
-- [ ] **Phase 9** — `fix_data.yaml`, CHANGELOG, dogfooding, root `CLAUDE.md`
-- [~] **Tests** — overlap sweep, density, menu, audio branches, label/indicator slots done. Remaining: bridge tests
+- [x] **Phase 9** — `fix_data.yaml`, CHANGELOG, dogfooding, root `CLAUDE.md`
+- [x] **Tests** — overlap sweep, density, menu, audio branches, slots, bridge
 - [~] **Goldens** — tile states + long-name sweep done. Remaining: label, indicator, placeholder, floating
 - [ ] **Wrap-up** — core merged, `pubspec.yaml` back to a git ref, `melos bootstrap`
