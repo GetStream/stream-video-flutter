@@ -89,12 +89,12 @@ class DefaultStreamParticipantPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = context.streamColorScheme;
 
-    final avatarTheme =
-        props.style?.avatarTheme ??
-        StreamAvatarThemeData(
-          size: StreamAvatarSize.xxl,
-          border: Border.all(color: colorScheme.borderOnInverse, width: 2),
-        );
+    // Merged rather than replaced: a style naming only a colour should not cost
+    // the placeholder its size and ring.
+    final avatarTheme = StreamAvatarThemeData(
+      size: StreamAvatarSize.xxl,
+      border: Border.all(color: colorScheme.borderOnInverse, width: 2),
+    ).merge(props.style?.avatarTheme);
 
     return Center(
       child: StreamAvatarTheme(

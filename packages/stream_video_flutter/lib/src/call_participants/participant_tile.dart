@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
@@ -612,7 +613,10 @@ class _MoreMenuButtonState extends State<_MoreMenuButton> {
   @override
   void didUpdateWidget(_MoreMenuButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!identical(oldWidget.actions, widget.actions)) _controller.close();
+    // By value: an actionsBuilder returns a fresh list every build, so
+    // comparing identity would close the menu on the next rebuild of the call —
+    // which, with participant state streaming in, is immediately.
+    if (!listEquals(oldWidget.actions, widget.actions)) _controller.close();
   }
 
   @override
@@ -868,21 +872,34 @@ class StreamCallParticipant extends StatelessWidget {
           borderRadius: _borderRadius,
           speakingBorder: speakingBorder,
           placeholderStyle: _placeholderStyleOf(_userAvatarTheme),
-          labelStyle: StreamParticipantLabelStyle(
-            nameTextStyle: _participantLabelTextStyle,
-            speakingColor: _audioLevelIndicatorColor,
-            microphoneOffColor: _disabledMicrophoneColor,
-            videoOffIconColor: _pausedVideoIndicatorColor,
-          ),
+          // Nested styles are merged shallowly, so handing over an all-null one
+          // would replace whatever the ambient theme set rather than leave it
+          // alone. Only build them when this widget was actually given
+          // something to say.
+          labelStyle:
+              (_participantLabelTextStyle != null ||
+                  _audioLevelIndicatorColor != null ||
+                  _disabledMicrophoneColor != null ||
+                  _pausedVideoIndicatorColor != null)
+              ? StreamParticipantLabelStyle(
+                  nameTextStyle: _participantLabelTextStyle,
+                  speakingColor: _audioLevelIndicatorColor,
+                  microphoneOffColor: _disabledMicrophoneColor,
+                  videoOffIconColor: _pausedVideoIndicatorColor,
+                )
+              : null,
           connectionQualityIndicatorStyle:
-              StreamConnectionQualityIndicatorStyle(
-                // The indicator now colors each level apart. A single legacy
-                // color is spread across all three, so an override still lands.
-                poorColor: _connectionLevelActiveColor,
-                fairColor: _connectionLevelActiveColor,
-                greatColor: _connectionLevelActiveColor,
-                inactiveColor: _connectionLevelInactiveColor,
-              ),
+              (_connectionLevelActiveColor != null ||
+                  _connectionLevelInactiveColor != null)
+              ? StreamConnectionQualityIndicatorStyle(
+                  // The indicator now colors each level apart. A single legacy
+                  // color spreads across all three, so an override still lands.
+                  poorColor: _connectionLevelActiveColor,
+                  fairColor: _connectionLevelActiveColor,
+                  greatColor: _connectionLevelActiveColor,
+                  inactiveColor: _connectionLevelInactiveColor,
+                )
+              : null,
         ),
       ),
     );

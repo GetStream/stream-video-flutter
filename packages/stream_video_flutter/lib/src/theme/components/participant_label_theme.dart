@@ -18,7 +18,7 @@ part 'participant_label_theme.g.theme.dart';
 /// ```dart
 /// StreamParticipantLabelTheme(
 ///   data: StreamParticipantLabelThemeData(
-///     style: StreamParticipantLabelStyle(blurSigma: null),
+///     style: StreamParticipantLabelStyle(blurSigma: 0),
 ///   ),
 ///   child: child,
 /// )
@@ -148,8 +148,10 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
 
   /// The blur applied to whatever sits behind the pill.
   ///
-  /// Defaults to 12.5. Set to `null` to skip the blur entirely: it costs one
-  /// render layer per tile, which is measurable on a full grid.
+  /// Defaults to 12.5. Set to `0` to skip the blur entirely: it costs one
+  /// render layer per tile, which is measurable on a full grid. `null` is not
+  /// the way to switch it off — like every property here it means "no
+  /// override", and leaves the default in place.
   final double? blurSigma;
 
   /// The text style of the participant's name.

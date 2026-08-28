@@ -134,6 +134,9 @@ class MobileCallParticipantsGrid extends StatelessWidget {
             final pageParticipants = pages.elementAt(index);
             final pageParticipantsCount = pageParticipants.length;
 
+            Widget page(Widget child) =>
+                Padding(padding: padding, child: child);
+
             Widget getParticipantTile(int index) {
               if (index < pageParticipantsCount) {
                 return Expanded(
@@ -146,60 +149,61 @@ class MobileCallParticipantsGrid extends StatelessWidget {
             }
 
             if (index == 0) {
-              return Column(
-                children: [
-                  if (pageParticipantsCount == 1) ...[
-                    Expanded(
-                      child: Padding(
-                        padding: padding,
+              return page(
+                Column(
+                  children: [
+                    if (pageParticipantsCount == 1) ...[
+                      Expanded(
                         child: itemBuilder(context, call, pageParticipants[0]),
                       ),
-                    ),
+                    ],
+                    if (pageParticipantsCount == 2) ...[
+                      getParticipantTile(0),
+                      SizedBox(height: mainAxisSpacing),
+                      getParticipantTile(1),
+                    ],
+                    if (pageParticipantsCount >= 3) ...[
+                      ...pageParticipants.mapIndexed((index, element) {
+                        if (index.isEven) {
+                          return Expanded(
+                            child: Row(
+                              children: [
+                                getParticipantTile(index),
+                                SizedBox(width: crossAxisSpacing),
+                                getParticipantTile(index + 1),
+                              ],
+                            ),
+                          );
+                        } else {
+                          return SizedBox(height: mainAxisSpacing);
+                        }
+                      }),
+                    ],
                   ],
-                  if (pageParticipantsCount == 2) ...[
-                    getParticipantTile(0),
-                    SizedBox(height: mainAxisSpacing),
-                    getParticipantTile(1),
-                  ],
-                  if (pageParticipantsCount >= 3) ...[
-                    ...pageParticipants.mapIndexed((index, element) {
-                      if (index.isEven) {
-                        return Expanded(
-                          child: Row(
-                            children: [
-                              getParticipantTile(index),
-                              SizedBox(width: crossAxisSpacing),
-                              getParticipantTile(index + 1),
-                            ],
-                          ),
-                        );
-                      } else {
-                        return SizedBox(height: mainAxisSpacing);
-                      }
-                    }),
-                  ],
-                ],
+                ),
               );
             }
 
-            return Column(
-              children: [
-                ...List.generate(pageSize, (index) => index).map((index) {
-                  if (index.isEven) {
-                    return Expanded(
-                      child: Row(
-                        children: [
-                          getParticipantTile(index),
-                          SizedBox(width: crossAxisSpacing),
-                          getParticipantTile(index + 1),
-                        ],
-                      ),
-                    );
-                  } else {
-                    return SizedBox(height: mainAxisSpacing);
-                  }
-                }),
-              ],
+            return page(
+              Column(
+                children: [
+                  ...List.generate(pageSize, (index) => index).map((index) {
+                    if (index.isEven) {
+                      return Expanded(
+                        child: Row(
+                          children: [
+                            getParticipantTile(index),
+                            SizedBox(width: crossAxisSpacing),
+                            getParticipantTile(index + 1),
+                          ],
+                        ),
+                      );
+                    } else {
+                      return SizedBox(height: mainAxisSpacing);
+                    }
+                  }),
+                ],
+              ),
             );
           },
         );

@@ -69,6 +69,26 @@ class StreamParticipantTileAction {
   /// A disabled action is still listed, so the menu does not change shape as
   /// state changes; it just cannot be chosen.
   final bool enabled;
+
+  /// Whether this action presents the same entry as [other].
+  ///
+  /// [onPressed] is deliberately left out. Actions are usually built inline, so
+  /// the callback is a fresh closure on every build and would make no two
+  /// actions ever equal — which is the opposite of what callers comparing
+  /// action lists want to know, namely whether the menu still offers the same
+  /// entries.
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is StreamParticipantTileAction &&
+        other.icon == icon &&
+        other.label == label &&
+        other.isDestructive == isDestructive &&
+        other.enabled == enabled;
+  }
+
+  @override
+  int get hashCode => Object.hash(icon, label, isDestructive, enabled);
 }
 
 /// Builds the overflow menu actions for [participant].

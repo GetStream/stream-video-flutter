@@ -113,9 +113,7 @@ class DefaultStreamUserAvatar extends StatelessWidget {
       backgroundColor: theme.backgroundColor ?? legacy.initialsBackground,
       foregroundColor: theme.foregroundColor ?? legacy.initialsTextStyle.color,
       semanticsLabel: user.name.isNotEmpty ? user.name : user.id,
-      placeholder: (context) => Text(
-        user.name.isNotEmpty ? user.name.initials() : user.id.initials(),
-      ),
+      placeholder: (context) => Text(_initialsFor(user)),
     );
 
     final onTap = props.onTap;
@@ -127,6 +125,13 @@ class DefaultStreamUserAvatar extends StatelessWidget {
       onLongPress: onLongPress != null ? () => onLongPress(user) : null,
       child: avatar,
     );
+  }
+
+  // A name of nothing but spaces has no initials, so fall through to the id
+  // rather than showing an empty circle.
+  static String _initialsFor(UserInfo user) {
+    final fromName = user.name.initials();
+    return fromName.isNotEmpty ? fromName : user.id.initials();
   }
 
   // The deprecated theme sizes an avatar with box constraints; the design
