@@ -94,9 +94,8 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final streamVideoTheme = StreamVideoTheme.of(context);
-    final textTheme = streamVideoTheme.textTheme;
-    final colorTheme = streamVideoTheme.colorTheme;
+    final textTheme = context.streamTextTheme;
+    final colorTheme = context.streamColorScheme;
     final currentUser = _userAuthController.currentUser;
 
     final theme = StreamLobbyViewTheme.of(context);
@@ -111,10 +110,12 @@ class _LobbyScreenState extends State<LobbyScreen> {
         ),
         titleSpacing: 4,
         centerTitle: false,
-        title: Text(currentUser.name, style: textTheme.body),
+        title: Text(currentUser.name, style: textTheme.headingXs),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.close, color: Colors.white),
+          StreamButton.icon(
+            style: .secondary,
+            type: .ghost,
+            icon: Icon(context.streamIcons.leave),
             onPressed: () => Navigator.maybePop(context),
           ),
         ],
@@ -125,15 +126,16 @@ class _LobbyScreenState extends State<LobbyScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               children: [
-                SvgPicture.asset(globalNetworkAssest, width: 35),
+                Icon(
+                  context.streamIcons.language,
+                  color: colorTheme.accentPrimary,
+                  size: 32,
+                ),
                 const SizedBox(height: 8),
                 Text(
-                  'Set up your call\nbefore joining',
+                  'Set up your call',
                   textAlign: TextAlign.center,
-                  style: textTheme.title1.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorTheme.textHighEmphasis,
-                  ),
+                  style: textTheme.headingLg,
                 ),
                 const SizedBox(height: 16),
                 StreamLobbyVideo(
@@ -212,46 +214,11 @@ class _LobbyScreenState extends State<LobbyScreen> {
                 ),
 
                 const SizedBox(height: 24),
-                Container(
-                  constraints: const BoxConstraints(maxWidth: 360),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: theme.cardBackgroundColor,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                const Padding(
-                                  padding: EdgeInsets.all(8),
-                                  child: Icon(Icons.lock_person),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    'Start a private test call. This demo is built on Stream’s SDKs and runs on our global edge network.',
-                                    style: textTheme.footnote.copyWith(
-                                      color: colorTheme.textLowEmphasis,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: double.infinity,
-                              child: StreamButton(
-                                onPressed: joinCallPressed,
-                                child: const Text('Start a test call'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                SizedBox(
+                  width: 400,
+                  child: StreamButton(
+                    onPressed: joinCallPressed,
+                    child: const Text('Start a test call'),
                   ),
                 ),
                 const SizedBox(height: 56),

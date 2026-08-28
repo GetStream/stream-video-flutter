@@ -150,17 +150,14 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: theme.scaffoldBackgroundColor,
           title: Text(
             'Enter the IDs of users you want to call (separated by commas)',
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: context.streamTextTheme.headingSm,
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
+              StreamTextInput(
                 controller: controller,
-                decoration: const InputDecoration(
-                  hintText: 'User ID',
-                  hintStyle: TextStyle(color: Colors.white30),
-                ),
+                hintText: 'User IDs',
               ),
               const SizedBox(height: 16),
               Align(
@@ -168,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: SizedBox(
                   width: 150,
                   child: StreamButton(
-                    iconLeft: const Icon(Icons.video_camera_front),
+                    iconLeft: Icon(context.streamIcons.video),
                     onPressed: () {
                       Navigator.of(context).pop();
                       _getOrCreateCall(
@@ -200,8 +197,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final currentUser = _userAuthController.currentUser;
     assert(currentUser != null, 'User must be logged in to access home screen');
 
-    final theme = Theme.of(context);
-    final colorScheme = StreamTheme.of(context).colorScheme;
+    final textTheme = context.streamTextTheme;
+    final colors = context.streamColorScheme;
+    final spacing = context.streamSpacing;
     final size = MediaQuery.sizeOf(context);
     final isHorizontal = size.width > size.height || size.height < 600;
     final width = math.min(size.width, kMaxWidthRegularScreen);
@@ -215,24 +213,16 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
 
-    final appTitle = [
-      Text('Stream', style: theme.textTheme.headlineMedium),
-      Text(
-        '[Video Calling]',
-        style: theme.textTheme.headlineMedium?.apply(
-          color: colorScheme.accentSuccess,
-        ),
-      ),
-    ];
+    final appTitle = Text('Stream Video Calling', style: textTheme.headingLg);
 
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: theme.scaffoldBackgroundColor,
+        backgroundColor: colors.backgroundApp,
         leading: UserActionsAvatar(currentUser: currentUser),
         titleSpacing: 4,
         centerTitle: false,
-        title: Text(name, style: theme.textTheme.bodyMedium),
+        title: Text(name, style: textTheme.bodyDefault),
         actions: [
           Row(
             children: [
@@ -242,8 +232,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   currentEnvironment: _appPreferences.environment,
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.logout, color: Colors.white),
+              StreamButton.icon(
+                type: .ghost,
+                style: .secondary,
+                icon: const Icon(Icons.logout),
                 onPressed: _userAuthController.logout,
               ),
             ],
@@ -258,28 +250,17 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (isHorizontal) ...[
-                  Row(
-                    children: [
-                      Expanded(child: logo),
-                      const SizedBox(width: 24),
-                      Column(children: appTitle),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                ] else ...[
-                  logo,
-                  const SizedBox(height: 24),
-                  ...appTitle,
-                  const SizedBox(height: 24),
-                ],
+                logo,
+                const SizedBox(height: 24),
+                appTitle,
+                const SizedBox(height: 24),
                 Text(
                   'Start a new call, join a meeting by\n'
                   'entering the call ID or by scanning\n'
                   'a QR code.',
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.apply(
-                    color: colorScheme.textSecondary,
+                  style: textTheme.bodyDefault.apply(
+                    color: colors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 36),
@@ -290,11 +271,37 @@ class _HomeScreenState extends State<HomeScreen> {
                   onLogoutPressed: _userAuthController.logout,
                   currentEnvironment: _appPreferences.environment,
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: spacing.xxl),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          color: colors.borderSubtle,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Text(
+                          'OR',
+                          style: TextStyle(color: colors.textDisabled),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 1,
+                          color: colors.borderSubtle,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: spacing.xxl),
                 SizedBox(
                   width: double.infinity,
                   child: StreamButton(
-                    iconLeft: const Icon(Icons.video_call),
                     onPressed: _getOrCreateCall,
                     child: const Text('Start New Call'),
                   ),
@@ -305,7 +312,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: StreamButton(
                     style: StreamButtonStyle.secondary,
                     type: StreamButtonType.outline,
-                    iconLeft: const Icon(Icons.person),
                     onPressed: () => _directCall(context),
                     child: const Text('Direct Call'),
                   ),
@@ -334,7 +340,7 @@ class _JoinForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = StreamTheme.of(context).colorScheme;
+    final spacing = context.streamSpacing;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -344,32 +350,15 @@ class _JoinForm extends StatelessWidget {
           children: [
             const SizedBox(height: 8),
             Flexible(
-              child: TextField(
+              child: StreamTextInput(
                 controller: callIdController,
-                style: const TextStyle(color: Colors.white),
-                autocorrect: false,
-                enableSuggestions: false,
-                decoration: InputDecoration(
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: colorScheme.textSecondary,
-                    ),
-                    borderRadius: const BorderRadius.all(Radius.circular(36)),
-                  ),
-                  border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(36)),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                  isDense: true,
-                  hintStyle: TextStyle(
-                    color: colorScheme.textSecondary,
-                  ),
-                  hintText: 'Enter call id',
-                  // suffix button to generate a random call id
-                  suffixIcon: CurrentPlatform.isMobile
-                      ? _scanQRButton(context)
-                      : _refreshIconButton(),
+                hintText: 'Enter call id',
+                style: .new(
+                  contentPadding: .only(left: spacing.md),
                 ),
+                trailing: CurrentPlatform.isMobile
+                    ? _scanQRButton(context)
+                    : _refreshIconButton(),
               ),
             ),
             const SizedBox(width: 12),
@@ -379,7 +368,6 @@ class _JoinForm extends StatelessWidget {
                 final hasText = value.text.isNotEmpty;
                 return StreamButton(
                   type: StreamButtonType.ghost,
-                  iconLeft: const Icon(Icons.login),
                   onPressed: hasText ? onJoinPressed : () {},
                   child: const Text('Join call'),
                 );
@@ -391,10 +379,10 @@ class _JoinForm extends StatelessWidget {
     );
   }
 
-  Widget _refreshIconButton() => IconButton(
+  Widget _refreshIconButton() => StreamButton.icon(
+    style: .secondary,
+    type: .ghost,
     icon: const Icon(Icons.refresh),
-    color: Colors.white,
-    padding: EdgeInsets.zero,
     onPressed: () {
       // generate a 10 character nanoId for call id
       final callId = generateAlphanumericString(10);
@@ -405,10 +393,10 @@ class _JoinForm extends StatelessWidget {
     },
   );
 
-  Widget _scanQRButton(BuildContext context) => IconButton(
+  Widget _scanQRButton(BuildContext context) => StreamButton.icon(
     icon: const Icon(Icons.qr_code),
-    color: Colors.white,
-    padding: EdgeInsets.zero,
+    style: .secondary,
+    type: .ghost,
     onPressed: () async {
       final result = await QrCodeScanner.scan(context);
 

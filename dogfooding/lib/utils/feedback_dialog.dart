@@ -18,7 +18,6 @@ Future<void> showFeedbackDialog(
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Scaffold(
-          backgroundColor: Colors.transparent,
           body: Align(
             child: Stack(
               children: [
@@ -36,8 +35,8 @@ Future<void> showFeedbackDialog(
                 Positioned(
                   right: 0,
                   top: 0,
-                  child: IconButton(
-                    icon: Icon(Icons.close, color: colorScheme.textPrimary),
+                  child: StreamButton.icon(
+                    icon: Icon(context.streamIcons.xmark),
                     onPressed: () => hideFeedbackDialog(context),
                   ),
                 ),
@@ -110,18 +109,13 @@ class __FeedbackRatingContentState extends State<_FeedbackRatingContent> {
             starColor: colorScheme.accentSuccess,
           ),
           const SizedBox(height: 16),
-          TextField(
+          StreamTextInput(
             controller: textController,
-            decoration: InputDecoration(
-              hintText: 'Tell us more about your experience',
-              hintStyle: TextStyle(color: colorScheme.textSecondary),
-              border: const OutlineInputBorder(),
-            ),
+            hintText: 'Tell us more about your experience',
             textInputAction: TextInputAction.done,
             onSubmitted: (value) {
               FocusManager.instance.primaryFocus?.unfocus();
             },
-            style: TextStyle(color: colorScheme.textPrimary),
             maxLines: 3,
           ),
           const SizedBox(height: 32),

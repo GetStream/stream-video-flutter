@@ -45,17 +45,13 @@ class IncomingCallControls extends StatelessWidget {
             children: [
               CallControlOption(
                 icon: const Icon(Icons.call_end_rounded),
-                iconColor: Colors.white,
-                backgroundColor: Colors.red,
+                state: .negative,
                 onPressed: onDeclineCallTap,
-                padding: const EdgeInsets.all(24),
               ),
               CallControlOption(
                 icon: const Icon(Icons.call_rounded),
-                iconColor: Colors.white,
-                backgroundColor: Colors.green,
+                state: .positive,
                 onPressed: onAcceptCallTap,
-                padding: const EdgeInsets.all(24),
               ),
             ],
           ),
@@ -69,14 +65,12 @@ class IncomingCallControls extends StatelessWidget {
                 icon: isMicrophoneEnabled
                     ? const Icon(Icons.mic_rounded)
                     : const Icon(Icons.mic_off_rounded),
-                padding: const EdgeInsets.all(16),
                 onPressed: onMicrophoneTap,
               ),
               CallControlOption(
                 icon: isCameraEnabled
                     ? const Icon(Icons.videocam_rounded)
                     : const Icon(Icons.videocam_off_rounded),
-                padding: const EdgeInsets.all(16),
                 onPressed: onCameraTap,
               ),
             ],
