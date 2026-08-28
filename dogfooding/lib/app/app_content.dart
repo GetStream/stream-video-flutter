@@ -6,7 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide CurrentPlatform;
+import 'package:stream_chat_flutter/stream_chat_flutter.dart'
+    hide CurrentPlatform;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter_l10n.dart';
 
