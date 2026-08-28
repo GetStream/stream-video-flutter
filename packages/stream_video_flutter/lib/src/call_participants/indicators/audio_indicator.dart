@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../participant_label_defaults.dart';
 import 'audio_level_indicator.dart';
 
 /// The sound indicator shown at the end of a participant's name pill.
@@ -25,25 +26,30 @@ class StreamAudioIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.streamColorScheme;
-    final radius = context.streamRadius;
+    // The pill's own defaults, rather than a second copy of them: the indicator
+    // is one of the parts the pill is made of, and the two have to agree on how
+    // big it is for the tile's own arithmetic to hold.
+    final defaults = StreamParticipantLabelStyleDefaults(context);
 
     return SizedBox.square(
-      dimension: style?.audioIndicatorSize ?? 24,
+      dimension: style?.audioIndicatorSize ?? defaults.audioIndicatorSize,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color:
               style?.audioIndicatorBackgroundColor ??
               style?.backgroundColor ??
-              colorScheme.backgroundOverlayDarkStrong,
+              defaults.audioIndicatorBackgroundColor,
           borderRadius:
-              style?.audioIndicatorBorderRadius ?? BorderRadius.all(radius.md),
+              style?.audioIndicatorBorderRadius ??
+              defaults.audioIndicatorBorderRadius,
         ),
         child: Center(
           child: StreamAudioLevelIndicator(
             isSpeaking: isSpeaking,
-            size: style?.audioIndicatorIconSize ?? 10,
-            color: style?.speakingColor ?? colorScheme.brand.shade300,
+            size:
+                style?.audioIndicatorIconSize ??
+                defaults.audioIndicatorIconSize,
+            color: style?.speakingColor ?? defaults.speakingColor,
           ),
         ),
       ),

@@ -1,8 +1,13 @@
+import 'dart:math' as math;
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import '../widgets/avatar_size_from_constraints.dart';
+import 'indicators/connection_quality_indicator_defaults.dart';
+import 'participant_label_defaults.dart';
 
 /// Builder function used to build a video placeholder.
 typedef VideoPlaceholderBuilder =
@@ -267,7 +272,7 @@ class DefaultStreamParticipantTile extends StatelessWidget {
             props: props,
             style: style,
             defaults: defaults,
-            density: _TileDensity.resolve(constraints),
+            constraints: constraints,
           ),
         ),
       ),
@@ -281,12 +286,18 @@ class DefaultStreamParticipantTile extends StatelessWidget {
 // and a 140px floating self-view, so what it can show is a function of the
 // space it was given rather than of the platform.
 //
-// The widths come from the chrome's own arithmetic, with the toolbar's 12px
-// inset on both sides and a 12px gap before the indicator:
+// This ladder covers the bottom toolbar, whose widths come from the chrome's
+// own arithmetic — the toolbar's 12px inset on both sides, a 12px gap before
+// the indicator, and the narrowest the pill can be drawn at:
 //
 //   indicator only         12 + 32 + 12                      =  56
 //   pill (icons only)      12 + (12 + 24 + 4) + 12 + 32 + 12 = 108
 //   pill with a short name 108 + a readable 44px of text     = 152
+//
+// It is a floor rather than the whole story: a muted participant's pill carries
+// icons the widths above do not account for, and the top toolbar is anchored to
+// the opposite edge, so both are measured against what they actually draw. See
+// [_TileContent.build] and [_BottomToolbar.build].
 enum _TileDensity {
   /// Everything.
   full,
@@ -323,9 +334,9 @@ enum _TileDensity {
 
   bool get showsConnectionQuality => this != bare;
 
-  bool get showsMoreButton => this == full || this == compact;
-
-  bool get showsReaction => this == full || this == compact;
+  // Both live in the top toolbar. The ladder decides whether a tile is big
+  // enough to carry any of it; whether it actually fits is measured.
+  bool get carriesTopToolbar => this == full || this == compact;
 }
 
 class _TileContent extends StatelessWidget {
@@ -333,17 +344,18 @@ class _TileContent extends StatelessWidget {
     required this.props,
     required this.style,
     required this.defaults,
-    required this.density,
+    required this.constraints,
   });
 
   final StreamParticipantTileProps props;
   final StreamParticipantTileStyle? style;
   final _StreamParticipantTileStyleDefaults defaults;
-  final _TileDensity density;
+  final BoxConstraints constraints;
 
   @override
   Widget build(BuildContext context) {
     final participant = props.participant;
+    final density = _TileDensity.resolve(constraints);
 
     final actions =
         props.actionsBuilder?.call(context, participant) ??
@@ -360,15 +372,45 @@ class _TileContent extends StatelessWidget {
             style?.showConnectionQualityIndicator ??
             defaults.showConnectionQualityIndicator) &&
         density.showsConnectionQuality;
+    final reaction = participant.reaction;
+
+    // The top toolbar hangs off the opposite edge from the bottom one, so the
+    // ladder's widths say nothing about whether it fits. Measure it: the button
+    // reserves a tap target, the reaction is drawn at its own size inset from
+    // the tile edge, and both have to clear whatever the bottom toolbar takes
+    // rather than land on top of it.
+    final topPadding = (style?.topToolbarPadding ?? defaults.topToolbarPadding)
+        .resolve(Directionality.maybeOf(context));
+    final reactionSpan =
+        (style?.reactionSize ?? defaults.reactionSize) +
+        2 * _reactionPadding(context, style: style, defaults: defaults);
+    final clearance =
+        topPadding.vertical +
+        _bottomChromeHeight(
+          context,
+          style: style,
+          defaults: defaults,
+          showLabel: showLabel,
+          showIndicator: showIndicator,
+        );
+
     final showMore =
         actions.isNotEmpty &&
         (style?.showMoreButton ?? defaults.showMoreButton) &&
-        density.showsMoreButton;
-    final reaction = participant.reaction;
+        density.carriesTopToolbar &&
+        constraints.maxWidth >= topPadding.horizontal + _kTapTarget &&
+        constraints.maxHeight >= clearance + _kTapTarget;
+
     final showReaction =
         reaction != null &&
         (props.showReaction ?? style?.showReaction ?? defaults.showReaction) &&
-        density.showsReaction;
+        density.carriesTopToolbar &&
+        constraints.maxWidth >=
+            topPadding.horizontal +
+                (showMore ? _kTapTarget : 0) +
+                reactionSpan &&
+        constraints.maxHeight >=
+            clearance + math.max(showMore ? _kTapTarget : 0, reactionSpan);
 
     return Stack(
       fit: StackFit.expand,
@@ -434,7 +476,10 @@ class _TileContent extends StatelessWidget {
         return StreamParticipantPlaceholder(
           call: call,
           participant: participant,
-          style: style?.placeholderStyle ?? defaults.placeholderStyle,
+          // No default of its own: the placeholder merges an incoming
+          // style over the defaults it owns, so restating them here would
+          // only be a second copy to keep in step.
+          style: style?.placeholderStyle,
         );
       },
     );
@@ -456,12 +501,8 @@ class _TopToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reactionInset = style?.reactionInset ?? defaults.reactionInset;
-    final topToolbarPadding =
-        style?.topToolbarPadding ?? defaults.topToolbarPadding;
-
     return Padding(
-      padding: topToolbarPadding,
+      padding: style?.topToolbarPadding ?? defaults.topToolbarPadding,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -469,27 +510,80 @@ class _TopToolbar extends StatelessWidget {
             _MoreMenuButton(actions: actions, style: style),
           const Spacer(),
           if (reaction != null)
-            Padding(
-              // Measured from the tile edge, so the toolbar's own inset comes
-              // off the designed distance.
-              padding: EdgeInsets.all(
-                (reactionInset - _resolveTopInset(context, topToolbarPadding))
-                    .clamp(0.0, double.infinity),
-              ),
-              child: _ReactionIndicator(
-                reaction: reaction!,
-                size: style?.reactionSize ?? defaults.reactionSize,
+            // Loose, so a glyph that measures wider than the size it was drawn
+            // at clips instead of overflowing the row. Emoji advance widths are
+            // a property of the platform's font, which the tile cannot know
+            // when it decides whether the reaction fits.
+            Flexible(
+              child: Padding(
+                // Measured from the tile edge, so the toolbar's own inset comes
+                // off the designed distance.
+                padding: EdgeInsets.all(
+                  _reactionPadding(context, style: style, defaults: defaults),
+                ),
+                child: _ReactionIndicator(
+                  reaction: reaction!,
+                  size: style?.reactionSize ?? defaults.reactionSize,
+                ),
               ),
             ),
         ],
       ),
     );
   }
+}
 
-  static double _resolveTopInset(
-    BuildContext context,
-    EdgeInsetsGeometry padding,
-  ) => padding.resolve(Directionality.maybeOf(context)).top;
+// The tap target the overflow button reserves around itself.
+const _kTapTarget = kMinInteractiveDimension;
+
+// The reaction's own inset, less whatever the toolbar already insets it by.
+double _reactionPadding(
+  BuildContext context, {
+  required StreamParticipantTileStyle? style,
+  required _StreamParticipantTileStyleDefaults defaults,
+}) {
+  final inset = style?.reactionInset ?? defaults.reactionInset;
+  final toolbarInset = (style?.topToolbarPadding ?? defaults.topToolbarPadding)
+      .resolve(Directionality.maybeOf(context))
+      .top;
+  return math.max(0, inset - toolbarInset);
+}
+
+// How much room the bottom toolbar takes, so the top one can keep clear of it.
+//
+// Both of its parts are resolved from their own styles rather than assumed:
+// either can be themed to a different size, and a tile that guessed would put
+// the overflow button back on top of the name pill.
+double _bottomChromeHeight(
+  BuildContext context, {
+  required StreamParticipantTileStyle? style,
+  required _StreamParticipantTileStyleDefaults defaults,
+  required bool showLabel,
+  required bool showIndicator,
+}) {
+  if (!showLabel && !showIndicator) return 0;
+
+  var content = 0.0;
+  if (showLabel) {
+    content = math.max(
+      content,
+      participantLabelHeight(context, style: style?.labelStyle),
+    );
+  }
+  if (showIndicator) {
+    content = math.max(
+      content,
+      connectionQualityIndicatorSize(
+        context,
+        style: style?.connectionQualityIndicatorStyle,
+      ),
+    );
+  }
+
+  final padding = (style?.toolbarPadding ?? defaults.toolbarPadding).resolve(
+    Directionality.maybeOf(context),
+  );
+  return padding.vertical + content;
 }
 
 class _ReactionIndicator extends StatelessWidget {
@@ -510,10 +604,6 @@ class _ReactionIndicator extends StatelessWidget {
   }
 }
 
-// The narrowest a name pill can be and still show anything: its padding either
-// side of a single audio indicator.
-const _kMinLabelWidth = 48.0;
-
 class _BottomToolbar extends StatelessWidget {
   const _BottomToolbar({
     required this.participant,
@@ -533,6 +623,18 @@ class _BottomToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // What the pill needs to draw everything this participant gives it. A muted
+    // camera-off participant carries two icons the density ladder's widths know
+    // nothing about, and the pill lays its icons out at their full size rather
+    // than shrinking them.
+    final minLabelWidth = participantLabelMinWidth(
+      context,
+      showName: showName,
+      showMicrophoneOff: !participant.isAudioEnabled,
+      showVideoOff: !participant.isVideoEnabled,
+      style: style?.labelStyle,
+    );
+
     return Padding(
       padding: style?.toolbarPadding ?? defaults.toolbarPadding,
       child: Row(
@@ -555,7 +657,7 @@ class _BottomToolbar extends StatelessWidget {
                       // is nothing left to truncate, so drop it rather than
                       // overflow.
                       builder: (context, constraints) =>
-                          constraints.maxWidth < _kMinLabelWidth
+                          constraints.maxWidth < minLabelWidth
                           ? const SizedBox.shrink()
                           : StreamParticipantLabel.fromParticipant(
                               participant: participant,
@@ -567,7 +669,11 @@ class _BottomToolbar extends StatelessWidget {
             ),
           ),
           if (showIndicator) ...[
-            SizedBox(width: style?.toolbarSpacing ?? defaults.toolbarSpacing),
+            // Only between the two of them. With no pill beside it the gap
+            // separates the indicator from nothing, and the tile's narrowest
+            // band has no room to spare for it.
+            if (showLabel)
+              SizedBox(width: style?.toolbarSpacing ?? defaults.toolbarSpacing),
             RepaintBoundary(
               child: StreamConnectionQualityIndicator(
                 connectionQuality: participant.connectionQuality,
@@ -684,13 +790,10 @@ StreamParticipantPlaceholderStyle? _placeholderStyleOf(
 ) {
   if (theme == null) return null;
 
-  final diameter = theme.constraints.constrain(Size.infinite).shortestSide;
-  final size = StreamAvatarSize.values.firstWhereOrNull(
-    (it) => it.value >= diameter,
-  );
-
   return StreamParticipantPlaceholderStyle(
-    avatarTheme: StreamAvatarThemeData(size: size),
+    avatarTheme: StreamAvatarThemeData(
+      size: avatarSizeFromConstraints(theme.constraints),
+    ),
   );
 }
 
@@ -749,15 +852,6 @@ class _StreamParticipantTileStyleDefaults extends StreamParticipantTileStyle {
 
   @override
   double get reactionInset => _spacing.sm;
-
-  @override
-  StreamParticipantPlaceholderStyle get placeholderStyle =>
-      StreamParticipantPlaceholderStyle(
-        avatarTheme: StreamAvatarThemeData(
-          size: StreamAvatarSize.xxl,
-          border: Border.all(color: _colorScheme.borderOnInverse, width: 2),
-        ),
-      );
 }
 
 /// A widget that represents a single participant in a call.
@@ -872,10 +966,9 @@ class StreamCallParticipant extends StatelessWidget {
           borderRadius: _borderRadius,
           speakingBorder: speakingBorder,
           placeholderStyle: _placeholderStyleOf(_userAvatarTheme),
-          // Nested styles are merged shallowly, so handing over an all-null one
-          // would replace whatever the ambient theme set rather than leave it
-          // alone. Only build them when this widget was actually given
-          // something to say.
+          // Only built when this widget was actually given something to say.
+          // The generated merge would leave an all-null style alone anyway, so
+          // this is about keeping the props readable rather than correctness.
           labelStyle:
               (_participantLabelTextStyle != null ||
                   _audioLevelIndicatorColor != null ||

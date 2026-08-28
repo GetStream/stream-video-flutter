@@ -79,8 +79,12 @@ Rules worth stating outright:
   type throws away the non-null overrides.
 - **Never let a defaults instance into a theme.** Generated `==` compares
   `runtimeType` and every getter is non-null, so merging one forces every field.
-- **Generated `merge` is shallow.** A nested style is replaced wholesale, so a
-  widget handing a sub-style to a child theme must merge it explicitly first.
+- **Generated `merge` recurses into nested styles**, so handing over an all-null
+  sub-style leaves whatever the ambient theme set alone. What does overwrite a
+  field is a style that has a value for it — which is why a defaults instance,
+  every getter non-null, must never reach a theme. A widget that resolves a
+  sub-style itself rather than passing the nested one straight down still has to
+  merge it explicitly.
 - Naming: `<Component>ThemeData` for the top-level theme, `<Component>Style` for
   the visual style it carries.
 
