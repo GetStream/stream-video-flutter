@@ -358,6 +358,61 @@ void main() {
       expect(find.byType(DefaultStreamParticipantLabel), findsNothing);
     });
 
+    testWidgets('uses a registered participant video builder', (tester) async {
+      await tester.pumpWidget(
+        StreamComponentFactory(
+          builders: StreamComponentBuilders(
+            extensions: streamVideoComponentBuilders(
+              participantVideo: (context, props) => const Text('video'),
+            ),
+          ),
+          child: TestWrapper(
+            child: SizedBox(
+              width: 300,
+              height: 300,
+              child: StreamParticipantTile(
+                call: MockCall(),
+                participant: _participant(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('video'), findsOneWidget);
+      expect(find.byType(DefaultStreamParticipantVideo), findsNothing);
+    });
+
+    testWidgets('prefers a per-instance renderer over the registered one', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        StreamComponentFactory(
+          builders: StreamComponentBuilders(
+            extensions: streamVideoComponentBuilders(
+              participantVideo: (context, props) => const Text('registered'),
+            ),
+          ),
+          child: TestWrapper(
+            child: SizedBox(
+              width: 300,
+              height: 300,
+              child: StreamParticipantTile(
+                call: MockCall(),
+                participant: _participant(),
+                videoRendererBuilder: (_, _, _) => const Text('per instance'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // A call site that named a renderer said something more specific than an
+      // app-wide default.
+      expect(find.text('per instance'), findsOneWidget);
+      expect(find.text('registered'), findsNothing);
+    });
+
     testWidgets('uses a registered connection quality indicator builder', (
       tester,
     ) async {
