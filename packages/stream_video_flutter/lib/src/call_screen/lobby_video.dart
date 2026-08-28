@@ -69,6 +69,16 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
     });
   }
 
+  @override
+  void dispose() {
+    // The tracks are created here, so they are released here. A lobby torn down
+    // without stopping them leaves the camera and microphone running, and the
+    // next lobby opens a second set alongside them.
+    _cameraTrack?.stop();
+    _microphoneTrack?.stop();
+    super.dispose();
+  }
+
   Future<void> toggleCamera() async {
     if (_cameraTrack != null) {
       await _cameraTrack?.stop();

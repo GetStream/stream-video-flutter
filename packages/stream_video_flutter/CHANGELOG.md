@@ -59,6 +59,10 @@
   Every component follows the same shape: `StreamX` resolves the registered builder and falls back to `DefaultX`, which holds the default implementation. The parameters of `StreamX` are carried in a `StreamXProps`, exposed as `StreamX.props`, so a custom builder can read them and `copyWith` them to decorate the default rather than reimplement it.
 - Added `StreamParticipantTile`, the participant tile as a replaceable component: register a `participantTile` builder to replace it, or use `DefaultStreamParticipantTile` for the default implementation.
 
+### 🐞 Fixed
+
+- `StreamLobbyVideo` now stops the camera and microphone tracks it created when it is disposed. It never released them, so a lobby that was torn down and rebuilt left the previous camera running and opened a second one alongside it.
+
 ### ⚠️ Deprecated
 
 - `StreamCallParticipantThemeData` and `StreamCallParticipantTheme` are deprecated. Their properties now live in `StreamParticipantTileThemeData`, `StreamParticipantLabelThemeData`, `StreamConnectionQualityIndicatorThemeData` and `StreamCallParticipantsGridThemeData`. A theme passed to `StreamVideoTheme(callParticipantTheme: ...)` is still applied — in full, so a tile styled the old way keeps looking the way it did. Stop passing it to pick up the redesign, and pass a theme in the new shape to replace it outright. The translation runs in that factory only: setting `callParticipantTheme` through `copyWith`, or wrapping a subtree in the `StreamCallParticipantTheme` widget, changes the field without restyling anything.
