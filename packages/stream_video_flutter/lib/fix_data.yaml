@@ -7,6 +7,12 @@ transforms:
   # parameters StreamParticipantTile dropped in favour of `style:`, so renaming
   # a call site that passes any of them turns working code into a compile
   # error. Those call sites move by hand; the CHANGELOG carries the mapping.
+  #
+  # participantLabelAlignment, connectionLevelAlignment and
+  # enabledMicrophoneColor are still accepted by the deprecated widget but are
+  # not forwarded anywhere: the label and the indicator are laid out by the
+  # toolbar, and an unmuted microphone draws no icon to colour. Removing them
+  # changes nothing at runtime, which is why it is safe to do in bulk.
 
   - title: "remove participantLabelAlignment from StreamCallParticipant"
     date: "2026-08-28"

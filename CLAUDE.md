@@ -22,7 +22,7 @@ melos run test:all
 `stream_core_flutter` is the design system and is **not** in this repo. It is a
 git dependency pinned in the root `pubspec.yaml`, so its source is at:
 
-```
+```text
 ~/.pub-cache/git/stream-core-flutter-<ref>/packages/stream_core_flutter
 ```
 

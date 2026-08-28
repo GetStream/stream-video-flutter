@@ -28,6 +28,22 @@ void main() {
       expect(find.text('A'), findsOneWidget);
     });
 
+    testWidgets('falls back to the id when the name is only spaces', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          child: StreamUserAvatar(
+            user: const UserInfo(id: 'ab', name: '   '),
+          ),
+        ),
+      );
+
+      // A name with no letters in it has no initials, and an empty circle says
+      // nothing about who is behind it.
+      expect(find.text('A'), findsOneWidget);
+    });
+
     testWidgets('reports taps with the user', (tester) async {
       UserInfo? tapped;
 
