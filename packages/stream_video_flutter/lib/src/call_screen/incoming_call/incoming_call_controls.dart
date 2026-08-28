@@ -49,7 +49,7 @@ class IncomingCallControls extends StatelessWidget {
                 onPressed: onDeclineCallTap,
               ),
               CallControlOption(
-                icon: const Icon(Icons.call_rounded), 
+                icon: const Icon(Icons.call_rounded),
                 state: .positive,
                 onPressed: onAcceptCallTap,
               ),

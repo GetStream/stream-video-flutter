@@ -184,7 +184,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
         .nonNulls
         .map((e) => e.toUserInfo())
         .toList();
-        
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
