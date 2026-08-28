@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import 'connection_quality_indicator_defaults.dart';
 
 /// A round chip reporting how good a participant's connection is.
 ///
@@ -85,7 +86,7 @@ class DefaultStreamConnectionQualityIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeStyle = StreamConnectionQualityIndicatorTheme.of(context).style;
     final style = themeStyle?.merge(props.style) ?? props.style;
-    final defaults = _StreamConnectionQualityIndicatorStyleDefaults(context);
+    final defaults = StreamConnectionQualityIndicatorStyleDefaults(context);
 
     final size = style?.size ?? defaults.size;
     final iconSize = style?.iconSize ?? defaults.iconSize;
@@ -127,40 +128,6 @@ class DefaultStreamConnectionQualityIndicator extends StatelessWidget {
     SfuConnectionQuality.excellent => 3,
     SfuConnectionQuality.unspecified => 0,
   };
-}
-
-// Default style values for [StreamConnectionQualityIndicator].
-//
-// The chip sits on top of video, so its fill is an overlay and its bars are
-// colored for legibility against that overlay rather than against a surface.
-class _StreamConnectionQualityIndicatorStyleDefaults
-    extends StreamConnectionQualityIndicatorStyle {
-  _StreamConnectionQualityIndicatorStyleDefaults(this._context);
-
-  final BuildContext _context;
-
-  late final _colorScheme = _context.streamColorScheme;
-
-  @override
-  double get size => 32;
-
-  @override
-  double get iconSize => 24;
-
-  @override
-  Color get backgroundColor => _colorScheme.backgroundOverlayDarkStrong;
-
-  @override
-  Color get poorColor => _colorScheme.accentError;
-
-  @override
-  Color get fairColor => _colorScheme.accentWarning;
-
-  @override
-  Color get greatColor => _colorScheme.accentSuccess;
-
-  @override
-  Color get inactiveColor => _colorScheme.textOnAccent.withValues(alpha: 0.4);
 }
 
 // Paints three bars of increasing height, `level` of them in [activeColor].

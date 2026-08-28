@@ -1,14 +1,33 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import '../widgets/avatar_size_from_constraints.dart';
 
 /// Defines default property values for [StreamParticipantTile] widgets.
+///
+/// Nothing reads this any more. It survives so existing code keeps compiling,
+/// and is translated onto the component themes once — in the
+/// [StreamVideoTheme] factory. Reaching it any other way, through
+/// [StreamVideoTheme.copyWith] or the [StreamCallParticipantTheme] widget,
+/// sets the value without restyling anything.
+@Deprecated(
+  'Use participantTileTheme, participantLabelTheme, '
+  'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
+  'Will be removed in the next major version.',
+)
 @immutable
 class StreamCallParticipantThemeData with Diagnosticable {
   /// Creates a new instance of [StreamCallParticipantThemeData].
+  @Deprecated(
+    'Use participantTileTheme, participantLabelTheme, '
+    'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
+    'Will be removed in the next major version.',
+  )
   const StreamCallParticipantThemeData({
     this.videoFit,
     this.backgroundColor = const Color(0xffB4B7BB),
@@ -484,23 +503,12 @@ class StreamCallParticipantThemeData with Diagnosticable {
         showConnectionQualityIndicator: showConnectionQualityIndicator,
         placeholderStyle: StreamParticipantPlaceholderStyle(
           avatarTheme: StreamAvatarThemeData(
-            size: _avatarSizeFor(userAvatarTheme.constraints),
+            size: avatarSizeFromConstraints(userAvatarTheme.constraints),
             backgroundColor: userAvatarTheme.initialsBackground,
             foregroundColor: userAvatarTheme.initialsTextStyle.color,
           ),
         ),
       ),
-    );
-  }
-
-  // The deprecated theme sizes its avatar with box constraints; the design
-  // system has a fixed set of diameters. Round up to the first that fits, so an
-  // avatar never comes out smaller than it was asked to be.
-  static StreamAvatarSize _avatarSizeFor(BoxConstraints constraints) {
-    final diameter = constraints.constrain(Size.infinite).shortestSide;
-    return StreamAvatarSize.values.firstWhere(
-      (it) => it.value >= diameter,
-      orElse: () => StreamAvatarSize.xxl,
     );
   }
 
@@ -544,8 +552,24 @@ class StreamCallParticipantThemeData with Diagnosticable {
 
 /// Applies a call participant theme to descendant [StreamParticipantTile]
 /// widgets.
+///
+/// The tile and its parts no longer read this, so wrapping a subtree in one
+/// restyles nothing. Scope the component themes instead: [
+/// StreamParticipantTileTheme], [StreamParticipantLabelTheme],
+/// [StreamConnectionQualityIndicatorTheme] and
+/// [StreamCallParticipantsGridTheme] each wrap a subtree the same way.
+@Deprecated(
+  'Use StreamParticipantTileTheme, StreamParticipantLabelTheme, '
+  'StreamConnectionQualityIndicatorTheme or StreamCallParticipantsGridTheme '
+  'instead. Will be removed in the next major version.',
+)
 class StreamCallParticipantTheme extends InheritedWidget {
   /// Creates a new instance of [StreamCallParticipantTheme].
+  @Deprecated(
+    'Use StreamParticipantTileTheme, StreamParticipantLabelTheme, '
+    'StreamConnectionQualityIndicatorTheme or StreamCallParticipantsGridTheme '
+    'instead. Will be removed in the next major version.',
+  )
   const StreamCallParticipantTheme({
     super.key,
     required this.data,

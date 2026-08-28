@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import 'floating_participant_tile_defaults.dart';
 
 /// The draggable self-view that floats over a call.
 ///
@@ -108,12 +109,20 @@ class DefaultStreamFloatingParticipantTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeStyle = StreamFloatingParticipantTileTheme.of(context).style;
     final style = themeStyle?.merge(props.style) ?? props.style;
-    final defaults = _StreamFloatingParticipantTileStyleDefaults(context);
+    final defaults = StreamFloatingParticipantTileStyleDefaults(context);
 
     final size = style?.size ?? defaults.size;
     final borderRadius = style?.borderRadius ?? defaults.borderRadius;
 
-    final tileStyle = defaults.tileStyle.merge(style?.tileStyle);
+    // The surface rounds the outside and the tile rounds the video inside it,
+    // so the two clips have to agree. Injected rather than left to the tile's
+    // own default: overriding only the surface radius would leave the tighter
+    // clip stopping short of the corners, which reads as four transparent
+    // notches. An explicit tileStyle radius still wins — that is a caller
+    // asking for the two to differ.
+    final tileStyle = defaults.tileStyle
+        .merge(StreamParticipantTileStyle(borderRadius: borderRadius))
+        .merge(style?.tileStyle);
 
     return SizedBox.fromSize(
       size: size,
@@ -150,51 +159,4 @@ class DefaultStreamFloatingParticipantTile extends StatelessWidget {
       ),
     );
   }
-}
-
-// Default style values for [StreamFloatingParticipantTile].
-class _StreamFloatingParticipantTileStyleDefaults
-    extends StreamFloatingParticipantTileStyle {
-  _StreamFloatingParticipantTileStyleDefaults(this._context);
-
-  final BuildContext _context;
-
-  late final _colorScheme = _context.streamColorScheme;
-  late final _spacing = _context.streamSpacing;
-  late final _radius = _context.streamRadius;
-  late final _elevation = _context.streamElevation;
-
-  @override
-  Size get size => const Size(140, 228);
-
-  @override
-  double get padding => _spacing.md;
-
-  @override
-  BorderRadius get borderRadius => BorderRadius.all(_radius.lg);
-
-  @override
-  BoxBorder get border => Border.all(color: _colorScheme.borderOpacitySubtle);
-
-  @override
-  double get elevation => _elevation.level2;
-
-  @override
-  FloatingViewAlignment get initialAlignment => FloatingViewAlignment.topRight;
-
-  @override
-  bool get enableSnapping => true;
-
-  @override
-  StreamParticipantTileStyle get tileStyle => StreamParticipantTileStyle(
-    borderRadius: borderRadius,
-    // At this size a name and an outline crowd the video out; the connection
-    // quality indicator is the one thing still worth the room.
-    showParticipantLabel: false,
-    showSpeakerBorder: false,
-    showMoreButton: false,
-    // The tile draws no border of its own — the floating surface owns it, and
-    // two hairlines on the same corner read as one thick one.
-    border: const Border(),
-  );
 }

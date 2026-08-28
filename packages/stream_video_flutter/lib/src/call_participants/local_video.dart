@@ -1,6 +1,9 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import 'floating_participant_tile_defaults.dart';
 
 /// Represents a floating item used to feature a participant video.
 class StreamLocalVideo extends StatelessWidget {
@@ -15,6 +18,11 @@ class StreamLocalVideo extends StatelessWidget {
     this.localVideoPadding,
     this.initialAlignment,
     this.enableSnappingBehavior,
+    @Deprecated(
+      'The self-view sizes its avatar from StreamAvatarTheme, and the '
+      'placeholder from StreamParticipantTileStyle.placeholderStyle. This '
+      'parameter has no effect. Will be removed in the next major version.',
+    )
     this.userAvatarTheme,
     this.borderRadius,
     this.shadowColor,
@@ -47,6 +55,11 @@ class StreamLocalVideo extends StatelessWidget {
   final bool? enableSnappingBehavior;
 
   /// The theme for the avatar.
+  @Deprecated(
+    'The self-view sizes its avatar from StreamAvatarTheme, and the placeholder '
+    'from StreamParticipantTileStyle.placeholderStyle. This parameter has no '
+    'effect. Will be removed in the next major version.',
+  )
   final StreamUserAvatarThemeData? userAvatarTheme;
 
   /// The border radius of the local video.
@@ -61,15 +74,15 @@ class StreamLocalVideo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final floatingStyle = StreamFloatingParticipantTileTheme.of(context).style;
-    final defaults = _floatingDefaults(context);
+    final defaults = StreamFloatingParticipantTileStyleDefaults(context);
 
     // The deprecated parameters win where they are given, so existing call
     // sites keep positioning the self-view the way they always did.
     final style = StreamFloatingParticipantTileStyle(
       size: (localVideoWidth != null || localVideoHeight != null)
           ? Size(
-              localVideoWidth ?? defaults.width,
-              localVideoHeight ?? defaults.height,
+              localVideoWidth ?? defaults.size.width,
+              localVideoHeight ?? defaults.size.height,
             )
           : null,
       padding: localVideoPadding,
@@ -80,15 +93,16 @@ class StreamLocalVideo extends StatelessWidget {
     );
 
     final resolved = floatingStyle?.merge(style) ?? style;
-    final size = resolved.size ?? Size(defaults.width, defaults.height);
+    final size = resolved.size ?? defaults.size;
 
     return FloatingViewContainer(
       floatingViewWidth: size.width,
       floatingViewHeight: size.height,
       floatingViewPadding: resolved.padding ?? defaults.padding,
-      enableSnappingBehavior: resolved.enableSnapping ?? true,
+      enableSnappingBehavior:
+          resolved.enableSnapping ?? defaults.enableSnapping,
       floatingViewAlignment:
-          resolved.initialAlignment ?? FloatingViewAlignment.topRight,
+          resolved.initialAlignment ?? defaults.initialAlignment,
       floatingView: StreamFloatingParticipantTile(
         call: call,
         participant: participant,
@@ -98,10 +112,4 @@ class StreamLocalVideo extends StatelessWidget {
       child: child,
     );
   }
-
-  // Only the dimensions and inset are needed before the floating tile builds;
-  // everything else it resolves for itself.
-  ({double width, double height, double padding}) _floatingDefaults(
-    BuildContext context,
-  ) => (width: 140, height: 228, padding: context.streamSpacing.md);
 }
