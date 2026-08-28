@@ -82,12 +82,17 @@ class _LobbyScreenState extends State<LobbyScreen> {
     super.dispose();
   }
 
-  void _selectVideoInput(RtcMediaDevice? device) {
-    // The preview owns the camera track, so switching device is just a matter
-    // of recording the choice: rebuilding gives the preview a new key, and it
-    // creates a track for the new device itself and reports it back through
-    // onCameraTrackSet.
-    setState(() => _selectedVideoInputDevice = device);
+  Future<void> _selectVideoInput(RtcMediaDevice? device) async {
+    // Recording the choice is enough to get a new track: the key below changes
+    // with it, so the preview is rebuilt and opens the newly chosen camera.
+    //
+    // The track it handed over earlier is ours to release, though, and the
+    // preview will not do it for us — nothing else holds a reference once it
+    // reports the replacement.
+    await _cameraTrack?.stop();
+    _cameraTrack = null;
+
+    if (mounted) setState(() => _selectedVideoInputDevice = device);
   }
 
   @override
