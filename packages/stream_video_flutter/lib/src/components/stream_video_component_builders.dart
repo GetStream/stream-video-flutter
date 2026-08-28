@@ -6,6 +6,8 @@ import '../../stream_video_flutter.dart';
 Iterable<StreamComponentBuilderExtension<Object>> streamVideoComponentBuilders({
   // ── Call participants ────────────────────────────────────────────────────
   StreamComponentBuilder<StreamParticipantTileProps>? participantTile,
+  StreamComponentBuilder<StreamFloatingParticipantTileProps>?
+  floatingParticipantTile,
   StreamComponentBuilder<StreamParticipantLabelProps>? participantLabel,
   StreamComponentBuilder<StreamConnectionQualityIndicatorProps>?
   connectionQualityIndicator,
@@ -13,6 +15,8 @@ Iterable<StreamComponentBuilderExtension<Object>> streamVideoComponentBuilders({
   final builders = [
     if (participantTile != null)
       StreamComponentBuilderExtension(builder: participantTile),
+    if (floatingParticipantTile != null)
+      StreamComponentBuilderExtension(builder: floatingParticipantTile),
     if (participantLabel != null)
       StreamComponentBuilderExtension(builder: participantLabel),
     if (connectionQualityIndicator != null)

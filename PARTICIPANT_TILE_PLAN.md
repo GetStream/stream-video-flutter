@@ -615,8 +615,8 @@ never committed from a local run.
 - [~] **Phase 5** — label + connection indicator done (triples, slots, exported). Remaining: `StreamUserAvatar`, placeholder, video-renderer triples + their slots
 - [x] **Phase 6** — the tile: new layout, density ladder, no-overlap toolbar
 - [x] **Phase 7** — more menu (`StreamParticipantTileAction`, `actionsBuilder`)
-- [ ] **Phase 8** — floating self-view + call sites
+- [x] **Phase 8** — floating self-view + call sites
 - [x] **Phase 9** — `fix_data.yaml`, CHANGELOG, dogfooding, root `CLAUDE.md`
 - [x] **Tests** — overlap sweep, density, menu, audio branches, slots, bridge
-- [~] **Goldens** — tile states + long-name sweep done. Remaining: label, indicator, placeholder, floating
+- [x] **Goldens** — tile, long-name sweep, label, indicator, floating
 - [ ] **Wrap-up** — core merged, `pubspec.yaml` back to a git ref, `melos bootstrap`
