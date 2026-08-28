@@ -60,53 +60,48 @@ class StreamLocalVideo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamLocalVideoTheme.of(context);
-    final localVideoWidth = this.localVideoWidth ?? theme.localVideoWidth;
-    final localVideoHeight = this.localVideoHeight ?? theme.localVideoHeight;
-    final localVideoPadding = this.localVideoPadding ?? theme.localVideoPadding;
-    final initialAlignment = this.initialAlignment ?? theme.initialAlignment;
-    final enableSnappingBehavior =
-        this.enableSnappingBehavior ?? theme.enableSnappingBehavior;
-    final borderRadius = this.borderRadius ?? theme.borderRadius;
-    final shadowColor = this.shadowColor ?? theme.shadowColor;
+    final floatingStyle = StreamFloatingParticipantTileTheme.of(context).style;
+    final defaults = _floatingDefaults(context);
 
-    var callParticipantBuilder = participantBuilder;
-    callParticipantBuilder ??= (context, call, participant) {
-      return StreamParticipantTile(
-        call: call,
-        participant: participant,
-        showParticipantLabel: false,
-        showSpeakerBorder: false,
-        style: StreamParticipantTileStyle(borderRadius: borderRadius),
-      );
-    };
+    // The deprecated parameters win where they are given, so existing call
+    // sites keep positioning the self-view the way they always did.
+    final style = StreamFloatingParticipantTileStyle(
+      size: (localVideoWidth != null || localVideoHeight != null)
+          ? Size(
+              localVideoWidth ?? defaults.width,
+              localVideoHeight ?? defaults.height,
+            )
+          : null,
+      padding: localVideoPadding,
+      borderRadius: borderRadius,
+      initialAlignment: initialAlignment,
+      enableSnapping: enableSnappingBehavior,
+      shadowColor: shadowColor,
+    );
+
+    final resolved = floatingStyle?.merge(style) ?? style;
+    final size = resolved.size ?? Size(defaults.width, defaults.height);
 
     return FloatingViewContainer(
-      floatingViewWidth: localVideoWidth,
-      floatingViewHeight: localVideoHeight,
-      floatingViewPadding: localVideoPadding,
-      enableSnappingBehavior: enableSnappingBehavior,
-      floatingViewAlignment: initialAlignment,
-      floatingView: Container(
-        width: localVideoWidth,
-        height: localVideoHeight,
-        decoration: BoxDecoration(
-          borderRadius: borderRadius,
-          boxShadow: [
-            BoxShadow(
-              color: shadowColor,
-              blurRadius: 4,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: callParticipantBuilder(
-          context,
-          call,
-          participant,
-        ),
+      floatingViewWidth: size.width,
+      floatingViewHeight: size.height,
+      floatingViewPadding: resolved.padding ?? defaults.padding,
+      enableSnappingBehavior: resolved.enableSnapping ?? true,
+      floatingViewAlignment:
+          resolved.initialAlignment ?? FloatingViewAlignment.topRight,
+      floatingView: StreamFloatingParticipantTile(
+        call: call,
+        participant: participant,
+        style: style,
+        participantBuilder: participantBuilder,
       ),
       child: child,
     );
   }
+
+  // Only the dimensions and inset are needed before the floating tile builds;
+  // everything else it resolves for itself.
+  ({double width, double height, double padding}) _floatingDefaults(
+    BuildContext context,
+  ) => (width: 140, height: 228, padding: context.streamSpacing.md);
 }
