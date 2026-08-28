@@ -30,11 +30,6 @@ dependency_overrides:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core
       ref: f83b5d4d706a79fc429de2d27aead4394b83c1fb
-  stream_core_flutter:
-    git:
-      url: https://github.com/GetStream/stream-core-flutter.git
-      path: packages/stream_core_flutter
-      ref: f83b5d4d706a79fc429de2d27aead4394b83c1fb
 
 melos:
   ignore:
@@ -55,7 +50,7 @@ melos:
         package_info_plus: ">=9.0.0 <11.0.0"
         share_plus: ^13.0.0
         stream_core: ^0.4.0
-        stream_core_flutter: ^0.4.1
+        stream_core_flutter: ^0.5.1
         stream_chat_flutter: ^10.0.0
         stream_webrtc_flutter: ^3.2.0
         stream_video: ^2.0.0-alpha
