@@ -1,5 +1,44 @@
 ## Upcoming (next major)
 
+### ✅ Added
+
+- Added component factory support, so the Stream Video UI components can be replaced app-wide instead of threading widget builders through the widget tree. Register the components you want to replace with `streamVideoComponentBuilders` and wrap your app in a `StreamComponentFactory`:
+
+  ```dart
+  class _MyAppState extends State<MyApp> {
+    // Build the builders once and hold on to them: a newly created
+    // StreamComponentBuilders is never equal to the previous one, so building
+    // it inline rebuilds every Stream component below the factory whenever the
+    // surrounding widget rebuilds.
+    late final _componentBuilders = StreamComponentBuilders(
+      extensions: streamVideoComponentBuilders(
+        // Decorate the default, or return your own widget entirely.
+        participantTile: (context, props) => DefaultStreamParticipantTile(
+          props: props.copyWith(showParticipantLabel: false),
+        ),
+      ),
+    );
+
+    @override
+    Widget build(BuildContext context) {
+      return MaterialApp(
+        builder: (context, child) => StreamComponentFactory(
+          builders: _componentBuilders,
+          child: child!,
+        ),
+        // ...
+      );
+    }
+  }
+  ```
+
+  Every component follows the same shape: `StreamX` resolves the registered builder and falls back to `DefaultX`, which holds the default implementation. The parameters of `StreamX` are carried in a `StreamXProps`, exposed as `StreamX.props`, so a custom builder can read them and `copyWith` them to decorate the default rather than reimplement it.
+- Added `StreamParticipantTile`, the participant tile as a replaceable component: register a `participantTile` builder to replace it, or use `DefaultStreamParticipantTile` for the default implementation.
+
+### ⚠️ Deprecated
+
+- `StreamCallParticipant` is deprecated in favour of `StreamParticipantTile`, matching the component name in the design system. It takes the same parameters and now only wraps `DefaultStreamParticipantTile`. Run `dart fix --apply` to migrate your call sites.
+
 ### ⚠️ Breaking
 
 - Call control buttons (`CallControlOption` and the widgets built on it) are now rendered with the shared `StreamButton` from `stream_core_flutter` instead of a raw Material `ElevatedButton`, and are styled by state rather than by colour. `CallControlOption` now takes a `state` — `CallControlState.on` (the default), `off`, `positive`, `negative` or `disabled` — next to `icon` and `onPressed`, and its per-button styling parameters (`iconColor`, `disabledIconColor`, `backgroundColor`, `disabledBackgroundColor`, `elevation`, `shape`, `padding`) are removed. Appearance now comes from the button styling in `StreamTheme` rather than from `StreamCallControlsThemeData`'s `optionElevation`/`optionShape`/`optionPadding` and `optionOff*` colours, so controls that relied on those look different: every control is now the same size — the accept/decline buttons of the incoming and outgoing call controls are no longer enlarged — an `off` control uses the destructive style instead of a custom colour, and a `disabled` control additionally shows an error badge.

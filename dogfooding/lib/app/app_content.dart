@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart'
+    hide CurrentPlatform;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter_l10n.dart';
 
@@ -31,6 +33,24 @@ class _StreamDogFoodingAppContentState
   late final _userAuthController = locator.get<UserAuthController>();
 
   late final _router = initRouter(_userAuthController);
+
+  /// The component builders that customise the Stream Video UI components.
+  ///
+  /// Built once so its identity stays stable across rebuilds: a newly created
+  /// [StreamComponentBuilders] is never equal to the previous one, so building
+  /// it inline would rebuild every widget depending on the
+  /// [StreamComponentFactory] every time the surrounding widget rebuilds.
+  late final _componentBuilders = StreamComponentBuilders(
+    extensions: [
+      ...streamVideoComponentBuilders(
+        // No-op change for [StreamParticipantTile] as demo example.
+        participantTile: (context, props) =>
+            DefaultStreamParticipantTile(props: props),
+      ),
+      // You can combine both chat and video component builders.
+      ...streamChatComponentBuilders(),
+    ],
+  );
 
   final _compositeSubscription = CompositeSubscription();
   bool? _microphoneEnabledBeforeInterruption;
@@ -258,7 +278,10 @@ class _StreamDogFoodingAppContentState
         ...StreamVideoFlutterLocalizations.localizationsDelegates,
       ],
       builder: (context, child) {
-        return child!;
+        return StreamComponentFactory(
+          builders: _componentBuilders,
+          child: child!,
+        );
       },
     );
   }

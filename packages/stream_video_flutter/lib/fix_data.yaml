@@ -2,6 +2,18 @@
 
 version: 1
 transforms:
+  #region Participant tile migration
+  - title: "replace StreamCallParticipant with StreamParticipantTile"
+    date: "2026-08-20"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      class: "StreamCallParticipant"
+    changes:
+      - kind: "rename"
+        newName: "StreamParticipantTile"
+  #endregion Participant tile migration
+
   #region Partial state updates
 
   #region StreamCallContainer

@@ -37,7 +37,7 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
     Call call,
     CallParticipantState participant,
   ) {
-    return StreamCallParticipant(
+    return StreamParticipantTile(
       key: ValueKey(
         '${participant.uniqueParticipantKey}-screenshare-video',
       ),
