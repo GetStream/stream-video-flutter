@@ -6,7 +6,8 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 // �🐦 Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart'
+    hide CurrentPlatform;
 import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart' hide User;
 
@@ -59,6 +60,7 @@ class _CallScreenState extends State<CallScreen> {
   static const _snackbarCooldown = Duration(seconds: 5);
 
   Channel? _channel;
+  StreamSubscription<Event>? _chatConnectionRecoverySubscription;
   ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.grid;
   bool _moreMenuVisible = false;
 
@@ -104,6 +106,7 @@ class _CallScreenState extends State<CallScreen> {
     _speakingWhileMutedDebounce?.cancel();
     _speakingWhileMutedSubscription.cancel();
     _speakingWhileMuted.dispose();
+    _chatConnectionRecoverySubscription?.cancel();
     widget.call.leave();
     _userChatRepo.disconnectUser();
     _videoEffectsManager.dispose();
@@ -138,8 +141,25 @@ class _CallScreenState extends State<CallScreen> {
       appPreferences.environment,
     );
 
+    if (!mounted) return;
+
+    // A channel watch is bound to the chat websocket connection id, and
+    // StreamChatCore disables the client-level state recovery. After a
+    // reconnect (e.g. the network blip that also triggers a video fast
+    // reconnect) nothing re-watches the channel, so new messages silently stop
+    // reaching the device. Re-watch it ourselves.
+    _chatConnectionRecoverySubscription = _userChatRepo.chatClient
+        .on(EventType.connectionRecovered)
+        .listen((_) async {
+          try {
+            await _channel?.watch();
+          } catch (e) {
+            debugPrint('Failed to re-watch chat channel after reconnect: $e');
+          }
+        });
+
     // Rebuild the widget to enable the chat button.
-    if (mounted) setState(() {});
+    setState(() {});
   }
 
   void showParticipants(BuildContext context) {
@@ -317,7 +337,10 @@ class _CallScreenState extends State<CallScreen> {
                               AppColorPalette.appRed,
                           // Keep the track alive on mute so speaking-while-
                           // muted detection also works on iOS/macOS.
-                          stopTrackOnMute: false,
+                          stopTrackOnMute:
+                              CurrentPlatform.isIos || CurrentPlatform.isMacOS
+                              ? false
+                              : null,
                         ),
                         ToggleCameraOption(
                           call: call,
