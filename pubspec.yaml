@@ -30,12 +30,11 @@ dependency_overrides:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core
       ref: 31ca84f0885eccea9ad6114719499e6f523991b0
-  # TODO(participant-tile): restore the git ref before review. The local path is
-  # temporary while this branch depends on an unreleased stream-core-flutter
-  # change (StreamColorScheme.backgroundOverlayDarkStrong).
-  #   ref: 13ef444220a6b38bbbe934a12d19c59820792c8e
   stream_core_flutter:
-    path: /Users/renefloor/Documents/github/stream-core-flutter/packages/stream_core_flutter
+    git:
+      url: https://github.com/GetStream/stream-core-flutter.git
+      path: packages/stream_core_flutter
+      ref: 31c96f67b1c7b81d7dabb95348bbb8136e3713cf
 
 melos:
   ignore:
