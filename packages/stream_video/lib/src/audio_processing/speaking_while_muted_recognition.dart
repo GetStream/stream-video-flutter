@@ -194,7 +194,8 @@ class SpeakingWhileMutedRecognition
       await _audioRecognition.start(
         onSoundStateChanged: (soundState) {
           _logger.i(
-            () => '[onSoundStateChanged] isSpeakingWhileMuted: '
+            () =>
+                '[onSoundStateChanged] isSpeakingWhileMuted: '
                 '${soundState.isSpeaking}, audioLevel: ${soundState.audioLevel}',
           );
 
