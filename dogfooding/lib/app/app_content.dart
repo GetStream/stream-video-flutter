@@ -16,6 +16,7 @@ import '../di/injector.dart';
 import '../router/router.dart';
 import '../router/routes.dart';
 import '../utils/consts.dart';
+import '../widgets/dogfooding_participant_tile.dart';
 import 'custom_video_localizations.dart';
 import 'firebase_messaging_handler.dart';
 import 'user_auth_controller.dart';
@@ -43,9 +44,8 @@ class _StreamDogFoodingAppContentState
   late final _componentBuilders = StreamComponentBuilders(
     extensions: [
       ...streamVideoComponentBuilders(
-        // No-op change for [StreamParticipantTile] as demo example.
         participantTile: (context, props) =>
-            DefaultStreamParticipantTile(props: props),
+            DogfoodingParticipantTile(props: props),
       ),
       // You can combine both chat and video component builders.
       ...streamChatComponentBuilders(),
