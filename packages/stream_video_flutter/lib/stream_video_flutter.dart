@@ -36,6 +36,7 @@ export 'src/call_participants/layout/participant_layout_mode.dart';
 export 'src/call_participants/livestream_hosts.dart';
 export 'src/call_participants/local_video.dart';
 export 'src/call_participants/participant_label.dart';
+export 'src/call_participants/participant_placeholder.dart';
 export 'src/call_participants/participant_tile.dart';
 export 'src/call_participants/participant_tile_action.dart';
 export 'src/call_screen/call_container.dart';
