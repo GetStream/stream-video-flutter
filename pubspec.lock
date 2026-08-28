@@ -2006,11 +2006,9 @@ packages:
   stream_core_flutter:
     dependency: "direct overridden"
     description:
-      path: "packages/stream_core_flutter"
-      ref: "13ef444220a6b38bbbe934a12d19c59820792c8e"
-      resolved-ref: "13ef444220a6b38bbbe934a12d19c59820792c8e"
-      url: "https://github.com/GetStream/stream-core-flutter.git"
-    source: git
+      path: "/Users/renefloor/Documents/github/stream-core-flutter/packages/stream_core_flutter"
+      relative: false
+    source: path
     version: "0.5.0"
   stream_thumbnail:
     dependency: transitive
