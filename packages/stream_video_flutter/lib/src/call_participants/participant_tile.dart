@@ -1,10 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 
 import '../../stream_video_flutter.dart';
-import 'indicators/connection_quality_indicator.dart';
-import 'participant_label.dart';
+import '../utils/extensions.dart';
 
 /// Builder function used to build a video placeholder.
 typedef VideoPlaceholderBuilder =
@@ -24,9 +22,18 @@ typedef VideoRendererBuilder =
 
 /// A widget that represents a single participant in a call.
 ///
+/// Shows the participant's video, falling back to their avatar while the camera
+/// is off, over two toolbars: an overflow button and any live reaction at the
+/// top, the name pill and connection quality indicator at the bottom.
+///
 /// The rendering can be replaced app-wide by registering a `participantTile`
 /// builder with [streamVideoComponentBuilders] on a [StreamComponentFactory].
 /// When no builder is registered, [DefaultStreamParticipantTile] is used.
+///
+/// See also:
+///
+///  * [StreamParticipantTileTheme], for customizing its appearance.
+///  * [StreamParticipantTileAction], for the overflow menu.
 class StreamParticipantTile extends StatelessWidget {
   /// Creates a new instance of [StreamParticipantTile].
   StreamParticipantTile({
@@ -35,23 +42,13 @@ class StreamParticipantTile extends StatelessWidget {
     required CallParticipantState participant,
     String? rendererScopePrefix,
     VideoFit? videoFit,
-    Color? backgroundColor,
-    BorderRadius? borderRadius,
-    StreamUserAvatarThemeData? userAvatarTheme,
     bool? showSpeakerBorder,
-    double? speakerBorderThickness,
-    Color? speakerBorderColor,
     bool? showParticipantLabel,
-    TextStyle? participantLabelTextStyle,
-    AlignmentGeometry? participantLabelAlignment,
-    Color? audioLevelIndicatorColor,
-    Color? enabledMicrophoneColor,
-    Color? disabledMicrophoneColor,
-    Color? pausedVideoIndicatorColor,
     bool? showConnectionQualityIndicator,
-    Color? connectionLevelActiveColor,
-    Color? connectionLevelInactiveColor,
-    AlignmentGeometry? connectionLevelAlignment,
+    bool? showReaction,
+    List<StreamParticipantTileAction>? actions,
+    StreamParticipantTileActionsBuilder? actionsBuilder,
+    StreamParticipantTileStyle? style,
     VideoPlaceholderBuilder? videoPlaceholderBuilder,
     VideoRendererBuilder? videoRendererBuilder,
     ValueSetter<Size>? onSizeChanged,
@@ -60,23 +57,13 @@ class StreamParticipantTile extends StatelessWidget {
          participant: participant,
          rendererScopePrefix: rendererScopePrefix,
          videoFit: videoFit,
-         backgroundColor: backgroundColor,
-         borderRadius: borderRadius,
-         userAvatarTheme: userAvatarTheme,
          showSpeakerBorder: showSpeakerBorder,
-         speakerBorderThickness: speakerBorderThickness,
-         speakerBorderColor: speakerBorderColor,
          showParticipantLabel: showParticipantLabel,
-         participantLabelTextStyle: participantLabelTextStyle,
-         participantLabelAlignment: participantLabelAlignment,
-         audioLevelIndicatorColor: audioLevelIndicatorColor,
-         enabledMicrophoneColor: enabledMicrophoneColor,
-         disabledMicrophoneColor: disabledMicrophoneColor,
-         pausedVideoIndicatorColor: pausedVideoIndicatorColor,
          showConnectionQualityIndicator: showConnectionQualityIndicator,
-         connectionLevelActiveColor: connectionLevelActiveColor,
-         connectionLevelInactiveColor: connectionLevelInactiveColor,
-         connectionLevelAlignment: connectionLevelAlignment,
+         showReaction: showReaction,
+         actions: actions,
+         actionsBuilder: actionsBuilder,
+         style: style,
          videoPlaceholderBuilder: videoPlaceholderBuilder,
          videoRendererBuilder: videoRendererBuilder,
          onSizeChanged: onSizeChanged,
@@ -95,13 +82,14 @@ class StreamParticipantTile extends StatelessWidget {
 
 /// Properties for configuring a [StreamParticipantTile].
 ///
-/// This class holds all the configuration options for a participant tile,
-/// allowing them to be passed through the [StreamComponentFactory].
+/// Appearance lives in [style]; everything here is either the data the tile
+/// renders or a decision about what it renders.
 ///
 /// See also:
 ///
 ///  * [StreamParticipantTile], which uses these properties.
 ///  * [DefaultStreamParticipantTile], the default implementation.
+@immutable
 class StreamParticipantTileProps {
   /// Creates properties for a participant tile.
   const StreamParticipantTileProps({
@@ -109,23 +97,13 @@ class StreamParticipantTileProps {
     required this.participant,
     this.rendererScopePrefix,
     this.videoFit,
-    this.backgroundColor,
-    this.borderRadius,
-    this.userAvatarTheme,
     this.showSpeakerBorder,
-    this.speakerBorderThickness,
-    this.speakerBorderColor,
     this.showParticipantLabel,
-    this.participantLabelTextStyle,
-    this.participantLabelAlignment,
-    this.audioLevelIndicatorColor,
-    this.enabledMicrophoneColor,
-    this.disabledMicrophoneColor,
-    this.pausedVideoIndicatorColor,
     this.showConnectionQualityIndicator,
-    this.connectionLevelActiveColor,
-    this.connectionLevelInactiveColor,
-    this.connectionLevelAlignment,
+    this.showReaction,
+    this.actions,
+    this.actionsBuilder,
+    this.style,
     this.videoPlaceholderBuilder,
     this.videoRendererBuilder,
     this.onSizeChanged,
@@ -140,64 +118,61 @@ class StreamParticipantTileProps {
   /// Optional prefix to scope renderer keys (e.g. PiP vs main view).
   final String? rendererScopePrefix;
 
-  /// The fit of the [VideoRenderer] widget
+  /// The fit of the video within the tile.
+  ///
+  /// Overrides [StreamParticipantTileStyle.videoFit] when set.
   final VideoFit? videoFit;
 
-  /// The background color of the call participant.
-  final Color? backgroundColor;
-
-  /// The border radius of the call participant.
-  final BorderRadius? borderRadius;
-
-  /// The theme for the avatar.
-  final StreamUserAvatarThemeData? userAvatarTheme;
-
-  /// Whether to highlight the participant when he/she is speaking.
+  /// Whether to outline the tile while the participant is speaking.
+  ///
+  /// Overrides [StreamParticipantTileStyle.showSpeakerBorder] when set.
   final bool? showSpeakerBorder;
 
-  /// The thickness of the speaker border.
-  final double? speakerBorderThickness;
-
-  /// The color of the speaker border.
-  final Color? speakerBorderColor;
-
-  /// Whether to show the label with participant name and mute status.
+  /// Whether to show the name pill.
+  ///
+  /// Overrides [StreamParticipantTileStyle.showParticipantLabel] when set.
   final bool? showParticipantLabel;
 
-  /// Text style for the participant label.
-  final TextStyle? participantLabelTextStyle;
-
-  /// Alignment for the participant label.
-  final AlignmentGeometry? participantLabelAlignment;
-
-  /// The color of an audio level indicator.
-  final Color? audioLevelIndicatorColor;
-
-  /// The color of an enabled microphone icon.
-  final Color? enabledMicrophoneColor;
-
-  /// The color of a disabled microphone icon.
-  final Color? disabledMicrophoneColor;
-
-  /// The color of a paused video indicator.
-  final Color? pausedVideoIndicatorColor;
-
   /// Whether to show the connection quality indicator.
+  ///
+  /// Overrides [StreamParticipantTileStyle.showConnectionQualityIndicator]
+  /// when set.
   final bool? showConnectionQualityIndicator;
 
-  /// The color of an active connection quality level.
-  final Color? connectionLevelActiveColor;
+  /// Whether to show the participant's live reaction.
+  ///
+  /// Overrides [StreamParticipantTileStyle.showReaction] when set.
+  final bool? showReaction;
 
-  /// The color of an inactive connection quality level.
-  final Color? connectionLevelInactiveColor;
+  /// The actions offered in the tile's overflow menu.
+  ///
+  /// The overflow button is hidden entirely while this resolves to an empty
+  /// list, which it does by default: the SDK ships no actions of its own.
+  /// Ignored when [actionsBuilder] is set.
+  final List<StreamParticipantTileAction>? actions;
 
-  /// Alignment for the connection level.
-  final AlignmentGeometry? connectionLevelAlignment;
+  /// Builds the actions offered in the tile's overflow menu.
+  ///
+  /// Takes precedence over [actions], and is called during build, so the menu
+  /// can reflect the participant's current state.
+  final StreamParticipantTileActionsBuilder? actionsBuilder;
+
+  /// Overrides for this tile's appearance.
+  ///
+  /// Merged over the ambient [StreamParticipantTileTheme].
+  final StreamParticipantTileStyle? style;
 
   /// Builder function used to build a video placeholder.
+  ///
+  /// Takes precedence over a `participantPlaceholder` builder registered on the
+  /// [StreamComponentFactory]: a call site that asked for something specific
+  /// outranks an app-wide default.
   final VideoPlaceholderBuilder? videoPlaceholderBuilder;
 
   /// Builder function used to build a video renderer.
+  ///
+  /// Takes precedence over a `participantVideo` builder registered on the
+  /// [StreamComponentFactory].
   final VideoRendererBuilder? videoRendererBuilder;
 
   /// Callback that is called when the size of the participant widget changes.
@@ -210,23 +185,13 @@ class StreamParticipantTileProps {
     CallParticipantState? participant,
     String? rendererScopePrefix,
     VideoFit? videoFit,
-    Color? backgroundColor,
-    BorderRadius? borderRadius,
-    StreamUserAvatarThemeData? userAvatarTheme,
     bool? showSpeakerBorder,
-    double? speakerBorderThickness,
-    Color? speakerBorderColor,
     bool? showParticipantLabel,
-    TextStyle? participantLabelTextStyle,
-    AlignmentGeometry? participantLabelAlignment,
-    Color? audioLevelIndicatorColor,
-    Color? enabledMicrophoneColor,
-    Color? disabledMicrophoneColor,
-    Color? pausedVideoIndicatorColor,
     bool? showConnectionQualityIndicator,
-    Color? connectionLevelActiveColor,
-    Color? connectionLevelInactiveColor,
-    AlignmentGeometry? connectionLevelAlignment,
+    bool? showReaction,
+    List<StreamParticipantTileAction>? actions,
+    StreamParticipantTileActionsBuilder? actionsBuilder,
+    StreamParticipantTileStyle? style,
     VideoPlaceholderBuilder? videoPlaceholderBuilder,
     VideoRendererBuilder? videoRendererBuilder,
     ValueSetter<Size>? onSizeChanged,
@@ -236,34 +201,14 @@ class StreamParticipantTileProps {
       participant: participant ?? this.participant,
       rendererScopePrefix: rendererScopePrefix ?? this.rendererScopePrefix,
       videoFit: videoFit ?? this.videoFit,
-      backgroundColor: backgroundColor ?? this.backgroundColor,
-      borderRadius: borderRadius ?? this.borderRadius,
-      userAvatarTheme: userAvatarTheme ?? this.userAvatarTheme,
       showSpeakerBorder: showSpeakerBorder ?? this.showSpeakerBorder,
-      speakerBorderThickness:
-          speakerBorderThickness ?? this.speakerBorderThickness,
-      speakerBorderColor: speakerBorderColor ?? this.speakerBorderColor,
       showParticipantLabel: showParticipantLabel ?? this.showParticipantLabel,
-      participantLabelTextStyle:
-          participantLabelTextStyle ?? this.participantLabelTextStyle,
-      participantLabelAlignment:
-          participantLabelAlignment ?? this.participantLabelAlignment,
-      audioLevelIndicatorColor:
-          audioLevelIndicatorColor ?? this.audioLevelIndicatorColor,
-      enabledMicrophoneColor:
-          enabledMicrophoneColor ?? this.enabledMicrophoneColor,
-      disabledMicrophoneColor:
-          disabledMicrophoneColor ?? this.disabledMicrophoneColor,
-      pausedVideoIndicatorColor:
-          pausedVideoIndicatorColor ?? this.pausedVideoIndicatorColor,
       showConnectionQualityIndicator:
           showConnectionQualityIndicator ?? this.showConnectionQualityIndicator,
-      connectionLevelActiveColor:
-          connectionLevelActiveColor ?? this.connectionLevelActiveColor,
-      connectionLevelInactiveColor:
-          connectionLevelInactiveColor ?? this.connectionLevelInactiveColor,
-      connectionLevelAlignment:
-          connectionLevelAlignment ?? this.connectionLevelAlignment,
+      showReaction: showReaction ?? this.showReaction,
+      actions: actions ?? this.actions,
+      actionsBuilder: actionsBuilder ?? this.actionsBuilder,
+      style: style ?? this.style,
       videoPlaceholderBuilder:
           videoPlaceholderBuilder ?? this.videoPlaceholderBuilder,
       videoRendererBuilder: videoRendererBuilder ?? this.videoRendererBuilder,
@@ -275,172 +220,574 @@ class StreamParticipantTileProps {
 /// The default implementation of [StreamParticipantTile].
 class DefaultStreamParticipantTile extends StatelessWidget {
   /// Creates a new instance of [DefaultStreamParticipantTile].
-  const DefaultStreamParticipantTile({
-    super.key,
-    required this.props,
-  });
+  const DefaultStreamParticipantTile({super.key, required this.props});
 
   /// The properties that configure this participant tile.
   final StreamParticipantTileProps props;
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamCallParticipantTheme.of(context);
+    final themeStyle = StreamParticipantTileTheme.of(context).style;
+    final style = themeStyle?.merge(props.style) ?? props.style;
+    final defaults = _StreamParticipantTileStyleDefaults(context);
 
-    final call = props.call;
     final participant = props.participant;
-    final rendererScopePrefix = props.rendererScopePrefix;
-    final onSizeChanged = props.onSizeChanged;
-
-    final videoFit = props.videoFit ?? theme.videoFit;
-    final backgroundColor = props.backgroundColor ?? theme.backgroundColor;
-    final borderRadius = props.borderRadius ?? theme.borderRadius;
-    final userAvatarTheme = props.userAvatarTheme ?? theme.userAvatarTheme;
+    final borderRadius = style?.borderRadius ?? defaults.borderRadius;
+    final hasVideo = participant.isVideoEnabled;
+    final isSpeaking = participant.isSpeaking;
     final showSpeakerBorder =
-        props.showSpeakerBorder ?? theme.showSpeakerBorder;
-    final speakerBorderThickness =
-        props.speakerBorderThickness ?? theme.speakerBorderThickness;
-    final speakerBorderColor =
-        props.speakerBorderColor ?? theme.speakerBorderColor;
-    final showParticipantLabel =
-        props.showParticipantLabel ?? theme.showParticipantLabel;
-    final participantLabelTextStyle =
-        props.participantLabelTextStyle ?? theme.participantLabelTextStyle;
-    final participantLabelAlignment =
-        props.participantLabelAlignment ?? theme.participantLabelAlignment;
-    final audioLevelIndicatorColor =
-        props.audioLevelIndicatorColor ?? theme.audioLevelIndicatorColor;
-    final enabledMicrophoneColor =
-        props.enabledMicrophoneColor ?? theme.enabledMicrophoneColor;
-    final disabledMicrophoneColor =
-        props.disabledMicrophoneColor ?? theme.disabledMicrophoneColor;
-    final pausedVideoIndicatorColor =
-        props.pausedVideoIndicatorColor ?? theme.pausedVideoIndicatorColor;
-    final showConnectionQualityIndicator =
-        props.showConnectionQualityIndicator ??
-        theme.showConnectionQualityIndicator;
-    final connectionLevelActiveColor =
-        props.connectionLevelActiveColor ?? theme.connectionLevelActiveColor;
-    final connectionLevelInactiveColor =
-        props.connectionLevelInactiveColor ??
-        theme.connectionLevelInactiveColor;
-    final connectionLevelAlignment =
-        props.connectionLevelAlignment ?? theme.connectionLevelAlignment;
+        props.showSpeakerBorder ??
+        style?.showSpeakerBorder ??
+        defaults.showSpeakerBorder;
+
+    // A tile showing video needs no outline — the video defines its own edge.
+    final border = switch ((isSpeaking && showSpeakerBorder, hasVideo)) {
+      (true, _) => style?.speakingBorder ?? defaults.speakingBorder,
+      (false, false) => style?.border ?? defaults.border,
+      (false, true) => null,
+    };
 
     return ClipRRect(
+      // A rounded decoration alone cannot clip the video: on Android the
+      // renderer can be a platform view, which only a real clip contains.
       borderRadius: borderRadius,
       child: Container(
         decoration: BoxDecoration(
-          color: backgroundColor,
+          color: style?.backgroundColor ?? defaults.backgroundColor,
           borderRadius: borderRadius,
         ),
+        // In the foreground so the outline paints over the video rather than
+        // insetting it, and so toggling it repaints without a relayout.
         foregroundDecoration: BoxDecoration(
           borderRadius: borderRadius,
-          border: participant.isSpeaking && showSpeakerBorder
-              ? Border.all(
-                  color: speakerBorderColor,
-                  width: speakerBorderThickness,
-                )
-              : null,
+          border: border,
         ),
-        child: Builder(
-          builder: (context) {
-            final theme = StreamVideoTheme.of(context);
-            var videoPlaceholderBuilder = props.videoPlaceholderBuilder;
-            videoPlaceholderBuilder ??= (context, call, participant) {
-              return Center(
-                child: StreamUserAvatarTheme(
-                  data: userAvatarTheme,
-                  child: StreamUserAvatar(
-                    user: participant.toUserInfo(),
-                  ),
-                ),
-              );
-            };
-
-            var videoRendererBuilder = props.videoRendererBuilder;
-            videoRendererBuilder ??= (context, call, participant) {
-              return Stack(
-                children: [
-                  StreamVideoRenderer(
-                    key: ValueKey(
-                      '${rendererScopePrefix ?? ''}${participant.uniqueParticipantKey}-video',
-                    ),
-                    rendererScopePrefix: rendererScopePrefix,
-                    call: call,
-                    participant: participant,
-                    videoTrackType: SfuTrackType.video,
-                    onSizeChanged: onSizeChanged,
-                    placeholderBuilder: (context) {
-                      return videoPlaceholderBuilder!(
-                        context,
-                        call,
-                        participant,
-                      );
-                    },
-                    videoFit: videoFit,
-                  ),
-                  if (participant.reaction != null)
-                    Align(
-                      alignment: Alignment.topCenter,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Text(
-                          theme.callControlsTheme.callReactions
-                                  .firstWhereOrNull(
-                                    (e) =>
-                                        e.emojiCode ==
-                                        participant.reaction?.emojiCode,
-                                  )
-                                  ?.icon ??
-                              '',
-                          style: const TextStyle(
-                            fontSize: 24,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            };
-
-            return Stack(
-              children: [
-                videoRendererBuilder(context, call, participant),
-                if (showParticipantLabel)
-                  Align(
-                    alignment: participantLabelAlignment,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        StreamParticipantLabel.fromParticipant(
-                          participant: participant,
-                          audioLevelIndicatorColor: audioLevelIndicatorColor,
-                          disabledMicrophoneColor: disabledMicrophoneColor,
-                          enabledMicrophoneColor: enabledMicrophoneColor,
-                          pausedVideoIndicatorColor: pausedVideoIndicatorColor,
-                          participantLabelTextStyle: participantLabelTextStyle,
-                        ),
-                      ],
-                    ),
-                  ),
-                if (showConnectionQualityIndicator)
-                  Align(
-                    alignment: connectionLevelAlignment,
-                    child: StreamConnectionQualityIndicator(
-                      connectionQuality: participant.connectionQuality,
-                      activeColor: connectionLevelActiveColor,
-                      inactiveColor: connectionLevelInactiveColor,
-                    ),
-                  ),
-              ],
-            );
-          },
+        child: LayoutBuilder(
+          builder: (context, constraints) => _TileContent(
+            props: props,
+            style: style,
+            defaults: defaults,
+            density: _TileDensity.resolve(constraints),
+          ),
         ),
       ),
     );
   }
+}
+
+// How much of the tile's chrome fits at its current size.
+//
+// The same tile is a full-width desktop cell, a thumbnail in a spotlight strip
+// and a 140px floating self-view, so what it can show is a function of the
+// space it was given rather than of the platform.
+//
+// The widths come from the chrome's own arithmetic, with the toolbar's 12px
+// inset on both sides and a 12px gap before the indicator:
+//
+//   indicator only         12 + 32 + 12                      =  56
+//   pill (icons only)      12 + (12 + 24 + 4) + 12 + 32 + 12 = 108
+//   pill with a short name 108 + a readable 44px of text     = 152
+enum _TileDensity {
+  /// Everything.
+  full,
+
+  /// No name — the icons still read at this size, a truncated name does not.
+  compact,
+
+  /// The connection quality indicator alone.
+  minimal,
+
+  /// No chrome at all.
+  bare;
+
+  static const _fullWidth = 152.0;
+  static const _compactWidth = 108.0;
+  static const _minimalWidth = 56.0;
+  static const _fullHeight = 128.0;
+  static const _compactHeight = 72.0;
+  static const _minimalHeight = 56.0;
+
+  static _TileDensity resolve(BoxConstraints constraints) {
+    final width = constraints.maxWidth;
+    final height = constraints.maxHeight;
+
+    if (width >= _fullWidth && height >= _fullHeight) return full;
+    if (width >= _compactWidth && height >= _compactHeight) return compact;
+    if (width >= _minimalWidth && height >= _minimalHeight) return minimal;
+    return bare;
+  }
+
+  bool get showsName => this == full;
+
+  bool get showsLabel => this == full || this == compact;
+
+  bool get showsConnectionQuality => this != bare;
+
+  bool get showsMoreButton => this == full || this == compact;
+
+  bool get showsReaction => this == full || this == compact;
+}
+
+class _TileContent extends StatelessWidget {
+  const _TileContent({
+    required this.props,
+    required this.style,
+    required this.defaults,
+    required this.density,
+  });
+
+  final StreamParticipantTileProps props;
+  final StreamParticipantTileStyle? style;
+  final _StreamParticipantTileStyleDefaults defaults;
+  final _TileDensity density;
+
+  @override
+  Widget build(BuildContext context) {
+    final participant = props.participant;
+
+    final actions =
+        props.actionsBuilder?.call(context, participant) ??
+        props.actions ??
+        const <StreamParticipantTileAction>[];
+
+    final showLabel =
+        (props.showParticipantLabel ??
+            style?.showParticipantLabel ??
+            defaults.showParticipantLabel) &&
+        density.showsLabel;
+    final showIndicator =
+        (props.showConnectionQualityIndicator ??
+            style?.showConnectionQualityIndicator ??
+            defaults.showConnectionQualityIndicator) &&
+        density.showsConnectionQuality;
+    final showMore =
+        actions.isNotEmpty &&
+        (style?.showMoreButton ?? defaults.showMoreButton) &&
+        density.showsMoreButton;
+    final reaction = participant.reaction;
+    final showReaction =
+        reaction != null &&
+        (props.showReaction ?? style?.showReaction ?? defaults.showReaction) &&
+        density.showsReaction;
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // No RepaintBoundary between here and the label pill: the pill's
+        // backdrop filter samples this subtree, and a boundary would hand it an
+        // empty backdrop and silently drop the blur.
+        _buildVideo(context),
+        if (showMore || showReaction)
+          PositionedDirectional(
+            top: 0,
+            start: 0,
+            end: 0,
+            child: RepaintBoundary(
+              child: _TopToolbar(
+                actions: showMore ? actions : const [],
+                reaction: showReaction ? reaction : null,
+                style: style,
+                defaults: defaults,
+              ),
+            ),
+          ),
+        if (showLabel || showIndicator)
+          PositionedDirectional(
+            start: 0,
+            end: 0,
+            bottom: 0,
+            child: _BottomToolbar(
+              participant: participant,
+              showLabel: showLabel,
+              showName: density.showsName,
+              showIndicator: showIndicator,
+              style: style,
+              defaults: defaults,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildVideo(BuildContext context) {
+    final call = props.call;
+    final participant = props.participant;
+    final rendererScopePrefix = props.rendererScopePrefix;
+
+    final rendererBuilder = props.videoRendererBuilder;
+    if (rendererBuilder != null) {
+      return rendererBuilder(context, call, participant);
+    }
+
+    final placeholderBuilder = props.videoPlaceholderBuilder;
+
+    return StreamVideoRenderer(
+      key: ValueKey(
+        '${rendererScopePrefix ?? ''}${participant.uniqueParticipantKey}-video',
+      ),
+      rendererScopePrefix: rendererScopePrefix,
+      call: call,
+      participant: participant,
+      videoTrackType: SfuTrackType.video,
+      onSizeChanged: props.onSizeChanged,
+      videoFit: props.videoFit ?? style?.videoFit ?? defaults.videoFit,
+      placeholderBuilder: (context) {
+        if (placeholderBuilder != null) {
+          return placeholderBuilder(context, call, participant);
+        }
+        return _ParticipantPlaceholder(
+          participant: participant,
+          style: style?.placeholderStyle,
+          defaults: defaults,
+        );
+      },
+    );
+  }
+}
+
+// The avatar shown while a participant's camera is off.
+class _ParticipantPlaceholder extends StatelessWidget {
+  const _ParticipantPlaceholder({
+    required this.participant,
+    required this.style,
+    required this.defaults,
+  });
+
+  final CallParticipantState participant;
+  final StreamParticipantPlaceholderStyle? style;
+  final _StreamParticipantTileStyleDefaults defaults;
+
+  @override
+  Widget build(BuildContext context) {
+    final avatarTheme =
+        style?.avatarTheme ?? defaults.placeholderStyle.avatarTheme!;
+
+    return Center(
+      child: StreamAvatarTheme(
+        data: avatarTheme,
+        child: StreamAvatar(
+          imageUrl: participant.image,
+          placeholder: (context) => Text(participant.name.initials()),
+        ),
+      ),
+    );
+  }
+}
+
+class _TopToolbar extends StatelessWidget {
+  const _TopToolbar({
+    required this.actions,
+    required this.reaction,
+    required this.style,
+    required this.defaults,
+  });
+
+  final List<StreamParticipantTileAction> actions;
+  final CallReaction? reaction;
+  final StreamParticipantTileStyle? style;
+  final _StreamParticipantTileStyleDefaults defaults;
+
+  @override
+  Widget build(BuildContext context) {
+    final reactionInset = style?.reactionInset ?? defaults.reactionInset;
+    final topToolbarPadding =
+        style?.topToolbarPadding ?? defaults.topToolbarPadding;
+
+    return Padding(
+      padding: topToolbarPadding,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (actions.isNotEmpty)
+            _MoreMenuButton(actions: actions, style: style),
+          const Spacer(),
+          if (reaction != null)
+            Padding(
+              // Measured from the tile edge, so the toolbar's own inset comes
+              // off the designed distance.
+              padding: EdgeInsets.all(
+                (reactionInset - _resolveTopInset(context, topToolbarPadding))
+                    .clamp(0.0, double.infinity),
+              ),
+              child: _ReactionIndicator(
+                reaction: reaction!,
+                size: style?.reactionSize ?? defaults.reactionSize,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  static double _resolveTopInset(
+    BuildContext context,
+    EdgeInsetsGeometry padding,
+  ) => padding.resolve(Directionality.maybeOf(context)).top;
+}
+
+class _ReactionIndicator extends StatelessWidget {
+  const _ReactionIndicator({required this.reaction, required this.size});
+
+  final CallReaction reaction;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = StreamVideoTheme.of(context).callControlsTheme.callReactions
+        .firstWhereOrNull((it) => it.emojiCode == reaction.emojiCode)
+        ?.icon;
+
+    if (icon == null) return const SizedBox.shrink();
+
+    return Text(icon, style: TextStyle(fontSize: size));
+  }
+}
+
+// The narrowest a name pill can be and still show anything: its padding either
+// side of a single audio indicator.
+const _kMinLabelWidth = 48.0;
+
+class _BottomToolbar extends StatelessWidget {
+  const _BottomToolbar({
+    required this.participant,
+    required this.showLabel,
+    required this.showName,
+    required this.showIndicator,
+    required this.style,
+    required this.defaults,
+  });
+
+  final CallParticipantState participant;
+  final bool showLabel;
+  final bool showName;
+  final bool showIndicator;
+  final StreamParticipantTileStyle? style;
+  final _StreamParticipantTileStyleDefaults defaults;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: style?.toolbarPadding ?? defaults.toolbarPadding,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          // Expanded, not Flexible plus a Spacer: two flex children would split
+          // the free space between them and cap the pill at half the row. This
+          // hands the label region exactly what is left after the indicator and
+          // the gap, which is what keeps a long name from reaching the
+          // indicator at any tile size.
+          Expanded(
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: showLabel
+                  ? LayoutBuilder(
+                      // The tile-level density check sizes the chrome against
+                      // the tile. What actually reaches the pill is whatever is
+                      // left after the indicator, which a replaced indicator can
+                      // shrink further. Below the pill's own fixed width there
+                      // is nothing left to truncate, so drop it rather than
+                      // overflow.
+                      builder: (context, constraints) =>
+                          constraints.maxWidth < _kMinLabelWidth
+                          ? const SizedBox.shrink()
+                          : StreamParticipantLabel.fromParticipant(
+                              participant: participant,
+                              showName: showName,
+                              style: style?.labelStyle,
+                            ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ),
+          if (showIndicator) ...[
+            SizedBox(width: style?.toolbarSpacing ?? defaults.toolbarSpacing),
+            RepaintBoundary(
+              child: StreamConnectionQualityIndicator(
+                connectionQuality: participant.connectionQuality,
+                style: style?.connectionQualityIndicatorStyle,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// The overflow button and the menu it anchors.
+//
+// Stateful because the menu has to be closed from outside a tap: a menu left
+// open while its tile scrolls away floats free of the tile it belongs to, and
+// one left open while tiles are recycled would act on the wrong participant.
+class _MoreMenuButton extends StatefulWidget {
+  const _MoreMenuButton({required this.actions, required this.style});
+
+  final List<StreamParticipantTileAction> actions;
+  final StreamParticipantTileStyle? style;
+
+  @override
+  State<_MoreMenuButton> createState() => _MoreMenuButtonState();
+}
+
+class _MoreMenuButtonState extends State<_MoreMenuButton> {
+  final _controller = MenuController();
+  ScrollPosition? _scrollPosition;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final position = Scrollable.maybeOf(context)?.position;
+    if (position == _scrollPosition) return;
+    _scrollPosition?.isScrollingNotifier.removeListener(_closeOnScroll);
+    _scrollPosition = position
+      ?..isScrollingNotifier.addListener(_closeOnScroll);
+  }
+
+  @override
+  void didUpdateWidget(_MoreMenuButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.actions, widget.actions)) _controller.close();
+  }
+
+  @override
+  void dispose() {
+    _scrollPosition?.isScrollingNotifier.removeListener(_closeOnScroll);
+    super.dispose();
+  }
+
+  void _closeOnScroll() {
+    if (_scrollPosition?.isScrollingNotifier.value ?? false) {
+      _controller.close();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamContextMenuAnchor(
+      controller: _controller,
+      alignmentOffset: Offset(0, context.streamSpacing.xxs),
+      menuChildren: [
+        for (final action in widget.actions)
+          StreamContextMenuAction<void>(
+            enabled: action.enabled,
+            isDestructive: action.isDestructive,
+            leading: Icon(action.icon),
+            // The menu sizes itself to its widest item, so a long label has to
+            // truncate rather than stretch the panel.
+            label: Text(
+              action.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            onTap: () {
+              // A MenuAnchor panel is an overlay rather than a route, so
+              // selecting an item does not dismiss it on its own.
+              _controller.close();
+              action.onPressed();
+            },
+          ),
+      ],
+      builder: (context, controller, child) => StreamTapTargetPadding(
+        minSize: const Size.square(kMinInteractiveDimension),
+        alignment: AlignmentDirectional.topStart,
+        child: StreamButton.icon(
+          style: .secondary,
+          size: .small,
+          themeStyle: widget.style?.moreButtonStyle,
+          icon: Icon(context.streamIcons.moreHorizontal),
+          onPressed: () =>
+              controller.isOpen ? controller.close() : controller.open(),
+        ),
+      ),
+    );
+  }
+}
+
+// Maps the deprecated avatar theme onto the placeholder's style.
+//
+// Only the properties the design-system avatar has an equivalent for carry
+// across: a size taken from the tightest constraint, and the initials text
+// style. The rest — per-corner radii, the selection ring — has no counterpart
+// and is dropped.
+StreamParticipantPlaceholderStyle? _placeholderStyleOf(
+  StreamUserAvatarThemeData? theme,
+) {
+  if (theme == null) return null;
+
+  final diameter = theme.constraints.constrain(Size.infinite).shortestSide;
+  final size = StreamAvatarSize.values.firstWhereOrNull(
+    (it) => it.value >= diameter,
+  );
+
+  return StreamParticipantPlaceholderStyle(
+    avatarTheme: StreamAvatarThemeData(size: size),
+  );
+}
+
+// Default style values for [StreamParticipantTile].
+class _StreamParticipantTileStyleDefaults extends StreamParticipantTileStyle {
+  _StreamParticipantTileStyleDefaults(this._context);
+
+  final BuildContext _context;
+
+  late final _colorScheme = _context.streamColorScheme;
+  late final _spacing = _context.streamSpacing;
+  late final _radius = _context.streamRadius;
+
+  @override
+  VideoFit get videoFit => defaultVideoFit;
+
+  @override
+  Color get backgroundColor => _colorScheme.backgroundSurfaceSubtle;
+
+  @override
+  BorderRadius get borderRadius => BorderRadius.all(_radius.xxl);
+
+  @override
+  BoxBorder get border => Border.all(color: _colorScheme.borderDefault);
+
+  @override
+  BoxBorder get speakingBorder =>
+      Border.all(color: _colorScheme.accentPrimary, width: 2);
+
+  @override
+  bool get showSpeakerBorder => true;
+
+  @override
+  bool get showParticipantLabel => true;
+
+  @override
+  bool get showConnectionQualityIndicator => true;
+
+  @override
+  bool get showMoreButton => true;
+
+  @override
+  bool get showReaction => true;
+
+  @override
+  EdgeInsetsGeometry get toolbarPadding => EdgeInsets.all(_spacing.sm);
+
+  @override
+  double get toolbarSpacing => _spacing.sm;
+
+  @override
+  EdgeInsetsGeometry get topToolbarPadding => EdgeInsets.all(_spacing.xxs);
+
+  @override
+  double get reactionSize => 48;
+
+  @override
+  double get reactionInset => _spacing.sm;
+
+  @override
+  StreamParticipantPlaceholderStyle get placeholderStyle =>
+      StreamParticipantPlaceholderStyle(
+        avatarTheme: StreamAvatarThemeData(
+          size: StreamAvatarSize.xxl,
+          border: Border.all(color: _colorScheme.borderOnInverse, width: 2),
+        ),
+      );
 }
 
 /// A widget that represents a single participant in a call.
@@ -471,6 +818,10 @@ class StreamCallParticipant extends StatelessWidget {
     Color? speakerBorderColor,
     bool? showParticipantLabel,
     TextStyle? participantLabelTextStyle,
+    @Deprecated(
+      'The participant label is laid out in the tile toolbar and no longer '
+      'takes an alignment. This parameter has no effect.',
+    )
     AlignmentGeometry? participantLabelAlignment,
     Color? audioLevelIndicatorColor,
     Color? enabledMicrophoneColor,
@@ -479,6 +830,10 @@ class StreamCallParticipant extends StatelessWidget {
     bool? showConnectionQualityIndicator,
     Color? connectionLevelActiveColor,
     Color? connectionLevelInactiveColor,
+    @Deprecated(
+      'The connection quality indicator is laid out in the tile toolbar and no '
+      'longer takes an alignment. This parameter has no effect.',
+    )
     AlignmentGeometry? connectionLevelAlignment,
     VideoPlaceholderBuilder? videoPlaceholderBuilder,
     VideoRendererBuilder? videoRendererBuilder,
@@ -488,33 +843,81 @@ class StreamCallParticipant extends StatelessWidget {
          participant: participant,
          rendererScopePrefix: rendererScopePrefix,
          videoFit: videoFit,
-         backgroundColor: backgroundColor,
-         borderRadius: borderRadius,
-         userAvatarTheme: userAvatarTheme,
          showSpeakerBorder: showSpeakerBorder,
-         speakerBorderThickness: speakerBorderThickness,
-         speakerBorderColor: speakerBorderColor,
          showParticipantLabel: showParticipantLabel,
-         participantLabelTextStyle: participantLabelTextStyle,
-         participantLabelAlignment: participantLabelAlignment,
-         audioLevelIndicatorColor: audioLevelIndicatorColor,
-         enabledMicrophoneColor: enabledMicrophoneColor,
-         disabledMicrophoneColor: disabledMicrophoneColor,
-         pausedVideoIndicatorColor: pausedVideoIndicatorColor,
          showConnectionQualityIndicator: showConnectionQualityIndicator,
-         connectionLevelActiveColor: connectionLevelActiveColor,
-         connectionLevelInactiveColor: connectionLevelInactiveColor,
-         connectionLevelAlignment: connectionLevelAlignment,
          videoPlaceholderBuilder: videoPlaceholderBuilder,
          videoRendererBuilder: videoRendererBuilder,
          onSizeChanged: onSizeChanged,
-       );
+       ),
+       _backgroundColor = backgroundColor,
+       _borderRadius = borderRadius,
+       _userAvatarTheme = userAvatarTheme,
+       _speakerBorderThickness = speakerBorderThickness,
+       _speakerBorderColor = speakerBorderColor,
+       _participantLabelTextStyle = participantLabelTextStyle,
+       _audioLevelIndicatorColor = audioLevelIndicatorColor,
+       _enabledMicrophoneColor = enabledMicrophoneColor,
+       _disabledMicrophoneColor = disabledMicrophoneColor,
+       _pausedVideoIndicatorColor = pausedVideoIndicatorColor,
+       _connectionLevelActiveColor = connectionLevelActiveColor,
+       _connectionLevelInactiveColor = connectionLevelInactiveColor;
 
   /// The properties that configure this participant tile.
   final StreamParticipantTileProps props;
 
+  final Color? _backgroundColor;
+  final BorderRadius? _borderRadius;
+  final StreamUserAvatarThemeData? _userAvatarTheme;
+  final double? _speakerBorderThickness;
+  final Color? _speakerBorderColor;
+  final TextStyle? _participantLabelTextStyle;
+  final Color? _audioLevelIndicatorColor;
+  final Color? _enabledMicrophoneColor;
+  final Color? _disabledMicrophoneColor;
+  final Color? _pausedVideoIndicatorColor;
+  final Color? _connectionLevelActiveColor;
+  final Color? _connectionLevelInactiveColor;
+
   @override
   Widget build(BuildContext context) {
-    return DefaultStreamParticipantTile(props: props);
+    // Built here rather than in the initializer list: a thickness given without
+    // a color (or the reverse) still needs the other half of the border, and
+    // that half comes from the theme.
+    final speakingBorder =
+        (_speakerBorderColor != null || _speakerBorderThickness != null)
+        ? Border.all(
+            color:
+                _speakerBorderColor ?? context.streamColorScheme.accentPrimary,
+            width: _speakerBorderThickness ?? 2,
+          )
+        : null;
+
+    return DefaultStreamParticipantTile(
+      props: props.copyWith(
+        style: StreamParticipantTileStyle(
+          backgroundColor: _backgroundColor,
+          borderRadius: _borderRadius,
+          speakingBorder: speakingBorder,
+          placeholderStyle: _placeholderStyleOf(_userAvatarTheme),
+          labelStyle: StreamParticipantLabelStyle(
+            nameTextStyle: _participantLabelTextStyle,
+            speakingColor: _audioLevelIndicatorColor,
+            microphoneOnColor: _enabledMicrophoneColor,
+            microphoneOffColor: _disabledMicrophoneColor,
+            videoOffIconColor: _pausedVideoIndicatorColor,
+          ),
+          connectionQualityIndicatorStyle:
+              StreamConnectionQualityIndicatorStyle(
+                // The indicator now colors each level apart. A single legacy
+                // color is spread across all three, so an override still lands.
+                poorColor: _connectionLevelActiveColor,
+                fairColor: _connectionLevelActiveColor,
+                greatColor: _connectionLevelActiveColor,
+                inactiveColor: _connectionLevelInactiveColor,
+              ),
+        ),
+      ),
+    );
   }
 }

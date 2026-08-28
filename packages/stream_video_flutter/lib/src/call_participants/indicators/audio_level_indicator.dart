@@ -1,18 +1,23 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../theme/stream_video_theme.dart';
-
-/// Widget used to indicate the audio levels of a given participant.
+/// Three bars that rise and fall while a participant is speaking.
+///
+/// The animation is a free-running loop rather than a reading of the
+/// participant's actual audio level: it says "this person is talking", not how
+/// loudly.
 class StreamAudioLevelIndicator extends StatefulWidget {
-  /// Creates a new instance of [StreamAudioLevelIndicator].
+  /// Creates an audio level indicator.
   const StreamAudioLevelIndicator({
     super.key,
-    this.color,
+    required this.color,
+    this.size = 16,
   });
 
-  /// The color of an audio level.
-  final Color? color;
+  /// The color of the bars.
+  final Color color;
+
+  /// The side length of the square the bars are painted in.
+  final double size;
 
   @override
   State<StreamAudioLevelIndicator> createState() =>
@@ -21,7 +26,7 @@ class StreamAudioLevelIndicator extends StatefulWidget {
 
 class _StreamAudioLevelIndicatorState extends State<StreamAudioLevelIndicator>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+  late final AnimationController _controller;
 
   @override
   void initState() {
@@ -40,67 +45,70 @@ class _StreamAudioLevelIndicatorState extends State<StreamAudioLevelIndicator>
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVideoTheme.of(context).callParticipantTheme;
-
-    return SizedBox(
-      width: 24,
-      height: 24,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (_, child) {
-          return CustomPaint(
-            size: const Size.square(24),
+    // The only thing on a tile repainting every frame. It sits above the label
+    // pill's backdrop filter, so a boundary here does not rob that filter of
+    // its backdrop.
+    return RepaintBoundary(
+      child: SizedBox.square(
+        dimension: widget.size,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) => CustomPaint(
+            size: Size.square(widget.size),
             painter: _AudioLevelIndicatorPainter(
               animationValue: _controller.value,
-              color: widget.color ?? theme.audioLevelIndicatorColor,
+              color: widget.color,
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
 }
 
-/// Painter widget for an the audio level indicator widget.
 class _AudioLevelIndicatorPainter extends CustomPainter {
-  /// Constructor for creating a [_AudioLevelIndicatorPainter].
   const _AudioLevelIndicatorPainter({
     required this.animationValue,
     required this.color,
   });
 
-  /// The current value of the animation.
   final double animationValue;
-
-  /// The color of an audio level.
   final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
+    const barCount = 3;
+    final strokeWidth = size.width / 8;
+    final gap = size.width / 8;
+    final center = size.height / 2;
+    final shortest = size.height / 5;
+    final tallest = size.height / 2;
+
+    final runWidth = barCount * strokeWidth + (barCount - 1) * gap;
+    final firstX = (size.width - runWidth + strokeWidth) / 2;
+
     final paint = Paint()
       ..color = color
-      ..strokeWidth = 3
+      ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    final offset = 4 * animationValue;
+    for (var i = 0; i < barCount; i++) {
+      // The outer bars lead the middle one, so the run reads as movement
+      // rather than as one bar pulsing three times.
+      final phase = i == 1 ? 1 - animationValue : animationValue;
+      final half = shortest + (tallest - shortest) * phase;
+      final x = firstX + i * (strokeWidth + gap);
 
-    canvas.drawLine(
-      Offset(7, 10 - offset),
-      const Offset(7, 16),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(12, 6 + offset),
-      const Offset(12, 16),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(17, 10 - offset),
-      const Offset(17, 16),
-      paint,
-    );
+      canvas.drawLine(
+        Offset(x, center - half / 2),
+        Offset(x, center + half / 2),
+        paint,
+      );
+    }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(_AudioLevelIndicatorPainter oldDelegate) =>
+      oldDelegate.animationValue != animationValue ||
+      oldDelegate.color != color;
 }
