@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../utils/extensions.dart';
 
 /// Builder function used to build a video placeholder.
 typedef VideoPlaceholderBuilder =
@@ -435,41 +434,12 @@ class _TileContent extends StatelessWidget {
         if (placeholderBuilder != null) {
           return placeholderBuilder(context, call, participant);
         }
-        return _ParticipantPlaceholder(
+        return StreamParticipantPlaceholder(
+          call: call,
           participant: participant,
-          style: style?.placeholderStyle,
-          defaults: defaults,
+          style: style?.placeholderStyle ?? defaults.placeholderStyle,
         );
       },
-    );
-  }
-}
-
-// The avatar shown while a participant's camera is off.
-class _ParticipantPlaceholder extends StatelessWidget {
-  const _ParticipantPlaceholder({
-    required this.participant,
-    required this.style,
-    required this.defaults,
-  });
-
-  final CallParticipantState participant;
-  final StreamParticipantPlaceholderStyle? style;
-  final _StreamParticipantTileStyleDefaults defaults;
-
-  @override
-  Widget build(BuildContext context) {
-    final avatarTheme =
-        style?.avatarTheme ?? defaults.placeholderStyle.avatarTheme!;
-
-    return Center(
-      child: StreamAvatarTheme(
-        data: avatarTheme,
-        child: StreamAvatar(
-          imageUrl: participant.image,
-          placeholder: (context) => Text(participant.name.initials()),
-        ),
-      ),
     );
   }
 }

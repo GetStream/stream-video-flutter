@@ -8,19 +8,28 @@ Iterable<StreamComponentBuilderExtension<Object>> streamVideoComponentBuilders({
   StreamComponentBuilder<StreamParticipantTileProps>? participantTile,
   StreamComponentBuilder<StreamFloatingParticipantTileProps>?
   floatingParticipantTile,
+  StreamComponentBuilder<StreamParticipantPlaceholderProps>?
+  participantPlaceholder,
   StreamComponentBuilder<StreamParticipantLabelProps>? participantLabel,
   StreamComponentBuilder<StreamConnectionQualityIndicatorProps>?
   connectionQualityIndicator,
+
+  // ── Shared ───────────────────────────────────────────────────────────────
+  StreamComponentBuilder<StreamUserAvatarProps>? userAvatar,
 }) {
   final builders = [
     if (participantTile != null)
       StreamComponentBuilderExtension(builder: participantTile),
     if (floatingParticipantTile != null)
       StreamComponentBuilderExtension(builder: floatingParticipantTile),
+    if (participantPlaceholder != null)
+      StreamComponentBuilderExtension(builder: participantPlaceholder),
     if (participantLabel != null)
       StreamComponentBuilderExtension(builder: participantLabel),
     if (connectionQualityIndicator != null)
       StreamComponentBuilderExtension(builder: connectionQualityIndicator),
+    if (userAvatar != null)
+      StreamComponentBuilderExtension(builder: userAvatar),
   ];
 
   return builders;

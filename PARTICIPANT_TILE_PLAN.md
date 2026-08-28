@@ -612,7 +612,7 @@ never committed from a local run.
 - [x] **Phase 2** — codegen setup (`theme_extensions_builder`, plus a `build.yaml` scoping it to `lib/`+`test/`)
 - [x] **Phase 3** — five new `@themeGen` themes under `src/theme/components/`
 - [x] **Phase 4** — legacy bridge (factory only; `copyWith` and the deprecated widget are documented as inert)
-- [~] **Phase 5** — label + connection indicator done (triples, slots, exported). Remaining: `StreamUserAvatar`, placeholder, video-renderer triples + their slots
+- [x] **Phase 5** — `StreamUserAvatar`, placeholder, label, connection indicator (triples, slots, exported). The video renderer keeps its per-instance builder rather than gaining a slot; see the note in the plan.
 - [x] **Phase 6** — the tile: new layout, density ladder, no-overlap toolbar
 - [x] **Phase 7** — more menu (`StreamParticipantTileAction`, `actionsBuilder`)
 - [x] **Phase 8** — floating self-view + call sites
