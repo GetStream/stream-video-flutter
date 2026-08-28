@@ -4,6 +4,8 @@
 
 - [Web] Added `CallState.isWebAudioPlaybackBlocked`, which reports whether the browser's autoplay policy is blocking playback of remote audio. Observe it through `call.state` to show a "tap to enable sound" affordance the moment playback is blocked. Always `false` on every other platform.
 - [Web] Added `RtcMediaDeviceNotifier.resumeWebAudioPlayback()`, which retries playback of the blocked remote audio elements. Call it from within a user gesture (e.g. a button tap) so the browser allows playback. A no-op on every other platform. Unrelated to the existing `resumeAudioPlayout()`, which unmutes playout paused via `pauseAudioPlayout()`.
+- Speaking-while-muted detection (`SpeakingWhileMutedRecognition`) now works on iOS, macOS and web (previously Android-only). On iOS/macOS it requires muting with `stopTrackOnMute: false`. Check the [cookbook](https://getstream.io/video/docs/flutter/ui-cookbook/speaking-while-muted/) for details and per-platform requirements.
+- Added an optional `stopTrackOnMute` parameter to `Call.setMicrophoneEnabled`. The default (`true`, unchanged) stops and releases the audio track on mute; `false` keeps the track alive and sends silence instead. See the [documentation](https://getstream.io/video/docs/flutter/guides/camera-and-microphone/microphone-and-audio/) for the trade-offs.
 
 ### 🔄 Changed
 
@@ -18,6 +20,8 @@
 - [Web] Fixed `Call.setAudioOutputDevice` leaving playback split across two output devices when one remote track rejected the switch. The switch is now attempted for every remote audio track, the tracks that accept it are updated, and the selection is only rejected when every track rejected the device.
 - Fixed `RtcRemoteTrack.copyWith` dropping the `transceiver`, so a remote track lost it as soon as a copy was made — which on web happens every time an audio output device is applied to the track.
 - [Web] Fixed the microphone not being published when Opus RED was enabled for the call, leaving the participant inaudible to everyone while their microphone still appeared active. Opus DTX and RED are no longer munged into the SDP. Both are negotiated by signalling them to the SFU with the published tracks.
+- Fixed `Call.setAudioBitrateProfile` unmuting already-muted participants. Muted tracks now stay muted and update constraints on next unmute.
+- Fixed `Call.suspendAudio()` resume unintentionally unmuting users who muted while audio was suspended. Resume now preserves mute state.
 
 ## 1.4.3
 

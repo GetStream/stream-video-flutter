@@ -6,7 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/call/session/call_session.dart';
 import 'package:stream_video/src/call/session/call_session_config.dart';
+import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/call/stats/tracer.dart';
+import 'package:stream_video/src/state_emitter.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
@@ -120,6 +122,59 @@ class _FakeVideoTrack implements RtcTrack {
   Future<ByteBuffer?> captureScreenshot() async => null;
 }
 
+/// Minimal [rtc.MediaStreamTrack] so a real [RtcLocalAudioTrack] can be built
+/// without a native media stack.
+class _FakeMediaStreamTrack extends Fake implements rtc.MediaStreamTrack {
+  @override
+  String? get kind => 'audio';
+
+  @override
+  bool enabled = true;
+
+  @override
+  Future<void> stop() async {}
+}
+
+class _FakeMediaStream extends Fake implements rtc.MediaStream {
+  @override
+  Future<void> dispose() async {}
+}
+
+RtcLocalAudioTrack _buildLocalAudioTrack({required bool enabled}) {
+  return RtcLocalAudioTrack(
+    trackIdPrefix: 'local',
+    trackType: SfuTrackType.audio,
+    mediaStream: _FakeMediaStream(),
+    mediaTrack: _FakeMediaStreamTrack()..enabled = enabled,
+    mediaConstraints: const AudioConstraints(),
+    stopTrackOnMute: false,
+  );
+}
+
+/// A state manager whose local participant reports the given microphone state.
+MockCallStateNotifier _stateManagerWithLocalAudio({required bool enabled}) {
+  final callState = createTestCallState().copyWith(
+    callParticipants: [
+      CallParticipantState(
+        name: 'test',
+        userId: 'test',
+        sessionId: 'test-session',
+        trackIdPrefix: 'local',
+        custom: const {},
+        roles: const [],
+        isLocal: true,
+        publishedTracks: {
+          SfuTrackType.audio: TrackState.local(muted: !enabled),
+        },
+      ),
+    ],
+  );
+
+  return createTestCallStateManager(
+    callState: MutableStateEmitterImpl<CallState>(callState, sync: true),
+  );
+}
+
 MockStreamVideo _buildMockStreamVideo() {
   final mock = setupMockStreamVideo();
   when(() => mock.apiKey).thenReturn('test-api-key');
@@ -128,9 +183,10 @@ MockStreamVideo _buildMockStreamVideo() {
 
 CallSession _buildTestSession({
   void Function(String)? onSuspendedAudioTrackRecorded,
+  CallStateNotifier? callStateManager,
 }) {
   final callCid = SampleCallData.defaultCid;
-  final stateManager = createTestCallStateManager();
+  final stateManager = callStateManager ?? createTestCallStateManager();
 
   return CallSession(
     callCid: callCid,
@@ -183,6 +239,58 @@ void main() {
       expect(track.startCalled, isFalse, reason: 'enable() only, not start()');
     });
 
+    test(
+      'leaves the local microphone disabled when it was muted during the '
+      'suspension',
+      () async {
+        final session = _buildTestSession(
+          // The user muted while audio was suspended, so the SDK reports the
+          // microphone as muted even though the snapshot says wasEnabled.
+          callStateManager: _stateManagerWithLocalAudio(enabled: false),
+        );
+        final mockRtcManager = MockRtcManager();
+        final track = _buildLocalAudioTrack(enabled: false);
+
+        when(
+          () => mockRtcManager.tracks,
+        ).thenReturn({track.trackId: track});
+        session.rtcManager = mockRtcManager;
+
+        await session.resumeSuspendedAudioTracks({
+          track.trackId: SuspendedTrackState.wasEnabled,
+        });
+
+        expect(
+          track.mediaTrack.enabled,
+          isFalse,
+          reason: 'resuming must not put a muted microphone back on air',
+        );
+      },
+    );
+
+    test(
+      're-enables the local microphone that was not muted during the '
+      'suspension',
+      () async {
+        final session = _buildTestSession(
+          callStateManager: _stateManagerWithLocalAudio(enabled: true),
+        );
+        final mockRtcManager = MockRtcManager();
+        final track = _buildLocalAudioTrack(enabled: false);
+
+        when(
+          () => mockRtcManager.tracks,
+        ).thenReturn({track.trackId: track});
+        session.rtcManager = mockRtcManager;
+
+        await session.resumeSuspendedAudioTracks({
+          track.trackId: SuspendedTrackState.wasEnabled,
+        });
+
+        expect(track.mediaTrack.enabled, isTrue);
+      },
+    );
+
     test('calls start() on neverStarted audio tracks', () async {
       final session = _buildTestSession();
       final mockRtcManager = MockRtcManager();
@@ -198,6 +306,59 @@ void main() {
 
       expect(track.startCalled, isTrue);
     });
+
+    test(
+      'leaves the local microphone unstarted when it was muted during the '
+      'suspension',
+      () async {
+        // A local microphone track published while audio was suspended is
+        // recorded as neverStarted (the normal path under
+        // MultiCallAudioPolicy.suspendIncoming). Starting it only re-enables
+        // it, so a mute that arrived in the meantime must still win.
+        final session = _buildTestSession(
+          callStateManager: _stateManagerWithLocalAudio(enabled: false),
+        );
+        final mockRtcManager = MockRtcManager();
+        final track = _buildLocalAudioTrack(enabled: false);
+
+        when(
+          () => mockRtcManager.tracks,
+        ).thenReturn({track.trackId: track});
+        session.rtcManager = mockRtcManager;
+
+        await session.resumeSuspendedAudioTracks({
+          track.trackId: SuspendedTrackState.neverStarted,
+        });
+
+        expect(
+          track.mediaTrack.enabled,
+          isFalse,
+          reason: 'resuming must not put a muted microphone on air',
+        );
+      },
+    );
+
+    test(
+      'starts the local microphone that was not muted during the suspension',
+      () async {
+        final session = _buildTestSession(
+          callStateManager: _stateManagerWithLocalAudio(enabled: true),
+        );
+        final mockRtcManager = MockRtcManager();
+        final track = _buildLocalAudioTrack(enabled: false);
+
+        when(
+          () => mockRtcManager.tracks,
+        ).thenReturn({track.trackId: track});
+        session.rtcManager = mockRtcManager;
+
+        await session.resumeSuspendedAudioTracks({
+          track.trackId: SuspendedTrackState.neverStarted,
+        });
+
+        expect(track.mediaTrack.enabled, isTrue);
+      },
+    );
 
     test('does not touch wasDisabled audio tracks', () async {
       final session = _buildTestSession();
