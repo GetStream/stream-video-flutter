@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart' hide TextTheme;
 
-import '../utils/device_segmentation.dart';
 import '../widgets/floating_view/floating_view_alignment.dart';
 import 'themes.dart';
 
@@ -19,6 +18,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamCallControlsThemeData? callControlsTheme,
     StreamUserAvatarThemeData? userAvatarTheme,
     StreamLobbyViewThemeData? lobbyViewTheme,
+    @Deprecated(
+      'Use participantTileTheme, participantLabelTheme, '
+      'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
+      'A theme set here is still applied in full, which also means the tile '
+      'keeps its pre-redesign styling; stop setting it to pick up the new '
+      'design. Will be removed in the next major version.',
+    )
     StreamCallParticipantThemeData? callParticipantTheme,
     StreamLocalVideoThemeData? localVideoTheme,
     StreamIncomingOutgoingCallThemeData? incomingCallTheme,
@@ -43,6 +49,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       textTheme,
     );
 
+    // A legacy participant theme is translated into the component themes it was
+    // split into, so code written against either shape keeps working. A theme
+    // given in the new shape replaces it outright rather than merging: the two
+    // describe the same tile, and blending them would produce a look neither
+    // one asked for.
+    final legacy = callParticipantTheme;
+
     final customizedTheme = defaultTheme.copyWith(
       textTheme: textTheme,
       colorTheme: colorTheme,
@@ -54,11 +67,17 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       localVideoTheme: localVideoTheme,
       incomingCallTheme: incomingCallTheme,
       outgoingCallTheme: outgoingCallTheme,
-      participantTileTheme: participantTileTheme,
+      participantTileTheme:
+          participantTileTheme ?? legacy?.toParticipantTileThemeData(),
       floatingParticipantTileTheme: floatingParticipantTileTheme,
-      participantLabelTheme: participantLabelTheme,
-      connectionQualityIndicatorTheme: connectionQualityIndicatorTheme,
-      callParticipantsGridTheme: callParticipantsGridTheme,
+      participantLabelTheme:
+          participantLabelTheme ?? legacy?.toParticipantLabelThemeData(),
+      connectionQualityIndicatorTheme:
+          connectionQualityIndicatorTheme ??
+          legacy?.toConnectionQualityIndicatorThemeData(),
+      callParticipantsGridTheme:
+          callParticipantsGridTheme ??
+          legacy?.toCallParticipantsGridThemeData(),
       livestreamTheme: livestreamTheme,
     );
 
@@ -80,7 +99,12 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.callControlsTheme,
     required this.userAvatarTheme,
     required this.lobbyViewTheme,
-    required this.callParticipantTheme,
+    @Deprecated(
+      'Use participantTileTheme, participantLabelTheme, '
+      'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
+      'Will be removed in the next major version.',
+    )
+    this.callParticipantTheme,
     required this.localVideoTheme,
     required this.incomingCallTheme,
     required this.callContentTheme,
@@ -163,34 +187,6 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           selectionColor: colorTheme.accentPrimary,
           selectionThickness: 4,
         ),
-      ),
-      callParticipantTheme: StreamCallParticipantThemeData(
-        showSpeakerBorder: true,
-        borderRadius: isDesktopDevice
-            ? const BorderRadius.all(Radius.circular(12))
-            : BorderRadius.zero,
-        speakerBorderColor: colorTheme.accentPrimary,
-        speakerBorderThickness: 4,
-        backgroundColor: colorTheme.disabled,
-        userAvatarTheme: StreamUserAvatarThemeData(
-          constraints: const BoxConstraints.tightFor(
-            height: 100,
-            width: 100,
-          ),
-          borderRadius: const BorderRadius.all(Radius.circular(50)),
-          initialsTextStyle: textTheme.title1.copyWith(color: Colors.white),
-          selectionColor: colorTheme.accentPrimary,
-          selectionThickness: 4,
-        ),
-        audioLevelIndicatorColor: colorTheme.accentPrimary,
-        participantLabelTextStyle: textTheme.footnote.copyWith(
-          color: Colors.white,
-        ),
-        disabledMicrophoneColor: colorTheme.accentError,
-        pausedVideoIndicatorColor: Colors.white,
-        enabledMicrophoneColor: Colors.white,
-        connectionLevelActiveColor: colorTheme.accentPrimary,
-        connectionLevelInactiveColor: Colors.white,
       ),
       localVideoTheme: const StreamLocalVideoThemeData(
         localVideoHeight: 150,
@@ -368,7 +364,16 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   final StreamLobbyViewThemeData lobbyViewTheme;
 
   /// Theme for the call participant widget.
-  final StreamCallParticipantThemeData callParticipantTheme;
+  ///
+  /// `null` unless an app sets one: the participant tile takes its defaults
+  /// from the widgets themselves now, so a populated value here means somebody
+  /// asked for the deprecated shape.
+  @Deprecated(
+    'Use participantTileTheme, participantLabelTheme, '
+    'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
+    'Will be removed in the next major version.',
+  )
+  final StreamCallParticipantThemeData? callParticipantTheme;
 
   /// Theme for the local video widget.
   final StreamLocalVideoThemeData localVideoTheme;
@@ -427,7 +432,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     callControlsTheme: this.callControlsTheme.merge(callControlsTheme),
     userAvatarTheme: this.userAvatarTheme.merge(userAvatarTheme),
     lobbyViewTheme: this.lobbyViewTheme.merge(lobbyViewTheme),
-    callParticipantTheme: this.callParticipantTheme.merge(callParticipantTheme),
+    callParticipantTheme:
+        this.callParticipantTheme?.merge(callParticipantTheme) ??
+        callParticipantTheme,
     localVideoTheme: this.localVideoTheme.merge(localVideoTheme),
     incomingCallTheme: this.incomingCallTheme.merge(incomingCallTheme),
     callContentTheme: this.callContentTheme.merge(callContentTheme),
@@ -457,9 +464,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callControlsTheme: callControlsTheme.merge(other.callControlsTheme),
       userAvatarTheme: userAvatarTheme.merge(other.userAvatarTheme),
       lobbyViewTheme: lobbyViewTheme.merge(other.lobbyViewTheme),
-      callParticipantTheme: callParticipantTheme.merge(
-        other.callParticipantTheme,
-      ),
+      callParticipantTheme:
+          callParticipantTheme?.merge(other.callParticipantTheme) ??
+          other.callParticipantTheme,
       localVideoTheme: localVideoTheme.merge(other.localVideoTheme),
       incomingCallTheme: incomingCallTheme.merge(other.incomingCallTheme),
       callContentTheme: callContentTheme.merge(other.callContentTheme),
@@ -496,10 +503,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       colorTheme: colorTheme.lerp(other.colorTheme, t),
       userAvatarTheme: userAvatarTheme.lerp(other.userAvatarTheme, t),
       lobbyViewTheme: lobbyViewTheme.lerp(other.lobbyViewTheme, t),
-      callParticipantTheme: callParticipantTheme.lerp(
-        other.callParticipantTheme,
-        t,
-      ),
+      callParticipantTheme:
+          callParticipantTheme != null && other.callParticipantTheme != null
+          ? callParticipantTheme!.lerp(other.callParticipantTheme!, t)
+          : (t < 0.5 ? callParticipantTheme : other.callParticipantTheme),
       localVideoTheme: localVideoTheme.lerp(other.localVideoTheme, t),
       callControlsTheme: callControlsTheme.lerp(other.callControlsTheme, t),
       incomingCallTheme: incomingCallTheme.lerp(other.incomingCallTheme, t),

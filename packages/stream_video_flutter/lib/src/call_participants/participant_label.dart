@@ -170,7 +170,10 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
             Icon(
               context.streamIcons.voiceOffFill,
               size: style?.microphoneIconSize ?? defaults.microphoneIconSize,
-              color: style?.microphoneOffColor ?? defaults.microphoneOffColor,
+              color:
+                  style?.microphoneOffColor ??
+                  nameTextStyle.color ??
+                  defaults.microphoneOffColor,
             ),
           if (!props.isVideoEnabled)
             Icon(
@@ -278,7 +281,7 @@ class _StreamParticipantLabelStyleDefaults extends StreamParticipantLabelStyle {
   double get microphoneIconSize => _spacing.lg;
 
   @override
-  Color get microphoneOffColor => _colorScheme.accentError;
+  Color get microphoneOffColor => _colorScheme.textOnAccent;
 
   @override
   double get audioIndicatorSize => 24;
