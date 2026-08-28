@@ -1989,7 +1989,7 @@ packages:
     source: hosted
     version: "2.1.1"
   stream_webrtc_flutter:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: stream_webrtc_flutter
       sha256: "6938c87d6054e7ddcd5114641f7173e84f000f14aedfc57651c1115726dcf356"
