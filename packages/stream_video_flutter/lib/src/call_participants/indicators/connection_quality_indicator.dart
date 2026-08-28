@@ -2,113 +2,211 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 
-/// Widget used to indicate the connection quality of a given participant.
+/// A round chip reporting how good a participant's connection is.
+///
+/// Three bars, of which as many are lit as the reported quality warrants. The
+/// lit bars are also colored by level, so the state reads at a glance without
+/// counting bars.
+///
+/// The rendering can be replaced app-wide by registering a
+/// `connectionQualityIndicator` builder with [streamVideoComponentBuilders] on
+/// a [StreamComponentFactory]. When no builder is registered,
+/// [DefaultStreamConnectionQualityIndicator] is used.
+///
+/// See also:
+///
+///  * [StreamConnectionQualityIndicatorTheme], for customizing its appearance.
 class StreamConnectionQualityIndicator extends StatelessWidget {
-  /// Creates a new instance of [StreamConnectionQualityIndicator].
-  const StreamConnectionQualityIndicator({
+  /// Creates a connection quality indicator.
+  StreamConnectionQualityIndicator({
     super.key,
-    required this.connectionQuality,
-    this.activeColor,
-    this.inactiveColor,
-  });
+    required SfuConnectionQuality connectionQuality,
+    StreamConnectionQualityIndicatorStyle? style,
+  }) : props = .new(connectionQuality: connectionQuality, style: style);
 
-  /// The connection quality of the participant.
-  final SfuConnectionQuality connectionQuality;
-
-  /// The color of an active connection quality level.
-  final Color? activeColor;
-
-  /// The color of an inactive connection quality level.
-  final Color? inactiveColor;
+  /// The properties that configure this indicator.
+  final StreamConnectionQualityIndicatorProps props;
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVideoTheme.of(context).callParticipantTheme;
+    final builder = context
+        .videoComponentBuilder<StreamConnectionQualityIndicatorProps>();
+    return builder?.call(context, props) ??
+        DefaultStreamConnectionQualityIndicator(props: props);
+  }
+}
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        // ignore: deprecated_member_use
-        color: Colors.black.withOpacity(0.85),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(10),
+/// Properties for configuring a [StreamConnectionQualityIndicator].
+///
+/// See also:
+///
+///  * [StreamConnectionQualityIndicator], which uses these properties.
+///  * [DefaultStreamConnectionQualityIndicator], the default implementation.
+@immutable
+class StreamConnectionQualityIndicatorProps {
+  /// Creates properties for a connection quality indicator.
+  const StreamConnectionQualityIndicatorProps({
+    required this.connectionQuality,
+    this.style,
+  });
+
+  /// The connection quality being reported.
+  final SfuConnectionQuality connectionQuality;
+
+  /// Overrides for this indicator's appearance.
+  ///
+  /// Merged over the ambient [StreamConnectionQualityIndicatorTheme].
+  final StreamConnectionQualityIndicatorStyle? style;
+
+  /// Creates a copy of these properties with the given fields replaced.
+  StreamConnectionQualityIndicatorProps copyWith({
+    SfuConnectionQuality? connectionQuality,
+    StreamConnectionQualityIndicatorStyle? style,
+  }) {
+    return StreamConnectionQualityIndicatorProps(
+      connectionQuality: connectionQuality ?? this.connectionQuality,
+      style: style ?? this.style,
+    );
+  }
+}
+
+/// The default implementation of [StreamConnectionQualityIndicator].
+class DefaultStreamConnectionQualityIndicator extends StatelessWidget {
+  /// Creates the default connection quality indicator.
+  const DefaultStreamConnectionQualityIndicator({
+    super.key,
+    required this.props,
+  });
+
+  /// The properties that configure this indicator.
+  final StreamConnectionQualityIndicatorProps props;
+
+  @override
+  Widget build(BuildContext context) {
+    final themeStyle = StreamConnectionQualityIndicatorTheme.of(context).style;
+    final style = themeStyle?.merge(props.style) ?? props.style;
+    final defaults = _StreamConnectionQualityIndicatorStyleDefaults(context);
+
+    final size = style?.size ?? defaults.size;
+    final iconSize = style?.iconSize ?? defaults.iconSize;
+
+    final activeColor = switch (props.connectionQuality) {
+      SfuConnectionQuality.poor => style?.poorColor ?? defaults.poorColor,
+      SfuConnectionQuality.good => style?.fairColor ?? defaults.fairColor,
+      SfuConnectionQuality.excellent =>
+        style?.greatColor ?? defaults.greatColor,
+      // Nothing is lit, so the active color never gets painted.
+      SfuConnectionQuality.unspecified =>
+        style?.inactiveColor ?? defaults.inactiveColor,
+    };
+
+    return SizedBox.square(
+      dimension: size,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: style?.backgroundColor ?? defaults.backgroundColor,
+          shape: BoxShape.circle,
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(4),
-        child: SizedBox(
-          width: 24,
-          height: 24,
+        child: Center(
           child: CustomPaint(
-            size: const Size.square(24),
+            size: Size.square(iconSize),
             painter: _ConnectionQualityIndicatorPainter(
-              connectionQuality: connectionQuality,
-              activeColor: activeColor ?? theme.connectionLevelActiveColor,
-              inactiveColor:
-                  inactiveColor ?? theme.connectionLevelInactiveColor,
+              level: _levelOf(props.connectionQuality),
+              activeColor: activeColor,
+              inactiveColor: style?.inactiveColor ?? defaults.inactiveColor,
             ),
           ),
         ),
       ),
     );
   }
+
+  static int _levelOf(SfuConnectionQuality quality) => switch (quality) {
+    SfuConnectionQuality.poor => 1,
+    SfuConnectionQuality.good => 2,
+    SfuConnectionQuality.excellent => 3,
+    SfuConnectionQuality.unspecified => 0,
+  };
 }
 
-/// Painter widget for the connection quality indicator widget.
+// Default style values for [StreamConnectionQualityIndicator].
+//
+// The chip sits on top of video, so its fill is an overlay and its bars are
+// colored for legibility against that overlay rather than against a surface.
+class _StreamConnectionQualityIndicatorStyleDefaults
+    extends StreamConnectionQualityIndicatorStyle {
+  _StreamConnectionQualityIndicatorStyleDefaults(this._context);
+
+  final BuildContext _context;
+
+  late final _colorScheme = _context.streamColorScheme;
+
+  @override
+  double get size => 32;
+
+  @override
+  double get iconSize => 24;
+
+  @override
+  Color get backgroundColor => _colorScheme.backgroundOverlayDarkStrong;
+
+  @override
+  Color get poorColor => _colorScheme.accentError;
+
+  @override
+  Color get fairColor => _colorScheme.accentWarning;
+
+  @override
+  Color get greatColor => _colorScheme.accentSuccess;
+
+  @override
+  Color get inactiveColor => _colorScheme.textOnAccent.withValues(alpha: 0.4);
+}
+
+// Paints three bars of increasing height, `level` of them in [activeColor].
 class _ConnectionQualityIndicatorPainter extends CustomPainter {
-  /// Constructor for creating a [_ConnectionQualityIndicatorPainter].
   const _ConnectionQualityIndicatorPainter({
-    required this.connectionQuality,
+    required this.level,
     required this.activeColor,
     required this.inactiveColor,
   });
 
-  /// The connection quality of the participant.
-  final SfuConnectionQuality connectionQuality;
-
-  /// The color of an active connection quality level.
+  final int level;
   final Color activeColor;
-
-  /// The color of an inactive connection quality level.
   final Color inactiveColor;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final inactivePaint = Paint()
-      ..color = inactiveColor
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round;
+    const barCount = 3;
+    final strokeWidth = size.width / 8;
+    final gap = size.width / 8;
+    final baseline = size.height * (2 / 3);
+    final shortest = size.height / 4;
+    final tallest = size.height * (7 / 12);
 
-    final activePaint = Paint()
-      ..color = activeColor
-      ..strokeWidth = 3
-      ..strokeCap = StrokeCap.round;
+    // Center the run of bars: each bar is a stroke, with a gap between them.
+    final runWidth = barCount * strokeWidth + (barCount - 1) * gap;
+    final firstX = (size.width - runWidth + strokeWidth) / 2;
 
-    for (var i = 0; i < 3; i++) {
-      final offsetLeft = 7 + i * 5.0;
-      final offsetTop = 14 - i * 3.0;
-      final connectionLevel = _getConnectionLevel();
+    for (var i = 0; i < barCount; i++) {
+      final height =
+          shortest + (tallest - shortest) * (i / (barCount - 1).toDouble());
+      final x = firstX + i * (strokeWidth + gap);
 
       canvas.drawLine(
-        Offset(offsetLeft, offsetTop),
-        Offset(offsetLeft, 16),
-        connectionLevel > i ? activePaint : inactivePaint,
+        Offset(x, baseline - height),
+        Offset(x, baseline),
+        Paint()
+          ..color = level > i ? activeColor : inactiveColor
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round,
       );
     }
   }
 
-  int _getConnectionLevel() {
-    switch (connectionQuality) {
-      case SfuConnectionQuality.poor:
-        return 1;
-      case SfuConnectionQuality.good:
-        return 2;
-      case SfuConnectionQuality.excellent:
-        return 3;
-      case SfuConnectionQuality.unspecified:
-        return 0;
-    }
-  }
-
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(_ConnectionQualityIndicatorPainter oldDelegate) =>
+      oldDelegate.level != level ||
+      oldDelegate.activeColor != activeColor ||
+      oldDelegate.inactiveColor != inactiveColor;
 }

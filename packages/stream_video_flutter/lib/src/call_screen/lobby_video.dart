@@ -4,7 +4,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../call_participants/participant_label.dart';
 
 /// A widget that can be shown before joining a call. Measures latencies
 /// and selects the best SFU. This speeds up the process of joining when
@@ -169,18 +168,17 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
                             else
                               placeHolderBuilder(context),
                             Align(
-                              alignment: Alignment.bottomLeft,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  StreamParticipantLabel(
-                                    isAudioEnabled: microphoneEnabled,
-                                    isSpeaking: false,
-                                    isTrackPaused: false,
-                                    participantName: currentUser.name,
-                                  ),
-                                ],
+                              alignment: AlignmentDirectional.bottomStart,
+                              child: Padding(
+                                padding: EdgeInsets.all(
+                                  context.streamSpacing.sm,
+                                ),
+                                child: StreamParticipantLabel(
+                                  name: currentUser.name,
+                                  isAudioEnabled: microphoneEnabled,
+                                  isSpeaking: false,
+                                  isVideoEnabled: cameraEnabled,
+                                ),
                               ),
                             ),
                           ],

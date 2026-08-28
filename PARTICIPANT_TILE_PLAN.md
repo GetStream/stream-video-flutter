@@ -605,10 +605,10 @@ never committed from a local run.
 ## Progress
 
 - [x] **Phase 0** — `stream_core_flutter` token (`backgroundOverlayDarkStrong`) + local path override
-- [ ] **Phase 1** — bug fixes: legacy `copyWith` param names, `merge` dropping `pausedVideoIndicatorColor`, `StreamVideoTheme.merge` self-merge + missing `localVideoTheme`
-- [ ] **Phase 2** — codegen setup (`theme_extensions_builder`)
-- [ ] **Phase 3** — five new `@themeGen` themes under `src/theme/components/`
-- [ ] **Phase 4** — `StreamVideoTheme` wiring + legacy bridge
+- [x] **Phase 1** — bug fixes: legacy `copyWith` param names, `merge` dropping `pausedVideoIndicatorColor`, `StreamVideoTheme.merge` self-merge + missing `localVideoTheme`
+- [x] **Phase 2** — codegen setup (`theme_extensions_builder`, plus a `build.yaml` scoping it to `lib/`+`test/`)
+- [x] **Phase 3** — five new `@themeGen` themes under `src/theme/components/`
+- [ ] **Phase 4** — legacy bridge (`StreamVideoTheme` wiring done)
 - [ ] **Phase 5** — leaf components (`StreamUserAvatar`, placeholder, video, label, indicator) + 5 factory slots
 - [ ] **Phase 6** — the tile: new layout, density ladder, no-overlap toolbar
 - [ ] **Phase 7** — more menu (`StreamParticipantTileAction`, `actionsBuilder`)
