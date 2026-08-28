@@ -82,14 +82,12 @@ class _LobbyScreenState extends State<LobbyScreen> {
     super.dispose();
   }
 
-  Future<void> _selectVideoInput(RtcMediaDevice? device) async {
-    _selectedVideoInputDevice = device;
-
-    _cameraTrack = device != null
-        ? await _cameraTrack?.selectVideoInput(device, [])
-        : await _cameraTrack?.recreate([]);
-
-    if (mounted) setState(() {});
+  void _selectVideoInput(RtcMediaDevice? device) {
+    // The preview owns the camera track, so switching device is just a matter
+    // of recording the choice: rebuilding gives the preview a new key, and it
+    // creates a track for the new device itself and reports it back through
+    // onCameraTrackSet.
+    setState(() => _selectedVideoInputDevice = device);
   }
 
   @override
@@ -139,7 +137,12 @@ class _LobbyScreenState extends State<LobbyScreen> {
                 ),
                 const SizedBox(height: 16),
                 StreamLobbyVideo(
-                  key: ValueKey(_cameraTrack),
+                  // Keyed on the chosen device, not on the track it produces.
+                  // Keying on the track makes the preview's identity depend on
+                  // its own output, so any later rebuild — switching between
+                  // light and dark, say — tears it down and starts the camera
+                  // over, re-enabling it if it had been turned off.
+                  key: ValueKey(_selectedVideoInputDevice?.id),
                   call: widget.call,
                   initialCameraDevice: _selectedVideoInputDevice,
                   onMicrophoneTrackSet: (track) {
