@@ -189,9 +189,15 @@ class SpeakingWhileMutedRecognition
     if (_isRunning) return;
     _isRunning = true;
     _activeAudioInputDeviceId = _lastSeenAudioInputDeviceId;
+    _logger.i(() => '[startRecognition] device: $_activeAudioInputDeviceId');
     try {
       await _audioRecognition.start(
         onSoundStateChanged: (soundState) {
+          _logger.i(
+            () => '[onSoundStateChanged] isSpeakingWhileMuted: '
+                '${soundState.isSpeaking}, audioLevel: ${soundState.audioLevel}',
+          );
+
           state = SpeakingWhileMutedState._(
             isSpeakingWhileMuted: soundState.isSpeaking,
           );
@@ -206,6 +212,7 @@ class SpeakingWhileMutedRecognition
   Future<void> _stopRecognition() async {
     if (!_isRunning) return;
     _isRunning = false;
+    _logger.i(() => '[stopRecognition] no args');
     state = const SpeakingWhileMutedState._(isSpeakingWhileMuted: false);
     try {
       await _audioRecognition.stop();
