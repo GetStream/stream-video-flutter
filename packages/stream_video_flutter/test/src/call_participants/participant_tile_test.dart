@@ -54,6 +54,7 @@ void main() {
       tester,
     ) async {
       when(() => participant.isSpeaking).thenReturn(false);
+      when(() => participant.isVideoEnabled).thenReturn(true);
 
       await tester.pumpWidget(
         TestWrapper(
@@ -77,6 +78,7 @@ void main() {
     testWidgets('renders the default participant tile', (tester) async {
       final participant = MockCallParticipantState();
       when(() => participant.isSpeaking).thenReturn(false);
+      when(() => participant.isVideoEnabled).thenReturn(true);
 
       await tester.pumpWidget(
         TestWrapper(

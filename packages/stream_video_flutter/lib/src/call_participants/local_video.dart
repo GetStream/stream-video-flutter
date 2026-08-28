@@ -67,7 +67,6 @@ class StreamLocalVideo extends StatelessWidget {
     final initialAlignment = this.initialAlignment ?? theme.initialAlignment;
     final enableSnappingBehavior =
         this.enableSnappingBehavior ?? theme.enableSnappingBehavior;
-    final userAvatarTheme = this.userAvatarTheme ?? theme.userAvatarTheme;
     final borderRadius = this.borderRadius ?? theme.borderRadius;
     final shadowColor = this.shadowColor ?? theme.shadowColor;
 
@@ -76,10 +75,9 @@ class StreamLocalVideo extends StatelessWidget {
       return StreamParticipantTile(
         call: call,
         participant: participant,
-        borderRadius: borderRadius,
-        userAvatarTheme: userAvatarTheme,
         showParticipantLabel: false,
         showSpeakerBorder: false,
+        style: StreamParticipantTileStyle(borderRadius: borderRadius),
       );
     };
 
