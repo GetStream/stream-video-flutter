@@ -3,27 +3,19 @@ import 'package:flutter/material.dart';
 import '../../../stream_video_flutter.dart';
 import 'audio_level_indicator.dart';
 
-/// Reports a participant's audio state in a fixed-size box.
+/// The sound indicator shown at the end of a participant's name pill.
 ///
-/// Shows one of three things, never two at once: animated level bars while the
-/// participant is speaking, a microphone icon while their microphone is on but
-/// silent, and a crossed-out microphone while it is off.
-///
-/// The design system shows the level bars and the muted icon side by side. That
-/// is deliberately not followed: a muted participant is not speaking, so the two
-/// states cannot both be true, and showing an icon per state keeps the pill from
-/// changing width as someone talks.
+/// Always present, so the pill keeps its shape as someone starts and stops
+/// talking: the bars animate while [isSpeaking] and rest as three dots
+/// otherwise. Whether the participant is muted is reported separately, by the
+/// microphone icon the pill draws next to this.
 class StreamAudioIndicator extends StatelessWidget {
-  /// Creates an audio indicator.
+  /// Creates a sound indicator.
   const StreamAudioIndicator({
     super.key,
-    required this.isAudioEnabled,
     required this.isSpeaking,
     this.style,
   });
-
-  /// Whether the participant's microphone is on.
-  final bool isAudioEnabled;
 
   /// Whether the participant is currently speaking.
   final bool isSpeaking;
@@ -36,11 +28,8 @@ class StreamAudioIndicator extends StatelessWidget {
     final colorScheme = context.streamColorScheme;
     final radius = context.streamRadius;
 
-    final size = style?.audioIndicatorSize ?? 24;
-    final iconSize = style?.audioIndicatorIconSize ?? 16;
-
     return SizedBox.square(
-      dimension: size,
+      dimension: style?.audioIndicatorSize ?? 24,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color:
@@ -51,22 +40,11 @@ class StreamAudioIndicator extends StatelessWidget {
               style?.audioIndicatorBorderRadius ?? BorderRadius.all(radius.md),
         ),
         child: Center(
-          child: switch ((isAudioEnabled, isSpeaking)) {
-            (true, true) => StreamAudioLevelIndicator(
-              size: iconSize,
-              color: style?.speakingColor ?? colorScheme.brand.shade300,
-            ),
-            (true, false) => Icon(
-              context.streamIcons.voiceFill,
-              size: iconSize,
-              color: style?.microphoneOnColor ?? colorScheme.textOnAccent,
-            ),
-            (false, _) => Icon(
-              context.streamIcons.voiceOffFill,
-              size: iconSize,
-              color: style?.microphoneOffColor ?? colorScheme.accentError,
-            ),
-          },
+          child: StreamAudioLevelIndicator(
+            isSpeaking: isSpeaking,
+            size: style?.audioIndicatorIconSize ?? 10,
+            color: style?.speakingColor ?? colorScheme.brand.shade300,
+          ),
         ),
       ),
     );

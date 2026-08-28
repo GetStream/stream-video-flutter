@@ -169,9 +169,9 @@ void main() {
   });
 
   group('audio indicator', () {
-    testWidgets('shows the level bars while speaking with the mic on', (
-      tester,
-    ) async {
+    // The sound indicator never leaves, so the pill keeps its shape as someone
+    // starts and stops talking. Only the muted state adds an icon.
+    testWidgets('is shown while speaking', (tester) async {
       await tester.pumpWidget(
         _tile(
           participant: _participant(isSpeaking: true),
@@ -180,36 +180,44 @@ void main() {
         ),
       );
 
-      // The bars are a CustomPaint, so their presence is asserted by the
-      // absence of either microphone glyph.
-      expect(find.byIcon(_icons.voiceFill), findsNothing);
+      expect(find.byType(StreamAudioIndicator), findsOneWidget);
       expect(find.byIcon(_icons.voiceOffFill), findsNothing);
     });
 
-    testWidgets('shows the microphone icon while silent', (tester) async {
+    testWidgets('is shown while silent, with no microphone icon', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _tile(participant: _participant(), width: 300, height: 300),
       );
 
-      expect(find.byIcon(_icons.voiceFill), findsOneWidget);
+      expect(find.byType(StreamAudioIndicator), findsOneWidget);
+      expect(find.byIcon(_icons.voiceOffFill), findsNothing);
     });
 
-    // The design system shows the level bars and the muted icon at once. That
-    // is deliberately not followed: a muted participant is not speaking, so the
-    // muted icon is the only honest thing to show.
-    testWidgets('shows the muted icon, not the bars, for a muted speaker', (
+    testWidgets('is shown alongside the muted icon while muted', (
       tester,
     ) async {
       await tester.pumpWidget(
         _tile(
-          participant: _participant(isSpeaking: true, isAudioEnabled: false),
+          participant: _participant(isAudioEnabled: false),
           width: 300,
           height: 300,
         ),
       );
 
+      expect(find.byType(StreamAudioIndicator), findsOneWidget);
       expect(find.byIcon(_icons.voiceOffFill), findsOneWidget);
-      expect(find.byIcon(_icons.voiceFill), findsNothing);
+    });
+
+    testWidgets('rests when the participant is not speaking', (tester) async {
+      await tester.pumpWidget(
+        _tile(participant: _participant(), width: 300, height: 300),
+      );
+
+      // A resting indicator runs no animation, so the tree settles. A speaking
+      // one never would.
+      await tester.pumpAndSettle();
     });
   });
 

@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import 'indicators/audio_indicator.dart';
 
 /// The pill on a participant tile carrying their name and audio state.
 ///
@@ -164,6 +163,15 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+          // Only the muted state gets an icon: an unmuted microphone is the
+          // norm, and the sound indicator already reports whether anything is
+          // coming through it.
+          if (!props.isAudioEnabled)
+            Icon(
+              context.streamIcons.voiceOffFill,
+              size: style?.microphoneIconSize ?? defaults.microphoneIconSize,
+              color: style?.microphoneOffColor ?? defaults.microphoneOffColor,
+            ),
           if (!props.isVideoEnabled)
             Icon(
               context.streamIcons.videoOffFill,
@@ -173,11 +181,7 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
                   nameTextStyle.color ??
                   defaults.videoOffIconColor,
             ),
-          StreamAudioIndicator(
-            isAudioEnabled: props.isAudioEnabled,
-            isSpeaking: props.isSpeaking,
-            style: style,
-          ),
+          StreamAudioIndicator(isSpeaking: props.isSpeaking, style: style),
         ],
       ),
     );
@@ -271,8 +275,14 @@ class _StreamParticipantLabelStyleDefaults extends StreamParticipantLabelStyle {
   double get videoOffIconSize => _spacing.lg;
 
   @override
+  double get microphoneIconSize => _spacing.lg;
+
+  @override
+  Color get microphoneOffColor => _colorScheme.accentError;
+
+  @override
   double get audioIndicatorSize => 24;
 
   @override
-  double get audioIndicatorIconSize => 16;
+  double get audioIndicatorIconSize => 10;
 }

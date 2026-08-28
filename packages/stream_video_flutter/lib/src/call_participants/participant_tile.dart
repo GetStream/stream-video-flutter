@@ -824,6 +824,10 @@ class StreamCallParticipant extends StatelessWidget {
     )
     AlignmentGeometry? participantLabelAlignment,
     Color? audioLevelIndicatorColor,
+    @Deprecated(
+      'Only a muted microphone draws an icon now, so there is nothing for this '
+      'to color. This parameter has no effect.',
+    )
     Color? enabledMicrophoneColor,
     Color? disabledMicrophoneColor,
     Color? pausedVideoIndicatorColor,
@@ -857,7 +861,6 @@ class StreamCallParticipant extends StatelessWidget {
        _speakerBorderColor = speakerBorderColor,
        _participantLabelTextStyle = participantLabelTextStyle,
        _audioLevelIndicatorColor = audioLevelIndicatorColor,
-       _enabledMicrophoneColor = enabledMicrophoneColor,
        _disabledMicrophoneColor = disabledMicrophoneColor,
        _pausedVideoIndicatorColor = pausedVideoIndicatorColor,
        _connectionLevelActiveColor = connectionLevelActiveColor,
@@ -873,7 +876,6 @@ class StreamCallParticipant extends StatelessWidget {
   final Color? _speakerBorderColor;
   final TextStyle? _participantLabelTextStyle;
   final Color? _audioLevelIndicatorColor;
-  final Color? _enabledMicrophoneColor;
   final Color? _disabledMicrophoneColor;
   final Color? _pausedVideoIndicatorColor;
   final Color? _connectionLevelActiveColor;
@@ -903,7 +905,6 @@ class StreamCallParticipant extends StatelessWidget {
           labelStyle: StreamParticipantLabelStyle(
             nameTextStyle: _participantLabelTextStyle,
             speakingColor: _audioLevelIndicatorColor,
-            microphoneOnColor: _enabledMicrophoneColor,
             microphoneOffColor: _disabledMicrophoneColor,
             videoOffIconColor: _pausedVideoIndicatorColor,
           ),

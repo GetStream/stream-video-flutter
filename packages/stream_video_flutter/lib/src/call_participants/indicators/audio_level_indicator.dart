@@ -1,22 +1,30 @@
 import 'package:flutter/widgets.dart';
 
-/// Three bars that rise and fall while a participant is speaking.
+/// Three bars reporting whether a participant is speaking.
 ///
-/// The animation is a free-running loop rather than a reading of the
-/// participant's actual audio level: it says "this person is talking", not how
-/// loudly.
+/// While [isSpeaking] the bars rise and fall around their shared centre line;
+/// otherwise they rest at their minimum, reading as three dots. The animation
+/// is a free-running loop rather than a reading of the participant's audio
+/// level: it says "this person is talking", not how loudly.
 class StreamAudioLevelIndicator extends StatefulWidget {
   /// Creates an audio level indicator.
   const StreamAudioLevelIndicator({
     super.key,
     required this.color,
-    this.size = 16,
+    required this.isSpeaking,
+    this.size = 10,
   });
 
   /// The color of the bars.
   final Color color;
 
+  /// Whether the bars animate.
+  final bool isSpeaking;
+
   /// The side length of the square the bars are painted in.
+  ///
+  /// The bars and the gaps between them are each a fifth of it, so three bars
+  /// and two gaps fill the width exactly.
   final double size;
 
   @override
@@ -34,7 +42,21 @@ class _StreamAudioLevelIndicatorState extends State<StreamAudioLevelIndicator>
     _controller = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
-    )..repeat(reverse: true);
+    );
+    if (widget.isSpeaking) _controller.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(StreamAudioLevelIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isSpeaking == oldWidget.isSpeaking) return;
+    if (widget.isSpeaking) {
+      _controller.repeat(reverse: true);
+    } else {
+      // Back to rest rather than stopping wherever the loop happened to be.
+      _controller.stop();
+      _controller.value = 0;
+    }
   }
 
   @override
@@ -57,6 +79,7 @@ class _StreamAudioLevelIndicatorState extends State<StreamAudioLevelIndicator>
             size: Size.square(widget.size),
             painter: _AudioLevelIndicatorPainter(
               animationValue: _controller.value,
+              isSpeaking: widget.isSpeaking,
               color: widget.color,
             ),
           ),
@@ -69,39 +92,44 @@ class _StreamAudioLevelIndicatorState extends State<StreamAudioLevelIndicator>
 class _AudioLevelIndicatorPainter extends CustomPainter {
   const _AudioLevelIndicatorPainter({
     required this.animationValue,
+    required this.isSpeaking,
     required this.color,
   });
 
   final double animationValue;
+  final bool isSpeaking;
   final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
     const barCount = 3;
-    final strokeWidth = size.width / 8;
-    final gap = size.width / 8;
-    final center = size.height / 2;
-    final shortest = size.height / 5;
-    final tallest = size.height / 2;
-
-    final runWidth = barCount * strokeWidth + (barCount - 1) * gap;
-    final firstX = (size.width - runWidth + strokeWidth) / 2;
+    // Three bars and two gaps, each a fifth of the width.
+    final unit = size.width / 5;
+    final centerY = size.height / 2;
 
     final paint = Paint()
       ..color = color
-      ..strokeWidth = strokeWidth
+      ..strokeWidth = unit
       ..strokeCap = StrokeCap.round;
 
     for (var i = 0; i < barCount; i++) {
-      // The outer bars lead the middle one, so the run reads as movement
-      // rather than as one bar pulsing three times.
-      final phase = i == 1 ? 1 - animationValue : animationValue;
-      final half = shortest + (tallest - shortest) * phase;
-      final x = firstX + i * (strokeWidth + gap);
+      // The middle bar runs against the outer two, so the group reads as
+      // movement rather than as one bar pulsing three times — but only while
+      // there is movement to read. At rest every bar collapses, or the
+      // inverted one would sit at full height with the others already down.
+      final phase = switch ((isSpeaking, i)) {
+        (false, _) => 0.0,
+        (true, 1) => 1 - animationValue,
+        (true, _) => animationValue,
+      };
+      // A collapsed line has no length at all: the round cap alone draws a dot
+      // one stroke across, which is the design's resting state.
+      final length = (size.height - unit) * phase;
 
+      final x = unit / 2 + i * 2 * unit;
       canvas.drawLine(
-        Offset(x, center - half / 2),
-        Offset(x, center + half / 2),
+        Offset(x, centerY - length / 2),
+        Offset(x, centerY + length / 2),
         paint,
       );
     }
@@ -110,5 +138,6 @@ class _AudioLevelIndicatorPainter extends CustomPainter {
   @override
   bool shouldRepaint(_AudioLevelIndicatorPainter oldDelegate) =>
       oldDelegate.animationValue != animationValue ||
+      oldDelegate.isSpeaking != isSpeaking ||
       oldDelegate.color != color;
 }

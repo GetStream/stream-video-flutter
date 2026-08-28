@@ -120,7 +120,7 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
     this.audioIndicatorBackgroundColor,
     this.audioIndicatorIconSize,
     this.speakingColor,
-    this.microphoneOnColor,
+    this.microphoneIconSize,
     this.microphoneOffColor,
   });
 
@@ -182,24 +182,24 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
   /// Defaults to [backgroundColor].
   final Color? audioIndicatorBackgroundColor;
 
-  /// The side length of the glyph inside the audio indicator.
+  /// The side length of the bars inside the audio indicator.
   ///
-  /// Defaults to 16.
+  /// Defaults to 10.
   final double? audioIndicatorIconSize;
 
-  /// The color of the bars shown while the participant is speaking.
+  /// The color of the sound indicator's bars.
   ///
   /// Defaults to `colorScheme.brand.shade300`.
   final Color? speakingColor;
 
-  /// The color of the microphone icon while the participant is unmuted and
-  /// silent.
+  /// The side length of the muted-microphone icon.
   ///
-  /// Defaults to `colorScheme.textOnAccent`.
-  final Color? microphoneOnColor;
+  /// Defaults to 20.
+  final double? microphoneIconSize;
 
   /// The color of the microphone icon while the participant is muted.
   ///
+  /// Only the muted state draws an icon, so there is no unmuted counterpart.
   /// Defaults to `colorScheme.accentError`.
   final Color? microphoneOffColor;
 
