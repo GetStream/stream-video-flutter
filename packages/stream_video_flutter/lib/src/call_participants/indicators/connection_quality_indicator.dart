@@ -164,6 +164,12 @@ class _StreamConnectionQualityIndicatorStyleDefaults
 }
 
 // Paints three bars of increasing height, `level` of them in [activeColor].
+//
+// The geometry is the design system's `Connection Indicator` icon, expressed in
+// its own 24-unit space and scaled to whatever size it is drawn at: three
+// 2-thick strokes at x 7, 12 and 17, rising from a shared baseline at y 16 to
+// 14, 11 and 8. Unlike the sound indicator's bars these grow from the bottom —
+// they report a level, not activity.
 class _ConnectionQualityIndicatorPainter extends CustomPainter {
   const _ConnectionQualityIndicatorPainter({
     required this.level,
@@ -171,34 +177,30 @@ class _ConnectionQualityIndicatorPainter extends CustomPainter {
     required this.inactiveColor,
   });
 
+  static const _viewBox = 24.0;
+  static const _strokeWidth = 2.0;
+  static const _baseline = 16.0;
+  static const _bars = [
+    (x: 7.0, top: 14.0),
+    (x: 12.0, top: 11.0),
+    (x: 17.0, top: 8.0),
+  ];
+
   final int level;
   final Color activeColor;
   final Color inactiveColor;
 
   @override
   void paint(Canvas canvas, Size size) {
-    const barCount = 3;
-    final strokeWidth = size.width / 8;
-    final gap = size.width / 8;
-    final baseline = size.height * (2 / 3);
-    final shortest = size.height / 4;
-    final tallest = size.height * (7 / 12);
+    final scale = size.width / _viewBox;
 
-    // Center the run of bars: each bar is a stroke, with a gap between them.
-    final runWidth = barCount * strokeWidth + (barCount - 1) * gap;
-    final firstX = (size.width - runWidth + strokeWidth) / 2;
-
-    for (var i = 0; i < barCount; i++) {
-      final height =
-          shortest + (tallest - shortest) * (i / (barCount - 1).toDouble());
-      final x = firstX + i * (strokeWidth + gap);
-
+    for (final (index, bar) in _bars.indexed) {
       canvas.drawLine(
-        Offset(x, baseline - height),
-        Offset(x, baseline),
+        Offset(bar.x * scale, bar.top * scale),
+        Offset(bar.x * scale, _baseline * scale),
         Paint()
-          ..color = level > i ? activeColor : inactiveColor
-          ..strokeWidth = strokeWidth
+          ..color = level > index ? activeColor : inactiveColor
+          ..strokeWidth = _strokeWidth * scale
           ..strokeCap = StrokeCap.round,
       );
     }
