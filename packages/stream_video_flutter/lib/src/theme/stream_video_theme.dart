@@ -402,12 +402,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     return copyWith(
       textTheme: textTheme.merge(other.textTheme),
       colorTheme: colorTheme.merge(other.colorTheme),
-      callControlsTheme: callControlsTheme.merge(callControlsTheme),
+      callControlsTheme: callControlsTheme.merge(other.callControlsTheme),
       userAvatarTheme: userAvatarTheme.merge(other.userAvatarTheme),
       lobbyViewTheme: lobbyViewTheme.merge(other.lobbyViewTheme),
       callParticipantTheme: callParticipantTheme.merge(
         other.callParticipantTheme,
       ),
+      localVideoTheme: localVideoTheme.merge(other.localVideoTheme),
       incomingCallTheme: incomingCallTheme.merge(other.incomingCallTheme),
       callContentTheme: callContentTheme.merge(other.callContentTheme),
       outgoingCallTheme: outgoingCallTheme.merge(other.outgoingCallTheme),
