@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import 'participant_label_defaults.dart';
 
 /// The pill on a participant tile carrying their name and audio state.
 ///
@@ -137,7 +138,7 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeStyle = StreamParticipantLabelTheme.of(context).style;
     final style = themeStyle?.merge(props.style) ?? props.style;
-    final defaults = _StreamParticipantLabelStyleDefaults(context);
+    final defaults = StreamParticipantLabelStyleDefaults(context);
 
     final borderRadius = style?.borderRadius ?? defaults.borderRadius;
     final nameTextStyle = style?.nameTextStyle ?? defaults.nameTextStyle;
@@ -234,58 +235,4 @@ class _MaybeBlur extends StatelessWidget {
       child: child,
     );
   }
-}
-
-// Default style values for [StreamParticipantLabel].
-class _StreamParticipantLabelStyleDefaults extends StreamParticipantLabelStyle {
-  _StreamParticipantLabelStyleDefaults(this._context);
-
-  final BuildContext _context;
-
-  late final _colorScheme = _context.streamColorScheme;
-  late final _textTheme = _context.streamTextTheme;
-  late final _spacing = _context.streamSpacing;
-  late final _radius = _context.streamRadius;
-
-  @override
-  Color get backgroundColor => _colorScheme.backgroundOverlayDarkStrong;
-
-  @override
-  BorderRadius get borderRadius => BorderRadius.all(_radius.lg);
-
-  @override
-  EdgeInsetsGeometry get padding => EdgeInsetsDirectional.fromSTEB(
-    _spacing.sm,
-    _spacing.xxs,
-    _spacing.xxs,
-    _spacing.xxs,
-  );
-
-  @override
-  double get spacing => _spacing.xs;
-
-  @override
-  double get blurSigma => 12.5;
-
-  @override
-  TextStyle get nameTextStyle =>
-      _textTheme.metadataDefault.copyWith(color: _colorScheme.textOnAccent);
-
-  @override
-  Color get videoOffIconColor => _colorScheme.textOnAccent;
-
-  @override
-  double get videoOffIconSize => _spacing.lg;
-
-  @override
-  double get microphoneIconSize => _spacing.lg;
-
-  @override
-  Color get microphoneOffColor => _colorScheme.textOnAccent;
-
-  @override
-  double get audioIndicatorSize => 24;
-
-  @override
-  double get audioIndicatorIconSize => 10;
 }

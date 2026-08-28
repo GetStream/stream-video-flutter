@@ -47,6 +47,17 @@ transforms:
       - kind: "removeParameter"
         name: "enabledMicrophoneColor"
 
+  - title: "remove userAvatarTheme from StreamLocalVideo"
+    date: "2026-08-28"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "StreamLocalVideo"
+    changes:
+      - kind: "removeParameter"
+        name: "userAvatarTheme"
+
   - title: "rename showDominantSpeakerBorder to showSpeakerBorder"
     date: "2026-08-28"
     bulkApply: true

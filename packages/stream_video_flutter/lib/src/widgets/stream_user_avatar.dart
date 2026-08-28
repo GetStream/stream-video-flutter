@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 import '../utils/extensions.dart';
+import 'avatar_size_from_constraints.dart';
 
 /// The action to perform when the user avatar is tapped.
 typedef OnUserAvatarTap = void Function(UserInfo);
@@ -109,7 +110,7 @@ class DefaultStreamUserAvatar extends StatelessWidget {
 
     final avatar = StreamAvatar(
       imageUrl: imageUrl != null && imageUrl.isNotEmpty ? imageUrl : null,
-      size: theme.size ?? _sizeFor(legacy.constraints),
+      size: theme.size ?? avatarSizeFromConstraints(legacy.constraints),
       backgroundColor: theme.backgroundColor ?? legacy.initialsBackground,
       foregroundColor: theme.foregroundColor ?? legacy.initialsTextStyle.color,
       semanticsLabel: user.name.isNotEmpty ? user.name : user.id,
@@ -132,16 +133,5 @@ class DefaultStreamUserAvatar extends StatelessWidget {
   static String _initialsFor(UserInfo user) {
     final fromName = user.name.initials();
     return fromName.isNotEmpty ? fromName : user.id.initials();
-  }
-
-  // The deprecated theme sizes an avatar with box constraints; the design
-  // system has a fixed set of diameters. Round up to the first one that fits,
-  // so an avatar never comes out smaller than it was asked to be.
-  static StreamAvatarSize _sizeFor(BoxConstraints constraints) {
-    final diameter = constraints.constrain(Size.infinite).shortestSide;
-    return StreamAvatarSize.values.firstWhere(
-      (it) => it.value >= diameter,
-      orElse: () => StreamAvatarSize.xxl,
-    );
   }
 }
