@@ -482,7 +482,25 @@ class StreamCallParticipantThemeData with Diagnosticable {
         showSpeakerBorder: showSpeakerBorder,
         showParticipantLabel: showParticipantLabel,
         showConnectionQualityIndicator: showConnectionQualityIndicator,
+        placeholderStyle: StreamParticipantPlaceholderStyle(
+          avatarTheme: StreamAvatarThemeData(
+            size: _avatarSizeFor(userAvatarTheme.constraints),
+            backgroundColor: userAvatarTheme.initialsBackground,
+            foregroundColor: userAvatarTheme.initialsTextStyle.color,
+          ),
+        ),
       ),
+    );
+  }
+
+  // The deprecated theme sizes its avatar with box constraints; the design
+  // system has a fixed set of diameters. Round up to the first that fits, so an
+  // avatar never comes out smaller than it was asked to be.
+  static StreamAvatarSize _avatarSizeFor(BoxConstraints constraints) {
+    final diameter = constraints.constrain(Size.infinite).shortestSide;
+    return StreamAvatarSize.values.firstWhere(
+      (it) => it.value >= diameter,
+      orElse: () => StreamAvatarSize.xxl,
     );
   }
 

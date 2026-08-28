@@ -90,6 +90,24 @@ void main() {
       expect(theme.callParticipantsGridTheme.padding, const EdgeInsets.all(8));
     });
 
+    test('carries the avatar configuration onto the placeholder', () {
+      final theme = StreamVideoTheme(
+        brightness: Brightness.light,
+        callParticipantTheme: const StreamCallParticipantThemeData(
+          userAvatarTheme: StreamUserAvatarThemeData(
+            constraints: BoxConstraints.tightFor(height: 48, width: 48),
+            initialsBackground: Color(0xFF223344),
+          ),
+        ),
+      );
+
+      final avatar =
+          theme.participantTileTheme.style?.placeholderStyle?.avatarTheme;
+      // Box constraints round up to the nearest design-system diameter.
+      expect(avatar?.size, StreamAvatarSize.xl);
+      expect(avatar?.backgroundColor, const Color(0xFF223344));
+    });
+
     test('maps every property an app is likely to have set', () {
       final theme = StreamVideoTheme(
         brightness: Brightness.light,

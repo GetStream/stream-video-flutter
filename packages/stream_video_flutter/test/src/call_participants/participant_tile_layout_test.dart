@@ -313,6 +313,66 @@ void main() {
       expect(find.text('Pin'), findsNothing);
     });
 
+    testWidgets('stays open when a rebuild yields an equal action list', (
+      tester,
+    ) async {
+      // actionsBuilder returns a fresh list every build, so comparing identity
+      // would close the menu on the next rebuild — which, with participant
+      // state streaming in during a call, is immediately.
+      await tester.pumpWidget(
+        _tile(
+          participant: _participant(),
+          width: 300,
+          height: 300,
+          actionsBuilder: (_, _) => [action('Pin')],
+        ),
+      );
+
+      await tester.tap(find.byType(StreamButton));
+      await tester.pumpAndSettle();
+      expect(find.text('Pin'), findsOneWidget);
+
+      // Rebuild with an equal — but not identical — list.
+      await tester.pumpWidget(
+        _tile(
+          participant: _participant(),
+          width: 300,
+          height: 300,
+          actionsBuilder: (_, _) => [action('Pin')],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pin'), findsOneWidget);
+    });
+
+    testWidgets('closes when the actions actually change', (tester) async {
+      await tester.pumpWidget(
+        _tile(
+          participant: _participant(),
+          width: 300,
+          height: 300,
+          actionsBuilder: (_, _) => [action('Pin')],
+        ),
+      );
+
+      await tester.tap(find.byType(StreamButton));
+      await tester.pumpAndSettle();
+      expect(find.text('Pin'), findsOneWidget);
+
+      await tester.pumpWidget(
+        _tile(
+          participant: _participant(),
+          width: 300,
+          height: 300,
+          actionsBuilder: (_, _) => [action('Unpin')],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Unpin'), findsNothing);
+    });
+
     testWidgets('prefers the actions builder over the action list', (
       tester,
     ) async {

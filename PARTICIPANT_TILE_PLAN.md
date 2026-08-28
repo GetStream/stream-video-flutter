@@ -312,7 +312,7 @@ icon.
 
 ## Phase 6 — The tile
 
-```
+```text
 ClipRRect(borderRadius)                     // Android RTCVideoView is a platform view; a
 └ Container(                                // BoxDecoration alone cannot round it
     decoration: BoxDecoration(color: backgroundColor, borderRadius: …),
