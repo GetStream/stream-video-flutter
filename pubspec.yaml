@@ -65,6 +65,7 @@ melos:
         stream_video_noise_cancellation: ^1.4.3
         stream_video_push_notification: ^1.4.3
         stream_video_screen_sharing: ^1.4.3
+        theme_extensions_builder_annotation: ^7.1.0
 
       hooks:
         # Keep streamVideoVersion in globals.dart in sync with the pubspec version.

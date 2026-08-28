@@ -23,6 +23,11 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamLocalVideoThemeData? localVideoTheme,
     StreamIncomingOutgoingCallThemeData? incomingCallTheme,
     StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
+    StreamParticipantTileThemeData? participantTileTheme,
+    StreamFloatingParticipantTileThemeData? floatingParticipantTileTheme,
+    StreamParticipantLabelThemeData? participantLabelTheme,
+    StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
+    StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
     StreamLivestreamThemeData? livestreamTheme,
   }) {
     final isDark = brightness == Brightness.dark;
@@ -49,6 +54,11 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       localVideoTheme: localVideoTheme,
       incomingCallTheme: incomingCallTheme,
       outgoingCallTheme: outgoingCallTheme,
+      participantTileTheme: participantTileTheme,
+      floatingParticipantTileTheme: floatingParticipantTileTheme,
+      participantLabelTheme: participantLabelTheme,
+      connectionQualityIndicatorTheme: connectionQualityIndicatorTheme,
+      callParticipantsGridTheme: callParticipantsGridTheme,
       livestreamTheme: livestreamTheme,
     );
 
@@ -75,6 +85,14 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.incomingCallTheme,
     required this.callContentTheme,
     required this.outgoingCallTheme,
+    this.participantTileTheme = const StreamParticipantTileThemeData(),
+    this.floatingParticipantTileTheme =
+        const StreamFloatingParticipantTileThemeData(),
+    this.participantLabelTheme = const StreamParticipantLabelThemeData(),
+    this.connectionQualityIndicatorTheme =
+        const StreamConnectionQualityIndicatorThemeData(),
+    this.callParticipantsGridTheme =
+        const StreamCallParticipantsGridThemeData(),
     required this.livestreamTheme,
   });
 
@@ -364,6 +382,22 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the outgoing call widget.
   final StreamIncomingOutgoingCallThemeData outgoingCallTheme;
 
+  /// Theme for the participant tile.
+  final StreamParticipantTileThemeData participantTileTheme;
+
+  /// Theme for the floating self-view.
+  final StreamFloatingParticipantTileThemeData floatingParticipantTileTheme;
+
+  /// Theme for the participant tile's name pill.
+  final StreamParticipantLabelThemeData participantLabelTheme;
+
+  /// Theme for the connection quality indicator.
+  final StreamConnectionQualityIndicatorThemeData
+  connectionQualityIndicatorTheme;
+
+  /// Theme for the participants grid layout.
+  final StreamCallParticipantsGridThemeData callParticipantsGridTheme;
+
   /// Theme for the outgoing call widget.
   final StreamLivestreamThemeData livestreamTheme;
 
@@ -381,6 +415,11 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamIncomingOutgoingCallThemeData? incomingCallTheme,
     StreamCallContentThemeData? callContentTheme,
     StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
+    StreamParticipantTileThemeData? participantTileTheme,
+    StreamFloatingParticipantTileThemeData? floatingParticipantTileTheme,
+    StreamParticipantLabelThemeData? participantLabelTheme,
+    StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
+    StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
     StreamLivestreamThemeData? livestreamTheme,
   }) => StreamVideoTheme.raw(
     textTheme: this.textTheme.merge(textTheme),
@@ -393,6 +432,19 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     incomingCallTheme: this.incomingCallTheme.merge(incomingCallTheme),
     callContentTheme: this.callContentTheme.merge(callContentTheme),
     outgoingCallTheme: this.outgoingCallTheme.merge(outgoingCallTheme),
+    participantTileTheme: this.participantTileTheme.merge(participantTileTheme),
+    floatingParticipantTileTheme: this.floatingParticipantTileTheme.merge(
+      floatingParticipantTileTheme,
+    ),
+    participantLabelTheme: this.participantLabelTheme.merge(
+      participantLabelTheme,
+    ),
+    connectionQualityIndicatorTheme: this.connectionQualityIndicatorTheme.merge(
+      connectionQualityIndicatorTheme,
+    ),
+    callParticipantsGridTheme: this.callParticipantsGridTheme.merge(
+      callParticipantsGridTheme,
+    ),
     livestreamTheme: this.livestreamTheme.merge(livestreamTheme),
   );
 
@@ -412,6 +464,21 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       incomingCallTheme: incomingCallTheme.merge(other.incomingCallTheme),
       callContentTheme: callContentTheme.merge(other.callContentTheme),
       outgoingCallTheme: outgoingCallTheme.merge(other.outgoingCallTheme),
+      participantTileTheme: participantTileTheme.merge(
+        other.participantTileTheme,
+      ),
+      floatingParticipantTileTheme: floatingParticipantTileTheme.merge(
+        other.floatingParticipantTileTheme,
+      ),
+      participantLabelTheme: participantLabelTheme.merge(
+        other.participantLabelTheme,
+      ),
+      connectionQualityIndicatorTheme: connectionQualityIndicatorTheme.merge(
+        other.connectionQualityIndicatorTheme,
+      ),
+      callParticipantsGridTheme: callParticipantsGridTheme.merge(
+        other.callParticipantsGridTheme,
+      ),
       livestreamTheme: livestreamTheme.merge(other.livestreamTheme),
     );
   }
@@ -438,6 +505,41 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       incomingCallTheme: incomingCallTheme.lerp(other.incomingCallTheme, t),
       callContentTheme: callContentTheme.lerp(other.callContentTheme, t),
       outgoingCallTheme: outgoingCallTheme.lerp(other.outgoingCallTheme, t),
+      participantTileTheme:
+          StreamParticipantTileThemeData.lerp(
+            participantTileTheme,
+            other.participantTileTheme,
+            t,
+          ) ??
+          participantTileTheme,
+      floatingParticipantTileTheme:
+          StreamFloatingParticipantTileThemeData.lerp(
+            floatingParticipantTileTheme,
+            other.floatingParticipantTileTheme,
+            t,
+          ) ??
+          floatingParticipantTileTheme,
+      participantLabelTheme:
+          StreamParticipantLabelThemeData.lerp(
+            participantLabelTheme,
+            other.participantLabelTheme,
+            t,
+          ) ??
+          participantLabelTheme,
+      connectionQualityIndicatorTheme:
+          StreamConnectionQualityIndicatorThemeData.lerp(
+            connectionQualityIndicatorTheme,
+            other.connectionQualityIndicatorTheme,
+            t,
+          ) ??
+          connectionQualityIndicatorTheme,
+      callParticipantsGridTheme:
+          StreamCallParticipantsGridThemeData.lerp(
+            callParticipantsGridTheme,
+            other.callParticipantsGridTheme,
+            t,
+          ) ??
+          callParticipantsGridTheme,
       livestreamTheme: livestreamTheme.lerp(other.livestreamTheme, t),
     );
   }

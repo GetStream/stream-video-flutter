@@ -2090,6 +2090,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.12"
+  theme_extensions_builder:
+    dependency: transitive
+    description:
+      name: theme_extensions_builder
+      sha256: e8ea8eb1d859716bc1a29058fb85db87519374eeb49930a07818d330fbf0f388
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.4.0"
   theme_extensions_builder_annotation:
     dependency: transitive
     description:
