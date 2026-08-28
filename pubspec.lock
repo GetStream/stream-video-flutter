@@ -421,10 +421,10 @@ packages:
     dependency: transitive
     description:
       name: dio
-      sha256: ea2bad3c89a27635ce2d85cce4d6b199da49a5a48ec77b03e45b65a3b90922b0
+      sha256: "852ec3b48cc431ac04fff978413c541502b67ffc3e26921e74e3d994694192c1"
       url: "https://pub.dev"
     source: hosted
-    version: "5.10.0"
+    version: "5.11.1"
   dio_web_adapter:
     dependency: transitive
     description:
@@ -1625,10 +1625,10 @@ packages:
     dependency: transitive
     description:
       name: rate_limiter
-      sha256: "2bae2e961adedf7fc2e8b0305d30e3a3619baf001d050c6907870c5c6235b559"
+      sha256: "1c38687fa7e3a79bc6d02b37aae908e6a6ff136fe467e0e5e53ca2d8257a60ca"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.1.1"
   recase:
     dependency: transitive
     description:
@@ -1934,26 +1934,26 @@ packages:
     dependency: transitive
     description:
       name: stream_chat
-      sha256: aeed9c840030cec38c29ec1ebc312512cdbf7574d3d2b1d65521d199b7d66340
+      sha256: bde4a4174b1450546a183ed3e255617d0aff5c074398c6b3919aaee78f76bc8f
       url: "https://pub.dev"
     source: hosted
-    version: "10.2.0"
+    version: "10.4.0"
   stream_chat_flutter:
     dependency: transitive
     description:
       name: stream_chat_flutter
-      sha256: c309836ca267c0a751a3351feb45a49c0fc3467d7943c92982935d469a54493f
+      sha256: "8d15749847498481e67e10ef71cb9400726881e78eee9a8322c04f17634ab426"
       url: "https://pub.dev"
     source: hosted
-    version: "10.2.0"
+    version: "10.4.0"
   stream_chat_flutter_core:
     dependency: transitive
     description:
       name: stream_chat_flutter_core
-      sha256: "9f3a9d5df0913fa84e75e47494904259894cd76025239ba389c243aa2dcf5db4"
+      sha256: "4bbfe3f50150cb51b230abd06b1eded7dd7feea0548ccc57bef48a23aa14f9ec"
       url: "https://pub.dev"
     source: hosted
-    version: "10.2.0"
+    version: "10.4.0"
   stream_core:
     dependency: "direct overridden"
     description:
@@ -1964,14 +1964,13 @@ packages:
     source: git
     version: "0.4.0"
   stream_core_flutter:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "packages/stream_core_flutter"
-      ref: f83b5d4d706a79fc429de2d27aead4394b83c1fb
-      resolved-ref: f83b5d4d706a79fc429de2d27aead4394b83c1fb
-      url: "https://github.com/GetStream/stream-core-flutter.git"
-    source: git
-    version: "0.5.0"
+      name: stream_core_flutter
+      sha256: "742ba6d965935a10ea080090b2a66038286246944f279a9044061f5c04ba08ec"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.1"
   stream_thumbnail:
     dependency: transitive
     description:
@@ -1989,7 +1988,7 @@ packages:
     source: hosted
     version: "2.1.1"
   stream_webrtc_flutter:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: stream_webrtc_flutter
       sha256: "6938c87d6054e7ddcd5114641f7173e84f000f14aedfc57651c1115726dcf356"

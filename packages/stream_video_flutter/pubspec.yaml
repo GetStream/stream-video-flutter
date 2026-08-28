@@ -29,7 +29,7 @@ dependencies:
   plugin_platform_interface: ^2.1.8
   rate_limiter: ^1.0.0
   rxdart: ^0.28.0
-  stream_core_flutter: ^0.4.1
+  stream_core_flutter: ^0.5.1
   stream_video: ^2.0.0-alpha
   stream_webrtc_flutter: ^3.2.0
   theme_extensions_builder_annotation: ^7.1.0
