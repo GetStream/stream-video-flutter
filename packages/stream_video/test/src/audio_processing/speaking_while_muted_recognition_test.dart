@@ -277,6 +277,53 @@ void main() {
 
       await sut.dispose();
     });
+
+    test(
+      'Test a transition queued before dispose does not touch state after it',
+      () async {
+        // Web: [start] sits on getUserMedia while the permission prompt is up.
+        final blockedStart = Completer<void>();
+        when(
+          () => audioRecognition.start(
+            onSoundStateChanged: any(named: 'onSoundStateChanged'),
+          ),
+        ).thenAnswer((_) => blockedStart.future);
+
+        final sut = SpeakingWhileMutedRecognition(
+          call: call,
+          audioRecognition: audioRecognition,
+        );
+
+        Object? streamError;
+        final subscription = sut.stream.listen(
+          (_) {},
+          onError: (Object e) => streamError = e,
+        );
+
+        // Mute: detection starts and blocks on the prompt.
+        callStateStreamController.add(createCallState(isAudioEnabled: false));
+        await Future<void>.delayed(Duration.zero);
+
+        // Unmute: the stop queues behind the blocked start.
+        callStateStreamController.add(createCallState(isAudioEnabled: true));
+        await Future<void>.delayed(Duration.zero);
+
+        // The user leaves while the prompt is still up.
+        await sut.dispose();
+
+        // The prompt is answered afterwards, releasing the queued stop.
+        blockedStart.complete();
+        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(streamError, isNull);
+        // The queued stop must still tear the recogniser down; before the
+        // guard it threw on the state write and never got this far.
+        verify(() => audioRecognition.stop()).called(1);
+
+        await subscription.cancel();
+      },
+    );
   });
 }
 

@@ -509,8 +509,71 @@ void main() {
       );
 
       test(
-        'platforms without ADM-level mute stop the track even when '
-        'stopTrackOnMute is false',
+        'unmuting a soft-muted track recreates it when the audio '
+        'constraints changed while it was muted',
+        () async {
+          final mediaTrack = _FakeMediaStreamTrack(kind: 'audio');
+          final track = addAudioTrack(
+            mediaTrack: mediaTrack,
+            mediaStream: _FakeMediaStream(),
+          );
+
+          await rtcManager.muteTrack(
+            trackId: track.trackId,
+            stopTrackOnMute: false,
+          );
+          await rtcManager.changeDefaultAudioConstraints(
+            const AudioConstraints(
+              noiseSuppression: false,
+              echoCancellation: false,
+              autoGainControl: false,
+              channelCount: 2,
+            ),
+          );
+          final stopsWhileMuted = mediaTrack.stopCallCount;
+
+          try {
+            await rtcManager.unmuteTrack(trackId: track.trackId);
+          } catch (_) {
+            // Acquiring the replacement needs the platform plugin.
+          }
+
+          // Without the recreate the track is merely re-enabled, and the user
+          // comes back on the constraints captured before the profile change.
+          expect(
+            mediaTrack.stopCallCount,
+            greaterThan(stopsWhileMuted),
+            reason: 'the stale capture must be torn down on unmute',
+          );
+        },
+      );
+
+      test(
+        'unmuting a soft-muted track only re-enables it when the audio '
+        'constraints did not change',
+        () async {
+          final mediaTrack = _FakeMediaStreamTrack(kind: 'audio');
+          final track = addAudioTrack(
+            mediaTrack: mediaTrack,
+            mediaStream: _FakeMediaStream(),
+          );
+
+          await rtcManager.muteTrack(
+            trackId: track.trackId,
+            stopTrackOnMute: false,
+          );
+
+          await rtcManager.unmuteTrack(trackId: track.trackId);
+
+          // Recreating here would restart the mic for nothing.
+          expect(mediaTrack.stopCallCount, 0);
+          expect(mediaTrack.enabled, isTrue);
+        },
+      );
+
+      test(
+        'platforms without ADM-level mute keep the track alive when '
+        'stopTrackOnMute is false, they just skip the ADM leg',
         () async {
           when(
             () => pcFactory.isAppleAdmMicrophoneMuteSupported,

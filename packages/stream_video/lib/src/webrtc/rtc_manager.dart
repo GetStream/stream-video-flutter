@@ -1657,8 +1657,11 @@ extension PublisherRtcManager on RtcManager {
       await _setAppleAdmMicrophoneMuted(false);
     }
 
-    // If the track was released before, restart it.
-    if (track.stopTrackOnMute) {
+    // A soft-muted track was never released, but it is still capturing with
+    // the constraints it was created with — enabling it again would leave it
+    // on the stale ones and skip the publish-options update below. So it is
+    // recreated too whenever [_defaultAudioConstraints] moved on since.
+    if (track.stopTrackOnMute || _hasStaleAudioConstraints(track)) {
       final transceivers = transceiversManager
           .getTransceiversForTrack(track.trackId)
           .toList();
@@ -1692,6 +1695,22 @@ extension PublisherRtcManager on RtcManager {
 
     _renegotiateIfUnacknowledged(trackId, '[unmuteTrack]');
     return Result.success(track);
+  }
+
+  /// Whether [track] captures with audio constraints that no longer match
+  /// [_defaultAudioConstraints].
+  bool _hasStaleAudioConstraints(RtcLocalTrack track) {
+    if (track is! RtcLocalAudioTrack) return false;
+
+    final current = track.mediaConstraints;
+    final next = _defaultAudioConstraints;
+
+    return current.noiseSuppression != next.noiseSuppression ||
+        current.echoCancellation != next.echoCancellation ||
+        current.autoGainControl != next.autoGainControl ||
+        current.highPassFilter != next.highPassFilter ||
+        current.typingNoiseDetection != next.typingNoiseDetection ||
+        current.channelCount != next.channelCount;
   }
 
   /// Returns true if [track] should use ADM-level mute.

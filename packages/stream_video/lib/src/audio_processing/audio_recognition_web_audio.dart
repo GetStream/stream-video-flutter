@@ -23,9 +23,8 @@ class AudioRecognitionWebAudio implements AudioRecognition {
 
   final WebAudioRecognitionConfig config;
 
-  /// Resolves the microphone to monitor at each [start]. Used when
-  /// [WebAudioRecognitionConfig.deviceId] is null. Falls back to the
-  /// browser's default microphone when both are null.
+  /// Resolves the microphone to monitor at each [start]. Falls back to the
+  /// browser's default microphone when it is null, or returns null.
   final String? Function()? deviceIdProvider;
 
   web.MediaStream? _stream;
@@ -53,7 +52,7 @@ class AudioRecognitionWebAudio implements AudioRecognition {
 
     final web.MediaStream stream;
     try {
-      final deviceId = config.deviceId ?? deviceIdProvider?.call();
+      final deviceId = deviceIdProvider?.call();
       stream = await web.window.navigator.mediaDevices
           .getUserMedia(
             web.MediaStreamConstraints(
@@ -84,7 +83,7 @@ class AudioRecognitionWebAudio implements AudioRecognition {
     final analyser = audioContext.createAnalyser()..fftSize = config.fftSize;
     source.connect(analyser);
 
-    // Detection can starts outside a user gesture (a moderator mute, or
+    // Detection can start outside a user gesture (a moderator mute, or
     // a participant who joined muted), so autoplay policies can hand back a
     // suspended context, and sampling one only ever yields silence.
     _resumeIfSuspended(audioContext);
@@ -197,7 +196,6 @@ class WebAudioRecognitionConfig {
     this.speechTimeout = const Duration(milliseconds: 500),
     this.fftSize = 128,
     this.audioLevelThreshold = 150,
-    this.deviceId,
   });
 
   /// How often the analyser is sampled. Mirrors the JS SDK's
@@ -216,10 +214,6 @@ class WebAudioRecognitionConfig {
   /// A frequency-bin byte value (0–255) at or above this threshold counts as
   /// sound. Mirrors the JS SDK's `audioLevelThreshold`.
   final int audioLevelThreshold;
-
-  /// Microphone device to monitor. Defaults to the browser's default
-  /// microphone.
-  final String? deviceId;
 }
 
 final _logger = taggedLogger(tag: 'SV:AudioRecognitionWebAudio');

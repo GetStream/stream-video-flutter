@@ -214,7 +214,9 @@ class SpeakingWhileMutedRecognition
     if (!_isRunning) return;
     _isRunning = false;
     _logger.i(() => '[stopRecognition] no args');
-    state = const SpeakingWhileMutedState._(isSpeakingWhileMuted: false);
+    if (!_disposed) {
+      state = const SpeakingWhileMutedState._(isSpeakingWhileMuted: false);
+    }
     try {
       await _audioRecognition.stop();
     } catch (e, trace) {

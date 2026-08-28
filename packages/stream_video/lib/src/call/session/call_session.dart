@@ -1259,7 +1259,19 @@ class CallSession extends Disposable {
     if (track is! RtcLocalTrack) return false;
     if (track.trackType != SfuTrackType.audio) return false;
 
-    return !(stateManager.callState.localParticipant?.isAudioEnabled ?? false);
+    final localParticipant = stateManager.callState.localParticipant;
+    if (localParticipant == null) {
+      // Warned about because the resume that follows is indistinguishable
+      // from a legitimate mute in a customer log.
+      _logger.w(
+        () =>
+            '[isMutedLocalMicrophoneTrack] no local participant in state, '
+            'treating ${track.trackId} as muted',
+      );
+      return true;
+    }
+
+    return !localParticipant.isAudioEnabled;
   }
 
   /// Resumes audio tracks that were suspended or arrived during suspension.
