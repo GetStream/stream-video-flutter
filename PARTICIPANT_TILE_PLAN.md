@@ -36,7 +36,7 @@ and all three keep working through a bridge.
 | More-menu actions | Props only: `actions` plus `actionsBuilder(context, participant)` |
 | Factory slots | Placeholder, video, participant label, connection-quality indicator, **user avatar** |
 | Grid spacing fields | New `StreamCallParticipantsGridThemeData`, read by `CallParticipantsGridView` itself |
-| Speaking vs mic icon | Keep today's behaviour (speaking indicator **or** mic icon), not the Figma design |
+| Speaking vs mic icon | Sound indicator always visible; a microphone icon only while muted (per the design thread, 2026-08-28) |
 
 Per repo convention this plan gets copied to the repo root as a tracked markdown file with a todo
 checklist, and each phase below is committed (not pushed) as it lands.
@@ -54,8 +54,11 @@ Top toolbar: padding 4 — "more" button top-left (secondary solid small, 32px v
 Floating self-view (`24212:75616`): 140×228, radius **12**, 1px `rgba(26,27,37,0.1)`, drop shadow,
 bottom toolbar with **only** the connection indicator.
 
-Node `413:38917` shows the mic-off icon *and* the sound indicator at once — the part we deliberately
-do not follow.
+The sound indicator is **always** shown: animated while speaking, resting as three dots otherwise
+(the design's `speaking=false` variant is a flat 10x2 strip). A microphone icon appears **only** while
+muted — there is no unmuted counterpart, since the sound indicator already reports whether anything is
+coming through. Confirmed on the design thread for node `413:38917`; an earlier reading of that node
+had the two treated as alternatives.
 
 ### Token coverage — verified against `design-system-tokens`
 
@@ -302,10 +305,10 @@ ClipRRect(                                  // its own clip — without it the B
 )
 ```
 
-Audio indicator keeps its three branches — speaking + mic on ⇒ animated bars, mic on ⇒ `voiceFill`,
-mic off ⇒ `voiceOffFill` — all at a fixed 24×24 so the pill does not jump. Keep an explanatory
-comment: this is a deliberate divergence from Figma, the way `stream_context_menu_anchor.dart`
-records its own.
+The sound indicator is a permanent 24x24 box holding a 10px glyph, so the pill keeps its shape as
+someone starts and stops talking. It animates around its centre line while speaking and collapses to
+three dots otherwise. The muted state adds a `voiceOffFill` icon ahead of it; there is no unmuted
+icon.
 
 ## Phase 6 — The tile
 

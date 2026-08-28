@@ -136,9 +136,9 @@ mixin _$StreamParticipantLabelStyle {
         t,
       ),
       speakingColor: Color.lerp(a.speakingColor, b.speakingColor, t),
-      microphoneOnColor: Color.lerp(
-        a.microphoneOnColor,
-        b.microphoneOnColor,
+      microphoneIconSize: lerpDouble$(
+        a.microphoneIconSize,
+        b.microphoneIconSize,
         t,
       ),
       microphoneOffColor: Color.lerp(
@@ -163,7 +163,7 @@ mixin _$StreamParticipantLabelStyle {
     Color? audioIndicatorBackgroundColor,
     double? audioIndicatorIconSize,
     Color? speakingColor,
-    Color? microphoneOnColor,
+    double? microphoneIconSize,
     Color? microphoneOffColor,
   }) {
     final _this = (this as StreamParticipantLabelStyle);
@@ -185,7 +185,7 @@ mixin _$StreamParticipantLabelStyle {
       audioIndicatorIconSize:
           audioIndicatorIconSize ?? _this.audioIndicatorIconSize,
       speakingColor: speakingColor ?? _this.speakingColor,
-      microphoneOnColor: microphoneOnColor ?? _this.microphoneOnColor,
+      microphoneIconSize: microphoneIconSize ?? _this.microphoneIconSize,
       microphoneOffColor: microphoneOffColor ?? _this.microphoneOffColor,
     );
   }
@@ -217,7 +217,7 @@ mixin _$StreamParticipantLabelStyle {
       audioIndicatorBackgroundColor: other.audioIndicatorBackgroundColor,
       audioIndicatorIconSize: other.audioIndicatorIconSize,
       speakingColor: other.speakingColor,
-      microphoneOnColor: other.microphoneOnColor,
+      microphoneIconSize: other.microphoneIconSize,
       microphoneOffColor: other.microphoneOffColor,
     );
   }
@@ -249,7 +249,7 @@ mixin _$StreamParticipantLabelStyle {
             _this.audioIndicatorBackgroundColor &&
         _other.audioIndicatorIconSize == _this.audioIndicatorIconSize &&
         _other.speakingColor == _this.speakingColor &&
-        _other.microphoneOnColor == _this.microphoneOnColor &&
+        _other.microphoneIconSize == _this.microphoneIconSize &&
         _other.microphoneOffColor == _this.microphoneOffColor;
   }
 
@@ -272,7 +272,7 @@ mixin _$StreamParticipantLabelStyle {
       _this.audioIndicatorBackgroundColor,
       _this.audioIndicatorIconSize,
       _this.speakingColor,
-      _this.microphoneOnColor,
+      _this.microphoneIconSize,
       _this.microphoneOffColor,
     );
   }
