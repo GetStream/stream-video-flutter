@@ -33,7 +33,20 @@ class StreamLobbyVideo extends StatefulWidget {
   /// Theme for the avatar.
   final StreamUserAvatarThemeData? userAvatarTheme;
 
+  /// Called with the microphone track whenever it is created, and with null
+  /// when it is stopped.
+  ///
+  /// The track becomes the caller's to manage: this widget never stops one it
+  /// has handed over, because the track may well outlive it. Passing it to
+  /// `CallConnectOptions.microphone` as a [TrackOption.provided] carries a
+  /// warmed-up microphone into the call rather than opening a second one.
+  /// Whoever takes it is responsible for stopping it.
   final FutureOr<void> Function(RtcLocalAudioTrack?)? onMicrophoneTrackSet;
+
+  /// Called with the camera track whenever it is created, and with null when it
+  /// is stopped.
+  ///
+  /// The track becomes the caller's to manage — see [onMicrophoneTrackSet].
   final FutureOr<void> Function(RtcLocalCameraTrack?)? onCameraTrackSet;
 
   final List<Widget> Function(BuildContext, Call)? additionalActionsBuilder;
@@ -67,16 +80,6 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
         toggleCamera();
       }
     });
-  }
-
-  @override
-  void dispose() {
-    // The tracks are created here, so they are released here. A lobby torn down
-    // without stopping them leaves the camera and microphone running, and the
-    // next lobby opens a second set alongside them.
-    _cameraTrack?.stop();
-    _microphoneTrack?.stop();
-    super.dispose();
   }
 
   Future<void> toggleCamera() async {

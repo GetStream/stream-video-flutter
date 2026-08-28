@@ -61,7 +61,7 @@
 
 ### 🐞 Fixed
 
-- `StreamLobbyVideo` now stops the camera and microphone tracks it created when it is disposed. It never released them, so a lobby that was torn down and rebuilt left the previous camera running and opened a second one alongside it.
+- Documented on `StreamLobbyVideo.onCameraTrackSet` and `onMicrophoneTrackSet` that the track becomes the caller's to stop. The widget deliberately does not stop tracks it has handed over: they may be passed to the call as a `TrackOption.provided`, and would otherwise be killed as the lobby is left.
 
 ### ⚠️ Deprecated
 
