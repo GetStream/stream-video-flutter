@@ -420,14 +420,10 @@ class _TileContent extends StatelessWidget {
 
     final placeholderBuilder = props.videoPlaceholderBuilder;
 
-    return StreamVideoRenderer(
-      key: ValueKey(
-        '${rendererScopePrefix ?? ''}${participant.uniqueParticipantKey}-video',
-      ),
-      rendererScopePrefix: rendererScopePrefix,
+    return StreamParticipantVideo(
       call: call,
       participant: participant,
-      videoTrackType: SfuTrackType.video,
+      rendererScopePrefix: rendererScopePrefix,
       onSizeChanged: props.onSizeChanged,
       videoFit: props.videoFit ?? style?.videoFit ?? defaults.videoFit,
       placeholderBuilder: (context) {
