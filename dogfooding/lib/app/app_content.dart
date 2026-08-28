@@ -380,31 +380,14 @@ class _StreamDogFoodingAppContentState
               initialsBackground: colorScheme.brand.shade100,
             ),
           ),
-          callParticipantTheme: StreamCallParticipantThemeData(
-            borderRadius: const BorderRadius.all(Radius.circular(16)),
-            speakerBorderColor: colorScheme.accentPrimary,
-            backgroundColor: colorScheme.backgroundSurface,
-            userAvatarTheme: StreamUserAvatarThemeData(
-              constraints: const BoxConstraints.tightFor(
-                height: 100,
-                width: 100,
-              ),
-              borderRadius: const BorderRadius.all(Radius.circular(50)),
-              initialsTextStyle: textTheme.title1.copyWith(
-                color: colorScheme.brand,
-              ),
-              initialsBackground: colorScheme.brand.shade100,
-              selectionColor: colorScheme.accentPrimary,
-            ),
-            audioLevelIndicatorColor: colorScheme.accentPrimary,
-            participantLabelTextStyle: textTheme.footnote.copyWith(
-              color: colorScheme.textOnAccent,
-            ),
-            disabledMicrophoneColor: colorScheme.textOnAccent,
-            connectionLevelActiveColor: const Color(0xFF00FF00),
-            participantsGridPadding: const EdgeInsets.all(4),
-            participantsGridMainAxisSpacing: 4,
-            participantsGridCrossAxisSpacing: 4,
+          // The participant tile is styled by the design system now. Nothing
+          // is overridden here, which is what an app wanting the stock look
+          // should do: setting `callParticipantTheme` opts back into the
+          // deprecated shape.
+          callParticipantsGridTheme: const StreamCallParticipantsGridThemeData(
+            padding: EdgeInsets.all(4),
+            mainAxisSpacing: 4,
+            crossAxisSpacing: 4,
           ),
         ),
       ],
