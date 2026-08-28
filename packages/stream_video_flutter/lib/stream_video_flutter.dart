@@ -39,6 +39,7 @@ export 'src/call_participants/participant_label.dart';
 export 'src/call_participants/participant_placeholder.dart';
 export 'src/call_participants/participant_tile.dart';
 export 'src/call_participants/participant_tile_action.dart';
+export 'src/call_participants/participant_video.dart';
 export 'src/call_screen/call_container.dart';
 export 'src/call_screen/call_content/call_app_bar.dart';
 export 'src/call_screen/call_content/call_content.dart';

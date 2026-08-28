@@ -8,6 +8,7 @@ Iterable<StreamComponentBuilderExtension<Object>> streamVideoComponentBuilders({
   StreamComponentBuilder<StreamParticipantTileProps>? participantTile,
   StreamComponentBuilder<StreamFloatingParticipantTileProps>?
   floatingParticipantTile,
+  StreamComponentBuilder<StreamParticipantVideoProps>? participantVideo,
   StreamComponentBuilder<StreamParticipantPlaceholderProps>?
   participantPlaceholder,
   StreamComponentBuilder<StreamParticipantLabelProps>? participantLabel,
@@ -22,6 +23,8 @@ Iterable<StreamComponentBuilderExtension<Object>> streamVideoComponentBuilders({
       StreamComponentBuilderExtension(builder: participantTile),
     if (floatingParticipantTile != null)
       StreamComponentBuilderExtension(builder: floatingParticipantTile),
+    if (participantVideo != null)
+      StreamComponentBuilderExtension(builder: participantVideo),
     if (participantPlaceholder != null)
       StreamComponentBuilderExtension(builder: participantPlaceholder),
     if (participantLabel != null)
