@@ -121,9 +121,9 @@ class StreamCallParticipantThemeData with Diagnosticable {
     Color? backgroundColor,
     BorderRadius? borderRadius,
     StreamUserAvatarThemeData? userAvatarTheme,
-    bool? showDominantSpeakerBorder,
-    double? dominantSpeakerBorderThickness,
-    Color? dominantSpeakerBorderColor,
+    bool? showSpeakerBorder,
+    double? speakerBorderThickness,
+    Color? speakerBorderColor,
     bool? showParticipantLabel,
     TextStyle? participantLabelTextStyle,
     AlignmentGeometry? participantLabelAlignment,
@@ -144,10 +144,10 @@ class StreamCallParticipantThemeData with Diagnosticable {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       borderRadius: borderRadius ?? this.borderRadius,
       userAvatarTheme: userAvatarTheme ?? this.userAvatarTheme,
-      showSpeakerBorder: showDominantSpeakerBorder ?? showSpeakerBorder,
+      showSpeakerBorder: showSpeakerBorder ?? this.showSpeakerBorder,
       speakerBorderThickness:
-          dominantSpeakerBorderThickness ?? speakerBorderThickness,
-      speakerBorderColor: dominantSpeakerBorderColor ?? speakerBorderColor,
+          speakerBorderThickness ?? this.speakerBorderThickness,
+      speakerBorderColor: speakerBorderColor ?? this.speakerBorderColor,
       showParticipantLabel: showParticipantLabel ?? this.showParticipantLabel,
       participantLabelTextStyle:
           participantLabelTextStyle ?? this.participantLabelTextStyle,
@@ -342,24 +342,11 @@ class StreamCallParticipantThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('backgroundColor', backgroundColor))
       ..add(DiagnosticsProperty('borderRadius', borderRadius))
       ..add(DiagnosticsProperty('userAvatarTheme', userAvatarTheme))
+      ..add(DiagnosticsProperty('showSpeakerBorder', showSpeakerBorder))
       ..add(
-        DiagnosticsProperty(
-          'showDominantSpeakerBorder',
-          showSpeakerBorder,
-        ),
+        DiagnosticsProperty('speakerBorderThickness', speakerBorderThickness),
       )
-      ..add(
-        DiagnosticsProperty(
-          'dominantSpeakerBorderThickness',
-          speakerBorderThickness,
-        ),
-      )
-      ..add(
-        DiagnosticsProperty(
-          'dominantSpeakerBorderColor',
-          speakerBorderColor,
-        ),
-      )
+      ..add(DiagnosticsProperty('speakerBorderColor', speakerBorderColor))
       ..add(DiagnosticsProperty('showParticipantLabel', showParticipantLabel))
       ..add(
         DiagnosticsProperty(
@@ -446,15 +433,16 @@ class StreamCallParticipantThemeData with Diagnosticable {
       backgroundColor: other.backgroundColor,
       borderRadius: other.borderRadius,
       userAvatarTheme: other.userAvatarTheme,
-      showDominantSpeakerBorder: other.showSpeakerBorder,
-      dominantSpeakerBorderThickness: other.speakerBorderThickness,
-      dominantSpeakerBorderColor: other.speakerBorderColor,
+      showSpeakerBorder: other.showSpeakerBorder,
+      speakerBorderThickness: other.speakerBorderThickness,
+      speakerBorderColor: other.speakerBorderColor,
       showParticipantLabel: other.showParticipantLabel,
       participantLabelTextStyle: other.participantLabelTextStyle,
       participantLabelAlignment: other.participantLabelAlignment,
       audioLevelIndicatorColor: other.audioLevelIndicatorColor,
       enabledMicrophoneColor: other.enabledMicrophoneColor,
       disabledMicrophoneColor: other.disabledMicrophoneColor,
+      pausedVideoIndicatorColor: other.pausedVideoIndicatorColor,
       showConnectionQualityIndicator: other.showConnectionQualityIndicator,
       connectionLevelActiveColor: other.connectionLevelActiveColor,
       connectionLevelInactiveColor: other.connectionLevelInactiveColor,
