@@ -452,6 +452,76 @@ class StreamCallParticipantThemeData with Diagnosticable {
       participantsGridCrossAxisSpacing: other.participantsGridCrossAxisSpacing,
     );
   }
+
+  // ── Migration to the component themes ──────────────────────────────────────
+  //
+  // `StreamVideoTheme.callParticipantTheme` is null unless an app sets one, so
+  // a value reaching here means somebody deliberately styled the tile through
+  // the deprecated shape. Everything it carries is translated, defaults
+  // included — an app that wants the redesigned tile stops setting it rather
+  // than setting parts of it.
+  //
+  // The translation runs in the `StreamVideoTheme` factory, which is where a
+  // theme is built. Reaching the deprecated shape any other way — through
+  // `copyWith`, or through the `StreamCallParticipantTheme` widget — sets the
+  // field without restyling anything.
+
+  static const _defaults = StreamCallParticipantThemeData();
+
+  /// The subset of this theme that describes the participant tile.
+  StreamParticipantTileThemeData toParticipantTileThemeData() {
+    return StreamParticipantTileThemeData(
+      style: StreamParticipantTileStyle(
+        videoFit: videoFit,
+        backgroundColor: backgroundColor,
+        borderRadius: borderRadius,
+        speakingBorder: Border.all(
+          color: speakerBorderColor,
+          width: speakerBorderThickness,
+        ),
+        showSpeakerBorder: showSpeakerBorder,
+        showParticipantLabel: showParticipantLabel,
+        showConnectionQualityIndicator: showConnectionQualityIndicator,
+      ),
+    );
+  }
+
+  /// The subset of this theme that describes the participant name pill.
+  StreamParticipantLabelThemeData toParticipantLabelThemeData() {
+    return StreamParticipantLabelThemeData(
+      style: StreamParticipantLabelStyle(
+        nameTextStyle: participantLabelTextStyle,
+        speakingColor: audioLevelIndicatorColor,
+        microphoneOffColor: disabledMicrophoneColor,
+        videoOffIconColor: pausedVideoIndicatorColor,
+      ),
+    );
+  }
+
+  /// The subset of this theme that describes the connection quality indicator.
+  StreamConnectionQualityIndicatorThemeData
+  toConnectionQualityIndicatorThemeData() {
+    return StreamConnectionQualityIndicatorThemeData(
+      style: StreamConnectionQualityIndicatorStyle(
+        // The indicator colours each level apart now. The single colour this
+        // theme carries spreads across all three, so it still reads as one
+        // flat colour the way it used to.
+        poorColor: connectionLevelActiveColor,
+        fairColor: connectionLevelActiveColor,
+        greatColor: connectionLevelActiveColor,
+        inactiveColor: connectionLevelInactiveColor,
+      ),
+    );
+  }
+
+  /// The subset of this theme that describes the participants grid layout.
+  StreamCallParticipantsGridThemeData toCallParticipantsGridThemeData() {
+    return StreamCallParticipantsGridThemeData(
+      padding: participantsGridPadding,
+      mainAxisSpacing: participantsGridMainAxisSpacing,
+      crossAxisSpacing: participantsGridCrossAxisSpacing,
+    );
+  }
 }
 
 /// Applies a call participant theme to descendant [StreamParticipantTile]
@@ -468,13 +538,18 @@ class StreamCallParticipantTheme extends InheritedWidget {
   final StreamCallParticipantThemeData data;
 
   /// Returns the configuration [data] from the closest
-  /// [StreamCallParticipantTheme] ancestor. If there is no ancestor,
-  /// it returns [StreamVideoTheme.callParticipantTheme].
+  /// [StreamCallParticipantTheme] ancestor.
+  ///
+  /// Falls back to [StreamVideoTheme.callParticipantTheme], and then to this
+  /// class's own defaults — which nothing reads any more. The tile and its
+  /// parts resolve their appearance from the component themes; this survives
+  /// only so existing calls keep compiling.
   static StreamCallParticipantThemeData of(BuildContext context) {
     final callParticipantTheme = context
         .dependOnInheritedWidgetOfExactType<StreamCallParticipantTheme>();
     return callParticipantTheme?.data ??
-        StreamVideoTheme.of(context).callParticipantTheme;
+        StreamVideoTheme.of(context).callParticipantTheme ??
+        StreamCallParticipantThemeData._defaults;
   }
 
   @override

@@ -200,7 +200,9 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
   /// The color of the microphone icon while the participant is muted.
   ///
   /// Only the muted state draws an icon, so there is no unmuted counterpart.
-  /// Defaults to `colorScheme.accentError`.
+  /// Defaults to the color of [nameTextStyle]: on a tile the muted state is
+  /// information rather than a warning, and the red used for the mute control
+  /// in the call bar would read as an error here.
   final Color? microphoneOffColor;
 
   /// Linearly interpolate between two styles.

@@ -2,13 +2,9 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
 
-import '../../theme/stream_video_theme.dart';
+import '../../../stream_video_flutter.dart';
 import '../../widgets/tile_view.dart';
-import '../call_participants.dart';
-
-const _kDefaultSpacing = 16.0;
 
 class CallParticipantsGridView extends StatelessWidget {
   const CallParticipantsGridView({
@@ -16,9 +12,9 @@ class CallParticipantsGridView extends StatelessWidget {
     required this.call,
     required this.participants,
     required this.itemBuilder,
-    this.padding = const EdgeInsets.all(_kDefaultSpacing),
-    this.mainAxisSpacing = _kDefaultSpacing,
-    this.crossAxisSpacing = _kDefaultSpacing,
+    this.padding,
+    this.mainAxisSpacing,
+    this.crossAxisSpacing,
   });
 
   /// Represents a call.
@@ -31,16 +27,34 @@ class CallParticipantsGridView extends StatelessWidget {
   final CallParticipantBuilder itemBuilder;
 
   /// Space between the items in the main axis.
-  final double mainAxisSpacing;
+  ///
+  /// Overrides [StreamCallParticipantsGridThemeData.mainAxisSpacing].
+  final double? mainAxisSpacing;
 
   /// Space between the items in the cross axis.
-  final double crossAxisSpacing;
+  ///
+  /// Overrides [StreamCallParticipantsGridThemeData.crossAxisSpacing].
+  final double? crossAxisSpacing;
 
   /// Padding around the grid.
-  final EdgeInsets padding;
+  ///
+  /// Overrides [StreamCallParticipantsGridThemeData.padding].
+  final EdgeInsets? padding;
 
   @override
   Widget build(BuildContext context) {
+    final theme = StreamCallParticipantsGridTheme.of(context);
+    final spacing = context.streamSpacing;
+
+    final padding =
+        this.padding ??
+        theme.padding?.resolve(Directionality.maybeOf(context)) ??
+        EdgeInsets.all(spacing.xs);
+    final mainAxisSpacing =
+        this.mainAxisSpacing ?? theme.mainAxisSpacing ?? spacing.xs;
+    final crossAxisSpacing =
+        this.crossAxisSpacing ?? theme.crossAxisSpacing ?? spacing.xs;
+
     if (CurrentPlatform.isIos || CurrentPlatform.isAndroid) {
       return MobileCallParticipantsGrid(
         call: call,
@@ -69,9 +83,9 @@ class MobileCallParticipantsGrid extends StatelessWidget {
     required this.call,
     required this.participants,
     required this.itemBuilder,
-    this.padding = const EdgeInsets.all(_kDefaultSpacing),
-    this.mainAxisSpacing = _kDefaultSpacing,
-    this.crossAxisSpacing = _kDefaultSpacing,
+    required this.padding,
+    required this.mainAxisSpacing,
+    required this.crossAxisSpacing,
   });
 
   /// Represents a call.
@@ -200,10 +214,10 @@ class DesktopCallParticipantsGrid extends StatefulWidget {
     required this.call,
     required this.participants,
     required this.itemBuilder,
+    required this.padding,
+    required this.mainAxisSpacing,
+    required this.crossAxisSpacing,
     this.pageSize = 16,
-    this.padding = const EdgeInsets.all(_kDefaultSpacing),
-    this.mainAxisSpacing = _kDefaultSpacing,
-    this.crossAxisSpacing = _kDefaultSpacing,
   }) : assert(pageSize <= 49, 'We currently support a maximum of 49 items');
 
   /// Represents a call.
