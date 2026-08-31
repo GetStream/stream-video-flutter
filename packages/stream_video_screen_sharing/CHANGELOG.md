@@ -1,3 +1,7 @@
+## 1.5.0
+
+- Sync version with `stream_video_flutter` 1.5.0
+
 ## 1.4.3
 
 - Minor bug fixes and improvements

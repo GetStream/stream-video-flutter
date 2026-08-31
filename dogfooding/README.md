@@ -7,8 +7,8 @@ For a more basic example of how to use the Stream Video Flutter package, check o
 ## Features
 
 - **Video Calls**: Test various aspects of video call functionality.
-    - Create or join a video meeting.
-    - Make direct calls to other users with ringing.
+  - Create or join a video meeting.
+  - Make direct calls to other users with ringing.
 
 - **Screen Sharing**: Experience seamless screen sharing between participants.
 
@@ -48,12 +48,12 @@ open Runner.xcworkspace
 - In Xcode, go to the **Signing & Capabilities** tab.
 - Under **Team**, select your development team.
 - Update the **Bundle Identifier** for both `Runner` and `ScreenSharing` targets:
-    - Example: `com.yourname.StreamDogfooding`
-    - Example (ScreenSharing): `com.yourname.StreamDogfooding.ScreenSharing`
+  - Example: `com.yourname.StreamDogfooding`
+  - Example (ScreenSharing): `com.yourname.StreamDogfooding.ScreenSharing`
 - Update the **App Group** for both targets:
-    - Remove the existing group.
-    - Create a new app group based on your updated bundle identifier.
-    - Example: `group.com.yourname.StreamDogfooding`
+  - Remove the existing group.
+  - Create a new app group based on your updated bundle identifier.
+  - Example: `group.com.yourname.StreamDogfooding`
 
 ### 3. macOS Setup
 
@@ -93,14 +93,23 @@ In the output go to the `Android toolchain` section and ensure that the JDK vers
 
 ### 5. Run the app
 
-Once the setup is complete, launch the app:
+Once the setup is complete, launch the app. The app is built with three flavors
+(`dev`, `beta` and `prod`), so pass the one you want to run:
 
 ```bash
 ## Ensure you're in the dogfooding directory
-flutter run
+flutter run --flavor dev
 ```
 
 The app should now start on your connected device or simulator.
+
+#### Build flavors
+
+| Flavor | Purpose                                                                                                                                                     |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dev`  | Day to day development. Enables all developer features.                                                                                                     |
+| `beta` | Internal beta builds. Enables all developer features.                                                                                                       |
+| `prod` | Store builds. Locks the app to the `demo` environment and hides the developer features (environment switcher, developer options in the call settings menu). |
 
 ### 6. Important notes
 
@@ -126,19 +135,29 @@ Using your **Stream app** will allow you to create an iOS certificate and APN pr
 ### Steps to Set Up a Custom Environment
 
 1. Modify the `custom_environment_loader.dart` file:
-    - Replace the global variable `customEnvironmentLoader` with your own `CustomEnvironmentLoader` implementation.
-    - This should return hardcoded tokens or fetch tokens from your backend.
-    - You can manually generate tokens using [this form](https://getstream.io/chat/docs/flutter-dart/tokens_and_authentication/#manually-generating-tokens).
+   - Replace the global variable `customEnvironmentLoader` with your own `CustomEnvironmentLoader` implementation.
+   - This should return hardcoded tokens or fetch tokens from your backend.
+   - You can manually generate tokens using [this form](https://getstream.io/chat/docs/flutter-dart/tokens_and_authentication/#manually-generating-tokens).
 
-2. Run the Dogfooding App:
-    - On the login page, select `custom` from the environment switcher in the top-right corner.
+2. Run the Dogfooding App with a non-production flavor (the environment switcher is hidden in `prod`):
+
+   ```bash
+   flutter run --flavor dev
+   ```
+
+   - On the login page, select `Custom` from the environment switcher in the top-right corner.
 
 3. Set Up Push Providers (if not configured yet):
-    - [Firebase Push Provider for Android](https://getstream.io/video/docs/flutter/advanced/incoming-calls/providers-configuration/#creating-firebase-provider)
-    - [APN Push Provider for iOS](https://getstream.io/video/docs/flutter/advanced/incoming-calls/providers-configuration/#creating-apns-provider)
+   - [Firebase Push Provider for Android](https://getstream.io/video/docs/flutter/advanced/incoming-calls/providers-configuration/#creating-firebase-provider)
+   - [APN Push Provider for iOS](https://getstream.io/video/docs/flutter/advanced/incoming-calls/providers-configuration/#creating-apns-provider)
 
-4. Update Push Providers in `injector.dart`: 
-    - Replace the default provider names in the `_initStreamVideo()` method with the ones you created.
+4. Update Push Providers in `injector.dart`:
+   - Replace the default provider names in the `_initStreamVideo()` method with the ones you created.
+
+5. (Optional) Configure the chat channel type:
+   - The in-call chat uses the `messaging` channel type on custom environments, because a freshly created app does not have the `videocall` channel type that Stream's own environments use.
+   - If your app defines a different channel type, pass it to your loader: `CustomEnvironmentLoader(..., messageChannelType: 'team')`.
+   - Using a channel type that does not exist in your app fails with `User '<id>' with role 'user' is not allowed to perform action CreateChannel in scope '<type>'`.
 
 ## License
 

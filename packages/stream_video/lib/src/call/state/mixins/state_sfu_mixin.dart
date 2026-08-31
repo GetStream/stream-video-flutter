@@ -149,6 +149,10 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
   void sfuDominantSpeakerChanged(
     SfuDominantSpeakerChangedEvent event,
   ) {
+    _logger.d(
+      () => '[sfuDominantSpeakerChanged] ${state.sessionId}; event: $event',
+    );
+
     state = state.copyWith(
       callParticipants: state.callParticipants.map((participant) {
         // Mark the new dominant speaker

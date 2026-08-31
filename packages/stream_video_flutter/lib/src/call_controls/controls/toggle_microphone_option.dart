@@ -18,6 +18,7 @@ class ToggleMicrophoneOption extends StatelessWidget {
     this.disabledMicrophoneIconColor,
     this.enabledMicrophoneBackgroundColor,
     this.disabledMicrophoneBackgroundColor,
+    this.stopTrackOnMute,
   });
 
   /// Represents a call.
@@ -45,6 +46,10 @@ class ToggleMicrophoneOption extends StatelessWidget {
   /// Color of the background when microphone is disabled
   final Color? disabledMicrophoneBackgroundColor;
 
+  /// Determines if muting the microphone stops and releases (`true`) or keeps and silences (`false`) the audio track.
+  /// Setting to `false` is necessary for "speaking-while-muted" detection on iOS and macOS.
+  final bool? stopTrackOnMute;
+
   @override
   Widget build(BuildContext context) {
     Widget buildContent(bool enabled) {
@@ -59,7 +64,10 @@ class ToggleMicrophoneOption extends StatelessWidget {
             ? enabledMicrophoneBackgroundColor
             : disabledMicrophoneBackgroundColor,
         onPressed: () {
-          call.setMicrophoneEnabled(enabled: !enabled);
+          call.setMicrophoneEnabled(
+            enabled: !enabled,
+            stopTrackOnMute: stopTrackOnMute,
+          );
         },
       );
     }
