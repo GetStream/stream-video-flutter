@@ -5,6 +5,20 @@ import 'stream_context_menu_anchor.dart';
 import 'stream_context_menu_heading.dart';
 import 'stream_radio_indicator.dart';
 
+/// Which way a menu is expected to open from its anchor.
+///
+/// The anchored menu flips itself when there is no room, so this is about what
+/// the anchor should *say* — which way its caret points — rather than where the
+/// menu ends up. A control bar along the bottom of a call opens upwards; a
+/// field in a form opens down.
+enum StreamMenuDirection {
+  /// Below the anchor. The default, and what a field in a form does.
+  down,
+
+  /// Above the anchor, as a control bar along the bottom of the screen does.
+  up,
+}
+
 /// One row inside a [StreamMenuSection].
 ///
 /// A row is a choice when [selected] is set and pickable when [onSelected] is:
@@ -126,7 +140,8 @@ class StreamAdaptiveMenuAnchor extends StatefulWidget {
     this.matchAnchorWidth = false,
     this.menuItemStyle,
     this.menuElevation,
-    this.alignmentOffset = const Offset(0, 8),
+    this.direction = StreamMenuDirection.down,
+    this.alignmentOffset,
   });
 
   /// The groups of choices the menu offers.
@@ -173,10 +188,18 @@ class StreamAdaptiveMenuAnchor extends StatefulWidget {
   /// its own surface and ignores this.
   final double? menuElevation;
 
+  /// Which way the menu is expected to open.
+  ///
+  /// Sets which side of the anchor [alignmentOffset] clears by default, and is
+  /// what an anchor asks to point its caret the right way. The sheet
+  /// presentation always comes up from the bottom and ignores it.
+  final StreamMenuDirection direction;
+
   /// The offset of the anchored menu relative to its anchor.
   ///
-  /// Ignored by the sheet presentation.
-  final Offset alignmentOffset;
+  /// Null clears the anchor by 8 on whichever side [direction] names. Ignored
+  /// by the sheet presentation.
+  final Offset? alignmentOffset;
 
   @override
   State<StreamAdaptiveMenuAnchor> createState() =>
@@ -279,7 +302,12 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
   Widget _anchored(BuildContext context, {double? width}) {
     return StreamContextMenuAnchor(
       controller: _menuController,
-      alignmentOffset: widget.alignmentOffset,
+      alignmentOffset:
+          widget.alignmentOffset ??
+          switch (widget.direction) {
+            StreamMenuDirection.down => const Offset(0, 8),
+            StreamMenuDirection.up => const Offset(0, -8),
+          },
       actionStyle: widget.menuItemStyle,
       elevation: widget.menuElevation,
       // StreamContextMenu is an IntrinsicWidth, so a tight width overrides

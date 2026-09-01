@@ -15,15 +15,16 @@ extension LobbyDeviceMenus on StreamMediaDevicesController {
     final translations = context.translations;
 
     return [
-      StreamMenuSection(
-        heading: translations.lobbyMicrophoneSection,
-        options: _options(
-          context,
-          devices: audioInputs,
-          selected: selectedAudioInput,
-          onSelected: selectAudioInput,
+      if (audioInputs.isNotEmpty)
+        StreamMenuSection(
+          heading: translations.lobbyMicrophoneSection,
+          options: _options(
+            context,
+            devices: audioInputs,
+            selected: selectedAudioInput,
+            onSelected: selectAudioInput,
+          ),
         ),
-      ),
       // Platforms that route audio themselves (iOS, Android) report no output
       // devices; there is nothing to pick from there.
       if (audioOutputs.isNotEmpty)
@@ -41,15 +42,16 @@ extension LobbyDeviceMenus on StreamMediaDevicesController {
 
   /// The camera group.
   List<StreamMenuSection> videoSections(BuildContext context) => [
-    StreamMenuSection(
-      heading: context.translations.lobbyCameraSection,
-      options: _options(
-        context,
-        devices: videoInputs,
-        selected: selectedVideoInput,
-        onSelected: selectVideoInput,
+    if (videoInputs.isNotEmpty)
+      StreamMenuSection(
+        heading: context.translations.lobbyCameraSection,
+        options: _options(
+          context,
+          devices: videoInputs,
+          selected: selectedVideoInput,
+          onSelected: selectVideoInput,
+        ),
       ),
-    ),
   ];
 
   List<StreamMenuOption> _options(
@@ -58,6 +60,9 @@ extension LobbyDeviceMenus on StreamMediaDevicesController {
     required RtcMediaDevice? selected,
     required ValueChanged<RtcMediaDevice?> onSelected,
   }) => [
+    // "System default" means "let the platform pick". A section is only built
+    // where there is something to pick from, so this is never the lone entry
+    // in a menu that cannot do anything.
     StreamMenuOption(
       label: context.translations.lobbySystemDefaultDevice,
       selected: selected == null,

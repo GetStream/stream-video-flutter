@@ -35,6 +35,7 @@ class StreamMicrophoneSplitButton extends StatelessWidget {
     required this.enabled,
     this.onPressed,
     this.unavailable = false,
+    this.menuDirection = StreamMenuDirection.down,
   });
 
   /// The device lists and the current selection, shared with anything else
@@ -54,6 +55,12 @@ class StreamMicrophoneSplitButton extends StatelessWidget {
   /// choice the user made.
   final bool unavailable;
 
+  /// Which way the caret expects its menu to open.
+  ///
+  /// A control bar along the bottom of a call opens upwards; the default suits
+  /// a control with room below it.
+  final StreamMenuDirection menuDirection;
+
   @override
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
@@ -68,6 +75,7 @@ class StreamMicrophoneSplitButton extends StatelessWidget {
       enabled: enabled,
       unavailable: unavailable,
       onPressed: onPressed,
+      menuDirection: menuDirection,
     );
   }
 }
@@ -82,6 +90,7 @@ class StreamCameraSplitButton extends StatelessWidget {
     required this.enabled,
     this.onPressed,
     this.unavailable = false,
+    this.menuDirection = StreamMenuDirection.down,
   });
 
   /// The device lists and the current selection.
@@ -97,6 +106,10 @@ class StreamCameraSplitButton extends StatelessWidget {
   /// [StreamMicrophoneSplitButton.unavailable].
   final bool unavailable;
 
+  /// Which way the caret expects its menu to open. See
+  /// [StreamMicrophoneSplitButton.menuDirection].
+  final StreamMenuDirection menuDirection;
+
   @override
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
@@ -111,6 +124,7 @@ class StreamCameraSplitButton extends StatelessWidget {
       enabled: enabled,
       unavailable: unavailable,
       onPressed: onPressed,
+      menuDirection: menuDirection,
     );
   }
 }
@@ -126,6 +140,7 @@ class _DeviceSplitButton extends StatelessWidget {
     required this.enabled,
     required this.unavailable,
     required this.onPressed,
+    required this.menuDirection,
   });
 
   final String title;
@@ -136,14 +151,28 @@ class _DeviceSplitButton extends StatelessWidget {
   final bool enabled;
   final bool unavailable;
   final VoidCallback? onPressed;
+  final StreamMenuDirection menuDirection;
 
   @override
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
+    // Nothing to pick from — a simulator with no camera, or permission not
+    // granted yet, so the platform names no devices.
+    final noChoice = sections.every((section) => section.options.isEmpty);
+
+    // Closed, the caret points where the menu will appear; open, it points
+    // back at the anchor, which is the way to close it again.
+    IconData caret({required bool isOpen}) => switch ((menuDirection, isOpen)) {
+      (StreamMenuDirection.down, false) => icons.caretDown,
+      (StreamMenuDirection.down, true) => icons.caretUp,
+      (StreamMenuDirection.up, false) => icons.caretUp,
+      (StreamMenuDirection.up, true) => icons.caretDown,
+    };
 
     return StreamAdaptiveMenuAnchor(
       title: title,
       sections: sections,
+      direction: menuDirection,
       // An unavailable device is not a user choice, so it is drawn disabled
       // with an error badge rather than in the destructive state a deliberate
       // mute gets. Both halves take a null callback because a split button
@@ -153,12 +182,12 @@ class _DeviceSplitButton extends StatelessWidget {
         showErrorBadge: unavailable,
         child: StreamSplitButton.icon(
           leadingIcon: Icon(icon),
-          trailingIcon: Icon(handle.isOpen ? icons.caretUp : icons.caretDown),
+          trailingIcon: Icon(caret(isOpen: handle.isOpen)),
           variant: enabled || unavailable ? .regular : .destructive,
           leadingTooltip: tooltip,
           trailingTooltip: trailingTooltip,
           onLeadingPressed: unavailable ? null : onPressed,
-          onTrailingPressed: unavailable ? null : handle.toggle,
+          onTrailingPressed: unavailable || noChoice ? null : handle.toggle,
         ),
       ),
     );
