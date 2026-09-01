@@ -163,6 +163,15 @@ void main() {
     expect(find.byType(StreamLobbyMicrophoneToggle), findsOneWidget);
   });
 
+  // Nothing reports a local audio level before joining, so an indicator here
+  // would sit permanently idle.
+  testWidgets('the preview shows no sound indicator', (tester) async {
+    await tester.pumpWidget(screen(LobbyActions.simple(), 900));
+
+    expect(find.byType(StreamParticipantLabel), findsOneWidget);
+    expect(find.byType(StreamAudioIndicator), findsNothing);
+  });
+
   // An app that registers a `participantTile` builder adding an overflow menu
   // to every tile — as dogfooding does — would otherwise get one on the
   // preview, offering to pin or mute someone who has not joined anything.
