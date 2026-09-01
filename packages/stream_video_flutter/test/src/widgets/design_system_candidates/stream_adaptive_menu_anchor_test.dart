@@ -52,6 +52,43 @@ void main() {
       expect(find.byType(StreamListTile), findsNothing);
     });
 
+    // A menu is not always a choice: a list that only shows something — the
+    // people already in a call — has no radio indicators and nothing to press.
+    for (final platform in [TargetPlatform.android, TargetPlatform.macOS]) {
+      final name = platform.name;
+
+      testWidgets('draws a plain row where there is no choice on $name', (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          TestWrapper(
+            platform: platform,
+            child: const _Menu(
+              sections: [
+                StreamMenuSection(
+                  options: [
+                    StreamMenuOption(
+                      label: 'Rene',
+                      leading: Icon(Icons.person),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('open'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Rene'), findsOneWidget);
+        expect(find.byIcon(Icons.person), findsOneWidget);
+        // No choice, so no radio and no heading.
+        expect(find.byType(StreamRadioIndicator), findsNothing);
+        expect(find.byType(StreamContextMenuHeading), findsNothing);
+      });
+    }
+
     // MenuAnchor clips its panel to the panel's own bounds by default, which
     // cuts off the shadow the menu's Material draws outside them — the shadow
     // stops dead along the bottom edge rather than fading out, and raising the
@@ -254,12 +291,14 @@ class _Menu extends StatelessWidget {
     this.onPicked,
     this.matchAnchorWidth = false,
     this.menuElevation,
+    this.sections,
   });
 
   final bool? useSheet;
   final ValueChanged<String>? onPicked;
   final bool matchAnchorWidth;
   final double? menuElevation;
+  final List<StreamMenuSection>? sections;
 
   @override
   Widget build(BuildContext context) {
@@ -275,19 +314,21 @@ class _Menu extends StatelessWidget {
       useSheet: useSheet,
       matchAnchorWidth: matchAnchorWidth,
       menuElevation: menuElevation,
-      sections: [
-        StreamMenuSection(
-          heading: 'Microphone',
-          options: [
-            option('MacBook Pro Microphone', selected: true),
-            option('Jabra Evolve2 65'),
+      sections:
+          sections ??
+          [
+            StreamMenuSection(
+              heading: 'Microphone',
+              options: [
+                option('MacBook Pro Microphone', selected: true),
+                option('Jabra Evolve2 65'),
+              ],
+            ),
+            StreamMenuSection(
+              heading: 'Speaker',
+              options: [option('MacBook Pro Speakers', selected: true)],
+            ),
           ],
-        ),
-        StreamMenuSection(
-          heading: 'Speaker',
-          options: [option('MacBook Pro Speakers', selected: true)],
-        ),
-      ],
       builder: (context, handle) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
