@@ -89,6 +89,23 @@ class StreamLobbyController extends ChangeNotifier {
   /// The last failure opening the camera, or null.
   Object? get cameraError => _cameraError;
 
+  /// Whether the microphone cannot be used at all.
+  ///
+  /// True when opening it failed — permission refused, or nothing to open —
+  /// and when the platform has stopped reporting any microphone since. A
+  /// control for an unavailable device is drawn disabled with an error badge
+  /// rather than in the state a deliberate mute gets, so a permission problem
+  /// is not mistaken for a choice the user made. Joining stays possible with
+  /// the device disabled.
+  bool get microphoneUnavailable =>
+      _microphoneError != null ||
+      (_hasMicrophonePermission && devices.audioInputs.isEmpty);
+
+  /// Whether the camera cannot be used at all. See [microphoneUnavailable].
+  bool get cameraUnavailable =>
+      _cameraError != null ||
+      (_hasCameraPermission && devices.videoInputs.isEmpty);
+
   /// Whether the microphone has been opened at least once.
   ///
   /// Device labels only arrive once `getUserMedia` has succeeded, so a
