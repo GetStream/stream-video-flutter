@@ -116,7 +116,7 @@ Breakpoints — [Chat SDK Design, Screen Sizing](https://www.figma.com/design/Us
 - [x] Phase 7 — `StreamLobbyView` rewrite, `StreamLobbyVideo` absorbed
 - [x] Phase 8 — lobby theme migrated to `@themeGen`
 - [x] Phase 9 — dogfooding uses the SDK lobby directly
-- [ ] Phase 10 — tests, goldens, changelog
+- [x] Phase 10 — tests, goldens, changelog
 
 Commit after each phase (no push), per the repo convention.
 
