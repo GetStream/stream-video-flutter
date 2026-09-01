@@ -126,6 +126,9 @@ mixin _$StreamLobbyViewStyle {
         b.overlayControlInset,
         t,
       ),
+      maxOverlaidControls: t < 0.5
+          ? a.maxOverlaidControls
+          : b.maxOverlaidControls,
       joinButtonWidth: lerpDouble$(a.joinButtonWidth, b.joinButtonWidth, t),
       titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
       subtitleTextStyle: TextStyle.lerp(
@@ -148,6 +151,7 @@ mixin _$StreamLobbyViewStyle {
     double? controlSpacing,
     double? settingSpacing,
     double? overlayControlInset,
+    int? maxOverlaidControls,
     double? joinButtonWidth,
     TextStyle? titleTextStyle,
     TextStyle? subtitleTextStyle,
@@ -167,6 +171,7 @@ mixin _$StreamLobbyViewStyle {
       controlSpacing: controlSpacing ?? _this.controlSpacing,
       settingSpacing: settingSpacing ?? _this.settingSpacing,
       overlayControlInset: overlayControlInset ?? _this.overlayControlInset,
+      maxOverlaidControls: maxOverlaidControls ?? _this.maxOverlaidControls,
       joinButtonWidth: joinButtonWidth ?? _this.joinButtonWidth,
       titleTextStyle: titleTextStyle ?? _this.titleTextStyle,
       subtitleTextStyle: subtitleTextStyle ?? _this.subtitleTextStyle,
@@ -198,6 +203,7 @@ mixin _$StreamLobbyViewStyle {
       controlSpacing: other.controlSpacing,
       settingSpacing: other.settingSpacing,
       overlayControlInset: other.overlayControlInset,
+      maxOverlaidControls: other.maxOverlaidControls,
       joinButtonWidth: other.joinButtonWidth,
       titleTextStyle:
           _this.titleTextStyle?.merge(other.titleTextStyle) ??
@@ -232,6 +238,7 @@ mixin _$StreamLobbyViewStyle {
         _other.controlSpacing == _this.controlSpacing &&
         _other.settingSpacing == _this.settingSpacing &&
         _other.overlayControlInset == _this.overlayControlInset &&
+        _other.maxOverlaidControls == _this.maxOverlaidControls &&
         _other.joinButtonWidth == _this.joinButtonWidth &&
         _other.titleTextStyle == _this.titleTextStyle &&
         _other.subtitleTextStyle == _this.subtitleTextStyle;
@@ -254,6 +261,7 @@ mixin _$StreamLobbyViewStyle {
       _this.controlSpacing,
       _this.settingSpacing,
       _this.overlayControlInset,
+      _this.maxOverlaidControls,
       _this.joinButtonWidth,
       _this.titleTextStyle,
       _this.subtitleTextStyle,
