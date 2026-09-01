@@ -109,6 +109,18 @@ void main() {
     ('simple', LobbyActions.simple),
     ('regular', LobbyActions.regular),
     ('full', LobbyActions.full),
+    // What dogfooding shows on a tablet, and the case that made the rule
+    // necessary: four controls overlaid on the preview run into the
+    // participant label, so the row drops below it instead.
+    (
+      'extras',
+      () => LobbyActions.regular(
+        extraControls: const [
+          StreamLobbyParticipantsControl(),
+          StreamLobbyCameraToggle(),
+        ],
+      ),
+    ),
   ]) {
     for (final brightness in Brightness.values) {
       streamGoldenTest(
@@ -148,6 +160,35 @@ void main() {
 
     expect(find.byType(StreamSelectInput), findsNothing);
     expect(find.byType(StreamLobbyMicrophoneToggle), findsOneWidget);
+  });
+
+  // The overlaid row shares the preview's bottom edge with the participant
+  // label, so it only ever holds a few buttons.
+  testWidgets('a long control row drops below the preview', (tester) async {
+    final tall = LobbyActions.regular(
+      extraControls: const [
+        StreamLobbyParticipantsControl(),
+        StreamLobbyCameraToggle(),
+      ],
+    );
+
+    await tester.pumpWidget(screen(tall, 1440));
+
+    final preview = tester.getRect(find.byType(StreamParticipantTile));
+    final controls = tester.getRect(
+      find.byType(StreamLobbyMicrophoneSplitButton),
+    );
+
+    expect(controls.top, greaterThanOrEqualTo(preview.bottom));
+  });
+
+  testWidgets('a short control row stays on the preview', (tester) async {
+    await tester.pumpWidget(screen(LobbyActions.simple(), 1440));
+
+    final preview = tester.getRect(find.byType(StreamParticipantTile));
+    final controls = tester.getRect(find.byType(StreamLobbyMicrophoneToggle));
+
+    expect(controls.top, lessThan(preview.bottom));
   });
 
   testWidgets('full keeps its settings row at the small breakpoint', (

@@ -151,6 +151,12 @@ class _LobbyBody extends StatelessWidget {
       StreamLobbyViewTheme.of(context).style,
     );
 
+    // The overlaid row is centred on a preview whose bottom-start corner is
+    // taken by the participant label, so a long row runs into it. Past that
+    // the row goes below the preview, however much width there is.
+    final overlayControls =
+        !isSmall && actions.controls.length <= style.maxOverlaidControls;
+
     final controlRow = actions.controls.isEmpty
         ? null
         : Row(
@@ -191,9 +197,9 @@ class _LobbyBody extends StatelessWidget {
                 alignment: AlignmentDirectional.bottomCenter,
                 children: [
                   const _LobbyPreview(),
-                  // Above 768px the controls float over the preview, clear of
-                  // the participant label's toolbar band along the bottom.
-                  if (!isSmall && controlRow != null)
+                  // Above 768px a short row floats over the preview, clear
+                  // of the participant label's toolbar band along the bottom.
+                  if (overlayControls && controlRow != null)
                     Padding(
                       padding: EdgeInsets.only(
                         bottom: style.overlayControlInset,
@@ -202,7 +208,7 @@ class _LobbyBody extends StatelessWidget {
                     ),
                 ],
               ),
-              if (isSmall && controlRow != null) controlRow,
+              if (!overlayControls && controlRow != null) controlRow,
               if (actions.settings.isNotEmpty)
                 Row(
                   spacing: style.settingSpacing,
@@ -346,6 +352,9 @@ class _StreamLobbyViewStyleDefaults extends StreamLobbyViewStyle {
 
   @override
   double get overlayControlInset => _style?.overlayControlInset ?? _spacing.md;
+
+  @override
+  int get maxOverlaidControls => _style?.maxOverlaidControls ?? 3;
 
   @override
   double get joinButtonWidth => _style?.joinButtonWidth ?? 400;
