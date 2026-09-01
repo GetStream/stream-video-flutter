@@ -130,6 +130,8 @@ class StreamLobbyController extends ChangeNotifier {
       sessionId: '',
       trackIdPrefix: '',
       isLocal: true,
+      // Left false: the in-call speaking state comes from the SFU, and there
+      // is no local mic level before joining. See FLU-714.
       publishedTracks: {
         SfuTrackType.audio: TrackState.local(
           muted: !microphoneEnabled,

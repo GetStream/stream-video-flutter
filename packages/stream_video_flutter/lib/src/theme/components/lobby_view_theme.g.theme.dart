@@ -104,16 +104,6 @@ mixin _$StreamLobbyViewStyle {
         b.previewBorderRadius,
         t,
       ),
-      previewBorderColor: Color.lerp(
-        a.previewBorderColor,
-        b.previewBorderColor,
-        t,
-      ),
-      previewBorderWidth: lerpDouble$(
-        a.previewBorderWidth,
-        b.previewBorderWidth,
-        t,
-      ),
       previewTileStyle: StreamParticipantTileStyle.lerp(
         a.previewTileStyle,
         b.previewTileStyle,
@@ -148,8 +138,6 @@ mixin _$StreamLobbyViewStyle {
 
   StreamLobbyViewStyle copyWith({
     BorderRadius? previewBorderRadius,
-    Color? previewBorderColor,
-    double? previewBorderWidth,
     StreamParticipantTileStyle? previewTileStyle,
     double? smallPreviewAspectRatio,
     Size? largePreviewSize,
@@ -168,8 +156,6 @@ mixin _$StreamLobbyViewStyle {
 
     return StreamLobbyViewStyle(
       previewBorderRadius: previewBorderRadius ?? _this.previewBorderRadius,
-      previewBorderColor: previewBorderColor ?? _this.previewBorderColor,
-      previewBorderWidth: previewBorderWidth ?? _this.previewBorderWidth,
       previewTileStyle: previewTileStyle ?? _this.previewTileStyle,
       smallPreviewAspectRatio:
           smallPreviewAspectRatio ?? _this.smallPreviewAspectRatio,
@@ -200,8 +186,6 @@ mixin _$StreamLobbyViewStyle {
 
     return copyWith(
       previewBorderRadius: other.previewBorderRadius,
-      previewBorderColor: other.previewBorderColor,
-      previewBorderWidth: other.previewBorderWidth,
       previewTileStyle:
           _this.previewTileStyle?.merge(other.previewTileStyle) ??
           other.previewTileStyle,
@@ -238,8 +222,6 @@ mixin _$StreamLobbyViewStyle {
     final _other = (other as StreamLobbyViewStyle);
 
     return _other.previewBorderRadius == _this.previewBorderRadius &&
-        _other.previewBorderColor == _this.previewBorderColor &&
-        _other.previewBorderWidth == _this.previewBorderWidth &&
         _other.previewTileStyle == _this.previewTileStyle &&
         _other.smallPreviewAspectRatio == _this.smallPreviewAspectRatio &&
         _other.largePreviewSize == _this.largePreviewSize &&
@@ -262,8 +244,6 @@ mixin _$StreamLobbyViewStyle {
     return Object.hash(
       runtimeType,
       _this.previewBorderRadius,
-      _this.previewBorderColor,
-      _this.previewBorderWidth,
       _this.previewTileStyle,
       _this.smallPreviewAspectRatio,
       _this.largePreviewSize,
