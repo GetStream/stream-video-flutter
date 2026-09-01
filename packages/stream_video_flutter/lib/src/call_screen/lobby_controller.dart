@@ -110,6 +110,44 @@ class StreamLobbyController extends ChangeNotifier {
   /// The user this lobby belongs to.
   UserInfo get currentUser => _video.currentUser;
 
+  /// The local user as a participant, so the preview can be drawn with the
+  /// same `StreamParticipantTile` the call itself uses.
+  ///
+  /// Nobody has joined yet, so there is no session and the tracks are not
+  /// registered with the call: the ids are empty and the tile is handed its
+  /// renderer directly. What is real is the mute state, which is what the tile
+  /// draws its label and its outline from.
+  CallParticipantState get localParticipant {
+    final camera = cameraTrack;
+
+    return CallParticipantState(
+      userId: currentUser.id,
+      name: currentUser.name,
+      image: currentUser.image,
+      roles: [currentUser.role],
+      // ignore: deprecated_member_use, still required by the constructor
+      custom: const {},
+      sessionId: '',
+      trackIdPrefix: '',
+      isLocal: true,
+      publishedTracks: {
+        SfuTrackType.audio: TrackState.local(
+          muted: !microphoneEnabled,
+          sourceDevice: devices.selectedAudioInput,
+        ),
+        SfuTrackType.video: TrackState.local(
+          muted: !cameraEnabled,
+          sourceDevice: devices.selectedVideoInput,
+          cameraPosition: switch (camera?.mediaConstraints.facingMode) {
+            FacingMode.user => CameraPosition.front,
+            FacingMode.environment => CameraPosition.back,
+            _ => null,
+          },
+        ),
+      },
+    );
+  }
+
   /// How the call should be joined: the warmed-up tracks, and the devices the
   /// user picked for them.
   CallConnectOptions get connectOptions {

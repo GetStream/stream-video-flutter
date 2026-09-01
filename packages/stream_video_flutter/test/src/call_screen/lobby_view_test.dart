@@ -31,11 +31,16 @@ const _frontCamera = RtcMediaDevice(
 /// 500 stands for the narrow desktop window: below the breakpoint, so it lays
 /// out like a phone, but still a pointer device, so a host gives it the `full`
 /// preset — toggles below the feed *and* a settings row.
-const _widths = <String, double>{
-  '375': 375,
-  '500': 500,
-  '900': 900,
-  '1440': 1440,
+// Each width is paired with a height generous enough for the tallest preset
+// at it. StreamParticipantTile has a LayoutBuilder inside — it sheds chrome to
+// fit — and alchemist lays its scenarios out in a Table, which asks for
+// intrinsic dimensions a LayoutBuilder cannot give. Tight constraints in both
+// axes stop the Table descending that far.
+const _widths = <String, Size>{
+  '375': Size(375, 560),
+  '500': Size(500, 700),
+  '900': Size(900, 640),
+  '1440': Size(1440, 640),
 };
 
 void main() {
@@ -114,10 +119,13 @@ void main() {
         builder: () => GoldenTestGroup(
           columns: 1,
           children: [
-            for (final MapEntry(key: name, value: width) in _widths.entries)
+            for (final MapEntry(key: name, value: size) in _widths.entries)
               GoldenTestScenario(
                 name: '$preset @ $name',
-                child: lobby(build(), width),
+                child: SizedBox.fromSize(
+                  size: size,
+                  child: lobby(build(), size.width),
+                ),
               ),
           ],
         ),

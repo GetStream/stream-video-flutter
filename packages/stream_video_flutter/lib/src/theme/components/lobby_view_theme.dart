@@ -103,7 +103,7 @@ class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
     this.previewBorderRadius,
     this.previewBorderColor,
     this.previewBorderWidth,
-    this.previewBackgroundColor,
+    this.previewTileStyle,
     this.smallPreviewAspectRatio,
     this.largePreviewSize,
     this.sectionSpacing,
@@ -113,7 +113,6 @@ class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
     this.controlSpacing,
     this.settingSpacing,
     this.overlayControlInset,
-    this.participantLabelInset,
     this.joinButtonWidth,
     this.titleTextStyle,
     this.subtitleTextStyle,
@@ -135,10 +134,13 @@ class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
   /// and leaves the default in place.
   final double? previewBorderWidth;
 
-  /// What the preview shows behind the camera, or in place of it.
+  /// Overrides for the participant tile the preview is drawn with.
   ///
-  /// Defaults to `colorScheme.backgroundSurface`.
-  final Color? previewBackgroundColor;
+  /// The preview *is* a `StreamParticipantTile`, so its surface, corner
+  /// radius, name pill and placeholder avatar come from
+  /// `StreamParticipantTileTheme` like every other tile's. Set this only to
+  /// make the preview differ from the tiles in the call it leads to.
+  final StreamParticipantTileStyle? previewTileStyle;
 
   /// The preview's aspect below [StreamScreenSize.smallMaxWidth].
   ///
@@ -188,12 +190,6 @@ class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
   /// controls are drawn on the preview. Defaults to `spacing.md`, which clears
   /// the participant label's band.
   final double? overlayControlInset;
-
-  /// The inset of the participant label from the preview's bottom-start
-  /// corner.
-  ///
-  /// Defaults to `spacing.sm`.
-  final double? participantLabelInset;
 
   /// The width of the join button at [StreamScreenSize.smallMaxWidth] and
   /// above.
