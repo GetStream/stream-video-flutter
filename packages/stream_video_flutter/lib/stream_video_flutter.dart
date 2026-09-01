@@ -65,6 +65,7 @@ export 'src/renderer/video_renderer.dart';
 export 'src/screen_share/screen_share.dart';
 export 'src/theme/themes.dart';
 export 'src/utils/device_segmentation.dart';
+export 'src/utils/screen_size.dart';
 export 'src/widgets/design_system_candidates/stream_context_menu_anchor.dart';
 export 'src/widgets/design_system_candidates/stream_context_menu_heading.dart';
 export 'src/widgets/design_system_candidates/stream_radio_indicator.dart';
