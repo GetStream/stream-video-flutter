@@ -12,12 +12,12 @@ part 'lobby_view_theme.g.theme.dart';
 ///
 /// {@tool snippet}
 ///
-/// Square the preview off:
+/// Give the preview a narrower join button than the default 400:
 ///
 /// ```dart
 /// StreamLobbyViewTheme(
 ///   data: StreamLobbyViewThemeData(
-///     style: StreamLobbyViewStyle(previewBorderRadius: BorderRadius.zero),
+///     style: StreamLobbyViewStyle(joinButtonWidth: 280),
 ///   ),
 ///   child: child,
 /// )
@@ -88,43 +88,30 @@ class StreamLobbyViewThemeData with _$StreamLobbyViewThemeData {
 
 /// Visual styling properties for a [StreamLobbyView].
 ///
-/// The lobby has two geometries, one for windows under
-/// [StreamScreenSize.smallMaxWidth] and one for wider ones, so several
-/// properties come in pairs. Which of the pair applies is the window's
-/// business, not the theme's.
+/// Deliberately small. The preview is a `StreamParticipantTile`, so its
+/// appearance belongs to `StreamParticipantTileTheme`; the gaps between the
+/// lobby's rows come from `StreamSpacing` and the headings from
+/// `StreamTextTheme`, so an app restyles them by restyling those rather than
+/// by respelling them here. What is left is the lobby's own geometry.
 @themeGen
 @immutable
 class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
   /// Creates a lobby style with optional property overrides.
   const StreamLobbyViewStyle({
-    this.previewBorderRadius,
     this.previewTileStyle,
     this.smallPreviewAspectRatio,
     this.largePreviewSize,
-    this.sectionSpacing,
-    this.headingSpacing,
-    this.smallLaneSpacing,
-    this.largeLaneSpacing,
-    this.controlSpacing,
-    this.settingSpacing,
-    this.overlayControlInset,
     this.maxOverlaidControls,
     this.joinButtonWidth,
-    this.titleTextStyle,
-    this.subtitleTextStyle,
   });
-
-  /// The preview's corner radius.
-  ///
-  /// Defaults to `radius.xxl`.
-  final BorderRadius? previewBorderRadius;
 
   /// Overrides for the participant tile the preview is drawn with.
   ///
   /// The preview *is* a `StreamParticipantTile`, so its surface, corner
   /// radius, name pill and placeholder avatar come from
-  /// `StreamParticipantTileTheme` like every other tile's. Set this only to
-  /// make the preview differ from the tiles in the call it leads to.
+  /// `StreamParticipantTileTheme` like every other tile's, and theming the
+  /// call's tiles themes the lobby with them. Set this only to make the
+  /// preview differ from the tiles in the call it leads to.
   final StreamParticipantTileStyle? previewTileStyle;
 
   /// The preview's aspect below [StreamScreenSize.smallMaxWidth].
@@ -137,44 +124,6 @@ class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
   /// Its width also caps the settings row, so the fields line up under the
   /// preview. Defaults to `Size(640, 360)`.
   final Size? largePreviewSize;
-
-  /// The gap between the heading, the preview block and the join button.
-  ///
-  /// Defaults to `spacing.xxl`.
-  final double? sectionSpacing;
-
-  /// The gap between the title and the subtitle.
-  ///
-  /// Defaults to `spacing.sm`.
-  final double? headingSpacing;
-
-  /// The gap between the preview, the control row and the settings row below
-  /// [StreamScreenSize.smallMaxWidth].
-  ///
-  /// Defaults to `spacing.sm`.
-  final double? smallLaneSpacing;
-
-  /// The same gap at [StreamScreenSize.smallMaxWidth] and above.
-  ///
-  /// Defaults to `spacing.md`.
-  final double? largeLaneSpacing;
-
-  /// The gap between the buttons in the control row.
-  ///
-  /// Defaults to `spacing.xs`.
-  final double? controlSpacing;
-
-  /// The gap between the fields in the settings row.
-  ///
-  /// Defaults to `spacing.xs`.
-  final double? settingSpacing;
-
-  /// How far the overlaid control row sits above the preview's bottom edge.
-  ///
-  /// Only applies at [StreamScreenSize.smallMaxWidth] and above, where the
-  /// controls are drawn on the preview. Defaults to `spacing.md`, which clears
-  /// the participant label's band.
-  final double? overlayControlInset;
 
   /// How many controls may be drawn on top of the preview.
   ///
@@ -189,16 +138,6 @@ class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
   ///
   /// Below it the button is always full width. Defaults to 400.
   final double? joinButtonWidth;
-
-  /// The text style of the heading.
-  ///
-  /// Defaults to `textTheme.headingMd`.
-  final TextStyle? titleTextStyle;
-
-  /// The text style of the line below the heading.
-  ///
-  /// Defaults to `textTheme.bodyDefault`.
-  final TextStyle? subtitleTextStyle;
 
   /// Linearly interpolate between two styles.
   static StreamLobbyViewStyle? lerp(
