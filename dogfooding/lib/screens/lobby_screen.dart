@@ -221,18 +221,22 @@ class _LobbyScreenState extends State<LobbyScreen> {
     final spacing = context.streamSpacing;
     final currentUser = _userAuthController.currentUser!;
 
-    // Picking a preset for the window is a demo of what a host can do, not
-    // something the SDK does: StreamLobbyView defaults to LobbyActions.simple()
-    // at every width. On Android and iOS the split buttons and the select
-    // inputs open bottom sheets with nothing here saying so.
+    // Picking a preset is a demo of what a host can do, not something the SDK
+    // does: StreamLobbyView defaults to LobbyActions.simple() everywhere.
+    //
+    // The choice is by platform, not by window width. A phone has no room for
+    // a settings row at any size, so the device choice goes on the toggles'
+    // carets; anything with a pointer gets the fields, however narrow the
+    // window is. Width still decides the *layout* — whether the control row
+    // sits on the preview or below it — but that is StreamLobbyView's business
+    // and it needs nothing from here.
     final extras = [
       const StreamLobbyParticipantsControl(),
       _BlurToggle(effects: _videoEffectsManager),
     ];
-    final actions = switch (context.streamScreenSize) {
-      StreamScreenSize.small => LobbyActions.regular(extraControls: extras),
-      _ => LobbyActions.full(extraControls: extras),
-    };
+    final actions = isMobileDevice
+        ? LobbyActions.regular(extraControls: extras)
+        : LobbyActions.full(extraControls: extras);
 
     return Scaffold(
       appBar: AppBar(
