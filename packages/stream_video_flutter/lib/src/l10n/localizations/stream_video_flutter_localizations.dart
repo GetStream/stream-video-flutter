@@ -251,12 +251,6 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'Before joining'**
   String get lobbyTitle;
 
-  /// Subheading of the lobby screen
-  ///
-  /// In en, this message translates to:
-  /// **'Set up your audio and video'**
-  String get lobbySubtitle;
-
   /// Label of the button that joins the call from the lobby
   ///
   /// In en, this message translates to:
