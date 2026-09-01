@@ -11,3 +11,11 @@ class MockCallParticipantState extends Mock implements CallParticipantState {}
 
 class MockRtcMediaDeviceNotifier extends Mock
     implements RtcMediaDeviceNotifier {}
+
+class MockStreamVideo extends Mock implements StreamVideo {}
+
+class MockCallCreatedData extends Mock implements CallCreatedData {}
+
+class MockCallMetadata extends Mock implements CallMetadata {}
+
+class MockCallSettings extends Mock implements CallSettings {}
