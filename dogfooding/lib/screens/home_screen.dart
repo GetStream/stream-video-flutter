@@ -158,6 +158,9 @@ class _HomeScreenState extends State<HomeScreen> {
               StreamTextInput(
                 controller: controller,
                 hintText: 'User IDs',
+                // A user id is looked up verbatim, so iOS auto-capitalizing
+                // the first letter turns a valid id into one that misses.
+                textCapitalization: .none,
               ),
               const SizedBox(height: 16),
               Align(
@@ -352,6 +355,10 @@ class _JoinForm extends StatelessWidget {
               child: StreamTextInput(
                 controller: callIdController,
                 hintText: 'Enter call id',
+                // A call id is matched verbatim, so iOS auto-capitalizing the
+                // first letter sends you to a different call — or to one that
+                // does not exist.
+                textCapitalization: .none,
                 style: .new(
                   contentPadding: .only(left: spacing.md),
                 ),
