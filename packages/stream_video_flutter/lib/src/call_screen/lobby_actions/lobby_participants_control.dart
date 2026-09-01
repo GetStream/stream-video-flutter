@@ -60,15 +60,23 @@ class StreamLobbyParticipantsControl extends StatelessWidget {
                   Builder(
                     builder: (context) {
                       final user = controller.users[participant.userId];
-                      return StreamListTile(
-                        leading: StreamUserAvatar(
-                          user: UserInfo(
-                            id: participant.userId,
-                            name: user?.name ?? participant.userId,
-                            image: user?.image,
-                          ),
+                      // Matches the inset the device sheets use, so rows in
+                      // the two line up and a highlight never runs into the
+                      // sheet's edges.
+                      return Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: context.streamSpacing.xxs,
                         ),
-                        title: Text(user?.name ?? participant.userId),
+                        child: StreamListTile(
+                          leading: StreamUserAvatar(
+                            user: UserInfo(
+                              id: participant.userId,
+                              name: user?.name ?? participant.userId,
+                              image: user?.image,
+                            ),
+                          ),
+                          title: Text(user?.name ?? participant.userId),
+                        ),
                       );
                     },
                   ),
