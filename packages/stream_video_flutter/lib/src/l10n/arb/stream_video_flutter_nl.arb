@@ -11,5 +11,17 @@
   "livestreamEndedWatchRecordings": "Bekijk de opnames:",
   "livestreamHostNotAvailable": "De video van de host is niet beschikbaar.",
   "livestreamBackstage": "Backstage",
-  "livestreamLive": "Live"
+  "livestreamLive": "Live",
+  "lobbyMicrophoneSection": "Microfoon",
+  "lobbySpeakerSection": "Luidspreker",
+  "lobbyCameraSection": "Camera",
+  "lobbySystemDefaultDevice": "Systeemstandaard",
+  "lobbyDefaultDeviceHint": "Standaard",
+  "lobbySelectAudioDevices": "Audioapparaten selecteren",
+  "lobbySelectVideoDevice": "Video-apparaat selecteren",
+  "lobbyMicrophonePermissionRequired": "Microfoontoegang is vereist om audioapparaten te selecteren",
+  "lobbyCameraPermissionRequired": "Cameratoegang is vereist om een video-apparaat te selecteren",
+  "lobbyToggleMicrophone": "Microfoon aan- of uitzetten",
+  "lobbyToggleCamera": "Camera aan- of uitzetten",
+  "lobbyParticipants": "Deelnemers"
 }

@@ -34,6 +34,11 @@ class StreamLobbyController extends ChangeNotifier {
       onVideoInputSelected: (_) => _restartCamera(),
     );
 
+    // StreamLobbyScope listens to this controller, not to the device one, so
+    // a device list arriving or a selection changing has to be forwarded or
+    // the pickers never rebuild.
+    devices.addListener(notifyListeners);
+
     _fetchCall();
     _listenEvents();
     _applyCallDefaults();
@@ -268,7 +273,9 @@ class StreamLobbyController extends ChangeNotifier {
   void dispose() {
     _fetchSubscription?.cancel();
     _eventSubscription?.cancel();
-    devices.dispose();
+    devices
+      ..removeListener(notifyListeners)
+      ..dispose();
 
     // Tracks are only stopped if they were not handed to a call. A track
     // passed as TrackOption.provided outlives the lobby, and stopping it here
