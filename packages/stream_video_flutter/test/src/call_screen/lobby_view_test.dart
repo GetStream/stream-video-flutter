@@ -27,7 +27,16 @@ const _frontCamera = RtcMediaDevice(
 /// how big the preview is. A `simple` lobby at 1440 must still overlay its
 /// controls, and a `full` lobby at 375 must still stack them below the preview
 /// and keep its settings row.
-const _widths = <String, double>{'375': 375, '900': 900, '1440': 1440};
+///
+/// 500 stands for the narrow desktop window: below the breakpoint, so it lays
+/// out like a phone, but still a pointer device, so a host gives it the `full`
+/// preset — toggles below the feed *and* a settings row.
+const _widths = <String, double>{
+  '375': 375,
+  '500': 500,
+  '900': 900,
+  '1440': 1440,
+};
 
 void main() {
   late StreamController<List<RtcMediaDevice>> deviceChanges;

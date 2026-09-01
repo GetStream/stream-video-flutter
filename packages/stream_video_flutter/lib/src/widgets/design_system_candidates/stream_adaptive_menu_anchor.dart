@@ -192,6 +192,7 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
     setState(() => _isOpen = true);
     await showStreamSheet<void>(
       context: context,
+      isDismissible: true,
       builder: (context, scrollController) => _MenuSheet(
         title: widget.title,
         sections: widget.sections,
@@ -265,7 +266,6 @@ class _MenuSheet extends StatelessWidget {
             // top drags the sheet instead of overscrolling.
             controller: scrollController,
             shrinkWrap: true,
-            padding: EdgeInsets.only(bottom: spacing.sm),
             children: [
               for (final section in sections) ...[
                 Padding(
