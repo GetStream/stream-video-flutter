@@ -7,6 +7,7 @@ import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../dogfooding_app_channel.dart';
+import '../../utils/app_features.dart';
 import '../../utils/consts.dart';
 import '../../utils/feedback_dialog.dart';
 import 'audio_output_menu_item.dart';
@@ -247,16 +248,18 @@ class _SettingsMenuState extends State<SettingsMenu> {
             });
           },
         ),
-        const SizedBox(height: 16),
-        StandardActionMenuItem(
-          icon: Icons.auto_awesome,
-          label: 'Set Background Effect',
-          onPressed: () {
-            setState(() {
-              showBackgroundEffects = true;
-            });
-          },
-        ),
+        if (AppFeature.backgroundBlur.isSupported) ...[
+          const SizedBox(height: 16),
+          StandardActionMenuItem(
+            icon: Icons.auto_awesome,
+            label: 'Set Background Effect',
+            onPressed: () {
+              setState(() {
+                showBackgroundEffects = true;
+              });
+            },
+          ),
+        ],
         const SizedBox(height: 16),
         StandardActionMenuItem(
           icon: Icons.high_quality_sharp,

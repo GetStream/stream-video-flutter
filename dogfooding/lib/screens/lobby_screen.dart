@@ -5,6 +5,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../app/user_auth_controller.dart';
 import '../di/injector.dart';
+import '../utils/app_features.dart';
 
 /// The dogfooding lobby: the SDK's [StreamLobbyView] under this app's own
 /// chrome, with a background-blur toggle spliced into the control row.
@@ -50,7 +51,8 @@ class _LobbyScreenState extends State<LobbyScreen> {
     // and it needs nothing from here.
     final extras = [
       const StreamLobbyParticipantsControl(),
-      _BlurToggle(effects: _videoEffectsManager),
+      if (AppFeature.backgroundBlur.isSupported)
+        _BlurToggle(effects: _videoEffectsManager),
     ];
     final actions = isMobileDevice
         ? LobbyActions.regular(extraControls: extras)
