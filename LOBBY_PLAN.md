@@ -112,7 +112,7 @@ Breakpoints — [Chat SDK Design, Screen Sizing](https://www.figma.com/design/Us
 - [x] Phase 3 — `StreamAdaptiveMenuAnchor`
 - [x] Phase 4 — `StreamMediaDevicesController`, `StreamLobbyController`, `StreamLobbyScope`
 - [x] Phase 5 — control and setting widgets
-- [ ] Phase 6 — `LobbyActions` and its presets
+- [x] Phase 6 — `LobbyActions` and its presets
 - [ ] Phase 7 — `StreamLobbyView` rewrite, `StreamLobbyVideo` absorbed
 - [ ] Phase 8 — lobby theme migrated to `@themeGen`
 - [ ] Phase 9 — dogfooding uses the SDK lobby directly
