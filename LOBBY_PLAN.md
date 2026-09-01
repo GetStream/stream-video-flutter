@@ -110,7 +110,7 @@ Breakpoints — [Chat SDK Design, Screen Sizing](https://www.figma.com/design/Us
 - [x] Phase 1 — `StreamScreenSize` breakpoints
 - [x] Phase 2 — `CallControlButton` + `CallFeatureButton`, icons off Material
 - [x] Phase 3 — `StreamAdaptiveMenuAnchor`
-- [ ] Phase 4 — `StreamMediaDevicesController`, `StreamLobbyController`, `StreamLobbyScope`
+- [x] Phase 4 — `StreamMediaDevicesController`, `StreamLobbyController`, `StreamLobbyScope`
 - [ ] Phase 5 — control and setting widgets
 - [ ] Phase 6 — `LobbyActions` and its presets
 - [ ] Phase 7 — `StreamLobbyView` rewrite, `StreamLobbyVideo` absorbed
