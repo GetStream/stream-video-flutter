@@ -99,10 +99,6 @@
   "@lobbyTitle": {
     "description": "Heading of the lobby screen"
   },
-  "lobbySubtitle": "Set up your audio and video",
-  "@lobbySubtitle": {
-    "description": "Subheading of the lobby screen"
-  },
   "lobbyJoinCall": "Join call",
   "@lobbyJoinCall": {
     "description": "Label of the button that joins the call from the lobby"

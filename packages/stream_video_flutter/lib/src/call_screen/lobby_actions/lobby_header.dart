@@ -55,7 +55,7 @@ class StreamLobbyHeaderProps {
   /// The heading. Null draws a localized default.
   final Widget? title;
 
-  /// The line below the heading. Null draws a localized default.
+  /// An optional line below the heading. Nothing is drawn when null.
   final Widget? subtitle;
 
   /// Creates a copy of these properties with the given fields replaced.
@@ -93,8 +93,9 @@ class DefaultStreamLobbyHeader extends StatelessWidget {
         ),
         props.title ??
             Text(translations.lobbyTitle, style: textTheme.headingMd),
-        props.subtitle ??
-            Text(translations.lobbySubtitle, style: textTheme.bodyDefault),
+        // No default: the design has a single line under the icon, so a
+        // subtitle is drawn only where a call site asks for one.
+        ?props.subtitle,
       ],
     );
   }

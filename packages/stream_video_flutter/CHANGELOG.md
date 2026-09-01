@@ -25,7 +25,7 @@
 - `StreamLobbyView` takes a `footer`, drawn between the controls and the join button, and a `joinEnabled` flag that says whether the join button can be pressed. Together they let a lobby ask for something the SDK knows nothing about — a shared encryption key, a display name — and refuse to join until it is there.
 
 
-- Added `StreamLobbyHeader`, the heading above the lobby's preview: the design's icon, a title and a line below it. It is registered as `lobbyHeader` on `streamVideoComponentBuilders`, so an app can replace the whole heading — a logo, a call name, a countdown — without touching the rest of the lobby. `StreamLobbyView`'s `title` and `subtitle` are passed through to it, and both still fall back to the localized defaults.
+- Added `StreamLobbyHeader`, the heading above the lobby's preview: the design's icon, a title and a line below it. It is registered as `lobbyHeader` on `streamVideoComponentBuilders`, so an app can replace the whole heading — a logo, a call name, a countdown — without touching the rest of the lobby. `StreamLobbyView`'s `title` and `subtitle` are passed through to it. The title falls back to a localized default; the subtitle has none, because the design puts a single line under the icon — pass one to get a second.
 
 - Added `StreamLobbyFooter`, the slot between the lobby's controls and its join button. It draws `StreamLobbyView.footer`, and is registered as `lobbyFooter` on `streamVideoComponentBuilders`, so an app can put something in every lobby's footer — a consent notice, an encryption key field — without touching the call sites. Nothing is drawn when neither is supplied.
 
