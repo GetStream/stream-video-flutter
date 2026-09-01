@@ -97,6 +97,12 @@ class StreamLobbyController extends ChangeNotifier {
   /// rather than in the state a deliberate mute gets, so a permission problem
   /// is not mistaken for a choice the user made. Joining stays possible with
   /// the device disabled.
+  ///
+  /// Guarded on having opened the device rather than merely on
+  /// [StreamMediaDevicesController.hasEnumerated], which is the weaker check a
+  /// call can use: before permission the platform may name no device at all
+  /// even where one exists, so an empty list only means something once
+  /// `getUserMedia` has succeeded.
   bool get microphoneUnavailable =>
       _microphoneError != null ||
       (_hasMicrophonePermission && devices.audioInputs.isEmpty);

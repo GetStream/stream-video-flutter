@@ -124,6 +124,14 @@ class _CallScreenState extends State<CallScreen> {
     super.dispose();
   }
 
+  /// Whether the platform has looked and found nothing.
+  ///
+  /// Guarded on the enumeration having happened at all: until then the list is
+  /// empty because nothing has been asked, and the control would flash an
+  /// error badge as the call opens.
+  bool _noDeviceFor(List<RtcMediaDevice> devices) =>
+      _devices.hasEnumerated && devices.isEmpty;
+
   Future<void> _connectChatChannel() async {
     final userAuthController = locator.get<UserAuthController>();
     final appPreferences = locator.get<AppPreferences>();
@@ -352,42 +360,64 @@ class _CallScreenState extends State<CallScreen> {
                         // Split buttons rather than plain toggles, so the
                         // device can be changed mid-call without opening the
                         // settings menu.
-                        PartialCallStateBuilder<bool>(
-                          call: call,
-                          selector: (state) =>
-                              state.localParticipant?.isAudioEnabled ?? false,
-                          builder: (context, enabled) =>
-                              StreamMicrophoneSplitButton(
-                                devices: _devices,
-                                enabled: enabled,
-                                // The bar sits along the bottom, so its menus
-                                // come up rather than down.
-                                menuDirection: StreamMenuDirection.up,
-                                onPressed: () => call.setMicrophoneEnabled(
-                                  enabled: !enabled,
-                                  // Keep the track alive on mute so
-                                  // speaking-while-muted detection also works
-                                  // on iOS/macOS.
-                                  stopTrackOnMute:
-                                      CurrentPlatform.isIos ||
-                                          CurrentPlatform.isMacOS
-                                      ? false
-                                      : null,
-                                ),
+                        // Listening to the devices as well as the call: the
+                        // buttons disable themselves when the platform reports
+                        // no device, which arrives on the device stream rather
+                        // than in call state.
+                        ListenableBuilder(
+                          listenable: _devices,
+                          builder: (context, _) => Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              PartialCallStateBuilder<bool>(
+                                call: call,
+                                selector: (state) =>
+                                    state.localParticipant?.isAudioEnabled ??
+                                    false,
+                                builder: (context, enabled) =>
+                                    StreamMicrophoneSplitButton(
+                                      devices: _devices,
+                                      enabled: enabled,
+                                      unavailable: _noDeviceFor(
+                                        _devices.audioInputs,
+                                      ),
+                                      // The bar sits along the bottom, so its
+                                      // menus come up rather than down.
+                                      menuDirection: StreamMenuDirection.up,
+                                      onPressed: () =>
+                                          call.setMicrophoneEnabled(
+                                            enabled: !enabled,
+                                            // Keep the track alive on mute so
+                                            // speaking-while-muted detection
+                                            // also works on iOS/macOS.
+                                            stopTrackOnMute:
+                                                CurrentPlatform.isIos ||
+                                                    CurrentPlatform.isMacOS
+                                                ? false
+                                                : null,
+                                          ),
+                                    ),
                               ),
-                        ),
-                        PartialCallStateBuilder<bool>(
-                          call: call,
-                          selector: (state) =>
-                              state.localParticipant?.isVideoEnabled ?? false,
-                          builder: (context, enabled) =>
-                              StreamCameraSplitButton(
-                                devices: _devices,
-                                enabled: enabled,
-                                menuDirection: StreamMenuDirection.up,
-                                onPressed: () =>
-                                    call.setCameraEnabled(enabled: !enabled),
+                              PartialCallStateBuilder<bool>(
+                                call: call,
+                                selector: (state) =>
+                                    state.localParticipant?.isVideoEnabled ??
+                                    false,
+                                builder: (context, enabled) =>
+                                    StreamCameraSplitButton(
+                                      devices: _devices,
+                                      enabled: enabled,
+                                      unavailable: _noDeviceFor(
+                                        _devices.videoInputs,
+                                      ),
+                                      menuDirection: StreamMenuDirection.up,
+                                      onPressed: () => call.setCameraEnabled(
+                                        enabled: !enabled,
+                                      ),
+                                    ),
                               ),
+                            ],
+                          ),
                         ),
                         const Spacer(),
                         // onTap, so the button opens this app's own
