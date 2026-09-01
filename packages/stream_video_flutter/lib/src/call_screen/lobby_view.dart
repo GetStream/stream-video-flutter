@@ -253,9 +253,11 @@ class _LobbyPreview extends StatelessWidget {
     final tile = StreamParticipantTile(
       call: controller.call,
       participant: controller.localParticipant,
-      // Nothing here has any meaning before the call is joined: nobody is
-      // speaking, there is no connection to rate and no reactions to receive.
-      showSpeakerBorder: false,
+      // Neither means anything before the call is joined: there is no
+      // connection to rate and no reactions to receive. The speaking outline
+      // is left on — it is simply never triggered, because the in-call
+      // speaking state comes from the SFU and there is no local mic level yet
+      // (FLU-714). When there is, the preview lights up with no change here.
       showConnectionQualityIndicator: false,
       showReaction: false,
       style: StreamParticipantTileStyle(
@@ -280,33 +282,17 @@ class _LobbyPreview extends StatelessWidget {
       },
     );
 
-    // The accent ring is the lobby's own chrome, not the tile's: a tile
-    // showing video draws no outline, because there the video defines the
-    // edge. Painted in the foreground so it sits over the tile's corner rather
-    // than insetting it.
-    final framed = DecoratedBox(
-      position: DecorationPosition.foreground,
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-        border: Border.all(
-          color: style.previewBorderColor,
-          width: style.previewBorderWidth,
-        ),
-      ),
-      child: tile,
-    );
-
     if (isSmall) {
       return AspectRatio(
         aspectRatio: style.smallPreviewAspectRatio,
-        child: framed,
+        child: tile,
       );
     }
 
     final size = style.largePreviewSize;
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: size.width),
-      child: AspectRatio(aspectRatio: size.aspectRatio, child: framed),
+      child: AspectRatio(aspectRatio: size.aspectRatio, child: tile),
     );
   }
 }
@@ -322,7 +308,6 @@ class _StreamLobbyViewStyleDefaults extends StreamLobbyViewStyle {
   final BuildContext _context;
   final StreamLobbyViewStyle? _style;
 
-  late final _colorScheme = _context.streamColorScheme;
   late final _textTheme = _context.streamTextTheme;
   late final _spacing = _context.streamSpacing;
   late final _radius = _context.streamRadius;
@@ -330,13 +315,6 @@ class _StreamLobbyViewStyleDefaults extends StreamLobbyViewStyle {
   @override
   BorderRadius get previewBorderRadius =>
       _style?.previewBorderRadius ?? BorderRadius.all(_radius.xxl);
-
-  @override
-  Color get previewBorderColor =>
-      _style?.previewBorderColor ?? _colorScheme.accentPrimary;
-
-  @override
-  double get previewBorderWidth => _style?.previewBorderWidth ?? 2;
 
   @override
   StreamParticipantTileStyle? get previewTileStyle => _style?.previewTileStyle;

@@ -12,15 +12,12 @@ part 'lobby_view_theme.g.theme.dart';
 ///
 /// {@tool snippet}
 ///
-/// Square the preview off and drop its accent border:
+/// Square the preview off:
 ///
 /// ```dart
 /// StreamLobbyViewTheme(
 ///   data: StreamLobbyViewThemeData(
-///     style: StreamLobbyViewStyle(
-///       previewBorderRadius: BorderRadius.zero,
-///       previewBorderWidth: 0,
-///     ),
+///     style: StreamLobbyViewStyle(previewBorderRadius: BorderRadius.zero),
 ///   ),
 ///   child: child,
 /// )
@@ -48,7 +45,7 @@ class StreamLobbyViewTheme extends InheritedTheme {
   /// Local values from the nearest [StreamLobbyViewTheme] ancestor take
   /// precedence over the global values from [StreamVideoTheme.lobbyViewTheme].
   /// This allows partial overrides: setting only
-  /// [StreamLobbyViewStyle.previewBorderColor] leaves the remaining properties
+  /// [StreamLobbyViewStyle.joinButtonWidth] leaves the remaining properties
   /// coming from the global theme.
   static StreamLobbyViewThemeData of(BuildContext context) {
     final localTheme = context
@@ -101,8 +98,6 @@ class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
   /// Creates a lobby style with optional property overrides.
   const StreamLobbyViewStyle({
     this.previewBorderRadius,
-    this.previewBorderColor,
-    this.previewBorderWidth,
     this.previewTileStyle,
     this.smallPreviewAspectRatio,
     this.largePreviewSize,
@@ -122,17 +117,6 @@ class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
   ///
   /// Defaults to `radius.xxl`.
   final BorderRadius? previewBorderRadius;
-
-  /// The color of the accent ring around the preview.
-  ///
-  /// Defaults to `colorScheme.accentPrimary`.
-  final Color? previewBorderColor;
-
-  /// The thickness of the ring around the preview.
-  ///
-  /// Defaults to 2. Set to `0` to drop the ring; `null` means "no override"
-  /// and leaves the default in place.
-  final double? previewBorderWidth;
 
   /// Overrides for the participant tile the preview is drawn with.
   ///
