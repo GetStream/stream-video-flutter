@@ -81,6 +81,9 @@ class _DeviceSelect extends StatelessWidget {
     return StreamAdaptiveMenuAnchor(
       title: title,
       sections: sections,
+      // A field is a wide anchor, and a narrow popup under it reads as
+      // belonging to something else.
+      matchAnchorWidth: true,
       builder: (context, handle) => Tooltip(
         message: tooltip,
         child: StreamSelectInput(
