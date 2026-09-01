@@ -9,14 +9,16 @@ class AddReactionOption extends StatefulWidget {
   const AddReactionOption({
     super.key,
     required this.call,
-    this.reactionIcon = Icons.add_reaction_outlined,
+    this.reactionIcon,
   });
 
   /// Represents a call.
   final Call call;
 
-  /// The icon that is shown when the camera is enabled.
-  final IconData reactionIcon;
+  /// The icon of the add-reaction button.
+  ///
+  /// Defaults to `context.streamIcons.emojiAddFill`.
+  final IconData? reactionIcon;
 
   @override
   State<AddReactionOption> createState() => _AddReactionOptionState();
@@ -30,9 +32,9 @@ class _AddReactionOptionState extends State<AddReactionOption> {
   Widget build(BuildContext context) {
     return VisibilityDetector(
       key: const Key('reactionControlKey'),
-      child: CallControlOption(
+      child: CallControlButton(
         key: key,
-        icon: Icon(widget.reactionIcon),
+        icon: Icon(widget.reactionIcon ?? context.streamIcons.emojiAddFill),
         onPressed: _toggleOverlay,
       ),
       onVisibilityChanged: (info) {

@@ -345,10 +345,9 @@ class _LobbyScreenState extends State<LobbyScreen> {
                         message: _blurEnabled
                             ? 'Disable background blur'
                             : 'Enable background blur',
-                        child: CallControlOption(
-                          icon: _blurEnabled
-                              ? const Icon(Icons.blur_on)
-                              : const Icon(Icons.blur_off),
+                        child: CallFeatureButton(
+                          icon: Icon(context.streamIcons.blurFill),
+                          selected: _blurEnabled,
                           onPressed: () async {
                             setState(() {
                               _blurEnabled = !_blurEnabled;

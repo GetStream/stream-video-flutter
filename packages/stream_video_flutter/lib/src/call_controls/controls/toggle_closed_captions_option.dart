@@ -9,45 +9,39 @@ class ToggleClosedCaptionsOption extends StatelessWidget {
   const ToggleClosedCaptionsOption({
     super.key,
     required this.call,
-    this.enabledClosedCaptionIcon = Icons.closed_caption_rounded,
-    this.disabledClosedCaptionIcon = Icons.closed_caption_disabled_rounded,
-    this.enabledClosedCaptionIconColor,
-    this.disabledClosedCaptionIconColor,
-    this.enabledClosedCaptionBackgroundColor,
-    this.disabledClosedCaptionBackgroundColor,
+    this.enabledClosedCaptionIcon,
+    this.disabledClosedCaptionIcon,
   });
 
   /// Represents a call.
   final Call call;
 
   /// The icon that is shown when the closed caption is enabled.
-  final IconData enabledClosedCaptionIcon;
+  ///
+  /// Defaults to `context.streamIcons.captionFill`.
+  final IconData? enabledClosedCaptionIcon;
 
   /// The icon that is shown when the closed caption is disabled.
-  final IconData disabledClosedCaptionIcon;
-
-  /// Color of the icon when closed caption is enabled
-  final Color? enabledClosedCaptionIconColor;
-
-  /// Color of the icon when closed caption is disabled
-  final Color? disabledClosedCaptionIconColor;
-
-  /// Color of the background when closed caption is enabled
-  final Color? enabledClosedCaptionBackgroundColor;
-
-  /// Color of the background when closed caption is disabled
-  final Color? disabledClosedCaptionBackgroundColor;
+  ///
+  /// Defaults to `context.streamIcons.captionFill`.
+  final IconData? disabledClosedCaptionIcon;
 
   @override
   Widget build(BuildContext context) {
+    final icons = context.streamIcons;
+
     return PartialCallStateBuilder<bool>(
       call: call,
       selector: (state) => state.isCaptioning,
-      builder: (_, enabled) => CallControlOption(
-        icon: enabled
-            ? Icon(enabledClosedCaptionIcon)
-            : Icon(disabledClosedCaptionIcon),
-        state: enabled ? .on : .off,
+      builder: (_, enabled) => CallFeatureButton(
+        // The design system has one caption glyph: whether captions are on is
+        // carried by the selected state, not by a second icon.
+        icon: Icon(
+          enabled
+              ? enabledClosedCaptionIcon ?? icons.captionFill
+              : disabledClosedCaptionIcon ?? icons.captionFill,
+        ),
+        selected: enabled,
         onPressed: () {
           if (!enabled) {
             call.startClosedCaptions();

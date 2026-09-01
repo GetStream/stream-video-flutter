@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../call_controls/call_control_option.dart';
+import '../../../stream_video_flutter.dart';
 
 /// Represents a set of controls the user can use on the calling screen
 /// to cancel the call, toggle their audio and video state.
@@ -32,6 +32,8 @@ class OutgoingCallControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final icons = context.streamIcons;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 64),
       child: Column(
@@ -39,22 +41,24 @@ class OutgoingCallControls extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              CallControlOption(
-                icon: isMicrophoneEnabled
-                    ? const Icon(Icons.mic_rounded)
-                    : const Icon(Icons.mic_off_rounded),
+              CallControlButton(
+                icon: Icon(
+                  isMicrophoneEnabled ? icons.voiceFill : icons.voiceOffFill,
+                ),
+                state: isMicrophoneEnabled ? .neutral : .negative,
                 onPressed: onMicrophoneTap,
               ),
-              CallControlOption(
-                icon: isCameraEnabled
-                    ? const Icon(Icons.videocam_rounded)
-                    : const Icon(Icons.videocam_off_rounded),
+              CallControlButton(
+                icon: Icon(
+                  isCameraEnabled ? icons.videoFill : icons.videoOffFill,
+                ),
+                state: isCameraEnabled ? .neutral : .negative,
                 onPressed: onCameraTap,
               ),
             ],
           ),
-          CallControlOption(
-            icon: const Icon(Icons.call_end_rounded),
+          CallControlButton(
+            icon: Icon(icons.phoneDownFill),
             state: .negative,
             onPressed: onCancelCallTap,
           ),

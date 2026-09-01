@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use_from_same_package
-
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
@@ -12,12 +10,8 @@ class ToggleMicrophoneOption extends StatelessWidget {
     super.key,
     required this.call,
     this.localParticipant,
-    this.enabledMicrophoneIcon = Icons.mic_rounded,
-    this.disabledMicrophoneIcon = Icons.mic_off_rounded,
-    this.enabledMicrophoneIconColor,
-    this.disabledMicrophoneIconColor,
-    this.enabledMicrophoneBackgroundColor,
-    this.disabledMicrophoneBackgroundColor,
+    this.enabledMicrophoneIcon,
+    this.disabledMicrophoneIcon,
     this.stopTrackOnMute,
   });
 
@@ -29,22 +23,14 @@ class ToggleMicrophoneOption extends StatelessWidget {
   final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the microphone is enabled.
-  final IconData enabledMicrophoneIcon;
+  ///
+  /// Defaults to `context.streamIcons.voiceFill`.
+  final IconData? enabledMicrophoneIcon;
 
   /// The icon that is shown when the microphone is disabled.
-  final IconData disabledMicrophoneIcon;
-
-  /// Color of the icon when microphone is enabled
-  final Color? enabledMicrophoneIconColor;
-
-  /// Color of the icon when microphone is disabled
-  final Color? disabledMicrophoneIconColor;
-
-  /// Color of the background when microphone is enabled
-  final Color? enabledMicrophoneBackgroundColor;
-
-  /// Color of the background when microphone is disabled
-  final Color? disabledMicrophoneBackgroundColor;
+  ///
+  /// Defaults to `context.streamIcons.voiceOffFill`.
+  final IconData? disabledMicrophoneIcon;
 
   /// Determines if muting the microphone stops and releases (`true`) or keeps and silences (`false`) the audio track.
   /// Setting to `false` is necessary for "speaking-while-muted" detection on iOS and macOS.
@@ -52,12 +38,16 @@ class ToggleMicrophoneOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final icons = context.streamIcons;
+
     Widget buildContent(bool enabled) {
-      return CallControlOption(
-        icon: enabled
-            ? Icon(enabledMicrophoneIcon)
-            : Icon(disabledMicrophoneIcon),
-        state: enabled ? .on : .off,
+      return CallControlButton(
+        icon: Icon(
+          enabled
+              ? enabledMicrophoneIcon ?? icons.voiceFill
+              : disabledMicrophoneIcon ?? icons.voiceOffFill,
+        ),
+        state: enabled ? .neutral : .negative,
         onPressed: () {
           call.setMicrophoneEnabled(
             enabled: !enabled,

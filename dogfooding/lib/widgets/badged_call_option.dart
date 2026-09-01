@@ -8,7 +8,7 @@ class BadgedCallOption extends StatelessWidget {
     this.badgeCount = 0,
   });
 
-  final CallControlOption callControlOption;
+  final Widget callControlOption;
   final int? badgeCount;
 
   @override

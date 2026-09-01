@@ -207,18 +207,22 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CallControlOption(
-                icon: microphoneEnabled
-                    ? const Icon(Icons.mic_rounded)
-                    : const Icon(Icons.mic_off_rounded),
-                state: microphoneEnabled ? .on : .off,
+              CallControlButton(
+                icon: Icon(
+                  microphoneEnabled
+                      ? context.streamIcons.voiceFill
+                      : context.streamIcons.voiceOffFill,
+                ),
+                state: microphoneEnabled ? .neutral : .negative,
                 onPressed: toggleMicrophone,
               ),
-              CallControlOption(
-                icon: cameraEnabled
-                    ? const Icon(Icons.videocam_rounded)
-                    : const Icon(Icons.videocam_off_rounded),
-                state: cameraEnabled ? .on : .off,
+              CallControlButton(
+                icon: Icon(
+                  cameraEnabled
+                      ? context.streamIcons.videoFill
+                      : context.streamIcons.videoOffFill,
+                ),
+                state: cameraEnabled ? .neutral : .negative,
                 onPressed: toggleCamera,
               ),
               if (widget.additionalActionsBuilder != null)
