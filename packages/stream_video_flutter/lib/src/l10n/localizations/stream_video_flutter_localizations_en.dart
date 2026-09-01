@@ -57,4 +57,42 @@ class StreamVideoFlutterLocalizationsEn
 
   @override
   String get livestreamLive => 'Live';
+
+  @override
+  String get lobbyMicrophoneSection => 'Microphone';
+
+  @override
+  String get lobbySpeakerSection => 'Speaker';
+
+  @override
+  String get lobbyCameraSection => 'Camera';
+
+  @override
+  String get lobbySystemDefaultDevice => 'System default';
+
+  @override
+  String get lobbyDefaultDeviceHint => 'Default';
+
+  @override
+  String get lobbySelectAudioDevices => 'Select audio devices';
+
+  @override
+  String get lobbySelectVideoDevice => 'Select video device';
+
+  @override
+  String get lobbyMicrophonePermissionRequired =>
+      'Microphone permission is required to select audio devices';
+
+  @override
+  String get lobbyCameraPermissionRequired =>
+      'Camera permission is required to select a video device';
+
+  @override
+  String get lobbyToggleMicrophone => 'Toggle microphone';
+
+  @override
+  String get lobbyToggleCamera => 'Toggle camera';
+
+  @override
+  String get lobbyParticipants => 'Participants';
 }
