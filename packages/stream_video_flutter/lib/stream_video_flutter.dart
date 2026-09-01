@@ -51,6 +51,11 @@ export 'src/call_screen/call_content/picture_in_picture/picture_in_picture_confi
 export 'src/call_screen/call_content/picture_in_picture/stream_picture_in_picture_android_view.dart';
 export 'src/call_screen/call_content/picture_in_picture/stream_picture_in_picture_ui_kit_view.dart';
 export 'src/call_screen/incoming_call/incoming_call_content.dart';
+export 'src/call_screen/lobby_actions/lobby_device_menu.dart';
+export 'src/call_screen/lobby_actions/lobby_device_selects.dart';
+export 'src/call_screen/lobby_actions/lobby_participants_control.dart';
+export 'src/call_screen/lobby_actions/lobby_split_buttons.dart';
+export 'src/call_screen/lobby_actions/lobby_toggles.dart';
 export 'src/call_screen/lobby_controller.dart';
 export 'src/call_screen/lobby_scope.dart';
 export 'src/call_screen/lobby_video.dart';
