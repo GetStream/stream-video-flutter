@@ -58,12 +58,12 @@ melos:
         stream_core_flutter: ^0.4.1
         stream_chat_flutter: ^10.0.0
         stream_webrtc_flutter: ^3.0.1
-        stream_video: ^1.4.3
-        stream_video_filters: ^1.4.3
-        stream_video_flutter: ^1.4.3
-        stream_video_noise_cancellation: ^1.4.3
-        stream_video_push_notification: ^1.4.3
-        stream_video_screen_sharing: ^1.4.3
+        stream_video: ^2.0.0-alpha
+        stream_video_filters: ^2.0.0-alpha
+        stream_video_flutter: ^2.0.0-alpha
+        stream_video_noise_cancellation: ^2.0.0-alpha
+        stream_video_push_notification: ^2.0.0-alpha
+        stream_video_screen_sharing: ^2.0.0-alpha
 
       hooks:
         # Keep streamVideoVersion in globals.dart in sync with the pubspec version.
