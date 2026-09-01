@@ -77,6 +77,15 @@ class StreamMediaDevicesController extends ChangeNotifier {
   /// an in-call switcher tells the call about it.
   final StreamMediaDeviceSelected? onVideoInputSelected;
 
+  bool _hasEnumerated = false;
+
+  /// Whether the platform has reported its devices yet.
+  ///
+  /// Until it has, the lists are empty because nothing has been asked, not
+  /// because there is nothing — so a control that disables itself for want of
+  /// a device has to wait for this or it flashes an error on startup.
+  bool get hasEnumerated => _hasEnumerated;
+
   List<RtcMediaDevice> _audioInputs = const [];
   List<RtcMediaDevice> _audioOutputs = const [];
   List<RtcMediaDevice> _videoInputs = const [];
@@ -137,6 +146,7 @@ class StreamMediaDevicesController extends ChangeNotifier {
   }
 
   void _handleDeviceChange(List<RtcMediaDevice> devices) {
+    _hasEnumerated = true;
     _audioInputs = devices.ofKind(RtcMediaDeviceKind.audioInput);
     _audioOutputs = devices.ofKind(RtcMediaDeviceKind.audioOutput);
     _videoInputs = devices.ofKind(RtcMediaDeviceKind.videoInput);
