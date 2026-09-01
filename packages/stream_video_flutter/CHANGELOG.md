@@ -18,6 +18,8 @@
   )
   ```
 - Both buttons take a `showErrorBadge` flag, which draws a `StreamErrorBadge` on the top-end corner. It is independent of the tone and of whether the button can be pressed, so a control can be red, badged and still tappable — a microphone whose permission was refused, say. A button that simply cannot be used takes a null `onPressed`.
+- Added `StreamAdaptiveMenuAnchor`, which presents a list of `StreamMenuSection`s as an anchored context menu on desktop and web and as a bottom sheet on Android and iOS. A popup pinned to a 32px caret is awkward to hit with a thumb and out of place next to the rest of a phone's chrome, so the presentation follows the platform rather than the call site — nothing that uses it has to branch. Its builder receives a `StreamMenuHandle` with `isOpen`, `open()`, `close()` and `toggle()`, so the same builder drives both presentations. Pass `useSheet` to force one.
+
 - `StreamIcons` from the design system is now exported. It used to be hidden from the barrel because this package shipped a three-icon class of the same name; that class is gone, so `context.streamIcons` finally has a nameable type.
 
 - Redesigned the participant tile onto the design system, and split its theme into one per component. The tile is now a 20px-radius surface with two toolbars: the overflow button and any live reaction at the top, the participant's name and connection quality at the bottom. `StreamParticipantTileTheme`, `StreamParticipantLabelTheme`, `StreamConnectionQualityIndicatorTheme` and `StreamCallParticipantsGridTheme` replace `StreamCallParticipantThemeData`; each has all-nullable properties, merges with the ambient theme instead of replacing it, and leaves defaults to the widget, which derives them from `StreamTheme`.
