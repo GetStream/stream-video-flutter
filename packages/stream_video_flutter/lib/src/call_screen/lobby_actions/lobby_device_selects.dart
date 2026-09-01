@@ -78,6 +78,9 @@ class _DeviceSelect extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Nothing to pick from, so the field has nothing to open.
+    final noChoice = sections.every((section) => section.options.isEmpty);
+
     return StreamAdaptiveMenuAnchor(
       title: title,
       sections: sections,
@@ -93,7 +96,7 @@ class _DeviceSelect extends StatelessWidget {
           // True for a sheet as well as a popup, so the caret points the same
           // way on every platform.
           expanded: handle.isOpen,
-          onPressed: enabled ? handle.toggle : null,
+          onPressed: enabled && !noChoice ? handle.toggle : null,
         ),
       ),
     );

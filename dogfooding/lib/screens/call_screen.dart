@@ -360,6 +360,9 @@ class _CallScreenState extends State<CallScreen> {
                               StreamMicrophoneSplitButton(
                                 devices: _devices,
                                 enabled: enabled,
+                                // The bar sits along the bottom, so its menus
+                                // come up rather than down.
+                                menuDirection: StreamMenuDirection.up,
                                 onPressed: () => call.setMicrophoneEnabled(
                                   enabled: !enabled,
                                   // Keep the track alive on mute so
@@ -381,6 +384,7 @@ class _CallScreenState extends State<CallScreen> {
                               StreamCameraSplitButton(
                                 devices: _devices,
                                 enabled: enabled,
+                                menuDirection: StreamMenuDirection.up,
                                 onPressed: () =>
                                     call.setCameraEnabled(enabled: !enabled),
                               ),
