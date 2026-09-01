@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../../theme/stream_icons.dart';
 
 /// A widget that allows to change the layout of the call.
 class ToggleLayoutOption extends StatefulWidget {
@@ -33,11 +32,13 @@ class _ToggleLayoutOptionState extends State<ToggleLayoutOption> {
 
   @override
   Widget build(BuildContext context) {
-    return CallControlOption(
+    final icons = context.streamIcons;
+
+    return CallControlButton(
       icon: Icon(
         _layoutMode == ParticipantLayoutMode.grid
-            ? StreamIcons.grid
-            : StreamIcons.spotlight,
+            ? icons.gridFill
+            : icons.speakerLeftFill,
       ),
       onPressed: () {
         _layoutMode = _layoutMode == ParticipantLayoutMode.grid

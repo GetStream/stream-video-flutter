@@ -107,7 +107,7 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
             : widget.disabledSpeakerphoneIconTheme;
         return StreamButton.icon(
           icon: Icon(
-            enabled ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+            enabled ? context.streamIcons.audio : context.streamIcons.mute,
           ),
           style: StreamButtonStyle.secondary,
           type: StreamButtonType.ghost,

@@ -66,7 +66,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
         (showBackButton
             ? IconButton(
                 icon: Icon(
-                  Icons.arrow_back,
+                  context.streamIcons.arrowLeft,
                   color: theme.colorTheme.textHighEmphasis,
                 ),
                 onPressed: () {

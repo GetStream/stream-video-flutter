@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use_from_same_package
-
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
@@ -11,14 +9,10 @@ class ToggleScreenShareOption extends StatelessWidget {
     super.key,
     required this.call,
     this.localParticipant,
-    this.enabledScreenShareIcon = Icons.screen_share,
-    this.disabledScreenShareIcon = Icons.stop_screen_share,
+    this.enabledScreenShareIcon,
+    this.disabledScreenShareIcon,
     this.screenShareConstraints,
     this.screenSharingNotificationOptionsBuilder,
-    this.enabledScreenShareIconColor,
-    this.disabledScreenShareIconColor,
-    this.enabledScreenShareBackgroundColor,
-    this.disabledScreenShareBackgroundColor,
     this.desktopScreenSelectorBuilder,
   });
 
@@ -30,22 +24,14 @@ class ToggleScreenShareOption extends StatelessWidget {
   final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the screen sharing is enabled.
-  final IconData enabledScreenShareIcon;
+  ///
+  /// Defaults to `context.streamIcons.presentDesktopFill`.
+  final IconData? enabledScreenShareIcon;
 
   /// The icon that is shown when the screen sharing is disabled.
-  final IconData disabledScreenShareIcon;
-
-  /// Color of the icon when screen sharing is enabled
-  final Color? enabledScreenShareIconColor;
-
-  /// Color of the icon when screen sharing is disabled
-  final Color? disabledScreenShareIconColor;
-
-  /// Color of the background when screen sharing is enabled
-  final Color? enabledScreenShareBackgroundColor;
-
-  /// Color of the background when screen sharing is disabled
-  final Color? disabledScreenShareBackgroundColor;
+  ///
+  /// Defaults to `context.streamIcons.presentDesktopFill`.
+  final IconData? disabledScreenShareIcon;
 
   /// Constraints for screen sharing
   final ScreenShareConstraints? screenShareConstraints;
@@ -57,12 +43,17 @@ class ToggleScreenShareOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var screenShareConstraints = this.screenShareConstraints;
+    final icons = context.streamIcons;
 
-    Widget buildContent(bool enabled) => CallControlOption(
-      icon: enabled
-          ? Icon(enabledScreenShareIcon)
-          : Icon(disabledScreenShareIcon),
-      state: enabled ? .positive : .on,
+    Widget buildContent(bool enabled) => CallFeatureButton(
+      // One glyph in both states: a live screen share is marked by the
+      // selected accent, not by a different picture.
+      icon: Icon(
+        enabled
+            ? enabledScreenShareIcon ?? icons.presentDesktopFill
+            : disabledScreenShareIcon ?? icons.presentDesktopFill,
+      ),
+      selected: enabled,
       onPressed: () async {
         final toggledEnabled = !enabled;
 

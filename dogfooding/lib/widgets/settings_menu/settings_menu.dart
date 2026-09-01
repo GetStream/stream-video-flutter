@@ -171,7 +171,7 @@ class _SettingsMenuState extends State<SettingsMenu> {
                   widget.onReactionSend?.call(e);
                 },
                 child: IgnorePointer(
-                  child: CallControlOption(
+                  child: CallControlButton(
                     icon: Text(e.icon, textAlign: TextAlign.center),
                     onPressed: () {},
                   ),

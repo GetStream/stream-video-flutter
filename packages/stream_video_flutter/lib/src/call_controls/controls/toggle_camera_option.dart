@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use_from_same_package
-
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
@@ -12,12 +10,8 @@ class ToggleCameraOption extends StatelessWidget {
     super.key,
     required this.call,
     this.localParticipant,
-    this.enabledCameraIcon = Icons.videocam_rounded,
-    this.disabledCameraIcon = Icons.videocam_off_rounded,
-    this.enabledCameraIconColor,
-    this.disabledCameraIconColor,
-    this.enabledCameraBackgroundColor,
-    this.disabledCameraBackgroundColor,
+    this.enabledCameraIcon,
+    this.disabledCameraIcon,
   });
 
   /// Represents a call.
@@ -28,29 +22,27 @@ class ToggleCameraOption extends StatelessWidget {
   final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the camera is enabled.
-  final IconData enabledCameraIcon;
+  ///
+  /// Defaults to `context.streamIcons.videoFill`.
+  final IconData? enabledCameraIcon;
 
   /// The icon that is shown when the camera is disabled.
-  final IconData disabledCameraIcon;
-
-  /// Color of the icon when camera is enabled
-  final Color? enabledCameraIconColor;
-
-  /// Color of the icon when camera is disabled
-  final Color? disabledCameraIconColor;
-
-  /// Color of the background when camera is enabled
-  final Color? enabledCameraBackgroundColor;
-
-  /// Color of the background when camera is disabled
-  final Color? disabledCameraBackgroundColor;
+  ///
+  /// Defaults to `context.streamIcons.videoOffFill`.
+  final IconData? disabledCameraIcon;
 
   @override
   Widget build(BuildContext context) {
+    final icons = context.streamIcons;
+
     Widget buildContent(bool enabled) {
-      return CallControlOption(
-        icon: enabled ? Icon(enabledCameraIcon) : Icon(disabledCameraIcon),
-        state: enabled ? .on : .off,
+      return CallControlButton(
+        icon: Icon(
+          enabled
+              ? enabledCameraIcon ?? icons.videoFill
+              : disabledCameraIcon ?? icons.videoOffFill,
+        ),
+        state: enabled ? .neutral : .negative,
         onPressed: () {
           call.setCameraEnabled(enabled: !enabled);
         },
