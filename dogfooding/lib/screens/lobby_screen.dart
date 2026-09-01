@@ -5,8 +5,9 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../app/user_auth_controller.dart';
 import '../di/injector.dart';
-import '../widgets/lobby_device_controls.dart';
 
+/// The dogfooding lobby: the SDK's [StreamLobbyView] under this app's own
+/// chrome, with a background-blur toggle spliced into the control row.
 class LobbyScreen extends StatefulWidget {
   const LobbyScreen({
     super.key,
@@ -23,18 +24,8 @@ class LobbyScreen extends StatefulWidget {
 }
 
 class _LobbyScreenState extends State<LobbyScreen> {
-  RtcLocalAudioTrack? _microphoneTrack;
-  RtcLocalCameraTrack? _cameraTrack;
-  RtcMediaDevice? _selectedAudioInputDevice;
-  RtcMediaDevice? _selectedAudioOutputDevice;
-  RtcMediaDevice? _selectedVideoInputDevice;
-  bool _blurEnabled = false;
-
   final _userAuthController = locator.get<UserAuthController>();
-  late StreamVideoEffectsManager _videoEffectsManager;
-
-  bool _hasMicrophonePermission = false;
-  bool _hasCameraPermission = false;
+  late final StreamVideoEffectsManager _videoEffectsManager;
 
   @override
   void initState() {
@@ -42,62 +33,24 @@ class _LobbyScreenState extends State<LobbyScreen> {
     _videoEffectsManager = StreamVideoEffectsManager(widget.call);
   }
 
-  void joinCallPressed() {
-    var options = const CallConnectOptions();
-
-    final cameraTrack = _cameraTrack;
-    if (cameraTrack != null) {
-      options = options.copyWith(camera: TrackOption.enabled());
-    }
-
-    final microphoneTrack = _microphoneTrack;
-    if (microphoneTrack != null) {
-      options = options.copyWith(microphone: TrackOption.enabled());
-    }
-
-    if (_selectedAudioInputDevice != null) {
-      options = options.copyWith(audioInputDevice: _selectedAudioInputDevice);
-    }
-
-    if (_selectedAudioOutputDevice != null) {
-      options = options.copyWith(audioOutputDevice: _selectedAudioOutputDevice);
-    }
-
-    if (_selectedVideoInputDevice != null) {
-      options = options.copyWith(videoInputDevice: _selectedVideoInputDevice);
-    }
-
-    widget.onJoinCallPressed(options, _videoEffectsManager);
-  }
-
-  @override
-  void dispose() {
-    _cameraTrack?.stop();
-    _microphoneTrack?.stop();
-
-    _cameraTrack = null;
-    _microphoneTrack = null;
-    super.dispose();
-  }
-
-  Future<void> _selectVideoInput(RtcMediaDevice? device) async {
-    // Recording the choice is enough to get a new track: the key below changes
-    // with it, so the preview is rebuilt and opens the newly chosen camera.
-    //
-    // The track it handed over earlier is ours to release, though, and the
-    // preview will not do it for us — nothing else holds a reference once it
-    // reports the replacement.
-    await _cameraTrack?.stop();
-    _cameraTrack = null;
-
-    if (mounted) setState(() => _selectedVideoInputDevice = device);
-  }
-
   @override
   Widget build(BuildContext context) {
     final textTheme = context.streamTextTheme;
-    final colorTheme = context.streamColorScheme;
-    final currentUser = _userAuthController.currentUser;
+    final spacing = context.streamSpacing;
+    final currentUser = _userAuthController.currentUser!;
+
+    // Picking a preset for the window is a demo of what a host can do, not
+    // something the SDK does: StreamLobbyView defaults to LobbyActions.simple()
+    // at every width. On Android and iOS the split buttons and the select
+    // inputs open bottom sheets with nothing here saying so.
+    final extras = [
+      const StreamLobbyParticipantsControl(),
+      _BlurToggle(effects: _videoEffectsManager),
+    ];
+    final actions = switch (context.streamScreenSize) {
+      StreamScreenSize.small => LobbyActions.regular(extraControls: extras),
+      _ => LobbyActions.full(extraControls: extras),
+    };
 
     return Scaffold(
       appBar: AppBar(
@@ -105,7 +58,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         leading: Padding(
           padding: const EdgeInsets.all(8),
-          child: StreamUserAvatar(user: currentUser!),
+          child: StreamUserAvatar(user: currentUser),
         ),
         titleSpacing: 4,
         centerTitle: false,
@@ -121,114 +74,75 @@ class _LobbyScreenState extends State<LobbyScreen> {
       ),
       body: Center(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              children: [
-                Icon(
-                  context.streamIcons.language,
-                  color: colorTheme.accentPrimary,
-                  size: 32,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Set up your call',
-                  textAlign: TextAlign.center,
-                  style: textTheme.headingLg,
-                ),
-                const SizedBox(height: 16),
-                StreamLobbyVideo(
-                  // Keyed on the chosen device, not on the track it produces.
-                  // Keying on the track makes the preview's identity depend on
-                  // its own output, so any later rebuild — switching between
-                  // light and dark, say — tears it down and starts the camera
-                  // over, re-enabling it if it had been turned off.
-                  key: ValueKey(_selectedVideoInputDevice?.id),
-                  call: widget.call,
-                  initialCameraDevice: _selectedVideoInputDevice,
-                  onMicrophoneTrackSet: (track) {
-                    _microphoneTrack = track;
-
-                    // A non-null track means getUserMedia succeeded, so we
-                    // have permission and device labels are now populated.
-                    if (track != null && !_hasMicrophonePermission) {
-                      setState(() => _hasMicrophonePermission = true);
-                    }
-                  },
-                  onCameraTrackSet: (track) {
-                    _cameraTrack = track;
-
-                    if (track != null && !_hasCameraPermission) {
-                      setState(() => _hasCameraPermission = true);
-                    }
-
-                    if (track != null && _blurEnabled) {
-                      _videoEffectsManager.applyBackgroundBlurFilter(
-                        BlurIntensity.medium,
-                        track: track,
-                      );
-                    }
-                  },
-                  additionalActionsBuilder: (context, call) {
-                    return [
-                      Tooltip(
-                        message: _blurEnabled
-                            ? 'Disable background blur'
-                            : 'Enable background blur',
-                        child: CallFeatureButton(
-                          icon: Icon(context.streamIcons.blurFill),
-                          selected: _blurEnabled,
-                          onPressed: () async {
-                            setState(() {
-                              _blurEnabled = !_blurEnabled;
-                            });
-
-                            if (_blurEnabled) {
-                              await _videoEffectsManager
-                                  .applyBackgroundBlurFilter(
-                                    BlurIntensity.medium,
-                                    track: _cameraTrack,
-                                  );
-                            } else {
-                              await _videoEffectsManager.disableAllFilters(
-                                track: _cameraTrack,
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                    ];
-                  },
-                ),
-                const SizedBox(height: 12),
-                LobbyDeviceControls(
-                  microphoneEnabled: _hasMicrophonePermission,
-                  cameraEnabled: _hasCameraPermission,
-                  selectedAudioInput: _selectedAudioInputDevice,
-                  selectedAudioOutput: _selectedAudioOutputDevice,
-                  selectedVideoInput: _selectedVideoInputDevice,
-                  onAudioInputSelected: (device) {
-                    setState(() => _selectedAudioInputDevice = device);
-                  },
-                  onAudioOutputSelected: (device) {
-                    setState(() => _selectedAudioOutputDevice = device);
-                  },
-                  onVideoInputSelected: _selectVideoInput,
-                ),
-
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: 400,
-                  child: StreamButton(
-                    onPressed: joinCallPressed,
-                    child: const Text('Start a test call'),
-                  ),
-                ),
-                const SizedBox(height: 56),
-              ],
-            ),
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.md,
+            vertical: spacing.xxl,
+          ),
+          child: StreamLobbyView(
+            call: widget.call,
+            actions: actions,
+            title: Text('Set up your call', style: textTheme.headingLg),
+            joinButtonLabel: const Text('Start a test call'),
+            onJoinCallPressed: (options) =>
+                widget.onJoinCallPressed(options, _videoEffectsManager),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Blurs whatever is behind the user in the preview.
+///
+/// A feature button rather than a control: it is off by default and should
+/// read as switched on, not as something taken away.
+class _BlurToggle extends StatefulWidget {
+  const _BlurToggle({required this.effects});
+
+  final StreamVideoEffectsManager effects;
+
+  @override
+  State<_BlurToggle> createState() => _BlurToggleState();
+}
+
+class _BlurToggleState extends State<_BlurToggle> {
+  bool _enabled = false;
+  RtcLocalCameraTrack? _appliedTo;
+
+  @override
+  Widget build(BuildContext context) {
+    // Reading the controller here subscribes this button to it, so switching
+    // camera device rebuilds and the filter is reapplied to the new track.
+    final controller = StreamLobbyScope.of(context);
+    final track = controller.cameraTrack;
+
+    if (_enabled && track != null && track != _appliedTo) {
+      _appliedTo = track;
+      widget.effects.applyBackgroundBlurFilter(
+        BlurIntensity.medium,
+        track: track,
+      );
+    }
+
+    return Tooltip(
+      message: _enabled ? 'Disable background blur' : 'Enable background blur',
+      child: CallFeatureButton(
+        icon: Icon(context.streamIcons.blurFill),
+        selected: _enabled,
+        onPressed: () async {
+          setState(() => _enabled = !_enabled);
+
+          if (_enabled) {
+            _appliedTo = track;
+            await widget.effects.applyBackgroundBlurFilter(
+              BlurIntensity.medium,
+              track: track,
+            );
+          } else {
+            _appliedTo = null;
+            await widget.effects.disableAllFilters(track: track);
+          }
+        },
       ),
     );
   }

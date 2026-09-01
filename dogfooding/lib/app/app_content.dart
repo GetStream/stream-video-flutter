@@ -298,7 +298,6 @@ class _StreamDogFoodingAppContentState
       .dark => StreamVideoTheme.dark(),
     };
 
-    final textTheme = videoTheme.textTheme;
     final colorScheme = coreTheme.colorScheme;
 
     return baseTheme.copyWith(
@@ -364,21 +363,6 @@ class _StreamDogFoodingAppContentState
               color: colorScheme.brand,
             ),
             initialsBackground: colorScheme.brand.shade100,
-          ),
-          lobbyViewTheme: StreamLobbyViewThemeData(
-            backgroundColor: colorScheme.backgroundApp,
-            cardBackgroundColor: colorScheme.backgroundSurface,
-            userAvatarTheme: StreamUserAvatarThemeData(
-              constraints: const BoxConstraints.tightFor(
-                height: 100,
-                width: 100,
-              ),
-              borderRadius: const BorderRadius.all(Radius.circular(50)),
-              initialsTextStyle: textTheme.title1.copyWith(
-                color: colorScheme.brand,
-              ),
-              initialsBackground: colorScheme.brand.shade100,
-            ),
           ),
           // The participant tile is styled by the design system now. Nothing
           // is overridden here, which is what an app wanting the stock look
