@@ -631,20 +631,25 @@ Also fix [lobby_participants_view.dart:21-23](packages/stream_video_flutter/lib/
 [lobby_device_controls.dart](dogfooding/lib/widgets/lobby_device_controls.dart) entirely — it now lives in the SDK.
 
 ```dart
-// A demo of picking a preset for the window, not something the SDK does for you:
-// StreamLobbyView defaults to LobbyActions.simple() at every width.
-final size = context.streamScreenSize;
-
+// A demo of picking a preset, not something the SDK does for you:
+// StreamLobbyView defaults to LobbyActions.simple() everywhere.
 StreamLobbyView(
   call: widget.call,
   onJoinCallPressed: (options) =>
       widget.onJoinCallPressed(options, _videoEffectsManager),
-  actions: switch (size) {
-    .small => LobbyActions.regular(extraControls: extras),
-    _ => LobbyActions.full(extraControls: extras),
-  },
+  actions: isMobileDevice
+      ? LobbyActions.regular(extraControls: extras)
+      : LobbyActions.full(extraControls: extras),
 )
 ```
+
+The preset is chosen **by platform, not by window width** — `isMobileDevice` from
+[device_segmentation.dart](packages/stream_video_flutter/lib/src/utils/device_segmentation.dart), which is exactly the complement to `StreamScreenSize` the
+two were kept separate for. A phone has no room for a settings row at any size, so its
+device choice goes on the toggles' carets; anything with a pointer gets the fields
+however narrow the window is ([Figma, narrow web lobby](https://www.figma.com/design/W7pOBtNINkAh14XdCJQKuB/Video-SDK-Design?node-id=413-38334)). Width still
+decides the *layout* — control row on the preview or below it — but that is
+`StreamLobbyView`'s business and needs nothing from the call site.
 
 where `extras` is `[const StreamLobbyParticipantsControl(), _BlurToggle(...)]` — the
 participants button from the second screenshot, and the blur toggle currently injected
@@ -740,7 +745,9 @@ Commit after each phase (no push), per the repo convention.
    the two select inputs; the participants badge shows a count when a second client joins
    the same call; picking a camera swaps the preview without re-enabling a disabled camera;
    both the caret and the select input open the anchored menu.
-4. Resize the window below 768px — the toggles drop below the feed, the settings row stays.
+4. Resize the window below 768px — the toggles drop below the feed and the settings row
+   stays, matching the narrow web lobby in the design. A narrow *desktop* window keeps the
+   `full` preset: the preset follows the platform, only the layout follows the width.
 5. Run dogfooding on an iOS simulator and an Android emulator — `regular` preset, split
    buttons, and the caret **and** the select input both open a bottom sheet with a drag
    handle and the same radio rows. No Speaker section if the platform reports no outputs.
