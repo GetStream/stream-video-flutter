@@ -284,9 +284,9 @@ class _CallScreenState extends State<CallScreen> {
                   child: SafeArea(
                     child: Row(
                       children: [
-                        CallControlOption(
-                          icon: const Icon(Icons.more_vert),
-                          state: _moreMenuVisible ? .positive : .on,
+                        CallFeatureButton(
+                          icon: Icon(context.streamIcons.moreVerticalFill),
+                          selected: _moreMenuVisible,
                           onPressed: () {
                             toggleMoreMenu(context);
                           },
@@ -297,32 +297,22 @@ class _CallScreenState extends State<CallScreen> {
                             useiOSBroadcastExtension: true,
                             captureScreenAudio: true,
                           ),
-                          enabledScreenShareBackgroundColor: colorScheme.brand,
-                          disabledScreenShareIcon: Icons.screen_share,
                           desktopScreenSelectorBuilder:
                               // ignore: avoid_redundant_argument_values
                               _useCustomDesktopScreenShareOption
                               ? _customDesktopScreenShareSelector
                               : null,
                         ),
-                        ToggleMicrophoneOption(
-                          call: call,
-                          disabledMicrophoneBackgroundColor:
-                              colorScheme.accentError,
-                        ),
-                        ToggleCameraOption(
-                          call: call,
-                          disabledCameraBackgroundColor:
-                              colorScheme.accentError,
-                        ),
+                        ToggleMicrophoneOption(call: call),
+                        ToggleCameraOption(call: call),
                         const Spacer(),
                         PartialCallStateBuilder(
                           call: call,
                           selector: (state) => state.callParticipants.length,
                           builder: (context, length) {
                             return BadgedCallOption(
-                              callControlOption: CallControlOption(
-                                icon: const Icon(Icons.people),
+                              callControlOption: CallControlButton(
+                                icon: Icon(context.streamIcons.usersFill),
                                 onPressed: _channel != null
                                     ? () => showParticipants(context)
                                     : null,
@@ -387,8 +377,8 @@ class __ShowChatButtonState extends State<_ShowChatButton> {
   @override
   Widget build(BuildContext context) {
     return BadgedCallOption(
-      callControlOption: CallControlOption(
-        icon: const Icon(Icons.question_answer),
+      callControlOption: CallControlButton(
+        icon: Icon(context.streamIcons.messageBubblesFill),
         onPressed: widget.channel != null ? () => showChat(context) : null,
       ),
       badgeCount: _unreadCount == 0 ? null : _unreadCount,

@@ -1,12 +1,10 @@
 // 📦 Package imports:
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../app/user_auth_controller.dart';
 import '../di/injector.dart';
-import '../utils/assets.dart';
 import '../widgets/lobby_device_controls.dart';
 
 class LobbyScreen extends StatefulWidget {
@@ -101,8 +99,6 @@ class _LobbyScreenState extends State<LobbyScreen> {
     final colorTheme = context.streamColorScheme;
     final currentUser = _userAuthController.currentUser;
 
-    final theme = StreamLobbyViewTheme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -179,10 +175,9 @@ class _LobbyScreenState extends State<LobbyScreen> {
                         message: _blurEnabled
                             ? 'Disable background blur'
                             : 'Enable background blur',
-                        child: CallControlOption(
-                          icon: _blurEnabled
-                              ? const Icon(Icons.blur_on)
-                              : const Icon(Icons.blur_off),
+                        child: CallFeatureButton(
+                          icon: Icon(context.streamIcons.blurFill),
+                          selected: _blurEnabled,
                           onPressed: () async {
                             setState(() {
                               _blurEnabled = !_blurEnabled;

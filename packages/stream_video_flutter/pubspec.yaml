@@ -55,11 +55,6 @@ flutter:
   assets:
     - images/
 
-  fonts:
-    - family: StreamIcons
-      fonts:
-        - asset: fonts/StreamIcons.ttf
-
   uses-material-design: true
 
   plugin:

@@ -73,19 +73,19 @@ class _CallDiagnosticsContentState extends State<CallDiagnosticsContent> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               IconButton(
-                icon: const Icon(
-                  Icons.cleaning_services_rounded,
+                icon: Icon(
+                  context.streamIcons.delete,
                   color: Colors.white,
                 ),
                 onPressed: _onClearPressed,
               ),
               IconButton(
-                icon: const Icon(Icons.share, color: Colors.white),
+                icon: Icon(context.streamIcons.share, color: Colors.white),
                 onPressed: _onSharePressed,
               ),
               const SizedBox(width: 24),
               IconButton(
-                icon: const Icon(Icons.close, color: Colors.white),
+                icon: Icon(context.streamIcons.xmark, color: Colors.white),
                 onPressed: () => widget.onClosePressed?.call(),
               ),
             ],

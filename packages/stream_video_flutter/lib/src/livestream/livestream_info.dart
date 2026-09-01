@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
 
+import '../../stream_video_flutter.dart';
 import '../l10n/localization_extension.dart';
-import '../theme/themes.dart';
-import '../widgets/partial_call_state_builder.dart';
-import 'livestream_speakerphone_option.dart';
 
 /// A control bar style widget meant for displaying livestream controls and
 /// actions.
@@ -123,9 +120,7 @@ class LivestreamInfo extends StatelessWidget {
                       children: [
                         IconTheme(
                           data: participantIconTheme,
-                          child: const Icon(
-                            Icons.remove_red_eye_outlined,
-                          ),
+                          child: Icon(context.streamIcons.eyeFill),
                         ),
                         const SizedBox(
                           width: 8,
@@ -168,6 +163,10 @@ class LivestreamInfo extends StatelessWidget {
                   IconButton(
                     onPressed: onFullscreenTapped,
                     icon: AnimatedCrossFade(
+                      // The design system ships a single `fullscreenFill`
+                      // glyph and no exit-fullscreen counterpart, and the
+                      // cross-fade needs two distinct pictures, so this pair
+                      // stays on Material until core grows one.
                       firstChild: IconTheme(
                         data: contractIconTheme,
                         child: const Icon(

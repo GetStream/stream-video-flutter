@@ -201,7 +201,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final colors = context.streamColorScheme;
     final spacing = context.streamSpacing;
     final size = MediaQuery.sizeOf(context);
-    final isHorizontal = size.width > size.height || size.height < 600;
     final width = math.min(size.width, kMaxWidthRegularScreen);
     final name = currentUser!.name;
 
