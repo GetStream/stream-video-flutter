@@ -63,6 +63,22 @@ void main() {
       verify(notifier.enumerateDevices).called(1);
     });
 
+    // An empty list before the platform has answered means "not asked yet",
+    // not "none" — a control that disables itself for want of a device would
+    // otherwise flash an error on startup.
+    test('says whether the platform has answered yet', () async {
+      final controller = build();
+
+      expect(controller.hasEnumerated, isFalse);
+      expect(controller.videoInputs, isEmpty);
+
+      deviceChanges.add([]);
+      await pumpEventQueue();
+
+      expect(controller.hasEnumerated, isTrue);
+      expect(controller.videoInputs, isEmpty);
+    });
+
     test('partitions a device change by kind', () async {
       final controller = build();
 
