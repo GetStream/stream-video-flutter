@@ -97,6 +97,8 @@
 
 ### 🐞 Fixed
 
+- The lobby no longer lists someone twice. `getOrCreate` returns a snapshot of the session while the event subscription is already live, so a join already reflected in that snapshot still arrives as a `ParticipantJoined` event — and the lobby appended it blindly. Participants are now upserted by session id, which leaves a genuine second session of the same user (a phone and a laptop) listed separately, as it should be. A join event for the local user is ignored, matching the snapshot, which always filtered them out.
+
 - Documented on `StreamLobbyVideo.onCameraTrackSet` and `onMicrophoneTrackSet` that the track becomes the caller's to stop. The widget deliberately does not stop tracks it has handed over: they may be passed to the call as a `TrackOption.provided`, and would otherwise be killed as the lobby is left.
 
 ### ⚠️ Deprecated

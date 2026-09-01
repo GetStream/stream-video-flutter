@@ -225,10 +225,15 @@ class StreamLobbyController extends ChangeNotifier {
           _logger.v(() => '[fetchCall] completed: $callData');
           final metadata = callData.data.metadata;
 
+          // One `now` for the whole sort: `sortedBy` calls the key function
+          // repeatedly, so a fresh DateTime.now() per element would not be a
+          // stable ordering.
+          final now = DateTime.now();
+
           _users = {...metadata.users};
           _participants = metadata.session.participants.values
-              .sortedBy((it) => it.joinedAt ?? DateTime.now())
               .where((it) => it.userId != currentUserId)
+              .sortedBy((it) => it.joinedAt ?? now)
               .toList();
           notifyListeners();
         },
@@ -262,8 +267,30 @@ class StreamLobbyController extends ChangeNotifier {
         notifyListeners();
       } else if (event is CoordinatorCallSessionParticipantJoinedEvent) {
         _logger.d(() => '[listenEvents] #userJoined; user: ${event.user}');
+
+        final participant = event.participant;
+        // The local user is filtered out of the fetched snapshot, so a join
+        // event for them must not slip one back in.
+        if (participant.userId == _video.currentUser.id) return;
+
+        // Upsert rather than append. `getOrCreate` returns a snapshot of the
+        // session while this subscription is already live, so a join that is
+        // already reflected in that snapshot still arrives as an event — and
+        // appending it blindly listed the same person twice. Identity is the
+        // session, not the user: someone on a phone and a laptop is two
+        // participants and belongs in the list twice.
+        final index = _participants.indexWhere(
+          (it) => it.userSessionId == participant.userSessionId,
+        );
+
         _users = {..._users, event.user.id: event.user};
-        _participants = [..._participants, event.participant];
+        _participants = [..._participants];
+        if (index == -1) {
+          _participants.add(participant);
+        } else {
+          _participants[index] = participant;
+        }
+
         notifyListeners();
       }
     });

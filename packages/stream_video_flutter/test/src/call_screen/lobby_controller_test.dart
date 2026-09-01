@@ -161,6 +161,76 @@ void main() {
       expect(controller.users.keys, ['a']);
     });
 
+    // getOrCreate returns a snapshot of the session while the event
+    // subscription is already live, so a join already reflected in that
+    // snapshot still arrives as an event. Appending it blindly listed the same
+    // person twice.
+    test(
+      'does not list someone twice when the snapshot already had them',
+      () async {
+        sessionParticipants = {'a': _participant('a')};
+        final controller = build();
+        await pumpEventQueue();
+
+        events.add(
+          CoordinatorCallSessionParticipantJoinedEvent(
+            callCid: _callCid,
+            createdAt: DateTime(2026),
+            sessionId: 'session',
+            user: _user('a'),
+            participant: _participant('a'),
+          ),
+        );
+        await pumpEventQueue();
+
+        expect(controller.participants, hasLength(1));
+      },
+    );
+
+    // Identity is the session, not the user: someone on a phone and a laptop
+    // is two participants and belongs in the list twice.
+    test('lists a second session of the same user separately', () async {
+      final controller = build();
+      await pumpEventQueue();
+
+      for (final sessionId in ['phone', 'laptop']) {
+        events.add(
+          CoordinatorCallSessionParticipantJoinedEvent(
+            callCid: _callCid,
+            createdAt: DateTime(2026),
+            sessionId: 'session',
+            user: _user('a'),
+            participant: CallParticipant(
+              userSessionId: sessionId,
+              userId: 'a',
+              role: 'user',
+            ),
+          ),
+        );
+      }
+      await pumpEventQueue();
+
+      expect(controller.participants, hasLength(2));
+    });
+
+    test('ignores a join event for the local user', () async {
+      final controller = build();
+      await pumpEventQueue();
+
+      events.add(
+        CoordinatorCallSessionParticipantJoinedEvent(
+          callCid: _callCid,
+          createdAt: DateTime(2026),
+          sessionId: 'session',
+          user: _user(_localUserId),
+          participant: _participant(_localUserId),
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(controller.participants, isEmpty);
+    });
+
     test('drops a participant that leaves, and their user with them', () async {
       sessionParticipants = {'a': _participant('a')};
       final controller = build();
