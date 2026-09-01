@@ -25,6 +25,7 @@ class StreamContextMenuAnchor extends StatelessWidget {
     this.controller,
     this.constraints = defaultConstraints,
     this.alignmentOffset = Offset.zero,
+    this.elevation,
     this.onOpen,
     this.onClose,
   });
@@ -71,6 +72,13 @@ class StreamContextMenuAnchor extends StatelessWidget {
   /// The offset of the menu relative to the anchor.
   final Offset alignmentOffset;
 
+  /// How high the menu floats above the page.
+  ///
+  /// Null takes the value from `StreamContextMenuTheme`, and 3 if that is not
+  /// set either. Pass 0 for a menu that sits flat on the page and is separated
+  /// from it by its border alone.
+  final double? elevation;
+
   /// Called when the menu opens.
   final VoidCallback? onOpen;
 
@@ -85,6 +93,12 @@ class StreamContextMenuAnchor extends StatelessWidget {
     return MenuAnchor(
       controller: controller,
       alignmentOffset: alignmentOffset,
+      // MenuAnchor clips its panel to the panel's own bounds by default, which
+      // cuts off the shadow StreamContextMenu's Material draws outside them —
+      // hardest to miss along the bottom edge, where that shadow is heaviest.
+      // Nothing here needs the panel's clip: the menu draws its own surface
+      // and clips its own content.
+      clipBehavior: Clip.none,
       onOpen: onOpen,
       onClose: onClose,
       style: menuStyle,
@@ -116,7 +130,10 @@ class StreamContextMenuAnchor extends StatelessWidget {
                   ),
                 ),
               ),
-              child: StreamContextMenu(children: menuChildren),
+              child: StreamContextMenu(
+                elevation: elevation,
+                children: menuChildren,
+              ),
             ),
           ),
         ),

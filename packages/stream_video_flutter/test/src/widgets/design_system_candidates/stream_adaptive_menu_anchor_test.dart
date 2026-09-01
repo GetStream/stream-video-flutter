@@ -52,6 +52,43 @@ void main() {
       expect(find.byType(StreamListTile), findsNothing);
     });
 
+    // MenuAnchor clips its panel to the panel's own bounds by default, which
+    // cuts off the shadow the menu's Material draws outside them — the shadow
+    // stops dead along the bottom edge rather than fading out, and raising the
+    // elevation changes nothing because the extra shadow is clipped too.
+    testWidgets('does not let the panel clip the menu shadow', (tester) async {
+      await tester.pumpWidget(
+        const TestWrapper(platform: .macOS, child: _Menu()),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<MenuAnchor>(find.byType(MenuAnchor)).clipBehavior,
+        Clip.none,
+      );
+    });
+
+    testWidgets('menuElevation reaches the menu', (tester) async {
+      await tester.pumpWidget(
+        const TestWrapper(
+          platform: .macOS,
+          child: _Menu(menuElevation: 0),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester
+            .widget<StreamContextMenu>(find.byType(StreamContextMenu))
+            .elevation,
+        0,
+      );
+    });
+
     // A selected row's fill is rounded, and running it flush into the sheet's
     // edges looks like a rendering mistake.
     testWidgets('insets sheet rows so a selected fill clears the edges', (
@@ -212,11 +249,17 @@ void main() {
 
 /// An anchor over two sections, whose button reports the handle's open state.
 class _Menu extends StatelessWidget {
-  const _Menu({this.useSheet, this.onPicked, this.matchAnchorWidth = false});
+  const _Menu({
+    this.useSheet,
+    this.onPicked,
+    this.matchAnchorWidth = false,
+    this.menuElevation,
+  });
 
   final bool? useSheet;
   final ValueChanged<String>? onPicked;
   final bool matchAnchorWidth;
+  final double? menuElevation;
 
   @override
   Widget build(BuildContext context) {
@@ -231,6 +274,7 @@ class _Menu extends StatelessWidget {
       title: 'Microphone',
       useSheet: useSheet,
       matchAnchorWidth: matchAnchorWidth,
+      menuElevation: menuElevation,
       sections: [
         StreamMenuSection(
           heading: 'Microphone',
