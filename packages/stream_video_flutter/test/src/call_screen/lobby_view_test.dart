@@ -286,8 +286,27 @@ void main() {
 
     expect(find.byIcon(const StreamIcons().language), findsOneWidget);
     expect(find.text('Set up your call'), findsOneWidget);
-    // The subtitle still falls back to the localized default.
-    expect(find.text('Set up your audio and video'), findsOneWidget);
+  });
+
+  // The design puts a single line under the icon, so a subtitle is drawn only
+  // where a call site asks for one.
+  testWidgets('the header draws no subtitle unless it is given one', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      TestWrapper(
+        child: SingleChildScrollView(
+          child: lobby(LobbyActions.simple(), 900),
+        ),
+      ),
+    );
+
+    final header = find.byType(DefaultStreamLobbyHeader);
+    expect(header, findsOneWidget);
+    expect(
+      find.descendant(of: header, matching: find.byType(Text)),
+      findsOneWidget,
+    );
   });
 
   // The header is the piece an app is most likely to want its own version of,

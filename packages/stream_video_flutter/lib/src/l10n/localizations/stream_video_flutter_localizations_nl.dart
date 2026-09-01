@@ -97,9 +97,6 @@ class StreamVideoFlutterLocalizationsNl
   String get lobbyTitle => 'Voordat je deelneemt';
 
   @override
-  String get lobbySubtitle => 'Stel je audio en video in';
-
-  @override
   String get lobbyJoinCall => 'Deelnemen';
 
   @override
