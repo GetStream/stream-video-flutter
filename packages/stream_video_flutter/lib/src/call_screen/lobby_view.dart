@@ -271,6 +271,9 @@ class _LobbyPreview extends StatelessWidget {
       // previewTileStyle can put the button back if an app really wants it.
       style: const StreamParticipantTileStyle(
         showMoreButton: false,
+        // Nothing reports a local audio level before joining, so the indicator
+        // would sit there permanently idle. See FLU-714.
+        labelStyle: StreamParticipantLabelStyle(showAudioIndicator: false),
       ).merge(style.previewTileStyle),
       videoRendererBuilder: (context, call, participant) {
         if (cameraTrack == null) {
