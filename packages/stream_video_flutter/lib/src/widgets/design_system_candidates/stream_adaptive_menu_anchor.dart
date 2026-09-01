@@ -306,23 +306,29 @@ class _MenuSheet extends StatelessWidget {
             children: [
               for (final section in sections) ...[
                 Padding(
-                  // A heading insets itself by spacing.xs, a list tile by
-                  // spacing.sm; the difference lines their text up.
-                  padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
+                  // Everything in the sheet is inset by spacing.xxs so a
+                  // selected row's rounded fill has room to breathe rather
+                  // than running into the sheet's edges. A heading insets
+                  // itself by spacing.xs and a list tile by spacing.sm, so the
+                  // heading takes the larger outer pad and the two line up.
+                  padding: EdgeInsets.symmetric(horizontal: spacing.xs),
                   child: StreamContextMenuHeading(
                     label: Text(section.heading),
                   ),
                 ),
                 for (final option in section.options)
-                  StreamListTile(
-                    leading: StreamRadioIndicator(selected: option.selected),
-                    title: Text(
-                      option.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
+                    child: StreamListTile(
+                      leading: StreamRadioIndicator(selected: option.selected),
+                      title: Text(
+                        option.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      selected: option.selected,
+                      onTap: () => onSelected(option),
                     ),
-                    selected: option.selected,
-                    onTap: () => onSelected(option),
                   ),
               ],
             ],
