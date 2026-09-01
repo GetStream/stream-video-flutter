@@ -313,7 +313,14 @@ class _LobbyPreview extends StatelessWidget {
       // (FLU-714). When there is, the preview lights up with no change here.
       showConnectionQualityIndicator: false,
       showReaction: false,
-      style: style.previewTileStyle,
+      // Nobody has joined, so there is nothing to pin, mute or remove. An
+      // app-wide `participantTile` builder that adds an overflow menu to every
+      // tile would otherwise put one here too; suppressing it through the
+      // style rather than the props means it survives that builder. Ordered so
+      // previewTileStyle can put the button back if an app really wants it.
+      style: const StreamParticipantTileStyle(
+        showMoreButton: false,
+      ).merge(style.previewTileStyle),
       videoRendererBuilder: (context, call, participant) {
         if (cameraTrack == null) {
           return StreamParticipantPlaceholder(

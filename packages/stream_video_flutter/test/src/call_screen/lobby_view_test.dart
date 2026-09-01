@@ -163,6 +163,48 @@ void main() {
     expect(find.byType(StreamLobbyMicrophoneToggle), findsOneWidget);
   });
 
+  // An app that registers a `participantTile` builder adding an overflow menu
+  // to every tile — as dogfooding does — would otherwise get one on the
+  // preview, offering to pin or mute someone who has not joined anything.
+  testWidgets('the preview shows no overflow menu', (tester) async {
+    await tester.pumpWidget(
+      TestWrapper(
+        child: StreamComponentFactory(
+          builders: StreamComponentBuilders(
+            extensions: [
+              ...streamVideoComponentBuilders(
+                participantTile: (context, props) =>
+                    DefaultStreamParticipantTile(
+                      props: props.copyWith(
+                        actionsBuilder: (context, participant) => [
+                          StreamParticipantTileAction(
+                            icon: context.streamIcons.pin,
+                            label: 'Pin',
+                            onPressed: () {},
+                          ),
+                        ],
+                      ),
+                    ),
+              ),
+            ],
+          ),
+          child: SingleChildScrollView(
+            child: lobby(LobbyActions.simple(), 900),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Pin'), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byType(DefaultStreamParticipantTile),
+        matching: find.byIcon(const StreamIcons().moreHorizontal),
+      ),
+      findsNothing,
+    );
+  });
+
   // The preview is a participant tile, so theming the call's tiles has to
   // theme it too — that is the whole point of using the tile rather than a
   // copy of it.
