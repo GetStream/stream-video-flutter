@@ -114,9 +114,9 @@ mixin _$StreamLobbyViewStyle {
         b.previewBorderWidth,
         t,
       ),
-      previewBackgroundColor: Color.lerp(
-        a.previewBackgroundColor,
-        b.previewBackgroundColor,
+      previewTileStyle: StreamParticipantTileStyle.lerp(
+        a.previewTileStyle,
+        b.previewTileStyle,
         t,
       ),
       smallPreviewAspectRatio: lerpDouble$(
@@ -136,11 +136,6 @@ mixin _$StreamLobbyViewStyle {
         b.overlayControlInset,
         t,
       ),
-      participantLabelInset: lerpDouble$(
-        a.participantLabelInset,
-        b.participantLabelInset,
-        t,
-      ),
       joinButtonWidth: lerpDouble$(a.joinButtonWidth, b.joinButtonWidth, t),
       titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
       subtitleTextStyle: TextStyle.lerp(
@@ -155,7 +150,7 @@ mixin _$StreamLobbyViewStyle {
     BorderRadius? previewBorderRadius,
     Color? previewBorderColor,
     double? previewBorderWidth,
-    Color? previewBackgroundColor,
+    StreamParticipantTileStyle? previewTileStyle,
     double? smallPreviewAspectRatio,
     Size? largePreviewSize,
     double? sectionSpacing,
@@ -165,7 +160,6 @@ mixin _$StreamLobbyViewStyle {
     double? controlSpacing,
     double? settingSpacing,
     double? overlayControlInset,
-    double? participantLabelInset,
     double? joinButtonWidth,
     TextStyle? titleTextStyle,
     TextStyle? subtitleTextStyle,
@@ -176,8 +170,7 @@ mixin _$StreamLobbyViewStyle {
       previewBorderRadius: previewBorderRadius ?? _this.previewBorderRadius,
       previewBorderColor: previewBorderColor ?? _this.previewBorderColor,
       previewBorderWidth: previewBorderWidth ?? _this.previewBorderWidth,
-      previewBackgroundColor:
-          previewBackgroundColor ?? _this.previewBackgroundColor,
+      previewTileStyle: previewTileStyle ?? _this.previewTileStyle,
       smallPreviewAspectRatio:
           smallPreviewAspectRatio ?? _this.smallPreviewAspectRatio,
       largePreviewSize: largePreviewSize ?? _this.largePreviewSize,
@@ -188,8 +181,6 @@ mixin _$StreamLobbyViewStyle {
       controlSpacing: controlSpacing ?? _this.controlSpacing,
       settingSpacing: settingSpacing ?? _this.settingSpacing,
       overlayControlInset: overlayControlInset ?? _this.overlayControlInset,
-      participantLabelInset:
-          participantLabelInset ?? _this.participantLabelInset,
       joinButtonWidth: joinButtonWidth ?? _this.joinButtonWidth,
       titleTextStyle: titleTextStyle ?? _this.titleTextStyle,
       subtitleTextStyle: subtitleTextStyle ?? _this.subtitleTextStyle,
@@ -211,7 +202,9 @@ mixin _$StreamLobbyViewStyle {
       previewBorderRadius: other.previewBorderRadius,
       previewBorderColor: other.previewBorderColor,
       previewBorderWidth: other.previewBorderWidth,
-      previewBackgroundColor: other.previewBackgroundColor,
+      previewTileStyle:
+          _this.previewTileStyle?.merge(other.previewTileStyle) ??
+          other.previewTileStyle,
       smallPreviewAspectRatio: other.smallPreviewAspectRatio,
       largePreviewSize: other.largePreviewSize,
       sectionSpacing: other.sectionSpacing,
@@ -221,7 +214,6 @@ mixin _$StreamLobbyViewStyle {
       controlSpacing: other.controlSpacing,
       settingSpacing: other.settingSpacing,
       overlayControlInset: other.overlayControlInset,
-      participantLabelInset: other.participantLabelInset,
       joinButtonWidth: other.joinButtonWidth,
       titleTextStyle:
           _this.titleTextStyle?.merge(other.titleTextStyle) ??
@@ -248,7 +240,7 @@ mixin _$StreamLobbyViewStyle {
     return _other.previewBorderRadius == _this.previewBorderRadius &&
         _other.previewBorderColor == _this.previewBorderColor &&
         _other.previewBorderWidth == _this.previewBorderWidth &&
-        _other.previewBackgroundColor == _this.previewBackgroundColor &&
+        _other.previewTileStyle == _this.previewTileStyle &&
         _other.smallPreviewAspectRatio == _this.smallPreviewAspectRatio &&
         _other.largePreviewSize == _this.largePreviewSize &&
         _other.sectionSpacing == _this.sectionSpacing &&
@@ -258,7 +250,6 @@ mixin _$StreamLobbyViewStyle {
         _other.controlSpacing == _this.controlSpacing &&
         _other.settingSpacing == _this.settingSpacing &&
         _other.overlayControlInset == _this.overlayControlInset &&
-        _other.participantLabelInset == _this.participantLabelInset &&
         _other.joinButtonWidth == _this.joinButtonWidth &&
         _other.titleTextStyle == _this.titleTextStyle &&
         _other.subtitleTextStyle == _this.subtitleTextStyle;
@@ -273,7 +264,7 @@ mixin _$StreamLobbyViewStyle {
       _this.previewBorderRadius,
       _this.previewBorderColor,
       _this.previewBorderWidth,
-      _this.previewBackgroundColor,
+      _this.previewTileStyle,
       _this.smallPreviewAspectRatio,
       _this.largePreviewSize,
       _this.sectionSpacing,
@@ -283,7 +274,6 @@ mixin _$StreamLobbyViewStyle {
       _this.controlSpacing,
       _this.settingSpacing,
       _this.overlayControlInset,
-      _this.participantLabelInset,
       _this.joinButtonWidth,
       _this.titleTextStyle,
       _this.subtitleTextStyle,

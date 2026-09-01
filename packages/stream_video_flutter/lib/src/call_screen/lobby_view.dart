@@ -276,7 +276,14 @@ class _LobbyBody extends StatelessWidget {
   }
 }
 
-/// The camera preview, with the local participant's label along its bottom.
+/// The camera preview: the participant tile the user is about to become.
+///
+/// Deliberately the same [StreamParticipantTile] the call draws, so the
+/// surface, corner radius, name pill and placeholder avatar cannot drift from
+/// the call's, and an app that themes its tiles themes this too. The tile is
+/// handed its renderer directly because the lobby's track belongs to nobody
+/// yet: it is warmed up locally and not registered with the call, so the
+/// tile's usual lookup by session id would find nothing.
 class _LobbyPreview extends StatelessWidget {
   const _LobbyPreview();
 
@@ -292,61 +299,63 @@ class _LobbyPreview extends StatelessWidget {
     final borderRadius = style.previewBorderRadius;
     final cameraTrack = controller.cameraTrack;
 
-    Widget placeholder(BuildContext context) =>
-        Center(child: StreamUserAvatar(user: controller.currentUser));
+    final tile = StreamParticipantTile(
+      call: controller.call,
+      participant: controller.localParticipant,
+      // Nothing here has any meaning before the call is joined: nobody is
+      // speaking, there is no connection to rate and no reactions to receive.
+      showSpeakerBorder: false,
+      showConnectionQualityIndicator: false,
+      showReaction: false,
+      style: StreamParticipantTileStyle(
+        borderRadius: borderRadius,
+      ).merge(style.previewTileStyle),
+      videoRendererBuilder: (context, call, participant) {
+        if (cameraTrack == null) {
+          return StreamParticipantPlaceholder(
+            call: call,
+            participant: participant,
+          );
+        }
 
-    final preview = DecoratedBox(
+        return VideoTrackRenderer(
+          videoTrack: cameraTrack,
+          mirror: cameraTrack.mediaConstraints.facingMode == FacingMode.user,
+          placeholderBuilder: (context) => StreamParticipantPlaceholder(
+            call: call,
+            participant: participant,
+          ),
+        );
+      },
+    );
+
+    // The accent ring is the lobby's own chrome, not the tile's: a tile
+    // showing video draws no outline, because there the video defines the
+    // edge. Painted in the foreground so it sits over the tile's corner rather
+    // than insetting it.
+    final framed = DecoratedBox(
+      position: DecorationPosition.foreground,
       decoration: BoxDecoration(
-        color: style.previewBackgroundColor,
         borderRadius: borderRadius,
         border: Border.all(
           color: style.previewBorderColor,
           width: style.previewBorderWidth,
         ),
       ),
-      child: ClipRRect(
-        borderRadius: borderRadius,
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: cameraTrack == null
-                  ? placeholder(context)
-                  : VideoTrackRenderer(
-                      videoTrack: cameraTrack,
-                      mirror:
-                          cameraTrack.mediaConstraints.facingMode ==
-                          FacingMode.user,
-                      placeholderBuilder: placeholder,
-                    ),
-            ),
-            Align(
-              alignment: AlignmentDirectional.bottomStart,
-              child: Padding(
-                padding: EdgeInsets.all(style.participantLabelInset),
-                child: StreamParticipantLabel(
-                  name: controller.currentUser.name,
-                  isAudioEnabled: controller.microphoneEnabled,
-                  isSpeaking: false,
-                  isVideoEnabled: controller.cameraEnabled,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      child: tile,
     );
 
     if (isSmall) {
       return AspectRatio(
         aspectRatio: style.smallPreviewAspectRatio,
-        child: preview,
+        child: framed,
       );
     }
 
     final size = style.largePreviewSize;
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: size.width),
-      child: AspectRatio(aspectRatio: size.aspectRatio, child: preview),
+      child: AspectRatio(aspectRatio: size.aspectRatio, child: framed),
     );
   }
 }
@@ -379,8 +388,7 @@ class _StreamLobbyViewStyleDefaults extends StreamLobbyViewStyle {
   double get previewBorderWidth => _style?.previewBorderWidth ?? 2;
 
   @override
-  Color get previewBackgroundColor =>
-      _style?.previewBackgroundColor ?? _colorScheme.backgroundSurface;
+  StreamParticipantTileStyle? get previewTileStyle => _style?.previewTileStyle;
 
   @override
   double get smallPreviewAspectRatio =>
@@ -409,10 +417,6 @@ class _StreamLobbyViewStyleDefaults extends StreamLobbyViewStyle {
 
   @override
   double get overlayControlInset => _style?.overlayControlInset ?? _spacing.md;
-
-  @override
-  double get participantLabelInset =>
-      _style?.participantLabelInset ?? _spacing.sm;
 
   @override
   double get joinButtonWidth => _style?.joinButtonWidth ?? 400;
