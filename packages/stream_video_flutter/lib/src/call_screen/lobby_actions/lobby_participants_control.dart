@@ -18,73 +18,56 @@ class StreamLobbyParticipantsControl extends StatelessWidget {
     final translations = context.translations;
     final participants = controller.participants;
 
-    final button = CallControlButton(
-      icon: Icon(context.streamIcons.usersFill),
-      tooltip: translations.lobbyParticipants,
-      onPressed: participants.isEmpty
-          ? null
-          : () => _showParticipants(context, controller),
-    );
+    return StreamAdaptiveMenuAnchor(
+      title: translations.lobbyParticipants,
+      sections: [
+        StreamMenuSection(
+          // One unlabelled group: the sheet's header already names it, and an
+          // anchored menu of names needs no heading over them.
+          options: [
+            for (final participant in participants)
+              StreamMenuOption(
+                label:
+                    controller.users[participant.userId]?.name ??
+                    participant.userId,
+                leading: StreamUserAvatar(
+                  user: _userInfoFor(controller, participant),
+                ),
+              ),
+          ],
+        ),
+      ],
+      builder: (context, handle) {
+        final button = CallControlButton(
+          icon: Icon(context.streamIcons.usersFill),
+          tooltip: translations.lobbyParticipants,
+          onPressed: participants.isEmpty ? null : handle.toggle,
+        );
 
-    if (participants.isEmpty) return button;
+        if (participants.isEmpty) return button;
 
-    return StreamBadgeNotificationTheme(
-      data: StreamBadgeNotificationThemeData(
-        primaryBackgroundColor: colorScheme.accentSuccess,
-      ),
-      child: StreamBadgeNotification(
-        label: '${participants.length}',
-        child: button,
-      ),
+        return StreamBadgeNotificationTheme(
+          data: StreamBadgeNotificationThemeData(
+            primaryBackgroundColor: colorScheme.accentSuccess,
+          ),
+          child: StreamBadgeNotification(
+            label: '${participants.length}',
+            child: button,
+          ),
+        );
+      },
     );
   }
 
-  void _showParticipants(
-    BuildContext context,
+  UserInfo _userInfoFor(
     StreamLobbyController controller,
+    CallParticipant participant,
   ) {
-    showStreamSheet<void>(
-      context: context,
-      builder: (context, scrollController) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          StreamSheetHeader(
-            title: Text(context.translations.lobbyParticipants),
-          ),
-          Flexible(
-            child: ListView(
-              controller: scrollController,
-              shrinkWrap: true,
-              children: [
-                for (final participant in controller.participants)
-                  Builder(
-                    builder: (context) {
-                      final user = controller.users[participant.userId];
-                      // Matches the inset the device sheets use, so rows in
-                      // the two line up and a highlight never runs into the
-                      // sheet's edges.
-                      return Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: context.streamSpacing.xxs,
-                        ),
-                        child: StreamListTile(
-                          leading: StreamUserAvatar(
-                            user: UserInfo(
-                              id: participant.userId,
-                              name: user?.name ?? participant.userId,
-                              image: user?.image,
-                            ),
-                          ),
-                          title: Text(user?.name ?? participant.userId),
-                        ),
-                      );
-                    },
-                  ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    final user = controller.users[participant.userId];
+    return UserInfo(
+      id: participant.userId,
+      name: user?.name ?? participant.userId,
+      image: user?.image,
     );
   }
 }

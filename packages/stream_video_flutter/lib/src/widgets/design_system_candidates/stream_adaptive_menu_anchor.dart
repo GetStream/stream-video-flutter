@@ -5,39 +5,56 @@ import 'stream_context_menu_anchor.dart';
 import 'stream_context_menu_heading.dart';
 import 'stream_radio_indicator.dart';
 
-/// One choice inside a [StreamMenuSection].
+/// One row inside a [StreamMenuSection].
+///
+/// A row is a choice when [selected] is set and pickable when [onSelected] is:
+/// a device menu sets both, a list that only shows something — the people
+/// already in a call, say — sets neither.
 @immutable
 class StreamMenuOption {
   /// Creates a menu option.
   const StreamMenuOption({
     required this.label,
-    required this.selected,
-    required this.onSelected,
+    this.leading,
+    this.selected,
+    this.onSelected,
   });
 
   /// The text of the row.
   final String label;
 
+  /// Drawn before the label.
+  ///
+  /// Defaults to a radio indicator when [selected] is set, and to nothing
+  /// otherwise.
+  final Widget? leading;
+
   /// Whether this is the option currently in effect.
-  final bool selected;
+  ///
+  /// Null where the section is not a choice, which also drops the radio
+  /// indicator the rows would otherwise carry.
+  final bool? selected;
 
   /// Called when the user picks this option.
   ///
-  /// The menu closes itself first, so this does not have to.
-  final VoidCallback onSelected;
+  /// The menu closes itself first, so this does not have to. Null renders the
+  /// row as something to read rather than something to press.
+  final VoidCallback? onSelected;
 }
 
-/// A group of mutually exclusive [StreamMenuOption]s under one [heading].
+/// A group of [StreamMenuOption]s, optionally under a [heading].
 @immutable
 class StreamMenuSection {
   /// Creates a menu section.
-  const StreamMenuSection({required this.heading, required this.options});
+  const StreamMenuSection({required this.options, this.heading});
 
   /// The label above the group, e.g. "Microphone".
-  final String heading;
+  ///
+  /// Null draws no heading, which is what a menu of one unlabelled group
+  /// wants.
+  final String? heading;
 
-  /// The choices in the group. Exactly one is normally [
-  /// StreamMenuOption.selected].
+  /// The rows in the group.
   final List<StreamMenuOption> options;
 }
 
@@ -205,7 +222,17 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
 
   void _select(StreamMenuOption option) {
     close();
-    option.onSelected();
+    option.onSelected?.call();
+  }
+
+  /// What a row draws before its label: whatever it was given, or the radio
+  /// indicator a choice implies.
+  static Widget? _leadingOf(StreamMenuOption option) {
+    if (option.leading case final leading?) return leading;
+    if (option.selected case final selected?) {
+      return StreamRadioIndicator(selected: selected);
+    }
+    return null;
   }
 
   Future<void> _openSheet() async {
@@ -264,11 +291,15 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
         sections: [
           for (final section in widget.sections)
             [
-              StreamContextMenuHeading(label: Text(section.heading)),
+              if (section.heading case final heading?)
+                StreamContextMenuHeading(label: Text(heading)),
               for (final option in section.options)
                 StreamContextMenuAction<void>(
-                  onTap: () => _select(option),
-                  leading: StreamRadioIndicator(selected: option.selected),
+                  onTap: option.onSelected == null
+                      ? null
+                      : () => _select(option),
+                  enabled: option.onSelected != null,
+                  leading: _leadingOf(option),
                   label: Text(
                     option.label,
                     maxLines: 1,
@@ -314,29 +345,33 @@ class _MenuSheet extends StatelessWidget {
             shrinkWrap: true,
             children: [
               for (final section in sections) ...[
-                Padding(
-                  // Everything in the sheet is inset by spacing.xxs so a
-                  // selected row's rounded fill has room to breathe rather
-                  // than running into the sheet's edges. A heading insets
-                  // itself by spacing.xs and a list tile by spacing.sm, so the
-                  // heading takes the larger outer pad and the two line up.
-                  padding: EdgeInsets.symmetric(horizontal: spacing.xs),
-                  child: StreamContextMenuHeading(
-                    label: Text(section.heading),
+                if (section.heading case final heading?)
+                  Padding(
+                    // Everything in the sheet is inset by spacing.xxs so a
+                    // selected row's rounded fill has room to breathe rather
+                    // than running into the sheet's edges. A heading insets
+                    // itself by spacing.xs and a list tile by spacing.sm, so the
+                    // heading takes the larger outer pad and the two line up.
+                    padding: EdgeInsets.symmetric(horizontal: spacing.xs),
+                    child: StreamContextMenuHeading(label: Text(heading)),
                   ),
-                ),
                 for (final option in section.options)
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
                     child: StreamListTile(
-                      leading: StreamRadioIndicator(selected: option.selected),
+                      leading: _StreamAdaptiveMenuAnchorState._leadingOf(
+                        option,
+                      ),
                       title: Text(
                         option.label,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      selected: option.selected,
-                      onTap: () => onSelected(option),
+                      selected: option.selected ?? false,
+                      enabled: option.onSelected != null,
+                      onTap: option.onSelected == null
+                          ? null
+                          : () => onSelected(option),
                     ),
                   ),
               ],
