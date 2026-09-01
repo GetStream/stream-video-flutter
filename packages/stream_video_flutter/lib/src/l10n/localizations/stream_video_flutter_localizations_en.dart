@@ -94,5 +94,14 @@ class StreamVideoFlutterLocalizationsEn
   String get lobbyToggleCamera => 'Toggle camera';
 
   @override
+  String get lobbyTitle => 'Before joining';
+
+  @override
+  String get lobbySubtitle => 'Set up your audio and video';
+
+  @override
+  String get lobbyJoinCall => 'Join call';
+
+  @override
   String get lobbyParticipants => 'Participants';
 }

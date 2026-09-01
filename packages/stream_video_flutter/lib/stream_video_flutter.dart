@@ -59,7 +59,6 @@ export 'src/call_screen/lobby_actions/lobby_split_buttons.dart';
 export 'src/call_screen/lobby_actions/lobby_toggles.dart';
 export 'src/call_screen/lobby_controller.dart';
 export 'src/call_screen/lobby_scope.dart';
-export 'src/call_screen/lobby_video.dart';
 export 'src/call_screen/lobby_view.dart';
 export 'src/call_screen/media_devices_controller.dart';
 export 'src/call_screen/outgoing_call/outgoing_call_content.dart';
