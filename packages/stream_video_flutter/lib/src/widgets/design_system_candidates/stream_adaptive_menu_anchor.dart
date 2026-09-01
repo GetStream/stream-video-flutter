@@ -124,6 +124,7 @@ class StreamAdaptiveMenuAnchor extends StatefulWidget {
     this.title,
     this.useSheet,
     this.matchAnchorWidth = false,
+    this.menuItemStyle,
     this.menuElevation,
     this.alignmentOffset = const Offset(0, 8),
   });
@@ -156,6 +157,14 @@ class StreamAdaptiveMenuAnchor extends StatefulWidget {
   /// Only has an effect when the anchor is given a bounded width, and nothing
   /// to do with the sheet presentation, which is always full width.
   final bool matchAnchorWidth;
+
+  /// Overrides for the anchored menu's rows.
+  ///
+  /// The design's menu row is sized for a 16px icon beside a caption; a menu
+  /// whose rows carry something bigger needs a taller one. The sheet's rows
+  /// are `StreamListTile`s and are already sized for it, so this does not
+  /// apply to them.
+  final StreamContextMenuActionStyle? menuItemStyle;
 
   /// How high the anchored menu floats above the page.
   ///
@@ -271,6 +280,7 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
     return StreamContextMenuAnchor(
       controller: _menuController,
       alignmentOffset: widget.alignmentOffset,
+      actionStyle: widget.menuItemStyle,
       elevation: widget.menuElevation,
       // StreamContextMenu is an IntrinsicWidth, so a tight width overrides
       // what its content would otherwise ask for — including the 200px

@@ -89,6 +89,24 @@ void main() {
       });
     }
 
+    // A device menu carries 16px icons, so it keeps the design's row and is
+    // not dragged along by the roomier one an avatar list asks for.
+    testWidgets('keeps the design row when no override is given', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const TestWrapper(platform: .macOS, child: _Menu()),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      final row = tester.getSize(
+        find.byType(StreamContextMenuAction<void>).first,
+      );
+      expect(row.height, 32);
+    });
+
     // MenuAnchor clips its panel to the panel's own bounds by default, which
     // cuts off the shadow the menu's Material draws outside them — the shadow
     // stops dead along the bottom edge rather than fading out, and raising the

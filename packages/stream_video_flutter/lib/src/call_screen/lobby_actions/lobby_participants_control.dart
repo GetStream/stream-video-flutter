@@ -18,8 +18,19 @@ class StreamLobbyParticipantsControl extends StatelessWidget {
     final translations = context.translations;
     final participants = controller.participants;
 
+    final spacing = context.streamSpacing;
+
     return StreamAdaptiveMenuAnchor(
       title: translations.lobbyParticipants,
+      // The design's menu row is sized for a 16px icon; an avatar is 40, and
+      // in a 40px row it touches both edges. These are the sheet's own
+      // insets, so a name sits the same distance from the edge either way.
+      menuItemStyle: StreamContextMenuActionStyle(
+        minimumSize: const WidgetStatePropertyAll(Size(200, 56)),
+        padding: WidgetStatePropertyAll(
+          EdgeInsets.symmetric(horizontal: spacing.sm),
+        ),
+      ),
       sections: [
         StreamMenuSection(
           // One unlabelled group: the sheet's header already names it, and an

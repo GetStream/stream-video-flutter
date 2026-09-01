@@ -115,6 +115,27 @@ void main() {
     expect(find.text('Rene iPad'), findsOneWidget);
   });
 
+  // The design's menu row is sized for a 16px icon; an avatar is 40, and in a
+  // 40px row it touches both edges. These are the sheet's own insets, so a
+  // name sits the same distance from the edge in either presentation.
+  testWidgets('gives an avatar row room in the anchored menu', (tester) async {
+    await pumpControl(tester, TargetPlatform.macOS);
+
+    await tester.tap(find.byType(CallControlButton));
+    await tester.pumpAndSettle();
+
+    final panel = tester.getRect(find.byType(StreamContextMenu));
+    final row = tester.getRect(
+      find.byType(StreamContextMenuAction<void>).first,
+    );
+    final avatar = tester.getRect(find.byType(StreamUserAvatar).first);
+
+    expect(row.height, 56);
+    expect(avatar.left - panel.left, 16);
+    expect(avatar.top - row.top, 8);
+    expect(row.bottom - avatar.bottom, 8);
+  });
+
   testWidgets('badges the number waiting', (tester) async {
     await pumpControl(tester, TargetPlatform.macOS);
 
