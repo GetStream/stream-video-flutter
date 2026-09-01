@@ -47,6 +47,7 @@ const _widths = <String, Size>{
 void main() {
   late StreamController<List<RtcMediaDevice>> deviceChanges;
   late StreamLobbyController controller;
+  late MockCall call;
 
   setUp(() {
     deviceChanges = StreamController<List<RtcMediaDevice>>.broadcast();
@@ -73,7 +74,7 @@ void main() {
       ),
     );
 
-    final call = MockCall();
+    call = MockCall();
     when(() => call.state).thenAnswer(
       (_) => MutableStateEmitter<CallState>(callState, sync: true),
     );
@@ -91,6 +92,60 @@ void main() {
 
   tearDown(() => deviceChanges.close());
 
+  /// A controller whose microphone and camera both refuse to open, as they do
+  /// on a simulator with no capture hardware.
+  StreamLobbyController unavailableDevices() {
+    final notifier = MockRtcMediaDeviceNotifier();
+    when(() => notifier.onDeviceChange).thenAnswer((_) => deviceChanges.stream);
+    when(
+      notifier.enumerateDevices,
+    ).thenAnswer((_) async => const Result.success(<RtcMediaDevice>[]));
+
+    final video = MockStreamVideo();
+    when(
+      () => video.currentUser,
+    ).thenReturn(const UserInfo(id: 'local', name: 'Rene Floor'));
+    when(() => video.events).thenAnswer((_) => const Stream.empty());
+
+    final callState = MockCallState();
+    // Both on, so the lobby tries to open them and finds nothing.
+    when(() => callState.settings).thenReturn(const CallSettings());
+
+    final failing = MockCall();
+    when(() => failing.state).thenAnswer(
+      (_) => MutableStateEmitter<CallState>(callState, sync: true),
+    );
+    when(failing.getOrCreate).thenAnswer(
+      (_) async => Result.failure(StateError('no network'), StackTrace.empty),
+    );
+    when(failing.ensureNativeFactory).thenThrow(StateError('no device'));
+
+    final controller = StreamLobbyController(
+      call: failing,
+      streamVideo: video,
+      deviceNotifier: notifier,
+    );
+    addTearDown(controller.dispose);
+    return controller;
+  }
+
+  Widget lobbyWith(
+    StreamLobbyController controller,
+    LobbyActions actions,
+    double width,
+  ) => MediaQuery(
+    data: MediaQueryData(size: Size(width, 900)),
+    child: SizedBox(
+      width: width,
+      child: StreamLobbyView(
+        call: controller.call,
+        controller: controller,
+        actions: actions,
+        onJoinCallPressed: (_) {},
+      ),
+    ),
+  );
+
   Widget lobby(LobbyActions actions, double width) => MediaQuery(
     // StreamScreenSize reads MediaQuery.sizeOf, so sizing the alchemist
     // surface alone would leave every case reporting the same breakpoint.
@@ -105,6 +160,50 @@ void main() {
       ),
     ),
   );
+
+  // What an iOS simulator shows: no camera at all, so opening one throws.
+  for (final brightness in Brightness.values) {
+    streamGoldenTest(
+      'StreamLobbyView marks an unavailable device',
+      fileName: 'stream_lobby_view_unavailable',
+      brightness: brightness,
+      constraints: const BoxConstraints(maxWidth: 900),
+      builder: () => GoldenTestGroup(
+        columns: 1,
+        children: [
+          GoldenTestScenario(
+            name: 'toggles',
+            child: SizedBox(
+              width: 900,
+              height: 620,
+              child: lobbyWith(
+                unavailableDevices(),
+                LobbyActions.simple(),
+                900,
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'split buttons',
+            child: SizedBox(
+              width: 900,
+              height: 620,
+              child: lobbyWith(
+                unavailableDevices(),
+                LobbyActions.regular(),
+                900,
+              ),
+            ),
+          ),
+        ],
+      ),
+      pumpBeforeTest: (tester) async {
+        await tester.pump();
+        // The camera is opened on the first frame and fails; pump past it.
+        await tester.pump(const Duration(milliseconds: 100));
+      },
+    );
+  }
 
   for (final (preset, build) in <(String, LobbyActions Function())>[
     ('simple', LobbyActions.simple),
@@ -161,6 +260,72 @@ void main() {
 
     expect(find.byType(StreamSelectInput), findsNothing);
     expect(find.byType(StreamLobbyMicrophoneToggle), findsOneWidget);
+  });
+
+  // A device that cannot be opened is not a user choice: the control is
+  // disabled and badged rather than drawn in the state a deliberate mute gets,
+  // so a permission problem is not mistaken for something the user did.
+  testWidgets('an unavailable device disables and badges its control', (
+    tester,
+  ) async {
+    final controller = unavailableDevices();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SingleChildScrollView(
+            child: lobbyWith(controller, LobbyActions.simple(), 900),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(controller.cameraUnavailable, isTrue);
+    expect(controller.microphoneUnavailable, isTrue);
+
+    final buttons = tester
+        .widgetList<CallControlButton>(find.byType(CallControlButton))
+        .toList();
+    expect(buttons, hasLength(2));
+    for (final button in buttons) {
+      expect(button.onPressed, isNull);
+      expect(button.showErrorBadge, isTrue);
+      // Neutral, not negative: red would read as "you muted this".
+      expect(button.state, CallControlState.neutral);
+    }
+  });
+
+  // "Joining remains possible with the unavailable device disabled."
+  testWidgets('an unavailable device does not block joining', (tester) async {
+    var joined = false;
+    final controller = unavailableDevices();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: SingleChildScrollView(
+            child: MediaQuery(
+              data: const MediaQueryData(size: Size(900, 900)),
+              child: SizedBox(
+                width: 900,
+                child: StreamLobbyView(
+                  call: controller.call,
+                  controller: controller,
+                  actions: LobbyActions.simple(),
+                  onJoinCallPressed: (_) => joined = true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.text('Join call'));
+    await tester.pump();
+
+    expect(joined, isTrue);
   });
 
   // Nothing reports a local audio level before joining, so an indicator here

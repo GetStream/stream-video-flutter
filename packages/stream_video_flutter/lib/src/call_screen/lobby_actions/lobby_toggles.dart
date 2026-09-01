@@ -16,13 +16,17 @@ class StreamLobbyMicrophoneToggle extends StatelessWidget {
     final controller = StreamLobbyScope.of(context);
     final icons = context.streamIcons;
     final enabled = controller.microphoneEnabled;
+    final unavailable = controller.microphoneUnavailable;
 
     return CallControlButton(
       icon: Icon(enabled ? icons.voiceFill : icons.voiceOffFill),
-      state: enabled ? .neutral : .negative,
-      showErrorBadge: controller.microphoneError != null,
+      // An unavailable device is not a user choice, so it is drawn disabled
+      // with an error badge rather than in the negative state a deliberate
+      // mute gets.
+      state: enabled || unavailable ? .neutral : .negative,
+      showErrorBadge: unavailable,
       tooltip: context.translations.lobbyToggleMicrophone,
-      onPressed: controller.toggleMicrophone,
+      onPressed: unavailable ? null : controller.toggleMicrophone,
     );
   }
 }
@@ -38,13 +42,15 @@ class StreamLobbyCameraToggle extends StatelessWidget {
     final controller = StreamLobbyScope.of(context);
     final icons = context.streamIcons;
     final enabled = controller.cameraEnabled;
+    final unavailable = controller.cameraUnavailable;
 
     return CallControlButton(
       icon: Icon(enabled ? icons.videoFill : icons.videoOffFill),
-      state: enabled ? .neutral : .negative,
-      showErrorBadge: controller.cameraError != null,
+      // See StreamLobbyMicrophoneToggle.
+      state: enabled || unavailable ? .neutral : .negative,
+      showErrorBadge: unavailable,
       tooltip: context.translations.lobbyToggleCamera,
-      onPressed: controller.toggleCamera,
+      onPressed: unavailable ? null : controller.toggleCamera,
     );
   }
 }

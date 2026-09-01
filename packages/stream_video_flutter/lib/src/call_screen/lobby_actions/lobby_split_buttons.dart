@@ -26,18 +26,27 @@ class StreamLobbyMicrophoneSplitButton extends StatelessWidget {
     final icons = context.streamIcons;
     final translations = context.translations;
     final enabled = controller.microphoneEnabled;
+    final unavailable = controller.microphoneUnavailable;
 
     return StreamAdaptiveMenuAnchor(
       title: translations.lobbyMicrophoneSection,
       sections: controller.devices.audioSections(context),
-      builder: (context, handle) => StreamSplitButton.icon(
-        icon: Icon(enabled ? icons.voiceFill : icons.voiceOffFill),
-        trailingIcon: Icon(handle.isOpen ? icons.caretUp : icons.caretDown),
-        style: enabled ? .secondary : .destructive,
-        tooltip: translations.lobbyToggleMicrophone,
-        trailingTooltip: translations.lobbySelectAudioDevices,
-        onPressed: controller.toggleMicrophone,
-        onTrailingPressed: handle.toggle,
+      // An unavailable device is not a user choice, so it is drawn disabled
+      // with an error badge rather than in the destructive state a deliberate
+      // mute gets. Both halves take a null callback because a split button
+      // only takes on its disabled surface once neither half can be pressed —
+      // and with no device there is nothing for the caret to offer anyway.
+      builder: (context, handle) => CallButtonBadge(
+        showErrorBadge: unavailable,
+        child: StreamSplitButton.icon(
+          icon: Icon(enabled ? icons.voiceFill : icons.voiceOffFill),
+          trailingIcon: Icon(handle.isOpen ? icons.caretUp : icons.caretDown),
+          style: enabled || unavailable ? .secondary : .destructive,
+          tooltip: translations.lobbyToggleMicrophone,
+          trailingTooltip: translations.lobbySelectAudioDevices,
+          onPressed: unavailable ? null : controller.toggleMicrophone,
+          onTrailingPressed: unavailable ? null : handle.toggle,
+        ),
       ),
     );
   }
@@ -55,18 +64,23 @@ class StreamLobbyCameraSplitButton extends StatelessWidget {
     final icons = context.streamIcons;
     final translations = context.translations;
     final enabled = controller.cameraEnabled;
+    final unavailable = controller.cameraUnavailable;
 
     return StreamAdaptiveMenuAnchor(
       title: translations.lobbyCameraSection,
       sections: controller.devices.videoSections(context),
-      builder: (context, handle) => StreamSplitButton.icon(
-        icon: Icon(enabled ? icons.videoFill : icons.videoOffFill),
-        trailingIcon: Icon(handle.isOpen ? icons.caretUp : icons.caretDown),
-        style: enabled ? .secondary : .destructive,
-        tooltip: translations.lobbyToggleCamera,
-        trailingTooltip: translations.lobbySelectVideoDevice,
-        onPressed: controller.toggleCamera,
-        onTrailingPressed: handle.toggle,
+      // See StreamLobbyMicrophoneSplitButton.
+      builder: (context, handle) => CallButtonBadge(
+        showErrorBadge: unavailable,
+        child: StreamSplitButton.icon(
+          icon: Icon(enabled ? icons.videoFill : icons.videoOffFill),
+          trailingIcon: Icon(handle.isOpen ? icons.caretUp : icons.caretDown),
+          style: enabled || unavailable ? .secondary : .destructive,
+          tooltip: translations.lobbyToggleCamera,
+          trailingTooltip: translations.lobbySelectVideoDevice,
+          onPressed: unavailable ? null : controller.toggleCamera,
+          onTrailingPressed: unavailable ? null : handle.toggle,
+        ),
       ),
     );
   }
