@@ -52,6 +52,28 @@ void main() {
       expect(find.byType(StreamListTile), findsNothing);
     });
 
+    // A selected row's fill is rounded, and running it flush into the sheet's
+    // edges looks like a rendering mistake.
+    testWidgets('insets sheet rows so a selected fill clears the edges', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        // Android is TestWrapper's default, but naming it says which
+        // presentation this is about.
+        // ignore: avoid_redundant_argument_values
+        const TestWrapper(platform: .android, child: _Menu()),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      final sheet = tester.getRect(find.byType(StreamSheetHeader).first);
+      final row = tester.getRect(find.byType(StreamListTile).first);
+
+      expect(row.left - sheet.left, 4);
+      expect(sheet.right - row.right, 4);
+    });
+
     testWidgets('useSheet overrides the platform', (tester) async {
       await tester.pumpWidget(
         const TestWrapper(platform: .macOS, child: _Menu(useSheet: true)),
