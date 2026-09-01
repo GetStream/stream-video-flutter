@@ -63,6 +63,74 @@ void main() {
       expect(find.byType(StreamListTile), findsNWidgets(3));
     });
 
+    // The anchor has to be given loose constraints for a SizedBox inside it to
+    // mean anything: TestWrapper's Material is sized to the viewport and hands
+    // its child tight constraints.
+    Future<double> openMenuUnder(
+      WidgetTester tester, {
+      required double anchorWidth,
+      required bool matchAnchorWidth,
+    }) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          platform: TargetPlatform.macOS,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: anchorWidth,
+              child: _Menu(matchAnchorWidth: matchAnchorWidth),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      return tester.getSize(find.byType(StreamContextMenu).first).width;
+    }
+
+    testWidgets('sizes the menu to its content by default', (tester) async {
+      final width = await openMenuUnder(
+        tester,
+        anchorWidth: 600,
+        matchAnchorWidth: false,
+      );
+
+      // Content-sized, and capped by the anchor's own maximum.
+      expect(width, lessThan(600));
+      expect(
+        width,
+        lessThanOrEqualTo(StreamContextMenuAnchor.defaultConstraints.maxWidth),
+      );
+    });
+
+    testWidgets('matchAnchorWidth stretches the menu to the anchor', (
+      tester,
+    ) async {
+      final width = await openMenuUnder(
+        tester,
+        anchorWidth: 600,
+        matchAnchorWidth: true,
+      );
+
+      expect(width, 600);
+    });
+
+    // A field narrower than the row's own 200px minimum: the tight width has
+    // to win, or the panel overflows its field.
+    testWidgets('matchAnchorWidth holds below the row minimum width', (
+      tester,
+    ) async {
+      final width = await openMenuUnder(
+        tester,
+        anchorWidth: 160,
+        matchAnchorWidth: true,
+      );
+
+      expect(width, 160);
+    });
+
     // The presentation is the anchor's business; what the builder sees must not
     // depend on it, or an anchor's caret would rotate on one platform only.
     for (final platform in [TargetPlatform.android, TargetPlatform.macOS]) {
@@ -122,10 +190,11 @@ void main() {
 
 /// An anchor over two sections, whose button reports the handle's open state.
 class _Menu extends StatelessWidget {
-  const _Menu({this.useSheet, this.onPicked});
+  const _Menu({this.useSheet, this.onPicked, this.matchAnchorWidth = false});
 
   final bool? useSheet;
   final ValueChanged<String>? onPicked;
+  final bool matchAnchorWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -139,6 +208,7 @@ class _Menu extends StatelessWidget {
     return StreamAdaptiveMenuAnchor(
       title: 'Microphone',
       useSheet: useSheet,
+      matchAnchorWidth: matchAnchorWidth,
       sections: [
         StreamMenuSection(
           heading: 'Microphone',
