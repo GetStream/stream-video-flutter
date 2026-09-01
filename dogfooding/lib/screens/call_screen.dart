@@ -54,6 +54,10 @@ class _CallScreenState extends State<CallScreen> {
   late final _videoEffectsManager =
       widget.videoEffectsManager ?? StreamVideoEffectsManager(widget.call);
 
+  /// Backs the mic and camera split buttons' carets. One controller, so the
+  /// two agree about which device is in use.
+  late final _devices = StreamMediaDevicesController.forCall(widget.call);
+
   late final _speakingWhileMuted = SpeakingWhileMutedRecognition(
     call: widget.call,
   );
@@ -113,6 +117,7 @@ class _CallScreenState extends State<CallScreen> {
     _speakingWhileMutedSubscription.cancel();
     _speakingWhileMuted.dispose();
     _chatConnectionRecoverySubscription?.cancel();
+    _devices.dispose();
     widget.call.leave();
     _userChatRepo.disconnectUser();
     _videoEffectsManager.dispose();
@@ -344,31 +349,62 @@ class _CallScreenState extends State<CallScreen> {
                               ? _customDesktopScreenShareSelector
                               : null,
                         ),
-                        ToggleMicrophoneOption(
+                        // Split buttons rather than plain toggles, so the
+                        // device can be changed mid-call without opening the
+                        // settings menu.
+                        PartialCallStateBuilder<bool>(
                           call: call,
-                          // Keep the track alive on mute so speaking-while-
-                          // muted detection also works on iOS/macOS.
-                          stopTrackOnMute:
-                              CurrentPlatform.isIos || CurrentPlatform.isMacOS
-                              ? false
-                              : null,
+                          selector: (state) =>
+                              state.localParticipant?.isAudioEnabled ?? false,
+                          builder: (context, enabled) =>
+                              StreamMicrophoneSplitButton(
+                                devices: _devices,
+                                enabled: enabled,
+                                onPressed: () => call.setMicrophoneEnabled(
+                                  enabled: !enabled,
+                                  // Keep the track alive on mute so
+                                  // speaking-while-muted detection also works
+                                  // on iOS/macOS.
+                                  stopTrackOnMute:
+                                      CurrentPlatform.isIos ||
+                                          CurrentPlatform.isMacOS
+                                      ? false
+                                      : null,
+                                ),
+                              ),
                         ),
-                        ToggleCameraOption(call: call),
-                        const Spacer(),
-                        PartialCallStateBuilder(
+                        PartialCallStateBuilder<bool>(
                           call: call,
-                          selector: (state) => state.callParticipants.length,
-                          builder: (context, length) {
-                            return BadgedCallOption(
-                              callControlOption: CallControlButton(
-                                icon: Icon(context.streamIcons.usersFill),
-                                onPressed: _channel != null
+                          selector: (state) =>
+                              state.localParticipant?.isVideoEnabled ?? false,
+                          builder: (context, enabled) =>
+                              StreamCameraSplitButton(
+                                devices: _devices,
+                                enabled: enabled,
+                                onPressed: () =>
+                                    call.setCameraEnabled(enabled: !enabled),
+                              ),
+                        ),
+                        const Spacer(),
+                        // onTap, so the button opens this app's own
+                        // participants screen rather than the SDK's list.
+                        PartialCallStateBuilder<List<CallParticipantState>>(
+                          call: call,
+                          selector: (state) => state.callParticipants,
+                          builder: (context, participants) =>
+                              StreamParticipantsControl(
+                                onTap: _channel != null
                                     ? () => showParticipants(context)
                                     : null,
+                                participants: [
+                                  for (final participant in participants)
+                                    UserInfo(
+                                      id: participant.userId,
+                                      name: participant.name,
+                                      image: participant.image,
+                                    ),
+                                ],
                               ),
-                              badgeCount: length,
-                            );
-                          },
                         ),
                         _ShowChatButton(channel: _channel),
                       ],

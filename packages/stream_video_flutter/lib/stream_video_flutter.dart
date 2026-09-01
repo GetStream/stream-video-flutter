@@ -29,6 +29,8 @@ export 'src/call_controls/controls/toggle_microphone_option.dart';
 export 'src/call_controls/controls/toggle_recording_option.dart';
 export 'src/call_controls/controls/toggle_screen_sharing_option.dart';
 export 'src/call_controls/controls/toggle_speakerphone_option.dart';
+export 'src/call_controls/device_split_buttons.dart';
+export 'src/call_controls/participants_control.dart';
 export 'src/call_participants/call_participants.dart';
 export 'src/call_participants/call_participants_sorting_mixin.dart';
 export 'src/call_participants/floating_participant_tile.dart';

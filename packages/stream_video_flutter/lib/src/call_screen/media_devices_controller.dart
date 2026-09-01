@@ -39,6 +39,29 @@ class StreamMediaDevicesController extends ChangeNotifier {
     unawaited(_deviceNotifier.enumerateDevices());
   }
 
+  /// Drives [call]'s own device selection.
+  ///
+  /// The lobby builds one that restarts a preview instead; this is the
+  /// in-call counterpart, so a device picker works the same either side of
+  /// joining.
+  factory StreamMediaDevicesController.forCall(
+    Call call, {
+    RtcMediaDeviceNotifier? deviceNotifier,
+  }) {
+    return StreamMediaDevicesController(
+      deviceNotifier: deviceNotifier,
+      onAudioInputSelected: (device) async {
+        if (device != null) await call.setAudioInputDevice(device);
+      },
+      onAudioOutputSelected: (device) async {
+        if (device != null) await call.setAudioOutputDevice(device);
+      },
+      onVideoInputSelected: (device) async {
+        if (device != null) await call.setVideoInputDevice(device);
+      },
+    );
+  }
+
   final RtcMediaDeviceNotifier _deviceNotifier;
   StreamSubscription<List<RtcMediaDevice>>? _subscription;
 
