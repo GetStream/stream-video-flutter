@@ -106,6 +106,7 @@ class StreamAdaptiveMenuAnchor extends StatefulWidget {
     required this.builder,
     this.title,
     this.useSheet,
+    this.matchAnchorWidth = false,
     this.alignmentOffset = const Offset(0, 8),
   });
 
@@ -126,6 +127,17 @@ class StreamAdaptiveMenuAnchor extends StatefulWidget {
   /// Null — the default — picks the sheet on Android and iOS and the anchored
   /// menu everywhere else.
   final bool? useSheet;
+
+  /// Whether the anchored menu should be exactly as wide as its anchor.
+  ///
+  /// Off by default, because a menu is normally as wide as its content: a
+  /// popup hanging off a 32px caret should not be 32px wide. Turn it on where
+  /// the anchor is a full-width field and a narrower menu would look detached
+  /// from it.
+  ///
+  /// Only has an effect when the anchor is given a bounded width, and nothing
+  /// to do with the sheet presentation, which is always full width.
+  final bool matchAnchorWidth;
 
   /// The offset of the anchored menu relative to its anchor.
   ///
@@ -206,10 +218,35 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
   @override
   Widget build(BuildContext context) {
     if (_useSheet) return widget.builder(context, this);
+    if (!widget.matchAnchorWidth) return _anchored(context);
 
+    // The anchor's own incoming constraints are the field's width. Measuring
+    // here rather than inside the MenuAnchor's builder because the panel's
+    // constraints are a property of the anchor widget, fixed before that
+    // builder runs.
+    return LayoutBuilder(
+      builder: (context, constraints) => _anchored(
+        context,
+        width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
+      ),
+    );
+  }
+
+  Widget _anchored(BuildContext context, {double? width}) {
     return StreamContextMenuAnchor(
       controller: _menuController,
       alignmentOffset: widget.alignmentOffset,
+      // StreamContextMenu is an IntrinsicWidth, so a tight width overrides
+      // what its content would otherwise ask for — including the 200px
+      // minimum a menu row carries, which would otherwise overflow a field
+      // narrower than that.
+      constraints: switch (width) {
+        final width? => StreamContextMenuAnchor.defaultConstraints.copyWith(
+          minWidth: width,
+          maxWidth: width,
+        ),
+        null => StreamContextMenuAnchor.defaultConstraints,
+      },
       onOpen: () => setState(() => _isOpen = true),
       onClose: () {
         if (mounted) setState(() => _isOpen = false);
