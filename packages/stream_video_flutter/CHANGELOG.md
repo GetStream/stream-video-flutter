@@ -34,7 +34,7 @@
 
 - Added golden coverage for the lobby: each of the three `LobbyActions` presets swept across all three breakpoints, in both brightnesses. The sweep is what proves the two axes are independent — the preset decides which widgets exist, the width decides where the control row sits and how big the preview is.
 
-- Added `StreamAdaptiveMenuAnchor`, which presents a list of `StreamMenuSection`s as an anchored context menu on desktop and web and as a bottom sheet on Android and iOS. A popup pinned to a 32px caret is awkward to hit with a thumb and out of place next to the rest of a phone's chrome, so the presentation follows the platform rather than the call site — nothing that uses it has to branch. Its builder receives a `StreamMenuHandle` with `isOpen`, `open()`, `close()` and `toggle()`, so the same builder drives both presentations. Pass `useSheet` to force one, and `matchAnchorWidth` to make the anchored menu exactly as wide as its anchor — which the lobby's device fields do, since a narrow popup under a wide field reads as belonging to something else.
+- Added `StreamAdaptiveMenuAnchor`, which presents a list of `StreamMenuSection`s as an anchored context menu on desktop and web and as a bottom sheet on Android and iOS. A popup pinned to a 32px caret is awkward to hit with a thumb and out of place next to the rest of a phone's chrome, so the presentation follows the platform rather than the call site — nothing that uses it has to branch. Its builder receives a `StreamMenuHandle` with `isOpen`, `open()`, `close()` and `toggle()`, so the same builder drives both presentations. Pass `menuElevation` to change how high the anchored menu floats — 0 for one separated from the page by its border alone — `useSheet` to force a presentation, and `matchAnchorWidth` to make the anchored menu exactly as wide as its anchor — which the lobby's device fields do, since a narrow popup under a wide field reads as belonging to something else.
 
 - `StreamIcons` from the design system is now exported. It used to be hidden from the barrel because this package shipped a three-icon class of the same name; that class is gone, so `context.streamIcons` finally has a nameable type.
 
@@ -98,6 +98,8 @@
 - Added `StreamParticipantTile`, the participant tile as a replaceable component: register a `participantTile` builder to replace it, or use `DefaultStreamParticipantTile` for the default implementation.
 
 ### 🐞 Fixed
+
+- The anchored context menu's shadow is no longer clipped away. `MenuAnchor` clips its panel to the panel's own bounds by default, which cut off the shadow the menu's `Material` draws outside them: the shadow stopped dead along the bottom edge instead of fading out, and raising the elevation changed nothing because the extra shadow was clipped too. `StreamContextMenuAnchor` also takes an `elevation` now, defaulting to `StreamContextMenuTheme`'s.
 
 - The lobby no longer lists someone twice. `getOrCreate` returns a snapshot of the session while the event subscription is already live, so a join already reflected in that snapshot still arrives as a `ParticipantJoined` event — and the lobby appended it blindly. Participants are now upserted by session id, which leaves a genuine second session of the same user (a phone and a laptop) listed separately, as it should be. A join event for the local user is ignored, matching the snapshot, which always filtered them out.
 
