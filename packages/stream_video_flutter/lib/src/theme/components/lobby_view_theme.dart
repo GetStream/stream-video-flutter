@@ -108,6 +108,7 @@ class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
     this.controlSpacing,
     this.settingSpacing,
     this.overlayControlInset,
+    this.maxOverlaidControls,
     this.joinButtonWidth,
     this.titleTextStyle,
     this.subtitleTextStyle,
@@ -174,6 +175,14 @@ class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
   /// controls are drawn on the preview. Defaults to `spacing.md`, which clears
   /// the participant label's band.
   final double? overlayControlInset;
+
+  /// How many controls may be drawn on top of the preview.
+  ///
+  /// The overlaid row is centred on a preview whose bottom-start corner is
+  /// already occupied by the participant label, so a long row runs into it.
+  /// Past this count the row moves below the preview instead, whatever the
+  /// screen size. Defaults to 3.
+  final int? maxOverlaidControls;
 
   /// The width of the join button at [StreamScreenSize.smallMaxWidth] and
   /// above.
