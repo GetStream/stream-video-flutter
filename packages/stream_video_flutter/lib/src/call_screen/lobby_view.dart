@@ -191,11 +191,12 @@ class _LobbyBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final translations = context.translations;
+    final spacing = context.streamSpacing;
+    final textTheme = context.streamTextTheme;
     final isSmall = context.streamScreenSize.isSmall;
     // Typed as the defaults class, not as the style: declaring it as the base
     // type would throw away the non-null overrides.
     final style = _StreamLobbyViewStyleDefaults(
-      context,
       StreamLobbyViewTheme.of(context).style,
     );
 
@@ -210,23 +211,23 @@ class _LobbyBody extends StatelessWidget {
         : Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
-            spacing: style.controlSpacing,
+            spacing: spacing.xs,
             children: actions.controls,
           );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
-      spacing: style.sectionSpacing,
+      spacing: spacing.xxl,
       children: [
         Column(
           mainAxisSize: MainAxisSize.min,
-          spacing: style.headingSpacing,
+          spacing: spacing.sm,
           children: [
-            title ?? Text(translations.lobbyTitle, style: style.titleTextStyle),
+            title ?? Text(translations.lobbyTitle, style: textTheme.headingMd),
             subtitle ??
                 Text(
                   translations.lobbySubtitle,
-                  style: style.subtitleTextStyle,
+                  style: textTheme.bodyDefault,
                 ),
           ],
         ),
@@ -239,7 +240,7 @@ class _LobbyBody extends StatelessWidget {
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            spacing: isSmall ? style.smallLaneSpacing : style.largeLaneSpacing,
+            spacing: isSmall ? spacing.sm : spacing.md,
             children: [
               Stack(
                 alignment: AlignmentDirectional.bottomCenter,
@@ -249,9 +250,8 @@ class _LobbyBody extends StatelessWidget {
                   // of the participant label's toolbar band along the bottom.
                   if (overlayControls && controlRow != null)
                     Padding(
-                      padding: EdgeInsets.only(
-                        bottom: style.overlayControlInset,
-                      ),
+                      // Clear of the participant label's toolbar band.
+                      padding: EdgeInsets.only(bottom: spacing.md),
                       child: controlRow,
                     ),
                 ],
@@ -259,7 +259,7 @@ class _LobbyBody extends StatelessWidget {
               if (!overlayControls && controlRow != null) controlRow,
               if (actions.settings.isNotEmpty)
                 Row(
-                  spacing: style.settingSpacing,
+                  spacing: spacing.xs,
                   children: [
                     for (final setting in actions.settings)
                       Expanded(child: setting),
@@ -298,11 +298,9 @@ class _LobbyPreview extends StatelessWidget {
     final controller = StreamLobbyScope.of(context);
     final isSmall = context.streamScreenSize.isSmall;
     final style = _StreamLobbyViewStyleDefaults(
-      context,
       StreamLobbyViewTheme.of(context).style,
     );
 
-    final borderRadius = style.previewBorderRadius;
     final cameraTrack = controller.cameraTrack;
 
     final tile = StreamParticipantTile(
@@ -315,9 +313,7 @@ class _LobbyPreview extends StatelessWidget {
       // (FLU-714). When there is, the preview lights up with no change here.
       showConnectionQualityIndicator: false,
       showReaction: false,
-      style: StreamParticipantTileStyle(
-        borderRadius: borderRadius,
-      ).merge(style.previewTileStyle),
+      style: style.previewTileStyle,
       videoRendererBuilder: (context, call, participant) {
         if (cameraTrack == null) {
           return StreamParticipantPlaceholder(
@@ -354,22 +350,13 @@ class _LobbyPreview extends StatelessWidget {
 
 /// The values a [StreamLobbyViewStyle] falls back to.
 ///
-/// Every getter is non-null and derived from the ambient design tokens, so a
-/// style that overrides one property inherits the rest. Never let an instance
-/// of this reach a theme: the generated `merge` would force every field.
+/// Every getter is non-null and derived from the design, so a style that
+/// overrides one property inherits the rest. Never let an instance of this
+/// reach a theme: the generated `merge` would force every field.
 class _StreamLobbyViewStyleDefaults extends StreamLobbyViewStyle {
-  _StreamLobbyViewStyleDefaults(this._context, this._style);
+  const _StreamLobbyViewStyleDefaults(this._style);
 
-  final BuildContext _context;
   final StreamLobbyViewStyle? _style;
-
-  late final _textTheme = _context.streamTextTheme;
-  late final _spacing = _context.streamSpacing;
-  late final _radius = _context.streamRadius;
-
-  @override
-  BorderRadius get previewBorderRadius =>
-      _style?.previewBorderRadius ?? BorderRadius.all(_radius.xxl);
 
   @override
   StreamParticipantTileStyle? get previewTileStyle => _style?.previewTileStyle;
@@ -382,37 +369,8 @@ class _StreamLobbyViewStyleDefaults extends StreamLobbyViewStyle {
   Size get largePreviewSize => _style?.largePreviewSize ?? const Size(640, 360);
 
   @override
-  double get sectionSpacing => _style?.sectionSpacing ?? _spacing.xxl;
-
-  @override
-  double get headingSpacing => _style?.headingSpacing ?? _spacing.sm;
-
-  @override
-  double get smallLaneSpacing => _style?.smallLaneSpacing ?? _spacing.sm;
-
-  @override
-  double get largeLaneSpacing => _style?.largeLaneSpacing ?? _spacing.md;
-
-  @override
-  double get controlSpacing => _style?.controlSpacing ?? _spacing.xs;
-
-  @override
-  double get settingSpacing => _style?.settingSpacing ?? _spacing.xs;
-
-  @override
-  double get overlayControlInset => _style?.overlayControlInset ?? _spacing.md;
-
-  @override
   int get maxOverlaidControls => _style?.maxOverlaidControls ?? 3;
 
   @override
   double get joinButtonWidth => _style?.joinButtonWidth ?? 400;
-
-  @override
-  TextStyle get titleTextStyle =>
-      _style?.titleTextStyle ?? _textTheme.headingMd;
-
-  @override
-  TextStyle get subtitleTextStyle =>
-      _style?.subtitleTextStyle ?? _textTheme.bodyDefault;
 }

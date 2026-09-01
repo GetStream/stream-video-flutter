@@ -99,11 +99,6 @@ mixin _$StreamLobbyViewStyle {
     }
 
     return StreamLobbyViewStyle(
-      previewBorderRadius: BorderRadius.lerp(
-        a.previewBorderRadius,
-        b.previewBorderRadius,
-        t,
-      ),
       previewTileStyle: StreamParticipantTileStyle.lerp(
         a.previewTileStyle,
         b.previewTileStyle,
@@ -115,66 +110,29 @@ mixin _$StreamLobbyViewStyle {
         t,
       ),
       largePreviewSize: Size.lerp(a.largePreviewSize, b.largePreviewSize, t),
-      sectionSpacing: lerpDouble$(a.sectionSpacing, b.sectionSpacing, t),
-      headingSpacing: lerpDouble$(a.headingSpacing, b.headingSpacing, t),
-      smallLaneSpacing: lerpDouble$(a.smallLaneSpacing, b.smallLaneSpacing, t),
-      largeLaneSpacing: lerpDouble$(a.largeLaneSpacing, b.largeLaneSpacing, t),
-      controlSpacing: lerpDouble$(a.controlSpacing, b.controlSpacing, t),
-      settingSpacing: lerpDouble$(a.settingSpacing, b.settingSpacing, t),
-      overlayControlInset: lerpDouble$(
-        a.overlayControlInset,
-        b.overlayControlInset,
-        t,
-      ),
       maxOverlaidControls: t < 0.5
           ? a.maxOverlaidControls
           : b.maxOverlaidControls,
       joinButtonWidth: lerpDouble$(a.joinButtonWidth, b.joinButtonWidth, t),
-      titleTextStyle: TextStyle.lerp(a.titleTextStyle, b.titleTextStyle, t),
-      subtitleTextStyle: TextStyle.lerp(
-        a.subtitleTextStyle,
-        b.subtitleTextStyle,
-        t,
-      ),
     );
   }
 
   StreamLobbyViewStyle copyWith({
-    BorderRadius? previewBorderRadius,
     StreamParticipantTileStyle? previewTileStyle,
     double? smallPreviewAspectRatio,
     Size? largePreviewSize,
-    double? sectionSpacing,
-    double? headingSpacing,
-    double? smallLaneSpacing,
-    double? largeLaneSpacing,
-    double? controlSpacing,
-    double? settingSpacing,
-    double? overlayControlInset,
     int? maxOverlaidControls,
     double? joinButtonWidth,
-    TextStyle? titleTextStyle,
-    TextStyle? subtitleTextStyle,
   }) {
     final _this = (this as StreamLobbyViewStyle);
 
     return StreamLobbyViewStyle(
-      previewBorderRadius: previewBorderRadius ?? _this.previewBorderRadius,
       previewTileStyle: previewTileStyle ?? _this.previewTileStyle,
       smallPreviewAspectRatio:
           smallPreviewAspectRatio ?? _this.smallPreviewAspectRatio,
       largePreviewSize: largePreviewSize ?? _this.largePreviewSize,
-      sectionSpacing: sectionSpacing ?? _this.sectionSpacing,
-      headingSpacing: headingSpacing ?? _this.headingSpacing,
-      smallLaneSpacing: smallLaneSpacing ?? _this.smallLaneSpacing,
-      largeLaneSpacing: largeLaneSpacing ?? _this.largeLaneSpacing,
-      controlSpacing: controlSpacing ?? _this.controlSpacing,
-      settingSpacing: settingSpacing ?? _this.settingSpacing,
-      overlayControlInset: overlayControlInset ?? _this.overlayControlInset,
       maxOverlaidControls: maxOverlaidControls ?? _this.maxOverlaidControls,
       joinButtonWidth: joinButtonWidth ?? _this.joinButtonWidth,
-      titleTextStyle: titleTextStyle ?? _this.titleTextStyle,
-      subtitleTextStyle: subtitleTextStyle ?? _this.subtitleTextStyle,
     );
   }
 
@@ -190,27 +148,13 @@ mixin _$StreamLobbyViewStyle {
     }
 
     return copyWith(
-      previewBorderRadius: other.previewBorderRadius,
       previewTileStyle:
           _this.previewTileStyle?.merge(other.previewTileStyle) ??
           other.previewTileStyle,
       smallPreviewAspectRatio: other.smallPreviewAspectRatio,
       largePreviewSize: other.largePreviewSize,
-      sectionSpacing: other.sectionSpacing,
-      headingSpacing: other.headingSpacing,
-      smallLaneSpacing: other.smallLaneSpacing,
-      largeLaneSpacing: other.largeLaneSpacing,
-      controlSpacing: other.controlSpacing,
-      settingSpacing: other.settingSpacing,
-      overlayControlInset: other.overlayControlInset,
       maxOverlaidControls: other.maxOverlaidControls,
       joinButtonWidth: other.joinButtonWidth,
-      titleTextStyle:
-          _this.titleTextStyle?.merge(other.titleTextStyle) ??
-          other.titleTextStyle,
-      subtitleTextStyle:
-          _this.subtitleTextStyle?.merge(other.subtitleTextStyle) ??
-          other.subtitleTextStyle,
     );
   }
 
@@ -227,21 +171,11 @@ mixin _$StreamLobbyViewStyle {
     final _this = (this as StreamLobbyViewStyle);
     final _other = (other as StreamLobbyViewStyle);
 
-    return _other.previewBorderRadius == _this.previewBorderRadius &&
-        _other.previewTileStyle == _this.previewTileStyle &&
+    return _other.previewTileStyle == _this.previewTileStyle &&
         _other.smallPreviewAspectRatio == _this.smallPreviewAspectRatio &&
         _other.largePreviewSize == _this.largePreviewSize &&
-        _other.sectionSpacing == _this.sectionSpacing &&
-        _other.headingSpacing == _this.headingSpacing &&
-        _other.smallLaneSpacing == _this.smallLaneSpacing &&
-        _other.largeLaneSpacing == _this.largeLaneSpacing &&
-        _other.controlSpacing == _this.controlSpacing &&
-        _other.settingSpacing == _this.settingSpacing &&
-        _other.overlayControlInset == _this.overlayControlInset &&
         _other.maxOverlaidControls == _this.maxOverlaidControls &&
-        _other.joinButtonWidth == _this.joinButtonWidth &&
-        _other.titleTextStyle == _this.titleTextStyle &&
-        _other.subtitleTextStyle == _this.subtitleTextStyle;
+        _other.joinButtonWidth == _this.joinButtonWidth;
   }
 
   @override
@@ -250,21 +184,11 @@ mixin _$StreamLobbyViewStyle {
 
     return Object.hash(
       runtimeType,
-      _this.previewBorderRadius,
       _this.previewTileStyle,
       _this.smallPreviewAspectRatio,
       _this.largePreviewSize,
-      _this.sectionSpacing,
-      _this.headingSpacing,
-      _this.smallLaneSpacing,
-      _this.largeLaneSpacing,
-      _this.controlSpacing,
-      _this.settingSpacing,
-      _this.overlayControlInset,
       _this.maxOverlaidControls,
       _this.joinButtonWidth,
-      _this.titleTextStyle,
-      _this.subtitleTextStyle,
     );
   }
 }

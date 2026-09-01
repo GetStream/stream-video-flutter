@@ -7,6 +7,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../test_utils/goldens.dart';
+import '../../test_utils/test_wrapper.dart';
 import '../mocks.dart';
 
 const _builtInMic = RtcMediaDevice(
@@ -160,6 +161,39 @@ void main() {
 
     expect(find.byType(StreamSelectInput), findsNothing);
     expect(find.byType(StreamLobbyMicrophoneToggle), findsOneWidget);
+  });
+
+  // The preview is a participant tile, so theming the call's tiles has to
+  // theme it too — that is the whole point of using the tile rather than a
+  // copy of it.
+  testWidgets('the preview follows StreamParticipantTileTheme', (tester) async {
+    await tester.pumpWidget(
+      TestWrapper(
+        child: StreamParticipantTileTheme(
+          data: const StreamParticipantTileThemeData(
+            style: StreamParticipantTileStyle(
+              backgroundColor: Color(0xFF00FF00),
+            ),
+          ),
+          child: SingleChildScrollView(
+            child: lobby(LobbyActions.simple(), 900),
+          ),
+        ),
+      ),
+    );
+
+    final decoration = tester
+        .widget<Container>(
+          find
+              .descendant(
+                of: find.byType(DefaultStreamParticipantTile),
+                matching: find.byType(Container),
+              )
+              .first,
+        )
+        .decoration;
+
+    expect((decoration! as BoxDecoration).color, const Color(0xFF00FF00));
   });
 
   // The overlaid row shares the preview's bottom edge with the participant
