@@ -38,10 +38,10 @@ const _frontCamera = RtcMediaDevice(
 // intrinsic dimensions a LayoutBuilder cannot give. Tight constraints in both
 // axes stop the Table descending that far.
 const _widths = <String, Size>{
-  '375': Size(375, 560),
-  '500': Size(500, 700),
-  '900': Size(900, 640),
-  '1440': Size(1440, 640),
+  '375': Size(375, 620),
+  '500': Size(500, 760),
+  '900': Size(900, 700),
+  '1440': Size(1440, 700),
 };
 
 void main() {
@@ -175,7 +175,7 @@ void main() {
             name: 'toggles',
             child: SizedBox(
               width: 900,
-              height: 620,
+              height: 690,
               child: lobbyWith(
                 unavailableDevices(),
                 LobbyActions.simple(),
@@ -187,7 +187,7 @@ void main() {
             name: 'split buttons',
             child: SizedBox(
               width: 900,
-              height: 620,
+              height: 690,
               child: lobbyWith(
                 unavailableDevices(),
                 LobbyActions.regular(),
@@ -260,6 +260,59 @@ void main() {
 
     expect(find.byType(StreamSelectInput), findsNothing);
     expect(find.byType(StreamLobbyMicrophoneToggle), findsOneWidget);
+  });
+
+  testWidgets("the header carries the icon and the view's title", (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      TestWrapper(
+        child: SingleChildScrollView(
+          child: MediaQuery(
+            data: const MediaQueryData(size: Size(900, 900)),
+            child: SizedBox(
+              width: 900,
+              child: StreamLobbyView(
+                call: controller.call,
+                controller: controller,
+                title: const Text('Set up your call'),
+                onJoinCallPressed: (_) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(const StreamIcons().language), findsOneWidget);
+    expect(find.text('Set up your call'), findsOneWidget);
+    // The subtitle still falls back to the localized default.
+    expect(find.text('Set up your audio and video'), findsOneWidget);
+  });
+
+  // The header is the piece an app is most likely to want its own version of,
+  // so it is replaceable app-wide rather than only per call site.
+  testWidgets('a registered builder replaces the header', (tester) async {
+    await tester.pumpWidget(
+      TestWrapper(
+        child: StreamComponentFactory(
+          builders: StreamComponentBuilders(
+            extensions: [
+              ...streamVideoComponentBuilders(
+                lobbyHeader: (context, props) => const Text('Branded header'),
+              ),
+            ],
+          ),
+          child: SingleChildScrollView(
+            child: lobby(LobbyActions.simple(), 900),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Branded header'), findsOneWidget);
+    expect(find.byType(DefaultStreamLobbyHeader), findsNothing);
+    expect(find.byIcon(const StreamIcons().language), findsNothing);
   });
 
   // A device that cannot be opened is not a user choice: the control is

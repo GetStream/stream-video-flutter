@@ -192,7 +192,6 @@ class _LobbyBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final translations = context.translations;
     final spacing = context.streamSpacing;
-    final textTheme = context.streamTextTheme;
     final isSmall = context.streamScreenSize.isSmall;
     // Typed as the defaults class, not as the style: declaring it as the base
     // type would throw away the non-null overrides.
@@ -219,18 +218,7 @@ class _LobbyBody extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       spacing: spacing.xxl,
       children: [
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          spacing: spacing.sm,
-          children: [
-            title ?? Text(translations.lobbyTitle, style: textTheme.headingMd),
-            subtitle ??
-                Text(
-                  translations.lobbySubtitle,
-                  style: textTheme.bodyDefault,
-                ),
-          ],
-        ),
+        StreamLobbyHeader(title: title, subtitle: subtitle),
         // The whole preview block is capped at the tile's width, so the
         // settings fields line up under it rather than running the width of
         // the window.
