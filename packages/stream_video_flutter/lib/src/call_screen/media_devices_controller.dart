@@ -6,6 +6,9 @@ import '../../stream_video_flutter.dart';
 
 /// Applies a device the user picked. See
 /// [StreamMediaDevicesController.onVideoInputSelected].
+///
+/// Throw to reject the selection: the controller puts the previous one back
+/// and notifies, so a picker never claims a device the hardware refused.
 typedef StreamMediaDeviceSelected =
     FutureOr<void> Function(RtcMediaDevice? device);
 
@@ -32,11 +35,12 @@ class StreamMediaDevicesController extends ChangeNotifier {
     this.onAudioInputSelected,
     this.onAudioOutputSelected,
     this.onVideoInputSelected,
+    this.supportsSystemDefault = true,
   }) : _deviceNotifier = deviceNotifier ?? RtcMediaDeviceNotifier.instance {
     _subscription = _deviceNotifier.onDeviceChange.listen(_handleDeviceChange);
     // The notifier replays its last enumeration to a new listener, but only
     // once it has run one; this kicks the first.
-    unawaited(_deviceNotifier.enumerateDevices());
+    unawaited(_enumerate());
   }
 
   /// Drives [call]'s own device selection.
@@ -48,16 +52,57 @@ class StreamMediaDevicesController extends ChangeNotifier {
     Call call, {
     RtcMediaDeviceNotifier? deviceNotifier,
   }) {
+    // A Failure here means the call kept the device it had — a moderation
+    // block, a missing send permission, a device another process grabbed — so
+    // it is thrown to put the picker back where it was rather than leaving it
+    // pointing at a device the call is not using.
+    Future<void> apply(
+      RtcMediaDevice? device,
+      Future<Result<None>> Function(RtcMediaDevice) set,
+    ) async {
+      // Call has no "revert to the system default" setter, which is why
+      // supportsSystemDefault is false below and no such row is offered.
+      if (device == null) return;
+
+      final result = await set(device);
+      if (result case Failure(:final error)) {
+        throw StateError('could not switch to ${device.id}: $error');
+      }
+    }
+
     return StreamMediaDevicesController(
+      // Whatever the call is already running on is not knowable from here, so
+      // the row for it is left out rather than shown wrongly.
+      supportsSystemDefault: false,
       deviceNotifier: deviceNotifier,
-      onAudioInputSelected: (device) async {
-        if (device != null) await call.setAudioInputDevice(device);
-      },
-      onAudioOutputSelected: (device) async {
-        if (device != null) await call.setAudioOutputDevice(device);
-      },
-      onVideoInputSelected: (device) async {
-        if (device != null) await call.setVideoInputDevice(device);
+      onAudioInputSelected: (device) => apply(device, call.setAudioInputDevice),
+      onAudioOutputSelected: (device) =>
+          apply(device, call.setAudioOutputDevice),
+      onVideoInputSelected: (device) => apply(device, call.setVideoInputDevice),
+    );
+  }
+
+  late final _logger = taggedLogger(tag: 'SV:MediaDevicesController');
+
+  /// Runs the first enumeration, keeping hold of why it failed.
+  ///
+  /// The notifier only emits on the paths that found something, so a failure
+  /// never reaches [_handleDeviceChange]: without this the lists would stay
+  /// empty, [hasEnumerated] false, every picker inert, and nothing anywhere
+  /// would say why.
+  Future<void> _enumerate() async {
+    final result = await _deviceNotifier.enumerateDevices();
+    result.fold(
+      onSuccess: (_) {},
+      onFailure: (error, stackTrace) {
+        if (_disposed) return;
+
+        _logger.e(
+          () => 'Could not list the available devices: $error\n$stackTrace',
+        );
+        _enumerationError = error;
+        _hasEnumerated = true;
+        notifyListeners();
       },
     );
   }
@@ -77,7 +122,25 @@ class StreamMediaDevicesController extends ChangeNotifier {
   /// an in-call switcher tells the call about it.
   final StreamMediaDeviceSelected? onVideoInputSelected;
 
+  /// Whether a null selection — "let the platform pick" — can be applied.
+  ///
+  /// False where the owner has no way to hand control back, as a call does
+  /// not: its device setters take a device. A menu built over such a
+  /// controller leaves the system-default row out instead of offering a choice
+  /// that would move the radio button without changing anything.
+  final bool supportsSystemDefault;
+
   bool _hasEnumerated = false;
+  bool _disposed = false;
+
+  Object? _enumerationError;
+
+  /// Why the platform could not be asked for its devices, or null.
+  ///
+  /// Distinct from an empty device list: the platform found nothing versus the
+  /// platform could not be asked. A picker that is inert because of this
+  /// should say so rather than blame permissions.
+  Object? get enumerationError => _enumerationError;
 
   /// Whether the platform has reported its devices yet.
   ///
@@ -119,42 +182,98 @@ class StreamMediaDevicesController extends ChangeNotifier {
   RtcMediaDevice? get selectedVideoInput => _selectedVideoInput;
 
   /// Picks [device] as the microphone, or the system default when null.
-  Future<void> selectAudioInput(RtcMediaDevice? device) async {
-    if (device?.id == _selectedAudioInput?.id) return;
-
-    _selectedAudioInput = device;
-    notifyListeners();
-    await onAudioInputSelected?.call(device);
-  }
+  Future<void> selectAudioInput(RtcMediaDevice? device) => _select(
+    device: device,
+    current: () => _selectedAudioInput,
+    assign: (it) => _selectedAudioInput = it,
+    apply: onAudioInputSelected,
+  );
 
   /// Picks [device] as the speaker, or the system default when null.
-  Future<void> selectAudioOutput(RtcMediaDevice? device) async {
-    if (device?.id == _selectedAudioOutput?.id) return;
-
-    _selectedAudioOutput = device;
-    notifyListeners();
-    await onAudioOutputSelected?.call(device);
-  }
+  Future<void> selectAudioOutput(RtcMediaDevice? device) => _select(
+    device: device,
+    current: () => _selectedAudioOutput,
+    assign: (it) => _selectedAudioOutput = it,
+    apply: onAudioOutputSelected,
+  );
 
   /// Picks [device] as the camera, or the system default when null.
-  Future<void> selectVideoInput(RtcMediaDevice? device) async {
-    if (device?.id == _selectedVideoInput?.id) return;
+  Future<void> selectVideoInput(RtcMediaDevice? device) => _select(
+    device: device,
+    current: () => _selectedVideoInput,
+    assign: (it) => _selectedVideoInput = it,
+    apply: onVideoInputSelected,
+  );
 
-    _selectedVideoInput = device;
+  /// Commits [device], then applies it.
+  ///
+  /// The selection is published before the effect runs so the picker responds
+  /// to the tap, and put back if the effect rejects it — otherwise a menu goes
+  /// on showing a device the hardware refused to switch to.
+  Future<void> _select({
+    required RtcMediaDevice? device,
+    required RtcMediaDevice? Function() current,
+    required void Function(RtcMediaDevice?) assign,
+    required StreamMediaDeviceSelected? apply,
+  }) async {
+    final previous = current();
+    if (device?.id == previous?.id) return;
+
+    assign(device);
     notifyListeners();
-    await onVideoInputSelected?.call(device);
+
+    try {
+      await apply?.call(device);
+    } catch (e, stk) {
+      _logger.e(() => 'Could not select device ${device?.id}: $e\n$stk');
+      if (_disposed) return;
+
+      assign(previous);
+      notifyListeners();
+    }
   }
 
   void _handleDeviceChange(List<RtcMediaDevice> devices) {
     _hasEnumerated = true;
+    _enumerationError = null;
     _audioInputs = devices.ofKind(RtcMediaDeviceKind.audioInput);
     _audioOutputs = devices.ofKind(RtcMediaDeviceKind.audioOutput);
     _videoInputs = devices.ofKind(RtcMediaDeviceKind.videoInput);
+
+    // A device the user picked can be unplugged. Left alone, the selection
+    // would keep naming it: the menu would show no row selected at all, the
+    // select field would keep its label, and the dead id would be handed to
+    // the call on join. Falling back to the system default is both what the
+    // platform will do anyway and something the menu can draw.
+    _selectedAudioInput = _stillPresent(_selectedAudioInput, _audioInputs);
+    _selectedAudioOutput = _stillPresent(_selectedAudioOutput, _audioOutputs);
+    _selectedVideoInput = _stillPresent(_selectedVideoInput, _videoInputs);
+
     notifyListeners();
+  }
+
+  /// [selected] as the list now describes it, or null once it is gone.
+  ///
+  /// Re-reads it from [available] rather than keeping the instance, so a
+  /// device the platform has renamed — a label only arrives after permission —
+  /// does not keep the stale one.
+  RtcMediaDevice? _stillPresent(
+    RtcMediaDevice? selected,
+    List<RtcMediaDevice> available,
+  ) {
+    if (selected == null) return null;
+
+    for (final device in available) {
+      if (device.id == selected.id) return device;
+    }
+
+    _logger.d(() => 'Picked device ${selected.id} is gone; using the default');
+    return null;
   }
 
   @override
   void dispose() {
+    _disposed = true;
     _subscription?.cancel();
     super.dispose();
   }

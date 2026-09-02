@@ -163,4 +163,133 @@ void main() {
       expect(controller.audioInputs, isEmpty);
     });
   });
+
+  group('StreamMediaDevicesController reconciles its selection', () {
+    test('drops a picked device the platform stops reporting', () async {
+      final controller = build();
+      deviceChanges.add(const [_headset, _builtInMic]);
+      await pumpEventQueue();
+
+      await controller.selectAudioInput(_headset);
+      expect(controller.selectedAudioInput, _headset);
+
+      // The headset is unplugged.
+      deviceChanges.add(const [_builtInMic]);
+      await pumpEventQueue();
+
+      // Back to the system default, which is what the platform will do anyway
+      // and what the menu can actually draw a selected row for.
+      expect(controller.selectedAudioInput, isNull);
+    });
+
+    test('re-reads a device the platform has renamed', () async {
+      const unnamed = RtcMediaDevice(
+        id: 'mic-1',
+        label: '',
+        kind: RtcMediaDeviceKind.audioInput,
+      );
+      const named = RtcMediaDevice(
+        id: 'mic-1',
+        label: 'Built-in Microphone',
+        kind: RtcMediaDeviceKind.audioInput,
+      );
+
+      final controller = build();
+      deviceChanges.add(const [unnamed]);
+      await pumpEventQueue();
+      await controller.selectAudioInput(unnamed);
+
+      // Labels only arrive once permission is granted.
+      deviceChanges.add(const [named]);
+      await pumpEventQueue();
+
+      expect(controller.selectedAudioInput?.label, 'Built-in Microphone');
+    });
+
+    test('puts the selection back when applying it is rejected', () async {
+      final controller = StreamMediaDevicesController(
+        deviceNotifier: notifier,
+        onAudioInputSelected: (device) {
+          if (device == _headset) throw StateError('device in use');
+        },
+      );
+      addTearDown(controller.dispose);
+
+      deviceChanges.add(const [_headset, _builtInMic]);
+      await pumpEventQueue();
+
+      await controller.selectAudioInput(_builtInMic);
+      await controller.selectAudioInput(_headset);
+
+      // The picker would otherwise go on naming a device nothing switched to.
+      expect(controller.selectedAudioInput, _builtInMic);
+    });
+
+    test('records why the devices could not be listed', () async {
+      when(notifier.enumerateDevices).thenAnswer(
+        (_) async =>
+            Result.failure(StateError('no platform'), StackTrace.empty),
+      );
+
+      final controller = build();
+      await pumpEventQueue();
+
+      // Distinct from "the platform found nothing", so a picker can say which.
+      expect(controller.enumerationError, isA<StateError>());
+      expect(controller.hasEnumerated, isTrue);
+      expect(controller.audioInputs, isEmpty);
+    });
+  });
+
+  group('StreamMediaDevicesController.forCall', () {
+    late MockCall call;
+
+    setUp(() {
+      call = MockCall();
+      when(() => call.setVideoInputDevice(_frontCamera)).thenAnswer(
+        (_) async => const Result.success(none),
+      );
+    });
+
+    StreamMediaDevicesController build() {
+      final controller = StreamMediaDevicesController.forCall(
+        call,
+        deviceNotifier: notifier,
+      );
+      addTearDown(controller.dispose);
+      return controller;
+    }
+
+    test('drives the call when a camera is picked', () async {
+      final controller = build();
+      deviceChanges.add(const [_frontCamera]);
+      await pumpEventQueue();
+
+      await controller.selectVideoInput(_frontCamera);
+
+      verify(() => call.setVideoInputDevice(_frontCamera)).called(1);
+      expect(controller.selectedVideoInput, _frontCamera);
+    });
+
+    test('offers no system-default row, having no way to apply one', () {
+      // Call's device setters take a device, so there is nothing to hand the
+      // choice back to; a row for it would move the radio and change nothing.
+      expect(build().supportsSystemDefault, isFalse);
+    });
+
+    test('keeps the old camera when the call refuses to switch', () async {
+      when(() => call.setVideoInputDevice(_frontCamera)).thenAnswer(
+        (_) async => Result.failure(StateError('blocked'), StackTrace.empty),
+      );
+
+      final controller = build();
+      deviceChanges.add(const [_frontCamera]);
+      await pumpEventQueue();
+
+      await controller.selectVideoInput(_frontCamera);
+
+      // Otherwise the menu shows a camera the call is not using.
+      expect(controller.selectedVideoInput, isNull);
+    });
+  });
 }
