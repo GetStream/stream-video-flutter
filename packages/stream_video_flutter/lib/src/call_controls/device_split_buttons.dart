@@ -184,12 +184,12 @@ class _DeviceSplitButton extends StatelessWidget {
       builder: (context, handle) => CallButtonBadge(
         showErrorBadge: unavailable,
         child: StreamSplitButton.icon(
-          icon: Icon(icon),
+          leadingIcon: Icon(icon),
           trailingIcon: Icon(caret(isOpen: handle.isOpen)),
-          style: enabled || unavailable ? .secondary : .destructive,
-          tooltip: tooltip,
+          variant: enabled || unavailable ? .regular : .destructive,
+          leadingTooltip: tooltip,
           trailingTooltip: trailingTooltip,
-          onPressed: onPressed,
+          onLeadingPressed: onPressed,
           onTrailingPressed: noChoice ? null : handle.toggle,
         ),
       ),
