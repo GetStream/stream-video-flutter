@@ -121,7 +121,7 @@ typedef StreamAdaptiveMenuAnchorBuilder =
 ///   ],
 ///   builder: (context, handle) => IconButton(
 ///     onPressed: handle.toggle,
-///     icon: const Icon(Icons.expand_more),
+///     icon: Icon(context.streamIcons.caretDown),
 ///   ),
 /// )
 /// ```
