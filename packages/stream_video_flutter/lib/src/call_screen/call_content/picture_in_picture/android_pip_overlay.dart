@@ -103,7 +103,7 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
           participant: pipParticipant,
         );
       } else {
-        pipBody = StreamCallParticipant(
+        pipBody = StreamParticipantTile(
           key: ValueKey(
             '${pipParticipant.uniqueParticipantKey} - pipVideo',
           ),

@@ -43,24 +43,20 @@ class OutgoingCallControls extends StatelessWidget {
                 icon: isMicrophoneEnabled
                     ? const Icon(Icons.mic_rounded)
                     : const Icon(Icons.mic_off_rounded),
-                padding: const EdgeInsets.all(16),
                 onPressed: onMicrophoneTap,
               ),
               CallControlOption(
                 icon: isCameraEnabled
                     ? const Icon(Icons.videocam_rounded)
                     : const Icon(Icons.videocam_off_rounded),
-                padding: const EdgeInsets.all(16),
                 onPressed: onCameraTap,
               ),
             ],
           ),
           CallControlOption(
             icon: const Icon(Icons.call_end_rounded),
-            iconColor: Colors.white,
-            backgroundColor: Colors.red,
+            state: .negative,
             onPressed: onCancelCallTap,
-            padding: const EdgeInsets.all(24),
           ),
           const SizedBox(
             height: 32,

@@ -47,12 +47,7 @@ class ToggleRecordingOption extends StatelessWidget {
         icon: enabled
             ? Icon(enabledRecordingIcon)
             : Icon(disabledRecordingIcon),
-        iconColor: enabled
-            ? enabledRecordingIconColor
-            : disabledRecordingIconColor,
-        backgroundColor: enabled
-            ? enabledRecordingBackgroundColor
-            : disabledRecordingBackgroundColor,
+        state: enabled ? .on : .off,
         onPressed: () {
           if (!enabled) {
             call.startRecording();

@@ -12,7 +12,6 @@ jobs:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
         with:
-          fetch-depth: 0
           # Bot token so the pushed commit can re-trigger CI on the branch.
           token: ${{ secrets.BOT_GITHUB_API_TOKEN }}
 
@@ -22,9 +21,10 @@ jobs:
       - name: 🛠️ Install Melos
         uses: ./.github/actions/setup-melos
 
-      - name: ⚙️ Prepare Environment
-        run: melos run generate:all
-
+      # No codegen step: `update:goldens` only runs in packages that depend on
+      # alchemist, which is stream_video_flutter alone, and that package has no
+      # generated sources. Everything build_runner produces elsewhere — the
+      # OpenAPI models and freezed classes in stream_video — is committed.
       - name: 🖼️ Update Goldens
         run: melos run update:goldens
 

@@ -25,8 +25,7 @@ class LeaveCallOption extends StatelessWidget {
   Widget build(BuildContext context) {
     return CallControlOption(
       icon: Icon(icon),
-      iconColor: Colors.white,
-      backgroundColor: Colors.red,
+      state: .negative,
       onPressed: () {
         if (onLeaveCallTap != null) {
           onLeaveCallTap!();

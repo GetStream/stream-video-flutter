@@ -238,9 +238,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           fontWeight: FontWeight.bold,
         ),
       ),
-      callContentTheme: const StreamCallContentThemeData(
-        callContentBackgroundColor: Color(0XFF272A30),
-      ),
+      callContentTheme: const StreamCallContentThemeData(),
       outgoingCallTheme: StreamIncomingOutgoingCallThemeData(
         singleParticipantAvatarTheme: StreamUserAvatarThemeData(
           initialsTextStyle: TextStyle(

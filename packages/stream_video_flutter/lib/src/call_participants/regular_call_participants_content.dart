@@ -42,7 +42,7 @@ class RegularCallParticipantsContent extends StatelessWidget {
     Call call,
     CallParticipantState participant,
   ) {
-    return StreamCallParticipant(
+    return StreamParticipantTile(
       key: ValueKey(participant.uniqueParticipantKey),
       call: call,
       participant: participant,

@@ -1,8 +1,50 @@
 ## Upcoming (next major)
 
+### ✅ Added
+
+- Added component factory support, so the Stream Video UI components can be replaced app-wide instead of threading widget builders through the widget tree. Register the components you want to replace with `streamVideoComponentBuilders` and wrap your app in a `StreamComponentFactory`:
+
+  ```dart
+  class _MyAppState extends State<MyApp> {
+    // Build the builders once and hold on to them: a newly created
+    // StreamComponentBuilders is never equal to the previous one, so building
+    // it inline rebuilds every Stream component below the factory whenever the
+    // surrounding widget rebuilds.
+    late final _componentBuilders = StreamComponentBuilders(
+      extensions: streamVideoComponentBuilders(
+        // Decorate the default, or return your own widget entirely.
+        participantTile: (context, props) => DefaultStreamParticipantTile(
+          props: props.copyWith(showParticipantLabel: false),
+        ),
+      ),
+    );
+
+    @override
+    Widget build(BuildContext context) {
+      return MaterialApp(
+        builder: (context, child) => StreamComponentFactory(
+          builders: _componentBuilders,
+          child: child!,
+        ),
+        // ...
+      );
+    }
+  }
+  ```
+
+  Every component follows the same shape: `StreamX` resolves the registered builder and falls back to `DefaultX`, which holds the default implementation. The parameters of `StreamX` are carried in a `StreamXProps`, exposed as `StreamX.props`, so a custom builder can read them and `copyWith` them to decorate the default rather than reimplement it.
+- Added `StreamParticipantTile`, the participant tile as a replaceable component: register a `participantTile` builder to replace it, or use `DefaultStreamParticipantTile` for the default implementation.
+
+### ⚠️ Deprecated
+
+- `StreamCallParticipant` is deprecated in favour of `StreamParticipantTile`, matching the component name in the design system. It takes the same parameters and now only wraps `DefaultStreamParticipantTile`. Run `dart fix --apply` to migrate your call sites.
+
 ### ⚠️ Breaking
 
-- Call control buttons (`CallControlOption` and the widgets built on it) are now rendered with the shared `StreamButton` from `stream_core_flutter` using the secondary button style, instead of a raw Material `ElevatedButton`. Their appearance is now driven by the button styling in `StreamTheme` rather than by `StreamCallControlsThemeData`'s `optionElevation`/`optionShape`/`optionPadding`, so buttons that relied on those values may look slightly different. The legacy `padding` is translated into a fixed circle diameter to preserve the prominence of larger buttons (e.g. incoming/outgoing accept/decline), and icons render at the button's default icon size.
+- Call control buttons (`CallControlOption` and the widgets built on it) are now rendered with the shared `StreamButton` from `stream_core_flutter` instead of a raw Material `ElevatedButton`, and are styled by state rather than by colour. `CallControlOption` now takes a `state` — `CallControlState.on` (the default), `off`, `positive`, `negative` or `disabled` — next to `icon` and `onPressed`, and its per-button styling parameters (`iconColor`, `disabledIconColor`, `backgroundColor`, `disabledBackgroundColor`, `elevation`, `shape`, `padding`) are removed. Appearance now comes from the button styling in `StreamTheme` rather than from `StreamCallControlsThemeData`'s `optionElevation`/`optionShape`/`optionPadding` and `optionOff*` colours, so controls that relied on those look different: every control is now the same size — the accept/decline buttons of the incoming and outgoing call controls are no longer enlarged — an `off` control uses the destructive style instead of a custom colour, and a `disabled` control additionally shows an error badge.
+- The colour parameters on the built-in toggle options — `enabled*IconColor`, `disabled*IconColor`, `enabled*BackgroundColor` and `disabled*BackgroundColor` on `ToggleCameraOption`, `ToggleMicrophoneOption`, `ToggleRecordingOption`, `ToggleClosedCaptionsOption` and `ToggleScreenShareOption` — are still accepted but no longer have any effect. Each option now passes a `CallControlState` down instead, so its colours come from the theme's button styling.
+- `StreamCallContentThemeData.callContentBackgroundColor` is now nullable and defaults to `null`, which resolves to the design system's `backgroundApp` colour instead of the hard-coded `0xFF272A30`. Set it explicitly to keep a fixed background.
+- `CallAppBar` now defaults to `elevation: 0` (was `1`), and its background falls back to the design system's `backgroundApp` colour instead of `StreamVideoTheme`'s `colorTheme.barsBg`.
 - You must now provide a `StreamTheme` to your app for the Stream Video UI components to be styled correctly. Add it as a `ThemeData` extension on the `MaterialApp` you wrap the Stream Video widgets with:
 
   ```dart
@@ -18,6 +60,16 @@
   ```
 
   When no `StreamTheme` is found in the widget tree, components fall back to a default theme derived from the ambient `Brightness`, so add your own `StreamTheme` to control their look.
+
+### ✅ Added
+
+- Added `StreamSelectInput`, `StreamContextMenuAnchor`, `StreamContextMenuHeading` and `StreamRadioIndicator`. These are design-system candidates: they implement components from the Stream design system that `stream_core_flutter` does not ship yet, and live in `src/widgets/design_system_candidates` until they graduate to core. `StreamSelectInput` is the select field (label, leading widget, value or placeholder, caret) with the design's hover/focus rings and disabled, error and active states; `StreamContextMenuAnchor` anchors a `StreamContextMenu` to a widget and sizes its items like the design's menu; `StreamContextMenuHeading` labels a section inside such a menu; `StreamRadioIndicator` marks the selected entry of a group.
+
+### 🔄 Changed
+
+- The lobby preview (`StreamLobbyVideo`) now scales with the space it is given instead of being a fixed 280px-tall card in a 420px-wide column: it allows up to 640px of width and derives its height from the available width, capped at 360px.
+- `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
+- Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.
 
 ## 1.4.3
 

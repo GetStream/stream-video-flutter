@@ -237,39 +237,41 @@ class _LoginScreenState extends State<LoginScreen> {
             child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: .stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Hero(
-                    tag: 'stream_logo',
-                    child: Image.asset(
-                      streamVideoIconAsset,
-                      width: width * 0.8,
+                  Center(
+                    child: Hero(
+                      tag: 'stream_logo',
+                      child: Image.asset(
+                        streamVideoIconAsset,
+                        width: width * 0.8,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 36),
-                  Text('Stream', style: theme.textTheme.headlineMedium),
+                  Text(
+                    'Stream',
+                    style: theme.textTheme.headlineMedium,
+                    textAlign: .center,
+                  ),
                   Text(
                     '[Video Calling]',
                     style: theme.textTheme.headlineMedium?.apply(
                       color: colorScheme.accentSuccess,
                     ),
+                    textAlign: .center,
                   ),
                   const SizedBox(height: 48),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: TextField(
+                    child: StreamTextInput(
                       controller: _usernameController,
-                      style: theme.textTheme.bodyMedium?.apply(
-                        color: colorScheme.textPrimary,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: 'Enter Username',
-                        isDense: true,
-                        border: const OutlineInputBorder(),
-                        errorText: _userNameHasError
-                            ? 'Please enter a name'
-                            : null,
-                      ),
+                      hintText: 'Enter Username',
+                      helperText: _userNameHasError
+                          ? 'Please enter a name'
+                          : null,
+                      helperState: _userNameHasError ? .error : null,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -287,14 +289,23 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Row(
                       children: [
                         Expanded(
-                          child: Container(height: 1, color: Colors.grey),
+                          child: Container(
+                            height: 1,
+                            color: colorScheme.borderSubtle,
+                          ),
                         ),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8),
-                          child: Text('OR'),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          child: Text(
+                            'OR',
+                            style: TextStyle(color: colorScheme.textDisabled),
+                          ),
                         ),
                         Expanded(
-                          child: Container(height: 1, color: Colors.grey),
+                          child: Container(
+                            height: 1,
+                            color: colorScheme.borderSubtle,
+                          ),
                         ),
                       ],
                     ),
@@ -329,6 +340,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Text(
                           'Version ${platformInfo?.version}+${platformInfo?.buildNumber}',
                           style: theme.textTheme.labelSmall,
+                          textAlign: .center,
                         ),
                       );
                     },

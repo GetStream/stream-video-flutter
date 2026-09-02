@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 
-/// Defines default property values for [StreamCallParticipant] widgets.
+/// Defines default property values for [StreamParticipantTile] widgets.
 @immutable
 class StreamCallParticipantThemeData with Diagnosticable {
   /// Creates a new instance of [StreamCallParticipantThemeData].
@@ -466,7 +466,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
   }
 }
 
-/// Applies a call participant theme to descendant [StreamCallParticipant]
+/// Applies a call participant theme to descendant [StreamParticipantTile]
 /// widgets.
 class StreamCallParticipantTheme extends InheritedWidget {
   /// Creates a new instance of [StreamCallParticipantTheme].
@@ -476,7 +476,7 @@ class StreamCallParticipantTheme extends InheritedWidget {
     required super.child,
   });
 
-  /// The properties used for all descendant [StreamCallParticipant] widgets.
+  /// The properties used for all descendant [StreamParticipantTile] widgets.
   final StreamCallParticipantThemeData data;
 
   /// Returns the configuration [data] from the closest

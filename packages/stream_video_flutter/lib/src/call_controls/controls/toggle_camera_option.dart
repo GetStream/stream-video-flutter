@@ -50,10 +50,7 @@ class ToggleCameraOption extends StatelessWidget {
     Widget buildContent(bool enabled) {
       return CallControlOption(
         icon: enabled ? Icon(enabledCameraIcon) : Icon(disabledCameraIcon),
-        iconColor: enabled ? enabledCameraIconColor : disabledCameraIconColor,
-        backgroundColor: enabled
-            ? enabledCameraBackgroundColor
-            : disabledCameraBackgroundColor,
+        state: enabled ? .on : .off,
         onPressed: () {
           call.setCameraEnabled(enabled: !enabled);
         },

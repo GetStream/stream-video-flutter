@@ -39,7 +39,6 @@ class UserActionsAvatar extends StatelessWidget {
           MenuItemButton(
             child: const Text(
               'List devices',
-              style: TextStyle(color: Colors.white),
             ),
             onPressed: () async {
               final devices = await StreamVideo.instance.getDevices();

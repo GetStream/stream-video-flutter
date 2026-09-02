@@ -235,7 +235,9 @@ class _StreamCallContentState extends State<StreamCallContent> {
     }
 
     return Scaffold(
-      backgroundColor: theme.callContentTheme.callContentBackgroundColor,
+      backgroundColor:
+          theme.callContentTheme.callContentBackgroundColor ??
+          context.streamColorScheme.backgroundApp,
       appBar:
           widget.callAppBarWidgetBuilder?.call(context, call) ??
           CallAppBar(

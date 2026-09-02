@@ -8,11 +8,11 @@ import '../../stream_video_flutter.dart';
 class StreamCallContentThemeData with Diagnosticable {
   /// Creates a new instance of [StreamCallContentThemeData].
   const StreamCallContentThemeData({
-    this.callContentBackgroundColor = const Color(0XFF272A30),
+    this.callContentBackgroundColor,
   });
 
   /// Theme for the avatar in a call with one participant.
-  final Color callContentBackgroundColor;
+  final Color? callContentBackgroundColor;
 
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
@@ -38,7 +38,7 @@ class StreamCallContentThemeData with Diagnosticable {
         callContentBackgroundColor,
         other.callContentBackgroundColor,
         t,
-      )!,
+      ),
     );
   }
 

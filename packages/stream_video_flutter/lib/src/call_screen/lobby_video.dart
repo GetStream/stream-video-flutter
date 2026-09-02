@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -126,63 +127,70 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
 
     final cameraEnabled = _cameraTrack != null;
     final microphoneEnabled = _microphoneTrack != null;
+    const minRatio = 178 / 127;
 
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 420),
+      constraints: const BoxConstraints(maxWidth: 640),
       child: Column(
         children: [
-          SizedBox(
-            height: 280,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: DecoratedBox(
-                decoration: BoxDecoration(color: cardBackgroundColor),
-                child: Builder(
-                  builder: (context) {
-                    Widget placeHolderBuilder(BuildContext context) {
-                      return Center(
-                        child: StreamUserAvatarTheme(
-                          data: userAvatarTheme,
-                          child: StreamUserAvatar(
-                            user: currentUser,
-                          ),
-                        ),
-                      );
-                    }
-
-                    return Stack(
-                      children: [
-                        if (cameraEnabled)
-                          VideoTrackRenderer(
-                            mirror:
-                                _cameraTrack!.mediaConstraints.facingMode ==
-                                FacingMode.user,
-                            videoTrack: _cameraTrack!,
-                            placeholderBuilder: placeHolderBuilder,
-                          )
-                        else
-                          placeHolderBuilder(context),
-                        Align(
-                          alignment: Alignment.bottomLeft,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              StreamParticipantLabel(
-                                isAudioEnabled: microphoneEnabled,
-                                isSpeaking: false,
-                                isTrackPaused: false,
-                                participantName: currentUser.name,
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final maxHeight = constraints.maxWidth / minRatio;
+              final height = math.min(360, maxHeight).toDouble();
+              return SizedBox(
+                height: height,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(color: cardBackgroundColor),
+                    child: Builder(
+                      builder: (context) {
+                        Widget placeHolderBuilder(BuildContext context) {
+                          return Center(
+                            child: StreamUserAvatarTheme(
+                              data: userAvatarTheme,
+                              child: StreamUserAvatar(
+                                user: currentUser,
                               ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                            ),
+                          );
+                        }
+
+                        return Stack(
+                          children: [
+                            if (cameraEnabled)
+                              VideoTrackRenderer(
+                                mirror:
+                                    _cameraTrack!.mediaConstraints.facingMode ==
+                                    FacingMode.user,
+                                videoTrack: _cameraTrack!,
+                                placeholderBuilder: placeHolderBuilder,
+                              )
+                            else
+                              placeHolderBuilder(context),
+                            Align(
+                              alignment: Alignment.bottomLeft,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  StreamParticipantLabel(
+                                    isAudioEnabled: microphoneEnabled,
+                                    isSpeaking: false,
+                                    isTrackPaused: false,
+                                    participantName: currentUser.name,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
           const SizedBox(height: 16),
           Row(
@@ -192,20 +200,14 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
                 icon: microphoneEnabled
                     ? const Icon(Icons.mic_rounded)
                     : const Icon(Icons.mic_off_rounded),
-                iconColor: microphoneEnabled ? null : theme.optionOffIconColor,
-                backgroundColor: microphoneEnabled
-                    ? null
-                    : theme.optionOffBackgroundColor,
+                state: microphoneEnabled ? .on : .off,
                 onPressed: toggleMicrophone,
               ),
               CallControlOption(
                 icon: cameraEnabled
                     ? const Icon(Icons.videocam_rounded)
                     : const Icon(Icons.videocam_off_rounded),
-                iconColor: cameraEnabled ? null : theme.optionOffIconColor,
-                backgroundColor: cameraEnabled
-                    ? null
-                    : theme.optionOffBackgroundColor,
+                state: cameraEnabled ? .on : .off,
                 onPressed: toggleCamera,
               ),
               if (widget.additionalActionsBuilder != null)

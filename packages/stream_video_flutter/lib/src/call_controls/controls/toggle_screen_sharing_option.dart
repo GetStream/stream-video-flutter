@@ -62,12 +62,7 @@ class ToggleScreenShareOption extends StatelessWidget {
       icon: enabled
           ? Icon(enabledScreenShareIcon)
           : Icon(disabledScreenShareIcon),
-      iconColor: enabled
-          ? enabledScreenShareIconColor
-          : disabledScreenShareIconColor,
-      backgroundColor: enabled
-          ? enabledScreenShareBackgroundColor
-          : disabledScreenShareBackgroundColor,
+      state: enabled ? .positive : .on,
       onPressed: () async {
         final toggledEnabled = !enabled;
 

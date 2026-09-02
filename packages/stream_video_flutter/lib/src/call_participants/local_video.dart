@@ -73,7 +73,7 @@ class StreamLocalVideo extends StatelessWidget {
 
     var callParticipantBuilder = participantBuilder;
     callParticipantBuilder ??= (context, call, participant) {
-      return StreamCallParticipant(
+      return StreamParticipantTile(
         call: call,
         participant: participant,
         borderRadius: borderRadius,
