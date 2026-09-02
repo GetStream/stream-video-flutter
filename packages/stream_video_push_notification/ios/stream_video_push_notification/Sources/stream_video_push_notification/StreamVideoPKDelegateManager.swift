@@ -29,6 +29,21 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
         defaultConfiguration = StreamVideoPushConfiguration(args: data)
     }
 
+    /// The configuration to build the incoming call with.
+    ///
+    /// A VoIP push can arrive before Dart has had a chance to call `initData`, most notably on a
+    /// cold start, so fall back to the copy persisted by the last run instead of silently using
+    /// defaults and losing the configured ringtone and Recents behaviour.
+    private func resolveConfiguration() -> StreamVideoPushConfiguration? {
+        if let defaultConfiguration = defaultConfiguration {
+            return defaultConfiguration
+        }
+
+        let persisted = StreamVideoPushConfiguration.loadPersisted()
+        defaultConfiguration = persisted
+        return persisted
+    }
+
     // MARK: - PKPushRegistryDelegate
     @objc public func pushRegistry(
         _ registry: PKPushRegistry, didUpdate pushCredentials: PKPushCredentials,
@@ -73,8 +88,10 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
 
         var callUUID = UUID().uuidString
 
+        let configuration = self.resolveConfiguration()
+
         let data: CallData
-        if let configuration = self.defaultConfiguration {
+        if let configuration = configuration {
             data = CallData.init(args: configuration.toJSON())
         } else {
             data = CallData.init(args: [String: Any]())
@@ -92,7 +109,7 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
         data.type = videoData
         data.extra = ["callCid": callCid]
         data.iconName =
-            UserDefaults.standard.string(forKey: "callKit_iconName") ?? defaultConfiguration?
+            UserDefaults.standard.string(forKey: "callKit_iconName") ?? configuration?
             .iconName ?? data.iconName
 
         // Show call incoming notification.

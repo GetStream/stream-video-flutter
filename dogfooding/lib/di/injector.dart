@@ -172,7 +172,13 @@ StreamVideo _initStreamVideo(
       ),
       pushConfiguration: const StreamVideoPushConfiguration(
         ios: IOSPushConfiguration(iconName: 'IconMask'),
-        android: AndroidPushConfiguration(defaultAvatar: 'assets/logo.png'),
+        android: AndroidPushConfiguration(
+          defaultAvatar: 'assets/logo.png',
+          telecom: TelecomPushConfiguration(
+            enabled: true,
+            schema: 'streamvideo',
+          ),
+        ),
       ),
       registerApnDeviceToken: true,
     ),

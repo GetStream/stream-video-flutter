@@ -1,8 +1,19 @@
 ## Upcoming
 
+### ✅ Added
+
+- [Android] Added a Telecom integration for the ringing flow, which registers incoming and outgoing ringing calls with the platform's [Telecom stack](https://developer.android.com/develop/connectivity/telecom) through Jetpack Telecom. This gives the call proper audio focus and a place in the system call state, and lets it be answered or hung up from a paired watch, a car head unit or a Bluetooth headset. The incoming call notification and full-screen ringing UI are unchanged. It is **on by default from Android 17**, where the platform will not play a ringtone from a service started by a push unless the call is in the Telecom stack, so ringing does not work correctly without it — opt out with `AndroidPushConfiguration(telecom: TelecomPushConfiguration(enabled: false))`. It is **off by default below Android 17**, where ringing works either way, so an existing integration is unaffected unless you pass `enabled: true`.
+- [iOS] Added `reportCallEnded`, which reports how a call ended to CallKit so it is listed correctly in the system Recents.
+
 ### 🐞 Fixed
 
+- [iOS] Fixed the CallKit provider configuration being lost when a VoIP push woke the app before any Dart code had run, which dropped the configured ringtone, icon and Recents behaviour on a cold start.
+- [iOS] Fixed `reportNewIncomingCall` failures being swallowed, so a call CallKit refused to display simply vanished. It now emits an `ActionCallIncomingFailed` ringing event carrying why it was refused, most usefully when Do Not Disturb or the block list filtered the call before it was ever shown. The SDK reports it and takes no action: rejecting a filtered call ends the ring on every device the user is being called on, so whether to do that is left to the app.
 - [Android] Fixed the incoming call ringtone being silently muted on Android 17. The ringtone is now played from a `phoneCall` foreground service, which Android 17's background audio hardening requires for audio played while no activity is visible.
+
+### 🔄 Changed
+
+- [Android] The plugin now compiles against Java 17, matching the other Stream Video Flutter packages, and adds `androidx.core:core-telecom` and `org.jetbrains.kotlinx:kotlinx-coroutines-android` as dependencies. 
 
 ## 1.5.0
 

@@ -61,14 +61,5 @@
             android:name="io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationService">
         </service>
 
-        <service
-            android:name="io.getstream.video.flutter.stream_video_push_notification.IncomingCallConnectionService"
-            android:permission="android.permission.BIND_CONNECTION_SERVICE"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.telecom.ConnectionService" />
-            </intent-filter>
-        </service>
-
     </application>
 </manifest>

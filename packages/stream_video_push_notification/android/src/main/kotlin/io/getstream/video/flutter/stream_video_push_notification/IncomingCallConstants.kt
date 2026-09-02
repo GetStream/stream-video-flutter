@@ -75,6 +75,21 @@ object IncomingCallConstants {
 
     const val EXTRA_CALL_ACTION_FROM = "EXTRA_CALL_ACTION_FROM"
 
+    /**
+     * Marks an ended broadcast as reported by the platform call UI rather than by a dismissed
+     * notification, e.g. a hang-up from a paired watch, a headset or a car head unit.
+     *
+     * Forwarded to Dart as `endedBySystem`, which is what tells the ringing flow that the end is
+     * authoritative and the call has to be left.
+     */
+    const val EXTRA_CALL_ENDED_BY_SYSTEM = "EXTRA_CALL_ENDED_BY_SYSTEM"
+
+    /**
+     * Set on an ENDED intent that only dismisses the ringing UI of a call that is now live, so the
+     * Telecom registration is kept and in-call system controls survive the accept.
+     */
+    const val EXTRA_KEEP_SYSTEM_CALL = "EXTRA_KEEP_SYSTEM_CALL"
+
     const val EXTRA_CALL_IS_SHOW_FULL_LOCKED_SCREEN = "EXTRA_CALL_IS_SHOW_FULL_LOCKED_SCREEN"
     const val EXTRA_CALL_IS_IMPORTANT = "EXTRA_CALL_IS_IMPORTANT"
     const val EXTRA_CALL_IS_BOT = "EXTRA_CALL_IS_BOT"

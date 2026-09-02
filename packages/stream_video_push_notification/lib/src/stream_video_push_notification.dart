@@ -21,6 +21,42 @@ const _idCallParticipantCount = 7;
 const _idActiveCall = 8;
 
 /// Implementation of [PushNotificationManager] for Stream Video.
+/// Decides what [StreamVideoPushNotificationManager.endCallByCid] has to end for [cid].
+///
+/// Pulled out of the method so the choice can be tested. The live path cannot be exercised in a
+/// unit test: `activeCalls` short-circuits to an empty list off-device, which always lands on
+/// [endAll].
+@visibleForTesting
+({bool endAll, List<CallData> calls}) resolveCallsToEnd(
+  List<CallData> activeCalls,
+  String cid,
+) {
+  final matching = activeCalls
+      .where((call) => call.callCid == cid && call.uuid != null)
+      .toList();
+
+  // Every active call belongs to this cid, so ending them one by one and ending them all are the
+  // same thing. This also covers a platform that reports no calls while still holding one, which
+  // is what the Android Telecom sweep in `endAllCalls` relies on.
+  if (activeCalls.length == matching.length) {
+    return (endAll: true, calls: const []);
+  }
+
+  // Calls the platform still has but that can no longer be identified.
+  //
+  // iOS reports a call the system knows about with nothing but its uuid once the in-process object
+  // describing it is gone — a CallKit call outliving the process that created it, after the app was
+  // killed, ran out of memory or was hot restarted. No cid can ever match those, so they used to
+  // fall through both branches untouched and the CallKit screen stayed up for the rest of the app's
+  // life. Nothing else can address them either, so this is the only chance to clear them.
+  final unidentified = activeCalls
+      .where((call) => call.callCid == null && call.uuid != null)
+      .toList();
+
+  // Anything still identifiable that belongs to another cid is deliberately left alone.
+  return (endAll: false, calls: [...matching, ...unidentified]);
+}
+
 class StreamVideoPushNotificationManager implements PushNotificationManager {
   StreamVideoPushNotificationManager._({
     required CoordinatorClient client,
@@ -144,9 +180,9 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
                   '[subscribeToEvents] Call accepted on the same device, ending CallKit silently: ${event.callCid}',
             );
 
-            // Call was already accepted, end the CallKit call silently
+            // The call is live on this device from here on, so only the ringing UI goes away.
             RingingEventBroadcaster().suppressEvent();
-            await endCallByCid(event.callCid.toString());
+            await dismissRingingCallByCid(event.callCid.toString());
           }
         }),
       );
@@ -424,23 +460,33 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   Future<void> endCall(String uuid) =>
       StreamVideoPushNotificationPlatform.instance.endCall(uuid);
 
+  /// Dismisses the ringing UI of a call that the user accepted and is now in.
+  ///
+  /// This is deliberately not [endCallByCid]. On Android the two differ: ending disconnects the
+  /// call from the Telecom stack, while dismissing leaves it registered so in-call controls on a
+  /// watch, headset or car head unit keep working. Only the caller knows which one it means —
+  /// natively an accept and an accept that failed to join look identical.
+  ///
+  /// On iOS there is nothing to keep: CallKit *is* the ring, and ending it is what dismissing it
+  /// means, so this behaves exactly as it always has.
+  Future<void> dismissRingingCallByCid(String cid) {
+    if (CurrentPlatform.isIos) return endCallByCid(cid);
+    return StreamVideoPushNotificationPlatform.instance.dismissRingingCall(cid);
+  }
+
   @override
   Future<void> endCallByCid(String cid, {bool silent = false}) async {
-    final activeCalls = await this.activeCalls();
-    final calls = activeCalls
-        .where((call) => call.callCid == cid && call.uuid != null)
-        .toList();
+    final decision = resolveCallsToEnd(await activeCalls(), cid);
 
-    // If multiple native ringing calls are stacked with identical metadata,
-    // ending by callCid may not be sufficient; fall back to endAllCalls.
-    if (activeCalls.length == calls.length) {
+    if (decision.endAll) {
       if (silent) RingingEventBroadcaster().suppressEvent();
       await endAllCalls();
-    } else {
-      for (final call in calls) {
-        if (silent) RingingEventBroadcaster().suppressEvent();
-        await endCall(call.uuid!);
-      }
+      return;
+    }
+
+    for (final call in decision.calls) {
+      if (silent) RingingEventBroadcaster().suppressEvent();
+      await endCall(call.uuid!);
     }
   }
 
@@ -500,6 +546,21 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   @override
   Future<void> setCallConnected(String uuid) {
     return StreamVideoPushNotificationPlatform.instance.setCallConnected(uuid);
+  }
+
+  /// Reports how a call ended so it shows up correctly in the system call history.
+  ///
+  /// iOS only. CallKit lists every call it displayed in Recents, and the reason decides how: a
+  /// call reported as [CallEndedReason.unanswered] appears as a missed call, while the default
+  /// hang-up path lists it as a regular one. Has no effect on Android.
+  Future<void> reportCallEnded(
+    String uuid, {
+    CallEndedReason reason = CallEndedReason.remoteEnded,
+  }) {
+    return StreamVideoPushNotificationPlatform.instance.reportCallEnded(
+      uuid,
+      reason,
+    );
   }
 
   @override

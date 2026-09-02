@@ -1,6 +1,7 @@
 package io.getstream.video.flutter.stream_video_push_notification
 
 import android.annotation.SuppressLint
+import android.telecom.DisconnectCause
 import androidx.annotation.NonNull
 import android.app.Activity
 import android.app.NotificationManager
@@ -19,6 +20,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationManager
 import io.getstream.video.flutter.stream_video_push_notification.Utils.Companion.reapCollection
+import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
 
 class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegistry.RequestPermissionsResultListener {
   companion object {
@@ -101,10 +103,6 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     sharePluginWithRegister(flutterPluginBinding)
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        InAppCallManager(flutterPluginBinding.applicationContext).registerPhoneAccount()
-    }
   }
 
   public fun showIncomingNotification(data: Data) {
@@ -151,6 +149,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
             )
         }
         removeAllCalls(context)
+        context?.let { StreamTelecomManager.disconnectAll(it, DisconnectCause.LOCAL) }
     }
 
     public fun sendEventCustom(body: Map<String, Any>) {
@@ -206,6 +205,13 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                     result.success(true)
                 }
 
+                "initData" -> {
+                    val configuration = call.arguments as? Map<String, Any?>
+                    context?.let { StreamTelecomManager.init(it, configuration) }
+
+                    result.success(null)
+                }
+
                 "muteCall" -> {
                     val map = buildMap {
                         val args = call.arguments
@@ -214,6 +220,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                         }
                     }
                     sendEvent(IncomingCallConstants.ACTION_CALL_TOGGLE_MUTE, map)
+
 
                     result.success(true)
                 }
@@ -226,6 +233,15 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                         }
                     }
                     sendEvent(IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD, map)
+
+                    val callId = map["id"] as? String
+                    if (callId != null && context != null) {
+                        StreamTelecomManager.setOnHold(
+                            requireNotNull(context),
+                            callId,
+                            map["isOnHold"] as? Boolean ?: true
+                        )
+                    }
 
                     result.success(true)
                 }
@@ -293,6 +309,44 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                         }
                     }
                     removeAllCalls(context)
+
+                    // Also sweep Telecom directly. The loop above only covers entries still in
+                    // ACTIVE_CALLS, so a call that fell out of that list while remaining live in
+                    // the Telecom stack would never be disconnected.
+                    context?.let {
+                        StreamTelecomManager.disconnectAll(it, DisconnectCause.LOCAL)
+                    }
+
+                    result.success(true)
+                }
+
+                // Ends the ring, not the call: the user accepted and is in the call now, so the
+                // notification and ringtone go but the Telecom registration stays. Kept apart from
+                // "endAllCalls" because an ENDED broadcast alone cannot say which of the two it is.
+                "dismissRingingCall" -> {
+                    val calls = getDataActiveCalls(context)
+                    calls.forEach { callData ->
+                        context?.let { ctx ->
+                            // Answer it rather than reading `isAccepted`. An accept from the
+                            // Flutter UI never fires the native ACCEPT broadcast, which is the
+                            // only thing that sets that flag and the only thing that answers the
+                            // Telecom call — so the flag says false for the most common accept
+                            // path, and trusting it here both left the call ringing in Telecom
+                            // forever and tore it down as REJECTED. This method is only ever
+                            // called for a call the user accepted, so answering is the truth.
+                            // Idempotent, so an accept from the notification action is unaffected.
+                            StreamTelecomManager.answer(ctx, callData.id)
+
+                            ctx.sendBroadcast(
+                                IncomingCallBroadcastReceiver.getIntentEnded(
+                                    ctx,
+                                    callData.toBundle(),
+                                    keepSystemCall = true
+                                )
+                            )
+                        }
+                    }
+                    removeAllCalls(context)
                     result.success(true)
                 }
 
@@ -353,6 +407,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
      methodChannels.remove(binding.binaryMessenger)?.setMethodCallHandler(null)
         eventChannels.remove(binding.binaryMessenger)?.setStreamHandler(null)
+        StreamTelecomManager.releaseIfIdle()
         instance.incomingCallSoundPlayerManager?.destroy()
         instance.incomingCallNotificationManager?.destroy()
         instance.incomingCallSoundPlayerManager = null

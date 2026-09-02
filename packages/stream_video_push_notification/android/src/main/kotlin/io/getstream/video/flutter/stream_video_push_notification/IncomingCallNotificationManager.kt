@@ -452,16 +452,22 @@ class IncomingCallNotificationManager(
     }
 
     fun clearIncomingNotification(data: Bundle, isAccepted: Boolean) {
-        incomingCallSoundPlayerManager?.stop()
-        currentIncomingNotification = null
-        // Covers accept, decline, ended and timeout, so the ringing foreground service never
-        // outlives the notification it was started for.
-        IncomingCallNotificationService.stopService(context)
-
-        context.sendBroadcast(IncomingCallActivity.getIntentEnded(context, isAccepted))
-
         val notificationId =
             data.getString(IncomingCallConstants.EXTRA_CALL_ID, "stream_video_call").hashCode()
+
+        // The ringtone and the ringing service are shared by every incoming call, so they may only
+        // be torn down for the call that currently owns them. A second call arriving while the
+        // first still rings takes them over, and clearing the first one then has to leave them be.
+        val current = currentIncomingNotification
+        if (current == null || current.id == notificationId) {
+            incomingCallSoundPlayerManager?.stop()
+            currentIncomingNotification = null
+            // Covers accept, decline, ended and timeout, so the ringing foreground service never
+            // outlives the notification it was started for.
+            IncomingCallNotificationService.stopService(context)
+        }
+
+        context.sendBroadcast(IncomingCallActivity.getIntentEnded(context, isAccepted))
 
         getNotificationManager().cancel(notificationId)
         targetInComingAvatarDefault?.let {
@@ -641,6 +647,15 @@ class IncomingCallNotificationManager(
     /** Rings from [IncomingCallNotificationService], once it is in the foreground. */
     internal fun playIncomingCallSound(data: Bundle) {
         incomingCallSoundPlayerManager?.play(data)
+    }
+
+    /**
+     * Stops the ringtone when the ringing notification goes away without passing through
+     * [clearIncomingNotification], e.g. the ringing service being torn down with the task.
+     */
+    internal fun stopIncomingCallRinging() {
+        incomingCallSoundPlayerManager?.stop()
+        currentIncomingNotification = null
     }
 
     fun requestNotificationPermission(activity: Activity?, map: Map<String, Any>) {

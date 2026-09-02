@@ -14,3 +14,5 @@ export 'src/stream_video_push_configuration.dart';
 export 'src/stream_video_push_notification.dart'
     hide RingingEventBroadcaster, StreamTokenProvider;
 export 'src/stream_video_push_params.dart';
+export 'stream_video_push_notification_platform_interface.dart'
+    show CallEndedReason;
