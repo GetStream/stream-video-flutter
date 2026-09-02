@@ -13,7 +13,6 @@ export 'src/call_background/background_service.dart';
 export 'src/call_background/model/notification_options.dart';
 export 'src/call_background/model/notification_payload.dart';
 export 'src/call_background/model/service_type.dart';
-export 'src/call_controls/call_button_badge.dart';
 export 'src/call_controls/call_control_button.dart';
 export 'src/call_controls/call_control_option.dart';
 export 'src/call_controls/call_controls.dart';

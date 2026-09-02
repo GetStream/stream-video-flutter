@@ -2,6 +2,12 @@
 
 ### ✅ Added
 
+- `CallButtonBadge` is no longer exported. It exists so the badge sits in the same place on both call buttons, which is an implementation detail; exporting it committed the package to its shape and gave integrators a way to badge things inconsistently.
+- `CallControlButton` no longer overrides `StreamButtonTheme` for every tone. Only `positive` repaints the primary background — there is no success button style in the design system — and wrapping the other two overrode an app's own primary style for buttons that never use it.
+- `StreamMenuHandle` is an `abstract interface class`, so it cannot be accidentally extended.
+- Added `hasNoOptions` on an `Iterable<StreamMenuSection>`, and `StreamAdaptiveMenuAnchor` now drops a heading with no rows under it. Every caller had to know both — "is there anything to open" was recomputed at each of two call sites, and an empty section drew a label over nothing.
+- `StreamLobbyScope.of` throws a `FlutterError` instead of asserting and then force-unwrapping. In a release build the assert is compiled out, so the old code failed as a bare null-check with none of the explanation.
+
 - Supplying `StreamLobbyView` a controller is a separate constructor now. `StreamLobbyView(call: a, controller: StreamLobbyController(call: b))` used to compile, with the preview and the connect options coming from `b` while the host joined `a` — `call` was required and then ignored. `StreamLobbyView({required call})` owns and disposes a controller of its own; `StreamLobbyView.withController({required controller})` takes one the caller keeps, and reads the call from it, so there is no second call to disagree. `StreamLobbyView.call` is still there and still non-null, resolved from whichever was given. It also handles being rebuilt: a changed call, or a controller arriving where the view had been making its own, disposes the one it owns instead of leaving it running against the old call.
 
 - `StreamLobbyViewStyle`'s preview geometry is named for the layout rather than the breakpoint: `compactPreviewAspectRatio` and `expandedPreviewSize`, previously `smallPreviewAspectRatio` and `largePreviewSize`. `largePreviewSize` applied to `StreamScreenSize.medium` as well as `large`, so the word "large" meant two different things across two public types. `expandedPreviewSize` is also documented as the cap it is — a window past the breakpoint but narrower than 640 gets a smaller preview — rather than a fixed size, and `maxOverlaidControls` now says that it interpolates as a step.

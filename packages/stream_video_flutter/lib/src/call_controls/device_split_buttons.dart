@@ -8,6 +8,7 @@ import 'package:stream_core_flutter/video.dart';
 
 import '../../stream_video_flutter.dart';
 import '../l10n/localization_extension.dart';
+import 'call_button_badge.dart';
 
 /// Turns the microphone on and off, with a caret that picks which microphone
 /// and speaker to use.
@@ -160,7 +161,7 @@ class _DeviceSplitButton extends StatelessWidget {
     final icons = context.streamIcons;
     // Nothing to pick from — a simulator with no camera, or permission not
     // granted yet, so the platform names no devices.
-    final noChoice = sections.every((section) => section.options.isEmpty);
+    final noChoice = sections.hasNoOptions;
 
     // Closed, the caret points where the menu will appear; open, it points
     // back at the anchor, which is the way to close it again.
