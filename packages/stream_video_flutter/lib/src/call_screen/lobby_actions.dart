@@ -30,9 +30,8 @@ import '../../stream_video_flutter.dart';
 class StreamLobbyActions {
   /// Shows exactly the lanes given, and nothing else.
   ///
-  /// Stays `const`, so it can be a default parameter value. The lanes are
-  /// whatever was passed rather than a copy, which is what lets it: hand over
-  /// `const` lists to keep the result immutable through and through.
+  /// The lanes are the lists passed, not copies, which is what keeps this
+  /// `const`: pass `const` lists for a wholly immutable result.
   const StreamLobbyActions.custom({
     this.controls = const [],
     this.settings = const [],
@@ -84,9 +83,7 @@ class StreamLobbyActions {
 
   /// The icon buttons that turn the microphone and camera on and off.
   ///
-  /// The presets build this themselves and hand over an unmodifiable list, so
-  /// `StreamLobbyActions.simple().controls.add(...)` throws rather than
-  /// quietly mutating something annotated [immutable]. A list given to
+  /// Unmodifiable where a preset built it. A list given to
   /// [StreamLobbyActions.custom] is passed through as it is.
   final List<Widget> controls;
 

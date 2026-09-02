@@ -87,11 +87,10 @@ class CallControlButton extends StatelessWidget {
       ),
     );
 
-    // Only `positive` needs this, and only it gets it: there is no success
-    // button style in the design system, and answering has to read as an
-    // answer rather than as an accent, so the primary background is repainted
-    // for this one button. Wrapping every tone would have overridden the app's
-    // own primary style for buttons that never use it.
+    // There is no success button style in the design system, and answering
+    // has to read as an answer rather than as an accent, so `positive`
+    // repaints the primary background. No other tone uses primary, so no
+    // other tone overrides the app's theme.
     if (tone != CallControlTone.positive) return button;
 
     return StreamButtonTheme(
