@@ -20,16 +20,20 @@ import '../../stream_video_flutter.dart';
 /// StreamLobbyView(
 ///   call: call,
 ///   onJoinCallPressed: join,
-///   actions: LobbyActions.full(
+///   actions: StreamLobbyActions.full(
 ///     extraControls: [const StreamLobbyParticipantsControl()],
 ///   ),
 /// )
 /// ```
 /// {@end-tool}
 @immutable
-class LobbyActions {
+class StreamLobbyActions {
   /// Shows exactly the lanes given, and nothing else.
-  const LobbyActions.custom({
+  ///
+  /// Stays `const`, so it can be a default parameter value. The lanes are
+  /// whatever was passed rather than a copy, which is what lets it: hand over
+  /// `const` lists to keep the result immutable through and through.
+  const StreamLobbyActions.custom({
     this.controls = const [],
     this.settings = const [],
   });
@@ -37,50 +41,55 @@ class LobbyActions {
   /// Microphone and camera toggles, and no device pickers.
   ///
   /// The default, and what a phone-sized lobby usually wants.
-  LobbyActions.simple({
+  StreamLobbyActions.simple({
     List<Widget> extraControls = const [],
     List<Widget> extraSettings = const [],
-  }) : controls = [
+  }) : controls = List.unmodifiable([
          const StreamLobbyMicrophoneToggle(),
          const StreamLobbyCameraToggle(),
          ...extraControls,
-       ],
-       settings = [...extraSettings];
+       ]),
+       settings = List.unmodifiable(extraSettings);
 
   /// Microphone and camera toggles with a caret on each for picking the
   /// device, and no separate settings row.
   ///
   /// Fits a narrow lobby that still needs a device choice.
-  LobbyActions.regular({
+  StreamLobbyActions.regular({
     List<Widget> extraControls = const [],
     List<Widget> extraSettings = const [],
-  }) : controls = [
+  }) : controls = List.unmodifiable([
          const StreamLobbyMicrophoneSplitButton(),
          const StreamLobbyCameraSplitButton(),
          ...extraControls,
-       ],
-       settings = [...extraSettings];
+       ]),
+       settings = List.unmodifiable(extraSettings);
 
   /// Microphone and camera toggles above a row of device fields.
   ///
   /// The roomiest preset, and the one the web design shows.
-  LobbyActions.full({
+  StreamLobbyActions.full({
     List<Widget> extraControls = const [],
     List<Widget> extraSettings = const [],
-  }) : controls = [
+  }) : controls = List.unmodifiable([
          const StreamLobbyMicrophoneToggle(),
          const StreamLobbyCameraToggle(),
          ...extraControls,
-       ],
-       settings = [
+       ]),
+       settings = List.unmodifiable([
          const StreamLobbyMicrophoneSelect(),
          const StreamLobbyCameraSelect(),
          ...extraSettings,
-       ];
+       ]);
 
   /// The icon buttons that turn the microphone and camera on and off.
+  ///
+  /// The presets build this themselves and hand over an unmodifiable list, so
+  /// `StreamLobbyActions.simple().controls.add(...)` throws rather than
+  /// quietly mutating something annotated [immutable]. A list given to
+  /// [StreamLobbyActions.custom] is passed through as it is.
   final List<Widget> controls;
 
-  /// The fields that pick which device to use.
+  /// The fields that pick which device to use. As [controls] is.
   final List<Widget> settings;
 }
