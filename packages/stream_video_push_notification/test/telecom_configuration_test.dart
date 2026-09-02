@@ -12,8 +12,6 @@ void main() {
       expect(config.schema, isNull);
     });
 
-
-
     test('round-trips through JSON', () {
       const config = TelecomPushConfiguration(enabled: true, schema: 'myapp');
 
@@ -24,8 +22,6 @@ void main() {
             .having((c) => c.schema, 'schema', 'myapp'),
       );
     });
-
-
 
     test('merge takes the telecom section from the override', () {
       const base = StreamVideoPushConfiguration(

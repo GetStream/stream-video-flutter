@@ -71,7 +71,8 @@ void main() {
       expect(
         literals,
         contains('filteredByDoNotDisturb'),
-        reason: 'the error-code literals could not be read out of the Swift source',
+        reason:
+            'the error-code literals could not be read out of the Swift source',
       );
 
       for (final literal in literals) {
@@ -79,7 +80,8 @@ void main() {
         expect(
           IncomingCallFailureReason.fromName(literal),
           isNot(IncomingCallFailureReason.unknown),
-          reason: '"$literal" is emitted by Swift but has no matching reason in Dart',
+          reason:
+              '"$literal" is emitted by Swift but has no matching reason in Dart',
         );
       }
     });

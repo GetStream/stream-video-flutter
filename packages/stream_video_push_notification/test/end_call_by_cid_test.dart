@@ -26,7 +26,9 @@ void main() {
     test('ends a call the platform can no longer identify', () {
       // iOS reports a CallKit call that outlived the process with its uuid and nothing else.
       // Before this was handled, nothing ended it and the CallKit screen stayed up for good.
-      final decision = resolveCallsToEnd([_call(uuid: 'uuid-1')], 'default:abc');
+      final decision = resolveCallsToEnd([
+        _call(uuid: 'uuid-1'),
+      ], 'default:abc');
 
       expect(decision.endAll, isFalse);
       expect(decision.calls.map((c) => c.uuid), ['uuid-1']);
