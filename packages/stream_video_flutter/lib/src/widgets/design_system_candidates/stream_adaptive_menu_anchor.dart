@@ -74,9 +74,8 @@ class StreamMenuSection {
 
 /// Whether a menu built from these sections has anything to offer.
 ///
-/// Every caller has to know this — a caret or a field with nothing to open is
-/// disabled rather than opening an empty popup — so it lives here rather than
-/// being recomputed at each call site.
+/// A caret or a field with nothing to open is disabled rather than opening an
+/// empty popup, so every caller needs this.
 extension StreamMenuSectionsX on Iterable<StreamMenuSection> {
   /// True when no section has a row in it.
   bool get hasNoOptions => every((section) => section.options.isEmpty);

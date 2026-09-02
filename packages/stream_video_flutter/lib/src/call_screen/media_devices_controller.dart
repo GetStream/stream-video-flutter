@@ -207,9 +207,9 @@ class StreamMediaDevicesController extends ChangeNotifier {
 
   /// Commits [device], then applies it.
   ///
-  /// The selection is published before the effect runs so the picker responds
-  /// to the tap, and put back if the effect rejects it — otherwise a menu goes
-  /// on showing a device the hardware refused to switch to.
+  /// Published before the effect runs, so the picker responds to the tap, and
+  /// put back if the effect rejects it, so it never names a device the
+  /// hardware would not switch to.
   Future<void> _select({
     required RtcMediaDevice? device,
     required RtcMediaDevice? Function() current,
@@ -240,11 +240,9 @@ class StreamMediaDevicesController extends ChangeNotifier {
     _audioOutputs = devices.ofKind(RtcMediaDeviceKind.audioOutput);
     _videoInputs = devices.ofKind(RtcMediaDeviceKind.videoInput);
 
-    // A device the user picked can be unplugged. Left alone, the selection
-    // would keep naming it: the menu would show no row selected at all, the
-    // select field would keep its label, and the dead id would be handed to
-    // the call on join. Falling back to the system default is both what the
-    // platform will do anyway and something the menu can draw.
+    // A device the user picked can be unplugged. The system default is both
+    // what the platform falls back to anyway and something a menu can draw a
+    // selected row for, which a device that is gone is not.
     _selectedAudioInput = _stillPresent(_selectedAudioInput, _audioInputs);
     _selectedAudioOutput = _stillPresent(_selectedAudioOutput, _audioOutputs);
     _selectedVideoInput = _stillPresent(_selectedVideoInput, _videoInputs);

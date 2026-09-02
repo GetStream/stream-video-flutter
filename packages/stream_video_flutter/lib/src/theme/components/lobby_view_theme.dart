@@ -114,25 +114,20 @@ class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
   /// preview differ from the tiles in the call it leads to.
   final StreamParticipantTileStyle? previewTileStyle;
 
-  /// The preview's aspect below [StreamScreenSize.smallMaxWidth].
-  ///
-  /// Named for the layout rather than the breakpoint: this applies to
-  /// [StreamScreenSize.small] only, while [expandedPreviewSize] covers both
-  /// `medium` and `large`, so calling them small and large would have made
-  /// `large` mean two different things across two public types.
+  /// The preview's aspect at [StreamScreenSize.small].
   ///
   /// Defaults to `370 / 264`.
   final double? compactPreviewAspectRatio;
 
   /// The preview's maximum width, and its aspect, at
-  /// [StreamScreenSize.smallMaxWidth] and above.
+  /// [StreamScreenSize.medium] and above.
   ///
-  /// A cap rather than a fixed size: a window past the breakpoint but
-  /// narrower than this gets a smaller preview of the same shape. Its width
-  /// also caps the settings row, so the fields line up under the preview.
+  /// A cap rather than a fixed size: a window past
+  /// [StreamScreenSize.smallMaxWidth] but narrower than this gets a smaller
+  /// preview of the same shape. Its width also caps the settings row, so the
+  /// fields line up under the preview.
   ///
-  /// Defaults to `Size(640, 360)`. See [compactPreviewAspectRatio] on the
-  /// naming.
+  /// Defaults to `Size(640, 360)`.
   final Size? expandedPreviewSize;
 
   /// How many controls may be drawn on top of the preview.
