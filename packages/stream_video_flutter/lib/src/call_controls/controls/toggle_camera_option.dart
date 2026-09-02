@@ -42,7 +42,7 @@ class ToggleCameraOption extends StatelessWidget {
               ? enabledCameraIcon ?? icons.videoFill
               : disabledCameraIcon ?? icons.videoOffFill,
         ),
-        state: enabled ? .neutral : .negative,
+        tone: enabled ? .neutral : .negative,
         onPressed: () {
           call.setCameraEnabled(enabled: !enabled);
         },

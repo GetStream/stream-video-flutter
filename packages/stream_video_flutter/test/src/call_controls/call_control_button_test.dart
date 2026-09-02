@@ -26,7 +26,7 @@ void main() {
             name: 'negative',
             child: CallControlButton(
               icon: Icon(icons.voiceOffFill),
-              state: .negative,
+              tone: .negative,
               onPressed: () {},
             ),
           ),
@@ -34,7 +34,7 @@ void main() {
             name: 'positive',
             child: CallControlButton(
               icon: Icon(icons.phoneFill),
-              state: .positive,
+              tone: .positive,
               onPressed: () {},
             ),
           ),
@@ -42,7 +42,7 @@ void main() {
             name: 'error badge',
             child: CallControlButton(
               icon: Icon(icons.voiceOffFill),
-              state: .negative,
+              tone: .negative,
               showErrorBadge: true,
               onPressed: () {},
             ),
@@ -57,7 +57,7 @@ void main() {
             name: 'disabled with badge',
             child: CallControlButton(
               icon: Icon(icons.videoOffFill),
-              state: .negative,
+              tone: .negative,
               showErrorBadge: true,
             ),
           ),

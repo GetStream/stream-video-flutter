@@ -434,7 +434,7 @@ void main() {
     for (final button in buttons) {
       expect(button.showErrorBadge, isTrue);
       // Neutral, not negative: red would read as "you muted this".
-      expect(button.state, CallControlState.neutral);
+      expect(button.tone, CallControlTone.neutral);
       // Pressable, because opening again is the only thing that clears the
       // failure — the device may have been busy, or permission since granted.
       expect(button.onPressed, isNotNull);
