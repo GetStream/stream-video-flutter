@@ -23,3 +23,7 @@ class MockCallCreatedData extends Mock implements CallCreatedData {}
 class MockCallMetadata extends Mock implements CallMetadata {}
 
 class MockCallSettings extends Mock implements CallSettings {}
+
+class MockRtcLocalAudioTrack extends Mock implements RtcLocalAudioTrack {}
+
+class MockRtcLocalCameraTrack extends Mock implements RtcLocalCameraTrack {}
