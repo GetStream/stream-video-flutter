@@ -223,7 +223,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
     final currentUser = _userAuthController.currentUser!;
 
     // Picking a preset is a demo of what a host can do, not something the SDK
-    // does: StreamLobbyView defaults to LobbyActions.simple() everywhere.
+    // does: StreamLobbyView defaults to StreamLobbyActions.simple() everywhere.
     //
     // The choice is by platform, not by window width. A phone has no room for
     // a settings row at any size, so the device choice goes on the toggles'
@@ -237,8 +237,8 @@ class _LobbyScreenState extends State<LobbyScreen> {
         _BlurToggle(effects: _videoEffectsManager),
     ];
     final actions = isMobileDevice
-        ? LobbyActions.regular(extraControls: extras)
-        : LobbyActions.full(extraControls: extras);
+        ? StreamLobbyActions.regular(extraControls: extras)
+        : StreamLobbyActions.full(extraControls: extras);
 
     return Scaffold(
       appBar: AppBar(

@@ -31,7 +31,7 @@ typedef StreamLobbyJoinCallback =
 ///     await call.join(connectOptions: options);
 ///     return true;
 ///   },
-///   actions: LobbyActions.full(),
+///   actions: StreamLobbyActions.full(),
 /// )
 /// ```
 /// {@end-tool}
@@ -39,7 +39,7 @@ typedef StreamLobbyJoinCallback =
 /// The layout follows the window's [StreamScreenSize]: under 768px the
 /// controls sit below the preview, above it they are overlaid on the preview
 /// itself. Which actions are shown does *not* follow the screen — [actions]
-/// defaults to `LobbyActions.simple()` at every width, and choosing a richer
+/// defaults to `StreamLobbyActions.simple()` at every width, and choosing a richer
 /// preset for a roomier window is the host's call.
 ///
 /// A row of more than [StreamLobbyViewStyle.maxOverlaidControls] sits below
@@ -83,8 +83,8 @@ class StreamLobbyView extends StatefulWidget {
 
   /// Which controls to show.
   ///
-  /// Defaults to `LobbyActions.simple()`.
-  final LobbyActions? actions;
+  /// Defaults to `StreamLobbyActions.simple()`.
+  final StreamLobbyActions? actions;
 
   /// The heading above the preview. Defaults to a localized string.
   final Widget? title;
@@ -161,7 +161,7 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
 
   @override
   Widget build(BuildContext context) {
-    final actions = widget.actions ?? LobbyActions.simple();
+    final actions = widget.actions ?? StreamLobbyActions.simple();
 
     return StreamLobbyScope(
       controller: _controller,
@@ -190,7 +190,7 @@ class _LobbyBody extends StatelessWidget {
     required this.onJoinCallPressed,
   });
 
-  final LobbyActions actions;
+  final StreamLobbyActions actions;
   final Widget? title;
   final Widget? subtitle;
   final Widget? joinButtonLabel;

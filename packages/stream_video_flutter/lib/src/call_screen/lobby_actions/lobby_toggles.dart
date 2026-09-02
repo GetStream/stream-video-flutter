@@ -6,7 +6,7 @@ import '../../l10n/localization_extension.dart';
 /// Turns the lobby's microphone on and off.
 ///
 /// Reads its state from [StreamLobbyScope], so it can be dropped into a
-/// `LobbyActions` list without being wired up.
+/// `StreamLobbyActions` list without being wired up.
 class StreamLobbyMicrophoneToggle extends StatelessWidget {
   /// Creates a new instance of [StreamLobbyMicrophoneToggle].
   const StreamLobbyMicrophoneToggle({super.key});

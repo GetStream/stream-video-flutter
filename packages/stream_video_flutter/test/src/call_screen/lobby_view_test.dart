@@ -131,7 +131,7 @@ void main() {
 
   Widget lobbyWith(
     StreamLobbyController controller,
-    LobbyActions actions,
+    StreamLobbyActions actions,
     double width,
   ) => MediaQuery(
     data: MediaQueryData(size: Size(width, 900)),
@@ -146,7 +146,7 @@ void main() {
     ),
   );
 
-  Widget lobby(LobbyActions actions, double width) => MediaQuery(
+  Widget lobby(StreamLobbyActions actions, double width) => MediaQuery(
     // StreamScreenSize reads MediaQuery.sizeOf, so sizing the alchemist
     // surface alone would leave every case reporting the same breakpoint.
     data: MediaQueryData(size: Size(width, 900)),
@@ -180,7 +180,7 @@ void main() {
               height: 690,
               child: lobbyWith(
                 unavailableDevices(),
-                LobbyActions.simple(),
+                StreamLobbyActions.simple(),
                 900,
               ),
             ),
@@ -192,7 +192,7 @@ void main() {
               height: 690,
               child: lobbyWith(
                 unavailableDevices(),
-                LobbyActions.regular(),
+                StreamLobbyActions.regular(),
                 900,
               ),
             ),
@@ -207,16 +207,16 @@ void main() {
     );
   }
 
-  for (final (preset, build) in <(String, LobbyActions Function())>[
-    ('simple', LobbyActions.simple),
-    ('regular', LobbyActions.regular),
-    ('full', LobbyActions.full),
+  for (final (preset, build) in <(String, StreamLobbyActions Function())>[
+    ('simple', StreamLobbyActions.simple),
+    ('regular', StreamLobbyActions.regular),
+    ('full', StreamLobbyActions.full),
     // What dogfooding shows on a tablet, and the case that made the rule
     // necessary: four controls overlaid on the preview run into the
     // participant label, so the row drops below it instead.
     (
       'extras',
-      () => LobbyActions.regular(
+      () => StreamLobbyActions.regular(
         extraControls: const [
           StreamLobbyParticipantsControl(),
           StreamLobbyCameraToggle(),
@@ -249,7 +249,7 @@ void main() {
 
   // The lobby builds no Scaffold and does not scroll itself, so a host has to
   // give it somewhere to overflow — as the example app and dogfooding both do.
-  Widget screen(LobbyActions actions, double width) => MaterialApp(
+  Widget screen(StreamLobbyActions actions, double width) => MaterialApp(
     home: Material(
       child: SingleChildScrollView(child: lobby(actions, width)),
     ),
@@ -258,7 +258,7 @@ void main() {
   testWidgets('the settings lane is not drawn when it is empty', (
     tester,
   ) async {
-    await tester.pumpWidget(screen(LobbyActions.simple(), 1440));
+    await tester.pumpWidget(screen(StreamLobbyActions.simple(), 1440));
 
     expect(find.byType(StreamSelectInput), findsNothing);
     expect(find.byType(StreamLobbyMicrophoneToggle), findsOneWidget);
@@ -298,7 +298,7 @@ void main() {
     await tester.pumpWidget(
       TestWrapper(
         child: SingleChildScrollView(
-          child: lobby(LobbyActions.simple(), 900),
+          child: lobby(StreamLobbyActions.simple(), 900),
         ),
       ),
     );
@@ -325,7 +325,7 @@ void main() {
             ],
           ),
           child: SingleChildScrollView(
-            child: lobby(LobbyActions.simple(), 900),
+            child: lobby(StreamLobbyActions.simple(), 900),
           ),
         ),
       ),
@@ -349,7 +349,7 @@ void main() {
               child: StreamLobbyView(
                 call: controller.call,
                 controller: controller,
-                actions: LobbyActions.simple(),
+                actions: StreamLobbyActions.simple(),
                 footer: const Text('Shared key'),
                 joinButtonLabel: const Text('Join'),
                 onJoinCallPressed: (_) => true,
@@ -375,7 +375,7 @@ void main() {
   testWidgets('no footer is drawn when none is asked for', (tester) async {
     await tester.pumpWidget(
       TestWrapper(
-        child: SingleChildScrollView(child: lobby(LobbyActions.simple(), 900)),
+        child: SingleChildScrollView(child: lobby(StreamLobbyActions.simple(), 900)),
       ),
     );
 
@@ -396,7 +396,7 @@ void main() {
             ],
           ),
           child: SingleChildScrollView(
-            child: lobby(LobbyActions.simple(), 900),
+            child: lobby(StreamLobbyActions.simple(), 900),
           ),
         ),
       ),
@@ -417,7 +417,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: SingleChildScrollView(
-            child: lobbyWith(controller, LobbyActions.simple(), 900),
+            child: lobbyWith(controller, StreamLobbyActions.simple(), 900),
           ),
         ),
       ),
@@ -459,7 +459,7 @@ void main() {
                 child: StreamLobbyView(
                   call: controller.call,
                   controller: controller,
-                  actions: LobbyActions.simple(),
+                  actions: StreamLobbyActions.simple(),
                   onJoinCallPressed: (_) {
                     joined = true;
                     return true;
@@ -482,7 +482,7 @@ void main() {
   // Nothing reports a local audio level before joining, so an indicator here
   // would sit permanently idle.
   testWidgets('the preview shows no sound indicator', (tester) async {
-    await tester.pumpWidget(screen(LobbyActions.simple(), 900));
+    await tester.pumpWidget(screen(StreamLobbyActions.simple(), 900));
 
     expect(find.byType(StreamParticipantLabel), findsOneWidget);
     expect(find.byType(StreamAudioIndicator), findsNothing);
@@ -514,7 +514,7 @@ void main() {
             ],
           ),
           child: SingleChildScrollView(
-            child: lobby(LobbyActions.simple(), 900),
+            child: lobby(StreamLobbyActions.simple(), 900),
           ),
         ),
       ),
@@ -543,7 +543,7 @@ void main() {
             ),
           ),
           child: SingleChildScrollView(
-            child: lobby(LobbyActions.simple(), 900),
+            child: lobby(StreamLobbyActions.simple(), 900),
           ),
         ),
       ),
@@ -566,7 +566,7 @@ void main() {
   // The overlaid row shares the preview's bottom edge with the participant
   // label, so it only ever holds a few buttons.
   testWidgets('a long control row drops below the preview', (tester) async {
-    final tall = LobbyActions.regular(
+    final tall = StreamLobbyActions.regular(
       extraControls: const [
         StreamLobbyParticipantsControl(),
         StreamLobbyCameraToggle(),
@@ -584,7 +584,7 @@ void main() {
   });
 
   testWidgets('a short control row stays on the preview', (tester) async {
-    await tester.pumpWidget(screen(LobbyActions.simple(), 1440));
+    await tester.pumpWidget(screen(StreamLobbyActions.simple(), 1440));
 
     final preview = tester.getRect(find.byType(StreamParticipantTile));
     final controls = tester.getRect(find.byType(StreamLobbyMicrophoneToggle));
@@ -595,7 +595,7 @@ void main() {
   testWidgets('full keeps its settings row at the small breakpoint', (
     tester,
   ) async {
-    await tester.pumpWidget(screen(LobbyActions.full(), 375));
+    await tester.pumpWidget(screen(StreamLobbyActions.full(), 375));
     deviceChanges.add(const [_builtInMic, _frontCamera]);
     await tester.pumpAndSettle();
 
