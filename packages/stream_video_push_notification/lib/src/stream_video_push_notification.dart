@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_video/stream_video.dart';
@@ -20,12 +21,11 @@ const _idCallRejected = 6;
 const _idCallParticipantCount = 7;
 const _idActiveCall = 8;
 
-/// Implementation of [PushNotificationManager] for Stream Video.
 /// Decides what [StreamVideoPushNotificationManager.endCallByCid] has to end for [cid].
 ///
 /// Pulled out of the method so the choice can be tested. The live path cannot be exercised in a
 /// unit test: `activeCalls` short-circuits to an empty list off-device, which always lands on
-/// [endAll].
+/// `endAll`.
 @visibleForTesting
 ({bool endAll, List<CallData> calls}) resolveCallsToEnd(
   List<CallData> activeCalls,
@@ -57,6 +57,7 @@ const _idActiveCall = 8;
   return (endAll: false, calls: [...matching, ...unidentified]);
 }
 
+/// Implementation of [PushNotificationManager] for Stream Video.
 class StreamVideoPushNotificationManager implements PushNotificationManager {
   StreamVideoPushNotificationManager._({
     required CoordinatorClient client,

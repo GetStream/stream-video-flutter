@@ -29,7 +29,9 @@ class StreamCallKitCallController: NSObject {
 
         self.requestCall(
             callTransaction, action: "startCall",
-            completion: { _ in
+            completion: { started in
+                guard started else { return }
+
                 let callUpdate = CXCallUpdate()
                 callUpdate.remoteHandle = handle
                 callUpdate.supportsDTMF = data.supportsDTMF
@@ -125,18 +127,41 @@ class StreamCallKitCallController: NSObject {
     private func requestCall(
         _ transaction: CXTransaction, action: String, completion: ((Bool) -> Void)? = nil
     ) {
-        callController.request(transaction) { error in
+        callController.request(transaction) { [weak self] error in
             if let error = error {
-                //fail
-                print("Error requesting transaction: \(error)")
-            } else {
-                if action == "startCall" {
-                    //TODO: push notification for Start Call
-                } else if action == "endCall" || action == "endAllCalls" {
-                    //TODO: push notification for End Call
-                }
-                completion?(error == nil)
-                print("Requested transaction successfully: \(action)")
+                NSLog("CallKit transaction '\(action)' failed: \(error.localizedDescription)")
+                self?.clearCallsAfterFailedEnd(transaction, action: action)
+                completion?(false)
+                return
+            }
+
+            NSLog("CallKit transaction '\(action)' succeeded")
+            completion?(true)
+        }
+    }
+
+    /// Last resort for an end transaction the call controller refused.
+    ///
+    /// A rejected `CXEndCallAction` used to be logged and dropped. Nothing retries it and nothing
+    /// else ends the call, so the CallKit screen stayed up for a call that had already ended
+    /// everywhere else. Reporting the call as ended goes through the provider instead of the call
+    /// controller, so it still clears the UI when the controller will not take the transaction.
+    ///
+    /// Only the provider that reported a call can end it this way, so this cannot rescue a call
+    /// left behind by an earlier process — it covers a call this process knows about whose end
+    /// transaction was refused.
+    private func clearCallsAfterFailedEnd(_ transaction: CXTransaction, action: String) {
+        guard action == "endCall" || action == "endAllCalls" else { return }
+
+        for callAction in transaction.actions.compactMap({ $0 as? CXCallAction }) {
+            NSLog("Reporting call \(callAction.callUUID) as ended after the failed \(action)")
+            sharedProvider?.reportCall(
+                with: callAction.callUUID, endedAt: Date(), reason: .remoteEnded)
+
+            // Drop our own bookkeeping too: reporting a call as ended does not run the
+            // `CXEndCallAction` delegate that normally does it.
+            if let call = callWithUUID(uuid: callAction.callUUID) {
+                removeCall(call)
             }
         }
     }
