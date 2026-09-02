@@ -20,7 +20,11 @@ class StreamLobbyMicrophoneSplitButton extends StatelessWidget {
       devices: controller.devices,
       enabled: controller.microphoneEnabled,
       unavailable: controller.microphoneUnavailable,
-      onPressed: controller.toggleMicrophone,
+      // Badged either way, but only a device the platform does not report at
+      // all is unpressable: retrying is what clears a failed open.
+      onPressed: controller.microphoneMissing
+          ? null
+          : controller.toggleMicrophone,
     );
   }
 }
@@ -38,7 +42,7 @@ class StreamLobbyCameraSplitButton extends StatelessWidget {
       devices: controller.devices,
       enabled: controller.cameraEnabled,
       unavailable: controller.cameraUnavailable,
-      onPressed: controller.toggleCamera,
+      onPressed: controller.cameraMissing ? null : controller.toggleCamera,
     );
   }
 }

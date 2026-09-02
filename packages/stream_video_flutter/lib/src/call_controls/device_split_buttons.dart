@@ -48,11 +48,13 @@ class StreamMicrophoneSplitButton extends StatelessWidget {
   /// Turns the microphone on and off.
   final VoidCallback? onPressed;
 
-  /// Whether the microphone cannot be used at all.
+  /// Whether the microphone is not usable right now.
   ///
-  /// Draws the control disabled with an error badge rather than in the state a
+  /// Draws the control with an error badge rather than in the state a
   /// deliberate mute gets, so a permission problem is not mistaken for a
-  /// choice the user made.
+  /// choice the user made. This is appearance only: pass a null [onPressed]
+  /// for a control that cannot be pressed, so a failure the user could retry
+  /// stays badged but live.
   final bool unavailable;
 
   /// Which way the caret expects its menu to open.
@@ -102,7 +104,7 @@ class StreamCameraSplitButton extends StatelessWidget {
   /// Turns the camera on and off.
   final VoidCallback? onPressed;
 
-  /// Whether the camera cannot be used at all. See
+  /// Whether the camera is not usable right now. See
   /// [StreamMicrophoneSplitButton.unavailable].
   final bool unavailable;
 
@@ -173,11 +175,11 @@ class _DeviceSplitButton extends StatelessWidget {
       title: title,
       sections: sections,
       direction: menuDirection,
-      // An unavailable device is not a user choice, so it is drawn disabled
-      // with an error badge rather than in the destructive state a deliberate
-      // mute gets. Both halves take a null callback because a split button
-      // only takes on its disabled surface once neither half can be pressed —
-      // and with no device there is nothing for the caret to offer anyway.
+      // An unavailable device is not a user choice, so it is badged rather
+      // than drawn in the destructive state a deliberate mute gets. Whether
+      // the leading half can be pressed is the caller's to say — a failed
+      // open is worth retrying — while the caret follows what it has to
+      // offer, which is nothing when the platform named no device.
       builder: (context, handle) => CallButtonBadge(
         showErrorBadge: unavailable,
         child: StreamSplitButton.icon(
@@ -186,8 +188,8 @@ class _DeviceSplitButton extends StatelessWidget {
           style: enabled || unavailable ? .secondary : .destructive,
           tooltip: tooltip,
           trailingTooltip: trailingTooltip,
-          onPressed: unavailable ? null : onPressed,
-          onTrailingPressed: unavailable || noChoice ? null : handle.toggle,
+          onPressed: onPressed,
+          onTrailingPressed: noChoice ? null : handle.toggle,
         ),
       ),
     );

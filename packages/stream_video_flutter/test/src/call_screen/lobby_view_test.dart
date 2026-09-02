@@ -335,9 +335,9 @@ void main() {
   });
 
   // A device that cannot be opened is not a user choice: the control is
-  // disabled and badged rather than drawn in the state a deliberate mute gets,
-  // so a permission problem is not mistaken for something the user did.
-  testWidgets('an unavailable device disables and badges its control', (
+  // badged rather than drawn in the state a deliberate mute gets, so a
+  // permission problem is not mistaken for something the user did.
+  testWidgets('a device that would not open is badged but still retryable', (
     tester,
   ) async {
     final controller = unavailableDevices();
@@ -360,11 +360,15 @@ void main() {
         .toList();
     expect(buttons, hasLength(2));
     for (final button in buttons) {
-      expect(button.onPressed, isNull);
       expect(button.showErrorBadge, isTrue);
       // Neutral, not negative: red would read as "you muted this".
       expect(button.state, CallControlState.neutral);
+      // Pressable, because opening again is the only thing that clears the
+      // failure — the device may have been busy, or permission since granted.
+      expect(button.onPressed, isNotNull);
     }
+    expect(controller.microphoneMissing, isFalse);
+    expect(controller.cameraMissing, isFalse);
   });
 
   // "Joining remains possible with the unavailable device disabled."
