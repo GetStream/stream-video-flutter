@@ -184,7 +184,9 @@ class _LobbyBody extends StatelessWidget {
         // the window.
         ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: isSmall ? double.infinity : style.largePreviewSize.width,
+            maxWidth: isSmall
+                ? double.infinity
+                : style.expandedPreviewSize.width,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -291,12 +293,12 @@ class _LobbyPreview extends StatelessWidget {
 
     if (isSmall) {
       return AspectRatio(
-        aspectRatio: style.smallPreviewAspectRatio,
+        aspectRatio: style.compactPreviewAspectRatio,
         child: tile,
       );
     }
 
-    final size = style.largePreviewSize;
+    final size = style.expandedPreviewSize;
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: size.width),
       child: AspectRatio(aspectRatio: size.aspectRatio, child: tile),
@@ -318,11 +320,12 @@ class _StreamLobbyViewStyleDefaults extends StreamLobbyViewStyle {
   StreamParticipantTileStyle? get previewTileStyle => _style?.previewTileStyle;
 
   @override
-  double get smallPreviewAspectRatio =>
-      _style?.smallPreviewAspectRatio ?? 370 / 264;
+  double get compactPreviewAspectRatio =>
+      _style?.compactPreviewAspectRatio ?? 370 / 264;
 
   @override
-  Size get largePreviewSize => _style?.largePreviewSize ?? const Size(640, 360);
+  Size get expandedPreviewSize =>
+      _style?.expandedPreviewSize ?? const Size(640, 360);
 
   @override
   int get maxOverlaidControls => _style?.maxOverlaidControls ?? 3;
