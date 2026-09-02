@@ -161,7 +161,9 @@ void main() {
     ),
   );
 
-  // What an iOS simulator shows: no camera at all, so opening one throws.
+  // What an iOS simulator shows: no camera at all, so opening one throws. The
+  // control is badged but still pressable — a failed open is worth retrying —
+  // which is what this snapshot pins.
   for (final brightness in Brightness.values) {
     streamGoldenTest(
       'StreamLobbyView marks an unavailable device',

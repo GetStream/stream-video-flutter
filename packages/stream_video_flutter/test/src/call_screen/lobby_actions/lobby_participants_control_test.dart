@@ -42,6 +42,12 @@ void main() {
     );
     when(call.getOrCreate).thenAnswer((_) async {
       final metadata = MockCallMetadata();
+      when(() => metadata.settings).thenReturn(
+        const CallSettings(
+          audio: StreamAudioSettings(micDefaultOn: false),
+          video: StreamVideoSettings(cameraDefaultOn: false),
+        ),
+      );
       when(() => metadata.users).thenReturn({
         'rene': const CallUser(
           id: 'rene',

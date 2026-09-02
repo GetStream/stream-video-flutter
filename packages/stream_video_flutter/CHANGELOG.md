@@ -108,6 +108,9 @@
 
 ### 🐞 Fixed
 
+- The lobby now honours the call's own device defaults. `micDefaultOn` and `cameraDefaultOn` were read from `call.state` one microtask after the controller was constructed, but a `CallState` starts life with `const CallSettings()` — both defaults on — and the real settings only arrive with the call's metadata, a network round trip later. A call configured to start muted had its microphone opened anyway. They are applied from the fetched metadata now, falling back to the call state if the fetch fails, so a lobby that cannot reach the coordinator still opens.
+- A failed `getOrCreate` is no longer only a log line. `StreamLobbyController.fetchError` records it, so a host can tell "nobody is here" from "we could not ask" and offer a retry; the participant list is empty in both cases. The stack trace is logged with it.
+
 - The people in a `StreamParticipantsControl`'s list are no longer greyed out. `StreamAdaptiveMenuAnchor` derived the design system's `enabled` flag from whether a row had anything to press, but `enabled: false` is the *unavailable* look — it paints the label in `textDisabled` — so every name in the list read as though that person could not be reached. A row with no `onSelected` is still inert, and still gets a non-interactive cursor; it just looks like text now. Asserted in a widget test, since the CI golden capture path drops anything painted into an `Overlay`.
 
 - A picked device the platform stops reporting no longer lingers in the selection. `StreamMediaDevicesController` reconciles its three selections whenever the device list changes: unplugging a chosen webcam or headset used to leave the selection naming it, so the menu drew no selected row at all, the select field kept the old label, and the dead device id was carried into `call.join`. The selection falls back to the system default, and is re-read from the new list, so a device the platform has since named loses its blank label.
