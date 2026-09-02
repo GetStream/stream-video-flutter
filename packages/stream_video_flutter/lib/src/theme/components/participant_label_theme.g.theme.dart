@@ -107,6 +107,8 @@ mixin _$StreamParticipantLabelStyle {
       borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
       padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
       spacing: lerpDouble$(a.spacing, b.spacing, t),
+      indicatorSpacing: lerpDouble$(a.indicatorSpacing, b.indicatorSpacing, t),
+      minHeight: lerpDouble$(a.minHeight, b.minHeight, t),
       blurSigma: lerpDouble$(a.blurSigma, b.blurSigma, t),
       nameTextStyle: TextStyle.lerp(a.nameTextStyle, b.nameTextStyle, t),
       videoOffIconColor: Color.lerp(
@@ -146,6 +148,7 @@ mixin _$StreamParticipantLabelStyle {
         b.microphoneOffColor,
         t,
       ),
+      showAudioIndicator: t < 0.5 ? a.showAudioIndicator : b.showAudioIndicator,
     );
   }
 
@@ -154,6 +157,8 @@ mixin _$StreamParticipantLabelStyle {
     BorderRadius? borderRadius,
     EdgeInsetsGeometry? padding,
     double? spacing,
+    double? indicatorSpacing,
+    double? minHeight,
     double? blurSigma,
     TextStyle? nameTextStyle,
     Color? videoOffIconColor,
@@ -165,6 +170,7 @@ mixin _$StreamParticipantLabelStyle {
     Color? speakingColor,
     double? microphoneIconSize,
     Color? microphoneOffColor,
+    bool? showAudioIndicator,
   }) {
     final _this = (this as StreamParticipantLabelStyle);
 
@@ -173,6 +179,8 @@ mixin _$StreamParticipantLabelStyle {
       borderRadius: borderRadius ?? _this.borderRadius,
       padding: padding ?? _this.padding,
       spacing: spacing ?? _this.spacing,
+      indicatorSpacing: indicatorSpacing ?? _this.indicatorSpacing,
+      minHeight: minHeight ?? _this.minHeight,
       blurSigma: blurSigma ?? _this.blurSigma,
       nameTextStyle: nameTextStyle ?? _this.nameTextStyle,
       videoOffIconColor: videoOffIconColor ?? _this.videoOffIconColor,
@@ -187,6 +195,7 @@ mixin _$StreamParticipantLabelStyle {
       speakingColor: speakingColor ?? _this.speakingColor,
       microphoneIconSize: microphoneIconSize ?? _this.microphoneIconSize,
       microphoneOffColor: microphoneOffColor ?? _this.microphoneOffColor,
+      showAudioIndicator: showAudioIndicator ?? _this.showAudioIndicator,
     );
   }
 
@@ -206,6 +215,8 @@ mixin _$StreamParticipantLabelStyle {
       borderRadius: other.borderRadius,
       padding: other.padding,
       spacing: other.spacing,
+      indicatorSpacing: other.indicatorSpacing,
+      minHeight: other.minHeight,
       blurSigma: other.blurSigma,
       nameTextStyle:
           _this.nameTextStyle?.merge(other.nameTextStyle) ??
@@ -219,6 +230,7 @@ mixin _$StreamParticipantLabelStyle {
       speakingColor: other.speakingColor,
       microphoneIconSize: other.microphoneIconSize,
       microphoneOffColor: other.microphoneOffColor,
+      showAudioIndicator: other.showAudioIndicator,
     );
   }
 
@@ -239,6 +251,8 @@ mixin _$StreamParticipantLabelStyle {
         _other.borderRadius == _this.borderRadius &&
         _other.padding == _this.padding &&
         _other.spacing == _this.spacing &&
+        _other.indicatorSpacing == _this.indicatorSpacing &&
+        _other.minHeight == _this.minHeight &&
         _other.blurSigma == _this.blurSigma &&
         _other.nameTextStyle == _this.nameTextStyle &&
         _other.videoOffIconColor == _this.videoOffIconColor &&
@@ -250,7 +264,8 @@ mixin _$StreamParticipantLabelStyle {
         _other.audioIndicatorIconSize == _this.audioIndicatorIconSize &&
         _other.speakingColor == _this.speakingColor &&
         _other.microphoneIconSize == _this.microphoneIconSize &&
-        _other.microphoneOffColor == _this.microphoneOffColor;
+        _other.microphoneOffColor == _this.microphoneOffColor &&
+        _other.showAudioIndicator == _this.showAudioIndicator;
   }
 
   @override
@@ -263,6 +278,8 @@ mixin _$StreamParticipantLabelStyle {
       _this.borderRadius,
       _this.padding,
       _this.spacing,
+      _this.indicatorSpacing,
+      _this.minHeight,
       _this.blurSigma,
       _this.nameTextStyle,
       _this.videoOffIconColor,
@@ -274,6 +291,7 @@ mixin _$StreamParticipantLabelStyle {
       _this.speakingColor,
       _this.microphoneIconSize,
       _this.microphoneOffColor,
+      _this.showAudioIndicator,
     );
   }
 }

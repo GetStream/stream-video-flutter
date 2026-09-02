@@ -6,10 +6,10 @@ import 'audio_level_indicator.dart';
 
 /// The sound indicator shown at the end of a participant's name pill.
 ///
-/// Always present, so the pill keeps its shape as someone starts and stops
-/// talking: the bars animate while [isSpeaking] and rest as three dots
-/// otherwise. Whether the participant is muted is reported separately, by the
-/// microphone icon the pill draws next to this.
+/// Drawn for as long as their microphone is open, so the pill keeps its shape
+/// as someone starts and stops talking: the bars animate while [isSpeaking] and
+/// rest as three dots otherwise. A muted participant has nothing for it to
+/// report, and the pill draws a microphone icon in its place instead.
 class StreamAudioIndicator extends StatelessWidget {
   /// Creates a sound indicator.
   const StreamAudioIndicator({

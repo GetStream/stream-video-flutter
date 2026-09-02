@@ -191,13 +191,13 @@ class StreamParticipantTileStyle with _$StreamParticipantTileStyle {
 
   /// The inset around the bottom toolbar's content.
   ///
-  /// Defaults to `spacing.sm` on every side. The toolbar takes its height from
+  /// Defaults to `spacing.xs` on every side. The toolbar takes its height from
   /// its content, so this also sets how far the pill sits from the tile edge.
   final EdgeInsetsGeometry? toolbarPadding;
 
   /// The gap between the name pill and the connection quality indicator.
   ///
-  /// Defaults to `spacing.sm`. Also the minimum distance a long name is kept
+  /// Defaults to `spacing.xxs`. Also the minimum distance a long name is kept
   /// from the indicator before it ellipsizes.
   final double? toolbarSpacing;
 
