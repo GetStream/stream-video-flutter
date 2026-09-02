@@ -287,12 +287,12 @@ class DefaultStreamParticipantTile extends StatelessWidget {
 // space it was given rather than of the platform.
 //
 // This ladder covers the bottom toolbar, whose widths come from the chrome's
-// own arithmetic — the toolbar's 12px inset on both sides, a 12px gap before
-// the indicator, and the narrowest the pill can be drawn at:
+// own arithmetic — the toolbar's 8px inset on both sides, a 4px gap before the
+// indicator, and the narrowest the pill can be drawn at:
 //
-//   indicator only         12 + 32 + 12                      =  56
-//   pill (icons only)      12 + (12 + 24 + 4) + 12 + 32 + 12 = 108
-//   pill with a short name 108 + a readable 44px of text     = 152
+//   indicator only         8 + 32 + 8                     =  48
+//   pill (icons only)      8 + (12 + 24 + 4) + 4 + 32 + 8 =  92
+//   pill with a short name 92 + a readable 44px of text   = 136
 //
 // It is a floor rather than the whole story: a muted participant's pill carries
 // icons the widths above do not account for, and the top toolbar is anchored to
@@ -311,12 +311,14 @@ enum _TileDensity {
   /// No chrome at all.
   bare;
 
-  static const _fullWidth = 152.0;
-  static const _compactWidth = 108.0;
-  static const _minimalWidth = 56.0;
+  static const _fullWidth = 136.0;
+  static const _compactWidth = 92.0;
+  static const _minimalWidth = 48.0;
   static const _fullHeight = 128.0;
   static const _compactHeight = 72.0;
-  static const _minimalHeight = 56.0;
+  // The same arithmetic as the width: the toolbar's inset on both sides around
+  // the indicator, which is as tall as it is wide.
+  static const _minimalHeight = 48.0;
 
   static _TileDensity resolve(BoxConstraints constraints) {
     final width = constraints.maxWidth;
@@ -839,10 +841,10 @@ class _StreamParticipantTileStyleDefaults extends StreamParticipantTileStyle {
   bool get showReaction => true;
 
   @override
-  EdgeInsetsGeometry get toolbarPadding => EdgeInsets.all(_spacing.sm);
+  EdgeInsetsGeometry get toolbarPadding => EdgeInsets.all(_spacing.xs);
 
   @override
-  double get toolbarSpacing => _spacing.sm;
+  double get toolbarSpacing => _spacing.xxs;
 
   @override
   EdgeInsetsGeometry get topToolbarPadding => EdgeInsets.all(_spacing.xxs);

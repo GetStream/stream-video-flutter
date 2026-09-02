@@ -7,10 +7,11 @@ import 'participant_label_defaults.dart';
 
 /// The pill on a participant tile carrying their name and audio state.
 ///
-/// Holds the participant's name, a camera-off icon while their video is off,
-/// and a [StreamAudioIndicator]. It is meant to be laid out inside a bounded
-/// parent: the name shrinks and ellipsizes rather than pushing the pill wider
-/// than the space it was given.
+/// Holds the participant's name followed by whatever their state contributes: a
+/// microphone icon while they are muted, a camera-off icon while their video is
+/// off, and a [StreamAudioIndicator] while their microphone is open. It is
+/// meant to be laid out inside a bounded parent: the name shrinks and
+/// ellipsizes rather than pushing the pill wider than the space it was given.
 ///
 /// The rendering can be replaced app-wide by registering a `participantLabel`
 /// builder with [streamVideoComponentBuilders] on a [StreamComponentFactory].
@@ -138,11 +139,47 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeStyle = StreamParticipantLabelTheme.of(context).style;
     final style = themeStyle?.merge(props.style) ?? props.style;
-    final defaults = StreamParticipantLabelStyleDefaults(context);
+    // The trailing inset depends on whether the indicator is drawn, so that has
+    // to be resolved before the defaults that describe the pill.
+    final drawsAudioIndicator = participantLabelDrawsAudioIndicator(
+      isAudioEnabled: props.isAudioEnabled,
+      style: style,
+    );
+    final defaults = StreamParticipantLabelStyleDefaults(
+      context,
+      drawsAudioIndicator: drawsAudioIndicator,
+    );
 
     final borderRadius = style?.borderRadius ?? defaults.borderRadius;
     final nameTextStyle = style?.nameTextStyle ?? defaults.nameTextStyle;
     final blurSigma = style?.blurSigma ?? defaults.blurSigma;
+
+    final indicators = <Widget>[
+      // Only the muted state gets an icon: an unmuted microphone is the norm.
+      if (!props.isAudioEnabled)
+        Icon(
+          context.streamIcons.voiceOffFill,
+          size: style?.microphoneIconSize ?? defaults.microphoneIconSize,
+          color:
+              style?.microphoneOffColor ??
+              nameTextStyle.color ??
+              defaults.microphoneOffColor,
+        ),
+      if (!props.isVideoEnabled)
+        Icon(
+          context.streamIcons.videoOffFill,
+          size: style?.videoOffIconSize ?? defaults.videoOffIconSize,
+          color:
+              style?.videoOffIconColor ??
+              nameTextStyle.color ??
+              defaults.videoOffIconColor,
+        ),
+      // The sound indicator reports what is coming through an open microphone.
+      // A muted participant has nothing for it to report, and the icon above
+      // already says why.
+      if (drawsAudioIndicator)
+        StreamAudioIndicator(isSpeaking: props.isSpeaking, style: style),
+    ];
 
     Widget content = Padding(
       padding: style?.padding ?? defaults.padding,
@@ -164,30 +201,31 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-          // Only the muted state gets an icon: an unmuted microphone is the
-          // norm, and the sound indicator already reports whether anything is
-          // coming through it.
-          if (!props.isAudioEnabled)
-            Icon(
-              context.streamIcons.voiceOffFill,
-              size: style?.microphoneIconSize ?? defaults.microphoneIconSize,
-              color:
-                  style?.microphoneOffColor ??
-                  nameTextStyle.color ??
-                  defaults.microphoneOffColor,
+          // Left out entirely when it would be empty: an empty child still
+          // claims the gap after the name, which would leave the pill padded
+          // for indicators it is not drawing.
+          if (indicators.isNotEmpty)
+            // The indicators sit closer to each other than to the name, so
+            // they read as one group reporting this participant's state rather
+            // than as separate items trailing the name.
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: style?.indicatorSpacing ?? defaults.indicatorSpacing,
+              children: indicators,
             ),
-          if (!props.isVideoEnabled)
-            Icon(
-              context.streamIcons.videoOffFill,
-              size: style?.videoOffIconSize ?? defaults.videoOffIconSize,
-              color:
-                  style?.videoOffIconColor ??
-                  nameTextStyle.color ??
-                  defaults.videoOffIconColor,
-            ),
-          StreamAudioIndicator(isSpeaking: props.isSpeaking, style: style),
         ],
       ),
+    );
+
+    // Without this the pill's height comes from whatever is tallest inside it,
+    // which is the sound indicator — so a pill drawing icons in its place, or
+    // nothing at all, would collapse onto its text and lose the padding around
+    // it. It also keeps the tile's chrome arithmetic holding across states.
+    content = ConstrainedBox(
+      constraints: BoxConstraints(
+        minHeight: style?.minHeight ?? defaults.minHeight,
+      ),
+      child: content,
     );
 
     // Text scaling grows the pill, which on a small tile can swallow the video.
