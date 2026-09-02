@@ -203,8 +203,9 @@ void main() {
     }
 
     // The pill lays its state icons out at full size, so a muted camera-off
-    // participant needs far more room than a name alone. The ladder's widths
-    // know nothing about that; the tile measures the pill instead.
+    // participant needs more room than the ladder's widths — measured against a
+    // pill carrying nothing but the sound indicator — account for. The tile
+    // measures the pill instead.
     testWidgets('drops the pill when state icons widen it past the room', (
       tester,
     ) async {
@@ -214,7 +215,7 @@ void main() {
             isAudioEnabled: false,
             isVideoEnabled: false,
           ),
-          width: 164,
+          width: 96,
           height: 300,
         ),
       );
@@ -234,7 +235,7 @@ void main() {
             isAudioEnabled: false,
             isVideoEnabled: false,
           ),
-          width: 180,
+          width: 120,
           height: 300,
         ),
       );
@@ -289,7 +290,7 @@ void main() {
         _tile(
           participant: _participant(),
           width: 300,
-          height: 104,
+          height: 96,
           actions: [_pin()],
         ),
       );
@@ -320,8 +321,8 @@ void main() {
   });
 
   group('audio indicator', () {
-    // The sound indicator never leaves, so the pill keeps its shape as someone
-    // starts and stops talking. Only the muted state adds an icon.
+    // The indicator stays put as someone starts and stops talking, so the pill
+    // keeps its shape. Muting is what replaces it, with an icon.
     testWidgets('is shown while speaking', (tester) async {
       await tester.pumpWidget(
         _tile(
@@ -346,9 +347,9 @@ void main() {
       expect(find.byIcon(_icons.voiceOffFill), findsNothing);
     });
 
-    testWidgets('is shown alongside the muted icon while muted', (
-      tester,
-    ) async {
+    // A muted microphone has nothing coming through it for the indicator to
+    // report, and the icon that replaces it already says why.
+    testWidgets('gives way to the muted icon while muted', (tester) async {
       await tester.pumpWidget(
         _tile(
           participant: _participant(isAudioEnabled: false),
@@ -357,8 +358,33 @@ void main() {
         ),
       );
 
-      expect(find.byType(StreamAudioIndicator), findsOneWidget);
+      expect(find.byType(StreamAudioIndicator), findsNothing);
       expect(find.byIcon(_icons.voiceOffFill), findsOneWidget);
+    });
+
+    // The icons that stand in for the indicator are shorter than it is, so the
+    // pill would come out shorter for a muted participant than for everyone
+    // else if it did not hold a height of its own.
+    testWidgets('leaves the pill the same height when it gives way', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _tile(participant: _participant(), width: 300, height: 300),
+      );
+      final unmuted = tester.getSize(
+        find.byType(DefaultStreamParticipantLabel),
+      );
+
+      await tester.pumpWidget(
+        _tile(
+          participant: _participant(isAudioEnabled: false),
+          width: 300,
+          height: 300,
+        ),
+      );
+      final muted = tester.getSize(find.byType(DefaultStreamParticipantLabel));
+
+      expect(muted.height, unmuted.height);
     });
 
     testWidgets('rests when the participant is not speaking', (tester) async {

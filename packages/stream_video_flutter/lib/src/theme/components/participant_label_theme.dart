@@ -95,8 +95,9 @@ class StreamParticipantLabelThemeData with _$StreamParticipantLabelThemeData {
 
 /// Visual styling properties for a `StreamParticipantLabel`.
 ///
-/// The label is a pill holding the participant's name, a camera-off icon while
-/// their video is off, and an audio indicator. It sits on top of video, so its
+/// The label is a pill holding the participant's name, a microphone icon while
+/// they are muted, a camera-off icon while their video is off, and an audio
+/// indicator while their microphone is open. It sits on top of video, so its
 /// fill is an overlay rather than a surface color.
 ///
 /// Exposed separately from [StreamParticipantLabelThemeData] so other theme
@@ -111,6 +112,8 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
     this.borderRadius,
     this.padding,
     this.spacing,
+    this.indicatorSpacing,
+    this.minHeight,
     this.blurSigma,
     this.nameTextStyle,
     this.videoOffIconColor,
@@ -122,6 +125,7 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
     this.speakingColor,
     this.microphoneIconSize,
     this.microphoneOffColor,
+    this.showAudioIndicator,
   });
 
   /// The pill's fill.
@@ -137,14 +141,28 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
 
   /// The inset around the pill's content.
   ///
-  /// Asymmetric by default — the audio indicator carries its own padding, so it
-  /// sits closer to the trailing edge than the name does to the leading one.
+  /// Asymmetric by default — the trailing indicator carries its own padding, so
+  /// it sits closer to the trailing edge than the name does to the leading one.
   final EdgeInsetsGeometry? padding;
 
-  /// The gap between the name, the camera-off icon and the audio indicator.
+  /// The gap between the name and the indicators that follow it.
   ///
   /// Defaults to `spacing.xs`.
   final double? spacing;
+
+  /// The gap between the indicators themselves.
+  ///
+  /// Tighter than [spacing] by default — `spacing.xxs` — so the indicators read
+  /// as one group reporting the participant's state rather than as separate
+  /// items trailing the name.
+  final double? indicatorSpacing;
+
+  /// The shortest the pill may be drawn.
+  ///
+  /// Defaults to the height the sound indicator gives it — its own size plus
+  /// the vertical [padding] — so a pill without one keeps the same height and
+  /// the same breathing room around its text rather than collapsing onto it.
+  final double? minHeight;
 
   /// The blur applied to whatever sits behind the pill.
   ///
@@ -166,12 +184,12 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
 
   /// The side length of the camera-off icon.
   ///
-  /// Defaults to 20.
+  /// Defaults to `spacing.md`.
   final double? videoOffIconSize;
 
   /// The side length of the audio indicator's box.
   ///
-  /// Defaults to 24.
+  /// Only drawn while the participant's microphone is open. Defaults to 24.
   final double? audioIndicatorSize;
 
   /// The corner radius of the audio indicator's box.
@@ -196,16 +214,26 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
 
   /// The side length of the muted-microphone icon.
   ///
-  /// Defaults to 20.
+  /// Defaults to `spacing.md`.
   final double? microphoneIconSize;
 
   /// The color of the microphone icon while the participant is muted.
   ///
-  /// Only the muted state draws an icon, so there is no unmuted counterpart.
+  /// Only the muted state draws an icon — an open microphone draws the audio
+  /// indicator instead — so there is no unmuted counterpart.
   /// Defaults to the color of [nameTextStyle]: on a tile the muted state is
   /// information rather than a warning, and the red used for the mute control
   /// in the call bar would read as an error here.
   final Color? microphoneOffColor;
+
+  /// Whether to draw the sound indicator at all.
+  ///
+  /// Defaults to true. Turn it off where there is no speaking state to show —
+  /// the lobby, where nobody has joined and nothing reports a local audio
+  /// level, draws a name and mute icons but no indicator. A muted participant
+  /// goes without one whatever this says: there is nothing coming through a
+  /// closed microphone for it to report.
+  final bool? showAudioIndicator;
 
   /// Linearly interpolate between two styles.
   static StreamParticipantLabelStyle? lerp(
