@@ -99,8 +99,8 @@ class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
   /// Creates a lobby style with optional property overrides.
   const StreamLobbyViewStyle({
     this.previewTileStyle,
-    this.smallPreviewAspectRatio,
-    this.largePreviewSize,
+    this.compactPreviewAspectRatio,
+    this.expandedPreviewSize,
     this.maxOverlaidControls,
     this.joinButtonWidth,
   });
@@ -116,14 +116,24 @@ class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
 
   /// The preview's aspect below [StreamScreenSize.smallMaxWidth].
   ///
-  /// Defaults to `370 / 264`.
-  final double? smallPreviewAspectRatio;
-
-  /// The preview's size at [StreamScreenSize.smallMaxWidth] and above.
+  /// Named for the layout rather than the breakpoint: this applies to
+  /// [StreamScreenSize.small] only, while [expandedPreviewSize] covers both
+  /// `medium` and `large`, so calling them small and large would have made
+  /// `large` mean two different things across two public types.
   ///
-  /// Its width also caps the settings row, so the fields line up under the
-  /// preview. Defaults to `Size(640, 360)`.
-  final Size? largePreviewSize;
+  /// Defaults to `370 / 264`.
+  final double? compactPreviewAspectRatio;
+
+  /// The preview's maximum width, and its aspect, at
+  /// [StreamScreenSize.smallMaxWidth] and above.
+  ///
+  /// A cap rather than a fixed size: a window past the breakpoint but
+  /// narrower than this gets a smaller preview of the same shape. Its width
+  /// also caps the settings row, so the fields line up under the preview.
+  ///
+  /// Defaults to `Size(640, 360)`. See [compactPreviewAspectRatio] on the
+  /// naming.
+  final Size? expandedPreviewSize;
 
   /// How many controls may be drawn on top of the preview.
   ///
@@ -131,6 +141,9 @@ class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
   /// already occupied by the participant label, so a long row runs into it.
   /// Past this count the row moves below the preview instead, whatever the
   /// screen size. Defaults to 3.
+  ///
+  /// Interpolates as a step, so a theme animation moves the row from overlaid
+  /// to below partway through rather than sliding it.
   final int? maxOverlaidControls;
 
   /// The width of the join button at [StreamScreenSize.smallMaxWidth] and
