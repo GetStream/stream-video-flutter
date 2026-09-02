@@ -62,12 +62,16 @@ extension LobbyDeviceMenus on StreamMediaDevicesController {
   }) => [
     // "System default" means "let the platform pick". A section is only built
     // where there is something to pick from, so this is never the lone entry
-    // in a menu that cannot do anything.
-    StreamMenuOption(
-      label: context.translations.lobbySystemDefaultDevice,
-      selected: selected == null,
-      onSelected: () => onSelected(null),
-    ),
+    // in a menu that cannot do anything — and it is left out entirely where
+    // the controller has no way to hand the choice back, as an in-call one
+    // does not, rather than offering a row that moves the radio button and
+    // changes nothing.
+    if (supportsSystemDefault)
+      StreamMenuOption(
+        label: context.translations.lobbySystemDefaultDevice,
+        selected: selected == null,
+        onSelected: () => onSelected(null),
+      ),
     for (final device in devices)
       StreamMenuOption(
         // A device the platform will not name is still pickable; its id is
