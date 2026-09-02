@@ -336,7 +336,12 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
                   onTap: option.onSelected == null
                       ? null
                       : () => _select(option),
-                  enabled: option.onSelected != null,
+                  // Deliberately left enabled for a row with nothing to
+                  // press. `enabled: false` is the design system's
+                  // *unavailable* look — it paints the label in
+                  // `textDisabled` — and a list that only shows something,
+                  // like the people already in a call, would render every
+                  // name as though that person were unavailable.
                   leading: _leadingOf(option),
                   label: Text(
                     option.label,
@@ -406,7 +411,9 @@ class _MenuSheet extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       selected: option.selected ?? false,
-                      enabled: option.onSelected != null,
+                      // See the anchored rows: enabled is the look, not the
+                      // interactivity. A null onTap already makes the row
+                      // inert and gives it a non-interactive cursor.
                       onTap: option.onSelected == null
                           ? null
                           : () => onSelected(option),
