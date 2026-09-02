@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import 'call_button_badge.dart';
 
 /// A round icon button for a call feature that is off by default and prominent
 /// while it is on: screen sharing, closed captions, recording, and the members
