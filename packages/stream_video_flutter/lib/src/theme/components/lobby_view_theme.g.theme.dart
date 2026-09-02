@@ -104,12 +104,16 @@ mixin _$StreamLobbyViewStyle {
         b.previewTileStyle,
         t,
       ),
-      smallPreviewAspectRatio: lerpDouble$(
-        a.smallPreviewAspectRatio,
-        b.smallPreviewAspectRatio,
+      compactPreviewAspectRatio: lerpDouble$(
+        a.compactPreviewAspectRatio,
+        b.compactPreviewAspectRatio,
         t,
       ),
-      largePreviewSize: Size.lerp(a.largePreviewSize, b.largePreviewSize, t),
+      expandedPreviewSize: Size.lerp(
+        a.expandedPreviewSize,
+        b.expandedPreviewSize,
+        t,
+      ),
       maxOverlaidControls: t < 0.5
           ? a.maxOverlaidControls
           : b.maxOverlaidControls,
@@ -119,8 +123,8 @@ mixin _$StreamLobbyViewStyle {
 
   StreamLobbyViewStyle copyWith({
     StreamParticipantTileStyle? previewTileStyle,
-    double? smallPreviewAspectRatio,
-    Size? largePreviewSize,
+    double? compactPreviewAspectRatio,
+    Size? expandedPreviewSize,
     int? maxOverlaidControls,
     double? joinButtonWidth,
   }) {
@@ -128,9 +132,9 @@ mixin _$StreamLobbyViewStyle {
 
     return StreamLobbyViewStyle(
       previewTileStyle: previewTileStyle ?? _this.previewTileStyle,
-      smallPreviewAspectRatio:
-          smallPreviewAspectRatio ?? _this.smallPreviewAspectRatio,
-      largePreviewSize: largePreviewSize ?? _this.largePreviewSize,
+      compactPreviewAspectRatio:
+          compactPreviewAspectRatio ?? _this.compactPreviewAspectRatio,
+      expandedPreviewSize: expandedPreviewSize ?? _this.expandedPreviewSize,
       maxOverlaidControls: maxOverlaidControls ?? _this.maxOverlaidControls,
       joinButtonWidth: joinButtonWidth ?? _this.joinButtonWidth,
     );
@@ -151,8 +155,8 @@ mixin _$StreamLobbyViewStyle {
       previewTileStyle:
           _this.previewTileStyle?.merge(other.previewTileStyle) ??
           other.previewTileStyle,
-      smallPreviewAspectRatio: other.smallPreviewAspectRatio,
-      largePreviewSize: other.largePreviewSize,
+      compactPreviewAspectRatio: other.compactPreviewAspectRatio,
+      expandedPreviewSize: other.expandedPreviewSize,
       maxOverlaidControls: other.maxOverlaidControls,
       joinButtonWidth: other.joinButtonWidth,
     );
@@ -172,8 +176,8 @@ mixin _$StreamLobbyViewStyle {
     final _other = (other as StreamLobbyViewStyle);
 
     return _other.previewTileStyle == _this.previewTileStyle &&
-        _other.smallPreviewAspectRatio == _this.smallPreviewAspectRatio &&
-        _other.largePreviewSize == _this.largePreviewSize &&
+        _other.compactPreviewAspectRatio == _this.compactPreviewAspectRatio &&
+        _other.expandedPreviewSize == _this.expandedPreviewSize &&
         _other.maxOverlaidControls == _this.maxOverlaidControls &&
         _other.joinButtonWidth == _this.joinButtonWidth;
   }
@@ -185,8 +189,8 @@ mixin _$StreamLobbyViewStyle {
     return Object.hash(
       runtimeType,
       _this.previewTileStyle,
-      _this.smallPreviewAspectRatio,
-      _this.largePreviewSize,
+      _this.compactPreviewAspectRatio,
+      _this.expandedPreviewSize,
       _this.maxOverlaidControls,
       _this.joinButtonWidth,
     );
