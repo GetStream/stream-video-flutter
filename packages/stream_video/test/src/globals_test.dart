@@ -12,9 +12,8 @@ void main() {
     final pubspec = Pubspec.parse(File(pubspecPath).readAsStringSync());
     final version = pubspec.version!;
 
-    expect(
-      streamVideoVersion,
-      '${version.major}.${version.minor}.${version.patch}',
-    );
+    // The full version, including any pre-release suffix (e.g. `2.0.0-alpha`),
+    // since that is what `tools/generate_version.dart` writes into globals.dart.
+    expect(streamVideoVersion, version.toString());
   });
 }
