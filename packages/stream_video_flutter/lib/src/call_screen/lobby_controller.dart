@@ -20,9 +20,8 @@ import '../../stream_video_flutter.dart';
 /// previewing rather than opening a second pair.
 /// Opens the lobby's microphone track.
 ///
-/// Injectable because [RtcLocalTrack]'s factories are static, which otherwise
-/// leaves everything downstream of an open device — the hand-over to the call
-/// included — impossible to test.
+/// Injectable because [RtcLocalTrack]'s factories are static, so a test has no
+/// other way to produce a track.
 @visibleForTesting
 typedef LobbyAudioTrackOpener = Future<RtcLocalAudioTrack> Function();
 
@@ -84,13 +83,12 @@ class StreamLobbyController extends ChangeNotifier {
 
   /// Set by [dispose]. Every `await` here outlives the widget that owns this
   /// controller, so anything resuming after one has to check it: notifying a
-  /// disposed [ChangeNotifier] throws, and a track that lands late belongs to
-  /// nobody and would otherwise keep the hardware open.
+  /// disposed [ChangeNotifier] throws, and a track that lands late has no
+  /// owner left to stop it.
   bool _disposed = false;
 
-  /// Whether a track is already being opened. Opening takes as long as the
-  /// permission prompt is up, so without this a second tap creates a second
-  /// track and orphans the first.
+  /// Whether a track is already being opened. Opening lasts as long as the
+  /// permission prompt is up, which is ample time for a second tap.
   bool _openingMicrophone = false;
   bool _openingCamera = false;
 
@@ -181,8 +179,7 @@ class StreamLobbyController extends ChangeNotifier {
   ///
   /// Device labels only arrive once `getUserMedia` has succeeded, so a
   /// microphone picker has nothing to show before this is true. Not a
-  /// permission check: it says the device has been opened, which permission
-  /// only makes possible. Nothing here asks the platform what it would grant.
+  /// permission check — nothing here asks the platform what it would grant.
   bool get hasOpenedMicrophone => _hasOpenedMicrophone;
   bool _hasOpenedMicrophone = false;
 
@@ -367,11 +364,9 @@ class StreamLobbyController extends ChangeNotifier {
 
   /// Opens whatever the call says should be on when someone arrives.
   ///
-  /// Driven off the fetch rather than a deferred frame. The settings arrive
-  /// with the call's metadata, which is a network round trip away, so reading
-  /// `call.state` a microtask after construction only ever saw the
-  /// `const CallSettings()` a `CallState` starts with — both devices on — and
-  /// a call configured `micDefaultOn: false` had its microphone opened anyway.
+  /// Called from the fetch, because that is where the settings arrive: a
+  /// `CallState` starts out carrying `const CallSettings()`, whose defaults
+  /// are both on, until the call's metadata lands.
   void _applyCallDefaults(CallSettings settings) {
     if (_disposed || _callDefaultsApplied) return;
     _callDefaultsApplied = true;

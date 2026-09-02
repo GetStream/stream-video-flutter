@@ -57,8 +57,7 @@ class StreamLobbyView extends StatefulWidget {
   /// Creates a lobby driven by [controller], which stays the caller's to
   /// dispose.
   ///
-  /// The call comes from the controller, so there is no second one to
-  /// disagree with it.
+  /// [call] comes from the controller.
   const StreamLobbyView.withController({
     super.key,
     required StreamLobbyController this.controller,
@@ -128,10 +127,9 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
   void didUpdateWidget(StreamLobbyView oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Handed a different call, or handed a controller where it had been making
-    // its own, the lobby has to let go of the one it owns — otherwise the
-    // preview keeps running against the old call until this widget is
-    // disposed. A controller whose tracks were handed over leaves them alone.
+    // A controller this lobby made is only good for the call it was made
+    // for, and is redundant once one is supplied. Disposing it stops the
+    // preview; a controller whose tracks were handed over keeps them.
     final stale = widget.controller != null || widget._call != oldWidget._call;
     if (_ownedController case final owned? when stale) {
       owned.dispose();
