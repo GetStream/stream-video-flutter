@@ -310,7 +310,7 @@ void main() {
 
       expect(controller.cameraEnabled, isFalse);
       expect(controller.cameraError, isA<StateError>());
-      expect(controller.hasCameraPermission, isFalse);
+      expect(controller.hasOpenedCamera, isFalse);
     });
 
     test('records why the microphone would not open', () async {
@@ -321,7 +321,7 @@ void main() {
 
       expect(controller.microphoneEnabled, isFalse);
       expect(controller.microphoneError, isA<StateError>());
-      expect(controller.hasMicrophonePermission, isFalse);
+      expect(controller.hasOpenedMicrophone, isFalse);
     });
 
     group('an unusable device', () {
