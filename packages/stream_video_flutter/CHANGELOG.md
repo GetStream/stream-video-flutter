@@ -2,12 +2,14 @@
 
 ### ✅ Added
 
-- Split the call control button in two, matching the design system. `CallControlButton` carries the three tones a control can have — `CallControlState.positive`, `.neutral`, `.negative` — and covers the microphone and camera toggles, answering, declining and leaving. `CallFeatureButton` carries a `selected` flag and covers a feature that is off by default and prominent when on: screen sharing, closed captions, recording, and the members and chat panels. The split exists because the two paint differently: a turned-off control is destructive red, while a selected feature is accent blue.
+- `CallControlButton` takes a `tone`, not a `state`, and the enum behind it is `CallControlTone`. The old name read as "is this on", which is exactly what a control's tone is *not* about — that is `CallFeatureButton.selected`.
+
+- Split the call control button in two, matching the design system. `CallControlButton` carries the three tones a control can have — `CallControlTone.positive`, `.neutral`, `.negative` — and covers the microphone and camera toggles, answering, declining and leaving. `CallFeatureButton` carries a `selected` flag and covers a feature that is off by default and prominent when on: screen sharing, closed captions, recording, and the members and chat panels. The split exists because the two paint differently: a turned-off control is destructive red, while a selected feature is accent blue.
 
   ```dart
   CallControlButton(
     icon: Icon(context.streamIcons.voiceFill),
-    state: isMuted ? .negative : .neutral,
+    tone: isMuted ? .negative : .neutral,
     onPressed: () => call.setMicrophoneEnabled(enabled: isMuted),
   )
 
@@ -135,7 +137,7 @@
 
 ### ⚠️ Deprecated
 
-- `CallControlOption` is deprecated in favour of `CallControlButton` and `CallFeatureButton`, and has been restored to the shape it has in the last release: it takes `iconColor`, `disabledIconColor`, `elevation`, `backgroundColor`, `disabledBackgroundColor`, `shape` and `padding`, and draws an `ElevatedButton` styled from `StreamCallControlsTheme`. Code written against the released SDK keeps compiling and keeps looking the way it did. Migrating is manual rather than a `dart fix`: neither replacement takes per-instance colours, so a rename would drop whatever the call site passed. Map `state`-free call sites and the old `on` state onto `CallControlButton(state: .neutral)`, `off` onto `.negative`, `positive` onto `.positive` for a control or `CallFeatureButton(selected: true)` for a feature, `negative` onto `.negative`, and `disabled` onto `CallControlButton(state: .negative, showErrorBadge: true)`.
+- `CallControlOption` is deprecated in favour of `CallControlButton` and `CallFeatureButton`, and has been restored to the shape it has in the last release: it takes `iconColor`, `disabledIconColor`, `elevation`, `backgroundColor`, `disabledBackgroundColor`, `shape` and `padding`, and draws an `ElevatedButton` styled from `StreamCallControlsTheme`. Code written against the released SDK keeps compiling and keeps looking the way it did. Migrating is manual rather than a `dart fix`: neither replacement takes per-instance colours, so a rename would drop whatever the call site passed. Map `state`-free call sites and the old `on` state onto `CallControlButton(tone: .neutral)`, `off` onto `.negative`, `positive` onto `.positive` for a control or `CallFeatureButton(selected: true)` for a feature, `negative` onto `.negative`, and `disabled` onto `CallControlButton(tone: .negative, showErrorBadge: true)`.
 - `StreamCallParticipantThemeData` and `StreamCallParticipantTheme` are deprecated. Their properties now live in `StreamParticipantTileThemeData`, `StreamParticipantLabelThemeData`, `StreamConnectionQualityIndicatorThemeData` and `StreamCallParticipantsGridThemeData`. A theme passed to `StreamVideoTheme(callParticipantTheme: ...)` is still applied — in full, so a tile styled the old way keeps looking the way it did. Stop passing it to pick up the redesign, and pass a theme in the new shape to replace it outright. The translation runs in that factory only: setting `callParticipantTheme` through `copyWith`, or wrapping a subtree in the `StreamCallParticipantTheme` widget, changes the field without restyling anything.
 - `StreamCallParticipant` is deprecated in favour of `StreamParticipantTile`, matching the component name in the design system. It keeps its own full parameter list and now only wraps `DefaultStreamParticipantTile`. Swapping the name is a manual migration rather than a `dart fix`: `StreamParticipantTile` replaces the visual parameters with a single `style:` (see the Breaking entry below), so a rename would drop whatever a call site passed. `dart fix --apply` does still strip the parameters that no longer have any effect.
 

@@ -8,7 +8,7 @@ import '../../stream_video_flutter.dart';
 /// camera, answering, declining, hanging up. Its tone says what pressing it
 /// means, not whether some feature is switched on: see [CallFeatureButton] for
 /// that.
-enum CallControlState {
+enum CallControlTone {
   /// An affirmative action. Answering a call.
   positive,
 
@@ -32,7 +32,7 @@ enum CallControlState {
 /// ```dart
 /// CallControlButton(
 ///   icon: Icon(context.streamIcons.voiceFill),
-///   state: isMuted ? .negative : .neutral,
+///   tone: isMuted ? .negative : .neutral,
 ///   onPressed: () => call.setMicrophoneEnabled(enabled: isMuted),
 /// )
 /// ```
@@ -42,7 +42,7 @@ class CallControlButton extends StatelessWidget {
   const CallControlButton({
     super.key,
     required this.icon,
-    this.state = .neutral,
+    this.tone = .neutral,
     this.showErrorBadge = false,
     this.onPressed,
     this.tooltip,
@@ -52,13 +52,13 @@ class CallControlButton extends StatelessWidget {
   final Widget icon;
 
   /// What pressing this button means.
-  final CallControlState state;
+  final CallControlTone tone;
 
   /// Whether to draw an error badge on the button's top-end corner.
   ///
   /// This marks a control the user should look at — a microphone permission
   /// that was refused, a camera that failed to start — and is independent of
-  /// [state] and of whether the button can be pressed. A button that simply
+  /// [tone] and of whether the button can be pressed. A button that simply
   /// cannot be used right now takes a null [onPressed] instead.
   final bool showErrorBadge;
 
@@ -90,7 +90,7 @@ class CallControlButton extends StatelessWidget {
           icon: icon,
           onPressed: onPressed,
           tooltip: tooltip,
-          style: switch (state) {
+          style: switch (tone) {
             .positive => .primary,
             .neutral => .secondary,
             .negative => .destructive,

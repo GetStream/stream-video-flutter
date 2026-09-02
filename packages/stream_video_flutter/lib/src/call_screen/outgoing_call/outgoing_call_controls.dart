@@ -45,21 +45,21 @@ class OutgoingCallControls extends StatelessWidget {
                 icon: Icon(
                   isMicrophoneEnabled ? icons.voiceFill : icons.voiceOffFill,
                 ),
-                state: isMicrophoneEnabled ? .neutral : .negative,
+                tone: isMicrophoneEnabled ? .neutral : .negative,
                 onPressed: onMicrophoneTap,
               ),
               CallControlButton(
                 icon: Icon(
                   isCameraEnabled ? icons.videoFill : icons.videoOffFill,
                 ),
-                state: isCameraEnabled ? .neutral : .negative,
+                tone: isCameraEnabled ? .neutral : .negative,
                 onPressed: onCameraTap,
               ),
             ],
           ),
           CallControlButton(
             icon: Icon(icons.phoneDownFill),
-            state: .negative,
+            tone: .negative,
             onPressed: onCancelCallTap,
           ),
           const SizedBox(

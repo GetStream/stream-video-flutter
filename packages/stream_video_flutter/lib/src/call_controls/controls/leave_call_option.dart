@@ -27,7 +27,7 @@ class LeaveCallOption extends StatelessWidget {
   Widget build(BuildContext context) {
     return CallControlButton(
       icon: Icon(icon ?? context.streamIcons.phoneDownFill),
-      state: .negative,
+      tone: .negative,
       onPressed: () {
         if (onLeaveCallTap != null) {
           onLeaveCallTap!();
