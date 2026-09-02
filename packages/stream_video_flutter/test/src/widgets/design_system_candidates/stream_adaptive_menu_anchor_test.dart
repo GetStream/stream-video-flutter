@@ -300,6 +300,42 @@ void main() {
       });
     }
   });
+
+  testWidgets('draws no heading over a section with no rows', (tester) async {
+    // The type permits an empty section, so every caller had to remember to
+    // filter one out; the anchor drops its heading itself now.
+    await tester.pumpWidget(
+      const TestWrapper(
+        child: _Menu(
+          useSheet: false,
+          sections: [
+            StreamMenuSection(heading: 'Speaker', options: []),
+            StreamMenuSection(
+              heading: 'Microphone',
+              options: [StreamMenuOption(label: 'Jabra Evolve2 65')],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Speaker'), findsNothing);
+    expect(find.text('Microphone'), findsOneWidget);
+  });
+
+  test('says when a set of sections has nothing to offer', () {
+    expect(const [StreamMenuSection(options: [])].hasNoOptions, isTrue);
+    expect(
+      const [
+        StreamMenuSection(options: []),
+        StreamMenuSection(options: [StreamMenuOption(label: 'Headset')]),
+      ].hasNoOptions,
+      isFalse,
+    );
+  });
 }
 
 /// An anchor over two sections, whose button reports the handle's open state.

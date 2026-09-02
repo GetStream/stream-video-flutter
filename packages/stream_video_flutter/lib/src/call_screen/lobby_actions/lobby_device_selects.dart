@@ -79,7 +79,7 @@ class _DeviceSelect extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Nothing to pick from, so the field has nothing to open.
-    final noChoice = sections.every((section) => section.options.isEmpty);
+    final noChoice = sections.hasNoOptions;
 
     return StreamAdaptiveMenuAnchor(
       title: title,

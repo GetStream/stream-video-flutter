@@ -26,12 +26,20 @@ class StreamLobbyScope extends InheritedNotifier<StreamLobbyController> {
   /// error: a lobby action is only meaningful inside one.
   static StreamLobbyController of(BuildContext context) {
     final controller = maybeOf(context);
-    assert(
-      controller != null,
-      'No StreamLobbyScope found above this widget. Lobby actions read their '
-      'state from the controller StreamLobbyView installs, so they can only '
-      'be used inside one.',
-    );
-    return controller!;
+    // Thrown rather than asserted, so the explanation survives a release
+    // build: an assert is compiled out there, leaving `controller!` to fail
+    // as a bare null-check with nothing to say why.
+    if (controller == null) {
+      throw FlutterError.fromParts([
+        ErrorSummary('No StreamLobbyScope found above this widget.'),
+        ErrorDescription(
+          'Lobby actions read their state from the controller '
+          'StreamLobbyView installs, so they can only be used inside one.',
+        ),
+        context.describeElement('The widget that asked for it was'),
+      ]);
+    }
+
+    return controller;
   }
 }

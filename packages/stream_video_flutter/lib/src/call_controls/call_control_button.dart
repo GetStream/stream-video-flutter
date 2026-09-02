@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import 'call_button_badge.dart';
 
 /// The tone of a [CallControlButton].
 ///
@@ -72,11 +73,28 @@ class CallControlButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final button = CallButtonBadge(
+      showErrorBadge: showErrorBadge,
+      child: StreamButton.icon(
+        icon: icon,
+        onPressed: onPressed,
+        tooltip: tooltip,
+        style: switch (tone) {
+          .positive => .primary,
+          .neutral => .secondary,
+          .negative => .destructive,
+        },
+      ),
+    );
+
+    // Only `positive` needs this, and only it gets it: there is no success
+    // button style in the design system, and answering has to read as an
+    // answer rather than as an accent, so the primary background is repainted
+    // for this one button. Wrapping every tone would have overridden the app's
+    // own primary style for buttons that never use it.
+    if (tone != CallControlTone.positive) return button;
+
     return StreamButtonTheme(
-      // There is no success button style in the design system, and `positive`
-      // has to read as an answer rather than as an accent. Repainting the
-      // primary background is the narrowest way to get there without teaching
-      // every app's theme about a fourth style.
       data: .new(
         primary: .new(
           solid: .new(
@@ -84,19 +102,7 @@ class CallControlButton extends StatelessWidget {
           ),
         ),
       ),
-      child: CallButtonBadge(
-        showErrorBadge: showErrorBadge,
-        child: StreamButton.icon(
-          icon: icon,
-          onPressed: onPressed,
-          tooltip: tooltip,
-          style: switch (tone) {
-            .positive => .primary,
-            .neutral => .secondary,
-            .negative => .destructive,
-          },
-        ),
-      ),
+      child: button,
     );
   }
 }

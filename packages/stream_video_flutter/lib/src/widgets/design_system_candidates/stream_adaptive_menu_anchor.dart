@@ -72,11 +72,21 @@ class StreamMenuSection {
   final List<StreamMenuOption> options;
 }
 
+/// Whether a menu built from these sections has anything to offer.
+///
+/// Every caller has to know this — a caret or a field with nothing to open is
+/// disabled rather than opening an empty popup — so it lives here rather than
+/// being recomputed at each call site.
+extension StreamMenuSectionsX on Iterable<StreamMenuSection> {
+  /// True when no section has a row in it.
+  bool get hasNoOptions => every((section) => section.options.isEmpty);
+}
+
 /// Opens and closes the menu a [StreamAdaptiveMenuAnchor] hosts.
 ///
 /// Handed to the anchor's builder so the same builder drives both
 /// presentations without knowing which one it got.
-abstract class StreamMenuHandle {
+abstract interface class StreamMenuHandle {
   /// Whether the menu is currently showing.
   bool get isOpen;
 
@@ -329,8 +339,10 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
         sections: [
           for (final section in widget.sections)
             [
-              if (section.heading case final heading?)
-                StreamContextMenuHeading(label: Text(heading)),
+              // A heading with no rows under it would label nothing.
+              if (section.options.isNotEmpty)
+                if (section.heading case final heading?)
+                  StreamContextMenuHeading(label: Text(heading)),
               for (final option in section.options)
                 StreamContextMenuAction<void>(
                   onTap: option.onSelected == null
@@ -388,16 +400,18 @@ class _MenuSheet extends StatelessWidget {
             shrinkWrap: true,
             children: [
               for (final section in sections) ...[
-                if (section.heading case final heading?)
-                  Padding(
-                    // Everything in the sheet is inset by spacing.xxs so a
-                    // selected row's rounded fill has room to breathe rather
-                    // than running into the sheet's edges. A heading insets
-                    // itself by spacing.xs and a list tile by spacing.sm, so the
-                    // heading takes the larger outer pad and the two line up.
-                    padding: EdgeInsets.symmetric(horizontal: spacing.xs),
-                    child: StreamContextMenuHeading(label: Text(heading)),
-                  ),
+                // See the anchored rows: a heading needs rows under it.
+                if (section.options.isNotEmpty)
+                  if (section.heading case final heading?)
+                    Padding(
+                      // Everything in the sheet is inset by spacing.xxs so a
+                      // selected row's rounded fill has room to breathe rather
+                      // than running into the sheet's edges. A heading insets
+                      // itself by spacing.xs and a list tile by spacing.sm, so the
+                      // heading takes the larger outer pad and the two line up.
+                      padding: EdgeInsets.symmetric(horizontal: spacing.xs),
+                      child: StreamContextMenuHeading(label: Text(heading)),
+                    ),
                 for (final option in section.options)
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
