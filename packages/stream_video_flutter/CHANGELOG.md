@@ -130,7 +130,6 @@
 
 - The lobby no longer lists someone twice. `getOrCreate` returns a snapshot of the session while the event subscription is already live, so a join already reflected in that snapshot still arrives as a `ParticipantJoined` event — and the lobby appended it blindly. Participants are now upserted by session id, which leaves a genuine second session of the same user (a phone and a laptop) listed separately, as it should be. A join event for the local user is ignored, matching the snapshot, which always filtered them out.
 
-- Documented on `StreamLobbyVideo.onCameraTrackSet` and `onMicrophoneTrackSet` that the track becomes the caller's to stop. The widget deliberately does not stop tracks it has handed over: they may be passed to the call as a `TrackOption.provided`, and would otherwise be killed as the lobby is left.
 
 ### ⚠️ Deprecated
 
@@ -164,8 +163,7 @@
 - `StreamCallParticipantThemeData.copyWith` accepted `showDominantSpeakerBorder`, `dominantSpeakerBorderThickness` and `dominantSpeakerBorderColor` for fields named `showSpeakerBorder`, `speakerBorderThickness` and `speakerBorderColor`, so the field names — the only names discoverable from the class — were a compile error. The parameters now match the fields. Run `dart fix --apply`.
 - `StreamCallParticipantThemeData.merge` dropped `pausedVideoIndicatorColor`, and `StreamVideoTheme.merge` dropped `callControlsTheme` and `localVideoTheme`. All three are fixed, so themes that set those values now take effect where they previously did not.
 - Requires the `StreamColorScheme.backgroundOverlayDarkStrong` color added in `stream_core_flutter`.
-- Call control buttons (`CallControlOption` and the widgets built on it) are now rendered with the shared `StreamButton` from `stream_core_flutter` instead of a raw Material `ElevatedButton`, and are styled by state rather than by colour. `CallControlOption` now takes a `state` — `CallControlState.on` (the default), `off`, `positive`, `negative` or `disabled` — next to `icon` and `onPressed`, and its per-button styling parameters (`iconColor`, `disabledIconColor`, `backgroundColor`, `disabledBackgroundColor`, `elevation`, `shape`, `padding`) are removed. Appearance now comes from the button styling in `StreamTheme` rather than from `StreamCallControlsThemeData`'s `optionElevation`/`optionShape`/`optionPadding` and `optionOff*` colours, so controls that relied on those look different: every control is now the same size — the accept/decline buttons of the incoming and outgoing call controls are no longer enlarged — an `off` control uses the destructive style instead of a custom colour, and a `disabled` control additionally shows an error badge.
-- The colour parameters on the built-in toggle options — `enabled*IconColor`, `disabled*IconColor`, `enabled*BackgroundColor` and `disabled*BackgroundColor` on `ToggleCameraOption`, `ToggleMicrophoneOption`, `ToggleRecordingOption`, `ToggleClosedCaptionsOption` and `ToggleScreenShareOption` — are still accepted but no longer have any effect. Each option now passes a `CallControlState` down instead, so its colours come from the theme's button styling.
+- Call controls are now rendered with the shared `StreamButton` from `stream_core_flutter` instead of a raw Material `ElevatedButton`, and are styled by state rather than by colour. Appearance comes from the button styling in `StreamTheme` rather than from `StreamCallControlsThemeData`'s `optionElevation`/`optionShape`/`optionPadding` and `optionOff*` colours, so controls that relied on those look different, and every control is now the same size — the accept/decline buttons of the incoming and outgoing call controls are no longer enlarged. See the `CallControlButton` / `CallFeatureButton` entries above for what replaces `CallControlOption`.
 - `StreamCallContentThemeData.callContentBackgroundColor` is now nullable and defaults to `null`, which resolves to the design system's `backgroundApp` colour instead of the hard-coded `0xFF272A30`. Set it explicitly to keep a fixed background.
 - `CallAppBar` now defaults to `elevation: 0` (was `1`), and its background falls back to the design system's `backgroundApp` colour instead of `StreamVideoTheme`'s `colorTheme.barsBg`.
 - You must now provide a `StreamTheme` to your app for the Stream Video UI components to be styled correctly. Add it as a `ThemeData` extension on the `MaterialApp` you wrap the Stream Video widgets with:
@@ -190,7 +188,6 @@
 
 ### 🔄 Changed
 
-- The lobby preview (`StreamLobbyVideo`) now scales with the space it is given instead of being a fixed 280px-tall card in a 420px-wide column: it allows up to 640px of width and derives its height from the available width, capped at 360px.
 - `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
 - Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.
 
