@@ -2,6 +2,8 @@
 
 ### ✅ Added
 
+- `StreamLobbyController.hasOpenedMicrophone` and `hasOpenedCamera` are what `hasMicrophonePermission` and `hasCameraPermission` are called now. They never asked the platform what it would grant: they say the device has been opened once, which is what makes the platform name it. An integrator wiring a permission prompt off the old name would have got it wrong.
+
 - `CallControlButton` takes a `tone`, not a `state`, and the enum behind it is `CallControlTone`. The old name read as "is this on", which is exactly what a control's tone is *not* about — that is `CallFeatureButton.selected`.
 
 - Split the call control button in two, matching the design system. `CallControlButton` carries the three tones a control can have — `CallControlTone.positive`, `.neutral`, `.negative` — and covers the microphone and camera toggles, answering, declining and leaving. `CallFeatureButton` carries a `selected` flag and covers a feature that is off by default and prominent when on: screen sharing, closed captions, recording, and the members and chat panels. The split exists because the two paint differently: a turned-off control is destructive red, while a selected feature is accent blue.

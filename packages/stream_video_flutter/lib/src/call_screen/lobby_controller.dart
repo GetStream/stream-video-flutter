@@ -169,27 +169,27 @@ class StreamLobbyController extends ChangeNotifier {
   /// user's only way to mute it.
   bool get microphoneMissing =>
       _microphoneTrack == null &&
-      _hasMicrophonePermission &&
+      _hasOpenedMicrophone &&
       devices.audioInputs.isEmpty;
 
   /// Whether the platform reports no camera to open at all. See
   /// [microphoneMissing].
   bool get cameraMissing =>
-      _cameraTrack == null &&
-      _hasCameraPermission &&
-      devices.videoInputs.isEmpty;
+      _cameraTrack == null && _hasOpenedCamera && devices.videoInputs.isEmpty;
 
   /// Whether the microphone has been opened at least once.
   ///
   /// Device labels only arrive once `getUserMedia` has succeeded, so a
-  /// microphone picker has nothing to show before this is true.
-  bool get hasMicrophonePermission => _hasMicrophonePermission;
-  bool _hasMicrophonePermission = false;
+  /// microphone picker has nothing to show before this is true. Not a
+  /// permission check: it says the device has been opened, which permission
+  /// only makes possible. Nothing here asks the platform what it would grant.
+  bool get hasOpenedMicrophone => _hasOpenedMicrophone;
+  bool _hasOpenedMicrophone = false;
 
   /// Whether the camera has been opened at least once. See
-  /// [hasMicrophonePermission].
-  bool get hasCameraPermission => _hasCameraPermission;
-  bool _hasCameraPermission = false;
+  /// [hasOpenedMicrophone].
+  bool get hasOpenedCamera => _hasOpenedCamera;
+  bool _hasOpenedCamera = false;
 
   /// The people already in the call, oldest first, excluding the local user.
   List<CallParticipant> get participants => _participants;
@@ -284,7 +284,7 @@ class StreamLobbyController extends ChangeNotifier {
 
       _microphoneTrack = track;
       _microphoneError = null;
-      _hasMicrophonePermission = true;
+      _hasOpenedMicrophone = true;
     } catch (e, stk) {
       // The stack trace is what separates a refused permission from a device
       // another app is holding, so it is worth keeping.
@@ -320,7 +320,7 @@ class StreamLobbyController extends ChangeNotifier {
 
       _cameraTrack = track;
       _cameraError = null;
-      _hasCameraPermission = true;
+      _hasOpenedCamera = true;
     } catch (e, stk) {
       _logger.e(() => 'Error creating camera track: $e\n$stk');
       _cameraError = e;

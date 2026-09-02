@@ -19,15 +19,15 @@ class StreamLobbyMicrophoneSelect extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = StreamLobbyScope.of(context);
     final translations = context.translations;
-    final allowed = controller.hasMicrophonePermission;
+    final opened = controller.hasOpenedMicrophone;
 
     return _DeviceSelect(
       title: translations.lobbyMicrophoneSection,
       sections: controller.devices.audioSections(context),
       icon: context.streamIcons.voiceFill,
       value: controller.devices.selectedAudioInput?.label,
-      enabled: allowed,
-      tooltip: allowed
+      enabled: opened,
+      tooltip: opened
           ? translations.lobbySelectAudioDevices
           : translations.lobbyMicrophonePermissionRequired,
     );
@@ -43,15 +43,15 @@ class StreamLobbyCameraSelect extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = StreamLobbyScope.of(context);
     final translations = context.translations;
-    final allowed = controller.hasCameraPermission;
+    final opened = controller.hasOpenedCamera;
 
     return _DeviceSelect(
       title: translations.lobbyCameraSection,
       sections: controller.devices.videoSections(context),
       icon: context.streamIcons.videoFill,
       value: controller.devices.selectedVideoInput?.label,
-      enabled: allowed,
-      tooltip: allowed
+      enabled: opened,
+      tooltip: opened
           ? translations.lobbySelectVideoDevice
           : translations.lobbyCameraPermissionRequired,
     );
