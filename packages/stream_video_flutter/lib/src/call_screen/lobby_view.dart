@@ -42,6 +42,11 @@ typedef StreamLobbyJoinCallback =
 /// defaults to `LobbyActions.simple()` at every width, and choosing a richer
 /// preset for a roomier window is the host's call.
 ///
+/// A row of more than [StreamLobbyViewStyle.maxOverlaidControls] sits below
+/// the preview at any width: the overlaid row is centred on a preview whose
+/// bottom-start corner already carries the participant label, so a longer one
+/// runs into it.
+///
 /// This builds no [Scaffold] of its own, so it can be embedded in a screen
 /// that already has one. Wrap it in whatever chrome the app needs.
 class StreamLobbyView extends StatefulWidget {
@@ -84,7 +89,10 @@ class StreamLobbyView extends StatefulWidget {
   /// The heading above the preview. Defaults to a localized string.
   final Widget? title;
 
-  /// The line below [title]. Defaults to a localized string.
+  /// An optional line below [title].
+  ///
+  /// Nothing is drawn when null: the design puts a single line under the icon,
+  /// so a subtitle appears only where a call site asks for one.
   final Widget? subtitle;
 
   /// The label of the join button. Defaults to a localized string.
@@ -242,7 +250,6 @@ class _LobbyBody extends StatelessWidget {
                   // of the participant label's toolbar band along the bottom.
                   if (overlayControls && controlRow != null)
                     Padding(
-                      // Clear of the participant label's toolbar band.
                       padding: EdgeInsets.only(bottom: spacing.md),
                       child: controlRow,
                     ),

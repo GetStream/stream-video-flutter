@@ -25,8 +25,9 @@ extension LobbyDeviceMenus on StreamMediaDevicesController {
             onSelected: selectAudioInput,
           ),
         ),
-      // Platforms that route audio themselves (iOS, Android) report no output
-      // devices; there is nothing to pick from there.
+      // Android routes audio itself and names no outputs; iOS names only the
+      // earpiece RtcMediaDeviceNotifier synthesises. Built only where there is
+      // something to pick from — see StreamMediaDevicesController.audioOutputs.
       if (audioOutputs.isNotEmpty)
         StreamMenuSection(
           heading: translations.lobbySpeakerSection,
