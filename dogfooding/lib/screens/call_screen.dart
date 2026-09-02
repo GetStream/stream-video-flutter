@@ -124,6 +124,48 @@ class _CallScreenState extends State<CallScreen> {
     super.dispose();
   }
 
+  /// Turns the microphone on or off, saying so when the call refuses.
+  ///
+  /// `setMicrophoneEnabled` returns a `Result`, and dropping it left the
+  /// button visibly doing nothing: its state comes from the call's own
+  /// participant state, which does not change on failure. A viewer without
+  /// `sendAudio` got no button movement, no message and no log.
+  Future<void> _setMicrophoneEnabled({required bool enabled}) async {
+    final message = 'Could not turn the microphone ${enabled ? 'on' : 'off'}';
+    final result = await widget.call.setMicrophoneEnabled(
+      enabled: enabled,
+      // Keeping the track alive on mute is what speaking-while-muted
+      // detection needs on iOS and macOS. Everywhere else the default
+      // release is right.
+      stopTrackOnMute: CurrentPlatform.isIos || CurrentPlatform.isMacOS
+          ? false
+          : null,
+    );
+    result.fold(
+      onSuccess: (_) {},
+      onFailure: (error, _) => _reportDeviceFailure(message, error),
+    );
+  }
+
+  /// Turns the camera on or off. See [_setMicrophoneEnabled].
+  Future<void> _setCameraEnabled({required bool enabled}) async {
+    final message = 'Could not turn the camera ${enabled ? 'on' : 'off'}';
+    final result = await widget.call.setCameraEnabled(enabled: enabled);
+    result.fold(
+      onSuccess: (_) {},
+      onFailure: (error, _) => _reportDeviceFailure(message, error),
+    );
+  }
+
+  void _reportDeviceFailure(String message, Object error) {
+    debugPrint('$message: $error');
+    if (!mounted) return;
+
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+    );
+  }
+
   /// Whether the platform has looked and found nothing.
   ///
   /// Guarded on the enumeration having happened at all: until then the list is
@@ -390,17 +432,8 @@ class _CallScreenState extends State<CallScreen> {
                                       onPressed:
                                           _noDeviceFor(_devices.audioInputs)
                                           ? null
-                                          : () => call.setMicrophoneEnabled(
+                                          : () => _setMicrophoneEnabled(
                                               enabled: !enabled,
-                                              // Keep the track alive on mute
-                                              // so speaking-while-muted
-                                              // detection also works on
-                                              // iOS/macOS.
-                                              stopTrackOnMute:
-                                                  CurrentPlatform.isIos ||
-                                                      CurrentPlatform.isMacOS
-                                                  ? false
-                                                  : null,
                                             ),
                                     ),
                               ),
@@ -421,7 +454,7 @@ class _CallScreenState extends State<CallScreen> {
                                       onPressed:
                                           _noDeviceFor(_devices.videoInputs)
                                           ? null
-                                          : () => call.setCameraEnabled(
+                                          : () => _setCameraEnabled(
                                               enabled: !enabled,
                                             ),
                                     ),
