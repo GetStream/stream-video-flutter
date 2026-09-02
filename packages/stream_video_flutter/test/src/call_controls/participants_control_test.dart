@@ -89,4 +89,45 @@ void main() {
 
     expect(tapped, 1);
   });
+
+  // A name is something to read, not something that is unavailable. The
+  // design system's `enabled: false` paints the label in `textDisabled`, so
+  // deriving it from "there is nothing to press" greyed out every person in
+  // the call. Goldens cannot catch this: the CI capture path drops overlays.
+  testWidgets('lists the people without greying their names out', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(find.byType(CallControlButton));
+    await tester.pumpAndSettle();
+
+    final rows = tester
+        .widgetList<StreamContextMenuAction<void>>(
+          find.byType(StreamContextMenuAction<void>),
+        )
+        .toList();
+    expect(rows, hasLength(_participants.length));
+    for (final row in rows) {
+      expect(row.props.enabled, isTrue);
+      // Still inert: there is nothing to pick in a list that only shows.
+      expect(row.props.onTap, isNull);
+    }
+  });
+
+  testWidgets('lists the people in a sheet without greying them out', (
+    tester,
+  ) async {
+    await pump(tester, platform: TargetPlatform.iOS);
+    await tester.tap(find.byType(CallControlButton));
+    await tester.pumpAndSettle();
+
+    final rows = tester
+        .widgetList<StreamListTile>(find.byType(StreamListTile))
+        .toList();
+    expect(rows, hasLength(_participants.length));
+    for (final row in rows) {
+      expect(row.props.enabled, isTrue);
+      expect(row.props.onTap, isNull);
+    }
+  });
 }
