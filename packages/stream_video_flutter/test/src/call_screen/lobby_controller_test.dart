@@ -44,6 +44,7 @@ void main() {
   late StreamController<CoordinatorEvent> events;
   late StreamController<List<RtcMediaDevice>> deviceChanges;
   late Map<String, CallParticipant> sessionParticipants;
+  late CallSettings callSettings;
 
   setUp(() {
     events = StreamController<CoordinatorEvent>.broadcast();
@@ -60,15 +61,15 @@ void main() {
     when(() => video.currentUser).thenReturn(const UserInfo(id: _localUserId));
     when(() => video.events).thenAnswer((_) => events.stream);
 
-    callState = MockCallState();
-    // Neither default is on, so constructing the controller opens no tracks:
-    // RtcLocalTrack's factories are static and cannot be faked.
-    when(() => callState.settings).thenReturn(
-      const CallSettings(
-        audio: StreamAudioSettings(micDefaultOn: false),
-        video: StreamVideoSettings(cameraDefaultOn: false),
-      ),
+    // Neither default is on, so constructing the controller opens no tracks
+    // unless a test asks for it.
+    callSettings = const CallSettings(
+      audio: StreamAudioSettings(micDefaultOn: false),
+      video: StreamVideoSettings(cameraDefaultOn: false),
     );
+
+    callState = MockCallState();
+    when(() => callState.settings).thenReturn(callSettings);
 
     call = MockCall();
     when(() => call.state).thenAnswer(
@@ -80,6 +81,9 @@ void main() {
       when(() => metadata.session).thenReturn(
         CallSessionData(participants: sessionParticipants),
       );
+      // The defaults are applied from the fetched metadata, not from the
+      // state the call starts with, so this is what decides them.
+      when(() => metadata.settings).thenReturn(callSettings);
 
       final data = MockCallCreatedData();
       when(() => data.metadata).thenReturn(metadata);
@@ -374,6 +378,62 @@ void main() {
       });
     });
 
+    group('the call defaults', () {
+      test(
+        'come from the fetched call, not from the state it starts in',
+        () async {
+          // A CallState is constructed with `const CallSettings()`, whose two
+          // defaults are both on, and the real settings only arrive with the
+          // metadata. Reading the state too early opened a microphone on a call
+          // configured to start muted.
+          // Both spelled out: which one wins is the whole point here.
+          // ignore: avoid_redundant_argument_values
+          callSettings = const CallSettings(
+            audio: StreamAudioSettings(micDefaultOn: false),
+            // ignore: avoid_redundant_argument_values
+            video: StreamVideoSettings(cameraDefaultOn: true),
+          );
+          when(() => callState.settings).thenReturn(const CallSettings());
+
+          final tracks = fakeTracks();
+          final controller = build(
+            openMicrophoneTrack: () async => tracks.microphone,
+            openCameraTrack: (_) async => tracks.camera,
+          );
+          await pumpEventQueue();
+
+          expect(controller.microphoneEnabled, isFalse);
+          expect(controller.cameraEnabled, isTrue);
+        },
+      );
+
+      test('fall back to the call state when the fetch fails', () async {
+        when(call.getOrCreate).thenAnswer(
+          (_) async => Result.failure(StateError('offline'), StackTrace.empty),
+        );
+        when(() => callState.settings).thenReturn(
+          const CallSettings(
+            // ignore: avoid_redundant_argument_values
+            audio: StreamAudioSettings(micDefaultOn: true),
+            video: StreamVideoSettings(cameraDefaultOn: false),
+          ),
+        );
+
+        final tracks = fakeTracks();
+        final controller = build(
+          openMicrophoneTrack: () async => tracks.microphone,
+          openCameraTrack: (_) async => tracks.camera,
+        );
+        await pumpEventQueue();
+
+        // A lobby that cannot reach the coordinator is still a lobby.
+        expect(controller.microphoneEnabled, isTrue);
+        expect(controller.cameraEnabled, isFalse);
+        expect(controller.fetchError, isA<StateError>());
+        expect(controller.participants, isEmpty);
+      });
+    });
+
     group('lifecycle', () {
       test(
         'hands the tracks to the call, so disposing the lobby leaves them '
@@ -491,7 +551,7 @@ void main() {
       test(
         'applies the call defaults unless the lobby is left first',
         () async {
-          when(() => callState.settings).thenReturn(const CallSettings());
+          callSettings = const CallSettings();
 
           final tracks = fakeTracks();
           var opens = 0;

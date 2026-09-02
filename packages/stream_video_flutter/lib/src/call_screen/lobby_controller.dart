@@ -59,7 +59,6 @@ class StreamLobbyController extends ChangeNotifier {
 
     _fetchCall();
     _listenEvents();
-    _applyCallDefaults();
   }
 
   late final _logger = taggedLogger(tag: 'SV:LobbyController');
@@ -78,7 +77,7 @@ class StreamLobbyController extends ChangeNotifier {
 
   StreamSubscription<Object>? _fetchSubscription;
   StreamSubscription<Object>? _eventSubscription;
-  Timer? _callDefaultsTimer;
+  bool _callDefaultsApplied = false;
 
   final LobbyAudioTrackOpener? _openMicrophoneTrack;
   final LobbyCameraTrackOpener? _openCameraTrack;
@@ -99,6 +98,15 @@ class StreamLobbyController extends ChangeNotifier {
   RtcLocalCameraTrack? _cameraTrack;
   Object? _microphoneError;
   Object? _cameraError;
+
+  Object? _fetchError;
+
+  /// Why the call could not be fetched, or null.
+  ///
+  /// [participants] is empty while this is set, which is not the same thing
+  /// as an empty call — a host that wants to tell the two apart, or offer a
+  /// retry, reads this.
+  Object? get fetchError => _fetchError;
 
   List<CallParticipant> _participants = const [];
   Map<String, CallUser> _users = {};
@@ -357,18 +365,19 @@ class StreamLobbyController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _applyCallDefaults() {
-    // The call's settings arrive with its state, which is not populated yet
-    // when the controller is constructed. Held in a timer rather than a bare
-    // Future.delayed so that leaving the lobby within the same frame cancels
-    // it instead of opening two devices nobody is left to close.
-    _callDefaultsTimer = Timer(Duration.zero, () {
-      if (_disposed) return;
+  /// Opens whatever the call says should be on when someone arrives.
+  ///
+  /// Driven off the fetch rather than a deferred frame. The settings arrive
+  /// with the call's metadata, which is a network round trip away, so reading
+  /// `call.state` a microtask after construction only ever saw the
+  /// `const CallSettings()` a `CallState` starts with — both devices on — and
+  /// a call configured `micDefaultOn: false` had its microphone opened anyway.
+  void _applyCallDefaults(CallSettings settings) {
+    if (_disposed || _callDefaultsApplied) return;
+    _callDefaultsApplied = true;
 
-      final settings = call.state.value.settings;
-      if (settings.audio.micDefaultOn) unawaited(toggleMicrophone());
-      if (settings.video.cameraDefaultOn) unawaited(toggleCamera());
-    });
+    if (settings.audio.micDefaultOn) unawaited(toggleMicrophone());
+    if (settings.video.cameraDefaultOn) unawaited(toggleCamera());
   }
 
   void _fetchCall() {
@@ -394,10 +403,19 @@ class StreamLobbyController extends ChangeNotifier {
               .where((it) => it.userId != currentUserId)
               .sortedBy((it) => it.joinedAt ?? now)
               .toList();
+          _fetchError = null;
+          _applyCallDefaults(metadata.settings);
           _notify();
         },
         onFailure: (error, stackTrace) {
-          _logger.e(() => '[fetchCall] failed: $error');
+          _logger.e(() => '[fetchCall] failed: $error\n$stackTrace');
+          _fetchError = error;
+          // The call's own settings are unknowable now, so fall back to what
+          // its state carries. A lobby that cannot reach the coordinator is
+          // still a lobby: the user gets a preview and the join button, which
+          // is where the failure will surface properly.
+          _applyCallDefaults(call.state.value.settings);
+          _notify();
         },
       );
     });
@@ -460,7 +478,6 @@ class StreamLobbyController extends ChangeNotifier {
     // Set before anything else: an open already in flight checks this to
     // decide whether the track it is about to produce has an owner.
     _disposed = true;
-    _callDefaultsTimer?.cancel();
     _fetchSubscription?.cancel();
     _eventSubscription?.cancel();
     devices
