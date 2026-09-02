@@ -123,28 +123,53 @@ class StreamLobbyController extends ChangeNotifier {
   /// The last failure opening the camera, or null.
   Object? get cameraError => _cameraError;
 
-  /// Whether the microphone cannot be used at all.
+  /// Whether the microphone is not usable right now.
   ///
-  /// True when opening it failed — permission refused, or nothing to open —
-  /// and when the platform has stopped reporting any microphone since. A
-  /// control for an unavailable device is drawn disabled with an error badge
-  /// rather than in the state a deliberate mute gets, so a permission problem
-  /// is not mistaken for a choice the user made. Joining stays possible with
-  /// the device disabled.
+  /// True when opening it failed — permission refused, or a device another
+  /// app is holding — and when the platform has stopped reporting any
+  /// microphone since. A control for an unavailable device carries an error
+  /// badge rather than the state a deliberate mute gets, so a permission
+  /// problem is not mistaken for a choice the user made. Joining stays
+  /// possible with the device disabled.
+  ///
+  /// This says how the control should *look*. Whether it can be pressed is
+  /// [microphoneMissing]: a failure is often worth another try, so the badge
+  /// alone does not disable the button.
+  bool get microphoneUnavailable =>
+      _microphoneError != null || microphoneMissing;
+
+  /// Whether the camera is not usable right now. See [microphoneUnavailable].
+  bool get cameraUnavailable => _cameraError != null || cameraMissing;
+
+  /// Whether the platform reports no microphone to open at all.
+  ///
+  /// The retryable half of [microphoneUnavailable]. A failed open can be
+  /// transient — another app was holding the device, or the user has since
+  /// granted permission in system settings — and a retry is the only thing
+  /// that clears the error, so a control whose *open* failed stays pressable
+  /// and keeps its badge until one succeeds. With no device to open there is
+  /// nothing a retry could achieve, so that control is disabled outright.
   ///
   /// Guarded on having opened the device rather than merely on
   /// [StreamMediaDevicesController.hasEnumerated], which is the weaker check a
   /// call can use: before permission the platform may name no device at all
   /// even where one exists, so an empty list only means something once
   /// `getUserMedia` has succeeded.
-  bool get microphoneUnavailable =>
-      _microphoneError != null ||
-      (_hasMicrophonePermission && devices.audioInputs.isEmpty);
+  /// A track that is open is itself proof the device exists, whatever the
+  /// enumeration says, so a live microphone is never missing — otherwise an
+  /// empty device list would badge a working microphone and take away the
+  /// user's only way to mute it.
+  bool get microphoneMissing =>
+      _microphoneTrack == null &&
+      _hasMicrophonePermission &&
+      devices.audioInputs.isEmpty;
 
-  /// Whether the camera cannot be used at all. See [microphoneUnavailable].
-  bool get cameraUnavailable =>
-      _cameraError != null ||
-      (_hasCameraPermission && devices.videoInputs.isEmpty);
+  /// Whether the platform reports no camera to open at all. See
+  /// [microphoneMissing].
+  bool get cameraMissing =>
+      _cameraTrack == null &&
+      _hasCameraPermission &&
+      devices.videoInputs.isEmpty;
 
   /// Whether the microphone has been opened at least once.
   ///

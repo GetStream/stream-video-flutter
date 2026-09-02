@@ -320,6 +320,60 @@ void main() {
       expect(controller.hasMicrophonePermission, isFalse);
     });
 
+    group('an unusable device', () {
+      test(
+        'stays retryable after a failed open, and a retry clears it',
+        () async {
+          final tracks = fakeTracks();
+          var attempts = 0;
+          final controller = build(
+            openMicrophoneTrack: () async {
+              attempts++;
+              // Busy the first time — another app holding the device — then
+              // free, as it is once that app lets go.
+              if (attempts == 1) throw StateError('device in use');
+              return tracks.microphone;
+            },
+          );
+
+          await controller.toggleMicrophone();
+          expect(controller.microphoneError, isA<StateError>());
+          // Badged, so the user can see something is wrong...
+          expect(controller.microphoneUnavailable, isTrue);
+          // ...but not written off: there is a device, it just would not open.
+          expect(controller.microphoneMissing, isFalse);
+
+          await controller.toggleMicrophone();
+
+          expect(attempts, 2);
+          expect(controller.microphoneEnabled, isTrue);
+          expect(controller.microphoneError, isNull);
+          expect(controller.microphoneUnavailable, isFalse);
+        },
+      );
+
+      test('is written off once the platform reports no device', () async {
+        final tracks = fakeTracks();
+        final controller = build(
+          openMicrophoneTrack: () async => tracks.microphone,
+        );
+
+        await controller.toggleMicrophone();
+        // A live track is proof the device exists, so it is not missing yet
+        // however empty the enumeration is.
+        deviceChanges.add(const []);
+        await pumpEventQueue();
+        expect(controller.microphoneMissing, isFalse);
+
+        // Turned off, and now the platform names nothing: the device is gone
+        // rather than merely unasked, and there is nothing to retry.
+        await controller.toggleMicrophone();
+
+        expect(controller.microphoneMissing, isTrue);
+        expect(controller.microphoneUnavailable, isTrue);
+      });
+    });
+
     group('lifecycle', () {
       test(
         'hands the tracks to the call, so disposing the lobby leaves them '

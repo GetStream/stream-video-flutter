@@ -384,18 +384,24 @@ class _CallScreenState extends State<CallScreen> {
                                       // The bar sits along the bottom, so its
                                       // menus come up rather than down.
                                       menuDirection: StreamMenuDirection.up,
-                                      onPressed: () =>
-                                          call.setMicrophoneEnabled(
-                                            enabled: !enabled,
-                                            // Keep the track alive on mute so
-                                            // speaking-while-muted detection
-                                            // also works on iOS/macOS.
-                                            stopTrackOnMute:
-                                                CurrentPlatform.isIos ||
-                                                    CurrentPlatform.isMacOS
-                                                ? false
-                                                : null,
-                                          ),
+                                      // Badging is appearance only, so a
+                                      // control with nothing to open has to
+                                      // be disabled here as well.
+                                      onPressed:
+                                          _noDeviceFor(_devices.audioInputs)
+                                          ? null
+                                          : () => call.setMicrophoneEnabled(
+                                              enabled: !enabled,
+                                              // Keep the track alive on mute
+                                              // so speaking-while-muted
+                                              // detection also works on
+                                              // iOS/macOS.
+                                              stopTrackOnMute:
+                                                  CurrentPlatform.isIos ||
+                                                      CurrentPlatform.isMacOS
+                                                  ? false
+                                                  : null,
+                                            ),
                                     ),
                               ),
                               PartialCallStateBuilder<bool>(
@@ -411,9 +417,13 @@ class _CallScreenState extends State<CallScreen> {
                                         _devices.videoInputs,
                                       ),
                                       menuDirection: StreamMenuDirection.up,
-                                      onPressed: () => call.setCameraEnabled(
-                                        enabled: !enabled,
-                                      ),
+                                      // See the microphone above.
+                                      onPressed:
+                                          _noDeviceFor(_devices.videoInputs)
+                                          ? null
+                                          : () => call.setCameraEnabled(
+                                              enabled: !enabled,
+                                            ),
                                     ),
                               ),
                             ],
