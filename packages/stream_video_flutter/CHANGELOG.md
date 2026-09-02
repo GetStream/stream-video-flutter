@@ -108,6 +108,9 @@
 
 ### 🐞 Fixed
 
+- The sample's in-call microphone and camera buttons now say when the call refuses them. `setMicrophoneEnabled` and `setCameraEnabled` return a `Result` that was dropped, and the buttons take their state from the call's own participant state, which does not change on a failure — so a user without permission to send video tapped the camera button and watched nothing happen, with nothing logged either.
+- The sample's background-blur toggle no longer applies its filter from inside `build()`. It recorded the track as filtered before the platform call had returned, and swallowed whatever that call threw, so switching camera to a device the filter could not handle left the button claiming blur over an unblurred preview with no way to retry. It runs from `didChangeDependencies` now and puts the toggle back on failure.
+
 - The lobby now honours the call's own device defaults. `micDefaultOn` and `cameraDefaultOn` were read from `call.state` one microtask after the controller was constructed, but a `CallState` starts life with `const CallSettings()` — both defaults on — and the real settings only arrive with the call's metadata, a network round trip later. A call configured to start muted had its microphone opened anyway. They are applied from the fetched metadata now, falling back to the call state if the fetch fails, so a lobby that cannot reach the coordinator still opens.
 - A failed `getOrCreate` is no longer only a log line. `StreamLobbyController.fetchError` records it, so a host can tell "nobody is here" from "we could not ask" and offer a retry; the participant list is empty in both cases. The stack trace is logged with it.
 
