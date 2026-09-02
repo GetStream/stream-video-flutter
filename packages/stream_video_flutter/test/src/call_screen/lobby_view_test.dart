@@ -48,6 +48,7 @@ void main() {
   late StreamController<List<RtcMediaDevice>> deviceChanges;
   late StreamLobbyController controller;
   late MockCall call;
+  late MockStreamVideo video;
 
   setUp(() {
     deviceChanges = StreamController<List<RtcMediaDevice>>.broadcast();
@@ -58,7 +59,7 @@ void main() {
       notifier.enumerateDevices,
     ).thenAnswer((_) async => const Result.success(<RtcMediaDevice>[]));
 
-    final video = MockStreamVideo();
+    video = MockStreamVideo();
     when(
       () => video.currentUser,
     ).thenReturn(const UserInfo(id: 'local', name: 'Rene Floor'));
@@ -137,8 +138,7 @@ void main() {
     data: MediaQueryData(size: Size(width, 900)),
     child: SizedBox(
       width: width,
-      child: StreamLobbyView(
-        call: controller.call,
+      child: StreamLobbyView.withController(
         controller: controller,
         actions: actions,
         onJoinCallPressed: (_) {},
@@ -152,8 +152,7 @@ void main() {
     data: MediaQueryData(size: Size(width, 900)),
     child: SizedBox(
       width: width,
-      child: StreamLobbyView(
-        call: controller.call,
+      child: StreamLobbyView.withController(
         controller: controller,
         actions: actions,
         onJoinCallPressed: (_) {},
@@ -274,8 +273,7 @@ void main() {
             data: const MediaQueryData(size: Size(900, 900)),
             child: SizedBox(
               width: 900,
-              child: StreamLobbyView(
-                call: controller.call,
+              child: StreamLobbyView.withController(
                 controller: controller,
                 title: const Text('Set up your call'),
                 onJoinCallPressed: (_) {},
@@ -386,8 +384,7 @@ void main() {
               data: const MediaQueryData(size: Size(900, 900)),
               child: SizedBox(
                 width: 900,
-                child: StreamLobbyView(
-                  call: controller.call,
+                child: StreamLobbyView.withController(
                   controller: controller,
                   actions: StreamLobbyActions.simple(),
                   onJoinCallPressed: (_) => joined = true,
@@ -527,5 +524,51 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(StreamSelectInput), findsNWidgets(2));
+  });
+  // The default constructor owns its controller, which is the path every real
+  // app takes and the one no test exercised: every other case here supplies
+  // one, so the owned controller was never built or disposed in CI.
+  testWidgets('owns and disposes a controller when given only a call', (
+    tester,
+  ) async {
+    Widget lobbyFor(Call call) => MediaQuery(
+      data: const MediaQueryData(size: Size(900, 900)),
+      child: TestWrapper(
+        child: SizedBox(
+          width: 900,
+          child: StreamLobbyView(
+            call: call,
+            streamVideo: video,
+            onJoinCallPressed: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(lobbyFor(call));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byType(StreamLobbyView), findsOneWidget);
+
+    // Handed a different call, the owned controller is replaced rather than
+    // left running against the old one.
+    final other = MockCall();
+    final otherState = MockCallState();
+    when(() => otherState.settings).thenReturn(
+      const CallSettings(
+        audio: StreamAudioSettings(micDefaultOn: false),
+        video: StreamVideoSettings(cameraDefaultOn: false),
+      ),
+    );
+    when(() => other.state).thenAnswer(
+      (_) => MutableStateEmitter<CallState>(otherState, sync: true),
+    );
+    when(other.getOrCreate).thenAnswer(
+      (_) async => Result.failure(StateError('no network'), StackTrace.empty),
+    );
+    await tester.pumpWidget(lobbyFor(other));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
   });
 }
