@@ -222,10 +222,17 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
         initCallkitProvider(data)
 
-        guard let uuid = UUID(uuidString: data.uuid) else { return }
+        guard let uuid = UUID(uuidString: data.uuid) else {
+            sendUnreportableCallEvent(data, "call uuid is not a valid UUID: '\(data.uuid)'")
+            return
+        }
+        guard let provider = self.sharedProvider else {
+            sendUnreportableCallEvent(data, "no CallKit provider")
+            return
+        }
 
         self.configureAudioSession()
-        self.sharedProvider?.reportNewIncomingCall(with: uuid, update: callUpdate) { error in
+        provider.reportNewIncomingCall(with: uuid, update: callUpdate) { error in
             if let error = error {
                 self.sendIncomingCallFailedEvent(data, error)
                 return
@@ -263,9 +270,18 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
         initCallkitProvider(data)
 
-        guard let uuid = UUID(uuidString: data.uuid) else { return }
+        guard let uuid = UUID(uuidString: data.uuid) else {
+            sendUnreportableCallEvent(data, "call uuid is not a valid UUID: '\(data.uuid)'")
+            completion()
+            return
+        }
+        guard let provider = self.sharedProvider else {
+            sendUnreportableCallEvent(data, "no CallKit provider")
+            completion()
+            return
+        }
 
-        self.sharedProvider?.reportNewIncomingCall(with: uuid, update: callUpdate) { error in
+        provider.reportNewIncomingCall(with: uuid, update: callUpdate) { error in
             if let error = error {
                 self.sendIncomingCallFailedEvent(data, error)
                 completion()
@@ -431,6 +447,21 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         default:
             return "unknown"
         }
+    }
+
+    /// Reports a call that was never handed to CallKit at all.
+    ///
+    /// Distinct from [sendIncomingCallFailedEvent], which reports a call CallKit was asked about
+    /// and refused. Here the SDK could not even ask, so there is no `Error` to describe — and
+    /// without this the call simply vanished, with nothing in the log and nothing sent to Dart.
+    private func sendUnreportableCallEvent(_ data: CallData, _ reason: String) {
+        NSLog("showIncomingCall: not reported to CallKit — \(reason)")
+
+        var body = data.toJSON()
+        body["error"] = reason
+        body["errorCode"] = "invalidCallData"
+
+        self.sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_INCOMING_FAILED, body)
     }
 
     /// Reports that CallKit refused to display an incoming call.

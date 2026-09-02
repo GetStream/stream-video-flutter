@@ -14,8 +14,13 @@ Whether it is on by default depends on the Android version:
 
 | Android version | Default | Why |
 | --- | --- | --- |
-| 17 and above | **On** — opt out with `enabled: false` | The platform refuses to play a ringtone from a service started by a push unless the call is in the Telecom stack, so ringing does not work correctly without it |
+| 17 and above | **On** — opt out with `enabled: false` | For an app targeting API 37, the platform will not play a ringtone from a service started by a push unless the call is in the Telecom stack, so ringing does not work correctly without it |
 | Below 17 | **Off** — opt in with `enabled: true` | Ringing works without it, so nothing about an existing integration changes |
+
+The default follows the Android version of the **device**, not your `targetSdk`, so it is also on
+for an app targeting a lower API that happens to run on Android 17. That is deliberately
+conservative: if you target below API 37 the restriction does not apply to you, and opting out
+leaves the ringing flow exactly as it was.
 
 An explicit `enabled` always wins on both. Leave it unset to take the default for whatever version
 the app is running on:
@@ -43,12 +48,22 @@ Requirements and behaviour:
 
 - Android 8.0 (API 26) or newer. On older versions the integration is skipped.
 - The `MANAGE_OWN_CALLS` permission, which the plugin already declares for you.
+- `BLUETOOTH_CONNECT` is optional and only affects Bluetooth device names, see below.
 - Below Android 17 only, devices without a telephony stack or a default dialer (some tablets and TV
   devices) are skipped. From Android 17 the API level is the only requirement, because skipping the
   integration there would take working ringing with it.
 
 In every skipped case the ringing flow behaves exactly as it does with Telecom disabled, so enabling
 the option is safe across a mixed device fleet.
+
+Jetpack Telecom uses `BLUETOOTH_CONNECT` to read the names of connected Bluetooth devices when it
+reports the available audio endpoints. The plugin declares it, but from Android 12 (API 31) it is a
+runtime permission, so it only takes effect once your app requests it — the SDK does not prompt,
+since when to ask is your app's decision.
+
+Nothing about ringing depends on it. `CallsManager.addCall` requires only `MANAGE_OWN_CALLS`, and
+Jetpack Telecom checks the Bluetooth grant before every use and falls back cleanly. Without it, only
+the active Bluetooth device is surfaced and its name falls back to a generic default.
 
 Outgoing calls are registered when you call `startOutgoingCall`; the SDK does not call it for you.
 

@@ -53,7 +53,14 @@ internal class TelecomCallRepository(private val context: Context) {
     private val registrationMutex = Mutex()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
+    /**
+     * Volatile: `release()` clears this from the main thread while the collectors below, which run
+     * on [Dispatchers.Default], are reading it to dispatch callbacks.
+     */
+    @Volatile
     private var listener: TelecomCallListener? = null
+
+    // Not volatile: only ever touched from setListener and release, both on the main thread.
     private var observeCallsJob: Job? = null
 
     @Volatile

@@ -324,7 +324,13 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                 // notification and ringtone go but the Telecom registration stays. Kept apart from
                 // "endAllCalls" because an ENDED broadcast alone cannot say which of the two it is.
                 "dismissRingingCall" -> {
-                    val calls = getDataActiveCalls(context)
+                    val requestedCid = (call.arguments as? Map<*, *>)?.get("id") as? String
+                    val activeCalls = getDataActiveCalls(context)
+                    val calls = requestedCid
+                        ?.let { cid -> activeCalls.filter { it.extra["callCid"] == cid } }
+                        ?.takeIf { it.isNotEmpty() }
+                        ?: activeCalls
+
                     calls.forEach { callData ->
                         context?.let { ctx ->
                             // Answer it rather than reading `isAccepted`. An accept from the
@@ -346,7 +352,6 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                             )
                         }
                     }
-                    removeAllCalls(context)
                     result.success(true)
                 }
 

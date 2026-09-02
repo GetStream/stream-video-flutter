@@ -33,14 +33,21 @@ internal object StreamTelecomManager {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
+    /** Written on the main thread, read from the repository's [Dispatchers.Default] callbacks. */
+    @Volatile
     private var appContext: Context? = null
+
+    /**
+     * Deliberately not volatile: [isConfigResolved] is the barrier for it.
+     */
     private var config: TelecomConfig = TelecomConfig.DISABLED
 
-    /** Guards the one-off read of the persisted configuration. */
+    /** Guards the one-off read of the persisted configuration. See [config]. */
     @Volatile
     private var isConfigResolved: Boolean = false
 
     @SuppressLint("NewApi")
+    @Volatile
     private var repository: TelecomCallRepository? = null
 
     /** Calls whose registration was started but has not reached the Telecom scope yet. */

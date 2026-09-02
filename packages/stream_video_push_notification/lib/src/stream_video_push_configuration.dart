@@ -86,7 +86,8 @@ class AndroidPushConfiguration {
   /// Show full locked screen.
   final bool? showFullScreenOnLockScreen;
 
-  /// Android Telecom integration. Disabled unless explicitly provided.
+  /// Android Telecom integration. Follows the platform default when omitted — on from Android 17,
+  /// off below it. See [TelecomPushConfiguration.enabled].
   final TelecomPushConfiguration? telecom;
 
   AndroidPushConfiguration copyWith({

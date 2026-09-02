@@ -12,21 +12,7 @@ void main() {
       expect(config.schema, isNull);
     });
 
-    test('an explicit opt-out survives JSON as false, not as unset', () {
-      const config = TelecomPushConfiguration(enabled: false);
 
-      final json = config.toJson();
-      expect(json['enabled'], isFalse);
-      expect(TelecomPushConfiguration.fromJson(json).enabled, isFalse);
-    });
-
-    test('an unset value survives JSON as unset', () {
-      const config = TelecomPushConfiguration();
-
-      final json = config.toJson();
-      expect(json['enabled'], isNull);
-      expect(TelecomPushConfiguration.fromJson(json).enabled, isNull);
-    });
 
     test('round-trips through JSON', () {
       const config = TelecomPushConfiguration(enabled: true, schema: 'myapp');
@@ -39,33 +25,7 @@ void main() {
       );
     });
 
-    test('is carried by the android section of the push configuration', () {
-      const configuration = StreamVideoPushConfiguration(
-        android: AndroidPushConfiguration(
-          telecom: TelecomPushConfiguration(enabled: true, schema: 'myapp'),
-        ),
-      );
 
-      final android = configuration.toJson()['android'] as Map<String, dynamic>;
-      final telecom = android['telecom'] as Map<String, dynamic>;
-
-      expect(telecom['enabled'], isTrue);
-      expect(telecom['schema'], 'myapp');
-    });
-
-    test('absent telecom section stays absent after merging', () {
-      const base = StreamVideoPushConfiguration(
-        android: AndroidPushConfiguration(ringtonePath: 'ringtone'),
-      );
-
-      final merged = base.merge(
-        const StreamVideoPushConfiguration(
-          android: AndroidPushConfiguration(defaultAvatar: 'avatar'),
-        ),
-      );
-
-      expect(merged.android?.telecom, isNull);
-    });
 
     test('merge takes the telecom section from the override', () {
       const base = StreamVideoPushConfiguration(

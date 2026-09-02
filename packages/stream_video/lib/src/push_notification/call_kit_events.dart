@@ -296,6 +296,10 @@ enum IncomingCallFailureReason {
   /// The caller is on the user's block list.
   filteredByBlockList,
 
+  /// The call never reached the platform call UI, so it was not refused — it could not be
+  /// reported in the first place, for example because the call data carried an unusable UUID.
+  invalidCallData,
+
   /// The platform gave a reason this version of the SDK does not know about.
   unknown;
 

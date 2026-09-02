@@ -15,6 +15,11 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
     
     companion object {
         private const val TAG = "IncomingCallReceiver"
+        /**
+         * Volatile: set from the method channel on the main thread, but read from the Telecom
+         * listener callbacks, which run on a background dispatcher.
+         */
+        @Volatile
         var silenceEvents = false
 
         fun getIntent(context: Context, action: String, data: Bundle?) =

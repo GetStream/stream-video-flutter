@@ -71,20 +71,19 @@ class StreamCallKitCallController: NSObject {
         self.requestCall(callTransaction, action: "endCall")
     }
 
-    func connectedCall(call: Call) {
+    /// Tells CallKit the call is connected, so the ringing UI becomes an in-call one.
+    ///
+    /// Deliberately not recovered automatically, unlike a refused end. There is no safe move here:
+    /// the app's own state is not known at this layer, and ending the call to clear the stale ring
+    /// would dismiss a ring the user may still be able to answer.
+    func connectedCall(call: Call, completion: ((Bool) -> Void)? = nil) {
         let callItem = self.callWithUUID(uuid: call.uuid)
         callItem?.connectedCall(completion: nil)
 
         let answerAction = CXAnswerCallAction(call: call.uuid)
         let transaction = CXTransaction(action: answerAction)
 
-        callController.request(transaction) { error in
-            if let error = error {
-                print("Error answering call: \(error.localizedDescription)")
-            } else {
-                // Call successfully answered
-            }
-        }
+        self.requestCall(transaction, action: "connectedCall", completion: completion)
     }
 
     func endAllCalls() {
