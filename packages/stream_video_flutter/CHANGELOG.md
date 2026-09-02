@@ -2,6 +2,8 @@
 
 ### ✅ Added
 
+- Supplying `StreamLobbyView` a controller is a separate constructor now. `StreamLobbyView(call: a, controller: StreamLobbyController(call: b))` used to compile, with the preview and the connect options coming from `b` while the host joined `a` — `call` was required and then ignored. `StreamLobbyView({required call})` owns and disposes a controller of its own; `StreamLobbyView.withController({required controller})` takes one the caller keeps, and reads the call from it, so there is no second call to disagree. `StreamLobbyView.call` is still there and still non-null, resolved from whichever was given. It also handles being rebuilt: a changed call, or a controller arriving where the view had been making its own, disposes the one it owns instead of leaving it running against the old call.
+
 - `StreamLobbyViewStyle`'s preview geometry is named for the layout rather than the breakpoint: `compactPreviewAspectRatio` and `expandedPreviewSize`, previously `smallPreviewAspectRatio` and `largePreviewSize`. `largePreviewSize` applied to `StreamScreenSize.medium` as well as `large`, so the word "large" meant two different things across two public types. `expandedPreviewSize` is also documented as the cap it is — a window past the breakpoint but narrower than 640 gets a smaller preview — rather than a fixed size, and `maxOverlaidControls` now says that it interpolates as a step.
 
 - `StreamLobbyController.hasOpenedMicrophone` and `hasOpenedCamera` are what `hasMicrophonePermission` and `hasCameraPermission` are called now. They never asked the platform what it would grant: they say the device has been opened once, which is what makes the platform name it. An integrator wiring a permission prompt off the old name would have got it wrong.

@@ -50,10 +50,14 @@ typedef StreamLobbyJoinCallback =
 /// This builds no [Scaffold] of its own, so it can be embedded in a screen
 /// that already has one. Wrap it in whatever chrome the app needs.
 class StreamLobbyView extends StatefulWidget {
-  /// Creates a new instance of [StreamLobbyView].
+  /// Creates a lobby for [call], driven by a controller of its own.
+  ///
+  /// The controller is created and disposed here. Use
+  /// [StreamLobbyView.withController] to keep the lobby's state outside the
+  /// widget, or to read it from the host screen.
   const StreamLobbyView({
     super.key,
-    required this.call,
+    required Call call,
     required this.onJoinCallPressed,
     this.actions,
     this.title,
@@ -61,12 +65,32 @@ class StreamLobbyView extends StatefulWidget {
     this.joinButtonLabel,
     this.joinEnabled = true,
     this.footer,
-    this.controller,
     this.streamVideo,
-  });
+  }) : _call = call,
+       controller = null;
 
-  /// Represents a call.
-  final Call call;
+  /// Creates a lobby driven by [controller], which stays the caller's to
+  /// dispose.
+  ///
+  /// The call comes from the controller, so there is no second one to
+  /// disagree with it.
+  const StreamLobbyView.withController({
+    super.key,
+    required StreamLobbyController this.controller,
+    required this.onJoinCallPressed,
+    this.actions,
+    this.title,
+    this.subtitle,
+    this.joinButtonLabel,
+    this.joinEnabled = true,
+    this.footer,
+  }) : _call = null,
+       streamVideo = null;
+
+  final Call? _call;
+
+  /// The call this lobby is a waiting room for.
+  Call get call => controller?.call ?? _call!;
 
   /// Called with the options the call should be joined with.
   ///
@@ -112,10 +136,10 @@ class StreamLobbyView extends StatefulWidget {
   /// nothing about.
   final Widget? footer;
 
-  /// The controller driving this lobby.
+  /// The controller driving this lobby, or null when it owns one.
   ///
-  /// One is created and disposed here when this is null. Supply one to keep
-  /// the lobby's state outside the widget, or to read it from the host screen.
+  /// Non-null only through [StreamLobbyView.withController], and then it is
+  /// the caller's to dispose.
   final StreamLobbyController? controller;
 
   /// An instance of [StreamVideo].
@@ -137,6 +161,21 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
     call: widget.call,
     streamVideo: widget.streamVideo,
   );
+
+  @override
+  void didUpdateWidget(StreamLobbyView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Handed a different call, or handed a controller where it had been making
+    // its own, the lobby has to let go of the one it owns — otherwise the
+    // preview keeps running against the old call until this widget is
+    // disposed. A controller whose tracks were handed over leaves them alone.
+    final stale = widget.controller != null || widget._call != oldWidget._call;
+    if (_ownedController case final owned? when stale) {
+      owned.dispose();
+      _ownedController = null;
+    }
+  }
 
   @override
   void dispose() {
