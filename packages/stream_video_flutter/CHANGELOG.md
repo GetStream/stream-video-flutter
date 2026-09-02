@@ -105,6 +105,9 @@
 
 ### 🐞 Fixed
 
+- Leaving the lobby while a device is still opening no longer leaves the camera or microphone running. `StreamLobbyController` guards every `await` on its own disposal: a track that arrives after the lobby is gone is stopped, since nothing is left to hand it to a call, and the deferred "apply the call's defaults" step is cancelled rather than opening two devices nobody will close. It also no longer notifies after disposal, which threw in debug and was an unhandled async error in release. The hand-over to the call is unaffected — `StreamLobbyController.tracksHandedOver` now exposes it, so a test can prove the tracks the call is publishing survive the lobby's disposal.
+- A control no longer opens two tracks when its button is tapped twice while the permission prompt is up. The second tap is a no-op until the first open finishes.
+
 - A device menu no longer offers "System default" where the platform names no device at all. On a simulator with no camera the caret opened a menu whose only entry could not pick anything; the section is dropped now, and with nothing left to offer the caret is disabled.
 
 - The anchored context menu's shadow is no longer clipped away. `MenuAnchor` clips its panel to the panel's own bounds by default, which cut off the shadow the menu's `Material` draws outside them: the shadow stopped dead along the bottom edge instead of fading out, and raising the elevation changed nothing because the extra shadow was clipped too. `StreamContextMenuAnchor` also takes an `elevation` now, defaulting to `StreamContextMenuTheme`'s.

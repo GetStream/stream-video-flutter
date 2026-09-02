@@ -94,14 +94,38 @@ void main() {
     await deviceChanges.close();
   });
 
-  StreamLobbyController build() {
+  StreamLobbyController build({
+    LobbyAudioTrackOpener? openMicrophoneTrack,
+    LobbyCameraTrackOpener? openCameraTrack,
+    // Off for the tests that dispose the controller themselves: dispose is
+    // not idempotent, matching every other ChangeNotifier.
+    bool autoDispose = true,
+  }) {
     final controller = StreamLobbyController(
       call: call,
       streamVideo: video,
       deviceNotifier: notifier,
+      openMicrophoneTrack: openMicrophoneTrack,
+      openCameraTrack: openCameraTrack,
     );
-    addTearDown(controller.dispose);
+    if (autoDispose) addTearDown(controller.dispose);
     return controller;
+  }
+
+  /// A microphone and a camera that record whether they were stopped.
+  ///
+  /// [RtcLocalTrack]'s factories are static, so the only way to observe what
+  /// the controller does with a track it has opened is to hand it one.
+  ({MockRtcLocalAudioTrack microphone, MockRtcLocalCameraTrack camera})
+  fakeTracks() {
+    final microphone = MockRtcLocalAudioTrack();
+    when(microphone.stop).thenAnswer((_) async {});
+
+    final camera = MockRtcLocalCameraTrack();
+    when(camera.stop).thenAnswer((_) async {});
+    when(() => camera.mediaConstraints).thenReturn(const CameraConstraints());
+
+    return (microphone: microphone, camera: camera);
   }
 
   group('StreamLobbyController', () {
@@ -294,6 +318,148 @@ void main() {
       expect(controller.microphoneEnabled, isFalse);
       expect(controller.microphoneError, isA<StateError>());
       expect(controller.hasMicrophonePermission, isFalse);
+    });
+
+    group('lifecycle', () {
+      test(
+        'hands the tracks to the call, so disposing the lobby leaves them '
+        'running',
+        () async {
+          final tracks = fakeTracks();
+          final controller = build(
+            openMicrophoneTrack: () async => tracks.microphone,
+            openCameraTrack: (_) async => tracks.camera,
+            autoDispose: false,
+          );
+
+          await controller.toggleMicrophone();
+          await controller.toggleCamera();
+          expect(controller.microphoneEnabled, isTrue);
+          expect(controller.cameraEnabled, isTrue);
+
+          // What StreamLobbyView does when the join button is pressed: read
+          // the options, then mark the tracks as the call's.
+          final options = controller.connectOptions;
+          controller.handOverTracks();
+          controller.dispose();
+
+          // The whole point: the call is publishing these, so the lobby must
+          // not have stopped them on its way out.
+          verifyNever(tracks.microphone.stop);
+          verifyNever(tracks.camera.stop);
+          expect(controller.tracksHandedOver, isTrue);
+
+          // And the live tracks are the very ones the call is told to join
+          // with, so the feed carries across without reopening the hardware.
+          expect(
+            (options.microphone as TrackProvided).track,
+            same(tracks.microphone),
+          );
+          expect(
+            (options.camera as TrackProvided).track,
+            same(tracks.camera),
+          );
+        },
+      );
+
+      test('stops the tracks when the lobby is left without joining', () async {
+        final tracks = fakeTracks();
+        final controller = build(
+          openMicrophoneTrack: () async => tracks.microphone,
+          openCameraTrack: (_) async => tracks.camera,
+          autoDispose: false,
+        );
+
+        await controller.toggleMicrophone();
+        await controller.toggleCamera();
+        controller.dispose();
+
+        verify(tracks.microphone.stop).called(1);
+        verify(tracks.camera.stop).called(1);
+      });
+
+      test('stops a track that finishes opening after dispose', () async {
+        final tracks = fakeTracks();
+        final opening = Completer<RtcLocalCameraTrack>();
+        final controller = build(
+          openCameraTrack: (_) => opening.future,
+          autoDispose: false,
+        );
+
+        final pending = controller.toggleCamera();
+        // The user backs out while the permission prompt is still up.
+        controller.dispose();
+        opening.complete(tracks.camera);
+        await pending;
+
+        // Nobody is left to hand this to a call, so the lobby owns it.
+        verify(tracks.camera.stop).called(1);
+        expect(controller.cameraEnabled, isFalse);
+      });
+
+      test('does not notify after being disposed', () async {
+        final tracks = fakeTracks();
+        final opening = Completer<RtcLocalAudioTrack>();
+        final controller = build(
+          openMicrophoneTrack: () => opening.future,
+          autoDispose: false,
+        );
+
+        final pending = controller.toggleMicrophone();
+        controller.dispose();
+        opening.complete(tracks.microphone);
+
+        // A post-dispose notifyListeners throws, so completing without one is
+        // the assertion.
+        await expectLater(pending, completes);
+      });
+
+      test('opens one track however fast the button is tapped', () async {
+        final tracks = fakeTracks();
+        var opens = 0;
+        final opening = Completer<RtcLocalAudioTrack>();
+        final controller = build(
+          openMicrophoneTrack: () {
+            opens++;
+            return opening.future;
+          },
+        );
+
+        final first = controller.toggleMicrophone();
+        final second = controller.toggleMicrophone();
+        opening.complete(tracks.microphone);
+        await Future.wait([first, second]);
+
+        expect(opens, 1);
+        expect(controller.microphoneEnabled, isTrue);
+      });
+
+      test(
+        'applies the call defaults unless the lobby is left first',
+        () async {
+          when(() => callState.settings).thenReturn(const CallSettings());
+
+          final tracks = fakeTracks();
+          var opens = 0;
+          final controller = build(
+            openMicrophoneTrack: () async {
+              opens++;
+              return tracks.microphone;
+            },
+            openCameraTrack: (_) async {
+              opens++;
+              return tracks.camera;
+            },
+            autoDispose: false,
+          );
+
+          // Disposed inside the same frame, before the deferred defaults run.
+          controller.dispose();
+          await pumpEventQueue();
+
+          expect(opens, 0);
+        },
+      );
     });
 
     test('disposes the device controller with itself', () {

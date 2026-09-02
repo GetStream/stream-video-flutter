@@ -18,13 +18,31 @@ import '../../stream_video_flutter.dart';
 /// Tracks created here are handed to the call as [TrackOption.provided], so
 /// the call carries on with the microphone and camera the user was already
 /// previewing rather than opening a second pair.
+/// Opens the lobby's microphone track.
+///
+/// Injectable because [RtcLocalTrack]'s factories are static, which otherwise
+/// leaves everything downstream of an open device — the hand-over to the call
+/// included — impossible to test.
+@visibleForTesting
+typedef LobbyAudioTrackOpener = Future<RtcLocalAudioTrack> Function();
+
+/// Opens the lobby's camera track on `deviceId`, or on the system default when
+/// it is null. See [LobbyAudioTrackOpener].
+@visibleForTesting
+typedef LobbyCameraTrackOpener =
+    Future<RtcLocalCameraTrack> Function(String? deviceId);
+
 class StreamLobbyController extends ChangeNotifier {
   /// Creates a new instance of [StreamLobbyController].
   StreamLobbyController({
     required this.call,
     StreamVideo? streamVideo,
     RtcMediaDeviceNotifier? deviceNotifier,
-  }) : _streamVideo = streamVideo {
+    @visibleForTesting LobbyAudioTrackOpener? openMicrophoneTrack,
+    @visibleForTesting LobbyCameraTrackOpener? openCameraTrack,
+  }) : _streamVideo = streamVideo,
+       _openMicrophoneTrack = openMicrophoneTrack,
+       _openCameraTrack = openCameraTrack {
     devices = StreamMediaDevicesController(
       deviceNotifier: deviceNotifier,
       // Switching camera while previewing means tearing the preview down and
@@ -60,6 +78,22 @@ class StreamLobbyController extends ChangeNotifier {
 
   StreamSubscription<Object>? _fetchSubscription;
   StreamSubscription<Object>? _eventSubscription;
+  Timer? _callDefaultsTimer;
+
+  final LobbyAudioTrackOpener? _openMicrophoneTrack;
+  final LobbyCameraTrackOpener? _openCameraTrack;
+
+  /// Set by [dispose]. Every `await` here outlives the widget that owns this
+  /// controller, so anything resuming after one has to check it: notifying a
+  /// disposed [ChangeNotifier] throws, and a track that lands late belongs to
+  /// nobody and would otherwise keep the hardware open.
+  bool _disposed = false;
+
+  /// Whether a track is already being opened. Opening takes as long as the
+  /// permission prompt is up, so without this a second tap creates a second
+  /// track and orphans the first.
+  bool _openingMicrophone = false;
+  bool _openingCamera = false;
 
   RtcLocalAudioTrack? _microphoneTrack;
   RtcLocalCameraTrack? _cameraTrack;
@@ -200,54 +234,68 @@ class StreamLobbyController extends ChangeNotifier {
   /// Turns the microphone on if it is off, and off if it is on.
   Future<void> toggleMicrophone() async {
     if (_microphoneTrack != null) {
-      await _microphoneTrack?.stop();
+      final track = _microphoneTrack;
       _microphoneTrack = null;
-      return notifyListeners();
+      _notify();
+      await track?.stop();
+      return;
     }
 
+    if (_openingMicrophone) return;
+    _openingMicrophone = true;
     try {
-      final nativeFactory = await call.ensureNativeFactory();
-      _microphoneTrack = await RtcLocalTrack.audio(
-        nativeFactory: nativeFactory,
-      );
+      final track = await _openMicrophone();
+      // The lobby was left while the device was opening. Nothing will ever
+      // hand this track to a call, so this is the only chance to stop it.
+      if (_disposed) return await track.stop();
+
+      _microphoneTrack = track;
       _microphoneError = null;
       _hasMicrophonePermission = true;
-    } catch (e) {
-      _logger.w(() => 'Error creating microphone track: $e');
+    } catch (e, stk) {
+      // The stack trace is what separates a refused permission from a device
+      // another app is holding, so it is worth keeping.
+      _logger.e(() => 'Error creating microphone track: $e\n$stk');
       _microphoneError = e;
+    } finally {
+      _openingMicrophone = false;
     }
 
-    notifyListeners();
+    _notify();
   }
 
   /// Turns the camera on if it is off, and off if it is on.
   Future<void> toggleCamera() async {
     if (_cameraTrack != null) {
-      await _cameraTrack?.stop();
+      final track = _cameraTrack;
       _cameraTrack = null;
-      return notifyListeners();
+      _notify();
+      await track?.stop();
+      return;
     }
 
     await _openCamera();
   }
 
   Future<void> _openCamera() async {
+    if (_openingCamera) return;
+    _openingCamera = true;
     try {
-      final nativeFactory = await call.ensureNativeFactory();
-      _cameraTrack = await RtcLocalTrack.camera(
-        constraints: CameraConstraints(
-          deviceId: devices.selectedVideoInput?.id,
-        ),
-        nativeFactory: nativeFactory,
-      );
+      final track = await _openCameraTrackFor(devices.selectedVideoInput?.id);
+      // See toggleMicrophone.
+      if (_disposed) return await track.stop();
+
+      _cameraTrack = track;
       _cameraError = null;
       _hasCameraPermission = true;
-    } catch (e) {
-      _logger.w(() => 'Error creating camera track: $e');
+    } catch (e, stk) {
+      _logger.e(() => 'Error creating camera track: $e\n$stk');
       _cameraError = e;
+    } finally {
+      _openingCamera = false;
     }
 
-    notifyListeners();
+    _notify();
   }
 
   /// Reopens the preview on the newly picked camera.
@@ -258,20 +306,43 @@ class StreamLobbyController extends ChangeNotifier {
     final track = _cameraTrack;
     if (track == null) return;
 
-    await track.stop();
     _cameraTrack = null;
-    notifyListeners();
+    _notify();
+    await track.stop();
 
     await _openCamera();
   }
 
+  Future<RtcLocalAudioTrack> _openMicrophone() async {
+    if (_openMicrophoneTrack case final open?) return open();
+    return RtcLocalTrack.audio(nativeFactory: await call.ensureNativeFactory());
+  }
+
+  Future<RtcLocalCameraTrack> _openCameraTrackFor(String? deviceId) async {
+    if (_openCameraTrack case final open?) return open(deviceId);
+    return RtcLocalTrack.camera(
+      constraints: CameraConstraints(deviceId: deviceId),
+      nativeFactory: await call.ensureNativeFactory(),
+    );
+  }
+
+  /// [notifyListeners], unless this controller is already disposed.
+  void _notify() {
+    if (_disposed) return;
+    notifyListeners();
+  }
+
   void _applyCallDefaults() {
     // The call's settings arrive with its state, which is not populated yet
-    // when the controller is constructed.
-    Future.delayed(Duration.zero, () {
+    // when the controller is constructed. Held in a timer rather than a bare
+    // Future.delayed so that leaving the lobby within the same frame cancels
+    // it instead of opening two devices nobody is left to close.
+    _callDefaultsTimer = Timer(Duration.zero, () {
+      if (_disposed) return;
+
       final settings = call.state.value.settings;
-      if (settings.audio.micDefaultOn) toggleMicrophone();
-      if (settings.video.cameraDefaultOn) toggleCamera();
+      if (settings.audio.micDefaultOn) unawaited(toggleMicrophone());
+      if (settings.video.cameraDefaultOn) unawaited(toggleCamera());
     });
   }
 
@@ -298,7 +369,7 @@ class StreamLobbyController extends ChangeNotifier {
               .where((it) => it.userId != currentUserId)
               .sortedBy((it) => it.joinedAt ?? now)
               .toList();
-          notifyListeners();
+          _notify();
         },
         onFailure: (error, stackTrace) {
           _logger.e(() => '[fetchCall] failed: $error');
@@ -327,7 +398,7 @@ class StreamLobbyController extends ChangeNotifier {
         );
         if (!hasSameUser) _users = {..._users}..remove(event.user.id);
 
-        notifyListeners();
+        _notify();
       } else if (event is CoordinatorCallSessionParticipantJoinedEvent) {
         _logger.d(() => '[listenEvents] #userJoined; user: ${event.user}');
 
@@ -354,13 +425,17 @@ class StreamLobbyController extends ChangeNotifier {
           _participants[index] = participant;
         }
 
-        notifyListeners();
+        _notify();
       }
     });
   }
 
   @override
   void dispose() {
+    // Set before anything else: an open already in flight checks this to
+    // decide whether the track it is about to produce has an owner.
+    _disposed = true;
+    _callDefaultsTimer?.cancel();
     _fetchSubscription?.cancel();
     _eventSubscription?.cancel();
     devices
@@ -381,6 +456,12 @@ class StreamLobbyController extends ChangeNotifier {
   }
 
   bool _tracksHandedOver = false;
+
+  /// Whether the tracks now belong to the call rather than to this lobby.
+  ///
+  /// Once true, [dispose] leaves the microphone and camera running: the call
+  /// is publishing them, and stopping them here would cut its audio and video.
+  bool get tracksHandedOver => _tracksHandedOver;
 
   /// Marks the tracks as belonging to the call, so [dispose] leaves them
   /// running.
