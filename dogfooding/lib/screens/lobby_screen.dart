@@ -1,3 +1,6 @@
+// 🎯 Dart imports:
+import 'dart:async';
+
 // 📦 Package imports:
 import 'package:flutter/material.dart';
 import 'package:stream_video_filters/video_effects_manager.dart';
@@ -116,38 +119,59 @@ class _BlurToggleState extends State<_BlurToggle> {
   RtcLocalCameraTrack? _appliedTo;
 
   @override
-  Widget build(BuildContext context) {
-    // Reading the controller here subscribes this button to it, so switching
-    // camera device rebuilds and the filter is reapplied to the new track.
-    final controller = StreamLobbyScope.of(context);
-    final track = controller.cameraTrack;
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-    if (_enabled && track != null && track != _appliedTo) {
-      _appliedTo = track;
-      widget.effects.applyBackgroundBlurFilter(
+    // Reading the controller here subscribes this button to it, so switching
+    // camera device brings us back and the filter is reapplied to the new
+    // track. This used to sit in build(), which meant firing a platform call
+    // and recording it as applied from inside a build that might never be
+    // committed — and swallowing whatever it threw.
+    final track = StreamLobbyScope.of(context).cameraTrack;
+    if (!_enabled || track == null || track == _appliedTo) return;
+
+    unawaited(_apply(track));
+  }
+
+  Future<void> _apply(RtcLocalCameraTrack? track) async {
+    final previous = _appliedTo;
+    _appliedTo = track;
+    try {
+      await widget.effects.applyBackgroundBlurFilter(
         BlurIntensity.medium,
         track: track,
       );
+    } catch (e) {
+      // Otherwise the button goes on claiming blur over an unblurred preview,
+      // and never retries because the track is already recorded as applied.
+      debugPrint('Could not apply the background blur: $e');
+      _appliedTo = previous;
+      if (mounted) setState(() => _enabled = false);
     }
+  }
+
+  Future<void> _remove(RtcLocalCameraTrack? track) async {
+    _appliedTo = null;
+    try {
+      await widget.effects.disableAllFilters(track: track);
+    } catch (e) {
+      debugPrint('Could not remove the background blur: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final track = StreamLobbyScope.of(context).cameraTrack;
 
     return Tooltip(
       message: _enabled ? 'Disable background blur' : 'Enable background blur',
       child: CallFeatureButton(
         icon: Icon(context.streamIcons.blurFill),
         selected: _enabled,
-        onPressed: () async {
-          setState(() => _enabled = !_enabled);
-
-          if (_enabled) {
-            _appliedTo = track;
-            await widget.effects.applyBackgroundBlurFilter(
-              BlurIntensity.medium,
-              track: track,
-            );
-          } else {
-            _appliedTo = null;
-            await widget.effects.disableAllFilters(track: track);
-          }
+        onPressed: () {
+          final enabling = !_enabled;
+          setState(() => _enabled = enabling);
+          unawaited(enabling ? _apply(track) : _remove(track));
         },
       ),
     );
