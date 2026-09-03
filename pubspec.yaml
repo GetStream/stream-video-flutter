@@ -25,10 +25,6 @@ dev_dependencies:
 dependency_overrides:
   cli_util: ^0.5.1
   file_picker: ^12.0.0-beta.5
-  stream_webrtc_flutter:
-    git:
-      url: https://github.com/GetStream/webrtc-flutter.git
-      ref: c79df9cd3f5345f530bc1ea4a2c45d594de2af3c
 
 melos:
   ignore:
@@ -49,7 +45,7 @@ melos:
         package_info_plus: ">=9.0.0 <11.0.0"
         share_plus: ^13.0.0
         stream_chat_flutter: ^10.0.0
-        stream_webrtc_flutter: ^3.0.1
+        stream_webrtc_flutter: ^3.2.0
         stream_video: ^1.4.3
         stream_video_filters: ^1.4.3
         stream_video_flutter: ^1.4.3
