@@ -438,17 +438,20 @@ class _CallScreenState extends State<CallScreen> {
                 );
               },
               callAppBarWidgetBuilder: (context, call) {
-                // A wide window has room for the layout toggle in the control
-                // bar's leading slot, which is where the design puts it, so
-                // the app bar only carries it below that breakpoint.
-                final showLayoutToggle = !context.streamScreenSize.isLarge;
+                // A wide window carries the layout toggle and leaving in the
+                // control bar, which is where the design puts them, so the app
+                // bar only holds them below that breakpoint. Otherwise both
+                // ends of the screen offer the same two controls, and the call
+                // has two ways to hang up a few hundred pixels apart.
+                final isCompact = !context.streamScreenSize.isLarge;
 
                 return CallAppBar(
                   call: call,
                   leadingWidth: 120,
+                  showLeaveCallAction: isCompact,
                   leading: Row(
                     children: [
-                      if (showLayoutToggle) _layoutToggle(),
+                      if (isCompact) _layoutToggle(),
                       PartialCallStateBuilder(
                         call: call,
                         selector: (state) => state.localParticipant != null,
