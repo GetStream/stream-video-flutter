@@ -56,13 +56,13 @@ void main() {
   });
 
   group('geometry', () {
-    testWidgets('is 64 tall below the large breakpoint and 72 at it', (
-      tester,
-    ) async {
+    // One height and one padding at every size: a bar that changed either
+    // across a breakpoint jumped as a desktop window was dragged over it.
+    testWidgets('is 72 tall at every breakpoint', (tester) async {
       const bar = CallControlBar(small);
 
-      await tester.pumpBarAndExpectHeight(bar, width: 402, height: 64);
-      await tester.pumpBarAndExpectHeight(bar, width: 900, height: 64);
+      await tester.pumpBarAndExpectHeight(bar, width: 402, height: 72);
+      await tester.pumpBarAndExpectHeight(bar, width: 900, height: 72);
       await tester.pumpBarAndExpectHeight(bar, width: 1440, height: 72);
     });
 
@@ -91,26 +91,46 @@ void main() {
       expect(reported, tester.getSize(find.byType(CallControlBar)).height);
     });
 
-    testWidgets('pads its edges by 8 when compact and 16 when expanded', (
-      tester,
-    ) async {
+    testWidgets('pads its edges by 12 at every breakpoint', (tester) async {
       const bar = CallControlBar(
         CallControlBarLayout(leading: [Text('leading')]),
       );
 
-      await pumpBar(tester, bar, width: 402);
-      expect(
-        tester.getTopLeft(find.text('leading')).dx -
-            tester.getTopLeft(find.byType(CallControlBar)).dx,
-        8,
+      for (final width in [402.0, 900.0, 1440.0]) {
+        await pumpBar(tester, bar, width: width);
+
+        expect(
+          tester.getTopLeft(find.text('leading')).dx -
+              tester.getTopLeft(find.byType(CallControlBar)).dx,
+          12,
+          reason: 'at $width',
+        );
+      }
+    });
+
+    // What the design specifies is the visible inset, not the padding: a
+    // control is 40 wide inside a 48 tap target, so the box starts 12 in and
+    // the glyph 16.
+    testWidgets('puts the visible edge of a control 16 in', (tester) async {
+      await pumpBar(
+        tester,
+        const CallControlBar(
+          CallControlBarLayout(
+            leading: [CallControlButton(icon: Icon(Icons.mic))],
+          ),
+        ),
+        width: 402,
       );
 
-      await pumpBar(tester, bar, width: 1440);
-      expect(
-        tester.getTopLeft(find.text('leading')).dx -
-            tester.getTopLeft(find.byType(CallControlBar)).dx,
-        16,
-      );
+      final button = tester.getRect(find.byType(CallControlButton));
+      final bar = tester.getRect(find.byType(CallControlBar));
+
+      // The tap target's box, then the visible circle inside it.
+      expect(button.left - bar.left, 12);
+      expect(button.width, 48);
+      expect(button.height, 48);
+      // 72 tall, slots centred: (72 - 48) / 2.
+      expect(button.top - bar.top, 12);
     });
 
     testWidgets('centres the centre slot however lopsided the sides are', (
@@ -271,7 +291,7 @@ void main() {
       const TestWrapper(
         child: CallControlBarTheme(
           data: CallControlBarThemeData(
-            style: CallControlBarStyle(compactHeight: 96),
+            style: CallControlBarStyle(height: 96),
           ),
           child: Align(
             alignment: Alignment.bottomCenter,
