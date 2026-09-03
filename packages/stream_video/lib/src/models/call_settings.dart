@@ -48,7 +48,7 @@ class CallSettings extends Equatable {
   final StreamIngressSettings? ingress;
 
   @override
-  List<Object?> get props => [audio, video, screenShare];
+  List<Object?> get props => [audio, video, screenShare, encryption];
 
   /// Returns a copy of this [CallSettings] with the given fields
   /// replaced with the new values.
