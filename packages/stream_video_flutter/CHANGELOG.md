@@ -185,6 +185,12 @@
 
 ### 🐞 Fixed
 
+- The microphone and camera controls no longer flash the muted look while a call is being joined. `CallParticipantState.isAudioEnabled` is `!(audioTrack?.muted ?? true)`, so a track the SFU has not named yet reads exactly like a track the user muted — and every control drew red for the second between joining and the first track arriving.
+
+  The two are distinguishable, and now distinguished: muting keeps the track entry and flags it, so an *absent* entry means nothing has said. While nothing has said, a control draws the state the call was joined with — `CallConnectOptions.microphone` and `camera`, where a provided track counts as on, since a lobby only hands one over for a device it opened. Once the track is reported it decides, so somebody who mutes a call they joined unmuted stays muted.
+
+  New on `CallParticipantState`: `trackEnabled(SfuTrackType)`, returning null for a track nothing has reported. `TrackOption.wantsOn` reads the intent behind a connect option.
+
 - The sample's in-call microphone and camera buttons now say when the call refuses them. `setMicrophoneEnabled` and `setCameraEnabled` return a `Result` that was dropped, and the buttons take their state from the call's own participant state, which does not change on a failure — so a user without permission to send video tapped the camera button and watched nothing happen, with nothing logged either.
 - The sample's background-blur toggle no longer applies its filter from inside `build()`. It recorded the track as filtered before the platform call had returned, and swallowed whatever that call threw, so switching camera to a device the filter could not handle left the button claiming blur over an unblurred preview with no way to retry. It runs from `didChangeDependencies` now and puts the toggle back on failure.
 

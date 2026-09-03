@@ -50,53 +50,73 @@ class StreamCameraButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final icons = context.streamIcons;
-
-    Widget buildContent(bool enabled, {required bool unavailable}) {
-      return CallControlButton(
-        icon: Icon(
-          enabled
-              ? enabledCameraIcon ?? icons.videoFill
-              : disabledCameraIcon ?? icons.videoOffFill,
-        ),
-        // See StreamMicrophoneButton: an absent camera is badged, not muted.
-        tone: enabled || unavailable ? .neutral : .negative,
-        showErrorBadge: unavailable,
-        onPressed: unavailable
-            ? null
-            : () => applyDeviceChange(
-                call.setCameraEnabled(enabled: !enabled),
-                description: 'turn the camera ${enabled ? 'off' : 'on'}',
-                onError: onError,
-              ),
-      );
-    }
-
-    Widget withState({required bool unavailable}) {
-      if (localParticipant case final participant?) {
-        return buildContent(
-          participant.isVideoEnabled,
-          unavailable: unavailable,
-        );
-      }
-
-      return PartialCallStateBuilder<bool>(
-        call: call,
-        selector: (state) => state.localParticipant?.isVideoEnabled ?? false,
-        builder: (_, enabled) =>
-            buildContent(enabled, unavailable: unavailable),
-      );
-    }
-
     if (devices case final devices?) {
+      // Whether the platform has a camera at all arrives on the device
+      // stream, not in call state.
       return ListenableBuilder(
         listenable: devices,
-        builder: (context, _) =>
-            withState(unavailable: devices.reportsNo(devices.videoInputs)),
+        builder: (context, _) => _withState(
+          context,
+          unavailable: devices.reportsNo(devices.videoInputs),
+        ),
       );
     }
 
-    return withState(unavailable: false);
+    // Given no devices there is nothing to ask, so nothing is claimed.
+    return _withState(context, unavailable: false);
+  }
+
+  // Nothing has reported the track yet: draw the state the call was joined
+  // with, since that is where it is about to be.
+  bool _resolve(bool? reported) =>
+      reported ?? call.connectOptions.camera.wantsOn;
+
+  Widget _withState(BuildContext context, {required bool unavailable}) {
+    if (localParticipant case final participant?) {
+      return _button(
+        context,
+        enabled: _resolve(participant.trackEnabled(SfuTrackType.video)),
+        unavailable: unavailable,
+      );
+    }
+
+    return PartialCallStateBuilder<bool?>(
+      call: call,
+      selector: (state) =>
+          state.localParticipant?.trackEnabled(SfuTrackType.video),
+      builder: (context, reported) => _button(
+        context,
+        enabled: _resolve(reported),
+        unavailable: unavailable,
+      ),
+    );
+  }
+
+  Widget _button(
+    BuildContext context, {
+    required bool enabled,
+    required bool unavailable,
+  }) {
+    final icons = context.streamIcons;
+
+    return CallControlButton(
+      icon: Icon(
+        enabled
+            ? enabledCameraIcon ?? icons.videoFill
+            : disabledCameraIcon ?? icons.videoOffFill,
+      ),
+      // An absent device is not a user choice, so it is badged rather than
+      // drawn as a deliberate mute.
+      tone: enabled || unavailable ? .neutral : .negative,
+      showErrorBadge: unavailable,
+      onPressed: unavailable
+          ? null
+          : () => applyDeviceChange(
+              call.setCameraEnabled(enabled: !enabled),
+              description: 'turn the camera ${enabled ? 'off' : 'on'}',
+              onError: onError,
+            ),
+    );
   }
 }
 
