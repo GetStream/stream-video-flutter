@@ -221,9 +221,12 @@ class CallControlBar extends StatelessWidget {
 
     final surfaceStyle = resolved.surfaceStyle;
 
-    // A docked bar is opaque and marks its top edge with the design system's
-    // `borderSubtle` hairline; a floating one drops both and fades into the
-    // call behind it instead.
+    // A docked bar is opaque; a floating one fades into the call behind it.
+    //
+    // Neither draws a line along its top edge. Core's bars treat a
+    // `borderSubtle` hairline as part of their identity, because they separate
+    // one page of content from another — a call has nothing to separate the
+    // controls from, and the design draws none.
     //
     // The outer [Semantics] keeps the slots grouped for screen readers so they
     // aren't intermixed with the call above. The inner one forces each control
@@ -240,12 +243,6 @@ class CallControlBar extends StatelessWidget {
           gradient: switch (surfaceStyle) {
             .floating => _floatingGradient(context, resolved),
             .regular => null,
-          },
-          border: switch (surfaceStyle) {
-            .floating => null,
-            .regular => Border(
-              top: BorderSide(color: context.streamColorScheme.borderSubtle),
-            ),
           },
         ),
         child: Semantics(explicitChildNodes: true, child: bar),
