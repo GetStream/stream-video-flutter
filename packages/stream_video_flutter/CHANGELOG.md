@@ -48,7 +48,7 @@
   )
   ```
 
-  Its geometry and surface come from `CallControlBarThemeData` on `StreamVideoTheme`, or from a `CallControlBarTheme` over a subtree. `CallControlBarStyle.surfaceStyle` docks the bar or floats it over the call, the way `StreamBottomAppBar` does.
+  Its geometry and surface come from `CallControlBarThemeData` on `StreamVideoTheme`, or from a `CallControlBarTheme` over a subtree. `CallControlBarStyle.surfaceStyle` docks the bar or floats it over the call, the way `StreamBottomAppBar` does. Only which controls are drawn varies by size: the bar is `kStreamToolbarHeight` (72) tall with the same padding at every breakpoint, since one that changed either jumped as a desktop window was dragged across it.
 
   It is deliberately not a `PreferredSizeWidget`: its height depends on the window and `preferredSize` cannot read one, so a caller that needs a preferred size builds it from `CallControlBar.heightOf(context)`.
 

@@ -99,18 +99,8 @@ mixin _$CallControlBarStyle {
     }
 
     return CallControlBarStyle(
-      compactHeight: lerpDouble$(a.compactHeight, b.compactHeight, t),
-      expandedHeight: lerpDouble$(a.expandedHeight, b.expandedHeight, t),
-      compactPadding: EdgeInsetsGeometry.lerp(
-        a.compactPadding,
-        b.compactPadding,
-        t,
-      ),
-      expandedPadding: EdgeInsetsGeometry.lerp(
-        a.expandedPadding,
-        b.expandedPadding,
-        t,
-      ),
+      height: lerpDouble$(a.height, b.height, t),
+      padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
       slotSpacing: lerpDouble$(a.slotSpacing, b.slotSpacing, t),
       controlSpacing: lerpDouble$(a.controlSpacing, b.controlSpacing, t),
       surfaceStyle: t < 0.5 ? a.surfaceStyle : b.surfaceStyle,
@@ -124,10 +114,8 @@ mixin _$CallControlBarStyle {
   }
 
   CallControlBarStyle copyWith({
-    double? compactHeight,
-    double? expandedHeight,
-    EdgeInsetsGeometry? compactPadding,
-    EdgeInsetsGeometry? expandedPadding,
+    double? height,
+    EdgeInsetsGeometry? padding,
     double? slotSpacing,
     double? controlSpacing,
     StreamSurfaceStyle? surfaceStyle,
@@ -137,10 +125,8 @@ mixin _$CallControlBarStyle {
     final _this = (this as CallControlBarStyle);
 
     return CallControlBarStyle(
-      compactHeight: compactHeight ?? _this.compactHeight,
-      expandedHeight: expandedHeight ?? _this.expandedHeight,
-      compactPadding: compactPadding ?? _this.compactPadding,
-      expandedPadding: expandedPadding ?? _this.expandedPadding,
+      height: height ?? _this.height,
+      padding: padding ?? _this.padding,
       slotSpacing: slotSpacing ?? _this.slotSpacing,
       controlSpacing: controlSpacing ?? _this.controlSpacing,
       surfaceStyle: surfaceStyle ?? _this.surfaceStyle,
@@ -162,10 +148,8 @@ mixin _$CallControlBarStyle {
     }
 
     return copyWith(
-      compactHeight: other.compactHeight,
-      expandedHeight: other.expandedHeight,
-      compactPadding: other.compactPadding,
-      expandedPadding: other.expandedPadding,
+      height: other.height,
+      padding: other.padding,
       slotSpacing: other.slotSpacing,
       controlSpacing: other.controlSpacing,
       surfaceStyle: other.surfaceStyle,
@@ -187,10 +171,8 @@ mixin _$CallControlBarStyle {
     final _this = (this as CallControlBarStyle);
     final _other = (other as CallControlBarStyle);
 
-    return _other.compactHeight == _this.compactHeight &&
-        _other.expandedHeight == _this.expandedHeight &&
-        _other.compactPadding == _this.compactPadding &&
-        _other.expandedPadding == _this.expandedPadding &&
+    return _other.height == _this.height &&
+        _other.padding == _this.padding &&
         _other.slotSpacing == _this.slotSpacing &&
         _other.controlSpacing == _this.controlSpacing &&
         _other.surfaceStyle == _this.surfaceStyle &&
@@ -204,10 +186,8 @@ mixin _$CallControlBarStyle {
 
     return Object.hash(
       runtimeType,
-      _this.compactHeight,
-      _this.expandedHeight,
-      _this.compactPadding,
-      _this.expandedPadding,
+      _this.height,
+      _this.padding,
       _this.slotSpacing,
       _this.controlSpacing,
       _this.surfaceStyle,
