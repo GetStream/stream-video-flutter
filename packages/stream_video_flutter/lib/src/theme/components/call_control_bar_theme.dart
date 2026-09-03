@@ -165,11 +165,16 @@ class CallControlBarStyle with _$CallControlBarStyle {
   final StreamSurfaceStyle? surfaceStyle;
 
   /// The bar's background while docked. Defaults to
-  /// `colorScheme.backgroundElevation1`.
+  /// `colorScheme.backgroundApp`, which is what the call surface and
+  /// `CallAppBar` are painted with, so the two ends of a call screen match.
   final Color? backgroundColor;
 
-  /// The colour the bar fades from while floating. Defaults to
-  /// `colorScheme.backgroundElevation0`.
+  /// The colour the bar fades from while floating.
+  ///
+  /// Defaults to `colorScheme.backgroundApp`, as [backgroundColor] does — a
+  /// bar floating over a call fades into the call's own ground. Separate from
+  /// [backgroundColor] so an app can tint the fade without repainting the
+  /// docked fill.
   final Color? floatingBackgroundColor;
 
   /// Linearly interpolate between two styles.
