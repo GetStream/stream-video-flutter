@@ -26,6 +26,18 @@ const _frontCamera = RtcMediaDevice(
   label: 'FaceTime HD Camera',
   kind: RtcMediaDeviceKind.videoInput,
 );
+// What Chrome reports alongside the real devices: the one it has picked, under
+// the reserved `default` id.
+const _defaultMic = RtcMediaDevice(
+  id: StreamMediaDevicesController.platformDefaultDeviceId,
+  label: 'Default - WH-1000XM3 (Bluetooth)',
+  kind: RtcMediaDeviceKind.audioInput,
+);
+const _defaultSpeaker = RtcMediaDevice(
+  id: StreamMediaDevicesController.platformDefaultDeviceId,
+  label: 'Default - WH-1000XM3 (Bluetooth)',
+  kind: RtcMediaDeviceKind.audioOutput,
+);
 
 void main() {
   late MockRtcMediaDeviceNotifier notifier;
@@ -244,11 +256,19 @@ void main() {
   group('StreamMediaDevicesController.forCall', () {
     late MockCall call;
 
+    setUpAll(() => registerFallbackValue(_builtInMic));
+
     setUp(() {
       call = MockCall();
       when(() => call.setVideoInputDevice(_frontCamera)).thenAnswer(
         (_) async => const Result.success(none),
       );
+      when(
+        () => call.setAudioInputDevice(any()),
+      ).thenAnswer((_) async => const Result.success(none));
+      when(
+        () => call.setAudioOutputDevice(any()),
+      ).thenAnswer((_) async => const Result.success(none));
     });
 
     StreamMediaDevicesController build() {
@@ -290,6 +310,61 @@ void main() {
 
       // Otherwise the menu shows a camera the call is not using.
       expect(controller.selectedVideoInput, isNull);
+    });
+
+    // The bug this fixes: with no way to draw "let the platform pick", every
+    // row in an in-call menu was unselected until something was picked.
+    group("the platform's own choice", () {
+      test('is what an unpicked selection resolves to', () async {
+        final controller = build();
+        deviceChanges.add(const [_defaultMic, _builtInMic, _defaultSpeaker]);
+        await pumpEventQueue();
+
+        expect(controller.selectedAudioInput, _defaultMic);
+        expect(controller.selectedAudioOutput, _defaultSpeaker);
+      });
+
+      test('gives way to a device the user picks', () async {
+        final controller = build();
+        deviceChanges.add(const [_defaultMic, _builtInMic]);
+        await pumpEventQueue();
+
+        await controller.selectAudioInput(_builtInMic);
+
+        expect(controller.selectedAudioInput, _builtInMic);
+      });
+
+      // Already in use, so there is nothing to switch to.
+      test('applies nothing when its own row is picked', () async {
+        final controller = build();
+        deviceChanges.add(const [_defaultMic, _builtInMic]);
+        await pumpEventQueue();
+
+        await controller.selectAudioInput(_defaultMic);
+
+        verifyNever(() => call.setAudioInputDevice(any()));
+      });
+
+      test('is resolved again once a picked device is unplugged', () async {
+        final controller = build();
+        deviceChanges.add(const [_defaultMic, _headset]);
+        await pumpEventQueue();
+        await controller.selectAudioInput(_headset);
+
+        deviceChanges.add(const [_defaultMic]);
+        await pumpEventQueue();
+
+        // The platform falls back to its own choice, so the menu says so.
+        expect(controller.selectedAudioInput, _defaultMic);
+      });
+
+      test('stays null where the platform reports no such device', () async {
+        final controller = build();
+        deviceChanges.add(const [_builtInMic, _headset]);
+        await pumpEventQueue();
+
+        expect(controller.selectedAudioInput, isNull);
+      });
     });
   });
 }

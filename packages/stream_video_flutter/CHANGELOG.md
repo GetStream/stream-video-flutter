@@ -193,6 +193,10 @@
 
 ### 🐞 Fixed
 
+- An in-call device menu marks the device in use. It marked nothing: `StreamMediaDevicesController.forCall` reports `supportsSystemDefault: false` — a call's device setters take a device, so there is no row for "let the platform pick" — and the selection stayed null until somebody picked something, which left every row unselected. The lobby was unaffected, since there null has a row of its own. The split buttons in a call's control bar are the first menus to show it.
+
+  Where null cannot be drawn, `selectedAudioInput` and its siblings now resolve to the device the platform reports as its own choice: the entry under the reserved `default` id, which is what web lists as "Default - <name>" alongside the real devices. It is a device like any other there, so its row is selectable and picking it applies nothing, since it is already in use. A platform that reports no such entry is unchanged.
+
 - The microphone and camera controls no longer flash the muted look while a call is being joined. `CallParticipantState.isAudioEnabled` is `!(audioTrack?.muted ?? true)`, so a track the SFU has not named yet reads exactly like a track the user muted — and every control drew red for the second between joining and the first track arriving.
 
   The two are distinguishable, and now distinguished: muting keeps the track entry and flags it, so an *absent* entry means nothing has said. While nothing has said, a control draws the state the call was joined with — `CallConnectOptions.microphone` and `camera`, where a provided track counts as on, since a lobby only hands one over for a device it opened. Once the track is reported it decides, so somebody who mutes a call they joined unmuted stays muted.
