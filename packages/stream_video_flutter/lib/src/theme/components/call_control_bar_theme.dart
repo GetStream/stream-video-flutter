@@ -1,0 +1,181 @@
+import 'package:flutter/widgets.dart';
+import 'package:theme_extensions_builder_annotation/theme_extensions_builder_annotation.dart';
+
+import '../../../stream_video_flutter.dart';
+
+part 'call_control_bar_theme.g.theme.dart';
+
+/// Applies a control bar theme to descendant [CallControlBar] widgets.
+///
+/// Wrap a subtree with [CallControlBarTheme] to override how the bar along the
+/// bottom of a call is drawn.
+///
+/// {@tool snippet}
+///
+/// Float the bar over the call rather than docking it under one:
+///
+/// ```dart
+/// CallControlBarTheme(
+///   data: CallControlBarThemeData(
+///     style: CallControlBarStyle(surfaceStyle: StreamSurfaceStyle.floating),
+///   ),
+///   child: child,
+/// )
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [CallControlBarThemeData], which describes the theme.
+///  * [CallControlBarStyle], the visual style it carries.
+class CallControlBarTheme extends InheritedTheme {
+  /// Creates a control bar theme.
+  const CallControlBarTheme({
+    super.key,
+    required this.data,
+    required super.child,
+  });
+
+  /// The control bar theme data for descendant widgets.
+  final CallControlBarThemeData data;
+
+  /// Returns the [CallControlBarThemeData] merged from local and global
+  /// themes.
+  ///
+  /// Local values from the nearest [CallControlBarTheme] ancestor take
+  /// precedence over the global values from
+  /// [StreamVideoTheme.callControlBarTheme]. This allows partial overrides:
+  /// setting only [CallControlBarStyle.backgroundColor] leaves the remaining
+  /// properties coming from the global theme.
+  static CallControlBarThemeData of(BuildContext context) {
+    final localTheme = context
+        .dependOnInheritedWidgetOfExactType<CallControlBarTheme>();
+    return StreamVideoTheme.of(
+      context,
+    ).callControlBarTheme.merge(localTheme?.data);
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    return CallControlBarTheme(data: data, child: child);
+  }
+
+  @override
+  bool updateShouldNotify(CallControlBarTheme oldWidget) =>
+      data != oldWidget.data;
+}
+
+/// Theme data for customizing [CallControlBar] widgets.
+///
+/// See also:
+///
+///  * [CallControlBarStyle], the style embedded here.
+///  * [CallControlBarTheme], for overriding it in a subtree.
+@themeGen
+@immutable
+class CallControlBarThemeData with _$CallControlBarThemeData {
+  /// Creates control bar theme data.
+  const CallControlBarThemeData({this.style});
+
+  /// Visual styling for the control bar.
+  final CallControlBarStyle? style;
+
+  /// Linearly interpolate between two theme data objects.
+  static CallControlBarThemeData? lerp(
+    CallControlBarThemeData? a,
+    CallControlBarThemeData? b,
+    double t,
+  ) => _$CallControlBarThemeData.lerp(a, b, t);
+}
+
+/// Visual styling properties for a [CallControlBar].
+///
+/// Deliberately small. The bar draws no buttons of its own, so a control's
+/// appearance belongs to `StreamButtonTheme` and the tone it is given; what is
+/// left is the bar's own geometry and surface.
+///
+/// The geometry comes in two sets rather than three. [StreamScreenSize.medium]
+/// is drawn the way [StreamScreenSize.small] is — the design only widens the
+/// bar at [StreamScreenSize.large] — so a `compact` and an `expanded` value
+/// cover every size, and a third would imply a distinction that does not
+/// exist.
+@themeGen
+@immutable
+class CallControlBarStyle with _$CallControlBarStyle {
+  /// Creates a control bar style with optional property overrides.
+  const CallControlBarStyle({
+    this.compactHeight,
+    this.expandedHeight,
+    this.compactPadding,
+    this.expandedPadding,
+    this.slotSpacing,
+    this.controlSpacing,
+    this.surfaceStyle,
+    this.backgroundColor,
+    this.floatingBackgroundColor,
+  });
+
+  /// The bar's height at [StreamScreenSize.small] and
+  /// [StreamScreenSize.medium]. Defaults to 64.
+  ///
+  /// The slots are centred in it rather than padded to it, so this has to
+  /// clear the tallest control the bar is given — 48 for the icon buttons the
+  /// design system draws, which is the button's tap target rather than its
+  /// visible 40.
+  final double? compactHeight;
+
+  /// The bar's height at [StreamScreenSize.large]. Defaults to
+  /// `kStreamToolbarHeight` (72). As [compactHeight] is.
+  final double? expandedHeight;
+
+  /// The padding along the bar's start and end edges at
+  /// [StreamScreenSize.small] and [StreamScreenSize.medium].
+  ///
+  /// Defaults to `EdgeInsets.symmetric(horizontal: spacing.xs)`. Vertical
+  /// padding narrows the band the slots are centred in rather than moving
+  /// them, since the bar's height is [compactHeight] either way.
+  final EdgeInsetsGeometry? compactPadding;
+
+  /// The padding along the bar's start and end edges at
+  /// [StreamScreenSize.large].
+  ///
+  /// Defaults to `EdgeInsets.symmetric(horizontal: spacing.md)`. As
+  /// [compactPadding] is.
+  final EdgeInsetsGeometry? expandedPadding;
+
+  /// The minimum gap kept between the centre slot and either side slot.
+  ///
+  /// Defaults to `spacing.md`. The centre is centred in the bar's full width,
+  /// so this is reserved on both sides of it whichever side is populated.
+  final double? slotSpacing;
+
+  /// The gap between two controls within the same slot. Defaults to
+  /// `spacing.none`.
+  ///
+  /// Zero because the design system's icon buttons already carry a 48 tap
+  /// target around a 40 visual, which is where the 8 the design shows between
+  /// two buttons comes from. Raising this adds to that gap rather than
+  /// creating it.
+  final double? controlSpacing;
+
+  /// Whether the bar is docked under the call or floating over it.
+  ///
+  /// Defaults to the ambient `StreamSurfaceStyle`. A docked bar is opaque and
+  /// separated from the content by a hairline; a floating one fades into it.
+  final StreamSurfaceStyle? surfaceStyle;
+
+  /// The bar's background while docked. Defaults to
+  /// `colorScheme.backgroundElevation1`.
+  final Color? backgroundColor;
+
+  /// The colour the bar fades from while floating. Defaults to
+  /// `colorScheme.backgroundElevation0`.
+  final Color? floatingBackgroundColor;
+
+  /// Linearly interpolate between two styles.
+  static CallControlBarStyle? lerp(
+    CallControlBarStyle? a,
+    CallControlBarStyle? b,
+    double t,
+  ) => _$CallControlBarStyle.lerp(a, b, t);
+}
