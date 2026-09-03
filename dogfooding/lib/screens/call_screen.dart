@@ -237,6 +237,97 @@ class _CallScreenState extends State<CallScreen> {
     });
   }
 
+  // The controls the two bar layouts have in common. Built per call rather
+  // than held as fields: they close over the call the content builder hands
+  // in, and a bar rebuilds whenever the window crosses a breakpoint anyway.
+
+  ToggleLayoutOption _layoutToggle() => ToggleLayoutOption(
+    initialLayout: _currentLayoutMode,
+    onLayoutModeChanged: (layout) {
+      setState(() {
+        _currentLayoutMode = layout;
+      });
+    },
+  );
+
+  ToggleScreenShareOption _screenShareOption(Call call) =>
+      ToggleScreenShareOption(
+        call: call,
+        screenShareConstraints: const ScreenShareConstraints(
+          useiOSBroadcastExtension: true,
+          captureScreenAudio: true,
+        ),
+        desktopScreenSelectorBuilder:
+            // ignore: avoid_redundant_argument_values
+            _useCustomDesktopScreenShareOption
+            ? _customDesktopScreenShareSelector
+            : null,
+      );
+
+  // Split buttons rather than plain toggles, so the device can be changed
+  // mid-call without opening the settings menu.
+  //
+  // Listening to the devices as well as the call: the buttons disable
+  // themselves when the platform reports no device, which arrives on the
+  // device stream rather than in call state.
+  Widget _microphoneButton(Call call) => ListenableBuilder(
+    listenable: _devices,
+    builder: (context, _) => PartialCallStateBuilder<bool>(
+      call: call,
+      selector: (state) => state.localParticipant?.isAudioEnabled ?? false,
+      builder: (context, enabled) => StreamMicrophoneSplitButton(
+        devices: _devices,
+        enabled: enabled,
+        unavailable: _noDeviceFor(_devices.audioInputs),
+        // The bar sits along the bottom, so its menus come up rather
+        // than down.
+        menuDirection: StreamMenuDirection.up,
+        // Badging is appearance only, so a control with nothing to open
+        // has to be disabled here as well.
+        onPressed: _noDeviceFor(_devices.audioInputs)
+            ? null
+            : () => _setMicrophoneEnabled(enabled: !enabled),
+      ),
+    ),
+  );
+
+  /// The camera's split button. See [_microphoneButton].
+  Widget _cameraButton(Call call) => ListenableBuilder(
+    listenable: _devices,
+    builder: (context, _) => PartialCallStateBuilder<bool>(
+      call: call,
+      selector: (state) => state.localParticipant?.isVideoEnabled ?? false,
+      builder: (context, enabled) => StreamCameraSplitButton(
+        devices: _devices,
+        enabled: enabled,
+        unavailable: _noDeviceFor(_devices.videoInputs),
+        menuDirection: StreamMenuDirection.up,
+        onPressed: _noDeviceFor(_devices.videoInputs)
+            ? null
+            : () => _setCameraEnabled(enabled: !enabled),
+      ),
+    ),
+  );
+
+  // onTap, so the button opens this app's own participants screen rather than
+  // the SDK's list.
+  Widget _participantsControl(Call call) =>
+      PartialCallStateBuilder<List<CallParticipantState>>(
+        call: call,
+        selector: (state) => state.callParticipants,
+        builder: (context, participants) => StreamParticipantsControl(
+          onTap: _channel != null ? () => showParticipants(context) : null,
+          participants: [
+            for (final participant in participants)
+              UserInfo(
+                id: participant.userId,
+                name: participant.name,
+                image: participant.image,
+              ),
+          ],
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     // ignore: deprecated_member_use
@@ -347,18 +438,17 @@ class _CallScreenState extends State<CallScreen> {
                 );
               },
               callAppBarWidgetBuilder: (context, call) {
+                // A wide window has room for the layout toggle in the control
+                // bar's leading slot, which is where the design puts it, so
+                // the app bar only carries it below that breakpoint.
+                final showLayoutToggle = !context.streamScreenSize.isLarge;
+
                 return CallAppBar(
                   call: call,
                   leadingWidth: 120,
                   leading: Row(
                     children: [
-                      ToggleLayoutOption(
-                        onLayoutModeChanged: (layout) {
-                          setState(() {
-                            _currentLayoutMode = layout;
-                          });
-                        },
-                      ),
+                      if (showLayoutToggle) _layoutToggle(),
                       PartialCallStateBuilder(
                         call: call,
                         selector: (state) => state.localParticipant != null,
@@ -373,119 +463,53 @@ class _CallScreenState extends State<CallScreen> {
                 );
               },
               callControlsWidgetBuilder: (BuildContext context, Call call) {
-                final colorScheme = StreamTheme.of(context).colorScheme;
-                return Container(
-                  padding: const EdgeInsets.only(top: 16, left: 8, bottom: 8),
-                  color: colorScheme.backgroundElevation0,
-                  child: SafeArea(
-                    child: Row(
-                      children: [
-                        CallFeatureButton(
-                          icon: Icon(context.streamIcons.moreVerticalFill),
-                          selected: _moreMenuVisible,
-                          onPressed: () {
-                            toggleMoreMenu(context);
-                          },
-                        ),
-                        ToggleScreenShareOption(
-                          call: call,
-                          screenShareConstraints: const ScreenShareConstraints(
-                            useiOSBroadcastExtension: true,
-                            captureScreenAudio: true,
-                          ),
-                          desktopScreenSelectorBuilder:
-                              // ignore: avoid_redundant_argument_values
-                              _useCustomDesktopScreenShareOption
-                              ? _customDesktopScreenShareSelector
-                              : null,
-                        ),
-                        // Split buttons rather than plain toggles, so the
-                        // device can be changed mid-call without opening the
-                        // settings menu.
-                        // Listening to the devices as well as the call: the
-                        // buttons disable themselves when the platform reports
-                        // no device, which arrives on the device stream rather
-                        // than in call state.
-                        ListenableBuilder(
-                          listenable: _devices,
-                          builder: (context, _) => Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              PartialCallStateBuilder<bool>(
-                                call: call,
-                                selector: (state) =>
-                                    state.localParticipant?.isAudioEnabled ??
-                                    false,
-                                builder: (context, enabled) =>
-                                    StreamMicrophoneSplitButton(
-                                      devices: _devices,
-                                      enabled: enabled,
-                                      unavailable: _noDeviceFor(
-                                        _devices.audioInputs,
-                                      ),
-                                      // The bar sits along the bottom, so its
-                                      // menus come up rather than down.
-                                      menuDirection: StreamMenuDirection.up,
-                                      // Badging is appearance only, so a
-                                      // control with nothing to open has to
-                                      // be disabled here as well.
-                                      onPressed:
-                                          _noDeviceFor(_devices.audioInputs)
-                                          ? null
-                                          : () => _setMicrophoneEnabled(
-                                              enabled: !enabled,
-                                            ),
-                                    ),
-                              ),
-                              PartialCallStateBuilder<bool>(
-                                call: call,
-                                selector: (state) =>
-                                    state.localParticipant?.isVideoEnabled ??
-                                    false,
-                                builder: (context, enabled) =>
-                                    StreamCameraSplitButton(
-                                      devices: _devices,
-                                      enabled: enabled,
-                                      unavailable: _noDeviceFor(
-                                        _devices.videoInputs,
-                                      ),
-                                      menuDirection: StreamMenuDirection.up,
-                                      // See the microphone above.
-                                      onPressed:
-                                          _noDeviceFor(_devices.videoInputs)
-                                          ? null
-                                          : () => _setCameraEnabled(
-                                              enabled: !enabled,
-                                            ),
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Spacer(),
-                        // onTap, so the button opens this app's own
-                        // participants screen rather than the SDK's list.
-                        PartialCallStateBuilder<List<CallParticipantState>>(
-                          call: call,
-                          selector: (state) => state.callParticipants,
-                          builder: (context, participants) =>
-                              StreamParticipantsControl(
-                                onTap: _channel != null
-                                    ? () => showParticipants(context)
-                                    : null,
-                                participants: [
-                                  for (final participant in participants)
-                                    UserInfo(
-                                      id: participant.userId,
-                                      name: participant.name,
-                                      image: participant.image,
-                                    ),
-                                ],
-                              ),
-                        ),
-                        _ShowChatButton(channel: _channel),
-                      ],
-                    ),
+                return CallControlBar(
+                  // A phone splits its controls between the two edges: there
+                  // is not enough width for a centre row and sides both.
+                  CallControlBarLayout(
+                    leading: [
+                      CallFeatureButton(
+                        icon: Icon(context.streamIcons.moreVerticalFill),
+                        selected: _moreMenuVisible,
+                        onPressed: () => toggleMoreMenu(context),
+                      ),
+                      _screenShareOption(call),
+                      _microphoneButton(call),
+                      _cameraButton(call),
+                    ],
+                    trailing: [
+                      _participantsControl(call),
+                      _ShowChatButton(channel: _channel),
+                    ],
+                  ),
+                  // Medium is left unset on purpose: a tablet gets the phone
+                  // bar, which is what the design shows.
+                  large: CallControlBarLayout(
+                    leading: [
+                      CallFeatureButton(
+                        icon: Icon(context.streamIcons.settingsFill),
+                        selected: _moreMenuVisible,
+                        onPressed: () => toggleMoreMenu(context),
+                      ),
+                      _layoutToggle(),
+                    ],
+                    center: [
+                      _microphoneButton(call),
+                      _cameraButton(call),
+                      ToggleClosedCaptionsOption(call: call),
+                      AddReactionOption(call: call),
+                      _screenShareOption(call),
+                      ToggleRecordingOption(call: call),
+                      LeaveCallOption(call: call),
+                    ],
+                    trailing: [
+                      CallFeatureButton(
+                        icon: Icon(context.streamIcons.statsFill),
+                        onPressed: () => showStats(context),
+                      ),
+                      _participantsControl(call),
+                      _ShowChatButton(channel: _channel),
+                    ],
                   ),
                 );
               },
