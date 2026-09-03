@@ -8,8 +8,8 @@ import 'package:stream_core_flutter/video.dart';
 
 import '../../stream_video_flutter.dart';
 import '../l10n/localization_extension.dart';
-import 'apply_device_change.dart';
 import 'call_button_badge.dart';
+import 'device_control.dart';
 
 /// Turns the microphone on and off, with a caret that picks which microphone
 /// and speaker to use.
@@ -99,7 +99,7 @@ class StreamMicrophoneSplitButton extends StatelessWidget {
   final bool? stopTrackOnMute;
 
   /// Called when the call refuses to mute or unmute. See
-  /// [ToggleMicrophoneOption.onError].
+  /// [StreamMicrophoneButton.onError].
   ///
   /// Null under [StreamMicrophoneSplitButton.withDevices], where pressing the
   /// button is the caller's own `onPressed` and there is no result to report.
@@ -343,16 +343,6 @@ class _CallDevicesState extends State<_CallDevices> {
       builder: (context, _) => widget.builder(context, devices),
     );
   }
-}
-
-extension on StreamMediaDevicesController {
-  /// Whether the platform has been asked and named nothing in [devices].
-  ///
-  /// Waits for [StreamMediaDevicesController.hasEnumerated]: the lists are
-  /// empty before the first enumeration because nothing has been asked, and a
-  /// control that read them straight away would badge itself on startup.
-  bool reportsNo(List<RtcMediaDevice> devices) =>
-      hasEnumerated && devices.isEmpty;
 }
 
 /// The shape both split buttons share.

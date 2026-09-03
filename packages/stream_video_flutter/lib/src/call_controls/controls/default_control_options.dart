@@ -10,9 +10,9 @@ List<Widget> defaultCallControlOptions({
   CallParticipantState? localParticipant,
 }) {
   return [
-    ToggleSpeakerphoneOption(call: call),
-    ToggleCameraOption(call: call, localParticipant: localParticipant),
-    ToggleMicrophoneOption(call: call, localParticipant: localParticipant),
-    FlipCameraOption(call: call, localParticipant: localParticipant),
+    StreamSpeakerphoneButton(call: call),
+    StreamCameraButton(call: call, localParticipant: localParticipant),
+    StreamMicrophoneButton(call: call, localParticipant: localParticipant),
+    StreamFlipCameraButton(call: call, localParticipant: localParticipant),
   ];
 }
