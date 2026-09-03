@@ -94,20 +94,16 @@ class CallControlBarThemeData with _$CallControlBarThemeData {
 /// appearance belongs to `StreamButtonTheme` and the tone it is given; what is
 /// left is the bar's own geometry and surface.
 ///
-/// The geometry comes in two sets rather than three. [StreamScreenSize.medium]
-/// is drawn the way [StreamScreenSize.small] is — the design only widens the
-/// bar at [StreamScreenSize.large] — so a `compact` and an `expanded` value
-/// cover every size, and a third would imply a distinction that does not
-/// exist.
+/// None of it varies by screen size: only *which* controls are drawn does. A
+/// bar that changed height or padding across a breakpoint jumped as a desktop
+/// window was dragged over it, for no gain.
 @themeGen
 @immutable
 class CallControlBarStyle with _$CallControlBarStyle {
   /// Creates a control bar style with optional property overrides.
   const CallControlBarStyle({
-    this.compactHeight,
-    this.expandedHeight,
-    this.compactPadding,
-    this.expandedPadding,
+    this.height,
+    this.padding,
     this.slotSpacing,
     this.controlSpacing,
     this.surfaceStyle,
@@ -115,33 +111,24 @@ class CallControlBarStyle with _$CallControlBarStyle {
     this.floatingBackgroundColor,
   });
 
-  /// The bar's height at [StreamScreenSize.small] and
-  /// [StreamScreenSize.medium]. Defaults to 64.
+  /// The bar's height, at every screen size. Defaults to
+  /// `kStreamToolbarHeight` (72).
   ///
   /// The slots are centred in it rather than padded to it, so this has to
   /// clear the tallest control the bar is given — 48 for the icon buttons the
   /// design system draws, which is the button's tap target rather than its
   /// visible 40.
-  final double? compactHeight;
+  final double? height;
 
-  /// The bar's height at [StreamScreenSize.large]. Defaults to
-  /// `kStreamToolbarHeight` (72). As [compactHeight] is.
-  final double? expandedHeight;
-
-  /// The padding along the bar's start and end edges at
-  /// [StreamScreenSize.small] and [StreamScreenSize.medium].
+  /// The padding along the bar's start and end edges, at every screen size.
   ///
-  /// Defaults to `EdgeInsets.symmetric(horizontal: spacing.xs)`. Vertical
-  /// padding narrows the band the slots are centred in rather than moving
-  /// them, since the bar's height is [compactHeight] either way.
-  final EdgeInsetsGeometry? compactPadding;
-
-  /// The padding along the bar's start and end edges at
-  /// [StreamScreenSize.large].
+  /// Defaults to `EdgeInsets.symmetric(horizontal: spacing.sm)` — 12, which
+  /// puts the visible edge of a control on the design's 16 once its tap
+  /// target's own 4 is added.
   ///
-  /// Defaults to `EdgeInsets.symmetric(horizontal: spacing.md)`. As
-  /// [compactPadding] is.
-  final EdgeInsetsGeometry? expandedPadding;
+  /// Vertical padding narrows the band the slots are centred in rather than
+  /// moving them, since the bar is [height] tall either way.
+  final EdgeInsetsGeometry? padding;
 
   /// The minimum gap kept between the centre slot and either side slot.
   ///

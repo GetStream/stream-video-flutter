@@ -148,19 +148,15 @@ class CallControlBar extends StatelessWidget {
 
   /// The height the bar renders at in [context], safe area excluded.
   ///
-  /// [CallControlBar] is not a [PreferredSizeWidget]: its height depends on
-  /// the window, which `preferredSize` cannot read. A caller that needs one —
-  /// to inset content out from under a floating bar, say — wraps the bar in a
+  /// [CallControlBar] is not a [PreferredSizeWidget]: the height is a themed
+  /// value, which `preferredSize` cannot read. A caller that needs one — to
+  /// inset content out from under a floating bar, say — wraps the bar in a
   /// [PreferredSize] built from this.
   static double heightOf(BuildContext context, {CallControlBarStyle? style}) {
-    final resolved = _CallControlBarStyleDefaults(
+    return _CallControlBarStyleDefaults(
       context,
       CallControlBarTheme.of(context).style?.merge(style) ?? style,
-    );
-
-    return context.streamScreenSize.isLarge
-        ? resolved.expandedHeight
-        : resolved.compactHeight;
+    ).height;
   }
 
   /// The surface style this bar renders with in [context].
@@ -181,15 +177,12 @@ class CallControlBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = context.streamScreenSize;
-    final isLarge = screenSize.isLarge;
-
     final resolved = _CallControlBarStyleDefaults(
       context,
       CallControlBarTheme.of(context).style?.merge(style) ?? style,
     );
 
-    final layout = layoutFor(screenSize);
+    final layout = layoutFor(context.streamScreenSize);
     final controlSpacing = resolved.controlSpacing;
 
     Widget? slot(List<Widget> controls) {
@@ -207,9 +200,9 @@ class CallControlBar extends StatelessWidget {
     // rather than padded down to it, so one height covers both a control's tap
     // target and its smaller visible box.
     Widget bar = SizedBox(
-      height: isLarge ? resolved.expandedHeight : resolved.compactHeight,
+      height: resolved.height,
       child: StreamToolbar(
-        padding: isLarge ? resolved.expandedPadding : resolved.compactPadding,
+        padding: resolved.padding,
         spacing: resolved.slotSpacing,
         leading: slot(layout.leading),
         middle: slot(layout.center),
@@ -262,10 +255,7 @@ class CallControlBar extends StatelessWidget {
     // bar above it, so the home indicator stays legible while the call shows
     // through the controls.
     final safeAreaBottom = primary ? MediaQuery.paddingOf(context).bottom : 0.0;
-    final height = context.streamScreenSize.isLarge
-        ? style.expandedHeight
-        : style.compactHeight;
-    final totalHeight = safeAreaBottom + height;
+    final totalHeight = safeAreaBottom + style.height;
 
     return streamFloatingFadeLinearGradient(
       color: style.floatingBackgroundColor,
@@ -289,18 +279,15 @@ class _CallControlBarStyleDefaults extends CallControlBarStyle {
   late final StreamColorScheme _colorScheme = _context.streamColorScheme;
 
   @override
-  double get compactHeight => _style?.compactHeight ?? 64;
+  double get height => _style?.height ?? kStreamToolbarHeight;
 
+  // `sm` rather than `md`, so the visible inset lands on the design's 16: a
+  // control is 40 visible inside a 48 tap target, which contributes the other
+  // 4 on every edge. Same reasoning, and the same pair of values, as
+  // StreamBottomAppBar at the same height.
   @override
-  double get expandedHeight => _style?.expandedHeight ?? kStreamToolbarHeight;
-
-  @override
-  EdgeInsetsGeometry get compactPadding =>
-      _style?.compactPadding ?? EdgeInsets.symmetric(horizontal: _spacing.xs);
-
-  @override
-  EdgeInsetsGeometry get expandedPadding =>
-      _style?.expandedPadding ?? EdgeInsets.symmetric(horizontal: _spacing.md);
+  EdgeInsetsGeometry get padding =>
+      _style?.padding ?? EdgeInsets.symmetric(horizontal: _spacing.sm);
 
   @override
   double get slotSpacing => _style?.slotSpacing ?? _spacing.md;
