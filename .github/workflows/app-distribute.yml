@@ -3,7 +3,7 @@ name: App Distribute CI
 on:
   push:
     branches:
-      - main
+      - v2
   release:
     types: [published]
 
@@ -37,6 +37,7 @@ env:
   APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
   APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
   FASTLANE_APPLE_ID: ${{ secrets.FASTLANE_APPLE_ID }}
+  FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 120
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

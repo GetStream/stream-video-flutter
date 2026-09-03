@@ -1,3 +1,27 @@
+## Upcoming
+
+### ✅ Added
+
+- [Android] Added a Telecom integration for the ringing flow, which registers incoming and outgoing ringing calls with the platform's [Telecom stack](https://developer.android.com/develop/connectivity/telecom) through Jetpack Telecom. This gives the call proper audio focus and a place in the system call state, and lets it be answered or hung up from a paired watch, a car head unit or a Bluetooth headset. The incoming call notification and full-screen ringing UI are unchanged. It is **on by default from Android 17**: for an app targeting API 37 the platform will not play a ringtone from a service started by a push unless the call is in the Telecom stack, so ringing does not work correctly without it. The default follows the Android version of the device rather than your `targetSdk`, so it is on for any app running on Android 17 — if you target below API 37 the restriction does not apply to you and you can opt out with `AndroidPushConfiguration(telecom: TelecomPushConfiguration(enabled: false))`. It is **off by default below Android 17**, where ringing works either way, so an existing integration is unaffected unless you pass `enabled: true`.
+- [iOS] Added `reportCallEnded`, which reports how a call ended to CallKit so it is listed correctly in the system Recents.
+
+### 🐞 Fixed
+
+- [iOS] Fixed the CallKit provider configuration being lost when a VoIP push woke the app before any Dart code had run, which dropped the configured ringtone, icon and Recents behaviour on a cold start.
+- [iOS] Fixed `reportNewIncomingCall` failures being swallowed, so a call CallKit refused to display simply vanished. It now emits an `ActionCallIncomingFailed` ringing event carrying why it was refused, most usefully when Do Not Disturb or the block list filtered the call before it was ever shown. The SDK reports it and takes no action: rejecting a filtered call ends the ring on every device the user is being called on, so whether to do that is left to the app.
+- [iOS] Fixed the CallKit call screen staying on screen after the call ended, when the call was one the system still knew about but the app no longer had the metadata for — a CallKit call that outlived the process that created it, after the app was killed, ran out of memory or was hot restarted. Such a call is reported by the platform with nothing but its uuid, so no call cid could match it and nothing ended it for the rest of the app's life.
+- [iOS] Fixed a refused CallKit transaction being logged and dropped. An end transaction the call controller rejected left the call on screen, since nothing retried it and nothing else ended it; the call is now reported as ended through the provider instead, which clears the UI. Callers waiting on such a transaction were also never told it had failed, because the completion only ran on success.
+- [Android] Fixed the incoming call ringtone being silently muted on Android 17. The ringtone is now played from a `phoneCall` foreground service, which Android 17's background audio hardening requires for audio played while no activity is visible.
+
+### 🔄 Changed
+
+- [Android] The plugin now compiles against Java 17, matching the other Stream Video Flutter packages, and adds `androidx.core:core-telecom` and `org.jetbrains.kotlinx:kotlinx-coroutines-android` as dependencies. 
+- [Android] `androidx.core:core-telecom` contributes `BLUETOOTH_CONNECT` and two components of its own — `androidx.core.telecom.internal.JetpackConnectionService` and `MuteStateReceiver` — to your merged manifest. `BLUETOOTH_CONNECT` is now declared by this plugin too, so it is owned rather than inherited invisibly. It is optional: ringing does not depend on it, `CallsManager.addCall` requires only `MANAGE_OWN_CALLS`, and Jetpack Telecom checks the Bluetooth grant before every use. It is a runtime permission from API 31, and without it only the active Bluetooth device is surfaced, under a generic name.
+
+## 1.5.0
+
+- Updated `stream_video` dependency to [`1.5.0`](https://pub.dev/packages/stream_video/changelog).
+
 ## 1.4.3
 
 ### 🐞 Fixed

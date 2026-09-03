@@ -5,7 +5,7 @@ import 'protobuf/video/sfu/models/models.pb.dart';
 import 'src/video_environment_manager.dart';
 
 const String streamSdkName = 'stream-flutter';
-const String streamVideoVersion = '1.4.3';
+const String streamVideoVersion = '1.5.0';
 const String openapiModelsVersion = '225.14.0';
 const String protocolModelsVersion = '1.48.0';
 const String androidWebRTCVersion = webrtc.androidWebRTCVersion;

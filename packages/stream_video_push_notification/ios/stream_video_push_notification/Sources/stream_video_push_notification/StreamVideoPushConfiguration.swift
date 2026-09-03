@@ -103,6 +103,43 @@ import Foundation
         }
     }
 
+    // MARK: - Persistence
+
+    /// UserDefaults key holding the last configuration received from Dart.
+    private static let persistedConfigurationKey = "io.getstream.callKit_configuration"
+
+    /// Persists the configuration so it survives a process restart.
+    ///
+    /// A VoIP push can wake the app before any Dart code has run, in which case
+    /// `initData` has not been called yet and the in-memory configuration is empty. Without a
+    /// persisted copy the CallKit provider would be built from defaults, losing the configured
+    /// ringtone, icon and Recents behaviour. 
+    @objc public func persist() {
+        UserDefaults.standard.set(persistedPayload(), forKey: Self.persistedConfigurationKey)
+    }
+
+    /// The configuration without `headers`.
+    ///
+    /// `headers` arrives straight from Dart as an untyped map, so it can hold values UserDefaults
+    /// refuses: a Dart `null` becomes `NSNull`, and storing it raises an uncaught
+    /// `NSInvalidArgumentException` that would crash the app on every `initData`. Nothing on iOS
+    /// reads the headers; they exist for the Android image loader.
+    private func persistedPayload() -> [String: Any] {
+        var payload = toJSON()
+        payload.removeValue(forKey: "headers")
+        return payload
+    }
+
+    /// Returns the last persisted configuration, or nil when none was stored yet.
+    @objc public static func loadPersisted() -> StreamVideoPushConfiguration? {
+        guard
+            let stored = UserDefaults.standard.dictionary(forKey: persistedConfigurationKey)
+        else {
+            return nil
+        }
+        return StreamVideoPushConfiguration(args: stored)
+    }
+
     open func toJSON() -> [String: Any] {
         let ios: [String: Any] = [
             "iconName": iconName,

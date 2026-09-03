@@ -49,8 +49,8 @@ class AppInjector {
 
     // Repositories
     locator.registerSingleton(
-      // ignore: avoid_redundant_argument_values
-      const TokenService(customEnvironmentLoader: customEnvironmentLoader),
+      // ignore: prefer_const_constructors, avoid_redundant_argument_values
+      TokenService(customEnvironmentLoader: customEnvironmentLoader),
     );
 
     locator.registerFactoryParam<UserAuthRepository, User, TokenResponse>((
@@ -176,7 +176,13 @@ StreamVideo _initStreamVideo(
       ),
       pushConfiguration: const StreamVideoPushConfiguration(
         ios: IOSPushConfiguration(iconName: 'IconMask'),
-        android: AndroidPushConfiguration(defaultAvatar: 'assets/logo.png'),
+        android: AndroidPushConfiguration(
+          defaultAvatar: 'assets/logo.png',
+          telecom: TelecomPushConfiguration(
+            enabled: true,
+            schema: 'streamvideo',
+          ),
+        ),
       ),
       registerApnDeviceToken: true,
     ),

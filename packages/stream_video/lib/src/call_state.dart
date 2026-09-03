@@ -66,6 +66,7 @@ class CallState extends Equatable {
       custom: const {},
       isVideoModerated: false,
       isAudioSuspended: false,
+      isWebAudioPlaybackBlocked: false,
       isE2eeEnabled: false,
     );
   }
@@ -110,6 +111,7 @@ class CallState extends Equatable {
     required this.custom,
     required this.isVideoModerated,
     required this.isAudioSuspended,
+    required this.isWebAudioPlaybackBlocked,
     required this.isE2eeEnabled,
   });
 
@@ -156,6 +158,14 @@ class CallState extends Equatable {
 
   /// Whether audio tracks have been suspended for this call.
   final bool isAudioSuspended;
+
+  /// Whether the browser's autoplay policy is blocking playback of remote
+  /// audio. Playback resumes only once `Call.resumeWebAudioPlayback()` is
+  /// called from within a user gesture, so show a "tap to enable sound"
+  /// affordance while this is `true`.
+  ///
+  /// Web only; always `false` on every other platform.
+  final bool isWebAudioPlaybackBlocked;
 
   /// Whether the SFU reports this call as end-to-end encrypted.
   final bool isE2eeEnabled;
@@ -233,6 +243,7 @@ class CallState extends Equatable {
     Map<String, Object>? custom,
     bool? isVideoModerated,
     bool? isAudioSuspended,
+    bool? isWebAudioPlaybackBlocked,
     bool? isE2eeEnabled,
   }) {
     return CallState._(
@@ -278,6 +289,8 @@ class CallState extends Equatable {
       custom: custom ?? this.custom,
       isVideoModerated: isVideoModerated ?? this.isVideoModerated,
       isAudioSuspended: isAudioSuspended ?? this.isAudioSuspended,
+      isWebAudioPlaybackBlocked:
+          isWebAudioPlaybackBlocked ?? this.isWebAudioPlaybackBlocked,
       isE2eeEnabled: isE2eeEnabled ?? this.isE2eeEnabled,
     );
   }
@@ -354,6 +367,7 @@ class CallState extends Equatable {
     custom,
     isVideoModerated,
     isAudioSuspended,
+    isWebAudioPlaybackBlocked,
     isE2eeEnabled,
   ];
 
@@ -364,6 +378,7 @@ class CallState extends Equatable {
         ' sessionId: $sessionId, isRecording: $isRecording,'
         ' isVideoModerated: $isVideoModerated,'
         ' isAudioSuspended: $isAudioSuspended,'
+        ' isWebAudioPlaybackBlocked: $isWebAudioPlaybackBlocked,'
         ' isE2eeEnabled: $isE2eeEnabled,'
         ' settings: $settings, egress: $egress, '
         ' videoInputDevice: $videoInputDevice,'

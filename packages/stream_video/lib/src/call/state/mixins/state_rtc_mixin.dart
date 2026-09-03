@@ -52,4 +52,15 @@ mixin StateRtcMixin on StateNotifier<CallState>, StatePendingTracksMixin {
       _logger.v(() => '[rtcUpdateSubscriberTrack] pSame: $participant');
     }
   }
+
+  /// Records whether the browser's autoplay policy is blocking remote audio
+  /// (web only), so integrators can react to it through `call.state` instead of
+  /// polling.
+  void rtcSetWebAudioPlaybackBlocked({required bool isBlocked}) {
+    if (state.isWebAudioPlaybackBlocked == isBlocked) return;
+
+    _logger.d(() => '[rtcSetWebAudioPlaybackBlocked] isBlocked: $isBlocked');
+
+    state = state.copyWith(isWebAudioPlaybackBlocked: isBlocked);
+  }
 }

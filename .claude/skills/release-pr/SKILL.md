@@ -121,17 +121,53 @@ For each, **apply the first matching rule below** — it's a decision tree, not 
    `git log v<prev>..HEAD --oneline -- packages/<pkg>`. Add a `## <version>` header with bullets in the existing
    emoji-prefixed sections only (`### ✅ Added`, `### 🐞 Fixed`, `### 🔄 Changed`, `### ⚠️ Deprecated`,
    `### ✨ Refactor`). Don't invent new section names.
-3. **Only a `stream_video` dep bump** (no in-package changes, but depends on `stream_video`) → add the dep-bump line:
+3. **No user-facing changes, but the package depends on `stream_video`** → add the dep-bump line:
    ```
    ## <version>
 
    - Updated `stream_video` dependency to [`<version>`](https://pub.dev/packages/stream_video/changelog).
    ```
-4. **Anything else** (internal-only changes, test fixes, refactors, or truly nothing) → add `## <version>` +
-   `- Minor bug fixes and improvements`.
+4. **No user-facing changes and no `stream_video` dependency** → add the version-sync line:
+   ```
+   ## <version>
+
+   - Sync version with `stream_video_flutter` <version>
+   ```
+
+Rules 3 and 4 are split by the **dependency**, not by how much changed. Internal-only churn (gradle bumps,
+`analysis_options.yaml`, lints, test fixes) is not a user-facing change, so it does not promote a package to rule 2 —
+it still lands on 3 or 4. Determine which with:
+
+```bash
+grep -l "^  stream_video:" packages/*/pubspec.yaml
+```
+
+`stream_video_screen_sharing` is the only package that does not depend on `stream_video`, so it is the only one that
+ever gets the rule 4 line. Every other package falls to rule 3 when it has nothing user-facing of its own.
+
+Neither line is `- Minor bug fixes and improvements`. That wording has been used in past releases but says nothing
+useful to an integrator — don't reach for it, and don't invent a third variant.
 
 **Every package gets a `## <version>` header**, even if it's only a dep-bump line. Empty version sections and
 missing headers both fail pana.
+
+#### Then: mirror `stream_video` into `stream_video_flutter`
+
+This runs **after** the decision tree, on top of whatever rule 1 or 2 produced for `stream_video_flutter`.
+
+Integrators read `stream_video_flutter`'s CHANGELOG as the changelog for the release — most never open
+`stream_video`'s. So `stream_video_flutter`'s `## <version>` section must be the **union**: every bullet from
+`stream_video`'s `## <version>` section, plus `stream_video_flutter`'s own.
+
+- Copy the bullets **verbatim**. Don't re-summarise, re-word, or attribute them to `stream_video`.
+- Merge into matching emoji-prefixed sections. Within a section put `stream_video_flutter`'s own bullets first, then
+  the ones carried over from `stream_video`.
+- If `stream_video` has a section `stream_video_flutter` lacks, add it, following the section order already used in
+  the file.
+- Skip any bullet already present in `stream_video_flutter` — don't duplicate.
+- `stream_video`'s own `## <version>` section is left as-is; this copies out of it, never into it.
+
+Verify: every bullet under `stream_video`'s `## <version>` appears under `stream_video_flutter`'s `## <version>`.
 
 ### 4. Sanity-check
 
