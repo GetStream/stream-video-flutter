@@ -2,6 +2,34 @@
 
 ### ✅ Added
 
+- Added `CallControlBar`, the row of controls along the bottom of a call. It takes a `CallControlBarLayout` per screen size — `leading`, `center` and `trailing` slots of plain widgets — and draws the one the window calls for, falling back to the next smaller layout that was given. Only `small` is required, so a bar handed `small` and `large` draws `small` on a tablet.
+
+  The centre is centred in the bar's full width rather than in the gap between the two sides, so a long leading group and an empty trailing one leave it where it was. It is given what is left after reserving the wider side's width on both sides of it — which is why at `StreamScreenSize.small` you want either the two sides or the centre, not both.
+
+  The bar owns its chrome: the background, the hairline separating it from the call, and the bottom safe-area inset. It owns no controls; a caller supplies every one of them.
+
+  ```dart
+  CallControlBar(
+    CallControlBarLayout(
+      leading: [ToggleMicrophoneOption(call: call), ToggleCameraOption(call: call)],
+      trailing: [StreamParticipantsControl(participants: participants)],
+    ),
+    large: CallControlBarLayout(
+      leading: [ToggleLayoutOption(onLayoutModeChanged: setLayout)],
+      center: [
+        ToggleMicrophoneOption(call: call),
+        ToggleCameraOption(call: call),
+        LeaveCallOption(call: call),
+      ],
+      trailing: [StreamParticipantsControl(participants: participants)],
+    ),
+  )
+  ```
+
+  Its geometry and surface come from `CallControlBarThemeData` on `StreamVideoTheme`, or from a `CallControlBarTheme` over a subtree. `CallControlBarStyle.surfaceStyle` docks the bar or floats it over the call, the way `StreamBottomAppBar` does.
+
+  It is deliberately not a `PreferredSizeWidget`: its height depends on the window and `preferredSize` cannot read one, so a caller that needs a preferred size builds it from `CallControlBar.heightOf(context)`.
+
 - `CallButtonBadge` is no longer exported. It exists so the badge sits in the same place on both call buttons, which is an implementation detail; exporting it committed the package to its shape and gave integrators a way to badge things inconsistently.
 - `CallControlButton` no longer overrides `StreamButtonTheme` for every tone. Only `positive` repaints the primary background — there is no success button style in the design system — and wrapping the other two overrode an app's own primary style for buttons that never use it.
 - `StreamMenuHandle` is an `abstract interface class`, so it cannot be accidentally extended.
