@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -10,7 +12,7 @@ void main() {
   // what TestWrapper's theme installs.
   const icons = StreamIcons();
 
-  testWidgets('ToggleMicrophoneOption', (tester) async {
+  testWidgets('StreamMicrophoneButton', (tester) async {
     var isAudioEnabled = true;
 
     final localParticipant = MockCallParticipantState();
@@ -30,7 +32,7 @@ void main() {
     // Microphone is enabled
     await tester.pumpWidget(
       TestWrapper(
-        child: ToggleMicrophoneOption(
+        child: StreamMicrophoneButton(
           localParticipant: localParticipant,
           call: call,
         ),
@@ -49,7 +51,7 @@ void main() {
     when(() => localParticipant.isAudioEnabled).thenReturn(isAudioEnabled);
     await tester.pumpWidget(
       TestWrapper(
-        child: ToggleMicrophoneOption(
+        child: StreamMicrophoneButton(
           localParticipant: localParticipant,
           call: call,
         ),
@@ -63,7 +65,7 @@ void main() {
   // returns a Result, and the button's state comes from the call's own
   // participant state, which does not change on failure. A viewer without
   // `sendAudio` pressed the button and got no movement, no message, no log.
-  testWidgets('ToggleMicrophoneOption reports a refusal', (tester) async {
+  testWidgets('StreamMicrophoneButton reports a refusal', (tester) async {
     final localParticipant = MockCallParticipantState();
     final call = MockCall();
     Object? reported;
@@ -75,7 +77,7 @@ void main() {
 
     await tester.pumpWidget(
       TestWrapper(
-        child: ToggleMicrophoneOption(
+        child: StreamMicrophoneButton(
           localParticipant: localParticipant,
           call: call,
           onError: (error) => reported = error,
@@ -89,7 +91,7 @@ void main() {
     expect(reported, _refused);
   });
 
-  testWidgets('ToggleCameraOption reports a refusal', (tester) async {
+  testWidgets('StreamCameraButton reports a refusal', (tester) async {
     final localParticipant = MockCallParticipantState();
     final call = MockCall();
     Object? reported;
@@ -101,7 +103,7 @@ void main() {
 
     await tester.pumpWidget(
       TestWrapper(
-        child: ToggleCameraOption(
+        child: StreamCameraButton(
           localParticipant: localParticipant,
           call: call,
           onError: (error) => reported = error,
@@ -117,7 +119,7 @@ void main() {
 
   // A control with no listener still has to survive the refusal rather than
   // throw out of the button's callback.
-  testWidgets('ToggleMicrophoneOption survives a refusal unwatched', (
+  testWidgets('StreamMicrophoneButton survives a refusal unwatched', (
     tester,
   ) async {
     final localParticipant = MockCallParticipantState();
@@ -130,7 +132,7 @@ void main() {
 
     await tester.pumpWidget(
       TestWrapper(
-        child: ToggleMicrophoneOption(
+        child: StreamMicrophoneButton(
           localParticipant: localParticipant,
           call: call,
         ),
@@ -141,6 +143,106 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
+  });
+
+  // The plain toggles had no way to say a device was missing, so a phone bar
+  // using them lost the badge the split buttons show. `devices` is opt-in:
+  // enumerating devices to draw a mic button is a cost a screen chooses.
+  group('with devices', () {
+    late StreamController<List<RtcMediaDevice>> deviceChanges;
+    late StreamMediaDevicesController devices;
+
+    setUp(() {
+      deviceChanges = StreamController<List<RtcMediaDevice>>.broadcast();
+
+      final notifier = MockRtcMediaDeviceNotifier();
+      when(
+        () => notifier.onDeviceChange,
+      ).thenAnswer((_) => deviceChanges.stream);
+      when(
+        notifier.enumerateDevices,
+      ).thenAnswer((_) async => const Result.success(<RtcMediaDevice>[]));
+
+      devices = StreamMediaDevicesController(deviceNotifier: notifier);
+      addTearDown(devices.dispose);
+    });
+
+    tearDown(() => deviceChanges.close());
+
+    Future<void> pump(WidgetTester tester) async {
+      final localParticipant = MockCallParticipantState();
+      when(() => localParticipant.isAudioEnabled).thenReturn(true);
+
+      await tester.pumpWidget(
+        TestWrapper(
+          child: StreamMicrophoneButton(
+            localParticipant: localParticipant,
+            call: MockCall(),
+            devices: devices,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    CallControlButton button(WidgetTester tester) =>
+        tester.widget<CallControlButton>(find.byType(CallControlButton));
+
+    testWidgets('badges and disables a microphone the platform lacks', (
+      tester,
+    ) async {
+      await pump(tester);
+      deviceChanges.add(const []);
+      await tester.pumpAndSettle();
+
+      expect(button(tester).showErrorBadge, isTrue);
+      expect(button(tester).onPressed, isNull);
+      // Badged, not muted: an absent device is not a choice the user made.
+      expect(button(tester).tone, CallControlTone.neutral);
+    });
+
+    testWidgets('says nothing until the platform has answered', (tester) async {
+      await pump(tester);
+
+      expect(button(tester).showErrorBadge, isFalse);
+      expect(button(tester).onPressed, isNotNull);
+    });
+
+    testWidgets('clears the badge once a microphone appears', (tester) async {
+      await pump(tester);
+      deviceChanges.add(const []);
+      await tester.pumpAndSettle();
+      deviceChanges.add(const [
+        RtcMediaDevice(
+          id: 'mic-1',
+          label: 'MacBook Pro Microphone',
+          kind: RtcMediaDeviceKind.audioInput,
+        ),
+      ]);
+      await tester.pumpAndSettle();
+
+      expect(button(tester).showErrorBadge, isFalse);
+      expect(button(tester).onPressed, isNotNull);
+    });
+  });
+
+  // A typedef to a class carries its constructors, so an unmigrated call site
+  // keeps compiling rather than only the type annotation surviving.
+  testWidgets('the deprecated name still builds one', (tester) async {
+    final localParticipant = MockCallParticipantState();
+    when(() => localParticipant.isAudioEnabled).thenReturn(true);
+
+    await tester.pumpWidget(
+      TestWrapper(
+        // ignore: deprecated_member_use_from_same_package
+        child: ToggleMicrophoneOption(
+          localParticipant: localParticipant,
+          call: MockCall(),
+        ),
+      ),
+    );
+
+    expect(find.byType(StreamMicrophoneButton), findsOneWidget);
   });
 }
 

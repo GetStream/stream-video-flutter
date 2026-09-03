@@ -91,7 +91,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
             if (showLeaveCallAction)
               Transform.scale(
                 scale: 0.8,
-                child: LeaveCallOption(
+                child: StreamLeaveCallButton(
                   call: call,
                   onLeaveCallTap: onLeaveCallTap,
                 ),
