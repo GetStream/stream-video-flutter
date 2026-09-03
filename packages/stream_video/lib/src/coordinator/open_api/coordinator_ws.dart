@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../globals.dart';
@@ -12,6 +13,16 @@ import 'coordinator_message_codec.dart';
 
 var _seq = 0;
 const _tag = 'SV:CoordinatorWS';
+
+/// The error carried by a disconnection source, as a [VideoError].
+///
+/// `_authenticateUser` only ever throws a [VideoError]; anything else is
+/// described by its `toString`.
+VideoError? _videoErrorOf(Object? error) => switch (error) {
+  null => null,
+  final VideoError it => it,
+  final it => VideoError(message: '$it'),
+};
 
 String _buildUrl(String baseUrl, String apiKey) {
   return '$baseUrl'
@@ -207,7 +218,20 @@ class CoordinatorWebSocket {
     final source = state.source;
     final wsException = source is ServerInitiated ? source.error : null;
 
-    final apiError = wsException?.apiError;
+    // An authentication failure is terminal (it is not reconnectable), so this
+    // event is the only account the app gets of it. Carry over the error that
+    // `_authenticateUser` threw instead of reporting a disconnect with no
+    // reason at all.
+    final authError = source is AuthenticationFailed
+        ? _videoErrorOf(source.error) ?? VideoError(message: source.closeReason)
+        : null;
+
+    final apiError =
+        wsException?.apiError ??
+        switch (authError) {
+          VideoErrorWithCause(cause: final StreamApiError it) => it,
+          _ => null,
+        };
     final wsReason = wsException?.reason;
 
     _events.emit(
@@ -219,7 +243,7 @@ class CoordinatorWebSocket {
             : null,
         closeReason: wsReason != null && wsReason != 'Unknown'
             ? wsReason
-            : apiError?.message,
+            : apiError?.message ?? authError?.message,
         apiError: apiError,
       ),
     );
