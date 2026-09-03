@@ -64,6 +64,19 @@ fun putString(context: Context?, key: String, value: String?) {
     editor?.commit()
 }
 
+/**
+ * Writes several values in one edit.
+ *
+ * Values that belong together stay consistent, and the whole write costs a single commit instead
+ * of one blocking disk write per key.
+ */
+fun putStrings(context: Context?, vararg entries: Pair<String, String?>) {
+    if (context == null || entries.isEmpty()) return
+    initInstance(context)
+    entries.forEach { (key, value) -> editor?.putString(key, value) }
+    editor?.commit()
+}
+
 fun getString(context: Context?, key: String, defaultValue: String = ""): String? {
     if (context == null) return null
     initInstance(context)

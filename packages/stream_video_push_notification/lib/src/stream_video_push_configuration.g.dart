@@ -48,6 +48,11 @@ AndroidPushConfiguration _$AndroidPushConfigurationFromJson(
   missedCallNotificationChannelName:
       json['missedCallNotificationChannelName'] as String?,
   showFullScreenOnLockScreen: json['showFullScreenOnLockScreen'] as bool?,
+  telecom: json['telecom'] == null
+      ? null
+      : TelecomPushConfiguration.fromJson(
+          json['telecom'] as Map<String, dynamic>,
+        ),
 );
 
 Map<String, dynamic> _$AndroidPushConfigurationToJson(
@@ -62,7 +67,19 @@ Map<String, dynamic> _$AndroidPushConfigurationToJson(
   'missedCallNotificationChannelName':
       instance.missedCallNotificationChannelName,
   'showFullScreenOnLockScreen': instance.showFullScreenOnLockScreen,
+  'telecom': instance.telecom?.toJson(),
 };
+
+TelecomPushConfiguration _$TelecomPushConfigurationFromJson(
+  Map<String, dynamic> json,
+) => TelecomPushConfiguration(
+  enabled: json['enabled'] as bool?,
+  schema: json['schema'] as String?,
+);
+
+Map<String, dynamic> _$TelecomPushConfigurationToJson(
+  TelecomPushConfiguration instance,
+) => <String, dynamic>{'enabled': instance.enabled, 'schema': instance.schema};
 
 IOSPushConfiguration _$IOSPushConfigurationFromJson(
   Map<String, dynamic> json,
