@@ -315,11 +315,17 @@ class _CallControlBarStyleDefaults extends CallControlBarStyle {
   StreamSurfaceStyle get surfaceStyle =>
       _style?.surfaceStyle ?? _context.streamSurfaceStyle;
 
+  // `backgroundApp` rather than core's `backgroundElevation1`, which is what
+  // its own bars use: the bar is chrome on the call surface, and `CallAppBar`
+  // and the call content's scaffold are both `backgroundApp`. Lifting only the
+  // bottom bar left the two ends of the same screen a shade apart in dark
+  // mode, where the elevations differ — in light they are all white, which is
+  // why the design frames agree either way.
   @override
   Color get backgroundColor =>
-      _style?.backgroundColor ?? _colorScheme.backgroundElevation1;
+      _style?.backgroundColor ?? _colorScheme.backgroundApp;
 
   @override
   Color get floatingBackgroundColor =>
-      _style?.floatingBackgroundColor ?? _colorScheme.backgroundElevation0;
+      _style?.floatingBackgroundColor ?? _colorScheme.backgroundApp;
 }
