@@ -40,6 +40,7 @@ class StreamRecordingButton extends StatelessWidget {
               : disabledRecordingIcon ?? icons.recordingFill,
         ),
         selected: enabled,
+        tone: .destructive,
         onPressed: () {
           if (!enabled) {
             call.startRecording();

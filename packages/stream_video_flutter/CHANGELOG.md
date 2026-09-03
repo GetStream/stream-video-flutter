@@ -2,6 +2,18 @@
 
 ### ✅ Added
 
+- `CallFeatureButton` takes a `tone`, so a feature can paint red while it is on rather than accent blue. `StreamRecordingButton` uses it: a running recording is capturing the call, which the design marks out from a feature that is merely active.
+
+  ```dart
+  CallFeatureButton(
+    icon: Icon(context.streamIcons.recordingStopFill),
+    selected: isRecording,
+    tone: .destructive,
+  )
+  ```
+
+  Only the selected state changes. An unselected feature is the same secondary grey whatever its tone, so a row of them reads as one row until something is switched on — which is what the design system's own component does across its Captions, Screen Share, Picture in Picture and Record variants.
+
 - `StreamMicrophoneButton` and `StreamCameraButton` no longer drop the `Result` their setter returns. A refusal is logged, and reported to the new `onError` if one is given.
 
   Dropping it made a refused press invisible: a control's on/off state comes from the call's own participant state, and that does not change when the call says no. A viewer without `sendAudio` pressed the microphone and got no button movement, no message and nothing in the log. The split buttons take the same `onError`.

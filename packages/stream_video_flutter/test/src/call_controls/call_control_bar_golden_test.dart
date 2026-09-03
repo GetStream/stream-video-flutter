@@ -13,8 +13,16 @@ void main() {
   CallControlButton control(IconData icon, {CallControlTone tone = .neutral}) =>
       CallControlButton(icon: Icon(icon), tone: tone, onPressed: () {});
 
-  CallFeatureButton feature(IconData icon, {bool selected = false}) =>
-      CallFeatureButton(icon: Icon(icon), selected: selected, onPressed: () {});
+  CallFeatureButton feature(
+    IconData icon, {
+    bool selected = false,
+    CallFeatureTone tone = .accent,
+  }) => CallFeatureButton(
+    icon: Icon(icon),
+    selected: selected,
+    tone: tone,
+    onPressed: () {},
+  );
 
   // What the design shows on a phone: the bar split in two, with no centre.
   final compact = CallControlBarLayout(
@@ -35,7 +43,7 @@ void main() {
       feature(icons.captionFill),
       feature(icons.emojiAddFill),
       feature(icons.presentDesktopFill, selected: true),
-      feature(icons.recordingFill),
+      feature(icons.recordingStopFill, selected: true, tone: .destructive),
       control(icons.phoneDownFill, tone: .negative),
     ],
     trailing: [
