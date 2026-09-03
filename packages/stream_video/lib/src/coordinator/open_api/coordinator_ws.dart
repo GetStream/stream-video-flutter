@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../globals.dart';

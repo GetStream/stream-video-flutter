@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:stream_core/stream_core.dart';
 
-import '../../../../platform_detector/platform_detector.dart';
 import '../../sdp.dart';
 import 'rule_mirror_sprop_stereo.dart';
 

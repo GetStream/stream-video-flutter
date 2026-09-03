@@ -1,3 +1,5 @@
+// ignore_for_file: missing_override_of_must_be_overridden
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';

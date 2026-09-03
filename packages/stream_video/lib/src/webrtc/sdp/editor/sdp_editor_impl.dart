@@ -1,9 +1,9 @@
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:meta/meta.dart';
+import 'package:stream_core/stream_core.dart';
 
 import '../../../logger/impl/tagged_logger.dart';
-import '../../../platform_detector/platform_detector.dart';
 import '../policy/sdp_policy.dart';
 import '../sdp.dart';
 import 'action/sdp_edit_action_factory.dart';

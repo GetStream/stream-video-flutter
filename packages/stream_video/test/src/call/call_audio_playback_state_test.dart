@@ -59,7 +59,7 @@ void main() {
 
     Future<void> expectBlocked(Call call, {required bool isBlocked}) {
       return expectLater(
-        call.state.valueStream.map((state) => state.isWebAudioPlaybackBlocked),
+        call.state.map((state) => state.isWebAudioPlaybackBlocked),
         emitsThrough(isBlocked),
       );
     }
