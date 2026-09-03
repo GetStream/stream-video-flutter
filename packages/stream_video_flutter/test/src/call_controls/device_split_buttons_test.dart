@@ -134,13 +134,19 @@ void main() {
       callState = MockCallState();
       localParticipant = MockCallParticipantState();
 
-      when(() => localParticipant.isVideoEnabled).thenReturn(true);
+      // The map the enabled state is derived from, rather than the derived
+      // getter: the control reads the track so it can tell an unreported one
+      // from a muted one.
+      when(() => localParticipant.publishedTracks).thenReturn({
+        SfuTrackType.video: TrackState.local(),
+      });
       when(() => callState.localParticipant).thenReturn(localParticipant);
+      when(() => call.connectOptions).thenReturn(const CallConnectOptions());
 
       final emitter = MutableStateEmitter<CallState>(callState, sync: true);
       when(() => call.state).thenAnswer((_) => emitter);
-      when(() => call.partialState<bool>(any())).thenAnswer((invocation) {
-        final CallStateSelector<bool> selector =
+      when(() => call.partialState<bool?>(any())).thenAnswer((invocation) {
+        final CallStateSelector<bool?> selector =
             invocation.positionalArguments[0];
         return Stream.value(selector(callState));
       });
