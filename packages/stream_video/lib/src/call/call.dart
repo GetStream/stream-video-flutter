@@ -1963,6 +1963,58 @@ class Call {
 
       final reconnectStartTime = DateTime.now();
       var fastReconnectAttemptsCount = 0;
+
+      // Counts consecutive unexpected throws. The per-strategy counters only
+      // advance when a strategy actually runs, so a throw raised before the
+      // dispatch (telemetry, network wait, stats) would otherwise keep the
+      // backoff pinned at zero. Reset as soon as an attempt completes without
+      // throwing.
+      var unexpectedErrorCount = 0;
+
+      // Shared post-failure handling: back off, then decide whether to
+      // escalate to `rejoin` or retry with `fast`.
+      Future<void> handleReconnectFailure({required bool wasMigrating}) async {
+        final strategyAttempt =
+            _reconnectStrategy == SfuReconnectionStrategy.fast
+            ? fastReconnectAttemptsCount
+            : _reconnectAttempts;
+        await Future<void>.delayed(
+          _retryPolicy.backoff(max(strategyAttempt, unexpectedErrorCount)),
+        );
+
+        final mustPerformRejoin =
+            DateTime.now().difference(reconnectStartTime) >
+            _fastReconnectDeadline;
+
+        final hasPendingRejoin = _isRejoinPending;
+        _isRejoinPending = false;
+
+        final hasClosedPeerConnection =
+            (_session?.rtcManager?.publisher?.isClosed() ?? false) ||
+            (_session?.rtcManager?.subscriber.isClosed() ?? false);
+
+        final hasReachedFastReconnectLimit = fastReconnectAttemptsCount >= 2;
+
+        final isAlreadyRejoining =
+            _reconnectStrategy == SfuReconnectionStrategy.rejoin;
+
+        final shouldRejoin =
+            isAlreadyRejoining ||
+            hasPendingRejoin ||
+            mustPerformRejoin ||
+            wasMigrating ||
+            hasReachedFastReconnectLimit ||
+            hasClosedPeerConnection;
+
+        if (!shouldRejoin) {
+          fastReconnectAttemptsCount++;
+        }
+
+        _reconnectStrategy = shouldRejoin
+            ? SfuReconnectionStrategy.rejoin
+            : SfuReconnectionStrategy.fast;
+      }
+
       do {
         // Wait for a stable network before reconnecting with rejoin/migrate
         // to prevent starting an SDP exchange on a transient connection that drops before the answer arrives.
@@ -2005,6 +2057,10 @@ class Call {
               '[reconnect] strategy: $_reconnectStrategy, attempt: $_reconnectAttempts',
         );
 
+        // capture BEFORE dispatch — strategy may change inside the helper
+        final wasMigrating =
+            _reconnectStrategy == SfuReconnectionStrategy.migrate;
+
         try {
           final networkStatus = await _awaitNetworkAvailableFuture;
           _logger.v(() => '[reconnect] network: $networkStatus');
@@ -2032,10 +2088,6 @@ class Call {
 
           unawaited(_sfuStatsReporter?.sendSfuStats());
 
-          // capture BEFORE dispatch — strategy may change inside the helper
-          final wasMigrating =
-              _reconnectStrategy == SfuReconnectionStrategy.migrate;
-
           final joinReason = triggeredByNetwork
               ? JoinReason.networkAvailable
               : _reconnectStrategy.joinReason;
@@ -2059,6 +2111,10 @@ class Call {
             _ => const Result.success(none),
           };
 
+          // The attempt ran to completion, so the throw counter no longer
+          // applies to the backoff.
+          unexpectedErrorCount = 0;
+
           if (reconnectResult.isSuccess) {
             _session?.trace(TraceTag.callReconnectSuccess, {
               'strategy': strategy.name,
@@ -2070,43 +2126,7 @@ class Call {
                   'strategy: $_reconnectStrategy, attempt: $_reconnectAttempts',
             );
 
-            final delay = _reconnectStrategy == SfuReconnectionStrategy.fast
-                ? _retryPolicy.backoff(fastReconnectAttemptsCount)
-                : _retryPolicy.backoff(_reconnectAttempts);
-            await Future<void>.delayed(delay);
-
-            final mustPerformRejoin =
-                DateTime.now().difference(reconnectStartTime) >
-                _fastReconnectDeadline;
-
-            final hasPendingRejoin = _isRejoinPending;
-            _isRejoinPending = false;
-
-            final hasClosedPeerConnection =
-                (_session?.rtcManager?.publisher?.isClosed() ?? false) ||
-                (_session?.rtcManager?.subscriber.isClosed() ?? false);
-
-            final hasReachedFastReconnectLimit =
-                fastReconnectAttemptsCount >= 2;
-
-            final isAlreadyRejoining =
-                _reconnectStrategy == SfuReconnectionStrategy.rejoin;
-
-            final shouldRejoin =
-                isAlreadyRejoining ||
-                hasPendingRejoin ||
-                mustPerformRejoin ||
-                wasMigrating ||
-                hasReachedFastReconnectLimit ||
-                hasClosedPeerConnection;
-
-            if (!shouldRejoin) {
-              fastReconnectAttemptsCount++;
-            }
-
-            _reconnectStrategy = shouldRejoin
-                ? SfuReconnectionStrategy.rejoin
-                : SfuReconnectionStrategy.fast;
+            await handleReconnectFailure(wasMigrating: wasMigrating);
           }
         } catch (error) {
           switch (error) {
@@ -2126,6 +2146,13 @@ class Call {
                 () =>
                     '[reconnect] unexpected error: $error, strategy: $_reconnectStrategy, attempt: $_reconnectAttempts',
               );
+
+              // Treat an unexpected throw like a failed reconnect result.
+              // Without this the loop retries the same strategy with no delay
+              // and no escalation, and since `reconnectTimeout` defaults to
+              // zero it spins until the call is left.
+              unexpectedErrorCount++;
+              await handleReconnectFailure(wasMigrating: wasMigrating);
           }
         }
       } while (state.value.status is! CallStatusConnected &&
