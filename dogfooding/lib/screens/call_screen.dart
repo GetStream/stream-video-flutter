@@ -114,31 +114,11 @@ class _CallScreenState extends State<CallScreen> {
     super.dispose();
   }
 
-  /// Turns the microphone on or off, saying so when the call refuses.
+  /// Says so on screen when the call refuses to change a device.
   ///
-  /// `setMicrophoneEnabled` returns a `Result`, and dropping it left the
-  /// button visibly doing nothing: its state comes from the call's own
-  /// participant state, which does not change on failure. A viewer without
-  /// `sendAudio` got no button movement, no message and no log.
-  Future<void> _setMicrophoneEnabled({required bool enabled}) async {
-    final message = 'Could not turn the microphone ${enabled ? 'on' : 'off'}';
-    final result = await widget.call.setMicrophoneEnabled(enabled: enabled);
-    result.fold(
-      onSuccess: (_) {},
-      onFailure: (error, _) => _reportDeviceFailure(message, error),
-    );
-  }
-
-  /// Turns the camera on or off. See [_setMicrophoneEnabled].
-  Future<void> _setCameraEnabled({required bool enabled}) async {
-    final message = 'Could not turn the camera ${enabled ? 'on' : 'off'}';
-    final result = await widget.call.setCameraEnabled(enabled: enabled);
-    result.fold(
-      onSuccess: (_) {},
-      onFailure: (error, _) => _reportDeviceFailure(message, error),
-    );
-  }
-
+  /// The SDK controls log a refusal and report it here; without a listener the
+  /// press is invisible, because a control's state comes from the call's own
+  /// participant state and that does not change on failure.
   void _reportDeviceFailure(String message, Object error) {
     debugPrint('$message: $error');
     if (!mounted) return;
@@ -147,14 +127,6 @@ class _CallScreenState extends State<CallScreen> {
       SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
     );
   }
-
-  /// Whether the platform has looked and found nothing.
-  ///
-  /// Guarded on the enumeration having happened at all: until then the list is
-  /// empty because nothing has been asked, and the control would flash an
-  /// error badge as the call opens.
-  bool _noDeviceFor(List<RtcMediaDevice> devices) =>
-      _devices.hasEnumerated && devices.isEmpty;
 
   Future<void> _connectChatChannel() async {
     final userAuthController = locator.get<UserAuthController>();
@@ -226,128 +198,54 @@ class _CallScreenState extends State<CallScreen> {
             : null,
       );
 
-  // Split buttons rather than plain toggles, so the device can be changed
-  // mid-call without opening the settings menu.
-  //
-  // Listening to the devices as well as the call: the buttons disable
-  // themselves when the platform reports no device, which arrives on the
-  // device stream rather than in call state.
-  Widget _microphoneButton(Call call) => ListenableBuilder(
-    listenable: _devices,
-    builder: (context, _) => PartialCallStateBuilder<bool>(
-      call: call,
-      selector: (state) => state.localParticipant?.isAudioEnabled ?? false,
-      builder: (context, enabled) => StreamMicrophoneSplitButton(
-        devices: _devices,
-        enabled: enabled,
-        unavailable: _noDeviceFor(_devices.audioInputs),
-        // The bar sits along the bottom, so its menus come up rather
-        // than down.
-        menuDirection: StreamMenuDirection.up,
-        // Badging is appearance only, so a control with nothing to open
-        // has to be disabled here as well.
-        onPressed: _noDeviceFor(_devices.audioInputs)
-            ? null
-            : () => _setMicrophoneEnabled(enabled: !enabled),
-      ),
-    ),
-  );
-
-  // The phone bar's microphone and camera: plain round buttons, no caret.
-  // A phone has one microphone and two cameras, and the design gives the
-  // narrow bar five controls in total — the device picker lives in the more
-  // menu there instead.
-  //
-  // Not the SDK's ToggleMicrophoneOption/ToggleCameraOption: those drop the
-  // Result that `setMicrophoneEnabled` returns, which is what left the button
-  // silently doing nothing for a viewer without `sendAudio`. See
-  // [_setMicrophoneEnabled].
-  Widget _microphoneToggle(Call call) => ListenableBuilder(
-    listenable: _devices,
-    builder: (context, _) {
-      final unavailable = _noDeviceFor(_devices.audioInputs);
-
-      return PartialCallStateBuilder<bool>(
-        call: call,
-        selector: (state) => state.localParticipant?.isAudioEnabled ?? false,
-        builder: (context, enabled) => CallControlButton(
-          icon: Icon(
-            enabled
-                ? context.streamIcons.voiceFill
-                : context.streamIcons.voiceOffFill,
-          ),
-          // An unavailable device is not a user choice, so it is badged
-          // rather than painted as something the user switched off.
-          tone: enabled || unavailable ? .neutral : .negative,
-          showErrorBadge: unavailable,
-          onPressed: unavailable
-              ? null
-              : () => _setMicrophoneEnabled(enabled: !enabled),
-        ),
-      );
-    },
+  // The phone bar's microphone and camera: plain round buttons, no caret. A
+  // phone has one microphone and two cameras, and the design gives the narrow
+  // bar five controls in total — the device picker lives in the more menu
+  // there instead.
+  ToggleMicrophoneOption _microphoneToggle(Call call) => ToggleMicrophoneOption(
+    call: call,
+    onError: (error) =>
+        _reportDeviceFailure('Could not switch the microphone', error),
   );
 
   /// The phone bar's camera. See [_microphoneToggle].
-  Widget _cameraToggle(Call call) => ListenableBuilder(
-    listenable: _devices,
-    builder: (context, _) {
-      final unavailable = _noDeviceFor(_devices.videoInputs);
-
-      return PartialCallStateBuilder<bool>(
-        call: call,
-        selector: (state) => state.localParticipant?.isVideoEnabled ?? false,
-        builder: (context, enabled) => CallControlButton(
-          icon: Icon(
-            enabled
-                ? context.streamIcons.videoFill
-                : context.streamIcons.videoOffFill,
-          ),
-          tone: enabled || unavailable ? .neutral : .negative,
-          showErrorBadge: unavailable,
-          onPressed: unavailable
-              ? null
-              : () => _setCameraEnabled(enabled: !enabled),
-        ),
-      );
-    },
+  ToggleCameraOption _cameraToggle(Call call) => ToggleCameraOption(
+    call: call,
+    onError: (error) =>
+        _reportDeviceFailure('Could not switch the camera', error),
   );
 
-  /// The camera's split button. See [_microphoneButton].
-  Widget _cameraButton(Call call) => ListenableBuilder(
-    listenable: _devices,
-    builder: (context, _) => PartialCallStateBuilder<bool>(
-      call: call,
-      selector: (state) => state.localParticipant?.isVideoEnabled ?? false,
-      builder: (context, enabled) => StreamCameraSplitButton(
+  // Split buttons rather than plain toggles, so the device can be changed
+  // mid-call without opening the settings menu.
+  //
+  // Sharing this screen's one controller: the settings menu offers the same
+  // device choice, and two controllers would disagree about which is in use.
+  StreamMicrophoneSplitButton _microphoneButton(Call call) =>
+      StreamMicrophoneSplitButton(
+        call: call,
         devices: _devices,
-        enabled: enabled,
-        unavailable: _noDeviceFor(_devices.videoInputs),
+        // The bar sits along the bottom, so its menus come up rather than
+        // down.
         menuDirection: StreamMenuDirection.up,
-        onPressed: _noDeviceFor(_devices.videoInputs)
-            ? null
-            : () => _setCameraEnabled(enabled: !enabled),
-      ),
-    ),
+        onError: (error) =>
+            _reportDeviceFailure('Could not switch the microphone', error),
+      );
+
+  /// The camera's split button. See [_microphoneButton].
+  StreamCameraSplitButton _cameraButton(Call call) => StreamCameraSplitButton(
+    call: call,
+    devices: _devices,
+    menuDirection: StreamMenuDirection.up,
+    onError: (error) =>
+        _reportDeviceFailure('Could not switch the camera', error),
   );
 
   // onTap, so the button opens this app's own participants screen rather than
   // the SDK's list.
-  Widget _participantsControl(Call call) =>
-      PartialCallStateBuilder<List<CallParticipantState>>(
+  StreamParticipantsControl _participantsControl(Call call) =>
+      StreamParticipantsControl(
         call: call,
-        selector: (state) => state.callParticipants,
-        builder: (context, participants) => StreamParticipantsControl(
-          onTap: _channel != null ? () => showParticipants(context) : null,
-          participants: [
-            for (final participant in participants)
-              UserInfo(
-                id: participant.userId,
-                name: participant.name,
-                image: participant.image,
-              ),
-          ],
-        ),
+        onTap: _channel != null ? () => showParticipants(context) : null,
       );
 
   @override
