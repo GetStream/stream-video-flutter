@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🐞 Fixed
+
+- Fixed the call reconnect loop retrying without a delay or an escalation when an unexpected error was thrown before the reconnect strategy ran. 
+
 ## 1.5.0
 
 ### ✅ Added
