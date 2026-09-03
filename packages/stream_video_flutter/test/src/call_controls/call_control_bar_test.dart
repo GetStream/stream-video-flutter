@@ -193,20 +193,26 @@ void main() {
         .map((it) => it.decoration)
         .whereType<BoxDecoration>();
 
-    testWidgets('docked paints a hairline along its top edge', (tester) async {
+    testWidgets('docked paints a flat fill and no separator', (tester) async {
+      // No line along the top edge, unlike core's bars: a call has nothing to
+      // separate the controls from, and the design draws none.
       await pumpBar(tester, const CallControlBar(small), width: 402);
 
       expect(
         decorations(tester),
         contains(
           isA<BoxDecoration>()
-              .having((it) => it.border, 'border', isNotNull)
+              .having((it) => it.color, 'color', isNotNull)
               .having((it) => it.gradient, 'gradient', isNull),
         ),
       );
+      expect(
+        decorations(tester).map((it) => it.border),
+        everyElement(isNull),
+      );
     });
 
-    testWidgets('floating drops the hairline for a fade', (tester) async {
+    testWidgets('floating swaps the fill for a fade', (tester) async {
       await pumpBar(
         tester,
         const CallControlBar(
@@ -221,7 +227,6 @@ void main() {
         contains(
           isA<BoxDecoration>()
               .having((it) => it.gradient, 'gradient', isNotNull)
-              .having((it) => it.border, 'border', isNull)
               .having((it) => it.color, 'color', isNull),
         ),
       );
