@@ -18,7 +18,9 @@ void main() {
     final localParticipant = MockCallParticipantState();
     final call = MockCall();
 
-    when(() => localParticipant.isAudioEnabled).thenReturn(isAudioEnabled);
+    when(() => localParticipant.publishedTracks).thenReturn({
+      SfuTrackType.audio: TrackState.local(muted: !isAudioEnabled),
+    });
     when(
       () => call.setMicrophoneEnabled(enabled: any(named: 'enabled')),
     ).thenAnswer(
@@ -48,7 +50,9 @@ void main() {
     verify(() => call.setMicrophoneEnabled(enabled: false)).called(1);
 
     // Microphone is disabled
-    when(() => localParticipant.isAudioEnabled).thenReturn(isAudioEnabled);
+    when(() => localParticipant.publishedTracks).thenReturn({
+      SfuTrackType.audio: TrackState.local(muted: !isAudioEnabled),
+    });
     await tester.pumpWidget(
       TestWrapper(
         child: StreamMicrophoneButton(
@@ -70,7 +74,9 @@ void main() {
     final call = MockCall();
     Object? reported;
 
-    when(() => localParticipant.isAudioEnabled).thenReturn(true);
+    when(
+      () => localParticipant.publishedTracks,
+    ).thenReturn({SfuTrackType.audio: TrackState.local()});
     when(
       () => call.setMicrophoneEnabled(enabled: any(named: 'enabled')),
     ).thenAnswer((_) async => const Result.failure(_refused));
@@ -96,7 +102,9 @@ void main() {
     final call = MockCall();
     Object? reported;
 
-    when(() => localParticipant.isVideoEnabled).thenReturn(true);
+    when(
+      () => localParticipant.publishedTracks,
+    ).thenReturn({SfuTrackType.video: TrackState.local()});
     when(
       () => call.setCameraEnabled(enabled: any(named: 'enabled')),
     ).thenAnswer((_) async => const Result.failure(_refused));
@@ -125,7 +133,9 @@ void main() {
     final localParticipant = MockCallParticipantState();
     final call = MockCall();
 
-    when(() => localParticipant.isAudioEnabled).thenReturn(true);
+    when(
+      () => localParticipant.publishedTracks,
+    ).thenReturn({SfuTrackType.audio: TrackState.local()});
     when(
       () => call.setMicrophoneEnabled(enabled: any(named: 'enabled')),
     ).thenAnswer((_) async => const Result.failure(_refused));
@@ -171,7 +181,9 @@ void main() {
 
     Future<void> pump(WidgetTester tester) async {
       final localParticipant = MockCallParticipantState();
-      when(() => localParticipant.isAudioEnabled).thenReturn(true);
+      when(
+        () => localParticipant.publishedTracks,
+      ).thenReturn({SfuTrackType.audio: TrackState.local()});
 
       await tester.pumpWidget(
         TestWrapper(
@@ -230,7 +242,9 @@ void main() {
   // keeps compiling rather than only the type annotation surviving.
   testWidgets('the deprecated name still builds one', (tester) async {
     final localParticipant = MockCallParticipantState();
-    when(() => localParticipant.isAudioEnabled).thenReturn(true);
+    when(
+      () => localParticipant.publishedTracks,
+    ).thenReturn({SfuTrackType.audio: TrackState.local()});
 
     await tester.pumpWidget(
       TestWrapper(
@@ -243,6 +257,134 @@ void main() {
     );
 
     expect(find.byType(StreamMicrophoneButton), findsOneWidget);
+  });
+
+  // The join flash: `isAudioEnabled` is `!(track?.muted ?? true)`, so a track
+  // the SFU has not named yet read as muted and the control went red for the
+  // second between joining and the first track arriving.
+  group('while the track has not been reported', () {
+    late MockCall call;
+    late MockCallState callState;
+
+    void givenLocalParticipant(Map<SfuTrackType, TrackState> tracks) {
+      final participant = MockCallParticipantState();
+      when(() => participant.publishedTracks).thenReturn(tracks);
+      when(() => callState.localParticipant).thenReturn(participant);
+    }
+
+    setUp(() {
+      call = MockCall();
+      callState = MockCallState();
+
+      final emitter = MutableStateEmitter<CallState>(callState, sync: true);
+      when(() => call.state).thenAnswer((_) => emitter);
+      when(() => call.partialState<bool?>(any())).thenAnswer((invocation) {
+        final CallStateSelector<bool?> selector =
+            invocation.positionalArguments[0];
+        return Stream.value(selector(callState));
+      });
+    });
+
+    Future<CallControlButton> pumpButton(
+      WidgetTester tester, {
+      required TrackOption microphone,
+    }) async {
+      when(
+        () => call.connectOptions,
+      ).thenReturn(CallConnectOptions(microphone: microphone));
+
+      await tester.pumpWidget(
+        TestWrapper(child: StreamMicrophoneButton(call: call)),
+      );
+      await tester.pumpAndSettle();
+
+      return tester.widget<CallControlButton>(find.byType(CallControlButton));
+    }
+
+    testWidgets('draws a call joined with the microphone on as on', (
+      tester,
+    ) async {
+      when(() => callState.localParticipant).thenReturn(null);
+
+      final button = await pumpButton(
+        tester,
+        microphone: TrackOption.enabled(),
+      );
+
+      expect(button.tone, CallControlTone.neutral);
+      expect(find.byIcon(icons.voiceFill), findsOneWidget);
+    });
+
+    // A track handed over from the lobby, which only provides one for a device
+    // it actually opened.
+    testWidgets('counts a provided track as on', (tester) async {
+      when(() => callState.localParticipant).thenReturn(null);
+
+      final button = await pumpButton(
+        tester,
+        microphone: TrackOption.provided(MockRtcLocalAudioTrack()),
+      );
+
+      expect(button.tone, CallControlTone.neutral);
+    });
+
+    testWidgets('draws a call joined muted as muted', (tester) async {
+      when(() => callState.localParticipant).thenReturn(null);
+
+      final button = await pumpButton(
+        tester,
+        microphone: TrackOption.disabled(),
+      );
+
+      expect(button.tone, CallControlTone.negative);
+      expect(find.byIcon(icons.voiceOffFill), findsOneWidget);
+    });
+
+    // The local participant can exist before its tracks do, which is the
+    // window the flash actually happened in.
+    testWidgets('falls back for a participant with no tracks yet', (
+      tester,
+    ) async {
+      givenLocalParticipant(const {});
+
+      final button = await pumpButton(
+        tester,
+        microphone: TrackOption.enabled(),
+      );
+
+      expect(button.tone, CallControlTone.neutral);
+    });
+
+    // The half that must not regress: once the track exists, it decides. A
+    // user who muted a call they joined unmuted stays muted.
+    testWidgets('a reported mute wins over the intent', (tester) async {
+      givenLocalParticipant({
+        SfuTrackType.audio: TrackState.local(muted: true),
+      });
+
+      final button = await pumpButton(
+        tester,
+        microphone: TrackOption.enabled(),
+      );
+
+      expect(button.tone, CallControlTone.negative);
+      expect(find.byIcon(icons.voiceOffFill), findsOneWidget);
+    });
+
+    testWidgets('a reported unmute wins over a disabled intent', (
+      tester,
+    ) async {
+      givenLocalParticipant({
+        SfuTrackType.audio: TrackState.local(),
+      });
+
+      final button = await pumpButton(
+        tester,
+        microphone: TrackOption.disabled(),
+      );
+
+      expect(button.tone, CallControlTone.neutral);
+    });
   });
 }
 

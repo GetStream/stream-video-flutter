@@ -40,3 +40,30 @@ extension StreamDeviceAvailability on StreamMediaDevicesController {
   bool reportsNo(List<RtcMediaDevice> devices) =>
       hasEnumerated && devices.isEmpty;
 }
+
+/// Reads a local device's state without mistaking "not reported yet" for
+/// "muted".
+extension StreamLocalTrackState on CallParticipantState {
+  /// Whether [trackType] is unmuted, or null while nothing has reported it.
+  ///
+  /// Null is the window between joining and the first track arriving, and any
+  /// later one — a reconnect — where the track is gone again. The
+  /// `isAudioEnabled` family collapses that into false, which is why a
+  /// control reading it flashed the muted look on every join. Only the user
+  /// gets false: muting keeps the entry and flags it.
+  bool? trackEnabled(SfuTrackType trackType) {
+    final track = publishedTracks[trackType];
+    if (track == null) return null;
+    return !track.muted;
+  }
+}
+
+/// Reads the intent a call was joined with.
+extension StreamTrackOptionIntent on TrackOption {
+  /// Whether this asks for the device to be on.
+  ///
+  /// What a control draws while [StreamLocalTrackState.trackEnabled] is null.
+  /// A provided track counts as on: the lobby only hands one over for a device
+  /// it opened, so a camera turned off there arrives as [TrackDisabled].
+  bool get wantsOn => this is! TrackDisabled;
+}

@@ -136,28 +136,35 @@ class StreamMicrophoneSplitButton extends StatelessWidget {
         builder: (context, devices) {
           final unavailable = devices.reportsNo(devices.audioInputs);
 
-          return PartialCallStateBuilder<bool>(
+          // Nothing has reported the track yet: draw the state the call was
+          // joined with, since that is where it is about to be.
+          return PartialCallStateBuilder<bool?>(
             call: call,
             selector: (state) =>
-                state.localParticipant?.isAudioEnabled ?? false,
-            builder: (context, enabled) => shape(
-              devices: devices,
-              enabled: enabled,
-              unavailable: unavailable,
-              // Badging is appearance only, so a microphone the platform
-              // does not report has to be disabled here as well.
-              onPressed: unavailable
-                  ? null
-                  : () => applyDeviceChange(
-                      call.setMicrophoneEnabled(
-                        enabled: !enabled,
-                        stopTrackOnMute: stopTrackOnMute,
+                state.localParticipant?.trackEnabled(SfuTrackType.audio),
+            builder: (context, reported) {
+              final enabled =
+                  reported ?? call.connectOptions.microphone.wantsOn;
+
+              return shape(
+                devices: devices,
+                enabled: enabled,
+                unavailable: unavailable,
+                // Badging is appearance only, so a microphone the platform
+                // does not report has to be disabled here as well.
+                onPressed: unavailable
+                    ? null
+                    : () => applyDeviceChange(
+                        call.setMicrophoneEnabled(
+                          enabled: !enabled,
+                          stopTrackOnMute: stopTrackOnMute,
+                        ),
+                        description:
+                            'turn the microphone ${enabled ? 'off' : 'on'}',
+                        onError: onError,
                       ),
-                      description:
-                          'turn the microphone ${enabled ? 'off' : 'on'}',
-                      onError: onError,
-                    ),
-            ),
+              );
+            },
           );
         },
       );
@@ -251,22 +258,29 @@ class StreamCameraSplitButton extends StatelessWidget {
         builder: (context, devices) {
           final unavailable = devices.reportsNo(devices.videoInputs);
 
-          return PartialCallStateBuilder<bool>(
+          // Nothing has reported the track yet: draw the state the call was
+          // joined with, since that is where it is about to be.
+          return PartialCallStateBuilder<bool?>(
             call: call,
             selector: (state) =>
-                state.localParticipant?.isVideoEnabled ?? false,
-            builder: (context, enabled) => shape(
-              devices: devices,
-              enabled: enabled,
-              unavailable: unavailable,
-              onPressed: unavailable
-                  ? null
-                  : () => applyDeviceChange(
-                      call.setCameraEnabled(enabled: !enabled),
-                      description: 'turn the camera ${enabled ? 'off' : 'on'}',
-                      onError: onError,
-                    ),
-            ),
+                state.localParticipant?.trackEnabled(SfuTrackType.video),
+            builder: (context, reported) {
+              final enabled = reported ?? call.connectOptions.camera.wantsOn;
+
+              return shape(
+                devices: devices,
+                enabled: enabled,
+                unavailable: unavailable,
+                onPressed: unavailable
+                    ? null
+                    : () => applyDeviceChange(
+                        call.setCameraEnabled(enabled: !enabled),
+                        description:
+                            'turn the camera ${enabled ? 'off' : 'on'}',
+                        onError: onError,
+                      ),
+              );
+            },
           );
         },
       );
