@@ -1,0 +1,120 @@
+import 'package:flutter/material.dart';
+
+import '../../../stream_video_flutter.dart';
+import '../device_control.dart';
+
+/// A widget that represents a call control option to toggle if the microphone
+/// is on or off.
+class StreamMicrophoneButton extends StatelessWidget {
+  /// Creates a new instance of [StreamMicrophoneButton].
+  const StreamMicrophoneButton({
+    super.key,
+    required this.call,
+    this.localParticipant,
+    this.devices,
+    this.enabledMicrophoneIcon,
+    this.disabledMicrophoneIcon,
+    this.onError,
+  });
+
+  /// Represents a call.
+  final Call call;
+
+  /// The current local participant.
+  /// If provided this [localParticipant] will be used, otherwise the localParticipant of the [call] will be used.
+  final CallParticipantState? localParticipant;
+
+  /// The devices the platform reports, used to mark a missing microphone.
+  ///
+  /// Optional, and no controller is built when it is left out: a plain toggle
+  /// needs none, and enumerating devices just to draw one is a cost a call
+  /// screen should opt into rather than pay by default. Given one — the same
+  /// controller the screen's other pickers read — the button badges itself and
+  /// stops responding while the platform names no microphone, the way
+  /// [StreamMicrophoneSplitButton] does.
+  final StreamMediaDevicesController? devices;
+
+  /// The icon that is shown when the microphone is enabled.
+  ///
+  /// Defaults to `context.streamIcons.voiceFill`.
+  final IconData? enabledMicrophoneIcon;
+
+  /// The icon that is shown when the microphone is disabled.
+  ///
+  /// Defaults to `context.streamIcons.voiceOffFill`.
+  final IconData? disabledMicrophoneIcon;
+
+  /// Called when the call refuses to turn the microphone on or off.
+  ///
+  /// The button draws the call's own participant state, and that does not
+  /// change on a refusal — so a viewer without `sendAudio` presses this and
+  /// nothing moves. A refusal is always logged; pass this to say so on screen
+  /// as well.
+  ///
+  /// The error is an `Object` rather than the `VideoError` behind it, matching
+  /// [StreamMediaDevicesController.enumerationError].
+  final ValueChanged<Object>? onError;
+
+  @override
+  Widget build(BuildContext context) {
+    final icons = context.streamIcons;
+
+    Widget buildContent(bool enabled, {required bool unavailable}) {
+      return CallControlButton(
+        icon: Icon(
+          enabled
+              ? enabledMicrophoneIcon ?? icons.voiceFill
+              : disabledMicrophoneIcon ?? icons.voiceOffFill,
+        ),
+        // A microphone the platform does not report is not a user choice, so
+        // it is badged rather than drawn in the state a deliberate mute gets.
+        tone: enabled || unavailable ? .neutral : .negative,
+        showErrorBadge: unavailable,
+        onPressed: unavailable
+            ? null
+            : () => applyDeviceChange(
+                call.setMicrophoneEnabled(enabled: !enabled),
+                description: 'turn the microphone ${enabled ? 'off' : 'on'}',
+                onError: onError,
+              ),
+      );
+    }
+
+    Widget withState({required bool unavailable}) {
+      if (localParticipant case final participant?) {
+        return buildContent(
+          participant.isAudioEnabled,
+          unavailable: unavailable,
+        );
+      }
+
+      return PartialCallStateBuilder<bool>(
+        call: call,
+        selector: (state) => state.localParticipant?.isAudioEnabled ?? false,
+        builder: (_, enabled) =>
+            buildContent(enabled, unavailable: unavailable),
+      );
+    }
+
+    // No controller, nothing to ask: a toggle given no devices has no way to
+    // know a microphone is missing, and says nothing rather than guessing.
+    if (devices case final devices?) {
+      // Whether the platform has a microphone at all arrives on the device
+      // stream, not in call state.
+      return ListenableBuilder(
+        listenable: devices,
+        builder: (context, _) =>
+            withState(unavailable: devices.reportsNo(devices.audioInputs)),
+      );
+    }
+
+    return withState(unavailable: false);
+  }
+}
+
+/// ToggleMicrophoneOption is [StreamMicrophoneButton] now.
+@Deprecated(
+  'ToggleMicrophoneOption is StreamMicrophoneButton now, matching the rest of the '
+  'call controls. Will be removed in the next major version.',
+)
+typedef ToggleMicrophoneOption = StreamMicrophoneButton;

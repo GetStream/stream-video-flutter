@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import '../../../stream_video_flutter.dart';
 
 /// A widget that represents a call control option to flip the active camera.
-class FlipCameraOption extends StatelessWidget {
-  /// Creates a new instance of [FlipCameraOption].
-  const FlipCameraOption({
+class StreamFlipCameraButton extends StatelessWidget {
+  /// Creates a new instance of [StreamFlipCameraButton].
+  const StreamFlipCameraButton({
     super.key,
     required this.call,
     this.localParticipant,
@@ -63,3 +63,10 @@ class FlipCameraOption extends StatelessWidget {
     );
   }
 }
+
+/// FlipCameraOption is [StreamFlipCameraButton] now.
+@Deprecated(
+  'FlipCameraOption is StreamFlipCameraButton now, matching the rest of the '
+  'call controls. Will be removed in the next major version.',
+)
+typedef FlipCameraOption = StreamFlipCameraButton;

@@ -30,3 +30,13 @@ Future<void> applyDeviceChange(
     onError?.call(error);
   }
 }
+
+extension StreamDeviceAvailability on StreamMediaDevicesController {
+  /// Whether the platform has been asked and named nothing in [devices].
+  ///
+  /// Waits for [StreamMediaDevicesController.hasEnumerated]: the lists are
+  /// empty before the first enumeration because nothing has been asked, and a
+  /// control that read them straight away would badge itself on startup.
+  bool reportsNo(List<RtcMediaDevice> devices) =>
+      hasEnumerated && devices.isEmpty;
+}

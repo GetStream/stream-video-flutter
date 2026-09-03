@@ -4,9 +4,9 @@ import '../../../stream_video_flutter.dart';
 
 /// A widget that represents a call control option to toggle if closed captions
 /// is on or off.
-class ToggleClosedCaptionsOption extends StatelessWidget {
-  /// Creates a new instance of [ToggleClosedCaptionsOption].
-  const ToggleClosedCaptionsOption({
+class StreamClosedCaptionsButton extends StatelessWidget {
+  /// Creates a new instance of [StreamClosedCaptionsButton].
+  const StreamClosedCaptionsButton({
     super.key,
     required this.call,
     this.enabledClosedCaptionIcon,
@@ -53,3 +53,10 @@ class ToggleClosedCaptionsOption extends StatelessWidget {
     );
   }
 }
+
+/// ToggleClosedCaptionsOption is [StreamClosedCaptionsButton] now.
+@Deprecated(
+  'ToggleClosedCaptionsOption is StreamClosedCaptionsButton now, matching the rest of the '
+  'call controls. Will be removed in the next major version.',
+)
+typedef ToggleClosedCaptionsOption = StreamClosedCaptionsButton;

@@ -16,11 +16,11 @@ import '../../stream_video_flutter.dart';
 ///
 /// ```dart
 /// CallControlBarLayout(
-///   leading: [ToggleLayoutOption(onLayoutModeChanged: setLayout)],
+///   leading: [StreamLayoutButton(onLayoutModeChanged: setLayout)],
 ///   center: [
-///     ToggleMicrophoneOption(call: call),
-///     ToggleCameraOption(call: call),
-///     LeaveCallOption(call: call),
+///     StreamMicrophoneButton(call: call),
+///     StreamCameraButton(call: call),
+///     StreamLeaveCallButton(call: call),
 ///   ],
 ///   trailing: [StreamParticipantsControl(call: call)],
 /// )
@@ -76,15 +76,15 @@ class CallControlBarLayout {
 /// ```dart
 /// CallControlBar(
 ///   CallControlBarLayout(
-///     leading: [ToggleMicrophoneOption(call: call), ToggleCameraOption(call: call)],
+///     leading: [StreamMicrophoneButton(call: call), StreamCameraButton(call: call)],
 ///     trailing: [StreamParticipantsControl(call: call)],
 ///   ),
 ///   large: CallControlBarLayout(
-///     leading: [ToggleLayoutOption(onLayoutModeChanged: setLayout)],
+///     leading: [StreamLayoutButton(onLayoutModeChanged: setLayout)],
 ///     center: [
-///       ToggleMicrophoneOption(call: call),
-///       ToggleCameraOption(call: call),
-///       LeaveCallOption(call: call),
+///       StreamMicrophoneButton(call: call),
+///       StreamCameraButton(call: call),
+///       StreamLeaveCallButton(call: call),
 ///     ],
 ///     trailing: [StreamParticipantsControl(call: call)],
 ///   ),
