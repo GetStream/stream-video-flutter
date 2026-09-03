@@ -213,7 +213,7 @@ class _CallScreenState extends State<CallScreen> {
   // than held as fields: they close over the call the content builder hands
   // in, and a bar rebuilds whenever the window crosses a breakpoint anyway.
 
-  ToggleLayoutOption _layoutToggle() => ToggleLayoutOption(
+  StreamLayoutButton _layoutToggle() => StreamLayoutButton(
     initialLayout: _currentLayoutMode,
     onLayoutModeChanged: (layout) {
       setState(() {
@@ -222,8 +222,8 @@ class _CallScreenState extends State<CallScreen> {
     },
   );
 
-  ToggleScreenShareOption _screenShareOption(Call call) =>
-      ToggleScreenShareOption(
+  StreamScreenShareButton _screenShareOption(Call call) =>
+      StreamScreenShareButton(
         call: call,
         screenShareConstraints: const ScreenShareConstraints(
           useiOSBroadcastExtension: true,
@@ -240,16 +240,21 @@ class _CallScreenState extends State<CallScreen> {
   // phone has one microphone and two cameras, and the design gives the narrow
   // bar five controls in total — the device picker lives in the more menu
   // there instead.
-  ToggleMicrophoneOption _microphoneToggle(Call call) => ToggleMicrophoneOption(
+  //
+  // Still handed this screen's device controller, so a microphone the platform
+  // does not report is badged and inert here as it is on the split buttons.
+  StreamMicrophoneButton _microphoneToggle(Call call) => StreamMicrophoneButton(
     call: call,
+    devices: _devices,
     stopTrackOnMute: _stopTrackOnMute,
     onError: (error) =>
         _reportDeviceFailure('Could not switch the microphone', error),
   );
 
   /// The phone bar's camera. See [_microphoneToggle].
-  ToggleCameraOption _cameraToggle(Call call) => ToggleCameraOption(
+  StreamCameraButton _cameraToggle(Call call) => StreamCameraButton(
     call: call,
+    devices: _devices,
     onError: (error) =>
         _reportDeviceFailure('Could not switch the camera', error),
   );
@@ -417,7 +422,7 @@ class _CallScreenState extends State<CallScreen> {
                         selector: (state) => state.localParticipant != null,
                         builder: (context, hasLocalParticipant) =>
                             hasLocalParticipant
-                            ? FlipCameraOption(call: call)
+                            ? StreamFlipCameraButton(call: call)
                             : const SizedBox.shrink(),
                       ),
                     ],
@@ -475,11 +480,11 @@ class _CallScreenState extends State<CallScreen> {
                     center: [
                       _microphoneButton(call),
                       _cameraButton(call),
-                      ToggleClosedCaptionsOption(call: call),
-                      AddReactionOption(call: call),
+                      StreamClosedCaptionsButton(call: call),
+                      StreamAddReactionButton(call: call),
                       _screenShareOption(call),
-                      ToggleRecordingOption(call: call),
-                      LeaveCallOption(call: call),
+                      StreamRecordingButton(call: call),
+                      StreamLeaveCallButton(call: call),
                     ],
                     trailing: [
                       CallFeatureButton(
