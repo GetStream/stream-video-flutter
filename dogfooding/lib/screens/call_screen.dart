@@ -291,6 +291,66 @@ class _CallScreenState extends State<CallScreen> {
     ),
   );
 
+  // The phone bar's microphone and camera: plain round buttons, no caret.
+  // A phone has one microphone and two cameras, and the design gives the
+  // narrow bar five controls in total — the device picker lives in the more
+  // menu there instead.
+  //
+  // Not the SDK's ToggleMicrophoneOption/ToggleCameraOption: those drop the
+  // Result that `setMicrophoneEnabled` returns, which is what left the button
+  // silently doing nothing for a viewer without `sendAudio`. See
+  // [_setMicrophoneEnabled].
+  Widget _microphoneToggle(Call call) => ListenableBuilder(
+    listenable: _devices,
+    builder: (context, _) {
+      final unavailable = _noDeviceFor(_devices.audioInputs);
+
+      return PartialCallStateBuilder<bool>(
+        call: call,
+        selector: (state) => state.localParticipant?.isAudioEnabled ?? false,
+        builder: (context, enabled) => CallControlButton(
+          icon: Icon(
+            enabled
+                ? context.streamIcons.voiceFill
+                : context.streamIcons.voiceOffFill,
+          ),
+          // An unavailable device is not a user choice, so it is badged
+          // rather than painted as something the user switched off.
+          tone: enabled || unavailable ? .neutral : .negative,
+          showErrorBadge: unavailable,
+          onPressed: unavailable
+              ? null
+              : () => _setMicrophoneEnabled(enabled: !enabled),
+        ),
+      );
+    },
+  );
+
+  /// The phone bar's camera. See [_microphoneToggle].
+  Widget _cameraToggle(Call call) => ListenableBuilder(
+    listenable: _devices,
+    builder: (context, _) {
+      final unavailable = _noDeviceFor(_devices.videoInputs);
+
+      return PartialCallStateBuilder<bool>(
+        call: call,
+        selector: (state) => state.localParticipant?.isVideoEnabled ?? false,
+        builder: (context, enabled) => CallControlButton(
+          icon: Icon(
+            enabled
+                ? context.streamIcons.videoFill
+                : context.streamIcons.videoOffFill,
+          ),
+          tone: enabled || unavailable ? .neutral : .negative,
+          showErrorBadge: unavailable,
+          onPressed: unavailable
+              ? null
+              : () => _setCameraEnabled(enabled: !enabled),
+        ),
+      );
+    },
+  );
+
   /// The camera's split button. See [_microphoneButton].
   Widget _cameraButton(Call call) => ListenableBuilder(
     listenable: _devices,
@@ -466,27 +526,43 @@ class _CallScreenState extends State<CallScreen> {
                 );
               },
               callControlsWidgetBuilder: (BuildContext context, Call call) {
+                final moreButton = CallFeatureButton(
+                  icon: Icon(context.streamIcons.moreVerticalFill),
+                  selected: _moreMenuVisible,
+                  onPressed: () => toggleMoreMenu(context),
+                );
+
+                final panels = [
+                  _participantsControl(call),
+                  _ShowChatButton(channel: _channel),
+                ];
+
                 return CallControlBar(
                   // A phone splits its controls between the two edges: there
-                  // is not enough width for a centre row and sides both.
+                  // is not enough width for a centre row and sides both. Five
+                  // controls, as the design draws it — screen sharing and the
+                  // device pickers are reachable from the more menu.
                   CallControlBarLayout(
                     leading: [
-                      CallFeatureButton(
-                        icon: Icon(context.streamIcons.moreVerticalFill),
-                        selected: _moreMenuVisible,
-                        onPressed: () => toggleMoreMenu(context),
-                      ),
+                      moreButton,
+                      _microphoneToggle(call),
+                      _cameraToggle(call),
+                    ],
+                    trailing: panels,
+                  ),
+                  // A tablet keeps the phone's shape but has the width for
+                  // screen sharing and a caret on each device, so it gets
+                  // them: picking a microphone mid-call without opening a menu
+                  // is worth the two extra controls at this size.
+                  medium: CallControlBarLayout(
+                    leading: [
+                      moreButton,
                       _screenShareOption(call),
                       _microphoneButton(call),
                       _cameraButton(call),
                     ],
-                    trailing: [
-                      _participantsControl(call),
-                      _ShowChatButton(channel: _channel),
-                    ],
+                    trailing: panels,
                   ),
-                  // Medium is left unset on purpose: a tablet gets the phone
-                  // bar, which is what the design shows.
                   large: CallControlBarLayout(
                     leading: [
                       CallFeatureButton(
@@ -510,8 +586,7 @@ class _CallScreenState extends State<CallScreen> {
                         icon: Icon(context.streamIcons.statsFill),
                         onPressed: () => showStats(context),
                       ),
-                      _participantsControl(call),
-                      _ShowChatButton(channel: _channel),
+                      ...panels,
                     ],
                   ),
                 );
