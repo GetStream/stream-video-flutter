@@ -17,21 +17,31 @@ import '../l10n/localization_extension.dart';
 ///
 /// ```dart
 /// StreamParticipantsControl(
-///   participants: participants,
+///   call: call,
 ///   onTap: () => openParticipantsPanel(),
 /// )
 /// ```
 /// {@end-tool}
 class StreamParticipantsControl extends StatelessWidget {
-  /// Creates a new instance of [StreamParticipantsControl].
-  const StreamParticipantsControl({
-    super.key,
-    required this.participants,
-    this.onTap,
-  });
+  /// Creates a control over the people in [call].
+  ///
+  /// The count follows the call's participants as they come and go. Use
+  /// [StreamParticipantsControl.forParticipants] where the people are not a
+  /// joined call's — in a lobby, which lists who is already inside.
+  const StreamParticipantsControl({super.key, required Call call, this.onTap})
+    : _call = call,
+      _participants = null;
 
-  /// The people to count on the badge, and to list when [onTap] is null.
-  final List<UserInfo> participants;
+  /// Creates a control over [participants], a list the caller keeps.
+  const StreamParticipantsControl.forParticipants({
+    super.key,
+    required List<UserInfo> participants,
+    this.onTap,
+  }) : _call = null,
+       _participants = participants;
+
+  final Call? _call;
+  final List<UserInfo>? _participants;
 
   /// Called instead of opening the built-in list.
   ///
@@ -40,6 +50,29 @@ class StreamParticipantsControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (_participants case final participants?) {
+      return _build(context, participants);
+    }
+
+    return PartialCallStateBuilder<List<CallParticipantState>>(
+      call: _call!,
+      selector: (state) => state.callParticipants,
+      builder: (context, participants) => _build(context, [
+        for (final participant in participants)
+          UserInfo(
+            id: participant.userId,
+            // The id where the call has no name for somebody: a menu row
+            // labelled with an empty string is a row of nothing.
+            name: participant.name.isNotEmpty
+                ? participant.name
+                : participant.userId,
+            image: participant.image,
+          ),
+      ]),
+    );
+  }
+
+  Widget _build(BuildContext context, List<UserInfo> participants) {
     final colorScheme = context.streamColorScheme;
     final translations = context.translations;
     final spacing = context.streamSpacing;

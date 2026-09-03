@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../apply_device_change.dart';
 
 /// A widget that represents a call control option to toggle if the camera
 /// is on or off.
@@ -12,6 +13,7 @@ class ToggleCameraOption extends StatelessWidget {
     this.localParticipant,
     this.enabledCameraIcon,
     this.disabledCameraIcon,
+    this.onError,
   });
 
   /// Represents a call.
@@ -31,6 +33,10 @@ class ToggleCameraOption extends StatelessWidget {
   /// Defaults to `context.streamIcons.videoOffFill`.
   final IconData? disabledCameraIcon;
 
+  /// Called when the call refuses to turn the camera on or off. See
+  /// [ToggleMicrophoneOption.onError].
+  final ValueChanged<Object>? onError;
+
   @override
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
@@ -43,9 +49,11 @@ class ToggleCameraOption extends StatelessWidget {
               : disabledCameraIcon ?? icons.videoOffFill,
         ),
         tone: enabled ? .neutral : .negative,
-        onPressed: () {
-          call.setCameraEnabled(enabled: !enabled);
-        },
+        onPressed: () => applyDeviceChange(
+          call.setCameraEnabled(enabled: !enabled),
+          description: 'turn the camera ${enabled ? 'off' : 'on'}',
+          onError: onError,
+        ),
       );
     }
 

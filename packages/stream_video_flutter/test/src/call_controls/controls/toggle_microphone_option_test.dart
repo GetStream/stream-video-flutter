@@ -58,4 +58,90 @@ void main() {
     expect(find.byIcon(icons.voiceFill), findsNothing);
     expect(find.byIcon(icons.voiceOffFill), findsOneWidget);
   });
+
+  // The refusal used to be dropped on the floor: `setMicrophoneEnabled`
+  // returns a Result, and the button's state comes from the call's own
+  // participant state, which does not change on failure. A viewer without
+  // `sendAudio` pressed the button and got no movement, no message, no log.
+  testWidgets('ToggleMicrophoneOption reports a refusal', (tester) async {
+    final localParticipant = MockCallParticipantState();
+    final call = MockCall();
+    Object? reported;
+
+    when(() => localParticipant.isAudioEnabled).thenReturn(true);
+    when(
+      () => call.setMicrophoneEnabled(enabled: any(named: 'enabled')),
+    ).thenAnswer((_) async => const Result.failure(_refused));
+
+    await tester.pumpWidget(
+      TestWrapper(
+        child: ToggleMicrophoneOption(
+          localParticipant: localParticipant,
+          call: call,
+          onError: (error) => reported = error,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(icons.voiceFill));
+    await tester.pumpAndSettle();
+
+    expect(reported, _refused);
+  });
+
+  testWidgets('ToggleCameraOption reports a refusal', (tester) async {
+    final localParticipant = MockCallParticipantState();
+    final call = MockCall();
+    Object? reported;
+
+    when(() => localParticipant.isVideoEnabled).thenReturn(true);
+    when(
+      () => call.setCameraEnabled(enabled: any(named: 'enabled')),
+    ).thenAnswer((_) async => const Result.failure(_refused));
+
+    await tester.pumpWidget(
+      TestWrapper(
+        child: ToggleCameraOption(
+          localParticipant: localParticipant,
+          call: call,
+          onError: (error) => reported = error,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(icons.videoFill));
+    await tester.pumpAndSettle();
+
+    expect(reported, _refused);
+  });
+
+  // A control with no listener still has to survive the refusal rather than
+  // throw out of the button's callback.
+  testWidgets('ToggleMicrophoneOption survives a refusal unwatched', (
+    tester,
+  ) async {
+    final localParticipant = MockCallParticipantState();
+    final call = MockCall();
+
+    when(() => localParticipant.isAudioEnabled).thenReturn(true);
+    when(
+      () => call.setMicrophoneEnabled(enabled: any(named: 'enabled')),
+    ).thenAnswer((_) async => const Result.failure(_refused));
+
+    await tester.pumpWidget(
+      TestWrapper(
+        child: ToggleMicrophoneOption(
+          localParticipant: localParticipant,
+          call: call,
+        ),
+      ),
+    );
+
+    await tester.tap(find.byIcon(icons.voiceFill));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
 }
+
+const _refused = 'the call refused';

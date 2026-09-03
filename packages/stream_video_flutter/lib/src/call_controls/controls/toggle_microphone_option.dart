@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../apply_device_change.dart';
 
 /// A widget that represents a call control option to toggle if the microphone
 /// is on or off.
@@ -13,6 +14,7 @@ class ToggleMicrophoneOption extends StatelessWidget {
     this.enabledMicrophoneIcon,
     this.disabledMicrophoneIcon,
     this.stopTrackOnMute,
+    this.onError,
   });
 
   /// Represents a call.
@@ -32,9 +34,24 @@ class ToggleMicrophoneOption extends StatelessWidget {
   /// Defaults to `context.streamIcons.voiceOffFill`.
   final IconData? disabledMicrophoneIcon;
 
-  /// Determines if muting the microphone stops and releases (`true`) or keeps and silences (`false`) the audio track.
-  /// Setting to `false` is necessary for "speaking-while-muted" detection on iOS and macOS.
+  /// Whether muting stops and releases the audio track, or keeps it and
+  /// sends silence.
+  ///
+  /// Null leaves the call's own default, which stops the track. Pass false to
+  /// keep it alive, which is what speaking-while-muted detection needs on iOS
+  /// and macOS.
   final bool? stopTrackOnMute;
+
+  /// Called when the call refuses to turn the microphone on or off.
+  ///
+  /// The button draws the call's own participant state, and that does not
+  /// change on a refusal — so a viewer without `sendAudio` presses this and
+  /// nothing moves. A refusal is always logged; pass this to say so on screen
+  /// as well.
+  ///
+  /// The error is an `Object` rather than the `VideoError` behind it, matching
+  /// [StreamMediaDevicesController.enumerationError].
+  final ValueChanged<Object>? onError;
 
   @override
   Widget build(BuildContext context) {
@@ -48,12 +65,14 @@ class ToggleMicrophoneOption extends StatelessWidget {
               : disabledMicrophoneIcon ?? icons.voiceOffFill,
         ),
         tone: enabled ? .neutral : .negative,
-        onPressed: () {
+        onPressed: () => applyDeviceChange(
           call.setMicrophoneEnabled(
             enabled: !enabled,
             stopTrackOnMute: stopTrackOnMute,
-          );
-        },
+          ),
+          description: 'turn the microphone ${enabled ? 'off' : 'on'}',
+          onError: onError,
+        ),
       );
     }
 
