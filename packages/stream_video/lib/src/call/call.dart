@@ -90,6 +90,7 @@ const _idAwait = 7;
 const _idFastReconnectTimeout = 8;
 const _idReconnect = 9;
 const _idNativeWebRtc = 10;
+const _idAudioPlayback = 11;
 
 const _tag = 'SV:Call';
 int _callSeq = 1;
@@ -358,6 +359,11 @@ class Call {
     await _session?.resumeSuspendedAudioTracks(_suspendedTrackStates);
     _suspendedTrackStates.clear();
 
+    // Resuming restarts recording, which clears the native ADM's microphone
+    // mute, and re-enables tracks from a snapshot taken before the suspension.
+    // Reconcile once the tracks have settled.
+    await _session?.rtcManager?.reconcileAppleAdmMicrophoneMute();
+
     _stateManager.state = _stateManager.callState.copyWith(
       isAudioSuspended: false,
     );
@@ -472,6 +478,7 @@ class Call {
       _observeReconnectEvents();
       _observeUserId();
       _observeNativeWebRtcEventStream();
+      _observeWebAudioPlaybackBlocked();
 
       _logger.v(() => '[_init] initialized');
       _initialized = true;
@@ -482,6 +489,20 @@ class Call {
     _subscriptions.add(
       _idNativeWebRtc,
       _onNativeWebRtcEvent(),
+    );
+  }
+
+  /// Mirrors the browser's autoplay-policy blocking, reported by the web audio
+  /// layer, into [CallState] — so the app can show a "tap to enable sound"
+  /// affordance and call
+  /// `RtcMediaDeviceNotifier.instance.resumeWebAudioPlayback()` from the
+  /// gesture.
+  void _observeWebAudioPlaybackBlocked() {
+    _subscriptions.add(
+      _idAudioPlayback,
+      _rtcMediaDeviceNotifier.webAudioPlaybackBlockedChanges.listen((blocked) {
+        _stateManager.rtcSetWebAudioPlaybackBlocked(isBlocked: blocked);
+      }),
     );
   }
 
@@ -553,11 +574,6 @@ class Call {
     if (status is CallStatusDisconnected) {
       await _clear('status-disconnected');
     }
-
-    _sessionFactory.sdpEditor.opusDtxEnabled =
-        state.settings.audio.opusDtxEnabled;
-    _sessionFactory.sdpEditor.opusRedEnabled =
-        state.settings.audio.redundantCodingEnabled;
   }
 
   StreamSubscription<NativeWebRtcEvent> _onNativeWebRtcEvent() {
@@ -3654,9 +3670,14 @@ class Call {
   }
 
   /// Enables or disables the microphone for this call.
+  ///
+  /// [stopTrackOnMute] controls whether muting disables and stops (default: `true`)
+  /// or keeps the audio track alive but silent (`false`). On iOS/macOS, `false` keeps
+  /// muted-talker detection active but leaves the mic indicator on. When null, keeps default behavior.
   Future<Result<None>> setMicrophoneEnabled({
     required bool enabled,
     AudioConstraints? constraints,
+    bool? stopTrackOnMute,
   }) async {
     if (enabled &&
         state.value.isVideoModerated &&
@@ -3672,6 +3693,7 @@ class Call {
         await _session?.setMicrophoneEnabled(
           enabled,
           constraints: constraints,
+          stopTrackOnMute: stopTrackOnMute,
         ) ??
         failureWithError('Session is null');
 

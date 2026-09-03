@@ -2031,10 +2031,11 @@ packages:
   stream_webrtc_flutter:
     dependency: "direct overridden"
     description:
-      path: "../webrtc-flutter"
-      relative: true
-    source: path
-    version: "3.0.2"
+      name: stream_webrtc_flutter
+      sha256: "9042f638f88d7c8ed7c720ad19bb5dd0da0880b9e3d5f5eacf96fddc911795af"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   string_scanner:
     dependency: transitive
     description:

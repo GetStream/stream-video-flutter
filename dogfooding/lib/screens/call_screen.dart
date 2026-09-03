@@ -132,7 +132,10 @@ class _CallScreenState extends State<CallScreen> {
     }
 
     // Create and watch channel for the call.
-    _channel = await _userChatRepo.createChannel(widget.call.id);
+    _channel = await _userChatRepo.createChannel(
+      widget.call.id,
+      appPreferences.environment,
+    );
 
     // Rebuild the widget to enable the chat button.
     if (mounted) setState(() {});
@@ -309,6 +312,9 @@ class _CallScreenState extends State<CallScreen> {
                           call: call,
                           disabledMicrophoneBackgroundColor:
                               colorScheme.accentError,
+                          // Keep the track alive on mute so speaking-while-
+                          // muted detection also works on iOS/macOS.
+                          stopTrackOnMute: false,
                         ),
                         ToggleCameraOption(
                           call: call,
