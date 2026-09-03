@@ -130,6 +130,15 @@ class StreamMediaDevicesController extends ChangeNotifier {
   /// that would move the radio button without changing anything.
   final bool supportsSystemDefault;
 
+  /// The id a platform gives the device it has picked for itself.
+  ///
+  /// Web reports one — Chrome lists it as "Default - <name>" — alongside the
+  /// real devices, and it is a device like any other: picking it is what
+  /// asking for the platform's choice looks like there. Platforms that report
+  /// no such entry leave [selectedAudioInput] and its siblings null until
+  /// something is picked.
+  static const platformDefaultDeviceId = 'default';
+
   bool _hasEnumerated = false;
   bool _disposed = false;
 
@@ -173,18 +182,45 @@ class StreamMediaDevicesController extends ChangeNotifier {
   RtcMediaDevice? _selectedVideoInput;
 
   /// The picked microphone, or null for the system default.
-  RtcMediaDevice? get selectedAudioInput => _selectedAudioInput;
+  ///
+  /// Where null cannot be shown — see [supportsSystemDefault] — this resolves
+  /// to the platform's own choice instead, so a menu marks the device in use
+  /// rather than marking nothing. An in-call menu had every row unselected
+  /// until something was picked.
+  RtcMediaDevice? get selectedAudioInput =>
+      _selectedAudioInput ?? _platformDefaultIn(_audioInputs);
 
-  /// The picked speaker, or null for the system default.
-  RtcMediaDevice? get selectedAudioOutput => _selectedAudioOutput;
+  /// The picked speaker, or null for the system default. As
+  /// [selectedAudioInput] is.
+  RtcMediaDevice? get selectedAudioOutput =>
+      _selectedAudioOutput ?? _platformDefaultIn(_audioOutputs);
 
-  /// The picked camera, or null for the system default.
-  RtcMediaDevice? get selectedVideoInput => _selectedVideoInput;
+  /// The picked camera, or null for the system default. As
+  /// [selectedAudioInput] is.
+  RtcMediaDevice? get selectedVideoInput =>
+      _selectedVideoInput ?? _platformDefaultIn(_videoInputs);
+
+  /// The platform's own choice among [devices], where that is what null has
+  /// to mean.
+  ///
+  /// Null while [supportsSystemDefault]: there the menu draws a row for "let
+  /// the platform pick", so resolving null to a device would move the mark off
+  /// it. Reflects the platform rather than changing anything — nothing is
+  /// applied, because the platform is already using it.
+  RtcMediaDevice? _platformDefaultIn(List<RtcMediaDevice> devices) {
+    if (supportsSystemDefault) return null;
+
+    for (final device in devices) {
+      if (device.id == platformDefaultDeviceId) return device;
+    }
+
+    return null;
+  }
 
   /// Picks [device] as the microphone, or the system default when null.
   Future<void> selectAudioInput(RtcMediaDevice? device) => _select(
     device: device,
-    current: () => _selectedAudioInput,
+    current: () => selectedAudioInput,
     assign: (it) => _selectedAudioInput = it,
     apply: onAudioInputSelected,
   );
@@ -192,7 +228,7 @@ class StreamMediaDevicesController extends ChangeNotifier {
   /// Picks [device] as the speaker, or the system default when null.
   Future<void> selectAudioOutput(RtcMediaDevice? device) => _select(
     device: device,
-    current: () => _selectedAudioOutput,
+    current: () => selectedAudioOutput,
     assign: (it) => _selectedAudioOutput = it,
     apply: onAudioOutputSelected,
   );
@@ -200,7 +236,7 @@ class StreamMediaDevicesController extends ChangeNotifier {
   /// Picks [device] as the camera, or the system default when null.
   Future<void> selectVideoInput(RtcMediaDevice? device) => _select(
     device: device,
-    current: () => _selectedVideoInput,
+    current: () => selectedVideoInput,
     assign: (it) => _selectedVideoInput = it,
     apply: onVideoInputSelected,
   );
@@ -210,6 +246,10 @@ class StreamMediaDevicesController extends ChangeNotifier {
   /// Published before the effect runs, so the picker responds to the tap, and
   /// put back if the effect rejects it, so it never names a device the
   /// hardware would not switch to.
+  ///
+  /// [current] is the resolved selection rather than the raw one, so tapping
+  /// the row already marked does nothing — including the platform's own
+  /// choice, which is already in use.
   Future<void> _select({
     required RtcMediaDevice? device,
     required RtcMediaDevice? Function() current,
