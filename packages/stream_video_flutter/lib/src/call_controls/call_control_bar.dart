@@ -22,7 +22,7 @@ import '../../stream_video_flutter.dart';
 ///     ToggleCameraOption(call: call),
 ///     LeaveCallOption(call: call),
 ///   ],
-///   trailing: [StreamParticipantsControl(participants: participants)],
+///   trailing: [StreamParticipantsControl(call: call)],
 /// )
 /// ```
 /// {@end-tool}
@@ -77,7 +77,7 @@ class CallControlBarLayout {
 /// CallControlBar(
 ///   CallControlBarLayout(
 ///     leading: [ToggleMicrophoneOption(call: call), ToggleCameraOption(call: call)],
-///     trailing: [StreamParticipantsControl(participants: participants)],
+///     trailing: [StreamParticipantsControl(call: call)],
 ///   ),
 ///   large: CallControlBarLayout(
 ///     leading: [ToggleLayoutOption(onLayoutModeChanged: setLayout)],
@@ -86,7 +86,7 @@ class CallControlBarLayout {
 ///       ToggleCameraOption(call: call),
 ///       LeaveCallOption(call: call),
 ///     ],
-///     trailing: [StreamParticipantsControl(participants: participants)],
+///     trailing: [StreamParticipantsControl(call: call)],
 ///   ),
 /// )
 /// ```

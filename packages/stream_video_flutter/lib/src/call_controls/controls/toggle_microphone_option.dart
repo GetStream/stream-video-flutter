@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../apply_device_change.dart';
 
 /// A widget that represents a call control option to toggle if the microphone
 /// is on or off.
@@ -12,6 +13,7 @@ class ToggleMicrophoneOption extends StatelessWidget {
     this.localParticipant,
     this.enabledMicrophoneIcon,
     this.disabledMicrophoneIcon,
+    this.onError,
   });
 
   /// Represents a call.
@@ -31,6 +33,17 @@ class ToggleMicrophoneOption extends StatelessWidget {
   /// Defaults to `context.streamIcons.voiceOffFill`.
   final IconData? disabledMicrophoneIcon;
 
+  /// Called when the call refuses to turn the microphone on or off.
+  ///
+  /// The button draws the call's own participant state, and that does not
+  /// change on a refusal — so a viewer without `sendAudio` presses this and
+  /// nothing moves. A refusal is always logged; pass this to say so on screen
+  /// as well.
+  ///
+  /// The error is an `Object` rather than the `VideoError` behind it, matching
+  /// [StreamMediaDevicesController.enumerationError].
+  final ValueChanged<Object>? onError;
+
   @override
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
@@ -43,9 +56,11 @@ class ToggleMicrophoneOption extends StatelessWidget {
               : disabledMicrophoneIcon ?? icons.voiceOffFill,
         ),
         tone: enabled ? .neutral : .negative,
-        onPressed: () {
-          call.setMicrophoneEnabled(enabled: !enabled);
-        },
+        onPressed: () => applyDeviceChange(
+          call.setMicrophoneEnabled(enabled: !enabled),
+          description: 'turn the microphone ${enabled ? 'off' : 'on'}',
+          onError: onError,
+        ),
       );
     }
 

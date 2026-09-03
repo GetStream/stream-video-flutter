@@ -2,6 +2,19 @@
 
 ### ✅ Added
 
+- `ToggleMicrophoneOption` and `ToggleCameraOption` no longer drop the `Result` their setter returns. A refusal is logged, and reported to the new `onError` if one is given.
+
+  Dropping it made a refused press invisible: a control's on/off state comes from the call's own participant state, and that does not change when the call says no. A viewer without `sendAudio` pressed the microphone and got no button movement, no message and nothing in the log. The split buttons take the same `onError`.
+
+  ```dart
+  ToggleMicrophoneOption(
+    call: call,
+    onError: (error) => showSnackBar('Could not switch the microphone'),
+  )
+  ```
+
+  The error is an `Object` rather than the `VideoError` behind it, matching `StreamMediaDevicesController.enumerationError`: `stream_video` exports the `Result` that carries the error but not the class, so the type cannot be named from outside that package.
+
 - Added `CallControlBar`, the row of controls along the bottom of a call. It takes a `CallControlBarLayout` per screen size — `leading`, `center` and `trailing` slots of plain widgets — and draws the one the window calls for, falling back to the next smaller layout that was given. Only `small` is required, so a bar handed `small` and `large` draws `small` on a tablet.
 
   The centre is centred in the bar's full width rather than in the gap between the two sides, so a long leading group and an empty trailing one leave it where it was. It is given what is left after reserving the wider side's width on both sides of it — which is why at `StreamScreenSize.small` you want either the two sides or the centre, not both.
@@ -74,7 +87,18 @@
 
 - The lobby marks a device it cannot use. When the camera or microphone is refused permission, or the platform reports none at all, its control is drawn disabled with an error badge rather than in the negative state a deliberate mute gets, so a permission problem is not mistaken for a choice the user made. Both the plain toggles and the split buttons do it, and joining stays possible with the unavailable device disabled. `StreamLobbyController` exposes `microphoneUnavailable` and `cameraUnavailable`.
 
-- The device split buttons and the participants control are call controls rather than lobby widgets. `StreamMicrophoneSplitButton` and `StreamCameraSplitButton` take a `StreamMediaDevicesController` and an enabled state, so the same control works either side of joining, plus a `menuDirection` — a control bar along the bottom of a call opens its menus upwards, and the caret should say so — `StreamMediaDevicesController.forCall` wires one to a call's own device setters. `StreamParticipantsControl` takes the people to badge and list, and an optional `onTap` that replaces the built-in list, which is what a call screen wants when it has a side panel of its own. The `StreamLobby*` widgets remain as thin wrappers that read the lobby's controller, so a preset can still list them without wiring anything up.
+- The device split buttons and the participants control are call controls rather than lobby widgets, and their default constructor takes the call — like `ToggleScreenShareOption` and every other control in this package.
+
+  `StreamMicrophoneSplitButton(call: call)` and `StreamCameraSplitButton(call: call)` read the call's own microphone or camera state, toggle it, build and dispose a `StreamMediaDevicesController` for it, and disable themselves when the platform names no such device. `StreamParticipantsControl(call: call)` badges and lists the call's participants, falling back to a user's id where the call has no name for them. All three still take the optional extras that matter at a call site: `menuDirection` — a control bar along the bottom of a call opens its menus upwards, and the caret should say so — `onError`, and `onTap`.
+
+  ```dart
+  StreamMicrophoneSplitButton(call: call, menuDirection: StreamMenuDirection.up)
+  StreamParticipantsControl(call: call, onTap: openParticipantsPanel)
+  ```
+
+  Pass `devices` to a split button to share one controller with every other picker on the screen — a settings menu's selects as well as this caret — so they never disagree about which device is in use.
+
+  Where the state and the action are the caller's, `StreamMicrophoneSplitButton.withDevices` and `StreamCameraSplitButton.withDevices` take a controller, an `enabled` flag and an `onPressed`, and `StreamParticipantsControl.forParticipants` takes a `List<UserInfo>`. That is what a lobby needs, where nobody has joined and there is no call state to read; the `StreamLobby*` wrappers use them, so a preset can still list them without wiring anything up.
 
 - Added the lobby's action widgets: `StreamLobbyMicrophoneToggle` and `StreamLobbyCameraToggle`, `StreamLobbyMicrophoneSplitButton` and `StreamLobbyCameraSplitButton` (a toggle with a caret that picks the device), `StreamLobbyMicrophoneSelect` and `StreamLobbyCameraSelect` for a settings row, and `StreamLobbyParticipantsControl`, which badges the number of people already in the call and opens the list — an anchored menu on desktop and a bottom sheet on Android and iOS, like the device pickers. Each reads its state from `StreamLobbyScope`, so none of them has to be wired up at the call site. The split button and the select input open the same sections over the same controller, so a lobby showing both never disagrees with itself, and on Android and iOS both open a bottom sheet without either knowing it.
 - Added lobby strings to the localizations, in English and Dutch: the device menu's section headings, its system-default option, the tooltips on the toggles and pickers, and the permission messages shown before a device can be named.
