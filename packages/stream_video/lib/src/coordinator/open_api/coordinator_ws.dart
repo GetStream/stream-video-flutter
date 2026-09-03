@@ -1,16 +1,28 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../globals.dart';
 import '../../../stream_video.dart';
+import '../../errors/video_error.dart';
 import '../../telemetry/client_event_reporter.dart';
 import '../../telemetry/client_event_types.dart';
-import '../../token/token_manager.dart';
+import '../../token/token_source.dart';
 import 'coordinator_message_codec.dart';
 
 var _seq = 0;
 const _tag = 'SV:CoordinatorWS';
+
+/// The error carried by a disconnection source, as a [VideoError].
+///
+/// `_authenticateUser` only ever throws a [VideoError]; anything else is
+/// described by its `toString`.
+VideoError? _videoErrorOf(Object? error) => switch (error) {
+  null => null,
+  final VideoError it => it,
+  final it => VideoError(message: '$it'),
+};
 
 String _buildUrl(String baseUrl, String apiKey) {
   return '$baseUrl'
@@ -24,20 +36,19 @@ class CoordinatorWebSocket {
     String url, {
     required this.apiKey,
     required this.userInfo,
-    required this.tokenManager,
+    required this.tokenSource,
     this.includeUserDetails = false,
     this.clientEventReporter = const ClientEventReporter.noOp(),
     NetworkStateProvider? networkStateProvider,
     RetryPolicy? retryPolicy,
   }) {
-    final wsUrl = _buildUrl(url, apiKey);
+    _wsUrl = _buildUrl(url, apiKey);
 
     _client = StreamWebSocketClient(
-      options: WebSocketOptions(url: wsUrl),
-      messageCodec: CoordinatorMessageCodec(
-        onTokenError: () => _refreshToken = true,
-      ),
-      onConnectionEstablished: _authenticateUser,
+      tag: _tag,
+      optionsBuilder: () => WebSocketOptions(url: _wsUrl),
+      messageCodec: const CoordinatorMessageCodec(),
+      onAuthenticate: _authenticateUser,
       pingRequestBuilder: ([info]) =>
           HealthCheckPingEvent(connectionId: info?.connectionId),
     );
@@ -47,6 +58,7 @@ class CoordinatorWebSocket {
         : null;
 
     _recoveryHandler = ConnectionRecoveryHandler(
+      tag: '$_tag:Recovery',
       client: _client,
       networkStateProvider: networkStateProvider,
       retryStrategy: _retryStrategy,
@@ -60,7 +72,7 @@ class CoordinatorWebSocket {
 
   final String apiKey;
   final UserInfo userInfo;
-  final TokenManager tokenManager;
+  final TokenSource tokenSource;
   final bool includeUserDetails;
 
   /// Reports the `CoordinatorWS` telemetry stage, which follows this socket's
@@ -70,6 +82,7 @@ class CoordinatorWebSocket {
   late final StreamWebSocketClient _client;
   late final ConnectionRecoveryHandler _recoveryHandler;
   late final RetryStrategy? _retryStrategy;
+  late final String _wsUrl;
 
   SharedEmitter<CoordinatorEvent> get events => _events;
   final _events = MutableSharedEmitter<CoordinatorEvent>();
@@ -77,7 +90,6 @@ class CoordinatorWebSocket {
   String? _userId;
   String? _connectionId;
 
-  bool _refreshToken = false;
   bool _isReconnecting = false;
 
   final _uuid = const Uuid();
@@ -111,23 +123,45 @@ class CoordinatorWebSocket {
 
   Future<void> dispose() => _recoveryHandler.dispose();
 
-  Future<void> _authenticateUser() async {
-    _logger.i(() => '[authenticateUser] url: ${_client.options.url}');
-    final tokenResult = await tokenManager.getToken(refresh: _refreshToken);
-    final userToken = tokenResult.getDataOrNull();
-    if (userToken == null) {
+  Future<void> _authenticateUser(
+    WsRequestSender send,
+    StreamApiError? previousError,
+  ) async {
+    _logger.i(
+      () => '[authenticateUser] url: $_wsUrl, previousError: $previousError',
+    );
+
+    final tokenRefused = previousError?.isTokenExpiredError ?? false;
+
+    // Mirrors the RpcRetryManager guard: a static provider can only return
+    // the token the server just refused, so the credentials cannot change.
+    // Throwing fails the attempt for good (AuthenticationFailed) instead of
+    // reconnecting with the same dead token.
+    if (tokenRefused && tokenSource.usesStaticProvider) {
       _logger.e(
-        () => '[authenticateUser] token fetch failed — disconnecting to retry',
+        () =>
+            '[authenticateUser] token refused and cannot be refreshed '
+            '(static token provider)',
       );
-      unawaited(
-        _client.disconnect(source: const DisconnectionSource.systemInitiated()),
+      throw const VideoError(
+        message:
+            'WS auth token refused and cannot be refreshed '
+            '(static token provider)',
       );
-      return;
     }
-    final token = userToken.rawValue;
-    _client.send(
+
+    final tokenResult = tokenRefused
+        ? await tokenSource.refreshToken()
+        : await tokenSource.getToken();
+
+    if (tokenResult is! Success<UserToken>) {
+      _logger.e(() => '[authenticateUser] token fetch failed: $tokenResult');
+      throw (tokenResult as Failure).videoError;
+    }
+
+    final sent = send(
       CoordinatorAuthRequest(
-        token: token,
+        token: tokenResult.data.rawValue,
         userId: userInfo.id,
         name: includeUserDetails ? userInfo.name : null,
         image: includeUserDetails ? userInfo.image : null,
@@ -136,6 +170,11 @@ class CoordinatorWebSocket {
             : <String, dynamic>{},
       ),
     );
+
+    if (sent is Failure) {
+      _logger.e(() => '[authenticateUser] sending credentials failed: $sent');
+      throw sent.videoError;
+    }
   }
 
   void _onWsEvent(WsEvent wsEvent) {
@@ -145,7 +184,6 @@ class CoordinatorWebSocket {
 
     if (event is CoordinatorConnectedEvent) {
       _logger.i(() => '[onWsEvent] connected: ${event.connectionId}');
-      _refreshToken = false;
       _userId ??= event.userId;
       _connectionId ??= event.connectionId;
 
@@ -180,6 +218,22 @@ class CoordinatorWebSocket {
     final source = state.source;
     final wsException = source is ServerInitiated ? source.error : null;
 
+    // An authentication failure is terminal (it is not reconnectable), so this
+    // event is the only account the app gets of it. Carry over the error that
+    // `_authenticateUser` threw instead of reporting a disconnect with no
+    // reason at all.
+    final authError = source is AuthenticationFailed
+        ? _videoErrorOf(source.error) ?? VideoError(message: source.closeReason)
+        : null;
+
+    final apiError =
+        wsException?.apiError ??
+        switch (authError) {
+          VideoErrorWithCause(cause: final StreamApiError it) => it,
+          _ => null,
+        };
+    final wsReason = wsException?.reason;
+
     _events.emit(
       CoordinatorDisconnectedEvent(
         userId: _userId,
@@ -187,9 +241,10 @@ class CoordinatorWebSocket {
         closeCode: wsException != null && wsException.code != 0
             ? wsException.code
             : null,
-        closeReason: wsException != null && wsException.reason != 'Unknown'
-            ? wsException.reason
-            : null,
+        closeReason: wsReason != null && wsReason != 'Unknown'
+            ? wsReason
+            : apiError?.message ?? authError?.message,
+        apiError: apiError,
       ),
     );
     _userId = null;

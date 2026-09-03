@@ -3,22 +3,29 @@ import '../../../stream_video.dart';
 import '../../errors/video_error.dart';
 import '../../models/call_received_data.dart';
 import '../../retry/retry_manager.dart';
-import '../../token/token_manager.dart';
+import '../../token/token_source.dart';
 import '../models/coordinator_models.dart';
 
 class CoordinatorClientRetry extends CoordinatorClient {
   CoordinatorClientRetry({
     required CoordinatorClient delegate,
     required RetryPolicy retryPolicy,
-    TokenManager? tokenManager,
+    TokenSource? tokenSource,
   }) : _delegate = delegate,
        _retryManager = RpcRetryManager(
          retryPolicy,
-         tokenManager: tokenManager,
-       );
+         tokenSource: tokenSource,
+       ),
+       _unauthenticatedRetryManager = RpcRetryManager(retryPolicy);
 
   final CoordinatorClient _delegate;
   final RpcRetryManager _retryManager;
+
+  /// Retry manager for calls that do not authenticate with the managed user
+  /// token, so a 401 must not trigger a token refresh. For guest creation this
+  /// is load-bearing: the call is what establishes the session, so a refresh
+  /// would ask the [TokenSource] for the very token this call is fetching.
+  final RpcRetryManager _unauthenticatedRetryManager;
 
   final _logger = taggedLogger(tag: 'SV:CoordinatorClientRetry');
 
@@ -847,7 +854,9 @@ class CoordinatorClientRetry extends CoordinatorClient {
     String? image,
     Map<String, Object> custom = const {},
   }) {
-    return _retryManager.execute(
+    // loadGuest authenticates with its own anonymous token, not the managed
+    // user token — see [_unauthenticatedRetryManager].
+    return _unauthenticatedRetryManager.execute(
       () => _delegate.loadGuest(
         id: id,
         name: name,

@@ -248,12 +248,19 @@ class StreamCallDisconnectedEvent extends StreamCallEvent {
     this.userId,
     this.closeCode,
     this.closeReason,
+    this.apiError,
   });
 
   final String? connectionId;
   final String? userId;
   final int? closeCode;
   final String? closeReason;
+
+  /// The error the server reported before closing, when it sent one.
+  ///
+  /// A refused token is reported this way rather than as a close code, so for
+  /// a connection the server rejected this is the only description of why.
+  final StreamApiError? apiError;
 
   @override
   List<Object?> get props => [
@@ -262,6 +269,7 @@ class StreamCallDisconnectedEvent extends StreamCallEvent {
     userId,
     closeCode,
     closeReason,
+    apiError,
   ];
 }
 
@@ -1652,6 +1660,7 @@ extension CoordinatorCallEventX on CoordinatorCallEvent {
         userId: event.userId,
         closeCode: event.closeCode,
         closeReason: event.closeReason,
+        apiError: event.apiError,
       ),
       final CoordinatorCallCreatedEvent event => StreamCallCreatedEvent(
         event.callCid,

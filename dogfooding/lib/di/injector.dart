@@ -159,6 +159,7 @@ StreamVideo _initStreamVideo(
   final streamVideoClient = StreamVideo(
     apiKey,
     user: user,
+    userToken: initialToken,
     tokenLoader: tokenLoader,
     options: StreamVideoOptions(
       logPriority: Priority.debug,

@@ -1,4 +1,4 @@
-import 'package:stream_core/stream_core.dart';
+import 'logger_api.dart';
 
 StreamLog get streamLog => StreamLog();
 

@@ -18,7 +18,6 @@
   - `SharedEmitter.firstWhere` no longer accepts a `timeLimit` parameter — use `waitFor` with an optional `timeLimit`, or call `.firstWhere(...).timeout(...)`.
 - `CurrentPlatform` and `PlatformType` are now provided by `stream_core`:
   - `CurrentPlatform.name` has been removed — use `CurrentPlatform.operatingSystem` instead.
-- `StreamLogger`, `Priority`, and `MessageBuilder` are now provided by `stream_core`. Import them from `stream_video` as before — the re-export is in place.
 - `User`, `UserType`, `UserToken`, and `AuthType` are now provided by `stream_core`. Several API changes follow:
   - `User` constructor signature changed: the `info` field is gone. Pass fields directly — `User(id: 'x', name: 'X', custom: {...})` — instead of wrapping them in `UserInfo`.
   - `User.regular(userId:, extraData:, ...)` factory has been removed. Use the `User(id:, custom:, ...)` constructor directly.
@@ -30,6 +29,24 @@
   - `UserType.authenticated` has been renamed to `UserType.regular`.
   - `UserToken.jwt(String rawValue)` named factory has been replaced by the default `UserToken(String rawValue)` constructor. Replace `UserToken.jwt('...')` with `UserToken('...')`.
   - `UserToken` validation changed: the new constructor throws `ArgumentError` (always) instead of `assert` (debug-only) when the JWT is missing a `user_id` claim.
+- `TokenManager` and `TokenProvider` are now provided by `stream_core`. Several API and behavioural changes follow:
+  - `TokenProvider.from(token, loader)` has been removed, and `TokenProvider.static`/`TokenProvider.dynamic` no longer accept `onTokenUpdated` or an initial token — pass `userToken`, `tokenLoader`, and `onTokenUpdated` to `StreamVideo` instead, which builds the matching provider.
+  - A static token whose `user_id` claim does not match the connected user's id is now rejected locally with an `ArgumentError` on first use, instead of being rejected later by the server.
+  - `OnTokenUpdated` changed from `Future<void> Function(UserToken)` to `void Function(UserToken)` and is **no longer awaited**. Async callbacks still compile, but the SDK may start using a token before your callback has persisted it.
+  - `onTokenUpdated` for a static token now fires on first token use and after every refresh, instead of once at client construction.
+- A coordinator WebSocket connection whose token could not be loaded is now closed as an authentication failure instead of being retried indefinitely. A `tokenLoader` that throws on a reconnect therefore ends the connection — the error is reported on `StreamCallDisconnectedEvent`/`CoordinatorDisconnected` — where before the socket kept retrying with nothing reported.
+
+### ✅ Added
+
+- Anonymous users can now carry a token: pass `userToken` with a `UserType.anonymous` user to send call-restricted tokens (e.g. for closed livestreams). The token's `user_id` claim must be `!anon`; an invalid token fails fast at client construction.
+- `StreamCallDisconnectedEvent`, `CoordinatorDisconnectedEvent`, and `CoordinatorDisconnected` now carry `apiError`, the error the server reported before closing the WebSocket. A refused token or a rejected API key arrives as an error frame rather than a close frame, so this is the only account of why such a connection was closed; `closeReason` falls back to the error's message when the closure itself carried none.
+
+### 🐞 Fixed
+
+- Guest users are now created with their `name`, `image`, and `custom` data — previously only the id was sent.
+- An expired guest token no longer re-creates the guest, which minted a new server-side identity mid-session. The guest is created once, by whichever caller needs a token first — a coordinator API call, `connect()`, or the client's own eager fetch — and everyone arriving while that is in flight waits for it. After it, the client holds the server-assigned identity with a static token, so refresh guards treat guests like static tokens and a rejected guest token fails terminally instead of triggering refreshes that could only return the same token.
+- Fixed a potential permanent hang when guest creation received a 401: the guest-creation call authenticates with its own anonymous token, so it no longer attempts a user-token refresh — which re-entered the token loading already in progress.
+- A coordinator WebSocket error frame that says nothing about the credentials — a rate limit, or an error about a single request — no longer closes an otherwise healthy connection. Only an expired or rejected token, or a rejected API key, closes the socket now; the rest are logged.
 
 ## 1.4.3
 

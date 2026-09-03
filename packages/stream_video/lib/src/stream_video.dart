@@ -6,8 +6,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_core/stream_core.dart'
-    hide LifecycleState, TokenManager, TokenProvider;
+import 'package:stream_core/stream_core.dart' hide LifecycleState;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:uuid/uuid.dart';
 
@@ -34,9 +33,11 @@ import 'lifecycle/lifecycle_state.dart';
 import 'lifecycle/lifecycle_utils.dart'
     if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart'
     as lifecycle;
+import 'logger/core_log_bridge.dart';
 import 'logger/impl/console_logger.dart';
 import 'logger/impl/external_logger.dart';
 import 'logger/impl/tagged_logger.dart';
+import 'logger/logger_api.dart';
 import 'logger/stream_log.dart';
 import 'models/audio_configuration_policy.dart';
 import 'models/call_cid.dart';
@@ -46,7 +47,6 @@ import 'models/call_received_data.dart';
 import 'models/call_ringing_data.dart';
 import 'models/call_status.dart';
 import 'models/disconnect_reason.dart';
-import 'models/guest_created_data.dart';
 import 'models/multi_call_audio_policy.dart';
 import 'models/push_device.dart';
 import 'models/push_provider.dart';
@@ -59,7 +59,8 @@ import 'retry/retry_policy.dart';
 import 'telemetry/client_event_reporter.dart';
 import 'telemetry/client_event_transport.dart';
 import 'token/token.dart';
-import 'token/token_manager.dart';
+import 'token/token_provider_factory.dart';
+import 'token/token_source.dart';
 import 'utils/cancelable_operation.dart';
 import 'utils/future.dart';
 import 'utils/none.dart';
@@ -183,10 +184,32 @@ class StreamVideo extends Disposable {
           )
         : const ClientEventReporter.noOp();
 
+    if (user.type == UserType.guest) {
+      // A guest's identity is assigned by the server, so the manager starts
+      // without one and is pointed at the created guest by the first caller
+      // that needs a token (see [_establishGuestSession]).
+      _tokenManager = TokenManager.unconfigured(onTokenUpdated: onTokenUpdated);
+      _tokens = TokenSource(
+        _tokenManager,
+        establishSession: _establishGuestSession,
+      );
+    } else {
+      _tokenManager = TokenManager(
+        userId: user.id,
+        tokenProvider: buildTokenProvider(
+          user,
+          userToken: userToken,
+          tokenLoader: tokenLoader,
+        ),
+        onTokenUpdated: onTokenUpdated,
+      );
+      _tokens = TokenSource(_tokenManager);
+    }
+
     _client = buildCoordinatorClient(
       user: user,
       apiKey: apiKey,
-      tokenManager: _tokenManager,
+      tokenSource: _tokens,
       latencySettings: _options.latencySettings,
       retryPolicy: _options.retryPolicy,
       rpcUrl: _options.coordinatorRpcUrl,
@@ -216,37 +239,11 @@ class StreamVideo extends Disposable {
       webrtcInitializationCompleter.complete();
     }
 
-    final tokenProvider = switch (user.type) {
-      UserType.regular => TokenProvider.from(
-        userToken?.let(UserToken.new),
-        tokenLoader,
-        onTokenUpdated,
-      ),
-      UserType.anonymous => TokenProvider.static(
-        UserToken.anonymous(),
-        onTokenUpdated: onTokenUpdated,
-      ),
-      UserType.guest => TokenProvider.dynamic((userId) async {
-        final result = await _client.loadGuest(id: userId);
-        if (result is! Success<GuestCreatedData>) {
-          throw (result as Failure).videoError;
-        }
-        final updatedUser = result.data.user;
-        final updatedInfo = updatedUser.toUserInfo();
-        _state.user.value = User(
-          id: updatedInfo.id,
-          name: updatedInfo.name.isEmpty ? null : updatedInfo.name,
-          image: updatedInfo.image,
-          role: updatedInfo.role,
-          teams: updatedInfo.teams,
-          custom: updatedInfo.extraData,
-          type: user.type,
-        );
-        return result.data.accessToken;
-      }, onTokenUpdated: onTokenUpdated),
-    };
-
-    _tokenManager.setTokenProvider(user.id, tokenProvider: tokenProvider);
+    // Pre-warm the token cache, mirroring the eager fetch previously
+    // triggered by setting the token provider. Failures are logged by
+    // getToken and surface later, when the token is actually needed — the
+    // caller that needs one then establishes the session itself.
+    unawaited(_tokens.getToken());
 
     _setupLogger(options.logPriority, options.logHandlerFunction);
 
@@ -314,7 +311,27 @@ class StreamVideo extends Disposable {
   @internal
   Completer<void> webrtcInitializationCompleter = Completer();
 
-  final _tokenManager = TokenManager();
+  late final TokenManager _tokenManager;
+
+  /// Every token this client authenticates with comes from here, so a guest's
+  /// identity is established by whichever caller needs a token first rather
+  /// than only by [connect].
+  late final TokenSource _tokens;
+
+  /// Creates this client's guest and adopts the identity the server assigns.
+  ///
+  /// Called by [_tokens] alone, which shares one exchange between concurrent
+  /// callers and retries after a failure.
+  Future<Result<UserToken>> _establishGuestSession() {
+    return establishGuestSession(
+      tokenManager: _tokenManager,
+      user: _state.user.value,
+      createGuest: ({required id, name, image, required custom}) =>
+          _client.loadGuest(id: id, name: name, image: image, custom: custom),
+      onGuestUserUpdated: (updatedUser) => _state.user.value = updatedUser,
+    );
+  }
+
   final _subscriptions = Subscriptions();
 
   late final CoordinatorClient _client;
@@ -329,7 +346,7 @@ class StreamVideo extends Disposable {
   /// Resolves the current user token for the telemetry transport's auth
   /// interceptor, mirroring the coordinator client's authentication.
   Future<UserToken> _clientEventToken() async {
-    final tokenResult = await _tokenManager.getToken();
+    final tokenResult = await _tokens.getToken();
     if (tokenResult is! Success<UserToken>) {
       throw (tokenResult as Failure).videoError;
     }
@@ -426,19 +443,17 @@ class StreamVideo extends Disposable {
 
     if (_connectionState.isConnected) {
       _logger.w(() => '[connect] rejected (already connected)');
-      final token = _tokenManager.getCachedToken();
-      if (token == null) {
-        return failureWithError(
-          '[connect] userToken is null in Connected state',
-        );
-      }
-      return Result.success(token);
+      // The cache can be briefly empty while a token refresh is in flight;
+      // getToken serves the cached token when present and otherwise waits
+      // for the refresh instead of failing.
+      return _tokens.getToken();
     }
 
     _connectionState = ConnectionState.connecting(_state.currentUser.id);
 
-    // guest user will be updated when token gets fetched
-    final tokenResult = await _tokenManager.getToken();
+    // Establishes a guest's server-assigned identity, unless a request that
+    // needed a token got there first.
+    final tokenResult = await _tokens.getToken();
     if (tokenResult is! Success<UserToken>) {
       _logger.e(() => '[connect] token fetching failed: $tokenResult');
       _connectionState = ConnectionState.failed(
@@ -1487,7 +1502,7 @@ CoordinatorClient buildCoordinatorClient({
   required String rpcUrl,
   required String wsUrl,
   required String apiKey,
-  required TokenManager tokenManager,
+  required TokenSource tokenSource,
   required RetryPolicy retryPolicy,
   required LatencySettings latencySettings,
   required InternetConnection networkMonitor,
@@ -1499,10 +1514,10 @@ CoordinatorClient buildCoordinatorClient({
 
   return CoordinatorClientRetry(
     retryPolicy: retryPolicy,
-    tokenManager: tokenManager,
+    tokenSource: tokenSource,
     delegate: CoordinatorClientOpenApi(
       apiKey: apiKey,
-      tokenManager: tokenManager,
+      tokenSource: tokenSource,
       latencyService: LatencyService(settings: latencySettings),
       retryPolicy: retryPolicy,
       rpcUrl: rpcUrl,
@@ -1523,6 +1538,8 @@ void _setupLogger(Priority logPriority, LogHandlerFunction logHandlerFunction) {
       const ConsoleStreamLogger(),
       ExternalStreamLogger(logHandlerFunction),
     ]);
+
+    installCoreLogBridge(logPriority);
   }
 }
 

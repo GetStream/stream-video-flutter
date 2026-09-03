@@ -5,10 +5,10 @@ import 'package:stream_video/open_api/video/coordinator/api.dart';
 import 'package:stream_video/src/errors/video_error.dart';
 import 'package:stream_video/src/retry/retry_manager.dart';
 import 'package:stream_video/src/retry/retry_policy.dart';
-import 'package:stream_video/src/token/token_manager.dart';
+import 'package:stream_video/src/token/token_source.dart';
 import 'package:stream_video/src/utils/result.dart';
 
-class MockTokenManager extends Mock implements TokenManager {}
+class MockTokenSource extends Mock implements TokenSource {}
 
 /// A [RetryPolicy] with no backoff delay for fast tests.
 const _noDelayPolicy = RetryPolicy(
@@ -40,22 +40,23 @@ final _token = UserToken.anonymous();
 
 void main() {
   group('RpcRetryManager auth retry', () {
-    late MockTokenManager tokenManager;
+    late MockTokenSource tokenSource;
 
     setUp(() {
-      tokenManager = MockTokenManager();
+      tokenSource = MockTokenSource();
+      when(() => tokenSource.usesStaticProvider).thenReturn(false);
     });
 
     test('refreshes token and retries on 401', () async {
       var callCount = 0;
 
-      when(() => tokenManager.refreshToken()).thenAnswer(
+      when(() => tokenSource.refreshToken()).thenAnswer(
         (_) async => Result.success(_token),
       );
 
       final manager = RpcRetryManager(
         _noDelayPolicy,
-        tokenManager: tokenManager,
+        tokenSource: tokenSource,
       );
 
       final result = await manager.execute(() async {
@@ -68,17 +69,17 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       expect(callCount, 2);
-      verify(() => tokenManager.refreshToken()).called(1);
+      verify(() => tokenSource.refreshToken()).called(1);
     });
 
     test('retries only once on repeated 401', () async {
-      when(() => tokenManager.refreshToken()).thenAnswer(
+      when(() => tokenSource.refreshToken()).thenAnswer(
         (_) async => Result.success(_token),
       );
 
       final manager = RpcRetryManager(
         _noDelayPolicy,
-        tokenManager: tokenManager,
+        tokenSource: tokenSource,
       );
 
       final result = await manager.execute(() async {
@@ -88,7 +89,7 @@ void main() {
       expect(result.isFailure, isTrue);
       // 1st call → 401 → refresh → 2nd call → 401 → no more auth retries
       // then normal retries continue up to rpcMaxRetries
-      verify(() => tokenManager.refreshToken()).called(1);
+      verify(() => tokenSource.refreshToken()).called(1);
     });
 
     test('does not refresh token on non-401 4xx errors', () async {
@@ -96,7 +97,7 @@ void main() {
 
       final manager = RpcRetryManager(
         _noDelayPolicy,
-        tokenManager: tokenManager,
+        tokenSource: tokenSource,
       );
 
       final result = await manager.execute(() async {
@@ -106,10 +107,32 @@ void main() {
 
       expect(result.isFailure, isTrue);
       expect(callCount, 1); // 403 is not retryable, fails immediately
-      verifyNever(() => tokenManager.refreshToken());
+      verifyNever(() => tokenSource.refreshToken());
     });
 
-    test('does not attempt refresh without tokenManager', () async {
+    test('does not refresh the token for static providers on 401', () async {
+      var callCount = 0;
+
+      when(() => tokenSource.usesStaticProvider).thenReturn(true);
+
+      final manager = RpcRetryManager(
+        _noDelayPolicy,
+        tokenSource: tokenSource,
+      );
+
+      final result = await manager.execute(() async {
+        callCount++;
+        return _httpError<String>(401, 'Unauthorized');
+      });
+
+      expect(result.isFailure, isTrue);
+      // 401 stays retryable, but no refresh is attempted: a static provider
+      // can only return the same token again.
+      expect(callCount, 3);
+      verifyNever(() => tokenSource.refreshToken());
+    });
+
+    test('does not attempt refresh without a token source', () async {
       var callCount = 0;
 
       const manager = RpcRetryManager(_noDelayPolicy);
@@ -120,7 +143,7 @@ void main() {
       });
 
       expect(result.isFailure, isTrue);
-      // 401 is retryable but no tokenManager to refresh — retries with same
+      // 401 is retryable but no token source to refresh — retries with same
       // stale token up to rpcMaxRetries
       expect(callCount, 3);
     });
@@ -128,7 +151,7 @@ void main() {
     test('auth retry does not consume a regular retry slot', () async {
       var callCount = 0;
 
-      when(() => tokenManager.refreshToken()).thenAnswer(
+      when(() => tokenSource.refreshToken()).thenAnswer(
         (_) async => Result.success(_token),
       );
 
@@ -139,7 +162,7 @@ void main() {
 
       final manager = RpcRetryManager(
         policy,
-        tokenManager: tokenManager,
+        tokenSource: tokenSource,
       );
 
       // 1st → 401 (auth retry, doesn't count)
@@ -154,7 +177,7 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       expect(callCount, 3);
-      verify(() => tokenManager.refreshToken()).called(1);
+      verify(() => tokenSource.refreshToken()).called(1);
     });
 
     test('retries 5xx errors normally without token refresh', () async {
@@ -162,7 +185,7 @@ void main() {
 
       final manager = RpcRetryManager(
         _noDelayPolicy,
-        tokenManager: tokenManager,
+        tokenSource: tokenSource,
       );
 
       final result = await manager.execute(() async {
@@ -176,7 +199,7 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       expect(callCount, 3);
-      verifyNever(() => tokenManager.refreshToken());
+      verifyNever(() => tokenSource.refreshToken());
     });
   });
 }

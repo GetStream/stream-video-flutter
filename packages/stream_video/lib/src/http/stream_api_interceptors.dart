@@ -23,7 +23,7 @@ class StreamAuthInterceptor extends Interceptor {
   ) async {
     try {
       final userToken = await getToken();
-      options.headers['stream-auth-type'] = userToken.authType.name;
+      options.headers['stream-auth-type'] = userToken.authType.headerValue;
       if (userToken.rawValue.isNotEmpty) {
         options.headers['Authorization'] = userToken.rawValue;
       }

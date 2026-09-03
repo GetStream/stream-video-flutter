@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_core/stream_core.dart';
+import 'package:stream_video/stream_video.dart';
 
 class TestStreamLogger extends StreamLogger {
   int startTimeMs = DateTime.now().millisecondsSinceEpoch;
