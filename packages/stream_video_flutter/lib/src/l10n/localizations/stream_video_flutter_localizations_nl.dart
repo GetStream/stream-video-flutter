@@ -94,5 +94,14 @@ class StreamVideoFlutterLocalizationsNl
   String get lobbyToggleCamera => 'Camera aan- of uitzetten';
 
   @override
+  String get lobbyTitle => 'Voordat je deelneemt';
+
+  @override
+  String get lobbySubtitle => 'Stel je audio en video in';
+
+  @override
+  String get lobbyJoinCall => 'Deelnemen';
+
+  @override
   String get lobbyParticipants => 'Deelnemers';
 }

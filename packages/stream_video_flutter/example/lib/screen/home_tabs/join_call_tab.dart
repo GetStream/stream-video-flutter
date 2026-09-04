@@ -78,12 +78,39 @@ class _JoinCallTabState extends State<JoinCallTab> {
     await Navigator.push(
       context,
       MaterialPageRoute<dynamic>(
-        builder: (context) => StreamLobbyView(
+        builder: (context) => _LobbyScreen(
           call: call,
           onJoinCallPressed: (options) {
             Navigator.of(context).pop();
             widget.onNavigateToCall(call, options: options);
+            return true;
           },
+        ),
+      ),
+    );
+  }
+}
+
+/// Wraps [StreamLobbyView] in the screen chrome it deliberately does not
+/// build: the view is body-only, so it can be embedded in a screen that
+/// already has a Scaffold.
+class _LobbyScreen extends StatelessWidget {
+  const _LobbyScreen({required this.call, required this.onJoinCallPressed});
+
+  final Call call;
+  final StreamLobbyJoinCallback onJoinCallPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(automaticallyImplyLeading: true),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(context.streamSpacing.md),
+          child: StreamLobbyView(
+            call: call,
+            onJoinCallPressed: onJoinCallPressed,
+          ),
         ),
       ),
     );
