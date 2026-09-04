@@ -11,11 +11,7 @@ FrameRecordingSettingsResponse _$FrameRecordingSettingsResponseFromJson(
 ) => FrameRecordingSettingsResponse(
   captureIntervalInSeconds: (json['capture_interval_in_seconds'] as num)
       .toInt(),
-  mode: $enumDecode(
-    _$FrameRecordingSettingsResponseModeEnumMap,
-    json['mode'],
-    unknownValue: FrameRecordingSettingsResponseMode.unknown,
-  ),
+  mode: FrameRecordingSettingsResponseMode.fromJson(json['mode'] as String),
   quality: json['quality'] as String?,
 );
 
@@ -23,13 +19,6 @@ Map<String, dynamic> _$FrameRecordingSettingsResponseToJson(
   FrameRecordingSettingsResponse instance,
 ) => <String, dynamic>{
   'capture_interval_in_seconds': instance.captureIntervalInSeconds,
-  'mode': _$FrameRecordingSettingsResponseModeEnumMap[instance.mode]!,
+  'mode': instance.mode.toJson(),
   'quality': instance.quality,
-};
-
-const _$FrameRecordingSettingsResponseModeEnumMap = {
-  FrameRecordingSettingsResponseMode.autoOn: 'auto-on',
-  FrameRecordingSettingsResponseMode.available: 'available',
-  FrameRecordingSettingsResponseMode.disabled: 'disabled',
-  FrameRecordingSettingsResponseMode.unknown: '_unknown',
 };

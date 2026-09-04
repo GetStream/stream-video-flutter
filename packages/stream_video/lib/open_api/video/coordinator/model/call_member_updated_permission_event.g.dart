@@ -11,19 +11,17 @@ CallMemberUpdatedPermissionEvent _$CallMemberUpdatedPermissionEventFromJson(
 ) => CallMemberUpdatedPermissionEvent(
   call: CallResponse.fromJson(json['call'] as Map<String, dynamic>),
   callCid: json['call_cid'] as String,
-  capabilitiesByRole: json['capabilities_by_role'] == null
-      ? const {}
-      : _capabilitiesByRoleFromJson(
-          json['capabilities_by_role'] as Map<String, dynamic>,
-        ),
-  createdAt: const EpochDateTimeConverter().fromJson(
+  capabilitiesByRole: (json['capabilities_by_role'] as Map<String, dynamic>)
+      .map(
+        (k, e) =>
+            MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
+      ),
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  members:
-      (json['members'] as List<dynamic>?)
-          ?.map((e) => MemberResponse.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      [],
+  members: (json['members'] as List<dynamic>)
+      .map((e) => MemberResponse.fromJson(e as Map<String, dynamic>))
+      .toList(),
   type: json['type'] as String,
 );
 
@@ -33,7 +31,7 @@ Map<String, dynamic> _$CallMemberUpdatedPermissionEventToJson(
   'call': instance.call.toJson(),
   'call_cid': instance.callCid,
   'capabilities_by_role': instance.capabilitiesByRole,
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'members': instance.members.map((e) => e.toJson()).toList(),
   'type': instance.type,
 };

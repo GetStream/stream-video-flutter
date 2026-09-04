@@ -9,16 +9,12 @@ part of 'bulk_action_appeals_request.dart';
 BulkActionAppealsRequest _$BulkActionAppealsRequestFromJson(
   Map<String, dynamic> json,
 ) => BulkActionAppealsRequest(
-  actionType: $enumDecode(
-    _$BulkActionAppealsRequestActionTypeEnumMap,
-    json['action_type'],
-    unknownValue: BulkActionAppealsRequestActionType.unknown,
+  actionType: BulkActionAppealsRequestActionType.fromJson(
+    json['action_type'] as String,
   ),
-  appealIds:
-      (json['appeal_ids'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      [],
+  appealIds: (json['appeal_ids'] as List<dynamic>)
+      .map((e) => e as String)
+      .toList(),
   markReviewed: json['mark_reviewed'] == null
       ? null
       : MarkReviewedRequestPayload.fromJson(
@@ -49,21 +45,11 @@ BulkActionAppealsRequest _$BulkActionAppealsRequestFromJson(
 Map<String, dynamic> _$BulkActionAppealsRequestToJson(
   BulkActionAppealsRequest instance,
 ) => <String, dynamic>{
-  'action_type':
-      _$BulkActionAppealsRequestActionTypeEnumMap[instance.actionType]!,
+  'action_type': instance.actionType.toJson(),
   'appeal_ids': instance.appealIds,
   'mark_reviewed': instance.markReviewed?.toJson(),
   'reject_appeal': instance.rejectAppeal?.toJson(),
   'restore': instance.restore?.toJson(),
   'unban': instance.unban?.toJson(),
   'unblock': instance.unblock?.toJson(),
-};
-
-const _$BulkActionAppealsRequestActionTypeEnumMap = {
-  BulkActionAppealsRequestActionType.markReviewed: 'mark_reviewed',
-  BulkActionAppealsRequestActionType.rejectAppeal: 'reject_appeal',
-  BulkActionAppealsRequestActionType.restore: 'restore',
-  BulkActionAppealsRequestActionType.unban: 'unban',
-  BulkActionAppealsRequestActionType.unblock: 'unblock',
-  BulkActionAppealsRequestActionType.unknown: '_unknown',
 };

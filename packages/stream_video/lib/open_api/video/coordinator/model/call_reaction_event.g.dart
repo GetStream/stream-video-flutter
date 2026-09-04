@@ -9,7 +9,7 @@ part of 'call_reaction_event.dart';
 CallReactionEvent _$CallReactionEventFromJson(Map<String, dynamic> json) =>
     CallReactionEvent(
       callCid: json['call_cid'] as String,
-      createdAt: const EpochDateTimeConverter().fromJson(
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
       reaction: VideoReactionResponse.fromJson(
@@ -21,7 +21,7 @@ CallReactionEvent _$CallReactionEventFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$CallReactionEventToJson(CallReactionEvent instance) =>
     <String, dynamic>{
       'call_cid': instance.callCid,
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'reaction': instance.reaction.toJson(),
       'type': instance.type,
     };

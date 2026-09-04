@@ -2868,14 +2868,14 @@ class Call {
       if (speakerOnWithSettingsPriority) {
         defaultAudioOutput = audioOutputs.firstWhereOrNull(
           (device) => device.id.equalsIgnoreCase(
-            AudioSettingsRequestDefaultDevice.speaker.name,
+            AudioSettingsRequestDefaultDevice.speaker,
           ),
         );
       } else {
         // 3. First non-speaker device
         defaultAudioOutput = audioOutputs.firstWhereOrNull(
           (device) => !device.id.equalsIgnoreCase(
-            AudioSettingsRequestDefaultDevice.speaker.name,
+            AudioSettingsRequestDefaultDevice.speaker,
           ),
         );
       }

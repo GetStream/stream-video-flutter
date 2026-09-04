@@ -12,11 +12,7 @@ LayoutSettingsRequest _$LayoutSettingsRequestFromJson(
   detectOrientation: json['detect_orientation'] as bool?,
   externalAppUrl: json['external_app_url'] as String?,
   externalCssUrl: json['external_css_url'] as String?,
-  name: $enumDecode(
-    _$LayoutSettingsRequestNameEnumMap,
-    json['name'],
-    unknownValue: LayoutSettingsRequestName.unknown,
-  ),
+  name: LayoutSettingsRequestName.fromJson(json['name'] as String),
   options: json['options'] as Map<String, dynamic>?,
 );
 
@@ -26,15 +22,6 @@ Map<String, dynamic> _$LayoutSettingsRequestToJson(
   'detect_orientation': instance.detectOrientation,
   'external_app_url': instance.externalAppUrl,
   'external_css_url': instance.externalCssUrl,
-  'name': _$LayoutSettingsRequestNameEnumMap[instance.name]!,
+  'name': instance.name.toJson(),
   'options': instance.options,
-};
-
-const _$LayoutSettingsRequestNameEnumMap = {
-  LayoutSettingsRequestName.custom: 'custom',
-  LayoutSettingsRequestName.grid: 'grid',
-  LayoutSettingsRequestName.mobile: 'mobile',
-  LayoutSettingsRequestName.singleParticipant: 'single-participant',
-  LayoutSettingsRequestName.spotlight: 'spotlight',
-  LayoutSettingsRequestName.unknown: '_unknown',
 };

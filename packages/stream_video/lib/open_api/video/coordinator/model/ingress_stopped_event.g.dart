@@ -9,7 +9,7 @@ part of 'ingress_stopped_event.dart';
 IngressStoppedEvent _$IngressStoppedEventFromJson(Map<String, dynamic> json) =>
     IngressStoppedEvent(
       callCid: json['call_cid'] as String,
-      createdAt: const EpochDateTimeConverter().fromJson(
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
       ingressStreamId: json['ingress_stream_id'] as String,
@@ -21,7 +21,7 @@ Map<String, dynamic> _$IngressStoppedEventToJson(
   IngressStoppedEvent instance,
 ) => <String, dynamic>{
   'call_cid': instance.callCid,
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'ingress_stream_id': instance.ingressStreamId,
   'type': instance.type,
   'user_id': instance.userId,

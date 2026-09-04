@@ -8,13 +8,13 @@ part of 'user_updated_event.dart';
 
 UserUpdatedEvent _$UserUpdatedEventFromJson(Map<String, dynamic> json) =>
     UserUpdatedEvent(
-      createdAt: const EpochDateTimeConverter().fromJson(
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
-      custom: json['custom'] as Map<String, dynamic>? ?? {},
+      custom: json['custom'] as Map<String, dynamic>,
       receivedAt: _$JsonConverterFromJson<Object, DateTime>(
         json['received_at'],
-        const EpochDateTimeConverter().fromJson,
+        const StreamDateTimeConverter().fromJson,
       ),
       type: json['type'] as String,
       user: UserResponsePrivacyFields.fromJson(
@@ -24,11 +24,11 @@ UserUpdatedEvent _$UserUpdatedEventFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$UserUpdatedEventToJson(UserUpdatedEvent instance) =>
     <String, dynamic>{
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'custom': instance.custom,
       'received_at': _$JsonConverterToJson<Object, DateTime>(
         instance.receivedAt,
-        const EpochDateTimeConverter().toJson,
+        const StreamDateTimeConverter().toJson,
       ),
       'type': instance.type,
       'user': instance.user.toJson(),

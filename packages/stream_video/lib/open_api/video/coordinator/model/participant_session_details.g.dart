@@ -12,15 +12,14 @@ ParticipantSessionDetails _$ParticipantSessionDetailsFromJson(
   durationInSeconds: (json['duration_in_seconds'] as num?)?.toInt(),
   joinedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['joined_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   leftAt: _$JsonConverterFromJson<Object, DateTime>(
     json['left_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   publisherType: json['publisher_type'] as String,
-  roles:
-      (json['roles'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+  roles: (json['roles'] as List<dynamic>).map((e) => e as String).toList(),
   userId: json['user_id'] as String,
   userSessionId: json['user_session_id'] as String,
 );
@@ -31,11 +30,11 @@ Map<String, dynamic> _$ParticipantSessionDetailsToJson(
   'duration_in_seconds': instance.durationInSeconds,
   'joined_at': _$JsonConverterToJson<Object, DateTime>(
     instance.joinedAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'left_at': _$JsonConverterToJson<Object, DateTime>(
     instance.leftAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'publisher_type': instance.publisherType,
   'roles': instance.roles,

@@ -137,13 +137,13 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<BanResponse> _ban({required BanRequest banRequest}) async {
+  Future<ModerationBanResponse> _ban({required BanRequest banRequest}) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(banRequest.toJson());
-    final _options = _setStreamType<Result<BanResponse>>(
+    final _options = _setStreamType<Result<ModerationBanResponse>>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -154,9 +154,9 @@ class _DefaultApi implements DefaultApi {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late BanResponse _value;
+    late ModerationBanResponse _value;
     try {
-      _value = BanResponse.fromJson(_result.data!);
+      _value = ModerationBanResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -165,8 +165,8 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<BanResponse>> ban({required BanRequest banRequest}) {
-    return _ResultCallAdapter<BanResponse>().adapt(
+  Future<Result<ModerationBanResponse>> ban({required BanRequest banRequest}) {
+    return _ResultCallAdapter<ModerationBanResponse>().adapt(
       () => _ban(banRequest: banRequest),
     );
   }
@@ -612,6 +612,44 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
+  Future<QueueResponse> _createQueue({
+    required CreateQueueRequest createQueueRequest,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(createQueueRequest.toJson());
+    final _options = _setStreamType<Result<QueueResponse>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/moderation/queues',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late QueueResponse _value;
+    try {
+      _value = QueueResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<QueueResponse>> createQueue({
+    required CreateQueueRequest createQueueRequest,
+  }) {
+    return _ResultCallAdapter<QueueResponse>().adapt(
+      () => _createQueue(createQueueRequest: createQueueRequest),
+    );
+  }
+
   Future<CreateUserGroupResponse> _createUserGroup({
     required CreateUserGroupRequest createUserGroupRequest,
   }) async {
@@ -912,13 +950,9 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<DurationResponse> _deletePoll({
-    required String pollId,
-    String? userId,
-  }) async {
+  Future<DurationResponse> _deletePoll({required String pollId}) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'user_id': userId};
-    queryParameters.removeWhere((k, v) => v == null);
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<Result<DurationResponse>>(
@@ -943,23 +977,18 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<DurationResponse>> deletePoll({
-    required String pollId,
-    String? userId,
-  }) {
+  Future<Result<DurationResponse>> deletePoll({required String pollId}) {
     return _ResultCallAdapter<DurationResponse>().adapt(
-      () => _deletePoll(pollId: pollId, userId: userId),
+      () => _deletePoll(pollId: pollId),
     );
   }
 
   Future<DurationResponse> _deletePollOption({
     required String pollId,
     required String optionId,
-    String? userId,
   }) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'user_id': userId};
-    queryParameters.removeWhere((k, v) => v == null);
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<Result<DurationResponse>>(
@@ -987,11 +1016,42 @@ class _DefaultApi implements DefaultApi {
   Future<Result<DurationResponse>> deletePollOption({
     required String pollId,
     required String optionId,
-    String? userId,
   }) {
     return _ResultCallAdapter<DurationResponse>().adapt(
-      () =>
-          _deletePollOption(pollId: pollId, optionId: optionId, userId: userId),
+      () => _deletePollOption(pollId: pollId, optionId: optionId),
+    );
+  }
+
+  Future<QueueResponse> _deleteQueue({required String id}) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<Result<QueueResponse>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/moderation/queues/${id}/delete',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late QueueResponse _value;
+    try {
+      _value = QueueResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<QueueResponse>> deleteQueue({required String id}) {
+    return _ResultCallAdapter<QueueResponse>().adapt(
+      () => _deleteQueue(id: id),
     );
   }
 
@@ -1170,13 +1230,13 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<FlagResponse> _flag({required FlagRequest flagRequest}) async {
+  Future<FlagItemResponse> _flag({required FlagRequest flagRequest}) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(flagRequest.toJson());
-    final _options = _setStreamType<Result<FlagResponse>>(
+    final _options = _setStreamType<Result<FlagItemResponse>>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
@@ -1187,9 +1247,9 @@ class _DefaultApi implements DefaultApi {
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late FlagResponse _value;
+    late FlagItemResponse _value;
     try {
-      _value = FlagResponse.fromJson(_result.data!);
+      _value = FlagItemResponse.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -1198,8 +1258,8 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<FlagResponse>> flag({required FlagRequest flagRequest}) {
-    return _ResultCallAdapter<FlagResponse>().adapt(
+  Future<Result<FlagItemResponse>> flag({required FlagRequest flagRequest}) {
+    return _ResultCallAdapter<FlagItemResponse>().adapt(
       () => _flag(flagRequest: flagRequest),
     );
   }
@@ -1520,6 +1580,49 @@ class _DefaultApi implements DefaultApi {
   }) {
     return _ResultCallAdapter<GetCallReportResponse>().adapt(
       () => _getCallReport(type: type, id: id, sessionId: sessionId),
+    );
+  }
+
+  Future<GetCallRingStateResponse> _getCallRingState({
+    required String type,
+    required String id,
+    required String callSessionId,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'call_session_id': callSessionId,
+    };
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<Result<GetCallRingStateResponse>>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/video/call/${type}/${id}/ring_state',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late GetCallRingStateResponse _value;
+    try {
+      _value = GetCallRingStateResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<GetCallRingStateResponse>> getCallRingState({
+    required String type,
+    required String id,
+    required String callSessionId,
+  }) {
+    return _ResultCallAdapter<GetCallRingStateResponse>().adapt(
+      () => _getCallRingState(type: type, id: id, callSessionId: callSessionId),
     );
   }
 
@@ -1889,13 +1992,9 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<PollResponse> _getPoll({
-    required String pollId,
-    String? userId,
-  }) async {
+  Future<PollResponse> _getPoll({required String pollId}) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'user_id': userId};
-    queryParameters.removeWhere((k, v) => v == null);
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<Result<PollResponse>>(
@@ -1920,23 +2019,18 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<PollResponse>> getPoll({
-    required String pollId,
-    String? userId,
-  }) {
+  Future<Result<PollResponse>> getPoll({required String pollId}) {
     return _ResultCallAdapter<PollResponse>().adapt(
-      () => _getPoll(pollId: pollId, userId: userId),
+      () => _getPoll(pollId: pollId),
     );
   }
 
   Future<PollOptionResponse> _getPollOption({
     required String pollId,
     required String optionId,
-    String? userId,
   }) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'user_id': userId};
-    queryParameters.removeWhere((k, v) => v == null);
+    final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<Result<PollOptionResponse>>(
@@ -1964,11 +2058,41 @@ class _DefaultApi implements DefaultApi {
   Future<Result<PollOptionResponse>> getPollOption({
     required String pollId,
     required String optionId,
-    String? userId,
   }) {
     return _ResultCallAdapter<PollOptionResponse>().adapt(
-      () => _getPollOption(pollId: pollId, optionId: optionId, userId: userId),
+      () => _getPollOption(pollId: pollId, optionId: optionId),
     );
+  }
+
+  Future<QueueResponse> _getQueue({required String id}) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<Result<QueueResponse>>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/moderation/queues/${id}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late QueueResponse _value;
+    try {
+      _value = QueueResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<QueueResponse>> getQueue({required String id}) {
+    return _ResultCallAdapter<QueueResponse>().adapt(() => _getQueue(id: id));
   }
 
   Future<GetUserGroupResponse> _getUserGroup({
@@ -2087,6 +2211,49 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
+  Future<ImportBlockListResponse> _importBlockList({
+    required String id,
+    required ImportBlockListRequest importBlockListRequest,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(importBlockListRequest.toJson());
+    final _options = _setStreamType<Result<ImportBlockListResponse>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/blocklists/${id}/import',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ImportBlockListResponse _value;
+    try {
+      _value = ImportBlockListResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<ImportBlockListResponse>> importBlockList({
+    required String id,
+    required ImportBlockListRequest importBlockListRequest,
+  }) {
+    return _ResultCallAdapter<ImportBlockListResponse>().adapt(
+      () => _importBlockList(
+        id: id,
+        importBlockListRequest: importBlockListRequest,
+      ),
+    );
+  }
+
   Future<JoinCallResponse> _joinCall({
     required String type,
     required String id,
@@ -2171,9 +2338,17 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<ListBlockListResponse> _listBlockLists({String? team}) async {
+  Future<ListBlockListResponse> _listBlockLists({
+    String? team,
+    String? cursor,
+    int? limit,
+  }) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'team': team};
+    final queryParameters = <String, dynamic>{
+      r'team': team,
+      r'cursor': cursor,
+      r'limit': limit,
+    };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
@@ -2199,9 +2374,13 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<ListBlockListResponse>> listBlockLists({String? team}) {
+  Future<Result<ListBlockListResponse>> listBlockLists({
+    String? team,
+    String? cursor,
+    int? limit,
+  }) {
     return _ResultCallAdapter<ListBlockListResponse>().adapt(
-      () => _listBlockLists(team: team),
+      () => _listBlockLists(team: team, cursor: cursor, limit: limit),
     );
   }
 
@@ -2236,6 +2415,37 @@ class _DefaultApi implements DefaultApi {
     return _ResultCallAdapter<ListDevicesResponse>().adapt(
       () => _listDevices(),
     );
+  }
+
+  Future<ListQueuesResponse> _listQueues() async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<Result<ListQueuesResponse>>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/moderation/queues',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ListQueuesResponse _value;
+    try {
+      _value = ListQueuesResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<ListQueuesResponse>> listQueues() {
+    return _ResultCallAdapter<ListQueuesResponse>().adapt(() => _listQueues());
   }
 
   Future<ListRecordingsResponse> _listRecordings({
@@ -2941,11 +3151,10 @@ class _DefaultApi implements DefaultApi {
 
   Future<PollVotesResponse> _queryPollVotes({
     required String pollId,
-    String? userId,
     QueryPollVotesRequest? queryPollVotesRequest,
   }) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'user_id': userId};
+    final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -2974,24 +3183,21 @@ class _DefaultApi implements DefaultApi {
   @override
   Future<Result<PollVotesResponse>> queryPollVotes({
     required String pollId,
-    String? userId,
     QueryPollVotesRequest? queryPollVotesRequest,
   }) {
     return _ResultCallAdapter<PollVotesResponse>().adapt(
       () => _queryPollVotes(
         pollId: pollId,
-        userId: userId,
         queryPollVotesRequest: queryPollVotesRequest,
       ),
     );
   }
 
   Future<QueryPollsResponse> _queryPolls({
-    String? userId,
     QueryPollsRequest? queryPollsRequest,
   }) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'user_id': userId};
+    final queryParameters = <String, dynamic>{};
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
@@ -3019,11 +3225,10 @@ class _DefaultApi implements DefaultApi {
 
   @override
   Future<Result<QueryPollsResponse>> queryPolls({
-    String? userId,
     QueryPollsRequest? queryPollsRequest,
   }) {
     return _ResultCallAdapter<QueryPollsResponse>().adapt(
-      () => _queryPolls(userId: userId, queryPollsRequest: queryPollsRequest),
+      () => _queryPolls(queryPollsRequest: queryPollsRequest),
     );
   }
 
@@ -4253,6 +4458,49 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
+  Future<UnbanResponse> _unban({
+    required String targetUserId,
+    String? channelCid,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'target_user_id': targetUserId,
+      r'channel_cid': channelCid,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<Result<UnbanResponse>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/moderation/unban',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late UnbanResponse _value;
+    try {
+      _value = UnbanResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<UnbanResponse>> unban({
+    required String targetUserId,
+    String? channelCid,
+  }) {
+    return _ResultCallAdapter<UnbanResponse>().adapt(
+      () => _unban(targetUserId: targetUserId, channelCid: channelCid),
+    );
+  }
+
   Future<UnblockUserResponse> _unblockUser({
     required String type,
     required String id,
@@ -4334,6 +4582,42 @@ class _DefaultApi implements DefaultApi {
   }) {
     return _ResultCallAdapter<UnblockUsersResponse>().adapt(
       () => _unblockUsers(unblockUsersRequest: unblockUsersRequest),
+    );
+  }
+
+  Future<UnmuteResponse> _unmute({required UnmuteRequest unmuteRequest}) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(unmuteRequest.toJson());
+    final _options = _setStreamType<Result<UnmuteResponse>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/moderation/unmute',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late UnmuteResponse _value;
+    try {
+      _value = UnmuteResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<UnmuteResponse>> unmute({
+    required UnmuteRequest unmuteRequest,
+  }) {
+    return _ResultCallAdapter<UnmuteResponse>().adapt(
+      () => _unmute(unmuteRequest: unmuteRequest),
     );
   }
 
@@ -4675,6 +4959,47 @@ class _DefaultApi implements DefaultApi {
       () => _updatePushNotificationPreferences(
         upsertPushPreferencesRequest: upsertPushPreferencesRequest,
       ),
+    );
+  }
+
+  Future<QueueResponse> _updateQueue({
+    required String id,
+    UpdateQueueRequest? updateQueueRequest,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(updateQueueRequest?.toJson() ?? <String, dynamic>{});
+    final _options = _setStreamType<Result<QueueResponse>>(
+      Options(method: 'PATCH', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/moderation/queues/${id}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late QueueResponse _value;
+    try {
+      _value = QueueResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<QueueResponse>> updateQueue({
+    required String id,
+    UpdateQueueRequest? updateQueueRequest,
+  }) {
+    return _ResultCallAdapter<QueueResponse>().adapt(
+      () => _updateQueue(id: id, updateQueueRequest: updateQueueRequest),
     );
   }
 

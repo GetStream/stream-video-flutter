@@ -12,7 +12,7 @@ BlockedUserResponse _$BlockedUserResponseFromJson(Map<String, dynamic> json) =>
         json['blocked_user'] as Map<String, dynamic>,
       ),
       blockedUserId: json['blocked_user_id'] as String,
-      createdAt: const EpochDateTimeConverter().fromJson(
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
       user: UserResponse.fromJson(json['user'] as Map<String, dynamic>),
@@ -24,7 +24,7 @@ Map<String, dynamic> _$BlockedUserResponseToJson(
 ) => <String, dynamic>{
   'blocked_user': instance.blockedUser.toJson(),
   'blocked_user_id': instance.blockedUserId,
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'user': instance.user.toJson(),
   'user_id': instance.userId,
 };

@@ -12,14 +12,12 @@ _$CallSessionParticipantCountsUpdatedEventFromJson(Map<String, dynamic> json) =>
       anonymousParticipantCount: (json['anonymous_participant_count'] as num)
           .toInt(),
       callCid: json['call_cid'] as String,
-      createdAt: const EpochDateTimeConverter().fromJson(
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
-      participantsCountByRole:
-          (json['participants_count_by_role'] as Map<String, dynamic>?)?.map(
-            (k, e) => MapEntry(k, (e as num).toInt()),
-          ) ??
-          {},
+      participantsCountByRole: Map<String, int>.from(
+        json['participants_count_by_role'] as Map,
+      ),
       sessionId: json['session_id'] as String,
       type: json['type'] as String,
     );
@@ -29,7 +27,7 @@ Map<String, dynamic> _$CallSessionParticipantCountsUpdatedEventToJson(
 ) => <String, dynamic>{
   'anonymous_participant_count': instance.anonymousParticipantCount,
   'call_cid': instance.callCid,
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'participants_count_by_role': instance.participantsCountByRole,
   'session_id': instance.sessionId,
   'type': instance.type,

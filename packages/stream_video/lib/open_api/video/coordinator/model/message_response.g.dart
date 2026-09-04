@@ -9,20 +9,18 @@ part of 'message_response.dart';
 MessageResponse _$MessageResponseFromJson(
   Map<String, dynamic> json,
 ) => MessageResponse(
-  attachments:
-      (json['attachments'] as List<dynamic>?)
-          ?.map((e) => Attachment.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      [],
+  attachments: (json['attachments'] as List<dynamic>)
+      .map((e) => Attachment.fromJson(e as Map<String, dynamic>))
+      .toList(),
   cid: json['cid'] as String,
   command: json['command'] as String?,
-  createdAt: const EpochDateTimeConverter().fromJson(
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  custom: json['custom'] as Map<String, dynamic>? ?? {},
+  custom: json['custom'] as Map<String, dynamic>,
   deletedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['deleted_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   deletedForMe: json['deleted_for_me'] as bool?,
   deletedReplyCount: (json['deleted_reply_count'] as num).toInt(),
@@ -38,15 +36,22 @@ MessageResponse _$MessageResponseFromJson(
     (k, e) =>
         MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
   ),
-  latestReactions:
-      (json['latest_reactions'] as List<dynamic>?)
-          ?.map((e) => ReactionResponse.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      [],
+  latestReactions: (json['latest_reactions'] as List<dynamic>)
+      .map((e) => ReactionResponse.fromJson(e as Map<String, dynamic>))
+      .toList(),
   member: json['member'] == null
       ? null
-      : ChannelMemberResponse.fromJson(json['member'] as Map<String, dynamic>),
+      : ChannelMemberPartialResponse.fromJson(
+          json['member'] as Map<String, dynamic>,
+        ),
   mentionedChannel: json['mentioned_channel'] as bool,
+  mentionedChannelMembers:
+      (json['mentioned_channel_members'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(
+          k,
+          ChannelMemberPartialResponse.fromJson(e as Map<String, dynamic>),
+        ),
+      ),
   mentionedGroupIds: (json['mentioned_group_ids'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
@@ -57,14 +62,12 @@ MessageResponse _$MessageResponseFromJson(
   mentionedRoles: (json['mentioned_roles'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
-  mentionedUsers:
-      (json['mentioned_users'] as List<dynamic>?)
-          ?.map((e) => UserResponse.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      [],
+  mentionedUsers: (json['mentioned_users'] as List<dynamic>)
+      .map((e) => UserResponse.fromJson(e as Map<String, dynamic>))
+      .toList(),
   messageTextUpdatedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['message_text_updated_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   mml: json['mml'] as String?,
   moderation: json['moderation'] == null
@@ -72,20 +75,18 @@ MessageResponse _$MessageResponseFromJson(
       : ModerationV2Response.fromJson(
           json['moderation'] as Map<String, dynamic>,
         ),
-  ownReactions:
-      (json['own_reactions'] as List<dynamic>?)
-          ?.map((e) => ReactionResponse.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      [],
+  ownReactions: (json['own_reactions'] as List<dynamic>)
+      .map((e) => ReactionResponse.fromJson(e as Map<String, dynamic>))
+      .toList(),
   parentId: json['parent_id'] as String?,
   pinExpires: _$JsonConverterFromJson<Object, DateTime>(
     json['pin_expires'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   pinned: json['pinned'] as bool,
   pinnedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['pinned_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   pinnedBy: json['pinned_by'] == null
       ? null
@@ -100,29 +101,19 @@ MessageResponse _$MessageResponseFromJson(
           json['quoted_message'] as Map<String, dynamic>,
         ),
   quotedMessageId: json['quoted_message_id'] as String?,
-  reactionCounts:
-      (json['reaction_counts'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, (e as num).toInt()),
-      ) ??
-      {},
+  reactionCounts: Map<String, int>.from(json['reaction_counts'] as Map),
   reactionGroups: (json['reaction_groups'] as Map<String, dynamic>?)?.map(
     (k, e) =>
         MapEntry(k, ReactionGroupResponse.fromJson(e as Map<String, dynamic>)),
   ),
-  reactionScores:
-      (json['reaction_scores'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, (e as num).toInt()),
-      ) ??
-      {},
+  reactionScores: Map<String, int>.from(json['reaction_scores'] as Map),
   reminder: json['reminder'] == null
       ? null
       : ReminderResponseData.fromJson(json['reminder'] as Map<String, dynamic>),
   replyCount: (json['reply_count'] as num).toInt(),
-  restrictedVisibility:
-      (json['restricted_visibility'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      [],
+  restrictedVisibility: (json['restricted_visibility'] as List<dynamic>)
+      .map((e) => e as String)
+      .toList(),
   shadowed: json['shadowed'] as bool,
   sharedLocation: json['shared_location'] == null
       ? null
@@ -136,7 +127,7 @@ MessageResponse _$MessageResponseFromJson(
       ?.map((e) => UserResponse.fromJson(e as Map<String, dynamic>))
       .toList(),
   type: json['type'] as String,
-  updatedAt: const EpochDateTimeConverter().fromJson(
+  updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
   user: UserResponse.fromJson(json['user'] as Map<String, dynamic>),
@@ -148,11 +139,11 @@ Map<String, dynamic> _$MessageResponseToJson(
   'attachments': instance.attachments.map((e) => e.toJson()).toList(),
   'cid': instance.cid,
   'command': instance.command,
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'custom': instance.custom,
   'deleted_at': _$JsonConverterToJson<Object, DateTime>(
     instance.deletedAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'deleted_for_me': instance.deletedForMe,
   'deleted_reply_count': instance.deletedReplyCount,
@@ -164,6 +155,9 @@ Map<String, dynamic> _$MessageResponseToJson(
   'latest_reactions': instance.latestReactions.map((e) => e.toJson()).toList(),
   'member': instance.member?.toJson(),
   'mentioned_channel': instance.mentionedChannel,
+  'mentioned_channel_members': instance.mentionedChannelMembers?.map(
+    (k, e) => MapEntry(k, e.toJson()),
+  ),
   'mentioned_group_ids': instance.mentionedGroupIds,
   'mentioned_groups': instance.mentionedGroups?.map((e) => e.toJson()).toList(),
   'mentioned_here': instance.mentionedHere,
@@ -171,7 +165,7 @@ Map<String, dynamic> _$MessageResponseToJson(
   'mentioned_users': instance.mentionedUsers.map((e) => e.toJson()).toList(),
   'message_text_updated_at': _$JsonConverterToJson<Object, DateTime>(
     instance.messageTextUpdatedAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'mml': instance.mml,
   'moderation': instance.moderation?.toJson(),
@@ -179,12 +173,12 @@ Map<String, dynamic> _$MessageResponseToJson(
   'parent_id': instance.parentId,
   'pin_expires': _$JsonConverterToJson<Object, DateTime>(
     instance.pinExpires,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'pinned': instance.pinned,
   'pinned_at': _$JsonConverterToJson<Object, DateTime>(
     instance.pinnedAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'pinned_by': instance.pinnedBy?.toJson(),
   'poll': instance.poll?.toJson(),
@@ -208,7 +202,7 @@ Map<String, dynamic> _$MessageResponseToJson(
       ?.map((e) => e.toJson())
       .toList(),
   'type': instance.type,
-  'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
+  'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
   'user': instance.user.toJson(),
 };
 

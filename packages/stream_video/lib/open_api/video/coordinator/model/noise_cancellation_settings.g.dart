@@ -9,22 +9,9 @@ part of 'noise_cancellation_settings.dart';
 NoiseCancellationSettings _$NoiseCancellationSettingsFromJson(
   Map<String, dynamic> json,
 ) => NoiseCancellationSettings(
-  mode: $enumDecode(
-    _$NoiseCancellationSettingsModeEnumMap,
-    json['mode'],
-    unknownValue: NoiseCancellationSettingsMode.unknown,
-  ),
+  mode: NoiseCancellationSettingsMode.fromJson(json['mode'] as String),
 );
 
 Map<String, dynamic> _$NoiseCancellationSettingsToJson(
   NoiseCancellationSettings instance,
-) => <String, dynamic>{
-  'mode': _$NoiseCancellationSettingsModeEnumMap[instance.mode]!,
-};
-
-const _$NoiseCancellationSettingsModeEnumMap = {
-  NoiseCancellationSettingsMode.autoOn: 'auto-on',
-  NoiseCancellationSettingsMode.available: 'available',
-  NoiseCancellationSettingsMode.disabled: 'disabled',
-  NoiseCancellationSettingsMode.unknown: '_unknown',
-};
+) => <String, dynamic>{'mode': instance.mode.toJson()};

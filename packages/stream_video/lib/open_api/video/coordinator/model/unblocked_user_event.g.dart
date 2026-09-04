@@ -9,7 +9,7 @@ part of 'unblocked_user_event.dart';
 UnblockedUserEvent _$UnblockedUserEventFromJson(Map<String, dynamic> json) =>
     UnblockedUserEvent(
       callCid: json['call_cid'] as String,
-      createdAt: const EpochDateTimeConverter().fromJson(
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
       type: json['type'] as String,
@@ -19,7 +19,7 @@ UnblockedUserEvent _$UnblockedUserEventFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$UnblockedUserEventToJson(UnblockedUserEvent instance) =>
     <String, dynamic>{
       'call_cid': instance.callCid,
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'type': instance.type,
       'user': instance.user.toJson(),
     };

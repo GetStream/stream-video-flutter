@@ -10,12 +10,12 @@ CallReportResponse _$CallReportResponseFromJson(Map<String, dynamic> json) =>
     CallReportResponse(
       endedAt: _$JsonConverterFromJson<Object, DateTime>(
         json['ended_at'],
-        const EpochDateTimeConverter().fromJson,
+        const StreamDateTimeConverter().fromJson,
       ),
       score: (json['score'] as num).toDouble(),
       startedAt: _$JsonConverterFromJson<Object, DateTime>(
         json['started_at'],
-        const EpochDateTimeConverter().fromJson,
+        const StreamDateTimeConverter().fromJson,
       ),
     );
 
@@ -23,12 +23,12 @@ Map<String, dynamic> _$CallReportResponseToJson(CallReportResponse instance) =>
     <String, dynamic>{
       'ended_at': _$JsonConverterToJson<Object, DateTime>(
         instance.endedAt,
-        const EpochDateTimeConverter().toJson,
+        const StreamDateTimeConverter().toJson,
       ),
       'score': instance.score,
       'started_at': _$JsonConverterToJson<Object, DateTime>(
         instance.startedAt,
-        const EpochDateTimeConverter().toJson,
+        const StreamDateTimeConverter().toJson,
       ),
     };
 

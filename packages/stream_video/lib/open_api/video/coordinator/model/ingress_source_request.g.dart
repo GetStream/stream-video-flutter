@@ -9,11 +9,7 @@ part of 'ingress_source_request.dart';
 IngressSourceRequest _$IngressSourceRequestFromJson(
   Map<String, dynamic> json,
 ) => IngressSourceRequest(
-  fps: $enumDecode(
-    _$IngressSourceRequestFpsEnumMap,
-    json['fps'],
-    unknownValue: IngressSourceRequestFps.unknown,
-  ),
+  fps: IngressSourceRequestFps.fromJson(json['fps'] as String),
   height: (json['height'] as num).toInt(),
   width: (json['width'] as num).toInt(),
 );
@@ -21,13 +17,7 @@ IngressSourceRequest _$IngressSourceRequestFromJson(
 Map<String, dynamic> _$IngressSourceRequestToJson(
   IngressSourceRequest instance,
 ) => <String, dynamic>{
-  'fps': _$IngressSourceRequestFpsEnumMap[instance.fps]!,
+  'fps': instance.fps.toJson(),
   'height': instance.height,
   'width': instance.width,
-};
-
-const _$IngressSourceRequestFpsEnumMap = {
-  IngressSourceRequestFps.n30: '30',
-  IngressSourceRequestFps.n60: '60',
-  IngressSourceRequestFps.unknown: '_unknown',
 };

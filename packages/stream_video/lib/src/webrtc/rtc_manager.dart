@@ -2279,7 +2279,7 @@ extension RtcManagerTrackHelper on RtcManager {
     try {
       if (CurrentPlatform.isIos &&
           device.id.equalsIgnoreCase(
-            AudioSettingsRequestDefaultDevice.speaker.name,
+            AudioSettingsRequestDefaultDevice.speaker,
           )) {
         await setAppleAudioConfiguration(
           speakerOn: true,

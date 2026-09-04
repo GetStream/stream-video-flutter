@@ -11,12 +11,12 @@ FeedsReactionResponse _$FeedsReactionResponseFromJson(
 ) => FeedsReactionResponse(
   activityId: json['activity_id'] as String,
   commentId: json['comment_id'] as String?,
-  createdAt: const EpochDateTimeConverter().fromJson(
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
   custom: json['custom'] as Map<String, dynamic>?,
   type: json['type'] as String,
-  updatedAt: const EpochDateTimeConverter().fromJson(
+  updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
   user: UserResponse.fromJson(json['user'] as Map<String, dynamic>),
@@ -27,9 +27,9 @@ Map<String, dynamic> _$FeedsReactionResponseToJson(
 ) => <String, dynamic>{
   'activity_id': instance.activityId,
   'comment_id': instance.commentId,
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'custom': instance.custom,
   'type': instance.type,
-  'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
+  'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
   'user': instance.user.toJson(),
 };

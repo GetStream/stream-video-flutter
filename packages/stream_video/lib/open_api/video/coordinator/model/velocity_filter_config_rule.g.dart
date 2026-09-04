@@ -9,16 +9,10 @@ part of 'velocity_filter_config_rule.dart';
 VelocityFilterConfigRule _$VelocityFilterConfigRuleFromJson(
   Map<String, dynamic> json,
 ) => VelocityFilterConfigRule(
-  action: $enumDecode(
-    _$VelocityFilterConfigRuleActionEnumMap,
-    json['action'],
-    unknownValue: VelocityFilterConfigRuleAction.unknown,
-  ),
+  action: VelocityFilterConfigRuleAction.fromJson(json['action'] as String),
   banDuration: (json['ban_duration'] as num).toInt(),
-  cascadingAction: $enumDecode(
-    _$VelocityFilterConfigRuleCascadingActionEnumMap,
-    json['cascading_action'],
-    unknownValue: VelocityFilterConfigRuleCascadingAction.unknown,
+  cascadingAction: VelocityFilterConfigRuleCascadingAction.fromJson(
+    json['cascading_action'] as String,
   ),
   cascadingThreshold: (json['cascading_threshold'] as num).toInt(),
   checkMessageContext: json['check_message_context'] as bool,
@@ -36,11 +30,9 @@ VelocityFilterConfigRule _$VelocityFilterConfigRuleFromJson(
 Map<String, dynamic> _$VelocityFilterConfigRuleToJson(
   VelocityFilterConfigRule instance,
 ) => <String, dynamic>{
-  'action': _$VelocityFilterConfigRuleActionEnumMap[instance.action]!,
+  'action': instance.action.toJson(),
   'ban_duration': instance.banDuration,
-  'cascading_action':
-      _$VelocityFilterConfigRuleCascadingActionEnumMap[instance
-          .cascadingAction]!,
+  'cascading_action': instance.cascadingAction.toJson(),
   'cascading_threshold': instance.cascadingThreshold,
   'check_message_context': instance.checkMessageContext,
   'fast_spam_threshold': instance.fastSpamThreshold,
@@ -52,20 +44,4 @@ Map<String, dynamic> _$VelocityFilterConfigRuleToJson(
   'slow_spam_threshold': instance.slowSpamThreshold,
   'slow_spam_ttl': instance.slowSpamTtl,
   'url_only': instance.urlOnly,
-};
-
-const _$VelocityFilterConfigRuleActionEnumMap = {
-  VelocityFilterConfigRuleAction.ban: 'ban',
-  VelocityFilterConfigRuleAction.flag: 'flag',
-  VelocityFilterConfigRuleAction.remove: 'remove',
-  VelocityFilterConfigRuleAction.shadow: 'shadow',
-  VelocityFilterConfigRuleAction.unknown: '_unknown',
-};
-
-const _$VelocityFilterConfigRuleCascadingActionEnumMap = {
-  VelocityFilterConfigRuleCascadingAction.ban: 'ban',
-  VelocityFilterConfigRuleCascadingAction.flag: 'flag',
-  VelocityFilterConfigRuleCascadingAction.remove: 'remove',
-  VelocityFilterConfigRuleCascadingAction.shadow: 'shadow',
-  VelocityFilterConfigRuleCascadingAction.unknown: '_unknown',
 };

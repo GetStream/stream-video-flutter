@@ -27,7 +27,7 @@ mixin _$ChatMessageResponse {
   String get id;
   Map<String, List<String>>? get imageLabels;
   List<ChatReactionResponse> get latestReactions;
-  ChannelMemberResponse? get member;
+  ChannelMemberPartialResponse? get member;
   bool get mentionedChannel;
   List<String>? get mentionedGroupIds;
   List<UserGroupResponse>? get mentionedGroups;
@@ -270,7 +270,7 @@ abstract mixin class $ChatMessageResponseCopyWith<$Res> {
     String id,
     Map<String, List<String>>? imageLabels,
     List<ChatReactionResponse> latestReactions,
-    ChannelMemberResponse? member,
+    ChannelMemberPartialResponse? member,
     bool mentionedChannel,
     List<String>? mentionedGroupIds,
     List<UserGroupResponse>? mentionedGroups,
@@ -432,7 +432,7 @@ class _$ChatMessageResponseCopyWithImpl<$Res>
         member: freezed == member
             ? _self.member
             : member // ignore: cast_nullable_to_non_nullable
-                  as ChannelMemberResponse?,
+                  as ChannelMemberPartialResponse?,
         mentionedChannel: null == mentionedChannel
             ? _self.mentionedChannel
             : mentionedChannel // ignore: cast_nullable_to_non_nullable

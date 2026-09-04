@@ -9,7 +9,7 @@ part of 'call_participant_response.dart';
 CallParticipantResponse _$CallParticipantResponseFromJson(
   Map<String, dynamic> json,
 ) => CallParticipantResponse(
-  joinedAt: const EpochDateTimeConverter().fromJson(
+  joinedAt: const StreamDateTimeConverter().fromJson(
     json['joined_at'] as Object,
   ),
   role: json['role'] as String,
@@ -20,7 +20,7 @@ CallParticipantResponse _$CallParticipantResponseFromJson(
 Map<String, dynamic> _$CallParticipantResponseToJson(
   CallParticipantResponse instance,
 ) => <String, dynamic>{
-  'joined_at': const EpochDateTimeConverter().toJson(instance.joinedAt),
+  'joined_at': const StreamDateTimeConverter().toJson(instance.joinedAt),
   'role': instance.role,
   'user': instance.user.toJson(),
   'user_session_id': instance.userSessionId,

@@ -7,11 +7,9 @@ part of 'mute_request.dart';
 // **************************************************************************
 
 MuteRequest _$MuteRequestFromJson(Map<String, dynamic> json) => MuteRequest(
-  targetIds:
-      (json['target_ids'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      [],
+  targetIds: (json['target_ids'] as List<dynamic>)
+      .map((e) => e as String)
+      .toList(),
   timeout: (json['timeout'] as num?)?.toInt(),
 );
 

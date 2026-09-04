@@ -14,11 +14,9 @@ SIPInboundRoutingRuleResponse _$SIPInboundRoutingRuleResponseFromJson(
       : SIPCallConfigsResponse.fromJson(
           json['call_configs'] as Map<String, dynamic>,
         ),
-  calledNumbers:
-      (json['called_numbers'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      [],
+  calledNumbers: (json['called_numbers'] as List<dynamic>)
+      .map((e) => e as String)
+      .toList(),
   callerConfigs: json['caller_configs'] == null
       ? null
       : SIPCallerConfigsResponse.fromJson(
@@ -27,7 +25,7 @@ SIPInboundRoutingRuleResponse _$SIPInboundRoutingRuleResponseFromJson(
   callerNumbers: (json['caller_numbers'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
-  createdAt: const EpochDateTimeConverter().fromJson(
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
   directRoutingConfigs: json['direct_routing_configs'] == null
@@ -48,10 +46,10 @@ SIPInboundRoutingRuleResponse _$SIPInboundRoutingRuleResponseFromJson(
       : SIPInboundRoutingRulePinConfigsResponse.fromJson(
           json['pin_routing_configs'] as Map<String, dynamic>,
         ),
-  trunkIds:
-      (json['trunk_ids'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-      [],
-  updatedAt: const EpochDateTimeConverter().fromJson(
+  trunkIds: (json['trunk_ids'] as List<dynamic>)
+      .map((e) => e as String)
+      .toList(),
+  updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
 );
@@ -63,7 +61,7 @@ Map<String, dynamic> _$SIPInboundRoutingRuleResponseToJson(
   'called_numbers': instance.calledNumbers,
   'caller_configs': instance.callerConfigs?.toJson(),
   'caller_numbers': instance.callerNumbers,
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'direct_routing_configs': instance.directRoutingConfigs?.toJson(),
   'duration': instance.duration,
   'id': instance.id,
@@ -71,5 +69,5 @@ Map<String, dynamic> _$SIPInboundRoutingRuleResponseToJson(
   'pin_protection_configs': instance.pinProtectionConfigs?.toJson(),
   'pin_routing_configs': instance.pinRoutingConfigs?.toJson(),
   'trunk_ids': instance.trunkIds,
-  'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
+  'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
 };

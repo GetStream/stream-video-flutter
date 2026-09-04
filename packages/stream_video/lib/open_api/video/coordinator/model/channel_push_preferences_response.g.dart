@@ -17,7 +17,7 @@ ChannelPushPreferencesResponse _$ChannelPushPreferencesResponseFromJson(
         ),
   disabledUntil: _$JsonConverterFromJson<Object, DateTime>(
     json['disabled_until'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
 );
 
@@ -28,7 +28,7 @@ Map<String, dynamic> _$ChannelPushPreferencesResponseToJson(
   'chat_preferences': instance.chatPreferences?.toJson(),
   'disabled_until': _$JsonConverterToJson<Object, DateTime>(
     instance.disabledUntil,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
 };
 

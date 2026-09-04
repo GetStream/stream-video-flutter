@@ -9,7 +9,11 @@ part of 'moderation_flag_response.dart';
 ModerationFlagResponse _$ModerationFlagResponseFromJson(
   Map<String, dynamic> json,
 ) => ModerationFlagResponse(
-  createdAt: const EpochDateTimeConverter().fromJson(
+  contentPublishedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['content_published_at'],
+    const StreamDateTimeConverter().fromJson,
+  ),
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
   custom: json['custom'] as Map<String, dynamic>?,
@@ -23,11 +27,9 @@ ModerationFlagResponse _$ModerationFlagResponseFromJson(
           json['moderation_payload'] as Map<String, dynamic>,
         ),
   reason: json['reason'] as String?,
-  result:
-      (json['result'] as List<dynamic>?)
-          ?.map((e) => e as Map<String, dynamic>)
-          .toList() ??
-      [],
+  result: (json['result'] as List<dynamic>)
+      .map((e) => e as Map<String, dynamic>)
+      .toList(),
   reviewQueueItem: json['review_queue_item'] == null
       ? null
       : ReviewQueueItemResponse.fromJson(
@@ -35,7 +37,7 @@ ModerationFlagResponse _$ModerationFlagResponseFromJson(
         ),
   reviewQueueItemId: json['review_queue_item_id'] as String?,
   type: json['type'] as String,
-  updatedAt: const EpochDateTimeConverter().fromJson(
+  updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
   user: json['user'] == null
@@ -47,7 +49,11 @@ ModerationFlagResponse _$ModerationFlagResponseFromJson(
 Map<String, dynamic> _$ModerationFlagResponseToJson(
   ModerationFlagResponse instance,
 ) => <String, dynamic>{
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'content_published_at': _$JsonConverterToJson<Object, DateTime>(
+    instance.contentPublishedAt,
+    const StreamDateTimeConverter().toJson,
+  ),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'custom': instance.custom,
   'entity_creator_id': instance.entityCreatorId,
   'entity_id': instance.entityId,
@@ -59,7 +65,17 @@ Map<String, dynamic> _$ModerationFlagResponseToJson(
   'review_queue_item': instance.reviewQueueItem?.toJson(),
   'review_queue_item_id': instance.reviewQueueItemId,
   'type': instance.type,
-  'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
+  'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
   'user': instance.user?.toJson(),
   'user_id': instance.userId,
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);
