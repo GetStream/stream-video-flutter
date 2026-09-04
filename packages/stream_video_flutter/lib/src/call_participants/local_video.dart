@@ -1,6 +1,9 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import 'floating_participant_tile_defaults.dart';
 
 /// Represents a floating item used to feature a participant video.
 class StreamLocalVideo extends StatelessWidget {
@@ -15,6 +18,11 @@ class StreamLocalVideo extends StatelessWidget {
     this.localVideoPadding,
     this.initialAlignment,
     this.enableSnappingBehavior,
+    @Deprecated(
+      'The self-view sizes its avatar from StreamAvatarTheme, and the '
+      'placeholder from StreamParticipantTileStyle.placeholderStyle. This '
+      'parameter has no effect. Will be removed in the next major version.',
+    )
     this.userAvatarTheme,
     this.borderRadius,
     this.shadowColor,
@@ -47,6 +55,11 @@ class StreamLocalVideo extends StatelessWidget {
   final bool? enableSnappingBehavior;
 
   /// The theme for the avatar.
+  @Deprecated(
+    'The self-view sizes its avatar from StreamAvatarTheme, and the placeholder '
+    'from StreamParticipantTileStyle.placeholderStyle. This parameter has no '
+    'effect. Will be removed in the next major version.',
+  )
   final StreamUserAvatarThemeData? userAvatarTheme;
 
   /// The border radius of the local video.
@@ -60,53 +73,41 @@ class StreamLocalVideo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamLocalVideoTheme.of(context);
-    final localVideoWidth = this.localVideoWidth ?? theme.localVideoWidth;
-    final localVideoHeight = this.localVideoHeight ?? theme.localVideoHeight;
-    final localVideoPadding = this.localVideoPadding ?? theme.localVideoPadding;
-    final initialAlignment = this.initialAlignment ?? theme.initialAlignment;
-    final enableSnappingBehavior =
-        this.enableSnappingBehavior ?? theme.enableSnappingBehavior;
-    final userAvatarTheme = this.userAvatarTheme ?? theme.userAvatarTheme;
-    final borderRadius = this.borderRadius ?? theme.borderRadius;
-    final shadowColor = this.shadowColor ?? theme.shadowColor;
+    final floatingStyle = StreamFloatingParticipantTileTheme.of(context).style;
+    final defaults = StreamFloatingParticipantTileStyleDefaults(context);
 
-    var callParticipantBuilder = participantBuilder;
-    callParticipantBuilder ??= (context, call, participant) {
-      return StreamParticipantTile(
-        call: call,
-        participant: participant,
-        borderRadius: borderRadius,
-        userAvatarTheme: userAvatarTheme,
-        showParticipantLabel: false,
-        showSpeakerBorder: false,
-      );
-    };
+    // The deprecated parameters win where they are given, so existing call
+    // sites keep positioning the self-view the way they always did.
+    final style = StreamFloatingParticipantTileStyle(
+      size: (localVideoWidth != null || localVideoHeight != null)
+          ? Size(
+              localVideoWidth ?? defaults.size.width,
+              localVideoHeight ?? defaults.size.height,
+            )
+          : null,
+      padding: localVideoPadding,
+      borderRadius: borderRadius,
+      initialAlignment: initialAlignment,
+      enableSnapping: enableSnappingBehavior,
+      shadowColor: shadowColor,
+    );
+
+    final resolved = floatingStyle?.merge(style) ?? style;
+    final size = resolved.size ?? defaults.size;
 
     return FloatingViewContainer(
-      floatingViewWidth: localVideoWidth,
-      floatingViewHeight: localVideoHeight,
-      floatingViewPadding: localVideoPadding,
-      enableSnappingBehavior: enableSnappingBehavior,
-      floatingViewAlignment: initialAlignment,
-      floatingView: Container(
-        width: localVideoWidth,
-        height: localVideoHeight,
-        decoration: BoxDecoration(
-          borderRadius: borderRadius,
-          boxShadow: [
-            BoxShadow(
-              color: shadowColor,
-              blurRadius: 4,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        child: callParticipantBuilder(
-          context,
-          call,
-          participant,
-        ),
+      floatingViewWidth: size.width,
+      floatingViewHeight: size.height,
+      floatingViewPadding: resolved.padding ?? defaults.padding,
+      enableSnappingBehavior:
+          resolved.enableSnapping ?? defaults.enableSnapping,
+      floatingViewAlignment:
+          resolved.initialAlignment ?? defaults.initialAlignment,
+      floatingView: StreamFloatingParticipantTile(
+        call: call,
+        participant: participant,
+        style: style,
+        participantBuilder: participantBuilder,
       ),
       child: child,
     );

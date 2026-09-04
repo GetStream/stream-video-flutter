@@ -1,18 +1,31 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../theme/stream_video_theme.dart';
-
-/// Widget used to indicate the audio levels of a given participant.
+/// Three bars reporting whether a participant is speaking.
+///
+/// While [isSpeaking] the bars rise and fall around their shared centre line;
+/// otherwise they rest at their minimum, reading as three dots. The animation
+/// is a free-running loop rather than a reading of the participant's audio
+/// level: it says "this person is talking", not how loudly.
 class StreamAudioLevelIndicator extends StatefulWidget {
-  /// Creates a new instance of [StreamAudioLevelIndicator].
+  /// Creates an audio level indicator.
   const StreamAudioLevelIndicator({
     super.key,
-    this.color,
+    required this.color,
+    required this.isSpeaking,
+    this.size = 10,
   });
 
-  /// The color of an audio level.
-  final Color? color;
+  /// The color of the bars.
+  final Color color;
+
+  /// Whether the bars animate.
+  final bool isSpeaking;
+
+  /// The side length of the square the bars are painted in.
+  ///
+  /// The bars and the gaps between them are each a fifth of it, so three bars
+  /// and two gaps fill the width exactly.
+  final double size;
 
   @override
   State<StreamAudioLevelIndicator> createState() =>
@@ -21,7 +34,7 @@ class StreamAudioLevelIndicator extends StatefulWidget {
 
 class _StreamAudioLevelIndicatorState extends State<StreamAudioLevelIndicator>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+  late final AnimationController _controller;
 
   @override
   void initState() {
@@ -29,7 +42,21 @@ class _StreamAudioLevelIndicatorState extends State<StreamAudioLevelIndicator>
     _controller = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
-    )..repeat(reverse: true);
+    );
+    if (widget.isSpeaking) _controller.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(StreamAudioLevelIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isSpeaking == oldWidget.isSpeaking) return;
+    if (widget.isSpeaking) {
+      _controller.repeat(reverse: true);
+    } else {
+      // Back to rest rather than stopping wherever the loop happened to be.
+      _controller.stop();
+      _controller.value = 0;
+    }
   }
 
   @override
@@ -40,67 +67,77 @@ class _StreamAudioLevelIndicatorState extends State<StreamAudioLevelIndicator>
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVideoTheme.of(context).callParticipantTheme;
-
-    return SizedBox(
-      width: 24,
-      height: 24,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (_, child) {
-          return CustomPaint(
-            size: const Size.square(24),
+    // The only thing on a tile repainting every frame. It sits above the label
+    // pill's backdrop filter, so a boundary here does not rob that filter of
+    // its backdrop.
+    return RepaintBoundary(
+      child: SizedBox.square(
+        dimension: widget.size,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) => CustomPaint(
+            size: Size.square(widget.size),
             painter: _AudioLevelIndicatorPainter(
               animationValue: _controller.value,
-              color: widget.color ?? theme.audioLevelIndicatorColor,
+              isSpeaking: widget.isSpeaking,
+              color: widget.color,
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
 }
 
-/// Painter widget for an the audio level indicator widget.
 class _AudioLevelIndicatorPainter extends CustomPainter {
-  /// Constructor for creating a [_AudioLevelIndicatorPainter].
   const _AudioLevelIndicatorPainter({
     required this.animationValue,
+    required this.isSpeaking,
     required this.color,
   });
 
-  /// The current value of the animation.
   final double animationValue;
-
-  /// The color of an audio level.
+  final bool isSpeaking;
   final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
+    const barCount = 3;
+    // Three bars and two gaps, each a fifth of the width.
+    final unit = size.width / 5;
+    final centerY = size.height / 2;
+
     final paint = Paint()
       ..color = color
-      ..strokeWidth = 3
+      ..strokeWidth = unit
       ..strokeCap = StrokeCap.round;
 
-    final offset = 4 * animationValue;
+    for (var i = 0; i < barCount; i++) {
+      // The middle bar runs against the outer two, so the group reads as
+      // movement rather than as one bar pulsing three times — but only while
+      // there is movement to read. At rest every bar collapses, or the
+      // inverted one would sit at full height with the others already down.
+      final phase = switch ((isSpeaking, i)) {
+        (false, _) => 0.0,
+        (true, 1) => 1 - animationValue,
+        (true, _) => animationValue,
+      };
+      // A collapsed line has no length at all: the round cap alone draws a dot
+      // one stroke across, which is the design's resting state.
+      final length = (size.height - unit) * phase;
 
-    canvas.drawLine(
-      Offset(7, 10 - offset),
-      const Offset(7, 16),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(12, 6 + offset),
-      const Offset(12, 16),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(17, 10 - offset),
-      const Offset(17, 16),
-      paint,
-    );
+      final x = unit / 2 + i * 2 * unit;
+      canvas.drawLine(
+        Offset(x, centerY - length / 2),
+        Offset(x, centerY + length / 2),
+        paint,
+      );
+    }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(_AudioLevelIndicatorPainter oldDelegate) =>
+      oldDelegate.animationValue != animationValue ||
+      oldDelegate.isSpeaking != isSpeaking ||
+      oldDelegate.color != color;
 }

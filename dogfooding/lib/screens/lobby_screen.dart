@@ -253,13 +253,16 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 
   Future<void> _selectVideoInput(RtcMediaDevice? device) async {
-    _selectedVideoInputDevice = device;
+    // Recording the choice is enough to get a new track: the key below changes
+    // with it, so the preview is rebuilt and opens the newly chosen camera.
+    //
+    // The track it handed over earlier is ours to release, though, and the
+    // preview will not do it for us — nothing else holds a reference once it
+    // reports the replacement.
+    await _cameraTrack?.stop();
+    _cameraTrack = null;
 
-    _cameraTrack = device != null
-        ? await _cameraTrack?.selectVideoInput(device, [])
-        : await _cameraTrack?.recreate([]);
-
-    if (mounted) setState(() {});
+    if (mounted) setState(() => _selectedVideoInputDevice = device);
   }
 
   @override

@@ -1,62 +1,58 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../participant_label_defaults.dart';
 import 'audio_level_indicator.dart';
 
-/// Widget used to indicate the audio state of a given participant.
-/// Either shows a mute icon or audio levels.
+/// The sound indicator shown at the end of a participant's name pill.
+///
+/// Drawn for as long as their microphone is open, so the pill keeps its shape
+/// as someone starts and stops talking: the bars animate while [isSpeaking] and
+/// rest as three dots otherwise. A muted participant has nothing for it to
+/// report, and the pill draws a microphone icon in its place instead.
 class StreamAudioIndicator extends StatelessWidget {
-  /// Creates a new instance of [StreamAudioIndicator].
+  /// Creates a sound indicator.
   const StreamAudioIndicator({
     super.key,
-    required this.isAudioEnabled,
     required this.isSpeaking,
-    this.audioLevelIndicatorColor,
-    this.enabledMicrophoneColor,
-    this.disabledMicrophoneColor,
+    this.style,
   });
 
-  /// If the participant has microphone enabled.
-  final bool isAudioEnabled;
-
-  /// If the participant is speaking.
+  /// Whether the participant is currently speaking.
   final bool isSpeaking;
 
-  /// The color of an audio level indicator.
-  final Color? audioLevelIndicatorColor;
-
-  /// The color of an enabled microphone icon.
-  final Color? enabledMicrophoneColor;
-
-  /// The color of a disabled microphone icon.
-  final Color? disabledMicrophoneColor;
+  /// Overrides for this indicator's appearance.
+  final StreamParticipantLabelStyle? style;
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVideoTheme.of(context).callParticipantTheme;
+    // The pill's own defaults, rather than a second copy of them: the indicator
+    // is one of the parts the pill is made of, and the two have to agree on how
+    // big it is for the tile's own arithmetic to hold.
+    final defaults = StreamParticipantLabelStyleDefaults(context);
 
-    if (isAudioEnabled && isSpeaking) {
-      return StreamAudioLevelIndicator(
-        color: audioLevelIndicatorColor,
-      );
-    } else if (isAudioEnabled && !isSpeaking) {
-      return Padding(
-        padding: const EdgeInsets.all(4),
-        child: Icon(
-          Icons.mic,
-          size: 16,
-          color: enabledMicrophoneColor ?? theme.enabledMicrophoneColor,
+    return SizedBox.square(
+      dimension: style?.audioIndicatorSize ?? defaults.audioIndicatorSize,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color:
+              style?.audioIndicatorBackgroundColor ??
+              style?.backgroundColor ??
+              defaults.audioIndicatorBackgroundColor,
+          borderRadius:
+              style?.audioIndicatorBorderRadius ??
+              defaults.audioIndicatorBorderRadius,
         ),
-      );
-    } else {
-      return Padding(
-        padding: const EdgeInsets.all(4),
-        child: Icon(
-          Icons.mic_off,
-          size: 16,
-          color: disabledMicrophoneColor ?? theme.disabledMicrophoneColor,
+        child: Center(
+          child: StreamAudioLevelIndicator(
+            isSpeaking: isSpeaking,
+            size:
+                style?.audioIndicatorIconSize ??
+                defaults.audioIndicatorIconSize,
+            color: style?.speakingColor ?? defaults.speakingColor,
+          ),
         ),
-      );
-    }
+      ),
+    );
   }
 }

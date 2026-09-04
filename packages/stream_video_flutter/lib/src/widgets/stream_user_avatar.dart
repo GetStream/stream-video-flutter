@@ -1,38 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 import '../utils/extensions.dart';
-
-/// Builder function used to build an image widget for the user avatar.
-typedef ImageWidgetBuilder =
-    Widget Function(
-      BuildContext context,
-      UserInfo user,
-      ImageProvider imageProvider,
-    );
-
-/// Builder function used to build a placeholder widget.
-typedef PlaceholderWidgetBuilder =
-    Widget Function(
-      BuildContext context,
-      UserInfo user,
-    );
-
-/// Builder function used to build an error widget.
-typedef ErrorWidgetBuilder =
-    Widget Function(
-      BuildContext context,
-      UserInfo user,
-      Object error,
-    );
-
-/// Builder function used to build a widget with the user initials.
-typedef FallbackWidgetBuilder =
-    Widget Function(
-      BuildContext context,
-      UserInfo user,
-    );
+import 'avatar_size_from_constraints.dart';
 
 /// The action to perform when the user avatar is tapped.
 typedef OnUserAvatarTap = void Function(UserInfo);
@@ -41,231 +11,127 @@ typedef OnUserAvatarTap = void Function(UserInfo);
 typedef OnUserAvatarLongPress = void Function(UserInfo);
 
 /// Displays a user's avatar.
+///
+/// Every avatar in the SDK goes through here, so registering a `userAvatar`
+/// builder with [streamVideoComponentBuilders] on a [StreamComponentFactory]
+/// changes all of them at once — in a participant tile, the lobby, the
+/// participants list and the incoming and outgoing call screens. The builder
+/// receives the whole [UserInfo], so an avatar can be drawn from fields the SDK
+/// itself never reads: a team badge, a role ring, an identicon derived from
+/// `extraData`.
+///
+/// When no builder is registered, [DefaultStreamUserAvatar] is used.
+///
+/// See also:
+///
+///  * [StreamAvatarTheme], for customizing its size, colors and border.
 class StreamUserAvatar extends StatelessWidget {
   /// Creates a new instance of [StreamUserAvatar].
-  const StreamUserAvatar({
+  StreamUserAvatar({
     super.key,
-    required this.user,
-    this.selected = false,
-    this.onTap,
-    this.onLongPress,
-    this.imageBuilder,
-    this.placeholderBuilder,
-    this.errorBuilder,
-    this.fallbackBuilder,
-    this.constraints,
-    this.borderRadius,
-    this.initialsTextStyle,
-    this.initialsBackground,
-    this.selectionColor,
-    this.selectionThickness,
-  });
+    required UserInfo user,
+    OnUserAvatarTap? onTap,
+    OnUserAvatarLongPress? onLongPress,
+  }) : props = .new(user: user, onTap: onTap, onLongPress: onLongPress);
 
-  /// User whose avatar is to be displayed.
-  final UserInfo user;
-
-  /// Flag for if avatar is selected. Defaults to `false`.
-  final bool selected;
-
-  /// The action to perform when the user avatar is tapped.
-  final OnUserAvatarTap? onTap;
-
-  /// The action to perform when the user avatar is long-pressed.
-  final OnUserAvatarLongPress? onLongPress;
-
-  /// Builder function used to build an image widget for the user avatar.
-  final ImageWidgetBuilder? imageBuilder;
-
-  /// Builder function used to build a placeholder widget.
-  final PlaceholderWidgetBuilder? placeholderBuilder;
-
-  /// Builder function used to build an error widget.
-  final ErrorWidgetBuilder? errorBuilder;
-
-  /// Builder function used to build a widget with the user initials.
-  final FallbackWidgetBuilder? fallbackBuilder;
-
-  /// Sizing constraints of the avatar.
-  final BoxConstraints? constraints;
-
-  /// [BorderRadius] of the image.
-  final BorderRadius? borderRadius;
-
-  /// [TextStyle] for the initials text.
-  final TextStyle? initialsTextStyle;
-
-  /// Background color for the initials.
-  final Color? initialsBackground;
-
-  /// Color of the selection.
-  final Color? selectionColor;
-
-  /// Selection thickness around the avatar.
-  final double? selectionThickness;
+  /// The properties that configure this avatar.
+  final StreamUserAvatarProps props;
 
   @override
   Widget build(BuildContext context) {
+    final builder = context.videoComponentBuilder<StreamUserAvatarProps>();
+    return builder?.call(context, props) ??
+        DefaultStreamUserAvatar(props: props);
+  }
+}
+
+/// Properties for configuring a [StreamUserAvatar].
+///
+/// See also:
+///
+///  * [StreamUserAvatar], which uses these properties.
+///  * [DefaultStreamUserAvatar], the default implementation.
+@immutable
+class StreamUserAvatarProps {
+  /// Creates properties for a user avatar.
+  const StreamUserAvatarProps({
+    required this.user,
+    this.onTap,
+    this.onLongPress,
+  });
+
+  /// The user whose avatar is displayed.
+  ///
+  /// The whole record rather than just an image URL, so a replacement can draw
+  /// from anything the user carries.
+  final UserInfo user;
+
+  /// Called when the avatar is tapped.
+  final OnUserAvatarTap? onTap;
+
+  /// Called when the avatar is long-pressed.
+  final OnUserAvatarLongPress? onLongPress;
+
+  /// Creates a copy of these properties with the given fields replaced.
+  StreamUserAvatarProps copyWith({
+    UserInfo? user,
+    OnUserAvatarTap? onTap,
+    OnUserAvatarLongPress? onLongPress,
+  }) {
+    return StreamUserAvatarProps(
+      user: user ?? this.user,
+      onTap: onTap ?? this.onTap,
+      onLongPress: onLongPress ?? this.onLongPress,
+    );
+  }
+}
+
+/// The default implementation of [StreamUserAvatar].
+///
+/// The design system's [StreamAvatar] showing the user's picture, falling back
+/// to their initials.
+class DefaultStreamUserAvatar extends StatelessWidget {
+  /// Creates the default user avatar.
+  const DefaultStreamUserAvatar({super.key, required this.props});
+
+  /// The properties that configure this avatar.
+  final StreamUserAvatarProps props;
+
+  @override
+  Widget build(BuildContext context) {
+    final user = props.user;
     final imageUrl = user.image;
-    final hasImage = imageUrl != null && imageUrl.isNotEmpty;
 
-    final theme = StreamUserAvatarTheme.of(context);
-    final constraints = this.constraints ?? theme.constraints;
-    final borderRadius = this.borderRadius ?? theme.borderRadius;
-    final initialsTextStyle = this.initialsTextStyle ?? theme.initialsTextStyle;
-    final initialsBackground =
-        this.initialsBackground ?? theme.initialsBackground;
-    final selectionColor = this.selectionColor ?? theme.selectionColor;
-    final selectionThickness =
-        this.selectionThickness ?? theme.selectionThickness;
+    // A scoped StreamAvatarTheme wins; the deprecated StreamUserAvatarTheme is
+    // read underneath it so the screens still wrapping avatars in one keep
+    // their sizing and colors.
+    final theme = StreamAvatarTheme.of(context);
+    final legacy = StreamUserAvatarTheme.of(context);
 
-    Widget avatar = FittedBox(
-      fit: BoxFit.cover,
-      child: Container(
-        constraints: constraints,
-        child: hasImage
-            ? CachedNetworkImage(
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.high,
-                imageUrl: imageUrl,
-                errorWidget: (context, __, error) => errorBuilder != null
-                    ? errorBuilder!(context, user, error)
-                    : _InitialsUserAvatar(
-                        user: user,
-                        borderRadius: borderRadius,
-                        initialsTextStyle: initialsTextStyle,
-                      ),
-                placeholder: placeholderBuilder != null
-                    ? (context, __) => placeholderBuilder!(context, user)
-                    : null,
-                imageBuilder: (context, imageProvider) => imageBuilder != null
-                    ? imageBuilder!(context, user, imageProvider)
-                    : _ImageUserAvatar(
-                        imageProvider: imageProvider,
-                        borderRadius: borderRadius,
-                      ),
-              )
-            : fallbackBuilder != null
-            ? fallbackBuilder!(context, user)
-            : _InitialsUserAvatar(
-                user: user,
-                borderRadius: borderRadius,
-                initialsTextStyle: initialsTextStyle,
-                initialsBackground: initialsBackground,
-              ),
-      ),
+    final avatar = StreamAvatar(
+      imageUrl: imageUrl != null && imageUrl.isNotEmpty ? imageUrl : null,
+      size: theme.size ?? avatarSizeFromConstraints(legacy.constraints),
+      backgroundColor: theme.backgroundColor ?? legacy.initialsBackground,
+      foregroundColor: theme.foregroundColor ?? legacy.initialsTextStyle.color,
+      semanticsLabel: user.name.isNotEmpty ? user.name : user.id,
+      placeholder: (context) => Text(_initialsFor(user)),
     );
 
-    if (selected) {
-      avatar = ClipRRect(
-        borderRadius: borderRadius + BorderRadius.circular(selectionThickness),
-        child: Container(
-          constraints: constraints,
-          color: selectionColor,
-          child: Padding(
-            padding: EdgeInsets.all(selectionThickness),
-            child: avatar,
-          ),
-        ),
-      );
-    }
+    final onTap = props.onTap;
+    final onLongPress = props.onLongPress;
+    if (onTap == null && onLongPress == null) return avatar;
+
     return GestureDetector(
-      onTap: onTap != null ? () => onTap!(user) : null,
-      onLongPress: onLongPress != null ? () => onLongPress!(user) : null,
+      onTap: onTap != null ? () => onTap(user) : null,
+      onLongPress: onLongPress != null ? () => onLongPress(user) : null,
       child: avatar,
     );
   }
-}
 
-/// Displays an avatar with the user picture.
-class _ImageUserAvatar extends StatelessWidget {
-  /// Creates a new instance of [_ImageUserAvatar].
-  const _ImageUserAvatar({
-    required this.imageProvider,
-    required this.borderRadius,
-  });
-
-  /// The image to be painted into the decoration.
-  final ImageProvider imageProvider;
-
-  /// [BorderRadius] of the image.
-  final BorderRadius borderRadius;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: borderRadius,
-        image: DecorationImage(
-          image: imageProvider,
-          fit: BoxFit.cover,
-        ),
-      ),
-    );
+  // A name of nothing but spaces has no initials, so fall through to the id
+  // rather than showing an empty circle.
+  static String _initialsFor(UserInfo user) {
+    final fromName = user.name.initials();
+    return fromName.isNotEmpty ? fromName : user.id.initials();
   }
-}
-
-/// Displays an avatar with a color background and initials text.
-class _InitialsUserAvatar extends StatelessWidget {
-  /// Creates a new instance of [_InitialsUserAvatar].
-  const _InitialsUserAvatar({
-    required this.user,
-    required this.borderRadius,
-    required this.initialsTextStyle,
-    this.initialsBackground,
-  });
-
-  /// User whose avatar is to be displayed.
-  final UserInfo user;
-
-  /// [BorderRadius] of the image.
-  final BorderRadius borderRadius;
-
-  /// [TextStyle] for the initials text.
-  final TextStyle? initialsTextStyle;
-
-  /// Background color for the initials.
-  final Color? initialsBackground;
-
-  @override
-  Widget build(BuildContext context) {
-    final initials = user.name.isNotEmpty
-        ? user.name.initials()
-        : user.id.initials();
-
-    final avatarColorIndex = initials.hashCode.abs() % avatarColors.length;
-    final avatarColor = avatarColors[avatarColorIndex];
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: initialsBackground ?? avatarColor,
-        borderRadius: borderRadius,
-      ),
-      child: Center(
-        child: Text(
-          initials,
-          style: initialsTextStyle,
-        ),
-      ),
-    );
-  }
-
-  /// The list of available colors for avatars.
-  static const avatarColors = [
-    Color(0xffb64e4e),
-    Color(0xffB4774B),
-    Color(0xffB4A34B),
-    Color(0xff9AB44B),
-    Color(0xff6EB44B),
-    Color(0xff4BB453),
-    Color(0xff4BB47F),
-    Color(0xff4BB4AC),
-    Color(0xff4B91B4),
-    Color(0xff4B65B4),
-    Color(0xff5C4BB4),
-    Color(0xff884BB4),
-    Color(0xffB44BB4),
-    Color(0xffB44B88),
-    Color(0xff926D73),
-    Color(0xff6E8B91),
-  ];
 }

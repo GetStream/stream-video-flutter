@@ -1,14 +1,33 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import '../widgets/avatar_size_from_constraints.dart';
 
 /// Defines default property values for [StreamParticipantTile] widgets.
+///
+/// Nothing reads this any more. It survives so existing code keeps compiling,
+/// and is translated onto the component themes once — in the
+/// [StreamVideoTheme] factory. Reaching it any other way, through
+/// [StreamVideoTheme.copyWith] or the [StreamCallParticipantTheme] widget,
+/// sets the value without restyling anything.
+@Deprecated(
+  'Use participantTileTheme, participantLabelTheme, '
+  'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
+  'Will be removed in the next major version.',
+)
 @immutable
 class StreamCallParticipantThemeData with Diagnosticable {
   /// Creates a new instance of [StreamCallParticipantThemeData].
+  @Deprecated(
+    'Use participantTileTheme, participantLabelTheme, '
+    'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
+    'Will be removed in the next major version.',
+  )
   const StreamCallParticipantThemeData({
     this.videoFit,
     this.backgroundColor = const Color(0xffB4B7BB),
@@ -121,9 +140,9 @@ class StreamCallParticipantThemeData with Diagnosticable {
     Color? backgroundColor,
     BorderRadius? borderRadius,
     StreamUserAvatarThemeData? userAvatarTheme,
-    bool? showDominantSpeakerBorder,
-    double? dominantSpeakerBorderThickness,
-    Color? dominantSpeakerBorderColor,
+    bool? showSpeakerBorder,
+    double? speakerBorderThickness,
+    Color? speakerBorderColor,
     bool? showParticipantLabel,
     TextStyle? participantLabelTextStyle,
     AlignmentGeometry? participantLabelAlignment,
@@ -144,10 +163,10 @@ class StreamCallParticipantThemeData with Diagnosticable {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       borderRadius: borderRadius ?? this.borderRadius,
       userAvatarTheme: userAvatarTheme ?? this.userAvatarTheme,
-      showSpeakerBorder: showDominantSpeakerBorder ?? showSpeakerBorder,
+      showSpeakerBorder: showSpeakerBorder ?? this.showSpeakerBorder,
       speakerBorderThickness:
-          dominantSpeakerBorderThickness ?? speakerBorderThickness,
-      speakerBorderColor: dominantSpeakerBorderColor ?? speakerBorderColor,
+          speakerBorderThickness ?? this.speakerBorderThickness,
+      speakerBorderColor: speakerBorderColor ?? this.speakerBorderColor,
       showParticipantLabel: showParticipantLabel ?? this.showParticipantLabel,
       participantLabelTextStyle:
           participantLabelTextStyle ?? this.participantLabelTextStyle,
@@ -342,24 +361,11 @@ class StreamCallParticipantThemeData with Diagnosticable {
       ..add(DiagnosticsProperty('backgroundColor', backgroundColor))
       ..add(DiagnosticsProperty('borderRadius', borderRadius))
       ..add(DiagnosticsProperty('userAvatarTheme', userAvatarTheme))
+      ..add(DiagnosticsProperty('showSpeakerBorder', showSpeakerBorder))
       ..add(
-        DiagnosticsProperty(
-          'showDominantSpeakerBorder',
-          showSpeakerBorder,
-        ),
+        DiagnosticsProperty('speakerBorderThickness', speakerBorderThickness),
       )
-      ..add(
-        DiagnosticsProperty(
-          'dominantSpeakerBorderThickness',
-          speakerBorderThickness,
-        ),
-      )
-      ..add(
-        DiagnosticsProperty(
-          'dominantSpeakerBorderColor',
-          speakerBorderColor,
-        ),
-      )
+      ..add(DiagnosticsProperty('speakerBorderColor', speakerBorderColor))
       ..add(DiagnosticsProperty('showParticipantLabel', showParticipantLabel))
       ..add(
         DiagnosticsProperty(
@@ -446,15 +452,16 @@ class StreamCallParticipantThemeData with Diagnosticable {
       backgroundColor: other.backgroundColor,
       borderRadius: other.borderRadius,
       userAvatarTheme: other.userAvatarTheme,
-      showDominantSpeakerBorder: other.showSpeakerBorder,
-      dominantSpeakerBorderThickness: other.speakerBorderThickness,
-      dominantSpeakerBorderColor: other.speakerBorderColor,
+      showSpeakerBorder: other.showSpeakerBorder,
+      speakerBorderThickness: other.speakerBorderThickness,
+      speakerBorderColor: other.speakerBorderColor,
       showParticipantLabel: other.showParticipantLabel,
       participantLabelTextStyle: other.participantLabelTextStyle,
       participantLabelAlignment: other.participantLabelAlignment,
       audioLevelIndicatorColor: other.audioLevelIndicatorColor,
       enabledMicrophoneColor: other.enabledMicrophoneColor,
       disabledMicrophoneColor: other.disabledMicrophoneColor,
+      pausedVideoIndicatorColor: other.pausedVideoIndicatorColor,
       showConnectionQualityIndicator: other.showConnectionQualityIndicator,
       connectionLevelActiveColor: other.connectionLevelActiveColor,
       connectionLevelInactiveColor: other.connectionLevelInactiveColor,
@@ -464,12 +471,105 @@ class StreamCallParticipantThemeData with Diagnosticable {
       participantsGridCrossAxisSpacing: other.participantsGridCrossAxisSpacing,
     );
   }
+
+  // ── Migration to the component themes ──────────────────────────────────────
+  //
+  // `StreamVideoTheme.callParticipantTheme` is null unless an app sets one, so
+  // a value reaching here means somebody deliberately styled the tile through
+  // the deprecated shape. Everything it carries is translated, defaults
+  // included — an app that wants the redesigned tile stops setting it rather
+  // than setting parts of it.
+  //
+  // The translation runs in the `StreamVideoTheme` factory, which is where a
+  // theme is built. Reaching the deprecated shape any other way — through
+  // `copyWith`, or through the `StreamCallParticipantTheme` widget — sets the
+  // field without restyling anything.
+
+  static const _defaults = StreamCallParticipantThemeData();
+
+  /// The subset of this theme that describes the participant tile.
+  StreamParticipantTileThemeData toParticipantTileThemeData() {
+    return StreamParticipantTileThemeData(
+      style: StreamParticipantTileStyle(
+        videoFit: videoFit,
+        backgroundColor: backgroundColor,
+        borderRadius: borderRadius,
+        speakingBorder: Border.all(
+          color: speakerBorderColor,
+          width: speakerBorderThickness,
+        ),
+        showSpeakerBorder: showSpeakerBorder,
+        showParticipantLabel: showParticipantLabel,
+        showConnectionQualityIndicator: showConnectionQualityIndicator,
+        placeholderStyle: StreamParticipantPlaceholderStyle(
+          avatarTheme: StreamAvatarThemeData(
+            size: avatarSizeFromConstraints(userAvatarTheme.constraints),
+            backgroundColor: userAvatarTheme.initialsBackground,
+            foregroundColor: userAvatarTheme.initialsTextStyle.color,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// The subset of this theme that describes the participant name pill.
+  StreamParticipantLabelThemeData toParticipantLabelThemeData() {
+    return StreamParticipantLabelThemeData(
+      style: StreamParticipantLabelStyle(
+        nameTextStyle: participantLabelTextStyle,
+        speakingColor: audioLevelIndicatorColor,
+        microphoneOffColor: disabledMicrophoneColor,
+        videoOffIconColor: pausedVideoIndicatorColor,
+      ),
+    );
+  }
+
+  /// The subset of this theme that describes the connection quality indicator.
+  StreamConnectionQualityIndicatorThemeData
+  toConnectionQualityIndicatorThemeData() {
+    return StreamConnectionQualityIndicatorThemeData(
+      style: StreamConnectionQualityIndicatorStyle(
+        // The indicator colours each level apart now. The single colour this
+        // theme carries spreads across all three, so it still reads as one
+        // flat colour the way it used to.
+        poorColor: connectionLevelActiveColor,
+        fairColor: connectionLevelActiveColor,
+        greatColor: connectionLevelActiveColor,
+        inactiveColor: connectionLevelInactiveColor,
+      ),
+    );
+  }
+
+  /// The subset of this theme that describes the participants grid layout.
+  StreamCallParticipantsGridThemeData toCallParticipantsGridThemeData() {
+    return StreamCallParticipantsGridThemeData(
+      padding: participantsGridPadding,
+      mainAxisSpacing: participantsGridMainAxisSpacing,
+      crossAxisSpacing: participantsGridCrossAxisSpacing,
+    );
+  }
 }
 
 /// Applies a call participant theme to descendant [StreamParticipantTile]
 /// widgets.
+///
+/// The tile and its parts no longer read this, so wrapping a subtree in one
+/// restyles nothing. Scope the component themes instead: [
+/// StreamParticipantTileTheme], [StreamParticipantLabelTheme],
+/// [StreamConnectionQualityIndicatorTheme] and
+/// [StreamCallParticipantsGridTheme] each wrap a subtree the same way.
+@Deprecated(
+  'Use StreamParticipantTileTheme, StreamParticipantLabelTheme, '
+  'StreamConnectionQualityIndicatorTheme or StreamCallParticipantsGridTheme '
+  'instead. Will be removed in the next major version.',
+)
 class StreamCallParticipantTheme extends InheritedWidget {
   /// Creates a new instance of [StreamCallParticipantTheme].
+  @Deprecated(
+    'Use StreamParticipantTileTheme, StreamParticipantLabelTheme, '
+    'StreamConnectionQualityIndicatorTheme or StreamCallParticipantsGridTheme '
+    'instead. Will be removed in the next major version.',
+  )
   const StreamCallParticipantTheme({
     super.key,
     required this.data,
@@ -480,13 +580,18 @@ class StreamCallParticipantTheme extends InheritedWidget {
   final StreamCallParticipantThemeData data;
 
   /// Returns the configuration [data] from the closest
-  /// [StreamCallParticipantTheme] ancestor. If there is no ancestor,
-  /// it returns [StreamVideoTheme.callParticipantTheme].
+  /// [StreamCallParticipantTheme] ancestor.
+  ///
+  /// Falls back to [StreamVideoTheme.callParticipantTheme], and then to this
+  /// class's own defaults — which nothing reads any more. The tile and its
+  /// parts resolve their appearance from the component themes; this survives
+  /// only so existing calls keep compiling.
   static StreamCallParticipantThemeData of(BuildContext context) {
     final callParticipantTheme = context
         .dependOnInheritedWidgetOfExactType<StreamCallParticipantTheme>();
     return callParticipantTheme?.data ??
-        StreamVideoTheme.of(context).callParticipantTheme;
+        StreamVideoTheme.of(context).callParticipantTheme ??
+        StreamCallParticipantThemeData._defaults;
   }
 
   @override

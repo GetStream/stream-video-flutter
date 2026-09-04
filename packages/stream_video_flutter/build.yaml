@@ -1,0 +1,11 @@
+# Without an explicit source list, build_runner also walks
+# `example/*/flutter/ephemeral/.plugin_symlinks`, where the symlinked plugin
+# sources carry annotations this package has no dependency on. Those fail to
+# resolve and take the whole build down with them, even though nothing there is
+# ours to generate.
+targets:
+  $default:
+    sources:
+      - lib/**
+      - test/**
+      - $package$

@@ -3,15 +3,96 @@
 version: 1
 transforms:
   #region Participant tile migration
-  - title: "replace StreamCallParticipant with StreamParticipantTile"
-    date: "2026-08-20"
+  # StreamCallParticipant is NOT renamed in bulk. It still accepts the visual
+  # parameters StreamParticipantTile dropped in favour of `style:`, so renaming
+  # a call site that passes any of them turns working code into a compile
+  # error. Those call sites move by hand; the CHANGELOG carries the mapping.
+  #
+  # participantLabelAlignment, connectionLevelAlignment and
+  # enabledMicrophoneColor are still accepted by the deprecated widget but are
+  # not forwarded anywhere: the label and the indicator are laid out by the
+  # toolbar, and an unmuted microphone draws no icon to colour. Removing them
+  # changes nothing at runtime, which is why it is safe to do in bulk.
+
+  - title: "remove participantLabelAlignment from StreamCallParticipant"
+    date: "2026-08-28"
     bulkApply: true
     element:
       uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
-      class: "StreamCallParticipant"
+      constructor: ""
+      inClass: "StreamCallParticipant"
     changes:
-      - kind: "rename"
-        newName: "StreamParticipantTile"
+      - kind: "removeParameter"
+        name: "participantLabelAlignment"
+
+  - title: "remove connectionLevelAlignment from StreamCallParticipant"
+    date: "2026-08-28"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "StreamCallParticipant"
+    changes:
+      - kind: "removeParameter"
+        name: "connectionLevelAlignment"
+
+  - title: "remove enabledMicrophoneColor from StreamCallParticipant"
+    date: "2026-08-28"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "StreamCallParticipant"
+    changes:
+      - kind: "removeParameter"
+        name: "enabledMicrophoneColor"
+
+  - title: "remove userAvatarTheme from StreamLocalVideo"
+    date: "2026-08-28"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "StreamLocalVideo"
+    changes:
+      - kind: "removeParameter"
+        name: "userAvatarTheme"
+
+  - title: "rename showDominantSpeakerBorder to showSpeakerBorder"
+    date: "2026-08-28"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      method: "copyWith"
+      inClass: "StreamCallParticipantThemeData"
+    changes:
+      - kind: "renameParameter"
+        oldName: "showDominantSpeakerBorder"
+        newName: "showSpeakerBorder"
+
+  - title: "rename dominantSpeakerBorderThickness to speakerBorderThickness"
+    date: "2026-08-28"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      method: "copyWith"
+      inClass: "StreamCallParticipantThemeData"
+    changes:
+      - kind: "renameParameter"
+        oldName: "dominantSpeakerBorderThickness"
+        newName: "speakerBorderThickness"
+
+  - title: "rename dominantSpeakerBorderColor to speakerBorderColor"
+    date: "2026-08-28"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      method: "copyWith"
+      inClass: "StreamCallParticipantThemeData"
+    changes:
+      - kind: "renameParameter"
+        oldName: "dominantSpeakerBorderColor"
+        newName: "speakerBorderColor"
   #endregion Participant tile migration
 
   #region Partial state updates
