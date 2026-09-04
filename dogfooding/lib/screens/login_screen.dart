@@ -189,10 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await authController.login(user, environment);
     } catch (e, stk) {
-      debugPrint(
-        'Login failed for user ${user.info.id} '
-        'on ${environment.name}: $e\n$stk',
-      );
+      debugPrint('Login failed: $e\n$stk');
       if (mounted) hideLoadingIndicator(context);
       _showSnackBar('Error: $e');
     } finally {
