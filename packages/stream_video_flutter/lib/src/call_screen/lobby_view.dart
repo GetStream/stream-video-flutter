@@ -96,10 +96,12 @@ class StreamLobbyView extends StatefulWidget {
   /// encryption key, a name, a call that is being created.
   final bool joinEnabled;
 
-  /// Drawn between the controls and the join button.
+  /// Drawn between the controls and the join button, through
+  /// [StreamLobbyFooter].
   ///
-  /// Nothing is drawn when null. Use it for whatever a call has to be set up
-  /// with that the lobby knows nothing about.
+  /// Nothing is drawn when null and no `lobbyFooter` builder is registered.
+  /// Use it for whatever a call has to be set up with that the lobby knows
+  /// nothing about.
   final Widget? footer;
 
   /// The controller driving this lobby.
@@ -193,6 +195,8 @@ class _LobbyBody extends StatelessWidget {
     final translations = context.translations;
     final spacing = context.streamSpacing;
     final isSmall = context.streamScreenSize.isSmall;
+    final footerBuilder = context
+        .videoComponentBuilder<StreamLobbyFooterProps>();
     // Typed as the defaults class, not as the style: declaring it as the base
     // type would throw away the non-null overrides.
     final style = _StreamLobbyViewStyleDefaults(
@@ -256,7 +260,11 @@ class _LobbyBody extends StatelessWidget {
             ],
           ),
         ),
-        if (footer case final footer?) footer,
+        // Drawn when there is something to draw: a footer from the call
+        // site, or an app-wide builder that supplies its own. Otherwise
+        // the Column's spacing would leave a gap for an empty slot.
+        if (footer != null || footerBuilder != null)
+          StreamLobbyFooter(child: footer),
         SizedBox(
           // Full width on a phone, a fixed 400 where there is room for it.
           width: isSmall ? double.infinity : style.joinButtonWidth,
