@@ -4,7 +4,6 @@ import 'package:uuid/uuid.dart';
 
 import '../../../globals.dart';
 import '../../../stream_video.dart';
-import '../../errors/video_error.dart';
 import '../../telemetry/client_event_reporter.dart';
 import '../../telemetry/client_event_types.dart';
 import '../../token/token_source.dart';

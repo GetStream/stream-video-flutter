@@ -49,8 +49,8 @@ class _LoginScreenState extends State<LoginScreen> {
     final googleService = await locator.getAsync<GoogleSignIn>();
     _googleAuthSubscription = googleService.authenticationEvents.listen(
       _handleGoogleAuthEvent,
-      onError: (Object e) {
-        debugPrint('Google auth event error: $e');
+      onError: (Object e, StackTrace stk) {
+        debugPrint('Google auth event error: $e\n$stk');
         _showSnackBar('Google sign-in failed: $e');
       },
     );
@@ -82,8 +82,8 @@ class _LoginScreenState extends State<LoginScreen> {
         // Result delivered via authenticationEvents -> _handleGoogleAuthEvent.
         await googleService.authenticate();
       }
-    } catch (e) {
-      debugPrint('Google sign-in failed: $e');
+    } catch (e, stk) {
+      debugPrint('Google sign-in failed: $e\n$stk');
       _showSnackBar('Google sign-in failed: $e');
     }
   }
@@ -110,8 +110,8 @@ class _LoginScreenState extends State<LoginScreen> {
         name: user.displayName ?? '',
         image: user.photoURL,
       );
-    } catch (e) {
-      debugPrint('Google sign-in failed: $e');
+    } catch (e, stk) {
+      debugPrint('Google sign-in failed: $e\n$stk');
       _showSnackBar('Google sign-in failed: $e');
     }
   }
@@ -186,7 +186,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       await authController.login(user, environment);
-    } catch (e) {
+    } catch (e, stk) {
+      debugPrint('Login failed: $e\n$stk');
       if (mounted) hideLoadingIndicator(context);
       _showSnackBar('Error: $e');
     } finally {

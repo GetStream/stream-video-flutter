@@ -1,6 +1,5 @@
 import '../../../open_api/video/coordinator/api.dart' as open;
 import '../../../stream_video.dart';
-import '../../errors/video_error.dart';
 import '../../models/call_received_data.dart';
 import '../../retry/retry_manager.dart';
 import '../../token/token_source.dart';
@@ -272,6 +271,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
     bool? video,
     int? membersLimit,
     bool? hintHighScaleLivestreamPublisher,
+    bool? e2ee,
   }) {
     return _retryManager.execute(
       () => _delegate.joinCall(
@@ -282,6 +282,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
         migratingFromList: migratingFromList,
         video: video,
         hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
+        e2ee: e2ee,
       ),
       (error, nextAttemptDelay) async {
         _logRetry('joinCall', error, nextAttemptDelay);
@@ -788,6 +789,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
     StreamIndividualRecordingSettings? individualRecording,
     StreamRawRecordingSettings? rawRecording,
     StreamIngressSettings? ingress,
+    StreamEncryptionSettings? encryption,
   }) {
     return _retryManager.execute(
       () => _delegate.updateCall(
@@ -808,6 +810,7 @@ class CoordinatorClientRetry extends CoordinatorClient {
         individualRecording: individualRecording,
         rawRecording: rawRecording,
         ingress: ingress,
+        encryption: encryption,
       ),
       (error, nextAttemptDelay) async {
         _logRetry('updateCall', error, nextAttemptDelay);

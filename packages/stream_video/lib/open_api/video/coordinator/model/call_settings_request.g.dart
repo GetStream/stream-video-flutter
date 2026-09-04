@@ -22,6 +22,11 @@ CallSettingsRequest _$CallSettingsRequestFromJson(
       : BroadcastSettingsRequest.fromJson(
           json['broadcasting'] as Map<String, dynamic>,
         ),
+  encryption: json['encryption'] == null
+      ? null
+      : EncryptionSettingsRequest.fromJson(
+          json['encryption'] as Map<String, dynamic>,
+        ),
   frameRecording: json['frame_recording'] == null
       ? null
       : FrameRecordingSettingsRequest.fromJson(
@@ -89,6 +94,7 @@ Map<String, dynamic> _$CallSettingsRequestToJson(
   'audio': instance.audio?.toJson(),
   'backstage': instance.backstage?.toJson(),
   'broadcasting': instance.broadcasting?.toJson(),
+  'encryption': instance.encryption?.toJson(),
   'frame_recording': instance.frameRecording?.toJson(),
   'geofencing': instance.geofencing?.toJson(),
   'individual_recording': instance.individualRecording?.toJson(),

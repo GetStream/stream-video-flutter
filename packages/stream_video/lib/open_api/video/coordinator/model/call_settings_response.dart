@@ -21,6 +21,7 @@ class CallSettingsResponse with _$CallSettingsResponse {
     required this.audio,
     required this.backstage,
     required this.broadcasting,
+    required this.encryption,
     required this.frameRecording,
     required this.geofencing,
     required this.individualRecording,
@@ -44,6 +45,10 @@ class CallSettingsResponse with _$CallSettingsResponse {
 
   @override
   final BroadcastSettingsResponse broadcasting;
+
+  /// EncryptionSettings is the payload for end-to-end encryption settings
+  @override
+  final EncryptionSettingsResponse encryption;
 
   @override
   final FrameRecordingSettingsResponse frameRecording;

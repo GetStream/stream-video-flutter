@@ -12,6 +12,7 @@ JoinCallRequest _$JoinCallRequestFromJson(Map<String, dynamic> json) =>
       data: json['data'] == null
           ? null
           : CallRequest.fromJson(json['data'] as Map<String, dynamic>),
+      e2ee: json['e2ee'] as bool?,
       hintHighScaleLivestreamPublisher:
           json['hint_high_scale_livestream_publisher'] as bool?,
       location: json['location'] as String,
@@ -29,6 +30,7 @@ Map<String, dynamic> _$JoinCallRequestToJson(JoinCallRequest instance) =>
     <String, dynamic>{
       'create': instance.create,
       'data': instance.data?.toJson(),
+      'e2ee': instance.e2ee,
       'hint_high_scale_livestream_publisher':
           instance.hintHighScaleLivestreamPublisher,
       'location': instance.location,

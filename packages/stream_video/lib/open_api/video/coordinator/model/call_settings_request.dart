@@ -21,6 +21,7 @@ class CallSettingsRequest with _$CallSettingsRequest {
     this.audio,
     this.backstage,
     this.broadcasting,
+    this.encryption,
     this.frameRecording,
     this.geofencing,
     this.individualRecording,
@@ -44,6 +45,9 @@ class CallSettingsRequest with _$CallSettingsRequest {
 
   @override
   final BroadcastSettingsRequest? broadcasting;
+
+  @override
+  final EncryptionSettingsRequest? encryption;
 
   @override
   final FrameRecordingSettingsRequest? frameRecording;

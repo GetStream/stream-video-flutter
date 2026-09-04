@@ -48,6 +48,22 @@
 - Fixed a potential permanent hang when guest creation received a 401: the guest-creation call authenticates with its own anonymous token, so it no longer attempts a user-token refresh — which re-entered the token loading already in progress.
 - A coordinator WebSocket error frame that says nothing about the credentials — a rate limit, or an error about a single request — no longer closes an otherwise healthy connection. Only an expired or rejected token, or a rejected API key, closes the socket now; the rest are logged.
 
+## 1.6.0
+
+### ✅ Added
+
+- Added the `ActionCallIncomingFailed` ringing event and `IncomingCallFailureReason`, raised when the platform call UI refuses to display an incoming call. iOS only, and most useful when Do Not Disturb or the block list filtered the call before it was ever shown. Observe it with `onRingingEvent<ActionCallIncomingFailed>` and decide what to do: the SDK deliberately takes no action, because rejecting a filtered call ends the ring on every device the user is being called on.
+- Added end-to-end encryption support: attach an `EncryptionManager` with `Call.setE2EEManager` before joining, request encryption at call creation with `StreamEncryptionSettings`, and read `CallState.isE2eeEnabled` to check whether it is in effect. Available on Android, iOS and macOS. See the [documentation](https://getstream.io/video/docs/flutter/guides/e2ee-encryption/) for details.
+- Added `CallPreferences.encryptionKeyResolver`, which supplies the key for calls your app does not join itself, such as those answered from a ringing notification. See the [documentation](https://getstream.io/video/docs/flutter/guides/e2ee-encryption/#ringing-calls) for details.
+
+### 🔄 Changed
+
+- Raised the minimum `dart_webrtc` to `1.8.2`, required for WebAssembly builds.
+
+### 🐞 Fixed
+
+- [Android] Fixed a call hung up outside the app, from a paired watch, a Bluetooth headset or a car head unit, not leaving the Stream call. Ended events carrying `CallData.endedBySystem` are now applied on Android too, while the ambiguous ones, which on Android also mean the incoming call notification was merely dismissed, keep being ignored. Requires the Android Telecom integration in `stream_video_push_notification`.
+
 ## 1.5.0
 
 ### ✅ Added

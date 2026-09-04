@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/open_api/video/coordinator/api.dart' as open;
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
-import 'package:stream_video/src/errors/video_error.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';

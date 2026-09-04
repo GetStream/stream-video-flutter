@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../open_api/video/coordinator/api.dart';
+
 /// Represents an SDK error that contains a message.
 class VideoError extends Equatable implements Error {
   /// TODO
@@ -41,4 +43,16 @@ class VideoErrorWithCause extends VideoError {
 
   @override
   List<Object?> get props => [...super.props, cause];
+}
+
+extension VideoErrorApiDetails on VideoError {
+  /// The typed server error behind this failure, or `null` when the failure is
+  /// not a server-side API error (e.g. a transport error).
+  StreamApiError? get apiError {
+    final self = this;
+    if (self is! VideoErrorWithCause) return null;
+
+    final cause = self.cause;
+    return cause is StreamApiError ? cause : null;
+  }
 }

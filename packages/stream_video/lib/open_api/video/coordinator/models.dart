@@ -220,6 +220,8 @@ export 'model/egress_hls_response.dart';
 export 'model/egress_rtmp_response.dart';
 export 'model/egress_response.dart';
 export 'model/end_call_response.dart';
+export 'model/encryption_settings_request.dart';
+export 'model/encryption_settings_response.dart';
 export 'model/enriched_activity.dart';
 export 'model/enriched_reaction.dart';
 export 'model/entity_creator_response.dart';

@@ -10,6 +10,8 @@ public struct StreamVideoIncomingCallConstants {
 
     // MARK: - Call Events
     public static let ACTION_CALL_INCOMING = "io.getstream.video.ACTION_CALL_INCOMING"
+    public static let ACTION_CALL_INCOMING_FAILED =
+        "io.getstream.video.ACTION_CALL_INCOMING_FAILED"
     public static let ACTION_CALL_START = "io.getstream.video.ACTION_CALL_START"
     public static let ACTION_CALL_ACCEPT = "io.getstream.video.ACTION_CALL_ACCEPT"
     public static let ACTION_CALL_DECLINE = "io.getstream.video.ACTION_CALL_DECLINE"

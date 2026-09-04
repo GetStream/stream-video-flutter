@@ -20,6 +20,7 @@ class JoinCallRequest with _$JoinCallRequest {
   const JoinCallRequest({
     this.create,
     this.data,
+    this.e2ee,
     this.hintHighScaleLivestreamPublisher,
     required this.location,
     this.membersLimit,
@@ -35,6 +36,11 @@ class JoinCallRequest with _$JoinCallRequest {
 
   @override
   final CallRequest? data;
+
+  /// the encryption mode the client intends to use for this join; the join is
+  /// rejected if it does not match the call's encryption configuration
+  @override
+  final bool? e2ee;
 
   @override
   final bool? hintHighScaleLivestreamPublisher;

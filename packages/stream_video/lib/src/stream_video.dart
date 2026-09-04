@@ -1232,9 +1232,12 @@ class StreamVideo extends Disposable {
   /// ActionCallEnded event is sent by native side of stream_video_push_notification package when the call is ended.
   /// On iOS this is connected to CallKit and should end active call or reject incoming call.
   /// On Android this is connected to push notification being dismissed.
-  /// When app is terminated it can be send even when accepting the call. That's why we only handle it on iOS.
+  /// When app is terminated it can be send even when accepting the call. That's why we only handle
+  /// it on iOS, unless the event carries [CallData.endedBySystem]: a hang-up reported by the
+  /// Android Telecom stack (paired watch, headset, car head unit) is unambiguous and has to be
+  /// applied, otherwise the call keeps running after the system has already ended it.
   Future<void> _onCallEnded(ActionCallEnded event) async {
-    if (CurrentPlatform.isAndroid) return;
+    if (CurrentPlatform.isAndroid && !event.data.endedBySystem) return;
 
     _logger.d(() => '[onCallEnded] event: $event');
 

@@ -536,6 +536,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     bool? video,
     int? membersLimit,
     bool? hintHighScaleLivestreamPublisher,
+    bool? e2ee,
   }) async {
     try {
       _logger.d(
@@ -564,6 +565,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
           migratingFromList: migratingFromList,
           video: video,
           hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
+          e2ee: e2ee,
         ),
       );
 
@@ -1609,6 +1611,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     StreamIndividualRecordingSettings? individualRecording,
     StreamRawRecordingSettings? rawRecording,
     StreamIngressSettings? ingress,
+
+    /// Whether the call permits end-to-end encryption.
+    StreamEncryptionSettings? encryption,
   }) async {
     try {
       final connectionResult = await _waitUntilConnected();
@@ -1636,6 +1641,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
             broadcasting: broadcasting?.toOpenDto(),
             session: session?.toOpenDto(),
             frameRecording: frameRecording?.toOpenDto(),
+            encryption: encryption?.toOpenDto(),
             individualRecording: individualRecording?.toOpenDto(),
             rawRecording: rawRecording?.toOpenDto(),
             ingress: ingress?.toOpenDto(),

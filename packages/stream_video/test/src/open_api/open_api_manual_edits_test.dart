@@ -491,6 +491,7 @@ Map<String, dynamic> _minimalCallSettingsJson() => {
     },
     'rtmp': {'enabled': false, 'quality': '720p'},
   },
+  'encryption': {'mode': 'disabled'},
   'frame_recording': {
     'capture_interval_in_seconds': 0,
     'mode': 'disabled',

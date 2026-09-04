@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 import '../../../../stream_video.dart';
-import '../../../errors/video_error.dart';
 import '../models/sfu_audio_level.dart';
 import '../models/sfu_audio_sender.dart';
 import '../models/sfu_call_ended_reason.dart';

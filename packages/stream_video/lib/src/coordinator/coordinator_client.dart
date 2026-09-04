@@ -76,6 +76,12 @@ abstract class CoordinatorClient {
     bool? video,
     int? membersLimit,
     bool? hintHighScaleLivestreamPublisher,
+
+    /// Whether this client publishes end-to-end encrypted media.
+    ///
+    /// The server rejects the join when it does not match the call's
+    /// encryption configuration.
+    bool? e2ee,
   });
 
   Future<Result<List<String>>> ringCall({
@@ -309,6 +315,9 @@ abstract class CoordinatorClient {
     StreamIndividualRecordingSettings? individualRecording,
     StreamRawRecordingSettings? rawRecording,
     StreamIngressSettings? ingress,
+
+    /// Whether the call permits end-to-end encryption.
+    StreamEncryptionSettings? encryption,
   });
 
   Future<Result<GuestCreatedData>> loadGuest({

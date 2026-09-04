@@ -6,11 +6,19 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
+import '../utils/call_encryption.dart';
 
 class ShareCallWelcomeCard extends StatefulWidget {
-  const ShareCallWelcomeCard({required this.callId, super.key});
+  const ShareCallWelcomeCard({
+    required this.call,
+    this.encryptionKey,
+    super.key,
+  });
 
-  final String callId;
+  final Call call;
+
+  /// The shared passphrase, put in the invite when [call] is encrypted.
+  final String? encryptionKey;
 
   @override
   State<ShareCallWelcomeCard> createState() => _ShareCallWelcomeCardState();
@@ -57,7 +65,12 @@ class _ShareCallWelcomeCardState extends State<ShareCallWelcomeCard> {
             ),
             childrenPadding: const EdgeInsets.all(16),
             onExpansionChanged: (value) => setState(() => _isExpanded = value),
-            children: [_ShareCardContent(callId: widget.callId)],
+            children: [
+              _ShareCardContent(
+                call: widget.call,
+                encryptionKey: widget.encryptionKey,
+              ),
+            ],
           ),
         ),
       ),
@@ -66,8 +79,15 @@ class _ShareCallWelcomeCardState extends State<ShareCallWelcomeCard> {
 }
 
 class ShareCallParticipantsCard extends StatelessWidget {
-  const ShareCallParticipantsCard({required this.callId, super.key});
-  final String callId;
+  const ShareCallParticipantsCard({
+    required this.call,
+    this.encryptionKey,
+    super.key,
+  });
+  final Call call;
+
+  /// The shared passphrase, put in the invite when [call] is encrypted.
+  final String? encryptionKey;
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +100,7 @@ class ShareCallParticipantsCard extends StatelessWidget {
         children: [
           Text('Share the link', style: theme.textTheme.title1),
           const SizedBox(height: 16),
-          _ShareCardContent(callId: callId),
+          _ShareCardContent(call: call, encryptionKey: encryptionKey),
         ],
       ),
     );
@@ -88,15 +108,25 @@ class ShareCallParticipantsCard extends StatelessWidget {
 }
 
 class _ShareCardContent extends StatelessWidget {
-  _ShareCardContent({required this.callId});
-  final String callId;
+  _ShareCardContent({required this.call, this.encryptionKey});
+  final Call call;
+  final String? encryptionKey;
   late final _appPreferences = locator.get<AppPreferences>();
 
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
     final colorScheme = StreamTheme.of(context).colorScheme;
-    final callUrl = _appPreferences.environment.getJoinUrl(callId: callId);
+    final callId = call.id;
+
+    // An encrypted call cannot be joined without the key, so an invite to one
+    // has to carry it.
+    final callUrl = _appPreferences.environment.getJoinUrl(
+      callId: callId,
+      encryptionKey: isCallEncrypted(call.state.value.settings)
+          ? encryptionKey
+          : null,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

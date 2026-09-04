@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_video/src/errors/video_error.dart';
 import 'package:stream_video/src/token/token_provider_factory.dart';
 import 'package:stream_video/stream_video.dart';
 

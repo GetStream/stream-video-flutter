@@ -16,6 +16,9 @@ CallSettingsResponse _$CallSettingsResponseFromJson(
   broadcasting: BroadcastSettingsResponse.fromJson(
     json['broadcasting'] as Map<String, dynamic>,
   ),
+  encryption: EncryptionSettingsResponse.fromJson(
+    json['encryption'] as Map<String, dynamic>,
+  ),
   frameRecording: FrameRecordingSettingsResponse.fromJson(
     json['frame_recording'] as Map<String, dynamic>,
   ),
@@ -61,6 +64,7 @@ Map<String, dynamic> _$CallSettingsResponseToJson(
   'audio': instance.audio.toJson(),
   'backstage': instance.backstage.toJson(),
   'broadcasting': instance.broadcasting.toJson(),
+  'encryption': instance.encryption.toJson(),
   'frame_recording': instance.frameRecording.toJson(),
   'geofencing': instance.geofencing.toJson(),
   'individual_recording': instance.individualRecording.toJson(),

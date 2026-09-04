@@ -15,6 +15,10 @@ T _$identity<T>(T value) => value;
 mixin _$JoinCallRequest {
   bool? get create;
   CallRequest? get data;
+
+  /// the encryption mode the client intends to use for this join; the join is
+  /// rejected if it does not match the call's encryption configuration
+  bool? get e2ee;
   bool? get hintHighScaleLivestreamPublisher;
   String get location;
   int? get membersLimit;
@@ -41,6 +45,7 @@ mixin _$JoinCallRequest {
             other is JoinCallRequest &&
             (identical(other.create, create) || other.create == create) &&
             (identical(other.data, data) || other.data == data) &&
+            (identical(other.e2ee, e2ee) || other.e2ee == e2ee) &&
             (identical(
                   other.hintHighScaleLivestreamPublisher,
                   hintHighScaleLivestreamPublisher,
@@ -67,6 +72,7 @@ mixin _$JoinCallRequest {
     runtimeType,
     create,
     data,
+    e2ee,
     hintHighScaleLivestreamPublisher,
     location,
     membersLimit,
@@ -79,7 +85,7 @@ mixin _$JoinCallRequest {
 
   @override
   String toString() {
-    return 'JoinCallRequest(create: $create, data: $data, hintHighScaleLivestreamPublisher: $hintHighScaleLivestreamPublisher, location: $location, membersLimit: $membersLimit, migratingFrom: $migratingFrom, migratingFromList: $migratingFromList, notify: $notify, ring: $ring, video: $video)';
+    return 'JoinCallRequest(create: $create, data: $data, e2ee: $e2ee, hintHighScaleLivestreamPublisher: $hintHighScaleLivestreamPublisher, location: $location, membersLimit: $membersLimit, migratingFrom: $migratingFrom, migratingFromList: $migratingFromList, notify: $notify, ring: $ring, video: $video)';
   }
 }
 
@@ -93,6 +99,7 @@ abstract mixin class $JoinCallRequestCopyWith<$Res> {
   $Res call({
     bool? create,
     CallRequest? data,
+    bool? e2ee,
     bool? hintHighScaleLivestreamPublisher,
     String location,
     int? membersLimit,
@@ -119,6 +126,7 @@ class _$JoinCallRequestCopyWithImpl<$Res>
   $Res call({
     Object? create = freezed,
     Object? data = freezed,
+    Object? e2ee = freezed,
     Object? hintHighScaleLivestreamPublisher = freezed,
     Object? location = null,
     Object? membersLimit = freezed,
@@ -138,6 +146,10 @@ class _$JoinCallRequestCopyWithImpl<$Res>
             ? _self.data
             : data // ignore: cast_nullable_to_non_nullable
                   as CallRequest?,
+        e2ee: freezed == e2ee
+            ? _self.e2ee
+            : e2ee // ignore: cast_nullable_to_non_nullable
+                  as bool?,
         hintHighScaleLivestreamPublisher:
             freezed == hintHighScaleLivestreamPublisher
             ? _self.hintHighScaleLivestreamPublisher

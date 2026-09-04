@@ -20,8 +20,10 @@ class MethodChannelStreamVideoPushNotification
 
   @override
   Future<void> init(Map<String, dynamic> pushConfiguration) async {
-    if (!CurrentPlatform.isIos) return;
-    await methodChannel.invokeMethod<String>('initData', pushConfiguration);
+    // iOS uses this to configure CallKit, Android to configure the optional
+    // Telecom integration.
+    if (!CurrentPlatform.isMobile) return;
+    await methodChannel.invokeMethod<void>('initData', pushConfiguration);
   }
 
   /// Only Android: show request permission for ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT
@@ -129,6 +131,12 @@ class MethodChannelStreamVideoPushNotification
     await methodChannel.invokeMethod('endAllCalls');
   }
 
+  /// Dismiss the ringing UI without ending the call.
+  @override
+  Future<void> dismissRingingCall(String cid) async {
+    await methodChannel.invokeMethod('dismissRingingCall', {'id': cid});
+  }
+
   /// Get active calls.
   /// On iOS: return active calls from Callkit.
   /// On Android: only return last call
@@ -191,6 +199,18 @@ class MethodChannelStreamVideoPushNotification
     return allowed ?? false;
   }
 
+  /// Report how a call ended so it is listed correctly in the system call history.
+  /// Only iOS: writes the outcome to CallKit, which decides how the call appears in Recents.
+  @override
+  Future<void> reportCallEnded(String uuid, CallEndedReason reason) async {
+    if (!CurrentPlatform.isIos) return;
+
+    await methodChannel.invokeMethod('reportCallEnded', {
+      'id': uuid,
+      'reason': reason.rawValue,
+    });
+  }
+
   CallData _callDataFromJson(Map<String, dynamic> json) {
     final extraData = json['extra']?.cast<String, dynamic>();
     return CallData(
@@ -201,6 +221,7 @@ class MethodChannelStreamVideoPushNotification
       hasVideo: json['type'] == 1,
       extraData: extraData,
       isAccepted: json['isAccepted'] as bool? ?? false,
+      endedBySystem: json['endedBySystem'] as bool? ?? false,
     );
   }
 
@@ -212,6 +233,13 @@ class MethodChannelStreamVideoPushNotification
 
       return switch (event) {
         Event.actionCallIncoming => ActionCallIncoming(data: callData),
+        Event.actionCallIncomingFailed => ActionCallIncomingFailed(
+          data: callData,
+          reason: IncomingCallFailureReason.fromName(
+            body['errorCode'] as String?,
+          ),
+          error: body['error'] as String?,
+        ),
         Event.actionCallStart => ActionCallStart(data: callData),
         Event.actionCallAccept => ActionCallAccept(data: callData),
         Event.actionCallDecline => ActionCallDecline(data: callData),

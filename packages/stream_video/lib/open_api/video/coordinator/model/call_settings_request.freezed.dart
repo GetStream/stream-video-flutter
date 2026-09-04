@@ -16,6 +16,7 @@ mixin _$CallSettingsRequest {
   AudioSettingsRequest? get audio;
   BackstageSettingsRequest? get backstage;
   BroadcastSettingsRequest? get broadcasting;
+  EncryptionSettingsRequest? get encryption;
   FrameRecordingSettingsRequest? get frameRecording;
   GeofenceSettingsRequest? get geofencing;
   IndividualRecordingSettingsRequest? get individualRecording;
@@ -50,6 +51,8 @@ mixin _$CallSettingsRequest {
                 other.backstage == backstage) &&
             (identical(other.broadcasting, broadcasting) ||
                 other.broadcasting == broadcasting) &&
+            (identical(other.encryption, encryption) ||
+                other.encryption == encryption) &&
             (identical(other.frameRecording, frameRecording) ||
                 other.frameRecording == frameRecording) &&
             (identical(other.geofencing, geofencing) ||
@@ -79,6 +82,7 @@ mixin _$CallSettingsRequest {
     audio,
     backstage,
     broadcasting,
+    encryption,
     frameRecording,
     geofencing,
     individualRecording,
@@ -96,7 +100,7 @@ mixin _$CallSettingsRequest {
 
   @override
   String toString() {
-    return 'CallSettingsRequest(audio: $audio, backstage: $backstage, broadcasting: $broadcasting, frameRecording: $frameRecording, geofencing: $geofencing, individualRecording: $individualRecording, ingress: $ingress, limits: $limits, rawRecording: $rawRecording, recording: $recording, ring: $ring, screensharing: $screensharing, session: $session, thumbnails: $thumbnails, transcription: $transcription, video: $video)';
+    return 'CallSettingsRequest(audio: $audio, backstage: $backstage, broadcasting: $broadcasting, encryption: $encryption, frameRecording: $frameRecording, geofencing: $geofencing, individualRecording: $individualRecording, ingress: $ingress, limits: $limits, rawRecording: $rawRecording, recording: $recording, ring: $ring, screensharing: $screensharing, session: $session, thumbnails: $thumbnails, transcription: $transcription, video: $video)';
   }
 }
 
@@ -111,6 +115,7 @@ abstract mixin class $CallSettingsRequestCopyWith<$Res> {
     AudioSettingsRequest? audio,
     BackstageSettingsRequest? backstage,
     BroadcastSettingsRequest? broadcasting,
+    EncryptionSettingsRequest? encryption,
     FrameRecordingSettingsRequest? frameRecording,
     GeofenceSettingsRequest? geofencing,
     IndividualRecordingSettingsRequest? individualRecording,
@@ -143,6 +148,7 @@ class _$CallSettingsRequestCopyWithImpl<$Res>
     Object? audio = freezed,
     Object? backstage = freezed,
     Object? broadcasting = freezed,
+    Object? encryption = freezed,
     Object? frameRecording = freezed,
     Object? geofencing = freezed,
     Object? individualRecording = freezed,
@@ -171,6 +177,10 @@ class _$CallSettingsRequestCopyWithImpl<$Res>
             ? _self.broadcasting
             : broadcasting // ignore: cast_nullable_to_non_nullable
                   as BroadcastSettingsRequest?,
+        encryption: freezed == encryption
+            ? _self.encryption
+            : encryption // ignore: cast_nullable_to_non_nullable
+                  as EncryptionSettingsRequest?,
         frameRecording: freezed == frameRecording
             ? _self.frameRecording
             : frameRecording // ignore: cast_nullable_to_non_nullable

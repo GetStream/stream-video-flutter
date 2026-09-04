@@ -61,6 +61,7 @@ class AndroidPushConfiguration {
     this.incomingCallNotificationChannelName,
     this.missedCallNotificationChannelName,
     this.showFullScreenOnLockScreen,
+    this.telecom,
   });
 
   factory AndroidPushConfiguration.fromJson(Map<String, dynamic> json) =>
@@ -85,6 +86,10 @@ class AndroidPushConfiguration {
   /// Show full locked screen.
   final bool? showFullScreenOnLockScreen;
 
+  /// Android Telecom integration. Follows the platform default when omitted — on from Android 17,
+  /// off below it. See [TelecomPushConfiguration.enabled].
+  final TelecomPushConfiguration? telecom;
+
   AndroidPushConfiguration copyWith({
     MissedCallNotificationParams? missedCallNotification,
     IncomingCallNotificationParams? incomingCallNotification,
@@ -93,6 +98,7 @@ class AndroidPushConfiguration {
     String? incomingCallNotificationChannelName,
     String? missedCallNotificationChannelName,
     bool? showFullScreenOnLockScreen,
+    TelecomPushConfiguration? telecom,
   }) {
     return AndroidPushConfiguration(
       missedCallNotification:
@@ -109,6 +115,7 @@ class AndroidPushConfiguration {
           this.missedCallNotificationChannelName,
       showFullScreenOnLockScreen:
           showFullScreenOnLockScreen ?? this.showFullScreenOnLockScreen,
+      telecom: telecom ?? this.telecom,
     );
   }
 
@@ -125,10 +132,63 @@ class AndroidPushConfiguration {
       missedCallNotificationChannelName:
           other.missedCallNotificationChannelName,
       showFullScreenOnLockScreen: other.showFullScreenOnLockScreen,
+      telecom: other.telecom,
     );
   }
 
   Map<String, dynamic> toJson() => _$AndroidPushConfigurationToJson(this);
+}
+
+/// Configures the Android Telecom integration for the ringing flow.
+///
+/// When enabled, incoming and outgoing ringing calls are additionally registered with the Android
+/// Telecom stack via Jetpack Telecom.
+///
+/// Requires Android 8.0 (API 26) or newer and the `MANAGE_OWN_CALLS` permission, which the plugin
+/// declares for you. On devices without a telephony stack or a default dialer, the integration is
+/// skipped and the ringing flow behaves exactly as it does with Telecom disabled.
+@JsonSerializable(explicitToJson: true)
+class TelecomPushConfiguration {
+  const TelecomPushConfiguration({
+    this.enabled,
+    this.schema,
+  });
+
+  factory TelecomPushConfiguration.fromJson(Map<String, dynamic> json) =>
+      _$TelecomPushConfigurationFromJson(json);
+
+  /// Whether calls should be registered with the Android Telecom stack.
+  ///
+  /// Leave it unset to take the platform default, which depends on the Android version:
+  ///
+  /// - **Android 17 and above: on.** The platform will not let a ringtone play from a service
+  ///   started by a push unless the call is in the Telecom stack, so ringing does not work
+  ///   correctly without it. Pass `false` to opt out anyway and accept that.
+  /// - **Below Android 17: off.** Ringing works without it, so it stays opt-in and nothing about
+  ///   an existing integration changes unless you pass `true`.
+  ///
+  /// An explicit value always wins on both. Note the integration also turns itself off on devices
+  /// that cannot support it, whatever this says.
+  final bool? enabled;
+
+  /// URI scheme used to build the call address reported to Telecom.
+  ///
+  /// For example `myapp` produces an address of `myapp:<callCid>`. Defaults to the application id
+  /// when omitted. Characters that are not valid in a URI scheme are replaced with `-`.
+  final String? schema;
+
+  /// Note [enabled] cannot be cleared back to unset through this; construct a new instance.
+  TelecomPushConfiguration copyWith({
+    bool? enabled,
+    String? schema,
+  }) {
+    return TelecomPushConfiguration(
+      enabled: enabled ?? this.enabled,
+      schema: schema ?? this.schema,
+    );
+  }
+
+  Map<String, dynamic> toJson() => _$TelecomPushConfigurationToJson(this);
 }
 
 @JsonSerializable(explicitToJson: true)

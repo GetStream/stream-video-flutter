@@ -249,6 +249,9 @@ extension CallSettingsExt on open.CallSettingsResponse {
         cameraFacing: video.cameraFacing.toRequestDomain(),
         targetResolution: video.targetResolution.toSettingsDomain(),
       ),
+      encryption: StreamEncryptionSettings(
+        mode: StreamEncryptionMode.fromString(encryption.mode.name),
+      ),
       screenShare: StreamScreenShareSettings(
         accessRequestEnabled: screensharing.accessRequestEnabled,
         enabled: screensharing.enabled,

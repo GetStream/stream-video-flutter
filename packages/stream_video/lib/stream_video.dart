@@ -7,6 +7,19 @@ library stream_video;
 
 export 'package:stream_core/stream_core.dart' hide LifecycleState, StreamLogger;
 
+/// End-to-end encryption, backed by the native `EncryptionManager`.
+export 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart'
+    show
+        E2eeEvent,
+        E2eeEventType,
+        E2eeKeyState,
+        E2eeSharedKey,
+        E2eeTrackPerf,
+        E2eeTrackType,
+        E2eeUserKey,
+        EncryptionAlgorithm,
+        EncryptionManager;
+
 export 'open_api/video/coordinator/api.dart' hide Role, User;
 export 'open_api/video/coordinator_legacy_enums.dart';
 export 'src/audio_processing/audio_processor.dart';
@@ -22,6 +35,7 @@ export 'src/call/session/dynascale_manager.dart';
 export 'src/call_state.dart';
 export 'src/coordinator/coordinator_client.dart';
 export 'src/coordinator/models/coordinator_events.dart';
+export 'src/errors/video_error.dart';
 export 'src/logger/impl/console_logger.dart';
 export 'src/logger/impl/file_logger.dart';
 export 'src/logger/impl/tagged_logger.dart';
@@ -48,6 +62,7 @@ export 'src/utils/none.dart';
 export 'src/utils/result.dart';
 export 'src/utils/string.dart';
 export 'src/utils/subscriptions.dart';
+export 'src/webrtc/e2ee/call_encryption_key.dart';
 export 'src/webrtc/media/media_constraints.dart';
 export 'src/webrtc/model/rtc_video_dimension.dart';
 export 'src/webrtc/model/rtc_video_parameters.dart';

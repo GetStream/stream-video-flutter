@@ -31,7 +31,7 @@ dependencies:
   rxdart: ^0.28.0
   stream_core_flutter: ^0.4.1
   stream_video: ^2.0.0-alpha
-  stream_webrtc_flutter: ^3.1.0
+  stream_webrtc_flutter: ^3.2.0
   visibility_detector: ^0.4.0+2
 
 dev_dependencies:

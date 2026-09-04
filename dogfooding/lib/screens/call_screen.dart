@@ -6,7 +6,8 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 // �🐦 Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart'
+    hide CurrentPlatform;
 import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart' hide User;
 
@@ -20,6 +21,7 @@ import '../utils/feedback_dialog.dart';
 import '../widgets/badged_call_option.dart';
 import '../widgets/call_duration_title.dart';
 import '../widgets/closed_captions_widget.dart';
+import '../widgets/e2ee_key_notification.dart';
 import '../widgets/settings_menu/settings_menu.dart';
 import '../widgets/share_call_card.dart';
 
@@ -31,11 +33,15 @@ class CallScreen extends StatefulWidget {
     required this.call,
     this.connectOptions,
     this.videoEffectsManager,
+    this.encryptionKey,
   });
 
   final Call call;
   final CallConnectOptions? connectOptions;
   final StreamVideoEffectsManager? videoEffectsManager;
+
+  /// The passphrase [call]'s shared key was derived from.
+  final String? encryptionKey;
 
   @override
   State<CallScreen> createState() => _CallScreenState();
@@ -43,6 +49,8 @@ class CallScreen extends StatefulWidget {
 
 class _CallScreenState extends State<CallScreen> {
   late final _userChatRepo = locator.get<UserChatRepository>();
+
+  late String? _encryptionKey = widget.encryptionKey;
   late final _videoEffectsManager =
       widget.videoEffectsManager ?? StreamVideoEffectsManager(widget.call);
 
@@ -58,6 +66,7 @@ class _CallScreenState extends State<CallScreen> {
   static const _snackbarCooldown = Duration(seconds: 5);
 
   Channel? _channel;
+  StreamSubscription<Event>? _chatConnectionRecoverySubscription;
   ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.grid;
   bool _moreMenuVisible = false;
 
@@ -103,6 +112,7 @@ class _CallScreenState extends State<CallScreen> {
     _speakingWhileMutedDebounce?.cancel();
     _speakingWhileMutedSubscription.cancel();
     _speakingWhileMuted.dispose();
+    _chatConnectionRecoverySubscription?.cancel();
     widget.call.leave();
     _userChatRepo.disconnectUser();
     _videoEffectsManager.dispose();
@@ -137,8 +147,25 @@ class _CallScreenState extends State<CallScreen> {
       appPreferences.environment,
     );
 
+    if (!mounted) return;
+
+    // A channel watch is bound to the chat websocket connection id, and
+    // StreamChatCore disables the client-level state recovery. After a
+    // reconnect (e.g. the network blip that also triggers a video fast
+    // reconnect) nothing re-watches the channel, so new messages silently stop
+    // reaching the device. Re-watch it ourselves.
+    _chatConnectionRecoverySubscription = _userChatRepo.chatClient
+        .on(EventType.connectionRecovered)
+        .listen((_) async {
+          try {
+            await _channel?.watch();
+          } catch (e) {
+            debugPrint('Failed to re-watch chat channel after reconnect: $e');
+          }
+        });
+
     // Rebuild the widget to enable the chat button.
-    if (mounted) setState(() {});
+    setState(() {});
   }
 
   void showParticipants(BuildContext context) {
@@ -203,6 +230,14 @@ class _CallScreenState extends State<CallScreen> {
                         ClosedCaptionsWidget(call: call),
                       ],
                     ),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: E2eeKeyNotification(
+                        call: call,
+                        onKeyApplied: (key) =>
+                            setState(() => _encryptionKey = key),
+                      ),
+                    ),
                     if (_moreMenuVisible) ...[
                       GestureDetector(
                         onTap: () => setState(() => _moreMenuVisible = false),
@@ -246,7 +281,10 @@ class _CallScreenState extends State<CallScreen> {
                           call: call,
                           selector: (state) => state.otherParticipants.isEmpty,
                           builder: (context, isEmpty) => isEmpty
-                              ? ShareCallWelcomeCard(callId: call.id)
+                              ? ShareCallWelcomeCard(
+                                  call: call,
+                                  encryptionKey: _encryptionKey,
+                                )
                               : const SizedBox.shrink(),
                         ),
                       ),
@@ -314,7 +352,10 @@ class _CallScreenState extends State<CallScreen> {
                               colorScheme.accentError,
                           // Keep the track alive on mute so speaking-while-
                           // muted detection also works on iOS/macOS.
-                          stopTrackOnMute: false,
+                          stopTrackOnMute:
+                              CurrentPlatform.isIos || CurrentPlatform.isMacOS
+                              ? false
+                              : null,
                         ),
                         ToggleCameraOption(
                           call: call,

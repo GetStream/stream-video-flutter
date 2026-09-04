@@ -16,6 +16,9 @@ mixin _$CallSettingsResponse {
   AudioSettingsResponse get audio;
   BackstageSettingsResponse get backstage;
   BroadcastSettingsResponse get broadcasting;
+
+  /// EncryptionSettings is the payload for end-to-end encryption settings
+  EncryptionSettingsResponse get encryption;
   FrameRecordingSettingsResponse get frameRecording;
   GeofenceSettingsResponse get geofencing;
   IndividualRecordingSettingsResponse get individualRecording;
@@ -50,6 +53,8 @@ mixin _$CallSettingsResponse {
                 other.backstage == backstage) &&
             (identical(other.broadcasting, broadcasting) ||
                 other.broadcasting == broadcasting) &&
+            (identical(other.encryption, encryption) ||
+                other.encryption == encryption) &&
             (identical(other.frameRecording, frameRecording) ||
                 other.frameRecording == frameRecording) &&
             (identical(other.geofencing, geofencing) ||
@@ -79,6 +84,7 @@ mixin _$CallSettingsResponse {
     audio,
     backstage,
     broadcasting,
+    encryption,
     frameRecording,
     geofencing,
     individualRecording,
@@ -96,7 +102,7 @@ mixin _$CallSettingsResponse {
 
   @override
   String toString() {
-    return 'CallSettingsResponse(audio: $audio, backstage: $backstage, broadcasting: $broadcasting, frameRecording: $frameRecording, geofencing: $geofencing, individualRecording: $individualRecording, ingress: $ingress, limits: $limits, rawRecording: $rawRecording, recording: $recording, ring: $ring, screensharing: $screensharing, session: $session, thumbnails: $thumbnails, transcription: $transcription, video: $video)';
+    return 'CallSettingsResponse(audio: $audio, backstage: $backstage, broadcasting: $broadcasting, encryption: $encryption, frameRecording: $frameRecording, geofencing: $geofencing, individualRecording: $individualRecording, ingress: $ingress, limits: $limits, rawRecording: $rawRecording, recording: $recording, ring: $ring, screensharing: $screensharing, session: $session, thumbnails: $thumbnails, transcription: $transcription, video: $video)';
   }
 }
 
@@ -111,6 +117,7 @@ abstract mixin class $CallSettingsResponseCopyWith<$Res> {
     AudioSettingsResponse audio,
     BackstageSettingsResponse backstage,
     BroadcastSettingsResponse broadcasting,
+    EncryptionSettingsResponse encryption,
     FrameRecordingSettingsResponse frameRecording,
     GeofenceSettingsResponse geofencing,
     IndividualRecordingSettingsResponse individualRecording,
@@ -143,6 +150,7 @@ class _$CallSettingsResponseCopyWithImpl<$Res>
     Object? audio = null,
     Object? backstage = null,
     Object? broadcasting = null,
+    Object? encryption = null,
     Object? frameRecording = null,
     Object? geofencing = null,
     Object? individualRecording = null,
@@ -171,6 +179,10 @@ class _$CallSettingsResponseCopyWithImpl<$Res>
             ? _self.broadcasting
             : broadcasting // ignore: cast_nullable_to_non_nullable
                   as BroadcastSettingsResponse,
+        encryption: null == encryption
+            ? _self.encryption
+            : encryption // ignore: cast_nullable_to_non_nullable
+                  as EncryptionSettingsResponse,
         frameRecording: null == frameRecording
             ? _self.frameRecording
             : frameRecording // ignore: cast_nullable_to_non_nullable

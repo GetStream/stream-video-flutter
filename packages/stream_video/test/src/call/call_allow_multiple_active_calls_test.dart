@@ -60,6 +60,7 @@ void main() {
           migratingFromList: any(named: 'migratingFromList'),
           video: any(named: 'video'),
           membersLimit: any(named: 'membersLimit'),
+          e2ee: any(named: 'e2ee'),
         ),
       ).thenAnswer(
         (_) async => const Result.failure('join not implemented in test'),

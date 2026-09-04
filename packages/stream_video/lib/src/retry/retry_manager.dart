@@ -64,8 +64,9 @@ class RpcRetryManager {
     return _apiError(result)?.statusCode == 401;
   }
 
-  /// Returns false for permanent client errors (4xx except 401/408/429)
-  /// that should not be retried.
+  /// Returns false for errors the server marked unrecoverable, and for
+  /// permanent client errors (4xx except 401/408/429) that should not be
+  /// retried.
   /// 401 (Unauthorized) is retryable because the auth-retry logic above handles it with a token refresh.
   /// 408 (Request Timeout) and 429 (Too Many Requests) are retryable because they are temporary errors.
   bool _isRetryable(Result<dynamic> result) {
@@ -73,6 +74,11 @@ class RpcRetryManager {
     // Transport-level failures (timeouts, connection errors) carry no typed
     // [StreamApiError]; treat them as retryable.
     if (apiError == null) return true;
+
+    // The server can mark an error unrecoverable explicitly; honour that
+    // over the status-code heuristic below.
+    final unrecoverable = apiError.unrecoverable;
+    if (unrecoverable != null) return !unrecoverable;
 
     final statusCode = apiError.statusCode;
     if (statusCode >= 400 && statusCode < 500) {
