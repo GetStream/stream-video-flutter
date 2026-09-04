@@ -4,7 +4,6 @@ import 'package:equatable/equatable.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../models/call_cid.dart';
-import '../../models/call_settings.dart';
 
 /// A key the SDK sets end-to-end encryption up with on the app's behalf.
 ///
@@ -72,25 +71,21 @@ final class SharedCallEncryptionKey extends CallEncryptionKey {
       'algorithm: ${algorithm.name})';
 }
 
-/// What the SDK knows about the call it is asking for a key for.
+/// The call a key is being asked for.
+///
+/// A request object rather than a bare cid so more context can be added later
+/// without breaking every resolver.
 class CallEncryptionKeyRequest extends Equatable {
-  const CallEncryptionKeyRequest({
-    required this.callCid,
-    required this.encryptionMode,
-  });
+  const CallEncryptionKeyRequest({required this.callCid});
 
   /// The call a key is being asked for.
   final StreamCallCid callCid;
 
-  /// The encryption mode the coordinator resolved, as far as this client knows.
-  final StreamEncryptionMode encryptionMode;
+  @override
+  List<Object?> get props => [callCid];
 
   @override
-  List<Object?> get props => [callCid, encryptionMode];
-
-  @override
-  String toString() =>
-      'CallEncryptionKeyRequest(callCid: $callCid, mode: ${encryptionMode.name})';
+  String toString() => 'CallEncryptionKeyRequest(callCid: $callCid)';
 }
 
 /// Provides the shared key for a call the app has not set up by hand.
@@ -99,11 +94,16 @@ class CallEncryptionKeyRequest extends Equatable {
 /// when no `EncryptionManager` is attached. An attached manager always wins:
 /// the app has already said which keys the call uses.
 ///
+/// Answer only for the calls you mean to encrypt, from whatever your app knows
+/// about them. The request carries the call's id and nothing else on purpose:
+/// the SDK does not tell you the call's encryption mode, because it does not
+/// reliably know it before the join and the other Stream SDKs do not offer one
+/// either. Returning a key for a call whose peers are not encrypting gets the
+/// join rejected by the server.
+///
 /// Return `null` for a call that needs no key from you. That is fine for a call
 /// whose encryption is `available`, which then joins unencrypted, and an error
 /// for one that is `auto-on`, which cannot be joined without a key at all.
-/// [CallEncryptionKeyRequest.encryptionMode] is there so a resolver can answer
-/// only for the calls that need it.
 ///
 /// Keep it quick. It runs inside the join, and on platforms where answering a
 /// call holds a system watchdog open — CallKit's answer action, on SDKs that

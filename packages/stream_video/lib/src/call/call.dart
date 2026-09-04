@@ -1040,11 +1040,18 @@ class Call {
   /// The manager is released and disposed when the call is left, so a fresh
   /// one is needed per call.
   Future<void> setE2EEManager(EncryptionManager manager) async {
-    if (_session?.rtcManager != null) {
+    final status = state.value.status;
+    final joinUnderWay =
+        status is CallStatusConnecting || // and Reconnecting, Migrating
+        status is CallStatusJoining ||
+        status is CallStatusConnected ||
+        status is CallStatusJoined;
+
+    if (joinUnderWay || _session?.rtcManager != null) {
       throw StateError(
-        'setE2EEManager must be called before join(): this call already has '
-        'peer connections, and attaching now would leave the session '
-        'half-encrypted.',
+        'setE2EEManager must be called before join(): this call is already '
+        'connecting, so its session and its join request were built without '
+        'the manager and its tracks would publish unencrypted.',
       );
     }
 
@@ -1060,20 +1067,17 @@ class Call {
       throw StateError(
         'This call already has a different EncryptionManager. Overwriting it '
         'would drop the current one while it still holds a native key store, '
-        'so release it first: clearE2EEManager() to dispose it, or '
-        'clearE2EEManager(dispose: false) to hand it to another call.',
+        'so release it first with clearE2EEManager().',
       );
     }
 
     final claimant = _e2eeClaims[callCid.value]?.call.target;
-    if (claimant != null &&
-        !identical(claimant, this) &&
-        !identical(claimant._e2eeManager, manager)) {
+    if (claimant != null && !identical(claimant, this)) {
       throw StateError(
-        'Another Call instance for $callCid already has a different '
-        'EncryptionManager. Two managers on one call means two key stores, so '
-        'peers can only decrypt one of them. Reuse that Call, or release its '
-        'manager with clearE2EEManager() (or leave()) first.',
+        'Another Call instance for $callCid already has an EncryptionManager. '
+        'A manager belongs to one call, because its key store has to have one '
+        'owner. Reuse that Call, or release its manager with '
+        'clearE2EEManager() (or leave()) and give this one its own.',
       );
     }
 
@@ -1106,43 +1110,21 @@ class Call {
     // An explicitly attached manager wins.
     if (_e2eeManager != null) return const Result.success(none);
 
-    final required =
-        state.value.settings.encryption.mode == StreamEncryptionMode.autoOn;
-
     final resolve = state.value.preferences.encryptionKeyResolver;
-    if (resolve == null) {
-      if (!required) return const Result.success(none);
 
-      return Result.error(
-        'This call requires end-to-end encryption, but no key was available. '
-        'Attach a manager with setE2EEManager() before join(), or set '
-        'encryptionKeyResolver on StreamVideoOptions.',
-      );
-    }
+    if (resolve == null) return const Result.success(none);
 
     final CallEncryptionKey? key;
     try {
-      key = await resolve(
-        CallEncryptionKeyRequest(
-          callCid: callCid,
-          encryptionMode: state.value.settings.encryption.mode,
-        ),
-      );
+      key = await resolve(CallEncryptionKeyRequest(callCid: callCid));
     } catch (e, stk) {
       _logger.e(() => '[resolveE2EE] resolver threw: $e; $stk');
       return Result.error('The encryption key resolver failed: $e');
     }
 
     if (key == null) {
-      if (!required) {
-        _logger.d(() => '[resolveE2EE] no key, joining unencrypted');
-        return const Result.success(none);
-      }
-
-      return Result.error(
-        'This call requires end-to-end encryption, but the key resolver '
-        'returned null for $callCid.',
-      );
+      _logger.d(() => '[resolveE2EE] no key, joining unencrypted');
+      return const Result.success(none);
     }
 
     if (!EncryptionManager.isSupported) {
@@ -1172,13 +1154,17 @@ class Call {
         // and it is the one that has to give its handle back.
         if (_e2eeManager != null) {
           _logger.d(() => '[resolveE2EE] a manager was attached meanwhile');
-          await manager.dispose().catchError((Object _) {});
+          await manager.dispose().catchError((Object e) {
+            _logger.w(() => '[resolveE2EE] surplus dispose failed: $e');
+          });
           return const Result.success(none);
         }
 
         await setE2EEManager(manager);
       } catch (_) {
-        await manager.dispose().catchError((Object _) {});
+        await manager.dispose().catchError((Object e) {
+          _logger.w(() => '[resolveE2EE] rollback dispose failed: $e');
+        });
         rethrow;
       }
 
@@ -1194,23 +1180,29 @@ class Call {
     }
   }
 
-  /// Detaches the E2EE manager, so later joins are unencrypted again.
+  /// Detaches the E2EE manager and releases it, so later joins are unencrypted
+  /// again.
   ///
-  /// Set [dispose] to `false` to keep the native manager alive, which is what
-  /// makes the hand-off work: [setE2EEManager] accepts it on another call
-  /// once this one has released it.
+  /// [leave] does this for you. Call it directly only to undo a
+  /// [setE2EEManager] on a call you are not going to join after all, such as
+  /// backing out of a lobby screen.
   ///
-  /// ```dart
-  /// await callA.clearE2EEManager(dispose: false);
-  /// await callB.setE2EEManager(e2ee); // same keys, no re-derivation
-  /// ```
+  /// The manager is always disposed: its keys live in a native store, and a
+  /// manager is not reusable across calls, so there is nothing to keep it alive
+  /// for. Give the next call its own manager. To skip deriving a key twice,
+  /// hold on to the derived bytes rather than to the manager, and import them
+  /// again with `setSharedKey`.
   ///
   /// Does nothing when no manager is attached.
-  Future<void> clearE2EEManager({bool dispose = true}) async {
+  Future<void> clearE2EEManager() async {
     final manager = _e2eeManager;
     if (manager == null) return;
 
-    if (dispose && _session?.rtcManager != null) {
+    // `isDisposed` matters: leave() tears the session down and then calls this,
+    // and a disposed CallSession still holds its RtcManager, so without it
+    // every encrypted call would warn on the way out.
+    final session = _session;
+    if (session != null && !session.isDisposed && session.rtcManager != null) {
       _logger.w(
         () =>
             '[clearE2EEManager] disposing while peer connections are still '
@@ -1218,7 +1210,7 @@ class Call {
       );
     }
 
-    _logger.i(() => '[clearE2EEManager] dispose: $dispose');
+    _logger.i(() => '[clearE2EEManager] releasing');
 
     _e2eeManager = null;
 
@@ -1229,11 +1221,9 @@ class Call {
     await _e2eeEventsSubscription?.cancel();
     _e2eeEventsSubscription = null;
 
-    if (dispose) {
-      await manager.dispose().catchError((Object e) {
-        _logger.w(() => '[clearE2EEManager] dispose failed: $e');
-      });
-    }
+    await manager.dispose().catchError((Object e) {
+      _logger.w(() => '[clearE2EEManager] dispose failed: $e');
+    });
   }
 
   void _onE2eeEvent(E2eeEvent event) {
@@ -2907,17 +2897,37 @@ class Call {
 
   Future<void> _applyConnectOptions() async {
     _logger.d(() => '[applyConnectOptions] connectOptions: $_connectOptions');
-    await _applyCameraOption(
-      _connectOptions.camera,
-      _connectOptions.cameraFacingMode,
-      _connectOptions.targetResolution,
-      _connectOptions.videoInputDevice?.id,
+
+    void report(String option, Result<None> result) {
+      if (result is Failure) {
+        _logger.e(
+          () =>
+              '[applyConnectOptions] $option not applied: '
+              '${result.error.message}',
+        );
+      }
+    }
+
+    report(
+      'camera',
+      await _applyCameraOption(
+        _connectOptions.camera,
+        _connectOptions.cameraFacingMode,
+        _connectOptions.targetResolution,
+        _connectOptions.videoInputDevice?.id,
+      ),
     );
 
-    await _applyMicrophoneOption(_connectOptions.microphone);
-    await _applyScreenShareOption(
-      _connectOptions.screenShare,
-      _connectOptions.screenShareTargetResolution,
+    report(
+      'microphone',
+      await _applyMicrophoneOption(_connectOptions.microphone),
+    );
+    report(
+      'screenShare',
+      await _applyScreenShareOption(
+        _connectOptions.screenShare,
+        _connectOptions.screenShareTargetResolution,
+      ),
     );
 
     if (_connectOptions.audioInputDevice != null) {
@@ -2970,30 +2980,34 @@ class Call {
     return const Result.success(none);
   }
 
-  Future<void> _applyMicrophoneOption(TrackOption microphoneOption) async {
+  Future<Result<None>> _applyMicrophoneOption(
+    TrackOption microphoneOption,
+  ) async {
     if (microphoneOption is TrackProvided) {
-      await _setLocalTrack(microphoneOption.track);
+      return _setLocalTrack(microphoneOption.track);
     } else if (microphoneOption is TrackEnabled) {
       final constraints = microphoneOption.constraints is AudioConstraints
           ? microphoneOption.constraints as AudioConstraints?
           : null;
-      await setMicrophoneEnabled(enabled: true, constraints: constraints);
+      return setMicrophoneEnabled(enabled: true, constraints: constraints);
     }
+
+    return const Result.success(none);
   }
 
-  Future<void> _applyScreenShareOption(
+  Future<Result<None>> _applyScreenShareOption(
     TrackOption screenShareOption,
     StreamTargetResolution? targetResolution,
   ) async {
     if (screenShareOption is TrackProvided) {
-      await _setLocalTrack(screenShareOption.track);
+      return _setLocalTrack(screenShareOption.track);
     } else if (screenShareOption is TrackEnabled) {
       final constraints =
           screenShareOption.constraints is ScreenShareConstraints
           ? screenShareOption.constraints as ScreenShareConstraints?
           : null;
 
-      await setScreenShareEnabled(
+      return setScreenShareEnabled(
         enabled: true,
         constraints:
             constraints ??
@@ -3006,6 +3020,8 @@ class Call {
             ),
       );
     }
+
+    return const Result.success(none);
   }
 
   Future<Result<None>> _setLocalTrack(RtcLocalTrack track) async {

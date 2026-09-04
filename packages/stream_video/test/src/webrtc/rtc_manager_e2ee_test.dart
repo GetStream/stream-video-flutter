@@ -149,6 +149,36 @@ void main() {
       expect(wires.stopCalls(), 1);
     });
 
+    test(
+      'a publish whose encryptor cannot attach leaves nothing registered',
+      () async {
+        final e2ee = _MockEncryptionManager();
+        when(
+          () => e2ee.encrypt(
+            any(),
+            codec: any(named: 'codec'),
+            trackType: any(named: 'trackType'),
+          ),
+        ).thenThrow(StateError('manager is disposed'));
+
+        final wires = buildManager(e2ee);
+        final track = _videoTrack('cam');
+
+        await wires.manager.publishVideoTrack(track: track);
+
+        // The publish registers its track up front. Leaving it behind would make
+        // the next `setCameraEnabled(true)` take the unmute path — silently
+        // doing nothing — instead of retrying the publish.
+        expect(
+          wires.manager.getPublisherTrackByType(SfuTrackType.video),
+          isNull,
+        );
+
+        // And the camera must not stay lit for a sender that never existed.
+        verify(track.mediaTrack.stop).called(1);
+      },
+    );
+
     test('a publish with no manager attached is unaffected', () async {
       final wires = buildManager(null);
 
@@ -178,6 +208,10 @@ void main() {
 
       expect(published.isSuccess, isTrue);
       expect(wires.stopCalls(), 0);
+      expect(
+        wires.manager.getPublisherTrackByType(SfuTrackType.video),
+        isNotNull,
+      );
       verify(
         () => e2ee.encrypt(
           any(),

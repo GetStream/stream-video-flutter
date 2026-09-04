@@ -1,23 +1,14 @@
 // 📦 Package imports:
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import 'e2ee.dart';
-
-/// Supplies a key for a call answered from a ringing notification.
+/// Supplies the shared key for a call the SDK joins on our behalf.
+///
+/// This app does not support encrypted ringing calls yet, so it always
+/// declines. Answering an `auto-on` call without a key is rejected by Stream,
+/// which is the honest outcome: joining with a made-up key would put the user
+/// in a call where nothing decrypts.
+///
+/// The hook is wired up all the same, because this is where a real app answers.
 Future<CallEncryptionKey?> resolveRingingEncryptionKey(
   CallEncryptionKeyRequest request,
-) async {
-  if (request.encryptionMode != StreamEncryptionMode.autoOn) return null;
-
-  // Dogfooding does not currently support the proper flow of encrypted ringing calls,
-  // so we use a random key here. See [randomEncryptionKey] for details: using a wrong
-  // key allows the user to enter the call, and the correct key can later be provided
-  // through the in-call banner.
-  return CallEncryptionKey.shared(
-    bytes: randomEncryptionKey(),
-    // Spelled out even though it matches the default: the index is a contract
-    // between participants, not a default worth inheriting quietly.
-    // ignore: avoid_redundant_argument_values
-    keyIndex: kE2EESharedKeyIndex,
-  );
-}
+) async => null;

@@ -806,15 +806,19 @@ class CallSession extends Disposable {
         await rtcManager?.flushPendingDecryptors();
       } else if (event is SfuParticipantUpdatedEvent) {
         stateManager.sfuParticipantUpdated(event);
+      } else if (event is SfuTrackPublishedEvent) {
+        stateManager.sfuTrackPublished(event);
+        await rtcManager?.flushPendingDecryptors();
       } else if (event is SfuParticipantLeftEvent) {
         stateManager.sfuParticipantLeft(event);
+        rtcManager?.discardPendingDecryptors(
+          event.participant.trackLookupPrefix,
+        );
       } else if (event is SfuConnectionQualityChangedEvent) {
         _tracer.trace(TraceTag.connectionQualityChanged, event.toJson());
         stateManager.sfuConnectionQualityChanged(event);
       } else if (event is SfuAudioLevelChangedEvent) {
         stateManager.sfuUpdateAudioLevelChanged(event);
-      } else if (event is SfuTrackPublishedEvent) {
-        stateManager.sfuTrackPublished(event);
       } else if (event is SfuTrackUnpublishedEvent) {
         stateManager.sfuTrackUnpublished(event);
       } else if (event is SfuDominantSpeakerChangedEvent) {

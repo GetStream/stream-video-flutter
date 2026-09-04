@@ -46,6 +46,24 @@ void main() {
     // The claim registry is static and every case here shares one cid.
     tearDown(Call.resetE2EEClaims);
 
+    test('refuses a manager once the call is already connecting', () async {
+      final call = createTestCall();
+
+      // The window this closes: the join request carries
+      // `e2ee: <manager != null>` and the session captures the manager by
+      // value, both well before an RtcManager exists. A manager accepted here
+      // would be held by the Call and used by neither, so every local track
+      // would publish in the clear while `e2eeManager` reported otherwise.
+      //
+      // Reachable from the SDK itself: `_onCallAccept` starts the join without
+      // awaiting it and then hands the call to `onCallAccepted`.
+      await call.join();
+
+      expect(call.state.value.status.isActive, isTrue);
+      expect(() => call.setE2EEManager(e2ee), throwsStateError);
+      expect(call.e2eeManager, isNull);
+    });
+
     test('is off until a manager is attached', () {
       final call = createTestCall();
 
@@ -152,6 +170,38 @@ void main() {
       },
     );
 
+    // Ringing calls sit in an active status for their whole pre-join life, and
+    // the key resolver exists mostly for them, so a guard that keyed off
+    // "active" locked encryption out of the flow it was built for.
+    for (final (label, status) in [
+      ('an accepted incoming call', CallStatus.incoming(acceptedByMe: true)),
+      ('a ringing incoming call', CallStatus.incoming()),
+      ('an outgoing ringing call', CallStatus.outgoing()),
+    ]) {
+      test('accepts a manager on $label', () async {
+        final call = createTestCallWithState(
+          initialState: createTestCallState().copyWith(status: status),
+        );
+
+        await call.setE2EEManager(e2ee);
+
+        expect(call.e2eeManager, same(e2ee));
+      });
+    }
+
+    test('refuses a manager once the connect has begun', () async {
+      final call = createTestCallWithState(
+        initialState: createTestCallState().copyWith(
+          status: CallStatus.connecting(),
+        ),
+      );
+
+      // The join request carries `e2ee: <manager != null>` and the session
+      // captures the manager as it is built, so this is the cutoff.
+      expect(() => call.setE2EEManager(e2ee), throwsStateError);
+      expect(call.e2eeManager, isNull);
+    });
+
     test('rejects a manager once peer connections exist', () async {
       final callSession = setupMockCallSession();
       when(() => callSession.rtcManager).thenReturn(MockRtcManager());
@@ -183,21 +233,6 @@ void main() {
       expect(() => callB.setE2EEManager(e2ee), throwsA(isA<StateError>()));
       expect(callB.e2eeManager, isNull);
       expect(callA.e2eeManager, same(e2ee));
-    });
-
-    test('a released manager can be attached to another call', () async {
-      final callA = createTestCall();
-      final callB = createTestCall(stateManager: _otherCallStateManager());
-
-      await callA.setE2EEManager(e2ee);
-      // Keeping the native manager alive is the point: the keys move to the
-      // next call with it.
-      await callA.clearE2EEManager(dispose: false);
-
-      await callB.setE2EEManager(e2ee);
-
-      expect(callB.e2eeManager, same(e2ee));
-      verifyNever(() => e2ee.dispose());
     });
 
     test('re-attaching the same manager to the same call is allowed', () async {
@@ -244,16 +279,6 @@ void main() {
       // Nothing else ever releases it: the manager outlives leave() by
       // design, and each live one holds a key store and a crypto thread.
       verify(() => e2ee.dispose()).called(1);
-      expect(call.e2eeManager, isNull);
-    });
-
-    test('clearE2EEManager can detach without disposing', () async {
-      final call = createTestCall();
-      await call.setE2EEManager(e2ee);
-
-      await call.clearE2EEManager(dispose: false);
-
-      verifyNever(() => e2ee.dispose());
       expect(call.e2eeManager, isNull);
     });
 
@@ -309,7 +334,7 @@ void main() {
     );
 
     test(
-      'a manager released on leave can be attached to the next call',
+      'leaving frees the cid for the next call to bring its own manager',
       () async {
         final callA = createTestCall();
 
@@ -355,20 +380,33 @@ void main() {
     );
 
     test(
-      'the same manager on another instance of the call is allowed',
+      'refuses the same manager on another instance of the call',
       () async {
-        // One key store, so there is nothing to disagree about. This is the
-        // hand-off in `clearE2EEManager(dispose: false)` seen from the far end.
+        // Tempting to allow, since there is only one key store to disagree
+        // about. But it would then have two owners: whichever call is released
+        // first disposes it out from under the other, and both write keys at
+        // the same indexes.
         final first = createTestCall();
         await first.setE2EEManager(e2ee);
 
         final second = createTestCall();
-        await second.setE2EEManager(e2ee);
 
-        expect(second.e2eeManager, same(e2ee));
-        verifyNever(() => e2ee.dispose());
+        expect(() => second.setE2EEManager(e2ee), throwsStateError);
+        expect(second.e2eeManager, isNull);
       },
     );
+
+    test('leaving disposes an attached manager', () async {
+      final call = createTestCall();
+      await call.setE2EEManager(e2ee);
+
+      await call.leave();
+
+      // Which is why the hand-off detaches first. Reattaching this one would
+      // throw, since a disposed manager holds no keys.
+      verify(() => e2ee.dispose()).called(1);
+      expect(call.e2eeManager, isNull);
+    });
 
     test('releasing the claim lets the next instance attach', () async {
       final first = createTestCall();

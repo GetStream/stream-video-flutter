@@ -711,12 +711,19 @@ class RtcManager extends Disposable {
   Future<void> flushPendingDecryptors() async {
     if (e2eeManager == null || _pendingDecryptors.isEmpty) return;
 
-    final pending = [..._pendingDecryptors.values];
-    _pendingDecryptors.clear();
+    for (final trackId in [..._pendingDecryptors.keys]) {
+      final track = _pendingDecryptors.remove(trackId);
+      if (track == null) continue;
 
-    for (final track in pending) {
       await attachDecryptor(track);
     }
+  }
+
+  /// Drops decryptors still waiting on a participant who has left.
+  void discardPendingDecryptors(String trackIdPrefix) {
+    _pendingDecryptors.removeWhere(
+      (_, track) => track.trackIdPrefix == trackIdPrefix,
+    );
   }
 
   /// The subscriber receiver carrying [track].
@@ -1193,6 +1200,31 @@ extension PublisherRtcManager on RtcManager {
     return Result.error('Unsupported track type: ${track.runtimeType}');
   }
 
+  /// Undoes the bookkeeping of a publish that registered its track and then
+  /// failed.
+  ///
+  /// [publishAudioTrack] and [publishVideoTrack] register [registered] before
+  /// any sender exists so `onPublisherNegotiationNeeded` can see it, and there
+  /// is no matching `unpublishTrack` when the publish never completes. Left
+  /// behind, the entry makes [getPublisherTrackByType] report a track that
+  /// never reached the SFU: the next enable takes the unmute path instead of
+  /// retrying the publish, and the camera or microphone keeps capturing for a
+  /// sender that does not exist.
+  ///
+  /// [acquired] is the same track carrying whatever clones the publish managed
+  /// to make; stopping it releases the device.
+  Future<void> _discardFailedPublish({
+    required RtcLocalTrack registered,
+    required RtcLocalTrack acquired,
+  }) async {
+    // A concurrent publish may already own the entry — drop only our own.
+    if (identical(tracks[registered.trackId], registered)) {
+      tracks.remove(registered.trackId);
+    }
+
+    await acquired.stop();
+  }
+
   Future<Result<RtcLocalAudioTrack>> publishAudioTrack({
     required RtcLocalAudioTrack track,
     bool stopTrackOnMute = true,
@@ -1247,6 +1279,10 @@ extension PublisherRtcManager on RtcManager {
 
         if (transceiverResult is Failure) {
           await mediaTrackClone.stop();
+          await _discardFailedPublish(
+            registered: audioTrack,
+            acquired: updatedTrack,
+          );
           return transceiverResult;
         }
 
@@ -1297,7 +1333,10 @@ extension PublisherRtcManager on RtcManager {
             '[publishAudioTrack] disposed mid-publish; discarding '
             '${updatedTrack.trackId}',
       );
-      await updatedTrack.stop();
+      await _discardFailedPublish(
+        registered: audioTrack,
+        acquired: updatedTrack,
+      );
       return Result.error('RtcManager was disposed while publishing');
     }
 
@@ -1337,6 +1376,10 @@ extension PublisherRtcManager on RtcManager {
         () =>
             '[publishVideoTrack] No publish options found for track type: ${videoTrack.trackType}',
       );
+      await _discardFailedPublish(
+        registered: videoTrack,
+        acquired: updatedTrack,
+      );
       return Result.error(
         'No publish options found for track type: ${videoTrack.trackType}',
       );
@@ -1372,6 +1415,10 @@ extension PublisherRtcManager on RtcManager {
 
         if (transceiverResult is Failure) {
           await mediaTrackClone.stop();
+          await _discardFailedPublish(
+            registered: videoTrack,
+            acquired: updatedTrack,
+          );
           return transceiverResult;
         }
 
@@ -1416,7 +1463,10 @@ extension PublisherRtcManager on RtcManager {
             '[publishVideoTrack] disposed mid-publish; discarding '
             '${updatedTrack.trackId}',
       );
-      await updatedTrack.stop();
+      await _discardFailedPublish(
+        registered: videoTrack,
+        acquired: updatedTrack,
+      );
       return Result.error('RtcManager was disposed while publishing');
     }
 
@@ -1657,7 +1707,16 @@ extension PublisherRtcManager on RtcManager {
     if (encryptorResult is Failure) {
       // Drop the sender: leaving it in place would negotiate an m-line that
       // publishes unencrypted media.
-      await _stopTransceiver(transceiver);
+      final stopped = await _stopTransceiver(transceiver);
+      if (!stopped) {
+        _logger.e(
+          () =>
+              '[addTransceiver] could not stop the sender for trackType: '
+              '${publishOptions.trackType} after its encryptor failed; it may '
+              'still negotiate and publish unencrypted',
+        );
+      }
+
       return Result.error(encryptorResult.error.message);
     }
 
@@ -1704,11 +1763,14 @@ extension PublisherRtcManager on RtcManager {
   }
 
   /// Stops [transceiver] so its m-line becomes recyclable.
-  Future<void> _stopTransceiver(RTCRtpTransceiver transceiver) async {
+  /// Stops [transceiver], reporting whether it actually stopped.
+  Future<bool> _stopTransceiver(RTCRtpTransceiver transceiver) async {
     try {
       await transceiver.stop();
+      return true;
     } catch (e, stk) {
       _logger.w(() => '[stopTransceiver] failed: $e\n$stk');
+      return false;
     }
   }
 

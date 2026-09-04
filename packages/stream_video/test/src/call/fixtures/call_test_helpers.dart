@@ -281,6 +281,10 @@ MockCallSession setupMockCallSession() {
 
   final callSession = MockCallSession();
 
+  // Live by default. `Call.clearE2EEManager` reads this to tell a release from
+  // a live call apart from one on the way out of leave().
+  when(() => callSession.isDisposed).thenReturn(false);
+
   when(
     () => callSession.start(
       reconnectDetails: any(named: 'reconnectDetails'),

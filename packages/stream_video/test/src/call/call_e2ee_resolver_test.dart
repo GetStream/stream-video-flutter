@@ -22,7 +22,12 @@ CallState _stateWith({
   );
 
   if (mode == null) return state;
+
+  // `createdAt` too, not just the settings: it is what tells the SDK the call
+  // has actually been described by the coordinator. Seeding the mode alone
+  // leaves it looking unknown, which is what let a bug hide here.
   return state.copyWith(
+    createdAt: DateTime.now(),
     settings: CallSettings(encryption: StreamEncryptionSettings(mode: mode)),
   );
 }
@@ -70,6 +75,22 @@ void main() {
     CallEncryptionKey aes128([int keyIndex = 0]) =>
         CallEncryptionKey.shared(bytes: Uint8List(16), keyIndex: keyIndex);
 
+    test('is asked with the call id alone', () async {
+      // A bare makeCall() then join(): nothing has fetched or created the call.
+      // The resolver is asked all the same, and answers from what the app knows
+      // rather than from anything the SDK half-knows about the call.
+      final call = createTestCallWithState(
+        initialState: _stateWith(resolver: resolverReturning(null)),
+      );
+
+      final result = await call.join();
+
+      expect(asked.single, CallEncryptionKeyRequest(callCid: call.callCid));
+      // Declining is not treated as a requirement failure here, so the join is
+      // left to the server to accept or reject.
+      expect(result.isSuccess, isTrue);
+    });
+
     test('an attached manager wins and the resolver is never asked', () async {
       final call = createTestCallWithState(
         initialState: _stateWith(resolver: resolverReturning(aes128())),
@@ -94,21 +115,6 @@ void main() {
       expect(result.isSuccess, isTrue);
       expect(call.e2eeManager, isNull);
       expect(asked.single.callCid, SampleCallData.defaultCid);
-    });
-
-    test('the resolver is told the mode the coordinator resolved', () async {
-      final call = createTestCallWithState(
-        initialState: _stateWith(
-          resolver: resolverReturning(aes128()),
-          mode: StreamEncryptionMode.autoOn,
-        ),
-      );
-
-      await call.join();
-
-      // Without this a resolver cannot answer "only for calls that need it",
-      // and a key handed to a plain call gets the join rejected.
-      expect(asked.single.encryptionMode, StreamEncryptionMode.autoOn);
     });
 
     test('a call that already has a manager is not resolved again', () async {
@@ -146,7 +152,7 @@ void main() {
       expect(call.e2eeManager, isNull);
     });
 
-    test('no key for a call that requires encryption fails the join', () async {
+    test('declining leaves an encrypted call to the server to reject', () async {
       final coordinatorClient = setupMockCoordinatorClient();
       final call = createTestCallWithState(
         initialState: _stateWith(
@@ -158,9 +164,12 @@ void main() {
 
       final result = await call.join();
 
-      expect(result, isA<Failure>());
-      // Fails here rather than being rejected by the server a round trip later.
-      verifyNever(
+      // No client-side pre-check, matching the other Stream SDKs: the join goes
+      // out reporting no encryption and Stream rejects it on the mismatch. The
+      // client cannot reliably know the mode before the join, so guessing here
+      // would only ever be a second, less reliable authority.
+      expect(result.isSuccess, isTrue);
+      verify(
         () => coordinatorClient.joinCall(
           callCid: any(named: 'callCid'),
           ringing: any(named: 'ringing'),
@@ -172,27 +181,21 @@ void main() {
           hintHighScaleLivestreamPublisher: any(
             named: 'hintHighScaleLivestreamPublisher',
           ),
-          e2ee: any(named: 'e2ee'),
+          e2ee: false,
         ),
-      );
+      ).called(1);
     });
 
-    test(
-      'no resolver at all for a call that requires encryption fails',
-      () async {
-        final call = createTestCallWithState(
-          initialState: _stateWith(mode: StreamEncryptionMode.autoOn),
-        );
+    test('no resolver means the resolver path does nothing at all', () async {
+      final call = createTestCallWithState(
+        initialState: _stateWith(mode: StreamEncryptionMode.autoOn),
+      );
 
-        final result = await call.join();
+      final result = await call.join();
 
-        expect(result, isA<Failure>());
-        expect(
-          (result as Failure).error.message,
-          contains('setE2EEManager'),
-        );
-      },
-    );
+      expect(result.isSuccess, isTrue);
+      expect(call.e2eeManager, isNull);
+    });
 
     test(
       'a resolver that throws fails the join rather than downgrading it',
