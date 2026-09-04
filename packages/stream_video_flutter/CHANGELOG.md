@@ -18,6 +18,8 @@
   )
   ```
 - Both buttons take a `showErrorBadge` flag, which draws a `StreamErrorBadge` on the top-end corner. It is independent of the tone and of whether the button can be pressed, so a control can be red, badged and still tappable — a microphone whose permission was refused, say. A button that simply cannot be used takes a null `onPressed`.
+- The lobby theme follows the `@themeGen` pattern the other component themes use: `StreamLobbyViewThemeData` carries one nullable `StreamLobbyViewStyle`, every property of which means "no override", and `StreamLobbyViewTheme` is an `InheritedTheme` that merges with the ambient theme instead of replacing it. Overriding one property therefore leaves the rest alone. Defaults live in the widget and are derived from `StreamTheme`, so the lobby follows the design system without an app configuring anything.
+
 - `StreamLobbyView` is rebuilt around `LobbyActions` and the lobby controller. It lays itself out per the window's `StreamScreenSize` — under 768px the controls sit below the preview, above it they are overlaid on the preview itself, and the preview goes from a 370×264 aspect to a fixed 640×360 — while *which* actions are shown does not follow the screen: `actions` defaults to `LobbyActions.simple()` at every width, and choosing a richer preset for a roomier window is the host's call.
 - `StreamLobbyView` takes a `footer`, drawn between the controls and the join button, and a `joinEnabled` flag that says whether the join button can be pressed. Together they let a lobby ask for something the SDK knows nothing about — a shared encryption key, a display name — and refuse to join until it is there.
 
@@ -103,6 +105,8 @@
 - `StreamCallParticipant` is deprecated in favour of `StreamParticipantTile`, matching the component name in the design system. It keeps its own full parameter list and now only wraps `DefaultStreamParticipantTile`. Swapping the name is a manual migration rather than a `dart fix`: `StreamParticipantTile` replaces the visual parameters with a single `style:` (see the Breaking entry below), so a rename would drop whatever a call site passed. `dart fix --apply` does still strip the parameters that no longer have any effect.
 
 ### ⚠️ Breaking
+
+- `StreamLobbyViewThemeData`'s properties are replaced by a single `style:` taking a `StreamLobbyViewStyle`. `backgroundColor` and `cardBackgroundColor` are gone — the lobby paints no background of its own now that it builds no `Scaffold`, and the preview's fill is `previewBackgroundColor`. `userAvatarTheme` and `participantAvatarTheme` are gone with them; size and colour the avatars through `StreamAvatarTheme`. `participantListHeight` went with the participants card, and `optionOffBackgroundColor` / `optionOffIconColor` were already read by nothing.
 
 - `StreamLobbyVideo` is removed. Its track handling moved into `StreamLobbyController` and its rendering into `StreamLobbyView`, which now draws the preview itself.
 - `StreamLobbyView` builds no `Scaffold` or `AppBar` of its own, so it can be embedded in a screen that already has one — wrap it in whatever chrome the app needs. `onCloseTap` is therefore gone, along with `backgroundColor`, `cardBackgroundColor`, `userAvatarTheme` and `participantAvatarTheme`; appearance comes from the theme, and extra buttons from `LobbyActions`. It gains `actions`, `title`, `subtitle`, `joinButtonLabel`, `footer`, `joinEnabled` and `controller`.

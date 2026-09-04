@@ -98,7 +98,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.colorTheme,
     required this.callControlsTheme,
     required this.userAvatarTheme,
-    required this.lobbyViewTheme,
+    this.lobbyViewTheme = const StreamLobbyViewThemeData(),
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -173,20 +173,6 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         ),
         selectionColor: colorTheme.accentPrimary,
         selectionThickness: 4,
-      ),
-      lobbyViewTheme: StreamLobbyViewThemeData(
-        backgroundColor: Colors.white,
-        cardBackgroundColor: const Color(0xFFF2F2F2),
-        userAvatarTheme: StreamUserAvatarThemeData(
-          constraints: const BoxConstraints.tightFor(
-            height: 100,
-            width: 100,
-          ),
-          borderRadius: const BorderRadius.all(Radius.circular(50)),
-          initialsTextStyle: textTheme.title1.copyWith(color: Colors.white),
-          selectionColor: colorTheme.accentPrimary,
-          selectionThickness: 4,
-        ),
       ),
       localVideoTheme: const StreamLocalVideoThemeData(
         localVideoHeight: 150,
@@ -360,7 +346,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the user avatar widget.
   final StreamUserAvatarThemeData userAvatarTheme;
 
-  /// Theme for the pre-joining view widget.
+  /// Theme for the lobby, the waiting room shown before a call is joined.
   final StreamLobbyViewThemeData lobbyViewTheme;
 
   /// Theme for the call participant widget.
@@ -502,7 +488,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       textTheme: textTheme.lerp(other.textTheme, t),
       colorTheme: colorTheme.lerp(other.colorTheme, t),
       userAvatarTheme: userAvatarTheme.lerp(other.userAvatarTheme, t),
-      lobbyViewTheme: lobbyViewTheme.lerp(other.lobbyViewTheme, t),
+      lobbyViewTheme:
+          StreamLobbyViewThemeData.lerp(
+            lobbyViewTheme,
+            other.lobbyViewTheme,
+            t,
+          ) ??
+          lobbyViewTheme,
       callParticipantTheme:
           callParticipantTheme != null && other.callParticipantTheme != null
           ? callParticipantTheme!.lerp(other.callParticipantTheme!, t)
