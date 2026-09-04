@@ -6,6 +6,10 @@
 - Added end-to-end encryption support: attach an `EncryptionManager` with `Call.setE2EEManager` before joining, request encryption at call creation with `StreamEncryptionSettings`, and read `CallState.isE2eeEnabled` to check whether it is in effect. Available on Android, iOS and macOS. See the [documentation](https://getstream.io/video/docs/flutter/guides/e2ee-encryption/) for details.
 - Added `CallPreferences.encryptionKeyResolver`, which supplies the key for calls your app does not join itself, such as those answered from a ringing notification. See the [documentation](https://getstream.io/video/docs/flutter/guides/e2ee-encryption/#ringing-calls) for details.
 
+### 🔄 Changed
+
+- Raised the minimum `dart_webrtc` to `1.8.2`, required for WebAssembly builds.
+
 ### 🐞 Fixed
 
 - [Android] Fixed a call hung up outside the app, from a paired watch, a Bluetooth headset or a car head unit, not leaving the Stream call. Ended events carrying `CallData.endedBySystem` are now applied on Android too, while the ambiguous ones, which on Android also mean the incoming call notification was merely dismissed, keep being ignored. Requires the Android Telecom integration in `stream_video_push_notification`.
