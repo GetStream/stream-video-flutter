@@ -1384,6 +1384,15 @@ class Call {
           );
 
           final error = result.getErrorOrNull();
+
+          if (_isUnrecoverableCoordinatorError(error)) {
+            _logger.e(
+              () => '[join] unrecoverable coordinator error, not retrying',
+            );
+            await leave(reason: DisconnectReason.failure(error!));
+            return result;
+          }
+
           if (error is VideoErrorWithCause &&
               error.cause is SessionConnectionFailure) {
             final connectionFailure = error.cause as SessionConnectionFailure;
@@ -1466,6 +1475,22 @@ class Call {
   bool _isUnrecoverableSfuError(SessionConnectionFailure failure) {
     return _extractSfuError(failure)?.reconnectStrategy ==
         SfuReconnectionStrategy.disconnect;
+  }
+
+  /// Whether the coordinator refused the join in a way that will not change.
+  bool _isUnrecoverableCoordinatorError(VideoError? error) {
+    if (error is! VideoErrorWithCause) return false;
+
+    final cause = error.cause;
+    if (cause is! ApiException) return false;
+
+    final unrecoverable = error.apiError?.unrecoverable;
+    if (unrecoverable != null) return unrecoverable;
+
+    final status = cause.code;
+    if (status < 400 || status >= 500) return false;
+
+    return status != 401 && status != 408 && status != 429;
   }
 
   /// Retry count attached to client-event stage completions.
