@@ -44,7 +44,11 @@ class JoinRoute extends GoRouteData with $JoinRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return JoinCallScreen(callId: callId, linkHost: state.uri.host);
+    return JoinCallScreen(
+      callId: callId,
+      linkHost: state.uri.host,
+      encryptionKey: state.uri.queryParameters['encryption_key'],
+    );
   }
 }
 
