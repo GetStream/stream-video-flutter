@@ -6,7 +6,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 // 🌎 Project imports:
 import '../utils/call_encryption.dart';
 
-/// Lobby control that turns on end-to-end encryption and manages the shared
+/// Lobby footer that turns on end-to-end encryption and manages the shared
 /// key.
 ///
 /// Encryption is fixed when a call is created, so what this offers depends
@@ -51,9 +51,11 @@ class LobbyEncryption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final streamVideoTheme = StreamVideoTheme.of(context);
-    final textTheme = streamVideoTheme.textTheme;
-    final colorTheme = streamVideoTheme.colorTheme;
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
+    final spacing = context.streamSpacing;
+    final radius = context.streamRadius;
+    final isSmall = context.streamScreenSize.isSmall;
 
     return PartialCallStateBuilder(
       call: call,
@@ -72,119 +74,107 @@ class LobbyEncryption extends StatelessWidget {
 
         final needsKey = callExists && isOn && encryptionKey.isEmpty;
 
-        return Container(
-          constraints: const BoxConstraints(maxWidth: 360),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: StreamLobbyViewTheme.of(context).cardBackgroundColor,
-            border: isOn
-                ? Border.all(
-                    color: colorTheme.accentInfo.withValues(alpha: 0.6),
-                  )
-                : null,
-          ),
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (callExists && isOn)
-                const _Header(
-                  title: 'End-to-end encryption',
-                  isOn: true,
-                )
-              else
-                _Header(
-                  title: 'End-to-end encryption',
-                  subtitle: switch ((callExists, isOn)) {
-                    (true, _) => 'This call was created without encryption',
-                    (false, true) => 'Only people with the key can join',
-                    (false, false) => 'Encrypt this call with a shared key',
-                  },
-                  isOn: isOn,
-                  trailing: Switch.adaptive(
-                    value: isOn,
-                    activeTrackColor: colorTheme.accentInfo,
-                    onChanged: callExists || busy ? null : onEncryptionToggled,
-                  ),
-                ),
-              AnimatedSize(
-                duration: const Duration(milliseconds: 180),
-                curve: Curves.easeOut,
-                alignment: Alignment.topCenter,
-                child: !isOn
-                    ? const SizedBox(width: double.infinity)
-                    : Padding(
-                        padding: const EdgeInsets.only(top: 16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: TextField(
-                                    controller: keyController,
-                                    onChanged: onEncryptionKeyChanged,
-                                    autocorrect: false,
-                                    enableSuggestions: false,
-                                    style: textTheme.body.copyWith(
-                                      color: colorTheme.textHighEmphasis,
-                                    ),
-                                    decoration: InputDecoration(
-                                      isDense: true,
-                                      hintText: 'Shared room key',
-                                      hintStyle: textTheme.body.copyWith(
-                                        color: colorTheme.textLowEmphasis,
-                                      ),
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 12,
+        return SizedBox(
+          // The same width as the join button below it, so the two line up.
+          width: isSmall ? double.infinity : 400,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(radius.lg),
+              color: colorScheme.backgroundSurfaceCard,
+              border: Border.all(
+                color: isOn ? colorScheme.accentPrimary : colorScheme.borderSubtle,
+              ),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(spacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: spacing.md,
+                children: [
+                  if (callExists && isOn)
+                    const _Header(
+                      title: 'End-to-end encryption',
+                      isOn: true,
+                    )
+                  else
+                    _Header(
+                      title: 'End-to-end encryption',
+                      subtitle: switch ((callExists, isOn)) {
+                        (true, _) => 'This call was created without encryption',
+                        (false, true) => 'Only people with the key can join',
+                        (false, false) => 'Encrypt this call with a shared key',
+                      },
+                      isOn: isOn,
+                      trailing: StreamSwitch(
+                        value: isOn,
+                        onChanged: callExists || busy
+                            ? null
+                            : onEncryptionToggled,
+                      ),
+                    ),
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOut,
+                    alignment: Alignment.topCenter,
+                    child: !isOn
+                        ? const SizedBox(width: double.infinity)
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: spacing.sm,
+                            children: [
+                              StreamTextInput(
+                                controller: keyController,
+                                onChanged: onEncryptionKeyChanged,
+                                hintText: 'Shared room key',
+                                // A key is matched verbatim, so iOS
+                                // auto-capitalizing the first letter turns a
+                                // valid key into one that will not decrypt.
+                                textCapitalization: .none,
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (!callExists)
+                                      Tooltip(
+                                        message: 'Generate a new key',
+                                        child: StreamButton.icon(
+                                          style: .secondary,
+                                          type: .ghost,
+                                          icon: Icon(
+                                            context.streamIcons.refresh,
                                           ),
-                                      border: const OutlineInputBorder(
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(8),
+                                          onPressed: busy
+                                              ? null
+                                              : onGenerateKey,
                                         ),
                                       ),
+                                    Tooltip(
+                                      message: 'Copy key',
+                                      child: StreamButton.icon(
+                                        style: .secondary,
+                                        type: .ghost,
+                                        icon: Icon(context.streamIcons.copy),
+                                        onPressed: encryptionKey.isEmpty
+                                            ? null
+                                            : () => _copyKey(context),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                                if (!callExists) ...[
-                                  const SizedBox(width: 4),
-                                  IconButton(
-                                    tooltip: 'Generate a new key',
-                                    icon: const Icon(
-                                      Icons.refresh,
-                                      color: Colors.white,
-                                    ),
-                                    onPressed: busy ? null : onGenerateKey,
-                                  ),
-                                ],
-                                IconButton(
-                                  tooltip: 'Copy key',
-                                  icon: const Icon(
-                                    Icons.copy_rounded,
-                                    color: Colors.white,
-                                  ),
-                                  onPressed: encryptionKey.isEmpty
-                                      ? null
-                                      : () => _copyKey(context),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              needsKey
-                                  ? 'Ask the call creator for the shared key, then enter it here.'
-                                  : 'Anyone with this key can join and decrypt the call. Share it only with people you trust.',
-                              style: textTheme.footnote.copyWith(
-                                color: colorTheme.textLowEmphasis,
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
+                              Text(
+                                needsKey
+                                    ? 'Ask the call creator for the shared key, then enter it here to join.'
+                                    : 'Anyone with this key can join and decrypt the call. Share it only with people you trust.',
+                                style: textTheme.captionDefault.copyWith(
+                                  color: colorScheme.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },
@@ -217,33 +207,33 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final streamVideoTheme = StreamVideoTheme.of(context);
-    final textTheme = streamVideoTheme.textTheme;
-    final colorTheme = streamVideoTheme.colorTheme;
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
+    final spacing = context.streamSpacing;
+    final icons = context.streamIcons;
 
     return Row(
+      spacing: spacing.sm,
       children: [
         Icon(
-          isOn ? Icons.lock_rounded : Icons.lock_open_rounded,
-          color: isOn ? colorTheme.accentInfo : colorTheme.textLowEmphasis,
+          isOn ? icons.lock : icons.unlock,
+          color: isOn ? colorScheme.accentPrimary : colorScheme.textSecondary,
         ),
-        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 title,
-                style: textTheme.bodyBold.copyWith(
-                  color: colorTheme.textHighEmphasis,
+                style: textTheme.bodyEmphasis.copyWith(
+                  color: colorScheme.textPrimary,
                 ),
               ),
-              const SizedBox(height: 2),
               if (subtitle != null)
                 Text(
                   subtitle!,
-                  style: textTheme.footnote.copyWith(
-                    color: colorTheme.textLowEmphasis,
+                  style: textTheme.captionDefault.copyWith(
+                    color: colorScheme.textSecondary,
                   ),
                 ),
             ],

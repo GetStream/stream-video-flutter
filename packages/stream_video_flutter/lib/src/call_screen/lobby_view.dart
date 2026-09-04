@@ -190,31 +190,38 @@ class _LobbyBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spacing = context.streamSpacing;
-    final textTheme = context.streamTextTheme;
     final translations = context.translations;
     final isSmall = context.streamScreenSize.isSmall;
+    // Typed as the defaults class, not as the style: declaring it as the base
+    // type would throw away the non-null overrides.
+    final style = _StreamLobbyViewStyleDefaults(
+      context,
+      StreamLobbyViewTheme.of(context).style,
+    );
 
     final controlRow = actions.controls.isEmpty
         ? null
         : Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
-            spacing: spacing.xs,
+            spacing: style.controlSpacing,
             children: actions.controls,
           );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
-      spacing: spacing.xxl,
+      spacing: style.sectionSpacing,
       children: [
         Column(
           mainAxisSize: MainAxisSize.min,
-          spacing: spacing.sm,
+          spacing: style.headingSpacing,
           children: [
-            title ?? Text(translations.lobbyTitle, style: textTheme.headingMd),
+            title ?? Text(translations.lobbyTitle, style: style.titleTextStyle),
             subtitle ??
-                Text(translations.lobbySubtitle, style: textTheme.bodyDefault),
+                Text(
+                  translations.lobbySubtitle,
+                  style: style.subtitleTextStyle,
+                ),
           ],
         ),
         // The whole preview block is capped at the tile's width, so the
@@ -222,11 +229,11 @@ class _LobbyBody extends StatelessWidget {
         // the window.
         ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: isSmall ? double.infinity : _LobbyPreview.largeWidth,
+            maxWidth: isSmall ? double.infinity : style.largePreviewSize.width,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            spacing: isSmall ? spacing.sm : spacing.md,
+            spacing: isSmall ? style.smallLaneSpacing : style.largeLaneSpacing,
             children: [
               Stack(
                 alignment: AlignmentDirectional.bottomCenter,
@@ -236,7 +243,9 @@ class _LobbyBody extends StatelessWidget {
                   // the participant label's toolbar band along the bottom.
                   if (!isSmall && controlRow != null)
                     Padding(
-                      padding: EdgeInsets.only(bottom: spacing.md),
+                      padding: EdgeInsets.only(
+                        bottom: style.overlayControlInset,
+                      ),
                       child: controlRow,
                     ),
                 ],
@@ -244,7 +253,7 @@ class _LobbyBody extends StatelessWidget {
               if (isSmall && controlRow != null) controlRow,
               if (actions.settings.isNotEmpty)
                 Row(
-                  spacing: spacing.xs,
+                  spacing: style.settingSpacing,
                   children: [
                     for (final setting in actions.settings)
                       Expanded(child: setting),
@@ -256,7 +265,7 @@ class _LobbyBody extends StatelessWidget {
         if (footer case final footer?) footer,
         SizedBox(
           // Full width on a phone, a fixed 400 where there is room for it.
-          width: isSmall ? double.infinity : 400,
+          width: isSmall ? double.infinity : style.joinButtonWidth,
           child: StreamButton(
             onPressed: joinEnabled ? onJoinCallPressed : null,
             child: joinButtonLabel ?? Text(translations.lobbyJoinCall),
@@ -271,24 +280,16 @@ class _LobbyBody extends StatelessWidget {
 class _LobbyPreview extends StatelessWidget {
   const _LobbyPreview();
 
-  /// The aspect the design gives the preview under 768px.
-  static const _smallAspectRatio = 370 / 264;
-
-  /// The size the design gives the preview at 768px and above.
-  static const _largeSize = Size(640, 360);
-
-  /// The width the preview block is capped at above 768px.
-  static double get largeWidth => _largeSize.width;
-
   @override
   Widget build(BuildContext context) {
     final controller = StreamLobbyScope.of(context);
-    final colorScheme = context.streamColorScheme;
-    final radius = context.streamRadius;
-    final spacing = context.streamSpacing;
     final isSmall = context.streamScreenSize.isSmall;
+    final style = _StreamLobbyViewStyleDefaults(
+      context,
+      StreamLobbyViewTheme.of(context).style,
+    );
 
-    final borderRadius = BorderRadius.all(radius.xxl);
+    final borderRadius = style.previewBorderRadius;
     final cameraTrack = controller.cameraTrack;
 
     Widget placeholder(BuildContext context) =>
@@ -296,9 +297,12 @@ class _LobbyPreview extends StatelessWidget {
 
     final preview = DecoratedBox(
       decoration: BoxDecoration(
-        color: colorScheme.backgroundSurface,
+        color: style.previewBackgroundColor,
         borderRadius: borderRadius,
-        border: Border.all(color: colorScheme.accentPrimary, width: 2),
+        border: Border.all(
+          color: style.previewBorderColor,
+          width: style.previewBorderWidth,
+        ),
       ),
       child: ClipRRect(
         borderRadius: borderRadius,
@@ -318,7 +322,7 @@ class _LobbyPreview extends StatelessWidget {
             Align(
               alignment: AlignmentDirectional.bottomStart,
               child: Padding(
-                padding: EdgeInsets.all(spacing.sm),
+                padding: EdgeInsets.all(style.participantLabelInset),
                 child: StreamParticipantLabel(
                   name: controller.currentUser.name,
                   isAudioEnabled: controller.microphoneEnabled,
@@ -333,15 +337,91 @@ class _LobbyPreview extends StatelessWidget {
     );
 
     if (isSmall) {
-      return AspectRatio(aspectRatio: _smallAspectRatio, child: preview);
+      return AspectRatio(
+        aspectRatio: style.smallPreviewAspectRatio,
+        child: preview,
+      );
     }
 
+    final size = style.largePreviewSize;
     return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: _largeSize.width),
-      child: AspectRatio(
-        aspectRatio: _largeSize.aspectRatio,
-        child: preview,
-      ),
+      constraints: BoxConstraints(maxWidth: size.width),
+      child: AspectRatio(aspectRatio: size.aspectRatio, child: preview),
     );
   }
+}
+
+/// The values a [StreamLobbyViewStyle] falls back to.
+///
+/// Every getter is non-null and derived from the ambient design tokens, so a
+/// style that overrides one property inherits the rest. Never let an instance
+/// of this reach a theme: the generated `merge` would force every field.
+class _StreamLobbyViewStyleDefaults extends StreamLobbyViewStyle {
+  _StreamLobbyViewStyleDefaults(this._context, this._style);
+
+  final BuildContext _context;
+  final StreamLobbyViewStyle? _style;
+
+  late final _colorScheme = _context.streamColorScheme;
+  late final _textTheme = _context.streamTextTheme;
+  late final _spacing = _context.streamSpacing;
+  late final _radius = _context.streamRadius;
+
+  @override
+  BorderRadius get previewBorderRadius =>
+      _style?.previewBorderRadius ?? BorderRadius.all(_radius.xxl);
+
+  @override
+  Color get previewBorderColor =>
+      _style?.previewBorderColor ?? _colorScheme.accentPrimary;
+
+  @override
+  double get previewBorderWidth => _style?.previewBorderWidth ?? 2;
+
+  @override
+  Color get previewBackgroundColor =>
+      _style?.previewBackgroundColor ?? _colorScheme.backgroundSurface;
+
+  @override
+  double get smallPreviewAspectRatio =>
+      _style?.smallPreviewAspectRatio ?? 370 / 264;
+
+  @override
+  Size get largePreviewSize => _style?.largePreviewSize ?? const Size(640, 360);
+
+  @override
+  double get sectionSpacing => _style?.sectionSpacing ?? _spacing.xxl;
+
+  @override
+  double get headingSpacing => _style?.headingSpacing ?? _spacing.sm;
+
+  @override
+  double get smallLaneSpacing => _style?.smallLaneSpacing ?? _spacing.sm;
+
+  @override
+  double get largeLaneSpacing => _style?.largeLaneSpacing ?? _spacing.md;
+
+  @override
+  double get controlSpacing => _style?.controlSpacing ?? _spacing.xs;
+
+  @override
+  double get settingSpacing => _style?.settingSpacing ?? _spacing.xs;
+
+  @override
+  double get overlayControlInset => _style?.overlayControlInset ?? _spacing.md;
+
+  @override
+  double get participantLabelInset =>
+      _style?.participantLabelInset ?? _spacing.sm;
+
+  @override
+  double get joinButtonWidth => _style?.joinButtonWidth ?? 400;
+
+  @override
+  TextStyle get titleTextStyle =>
+      _style?.titleTextStyle ?? _textTheme.headingMd;
+
+  @override
+  TextStyle get subtitleTextStyle =>
+      _style?.subtitleTextStyle ?? _textTheme.bodyDefault;
 }
