@@ -16,6 +16,7 @@ mixin _$RuleBuilderAction {
   BanOptions? get banOptions;
   CallActionOptions? get callOptions;
   FlagUserOptions? get flagUserOptions;
+  String? get reason;
   bool? get skipInbox;
   RuleBuilderActionType? get type;
 
@@ -40,6 +41,7 @@ mixin _$RuleBuilderAction {
                 other.callOptions == callOptions) &&
             (identical(other.flagUserOptions, flagUserOptions) ||
                 other.flagUserOptions == flagUserOptions) &&
+            (identical(other.reason, reason) || other.reason == reason) &&
             (identical(other.skipInbox, skipInbox) ||
                 other.skipInbox == skipInbox) &&
             (identical(other.type, type) || other.type == type));
@@ -51,13 +53,14 @@ mixin _$RuleBuilderAction {
     banOptions,
     callOptions,
     flagUserOptions,
+    reason,
     skipInbox,
     type,
   );
 
   @override
   String toString() {
-    return 'RuleBuilderAction(banOptions: $banOptions, callOptions: $callOptions, flagUserOptions: $flagUserOptions, skipInbox: $skipInbox, type: $type)';
+    return 'RuleBuilderAction(banOptions: $banOptions, callOptions: $callOptions, flagUserOptions: $flagUserOptions, reason: $reason, skipInbox: $skipInbox, type: $type)';
   }
 }
 
@@ -72,6 +75,7 @@ abstract mixin class $RuleBuilderActionCopyWith<$Res> {
     BanOptions? banOptions,
     CallActionOptions? callOptions,
     FlagUserOptions? flagUserOptions,
+    String? reason,
     bool? skipInbox,
     RuleBuilderActionType? type,
   });
@@ -93,6 +97,7 @@ class _$RuleBuilderActionCopyWithImpl<$Res>
     Object? banOptions = freezed,
     Object? callOptions = freezed,
     Object? flagUserOptions = freezed,
+    Object? reason = freezed,
     Object? skipInbox = freezed,
     Object? type = freezed,
   }) {
@@ -110,6 +115,10 @@ class _$RuleBuilderActionCopyWithImpl<$Res>
             ? _self.flagUserOptions
             : flagUserOptions // ignore: cast_nullable_to_non_nullable
                   as FlagUserOptions?,
+        reason: freezed == reason
+            ? _self.reason
+            : reason // ignore: cast_nullable_to_non_nullable
+                  as String?,
         skipInbox: freezed == skipInbox
             ? _self.skipInbox
             : skipInbox // ignore: cast_nullable_to_non_nullable

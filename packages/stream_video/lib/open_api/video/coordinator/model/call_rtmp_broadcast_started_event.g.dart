@@ -10,7 +10,7 @@ CallRtmpBroadcastStartedEvent _$CallRtmpBroadcastStartedEventFromJson(
   Map<String, dynamic> json,
 ) => CallRtmpBroadcastStartedEvent(
   callCid: json['call_cid'] as String,
-  createdAt: const EpochDateTimeConverter().fromJson(
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
   name: json['name'] as String,
@@ -21,7 +21,7 @@ Map<String, dynamic> _$CallRtmpBroadcastStartedEventToJson(
   CallRtmpBroadcastStartedEvent instance,
 ) => <String, dynamic>{
   'call_cid': instance.callCid,
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'name': instance.name,
   'type': instance.type,
 };

@@ -17,7 +17,7 @@ _$GetCallParticipantSessionMetricsResponseFromJson(Map<String, dynamic> json) =>
       isSubscriber: json['is_subscriber'] as bool?,
       joinedAt: _$JsonConverterFromJson<Object, DateTime>(
         json['joined_at'],
-        const EpochDateTimeConverter().fromJson,
+        const StreamDateTimeConverter().fromJson,
       ),
       publishedTracks: (json['published_tracks'] as List<dynamic>?)
           ?.map(
@@ -38,7 +38,7 @@ Map<String, dynamic> _$GetCallParticipantSessionMetricsResponseToJson(
   'is_subscriber': instance.isSubscriber,
   'joined_at': _$JsonConverterToJson<Object, DateTime>(
     instance.joinedAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'published_tracks': instance.publishedTracks?.map((e) => e.toJson()).toList(),
   'publisher_type': instance.publisherType,

@@ -8,16 +8,16 @@ part of 'member_response.dart';
 
 MemberResponse _$MemberResponseFromJson(Map<String, dynamic> json) =>
     MemberResponse(
-      createdAt: const EpochDateTimeConverter().fromJson(
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
-      custom: json['custom'] as Map<String, dynamic>? ?? {},
+      custom: json['custom'] as Map<String, dynamic>,
       deletedAt: _$JsonConverterFromJson<Object, DateTime>(
         json['deleted_at'],
-        const EpochDateTimeConverter().fromJson,
+        const StreamDateTimeConverter().fromJson,
       ),
       role: json['role'] as String?,
-      updatedAt: const EpochDateTimeConverter().fromJson(
+      updatedAt: const StreamDateTimeConverter().fromJson(
         json['updated_at'] as Object,
       ),
       user: UserResponse.fromJson(json['user'] as Map<String, dynamic>),
@@ -26,14 +26,14 @@ MemberResponse _$MemberResponseFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$MemberResponseToJson(MemberResponse instance) =>
     <String, dynamic>{
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'custom': instance.custom,
       'deleted_at': _$JsonConverterToJson<Object, DateTime>(
         instance.deletedAt,
-        const EpochDateTimeConverter().toJson,
+        const StreamDateTimeConverter().toJson,
       ),
       'role': instance.role,
-      'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
+      'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
       'user': instance.user.toJson(),
       'user_id': instance.userId,
     };

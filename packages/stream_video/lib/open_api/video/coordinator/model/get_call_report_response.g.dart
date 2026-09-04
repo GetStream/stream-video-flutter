@@ -14,6 +14,9 @@ GetCallReportResponse _$GetCallReportResponseFromJson(
       : ChatActivityStatsResponse.fromJson(
           json['chat_activity'] as Map<String, dynamic>,
         ),
+  digest: json['digest'] == null
+      ? null
+      : BroadcastDigest.fromJson(json['digest'] as Map<String, dynamic>),
   duration: json['duration'] as String,
   report: ReportResponse.fromJson(json['report'] as Map<String, dynamic>),
   session: json['session'] == null
@@ -29,6 +32,7 @@ Map<String, dynamic> _$GetCallReportResponseToJson(
   GetCallReportResponse instance,
 ) => <String, dynamic>{
   'chat_activity': instance.chatActivity?.toJson(),
+  'digest': instance.digest?.toJson(),
   'duration': instance.duration,
   'report': instance.report.toJson(),
   'session': instance.session?.toJson(),

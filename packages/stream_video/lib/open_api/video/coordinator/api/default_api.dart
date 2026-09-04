@@ -35,7 +35,7 @@ abstract interface class DefaultApi {
   });
 
   @POST('/api/v2/moderation/ban')
-  Future<Result<BanResponse>> ban({
+  Future<Result<ModerationBanResponse>> ban({
     @Body() required BanRequest banRequest,
   });
 
@@ -101,6 +101,11 @@ abstract interface class DefaultApi {
     @Body() required CreatePollOptionRequest createPollOptionRequest,
   });
 
+  @POST('/api/v2/moderation/queues')
+  Future<Result<QueueResponse>> createQueue({
+    @Body() required CreateQueueRequest createQueueRequest,
+  });
+
   @POST('/api/v2/usergroups')
   Future<Result<CreateUserGroupResponse>> createUserGroup({
     @Body() required CreateUserGroupRequest createUserGroupRequest,
@@ -148,14 +153,17 @@ abstract interface class DefaultApi {
   @DELETE('/api/v2/polls/{poll_id}')
   Future<Result<DurationResponse>> deletePoll({
     @Path('poll_id') required String pollId,
-    @Query('user_id') String? userId,
   });
 
   @DELETE('/api/v2/polls/{poll_id}/options/{option_id}')
   Future<Result<DurationResponse>> deletePollOption({
     @Path('poll_id') required String pollId,
     @Path('option_id') required String optionId,
-    @Query('user_id') String? userId,
+  });
+
+  @POST('/api/v2/moderation/queues/{id}/delete')
+  Future<Result<QueueResponse>> deleteQueue({
+    @Path('id') required String id,
   });
 
   @DELETE('/api/v2/video/call/{type}/{id}/{session}/recordings/{filename}')
@@ -187,7 +195,7 @@ abstract interface class DefaultApi {
   });
 
   @POST('/api/v2/moderation/flag')
-  Future<Result<FlagResponse>> flag({
+  Future<Result<FlagItemResponse>> flag({
     @Body() required FlagRequest flagRequest,
   });
 
@@ -239,6 +247,13 @@ abstract interface class DefaultApi {
     @Path('type') required String type,
     @Path('id') required String id,
     @Query('session_id') String? sessionId,
+  });
+
+  @GET('/api/v2/video/call/{type}/{id}/ring_state')
+  Future<Result<GetCallRingStateResponse>> getCallRingState({
+    @Path('type') required String type,
+    @Path('id') required String id,
+    @Query('call_session_id') required String callSessionId,
   });
 
   @GET(
@@ -307,14 +322,17 @@ abstract interface class DefaultApi {
   @GET('/api/v2/polls/{poll_id}')
   Future<Result<PollResponse>> getPoll({
     @Path('poll_id') required String pollId,
-    @Query('user_id') String? userId,
   });
 
   @GET('/api/v2/polls/{poll_id}/options/{option_id}')
   Future<Result<PollOptionResponse>> getPollOption({
     @Path('poll_id') required String pollId,
     @Path('option_id') required String optionId,
-    @Query('user_id') String? userId,
+  });
+
+  @GET('/api/v2/moderation/queues/{id}')
+  Future<Result<QueueResponse>> getQueue({
+    @Path('id') required String id,
   });
 
   @GET('/api/v2/usergroups/{id}')
@@ -331,6 +349,12 @@ abstract interface class DefaultApi {
     @Path('type') required String type,
     @Path('id') required String id,
     @Body() GoLiveRequest? goLiveRequest,
+  });
+
+  @POST('/api/v2/blocklists/{id}/import')
+  Future<Result<ImportBlockListResponse>> importBlockList({
+    @Path('id') required String id,
+    @Body() required ImportBlockListRequest importBlockListRequest,
   });
 
   @POST('/api/v2/video/call/{type}/{id}/join')
@@ -350,10 +374,15 @@ abstract interface class DefaultApi {
   @GET('/api/v2/blocklists')
   Future<Result<ListBlockListResponse>> listBlockLists({
     @Query('team') String? team,
+    @Query('cursor') String? cursor,
+    @Query('limit') int? limit,
   });
 
   @GET('/api/v2/devices')
   Future<Result<ListDevicesResponse>> listDevices();
+
+  @GET('/api/v2/moderation/queues')
+  Future<Result<ListQueuesResponse>> listQueues();
 
   @GET('/api/v2/video/call/{type}/{id}/recordings')
   Future<Result<ListRecordingsResponse>> listRecordings({
@@ -463,13 +492,11 @@ abstract interface class DefaultApi {
   @POST('/api/v2/polls/{poll_id}/votes')
   Future<Result<PollVotesResponse>> queryPollVotes({
     @Path('poll_id') required String pollId,
-    @Query('user_id') String? userId,
     @Body() QueryPollVotesRequest? queryPollVotesRequest,
   });
 
   @POST('/api/v2/polls/query')
   Future<Result<QueryPollsResponse>> queryPolls({
-    @Query('user_id') String? userId,
     @Body() QueryPollsRequest? queryPollsRequest,
   });
 
@@ -658,6 +685,12 @@ abstract interface class DefaultApi {
     @Body() required SubmitActionRequest submitActionRequest,
   });
 
+  @POST('/api/v2/moderation/unban')
+  Future<Result<UnbanResponse>> unban({
+    @Query('target_user_id') required String targetUserId,
+    @Query('channel_cid') String? channelCid,
+  });
+
   @POST('/api/v2/video/call/{type}/{id}/unblock')
   Future<Result<UnblockUserResponse>> unblockUser({
     @Path('type') required String type,
@@ -668,6 +701,11 @@ abstract interface class DefaultApi {
   @POST('/api/v2/users/unblock')
   Future<Result<UnblockUsersResponse>> unblockUsers({
     @Body() required UnblockUsersRequest unblockUsersRequest,
+  });
+
+  @POST('/api/v2/moderation/unmute')
+  Future<Result<UnmuteResponse>> unmute({
+    @Body() required UnmuteRequest unmuteRequest,
   });
 
   @PUT('/api/v2/blocklists/{name}')
@@ -716,6 +754,12 @@ abstract interface class DefaultApi {
   Future<Result<UpsertPushPreferencesResponse>>
   updatePushNotificationPreferences({
     @Body() required UpsertPushPreferencesRequest upsertPushPreferencesRequest,
+  });
+
+  @PATCH('/api/v2/moderation/queues/{id}')
+  Future<Result<QueueResponse>> updateQueue({
+    @Path('id') required String id,
+    @Body() UpdateQueueRequest? updateQueueRequest,
   });
 
   @PUT('/api/v2/usergroups/{id}')
@@ -778,5 +822,5 @@ abstract interface class DefaultApi {
 
 class _ResultCallAdapter<T> extends CallAdapter<Future<T>, Future<Result<T>>> {
   @override
-  Future<Result<T>> adapt(Future<T> Function() call) => runSafely(call);
+  Future<Result<T>> adapt(Future<T> Function() call) => runApiSafely(call);
 }

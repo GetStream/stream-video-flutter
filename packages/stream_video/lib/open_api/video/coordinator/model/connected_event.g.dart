@@ -9,7 +9,7 @@ part of 'connected_event.dart';
 ConnectedEvent _$ConnectedEventFromJson(Map<String, dynamic> json) =>
     ConnectedEvent(
       connectionId: json['connection_id'] as String,
-      createdAt: const EpochDateTimeConverter().fromJson(
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
       me: OwnUserResponse.fromJson(json['me'] as Map<String, dynamic>),
@@ -19,7 +19,7 @@ ConnectedEvent _$ConnectedEventFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$ConnectedEventToJson(ConnectedEvent instance) =>
     <String, dynamic>{
       'connection_id': instance.connectionId,
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'me': instance.me.toJson(),
       'type': instance.type,
     };

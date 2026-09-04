@@ -11,18 +11,15 @@ CallStatsParticipant _$CallStatsParticipantFromJson(
 ) => CallStatsParticipant(
   latestActivityAt: _$JsonConverterFromJson<Object, DateTime>(
     json['latest_activity_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   name: json['name'] as String?,
   roles: (json['roles'] as List<dynamic>?)?.map((e) => e as String).toList(),
-  sessions:
-      (json['sessions'] as List<dynamic>?)
-          ?.map(
-            (e) =>
-                CallStatsParticipantSession.fromJson(e as Map<String, dynamic>),
-          )
-          .toList() ??
-      [],
+  sessions: (json['sessions'] as List<dynamic>)
+      .map(
+        (e) => CallStatsParticipantSession.fromJson(e as Map<String, dynamic>),
+      )
+      .toList(),
   userId: json['user_id'] as String,
 );
 
@@ -31,7 +28,7 @@ Map<String, dynamic> _$CallStatsParticipantToJson(
 ) => <String, dynamic>{
   'latest_activity_at': _$JsonConverterToJson<Object, DateTime>(
     instance.latestActivityAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'name': instance.name,
   'roles': instance.roles,

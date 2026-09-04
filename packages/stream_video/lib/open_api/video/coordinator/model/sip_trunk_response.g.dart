@@ -8,23 +8,19 @@ part of 'sip_trunk_response.dart';
 
 SIPTrunkResponse _$SIPTrunkResponseFromJson(Map<String, dynamic> json) =>
     SIPTrunkResponse(
-      allowedIps:
-          (json['allowed_ips'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          [],
-      createdAt: const EpochDateTimeConverter().fromJson(
+      allowedIps: (json['allowed_ips'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
       id: json['id'] as String,
       name: json['name'] as String,
-      numbers:
-          (json['numbers'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          [],
+      numbers: (json['numbers'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
       password: json['password'] as String,
-      updatedAt: const EpochDateTimeConverter().fromJson(
+      updatedAt: const StreamDateTimeConverter().fromJson(
         json['updated_at'] as Object,
       ),
       uri: json['uri'] as String,
@@ -34,12 +30,12 @@ SIPTrunkResponse _$SIPTrunkResponseFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$SIPTrunkResponseToJson(SIPTrunkResponse instance) =>
     <String, dynamic>{
       'allowed_ips': instance.allowedIps,
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'id': instance.id,
       'name': instance.name,
       'numbers': instance.numbers,
       'password': instance.password,
-      'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
+      'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
       'uri': instance.uri,
       'username': instance.username,
     };

@@ -21,6 +21,7 @@ mixin _$ClientEvent {
   String? get iceState;
   String? get id;
   String? get joinAttemptId;
+  String? get joinReason;
   String? get microphonePermissionStatus;
   String? get outcome;
   String? get peerConnection;
@@ -67,6 +68,8 @@ mixin _$ClientEvent {
             (identical(other.id, id) || other.id == id) &&
             (identical(other.joinAttemptId, joinAttemptId) ||
                 other.joinAttemptId == joinAttemptId) &&
+            (identical(other.joinReason, joinReason) ||
+                other.joinReason == joinReason) &&
             (identical(
                   other.microphonePermissionStatus,
                   microphonePermissionStatus,
@@ -117,6 +120,7 @@ mixin _$ClientEvent {
     iceState,
     id,
     joinAttemptId,
+    joinReason,
     microphonePermissionStatus,
     outcome,
     peerConnection,
@@ -139,7 +143,7 @@ mixin _$ClientEvent {
 
   @override
   String toString() {
-    return 'ClientEvent(callSessionId: $callSessionId, cameraPermissionStatus: $cameraPermissionStatus, coordinatorConnectId: $coordinatorConnectId, elapsedTime: $elapsedTime, eventType: $eventType, iceState: $iceState, id: $id, joinAttemptId: $joinAttemptId, microphonePermissionStatus: $microphonePermissionStatus, outcome: $outcome, peerConnection: $peerConnection, previouslyConnectedTimestamp: $previouslyConnectedTimestamp, retryCountAttempt: $retryCountAttempt, retryFailureCode: $retryFailureCode, retryFailureReason: $retryFailureReason, screenShareStatus: $screenShareStatus, sdkVersion: $sdkVersion, sfuId: $sfuId, stage: $stage, stageId: $stageId, timestamp: $timestamp, trackId: $trackId, type: $type, userAgent: $userAgent, userId: $userId, wasPreviouslyConnected: $wasPreviouslyConnected)';
+    return 'ClientEvent(callSessionId: $callSessionId, cameraPermissionStatus: $cameraPermissionStatus, coordinatorConnectId: $coordinatorConnectId, elapsedTime: $elapsedTime, eventType: $eventType, iceState: $iceState, id: $id, joinAttemptId: $joinAttemptId, joinReason: $joinReason, microphonePermissionStatus: $microphonePermissionStatus, outcome: $outcome, peerConnection: $peerConnection, previouslyConnectedTimestamp: $previouslyConnectedTimestamp, retryCountAttempt: $retryCountAttempt, retryFailureCode: $retryFailureCode, retryFailureReason: $retryFailureReason, screenShareStatus: $screenShareStatus, sdkVersion: $sdkVersion, sfuId: $sfuId, stage: $stage, stageId: $stageId, timestamp: $timestamp, trackId: $trackId, type: $type, userAgent: $userAgent, userId: $userId, wasPreviouslyConnected: $wasPreviouslyConnected)';
   }
 }
 
@@ -159,6 +163,7 @@ abstract mixin class $ClientEventCopyWith<$Res> {
     String? iceState,
     String? id,
     String? joinAttemptId,
+    String? joinReason,
     String? microphonePermissionStatus,
     String? outcome,
     String? peerConnection,
@@ -200,6 +205,7 @@ class _$ClientEventCopyWithImpl<$Res> implements $ClientEventCopyWith<$Res> {
     Object? iceState = freezed,
     Object? id = freezed,
     Object? joinAttemptId = freezed,
+    Object? joinReason = freezed,
     Object? microphonePermissionStatus = freezed,
     Object? outcome = freezed,
     Object? peerConnection = freezed,
@@ -252,6 +258,10 @@ class _$ClientEventCopyWithImpl<$Res> implements $ClientEventCopyWith<$Res> {
         joinAttemptId: freezed == joinAttemptId
             ? _self.joinAttemptId
             : joinAttemptId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        joinReason: freezed == joinReason
+            ? _self.joinReason
+            : joinReason // ignore: cast_nullable_to_non_nullable
                   as String?,
         microphonePermissionStatus: freezed == microphonePermissionStatus
             ? _self.microphonePermissionStatus

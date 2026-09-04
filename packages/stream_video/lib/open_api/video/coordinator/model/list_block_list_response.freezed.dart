@@ -15,6 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$ListBlockListResponse {
   List<BlockListResponse> get blocklists;
   String get duration;
+  String? get nextCursor;
 
   /// Create a copy of ListBlockListResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -36,7 +37,9 @@ mixin _$ListBlockListResponse {
               blocklists,
             ) &&
             (identical(other.duration, duration) ||
-                other.duration == duration));
+                other.duration == duration) &&
+            (identical(other.nextCursor, nextCursor) ||
+                other.nextCursor == nextCursor));
   }
 
   @override
@@ -44,11 +47,12 @@ mixin _$ListBlockListResponse {
     runtimeType,
     const DeepCollectionEquality().hash(blocklists),
     duration,
+    nextCursor,
   );
 
   @override
   String toString() {
-    return 'ListBlockListResponse(blocklists: $blocklists, duration: $duration)';
+    return 'ListBlockListResponse(blocklists: $blocklists, duration: $duration, nextCursor: $nextCursor)';
   }
 }
 
@@ -59,7 +63,11 @@ abstract mixin class $ListBlockListResponseCopyWith<$Res> {
     $Res Function(ListBlockListResponse) _then,
   ) = _$ListBlockListResponseCopyWithImpl;
   @useResult
-  $Res call({List<BlockListResponse> blocklists, String duration});
+  $Res call({
+    List<BlockListResponse> blocklists,
+    String duration,
+    String? nextCursor,
+  });
 }
 
 /// @nodoc
@@ -74,7 +82,11 @@ class _$ListBlockListResponseCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? blocklists = null, Object? duration = null}) {
+  $Res call({
+    Object? blocklists = null,
+    Object? duration = null,
+    Object? nextCursor = freezed,
+  }) {
     return _then(
       ListBlockListResponse(
         blocklists: null == blocklists
@@ -85,6 +97,10 @@ class _$ListBlockListResponseCopyWithImpl<$Res>
             ? _self.duration
             : duration // ignore: cast_nullable_to_non_nullable
                   as String,
+        nextCursor: freezed == nextCursor
+            ? _self.nextCursor
+            : nextCursor // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }

@@ -8,7 +8,7 @@ part of 'device_response.dart';
 
 DeviceResponse _$DeviceResponseFromJson(Map<String, dynamic> json) =>
     DeviceResponse(
-      createdAt: const EpochDateTimeConverter().fromJson(
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
       disabled: json['disabled'] as bool?,
@@ -23,7 +23,7 @@ DeviceResponse _$DeviceResponseFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$DeviceResponseToJson(DeviceResponse instance) =>
     <String, dynamic>{
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'disabled': instance.disabled,
       'disabled_reason': instance.disabledReason,
       'hardware_id': instance.hardwareId,

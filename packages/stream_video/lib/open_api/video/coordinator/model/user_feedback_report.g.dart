@@ -8,11 +8,7 @@ part of 'user_feedback_report.dart';
 
 UserFeedbackReport _$UserFeedbackReportFromJson(Map<String, dynamic> json) =>
     UserFeedbackReport(
-      countByRating:
-          (json['count_by_rating'] as Map<String, dynamic>?)?.map(
-            (k, e) => MapEntry(k, (e as num).toInt()),
-          ) ??
-          {},
+      countByRating: Map<String, int>.from(json['count_by_rating'] as Map),
       unreportedCount: (json['unreported_count'] as num).toInt(),
     );
 

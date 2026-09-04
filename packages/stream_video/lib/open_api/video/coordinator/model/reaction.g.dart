@@ -9,13 +9,13 @@ part of 'reaction.dart';
 Reaction _$ReactionFromJson(Map<String, dynamic> json) => Reaction(
   activityId: json['activity_id'] as String,
   childrenCounts: json['children_counts'] as Map<String, dynamic>?,
-  createdAt: const EpochDateTimeConverter().fromJson(
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
   data: json['data'] as Map<String, dynamic>?,
   deletedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['deleted_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   id: json['id'] as String?,
   kind: json['kind'] as String,
@@ -43,7 +43,7 @@ Reaction _$ReactionFromJson(Map<String, dynamic> json) => Reaction(
       .toList(),
   targetFeedsExtraData:
       json['target_feeds_extra_data'] as Map<String, dynamic>?,
-  updatedAt: const EpochDateTimeConverter().fromJson(
+  updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
   user: json['user'] == null
@@ -55,11 +55,11 @@ Reaction _$ReactionFromJson(Map<String, dynamic> json) => Reaction(
 Map<String, dynamic> _$ReactionToJson(Reaction instance) => <String, dynamic>{
   'activity_id': instance.activityId,
   'children_counts': instance.childrenCounts,
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'data': instance.data,
   'deleted_at': _$JsonConverterToJson<Object, DateTime>(
     instance.deletedAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'id': instance.id,
   'kind': instance.kind,
@@ -74,7 +74,7 @@ Map<String, dynamic> _$ReactionToJson(Reaction instance) => <String, dynamic>{
   'score': instance.score,
   'target_feeds': instance.targetFeeds,
   'target_feeds_extra_data': instance.targetFeedsExtraData,
-  'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
+  'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
   'user': instance.user?.toJson(),
   'user_id': instance.userId,
 };

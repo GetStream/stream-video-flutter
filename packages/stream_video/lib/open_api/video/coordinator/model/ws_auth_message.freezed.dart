@@ -13,6 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$WSAuthMessage {
+  List<String>? get memberCustomInclude;
   List<WSAuthMessageProducts>? get products;
   String get token;
 
@@ -31,6 +32,10 @@ mixin _$WSAuthMessage {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is WSAuthMessage &&
+            const DeepCollectionEquality().equals(
+              other.memberCustomInclude,
+              memberCustomInclude,
+            ) &&
             const DeepCollectionEquality().equals(other.products, products) &&
             (identical(other.token, token) || other.token == token));
   }
@@ -38,13 +43,14 @@ mixin _$WSAuthMessage {
   @override
   int get hashCode => Object.hash(
     runtimeType,
+    const DeepCollectionEquality().hash(memberCustomInclude),
     const DeepCollectionEquality().hash(products),
     token,
   );
 
   @override
   String toString() {
-    return 'WSAuthMessage(products: $products, token: $token)';
+    return 'WSAuthMessage(memberCustomInclude: $memberCustomInclude, products: $products, token: $token)';
   }
 }
 
@@ -55,7 +61,11 @@ abstract mixin class $WSAuthMessageCopyWith<$Res> {
     $Res Function(WSAuthMessage) _then,
   ) = _$WSAuthMessageCopyWithImpl;
   @useResult
-  $Res call({List<WSAuthMessageProducts>? products, String token});
+  $Res call({
+    List<String>? memberCustomInclude,
+    List<WSAuthMessageProducts>? products,
+    String token,
+  });
 }
 
 /// @nodoc
@@ -70,9 +80,17 @@ class _$WSAuthMessageCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? products = freezed, Object? token = null}) {
+  $Res call({
+    Object? memberCustomInclude = freezed,
+    Object? products = freezed,
+    Object? token = null,
+  }) {
     return _then(
       WSAuthMessage(
+        memberCustomInclude: freezed == memberCustomInclude
+            ? _self.memberCustomInclude
+            : memberCustomInclude // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
         products: freezed == products
             ? _self.products
             : products // ignore: cast_nullable_to_non_nullable

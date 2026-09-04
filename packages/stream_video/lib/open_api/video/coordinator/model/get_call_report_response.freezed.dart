@@ -14,6 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$GetCallReportResponse {
   ChatActivityStatsResponse? get chatActivity;
+  BroadcastDigest? get digest;
   String get duration;
   ReportResponse get report;
   CallSessionResponse? get session;
@@ -37,6 +38,7 @@ mixin _$GetCallReportResponse {
             other is GetCallReportResponse &&
             (identical(other.chatActivity, chatActivity) ||
                 other.chatActivity == chatActivity) &&
+            (identical(other.digest, digest) || other.digest == digest) &&
             (identical(other.duration, duration) ||
                 other.duration == duration) &&
             (identical(other.report, report) || other.report == report) &&
@@ -53,6 +55,7 @@ mixin _$GetCallReportResponse {
   int get hashCode => Object.hash(
     runtimeType,
     chatActivity,
+    digest,
     duration,
     report,
     session,
@@ -62,7 +65,7 @@ mixin _$GetCallReportResponse {
 
   @override
   String toString() {
-    return 'GetCallReportResponse(chatActivity: $chatActivity, duration: $duration, report: $report, session: $session, sessionId: $sessionId, videoReactions: $videoReactions)';
+    return 'GetCallReportResponse(chatActivity: $chatActivity, digest: $digest, duration: $duration, report: $report, session: $session, sessionId: $sessionId, videoReactions: $videoReactions)';
   }
 }
 
@@ -75,6 +78,7 @@ abstract mixin class $GetCallReportResponseCopyWith<$Res> {
   @useResult
   $Res call({
     ChatActivityStatsResponse? chatActivity,
+    BroadcastDigest? digest,
     String duration,
     ReportResponse report,
     CallSessionResponse? session,
@@ -97,6 +101,7 @@ class _$GetCallReportResponseCopyWithImpl<$Res>
   @override
   $Res call({
     Object? chatActivity = freezed,
+    Object? digest = freezed,
     Object? duration = null,
     Object? report = null,
     Object? session = freezed,
@@ -109,6 +114,10 @@ class _$GetCallReportResponseCopyWithImpl<$Res>
             ? _self.chatActivity
             : chatActivity // ignore: cast_nullable_to_non_nullable
                   as ChatActivityStatsResponse?,
+        digest: freezed == digest
+            ? _self.digest
+            : digest // ignore: cast_nullable_to_non_nullable
+                  as BroadcastDigest?,
         duration: null == duration
             ? _self.duration
             : duration // ignore: cast_nullable_to_non_nullable

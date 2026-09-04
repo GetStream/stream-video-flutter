@@ -17,6 +17,7 @@ mixin _$ReactionGroupResponse {
   DateTime get firstReactionAt;
   DateTime get lastReactionAt;
   List<ReactionGroupUserResponse> get latestReactionsBy;
+  int get sumScores;
 
   /// Create a copy of ReactionGroupResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -41,7 +42,9 @@ mixin _$ReactionGroupResponse {
             const DeepCollectionEquality().equals(
               other.latestReactionsBy,
               latestReactionsBy,
-            ));
+            ) &&
+            (identical(other.sumScores, sumScores) ||
+                other.sumScores == sumScores));
   }
 
   @override
@@ -51,11 +54,12 @@ mixin _$ReactionGroupResponse {
     firstReactionAt,
     lastReactionAt,
     const DeepCollectionEquality().hash(latestReactionsBy),
+    sumScores,
   );
 
   @override
   String toString() {
-    return 'ReactionGroupResponse(count: $count, firstReactionAt: $firstReactionAt, lastReactionAt: $lastReactionAt, latestReactionsBy: $latestReactionsBy)';
+    return 'ReactionGroupResponse(count: $count, firstReactionAt: $firstReactionAt, lastReactionAt: $lastReactionAt, latestReactionsBy: $latestReactionsBy, sumScores: $sumScores)';
   }
 }
 

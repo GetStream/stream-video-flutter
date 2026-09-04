@@ -19,7 +19,7 @@ CallRequest _$CallRequestFromJson(Map<String, dynamic> json) => CallRequest(
         ),
   startsAt: _$JsonConverterFromJson<Object, DateTime>(
     json['starts_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   team: json['team'] as String?,
   video: json['video'] as bool?,
@@ -33,7 +33,7 @@ Map<String, dynamic> _$CallRequestToJson(CallRequest instance) =>
       'settings_override': instance.settingsOverride?.toJson(),
       'starts_at': _$JsonConverterToJson<Object, DateTime>(
         instance.startsAt,
-        const EpochDateTimeConverter().toJson,
+        const StreamDateTimeConverter().toJson,
       ),
       'team': instance.team,
       'video': instance.video,

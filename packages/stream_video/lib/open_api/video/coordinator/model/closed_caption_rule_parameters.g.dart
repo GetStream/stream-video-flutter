@@ -15,6 +15,7 @@ ClosedCaptionRuleParameters _$ClosedCaptionRuleParametersFromJson(
   llmHarmLabels: (json['llm_harm_labels'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(k, e as String),
   ),
+  severity: json['severity'] as String?,
   threshold: (json['threshold'] as num?)?.toInt(),
   timeWindow: json['time_window'] as String?,
 );
@@ -24,6 +25,7 @@ Map<String, dynamic> _$ClosedCaptionRuleParametersToJson(
 ) => <String, dynamic>{
   'harm_labels': instance.harmLabels,
   'llm_harm_labels': instance.llmHarmLabels,
+  'severity': instance.severity,
   'threshold': instance.threshold,
   'time_window': instance.timeWindow,
 };

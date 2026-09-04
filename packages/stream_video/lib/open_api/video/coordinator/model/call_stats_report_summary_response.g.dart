@@ -15,9 +15,9 @@ CallStatsReportSummaryResponse _$CallStatsReportSummaryResponseFromJson(
   callStatus: json['call_status'] as String,
   createdAt: _$JsonConverterFromJson<Object, DateTime>(
     json['created_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
-  firstStatsTime: const EpochDateTimeConverter().fromJson(
+  firstStatsTime: const StreamDateTimeConverter().fromJson(
     json['first_stats_time'] as Object,
   ),
   minUserRating: (json['min_user_rating'] as num?)?.toInt(),
@@ -33,9 +33,9 @@ Map<String, dynamic> _$CallStatsReportSummaryResponseToJson(
   'call_status': instance.callStatus,
   'created_at': _$JsonConverterToJson<Object, DateTime>(
     instance.createdAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
-  'first_stats_time': const EpochDateTimeConverter().toJson(
+  'first_stats_time': const StreamDateTimeConverter().toJson(
     instance.firstStatsTime,
   ),
   'min_user_rating': instance.minUserRating,

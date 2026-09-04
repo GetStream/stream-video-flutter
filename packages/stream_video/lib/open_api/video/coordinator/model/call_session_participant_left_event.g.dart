@@ -10,7 +10,7 @@ CallSessionParticipantLeftEvent _$CallSessionParticipantLeftEventFromJson(
   Map<String, dynamic> json,
 ) => CallSessionParticipantLeftEvent(
   callCid: json['call_cid'] as String,
-  createdAt: const EpochDateTimeConverter().fromJson(
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
   durationSeconds: (json['duration_seconds'] as num).toInt(),
@@ -26,7 +26,7 @@ Map<String, dynamic> _$CallSessionParticipantLeftEventToJson(
   CallSessionParticipantLeftEvent instance,
 ) => <String, dynamic>{
   'call_cid': instance.callCid,
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'duration_seconds': instance.durationSeconds,
   'participant': instance.participant.toJson(),
   'reason': instance.reason,

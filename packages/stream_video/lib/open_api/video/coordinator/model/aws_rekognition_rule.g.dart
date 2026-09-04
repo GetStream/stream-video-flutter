@@ -8,11 +8,7 @@ part of 'aws_rekognition_rule.dart';
 
 AWSRekognitionRule _$AWSRekognitionRuleFromJson(Map<String, dynamic> json) =>
     AWSRekognitionRule(
-      action: $enumDecode(
-        _$AWSRekognitionRuleActionEnumMap,
-        json['action'],
-        unknownValue: AWSRekognitionRuleAction.unknown,
-      ),
+      action: AWSRekognitionRuleAction.fromJson(json['action'] as String),
       label: json['label'] as String,
       minConfidence: (json['min_confidence'] as num).toDouble(),
       subclassifications: json['subclassifications'] as Map<String, dynamic>?,
@@ -20,18 +16,8 @@ AWSRekognitionRule _$AWSRekognitionRuleFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$AWSRekognitionRuleToJson(AWSRekognitionRule instance) =>
     <String, dynamic>{
-      'action': _$AWSRekognitionRuleActionEnumMap[instance.action]!,
+      'action': instance.action.toJson(),
       'label': instance.label,
       'min_confidence': instance.minConfidence,
       'subclassifications': instance.subclassifications,
     };
-
-const _$AWSRekognitionRuleActionEnumMap = {
-  AWSRekognitionRuleAction.bounce: 'bounce',
-  AWSRekognitionRuleAction.bounceFlag: 'bounce_flag',
-  AWSRekognitionRuleAction.bounceRemove: 'bounce_remove',
-  AWSRekognitionRuleAction.flag: 'flag',
-  AWSRekognitionRuleAction.remove: 'remove',
-  AWSRekognitionRuleAction.shadow: 'shadow',
-  AWSRekognitionRuleAction.unknown: '_unknown',
-};

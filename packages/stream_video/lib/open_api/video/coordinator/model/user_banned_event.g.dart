@@ -14,7 +14,7 @@ UserBannedEvent _$UserBannedEventFromJson(Map<String, dynamic> json) =>
       channelMessageCount: (json['channel_message_count'] as num?)?.toInt(),
       channelType: json['channel_type'] as String?,
       cid: json['cid'] as String?,
-      createdAt: const EpochDateTimeConverter().fromJson(
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
       createdBy: json['created_by'] == null
@@ -22,15 +22,15 @@ UserBannedEvent _$UserBannedEventFromJson(Map<String, dynamic> json) =>
           : UserResponseCommonFields.fromJson(
               json['created_by'] as Map<String, dynamic>,
             ),
-      custom: json['custom'] as Map<String, dynamic>? ?? {},
+      custom: json['custom'] as Map<String, dynamic>,
       expiration: _$JsonConverterFromJson<Object, DateTime>(
         json['expiration'],
-        const EpochDateTimeConverter().fromJson,
+        const StreamDateTimeConverter().fromJson,
       ),
       reason: json['reason'] as String?,
       receivedAt: _$JsonConverterFromJson<Object, DateTime>(
         json['received_at'],
-        const EpochDateTimeConverter().fromJson,
+        const StreamDateTimeConverter().fromJson,
       ),
       reviewQueueItemId: json['review_queue_item_id'] as String?,
       shadow: json['shadow'] as bool?,
@@ -50,17 +50,17 @@ Map<String, dynamic> _$UserBannedEventToJson(UserBannedEvent instance) =>
       'channel_message_count': instance.channelMessageCount,
       'channel_type': instance.channelType,
       'cid': instance.cid,
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'created_by': instance.createdBy?.toJson(),
       'custom': instance.custom,
       'expiration': _$JsonConverterToJson<Object, DateTime>(
         instance.expiration,
-        const EpochDateTimeConverter().toJson,
+        const StreamDateTimeConverter().toJson,
       ),
       'reason': instance.reason,
       'received_at': _$JsonConverterToJson<Object, DateTime>(
         instance.receivedAt,
-        const EpochDateTimeConverter().toJson,
+        const StreamDateTimeConverter().toJson,
       ),
       'review_queue_item_id': instance.reviewQueueItemId,
       'shadow': instance.shadow,

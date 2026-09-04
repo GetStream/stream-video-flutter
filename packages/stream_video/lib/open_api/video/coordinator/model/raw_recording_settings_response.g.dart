@@ -10,23 +10,12 @@ RawRecordingSettingsResponse _$RawRecordingSettingsResponseFromJson(
   Map<String, dynamic> json,
 ) => RawRecordingSettingsResponse(
   audioOnly: json['audio_only'] as bool?,
-  mode: $enumDecode(
-    _$RawRecordingSettingsResponseModeEnumMap,
-    json['mode'],
-    unknownValue: RawRecordingSettingsResponseMode.unknown,
-  ),
+  mode: RawRecordingSettingsResponseMode.fromJson(json['mode'] as String),
 );
 
 Map<String, dynamic> _$RawRecordingSettingsResponseToJson(
   RawRecordingSettingsResponse instance,
 ) => <String, dynamic>{
   'audio_only': instance.audioOnly,
-  'mode': _$RawRecordingSettingsResponseModeEnumMap[instance.mode]!,
-};
-
-const _$RawRecordingSettingsResponseModeEnumMap = {
-  RawRecordingSettingsResponseMode.autoOn: 'auto-on',
-  RawRecordingSettingsResponseMode.available: 'available',
-  RawRecordingSettingsResponseMode.disabled: 'disabled',
-  RawRecordingSettingsResponseMode.unknown: '_unknown',
+  'mode': instance.mode.toJson(),
 };

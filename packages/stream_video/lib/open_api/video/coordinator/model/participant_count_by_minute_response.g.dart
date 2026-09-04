@@ -13,7 +13,7 @@ ParticipantCountByMinuteResponse _$ParticipantCountByMinuteResponseFromJson(
   last: (json['last'] as num).toInt(),
   max: (json['max'] as num).toInt(),
   min: (json['min'] as num).toInt(),
-  startTs: const EpochDateTimeConverter().fromJson(json['start_ts'] as Object),
+  startTs: const StreamDateTimeConverter().fromJson(json['start_ts'] as Object),
 );
 
 Map<String, dynamic> _$ParticipantCountByMinuteResponseToJson(
@@ -23,5 +23,5 @@ Map<String, dynamic> _$ParticipantCountByMinuteResponseToJson(
   'last': instance.last,
   'max': instance.max,
   'min': instance.min,
-  'start_ts': const EpochDateTimeConverter().toJson(instance.startTs),
+  'start_ts': const StreamDateTimeConverter().toJson(instance.startTs),
 };

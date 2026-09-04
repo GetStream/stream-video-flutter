@@ -8,17 +8,17 @@ part of 'user_mute_response.dart';
 
 UserMuteResponse _$UserMuteResponseFromJson(Map<String, dynamic> json) =>
     UserMuteResponse(
-      createdAt: const EpochDateTimeConverter().fromJson(
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
       expires: _$JsonConverterFromJson<Object, DateTime>(
         json['expires'],
-        const EpochDateTimeConverter().fromJson,
+        const StreamDateTimeConverter().fromJson,
       ),
       target: json['target'] == null
           ? null
           : UserResponse.fromJson(json['target'] as Map<String, dynamic>),
-      updatedAt: const EpochDateTimeConverter().fromJson(
+      updatedAt: const StreamDateTimeConverter().fromJson(
         json['updated_at'] as Object,
       ),
       user: json['user'] == null
@@ -28,13 +28,13 @@ UserMuteResponse _$UserMuteResponseFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$UserMuteResponseToJson(UserMuteResponse instance) =>
     <String, dynamic>{
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'expires': _$JsonConverterToJson<Object, DateTime>(
         instance.expires,
-        const EpochDateTimeConverter().toJson,
+        const StreamDateTimeConverter().toJson,
       ),
       'target': instance.target?.toJson(),
-      'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
+      'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
       'user': instance.user?.toJson(),
     };
 
