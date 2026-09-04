@@ -53,6 +53,7 @@ class CallSessionFactory {
     required StreamVideo streamVideo,
     required StreamPeerConnectionFactory pcFactory,
     ClientPublishOptions? clientPublishOptions,
+    EncryptionManager? e2eeManager,
     List<TraceRecord> leftoverTraceRecords = const [],
   }) async {
     final finalSessionId = sessionId ?? const Uuid().v4();
@@ -98,6 +99,7 @@ class CallSessionFactory {
       onReconnectionNeeded: onReconnectionNeeded,
       onSuspendedAudioTrackRecorded: onSuspendedAudioTrackRecorded,
       clientPublishOptions: clientPublishOptions,
+      e2eeManager: e2eeManager,
       networkMonitor: networkMonitor,
       statsOptions: statsOptions,
       streamVideo: streamVideo,

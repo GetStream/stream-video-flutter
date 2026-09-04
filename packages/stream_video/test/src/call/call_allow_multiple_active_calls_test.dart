@@ -61,6 +61,7 @@ void main() {
           migratingFromList: any(named: 'migratingFromList'),
           video: any(named: 'video'),
           membersLimit: any(named: 'membersLimit'),
+          e2ee: any(named: 'e2ee'),
         ),
       ).thenAnswer((_) async => Result.error('join not implemented in test'));
     });

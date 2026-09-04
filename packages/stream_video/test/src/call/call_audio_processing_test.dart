@@ -5,7 +5,6 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
-import 'package:stream_video/src/errors/video_error.dart';
 import 'package:stream_video/src/state_emitter.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -461,6 +460,7 @@ void main() {
               migratingFromList: any(named: 'migratingFromList'),
               video: any(named: 'video'),
               membersLimit: any(named: 'membersLimit'),
+              e2ee: any(named: 'e2ee'),
             ),
           ).thenAnswer(
             (_) async => Result.success(
@@ -551,6 +551,7 @@ void main() {
               migratingFromList: any(named: 'migratingFromList'),
               video: any(named: 'video'),
               membersLimit: any(named: 'membersLimit'),
+              e2ee: any(named: 'e2ee'),
             ),
           ).thenAnswer(
             (_) async => Result.success(
@@ -595,6 +596,7 @@ void main() {
               migratingFromList: any(named: 'migratingFromList'),
               video: any(named: 'video'),
               membersLimit: any(named: 'membersLimit'),
+              e2ee: any(named: 'e2ee'),
             ),
           ).thenAnswer(
             (_) async => Result.success(
@@ -803,6 +805,7 @@ void main() {
               migratingFromList: any(named: 'migratingFromList'),
               video: any(named: 'video'),
               membersLimit: any(named: 'membersLimit'),
+              e2ee: any(named: 'e2ee'),
             ),
           ).thenAnswer(
             (_) async => Result.success(
@@ -881,6 +884,7 @@ void main() {
               migratingFromList: any(named: 'migratingFromList'),
               video: any(named: 'video'),
               membersLimit: any(named: 'membersLimit'),
+              e2ee: any(named: 'e2ee'),
             ),
           ).thenAnswer(
             (_) async => Result.success(
@@ -938,6 +942,7 @@ void main() {
               migratingFromList: any(named: 'migratingFromList'),
               video: any(named: 'video'),
               membersLimit: any(named: 'membersLimit'),
+              e2ee: any(named: 'e2ee'),
             ),
           ).thenAnswer(
             (_) async => Result.success(
@@ -1001,6 +1006,7 @@ void main() {
               migratingFromList: any(named: 'migratingFromList'),
               video: any(named: 'video'),
               membersLimit: any(named: 'membersLimit'),
+              e2ee: any(named: 'e2ee'),
             ),
           ).thenAnswer(
             (_) async => Result.success(

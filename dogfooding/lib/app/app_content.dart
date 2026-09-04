@@ -107,6 +107,7 @@ class _StreamDogFoodingAppContentState
               call: call,
               connectOptions: null,
               effectsManager: null,
+              encryptionKey: null,
             );
 
             _router.push(CallRoute($extra: extra).location, extra: extra);
@@ -133,6 +134,7 @@ class _StreamDogFoodingAppContentState
               call: callToJoin,
               connectOptions: null,
               effectsManager: null,
+              encryptionKey: null,
             );
 
             _router.push(CallRoute($extra: extra).location, extra: extra);
@@ -149,6 +151,7 @@ class _StreamDogFoodingAppContentState
             call: call,
             connectOptions: null,
             effectsManager: null,
+            encryptionKey: null,
           );
 
           _router.push(CallRoute($extra: extra).location, extra: extra);

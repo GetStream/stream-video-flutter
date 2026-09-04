@@ -7,6 +7,7 @@ import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
 import '../router/routes.dart';
 import '../theme/app_palette.dart';
+import '../utils/call_lookup.dart';
 import '../utils/consts.dart';
 
 /// Turns a `/join/<callId>` link into the lobby for that call.
@@ -15,7 +16,12 @@ import '../utils/consts.dart';
 /// first, so the route lands here rather than on the lobby directly. This
 /// screen replaces itself with the lobby as soon as the call is ready.
 class JoinCallScreen extends StatefulWidget {
-  const JoinCallScreen({super.key, required this.callId, this.linkHost});
+  const JoinCallScreen({
+    super.key,
+    required this.callId,
+    this.linkHost,
+    this.encryptionKey,
+  });
 
   /// Id of the call to join.
   final String callId;
@@ -24,6 +30,10 @@ class JoinCallScreen extends StatefulWidget {
   /// come from a link. It is the only place the app learns which environment
   /// the call lives in.
   final String? linkHost;
+
+  /// The shared passphrase the link carried, null for a link to a call that is
+  /// not encrypted.
+  final String? encryptionKey;
 
   @override
   State<JoinCallScreen> createState() => _JoinCallScreenState();
@@ -46,10 +56,25 @@ class _JoinCallScreenState extends State<JoinCallScreen> {
         callType: kCallType,
         id: widget.callId,
       );
-      await call.getOrCreate();
+
+      // A link can point at a call that was never created. Creation is left to
+      // the lobby, because that is where the encryption mode is chosen and the
+      // mode is fixed at creation.
+      final lookup = await lookupCallExists(call);
+      if (lookup is Failure) {
+        debugPrint('Could not look up call ${widget.callId}: ${lookup.error}');
+        if (mounted) setState(() => _failed = true);
+        return;
+      }
 
       if (!mounted) return;
-      LobbyRoute($extra: call).replace(context);
+      LobbyRoute(
+        $extra: (
+          call: call,
+          callExists: (lookup as Success<bool>).data,
+          encryptionKey: widget.encryptionKey,
+        ),
+      ).replace(context);
     } catch (e, stk) {
       debugPrint('Could not open the call from the link: $e');
       debugPrintStack(stackTrace: stk);

@@ -3,6 +3,8 @@
 ### ✅ Added
 
 - Added the `ActionCallIncomingFailed` ringing event and `IncomingCallFailureReason`, raised when the platform call UI refuses to display an incoming call. iOS only, and most useful when Do Not Disturb or the block list filtered the call before it was ever shown. Observe it with `onRingingEvent<ActionCallIncomingFailed>` and decide what to do: the SDK deliberately takes no action, because rejecting a filtered call ends the ring on every device the user is being called on.
+- Added end-to-end encryption support: attach an `EncryptionManager` with `Call.setE2EEManager` before joining, request encryption at call creation with `StreamEncryptionSettings`, and read `CallState.isE2eeEnabled` to check whether it is in effect. Available on Android, iOS and macOS. See the [documentation](https://getstream.io/video/docs/flutter/guides/e2ee-encryption/) for details.
+- Added `CallPreferences.encryptionKeyResolver`, which supplies the key for calls your app does not join itself, such as those answered from a ringing notification. See the [documentation](https://getstream.io/video/docs/flutter/guides/e2ee-encryption/#ringing-calls) for details.
 
 ### 🐞 Fixed
 

@@ -16,6 +16,7 @@ class CallSettingsResponse {
     required this.audio,
     required this.backstage,
     required this.broadcasting,
+    required this.encryption,
     required this.frameRecording,
     required this.geofencing,
     required this.individualRecording,
@@ -36,6 +37,9 @@ class CallSettingsResponse {
   BackstageSettingsResponse backstage;
 
   BroadcastSettingsResponse broadcasting;
+
+  /// EncryptionSettings is the payload for end-to-end encryption settings
+  EncryptionSettingsResponse encryption;
 
   FrameRecordingSettingsResponse frameRecording;
 
@@ -76,6 +80,7 @@ class CallSettingsResponse {
           other.audio == audio &&
           other.backstage == backstage &&
           other.broadcasting == broadcasting &&
+          other.encryption == encryption &&
           other.frameRecording == frameRecording &&
           other.geofencing == geofencing &&
           other.individualRecording == individualRecording &&
@@ -96,6 +101,7 @@ class CallSettingsResponse {
       (audio.hashCode) +
       (backstage.hashCode) +
       (broadcasting.hashCode) +
+      (encryption.hashCode) +
       (frameRecording.hashCode) +
       (geofencing.hashCode) +
       (individualRecording.hashCode) +
@@ -112,13 +118,14 @@ class CallSettingsResponse {
 
   @override
   String toString() =>
-      'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, frameRecording=$frameRecording, geofencing=$geofencing, individualRecording=$individualRecording, ingress=$ingress, limits=$limits, rawRecording=$rawRecording, recording=$recording, ring=$ring, screensharing=$screensharing, session=$session, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
+      'CallSettingsResponse[audio=$audio, backstage=$backstage, broadcasting=$broadcasting, encryption=$encryption, frameRecording=$frameRecording, geofencing=$geofencing, individualRecording=$individualRecording, ingress=$ingress, limits=$limits, rawRecording=$rawRecording, recording=$recording, ring=$ring, screensharing=$screensharing, session=$session, thumbnails=$thumbnails, transcription=$transcription, video=$video]';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{};
     json[r'audio'] = this.audio;
     json[r'backstage'] = this.backstage;
     json[r'broadcasting'] = this.broadcasting;
+    json[r'encryption'] = this.encryption;
     json[r'frame_recording'] = this.frameRecording;
     json[r'geofencing'] = this.geofencing;
     json[r'individual_recording'] = this.individualRecording;
@@ -162,6 +169,10 @@ class CallSettingsResponse {
             'Required key "CallSettingsResponse[broadcasting]" is missing from JSON.');
         assert(json[r'broadcasting'] != null,
             'Required key "CallSettingsResponse[broadcasting]" has a null value in JSON.');
+        assert(json.containsKey(r'encryption'),
+            'Required key "CallSettingsResponse[encryption]" is missing from JSON.');
+        assert(json[r'encryption'] != null,
+            'Required key "CallSettingsResponse[encryption]" has a null value in JSON.');
         assert(json.containsKey(r'frame_recording'),
             'Required key "CallSettingsResponse[frame_recording]" is missing from JSON.');
         assert(json[r'frame_recording'] != null,
@@ -218,6 +229,7 @@ class CallSettingsResponse {
         backstage: BackstageSettingsResponse.fromJson(json[r'backstage'])!,
         broadcasting:
             BroadcastSettingsResponse.fromJson(json[r'broadcasting'])!,
+        encryption: EncryptionSettingsResponse.fromJson(json[r'encryption'])!,
         frameRecording:
             FrameRecordingSettingsResponse.fromJson(json[r'frame_recording'])!,
         geofencing: GeofenceSettingsResponse.fromJson(json[r'geofencing'])!,
@@ -295,6 +307,7 @@ class CallSettingsResponse {
     'audio',
     'backstage',
     'broadcasting',
+    'encryption',
     'frame_recording',
     'geofencing',
     'individual_recording',

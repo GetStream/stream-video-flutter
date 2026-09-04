@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
+
+import '../../open_api/video/coordinator/api.dart';
 
 /// Represents an SDK error that contains a message.
 class VideoError extends Equatable implements Error {
@@ -41,4 +45,23 @@ class VideoErrorWithCause extends VideoError {
 
   @override
   List<Object?> get props => [...super.props, cause];
+}
+
+extension VideoErrorApiDetails on VideoError {
+  APIError? get apiError {
+    final self = this;
+    if (self is! VideoErrorWithCause) return null;
+
+    final cause = self.cause;
+    if (cause is! ApiException) return null;
+
+    final body = cause.message;
+    if (body == null || body.isEmpty) return null;
+
+    try {
+      return APIError.fromJson(jsonDecode(body));
+    } catch (_) {
+      return null;
+    }
+  }
 }

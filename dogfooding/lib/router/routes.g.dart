@@ -106,8 +106,10 @@ RouteBase get $lobbyRoute => GoRouteData.$route(
 );
 
 mixin $LobbyRoute on GoRouteData {
-  static LobbyRoute _fromState(GoRouterState state) =>
-      LobbyRoute($extra: state.extra as Call);
+  static LobbyRoute _fromState(GoRouterState state) => LobbyRoute(
+    $extra:
+        state.extra as ({Call call, bool callExists, String? encryptionKey}),
+  );
 
   LobbyRoute get _self => this as LobbyRoute;
 
@@ -175,6 +177,7 @@ mixin $CallRoute on GoRouteData {
               Call call,
               CallConnectOptions? connectOptions,
               StreamVideoEffectsManager? effectsManager,
+              String? encryptionKey,
             }),
   );
 
