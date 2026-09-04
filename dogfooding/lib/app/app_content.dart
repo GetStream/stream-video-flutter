@@ -1,8 +1,4 @@
-import 'dart:async';
-
-import 'package:app_links/app_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rxdart/rxdart.dart';
@@ -10,7 +6,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart' as chat;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter_l10n.dart';
 
-import '../core/model/environment.dart';
 import '../di/injector.dart';
 import '../router/router.dart';
 import '../router/routes.dart';
@@ -70,8 +65,6 @@ class _StreamDogFoodingAppContentState
 
     // Observe call kit events.
     _observeRingingEvents();
-    // Observes deep links.
-    _observeDeepLinks();
     // Observe FCM messages.
     _observeFcmMessages();
 
