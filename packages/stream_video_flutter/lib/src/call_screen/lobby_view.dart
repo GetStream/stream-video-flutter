@@ -1,54 +1,116 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import 'lobby_participants_view.dart';
+import '../l10n/localization_extension.dart';
 
-/// A widget that can be shown before joining a call. Measures latencies
-/// and selects the best SFU. This speeds up the process of joining when
-/// the user decides to enter the call.
+/// Joins the call the lobby is a waiting room for, with the options it
+/// prepared.
+///
+/// Returns whether the join happened. See
+/// [StreamLobbyView.onJoinCallPressed].
+typedef StreamLobbyJoinCallback =
+    FutureOr<bool> Function(CallConnectOptions options);
+
+/// The waiting room shown before a call is joined: a preview of the local
+/// camera, the controls that set the microphone and camera up, and a button
+/// that joins.
+///
+/// Everything the lobby knows lives in a [StreamLobbyController], installed
+/// above the tree as a [StreamLobbyScope]. The widgets in [actions] read it
+/// from there, so a lobby is configured by saying which actions to show rather
+/// than by wiring callbacks:
+///
+/// {@tool snippet}
+///
+/// ```dart
+/// StreamLobbyView(
+///   call: call,
+///   onJoinCallPressed: (options) async {
+///     await call.join(connectOptions: options);
+///     return true;
+///   },
+///   actions: LobbyActions.full(),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// The layout follows the window's [StreamScreenSize]: under 768px the
+/// controls sit below the preview, above it they are overlaid on the preview
+/// itself. Which actions are shown does *not* follow the screen — [actions]
+/// defaults to `LobbyActions.simple()` at every width, and choosing a richer
+/// preset for a roomier window is the host's call.
+///
+/// This builds no [Scaffold] of its own, so it can be embedded in a screen
+/// that already has one. Wrap it in whatever chrome the app needs.
 class StreamLobbyView extends StatefulWidget {
   /// Creates a new instance of [StreamLobbyView].
   const StreamLobbyView({
     super.key,
     required this.call,
     required this.onJoinCallPressed,
-    this.onCloseTap,
-    this.backgroundColor,
-    this.cardBackgroundColor,
-    this.userAvatarTheme,
-    this.participantAvatarTheme,
+    this.actions,
+    this.title,
+    this.subtitle,
+    this.joinButtonLabel,
+    this.joinEnabled = true,
+    this.footer,
+    this.controller,
     this.streamVideo,
   });
 
   /// Represents a call.
   final Call call;
 
-  /// The action to perform when pressing the "join call" button.
-  final ValueSetter<CallConnectOptions> onJoinCallPressed;
-
-  /// The action to perform when the back button is pressed.
+  /// Called with the options the call should be joined with.
   ///
-  /// By default it calls [Navigator.pop].
-  final VoidCallback? onCloseTap;
+  /// The tracks in them are handed over before this runs: the lobby stops
+  /// managing them, so whatever joins the call is responsible for their
+  /// lifetime.
+  ///
+  /// Return true once the call has been joined, or once whoever joins it has
+  /// been handed the options. Return false to say the join did not happen —
+  /// the lobby takes its tracks back and carries on previewing, so a call
+  /// that could not be created, or a key that turned out to be wrong, leaves
+  /// the user where they were.
+  final StreamLobbyJoinCallback onJoinCallPressed;
 
-  /// The color of the background behind avatar.
-  final Color? backgroundColor;
+  /// Which controls to show.
+  ///
+  /// Defaults to `LobbyActions.simple()`.
+  final LobbyActions? actions;
 
-  /// The color of the focus border.
-  final Color? cardBackgroundColor;
+  /// The heading above the preview. Defaults to a localized string.
+  final Widget? title;
 
-  /// Theme for the avatar.
-  final StreamUserAvatarThemeData? userAvatarTheme;
+  /// The line below [title]. Defaults to a localized string.
+  final Widget? subtitle;
 
-  /// Theme for the participant avatar.
-  final StreamUserAvatarThemeData? participantAvatarTheme;
+  /// The label of the join button. Defaults to a localized string.
+  final Widget? joinButtonLabel;
+
+  /// Whether the join button can be pressed. Defaults to true.
+  ///
+  /// Set it from whatever the lobby is still waiting for — a shared
+  /// encryption key, a name, a call that is being created.
+  final bool joinEnabled;
+
+  /// Drawn between the controls and the join button.
+  ///
+  /// Nothing is drawn when null. Use it for whatever a call has to be set up
+  /// with that the lobby knows nothing about.
+  final Widget? footer;
+
+  /// The controller driving this lobby.
+  ///
+  /// One is created and disposed here when this is null. Supply one to keep
+  /// the lobby's state outside the widget, or to read it from the host screen.
+  final StreamLobbyController? controller;
 
   /// An instance of [StreamVideo].
   ///
-  /// If not provided, it will be obtained via StreamVideo.instance
+  /// If not provided, it will be obtained via StreamVideo.instance.
   final StreamVideo? streamVideo;
 
   @override
@@ -56,248 +118,230 @@ class StreamLobbyView extends StatefulWidget {
 }
 
 class _StreamLobbyViewState extends State<StreamLobbyView> {
-  late final _logger = taggedLogger(tag: 'SV:LobbyView');
+  StreamLobbyController? _ownedController;
 
-  RtcLocalAudioTrack? _microphoneTrack;
-  RtcLocalCameraTrack? _cameraTrack;
-  List<CallParticipant> _participants = <CallParticipant>[];
-  Map<String, CallUser> _users = <String, CallUser>{};
+  StreamLobbyController get _controller =>
+      widget.controller ?? (_ownedController ??= _createController());
 
-  StreamSubscription<Object>? _fetchSubscription;
-  StreamSubscription<Object>? _eventSubscription;
-
-  bool get hasCameraEnabled => _cameraTrack != null;
-
-  bool get hasMicrophoneEnabled => _microphoneTrack != null;
-
-  void onJoinCallPressed() {
-    var options = const CallConnectOptions();
-
-    if (hasCameraEnabled) {
-      options = options.copyWith(
-        camera: TrackOption.enabled(),
-      );
-    }
-
-    if (hasMicrophoneEnabled) {
-      options = options.copyWith(
-        microphone: TrackOption.enabled(),
-      );
-    }
-
-    widget.onJoinCallPressed(options);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchCall();
-    _listenEvents();
-  }
+  StreamLobbyController _createController() => StreamLobbyController(
+    call: widget.call,
+    streamVideo: widget.streamVideo,
+  );
 
   @override
   void dispose() {
-    _cameraTrack?.stop();
-    _microphoneTrack?.stop();
-
-    _cameraTrack = null;
-    _microphoneTrack = null;
-    _fetchSubscription?.cancel();
-    _eventSubscription?.cancel();
+    _ownedController?.dispose();
     super.dispose();
   }
 
-  void _fetchCall() {
-    // Obtains SFU credentials and picks the best server, but doesn't
-    // connect to the call yet.
-    final currentUserId =
-        (widget.streamVideo ?? StreamVideo.instance).currentUser.id;
-    _logger.d(() => '[fetchCall] currentUserId: $currentUserId');
-    _fetchSubscription?.cancel();
-    _fetchSubscription = widget.call.getOrCreate().asStream().listen((result) {
-      result.fold(
-        onSuccess: (callData) {
-          _logger.v(() => '[fetchCall] completed: $callData');
-          final metadata = callData.data.metadata;
+  Future<void> _onJoinCallPressed() async {
+    final options = _controller.connectOptions;
 
-          setState(() {
-            _users = metadata.users;
-            _participants = metadata.session.participants.values
-                .sortedBy((it) => it.joinedAt ?? DateTime.now())
-                .where((it) => it.userId != currentUserId)
-                .toList();
-          });
-        },
-        onFailure: (error, stackTrace) {
-          _logger.e(() => '[fetchCall] failed: $error');
-        },
-      );
-    });
-  }
+    // Handed over before the callback rather than after it: a host usually
+    // navigates from inside it, and the lobby is disposed on the way out —
+    // with the tracks still its own, that would stop the microphone and
+    // camera the call is about to publish.
+    _controller.handOverTracks();
 
-  void _listenEvents() {
-    _eventSubscription?.cancel();
-    _eventSubscription = (widget.streamVideo ?? StreamVideo.instance).events
-        .listen((event) {
-          if (event is CoordinatorCallSessionParticipantLeftEvent) {
-            _logger.d(
-              () =>
-                  '[listenEvents] #userLeft; user: ${event.user}, reason: ${event.reason}',
-            );
-            _participants.removeWhere(
-              (it) => it.userSessionId == event.participant.userSessionId,
-            );
-            final hasSameUser =
-                _participants.firstWhereOrNull(
-                  (it) => it.userId == event.participant.userId,
-                ) !=
-                null;
-            if (!hasSameUser) {
-              _users.remove(event.user.id);
-            }
-            setState(() {});
-          } else if (event is CoordinatorCallSessionParticipantJoinedEvent) {
-            _logger.d(() => '[listenEvents] #userJoined; user: ${event.user}');
-            _users[event.user.id] = event.user;
-            _participants.add(event.participant);
-            setState(() {});
-          }
-        });
+    if (await widget.onJoinCallPressed(options)) return;
+
+    // The join did not happen, so the preview is the lobby's again.
+    if (mounted) _controller.reclaimTracks();
   }
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = context.streamTextTheme;
-    final colorTheme = context.streamColorScheme;
-    final spacing = context.streamSpacing;
+    final actions = widget.actions ?? LobbyActions.simple();
 
-    final theme = StreamLobbyViewTheme.of(context);
-    final backgroundColor = widget.backgroundColor ?? theme.backgroundColor;
-    final cardBackgroundColor =
-        widget.cardBackgroundColor ?? theme.cardBackgroundColor;
-    final userAvatarTheme = widget.userAvatarTheme ?? theme.userAvatarTheme;
-    final participantAvatarTheme =
-        widget.participantAvatarTheme ?? theme.participantAvatarTheme;
-
-    final participants = _participants
-        .map((it) => _users[it.userId])
-        .nonNulls
-        .map((e) => e.toUserInfo())
-        .toList();
-
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          StreamButton.icon(
-            style: .secondary,
-            type: .ghost,
-            icon: Icon(
-              context.streamIcons.leave,
-            ),
-            onPressed: () async {
-              if (widget.onCloseTap != null) {
-                widget.onCloseTap!();
-              } else {
-                await Navigator.maybePop(context);
-              }
-            },
-          ),
-        ],
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: spacing.md),
-            child: Column(
-              children: [
-                Text(
-                  'Before Joining',
-                  style: textTheme.headingMd,
-                ),
-                Text(
-                  'Setup your audio and video',
-                  style: textTheme.headingMd,
-                ),
-                const SizedBox(height: 16),
-                StreamLobbyVideo(
-                  call: widget.call,
-                  cardBackgroundColor: cardBackgroundColor,
-                  userAvatarTheme: userAvatarTheme,
-                  onMicrophoneTrackSet: (track) => _microphoneTrack = track,
-                  onCameraTrackSet: (track) => _cameraTrack = track,
-                ),
-                const SizedBox(height: 24),
-                Container(
-                  constraints: const BoxConstraints(maxWidth: 360),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: theme.cardBackgroundColor,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              child: Text(
-                                'You are about to join a call. ${participants.length} more people are in the call.',
-                                style: textTheme.headingSm,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            if (participants.isNotEmpty)
-                              StreamLobbyParticipantsView(
-                                participants: participants,
-                                participantAvatarTheme: participantAvatarTheme,
-                              ),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: colorTheme.accentPrimary,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                minimumSize: const Size.fromHeight(40),
-                              ),
-                              onPressed: onJoinCallPressed,
-                              child: Text(
-                                'Join Call',
-                                style: textTheme.headingSm.copyWith(
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 56),
-              ],
-            ),
-          ),
-        ),
+    return StreamLobbyScope(
+      controller: _controller,
+      child: _LobbyBody(
+        actions: actions,
+        title: widget.title,
+        subtitle: widget.subtitle,
+        joinButtonLabel: widget.joinButtonLabel,
+        joinEnabled: widget.joinEnabled,
+        footer: widget.footer,
+        onJoinCallPressed: _onJoinCallPressed,
       ),
     );
   }
 }
 
-extension on CallUser {
-  UserInfo toUserInfo() {
-    return UserInfo(
-      id: id,
-      name: name,
-      image: image,
-      role: roles.firstOrNull ?? '',
-      teams: teams,
+/// The lobby's layout, below the scope so it can read the controller.
+class _LobbyBody extends StatelessWidget {
+  const _LobbyBody({
+    required this.actions,
+    required this.title,
+    required this.subtitle,
+    required this.joinButtonLabel,
+    required this.joinEnabled,
+    required this.footer,
+    required this.onJoinCallPressed,
+  });
+
+  final LobbyActions actions;
+  final Widget? title;
+  final Widget? subtitle;
+  final Widget? joinButtonLabel;
+  final bool joinEnabled;
+  final Widget? footer;
+  final VoidCallback onJoinCallPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+    final textTheme = context.streamTextTheme;
+    final translations = context.translations;
+    final isSmall = context.streamScreenSize.isSmall;
+
+    final controlRow = actions.controls.isEmpty
+        ? null
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: spacing.xs,
+            children: actions.controls,
+          );
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      spacing: spacing.xxl,
+      children: [
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: spacing.sm,
+          children: [
+            title ?? Text(translations.lobbyTitle, style: textTheme.headingMd),
+            subtitle ??
+                Text(translations.lobbySubtitle, style: textTheme.bodyDefault),
+          ],
+        ),
+        // The whole preview block is capped at the tile's width, so the
+        // settings fields line up under it rather than running the width of
+        // the window.
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: isSmall ? double.infinity : _LobbyPreview.largeWidth,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: isSmall ? spacing.sm : spacing.md,
+            children: [
+              Stack(
+                alignment: AlignmentDirectional.bottomCenter,
+                children: [
+                  const _LobbyPreview(),
+                  // Above 768px the controls float over the preview, clear of
+                  // the participant label's toolbar band along the bottom.
+                  if (!isSmall && controlRow != null)
+                    Padding(
+                      padding: EdgeInsets.only(bottom: spacing.md),
+                      child: controlRow,
+                    ),
+                ],
+              ),
+              if (isSmall && controlRow != null) controlRow,
+              if (actions.settings.isNotEmpty)
+                Row(
+                  spacing: spacing.xs,
+                  children: [
+                    for (final setting in actions.settings)
+                      Expanded(child: setting),
+                  ],
+                ),
+            ],
+          ),
+        ),
+        if (footer case final footer?) footer,
+        SizedBox(
+          // Full width on a phone, a fixed 400 where there is room for it.
+          width: isSmall ? double.infinity : 400,
+          child: StreamButton(
+            onPressed: joinEnabled ? onJoinCallPressed : null,
+            child: joinButtonLabel ?? Text(translations.lobbyJoinCall),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The camera preview, with the local participant's label along its bottom.
+class _LobbyPreview extends StatelessWidget {
+  const _LobbyPreview();
+
+  /// The aspect the design gives the preview under 768px.
+  static const _smallAspectRatio = 370 / 264;
+
+  /// The size the design gives the preview at 768px and above.
+  static const _largeSize = Size(640, 360);
+
+  /// The width the preview block is capped at above 768px.
+  static double get largeWidth => _largeSize.width;
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = StreamLobbyScope.of(context);
+    final colorScheme = context.streamColorScheme;
+    final radius = context.streamRadius;
+    final spacing = context.streamSpacing;
+    final isSmall = context.streamScreenSize.isSmall;
+
+    final borderRadius = BorderRadius.all(radius.xxl);
+    final cameraTrack = controller.cameraTrack;
+
+    Widget placeholder(BuildContext context) =>
+        Center(child: StreamUserAvatar(user: controller.currentUser));
+
+    final preview = DecoratedBox(
+      decoration: BoxDecoration(
+        color: colorScheme.backgroundSurface,
+        borderRadius: borderRadius,
+        border: Border.all(color: colorScheme.accentPrimary, width: 2),
+      ),
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: cameraTrack == null
+                  ? placeholder(context)
+                  : VideoTrackRenderer(
+                      videoTrack: cameraTrack,
+                      mirror:
+                          cameraTrack.mediaConstraints.facingMode ==
+                          FacingMode.user,
+                      placeholderBuilder: placeholder,
+                    ),
+            ),
+            Align(
+              alignment: AlignmentDirectional.bottomStart,
+              child: Padding(
+                padding: EdgeInsets.all(spacing.sm),
+                child: StreamParticipantLabel(
+                  name: controller.currentUser.name,
+                  isAudioEnabled: controller.microphoneEnabled,
+                  isSpeaking: false,
+                  isVideoEnabled: controller.cameraEnabled,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (isSmall) {
+      return AspectRatio(aspectRatio: _smallAspectRatio, child: preview);
+    }
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: _largeSize.width),
+      child: AspectRatio(
+        aspectRatio: _largeSize.aspectRatio,
+        child: preview,
+      ),
     );
   }
 }

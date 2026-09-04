@@ -23,5 +23,8 @@
   "lobbyCameraPermissionRequired": "Cameratoegang is vereist om een video-apparaat te selecteren",
   "lobbyToggleMicrophone": "Microfoon aan- of uitzetten",
   "lobbyToggleCamera": "Camera aan- of uitzetten",
+  "lobbyTitle": "Voordat je deelneemt",
+  "lobbySubtitle": "Stel je audio en video in",
+  "lobbyJoinCall": "Deelnemen",
   "lobbyParticipants": "Deelnemers"
 }
