@@ -4,6 +4,10 @@
 
 - Added the `ActionCallIncomingFailed` ringing event and `IncomingCallFailureReason`, raised when the platform call UI refuses to display an incoming call. iOS only, and most useful when Do Not Disturb or the block list filtered the call before it was ever shown. Observe it with `onRingingEvent<ActionCallIncomingFailed>` and decide what to do: the SDK deliberately takes no action, because rejecting a filtered call ends the ring on every device the user is being called on.
 
+### 🔄 Changed
+
+- Raised the minimum `dart_webrtc` to `1.8.2`, required for WebAssembly builds.
+
 ### 🐞 Fixed
 
 - [Android] Fixed a call hung up outside the app, from a paired watch, a Bluetooth headset or a car head unit, not leaving the Stream call. Ended events carrying `CallData.endedBySystem` are now applied on Android too, while the ambiguous ones, which on Android also mean the incoming call notification was merely dismissed, keep being ignored. Requires the Android Telecom integration in `stream_video_push_notification`.
