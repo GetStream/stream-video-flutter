@@ -7,6 +7,7 @@ import '../screens/call_participants_list.dart';
 import '../screens/call_screen.dart';
 import '../screens/call_stats_screen.dart';
 import '../screens/home_screen.dart';
+import '../screens/join_call_screen.dart';
 import '../screens/livestream_demo_screen.dart';
 import '../screens/lobby_screen.dart';
 import '../screens/login_screen.dart';
@@ -14,7 +15,11 @@ import '../screens/login_screen.dart';
 part 'routes.g.dart';
 
 @immutable
-@TypedGoRoute<HomeRoute>(path: '/', name: 'home')
+@TypedGoRoute<HomeRoute>(
+  path: '/',
+  name: 'home',
+  routes: [TypedGoRoute<JoinRoute>(path: 'join/:callId', name: 'join')],
+)
 class HomeRoute extends GoRouteData with $HomeRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -28,6 +33,18 @@ class LoginRoute extends GoRouteData with $LoginRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const LoginScreen();
+  }
+}
+
+@immutable
+class JoinRoute extends GoRouteData with $JoinRoute {
+  const JoinRoute({required this.callId});
+
+  final String callId;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return JoinCallScreen(callId: callId, linkHost: state.uri.host);
   }
 }
 
