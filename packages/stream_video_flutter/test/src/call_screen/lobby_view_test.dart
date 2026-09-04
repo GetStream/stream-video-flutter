@@ -141,7 +141,7 @@ void main() {
         call: controller.call,
         controller: controller,
         actions: actions,
-        onJoinCallPressed: (_) {},
+        onJoinCallPressed: (_) => true,
       ),
     ),
   );
@@ -156,7 +156,7 @@ void main() {
         call: controller.call,
         controller: controller,
         actions: actions,
-        onJoinCallPressed: (_) {},
+        onJoinCallPressed: (_) => true,
       ),
     ),
   );
@@ -276,7 +276,7 @@ void main() {
                 call: controller.call,
                 controller: controller,
                 title: const Text('Set up your call'),
-                onJoinCallPressed: (_) {},
+                onJoinCallPressed: (_) => true,
               ),
             ),
           ),
@@ -313,6 +313,76 @@ void main() {
     expect(find.text('Branded header'), findsOneWidget);
     expect(find.byType(DefaultStreamLobbyHeader), findsNothing);
     expect(find.byIcon(const StreamIcons().language), findsNothing);
+  });
+
+  testWidgets('the footer sits between the controls and the join button', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      TestWrapper(
+        child: SingleChildScrollView(
+          child: MediaQuery(
+            data: const MediaQueryData(size: Size(900, 900)),
+            child: SizedBox(
+              width: 900,
+              child: StreamLobbyView(
+                call: controller.call,
+                controller: controller,
+                actions: LobbyActions.simple(),
+                footer: const Text('Shared key'),
+                joinButtonLabel: const Text('Join'),
+                onJoinCallPressed: (_) => true,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final footer = tester.getCenter(find.text('Shared key')).dy;
+    expect(
+      footer,
+      greaterThan(
+        tester.getCenter(find.byType(StreamLobbyMicrophoneToggle)).dy,
+      ),
+    );
+    expect(footer, lessThan(tester.getCenter(find.text('Join')).dy));
+  });
+
+  // Without a footer and without a builder the slot is not built at all: the
+  // body's Column spaces its children out, so an empty one would leave a gap.
+  testWidgets('no footer is drawn when none is asked for', (tester) async {
+    await tester.pumpWidget(
+      TestWrapper(
+        child: SingleChildScrollView(child: lobby(LobbyActions.simple(), 900)),
+      ),
+    );
+
+    expect(find.byType(StreamLobbyFooter), findsNothing);
+  });
+
+  // Registering a builder is also how an app puts a footer in a lobby whose
+  // call site passed none.
+  testWidgets('a registered builder supplies the footer', (tester) async {
+    await tester.pumpWidget(
+      TestWrapper(
+        child: StreamComponentFactory(
+          builders: StreamComponentBuilders(
+            extensions: [
+              ...streamVideoComponentBuilders(
+                lobbyFooter: (context, props) => const Text('App-wide footer'),
+              ),
+            ],
+          ),
+          child: SingleChildScrollView(
+            child: lobby(LobbyActions.simple(), 900),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('App-wide footer'), findsOneWidget);
+    expect(find.byType(DefaultStreamLobbyFooter), findsNothing);
   });
 
   // A device that cannot be opened is not a user choice: the control is
@@ -365,7 +435,10 @@ void main() {
                   call: controller.call,
                   controller: controller,
                   actions: LobbyActions.simple(),
-                  onJoinCallPressed: (_) => joined = true,
+                  onJoinCallPressed: (_) {
+                    joined = true;
+                    return true;
+                  },
                 ),
               ),
             ),
