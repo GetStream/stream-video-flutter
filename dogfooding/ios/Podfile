@@ -79,6 +79,12 @@ post_install do |installer|
         'PERMISSION_NOTIFICATIONS=1',
       ]
 
+      # some pods still declare deployment targets below the platform minimum,
+      # which recent Xcode/simulator SDKs reject outright
+      deployment_target = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+      if deployment_target && Gem::Version.new(deployment_target) < Gem::Version.new('15.0')
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
+      end
     end
   end
 end
