@@ -75,7 +75,7 @@ void main() {
     when(() => call.state).thenAnswer(
       (_) => MutableStateEmitter<CallState>(callState, sync: true),
     );
-    when(call.getOrCreate).thenAnswer((_) async {
+    when(call.get).thenAnswer((_) async {
       final metadata = MockCallMetadata();
       when(() => metadata.users).thenReturn({});
       when(() => metadata.session).thenReturn(
@@ -85,10 +85,8 @@ void main() {
       // state the call starts with, so this is what decides them.
       when(() => metadata.settings).thenReturn(callSettings);
 
-      final data = MockCallCreatedData();
-      when(() => data.metadata).thenReturn(metadata);
       return Result.success(
-        CallReceivedOrCreatedData(wasCreated: true, data: data),
+        CallReceivedData(callCid: _callCid, metadata: metadata),
       );
     });
   });
@@ -133,6 +131,17 @@ void main() {
   }
 
   group('StreamLobbyController', () {
+    // Showing a waiting room is not a decision to create the call. What a
+    // call is created with — its encryption mode above all, which cannot be
+    // changed afterwards — belongs to whoever creates it.
+    test('reads the call and never creates it', () async {
+      build();
+      await pumpEventQueue();
+
+      verify(call.get).called(1);
+      verifyNever(call.getOrCreate);
+    });
+
     test('exposes one device controller for every action to share', () {
       expect(build().devices, isA<StreamMediaDevicesController>());
     });
@@ -189,7 +198,7 @@ void main() {
       expect(controller.users.keys, ['a']);
     });
 
-    // getOrCreate returns a snapshot of the session while the event
+    // The fetch returns a snapshot of the session while the event
     // subscription is already live, so a join already reflected in that
     // snapshot still arrives as an event. Appending it blindly listed the same
     // person twice.
@@ -408,7 +417,7 @@ void main() {
       );
 
       test('fall back to the call state when the fetch fails', () async {
-        when(call.getOrCreate).thenAnswer(
+        when(call.get).thenAnswer(
           (_) async => Result.failure(StateError('offline'), StackTrace.empty),
         );
         when(() => callState.settings).thenReturn(

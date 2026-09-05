@@ -75,6 +75,17 @@ class _JoinCallTabState extends State<JoinCallTab> {
       widget.onNavigateToCall(call);
       return;
     }
+
+    // The lobby reads the call rather than creating it, so an id typed in here
+    // has to be brought into existence before there is a waiting room for it.
+    final result = await call.getOrCreate();
+    if (!mounted) return;
+
+    if (result case final Failure failure) {
+      context.showSnackBar(failure.videoError.message);
+      return;
+    }
+
     await Navigator.push(
       context,
       MaterialPageRoute<dynamic>(

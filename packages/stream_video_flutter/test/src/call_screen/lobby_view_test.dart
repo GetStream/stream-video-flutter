@@ -79,7 +79,7 @@ void main() {
     when(() => call.state).thenAnswer(
       (_) => MutableStateEmitter<CallState>(callState, sync: true),
     );
-    when(call.getOrCreate).thenAnswer(
+    when(call.get).thenAnswer(
       (_) async => Result.failure(StateError('no network'), StackTrace.empty),
     );
 
@@ -116,7 +116,7 @@ void main() {
     when(() => failing.state).thenAnswer(
       (_) => MutableStateEmitter<CallState>(callState, sync: true),
     );
-    when(failing.getOrCreate).thenAnswer(
+    when(failing.get).thenAnswer(
       (_) async => Result.failure(StateError('no network'), StackTrace.empty),
     );
     when(failing.ensureNativeFactory).thenThrow(StateError('no device'));
@@ -634,7 +634,7 @@ void main() {
     when(() => other.state).thenAnswer(
       (_) => MutableStateEmitter<CallState>(otherState, sync: true),
     );
-    when(other.getOrCreate).thenAnswer(
+    when(other.get).thenAnswer(
       (_) async => Result.failure(StateError('no network'), StackTrace.empty),
     );
     await tester.pumpWidget(lobbyFor(other));
