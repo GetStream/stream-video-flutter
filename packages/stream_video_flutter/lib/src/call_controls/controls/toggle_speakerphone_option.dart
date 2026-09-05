@@ -20,18 +20,22 @@ class ToggleSpeakerphoneOption extends StatefulWidget {
   const ToggleSpeakerphoneOption({
     super.key,
     required this.call,
-    this.enabledSpeakerphoneIcon = Icons.volume_up_rounded,
-    this.disabledSpeakerphoneIcon = Icons.volume_off_rounded,
+    this.enabledSpeakerphoneIcon,
+    this.disabledSpeakerphoneIcon,
   });
 
   /// Represents a call.
   final Call call;
 
   /// The icon that is shown when the speakerphone is enabled.
-  final IconData enabledSpeakerphoneIcon;
+  ///
+  /// Defaults to `context.streamIcons.audio`.
+  final IconData? enabledSpeakerphoneIcon;
 
   /// The icon that is shown when the speakerphone is disabled.
-  final IconData disabledSpeakerphoneIcon;
+  ///
+  /// Defaults to `context.streamIcons.mute`.
+  final IconData? disabledSpeakerphoneIcon;
 
   @override
   State<ToggleSpeakerphoneOption> createState() => _ToggleSpeakerState();
@@ -93,6 +97,8 @@ class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
 
   @override
   Widget build(BuildContext context) {
+    final icons = context.streamIcons;
+
     return PartialCallStateBuilder<bool>(
       call: widget.call,
       selector: (state) {
@@ -102,10 +108,14 @@ class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
         }
         return false;
       },
-      builder: (_, enabled) => CallControlOption(
-        icon: enabled
-            ? Icon(widget.enabledSpeakerphoneIcon)
-            : Icon(widget.disabledSpeakerphoneIcon),
+      // Routing audio to the speaker is a mode this control cycles, not a
+      // feature that is off by default, so it stays a neutral control.
+      builder: (_, enabled) => CallControlButton(
+        icon: Icon(
+          enabled
+              ? widget.enabledSpeakerphoneIcon ?? icons.audio
+              : widget.disabledSpeakerphoneIcon ?? icons.mute,
+        ),
         onPressed: () async {
           try {
             await _setSpeakerphoneEnabled(enabled: !enabled);

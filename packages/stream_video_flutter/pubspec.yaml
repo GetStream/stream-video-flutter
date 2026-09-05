@@ -52,13 +52,13 @@ platforms:
   windows:
 
 flutter:
+  # Required by `flutter gen-l10n`, which `melos run gen-l10n` drives. The
+  # generated localizations are committed under lib/src/l10n/localizations
+  # rather than synthesised, per l10n.yaml.
+  generate: true
+
   assets:
     - images/
-
-  fonts:
-    - family: StreamIcons
-      fonts:
-        - asset: fonts/StreamIcons.ttf
 
   uses-material-design: true
 

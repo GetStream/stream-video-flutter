@@ -50,5 +50,61 @@
   "livestreamLive": "Live",
   "@livestreamLive": {
     "description": "The badge text shown when the call mode is live"
+  },
+  "lobbyMicrophoneSection": "Microphone",
+  "@lobbyMicrophoneSection": {
+    "description": "Heading of the microphone group in the lobby's device menu"
+  },
+  "lobbySpeakerSection": "Speaker",
+  "@lobbySpeakerSection": {
+    "description": "Heading of the speaker group in the lobby's device menu"
+  },
+  "lobbyCameraSection": "Camera",
+  "@lobbyCameraSection": {
+    "description": "Heading of the camera group in the lobby's device menu"
+  },
+  "lobbySystemDefaultDevice": "System default",
+  "@lobbySystemDefaultDevice": {
+    "description": "The device option that leaves the choice to the operating system"
+  },
+  "lobbyDefaultDeviceHint": "Default",
+  "@lobbyDefaultDeviceHint": {
+    "description": "Placeholder on a device field while no device has been picked"
+  },
+  "lobbySelectAudioDevices": "Select audio devices",
+  "@lobbySelectAudioDevices": {
+    "description": "Tooltip of the lobby control that picks a microphone and speaker"
+  },
+  "lobbySelectVideoDevice": "Select video device",
+  "@lobbySelectVideoDevice": {
+    "description": "Tooltip of the lobby control that picks a camera"
+  },
+  "lobbyMicrophonePermissionRequired": "Microphone permission is required to select audio devices",
+  "@lobbyMicrophonePermissionRequired": {
+    "description": "Tooltip shown on the lobby's audio picker before microphone permission is granted"
+  },
+  "lobbyCameraPermissionRequired": "Camera permission is required to select a video device",
+  "@lobbyCameraPermissionRequired": {
+    "description": "Tooltip shown on the lobby's camera picker before camera permission is granted"
+  },
+  "lobbyToggleMicrophone": "Toggle microphone",
+  "@lobbyToggleMicrophone": {
+    "description": "Tooltip of the lobby's microphone toggle"
+  },
+  "lobbyToggleCamera": "Toggle camera",
+  "@lobbyToggleCamera": {
+    "description": "Tooltip of the lobby's camera toggle"
+  },
+  "lobbyTitle": "Before joining",
+  "@lobbyTitle": {
+    "description": "Heading of the lobby screen"
+  },
+  "lobbyJoinCall": "Join call",
+  "@lobbyJoinCall": {
+    "description": "Label of the button that joins the call from the lobby"
+  },
+  "lobbyParticipants": "Participants",
+  "@lobbyParticipants": {
+    "description": "Tooltip and sheet title of the lobby's participants control"
   }
 }

@@ -1,16 +1,17 @@
-// 📦 Package imports:
+// 🎯 Dart imports:
 import 'dart:async';
 
+// 📦 Package imports:
 import 'package:flutter/material.dart';
 import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../app/user_auth_controller.dart';
 import '../di/injector.dart';
+import '../utils/app_features.dart';
 import '../utils/call_encryption.dart';
 import '../utils/e2ee.dart';
 import '../utils/random_words.dart';
-import '../widgets/lobby_device_controls.dart';
 import '../widgets/lobby_encryption.dart';
 
 /// Hands the call over to the call screen once the lobby is done with it.
@@ -28,6 +29,9 @@ typedef OnJoinCallPressed =
       String? encryptionKey,
     });
 
+/// The dogfooding lobby: the SDK's [StreamLobbyView] under this app's own
+/// chrome, with a background-blur toggle spliced into the control row and the
+/// encryption settings in the footer.
 class LobbyScreen extends StatefulWidget {
   const LobbyScreen({
     super.key,
@@ -55,18 +59,8 @@ class LobbyScreen extends StatefulWidget {
 }
 
 class _LobbyScreenState extends State<LobbyScreen> {
-  RtcLocalAudioTrack? _microphoneTrack;
-  RtcLocalCameraTrack? _cameraTrack;
-  RtcMediaDevice? _selectedAudioInputDevice;
-  RtcMediaDevice? _selectedAudioOutputDevice;
-  RtcMediaDevice? _selectedVideoInputDevice;
-  bool _blurEnabled = false;
-
   final _userAuthController = locator.get<UserAuthController>();
-  late StreamVideoEffectsManager _videoEffectsManager;
-
-  /// The call about to be joined.
-  late final Call _call;
+  late final StreamVideoEffectsManager _videoEffectsManager;
 
   /// Whether to create the call encrypted. Only meaningful until the call
   /// exists, after which the call itself is the answer.
@@ -87,20 +81,17 @@ class _LobbyScreenState extends State<LobbyScreen> {
   bool get _callExists => widget.callExists || _created;
 
   /// Set once the call has been handed to the call screen, which owns the
-  /// manager from then on.
+  /// encryption manager from then on.
   bool _joining = false;
-
-  bool _hasMicrophonePermission = false;
-  bool _hasCameraPermission = false;
 
   @override
   void initState() {
     super.initState();
-    _call = widget.call;
-    _videoEffectsManager = StreamVideoEffectsManager(_call);
+    _videoEffectsManager = StreamVideoEffectsManager(widget.call);
 
-    // If an invite includes a key, the call should be encrypted and the user doesn't need to input anything.
-    // For new calls, an invite key will also trigger encrypted call creation.
+    // An invite that carries a key is an invite to an encrypted call, so the
+    // user has nothing to fill in. For a call that does not exist yet, it also
+    // decides that the call is created encrypted.
     final invitedKey = widget.initialEncryptionKey;
     if (invitedKey != null && invitedKey.isNotEmpty) {
       _encryptionEnabled = true;
@@ -108,61 +99,48 @@ class _LobbyScreenState extends State<LobbyScreen> {
     }
   }
 
-  Future<void> joinCallPressed() async {
-    if (_creatingCall) return;
+  @override
+  void dispose() {
+    _encryptionKeyController.dispose();
+    if (!_joining) unawaited(widget.call.clearE2EEManager());
+    super.dispose();
+  }
 
-    // Creation is deferred to here so the switch above stays live for as long
-    // as it means anything: the encryption mode is fixed at creation, and this
-    // is the last moment before it is.
+  /// Creates the call if this screen owns its creation, attaches the
+  /// encryption manager, and hands the call to the call screen.
+  ///
+  /// Returns false without joining when any of that fails, which leaves the
+  /// lobby on screen with its preview running.
+  Future<bool> _joinCallPressed(CallConnectOptions options) async {
+    if (_creatingCall) return false;
+
+    // Creation is deferred to here so the encryption switch stays live for as
+    // long as it means anything: the mode is fixed at creation, and this is
+    // the last moment before it is.
     if (!_callExists) {
-      final created = await _createCall();
-      if (!created || !mounted) return;
+      if (!await _createCall() || !mounted) return false;
     }
 
     // The manager has to be attached before any peer connection exists, and
     // the join happens on the next screen — so this is the last moment.
-    final isEncrypted = isCallEncrypted(_call.state.value.settings);
+    final isEncrypted = isCallEncrypted(widget.call.state.value.settings);
     if (isEncrypted && _encryptionKey.isNotEmpty) {
-      final attached = await _attachE2EE();
-      if (!attached || !mounted) return;
-    }
-
-    var options = const CallConnectOptions();
-
-    final cameraTrack = _cameraTrack;
-    if (cameraTrack != null) {
-      options = options.copyWith(camera: TrackOption.enabled());
-    }
-
-    final microphoneTrack = _microphoneTrack;
-    if (microphoneTrack != null) {
-      options = options.copyWith(microphone: TrackOption.enabled());
-    }
-
-    if (_selectedAudioInputDevice != null) {
-      options = options.copyWith(audioInputDevice: _selectedAudioInputDevice);
-    }
-
-    if (_selectedAudioOutputDevice != null) {
-      options = options.copyWith(audioOutputDevice: _selectedAudioOutputDevice);
-    }
-
-    if (_selectedVideoInputDevice != null) {
-      options = options.copyWith(videoInputDevice: _selectedVideoInputDevice);
+      if (!await _attachE2EE() || !mounted) return false;
     }
 
     _joining = true;
     widget.onJoinCallPressed(
-      call: _call,
+      call: widget.call,
       connectOptions: options,
       effectsManager: _videoEffectsManager,
       encryptionKey: isEncrypted && _encryptionKey.isNotEmpty
           ? _encryptionKey
           : null,
     );
+    return true;
   }
 
-  /// Derives the shared key and attaches a manager to [_call].
+  /// Derives the shared key and attaches a manager to the call.
   Future<bool> _attachE2EE() async {
     if (!EncryptionManager.isSupported) {
       _showError('End-to-end encryption is not available on this platform.');
@@ -176,7 +154,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
       );
 
       await e2ee.setSharedKey(kE2EESharedKeyIndex, keyBytes);
-      await _call.setE2EEManager(e2ee);
+      await widget.call.setE2EEManager(e2ee);
       return true;
     } catch (e, stk) {
       debugPrint('Failed to enable E2EE: $e\n$stk');
@@ -189,7 +167,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
     setState(() => _creatingCall = true);
 
     try {
-      final result = await _call.getOrCreate(
+      final result = await widget.call.getOrCreate(
         video: true,
         encryption: _encryptionEnabled
             ? const StreamEncryptionSettings(mode: StreamEncryptionMode.autoOn)
@@ -239,37 +217,28 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 
   @override
-  void dispose() {
-    _cameraTrack?.stop();
-    _microphoneTrack?.stop();
-
-    _cameraTrack = null;
-    _microphoneTrack = null;
-    _encryptionKeyController.dispose();
-
-    if (!_joining) unawaited(_call.clearE2EEManager());
-
-    super.dispose();
-  }
-
-  Future<void> _selectVideoInput(RtcMediaDevice? device) async {
-    // Recording the choice is enough to get a new track: the key below changes
-    // with it, so the preview is rebuilt and opens the newly chosen camera.
-    //
-    // The track it handed over earlier is ours to release, though, and the
-    // preview will not do it for us — nothing else holds a reference once it
-    // reports the replacement.
-    await _cameraTrack?.stop();
-    _cameraTrack = null;
-
-    if (mounted) setState(() => _selectedVideoInputDevice = device);
-  }
-
-  @override
   Widget build(BuildContext context) {
     final textTheme = context.streamTextTheme;
-    final colorTheme = context.streamColorScheme;
-    final currentUser = _userAuthController.currentUser;
+    final spacing = context.streamSpacing;
+    final currentUser = _userAuthController.currentUser!;
+
+    // Picking a preset is a demo of what a host can do, not something the SDK
+    // does: StreamLobbyView defaults to StreamLobbyActions.simple() everywhere.
+    //
+    // The choice is by platform, not by window width. A phone has no room for
+    // a settings row at any size, so the device choice goes on the toggles'
+    // carets; anything with a pointer gets the fields, however narrow the
+    // window is. Width still decides the *layout* — whether the control row
+    // sits on the preview or below it — but that is StreamLobbyView's business
+    // and it needs nothing from here.
+    final extras = [
+      const StreamLobbyParticipantsControl(),
+      if (AppFeature.backgroundBlur.isSupported)
+        _BlurToggle(effects: _videoEffectsManager),
+    ];
+    final actions = isMobileDevice
+        ? StreamLobbyActions.regular(extraControls: extras)
+        : StreamLobbyActions.full(extraControls: extras);
 
     return Scaffold(
       appBar: AppBar(
@@ -277,7 +246,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         leading: Padding(
           padding: const EdgeInsets.all(8),
-          child: StreamUserAvatar(user: currentUser!),
+          child: StreamUserAvatar(user: currentUser),
         ),
         titleSpacing: 4,
         centerTitle: false,
@@ -293,103 +262,29 @@ class _LobbyScreenState extends State<LobbyScreen> {
       ),
       body: Center(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              children: [
-                Icon(
-                  context.streamIcons.language,
-                  color: colorTheme.accentPrimary,
-                  size: 32,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Set up your call',
-                  textAlign: TextAlign.center,
-                  style: textTheme.headingLg,
-                ),
-                const SizedBox(height: 16),
-                StreamLobbyVideo(
-                  // Keyed on the selected camera, since the preview owns the
-                  // track it renders and has no way to be handed a different
-                  // one — remounting is how the device change reaches it.
-                  key: ValueKey(_selectedVideoInputDevice?.id),
-                  call: _call,
-                  initialCameraDevice: _selectedVideoInputDevice,
-                  onMicrophoneTrackSet: (track) {
-                    _microphoneTrack = track;
+          padding: EdgeInsets.symmetric(
+            horizontal: spacing.md,
+            vertical: spacing.xxl,
+          ),
+          // An `auto-on` call requires every participant to encrypt, so the
+          // server rejects a join without a key.
+          child: PartialCallStateBuilder(
+            call: widget.call,
+            selector: (state) => isCallEncrypted(state.settings),
+            builder: (context, isEncrypted) {
+              final willBeEncrypted = _callExists
+                  ? isEncrypted
+                  : _encryptionEnabled;
+              final needsKey = willBeEncrypted && _encryptionKey.isEmpty;
 
-                    // A non-null track means getUserMedia succeeded, so we
-                    // have permission and device labels are now populated.
-                    if (track != null && !_hasMicrophonePermission) {
-                      setState(() => _hasMicrophonePermission = true);
-                    }
-                  },
-                  onCameraTrackSet: (track) {
-                    _cameraTrack = track;
-
-                    if (track != null && !_hasCameraPermission) {
-                      setState(() => _hasCameraPermission = true);
-                    }
-
-                    if (track != null && _blurEnabled) {
-                      _videoEffectsManager.applyBackgroundBlurFilter(
-                        BlurIntensity.medium,
-                        track: track,
-                      );
-                    }
-                  },
-                  additionalActionsBuilder: (context, call) {
-                    return [
-                      Tooltip(
-                        message: _blurEnabled
-                            ? 'Disable background blur'
-                            : 'Enable background blur',
-                        child: CallControlOption(
-                          icon: _blurEnabled
-                              ? const Icon(Icons.blur_on)
-                              : const Icon(Icons.blur_off),
-                          onPressed: () async {
-                            setState(() {
-                              _blurEnabled = !_blurEnabled;
-                            });
-
-                            if (_blurEnabled) {
-                              await _videoEffectsManager
-                                  .applyBackgroundBlurFilter(
-                                    BlurIntensity.medium,
-                                    track: _cameraTrack,
-                                  );
-                            } else {
-                              await _videoEffectsManager.disableAllFilters(
-                                track: _cameraTrack,
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                    ];
-                  },
-                ),
-                const SizedBox(height: 12),
-                LobbyDeviceControls(
-                  microphoneEnabled: _hasMicrophonePermission,
-                  cameraEnabled: _hasCameraPermission,
-                  selectedAudioInput: _selectedAudioInputDevice,
-                  selectedAudioOutput: _selectedAudioOutputDevice,
-                  selectedVideoInput: _selectedVideoInputDevice,
-                  onAudioInputSelected: (device) {
-                    setState(() => _selectedAudioInputDevice = device);
-                  },
-                  onAudioOutputSelected: (device) {
-                    setState(() => _selectedAudioOutputDevice = device);
-                  },
-                  onVideoInputSelected: _selectVideoInput,
-                ),
-
-                const SizedBox(height: 24),
-                LobbyEncryption(
-                  call: _call,
+              return StreamLobbyView(
+                call: widget.call,
+                actions: actions,
+                title: Text('Set up your call', style: textTheme.headingLg),
+                joinButtonLabel: const Text('Start a test call'),
+                joinEnabled: !needsKey && !_creatingCall,
+                footer: LobbyEncryption(
+                  call: widget.call,
                   callExists: _callExists,
                   encryptionEnabled: _encryptionEnabled,
                   encryptionKey: _encryptionKey,
@@ -400,54 +295,95 @@ class _LobbyScreenState extends State<LobbyScreen> {
                     final next = value.trim();
                     final wasEmpty = _encryptionKey.isEmpty;
                     _encryptionKey = next;
+                    // Only the join button and the hint depend on the key, and
+                    // only on whether there is one at all.
                     if (wasEmpty != next.isEmpty) setState(() {});
                   },
                   onGenerateKey: () =>
                       setState(() => _setEncryptionKey(getRandomWords())),
                 ),
-                const SizedBox(height: 24),
-                // An `auto-on` call requires every participant to encrypt, so
-                // the server rejects a join without a key.
-                PartialCallStateBuilder(
-                  call: _call,
-                  selector: (state) => isCallEncrypted(state.settings),
-                  builder: (context, isEncrypted) {
-                    final willBeEncrypted = _callExists
-                        ? isEncrypted
-                        : _encryptionEnabled;
-                    final needsKey = willBeEncrypted && _encryptionKey.isEmpty;
-
-                    return Column(
-                      children: [
-                        if (needsKey)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Text(
-                              'Enter the shared encryption key to join',
-                              textAlign: TextAlign.center,
-                              style: textTheme.captionDefault.copyWith(
-                                color: colorTheme.textSecondary,
-                              ),
-                            ),
-                          ),
-                        SizedBox(
-                          width: 400,
-                          child: StreamButton(
-                            onPressed: needsKey || _creatingCall
-                                ? null
-                                : joinCallPressed,
-                            child: const Text('Start a test call'),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(height: 56),
-              ],
-            ),
+                onJoinCallPressed: _joinCallPressed,
+              );
+            },
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Blurs whatever is behind the user in the preview.
+///
+/// A feature button rather than a control: it is off by default and should
+/// read as switched on, not as something taken away.
+class _BlurToggle extends StatefulWidget {
+  const _BlurToggle({required this.effects});
+
+  final StreamVideoEffectsManager effects;
+
+  @override
+  State<_BlurToggle> createState() => _BlurToggleState();
+}
+
+class _BlurToggleState extends State<_BlurToggle> {
+  bool _enabled = false;
+  RtcLocalCameraTrack? _appliedTo;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Reading the controller here subscribes this button to it, so switching
+    // camera device brings us back and the filter is reapplied to the new
+    // track. This used to sit in build(), which meant firing a platform call
+    // and recording it as applied from inside a build that might never be
+    // committed — and swallowing whatever it threw.
+    final track = StreamLobbyScope.of(context).cameraTrack;
+    if (!_enabled || track == null || track == _appliedTo) return;
+
+    unawaited(_apply(track));
+  }
+
+  Future<void> _apply(RtcLocalCameraTrack? track) async {
+    final previous = _appliedTo;
+    _appliedTo = track;
+    try {
+      await widget.effects.applyBackgroundBlurFilter(
+        BlurIntensity.medium,
+        track: track,
+      );
+    } catch (e) {
+      // Otherwise the button goes on claiming blur over an unblurred preview,
+      // and never retries because the track is already recorded as applied.
+      debugPrint('Could not apply the background blur: $e');
+      _appliedTo = previous;
+      if (mounted) setState(() => _enabled = false);
+    }
+  }
+
+  Future<void> _remove(RtcLocalCameraTrack? track) async {
+    _appliedTo = null;
+    try {
+      await widget.effects.disableAllFilters(track: track);
+    } catch (e) {
+      debugPrint('Could not remove the background blur: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final track = StreamLobbyScope.of(context).cameraTrack;
+
+    return Tooltip(
+      message: _enabled ? 'Disable background blur' : 'Enable background blur',
+      child: CallFeatureButton(
+        icon: Icon(context.streamIcons.blurFill),
+        selected: _enabled,
+        onPressed: () {
+          final enabling = !_enabled;
+          setState(() => _enabled = enabling);
+          unawaited(enabling ? _apply(track) : _remove(track));
+        },
       ),
     );
   }

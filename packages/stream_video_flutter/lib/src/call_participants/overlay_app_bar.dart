@@ -45,8 +45,8 @@ class OverlayAppBar extends StatelessWidget {
               children: [
                 if (showBackButton ?? true)
                   IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back,
+                    icon: Icon(
+                      context.streamIcons.arrowLeft,
                       color: Colors.white,
                     ),
                     onPressed: () {

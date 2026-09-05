@@ -121,10 +121,16 @@ Read them from the context extensions — `context.streamColorScheme`,
 belong to the older system.
 
 One trap: the barrel re-exports core as
-`export 'package:stream_core_flutter/core.dart' hide StreamIcons, StreamTextTheme;`.
-A bare `StreamIcons` is therefore this repo's own three-icon class, while
-`context.streamIcons` returns core's full set. Naming `StreamTextTheme` in a file
-that also imports core directly is ambiguous — let the accessors infer instead.
+`export 'package:stream_core_flutter/core.dart' hide StreamTextTheme;`. Naming
+`StreamTextTheme` in a file that also imports core directly is therefore
+ambiguous — let the accessors infer instead. `StreamIcons` used to be hidden the
+same way, because this repo shipped a three-icon class of that name; that class
+is gone, so a bare `StreamIcons` is now core's full set and `const StreamIcons()`
+is how a test names the icon a widget will resolve.
+
+Every icon comes from `context.streamIcons`. No `Icons.*` from Material, with one
+documented exception: the livestream fullscreen toggle cross-fades between two
+glyphs and core ships no exit-fullscreen counterpart.
 
 Shadows come from `StreamElevation` through a `Material`, not a hand-painted
 `BoxShadow`. Material clips with `PhysicalShape`, so draw borders in a

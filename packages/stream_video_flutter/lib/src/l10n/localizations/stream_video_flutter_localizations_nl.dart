@@ -57,4 +57,48 @@ class StreamVideoFlutterLocalizationsNl
 
   @override
   String get livestreamLive => 'Live';
+
+  @override
+  String get lobbyMicrophoneSection => 'Microfoon';
+
+  @override
+  String get lobbySpeakerSection => 'Luidspreker';
+
+  @override
+  String get lobbyCameraSection => 'Camera';
+
+  @override
+  String get lobbySystemDefaultDevice => 'Systeemstandaard';
+
+  @override
+  String get lobbyDefaultDeviceHint => 'Standaard';
+
+  @override
+  String get lobbySelectAudioDevices => 'Audioapparaten selecteren';
+
+  @override
+  String get lobbySelectVideoDevice => 'Video-apparaat selecteren';
+
+  @override
+  String get lobbyMicrophonePermissionRequired =>
+      'Microfoontoegang is vereist om audioapparaten te selecteren';
+
+  @override
+  String get lobbyCameraPermissionRequired =>
+      'Cameratoegang is vereist om een video-apparaat te selecteren';
+
+  @override
+  String get lobbyToggleMicrophone => 'Microfoon aan- of uitzetten';
+
+  @override
+  String get lobbyToggleCamera => 'Camera aan- of uitzetten';
+
+  @override
+  String get lobbyTitle => 'Voordat je deelneemt';
+
+  @override
+  String get lobbyJoinCall => 'Deelnemen';
+
+  @override
+  String get lobbyParticipants => 'Deelnemers';
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../call_controls/call_control_option.dart';
+import '../../../stream_video_flutter.dart';
 
 /// Represents a set of controls the user can use on the calling screen
 /// to accept/cancel the call, toggle their audio and video state.
@@ -36,6 +36,8 @@ class IncomingCallControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final icons = context.streamIcons;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 64),
       child: Column(
@@ -43,14 +45,14 @@ class IncomingCallControls extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              CallControlOption(
-                icon: const Icon(Icons.call_end_rounded),
-                state: .negative,
+              CallControlButton(
+                icon: Icon(icons.phoneDownFill),
+                tone: .negative,
                 onPressed: onDeclineCallTap,
               ),
-              CallControlOption(
-                icon: const Icon(Icons.call_rounded),
-                state: .positive,
+              CallControlButton(
+                icon: Icon(icons.phoneFill),
+                tone: .positive,
                 onPressed: onAcceptCallTap,
               ),
             ],
@@ -61,16 +63,18 @@ class IncomingCallControls extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              CallControlOption(
-                icon: isMicrophoneEnabled
-                    ? const Icon(Icons.mic_rounded)
-                    : const Icon(Icons.mic_off_rounded),
+              CallControlButton(
+                icon: Icon(
+                  isMicrophoneEnabled ? icons.voiceFill : icons.voiceOffFill,
+                ),
+                tone: isMicrophoneEnabled ? .neutral : .negative,
                 onPressed: onMicrophoneTap,
               ),
-              CallControlOption(
-                icon: isCameraEnabled
-                    ? const Icon(Icons.videocam_rounded)
-                    : const Icon(Icons.videocam_off_rounded),
+              CallControlButton(
+                icon: Icon(
+                  isCameraEnabled ? icons.videoFill : icons.videoOffFill,
+                ),
+                tone: isCameraEnabled ? .neutral : .negative,
                 onPressed: onCameraTap,
               ),
             ],

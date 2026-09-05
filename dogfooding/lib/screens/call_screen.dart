@@ -54,6 +54,10 @@ class _CallScreenState extends State<CallScreen> {
   late final _videoEffectsManager =
       widget.videoEffectsManager ?? StreamVideoEffectsManager(widget.call);
 
+  /// Backs the mic and camera split buttons' carets. One controller, so the
+  /// two agree about which device is in use.
+  late final _devices = StreamMediaDevicesController.forCall(widget.call);
+
   late final _speakingWhileMuted = SpeakingWhileMutedRecognition(
     call: widget.call,
   );
@@ -113,11 +117,62 @@ class _CallScreenState extends State<CallScreen> {
     _speakingWhileMutedSubscription.cancel();
     _speakingWhileMuted.dispose();
     _chatConnectionRecoverySubscription?.cancel();
+    _devices.dispose();
     widget.call.leave();
     _userChatRepo.disconnectUser();
     _videoEffectsManager.dispose();
     super.dispose();
   }
+
+  /// Turns the microphone on or off, saying so when the call refuses.
+  ///
+  /// `setMicrophoneEnabled` returns a `Result`, and dropping it left the
+  /// button visibly doing nothing: its state comes from the call's own
+  /// participant state, which does not change on failure. A viewer without
+  /// `sendAudio` got no button movement, no message and no log.
+  Future<void> _setMicrophoneEnabled({required bool enabled}) async {
+    final message = 'Could not turn the microphone ${enabled ? 'on' : 'off'}';
+    final result = await widget.call.setMicrophoneEnabled(
+      enabled: enabled,
+      // Keeping the track alive on mute is what speaking-while-muted
+      // detection needs on iOS and macOS. Everywhere else the default
+      // release is right.
+      stopTrackOnMute: CurrentPlatform.isIos || CurrentPlatform.isMacOS
+          ? false
+          : null,
+    );
+    result.fold(
+      onSuccess: (_) {},
+      onFailure: (error, _) => _reportDeviceFailure(message, error),
+    );
+  }
+
+  /// Turns the camera on or off. See [_setMicrophoneEnabled].
+  Future<void> _setCameraEnabled({required bool enabled}) async {
+    final message = 'Could not turn the camera ${enabled ? 'on' : 'off'}';
+    final result = await widget.call.setCameraEnabled(enabled: enabled);
+    result.fold(
+      onSuccess: (_) {},
+      onFailure: (error, _) => _reportDeviceFailure(message, error),
+    );
+  }
+
+  void _reportDeviceFailure(String message, Object error) {
+    debugPrint('$message: $error');
+    if (!mounted) return;
+
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+    );
+  }
+
+  /// Whether the platform has looked and found nothing.
+  ///
+  /// Guarded on the enumeration having happened at all: until then the list is
+  /// empty because nothing has been asked, and the control would flash an
+  /// error badge as the call opens.
+  bool _noDeviceFor(List<RtcMediaDevice> devices) =>
+      _devices.hasEnumerated && devices.isEmpty;
 
   Future<void> _connectChatChannel() async {
     final userAuthController = locator.get<UserAuthController>();
@@ -325,9 +380,9 @@ class _CallScreenState extends State<CallScreen> {
                   child: SafeArea(
                     child: Row(
                       children: [
-                        CallControlOption(
-                          icon: const Icon(Icons.more_vert),
-                          state: _moreMenuVisible ? .positive : .on,
+                        CallFeatureButton(
+                          icon: Icon(context.streamIcons.moreVerticalFill),
+                          selected: _moreMenuVisible,
                           onPressed: () {
                             toggleMoreMenu(context);
                           },
@@ -338,45 +393,95 @@ class _CallScreenState extends State<CallScreen> {
                             useiOSBroadcastExtension: true,
                             captureScreenAudio: true,
                           ),
-                          enabledScreenShareBackgroundColor: colorScheme.brand,
-                          disabledScreenShareIcon: Icons.screen_share,
                           desktopScreenSelectorBuilder:
                               // ignore: avoid_redundant_argument_values
                               _useCustomDesktopScreenShareOption
                               ? _customDesktopScreenShareSelector
                               : null,
                         ),
-                        ToggleMicrophoneOption(
-                          call: call,
-                          disabledMicrophoneBackgroundColor:
-                              colorScheme.accentError,
-                          // Keep the track alive on mute so speaking-while-
-                          // muted detection also works on iOS/macOS.
-                          stopTrackOnMute:
-                              CurrentPlatform.isIos || CurrentPlatform.isMacOS
-                              ? false
-                              : null,
-                        ),
-                        ToggleCameraOption(
-                          call: call,
-                          disabledCameraBackgroundColor:
-                              colorScheme.accentError,
+                        // Split buttons rather than plain toggles, so the
+                        // device can be changed mid-call without opening the
+                        // settings menu.
+                        // Listening to the devices as well as the call: the
+                        // buttons disable themselves when the platform reports
+                        // no device, which arrives on the device stream rather
+                        // than in call state.
+                        ListenableBuilder(
+                          listenable: _devices,
+                          builder: (context, _) => Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              PartialCallStateBuilder<bool>(
+                                call: call,
+                                selector: (state) =>
+                                    state.localParticipant?.isAudioEnabled ??
+                                    false,
+                                builder: (context, enabled) =>
+                                    StreamMicrophoneSplitButton(
+                                      devices: _devices,
+                                      enabled: enabled,
+                                      unavailable: _noDeviceFor(
+                                        _devices.audioInputs,
+                                      ),
+                                      // The bar sits along the bottom, so its
+                                      // menus come up rather than down.
+                                      menuDirection: StreamMenuDirection.up,
+                                      // Badging is appearance only, so a
+                                      // control with nothing to open has to
+                                      // be disabled here as well.
+                                      onPressed:
+                                          _noDeviceFor(_devices.audioInputs)
+                                          ? null
+                                          : () => _setMicrophoneEnabled(
+                                              enabled: !enabled,
+                                            ),
+                                    ),
+                              ),
+                              PartialCallStateBuilder<bool>(
+                                call: call,
+                                selector: (state) =>
+                                    state.localParticipant?.isVideoEnabled ??
+                                    false,
+                                builder: (context, enabled) =>
+                                    StreamCameraSplitButton(
+                                      devices: _devices,
+                                      enabled: enabled,
+                                      unavailable: _noDeviceFor(
+                                        _devices.videoInputs,
+                                      ),
+                                      menuDirection: StreamMenuDirection.up,
+                                      // See the microphone above.
+                                      onPressed:
+                                          _noDeviceFor(_devices.videoInputs)
+                                          ? null
+                                          : () => _setCameraEnabled(
+                                              enabled: !enabled,
+                                            ),
+                                    ),
+                              ),
+                            ],
+                          ),
                         ),
                         const Spacer(),
-                        PartialCallStateBuilder(
+                        // onTap, so the button opens this app's own
+                        // participants screen rather than the SDK's list.
+                        PartialCallStateBuilder<List<CallParticipantState>>(
                           call: call,
-                          selector: (state) => state.callParticipants.length,
-                          builder: (context, length) {
-                            return BadgedCallOption(
-                              callControlOption: CallControlOption(
-                                icon: const Icon(Icons.people),
-                                onPressed: _channel != null
+                          selector: (state) => state.callParticipants,
+                          builder: (context, participants) =>
+                              StreamParticipantsControl(
+                                onTap: _channel != null
                                     ? () => showParticipants(context)
                                     : null,
+                                participants: [
+                                  for (final participant in participants)
+                                    UserInfo(
+                                      id: participant.userId,
+                                      name: participant.name,
+                                      image: participant.image,
+                                    ),
+                                ],
                               ),
-                              badgeCount: length,
-                            );
-                          },
                         ),
                         _ShowChatButton(channel: _channel),
                       ],
@@ -434,8 +539,8 @@ class __ShowChatButtonState extends State<_ShowChatButton> {
   @override
   Widget build(BuildContext context) {
     return BadgedCallOption(
-      callControlOption: CallControlOption(
-        icon: const Icon(Icons.question_answer),
+      callControlOption: CallControlButton(
+        icon: Icon(context.streamIcons.messageBubblesFill),
         onPressed: widget.channel != null ? () => showChat(context) : null,
       ),
       badgeCount: _unreadCount == 0 ? null : _unreadCount,

@@ -25,6 +25,8 @@ class StreamContextMenuAnchor extends StatelessWidget {
     this.controller,
     this.constraints = defaultConstraints,
     this.alignmentOffset = Offset.zero,
+    this.actionStyle,
+    this.elevation,
     this.onOpen,
     this.onClose,
   });
@@ -71,6 +73,21 @@ class StreamContextMenuAnchor extends StatelessWidget {
   /// The offset of the menu relative to the anchor.
   final Offset alignmentOffset;
 
+  /// Overrides for the rows inside the menu.
+  ///
+  /// Merged over the design's `Web / Menu Item`, which is sized for a 16px
+  /// icon beside a caption. A menu whose rows carry something bigger — an
+  /// avatar, a thumbnail — needs a taller row and a wider inset, or its
+  /// content fills the row edge to edge.
+  final StreamContextMenuActionStyle? actionStyle;
+
+  /// How high the menu floats above the page.
+  ///
+  /// Null takes the value from `StreamContextMenuTheme`, and 3 if that is not
+  /// set either. Pass 0 for a menu that sits flat on the page and is separated
+  /// from it by its border alone.
+  final double? elevation;
+
   /// Called when the menu opens.
   final VoidCallback? onOpen;
 
@@ -85,6 +102,12 @@ class StreamContextMenuAnchor extends StatelessWidget {
     return MenuAnchor(
       controller: controller,
       alignmentOffset: alignmentOffset,
+      // MenuAnchor clips its panel to the panel's own bounds by default, which
+      // cuts off the shadow StreamContextMenu's Material draws outside them —
+      // hardest to miss along the bottom edge, where that shadow is heaviest.
+      // Nothing here needs the panel's clip: the menu draws its own surface
+      // and clips its own content.
+      clipBehavior: Clip.none,
       onOpen: onOpen,
       onClose: onClose,
       style: menuStyle,
@@ -114,9 +137,12 @@ class StreamContextMenuAnchor extends StatelessWidget {
                   padding: WidgetStatePropertyAll(
                     EdgeInsets.symmetric(horizontal: spacing.xs),
                   ),
-                ),
+                ).merge(actionStyle),
               ),
-              child: StreamContextMenu(children: menuChildren),
+              child: StreamContextMenu(
+                elevation: elevation,
+                children: menuChildren,
+              ),
             ),
           ),
         ),

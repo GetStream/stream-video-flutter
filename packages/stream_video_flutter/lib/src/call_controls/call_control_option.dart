@@ -3,81 +3,87 @@ import 'package:flutter/material.dart';
 import '../../stream_video_flutter.dart';
 
 /// Widget that represents a call control option.
+@Deprecated(
+  'Use CallControlButton for the microphone, camera, answer, decline '
+  'and leave controls, or CallFeatureButton for a feature that is off '
+  'by default and prominent when on. Both are built on the design '
+  "system's StreamButton and take their colours from the theme rather "
+  'than from per-instance parameters.',
+)
 class CallControlOption extends StatelessWidget {
   /// Creates a new instance of [CallControlOption].
+  @Deprecated(
+    'Use CallControlButton or CallFeatureButton instead. See the CHANGELOG '
+    'for the mapping.',
+  )
   const CallControlOption({
     super.key,
     required this.icon,
-    this.state = .on,
+    this.iconColor,
+    this.disabledIconColor,
+    this.elevation,
+    this.backgroundColor,
+    this.disabledBackgroundColor,
+    this.shape,
+    this.padding,
     this.onPressed,
   });
 
   /// The icon of the call control option.
   final Widget icon;
 
-  final CallControlState state;
+  /// The color of the icon of the call control option.
+  final Color? iconColor;
+
+  /// The color of the icon of the call control option when it is disabled.
+  final Color? disabledIconColor;
+
+  /// The elevation of the call control option.
+  final double? elevation;
+
+  /// The background color of the call control option.
+  final Color? backgroundColor;
+
+  /// The background color of the call control option when it is disabled.
+  final Color? disabledBackgroundColor;
+
+  /// The shape of the call control option.
+  final OutlinedBorder? shape;
+
+  /// The padding applied to the call control option.
+  final EdgeInsetsGeometry? padding;
 
   /// The callback to invoke when the user taps on the call control option.
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return StreamButtonTheme(
-      data: .new(
-        primary: .new(
-          solid: .new(
-            backgroundColor: .all(
-              context.streamColorScheme.accentSuccess,
-            ),
-          ),
-        ),
+    final theme = StreamCallControlsTheme.of(context);
+
+    Color? iconColor;
+    if (onPressed != null) {
+      iconColor = this.iconColor ?? theme.optionIconColor;
+    } else {
+      iconColor = disabledIconColor ?? theme.inactiveOptionIconColor;
+    }
+
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        elevation: elevation ?? theme.optionElevation,
+        backgroundColor: backgroundColor ?? theme.optionBackgroundColor,
+        shape: shape ?? theme.optionShape,
+        padding: padding ?? theme.optionPadding,
+        visualDensity: VisualDensity.comfortable,
+        disabledBackgroundColor:
+            disabledBackgroundColor ?? theme.inactiveOptionBackgroundColor,
       ),
-      child: _MaybeBadged(
-        showErrorBadge: state == .disabled,
-        child: StreamButton.icon(
-          icon: icon,
-          onPressed: onPressed,
-          style: switch (state) {
-            .on => .secondary,
-            .off => .destructive,
-            .positive => .primary,
-            .negative => .destructive,
-            .disabled => .destructive,
-          },
+      child: IconTheme.merge(
+        data: IconThemeData(
+          color: iconColor,
         ),
+        child: icon,
       ),
     );
   }
-}
-
-class _MaybeBadged extends StatelessWidget {
-  const _MaybeBadged({required this.showErrorBadge, required this.child});
-
-  final bool showErrorBadge;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!showErrorBadge) return child;
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        child,
-        PositionedDirectional(
-          top: -4,
-          end: -4,
-          child: StreamErrorBadge(size: StreamErrorBadgeSize.sm),
-        ),
-      ],
-    );
-  }
-}
-
-enum CallControlState {
-  on,
-  off,
-  positive,
-  negative,
-  disabled,
 }

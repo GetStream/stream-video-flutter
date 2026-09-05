@@ -15,6 +15,10 @@ Iterable<StreamComponentBuilderExtension<Object>> streamVideoComponentBuilders({
   StreamComponentBuilder<StreamConnectionQualityIndicatorProps>?
   connectionQualityIndicator,
 
+  // ── Lobby ────────────────────────────────────────────────────────────────
+  StreamComponentBuilder<StreamLobbyHeaderProps>? lobbyHeader,
+  StreamComponentBuilder<StreamLobbyFooterProps>? lobbyFooter,
+
   // ── Shared ───────────────────────────────────────────────────────────────
   StreamComponentBuilder<StreamUserAvatarProps>? userAvatar,
 }) {
@@ -31,6 +35,10 @@ Iterable<StreamComponentBuilderExtension<Object>> streamVideoComponentBuilders({
       StreamComponentBuilderExtension(builder: participantLabel),
     if (connectionQualityIndicator != null)
       StreamComponentBuilderExtension(builder: connectionQualityIndicator),
+    if (lobbyHeader != null)
+      StreamComponentBuilderExtension(builder: lobbyHeader),
+    if (lobbyFooter != null)
+      StreamComponentBuilderExtension(builder: lobbyFooter),
     if (userAvatar != null)
       StreamComponentBuilderExtension(builder: userAvatar),
   ];

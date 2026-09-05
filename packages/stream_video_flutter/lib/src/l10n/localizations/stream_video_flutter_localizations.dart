@@ -178,6 +178,90 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'Live'**
   String get livestreamLive;
+
+  /// Heading of the microphone group in the lobby's device menu
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone'**
+  String get lobbyMicrophoneSection;
+
+  /// Heading of the speaker group in the lobby's device menu
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker'**
+  String get lobbySpeakerSection;
+
+  /// Heading of the camera group in the lobby's device menu
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get lobbyCameraSection;
+
+  /// The device option that leaves the choice to the operating system
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get lobbySystemDefaultDevice;
+
+  /// Placeholder on a device field while no device has been picked
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get lobbyDefaultDeviceHint;
+
+  /// Tooltip of the lobby control that picks a microphone and speaker
+  ///
+  /// In en, this message translates to:
+  /// **'Select audio devices'**
+  String get lobbySelectAudioDevices;
+
+  /// Tooltip of the lobby control that picks a camera
+  ///
+  /// In en, this message translates to:
+  /// **'Select video device'**
+  String get lobbySelectVideoDevice;
+
+  /// Tooltip shown on the lobby's audio picker before microphone permission is granted
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone permission is required to select audio devices'**
+  String get lobbyMicrophonePermissionRequired;
+
+  /// Tooltip shown on the lobby's camera picker before camera permission is granted
+  ///
+  /// In en, this message translates to:
+  /// **'Camera permission is required to select a video device'**
+  String get lobbyCameraPermissionRequired;
+
+  /// Tooltip of the lobby's microphone toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle microphone'**
+  String get lobbyToggleMicrophone;
+
+  /// Tooltip of the lobby's camera toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle camera'**
+  String get lobbyToggleCamera;
+
+  /// Heading of the lobby screen
+  ///
+  /// In en, this message translates to:
+  /// **'Before joining'**
+  String get lobbyTitle;
+
+  /// Label of the button that joins the call from the lobby
+  ///
+  /// In en, this message translates to:
+  /// **'Join call'**
+  String get lobbyJoinCall;
+
+  /// Tooltip and sheet title of the lobby's participants control
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get lobbyParticipants;
 }
 
 class _StreamVideoFlutterLocalizationsDelegate

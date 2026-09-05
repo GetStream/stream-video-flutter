@@ -290,7 +290,7 @@ class _DesktopCallParticipantsGridState
                         scale: currentPage > 0 ? 1 : 0,
                         duration: kThemeAnimationDuration,
                         child: PageNavigationButton(
-                          icon: const Icon(Icons.chevron_left_rounded),
+                          icon: Icon(context.streamIcons.chevronLeft),
                           onPressed: () async {
                             final previousPage = currentPage - 1;
                             await _pageController.animateToPage(
@@ -309,7 +309,7 @@ class _DesktopCallParticipantsGridState
                         scale: currentPage < _pages.length - 1 ? 1 : 0,
                         duration: kThemeAnimationDuration,
                         child: PageNavigationButton(
-                          icon: const Icon(Icons.chevron_right_rounded),
+                          icon: Icon(context.streamIcons.chevronRight),
                           onPressed: () async {
                             final nextPage = currentPage + 1;
                             await _pageController.animateToPage(

@@ -9,45 +9,37 @@ class ToggleRecordingOption extends StatelessWidget {
   const ToggleRecordingOption({
     super.key,
     required this.call,
-    this.enabledRecordingIcon = Icons.video_file_outlined,
-    this.disabledRecordingIcon = Icons.video_file_rounded,
-    this.enabledRecordingIconColor,
-    this.disabledRecordingIconColor,
-    this.enabledRecordingBackgroundColor,
-    this.disabledRecordingBackgroundColor,
+    this.enabledRecordingIcon,
+    this.disabledRecordingIcon,
   });
 
   /// Represents a call.
   final Call call;
 
   /// The icon that is shown when the recording is enabled.
-  final IconData enabledRecordingIcon;
+  ///
+  /// Defaults to `context.streamIcons.recordingStopFill`.
+  final IconData? enabledRecordingIcon;
 
   /// The icon that is shown when the recording is disabled.
-  final IconData disabledRecordingIcon;
-
-  /// Color of the icon when recording is enabled
-  final Color? enabledRecordingIconColor;
-
-  /// Color of the icon when recording is disabled
-  final Color? disabledRecordingIconColor;
-
-  /// Color of the background when recording is enabled
-  final Color? enabledRecordingBackgroundColor;
-
-  /// Color of the background when recording is disabled
-  final Color? disabledRecordingBackgroundColor;
+  ///
+  /// Defaults to `context.streamIcons.recordingFill`.
+  final IconData? disabledRecordingIcon;
 
   @override
   Widget build(BuildContext context) {
+    final icons = context.streamIcons;
+
     return PartialCallStateBuilder<bool>(
       call: call,
       selector: (state) => state.isRecording,
-      builder: (_, enabled) => CallControlOption(
-        icon: enabled
-            ? Icon(enabledRecordingIcon)
-            : Icon(disabledRecordingIcon),
-        state: enabled ? .on : .off,
+      builder: (_, enabled) => CallFeatureButton(
+        icon: Icon(
+          enabled
+              ? enabledRecordingIcon ?? icons.recordingStopFill
+              : disabledRecordingIcon ?? icons.recordingFill,
+        ),
+        selected: enabled,
         onPressed: () {
           if (!enabled) {
             call.startRecording();
