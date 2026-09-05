@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../test_utils/test_wrapper.dart';
+import '../mocks.dart';
 
 const _participants = [
   UserInfo(id: 'a', name: 'Rene iPad'),
@@ -19,7 +21,7 @@ void main() {
     await tester.pumpWidget(
       TestWrapper(
         platform: platform,
-        child: StreamParticipantsControl(
+        child: StreamParticipantsControl.forParticipants(
           participants: participants,
           onTap: onTap,
         ),
@@ -129,5 +131,112 @@ void main() {
       expect(row.props.enabled, isTrue);
       expect(row.props.onTap, isNull);
     }
+  });
+
+  // The call-driven constructor is what a call screen reaches for, so the
+  // mapping from participants to the badge and the list is the SDK's job
+  // rather than something every app repeats.
+  group('over a call', () {
+    late MockCall call;
+    late MockCallState callState;
+
+    CallParticipantState participant(String id, String name) {
+      final it = MockCallParticipantState();
+      when(() => it.userId).thenReturn(id);
+      when(() => it.name).thenReturn(name);
+      when(() => it.image).thenReturn(null);
+      return it;
+    }
+
+    void givenParticipants(List<CallParticipantState> participants) {
+      when(() => callState.callParticipants).thenReturn(participants);
+    }
+
+    setUp(() {
+      call = MockCall();
+      callState = MockCallState();
+
+      final emitter = MutableStateEmitter<CallState>(callState, sync: true);
+      when(() => call.state).thenAnswer((_) => emitter);
+      when(
+        () => call.partialState<List<CallParticipantState>>(any()),
+      ).thenAnswer((invocation) {
+        final CallStateSelector<List<CallParticipantState>> selector =
+            invocation.positionalArguments[0];
+        return Stream.value(selector(callState));
+      });
+    });
+
+    Future<void> pumpCall(WidgetTester tester, {VoidCallback? onTap}) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          platform: TargetPlatform.macOS,
+          child: StreamParticipantsControl(call: call, onTap: onTap),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets("badges the call's participants", (tester) async {
+      givenParticipants([
+        participant('a', 'Rene iPad'),
+        participant('b', 'rebe'),
+      ]);
+
+      await pumpCall(tester);
+
+      expect(find.text('2'), findsOneWidget);
+    });
+
+    testWidgets('lists them by name', (tester) async {
+      givenParticipants([participant('a', 'Rene iPad')]);
+
+      await pumpCall(tester);
+      await tester.tap(find.byType(CallControlButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Rene iPad'), findsOneWidget);
+    });
+
+    // A row labelled with an empty string is a row of nothing, so somebody
+    // the call has no name for is listed by id instead.
+    testWidgets('falls back to the id of a nameless participant', (
+      tester,
+    ) async {
+      givenParticipants([participant('user-7', '')]);
+
+      await pumpCall(tester);
+      await tester.tap(find.byType(CallControlButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('user-7'), findsOneWidget);
+    });
+
+    testWidgets('is disabled in an empty call with nothing to open', (
+      tester,
+    ) async {
+      givenParticipants(const []);
+
+      await pumpCall(tester);
+
+      expect(
+        tester
+            .widget<CallControlButton>(find.byType(CallControlButton))
+            .onPressed,
+        isNull,
+      );
+    });
+
+    testWidgets('calls onTap instead of opening the list', (tester) async {
+      givenParticipants([participant('a', 'Rene iPad')]);
+      var tapped = 0;
+
+      await pumpCall(tester, onTap: () => tapped++);
+      await tester.tap(find.byType(CallControlButton));
+      await tester.pumpAndSettle();
+
+      expect(tapped, 1);
+      expect(find.text('Rene iPad'), findsNothing);
+    });
   });
 }

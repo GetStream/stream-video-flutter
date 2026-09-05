@@ -2,6 +2,68 @@
 
 ### ✅ Added
 
+- `CallFeatureButton` takes a `tone`, so a feature can paint red while it is on rather than accent blue. `StreamRecordingButton` uses it: a running recording is capturing the call, which the design marks out from a feature that is merely active.
+
+  ```dart
+  CallFeatureButton(
+    icon: Icon(context.streamIcons.recordingStopFill),
+    selected: isRecording,
+    tone: .destructive,
+  )
+  ```
+
+  Only the selected state changes. An unselected feature is the same secondary grey whatever its tone, so a row of them reads as one row until something is switched on — which is what the design system's own component does across its Captions, Screen Share, Picture in Picture and Record variants.
+
+- `StreamMicrophoneButton` and `StreamCameraButton` no longer drop the `Result` their setter returns. A refusal is logged, and reported to the new `onError` if one is given.
+
+  Dropping it made a refused press invisible: a control's on/off state comes from the call's own participant state, and that does not change when the call says no. A viewer without `sendAudio` pressed the microphone and got no button movement, no message and nothing in the log. The split buttons take the same `onError`.
+
+  ```dart
+  StreamMicrophoneButton(
+    call: call,
+    onError: (error) => showSnackBar('Could not switch the microphone'),
+  )
+  ```
+
+  The error is an `Object` rather than the `VideoError` behind it, matching `StreamMediaDevicesController.enumerationError`: `stream_video` exports the `Result` that carries the error but not the class, so the type cannot be named from outside that package.
+
+- `StreamMicrophoneButton` and `StreamMicrophoneSplitButton` take `stopTrackOnMute`, passed on to `Call.setMicrophoneEnabled`, as `ToggleMicrophoneOption` did.
+- `StreamMicrophoneButton` and `StreamCameraButton` take an optional `devices`, and mark a device the platform does not report — an error badge, no press, and the neutral tone rather than the negative one a deliberate mute gets. Only the split buttons could say this before, so a narrow control bar built from the plain toggles lost it.
+
+  Optional, and no controller is built without it: a plain toggle needs none, and enumerating devices to draw a microphone button is a cost a screen should opt into. Pass the controller the screen's other pickers already read.
+
+  ```dart
+  StreamMicrophoneButton(call: call, devices: devices)
+  ```
+
+- Added `CallControlBar`, the row of controls along the bottom of a call. It takes a `CallControlBarLayout` per screen size — `leading`, `center` and `trailing` slots of plain widgets — and draws the one the window calls for, falling back to the next smaller layout that was given. Only `small` is required, so a bar handed `small` and `large` draws `small` on a tablet.
+
+  The centre is centred in the bar's full width rather than in the gap between the two sides, so a long leading group and an empty trailing one leave it where it was. It is given what is left after reserving the wider side's width on both sides of it — which is why at `StreamScreenSize.small` you want either the two sides or the centre, not both.
+
+  The bar owns its chrome: the background, the hairline separating it from the call, and the bottom safe-area inset. It owns no controls; a caller supplies every one of them.
+
+  ```dart
+  CallControlBar(
+    CallControlBarLayout(
+      leading: [StreamMicrophoneButton(call: call), StreamCameraButton(call: call)],
+      trailing: [StreamParticipantsControl(call: call)],
+    ),
+    large: CallControlBarLayout(
+      leading: [StreamLayoutButton(onLayoutModeChanged: setLayout)],
+      center: [
+        StreamMicrophoneButton(call: call),
+        StreamCameraButton(call: call),
+        StreamLeaveCallButton(call: call),
+      ],
+      trailing: [StreamParticipantsControl(call: call)],
+    ),
+  )
+  ```
+
+  Its geometry and surface come from `CallControlBarThemeData` on `StreamVideoTheme`, or from a `CallControlBarTheme` over a subtree. `CallControlBarStyle.surfaceStyle` docks the bar or floats it over the call, the way `StreamBottomAppBar` does. Only which controls are drawn varies by size: the bar is `kStreamToolbarHeight` (72) tall with the same padding at every breakpoint, since one that changed either jumped as a desktop window was dragged across it.
+
+  It is deliberately not a `PreferredSizeWidget`: its height depends on the window and `preferredSize` cannot read one, so a caller that needs a preferred size builds it from `CallControlBar.heightOf(context)`.
+
 - `CallButtonBadge` is no longer exported. It exists so the badge sits in the same place on both call buttons, which is an implementation detail; exporting it committed the package to its shape and gave integrators a way to badge things inconsistently.
 - `CallControlButton` no longer overrides `StreamButtonTheme` for every tone. Only `positive` repaints the primary background — there is no success button style in the design system — and wrapping the other two overrode an app's own primary style for buttons that never use it.
 - `StreamMenuHandle` is an `abstract interface class`, so it cannot be accidentally extended.
@@ -49,7 +111,18 @@
 
 - The lobby marks a device it cannot use. When the camera or microphone is refused permission, or the platform reports none at all, its control is drawn disabled with an error badge rather than in the negative state a deliberate mute gets, so a permission problem is not mistaken for a choice the user made. Both the plain toggles and the split buttons do it, and joining stays possible with the unavailable device disabled. `StreamLobbyController` exposes `microphoneUnavailable` and `cameraUnavailable`.
 
-- The device split buttons and the participants control are call controls rather than lobby widgets. `StreamMicrophoneSplitButton` and `StreamCameraSplitButton` take a `StreamMediaDevicesController` and an enabled state, so the same control works either side of joining, plus a `menuDirection` — a control bar along the bottom of a call opens its menus upwards, and the caret should say so — `StreamMediaDevicesController.forCall` wires one to a call's own device setters. `StreamParticipantsControl` takes the people to badge and list, and an optional `onTap` that replaces the built-in list, which is what a call screen wants when it has a side panel of its own. The `StreamLobby*` widgets remain as thin wrappers that read the lobby's controller, so a preset can still list them without wiring anything up.
+- The device split buttons and the participants control are call controls rather than lobby widgets, and their default constructor takes the call — like `StreamScreenShareButton` and every other control in this package.
+
+  `StreamMicrophoneSplitButton(call: call)` and `StreamCameraSplitButton(call: call)` read the call's own microphone or camera state, toggle it, build and dispose a `StreamMediaDevicesController` for it, and disable themselves when the platform names no such device. `StreamParticipantsControl(call: call)` badges and lists the call's participants, falling back to a user's id where the call has no name for them. All three still take the optional extras that matter at a call site: `menuDirection` — a control bar along the bottom of a call opens its menus upwards, and the caret should say so — `onError`, and `onTap`.
+
+  ```dart
+  StreamMicrophoneSplitButton(call: call, menuDirection: StreamMenuDirection.up)
+  StreamParticipantsControl(call: call, onTap: openParticipantsPanel)
+  ```
+
+  Pass `devices` to a split button to share one controller with every other picker on the screen — a settings menu's selects as well as this caret — so they never disagree about which device is in use.
+
+  Where the state and the action are the caller's, `StreamMicrophoneSplitButton.withDevices` and `StreamCameraSplitButton.withDevices` take a controller, an `enabled` flag and an `onPressed`, and `StreamParticipantsControl.forParticipants` takes a `List<UserInfo>`. That is what a lobby needs, where nobody has joined and there is no call state to read; the `StreamLobby*` wrappers use them, so a preset can still list them without wiring anything up.
 
 - Added the lobby's action widgets: `StreamLobbyMicrophoneToggle` and `StreamLobbyCameraToggle`, `StreamLobbyMicrophoneSplitButton` and `StreamLobbyCameraSplitButton` (a toggle with a caret that picks the device), `StreamLobbyMicrophoneSelect` and `StreamLobbyCameraSelect` for a settings row, and `StreamLobbyParticipantsControl`, which badges the number of people already in the call and opens the list — an anchored menu on desktop and a bottom sheet on Android and iOS, like the device pickers. Each reads its state from `StreamLobbyScope`, so none of them has to be wired up at the call site. The split button and the select input open the same sections over the same controller, so a lobby showing both never disagrees with itself, and on Android and iOS both open a bottom sheet without either knowing it.
 - Added lobby strings to the localizations, in English and Dutch: the device menu's section headings, its system-default option, the tooltips on the toggles and pickers, and the permission messages shown before a device can be named.
@@ -124,6 +197,16 @@
 
 ### 🐞 Fixed
 
+- An in-call device menu marks the device in use. It marked nothing: `StreamMediaDevicesController.forCall` reports `supportsSystemDefault: false` — a call's device setters take a device, so there is no row for "let the platform pick" — and the selection stayed null until somebody picked something, which left every row unselected. The lobby was unaffected, since there null has a row of its own. The split buttons in a call's control bar are the first menus to show it.
+
+  Where null cannot be drawn, `selectedAudioInput` and its siblings now resolve to the device the platform reports as its own choice: the entry under the reserved `default` id, which is what web lists as "Default - <name>" alongside the real devices. It is a device like any other there, so its row is selectable and picking it applies nothing, since it is already in use. A platform that reports no such entry is unchanged.
+
+- The microphone and camera controls no longer flash the muted look while a call is being joined. `CallParticipantState.isAudioEnabled` is `!(audioTrack?.muted ?? true)`, so a track the SFU has not named yet reads exactly like a track the user muted — and every control drew red for the second between joining and the first track arriving.
+
+  The two are distinguishable, and now distinguished: muting keeps the track entry and flags it, so an *absent* entry means nothing has said. While nothing has said, a control draws the state the call was joined with — `CallConnectOptions.microphone` and `camera`, where a provided track counts as on, since a lobby only hands one over for a device it opened. Once the track is reported it decides, so somebody who mutes a call they joined unmuted stays muted.
+
+  New on `CallParticipantState`: `trackEnabled(SfuTrackType)`, returning null for a track nothing has reported. `TrackOption.wantsOn` reads the intent behind a connect option.
+
 - The sample's in-call microphone and camera buttons now say when the call refuses them. `setMicrophoneEnabled` and `setCameraEnabled` return a `Result` that was dropped, and the buttons take their state from the call's own participant state, which does not change on a failure — so a user without permission to send video tapped the camera button and watched nothing happen, with nothing logged either.
 - The sample's background-blur toggle no longer applies its filter from inside `build()`. It recorded the track as filtered before the platform call had returned, and swallowed whatever that call threw, so switching camera to a device the filter could not handle left the button claiming blur over an unblurred preview with no way to retry. It runs from `didChangeDependencies` now and puts the toggle back on failure.
 
@@ -152,6 +235,10 @@
 
 ### ⚠️ Deprecated
 
+- Every call control is named `Stream<Thing>Button` now, matching the split buttons, the `CallControlButton` / `CallFeatureButton` primitives, and the design system's own components. `ToggleMicrophoneOption` is `StreamMicrophoneButton`, and alongside it `ToggleCameraOption`, `ToggleScreenShareOption`, `ToggleRecordingOption`, `ToggleClosedCaptionsOption`, `ToggleLayoutOption`, `ToggleSpeakerphoneOption`, `FlipCameraOption`, `AddReactionOption` and `LeaveCallOption` become `StreamCameraButton`, `StreamScreenShareButton`, `StreamRecordingButton`, `StreamClosedCaptionsButton`, `StreamLayoutButton`, `StreamSpeakerphoneButton`, `StreamFlipCameraButton`, `StreamAddReactionButton` and `StreamLeaveCallButton`.
+
+  "Toggle" went with the rename: it described the press rather than the control, and half the family never toggled anything. Each old name survives as a deprecated typedef, and a typedef to a class carries its constructors, so an unmigrated call site keeps compiling whatever arguments it passes. `dart fix --apply` renames them all.
+
 - `CallControlOption` is deprecated in favour of `CallControlButton` and `CallFeatureButton`, and has been restored to the shape it has in the last release: it takes `iconColor`, `disabledIconColor`, `elevation`, `backgroundColor`, `disabledBackgroundColor`, `shape` and `padding`, and draws an `ElevatedButton` styled from `StreamCallControlsTheme`. Code written against the released SDK keeps compiling and keeps looking the way it did. Migrating is manual rather than a `dart fix`: neither replacement takes per-instance colours, so a rename would drop whatever the call site passed. Map `state`-free call sites and the old `on` state onto `CallControlButton(tone: .neutral)`, `off` onto `.negative`, `positive` onto `.positive` for a control or `CallFeatureButton(selected: true)` for a feature, `negative` onto `.negative`, and `disabled` onto `CallControlButton(tone: .negative, showErrorBadge: true)`.
 - `StreamCallParticipantThemeData` and `StreamCallParticipantTheme` are deprecated. Their properties now live in `StreamParticipantTileThemeData`, `StreamParticipantLabelThemeData`, `StreamConnectionQualityIndicatorThemeData` and `StreamCallParticipantsGridThemeData`. A theme passed to `StreamVideoTheme(callParticipantTheme: ...)` is still applied — in full, so a tile styled the old way keeps looking the way it did. Stop passing it to pick up the redesign, and pass a theme in the new shape to replace it outright. The translation runs in that factory only: setting `callParticipantTheme` through `copyWith`, or wrapping a subtree in the `StreamCallParticipantTheme` widget, changes the field without restyling anything.
 - `StreamCallParticipant` is deprecated in favour of `StreamParticipantTile`, matching the component name in the design system. It keeps its own full parameter list and now only wraps `DefaultStreamParticipantTile`. Swapping the name is a manual migration rather than a `dart fix`: `StreamParticipantTile` replaces the visual parameters with a single `style:` (see the Breaking entry below), so a rename would drop whatever a call site passed. `dart fix --apply` does still strip the parameters that no longer have any effect.
@@ -168,9 +255,9 @@
 - The lobby's hardcoded English moved into the localizations, so the heading, subheading and join button follow the app's locale. Pass `title`, `subtitle` or `joinButtonLabel` to override them.
 
 - Every icon the SDK draws now resolves from the design system's icon set through `context.streamIcons`, instead of from Material. A microphone is `voiceFill` / `voiceOffFill`, a camera `videoFill` / `videoOffFill`, hanging up `phoneDownFill`, answering `phoneFill`, screen sharing `presentDesktopFill`, captions `captionFill`, recording `recordingFill` / `recordingStopFill`. The one exception is the livestream fullscreen toggle, whose cross-fade needs two distinct glyphs where the design system ships only `fullscreenFill`.
-- The `IconData` parameters on the control widgets — `enabledMicrophoneIcon`, `disabledCameraIcon`, `icon` on `LeaveCallOption` and the rest — are now nullable and default to null, resolving from `context.streamIcons` at build time. Passing an icon still works; the defaults could not stay in the constructor because reading the theme needs a context.
+- The `IconData` parameters on the control widgets — `enabledMicrophoneIcon`, `disabledCameraIcon`, `icon` on `StreamLeaveCallButton` and the rest — are now nullable and default to null, resolving from `context.streamIcons` at build time. Passing an icon still works; the defaults could not stay in the constructor because reading the theme needs a context.
 - This package's own three-icon `StreamIcons` class and its bundled font are removed. It was never exported from the barrel, and its `grid`, `spotlight` and `fullscreen` are covered by `context.streamIcons.gridFill`, `.speakerLeftFill` and `.fullscreenFill`.
-- The dead colour parameters on `ToggleMicrophoneOption`, `ToggleCameraOption`, `ToggleRecordingOption`, `ToggleClosedCaptionsOption` and `ToggleScreenShareOption` (`enabled*IconColor`, `disabled*IconColor`, `enabled*BackgroundColor`, `disabled*BackgroundColor`) are removed. They stopped having any effect when those widgets moved onto `StreamButton`, so dropping them changes nothing at runtime. Run `dart fix --apply`.
+- The dead colour parameters on `StreamMicrophoneButton`, `StreamCameraButton`, `StreamRecordingButton`, `StreamClosedCaptionsButton` and `StreamScreenShareButton` (`enabled*IconColor`, `disabled*IconColor`, `enabled*BackgroundColor`, `disabled*BackgroundColor`) are removed. They stopped having any effect when those widgets moved onto `StreamButton`, so dropping them changes nothing at runtime. Run `dart fix --apply`.
 - The participant tile follows the redesigned design system. Its corner radius is 20 (was 0 on mobile and 12 on desktop), the speaking outline is 2px (was 4px), a tile showing no video draws a hairline over a subtle surface instead of a solid grey fill, the placeholder avatar is 80px with a white ring, and the name and connection quality indicator share one 48px toolbar along the bottom.
 - The participant name can no longer overlap the connection quality indicator. The two were independent `Stack` children aligned to opposite corners; they are now laid out in a single row, so a long name ellipsizes rather than running underneath. As a consequence `StreamCallParticipantThemeData.participantLabelAlignment` and `connectionLevelAlignment` no longer have any effect, and the same parameters on `StreamCallParticipant` are accepted and ignored. Run `dart fix --apply` to drop them.
 - The tile now sheds chrome on tiles too small to carry it, rather than overflowing: the name goes first, then the name pill, then the connection quality indicator. The pill is measured against what this participant makes it draw, so a muted camera-off participant loses it earlier than a plain one. The overflow button and the reaction are dropped on a tile too small to carry them beside each other, or too short for the top toolbar to clear the bottom one. A spotlight thumbnail or a floating self-view will show less than a full-size tile does.

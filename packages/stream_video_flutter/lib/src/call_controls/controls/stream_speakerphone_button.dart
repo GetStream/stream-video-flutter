@@ -15,9 +15,9 @@ const deviceIdEarpiece = 'earpiece';
 /// speakerphone is on or off.
 ///
 /// This widget is only available on Android and iOS.
-class ToggleSpeakerphoneOption extends StatefulWidget {
-  /// Creates a new instance of [ToggleSpeakerphoneOption].
-  const ToggleSpeakerphoneOption({
+class StreamSpeakerphoneButton extends StatefulWidget {
+  /// Creates a new instance of [StreamSpeakerphoneButton].
+  const StreamSpeakerphoneButton({
     super.key,
     required this.call,
     this.enabledSpeakerphoneIcon,
@@ -38,10 +38,10 @@ class ToggleSpeakerphoneOption extends StatefulWidget {
   final IconData? disabledSpeakerphoneIcon;
 
   @override
-  State<ToggleSpeakerphoneOption> createState() => _ToggleSpeakerState();
+  State<StreamSpeakerphoneButton> createState() => _ToggleSpeakerState();
 }
 
-class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
+class _ToggleSpeakerState extends State<StreamSpeakerphoneButton> {
   final _deviceNotifier = RtcMediaDeviceNotifier.instance;
   StreamSubscription<List<RtcMediaDevice>>? _deviceChangeSubscription;
 
@@ -125,3 +125,10 @@ class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
     );
   }
 }
+
+/// ToggleSpeakerphoneOption is [StreamSpeakerphoneButton] now.
+@Deprecated(
+  'ToggleSpeakerphoneOption is StreamSpeakerphoneButton now, matching the rest of the '
+  'call controls. Will be removed in the next major version.',
+)
+typedef ToggleSpeakerphoneOption = StreamSpeakerphoneButton;

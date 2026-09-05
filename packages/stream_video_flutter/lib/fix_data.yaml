@@ -699,3 +699,111 @@ transforms:
 
   #endregion Call control button migration
 #endregion
+
+  #region Call control naming
+  # Every call control is `Stream<Thing>Button` now, matching the split
+  # buttons and the design system's own components. Each old name survives as a
+  # deprecated typedef, and a typedef to a class carries its constructors, so
+  # renaming a call site is safe whatever arguments it passes.
+
+  - title: "replace ToggleMicrophoneOption with StreamMicrophoneButton"
+    date: "2026-09-03"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      typedef: "ToggleMicrophoneOption"
+    changes:
+      - kind: "rename"
+        newName: "StreamMicrophoneButton"
+
+  - title: "replace ToggleCameraOption with StreamCameraButton"
+    date: "2026-09-03"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      typedef: "ToggleCameraOption"
+    changes:
+      - kind: "rename"
+        newName: "StreamCameraButton"
+
+  - title: "replace ToggleScreenShareOption with StreamScreenShareButton"
+    date: "2026-09-03"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      typedef: "ToggleScreenShareOption"
+    changes:
+      - kind: "rename"
+        newName: "StreamScreenShareButton"
+
+  - title: "replace ToggleRecordingOption with StreamRecordingButton"
+    date: "2026-09-03"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      typedef: "ToggleRecordingOption"
+    changes:
+      - kind: "rename"
+        newName: "StreamRecordingButton"
+
+  - title: "replace ToggleClosedCaptionsOption with StreamClosedCaptionsButton"
+    date: "2026-09-03"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      typedef: "ToggleClosedCaptionsOption"
+    changes:
+      - kind: "rename"
+        newName: "StreamClosedCaptionsButton"
+
+  - title: "replace ToggleLayoutOption with StreamLayoutButton"
+    date: "2026-09-03"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      typedef: "ToggleLayoutOption"
+    changes:
+      - kind: "rename"
+        newName: "StreamLayoutButton"
+
+  - title: "replace ToggleSpeakerphoneOption with StreamSpeakerphoneButton"
+    date: "2026-09-03"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      typedef: "ToggleSpeakerphoneOption"
+    changes:
+      - kind: "rename"
+        newName: "StreamSpeakerphoneButton"
+
+  - title: "replace FlipCameraOption with StreamFlipCameraButton"
+    date: "2026-09-03"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      typedef: "FlipCameraOption"
+    changes:
+      - kind: "rename"
+        newName: "StreamFlipCameraButton"
+
+  - title: "replace AddReactionOption with StreamAddReactionButton"
+    date: "2026-09-03"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      typedef: "AddReactionOption"
+    changes:
+      - kind: "rename"
+        newName: "StreamAddReactionButton"
+
+  - title: "replace LeaveCallOption with StreamLeaveCallButton"
+    date: "2026-09-03"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      typedef: "LeaveCallOption"
+    changes:
+      - kind: "rename"
+        newName: "StreamLeaveCallButton"
+
+  #endregion

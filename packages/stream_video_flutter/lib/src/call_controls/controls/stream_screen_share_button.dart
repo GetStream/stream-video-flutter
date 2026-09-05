@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../stream_video_flutter.dart';
 
 /// A widget that represents a call control option to start/stop screen sharing
-class ToggleScreenShareOption extends StatelessWidget {
-  /// Creates a new instance of [ToggleScreenShareOption].
-  const ToggleScreenShareOption({
+class StreamScreenShareButton extends StatelessWidget {
+  /// Creates a new instance of [StreamScreenShareButton].
+  const StreamScreenShareButton({
     super.key,
     required this.call,
     this.localParticipant,
@@ -45,13 +45,17 @@ class ToggleScreenShareOption extends StatelessWidget {
     var screenShareConstraints = this.screenShareConstraints;
     final icons = context.streamIcons;
 
+    final defaultIcon = CurrentPlatform.isMobile
+        ? icons.presentMobileFill
+        : icons.presentDesktopFill;
+
     Widget buildContent(bool enabled) => CallFeatureButton(
       // One glyph in both states: a live screen share is marked by the
       // selected accent, not by a different picture.
       icon: Icon(
         enabled
-            ? enabledScreenShareIcon ?? icons.presentDesktopFill
-            : disabledScreenShareIcon ?? icons.presentDesktopFill,
+            ? enabledScreenShareIcon ?? defaultIcon
+            : disabledScreenShareIcon ?? defaultIcon,
       ),
       selected: enabled,
       onPressed: () async {
@@ -116,3 +120,10 @@ class ToggleScreenShareOption extends StatelessWidget {
     );
   }
 }
+
+/// ToggleScreenShareOption is [StreamScreenShareButton] now.
+@Deprecated(
+  'ToggleScreenShareOption is StreamScreenShareButton now, matching the rest of the '
+  'call controls. Will be removed in the next major version.',
+)
+typedef ToggleScreenShareOption = StreamScreenShareButton;

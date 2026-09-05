@@ -5,9 +5,9 @@ import '../../../stream_video_flutter.dart';
 /// The lobby's microphone split button: [StreamMicrophoneSplitButton] driven
 /// by the lobby's own controller.
 ///
-/// Exists so a preset can list it without wiring anything up. Use
-/// [StreamMicrophoneSplitButton] directly anywhere there is no
-/// [StreamLobbyScope] — in a call, say.
+/// Exists so a preset can list it without wiring anything up. In a call reach
+/// for [StreamMicrophoneSplitButton] instead, whose default constructor takes
+/// the call and needs no wiring either.
 class StreamLobbyMicrophoneSplitButton extends StatelessWidget {
   /// Creates a new instance of [StreamLobbyMicrophoneSplitButton].
   const StreamLobbyMicrophoneSplitButton({super.key});
@@ -16,7 +16,7 @@ class StreamLobbyMicrophoneSplitButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = StreamLobbyScope.of(context);
 
-    return StreamMicrophoneSplitButton(
+    return StreamMicrophoneSplitButton.withDevices(
       devices: controller.devices,
       enabled: controller.microphoneEnabled,
       unavailable: controller.microphoneUnavailable,
@@ -38,7 +38,7 @@ class StreamLobbyCameraSplitButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = StreamLobbyScope.of(context);
 
-    return StreamCameraSplitButton(
+    return StreamCameraSplitButton.withDevices(
       devices: controller.devices,
       enabled: controller.cameraEnabled,
       unavailable: controller.cameraUnavailable,

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../stream_video_flutter.dart';
 
 /// A widget that allows to change the layout of the call.
-class ToggleLayoutOption extends StatefulWidget {
-  /// Creates a new instance of [ToggleLayoutOption].
-  const ToggleLayoutOption({
+class StreamLayoutButton extends StatefulWidget {
+  /// Creates a new instance of [StreamLayoutButton].
+  const StreamLayoutButton({
     super.key,
     required this.onLayoutModeChanged,
     this.initialLayout = ParticipantLayoutMode.grid,
@@ -18,10 +18,10 @@ class ToggleLayoutOption extends StatefulWidget {
   final void Function(ParticipantLayoutMode) onLayoutModeChanged;
 
   @override
-  State<ToggleLayoutOption> createState() => _ToggleLayoutOptionState();
+  State<StreamLayoutButton> createState() => _StreamLayoutButtonState();
 }
 
-class _ToggleLayoutOptionState extends State<ToggleLayoutOption> {
+class _StreamLayoutButtonState extends State<StreamLayoutButton> {
   ParticipantLayoutMode _layoutMode = ParticipantLayoutMode.grid;
 
   @override
@@ -51,3 +51,10 @@ class _ToggleLayoutOptionState extends State<ToggleLayoutOption> {
     );
   }
 }
+
+/// ToggleLayoutOption is [StreamLayoutButton] now.
+@Deprecated(
+  'ToggleLayoutOption is StreamLayoutButton now, matching the rest of the '
+  'call controls. Will be removed in the next major version.',
+)
+typedef ToggleLayoutOption = StreamLayoutButton;
