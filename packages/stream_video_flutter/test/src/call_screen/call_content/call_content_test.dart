@@ -57,6 +57,43 @@ void main() {
       when(() => mockLocalParticipant.isAudioEnabled).thenReturn(true);
     });
 
+    // A double-tap handler over the body held the pointer arena for
+    // kDoubleTapTimeout, so a button inside it — a participant tile's overflow
+    // menu above all — did not fire until 300ms after the finger lifted.
+    testWidgets('a tap in the body is recognized in the same frame', (
+      tester,
+    ) async {
+      var taps = 0;
+
+      await tester.pumpWidget(
+        SizedBox(
+          width: 300,
+          height: 300,
+          child: TestWrapper(
+            child: StreamCallContent(
+              call: mockCall,
+              callAppBarWidgetBuilder: (context, call) => AppBar(),
+              callControlsWidgetBuilder: (context, call) => const SizedBox(),
+              callParticipantsWidgetBuilder: (context, call) => Center(
+                child: ElevatedButton(
+                  onPressed: () => taps++,
+                  child: const Text('In the body'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('In the body'));
+      // No pump for the double-tap timeout: the press has to have landed
+      // already.
+      await tester.pump();
+
+      expect(taps, 1);
+    });
+
     goldenTest(
       'renders correctly with extendBody true',
       fileName: 'stream_call_content_extend_body_true',

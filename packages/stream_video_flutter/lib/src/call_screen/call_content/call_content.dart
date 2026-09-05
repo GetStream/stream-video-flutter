@@ -2,11 +2,9 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../call_diagnostics_content/call_diagnostics_content.dart';
 
 typedef CallNotConnectedBuilder =
     Widget Function(
@@ -111,9 +109,6 @@ class _StreamCallContentState extends State<StreamCallContent> {
 
   StreamSubscription<({CallStatus status, bool isScreenShareEnabled})>?
   _callStateSubscription;
-
-  /// Controls the visibility of [CallDiagnosticsContent].
-  bool _isStatsVisible = false;
 
   @override
   void initState() {
@@ -247,17 +242,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
           ),
       body: Stack(
         children: [
-          GestureDetector(
-            onDoubleTap: _toggleStatsVisibility,
-            child: bodyWidget,
-          ),
-          Visibility(
-            visible: _isStatsVisible,
-            child: CallDiagnosticsContent(
-              call: call,
-              onClosePressed: _toggleStatsVisibility,
-            ),
-          ),
+          bodyWidget,
           if (_status.isFastReconnecting)
             widget.callFastReconnectingOverlayBuilder?.call(
                   context,
@@ -289,13 +274,5 @@ class _StreamCallContentState extends State<StreamCallContent> {
             : const SizedBox.shrink(),
       ),
     );
-  }
-
-  void _toggleStatsVisibility() {
-    if (kDebugMode) {
-      setState(() {
-        _isStatsVisible = !_isStatsVisible;
-      });
-    }
   }
 }
