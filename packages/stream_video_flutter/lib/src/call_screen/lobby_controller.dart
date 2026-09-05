@@ -31,6 +31,11 @@ typedef LobbyAudioTrackOpener = Future<RtcLocalAudioTrack> Function();
 typedef LobbyCameraTrackOpener =
     Future<RtcLocalCameraTrack> Function(String? deviceId);
 
+/// Everything the lobby knows before the call is joined.
+///
+/// The call is read, not created: one that does not exist yet leaves
+/// [fetchError] set and [participants] empty, and creating it is the host's to
+/// do — before the lobby, or from [StreamLobbyView.onJoinCallPressed].
 class StreamLobbyController extends ChangeNotifier {
   /// Creates a new instance of [StreamLobbyController].
   StreamLobbyController({
@@ -103,7 +108,9 @@ class StreamLobbyController extends ChangeNotifier {
   ///
   /// [participants] is empty while this is set, which is not the same thing
   /// as an empty call — a host that wants to tell the two apart, or offer a
-  /// retry, reads this.
+  /// retry, reads this. A call that has not been created yet fetches as a
+  /// failure too, so a lobby that leaves creation to its join callback sees
+  /// this until it joins.
   Object? get fetchError => _fetchError;
 
   List<CallParticipant> _participants = const [];
@@ -376,17 +383,20 @@ class StreamLobbyController extends ChangeNotifier {
   }
 
   void _fetchCall() {
-    // Obtains SFU credentials and picks the best server, but doesn't connect
-    // to the call yet.
+    // Reads the call, and does not create one that is not there: what a call
+    // is created with — its encryption mode above all, which cannot be changed
+    // afterwards — is the host's to decide, and a waiting room being shown is
+    // not that decision. A call that does not exist yet fetches as a failure,
+    // which leaves the lobby with a preview, no participants and [fetchError].
     final currentUserId = _video.currentUser.id;
     _logger.d(() => '[fetchCall] currentUserId: $currentUserId');
 
     _fetchSubscription?.cancel();
-    _fetchSubscription = call.getOrCreate().asStream().listen((result) {
+    _fetchSubscription = call.get().asStream().listen((result) {
       result.fold(
         onSuccess: (callData) {
           _logger.v(() => '[fetchCall] completed: $callData');
-          final metadata = callData.data.metadata;
+          final metadata = callData.metadata;
 
           // One `now` for the whole sort: `sortedBy` calls the key function
           // repeatedly, so a fresh DateTime.now() per element would not be a
@@ -445,7 +455,7 @@ class StreamLobbyController extends ChangeNotifier {
         // event for them must not slip one back in.
         if (participant.userId == _video.currentUser.id) return;
 
-        // Upsert rather than append. `getOrCreate` returns a snapshot of the
+        // Upsert rather than append. The fetch returns a snapshot of the
         // session while this subscription is already live, so a join that is
         // already reflected in that snapshot still arrives as an event — and
         // appending it blindly listed the same person twice. Identity is the

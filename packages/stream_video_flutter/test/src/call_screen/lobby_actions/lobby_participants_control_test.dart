@@ -8,6 +8,8 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import '../../../test_utils/test_wrapper.dart';
 import '../../mocks.dart';
 
+final _callCid = StreamCallCid(cid: 'default:lobby');
+
 // The control opens the same list either way, but not in the same shape: an
 // anchored menu where there is a pointer, a bottom sheet where there is a
 // thumb.
@@ -40,7 +42,7 @@ void main() {
     when(() => call.state).thenAnswer(
       (_) => MutableStateEmitter<CallState>(callState, sync: true),
     );
-    when(call.getOrCreate).thenAnswer((_) async {
+    when(call.get).thenAnswer((_) async {
       final metadata = MockCallMetadata();
       when(() => metadata.settings).thenReturn(
         const CallSettings(
@@ -68,10 +70,8 @@ void main() {
         ),
       );
 
-      final data = MockCallCreatedData();
-      when(() => data.metadata).thenReturn(metadata);
       return Result.success(
-        CallReceivedOrCreatedData(wasCreated: true, data: data),
+        CallReceivedData(callCid: _callCid, metadata: metadata),
       );
     });
 

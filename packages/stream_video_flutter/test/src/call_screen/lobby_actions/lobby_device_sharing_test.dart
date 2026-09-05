@@ -56,7 +56,7 @@ void main() {
       (_) => MutableStateEmitter<CallState>(callState, sync: true),
     );
     // The participant list plays no part here.
-    when(call.getOrCreate).thenAnswer(
+    when(call.get).thenAnswer(
       (_) async => Result.failure(
         StateError('not needed for this test'),
         StackTrace.empty,
