@@ -44,7 +44,7 @@ class CallUpdatedEvent extends core.WsEvent with _$CallUpdatedEvent {
   final String callCid;
 
   @override
-  @JsonKey(name: 'capabilities_by_role')
+  @JsonKey(name: 'capabilities_by_role', fromJson: _capabilitiesByRoleFromJson)
   final Map<String, List<String>> capabilitiesByRole;
 
   @override

@@ -46,7 +46,7 @@ class CallMemberUpdatedPermissionEvent extends core.WsEvent
   final String callCid;
 
   @override
-  @JsonKey(name: 'capabilities_by_role')
+  @JsonKey(name: 'capabilities_by_role', fromJson: _capabilitiesByRoleFromJson)
   final Map<String, List<String>> capabilitiesByRole;
 
   @override

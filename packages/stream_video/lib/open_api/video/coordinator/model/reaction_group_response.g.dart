@@ -19,6 +19,7 @@ ReactionGroupResponse _$ReactionGroupResponseFromJson(
   latestReactionsBy: (json['latest_reactions_by'] as List<dynamic>)
       .map((e) => ReactionGroupUserResponse.fromJson(e as Map<String, dynamic>))
       .toList(),
+  sumScores: (json['sum_scores'] as num).toInt(),
 );
 
 Map<String, dynamic> _$ReactionGroupResponseToJson(
@@ -34,4 +35,5 @@ Map<String, dynamic> _$ReactionGroupResponseToJson(
   'latest_reactions_by': instance.latestReactionsBy
       .map((e) => e.toJson())
       .toList(),
+  'sum_scores': instance.sumScores,
 };

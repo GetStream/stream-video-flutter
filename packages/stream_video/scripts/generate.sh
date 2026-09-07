@@ -53,8 +53,8 @@ echo "🗂 Output:   $OUTPUT_DIR_VIDEO"
 echo "💬 CHAT_DIR: $CHAT_DIR"
 echo ""
 
-# ---------- [1/4] Generate spec & client ----------
-section "➡️ [1/4] Generating OpenAPI spec and Dart client…"
+# ---------- [1/5] Generate spec & client ----------
+section "➡️ [1/5] Generating OpenAPI spec and Dart client…"
 
 # Clean target & ensure parent exists
 rm -rf "$OUTPUT_DIR_VIDEO"
@@ -80,65 +80,71 @@ mkdir -p "$OUTPUT_DIR_VIDEO"
 
 section "✅ Finished generating client at: $OUTPUT_DIR_VIDEO"
 
-# ---------- [2/4] Post-generation fixes ----------
-section "➡️ [2/4] Applying post-generation fixes…"
+# ---------- [2/5] Post-generation fixes ----------
+section "➡️ [2/5] Applying post-generation fixes…"
 
-CALL_PARTICIPANT_FILE="$OUTPUT_DIR_VIDEO/model/call_participant.dart"
-if [[ -f "$CALL_PARTICIPANT_FILE" ]]; then
-  # Remove duplicate constructor arg 'role'
-  sed_inplace '/required this\.role,/{N;/required this\.role,.*\n.*required this\.role,/s/\n.*required this\.role,//;}' "$CALL_PARTICIPANT_FILE"
-  # Remove duplicate field/override block for 'role'
-  sed_inplace '/final String role;/{N;N;N;/final String role;.*\n.*\n.*@override.*\n.*final String role;/s/\n.*\n.*@override.*\n.*final String role;//;}' "$CALL_PARTICIPANT_FILE"
-  echo "• Fixed duplicate role in CallParticipant"
-fi
+# Every fix below is a text patch against generated output, so it goes stale the
+# moment the Dart templates change shape — and `sed` exits 0 when it matches
+# nothing, so a stale patch is silent. Each fix therefore asserts its own result
+# and fails the run rather than shipping half-patched models.
+#
+# require_file fails when a fix's target model is gone, so a renamed or dropped
+# model is reported instead of silently skipped.
+require_file() {
+  [[ -f "$1" ]] || {
+    echo "❌ post-gen fix target is missing: $1"
+    echo "   the model was renamed or is no longer generated — update generate.sh"
+    exit 1
+  }
+}
 
-REACTION_GROUP_RESPONSE_FILE="$OUTPUT_DIR_VIDEO/model/reaction_group_response.dart"
-if [[ -f "$REACTION_GROUP_RESPONSE_FILE" ]]; then
-  # Remove stray sumScores artifacts
-  sed_inplace '/required this\.sumScores,/d' "$REACTION_GROUP_RESPONSE_FILE"
-  sed_inplace '/@override/{N;/final int sumScores;/d;}' "$REACTION_GROUP_RESPONSE_FILE"
-  echo "• Fixed extra sumScores in ReactionGroupResponse"
-fi
+# require_match fails when a patch left no trace, i.e. its pattern went stale.
+require_match() {
+  grep -q "$2" "$1" || {
+    echo "❌ post-gen fix did not apply to $1"
+    echo "   expected to find: $2"
+    echo "   the generated output changed shape — update generate.sh"
+    exit 1
+  }
+}
 
 # capabilitiesByRole: Map<String, List<String>> — the generated cast crashes for
 # non-List values. Insert a tolerant helper and wire it via @JsonKey(fromJson:).
 for file in \
   "$OUTPUT_DIR_VIDEO/model/call_updated_event.dart" \
   "$OUTPUT_DIR_VIDEO/model/call_member_updated_permission_event.dart"; do
-  if [[ -f "$file" ]]; then
-    # Insert the helper function before the first @freezed annotation.
-    awk '/^@freezed$/ && !inserted {
-      print "Map<String, List<String>> _capabilitiesByRoleFromJson(Map<String, dynamic> json) {"
-      print "  return {"
-      print "    for (final entry in json.entries)"
-      print "      if (entry.value is List)"
-      print "        entry.key: (entry.value as List).map((i) => i as String).toList(),"
-      print "  };"
-      print "}"
-      print ""
-      inserted=1
-    }
-    { print }' "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
-    # Wire the helper: replace @JsonKey(defaultValue: {}) with @JsonKey(fromJson:).
-    # capabilitiesByRole is the only required Map field in these two event models,
-    # so the replacement is unambiguous.
-    sed_inplace 's/@JsonKey(defaultValue: {})/@JsonKey(fromJson: _capabilitiesByRoleFromJson)/' "$file"
-    echo "• Fixed capabilitiesByRole in $(basename "$file")"
-  fi
-done
+  require_file "$file"
 
-# TranscriptionSettingsResponseLanguage: use .auto (not .unknown) as the
-# unknown-value fallback so existing transcription sessions aren't lost.
-TRANSCRIPTION_FILE="$OUTPUT_DIR_VIDEO/model/transcription_settings_response.dart"
-if [[ -f "$TRANSCRIPTION_FILE" ]]; then
-  sed_inplace 's/unknownEnumValue: TranscriptionSettingsResponseLanguage\.unknown/unknownEnumValue: TranscriptionSettingsResponseLanguage.auto/g' "$TRANSCRIPTION_FILE"
-  echo "• Fixed TranscriptionSettingsResponseLanguage unknownEnumValue to .auto"
-fi
+  # Insert the helper function before the first @freezed annotation.
+  awk '/^@freezed$/ && !inserted {
+    print "Map<String, List<String>> _capabilitiesByRoleFromJson(Map<String, dynamic> json) {"
+    print "  return {"
+    print "    for (final entry in json.entries)"
+    print "      if (entry.value is List)"
+    print "        entry.key: (entry.value as List).map((i) => i as String).toList(),"
+    print "  };"
+    print "}"
+    print ""
+    inserted=1
+  }
+  { print }' "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
+
+  # Wire the helper onto the field, keeping the generated `name:` argument.
+  # capabilitiesByRole is the only Map<String, List<String>> field in these two
+  # event models, so keying off its JSON name is unambiguous.
+  sed_inplace \
+    "s/@JsonKey(name: 'capabilities_by_role')/@JsonKey(name: 'capabilities_by_role', fromJson: _capabilitiesByRoleFromJson)/" \
+    "$file"
+
+  require_match "$file" 'Map<String, List<String>> _capabilitiesByRoleFromJson'
+  require_match "$file" 'fromJson: _capabilitiesByRoleFromJson'
+  echo "• Fixed capabilitiesByRole in $(basename "$file")"
+done
 
 section "✅ Post-generation fixes applied"
 
-# ---------- [3/4] build_runner (package only) ----------
-section "➡️ [3/4] Running build_runner in stream_video…"
+# ---------- [3/5] build_runner (package only) ----------
+section "➡️ [3/5] Running build_runner in stream_video…"
 
 (
   cd "$PKG_DIR"
@@ -151,8 +157,8 @@ section "➡️ [3/4] Running build_runner in stream_video…"
 
 section "✅ build_runner completed"
 
-# ---------- [4/4] Format generated files only ----------
-section "➡️ [4/4] Formatting generated API files…"
+# ---------- [4/5] Format generated files only ----------
+section "➡️ [4/5] Formatting generated API files…"
 
 (
   cd "$PKG_DIR"
@@ -161,6 +167,25 @@ section "➡️ [4/4] Formatting generated API files…"
 )
 
 section "✅ Formatting completed"
+
+# ---------- [5/5] Verify the generated code ----------
+section "➡️ [5/5] Verifying generated code…"
+
+# `analysis_options.yaml` excludes `lib/open_api/**`, so `dart analyze` cannot
+# see a compile error in generated code — a model whose field is missing from its
+# constructor analyses clean and only fails once something imports the library.
+# These tests import it, so they compile the whole generated tree, and they also
+# assert the post-generation fixes above actually behave.
+(
+  cd "$PKG_DIR"
+  if command -v flutter >/dev/null; then
+    flutter test test/src/open_api
+  else
+    dart test test/src/open_api
+  fi
+)
+
+section "✅ Generated code compiles and post-generation fixes hold"
 
 # ---------- summary ----------
 section "🎉 All done!"

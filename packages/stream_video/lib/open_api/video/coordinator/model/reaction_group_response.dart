@@ -22,6 +22,7 @@ class ReactionGroupResponse with _$ReactionGroupResponse {
     required this.firstReactionAt,
     required this.lastReactionAt,
     required this.latestReactionsBy,
+    required this.sumScores,
   });
 
   @override

@@ -75,6 +75,7 @@ abstract mixin class $ReactionGroupResponseCopyWith<$Res> {
     DateTime firstReactionAt,
     DateTime lastReactionAt,
     List<ReactionGroupUserResponse> latestReactionsBy,
+    int sumScores,
   });
 }
 
@@ -95,6 +96,7 @@ class _$ReactionGroupResponseCopyWithImpl<$Res>
     Object? firstReactionAt = null,
     Object? lastReactionAt = null,
     Object? latestReactionsBy = null,
+    Object? sumScores = null,
   }) {
     return _then(
       ReactionGroupResponse(
@@ -114,6 +116,10 @@ class _$ReactionGroupResponseCopyWithImpl<$Res>
             ? _self.latestReactionsBy
             : latestReactionsBy // ignore: cast_nullable_to_non_nullable
                   as List<ReactionGroupUserResponse>,
+        sumScores: null == sumScores
+            ? _self.sumScores
+            : sumScores // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
