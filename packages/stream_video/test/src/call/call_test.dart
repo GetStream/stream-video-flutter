@@ -5,7 +5,6 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
-import 'package:stream_video/src/errors/video_error.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -73,6 +72,7 @@ void main() {
             migratingFromList: any(named: 'migratingFromList'),
             video: any(named: 'video'),
             membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
           ),
           () => mockCallSession.start(
             reconnectDetails: any(named: 'reconnectDetails'),
@@ -102,6 +102,7 @@ void main() {
             migratingFromList: any(named: 'migratingFromList'),
             video: any(named: 'video'),
             membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
           ),
           () => mockCallSession.start(
             reconnectDetails: any(named: 'reconnectDetails'),
@@ -150,6 +151,9 @@ void main() {
             migratingFromList: any(named: 'migratingFromList'),
             video: false,
             membersLimit: null,
+            // No E2EE manager attached, so the join reports an unencrypted
+            // session.
+            e2ee: false,
           ),
         ).called(1);
 

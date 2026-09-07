@@ -40,6 +40,7 @@ class RtcManagerFactory {
     StatsOptions? statsOptions,
     CallSessionConfig? callSessionConfig,
     int clientEventRetryCount = 0,
+    EncryptionManager? e2eeManager,
   }) async {
     _logger.d(() => '[makeRtcManager] publisherId: $publisherId');
 
@@ -81,6 +82,7 @@ class RtcManagerFactory {
       pcFactory: pcFactory,
       sfuId: callSessionConfig?.sfuName,
       clientEventRetryCount: clientEventRetryCount,
+      e2eeManager: e2eeManager,
     );
   }
 }

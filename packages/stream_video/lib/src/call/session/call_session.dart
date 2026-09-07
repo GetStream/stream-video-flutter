@@ -15,7 +15,6 @@ import '../../../protobuf/video/sfu/models/models.pbenum.dart';
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
 import '../../disposable.dart';
-import '../../errors/video_error.dart';
 import '../../errors/video_error_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_call_state.dart';
@@ -70,6 +69,7 @@ class CallSession extends Disposable {
     required Tracer tracer,
     required StreamPeerConnectionFactory pcFactory,
     this.clientPublishOptions,
+    this.e2eeManager,
     this.joinResponseTimeout = const Duration(seconds: 5),
   }) : _tracer = tracer,
        _streamVideo = streamVideo,
@@ -115,6 +115,11 @@ class CallSession extends Disposable {
   final ClientPublishOptions? clientPublishOptions;
   final InternetConnection networkMonitor;
   final StatsOptions statsOptions;
+
+  /// End-to-end encryption for this session, or `null` when the call is
+  /// unencrypted. Handed to every [RtcManager] this session builds.
+  final EncryptionManager? e2eeManager;
+
   final Tracer _tracer;
   final Tracer _zonedTracer = Tracer(null);
   final StreamVideo _streamVideo;
@@ -364,6 +369,7 @@ class CallSession extends Disposable {
                 callSessionConfig: config,
                 publishOptions: joinResponseEvent.publishOptions,
                 clientEventRetryCount: clientEventRetryCount,
+                e2eeManager: e2eeManager,
               )
               ..onSubscriberIceCandidate = _onLocalIceCandidate
               ..onRenegotiationNeeded = negotiateOrRecover
@@ -391,6 +397,7 @@ class CallSession extends Disposable {
                 statsOptions: statsOptions,
                 callSessionConfig: config,
                 clientEventRetryCount: clientEventRetryCount,
+                e2eeManager: e2eeManager,
               )
               ..onPublisherIceCandidate = _onLocalIceCandidate
               ..onSubscriberIceCandidate = _onLocalIceCandidate
@@ -405,6 +412,7 @@ class CallSession extends Disposable {
       _rtcManagerSubject!.add(rtcManager!);
 
       stateManager.sfuPinsUpdated(event.callState.pins);
+      stateManager.sfuE2eeEnabledUpdated(event.callState.e2eeEnabled);
 
       final environment = ClientEnvironment(
         sfu: config.sfuUrl,
@@ -539,6 +547,7 @@ class CallSession extends Disposable {
         _logger.v(() => '[fastReconnect] fast-reconnect done');
 
         stateManager.sfuPinsUpdated(event.callState.pins);
+        stateManager.sfuE2eeEnabledUpdated(event.callState.e2eeEnabled);
 
         result = Result.success(
           (
@@ -789,19 +798,27 @@ class CallSession extends Disposable {
 
       if (event is SfuJoinResponseEvent) {
         stateManager.sfuJoinResponse(event);
+        // The participant list just landed, so tracks that arrived before it
+        // can finally resolve a user id and attach their decryptor.
+        await rtcManager?.flushPendingDecryptors();
       } else if (event is SfuParticipantJoinedEvent) {
         stateManager.sfuParticipantJoined(event);
+        await rtcManager?.flushPendingDecryptors();
       } else if (event is SfuParticipantUpdatedEvent) {
         stateManager.sfuParticipantUpdated(event);
+      } else if (event is SfuTrackPublishedEvent) {
+        stateManager.sfuTrackPublished(event);
+        await rtcManager?.flushPendingDecryptors();
       } else if (event is SfuParticipantLeftEvent) {
         stateManager.sfuParticipantLeft(event);
+        rtcManager?.discardPendingDecryptors(
+          event.participant.trackLookupPrefix,
+        );
       } else if (event is SfuConnectionQualityChangedEvent) {
         _tracer.trace(TraceTag.connectionQualityChanged, event.toJson());
         stateManager.sfuConnectionQualityChanged(event);
       } else if (event is SfuAudioLevelChangedEvent) {
         stateManager.sfuUpdateAudioLevelChanged(event);
-      } else if (event is SfuTrackPublishedEvent) {
-        stateManager.sfuTrackPublished(event);
       } else if (event is SfuTrackUnpublishedEvent) {
         stateManager.sfuTrackUnpublished(event);
       } else if (event is SfuDominantSpeakerChangedEvent) {

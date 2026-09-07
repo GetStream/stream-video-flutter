@@ -32,12 +32,14 @@ class CallState extends $pb.GeneratedMessage {
     $0.Timestamp? startedAt,
     ParticipantCount? participantCount,
     $core.Iterable<Pin>? pins,
+    $core.bool? e2eeEnabled,
   }) {
     final result = create();
     if (participants != null) result.participants.addAll(participants);
     if (startedAt != null) result.startedAt = startedAt;
     if (participantCount != null) result.participantCount = participantCount;
     if (pins != null) result.pins.addAll(pins);
+    if (e2eeEnabled != null) result.e2eeEnabled = e2eeEnabled;
     return result;
   }
 
@@ -62,6 +64,7 @@ class CallState extends $pb.GeneratedMessage {
     ..aOM<ParticipantCount>(3, _omitFieldNames ? '' : 'participantCount',
         subBuilder: ParticipantCount.create)
     ..pPM<Pin>(4, _omitFieldNames ? '' : 'pins', subBuilder: Pin.create)
+    ..aOB(5, _omitFieldNames ? '' : 'e2eeEnabled')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -118,6 +121,18 @@ class CallState extends $pb.GeneratedMessage {
   /// Pins are ordered in descending order (most important first).
   @$pb.TagNumber(4)
   $pb.PbList<Pin> get pins => $_getList(3);
+
+  /// e2ee_enabled is true when the call uses end-to-end encryption. Clients
+  /// must enable their frame encryptor; the SFU forwards encrypted frames
+  /// opaquely and server-side recording/transcription/broadcasting are disabled.
+  @$pb.TagNumber(5)
+  $core.bool get e2eeEnabled => $_getBF(4);
+  @$pb.TagNumber(5)
+  set e2eeEnabled($core.bool value) => $_setBool(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasE2eeEnabled() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearE2eeEnabled() => $_clearField(5);
 }
 
 class ParticipantCount extends $pb.GeneratedMessage {

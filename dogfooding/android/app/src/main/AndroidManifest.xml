@@ -44,6 +44,10 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
 
+            <meta-data
+                android:name="flutter_deeplinking_enabled"
+                android:value="true" />
+
             <intent-filter android:autoVerify="true" android:label="call_link">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

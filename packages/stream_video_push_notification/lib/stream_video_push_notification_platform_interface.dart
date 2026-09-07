@@ -109,6 +109,15 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
     throw UnimplementedError('endAllCalls() has not been implemented.');
   }
 
+  /// Dismiss the ringing UI of a call the user just accepted and is now in.
+  ///
+  /// Unlike [endAllCalls] this does not end the call: on Android the incoming notification and
+  /// ringtone stop, but the call stays registered with the Telecom stack, so hanging up or
+  /// holding from a watch, headset or car head unit keeps working for the rest of the call.
+  Future<void> dismissRingingCall(String cid) {
+    throw UnimplementedError('dismissRingingCall() has not been implemented.');
+  }
+
   /// Get active calls.
   /// On iOS: return active calls from Callkit.
   /// On Android: only return last call
@@ -150,4 +159,35 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
       'canUseFullScreenIntent() has not been implemented.',
     );
   }
+
+  /// Report how a call ended so it is listed correctly in the system call history.
+  /// Only iOS: writes the outcome to CallKit, which decides how the call appears in Recents.
+  Future<void> reportCallEnded(String uuid, CallEndedReason reason) {
+    throw UnimplementedError('reportCallEnded() has not been implemented.');
+  }
+}
+
+/// How a call ended, as reported to the system call history.
+///
+/// Values mirror `CXCallEndedReason` on iOS.
+enum CallEndedReason {
+  /// The call failed, for example because the network dropped.
+  failed(1),
+
+  /// The remote side ended the call.
+  remoteEnded(2),
+
+  /// Nobody picked up before the call timed out. Shows as a missed call.
+  unanswered(3),
+
+  /// The call was answered on another of the user's devices.
+  answeredElsewhere(4),
+
+  /// The call was declined on another of the user's devices.
+  declinedElsewhere(5);
+
+  const CallEndedReason(this.rawValue);
+
+  /// Raw value passed to the platform, matching `CXCallEndedReason`.
+  final int rawValue;
 }

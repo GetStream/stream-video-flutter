@@ -1,3 +1,4 @@
+import '../webrtc/e2ee/call_encryption_key.dart';
 import 'audio_configuration_policy.dart';
 import 'call_client_publish_options.dart';
 import 'moderation_blur_config.dart';
@@ -60,6 +61,27 @@ abstract class CallPreferences {
   /// native peer-connection factory is built with this policy instead of
   /// the client-level default `StreamVideoOptions.audioConfigurationPolicy`.
   AudioConfigurationPolicy? get audioConfigurationPolicy;
+
+  /// Supplies the shared key for this call when no `EncryptionManager` has been
+  /// attached to it by hand.
+  ///
+  /// Mostly for the ringing flow, which is where the SDK, not the app, decides
+  /// when the join happens. Answering a call from a notification, or after the
+  /// process was killed, leaves nowhere to attach a manager and nobody to ask
+  /// for a key — so pass it in with the preferences the accept already carries:
+  ///
+  /// ```dart
+  /// streamVideo.observeCoreRingingEvents(
+  ///   acceptCallPreferences: DefaultCallPreferences(
+  ///     encryptionKeyResolver: myResolver,
+  ///   ),
+  /// );
+  /// ```
+  ///
+  /// Set it on `StreamVideoOptions.defaultCallPreferences` to cover every call
+  /// instead, or on a single `makeCall`. A manager attached with
+  /// `setE2EEManager` always wins, and the resolver is not called at all.
+  CallEncryptionKeyResolver? get encryptionKeyResolver;
 }
 
 class DefaultCallPreferences implements CallPreferences {
@@ -75,6 +97,7 @@ class DefaultCallPreferences implements CallPreferences {
     this.closedCaptionsVisibleCaptions = 2,
     this.videoModerationConfig = const VideoModerationConfig.disabled(),
     this.audioConfigurationPolicy,
+    this.encryptionKeyResolver,
   });
 
   /// The maximum duration to wait when establishing a connection to the call.
@@ -164,4 +187,9 @@ class DefaultCallPreferences implements CallPreferences {
   /// Defaults to null (falls back to `StreamVideoOptions.audioConfigurationPolicy`).
   @override
   final AudioConfigurationPolicy? audioConfigurationPolicy;
+
+  /// Supplies the shared key for this call when no manager was attached by
+  /// hand. See [CallPreferences.encryptionKeyResolver].
+  @override
+  final CallEncryptionKeyResolver? encryptionKeyResolver;
 }

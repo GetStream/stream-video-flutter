@@ -256,6 +256,61 @@ class ActionCallCustom extends RingingEvent {
   List<Object?> get props => [body];
 }
 
+/// Represents an incoming call the platform refused to display.
+/// iOS only, raised when `CXProvider.reportNewIncomingCall` fails.
+class ActionCallIncomingFailed extends RingingEvent {
+  /// Creates an [ActionCallIncomingFailed] event for the call in [data].
+  const ActionCallIncomingFailed({
+    required this.data,
+    required this.reason,
+    this.error,
+  });
+
+  /// The call that could not be displayed.
+  final CallData data;
+
+  /// Why the platform refused it.
+  final IncomingCallFailureReason reason;
+
+  /// The platform's own description of the failure. For logging, not for branching.
+  final String? error;
+
+  @override
+  List<Object?> get props => [data, reason, error];
+}
+
+/// Why the platform refused to display an incoming call.
+///
+/// Mirrors `CXErrorCodeIncomingCallError` on iOS.
+enum IncomingCallFailureReason {
+  /// The app is missing the VoIP entitlement. A build or provisioning problem, not a runtime one.
+  unentitled,
+
+  /// A call with this UUID is already being displayed, so that call is still on screen. Ending it
+  /// in response to this would take down a call that is working.
+  callUuidAlreadyExists,
+
+  /// Do Not Disturb or a Focus mode filtered the call before it was shown.
+  filteredByDoNotDisturb,
+
+  /// The caller is on the user's block list.
+  filteredByBlockList,
+
+  /// The call never reached the platform call UI, so it was not refused — it could not be
+  /// reported in the first place, for example because the call data carried an unusable UUID.
+  invalidCallData,
+
+  /// The platform gave a reason this version of the SDK does not know about.
+  unknown;
+
+  /// Parses the identifier sent by the platform, falling back to [unknown].
+  static IncomingCallFailureReason fromName(String? name) =>
+      IncomingCallFailureReason.values.firstWhere(
+        (reason) => reason.name == name,
+        orElse: () => IncomingCallFailureReason.unknown,
+      );
+}
+
 /// Represents call data with various properties related to the call.
 ///
 /// This class encapsulates information about an ongoing or past call, including
@@ -272,6 +327,7 @@ class CallData extends Equatable {
     this.hasVideo,
     this.extraData,
     this.isAccepted = false,
+    this.endedBySystem = false,
   });
 
   /// Unique identifier for the call.
@@ -298,6 +354,13 @@ class CallData extends Equatable {
   /// Whether the user has accepted this call via the native notification UI.
   final bool isAccepted;
 
+  /// Whether the platform call UI reported this call as ended.
+  ///
+  /// Set on Android when a call registered with Telecom is hung up from outside the app, such as
+  /// from a paired watch, a Bluetooth headset or a car head unit. An ended event without this flag
+  /// can also mean the incoming call notification was merely dismissed, which is not a hang-up.
+  final bool endedBySystem;
+
   @override
   bool? get stringify => true;
 
@@ -311,5 +374,6 @@ class CallData extends Equatable {
     hasVideo,
     extraData,
     isAccepted,
+    endedBySystem,
   ];
 }

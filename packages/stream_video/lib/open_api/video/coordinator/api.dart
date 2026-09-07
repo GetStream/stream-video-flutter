@@ -154,6 +154,8 @@ part 'model/egress_hls_response.dart';
 part 'model/egress_rtmp_response.dart';
 part 'model/egress_response.dart';
 part 'model/end_call_response.dart';
+part 'model/encryption_settings_request.dart';
+part 'model/encryption_settings_response.dart';
 part 'model/feeds_preferences_response.dart';
 part 'model/file_upload_config.dart';
 part 'model/frame_recording_response.dart';

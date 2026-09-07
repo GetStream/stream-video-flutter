@@ -381,6 +381,7 @@ const CallState$json = {
       '6': '.stream.video.sfu.models.Pin',
       '10': 'pins'
     },
+    {'1': 'e2ee_enabled', '3': 5, '4': 1, '5': 8, '10': 'e2eeEnabled'},
   ],
 };
 
@@ -391,7 +392,7 @@ final $typed_data.Uint8List callStateDescriptor = $convert.base64Decode(
     'Z2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJc3RhcnRlZEF0ElYKEXBhcnRpY2lwYW50X2NvdW50GA'
     'MgASgLMikuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUGFydGljaXBhbnRDb3VudFIQcGFydGlj'
     'aXBhbnRDb3VudBIwCgRwaW5zGAQgAygLMhwuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuUGluUg'
-    'RwaW5z');
+    'RwaW5zEiEKDGUyZWVfZW5hYmxlZBgFIAEoCFILZTJlZUVuYWJsZWQ=');
 
 @$core.Deprecated('Use participantCountDescriptor instead')
 const ParticipantCount$json = {

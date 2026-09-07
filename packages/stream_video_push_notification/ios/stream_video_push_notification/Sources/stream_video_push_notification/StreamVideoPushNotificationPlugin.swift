@@ -42,6 +42,9 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
                     persistentState.set(iconName, forKey: "callKit_iconName")
                 }
 
+                // Kept for the cold-start VoIP push path, where no Dart code has run yet.
+                StreamVideoPushConfiguration(args: arguments).persist()
+
                 StreamVideoPKDelegateManager.shared.initData(data: arguments)
                 callKitManager.initCallkitProvider(CallData(args: arguments))
                 result(nil)

@@ -258,6 +258,7 @@ void main() {
             migratingFromList: any(named: 'migratingFromList'),
             video: any(named: 'video'),
             membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
           ),
         ).called(1);
 
@@ -277,6 +278,7 @@ void main() {
             migratingFromList: any(named: 'migratingFromList'),
             video: any(named: 'video'),
             membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
           ),
         );
       },
@@ -306,6 +308,7 @@ void main() {
             migratingFromList: any(named: 'migratingFromList'),
             video: any(named: 'video'),
             membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
           ),
         ).called(2);
       },
@@ -332,6 +335,7 @@ void main() {
             migratingFromList: any(named: 'migratingFromList'),
             video: any(named: 'video'),
             membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
           ),
         ).called(1);
 
@@ -353,6 +357,7 @@ void main() {
             migratingFromList: any(named: 'migratingFromList'),
             video: any(named: 'video'),
             membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
           ),
         );
 
@@ -370,6 +375,7 @@ void main() {
             migratingFromList: any(named: 'migratingFromList'),
             video: any(named: 'video'),
             membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
           ),
         ).called(1);
       },
@@ -406,6 +412,7 @@ void main() {
             migratingFromList: any(named: 'migratingFromList'),
             video: any(named: 'video'),
             membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
           ),
         ).called(1);
 
@@ -432,6 +439,7 @@ void main() {
             migratingFromList: any(named: 'migratingFromList'),
             video: any(named: 'video'),
             membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
           ),
         );
 
@@ -470,6 +478,7 @@ void main() {
             migratingFromList: any(named: 'migratingFromList'),
             video: any(named: 'video'),
             membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
           ),
         ).called(1);
 
@@ -487,6 +496,7 @@ void main() {
             migratingFromList: any(named: 'migratingFromList'),
             video: any(named: 'video'),
             membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
           ),
         );
       },
@@ -544,6 +554,7 @@ void main() {
             migratingFromList: any(named: 'migratingFromList'),
             video: any(named: 'video'),
             membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
           ),
         ).called(1);
 
@@ -574,6 +585,7 @@ void main() {
             migratingFromList: any(named: 'migratingFromList'),
             video: any(named: 'video'),
             membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
           ),
         ).called(1);
       },
@@ -629,6 +641,7 @@ void main() {
             migratingFromList: any(named: 'migratingFromList'),
             video: any(named: 'video'),
             membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
           ),
         ).called(1);
 
@@ -657,6 +670,7 @@ void main() {
             migratingFromList: any(named: 'migratingFromList'),
             video: any(named: 'video'),
             membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
           ),
         ).called(1);
       },

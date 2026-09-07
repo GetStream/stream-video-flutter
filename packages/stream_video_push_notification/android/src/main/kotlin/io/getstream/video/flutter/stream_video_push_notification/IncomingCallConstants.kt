@@ -26,6 +26,13 @@ object IncomingCallConstants {
     const val ACTION_CALL_UNHELD = "io.getstream.video.ACTION_CALL_UNHELD"
     const val ACTION_CALL_CONNECTED = "io.getstream.video.ACTION_CALL_CONNECTED"
 
+    /** Internal action that runs [IncomingCallNotificationService] as a foreground service while ringing. */
+    const val ACTION_CALL_RINGING = "io.getstream.video.ACTION_CALL_RINGING"
+
+    // Polyfill for a Build.VERSION_CODES value not yet available at the current compileSdk.
+    // TODO: delete once compileSdk covers it, replacing usages with the real constant.
+    const val SDK_INT_CINNAMON_BUN = 37 // Build.VERSION_CODES.CINNAMON_BUN - needs compileSdk 37
+
 
     const val EXTRA_CALL_INCOMING_DATA = "EXTRA_CALL_INCOMING_DATA"
 
@@ -67,6 +74,21 @@ object IncomingCallConstants {
         "EXTRA_CALL_ONGOING_CALL_NOTIFICATION_CHANNEL_NAME"
 
     const val EXTRA_CALL_ACTION_FROM = "EXTRA_CALL_ACTION_FROM"
+
+    /**
+     * Marks an ended broadcast as reported by the platform call UI rather than by a dismissed
+     * notification, e.g. a hang-up from a paired watch, a headset or a car head unit.
+     *
+     * Forwarded to Dart as `endedBySystem`, which is what tells the ringing flow that the end is
+     * authoritative and the call has to be left.
+     */
+    const val EXTRA_CALL_ENDED_BY_SYSTEM = "EXTRA_CALL_ENDED_BY_SYSTEM"
+
+    /**
+     * Set on an ENDED intent that only dismisses the ringing UI of a call that is now live, so the
+     * Telecom registration is kept and in-call system controls survive the accept.
+     */
+    const val EXTRA_KEEP_SYSTEM_CALL = "EXTRA_KEEP_SYSTEM_CALL"
 
     const val EXTRA_CALL_IS_SHOW_FULL_LOCKED_SCREEN = "EXTRA_CALL_IS_SHOW_FULL_LOCKED_SCREEN"
     const val EXTRA_CALL_IS_IMPORTANT = "EXTRA_CALL_IS_IMPORTANT"

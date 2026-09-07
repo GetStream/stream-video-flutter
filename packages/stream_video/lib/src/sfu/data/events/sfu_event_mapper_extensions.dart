@@ -235,6 +235,7 @@ extension SfuCallStateExtension on sfu_models.CallState {
       participantCount: participantCount.toDomain(),
       startedAt: startedAt.toDateTime(),
       pins: pins.map((it) => it.toDomain()).toList(),
+      e2eeEnabled: e2eeEnabled,
     );
   }
 }

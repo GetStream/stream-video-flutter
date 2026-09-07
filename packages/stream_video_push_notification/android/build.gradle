@@ -23,8 +23,8 @@ android {
     compileSdk = flutter.compileSdkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     sourceSets {
@@ -45,6 +45,8 @@ android {
         implementation 'com.fasterxml.jackson.core:jackson-core:2.20.0'
         implementation 'com.fasterxml.jackson.core:jackson-databind:2.20.0'
         implementation "io.coil-kt:coil:1.4.0"
+        implementation 'androidx.core:core-telecom:1.0.1'
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
     }
 
     testOptions {
@@ -62,6 +64,6 @@ android {
 
 kotlin {
     compilerOptions {
-        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }

@@ -21,6 +21,7 @@ import '../telemetry/peer_connection_connect_reporter.dart';
 import '../utils/extensions.dart';
 import 'codecs_helper.dart' as codecs;
 import 'codecs_helper.dart';
+import 'e2ee/e2ee_mapping.dart';
 import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_encoding.dart';
 import 'peer_connection.dart';
@@ -65,6 +66,7 @@ class RtcManager extends Disposable {
     required this.stateManager,
     required StreamVideo streamVideo,
     required this.pcFactory,
+    this.e2eeManager,
     this.sfuId,
     this.clientEventRetryCount = 0,
   }) : _streamVideo = streamVideo {
@@ -89,6 +91,17 @@ class RtcManager extends Disposable {
   MediaFrameReporter? _mediaFrameReporter;
 
   final StreamPeerConnectionFactory pcFactory;
+
+  /// End-to-end encryption for this session, or `null` when the call is
+  /// unencrypted.
+  ///
+  /// Set before the peer connections carry any media: local transceivers get
+  /// an encryptor as they are added, remote receivers get a decryptor as
+  /// tracks arrive.
+  final rtc.EncryptionManager? e2eeManager;
+
+  /// Remote tracks that arrived before their participant was known.
+  final _pendingDecryptors = <String, RtcRemoteTrack>{};
 
   final transceiversManager = TransceiverManager();
 
@@ -301,6 +314,8 @@ class RtcManager extends Disposable {
       mediaStream: stream,
       transceiver: transceiver,
     );
+
+    unawaited(attachDecryptor(remoteTrack));
 
     onRemoteTrackReceived?.call(pc, remoteTrack);
     tracks[remoteTrack.trackId] = remoteTrack;
@@ -638,6 +653,96 @@ class RtcManager extends Disposable {
     );
   }
 
+  /// The user id that owns the remote track under [trackIdPrefix].
+  String? _userIdForTrackPrefix(String trackIdPrefix) {
+    return stateManager.callState.callParticipants
+        .firstWhereOrNull((it) => it.trackIdPrefix == trackIdPrefix)
+        ?.userId;
+  }
+
+  /// Decrypts everything [track]'s receiver delivers, or queues the track
+  /// until its participant is known.
+  Future<void> attachDecryptor(RtcRemoteTrack track) async {
+    final manager = e2eeManager;
+    if (manager == null) return;
+
+    final userId = _userIdForTrackPrefix(track.trackIdPrefix);
+    if (userId == null) {
+      _logger.d(
+        () =>
+            '[attachDecryptor] no participant yet for '
+            '${track.trackIdPrefix}; queueing ${track.trackId}',
+      );
+      _pendingDecryptors[track.trackId] = track;
+      return;
+    }
+
+    final receiver = await _receiverForTrack(track);
+    if (receiver == null) {
+      _logger.w(
+        () =>
+            '[attachDecryptor] no RTP receiver for ${track.trackId}; '
+            'frames from $userId stay encrypted',
+      );
+      return;
+    }
+
+    try {
+      await manager.decrypt(
+        receiver,
+        userId: userId,
+        trackType: track.trackType.e2eeTrackType,
+      );
+
+      _logger.d(
+        () =>
+            '[attachDecryptor] attached for userId: $userId, '
+            'trackType: ${track.trackType}',
+      );
+    } catch (e, stk) {
+      _logger.e(
+        () => '[attachDecryptor] failed for userId: $userId: $e',
+      );
+      _logger.v(() => '[attachDecryptor] $stk');
+    }
+  }
+
+  /// Retries decryptors that were waiting on a participant.
+  Future<void> flushPendingDecryptors() async {
+    if (e2eeManager == null || _pendingDecryptors.isEmpty) return;
+
+    for (final trackId in [..._pendingDecryptors.keys]) {
+      final track = _pendingDecryptors.remove(trackId);
+      if (track == null) continue;
+
+      await attachDecryptor(track);
+    }
+  }
+
+  /// Drops decryptors still waiting on a participant who has left.
+  void discardPendingDecryptors(String trackIdPrefix) {
+    _pendingDecryptors.removeWhere(
+      (_, track) => track.trackIdPrefix == trackIdPrefix,
+    );
+  }
+
+  /// The subscriber receiver carrying [track].
+  Future<rtc.RTCRtpReceiver?> _receiverForTrack(RtcRemoteTrack track) async {
+    final trackId = track.mediaTrack.id;
+
+    try {
+      final transceivers = await subscriber.pc.getTransceivers();
+      final match = transceivers.firstWhereOrNull(
+        (it) => it.receiver.track?.id == trackId,
+      );
+      if (match != null) return match.receiver;
+    } catch (e) {
+      _logger.w(() => '[receiverForTrack] getTransceivers failed: $e');
+    }
+
+    return track.transceiver?.receiver;
+  }
+
   @override
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
@@ -660,6 +765,7 @@ class RtcManager extends Disposable {
     );
 
     tracks.clear();
+    _pendingDecryptors.clear();
 
     onLocalTrackMuted = null;
     onLocalTrackPublished = null;
@@ -1094,6 +1200,31 @@ extension PublisherRtcManager on RtcManager {
     return Result.error('Unsupported track type: ${track.runtimeType}');
   }
 
+  /// Undoes the bookkeeping of a publish that registered its track and then
+  /// failed.
+  ///
+  /// [publishAudioTrack] and [publishVideoTrack] register [registered] before
+  /// any sender exists so `onPublisherNegotiationNeeded` can see it, and there
+  /// is no matching `unpublishTrack` when the publish never completes. Left
+  /// behind, the entry makes [getPublisherTrackByType] report a track that
+  /// never reached the SFU: the next enable takes the unmute path instead of
+  /// retrying the publish, and the camera or microphone keeps capturing for a
+  /// sender that does not exist.
+  ///
+  /// [acquired] is the same track carrying whatever clones the publish managed
+  /// to make; stopping it releases the device.
+  Future<void> _discardFailedPublish({
+    required RtcLocalTrack registered,
+    required RtcLocalTrack acquired,
+  }) async {
+    // A concurrent publish may already own the entry — drop only our own.
+    if (identical(tracks[registered.trackId], registered)) {
+      tracks.remove(registered.trackId);
+    }
+
+    await acquired.stop();
+  }
+
   Future<Result<RtcLocalAudioTrack>> publishAudioTrack({
     required RtcLocalAudioTrack track,
     bool stopTrackOnMute = true,
@@ -1148,6 +1279,10 @@ extension PublisherRtcManager on RtcManager {
 
         if (transceiverResult is Failure) {
           await mediaTrackClone.stop();
+          await _discardFailedPublish(
+            registered: audioTrack,
+            acquired: updatedTrack,
+          );
           return transceiverResult;
         }
 
@@ -1198,7 +1333,10 @@ extension PublisherRtcManager on RtcManager {
             '[publishAudioTrack] disposed mid-publish; discarding '
             '${updatedTrack.trackId}',
       );
-      await updatedTrack.stop();
+      await _discardFailedPublish(
+        registered: audioTrack,
+        acquired: updatedTrack,
+      );
       return Result.error('RtcManager was disposed while publishing');
     }
 
@@ -1238,6 +1376,10 @@ extension PublisherRtcManager on RtcManager {
         () =>
             '[publishVideoTrack] No publish options found for track type: ${videoTrack.trackType}',
       );
+      await _discardFailedPublish(
+        registered: videoTrack,
+        acquired: updatedTrack,
+      );
       return Result.error(
         'No publish options found for track type: ${videoTrack.trackType}',
       );
@@ -1273,6 +1415,10 @@ extension PublisherRtcManager on RtcManager {
 
         if (transceiverResult is Failure) {
           await mediaTrackClone.stop();
+          await _discardFailedPublish(
+            registered: videoTrack,
+            acquired: updatedTrack,
+          );
           return transceiverResult;
         }
 
@@ -1317,7 +1463,10 @@ extension PublisherRtcManager on RtcManager {
             '[publishVideoTrack] disposed mid-publish; discarding '
             '${updatedTrack.trackId}',
       );
-      await updatedTrack.stop();
+      await _discardFailedPublish(
+        registered: videoTrack,
+        acquired: updatedTrack,
+      );
       return Result.error('RtcManager was disposed while publishing');
     }
 
@@ -1463,6 +1612,46 @@ extension PublisherRtcManager on RtcManager {
     });
   }
 
+  /// Encrypts everything [transceiver]'s sender publishes.
+  Future<Result<None>> _attachEncryptor(
+    rtc.RTCRtpTransceiver transceiver,
+    SfuPublishOptions publishOptions,
+  ) async {
+    final manager = e2eeManager;
+    if (manager == null) return const Result.success(none);
+
+    final codecPin = publishOptions.codec.e2eeCodecPin;
+    final trackType = publishOptions.trackType.e2eeTrackType;
+
+    try {
+      await manager.encrypt(
+        transceiver.sender,
+        codec: codecPin,
+        trackType: trackType,
+      );
+
+      _logger.d(
+        () =>
+            '[attachEncryptor] attached; codec: $codecPin, '
+            'trackType: $trackType',
+      );
+
+      return const Result.success(none);
+    } catch (e, stk) {
+      _logger.e(
+        () =>
+            '[attachEncryptor] failed for trackType: '
+            '${publishOptions.trackType}; refusing to publish cleartext: $e',
+      );
+      _logger.v(() => '[attachEncryptor] $stk');
+
+      return Result.error(
+        'Failed to attach the E2EE encryptor for trackType: '
+        '${publishOptions.trackType}: $e',
+      );
+    }
+  }
+
   Future<Result<rtc.RTCRtpTransceiver>> _createTransceiver(
     RtcLocalTrack track,
     SfuPublishOptions publishOptions,
@@ -1512,6 +1701,25 @@ extension PublisherRtcManager on RtcManager {
 
     final transceiver = transceiverResult.getDataOrNull()!;
 
+    // Attach before the answer is negotiated so the first encoded frame this
+    // sender produces is already encrypted.
+    final encryptorResult = await _attachEncryptor(transceiver, publishOptions);
+    if (encryptorResult is Failure) {
+      // Drop the sender: leaving it in place would negotiate an m-line that
+      // publishes unencrypted media.
+      final stopped = await _stopTransceiver(transceiver);
+      if (!stopped) {
+        _logger.e(
+          () =>
+              '[addTransceiver] could not stop the sender for trackType: '
+              '${publishOptions.trackType} after its encryptor failed; it may '
+              'still negotiate and publish unencrypted',
+        );
+      }
+
+      return Result.error(encryptorResult.error.message);
+    }
+
     final cached = transceiversManager.add(
       track,
       publishOptions,
@@ -1555,11 +1763,14 @@ extension PublisherRtcManager on RtcManager {
   }
 
   /// Stops [transceiver] so its m-line becomes recyclable.
-  Future<void> _stopTransceiver(RTCRtpTransceiver transceiver) async {
+  /// Stops [transceiver], reporting whether it actually stopped.
+  Future<bool> _stopTransceiver(RTCRtpTransceiver transceiver) async {
     try {
       await transceiver.stop();
+      return true;
     } catch (e, stk) {
       _logger.w(() => '[stopTransceiver] failed: $e\n$stk');
+      return false;
     }
   }
 

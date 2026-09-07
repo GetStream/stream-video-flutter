@@ -12,6 +12,7 @@ class CallEvent {
 enum Event {
   actionDidUpdateDevicePushTokenVoip,
   actionCallIncoming,
+  actionCallIncomingFailed,
   actionCallStart,
   actionCallAccept,
   actionCallDecline,
@@ -35,6 +36,8 @@ extension EventX on Event {
         return 'io.getstream.video.DID_UPDATE_DEVICE_PUSH_TOKEN_VOIP';
       case Event.actionCallIncoming:
         return 'io.getstream.video.ACTION_CALL_INCOMING';
+      case Event.actionCallIncomingFailed:
+        return 'io.getstream.video.ACTION_CALL_INCOMING_FAILED';
       case Event.actionCallStart:
         return 'io.getstream.video.ACTION_CALL_START';
       case Event.actionCallAccept:

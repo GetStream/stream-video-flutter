@@ -7,6 +7,7 @@ import '../screens/call_participants_list.dart';
 import '../screens/call_screen.dart';
 import '../screens/call_stats_screen.dart';
 import '../screens/home_screen.dart';
+import '../screens/join_call_screen.dart';
 import '../screens/livestream_demo_screen.dart';
 import '../screens/lobby_screen.dart';
 import '../screens/login_screen.dart';
@@ -14,7 +15,11 @@ import '../screens/login_screen.dart';
 part 'routes.g.dart';
 
 @immutable
-@TypedGoRoute<HomeRoute>(path: '/', name: 'home')
+@TypedGoRoute<HomeRoute>(
+  path: '/',
+  name: 'home',
+  routes: [TypedGoRoute<JoinRoute>(path: 'join/:callId', name: 'join')],
+)
 class HomeRoute extends GoRouteData with $HomeRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -32,26 +37,53 @@ class LoginRoute extends GoRouteData with $LoginRoute {
 }
 
 @immutable
+class JoinRoute extends GoRouteData with $JoinRoute {
+  const JoinRoute({required this.callId});
+
+  final String callId;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return JoinCallScreen(
+      callId: callId,
+      linkHost: state.uri.host,
+      encryptionKey: state.uri.queryParameters['encryption_key'],
+    );
+  }
+}
+
+@immutable
 @TypedGoRoute<LobbyRoute>(path: '/lobby', name: 'lobby')
 class LobbyRoute extends GoRouteData with $LobbyRoute {
   const LobbyRoute({required this.$extra});
 
-  final Call $extra;
+  final ({Call call, bool callExists, String? encryptionKey}) $extra;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return LobbyScreen(
-      call: $extra,
-      onJoinCallPressed: (connectOptions, effectsManager) {
-        // Navigate to the call screen.
-        CallRoute(
-          $extra: (
-            call: $extra,
-            connectOptions: connectOptions,
-            effectsManager: effectsManager,
-          ),
-        ).replace(context);
-      },
+      call: $extra.call,
+      callExists: $extra.callExists,
+      initialEncryptionKey: $extra.encryptionKey,
+      onJoinCallPressed:
+          ({
+            required call,
+            required connectOptions,
+            required effectsManager,
+            encryptionKey,
+          }) {
+            // Navigate to the call screen.
+            CallRoute(
+              $extra: (
+                call: call,
+                connectOptions: connectOptions,
+                effectsManager: effectsManager,
+                // The passphrase the lobby settled on, so the call screen can
+                // put it in the invite it offers.
+                encryptionKey: encryptionKey,
+              ),
+            ).replace(context);
+          },
     );
   }
 }
@@ -78,6 +110,7 @@ class CallRoute extends GoRouteData with $CallRoute {
     Call call,
     CallConnectOptions? connectOptions,
     StreamVideoEffectsManager? effectsManager,
+    String? encryptionKey,
   })
   $extra;
 
@@ -87,6 +120,7 @@ class CallRoute extends GoRouteData with $CallRoute {
       call: $extra.call,
       connectOptions: $extra.connectOptions,
       videoEffectsManager: $extra.effectsManager,
+      encryptionKey: $extra.encryptionKey,
     );
   }
 }

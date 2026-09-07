@@ -7,12 +7,19 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.telecom.DisconnectCause
 import android.util.Log
+import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
 
 class IncomingCallBroadcastReceiver : BroadcastReceiver() {
     
     companion object {
         private const val TAG = "IncomingCallReceiver"
+        /**
+         * Volatile: set from the method channel on the main thread, but read from the Telecom
+         * listener callbacks, which run on a background dispatcher.
+         */
+        @Volatile
         var silenceEvents = false
 
         fun getIntent(context: Context, action: String, data: Bundle?) =
@@ -45,11 +52,15 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
                 putExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA, data)
             }
 
-        fun getIntentEnded(context: Context, data: Bundle?) =
-            Intent(context, IncomingCallBroadcastReceiver::class.java).apply {
-                action = "${context.packageName}.${IncomingCallConstants.ACTION_CALL_ENDED}"
-                putExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA, data)
-            }
+        fun getIntentEnded(
+            context: Context,
+            data: Bundle?,
+            keepSystemCall: Boolean = false,
+        ) = Intent(context, IncomingCallBroadcastReceiver::class.java).apply {
+            action = "${context.packageName}.${IncomingCallConstants.ACTION_CALL_ENDED}"
+            putExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA, data)
+            putExtra(IncomingCallConstants.EXTRA_KEEP_SYSTEM_CALL, keepSystemCall)
+        }
 
         fun getIntentTimeout(context: Context, data: Bundle?) =
             Intent(context, IncomingCallBroadcastReceiver::class.java).apply {
@@ -92,9 +103,18 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
         when (action) {
             "${context.packageName}.${IncomingCallConstants.ACTION_CALL_INCOMING}" -> {
                 try {
+                    val callData = Data.fromBundle(data)
+                    // Registered before the notification so the ringing foreground service is
+                    // promoted with the call already in the Telecom stack; if this loses the race,
+                    // StreamTelecomManager re-promotes once registration completes.
+                    try {
+                        StreamTelecomManager.registerIncomingCall(context, callData)
+                    } catch (error: Exception) {
+                        Log.e(TAG, "telecom registration failed; ringing continues without it", error)
+                    }
                     incomingCallNotificationManager?.showIncomingNotification(data)
                     sendEventFlutter(IncomingCallConstants.ACTION_CALL_INCOMING, data)
-                    addCall(context, Data.fromBundle(data))
+                    addCall(context, callData)
                 } catch (error: Exception) {
                     Log.e(TAG, null, error)
                 }
@@ -109,7 +129,9 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
                         data
                     )
                     sendEventFlutter(IncomingCallConstants.ACTION_CALL_START, data)
-                    addCall(context, Data.fromBundle(data), true)
+                    val callData = Data.fromBundle(data)
+                    addCall(context, callData, true)
+                    StreamTelecomManager.registerOutgoingCall(context, callData)
                 } catch (error: Exception) {
                     Log.e(TAG, null, error)
                 }
@@ -124,7 +146,9 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
                         data
                     )
                     sendEventFlutter(IncomingCallConstants.ACTION_CALL_ACCEPT, data)
-                    addCall(context, Data.fromBundle(data), true)
+                    val callData = Data.fromBundle(data)
+                    addCall(context, callData, true)
+                    StreamTelecomManager.answer(context, callData.id)
                 } catch (error: Exception) {
                     Log.e(TAG, null, error)
                 }
@@ -135,7 +159,13 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
                     // clear notification
                     incomingCallNotificationManager?.clearIncomingNotification(data, false)
                     sendEventFlutter(IncomingCallConstants.ACTION_CALL_DECLINE, data)
-                    removeCall(context, Data.fromBundle(data))
+                    val callData = Data.fromBundle(data)
+                    removeCall(context, callData)
+                    StreamTelecomManager.disconnect(
+                        context,
+                        callData.id,
+                        DisconnectCause.REJECTED
+                    )
                 } catch (error: Exception) {
                     Log.e(TAG, null, error)
                 }
@@ -145,9 +175,24 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
                 try {
                     // clear notification and stop service
                     incomingCallNotificationManager?.clearIncomingNotification(data, false)
-                    IncomingCallNotificationService.stopService(context)
                     sendEventFlutter(IncomingCallConstants.ACTION_CALL_ENDED, data)
-                    removeCall(context, Data.fromBundle(data))
+                    val callData = Data.fromBundle(data)
+                    removeCall(context, callData)
+
+                    // An ENDED right after an accept means "the ring is over", not "the call is
+                    // over". Disconnecting Telecom here would end the registration seconds into a
+                    // call the user is still in, taking watch/headset/car controls with it.
+                    val keepSystemCall = intent.getBooleanExtra(
+                        IncomingCallConstants.EXTRA_KEEP_SYSTEM_CALL,
+                        false,
+                    )
+                    if (!keepSystemCall) {
+                        StreamTelecomManager.disconnect(
+                            context,
+                            callData.id,
+                            DisconnectCause.LOCAL
+                        )
+                    }
                 } catch (error: Exception) {
                     Log.e(TAG, null, error)
                 }
@@ -157,7 +202,13 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
                 try {
                     incomingCallNotificationManager?.clearIncomingNotification(data, false)
                     sendEventFlutter(IncomingCallConstants.ACTION_CALL_TIMEOUT, data)
-                    removeCall(context, Data.fromBundle(data))
+                    val callData = Data.fromBundle(data)
+                    removeCall(context, callData)
+                    StreamTelecomManager.disconnect(
+                        context,
+                        callData.id,
+                        DisconnectCause.MISSED
+                    )
                 } catch (error: Exception) {
                     Log.e(TAG, null, error)
                 }
@@ -166,6 +217,7 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
             "${context.packageName}.${IncomingCallConstants.ACTION_CALL_CONNECTED}" -> {
                 try {
                     sendEventFlutter(IncomingCallConstants.ACTION_CALL_CONNECTED, data)
+                    StreamTelecomManager.activate(context, Data.fromBundle(data).id)
                 } catch (error: Exception) {
                     Log.e(TAG, null, error)
                 }
@@ -232,6 +284,10 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
             "number" to data.getString(IncomingCallConstants.EXTRA_CALL_HANDLE, ""),
             "type" to data.getInt(IncomingCallConstants.EXTRA_CALL_TYPE, 0),
             "duration" to data.getLong(IncomingCallConstants.EXTRA_CALL_DURATION, 0L),
+            "endedBySystem" to data.getBoolean(
+                IncomingCallConstants.EXTRA_CALL_ENDED_BY_SYSTEM,
+                false,
+            ),
             "extra" to data.getSerializable(IncomingCallConstants.EXTRA_CALL_EXTRA),
             "android" to android
         )

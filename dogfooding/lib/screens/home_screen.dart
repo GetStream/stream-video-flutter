@@ -17,6 +17,7 @@ import '../di/injector.dart';
 import '../router/routes.dart';
 import '../theme/app_palette.dart';
 import '../utils/assets.dart';
+import '../utils/call_lookup.dart';
 import '../utils/consts.dart';
 import '../utils/loading_dialog.dart';
 import '../widgets/environment_switcher.dart';
@@ -38,6 +39,10 @@ class _HomeScreenState extends State<HomeScreen> {
   late final _callIdController = TextEditingController();
 
   late Call _call;
+
+  /// A shared passphrase that came in with a scanned or followed invite, and
+  /// the call id it was for.
+  ({String callId, String key})? _invitedEncryptionKey;
 
   @override
   void initState() {
@@ -78,11 +83,13 @@ class _HomeScreenState extends State<HomeScreen> {
     var callId = _callIdController.text;
 
     // Always generate a new call id for ringing
-    if (callId.isEmpty || memberIds.isNotEmpty) {
+    final generatedCallId = callId.isEmpty || memberIds.isNotEmpty;
+    if (generatedCallId) {
       callId = generateAlphanumericString(12);
     }
 
     unawaited(showLoadingIndicator(context));
+
     _call = _streamVideo.makeCall(
       callType: kCallType,
       id: callId,
@@ -100,36 +107,57 @@ class _HomeScreenState extends State<HomeScreen> {
     final isRinging = memberIds.isNotEmpty;
 
     try {
-      final result = await _call.getOrCreate(
-        memberIds: memberIds,
-        ringing: isRinging,
-        video: true,
-      );
+      if (isRinging) {
+        final result = await _call.getOrCreate(
+          memberIds: memberIds,
+          ringing: true,
+          video: true,
+        );
 
-      result.fold(
-        success: (success) {
-          if (mounted) {
-            if (isRinging) {
-              CallRoute(
-                $extra: (
-                  call: _call,
-                  connectOptions: null,
-                  effectsManager: null,
-                ),
-              ).push<void>(context);
-            } else {
-              LobbyRoute($extra: _call).push<void>(context);
-            }
-          }
-        },
-        failure: (failure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              duration: const Duration(seconds: 20),
-              content: Text('Error: ${failure.error.message}'),
-            ),
-          );
-        },
+        if (!mounted) return;
+
+        result.fold(
+          success: (_) => unawaited(
+            CallRoute(
+              $extra: (
+                call: _call,
+                connectOptions: null,
+                effectsManager: null,
+                // Ringing has no lobby to pick a key up in.
+                encryptionKey: null,
+              ),
+            ).push<void>(context),
+          ),
+          failure: (failure) => _showError(failure.error.message),
+        );
+
+        return;
+      }
+
+      // Creation is left to the lobby, because that is where the encryption
+      // mode is chosen and the mode is fixed at creation.
+      var callExists = false;
+      if (!generatedCallId) {
+        final lookup = await lookupCallExists(_call);
+        if (lookup is Failure) {
+          if (mounted) _showError(lookup.error.message);
+          return;
+        }
+
+        callExists = (lookup as Success<bool>).data;
+      }
+
+      if (!mounted) return;
+
+      final invited = _invitedEncryptionKey;
+      unawaited(
+        LobbyRoute(
+          $extra: (
+            call: _call,
+            callExists: callExists,
+            encryptionKey: invited?.callId == callId ? invited?.key : null,
+          ),
+        ).push<void>(context),
       );
     } catch (e, stk) {
       debugPrint('Error joining or creating call: $e');
@@ -139,6 +167,15 @@ class _HomeScreenState extends State<HomeScreen> {
         hideLoadingIndicator(context);
       }
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        duration: const Duration(seconds: 20),
+        content: Text('Error: $message'),
+      ),
+    );
   }
 
   Future<void> _directCall(BuildContext context) async {
@@ -291,6 +328,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 _JoinForm(
                   callIdController: _callIdController,
                   onJoinPressed: _getOrCreateCall,
+                  onEncryptionKeyScanned: (invited) =>
+                      _invitedEncryptionKey = invited,
                   onLogoutPressed: _userAuthController.logout,
                   currentEnvironment: _appPreferences.environment,
                 ),
@@ -319,12 +358,15 @@ class _JoinForm extends StatelessWidget {
   const _JoinForm({
     required this.callIdController,
     required this.onJoinPressed,
+    required this.onEncryptionKeyScanned,
     required this.onLogoutPressed,
     required this.currentEnvironment,
   });
 
   final TextEditingController callIdController;
   final VoidCallback onJoinPressed;
+
+  final ValueChanged<({String callId, String key})?> onEncryptionKeyScanned;
   final VoidCallback onLogoutPressed;
   final Environment currentEnvironment;
 
@@ -480,11 +522,19 @@ class _JoinForm extends StatelessWidget {
 
     final callId = callPathId ?? callParameterId;
 
-    if (callId != null) {
-      callIdController.value = TextEditingValue(
-        text: callId,
-        selection: TextSelection.collapsed(offset: callId.length),
-      );
-    }
+    if (callId == null) return;
+
+    callIdController.value = TextEditingValue(
+      text: callId,
+      selection: TextSelection.collapsed(offset: callId.length),
+    );
+
+    // An encrypted call's invite carries the shared key.
+    final encryptionKey = uri.queryParameters['encryption_key'];
+    onEncryptionKeyScanned(
+      encryptionKey == null || encryptionKey.isEmpty
+          ? null
+          : (callId: callId, key: encryptionKey),
+    );
   }
 }

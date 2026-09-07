@@ -16,14 +16,48 @@ List<RouteBase> get $appRoutes => [
   $callStatsRoute,
 ];
 
-RouteBase get $homeRoute =>
-    GoRouteData.$route(path: '/', name: 'home', factory: $HomeRoute._fromState);
+RouteBase get $homeRoute => GoRouteData.$route(
+  path: '/',
+  name: 'home',
+  factory: $HomeRoute._fromState,
+  routes: [
+    GoRouteData.$route(
+      path: 'join/:callId',
+      name: 'join',
+      factory: $JoinRoute._fromState,
+    ),
+  ],
+);
 
 mixin $HomeRoute on GoRouteData {
   static HomeRoute _fromState(GoRouterState state) => HomeRoute();
 
   @override
   String get location => GoRouteData.$location('/');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $JoinRoute on GoRouteData {
+  static JoinRoute _fromState(GoRouterState state) =>
+      JoinRoute(callId: state.pathParameters['callId']!);
+
+  JoinRoute get _self => this as JoinRoute;
+
+  @override
+  String get location =>
+      GoRouteData.$location('/join/${Uri.encodeComponent(_self.callId)}');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -72,8 +106,10 @@ RouteBase get $lobbyRoute => GoRouteData.$route(
 );
 
 mixin $LobbyRoute on GoRouteData {
-  static LobbyRoute _fromState(GoRouterState state) =>
-      LobbyRoute($extra: state.extra as Call);
+  static LobbyRoute _fromState(GoRouterState state) => LobbyRoute(
+    $extra:
+        state.extra as ({Call call, bool callExists, String? encryptionKey}),
+  );
 
   LobbyRoute get _self => this as LobbyRoute;
 
@@ -141,6 +177,7 @@ mixin $CallRoute on GoRouteData {
               Call call,
               CallConnectOptions? connectOptions,
               StreamVideoEffectsManager? effectsManager,
+              String? encryptionKey,
             }),
   );
 

@@ -73,18 +73,29 @@ enum Environment {
   /// Whether this is a Pronto environment.
   bool get isPronto => envName == 'pronto';
 
-  String? getJoinUrl({required String callId, String? callType}) {
-    switch (this) {
-      case Environment.pronto:
-      case Environment.prontoStaging:
-      case Environment.staging:
-        return '${baseUrls.first}/join/$callId?type=${callType ?? 'default'}';
-      case Environment.demo:
-        return '${baseUrls.first}/video/demos/join/$callId?type=${callType ?? 'default'}';
-      case Environment.livestream:
-        return '${baseUrls.first}/?id=$callId&type=${callType ?? 'livestream'}';
-      case Environment.custom:
-        return null;
+  /// The URL that joins [callId] on this environment, or null when it has no
+  /// public join page.
+  ///
+  /// [encryptionKey] is the shared passphrase, appended as `encryption_key`.
+  String? getJoinUrl({
+    required String callId,
+    String? callType,
+    String? encryptionKey,
+  }) {
+    final url = switch (this) {
+      Environment.pronto || Environment.prontoStaging || Environment.staging =>
+        '${baseUrls.first}/join/$callId?type=${callType ?? 'default'}',
+      Environment.demo =>
+        '${baseUrls.first}/video/demos/join/$callId?type=${callType ?? 'default'}',
+      Environment.livestream =>
+        '${baseUrls.first}/?id=$callId&type=${callType ?? 'livestream'}',
+      Environment.custom => null,
+    };
+
+    if (url == null || encryptionKey == null || encryptionKey.isEmpty) {
+      return url;
     }
+
+    return '$url&encryption_key=${Uri.encodeQueryComponent(encryptionKey)}';
   }
 }
