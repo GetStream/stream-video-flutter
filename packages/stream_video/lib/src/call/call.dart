@@ -2920,17 +2920,24 @@ class Call {
   Future<void> _applyConnectOptions() async {
     _logger.d(() => '[applyConnectOptions] connectOptions: $_connectOptions');
 
-    void report(String option, Result<None> result) {
-      if (result is Failure) {
-        _logger.e(
-          () =>
-              '[applyConnectOptions] $option not applied: '
-              '${result.videoError.message}',
-        );
-      }
+    // A refused option leaves the device off, so the intent comes down with
+    // it: the setters only downgrade `_connectOptions` on success, and a
+    // control that reads the intent while no track has been reported would
+    // otherwise draw the device as live for the rest of the call — and refuse
+    // to toggle, having no track to mute.
+    bool failed(String option, Result<None> result) {
+      if (result is! Failure) return false;
+
+      _logger.e(
+        () =>
+            '[applyConnectOptions] $option not applied: '
+            '${result.videoError.message}',
+      );
+
+      return true;
     }
 
-    report(
+    final cameraFailed = failed(
       'camera',
       await _applyCameraOption(
         _connectOptions.camera,
@@ -2939,18 +2946,34 @@ class Call {
         _connectOptions.videoInputDevice?.id,
       ),
     );
+    if (cameraFailed) {
+      _connectOptions = _connectOptions.copyWith(
+        camera: TrackOption.disabled(),
+      );
+    }
 
-    report(
+    final microphoneFailed = failed(
       'microphone',
       await _applyMicrophoneOption(_connectOptions.microphone),
     );
-    report(
+    if (microphoneFailed) {
+      _connectOptions = _connectOptions.copyWith(
+        microphone: TrackOption.disabled(),
+      );
+    }
+
+    final screenShareFailed = failed(
       'screenShare',
       await _applyScreenShareOption(
         _connectOptions.screenShare,
         _connectOptions.screenShareTargetResolution,
       ),
     );
+    if (screenShareFailed) {
+      _connectOptions = _connectOptions.copyWith(
+        screenShare: TrackOption.disabled(),
+      );
+    }
 
     if (_connectOptions.audioInputDevice != null) {
       await setAudioInputDevice(_connectOptions.audioInputDevice!);
