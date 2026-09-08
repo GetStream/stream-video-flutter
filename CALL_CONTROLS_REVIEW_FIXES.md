@@ -54,12 +54,12 @@ controls go badged and inert with no reason and no retry.
 
 ## Phase 5 — tests
 
-- [ ] `stream_camera_button_test.dart` mirroring the microphone's groups
-- [ ] `StreamMicrophoneSplitButton`'s call-driven path
-- [ ] `stopTrackOnMute` (currently in zero tests)
-- [ ] `primary` / SafeArea, with a non-zero bottom inset
-- [ ] Responsive fallback as a widget test, not only `layoutFor`
-- [ ] Make the disposal test actually observe disposal
+- [x] `stream_camera_button_test.dart` mirroring the microphone's groups
+- [x] `StreamMicrophoneSplitButton`'s call-driven path
+- [x] `stopTrackOnMute` (currently in zero tests)
+- [x] `primary` / SafeArea, with a non-zero bottom inset
+- [x] Responsive fallback as a widget test, not only `layoutFor`
+- [x] Make the disposal test actually observe disposal
 
 ## Phase 6 — comments and docs
 

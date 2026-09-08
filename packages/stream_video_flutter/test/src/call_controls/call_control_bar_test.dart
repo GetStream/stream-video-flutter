@@ -53,6 +53,36 @@ void main() {
 
       expect(bar.layoutFor(StreamScreenSize.large), medium);
     });
+
+    // `layoutFor` being right is only half of it: the bar has to ask it with
+    // the window's own size. Hard-coding one there leaves every case above
+    // green and only shifts the goldens.
+    testWidgets('the bar draws the layout for the window it is in', (
+      tester,
+    ) async {
+      const bar = CallControlBar(small: small, medium: medium, large: large);
+
+      for (final (width, expected) in const [
+        (402.0, 'small'),
+        (900.0, 'medium'),
+        (1440.0, 'large'),
+      ]) {
+        await pumpBar(tester, bar, width: width);
+
+        expect(find.text(expected), findsOneWidget, reason: 'at $width');
+      }
+    });
+
+    testWidgets('a window with no layout of its own falls back on screen', (
+      tester,
+    ) async {
+      const bar = CallControlBar(small: small, large: large);
+
+      await pumpBar(tester, bar, width: 900);
+
+      expect(find.text('small'), findsOneWidget);
+      expect(find.text('large'), findsNothing);
+    });
   });
 
   group('geometry', () {
@@ -89,6 +119,58 @@ void main() {
       );
 
       expect(reported, tester.getSize(find.byType(CallControlBar)).height);
+    });
+
+    // The case the assertion above cannot fail on: with no bottom inset the
+    // safe area is zero either way, so `heightOf` agreed with the bar whether
+    // or not it accounted for one.
+    group('over a bottom inset', () {
+      const inset = 34.0;
+
+      Future<double> pumpAndReport(
+        WidgetTester tester, {
+        required bool primary,
+      }) async {
+        late double reported;
+
+        tester.view
+          ..devicePixelRatio = 1.0
+          ..physicalSize = const Size(402, 800)
+          ..padding = const FakeViewPadding(bottom: inset);
+        addTearDown(tester.view.reset);
+
+        await tester.pumpWidget(
+          TestWrapper(
+            child: Builder(
+              builder: (context) {
+                reported = CallControlBar.heightOf(context, primary: primary);
+                return Align(
+                  alignment: Alignment.bottomCenter,
+                  child: CallControlBar(small: small, primary: primary),
+                );
+              },
+            ),
+          ),
+        );
+
+        return reported;
+      }
+
+      testWidgets('a primary bar clears the inset and says so', (tester) async {
+        final reported = await pumpAndReport(tester, primary: true);
+
+        expect(tester.getSize(find.byType(CallControlBar)).height, 72 + inset);
+        expect(reported, 72 + inset);
+      });
+
+      // Something below it has already taken the inset, so taking it again
+      // would pad the bar twice.
+      testWidgets('a non-primary bar takes no inset', (tester) async {
+        final reported = await pumpAndReport(tester, primary: false);
+
+        expect(tester.getSize(find.byType(CallControlBar)).height, 72);
+        expect(reported, 72);
+      });
     });
 
     testWidgets('pads its edges by 12 at every breakpoint', (tester) async {

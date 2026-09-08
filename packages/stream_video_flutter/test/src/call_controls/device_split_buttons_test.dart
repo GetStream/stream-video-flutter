@@ -13,6 +13,11 @@ const _camera = RtcMediaDevice(
   label: 'FaceTime HD Camera',
   kind: RtcMediaDeviceKind.videoInput,
 );
+const _microphone = RtcMediaDevice(
+  id: 'mic-1',
+  label: 'MacBook Pro Microphone',
+  kind: RtcMediaDeviceKind.audioInput,
+);
 
 void main() {
   late StreamController<List<RtcMediaDevice>> deviceChanges;
@@ -211,10 +216,16 @@ void main() {
     // Owns a controller when none is given, and disposes it — a leak here
     // would keep a device subscription alive for every bar ever built.
     testWidgets('builds and disposes a controller of its own', (tester) async {
+      // A live stream, not Stream.empty(): the assertion below depends on
+      // being able to notify the controller after the widget is gone.
+      final ownedDeviceChanges =
+          StreamController<List<RtcMediaDevice>>.broadcast();
+      addTearDown(ownedDeviceChanges.close);
+
       final notifier = MockRtcMediaDeviceNotifier();
       when(
         () => notifier.onDeviceChange,
-      ).thenAnswer((_) => const Stream.empty());
+      ).thenAnswer((_) => ownedDeviceChanges.stream);
       when(
         notifier.enumerateDevices,
       ).thenAnswer((_) async => const Result.success(<RtcMediaDevice>[]));
@@ -224,13 +235,135 @@ void main() {
       await pumpCall(tester);
       expect(find.byType(StreamCameraSplitButton), findsOneWidget);
 
-      // Replacing the widget disposes what it owned; a disposed
-      // ChangeNotifier throws if anything still notifies it, which is what
-      // would surface here.
+      // The controller it built subscribed to the device stream, which is the
+      // thing a leak would keep alive.
+      expect(ownedDeviceChanges.hasListener, isTrue);
+
       await tester.pumpWidget(const TestWrapper(child: SizedBox()));
       await tester.pumpAndSettle();
 
-      expect(tester.takeException(), isNull);
+      // Disposing the controller cancels that subscription. Notifying it
+      // instead proves nothing: dispose cancels first, so a leaked controller
+      // would be just as silent.
+      expect(ownedDeviceChanges.hasListener, isFalse);
+    });
+  });
+
+  // The microphone half of 'over a call'. The two split buttons are separate
+  // implementations rather than one generic, so the camera group above gives
+  // this none of its coverage.
+  group('a microphone over a call', () {
+    late MockCall call;
+    late MockCallState callState;
+    late MockCallParticipantState localParticipant;
+
+    setUp(() {
+      call = MockCall();
+      callState = MockCallState();
+      localParticipant = MockCallParticipantState();
+
+      when(() => localParticipant.publishedTracks).thenReturn({
+        SfuTrackType.audio: TrackState.local(),
+      });
+      when(() => callState.localParticipant).thenReturn(localParticipant);
+      when(() => call.connectOptions).thenReturn(const CallConnectOptions());
+
+      final emitter = MutableStateEmitter<CallState>(callState, sync: true);
+      when(() => call.state).thenAnswer((_) => emitter);
+      when(() => call.partialState<bool?>(any())).thenAnswer((invocation) {
+        final CallStateSelector<bool?> selector =
+            invocation.positionalArguments[0];
+        return Stream.value(selector(callState));
+      });
+      when(
+        () => call.setMicrophoneEnabled(
+          enabled: any(named: 'enabled'),
+          stopTrackOnMute: any(named: 'stopTrackOnMute'),
+        ),
+      ).thenAnswer((_) async => const Result.success(none));
+    });
+
+    Future<void> pumpCall(WidgetTester tester, {bool? stopTrackOnMute}) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          platform: TargetPlatform.macOS,
+          child: StreamMicrophoneSplitButton(
+            call: call,
+            devices: devices,
+            stopTrackOnMute: stopTrackOnMute,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    // Reads audioInputs and the call's audio track, not the camera's.
+    testWidgets("turns the call's microphone off", (tester) async {
+      await pumpCall(tester);
+      deviceChanges.add(const [_microphone]);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(const StreamIcons().voiceFill));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => call.setMicrophoneEnabled(
+          enabled: false,
+          stopTrackOnMute: any(named: 'stopTrackOnMute'),
+        ),
+      ).called(1);
+    });
+
+    testWidgets('disables itself when the platform names no microphone', (
+      tester,
+    ) async {
+      await pumpCall(tester);
+      deviceChanges.add(const []);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(const StreamIcons().voiceFill));
+      await tester.pumpAndSettle();
+
+      verifyNever(
+        () => call.setMicrophoneEnabled(
+          enabled: any(named: 'enabled'),
+          stopTrackOnMute: any(named: 'stopTrackOnMute'),
+        ),
+      );
+    });
+
+    testWidgets('a camera the platform lacks leaves it alone', (tester) async {
+      await pumpCall(tester);
+      deviceChanges.add(const [_microphone]);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(const StreamIcons().voiceFill));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => call.setMicrophoneEnabled(
+          enabled: false,
+          stopTrackOnMute: any(named: 'stopTrackOnMute'),
+        ),
+      ).called(1);
+    });
+
+    // Speaking-while-muted detection needs the track kept alive on iOS and
+    // macOS, so the flag has to reach the call rather than being dropped.
+    testWidgets('passes stopTrackOnMute through to the call', (tester) async {
+      await pumpCall(tester, stopTrackOnMute: false);
+      deviceChanges.add(const [_microphone]);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(const StreamIcons().voiceFill));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => call.setMicrophoneEnabled(
+          enabled: false,
+          stopTrackOnMute: false,
+        ),
+      ).called(1);
     });
   });
 }
