@@ -8,7 +8,10 @@ import 'package:stream_video/stream_video.dart';
 import '../../test_helpers.dart';
 import 'fixtures/call_test_helpers.dart';
 
-class _MockRtcManager extends Mock implements RtcManager {}
+class _MockRtcManager extends Mock implements RtcManager {
+  @override
+  Future<void> dispose() async {}
+}
 
 void main() {
   setUpAll(() {
@@ -55,7 +58,9 @@ void main() {
       permissionManager = MockPermissionsManager();
 
       for (final permission in CallPermission.values) {
-        when(() => permissionManager.hasPermission(permission)).thenReturn(true);
+        when(
+          () => permissionManager.hasPermission(permission),
+        ).thenReturn(true);
       }
 
       startInvokesRtcManagerCreated();
@@ -78,31 +83,37 @@ void main() {
     // it: a control that reads it while no track has been reported would
     // otherwise draw the device as live for the rest of the call, and refuse
     // to toggle, having no track to mute.
-    test('drops the microphone intent when the call refuses to send audio', () async {
-      when(
-        () => permissionManager.hasPermission(CallPermission.sendAudio),
-      ).thenReturn(false);
+    test(
+      'drops the microphone intent when the call refuses to send audio',
+      () async {
+        when(
+          () => permissionManager.hasPermission(CallPermission.sendAudio),
+        ).thenReturn(false);
 
-      final call = await joinWith(
-        CallConnectOptions(microphone: TrackOption.enabled()),
-      );
+        final call = await joinWith(
+          CallConnectOptions(microphone: TrackOption.enabled()),
+        );
 
-      expect(call.connectOptions.microphone, isA<TrackDisabled>());
-      expect(call.connectOptions.microphone.isDisabled, isTrue);
-    });
+        expect(call.connectOptions.microphone, isA<TrackDisabled>());
+        expect(call.connectOptions.microphone.isDisabled, isTrue);
+      },
+    );
 
-    test('drops the camera intent when the call refuses to send video', () async {
-      when(
-        () => permissionManager.hasPermission(CallPermission.sendVideo),
-      ).thenReturn(false);
+    test(
+      'drops the camera intent when the call refuses to send video',
+      () async {
+        when(
+          () => permissionManager.hasPermission(CallPermission.sendVideo),
+        ).thenReturn(false);
 
-      final call = await joinWith(
-        CallConnectOptions(camera: TrackOption.enabled()),
-      );
+        final call = await joinWith(
+          CallConnectOptions(camera: TrackOption.enabled()),
+        );
 
-      expect(call.connectOptions.camera, isA<TrackDisabled>());
-      expect(call.connectOptions.camera.isDisabled, isTrue);
-    });
+        expect(call.connectOptions.camera, isA<TrackDisabled>());
+        expect(call.connectOptions.camera.isDisabled, isTrue);
+      },
+    );
 
     test('leaves the other device alone when only one is refused', () async {
       when(
