@@ -27,8 +27,8 @@ void main() {
     when(
       () => call.setCameraEnabled(enabled: any(named: 'enabled')),
     ).thenAnswer((invocation) async {
-      isVideoEnabled = invocation.namedArguments[const Symbol('enabled')]
-          as bool;
+      isVideoEnabled =
+          invocation.namedArguments[const Symbol('enabled')] as bool;
       return const Result.success(none);
     });
 
@@ -106,7 +106,9 @@ void main() {
       expect(button(tester).tone, CallControlTone.neutral);
     });
 
-    testWidgets('is unmoved by a microphone the platform lacks', (tester) async {
+    testWidgets('is unmoved by a microphone the platform lacks', (
+      tester,
+    ) async {
       await pump(tester);
       deviceChanges.add(const [
         RtcMediaDevice(

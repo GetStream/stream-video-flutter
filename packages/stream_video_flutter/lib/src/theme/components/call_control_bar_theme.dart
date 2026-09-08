@@ -94,9 +94,7 @@ class CallControlBarThemeData with _$CallControlBarThemeData {
 /// appearance belongs to `StreamButtonTheme` and the tone it is given; what is
 /// left is the bar's own geometry and surface.
 ///
-/// None of it varies by screen size: only *which* controls are drawn does. A
-/// bar that changed height or padding across a breakpoint jumped as a desktop
-/// window was dragged over it, for no gain.
+/// None of it varies by screen size: only *which* controls are drawn does.
 @themeGen
 @immutable
 class CallControlBarStyle with _$CallControlBarStyle {
@@ -148,7 +146,7 @@ class CallControlBarStyle with _$CallControlBarStyle {
   /// Whether the bar is docked under the call or floating over it.
   ///
   /// Defaults to the ambient `StreamSurfaceStyle`. A docked bar is opaque and
-  /// separated from the content by a hairline; a floating one fades into it.
+  /// a floating one fades into the call behind it.
   final StreamSurfaceStyle? surfaceStyle;
 
   /// The bar's background while docked. Defaults to

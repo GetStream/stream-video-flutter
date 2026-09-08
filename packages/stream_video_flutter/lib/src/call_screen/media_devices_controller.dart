@@ -190,12 +190,11 @@ class StreamMediaDevicesController extends ChangeNotifier {
   RtcMediaDevice? _selectedAudioOutput;
   RtcMediaDevice? _selectedVideoInput;
 
-  /// The picked microphone, or null for the system default.
+  /// The microphone in use, or null for the system default.
   ///
   /// Where null cannot be shown — see [supportsSystemDefault] — this resolves
   /// to the platform's own choice instead, so a menu marks the device in use
-  /// rather than marking nothing. An in-call menu had every row unselected
-  /// until something was picked.
+  /// rather than marking nothing.
   RtcMediaDevice? get selectedAudioInput =>
       _selectedAudioInput ?? _platformDefaultIn(_audioInputs);
 

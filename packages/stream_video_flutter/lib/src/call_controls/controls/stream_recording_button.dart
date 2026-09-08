@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 
-/// A widget that represents a call control option to toggle if recording
-/// is on or off.
+/// A call control that starts and stops recording.
 class StreamRecordingButton extends StatelessWidget {
   /// Creates a new instance of [StreamRecordingButton].
   const StreamRecordingButton({

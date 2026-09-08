@@ -14,7 +14,7 @@ typedef StreamDeviceErrorCallback =
 /// A refusal is always logged, and passed to [onError] if one is given. A
 /// device control takes its on/off state from the call's own participant
 /// state, which does not change when the call refuses, so a dropped `Result`
-/// leaves the button doing nothing visible.
+/// would leave the button doing nothing visible.
 ///
 /// [description] completes "Could not …", so phrase it as the thing that was
 /// attempted: `'turn the microphone on'`. [onError] receives that phrase
@@ -66,11 +66,10 @@ extension StreamDeviceAvailability on StreamMediaDevicesController {
 extension StreamLocalTrackState on CallParticipantState {
   /// Whether [trackType] is unmuted, or null while nothing has reported it.
   ///
-  /// Null is the window between joining and the first track arriving, and any
-  /// later one — a reconnect — where the track is gone again. The
-  /// `isAudioEnabled` family collapses that into false, which is why a
-  /// control reading it flashed the muted look on every join. Only the user
-  /// gets false: muting keeps the entry and flags it.
+  /// Null covers the window between joining and the first track arriving, and
+  /// any later one — a reconnect — where the track is gone again. A muted
+  /// track keeps its entry with `muted` set, so false means muted rather than
+  /// unreported; the `isAudioEnabled` family collapses the two into false.
   bool? trackEnabled(SfuTrackType trackType) {
     final track = publishedTracks[trackType];
     if (track == null) return null;

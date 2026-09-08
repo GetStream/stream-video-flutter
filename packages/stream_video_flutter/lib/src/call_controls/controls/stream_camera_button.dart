@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 
-/// A widget that represents a call control option to toggle if the camera
-/// is on or off.
+/// A call control that turns the camera on and off.
 class StreamCameraButton extends StatelessWidget {
   /// Creates a new instance of [StreamCameraButton].
   const StreamCameraButton({
@@ -19,8 +18,10 @@ class StreamCameraButton extends StatelessWidget {
   /// Represents a call.
   final Call call;
 
-  /// The current local participant.
-  /// If provided this [localParticipant] will be used, otherwise the localParticipant of the [call] will be used.
+  /// The local participant to read, instead of watching [call] for it.
+  ///
+  /// Must be [call]'s own local participant: one from another call would draw
+  /// that call's state onto this control.
   final CallParticipantState? localParticipant;
 
   /// The devices the platform reports, used to mark a missing camera.

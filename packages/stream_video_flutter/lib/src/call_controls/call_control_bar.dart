@@ -65,9 +65,8 @@ class CallControlBarLayout {
 /// medium window. [small] is required because it is the fallback everything
 /// else lands on.
 ///
-/// The bar owns its chrome: the background, the hairline separating it from
-/// the call above, and the bottom safe-area inset. It owns no controls; the
-/// layouts supply all of them.
+/// The bar owns its chrome: the background and the bottom safe-area inset. It
+/// owns no controls; the layouts supply all of them.
 ///
 /// {@tool snippet}
 ///
@@ -92,6 +91,11 @@ class CallControlBarLayout {
 /// )
 /// ```
 /// {@end-tool}
+///
+/// The bar is configured rather than replaced: it takes no props and looks up
+/// no component builder, so an app that wants different controls supplies
+/// different layouts, and one that wants a different look restyles it through
+/// [CallControlBarTheme]. Register builders on the controls inside it.
 ///
 /// See also:
 ///
@@ -219,11 +223,7 @@ class CallControlBar extends StatelessWidget {
     final surfaceStyle = resolved.surfaceStyle;
 
     // A docked bar is opaque; a floating one fades into the call behind it.
-    //
-    // Neither draws a line along its top edge. Core's bars treat a
-    // `borderSubtle` hairline as part of their identity, because they separate
-    // one page of content from another — a call has nothing to separate the
-    // controls from, and the design draws none.
+    // Neither draws a line along its top edge.
     //
     // The outer [Semantics] keeps the slots grouped for screen readers so they
     // aren't intermixed with the call above. The inner one forces each control
@@ -287,8 +287,7 @@ class _CallControlBarStyleDefaults extends CallControlBarStyle {
 
   // `sm` rather than `md`, so the visible inset lands on the design's 16: a
   // control is 40 visible inside a 48 tap target, which contributes the other
-  // 4 on every edge. Same reasoning, and the same pair of values, as
-  // StreamBottomAppBar at the same height.
+  // 4 on every edge.
   @override
   EdgeInsetsGeometry get padding =>
       _style?.padding ?? EdgeInsets.symmetric(horizontal: _spacing.sm);
@@ -303,12 +302,8 @@ class _CallControlBarStyleDefaults extends CallControlBarStyle {
   StreamSurfaceStyle get surfaceStyle =>
       _style?.surfaceStyle ?? _context.streamSurfaceStyle;
 
-  // `backgroundApp` rather than core's `backgroundElevation1`, which is what
-  // its own bars use: the bar is chrome on the call surface, and `CallAppBar`
-  // and the call content's scaffold are both `backgroundApp`. Lifting only the
-  // bottom bar left the two ends of the same screen a shade apart in dark
-  // mode, where the elevations differ — in light they are all white, which is
-  // why the design frames agree either way.
+  // `backgroundApp`, matching `CallAppBar` and the call content's scaffold:
+  // the bar is chrome on the call surface, not an elevation above it.
   @override
   Color get backgroundColor =>
       _style?.backgroundColor ?? _colorScheme.backgroundApp;

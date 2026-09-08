@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 
-/// A widget that represents a call control option to toggle if the microphone
-/// is on or off.
+/// A call control that turns the microphone on and off.
 class StreamMicrophoneButton extends StatelessWidget {
   /// Creates a new instance of [StreamMicrophoneButton].
   const StreamMicrophoneButton({
@@ -20,8 +19,10 @@ class StreamMicrophoneButton extends StatelessWidget {
   /// Represents a call.
   final Call call;
 
-  /// The current local participant.
-  /// If provided this [localParticipant] will be used, otherwise the localParticipant of the [call] will be used.
+  /// The local participant to read, instead of watching [call] for it.
+  ///
+  /// Must be [call]'s own local participant: one from another call would draw
+  /// that call's state onto this control.
   final CallParticipantState? localParticipant;
 
   /// The devices the platform reports, used to mark a missing microphone.
@@ -58,12 +59,9 @@ class StreamMicrophoneButton extends StatelessWidget {
   /// Called when the call refuses to turn the microphone on or off.
   ///
   /// The button draws the call's own participant state, and that does not
-  /// change on a refusal — so a viewer without `sendAudio` presses this and
-  /// nothing moves. A refusal is always logged; pass this to say so on screen
-  /// as well.
-  ///
-  /// The error is an `Object` rather than the `VideoError` behind it, matching
-  /// [StreamMediaDevicesController.enumerationError].
+  /// change on a refusal, so nothing moves when a viewer without `sendAudio`
+  /// presses it. A refusal is always logged; pass this to say so on screen as
+  /// well. The callback receives the action that failed alongside the error.
   final StreamDeviceErrorCallback? onError;
 
   @override

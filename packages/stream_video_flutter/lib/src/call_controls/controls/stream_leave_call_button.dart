@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 
-/// A widget that represents a call control option to leave a call.
+/// A call control that leaves the call.
 class StreamLeaveCallButton extends StatelessWidget {
   /// Creates a new instance of [StreamLeaveCallButton].
   const StreamLeaveCallButton({

@@ -63,19 +63,19 @@ controls go badged and inert with no reason and no retry.
 
 ## Phase 6 — comments and docs
 
-- [ ] Remove the three hairline claims (the bar draws no top border)
-- [ ] Fix `heightOf`'s "depends on the window" reason -> themed value
-- [ ] Fix the `devices` doc: the split button always enumerates
-- [ ] Fix the `onError` reason: `Failure.error` is `Object`; `VideoError` *is*
+- [x] Remove the three hairline claims (the bar draws no top border)
+- [x] Fix `heightOf`'s "depends on the window" reason -> themed value
+- [x] Fix the `devices` doc: the split button always enumerates
+- [x] Fix the `onError` reason: `Failure.error` is `Object`; `VideoError` *is*
       exported and `enumerationError` is `StreamDeviceError?`
-- [ ] Fix "no controller is built" -> nothing listens for devices
-- [ ] Fix `.withDevices` "does its own muting"
-- [ ] Lead `selectedAudioInput` with the behaviour, not the null case
-- [ ] Strip refactor rationale from doc comments (recorded preference)
-- [ ] Stale identifiers: `SV:SpeakerphoneOption`, `_ToggleSpeakerState`
-- [ ] Dead `ignore_for_file` in `default_control_options.dart`
-- [ ] Eight controls still say "call control option"
-- [ ] Undocumented public fields on `StreamScreenShareButton`
+- [x] Fix "no controller is built" -> nothing listens for devices
+- [x] Fix `.withDevices` "does its own muting"
+- [x] Lead `selectedAudioInput` with the behaviour, not the null case
+- [x] Strip refactor rationale from doc comments (recorded preference)
+- [x] Stale identifiers: `SV:SpeakerphoneOption`, `_ToggleSpeakerState`
+- [x] Dead `ignore_for_file` in `default_control_options.dart`
+- [x] Eight controls still say "call control option"
+- [x] Undocumented public fields on `StreamScreenShareButton`
 
 ## Phase 7 — changelog
 

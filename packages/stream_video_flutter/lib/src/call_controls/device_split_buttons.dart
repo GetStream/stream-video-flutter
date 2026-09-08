@@ -93,8 +93,9 @@ class StreamMicrophoneSplitButton extends StatelessWidget {
   ///
   /// Null leaves the call's own default, which stops the track. Pass false to
   /// keep it alive, which is what speaking-while-muted detection needs on iOS
-  /// and macOS. Only meaningful alongside a call:
-  /// [StreamMicrophoneSplitButton.withDevices] does its own muting.
+  /// and macOS. Only meaningful alongside a call: under
+  /// [StreamMicrophoneSplitButton.withDevices] a press runs the caller's own
+  /// `onPressed`, which mutes however it chooses.
   final bool? stopTrackOnMute;
 
   /// Called when the call refuses to mute or unmute. See

@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 
-/// A widget that represents a call control option to toggle if closed captions
-/// is on or off.
+/// A call control that turns closed captions on and off.
 class StreamClosedCaptionsButton extends StatelessWidget {
   /// Creates a new instance of [StreamClosedCaptionsButton].
   const StreamClosedCaptionsButton({

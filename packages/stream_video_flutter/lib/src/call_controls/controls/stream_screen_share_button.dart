@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 
-/// A widget that represents a call control option to start/stop screen sharing
+/// A call control that starts and stops screen sharing
 class StreamScreenShareButton extends StatelessWidget {
   /// Creates a new instance of [StreamScreenShareButton].
   const StreamScreenShareButton({
@@ -36,8 +36,16 @@ class StreamScreenShareButton extends StatelessWidget {
   /// Constraints for screen sharing
   final ScreenShareConstraints? screenShareConstraints;
 
+  /// Builds the foreground-service notification shown while sharing.
+  ///
+  /// Android only, and read by the screen-sharing plugin rather than by this
+  /// widget.
   final NotificationOptionsBuilder? screenSharingNotificationOptionsBuilder;
 
+  /// Builds the picker that chooses which screen or window to share.
+  ///
+  /// Desktop only, where the platform offers no chooser of its own. Null uses
+  /// the built-in selector.
   final DesktopScreenSelectorBuilder? desktopScreenSelectorBuilder;
 
   @override
