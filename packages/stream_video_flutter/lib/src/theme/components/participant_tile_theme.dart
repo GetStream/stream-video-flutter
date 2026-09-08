@@ -99,9 +99,11 @@ class StreamParticipantTileThemeData with _$StreamParticipantTileThemeData {
 /// carrying the name pill and the connection quality indicator.
 ///
 /// The nested [placeholderStyle], [labelStyle] and
-/// [connectionQualityIndicatorStyle] are handed to their components through
-/// scoped themes, so a component supplied through the component factory picks
-/// up the tile's styling without having to thread it manually.
+/// [connectionQualityIndicatorStyle] are handed to their components as props,
+/// so a component supplied through the component factory receives the tile's
+/// styling in `props.style` without having to thread it manually. It does not
+/// arrive through a scoped theme, so a replacement that resolves its style from
+/// the ambient theme alone will not see it.
 ///
 /// Exposed separately from [StreamParticipantTileThemeData] so other theme data
 /// classes can embed a tile style via a typed field — see
@@ -209,8 +211,10 @@ class StreamParticipantTileStyle with _$StreamParticipantTileStyle {
 
   /// The button style applied to the overflow button.
   ///
-  /// Applied through a scoped [StreamButtonTheme], so a [StreamButton] supplied
-  /// by a custom component builder picks it up too.
+  /// Handed to the button as `props.themeStyle`, so a [StreamButton] supplied
+  /// by a custom component builder picks it up too. Not a scoped
+  /// [StreamButtonTheme]: it reaches that one button rather than every button
+  /// under the tile.
   final StreamButtonThemeStyle? moreButtonStyle;
 
   /// The font size of the reaction emoji.

@@ -21,6 +21,7 @@ import 'package:stream_video/stream_video.dart';
 ///       label: participant.isPinned ? 'Unpin' : 'Pin',
 ///       onPressed: () => call.setParticipantPinnedLocally(
 ///         sessionId: participant.sessionId,
+///         userId: participant.userId,
 ///         pinned: !participant.isPinned,
 ///       ),
 ///     ),
@@ -57,6 +58,12 @@ class StreamParticipantTileAction {
   final String label;
 
   /// Called when the action is selected.
+  ///
+  /// The menu closes before this runs. Coordinator calls such as
+  /// `Call.muteUsers` report failure as a `Failure` result rather than by
+  /// throwing, so a callback that discards the future loses the failure
+  /// entirely — handle the result if the action can fail in a way the user
+  /// should hear about.
   final VoidCallback onPressed;
 
   /// Whether the action is presented as destructive.

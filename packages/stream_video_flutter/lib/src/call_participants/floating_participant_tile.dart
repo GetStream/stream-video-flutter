@@ -6,8 +6,9 @@ import 'floating_participant_tile_defaults.dart';
 /// The draggable self-view that floats over a call.
 ///
 /// A participant tile sized and styled for the corner of the screen: small
-/// enough that the name pill and the speaking outline would only crowd it, so
-/// by default it carries the connection quality indicator alone.
+/// enough that the name pill, the overflow button and the speaking outline
+/// would only crowd it, so by default it drops all three and keeps the
+/// connection quality indicator and any live reaction.
 ///
 /// The rendering can be replaced app-wide by registering a
 /// `floatingParticipantTile` builder with [streamVideoComponentBuilders] on a
@@ -114,13 +115,24 @@ class DefaultStreamFloatingParticipantTile extends StatelessWidget {
     final size = style?.size ?? defaults.size;
     final borderRadius = style?.borderRadius ?? defaults.borderRadius;
 
-    // The surface rounds the outside and the tile rounds the video inside it,
-    // so the two clips have to agree. Injected rather than left to the tile's
-    // own default: overriding only the surface radius would leave the tighter
-    // clip stopping short of the corners, which reads as four transparent
-    // notches. An explicit tileStyle radius still wins — that is a caller
-    // asking for the two to differ.
+    // What the tile inside the surface is styled with, lowest precedence
+    // first:
+    //
+    //  1. the floating defaults, which strip the chrome that does not fit at
+    //     this size;
+    //  2. the ambient participant tile theme, so an app that deliberately
+    //     styled tiles reaches this one too — a default must never outrank a
+    //     theme, which is why this is not left to the tile's own merge, where
+    //     everything below arrives as props and would beat it;
+    //  3. the surface's corner radius. The surface rounds the outside and the
+    //     tile rounds the video inside it, so the two clips have to agree;
+    //     overriding only the surface radius would leave the tighter clip
+    //     stopping short of the corners, which reads as four transparent
+    //     notches;
+    //  4. an explicit tileStyle, which is a caller asking for exactly this —
+    //     including a radius that differs from the surface's.
     final tileStyle = defaults.tileStyle
+        .merge(StreamParticipantTileTheme.of(context).style)
         .merge(StreamParticipantTileStyle(borderRadius: borderRadius))
         .merge(style?.tileStyle);
 

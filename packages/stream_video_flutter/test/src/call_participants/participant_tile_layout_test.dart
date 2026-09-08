@@ -550,7 +550,7 @@ void main() {
       expect(find.text('Unpin'), findsNothing);
     });
 
-    testWidgets('prefers the actions builder over the action list', (
+    testWidgets('builds the menu for the participant it is shown on', (
       tester,
     ) async {
       CallParticipantState? received;
@@ -561,7 +561,6 @@ void main() {
           participant: participant,
           width: 300,
           height: 300,
-          actions: [action('From the list')],
           actionsBuilder: (_, it) {
             received = it;
             return [action('From the builder')];
@@ -573,8 +572,56 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('From the builder'), findsOneWidget);
-      expect(find.text('From the list'), findsNothing);
       expect(received, same(participant));
+    });
+
+    test('a list and a builder together is an error', () {
+      // They describe the same menu, and a fixed list is collapsed into a
+      // builder anyway — so there is no precedence left to get wrong.
+      expect(
+        () => StreamParticipantTile(
+          call: MockCall(),
+          participant: _participant(),
+          actions: [action('From the list')],
+          actionsBuilder: (_, _) => [action('From the builder')],
+        ),
+        throwsAssertionError,
+      );
+    });
+
+    testWidgets('a fixed list reaches the props as a builder', (tester) async {
+      // What lets a decorator substitute the menu: the props carry one field,
+      // so copyWith can replace it.
+      final tile = StreamParticipantTile(
+        call: MockCall(),
+        participant: _participant(),
+        actions: [action('From the list')],
+        // The renderer needs a live call.
+        videoRendererBuilder: (_, _, _) =>
+            const ColoredBox(color: Color(0xFF6E7A8A)),
+      );
+
+      expect(tile.props.actionsBuilder, isNotNull);
+
+      await tester.pumpWidget(
+        TestWrapper(
+          child: SizedBox(
+            width: 300,
+            height: 300,
+            child: DefaultStreamParticipantTile(
+              props: tile.props.copyWith(
+                actionsBuilder: (_, _) => [action('Substituted')],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(StreamButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Substituted'), findsOneWidget);
+      expect(find.text('From the list'), findsNothing);
     });
   });
 
@@ -672,6 +719,94 @@ void main() {
         find.byType(DefaultStreamConnectionQualityIndicator),
         findsNothing,
       );
+    });
+  });
+
+  group('video forwarding', () {
+    // Dynascale rides on onSizeChanged: the measured size decides which
+    // quality layer is requested from the SFU, so dropping the forward
+    // degrades every call silently — no layout changes, no golden moves.
+    testWidgets('forwards onSizeChanged to the video', (tester) async {
+      late StreamParticipantVideoProps captured;
+      void onSizeChanged(Size _) {}
+
+      await tester.pumpWidget(
+        StreamComponentFactory(
+          builders: StreamComponentBuilders(
+            extensions: streamVideoComponentBuilders(
+              participantVideo: (context, props) {
+                captured = props;
+                return const Text('video');
+              },
+            ),
+          ),
+          child: TestWrapper(
+            child: SizedBox(
+              width: 300,
+              height: 300,
+              child: StreamParticipantTile(
+                call: MockCall(),
+                participant: _participant(),
+                onSizeChanged: onSizeChanged,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(captured.onSizeChanged, same(onSizeChanged));
+    });
+
+    testWidgets('resolves videoFit prop over style over default', (
+      tester,
+    ) async {
+      Future<StreamParticipantVideoProps> pump({
+        VideoFit? prop,
+        VideoFit? styled,
+      }) async {
+        late StreamParticipantVideoProps captured;
+
+        await tester.pumpWidget(
+          StreamComponentFactory(
+            builders: StreamComponentBuilders(
+              extensions: streamVideoComponentBuilders(
+                participantVideo: (context, props) {
+                  captured = props;
+                  return const Text('video');
+                },
+              ),
+            ),
+            child: TestWrapper(
+              child: SizedBox(
+                width: 300,
+                height: 300,
+                child: StreamParticipantTile(
+                  call: MockCall(),
+                  participant: _participant(),
+                  videoFit: prop,
+                  style: styled == null
+                      ? null
+                      : StreamParticipantTileStyle(videoFit: styled),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        return captured;
+      }
+
+      final styledOnly = await pump(styled: VideoFit.contain);
+      expect(styledOnly.videoFit, VideoFit.contain);
+
+      final propWins = await pump(
+        prop: VideoFit.cover,
+        styled: VideoFit.contain,
+      );
+      expect(propWins.videoFit, VideoFit.cover);
+
+      final neither = await pump();
+      expect(neither.videoFit, isNotNull);
     });
   });
 }

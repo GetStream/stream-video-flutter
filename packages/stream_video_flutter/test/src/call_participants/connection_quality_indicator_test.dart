@@ -20,6 +20,11 @@ List<Paint> _paintsOf(WidgetTester tester, {required double at}) {
   ).captured.whereType<Paint>().toList();
 }
 
+// Packed ARGB rather than the Color itself: Color holds its channels as
+// floats, so a value like 0x44 does not come back as an identical instance.
+List<int> _colorsOf(List<Paint> paints) =>
+    paints.map((it) => it.color.toARGB32()).toList();
+
 BoxDecoration _decorationOf(WidgetTester tester) {
   final box = tester.widget<DecoratedBox>(
     find
@@ -32,9 +37,12 @@ BoxDecoration _decorationOf(WidgetTester tester) {
   return box.decoration as BoxDecoration;
 }
 
-Widget _indicator({StreamConnectionQualityIndicatorStyle? style}) {
+Widget _indicator({
+  StreamConnectionQualityIndicatorStyle? style,
+  SfuConnectionQuality quality = SfuConnectionQuality.excellent,
+}) {
   final indicator = StreamConnectionQualityIndicator(
-    connectionQuality: SfuConnectionQuality.excellent,
+    connectionQuality: quality,
   );
 
   return TestWrapper(
@@ -63,7 +71,8 @@ void main() {
       expect(decoration.shape, BoxShape.circle);
       expect(
         decoration.color,
-        streamTestTheme().extension<StreamTheme>()!
+        streamTestTheme()
+            .extension<StreamTheme>()!
             .colorScheme
             .backgroundOverlayDarkStrong,
       );
@@ -115,6 +124,73 @@ void main() {
 
       final paints = _paintsOf(tester, at: 12);
       expect(paints.map((it) => it.strokeWidth), everyElement(2.0));
+    });
+
+    testWidgets('takes the per-level bar colours from the theme', (
+      tester,
+    ) async {
+      // The legacy bridge spreads one colour across all three levels, so
+      // honouring them is what keeps a migrated app looking the way it did.
+      const great = Color(0xFF00FF00);
+      const inactive = Color(0xFF444444);
+
+      await tester.pumpWidget(
+        _indicator(
+          style: const StreamConnectionQualityIndicatorStyle(
+            greatColor: great,
+            inactiveColor: inactive,
+          ),
+        ),
+      );
+
+      final paints = _paintsOf(tester, at: 24);
+      // Excellent lights all three bars, so none are left inactive.
+      expect(_colorsOf(paints), everyElement(great.toARGB32()));
+    });
+
+    testWidgets('leaves the bars above the reported level inactive', (
+      tester,
+    ) async {
+      const poor = Color(0xFFFF0000);
+      const inactive = Color(0xFF444444);
+
+      await tester.pumpWidget(
+        _indicator(
+          quality: SfuConnectionQuality.poor,
+          style: const StreamConnectionQualityIndicatorStyle(
+            poorColor: poor,
+            inactiveColor: inactive,
+          ),
+        ),
+      );
+
+      final paints = _paintsOf(tester, at: 24);
+      expect(_colorsOf(paints), [
+        poor.toARGB32(),
+        inactive.toARGB32(),
+        inactive.toARGB32(),
+      ]);
+    });
+
+    testWidgets('draws nothing lit when the quality is unspecified', (
+      tester,
+    ) async {
+      // Not the same as a bad connection: nothing has reported yet, so every
+      // bar is inactive rather than one being lit red.
+      const inactive = Color(0xFF444444);
+
+      await tester.pumpWidget(
+        _indicator(
+          quality: SfuConnectionQuality.unspecified,
+          style: const StreamConnectionQualityIndicatorStyle(
+            poorColor: Color(0xFFFF0000),
+            inactiveColor: inactive,
+          ),
+        ),
+      );
+
+      final paints = _paintsOf(tester, at: 24);
+      expect(_colorsOf(paints), everyElement(inactive.toARGB32()));
     });
 
     testWidgets('defaults the bar thickness to 2', (tester) async {

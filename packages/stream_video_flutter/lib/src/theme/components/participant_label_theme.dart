@@ -118,6 +118,8 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
     this.nameTextStyle,
     this.videoOffIconColor,
     this.videoOffIconSize,
+    this.videoPausedColor,
+    this.videoPausedIconSize,
     this.audioIndicatorSize,
     this.audioIndicatorBorderRadius,
     this.audioIndicatorBackgroundColor,
@@ -186,6 +188,19 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
   ///
   /// Defaults to `spacing.md`.
   final double? videoOffIconSize;
+
+  /// The color of the paused-video icon.
+  ///
+  /// Drawn when the SFU has paused this participant's inbound video to save
+  /// bandwidth, which is a different state from their camera being off.
+  ///
+  /// Defaults to the color of [nameTextStyle].
+  final Color? videoPausedColor;
+
+  /// The side length of the paused-video icon.
+  ///
+  /// Defaults to `spacing.md`.
+  final double? videoPausedIconSize;
 
   /// The side length of the audio indicator's box.
   ///

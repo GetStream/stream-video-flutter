@@ -476,9 +476,14 @@ class StreamCallParticipantThemeData with Diagnosticable {
   //
   // `StreamVideoTheme.callParticipantTheme` is null unless an app sets one, so
   // a value reaching here means somebody deliberately styled the tile through
-  // the deprecated shape. Everything it carries is translated, defaults
-  // included — an app that wants the redesigned tile stops setting it rather
-  // than setting parts of it.
+  // the deprecated shape. Everything it carries that the redesigned tile has an
+  // equivalent for is translated, defaults included — an app that wants the
+  // redesigned tile stops setting it rather than setting parts of it.
+  //
+  // Three properties have nowhere to go and are dropped: participantLabelAlignment
+  // and connectionLevelAlignment, since the name and the indicator share one
+  // row now, and enabledMicrophoneColor, since an open microphone draws no
+  // icon.
   //
   // The translation runs in the `StreamVideoTheme` factory, which is where a
   // theme is built. Reaching the deprecated shape any other way — through
@@ -524,7 +529,7 @@ class StreamCallParticipantThemeData with Diagnosticable {
         nameTextStyle: participantLabelTextStyle,
         speakingColor: audioLevelIndicatorColor,
         microphoneOffColor: disabledMicrophoneColor,
-        videoOffIconColor: pausedVideoIndicatorColor,
+        videoPausedColor: pausedVideoIndicatorColor,
       ),
     );
   }
@@ -559,8 +564,8 @@ class StreamCallParticipantThemeData with Diagnosticable {
 /// widgets.
 ///
 /// The tile and its parts no longer read this, so wrapping a subtree in one
-/// restyles nothing. Scope the component themes instead: [
-/// StreamParticipantTileTheme], [StreamParticipantLabelTheme],
+/// restyles nothing. Scope the component themes instead:
+/// [StreamParticipantTileTheme], [StreamParticipantLabelTheme],
 /// [StreamConnectionQualityIndicatorTheme] and
 /// [StreamCallParticipantsGridTheme] each wrap a subtree the same way.
 @Deprecated(

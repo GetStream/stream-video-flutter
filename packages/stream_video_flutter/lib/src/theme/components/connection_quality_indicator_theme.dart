@@ -163,6 +163,10 @@ class StreamConnectionQualityIndicatorStyle
 
   /// The side length of the bars glyph inside the chip.
   ///
+  /// Clamped by [size]: the glyph is centred in the chip, so a value larger
+  /// than the chip has no further effect. Shrinking the chip alone therefore
+  /// stops this having one — set both.
+  ///
   /// Defaults to 24.
   final double? iconSize;
 

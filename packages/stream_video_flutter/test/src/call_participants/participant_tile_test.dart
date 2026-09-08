@@ -129,6 +129,127 @@ void main() {
     });
   });
 
+  group('StreamFloatingParticipantTile default tile style', () {
+    // No participantBuilder in either of these: the injected tileStyle only
+    // reaches the tile the floating widget builds itself, and a supplied
+    // builder bypasses it entirely — which is why both goldens miss this. The
+    // renderer is stubbed through the component factory instead, since it
+    // needs a live call.
+    MockCallParticipantState participant({bool isSpeaking = false}) {
+      final it = MockCallParticipantState();
+      when(() => it.name).thenReturn('Rene Floor');
+      when(() => it.image).thenReturn(null);
+      when(() => it.isSpeaking).thenReturn(isSpeaking);
+      when(() => it.isAudioEnabled).thenReturn(true);
+      when(() => it.isVideoEnabled).thenReturn(true);
+      when(
+        () => it.connectionQuality,
+      ).thenReturn(SfuConnectionQuality.excellent);
+      when(() => it.reaction).thenReturn(null);
+      return it;
+    }
+
+    Widget wrap({required Widget child, StreamVideoTheme? videoTheme}) {
+      final withFactory = StreamComponentFactory(
+        builders: StreamComponentBuilders(
+          extensions: streamVideoComponentBuilders(
+            participantVideo: (context, props) => const Text('video'),
+          ),
+        ),
+        child: child,
+      );
+
+      if (videoTheme == null) return TestWrapper(child: withFactory);
+
+      return MaterialApp(
+        theme: ThemeData(
+          extensions: <ThemeExtension<dynamic>>[
+            StreamTheme(brightness: Brightness.light),
+            videoTheme,
+          ],
+        ),
+        home: Material(child: withFactory),
+      );
+    }
+
+    testWidgets('strips the chrome the self-view has no room for', (
+      tester,
+    ) async {
+      // 140x228 clears the density ladder's `full` thresholds, so without the
+      // injection the corner of the screen would carry a name pill.
+      await tester.pumpWidget(
+        wrap(
+          child: Center(
+            child: StreamFloatingParticipantTile(
+              call: MockCall(),
+              participant: participant(isSpeaking: true),
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.byType(StreamParticipantLabel), findsNothing);
+      expect(find.byType(StreamConnectionQualityIndicator), findsOneWidget);
+    });
+
+    testWidgets('an app-wide tile theme still reaches the self-view', (
+      tester,
+    ) async {
+      // A default must not outrank a theme: an app that deliberately asked for
+      // the pill everywhere gets it here too.
+      await tester.pumpWidget(
+        wrap(
+          videoTheme: StreamVideoTheme(
+            brightness: Brightness.light,
+            participantTileTheme: const StreamParticipantTileThemeData(
+              style: StreamParticipantTileStyle(showParticipantLabel: true),
+            ),
+          ),
+          child: Center(
+            child: StreamFloatingParticipantTile(
+              call: MockCall(),
+              participant: participant(),
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.byType(StreamParticipantLabel), findsOneWidget);
+    });
+
+    testWidgets('an explicit tileStyle beats both', (tester) async {
+      await tester.pumpWidget(
+        wrap(
+          videoTheme: StreamVideoTheme(
+            brightness: Brightness.light,
+            participantTileTheme: const StreamParticipantTileThemeData(
+              style: StreamParticipantTileStyle(showParticipantLabel: true),
+            ),
+            floatingParticipantTileTheme:
+                const StreamFloatingParticipantTileThemeData(
+                  style: StreamFloatingParticipantTileStyle(
+                    tileStyle: StreamParticipantTileStyle(
+                      showParticipantLabel: false,
+                    ),
+                  ),
+                ),
+          ),
+          child: Center(
+            child: StreamFloatingParticipantTile(
+              call: MockCall(),
+              participant: participant(),
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.byType(StreamParticipantLabel), findsNothing);
+    });
+  });
+
   group('StreamCallParticipant (deprecated)', () {
     testWidgets('renders the default participant tile', (tester) async {
       final participant = MockCallParticipantState();

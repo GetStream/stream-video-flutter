@@ -5,6 +5,40 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 void main() {
+  group('the translation runs in the generative constructor only', () {
+    // Documented behaviour, pinned because the difference is invisible: both
+    // spellings compile and only one restyles anything. If this ever starts
+    // translating, the deprecation text on copyWith has to change with it.
+    test('copyWith stores the legacy theme without translating it', () {
+      final theme = StreamVideoTheme.light().copyWith(
+        callParticipantTheme: const StreamCallParticipantThemeData(
+          backgroundColor: Color(0xFF223344),
+          participantsGridPadding: EdgeInsets.all(4),
+        ),
+      );
+
+      expect(theme.callParticipantTheme, isNotNull);
+      expect(theme.participantTileTheme.style, isNull);
+      expect(theme.callParticipantsGridTheme.padding, isNull);
+    });
+
+    test('the generative constructor does translate it', () {
+      final theme = StreamVideoTheme(
+        brightness: Brightness.light,
+        callParticipantTheme: const StreamCallParticipantThemeData(
+          backgroundColor: Color(0xFF223344),
+          participantsGridPadding: EdgeInsets.all(4),
+        ),
+      );
+
+      expect(
+        theme.participantTileTheme.style?.backgroundColor,
+        const Color(0xFF223344),
+      );
+      expect(theme.callParticipantsGridTheme.padding, const EdgeInsets.all(4));
+    });
+  });
+
   group('StreamCallParticipantThemeData migration', () {
     test('an app that sets no participant theme gets the redesign', () {
       final theme = StreamVideoTheme.light();
@@ -139,7 +173,9 @@ void main() {
       expect(label?.nameTextStyle?.fontSize, 11);
       expect(label?.speakingColor, const Color(0xFF334455));
       expect(label?.microphoneOffColor, const Color(0xFF445566));
-      expect(label?.videoOffIconColor, const Color(0xFF556677));
+      // `pausedVideoIndicatorColor` described the paused-video indicator, so
+      // it lands on that icon rather than on the camera-off one.
+      expect(label?.videoPausedColor, const Color(0xFF556677));
 
       expect(
         theme.connectionQualityIndicatorTheme.style?.inactiveColor,

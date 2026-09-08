@@ -76,7 +76,18 @@ void main() {
         colours,
         everyElement(isIn(palette.map((it) => it.backgroundColor))),
       );
-      expect(colours.first, isNot(colours.last));
+
+      // `String.hashCode` is not contractually stable across Dart SDKs or
+      // between the native and web backends, so which pair a given id lands on
+      // is not asserted — only that the choice follows the id, which is what
+      // the feature promises. Two ids colliding on the same pair is legitimate
+      // with a five-colour palette, so a difference is not asserted either;
+      // the per-id stability test below is the one that would catch the
+      // palette collapsing to one entry.
+      expect(
+        colours.map((it) => palette.indexWhere((p) => p.backgroundColor == it)),
+        everyElement(isNonNegative),
+      );
     });
 
     testWidgets('pairs the palette foreground with its background', (
@@ -98,6 +109,26 @@ void main() {
         (it) => it.backgroundColor == avatar.props.backgroundColor,
       );
       expect(avatar.props.foregroundColor, pair.foregroundColor);
+    });
+
+    testWidgets('picks the pair the user id indexes to', (tester) async {
+      // Pins the formula rather than a colour: whatever `hashCode` returns on
+      // this backend, the avatar has to land on the same entry the SDK
+      // documents, so "one person keeps one colour everywhere" cannot drift
+      // between platforms unnoticed.
+      final palette = streamTestTheme()
+          .extension<StreamTheme>()!
+          .colorScheme
+          .avatarPalette;
+      final expected = palette[_user.id.hashCode % palette.length];
+
+      await tester.pumpWidget(
+        TestWrapper(child: StreamUserAvatar(user: _user)),
+      );
+
+      final avatar = tester.widget<StreamAvatar>(find.byType(StreamAvatar));
+      expect(avatar.props.backgroundColor, expected.backgroundColor);
+      expect(avatar.props.foregroundColor, expected.foregroundColor);
     });
 
     testWidgets('keeps one colour for one user across avatars', (tester) async {
@@ -251,6 +282,40 @@ void main() {
 
       expect(find.text('avatar:Katie Miler'), findsNWidgets(2));
       expect(find.byType(DefaultStreamUserAvatar), findsNothing);
+    });
+
+    testWidgets('the placeholder merges a partial avatar style', (
+      tester,
+    ) async {
+      // A style naming only a colour must not cost the placeholder its size
+      // and its ring — the sub-style is merged over the defaults rather than
+      // replacing them.
+      final participant = MockCallParticipantState();
+      when(participant.toUserInfo).thenReturn(_user);
+
+      await tester.pumpWidget(
+        TestWrapper(
+          child: Center(
+            child: StreamParticipantPlaceholder(
+              call: MockCall(),
+              participant: participant,
+              style: const StreamParticipantPlaceholderStyle(
+                avatarTheme: StreamAvatarThemeData(
+                  backgroundColor: Color(0xFF112233),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final avatar = tester.widget<StreamAvatar>(find.byType(StreamAvatar));
+      expect(avatar.props.backgroundColor, const Color(0xFF112233));
+      // Still the placeholder's own size, not the design system's default.
+      expect(
+        tester.getSize(find.byType(StreamAvatar)).width,
+        StreamAvatarSize.xxl.value,
+      );
     });
 
     testWidgets('a participant tile shows the placeholder in place of video', (

@@ -21,11 +21,18 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
-      'A theme set here is still applied in full, which also means the tile '
-      'keeps its pre-redesign styling; stop setting it to pick up the new '
-      'design. Will be removed in the next major version.',
+      'Everything it sets that the redesigned tile has an equivalent for is '
+      'still applied, so its colours and sizes carry over; the layout is the '
+      'new one, and participantLabelAlignment, connectionLevelAlignment and '
+      'enabledMicrophoneColor no longer have anywhere to go. Stop setting it '
+      'to pick up the new design. Will be removed in the next major version.',
     )
     StreamCallParticipantThemeData? callParticipantTheme,
+    @Deprecated(
+      'Use floatingParticipantTileTheme instead. The self-view is its own '
+      'component now and no longer reads this, so a theme set here has no '
+      'effect. Will be removed in the next major version.',
+    )
     StreamLocalVideoThemeData? localVideoTheme,
     StreamIncomingOutgoingCallThemeData? incomingCallTheme,
     StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
@@ -105,6 +112,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       'Will be removed in the next major version.',
     )
     this.callParticipantTheme,
+    @Deprecated(
+      'Use floatingParticipantTileTheme instead. '
+      'Will be removed in the next major version.',
+    )
     required this.localVideoTheme,
     required this.incomingCallTheme,
     required this.callContentTheme,
@@ -376,6 +387,14 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   final StreamCallParticipantThemeData? callParticipantTheme;
 
   /// Theme for the local video widget.
+  ///
+  /// Nothing reads this: `StreamLocalVideo` only positions the self-view, which
+  /// `StreamFloatingParticipantTile` draws.
+  @Deprecated(
+    'Use floatingParticipantTileTheme instead. The self-view is its own '
+    'component now and no longer reads this. '
+    'Will be removed in the next major version.',
+  )
   final StreamLocalVideoThemeData localVideoTheme;
 
   /// Theme for the outgoing call widget.
@@ -408,6 +427,12 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
 
   /// Creates a copy of [StreamVideoTheme] with specified attributes
   /// overridden.
+  ///
+  /// The deprecated `callParticipantTheme` is stored as given and **not**
+  /// translated onto the component themes — only the generative constructor
+  /// does that. Reaching the tile through this parameter therefore restyles
+  /// nothing; build the theme with `StreamVideoTheme(callParticipantTheme: …)`
+  /// if you need the translation, or set the component themes directly.
   @override
   StreamVideoTheme copyWith({
     StreamTextTheme? textTheme,
@@ -415,7 +440,18 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamCallControlsThemeData? callControlsTheme,
     StreamUserAvatarThemeData? userAvatarTheme,
     StreamLobbyViewThemeData? lobbyViewTheme,
+    @Deprecated(
+      'Use participantTileTheme, participantLabelTheme, '
+      'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
+      'Unlike the generative constructor, copyWith stores this without '
+      'translating it onto them, so a theme set here restyles nothing. '
+      'Will be removed in the next major version.',
+    )
     StreamCallParticipantThemeData? callParticipantTheme,
+    @Deprecated(
+      'Use floatingParticipantTileTheme instead. The self-view no longer '
+      'reads this. Will be removed in the next major version.',
+    )
     StreamLocalVideoThemeData? localVideoTheme,
     StreamIncomingOutgoingCallThemeData? incomingCallTheme,
     StreamCallContentThemeData? callContentTheme,

@@ -76,6 +76,12 @@ class StreamParticipantLabelStyleDefaults extends StreamParticipantLabelStyle {
   double get videoOffIconSize => _spacing.md;
 
   @override
+  Color get videoPausedColor => _colorScheme.textOnAccent;
+
+  @override
+  double get videoPausedIconSize => _spacing.md;
+
+  @override
   double get microphoneIconSize => _spacing.md;
 
   @override
@@ -101,11 +107,12 @@ class StreamParticipantLabelStyleDefaults extends StreamParticipantLabelStyle {
 /// Whether a pill drawn for a participant in this state, under this style, ends
 /// up with a sound indicator.
 ///
-/// Two things suppress it: a style that switched it off — the lobby does, where
-/// nothing reports a local audio level — and a muted participant, who has
-/// nothing for it to report. The pill's trailing inset and its minimum width
-/// both follow from the answer, so the widget and the measurements below
-/// resolve it the same way rather than each spelling out the rule.
+/// Two things suppress it: a style that switched it off — for a preview where
+/// nothing reports a local audio level, such as the lobby — and a muted
+/// participant, who has nothing for it to report. The pill's trailing inset and
+/// its minimum width both follow from the answer, so the widget and the
+/// measurements below resolve it the same way rather than each spelling out the
+/// rule.
 ///
 /// [style] is the style already merged over the ambient theme.
 @internal
@@ -128,6 +135,7 @@ double participantLabelMinWidth(
   required bool showName,
   required bool showMicrophoneOff,
   required bool showVideoOff,
+  required bool showVideoPaused,
   StreamParticipantLabelStyle? style,
 }) {
   // The same resolution order the label itself uses, so the two agree on what
@@ -152,6 +160,8 @@ double participantLabelMinWidth(
     if (showMicrophoneOff)
       resolved?.microphoneIconSize ?? defaults.microphoneIconSize,
     if (showVideoOff) resolved?.videoOffIconSize ?? defaults.videoOffIconSize,
+    if (showVideoPaused)
+      resolved?.videoPausedIconSize ?? defaults.videoPausedIconSize,
     // The sound indicator stands in for the microphone icon rather than
     // joining it: the pill draws one or the other, never both.
     if (drawsAudioIndicator)
@@ -201,6 +211,7 @@ double participantLabelHeight(
     resolved?.audioIndicatorSize ?? defaults.audioIndicatorSize,
     resolved?.microphoneIconSize ?? defaults.microphoneIconSize,
     resolved?.videoOffIconSize ?? defaults.videoOffIconSize,
+    resolved?.videoPausedIconSize ?? defaults.videoPausedIconSize,
   ].reduce(math.max);
 
   return math.max(

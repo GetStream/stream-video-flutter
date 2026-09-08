@@ -28,6 +28,7 @@ class StreamParticipantLabel extends StatelessWidget {
     required bool isAudioEnabled,
     required bool isSpeaking,
     required bool isVideoEnabled,
+    bool isTrackPaused = false,
     bool showName = true,
     StreamParticipantLabelStyle? style,
   }) : props = .new(
@@ -35,6 +36,7 @@ class StreamParticipantLabel extends StatelessWidget {
          isAudioEnabled: isAudioEnabled,
          isSpeaking: isSpeaking,
          isVideoEnabled: isVideoEnabled,
+         isTrackPaused: isTrackPaused,
          showName: showName,
          style: style,
        );
@@ -50,6 +52,7 @@ class StreamParticipantLabel extends StatelessWidget {
          isAudioEnabled: participant.isAudioEnabled,
          isSpeaking: participant.isSpeaking,
          isVideoEnabled: participant.isVideoEnabled,
+         isTrackPaused: participant.isTrackPaused(SfuTrackType.video),
          showName: showName,
          style: style,
        );
@@ -80,6 +83,7 @@ class StreamParticipantLabelProps {
     required this.isAudioEnabled,
     required this.isSpeaking,
     required this.isVideoEnabled,
+    this.isTrackPaused = false,
     this.showName = true,
     this.style,
   });
@@ -95,6 +99,14 @@ class StreamParticipantLabelProps {
 
   /// Whether the participant's camera is on.
   final bool isVideoEnabled;
+
+  /// Whether the SFU has paused this participant's inbound video.
+  ///
+  /// A different state from [isVideoEnabled]: the participant's camera is on
+  /// and publishing, but the SFU has stopped sending it here to save
+  /// bandwidth. The tile shows the placeholder either way, so without an
+  /// indicator of its own the two are indistinguishable.
+  final bool isTrackPaused;
 
   /// Whether [name] is shown.
   ///
@@ -113,6 +125,7 @@ class StreamParticipantLabelProps {
     bool? isAudioEnabled,
     bool? isSpeaking,
     bool? isVideoEnabled,
+    bool? isTrackPaused,
     bool? showName,
     StreamParticipantLabelStyle? style,
   }) {
@@ -121,6 +134,7 @@ class StreamParticipantLabelProps {
       isAudioEnabled: isAudioEnabled ?? this.isAudioEnabled,
       isSpeaking: isSpeaking ?? this.isSpeaking,
       isVideoEnabled: isVideoEnabled ?? this.isVideoEnabled,
+      isTrackPaused: isTrackPaused ?? this.isTrackPaused,
       showName: showName ?? this.showName,
       style: style ?? this.style,
     );
@@ -174,6 +188,20 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
               nameTextStyle.color ??
               defaults.videoOffIconColor,
         ),
+      // Paused is not the same as camera-off: the camera is publishing and the
+      // SFU is holding the stream back, so the tile's placeholder needs
+      // something beside it to say which of the two it is standing in for.
+      if (props.isTrackPaused)
+        Icon(
+          // TODO: swap for the design system's paused-video icon once it ships;
+          // this is the pre-redesign Material icon standing in until then.
+          Icons.network_check,
+          size: style?.videoPausedIconSize ?? defaults.videoPausedIconSize,
+          color:
+              style?.videoPausedColor ??
+              nameTextStyle.color ??
+              defaults.videoPausedColor,
+        ),
       // The sound indicator reports what is coming through an open microphone.
       // A muted participant has nothing for it to report, and the icon above
       // already says why.
@@ -187,7 +215,10 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         spacing: style?.spacing ?? defaults.spacing,
         children: [
-          if (props.showName)
+          // An empty name draws a zero-width Text that still claims the gap
+          // before the indicators, leaving the pill padded for a name it is
+          // not showing. A participant with no name set is not unusual.
+          if (props.showName && props.name.isNotEmpty)
             // Flexible, not Expanded: the pill is only as wide as it needs to
             // be, up to whatever its parent allows. Combined with the parent's
             // bound this is what makes a long name ellipsize instead of

@@ -117,6 +117,12 @@ mixin _$StreamParticipantLabelStyle {
         t,
       ),
       videoOffIconSize: lerpDouble$(a.videoOffIconSize, b.videoOffIconSize, t),
+      videoPausedColor: Color.lerp(a.videoPausedColor, b.videoPausedColor, t),
+      videoPausedIconSize: lerpDouble$(
+        a.videoPausedIconSize,
+        b.videoPausedIconSize,
+        t,
+      ),
       audioIndicatorSize: lerpDouble$(
         a.audioIndicatorSize,
         b.audioIndicatorSize,
@@ -163,6 +169,8 @@ mixin _$StreamParticipantLabelStyle {
     TextStyle? nameTextStyle,
     Color? videoOffIconColor,
     double? videoOffIconSize,
+    Color? videoPausedColor,
+    double? videoPausedIconSize,
     double? audioIndicatorSize,
     BorderRadius? audioIndicatorBorderRadius,
     Color? audioIndicatorBackgroundColor,
@@ -185,6 +193,8 @@ mixin _$StreamParticipantLabelStyle {
       nameTextStyle: nameTextStyle ?? _this.nameTextStyle,
       videoOffIconColor: videoOffIconColor ?? _this.videoOffIconColor,
       videoOffIconSize: videoOffIconSize ?? _this.videoOffIconSize,
+      videoPausedColor: videoPausedColor ?? _this.videoPausedColor,
+      videoPausedIconSize: videoPausedIconSize ?? _this.videoPausedIconSize,
       audioIndicatorSize: audioIndicatorSize ?? _this.audioIndicatorSize,
       audioIndicatorBorderRadius:
           audioIndicatorBorderRadius ?? _this.audioIndicatorBorderRadius,
@@ -223,6 +233,8 @@ mixin _$StreamParticipantLabelStyle {
           other.nameTextStyle,
       videoOffIconColor: other.videoOffIconColor,
       videoOffIconSize: other.videoOffIconSize,
+      videoPausedColor: other.videoPausedColor,
+      videoPausedIconSize: other.videoPausedIconSize,
       audioIndicatorSize: other.audioIndicatorSize,
       audioIndicatorBorderRadius: other.audioIndicatorBorderRadius,
       audioIndicatorBackgroundColor: other.audioIndicatorBackgroundColor,
@@ -257,6 +269,8 @@ mixin _$StreamParticipantLabelStyle {
         _other.nameTextStyle == _this.nameTextStyle &&
         _other.videoOffIconColor == _this.videoOffIconColor &&
         _other.videoOffIconSize == _this.videoOffIconSize &&
+        _other.videoPausedColor == _this.videoPausedColor &&
+        _other.videoPausedIconSize == _this.videoPausedIconSize &&
         _other.audioIndicatorSize == _this.audioIndicatorSize &&
         _other.audioIndicatorBorderRadius == _this.audioIndicatorBorderRadius &&
         _other.audioIndicatorBackgroundColor ==
@@ -272,7 +286,7 @@ mixin _$StreamParticipantLabelStyle {
   int get hashCode {
     final _this = (this as StreamParticipantLabelStyle);
 
-    return Object.hash(
+    return Object.hashAll([
       runtimeType,
       _this.backgroundColor,
       _this.borderRadius,
@@ -284,6 +298,8 @@ mixin _$StreamParticipantLabelStyle {
       _this.nameTextStyle,
       _this.videoOffIconColor,
       _this.videoOffIconSize,
+      _this.videoPausedColor,
+      _this.videoPausedIconSize,
       _this.audioIndicatorSize,
       _this.audioIndicatorBorderRadius,
       _this.audioIndicatorBackgroundColor,
@@ -292,6 +308,6 @@ mixin _$StreamParticipantLabelStyle {
       _this.microphoneIconSize,
       _this.microphoneOffColor,
       _this.showAudioIndicator,
-    );
+    ]);
   }
 }

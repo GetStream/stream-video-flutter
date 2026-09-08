@@ -26,6 +26,12 @@ class StreamAudioIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Merged the way every other component resolves its style, so a scoped
+    // StreamParticipantLabelTheme reaches one of these drawn on its own. The
+    // pill hands over an already-merged style, which merges over itself.
+    final themeStyle = StreamParticipantLabelTheme.of(context).style;
+    final style = themeStyle?.merge(this.style) ?? this.style;
+
     // The pill's own defaults, rather than a second copy of them: the indicator
     // is one of the parts the pill is made of, and the two have to agree on how
     // big it is for the tile's own arithmetic to hold.

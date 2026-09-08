@@ -15,6 +15,22 @@ import '../../stream_video_flutter.dart';
 @internal
 StreamAvatarSize avatarSizeFromConstraints(BoxConstraints constraints) {
   final diameter = constraints.constrain(Size.infinite).shortestSide;
+
+  // Rounding up is the promise above, and this is the one case it cannot keep:
+  // an app whose avatars quietly got smaller during the migration finds out
+  // from a debug log rather than from a screenshot. Unbounded constraints land
+  // here too, where the largest diameter is the only sensible answer.
+  assert(() {
+    if (diameter.isFinite && diameter > StreamAvatarSize.xxl.value) {
+      debugPrint(
+        'StreamUserAvatar: a deprecated theme asked for ${diameter}px, which '
+        'is larger than the biggest design-system avatar '
+        '(${StreamAvatarSize.xxl.value}px); it will be drawn at that size.',
+      );
+    }
+    return true;
+  }());
+
   return StreamAvatarSize.values.firstWhere(
     (it) => it.value >= diameter,
     orElse: () => StreamAvatarSize.xxl,

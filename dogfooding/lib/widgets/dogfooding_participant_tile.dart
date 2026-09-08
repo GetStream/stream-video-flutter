@@ -19,7 +19,7 @@ class DogfoodingParticipantTile extends StatelessWidget {
   Widget build(BuildContext context) {
     // Decorate rather than clobber: a call site that supplied its own actions
     // asked for something more specific than an app-wide default.
-    if (props.actions != null || props.actionsBuilder != null) {
+    if (props.actionsBuilder != null) {
       return DefaultStreamParticipantTile(props: props);
     }
 
@@ -36,6 +36,21 @@ class DogfoodingParticipantTile extends StatelessWidget {
     BuildContext context,
     CallParticipantState participant,
   ) {
+    // The coordinator reports moderation failures as a Failure rather than by
+    // throwing, so discarding the future loses them outright: no unhandled
+    // async error, and nothing above verbose in the log. The moderator would
+    // tap Mute, watch the menu close, see nothing change, and have no way to
+    // tell a rejection from a slow round-trip.
+    void report(Future<Result<void>> action) {
+      final messenger = ScaffoldMessenger.of(context);
+      action.then((result) {
+        if (result is! Failure) return;
+        messenger.showSnackBar(
+          SnackBar(content: Text(result.videoError.message)),
+        );
+      }).ignore();
+    }
+
     final call = props.call;
     final icons = context.streamIcons;
 
@@ -60,7 +75,7 @@ class DogfoodingParticipantTile extends StatelessWidget {
           // shape as people talk.
           enabled: participant.isAudioEnabled,
           onPressed: () =>
-              unawaited(call.muteUsers(userIds: [participant.userId])),
+              report(call.muteUsers(userIds: [participant.userId])),
         ),
     ];
   }

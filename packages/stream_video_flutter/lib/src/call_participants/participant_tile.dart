@@ -57,7 +57,12 @@ class StreamParticipantTile extends StatelessWidget {
     VideoPlaceholderBuilder? videoPlaceholderBuilder,
     VideoRendererBuilder? videoRendererBuilder,
     ValueSetter<Size>? onSizeChanged,
-  }) : props = .new(
+  }) : assert(
+         actions == null || actionsBuilder == null,
+         'Pass actions or actionsBuilder, not both: a builder describes the '
+         'same menu and would be the one used.',
+       ),
+       props = .new(
          call: call,
          participant: participant,
          rendererScopePrefix: rendererScopePrefix,
@@ -66,8 +71,12 @@ class StreamParticipantTile extends StatelessWidget {
          showParticipantLabel: showParticipantLabel,
          showConnectionQualityIndicator: showConnectionQualityIndicator,
          showReaction: showReaction,
-         actions: actions,
-         actionsBuilder: actionsBuilder,
+         // A fixed list is a builder that ignores its participant. Collapsing
+         // it here leaves the props with one way to say this, so a decorator
+         // can substitute the menu with copyWith instead of finding its list
+         // outranked by a builder it cannot clear.
+         actionsBuilder:
+             actionsBuilder ?? (actions == null ? null : (_, _) => actions),
          style: style,
          videoPlaceholderBuilder: videoPlaceholderBuilder,
          videoRendererBuilder: videoRendererBuilder,
@@ -106,7 +115,6 @@ class StreamParticipantTileProps {
     this.showParticipantLabel,
     this.showConnectionQualityIndicator,
     this.showReaction,
-    this.actions,
     this.actionsBuilder,
     this.style,
     this.videoPlaceholderBuilder,
@@ -149,17 +157,15 @@ class StreamParticipantTileProps {
   /// Overrides [StreamParticipantTileStyle.showReaction] when set.
   final bool? showReaction;
 
-  /// The actions offered in the tile's overflow menu.
-  ///
-  /// The overflow button is hidden entirely while this resolves to an empty
-  /// list, which it does by default: the SDK ships no actions of its own.
-  /// Ignored when [actionsBuilder] is set.
-  final List<StreamParticipantTileAction>? actions;
-
   /// Builds the actions offered in the tile's overflow menu.
   ///
-  /// Takes precedence over [actions], and is called during build, so the menu
-  /// can reflect the participant's current state.
+  /// Called during build, so the menu can reflect the participant's current
+  /// state. The overflow button is hidden entirely while this is null or
+  /// returns an empty list, which it does by default: the SDK ships no actions
+  /// of its own.
+  ///
+  /// A fixed list passed as `StreamParticipantTile(actions: …)` arrives here as
+  /// a builder that ignores its participant.
   final StreamParticipantTileActionsBuilder? actionsBuilder;
 
   /// Overrides for this tile's appearance.
@@ -184,6 +190,10 @@ class StreamParticipantTileProps {
   final ValueSetter<Size>? onSizeChanged;
 
   /// Creates a copy of these properties but with the given fields replaced
+  ///
+  /// Passing null leaves a field alone rather than clearing it, so a decorator
+  /// substituting the menu passes its own builder:
+  /// `copyWith(actionsBuilder: (_, _) => mine)`.
   /// with the new values.
   StreamParticipantTileProps copyWith({
     Call? call,
@@ -194,7 +204,6 @@ class StreamParticipantTileProps {
     bool? showParticipantLabel,
     bool? showConnectionQualityIndicator,
     bool? showReaction,
-    List<StreamParticipantTileAction>? actions,
     StreamParticipantTileActionsBuilder? actionsBuilder,
     StreamParticipantTileStyle? style,
     VideoPlaceholderBuilder? videoPlaceholderBuilder,
@@ -211,7 +220,6 @@ class StreamParticipantTileProps {
       showConnectionQualityIndicator:
           showConnectionQualityIndicator ?? this.showConnectionQualityIndicator,
       showReaction: showReaction ?? this.showReaction,
-      actions: actions ?? this.actions,
       actionsBuilder: actionsBuilder ?? this.actionsBuilder,
       style: style ?? this.style,
       videoPlaceholderBuilder:
@@ -361,7 +369,6 @@ class _TileContent extends StatelessWidget {
 
     final actions =
         props.actionsBuilder?.call(context, participant) ??
-        props.actions ??
         const <StreamParticipantTileAction>[];
 
     final showLabel =
@@ -428,6 +435,7 @@ class _TileContent extends StatelessWidget {
             end: 0,
             child: RepaintBoundary(
               child: _TopToolbar(
+                sessionId: participant.sessionId,
                 actions: showMore ? actions : const [],
                 reaction: showReaction ? reaction : null,
                 style: style,
@@ -490,12 +498,14 @@ class _TileContent extends StatelessWidget {
 
 class _TopToolbar extends StatelessWidget {
   const _TopToolbar({
+    required this.sessionId,
     required this.actions,
     required this.reaction,
     required this.style,
     required this.defaults,
   });
 
+  final String sessionId;
   final List<StreamParticipantTileAction> actions;
   final CallReaction? reaction;
   final StreamParticipantTileStyle? style;
@@ -508,25 +518,33 @@ class _TopToolbar extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (actions.isNotEmpty)
-            _MoreMenuButton(actions: actions, style: style),
-          const Spacer(),
+          // Expanded on the button's side rather than a Spacer beside a
+          // Flexible reaction: two flex children would split the free space
+          // between them and cap the reaction at half the row, which at phone
+          // tile widths draws it at a fraction of the size the tile measured it
+          // at. This hands the reaction everything the button leaves.
+          Expanded(
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: actions.isNotEmpty
+                  ? _MoreMenuButton(
+                      sessionId: sessionId,
+                      actions: actions,
+                      style: style,
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ),
           if (reaction != null)
-            // Loose, so a glyph that measures wider than the size it was drawn
-            // at clips instead of overflowing the row. Emoji advance widths are
-            // a property of the platform's font, which the tile cannot know
-            // when it decides whether the reaction fits.
-            Flexible(
-              child: Padding(
-                // Measured from the tile edge, so the toolbar's own inset comes
-                // off the designed distance.
-                padding: EdgeInsets.all(
-                  _reactionPadding(context, style: style, defaults: defaults),
-                ),
-                child: _ReactionIndicator(
-                  reaction: reaction!,
-                  size: style?.reactionSize ?? defaults.reactionSize,
-                ),
+            Padding(
+              // Measured from the tile edge, so the toolbar's own inset comes
+              // off the designed distance.
+              padding: EdgeInsets.all(
+                _reactionPadding(context, style: style, defaults: defaults),
+              ),
+              child: _ReactionIndicator(
+                reaction: reaction!,
+                size: style?.reactionSize ?? defaults.reactionSize,
               ),
             ),
         ],
@@ -634,6 +652,7 @@ class _BottomToolbar extends StatelessWidget {
       showName: showName,
       showMicrophoneOff: !participant.isAudioEnabled,
       showVideoOff: !participant.isVideoEnabled,
+      showVideoPaused: participant.isTrackPaused(SfuTrackType.video),
       style: style?.labelStyle,
     );
 
@@ -695,7 +714,14 @@ class _BottomToolbar extends StatelessWidget {
 // open while its tile scrolls away floats free of the tile it belongs to, and
 // one left open while tiles are recycled would act on the wrong participant.
 class _MoreMenuButton extends StatefulWidget {
-  const _MoreMenuButton({required this.actions, required this.style});
+  const _MoreMenuButton({
+    required this.sessionId,
+    required this.actions,
+    required this.style,
+  });
+
+  /// The participant the open menu would act on.
+  final String sessionId;
 
   final List<StreamParticipantTileAction> actions;
   final StreamParticipantTileStyle? style;
@@ -721,6 +747,15 @@ class _MoreMenuButtonState extends State<_MoreMenuButton> {
   @override
   void didUpdateWidget(_MoreMenuButton oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // The target changing is the case the recycling comment above is about,
+    // and the one the action list cannot report: the same three entries —
+    // "Pin", "Mute", "Remove" — compare equal for every participant, so a
+    // recycled element would leave the menu open over somebody else.
+    if (oldWidget.sessionId != widget.sessionId) {
+      _controller.close();
+      return;
+    }
+
     // By value: an actionsBuilder returns a fresh list every build, so
     // comparing identity would close the menu on the next rebuild of the call —
     // which, with participant state streaming in, is immediately.
@@ -745,7 +780,14 @@ class _MoreMenuButtonState extends State<_MoreMenuButton> {
       controller: _controller,
       alignmentOffset: Offset(0, context.streamSpacing.xxs),
       menuChildren: [
-        for (final action in widget.actions)
+        // Destructive entries go below the rest, whatever order the caller
+        // listed them in, so "Remove" never lands between two ordinary items.
+        // A stable partition, so the relative order within each group is the
+        // caller's.
+        for (final action in [
+          ...widget.actions.where((it) => !it.isDestructive),
+          ...widget.actions.where((it) => it.isDestructive),
+        ])
           StreamContextMenuAction<void>(
             enabled: action.enabled,
             isDestructive: action.isDestructive,
@@ -784,9 +826,12 @@ class _MoreMenuButtonState extends State<_MoreMenuButton> {
 // Maps the deprecated avatar theme onto the placeholder's style.
 //
 // Only the properties the design-system avatar has an equivalent for carry
-// across: a size taken from the tightest constraint, and the initials text
-// style. The rest — per-corner radii, the selection ring — has no counterpart
-// and is dropped.
+// across: a size taken from the tightest constraint, and the initials fill and
+// text colour. The rest — per-corner radii, the selection ring — has no
+// counterpart and is dropped.
+//
+// Kept in step with `StreamCallParticipantThemeData.toParticipantTileThemeData`,
+// which translates the same legacy property on the theme path.
 StreamParticipantPlaceholderStyle? _placeholderStyleOf(
   StreamUserAvatarThemeData? theme,
 ) {
@@ -795,6 +840,13 @@ StreamParticipantPlaceholderStyle? _placeholderStyleOf(
   return StreamParticipantPlaceholderStyle(
     avatarTheme: StreamAvatarThemeData(
       size: avatarSizeFromConstraints(theme.constraints),
+      // The initials chip is coloured as one piece, so its fill and text
+      // travel together. Without a fill the avatar picks a colour per user
+      // instead, and the text colour goes with it.
+      backgroundColor: theme.initialsBackground,
+      foregroundColor: theme.initialsBackground == null
+          ? null
+          : theme.initialsTextStyle.color,
     ),
   );
 }
@@ -980,7 +1032,7 @@ class StreamCallParticipant extends StatelessWidget {
                   nameTextStyle: _participantLabelTextStyle,
                   speakingColor: _audioLevelIndicatorColor,
                   microphoneOffColor: _disabledMicrophoneColor,
-                  videoOffIconColor: _pausedVideoIndicatorColor,
+                  videoPausedColor: _pausedVideoIndicatorColor,
                 )
               : null,
           connectionQualityIndicatorStyle:
