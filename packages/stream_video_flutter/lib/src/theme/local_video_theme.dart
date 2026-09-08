@@ -8,9 +8,22 @@ import 'package:flutter/material.dart';
 import '../../stream_video_flutter.dart';
 
 /// Defines default property values for [StreamLocalVideo] widgets.
+///
+/// Nothing reads this any more: [StreamLocalVideo] only positions the
+/// self-view, which [StreamFloatingParticipantTile] draws and
+/// [StreamFloatingParticipantTileThemeData] styles.
+@Deprecated(
+  'Use StreamFloatingParticipantTileThemeData instead. The self-view is its '
+  'own component now and no longer reads this, so a theme set here has no '
+  'effect. Will be removed in the next major version.',
+)
 @immutable
 class StreamLocalVideoThemeData with Diagnosticable {
   /// Creates a new instance of [StreamLocalVideoThemeData].
+  @Deprecated(
+    'Use StreamFloatingParticipantTileThemeData instead. '
+    'Will be removed in the next major version.',
+  )
   const StreamLocalVideoThemeData({
     this.localVideoWidth = 125,
     this.localVideoHeight = 150,
@@ -179,8 +192,21 @@ class StreamLocalVideoThemeData with Diagnosticable {
 }
 
 /// Applies a local video theme to descendant [StreamLocalVideo] widgets.
+///
+/// Wrapping a subtree in one restyles nothing: the self-view is drawn by
+/// [StreamFloatingParticipantTile]. Scope a
+/// [StreamFloatingParticipantTileTheme] instead.
+@Deprecated(
+  'Use StreamFloatingParticipantTileTheme instead. The self-view is its own '
+  'component now and no longer reads this, so wrapping a subtree in one has '
+  'no effect. Will be removed in the next major version.',
+)
 class StreamLocalVideoTheme extends InheritedWidget {
   /// Creates a new instance of [StreamLocalVideoTheme].
+  @Deprecated(
+    'Use StreamFloatingParticipantTileTheme instead. '
+    'Will be removed in the next major version.',
+  )
   const StreamLocalVideoTheme({
     super.key,
     required this.data,
