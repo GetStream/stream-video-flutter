@@ -79,8 +79,8 @@ controls go badged and inert with no reason and no retry.
 
 ## Phase 7 — changelog
 
-- [ ] Compress the new entries to one sentence each (recorded preference)
-- [ ] Fix the `:63`/`:65` self-contradiction
+- [x] Compress the new entries to one sentence each (recorded preference)
+- [x] Fix the `:63`/`:65` self-contradiction
 
 ## Deliberately not done
 
