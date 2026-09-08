@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../device_control.dart';
 
 /// A widget that represents a call control option to toggle if the camera
 /// is on or off.
@@ -46,7 +45,7 @@ class StreamCameraButton extends StatelessWidget {
 
   /// Called when the call refuses to turn the camera on or off. See
   /// [StreamMicrophoneButton.onError].
-  final ValueChanged<Object>? onError;
+  final StreamDeviceErrorCallback? onError;
 
   @override
   Widget build(BuildContext context) {

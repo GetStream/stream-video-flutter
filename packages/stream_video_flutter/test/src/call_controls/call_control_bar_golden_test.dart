@@ -59,7 +59,7 @@ void main() {
     data: MediaQueryData(size: Size(width, 800)),
     child: SizedBox(
       width: width,
-      child: CallControlBar(compact, large: expanded, style: style),
+      child: CallControlBar(small: compact, large: expanded, style: style),
     ),
   );
 

@@ -32,7 +32,7 @@ void main() {
 
   group('layoutFor', () {
     test('falls back to the next smaller layout that was given', () {
-      const bar = CallControlBar(small, medium: medium, large: large);
+      const bar = CallControlBar(small: small, medium: medium, large: large);
 
       expect(bar.layoutFor(StreamScreenSize.small), small);
       expect(bar.layoutFor(StreamScreenSize.medium), medium);
@@ -42,14 +42,14 @@ void main() {
     test('a missing medium does not stop large being used', () {
       // The case the API exists for: an app that draws a phone bar up to the
       // desktop breakpoint, and a wide bar past it.
-      const bar = CallControlBar(small, large: large);
+      const bar = CallControlBar(small: small, large: large);
 
       expect(bar.layoutFor(StreamScreenSize.medium), small);
       expect(bar.layoutFor(StreamScreenSize.large), large);
     });
 
     test('large falls back through medium, not straight to small', () {
-      const bar = CallControlBar(small, medium: medium);
+      const bar = CallControlBar(small: small, medium: medium);
 
       expect(bar.layoutFor(StreamScreenSize.large), medium);
     });
@@ -59,7 +59,7 @@ void main() {
     // One height and one padding at every size: a bar that changed either
     // across a breakpoint jumped as a desktop window was dragged over it.
     testWidgets('is 72 tall at every breakpoint', (tester) async {
-      const bar = CallControlBar(small);
+      const bar = CallControlBar(small: small);
 
       await tester.pumpBarAndExpectHeight(bar, width: 402, height: 72);
       await tester.pumpBarAndExpectHeight(bar, width: 900, height: 72);
@@ -81,7 +81,7 @@ void main() {
               reported = CallControlBar.heightOf(context);
               return const Align(
                 alignment: Alignment.bottomCenter,
-                child: CallControlBar(small),
+                child: CallControlBar(small: small),
               );
             },
           ),
@@ -93,7 +93,7 @@ void main() {
 
     testWidgets('pads its edges by 12 at every breakpoint', (tester) async {
       const bar = CallControlBar(
-        CallControlBarLayout(leading: [Text('leading')]),
+        small: CallControlBarLayout(leading: [Text('leading')]),
       );
 
       for (final width in [402.0, 900.0, 1440.0]) {
@@ -115,7 +115,7 @@ void main() {
       await pumpBar(
         tester,
         const CallControlBar(
-          CallControlBarLayout(
+          small: CallControlBarLayout(
             leading: [CallControlButton(icon: Icon(Icons.mic))],
           ),
         ),
@@ -142,7 +142,7 @@ void main() {
       await pumpBar(
         tester,
         const CallControlBar(
-          CallControlBarLayout(
+          small: CallControlBarLayout(
             leading: [
               SizedBox.square(dimension: 48),
               SizedBox.square(dimension: 48),
@@ -167,7 +167,7 @@ void main() {
       await pumpBar(
         tester,
         const CallControlBar(
-          CallControlBarLayout(
+          small: CallControlBarLayout(
             center: [SizedBox(width: 1200, height: 48, key: Key('center'))],
           ),
         ),
@@ -182,7 +182,7 @@ void main() {
       await pumpBar(
         tester,
         const CallControlBar(
-          CallControlBarLayout(
+          small: CallControlBarLayout(
             leading: [
               SizedBox.square(dimension: 48),
               SizedBox.square(dimension: 48),
@@ -216,7 +216,7 @@ void main() {
     testWidgets('docked paints a flat fill and no separator', (tester) async {
       // No line along the top edge, unlike core's bars: a call has nothing to
       // separate the controls from, and the design draws none.
-      await pumpBar(tester, const CallControlBar(small), width: 402);
+      await pumpBar(tester, const CallControlBar(small: small), width: 402);
 
       expect(
         decorations(tester),
@@ -236,7 +236,7 @@ void main() {
       await pumpBar(
         tester,
         const CallControlBar(
-          small,
+          small: small,
           style: CallControlBarStyle(surfaceStyle: StreamSurfaceStyle.floating),
         ),
         width: 402,
@@ -258,7 +258,7 @@ void main() {
       await pumpBar(
         tester,
         CallControlBar(
-          CallControlBarLayout(
+          small: CallControlBarLayout(
             leading: [
               Builder(
                 builder: (context) {
@@ -295,7 +295,7 @@ void main() {
           ),
           child: Align(
             alignment: Alignment.bottomCenter,
-            child: CallControlBar(small),
+            child: CallControlBar(small: small),
           ),
         ),
       ),

@@ -72,7 +72,8 @@ void main() {
   testWidgets('StreamMicrophoneButton reports a refusal', (tester) async {
     final localParticipant = MockCallParticipantState();
     final call = MockCall();
-    Object? reported;
+    VideoError? reported;
+    String? reportedAction;
 
     when(
       () => localParticipant.publishedTracks,
@@ -86,7 +87,10 @@ void main() {
         child: StreamMicrophoneButton(
           localParticipant: localParticipant,
           call: call,
-          onError: (error) => reported = error,
+          onError: (error, action) {
+            reported = error;
+            reportedAction = action;
+          },
         ),
       ),
     );
@@ -95,12 +99,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(reported, _refused);
+    expect(reportedAction, 'turn the microphone off');
   });
 
   testWidgets('StreamCameraButton reports a refusal', (tester) async {
     final localParticipant = MockCallParticipantState();
     final call = MockCall();
-    Object? reported;
+    VideoError? reported;
+    String? reportedAction;
 
     when(
       () => localParticipant.publishedTracks,
@@ -114,7 +120,10 @@ void main() {
         child: StreamCameraButton(
           localParticipant: localParticipant,
           call: call,
-          onError: (error) => reported = error,
+          onError: (error, action) {
+            reported = error;
+            reportedAction = action;
+          },
         ),
       ),
     );
@@ -123,6 +132,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(reported, _refused);
+    expect(reportedAction, 'turn the camera off');
   });
 
   // A control with no listener still has to survive the refusal rather than
@@ -388,4 +398,4 @@ void main() {
   });
 }
 
-const _refused = 'the call refused';
+const _refused = VideoError(message: 'the call refused');

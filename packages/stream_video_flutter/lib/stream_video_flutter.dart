@@ -29,6 +29,7 @@ export 'src/call_controls/controls/stream_microphone_button.dart';
 export 'src/call_controls/controls/stream_recording_button.dart';
 export 'src/call_controls/controls/stream_screen_share_button.dart';
 export 'src/call_controls/controls/stream_speakerphone_button.dart';
+export 'src/call_controls/device_control.dart';
 export 'src/call_controls/device_split_buttons.dart';
 export 'src/call_controls/participants_button.dart';
 export 'src/call_participants/call_participants.dart';

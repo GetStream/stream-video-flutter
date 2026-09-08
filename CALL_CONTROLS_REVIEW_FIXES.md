@@ -23,21 +23,23 @@ pressing it now calls `setMicrophoneEnabled(enabled: true)`, which runs
 
 ## Phase 2 — API corrections
 
-- [ ] Export `device_control.dart` from the barrel (`CHANGELOG.md:210` already
+- [x] Export `device_control.dart` from the barrel (`CHANGELOG.md:210` already
       announces `trackEnabled` and `wantsOn`)
-- [ ] `StreamLayoutButton`: `initialLayout` -> `layout`, drop the internal state,
+- [x] `StreamLayoutButton`: `initialLayout` -> `layout`, drop the internal state,
       make it stateless (every caller already owns the mode) + `fix_data.yaml`
       parameter transform + breaking changelog note
-- [ ] `CallControlBar`: `small` becomes named, `super.key` last
-- [ ] `heightOf` takes `primary` and includes the bottom inset when set
-- [ ] Delete `resolveSurfaceStyle` (zero callers, zero tests)
-- [ ] Collapse the hand-copied style-resolution chains into one private static
-- [ ] `assert` against an all-empty `CallControlBarLayout`
+- [x] `CallControlBar`: `small` becomes named, `super.key` last
+- [x] `heightOf` takes `primary` and includes the bottom inset when set
+- [x] Delete `resolveSurfaceStyle` (zero callers, zero tests)
+- [x] Collapse the hand-copied style-resolution chains into one private static
+- [~] `assert` against an all-empty `CallControlBarLayout` — **not done**: a
+      const constructor cannot evaluate `List.length`, and `const`-ability is
+      load-bearing here. Documented on the constructor instead.
 
 ## Phase 3 — dogfooding
 
-- [ ] Extract the `callControlsWidgetBuilder` closure into a method
-- [ ] Error messages name the action, not a device switch (regression from base)
+- [x] Extract the `callControlsWidgetBuilder` closure into a method
+- [x] Error messages name the action, not a device switch (regression from base)
 - [ ] Fix the shared-controller comment (`SettingsMenu` takes no controller)
 - [ ] Fix the control count ("two extra controls" is one plus a caret)
 

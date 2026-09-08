@@ -30,8 +30,9 @@ import '../../stream_video_flutter.dart';
 class CallControlBarLayout {
   /// Creates a layout showing exactly the slots given.
   ///
-  /// The slots are the lists passed, not copies, which is what keeps this
-  /// `const`: pass `const` lists for a wholly immutable result.
+  /// The lists are held as given, not copied. A layout with every slot empty
+  /// draws an empty bar; omit the bar instead, or leave the size null and let
+  /// it fall back to a smaller one.
   const CallControlBarLayout({
     this.leading = const [],
     this.center = const [],
@@ -75,7 +76,7 @@ class CallControlBarLayout {
 ///
 /// ```dart
 /// CallControlBar(
-///   CallControlBarLayout(
+///   small: CallControlBarLayout(
 ///     leading: [StreamMicrophoneButton(call: call), StreamCameraButton(call: call)],
 ///     trailing: [StreamParticipantsButton(call: call)],
 ///   ),
@@ -98,13 +99,13 @@ class CallControlBarLayout {
 ///  * [CallControlBarTheme], for restyling the bar in a subtree.
 class CallControlBar extends StatelessWidget {
   /// Creates a control bar.
-  const CallControlBar(
-    this.small, {
-    super.key,
+  const CallControlBar({
+    required this.small,
     this.medium,
     this.large,
     this.style,
     this.primary = true,
+    super.key,
   });
 
   /// The layout drawn at [StreamScreenSize.small], and the fallback for both
@@ -146,40 +147,43 @@ class CallControlBar extends StatelessWidget {
         .large => large ?? medium ?? small,
       };
 
-  /// The height the bar renders at in [context], safe area excluded.
-  ///
-  /// [CallControlBar] is not a [PreferredSizeWidget]: the height is a themed
-  /// value, which `preferredSize` cannot read. A caller that needs one — to
-  /// inset content out from under a floating bar, say — wraps the bar in a
-  /// [PreferredSize] built from this.
-  static double heightOf(BuildContext context, {CallControlBarStyle? style}) {
-    return _CallControlBarStyleDefaults(
-      context,
-      CallControlBarTheme.of(context).style?.merge(style) ?? style,
-    ).height;
+  /// The style [style] resolves to against the ambient theme.
+  static CallControlBarStyle? _effectiveStyle(
+    BuildContext context,
+    CallControlBarStyle? style,
+  ) {
+    final themeStyle = CallControlBarTheme.of(context).style;
+    return themeStyle?.merge(style) ?? style;
   }
 
-  /// The surface style this bar renders with in [context].
+  /// The height the bar occupies in [context], including the bottom inset a
+  /// [primary] bar clears.
   ///
-  /// Precedence: the per-instance [style], then the ambient
-  /// [CallControlBarTheme] style, then the ambient [StreamSurfaceStyle].
+  /// [CallControlBar] is not a [PreferredSizeWidget]: the height is a themed
+  /// value, which `preferredSize` cannot read for want of a [BuildContext]. A
+  /// caller that needs one — to inset content out from under a floating bar,
+  /// say — wraps the bar in a [PreferredSize] built from this.
   ///
-  /// Matches what the bar resolves for itself, so a screen dropping one into a
-  /// call can lay the content above it out to match.
-  static StreamSurfaceStyle resolveSurfaceStyle(
+  /// Pass [primary] to match the bar being measured.
+  static double heightOf(
     BuildContext context, {
     CallControlBarStyle? style,
+    bool primary = true,
   }) {
-    final themeStyle = CallControlBarTheme.of(context).style;
-    final effective = themeStyle?.merge(style) ?? style;
-    return effective?.surfaceStyle ?? context.streamSurfaceStyle;
+    final height = _CallControlBarStyleDefaults(
+      context,
+      _effectiveStyle(context, style),
+    ).height;
+
+    if (!primary) return height;
+    return height + MediaQuery.paddingOf(context).bottom;
   }
 
   @override
   Widget build(BuildContext context) {
     final resolved = _CallControlBarStyleDefaults(
       context,
-      CallControlBarTheme.of(context).style?.merge(style) ?? style,
+      _effectiveStyle(context, style),
     );
 
     final layout = layoutFor(context.streamScreenSize);

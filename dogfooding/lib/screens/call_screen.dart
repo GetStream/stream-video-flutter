@@ -139,13 +139,14 @@ class _CallScreenState extends State<CallScreen> {
   /// The SDK controls log a refusal and report it here; without a listener the
   /// press is invisible, because a control's state comes from the call's own
   /// participant state and that does not change on failure.
-  void _reportDeviceFailure(String message, Object error) {
+  void _reportDeviceFailure(VideoError error, String description) {
+    final message = 'Could not $description';
     _logger.e(() => '$message: $error');
     if (!mounted) return;
 
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(
       SnackBar(
-        content: Text('$message: $error'),
+        content: Text('$message: ${error.message}'),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -221,7 +222,7 @@ class _CallScreenState extends State<CallScreen> {
   // in, and a bar rebuilds whenever the window crosses a breakpoint anyway.
 
   StreamLayoutButton _layoutToggle() => StreamLayoutButton(
-    initialLayout: _currentLayoutMode,
+    layout: _currentLayoutMode,
     onLayoutModeChanged: (layout) {
       setState(() {
         _currentLayoutMode = layout;
@@ -254,16 +255,14 @@ class _CallScreenState extends State<CallScreen> {
     call: call,
     devices: _devices,
     stopTrackOnMute: _stopTrackOnMute,
-    onError: (error) =>
-        _reportDeviceFailure('Could not switch the microphone', error),
+    onError: _reportDeviceFailure,
   );
 
   /// The phone bar's camera. See [_microphoneToggle].
   StreamCameraButton _cameraToggle(Call call) => StreamCameraButton(
     call: call,
     devices: _devices,
-    onError: (error) =>
-        _reportDeviceFailure('Could not switch the camera', error),
+    onError: _reportDeviceFailure,
   );
 
   // Split buttons rather than plain toggles, so the device can be changed
@@ -279,8 +278,7 @@ class _CallScreenState extends State<CallScreen> {
         // down.
         menuDirection: StreamMenuDirection.up,
         stopTrackOnMute: _stopTrackOnMute,
-        onError: (error) =>
-            _reportDeviceFailure('Could not switch the microphone', error),
+        onError: _reportDeviceFailure,
       );
 
   /// The camera's split button. See [_microphoneButton].
@@ -288,8 +286,7 @@ class _CallScreenState extends State<CallScreen> {
     call: call,
     devices: _devices,
     menuDirection: StreamMenuDirection.up,
-    onError: (error) =>
-        _reportDeviceFailure('Could not switch the camera', error),
+    onError: _reportDeviceFailure,
   );
 
   // onTap, so the button opens this app's own participants screen rather than
@@ -454,7 +451,7 @@ class _CallScreenState extends State<CallScreen> {
                   // is not enough width for a centre row and sides both. Five
                   // controls, as the design draws it — screen sharing and the
                   // device pickers are reachable from the more menu.
-                  CallControlBarLayout(
+                  small: CallControlBarLayout(
                     leading: [
                       moreButton,
                       _microphoneToggle(call),

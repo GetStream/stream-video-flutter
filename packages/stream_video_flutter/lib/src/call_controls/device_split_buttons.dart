@@ -9,7 +9,6 @@ import 'package:stream_core_flutter/video.dart';
 import '../../stream_video_flutter.dart';
 import '../l10n/localization_extension.dart';
 import 'call_button_badge.dart';
-import 'device_control.dart';
 
 /// Turns the microphone on and off, with a caret that picks which microphone
 /// and speaker to use.
@@ -103,7 +102,7 @@ class StreamMicrophoneSplitButton extends StatelessWidget {
   ///
   /// Null under [StreamMicrophoneSplitButton.withDevices], where pressing the
   /// button is the caller's own `onPressed` and there is no result to report.
-  final ValueChanged<Object>? onError;
+  final StreamDeviceErrorCallback? onError;
 
   @override
   Widget build(BuildContext context) {
@@ -225,7 +224,7 @@ class StreamCameraSplitButton extends StatelessWidget {
 
   /// Called when the call refuses to turn the camera on or off. See
   /// [StreamMicrophoneSplitButton.onError].
-  final ValueChanged<Object>? onError;
+  final StreamDeviceErrorCallback? onError;
 
   @override
   Widget build(BuildContext context) {

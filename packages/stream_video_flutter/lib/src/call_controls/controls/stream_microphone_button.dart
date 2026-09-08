@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../device_control.dart';
 
 /// A widget that represents a call control option to toggle if the microphone
 /// is on or off.
@@ -62,7 +61,7 @@ class StreamMicrophoneButton extends StatelessWidget {
   ///
   /// The error is an `Object` rather than the `VideoError` behind it, matching
   /// [StreamMediaDevicesController.enumerationError].
-  final ValueChanged<Object>? onError;
+  final StreamDeviceErrorCallback? onError;
 
   @override
   Widget build(BuildContext context) {

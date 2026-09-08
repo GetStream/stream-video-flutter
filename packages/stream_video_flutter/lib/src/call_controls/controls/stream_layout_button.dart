@@ -2,52 +2,34 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 
-/// A widget that allows to change the layout of the call.
-class StreamLayoutButton extends StatefulWidget {
+/// A widget that switches the call between a grid and a spotlight layout.
+class StreamLayoutButton extends StatelessWidget {
   /// Creates a new instance of [StreamLayoutButton].
   const StreamLayoutButton({
-    super.key,
     required this.onLayoutModeChanged,
-    this.initialLayout = ParticipantLayoutMode.grid,
+    this.layout = ParticipantLayoutMode.grid,
+    super.key,
   });
 
-  /// The initial layout mode.
-  final ParticipantLayoutMode initialLayout;
+  /// The layout mode the button draws.
+  final ParticipantLayoutMode layout;
 
   /// Callback that is called when the layout mode is changed.
+  ///
+  /// The button holds no state of its own, so the caller is expected to pass
+  /// the new mode back in through [layout].
   final void Function(ParticipantLayoutMode) onLayoutModeChanged;
-
-  @override
-  State<StreamLayoutButton> createState() => _StreamLayoutButtonState();
-}
-
-class _StreamLayoutButtonState extends State<StreamLayoutButton> {
-  ParticipantLayoutMode _layoutMode = ParticipantLayoutMode.grid;
-
-  @override
-  void initState() {
-    super.initState();
-    _layoutMode = widget.initialLayout;
-  }
 
   @override
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
+    final isGrid = layout == ParticipantLayoutMode.grid;
 
     return CallControlButton(
-      icon: Icon(
-        _layoutMode == ParticipantLayoutMode.grid
-            ? icons.gridFill
-            : icons.speakerLeftFill,
+      icon: Icon(isGrid ? icons.gridFill : icons.speakerLeftFill),
+      onPressed: () => onLayoutModeChanged(
+        isGrid ? ParticipantLayoutMode.spotlight : ParticipantLayoutMode.grid,
       ),
-      onPressed: () {
-        _layoutMode = _layoutMode == ParticipantLayoutMode.grid
-            ? ParticipantLayoutMode.spotlight
-            : ParticipantLayoutMode.grid;
-
-        widget.onLayoutModeChanged.call(_layoutMode);
-        setState(() {});
-      },
     );
   }
 }
