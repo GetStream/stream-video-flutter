@@ -5,8 +5,9 @@ import '../../../stream_video_flutter.dart';
 
 /// Default style values for [StreamConnectionQualityIndicator].
 ///
-/// The chip sits on top of video, so its fill is an overlay and its bars are
-/// colored for legibility against that overlay rather than against a surface.
+/// The chip sits on top of video, so its decoration is an overlay fill and its
+/// bars are colored for legibility against that overlay rather than against a
+/// surface.
 ///
 /// Shared with the tile, which has to know how much room the chip takes before
 /// it decides what else fits beside it. Deliberately not exported.
@@ -27,7 +28,13 @@ class StreamConnectionQualityIndicatorStyleDefaults
   double get iconSize => 24;
 
   @override
-  Color get backgroundColor => _colorScheme.backgroundOverlayDarkStrong;
+  double get strokeWidth => 2;
+
+  @override
+  BoxDecoration get decoration => BoxDecoration(
+    color: _colorScheme.backgroundOverlayDarkStrong,
+    shape: BoxShape.circle,
+  );
 
   @override
   Color get poorColor => _colorScheme.accentError;

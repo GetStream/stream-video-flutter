@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../stream_video_flutter.dart';
 import 'connection_quality_indicator_defaults.dart';
 
-/// A round chip reporting how good a participant's connection is.
+/// A chip reporting how good a participant's connection is.
 ///
 /// Three bars, of which as many are lit as the reported quality warrants. The
 /// lit bars are also colored by level, so the state reads at a glance without
-/// counting bars.
+/// counting bars. The chip is round unless
+/// [StreamConnectionQualityIndicatorStyle.decoration] says otherwise.
 ///
 /// The rendering can be replaced app-wide by registering a
 /// `connectionQualityIndicator` builder with [streamVideoComponentBuilders] on
@@ -90,6 +91,7 @@ class DefaultStreamConnectionQualityIndicator extends StatelessWidget {
 
     final size = style?.size ?? defaults.size;
     final iconSize = style?.iconSize ?? defaults.iconSize;
+    final strokeWidth = style?.strokeWidth ?? defaults.strokeWidth;
 
     final activeColor = switch (props.connectionQuality) {
       SfuConnectionQuality.poor => style?.poorColor ?? defaults.poorColor,
@@ -104,15 +106,13 @@ class DefaultStreamConnectionQualityIndicator extends StatelessWidget {
     return SizedBox.square(
       dimension: size,
       child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: style?.backgroundColor ?? defaults.backgroundColor,
-          shape: BoxShape.circle,
-        ),
+        decoration: style?.decoration ?? defaults.decoration,
         child: Center(
           child: CustomPaint(
             size: Size.square(iconSize),
             painter: _ConnectionQualityIndicatorPainter(
               level: _levelOf(props.connectionQuality),
+              strokeWidth: strokeWidth,
               activeColor: activeColor,
               inactiveColor: style?.inactiveColor ?? defaults.inactiveColor,
             ),
@@ -134,18 +134,19 @@ class DefaultStreamConnectionQualityIndicator extends StatelessWidget {
 //
 // The geometry is the design system's `Connection Indicator` icon, expressed in
 // its own 24-unit space and scaled to whatever size it is drawn at: three
-// 2-thick strokes at x 7, 12 and 17, rising from a shared baseline at y 16 to
-// 14, 11 and 8. Unlike the sound indicator's bars these grow from the bottom —
-// they report a level, not activity.
+// strokes at x 7, 12 and 17, rising from a shared baseline at y 16 to 14, 11
+// and 8. [strokeWidth] is in that same space, so the bars stay proportional.
+// Unlike the sound indicator's bars these grow from the bottom — they report a
+// level, not activity.
 class _ConnectionQualityIndicatorPainter extends CustomPainter {
   const _ConnectionQualityIndicatorPainter({
     required this.level,
+    required this.strokeWidth,
     required this.activeColor,
     required this.inactiveColor,
   });
 
   static const _viewBox = 24.0;
-  static const _strokeWidth = 2.0;
   static const _baseline = 16.0;
   static const _bars = [
     (x: 7.0, top: 14.0),
@@ -154,6 +155,7 @@ class _ConnectionQualityIndicatorPainter extends CustomPainter {
   ];
 
   final int level;
+  final double strokeWidth;
   final Color activeColor;
   final Color inactiveColor;
 
@@ -167,7 +169,7 @@ class _ConnectionQualityIndicatorPainter extends CustomPainter {
         Offset(bar.x * scale, _baseline * scale),
         Paint()
           ..color = level > index ? activeColor : inactiveColor
-          ..strokeWidth = _strokeWidth * scale
+          ..strokeWidth = strokeWidth * scale
           ..strokeCap = StrokeCap.round,
       );
     }
@@ -176,6 +178,7 @@ class _ConnectionQualityIndicatorPainter extends CustomPainter {
   @override
   bool shouldRepaint(_ConnectionQualityIndicatorPainter oldDelegate) =>
       oldDelegate.level != level ||
+      oldDelegate.strokeWidth != strokeWidth ||
       oldDelegate.activeColor != activeColor ||
       oldDelegate.inactiveColor != inactiveColor;
 }

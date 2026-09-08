@@ -106,8 +106,9 @@ mixin _$StreamConnectionQualityIndicatorStyle {
 
     return StreamConnectionQualityIndicatorStyle(
       size: lerpDouble$(a.size, b.size, t),
-      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+      decoration: BoxDecoration.lerp(a.decoration, b.decoration, t),
       iconSize: lerpDouble$(a.iconSize, b.iconSize, t),
+      strokeWidth: lerpDouble$(a.strokeWidth, b.strokeWidth, t),
       poorColor: Color.lerp(a.poorColor, b.poorColor, t),
       fairColor: Color.lerp(a.fairColor, b.fairColor, t),
       greatColor: Color.lerp(a.greatColor, b.greatColor, t),
@@ -117,8 +118,9 @@ mixin _$StreamConnectionQualityIndicatorStyle {
 
   StreamConnectionQualityIndicatorStyle copyWith({
     double? size,
-    Color? backgroundColor,
+    BoxDecoration? decoration,
     double? iconSize,
+    double? strokeWidth,
     Color? poorColor,
     Color? fairColor,
     Color? greatColor,
@@ -128,8 +130,9 @@ mixin _$StreamConnectionQualityIndicatorStyle {
 
     return StreamConnectionQualityIndicatorStyle(
       size: size ?? _this.size,
-      backgroundColor: backgroundColor ?? _this.backgroundColor,
+      decoration: decoration ?? _this.decoration,
       iconSize: iconSize ?? _this.iconSize,
+      strokeWidth: strokeWidth ?? _this.strokeWidth,
       poorColor: poorColor ?? _this.poorColor,
       fairColor: fairColor ?? _this.fairColor,
       greatColor: greatColor ?? _this.greatColor,
@@ -152,8 +155,9 @@ mixin _$StreamConnectionQualityIndicatorStyle {
 
     return copyWith(
       size: other.size,
-      backgroundColor: other.backgroundColor,
+      decoration: other.decoration,
       iconSize: other.iconSize,
+      strokeWidth: other.strokeWidth,
       poorColor: other.poorColor,
       fairColor: other.fairColor,
       greatColor: other.greatColor,
@@ -175,8 +179,9 @@ mixin _$StreamConnectionQualityIndicatorStyle {
     final _other = (other as StreamConnectionQualityIndicatorStyle);
 
     return _other.size == _this.size &&
-        _other.backgroundColor == _this.backgroundColor &&
+        _other.decoration == _this.decoration &&
         _other.iconSize == _this.iconSize &&
+        _other.strokeWidth == _this.strokeWidth &&
         _other.poorColor == _this.poorColor &&
         _other.fairColor == _this.fairColor &&
         _other.greatColor == _this.greatColor &&
@@ -190,8 +195,9 @@ mixin _$StreamConnectionQualityIndicatorStyle {
     return Object.hash(
       runtimeType,
       _this.size,
-      _this.backgroundColor,
+      _this.decoration,
       _this.iconSize,
+      _this.strokeWidth,
       _this.poorColor,
       _this.fairColor,
       _this.greatColor,

@@ -22,6 +22,10 @@ typedef OnUserAvatarLongPress = void Function(UserInfo);
 ///
 /// When no builder is registered, [DefaultStreamUserAvatar] is used.
 ///
+/// The initials shown when a user has no picture sit on a color picked from
+/// [StreamColorScheme.avatarPalette] by user id, so one person keeps one color
+/// everywhere. An ambient [StreamAvatarTheme] naming colors overrides that.
+///
 /// See also:
 ///
 ///  * [StreamAvatarTheme], for customizing its size, colors and border.
@@ -107,12 +111,13 @@ class DefaultStreamUserAvatar extends StatelessWidget {
     // their sizing and colors.
     final theme = StreamAvatarTheme.of(context);
     final legacy = StreamUserAvatarTheme.of(context);
+    final colors = _colorsFor(context, user, legacy);
 
     final avatar = StreamAvatar(
       imageUrl: imageUrl != null && imageUrl.isNotEmpty ? imageUrl : null,
       size: theme.size ?? avatarSizeFromConstraints(legacy.constraints),
-      backgroundColor: theme.backgroundColor ?? legacy.initialsBackground,
-      foregroundColor: theme.foregroundColor ?? legacy.initialsTextStyle.color,
+      backgroundColor: theme.backgroundColor ?? colors.backgroundColor,
+      foregroundColor: theme.foregroundColor ?? colors.foregroundColor,
       semanticsLabel: user.name.isNotEmpty ? user.name : user.id,
       placeholder: (context) => Text(_initialsFor(user)),
     );
@@ -126,6 +131,35 @@ class DefaultStreamUserAvatar extends StatelessWidget {
       onLongPress: onLongPress != null ? () => onLongPress(user) : null,
       child: avatar,
     );
+  }
+
+  // The colors the initials are drawn in when nothing overrides them.
+  //
+  // The design system ships the palette but always reaches for its first
+  // entry, so picking one per user is the SDK's job — the chat SDK does the
+  // same, keyed the same way, so a person carries one color across products.
+  static StreamAvatarColorPair _colorsFor(
+    BuildContext context,
+    UserInfo user,
+    StreamUserAvatarThemeData legacy,
+  ) {
+    final palette = context.streamColorScheme.avatarPalette;
+    // Off the id rather than the initials, so renaming somebody does not
+    // recolor them. Dart's `%` lands in range even for a negative hash.
+    final pair = palette[user.id.hashCode % palette.length];
+
+    // The deprecated theme dresses the initials as one piece — a saturated
+    // fill with light text on top — and its text color is non-null even when
+    // untouched. Honouring it only alongside an `initialsBackground` keeps it
+    // from putting white initials on the palette's pale fills.
+    if (legacy.initialsBackground case final background?) {
+      return StreamAvatarColorPair(
+        backgroundColor: background,
+        foregroundColor: legacy.initialsTextStyle.color ?? pair.foregroundColor,
+      );
+    }
+
+    return pair;
   }
 
   // A name of nothing but spaces has no initials, so fall through to the id

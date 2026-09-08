@@ -504,8 +504,13 @@ class StreamCallParticipantThemeData with Diagnosticable {
         placeholderStyle: StreamParticipantPlaceholderStyle(
           avatarTheme: StreamAvatarThemeData(
             size: avatarSizeFromConstraints(userAvatarTheme.constraints),
+            // The initials chip is coloured as one piece, so its fill and text
+            // travel together. Without a fill the avatar picks a colour per
+            // user instead, and the text colour goes with it.
             backgroundColor: userAvatarTheme.initialsBackground,
-            foregroundColor: userAvatarTheme.initialsTextStyle.color,
+            foregroundColor: userAvatarTheme.initialsBackground == null
+                ? null
+                : userAvatarTheme.initialsTextStyle.color,
           ),
         ),
       ),
