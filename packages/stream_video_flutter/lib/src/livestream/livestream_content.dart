@@ -211,9 +211,11 @@ class _LivestreamContentState extends State<LivestreamContent> {
         rendererScopePrefix: 'livecontent',
         call: call,
         participant: participant,
-        backgroundColor: StreamVideoTheme.of(
-          context,
-        ).colorTheme.livestreamBackground,
+        style: StreamParticipantTileStyle(
+          backgroundColor: StreamVideoTheme.of(
+            context,
+          ).colorTheme.livestreamBackground,
+        ),
         showConnectionQualityIndicator: false,
         showParticipantLabel: false,
         showSpeakerBorder: false,

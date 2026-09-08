@@ -2,13 +2,9 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:stream_video/stream_video.dart';
 
-import '../../theme/stream_video_theme.dart';
+import '../../../stream_video_flutter.dart';
 import '../../widgets/tile_view.dart';
-import '../call_participants.dart';
-
-const _kDefaultSpacing = 16.0;
 
 class CallParticipantsGridView extends StatelessWidget {
   const CallParticipantsGridView({
@@ -16,9 +12,9 @@ class CallParticipantsGridView extends StatelessWidget {
     required this.call,
     required this.participants,
     required this.itemBuilder,
-    this.padding = const EdgeInsets.all(_kDefaultSpacing),
-    this.mainAxisSpacing = _kDefaultSpacing,
-    this.crossAxisSpacing = _kDefaultSpacing,
+    this.padding,
+    this.mainAxisSpacing,
+    this.crossAxisSpacing,
   });
 
   /// Represents a call.
@@ -31,16 +27,34 @@ class CallParticipantsGridView extends StatelessWidget {
   final CallParticipantBuilder itemBuilder;
 
   /// Space between the items in the main axis.
-  final double mainAxisSpacing;
+  ///
+  /// Overrides [StreamCallParticipantsGridThemeData.mainAxisSpacing].
+  final double? mainAxisSpacing;
 
   /// Space between the items in the cross axis.
-  final double crossAxisSpacing;
+  ///
+  /// Overrides [StreamCallParticipantsGridThemeData.crossAxisSpacing].
+  final double? crossAxisSpacing;
 
   /// Padding around the grid.
-  final EdgeInsets padding;
+  ///
+  /// Overrides [StreamCallParticipantsGridThemeData.padding].
+  final EdgeInsets? padding;
 
   @override
   Widget build(BuildContext context) {
+    final theme = StreamCallParticipantsGridTheme.of(context);
+    final spacing = context.streamSpacing;
+
+    final padding =
+        this.padding ??
+        theme.padding?.resolve(Directionality.maybeOf(context)) ??
+        EdgeInsets.all(spacing.xs);
+    final mainAxisSpacing =
+        this.mainAxisSpacing ?? theme.mainAxisSpacing ?? spacing.xs;
+    final crossAxisSpacing =
+        this.crossAxisSpacing ?? theme.crossAxisSpacing ?? spacing.xs;
+
     if (CurrentPlatform.isIos || CurrentPlatform.isAndroid) {
       return MobileCallParticipantsGrid(
         call: call,
@@ -69,9 +83,9 @@ class MobileCallParticipantsGrid extends StatelessWidget {
     required this.call,
     required this.participants,
     required this.itemBuilder,
-    this.padding = const EdgeInsets.all(_kDefaultSpacing),
-    this.mainAxisSpacing = _kDefaultSpacing,
-    this.crossAxisSpacing = _kDefaultSpacing,
+    required this.padding,
+    required this.mainAxisSpacing,
+    required this.crossAxisSpacing,
   });
 
   /// Represents a call.
@@ -120,6 +134,9 @@ class MobileCallParticipantsGrid extends StatelessWidget {
             final pageParticipants = pages.elementAt(index);
             final pageParticipantsCount = pageParticipants.length;
 
+            Widget page(Widget child) =>
+                Padding(padding: padding, child: child);
+
             Widget getParticipantTile(int index) {
               if (index < pageParticipantsCount) {
                 return Expanded(
@@ -132,60 +149,61 @@ class MobileCallParticipantsGrid extends StatelessWidget {
             }
 
             if (index == 0) {
-              return Column(
-                children: [
-                  if (pageParticipantsCount == 1) ...[
-                    Expanded(
-                      child: Padding(
-                        padding: padding,
+              return page(
+                Column(
+                  children: [
+                    if (pageParticipantsCount == 1) ...[
+                      Expanded(
                         child: itemBuilder(context, call, pageParticipants[0]),
                       ),
-                    ),
+                    ],
+                    if (pageParticipantsCount == 2) ...[
+                      getParticipantTile(0),
+                      SizedBox(height: mainAxisSpacing),
+                      getParticipantTile(1),
+                    ],
+                    if (pageParticipantsCount >= 3) ...[
+                      ...pageParticipants.mapIndexed((index, element) {
+                        if (index.isEven) {
+                          return Expanded(
+                            child: Row(
+                              children: [
+                                getParticipantTile(index),
+                                SizedBox(width: crossAxisSpacing),
+                                getParticipantTile(index + 1),
+                              ],
+                            ),
+                          );
+                        } else {
+                          return SizedBox(height: mainAxisSpacing);
+                        }
+                      }),
+                    ],
                   ],
-                  if (pageParticipantsCount == 2) ...[
-                    getParticipantTile(0),
-                    SizedBox(height: mainAxisSpacing),
-                    getParticipantTile(1),
-                  ],
-                  if (pageParticipantsCount >= 3) ...[
-                    ...pageParticipants.mapIndexed((index, element) {
-                      if (index.isEven) {
-                        return Expanded(
-                          child: Row(
-                            children: [
-                              getParticipantTile(index),
-                              SizedBox(width: crossAxisSpacing),
-                              getParticipantTile(index + 1),
-                            ],
-                          ),
-                        );
-                      } else {
-                        return SizedBox(height: mainAxisSpacing);
-                      }
-                    }),
-                  ],
-                ],
+                ),
               );
             }
 
-            return Column(
-              children: [
-                ...List.generate(pageSize, (index) => index).map((index) {
-                  if (index.isEven) {
-                    return Expanded(
-                      child: Row(
-                        children: [
-                          getParticipantTile(index),
-                          SizedBox(width: crossAxisSpacing),
-                          getParticipantTile(index + 1),
-                        ],
-                      ),
-                    );
-                  } else {
-                    return SizedBox(height: mainAxisSpacing);
-                  }
-                }),
-              ],
+            return page(
+              Column(
+                children: [
+                  ...List.generate(pageSize, (index) => index).map((index) {
+                    if (index.isEven) {
+                      return Expanded(
+                        child: Row(
+                          children: [
+                            getParticipantTile(index),
+                            SizedBox(width: crossAxisSpacing),
+                            getParticipantTile(index + 1),
+                          ],
+                        ),
+                      );
+                    } else {
+                      return SizedBox(height: mainAxisSpacing);
+                    }
+                  }),
+                ],
+              ),
             );
           },
         );
@@ -200,10 +218,10 @@ class DesktopCallParticipantsGrid extends StatefulWidget {
     required this.call,
     required this.participants,
     required this.itemBuilder,
+    required this.padding,
+    required this.mainAxisSpacing,
+    required this.crossAxisSpacing,
     this.pageSize = 16,
-    this.padding = const EdgeInsets.all(_kDefaultSpacing),
-    this.mainAxisSpacing = _kDefaultSpacing,
-    this.crossAxisSpacing = _kDefaultSpacing,
   }) : assert(pageSize <= 49, 'We currently support a maximum of 49 items');
 
   /// Represents a call.
