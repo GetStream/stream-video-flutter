@@ -268,8 +268,8 @@ class _CallScreenState extends State<CallScreen> {
   // Split buttons rather than plain toggles, so the device can be changed
   // mid-call without opening the settings menu.
   //
-  // Sharing this screen's one controller: the settings menu offers the same
-  // device choice, and two controllers would disagree about which is in use.
+  // Sharing this screen's one controller with the plain toggles, so the two
+  // never disagree about which device is in use.
   StreamMicrophoneSplitButton _microphoneButton(Call call) =>
       StreamMicrophoneSplitButton(
         call: call,
@@ -296,6 +296,74 @@ class _CallScreenState extends State<CallScreen> {
         call: call,
         onTap: _channel != null ? () => showParticipants(context) : null,
       );
+
+  /// The call's control bar, laid out per screen size.
+  CallControlBar _callControls(BuildContext context, Call call) {
+    final moreButton = CallFeatureButton(
+      icon: Icon(context.streamIcons.moreVerticalFill),
+      selected: _moreMenuVisible,
+      onPressed: () => toggleMoreMenu(context),
+    );
+
+    final panels = [
+      _participantsControl(call),
+      _ShowChatButton(channel: _channel),
+    ];
+
+    return CallControlBar(
+      // A phone splits its controls between the two edges: there
+      // is not enough width for a centre row and sides both. Five
+      // controls, as the design draws it — screen sharing and the
+      // device pickers are reachable from the more menu.
+      small: CallControlBarLayout(
+        leading: [
+          moreButton,
+          _microphoneToggle(call),
+          _cameraToggle(call),
+        ],
+        trailing: panels,
+      ),
+      // A tablet keeps the phone's shape but has the width for
+      // screen sharing and a caret on each device, so it gets
+      // them: picking a microphone mid-call without opening a menu
+      // is worth one extra control and a caret at this size.
+      medium: CallControlBarLayout(
+        leading: [
+          moreButton,
+          _screenShareOption(call),
+          _microphoneButton(call),
+          _cameraButton(call),
+        ],
+        trailing: panels,
+      ),
+      large: CallControlBarLayout(
+        leading: [
+          CallFeatureButton(
+            icon: Icon(context.streamIcons.settingsFill),
+            selected: _moreMenuVisible,
+            onPressed: () => toggleMoreMenu(context),
+          ),
+          _layoutToggle(),
+        ],
+        center: [
+          _microphoneButton(call),
+          _cameraButton(call),
+          StreamClosedCaptionsButton(call: call),
+          StreamAddReactionButton(call: call),
+          _screenShareOption(call),
+          StreamRecordingButton(call: call),
+          StreamLeaveCallButton(call: call),
+        ],
+        trailing: [
+          CallFeatureButton(
+            icon: Icon(context.streamIcons.statsFill),
+            onPressed: () => showStats(context),
+          ),
+          ...panels,
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -434,72 +502,7 @@ class _CallScreenState extends State<CallScreen> {
                   title: CallDurationTitle(call: call),
                 );
               },
-              callControlsWidgetBuilder: (BuildContext context, Call call) {
-                final moreButton = CallFeatureButton(
-                  icon: Icon(context.streamIcons.moreVerticalFill),
-                  selected: _moreMenuVisible,
-                  onPressed: () => toggleMoreMenu(context),
-                );
-
-                final panels = [
-                  _participantsControl(call),
-                  _ShowChatButton(channel: _channel),
-                ];
-
-                return CallControlBar(
-                  // A phone splits its controls between the two edges: there
-                  // is not enough width for a centre row and sides both. Five
-                  // controls, as the design draws it — screen sharing and the
-                  // device pickers are reachable from the more menu.
-                  small: CallControlBarLayout(
-                    leading: [
-                      moreButton,
-                      _microphoneToggle(call),
-                      _cameraToggle(call),
-                    ],
-                    trailing: panels,
-                  ),
-                  // A tablet keeps the phone's shape but has the width for
-                  // screen sharing and a caret on each device, so it gets
-                  // them: picking a microphone mid-call without opening a menu
-                  // is worth the two extra controls at this size.
-                  medium: CallControlBarLayout(
-                    leading: [
-                      moreButton,
-                      _screenShareOption(call),
-                      _microphoneButton(call),
-                      _cameraButton(call),
-                    ],
-                    trailing: panels,
-                  ),
-                  large: CallControlBarLayout(
-                    leading: [
-                      CallFeatureButton(
-                        icon: Icon(context.streamIcons.settingsFill),
-                        selected: _moreMenuVisible,
-                        onPressed: () => toggleMoreMenu(context),
-                      ),
-                      _layoutToggle(),
-                    ],
-                    center: [
-                      _microphoneButton(call),
-                      _cameraButton(call),
-                      StreamClosedCaptionsButton(call: call),
-                      StreamAddReactionButton(call: call),
-                      _screenShareOption(call),
-                      StreamRecordingButton(call: call),
-                      StreamLeaveCallButton(call: call),
-                    ],
-                    trailing: [
-                      CallFeatureButton(
-                        icon: Icon(context.streamIcons.statsFill),
-                        onPressed: () => showStats(context),
-                      ),
-                      ...panels,
-                    ],
-                  ),
-                );
-              },
+              callControlsWidgetBuilder: _callControls,
             );
           },
         ),

@@ -40,8 +40,8 @@ pressing it now calls `setMicrophoneEnabled(enabled: true)`, which runs
 
 - [x] Extract the `callControlsWidgetBuilder` closure into a method
 - [x] Error messages name the action, not a device switch (regression from base)
-- [ ] Fix the shared-controller comment (`SettingsMenu` takes no controller)
-- [ ] Fix the control count ("two extra controls" is one plus a caret)
+- [x] Fix the shared-controller comment (`SettingsMenu` takes no controller)
+- [x] Fix the control count ("two extra controls" is one plus a caret)
 
 ## Phase 4 — enumeration failure is not "no hardware"
 
