@@ -32,14 +32,33 @@ Future<void> applyDeviceChange(
   }
 }
 
+/// Reads what a controller can say about the devices it lists.
 extension StreamDeviceAvailability on StreamMediaDevicesController {
   /// Whether the platform has been asked and named nothing in [devices].
   ///
   /// Waits for [StreamMediaDevicesController.hasEnumerated]: the lists are
   /// empty before the first enumeration because nothing has been asked, and a
   /// control that read them straight away would badge itself on startup.
+  ///
+  /// True whenever the list is empty, whether the platform has no such device
+  /// or could not list it at all — see [enumerationFailed] to tell the two
+  /// apart.
   bool reportsNo(List<RtcMediaDevice> devices) =>
       hasEnumerated && devices.isEmpty;
+
+  /// Whether the last enumeration failed for some reason other than there
+  /// being no device.
+  ///
+  /// A refused permission, or a device another application is holding, leaves
+  /// the lists as empty as absent hardware does.
+  /// [StreamMediaDevicesController.enumerationError] says which, and
+  /// [StreamMediaDevicesController.refreshDevices] retries — both of which
+  /// need a controller the screen holds, so pass `devices` to a control rather
+  /// than letting it build its own if you mean to offer either.
+  bool get enumerationFailed {
+    final error = enumerationError;
+    return error != null && !error.isNoDevice;
+  }
 }
 
 /// Reads a local device's state without mistaking "not reported yet" for

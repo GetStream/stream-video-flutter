@@ -26,12 +26,15 @@ class StreamMicrophoneButton extends StatelessWidget {
 
   /// The devices the platform reports, used to mark a missing microphone.
   ///
-  /// Optional, and no controller is built when it is left out: a plain toggle
-  /// needs none, and enumerating devices just to draw one is a cost a call
-  /// screen should opt into rather than pay by default. Given one — the same
-  /// controller the screen's other pickers read — the button badges itself and
-  /// stops responding while the platform names no microphone, the way
-  /// [StreamMicrophoneSplitButton] does.
+  /// Given one — the same controller the screen's other pickers read — the
+  /// button badges itself and stops responding while the platform names no
+  /// microphone. Left out, nothing listens for devices and the button claims
+  /// nothing about them. Note that [StreamMicrophoneSplitButton] always
+  /// enumerates, building a controller for the call when none is passed.
+  ///
+  /// Pass the screen's own controller to be able to read
+  /// [StreamMediaDevicesController.enumerationError] or offer
+  /// [StreamMediaDevicesController.refreshDevices] as a retry.
   final StreamMediaDevicesController? devices;
 
   /// The icon that is shown when the microphone is enabled.

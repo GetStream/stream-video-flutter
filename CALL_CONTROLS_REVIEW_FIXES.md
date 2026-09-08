@@ -49,8 +49,8 @@ pressing it now calls `setMicrophoneEnabled(enabled: true)`, which runs
 `enumerateDevices()` sets `hasEnumerated` with the lists still empty. Both
 controls go badged and inert with no reason and no retry.
 
-- [ ] Distinguish an enumeration failure from an empty enumeration
-- [ ] Give the in-call controls a way to surface/retry it
+- [x] Distinguish an enumeration failure from an empty enumeration
+- [x] Give the in-call controls a way to surface/retry it
 
 ## Phase 5 — tests
 

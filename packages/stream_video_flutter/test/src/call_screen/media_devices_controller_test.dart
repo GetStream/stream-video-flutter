@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -259,6 +260,42 @@ void main() {
       );
       expect(controller.hasEnumerated, isTrue);
       expect(controller.audioInputs, isEmpty);
+    });
+
+    // `reportsNo` is true either way, so a control that badged itself off it
+    // alone could not say whether a retry was worth offering.
+    test('separates a failed enumeration from absent hardware', () async {
+      when(notifier.enumerateDevices).thenAnswer(
+        (_) async => Result.failure(
+          PlatformException(code: 'NotAllowedError'),
+          StackTrace.empty,
+        ),
+      );
+
+      final controller = build();
+      await pumpEventQueue();
+
+      expect(controller.reportsNo(controller.audioInputs), isTrue);
+      expect(controller.enumerationFailed, isTrue);
+      expect(
+        controller.enumerationError?.reason,
+        StreamDeviceFailureReason.permissionDenied,
+      );
+    });
+
+    test('a platform reporting no device has not failed', () async {
+      when(notifier.enumerateDevices).thenAnswer(
+        (_) async => Result.failure(
+          PlatformException(code: 'NotFoundError'),
+          StackTrace.empty,
+        ),
+      );
+
+      final controller = build();
+      await pumpEventQueue();
+
+      expect(controller.reportsNo(controller.audioInputs), isTrue);
+      expect(controller.enumerationFailed, isFalse);
     });
   });
 
