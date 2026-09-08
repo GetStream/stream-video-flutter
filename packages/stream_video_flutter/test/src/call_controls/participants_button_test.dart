@@ -19,7 +19,7 @@ void main() {
     await tester.pumpWidget(
       TestWrapper(
         platform: platform,
-        child: StreamParticipantsControl(
+        child: StreamParticipantsButton(
           participants: participants,
           onTap: onTap,
         ),

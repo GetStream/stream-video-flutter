@@ -232,7 +232,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
     // sits on the preview or below it — but that is StreamLobbyView's business
     // and it needs nothing from here.
     final extras = [
-      const StreamLobbyParticipantsControl(),
+      const StreamLobbyParticipantsButton(),
       if (AppFeature.backgroundBlur.isSupported)
         _BlurToggle(effects: _videoEffectsManager),
     ];

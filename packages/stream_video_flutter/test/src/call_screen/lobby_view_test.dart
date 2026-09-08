@@ -217,7 +217,7 @@ void main() {
       'extras',
       () => StreamLobbyActions.regular(
         extraControls: const [
-          StreamLobbyParticipantsControl(),
+          StreamLobbyParticipantsButton(),
           StreamLobbyCameraToggle(),
         ],
       ),
@@ -372,7 +372,9 @@ void main() {
   testWidgets('no footer is drawn when none is asked for', (tester) async {
     await tester.pumpWidget(
       TestWrapper(
-        child: SingleChildScrollView(child: lobby(StreamLobbyActions.simple(), 900)),
+        child: SingleChildScrollView(
+          child: lobby(StreamLobbyActions.simple(), 900),
+        ),
       ),
     );
 
@@ -564,7 +566,7 @@ void main() {
   testWidgets('a long control row drops below the preview', (tester) async {
     final tall = StreamLobbyActions.regular(
       extraControls: const [
-        StreamLobbyParticipantsControl(),
+        StreamLobbyParticipantsButton(),
         StreamLobbyCameraToggle(),
       ],
     );

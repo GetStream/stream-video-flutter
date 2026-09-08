@@ -82,7 +82,9 @@ class LobbyEncryption extends StatelessWidget {
               borderRadius: BorderRadius.all(radius.lg),
               color: colorScheme.backgroundSurfaceCard,
               border: Border.all(
-                color: isOn ? colorScheme.accentPrimary : colorScheme.borderSubtle,
+                color: isOn
+                    ? colorScheme.accentPrimary
+                    : colorScheme.borderSubtle,
               ),
             ),
             child: Padding(

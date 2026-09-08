@@ -36,7 +36,7 @@ class StreamMicrophoneSplitButton extends StatelessWidget {
     required this.enabled,
     this.onPressed,
     this.unavailable = false,
-    this.menuDirection = StreamMenuDirection.down,
+    this.menuDirection = .down,
   });
 
   /// The device lists and the current selection, shared with anything else
@@ -93,7 +93,7 @@ class StreamCameraSplitButton extends StatelessWidget {
     required this.enabled,
     this.onPressed,
     this.unavailable = false,
-    this.menuDirection = StreamMenuDirection.down,
+    this.menuDirection = .down,
   });
 
   /// The device lists and the current selection.

@@ -92,7 +92,7 @@ void main() {
         platform: platform,
         child: StreamLobbyScope(
           controller: controller,
-          child: const StreamLobbyParticipantsControl(),
+          child: const StreamLobbyParticipantsButton(),
         ),
       ),
     );

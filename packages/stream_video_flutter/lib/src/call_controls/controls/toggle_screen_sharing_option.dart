@@ -25,12 +25,12 @@ class ToggleScreenShareOption extends StatelessWidget {
 
   /// The icon that is shown when the screen sharing is enabled.
   ///
-  /// Defaults to `context.streamIcons.presentDesktopFill`.
+  /// Defaults to `context.streamPresentIcon`.
   final IconData? enabledScreenShareIcon;
 
   /// The icon that is shown when the screen sharing is disabled.
   ///
-  /// Defaults to `context.streamIcons.presentDesktopFill`.
+  /// Defaults to `context.streamPresentIcon`.
   final IconData? disabledScreenShareIcon;
 
   /// Constraints for screen sharing
@@ -43,15 +43,15 @@ class ToggleScreenShareOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var screenShareConstraints = this.screenShareConstraints;
-    final icons = context.streamIcons;
+    final presentIcon = context.streamPresentIcon;
 
     Widget buildContent(bool enabled) => CallFeatureButton(
       // One glyph in both states: a live screen share is marked by the
       // selected accent, not by a different picture.
       icon: Icon(
         enabled
-            ? enabledScreenShareIcon ?? icons.presentDesktopFill
-            : disabledScreenShareIcon ?? icons.presentDesktopFill,
+            ? enabledScreenShareIcon ?? presentIcon
+            : disabledScreenShareIcon ?? presentIcon,
       ),
       selected: enabled,
       onPressed: () async {

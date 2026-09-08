@@ -39,7 +39,7 @@ void main() {
     // Both extension points on every preset is what lets a host add one button
     // or one field without respelling the whole list.
     test('every preset takes extras in both lanes', () {
-      const extraControl = StreamLobbyParticipantsControl();
+      const extraControl = StreamLobbyParticipantsButton();
       const extraSetting = StreamLobbyCameraSelect();
 
       final presets = [

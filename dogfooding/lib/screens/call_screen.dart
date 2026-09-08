@@ -125,11 +125,6 @@ class _CallScreenState extends State<CallScreen> {
   }
 
   /// Turns the microphone on or off, saying so when the call refuses.
-  ///
-  /// `setMicrophoneEnabled` returns a `Result`, and dropping it left the
-  /// button visibly doing nothing: its state comes from the call's own
-  /// participant state, which does not change on failure. A viewer without
-  /// `sendAudio` got no button movement, no message and no log.
   Future<void> _setMicrophoneEnabled({required bool enabled}) async {
     final message = 'Could not turn the microphone ${enabled ? 'on' : 'off'}';
     final result = await widget.call.setMicrophoneEnabled(
@@ -399,19 +394,12 @@ class _CallScreenState extends State<CallScreen> {
                               ? _customDesktopScreenShareSelector
                               : null,
                         ),
-                        // Split buttons rather than plain toggles, so the
-                        // device can be changed mid-call without opening the
-                        // settings menu.
-                        // Listening to the devices as well as the call: the
-                        // buttons disable themselves when the platform reports
-                        // no device, which arrives on the device stream rather
-                        // than in call state.
                         ListenableBuilder(
                           listenable: _devices,
                           builder: (context, _) => Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              PartialCallStateBuilder<bool>(
+                              PartialCallStateBuilder(
                                 call: call,
                                 selector: (state) =>
                                     state.localParticipant?.isAudioEnabled ??
@@ -423,12 +411,7 @@ class _CallScreenState extends State<CallScreen> {
                                       unavailable: _noDeviceFor(
                                         _devices.audioInputs,
                                       ),
-                                      // The bar sits along the bottom, so its
-                                      // menus come up rather than down.
-                                      menuDirection: StreamMenuDirection.up,
-                                      // Badging is appearance only, so a
-                                      // control with nothing to open has to
-                                      // be disabled here as well.
+                                      menuDirection: .up,
                                       onPressed:
                                           _noDeviceFor(_devices.audioInputs)
                                           ? null
@@ -437,7 +420,7 @@ class _CallScreenState extends State<CallScreen> {
                                             ),
                                     ),
                               ),
-                              PartialCallStateBuilder<bool>(
+                              PartialCallStateBuilder(
                                 call: call,
                                 selector: (state) =>
                                     state.localParticipant?.isVideoEnabled ??
@@ -449,8 +432,7 @@ class _CallScreenState extends State<CallScreen> {
                                       unavailable: _noDeviceFor(
                                         _devices.videoInputs,
                                       ),
-                                      menuDirection: StreamMenuDirection.up,
-                                      // See the microphone above.
+                                      menuDirection: .up,
                                       onPressed:
                                           _noDeviceFor(_devices.videoInputs)
                                           ? null
@@ -463,13 +445,11 @@ class _CallScreenState extends State<CallScreen> {
                           ),
                         ),
                         const Spacer(),
-                        // onTap, so the button opens this app's own
-                        // participants screen rather than the SDK's list.
-                        PartialCallStateBuilder<List<CallParticipantState>>(
+                        PartialCallStateBuilder(
                           call: call,
                           selector: (state) => state.callParticipants,
                           builder: (context, participants) =>
-                              StreamParticipantsControl(
+                              StreamParticipantsButton(
                                 onTap: _channel != null
                                     ? () => showParticipants(context)
                                     : null,

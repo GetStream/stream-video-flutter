@@ -21,7 +21,7 @@ import '../../stream_video_flutter.dart';
 ///   call: call,
 ///   onJoinCallPressed: join,
 ///   actions: StreamLobbyActions.full(
-///     extraControls: [const StreamLobbyParticipantsControl()],
+///     extraControls: [const StreamLobbyParticipantsButton()],
 ///   ),
 /// )
 /// ```

@@ -2,16 +2,16 @@ import 'package:flutter/widgets.dart';
 
 import '../../../stream_video_flutter.dart';
 
-/// The lobby's participants control: [StreamParticipantsControl] over the
-/// people already in the call.
+/// The lobby's participants button: [StreamParticipantsButton] over the people
+/// already in the call.
 ///
 /// Exists so a preset can list it without wiring anything up. Use
-/// [StreamParticipantsControl] directly anywhere there is no
+/// [StreamParticipantsButton] directly anywhere there is no
 /// [StreamLobbyScope] — in a call, where an app usually wants `onTap` to open
 /// a panel of its own rather than the built-in list.
-class StreamLobbyParticipantsControl extends StatelessWidget {
-  /// Creates a new instance of [StreamLobbyParticipantsControl].
-  const StreamLobbyParticipantsControl({super.key, this.onTap});
+class StreamLobbyParticipantsButton extends StatelessWidget {
+  /// Creates a new instance of [StreamLobbyParticipantsButton].
+  const StreamLobbyParticipantsButton({super.key, this.onTap});
 
   /// Called instead of opening the built-in list.
   final VoidCallback? onTap;
@@ -20,7 +20,7 @@ class StreamLobbyParticipantsControl extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = StreamLobbyScope.of(context);
 
-    return StreamParticipantsControl(
+    return StreamParticipantsButton(
       onTap: onTap,
       participants: [
         for (final participant in controller.participants)

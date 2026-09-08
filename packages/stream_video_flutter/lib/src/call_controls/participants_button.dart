@@ -5,9 +5,6 @@ import '../l10n/localization_extension.dart';
 
 /// Shows how many people are in the call, and opens the list of them.
 ///
-/// The count sits on a green badge rather than the notification badge's red,
-/// because people being there is good news rather than something to fix.
-///
 /// Tapping opens the list itself — an anchored menu on desktop, a bottom sheet
 /// on Android and iOS. Pass [onTap] to do something else with the press: in a
 /// call an app usually has a side panel of its own to open, with more in it
@@ -16,15 +13,15 @@ import '../l10n/localization_extension.dart';
 /// {@tool snippet}
 ///
 /// ```dart
-/// StreamParticipantsControl(
+/// StreamParticipantsButton(
 ///   participants: participants,
 ///   onTap: () => openParticipantsPanel(),
 /// )
 /// ```
 /// {@end-tool}
-class StreamParticipantsControl extends StatelessWidget {
-  /// Creates a new instance of [StreamParticipantsControl].
-  const StreamParticipantsControl({
+class StreamParticipantsButton extends StatelessWidget {
+  /// Creates a new instance of [StreamParticipantsButton].
+  const StreamParticipantsButton({
     super.key,
     required this.participants,
     this.onTap,
