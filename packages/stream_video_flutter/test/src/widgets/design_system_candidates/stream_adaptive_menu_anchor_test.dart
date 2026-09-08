@@ -336,6 +336,60 @@ void main() {
       isFalse,
     );
   });
+
+  // The sheet branch opens by pushing a route and closes by popping one, so
+  // both directions are guarded: a second push stacks a sheet the handle can
+  // no longer reach, and a pop with nothing open takes the host screen.
+  for (final platform in [TargetPlatform.android, TargetPlatform.macOS]) {
+    final name = platform.name;
+
+    testWidgets('opening twice presents one menu on $name', (tester) async {
+      late StreamMenuHandle handle;
+
+      await tester.pumpWidget(
+        TestWrapper(
+          platform: platform,
+          child: _Menu(onHandle: (it) => handle = it),
+        ),
+      );
+
+      handle.open();
+      await tester.pumpAndSettle();
+      handle.open();
+      await tester.pumpAndSettle();
+
+      expect(handle.isOpen, isTrue);
+
+      handle.close();
+      await tester.pumpAndSettle();
+
+      // One close is enough: a second sheet would still be up, and the
+      // anchor would have no way left to dismiss it.
+      expect(handle.isOpen, isFalse);
+      expect(find.byType(StreamListTile), findsNothing);
+      expect(find.byType(StreamContextMenuAction<void>), findsNothing);
+      expect(find.text('open'), findsOneWidget);
+    });
+
+    testWidgets('closing while closed does nothing on $name', (tester) async {
+      late StreamMenuHandle handle;
+
+      await tester.pumpWidget(
+        TestWrapper(
+          platform: platform,
+          child: _Menu(onHandle: (it) => handle = it),
+        ),
+      );
+
+      handle.close();
+      await tester.pumpAndSettle();
+
+      // Unguarded, the sheet branch would have popped the screen the anchor
+      // sits on.
+      expect(handle.isOpen, isFalse);
+      expect(find.text('open'), findsOneWidget);
+    });
+  }
 }
 
 /// An anchor over two sections, whose button reports the handle's open state.
@@ -346,6 +400,7 @@ class _Menu extends StatelessWidget {
     this.matchAnchorWidth = false,
     this.menuElevation,
     this.sections,
+    this.onHandle,
   });
 
   final bool? useSheet;
@@ -353,6 +408,7 @@ class _Menu extends StatelessWidget {
   final bool matchAnchorWidth;
   final double? menuElevation;
   final List<StreamMenuSection>? sections;
+  final ValueChanged<StreamMenuHandle>? onHandle;
 
   @override
   Widget build(BuildContext context) {
@@ -383,13 +439,16 @@ class _Menu extends StatelessWidget {
               options: [option('MacBook Pro Speakers', selected: true)],
             ),
           ],
-      builder: (context, handle) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(handle.isOpen ? 'showing' : 'closed'),
-          TextButton(onPressed: handle.toggle, child: const Text('open')),
-        ],
-      ),
+      builder: (context, handle) {
+        onHandle?.call(handle);
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(handle.isOpen ? 'showing' : 'closed'),
+            TextButton(onPressed: handle.toggle, child: const Text('open')),
+          ],
+        );
+      },
     );
   }
 }

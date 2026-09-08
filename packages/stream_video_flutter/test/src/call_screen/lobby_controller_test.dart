@@ -24,6 +24,11 @@ const _frontCamera = RtcMediaDevice(
   label: 'FaceTime HD Camera',
   kind: RtcMediaDeviceKind.videoInput,
 );
+const _backCamera = RtcMediaDevice(
+  id: 'cam-2',
+  label: 'Studio Display Camera',
+  kind: RtcMediaDeviceKind.videoInput,
+);
 
 CallParticipant _participant(String id, {int joinedSecondsAgo = 0}) =>
     CallParticipant(
@@ -441,6 +446,270 @@ void main() {
         expect(controller.fetchError, isA<StateError>());
         expect(controller.participants, isEmpty);
       });
+
+      // The fetch is a network round-trip and the toggles are live from the
+      // first frame, so the defaults arrive after the user can already have
+      // acted. Applying them as a toggle undid the tap.
+      test('leave a device the user already reached for alone', () async {
+        callSettings = const CallSettings(
+          // ignore: avoid_redundant_argument_values
+          audio: StreamAudioSettings(micDefaultOn: true),
+          video: StreamVideoSettings(cameraDefaultOn: false),
+        );
+
+        final fetched = Completer<Result<CallReceivedData>>();
+        when(call.get).thenAnswer((_) => fetched.future);
+
+        final tracks = fakeTracks();
+        final controller = build(
+          openMicrophoneTrack: () async => tracks.microphone,
+          openCameraTrack: (_) async => tracks.camera,
+        );
+
+        // The user unmutes before the call's own default lands.
+        await controller.toggleMicrophone();
+        expect(controller.microphoneEnabled, isTrue);
+
+        final metadata = MockCallMetadata();
+        when(() => metadata.users).thenReturn({});
+        when(() => metadata.session).thenReturn(const CallSessionData());
+        when(() => metadata.settings).thenReturn(callSettings);
+        fetched.complete(
+          Result.success(
+            CallReceivedData(callCid: _callCid, metadata: metadata),
+          ),
+        );
+        await pumpEventQueue();
+
+        // Still on, and never stopped: the default agreed with the tap here,
+        // but a toggle would have turned it off regardless.
+        expect(controller.microphoneEnabled, isTrue);
+        verifyNever(tracks.microphone.stop);
+      });
+
+      test('do not invert a tap that disagrees with them', () async {
+        callSettings = const CallSettings(
+          audio: StreamAudioSettings(micDefaultOn: false),
+          // ignore: avoid_redundant_argument_values
+          video: StreamVideoSettings(cameraDefaultOn: true),
+        );
+
+        final fetched = Completer<Result<CallReceivedData>>();
+        when(call.get).thenAnswer((_) => fetched.future);
+
+        final tracks = fakeTracks();
+        final controller = build(
+          openMicrophoneTrack: () async => tracks.microphone,
+          openCameraTrack: (_) async => tracks.camera,
+        );
+
+        // The user turns the camera on, then the call says it should be on
+        // too. A toggle would read "already on" and switch it off.
+        await controller.toggleCamera();
+        expect(controller.cameraEnabled, isTrue);
+
+        final metadata = MockCallMetadata();
+        when(() => metadata.users).thenReturn({});
+        when(() => metadata.session).thenReturn(const CallSessionData());
+        when(() => metadata.settings).thenReturn(callSettings);
+        fetched.complete(
+          Result.success(
+            CallReceivedData(callCid: _callCid, metadata: metadata),
+          ),
+        );
+        await pumpEventQueue();
+
+        expect(controller.cameraEnabled, isTrue);
+        verifyNever(tracks.camera.stop);
+      });
+    });
+
+    group('setting a device rather than toggling it', () {
+      test('asking for the state it is already in does nothing', () async {
+        var opens = 0;
+        final tracks = fakeTracks();
+        final controller = build(
+          openMicrophoneTrack: () async {
+            opens++;
+            return tracks.microphone;
+          },
+        );
+
+        await controller.setMicrophoneEnabled(enabled: true);
+        await controller.setMicrophoneEnabled(enabled: true);
+
+        expect(opens, 1);
+        expect(controller.microphoneEnabled, isTrue);
+
+        await controller.setMicrophoneEnabled(enabled: false);
+        await controller.setMicrophoneEnabled(enabled: false);
+
+        expect(controller.microphoneEnabled, isFalse);
+        verify(tracks.microphone.stop).called(1);
+      });
+
+      // Turning a device off while it is still opening has nothing to stop
+      // yet. Dropping that tap left the user with the microphone on after
+      // they had asked twice for it to be off.
+      test('a tap during an open is not lost', () async {
+        final opening = Completer<RtcLocalAudioTrack>();
+        final tracks = fakeTracks();
+        final controller = build(openMicrophoneTrack: () => opening.future);
+
+        final turningOn = controller.setMicrophoneEnabled(enabled: true);
+        expect(controller.isOpeningMicrophone, isTrue);
+
+        // The user changes their mind before the platform has answered.
+        await controller.setMicrophoneEnabled(enabled: false);
+
+        opening.complete(tracks.microphone);
+        await turningOn;
+        await pumpEventQueue();
+
+        // The track that landed is released rather than kept: nothing wants
+        // it any more.
+        expect(controller.microphoneEnabled, isFalse);
+        verify(tracks.microphone.stop).called(1);
+      });
+
+      test('reports an open in flight', () async {
+        final opening = Completer<RtcLocalAudioTrack>();
+        final tracks = fakeTracks();
+        final controller = build(openMicrophoneTrack: () => opening.future);
+
+        expect(controller.isOpeningMicrophone, isFalse);
+
+        final pending = controller.setMicrophoneEnabled(enabled: true);
+        expect(controller.isOpeningMicrophone, isTrue);
+
+        opening.complete(tracks.microphone);
+        await pending;
+
+        expect(controller.isOpeningMicrophone, isFalse);
+        expect(controller.microphoneEnabled, isTrue);
+      });
+    });
+
+    group('switching camera', () {
+      test('opens the newly picked device', () async {
+        final tracks = fakeTracks();
+        final second = MockRtcLocalCameraTrack();
+        when(second.stop).thenAnswer((_) async {});
+        when(() => second.mediaConstraints).thenReturn(
+          const CameraConstraints(),
+        );
+
+        final opened = <String?>[];
+        final controller = build(
+          openCameraTrack: (deviceId) async {
+            opened.add(deviceId);
+            return opened.length == 1 ? tracks.camera : second;
+          },
+        );
+
+        deviceChanges.add(const [_frontCamera, _backCamera]);
+        await pumpEventQueue();
+
+        await controller.toggleCamera();
+        expect(controller.cameraTrack, tracks.camera);
+
+        await controller.devices.selectVideoInput(_backCamera);
+        await pumpEventQueue();
+
+        // The old track was released and the new one opened against the id
+        // the user picked, not against the system default.
+        verify(tracks.camera.stop).called(1);
+        expect(opened, [null, _backCamera.id]);
+        expect(controller.cameraTrack, second);
+        expect(controller.devices.selectedVideoInput, _backCamera);
+      });
+
+      test('leaves a camera the user turned off alone', () async {
+        var opens = 0;
+        final controller = build(
+          openCameraTrack: (_) async {
+            opens++;
+            return fakeTracks().camera;
+          },
+        );
+
+        deviceChanges.add(const [_frontCamera, _backCamera]);
+        await pumpEventQueue();
+
+        await controller.devices.selectVideoInput(_backCamera);
+        await pumpEventQueue();
+
+        // Picking a device is not a request to start filming.
+        expect(opens, 0);
+        expect(controller.cameraEnabled, isFalse);
+        expect(controller.devices.selectedVideoInput, _backCamera);
+      });
+
+      // The open is async, and the pick can change while it runs. Landing the
+      // first track and stopping there left the preview on the old camera
+      // with the picker naming the new one.
+      test('ends up on the last device picked, however fast', () async {
+        final opened = <String?>[];
+        final firstOpening = Completer<RtcLocalCameraTrack>();
+
+        RtcLocalCameraTrack trackFor() {
+          final track = MockRtcLocalCameraTrack();
+          when(track.stop).thenAnswer((_) async {});
+          when(
+            () => track.mediaConstraints,
+          ).thenReturn(const CameraConstraints());
+          return track;
+        }
+
+        final controller = build(
+          openCameraTrack: (deviceId) {
+            opened.add(deviceId);
+            // Only the first open is held; the rest resolve on their own, so
+            // completing the first cannot deadlock on a later one.
+            if (opened.length == 1) return firstOpening.future;
+            return Future.value(trackFor());
+          },
+        );
+
+        deviceChanges.add(const [_frontCamera, _backCamera]);
+        await pumpEventQueue();
+
+        final firstOpen = controller.toggleCamera();
+        // Pick a different camera while the first is still opening.
+        final picking = controller.devices.selectVideoInput(_backCamera);
+
+        firstOpening.complete(trackFor());
+        await firstOpen;
+        await picking;
+        await pumpEventQueue();
+
+        // The camera the user last picked is the one the preview reconciled
+        // onto, and the picker agrees with it.
+        expect(opened, [null, _backCamera.id]);
+        expect(controller.devices.selectedVideoInput, _backCamera);
+        expect(controller.cameraEnabled, isTrue);
+      });
+
+      test('puts the picker back when the new device will not open', () async {
+        final tracks = fakeTracks();
+        final controller = build(
+          openCameraTrack: (deviceId) async {
+            if (deviceId == _backCamera.id) throw StateError('device busy');
+            return tracks.camera;
+          },
+        );
+
+        deviceChanges.add(const [_frontCamera, _backCamera]);
+        await pumpEventQueue();
+
+        await controller.toggleCamera();
+        await controller.devices.selectVideoInput(_backCamera);
+        await pumpEventQueue();
+
+        // The selection never claims a camera the hardware refused.
+        expect(controller.devices.selectedVideoInput, isNot(_backCamera));
+        expect(controller.cameraError, isNotNull);
+      });
     });
 
     group('lifecycle', () {
@@ -505,6 +774,35 @@ void main() {
 
         controller.dispose();
 
+        verify(tracks.microphone.stop).called(1);
+        verify(tracks.camera.stop).called(1);
+      });
+
+      // A host can navigate away while its join is still in flight, so the
+      // lobby is disposed with the tracks handed over and the join then fails.
+      // Nothing but a late reclaim is left that can release the hardware.
+      test('stops handed-over tracks when the reclaim arrives late', () async {
+        final tracks = fakeTracks();
+        final controller = build(
+          openMicrophoneTrack: () async => tracks.microphone,
+          openCameraTrack: (_) async => tracks.camera,
+          autoDispose: false,
+        );
+
+        await controller.toggleMicrophone();
+        await controller.toggleCamera();
+
+        controller.handOverTracks();
+        controller.dispose();
+
+        // Still running: as far as dispose knew, a call was publishing them.
+        verifyNever(tracks.microphone.stop);
+        verifyNever(tracks.camera.stop);
+
+        controller.reclaimTracks();
+
+        // The join never happened, so the microphone and camera go off rather
+        // than staying live with nothing left to own them.
         verify(tracks.microphone.stop).called(1);
         verify(tracks.camera.stop).called(1);
       });

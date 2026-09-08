@@ -21,17 +21,17 @@ const _frontCamera = RtcMediaDevice(
   kind: RtcMediaDeviceKind.videoInput,
 );
 
-/// The three presets, each swept across the three breakpoints.
-///
-/// The sweep is what proves the two axes are independent: the preset decides
-/// *which* widgets exist, the width decides *where* the control row sits and
-/// how big the preview is. A `simple` lobby at 1440 must still overlay its
-/// controls, and a `full` lobby at 375 must still stack them below the preview
-/// and keep its settings row.
-///
-/// 500 stands for the narrow desktop window: below the breakpoint, so it lays
-/// out like a phone, but still a pointer device, so a host gives it the `full`
-/// preset — toggles below the feed *and* a settings row.
+// The presets are swept across these widths, which is what proves the two
+// axes are independent: the preset decides *which* widgets exist, the width
+// decides *where* the control row sits and how big the preview is. A `simple`
+// lobby at 1440 must still overlay its controls, and a `full` lobby at 375
+// must still stack them below the preview and keep its settings row.
+//
+// 375, 900 and 1440 are the three breakpoints. 500 stands for the narrow
+// desktop window: below the breakpoint, so it lays out like a phone, but
+// still a pointer device, so a host gives it the `full` preset — toggles below
+// the feed *and* a settings row.
+//
 // Each width is paired with a height generous enough for the tallest preset
 // at it. StreamParticipantTile has a LayoutBuilder inside — it sheds chrome to
 // fit — and alchemist lays its scenarios out in a Table, which asks for
@@ -602,47 +602,215 @@ void main() {
   // The default constructor owns its controller, which is the path every real
   // app takes and the one no test exercised: every other case here supplies
   // one, so the owned controller was never built or disposed in CI.
-  testWidgets('owns and disposes a controller when given only a call', (
-    tester,
-  ) async {
-    Widget lobbyFor(Call call) => MediaQuery(
-      data: const MediaQueryData(size: Size(900, 900)),
-      child: TestWrapper(
-        child: SizedBox(
-          width: 900,
-          child: StreamLobbyView(
-            call: call,
-            streamVideo: video,
-            onJoinCallPressed: (_) => true,
+  group('an owned controller', () {
+    Widget lobbyFor(Call forCall, {StreamLobbyController? controller}) =>
+        MediaQuery(
+          data: const MediaQueryData(size: Size(900, 900)),
+          child: TestWrapper(
+            child: SizedBox(
+              width: 900,
+              child: controller == null
+                  ? StreamLobbyView(
+                      call: forCall,
+                      streamVideo: video,
+                      onJoinCallPressed: (_) => true,
+                    )
+                  : StreamLobbyView.withController(
+                      controller: controller,
+                      onJoinCallPressed: (_) => true,
+                    ),
+            ),
           ),
+        );
+
+    MockCall otherCall() {
+      final other = MockCall();
+      final otherState = MockCallState();
+      when(() => otherState.settings).thenReturn(
+        const CallSettings(
+          audio: StreamAudioSettings(micDefaultOn: false),
+          video: StreamVideoSettings(cameraDefaultOn: false),
         ),
-      ),
-    );
+      );
+      when(() => other.state).thenAnswer(
+        (_) => MutableStateEmitter<CallState>(otherState, sync: true),
+      );
+      when(other.get).thenAnswer(
+        (_) async => Result.failure(StateError('no network'), StackTrace.empty),
+      );
+      return other;
+    }
 
-    await tester.pumpWidget(lobbyFor(call));
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(find.byType(StreamLobbyView), findsOneWidget);
+    // A fresh call each time: setUp already builds a controller against the
+    // shared one, so its fetch would be counted here too.
+    testWidgets('is built for the call it was given', (tester) async {
+      final only = otherCall();
 
-    // Handed a different call, the owned controller is replaced rather than
-    // left running against the old one.
-    final other = MockCall();
-    final otherState = MockCallState();
-    when(() => otherState.settings).thenReturn(
-      const CallSettings(
-        audio: StreamAudioSettings(micDefaultOn: false),
-        video: StreamVideoSettings(cameraDefaultOn: false),
-      ),
-    );
-    when(() => other.state).thenAnswer(
-      (_) => MutableStateEmitter<CallState>(otherState, sync: true),
-    );
-    when(other.get).thenAnswer(
-      (_) async => Result.failure(StateError('no network'), StackTrace.empty),
-    );
-    await tester.pumpWidget(lobbyFor(other));
-    await tester.pump(const Duration(milliseconds: 100));
+      await tester.pumpWidget(lobbyFor(only));
+      await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.pumpWidget(const SizedBox());
-    await tester.pump();
+      // The controller it made fetched *this* call, which is the only
+      // observable proof it was built and pointed at the right place.
+      verify(only.get).called(1);
+    });
+
+    testWidgets('is replaced when the call changes', (tester) async {
+      final first = otherCall();
+      final second = otherCall();
+
+      await tester.pumpWidget(lobbyFor(first));
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pumpWidget(lobbyFor(second));
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // A controller made for the old call is no good for the new one, so a
+      // fresh one is built and fetches the call it is now a waiting room for
+      // — while the old call is not fetched a second time.
+      verify(first.get).called(1);
+      verify(second.get).called(1);
+    });
+
+    testWidgets('gives way to a supplied controller', (tester) async {
+      await tester.pumpWidget(lobbyFor(call));
+      await tester.pump(const Duration(milliseconds: 100));
+
+      final supplied = StreamLobbyController(
+        call: call,
+        streamVideo: video,
+        deviceNotifier: _emptyNotifier(deviceChanges),
+      );
+      addTearDown(supplied.dispose);
+
+      await tester.pumpWidget(lobbyFor(call, controller: supplied));
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // The owned one is disposed rather than left running against the same
+      // call alongside the supplied one.
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
+
+      // The supplied controller is the caller's, so it survives the lobby.
+      expect(() => supplied.addListener(() {}), returnsNormally);
+    });
   });
+
+  group('joining', () {
+    Widget lobbyWith(StreamLobbyJoinCallback onJoin, {bool enabled = true}) =>
+        MediaQuery(
+          data: const MediaQueryData(size: Size(900, 900)),
+          child: TestWrapper(
+            child: SizedBox(
+              width: 900,
+              child: StreamLobbyView.withController(
+                controller: controller,
+                joinEnabled: enabled,
+                onJoinCallPressed: onJoin,
+              ),
+            ),
+          ),
+        );
+
+    Future<void> tapJoin(WidgetTester tester) async {
+      await tester.tap(find.text('Join call'));
+      await tester.pump();
+    }
+
+    testWidgets('hands the tracks over before calling the host', (
+      tester,
+    ) async {
+      var handedOverDuringCallback = false;
+
+      await tester.pumpWidget(
+        lobbyWith((_) {
+          // A host usually navigates from in here, disposing the lobby on the
+          // way out; the tracks have to belong to the call by then.
+          handedOverDuringCallback = controller.tracksHandedOver;
+          return true;
+        }),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+
+      await tapJoin(tester);
+
+      expect(handedOverDuringCallback, isTrue);
+      expect(controller.tracksHandedOver, isTrue);
+    });
+
+    testWidgets('takes the tracks back when the join is refused', (
+      tester,
+    ) async {
+      await tester.pumpWidget(lobbyWith((_) => false));
+      await tester.pump(const Duration(milliseconds: 100));
+
+      await tapJoin(tester);
+      await tester.pumpAndSettle();
+
+      // The join did not happen, so the preview is the lobby's again.
+      expect(controller.tracksHandedOver, isFalse);
+    });
+
+    testWidgets('takes the tracks back when the host throws', (tester) async {
+      await tester.pumpWidget(
+        lobbyWith((_) async => throw StateError('no user')),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+
+      await tapJoin(tester);
+      await tester.pumpAndSettle();
+
+      // Without this the microphone and camera stay live with nothing left
+      // to own them.
+      expect(controller.tracksHandedOver, isFalse);
+    });
+
+    testWidgets('runs the host once however fast the button is tapped', (
+      tester,
+    ) async {
+      var calls = 0;
+      final joining = Completer<bool>();
+
+      await tester.pumpWidget(
+        lobbyWith((_) {
+          calls++;
+          return joining.future;
+        }),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+
+      await tapJoin(tester);
+      await tapJoin(tester);
+      joining.complete(true);
+      await tester.pumpAndSettle();
+
+      expect(calls, 1);
+    });
+
+    testWidgets('cannot be joined while joinEnabled is false', (tester) async {
+      var calls = 0;
+
+      await tester.pumpWidget(
+        lobbyWith((_) {
+          calls++;
+          return true;
+        }, enabled: false),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+
+      await tapJoin(tester);
+
+      expect(calls, 0);
+      expect(controller.tracksHandedOver, isFalse);
+    });
+  });
+}
+
+MockRtcMediaDeviceNotifier _emptyNotifier(
+  StreamController<List<RtcMediaDevice>> changes,
+) {
+  final notifier = MockRtcMediaDeviceNotifier();
+  when(() => notifier.onDeviceChange).thenAnswer((_) => changes.stream);
+  when(
+    notifier.enumerateDevices,
+  ).thenAnswer((_) async => const Result.success(<RtcMediaDevice>[]));
+  return notifier;
 }

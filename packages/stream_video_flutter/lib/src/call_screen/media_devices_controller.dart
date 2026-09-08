@@ -216,10 +216,20 @@ class StreamMediaDevicesController extends ChangeNotifier {
     required void Function(RtcMediaDevice?) assign,
     required StreamMediaDeviceSelected? apply,
   }) async {
+    if (device == null && !supportsSystemDefault) {
+      assert(
+        false,
+        'this controller cannot revert to the system default; '
+        'see StreamMediaDevicesController.supportsSystemDefault',
+      );
+      return;
+    }
+
     final previous = current();
     if (device?.id == previous?.id) return;
 
     assign(device);
+    final epoch = ++_selectionEpoch;
     notifyListeners();
 
     try {
@@ -228,12 +238,23 @@ class StreamMediaDevicesController extends ChangeNotifier {
       _logger.e(() => 'Could not select device ${device?.id}: $e\n$stk');
       if (_disposed) return;
 
+      // Only the newest selection may be reverted. A slow effect failing
+      // after the user has picked again would otherwise put back the device
+      // from before *its* pick, throwing away a choice that succeeded.
+      if (epoch != _selectionEpoch) return;
+
       assign(previous);
       notifyListeners();
     }
   }
 
+  /// Bumped by every committed selection, so a rejection can tell whether it
+  /// is still the one on screen.
+  int _selectionEpoch = 0;
+
   void _handleDeviceChange(List<RtcMediaDevice> devices) {
+    if (_disposed) return;
+
     _hasEnumerated = true;
     _enumerationError = null;
     _audioInputs = devices.ofKind(RtcMediaDeviceKind.audioInput);

@@ -29,20 +29,20 @@ Decisions taken where the review left a choice, so the work is unblocked:
 
 ## Phase 2 — Track ownership and device races
 
-- [ ] Hot mic: `dispose()` keeps the track references when handed over,
+- [x] Hot mic: `dispose()` keeps the track references when handed over,
       `reclaimTracks()` stops them if the controller is already disposed,
       `_onJoinCallPressed` awaits and guards the host callback, drop the
       `mounted` gate, add a re-entry guard
-- [ ] `_restartCamera`: `track.stop()` in its own try/catch so `_openCamera()`
+- [x] `_restartCamera`: `track.stop()` in its own try/catch so `_openCamera()`
       always runs
-- [ ] Camera race: an open records the device id it opened, and reconciles
+- [x] Camera race: an open records the device id it opened, and reconciles
       against `devices.selectedVideoInput` afterwards; a failed open rejects so
       `_select` puts the picker back
-- [ ] `_applyCallDefaults` sets rather than toggles, and skips a device the user
+- [x] `_applyCallDefaults` sets rather than toggles, and skips a device the user
       has already touched
-- [ ] `_select`: a selection epoch, so a rejected switch cannot clobber a newer one
-- [ ] `_select`: reject `null` when `!supportsSystemDefault`
-- [ ] `StreamAdaptiveMenuAnchor.open()` guards on `_isOpen` and `mounted`
+- [x] `_select`: a selection epoch, so a rejected switch cannot clobber a newer one
+- [x] `_select`: reject `null` when `!supportsSystemDefault`
+- [x] `StreamAdaptiveMenuAnchor.open()` guards on `_isOpen` and `mounted`
 
 ## Phase 3 — Making failures visible
 
@@ -54,9 +54,9 @@ Decisions taken where the review left a choice, so the work is unblocked:
       ask", stops self-clearing, and reaches the UI
 - [ ] `fetchError` reaches the UI, or its doc stops promising it does
 - [ ] `onError` on the fetch and event subscriptions
-- [ ] `isOpeningMicrophone` / `isOpeningCamera`, and a second tap during an open
+- [x] `isOpeningMicrophone` / `isOpeningCamera`, and a second tap during an open
       is no longer swallowed
-- [ ] `dispose()`'s unawaited `stop()` calls log their failures
+- [x] `dispose()`'s unawaited `stop()` calls log their failures
 - [ ] dogfooding: `_remove` reverts `_enabled` like `_apply` does; `debugPrint`
       -> `taggedLogger`; snackbars carry the reason
 - [ ] `toggle_speakerphone_option.dart`'s `catch (_) {}`

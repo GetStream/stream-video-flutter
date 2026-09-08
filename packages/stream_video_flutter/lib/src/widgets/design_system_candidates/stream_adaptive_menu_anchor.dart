@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:stream_core_flutter/core.dart';
 
@@ -228,8 +230,13 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
 
   @override
   void open() {
+    // Guarded like [close]: the sheet branch opens by pushing a route, and a
+    // second push would stack a sheet that the handle can no longer reach —
+    // the first one to be popped clears [isOpen] for both.
+    if (_isOpen || !mounted) return;
+
     if (_useSheet) {
-      _openSheet();
+      unawaited(_openSheet());
     } else {
       _menuController.open();
     }
@@ -239,7 +246,7 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
   void close() {
     // Guarded because the sheet branch closes by popping a route: called while
     // nothing is open it would pop whatever screen the anchor sits on.
-    if (!_isOpen) return;
+    if (!_isOpen || !mounted) return;
 
     if (_useSheet) {
       Navigator.of(context).pop();

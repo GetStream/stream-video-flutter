@@ -151,6 +151,8 @@ class StreamLobbyView extends StatefulWidget {
 }
 
 class _StreamLobbyViewState extends State<StreamLobbyView> {
+  late final _logger = taggedLogger(tag: 'SV:LobbyView');
+
   StreamLobbyController? _ownedController;
 
   StreamLobbyController get _controller =>
@@ -181,19 +183,36 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
     super.dispose();
   }
 
+  /// Whether a join is already running. A second tap would hand the tracks
+  /// over twice and run the host's callback again.
+  bool _joining = false;
+
   Future<void> _onJoinCallPressed() async {
-    final options = _controller.connectOptions;
+    if (_joining) return;
+    _joining = true;
+
+    final controller = _controller;
+    final options = controller.connectOptions;
 
     // Handed over before the callback rather than after it: a host usually
     // navigates from inside it, and the lobby is disposed on the way out —
     // with the tracks still its own, that would stop the microphone and
     // camera the call is about to publish.
-    _controller.handOverTracks();
+    controller.handOverTracks();
 
-    if (await widget.onJoinCallPressed(options)) return;
-
-    // The join did not happen, so the preview is the lobby's again.
-    if (mounted) _controller.reclaimTracks();
+    var joined = false;
+    try {
+      joined = await widget.onJoinCallPressed(options);
+    } catch (e, stk) {
+      _logger.e(() => 'Error joining the call: $e\n$stk');
+    } finally {
+      _joining = false;
+      // Read off the controller, not off `mounted`: the lobby can be gone
+      // already — a host navigating away while its join is in flight — and
+      // the tracks handed over to a join that never happened would then be
+      // left running with nothing to stop them.
+      if (!joined) controller.reclaimTracks();
+    }
   }
 
   @override
@@ -209,7 +228,9 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
         joinButtonLabel: widget.joinButtonLabel,
         joinEnabled: widget.joinEnabled,
         footer: widget.footer,
-        onJoinCallPressed: _onJoinCallPressed,
+        // Explicitly unawaited: the button wants a VoidCallback, and letting
+        // the future be dropped implicitly would drop its errors with it.
+        onJoinCallPressed: () => unawaited(_onJoinCallPressed()),
       ),
     );
   }

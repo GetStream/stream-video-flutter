@@ -160,6 +160,10 @@ void main() {
       deviceChanges.add([_builtInMic]);
       await pumpEventQueue();
 
+      // The list was empty before the push too, so emptiness proves nothing
+      // on its own: what matters is that the event was not taken in at all,
+      // since notifying a disposed ChangeNotifier throws.
+      expect(controller.hasEnumerated, isFalse);
       expect(controller.audioInputs, isEmpty);
     });
   });
@@ -290,6 +294,69 @@ void main() {
 
       // Otherwise the menu shows a camera the call is not using.
       expect(controller.selectedVideoInput, isNull);
+    });
+
+    // A call has no "revert to the system default" setter, so committing null
+    // moved the radio button while the call kept the device it had.
+    test('refuses the system default where it cannot be applied', () async {
+      final applied = <RtcMediaDevice?>[];
+      final controller = StreamMediaDevicesController(
+        deviceNotifier: notifier,
+        supportsSystemDefault: false,
+        onAudioInputSelected: applied.add,
+      );
+      addTearDown(controller.dispose);
+
+      deviceChanges.add(const [_headset, _builtInMic]);
+      await pumpEventQueue();
+
+      await controller.selectAudioInput(_headset);
+      expect(controller.selectedAudioInput, _headset);
+
+      await expectLater(
+        () => controller.selectAudioInput(null),
+        throwsAssertionError,
+      );
+
+      // The pick stands, and the hook was never told to do the impossible.
+      expect(controller.selectedAudioInput, _headset);
+      expect(applied, [_headset]);
+    });
+  });
+
+  group('StreamMediaDevicesController with overlapping selections', () {
+    // The revert used to restore whatever was picked before *its own* effect
+    // started, throwing away a newer pick that had already succeeded.
+    test('a slow rejection does not undo a newer selection', () async {
+      final rejectHeadset = Completer<void>();
+
+      final controller = build(
+        onAudioInputSelected: (device) {
+          if (device?.id == _headset.id) {
+            return rejectHeadset.future.then(
+              (_) => throw StateError('device busy'),
+            );
+          }
+          return null;
+        },
+      );
+
+      deviceChanges.add(const [_headset, _builtInMic]);
+      await pumpEventQueue();
+
+      // Pick the headset, then change to the built-in before the headset's
+      // effect has come back.
+      final first = controller.selectAudioInput(_headset);
+      await controller.selectAudioInput(_builtInMic);
+      expect(controller.selectedAudioInput, _builtInMic);
+
+      rejectHeadset.complete();
+      await first;
+      await pumpEventQueue();
+
+      // The built-in mic is what the user last picked and what worked, so it
+      // is what the picker keeps.
+      expect(controller.selectedAudioInput, _builtInMic);
     });
   });
 }

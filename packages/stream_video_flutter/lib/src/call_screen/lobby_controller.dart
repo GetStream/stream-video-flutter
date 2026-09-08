@@ -31,6 +31,26 @@ typedef LobbyAudioTrackOpener = Future<RtcLocalAudioTrack> Function();
 typedef LobbyCameraTrackOpener =
     Future<RtcLocalCameraTrack> Function(String? deviceId);
 
+/// Thrown when the lobby cannot open a device the user picked.
+///
+/// [StreamMediaDevicesController] catches this and puts the previous selection
+/// back, so a picker never names a camera the preview is not running on.
+class StreamLobbyDeviceException implements Exception {
+  /// Creates a new instance of [StreamLobbyDeviceException].
+  const StreamLobbyDeviceException(this.message, this.cause);
+
+  /// What could not be done.
+  final String message;
+
+  /// The failure the platform reported, or null.
+  final Object? cause;
+
+  @override
+  String toString() =>
+      'StreamLobbyDeviceException: $message'
+      '${cause == null ? '' : ' ($cause)'}';
+}
+
 /// Everything the lobby knows before the call is joined.
 ///
 /// The call is read, not created: one that does not exist yet leaves
@@ -96,6 +116,17 @@ class StreamLobbyController extends ChangeNotifier {
   /// permission prompt is up, which is ample time for a second tap.
   bool _openingMicrophone = false;
   bool _openingCamera = false;
+
+  /// Whether the user has reached for this device themselves. The call's
+  /// defaults land after a fetch, and must not overrule a tap that beat them.
+  bool _microphoneTouched = false;
+  bool _cameraTouched = false;
+
+  /// The state last asked for, which an open in flight is reconciled against.
+  /// Turning a device off while it is still opening has nothing to stop yet,
+  /// so the track is released when it lands instead.
+  bool _microphoneDesired = false;
+  bool _cameraDesired = false;
 
   RtcLocalAudioTrack? _microphoneTrack;
   RtcLocalCameraTrack? _cameraTrack;
@@ -181,6 +212,16 @@ class StreamLobbyController extends ChangeNotifier {
   /// [microphoneMissing].
   bool get cameraMissing =>
       _cameraTrack == null && _hasOpenedCamera && devices.videoInputs.isEmpty;
+
+  /// Whether the microphone is being opened right now.
+  ///
+  /// True for as long as the platform takes, which includes a permission
+  /// prompt being up. A control that reads this can say it is working rather
+  /// than looking switched off.
+  bool get isOpeningMicrophone => _openingMicrophone;
+
+  /// Whether the camera is being opened right now. See [isOpeningMicrophone].
+  bool get isOpeningCamera => _openingCamera;
 
   /// Whether the microphone has been opened at least once.
   ///
@@ -269,22 +310,41 @@ class StreamLobbyController extends ChangeNotifier {
   }
 
   /// Turns the microphone on if it is off, and off if it is on.
-  Future<void> toggleMicrophone() async {
-    if (_microphoneTrack != null) {
+  Future<void> toggleMicrophone() =>
+      setMicrophoneEnabled(enabled: !microphoneEnabled);
+
+  /// Opens the microphone, or closes it.
+  ///
+  /// Idempotent: asking for the state it is already in does nothing, so a
+  /// caller that knows what it wants — the call's own defaults, above all —
+  /// cannot invert a state the user has since changed.
+  Future<void> setMicrophoneEnabled({required bool enabled}) async {
+    _microphoneTouched = true;
+    _microphoneDesired = enabled;
+
+    if (!enabled) {
       final track = _microphoneTrack;
+      if (track == null) {
+        // Nothing open yet. An open in flight sees this and releases the
+        // track it produces, so a second tap is not lost.
+        _notify();
+        return;
+      }
       _microphoneTrack = null;
       _notify();
-      await track?.stop();
+      await track.stop();
       return;
     }
 
-    if (_openingMicrophone) return;
+    if (_microphoneTrack != null || _openingMicrophone) return;
     _openingMicrophone = true;
+    _notify();
     try {
       final track = await _openMicrophone();
-      // The lobby was left while the device was opening. Nothing will ever
-      // hand this track to a call, so this is the only chance to stop it.
-      if (_disposed) return await track.stop();
+      // The lobby was left, or the microphone turned off again, while the
+      // device was opening. Nothing will ever hand this track to a call, so
+      // this is the only chance to stop it.
+      if (_disposed || !_microphoneDesired) return await track.stop();
 
       _microphoneTrack = track;
       _microphoneError = null;
@@ -302,25 +362,46 @@ class StreamLobbyController extends ChangeNotifier {
   }
 
   /// Turns the camera on if it is off, and off if it is on.
-  Future<void> toggleCamera() async {
-    if (_cameraTrack != null) {
+  Future<void> toggleCamera() => setCameraEnabled(enabled: !cameraEnabled);
+
+  /// Opens the camera, or closes it. See [setMicrophoneEnabled].
+  Future<void> setCameraEnabled({required bool enabled}) async {
+    _cameraTouched = true;
+    _cameraDesired = enabled;
+
+    if (!enabled) {
       final track = _cameraTrack;
+      if (track == null) {
+        _notify();
+        return;
+      }
       _cameraTrack = null;
       _notify();
-      await track?.stop();
+      await track.stop();
       return;
     }
 
+    if (_cameraTrack != null) return;
     await _openCamera();
   }
 
-  Future<void> _openCamera() async {
-    if (_openingCamera) return;
+  /// Opens the camera on the picked device, and reports whether it worked.
+  ///
+  /// Reconciles afterwards: the pick can change while the platform is opening,
+  /// and the track that lands is then on the wrong device.
+  Future<bool> _openCamera() async {
+    if (_openingCamera) return false;
     _openingCamera = true;
+    _notify();
+    final requested = devices.selectedVideoInput?.id;
     try {
-      final track = await _openCameraTrackFor(devices.selectedVideoInput?.id);
-      // See toggleMicrophone.
-      if (_disposed) return await track.stop();
+      final track = await _openCameraTrackFor(requested);
+      // See setMicrophoneEnabled.
+      if (_disposed || !_cameraDesired) {
+        _openingCamera = false;
+        await track.stop();
+        return false;
+      }
 
       _cameraTrack = track;
       _cameraError = null;
@@ -328,26 +409,56 @@ class StreamLobbyController extends ChangeNotifier {
     } catch (e, stk) {
       _logger.e(() => 'Error creating camera track: $e\n$stk');
       _cameraError = e;
-    } finally {
       _openingCamera = false;
+      _notify();
+      return false;
     }
-
+    _openingCamera = false;
     _notify();
+
+    if (!_disposed && devices.selectedVideoInput?.id != requested) {
+      return _reopenCamera();
+    }
+    return true;
   }
 
-  /// Reopens the preview on the newly picked camera.
+  /// Reopens the preview on the newly picked camera, reporting whether it
+  /// ended up there.
   ///
   /// A camera the user has turned off stays off: picking a device is not a
   /// request to start filming.
-  Future<void> _restartCamera() async {
+  Future<bool> _reopenCamera() async {
+    // An open already in flight reconciles onto the newest pick when it
+    // lands, so there is nothing to reopen yet.
+    if (_openingCamera) return true;
+
     final track = _cameraTrack;
-    if (track == null) return;
+    if (track == null) return true;
 
     _cameraTrack = null;
     _notify();
-    await track.stop();
+    try {
+      await track.stop();
+    } catch (e, stk) {
+      // Failing to stop the old track must not cost the user the new one.
+      _logger.e(() => 'Error stopping the camera track: $e\n$stk');
+    }
 
-    await _openCamera();
+    return _openCamera();
+  }
+
+  /// [StreamMediaDevicesController]'s camera hook.
+  ///
+  /// Throws when the picked device could not be opened, which is how the
+  /// devices controller learns to put the picker back rather than leave it
+  /// naming a camera the preview is not running on.
+  Future<void> _restartCamera() async {
+    if (await _reopenCamera()) return;
+
+    throw StreamLobbyDeviceException(
+      'could not open camera ${devices.selectedVideoInput?.id}',
+      _cameraError,
+    );
   }
 
   Future<RtcLocalAudioTrack> _openMicrophone() async {
@@ -378,8 +489,15 @@ class StreamLobbyController extends ChangeNotifier {
     if (_disposed || _callDefaultsApplied) return;
     _callDefaultsApplied = true;
 
-    if (settings.audio.micDefaultOn) unawaited(toggleMicrophone());
-    if (settings.video.cameraDefaultOn) unawaited(toggleCamera());
+    // Set rather than toggled, and skipped for a device the user has already
+    // reached for: the fetch is a network round-trip and the toggles are live
+    // from the first frame, so a toggle here could undo their tap.
+    if (!_microphoneTouched) {
+      unawaited(setMicrophoneEnabled(enabled: settings.audio.micDefaultOn));
+    }
+    if (!_cameraTouched) {
+      unawaited(setCameraEnabled(enabled: settings.video.cameraDefaultOn));
+    }
   }
 
   void _fetchCall() {
@@ -492,14 +610,30 @@ class StreamLobbyController extends ChangeNotifier {
     // Tracks are only stopped if they were not handed to a call. A track
     // passed as TrackOption.provided outlives the lobby, and stopping it here
     // would kill the microphone the user just joined with.
-    if (!_tracksHandedOver) {
-      _microphoneTrack?.stop();
-      _cameraTrack?.stop();
+    //
+    // Handed-over tracks keep their references: a join can still fail after
+    // the lobby is gone, and [reclaimTracks] is then the only thing left that
+    // can turn the devices off.
+    if (_tracksHandedOver) {
+      super.dispose();
+      return;
     }
+
+    _stopTracks();
+    super.dispose();
+  }
+
+  void _stopTracks() {
+    // Fire-and-forget, at a point where nothing can be reported — but a
+    // failure to release the camera should at least name itself in the log.
+    _microphoneTrack?.stop().onError((e, stk) {
+      _logger.e(() => 'Error stopping the microphone track: $e\n$stk');
+    });
+    _cameraTrack?.stop().onError((e, stk) {
+      _logger.e(() => 'Error stopping the camera track: $e\n$stk');
+    });
     _microphoneTrack = null;
     _cameraTrack = null;
-
-    super.dispose();
   }
 
   bool _tracksHandedOver = false;
@@ -519,6 +653,11 @@ class StreamLobbyController extends ChangeNotifier {
   /// Takes the tracks back, so [dispose] stops them again.
   ///
   /// Call this when a join [handOverTracks] was called for did not happen
-  /// after all and the lobby carries on with its preview.
-  void reclaimTracks() => _tracksHandedOver = false;
+  /// after all and the lobby carries on with its preview. Safe to call once
+  /// the lobby is gone: a controller already disposed stops the tracks here
+  /// instead, since nothing else will.
+  void reclaimTracks() {
+    _tracksHandedOver = false;
+    if (_disposed) _stopTracks();
+  }
 }
