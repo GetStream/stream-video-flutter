@@ -179,7 +179,9 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 200));
 
-      final icon = tester.widget<Icon>(find.byIcon(Icons.network_check));
+      final icon = tester.widget<Icon>(
+        find.byIcon(const StreamIcons().lowBandwidthFill),
+      );
       expect(icon.color, const Color(0xFFFEDCBA));
     });
   });

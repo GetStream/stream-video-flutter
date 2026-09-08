@@ -42,6 +42,8 @@ class ToggleSpeakerphoneOption extends StatefulWidget {
 }
 
 class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
+  late final _logger = taggedLogger(tag: 'SV:SpeakerphoneOption');
+
   final _deviceNotifier = RtcMediaDeviceNotifier.instance;
   StreamSubscription<List<RtcMediaDevice>>? _deviceChangeSubscription;
 
@@ -70,7 +72,12 @@ class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
     }
 
     // If we don't have a device, we can't set it as the audio output.
-    if (device == null) return;
+    // Android names no audio outputs at all, so this is the ordinary path
+    // there rather than a fault: there is nothing to route to.
+    if (device == null) {
+      _logger.w(() => 'No audio output to route to; leaving it as it is');
+      return;
+    }
 
     // Set the device as the current audio output.
     await widget.call.setAudioOutputDevice(device);
@@ -119,7 +126,9 @@ class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
         onPressed: () async {
           try {
             await _setSpeakerphoneEnabled(enabled: !enabled);
-          } catch (_) {}
+          } catch (e, stk) {
+            _logger.e(() => 'Error routing the audio output: $e\n$stk');
+          }
         },
       ),
     );

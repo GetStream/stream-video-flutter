@@ -238,8 +238,13 @@ void main() {
       final controller = build();
       await pumpEventQueue();
 
-      // Distinct from "the platform found nothing", so a picker can say which.
-      expect(controller.enumerationError, isA<StateError>());
+      // The reason is what tells "could not be asked" from "asked and found
+      // nothing": both arrive here, and only the reason separates them.
+      expect(controller.enumerationError?.cause, isA<StateError>());
+      expect(
+        controller.enumerationError?.reason,
+        StreamDeviceFailureReason.unknown,
+      );
       expect(controller.hasEnumerated, isTrue);
       expect(controller.audioInputs, isEmpty);
     });

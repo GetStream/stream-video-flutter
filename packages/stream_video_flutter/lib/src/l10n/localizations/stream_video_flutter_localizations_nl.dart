@@ -80,14 +80,6 @@ class StreamVideoFlutterLocalizationsNl
   String get lobbySelectVideoDevice => 'Video-apparaat selecteren';
 
   @override
-  String get lobbyMicrophonePermissionRequired =>
-      'Microfoontoegang is vereist om audioapparaten te selecteren';
-
-  @override
-  String get lobbyCameraPermissionRequired =>
-      'Cameratoegang is vereist om een video-apparaat te selecteren';
-
-  @override
   String get lobbyToggleMicrophone => 'Microfoon aan- of uitzetten';
 
   @override
@@ -101,4 +93,36 @@ class StreamVideoFlutterLocalizationsNl
 
   @override
   String get lobbyParticipants => 'Deelnemers';
+
+  @override
+  String get lobbyMicrophoneNotOpened =>
+      'Zet de microfoon aan om een apparaat te kiezen';
+
+  @override
+  String get lobbyCameraNotOpened =>
+      'Zet de camera aan om een apparaat te kiezen';
+
+  @override
+  String get lobbyNoMicrophoneFound => 'Geen microfoon gevonden';
+
+  @override
+  String get lobbyNoCameraFound => 'Geen camera gevonden';
+
+  @override
+  String get lobbyMicrophonePermissionDenied =>
+      'Microfoontoegang is geweigerd — sta het toe in je systeeminstellingen';
+
+  @override
+  String get lobbyCameraPermissionDenied =>
+      'Cameratoegang is geweigerd — sta het toe in je systeeminstellingen';
+
+  @override
+  String get lobbyMicrophoneBusy => 'Een andere app gebruikt de microfoon';
+
+  @override
+  String get lobbyCameraBusy => 'Een andere app gebruikt de camera';
+
+  @override
+  String get lobbyDevicesUnreadable =>
+      'Je apparaten konden niet worden gelezen';
 }

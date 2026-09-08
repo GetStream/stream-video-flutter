@@ -80,14 +80,6 @@ class StreamVideoFlutterLocalizationsEn
   String get lobbySelectVideoDevice => 'Select video device';
 
   @override
-  String get lobbyMicrophonePermissionRequired =>
-      'Microphone permission is required to select audio devices';
-
-  @override
-  String get lobbyCameraPermissionRequired =>
-      'Camera permission is required to select a video device';
-
-  @override
   String get lobbyToggleMicrophone => 'Toggle microphone';
 
   @override
@@ -101,4 +93,34 @@ class StreamVideoFlutterLocalizationsEn
 
   @override
   String get lobbyParticipants => 'Participants';
+
+  @override
+  String get lobbyMicrophoneNotOpened =>
+      'Turn the microphone on to choose a device';
+
+  @override
+  String get lobbyCameraNotOpened => 'Turn the camera on to choose a device';
+
+  @override
+  String get lobbyNoMicrophoneFound => 'No microphone found';
+
+  @override
+  String get lobbyNoCameraFound => 'No camera found';
+
+  @override
+  String get lobbyMicrophonePermissionDenied =>
+      'Microphone access was refused — allow it in your system settings';
+
+  @override
+  String get lobbyCameraPermissionDenied =>
+      'Camera access was refused — allow it in your system settings';
+
+  @override
+  String get lobbyMicrophoneBusy => 'Another app is using the microphone';
+
+  @override
+  String get lobbyCameraBusy => 'Another app is using the camera';
+
+  @override
+  String get lobbyDevicesUnreadable => 'Your devices could not be read';
 }

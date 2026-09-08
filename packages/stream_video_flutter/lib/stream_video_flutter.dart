@@ -65,6 +65,7 @@ export 'src/call_screen/lobby_scope.dart';
 export 'src/call_screen/lobby_view.dart';
 export 'src/call_screen/media_devices_controller.dart';
 export 'src/call_screen/outgoing_call/outgoing_call_content.dart';
+export 'src/call_screen/stream_device_error.dart';
 export 'src/components/stream_video_component_builders.dart';
 export 'src/livestream/livestream_backstage_content.dart';
 export 'src/livestream/livestream_content.dart';

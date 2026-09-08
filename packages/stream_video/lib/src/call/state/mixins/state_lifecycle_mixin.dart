@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
 
 import '../../../../stream_video.dart';
-import '../../../models/call_received_data.dart';
 
 final _logger = taggedLogger(tag: 'SV:CallState:Lifecycle');
 

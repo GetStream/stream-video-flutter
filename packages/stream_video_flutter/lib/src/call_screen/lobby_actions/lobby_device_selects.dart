@@ -10,7 +10,8 @@ import '../../l10n/localization_extension.dart';
 ///
 /// Stays visible but disabled until the microphone has been opened once: the
 /// platform only names devices after `getUserMedia` has succeeded, and hiding
-/// the field would shift the layout the moment permission is granted.
+/// the field would shift the layout the moment permission is granted. The
+/// tooltip then says which of those it is waiting on.
 class StreamLobbyMicrophoneSelect extends StatelessWidget {
   /// Creates a new instance of [StreamLobbyMicrophoneSelect].
   const StreamLobbyMicrophoneSelect({super.key});
@@ -29,7 +30,17 @@ class StreamLobbyMicrophoneSelect extends StatelessWidget {
       enabled: opened,
       tooltip: opened
           ? translations.lobbySelectAudioDevices
-          : translations.lobbyMicrophonePermissionRequired,
+          : _unavailableReason(
+              context,
+              error: controller.microphoneError,
+              enumerationError: controller.devices.enumerationError,
+              hasEnumerated: controller.devices.hasEnumerated,
+              devices: controller.devices.audioInputs,
+              permissionDenied: translations.lobbyMicrophonePermissionDenied,
+              busy: translations.lobbyMicrophoneBusy,
+              missing: translations.lobbyNoMicrophoneFound,
+              notOpened: translations.lobbyMicrophoneNotOpened,
+            ),
     );
   }
 }
@@ -53,9 +64,56 @@ class StreamLobbyCameraSelect extends StatelessWidget {
       enabled: opened,
       tooltip: opened
           ? translations.lobbySelectVideoDevice
-          : translations.lobbyCameraPermissionRequired,
+          : _unavailableReason(
+              context,
+              error: controller.cameraError,
+              enumerationError: controller.devices.enumerationError,
+              hasEnumerated: controller.devices.hasEnumerated,
+              devices: controller.devices.videoInputs,
+              permissionDenied: translations.lobbyCameraPermissionDenied,
+              busy: translations.lobbyCameraBusy,
+              missing: translations.lobbyNoCameraFound,
+              notOpened: translations.lobbyCameraNotOpened,
+            ),
     );
   }
+}
+
+/// Why a device field is inert, said as narrowly as what is actually known.
+///
+/// Nothing here asks the platform what it would grant, so a field that is
+/// merely waiting for the device to be turned on must not claim a permission
+/// was refused — only a failure that says so does.
+String _unavailableReason(
+  BuildContext context, {
+  required StreamDeviceError? error,
+  required StreamDeviceError? enumerationError,
+  required bool hasEnumerated,
+  required List<RtcMediaDevice> devices,
+  required String permissionDenied,
+  required String busy,
+  required String missing,
+  required String notOpened,
+}) {
+  if (error != null) {
+    return switch (error.reason) {
+      StreamDeviceFailureReason.permissionDenied => permissionDenied,
+      StreamDeviceFailureReason.deviceBusy => busy,
+      StreamDeviceFailureReason.noDevice => missing,
+      StreamDeviceFailureReason.unknown => notOpened,
+    };
+  }
+
+  if (hasEnumerated && devices.isEmpty) {
+    // An empty list is reported as a failure by the platform, so the reason
+    // tells "nothing to pick from" apart from "could not be asked".
+    if (enumerationError != null && !enumerationError.isNoDevice) {
+      return context.translations.lobbyDevicesUnreadable;
+    }
+    return missing;
+  }
+
+  return notOpened;
 }
 
 /// A select field opening a device menu.

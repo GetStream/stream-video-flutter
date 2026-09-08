@@ -79,14 +79,6 @@
   "@lobbySelectVideoDevice": {
     "description": "Tooltip of the lobby control that picks a camera"
   },
-  "lobbyMicrophonePermissionRequired": "Microphone permission is required to select audio devices",
-  "@lobbyMicrophonePermissionRequired": {
-    "description": "Tooltip shown on the lobby's audio picker before microphone permission is granted"
-  },
-  "lobbyCameraPermissionRequired": "Camera permission is required to select a video device",
-  "@lobbyCameraPermissionRequired": {
-    "description": "Tooltip shown on the lobby's camera picker before camera permission is granted"
-  },
   "lobbyToggleMicrophone": "Toggle microphone",
   "@lobbyToggleMicrophone": {
     "description": "Tooltip of the lobby's microphone toggle"
@@ -106,5 +98,41 @@
   "lobbyParticipants": "Participants",
   "@lobbyParticipants": {
     "description": "Tooltip and sheet title of the lobby's participants control"
+  },
+  "lobbyMicrophoneNotOpened": "Turn the microphone on to choose a device",
+  "@lobbyMicrophoneNotOpened": {
+    "description": "Tooltip on the lobby's audio picker while the microphone has never been opened"
+  },
+  "lobbyCameraNotOpened": "Turn the camera on to choose a device",
+  "@lobbyCameraNotOpened": {
+    "description": "Tooltip on the lobby's camera picker while the camera has never been opened"
+  },
+  "lobbyNoMicrophoneFound": "No microphone found",
+  "@lobbyNoMicrophoneFound": {
+    "description": "Tooltip on the lobby's audio picker when the platform reports no microphone"
+  },
+  "lobbyNoCameraFound": "No camera found",
+  "@lobbyNoCameraFound": {
+    "description": "Tooltip on the lobby's camera picker when the platform reports no camera"
+  },
+  "lobbyMicrophonePermissionDenied": "Microphone access was refused — allow it in your system settings",
+  "@lobbyMicrophonePermissionDenied": {
+    "description": "Tooltip on the lobby's audio picker when microphone permission was refused"
+  },
+  "lobbyCameraPermissionDenied": "Camera access was refused — allow it in your system settings",
+  "@lobbyCameraPermissionDenied": {
+    "description": "Tooltip on the lobby's camera picker when camera permission was refused"
+  },
+  "lobbyMicrophoneBusy": "Another app is using the microphone",
+  "@lobbyMicrophoneBusy": {
+    "description": "Tooltip on the lobby's audio picker when another application holds the microphone"
+  },
+  "lobbyCameraBusy": "Another app is using the camera",
+  "@lobbyCameraBusy": {
+    "description": "Tooltip on the lobby's camera picker when another application holds the camera"
+  },
+  "lobbyDevicesUnreadable": "Your devices could not be read",
+  "@lobbyDevicesUnreadable": {
+    "description": "Tooltip on a lobby device picker when the platform could not be asked for its devices"
   }
 }

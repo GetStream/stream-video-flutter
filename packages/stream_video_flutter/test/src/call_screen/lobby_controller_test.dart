@@ -323,7 +323,10 @@ void main() {
       await controller.toggleCamera();
 
       expect(controller.cameraEnabled, isFalse);
-      expect(controller.cameraError, isA<StateError>());
+      expect(controller.cameraError?.cause, isA<StateError>());
+      // Nothing in "no camera" names a cause the SDK can act on, so it is
+      // reported as unknown rather than guessed at.
+      expect(controller.cameraError?.reason, StreamDeviceFailureReason.unknown);
       expect(controller.hasOpenedCamera, isFalse);
     });
 
@@ -334,7 +337,11 @@ void main() {
       await controller.toggleMicrophone();
 
       expect(controller.microphoneEnabled, isFalse);
-      expect(controller.microphoneError, isA<StateError>());
+      expect(controller.microphoneError?.cause, isA<StateError>());
+      expect(
+        controller.microphoneError?.reason,
+        StreamDeviceFailureReason.unknown,
+      );
       expect(controller.hasOpenedMicrophone, isFalse);
     });
 
@@ -355,7 +362,12 @@ void main() {
           );
 
           await controller.toggleMicrophone();
-          expect(controller.microphoneError, isA<StateError>());
+          // "device in use" classifies as a device another app is holding,
+          // which is exactly the retryable kind.
+          expect(
+            controller.microphoneError?.reason,
+            StreamDeviceFailureReason.deviceBusy,
+          );
           // Badged, so the user can see something is wrong...
           expect(controller.microphoneUnavailable, isTrue);
           // ...but not written off: there is a device, it just would not open.

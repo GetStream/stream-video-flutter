@@ -59,6 +59,8 @@ class LobbyScreen extends StatefulWidget {
 }
 
 class _LobbyScreenState extends State<LobbyScreen> {
+  late final _logger = taggedLogger(tag: 'SV:Dogfooding:LobbyScreen');
+
   final _userAuthController = locator.get<UserAuthController>();
   late final StreamVideoEffectsManager _videoEffectsManager;
 
@@ -157,7 +159,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
       await widget.call.setE2EEManager(e2ee);
       return true;
     } catch (e, stk) {
-      debugPrint('Failed to enable E2EE: $e\n$stk');
+      _logger.e(() => 'Failed to enable E2EE: $e\n$stk');
       _showError('Could not enable encryption: $e');
       return false;
     }
@@ -326,6 +328,8 @@ class _BlurToggle extends StatefulWidget {
 }
 
 class _BlurToggleState extends State<_BlurToggle> {
+  late final _logger = taggedLogger(tag: 'SV:Dogfooding:BlurToggle');
+
   bool _enabled = false;
   RtcLocalCameraTrack? _appliedTo;
 
@@ -352,21 +356,26 @@ class _BlurToggleState extends State<_BlurToggle> {
         BlurIntensity.medium,
         track: track,
       );
-    } catch (e) {
+    } catch (e, stk) {
       // Otherwise the button goes on claiming blur over an unblurred preview,
       // and never retries because the track is already recorded as applied.
-      debugPrint('Could not apply the background blur: $e');
+      _logger.e(() => 'Could not apply the background blur: $e\n$stk');
       _appliedTo = previous;
       if (mounted) setState(() => _enabled = false);
     }
   }
 
   Future<void> _remove(RtcLocalCameraTrack? track) async {
+    final previous = _appliedTo;
     _appliedTo = null;
     try {
       await widget.effects.disableAllFilters(track: track);
-    } catch (e) {
-      debugPrint('Could not remove the background blur: $e');
+    } catch (e, stk) {
+      // Otherwise the button reads "off" over a preview that is still
+      // blurred, and the user joins blurred believing they turned it off.
+      _logger.e(() => 'Could not remove the background blur: $e\n$stk');
+      _appliedTo = previous;
+      if (mounted) setState(() => _enabled = true);
     }
   }
 

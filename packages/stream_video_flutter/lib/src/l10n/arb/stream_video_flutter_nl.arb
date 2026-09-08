@@ -19,11 +19,18 @@
   "lobbyDefaultDeviceHint": "Standaard",
   "lobbySelectAudioDevices": "Audioapparaten selecteren",
   "lobbySelectVideoDevice": "Video-apparaat selecteren",
-  "lobbyMicrophonePermissionRequired": "Microfoontoegang is vereist om audioapparaten te selecteren",
-  "lobbyCameraPermissionRequired": "Cameratoegang is vereist om een video-apparaat te selecteren",
   "lobbyToggleMicrophone": "Microfoon aan- of uitzetten",
   "lobbyToggleCamera": "Camera aan- of uitzetten",
   "lobbyTitle": "Voordat je deelneemt",
   "lobbyJoinCall": "Deelnemen",
-  "lobbyParticipants": "Deelnemers"
+  "lobbyParticipants": "Deelnemers",
+  "lobbyMicrophoneNotOpened": "Zet de microfoon aan om een apparaat te kiezen",
+  "lobbyCameraNotOpened": "Zet de camera aan om een apparaat te kiezen",
+  "lobbyNoMicrophoneFound": "Geen microfoon gevonden",
+  "lobbyNoCameraFound": "Geen camera gevonden",
+  "lobbyMicrophonePermissionDenied": "Microfoontoegang is geweigerd — sta het toe in je systeeminstellingen",
+  "lobbyCameraPermissionDenied": "Cameratoegang is geweigerd — sta het toe in je systeeminstellingen",
+  "lobbyMicrophoneBusy": "Een andere app gebruikt de microfoon",
+  "lobbyCameraBusy": "Een andere app gebruikt de camera",
+  "lobbyDevicesUnreadable": "Je apparaten konden niet worden gelezen"
 }

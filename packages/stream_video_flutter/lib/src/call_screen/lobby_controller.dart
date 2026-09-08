@@ -31,26 +31,6 @@ typedef LobbyAudioTrackOpener = Future<RtcLocalAudioTrack> Function();
 typedef LobbyCameraTrackOpener =
     Future<RtcLocalCameraTrack> Function(String? deviceId);
 
-/// Thrown when the lobby cannot open a device the user picked.
-///
-/// [StreamMediaDevicesController] catches this and puts the previous selection
-/// back, so a picker never names a camera the preview is not running on.
-class StreamLobbyDeviceException implements Exception {
-  /// Creates a new instance of [StreamLobbyDeviceException].
-  const StreamLobbyDeviceException(this.message, this.cause);
-
-  /// What could not be done.
-  final String message;
-
-  /// The failure the platform reported, or null.
-  final Object? cause;
-
-  @override
-  String toString() =>
-      'StreamLobbyDeviceException: $message'
-      '${cause == null ? '' : ' ($cause)'}';
-}
-
 /// Everything the lobby knows before the call is joined.
 ///
 /// The call is read, not created: one that does not exist yet leaves
@@ -130,8 +110,8 @@ class StreamLobbyController extends ChangeNotifier {
 
   RtcLocalAudioTrack? _microphoneTrack;
   RtcLocalCameraTrack? _cameraTrack;
-  Object? _microphoneError;
-  Object? _cameraError;
+  StreamDeviceError? _microphoneError;
+  StreamDeviceError? _cameraError;
 
   Object? _fetchError;
 
@@ -161,11 +141,13 @@ class StreamLobbyController extends ChangeNotifier {
 
   /// The last failure opening the microphone, or null.
   ///
-  /// Drives the error badge on the microphone control.
-  Object? get microphoneError => _microphoneError;
+  /// Drives the error badge on the microphone control, and carries a
+  /// [StreamDeviceError.reason] so an app can tell a refused permission from a
+  /// device another application is holding.
+  StreamDeviceError? get microphoneError => _microphoneError;
 
-  /// The last failure opening the camera, or null.
-  Object? get cameraError => _cameraError;
+  /// The last failure opening the camera, or null. See [microphoneError].
+  StreamDeviceError? get cameraError => _cameraError;
 
   /// Whether the microphone is not usable right now.
   ///
@@ -353,7 +335,7 @@ class StreamLobbyController extends ChangeNotifier {
       // The stack trace is what separates a refused permission from a device
       // another app is holding, so it is worth keeping.
       _logger.e(() => 'Error creating microphone track: $e\n$stk');
-      _microphoneError = e;
+      _microphoneError = StreamDeviceError.from(e, stk);
     } finally {
       _openingMicrophone = false;
     }
@@ -408,7 +390,7 @@ class StreamLobbyController extends ChangeNotifier {
       _hasOpenedCamera = true;
     } catch (e, stk) {
       _logger.e(() => 'Error creating camera track: $e\n$stk');
-      _cameraError = e;
+      _cameraError = StreamDeviceError.from(e, stk);
       _openingCamera = false;
       _notify();
       return false;
@@ -455,10 +437,11 @@ class StreamLobbyController extends ChangeNotifier {
   Future<void> _restartCamera() async {
     if (await _reopenCamera()) return;
 
-    throw StreamLobbyDeviceException(
-      'could not open camera ${devices.selectedVideoInput?.id}',
-      _cameraError,
-    );
+    throw _cameraError ??
+        StreamDeviceError(
+          reason: StreamDeviceFailureReason.unknown,
+          cause: 'could not open camera ${devices.selectedVideoInput?.id}',
+        );
   }
 
   Future<RtcLocalAudioTrack> _openMicrophone() async {
@@ -541,59 +524,76 @@ class StreamLobbyController extends ChangeNotifier {
           _notify();
         },
       );
-    });
+    }, onError: _onFetchError);
+  }
+
+  /// A throw from inside the client rather than a reported failure — an
+  /// assertion, a parse bug — which bypasses the fold above entirely. Without
+  /// this the lobby would be indistinguishable from a healthy empty call.
+  void _onFetchError(Object error, StackTrace stackTrace) {
+    if (_disposed) return;
+
+    _logger.e(() => '[fetchCall] threw: $error\n$stackTrace');
+    _fetchError = error;
+    _applyCallDefaults(call.state.value.settings);
+    _notify();
   }
 
   void _listenEvents() {
     _eventSubscription?.cancel();
-    _eventSubscription = _video.events.listen((event) {
-      if (event is CoordinatorCallSessionParticipantLeftEvent) {
-        _logger.d(
-          () =>
-              '[listenEvents] #userLeft; user: ${event.user}, '
-              'reason: ${event.reason}',
-        );
-        final remaining = [..._participants]
-          ..removeWhere(
-            (it) => it.userSessionId == event.participant.userSessionId,
+    _eventSubscription = _video.events.listen(
+      (event) {
+        if (event is CoordinatorCallSessionParticipantLeftEvent) {
+          _logger.d(
+            () =>
+                '[listenEvents] #userLeft; user: ${event.user}, '
+                'reason: ${event.reason}',
           );
-        _participants = remaining;
+          final remaining = [..._participants]
+            ..removeWhere(
+              (it) => it.userSessionId == event.participant.userSessionId,
+            );
+          _participants = remaining;
 
-        final hasSameUser = remaining.any(
-          (it) => it.userId == event.participant.userId,
-        );
-        if (!hasSameUser) _users = {..._users}..remove(event.user.id);
+          final hasSameUser = remaining.any(
+            (it) => it.userId == event.participant.userId,
+          );
+          if (!hasSameUser) _users = {..._users}..remove(event.user.id);
 
-        _notify();
-      } else if (event is CoordinatorCallSessionParticipantJoinedEvent) {
-        _logger.d(() => '[listenEvents] #userJoined; user: ${event.user}');
+          _notify();
+        } else if (event is CoordinatorCallSessionParticipantJoinedEvent) {
+          _logger.d(() => '[listenEvents] #userJoined; user: ${event.user}');
 
-        final participant = event.participant;
-        // The local user is filtered out of the fetched snapshot, so a join
-        // event for them must not slip one back in.
-        if (participant.userId == _video.currentUser.id) return;
+          final participant = event.participant;
+          // The local user is filtered out of the fetched snapshot, so a join
+          // event for them must not slip one back in.
+          if (participant.userId == _video.currentUser.id) return;
 
-        // Upsert rather than append. The fetch returns a snapshot of the
-        // session while this subscription is already live, so a join that is
-        // already reflected in that snapshot still arrives as an event — and
-        // appending it blindly listed the same person twice. Identity is the
-        // session, not the user: someone on a phone and a laptop is two
-        // participants and belongs in the list twice.
-        final index = _participants.indexWhere(
-          (it) => it.userSessionId == participant.userSessionId,
-        );
+          // Upsert rather than append. The fetch returns a snapshot of the
+          // session while this subscription is already live, so a join that is
+          // already reflected in that snapshot still arrives as an event — and
+          // appending it blindly listed the same person twice. Identity is the
+          // session, not the user: someone on a phone and a laptop is two
+          // participants and belongs in the list twice.
+          final index = _participants.indexWhere(
+            (it) => it.userSessionId == participant.userSessionId,
+          );
 
-        _users = {..._users, event.user.id: event.user};
-        _participants = [..._participants];
-        if (index == -1) {
-          _participants.add(participant);
-        } else {
-          _participants[index] = participant;
+          _users = {..._users, event.user.id: event.user};
+          _participants = [..._participants];
+          if (index == -1) {
+            _participants.add(participant);
+          } else {
+            _participants[index] = participant;
+          }
+
+          _notify();
         }
-
-        _notify();
-      }
-    });
+      },
+      onError: (Object e, StackTrace stk) {
+        _logger.e(() => '[listenEvents] threw: $e\n$stk');
+      },
+    );
   }
 
   @override

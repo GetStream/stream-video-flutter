@@ -221,18 +221,6 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'Select video device'**
   String get lobbySelectVideoDevice;
 
-  /// Tooltip shown on the lobby's audio picker before microphone permission is granted
-  ///
-  /// In en, this message translates to:
-  /// **'Microphone permission is required to select audio devices'**
-  String get lobbyMicrophonePermissionRequired;
-
-  /// Tooltip shown on the lobby's camera picker before camera permission is granted
-  ///
-  /// In en, this message translates to:
-  /// **'Camera permission is required to select a video device'**
-  String get lobbyCameraPermissionRequired;
-
   /// Tooltip of the lobby's microphone toggle
   ///
   /// In en, this message translates to:
@@ -262,6 +250,60 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'Participants'**
   String get lobbyParticipants;
+
+  /// Tooltip on the lobby's audio picker while the microphone has never been opened
+  ///
+  /// In en, this message translates to:
+  /// **'Turn the microphone on to choose a device'**
+  String get lobbyMicrophoneNotOpened;
+
+  /// Tooltip on the lobby's camera picker while the camera has never been opened
+  ///
+  /// In en, this message translates to:
+  /// **'Turn the camera on to choose a device'**
+  String get lobbyCameraNotOpened;
+
+  /// Tooltip on the lobby's audio picker when the platform reports no microphone
+  ///
+  /// In en, this message translates to:
+  /// **'No microphone found'**
+  String get lobbyNoMicrophoneFound;
+
+  /// Tooltip on the lobby's camera picker when the platform reports no camera
+  ///
+  /// In en, this message translates to:
+  /// **'No camera found'**
+  String get lobbyNoCameraFound;
+
+  /// Tooltip on the lobby's audio picker when microphone permission was refused
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone access was refused — allow it in your system settings'**
+  String get lobbyMicrophonePermissionDenied;
+
+  /// Tooltip on the lobby's camera picker when camera permission was refused
+  ///
+  /// In en, this message translates to:
+  /// **'Camera access was refused — allow it in your system settings'**
+  String get lobbyCameraPermissionDenied;
+
+  /// Tooltip on the lobby's audio picker when another application holds the microphone
+  ///
+  /// In en, this message translates to:
+  /// **'Another app is using the microphone'**
+  String get lobbyMicrophoneBusy;
+
+  /// Tooltip on the lobby's camera picker when another application holds the camera
+  ///
+  /// In en, this message translates to:
+  /// **'Another app is using the camera'**
+  String get lobbyCameraBusy;
+
+  /// Tooltip on a lobby device picker when the platform could not be asked for its devices
+  ///
+  /// In en, this message translates to:
+  /// **'Your devices could not be read'**
+  String get lobbyDevicesUnreadable;
 }
 
 class _StreamVideoFlutterLocalizationsDelegate

@@ -46,20 +46,29 @@ Decisions taken where the review left a choice, so the work is unblocked:
 
 ## Phase 3 — Making failures visible
 
-- [ ] Typed device error carrying `permissionDenied | deviceBusy | noDevice |
+- [x] Typed device error carrying `permissionDenied | deviceBusy | noDevice |
       unknown` plus cause and stack trace
-- [ ] `lobby_device_selects.dart` says what is actually known instead of
+- [x] `lobby_device_selects.dart` says what is actually known instead of
       asserting a permission verdict; new l10n strings in `en` and `nl`
-- [ ] `enumerationError` distinguishes "asked and found nothing" from "could not
+- [x] `enumerationError` distinguishes "asked and found nothing" from "could not
       ask", stops self-clearing, and reaches the UI
-- [ ] `fetchError` reaches the UI, or its doc stops promising it does
-- [ ] `onError` on the fetch and event subscriptions
+- [x] `fetchError`: its doc only ever offered it to a *host* (to tell an empty
+      call from an unreachable one, or offer a retry), which is accurate as
+      written, so it stays host-facing rather than being surfaced by the SDK
+- [x] `onError` on the fetch and event subscriptions
 - [x] `isOpeningMicrophone` / `isOpeningCamera`, and a second tap during an open
       is no longer swallowed
 - [x] `dispose()`'s unawaited `stop()` calls log their failures
-- [ ] dogfooding: `_remove` reverts `_enabled` like `_apply` does; `debugPrint`
+- [x] dogfooding: `_remove` reverts `_enabled` like `_apply` does; `debugPrint`
       -> `taggedLogger`; snackbars carry the reason
-- [ ] `toggle_speakerphone_option.dart`'s `catch (_) {}`
+- [x] `toggle_speakerphone_option.dart`'s `catch (_) {}`
+
+## Out of band
+
+- [x] `stream_core_flutter` pinned to `3ab8dbea` and the paused-video
+      `Icons.network_check` placeholder replaced with `lowBandwidthFill`
+- [x] The five `call_received_data.dart` imports this PR's new export made
+      redundant, which were failing `melos run analyze`
 
 ## Phase 4 — Encapsulation and API polish
 

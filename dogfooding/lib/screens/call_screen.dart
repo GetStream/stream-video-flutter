@@ -48,6 +48,8 @@ class CallScreen extends StatefulWidget {
 }
 
 class _CallScreenState extends State<CallScreen> {
+  late final _logger = taggedLogger(tag: 'SV:Dogfooding:CallScreen');
+
   late final _userChatRepo = locator.get<UserChatRepository>();
 
   late String? _encryptionKey = widget.encryptionKey;
@@ -153,11 +155,14 @@ class _CallScreenState extends State<CallScreen> {
   }
 
   void _reportDeviceFailure(String message, Object error) {
-    debugPrint('$message: $error');
+    _logger.e(() => '$message: $error');
     if (!mounted) return;
 
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+      SnackBar(
+        content: Text('$message: $error'),
+        behavior: SnackBarBehavior.floating,
+      ),
     );
   }
 
@@ -210,7 +215,9 @@ class _CallScreenState extends State<CallScreen> {
           try {
             await _channel?.watch();
           } catch (e) {
-            debugPrint('Failed to re-watch chat channel after reconnect: $e');
+            _logger.e(
+              () => 'Failed to re-watch chat channel after reconnect: $e',
+            );
           }
         });
 

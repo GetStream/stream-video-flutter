@@ -84,12 +84,19 @@ class StreamMediaDevicesController extends ChangeNotifier {
 
   late final _logger = taggedLogger(tag: 'SV:MediaDevicesController');
 
-  /// Runs the first enumeration, keeping hold of why it failed.
+  /// Asks the platform for its devices again.
   ///
-  /// The notifier only emits on the paths that found something, so a failure
-  /// never reaches [_handleDeviceChange]: without this the lists would stay
-  /// empty, [hasEnumerated] false, every picker inert, and nothing anywhere
-  /// would say why.
+  /// The lists also update on their own as hardware comes and goes; this is
+  /// for offering a retry after [enumerationError].
+  Future<void> refreshDevices() => _enumerate();
+
+  /// Runs an enumeration, keeping hold of why it failed.
+  ///
+  /// The notifier reports a failure through its return value, not through the
+  /// stream, so without this the lists would stay empty, [hasEnumerated]
+  /// false, every picker inert, and nothing anywhere would say why. Note that
+  /// it emits its (empty) list before reporting an empty enumeration as a
+  /// failure, so [_handleDeviceChange] runs first in that case.
   Future<void> _enumerate() async {
     final result = await _deviceNotifier.enumerateDevices();
     result.fold(
@@ -100,7 +107,7 @@ class StreamMediaDevicesController extends ChangeNotifier {
         _logger.e(
           () => 'Could not list the available devices: $error\n$stackTrace',
         );
-        _enumerationError = error;
+        _enumerationError = StreamDeviceError.from(error, stackTrace);
         _hasEnumerated = true;
         notifyListeners();
       },
@@ -133,14 +140,16 @@ class StreamMediaDevicesController extends ChangeNotifier {
   bool _hasEnumerated = false;
   bool _disposed = false;
 
-  Object? _enumerationError;
+  StreamDeviceError? _enumerationError;
 
-  /// Why the platform could not be asked for its devices, or null.
+  /// Why the last enumeration failed, or null.
   ///
-  /// Distinct from an empty device list: the platform found nothing versus the
-  /// platform could not be asked. A picker that is inert because of this
-  /// should say so rather than blame permissions.
-  Object? get enumerationError => _enumerationError;
+  /// The platform reports an empty device list as a failure too, so this is
+  /// set with [StreamDeviceFailureReason.noDevice] where there is simply
+  /// nothing to pick from — read [StreamDeviceError.reason] rather than
+  /// treating any value here as a fault. It stays set until an enumeration
+  /// reports devices.
+  StreamDeviceError? get enumerationError => _enumerationError;
 
   /// Whether the platform has reported its devices yet.
   ///
@@ -256,7 +265,12 @@ class StreamMediaDevicesController extends ChangeNotifier {
     if (_disposed) return;
 
     _hasEnumerated = true;
-    _enumerationError = null;
+    // Cleared only by an enumeration that actually found something. The
+    // platform emits its (empty) list and *then* reports the emptiness as a
+    // failure, so clearing unconditionally threw that failure away — and,
+    // since a later device change discards the result entirely, nothing would
+    // have set it again.
+    if (devices.isNotEmpty) _enumerationError = null;
     _audioInputs = devices.ofKind(RtcMediaDeviceKind.audioInput);
     _audioOutputs = devices.ofKind(RtcMediaDeviceKind.audioOutput);
     _videoInputs = devices.ofKind(RtcMediaDeviceKind.videoInput);
