@@ -5,16 +5,18 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
 
-class CallParticipantsList extends StatelessWidget {
-  const CallParticipantsList({super.key, required this.call});
+/// The call's participants and invited members, as the body of a side panel.
+class CallParticipantsPanelBody extends StatelessWidget {
+  /// Creates a participants body for [call].
+  const CallParticipantsPanelBody({super.key, required this.call});
 
+  /// The call whose participants and members are listed.
   final Call call;
 
   @override
   Widget build(BuildContext context) {
     final streamVideoTheme = StreamVideoTheme.of(context);
     final textTheme = streamVideoTheme.textTheme;
-    final colorScheme = StreamTheme.of(context).colorScheme;
 
     return StreamBuilder<CallState>(
       initialData: call.state.value,
@@ -28,91 +30,68 @@ class CallParticipantsList extends StatelessWidget {
             .where((member) => !participantIds.contains(member.userId))
             .toList();
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              'Participants (${participants.length})',
-              style: textTheme.title3.apply(color: colorScheme.textPrimary),
-            ),
-            centerTitle: true,
-            foregroundColor: colorScheme.textPrimary,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            actions: [
-              IconButton(
-                icon: Icon(Icons.close, color: colorScheme.textPrimary),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-          body: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  children: [
-                    for (final participant in participants)
-                      _ParticipantTile(
-                        participant: participant,
+        return Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.only(bottom: 16),
+                children: [
+                  for (final participant in participants)
+                    _ParticipantTile(
+                      participant: participant,
+                      theme: streamVideoTheme,
+                    ),
+                  if (membersNotInCall.isNotEmpty) ...[
+                    const Divider(height: 32),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: Text(
+                        'Members not in call (${membersNotInCall.length})',
+                        style: textTheme.title3,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    for (final member in membersNotInCall)
+                      _MemberTile(
+                        member: member,
                         theme: streamVideoTheme,
+                        onRing: () => _ringMember(context, member),
                       ),
-                    if (membersNotInCall.isNotEmpty) ...[
-                      const Divider(height: 32),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: Text(
-                          'Members not in call (${membersNotInCall.length})',
-                          style: textTheme.title3,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      for (final member in membersNotInCall)
-                        _MemberTile(
-                          member: member,
-                          theme: streamVideoTheme,
-                          onRing: () => _ringMember(context, member),
-                        ),
-                    ],
                   ],
-                ),
+                ],
               ),
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        // Builder provides the button's own context so the
-                        // share sheet can be anchored to the button.
-                        child: Builder(
-                          builder: (buttonContext) => StreamButton(
-                            style: StreamButtonStyle.secondary,
-                            type: StreamButtonType.outline,
-                            iconLeft: const Icon(Icons.link),
-                            onPressed: () => _shareLink(buttonContext),
-                            child: const Text('Share link'),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: StreamButton(
-                          iconLeft: const Icon(Icons.person_add_alt_1),
-                          onPressed: () => _showAddMemberDialog(context),
-                          child: const Text('Add member'),
-                        ),
-                      ),
-                    ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                // Stacked rather than side by side: two labelled buttons do
+                // not fit across a side panel, and 'Add member' wraps.
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Builder provides the button's own context so the share
+                  // sheet can be anchored to the button.
+                  Builder(
+                    builder: (buttonContext) => StreamButton(
+                      style: StreamButtonStyle.secondary,
+                      type: StreamButtonType.outline,
+                      iconLeft: const Icon(Icons.link),
+                      onPressed: () => _shareLink(buttonContext),
+                      child: const Text('Share link'),
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 12),
+                  StreamButton(
+                    iconLeft: const Icon(Icons.person_add_alt_1),
+                    onPressed: () => _showAddMemberDialog(context),
+                    child: const Text('Add member'),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         );
       },
     );

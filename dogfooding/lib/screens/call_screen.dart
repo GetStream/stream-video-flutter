@@ -17,7 +17,6 @@ import '../app/user_auth_controller.dart';
 import '../core/repos/app_preferences.dart';
 import '../core/repos/user_chat_repository.dart';
 import '../di/injector.dart';
-import '../router/routes.dart';
 import '../utils/feedback_dialog.dart';
 import '../widgets/badged_call_option.dart';
 import '../widgets/call_duration_title.dart';
@@ -25,6 +24,11 @@ import '../widgets/closed_captions_widget.dart';
 import '../widgets/e2ee_key_notification.dart';
 import '../widgets/settings_menu/settings_menu.dart';
 import '../widgets/share_call_card.dart';
+import '../widgets/side_panel/call_side_panel.dart';
+import '../widgets/side_panel/call_side_panel_layout.dart';
+import '../widgets/side_panel/chat_panel_body.dart';
+import 'call_participants_list.dart';
+import 'call_stats_screen.dart';
 
 const _useCustomDesktopScreenShareOption = false;
 
@@ -48,7 +52,8 @@ class CallScreen extends StatefulWidget {
   State<CallScreen> createState() => _CallScreenState();
 }
 
-class _CallScreenState extends State<CallScreen> {
+class _CallScreenState extends State<CallScreen>
+    with SingleTickerProviderStateMixin {
   late final _logger = taggedLogger(tag: 'SV:Dogfooding:CallScreen');
 
   late final _userChatRepo = locator.get<UserChatRepository>();
@@ -76,6 +81,29 @@ class _CallScreenState extends State<CallScreen> {
   StreamSubscription<Event>? _chatConnectionRecoverySubscription;
   ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.auto;
   bool _moreMenuVisible = false;
+
+  /// The panel the user asked for, or null once it starts closing.
+  CallSidePanel? _openPanel;
+
+  /// The panel whose content is in the tree. Outlives [_openPanel], so the
+  /// exit animation still has something to animate.
+  CallSidePanel? _mountedPanel;
+
+  late final _panelController = AnimationController(
+    duration: const Duration(milliseconds: 250),
+    vsync: this,
+  )..addStatusListener(_onPanelStatusChanged);
+
+  late final _panelAnimation = CurvedAnimation(
+    parent: _panelController,
+    curve: Curves.easeOutCubic,
+    reverseCurve: Curves.easeInCubic,
+  );
+
+  /// Carries the panel's own state across the breakpoint: the docked and the
+  /// full-screen layout hang it in different places, and without a global key
+  /// crossing 768px would remount it and lose the chat's scroll offset.
+  final _panelKey = GlobalKey();
 
   @override
   void initState() {
@@ -121,6 +149,8 @@ class _CallScreenState extends State<CallScreen> {
     _speakingWhileMuted.dispose();
     _chatConnectionRecoverySubscription?.cancel();
     _devices.dispose();
+    _panelAnimation.dispose();
+    _panelController.dispose();
     widget.call.leave();
     _userChatRepo.disconnectUser();
     _videoEffectsManager.dispose();
@@ -204,18 +234,73 @@ class _CallScreenState extends State<CallScreen> {
     setState(() {});
   }
 
-  void showParticipants(BuildContext context) {
-    CallParticipantsRoute($extra: widget.call).push<void>(context);
+  void _onPanelStatusChanged(AnimationStatus status) {
+    // Held until the exit finishes: unmounting the panel any earlier would
+    // take the app bar's height back while the panel is still on screen.
+    if (status == AnimationStatus.dismissed) {
+      setState(() => _mountedPanel = null);
+    }
   }
 
-  void showStats(BuildContext context) {
-    CallStatsRoute($extra: widget.call).push<void>(context);
+  /// Opens [panel], or closes it if it is already the open one.
+  void togglePanel(CallSidePanel panel) {
+    if (_openPanel == panel) return closePanel();
+
+    setState(() {
+      _openPanel = _mountedPanel = panel;
+      // The two never share the screen: both hang off the same control bar.
+      _moreMenuVisible = false;
+    });
+    _panelController.forward();
+  }
+
+  /// Closes whichever panel is open, animating it out.
+  void closePanel() {
+    if (_openPanel == null) return;
+
+    setState(() => _openPanel = null);
+    _panelController.reverse();
   }
 
   void toggleMoreMenu(BuildContext context) {
+    final visible = !_moreMenuVisible;
+    if (visible) closePanel();
+
     setState(() {
-      _moreMenuVisible = !_moreMenuVisible;
+      _moreMenuVisible = visible;
     });
+  }
+
+  /// The open panel's chrome and content, or null when nothing is open.
+  Widget? _panelContent(Call call, {required bool fullScreen}) {
+    final panel = _mountedPanel;
+    if (panel == null) return null;
+
+    return CallSidePanelSurface(
+      key: _panelKey,
+      showLeadingDivider: !fullScreen,
+      onClose: closePanel,
+      title: switch (panel) {
+        CallSidePanel.participants => PartialCallStateBuilder(
+          call: call,
+          selector: (state) => state.callParticipants.length,
+          builder: (context, count) => Text('Participants ($count)'),
+        ),
+        CallSidePanel.chat => const Text('Chat'),
+        CallSidePanel.stats => const Text('Stats'),
+      },
+      child: switch (panel) {
+        CallSidePanel.participants => CallParticipantsPanelBody(call: call),
+        CallSidePanel.chat => switch (_channel) {
+          final channel? => ChatPanelBody(channel: channel),
+          // The chat connects asynchronously and its control stays disabled
+          // until it does, but losing the channel must not take the panel
+          // down with it.
+          null => const Center(child: CircularProgressIndicator()),
+        },
+        CallSidePanel.stats => CallStatsPanelBody(call: call),
+      },
+    );
   }
 
   // The controls the two bar layouts have in common. Built per call rather
@@ -307,13 +392,21 @@ class _CallScreenState extends State<CallScreen> {
     onError: _reportDeviceFailure,
   );
 
-  // onTap, so the button opens this app's own participants screen rather than
-  // the SDK's list.
-  StreamParticipantsButton _participantsControl(Call call) =>
-      StreamParticipantsButton(
-        call: call,
-        onTap: _channel != null ? () => showParticipants(context) : null,
-      );
+  // Not StreamParticipantsButton: this app opens its own panel rather than
+  // the SDK's list, and only CallFeatureButton can show that the panel is up.
+  Widget _participantsControl(Call call) => PartialCallStateBuilder(
+    call: call,
+    selector: (state) => state.callParticipants.length,
+    builder: (context, count) => BadgedCallOption(
+      badgeCount: count == 0 ? null : count,
+      callControlOption: CallFeatureButton(
+        icon: Icon(context.streamIcons.usersFill),
+        tooltip: 'Participants',
+        selected: _openPanel == CallSidePanel.participants,
+        onPressed: () => togglePanel(CallSidePanel.participants),
+      ),
+    ),
+  );
 
   /// The call's control bar, laid out per screen size.
   CallControlBar _callControls(BuildContext context, Call call) {
@@ -325,7 +418,11 @@ class _CallScreenState extends State<CallScreen> {
 
     final panels = [
       _participantsControl(call),
-      _ShowChatButton(channel: _channel),
+      _ShowChatButton(
+        channel: _channel,
+        selected: _openPanel == CallSidePanel.chat,
+        onPressed: () => togglePanel(CallSidePanel.chat),
+      ),
     ];
 
     return CallControlBar(
@@ -375,7 +472,8 @@ class _CallScreenState extends State<CallScreen> {
         trailing: [
           CallFeatureButton(
             icon: Icon(context.streamIcons.statsFill),
-            onPressed: () => showStats(context),
+            selected: _openPanel == CallSidePanel.stats,
+            onPressed: () => togglePanel(CallSidePanel.stats),
           ),
           ...panels,
         ],
@@ -388,6 +486,11 @@ class _CallScreenState extends State<CallScreen> {
     // ignore: deprecated_member_use
     return WillPopScope(
       onWillPop: () async {
+        if (_openPanel != null) {
+          closePanel();
+          return false;
+        }
+
         return !Navigator.of(context).userGestureInProgress;
       },
       child: Scaffold(
@@ -418,81 +521,106 @@ class _CallScreenState extends State<CallScreen> {
                     enablePictureInPicture: true,
                   ),
               callParticipantsWidgetBuilder: (context, call) {
-                return Stack(
-                  children: [
-                    Column(
-                      children: [
-                        Expanded(
-                          child: StreamCallParticipants(
-                            call: call,
-                            layoutMode: _currentLayoutMode,
-                          ),
-                        ),
-                        ClosedCaptionsWidget(call: call),
-                      ],
-                    ),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: E2eeKeyNotification(
-                        call: call,
-                        onKeyApplied: (key) =>
-                            setState(() => _encryptionKey = key),
-                      ),
-                    ),
-                    if (_moreMenuVisible) ...[
-                      GestureDetector(
-                        onTap: () => setState(() => _moreMenuVisible = false),
-                        child: Container(color: Colors.black12),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Align(
-                          alignment: Alignment.bottomLeft,
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 500),
-                            child: SettingsMenu(
+                // A narrow window has no room beside the grid, so the panel
+                // covers it instead of docking next to it.
+                final fullScreen = context.streamScreenSize.isSmall;
+
+                return CallSidePanelLayout(
+                  animation: _panelAnimation,
+                  panel: _panelContent(call, fullScreen: fullScreen),
+                  fullScreen: fullScreen,
+                  // What the collapsed app bar gave up, handed back to the
+                  // grid so it neither moves nor re-tiles while a panel is up.
+                  coveredTopExtent: _mountedPanel != null ? kToolbarHeight : 0,
+                  child: Stack(
+                    children: [
+                      Column(
+                        children: [
+                          Expanded(
+                            child: StreamCallParticipants(
                               call: call,
-                              videoEffectsManager: _videoEffectsManager,
-                              onReactionSend: (_) =>
-                                  setState(() => _moreMenuVisible = false),
-                              onStatsPressed: () => setState(() {
-                                showStats(context);
-                                _moreMenuVisible = false;
-                              }),
-                              onAudioOutputChange: (_, {closeMenu = true}) {
-                                if (closeMenu) {
-                                  setState(() => _moreMenuVisible = false);
-                                }
-                              },
-                              onAudioInputChange: (_) =>
-                                  setState(() => _moreMenuVisible = false),
+                              layoutMode: _currentLayoutMode,
+                            ),
+                          ),
+                          ClosedCaptionsWidget(call: call),
+                        ],
+                      ),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: E2eeKeyNotification(
+                          call: call,
+                          onKeyApplied: (key) =>
+                              setState(() => _encryptionKey = key),
+                        ),
+                      ),
+                      if (_moreMenuVisible) ...[
+                        GestureDetector(
+                          onTap: () => setState(() => _moreMenuVisible = false),
+                          child: Container(color: Colors.black12),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Align(
+                            alignment: Alignment.bottomLeft,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 500),
+                              child: SettingsMenu(
+                                call: call,
+                                videoEffectsManager: _videoEffectsManager,
+                                onReactionSend: (_) =>
+                                    setState(() => _moreMenuVisible = false),
+                                onStatsPressed: () =>
+                                    togglePanel(CallSidePanel.stats),
+                                onAudioOutputChange: (_, {closeMenu = true}) {
+                                  if (closeMenu) {
+                                    setState(() => _moreMenuVisible = false);
+                                  }
+                                },
+                                onAudioInputChange: (_) =>
+                                    setState(() => _moreMenuVisible = false),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                    if (!_moreMenuVisible)
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: PartialCallStateBuilder(
-                          call: call,
-                          selector: (state) => state.otherParticipants.isEmpty,
-                          builder: (context, isEmpty) => isEmpty
-                              ? ShareCallWelcomeCard(
-                                  call: call,
-                                  encryptionKey: _encryptionKey,
-                                )
-                              : const SizedBox.shrink(),
+                      ],
+                      if (!_moreMenuVisible)
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: PartialCallStateBuilder(
+                            call: call,
+                            selector: (state) =>
+                                state.otherParticipants.isEmpty,
+                            builder: (context, isEmpty) => isEmpty
+                                ? ShareCallWelcomeCard(
+                                    call: call,
+                                    encryptionKey: _encryptionKey,
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 );
               },
               callAppBarWidgetBuilder: (context, call) {
+                // A narrow window gives the whole body to the panel, the app
+                // bar's row included. A zero-height bar rather than null,
+                // because null falls back to the SDK's own.
+                if (context.streamScreenSize.isSmall && _mountedPanel != null) {
+                  return PreferredSize(
+                    preferredSize: Size.zero,
+                    // Scaffold sizes this slot from the child rather than the
+                    // preferred size, and strips the top inset from the body's
+                    // MediaQuery either way — so the status bar's strip has to
+                    // be held open here or the panel runs under the notch.
+                    child: SizedBox(height: MediaQuery.paddingOf(context).top),
+                  );
+                }
+
                 // A wide window carries the layout toggle and leaving in the
                 // control bar, which is where the design puts them, so the app
                 // bar only holds them below that breakpoint. Otherwise both
@@ -533,8 +661,19 @@ class _CallScreenState extends State<CallScreen> {
 }
 
 class _ShowChatButton extends StatefulWidget {
-  const _ShowChatButton({required this.channel});
+  const _ShowChatButton({
+    required this.channel,
+    required this.selected,
+    required this.onPressed,
+  });
+
   final Channel? channel;
+
+  /// Whether the chat panel is the one currently open.
+  final bool selected;
+
+  /// Called to open or close the chat panel.
+  final VoidCallback onPressed;
 
   @override
   State<_ShowChatButton> createState() => __ShowChatButtonState();
@@ -574,52 +713,12 @@ class __ShowChatButtonState extends State<_ShowChatButton> {
   @override
   Widget build(BuildContext context) {
     return BadgedCallOption(
-      callControlOption: CallControlButton(
+      callControlOption: CallFeatureButton(
         icon: Icon(context.streamIcons.messageBubblesFill),
-        onPressed: widget.channel != null ? () => showChat(context) : null,
+        selected: widget.selected,
+        onPressed: widget.channel != null ? widget.onPressed : null,
       ),
       badgeCount: _unreadCount == 0 ? null : _unreadCount,
-    );
-  }
-
-  void showChat(BuildContext context) {
-    showModalBottomSheet<dynamic>(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (_) {
-        final size = MediaQuery.sizeOf(context);
-        final viewInsets = MediaQuery.viewInsetsOf(context);
-
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          height: size.height * 0.6 + viewInsets.bottom,
-          padding: EdgeInsets.only(bottom: viewInsets.bottom),
-          child: ChatBottomSheet(channel: widget.channel!),
-        );
-      },
-    );
-  }
-}
-
-class ChatBottomSheet extends StatelessWidget {
-  const ChatBottomSheet({super.key, required this.channel});
-
-  final Channel channel;
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamChannel(
-      channel: channel,
-      child: Column(
-        children: <Widget>[
-          const Expanded(child: StreamMessageListView()),
-          StreamMessageComposer(),
-        ],
-      ),
     );
   }
 }
