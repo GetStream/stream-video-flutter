@@ -465,4 +465,237 @@ transforms:
       - kind: "rename"
         newName: "observeCallEndedRingingEvent"
   #endregion CallKit migration (barrel)
+
+  #region Call control button migration
+  # CallControlOption is NOT renamed in bulk. CallControlButton and
+  # CallFeatureButton take neither its per-instance colours nor its shape,
+  # elevation or padding, so renaming a call site that passes any of them turns
+  # working code into a compile error. Those call sites move by hand; the
+  # CHANGELOG carries the mapping.
+  #
+  # The colour parameters below are safe to remove in bulk because they are
+  # already dead: the toggle widgets stopped reading them when they moved onto
+  # StreamButton, so dropping them changes nothing at runtime.
+
+  - title: "remove enabledMicrophoneIconColor from ToggleMicrophoneOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleMicrophoneOption"
+    changes:
+      - kind: "removeParameter"
+        name: "enabledMicrophoneIconColor"
+
+  - title: "remove disabledMicrophoneIconColor from ToggleMicrophoneOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleMicrophoneOption"
+    changes:
+      - kind: "removeParameter"
+        name: "disabledMicrophoneIconColor"
+
+  - title: "remove enabledMicrophoneBackgroundColor from ToggleMicrophoneOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleMicrophoneOption"
+    changes:
+      - kind: "removeParameter"
+        name: "enabledMicrophoneBackgroundColor"
+
+  - title: "remove disabledMicrophoneBackgroundColor from ToggleMicrophoneOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleMicrophoneOption"
+    changes:
+      - kind: "removeParameter"
+        name: "disabledMicrophoneBackgroundColor"
+
+  - title: "remove enabledCameraIconColor from ToggleCameraOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleCameraOption"
+    changes:
+      - kind: "removeParameter"
+        name: "enabledCameraIconColor"
+
+  - title: "remove disabledCameraIconColor from ToggleCameraOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleCameraOption"
+    changes:
+      - kind: "removeParameter"
+        name: "disabledCameraIconColor"
+
+  - title: "remove enabledCameraBackgroundColor from ToggleCameraOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleCameraOption"
+    changes:
+      - kind: "removeParameter"
+        name: "enabledCameraBackgroundColor"
+
+  - title: "remove disabledCameraBackgroundColor from ToggleCameraOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleCameraOption"
+    changes:
+      - kind: "removeParameter"
+        name: "disabledCameraBackgroundColor"
+
+  - title: "remove enabledRecordingIconColor from ToggleRecordingOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleRecordingOption"
+    changes:
+      - kind: "removeParameter"
+        name: "enabledRecordingIconColor"
+
+  - title: "remove disabledRecordingIconColor from ToggleRecordingOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleRecordingOption"
+    changes:
+      - kind: "removeParameter"
+        name: "disabledRecordingIconColor"
+
+  - title: "remove enabledRecordingBackgroundColor from ToggleRecordingOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleRecordingOption"
+    changes:
+      - kind: "removeParameter"
+        name: "enabledRecordingBackgroundColor"
+
+  - title: "remove disabledRecordingBackgroundColor from ToggleRecordingOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleRecordingOption"
+    changes:
+      - kind: "removeParameter"
+        name: "disabledRecordingBackgroundColor"
+
+  - title: "remove enabledClosedCaptionIconColor from ToggleClosedCaptionsOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleClosedCaptionsOption"
+    changes:
+      - kind: "removeParameter"
+        name: "enabledClosedCaptionIconColor"
+
+  - title: "remove disabledClosedCaptionIconColor from ToggleClosedCaptionsOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleClosedCaptionsOption"
+    changes:
+      - kind: "removeParameter"
+        name: "disabledClosedCaptionIconColor"
+
+  - title: "remove enabledClosedCaptionBackgroundColor from ToggleClosedCaptionsOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleClosedCaptionsOption"
+    changes:
+      - kind: "removeParameter"
+        name: "enabledClosedCaptionBackgroundColor"
+
+  - title: "remove disabledClosedCaptionBackgroundColor from ToggleClosedCaptionsOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleClosedCaptionsOption"
+    changes:
+      - kind: "removeParameter"
+        name: "disabledClosedCaptionBackgroundColor"
+
+  - title: "remove enabledScreenShareIconColor from ToggleScreenShareOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleScreenShareOption"
+    changes:
+      - kind: "removeParameter"
+        name: "enabledScreenShareIconColor"
+
+  - title: "remove disabledScreenShareIconColor from ToggleScreenShareOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleScreenShareOption"
+    changes:
+      - kind: "removeParameter"
+        name: "disabledScreenShareIconColor"
+
+  - title: "remove enabledScreenShareBackgroundColor from ToggleScreenShareOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleScreenShareOption"
+    changes:
+      - kind: "removeParameter"
+        name: "enabledScreenShareBackgroundColor"
+
+  - title: "remove disabledScreenShareBackgroundColor from ToggleScreenShareOption"
+    date: "2026-09-01"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "ToggleScreenShareOption"
+    changes:
+      - kind: "removeParameter"
+        name: "disabledScreenShareBackgroundColor"
+
+  #endregion Call control button migration
 #endregion

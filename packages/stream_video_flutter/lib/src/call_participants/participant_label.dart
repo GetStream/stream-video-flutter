@@ -193,9 +193,7 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
       // something beside it to say which of the two it is standing in for.
       if (props.isTrackPaused)
         Icon(
-          // TODO: swap for the design system's paused-video icon once it ships;
-          // this is the pre-redesign Material icon standing in until then.
-          Icons.network_check,
+          context.streamIcons.lowBandwidthFill,
           size: style?.videoPausedIconSize ?? defaults.videoPausedIconSize,
           color:
               style?.videoPausedColor ??

@@ -37,6 +37,40 @@ void main() {
   }
 
   group('Basic coordinator events', () {
+    // What a lobby stands on: it shows people arriving and leaving before
+    // anyone has joined, and a call nobody joined has no other subscription to
+    // the coordinator. Watching the call is what puts one in place.
+    test('a watched call emits its events before it is joined', () async {
+      final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+      final coordinatorClient = setupMockCoordinatorClient(
+        events: coordinatorEvents,
+      );
+
+      final call = createTestCall(coordinatorClient: coordinatorClient);
+      await call.getOrCreate();
+
+      final received = <StreamCallEvent>[];
+      call.callEvents.listen(received.add);
+
+      coordinatorEvents.emit(
+        CoordinatorCallSessionParticipantJoinedEvent(
+          callCid: call.callCid,
+          createdAt: DateTime.now(),
+          sessionId: 'session',
+          user: SampleCallData.defaultCallUser,
+          participant: const CallParticipant(
+            userSessionId: 'session-id',
+            userId: 'id',
+            role: 'user',
+          ),
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(call.state.value.status, isNot(isA<CallStatusJoined>()));
+      expect(received, [isA<StreamCallSessionParticipantJoinedEvent>()]);
+    });
+
     test(
       'permission request event - onPermissionRequest is called when permission request event is emitted',
       () async {

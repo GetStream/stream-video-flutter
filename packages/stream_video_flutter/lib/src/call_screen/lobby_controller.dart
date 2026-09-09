@@ -1,0 +1,672 @@
+import 'dart:async';
+
+import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
+
+import '../../stream_video_flutter.dart';
+
+/// Everything the lobby knows before the call is joined: the warmed-up
+/// microphone and camera tracks, the devices they run on, and who is already
+/// in the call.
+///
+/// The lobby's action widgets are handed to [StreamLobbyView] as a plain list
+/// of widgets, so they cannot take callbacks through their constructors. They
+/// read this from the tree through [StreamLobbyScope] instead, which is why
+/// all of the state that used to be spread across the view, its preview and
+/// the device pickers lives here.
+///
+/// Tracks created here are handed to the call as [TrackOption.provided], so
+/// the call carries on with the microphone and camera the user was already
+/// previewing rather than opening a second pair.
+/// Opens the lobby's microphone track.
+///
+/// Injectable because [RtcLocalTrack]'s factories are static, so a test has no
+/// other way to produce a track.
+@visibleForTesting
+typedef LobbyAudioTrackOpener = Future<RtcLocalAudioTrack> Function();
+
+/// Opens the lobby's camera track on `deviceId`, or on the system default when
+/// it is null. See [LobbyAudioTrackOpener].
+@visibleForTesting
+typedef LobbyCameraTrackOpener =
+    Future<RtcLocalCameraTrack> Function(String? deviceId);
+
+/// Everything the lobby knows before the call is joined.
+///
+/// The call is read, not created: one that does not exist yet leaves
+/// [fetchError] set and [participants] empty, and creating it is the host's to
+/// do — before the lobby, or from [StreamLobbyView.onJoinCallPressed].
+class StreamLobbyController extends ChangeNotifier {
+  /// Creates a new instance of [StreamLobbyController].
+  StreamLobbyController({
+    required this.call,
+    RtcMediaDeviceNotifier? deviceNotifier,
+    @visibleForTesting LobbyAudioTrackOpener? openMicrophoneTrack,
+    @visibleForTesting LobbyCameraTrackOpener? openCameraTrack,
+  }) : _openMicrophoneTrack = openMicrophoneTrack,
+       _openCameraTrack = openCameraTrack {
+    devices = StreamMediaDevicesController(
+      deviceNotifier: deviceNotifier,
+      // Switching camera while previewing means tearing the preview down and
+      // opening it again on the new device; nothing else can do this, which is
+      // why the controller takes the effect as a hook rather than performing
+      // it itself.
+      onVideoInputSelected: (_) => _restartCamera(),
+    );
+
+    // StreamLobbyScope listens to this controller, not to the device one, so
+    // a device list arriving or a selection changing has to be forwarded or
+    // the pickers never rebuild.
+    devices.addListener(notifyListeners);
+
+    // Before the fetch, so that someone arriving between the snapshot and the
+    // subscription is not missed — and because the fetch is what starts the
+    // events flowing. See [_listenEvents].
+    _listenEvents();
+    _fetchCall();
+  }
+
+  late final _logger = taggedLogger(tag: 'SV:LobbyController');
+
+  /// The call the lobby is a waiting room for.
+  final Call call;
+
+  /// The device lists and the current selection.
+  ///
+  /// Shared by every action that offers a device choice.
+  late final StreamMediaDevicesController devices;
+
+  StreamSubscription<Object>? _fetchSubscription;
+  StreamSubscription<Object>? _eventSubscription;
+  bool _callDefaultsApplied = false;
+
+  final LobbyAudioTrackOpener? _openMicrophoneTrack;
+  final LobbyCameraTrackOpener? _openCameraTrack;
+
+  /// Set by [dispose]. Every `await` here outlives the widget that owns this
+  /// controller, so anything resuming after one has to check it: notifying a
+  /// disposed [ChangeNotifier] throws, and a track that lands late has no
+  /// owner left to stop it.
+  bool _disposed = false;
+
+  /// Whether a track is already being opened. Opening lasts as long as the
+  /// permission prompt is up, which is ample time for a second tap.
+  bool _openingMicrophone = false;
+  bool _openingCamera = false;
+
+  /// Whether the user has reached for this device themselves. The call's
+  /// defaults land after a fetch, and must not overrule a tap that beat them.
+  bool _microphoneTouched = false;
+  bool _cameraTouched = false;
+
+  /// The state last asked for, which an open in flight is reconciled against.
+  /// Turning a device off while it is still opening has nothing to stop yet,
+  /// so the track is released when it lands instead.
+  bool _microphoneDesired = false;
+  bool _cameraDesired = false;
+
+  RtcLocalAudioTrack? _microphoneTrack;
+  RtcLocalCameraTrack? _cameraTrack;
+  StreamDeviceError? _microphoneError;
+  StreamDeviceError? _cameraError;
+
+  Object? _fetchError;
+
+  /// Why the call could not be fetched, or null.
+  ///
+  /// [participants] is empty while this is set, which is not the same thing
+  /// as an empty call — a host that wants to tell the two apart, or offer a
+  /// retry, reads this. A call that has not been created yet fetches as a
+  /// failure too, so a lobby that leaves creation to its join callback sees
+  /// this until it joins.
+  Object? get fetchError => _fetchError;
+
+  List<CallParticipant> _participants = const [];
+  Map<String, CallUser> _users = {};
+
+  /// The live microphone track, or null when the microphone is off.
+  RtcLocalAudioTrack? get microphoneTrack => _microphoneTrack;
+
+  /// The live camera track, or null when the camera is off.
+  RtcLocalCameraTrack? get cameraTrack => _cameraTrack;
+
+  /// Whether the microphone is on.
+  bool get microphoneEnabled => _microphoneTrack != null;
+
+  /// Whether the camera is on.
+  bool get cameraEnabled => _cameraTrack != null;
+
+  /// The last failure opening the microphone, or null.
+  ///
+  /// Drives the error badge on the microphone control, and carries a
+  /// [StreamDeviceError.reason] so an app can tell a refused permission from a
+  /// device another application is holding.
+  StreamDeviceError? get microphoneError => _microphoneError;
+
+  /// The last failure opening the camera, or null. See [microphoneError].
+  StreamDeviceError? get cameraError => _cameraError;
+
+  /// Whether the microphone is not usable right now.
+  ///
+  /// True when opening it failed — permission refused, or a device another
+  /// app is holding — and when the platform has stopped reporting any
+  /// microphone since. A control for an unavailable device carries an error
+  /// badge rather than the state a deliberate mute gets, so a permission
+  /// problem is not mistaken for a choice the user made. Joining stays
+  /// possible with the device disabled.
+  ///
+  /// This says how the control should *look*. Whether it can be pressed is
+  /// [microphoneMissing]: a failure is often worth another try, so the badge
+  /// alone does not disable the button.
+  bool get microphoneUnavailable =>
+      _microphoneError != null || microphoneMissing;
+
+  /// Whether the camera is not usable right now. See [microphoneUnavailable].
+  bool get cameraUnavailable => _cameraError != null || cameraMissing;
+
+  /// Whether the platform reports no microphone to open at all.
+  ///
+  /// The retryable half of [microphoneUnavailable]. A failed open can be
+  /// transient — another app was holding the device, or the user has since
+  /// granted permission in system settings — and a retry is the only thing
+  /// that clears the error, so a control whose *open* failed stays pressable
+  /// and keeps its badge until one succeeds. With no device to open there is
+  /// nothing a retry could achieve, so that control is disabled outright.
+  ///
+  /// Guarded on having opened the device rather than merely on
+  /// [StreamMediaDevicesController.hasEnumerated], which is the weaker check a
+  /// call can use: before permission the platform may name no device at all
+  /// even where one exists, so an empty list only means something once
+  /// `getUserMedia` has succeeded.
+  /// A track that is open is itself proof the device exists, whatever the
+  /// enumeration says, so a live microphone is never missing — otherwise an
+  /// empty device list would badge a working microphone and take away the
+  /// user's only way to mute it.
+  bool get microphoneMissing =>
+      _microphoneTrack == null &&
+      _hasOpenedMicrophone &&
+      devices.audioInputs.isEmpty;
+
+  /// Whether the platform reports no camera to open at all. See
+  /// [microphoneMissing].
+  bool get cameraMissing =>
+      _cameraTrack == null && _hasOpenedCamera && devices.videoInputs.isEmpty;
+
+  /// Whether the microphone is being opened right now.
+  ///
+  /// True for as long as the platform takes, which includes a permission
+  /// prompt being up. A control that reads this can say it is working rather
+  /// than looking switched off.
+  bool get isOpeningMicrophone => _openingMicrophone;
+
+  /// Whether the camera is being opened right now. See [isOpeningMicrophone].
+  bool get isOpeningCamera => _openingCamera;
+
+  /// Whether the microphone has been opened at least once.
+  ///
+  /// Device labels only arrive once `getUserMedia` has succeeded, so a
+  /// microphone picker has nothing to show before this is true. Not a
+  /// permission check — nothing here asks the platform what it would grant.
+  bool get hasOpenedMicrophone => _hasOpenedMicrophone;
+  bool _hasOpenedMicrophone = false;
+
+  /// Whether the camera has been opened at least once. See
+  /// [hasOpenedMicrophone].
+  bool get hasOpenedCamera => _hasOpenedCamera;
+  bool _hasOpenedCamera = false;
+
+  /// The people already in the call, oldest first, excluding the local user.
+  List<CallParticipant> get participants => _participants;
+
+  /// The users behind [participants], by id.
+  Map<String, CallUser> get users => _users;
+
+  /// The user this lobby belongs to.
+  UserInfo get currentUser => call.currentUser;
+
+  /// The local user as a participant, so the preview can be drawn with the
+  /// same `StreamParticipantTile` the call itself uses.
+  ///
+  /// Nobody has joined yet, so there is no session and the tracks are not
+  /// registered with the call: the ids are empty and the tile is handed its
+  /// renderer directly. What is real is the mute state, which is what the tile
+  /// draws its label and its outline from.
+  CallParticipantState get localParticipant {
+    final camera = cameraTrack;
+
+    return CallParticipantState(
+      userId: currentUser.id,
+      name: currentUser.name,
+      image: currentUser.image,
+      roles: [currentUser.role],
+      // ignore: deprecated_member_use, still required by the constructor
+      custom: const {},
+      sessionId: '',
+      trackIdPrefix: '',
+      isLocal: true,
+      // Left false: the in-call speaking state comes from the SFU, and there
+      // is no local mic level before joining. See FLU-714.
+      publishedTracks: {
+        SfuTrackType.audio: TrackState.local(
+          muted: !microphoneEnabled,
+          sourceDevice: devices.selectedAudioInput,
+        ),
+        SfuTrackType.video: TrackState.local(
+          muted: !cameraEnabled,
+          sourceDevice: devices.selectedVideoInput,
+          cameraPosition: switch (camera?.mediaConstraints.facingMode) {
+            FacingMode.user => CameraPosition.front,
+            FacingMode.environment => CameraPosition.back,
+            _ => null,
+          },
+        ),
+      },
+    );
+  }
+
+  /// How the call should be joined: the warmed-up tracks, and the devices the
+  /// user picked for them.
+  CallConnectOptions get connectOptions {
+    var options = CallConnectOptions(
+      audioInputDevice: devices.selectedAudioInput,
+      audioOutputDevice: devices.selectedAudioOutput,
+      videoInputDevice: devices.selectedVideoInput,
+    );
+
+    final cameraTrack = _cameraTrack;
+    if (cameraTrack != null) {
+      options = options.copyWith(camera: TrackOption.provided(cameraTrack));
+    }
+
+    final microphoneTrack = _microphoneTrack;
+    if (microphoneTrack != null) {
+      options = options.copyWith(
+        microphone: TrackOption.provided(microphoneTrack),
+      );
+    }
+
+    return options;
+  }
+
+  /// Turns the microphone on if it is off, and off if it is on.
+  Future<void> toggleMicrophone() =>
+      setMicrophoneEnabled(enabled: !microphoneEnabled);
+
+  /// Opens the microphone, or closes it.
+  ///
+  /// Idempotent: asking for the state it is already in does nothing, so a
+  /// caller that knows what it wants — the call's own defaults, above all —
+  /// cannot invert a state the user has since changed.
+  Future<void> setMicrophoneEnabled({required bool enabled}) async {
+    _microphoneTouched = true;
+    _microphoneDesired = enabled;
+
+    if (!enabled) {
+      final track = _microphoneTrack;
+      if (track == null) {
+        // Nothing open yet. An open in flight sees this and releases the
+        // track it produces, so a second tap is not lost.
+        _notify();
+        return;
+      }
+      _microphoneTrack = null;
+      _notify();
+      await track.stop();
+      return;
+    }
+
+    if (_microphoneTrack != null || _openingMicrophone) return;
+    _openingMicrophone = true;
+    _notify();
+    try {
+      final track = await _openMicrophone();
+      // The lobby was left, or the microphone turned off again, while the
+      // device was opening. Nothing will ever hand this track to a call, so
+      // this is the only chance to stop it.
+      if (_disposed || !_microphoneDesired) return await track.stop();
+
+      _microphoneTrack = track;
+      _microphoneError = null;
+      _hasOpenedMicrophone = true;
+    } catch (e, stk) {
+      // The stack trace is what separates a refused permission from a device
+      // another app is holding, so it is worth keeping.
+      _logger.e(() => 'Error creating microphone track: $e\n$stk');
+      _microphoneError = StreamDeviceError.from(e, stk);
+    } finally {
+      _openingMicrophone = false;
+    }
+
+    _notify();
+  }
+
+  /// Turns the camera on if it is off, and off if it is on.
+  Future<void> toggleCamera() => setCameraEnabled(enabled: !cameraEnabled);
+
+  /// Opens the camera, or closes it. See [setMicrophoneEnabled].
+  Future<void> setCameraEnabled({required bool enabled}) async {
+    _cameraTouched = true;
+    _cameraDesired = enabled;
+
+    if (!enabled) {
+      final track = _cameraTrack;
+      if (track == null) {
+        _notify();
+        return;
+      }
+      _cameraTrack = null;
+      _notify();
+      await track.stop();
+      return;
+    }
+
+    if (_cameraTrack != null) return;
+    await _openCamera();
+  }
+
+  /// Opens the camera on the picked device, and reports whether it worked.
+  ///
+  /// Reconciles afterwards: the pick can change while the platform is opening,
+  /// and the track that lands is then on the wrong device.
+  Future<bool> _openCamera() async {
+    if (_openingCamera) return false;
+    _openingCamera = true;
+    _notify();
+    final requested = devices.selectedVideoInput?.id;
+    try {
+      final track = await _openCameraTrackFor(requested);
+      // See setMicrophoneEnabled.
+      if (_disposed || !_cameraDesired) {
+        _openingCamera = false;
+        await track.stop();
+        return false;
+      }
+
+      _cameraTrack = track;
+      _cameraError = null;
+      _hasOpenedCamera = true;
+    } catch (e, stk) {
+      _logger.e(() => 'Error creating camera track: $e\n$stk');
+      _cameraError = StreamDeviceError.from(e, stk);
+      _openingCamera = false;
+      _notify();
+      return false;
+    }
+    _openingCamera = false;
+    _notify();
+
+    if (!_disposed && devices.selectedVideoInput?.id != requested) {
+      return _reopenCamera();
+    }
+    return true;
+  }
+
+  /// Reopens the preview on the newly picked camera, reporting whether it
+  /// ended up there.
+  ///
+  /// A camera the user has turned off stays off: picking a device is not a
+  /// request to start filming.
+  Future<bool> _reopenCamera() async {
+    // An open already in flight reconciles onto the newest pick when it
+    // lands, so there is nothing to reopen yet.
+    if (_openingCamera) return true;
+
+    final track = _cameraTrack;
+    if (track == null) return true;
+
+    _cameraTrack = null;
+    _notify();
+    try {
+      await track.stop();
+    } catch (e, stk) {
+      // Failing to stop the old track must not cost the user the new one.
+      _logger.e(() => 'Error stopping the camera track: $e\n$stk');
+    }
+
+    return _openCamera();
+  }
+
+  /// [StreamMediaDevicesController]'s camera hook.
+  ///
+  /// Throws when the picked device could not be opened, which is how the
+  /// devices controller learns to put the picker back rather than leave it
+  /// naming a camera the preview is not running on.
+  Future<void> _restartCamera() async {
+    if (await _reopenCamera()) return;
+
+    throw _cameraError ??
+        StreamDeviceError(
+          reason: StreamDeviceFailureReason.unknown,
+          cause: 'could not open camera ${devices.selectedVideoInput?.id}',
+        );
+  }
+
+  Future<RtcLocalAudioTrack> _openMicrophone() async {
+    if (_openMicrophoneTrack case final open?) return open();
+    return RtcLocalTrack.audio(nativeFactory: await call.ensureNativeFactory());
+  }
+
+  Future<RtcLocalCameraTrack> _openCameraTrackFor(String? deviceId) async {
+    if (_openCameraTrack case final open?) return open(deviceId);
+    return RtcLocalTrack.camera(
+      constraints: CameraConstraints(deviceId: deviceId),
+      nativeFactory: await call.ensureNativeFactory(),
+    );
+  }
+
+  /// [notifyListeners], unless this controller is already disposed.
+  void _notify() {
+    if (_disposed) return;
+    notifyListeners();
+  }
+
+  /// Opens whatever the call says should be on when someone arrives.
+  ///
+  /// Called from the fetch, because that is where the settings arrive: a
+  /// `CallState` starts out carrying `const CallSettings()`, whose defaults
+  /// are both on, until the call's metadata lands.
+  void _applyCallDefaults(CallSettings settings) {
+    if (_disposed || _callDefaultsApplied) return;
+    _callDefaultsApplied = true;
+
+    // Set rather than toggled, and skipped for a device the user has already
+    // reached for: the fetch is a network round-trip and the toggles are live
+    // from the first frame, so a toggle here could undo their tap.
+    if (!_microphoneTouched) {
+      unawaited(setMicrophoneEnabled(enabled: settings.audio.micDefaultOn));
+    }
+    if (!_cameraTouched) {
+      unawaited(setCameraEnabled(enabled: settings.video.cameraDefaultOn));
+    }
+  }
+
+  void _fetchCall() {
+    // Reads the call, and does not create one that is not there: what a call
+    // is created with — its encryption mode above all, which cannot be changed
+    // afterwards — is the host's to decide, and a waiting room being shown is
+    // not that decision. A call that does not exist yet fetches as a failure,
+    // which leaves the lobby with a preview, no participants and [fetchError].
+    final currentUserId = call.state.value.currentUserId;
+    _logger.d(() => '[fetchCall] currentUserId: $currentUserId');
+
+    _fetchSubscription?.cancel();
+    _fetchSubscription = call.get().asStream().listen((result) {
+      result.fold(
+        onSuccess: (callData) {
+          _logger.v(() => '[fetchCall] completed: $callData');
+          final metadata = callData.metadata;
+
+          // One `now` for the whole sort: `sortedBy` calls the key function
+          // repeatedly, so a fresh DateTime.now() per element would not be a
+          // stable ordering.
+          final now = DateTime.now();
+
+          _users = {...metadata.users};
+          _participants = metadata.session.participants.values
+              .where((it) => it.userId != currentUserId)
+              .sortedBy((it) => it.joinedAt ?? now)
+              .toList();
+          _fetchError = null;
+          _applyCallDefaults(metadata.settings);
+          _notify();
+        },
+        onFailure: (error, stackTrace) {
+          _logger.e(() => '[fetchCall] failed: $error\n$stackTrace');
+          _fetchError = error;
+          // The call's own settings are unknowable now, so fall back to what
+          // its state carries. A lobby that cannot reach the coordinator is
+          // still a lobby: the user gets a preview and the join button, which
+          // is where the failure will surface properly.
+          _applyCallDefaults(call.state.value.settings);
+          _notify();
+        },
+      );
+    }, onError: _onFetchError);
+  }
+
+  /// A throw from inside the client rather than a reported failure — an
+  /// assertion, a parse bug — which bypasses the fold above entirely. Without
+  /// this the lobby would be indistinguishable from a healthy empty call.
+  void _onFetchError(Object error, StackTrace stackTrace) {
+    if (_disposed) return;
+
+    _logger.e(() => '[fetchCall] threw: $error\n$stackTrace');
+    _fetchError = error;
+    _applyCallDefaults(call.state.value.settings);
+    _notify();
+  }
+
+  /// Follows the call's own events.
+  ///
+  /// They flow because [_fetchCall] watches the call, which is what `Call.get`
+  /// does unless asked not to: a watched call follows the coordinator without
+  /// having been joined.
+  ///
+  /// Filtered by cid: the coordinator's socket carries every call the user is
+  /// in, so without this a second call — one ringing in the background, or the
+  /// one this user just stepped out of — moves people in and out of this
+  /// lobby's list.
+  void _listenEvents() {
+    _eventSubscription?.cancel();
+    _eventSubscription = call.callEvents.listen(
+      (event) {
+        if (event.callCid != call.callCid) return;
+
+        if (event is StreamCallSessionParticipantLeftEvent) {
+          _logger.d(
+            () =>
+                '[listenEvents] #userLeft; user: ${event.user}, '
+                'reason: ${event.reason}',
+          );
+          final remaining = [..._participants]
+            ..removeWhere(
+              (it) => it.userSessionId == event.participant.userSessionId,
+            );
+          _participants = remaining;
+
+          final hasSameUser = remaining.any(
+            (it) => it.userId == event.participant.userId,
+          );
+          if (!hasSameUser) _users = {..._users}..remove(event.user.id);
+
+          _notify();
+        } else if (event is StreamCallSessionParticipantJoinedEvent) {
+          _logger.d(() => '[listenEvents] #userJoined; user: ${event.user}');
+
+          final participant = event.participant;
+          // The local user is filtered out of the fetched snapshot, so a join
+          // event for them must not slip one back in.
+          if (participant.userId == call.state.value.currentUserId) return;
+
+          // Upsert rather than append. The fetch returns a snapshot of the
+          // session while this subscription is already live, so a join that is
+          // already reflected in that snapshot still arrives as an event — and
+          // appending it blindly listed the same person twice. Identity is the
+          // session, not the user: someone on a phone and a laptop is two
+          // participants and belongs in the list twice.
+          final index = _participants.indexWhere(
+            (it) => it.userSessionId == participant.userSessionId,
+          );
+
+          _users = {..._users, event.user.id: event.user};
+          _participants = [..._participants];
+          if (index == -1) {
+            _participants.add(participant);
+          } else {
+            _participants[index] = participant;
+          }
+
+          _notify();
+        }
+      },
+      onError: (Object e, StackTrace stk) {
+        _logger.e(() => '[listenEvents] threw: $e\n$stk');
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    // Set before anything else: an open already in flight checks this to
+    // decide whether the track it is about to produce has an owner.
+    _disposed = true;
+    _fetchSubscription?.cancel();
+    _eventSubscription?.cancel();
+    devices
+      ..removeListener(notifyListeners)
+      ..dispose();
+
+    // Tracks are only stopped if they were not handed to a call. A track
+    // passed as TrackOption.provided outlives the lobby, and stopping it here
+    // would kill the microphone the user just joined with.
+    //
+    // Handed-over tracks keep their references: a join can still fail after
+    // the lobby is gone, and [reclaimTracks] is then the only thing left that
+    // can turn the devices off.
+    if (_tracksHandedOver) {
+      super.dispose();
+      return;
+    }
+
+    _stopTracks();
+    super.dispose();
+  }
+
+  void _stopTracks() {
+    // Fire-and-forget, at a point where nothing can be reported — but a
+    // failure to release the camera should at least name itself in the log.
+    _microphoneTrack?.stop().onError((e, stk) {
+      _logger.e(() => 'Error stopping the microphone track: $e\n$stk');
+    });
+    _cameraTrack?.stop().onError((e, stk) {
+      _logger.e(() => 'Error stopping the camera track: $e\n$stk');
+    });
+    _microphoneTrack = null;
+    _cameraTrack = null;
+  }
+
+  bool _tracksHandedOver = false;
+
+  /// Whether the tracks now belong to the call rather than to this lobby.
+  ///
+  /// Once true, [dispose] leaves the microphone and camera running: the call
+  /// is publishing them, and stopping them here would cut its audio and video.
+  bool get tracksHandedOver => _tracksHandedOver;
+
+  /// Marks the tracks as belonging to the call, so [dispose] leaves them
+  /// running.
+  ///
+  /// Call this when [connectOptions] has been passed to a join.
+  void handOverTracks() => _tracksHandedOver = true;
+
+  /// Takes the tracks back, so [dispose] stops them again.
+  ///
+  /// Call this when a join [handOverTracks] was called for did not happen
+  /// after all and the lobby carries on with its preview. Safe to call once
+  /// the lobby is gone: a controller already disposed stops the tracks here
+  /// instead, since nothing else will.
+  void reclaimTracks() {
+    _tracksHandedOver = false;
+    if (_disposed) _stopTracks();
+  }
+}

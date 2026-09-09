@@ -50,5 +50,89 @@
   "livestreamLive": "Live",
   "@livestreamLive": {
     "description": "The badge text shown when the call mode is live"
+  },
+  "lobbyMicrophoneSection": "Microphone",
+  "@lobbyMicrophoneSection": {
+    "description": "Heading of the microphone group in the lobby's device menu"
+  },
+  "lobbySpeakerSection": "Speaker",
+  "@lobbySpeakerSection": {
+    "description": "Heading of the speaker group in the lobby's device menu"
+  },
+  "lobbyCameraSection": "Camera",
+  "@lobbyCameraSection": {
+    "description": "Heading of the camera group in the lobby's device menu"
+  },
+  "lobbySystemDefaultDevice": "System default",
+  "@lobbySystemDefaultDevice": {
+    "description": "The device option that leaves the choice to the operating system"
+  },
+  "lobbyDefaultDeviceHint": "Default",
+  "@lobbyDefaultDeviceHint": {
+    "description": "Placeholder on a device field while no device has been picked"
+  },
+  "lobbySelectAudioDevices": "Select audio devices",
+  "@lobbySelectAudioDevices": {
+    "description": "Tooltip of the lobby control that picks a microphone and speaker"
+  },
+  "lobbySelectVideoDevice": "Select video device",
+  "@lobbySelectVideoDevice": {
+    "description": "Tooltip of the lobby control that picks a camera"
+  },
+  "lobbyToggleMicrophone": "Toggle microphone",
+  "@lobbyToggleMicrophone": {
+    "description": "Tooltip of the lobby's microphone toggle"
+  },
+  "lobbyToggleCamera": "Toggle camera",
+  "@lobbyToggleCamera": {
+    "description": "Tooltip of the lobby's camera toggle"
+  },
+  "lobbyTitle": "Before joining",
+  "@lobbyTitle": {
+    "description": "Heading of the lobby screen"
+  },
+  "lobbyJoinCall": "Join call",
+  "@lobbyJoinCall": {
+    "description": "Label of the button that joins the call from the lobby"
+  },
+  "lobbyParticipants": "Participants",
+  "@lobbyParticipants": {
+    "description": "Tooltip and sheet title of the lobby's participants control"
+  },
+  "lobbyMicrophoneNotOpened": "Turn the microphone on to choose a device",
+  "@lobbyMicrophoneNotOpened": {
+    "description": "Tooltip on the lobby's audio picker while the microphone has never been opened"
+  },
+  "lobbyCameraNotOpened": "Turn the camera on to choose a device",
+  "@lobbyCameraNotOpened": {
+    "description": "Tooltip on the lobby's camera picker while the camera has never been opened"
+  },
+  "lobbyNoMicrophoneFound": "No microphone found",
+  "@lobbyNoMicrophoneFound": {
+    "description": "Tooltip on the lobby's audio picker when the platform reports no microphone"
+  },
+  "lobbyNoCameraFound": "No camera found",
+  "@lobbyNoCameraFound": {
+    "description": "Tooltip on the lobby's camera picker when the platform reports no camera"
+  },
+  "lobbyMicrophonePermissionDenied": "Microphone access was refused — allow it in your system settings",
+  "@lobbyMicrophonePermissionDenied": {
+    "description": "Tooltip on the lobby's audio picker when microphone permission was refused"
+  },
+  "lobbyCameraPermissionDenied": "Camera access was refused — allow it in your system settings",
+  "@lobbyCameraPermissionDenied": {
+    "description": "Tooltip on the lobby's camera picker when camera permission was refused"
+  },
+  "lobbyMicrophoneBusy": "Another app is using the microphone",
+  "@lobbyMicrophoneBusy": {
+    "description": "Tooltip on the lobby's audio picker when another application holds the microphone"
+  },
+  "lobbyCameraBusy": "Another app is using the camera",
+  "@lobbyCameraBusy": {
+    "description": "Tooltip on the lobby's camera picker when another application holds the camera"
+  },
+  "lobbyDevicesUnreadable": "Your devices could not be read",
+  "@lobbyDevicesUnreadable": {
+    "description": "Tooltip on a lobby device picker when the platform could not be asked for its devices"
   }
 }

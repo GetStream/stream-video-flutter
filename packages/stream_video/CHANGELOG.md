@@ -38,8 +38,10 @@
 
 ### ✅ Added
 
+- `CallReceivedData`, what `Call.get()` returns, is exported. Handling that result meant naming a type the package kept to itself.
 - Anonymous users can now carry a token: pass `userToken` with a `UserType.anonymous` user to send call-restricted tokens (e.g. for closed livestreams). The token's `user_id` claim must be `!anon`; an invalid token fails fast at client construction.
 - `StreamCallDisconnectedEvent`, `CoordinatorDisconnectedEvent`, and `CoordinatorDisconnected` now carry `apiError`, the error the server reported before closing the WebSocket. A refused token or a rejected API key arrives as an error frame rather than a close frame, so this is the only account of why such a connection was closed; `closeReason` falls back to the error's message when the closure itself carried none.
+- `Call.currentUser` is the user the call is being watched or joined by.
 
 ### 🐞 Fixed
 
@@ -63,6 +65,7 @@
 ### 🐞 Fixed
 
 - [Android] Fixed a call hung up outside the app, from a paired watch, a Bluetooth headset or a car head unit, not leaving the Stream call. Ended events carrying `CallData.endedBySystem` are now applied on Android too, while the ambiguous ones, which on Android also mean the incoming call notification was merely dismissed, keep being ignored. Requires the Android Telecom integration in `stream_video_push_notification`.
+- Fixed the call reconnect loop retrying without a delay or an escalation when an unexpected error was thrown before the reconnect strategy ran. 
 
 ## 1.5.0
 

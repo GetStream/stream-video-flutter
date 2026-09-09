@@ -57,4 +57,70 @@ class StreamVideoFlutterLocalizationsEn
 
   @override
   String get livestreamLive => 'Live';
+
+  @override
+  String get lobbyMicrophoneSection => 'Microphone';
+
+  @override
+  String get lobbySpeakerSection => 'Speaker';
+
+  @override
+  String get lobbyCameraSection => 'Camera';
+
+  @override
+  String get lobbySystemDefaultDevice => 'System default';
+
+  @override
+  String get lobbyDefaultDeviceHint => 'Default';
+
+  @override
+  String get lobbySelectAudioDevices => 'Select audio devices';
+
+  @override
+  String get lobbySelectVideoDevice => 'Select video device';
+
+  @override
+  String get lobbyToggleMicrophone => 'Toggle microphone';
+
+  @override
+  String get lobbyToggleCamera => 'Toggle camera';
+
+  @override
+  String get lobbyTitle => 'Before joining';
+
+  @override
+  String get lobbyJoinCall => 'Join call';
+
+  @override
+  String get lobbyParticipants => 'Participants';
+
+  @override
+  String get lobbyMicrophoneNotOpened =>
+      'Turn the microphone on to choose a device';
+
+  @override
+  String get lobbyCameraNotOpened => 'Turn the camera on to choose a device';
+
+  @override
+  String get lobbyNoMicrophoneFound => 'No microphone found';
+
+  @override
+  String get lobbyNoCameraFound => 'No camera found';
+
+  @override
+  String get lobbyMicrophonePermissionDenied =>
+      'Microphone access was refused — allow it in your system settings';
+
+  @override
+  String get lobbyCameraPermissionDenied =>
+      'Camera access was refused — allow it in your system settings';
+
+  @override
+  String get lobbyMicrophoneBusy => 'Another app is using the microphone';
+
+  @override
+  String get lobbyCameraBusy => 'Another app is using the camera';
+
+  @override
+  String get lobbyDevicesUnreadable => 'Your devices could not be read';
 }

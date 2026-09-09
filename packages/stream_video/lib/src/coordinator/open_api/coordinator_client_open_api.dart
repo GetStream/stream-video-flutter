@@ -6,7 +6,6 @@ import '../../errors/video_error_composer.dart';
 import '../../http/stream_api_interceptors.dart';
 import '../../latency/latency_service.dart';
 import '../../location/location_service.dart';
-import '../../models/call_received_data.dart';
 import '../../telemetry/client_event_reporter.dart';
 import '../../token/token_source.dart';
 import '../models/coordinator_connection_state.dart';

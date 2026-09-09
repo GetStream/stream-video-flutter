@@ -178,6 +178,132 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'Live'**
   String get livestreamLive;
+
+  /// Heading of the microphone group in the lobby's device menu
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone'**
+  String get lobbyMicrophoneSection;
+
+  /// Heading of the speaker group in the lobby's device menu
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker'**
+  String get lobbySpeakerSection;
+
+  /// Heading of the camera group in the lobby's device menu
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get lobbyCameraSection;
+
+  /// The device option that leaves the choice to the operating system
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get lobbySystemDefaultDevice;
+
+  /// Placeholder on a device field while no device has been picked
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get lobbyDefaultDeviceHint;
+
+  /// Tooltip of the lobby control that picks a microphone and speaker
+  ///
+  /// In en, this message translates to:
+  /// **'Select audio devices'**
+  String get lobbySelectAudioDevices;
+
+  /// Tooltip of the lobby control that picks a camera
+  ///
+  /// In en, this message translates to:
+  /// **'Select video device'**
+  String get lobbySelectVideoDevice;
+
+  /// Tooltip of the lobby's microphone toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle microphone'**
+  String get lobbyToggleMicrophone;
+
+  /// Tooltip of the lobby's camera toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle camera'**
+  String get lobbyToggleCamera;
+
+  /// Heading of the lobby screen
+  ///
+  /// In en, this message translates to:
+  /// **'Before joining'**
+  String get lobbyTitle;
+
+  /// Label of the button that joins the call from the lobby
+  ///
+  /// In en, this message translates to:
+  /// **'Join call'**
+  String get lobbyJoinCall;
+
+  /// Tooltip and sheet title of the lobby's participants control
+  ///
+  /// In en, this message translates to:
+  /// **'Participants'**
+  String get lobbyParticipants;
+
+  /// Tooltip on the lobby's audio picker while the microphone has never been opened
+  ///
+  /// In en, this message translates to:
+  /// **'Turn the microphone on to choose a device'**
+  String get lobbyMicrophoneNotOpened;
+
+  /// Tooltip on the lobby's camera picker while the camera has never been opened
+  ///
+  /// In en, this message translates to:
+  /// **'Turn the camera on to choose a device'**
+  String get lobbyCameraNotOpened;
+
+  /// Tooltip on the lobby's audio picker when the platform reports no microphone
+  ///
+  /// In en, this message translates to:
+  /// **'No microphone found'**
+  String get lobbyNoMicrophoneFound;
+
+  /// Tooltip on the lobby's camera picker when the platform reports no camera
+  ///
+  /// In en, this message translates to:
+  /// **'No camera found'**
+  String get lobbyNoCameraFound;
+
+  /// Tooltip on the lobby's audio picker when microphone permission was refused
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone access was refused — allow it in your system settings'**
+  String get lobbyMicrophonePermissionDenied;
+
+  /// Tooltip on the lobby's camera picker when camera permission was refused
+  ///
+  /// In en, this message translates to:
+  /// **'Camera access was refused — allow it in your system settings'**
+  String get lobbyCameraPermissionDenied;
+
+  /// Tooltip on the lobby's audio picker when another application holds the microphone
+  ///
+  /// In en, this message translates to:
+  /// **'Another app is using the microphone'**
+  String get lobbyMicrophoneBusy;
+
+  /// Tooltip on the lobby's camera picker when another application holds the camera
+  ///
+  /// In en, this message translates to:
+  /// **'Another app is using the camera'**
+  String get lobbyCameraBusy;
+
+  /// Tooltip on a lobby device picker when the platform could not be asked for its devices
+  ///
+  /// In en, this message translates to:
+  /// **'Your devices could not be read'**
+  String get lobbyDevicesUnreadable;
 }
 
 class _StreamVideoFlutterLocalizationsDelegate
