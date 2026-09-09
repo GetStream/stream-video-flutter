@@ -323,8 +323,9 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
   /// [StreamMenuOption.leading] — so without this a menu of icons shows nothing
   /// at all for the option in effect.
   ///
-  /// The style has to be built up from [StreamContextMenuAnchor.defaultActionStyle]
-  /// rather than layered over it: [StreamContextMenuActionTheme.of] reads the
+  /// The style has to be built up from
+  /// [StreamContextMenuAnchor.defaultActionStyle] rather than layered over it:
+  /// [StreamContextMenuActionTheme.of] reads the
   /// nearest theme only, so a bare override here would drop the design's row
   /// metrics and leave the selected row taller and wider than its siblings.
   Widget _selectedBackground(

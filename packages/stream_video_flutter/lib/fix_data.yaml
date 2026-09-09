@@ -825,7 +825,7 @@ transforms:
 
   #region Participant layout modes
 
-  - title: "replace ParticipantLayoutMode.spotlight with ParticipantLayoutMode.speakerBottom"
+  - title: "replace ParticipantLayoutMode.spotlight with ParticipantLayoutMode.speakerTop"
     date: "2026-09-08"
     bulkApply: true
     element:
@@ -836,7 +836,7 @@ transforms:
       - kind: "replacedBy"
         newElement:
           uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
-          constant: "speakerBottom"
+          constant: "speakerTop"
           inEnum: "ParticipantLayoutMode"
 
   - title: "replace ParticipantLayoutMode.pictureInPicture with ParticipantLayoutMode.speakerOneToOne"

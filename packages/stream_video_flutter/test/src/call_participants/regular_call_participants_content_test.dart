@@ -29,9 +29,9 @@ Widget _box(BuildContext _, Call __, CallParticipantState participant) =>
     );
 
 void main() {
-  // `enableLocalVideo` is passed explicitly throughout: its default reads a
-  // platform detector with no test override, so leaving it off would make
-  // these depend on the host OS.
+  // The helper defaults `enableLocalVideo` to true: under `auto` the flag
+  // falls back to a platform detector with no test override, which would make
+  // those cases depend on the host OS.
   Future<void> pump(
     WidgetTester tester, {
     required ParticipantLayoutMode layoutMode,
@@ -70,10 +70,10 @@ void main() {
   group('the four bar layouts', () {
     for (final (mode, alignment)
         in <(ParticipantLayoutMode, ParticipantsBarAlignment)>[
-          (.speakerTop, .top),
-          (.speakerBottom, .bottom),
-          (.speakerLeft, .left),
-          (.speakerRight, .right),
+          (.speakerTop, .bottom),
+          (.speakerBottom, .top),
+          (.speakerLeft, .right),
+          (.speakerRight, .left),
         ]) {
       testWidgets('$mode spotlights with the bar $alignment', (tester) async {
         await pump(
@@ -98,6 +98,32 @@ void main() {
         expect(find.byType(StreamLocalVideo), findsNothing);
       });
     }
+
+    testWidgets('spotlights a remote when only one other person is in the '
+        'call', (tester) async {
+      await pump(
+        tester,
+        layoutMode: .speakerBottom,
+        participants: [
+          _participant('local', isLocal: true),
+          _participant('remote-1'),
+        ],
+      );
+
+      final view = tester.widget<CallParticipantsSpotlightView>(
+        find.byType(CallParticipantsSpotlightView),
+      );
+      expect(view.spotlight.sessionId, 'remote-1');
+      expect(view.participants.map((e) => e.sessionId), ['local']);
+    });
+
+    testWidgets('grid takes over when nobody is in the call', (tester) async {
+      await pump(tester, layoutMode: .speakerBottom, participants: const []);
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(CallParticipantsSpotlightView), findsNothing);
+      expect(find.byType(CallParticipantsGridView), findsOneWidget);
+    });
 
     testWidgets('spotlight is still the bottom bar', (tester) async {
       await pump(
@@ -136,12 +162,20 @@ void main() {
       expect(find.byType(StreamLocalVideo), findsOneWidget);
     });
 
+    testWidgets('grid takes over when nobody is in the call', (tester) async {
+      await pump(tester, layoutMode: .speakerOneToOne, participants: const []);
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(CallParticipantsSpotlightView), findsNothing);
+      expect(find.byType(CallParticipantsGridView), findsOneWidget);
+    });
+
     testWidgets('floats the self-view even where the default is off', (
       tester,
     ) async {
-      // `enableLocalVideo` defaults to off on desktop, which under this layout
-      // used to drop the local participant altogether: the bar is empty, so
-      // without the self-view they were nowhere on screen.
+      // This layout defaults the flag to true on every platform: the bar is
+      // empty, so without the self-view the local participant is nowhere on
+      // screen.
       await pump(
         tester,
         layoutMode: .speakerOneToOne,

@@ -5,41 +5,14 @@
   "desktopScreenShareEntireScreen": "Volledig scherm",
   "desktopScreenShareWindow": "Venster",
   "layoutMenuTitle": "Indeling",
-  "@layoutMenuTitle": {
-    "description": "Title of the sheet that picks how participants are laid out"
-  },
   "layoutSelectTooltip": "Indeling wijzigen",
-  "@layoutSelectTooltip": {
-    "description": "Tooltip of the call control that picks a participant layout"
-  },
   "layoutDefault": "Standaard",
-  "@layoutDefault": {
-    "description": "The participant layout that follows the call instead of being fixed"
-  },
   "layoutGrid": "Raster",
-  "@layoutGrid": {
-    "description": "The participant layout giving everybody an equal tile"
-  },
   "layoutSpeakerTop": "Spreker (boven)",
-  "@layoutSpeakerTop": {
-    "description": "The participant layout with the speaker below the other participants"
-  },
   "layoutSpeakerBottom": "Spreker (onder)",
-  "@layoutSpeakerBottom": {
-    "description": "The participant layout with the speaker above the other participants"
-  },
   "layoutSpeakerLeft": "Spreker (links)",
-  "@layoutSpeakerLeft": {
-    "description": "The participant layout with the speaker right of the other participants"
-  },
   "layoutSpeakerRight": "Spreker (rechts)",
-  "@layoutSpeakerRight": {
-    "description": "The participant layout with the speaker left of the other participants"
-  },
   "layoutSpeakerOneToOne": "Spreker 1:1",
-  "@layoutSpeakerOneToOne": {
-    "description": "The participant layout showing only the speaker and the local participant"
-  },
   "livestreamBackstageStartingSoon": "Livestream begint binnenkort",
   "livestreamBackstageStartingIn": "Livestream begint over:",
   "livestreamBackstageParticipants": "{count, plural, zero{Nog geen deelnemers  zijn} one{Eén deelnemer is} other{{count} deelnemers zijn}} vroeg aanwezig",

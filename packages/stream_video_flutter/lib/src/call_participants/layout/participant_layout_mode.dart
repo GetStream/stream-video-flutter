@@ -10,44 +10,51 @@ import 'call_participants_spotlight_view.dart';
 
 /// How the participants of a call are arranged on screen.
 enum ParticipantLayoutMode {
-  /// Follows the call: the speaker fills the frame in a one-on-one call, and
+  /// Follows the call: the speaker takes the frame in a one-on-one call, and
   /// everybody sits in a grid otherwise.
   ///
-  /// The local participant floats over the layout rather than taking a tile of
-  /// its own, subject to `enableLocalVideo`.
+  /// In a one-on-one call the local participant floats over the speaker. In a
+  /// group call they float on mobile and take a grid tile on desktop.
+  /// `enableLocalVideo` overrides either default.
   auto,
 
-  /// Every participant, including the local one, takes an equal tile in a
-  /// grid.
+  /// Every participant, including the local one, takes a tile in a grid.
   grid,
 
-  /// The speaker fills the frame, with everybody else in a bar above them.
+  /// The speaker takes the top of the frame, with everybody else in a bar
+  /// below them.
   speakerTop,
 
-  /// The speaker fills the frame, with everybody else in a bar below them.
+  /// The speaker takes the bottom of the frame, with everybody else in a bar
+  /// above them.
   speakerBottom,
 
-  /// The speaker fills the frame, with everybody else in a bar to their left.
+  /// The speaker takes the left of the frame, with everybody else in a bar to
+  /// their right.
   speakerLeft,
 
-  /// The speaker fills the frame, with everybody else in a bar to their right.
+  /// The speaker takes the right of the frame, with everybody else in a bar to
+  /// their left.
   speakerRight,
 
-  /// The speaker fills the frame alone, with the local participant floating
+  /// The speaker takes the whole frame, with the local participant floating
   /// over them and nobody else shown.
+  ///
+  /// The self-view floats on every platform unless `enableLocalVideo` is false.
   speakerOneToOne,
 
-  /// The layout mode is set to spotlight view.
+  /// Alias for [ParticipantLayoutMode.speakerTop].
   @Deprecated(
-    'Use ParticipantLayoutMode.speakerBottom instead, which is where the '
-    'participants bar already sat. Will be removed in the next major version.',
+    'Use ParticipantLayoutMode.speakerTop instead. Will be removed in the '
+    'next major version.',
   )
   spotlight,
 
-  /// The layout mode is set to picture-in-picture view.
+  /// Alias for [ParticipantLayoutMode.speakerOneToOne].
   @Deprecated(
-    'Use ParticipantLayoutMode.speakerOneToOne instead. Will be removed in '
-    'the next major version.',
+    'Use ParticipantLayoutMode.speakerOneToOne instead, which spotlights the '
+    'speaker alone rather than drawing a grid. Will be removed in the next '
+    'major version.',
   )
   pictureInPicture,
 }
@@ -75,7 +82,8 @@ extension SortingExtension on ParticipantLayoutMode {
 /// How a layout presents itself: where its bar sits, what it is called and
 /// which icon stands for it.
 extension ParticipantLayoutModeX on ParticipantLayoutMode {
-  /// The layouts offered by default, newest naming only.
+  /// Every layout the SDK renders, in menu order, without the deprecated
+  /// aliases.
   ///
   /// [ParticipantLayoutMode.values] still carries the deprecated aliases, which
   /// would show up as duplicate rows in a menu built from it.
@@ -91,27 +99,29 @@ extension ParticipantLayoutModeX on ParticipantLayoutMode {
 
   /// The layout this one is an alias for, or itself.
   ///
-  /// Lets the rest of the SDK switch over the current names alone while the
-  /// deprecated values are still around.
+  /// Lets the rest of the SDK switch over the current names alone.
   ParticipantLayoutMode get canonical => switch (this) {
-    ParticipantLayoutMode.spotlight => ParticipantLayoutMode.speakerBottom,
+    ParticipantLayoutMode.spotlight => ParticipantLayoutMode.speakerTop,
     ParticipantLayoutMode.pictureInPicture =>
       ParticipantLayoutMode.speakerOneToOne,
     _ => this,
   };
 
   /// Where the participants bar sits, or null for a layout that has no bar.
+  ///
+  /// The bar takes the edge opposite the speaker, so
+  /// [ParticipantLayoutMode.speakerTop] puts it along the bottom.
   ParticipantsBarAlignment? get barAlignment {
     switch (this) {
       case ParticipantLayoutMode.speakerTop:
-        return ParticipantsBarAlignment.top;
-      case ParticipantLayoutMode.speakerBottom:
       case ParticipantLayoutMode.spotlight:
         return ParticipantsBarAlignment.bottom;
+      case ParticipantLayoutMode.speakerBottom:
+        return ParticipantsBarAlignment.top;
       case ParticipantLayoutMode.speakerLeft:
-        return ParticipantsBarAlignment.left;
-      case ParticipantLayoutMode.speakerRight:
         return ParticipantsBarAlignment.right;
+      case ParticipantLayoutMode.speakerRight:
+        return ParticipantsBarAlignment.left;
       case ParticipantLayoutMode.auto:
       case ParticipantLayoutMode.grid:
       case ParticipantLayoutMode.speakerOneToOne:
@@ -120,9 +130,9 @@ extension ParticipantLayoutModeX on ParticipantLayoutMode {
     }
   }
 
-  /// Whether this layout spotlights a single participant.
+  /// Whether this layout always spotlights a single participant.
   ///
-  /// True for every speaker layout, including the one that shows nobody else.
+  /// False for [ParticipantLayoutMode.auto], which decides per call.
   bool get isSpeakerLayout => switch (canonical) {
     ParticipantLayoutMode.speakerTop ||
     ParticipantLayoutMode.speakerBottom ||

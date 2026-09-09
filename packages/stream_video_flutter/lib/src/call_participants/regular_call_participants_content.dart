@@ -23,7 +23,12 @@ class RegularCallParticipantsContent extends StatelessWidget {
   /// The list of participants to display.
   final Iterable<CallParticipantState> participants;
 
-  /// Enable local video view for the local participant.
+  /// Whether the local participant's self-view floats over the layout.
+  ///
+  /// Only [ParticipantLayoutMode.auto] and
+  /// [ParticipantLayoutMode.speakerOneToOne] read it, the layouts that leave
+  /// the local participant out of the arrangement. Defaults to true under
+  /// `speakerOneToOne`, and to false on desktop under `auto`.
   final bool? enableLocalVideo;
 
   /// Builder function used to build a participant grid item.
@@ -66,17 +71,13 @@ class RegularCallParticipantsContent extends StatelessWidget {
     };
 
     // Only these two layouts leave the local participant out of the
-    // arrangement, so only they can float a self-view over it. The grid and the
-    // four bar layouts give them a tile of their own, and a self-view on top of
-    // that would show them twice — which is why every other case is false here
-    // whatever [enableLocalVideo] says.
+    // arrangement, so only they can float a self-view. The grid and the four
+    // bar layouts give them a tile, where a self-view would show them twice,
+    // so every other case is false whatever enableLocalVideo says.
     //
-    // The two differ in what they default to. Under speakerOneToOne the inset
-    // is the layout rather than an addition to it: without it the layout is a
-    // lone spotlight, and the local participant, who gets no tile and no bar
-    // either, disappears from the call. Under auto's grid it follows the
-    // platform, since a phone has no room for a tile per person but a desktop
-    // does.
+    // speakerOneToOne floats on every platform: it shows nobody but the
+    // speaker, so without the inset the local participant is absent from the
+    // call entirely. auto's grid follows the platform instead.
     final floatsSelfView = switch (effective) {
       ParticipantLayoutMode.speakerOneToOne => enableLocalVideo ?? true,
       ParticipantLayoutMode.grid when isAuto =>
@@ -90,19 +91,21 @@ class RegularCallParticipantsContent extends StatelessWidget {
         remoteParticipants.isNotEmpty;
 
     Widget child;
-    if (effective.isSpeakerLayout) {
+    // A speaker layout has to have somebody to spotlight; with nobody in the
+    // call the grid renders its own empty state.
+    if (effective.isSpeakerLayout && participants.isNotEmpty) {
       var spotlight = participants.first;
 
-      // The frame belongs to somebody else whenever the local participant is
-      // already accounted for: floating over the layout, or — in a 1-on-1
-      // call — because spotlighting yourself is never what was meant.
+      // Somebody else takes the frame whenever the local participant is
+      // already accounted for: floating over the layout, or alone with one
+      // other person.
       if (remoteParticipants.isNotEmpty &&
           (floatLocalVideo || remoteParticipants.length == 1)) {
         spotlight = remoteParticipants.first;
       }
 
       // speakerOneToOne shows the speaker alone. The spotlight view hides an
-      // empty bar and gives the whole frame to the spotlight.
+      // empty bar and gives its space to the spotlight.
       final barParticipants = effective.barAlignment == null
           ? const <CallParticipantState>[]
           : ([...participants]..remove(spotlight));

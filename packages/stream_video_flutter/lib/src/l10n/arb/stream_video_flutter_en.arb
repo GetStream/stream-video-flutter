@@ -37,19 +37,19 @@
   },
   "layoutSpeakerTop": "Speaker (Top)",
   "@layoutSpeakerTop": {
-    "description": "The participant layout with the speaker below the other participants"
+    "description": "The participant layout with the speaker above the other participants"
   },
   "layoutSpeakerBottom": "Speaker (Bottom)",
   "@layoutSpeakerBottom": {
-    "description": "The participant layout with the speaker above the other participants"
+    "description": "The participant layout with the speaker below the other participants"
   },
   "layoutSpeakerLeft": "Speaker (Left)",
   "@layoutSpeakerLeft": {
-    "description": "The participant layout with the speaker right of the other participants"
+    "description": "The participant layout with the speaker left of the other participants"
   },
   "layoutSpeakerRight": "Speaker (Right)",
   "@layoutSpeakerRight": {
-    "description": "The participant layout with the speaker left of the other participants"
+    "description": "The participant layout with the speaker right of the other participants"
   },
   "layoutSpeakerOneToOne": "Speaker 1:1",
   "@layoutSpeakerOneToOne": {

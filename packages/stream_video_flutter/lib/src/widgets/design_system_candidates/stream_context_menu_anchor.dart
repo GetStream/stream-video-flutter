@@ -100,9 +100,9 @@ class StreamContextMenuAnchor extends StatelessWidget {
   /// and 16px icons. The stream_core_flutter defaults are a 40px tall row with
   /// a 242px minimum width, a body/emphasis label and 20px icons.
   ///
-  /// The row is inset by 8px on top of the 4px the menu panel already pads
-  /// with, which puts the content 12px from the panel edge and leaves the row's
-  /// rounded highlight 4px inside it, as designed.
+  /// The row is inset horizontally by 8px on top of the 4px the menu panel
+  /// already pads with, which puts the content 12px from the panel edge and
+  /// leaves the row's rounded highlight 4px inside it, as designed.
   ///
   /// Public because [StreamContextMenuActionTheme.of] reads only the nearest
   /// theme: anything varying one row has to re-merge this, or that row falls

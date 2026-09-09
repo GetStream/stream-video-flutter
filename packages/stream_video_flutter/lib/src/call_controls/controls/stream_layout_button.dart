@@ -7,9 +7,8 @@ import '../../l10n/localization_extension.dart';
 ///
 /// Draws the icon of the layout currently in effect. Given three or more
 /// [layouts] it opens a [StreamAdaptiveMenuAnchor], so the choices are a
-/// context menu on desktop and web and a bottom sheet on Android and iOS.
-/// Given two it toggles between them instead: a menu of two rows is a longer
-/// way to press a button that has only one thing to do.
+/// context menu on a desktop platform and a bottom sheet on Android and iOS.
+/// Given fewer it toggles to the next one instead.
 class StreamLayoutButton extends StatelessWidget {
   /// Creates a new instance of [StreamLayoutButton].
   const StreamLayoutButton({
@@ -34,9 +33,9 @@ class StreamLayoutButton extends StatelessWidget {
 
   /// The layouts the button offers.
   ///
-  /// Three or more open a menu; two toggle. Narrow it to keep a layout out of
-  /// an app's reach — a window too narrow for a column of participants beside
-  /// the speaker has no use for the left and right bar layouts.
+  /// Three or more open a menu; fewer toggle. Narrow it to keep a layout out
+  /// of an app's reach — a window too narrow for a column of participants
+  /// beside the speaker has no use for the left and right bar layouts.
   final List<ParticipantLayoutMode> layouts;
 
   /// Which way the menu is expected to open.

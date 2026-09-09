@@ -155,25 +155,25 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'Grid'**
   String get layoutGrid;
 
-  /// The participant layout with the speaker below the other participants
+  /// The participant layout with the speaker above the other participants
   ///
   /// In en, this message translates to:
   /// **'Speaker (Top)'**
   String get layoutSpeakerTop;
 
-  /// The participant layout with the speaker above the other participants
+  /// The participant layout with the speaker below the other participants
   ///
   /// In en, this message translates to:
   /// **'Speaker (Bottom)'**
   String get layoutSpeakerBottom;
 
-  /// The participant layout with the speaker right of the other participants
+  /// The participant layout with the speaker left of the other participants
   ///
   /// In en, this message translates to:
   /// **'Speaker (Left)'**
   String get layoutSpeakerLeft;
 
-  /// The participant layout with the speaker left of the other participants
+  /// The participant layout with the speaker right of the other participants
   ///
   /// In en, this message translates to:
   /// **'Speaker (Right)'**

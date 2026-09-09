@@ -46,7 +46,7 @@ void main() {
     ) async {
       for (final (mode, icon) in <(ParticipantLayoutMode, IconData)>[
         // ignore: deprecated_member_use
-        (ParticipantLayoutMode.spotlight, icons.speakerBottomFill),
+        (ParticipantLayoutMode.spotlight, icons.speakerTopFill),
         // ignore: deprecated_member_use
         (ParticipantLayoutMode.pictureInPicture, icons.pipFill),
       ]) {

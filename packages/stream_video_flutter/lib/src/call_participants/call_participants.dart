@@ -70,7 +70,12 @@ class StreamCallParticipants extends StatefulWidget {
   /// Used for sorting the call participants.
   final CallParticipantSort<CallParticipantState> sort;
 
-  /// Enable local video view for the local participant.
+  /// Whether the local participant's self-view floats over the layout.
+  ///
+  /// Only [ParticipantLayoutMode.auto] and
+  /// [ParticipantLayoutMode.speakerOneToOne] read it, the layouts that leave
+  /// the local participant out of the arrangement. Defaults to true under
+  /// `speakerOneToOne`, and to false on desktop under `auto`.
   final bool? enableLocalVideo;
 
   /// Builder function used to build a participant grid item.
