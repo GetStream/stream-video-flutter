@@ -65,7 +65,6 @@ class StreamLobbyView extends StatefulWidget {
     this.joinButtonLabel,
     this.joinEnabled = true,
     this.footer,
-    this.streamVideo,
   }) : _call = call,
        controller = null;
 
@@ -83,8 +82,7 @@ class StreamLobbyView extends StatefulWidget {
     this.joinButtonLabel,
     this.joinEnabled = true,
     this.footer,
-  }) : _call = null,
-       streamVideo = null;
+  }) : _call = null;
 
   final Call? _call;
 
@@ -141,11 +139,6 @@ class StreamLobbyView extends StatefulWidget {
   /// the caller's to dispose.
   final StreamLobbyController? controller;
 
-  /// An instance of [StreamVideo].
-  ///
-  /// If not provided, it will be obtained via StreamVideo.instance.
-  final StreamVideo? streamVideo;
-
   @override
   State<StreamLobbyView> createState() => _StreamLobbyViewState();
 }
@@ -158,10 +151,8 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
   StreamLobbyController get _controller =>
       widget.controller ?? (_ownedController ??= _createController());
 
-  StreamLobbyController _createController() => StreamLobbyController(
-    call: widget.call,
-    streamVideo: widget.streamVideo,
-  );
+  StreamLobbyController _createController() =>
+      StreamLobbyController(call: widget.call);
 
   @override
   void didUpdateWidget(StreamLobbyView oldWidget) {

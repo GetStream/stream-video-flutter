@@ -47,3 +47,30 @@ class MockCallSettings extends Mock implements CallSettings {}
 class MockRtcLocalAudioTrack extends Mock implements RtcLocalAudioTrack {}
 
 class MockRtcLocalCameraTrack extends Mock implements RtcLocalCameraTrack {}
+
+/// Stubs what [StreamLobbyController] reads off a call: the state it takes its
+/// defaults and the local user id from, the user it draws the preview for, and
+/// the events it follows while nobody has joined yet.
+///
+/// Returns the emitter behind [Call.callEvents], so a test can make someone
+/// arrive or leave.
+MutableSharedEmitter<StreamCallEvent> stubLobbyCall(
+  MockCall call,
+  MockCallState state, {
+  UserInfo currentUser = const UserInfo(id: 'local'),
+  StreamCallCid? callCid,
+}) {
+  final events = MutableSharedEmitter<StreamCallEvent>(sync: true);
+
+  when(() => state.currentUserId).thenReturn(currentUser.id);
+  when(() => call.currentUser).thenReturn(currentUser);
+  when(
+    () => call.callCid,
+  ).thenReturn(callCid ?? StreamCallCid(cid: 'default:lobby'));
+  when(() => call.callEvents).thenAnswer((_) => events);
+  when(() => call.state).thenAnswer(
+    (_) => MutableStateEmitter<CallState>(state, sync: true),
+  );
+
+  return events;
+}

@@ -26,10 +26,6 @@ void main() {
       notifier.enumerateDevices,
     ).thenAnswer((_) async => const Result.success(<RtcMediaDevice>[]));
 
-    final video = MockStreamVideo();
-    when(() => video.currentUser).thenReturn(const UserInfo(id: 'local'));
-    when(() => video.events).thenAnswer((_) => const Stream.empty());
-
     final callState = MockCallState();
     when(() => callState.settings).thenReturn(
       const CallSettings(
@@ -39,9 +35,7 @@ void main() {
     );
 
     final call = MockCall();
-    when(() => call.state).thenAnswer(
-      (_) => MutableStateEmitter<CallState>(callState, sync: true),
-    );
+    stubLobbyCall(call, callState);
     when(call.get).thenAnswer((_) async {
       final metadata = MockCallMetadata();
       when(() => metadata.settings).thenReturn(
@@ -77,7 +71,6 @@ void main() {
 
     controller = StreamLobbyController(
       call: call,
-      streamVideo: video,
       deviceNotifier: notifier,
     );
     addTearDown(controller.dispose);

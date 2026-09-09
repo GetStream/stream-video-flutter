@@ -150,7 +150,7 @@
 - The anchored context menu's shadow is no longer clipped away. `MenuAnchor` clips its panel to the panel's own bounds by default, which cut off the shadow the menu's `Material` draws outside them: the shadow stopped dead along the bottom edge instead of fading out, and raising the elevation changed nothing because the extra shadow was clipped too. `StreamContextMenuAnchor` also takes an `elevation` now, defaulting to `StreamContextMenuTheme`'s.
 
 - The lobby no longer lists someone twice. `getOrCreate` returns a snapshot of the session while the event subscription is already live, so a join already reflected in that snapshot still arrives as a `ParticipantJoined` event — and the lobby appended it blindly. Participants are now upserted by session id, which leaves a genuine second session of the same user (a phone and a laptop) listed separately, as it should be. A join event for the local user is ignored, matching the snapshot, which always filtered them out.
-
+- The lobby no longer adds and drops people on another call's events.
 
 ### ⚠️ Deprecated
 

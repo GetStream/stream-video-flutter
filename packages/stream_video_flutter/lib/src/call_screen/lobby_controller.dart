@@ -40,12 +40,10 @@ class StreamLobbyController extends ChangeNotifier {
   /// Creates a new instance of [StreamLobbyController].
   StreamLobbyController({
     required this.call,
-    StreamVideo? streamVideo,
     RtcMediaDeviceNotifier? deviceNotifier,
     @visibleForTesting LobbyAudioTrackOpener? openMicrophoneTrack,
     @visibleForTesting LobbyCameraTrackOpener? openCameraTrack,
-  }) : _streamVideo = streamVideo,
-       _openMicrophoneTrack = openMicrophoneTrack,
+  }) : _openMicrophoneTrack = openMicrophoneTrack,
        _openCameraTrack = openCameraTrack {
     devices = StreamMediaDevicesController(
       deviceNotifier: deviceNotifier,
@@ -61,18 +59,17 @@ class StreamLobbyController extends ChangeNotifier {
     // the pickers never rebuild.
     devices.addListener(notifyListeners);
 
-    _fetchCall();
+    // Before the fetch, so that someone arriving between the snapshot and the
+    // subscription is not missed — and because the fetch is what starts the
+    // events flowing. See [_listenEvents].
     _listenEvents();
+    _fetchCall();
   }
 
   late final _logger = taggedLogger(tag: 'SV:LobbyController');
 
   /// The call the lobby is a waiting room for.
   final Call call;
-
-  final StreamVideo? _streamVideo;
-
-  StreamVideo get _video => _streamVideo ?? StreamVideo.instance;
 
   /// The device lists and the current selection.
   ///
@@ -225,7 +222,7 @@ class StreamLobbyController extends ChangeNotifier {
   Map<String, CallUser> get users => _users;
 
   /// The user this lobby belongs to.
-  UserInfo get currentUser => _video.currentUser;
+  UserInfo get currentUser => call.currentUser;
 
   /// The local user as a participant, so the preview can be drawn with the
   /// same `StreamParticipantTile` the call itself uses.
@@ -489,7 +486,7 @@ class StreamLobbyController extends ChangeNotifier {
     // afterwards — is the host's to decide, and a waiting room being shown is
     // not that decision. A call that does not exist yet fetches as a failure,
     // which leaves the lobby with a preview, no participants and [fetchError].
-    final currentUserId = _video.currentUser.id;
+    final currentUserId = call.state.value.currentUserId;
     _logger.d(() => '[fetchCall] currentUserId: $currentUserId');
 
     _fetchSubscription?.cancel();
@@ -539,11 +536,23 @@ class StreamLobbyController extends ChangeNotifier {
     _notify();
   }
 
+  /// Follows the call's own events.
+  ///
+  /// They flow because [_fetchCall] watches the call, which is what `Call.get`
+  /// does unless asked not to: a watched call follows the coordinator without
+  /// having been joined.
+  ///
+  /// Filtered by cid: the coordinator's socket carries every call the user is
+  /// in, so without this a second call — one ringing in the background, or the
+  /// one this user just stepped out of — moves people in and out of this
+  /// lobby's list.
   void _listenEvents() {
     _eventSubscription?.cancel();
-    _eventSubscription = _video.events.listen(
+    _eventSubscription = call.callEvents.listen(
       (event) {
-        if (event is CoordinatorCallSessionParticipantLeftEvent) {
+        if (event.callCid != call.callCid) return;
+
+        if (event is StreamCallSessionParticipantLeftEvent) {
           _logger.d(
             () =>
                 '[listenEvents] #userLeft; user: ${event.user}, '
@@ -561,13 +570,13 @@ class StreamLobbyController extends ChangeNotifier {
           if (!hasSameUser) _users = {..._users}..remove(event.user.id);
 
           _notify();
-        } else if (event is CoordinatorCallSessionParticipantJoinedEvent) {
+        } else if (event is StreamCallSessionParticipantJoinedEvent) {
           _logger.d(() => '[listenEvents] #userJoined; user: ${event.user}');
 
           final participant = event.participant;
           // The local user is filtered out of the fetched snapshot, so a join
           // event for them must not slip one back in.
-          if (participant.userId == _video.currentUser.id) return;
+          if (participant.userId == call.state.value.currentUserId) return;
 
           // Upsert rather than append. The fetch returns a snapshot of the
           // session while this subscription is already live, so a join that is

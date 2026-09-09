@@ -44,15 +44,13 @@ CallUser _user(String id) =>
 void main() {
   late MockCall call;
   late MockCallState callState;
-  late MockStreamVideo video;
   late MockRtcMediaDeviceNotifier notifier;
-  late StreamController<CoordinatorEvent> events;
+  late MutableSharedEmitter<StreamCallEvent> events;
   late StreamController<List<RtcMediaDevice>> deviceChanges;
   late Map<String, CallParticipant> sessionParticipants;
   late CallSettings callSettings;
 
   setUp(() {
-    events = StreamController<CoordinatorEvent>.broadcast();
     deviceChanges = StreamController<List<RtcMediaDevice>>.broadcast();
     sessionParticipants = {};
 
@@ -61,10 +59,6 @@ void main() {
     when(
       notifier.enumerateDevices,
     ).thenAnswer((_) async => const Result.success(<RtcMediaDevice>[]));
-
-    video = MockStreamVideo();
-    when(() => video.currentUser).thenReturn(const UserInfo(id: _localUserId));
-    when(() => video.events).thenAnswer((_) => events.stream);
 
     // Neither default is on, so constructing the controller opens no tracks
     // unless a test asks for it.
@@ -77,8 +71,11 @@ void main() {
     when(() => callState.settings).thenReturn(callSettings);
 
     call = MockCall();
-    when(() => call.state).thenAnswer(
-      (_) => MutableStateEmitter<CallState>(callState, sync: true),
+    events = stubLobbyCall(
+      call,
+      callState,
+      currentUser: const UserInfo(id: _localUserId),
+      callCid: _callCid,
     );
     when(call.get).thenAnswer((_) async {
       final metadata = MockCallMetadata();
@@ -110,7 +107,6 @@ void main() {
   }) {
     final controller = StreamLobbyController(
       call: call,
-      streamVideo: video,
       deviceNotifier: notifier,
       openMicrophoneTrack: openMicrophoneTrack,
       openCameraTrack: openCameraTrack,
@@ -188,9 +184,9 @@ void main() {
       final controller = build();
       await pumpEventQueue();
 
-      events.add(
-        CoordinatorCallSessionParticipantJoinedEvent(
-          callCid: _callCid,
+      events.emit(
+        StreamCallSessionParticipantJoinedEvent(
+          _callCid,
           createdAt: DateTime(2026),
           sessionId: 'session',
           user: _user('a'),
@@ -214,9 +210,9 @@ void main() {
         final controller = build();
         await pumpEventQueue();
 
-        events.add(
-          CoordinatorCallSessionParticipantJoinedEvent(
-            callCid: _callCid,
+        events.emit(
+          StreamCallSessionParticipantJoinedEvent(
+            _callCid,
             createdAt: DateTime(2026),
             sessionId: 'session',
             user: _user('a'),
@@ -236,9 +232,9 @@ void main() {
       await pumpEventQueue();
 
       for (final sessionId in ['phone', 'laptop']) {
-        events.add(
-          CoordinatorCallSessionParticipantJoinedEvent(
-            callCid: _callCid,
+        events.emit(
+          StreamCallSessionParticipantJoinedEvent(
+            _callCid,
             createdAt: DateTime(2026),
             sessionId: 'session',
             user: _user('a'),
@@ -255,13 +251,46 @@ void main() {
       expect(controller.participants, hasLength(2));
     });
 
+    // The coordinator's socket carries every call the user is in, so a call
+    // ringing in the background used to move people in and out of this
+    // lobby's list.
+    test('ignores an event for another call', () async {
+      sessionParticipants = {'a': _participant('a')};
+      final controller = build();
+      await pumpEventQueue();
+
+      events
+        ..emit(
+          StreamCallSessionParticipantJoinedEvent(
+            StreamCallCid(cid: 'default:other'),
+            createdAt: DateTime(2026),
+            sessionId: 'session',
+            user: _user('b'),
+            participant: _participant('b'),
+          ),
+        )
+        ..emit(
+          StreamCallSessionParticipantLeftEvent(
+            StreamCallCid(cid: 'default:other'),
+            createdAt: DateTime(2026),
+            sessionId: 'session',
+            duration: Duration.zero,
+            user: _user('a'),
+            participant: _participant('a'),
+          ),
+        );
+      await pumpEventQueue();
+
+      expect(controller.participants.map((it) => it.userId), ['a']);
+    });
+
     test('ignores a join event for the local user', () async {
       final controller = build();
       await pumpEventQueue();
 
-      events.add(
-        CoordinatorCallSessionParticipantJoinedEvent(
-          callCid: _callCid,
+      events.emit(
+        StreamCallSessionParticipantJoinedEvent(
+          _callCid,
           createdAt: DateTime(2026),
           sessionId: 'session',
           user: _user(_localUserId),
@@ -278,9 +307,9 @@ void main() {
       final controller = build();
       await pumpEventQueue();
 
-      events.add(
-        CoordinatorCallSessionParticipantLeftEvent(
-          callCid: _callCid,
+      events.emit(
+        StreamCallSessionParticipantLeftEvent(
+          _callCid,
           createdAt: DateTime(2026),
           sessionId: 'session',
           duration: Duration.zero,
@@ -922,7 +951,6 @@ void main() {
     test('disposes the device controller with itself', () {
       final controller = StreamLobbyController(
         call: call,
-        streamVideo: video,
         deviceNotifier: notifier,
       );
       final devices = controller.devices;

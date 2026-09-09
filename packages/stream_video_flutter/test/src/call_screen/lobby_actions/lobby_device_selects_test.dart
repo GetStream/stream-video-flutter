@@ -20,7 +20,6 @@ const _builtInMic = RtcMediaDevice(
 // — so a call configured to start muted blamed permissions from the first
 // frame, and a user who went to system settings found the permission granted.
 void main() {
-  late MockStreamVideo video;
   late MockRtcMediaDeviceNotifier notifier;
   late StreamController<List<RtcMediaDevice>> deviceChanges;
   late Result<List<RtcMediaDevice>> enumeration;
@@ -32,10 +31,6 @@ void main() {
     notifier = MockRtcMediaDeviceNotifier();
     when(() => notifier.onDeviceChange).thenAnswer((_) => deviceChanges.stream);
     when(notifier.enumerateDevices).thenAnswer((_) async => enumeration);
-
-    video = MockStreamVideo();
-    when(() => video.currentUser).thenReturn(const UserInfo(id: 'local'));
-    when(() => video.events).thenAnswer((_) => const Stream.empty());
   });
 
   tearDown(() => deviceChanges.close());
@@ -52,16 +47,13 @@ void main() {
     );
 
     final call = MockCall();
-    when(() => call.state).thenAnswer(
-      (_) => MutableStateEmitter<CallState>(callState, sync: true),
-    );
+    stubLobbyCall(call, callState);
     when(call.get).thenAnswer(
       (_) async => Result.failure(StateError('no network'), StackTrace.empty),
     );
 
     final controller = StreamLobbyController(
       call: call,
-      streamVideo: video,
       deviceNotifier: notifier,
       openMicrophoneTrack: openMicrophoneTrack,
     );

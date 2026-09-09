@@ -25,7 +25,6 @@ const _headset = RtcMediaDevice(
 // one selection. A lobby showing both must never disagree with itself.
 void main() {
   late MockCall call;
-  late MockStreamVideo video;
   late MockRtcMediaDeviceNotifier notifier;
   late StreamController<List<RtcMediaDevice>> deviceChanges;
   late StreamLobbyController controller;
@@ -39,10 +38,6 @@ void main() {
       notifier.enumerateDevices,
     ).thenAnswer((_) async => const Result.success(<RtcMediaDevice>[]));
 
-    video = MockStreamVideo();
-    when(() => video.currentUser).thenReturn(const UserInfo(id: 'local'));
-    when(() => video.events).thenAnswer((_) => const Stream.empty());
-
     final callState = MockCallState();
     when(() => callState.settings).thenReturn(
       const CallSettings(
@@ -52,9 +47,7 @@ void main() {
     );
 
     call = MockCall();
-    when(() => call.state).thenAnswer(
-      (_) => MutableStateEmitter<CallState>(callState, sync: true),
-    );
+    stubLobbyCall(call, callState);
     // The participant list plays no part here.
     when(call.get).thenAnswer(
       (_) async => Result.failure(
@@ -65,7 +58,6 @@ void main() {
 
     controller = StreamLobbyController(
       call: call,
-      streamVideo: video,
       deviceNotifier: notifier,
     );
     addTearDown(controller.dispose);

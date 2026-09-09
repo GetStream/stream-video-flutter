@@ -48,7 +48,6 @@ void main() {
   late StreamController<List<RtcMediaDevice>> deviceChanges;
   late StreamLobbyController controller;
   late MockCall call;
-  late MockStreamVideo video;
 
   setUp(() {
     deviceChanges = StreamController<List<RtcMediaDevice>>.broadcast();
@@ -58,12 +57,6 @@ void main() {
     when(
       notifier.enumerateDevices,
     ).thenAnswer((_) async => const Result.success(<RtcMediaDevice>[]));
-
-    video = MockStreamVideo();
-    when(
-      () => video.currentUser,
-    ).thenReturn(const UserInfo(id: 'local', name: 'Rene Floor'));
-    when(() => video.events).thenAnswer((_) => const Stream.empty());
 
     final callState = MockCallState();
     // Both off, so no track is opened: RtcLocalTrack's factories are static
@@ -76,18 +69,16 @@ void main() {
     );
 
     call = MockCall();
-    when(() => call.state).thenAnswer(
-      (_) => MutableStateEmitter<CallState>(callState, sync: true),
+    stubLobbyCall(
+      call,
+      callState,
+      currentUser: const UserInfo(id: 'local', name: 'Rene Floor'),
     );
     when(call.get).thenAnswer(
       (_) async => Result.failure(StateError('no network'), StackTrace.empty),
     );
 
-    controller = StreamLobbyController(
-      call: call,
-      streamVideo: video,
-      deviceNotifier: notifier,
-    );
+    controller = StreamLobbyController(call: call, deviceNotifier: notifier);
     addTearDown(controller.dispose);
   });
 
@@ -102,19 +93,15 @@ void main() {
       notifier.enumerateDevices,
     ).thenAnswer((_) async => const Result.success(<RtcMediaDevice>[]));
 
-    final video = MockStreamVideo();
-    when(
-      () => video.currentUser,
-    ).thenReturn(const UserInfo(id: 'local', name: 'Rene Floor'));
-    when(() => video.events).thenAnswer((_) => const Stream.empty());
-
     final callState = MockCallState();
     // Both on, so the lobby tries to open them and finds nothing.
     when(() => callState.settings).thenReturn(const CallSettings());
 
     final failing = MockCall();
-    when(() => failing.state).thenAnswer(
-      (_) => MutableStateEmitter<CallState>(callState, sync: true),
+    stubLobbyCall(
+      failing,
+      callState,
+      currentUser: const UserInfo(id: 'local', name: 'Rene Floor'),
     );
     when(failing.get).thenAnswer(
       (_) async => Result.failure(StateError('no network'), StackTrace.empty),
@@ -123,7 +110,6 @@ void main() {
 
     final controller = StreamLobbyController(
       call: failing,
-      streamVideo: video,
       deviceNotifier: notifier,
     );
     addTearDown(controller.dispose);
@@ -612,7 +598,6 @@ void main() {
               child: controller == null
                   ? StreamLobbyView(
                       call: forCall,
-                      streamVideo: video,
                       onJoinCallPressed: (_) => true,
                     )
                   : StreamLobbyView.withController(
@@ -632,9 +617,7 @@ void main() {
           video: StreamVideoSettings(cameraDefaultOn: false),
         ),
       );
-      when(() => other.state).thenAnswer(
-        (_) => MutableStateEmitter<CallState>(otherState, sync: true),
-      );
+      stubLobbyCall(other, otherState);
       when(other.get).thenAnswer(
         (_) async => Result.failure(StateError('no network'), StackTrace.empty),
       );
@@ -676,7 +659,6 @@ void main() {
 
       final supplied = StreamLobbyController(
         call: call,
-        streamVideo: video,
         deviceNotifier: _emptyNotifier(deviceChanges),
       );
       addTearDown(supplied.dispose);

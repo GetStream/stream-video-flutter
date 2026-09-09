@@ -482,6 +482,9 @@ class Call {
     _connectOptionsOverride = connectOptions;
   }
 
+  /// The user this call is being watched or joined by.
+  UserInfo get currentUser => _streamVideo.currentUser;
+
   Future<void> _init() {
     return _callInitLock.synchronized(() async {
       _logger.v(() => '[_init] no args');
