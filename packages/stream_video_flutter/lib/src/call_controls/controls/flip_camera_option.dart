@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use_from_same_package
-
 import 'package:flutter/material.dart';
 import '../../../stream_video_flutter.dart';
 
@@ -10,8 +8,8 @@ class FlipCameraOption extends StatelessWidget {
     super.key,
     required this.call,
     this.localParticipant,
-    this.frontCameraIcon = Icons.flip_camera_ios_rounded,
-    this.backCameraIcon = Icons.flip_camera_ios_rounded,
+    this.frontCameraIcon,
+    this.backCameraIcon,
   });
 
   /// Represents a call.
@@ -22,23 +20,31 @@ class FlipCameraOption extends StatelessWidget {
   final CallParticipantState? localParticipant;
 
   /// The icon that is shown when the front camera is active.
-  final IconData frontCameraIcon;
+  ///
+  /// Defaults to `context.streamIcons.cameraFlipFill`.
+  final IconData? frontCameraIcon;
 
   /// The icon that is shown when the back icon is active.
-  final IconData backCameraIcon;
+  ///
+  /// Defaults to `context.streamIcons.cameraFlipFill`.
+  final IconData? backCameraIcon;
 
   @override
   Widget build(BuildContext context) {
+    final icons = context.streamIcons;
+
     Widget buildContent(TrackState? trackState) {
       CameraPosition? position;
       if (trackState is LocalTrackState) {
         position = trackState.cameraPosition;
       }
 
-      return CallControlOption(
-        icon: position == CameraPosition.front
-            ? Icon(frontCameraIcon)
-            : Icon(backCameraIcon),
+      return CallControlButton(
+        icon: Icon(
+          position == CameraPosition.front
+              ? frontCameraIcon ?? icons.cameraFlipFill
+              : backCameraIcon ?? icons.cameraFlipFill,
+        ),
         onPressed:
             trackState?.muted ==
                 false //

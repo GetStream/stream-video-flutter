@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -19,6 +18,8 @@ const _earpieceDevice = RtcMediaDevice(
 );
 
 void main() {
+  const icons = StreamIcons();
+
   late MockCall mockCall;
   late MockCallState mockCallState;
   late MutableStateEmitter<CallState> callStateEmitter;
@@ -67,8 +68,8 @@ void main() {
       TestWrapper(child: LivestreamSpeakerphoneOption(call: mockCall)),
     );
 
-    expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.volume_off_rounded), findsNothing);
+    expect(find.byIcon(icons.audio), findsOneWidget);
+    expect(find.byIcon(icons.mute), findsNothing);
   });
 
   testWidgets(
@@ -82,8 +83,8 @@ void main() {
         TestWrapper(child: LivestreamSpeakerphoneOption(call: mockCall)),
       );
 
-      expect(find.byIcon(Icons.volume_off_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.volume_up_rounded), findsNothing);
+      expect(find.byIcon(icons.mute), findsOneWidget);
+      expect(find.byIcon(icons.audio), findsNothing);
     },
   );
 
@@ -98,8 +99,8 @@ void main() {
         TestWrapper(child: LivestreamSpeakerphoneOption(call: mockCall)),
       );
 
-      expect(find.byIcon(Icons.volume_off_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.volume_up_rounded), findsNothing);
+      expect(find.byIcon(icons.mute), findsOneWidget);
+      expect(find.byIcon(icons.audio), findsNothing);
     },
   );
 
@@ -112,7 +113,7 @@ void main() {
         TestWrapper(child: LivestreamSpeakerphoneOption(call: mockCall)),
       );
 
-      await tester.tap(find.byIcon(Icons.volume_off_rounded));
+      await tester.tap(find.byIcon(icons.mute));
       await tester.pumpAndSettle();
 
       // With no enumerated audio outputs the option guards against changing
@@ -135,7 +136,7 @@ void main() {
     // Let the device-change subscription deliver the available outputs.
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.volume_off_rounded));
+    await tester.tap(find.byIcon(icons.mute));
     await tester.pumpAndSettle();
 
     verify(() => mockCall.setAudioOutputDevice(_speakerDevice)).called(1);
@@ -154,7 +155,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.volume_up_rounded));
+    await tester.tap(find.byIcon(icons.audio));
     await tester.pumpAndSettle();
 
     verify(() => mockCall.setAudioOutputDevice(_earpieceDevice)).called(1);

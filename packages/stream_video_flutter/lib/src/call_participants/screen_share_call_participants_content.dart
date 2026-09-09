@@ -95,7 +95,7 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.screen_share_rounded,
+                      context.streamPresentIcon,
                       color: colorTheme.textHighEmphasis,
                     ),
                     const SizedBox(width: 8),

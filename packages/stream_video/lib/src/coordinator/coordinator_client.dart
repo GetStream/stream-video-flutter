@@ -2,7 +2,6 @@
 
 import '../../open_api/video/coordinator/api.dart' as open;
 import '../../stream_video.dart';
-import '../models/call_received_data.dart';
 import 'models/coordinator_models.dart' as models;
 
 abstract class CoordinatorClient {

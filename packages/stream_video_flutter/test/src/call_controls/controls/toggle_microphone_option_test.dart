@@ -1,6 +1,3 @@
-// ignore_for_file: deprecated_member_use_from_same_package
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -9,6 +6,10 @@ import '../../../test_utils/test_wrapper.dart';
 import '../../mocks.dart';
 
 void main() {
+  // The icons the widget resolves off `context.streamIcons`; the defaults are
+  // what TestWrapper's theme installs.
+  const icons = StreamIcons();
+
   testWidgets('ToggleMicrophoneOption', (tester) async {
     var isAudioEnabled = true;
 
@@ -36,10 +37,10 @@ void main() {
       ),
     );
 
-    expect(find.byIcon(Icons.mic_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.mic_off_rounded), findsNothing);
+    expect(find.byIcon(icons.voiceFill), findsOneWidget);
+    expect(find.byIcon(icons.voiceOffFill), findsNothing);
 
-    await tester.tap(find.byIcon(Icons.mic_rounded));
+    await tester.tap(find.byIcon(icons.voiceFill));
     await tester.pumpAndSettle();
 
     verify(() => call.setMicrophoneEnabled(enabled: false)).called(1);
@@ -54,7 +55,7 @@ void main() {
         ),
       ),
     );
-    expect(find.byIcon(Icons.mic_rounded), findsNothing);
-    expect(find.byIcon(Icons.mic_off_rounded), findsOneWidget);
+    expect(find.byIcon(icons.voiceFill), findsNothing);
+    expect(find.byIcon(icons.voiceOffFill), findsOneWidget);
   });
 }

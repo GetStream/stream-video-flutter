@@ -24,7 +24,6 @@ import '../errors/video_error.dart';
 import '../errors/video_error_composer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../logger/stream_log.dart';
-import '../models/call_received_data.dart';
 import '../models/models.dart';
 import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
@@ -482,6 +481,9 @@ class Call {
     _logger.d(() => '[setConnectOptions] connectOptions: $connectOptions)');
     _connectOptionsOverride = connectOptions;
   }
+
+  /// The user this call is being watched or joined by.
+  UserInfo get currentUser => _streamVideo.currentUser;
 
   Future<void> _init() {
     return _callInitLock.synchronized(() async {

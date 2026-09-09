@@ -1,6 +1,5 @@
 import '../../../open_api/video/coordinator/api.dart' as open;
 import '../../../stream_video.dart';
-import '../../models/call_received_data.dart';
 import '../../retry/retry_manager.dart';
 import '../../token/token_source.dart';
 import '../models/coordinator_models.dart';

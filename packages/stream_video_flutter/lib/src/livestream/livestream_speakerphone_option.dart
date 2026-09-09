@@ -37,6 +37,8 @@ class LivestreamSpeakerphoneOption extends StatefulWidget {
 }
 
 class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
+  late final _logger = taggedLogger(tag: 'SV:LivestreamSpeakerphoneOption');
+
   final _deviceNotifier = RtcMediaDeviceNotifier.instance;
   StreamSubscription<List<RtcMediaDevice>>? _deviceChangeSubscription;
 
@@ -65,7 +67,12 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
     }
 
     // If we don't have a device, we can't set it as the audio output.
-    if (device == null) return;
+    // Android names no audio outputs at all, so this is the ordinary path
+    // there rather than a fault: there is nothing to route to.
+    if (device == null) {
+      _logger.w(() => 'No audio output to route to; leaving it as it is');
+      return;
+    }
 
     // Set the device as the current audio output.
     await widget.call.setAudioOutputDevice(device);
@@ -107,7 +114,7 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
             : widget.disabledSpeakerphoneIconTheme;
         return StreamButton.icon(
           icon: Icon(
-            enabled ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+            enabled ? context.streamIcons.audio : context.streamIcons.mute,
           ),
           style: StreamButtonStyle.secondary,
           type: StreamButtonType.ghost,
@@ -118,7 +125,9 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
           onPressed: () async {
             try {
               await _setSpeakerphoneEnabled(enabled: !enabled);
-            } catch (_) {}
+            } catch (e, stk) {
+              _logger.e(() => 'Error routing the audio output: $e\n$stk');
+            }
           },
         );
       },
