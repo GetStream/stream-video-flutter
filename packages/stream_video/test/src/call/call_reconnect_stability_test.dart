@@ -714,7 +714,7 @@ void main() {
             unifiedSessionId: any(named: 'unifiedSessionId'),
           ),
         ).thenAnswer(
-          (_) async => Result.error('simulated fast reconnect failure'),
+          (_) async => const Result.failure('simulated fast reconnect failure'),
         );
 
         // `reportJoinAttempt` runs before the strategy is dispatched, so every
