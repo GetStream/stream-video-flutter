@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 
 // � Package imports:
+import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 // �🐦 Flutter imports:
 import 'package:flutter/material.dart';
@@ -221,31 +222,31 @@ class _CallScreenState extends State<CallScreen> {
   // than held as fields: they close over the call the content builder hands
   // in, and a bar rebuilds whenever the window crosses a breakpoint anyway.
 
-  // The sample offers every layout, minus the two that stand a column of
-  // participants beside the speaker: on a phone-width window that column
-  // leaves the speaker too narrow to be worth looking at.
-  List<ParticipantLayoutMode> get _layoutOptions => [
-    for (final layout in ParticipantLayoutModeX.selectable)
-      if (!context.streamScreenSize.isSmall ||
-          (layout != ParticipantLayoutMode.speakerLeft &&
-              layout != ParticipantLayoutMode.speakerRight))
-        layout,
-  ];
-
   // The menu opens away from wherever the button sits: upwards out of the
   // control bar along the bottom, downwards out of the app bar.
   StreamLayoutButton _layoutToggle({
     StreamMenuDirection direction = StreamMenuDirection.up,
-  }) => StreamLayoutButton(
-    layout: _currentLayoutMode,
-    layouts: _layoutOptions,
-    direction: direction,
-    onLayoutModeChanged: (layout) {
-      setState(() {
-        _currentLayoutMode = layout;
-      });
-    },
-  );
+  }) {
+    final blocked = context.streamScreenSize.isSmall
+        ? const [
+            ParticipantLayoutMode.speakerLeft,
+            ParticipantLayoutMode.speakerRight,
+          ]
+        : const <ParticipantLayoutMode>[];
+
+    return StreamLayoutButton(
+      layout: _currentLayoutMode,
+      layouts: ParticipantLayoutModeX.selectable
+          .whereNot(blocked.contains)
+          .toList(),
+      direction: direction,
+      onLayoutModeChanged: (layout) {
+        setState(() {
+          _currentLayoutMode = layout;
+        });
+      },
+    );
+  }
 
   StreamScreenShareButton _screenShareOption(Call call) =>
       StreamScreenShareButton(

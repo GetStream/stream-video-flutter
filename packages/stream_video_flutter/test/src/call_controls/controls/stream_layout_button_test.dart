@@ -328,7 +328,8 @@ void main() {
       );
 
       expect(
-        tester.widget<CallControlButton>(find.byType(CallControlButton))
+        tester
+            .widget<CallControlButton>(find.byType(CallControlButton))
             .onPressed,
         isNull,
       );
