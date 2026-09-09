@@ -6,9 +6,11 @@ import 'floating_participant_tile_defaults.dart';
 /// The draggable self-view that floats over a call.
 ///
 /// A participant tile sized and styled for the corner of the screen: small
-/// enough that the name pill, the overflow button and the speaking outline
-/// would only crowd it, so by default it drops all three and keeps the
-/// connection quality indicator and any live reaction.
+/// enough that the overflow button and the speaking outline would only crowd
+/// it, so by default it drops both and keeps the connection quality indicator
+/// and any live reaction. It carries no name pill at all — an app-wide
+/// [StreamParticipantTileTheme] asking for one does not put one here, though
+/// [StreamFloatingParticipantTileStyle.tileStyle] still can.
 ///
 /// The rendering can be replaced app-wide by registering a
 /// `floatingParticipantTile` builder with [streamVideoComponentBuilders] on a
@@ -124,16 +126,27 @@ class DefaultStreamFloatingParticipantTile extends StatelessWidget {
     //     styled tiles reaches this one too — a default must never outrank a
     //     theme, which is why this is not left to the tile's own merge, where
     //     everything below arrives as props and would beat it;
-    //  3. the surface's corner radius. The surface rounds the outside and the
-    //     tile rounds the video inside it, so the two clips have to agree;
-    //     overriding only the surface radius would leave the tighter clip
-    //     stopping short of the corners, which reads as four transparent
-    //     notches;
+    //  3. what the self-view is rather than what it defaults to: the design
+    //     gives it no name pill at any size, and the surface's corner radius,
+    //     since the surface rounds the outside while the tile rounds the video
+    //     inside it and the two clips have to agree — overriding only the
+    //     surface radius would leave the tighter clip stopping short of the
+    //     corners, which reads as four transparent notches. Above the ambient
+    //     theme because neither is a default an app-wide tile theme should
+    //     restyle away; the deprecated `callParticipantTheme` bridges a
+    //     non-null `showParticipantLabel: true` into that theme, so leaving
+    //     the pill below it put one on the self-view of every app that had
+    //     merely set the old theme;
     //  4. an explicit tileStyle, which is a caller asking for exactly this —
-    //     including a radius that differs from the surface's.
+    //     including the pill, and a radius that differs from the surface's.
     final tileStyle = defaults.tileStyle
         .merge(StreamParticipantTileTheme.of(context).style)
-        .merge(StreamParticipantTileStyle(borderRadius: borderRadius))
+        .merge(
+          StreamParticipantTileStyle(
+            borderRadius: borderRadius,
+            showParticipantLabel: false,
+          ),
+        )
         .merge(style?.tileStyle);
 
     return SizedBox.fromSize(

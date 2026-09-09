@@ -196,8 +196,39 @@ void main() {
     testWidgets('an app-wide tile theme still reaches the self-view', (
       tester,
     ) async {
-      // A default must not outrank a theme: an app that deliberately asked for
-      // the pill everywhere gets it here too.
+      // A default must not outrank a theme: an app that deliberately styled
+      // tiles reaches this one too. The name pill is the exception below.
+      await tester.pumpWidget(
+        wrap(
+          videoTheme: StreamVideoTheme(
+            brightness: Brightness.light,
+            participantTileTheme: const StreamParticipantTileThemeData(
+              style: StreamParticipantTileStyle(showSpeakerBorder: true),
+            ),
+          ),
+          child: Center(
+            child: StreamFloatingParticipantTile(
+              call: MockCall(),
+              participant: participant(isSpeaking: true),
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(
+        tester
+            .widget<StreamParticipantTile>(find.byType(StreamParticipantTile))
+            .props
+            .style
+            ?.showSpeakerBorder,
+        isTrue,
+      );
+    });
+
+    testWidgets('no name pill, whatever the ambient tile theme asks for', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         wrap(
           videoTheme: StreamVideoTheme(
@@ -216,7 +247,33 @@ void main() {
       );
       await tester.pump(const Duration(milliseconds: 200));
 
-      expect(find.byType(StreamParticipantLabel), findsOneWidget);
+      expect(find.byType(StreamParticipantLabel), findsNothing);
+    });
+
+    // The deprecated theme bridges a non-null `showParticipantLabel: true`
+    // into the participant tile theme, so an app that had merely set the old
+    // theme — asking for nothing — used to get a pill on its self-view.
+    testWidgets('no name pill under the deprecated participant theme', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          videoTheme: StreamVideoTheme(
+            brightness: Brightness.light,
+            // ignore: deprecated_member_use_from_same_package
+            callParticipantTheme: const StreamCallParticipantThemeData(),
+          ),
+          child: Center(
+            child: StreamFloatingParticipantTile(
+              call: MockCall(),
+              participant: participant(),
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.byType(StreamParticipantLabel), findsNothing);
     });
 
     testWidgets('an explicit tileStyle beats both', (tester) async {

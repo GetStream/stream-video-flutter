@@ -126,6 +126,7 @@
 
 ### 🐞 Fixed
 
+- The floating self-view never draws a name pill. It suppressed the pill as a default, which the deprecated `callParticipantTheme` overrode with a non-null `showParticipantLabel: true` — so an app that had merely set the old theme got a pill on its self-view. `StreamFloatingParticipantTileStyle.tileStyle` can still ask for one.
 - A participant tile keeps the name in its label at every size it draws the label at, truncating with an ellipsis, instead of dropping it below 136×128. The strip tiles in the screen-share and spotlight layouts showed icons alone.
 - The participant label stops growing at 268px, leaving the rest of the space between it and the connection quality indicator. Overridable through `StreamParticipantLabelStyle.maxWidth`.
 

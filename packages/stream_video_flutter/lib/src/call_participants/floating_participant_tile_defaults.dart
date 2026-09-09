@@ -46,9 +46,10 @@ class StreamFloatingParticipantTileStyleDefaults
   // sits in, which the caller may have overridden.
   @override
   StreamParticipantTileStyle get tileStyle => const StreamParticipantTileStyle(
-    // At this size a name and an outline crowd the video out; the connection
-    // quality indicator is the one thing still worth the room.
-    showParticipantLabel: false,
+    // At this size an outline crowds the video out; the connection quality
+    // indicator is the one thing still worth the room. The name pill is not
+    // here because the self-view never carries one — see
+    // [DefaultStreamFloatingParticipantTile.build].
     showSpeakerBorder: false,
     showMoreButton: false,
     // The tile draws no border of its own — the floating surface owns it, and
