@@ -114,6 +114,7 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
     this.spacing,
     this.indicatorSpacing,
     this.minHeight,
+    this.maxWidth,
     this.blurSigma,
     this.nameTextStyle,
     this.videoOffIconColor,
@@ -165,6 +166,13 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
   /// the vertical [padding] — so a pill without one keeps the same height and
   /// the same breathing room around its text rather than collapsing onto it.
   final double? minHeight;
+
+  /// The widest the pill may be drawn.
+  ///
+  /// Below it the pill takes whatever space it is given and the name
+  /// ellipsizes into what is left; at it the pill stops growing and any
+  /// remaining space stays free beside it. Defaults to 268.
+  final double? maxWidth;
 
   /// The blur applied to whatever sits behind the pill.
   ///

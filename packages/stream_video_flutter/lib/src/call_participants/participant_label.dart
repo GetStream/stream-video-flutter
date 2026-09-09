@@ -110,8 +110,9 @@ class StreamParticipantLabelProps {
 
   /// Whether [name] is shown.
   ///
-  /// A tile too narrow to fit a readable name drops it and keeps the icons,
-  /// which stay meaningful at any size.
+  /// A pill without it is its indicators alone. Size is not a reason to switch
+  /// it off: the name ellipsizes into whatever space the pill has, down to
+  /// nothing.
   final bool showName;
 
   /// Overrides for this label's appearance.
@@ -211,7 +212,6 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
       padding: style?.padding ?? defaults.padding,
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        spacing: style?.spacing ?? defaults.spacing,
         children: [
           // An empty name draws a zero-width Text that still claims the gap
           // before the indicators, leaving the pill padded for a name it is
@@ -222,12 +222,24 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
             // bound this is what makes a long name ellipsize instead of
             // sliding under whatever sits next to the pill.
             Flexible(
-              child: Text(
-                props.name,
-                style: nameTextStyle,
-                maxLines: 1,
-                softWrap: false,
-                overflow: TextOverflow.ellipsis,
+              child: Padding(
+                // The gap before the indicators sits inside the name's own
+                // region rather than between the two children, so a name
+                // squeezed to nothing takes the gap with it. Between them it
+                // would survive the name and leave the pill holding 8px of
+                // space for text it is no longer drawing.
+                padding: indicators.isEmpty
+                    ? EdgeInsets.zero
+                    : EdgeInsetsDirectional.only(
+                        end: style?.spacing ?? defaults.spacing,
+                      ),
+                child: Text(
+                  props.name,
+                  style: nameTextStyle,
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
           // Left out entirely when it would be empty: an empty child still
@@ -246,13 +258,18 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
       ),
     );
 
-    // Without this the pill's height comes from whatever is tallest inside it,
-    // which is the sound indicator — so a pill drawing icons in its place, or
-    // nothing at all, would collapse onto its text and lose the padding around
-    // it. It also keeps the tile's chrome arithmetic holding across states.
+    // The minimum height keeps the pill from taking its height from whatever
+    // is tallest inside it, which is the sound indicator — so a pill drawing
+    // icons in its place, or nothing at all, is the size it would have been
+    // with one rather than collapsing onto its text. It also keeps the tile's
+    // chrome arithmetic holding across states.
+    //
+    // The maximum width is where the pill stops growing with the space it is
+    // given; a name longer than that ellipsizes into it.
     content = ConstrainedBox(
       constraints: BoxConstraints(
         minHeight: style?.minHeight ?? defaults.minHeight,
+        maxWidth: style?.maxWidth ?? defaults.maxWidth,
       ),
       child: content,
     );

@@ -299,19 +299,19 @@ class DefaultStreamParticipantTile extends StatelessWidget {
 // indicator, and the narrowest the pill can be drawn at:
 //
 //   indicator only         8 + 32 + 8                     =  48
-//   pill (icons only)      8 + (12 + 24 + 4) + 4 + 32 + 8 =  92
-//   pill with a short name 92 + a readable 44px of text   = 136
+//   pill and indicator     8 + (12 + 24 + 4) + 4 + 32 + 8 =  92
 //
-// It is a floor rather than the whole story: a muted participant's pill carries
-// icons the widths above do not account for, and the top toolbar is anchored to
-// the opposite edge, so both are measured against what they actually draw. See
-// [_TileContent.build] and [_BottomToolbar.build].
+// The pill keeps the participant's name at every size it is drawn at: the name
+// takes whatever is left after the indicator and ellipsizes into it, so it
+// needs no width of its own on top of the figures above.
+//
+// The ladder is a floor rather than the whole story: a muted participant's
+// pill carries icons the widths above do not account for, and the top toolbar
+// is anchored to the opposite edge, so both are measured against what they
+// actually draw. See [_TileContent.build] and [_BottomToolbar.build].
 enum _TileDensity {
   /// Everything.
   full,
-
-  /// No name — the icons still read at this size, a truncated name does not.
-  compact,
 
   /// The connection quality indicator alone.
   minimal,
@@ -319,11 +319,9 @@ enum _TileDensity {
   /// No chrome at all.
   bare;
 
-  static const _fullWidth = 136.0;
-  static const _compactWidth = 92.0;
+  static const _fullWidth = 92.0;
   static const _minimalWidth = 48.0;
-  static const _fullHeight = 128.0;
-  static const _compactHeight = 72.0;
+  static const _fullHeight = 72.0;
   // The same arithmetic as the width: the toolbar's inset on both sides around
   // the indicator, which is as tall as it is wide.
   static const _minimalHeight = 48.0;
@@ -333,20 +331,17 @@ enum _TileDensity {
     final height = constraints.maxHeight;
 
     if (width >= _fullWidth && height >= _fullHeight) return full;
-    if (width >= _compactWidth && height >= _compactHeight) return compact;
     if (width >= _minimalWidth && height >= _minimalHeight) return minimal;
     return bare;
   }
 
-  bool get showsName => this == full;
-
-  bool get showsLabel => this == full || this == compact;
+  bool get showsLabel => this == full;
 
   bool get showsConnectionQuality => this != bare;
 
   // Both live in the top toolbar. The ladder decides whether a tile is big
   // enough to carry any of it; whether it actually fits is measured.
-  bool get carriesTopToolbar => this == full || this == compact;
+  bool get carriesTopToolbar => this == full;
 }
 
 class _TileContent extends StatelessWidget {
@@ -451,7 +446,6 @@ class _TileContent extends StatelessWidget {
             child: _BottomToolbar(
               participant: participant,
               showLabel: showLabel,
-              showName: density.showsName,
               showIndicator: showIndicator,
               style: style,
               defaults: defaults,
@@ -628,7 +622,6 @@ class _BottomToolbar extends StatelessWidget {
   const _BottomToolbar({
     required this.participant,
     required this.showLabel,
-    required this.showName,
     required this.showIndicator,
     required this.style,
     required this.defaults,
@@ -636,7 +629,6 @@ class _BottomToolbar extends StatelessWidget {
 
   final CallParticipantState participant;
   final bool showLabel;
-  final bool showName;
   final bool showIndicator;
   final StreamParticipantTileStyle? style;
   final _StreamParticipantTileStyleDefaults defaults;
@@ -649,7 +641,6 @@ class _BottomToolbar extends StatelessWidget {
     // than shrinking them.
     final minLabelWidth = participantLabelMinWidth(
       context,
-      showName: showName,
       showMicrophoneOff: !participant.isAudioEnabled,
       showVideoOff: !participant.isVideoEnabled,
       showVideoPaused: participant.isTrackPaused(SfuTrackType.video),
@@ -682,7 +673,6 @@ class _BottomToolbar extends StatelessWidget {
                           ? const SizedBox.shrink()
                           : StreamParticipantLabel.fromParticipant(
                               participant: participant,
-                              showName: showName,
                               style: style?.labelStyle,
                             ),
                     )

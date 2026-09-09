@@ -114,4 +114,76 @@ void main() {
       expect(find.byType(StreamAudioIndicator), findsNothing);
     });
   });
+
+  group('width', () {
+    Future<Rect> pillNamed(
+      WidgetTester tester,
+      String name, {
+      double available = 1000,
+      double? maxWidth,
+    }) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: available,
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: StreamParticipantLabel(
+                  name: name,
+                  isAudioEnabled: true,
+                  isSpeaking: false,
+                  isVideoEnabled: true,
+                  style: StreamParticipantLabelStyle(
+                    blurSigma: 0,
+                    maxWidth: maxWidth,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      return tester.getRect(find.byType(StreamParticipantLabel));
+    }
+
+    testWidgets('grows with the name up to the maximum', (tester) async {
+      final short = await pillNamed(tester, 'Rene');
+      final longer = await pillNamed(tester, 'Rene Floor');
+
+      expect(longer.width, greaterThan(short.width));
+      expect(longer.width, lessThan(268));
+    });
+
+    testWidgets('stops at 268 however long the name is', (tester) async {
+      final rect = await pillNamed(
+        tester,
+        'Bartholomew Fitzgerald-Montgomery the Third of Northumberland',
+      );
+
+      expect(rect.width, 268);
+    });
+
+    testWidgets('takes what it is given below the maximum', (tester) async {
+      final rect = await pillNamed(
+        tester,
+        'Bartholomew Fitzgerald-Montgomery the Third of Northumberland',
+        available: 120,
+      );
+
+      expect(rect.width, 120);
+    });
+
+    testWidgets('follows the style over the default', (tester) async {
+      final rect = await pillNamed(
+        tester,
+        'Bartholomew Fitzgerald-Montgomery the Third of Northumberland',
+        maxWidth: 160,
+      );
+
+      expect(rect.width, 160);
+    });
+  });
 }

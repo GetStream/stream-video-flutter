@@ -150,7 +150,15 @@ Flutter's defaults instead of the pinned theme, platform and locale.
   `flutter test --tags golden --update-goldens` has run once.
 - Regenerate the committed ones by dispatching the `update_goldens` workflow
   from the branch, not locally: it runs on the same Linux host CI compares
-  against.
+  against. Dispatch it with the `gh` CLI:
+
+  ```bash
+  gh workflow run update_goldens.yml --ref <branch>
+  ```
+
+  It checks out the ref, runs `melos run update:goldens` and commits the PNGs
+  back to that branch, so the branch has to be pushed first — which needs
+  confirmation, see Conventions.
 - The CI capture path drops anything painted into an `Overlay`, so a menu,
   tooltip or dialog snapshots blank. Assert those in a widget test.
 - `BackdropFilter` is a no-op under `flutter test`; a blurred surface snapshots
@@ -160,6 +168,10 @@ Flutter's defaults instead of the pinned theme, platform and locale.
 
 ## Conventions
 
+- **Ask before pushing, every time.** Committing locally is fine once the work
+  is asked for, but `git push` and anything that needs a pushed branch — a
+  workflow dispatch, opening a PR — waits for explicit confirmation on that
+  push. Approval for one push does not carry to the next.
 - Changelog entries go under `## Upcoming (next major)` in the affected
   package's `CHANGELOG.md`, using the `### ✅ Added` / `### ⚠️ Deprecated` /
   `### ⚠️ Breaking` / `### 🔄 Changed` headings already there.
