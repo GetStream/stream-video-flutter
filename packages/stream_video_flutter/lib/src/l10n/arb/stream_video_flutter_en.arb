@@ -19,6 +19,42 @@
   "@desktopScreenShareWindow": {
     "description": "Tab to select a single window to share"
   },
+  "layoutMenuTitle": "Layout",
+  "@layoutMenuTitle": {
+    "description": "Title of the sheet that picks how participants are laid out"
+  },
+  "layoutSelectTooltip": "Change layout",
+  "@layoutSelectTooltip": {
+    "description": "Tooltip of the call control that picks a participant layout"
+  },
+  "layoutDefault": "Default",
+  "@layoutDefault": {
+    "description": "The participant layout that follows the call instead of being fixed"
+  },
+  "layoutGrid": "Grid",
+  "@layoutGrid": {
+    "description": "The participant layout giving everybody an equal tile"
+  },
+  "layoutSpeakerTop": "Speaker (Top)",
+  "@layoutSpeakerTop": {
+    "description": "The participant layout with the speaker below the other participants"
+  },
+  "layoutSpeakerBottom": "Speaker (Bottom)",
+  "@layoutSpeakerBottom": {
+    "description": "The participant layout with the speaker above the other participants"
+  },
+  "layoutSpeakerLeft": "Speaker (Left)",
+  "@layoutSpeakerLeft": {
+    "description": "The participant layout with the speaker right of the other participants"
+  },
+  "layoutSpeakerRight": "Speaker (Right)",
+  "@layoutSpeakerRight": {
+    "description": "The participant layout with the speaker left of the other participants"
+  },
+  "layoutSpeakerOneToOne": "Speaker 1:1",
+  "@layoutSpeakerOneToOne": {
+    "description": "The participant layout showing only the speaker and the local participant"
+  },
   "livestreamBackstageStartingSoon": "Livestream will start soon",
   "@livestreamBackstageStartingSoon": {
     "description": "Label for livestream backstage when live stream will soon start"

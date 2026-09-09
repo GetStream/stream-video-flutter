@@ -315,6 +315,41 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
     );
   }
 
+  /// Fills the row of the option currently in effect, as the sheet's
+  /// [StreamListTile] does for its own selected row.
+  ///
+  /// [StreamContextMenuAction] has no selected state, and the radio indicator
+  /// that would otherwise mark the choice is suppressed by an explicit
+  /// [StreamMenuOption.leading] — so without this a menu of icons shows nothing
+  /// at all for the option in effect.
+  ///
+  /// The style has to be built up from [StreamContextMenuAnchor.defaultActionStyle]
+  /// rather than layered over it: [StreamContextMenuActionTheme.of] reads the
+  /// nearest theme only, so a bare override here would drop the design's row
+  /// metrics and leave the selected row taller and wider than its siblings.
+  Widget _selectedBackground(
+    BuildContext context, {
+    required bool selected,
+    required Widget child,
+  }) {
+    if (!selected) return child;
+
+    return StreamContextMenuActionTheme(
+      data: StreamContextMenuActionThemeData(
+        style: StreamContextMenuAnchor.defaultActionStyle(context)
+            .merge(widget.menuItemStyle)
+            .merge(
+              StreamContextMenuActionStyle(
+                backgroundColor: WidgetStatePropertyAll(
+                  context.streamColorScheme.backgroundSelected,
+                ),
+              ),
+            ),
+      ),
+      child: child,
+    );
+  }
+
   Widget _anchored(BuildContext context, {double? width}) {
     return StreamContextMenuAnchor(
       controller: _menuController,
@@ -350,21 +385,25 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
                 if (section.heading case final heading?)
                   StreamContextMenuHeading(label: Text(heading)),
               for (final option in section.options)
-                StreamContextMenuAction<void>(
-                  onTap: option.onSelected == null
-                      ? null
-                      : () => _select(option),
-                  // Deliberately left enabled for a row with nothing to
-                  // press. `enabled: false` is the design system's
-                  // *unavailable* look — it paints the label in
-                  // `textDisabled` — and a list that only shows something,
-                  // like the people already in a call, would render every
-                  // name as though that person were unavailable.
-                  leading: _leadingOf(option),
-                  label: Text(
-                    option.label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                _selectedBackground(
+                  context,
+                  selected: option.selected ?? false,
+                  child: StreamContextMenuAction<void>(
+                    onTap: option.onSelected == null
+                        ? null
+                        : () => _select(option),
+                    // Deliberately left enabled for a row with nothing to
+                    // press. `enabled: false` is the design system's
+                    // *unavailable* look — it paints the label in
+                    // `textDisabled` — and a list that only shows something,
+                    // like the people already in a call, would render every
+                    // name as though that person were unavailable.
+                    leading: _leadingOf(option),
+                    label: Text(
+                      option.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
             ],

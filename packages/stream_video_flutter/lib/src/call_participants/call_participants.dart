@@ -54,7 +54,7 @@ class StreamCallParticipants extends StatefulWidget {
     this.localVideoParticipantBuilder,
     this.screenShareContentBuilder,
     this.screenShareParticipantBuilder = _defaultParticipantBuilder,
-    this.layoutMode = ParticipantLayoutMode.grid,
+    this.layoutMode = ParticipantLayoutMode.auto,
   }) : sort = sort ?? layoutMode.sorting;
 
   /// Represents a call.

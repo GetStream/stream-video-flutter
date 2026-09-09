@@ -73,7 +73,7 @@ class _CallScreenState extends State<CallScreen> {
 
   Channel? _channel;
   StreamSubscription<Event>? _chatConnectionRecoverySubscription;
-  ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.grid;
+  ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.auto;
   bool _moreMenuVisible = false;
 
   @override
@@ -221,8 +221,25 @@ class _CallScreenState extends State<CallScreen> {
   // than held as fields: they close over the call the content builder hands
   // in, and a bar rebuilds whenever the window crosses a breakpoint anyway.
 
-  StreamLayoutButton _layoutToggle() => StreamLayoutButton(
+  // The sample offers every layout, minus the two that stand a column of
+  // participants beside the speaker: on a phone-width window that column
+  // leaves the speaker too narrow to be worth looking at.
+  List<ParticipantLayoutMode> get _layoutOptions => [
+    for (final layout in ParticipantLayoutModeX.selectable)
+      if (!context.streamScreenSize.isSmall ||
+          (layout != ParticipantLayoutMode.speakerLeft &&
+              layout != ParticipantLayoutMode.speakerRight))
+        layout,
+  ];
+
+  // The menu opens away from wherever the button sits: upwards out of the
+  // control bar along the bottom, downwards out of the app bar.
+  StreamLayoutButton _layoutToggle({
+    StreamMenuDirection direction = StreamMenuDirection.up,
+  }) => StreamLayoutButton(
     layout: _currentLayoutMode,
+    layouts: _layoutOptions,
+    direction: direction,
     onLayoutModeChanged: (layout) {
       setState(() {
         _currentLayoutMode = layout;
@@ -488,7 +505,8 @@ class _CallScreenState extends State<CallScreen> {
                   showLeaveCallAction: isCompact,
                   leading: Row(
                     children: [
-                      if (isCompact) _layoutToggle(),
+                      if (isCompact)
+                        _layoutToggle(direction: StreamMenuDirection.down),
                       PartialCallStateBuilder(
                         call: call,
                         selector: (state) => state.localParticipant != null,

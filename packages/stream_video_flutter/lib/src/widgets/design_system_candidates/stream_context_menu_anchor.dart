@@ -94,11 +94,32 @@ class StreamContextMenuAnchor extends StatelessWidget {
   /// Called when the menu closes.
   final VoidCallback? onClose;
 
+  /// The design's `Web / Menu Item`, which every row in the menu is styled to.
+  ///
+  /// It is a 32px tall row with a 200px minimum width, a caption/emphasis label
+  /// and 16px icons. The stream_core_flutter defaults are a 40px tall row with
+  /// a 242px minimum width, a body/emphasis label and 20px icons.
+  ///
+  /// The row is inset by 8px on top of the 4px the menu panel already pads
+  /// with, which puts the content 12px from the panel edge and leaves the row's
+  /// rounded highlight 4px inside it, as designed.
+  ///
+  /// Public because [StreamContextMenuActionTheme.of] reads only the nearest
+  /// theme: anything varying one row has to re-merge this, or that row falls
+  /// back to the core defaults while its siblings keep the design's metrics.
+  static StreamContextMenuActionStyle defaultActionStyle(
+    BuildContext context,
+  ) => StreamContextMenuActionStyle(
+    textStyle: WidgetStatePropertyAll(context.streamTextTheme.captionEmphasis),
+    iconSize: const WidgetStatePropertyAll(16),
+    minimumSize: const WidgetStatePropertyAll(Size(200, 32)),
+    padding: WidgetStatePropertyAll(
+      EdgeInsets.symmetric(horizontal: context.streamSpacing.xs),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
-    final spacing = context.streamSpacing;
-    final textTheme = context.streamTextTheme;
-
     return MenuAnchor(
       controller: controller,
       alignmentOffset: alignmentOffset,
@@ -120,24 +141,9 @@ class StreamContextMenuAnchor extends StatelessWidget {
         PrimaryScrollController.none(
           child: ConstrainedBox(
             constraints: constraints,
-            // The design's `Web / Menu Item` is a 32px tall row with a 200px
-            // minimum width, a caption/emphasis label and 16px icons. The
-            // stream_core_flutter defaults are a 40px tall row with a 242px
-            // minimum width, a body/emphasis label and 20px icons.
-            //
-            // The row is inset by 8px on top of the 4px the menu panel already
-            // pads with, which puts the content 12px from the panel edge and
-            // leaves the row's rounded highlight 4px inside it, as designed.
             child: StreamContextMenuActionTheme(
               data: StreamContextMenuActionThemeData(
-                style: StreamContextMenuActionStyle(
-                  textStyle: WidgetStatePropertyAll(textTheme.captionEmphasis),
-                  iconSize: const WidgetStatePropertyAll(16),
-                  minimumSize: const WidgetStatePropertyAll(Size(200, 32)),
-                  padding: WidgetStatePropertyAll(
-                    EdgeInsets.symmetric(horizontal: spacing.xs),
-                  ),
-                ).merge(actionStyle),
+                style: defaultActionStyle(context).merge(actionStyle),
               ),
               child: StreamContextMenu(
                 elevation: elevation,

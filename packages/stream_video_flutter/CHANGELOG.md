@@ -2,6 +2,14 @@
 
 ### ✅ Added
 
+- `StreamLayoutButton` draws the participant layout in effect, and offers the rest through a `StreamAdaptiveMenuAnchor` — a context menu on desktop and web, a bottom sheet on Android and iOS. Given two layouts it toggles between them instead of opening a menu.
+- `StreamLayoutButton.defaultLayouts` is `auto` and `speakerBottom`, so the button toggles unless it is given more.
+- `ParticipantLayoutMode` offers `auto`, `grid`, `speakerTop`, `speakerBottom`, `speakerLeft`, `speakerRight` and `speakerOneToOne`.
+- `ParticipantLayoutMode` carries its own presentation: `selectable`, `canonical`, `barAlignment`, `isSpeakerLayout`, `icon` and `label`.
+- `StreamLayoutButton` takes `layouts`, to choose what it offers, and `direction`, for which way the menu opens.
+- `CallParticipantsSpotlightView` and `ParticipantsBarAlignment` are exported.
+- `StreamAdaptiveMenuAnchor` fills the row of the selected option in the anchored menu, which only the sheet did before.
+- Added `StreamContextMenuAnchor.defaultActionStyle`, the design's menu row metrics, so a caller varying one row can re-merge them.
 - `CallFeatureButton` takes a `tone`, so a selected feature can paint destructive red instead of accent blue. `StreamRecordingButton` uses it.
 - `StreamMicrophoneButton` and `StreamCameraButton` take an `onError`, called with a typed `VideoError` and the action that failed when the call refuses the change. The split buttons take the same.
 - `StreamMicrophoneButton` and `StreamMicrophoneSplitButton` take `stopTrackOnMute`, passed on to `Call.setMicrophoneEnabled`.
@@ -180,6 +188,7 @@
 
 ### ⚠️ Deprecated
 
+- `ParticipantLayoutMode.spotlight` is `speakerBottom` now, and `pictureInPicture` is `speakerOneToOne`. `dart fix --apply` migrates both.
 - `StreamLocalVideoThemeData`, `StreamLocalVideoTheme` and `StreamVideoTheme.localVideoTheme` are deprecated in favour of `StreamFloatingParticipantTileThemeData`. `StreamLocalVideo` only positions the self-view now, so nothing reads them.
 - Every call control is named `Stream<Thing>Button` now, matching the split buttons, the `CallControlButton` / `CallFeatureButton` primitives, and the design system's own components. `ToggleMicrophoneOption` is `StreamMicrophoneButton`, and alongside it `ToggleCameraOption`, `ToggleScreenShareOption`, `ToggleRecordingOption`, `ToggleClosedCaptionsOption`, `ToggleLayoutOption`, `ToggleSpeakerphoneOption`, `FlipCameraOption`, `AddReactionOption` and `LeaveCallOption` become `StreamCameraButton`, `StreamScreenShareButton`, `StreamRecordingButton`, `StreamClosedCaptionsButton`, `StreamLayoutButton`, `StreamSpeakerphoneButton`, `StreamFlipCameraButton`, `StreamAddReactionButton` and `StreamLeaveCallButton`.
 
@@ -191,6 +200,10 @@
 
 ### ⚠️ Breaking
 
+- `ParticipantLayoutMode.auto` is the default wherever `grid` was, and renders what `grid` used to.
+- `ParticipantLayoutMode.grid` gives the local participant a tile of its own instead of floating them over the grid. `auto` and `speakerOneToOne` are the layouts that float the self-view.
+- `speakerOneToOne` floats the self-view on desktop too, where `enableLocalVideo` otherwise defaults to off. Passing `enableLocalVideo: false` still suppresses it.
+- `ParticipantLayoutMode.pictureInPicture` spotlights the speaker alone under its new name, where it used to draw a grid.
 - `translations.defaultDevice` replaces `lobbySystemDefaultDevice` and `lobbyDefaultDeviceHint`, and reads "Default" rather than "System default". The two strings were shown side by side — the menu's row and the field's placeholder — so a translation could make them disagree about the same choice.
 - `StreamLayoutButton` takes `layout` instead of `initialLayout` and keeps no state, so the caller passes the mode back in through it. `dart fix --apply` renames the parameter.
 - `onError` on the device controls takes a `StreamDeviceErrorCallback`, receiving a typed `VideoError` and the action that failed.
