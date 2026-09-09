@@ -65,21 +65,29 @@ class RegularCallParticipantsContent extends StatelessWidget {
       true => ParticipantLayoutMode.grid,
     };
 
-    // By default we don't show local video on desktop devices — except under
-    // speakerOneToOne, where the floating self-view is the layout rather than
-    // an addition to it: without it the layout is a lone spotlight, and the
-    // local participant, who has no tile either, disappears from the call.
-    final showsSelfView = effective == ParticipantLayoutMode.speakerOneToOne;
-    final enableLocalVideo =
-        this.enableLocalVideo ?? (showsSelfView || !isDesktopDevice);
-    // Only the layouts that leave the local participant out of the arrangement
-    // float them over it. The grid and the four bar layouts already give them a
-    // tile, and a self-view on top of that would show them twice.
+    // Only these two layouts leave the local participant out of the
+    // arrangement, so only they can float a self-view over it. The grid and the
+    // four bar layouts give them a tile of their own, and a self-view on top of
+    // that would show them twice — which is why every other case is false here
+    // whatever [enableLocalVideo] says.
+    //
+    // The two differ in what they default to. Under speakerOneToOne the inset
+    // is the layout rather than an addition to it: without it the layout is a
+    // lone spotlight, and the local participant, who gets no tile and no bar
+    // either, disappears from the call. Under auto's grid it follows the
+    // platform, since a phone has no room for a tile per person but a desktop
+    // does.
+    final floatsSelfView = switch (effective) {
+      ParticipantLayoutMode.speakerOneToOne => enableLocalVideo ?? true,
+      ParticipantLayoutMode.grid when isAuto =>
+        enableLocalVideo ?? !isDesktopDevice,
+      _ => false,
+    };
+
     final floatLocalVideo =
-        enableLocalVideo &&
+        floatsSelfView &&
         localParticipant != null &&
-        remoteParticipants.isNotEmpty &&
-        (isAuto || showsSelfView);
+        remoteParticipants.isNotEmpty;
 
     Widget child;
     if (effective.isSpeakerLayout) {
