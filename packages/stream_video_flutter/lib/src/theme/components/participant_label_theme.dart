@@ -169,9 +169,8 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
 
   /// The widest the pill may be drawn.
   ///
-  /// Below it the pill takes whatever space it is given and the name
-  /// ellipsizes into what is left; at it the pill stops growing and any
-  /// remaining space stays free beside it. Defaults to 268.
+  /// Below it the pill takes the space it is given; at it the pill stops
+  /// growing and the rest stays free beside it. Defaults to 268.
   final double? maxWidth;
 
   /// The blur applied to whatever sits behind the pill.

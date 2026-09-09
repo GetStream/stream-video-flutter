@@ -301,14 +301,13 @@ class DefaultStreamParticipantTile extends StatelessWidget {
 //   indicator only         8 + 32 + 8                     =  48
 //   pill and indicator     8 + (12 + 24 + 4) + 4 + 32 + 8 =  92
 //
-// The pill keeps the participant's name at every size it is drawn at: the name
-// takes whatever is left after the indicator and ellipsizes into it, so it
-// needs no width of its own on top of the figures above.
+// The name needs no width of its own: it takes what is left after the
+// indicator and ellipsizes into it.
 //
-// The ladder is a floor rather than the whole story: a muted participant's
-// pill carries icons the widths above do not account for, and the top toolbar
-// is anchored to the opposite edge, so both are measured against what they
-// actually draw. See [_TileContent.build] and [_BottomToolbar.build].
+// The ladder is a floor: a muted participant's pill carries icons these widths
+// do not cover, and the top toolbar hangs off the opposite edge, so both are
+// measured against what they draw. See [_TileContent.build] and
+// [_BottomToolbar.build].
 enum _TileDensity {
   /// Everything.
   full,

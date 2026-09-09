@@ -130,8 +130,8 @@ bool participantLabelDrawsAudioIndicator({
 /// The tile drops the pill rather than let it overflow, and to decide that it
 /// needs the same number the pill lays itself out to: whichever indicators the
 /// participant contributes, the padding around them and the gaps between them.
-/// The name contributes nothing — it ellipsizes away to nothing, and takes the
-/// gap before the indicators with it.
+/// The name contributes nothing: it ellipsizes away, taking the gap before the
+/// indicators with it.
 @internal
 double participantLabelMinWidth(
   BuildContext context, {
@@ -173,8 +173,7 @@ double participantLabelMinWidth(
   var width = padding.horizontal;
 
   // A pill can come down to a name alone — an unmuted, camera-on participant
-  // under a style that switched the indicator off — which leaves the padding
-  // as the whole of it.
+  // under a style that switched the indicator off — leaving just the padding.
   if (indicators.isNotEmpty) {
     width +=
         indicators.reduce((a, b) => a + b) +

@@ -110,9 +110,7 @@ class StreamParticipantLabelProps {
 
   /// Whether [name] is shown.
   ///
-  /// A pill without it is its indicators alone. Size is not a reason to switch
-  /// it off: the name ellipsizes into whatever space the pill has, down to
-  /// nothing.
+  /// A pill without it draws its indicators alone.
   final bool showName;
 
   /// Overrides for this label's appearance.
@@ -223,11 +221,9 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
             // sliding under whatever sits next to the pill.
             Flexible(
               child: Padding(
-                // The gap before the indicators sits inside the name's own
-                // region rather than between the two children, so a name
-                // squeezed to nothing takes the gap with it. Between them it
-                // would survive the name and leave the pill holding 8px of
-                // space for text it is no longer drawing.
+                // Inside the name's region rather than between the two
+                // children, so a name squeezed to nothing takes the gap
+                // with it.
                 padding: indicators.isEmpty
                     ? EdgeInsets.zero
                     : EdgeInsetsDirectional.only(
@@ -258,14 +254,10 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
       ),
     );
 
-    // The minimum height keeps the pill from taking its height from whatever
-    // is tallest inside it, which is the sound indicator — so a pill drawing
-    // icons in its place, or nothing at all, is the size it would have been
-    // with one rather than collapsing onto its text. It also keeps the tile's
-    // chrome arithmetic holding across states.
-    //
-    // The maximum width is where the pill stops growing with the space it is
-    // given; a name longer than that ellipsizes into it.
+    // The minimum height holds the pill at the height the sound indicator
+    // gives it, so it does not collapse onto its text in the states without
+    // one. The maximum width is where it stops growing with the space it is
+    // given.
     content = ConstrainedBox(
       constraints: BoxConstraints(
         minHeight: style?.minHeight ?? defaults.minHeight,

@@ -196,8 +196,8 @@ void main() {
     testWidgets('an app-wide tile theme still reaches the self-view', (
       tester,
     ) async {
-      // A default must not outrank a theme: an app that deliberately styled
-      // tiles reaches this one too. The name pill is the exception below.
+      // A default must not outrank a theme. The name pill is the exception
+      // below.
       await tester.pumpWidget(
         wrap(
           videoTheme: StreamVideoTheme(
@@ -251,8 +251,7 @@ void main() {
     });
 
     // The deprecated theme bridges a non-null `showParticipantLabel: true`
-    // into the participant tile theme, so an app that had merely set the old
-    // theme — asking for nothing — used to get a pill on its self-view.
+    // into the participant tile theme.
     testWidgets('no name pill under the deprecated participant theme', (
       tester,
     ) async {
