@@ -1,4 +1,4 @@
-## Upcoming
+## Upcoming (major)
 
 ### ✅ Added
 
@@ -217,6 +217,13 @@
 
 - `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
 - Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.
+
+
+## Upcoming (minor)
+
+### 🐞 Fixed
+
+- Fixed the call reconnect loop retrying without a delay or an escalation when an unexpected error was thrown before the reconnect strategy ran. 
 
 ## 1.5.0
 

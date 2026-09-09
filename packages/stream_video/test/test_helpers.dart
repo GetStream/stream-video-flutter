@@ -30,11 +30,14 @@ class MockStreamVideo extends Mock implements StreamVideo {
     return Future.value();
   }
 
+  /// Set by tests that need to observe or fail telemetry calls.
+  ClientEventReporter? clientEventReporterOverride;
+
   /// Telemetry is a no-op in tests unless a test overrides it, so call sites
   /// (join/leave) don't need to stub it.
   @override
   ClientEventReporter get clientEventReporter =>
-      const ClientEventReporter.noOp();
+      clientEventReporterOverride ?? const ClientEventReporter.noOp();
 }
 
 class MockCallStateNotifier extends Mock implements CallStateNotifier {}
