@@ -159,6 +159,10 @@ Flutter's defaults instead of the pinned theme, platform and locale.
   It checks out the ref, runs `melos run update:goldens` and commits the PNGs
   back to that branch, so the branch has to be pushed first — which needs
   confirmation, see Conventions.
+- **After dispatching it, see it through**: poll the run to completion, then
+  `git pull` the bot's `chore: update goldens` commit, then say what came back
+  — which PNGs changed, or that the run failed and why. Do not dispatch and
+  hand the run back to the user to watch.
 - The CI capture path drops anything painted into an `Overlay`, so a menu,
   tooltip or dialog snapshots blank. Assert those in a widget test.
 - `BackdropFilter` is a no-op under `flutter test`; a blurred surface snapshots
@@ -172,6 +176,11 @@ Flutter's defaults instead of the pinned theme, platform and locale.
   is asked for, but `git push` and anything that needs a pushed branch — a
   workflow dispatch, opening a PR — waits for explicit confirmation on that
   push. Approval for one push does not carry to the next.
+- **Creating a remote branch needs its name confirmed.** When a push would
+  create a new upstream branch, propose the remote name and wait for agreement
+  before pushing. Never inherit it silently from the local branch — a worktree's
+  generated name (`claude/<slug>-<hash>`) is not a branch name anyone wants on
+  the remote. Repo convention is `feat/…` or `fix/…`.
 - Changelog entries go under `## Upcoming (next major)` in the affected
   package's `CHANGELOG.md`, using the `### ✅ Added` / `### ⚠️ Deprecated` /
   `### ⚠️ Breaking` / `### 🔄 Changed` headings already there.
