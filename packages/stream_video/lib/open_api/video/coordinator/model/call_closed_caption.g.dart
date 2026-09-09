@@ -8,14 +8,14 @@ part of 'call_closed_caption.dart';
 
 CallClosedCaption _$CallClosedCaptionFromJson(Map<String, dynamic> json) =>
     CallClosedCaption(
-      endTime: const EpochDateTimeConverter().fromJson(
+      endTime: const StreamDateTimeConverter().fromJson(
         json['end_time'] as Object,
       ),
       id: json['id'] as String,
       language: json['language'] as String,
       service: json['service'] as String?,
       speakerId: json['speaker_id'] as String,
-      startTime: const EpochDateTimeConverter().fromJson(
+      startTime: const StreamDateTimeConverter().fromJson(
         json['start_time'] as Object,
       ),
       text: json['text'] as String,
@@ -25,12 +25,12 @@ CallClosedCaption _$CallClosedCaptionFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$CallClosedCaptionToJson(CallClosedCaption instance) =>
     <String, dynamic>{
-      'end_time': const EpochDateTimeConverter().toJson(instance.endTime),
+      'end_time': const StreamDateTimeConverter().toJson(instance.endTime),
       'id': instance.id,
       'language': instance.language,
       'service': instance.service,
       'speaker_id': instance.speakerId,
-      'start_time': const EpochDateTimeConverter().toJson(instance.startTime),
+      'start_time': const StreamDateTimeConverter().toJson(instance.startTime),
       'text': instance.text,
       'translated': instance.translated,
       'user': instance.user.toJson(),

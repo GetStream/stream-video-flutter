@@ -8,13 +8,13 @@ part of 'call_recording.dart';
 
 CallRecording _$CallRecordingFromJson(Map<String, dynamic> json) =>
     CallRecording(
-      endTime: const EpochDateTimeConverter().fromJson(
+      endTime: const StreamDateTimeConverter().fromJson(
         json['end_time'] as Object,
       ),
       filename: json['filename'] as String,
       recordingType: json['recording_type'] as String,
       sessionId: json['session_id'] as String,
-      startTime: const EpochDateTimeConverter().fromJson(
+      startTime: const StreamDateTimeConverter().fromJson(
         json['start_time'] as Object,
       ),
       url: json['url'] as String,
@@ -22,10 +22,10 @@ CallRecording _$CallRecordingFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$CallRecordingToJson(CallRecording instance) =>
     <String, dynamic>{
-      'end_time': const EpochDateTimeConverter().toJson(instance.endTime),
+      'end_time': const StreamDateTimeConverter().toJson(instance.endTime),
       'filename': instance.filename,
       'recording_type': instance.recordingType,
       'session_id': instance.sessionId,
-      'start_time': const EpochDateTimeConverter().toJson(instance.startTime),
+      'start_time': const StreamDateTimeConverter().toJson(instance.startTime),
       'url': instance.url,
     };

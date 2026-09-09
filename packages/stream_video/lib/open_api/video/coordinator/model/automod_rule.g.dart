@@ -7,28 +7,14 @@ part of 'automod_rule.dart';
 // **************************************************************************
 
 AutomodRule _$AutomodRuleFromJson(Map<String, dynamic> json) => AutomodRule(
-  action: $enumDecode(
-    _$AutomodRuleActionEnumMap,
-    json['action'],
-    unknownValue: AutomodRuleAction.unknown,
-  ),
+  action: AutomodRuleAction.fromJson(json['action'] as String),
   label: json['label'] as String,
   threshold: (json['threshold'] as num).toDouble(),
 );
 
 Map<String, dynamic> _$AutomodRuleToJson(AutomodRule instance) =>
     <String, dynamic>{
-      'action': _$AutomodRuleActionEnumMap[instance.action]!,
+      'action': instance.action.toJson(),
       'label': instance.label,
       'threshold': instance.threshold,
     };
-
-const _$AutomodRuleActionEnumMap = {
-  AutomodRuleAction.bounce: 'bounce',
-  AutomodRuleAction.bounceFlag: 'bounce_flag',
-  AutomodRuleAction.bounceRemove: 'bounce_remove',
-  AutomodRuleAction.flag: 'flag',
-  AutomodRuleAction.remove: 'remove',
-  AutomodRuleAction.shadow: 'shadow',
-  AutomodRuleAction.unknown: '_unknown',
-};

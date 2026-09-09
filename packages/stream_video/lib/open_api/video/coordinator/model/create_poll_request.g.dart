@@ -20,11 +20,11 @@ CreatePollRequest _$CreatePollRequestFromJson(Map<String, dynamic> json) =>
       options: (json['options'] as List<dynamic>?)
           ?.map((e) => PollOptionInput.fromJson(e as Map<String, dynamic>))
           .toList(),
-      votingVisibility: $enumDecodeNullable(
-        _$CreatePollRequestVotingVisibilityEnumMap,
-        json['voting_visibility'],
-        unknownValue: CreatePollRequestVotingVisibility.unknown,
-      ),
+      votingVisibility: json['voting_visibility'] == null
+          ? null
+          : CreatePollRequestVotingVisibility.fromJson(
+              json['voting_visibility'] as String,
+            ),
     );
 
 Map<String, dynamic> _$CreatePollRequestToJson(CreatePollRequest instance) =>
@@ -39,12 +39,5 @@ Map<String, dynamic> _$CreatePollRequestToJson(CreatePollRequest instance) =>
       'max_votes_allowed': instance.maxVotesAllowed,
       'name': instance.name,
       'options': instance.options?.map((e) => e.toJson()).toList(),
-      'voting_visibility':
-          _$CreatePollRequestVotingVisibilityEnumMap[instance.votingVisibility],
+      'voting_visibility': instance.votingVisibility?.toJson(),
     };
-
-const _$CreatePollRequestVotingVisibilityEnumMap = {
-  CreatePollRequestVotingVisibility.anonymous: 'anonymous',
-  CreatePollRequestVotingVisibility.public: 'public',
-  CreatePollRequestVotingVisibility.unknown: '_unknown',
-};

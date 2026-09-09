@@ -11,19 +11,19 @@ CallStatsSessionResponse _$CallStatsSessionResponseFromJson(
 ) => CallStatsSessionResponse(
   callEndedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['call_ended_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   callId: json['call_id'] as String,
   callSessionId: json['call_session_id'] as String,
   callStartedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['call_started_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   callType: json['call_type'] as String,
   counts: CallStatsParticipantCounts.fromJson(
     json['counts'] as Map<String, dynamic>,
   ),
-  generatedAt: const EpochDateTimeConverter().fromJson(
+  generatedAt: const StreamDateTimeConverter().fromJson(
     json['generated_at'] as Object,
   ),
 );
@@ -33,17 +33,17 @@ Map<String, dynamic> _$CallStatsSessionResponseToJson(
 ) => <String, dynamic>{
   'call_ended_at': _$JsonConverterToJson<Object, DateTime>(
     instance.callEndedAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'call_id': instance.callId,
   'call_session_id': instance.callSessionId,
   'call_started_at': _$JsonConverterToJson<Object, DateTime>(
     instance.callStartedAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'call_type': instance.callType,
   'counts': instance.counts.toJson(),
-  'generated_at': const EpochDateTimeConverter().toJson(instance.generatedAt),
+  'generated_at': const StreamDateTimeConverter().toJson(instance.generatedAt),
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

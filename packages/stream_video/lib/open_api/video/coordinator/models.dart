@@ -1,14 +1,17 @@
 // ignore_for_file: directives_ordering
 
-import 'package:json_annotation/json_annotation.dart';
+export 'package:stream_core/stream_core.dart'
+    show StreamApiError, StreamDateTimeConverter;
 
-export 'package:stream_core/stream_core.dart' show StreamApiError;
-
+export 'model/ai_audio_config_request.dart';
+export 'model/ai_audio_config_response.dart';
 export 'model/ai_image_config.dart';
 export 'model/ai_image_label_definition.dart';
 export 'model/ai_text_config.dart';
-export 'model/ai_video_config.dart';
+export 'model/ai_video_config_request.dart';
+export 'model/ai_video_config_response.dart';
 export 'model/aws_rekognition_rule.dart';
+export 'model/absent_metric.dart';
 export 'model/accept_call_response.dart';
 export 'model/action.dart';
 export 'model/action_log_response.dart';
@@ -22,6 +25,7 @@ export 'model/appeal_item_response.dart';
 export 'model/appeal_request.dart';
 export 'model/appeal_response.dart';
 export 'model/attachment.dart';
+export 'model/audience.dart';
 export 'model/audio_settings_request.dart';
 export 'model/audio_settings_response.dart';
 export 'model/automod_platform_circumvention_config.dart';
@@ -35,7 +39,6 @@ export 'model/ban_action_request_payload.dart';
 export 'model/ban_info_response.dart';
 export 'model/ban_options.dart';
 export 'model/ban_request.dart';
-export 'model/ban_response.dart';
 export 'model/block_action_request_payload.dart';
 export 'model/block_list_config.dart';
 export 'model/block_list_options.dart';
@@ -51,6 +54,9 @@ export 'model/bodyguard_profile_summary.dart';
 export 'model/bodyguard_rule.dart';
 export 'model/bodyguard_severity_rule.dart';
 export 'model/bound.dart';
+export 'model/broadcast_digest.dart';
+export 'model/broadcast_info.dart';
+export 'model/broadcast_segment.dart';
 export 'model/broadcast_settings_request.dart';
 export 'model/broadcast_settings_response.dart';
 export 'model/bulk_action_appeals_request.dart';
@@ -147,8 +153,10 @@ export 'model/call_violation_count_parameters.dart';
 export 'model/calls_per_day_report.dart';
 export 'model/calls_per_day_report_response.dart';
 export 'model/channel_config_with_info.dart';
+export 'model/channel_member_partial_response.dart';
 export 'model/channel_member_response.dart';
 export 'model/channel_message_count_rule_parameters.dart';
+export 'model/channel_metadata.dart';
 export 'model/channel_mute.dart';
 export 'model/channel_own_capability.dart';
 export 'model/channel_push_preferences_response.dart';
@@ -173,13 +181,16 @@ export 'model/collect_user_feedback_request.dart';
 export 'model/collect_user_feedback_response.dart';
 export 'model/command.dart';
 export 'model/composite_recording_response.dart';
+export 'model/concurrency_minute.dart';
 export 'model/config_response.dart';
 export 'model/connected_event.dart';
 export 'model/connection_error_event.dart';
 export 'model/content_count_rule_parameters.dart';
 export 'model/content_custom_property_count_parameters.dart';
+export 'model/content_custom_property_parameters.dart';
 export 'model/coordinates_response.dart';
 export 'model/count_by_minute_response.dart';
+export 'model/coverage.dart';
 export 'model/create_block_list_request.dart';
 export 'model/create_block_list_response.dart';
 export 'model/create_device_request.dart';
@@ -187,6 +198,7 @@ export 'model/create_guest_request.dart';
 export 'model/create_guest_response.dart';
 export 'model/create_poll_option_request.dart';
 export 'model/create_poll_request.dart';
+export 'model/create_queue_request.dart';
 export 'model/create_user_group_request.dart';
 export 'model/create_user_group_response.dart';
 export 'model/credentials.dart';
@@ -209,8 +221,10 @@ export 'model/delete_moderation_config_response.dart';
 export 'model/delete_reaction_request_payload.dart';
 export 'model/delete_recording_response.dart';
 export 'model/delete_transcription_response.dart';
+export 'model/delete_user_messages_request_payload.dart';
 export 'model/delete_user_request_payload.dart';
 export 'model/delivery_receipts_response.dart';
+export 'model/delivery_zone_segment.dart';
 export 'model/device_response.dart';
 export 'model/draft_payload_response.dart';
 export 'model/draft_response.dart';
@@ -219,9 +233,10 @@ export 'model/edge_response.dart';
 export 'model/egress_hls_response.dart';
 export 'model/egress_rtmp_response.dart';
 export 'model/egress_response.dart';
-export 'model/end_call_response.dart';
+export 'model/encoding_profile.dart';
 export 'model/encryption_settings_request.dart';
 export 'model/encryption_settings_response.dart';
+export 'model/end_call_response.dart';
 export 'model/enriched_activity.dart';
 export 'model/enriched_reaction.dart';
 export 'model/entity_creator_response.dart';
@@ -240,6 +255,7 @@ export 'model/feeds_preferences.dart';
 export 'model/feeds_preferences_response.dart';
 export 'model/feeds_reaction_group_response.dart';
 export 'model/feeds_reaction_response.dart';
+export 'model/feeds_share_response.dart';
 export 'model/feeds_v3_activity_response.dart';
 export 'model/feeds_v3_comment_response.dart';
 export 'model/field.dart';
@@ -248,12 +264,14 @@ export 'model/file_upload_request.dart';
 export 'model/file_upload_response.dart';
 export 'model/filter_config_response.dart';
 export 'model/flag_count_rule_parameters.dart';
+export 'model/flag_item_response.dart';
 export 'model/flag_request.dart';
-export 'model/flag_response.dart';
 export 'model/flag_user_options.dart';
 export 'model/flood_config.dart';
 export 'model/flood_identical_config.dart';
+export 'model/flood_identical_rule_parameters.dart';
 export 'model/flood_similar_config.dart';
+export 'model/flood_similar_rule_parameters.dart';
 export 'model/frame_recording_response.dart';
 export 'model/frame_recording_settings_request.dart';
 export 'model/frame_recording_settings_response.dart';
@@ -267,6 +285,7 @@ export 'model/get_blocked_users_response.dart';
 export 'model/get_call_participant_session_metrics_response.dart';
 export 'model/get_call_report_response.dart';
 export 'model/get_call_response.dart';
+export 'model/get_call_ring_state_response.dart';
 export 'model/get_call_session_participant_stats_details_response.dart';
 export 'model/get_config_response.dart';
 export 'model/get_edges_response.dart';
@@ -282,6 +301,8 @@ export 'model/hls_settings_request.dart';
 export 'model/hls_settings_response.dart';
 export 'model/harm_config.dart';
 export 'model/ice_server_response.dart';
+export 'model/ip_content_count_rule_parameters.dart';
+export 'model/ip_flag_count_rule_parameters.dart';
 export 'model/image_content_parameters.dart';
 export 'model/image_data.dart';
 export 'model/image_rule_parameters.dart';
@@ -289,6 +310,9 @@ export 'model/image_size.dart';
 export 'model/image_upload_request.dart';
 export 'model/image_upload_response.dart';
 export 'model/images.dart';
+export 'model/import_block_list_request.dart';
+export 'model/import_block_list_response.dart';
+export 'model/incident.dart';
 export 'model/individual_recording_response.dart';
 export 'model/individual_recording_settings_request.dart';
 export 'model/individual_recording_settings_response.dart';
@@ -307,6 +331,7 @@ export 'model/ingress_video_layer_request.dart';
 export 'model/ingress_video_layer_response.dart';
 export 'model/join_call_request.dart';
 export 'model/join_call_response.dart';
+export 'model/joins.dart';
 export 'model/keyframe_ocr_rule_parameters.dart';
 export 'model/keyframe_rule_parameters.dart';
 export 'model/kick_user_request.dart';
@@ -320,6 +345,7 @@ export 'model/limits_settings_request.dart';
 export 'model/limits_settings_response.dart';
 export 'model/list_block_list_response.dart';
 export 'model/list_devices_response.dart';
+export 'model/list_queues_response.dart';
 export 'model/list_recordings_response.dart';
 export 'model/list_transcriptions_response.dart';
 export 'model/list_user_groups_response.dart';
@@ -332,13 +358,17 @@ export 'model/message_stats_response.dart';
 export 'model/metric_descriptor.dart';
 export 'model/metric_threshold.dart';
 export 'model/metric_time_series.dart';
+export 'model/metrics_pct.dart';
 export 'model/moderation_action_config_response.dart';
+export 'model/moderation_ban_response.dart';
+export 'model/moderation_call_response.dart';
 export 'model/moderation_custom_action_event.dart';
 export 'model/moderation_flag_response.dart';
 export 'model/moderation_flagged_event.dart';
 export 'model/moderation_mark_reviewed_event.dart';
 export 'model/moderation_payload.dart';
 export 'model/moderation_payload_response.dart';
+export 'model/moderation_queue_response.dart';
 export 'model/moderation_v2_response.dart';
 export 'model/mute_request.dart';
 export 'model/mute_response.dart';
@@ -346,6 +376,7 @@ export 'model/mute_users_request.dart';
 export 'model/mute_users_response.dart';
 export 'model/network_metrics_report_response.dart';
 export 'model/noise_cancellation_settings.dart';
+export 'model/ocr_content_parameters.dart';
 export 'model/ocr_rule.dart';
 export 'model/only_user_id.dart';
 export 'model/own_capability.dart';
@@ -361,6 +392,7 @@ export 'model/participant_series_track_metrics.dart';
 export 'model/participant_series_user_stats.dart';
 export 'model/participant_session_details.dart';
 export 'model/per_sdk_usage_report.dart';
+export 'model/percentiles.dart';
 export 'model/permission_request_event.dart';
 export 'model/pin_request.dart';
 export 'model/pin_response.dart';
@@ -372,12 +404,16 @@ export 'model/poll_response.dart';
 export 'model/poll_response_data.dart';
 export 'model/poll_vote_response_data.dart';
 export 'model/poll_votes_response.dart';
+export 'model/poor_by_cause.dart';
+export 'model/poor_tail.dart';
 export 'model/privacy_settings_response.dart';
 export 'model/published_track_flags.dart';
 export 'model/published_track_metrics.dart';
+export 'model/publisher_session.dart';
 export 'model/publisher_stats_response.dart';
 export 'model/push_preference_input.dart';
 export 'model/push_preferences_response.dart';
+export 'model/quality.dart';
 export 'model/quality_score_report.dart';
 export 'model/quality_score_report_response.dart';
 export 'model/query_aggregate_call_stats_request.dart';
@@ -407,6 +443,7 @@ export 'model/query_review_queue_request.dart';
 export 'model/query_review_queue_response.dart';
 export 'model/query_users_payload.dart';
 export 'model/query_users_response.dart';
+export 'model/queue_response.dart';
 export 'model/rtmp_broadcast_request.dart';
 export 'model/rtmp_ingress.dart';
 export 'model/rtmp_settings_request.dart';
@@ -463,10 +500,12 @@ export 'model/sip_inbound_routing_rule_response.dart';
 export 'model/sip_pin_protection_configs_response.dart';
 export 'model/sip_trunk_response.dart';
 export 'model/srt_ingress.dart';
+export 'model/score_bands.dart';
 export 'model/screensharing_settings_request.dart';
 export 'model/screensharing_settings_response.dart';
 export 'model/search_roles_response.dart';
 export 'model/search_user_groups_response.dart';
+export 'model/segments.dart';
 export 'model/send_call_event_request.dart';
 export 'model/send_call_event_response.dart';
 export 'model/send_video_reaction_request.dart';
@@ -481,6 +520,8 @@ export 'model/shared_location_response_data.dart';
 export 'model/shared_locations_response.dart';
 export 'model/sip_inbound_credentials.dart';
 export 'model/sort_param_request.dart';
+export 'model/source_health.dart';
+export 'model/source_interruption.dart';
 export 'model/speech_segment_config.dart';
 export 'model/start_closed_captions_request.dart';
 export 'model/start_closed_captions_response.dart';
@@ -508,6 +549,7 @@ export 'model/stop_transcription_response.dart';
 export 'model/submit_action_request.dart';
 export 'model/submit_action_response.dart';
 export 'model/subscriber_stats_response.dart';
+export 'model/supporting.dart';
 export 'model/target_resolution.dart';
 export 'model/text_content_parameters.dart';
 export 'model/text_rule_parameters.dart';
@@ -515,18 +557,22 @@ export 'model/thresholds.dart';
 export 'model/thumbnail_response.dart';
 export 'model/thumbnails_settings_request.dart';
 export 'model/thumbnails_settings_response.dart';
+export 'model/time_window.dart';
 export 'model/track_stats_response.dart';
 export 'model/transcription_settings_request.dart';
 export 'model/transcription_settings_response.dart';
 export 'model/translation_settings.dart';
 export 'model/typing_indicators_response.dart';
 export 'model/unban_action_request_payload.dart';
+export 'model/unban_response.dart';
 export 'model/unblock_action_request_payload.dart';
 export 'model/unblock_user_request.dart';
 export 'model/unblock_user_response.dart';
 export 'model/unblock_users_request.dart';
 export 'model/unblock_users_response.dart';
 export 'model/unblocked_user_event.dart';
+export 'model/unmute_request.dart';
+export 'model/unmute_response.dart';
 export 'model/unpin_request.dart';
 export 'model/unpin_response.dart';
 export 'model/update_block_list_request.dart';
@@ -539,6 +585,7 @@ export 'model/update_live_location_request.dart';
 export 'model/update_poll_option_request.dart';
 export 'model/update_poll_partial_request.dart';
 export 'model/update_poll_request.dart';
+export 'model/update_queue_request.dart';
 export 'model/update_user_group_request.dart';
 export 'model/update_user_group_response.dart';
 export 'model/update_user_partial_request.dart';
@@ -563,6 +610,7 @@ export 'model/user_deactivated_event.dart';
 export 'model/user_deleted_event.dart';
 export 'model/user_feedback_report.dart';
 export 'model/user_feedback_report_response.dart';
+export 'model/user_group_member.dart';
 export 'model/user_group_response.dart';
 export 'model/user_identical_content_count_parameters.dart';
 export 'model/user_mute_response.dart';
@@ -587,41 +635,9 @@ export 'model/video_reactions_response.dart';
 export 'model/video_rule_parameters.dart';
 export 'model/video_settings_request.dart';
 export 'model/video_settings_response.dart';
+export 'model/viewer_behavior.dart';
 export 'model/whip_ingress.dart';
 export 'model/ws_auth_message.dart';
 export 'model/ws_call_event.dart';
 export 'model/ws_client_event.dart';
 export 'model/ws_event.dart';
-
-/// A [JsonConverter] for the API's [DateTime] fields.
-///
-/// Depending on the api version, the backend encodes timestamps either as
-/// ISO-8601 strings (e.g. the video coordinator) or as epoch nanoseconds
-/// (e.g. feeds, generated with `--encode-time-as-unix-timestamp`). The same
-/// generated client must read both, so this converter accepts either form:
-///
-/// - `fromJson`: parses an ISO-8601 [String] or epoch-nanoseconds [num] into a
-///   UTC [DateTime].
-/// - `toJson`: emits an ISO-8601 [String]; the backend accepts RFC3339 on
-///   request bodies regardless of how it encodes responses.
-class EpochDateTimeConverter implements JsonConverter<DateTime, Object> {
-  /// Creates a constant [EpochDateTimeConverter].
-  const EpochDateTimeConverter();
-
-  @override
-  DateTime fromJson(Object json) {
-    if (json is String) {
-      return DateTime.parse(json).toUtc();
-    }
-    if (json is num) {
-      // Epoch nanoseconds -> microseconds.
-      return DateTime.fromMicrosecondsSinceEpoch(json ~/ 1000, isUtc: true);
-    }
-    throw ArgumentError(
-      'Cannot convert $json (${json.runtimeType}) to DateTime',
-    );
-  }
-
-  @override
-  Object toJson(DateTime object) => object.microsecondsSinceEpoch * 1000;
-}

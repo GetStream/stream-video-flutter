@@ -9,18 +9,11 @@ part of 'individual_recording_settings_request.dart';
 IndividualRecordingSettingsRequest _$IndividualRecordingSettingsRequestFromJson(
   Map<String, dynamic> json,
 ) => IndividualRecordingSettingsRequest(
-  mode: $enumDecode(
-    _$IndividualRecordingSettingsRequestModeEnumMap,
-    json['mode'],
-    unknownValue: IndividualRecordingSettingsRequestMode.unknown,
-  ),
+  mode: IndividualRecordingSettingsRequestMode.fromJson(json['mode'] as String),
   outputTypes: (json['output_types'] as List<dynamic>?)
       ?.map(
-        (e) => $enumDecode(
-          _$IndividualRecordingSettingsRequestOutputTypesEnumMap,
-          e,
-          unknownValue: IndividualRecordingSettingsRequestOutputTypes.unknown,
-        ),
+        (e) =>
+            IndividualRecordingSettingsRequestOutputTypes.fromJson(e as String),
       )
       .toList(),
 );
@@ -28,28 +21,6 @@ IndividualRecordingSettingsRequest _$IndividualRecordingSettingsRequestFromJson(
 Map<String, dynamic> _$IndividualRecordingSettingsRequestToJson(
   IndividualRecordingSettingsRequest instance,
 ) => <String, dynamic>{
-  'mode': _$IndividualRecordingSettingsRequestModeEnumMap[instance.mode]!,
-  'output_types': instance.outputTypes
-      ?.map((e) => _$IndividualRecordingSettingsRequestOutputTypesEnumMap[e]!)
-      .toList(),
-};
-
-const _$IndividualRecordingSettingsRequestModeEnumMap = {
-  IndividualRecordingSettingsRequestMode.autoOn: 'auto-on',
-  IndividualRecordingSettingsRequestMode.available: 'available',
-  IndividualRecordingSettingsRequestMode.disabled: 'disabled',
-  IndividualRecordingSettingsRequestMode.unknown: '_unknown',
-};
-
-const _$IndividualRecordingSettingsRequestOutputTypesEnumMap = {
-  IndividualRecordingSettingsRequestOutputTypes.audioOnly: 'audio_only',
-  IndividualRecordingSettingsRequestOutputTypes.audioVideo: 'audio_video',
-  IndividualRecordingSettingsRequestOutputTypes.screenshareAudioOnly:
-      'screenshare_audio_only',
-  IndividualRecordingSettingsRequestOutputTypes.screenshareAudioVideo:
-      'screenshare_audio_video',
-  IndividualRecordingSettingsRequestOutputTypes.screenshareVideoOnly:
-      'screenshare_video_only',
-  IndividualRecordingSettingsRequestOutputTypes.videoOnly: 'video_only',
-  IndividualRecordingSettingsRequestOutputTypes.unknown: '_unknown',
+  'mode': instance.mode.toJson(),
+  'output_types': instance.outputTypes?.map((e) => e.toJson()).toList(),
 };

@@ -29,12 +29,14 @@ mixin _$FeedsV3ActivityResponse {
   int? get friendReactionCount;
   List<FeedsReactionResponse>? get friendReactions;
   bool get hidden;
+  Map<String, String>? get i18n;
   String get id;
   List<String> get interestTags;
   bool? get isRead;
   bool? get isSeen;
   bool? get isWatched;
   List<FeedsReactionResponse> get latestReactions;
+  List<FeedsShareResponse>? get latestShares;
   FeedsActivityLocation? get location;
   List<UserResponse> get mentionedUsers;
   Map<String, int>? get metrics;
@@ -113,6 +115,7 @@ mixin _$FeedsV3ActivityResponse {
               friendReactions,
             ) &&
             (identical(other.hidden, hidden) || other.hidden == hidden) &&
+            const DeepCollectionEquality().equals(other.i18n, i18n) &&
             (identical(other.id, id) || other.id == id) &&
             const DeepCollectionEquality().equals(
               other.interestTags,
@@ -125,6 +128,10 @@ mixin _$FeedsV3ActivityResponse {
             const DeepCollectionEquality().equals(
               other.latestReactions,
               latestReactions,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other.latestShares,
+              latestShares,
             ) &&
             (identical(other.location, location) ||
                 other.location == location) &&
@@ -200,12 +207,14 @@ mixin _$FeedsV3ActivityResponse {
     friendReactionCount,
     const DeepCollectionEquality().hash(friendReactions),
     hidden,
+    const DeepCollectionEquality().hash(i18n),
     id,
     const DeepCollectionEquality().hash(interestTags),
     isRead,
     isSeen,
     isWatched,
     const DeepCollectionEquality().hash(latestReactions),
+    const DeepCollectionEquality().hash(latestShares),
     location,
     const DeepCollectionEquality().hash(mentionedUsers),
     const DeepCollectionEquality().hash(metrics),
@@ -236,7 +245,7 @@ mixin _$FeedsV3ActivityResponse {
 
   @override
   String toString() {
-    return 'FeedsV3ActivityResponse(attachments: $attachments, bookmarkCount: $bookmarkCount, collections: $collections, commentCount: $commentCount, comments: $comments, createdAt: $createdAt, currentFeed: $currentFeed, custom: $custom, deletedAt: $deletedAt, editedAt: $editedAt, expiresAt: $expiresAt, feeds: $feeds, filterTags: $filterTags, friendReactionCount: $friendReactionCount, friendReactions: $friendReactions, hidden: $hidden, id: $id, interestTags: $interestTags, isRead: $isRead, isSeen: $isSeen, isWatched: $isWatched, latestReactions: $latestReactions, location: $location, mentionedUsers: $mentionedUsers, metrics: $metrics, moderation: $moderation, moderationAction: $moderationAction, notificationContext: $notificationContext, ownBookmarks: $ownBookmarks, ownReactions: $ownReactions, parent: $parent, poll: $poll, popularity: $popularity, preview: $preview, reactionCount: $reactionCount, reactionGroups: $reactionGroups, restrictReplies: $restrictReplies, score: $score, scoreVars: $scoreVars, searchData: $searchData, selectorSource: $selectorSource, shareCount: $shareCount, text: $text, type: $type, updatedAt: $updatedAt, user: $user, visibility: $visibility, visibilityTag: $visibilityTag)';
+    return 'FeedsV3ActivityResponse(attachments: $attachments, bookmarkCount: $bookmarkCount, collections: $collections, commentCount: $commentCount, comments: $comments, createdAt: $createdAt, currentFeed: $currentFeed, custom: $custom, deletedAt: $deletedAt, editedAt: $editedAt, expiresAt: $expiresAt, feeds: $feeds, filterTags: $filterTags, friendReactionCount: $friendReactionCount, friendReactions: $friendReactions, hidden: $hidden, i18n: $i18n, id: $id, interestTags: $interestTags, isRead: $isRead, isSeen: $isSeen, isWatched: $isWatched, latestReactions: $latestReactions, latestShares: $latestShares, location: $location, mentionedUsers: $mentionedUsers, metrics: $metrics, moderation: $moderation, moderationAction: $moderationAction, notificationContext: $notificationContext, ownBookmarks: $ownBookmarks, ownReactions: $ownReactions, parent: $parent, poll: $poll, popularity: $popularity, preview: $preview, reactionCount: $reactionCount, reactionGroups: $reactionGroups, restrictReplies: $restrictReplies, score: $score, scoreVars: $scoreVars, searchData: $searchData, selectorSource: $selectorSource, shareCount: $shareCount, text: $text, type: $type, updatedAt: $updatedAt, user: $user, visibility: $visibility, visibilityTag: $visibilityTag)';
   }
 }
 
@@ -264,12 +273,14 @@ abstract mixin class $FeedsV3ActivityResponseCopyWith<$Res> {
     int? friendReactionCount,
     List<FeedsReactionResponse>? friendReactions,
     bool hidden,
+    Map<String, String>? i18n,
     String id,
     List<String> interestTags,
     bool? isRead,
     bool? isSeen,
     bool? isWatched,
     List<FeedsReactionResponse> latestReactions,
+    List<FeedsShareResponse>? latestShares,
     FeedsActivityLocation? location,
     List<UserResponse> mentionedUsers,
     Map<String, int>? metrics,
@@ -328,12 +339,14 @@ class _$FeedsV3ActivityResponseCopyWithImpl<$Res>
     Object? friendReactionCount = freezed,
     Object? friendReactions = freezed,
     Object? hidden = null,
+    Object? i18n = freezed,
     Object? id = null,
     Object? interestTags = null,
     Object? isRead = freezed,
     Object? isSeen = freezed,
     Object? isWatched = freezed,
     Object? latestReactions = null,
+    Object? latestShares = freezed,
     Object? location = freezed,
     Object? mentionedUsers = null,
     Object? metrics = freezed,
@@ -427,6 +440,10 @@ class _$FeedsV3ActivityResponseCopyWithImpl<$Res>
             ? _self.hidden
             : hidden // ignore: cast_nullable_to_non_nullable
                   as bool,
+        i18n: freezed == i18n
+            ? _self.i18n
+            : i18n // ignore: cast_nullable_to_non_nullable
+                  as Map<String, String>?,
         id: null == id
             ? _self.id
             : id // ignore: cast_nullable_to_non_nullable
@@ -451,6 +468,10 @@ class _$FeedsV3ActivityResponseCopyWithImpl<$Res>
             ? _self.latestReactions
             : latestReactions // ignore: cast_nullable_to_non_nullable
                   as List<FeedsReactionResponse>,
+        latestShares: freezed == latestShares
+            ? _self.latestShares
+            : latestShares // ignore: cast_nullable_to_non_nullable
+                  as List<FeedsShareResponse>?,
         location: freezed == location
             ? _self.location
             : location // ignore: cast_nullable_to_non_nullable

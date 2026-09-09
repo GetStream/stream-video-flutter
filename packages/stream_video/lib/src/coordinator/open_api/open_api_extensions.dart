@@ -116,7 +116,7 @@ extension EnvelopeExt on open.CallResponse {
       team: team ?? '',
       ownCapabilities:
           ownCapabilities?.map(
-            (it) => CallPermission.fromAlias(it.name),
+            CallPermission.fromAlias,
           ) ??
           [],
       blockedUserIds: List.unmodifiable(blockedUserIds),
@@ -250,7 +250,7 @@ extension CallSettingsExt on open.CallSettingsResponse {
         targetResolution: video.targetResolution.toSettingsDomain(),
       ),
       encryption: StreamEncryptionSettings(
-        mode: StreamEncryptionMode.fromString(encryption.mode.name),
+        mode: StreamEncryptionMode.fromString(encryption.mode),
       ),
       screenShare: StreamScreenShareSettings(
         accessRequestEnabled: screensharing.accessRequestEnabled,
@@ -287,7 +287,7 @@ extension CallSettingsExt on open.CallSettingsResponse {
       ),
       individualRecording: StreamIndividualRecordingSettings(
         mode: IndividualRecordingSettingsMode.fromString(
-          individualRecording.mode.name,
+          individualRecording.mode,
         ),
         outputTypes:
             individualRecording.outputTypes
@@ -298,7 +298,7 @@ extension CallSettingsExt on open.CallSettingsResponse {
       ),
       rawRecording: StreamRawRecordingSettings(
         mode: RawRecordingSettingsMode.fromString(
-          rawRecording.mode.name,
+          rawRecording.mode,
         ),
         audioOnly: rawRecording.audioOnly,
       ),
@@ -386,7 +386,7 @@ extension on open.TranscriptionSettingsResponseMode {
 extension on open.TranscriptionSettingsResponseLanguage {
   TranscriptionSettingsLanguage toSettingsDomain() {
     return TranscriptionSettingsLanguage.values.firstWhereOrNull(
-          (it) => it.value == name,
+          (it) => it.value == this,
         ) ??
         TranscriptionSettingsLanguage.auto;
   }
@@ -509,7 +509,6 @@ extension IngressVideoLayerRequestCodecExt on IngressVideoLayerRequestCodec {
     return switch (value) {
       'h264' => IngressVideoLayerRequestCodec.h264,
       'vp8' => IngressVideoLayerRequestCodec.vp8,
-      '_unknown' => IngressVideoLayerRequestCodec.unknown,
       _ => IngressVideoLayerRequestCodec.h264,
     };
   }

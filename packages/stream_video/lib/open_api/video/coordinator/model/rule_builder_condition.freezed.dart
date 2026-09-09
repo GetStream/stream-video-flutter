@@ -21,11 +21,17 @@ mixin _$RuleBuilderCondition {
   double? get confidence;
   ContentCountRuleParameters? get contentCountRuleParams;
   ContentCustomPropertyCountParameters? get contentCustomPropertyCountParams;
+  ContentCustomPropertyParameters? get contentCustomPropertyParams;
   FlagCountRuleParameters? get contentFlagCountRuleParams;
+  FloodIdenticalRuleParameters? get floodIdenticalParams;
+  FloodSimilarRuleParameters? get floodSimilarParams;
   ImageContentParameters? get imageContentParams;
   ImageRuleParameters? get imageRuleParams;
+  IPContentCountRuleParameters? get ipContentCountRuleParams;
+  IPFlagCountRuleParameters? get ipFlagCountRuleParams;
   KeyframeOCRRuleParameters? get keyframeOcrRuleParams;
   KeyframeRuleParameters? get keyframeRuleParams;
+  OCRContentParameters? get ocrContentParams;
   TextContentParameters? get textContentParams;
   TextRuleParameters? get textRuleParams;
   String? get type;
@@ -87,19 +93,38 @@ mixin _$RuleBuilderCondition {
                 other.contentCustomPropertyCountParams ==
                     contentCustomPropertyCountParams) &&
             (identical(
+                  other.contentCustomPropertyParams,
+                  contentCustomPropertyParams,
+                ) ||
+                other.contentCustomPropertyParams ==
+                    contentCustomPropertyParams) &&
+            (identical(
                   other.contentFlagCountRuleParams,
                   contentFlagCountRuleParams,
                 ) ||
                 other.contentFlagCountRuleParams ==
                     contentFlagCountRuleParams) &&
+            (identical(other.floodIdenticalParams, floodIdenticalParams) ||
+                other.floodIdenticalParams == floodIdenticalParams) &&
+            (identical(other.floodSimilarParams, floodSimilarParams) ||
+                other.floodSimilarParams == floodSimilarParams) &&
             (identical(other.imageContentParams, imageContentParams) ||
                 other.imageContentParams == imageContentParams) &&
             (identical(other.imageRuleParams, imageRuleParams) ||
                 other.imageRuleParams == imageRuleParams) &&
+            (identical(
+                  other.ipContentCountRuleParams,
+                  ipContentCountRuleParams,
+                ) ||
+                other.ipContentCountRuleParams == ipContentCountRuleParams) &&
+            (identical(other.ipFlagCountRuleParams, ipFlagCountRuleParams) ||
+                other.ipFlagCountRuleParams == ipFlagCountRuleParams) &&
             (identical(other.keyframeOcrRuleParams, keyframeOcrRuleParams) ||
                 other.keyframeOcrRuleParams == keyframeOcrRuleParams) &&
             (identical(other.keyframeRuleParams, keyframeRuleParams) ||
                 other.keyframeRuleParams == keyframeRuleParams) &&
+            (identical(other.ocrContentParams, ocrContentParams) ||
+                other.ocrContentParams == ocrContentParams) &&
             (identical(other.textContentParams, textContentParams) ||
                 other.textContentParams == textContentParams) &&
             (identical(other.textRuleParams, textRuleParams) ||
@@ -147,11 +172,17 @@ mixin _$RuleBuilderCondition {
     confidence,
     contentCountRuleParams,
     contentCustomPropertyCountParams,
+    contentCustomPropertyParams,
     contentFlagCountRuleParams,
+    floodIdenticalParams,
+    floodSimilarParams,
     imageContentParams,
     imageRuleParams,
+    ipContentCountRuleParams,
+    ipFlagCountRuleParams,
     keyframeOcrRuleParams,
     keyframeRuleParams,
+    ocrContentParams,
     textContentParams,
     textRuleParams,
     type,
@@ -167,7 +198,7 @@ mixin _$RuleBuilderCondition {
 
   @override
   String toString() {
-    return 'RuleBuilderCondition(callCustomPropertyParams: $callCustomPropertyParams, callTypeRuleParams: $callTypeRuleParams, callViolationCountParams: $callViolationCountParams, channelMessageCountRuleParams: $channelMessageCountRuleParams, closedCaptionRuleParams: $closedCaptionRuleParams, confidence: $confidence, contentCountRuleParams: $contentCountRuleParams, contentCustomPropertyCountParams: $contentCustomPropertyCountParams, contentFlagCountRuleParams: $contentFlagCountRuleParams, imageContentParams: $imageContentParams, imageRuleParams: $imageRuleParams, keyframeOcrRuleParams: $keyframeOcrRuleParams, keyframeRuleParams: $keyframeRuleParams, textContentParams: $textContentParams, textRuleParams: $textRuleParams, type: $type, userCreatedWithinParams: $userCreatedWithinParams, userCustomPropertyParams: $userCustomPropertyParams, userFlagCountRuleParams: $userFlagCountRuleParams, userIdenticalContentCountParams: $userIdenticalContentCountParams, userRoleParams: $userRoleParams, userRuleParams: $userRuleParams, videoContentParams: $videoContentParams, videoRuleParams: $videoRuleParams)';
+    return 'RuleBuilderCondition(callCustomPropertyParams: $callCustomPropertyParams, callTypeRuleParams: $callTypeRuleParams, callViolationCountParams: $callViolationCountParams, channelMessageCountRuleParams: $channelMessageCountRuleParams, closedCaptionRuleParams: $closedCaptionRuleParams, confidence: $confidence, contentCountRuleParams: $contentCountRuleParams, contentCustomPropertyCountParams: $contentCustomPropertyCountParams, contentCustomPropertyParams: $contentCustomPropertyParams, contentFlagCountRuleParams: $contentFlagCountRuleParams, floodIdenticalParams: $floodIdenticalParams, floodSimilarParams: $floodSimilarParams, imageContentParams: $imageContentParams, imageRuleParams: $imageRuleParams, ipContentCountRuleParams: $ipContentCountRuleParams, ipFlagCountRuleParams: $ipFlagCountRuleParams, keyframeOcrRuleParams: $keyframeOcrRuleParams, keyframeRuleParams: $keyframeRuleParams, ocrContentParams: $ocrContentParams, textContentParams: $textContentParams, textRuleParams: $textRuleParams, type: $type, userCreatedWithinParams: $userCreatedWithinParams, userCustomPropertyParams: $userCustomPropertyParams, userFlagCountRuleParams: $userFlagCountRuleParams, userIdenticalContentCountParams: $userIdenticalContentCountParams, userRoleParams: $userRoleParams, userRuleParams: $userRuleParams, videoContentParams: $videoContentParams, videoRuleParams: $videoRuleParams)';
   }
 }
 
@@ -187,11 +218,17 @@ abstract mixin class $RuleBuilderConditionCopyWith<$Res> {
     double? confidence,
     ContentCountRuleParameters? contentCountRuleParams,
     ContentCustomPropertyCountParameters? contentCustomPropertyCountParams,
+    ContentCustomPropertyParameters? contentCustomPropertyParams,
     FlagCountRuleParameters? contentFlagCountRuleParams,
+    FloodIdenticalRuleParameters? floodIdenticalParams,
+    FloodSimilarRuleParameters? floodSimilarParams,
     ImageContentParameters? imageContentParams,
     ImageRuleParameters? imageRuleParams,
+    IPContentCountRuleParameters? ipContentCountRuleParams,
+    IPFlagCountRuleParameters? ipFlagCountRuleParams,
     KeyframeOCRRuleParameters? keyframeOcrRuleParams,
     KeyframeRuleParameters? keyframeRuleParams,
+    OCRContentParameters? ocrContentParams,
     TextContentParameters? textContentParams,
     TextRuleParameters? textRuleParams,
     String? type,
@@ -227,11 +264,17 @@ class _$RuleBuilderConditionCopyWithImpl<$Res>
     Object? confidence = freezed,
     Object? contentCountRuleParams = freezed,
     Object? contentCustomPropertyCountParams = freezed,
+    Object? contentCustomPropertyParams = freezed,
     Object? contentFlagCountRuleParams = freezed,
+    Object? floodIdenticalParams = freezed,
+    Object? floodSimilarParams = freezed,
     Object? imageContentParams = freezed,
     Object? imageRuleParams = freezed,
+    Object? ipContentCountRuleParams = freezed,
+    Object? ipFlagCountRuleParams = freezed,
     Object? keyframeOcrRuleParams = freezed,
     Object? keyframeRuleParams = freezed,
+    Object? ocrContentParams = freezed,
     Object? textContentParams = freezed,
     Object? textRuleParams = freezed,
     Object? type = freezed,
@@ -279,10 +322,22 @@ class _$RuleBuilderConditionCopyWithImpl<$Res>
             ? _self.contentCustomPropertyCountParams
             : contentCustomPropertyCountParams // ignore: cast_nullable_to_non_nullable
                   as ContentCustomPropertyCountParameters?,
+        contentCustomPropertyParams: freezed == contentCustomPropertyParams
+            ? _self.contentCustomPropertyParams
+            : contentCustomPropertyParams // ignore: cast_nullable_to_non_nullable
+                  as ContentCustomPropertyParameters?,
         contentFlagCountRuleParams: freezed == contentFlagCountRuleParams
             ? _self.contentFlagCountRuleParams
             : contentFlagCountRuleParams // ignore: cast_nullable_to_non_nullable
                   as FlagCountRuleParameters?,
+        floodIdenticalParams: freezed == floodIdenticalParams
+            ? _self.floodIdenticalParams
+            : floodIdenticalParams // ignore: cast_nullable_to_non_nullable
+                  as FloodIdenticalRuleParameters?,
+        floodSimilarParams: freezed == floodSimilarParams
+            ? _self.floodSimilarParams
+            : floodSimilarParams // ignore: cast_nullable_to_non_nullable
+                  as FloodSimilarRuleParameters?,
         imageContentParams: freezed == imageContentParams
             ? _self.imageContentParams
             : imageContentParams // ignore: cast_nullable_to_non_nullable
@@ -291,6 +346,14 @@ class _$RuleBuilderConditionCopyWithImpl<$Res>
             ? _self.imageRuleParams
             : imageRuleParams // ignore: cast_nullable_to_non_nullable
                   as ImageRuleParameters?,
+        ipContentCountRuleParams: freezed == ipContentCountRuleParams
+            ? _self.ipContentCountRuleParams
+            : ipContentCountRuleParams // ignore: cast_nullable_to_non_nullable
+                  as IPContentCountRuleParameters?,
+        ipFlagCountRuleParams: freezed == ipFlagCountRuleParams
+            ? _self.ipFlagCountRuleParams
+            : ipFlagCountRuleParams // ignore: cast_nullable_to_non_nullable
+                  as IPFlagCountRuleParameters?,
         keyframeOcrRuleParams: freezed == keyframeOcrRuleParams
             ? _self.keyframeOcrRuleParams
             : keyframeOcrRuleParams // ignore: cast_nullable_to_non_nullable
@@ -299,6 +362,10 @@ class _$RuleBuilderConditionCopyWithImpl<$Res>
             ? _self.keyframeRuleParams
             : keyframeRuleParams // ignore: cast_nullable_to_non_nullable
                   as KeyframeRuleParameters?,
+        ocrContentParams: freezed == ocrContentParams
+            ? _self.ocrContentParams
+            : ocrContentParams // ignore: cast_nullable_to_non_nullable
+                  as OCRContentParameters?,
         textContentParams: freezed == textContentParams
             ? _self.textContentParams
             : textContentParams // ignore: cast_nullable_to_non_nullable

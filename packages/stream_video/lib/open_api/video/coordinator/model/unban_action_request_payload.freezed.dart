@@ -16,6 +16,7 @@ mixin _$UnbanActionRequestPayload {
   String? get channelCid;
   String? get decisionReason;
   bool? get removeFutureChannelsBan;
+  String? get targetUserId;
 
   /// Create a copy of UnbanActionRequestPayload
   /// with the given fields replaced by the non-null parameter values.
@@ -40,7 +41,9 @@ mixin _$UnbanActionRequestPayload {
                   other.removeFutureChannelsBan,
                   removeFutureChannelsBan,
                 ) ||
-                other.removeFutureChannelsBan == removeFutureChannelsBan));
+                other.removeFutureChannelsBan == removeFutureChannelsBan) &&
+            (identical(other.targetUserId, targetUserId) ||
+                other.targetUserId == targetUserId));
   }
 
   @override
@@ -49,11 +52,12 @@ mixin _$UnbanActionRequestPayload {
     channelCid,
     decisionReason,
     removeFutureChannelsBan,
+    targetUserId,
   );
 
   @override
   String toString() {
-    return 'UnbanActionRequestPayload(channelCid: $channelCid, decisionReason: $decisionReason, removeFutureChannelsBan: $removeFutureChannelsBan)';
+    return 'UnbanActionRequestPayload(channelCid: $channelCid, decisionReason: $decisionReason, removeFutureChannelsBan: $removeFutureChannelsBan, targetUserId: $targetUserId)';
   }
 }
 
@@ -68,6 +72,7 @@ abstract mixin class $UnbanActionRequestPayloadCopyWith<$Res> {
     String? channelCid,
     String? decisionReason,
     bool? removeFutureChannelsBan,
+    String? targetUserId,
   });
 }
 
@@ -87,6 +92,7 @@ class _$UnbanActionRequestPayloadCopyWithImpl<$Res>
     Object? channelCid = freezed,
     Object? decisionReason = freezed,
     Object? removeFutureChannelsBan = freezed,
+    Object? targetUserId = freezed,
   }) {
     return _then(
       UnbanActionRequestPayload(
@@ -102,6 +108,10 @@ class _$UnbanActionRequestPayloadCopyWithImpl<$Res>
             ? _self.removeFutureChannelsBan
             : removeFutureChannelsBan // ignore: cast_nullable_to_non_nullable
                   as bool?,
+        targetUserId: freezed == targetUserId
+            ? _self.targetUserId
+            : targetUserId // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }

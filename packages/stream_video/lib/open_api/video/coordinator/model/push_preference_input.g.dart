@@ -8,17 +8,13 @@ part of 'push_preference_input.dart';
 
 PushPreferenceInput _$PushPreferenceInputFromJson(Map<String, dynamic> json) =>
     PushPreferenceInput(
-      callLevel: $enumDecodeNullable(
-        _$PushPreferenceInputCallLevelEnumMap,
-        json['call_level'],
-        unknownValue: PushPreferenceInputCallLevel.unknown,
-      ),
+      callLevel: json['call_level'] == null
+          ? null
+          : PushPreferenceInputCallLevel.fromJson(json['call_level'] as String),
       channelCid: json['channel_cid'] as String?,
-      chatLevel: $enumDecodeNullable(
-        _$PushPreferenceInputChatLevelEnumMap,
-        json['chat_level'],
-        unknownValue: PushPreferenceInputChatLevel.unknown,
-      ),
+      chatLevel: json['chat_level'] == null
+          ? null
+          : PushPreferenceInputChatLevel.fromJson(json['chat_level'] as String),
       chatPreferences: json['chat_preferences'] == null
           ? null
           : ChatPreferencesInput.fromJson(
@@ -26,13 +22,13 @@ PushPreferenceInput _$PushPreferenceInputFromJson(Map<String, dynamic> json) =>
             ),
       disabledUntil: _$JsonConverterFromJson<Object, DateTime>(
         json['disabled_until'],
-        const EpochDateTimeConverter().fromJson,
+        const StreamDateTimeConverter().fromJson,
       ),
-      feedsLevel: $enumDecodeNullable(
-        _$PushPreferenceInputFeedsLevelEnumMap,
-        json['feeds_level'],
-        unknownValue: PushPreferenceInputFeedsLevel.unknown,
-      ),
+      feedsLevel: json['feeds_level'] == null
+          ? null
+          : PushPreferenceInputFeedsLevel.fromJson(
+              json['feeds_level'] as String,
+            ),
       feedsPreferences: json['feeds_preferences'] == null
           ? null
           : FeedsPreferences.fromJson(
@@ -45,48 +41,24 @@ PushPreferenceInput _$PushPreferenceInputFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$PushPreferenceInputToJson(
   PushPreferenceInput instance,
 ) => <String, dynamic>{
-  'call_level': _$PushPreferenceInputCallLevelEnumMap[instance.callLevel],
+  'call_level': instance.callLevel?.toJson(),
   'channel_cid': instance.channelCid,
-  'chat_level': _$PushPreferenceInputChatLevelEnumMap[instance.chatLevel],
+  'chat_level': instance.chatLevel?.toJson(),
   'chat_preferences': instance.chatPreferences?.toJson(),
   'disabled_until': _$JsonConverterToJson<Object, DateTime>(
     instance.disabledUntil,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
-  'feeds_level': _$PushPreferenceInputFeedsLevelEnumMap[instance.feedsLevel],
+  'feeds_level': instance.feedsLevel?.toJson(),
   'feeds_preferences': instance.feedsPreferences?.toJson(),
   'remove_disable': instance.removeDisable,
   'user_id': instance.userId,
-};
-
-const _$PushPreferenceInputCallLevelEnumMap = {
-  PushPreferenceInputCallLevel.all: 'all',
-  PushPreferenceInputCallLevel.default_: 'default',
-  PushPreferenceInputCallLevel.none: 'none',
-  PushPreferenceInputCallLevel.unknown: '_unknown',
-};
-
-const _$PushPreferenceInputChatLevelEnumMap = {
-  PushPreferenceInputChatLevel.all: 'all',
-  PushPreferenceInputChatLevel.allMentions: 'all_mentions',
-  PushPreferenceInputChatLevel.default_: 'default',
-  PushPreferenceInputChatLevel.directMentions: 'direct_mentions',
-  PushPreferenceInputChatLevel.mentions: 'mentions',
-  PushPreferenceInputChatLevel.none: 'none',
-  PushPreferenceInputChatLevel.unknown: '_unknown',
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,
   Value? Function(Json json) fromJson,
 ) => json == null ? null : fromJson(json as Json);
-
-const _$PushPreferenceInputFeedsLevelEnumMap = {
-  PushPreferenceInputFeedsLevel.all: 'all',
-  PushPreferenceInputFeedsLevel.default_: 'default',
-  PushPreferenceInputFeedsLevel.none: 'none',
-  PushPreferenceInputFeedsLevel.unknown: '_unknown',
-};
 
 Json? _$JsonConverterToJson<Json, Value>(
   Value? value,

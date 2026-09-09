@@ -11,7 +11,7 @@ IngressStartedEvent _$IngressStartedEventFromJson(Map<String, dynamic> json) =>
       callCid: json['call_cid'] as String,
       clientIp: json['client_ip'] as String?,
       clientName: json['client_name'] as String?,
-      createdAt: const EpochDateTimeConverter().fromJson(
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
       ingressStreamId: json['ingress_stream_id'] as String,
@@ -27,7 +27,7 @@ Map<String, dynamic> _$IngressStartedEventToJson(
   'call_cid': instance.callCid,
   'client_ip': instance.clientIp,
   'client_name': instance.clientName,
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'ingress_stream_id': instance.ingressStreamId,
   'publisher_type': instance.publisherType,
   'type': instance.type,

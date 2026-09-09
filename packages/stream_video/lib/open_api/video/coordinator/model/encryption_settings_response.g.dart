@@ -9,22 +9,9 @@ part of 'encryption_settings_response.dart';
 EncryptionSettingsResponse _$EncryptionSettingsResponseFromJson(
   Map<String, dynamic> json,
 ) => EncryptionSettingsResponse(
-  mode: $enumDecode(
-    _$EncryptionSettingsResponseModeEnumMap,
-    json['mode'],
-    unknownValue: EncryptionSettingsResponseMode.unknown,
-  ),
+  mode: EncryptionSettingsResponseMode.fromJson(json['mode'] as String),
 );
 
 Map<String, dynamic> _$EncryptionSettingsResponseToJson(
   EncryptionSettingsResponse instance,
-) => <String, dynamic>{
-  'mode': _$EncryptionSettingsResponseModeEnumMap[instance.mode]!,
-};
-
-const _$EncryptionSettingsResponseModeEnumMap = {
-  EncryptionSettingsResponseMode.autoOn: 'auto-on',
-  EncryptionSettingsResponseMode.available: 'available',
-  EncryptionSettingsResponseMode.disabled: 'disabled',
-  EncryptionSettingsResponseMode.unknown: '_unknown',
-};
+) => <String, dynamic>{'mode': instance.mode.toJson()};

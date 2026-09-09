@@ -10,16 +10,16 @@ ParticipantSeriesTimeframe _$ParticipantSeriesTimeframeFromJson(
   Map<String, dynamic> json,
 ) => ParticipantSeriesTimeframe(
   maxPoints: (json['max_points'] as num).toInt(),
-  since: const EpochDateTimeConverter().fromJson(json['since'] as Object),
+  since: const StreamDateTimeConverter().fromJson(json['since'] as Object),
   stepSeconds: (json['step_seconds'] as num).toInt(),
-  until: const EpochDateTimeConverter().fromJson(json['until'] as Object),
+  until: const StreamDateTimeConverter().fromJson(json['until'] as Object),
 );
 
 Map<String, dynamic> _$ParticipantSeriesTimeframeToJson(
   ParticipantSeriesTimeframe instance,
 ) => <String, dynamic>{
   'max_points': instance.maxPoints,
-  'since': const EpochDateTimeConverter().toJson(instance.since),
+  'since': const StreamDateTimeConverter().toJson(instance.since),
   'step_seconds': instance.stepSeconds,
-  'until': const EpochDateTimeConverter().toJson(instance.until),
+  'until': const StreamDateTimeConverter().toJson(instance.until),
 };

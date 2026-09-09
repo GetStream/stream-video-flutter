@@ -21,6 +21,8 @@ TextContentParameters _$TextContentParametersFromJson(
     (k, e) => MapEntry(k, e as String),
   ),
   severity: json['severity'] as String?,
+  textLength: (json['text_length'] as num?)?.toInt(),
+  textLengthOperator: json['text_length_operator'] as String?,
 );
 
 Map<String, dynamic> _$TextContentParametersToJson(
@@ -32,4 +34,6 @@ Map<String, dynamic> _$TextContentParametersToJson(
   'label_operator': instance.labelOperator,
   'llm_harm_labels': instance.llmHarmLabels,
   'severity': instance.severity,
+  'text_length': instance.textLength,
+  'text_length_operator': instance.textLengthOperator,
 };

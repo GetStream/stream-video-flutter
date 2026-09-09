@@ -9,7 +9,7 @@ part of 'kicked_user_event.dart';
 KickedUserEvent _$KickedUserEventFromJson(Map<String, dynamic> json) =>
     KickedUserEvent(
       callCid: json['call_cid'] as String,
-      createdAt: const EpochDateTimeConverter().fromJson(
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
       kickedByUser: json['kicked_by_user'] == null
@@ -24,7 +24,7 @@ KickedUserEvent _$KickedUserEventFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$KickedUserEventToJson(KickedUserEvent instance) =>
     <String, dynamic>{
       'call_cid': instance.callCid,
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'kicked_by_user': instance.kickedByUser?.toJson(),
       'type': instance.type,
       'user': instance.user.toJson(),

@@ -10,14 +10,14 @@ ChannelMute _$ChannelMuteFromJson(Map<String, dynamic> json) => ChannelMute(
   channel: json['channel'] == null
       ? null
       : ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
-  createdAt: const EpochDateTimeConverter().fromJson(
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
   expires: _$JsonConverterFromJson<Object, DateTime>(
     json['expires'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
-  updatedAt: const EpochDateTimeConverter().fromJson(
+  updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
   user: json['user'] == null
@@ -28,12 +28,12 @@ ChannelMute _$ChannelMuteFromJson(Map<String, dynamic> json) => ChannelMute(
 Map<String, dynamic> _$ChannelMuteToJson(ChannelMute instance) =>
     <String, dynamic>{
       'channel': instance.channel?.toJson(),
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'expires': _$JsonConverterToJson<Object, DateTime>(
         instance.expires,
-        const EpochDateTimeConverter().toJson,
+        const StreamDateTimeConverter().toJson,
       ),
-      'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
+      'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
       'user': instance.user?.toJson(),
     };
 

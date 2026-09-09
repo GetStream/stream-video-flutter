@@ -9,7 +9,7 @@ part of 'reaction_group_user_response.dart';
 ReactionGroupUserResponse _$ReactionGroupUserResponseFromJson(
   Map<String, dynamic> json,
 ) => ReactionGroupUserResponse(
-  createdAt: const EpochDateTimeConverter().fromJson(
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
   user: json['user'] == null
@@ -21,7 +21,7 @@ ReactionGroupUserResponse _$ReactionGroupUserResponseFromJson(
 Map<String, dynamic> _$ReactionGroupUserResponseToJson(
   ReactionGroupUserResponse instance,
 ) => <String, dynamic>{
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'user': instance.user?.toJson(),
   'user_id': instance.userId,
 };

@@ -10,10 +10,8 @@ AudioSettingsRequest _$AudioSettingsRequestFromJson(
   Map<String, dynamic> json,
 ) => AudioSettingsRequest(
   accessRequestEnabled: json['access_request_enabled'] as bool?,
-  defaultDevice: $enumDecode(
-    _$AudioSettingsRequestDefaultDeviceEnumMap,
-    json['default_device'],
-    unknownValue: AudioSettingsRequestDefaultDevice.unknown,
+  defaultDevice: AudioSettingsRequestDefaultDevice.fromJson(
+    json['default_device'] as String,
   ),
   hifiAudioEnabled: json['hifi_audio_enabled'] as bool?,
   micDefaultOn: json['mic_default_on'] as bool?,
@@ -31,18 +29,11 @@ Map<String, dynamic> _$AudioSettingsRequestToJson(
   AudioSettingsRequest instance,
 ) => <String, dynamic>{
   'access_request_enabled': instance.accessRequestEnabled,
-  'default_device':
-      _$AudioSettingsRequestDefaultDeviceEnumMap[instance.defaultDevice]!,
+  'default_device': instance.defaultDevice.toJson(),
   'hifi_audio_enabled': instance.hifiAudioEnabled,
   'mic_default_on': instance.micDefaultOn,
   'noise_cancellation': instance.noiseCancellation?.toJson(),
   'opus_dtx_enabled': instance.opusDtxEnabled,
   'redundant_coding_enabled': instance.redundantCodingEnabled,
   'speaker_default_on': instance.speakerDefaultOn,
-};
-
-const _$AudioSettingsRequestDefaultDeviceEnumMap = {
-  AudioSettingsRequestDefaultDevice.earpiece: 'earpiece',
-  AudioSettingsRequestDefaultDevice.speaker: 'speaker',
-  AudioSettingsRequestDefaultDevice.unknown: '_unknown',
 };

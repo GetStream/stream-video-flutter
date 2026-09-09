@@ -16,7 +16,7 @@ UpdateCallRequest _$UpdateCallRequestFromJson(Map<String, dynamic> json) =>
             ),
       startsAt: _$JsonConverterFromJson<Object, DateTime>(
         json['starts_at'],
-        const EpochDateTimeConverter().fromJson,
+        const StreamDateTimeConverter().fromJson,
       ),
     );
 
@@ -26,7 +26,7 @@ Map<String, dynamic> _$UpdateCallRequestToJson(UpdateCallRequest instance) =>
       'settings_override': instance.settingsOverride?.toJson(),
       'starts_at': _$JsonConverterToJson<Object, DateTime>(
         instance.startsAt,
-        const EpochDateTimeConverter().toJson,
+        const StreamDateTimeConverter().toJson,
       ),
     };
 

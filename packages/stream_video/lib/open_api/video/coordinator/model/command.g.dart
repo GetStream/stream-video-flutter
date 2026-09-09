@@ -10,14 +10,14 @@ Command _$CommandFromJson(Map<String, dynamic> json) => Command(
   args: json['args'] as String,
   createdAt: _$JsonConverterFromJson<Object, DateTime>(
     json['created_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   description: json['description'] as String,
   name: json['name'] as String,
   set: json['set'] as String,
   updatedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['updated_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
 );
 
@@ -25,14 +25,14 @@ Map<String, dynamic> _$CommandToJson(Command instance) => <String, dynamic>{
   'args': instance.args,
   'created_at': _$JsonConverterToJson<Object, DateTime>(
     instance.createdAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'description': instance.description,
   'name': instance.name,
   'set': instance.set,
   'updated_at': _$JsonConverterToJson<Object, DateTime>(
     instance.updatedAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
 };
 

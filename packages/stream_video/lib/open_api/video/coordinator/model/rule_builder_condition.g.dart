@@ -47,10 +47,25 @@ RuleBuilderCondition _$RuleBuilderConditionFromJson(
       : ContentCustomPropertyCountParameters.fromJson(
           json['content_custom_property_count_params'] as Map<String, dynamic>,
         ),
+  contentCustomPropertyParams: json['content_custom_property_params'] == null
+      ? null
+      : ContentCustomPropertyParameters.fromJson(
+          json['content_custom_property_params'] as Map<String, dynamic>,
+        ),
   contentFlagCountRuleParams: json['content_flag_count_rule_params'] == null
       ? null
       : FlagCountRuleParameters.fromJson(
           json['content_flag_count_rule_params'] as Map<String, dynamic>,
+        ),
+  floodIdenticalParams: json['flood_identical_params'] == null
+      ? null
+      : FloodIdenticalRuleParameters.fromJson(
+          json['flood_identical_params'] as Map<String, dynamic>,
+        ),
+  floodSimilarParams: json['flood_similar_params'] == null
+      ? null
+      : FloodSimilarRuleParameters.fromJson(
+          json['flood_similar_params'] as Map<String, dynamic>,
         ),
   imageContentParams: json['image_content_params'] == null
       ? null
@@ -62,6 +77,16 @@ RuleBuilderCondition _$RuleBuilderConditionFromJson(
       : ImageRuleParameters.fromJson(
           json['image_rule_params'] as Map<String, dynamic>,
         ),
+  ipContentCountRuleParams: json['ip_content_count_rule_params'] == null
+      ? null
+      : IPContentCountRuleParameters.fromJson(
+          json['ip_content_count_rule_params'] as Map<String, dynamic>,
+        ),
+  ipFlagCountRuleParams: json['ip_flag_count_rule_params'] == null
+      ? null
+      : IPFlagCountRuleParameters.fromJson(
+          json['ip_flag_count_rule_params'] as Map<String, dynamic>,
+        ),
   keyframeOcrRuleParams: json['keyframe_ocr_rule_params'] == null
       ? null
       : KeyframeOCRRuleParameters.fromJson(
@@ -71,6 +96,11 @@ RuleBuilderCondition _$RuleBuilderConditionFromJson(
       ? null
       : KeyframeRuleParameters.fromJson(
           json['keyframe_rule_params'] as Map<String, dynamic>,
+        ),
+  ocrContentParams: json['ocr_content_params'] == null
+      ? null
+      : OCRContentParameters.fromJson(
+          json['ocr_content_params'] as Map<String, dynamic>,
         ),
   textContentParams: json['text_content_params'] == null
       ? null
@@ -140,12 +170,19 @@ Map<String, dynamic> _$RuleBuilderConditionToJson(
   'content_custom_property_count_params': instance
       .contentCustomPropertyCountParams
       ?.toJson(),
+  'content_custom_property_params': instance.contentCustomPropertyParams
+      ?.toJson(),
   'content_flag_count_rule_params': instance.contentFlagCountRuleParams
       ?.toJson(),
+  'flood_identical_params': instance.floodIdenticalParams?.toJson(),
+  'flood_similar_params': instance.floodSimilarParams?.toJson(),
   'image_content_params': instance.imageContentParams?.toJson(),
   'image_rule_params': instance.imageRuleParams?.toJson(),
+  'ip_content_count_rule_params': instance.ipContentCountRuleParams?.toJson(),
+  'ip_flag_count_rule_params': instance.ipFlagCountRuleParams?.toJson(),
   'keyframe_ocr_rule_params': instance.keyframeOcrRuleParams?.toJson(),
   'keyframe_rule_params': instance.keyframeRuleParams?.toJson(),
+  'ocr_content_params': instance.ocrContentParams?.toJson(),
   'text_content_params': instance.textContentParams?.toJson(),
   'text_rule_params': instance.textRuleParams?.toJson(),
   'type': instance.type,

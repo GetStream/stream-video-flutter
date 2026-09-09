@@ -10,12 +10,10 @@ CallUpdatedEvent _$CallUpdatedEventFromJson(Map<String, dynamic> json) =>
     CallUpdatedEvent(
       call: CallResponse.fromJson(json['call'] as Map<String, dynamic>),
       callCid: json['call_cid'] as String,
-      capabilitiesByRole: json['capabilities_by_role'] == null
-          ? const {}
-          : _capabilitiesByRoleFromJson(
-              json['capabilities_by_role'] as Map<String, dynamic>,
-            ),
-      createdAt: const EpochDateTimeConverter().fromJson(
+      capabilitiesByRole: _capabilitiesByRoleFromJson(
+        json['capabilities_by_role'] as Map<String, dynamic>,
+      ),
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
       type: json['type'] as String,
@@ -26,6 +24,6 @@ Map<String, dynamic> _$CallUpdatedEventToJson(CallUpdatedEvent instance) =>
       'call': instance.call.toJson(),
       'call_cid': instance.callCid,
       'capabilities_by_role': instance.capabilitiesByRole,
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'type': instance.type,
     };

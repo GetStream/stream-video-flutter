@@ -11,7 +11,7 @@ UpdateLiveLocationRequest _$UpdateLiveLocationRequestFromJson(
 ) => UpdateLiveLocationRequest(
   endAt: _$JsonConverterFromJson<Object, DateTime>(
     json['end_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   latitude: (json['latitude'] as num?)?.toDouble(),
   longitude: (json['longitude'] as num?)?.toDouble(),
@@ -23,7 +23,7 @@ Map<String, dynamic> _$UpdateLiveLocationRequestToJson(
 ) => <String, dynamic>{
   'end_at': _$JsonConverterToJson<Object, DateTime>(
     instance.endAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'latitude': instance.latitude,
   'longitude': instance.longitude,

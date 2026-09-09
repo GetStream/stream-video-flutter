@@ -9,7 +9,7 @@ part of 'user_deactivated_event.dart';
 UserDeactivatedEvent _$UserDeactivatedEventFromJson(
   Map<String, dynamic> json,
 ) => UserDeactivatedEvent(
-  createdAt: const EpochDateTimeConverter().fromJson(
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
   createdBy: json['created_by'] == null
@@ -17,10 +17,10 @@ UserDeactivatedEvent _$UserDeactivatedEventFromJson(
       : UserResponseCommonFields.fromJson(
           json['created_by'] as Map<String, dynamic>,
         ),
-  custom: json['custom'] as Map<String, dynamic>? ?? {},
+  custom: json['custom'] as Map<String, dynamic>,
   receivedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['received_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   type: json['type'] as String,
   user: UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
@@ -29,12 +29,12 @@ UserDeactivatedEvent _$UserDeactivatedEventFromJson(
 Map<String, dynamic> _$UserDeactivatedEventToJson(
   UserDeactivatedEvent instance,
 ) => <String, dynamic>{
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'created_by': instance.createdBy?.toJson(),
   'custom': instance.custom,
   'received_at': _$JsonConverterToJson<Object, DateTime>(
     instance.receivedAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'type': instance.type,
   'user': instance.user.toJson(),

@@ -12,7 +12,7 @@ SessionWarningResponse _$SessionWarningResponseFromJson(
   code: json['code'] as String,
   time: _$JsonConverterFromJson<Object, DateTime>(
     json['time'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   warning: json['warning'] as String,
 );
@@ -23,7 +23,7 @@ Map<String, dynamic> _$SessionWarningResponseToJson(
   'code': instance.code,
   'time': _$JsonConverterToJson<Object, DateTime>(
     instance.time,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'warning': instance.warning,
 };

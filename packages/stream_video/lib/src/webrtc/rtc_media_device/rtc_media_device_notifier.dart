@@ -252,12 +252,12 @@ class RtcMediaDeviceNotifier {
             (kind == null || kind == RtcMediaDeviceKind.audioOutput) &&
             devices.none(
               (d) => d.deviceId.equalsIgnoreCase(
-                AudioSettingsRequestDefaultDevice.earpiece.name,
+                AudioSettingsRequestDefaultDevice.earpiece,
               ),
             ))
           RtcMediaDevice(
-            id: AudioSettingsRequestDefaultDevice.earpiece.name,
-            label: AudioSettingsRequestDefaultDevice.earpiece.name
+            id: AudioSettingsRequestDefaultDevice.earpiece,
+            label: AudioSettingsRequestDefaultDevice.earpiece
                 .capitalizeFirstLetter(),
             kind: RtcMediaDeviceKind.audioOutput,
           ),

@@ -13,6 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$FloodConfig {
+  List<String>? get allowlist;
   FloodIdenticalConfig? get identical_;
   FloodSimilarConfig? get similar;
 
@@ -28,17 +29,23 @@ mixin _$FloodConfig {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is FloodConfig &&
+            const DeepCollectionEquality().equals(other.allowlist, allowlist) &&
             (identical(other.identical_, identical_) ||
                 other.identical_ == identical_) &&
             (identical(other.similar, similar) || other.similar == similar));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, identical_, similar);
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(allowlist),
+    identical_,
+    similar,
+  );
 
   @override
   String toString() {
-    return 'FloodConfig(identical_: $identical_, similar: $similar)';
+    return 'FloodConfig(allowlist: $allowlist, identical_: $identical_, similar: $similar)';
   }
 }
 
@@ -49,7 +56,11 @@ abstract mixin class $FloodConfigCopyWith<$Res> {
     $Res Function(FloodConfig) _then,
   ) = _$FloodConfigCopyWithImpl;
   @useResult
-  $Res call({FloodIdenticalConfig? identical_, FloodSimilarConfig? similar});
+  $Res call({
+    List<String>? allowlist,
+    FloodIdenticalConfig? identical_,
+    FloodSimilarConfig? similar,
+  });
 }
 
 /// @nodoc
@@ -63,9 +74,17 @@ class _$FloodConfigCopyWithImpl<$Res> implements $FloodConfigCopyWith<$Res> {
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? identical_ = freezed, Object? similar = freezed}) {
+  $Res call({
+    Object? allowlist = freezed,
+    Object? identical_ = freezed,
+    Object? similar = freezed,
+  }) {
     return _then(
       FloodConfig(
+        allowlist: freezed == allowlist
+            ? _self.allowlist
+            : allowlist // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
         identical_: freezed == identical_
             ? _self.identical_
             : identical_ // ignore: cast_nullable_to_non_nullable

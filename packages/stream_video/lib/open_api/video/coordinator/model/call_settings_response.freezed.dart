@@ -16,8 +16,6 @@ mixin _$CallSettingsResponse {
   AudioSettingsResponse get audio;
   BackstageSettingsResponse get backstage;
   BroadcastSettingsResponse get broadcasting;
-
-  /// EncryptionSettings is the payload for end-to-end encryption settings
   EncryptionSettingsResponse get encryption;
   FrameRecordingSettingsResponse get frameRecording;
   GeofenceSettingsResponse get geofencing;

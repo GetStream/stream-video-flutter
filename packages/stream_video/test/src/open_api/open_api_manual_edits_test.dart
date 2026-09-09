@@ -204,50 +204,46 @@ void main() {
     },
   );
 
-  // TranscriptionSettingsResponse: language defaults to .auto on empty/unknown string
-  group('TranscriptionSettingsResponse – language fallback to auto', () {
-    test('empty string language falls back to auto', () {
-      final json = {
+  // TranscriptionSettingsResponse: `language` is an open enum. The generator
+  // emits it as an extension type over String, so a value this SDK version does
+  // not know is carried through verbatim. This replaces the older MANUAL_EDIT
+  // that pinned unknown values to `.auto` via `@JsonKey(unknownEnumValue:)`.
+  group('TranscriptionSettingsResponse – language is an open enum', () {
+    TranscriptionSettingsResponse parseLanguage(String language) {
+      return TranscriptionSettingsResponse.fromJson({
         'closed_caption_mode': 'disabled',
-        'language': '',
+        'language': language,
         'mode': 'disabled',
-      };
+      });
+    }
 
-      final result = TranscriptionSettingsResponse.fromJson(json);
+    test('a known language reads as its constant', () {
+      final result = parseLanguage('en');
 
-      expect(
-        result.language,
-        TranscriptionSettingsResponseLanguage.auto,
-      );
+      expect(result.language, TranscriptionSettingsResponseLanguage.en);
     });
 
-    test('valid language is parsed correctly', () {
-      final json = {
-        'closed_caption_mode': 'disabled',
-        'language': 'en',
-        'mode': 'available',
-      };
+    // The server can start transcribing in a language released after this SDK
+    // version. Collapsing it into `.auto` would both misreport the language and
+    // rewrite it on the way back out.
+    test('a language this SDK does not know is carried through', () {
+      final result = parseLanguage('unknown_language_xyz');
 
-      final result = TranscriptionSettingsResponse.fromJson(json);
-
+      expect(result.language, 'unknown_language_xyz');
       expect(
         result.language,
-        TranscriptionSettingsResponseLanguage.en,
+        isNot(TranscriptionSettingsResponseLanguage.auto),
       );
+      expect(result.toJson()['language'], 'unknown_language_xyz');
     });
 
-    test('unknown language string falls back to auto', () {
-      final json = {
-        'closed_caption_mode': 'disabled',
-        'language': 'unknown_language_xyz',
-        'mode': 'disabled',
-      };
+    test('an empty language is carried through rather than defaulted', () {
+      final result = parseLanguage('');
 
-      final result = TranscriptionSettingsResponse.fromJson(json);
-
+      expect(result.language, isEmpty);
       expect(
         result.language,
-        TranscriptionSettingsResponseLanguage.auto,
+        isNot(TranscriptionSettingsResponseLanguage.auto),
       );
     });
   });
