@@ -225,7 +225,7 @@ class _CallScreenState extends State<CallScreen> {
   // The menu opens away from wherever the button sits: upwards out of the
   // control bar along the bottom, downwards out of the app bar.
   StreamLayoutButton _layoutToggle({
-    StreamMenuDirection direction = StreamMenuDirection.up,
+    StreamMenuDirection menuDirection = StreamMenuDirection.up,
   }) {
     final blocked = context.streamScreenSize.isSmall
         ? const [
@@ -239,7 +239,7 @@ class _CallScreenState extends State<CallScreen> {
       layouts: ParticipantLayoutModeX.selectable
           .whereNot(blocked.contains)
           .toList(),
-      direction: direction,
+      menuDirection: menuDirection,
       onLayoutModeChanged: (layout) {
         setState(() {
           _currentLayoutMode = layout;
@@ -507,7 +507,9 @@ class _CallScreenState extends State<CallScreen> {
                   leading: Row(
                     children: [
                       if (isCompact)
-                        _layoutToggle(direction: StreamMenuDirection.down),
+                        _layoutToggle(
+                          menuDirection: StreamMenuDirection.down,
+                        ),
                       PartialCallStateBuilder(
                         call: call,
                         selector: (state) => state.localParticipant != null,

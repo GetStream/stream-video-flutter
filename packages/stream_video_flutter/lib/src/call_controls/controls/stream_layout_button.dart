@@ -15,7 +15,7 @@ class StreamLayoutButton extends StatelessWidget {
     required this.onLayoutModeChanged,
     this.layout = ParticipantLayoutMode.auto,
     this.layouts = defaultLayouts,
-    this.direction = StreamMenuDirection.up,
+    this.menuDirection = StreamMenuDirection.down,
     super.key,
   });
 
@@ -38,13 +38,12 @@ class StreamLayoutButton extends StatelessWidget {
   /// beside the speaker has no use for the left and right bar layouts.
   final List<ParticipantLayoutMode> layouts;
 
-  /// Which way the menu is expected to open.
+  /// Which way the button expects its menu to open.
   ///
-  /// Defaults to [StreamMenuDirection.up], for the button's usual home in a
-  /// control bar along the bottom of the call. Pass [StreamMenuDirection.down]
-  /// where it sits in an app bar instead. The bottom sheet ignores this, and so
-  /// does a button that toggles.
-  final StreamMenuDirection direction;
+  /// A control bar along the bottom of a call opens upwards; the default suits
+  /// a control with room below it. The bottom sheet ignores this, and so does
+  /// a button that toggles.
+  final StreamMenuDirection menuDirection;
 
   /// Callback that is called when the layout mode is changed.
   ///
@@ -81,7 +80,7 @@ class StreamLayoutButton extends StatelessWidget {
 
     return StreamAdaptiveMenuAnchor(
       title: context.translations.layoutMenuTitle,
-      direction: direction,
+      direction: menuDirection,
       sections: [
         StreamMenuSection(
           options: [

@@ -95,6 +95,32 @@ void main() {
       }
     });
 
+    testWidgets('menuDirection decides which way the menu opens', (
+      tester,
+    ) async {
+      for (final (direction, offset) in <(StreamMenuDirection, Offset)>[
+        (StreamMenuDirection.up, const Offset(0, -8)),
+        (StreamMenuDirection.down, const Offset(0, 8)),
+      ]) {
+        await tester.pumpWidget(
+          TestWrapper(
+            platform: .macOS,
+            child: StreamLayoutButton(
+              layouts: ParticipantLayoutModeX.selectable,
+              menuDirection: direction,
+              onLayoutModeChanged: (_) {},
+            ),
+          ),
+        );
+
+        expect(
+          tester.widget<MenuAnchor>(find.byType(MenuAnchor)).alignmentOffset,
+          offset,
+          reason: '$direction',
+        );
+      }
+    });
+
     testWidgets('opens a sheet headed "Layout" on Android', (tester) async {
       await tester.pumpWidget(
         TestWrapper(

@@ -7,7 +7,7 @@
 - Added layout strings to the localizations, in English and Dutch: `layoutMenuTitle`, `layoutSelectTooltip`, `layoutDefault`, `layoutGrid`, `layoutSpeakerTop`, `layoutSpeakerBottom`, `layoutSpeakerLeft`, `layoutSpeakerRight` and `layoutSpeakerOneToOne`.
 - `ParticipantLayoutMode` offers `auto`, `grid`, `speakerTop`, `speakerBottom`, `speakerLeft`, `speakerRight` and `speakerOneToOne`.
 - `ParticipantLayoutMode` carries its own presentation: `selectable`, `canonical`, `barAlignment`, `isSpeakerLayout`, `icon` and `label`.
-- `StreamLayoutButton` takes `layouts`, to choose what it offers, and `direction`, for which way the menu opens.
+- `StreamLayoutButton` takes `layouts`, to choose what it offers, and `menuDirection`, for which way the menu opens.
 - `CallParticipantsSpotlightView` and `ParticipantsBarAlignment` are exported.
 - `StreamAdaptiveMenuAnchor` fills the row of the selected option in the anchored menu.
 - Added `StreamContextMenuAnchor.defaultActionStyle`, the design's menu row metrics.
