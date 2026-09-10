@@ -12,8 +12,8 @@ class RegularCallParticipantsContent extends StatelessWidget {
     required this.call,
     required this.participants,
     this.callParticipantBuilder = _defaultParticipantBuilder,
-    this.enableLocalVideo,
-    this.localVideoParticipantBuilder,
+    this.enableFloatingSelfView,
+    this.floatingSelfViewBuilder,
     this.layoutMode = ParticipantLayoutMode.auto,
   });
 
@@ -27,15 +27,19 @@ class RegularCallParticipantsContent extends StatelessWidget {
   ///
   /// Only [ParticipantLayoutMode.auto] and
   /// [ParticipantLayoutMode.speakerOneToOne] read it, the layouts that leave
-  /// the local participant out of the arrangement. Defaults to true under
-  /// `speakerOneToOne`, and to false on desktop under `auto`.
-  final bool? enableLocalVideo;
+  /// the local participant out of the arrangement. The grid and the four bar
+  /// layouts give them a tile, so a self-view would show them twice.
+  ///
+  /// Defaults to true under `speakerOneToOne`, which `auto` resolves to in a
+  /// one-on-one call. Under `auto` in a group call it defaults to true on
+  /// mobile and false on desktop.
+  final bool? enableFloatingSelfView;
 
   /// Builder function used to build a participant grid item.
   final CallParticipantBuilder callParticipantBuilder;
 
-  /// Builder function used to build a local video participant widget.
-  final CallParticipantBuilder? localVideoParticipantBuilder;
+  /// Builder function used to build the floating self-view.
+  final CallParticipantBuilder? floatingSelfViewBuilder;
 
   /// The layout mode used to display the participants.
   final ParticipantLayoutMode layoutMode;
@@ -71,17 +75,18 @@ class RegularCallParticipantsContent extends StatelessWidget {
     };
 
     // Only these two layouts leave the local participant out of the
-    // arrangement, so only they can float a self-view. The grid and the four
-    // bar layouts give them a tile, where a self-view would show them twice,
-    // so every other case is false whatever enableLocalVideo says.
+    // arrangement, so only they can float a self-view. An explicitly
+    // requested grid and the four bar layouts give them a tile, where a
+    // self-view would show them twice, so every other case is false whatever
+    // enableFloatingSelfView says. auto's grid still floats one.
     //
     // speakerOneToOne floats on every platform: it shows nobody but the
     // speaker, so without the inset the local participant is absent from the
     // call entirely. auto's grid follows the platform instead.
     final floatsSelfView = switch (effective) {
-      ParticipantLayoutMode.speakerOneToOne => enableLocalVideo ?? true,
+      ParticipantLayoutMode.speakerOneToOne => enableFloatingSelfView ?? true,
       ParticipantLayoutMode.grid when isAuto =>
-        enableLocalVideo ?? !isDesktopDevice,
+        enableFloatingSelfView ?? !isDesktopDevice,
       _ => false,
     };
 
@@ -132,7 +137,7 @@ class RegularCallParticipantsContent extends StatelessWidget {
       child = StreamLocalVideo(
         call: call,
         participant: localParticipant,
-        participantBuilder: localVideoParticipantBuilder,
+        participantBuilder: floatingSelfViewBuilder,
         child: child,
       );
     }

@@ -205,7 +205,8 @@
 - `ParticipantLayoutMode.grid` gives the local participant a tile of its own instead of floating them over the grid.
 - `speakerOneToOne` floats the self-view on desktop too. Passing `enableLocalVideo: false` still suppresses it.
 - `ParticipantLayoutMode.pictureInPicture` spotlights the speaker alone under its new name, where it used to draw a grid.
-- `enableLocalVideo` is read only by `auto` and `speakerOneToOne`; the grid and the four bar layouts give the local participant a tile regardless.
+- `enableLocalVideo` is `enableFloatingSelfView` now, and `localVideoParticipantBuilder` is `floatingSelfViewBuilder`. `dart fix --apply` renames both.
+- `enableFloatingSelfView` is read only by `auto` and `speakerOneToOne`; the grid and the four bar layouts give the local participant a tile regardless.
 - `translations.defaultDevice` replaces `lobbySystemDefaultDevice` and `lobbyDefaultDeviceHint`, and reads "Default" rather than "System default". The two strings were shown side by side — the menu's row and the field's placeholder — so a translation could make them disagree about the same choice.
 - `StreamLayoutButton` takes `layout` instead of `initialLayout` and keeps no state, so the caller passes the mode back in through it. `dart fix --apply` renames the parameter.
 - `onError` on the device controls takes a `StreamDeviceErrorCallback`, receiving a typed `VideoError` and the action that failed.

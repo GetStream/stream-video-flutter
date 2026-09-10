@@ -29,14 +29,14 @@ Widget _box(BuildContext _, Call __, CallParticipantState participant) =>
     );
 
 void main() {
-  // The helper defaults `enableLocalVideo` to true: under `auto` the flag
+  // The helper defaults `enableFloatingSelfView` to true: under `auto` the flag
   // falls back to a platform detector with no test override, which would make
   // those cases depend on the host OS.
   Future<void> pump(
     WidgetTester tester, {
     required ParticipantLayoutMode layoutMode,
     required List<CallParticipantState> participants,
-    bool? enableLocalVideo = true,
+    bool? enableFloatingSelfView = true,
   }) => tester.pumpWidget(
     TestWrapper(
       child: SizedBox(
@@ -46,11 +46,11 @@ void main() {
           call: MockCall(),
           participants: participants,
           layoutMode: layoutMode,
-          enableLocalVideo: enableLocalVideo,
+          enableFloatingSelfView: enableFloatingSelfView,
           callParticipantBuilder: _box,
           // The self-view otherwise falls back to the real participant tile,
           // which asks the mock far more than a layout test cares to stub.
-          localVideoParticipantBuilder: _box,
+          floatingSelfViewBuilder: _box,
         ),
       ),
     ),
@@ -179,7 +179,7 @@ void main() {
       await pump(
         tester,
         layoutMode: .speakerOneToOne,
-        enableLocalVideo: null,
+        enableFloatingSelfView: null,
         participants: [
           _participant('remote-1'),
           _participant('local', isLocal: true),
@@ -189,13 +189,13 @@ void main() {
       expect(find.byType(StreamLocalVideo), findsOneWidget);
     });
 
-    testWidgets('still obeys an explicit enableLocalVideo: false', (
+    testWidgets('still obeys an explicit enableFloatingSelfView: false', (
       tester,
     ) async {
       await pump(
         tester,
         layoutMode: .speakerOneToOne,
-        enableLocalVideo: false,
+        enableFloatingSelfView: false,
         participants: [
           _participant('remote-1'),
           _participant('local', isLocal: true),
@@ -311,7 +311,7 @@ void main() {
       await pump(
         tester,
         layoutMode: .auto,
-        enableLocalVideo: false,
+        enableFloatingSelfView: false,
         participants: [
           _participant('remote-1'),
           _participant('remote-2'),

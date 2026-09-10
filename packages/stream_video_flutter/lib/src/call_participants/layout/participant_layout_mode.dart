@@ -15,7 +15,7 @@ enum ParticipantLayoutMode {
   ///
   /// In a one-on-one call the local participant floats over the speaker. In a
   /// group call they float on mobile and take a grid tile on desktop.
-  /// `enableLocalVideo` overrides either default.
+  /// `enableFloatingSelfView` overrides either default.
   auto,
 
   /// Every participant, including the local one, takes a tile in a grid.
@@ -40,7 +40,8 @@ enum ParticipantLayoutMode {
   /// The speaker takes the whole frame, with the local participant floating
   /// over them and nobody else shown.
   ///
-  /// The self-view floats on every platform unless `enableLocalVideo` is false.
+  /// The self-view floats on every platform unless `enableFloatingSelfView`
+  /// is false.
   speakerOneToOne,
 
   /// Alias for [ParticipantLayoutMode.speakerTop].

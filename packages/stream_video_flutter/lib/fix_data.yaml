@@ -854,3 +854,37 @@ transforms:
           inEnum: "ParticipantLayoutMode"
 
   #endregion Participant layout modes
+
+  #region Floating self-view
+
+  # The flag and its builder are named after what they control — a self-view
+  # that floats over the layout — rather than after local video in general.
+  # The grid and the four bar layouts give the local participant a tile and
+  # read neither. RegularCallParticipantsContent takes the same pair but is
+  # not exported, so it needs no transform.
+
+  - title: "rename enableLocalVideo to enableFloatingSelfView on StreamCallParticipants"
+    date: "2026-09-10"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "StreamCallParticipants"
+    changes:
+      - kind: "renameParameter"
+        oldName: "enableLocalVideo"
+        newName: "enableFloatingSelfView"
+
+  - title: "rename localVideoParticipantBuilder to floatingSelfViewBuilder on StreamCallParticipants"
+    date: "2026-09-10"
+    bulkApply: true
+    element:
+      uris: ["package:stream_video_flutter/stream_video_flutter.dart"]
+      constructor: ""
+      inClass: "StreamCallParticipants"
+    changes:
+      - kind: "renameParameter"
+        oldName: "localVideoParticipantBuilder"
+        newName: "floatingSelfViewBuilder"
+
+  #endregion Floating self-view

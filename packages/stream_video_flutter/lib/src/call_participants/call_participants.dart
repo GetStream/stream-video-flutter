@@ -49,9 +49,9 @@ class StreamCallParticipants extends StatefulWidget {
     this.participants,
     this.filter = _defaultFilter,
     CallParticipantSort<CallParticipantState>? sort,
-    this.enableLocalVideo,
+    this.enableFloatingSelfView,
     this.callParticipantBuilder = _defaultParticipantBuilder,
-    this.localVideoParticipantBuilder,
+    this.floatingSelfViewBuilder,
     this.screenShareContentBuilder,
     this.screenShareParticipantBuilder = _defaultParticipantBuilder,
     this.layoutMode = ParticipantLayoutMode.auto,
@@ -74,15 +74,19 @@ class StreamCallParticipants extends StatefulWidget {
   ///
   /// Only [ParticipantLayoutMode.auto] and
   /// [ParticipantLayoutMode.speakerOneToOne] read it, the layouts that leave
-  /// the local participant out of the arrangement. Defaults to true under
-  /// `speakerOneToOne`, and to false on desktop under `auto`.
-  final bool? enableLocalVideo;
+  /// the local participant out of the arrangement. The grid and the four bar
+  /// layouts give them a tile, so a self-view would show them twice.
+  ///
+  /// Defaults to true under `speakerOneToOne`, which `auto` resolves to in a
+  /// one-on-one call. Under `auto` in a group call it defaults to true on
+  /// mobile and false on desktop.
+  final bool? enableFloatingSelfView;
 
   /// Builder function used to build a participant grid item.
   final CallParticipantBuilder callParticipantBuilder;
 
-  /// Builder function used to build a local video participant widget.
-  final CallParticipantBuilder? localVideoParticipantBuilder;
+  /// Builder function used to build the floating self-view.
+  final CallParticipantBuilder? floatingSelfViewBuilder;
 
   /// Builder function used to build a screen sharing item.
   final ScreenShareContentBuilder? screenShareContentBuilder;
@@ -184,9 +188,9 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
       call: widget.call,
       participants: sortedParticipants,
       layoutMode: widget.layoutMode,
-      enableLocalVideo: widget.enableLocalVideo,
+      enableFloatingSelfView: widget.enableFloatingSelfView,
       callParticipantBuilder: widget.callParticipantBuilder,
-      localVideoParticipantBuilder: widget.localVideoParticipantBuilder,
+      floatingSelfViewBuilder: widget.floatingSelfViewBuilder,
     );
   }
 }
