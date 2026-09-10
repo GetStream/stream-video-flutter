@@ -62,6 +62,9 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
   void didUpdateWidget(covariant StreamVideoRenderer oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    final info = latestVisibilityInfo;
+    if (info == null) return;
+
     final prevTrackState =
         oldWidget.participant.publishedTracks[oldWidget.videoTrackType];
     final newTrackState =
@@ -69,10 +72,37 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
 
     if (prevTrackState == null && newTrackState != null) {
       // The video track has been published.
-      if (latestVisibilityInfo != null) {
-        _onVisibilityChanged(latestVisibilityInfo!, widget.participant.userId);
-      }
+      _onVisibilityChanged(info, widget.participant.userId);
+      return;
     }
+
+    // A [VisibilityDetector] reports changes, and only its own: it will not
+    // report this renderer again until what it measures changes. So a report
+    // that was dropped — the call was reconnecting, or another renderer of the
+    // same participant reported zero as it was unmounted — would leave a tile
+    // that is plainly on screen recorded as not visible for the rest of the
+    // call, out of the running for a speaker's tile and liable to have its
+    // track unsubscribed.
+    //
+    // Re-assert it. Only upwards: a renderer that is showing the participant
+    // insists, and one that is not stays quiet, so the record settles on
+    // visible whenever any renderer has them on screen instead of ping-ponging
+    // between two that disagree.
+    if (_measuredVisibility(info).isVisible && !_recordedVisibility.isVisible) {
+      _onVisibilityChanged(info, widget.participant.userId);
+    }
+  }
+
+  /// What this renderer last measured for the track it draws.
+  ViewportVisibility _measuredVisibility(VisibilityInfo info) {
+    return ViewportVisibility.fromVisibleFraction(info.visibleFraction);
+  }
+
+  /// What the call state records for the track this renderer draws.
+  ViewportVisibility get _recordedVisibility {
+    return widget.videoTrackType.isScreenShare
+        ? widget.participant.screenShareViewportVisibility
+        : widget.participant.viewportVisibility;
   }
 
   @override
@@ -166,13 +196,9 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
 
   void _onVisibilityChanged(VisibilityInfo info, String participantId) {
     latestVisibilityInfo = info;
-    final fraction = info.visibleFraction;
 
-    final prevVisibility = widget.videoTrackType.isScreenShare
-        ? widget.participant.screenShareViewportVisibility
-        : widget.participant.viewportVisibility;
-
-    final visibility = ViewportVisibility.fromVisibleFraction(fraction);
+    final prevVisibility = _recordedVisibility;
+    final visibility = _measuredVisibility(info);
 
     // Update the viewport visibility of the participant.
     if (prevVisibility != visibility) {

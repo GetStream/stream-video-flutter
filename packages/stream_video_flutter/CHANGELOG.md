@@ -127,6 +127,7 @@
 ### 🐞 Fixed
 
 - Fixed the participant grid rearranging itself when a participant nobody can see starts speaking. They take the place of the tile with the least claim to one — the last one on screen — instead of the first, which used to move every tile below it down one.
+- Fixed a participant tile on screen being recorded as not visible, which kept it out of the running for a speaker's tile and could get its track unsubscribed. A renderer showing a participant now says so again when the call state disagrees, and the floating self-view no longer shares its visibility bookkeeping with the same participant's tile in the grid.
 
 - The sample's in-call microphone and camera buttons now say when the call refuses them. `setMicrophoneEnabled` and `setCameraEnabled` return a `Result` that was dropped, and the buttons take their state from the call's own participant state, which does not change on a failure — so a user without permission to send video tapped the camera button and watched nothing happen, with nothing logged either.
 - The sample's background-blur toggle no longer applies its filter from inside `build()`. It recorded the track as filtered before the platform call had returned, and swallowed whatever that call threw, so switching camera to a device the filter could not handle left the button claiming blur over an unblurred preview with no way to retry. It runs from `didChangeDependencies` now and puts the toggle back on failure.

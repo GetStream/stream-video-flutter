@@ -165,6 +165,13 @@ class DefaultStreamFloatingParticipantTile extends StatelessWidget {
               StreamParticipantTile(
                 call: props.call,
                 participant: props.participant,
+                // The same participant is in the grid until this view takes
+                // them over, and for the frame in between both are mounted.
+                // Two renderers of one participant sharing a scope share the
+                // keys their visibility is tracked under, and the one going
+                // away reports zero and clears the bookkeeping of the one
+                // arriving, leaving the self-view recorded as not visible.
+                rendererScopePrefix: 'selfView',
                 style: tileStyle,
               ),
         ),

@@ -4352,11 +4352,6 @@ class Call {
       return const Result.success(none);
     }
 
-    final change = VisibilityChange(
-      sessionId: sessionId,
-      userId: userId,
-      visibility: visibility,
-    );
     if (trackType.isScreenShare) {
       _stateManager.participantUpdateScreenShareViewportVisibility(
         sessionId: sessionId,
@@ -4366,19 +4361,26 @@ class Call {
       return const Result.success(none);
     }
 
-    final result =
-        await _session?.updateViewportVisibility(change) ??
+    // Recorded before the session is told, and whatever it makes of it. The
+    // caller reports a change once — a viewport reports what changed, not what
+    // it holds — so a visibility dropped here is not offered again, and the
+    // participant stays recorded as something they are not for the rest of the
+    // call. The session's own handling of this is a debounce that ends in the
+    // UI reading this same state back, so there is nothing to wait for.
+    _stateManager.participantUpdateViewportVisibility(
+      sessionId: sessionId,
+      userId: userId,
+      visibility: visibility,
+    );
+
+    final change = VisibilityChange(
+      sessionId: sessionId,
+      userId: userId,
+      visibility: visibility,
+    );
+
+    return await _session?.updateViewportVisibility(change) ??
         failureWithError('Session is null');
-
-    if (result.isSuccess) {
-      _stateManager.participantUpdateViewportVisibility(
-        sessionId: sessionId,
-        userId: userId,
-        visibility: visibility,
-      );
-    }
-
-    return result;
   }
 
   Future<Result<None>> setSubscriptions(

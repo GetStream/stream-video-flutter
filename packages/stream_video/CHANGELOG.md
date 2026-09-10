@@ -53,6 +53,7 @@
 - Fixed a potential permanent hang when guest creation received a 401: the guest-creation call authenticates with its own anonymous token, so it no longer attempts a user-token refresh — which re-entered the token loading already in progress.
 - A coordinator WebSocket error frame that says nothing about the credentials — a rate limit, or an error about a single request — no longer closes an otherwise healthy connection. Only an expired or rejected token, or a rejected API key, closes the socket now; the rest are logged.
 - Fixed the participant sort reordering tiles that are visible on screen. One participant whose tile was not visible was enough to move the dominant speaker to the first tile.
+- A viewport visibility is now recorded whether or not the session accepts it. A dropped report left a participant recorded as something they were not for the rest of the call, since a viewport only ever reports what changed.
 
 ## 1.6.0
 
