@@ -63,6 +63,9 @@ class StreamParticipantLabelStyleDefaults extends StreamParticipantLabelStyle {
   double get minHeight => padding.vertical + audioIndicatorSize;
 
   @override
+  double get maxWidth => 268;
+
+  @override
   double get blurSigma => 12.5;
 
   @override
@@ -127,12 +130,11 @@ bool participantLabelDrawsAudioIndicator({
 /// The tile drops the pill rather than let it overflow, and to decide that it
 /// needs the same number the pill lays itself out to: whichever indicators the
 /// participant contributes, the padding around them and the gaps between them.
-/// A name contributes no width of its own — it ellipsizes away to nothing — but
-/// it still claims the gap before the indicators.
+/// The name contributes nothing: it ellipsizes away, taking the gap before the
+/// indicators with it.
 @internal
 double participantLabelMinWidth(
   BuildContext context, {
-  required bool showName,
   required bool showMicrophoneOff,
   required bool showVideoOff,
   required bool showVideoPaused,
@@ -171,14 +173,12 @@ double participantLabelMinWidth(
   var width = padding.horizontal;
 
   // A pill can come down to a name alone — an unmuted, camera-on participant
-  // under a style that switched the indicator off. There is then nothing for
-  // the gap after the name to separate it from either.
+  // under a style that switched the indicator off — leaving just the padding.
   if (indicators.isNotEmpty) {
     width +=
         indicators.reduce((a, b) => a + b) +
         (indicators.length - 1) *
             (resolved?.indicatorSpacing ?? defaults.indicatorSpacing);
-    if (showName) width += resolved?.spacing ?? defaults.spacing;
   }
 
   return width;
