@@ -157,7 +157,8 @@
 - The floating self-view draws no name pill, whatever an app-wide participant tile theme asks for. `StreamFloatingParticipantTileStyle.tileStyle` still can.
 - A participant tile keeps the name in its label at every size it draws the label at, truncating with an ellipsis.
 - The participant label stops growing at 268px, set by `StreamParticipantLabelStyle.maxWidth`.
-
+- `StreamCallParticipants` re-sorts when the layout changes, so a speaker layout spotlights the speaker instead of whoever the previous layout put first.
+- A speaker layout with no participants bar spotlights a remote participant rather than the local one.
 - An in-call device menu marks the device the call is using, instead of leaving every row unselected.
 - A device menu no longer offers the platform's own choice twice on web, once as "Default" and once as the browser's own entry.
 - The microphone and camera controls no longer flash the muted look while a call is being joined.

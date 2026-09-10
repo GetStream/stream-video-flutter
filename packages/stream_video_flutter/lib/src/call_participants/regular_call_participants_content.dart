@@ -101,11 +101,12 @@ class RegularCallParticipantsContent extends StatelessWidget {
     if (effective.isSpeakerLayout && participants.isNotEmpty) {
       var spotlight = participants.first;
 
-      // Somebody else takes the frame whenever the local participant is
-      // already accounted for: floating over the layout, or alone with one
-      // other person.
+      // A layout with no bar shows nobody but the spotlight, so it goes to a
+      // remote whenever there is one. A bar layout can spotlight whoever the
+      // sort put first, the local participant included, since everybody else
+      // is still in the bar — unless there is only one other person.
       if (remoteParticipants.isNotEmpty &&
-          (floatLocalVideo || remoteParticipants.length == 1)) {
+          (effective.barAlignment == null || remoteParticipants.length == 1)) {
         spotlight = remoteParticipants.first;
       }
 

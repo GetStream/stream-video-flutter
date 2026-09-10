@@ -153,13 +153,18 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
   void didUpdateWidget(covariant StreamCallParticipants oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    // The sort follows layoutMode unless the caller supplied one, so picking
+    // a speaker layout swaps the preset and the list has to be ordered again.
+    final sortChanged = widget.sort != oldWidget.sort;
+
     if (widget.participants != null) {
       _participantsSubscription?.cancel();
 
-      if (!const ListEquality<CallParticipantState>().equals(
-        widget.participants!.toList(),
-        oldWidget.participants?.toList(),
-      )) {
+      if (sortChanged ||
+          !const ListEquality<CallParticipantState>().equals(
+            widget.participants!.toList(),
+            oldWidget.participants?.toList(),
+          )) {
         recalculateParticipants(widget.participants!);
       }
     } else if (widget.call != oldWidget.call) {
@@ -168,6 +173,8 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
           .partialState((state) => state.callParticipants)
           .listen(recalculateParticipants);
 
+      recalculateParticipants(widget.call.state.value.callParticipants);
+    } else if (sortChanged) {
       recalculateParticipants(widget.call.state.value.callParticipants);
     }
   }

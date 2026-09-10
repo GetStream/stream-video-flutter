@@ -227,6 +227,28 @@ void main() {
       expect(find.byType(StreamLocalVideo), findsOneWidget);
     });
 
+    testWidgets('spotlights a remote with the self-view off and the local '
+        'one sorting first', (tester) async {
+      // With no bar and no floating self-view, spotlighting the local
+      // participant would leave every remote off the screen entirely.
+      await pump(
+        tester,
+        layoutMode: .speakerOneToOne,
+        enableFloatingSelfView: false,
+        participants: [
+          _participant('local', isLocal: true),
+          _participant('remote-1'),
+          _participant('remote-2'),
+        ],
+      );
+
+      final view = tester.widget<CallParticipantsSpotlightView>(
+        find.byType(CallParticipantsSpotlightView),
+      );
+      expect(view.spotlight.sessionId, 'remote-1');
+      expect(find.byType(StreamLocalVideo), findsNothing);
+    });
+
     testWidgets('spotlights the local participant when alone in the call', (
       tester,
     ) async {
