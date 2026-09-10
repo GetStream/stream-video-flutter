@@ -1,0 +1,16 @@
+name: Select Xcode
+description: "Selects the Xcode version used for all Apple builds in this repo."
+
+inputs:
+  xcode-version:
+    description: "The Xcode version to select. Leave at the default to use the newest Xcode on the runner."
+    required: false
+    default: "latest"
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🍎 Select Xcode
+      uses: maxim-lobanov/setup-xcode@v1.7.0
+      with:
+        xcode-version: ${{ inputs.xcode-version }}

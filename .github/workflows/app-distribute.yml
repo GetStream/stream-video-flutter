@@ -63,9 +63,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Select Xcode
-        uses: maxim-lobanov/setup-xcode@v1.7.0
-        with:
-          xcode-version: "latest"
+        uses: ./.github/actions/select-xcode
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
