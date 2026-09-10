@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -343,6 +344,96 @@ void main() {
 
       expect(find.byType(StreamLocalVideo), findsNothing);
       expect(gridSessionsOf(tester), ['remote-1', 'remote-2', 'local']);
+    });
+
+    // These pass enableFloatingSelfView: null to exercise the default itself.
+    // `isDesktopDevice` reads defaultTargetPlatform, which flutter_test
+    // reports as android, so the unoverridden cases take the mobile path.
+    testWidgets('floats the self-view on mobile with two others', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        layoutMode: .auto,
+        enableFloatingSelfView: null,
+        participants: [
+          _participant('remote-1'),
+          _participant('remote-2'),
+          _participant('local', isLocal: true),
+        ],
+      );
+
+      expect(find.byType(StreamLocalVideo), findsOneWidget);
+      expect(gridSessionsOf(tester), ['remote-1', 'remote-2']);
+    });
+
+    testWidgets('gives the local participant a tile on mobile once a third '
+        'person joins', (tester) async {
+      await pump(
+        tester,
+        layoutMode: .auto,
+        enableFloatingSelfView: null,
+        participants: [
+          _participant('remote-1'),
+          _participant('remote-2'),
+          _participant('remote-3'),
+          _participant('local', isLocal: true),
+        ],
+      );
+
+      expect(find.byType(StreamLocalVideo), findsNothing);
+      expect(gridSessionsOf(tester), [
+        'remote-1',
+        'remote-2',
+        'remote-3',
+        'local',
+      ]);
+    });
+
+    testWidgets('still floats a self-view a crowded grid asked for', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        layoutMode: .auto,
+        // Matching the helper's default, but stated because opting in over a
+        // crowded grid is what this pins.
+        // ignore: avoid_redundant_argument_values
+        enableFloatingSelfView: true,
+        participants: [
+          _participant('remote-1'),
+          _participant('remote-2'),
+          _participant('remote-3'),
+          _participant('local', isLocal: true),
+        ],
+      );
+
+      expect(find.byType(StreamLocalVideo), findsOneWidget);
+    });
+
+    testWidgets('gives the local participant a tile on desktop', (
+      tester,
+    ) async {
+      // Reset inside the body: the framework checks the foundation debug
+      // variables before tearDowns run.
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      try {
+        await pump(
+          tester,
+          layoutMode: .auto,
+          enableFloatingSelfView: null,
+          participants: [
+            _participant('remote-1'),
+            _participant('remote-2'),
+            _participant('local', isLocal: true),
+          ],
+        );
+
+        expect(find.byType(StreamLocalVideo), findsNothing);
+        expect(gridSessionsOf(tester), ['remote-1', 'remote-2', 'local']);
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
     });
 
     testWidgets('draws a grid while nobody else has joined', (tester) async {

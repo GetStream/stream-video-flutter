@@ -14,7 +14,8 @@ enum ParticipantLayoutMode {
   /// everybody sits in a grid otherwise.
   ///
   /// In a one-on-one call the local participant floats over the speaker. In a
-  /// group call they float on mobile and take a grid tile on desktop.
+  /// group call they float on mobile while at most two other people are in
+  /// the call, and take a grid tile otherwise.
   /// `enableFloatingSelfView` overrides either default.
   auto,
 

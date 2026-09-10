@@ -32,7 +32,8 @@ class RegularCallParticipantsContent extends StatelessWidget {
   ///
   /// Defaults to true under `speakerOneToOne`, which `auto` resolves to in a
   /// one-on-one call. Under `auto` in a group call it defaults to true on
-  /// mobile and false on desktop.
+  /// mobile while at most two other people are in the call, and to false
+  /// otherwise.
   final bool? enableFloatingSelfView;
 
   /// Builder function used to build a participant grid item.
@@ -43,6 +44,13 @@ class RegularCallParticipantsContent extends StatelessWidget {
 
   /// The layout mode used to display the participants.
   final ParticipantLayoutMode layoutMode;
+
+  /// The most other participants [ParticipantLayoutMode.auto] floats a
+  /// self-view over on mobile.
+  ///
+  /// A grid past this many tiles is crowded enough on a phone that the inset
+  /// would cover one, so the local participant takes a tile of their own.
+  static const _maxRemotesBehindSelfView = 2;
 
   // The default participant builder.
   static Widget _defaultParticipantBuilder(
@@ -82,11 +90,14 @@ class RegularCallParticipantsContent extends StatelessWidget {
     //
     // speakerOneToOne floats on every platform: it shows nobody but the
     // speaker, so without the inset the local participant is absent from the
-    // call entirely. auto's grid follows the platform instead.
+    // call entirely. auto's grid follows the platform and the size of the
+    // call instead.
     final floatsSelfView = switch (effective) {
       ParticipantLayoutMode.speakerOneToOne => enableFloatingSelfView ?? true,
       ParticipantLayoutMode.grid when isAuto =>
-        enableFloatingSelfView ?? !isDesktopDevice,
+        enableFloatingSelfView ??
+            (!isDesktopDevice &&
+                remoteParticipants.length <= _maxRemotesBehindSelfView),
       _ => false,
     };
 

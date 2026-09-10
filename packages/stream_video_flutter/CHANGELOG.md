@@ -204,6 +204,7 @@
 
 - `ParticipantLayoutMode.auto` is the default layout of `StreamCallContent`, `StreamCallParticipants` and `RegularCallParticipantsContent`, and renders what `grid` used to. The livestream widgets still default to `grid`.
 - `ParticipantLayoutMode.grid` gives the local participant a tile of its own instead of floating them over the grid.
+- `ParticipantLayoutMode.auto` floats the self-view on mobile only while at most two other people are in the call, and gives the local participant a tile beyond that.
 - `speakerOneToOne` floats the self-view on desktop too. Passing `enableLocalVideo: false` still suppresses it.
 - `ParticipantLayoutMode.pictureInPicture` spotlights the speaker alone under its new name, where it used to draw a grid.
 - `enableLocalVideo` is `enableFloatingSelfView` now, and `localVideoParticipantBuilder` is `floatingSelfViewBuilder`. `dart fix --apply` renames both.

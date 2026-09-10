@@ -79,7 +79,8 @@ class StreamCallParticipants extends StatefulWidget {
   ///
   /// Defaults to true under `speakerOneToOne`, which `auto` resolves to in a
   /// one-on-one call. Under `auto` in a group call it defaults to true on
-  /// mobile and false on desktop.
+  /// mobile while at most two other people are in the call, and to false
+  /// otherwise.
   final bool? enableFloatingSelfView;
 
   /// Builder function used to build a participant grid item.
