@@ -26,7 +26,9 @@ import 'call_participant_state_sorting.dart';
 ///
 /// [participants] is expected in the order it is currently displayed in —
 /// which is what "stays where it was" is measured against — and is not
-/// modified.
+/// modified. Being handed the order it produced last time is also what keeps
+/// this cheap enough to run on every update: the sorts are stable and the list
+/// is already almost right, so they walk it rather than rebuild it.
 List<CallParticipantState> sortParticipants(
   Iterable<CallParticipantState> participants, {
   required Comparator<CallParticipantState> sort,
@@ -34,77 +36,68 @@ List<CallParticipantState> sortParticipants(
   final result = [...participants];
   if (result.length < 2) return result;
 
-  // What the sort makes of a participant with their tile on screen, which is
-  // the same participant unless the sort has something to say about them being
-  // off it.
-  CallParticipantState asIfOnScreen(CallParticipantState participant) {
-    if (participant.viewportVisibility.isVisible) return participant;
-    return participant.copyWith(
-      viewportVisibility: ViewportVisibility.visible,
-    );
+  // With every tile on screen there is nothing to place — the sort has nothing
+  // to say about anybody being off it — and nothing to say it with. Which is
+  // the ordinary case, so it pays for none of the bookkeeping below.
+  if (result.every((it) => it.viewportVisibility.isVisible)) {
+    mergeSort(result, compare: sort);
+    return result;
   }
 
-  final onScreen = <String, CallParticipantState>{
-    for (final participant in result)
-      participant.uniqueParticipantKey: asIfOnScreen(participant),
-  };
-
-  int sortAsIfOnScreen(CallParticipantState a, CallParticipantState b) {
-    return sort(
-      onScreen[a.uniqueParticipantKey]!,
-      onScreen[b.uniqueParticipantKey]!,
-    );
-  }
+  final placed = [for (final participant in result) _Placed(participant)];
 
   // The criteria that do not ask about the viewport order everybody. Stable,
   // so participants they have nothing to say about keep the places they came
   // in with.
-  mergeSort(result, compare: sortAsIfOnScreen);
+  mergeSort(placed, compare: (a, b) => sort(a.onScreen, b.onScreen));
 
+  final offScreen = <_Placed>[];
   final offScreenPlaces = <int>[];
   final onScreenPlaces = <int>[];
-  for (var i = 0; i < result.length; i++) {
-    if (result[i].viewportVisibility.isVisible) {
+  for (var i = 0; i < placed.length; i++) {
+    if (placed[i].isOnScreen) {
       onScreenPlaces.add(i);
     } else {
+      offScreen.add(placed[i]);
       offScreenPlaces.add(i);
     }
   }
 
   // The rest of the sort orders the off-screen participants among the places
   // they hold between them.
-  final offScreen = [for (final place in offScreenPlaces) result[place]];
-  mergeSort(offScreen, compare: sort);
+  mergeSort(offScreen, compare: (a, b) => sort(a.participant, b.participant));
   for (var i = 0; i < offScreenPlaces.length; i++) {
-    result[offScreenPlaces[i]] = offScreen[i];
+    placed[offScreenPlaces[i]] = offScreen[i];
   }
 
   // And earns the best of them a place on screen, taken from the tiles with
   // the least claim to one: the last of them, whatever the criteria above made
   // of the rest.
-  final claimants = <CallParticipantState>[];
+  final claimants = <_Placed>[];
   final claimantPlaces = <int>[];
-  final residents = <CallParticipantState>[];
+  final residents = <_Placed>[];
   final residentPlaces = <int>[];
 
   var place = onScreenPlaces.length - 1;
-  for (final candidate in offScreen) {
+  for (var i = 0; i < offScreen.length; i++) {
     if (place < 0) break;
 
+    final candidate = offScreen[i];
+    // Where the ordering above left them, and where they stay unless they
+    // trade places with a resident: a trade only ever moves a candidate ahead
+    // of this one, never this one.
+    final candidatePlace = offScreenPlaces[i];
+
     final residentPlace = onScreenPlaces[place];
-    final resident = result[residentPlace];
+    final resident = placed[residentPlace];
 
     // The candidates are in order, so once one has no claim over the tile with
     // the least of it, neither has anybody behind them.
-    if (sort(candidate, resident) >= 0) break;
+    if (sort(candidate.participant, resident.participant) >= 0) break;
 
     // Ahead of the resident for a reason that has nothing to do with the
     // viewport: already placed, by the sort above.
-    if (sortAsIfOnScreen(candidate, resident) < 0) continue;
-
-    final candidatePlace = result.indexWhere(
-      (it) => it.uniqueParticipantKey == candidate.uniqueParticipantKey,
-    );
+    if (sort(candidate.onScreen, resident.onScreen) < 0) continue;
 
     // Already holding a better place than the one on offer.
     if (candidatePlace < residentPlace) continue;
@@ -122,9 +115,33 @@ List<CallParticipantState> sortParticipants(
   claimantPlaces.sort();
   residentPlaces.sort();
   for (var i = 0; i < claimants.length; i++) {
-    result[residentPlaces[i]] = claimants[i];
-    result[claimantPlaces[i]] = residents[residents.length - 1 - i];
+    placed[residentPlaces[i]] = claimants[i];
+    placed[claimantPlaces[i]] = residents[residents.length - 1 - i];
+  }
+
+  for (var i = 0; i < placed.length; i++) {
+    result[i] = placed[i].participant;
   }
 
   return result;
+}
+
+/// A participant and the same participant as a sort sees them with their tile
+/// on screen, so that both readings are one field access away rather than a
+/// copy per comparison.
+class _Placed {
+  _Placed(this.participant)
+    : onScreen = participant.viewportVisibility.isVisible
+          ? participant
+          : participant.copyWith(
+              viewportVisibility: ViewportVisibility.visible,
+            );
+
+  final CallParticipantState participant;
+
+  /// [participant] themselves when their tile is on screen, which is how
+  /// [isOnScreen] can be told from it.
+  final CallParticipantState onScreen;
+
+  bool get isOnScreen => identical(participant, onScreen);
 }

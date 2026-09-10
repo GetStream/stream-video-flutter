@@ -28,30 +28,28 @@ mixin CallParticipantsSortingMixin<T extends StatefulWidget> on State<T> {
   /// Call this method whenever the participant list changes, typically from
   /// a stream subscription or in [didUpdateWidget].
   void recalculateParticipants(List<CallParticipantState> newParticipants) {
-    var participants = [
-      ...newParticipants,
-    ].where(participantFilter ?? (_) => true).toList();
+    final filter = participantFilter;
+    final incoming = <String, CallParticipantState>{
+      for (final participant in newParticipants)
+        if (filter == null || filter(participant))
+          participant.uniqueParticipantKey: participant,
+    };
 
-    for (final participant in participants) {
-      final index = _sortedParticipantKeys.indexOf(
-        participant.uniqueParticipantKey,
-      );
-      if (index == -1) {
-        _sortedParticipantKeys.add(participant.uniqueParticipantKey);
-      }
-    }
-
-    // First apply previous sorting on new participants list
-    participants.sort(
-      (a, b) => _sortedParticipantKeys
-          .indexOf(a.uniqueParticipantKey)
-          .compareTo(_sortedParticipantKeys.indexOf(b.uniqueParticipantKey)),
-    );
+    // The order the tiles are in, which is what the sort below is allowed to
+    // keep. Built by walking it rather than by sorting an index of it: this
+    // runs on every update, and participants who have since left drop out of
+    // the record instead of accumulating in it.
+    var participants = <CallParticipantState>[
+      for (final key in _sortedParticipantKeys)
+        if (incoming.remove(key) case final participant?) participant,
+      // Whoever the previous order has never seen, in the order they arrived.
+      ...incoming.values,
+    ];
 
     final sort = participantSort;
     if (sort != null) {
-      // Not a plain sort: the order above is the order the tiles are in, and
-      // `sortParticipants` keeps the ones on screen there.
+      // Not a plain sort: `sortParticipants` leaves the tiles that are on
+      // screen where the order above has them.
       participants = sortParticipants(participants, sort: sort);
     }
 
