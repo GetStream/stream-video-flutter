@@ -197,17 +197,11 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'Camera'**
   String get lobbyCameraSection;
 
-  /// The device option that leaves the choice to the operating system
-  ///
-  /// In en, this message translates to:
-  /// **'System default'**
-  String get lobbySystemDefaultDevice;
-
-  /// Placeholder on a device field while no device has been picked
+  /// The device option that leaves the choice to the platform, and the placeholder on a device field while it is the one in effect
   ///
   /// In en, this message translates to:
   /// **'Default'**
-  String get lobbyDefaultDeviceHint;
+  String get defaultDevice;
 
   /// Tooltip of the lobby control that picks a microphone and speaker
   ///

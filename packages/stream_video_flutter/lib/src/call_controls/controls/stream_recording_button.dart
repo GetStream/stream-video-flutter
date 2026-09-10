@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 
-/// A widget that represents a call control option to toggle if recording
-/// is on or off.
-class ToggleRecordingOption extends StatelessWidget {
-  /// Creates a new instance of [ToggleRecordingOption].
-  const ToggleRecordingOption({
+/// A call control that starts and stops recording.
+class StreamRecordingButton extends StatelessWidget {
+  /// Creates a new instance of [StreamRecordingButton].
+  const StreamRecordingButton({
     super.key,
     required this.call,
     this.enabledRecordingIcon,
@@ -40,6 +39,7 @@ class ToggleRecordingOption extends StatelessWidget {
               : disabledRecordingIcon ?? icons.recordingFill,
         ),
         selected: enabled,
+        tone: .destructive,
         onPressed: () {
           if (!enabled) {
             call.startRecording();
@@ -51,3 +51,10 @@ class ToggleRecordingOption extends StatelessWidget {
     );
   }
 }
+
+/// ToggleRecordingOption is [StreamRecordingButton] now.
+@Deprecated(
+  'ToggleRecordingOption is StreamRecordingButton now, matching the rest of the '
+  'call controls. Will be removed in the next major version.',
+)
+typedef ToggleRecordingOption = StreamRecordingButton;

@@ -45,6 +45,7 @@
 
 ### 🐞 Fixed
 
+- A camera, microphone or screen share the call refuses at join is now recorded as disabled in `connectOptions`.
 - Guest users are now created with their `name`, `image`, and `custom` data — previously only the id was sent.
 - An expired guest token no longer re-creates the guest, which minted a new server-side identity mid-session. The guest is created once, by whichever caller needs a token first — a coordinator API call, `connect()`, or the client's own eager fetch — and everyone arriving while that is in flight waits for it. After it, the client holds the server-assigned identity with a static token, so refresh guards treat guests like static tokens and a rejected guest token fails terminally instead of triggering refreshes that could only return the same token.
 - Fixed a potential permanent hang when guest creation received a 401: the guest-creation call authenticates with its own anonymous token, so it no longer attempts a user-token refresh — which re-entered the token loading already in progress.

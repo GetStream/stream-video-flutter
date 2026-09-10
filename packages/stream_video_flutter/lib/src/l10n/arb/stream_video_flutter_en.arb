@@ -63,13 +63,9 @@
   "@lobbyCameraSection": {
     "description": "Heading of the camera group in the lobby's device menu"
   },
-  "lobbySystemDefaultDevice": "System default",
-  "@lobbySystemDefaultDevice": {
-    "description": "The device option that leaves the choice to the operating system"
-  },
-  "lobbyDefaultDeviceHint": "Default",
-  "@lobbyDefaultDeviceHint": {
-    "description": "Placeholder on a device field while no device has been picked"
+  "defaultDevice": "Default",
+  "@defaultDevice": {
+    "description": "The device option that leaves the choice to the platform, and the placeholder on a device field while it is the one in effect"
   },
   "lobbySelectAudioDevices": "Select audio devices",
   "@lobbySelectAudioDevices": {

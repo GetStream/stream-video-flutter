@@ -68,10 +68,7 @@ class StreamVideoFlutterLocalizationsNl
   String get lobbyCameraSection => 'Camera';
 
   @override
-  String get lobbySystemDefaultDevice => 'Systeemstandaard';
-
-  @override
-  String get lobbyDefaultDeviceHint => 'Standaard';
+  String get defaultDevice => 'Standaard';
 
   @override
   String get lobbySelectAudioDevices => 'Audioapparaten selecteren';

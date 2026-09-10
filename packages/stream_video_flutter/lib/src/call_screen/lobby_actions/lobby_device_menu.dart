@@ -61,7 +61,7 @@ extension LobbyDeviceMenus on StreamMediaDevicesController {
     required RtcMediaDevice? selected,
     required ValueChanged<RtcMediaDevice?> onSelected,
   }) => [
-    // "System default" means "let the platform pick". A section is only built
+    // "Default" means "let the platform pick". A section is only built
     // where there is something to pick from, so this is never the lone entry
     // in a menu that cannot do anything — and it is left out entirely where
     // the controller has no way to hand the choice back, as an in-call one
@@ -69,7 +69,7 @@ extension LobbyDeviceMenus on StreamMediaDevicesController {
     // changes nothing.
     if (supportsSystemDefault)
       StreamMenuOption(
-        label: context.translations.lobbySystemDefaultDevice,
+        label: context.translations.defaultDevice,
         selected: selected == null,
         onSelected: () => onSelected(null),
       ),

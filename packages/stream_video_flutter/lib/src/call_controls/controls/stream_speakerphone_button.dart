@@ -11,13 +11,12 @@ import '../../utils/extensions.dart';
 const deviceIdSpeaker = 'speaker';
 const deviceIdEarpiece = 'earpiece';
 
-/// A widget that represents a call control option to toggle if the
-/// speakerphone is on or off.
+/// A call control that turns the speakerphone on and off.
 ///
 /// This widget is only available on Android and iOS.
-class ToggleSpeakerphoneOption extends StatefulWidget {
-  /// Creates a new instance of [ToggleSpeakerphoneOption].
-  const ToggleSpeakerphoneOption({
+class StreamSpeakerphoneButton extends StatefulWidget {
+  /// Creates a new instance of [StreamSpeakerphoneButton].
+  const StreamSpeakerphoneButton({
     super.key,
     required this.call,
     this.enabledSpeakerphoneIcon,
@@ -38,11 +37,12 @@ class ToggleSpeakerphoneOption extends StatefulWidget {
   final IconData? disabledSpeakerphoneIcon;
 
   @override
-  State<ToggleSpeakerphoneOption> createState() => _ToggleSpeakerState();
+  State<StreamSpeakerphoneButton> createState() =>
+      _StreamSpeakerphoneButtonState();
 }
 
-class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
-  late final _logger = taggedLogger(tag: 'SV:SpeakerphoneOption');
+class _StreamSpeakerphoneButtonState extends State<StreamSpeakerphoneButton> {
+  late final _logger = taggedLogger(tag: 'SV:SpeakerphoneButton');
 
   final _deviceNotifier = RtcMediaDeviceNotifier.instance;
   StreamSubscription<List<RtcMediaDevice>>? _deviceChangeSubscription;
@@ -134,3 +134,10 @@ class _ToggleSpeakerState extends State<ToggleSpeakerphoneOption> {
     );
   }
 }
+
+/// ToggleSpeakerphoneOption is [StreamSpeakerphoneButton] now.
+@Deprecated(
+  'ToggleSpeakerphoneOption is StreamSpeakerphoneButton now, matching the rest of the '
+  'call controls. Will be removed in the next major version.',
+)
+typedef ToggleSpeakerphoneOption = StreamSpeakerphoneButton;

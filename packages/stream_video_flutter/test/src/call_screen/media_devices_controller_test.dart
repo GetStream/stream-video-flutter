@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -25,6 +26,35 @@ const _frontCamera = RtcMediaDevice(
   id: 'cam-1',
   label: 'FaceTime HD Camera',
   kind: RtcMediaDeviceKind.videoInput,
+);
+// What Chrome reports alongside the real devices: the one it has picked, under
+// the reserved `default` id.
+const _defaultMic = RtcMediaDevice(
+  id: StreamMediaDevicesController.platformDefaultDeviceId,
+  label: 'Default - WH-1000XM3 (Bluetooth)',
+  kind: RtcMediaDeviceKind.audioInput,
+);
+const _defaultSpeaker = RtcMediaDevice(
+  id: StreamMediaDevicesController.platformDefaultDeviceId,
+  label: 'Default - WH-1000XM3 (Bluetooth)',
+  kind: RtcMediaDeviceKind.audioOutput,
+);
+// What a phone reports instead: routes under their own ids, and no `default`
+// entry anywhere in the list.
+const _phoneSpeaker = RtcMediaDevice(
+  id: 'speaker',
+  label: 'Speaker',
+  kind: RtcMediaDeviceKind.audioOutput,
+);
+const _earpiece = RtcMediaDevice(
+  id: 'earpiece',
+  label: 'Earpiece',
+  kind: RtcMediaDeviceKind.audioOutput,
+);
+const _phoneMic = RtcMediaDevice(
+  id: 'microphone-bottom',
+  label: 'Bottom Microphone',
+  kind: RtcMediaDeviceKind.audioInput,
 );
 
 void main() {
@@ -88,6 +118,24 @@ void main() {
       expect(controller.audioInputs, [_builtInMic, _headset]);
       expect(controller.audioOutputs, [_speakers]);
       expect(controller.videoInputs, [_frontCamera]);
+    });
+
+    // Both mean "let the platform pick", and a menu over this controller
+    // already draws a row for null, so listing the browser's own entry offered
+    // the same choice twice.
+    test('drops the browser default, which a row already stands for', () async {
+      final controller = build();
+
+      deviceChanges.add(const [
+        _defaultMic,
+        _builtInMic,
+        _defaultSpeaker,
+        _speakers,
+      ]);
+      await pumpEventQueue();
+
+      expect(controller.audioInputs, [_builtInMic]);
+      expect(controller.audioOutputs, [_speakers]);
     });
 
     test('notifies listeners when the device list changes', () async {
@@ -248,16 +296,84 @@ void main() {
       expect(controller.hasEnumerated, isTrue);
       expect(controller.audioInputs, isEmpty);
     });
+
+    // `reportsNo` is true either way, so a control that badged itself off it
+    // alone could not say whether a retry was worth offering.
+    test('separates a failed enumeration from absent hardware', () async {
+      when(notifier.enumerateDevices).thenAnswer(
+        (_) async => Result.failure(
+          PlatformException(code: 'NotAllowedError'),
+          StackTrace.empty,
+        ),
+      );
+
+      final controller = build();
+      await pumpEventQueue();
+
+      expect(controller.reportsNo(controller.audioInputs), isTrue);
+      expect(controller.enumerationFailed, isTrue);
+      expect(
+        controller.enumerationError?.reason,
+        StreamDeviceFailureReason.permissionDenied,
+      );
+    });
+
+    test('a platform reporting no device has not failed', () async {
+      when(notifier.enumerateDevices).thenAnswer(
+        (_) async => Result.failure(
+          PlatformException(code: 'NotFoundError'),
+          StackTrace.empty,
+        ),
+      );
+
+      final controller = build();
+      await pumpEventQueue();
+
+      expect(controller.reportsNo(controller.audioInputs), isTrue);
+      expect(controller.enumerationFailed, isFalse);
+    });
   });
 
   group('StreamMediaDevicesController.forCall', () {
     late MockCall call;
+    late MutableStateEmitter<CallState> callState;
+
+    setUpAll(() => registerFallbackValue(_builtInMic));
+
+    /// The call using [audioInput], [audioOutput] and [videoInput].
+    void inUse({
+      RtcMediaDevice? audioInput,
+      RtcMediaDevice? audioOutput,
+      RtcMediaDevice? videoInput,
+    }) => callState.value = callState.value.copyWith(
+      audioInputDevice: audioInput,
+      audioOutputDevice: audioOutput,
+      videoInputDevice: videoInput,
+    );
 
     setUp(() {
       call = MockCall();
+      callState = MutableStateEmitter<CallState>(
+        CallState(
+          currentUserId: 'current-user',
+          callCid: StreamCallCid.from(
+            type: StreamCallType.defaultType(),
+            id: 'test-call',
+          ),
+          preferences: DefaultCallPreferences(),
+        ),
+        sync: true,
+      );
+      when(() => call.state).thenAnswer((_) => callState);
       when(() => call.setVideoInputDevice(_frontCamera)).thenAnswer(
         (_) async => const Result.success(none),
       );
+      when(
+        () => call.setAudioInputDevice(any()),
+      ).thenAnswer((_) async => const Result.success(none));
+      when(
+        () => call.setAudioOutputDevice(any()),
+      ).thenAnswer((_) async => const Result.success(none));
     });
 
     StreamMediaDevicesController build() {
@@ -326,6 +442,150 @@ void main() {
       // The pick stands, and the hook was never told to do the impossible.
       expect(controller.selectedAudioInput, _headset);
       expect(applied, [_headset]);
+    });
+    // The bug this fixes: with no way to draw "let the platform pick", every
+    // row in an in-call menu was unselected until something was picked.
+    group("the platform's own choice", () {
+      // Nothing here draws a row for null, so the browser's own entry is the
+      // only handle on its choice and is left in the list.
+      test('is listed, there being no row for it', () async {
+        final controller = build();
+        deviceChanges.add(const [_defaultMic, _builtInMic]);
+        await pumpEventQueue();
+
+        expect(controller.audioInputs, [_defaultMic, _builtInMic]);
+      });
+
+      test('is what an unpicked selection resolves to', () async {
+        final controller = build();
+        deviceChanges.add(const [_defaultMic, _builtInMic, _defaultSpeaker]);
+        await pumpEventQueue();
+
+        expect(controller.selectedAudioInput, _defaultMic);
+        expect(controller.selectedAudioOutput, _defaultSpeaker);
+      });
+
+      test('gives way to a device the user picks', () async {
+        final controller = build();
+        deviceChanges.add(const [_defaultMic, _builtInMic]);
+        await pumpEventQueue();
+
+        await controller.selectAudioInput(_builtInMic);
+
+        expect(controller.selectedAudioInput, _builtInMic);
+      });
+
+      // Already in use, so there is nothing to switch to.
+      test('applies nothing when its own row is picked', () async {
+        final controller = build();
+        deviceChanges.add(const [_defaultMic, _builtInMic]);
+        await pumpEventQueue();
+
+        await controller.selectAudioInput(_defaultMic);
+
+        verifyNever(() => call.setAudioInputDevice(any()));
+      });
+
+      test('is resolved again once a picked device is unplugged', () async {
+        final controller = build();
+        deviceChanges.add(const [_defaultMic, _headset]);
+        await pumpEventQueue();
+        await controller.selectAudioInput(_headset);
+
+        deviceChanges.add(const [_defaultMic]);
+        await pumpEventQueue();
+
+        // The platform falls back to its own choice, so the menu says so.
+        expect(controller.selectedAudioInput, _defaultMic);
+      });
+
+      test('stays null where the platform reports no such device', () async {
+        final controller = build();
+        deviceChanges.add(const [_builtInMic, _headset]);
+        await pumpEventQueue();
+
+        expect(controller.selectedAudioInput, isNull);
+      });
+    });
+
+    // Only a browser reports a `default` device, so on a phone the selection
+    // comes from what the call says it is using.
+    group('the device the call is using', () {
+      test('is where the selection starts', () async {
+        inUse(audioInput: _phoneMic, audioOutput: _earpiece);
+        final controller = build();
+        deviceChanges.add(const [_phoneMic, _phoneSpeaker, _earpiece]);
+        await pumpEventQueue();
+
+        expect(controller.selectedAudioInput, _phoneMic);
+        expect(controller.selectedAudioOutput, _earpiece);
+      });
+
+      // The call is already on it, so switching to it is not this
+      // controller's to do.
+      test('is taken without being applied', () async {
+        final controller = build();
+        deviceChanges.add(const [_phoneSpeaker, _earpiece]);
+        inUse(audioOutput: _earpiece);
+        await pumpEventQueue();
+
+        expect(controller.selectedAudioOutput, _earpiece);
+        verifyNever(() => call.setAudioOutputDevice(any()));
+      });
+
+      // What iOS's own route picker does: the call records the new route, and
+      // a menu has to mark it rather than the device picked before.
+      test('moves the selection when the call switches route', () async {
+        final controller = build();
+        deviceChanges.add(const [_phoneSpeaker, _earpiece]);
+        inUse(audioOutput: _earpiece);
+        await pumpEventQueue();
+
+        inUse(audioOutput: _phoneSpeaker);
+        await pumpEventQueue();
+
+        expect(controller.selectedAudioOutput, _phoneSpeaker);
+      });
+
+      test('notifies listeners when it changes', () async {
+        final controller = build();
+        deviceChanges.add(const [_phoneSpeaker, _earpiece]);
+        await pumpEventQueue();
+
+        var notifications = 0;
+        controller.addListener(() => notifications++);
+        inUse(audioOutput: _earpiece);
+        await pumpEventQueue();
+
+        expect(notifications, 1);
+      });
+
+      // A call resolves an output before it has an input to match it with, so
+      // the kinds it has not named have to be left alone.
+      test('leaves a kind it names no device for alone', () async {
+        final controller = build();
+        deviceChanges.add(const [_phoneMic, _phoneSpeaker, _earpiece]);
+        await pumpEventQueue();
+        await controller.selectAudioInput(_phoneMic);
+
+        inUse(audioOutput: _earpiece);
+        await pumpEventQueue();
+
+        expect(controller.selectedAudioInput, _phoneMic);
+        expect(controller.selectedAudioOutput, _earpiece);
+      });
+
+      test('gives way to a device the user picks', () async {
+        final controller = build();
+        deviceChanges.add(const [_phoneSpeaker, _earpiece]);
+        inUse(audioOutput: _earpiece);
+        await pumpEventQueue();
+
+        await controller.selectAudioOutput(_phoneSpeaker);
+
+        expect(controller.selectedAudioOutput, _phoneSpeaker);
+        verify(() => call.setAudioOutputDevice(_phoneSpeaker)).called(1);
+      });
     });
   });
 
