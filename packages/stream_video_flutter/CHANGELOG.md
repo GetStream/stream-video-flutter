@@ -146,6 +146,7 @@
 ### 🐞 Fixed
 
 - An in-call device menu marks the device the call is using, instead of leaving every row unselected.
+- A device menu no longer offers the platform's own choice twice on web, once as "Default" and once as the browser's own entry.
 - The microphone and camera controls no longer flash the muted look while a call is being joined.
 - The sample's in-call microphone and camera buttons now say when the call refuses them. `setMicrophoneEnabled` and `setCameraEnabled` return a `Result` that was dropped, and the buttons take their state from the call's own participant state, which does not change on a failure — so a user without permission to send video tapped the camera button and watched nothing happen, with nothing logged either.
 - The sample's background-blur toggle no longer applies its filter from inside `build()`. It recorded the track as filtered before the platform call had returned, and swallowed whatever that call threw, so switching camera to a device the filter could not handle left the button claiming blur over an unblurred preview with no way to retry. It runs from `didChangeDependencies` now and puts the toggle back on failure.

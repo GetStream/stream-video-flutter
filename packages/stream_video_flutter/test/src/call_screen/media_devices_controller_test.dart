@@ -120,6 +120,24 @@ void main() {
       expect(controller.videoInputs, [_frontCamera]);
     });
 
+    // Both mean "let the platform pick", and a menu over this controller
+    // already draws a row for null, so listing the browser's own entry offered
+    // the same choice twice.
+    test('drops the browser default, which a row already stands for', () async {
+      final controller = build();
+
+      deviceChanges.add(const [
+        _defaultMic,
+        _builtInMic,
+        _defaultSpeaker,
+        _speakers,
+      ]);
+      await pumpEventQueue();
+
+      expect(controller.audioInputs, [_builtInMic]);
+      expect(controller.audioOutputs, [_speakers]);
+    });
+
     test('notifies listeners when the device list changes', () async {
       final controller = build();
       var notifications = 0;
@@ -428,6 +446,16 @@ void main() {
     // The bug this fixes: with no way to draw "let the platform pick", every
     // row in an in-call menu was unselected until something was picked.
     group("the platform's own choice", () {
+      // Nothing here draws a row for null, so the browser's own entry is the
+      // only handle on its choice and is left in the list.
+      test('is listed, there being no row for it', () async {
+        final controller = build();
+        deviceChanges.add(const [_defaultMic, _builtInMic]);
+        await pumpEventQueue();
+
+        expect(controller.audioInputs, [_defaultMic, _builtInMic]);
+      });
+
       test('is what an unpicked selection resolves to', () async {
         final controller = build();
         deviceChanges.add(const [_defaultMic, _builtInMic, _defaultSpeaker]);

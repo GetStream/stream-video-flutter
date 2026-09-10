@@ -174,6 +174,10 @@ class StreamMediaDevicesController extends ChangeNotifier {
   /// Android names its outputs `speaker`, `earpiece`, `bluetooth` and
   /// `wired-headset`, iOS uses port UIDs — so elsewhere the device in use is
   /// the one the owner reports through `devicesInUse`.
+  ///
+  /// Left out of the device lists while [supportsSystemDefault], where a row
+  /// for null already means "let the platform pick" and listing it too would
+  /// offer that choice twice.
   static const platformDefaultDeviceId = 'default';
 
   bool _hasEnumerated = false;
@@ -201,7 +205,8 @@ class StreamMediaDevicesController extends ChangeNotifier {
   List<RtcMediaDevice> _audioOutputs = const [];
   List<RtcMediaDevice> _videoInputs = const [];
 
-  /// The microphones the platform reports.
+  /// The microphones the platform reports, less the browser's own `default`
+  /// entry where a row already stands for it — see [platformDefaultDeviceId].
   List<RtcMediaDevice> get audioInputs => _audioInputs;
 
   /// The speakers the platform reports.
@@ -210,10 +215,10 @@ class StreamMediaDevicesController extends ChangeNotifier {
   /// Android — there is nothing to pick from, and a speaker section built from
   /// this should be omitted rather than shown empty. Note that
   /// [RtcMediaDeviceNotifier] synthesises an earpiece on iOS, so this is not
-  /// reliably empty there.
+  /// reliably empty there. Filtered as [audioInputs] is.
   List<RtcMediaDevice> get audioOutputs => _audioOutputs;
 
-  /// The cameras the platform reports.
+  /// The cameras the platform reports. Filtered as [audioInputs] is.
   List<RtcMediaDevice> get videoInputs => _videoInputs;
 
   RtcMediaDevice? _selectedAudioInput;
@@ -346,9 +351,20 @@ class StreamMediaDevicesController extends ChangeNotifier {
     // since a later device change discards the result entirely, nothing would
     // have set it again.
     if (devices.isNotEmpty) _enumerationError = null;
-    _audioInputs = devices.ofKind(RtcMediaDeviceKind.audioInput);
-    _audioOutputs = devices.ofKind(RtcMediaDeviceKind.audioOutput);
-    _videoInputs = devices.ofKind(RtcMediaDeviceKind.videoInput);
+    // A browser's own `default` entry is dropped where a row already stands
+    // for "let the platform pick": both mean the same thing, and listing them
+    // side by side offers the same choice twice — once as an id to apply and
+    // once as null. Kept where there is no such row, since it is then the only
+    // handle on the browser's choice.
+    final available = supportsSystemDefault
+        ? devices
+              .where((device) => device.id != platformDefaultDeviceId)
+              .toList(growable: false)
+        : devices;
+
+    _audioInputs = available.ofKind(RtcMediaDeviceKind.audioInput);
+    _audioOutputs = available.ofKind(RtcMediaDeviceKind.audioOutput);
+    _videoInputs = available.ofKind(RtcMediaDeviceKind.videoInput);
 
     // A device the user picked can be unplugged. The system default is both
     // what the platform falls back to anyway and something a menu can draw a
