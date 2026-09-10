@@ -42,6 +42,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamParticipantLabelThemeData? participantLabelTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
+    StreamCallButtonBadgeThemeData? callButtonBadgeTheme,
     StreamLivestreamThemeData? livestreamTheme,
   }) {
     final isDark = brightness == Brightness.dark;
@@ -87,6 +88,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callParticipantsGridTheme:
           callParticipantsGridTheme ??
           legacy?.toCallParticipantsGridThemeData(),
+      callButtonBadgeTheme:
+          callButtonBadgeTheme ?? const StreamCallButtonBadgeThemeData(),
       livestreamTheme: livestreamTheme,
     );
 
@@ -131,6 +134,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         const StreamConnectionQualityIndicatorThemeData(),
     this.callParticipantsGridTheme =
         const StreamCallParticipantsGridThemeData(),
+    this.callButtonBadgeTheme = const StreamCallButtonBadgeThemeData(),
     required this.livestreamTheme,
   });
 
@@ -414,6 +418,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the participants grid layout.
   final StreamCallParticipantsGridThemeData callParticipantsGridTheme;
 
+  /// Theme for the badge overlaid on a call control button.
+  final StreamCallButtonBadgeThemeData callButtonBadgeTheme;
+
   /// Theme for the outgoing call widget.
   final StreamLivestreamThemeData livestreamTheme;
 
@@ -454,6 +461,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamParticipantLabelThemeData? participantLabelTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
+    StreamCallButtonBadgeThemeData? callButtonBadgeTheme,
     StreamLivestreamThemeData? livestreamTheme,
   }) => StreamVideoTheme.raw(
     textTheme: this.textTheme.merge(textTheme),
@@ -482,6 +490,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     callParticipantsGridTheme: this.callParticipantsGridTheme.merge(
       callParticipantsGridTheme,
     ),
+    callButtonBadgeTheme: this.callButtonBadgeTheme.merge(callButtonBadgeTheme),
     livestreamTheme: this.livestreamTheme.merge(livestreamTheme),
   );
 
@@ -516,6 +525,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       ),
       callParticipantsGridTheme: callParticipantsGridTheme.merge(
         other.callParticipantsGridTheme,
+      ),
+      callButtonBadgeTheme: callButtonBadgeTheme.merge(
+        other.callButtonBadgeTheme,
       ),
       livestreamTheme: livestreamTheme.merge(other.livestreamTheme),
     );
@@ -591,6 +603,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           callParticipantsGridTheme,
+      callButtonBadgeTheme:
+          StreamCallButtonBadgeThemeData.lerp(
+            callButtonBadgeTheme,
+            other.callButtonBadgeTheme,
+            t,
+          ) ??
+          callButtonBadgeTheme,
       livestreamTheme: livestreamTheme.lerp(other.livestreamTheme, t),
     );
   }

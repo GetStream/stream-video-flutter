@@ -8,7 +8,6 @@ import 'package:stream_core_flutter/video.dart';
 
 import '../../stream_video_flutter.dart';
 import '../l10n/localization_extension.dart';
-import 'call_button_badge.dart';
 
 /// Turns the microphone on and off, with a caret that picks which microphone
 /// and speaker to use.
@@ -408,7 +407,7 @@ class _DeviceSplitButton extends StatelessWidget {
       // the leading half can be pressed is the caller's to say — a failed
       // open is worth retrying — while the caret follows what it has to
       // offer, which is nothing when the platform named no device.
-      builder: (context, handle) => CallButtonBadge(
+      builder: (context, handle) => StreamCallButtonBadge(
         showErrorBadge: unavailable,
         child: StreamSplitButton.icon(
           leadingIcon: Icon(icon),

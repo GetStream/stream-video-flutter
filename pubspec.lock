@@ -165,10 +165,10 @@ packages:
     dependency: transitive
     description:
       name: cached_network_image_ce
-      sha256: "9c61372fecd5f6ac6aaa66fa6808b4c303b8574875e853a0916116bf2fae6840"
+      sha256: "9165bb982487e899e4b35729e821e4e2d2407fb9b0c8d4e07d3ea39e148200ba"
       url: "https://pub.dev"
     source: hosted
-    version: "4.9.0"
+    version: "4.12.0"
   cached_network_image_platform_interface:
     dependency: transitive
     description:
@@ -197,10 +197,10 @@ packages:
     dependency: transitive
     description:
       name: cached_network_image_web_ce
-      sha256: "6bcd8608d4ace7c35625f09d971ce68c7a6581a4631b0fb6ceb2909b2c2e17a8"
+      sha256: "22cdf044cd013ff8d6eb06ce148bfe3f1106388ca2af244e2358739debb4459c"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.1"
+    version: "2.1.2"
   characters:
     dependency: transitive
     description:
@@ -719,10 +719,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_markdown_plus
-      sha256: "3893b00caa52ce75cf9212f2c159ea517b9d64a641fc2226811bf5f218b5b77e"
+      sha256: fce641d6c2106cc495de1cd603f97a4f9d615a97a64011928ded380dbdade935
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.9"
+    version: "1.0.12"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -1955,20 +1955,19 @@ packages:
     source: hosted
     version: "10.4.0"
   stream_core:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "packages/stream_core"
-      ref: f83b5d4d706a79fc429de2d27aead4394b83c1fb
-      resolved-ref: f83b5d4d706a79fc429de2d27aead4394b83c1fb
-      url: "https://github.com/GetStream/stream-core-flutter.git"
-    source: git
-    version: "0.4.0"
+      name: stream_core
+      sha256: "25c19466b96050354e9a64fb13767956b48b9405576472005598733502ef219c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.0"
   stream_core_flutter:
     dependency: "direct overridden"
     description:
       path: "packages/stream_core_flutter"
-      ref: "3ab8dbeadc0bfe28c08a732858ec970c02e67c42"
-      resolved-ref: "3ab8dbeadc0bfe28c08a732858ec970c02e67c42"
+      ref: f4d49e9db343b48d890247fc9bf142805804daf1
+      resolved-ref: f4d49e9db343b48d890247fc9bf142805804daf1
       url: "https://github.com/GetStream/stream-core-flutter.git"
     source: git
     version: "0.5.1"

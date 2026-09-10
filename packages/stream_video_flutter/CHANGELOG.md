@@ -19,7 +19,7 @@
 - Added `CallControlBarThemeData` on `StreamVideoTheme`, and `CallControlBarTheme` to restyle the bar over a subtree.
 - Added `StreamDeviceAvailability.enumerationFailed`, which tells an enumeration the platform refused from one that found no device.
 - Added `CallParticipantState.trackEnabled`, null for a track nothing has reported, and `TrackOption.wantsOn` for the intent a call was joined with.
-- `CallButtonBadge` is no longer exported. It exists so the badge sits in the same place on both call buttons, which is an implementation detail; exporting it committed the package to its shape and gave integrators a way to badge things inconsistently.
+- Added `StreamCallButtonBadge`, the badge on the call control buttons, with `StreamCallButtonBadgeTheme`, `StreamCallButtonBadgeThemeData` and `StreamCallButtonBadgeStyle` served from `StreamVideoTheme.callButtonBadgeTheme`.
 - `CallControlButton` no longer overrides `StreamButtonTheme` for every tone. Only `positive` repaints the primary background — there is no success button style in the design system — and wrapping the other two overrode an app's own primary style for buttons that never use it.
 - `StreamMenuHandle` is an `abstract interface class`, so it cannot be accidentally extended.
 - Added `hasNoOptions` on an `Iterable<StreamMenuSection>`, and `StreamAdaptiveMenuAnchor` now drops a heading with no rows under it. Every caller had to know both — "is there anything to open" was recomputed at each of two call sites, and an empty section drew a label over nothing.
