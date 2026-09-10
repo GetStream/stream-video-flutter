@@ -186,6 +186,7 @@
 
 ### ⚠️ Breaking
 
+- `translations.defaultDevice` replaces `lobbySystemDefaultDevice` and `lobbyDefaultDeviceHint`, and reads "Default" rather than "System default". The two strings were shown side by side — the menu's row and the field's placeholder — so a translation could make them disagree about the same choice.
 - `StreamLayoutButton` takes `layout` instead of `initialLayout` and keeps no state, so the caller passes the mode back in through it. `dart fix --apply` renames the parameter.
 - `onError` on the device controls takes a `StreamDeviceErrorCallback`, receiving a typed `VideoError` and the action that failed.
 - `StreamCallContent` no longer shows `CallDiagnosticsContent` on a double tap. The gesture held the pointer arena for `kDoubleTapTimeout`, so every tap in the call body — a participant tile's overflow menu above all — waited 300ms to be recognized, and the overlay it toggled only ever appeared in debug builds. `CallDiagnosticsContent` is still public: show it from an affordance of your own, the way `StreamLivestreamContent` does with `displayDiagnostics`.

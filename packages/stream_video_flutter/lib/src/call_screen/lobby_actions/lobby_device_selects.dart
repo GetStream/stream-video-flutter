@@ -150,7 +150,7 @@ class _DeviceSelect extends StatelessWidget {
         child: StreamSelectInput(
           leading: Icon(icon),
           value: value,
-          hintText: context.translations.lobbyDefaultDeviceHint,
+          hintText: context.translations.defaultDevice,
           // True for a sheet as well as a popup, so the caret points the same
           // way on every platform.
           expanded: handle.isOpen,

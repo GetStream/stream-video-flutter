@@ -60,7 +60,7 @@ void main() {
   }
 
   // What an iOS simulator reports: no camera at all. The caret used to open a
-  // menu whose only entry was "System default", which could pick nothing.
+  // menu whose only entry was "Default", which could pick nothing.
   testWidgets('offers no menu when the platform names no device', (
     tester,
   ) async {
@@ -71,7 +71,7 @@ void main() {
     await tester.tap(find.byIcon(const StreamIcons().caretDown));
     await tester.pumpAndSettle();
 
-    expect(find.text('System default'), findsNothing);
+    expect(find.text('Default'), findsNothing);
     expect(find.byType(StreamContextMenuAction<void>), findsNothing);
   });
 
@@ -122,7 +122,7 @@ void main() {
     await tester.tap(find.byIcon(const StreamIcons().caretDown));
     await tester.pumpAndSettle();
 
-    expect(find.text('System default'), findsOneWidget);
+    expect(find.text('Default'), findsOneWidget);
     expect(find.text('FaceTime HD Camera'), findsOneWidget);
   });
 
