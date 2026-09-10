@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../globals.dart';
@@ -12,14 +13,21 @@ import 'coordinator_message_codec.dart';
 var _seq = 0;
 const _tag = 'SV:CoordinatorWS';
 
-/// The error carried by a disconnection source, as a [VideoError].
+/// The error carried by a disconnection source, as a [StreamVideoException].
 ///
-/// `_authenticateUser` only ever throws a [VideoError]; anything else is
-/// described by its `toString`.
-VideoError? _videoErrorOf(Object? error) => switch (error) {
+/// A core exception is kept as the cause rather than flattened to its message:
+/// the accessors on [StreamVideoException] read the verdict from there, and
+/// `CoordinatorDisconnectedEvent.apiError` is the only account an app gets of a
+/// closure that is not reconnectable.
+StreamVideoException? _videoErrorOf(Object? error) => switch (error) {
   null => null,
-  final VideoError it => it,
-  final it => VideoError(message: '$it'),
+  final StreamVideoException it => it,
+  StreamException(cause: final StreamVideoException it) => it,
+  final StreamException it => StreamVideoExceptionWithCause(
+    message: it.message,
+    cause: it,
+  ),
+  final it => StreamVideoException(message: '$it'),
 };
 
 String _buildUrl(String baseUrl, String apiKey) {
@@ -38,22 +46,19 @@ class CoordinatorWebSocket {
     this.includeUserDetails = false,
     this.clientEventReporter = const ClientEventReporter.noOp(),
     NetworkStateProvider? networkStateProvider,
-    RetryPolicy? retryPolicy,
   }) {
     _wsUrl = _buildUrl(url, apiKey);
 
     _client = StreamWebSocketClient(
       tag: _tag,
       optionsBuilder: () => WebSocketOptions(url: _wsUrl),
-      messageCodec: const CoordinatorMessageCodec(),
+      messageCodec: CoordinatorMessageCodec(),
       onAuthenticate: _authenticateUser,
       pingRequestBuilder: ([info]) =>
           HealthCheckPingEvent(connectionId: info?.connectionId),
     );
 
-    _retryStrategy = retryPolicy != null
-        ? _RetryPolicyStrategy(retryPolicy)
-        : null;
+    _retryStrategy = DefaultRetryStrategy();
 
     _recoveryHandler = ConnectionRecoveryHandler(
       tag: '$_tag:Recovery',
@@ -78,8 +83,15 @@ class CoordinatorWebSocket {
   final ClientEventReporter clientEventReporter;
 
   late final StreamWebSocketClient _client;
+
+  /// The underlying socket client.
+  ///
+  /// Exposed so tests can drive its connection state directly — they never
+  /// establish a real socket.
+  @visibleForTesting
+  StreamWebSocketClient get client => _client;
   late final ConnectionRecoveryHandler _recoveryHandler;
-  late final RetryStrategy? _retryStrategy;
+  late final RetryStrategy _retryStrategy;
   late final String _wsUrl;
 
   SharedEmitter<CoordinatorEvent> get events => _events;
@@ -122,30 +134,32 @@ class CoordinatorWebSocket {
   Future<void> dispose() => _recoveryHandler.dispose();
 
   Future<void> _authenticateUser(
-    WsRequestSender send,
-    StreamApiError? previousError,
+    WsRequestSender authenticator,
+    StreamApiException? previousError,
   ) async {
     _logger.i(
       () => '[authenticateUser] url: $_wsUrl, previousError: $previousError',
     );
 
-    final tokenRefused = previousError?.isTokenExpiredError ?? false;
+    // The verdict the server refused the last attempt with, when refusing the
+    // token is what it was about.
+    final refusal = switch (previousError) {
+      final StreamApiException it when it.isTokenExpired => it,
+      _ => null,
+    };
+    final tokenRefused = refusal != null;
 
     // Mirrors the RpcRetryManager guard: a static provider can only return
     // the token the server just refused, so the credentials cannot change.
-    // Throwing fails the attempt for good (AuthenticationFailed) instead of
-    // reconnecting with the same dead token.
+    // Throwing fails the attempt for good (AuthenticationFailed, which is not
+    // reconnectable) instead of reconnecting with the same dead token.
     if (tokenRefused && tokenSource.usesStaticProvider) {
       _logger.e(
         () =>
             '[authenticateUser] token refused and cannot be refreshed '
-            '(static token provider)',
+            '(static token provider): $refusal',
       );
-      throw const VideoError(
-        message:
-            'WS auth token refused and cannot be refreshed '
-            '(static token provider)',
-      );
+      Error.throwWithStackTrace(refusal, StackTrace.current);
     }
 
     final tokenResult = tokenRefused
@@ -153,11 +167,23 @@ class CoordinatorWebSocket {
         : await tokenSource.getToken();
 
     if (tokenResult is! Success<UserToken>) {
-      _logger.e(() => '[authenticateUser] token fetch failed: $tokenResult');
-      throw (tokenResult as Failure).videoError;
+      final failure = tokenResult as Failure;
+      _logger.e(
+        () => '[authenticateUser] token fetch failed: ${failure.error}',
+      );
+
+      final error = failure.error;
+      final raised = error is StreamVideoException
+          ? error.streamException ?? error
+          : error;
+
+      Error.throwWithStackTrace(
+        raised,
+        failure.stackTrace ?? StackTrace.current,
+      );
     }
 
-    final sent = send(
+    final sent = authenticator(
       CoordinatorAuthRequest(
         token: tokenResult.data.rawValue,
         userId: userInfo.id,
@@ -169,9 +195,9 @@ class CoordinatorWebSocket {
       ),
     );
 
-    if (sent is Failure) {
-      _logger.e(() => '[authenticateUser] sending credentials failed: $sent');
-      throw sent.videoError;
+    if (sent case Failure(:final error, :final stackTrace)) {
+      _logger.e(() => '[authenticateUser] sending credentials failed: $error');
+      Error.throwWithStackTrace(error, stackTrace ?? StackTrace.current);
     }
   }
 
@@ -221,27 +247,35 @@ class CoordinatorWebSocket {
     // `_authenticateUser` threw instead of reporting a disconnect with no
     // reason at all.
     final authError = source is AuthenticationFailed
-        ? _videoErrorOf(source.error) ?? VideoError(message: source.closeReason)
+        ? _videoErrorOf(source.error) ??
+              StreamVideoException(message: source.closeReason)
         : null;
 
     final apiError =
-        wsException?.apiError ??
-        switch (authError) {
-          VideoErrorWithCause(cause: final StreamApiError it) => it,
+        switch (wsException) {
+          StreamApiException(:final apiError) => apiError,
           _ => null,
-        };
-    final wsReason = wsException?.reason;
+        } ??
+        authError?.apiError;
+
+    // Only a transport-level closure carries a close code; a server verdict
+    // reported over the socket describes itself through its error payload.
+    final closeCode = switch (wsException) {
+      StreamNetworkException(:final closeCode?) when closeCode != 0 =>
+        closeCode,
+      _ => null,
+    };
 
     _events.emit(
       CoordinatorDisconnectedEvent(
         userId: _userId,
         connectionId: _connectionId,
-        closeCode: wsException != null && wsException.code != 0
-            ? wsException.code
-            : null,
-        closeReason: wsReason != null && wsReason != 'Unknown'
-            ? wsReason
-            : apiError?.message ?? authError?.message,
+        closeCode: closeCode,
+        closeReason:
+            wsException?.message ??
+            apiError?.message ??
+            authError?.message ??
+            source.closeReason,
         apiError: apiError,
       ),
     );
@@ -262,8 +296,7 @@ class CoordinatorWebSocket {
     switch (state) {
       case Connecting():
         if (_coordinatorWsStageId != null) break;
-        _coordinatorWsStageRetryCount =
-            _retryStrategy?.consecutiveFailuresCount ?? 0;
+        _coordinatorWsStageRetryCount = _retryStrategy.consecutiveFailuresCount;
         final stageId = clientEventReporter.beginConnectionStage(
           ClientEventStage.coordinatorWs,
           connectId: _uuid.v4(),
@@ -298,36 +331,4 @@ class CoordinatorWebSocket {
         break;
     }
   }
-}
-
-/// Bridges stream_video's [RetryPolicy] into stream_core's [RetryStrategy]
-class _RetryPolicyStrategy implements RetryStrategy {
-  _RetryPolicyStrategy(this._policy);
-
-  final RetryPolicy _policy;
-
-  @override
-  int get consecutiveFailuresCount => _consecutiveFailuresCount;
-  var _consecutiveFailuresCount = 0;
-
-  @override
-  void incrementConsecutiveFailures() => _consecutiveFailuresCount++;
-
-  @override
-  void resetConsecutiveFailures() => _consecutiveFailuresCount = 0;
-
-  @override
-  Duration getNextRetryDelay() => _policy.backoff(_consecutiveFailuresCount);
-}
-
-class CallInfo {
-  const CallInfo({
-    required this.callType,
-    required this.callId,
-  });
-
-  final String callType;
-  final String callId;
-
-  String get callCid => '$callType:$callId';
 }

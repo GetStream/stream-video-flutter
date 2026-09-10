@@ -1,7 +1,8 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:stream_core/stream_core.dart' show StreamDioExceptionExtension;
+import 'package:stream_core/stream_core.dart'
+    show DioExceptionMapping, StreamApiException, StreamException;
 import 'package:tart/tart.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -9,18 +10,21 @@ import '../../open_api/video/coordinator/api.dart';
 import '../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../sfu/data/events/sfu_event_mapper_extensions.dart';
 import '../sfu/data/models/sfu_error.dart';
-import 'video_error.dart';
+import 'stream_video_exception.dart';
 
-mixin VideoErrors {
-  /// Composes [VideoError] instance.
-  static VideoError compose(Object? exception, [StackTrace? stackTrace]) {
+mixin StreamVideoExceptions {
+  /// Composes [StreamVideoException] instance.
+  static StreamVideoException compose(
+    Object? exception, [
+    StackTrace? stackTrace,
+  ]) {
     if (exception is String) {
-      return VideoError(
+      return StreamVideoException(
         message: exception,
         stackTrace: stackTrace,
       );
     } else if (exception is sfu_models.Error) {
-      return VideoErrorWithCause(
+      return StreamVideoExceptionWithCause(
         message: exception.message,
         cause: SfuError(
           message: exception.message,
@@ -31,32 +35,51 @@ mixin VideoErrors {
         stackTrace: stackTrace,
       );
     } else if (exception is TwirpError) {
-      return VideoErrorWithCause(
+      return StreamVideoExceptionWithCause(
         message: exception.getMsg,
         cause: exception,
         stackTrace: stackTrace,
       );
     } else if (exception is WebSocketChannelException) {
-      return VideoErrorWithCause(
+      return StreamVideoExceptionWithCause(
         message: exception.message ?? exception.inner?.toString() ?? '',
         cause: exception,
         stackTrace: stackTrace,
       );
     } else if (exception is DioException) {
-      final apiError = exception.apiError ?? _streamApiErrorOf(exception);
-      return VideoErrorWithCause(
-        message: apiError?.message ?? exception.message ?? exception.toString(),
-        cause: apiError ?? exception,
+      final mapped = exception.toStreamException();
+      final enveloped = _streamApiErrorOf(exception);
+
+      final cause = switch (mapped) {
+        StreamApiException(apiError: null, :final retryAfter)
+            when enveloped != null =>
+          StreamApiException.fromApiError(
+            enveloped,
+            retryAfter: retryAfter,
+            cause: exception,
+          ),
+        _ => mapped,
+      };
+
+      return StreamVideoExceptionWithCause(
+        message: cause.message,
+        cause: cause,
         stackTrace: stackTrace ?? exception.stackTrace,
       );
+    } else if (exception is StreamException) {
+      return StreamVideoExceptionWithCause(
+        message: exception.message,
+        cause: exception,
+        stackTrace: stackTrace,
+      );
     } else if (exception is Exception) {
-      return VideoErrorWithCause(
+      return StreamVideoExceptionWithCause(
         message: exception.toString(),
         cause: exception,
         stackTrace: stackTrace,
       );
     } else {
-      return VideoError(
+      return StreamVideoException(
         message: 'Unexpected error: $exception',
         stackTrace: stackTrace,
       );

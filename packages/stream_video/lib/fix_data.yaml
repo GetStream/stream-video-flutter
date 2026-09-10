@@ -84,3 +84,29 @@ transforms:
     changes:
       - kind: "rename"
         newName: "observeCallEndedRingingEvent"
+
+  - title: "rename VideoError to StreamVideoException"
+    date: "2026-09-09"
+    element:
+      uris:
+        [
+          "package:stream_video/src/errors/stream_video_exception.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "VideoError"
+    changes:
+      - kind: "rename"
+        newName: "StreamVideoException"
+
+  - title: "rename VideoErrorWithCause to StreamVideoExceptionWithCause"
+    date: "2026-09-09"
+    element:
+      uris:
+        [
+          "package:stream_video/src/errors/stream_video_exception.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "VideoErrorWithCause"
+    changes:
+      - kind: "rename"
+        newName: "StreamVideoExceptionWithCause"

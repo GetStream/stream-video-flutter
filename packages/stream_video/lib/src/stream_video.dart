@@ -20,12 +20,11 @@ import 'call/call_type.dart';
 import 'coordinator/coordinator_client.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'coordinator/open_api/coordinator_client_open_api.dart';
-import 'coordinator/retry/coordinator_client_retry.dart';
 import 'core/client_state.dart';
 import 'core/connection_state.dart';
 import 'core/internet_connection_network_state_provider.dart';
-import 'errors/video_error.dart';
-import 'errors/video_error_composer.dart';
+import 'errors/stream_video_exception.dart';
+import 'errors/stream_video_exception_composer.dart';
 import 'internal/_instance_holder.dart';
 import 'latency/latency_service.dart';
 import 'latency/latency_settings.dart';
@@ -491,7 +490,7 @@ class StreamVideo extends Disposable {
       return Result.success(tokenResult.data);
     } catch (e, stk) {
       _logger.e(() => '[connect] failed(${user.id}): $e');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -517,7 +516,7 @@ class StreamVideo extends Disposable {
       return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[disconnect] failed: $e');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -562,32 +561,34 @@ class StreamVideo extends Disposable {
     } else if (event is CoordinatorConnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] connected ${event.userId}');
       _connectionState = ConnectionState.connected(_state.currentUser.id);
+      _rewatchCalls();
     } else if (event is CoordinatorDisconnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] disconnected ${event.userId}');
       _connectionState = ConnectionState.disconnected(_state.currentUser.id);
     } else if (event is CoordinatorReconnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] reconnected ${event.userId}');
-      if (state.watchedCalls.value.isNotEmpty) {
-        // Re-watch the previously watched calls.
-        unawaited(
-          queryCalls(
-            watch: true,
-            filterConditions: {
-              'cid': {
-                r'$in': state.watchedCalls.value
-                    .map((call) => call.callCid.value)
-                    .toList(),
-              },
-            },
-          ).onError((error, stackTrace) {
-            _logger.e(
-              () => '[onCoordinatorEvent] re-watching calls failed: $error',
-            );
-            return Result.failure(VideoErrors.compose(error, stackTrace));
-          }),
-        );
-      }
     }
+  }
+
+  void _rewatchCalls() {
+    final watched = state.watchedCalls.value;
+    if (watched.isEmpty) return;
+
+    _logger.d(() => '[rewatchCalls] count: ${watched.length}');
+    unawaited(
+      queryCalls(
+        watch: true,
+        filterConditions: {
+          'cid': {r'$in': watched.map((call) => call.callCid.value).toList()},
+        },
+      ).onError((error, stackTrace) {
+        _logger.e(() => '[rewatchCalls] re-watching calls failed: $error');
+        return Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        );
+      }),
+    );
   }
 
   Future<void> _onAppState(LifecycleState state) async {
@@ -1434,7 +1435,9 @@ class StreamVideo extends Disposable {
     final manager = pushNotificationManager;
     if (manager == null) {
       return const Result.failure(
-        VideoError(message: 'Push notification manager not initialized.'),
+        StreamVideoException(
+          message: 'Push notification manager not initialized.',
+        ),
       );
     }
 
@@ -1479,13 +1482,17 @@ class StreamVideo extends Disposable {
   @internal
   Future<Result<bool>> isAudioProcessingEnabled() async {
     return await _options.audioProcessor?.isEnabled() ??
-        const Result.failure(VideoError(message: 'No audio processor found.'));
+        const Result.failure(
+          StreamVideoException(message: 'No audio processor found.'),
+        );
   }
 
   @internal
   Future<Result<None>> setAudioProcessingEnabled(bool enabled) async {
     return await _options.audioProcessor?.setEnabled(enabled) ??
-        const Result.failure(VideoError(message: 'No audio processor found.'));
+        const Result.failure(
+          StreamVideoException(message: 'No audio processor found.'),
+        );
   }
 
   /// This method returns true if the iOS device supports Apple's Neural Engine
@@ -1496,7 +1503,9 @@ class StreamVideo extends Disposable {
   Future<Result<bool>> deviceSupportsAdvancedAudioProcessing() async {
     return await _options.audioProcessor
             ?.deviceSupportsAdvancedAudioProcessing() ??
-        const Result.failure(VideoError(message: 'No audio processor found.'));
+        const Result.failure(
+          StreamVideoException(message: 'No audio processor found.'),
+        );
   }
 }
 
@@ -1515,22 +1524,20 @@ CoordinatorClient buildCoordinatorClient({
   streamLog.i(_tag, () => '[buildCoordinatorClient] wsUrl: $wsUrl');
   streamLog.i(_tag, () => '[buildCoordinatorClient] apiKey: $apiKey');
 
-  return CoordinatorClientRetry(
-    retryPolicy: retryPolicy,
+  // Retries live in the HTTP client's interceptor chain, so there is no
+  // wrapper around these methods any more.
+  return CoordinatorClientOpenApi(
+    apiKey: apiKey,
     tokenSource: tokenSource,
-    delegate: CoordinatorClientOpenApi(
-      apiKey: apiKey,
-      tokenSource: tokenSource,
-      latencyService: LatencyService(settings: latencySettings),
-      retryPolicy: retryPolicy,
-      rpcUrl: rpcUrl,
-      wsUrl: wsUrl,
-      isAnonymous: user.type == UserType.anonymous,
-      networkStateProvider: InternetConnectionNetworkStateProvider(
-        networkMonitor,
-      ),
-      clientEventReporter: clientEventReporter,
+    latencyService: LatencyService(settings: latencySettings),
+    retryPolicy: retryPolicy,
+    rpcUrl: rpcUrl,
+    wsUrl: wsUrl,
+    isAnonymous: user.type == UserType.anonymous,
+    networkStateProvider: InternetConnectionNetworkStateProvider(
+      networkMonitor,
     ),
+    clientEventReporter: clientEventReporter,
   );
 }
 

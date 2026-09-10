@@ -10,7 +10,7 @@ import 'package:webrtc_interface/webrtc_interface.dart';
 import '../../stream_video.dart';
 import '../call/state/call_state_notifier.dart';
 import '../call/stats/trace_tag.dart';
-import '../errors/video_error_composer.dart';
+import '../errors/stream_video_exception_composer.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
 import '../sfu/data/models/sfu_video_sender.dart';
@@ -2004,7 +2004,7 @@ extension PublisherRtcManager on RtcManager {
       return Result.success(audioTrack);
     } catch (e, stk) {
       _logger.e(() => '[createAudioTrack] rejected: $e');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -2030,7 +2030,7 @@ extension PublisherRtcManager on RtcManager {
       return Result.success(videoTrack);
     } catch (e, stk) {
       _logger.e(() => '[createCameraTrack] rejected: $e');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -2058,7 +2058,7 @@ extension PublisherRtcManager on RtcManager {
       return Result.success(screenShareTrack);
     } catch (e, stk) {
       _logger.e(() => '[createScreenShareTrack] rejected: $e');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -2270,7 +2270,7 @@ extension RtcManagerTrackHelper on RtcManager {
       if (applied.isEmpty && failures.isNotEmpty) {
         final (_, error, stk) = failures.first;
         _logger.e(() => '[setAudioOutputDevice] rejected: $error');
-        return Result.failure(VideoErrors.compose(error, stk));
+        return Result.failure(StreamVideoExceptions.compose(error, stk), stk);
       }
 
       return const Result.success(none);
@@ -2301,7 +2301,7 @@ extension RtcManagerTrackHelper on RtcManager {
       return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[setAudioOutputDevice] rejected: $e');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -2582,7 +2582,7 @@ extension RtcManagerTrackHelper on RtcManager {
       );
       return const Result.success(none);
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 }

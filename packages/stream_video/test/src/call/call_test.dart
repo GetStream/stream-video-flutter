@@ -50,7 +50,7 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => const Result.failure(
-            VideoError(message: 'Failed to start session'),
+            StreamVideoException(message: 'Failed to start session'),
           ),
         );
 
@@ -315,7 +315,7 @@ void main() {
 
         final resultArray = <Result<None>>[
           Result.failure(
-            VideoErrorWithCause(
+            StreamVideoExceptionWithCause(
               message: '',
               cause: TrackMissingException(trackType: SfuTrackType.audio),
             ),

@@ -1,6 +1,6 @@
 import 'package:stream_core/stream_core.dart';
 
-import '../errors/video_error_composer.dart';
+import '../errors/stream_video_exception_composer.dart';
 import '../models/models.dart';
 import 'token.dart';
 import 'token_manager_extension.dart';
@@ -74,7 +74,7 @@ Future<Result<UserToken>> establishGuestSession({
   try {
     token = UserToken(result.data.accessToken);
   } catch (e, stk) {
-    return Result.failure(VideoErrors.compose(e, stk));
+    return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
   }
 
   final updatedInfo = result.data.user.toUserInfo();

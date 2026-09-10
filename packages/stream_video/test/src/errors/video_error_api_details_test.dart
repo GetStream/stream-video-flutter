@@ -1,8 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/stream_video.dart';
 
-VideoError _apiFailure(int status, {int code = 109, bool? unrecoverable}) {
-  return VideoErrorWithCause(
+StreamVideoException _apiFailure(
+  int status, {
+  StreamErrorCode code = StreamErrorCode.videoJoinMustRequestE2ee,
+  bool? unrecoverable,
+}) {
+  return StreamVideoExceptionWithCause(
     message: 'failed',
     cause: StreamApiError(
       code: code,
@@ -19,7 +23,7 @@ VideoError _apiFailure(int status, {int code = 109, bool? unrecoverable}) {
 }
 
 void main() {
-  group('VideoError.apiError', () {
+  group('StreamVideoException.apiError', () {
     test('exposes the error the server actually sent', () {
       final api = _apiFailure(400, unrecoverable: true).apiError;
 
@@ -31,7 +35,7 @@ void main() {
     });
 
     test('reports null when the server did not say', () {
-      final api = _apiFailure(500, code: 0).apiError;
+      final api = _apiFailure(500, code: const StreamErrorCode(0)).apiError;
 
       // Absent, not false: the caller falls back to the status rather than
       // reading an omission as a verdict.
@@ -40,9 +44,9 @@ void main() {
     });
 
     test('is null for a failure that did not come from the API', () {
-      expect(const VideoError(message: 'local').apiError, isNull);
+      expect(const StreamVideoException(message: 'local').apiError, isNull);
       expect(
-        const VideoErrorWithCause(
+        const StreamVideoExceptionWithCause(
           message: 'x',
           cause: 'not an api error',
         ).apiError,

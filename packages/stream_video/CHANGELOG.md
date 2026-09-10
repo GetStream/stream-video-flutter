@@ -2,13 +2,14 @@
 
 ### ⚠️ Breaking
 
+- `RetryConfig.callRejoinTimeout` is removed. It was deprecated and had no readers. Use `CallPreferences.networkAvailabilityTimeout`, which is what actually bounds waiting for the network.
 - Generated enum types no longer use the `Enum` suffix (e.g. `AudioSettingsRequestDefaultDeviceEnum` → `AudioSettingsRequestDefaultDevice`). The old names remain available as deprecated aliases and will be removed in a future release — please migrate to the new names.
 - `custom` map fields now allow null values (`Map<String, Object?>`). Code that assumed non-null values may need null handling.
 - `Result`, `Success`, and `Failure` are now provided by `stream_core`. Several API changes follow:
   - `Result.fold()` now takes `{onSuccess:, onFailure:}` parameters instead of `{success:, failure:}`. Use the new `foldResult()` extension method to keep the previous `{success: (Success<T>), failure: (Failure)}` style.
   - `Result.error(String)` constructor has been removed. Use the top-level `failureWithError('...')` function instead.
   - `Result.failureWithCause(String, Object, [StackTrace?])` is no longer a named constructor — use the top-level `failureWithError(..., cause: ...)` function instead.
-  - `Failure.error` is now typed as `Object` instead of `VideoError`. Use the `.videoError` getter to obtain a typed `VideoError`.
+  - `Failure.error` is now typed as `Object` instead of `StreamVideoException`. Use the `.videoError` getter to obtain a typed `StreamVideoException`.
 - `StateEmitter`, `MutableStateEmitter`, `SharedEmitter`, and `MutableSharedEmitter` are now provided by `stream_core`. Several behavioural and API changes follow:
   - `MutableStateEmitter` is **always seeded** — it requires an initial value and `.value` is always available. Use `.value` instead of `.valueOrNull` or `hasValue` checks.
   - Equal consecutive values are **conflated** — setting the same value twice emits only once. Previously every assignment produced an event regardless of equality.
@@ -35,6 +36,13 @@
   - `OnTokenUpdated` changed from `Future<void> Function(UserToken)` to `void Function(UserToken)` and is **no longer awaited**. Async callbacks still compile, but the SDK may start using a token before your callback has persisted it.
   - `onTokenUpdated` for a static token now fires on first token use and after every refresh, instead of once at client construction.
 - A coordinator WebSocket connection whose token could not be loaded is now closed as an authentication failure instead of being retried indefinitely. A `tokenLoader` that throws on a reconnect therefore ends the connection — the error is reported on `StreamCallDisconnectedEvent`/`CoordinatorDisconnected` — where before the socket kept retrying with nothing reported.
+- `StreamVideoExceptionWithCause.cause` now carries the `StreamApiException` for a failure the server answered, where it previously carried the parsed `StreamApiError` payload. Code matching on `cause is StreamApiError` still compiles but no longer matches, so this change is silent. Read the verdict through the accessors on `StreamVideoException` instead: `apiStatusCode`, `apiErrorCode`, `isUnrecoverable`, `retryAfter`, and `apiError` for the payload itself. They answer from either shape. 
+- `StreamVideoExceptionWithCause.cause` is deprecated. Its runtime type is not part of this API - it is chosen by whatever mapped the failure — so matching on it compiles but can stop matching without warning, which is what happened to the change above. Read the failure through the accessors on `StreamVideoException` instead.
+- `StreamVideoException` (formerly `VideoError`) now implements `Exception` rather than `Error`. An `on Error catch` clause no longer matches it — these are runtime conditions to handle, not programming bugs. Catch `Exception`, or `StreamVideoException` directly.
+
+### ⚠️ Deprecated
+
+- `VideoError` is renamed to `StreamVideoException`, and `VideoErrorWithCause` to `StreamVideoExceptionWithCause`. The old names remain as deprecated typedefs, so existing code still compiles; `dart fix --apply` migrates it. 
 
 ### ✅ Added
 
@@ -45,6 +53,14 @@
 
 ### 🐞 Fixed
 
+- Guest creation no longer waits for a coordinator connection id. The call is unauthenticated and watches nothing, so an id could only add latency.
+- A request that could not be signed now reports a credentials failure rather than a network one.
+- A 4xx the server answered without a Stream error payload — an edge, proxy or WAF answering on its own — is no longer retried as if it were a timeout. The status is read off the failure itself, so a permission denial fails on the first attempt instead of spending the whole retry budget.
+- A request whose token expired is now replaced once by the HTTP client and retried there. A refused token signature or an unknown API key fails immediately instead of spending the retry budget on a configuration problem no fresh token fixes.
+- A cancelled request is no longer retried.
+- A request now honours the server's `Retry-After` when one is sent, instead of retrying on the computed backoff alone — which against a rate limit retried too early.
+- A call that is still ringing is now reloaded from the coordinator when the socket connects. Accept, reject and end for a ring arrive as coordinator events, so a socket drop while ringing left the local copy stale — an outgoing ring the callee had already answered still looked unanswered, and the caller never joined.
+- An SFU connection that closed in a way that will not change — a server verdict, refused credentials — no longer spends the call's whole reconnect budget. Reconnection is decided by the disconnection source rather than the WebSocket close code, which a server can set to a normal value even when something went wrong.
 - Guest users are now created with their `name`, `image`, and `custom` data — previously only the id was sent.
 - An expired guest token no longer re-creates the guest, which minted a new server-side identity mid-session. The guest is created once, by whichever caller needs a token first — a coordinator API call, `connect()`, or the client's own eager fetch — and everyone arriving while that is in flight waits for it. After it, the client holds the server-assigned identity with a static token, so refresh guards treat guests like static tokens and a rejected guest token fails terminally instead of triggering refreshes that could only return the same token.
 - Fixed a potential permanent hang when guest creation received a 401: the guest-creation call authenticates with its own anonymous token, so it no longer attempts a user-token refresh — which re-entered the token loading already in progress.
@@ -65,7 +81,7 @@
 ### 🐞 Fixed
 
 - [Android] Fixed a call hung up outside the app, from a paired watch, a Bluetooth headset or a car head unit, not leaving the Stream call. Ended events carrying `CallData.endedBySystem` are now applied on Android too, while the ambiguous ones, which on Android also mean the incoming call notification was merely dismissed, keep being ignored. Requires the Android Telecom integration in `stream_video_push_notification`.
-- Fixed the call reconnect loop retrying without a delay or an escalation when an unexpected error was thrown before the reconnect strategy ran. 
+- Fixed the call reconnect loop retrying without a delay or an escalation when an unexpected error was thrown before the reconnect strategy ran.
 
 ## 1.5.0
 

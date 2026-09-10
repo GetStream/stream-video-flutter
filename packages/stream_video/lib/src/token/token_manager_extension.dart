@@ -1,6 +1,6 @@
 import 'package:stream_core/stream_core.dart';
 
-import '../errors/video_error_composer.dart';
+import '../errors/stream_video_exception_composer.dart';
 import '../logger/impl/tagged_logger.dart';
 
 final _logger = taggedLogger(tag: 'SV:TokenManager');
@@ -35,7 +35,7 @@ extension TokenManagerResultExtension on TokenManager {
       return Result.success(await getToken());
     } catch (e, stk) {
       _logger.e(() => '[getToken] failed: $e; $stk');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -46,7 +46,7 @@ extension TokenManagerResultExtension on TokenManager {
       return Result.success(await refreshToken());
     } catch (e, stk) {
       _logger.e(() => '[refreshToken] failed: $e; $stk');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 }

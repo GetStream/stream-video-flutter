@@ -24,9 +24,5 @@ Future<Result<bool>> lookupCallExists(Call call) async {
 
 /// The coordinator answers a lookup for a call that was never created with a
 /// 404. Any other status is a real failure and says nothing about existence.
-bool _isNotFound(VideoError error) {
-  if (error is! VideoErrorWithCause) return false;
-
-  final cause = error.cause;
-  return cause is StreamApiError && cause.statusCode == 404;
-}
+///
+bool _isNotFound(StreamVideoException error) => error.apiStatusCode == 404;

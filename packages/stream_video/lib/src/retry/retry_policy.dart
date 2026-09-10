@@ -6,7 +6,9 @@ const _maxJitterMs = 500;
 const _minDelay = Duration(milliseconds: 200);
 const _defaultRpcMaxRetries = 5;
 const _defaultMaxBackoff = Duration(seconds: 3);
-const _defaultRejoinTimeout = Duration(minutes: 5);
+const _defaultMaxTotalRetryDelay = Duration(seconds: 30);
+const _defaultSfuRpcMaxRetries = 3;
+const _defaultSfuRpcTimeout = Duration(seconds: 10);
 
 final Random _rnd = Random();
 
@@ -21,6 +23,7 @@ class RetryPolicy {
   final RetryConfig config;
   final Backoff _backoff;
 
+  /// The delay before the attempt following [retryAttempt] failures.
   Duration backoff(int retryAttempt) {
     return _backoff.call(config, retryAttempt);
   }
@@ -42,20 +45,37 @@ class RetryConfig extends Equatable {
   const RetryConfig({
     this.rpcMaxRetries = _defaultRpcMaxRetries,
     this.maxBackoff = _defaultMaxBackoff,
-    @Deprecated('Use CallPreferences.networkAvailabilityTimeout instead')
-    this.callRejoinTimeout = _defaultRejoinTimeout,
+    this.maxTotalRetryDelay = _defaultMaxTotalRetryDelay,
+    this.sfuRpcMaxRetries = _defaultSfuRpcMaxRetries,
+    this.sfuRpcTimeout = _defaultSfuRpcTimeout,
   });
 
+  /// How many attempts a coordinator HTTP request gets in total, the first one
+  /// included.
   final int rpcMaxRetries;
 
+  /// The ceiling on the computed backoff between attempts.
   final Duration maxBackoff;
 
-  @Deprecated('Use CallPreferences.networkAvailabilityTimeout instead')
-  final Duration callRejoinTimeout;
+  /// The total time retrying may add to one call.
+  final Duration maxTotalRetryDelay;
+
+  /// How many attempts an SFU signalling RPC gets in total, the first one
+  /// included.
+  final int sfuRpcMaxRetries;
+
+  /// How long one SFU signalling attempt may take before it is abandoned.
+  final Duration sfuRpcTimeout;
 
   @override
   bool? get stringify => true;
 
   @override
-  List<Object> get props => [rpcMaxRetries, maxBackoff];
+  List<Object> get props => [
+    rpcMaxRetries,
+    maxBackoff,
+    maxTotalRetryDelay,
+    sfuRpcMaxRetries,
+    sfuRpcTimeout,
+  ];
 }

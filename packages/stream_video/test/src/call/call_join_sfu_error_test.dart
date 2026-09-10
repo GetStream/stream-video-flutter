@@ -42,7 +42,7 @@ void main() {
             ),
           ).thenAnswer(
             (_) async => const Result.failure(
-              VideoErrorWithCause(
+              StreamVideoExceptionWithCause(
                 message: 'SFU disconnect',
                 cause: SfuError(
                   message: 'SFU disconnect',
@@ -125,7 +125,7 @@ void main() {
               ),
             ).thenAnswer(
               (_) async => Result.failure(
-                VideoErrorWithCause(
+                StreamVideoExceptionWithCause(
                   message: 'Join error: $errorCode',
                   cause: SfuError(
                     message: 'Join error: $errorCode',
@@ -227,7 +227,7 @@ void main() {
             ),
           ).thenAnswer(
             (_) async => const Result.failure(
-              VideoErrorWithCause(
+              StreamVideoExceptionWithCause(
                 message: 'Internal server error',
                 cause: SfuError(
                   message: 'Internal server error',
@@ -321,7 +321,7 @@ void main() {
             callCount++;
             if (callCount == 1) {
               return const Result.failure(
-                VideoErrorWithCause(
+                StreamVideoExceptionWithCause(
                   message: 'Participant not found',
                   cause: SfuError(
                     message: 'Participant not found',
@@ -396,7 +396,7 @@ void main() {
             ),
           ).thenAnswer(
             (_) async => const Result.failure(
-              VideoErrorWithCause(
+              StreamVideoExceptionWithCause(
                 message: 'Media transport failure',
                 cause: SfuError(
                   message: 'Media transport failure',

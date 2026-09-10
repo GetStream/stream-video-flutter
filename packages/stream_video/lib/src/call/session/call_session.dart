@@ -14,7 +14,7 @@ import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/models/models.pbenum.dart';
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
-import '../../errors/video_error_composer.dart';
+import '../../errors/stream_video_exception_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_call_state.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
@@ -32,7 +32,6 @@ import '../../webrtc/peer_connection_factory.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
-import '../../ws/ws.dart';
 import '../state/call_state_notifier.dart';
 import '../stats/stats_reporter.dart';
 import '../stats/trace_tag.dart';
@@ -45,7 +44,7 @@ const _debounceDuration = Duration(milliseconds: 200);
 const _migrationCompleteEventTimeout = Duration(seconds: 7);
 const _publisherConnectionCheckDelay = Duration(seconds: 15);
 
-class _UnresolvedTrackMidError extends VideoError {
+class _UnresolvedTrackMidError extends StreamVideoException {
   const _UnresolvedTrackMidError()
     : super(message: 'Could not resolve the mid of every published track');
 }
@@ -66,6 +65,7 @@ class CallSession extends Disposable {
     required StreamVideo streamVideo,
     required Tracer tracer,
     required StreamPeerConnectionFactory pcFactory,
+    required RetryPolicy retryPolicy,
     this.clientPublishOptions,
     this.e2eeManager,
     this.joinResponseTimeout = const Duration(seconds: 5),
@@ -76,6 +76,7 @@ class CallSession extends Disposable {
          sfuToken: config.sfuToken,
          sessionSeq: sessionSeq,
          tracer: tracer,
+         retryPolicy: retryPolicy,
        ),
        sfuWS = SfuWebSocket(
          sessionSeq: sessionSeq,
@@ -257,7 +258,7 @@ class CallSession extends Disposable {
         );
         _logger.e(() => '[start] ws connect failed: $wsResult');
         return const Result.failure(
-          VideoError(message: 'Failed to connect to WS'),
+          StreamVideoException(message: 'Failed to connect to WS'),
         );
       }
 
@@ -446,7 +447,7 @@ class CallSession extends Disposable {
       );
       _tracer.trace(TraceTag.joinRequestTimeout, message);
       _logger.e(() => '[start] failed: $e');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     } catch (e, stk) {
       reporter.failStageWithError(
         wsJoinStageId,
@@ -455,7 +456,7 @@ class CallSession extends Disposable {
         retryCount: clientEventRetryCount,
       );
       _logger.e(() => '[start] failed: $e');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -471,7 +472,7 @@ class CallSession extends Disposable {
       return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[waitForMigrationComplete] failed: $e');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -508,7 +509,7 @@ class CallSession extends Disposable {
       if (wsResult.isFailure) {
         _logger.w(() => '[fastReconnect] sfu recreate failed: $wsResult');
         return const Result.failure(
-          VideoError(message: 'SFU WS reconnect failed'),
+          StreamVideoException(message: 'SFU WS reconnect failed'),
         );
       }
 
@@ -554,7 +555,7 @@ class CallSession extends Disposable {
       } else {
         _logger.v(() => '[fastReconnect] fast-reconnect not possible');
         return const Result.failure(
-          VideoError(message: 'Fast reconnect not possible'),
+          StreamVideoException(message: 'Fast reconnect not possible'),
         );
       }
 
@@ -596,7 +597,7 @@ class CallSession extends Disposable {
     } catch (e, stk) {
       _logger.e(() => '[fastReconnect] failed: $e');
       _tracer.trace(TraceTag.fastReconnectFailure, e.toString());
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     } finally {
       rtcManager?.subscriber.setReconnecting(false);
       rtcManager?.publisher?.setReconnecting(false);
@@ -684,7 +685,7 @@ class CallSession extends Disposable {
   }
 
   Future<void> close(
-    StreamWebSocketCloseCode code, {
+    CloseCode code, {
     String? closeReason,
   }) async {
     _logger.d(
@@ -705,7 +706,7 @@ class CallSession extends Disposable {
     unawaited(
       sfuWS
           .disconnect(
-            code.value,
+            code,
             'dart-client: $closeReason',
           )
           .catchError((Object e, StackTrace stk) {
@@ -731,7 +732,7 @@ class CallSession extends Disposable {
     _logger.d(() => '[dispose] no args');
     _isLeavingOrClosed = true;
 
-    await close(StreamWebSocketCloseCode.normalClosure);
+    await close(CloseCode.normalClosure);
     return await super.dispose();
   }
 
@@ -1198,7 +1199,7 @@ class CallSession extends Disposable {
       } catch (e, stk) {
         _logger.e(() => '[negotiate] failed: $e\n$stk');
         await pc.rollbackLocalDescription();
-        return Result.failure(VideoErrors.compose(e, stk));
+        return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
       }
     });
   }

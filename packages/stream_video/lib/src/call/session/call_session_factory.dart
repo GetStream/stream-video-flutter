@@ -18,12 +18,14 @@ class CallSessionFactory {
   CallSessionFactory({
     required this.callCid,
     required this.sdpEditor,
+    required this.retryPolicy,
   });
 
   late final _logger = taggedLogger(tag: 'SV:CallSessionFactory');
 
   final StreamCallCid callCid;
   final SdpEditor sdpEditor;
+  final RetryPolicy retryPolicy;
 
   /// Creates a new [CallSession] instance.
   /// If [sessionId] is not provided, a new UUID will be generated.
@@ -105,6 +107,7 @@ class CallSessionFactory {
       streamVideo: streamVideo,
       tracer: tracer,
       pcFactory: pcFactory,
+      retryPolicy: retryPolicy,
     );
   }
 

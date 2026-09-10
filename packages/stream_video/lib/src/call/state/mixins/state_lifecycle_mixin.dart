@@ -225,6 +225,13 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
   }
 
   void lifecycleCallConnected() {
+    if (state.status.isDisconnected) {
+      _logger.w(
+        () => '[lifecycleCallConnected] rejected (call is disconnected)',
+      );
+      return;
+    }
+
     _logWithState('lifecycleCallConnected');
     state = state.copyWith(
       status: CallStatus.connected(),

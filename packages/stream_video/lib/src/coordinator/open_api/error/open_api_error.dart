@@ -23,14 +23,3 @@ class OpenApiError {
 
   final StreamApiError apiError;
 }
-
-class NoErrorException implements Exception {
-  const NoErrorException(this.jsonObj);
-
-  final dynamic jsonObj;
-
-  @override
-  String toString() {
-    return 'NoEventTypeException{jsonObj: $jsonObj}';
-  }
-}

@@ -6,7 +6,7 @@ import 'package:synchronized/synchronized.dart';
 
 import '../../protobuf/video/sfu/models/models.pbenum.dart';
 import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart';
-import '../errors/video_error_composer.dart';
+import '../errors/stream_video_exception_composer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
 import '../sfu/data/models/sfu_error.dart';
@@ -167,7 +167,7 @@ class StreamPeerConnection extends Disposable {
         try {
           await pc.restartIce();
         } catch (e, stk) {
-          return Result.failure(VideoErrors.compose(e, stk));
+          return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
         }
         return const Result.success(null);
       } else {
@@ -179,7 +179,7 @@ class StreamPeerConnection extends Disposable {
         );
       }
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -205,7 +205,7 @@ class StreamPeerConnection extends Disposable {
 
       return Result.success(modifiedOffer);
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -250,7 +250,7 @@ class StreamPeerConnection extends Disposable {
       }
       return Result.success(modifiedAnswer);
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -284,7 +284,7 @@ class StreamPeerConnection extends Disposable {
       try {
         await pc.setRemoteDescription(sd);
       } catch (e, stk) {
-        return Result.failure(VideoErrors.compose(e, stk));
+        return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
       }
 
       final pending = List<rtc.RTCIceCandidate>.of(_pendingCandidates);
@@ -313,7 +313,7 @@ class StreamPeerConnection extends Disposable {
       final result = await pc.setLocalDescription(description);
       return Result.success(result);
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -336,7 +336,7 @@ class StreamPeerConnection extends Disposable {
         () => '[rollbackLocalDescription] #$type; failed: $e',
       );
 
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -358,7 +358,7 @@ class StreamPeerConnection extends Disposable {
         await pc.addCandidate(candidate);
         return const Result.success(AddIceCandidateResult.added);
       } catch (e, stk) {
-        return Result.failure(VideoErrors.compose(e, stk));
+        return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
       }
     });
   }
@@ -380,7 +380,7 @@ class StreamPeerConnection extends Disposable {
 
       return Result.success(transceiver);
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -410,7 +410,7 @@ class StreamPeerConnection extends Disposable {
 
       return Result.success(transceiver);
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 

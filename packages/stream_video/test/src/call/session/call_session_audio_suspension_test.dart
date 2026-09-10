@@ -191,6 +191,7 @@ CallSession _buildTestSession({
   final stateManager = callStateManager ?? createTestCallStateManager();
 
   return CallSession(
+    retryPolicy: const RetryPolicy(),
     callCid: callCid,
     sessionSeq: 0,
     sessionId: 'test-session',

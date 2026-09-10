@@ -357,19 +357,24 @@ class SfuSocketFailed extends SfuSocketEvent {
   const SfuSocketFailed({
     required this.sessionId,
     required this.url,
+    required this.isReconnectable,
     required this.error,
   });
 
   final String sessionId;
   final String url;
-  final VideoError error;
+
+  /// Whether a connection that failed this way is worth opening again.
+  final bool isReconnectable;
+  final StreamVideoException error;
 
   @override
-  List<Object?> get props => [sessionId, url, error];
+  List<Object?> get props => [sessionId, url, error, isReconnectable];
 }
 
 class DisconnectionReason extends Equatable {
   const DisconnectionReason({
+    required this.isReconnectable,
     this.closeCode,
     this.closeReason,
   });
@@ -377,13 +382,17 @@ class DisconnectionReason extends Equatable {
   final int? closeCode;
   final String? closeReason;
 
+  /// Whether a connection closed for this reason is worth opening again.
+  final bool isReconnectable;
+
   @override
   String toString() {
-    return 'DisconnectionReason{code: $closeCode, reason: $closeReason}';
+    return 'DisconnectionReason{code: $closeCode, reason: $closeReason, '
+        'reconnectable: $isReconnectable}';
   }
 
   @override
-  List<Object?> get props => [closeCode, closeReason];
+  List<Object?> get props => [closeCode, closeReason, isReconnectable];
 }
 
 extension LogPriority on SfuEvent {

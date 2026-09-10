@@ -2,8 +2,11 @@ import 'dart:async';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../../stream_video.dart';
-import '../../errors/video_error_composer.dart';
-import '../../http/stream_api_interceptors.dart';
+import '../../errors/stream_video_exception_composer.dart';
+import '../../http/stream_auth_interceptor.dart';
+import '../../http/stream_client_info_interceptor.dart';
+import '../../http/stream_connection_id_interceptor.dart';
+import '../../http/stream_retry_interceptor.dart';
 import '../../latency/latency_service.dart';
 import '../../location/location_service.dart';
 import '../../telemetry/client_event_reporter.dart';
@@ -13,7 +16,11 @@ import '../models/coordinator_models.dart';
 import 'coordinator_ws.dart';
 import 'open_api_extensions.dart';
 
-const _waitForConnectionTimeout = 5000;
+/// How long `connectUser` waits for the socket to come up.
+const _connectUserTimeout = Duration(seconds: 5);
+
+/// How long a request waits for a connection id that is on its way.
+const _waitForConnectionId = Duration(seconds: 5);
 
 /// An accessor that allows us to communicate with the API around video calls.
 class CoordinatorClientOpenApi extends CoordinatorClient {
@@ -49,22 +56,42 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
   final bool isAnonymous;
 
-  late final StreamCoreHttpClient _httpClient = StreamCoreHttpClient(
-    options: BaseOptions(
-      baseUrl: _rpcUrl,
-    ),
-    interceptors: _buildInterceptors(
-      apiKey: _apiKey,
-      getToken: () async {
-        final tokenResult = await _tokenSource.getToken();
-        if (tokenResult is! Success<UserToken>) {
-          throw (tokenResult as Failure).videoError;
-        }
-        return tokenResult.data;
-      },
-      getConnectionId: () => _ws?.connectionId,
-    ),
-  );
+  late final StreamCoreHttpClient _httpClient = _buildHttpClient();
+
+  Future<UserToken> _getToken() async {
+    final tokenResult = await _tokenSource.getToken();
+    if (tokenResult is! Success<UserToken>) {
+      throw (tokenResult as Failure).videoError;
+    }
+    return tokenResult.data;
+  }
+
+  /// The client every coordinator call goes through.
+  StreamCoreHttpClient _buildHttpClient() {
+    final client = StreamCoreHttpClient(
+      options: BaseOptions(baseUrl: _rpcUrl),
+    );
+
+    client.interceptors.addAll(
+      _buildInterceptors(
+        apiKey: _apiKey,
+        connectionIdInterceptor: StreamConnectionIdInterceptor(
+          _resolveConnectionId,
+        ),
+        authInterceptor: StreamAuthInterceptor.refreshing(
+          _getToken,
+          dio: client,
+          tokenSource: _tokenSource,
+        ),
+        retryInterceptor: StreamRetryInterceptor(
+          dio: client,
+          policy: _retryPolicy,
+        ),
+      ),
+    );
+
+    return client;
+  }
 
   late final _defaultApi = open.DefaultApi(_httpClient);
   late final _locationService = LocationService();
@@ -98,7 +125,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     }
     if (state.isConnecting) {
       _logger.w(() => '[connectUser] wait (already connecting): $_user');
-      return _waitUntilConnected();
+      return _awaitConnected();
     }
     _connectionState.value = CoordinatorConnectionState.connecting(
       userId: user.id,
@@ -134,39 +161,70 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       _logger.e(() => '[connectUser] open failed: $openResult');
       return openResult;
     }
-    return _waitUntilConnected().whenComplete(() {
+    return _awaitConnected().whenComplete(() {
       _logger.v(() => '[connectUser] completed');
     });
   }
 
-  Future<Result<None>> _waitUntilConnected() async {
-    if (isAnonymous) {
-      _logger.d(
-        () => '[waitUntilConnected] anonymous user does not require connection',
-      );
-      return const Result.success(none);
-    }
-
-    _logger.d(
-      () =>
-          '[waitUntilConnected] user.id: ${_user?.id}, current state: ${_connectionState.value},',
-    );
-
+  /// Completes once the socket is connected, or fails if it does not get there
+  /// in time.
+  ///
+  /// Unlike [_resolveConnectionId] this is a real precondition: `connectUser`
+  /// is not done until the socket is up, so a caller awaiting it needs the
+  /// failure. No other call uses it — a request that merely wants a connection
+  /// id goes out without one rather than failing.
+  Future<Result<None>> _awaitConnected() {
     return _connectionState
-        .firstWhere(
-          (it) => it.isConnected,
-        )
-        // TODO
-        // replace timeout with config value,
-        .timeout(const Duration(milliseconds: _waitForConnectionTimeout))
-        .then((it) {
-          _logger.v(() => '[waitUntilConnected] completed: $it');
-          return const Result.success(none);
+        .firstWhere((it) => it.isConnected)
+        .timeout(_connectUserTimeout)
+        .then((_) {
+          _logger.v(() => '[awaitConnected] connected');
+          return const Result<None>.success(none);
         })
         .onError((error, stackTrace) {
-          _logger.e(() => '[waitUntilConnected] failed: $error; $stackTrace');
-          return Result<None>.failure(VideoErrors.compose(error, stackTrace));
+          _logger.e(() => '[awaitConnected] failed: $error');
+          return Result<None>.failure(
+            StreamVideoExceptions.compose(error, stackTrace),
+            stackTrace,
+          );
         });
+  }
+
+  /// The connection id to attach to a request, or `null` when there is none
+  /// and none is on its way.
+  ///
+  /// Never fails the request. A call made without an id succeeds, and the
+  /// watches it registered are re-registered when the socket connects — see
+  /// `StreamVideo._rewatchCalls`.
+  Future<String?> _resolveConnectionId() async {
+    // An anonymous session never opens a socket, so there is never an id.
+    if (isAnonymous) return null;
+
+    final connectionId = _ws?.connectionId;
+    if (connectionId != null && connectionId.isNotEmpty) return connectionId;
+
+    final state = _connectionState.value;
+    if (!state.isConnecting) {
+      _logger.d(
+        () => '[resolveConnectionId] not waiting (state: $state)',
+      );
+      return null;
+    }
+
+    _logger.d(() => '[resolveConnectionId] waiting for the socket');
+    try {
+      await _connectionState
+          .firstWhere((it) => it.isConnected)
+          .timeout(_waitForConnectionId);
+      return _ws?.connectionId;
+    } on TimeoutException catch (_) {
+      _logger.w(
+        () =>
+            '[resolveConnectionId] gave up after '
+            '${_waitForConnectionId.inSeconds}s',
+      );
+      return null;
+    }
   }
 
   @override
@@ -190,7 +248,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[openConnection] failed: $e');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -213,7 +271,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[closeConnection] failed: $e');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -251,7 +309,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       tokenSource: _tokenSource,
       includeUserDetails: includeUserDetails,
       networkStateProvider: _networkStateProvider,
-      retryPolicy: _retryPolicy,
       clientEventReporter: _clientEventReporter,
     );
   }
@@ -270,12 +327,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     Map<String, Object>? custom,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[collectUserFeedback] no connection established');
-        return connectionResult;
-      }
-
       final input = open.CollectUserFeedbackRequest(
         custom: custom ?? {},
         rating: rating,
@@ -296,12 +347,14 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
       _logger.e(() => '[collectUserFeedback] failed: $e; $stk');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -314,12 +367,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     bool? voipToken,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[createDevice] no connection established');
-        return connectionResult;
-      }
-
       final input = open.CreateDeviceRequest(
         id: id,
         pushProvider: pushProvider.toOpenDTO(),
@@ -335,12 +382,14 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       _logger.v(() => '[createDevice] completed: $result');
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
       _logger.e(() => '[createDevice] failed: $e; $stk');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -349,22 +398,19 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<Result<List<PushDevice>>> listDevices() async {
     try {
       _logger.d(() => '[listDevices]');
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[listDevices] no connection established');
-        return connectionResult;
-      }
 
       final result = await _defaultApi.listDevices();
       _logger.v(() => '[listDevices] completed: $result');
       return result.fold(
         onSuccess: (data) => Result.success(data.devices.toPushDevices()),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
       _logger.e(() => '[listDevices] failed: $e; $stk');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -376,11 +422,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }) async {
     try {
       _logger.d(() => '[deleteDevice] id: $id, userId: $userId');
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[deleteDevice] no connection established');
-        return connectionResult;
-      }
 
       final result = await _defaultApi.deleteDevice(
         id: id,
@@ -389,12 +430,14 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       _logger.v(() => '[deleteDevice] completed: $result');
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
       _logger.e(() => '[deleteDevice] failed: $e; $stk');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -414,11 +457,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
             ', membersLimit: $membersLimit, ringing: $ringing, notify: $notify'
             ', video: $video',
       );
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[getCall] no connection established');
-        return connectionResult;
-      }
 
       final result = await _defaultApi.getCall(
         type: callCid.type.value,
@@ -442,12 +480,14 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
             ),
           ),
         ),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
       _logger.e(() => '[getCall] failed: $e; $stk');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -473,11 +513,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
             ', team: $team, notify: $notify, video: $video'
             ', startsAt: $startsAt, settingsOverride: $settingsOverride',
       );
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[getOrCreateCall] no connection established');
-        return connectionResult;
-      }
 
       final result = await _defaultApi.getOrCreateCall(
         type: callCid.type.value,
@@ -514,12 +549,14 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
             ),
           ),
         ),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
       _logger.e(() => '[getOrCreateCall] failed: $e; $stk');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -544,11 +581,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
             ', ringing: $ringing, create: $create , migratingFrom: $migratingFrom'
             ', video: $video',
       );
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[joinCall] no connection established');
-        return connectionResult;
-      }
       final location = await _locationService.getLocation();
       _logger.v(() => '[joinCall] location: $location');
 
@@ -589,12 +621,14 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
                 .toList(),
           ),
         ),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
       _logger.e(() => '[joinCall] failed: $e; $stk');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -610,12 +644,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
             '[ringCall] cid: $callCid, membersIds: $membersIds, video: $video',
       );
 
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[ringCall] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.ringCall(
         type: callCid.type.value,
         id: callCid.id,
@@ -629,12 +657,14 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (data) => Result.success(data.membersIds),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
       _logger.e(() => '[ringCall] failed: $e; $stk');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -651,11 +681,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
             '[sendCustomEvent] cid: $callCid'
             ', eventType: $eventType, custom: $custom',
       );
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[sendCustomEvent] no connection established');
-        return connectionResult;
-      }
       final result = await _defaultApi.sendCallEvent(
         type: callCid.type.value,
         id: callCid.id,
@@ -667,12 +692,14 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       _logger.v(() => '[sendCustomEvent] completed: $result');
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
       _logger.e(() => '[sendCustomEvent] failed: $e; $stk');
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -712,11 +739,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         () =>
             '[updateCallMembers] cid: $callCid, updateMembers: $updateMembers, removeIds: $removeIds',
       );
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[updateCallMembers] no connection established');
-        return connectionResult;
-      }
 
       final result = await _defaultApi.updateCallMembers(
         type: callCid.type.value,
@@ -730,11 +752,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       _logger.v(() => '[updateCallMembers] completed: $result');
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -744,12 +768,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required List<CallPermission> permissions,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[requestPermissions] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.requestPermission(
         type: callCid.type.value,
         id: callCid.id,
@@ -763,11 +781,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -778,11 +798,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required String userId,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[videoPin] no connection established');
-        return connectionResult;
-      }
       final result = await _defaultApi.videoPin(
         type: callCid.type.value,
         id: callCid.id,
@@ -794,11 +809,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -809,12 +826,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required String userId,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[videoUnpin] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.videoUnpin(
         type: callCid.type.value,
         id: callCid.id,
@@ -826,11 +837,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -842,11 +855,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required List<CallPermission> revokePermissions,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[updateUserPermissions] no connection established');
-        return connectionResult;
-      }
       final result = await _defaultApi.updateUserPermissions(
         type: callCid.type.value,
         id: callCid.id,
@@ -865,11 +873,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -880,12 +890,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     String? recordingExternalStorage,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[startRecording] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.startRecording(
         type: callCid.type.value,
         id: callCid.id,
@@ -897,11 +901,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -910,11 +916,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     StreamCallCid callCid,
   ) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[listRecordings] no connection established');
-        return connectionResult;
-      }
       final result = await _defaultApi.listRecordings(
         type: callCid.type.value,
         id: callCid.id,
@@ -922,11 +923,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (data) => Result.success(data.recordings),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -936,12 +939,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     RecordingType recordingType = RecordingType.composite,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[stopRecording] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.stopRecording(
         type: callCid.type.value,
         id: callCid.id,
@@ -950,11 +947,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -966,12 +965,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     String? transcriptionExternalStorage,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[startTranscription] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.startTranscription(
         type: callCid.type.value,
         id: callCid.id,
@@ -984,11 +977,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -997,12 +992,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     StreamCallCid callCid,
   ) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[listTranscriptions] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.listTranscriptions(
         type: callCid.type.value,
         id: callCid.id,
@@ -1010,11 +999,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (data) => Result.success(data.transcriptions),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1024,12 +1015,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     bool? stopClosedCaptions,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[stopTranscription] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.stopTranscription(
         type: callCid.type.value,
         id: callCid.id,
@@ -1040,11 +1025,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1056,12 +1043,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     String? transcriptionExternalStorage,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[startClosedCaptions] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.startClosedCaptions(
         type: callCid.type.value,
         id: callCid.id,
@@ -1074,11 +1055,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1088,12 +1071,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     bool? stopTranscription,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[stopClosedCaptions] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.stopClosedCaptions(
         type: callCid.type.value,
         id: callCid.id,
@@ -1104,23 +1081,19 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
   @override
   Future<Result<String?>> startBroadcasting(StreamCallCid callCid) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[startBroadcasting] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.startHLSBroadcasting(
         type: callCid.type.value,
         id: callCid.id,
@@ -1128,23 +1101,19 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (data) => Result.success(data.playlistUrl),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
   @override
   Future<Result<None>> stopBroadcasting(StreamCallCid callCid) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[stopBroadcasting] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.stopHLSBroadcasting(
         type: callCid.type.value,
         id: callCid.id,
@@ -1152,11 +1121,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1166,12 +1137,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required List<StreamRtmpBroadcastRequest> broadcasts,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[startRtmpBroadcasts] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.startRTMPBroadcasts(
         type: callCid.type.value,
         id: callCid.id,
@@ -1182,11 +1147,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1196,12 +1163,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required String name,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[stopRtmpBroadcast] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.stopRTMPBroadcast(
         type: callCid.type.value,
         id: callCid.id,
@@ -1210,23 +1171,19 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
   @override
   Future<Result<None>> stopAllRtmpBroadcasts(StreamCallCid callCid) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[stopAllRtmpBroadcasts] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.stopAllRTMPBroadcasts(
         type: callCid.type.value,
         id: callCid.id,
@@ -1234,11 +1191,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1250,12 +1209,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     Map<String, Object> custom = const {},
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[sendReaction] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.sendVideoReaction(
         type: callCid.type.value,
         id: callCid.id,
@@ -1268,11 +1221,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (data) => Result.success(data.reaction.toCallReaction()),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1287,12 +1242,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     int? limit,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[queryMembers] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.queryCallMembers(
         queryCallMembersRequest: open.QueryCallMembersRequest(
           type: callCid.type.value,
@@ -1307,11 +1256,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (data) => Result.success(data.toQueriedMembers(callCid)),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1326,12 +1277,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     bool? watch,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[queryCalls] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.queryCalls(
         queryCallsRequest: open.QueryCallsRequest(
           filterConditions: filterConditions,
@@ -1345,11 +1290,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (data) => Result.success(data.toQueriedCalls()),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1359,12 +1306,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required String userId,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[blockUser] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.blockUser(
         type: callCid.type.value,
         id: callCid.id,
@@ -1373,11 +1314,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1387,12 +1330,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required String userId,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[unblockUser] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.unblockUser(
         type: callCid.type.value,
         id: callCid.id,
@@ -1401,11 +1338,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1416,12 +1355,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     bool block = false,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[kickUser] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.kickUser(
         type: callCid.type.value,
         id: callCid.id,
@@ -1430,23 +1363,19 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
   @override
   Future<Result<None>> endCall(StreamCallCid callCid) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[endCall] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.endCall(
         type: callCid.type.value,
         id: callCid.id,
@@ -1454,11 +1383,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1476,12 +1407,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     String? transcriptionStorageName,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[goLive] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.goLive(
         type: callCid.type.value,
         id: callCid.id,
@@ -1500,11 +1425,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (data) => Result.success(data.call.toCallMetadata()),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1521,12 +1448,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     bool? continueTranscription,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[stopLive] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.stopLive(
         type: callCid.type.value,
         id: callCid.id,
@@ -1544,11 +1465,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (data) => Result.success(data.call.toCallMetadata()),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1562,12 +1485,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     bool? screenshare,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[muteUsers] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.muteUsers(
         type: callCid.type.value,
         id: callCid.id,
@@ -1582,11 +1499,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1615,12 +1534,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     StreamEncryptionSettings? encryption,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[updateCall] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.updateCall(
         type: callCid.type.value,
         id: callCid.id,
@@ -1650,11 +1563,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (data) => Result.success(data.call.toCallMetadata()),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1666,12 +1581,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     required StreamCallCid cid,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[acceptCall] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.acceptCall(
         type: cid.type.value,
         id: cid.id,
@@ -1679,11 +1588,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
-    } catch (e) {
-      return Result.failure(VideoErrors.compose(e));
+    } catch (e, stk) {
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1696,12 +1607,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     String? reason,
   }) async {
     try {
-      final connectionResult = await _waitUntilConnected();
-      if (connectionResult is Failure) {
-        _logger.e(() => '[rejectCall] no connection established');
-        return connectionResult;
-      }
-
       final result = await _defaultApi.rejectCall(
         type: cid.type.value,
         id: cid.id,
@@ -1712,11 +1617,13 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (_) => const Result.success(none),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
-    } catch (e) {
-      return Result.failure(VideoErrors.compose(e));
+    } catch (e, stk) {
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 
@@ -1731,10 +1638,23 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       _logger.d(() => '[loadGuest] id: $id');
       final dio = StreamCoreHttpClient(
         options: BaseOptions(baseUrl: _rpcUrl),
-        interceptors: _buildInterceptors(
+      );
+      dio.interceptors.addAll(
+        _buildInterceptors(
           apiKey: _apiKey,
-          getToken: UserToken.anonymous,
-          getConnectionId: () => _ws?.connectionId,
+          // No connection id: this call is unauthenticated and watches
+          // nothing, so an id could only add latency. It would also couple the
+          // call to the socket that is often waiting on it — establishing the
+          // session is what a socket authenticating a guest is blocked on, and
+          // resolving an id waits for that same socket to connect.
+          //
+          // Signs only, too: this call is what establishes the session, so
+          // there is no token yet for a refusal to replace.
+          authInterceptor: const StreamAuthInterceptor(UserToken.anonymous),
+          retryInterceptor: StreamRetryInterceptor(
+            dio: dio,
+            policy: _retryPolicy,
+          ),
         ),
       );
       final defaultApi = open.DefaultApi(dio);
@@ -1752,30 +1672,38 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       return result.fold(
         onSuccess: (data) => Result.success(data.toGuestCreatedData()),
-        onFailure: (error, stackTrace) =>
-            Result.failure(VideoErrors.compose(error, stackTrace)),
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
       );
-    } catch (e) {
-      return Result.failure(VideoErrors.compose(e));
+    } catch (e, stk) {
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 }
 
-typedef GetConnectionId = String? Function();
-
 final _httpLogger = taggedLogger(tag: 'SV:CoordHttp');
 
+/// The interceptor stack every coordinator call goes through.
+///
+/// [connectionIdInterceptor] is omitted for a request that cannot use a
+/// connection id — see `loadGuest`.
 List<Interceptor> _buildInterceptors({
   required String apiKey,
-  required GetToken getToken,
-  required GetConnectionId getConnectionId,
+  required StreamAuthInterceptor authInterceptor,
+  required StreamRetryInterceptor retryInterceptor,
+  StreamConnectionIdInterceptor? connectionIdInterceptor,
 }) {
   return [
     _ApiKeyInterceptor(apiKey),
-    ConnectionIdInterceptor(getConnectionId),
-    StreamAuthInterceptor(getToken),
+    ?connectionIdInterceptor,
+    authInterceptor,
     const StreamClientInfoInterceptor(),
+    // Before the retry, so a retryable failure is already carrying the Stream
+    // exception the retry reads its decision from.
     const ApiErrorInterceptor(),
+    retryInterceptor,
     LoggingInterceptor(
       requestHeader: true,
       logPrint: (_, object) => _httpLogger.v(() => object.toString()),

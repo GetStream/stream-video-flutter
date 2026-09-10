@@ -164,7 +164,9 @@ void main() {
         final setup = await setupOngoingCall();
         stubRingCall(
           setup.coordinatorClient,
-          result: const Result.failure(VideoError(message: 'ring failed')),
+          result: const Result.failure(
+            StreamVideoException(message: 'ring failed'),
+          ),
         );
 
         final result = await setup.call.ring(userIds: ['user1']);

@@ -19,9 +19,8 @@ import '../call_state.dart';
 import '../coordinator/coordinator_client.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../coordinator/models/coordinator_models.dart';
-import '../coordinator/open_api/error/open_api_error.dart';
-import '../errors/video_error.dart';
-import '../errors/video_error_composer.dart';
+import '../errors/stream_video_exception.dart';
+import '../errors/stream_video_exception_composer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../logger/stream_log.dart';
 import '../models/models.dart';
@@ -238,6 +237,7 @@ class Call {
            sessionFactory ??
            CallSessionFactory(
              callCid: stateManager.callState.callCid,
+             retryPolicy: retryPolicy,
              sdpEditor: sdpPolicy.spdEditingEnabled
                  ? SdpEditorImpl(sdpPolicy)
                  : NoOpSdpEditor(),
@@ -591,8 +591,19 @@ class Call {
     }
 
     if (status is CallStatusDisconnected) {
+      _releaseCallLifecycle();
       await _clear('status-disconnected');
     }
+  }
+
+  /// Releases everything waiting on this call's lifecycle.
+  ///
+  /// [_callLifecycleCompleter] is what cancels in-flight join and reconnect
+  /// work — see [_disconnect], which is the other caller. Every path to a
+  /// terminal state has to go through here.
+  void _releaseCallLifecycle() {
+    if (_callLifecycleCompleter.isCompleted) return;
+    _callLifecycleCompleter.complete();
   }
 
   StreamSubscription<NativeWebRtcEvent> _onNativeWebRtcEvent() {
@@ -1391,9 +1402,9 @@ class Call {
             return result;
           }
 
-          if (error is VideoErrorWithCause &&
-              error.cause is SessionConnectionFailure) {
-            final connectionFailure = error.cause as SessionConnectionFailure;
+          final joinCause = error?.rawCause;
+          if (error != null && joinCause is SessionConnectionFailure) {
+            final connectionFailure = joinCause;
 
             if (_isUnrecoverableSfuError(connectionFailure)) {
               _logger.e(
@@ -1445,7 +1456,7 @@ class Call {
       if (disconnectOnMaxRetries) {
         await leave(
           reason: DisconnectReason.failure(
-            VideoError(
+            StreamVideoException(
               message: 'failed to join after $maxJoinRetries attempts',
             ),
           ),
@@ -1459,11 +1470,7 @@ class Call {
   }
 
   SfuError? _extractSfuError(SessionConnectionFailure failure) {
-    final innerError = failure.error;
-    if (innerError is VideoErrorWithCause && innerError.cause is SfuError) {
-      return innerError.cause as SfuError;
-    }
-    return null;
+    return failure.error.sfuError;
   }
 
   bool _isJoinErrorCode(SessionConnectionFailure failure) {
@@ -1476,16 +1483,16 @@ class Call {
   }
 
   /// Whether the coordinator refused the join in a way that will not change.
-  bool _isUnrecoverableCoordinatorError(VideoError? error) {
-    if (error is! VideoErrorWithCause) return false;
+  bool _isUnrecoverableCoordinatorError(StreamVideoException? error) {
+    if (error == null) return false;
 
-    final cause = error.cause;
-    if (cause is! StreamApiError) return false;
+    // The server can declare that retrying will not help, which settles it.
+    if (error.isUnrecoverable) return true;
 
-    final unrecoverable = cause.unrecoverable;
-    if (unrecoverable != null) return unrecoverable;
-
-    final status = cause.statusCode;
+    // No status means the join never reached a server verdict, so the refusal
+    // is not the coordinator's — a reconnect can still get through.
+    final status = error.apiStatusCode;
+    if (status == null) return false;
     if (status < 400 || status >= 500) return false;
 
     return status != 401 && status != 408 && status != 429;
@@ -2125,11 +2132,11 @@ class Call {
 
     if (sfuEvent is SfuSocketDisconnected) {
       await _sfuStatsReporter?.sendSfuStats();
-      // Don't attempt reconnection if leaving the call was triggered
-      if (!_leaveCallTriggered &&
-          !StreamWebSocketCloseCode.isIntentionalClosure(
-            sfuEvent.reason.closeCode,
-          )) {
+      // Don't attempt reconnection if leaving the call was triggered, or if the
+      // closure itself says another attempt is pointless. That verdict comes
+      // from the disconnection source rather than the close code, which a
+      // server can set to a normal value even when something went wrong.
+      if (!_leaveCallTriggered && sfuEvent.reason.isReconnectable) {
         _logger.w(() => '[onSfuEvent] socket disconnected');
 
         _session?.trace(TraceTag.sfuSocketDisconnected, {
@@ -2146,16 +2153,47 @@ class Call {
           () =>
               '[onSfuEvent] socket disconnected, leaving call was triggered - no reconnection',
         );
+      } else {
+        _logger.w(
+          () =>
+              '[onSfuEvent] socket disconnected, closure is not reconnectable '
+              '(closeCode: ${sfuEvent.reason.closeCode}, '
+              'closeReason: ${sfuEvent.reason.closeReason}) - leaving',
+        );
+
+        _session?.trace(TraceTag.sfuSocketDisconnected, {
+          'closeCode': sfuEvent.reason.closeCode,
+          'closeReason': sfuEvent.reason.closeReason,
+          'isReconnectable': false,
+        });
+
+        await leave(reason: DisconnectReason.ended());
       }
     } else if (sfuEvent is SfuSocketFailed) {
       _logger.w(() => '[onSfuEvent] socket failed');
       _session?.trace(TraceTag.sfuSocketFailed, {
         'error': sfuEvent.error.message,
       });
-      await _reconnect(
-        SfuReconnectionStrategy.fast,
-        reconnectReason: 'sfu socket failed: ${sfuEvent.error.message}',
-      );
+
+      if (_leaveCallTriggered) {
+        _logger.d(
+          () =>
+              '[onSfuEvent] socket failed, leaving call was triggered - no reconnection',
+        );
+      } else if (!sfuEvent.isReconnectable) {
+        _logger.e(
+          () =>
+              '[onSfuEvent] socket failed unrecoverably: '
+              '${sfuEvent.error.message}',
+        );
+
+        await leave(reason: DisconnectReason.failure(sfuEvent.error));
+      } else {
+        await _reconnect(
+          SfuReconnectionStrategy.fast,
+          reconnectReason: 'sfu socket failed: ${sfuEvent.error.message}',
+        );
+      }
     } else if (sfuEvent is SfuGoAwayEvent) {
       _logger.w(() => '[onSfuEvent] go away, migrating sfu');
       _session?.trace(TraceTag.sfuSocketGoAway, {
@@ -2410,7 +2448,7 @@ class Call {
           }
         } catch (error) {
           switch (error) {
-            case OpenApiError() when error.apiError.unrecoverable ?? false:
+            case StreamApiException(unrecoverable: true):
             case StreamApiError() when error.unrecoverable ?? false:
               _logger.w(() => '[reconnect] unrecoverable error');
               _stateManager.lifecycleCallReconnectingFailed();
@@ -2474,7 +2512,7 @@ class Call {
       return joinResult;
     }
 
-    await _previousSession?.close(StreamWebSocketCloseCode.disposeOldSocket);
+    await _previousSession?.close(StreamVideoCloseCode.disposeOldSocket);
 
     final migrationResult = await _awaitMigrationCompleteFuture;
     if (migrationResult == null) {
@@ -2692,12 +2730,10 @@ class Call {
 
     _leaveCallTriggered = true;
 
-    // Complete the lifecycle completer to cancel ongoing operations awaiting
-    // it (e.g. _startSession). This must run regardless of whether the
-    // disconnect proceeds further so that nothing gets stuck waiting.
-    if (!_callLifecycleCompleter.isCompleted) {
-      _callLifecycleCompleter.complete();
-    }
+    // Cancels ongoing operations awaiting it (e.g. _startSession). This must
+    // run regardless of whether the disconnect proceeds further so that
+    // nothing gets stuck waiting.
+    _releaseCallLifecycle();
 
     if (state.value.status.isDisconnected) {
       _logger.d(() => '[disconnect] rejected (status is disconnected)');
@@ -3127,7 +3163,7 @@ class Call {
         })
         .onError((e, stk) {
           _logger.e(() => '[awaitIncomingToBeAccepted] failed: $e');
-          return Result.failure(VideoErrors.compose(e, stk));
+          return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
         });
   }
 
@@ -3146,7 +3182,7 @@ class Call {
         })
         .onError((e, stk) {
           _logger.e(() => '[awaitOutgoingToBeAccepted] failed: $e');
-          return Result.failure(VideoErrors.compose(e, stk));
+          return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
         });
   }
 
@@ -3164,7 +3200,7 @@ class Call {
         })
         .onError((e, stk) {
           _logger.e(() => '[awaitCallToBeJoined] failed: $e');
-          return Result.failure(VideoErrors.compose(e, stk));
+          return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
         });
   }
 
@@ -4151,7 +4187,7 @@ class Call {
       _stateManager.participantSetAudioInputDevice(device: device);
       return const Result.success(none);
     } else {
-      if (result.getErrorOrNull() case VideoErrorWithCause(
+      if (result.getErrorOrNull() case StreamVideoExceptionWithCause(
         cause: TrackMissingException(),
       )) {
         // If the track is null, it most probably means that the user
@@ -4703,7 +4739,7 @@ class SessionConnectionFailure {
     required this.error,
   });
 
-  final VideoError error;
+  final StreamVideoException error;
 }
 
 /// One call cid's claim on an [EncryptionManager], held weakly.

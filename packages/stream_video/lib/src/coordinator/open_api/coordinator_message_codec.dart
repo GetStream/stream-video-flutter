@@ -1,16 +1,6 @@
 import 'dart:convert';
 
-import 'package:stream_core/stream_core.dart'
-    show
-        HealthCheckInfo,
-        HealthCheckPingEvent,
-        StreamApiErrorExtension,
-        WebSocketMessageCodec,
-        WsEvent,
-        WsRequest;
-
-import '../../logger/impl/tagged_logger.dart';
-import '../models/coordinator_events.dart';
+import '../../../stream_video.dart';
 import 'error/open_api_error.dart';
 import 'event/open_api_event.dart';
 import 'open_api_mapper_extensions.dart';
@@ -42,11 +32,71 @@ final class CoordinatorWsEvent extends WsEvent {
   static const suppressed = CoordinatorWsEvent(null);
 }
 
+/// Why a coordinator message was dropped instead of delivered.
+enum CoordinatorDropReason {
+  /// The frame was not text, so there is no JSON to read.
+  notText,
+
+  /// The frame was text, but not JSON — or not a JSON object.
+  malformedJson,
+
+  /// A server error that was not about the credentials. Reporting it would
+  /// have the socket client close a connection the error was never about.
+  serverError,
+
+  /// JSON the coordinator event envelope did not recognise.
+  unrecognisedEnvelope,
+
+  /// A recognised envelope this SDK version has no domain event for.
+  unmappedEvent,
+}
+
+/// Counts the messages [CoordinatorMessageCodec] dropped, by reason.
+///
+/// A decode failure on a live event stream is the one failure deliberately not
+/// delivered: there is no operation to fail, and closing a healthy connection
+/// over one bad frame would be worse. Counting is what keeps that visible —
+/// without it, "the event never arrived" cannot be told apart from "the server
+/// never sent it".
+class CoordinatorDropCounter {
+  final _counts = <CoordinatorDropReason, int>{};
+
+  /// How many messages were dropped for [reason].
+  int operator [](CoordinatorDropReason reason) => _counts[reason] ?? 0;
+
+  /// How many messages were dropped in total.
+  int get total => _counts.values.fold(0, (sum, count) => sum + count);
+
+  /// Records one drop and returns the new count for [reason].
+  int record(CoordinatorDropReason reason) {
+    return _counts[reason] = this[reason] + 1;
+  }
+
+  @override
+  String toString() => 'CoordinatorDropCounter{total: $total, by: $_counts}';
+}
+
 /// Encodes/decodes messages between the coordinator WebSocket wire format
 /// (JSON) and [CoordinatorWsEvent].
 class CoordinatorMessageCodec
     implements WebSocketMessageCodec<WsEvent, WsRequest> {
-  const CoordinatorMessageCodec();
+  /// Creates a [CoordinatorMessageCodec] counting its drops in [dropped].
+  CoordinatorMessageCodec({CoordinatorDropCounter? dropped})
+    : dropped = dropped ?? CoordinatorDropCounter();
+
+  /// What this codec has dropped, and why.
+  final CoordinatorDropCounter dropped;
+
+  /// Logs and counts a dropped message, and suppresses it.
+  CoordinatorWsEvent _drop(CoordinatorDropReason reason, [Object? detail]) {
+    final count = dropped.record(reason);
+    _logger.w(
+      () =>
+          '[decode] dropped a message (${reason.name}, $count so far)'
+          '${detail == null ? '' : ': $detail'}',
+    );
+    return CoordinatorWsEvent.suppressed;
+  }
 
   @override
   Object encode(WsRequest message) {
@@ -59,33 +109,40 @@ class CoordinatorMessageCodec
 
   @override
   CoordinatorWsEvent decode(Object message) {
-    if (message is! String) return CoordinatorWsEvent.suppressed;
+    if (message is! String) {
+      return _drop(CoordinatorDropReason.notText, message.runtimeType);
+    }
 
     final Map<String, dynamic> jsonMap;
     try {
       jsonMap = json.decode(message) as Map<String, dynamic>;
-    } catch (_) {
-      return CoordinatorWsEvent.suppressed;
+    } catch (e) {
+      return _drop(CoordinatorDropReason.malformedJson, e);
     }
 
     final dtoError = OpenApiError.fromJson(jsonMap);
     if (dtoError != null) {
       final apiError = dtoError.apiError;
+      final code = apiError.code;
 
       // Only an error about the credentials is reported as the event's error:
       // the socket client closes the connection with whatever error it is
       // handed, so reporting the rest would drop a working connection over an
       // error that was never about it.
-      if (apiError.isTokenExpiredError || apiError.isInvalidTokenError) {
+      if (code.isTokenExpired ||
+          code.isTokenNotYetValid ||
+          code.isTokenSignatureInvalid ||
+          code.isApiKeyInvalid) {
         return CoordinatorWsEvent(null, error: apiError);
       }
 
-      _logger.w(() => '[decode] server reported an error: $apiError');
-      return CoordinatorWsEvent.suppressed;
+      return _drop(CoordinatorDropReason.serverError, apiError);
     }
 
     final dtoEvent = OpenApiEvent.fromJson(jsonMap);
-    if (dtoEvent == null) return CoordinatorWsEvent.suppressed;
+    if (dtoEvent == null) {
+      return _drop(CoordinatorDropReason.unrecognisedEnvelope, jsonMap['type']);
+    }
 
     // Connected — signals initial pong and carries the connection ID used
     // for subsequent health check pings.
@@ -114,7 +171,9 @@ class CoordinatorMessageCodec
     }
 
     final domainEvent = dtoEvent.toCoordinatorEvent();
-    if (domainEvent == null) return CoordinatorWsEvent.suppressed;
+    if (domainEvent == null) {
+      return _drop(CoordinatorDropReason.unmappedEvent, jsonMap['type']);
+    }
     return CoordinatorWsEvent(domainEvent);
   }
 }
