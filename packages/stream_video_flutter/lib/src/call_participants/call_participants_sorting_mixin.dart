@@ -28,7 +28,7 @@ mixin CallParticipantsSortingMixin<T extends StatefulWidget> on State<T> {
   /// Call this method whenever the participant list changes, typically from
   /// a stream subscription or in [didUpdateWidget].
   void recalculateParticipants(List<CallParticipantState> newParticipants) {
-    final participants = [
+    var participants = [
       ...newParticipants,
     ].where(participantFilter ?? (_) => true).toList();
 
@@ -48,8 +48,11 @@ mixin CallParticipantsSortingMixin<T extends StatefulWidget> on State<T> {
           .compareTo(_sortedParticipantKeys.indexOf(b.uniqueParticipantKey)),
     );
 
-    if (participantSort != null) {
-      mergeSort(participants, compare: participantSort);
+    final sort = participantSort;
+    if (sort != null) {
+      // Not a plain sort: the order above is the order the tiles are in, and
+      // `sortParticipants` keeps the ones on screen there.
+      participants = sortParticipants(participants, sort: sort);
     }
 
     final screenShareParticipant = participants.firstWhereOrNull(
