@@ -39,6 +39,23 @@ const _defaultSpeaker = RtcMediaDevice(
   label: 'Default - WH-1000XM3 (Bluetooth)',
   kind: RtcMediaDeviceKind.audioOutput,
 );
+// What a phone reports instead: routes under their own ids, and no `default`
+// entry anywhere in the list.
+const _phoneSpeaker = RtcMediaDevice(
+  id: 'speaker',
+  label: 'Speaker',
+  kind: RtcMediaDeviceKind.audioOutput,
+);
+const _earpiece = RtcMediaDevice(
+  id: 'earpiece',
+  label: 'Earpiece',
+  kind: RtcMediaDeviceKind.audioOutput,
+);
+const _phoneMic = RtcMediaDevice(
+  id: 'microphone-bottom',
+  label: 'Bottom Microphone',
+  kind: RtcMediaDeviceKind.audioInput,
+);
 
 void main() {
   late MockRtcMediaDeviceNotifier notifier;
@@ -301,11 +318,35 @@ void main() {
 
   group('StreamMediaDevicesController.forCall', () {
     late MockCall call;
+    late MutableStateEmitter<CallState> callState;
 
     setUpAll(() => registerFallbackValue(_builtInMic));
 
+    /// The call using [audioInput], [audioOutput] and [videoInput].
+    void inUse({
+      RtcMediaDevice? audioInput,
+      RtcMediaDevice? audioOutput,
+      RtcMediaDevice? videoInput,
+    }) => callState.value = callState.value.copyWith(
+      audioInputDevice: audioInput,
+      audioOutputDevice: audioOutput,
+      videoInputDevice: videoInput,
+    );
+
     setUp(() {
       call = MockCall();
+      callState = MutableStateEmitter<CallState>(
+        CallState(
+          currentUserId: 'current-user',
+          callCid: StreamCallCid.from(
+            type: StreamCallType.defaultType(),
+            id: 'test-call',
+          ),
+          preferences: DefaultCallPreferences(),
+        ),
+        sync: true,
+      );
+      when(() => call.state).thenAnswer((_) => callState);
       when(() => call.setVideoInputDevice(_frontCamera)).thenAnswer(
         (_) async => const Result.success(none),
       );
@@ -436,6 +477,86 @@ void main() {
         await pumpEventQueue();
 
         expect(controller.selectedAudioInput, isNull);
+      });
+    });
+
+    // Only a browser reports a `default` device, so on a phone the selection
+    // comes from what the call says it is using.
+    group('the device the call is using', () {
+      test('is where the selection starts', () async {
+        inUse(audioInput: _phoneMic, audioOutput: _earpiece);
+        final controller = build();
+        deviceChanges.add(const [_phoneMic, _phoneSpeaker, _earpiece]);
+        await pumpEventQueue();
+
+        expect(controller.selectedAudioInput, _phoneMic);
+        expect(controller.selectedAudioOutput, _earpiece);
+      });
+
+      // The call is already on it, so switching to it is not this
+      // controller's to do.
+      test('is taken without being applied', () async {
+        final controller = build();
+        deviceChanges.add(const [_phoneSpeaker, _earpiece]);
+        inUse(audioOutput: _earpiece);
+        await pumpEventQueue();
+
+        expect(controller.selectedAudioOutput, _earpiece);
+        verifyNever(() => call.setAudioOutputDevice(any()));
+      });
+
+      // What iOS's own route picker does: the call records the new route, and
+      // a menu has to mark it rather than the device picked before.
+      test('moves the selection when the call switches route', () async {
+        final controller = build();
+        deviceChanges.add(const [_phoneSpeaker, _earpiece]);
+        inUse(audioOutput: _earpiece);
+        await pumpEventQueue();
+
+        inUse(audioOutput: _phoneSpeaker);
+        await pumpEventQueue();
+
+        expect(controller.selectedAudioOutput, _phoneSpeaker);
+      });
+
+      test('notifies listeners when it changes', () async {
+        final controller = build();
+        deviceChanges.add(const [_phoneSpeaker, _earpiece]);
+        await pumpEventQueue();
+
+        var notifications = 0;
+        controller.addListener(() => notifications++);
+        inUse(audioOutput: _earpiece);
+        await pumpEventQueue();
+
+        expect(notifications, 1);
+      });
+
+      // A call resolves an output before it has an input to match it with, so
+      // the kinds it has not named have to be left alone.
+      test('leaves a kind it names no device for alone', () async {
+        final controller = build();
+        deviceChanges.add(const [_phoneMic, _phoneSpeaker, _earpiece]);
+        await pumpEventQueue();
+        await controller.selectAudioInput(_phoneMic);
+
+        inUse(audioOutput: _earpiece);
+        await pumpEventQueue();
+
+        expect(controller.selectedAudioInput, _phoneMic);
+        expect(controller.selectedAudioOutput, _earpiece);
+      });
+
+      test('gives way to a device the user picks', () async {
+        final controller = build();
+        deviceChanges.add(const [_phoneSpeaker, _earpiece]);
+        inUse(audioOutput: _earpiece);
+        await pumpEventQueue();
+
+        await controller.selectAudioOutput(_phoneSpeaker);
+
+        expect(controller.selectedAudioOutput, _phoneSpeaker);
+        verify(() => call.setAudioOutputDevice(_phoneSpeaker)).called(1);
       });
     });
   });

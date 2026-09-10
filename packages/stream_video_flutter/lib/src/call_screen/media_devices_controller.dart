@@ -12,6 +12,14 @@ import '../../stream_video_flutter.dart';
 typedef StreamMediaDeviceSelected =
     FutureOr<void> Function(RtcMediaDevice? device);
 
+/// The devices an owner reports it is already using. See
+/// [StreamMediaDevicesController.new]'s `devicesInUse`.
+typedef StreamDevicesInUse = ({
+  RtcMediaDevice? audioInput,
+  RtcMediaDevice? audioOutput,
+  RtcMediaDevice? videoInput,
+});
+
 /// Loads the available input and output devices and remembers which one is
 /// picked.
 ///
@@ -30,14 +38,21 @@ typedef StreamMediaDeviceSelected =
 /// lists are empty until the user has granted permission.
 class StreamMediaDevicesController extends ChangeNotifier {
   /// Creates a new instance of [StreamMediaDevicesController].
+  ///
+  /// [devicesInUse] follows an owner that tracks its own devices, so that the
+  /// selection starts on what is already in use and moves with a switch made
+  /// outside the controller. Nothing is applied for what arrives that way: the
+  /// owner is the one that changed it.
   StreamMediaDevicesController({
     RtcMediaDeviceNotifier? deviceNotifier,
     this.onAudioInputSelected,
     this.onAudioOutputSelected,
     this.onVideoInputSelected,
     this.supportsSystemDefault = true,
+    Stream<StreamDevicesInUse>? devicesInUse,
   }) : _deviceNotifier = deviceNotifier ?? RtcMediaDeviceNotifier.instance {
     _subscription = _deviceNotifier.onDeviceChange.listen(_handleDeviceChange);
+    _devicesInUseSubscription = devicesInUse?.listen(_handleDevicesInUse);
     // The notifier replays its last enumeration to a new listener, but only
     // once it has run one; this kicks the first.
     unawaited(_enumerate());
@@ -71,10 +86,22 @@ class StreamMediaDevicesController extends ChangeNotifier {
     }
 
     return StreamMediaDevicesController(
-      // Whatever the call is already running on is not knowable from here, so
-      // the row for it is left out rather than shown wrongly.
       supportsSystemDefault: false,
       deviceNotifier: deviceNotifier,
+      // The call resolves a device per kind as it joins — the speaker or
+      // earpiece its settings ask for on mobile, whatever the browser named on
+      // web — and records every switch after that, including the ones iOS
+      // makes through its own route picker. Distinct because the rest of the
+      // call state churns throughout a call.
+      devicesInUse: call.state
+          .map(
+            (state) => (
+              audioInput: state.audioInputDevice,
+              audioOutput: state.audioOutputDevice,
+              videoInput: state.videoInputDevice,
+            ),
+          )
+          .distinct(),
       onAudioInputSelected: (device) => apply(device, call.setAudioInputDevice),
       onAudioOutputSelected: (device) =>
           apply(device, call.setAudioOutputDevice),
@@ -116,6 +143,7 @@ class StreamMediaDevicesController extends ChangeNotifier {
 
   final RtcMediaDeviceNotifier _deviceNotifier;
   StreamSubscription<List<RtcMediaDevice>>? _subscription;
+  StreamSubscription<StreamDevicesInUse>? _devicesInUseSubscription;
 
   /// Called when the microphone changes, with null for the system default.
   final StreamMediaDeviceSelected? onAudioInputSelected;
@@ -137,13 +165,15 @@ class StreamMediaDevicesController extends ChangeNotifier {
   /// that would move the radio button without changing anything.
   final bool supportsSystemDefault;
 
-  /// The id a platform gives the device it has picked for itself.
+  /// The reserved id browsers give the audio device they have picked for
+  /// themselves.
   ///
-  /// Web reports one — Chrome lists it as "Default - <name>" — alongside the
-  /// real devices, and it is a device like any other: picking it is what
-  /// asking for the platform's choice looks like there. Platforms that report
-  /// no such entry leave [selectedAudioInput] and its siblings null until
-  /// something is picked.
+  /// Chrome lists it as "Default - <name>" alongside the real microphones and
+  /// speakers, and it is a device like any other: picking it is what asking
+  /// for the browser's choice looks like there. Nothing else reports it —
+  /// Android names its outputs `speaker`, `earpiece`, `bluetooth` and
+  /// `wired-headset`, iOS uses port UIDs — so elsewhere the device in use is
+  /// the one the owner reports through `devicesInUse`.
   static const platformDefaultDeviceId = 'default';
 
   bool _hasEnumerated = false;
@@ -194,7 +224,9 @@ class StreamMediaDevicesController extends ChangeNotifier {
   ///
   /// Where null cannot be shown — see [supportsSystemDefault] — this resolves
   /// to the platform's own choice instead, so a menu marks the device in use
-  /// rather than marking nothing.
+  /// rather than marking nothing. That choice is the one the owner reports
+  /// through `devicesInUse`, or the device under [platformDefaultDeviceId]
+  /// where it reports none.
   RtcMediaDevice? get selectedAudioInput =>
       _selectedAudioInput ?? _platformDefaultIn(_audioInputs);
 
@@ -208,8 +240,12 @@ class StreamMediaDevicesController extends ChangeNotifier {
   RtcMediaDevice? get selectedVideoInput =>
       _selectedVideoInput ?? _platformDefaultIn(_videoInputs);
 
-  /// The platform's own choice among [devices], where that is what null has
+  /// The browser's own choice among [devices], where that is what null has
   /// to mean.
+  ///
+  /// Covers a selection no owner has reported, which on web is every kind
+  /// until something is picked: a browser only names a default microphone and
+  /// speaker, never a default camera.
   ///
   /// Null while [supportsSystemDefault]: there the menu draws a row for "let
   /// the platform pick", so resolving null to a device would move the mark off
@@ -343,10 +379,27 @@ class StreamMediaDevicesController extends ChangeNotifier {
     return null;
   }
 
+  /// Takes over the selection from the owner's own device tracking.
+  ///
+  /// Assigned rather than selected: the owner has already switched to it, so
+  /// there is nothing to apply and no rejection to put back. A kind it names
+  /// no device for is left as it is, so an owner that has resolved only some
+  /// of them does not clear the rest.
+  void _handleDevicesInUse(StreamDevicesInUse devices) {
+    if (_disposed) return;
+
+    _selectedAudioInput = devices.audioInput ?? _selectedAudioInput;
+    _selectedAudioOutput = devices.audioOutput ?? _selectedAudioOutput;
+    _selectedVideoInput = devices.videoInput ?? _selectedVideoInput;
+
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     _disposed = true;
     _subscription?.cancel();
+    _devicesInUseSubscription?.cancel();
     super.dispose();
   }
 }
