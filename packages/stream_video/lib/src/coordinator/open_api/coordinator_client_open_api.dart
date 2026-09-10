@@ -173,21 +173,101 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   /// is not done until the socket is up, so a caller awaiting it needs the
   /// failure. No other call uses it — a request that merely wants a connection
   /// id goes out without one rather than failing.
-  Future<Result<None>> _awaitConnected() {
-    return _connectionState
-        .firstWhere((it) => it.isConnected)
-        .timeout(_connectUserTimeout)
-        .then((_) {
-          _logger.v(() => '[awaitConnected] connected');
-          return const Result<None>.success(none);
-        })
-        .onError((error, stackTrace) {
-          _logger.e(() => '[awaitConnected] failed: $error');
-          return Result<None>.failure(
-            StreamVideoExceptions.compose(error, stackTrace),
-            stackTrace,
-          );
-        });
+  Future<Result<None>> _awaitConnected() async {
+    final settled = await _awaitConnection(_connectUserTimeout);
+
+    if (settled?.isConnected ?? false) {
+      _logger.v(() => '[awaitConnected] connected');
+      return const Result<None>.success(none);
+    }
+
+    final failure = _connectFailure(settled);
+    _logger.e(() => '[awaitConnected] failed: $failure');
+    return Result<None>.failure(failure, StackTrace.current);
+  }
+
+  /// Why an attempt that ended in [settled] failed, or timed out when it never
+  /// settled at all.
+  ///
+  /// A refusal the server explained is reported as that verdict rather than as
+  /// a timeout. An unknown API key or a refused signature is terminal, and a
+  /// caller handed a timeout instead would retry a configuration error for as
+  /// long as it kept trying.
+  StreamVideoException _connectFailure(CoordinatorConnectionState? settled) {
+    return switch (settled) {
+      // The only state that settles the wait early — see `_awaitConnection`.
+      CoordinatorDisconnected(apiError: final apiError?) =>
+        StreamVideoExceptions.compose(
+          StreamApiException.fromApiError(apiError),
+        ),
+
+      // Anything else here means the attempt never landed at all.
+      _ => StreamVideoExceptions.compose(
+        TimeoutException(
+          'The connection was not established in time',
+          _connectUserTimeout,
+        ),
+      ),
+    };
+  }
+
+  /// Whether the socket reached [CoordinatorConnected] within [timeout].
+  ///
+  /// The subscription is held and cancelled here rather than left to
+  /// `Future.timeout`, which completes the future it returns without touching
+  /// the `firstWhere` listening underneath it. Since this runs once per
+  /// request while the socket is coming up, an expired wait would otherwise
+  /// leave a listener on [_connectionState] for every request that gave up,
+  /// released only when the socket eventually connected.
+  Future<CoordinatorConnectionState?> _awaitConnection(Duration timeout) {
+    // A disconnect settles the attempt only when the server explained it.
+    //
+    // Not every disconnect ends the attempt: core's recovery handler
+    // reconnects from a transient close, and this socket reports the blip as a
+    // `disconnected` state on the way. Settling on that would fail
+    // `connectUser` for a close the SDK recovers from inside this same
+    // window — and the socket, still alive, would go on to connect.
+    //
+    // A closure carrying an `apiError` is the other case: a refused signature,
+    // an unknown API key, a verdict marked unrecoverable. Nothing reconnects
+    // from those, and waiting the timeout out would report one as a timeout
+    // and discard the verdict.
+    bool hasSettled(CoordinatorConnectionState state) => switch (state) {
+      CoordinatorConnected() => true,
+      CoordinatorDisconnected(apiError: _?) => true,
+      _ => false,
+    };
+
+    final current = _connectionState.value;
+    if (hasSettled(current)) return Future.value(current);
+
+    final completer = Completer<CoordinatorConnectionState?>();
+    StreamSubscription<CoordinatorConnectionState>? subscription;
+    Timer? timer;
+
+    void settle(CoordinatorConnectionState? state) {
+      if (completer.isCompleted) return;
+      timer?.cancel();
+      unawaited(subscription?.cancel());
+      completer.complete(state);
+    }
+
+    timer = Timer(timeout, () => settle(null));
+    subscription = _connectionState.listen(
+      (state) {
+        if (hasSettled(state)) settle(state);
+      },
+      // A closed or erroring emitter is not going to connect, and leaving the
+      // wait pending on either would hang the caller.
+      onError: (_, __) => settle(null),
+      onDone: () => settle(null),
+    );
+
+    // The emitter replays its current value, so the wait can already have been
+    // settled by the time the subscription lands in the variable above.
+    if (completer.isCompleted) unawaited(subscription.cancel());
+
+    return completer.future;
   }
 
   /// The connection id to attach to a request, or `null` when there is none
@@ -212,12 +292,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     }
 
     _logger.d(() => '[resolveConnectionId] waiting for the socket');
-    try {
-      await _connectionState
-          .firstWhere((it) => it.isConnected)
-          .timeout(_waitForConnectionId);
-      return _ws?.connectionId;
-    } on TimeoutException catch (_) {
+    final settled = await _awaitConnection(_waitForConnectionId);
+    if (!(settled?.isConnected ?? false)) {
       _logger.w(
         () =>
             '[resolveConnectionId] gave up after '
@@ -225,6 +301,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       );
       return null;
     }
+
+    return _ws?.connectionId;
   }
 
   @override

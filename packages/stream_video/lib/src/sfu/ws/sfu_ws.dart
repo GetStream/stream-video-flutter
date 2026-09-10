@@ -169,10 +169,6 @@ class SfuWebSocket {
   void send(sfu_events.SfuRequest message) {
     _logger.v(() => '[send] message: $message');
 
-    // `leave` and `sendPing` both fire opportunistically, so they can reach a
-    // socket that was never opened — a session abandoned before it connected.
-    // The client reports sending before connecting as a [StateError], which is
-    // nothing for those callers to act on: there is no connection to send on.
     if (_client.connectionState.value is Initialized) {
       _logger.w(() => '[send] rejected (connection not opened)');
       return;
@@ -223,7 +219,7 @@ class SfuWebSocket {
               sessionId: sessionId,
               url: url,
               isReconnectable: source.isReconnectable,
-              error: StreamVideoExceptions.compose(error.cause ?? error),
+              error: StreamVideoExceptions.compose(error),
             ),
           );
         }
@@ -260,8 +256,16 @@ class SfuWebSocket {
             ),
           ),
         );
+      // A close this SDK asked for is not news for the call to act on:
+      // `UserInitiated` is a leave, `SystemInitiated` a recreate.
+      //
+      // `ServerInitiated` is listed only to keep the switch exhaustive — the
+      // arm above matches it whenever it carries an error, and core builds it
+      // no other way. Should that change, a reasonless server closure would
+      // land here and be suppressed, which `isReconnectable` calls worth
+      // recovering — so it would need an arm of its own rather than this one.
       case UserInitiated() || SystemInitiated() || ServerInitiated():
-        break; // manual close or recreate — suppress
+        break;
     }
   }
 }

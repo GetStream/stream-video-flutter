@@ -96,66 +96,43 @@ void main() {
     });
   });
 
-  // Dropping is the one sanctioned way a failure goes undelivered, and the
-  // count is what keeps it visible: without it, an event this SDK version has
-  // no model for is indistinguishable from one the server never sent.
-  group('CoordinatorMessageCodec counts what it drops', () {
+  // Dropping is the one sanctioned way a failure goes undelivered: there is no
+  // operation to fail, and closing a healthy connection over one bad frame
+  // would be worse. What the socket must never see is a half-decoded message.
+  group('CoordinatorMessageCodec suppresses what it cannot deliver', () {
     late CoordinatorMessageCodec codec;
 
     setUp(() => codec = CoordinatorMessageCodec());
 
-    test('counts a frame that is not text', () {
-      codec.decode(const [1, 2, 3]);
+    void expectSuppressed(Object message) {
+      final event = codec.decode(message);
 
-      expect(codec.dropped[CoordinatorDropReason.notText], 1);
-      expect(codec.dropped.total, 1);
+      expect(event.event, isNull);
+      expect(event.error, isNull);
+      expect(event.healthCheckInfo, isNull);
+    }
+
+    test('a frame that is not text', () => expectSuppressed(const [1, 2, 3]));
+
+    test('a frame that is not JSON', () => expectSuppressed('not json'));
+
+    test('a server error it does not surface', () {
+      expectSuppressed(_apiErrorMessage(17));
     });
 
-    test('counts a frame that is not JSON', () {
-      codec.decode('not json');
-
-      expect(codec.dropped[CoordinatorDropReason.malformedJson], 1);
+    test('an envelope it does not recognise', () {
+      expectSuppressed(json.encode({'nothing': 'recognisable'}));
     });
 
-    test('counts a server error it did not surface', () {
-      codec.decode(_apiErrorMessage(17));
-
-      expect(codec.dropped[CoordinatorDropReason.serverError], 1);
-    });
-
-    test('counts an envelope it does not recognise', () {
-      codec.decode(json.encode({'nothing': 'recognisable'}));
-
-      expect(codec.dropped[CoordinatorDropReason.unrecognisedEnvelope], 1);
-    });
-
-    test('does not count a credentials error, which it surfaces', () {
-      codec.decode(_apiErrorMessage(40));
-
-      expect(codec.dropped.total, 0);
-    });
-
-    test('does not count an event it delivered', () {
-      codec.decode(
+    // Suppressed by the codec, which still knows the type name to log, rather
+    // than handed to the socket as an event it can only discard unnamed.
+    test('an event type this SDK version has no model for', () {
+      expectSuppressed(
         json.encode({
-          'type': 'health.check',
-          'connection_id': 'connection-1',
+          'type': 'call.invented_in_a_later_version',
           'created_at': '2026-01-01T00:00:00.000Z',
         }),
       );
-
-      expect(codec.dropped.total, 0);
-    });
-
-    test('accumulates across messages, by reason', () {
-      codec
-        ..decode('not json')
-        ..decode('still not json')
-        ..decode(_apiErrorMessage(17));
-
-      expect(codec.dropped[CoordinatorDropReason.malformedJson], 2);
-      expect(codec.dropped[CoordinatorDropReason.serverError], 1);
-      expect(codec.dropped.total, 3);
     });
   });
 }

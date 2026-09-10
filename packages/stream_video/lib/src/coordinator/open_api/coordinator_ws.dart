@@ -149,8 +149,8 @@ class CoordinatorWebSocket {
     };
     final tokenRefused = refusal != null;
 
-    // Mirrors the RpcRetryManager guard: a static provider can only return
-    // the token the server just refused, so the credentials cannot change.
+    // A static provider can only return the token the server just refused,
+    // so the credentials cannot change.
     // Throwing fails the attempt for good (AuthenticationFailed, which is not
     // reconnectable) instead of reconnecting with the same dead token.
     if (tokenRefused && tokenSource.usesStaticProvider) {
@@ -222,11 +222,6 @@ class CoordinatorWebSocket {
         );
         return;
       }
-    }
-
-    if (event is CoordinatorUnknownEvent) {
-      _logger.v(() => '[onWsEvent] unknown event');
-      return;
     }
 
     _events.emit(event);

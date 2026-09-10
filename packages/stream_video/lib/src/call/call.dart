@@ -1370,6 +1370,11 @@ class Call {
       String? sfuToForceExclude;
       final sfusToExclude = <String>[];
 
+      // What the last attempt failed with, so an exhausted budget reports the
+      // verdict rather than only the fact that it ran out.
+      StreamVideoException? lastError;
+      StackTrace? lastStackTrace;
+
       for (var attempt = 0; attempt < max(maxJoinRetries, 1); attempt++) {
         final result = await runCatchingResult(
           () => _doJoin(
@@ -1393,6 +1398,8 @@ class Call {
           );
 
           final error = result.getErrorOrNull();
+          lastError = error;
+          lastStackTrace = result.stackTraceOrNull();
 
           if (_isUnrecoverableCoordinatorError(error)) {
             _logger.e(
@@ -1453,19 +1460,17 @@ class Call {
         );
       }
 
+      final failure =
+          lastError ??
+          StreamVideoException(
+            message: 'failed to join after $maxJoinRetries attempts',
+          );
+
       if (disconnectOnMaxRetries) {
-        await leave(
-          reason: DisconnectReason.failure(
-            StreamVideoException(
-              message: 'failed to join after $maxJoinRetries attempts',
-            ),
-          ),
-        );
+        await leave(reason: DisconnectReason.failure(failure));
       }
 
-      return failureWithError(
-        'failed to join after $maxJoinRetries attempts',
-      );
+      return Result.failure(failure, lastStackTrace);
     });
   }
 
@@ -4187,9 +4192,9 @@ class Call {
       _stateManager.participantSetAudioInputDevice(device: device);
       return const Result.success(none);
     } else {
-      if (result.getErrorOrNull() case StreamVideoExceptionWithCause(
-        cause: TrackMissingException(),
-      )) {
+      final error = result.getErrorOrNull();
+      if (error is StreamVideoException &&
+          error.rawCause is TrackMissingException) {
         // If the track is null, it most probably means that the user
         // joined the call muted and the audio track was not created.
         // We will set the audio input device when the user unmutes.

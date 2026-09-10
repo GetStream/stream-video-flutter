@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_core/stream_core.dart';
+import 'package:stream_video/src/http/stream_auth_interceptor.dart';
 import 'package:stream_video/src/http/stream_retry_interceptor.dart';
 import 'package:stream_video/src/retry/retry_policy.dart';
 
@@ -292,6 +293,24 @@ void main() {
       );
     });
 
+    // Credentials that could not be produced are about the setup, not the
+    // moment. Injected directly, because the interceptor that produces one
+    // rejects in `onRequest` and so never reaches this arm in the real chain —
+    // the value is asserted here so it cannot drift if that ever changes.
+    test('stops on credentials it could not produce', () async {
+      expect(
+        await attemptsFor(
+          () => throw DioException(
+            requestOptions: RequestOptions(path: '/x'),
+            error: const StreamAuthenticationException(
+              message: 'tokenProvider threw',
+            ),
+          ),
+        ),
+        1,
+      );
+    });
+
     // Wire data that would not decode produces the same bytes and the same
     // failure next time, so the budget goes unspent and the caller is told.
     test('stops on a failure inside the SDK', () async {
@@ -313,6 +332,72 @@ void main() {
     test('spends no more attempts than the policy allows', () async {
       expect(await attemptsFor(() => _refused(500), rpcMaxRetries: 1), 1);
       expect(await attemptsFor(() => _refused(500), rpcMaxRetries: 5), 5);
+    });
+  });
+
+  // The two interceptors were only ever exercised apart, which hid the fact
+  // that a signing failure never reaches this one: dio's
+  // `RequestInterceptorHandler.reject` skips the following error interceptors
+  // unless asked not to, and the auth interceptor does not ask.
+  group('wired together with the auth interceptor', () {
+    test('a request that could not be signed is not retried', () async {
+      final dio = Dio(BaseOptions(baseUrl: 'https://example.invalid'));
+      final adapter = _CountingAdapter(() => _bare(200));
+      dio.httpClientAdapter = adapter;
+      dio.interceptors.addAll([
+        StreamAuthInterceptor(
+          () => throw const StreamAuthenticationException(
+            message: 'tokenProvider threw',
+          ),
+        ),
+        const ApiErrorInterceptor(),
+        StreamRetryInterceptor(
+          dio: dio,
+          policy: const RetryPolicy(backoff: _noBackoff),
+        ),
+      ]);
+
+      StreamException? classified;
+      try {
+        await dio.get<dynamic>('/x');
+      } on DioException catch (exception) {
+        classified = exception.toStreamException();
+      }
+
+      expect(
+        adapter.attempts,
+        0,
+        reason: 'the request never went out, so there was nothing to retry',
+      );
+      expect(classified, isA<StreamAuthenticationException>());
+    });
+
+    // The contrast: a refusal the server sent does reach the retry
+    // interceptor, so the chain is wired up and the assertion above is not
+    // passing for the wrong reason.
+    test('a 5xx the server sent still is', () async {
+      final dio = Dio(BaseOptions(baseUrl: 'https://example.invalid'));
+      final adapter = _CountingAdapter(() => _refused(503));
+      dio.httpClientAdapter = adapter;
+      dio.interceptors.addAll([
+        const StreamAuthInterceptor(UserToken.anonymous),
+        const ApiErrorInterceptor(),
+        StreamRetryInterceptor(
+          dio: dio,
+          policy: const RetryPolicy(
+            config: RetryConfig(rpcMaxRetries: 3),
+            backoff: _noBackoff,
+          ),
+        ),
+      ]);
+
+      try {
+        await dio.get<dynamic>('/x');
+      } on DioException catch (_) {
+        // The attempt count is the assertion.
+      }
+
+      expect(adapter.attempts, 3);
     });
   });
 }

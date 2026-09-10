@@ -33,7 +33,12 @@ final class CoordinatorWsEvent extends WsEvent {
 }
 
 /// Why a coordinator message was dropped instead of delivered.
-enum CoordinatorDropReason {
+///
+/// Names the drop in the log line: a decode failure on a live event stream is
+/// the one failure deliberately not delivered — there is no operation to fail,
+/// and closing a healthy connection over one bad frame would be worse — so the
+/// log is the only account of it.
+enum _DropReason {
   /// The frame was not text, so there is no JSON to read.
   notText,
 
@@ -47,52 +52,22 @@ enum CoordinatorDropReason {
   /// JSON the coordinator event envelope did not recognise.
   unrecognisedEnvelope,
 
+  /// An envelope naming an event type this SDK version has no model for.
+  unknownEventType,
+
   /// A recognised envelope this SDK version has no domain event for.
   unmappedEvent,
-}
-
-/// Counts the messages [CoordinatorMessageCodec] dropped, by reason.
-///
-/// A decode failure on a live event stream is the one failure deliberately not
-/// delivered: there is no operation to fail, and closing a healthy connection
-/// over one bad frame would be worse. Counting is what keeps that visible —
-/// without it, "the event never arrived" cannot be told apart from "the server
-/// never sent it".
-class CoordinatorDropCounter {
-  final _counts = <CoordinatorDropReason, int>{};
-
-  /// How many messages were dropped for [reason].
-  int operator [](CoordinatorDropReason reason) => _counts[reason] ?? 0;
-
-  /// How many messages were dropped in total.
-  int get total => _counts.values.fold(0, (sum, count) => sum + count);
-
-  /// Records one drop and returns the new count for [reason].
-  int record(CoordinatorDropReason reason) {
-    return _counts[reason] = this[reason] + 1;
-  }
-
-  @override
-  String toString() => 'CoordinatorDropCounter{total: $total, by: $_counts}';
 }
 
 /// Encodes/decodes messages between the coordinator WebSocket wire format
 /// (JSON) and [CoordinatorWsEvent].
 class CoordinatorMessageCodec
     implements WebSocketMessageCodec<WsEvent, WsRequest> {
-  /// Creates a [CoordinatorMessageCodec] counting its drops in [dropped].
-  CoordinatorMessageCodec({CoordinatorDropCounter? dropped})
-    : dropped = dropped ?? CoordinatorDropCounter();
-
-  /// What this codec has dropped, and why.
-  final CoordinatorDropCounter dropped;
-
-  /// Logs and counts a dropped message, and suppresses it.
-  CoordinatorWsEvent _drop(CoordinatorDropReason reason, [Object? detail]) {
-    final count = dropped.record(reason);
+  /// Logs a dropped message and suppresses it.
+  CoordinatorWsEvent _drop(_DropReason reason, [Object? detail]) {
     _logger.w(
       () =>
-          '[decode] dropped a message (${reason.name}, $count so far)'
+          '[decode] dropped a message (${reason.name})'
           '${detail == null ? '' : ': $detail'}',
     );
     return CoordinatorWsEvent.suppressed;
@@ -110,14 +85,14 @@ class CoordinatorMessageCodec
   @override
   CoordinatorWsEvent decode(Object message) {
     if (message is! String) {
-      return _drop(CoordinatorDropReason.notText, message.runtimeType);
+      return _drop(_DropReason.notText, message.runtimeType);
     }
 
     final Map<String, dynamic> jsonMap;
     try {
       jsonMap = json.decode(message) as Map<String, dynamic>;
     } catch (e) {
-      return _drop(CoordinatorDropReason.malformedJson, e);
+      return _drop(_DropReason.malformedJson, e);
     }
 
     final dtoError = OpenApiError.fromJson(jsonMap);
@@ -136,12 +111,12 @@ class CoordinatorMessageCodec
         return CoordinatorWsEvent(null, error: apiError);
       }
 
-      return _drop(CoordinatorDropReason.serverError, apiError);
+      return _drop(_DropReason.serverError, apiError);
     }
 
     final dtoEvent = OpenApiEvent.fromJson(jsonMap);
     if (dtoEvent == null) {
-      return _drop(CoordinatorDropReason.unrecognisedEnvelope, jsonMap['type']);
+      return _drop(_DropReason.unrecognisedEnvelope, jsonMap['type']);
     }
 
     // Connected — signals initial pong and carries the connection ID used
@@ -172,8 +147,16 @@ class CoordinatorMessageCodec
 
     final domainEvent = dtoEvent.toCoordinatorEvent();
     if (domainEvent == null) {
-      return _drop(CoordinatorDropReason.unmappedEvent, jsonMap['type']);
+      return _drop(_DropReason.unmappedEvent, jsonMap['type']);
     }
+
+    // An event type this SDK version has no model for. Dropped here, where the
+    // type is still known, rather than delivered as an opaque event for the
+    // socket to discard without being able to name it.
+    if (domainEvent is CoordinatorUnknownEvent) {
+      return _drop(_DropReason.unknownEventType, jsonMap['type']);
+    }
+
     return CoordinatorWsEvent(domainEvent);
   }
 }

@@ -581,12 +581,14 @@ class StreamVideo extends Disposable {
         filterConditions: {
           'cid': {r'$in': watched.map((call) => call.callCid.value).toList()},
         },
-      ).onError((error, stackTrace) {
-        _logger.e(() => '[rewatchCalls] re-watching calls failed: $error');
-        return Result.failure(
-          StreamVideoExceptions.compose(error, stackTrace),
-          stackTrace,
-        );
+      ).then((result) {
+        if (result case Failure(:final error)) {
+          _logger.e(
+            () =>
+                '[rewatchCalls] re-watching ${watched.length} call(s) '
+                'failed: $error',
+          );
+        }
       }),
     );
   }

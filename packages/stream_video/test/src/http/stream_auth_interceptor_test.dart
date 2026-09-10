@@ -53,7 +53,7 @@ ResponseBody _refused(int code, {int status = 401}) {
 
 /// An unsigned JWT claiming [userId], which is all `UserToken` reads: it parses
 /// claims without verifying the signature.
-String _jwt(String userId) {
+String _jwt(String userId, {int issue = 0}) {
   String segment(Map<String, Object?> claims) {
     return base64Url
         .encode(utf8.encode(jsonEncode(claims)))
@@ -61,7 +61,10 @@ String _jwt(String userId) {
   }
 
   final header = segment({'alg': 'HS256', 'typ': 'JWT'});
-  final payload = segment({'user_id': userId});
+  // `issue` distinguishes successive tokens for the same user, so a test can
+  // tell a replacement from a resend. The `user_id` claim is what the SDK
+  // validates, so it stays as it is.
+  final payload = segment({'user_id': userId, 'iat': issue});
   // Never verified, but it still has to decode as base64url.
   final signature = base64Url.encode(utf8.encode('sig')).replaceAll('=', '');
   return '$header.$payload.$signature';
@@ -71,10 +74,17 @@ const _userId = 'u1';
 
 /// A manager whose provider can mint another token, so a refusal is worth
 /// replacing. A dynamic provider only accepts JWTs.
+///
+/// Every load returns a *different* token — `_jwt(_userId, issue: 1)`, then
+/// `issue: 2`, and so on — so a retry that reused the refused header is
+/// distinguishable from one carrying the replacement.
 TokenManager _refreshable() {
+  var issued = 0;
   return TokenManager(
     userId: _userId,
-    tokenProvider: TokenProvider.dynamic((id) async => UserToken(_jwt(id))),
+    tokenProvider: TokenProvider.dynamic(
+      (id) async => UserToken(_jwt(id, issue: ++issued)),
+    ),
   );
 }
 
@@ -152,6 +162,20 @@ void main() {
         hasLength(2),
         reason: 'the refusal is retried carrying a replacement token',
       );
+
+      // The point of the retry: it is signed with the replacement, not with
+      // the header the server just refused.
+      final signatures = c.adapter.requests
+          .map((it) => it.headers['Authorization'])
+          .toList();
+
+      expect(signatures.first, _jwt(_userId, issue: 1));
+      expect(
+        signatures.last,
+        _jwt(_userId, issue: 2),
+        reason: 'the retry carries the refreshed token',
+      );
+      expect(signatures.first, isNot(signatures.last));
     });
 
     test('reports a replacement that is refused too', () async {

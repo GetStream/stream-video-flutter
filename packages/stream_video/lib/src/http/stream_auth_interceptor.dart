@@ -3,7 +3,10 @@ import 'dart:async';
 import 'package:stream_core/stream_core.dart';
 
 import '../errors/stream_video_exception.dart';
+import '../logger/impl/tagged_logger.dart';
 import '../token/token_source.dart';
+
+final _logger = taggedLogger(tag: 'SV:HttpAuth');
 
 /// Resolves the current user token for authenticated Stream API requests.
 typedef GetToken = FutureOr<UserToken> Function();
@@ -93,10 +96,33 @@ class StreamAuthInterceptor extends Interceptor {
     if (tokenSource.usesStaticProvider) return handler.next(err);
 
     // The replacement was refused too, so another one will be as well.
-    if (options.extra[_retriedKey] == true) return handler.next(err);
+    if (options.extra[_retriedKey] == true) {
+      _logger.e(
+        () =>
+            '[${options.path}] the replacement token was refused too, '
+            'reporting the refusal',
+      );
+      return handler.next(err);
+    }
 
     final refreshed = await tokenSource.refreshToken();
-    if (refreshed is! Success<UserToken>) return handler.next(err);
+    if (refreshed is! Success<UserToken>) {
+      // Reported here as well as by `TokenManager`, because this is the only
+      // place the two halves meet: what the caller receives is the server's
+      // `token expired`, and on its own that reads as an expiry rather than as
+      // an app token endpoint that is failing.
+      //
+      // Not attached to the rejected failure as a cause: the retry interceptor
+      // decides from its type, and a credentials failure there is retryable
+      // where an expired token is not — so swapping it in would spend five
+      // more attempts minting tokens that cannot help.
+      _logger.e(
+        () =>
+            '[${options.path}] could not replace the refused token, '
+            'reporting the refusal: ${refreshed.exceptionOrNull()}',
+      );
+      return handler.next(err);
+    }
 
     final data = options.data;
     final retry = options.copyWith(

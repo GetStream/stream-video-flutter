@@ -57,7 +57,7 @@ class RetryConfig extends Equatable {
   /// The ceiling on the computed backoff between attempts.
   final Duration maxBackoff;
 
-  /// The total time retrying may add to one call.
+  /// The total time retrying may add to a single coordinator HTTP request. Not applied to SFU signalling retries.
   final Duration maxTotalRetryDelay;
 
   /// How many attempts an SFU signalling RPC gets in total, the first one

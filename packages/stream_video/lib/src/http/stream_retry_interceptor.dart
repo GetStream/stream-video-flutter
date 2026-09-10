@@ -145,9 +145,7 @@ class StreamRetryInterceptor extends Interceptor {
     // attempt, and the outcome of the last one is unknown either way.
     StreamNetworkException() => true,
 
-    // Credentials that could not be produced or sent. Retried because the
-    // failure may be a transient one inside app-supplied token code.
-    StreamAuthenticationException() => true,
+    StreamAuthenticationException() => false,
 
     // A failure inside the SDK — wire data that would not decode, a bug in a
     // mapper. Resending produces the same bytes and the same failure, so the
