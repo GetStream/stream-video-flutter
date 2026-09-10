@@ -9,6 +9,11 @@ part of 'config_response.dart';
 ConfigResponse _$ConfigResponseFromJson(
   Map<String, dynamic> json,
 ) => ConfigResponse(
+  aiAudioConfig: json['ai_audio_config'] == null
+      ? null
+      : AIAudioConfigResponse.fromJson(
+          json['ai_audio_config'] as Map<String, dynamic>,
+        ),
   aiImageConfig: json['ai_image_config'] == null
       ? null
       : AIImageConfig.fromJson(json['ai_image_config'] as Map<String, dynamic>),
@@ -28,7 +33,9 @@ ConfigResponse _$ConfigResponseFromJson(
       : AITextConfig.fromJson(json['ai_text_config'] as Map<String, dynamic>),
   aiVideoConfig: json['ai_video_config'] == null
       ? null
-      : AIVideoConfig.fromJson(json['ai_video_config'] as Map<String, dynamic>),
+      : AIVideoConfigResponse.fromJson(
+          json['ai_video_config'] as Map<String, dynamic>,
+        ),
   async: json['async'] as bool,
   automodPlatformCircumventionConfig:
       json['automod_platform_circumvention_config'] == null
@@ -57,7 +64,7 @@ ConfigResponse _$ConfigResponseFromJson(
       : BlockListConfig.fromJson(
           json['block_list_config'] as Map<String, dynamic>,
         ),
-  createdAt: const EpochDateTimeConverter().fromJson(
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
   floodConfig: json['flood_config'] == null
@@ -68,12 +75,11 @@ ConfigResponse _$ConfigResponseFromJson(
       ? null
       : LLMConfig.fromJson(json['llm_config'] as Map<String, dynamic>),
   supportedVideoCallHarmTypes:
-      (json['supported_video_call_harm_types'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      [],
+      (json['supported_video_call_harm_types'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
   team: json['team'] as String,
-  updatedAt: const EpochDateTimeConverter().fromJson(
+  updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
   velocityFilterConfig: json['velocity_filter_config'] == null
@@ -90,6 +96,7 @@ ConfigResponse _$ConfigResponseFromJson(
 
 Map<String, dynamic> _$ConfigResponseToJson(ConfigResponse instance) =>
     <String, dynamic>{
+      'ai_audio_config': instance.aiAudioConfig?.toJson(),
       'ai_image_config': instance.aiImageConfig?.toJson(),
       'ai_image_label_definitions': instance.aiImageLabelDefinitions
           ?.map((e) => e.toJson())
@@ -108,13 +115,13 @@ Map<String, dynamic> _$ConfigResponseToJson(ConfigResponse instance) =>
           ?.map((e) => e.toJson())
           .toList(),
       'block_list_config': instance.blockListConfig?.toJson(),
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'flood_config': instance.floodConfig?.toJson(),
       'key': instance.key,
       'llm_config': instance.llmConfig?.toJson(),
       'supported_video_call_harm_types': instance.supportedVideoCallHarmTypes,
       'team': instance.team,
-      'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
+      'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
       'velocity_filter_config': instance.velocityFilterConfig?.toJson(),
       'video_call_rule_config': instance.videoCallRuleConfig?.toJson(),
     };

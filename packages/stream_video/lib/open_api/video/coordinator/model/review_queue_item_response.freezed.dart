@@ -19,7 +19,7 @@ mixin _$ReviewQueueItemResponse {
   AppealItemResponse? get appeal;
   UserResponse? get assignedTo;
   List<BanInfoResponse> get bans;
-  CallResponse? get call;
+  ModerationCallResponse? get call;
   DateTime? get completedAt;
   String? get configKey;
   DateTime get createdAt;
@@ -194,7 +194,7 @@ abstract mixin class $ReviewQueueItemResponseCopyWith<$Res> {
     AppealItemResponse? appeal,
     UserResponse? assignedTo,
     List<BanInfoResponse> bans,
-    CallResponse? call,
+    ModerationCallResponse? call,
     DateTime? completedAt,
     String? configKey,
     DateTime createdAt,
@@ -308,7 +308,7 @@ class _$ReviewQueueItemResponseCopyWithImpl<$Res>
         call: freezed == call
             ? _self.call
             : call // ignore: cast_nullable_to_non_nullable
-                  as CallResponse?,
+                  as ModerationCallResponse?,
         completedAt: freezed == completedAt
             ? _self.completedAt
             : completedAt // ignore: cast_nullable_to_non_nullable

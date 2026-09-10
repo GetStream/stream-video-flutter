@@ -12,6 +12,7 @@ UnbanActionRequestPayload _$UnbanActionRequestPayloadFromJson(
   channelCid: json['channel_cid'] as String?,
   decisionReason: json['decision_reason'] as String?,
   removeFutureChannelsBan: json['remove_future_channels_ban'] as bool?,
+  targetUserId: json['target_user_id'] as String?,
 );
 
 Map<String, dynamic> _$UnbanActionRequestPayloadToJson(
@@ -20,4 +21,5 @@ Map<String, dynamic> _$UnbanActionRequestPayloadToJson(
   'channel_cid': instance.channelCid,
   'decision_reason': instance.decisionReason,
   'remove_future_channels_ban': instance.removeFutureChannelsBan,
+  'target_user_id': instance.targetUserId,
 };

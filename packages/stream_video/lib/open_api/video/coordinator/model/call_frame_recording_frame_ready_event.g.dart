@@ -10,10 +10,10 @@ CallFrameRecordingFrameReadyEvent _$CallFrameRecordingFrameReadyEventFromJson(
   Map<String, dynamic> json,
 ) => CallFrameRecordingFrameReadyEvent(
   callCid: json['call_cid'] as String,
-  capturedAt: const EpochDateTimeConverter().fromJson(
+  capturedAt: const StreamDateTimeConverter().fromJson(
     json['captured_at'] as Object,
   ),
-  createdAt: const EpochDateTimeConverter().fromJson(
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
   egressId: json['egress_id'] as String,
@@ -21,19 +21,17 @@ CallFrameRecordingFrameReadyEvent _$CallFrameRecordingFrameReadyEventFromJson(
   trackType: json['track_type'] as String,
   type: json['type'] as String,
   url: json['url'] as String,
-  users:
-      (json['users'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, UserResponse.fromJson(e as Map<String, dynamic>)),
-      ) ??
-      {},
+  users: (json['users'] as Map<String, dynamic>).map(
+    (k, e) => MapEntry(k, UserResponse.fromJson(e as Map<String, dynamic>)),
+  ),
 );
 
 Map<String, dynamic> _$CallFrameRecordingFrameReadyEventToJson(
   CallFrameRecordingFrameReadyEvent instance,
 ) => <String, dynamic>{
   'call_cid': instance.callCid,
-  'captured_at': const EpochDateTimeConverter().toJson(instance.capturedAt),
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'captured_at': const StreamDateTimeConverter().toJson(instance.capturedAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'egress_id': instance.egressId,
   'session_id': instance.sessionId,
   'track_type': instance.trackType,

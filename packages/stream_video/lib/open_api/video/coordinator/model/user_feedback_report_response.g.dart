@@ -9,15 +9,13 @@ part of 'user_feedback_report_response.dart';
 UserFeedbackReportResponse _$UserFeedbackReportResponseFromJson(
   Map<String, dynamic> json,
 ) => UserFeedbackReportResponse(
-  daily:
-      (json['daily'] as List<dynamic>?)
-          ?.map(
-            (e) => DailyAggregateUserFeedbackReportResponse.fromJson(
-              e as Map<String, dynamic>,
-            ),
-          )
-          .toList() ??
-      [],
+  daily: (json['daily'] as List<dynamic>)
+      .map(
+        (e) => DailyAggregateUserFeedbackReportResponse.fromJson(
+          e as Map<String, dynamic>,
+        ),
+      )
+      .toList(),
 );
 
 Map<String, dynamic> _$UserFeedbackReportResponseToJson(

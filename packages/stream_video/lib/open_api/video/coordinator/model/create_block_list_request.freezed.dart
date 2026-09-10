@@ -13,8 +13,10 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$CreateBlockListRequest {
+  bool? get isConfusableFoldingEnabled;
   bool? get isLeetCheckEnabled;
   bool? get isPluralCheckEnabled;
+  bool? get isSubstringMatchingEnabled;
   String get name;
   String? get team;
   CreateBlockListRequestType? get type;
@@ -35,10 +37,22 @@ mixin _$CreateBlockListRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is CreateBlockListRequest &&
+            (identical(
+                  other.isConfusableFoldingEnabled,
+                  isConfusableFoldingEnabled,
+                ) ||
+                other.isConfusableFoldingEnabled ==
+                    isConfusableFoldingEnabled) &&
             (identical(other.isLeetCheckEnabled, isLeetCheckEnabled) ||
                 other.isLeetCheckEnabled == isLeetCheckEnabled) &&
             (identical(other.isPluralCheckEnabled, isPluralCheckEnabled) ||
                 other.isPluralCheckEnabled == isPluralCheckEnabled) &&
+            (identical(
+                  other.isSubstringMatchingEnabled,
+                  isSubstringMatchingEnabled,
+                ) ||
+                other.isSubstringMatchingEnabled ==
+                    isSubstringMatchingEnabled) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.team, team) || other.team == team) &&
             (identical(other.type, type) || other.type == type) &&
@@ -48,8 +62,10 @@ mixin _$CreateBlockListRequest {
   @override
   int get hashCode => Object.hash(
     runtimeType,
+    isConfusableFoldingEnabled,
     isLeetCheckEnabled,
     isPluralCheckEnabled,
+    isSubstringMatchingEnabled,
     name,
     team,
     type,
@@ -58,7 +74,7 @@ mixin _$CreateBlockListRequest {
 
   @override
   String toString() {
-    return 'CreateBlockListRequest(isLeetCheckEnabled: $isLeetCheckEnabled, isPluralCheckEnabled: $isPluralCheckEnabled, name: $name, team: $team, type: $type, words: $words)';
+    return 'CreateBlockListRequest(isConfusableFoldingEnabled: $isConfusableFoldingEnabled, isLeetCheckEnabled: $isLeetCheckEnabled, isPluralCheckEnabled: $isPluralCheckEnabled, isSubstringMatchingEnabled: $isSubstringMatchingEnabled, name: $name, team: $team, type: $type, words: $words)';
   }
 }
 
@@ -70,8 +86,10 @@ abstract mixin class $CreateBlockListRequestCopyWith<$Res> {
   ) = _$CreateBlockListRequestCopyWithImpl;
   @useResult
   $Res call({
+    bool? isConfusableFoldingEnabled,
     bool? isLeetCheckEnabled,
     bool? isPluralCheckEnabled,
+    bool? isSubstringMatchingEnabled,
     String name,
     String? team,
     CreateBlockListRequestType? type,
@@ -92,8 +110,10 @@ class _$CreateBlockListRequestCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? isConfusableFoldingEnabled = freezed,
     Object? isLeetCheckEnabled = freezed,
     Object? isPluralCheckEnabled = freezed,
+    Object? isSubstringMatchingEnabled = freezed,
     Object? name = null,
     Object? team = freezed,
     Object? type = freezed,
@@ -101,6 +121,10 @@ class _$CreateBlockListRequestCopyWithImpl<$Res>
   }) {
     return _then(
       CreateBlockListRequest(
+        isConfusableFoldingEnabled: freezed == isConfusableFoldingEnabled
+            ? _self.isConfusableFoldingEnabled
+            : isConfusableFoldingEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool?,
         isLeetCheckEnabled: freezed == isLeetCheckEnabled
             ? _self.isLeetCheckEnabled
             : isLeetCheckEnabled // ignore: cast_nullable_to_non_nullable
@@ -108,6 +132,10 @@ class _$CreateBlockListRequestCopyWithImpl<$Res>
         isPluralCheckEnabled: freezed == isPluralCheckEnabled
             ? _self.isPluralCheckEnabled
             : isPluralCheckEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        isSubstringMatchingEnabled: freezed == isSubstringMatchingEnabled
+            ? _self.isSubstringMatchingEnabled
+            : isSubstringMatchingEnabled // ignore: cast_nullable_to_non_nullable
                   as bool?,
         name: null == name
             ? _self.name

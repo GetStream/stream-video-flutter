@@ -13,7 +13,7 @@ CallStatsReportReadyEvent _$CallStatsReportReadyEventFromJson(
   counts: CallStatsParticipantCounts.fromJson(
     json['counts'] as Map<String, dynamic>,
   ),
-  createdAt: const EpochDateTimeConverter().fromJson(
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
   isTrimmed: json['is_trimmed'] as bool?,
@@ -29,7 +29,7 @@ Map<String, dynamic> _$CallStatsReportReadyEventToJson(
 ) => <String, dynamic>{
   'call_cid': instance.callCid,
   'counts': instance.counts.toJson(),
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'is_trimmed': instance.isTrimmed,
   'participants_overview': instance.participantsOverview
       ?.map((e) => e.toJson())

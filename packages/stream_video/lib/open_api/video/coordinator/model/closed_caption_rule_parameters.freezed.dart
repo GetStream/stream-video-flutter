@@ -15,6 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$ClosedCaptionRuleParameters {
   List<String>? get harmLabels;
   Map<String, String>? get llmHarmLabels;
+  String? get severity;
   int? get threshold;
   String? get timeWindow;
 
@@ -42,6 +43,8 @@ mixin _$ClosedCaptionRuleParameters {
               other.llmHarmLabels,
               llmHarmLabels,
             ) &&
+            (identical(other.severity, severity) ||
+                other.severity == severity) &&
             (identical(other.threshold, threshold) ||
                 other.threshold == threshold) &&
             (identical(other.timeWindow, timeWindow) ||
@@ -53,13 +56,14 @@ mixin _$ClosedCaptionRuleParameters {
     runtimeType,
     const DeepCollectionEquality().hash(harmLabels),
     const DeepCollectionEquality().hash(llmHarmLabels),
+    severity,
     threshold,
     timeWindow,
   );
 
   @override
   String toString() {
-    return 'ClosedCaptionRuleParameters(harmLabels: $harmLabels, llmHarmLabels: $llmHarmLabels, threshold: $threshold, timeWindow: $timeWindow)';
+    return 'ClosedCaptionRuleParameters(harmLabels: $harmLabels, llmHarmLabels: $llmHarmLabels, severity: $severity, threshold: $threshold, timeWindow: $timeWindow)';
   }
 }
 
@@ -73,6 +77,7 @@ abstract mixin class $ClosedCaptionRuleParametersCopyWith<$Res> {
   $Res call({
     List<String>? harmLabels,
     Map<String, String>? llmHarmLabels,
+    String? severity,
     int? threshold,
     String? timeWindow,
   });
@@ -93,6 +98,7 @@ class _$ClosedCaptionRuleParametersCopyWithImpl<$Res>
   $Res call({
     Object? harmLabels = freezed,
     Object? llmHarmLabels = freezed,
+    Object? severity = freezed,
     Object? threshold = freezed,
     Object? timeWindow = freezed,
   }) {
@@ -106,6 +112,10 @@ class _$ClosedCaptionRuleParametersCopyWithImpl<$Res>
             ? _self.llmHarmLabels
             : llmHarmLabels // ignore: cast_nullable_to_non_nullable
                   as Map<String, String>?,
+        severity: freezed == severity
+            ? _self.severity
+            : severity // ignore: cast_nullable_to_non_nullable
+                  as String?,
         threshold: freezed == threshold
             ? _self.threshold
             : threshold // ignore: cast_nullable_to_non_nullable

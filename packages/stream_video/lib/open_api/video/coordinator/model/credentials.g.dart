@@ -7,11 +7,9 @@ part of 'credentials.dart';
 // **************************************************************************
 
 Credentials _$CredentialsFromJson(Map<String, dynamic> json) => Credentials(
-  iceServers:
-      (json['ice_servers'] as List<dynamic>?)
-          ?.map((e) => ICEServerResponse.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      [],
+  iceServers: (json['ice_servers'] as List<dynamic>)
+      .map((e) => ICEServerResponse.fromJson(e as Map<String, dynamic>))
+      .toList(),
   server: SFUResponse.fromJson(json['server'] as Map<String, dynamic>),
   token: json['token'] as String,
 );

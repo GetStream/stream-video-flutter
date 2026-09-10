@@ -15,9 +15,6 @@ T _$identity<T>(T value) => value;
 mixin _$JoinCallRequest {
   bool? get create;
   CallRequest? get data;
-
-  /// the encryption mode the client intends to use for this join; the join is
-  /// rejected if it does not match the call's encryption configuration
   bool? get e2ee;
   bool? get hintHighScaleLivestreamPublisher;
   String get location;

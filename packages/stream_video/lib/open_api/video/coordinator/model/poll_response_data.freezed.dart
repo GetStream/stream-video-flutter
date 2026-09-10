@@ -33,7 +33,7 @@ mixin _$PollResponseData {
   DateTime get updatedAt;
   int get voteCount;
   Map<String, int> get voteCountsByOption;
-  String get votingVisibility;
+  PollResponseDataVotingVisibility get votingVisibility;
 
   /// Create a copy of PollResponseData
   /// with the given fields replaced by the non-null parameter values.
@@ -158,7 +158,7 @@ abstract mixin class $PollResponseDataCopyWith<$Res> {
     DateTime updatedAt,
     int voteCount,
     Map<String, int> voteCountsByOption,
-    String votingVisibility,
+    PollResponseDataVotingVisibility votingVisibility,
   });
 }
 
@@ -282,7 +282,7 @@ class _$PollResponseDataCopyWithImpl<$Res>
         votingVisibility: null == votingVisibility
             ? _self.votingVisibility
             : votingVisibility // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as PollResponseDataVotingVisibility,
       ),
     );
   }

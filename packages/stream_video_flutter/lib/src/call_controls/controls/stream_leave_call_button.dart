@@ -1,0 +1,47 @@
+import 'package:flutter/material.dart';
+
+import '../../../stream_video_flutter.dart';
+
+/// A call control that leaves the call.
+class StreamLeaveCallButton extends StatelessWidget {
+  /// Creates a new instance of [StreamLeaveCallButton].
+  const StreamLeaveCallButton({
+    super.key,
+    required this.call,
+    this.icon,
+    this.onLeaveCallTap,
+  });
+
+  /// Represents a call.
+  final Call call;
+
+  /// The icon of the leave call button.
+  ///
+  /// Defaults to `context.streamIcons.phoneDownFill`.
+  final IconData? icon;
+
+  /// The action to perform when the leave call button is tapped.
+  final VoidCallback? onLeaveCallTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return CallControlButton(
+      icon: Icon(icon ?? context.streamIcons.phoneDownFill),
+      tone: .negative,
+      onPressed: () {
+        if (onLeaveCallTap != null) {
+          onLeaveCallTap!();
+        } else {
+          call.leave();
+        }
+      },
+    );
+  }
+}
+
+/// LeaveCallOption is [StreamLeaveCallButton] now.
+@Deprecated(
+  'LeaveCallOption is StreamLeaveCallButton now, matching the rest of the '
+  'call controls. Will be removed in the next major version.',
+)
+typedef LeaveCallOption = StreamLeaveCallButton;

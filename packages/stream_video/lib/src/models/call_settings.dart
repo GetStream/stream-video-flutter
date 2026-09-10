@@ -1313,24 +1313,15 @@ enum TranscriptionSettingsLanguage {
   String toString() => value;
 
   TranscriptionSettingsRequestLanguage toOpenDto() {
-    return TranscriptionSettingsRequestLanguage.values.firstWhere(
-      (e) => e.name == name,
-      orElse: () => TranscriptionSettingsRequestLanguage.auto,
-    );
+    return TranscriptionSettingsRequestLanguage.fromJson(value);
   }
 
   StartTranscriptionRequestLanguage toStartTranscriptionDto() {
-    return StartTranscriptionRequestLanguage.values.firstWhere(
-      (e) => e.name == name,
-      orElse: () => StartTranscriptionRequestLanguage.auto,
-    );
+    return StartTranscriptionRequestLanguage.fromJson(value);
   }
 
   StartClosedCaptionsRequestLanguage toStartClosedCaptionsDto() {
-    return StartClosedCaptionsRequestLanguage.values.firstWhere(
-      (e) => e.name == name,
-      orElse: () => StartClosedCaptionsRequestLanguage.auto,
-    );
+    return StartClosedCaptionsRequestLanguage.fromJson(value);
   }
 }
 

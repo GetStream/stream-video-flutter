@@ -8,10 +8,10 @@ part of 'user_deleted_event.dart';
 
 UserDeletedEvent _$UserDeletedEventFromJson(Map<String, dynamic> json) =>
     UserDeletedEvent(
-      createdAt: const EpochDateTimeConverter().fromJson(
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
-      custom: json['custom'] as Map<String, dynamic>? ?? {},
+      custom: json['custom'] as Map<String, dynamic>,
       deleteConversation: json['delete_conversation'] as String,
       deleteConversationChannels: json['delete_conversation_channels'] as bool,
       deleteMessages: json['delete_messages'] as String,
@@ -20,7 +20,7 @@ UserDeletedEvent _$UserDeletedEventFromJson(Map<String, dynamic> json) =>
       markMessagesDeleted: json['mark_messages_deleted'] as bool,
       receivedAt: _$JsonConverterFromJson<Object, DateTime>(
         json['received_at'],
-        const EpochDateTimeConverter().fromJson,
+        const StreamDateTimeConverter().fromJson,
       ),
       type: json['type'] as String,
       user: UserResponseCommonFields.fromJson(
@@ -30,7 +30,7 @@ UserDeletedEvent _$UserDeletedEventFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$UserDeletedEventToJson(UserDeletedEvent instance) =>
     <String, dynamic>{
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'custom': instance.custom,
       'delete_conversation': instance.deleteConversation,
       'delete_conversation_channels': instance.deleteConversationChannels,
@@ -40,7 +40,7 @@ Map<String, dynamic> _$UserDeletedEventToJson(UserDeletedEvent instance) =>
       'mark_messages_deleted': instance.markMessagesDeleted,
       'received_at': _$JsonConverterToJson<Object, DateTime>(
         instance.receivedAt,
-        const EpochDateTimeConverter().toJson,
+        const StreamDateTimeConverter().toJson,
       ),
       'type': instance.type,
       'user': instance.user.toJson(),

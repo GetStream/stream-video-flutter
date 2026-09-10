@@ -10,7 +10,7 @@ CallEndedEvent _$CallEndedEventFromJson(Map<String, dynamic> json) =>
     CallEndedEvent(
       call: CallResponse.fromJson(json['call'] as Map<String, dynamic>),
       callCid: json['call_cid'] as String,
-      createdAt: const EpochDateTimeConverter().fromJson(
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
       members: (json['members'] as List<dynamic>?)
@@ -27,7 +27,7 @@ Map<String, dynamic> _$CallEndedEventToJson(CallEndedEvent instance) =>
     <String, dynamic>{
       'call': instance.call.toJson(),
       'call_cid': instance.callCid,
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'members': instance.members?.map((e) => e.toJson()).toList(),
       'reason': instance.reason,
       'type': instance.type,

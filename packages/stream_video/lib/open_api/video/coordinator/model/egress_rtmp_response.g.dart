@@ -9,7 +9,7 @@ part of 'egress_rtmp_response.dart';
 EgressRTMPResponse _$EgressRTMPResponseFromJson(Map<String, dynamic> json) =>
     EgressRTMPResponse(
       name: json['name'] as String,
-      startedAt: const EpochDateTimeConverter().fromJson(
+      startedAt: const StreamDateTimeConverter().fromJson(
         json['started_at'] as Object,
       ),
       streamKey: json['stream_key'] as String?,
@@ -19,7 +19,7 @@ EgressRTMPResponse _$EgressRTMPResponseFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$EgressRTMPResponseToJson(EgressRTMPResponse instance) =>
     <String, dynamic>{
       'name': instance.name,
-      'started_at': const EpochDateTimeConverter().toJson(instance.startedAt),
+      'started_at': const StreamDateTimeConverter().toJson(instance.startedAt),
       'stream_key': instance.streamKey,
       'stream_url': instance.streamUrl,
     };

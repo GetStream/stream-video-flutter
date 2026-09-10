@@ -8,11 +8,7 @@ part of 'per_sdk_usage_report.dart';
 
 PerSDKUsageReport _$PerSDKUsageReportFromJson(Map<String, dynamic> json) =>
     PerSDKUsageReport(
-      byVersion:
-          (json['by_version'] as Map<String, dynamic>?)?.map(
-            (k, e) => MapEntry(k, (e as num).toInt()),
-          ) ??
-          {},
+      byVersion: Map<String, int>.from(json['by_version'] as Map),
       total: (json['total'] as num).toInt(),
     );
 

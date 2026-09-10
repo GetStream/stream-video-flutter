@@ -11,11 +11,11 @@ VideoSettingsRequest _$VideoSettingsRequestFromJson(
 ) => VideoSettingsRequest(
   accessRequestEnabled: json['access_request_enabled'] as bool?,
   cameraDefaultOn: json['camera_default_on'] as bool?,
-  cameraFacing: $enumDecodeNullable(
-    _$VideoSettingsRequestCameraFacingEnumMap,
-    json['camera_facing'],
-    unknownValue: VideoSettingsRequestCameraFacing.unknown,
-  ),
+  cameraFacing: json['camera_facing'] == null
+      ? null
+      : VideoSettingsRequestCameraFacing.fromJson(
+          json['camera_facing'] as String,
+        ),
   enabled: json['enabled'] as bool?,
   targetResolution: json['target_resolution'] == null
       ? null
@@ -29,15 +29,7 @@ Map<String, dynamic> _$VideoSettingsRequestToJson(
 ) => <String, dynamic>{
   'access_request_enabled': instance.accessRequestEnabled,
   'camera_default_on': instance.cameraDefaultOn,
-  'camera_facing':
-      _$VideoSettingsRequestCameraFacingEnumMap[instance.cameraFacing],
+  'camera_facing': instance.cameraFacing?.toJson(),
   'enabled': instance.enabled,
   'target_resolution': instance.targetResolution?.toJson(),
-};
-
-const _$VideoSettingsRequestCameraFacingEnumMap = {
-  VideoSettingsRequestCameraFacing.back: 'back',
-  VideoSettingsRequestCameraFacing.external: 'external',
-  VideoSettingsRequestCameraFacing.front: 'front',
-  VideoSettingsRequestCameraFacing.unknown: '_unknown',
 };

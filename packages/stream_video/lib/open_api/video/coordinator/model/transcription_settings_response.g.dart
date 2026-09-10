@@ -9,21 +9,13 @@ part of 'transcription_settings_response.dart';
 TranscriptionSettingsResponse _$TranscriptionSettingsResponseFromJson(
   Map<String, dynamic> json,
 ) => TranscriptionSettingsResponse(
-  closedCaptionMode: $enumDecode(
-    _$TranscriptionSettingsResponseClosedCaptionModeEnumMap,
-    json['closed_caption_mode'],
-    unknownValue: TranscriptionSettingsResponseClosedCaptionMode.unknown,
+  closedCaptionMode: TranscriptionSettingsResponseClosedCaptionMode.fromJson(
+    json['closed_caption_mode'] as String,
   ),
-  language: $enumDecode(
-    _$TranscriptionSettingsResponseLanguageEnumMap,
-    json['language'],
-    unknownValue: TranscriptionSettingsResponseLanguage.auto,
+  language: TranscriptionSettingsResponseLanguage.fromJson(
+    json['language'] as String,
   ),
-  mode: $enumDecode(
-    _$TranscriptionSettingsResponseModeEnumMap,
-    json['mode'],
-    unknownValue: TranscriptionSettingsResponseMode.unknown,
-  ),
+  mode: TranscriptionSettingsResponseMode.fromJson(json['mode'] as String),
   speechSegmentConfig: json['speech_segment_config'] == null
       ? null
       : SpeechSegmentConfig.fromJson(
@@ -39,67 +31,9 @@ TranscriptionSettingsResponse _$TranscriptionSettingsResponseFromJson(
 Map<String, dynamic> _$TranscriptionSettingsResponseToJson(
   TranscriptionSettingsResponse instance,
 ) => <String, dynamic>{
-  'closed_caption_mode':
-      _$TranscriptionSettingsResponseClosedCaptionModeEnumMap[instance
-          .closedCaptionMode]!,
-  'language':
-      _$TranscriptionSettingsResponseLanguageEnumMap[instance.language]!,
-  'mode': _$TranscriptionSettingsResponseModeEnumMap[instance.mode]!,
+  'closed_caption_mode': instance.closedCaptionMode.toJson(),
+  'language': instance.language.toJson(),
+  'mode': instance.mode.toJson(),
   'speech_segment_config': instance.speechSegmentConfig?.toJson(),
   'translation': instance.translation?.toJson(),
-};
-
-const _$TranscriptionSettingsResponseClosedCaptionModeEnumMap = {
-  TranscriptionSettingsResponseClosedCaptionMode.autoOn: 'auto-on',
-  TranscriptionSettingsResponseClosedCaptionMode.available: 'available',
-  TranscriptionSettingsResponseClosedCaptionMode.disabled: 'disabled',
-  TranscriptionSettingsResponseClosedCaptionMode.unknown: '_unknown',
-};
-
-const _$TranscriptionSettingsResponseLanguageEnumMap = {
-  TranscriptionSettingsResponseLanguage.ar: 'ar',
-  TranscriptionSettingsResponseLanguage.auto: 'auto',
-  TranscriptionSettingsResponseLanguage.bg: 'bg',
-  TranscriptionSettingsResponseLanguage.ca: 'ca',
-  TranscriptionSettingsResponseLanguage.cs: 'cs',
-  TranscriptionSettingsResponseLanguage.da: 'da',
-  TranscriptionSettingsResponseLanguage.de: 'de',
-  TranscriptionSettingsResponseLanguage.el: 'el',
-  TranscriptionSettingsResponseLanguage.en: 'en',
-  TranscriptionSettingsResponseLanguage.es: 'es',
-  TranscriptionSettingsResponseLanguage.et: 'et',
-  TranscriptionSettingsResponseLanguage.fi: 'fi',
-  TranscriptionSettingsResponseLanguage.fr: 'fr',
-  TranscriptionSettingsResponseLanguage.he: 'he',
-  TranscriptionSettingsResponseLanguage.hi: 'hi',
-  TranscriptionSettingsResponseLanguage.hr: 'hr',
-  TranscriptionSettingsResponseLanguage.hu: 'hu',
-  TranscriptionSettingsResponseLanguage.id: 'id',
-  TranscriptionSettingsResponseLanguage.it: 'it',
-  TranscriptionSettingsResponseLanguage.ja: 'ja',
-  TranscriptionSettingsResponseLanguage.ko: 'ko',
-  TranscriptionSettingsResponseLanguage.ms: 'ms',
-  TranscriptionSettingsResponseLanguage.nl: 'nl',
-  TranscriptionSettingsResponseLanguage.no: 'no',
-  TranscriptionSettingsResponseLanguage.pl: 'pl',
-  TranscriptionSettingsResponseLanguage.pt: 'pt',
-  TranscriptionSettingsResponseLanguage.ro: 'ro',
-  TranscriptionSettingsResponseLanguage.ru: 'ru',
-  TranscriptionSettingsResponseLanguage.sk: 'sk',
-  TranscriptionSettingsResponseLanguage.sl: 'sl',
-  TranscriptionSettingsResponseLanguage.sv: 'sv',
-  TranscriptionSettingsResponseLanguage.ta: 'ta',
-  TranscriptionSettingsResponseLanguage.th: 'th',
-  TranscriptionSettingsResponseLanguage.tl: 'tl',
-  TranscriptionSettingsResponseLanguage.tr: 'tr',
-  TranscriptionSettingsResponseLanguage.uk: 'uk',
-  TranscriptionSettingsResponseLanguage.zh: 'zh',
-  TranscriptionSettingsResponseLanguage.unknown: '_unknown',
-};
-
-const _$TranscriptionSettingsResponseModeEnumMap = {
-  TranscriptionSettingsResponseMode.autoOn: 'auto-on',
-  TranscriptionSettingsResponseMode.available: 'available',
-  TranscriptionSettingsResponseMode.disabled: 'disabled',
-  TranscriptionSettingsResponseMode.unknown: '_unknown',
 };

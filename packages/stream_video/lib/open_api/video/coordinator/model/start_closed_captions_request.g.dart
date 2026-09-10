@@ -11,11 +11,9 @@ StartClosedCaptionsRequest _$StartClosedCaptionsRequestFromJson(
 ) => StartClosedCaptionsRequest(
   enableTranscription: json['enable_transcription'] as bool?,
   externalStorage: json['external_storage'] as String?,
-  language: $enumDecodeNullable(
-    _$StartClosedCaptionsRequestLanguageEnumMap,
-    json['language'],
-    unknownValue: StartClosedCaptionsRequestLanguage.unknown,
-  ),
+  language: json['language'] == null
+      ? null
+      : StartClosedCaptionsRequestLanguage.fromJson(json['language'] as String),
   speechSegmentConfig: json['speech_segment_config'] == null
       ? null
       : SpeechSegmentConfig.fromJson(
@@ -28,47 +26,6 @@ Map<String, dynamic> _$StartClosedCaptionsRequestToJson(
 ) => <String, dynamic>{
   'enable_transcription': instance.enableTranscription,
   'external_storage': instance.externalStorage,
-  'language': _$StartClosedCaptionsRequestLanguageEnumMap[instance.language],
+  'language': instance.language?.toJson(),
   'speech_segment_config': instance.speechSegmentConfig?.toJson(),
-};
-
-const _$StartClosedCaptionsRequestLanguageEnumMap = {
-  StartClosedCaptionsRequestLanguage.ar: 'ar',
-  StartClosedCaptionsRequestLanguage.auto: 'auto',
-  StartClosedCaptionsRequestLanguage.bg: 'bg',
-  StartClosedCaptionsRequestLanguage.ca: 'ca',
-  StartClosedCaptionsRequestLanguage.cs: 'cs',
-  StartClosedCaptionsRequestLanguage.da: 'da',
-  StartClosedCaptionsRequestLanguage.de: 'de',
-  StartClosedCaptionsRequestLanguage.el: 'el',
-  StartClosedCaptionsRequestLanguage.en: 'en',
-  StartClosedCaptionsRequestLanguage.es: 'es',
-  StartClosedCaptionsRequestLanguage.et: 'et',
-  StartClosedCaptionsRequestLanguage.fi: 'fi',
-  StartClosedCaptionsRequestLanguage.fr: 'fr',
-  StartClosedCaptionsRequestLanguage.he: 'he',
-  StartClosedCaptionsRequestLanguage.hi: 'hi',
-  StartClosedCaptionsRequestLanguage.hr: 'hr',
-  StartClosedCaptionsRequestLanguage.hu: 'hu',
-  StartClosedCaptionsRequestLanguage.id: 'id',
-  StartClosedCaptionsRequestLanguage.it: 'it',
-  StartClosedCaptionsRequestLanguage.ja: 'ja',
-  StartClosedCaptionsRequestLanguage.ko: 'ko',
-  StartClosedCaptionsRequestLanguage.ms: 'ms',
-  StartClosedCaptionsRequestLanguage.nl: 'nl',
-  StartClosedCaptionsRequestLanguage.no: 'no',
-  StartClosedCaptionsRequestLanguage.pl: 'pl',
-  StartClosedCaptionsRequestLanguage.pt: 'pt',
-  StartClosedCaptionsRequestLanguage.ro: 'ro',
-  StartClosedCaptionsRequestLanguage.ru: 'ru',
-  StartClosedCaptionsRequestLanguage.sk: 'sk',
-  StartClosedCaptionsRequestLanguage.sl: 'sl',
-  StartClosedCaptionsRequestLanguage.sv: 'sv',
-  StartClosedCaptionsRequestLanguage.ta: 'ta',
-  StartClosedCaptionsRequestLanguage.th: 'th',
-  StartClosedCaptionsRequestLanguage.tl: 'tl',
-  StartClosedCaptionsRequestLanguage.tr: 'tr',
-  StartClosedCaptionsRequestLanguage.uk: 'uk',
-  StartClosedCaptionsRequestLanguage.zh: 'zh',
-  StartClosedCaptionsRequestLanguage.unknown: '_unknown',
 };

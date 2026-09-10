@@ -14,7 +14,7 @@ BlockedUserEvent _$BlockedUserEventFromJson(Map<String, dynamic> json) =>
               json['blocked_by_user'] as Map<String, dynamic>,
             ),
       callCid: json['call_cid'] as String,
-      createdAt: const EpochDateTimeConverter().fromJson(
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
       type: json['type'] as String,
@@ -25,7 +25,7 @@ Map<String, dynamic> _$BlockedUserEventToJson(BlockedUserEvent instance) =>
     <String, dynamic>{
       'blocked_by_user': instance.blockedByUser?.toJson(),
       'call_cid': instance.callCid,
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'type': instance.type,
       'user': instance.user.toJson(),
     };

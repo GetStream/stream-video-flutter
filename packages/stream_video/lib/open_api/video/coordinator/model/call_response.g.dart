@@ -8,24 +8,22 @@ part of 'call_response.dart';
 
 CallResponse _$CallResponseFromJson(Map<String, dynamic> json) => CallResponse(
   backstage: json['backstage'] as bool,
-  blockedUserIds:
-      (json['blocked_user_ids'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      [],
+  blockedUserIds: (json['blocked_user_ids'] as List<dynamic>)
+      .map((e) => e as String)
+      .toList(),
   captioning: json['captioning'] as bool,
   channelCid: json['channel_cid'] as String?,
   cid: json['cid'] as String,
-  createdAt: const EpochDateTimeConverter().fromJson(
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
   createdBy: UserResponse.fromJson(json['created_by'] as Map<String, dynamic>),
   currentSessionId: json['current_session_id'] as String,
-  custom: json['custom'] as Map<String, dynamic>? ?? {},
+  custom: json['custom'] as Map<String, dynamic>,
   egress: EgressResponse.fromJson(json['egress'] as Map<String, dynamic>),
   endedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['ended_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   id: json['id'] as String,
   ingress: CallIngressResponse.fromJson(
@@ -42,7 +40,7 @@ CallResponse _$CallResponseFromJson(Map<String, dynamic> json) => CallResponse(
   ),
   startsAt: _$JsonConverterFromJson<Object, DateTime>(
     json['starts_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   team: json['team'] as String?,
   thumbnails: json['thumbnails'] == null
@@ -51,7 +49,7 @@ CallResponse _$CallResponseFromJson(Map<String, dynamic> json) => CallResponse(
   transcribing: json['transcribing'] as bool,
   translating: json['translating'] as bool,
   type: json['type'] as String,
-  updatedAt: const EpochDateTimeConverter().fromJson(
+  updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
 );
@@ -63,14 +61,14 @@ Map<String, dynamic> _$CallResponseToJson(CallResponse instance) =>
       'captioning': instance.captioning,
       'channel_cid': instance.channelCid,
       'cid': instance.cid,
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'created_by': instance.createdBy.toJson(),
       'current_session_id': instance.currentSessionId,
       'custom': instance.custom,
       'egress': instance.egress.toJson(),
       'ended_at': _$JsonConverterToJson<Object, DateTime>(
         instance.endedAt,
-        const EpochDateTimeConverter().toJson,
+        const StreamDateTimeConverter().toJson,
       ),
       'id': instance.id,
       'ingress': instance.ingress.toJson(),
@@ -81,14 +79,14 @@ Map<String, dynamic> _$CallResponseToJson(CallResponse instance) =>
       'settings': instance.settings.toJson(),
       'starts_at': _$JsonConverterToJson<Object, DateTime>(
         instance.startsAt,
-        const EpochDateTimeConverter().toJson,
+        const StreamDateTimeConverter().toJson,
       ),
       'team': instance.team,
       'thumbnails': instance.thumbnails?.toJson(),
       'transcribing': instance.transcribing,
       'translating': instance.translating,
       'type': instance.type,
-      'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
+      'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(

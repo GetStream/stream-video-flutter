@@ -7,23 +7,21 @@ part of 'role.dart';
 // **************************************************************************
 
 Role _$RoleFromJson(Map<String, dynamic> json) => Role(
-  createdAt: const EpochDateTimeConverter().fromJson(
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
   custom: json['custom'] as bool,
   name: json['name'] as String,
-  scopes:
-      (json['scopes'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-      [],
-  updatedAt: const EpochDateTimeConverter().fromJson(
+  scopes: (json['scopes'] as List<dynamic>).map((e) => e as String).toList(),
+  updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
 );
 
 Map<String, dynamic> _$RoleToJson(Role instance) => <String, dynamic>{
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'custom': instance.custom,
   'name': instance.name,
   'scopes': instance.scopes,
-  'updated_at': const EpochDateTimeConverter().toJson(instance.updatedAt),
+  'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
 };

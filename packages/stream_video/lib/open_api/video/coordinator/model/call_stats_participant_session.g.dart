@@ -18,7 +18,7 @@ CallStatsParticipantSession _$CallStatsParticipantSessionFromJson(
       ?.toDouble(),
   endedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['ended_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   freezesDurationMs: (json['freezes_duration_ms'] as num?)?.toInt(),
   ingress: json['ingress'] as String?,
@@ -37,7 +37,7 @@ CallStatsParticipantSession _$CallStatsParticipantSessionFromJson(
   sdkVersion: json['sdk_version'] as String?,
   startedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['started_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   unifiedSessionId: json['unified_session_id'] as String?,
   userSessionId: json['user_session_id'] as String,
@@ -55,7 +55,7 @@ Map<String, dynamic> _$CallStatsParticipantSessionToJson(
   'distance_to_sfu_kilometers': instance.distanceToSfuKilometers,
   'ended_at': _$JsonConverterToJson<Object, DateTime>(
     instance.endedAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'freezes_duration_ms': instance.freezesDurationMs,
   'ingress': instance.ingress,
@@ -70,7 +70,7 @@ Map<String, dynamic> _$CallStatsParticipantSessionToJson(
   'sdk_version': instance.sdkVersion,
   'started_at': _$JsonConverterToJson<Object, DateTime>(
     instance.startedAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'unified_session_id': instance.unifiedSessionId,
   'user_session_id': instance.userSessionId,

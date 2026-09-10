@@ -24,6 +24,7 @@ mixin _$SubmitActionRequest {
   DeleteMessageRequestPayload? get deleteMessage;
   DeleteReactionRequestPayload? get deleteReaction;
   DeleteUserRequestPayload? get deleteUser;
+  DeleteUserMessagesRequestPayload? get deleteUserMessages;
   EscalatePayload? get escalate;
   FlagRequest? get flag;
   String? get itemId;
@@ -67,6 +68,8 @@ mixin _$SubmitActionRequest {
                 other.deleteReaction == deleteReaction) &&
             (identical(other.deleteUser, deleteUser) ||
                 other.deleteUser == deleteUser) &&
+            (identical(other.deleteUserMessages, deleteUserMessages) ||
+                other.deleteUserMessages == deleteUserMessages) &&
             (identical(other.escalate, escalate) ||
                 other.escalate == escalate) &&
             (identical(other.flag, flag) || other.flag == flag) &&
@@ -96,6 +99,7 @@ mixin _$SubmitActionRequest {
     deleteMessage,
     deleteReaction,
     deleteUser,
+    deleteUserMessages,
     escalate,
     flag,
     itemId,
@@ -109,7 +113,7 @@ mixin _$SubmitActionRequest {
 
   @override
   String toString() {
-    return 'SubmitActionRequest(actionType: $actionType, appealId: $appealId, ban: $ban, block: $block, bypass: $bypass, custom: $custom, deleteActivity: $deleteActivity, deleteComment: $deleteComment, deleteMessage: $deleteMessage, deleteReaction: $deleteReaction, deleteUser: $deleteUser, escalate: $escalate, flag: $flag, itemId: $itemId, markReviewed: $markReviewed, rejectAppeal: $rejectAppeal, restore: $restore, shadowBlock: $shadowBlock, unban: $unban, unblock: $unblock)';
+    return 'SubmitActionRequest(actionType: $actionType, appealId: $appealId, ban: $ban, block: $block, bypass: $bypass, custom: $custom, deleteActivity: $deleteActivity, deleteComment: $deleteComment, deleteMessage: $deleteMessage, deleteReaction: $deleteReaction, deleteUser: $deleteUser, deleteUserMessages: $deleteUserMessages, escalate: $escalate, flag: $flag, itemId: $itemId, markReviewed: $markReviewed, rejectAppeal: $rejectAppeal, restore: $restore, shadowBlock: $shadowBlock, unban: $unban, unblock: $unblock)';
   }
 }
 
@@ -132,6 +136,7 @@ abstract mixin class $SubmitActionRequestCopyWith<$Res> {
     DeleteMessageRequestPayload? deleteMessage,
     DeleteReactionRequestPayload? deleteReaction,
     DeleteUserRequestPayload? deleteUser,
+    DeleteUserMessagesRequestPayload? deleteUserMessages,
     EscalatePayload? escalate,
     FlagRequest? flag,
     String? itemId,
@@ -168,6 +173,7 @@ class _$SubmitActionRequestCopyWithImpl<$Res>
     Object? deleteMessage = freezed,
     Object? deleteReaction = freezed,
     Object? deleteUser = freezed,
+    Object? deleteUserMessages = freezed,
     Object? escalate = freezed,
     Object? flag = freezed,
     Object? itemId = freezed,
@@ -224,6 +230,10 @@ class _$SubmitActionRequestCopyWithImpl<$Res>
             ? _self.deleteUser
             : deleteUser // ignore: cast_nullable_to_non_nullable
                   as DeleteUserRequestPayload?,
+        deleteUserMessages: freezed == deleteUserMessages
+            ? _self.deleteUserMessages
+            : deleteUserMessages // ignore: cast_nullable_to_non_nullable
+                  as DeleteUserMessagesRequestPayload?,
         escalate: freezed == escalate
             ? _self.escalate
             : escalate // ignore: cast_nullable_to_non_nullable

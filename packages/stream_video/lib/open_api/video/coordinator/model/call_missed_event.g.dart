@@ -10,14 +10,12 @@ CallMissedEvent _$CallMissedEventFromJson(Map<String, dynamic> json) =>
     CallMissedEvent(
       call: CallResponse.fromJson(json['call'] as Map<String, dynamic>),
       callCid: json['call_cid'] as String,
-      createdAt: const EpochDateTimeConverter().fromJson(
+      createdAt: const StreamDateTimeConverter().fromJson(
         json['created_at'] as Object,
       ),
-      members:
-          (json['members'] as List<dynamic>?)
-              ?.map((e) => MemberResponse.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          [],
+      members: (json['members'] as List<dynamic>)
+          .map((e) => MemberResponse.fromJson(e as Map<String, dynamic>))
+          .toList(),
       notifyUser: json['notify_user'] as bool,
       sessionId: json['session_id'] as String,
       type: json['type'] as String,
@@ -28,7 +26,7 @@ Map<String, dynamic> _$CallMissedEventToJson(CallMissedEvent instance) =>
     <String, dynamic>{
       'call': instance.call.toJson(),
       'call_cid': instance.callCid,
-      'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
       'members': instance.members.map((e) => e.toJson()).toList(),
       'notify_user': instance.notifyUser,
       'session_id': instance.sessionId,

@@ -1,0 +1,143 @@
+import 'dart:async';
+
+import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
+
+import '../../../stream_video_flutter.dart';
+import '../../utils/extensions.dart';
+
+// These are eyeballed device IDs for the speaker and earpiece.
+// based on Android and iOS enumerated devices.
+const deviceIdSpeaker = 'speaker';
+const deviceIdEarpiece = 'earpiece';
+
+/// A call control that turns the speakerphone on and off.
+///
+/// This widget is only available on Android and iOS.
+class StreamSpeakerphoneButton extends StatefulWidget {
+  /// Creates a new instance of [StreamSpeakerphoneButton].
+  const StreamSpeakerphoneButton({
+    super.key,
+    required this.call,
+    this.enabledSpeakerphoneIcon,
+    this.disabledSpeakerphoneIcon,
+  });
+
+  /// Represents a call.
+  final Call call;
+
+  /// The icon that is shown when the speakerphone is enabled.
+  ///
+  /// Defaults to `context.streamIcons.audio`.
+  final IconData? enabledSpeakerphoneIcon;
+
+  /// The icon that is shown when the speakerphone is disabled.
+  ///
+  /// Defaults to `context.streamIcons.mute`.
+  final IconData? disabledSpeakerphoneIcon;
+
+  @override
+  State<StreamSpeakerphoneButton> createState() =>
+      _StreamSpeakerphoneButtonState();
+}
+
+class _StreamSpeakerphoneButtonState extends State<StreamSpeakerphoneButton> {
+  late final _logger = taggedLogger(tag: 'SV:SpeakerphoneButton');
+
+  final _deviceNotifier = RtcMediaDeviceNotifier.instance;
+  StreamSubscription<List<RtcMediaDevice>>? _deviceChangeSubscription;
+
+  var _audioOutputs = <RtcMediaDevice>[];
+
+  Future<void> _setSpeakerphoneEnabled({bool enabled = false}) async {
+    final audioOutputs = _audioOutputs;
+    if (audioOutputs.isEmpty) return;
+
+    var device = audioOutputs.firstWhereOrNull(
+      (it) => it.id.equalsIgnoreCase(
+        enabled ? deviceIdSpeaker : deviceIdEarpiece,
+      ),
+    );
+
+    if (!enabled && device == null) {
+      // In IOS, we don't have earpiece as a listed device. So we will try to
+      // create a new device with the earpiece ID.
+      if (CurrentPlatform.isIos) {
+        device = const RtcMediaDevice(
+          id: deviceIdEarpiece,
+          kind: RtcMediaDeviceKind.audioOutput,
+          label: 'Earpiece',
+        );
+      }
+    }
+
+    // If we don't have a device, we can't set it as the audio output.
+    // Android names no audio outputs at all, so this is the ordinary path
+    // there rather than a fault: there is nothing to route to.
+    if (device == null) {
+      _logger.w(() => 'No audio output to route to; leaving it as it is');
+      return;
+    }
+
+    // Set the device as the current audio output.
+    await widget.call.setAudioOutputDevice(device);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _deviceChangeSubscription = _deviceNotifier.onDeviceChange.listen((
+      devices,
+    ) {
+      final audioOutputs = devices.where(
+        (it) => it.kind == RtcMediaDeviceKind.audioOutput,
+      );
+      _audioOutputs = audioOutputs.toList();
+    });
+  }
+
+  @override
+  void dispose() {
+    _deviceChangeSubscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final icons = context.streamIcons;
+
+    return PartialCallStateBuilder<bool>(
+      call: widget.call,
+      selector: (state) {
+        final audioOutputDevice = state.audioOutputDevice;
+        if (audioOutputDevice != null) {
+          return audioOutputDevice.id.equalsIgnoreCase(deviceIdSpeaker);
+        }
+        return false;
+      },
+      // Routing audio to the speaker is a mode this control cycles, not a
+      // feature that is off by default, so it stays a neutral control.
+      builder: (_, enabled) => CallControlButton(
+        icon: Icon(
+          enabled
+              ? widget.enabledSpeakerphoneIcon ?? icons.audio
+              : widget.disabledSpeakerphoneIcon ?? icons.mute,
+        ),
+        onPressed: () async {
+          try {
+            await _setSpeakerphoneEnabled(enabled: !enabled);
+          } catch (e, stk) {
+            _logger.e(() => 'Error routing the audio output: $e\n$stk');
+          }
+        },
+      ),
+    );
+  }
+}
+
+/// ToggleSpeakerphoneOption is [StreamSpeakerphoneButton] now.
+@Deprecated(
+  'ToggleSpeakerphoneOption is StreamSpeakerphoneButton now, matching the rest of the '
+  'call controls. Will be removed in the next major version.',
+)
+typedef ToggleSpeakerphoneOption = StreamSpeakerphoneButton;

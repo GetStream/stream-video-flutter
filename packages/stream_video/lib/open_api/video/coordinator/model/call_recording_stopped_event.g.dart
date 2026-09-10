@@ -10,14 +10,12 @@ CallRecordingStoppedEvent _$CallRecordingStoppedEventFromJson(
   Map<String, dynamic> json,
 ) => CallRecordingStoppedEvent(
   callCid: json['call_cid'] as String,
-  createdAt: const EpochDateTimeConverter().fromJson(
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
   egressId: json['egress_id'] as String,
-  recordingType: $enumDecode(
-    _$CallRecordingStoppedEventRecordingTypeEnumMap,
-    json['recording_type'],
-    unknownValue: CallRecordingStoppedEventRecordingType.unknown,
+  recordingType: CallRecordingStoppedEventRecordingType.fromJson(
+    json['recording_type'] as String,
   ),
   type: json['type'] as String,
 );
@@ -26,16 +24,8 @@ Map<String, dynamic> _$CallRecordingStoppedEventToJson(
   CallRecordingStoppedEvent instance,
 ) => <String, dynamic>{
   'call_cid': instance.callCid,
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'egress_id': instance.egressId,
-  'recording_type':
-      _$CallRecordingStoppedEventRecordingTypeEnumMap[instance.recordingType]!,
+  'recording_type': instance.recordingType.toJson(),
   'type': instance.type,
-};
-
-const _$CallRecordingStoppedEventRecordingTypeEnumMap = {
-  CallRecordingStoppedEventRecordingType.composite: 'composite',
-  CallRecordingStoppedEventRecordingType.individual: 'individual',
-  CallRecordingStoppedEventRecordingType.raw: 'raw',
-  CallRecordingStoppedEventRecordingType.unknown: '_unknown',
 };

@@ -8,12 +8,9 @@ part of 'update_users_request.dart';
 
 UpdateUsersRequest _$UpdateUsersRequestFromJson(Map<String, dynamic> json) =>
     UpdateUsersRequest(
-      users:
-          (json['users'] as Map<String, dynamic>?)?.map(
-            (k, e) =>
-                MapEntry(k, UserRequest.fromJson(e as Map<String, dynamic>)),
-          ) ??
-          {},
+      users: (json['users'] as Map<String, dynamic>).map(
+        (k, e) => MapEntry(k, UserRequest.fromJson(e as Map<String, dynamic>)),
+      ),
     );
 
 Map<String, dynamic> _$UpdateUsersRequestToJson(UpdateUsersRequest instance) =>

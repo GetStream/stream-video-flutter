@@ -11,13 +11,13 @@ QueryCallStatsMapResponse _$QueryCallStatsMapResponseFromJson(
 ) => QueryCallStatsMapResponse(
   callEndedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['call_ended_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   callId: json['call_id'] as String,
   callSessionId: json['call_session_id'] as String,
   callStartedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['call_started_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   callType: json['call_type'] as String,
   counts: CallStatsParticipantCounts.fromJson(
@@ -27,11 +27,11 @@ QueryCallStatsMapResponse _$QueryCallStatsMapResponseFromJson(
   duration: json['duration'] as String,
   endTime: _$JsonConverterFromJson<Object, DateTime>(
     json['end_time'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   generatedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['generated_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   publishers: json['publishers'] == null
       ? null
@@ -43,7 +43,7 @@ QueryCallStatsMapResponse _$QueryCallStatsMapResponseFromJson(
       : CallStatsMapSFUs.fromJson(json['sfus'] as Map<String, dynamic>),
   startTime: _$JsonConverterFromJson<Object, DateTime>(
     json['start_time'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   subscribers: json['subscribers'] == null
       ? null
@@ -57,13 +57,13 @@ Map<String, dynamic> _$QueryCallStatsMapResponseToJson(
 ) => <String, dynamic>{
   'call_ended_at': _$JsonConverterToJson<Object, DateTime>(
     instance.callEndedAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'call_id': instance.callId,
   'call_session_id': instance.callSessionId,
   'call_started_at': _$JsonConverterToJson<Object, DateTime>(
     instance.callStartedAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'call_type': instance.callType,
   'counts': instance.counts.toJson(),
@@ -71,17 +71,17 @@ Map<String, dynamic> _$QueryCallStatsMapResponseToJson(
   'duration': instance.duration,
   'end_time': _$JsonConverterToJson<Object, DateTime>(
     instance.endTime,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'generated_at': _$JsonConverterToJson<Object, DateTime>(
     instance.generatedAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'publishers': instance.publishers?.toJson(),
   'sfus': instance.sfus?.toJson(),
   'start_time': _$JsonConverterToJson<Object, DateTime>(
     instance.startTime,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'subscribers': instance.subscribers?.toJson(),
 };

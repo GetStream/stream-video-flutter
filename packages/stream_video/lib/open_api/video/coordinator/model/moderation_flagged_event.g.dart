@@ -10,14 +10,14 @@ ModerationFlaggedEvent _$ModerationFlaggedEventFromJson(
   Map<String, dynamic> json,
 ) => ModerationFlaggedEvent(
   contentType: json['content_type'] as String,
-  createdAt: const EpochDateTimeConverter().fromJson(
+  createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  custom: json['custom'] as Map<String, dynamic>? ?? {},
+  custom: json['custom'] as Map<String, dynamic>,
   objectId: json['object_id'] as String,
   receivedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['received_at'],
-    const EpochDateTimeConverter().fromJson,
+    const StreamDateTimeConverter().fromJson,
   ),
   type: json['type'] as String,
 );
@@ -26,12 +26,12 @@ Map<String, dynamic> _$ModerationFlaggedEventToJson(
   ModerationFlaggedEvent instance,
 ) => <String, dynamic>{
   'content_type': instance.contentType,
-  'created_at': const EpochDateTimeConverter().toJson(instance.createdAt),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'custom': instance.custom,
   'object_id': instance.objectId,
   'received_at': _$JsonConverterToJson<Object, DateTime>(
     instance.receivedAt,
-    const EpochDateTimeConverter().toJson,
+    const StreamDateTimeConverter().toJson,
   ),
   'type': instance.type,
 };

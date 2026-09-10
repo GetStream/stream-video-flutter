@@ -19,6 +19,8 @@ mixin _$TextContentParameters {
   String? get labelOperator;
   Map<String, String>? get llmHarmLabels;
   String? get severity;
+  int? get textLength;
+  String? get textLengthOperator;
 
   /// Create a copy of TextContentParameters
   /// with the given fields replaced by the non-null parameter values.
@@ -52,7 +54,11 @@ mixin _$TextContentParameters {
               llmHarmLabels,
             ) &&
             (identical(other.severity, severity) ||
-                other.severity == severity));
+                other.severity == severity) &&
+            (identical(other.textLength, textLength) ||
+                other.textLength == textLength) &&
+            (identical(other.textLengthOperator, textLengthOperator) ||
+                other.textLengthOperator == textLengthOperator));
   }
 
   @override
@@ -64,11 +70,13 @@ mixin _$TextContentParameters {
     labelOperator,
     const DeepCollectionEquality().hash(llmHarmLabels),
     severity,
+    textLength,
+    textLengthOperator,
   );
 
   @override
   String toString() {
-    return 'TextContentParameters(blocklistMatch: $blocklistMatch, containsUrl: $containsUrl, harmLabels: $harmLabels, labelOperator: $labelOperator, llmHarmLabels: $llmHarmLabels, severity: $severity)';
+    return 'TextContentParameters(blocklistMatch: $blocklistMatch, containsUrl: $containsUrl, harmLabels: $harmLabels, labelOperator: $labelOperator, llmHarmLabels: $llmHarmLabels, severity: $severity, textLength: $textLength, textLengthOperator: $textLengthOperator)';
   }
 }
 
@@ -86,6 +94,8 @@ abstract mixin class $TextContentParametersCopyWith<$Res> {
     String? labelOperator,
     Map<String, String>? llmHarmLabels,
     String? severity,
+    int? textLength,
+    String? textLengthOperator,
   });
 }
 
@@ -108,6 +118,8 @@ class _$TextContentParametersCopyWithImpl<$Res>
     Object? labelOperator = freezed,
     Object? llmHarmLabels = freezed,
     Object? severity = freezed,
+    Object? textLength = freezed,
+    Object? textLengthOperator = freezed,
   }) {
     return _then(
       TextContentParameters(
@@ -134,6 +146,14 @@ class _$TextContentParametersCopyWithImpl<$Res>
         severity: freezed == severity
             ? _self.severity
             : severity // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        textLength: freezed == textLength
+            ? _self.textLength
+            : textLength // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        textLengthOperator: freezed == textLengthOperator
+            ? _self.textLengthOperator
+            : textLengthOperator // ignore: cast_nullable_to_non_nullable
                   as String?,
       ),
     );
