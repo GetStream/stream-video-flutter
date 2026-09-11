@@ -3,9 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../screens/call_participants_list.dart';
 import '../screens/call_screen.dart';
-import '../screens/call_stats_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/join_call_screen.dart';
 import '../screens/livestream_demo_screen.dart';
@@ -122,34 +120,5 @@ class CallRoute extends GoRouteData with $CallRoute {
       videoEffectsManager: $extra.effectsManager,
       encryptionKey: $extra.encryptionKey,
     );
-  }
-}
-
-@immutable
-@TypedGoRoute<CallParticipantsRoute>(
-  path: '/call/participants',
-  name: 'participants',
-)
-class CallParticipantsRoute extends GoRouteData with $CallParticipantsRoute {
-  const CallParticipantsRoute({required this.$extra});
-
-  final Call $extra;
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return CallParticipantsList(call: $extra);
-  }
-}
-
-@immutable
-@TypedGoRoute<CallStatsRoute>(path: '/call/stats', name: 'stats')
-class CallStatsRoute extends GoRouteData with $CallStatsRoute {
-  const CallStatsRoute({required this.$extra});
-
-  final Call $extra;
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return CallStatsScreen(call: $extra);
   }
 }
