@@ -5,14 +5,12 @@ import '../../../stream_video_flutter.dart';
 
 part 'picture_in_picture_theme.g.theme.dart';
 
-/// Applies a picture-in-picture theme to the descendant
-/// picture-in-picture window.
+/// Applies a picture-in-picture theme to the descendant picture-in-picture
+/// window.
 ///
-/// The window is inserted into the nearest [Overlay], which in an app with a
-/// [Navigator] sits above the route showing the call. A theme wrapped around
-/// the call screen is therefore not an ancestor of it: set
-/// [StreamVideoTheme.pictureInPictureTheme], or wrap this above the
-/// [Navigator], to reach the window.
+/// The window is inserted into the nearest [Overlay], above the route showing
+/// the call. Set [StreamVideoTheme.pictureInPictureTheme], or wrap this above
+/// the [Navigator], to reach it.
 ///
 /// See also:
 ///
@@ -78,9 +76,8 @@ class StreamPictureInPictureThemeData with _$StreamPictureInPictureThemeData {
 
 /// Visual styling properties for the picture-in-picture window.
 ///
-/// Applies to the window Android draws while the app is in
-/// picture-in-picture mode. The iOS window is rendered natively and is
-/// configured through `IOSPictureInPictureConfiguration` instead.
+/// Applies to the window Android draws. The iOS window is rendered natively
+/// and is configured through `IOSPictureInPictureConfiguration`.
 @themeGen
 @immutable
 class StreamPictureInPictureStyle with _$StreamPictureInPictureStyle {
@@ -89,16 +86,12 @@ class StreamPictureInPictureStyle with _$StreamPictureInPictureStyle {
 
   /// Overrides applied to the participant tile the window renders.
   ///
-  /// Merged over the ambient [StreamParticipantTileTheme] style, so an app-wide
-  /// tile customization still reaches the window, and over the window's own
-  /// choices, so this is what puts any of them back. The window draws no name
-  /// pill, no connection quality indicator and no overflow button: it is a
-  /// glance at the call, and Android delivers taps to the window rather than
-  /// to what is drawn in it.
+  /// Merged over the ambient [StreamParticipantTileTheme] style and over the
+  /// window's own choices: it draws no name pill, connection quality indicator
+  /// or overflow button, and this is what puts them back.
   ///
-  /// Nothing here reaches a window built by
-  /// `AndroidPictureInPictureConfiguration.callPictureInPictureWidgetBuilder` —
-  /// that replaces what this styles.
+  /// Has no effect on a window built by
+  /// `AndroidPictureInPictureConfiguration.callPictureInPictureWidgetBuilder`.
   final StreamParticipantTileStyle? tileStyle;
 
   /// Linearly interpolate between two styles.

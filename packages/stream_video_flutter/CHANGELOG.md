@@ -2,7 +2,7 @@
 
 ### ✅ Added
 
-- Added `StreamPictureInPictureThemeData` on `StreamVideoTheme`, whose `StreamPictureInPictureStyle.tileStyle` restyles the participant tile the Android picture-in-picture window draws — including putting back the chrome it leaves out.
+- Added `StreamPictureInPictureThemeData` on `StreamVideoTheme`, whose `StreamPictureInPictureStyle.tileStyle` restyles the participant tile the Android picture-in-picture window draws.
 - `StreamLayoutButton` draws the participant layout in effect and offers the rest through a `StreamAdaptiveMenuAnchor`.
 - `StreamLayoutButton.defaultLayouts` is `auto` and `speakerBottom`, so the button toggles unless it is given more.
 - Added layout strings to the localizations, in English and Dutch: `layoutMenuTitle`, `layoutSelectTooltip`, `layoutDefault`, `layoutGrid`, `layoutSpeakerTop`, `layoutSpeakerBottom`, `layoutSpeakerLeft`, `layoutSpeakerRight` and `layoutSpeakerOneToOne`.

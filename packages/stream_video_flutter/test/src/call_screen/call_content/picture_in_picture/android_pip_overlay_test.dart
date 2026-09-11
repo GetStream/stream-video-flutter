@@ -47,9 +47,8 @@ void main() {
       });
     });
 
-    // An app that registers a `participantTile` builder adding an overflow menu
-    // to every tile — which the dogfooding app does — must not get one in the
-    // window either.
+    // The registered tile builder adds an overflow menu to every tile, the way
+    // the dogfooding app does.
     Future<void> pumpOverlay(
       WidgetTester tester, {
       StreamPictureInPictureThemeData? pictureInPictureTheme,
