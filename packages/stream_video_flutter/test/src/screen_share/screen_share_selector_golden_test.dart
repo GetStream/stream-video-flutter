@@ -47,6 +47,22 @@ void main() {
 
   for (final brightness in Brightness.values) {
     streamGoldenTest(
+      'the screen share modal, header and footer included',
+      fileName: 'screen_share_modal',
+      brightness: brightness,
+      // A dialog built inline rather than shown as a route, so the snapshot
+      // catches it: the CI capture drops overlay content.
+      constraints: const BoxConstraints.tightFor(width: 800, height: 720),
+      pumpBeforeTest: (tester) => _settle(tester, tap: 'Screen 1'),
+      builder: () => _DisposingSelector(
+        controller: ScreenShareSourceController(
+          capturer: FakeDesktopCapturer(sources: sources),
+        ),
+        asModal: true,
+      ),
+    );
+
+    streamGoldenTest(
       'StreamScreenShareSelector outlines the picked screen',
       fileName: 'screen_share_selector_screens',
       brightness: brightness,
@@ -78,10 +94,13 @@ Future<void> _settle(WidgetTester tester, {String? tap}) async {
 
 /// Sizes the selector to the body of a 720x640 modal — its 88px header and
 /// 88px footer taken off — and disposes the controller when the test is over.
+///
+/// With [asModal] it draws the whole modal around it instead.
 class _DisposingSelector extends StatefulWidget {
-  const _DisposingSelector({required this.controller});
+  const _DisposingSelector({required this.controller, this.asModal = false});
 
   final ScreenShareSourceController controller;
+  final bool asModal;
 
   @override
   State<_DisposingSelector> createState() => _DisposingSelectorState();
@@ -95,9 +114,55 @@ class _DisposingSelectorState extends State<_DisposingSelector> {
   }
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    width: 720,
-    height: 464,
-    child: StreamScreenShareSelector(controller: widget.controller),
-  );
+  Widget build(BuildContext context) {
+    final selector = StreamScreenShareSelector(controller: widget.controller);
+
+    if (!widget.asModal) {
+      return SizedBox(width: 720, height: 464, child: selector);
+    }
+
+    // On the scrim over a filled backdrop, the way it is seen in a call — a
+    // white modal on the wrapper's white page has no visible edge. The blur is
+    // a no-op under `flutter test`, so the scrim snapshots as a flat fill.
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ColoredBox(color: context.streamColorScheme.backgroundInverse),
+        const StreamBlurScrim(),
+        _modal(context),
+      ],
+    );
+  }
+
+  Widget _modal(BuildContext context) {
+    final selector = StreamScreenShareSelector(controller: widget.controller);
+
+    return ValueListenableBuilder(
+      valueListenable: widget.controller,
+      builder: (context, state, _) => StreamModalDialog(
+        title: const Text('Choose what to share'),
+        headerActions: [
+          StreamButton.icon(
+            icon: Icon(context.streamIcons.refresh),
+            style: StreamButtonStyle.secondary,
+            type: StreamButtonType.ghost,
+            onPressed: () {},
+          ),
+        ],
+        actions: [
+          StreamButton(
+            style: StreamButtonStyle.secondary,
+            type: StreamButtonType.ghost,
+            onPressed: () {},
+            child: const Text('Cancel'),
+          ),
+          StreamButton(
+            onPressed: state.selectedSource == null ? null : () {},
+            child: const Text('Share'),
+          ),
+        ],
+        child: selector,
+      ),
+    );
+  }
 }
