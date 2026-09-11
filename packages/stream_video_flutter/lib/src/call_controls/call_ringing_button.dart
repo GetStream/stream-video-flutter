@@ -28,6 +28,7 @@ class CallRingingButton extends StatelessWidget {
     required this.icon,
     required this.tone,
     this.label,
+    this.labelStyle,
     this.onPressed,
     this.tooltip,
   });
@@ -49,6 +50,13 @@ class CallRingingButton extends StatelessWidget {
 
   /// The text under the button, or null to leave it unlabelled.
   final String? label;
+
+  /// The style of [label].
+  ///
+  /// Defaults to `textTheme.captionEmphasis` in `colorScheme.textSecondary`,
+  /// which is text on a surface. A button placed on top of video or an image
+  /// needs a color that reads there instead.
+  final TextStyle? labelStyle;
 
   /// The callback to invoke when the user taps on the button.
   ///
@@ -82,9 +90,11 @@ class CallRingingButton extends StatelessWidget {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: context.streamTextTheme.captionEmphasis.copyWith(
-              color: context.streamColorScheme.textSecondary,
-            ),
+            style:
+                labelStyle ??
+                context.streamTextTheme.captionEmphasis.copyWith(
+                  color: context.streamColorScheme.textSecondary,
+                ),
           ),
         ],
       );

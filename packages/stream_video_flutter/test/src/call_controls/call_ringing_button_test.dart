@@ -1,7 +1,6 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_core_flutter/core.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../test_utils/goldens.dart';

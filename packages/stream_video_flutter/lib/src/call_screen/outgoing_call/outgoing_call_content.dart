@@ -1,20 +1,12 @@
-// ignore_for_file: deprecated_member_use_from_same_package
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../common/call_background.dart';
-import '../common/calling_participants.dart';
-import '../common/participant_avatars.dart';
+import '../../l10n/localization_extension.dart';
+import '../common/ringing_call_details.dart';
+import '../common/ringing_call_style_defaults.dart';
 import 'outgoing_call_controls.dart';
-
-typedef OutgoingCallBackground =
-    Widget Function(
-      Call call,
-      CallState callState,
-      List<UserInfo> participants,
-      Widget child,
-    );
 
 /// Represents the Outgoing Call state and UI, when the user is calling
 /// other people.
@@ -26,11 +18,8 @@ class StreamOutgoingCallContent extends StatefulWidget {
     this.onCancelCallTap,
     this.onMicrophoneTap,
     this.onCameraTap,
-    this.singleParticipantAvatarTheme,
-    this.multipleParticipantAvatarTheme,
-    this.singleParticipantTextStyle,
-    this.multipleParticipantTextStyle,
-    this.callingLabelTextStyle,
+    this.style,
+    this.controller,
     this.callBackgroundWidgetBuilder,
     this.participantsAvatarWidgetBuilder,
     this.participantsDisplayNameWidgetBuilder,
@@ -48,20 +37,18 @@ class StreamOutgoingCallContent extends StatefulWidget {
   /// The action to perform when the camera button is tapped.
   final VoidCallback? onCameraTap;
 
-  /// Theme for the avatar in a call with one participant.
-  final StreamUserAvatarThemeData? singleParticipantAvatarTheme;
+  /// Overrides for this screen alone.
+  ///
+  /// Resolved over [StreamOutgoingCallTheme], so setting one property here
+  /// leaves the rest coming from the theme.
+  final StreamRingingCallStyle? style;
 
-  /// Theme for the avatar in a call with multiple participants.
-  final StreamUserAvatarThemeData? multipleParticipantAvatarTheme;
-
-  /// Text style for the participant label in a call with one participant.
-  final TextStyle? singleParticipantTextStyle;
-
-  /// Text style for the participant label in a call with multiple participants.
-  final TextStyle? multipleParticipantTextStyle;
-
-  /// Text style for the calling label.
-  final TextStyle? callingLabelTextStyle;
+  /// The camera the screen previews and the call is placed with.
+  ///
+  /// When null the screen makes one for [call] and disposes of it itself.
+  /// Supply one to keep the preview running across a screen the host rebuilds,
+  /// or to drive the camera from outside this widget.
+  final StreamRingingCameraController? controller;
 
   /// Builder used to create a custom widget for participants avatars.
   final CallWidgetBuilderWithData<ParticipantsData>?
@@ -71,9 +58,12 @@ class StreamOutgoingCallContent extends StatefulWidget {
   final CallWidgetBuilderWithData<ParticipantsData>?
   participantsDisplayNameWidgetBuilder;
 
-  /// A widget that is placed behind the outgoing call UI instead of the Stream default
+  /// A widget that is placed behind the outgoing call UI instead of the Stream
+  /// default.
   ///
-  /// Preferably use a [Stack] widget to layer your UI like in the default [CallBackground].
+  /// The default draws the caller's own camera behind a blur and a scrim.
+  /// Preferably use a [Stack] widget to layer your UI like in the default
+  /// [RingingCallBackground].
   final CallWidgetChildBuilder? callBackgroundWidgetBuilder;
 
   @override
@@ -82,73 +72,95 @@ class StreamOutgoingCallContent extends StatefulWidget {
 }
 
 class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
-  CallConnectOptions get connectOptions => widget.call.connectOptions;
+  StreamRingingCameraController? _ownedController;
+
+  StreamRingingCameraController get _controller =>
+      widget.controller ?? _ownedController!;
+
+  @override
+  void initState() {
+    super.initState();
+    _createOwnedController();
+  }
+
+  @override
+  void didUpdateWidget(StreamOutgoingCallContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller ||
+        widget.call != oldWidget.call) {
+      _disposeOwnedController();
+      _createOwnedController();
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposeOwnedController();
+    super.dispose();
+  }
+
+  void _createOwnedController() {
+    if (widget.controller != null) return;
+    _ownedController = StreamRingingCameraController(call: widget.call)
+      ..addListener(_onControllerChanged);
+  }
+
+  void _disposeOwnedController() {
+    _ownedController
+      ?..removeListener(_onControllerChanged)
+      ..dispose();
+    _ownedController = null;
+  }
+
+  void _onControllerChanged() => setState(() {});
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamIncomingOutgoingCallTheme.outgoingCallThemeOf(context);
-
-    final singleParticipantAvatarTheme =
-        widget.singleParticipantAvatarTheme ??
-        theme.singleParticipantAvatarTheme;
-    final multipleParticipantAvatarTheme =
-        widget.multipleParticipantAvatarTheme ??
-        theme.multipleParticipantAvatarTheme;
-    final singleParticipantTextStyle =
-        widget.singleParticipantTextStyle ?? theme.singleParticipantTextStyle;
-    final multipleParticipantTextStyle =
-        widget.multipleParticipantTextStyle ??
-        theme.multipleParticipantTextStyle;
-    final callingLabelTextStyle =
-        widget.callingLabelTextStyle ?? theme.callingLabelTextStyle;
+    final style = _StreamOutgoingCallStyleDefaults(
+      context,
+      StreamOutgoingCallTheme.of(context).style?.merge(widget.style) ??
+          widget.style,
+    );
 
     Widget buildContent(List<UserInfo> participants) {
       final child = Material(
         color: Colors.transparent,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Spacer(),
-            widget.participantsAvatarWidgetBuilder?.call(
-                  context,
-                  widget.call,
-                  ParticipantsData(participants: participants),
-                ) ??
-                ParticipantAvatars(
+        child: SafeArea(
+          child: Stack(
+            children: [
+              Center(
+                child: RingingCallDetails(
                   participants: participants,
-                  singleParticipantAvatarTheme: singleParticipantAvatarTheme,
-                  multipleParticipantAvatarTheme:
-                      multipleParticipantAvatarTheme,
-                ),
-            widget.participantsDisplayNameWidgetBuilder?.call(
-                  context,
-                  widget.call,
-                  ParticipantsData(participants: participants),
-                ) ??
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 64,
-                    vertical: 32,
+                  status: context.translations.ringingCalling,
+                  style: style,
+                  avatar: widget.participantsAvatarWidgetBuilder?.call(
+                    context,
+                    widget.call,
+                    ParticipantsData(participants: participants),
                   ),
-                  child: CallingParticipants(
-                    participants: participants,
-                    singleParticipantTextStyle: singleParticipantTextStyle,
-                    multipleParticipantTextStyle: multipleParticipantTextStyle,
+                  nameLine: widget.participantsDisplayNameWidgetBuilder?.call(
+                    context,
+                    widget.call,
+                    ParticipantsData(participants: participants),
                   ),
                 ),
-            Text(
-              'Calling…',
-              style: callingLabelTextStyle,
-            ),
-            const Spacer(),
-            OutgoingCallControls(
-              isMicrophoneEnabled: connectOptions.microphone.isEnabled,
-              isCameraEnabled: connectOptions.camera.isEnabled,
-              onCancelCallTap: () => _onCancelCallTap(context),
-              onMicrophoneTap: () => _onMicrophoneTap(context),
-              onCameraTap: () => _onCameraTap(context),
-            ),
-          ],
+              ),
+              Align(
+                alignment: AlignmentDirectional.bottomCenter,
+                child: Padding(
+                  padding: style.controlsPadding,
+                  child: OutgoingCallControls(
+                    style: style,
+                    isMicrophoneEnabled: _controller.microphoneEnabled,
+                    isCameraEnabled: _controller.cameraEnabled,
+                    onCancelCallTap: () => _onCancelCallTap(context),
+                    onMicrophoneTap: _onMicrophoneTap,
+                    onCameraTap: _onCameraTap,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       );
 
@@ -157,8 +169,9 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
             widget.call,
             child,
           ) ??
-          CallBackground(
-            participants: participants,
+          RingingCallBackground(
+            style: style,
+            cameraTrack: _controller.cameraTrack,
             child: child,
           );
     }
@@ -179,25 +192,41 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
     }
   }
 
-  Future<void> _onMicrophoneTap(BuildContext context) async {
+  void _onMicrophoneTap() {
     if (widget.onMicrophoneTap != null) {
       widget.onMicrophoneTap!();
     } else {
-      widget.call.connectOptions = connectOptions.copyWith(
-        microphone: connectOptions.microphone.toggle(),
-      );
-      return setState(() => {});
+      _controller.toggleMicrophone();
     }
   }
 
-  Future<void> _onCameraTap(BuildContext context) async {
+  void _onCameraTap() {
     if (widget.onCameraTap != null) {
       widget.onCameraTap!();
     } else {
-      widget.call.connectOptions = connectOptions.copyWith(
-        camera: connectOptions.camera.toggle(),
-      );
-      return setState(() => {});
+      unawaited(_controller.toggleCamera());
     }
   }
+}
+
+// Default style values for [StreamOutgoingCallContent].
+//
+// The screen is drawn on top of the caller's own camera, so its text is the
+// text used on an image rather than on a surface.
+class _StreamOutgoingCallStyleDefaults extends RingingCallStyleDefaults {
+  _StreamOutgoingCallStyleDefaults(super.context, super.style);
+
+  @override
+  Color get backgroundColor =>
+      style?.backgroundColor ?? colorScheme.backgroundApp;
+
+  @override
+  TextStyle get titleTextStyle =>
+      style?.titleTextStyle ??
+      textTheme.headingLg.copyWith(color: colorScheme.textOnAccent);
+
+  @override
+  TextStyle get statusTextStyle =>
+      style?.statusTextStyle ??
+      textTheme.bodyDefault.copyWith(color: colorScheme.textOnAccent);
 }
