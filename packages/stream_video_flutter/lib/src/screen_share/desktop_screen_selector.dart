@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../stream_video_flutter.dart';
 import '../l10n/localization_extension.dart';
 import 'screen_share_selector_defaults.dart';
