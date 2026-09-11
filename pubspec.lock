@@ -1967,8 +1967,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/stream_core_flutter"
-      ref: "3ab8dbeadc0bfe28c08a732858ec970c02e67c42"
-      resolved-ref: "3ab8dbeadc0bfe28c08a732858ec970c02e67c42"
+      ref: "944ae2833aafbccc53afd561d65d649980526667"
+      resolved-ref: "944ae2833aafbccc53afd561d65d649980526667"
       url: "https://github.com/GetStream/stream-core-flutter.git"
     source: git
     version: "0.5.1"
