@@ -37,6 +37,7 @@ export 'src/call_participants/call_participants_sorting_mixin.dart';
 export 'src/call_participants/floating_participant_tile.dart';
 export 'src/call_participants/indicators/audio_indicator.dart';
 export 'src/call_participants/indicators/connection_quality_indicator.dart';
+export 'src/call_participants/layout/call_participants_spotlight_view.dart';
 export 'src/call_participants/layout/participant_layout_mode.dart';
 export 'src/call_participants/livestream_hosts.dart';
 export 'src/call_participants/local_video.dart';

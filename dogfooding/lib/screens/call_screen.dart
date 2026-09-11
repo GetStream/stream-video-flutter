@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 
 // � Package imports:
+import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 // �🐦 Flutter imports:
 import 'package:flutter/material.dart';
@@ -73,7 +74,7 @@ class _CallScreenState extends State<CallScreen> {
 
   Channel? _channel;
   StreamSubscription<Event>? _chatConnectionRecoverySubscription;
-  ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.grid;
+  ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.auto;
   bool _moreMenuVisible = false;
 
   @override
@@ -221,14 +222,31 @@ class _CallScreenState extends State<CallScreen> {
   // than held as fields: they close over the call the content builder hands
   // in, and a bar rebuilds whenever the window crosses a breakpoint anyway.
 
-  StreamLayoutButton _layoutToggle() => StreamLayoutButton(
-    layout: _currentLayoutMode,
-    onLayoutModeChanged: (layout) {
-      setState(() {
-        _currentLayoutMode = layout;
-      });
-    },
-  );
+  // The menu opens away from wherever the button sits: upwards out of the
+  // control bar along the bottom, downwards out of the app bar.
+  StreamLayoutButton _layoutToggle({
+    StreamMenuDirection menuDirection = StreamMenuDirection.up,
+  }) {
+    final blocked = context.streamScreenSize.isSmall
+        ? const [
+            ParticipantLayoutMode.speakerLeft,
+            ParticipantLayoutMode.speakerRight,
+          ]
+        : const <ParticipantLayoutMode>[];
+
+    return StreamLayoutButton(
+      layout: _currentLayoutMode,
+      layouts: ParticipantLayoutModeX.selectable
+          .whereNot(blocked.contains)
+          .toList(),
+      menuDirection: menuDirection,
+      onLayoutModeChanged: (layout) {
+        setState(() {
+          _currentLayoutMode = layout;
+        });
+      },
+    );
+  }
 
   StreamScreenShareButton _screenShareOption(Call call) =>
       StreamScreenShareButton(
@@ -488,7 +506,10 @@ class _CallScreenState extends State<CallScreen> {
                   showLeaveCallAction: isCompact,
                   leading: Row(
                     children: [
-                      if (isCompact) _layoutToggle(),
+                      if (isCompact)
+                        _layoutToggle(
+                          menuDirection: StreamMenuDirection.down,
+                        ),
                       PartialCallStateBuilder(
                         call: call,
                         selector: (state) => state.localParticipant != null,

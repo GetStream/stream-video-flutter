@@ -25,6 +25,33 @@ class StreamVideoFlutterLocalizationsNl
   String get desktopScreenShareWindow => 'Venster';
 
   @override
+  String get layoutMenuTitle => 'Indeling';
+
+  @override
+  String get layoutSelectTooltip => 'Indeling wijzigen';
+
+  @override
+  String get layoutDefault => 'Standaard';
+
+  @override
+  String get layoutGrid => 'Raster';
+
+  @override
+  String get layoutSpeakerTop => 'Spreker (boven)';
+
+  @override
+  String get layoutSpeakerBottom => 'Spreker (onder)';
+
+  @override
+  String get layoutSpeakerLeft => 'Spreker (links)';
+
+  @override
+  String get layoutSpeakerRight => 'Spreker (rechts)';
+
+  @override
+  String get layoutSpeakerOneToOne => 'Spreker 1:1';
+
+  @override
   String get livestreamBackstageStartingSoon => 'Livestream begint binnenkort';
 
   @override

@@ -131,6 +131,60 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'Window'**
   String get desktopScreenShareWindow;
 
+  /// Title of the sheet that picks how participants are laid out
+  ///
+  /// In en, this message translates to:
+  /// **'Layout'**
+  String get layoutMenuTitle;
+
+  /// Tooltip of the call control that picks a participant layout
+  ///
+  /// In en, this message translates to:
+  /// **'Change layout'**
+  String get layoutSelectTooltip;
+
+  /// The participant layout that follows the call instead of being fixed
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get layoutDefault;
+
+  /// The participant layout giving everybody an equal tile
+  ///
+  /// In en, this message translates to:
+  /// **'Grid'**
+  String get layoutGrid;
+
+  /// The participant layout with the speaker above the other participants
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker (Top)'**
+  String get layoutSpeakerTop;
+
+  /// The participant layout with the speaker below the other participants
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker (Bottom)'**
+  String get layoutSpeakerBottom;
+
+  /// The participant layout with the speaker left of the other participants
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker (Left)'**
+  String get layoutSpeakerLeft;
+
+  /// The participant layout with the speaker right of the other participants
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker (Right)'**
+  String get layoutSpeakerRight;
+
+  /// The participant layout showing only the speaker and the local participant
+  ///
+  /// In en, this message translates to:
+  /// **'Speaker 1:1'**
+  String get layoutSpeakerOneToOne;
+
   /// Label for livestream backstage when live stream will soon start
   ///
   /// In en, this message translates to:

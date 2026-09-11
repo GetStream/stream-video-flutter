@@ -49,12 +49,12 @@ class StreamCallParticipants extends StatefulWidget {
     this.participants,
     this.filter = _defaultFilter,
     CallParticipantSort<CallParticipantState>? sort,
-    this.enableLocalVideo,
+    this.enableFloatingSelfView,
     this.callParticipantBuilder = _defaultParticipantBuilder,
-    this.localVideoParticipantBuilder,
+    this.floatingSelfViewBuilder,
     this.screenShareContentBuilder,
     this.screenShareParticipantBuilder = _defaultParticipantBuilder,
-    this.layoutMode = ParticipantLayoutMode.grid,
+    this.layoutMode = ParticipantLayoutMode.auto,
   }) : sort = sort ?? layoutMode.sorting;
 
   /// Represents a call.
@@ -70,14 +70,24 @@ class StreamCallParticipants extends StatefulWidget {
   /// Used for sorting the call participants.
   final CallParticipantSort<CallParticipantState> sort;
 
-  /// Enable local video view for the local participant.
-  final bool? enableLocalVideo;
+  /// Whether the local participant's self-view floats over the layout.
+  ///
+  /// Only [ParticipantLayoutMode.auto] and
+  /// [ParticipantLayoutMode.speakerOneToOne] read it, the layouts that leave
+  /// the local participant out of the arrangement. The grid and the four bar
+  /// layouts give them a tile, so a self-view would show them twice.
+  ///
+  /// Defaults to true under `speakerOneToOne`, which `auto` resolves to in a
+  /// one-on-one call. Under `auto` in a group call it defaults to true on
+  /// mobile while at most two other people are in the call, and to false
+  /// otherwise.
+  final bool? enableFloatingSelfView;
 
   /// Builder function used to build a participant grid item.
   final CallParticipantBuilder callParticipantBuilder;
 
-  /// Builder function used to build a local video participant widget.
-  final CallParticipantBuilder? localVideoParticipantBuilder;
+  /// Builder function used to build the floating self-view.
+  final CallParticipantBuilder? floatingSelfViewBuilder;
 
   /// Builder function used to build a screen sharing item.
   final ScreenShareContentBuilder? screenShareContentBuilder;
@@ -144,13 +154,22 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
   void didUpdateWidget(covariant StreamCallParticipants oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    // Picking a speaker layout swaps the preset the list is ordered by, so it
+    // has to be ordered again. Compared through layoutMode rather than
+    // through sort: the presets are two cached instances, where a sort the
+    // caller passed is a function, and an inline closure is a new object on
+    // every build.
+    final sortChanged =
+        widget.layoutMode.sorting != oldWidget.layoutMode.sorting;
+
     if (widget.participants != null) {
       _participantsSubscription?.cancel();
 
-      if (!const ListEquality<CallParticipantState>().equals(
-        widget.participants!.toList(),
-        oldWidget.participants?.toList(),
-      )) {
+      if (sortChanged ||
+          !const ListEquality<CallParticipantState>().equals(
+            widget.participants!.toList(),
+            oldWidget.participants?.toList(),
+          )) {
         recalculateParticipants(widget.participants!);
       }
     } else if (widget.call != oldWidget.call) {
@@ -159,6 +178,8 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
           .partialState((state) => state.callParticipants)
           .listen(recalculateParticipants);
 
+      recalculateParticipants(widget.call.state.value.callParticipants);
+    } else if (sortChanged) {
       recalculateParticipants(widget.call.state.value.callParticipants);
     }
   }
@@ -179,9 +200,9 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
       call: widget.call,
       participants: sortedParticipants,
       layoutMode: widget.layoutMode,
-      enableLocalVideo: widget.enableLocalVideo,
+      enableFloatingSelfView: widget.enableFloatingSelfView,
       callParticipantBuilder: widget.callParticipantBuilder,
-      localVideoParticipantBuilder: widget.localVideoParticipantBuilder,
+      floatingSelfViewBuilder: widget.floatingSelfViewBuilder,
     );
   }
 }
