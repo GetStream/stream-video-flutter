@@ -2,6 +2,24 @@
 
 ### ✅ Added
 
+- Added `StreamVideoPushHandler.handleBackgroundMessage`, which simplifies the ringing setup by running a Stream ringing push through its whole background lifecycle from your Firebase background handler: it builds the client through the factory you give it, observes the ringing events a background isolate can act on, and disposes the client — along with whatever that factory set up — once the user has answered, declined, or let the call time out. It replaces the setup and teardown each integration had to write by hand. Pass `existingClient` if your app does not keep its client in the `StreamVideo` singleton.
+
+```dart
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  await StreamVideoPushHandler.handleBackgroundMessage(
+    message,
+    createStreamVideo: () async {
+      // Read credentials, fetch a token, build the client. Return null when
+      // nobody is logged in.
+    },
+    onDispose: () => MyDependencies.reset(),
+  );
+}
+```
+
 - [Android] Added a Telecom integration for the ringing flow, which registers incoming and outgoing ringing calls with the platform's [Telecom stack](https://developer.android.com/develop/connectivity/telecom) through Jetpack Telecom. This gives the call proper audio focus and a place in the system call state, and lets it be answered or hung up from a paired watch, a car head unit or a Bluetooth headset. The incoming call notification and full-screen ringing UI are unchanged. It is **on by default from Android 17**: for an app targeting API 37 the platform will not play a ringtone from a service started by a push unless the call is in the Telecom stack, so ringing does not work correctly without it. The default follows the Android version of the device rather than your `targetSdk`, so it is on for any app running on Android 17 — if you target below API 37 the restriction does not apply to you and you can opt out with `AndroidPushConfiguration(telecom: TelecomPushConfiguration(enabled: false))`. It is **off by default below Android 17**, where ringing works either way, so an existing integration is unaffected unless you pass `enabled: true`.
 - [iOS] Added `reportCallEnded`, which reports how a call ended to CallKit so it is listed correctly in the system Recents.
 

@@ -10,6 +10,7 @@
 /// ringing experience.
 library stream_video_push_notification;
 
+export 'src/background_push_handler.dart';
 export 'src/stream_video_push_configuration.dart';
 export 'src/stream_video_push_notification.dart'
     hide RingingEventBroadcaster, StreamTokenProvider, resolveCallsToEnd;
