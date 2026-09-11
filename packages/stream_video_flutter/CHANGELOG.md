@@ -154,6 +154,8 @@
 
 ### 🐞 Fixed
 
+- Fixed the participant grid rearranging itself when a participant nobody can see starts speaking. They take the place of the tile with the least claim to one — the last one on screen — instead of the first, which used to move every tile below it down one.
+- Fixed a participant tile on screen being recorded as not visible, which kept it out of the running for a speaker's tile and could get its track unsubscribed. A renderer showing a participant now says so again when the call state disagrees, and the floating self-view no longer shares its visibility bookkeeping with the same participant's tile in the grid.
 - The floating self-view draws no name pill, whatever an app-wide participant tile theme asks for. `StreamFloatingParticipantTileStyle.tileStyle` still can.
 - A participant tile keeps the name in its label at every size it draws the label at, truncating with an ellipsis.
 - The participant label stops growing at 268px, set by `StreamParticipantLabelStyle.maxWidth`.

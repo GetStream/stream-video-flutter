@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_redundant_argument_values
 
+import 'package:collection/collection.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/models/call_metadata.dart';
 import 'package:stream_video/src/models/call_participant_pin.dart';
@@ -166,8 +167,8 @@ void main() {
       expect(list.map((p) => p.name), ['Alice', 'Bob']);
     });
 
-    test('ifInvisibleBy applies only when any is not visible', () {
-      final comparator = ifInvisibleBy(dominantSpeaker);
+    test('ifInvisibleBy scores only the participants that are not visible', () {
+      final comparator = ifInvisibleBy(dominantSpeakerPriority);
 
       final visibleDominant = CallParticipantState(
         name: 'A',
@@ -193,6 +194,18 @@ void main() {
 
       // When both visible, comparator must not change order (returns 0)
       expect(comparator(visibleDominant, visibleNotDominant), 0);
+
+      // Nor when only the dominant speaker is visible: a tile on screen is
+      // never moved for speaking, whoever it is compared against.
+      expect(
+        comparator(
+          visibleDominant,
+          visibleNotDominant.copyWith(
+            viewportVisibility: ViewportVisibility.unknown,
+          ),
+        ),
+        0,
+      );
 
       final invisibleDominant = visibleDominant.copyWith(
         viewportVisibility: ViewportVisibility.unknown,
@@ -529,6 +542,9 @@ void main() {
     test(
       'livestreamOrAudioRoom: rtmp prioritized; then roles (admin/host/speaker)',
       () {
+        // All three are off screen, so the role is the only thing separating
+        // the two WebRTC participants. A viewer whose tile the user is
+        // watching would sort ahead of them both, publishing nothing.
         final viewer = CallParticipantState(
           name: 'Viewer',
           userId: '1',
@@ -537,7 +553,7 @@ void main() {
           roles: const ['viewer'],
           trackIdPrefix: 'prefix',
           participantSource: SfuParticipantSource.webrtc,
-          viewportVisibility: ViewportVisibility.visible,
+          viewportVisibility: ViewportVisibility.hidden,
         );
 
         final admin = CallParticipantState(
@@ -602,5 +618,177 @@ void main() {
         expect(list.first, invisibleRaised);
       },
     );
+  });
+
+  // The order the presets promise: a tile the user is watching stays where it
+  // is, and only participants who are off screen are moved around it.
+  //
+  // `ifInvisibleBy` used to gate on the pair — "apply unless both are
+  // visible" — which made the comparator intransitive. One participant whose
+  // tile was not visible was then enough for a stable sort to shuffle the
+  // visible ones around it, landing the dominant speaker on the first tile.
+  group('order stability', () {
+    CallParticipantState participant(
+      String id, {
+      bool dominantSpeaker = false,
+      bool speaking = false,
+      bool video = false,
+      bool audio = false,
+      ViewportVisibility visibility = ViewportVisibility.visible,
+    }) {
+      return CallParticipantState(
+        name: id,
+        userId: id,
+        sessionId: id,
+        custom: const {},
+        roles: const [],
+        trackIdPrefix: 'prefix',
+        publishedTracks: {
+          if (video) SfuTrackType.video: TrackState.remote(),
+          if (audio) SfuTrackType.audio: TrackState.remote(),
+        },
+        isDominantSpeaker: dominantSpeaker,
+        isSpeaking: speaking,
+        viewportVisibility: visibility,
+      );
+    }
+
+    List<String> sorted(List<CallParticipantState> participants) {
+      final result = [...participants];
+      mergeSort(result, compare: CallParticipantSortingPresets.regular);
+      return result.map((it) => it.userId).toList();
+    }
+
+    test('a visible speaker stays put, wherever the off-screen tile is', () {
+      // Every call size, every position for the one participant whose tile is
+      // not visible, every position for the speaker. Everybody publishes both
+      // tracks, so nothing but the speaking has anything to say about the
+      // order, and the order has to come back untouched.
+      for (var count = 2; count <= 9; count++) {
+        final ids = [for (var i = 0; i < count; i++) 'p$i'];
+
+        for (var invisible = 0; invisible < count; invisible++) {
+          for (var speaker = 0; speaker < count; speaker++) {
+            if (speaker == invisible) continue;
+
+            final participants = [
+              for (var i = 0; i < count; i++)
+                participant(
+                  ids[i],
+                  dominantSpeaker: i == speaker,
+                  speaking: i == speaker,
+                  video: true,
+                  audio: true,
+                  visibility: i == invisible
+                      ? ViewportVisibility.unknown
+                      : ViewportVisibility.visible,
+                ),
+            ];
+
+            expect(
+              sorted(participants),
+              ids,
+              reason:
+                  'count: $count, invisible: ${ids[invisible]}, '
+                  'speaker: ${ids[speaker]}',
+            );
+          }
+        }
+      }
+    });
+
+    test('sinking an off-screen tile leaves the visible ones in place', () {
+      // The off-screen participant is the only one who may move: whether the
+      // visible ones publish anything, and which of them is speaking, cannot
+      // reorder them.
+      final participants = [
+        participant('a', video: true),
+        participant('b'),
+        participant('c', dominantSpeaker: true, speaking: true),
+        participant('d', video: true),
+        participant('e', visibility: ViewportVisibility.hidden),
+      ];
+
+      final order = sorted(participants);
+      expect(order.where((it) => it != 'e'), ['a', 'b', 'c', 'd']);
+      expect(order.last, 'e');
+    });
+
+    test('an off-screen speaker is brought to the front', () {
+      final participants = [
+        participant('a'),
+        participant('b'),
+        participant(
+          'c',
+          dominantSpeaker: true,
+          speaking: true,
+          visibility: ViewportVisibility.hidden,
+        ),
+        participant('d'),
+      ];
+
+      expect(sorted(participants), ['c', 'a', 'b', 'd']);
+    });
+
+    test('an off-screen participant with nothing to show sinks behind', () {
+      final participants = [
+        participant('a', visibility: ViewportVisibility.hidden),
+        participant('b', video: true),
+        participant('c'),
+      ];
+
+      expect(sorted(participants), ['b', 'c', 'a']);
+    });
+
+    // Promotion has to be strict, or a participant pulled onto the first page
+    // pushes one off it, which promotes that one in turn: the grid carousels.
+    test('publishing does not pull an off-screen tile past a visible '
+        'one that publishes too', () {
+      final participants = [
+        participant('a', video: true, audio: true),
+        participant('b', video: true, audio: true),
+        participant(
+          'c',
+          video: true,
+          audio: true,
+          visibility: ViewportVisibility.hidden,
+        ),
+      ];
+
+      expect(sorted(participants), ['a', 'b', 'c']);
+    });
+
+    test('a paginated grid settles', () {
+      const pageSize = 4;
+      var order = [
+        for (var i = 0; i < 9; i++)
+          participant('p$i', video: i.isEven, audio: true),
+      ];
+
+      // Each pass sorts, then marks the first page visible and the rest not,
+      // the way the viewport reports it back. Somebody has to stop moving.
+      List<String> pass() {
+        order = [
+          for (var i = 0; i < order.length; i++)
+            order[i].copyWith(
+              viewportVisibility: i < pageSize
+                  ? ViewportVisibility.visible
+                  : ViewportVisibility.hidden,
+            ),
+        ];
+
+        final sortedOrder = [...order];
+        mergeSort(
+          sortedOrder,
+          compare: CallParticipantSortingPresets.regular,
+        );
+        order = sortedOrder;
+
+        return order.map((it) => it.userId).toList();
+      }
+
+      pass();
+      expect(pass(), pass());
+    });
   });
 }
