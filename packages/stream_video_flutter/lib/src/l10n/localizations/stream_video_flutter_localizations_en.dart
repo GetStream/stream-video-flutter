@@ -25,6 +25,12 @@ class StreamVideoFlutterLocalizationsEn
   String get desktopScreenShareWindow => 'Window';
 
   @override
+  String get desktopScreenShareRefresh => 'Refresh';
+
+  @override
+  String get desktopScreenShareNoSources => 'Nothing to share here.';
+
+  @override
   String get layoutMenuTitle => 'Layout';
 
   @override

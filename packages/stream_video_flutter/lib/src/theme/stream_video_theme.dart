@@ -43,6 +43,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamPictureInPictureThemeData? pictureInPictureTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
+    StreamScreenShareSelectorThemeData? screenShareSelectorTheme,
     StreamLivestreamThemeData? livestreamTheme,
   }) {
     final isDark = brightness == Brightness.dark;
@@ -89,6 +90,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callParticipantsGridTheme:
           callParticipantsGridTheme ??
           legacy?.toCallParticipantsGridThemeData(),
+      screenShareSelectorTheme: screenShareSelectorTheme,
       livestreamTheme: livestreamTheme,
     );
 
@@ -134,6 +136,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         const StreamConnectionQualityIndicatorThemeData(),
     this.callParticipantsGridTheme =
         const StreamCallParticipantsGridThemeData(),
+    this.screenShareSelectorTheme = const StreamScreenShareSelectorThemeData(),
     required this.livestreamTheme,
   });
 
@@ -420,6 +423,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the participants grid layout.
   final StreamCallParticipantsGridThemeData callParticipantsGridTheme;
 
+  /// Theme for the desktop screen share selector.
+  final StreamScreenShareSelectorThemeData screenShareSelectorTheme;
+
   /// Theme for the outgoing call widget.
   final StreamLivestreamThemeData livestreamTheme;
 
@@ -461,6 +467,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamPictureInPictureThemeData? pictureInPictureTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
+    StreamScreenShareSelectorThemeData? screenShareSelectorTheme,
     StreamLivestreamThemeData? livestreamTheme,
   }) => StreamVideoTheme.raw(
     textTheme: this.textTheme.merge(textTheme),
@@ -491,6 +498,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     ),
     callParticipantsGridTheme: this.callParticipantsGridTheme.merge(
       callParticipantsGridTheme,
+    ),
+    screenShareSelectorTheme: this.screenShareSelectorTheme.merge(
+      screenShareSelectorTheme,
     ),
     livestreamTheme: this.livestreamTheme.merge(livestreamTheme),
   );
@@ -529,6 +539,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       ),
       callParticipantsGridTheme: callParticipantsGridTheme.merge(
         other.callParticipantsGridTheme,
+      ),
+      screenShareSelectorTheme: screenShareSelectorTheme.merge(
+        other.screenShareSelectorTheme,
       ),
       livestreamTheme: livestreamTheme.merge(other.livestreamTheme),
     );
@@ -611,6 +624,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           callParticipantsGridTheme,
+      screenShareSelectorTheme:
+          StreamScreenShareSelectorThemeData.lerp(
+            screenShareSelectorTheme,
+            other.screenShareSelectorTheme,
+            t,
+          ) ??
+          screenShareSelectorTheme,
       livestreamTheme: livestreamTheme.lerp(other.livestreamTheme, t),
     );
   }

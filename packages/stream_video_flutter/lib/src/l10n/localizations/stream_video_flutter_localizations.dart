@@ -131,6 +131,18 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'Window'**
   String get desktopScreenShareWindow;
 
+  /// Tooltip of the action that re-reads the screens and windows on offer
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get desktopScreenShareRefresh;
+
+  /// Shown in place of the grid when the platform offers no screen or window of the selected type
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to share here.'**
+  String get desktopScreenShareNoSources;
+
   /// Title of the sheet that picks how participants are laid out
   ///
   /// In en, this message translates to:
