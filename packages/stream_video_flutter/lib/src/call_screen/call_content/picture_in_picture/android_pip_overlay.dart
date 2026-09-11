@@ -110,6 +110,16 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
           rendererScopePrefix: 'pipVideo',
           call: widget.call,
           participant: pipParticipant,
+          // The PiP window is a glance at the call, and nothing drawn in it can
+          // be tapped: Android routes taps to the window itself, not to the
+          // Flutter view. Suppressed through the style rather than the props so
+          // an app-wide `participantTile` builder that adds an overflow menu to
+          // every tile does not put one back here.
+          style: const StreamParticipantTileStyle(
+            showParticipantLabel: false,
+            showConnectionQualityIndicator: false,
+            showMoreButton: false,
+          ),
         );
       }
     }
