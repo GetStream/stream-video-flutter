@@ -160,6 +160,7 @@
 - Fixed a participant tile on screen being recorded as not visible, which kept it out of the running for a speaker's tile and could get its track unsubscribed. A renderer showing a participant now says so again when the call state disagrees, and the floating self-view no longer shares its visibility bookkeeping with the same participant's tile in the grid.
 - The Android picture-in-picture window draws no overflow button, camera-off icon or sound indicator. It keeps the name pill and the connection quality indicator.
 - The participant in the Android picture-in-picture window is drawn with square corners and no outline, so the rounded window no longer shows black wedges in its corners or a border down its sides.
+- The name pill and the connection quality indicator sit in the corners of the Android picture-in-picture window, square on the corner each one occupies.
 - The name pill draws nothing at all when it has neither a name nor an indicator, instead of an empty rounded rectangle over the video.
 - The floating self-view draws no name pill, whatever an app-wide participant tile theme asks for. `StreamFloatingParticipantTileStyle.tileStyle` still can.
 - A participant tile keeps the name in its label at every size it draws the label at, truncating with an ellipsis.

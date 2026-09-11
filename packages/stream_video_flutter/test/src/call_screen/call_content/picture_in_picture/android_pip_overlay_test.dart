@@ -52,7 +52,17 @@ void main() {
     Future<void> pumpOverlay(
       WidgetTester tester, {
       StreamPictureInPictureThemeData? pictureInPictureTheme,
+      StreamConnectionQualityIndicatorThemeData?
+      connectionQualityIndicatorTheme,
     }) async {
+      final overlay = switch (pictureInPictureTheme) {
+        final theme? => StreamPictureInPictureTheme(
+          data: theme,
+          child: AndroidPipOverlay(call: call),
+        ),
+        null => AndroidPipOverlay(call: call),
+      };
+
       await tester.pumpWidget(
         StreamComponentFactory(
           builders: StreamComponentBuilders(
@@ -76,12 +86,12 @@ void main() {
             child: SizedBox(
               width: 200,
               height: 300,
-              child: switch (pictureInPictureTheme) {
-                final theme? => StreamPictureInPictureTheme(
+              child: switch (connectionQualityIndicatorTheme) {
+                final theme? => StreamConnectionQualityIndicatorTheme(
                   data: theme,
-                  child: AndroidPipOverlay(call: call),
+                  child: overlay,
                 ),
-                null => AndroidPipOverlay(call: call),
+                null => overlay,
               },
             ),
           ),
@@ -147,6 +157,72 @@ void main() {
       final decoration = container.foregroundDecoration as BoxDecoration?;
 
       expect(decoration?.border, const Border());
+    });
+
+    // Both pieces of chrome sit in a corner of the window, so the corner each
+    // one occupies is square.
+    testWidgets('anchors the chrome in the corners', (tester) async {
+      await pumpOverlay(tester);
+
+      final toolbarPadding = tester
+          .widgetList<Padding>(
+            find.descendant(
+              of: find.byType(DefaultStreamParticipantTile),
+              matching: find.byType(Padding),
+            ),
+          )
+          .map((it) => it.padding)
+          .toList();
+
+      expect(toolbarPadding, contains(EdgeInsets.zero));
+
+      final pill = tester.widget<ClipRRect>(
+        find
+            .descendant(
+              of: find.byType(DefaultStreamParticipantLabel),
+              matching: find.byType(ClipRRect),
+            )
+            .first,
+      );
+      expect(
+        pill.borderRadius,
+        BorderRadius.only(topRight: const StreamRadius().lg),
+      );
+    });
+
+    // Only the shape is the window's business, so the fill an app themed the
+    // indicator with has to survive.
+    testWidgets('squares the indicator without dropping its fill', (
+      tester,
+    ) async {
+      const themed = Color(0xFF00FF00);
+
+      await pumpOverlay(
+        tester,
+        connectionQualityIndicatorTheme:
+            const StreamConnectionQualityIndicatorThemeData(
+              style: StreamConnectionQualityIndicatorStyle(
+                decoration: BoxDecoration(color: themed),
+              ),
+            ),
+      );
+
+      final box = tester.widget<DecoratedBox>(
+        find
+            .descendant(
+              of: find.byType(StreamConnectionQualityIndicator),
+              matching: find.byType(DecoratedBox),
+            )
+            .first,
+      );
+      final decoration = box.decoration as BoxDecoration;
+
+      expect(decoration.color, themed);
+      expect(decoration.shape, BoxShape.rectangle);
+      expect(
+        decoration.borderRadius,
+        BorderRadius.only(topLeft: const StreamRadius().lg),
+      );
     });
 
     testWidgets('draws the chrome the picture-in-picture theme asks back', (
