@@ -145,6 +145,10 @@ class StreamRetryInterceptor extends Interceptor {
     // attempt, and the outcome of the last one is unknown either way.
     StreamNetworkException() => true,
 
+    // Credentials that could not be produced at all, which is about the setup
+    // rather than the moment. Unreachable in the real chain — the auth
+    // interceptor rejects in `onRequest`, and dio skips the error interceptors
+    // for that — and asserted in the tests so it cannot drift.
     StreamAuthenticationException() => false,
 
     // A failure inside the SDK — wire data that would not decode, a bug in a

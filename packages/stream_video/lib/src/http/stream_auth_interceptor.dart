@@ -112,10 +112,11 @@ class StreamAuthInterceptor extends Interceptor {
       // `token expired`, and on its own that reads as an expiry rather than as
       // an app token endpoint that is failing.
       //
-      // Not attached to the rejected failure as a cause: the retry interceptor
-      // decides from its type, and a credentials failure there is retryable
-      // where an expired token is not — so swapping it in would spend five
-      // more attempts minting tokens that cannot help.
+      // Not attached to the rejected failure as a cause: what the caller asked
+      // about is this request, and the server's `token expired` is the answer
+      // to it. The refresh failure came out of a different exchange, carrying
+      // whatever type and code the token endpoint answered with — swapping it
+      // in would report a request the caller never made.
       _logger.e(
         () =>
             '[${options.path}] could not replace the refused token, '
