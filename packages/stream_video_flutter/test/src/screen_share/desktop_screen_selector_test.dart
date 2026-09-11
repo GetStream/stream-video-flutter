@@ -100,6 +100,46 @@ void main() {
   });
 
   group('showDefaultScreenSelectionDialog', () {
+    testWidgets('opens the modal and cancels with nothing', (tester) async {
+      // The real entry point, on the real global capturer: there is no
+      // platform behind it under `flutter test`, so the load fails and the
+      // grid says it has nothing — which is enough to prove the dialog opens,
+      // dismisses, and returns null.
+      DesktopCapturerSource? result;
+      var popped = false;
+
+      await tester.pumpWidget(
+        TestWrapper(
+          child: Builder(
+            builder: (context) => TextButton(
+              onPressed: () async {
+                result = await showDefaultScreenSelectionDialog(context);
+                popped = true;
+              },
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      // Explicit pumps rather than pumpAndSettle: the loading spinner repeats
+      // forever, and there is no platform here to finish the load.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.text('Choose what to share'), findsOneWidget);
+      expect(find.text('Entire Screen'), findsOneWidget);
+      expect(find.text('Window'), findsOneWidget);
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(popped, isTrue);
+      expect(result, isNull);
+    });
+
     testWidgets('shares the picked source and cancels with nothing', (
       tester,
     ) async {
