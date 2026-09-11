@@ -111,9 +111,11 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
           call: widget.call,
           participant: pipParticipant,
           style: const StreamParticipantTileStyle(
-            showParticipantLabel: false,
-            showConnectionQualityIndicator: false,
             showMoreButton: false,
+            labelStyle: StreamParticipantLabelStyle(
+              showAudioIndicator: false,
+              showVideoOffIcon: false,
+            ),
           ).merge(StreamPictureInPictureTheme.of(context).style?.tileStyle),
         );
       }

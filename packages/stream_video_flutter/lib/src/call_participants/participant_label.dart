@@ -178,7 +178,8 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
               nameTextStyle.color ??
               defaults.microphoneOffColor,
         ),
-      if (!props.isVideoEnabled)
+      if (!props.isVideoEnabled &&
+          (style?.showVideoOffIcon ?? defaults.showVideoOffIcon))
         Icon(
           context.streamIcons.videoOffFill,
           size: style?.videoOffIconSize ?? defaults.videoOffIconSize,
@@ -206,6 +207,12 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
         StreamAudioIndicator(isSpeaking: props.isSpeaking, style: style),
     ];
 
+    final showsName = props.showName && props.name.isNotEmpty;
+
+    // A participant with no name set, under a style drawing none of the
+    // indicators, leaves an empty pill sitting on the video.
+    if (!showsName && indicators.isEmpty) return const SizedBox.shrink();
+
     Widget content = Padding(
       padding: style?.padding ?? defaults.padding,
       child: Row(
@@ -214,7 +221,7 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
           // An empty name draws a zero-width Text that still claims the gap
           // before the indicators, leaving the pill padded for a name it is
           // not showing. A participant with no name set is not unusual.
-          if (props.showName && props.name.isNotEmpty)
+          if (showsName)
             // Flexible, not Expanded: the pill is only as wide as it needs to
             // be, up to whatever its parent allows. Combined with the parent's
             // bound this is what makes a long name ellipsize instead of

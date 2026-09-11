@@ -90,36 +90,49 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('draws the participant without any tile chrome', (
-      tester,
-    ) async {
+    testWidgets('draws the name and the connection quality', (tester) async {
       await pumpOverlay(tester);
 
       expect(find.text('renderer'), findsOneWidget);
-      expect(find.byType(StreamParticipantLabel), findsNothing);
-      expect(find.byType(StreamConnectionQualityIndicator), findsNothing);
+      expect(find.text('Rene Floor'), findsOneWidget);
+      expect(find.byType(StreamConnectionQualityIndicator), findsOneWidget);
+    });
+
+    testWidgets('draws no overflow button, camera icon or sound indicator', (
+      tester,
+    ) async {
+      when(() => participant.isVideoEnabled).thenReturn(false);
+
+      await pumpOverlay(tester);
+
       expect(find.byIcon(const StreamIcons().moreHorizontal), findsNothing);
+      expect(find.byIcon(const StreamIcons().videoOffFill), findsNothing);
+      expect(find.byType(StreamAudioIndicator), findsNothing);
     });
 
     testWidgets('draws the chrome the picture-in-picture theme asks back', (
       tester,
     ) async {
+      when(() => participant.isVideoEnabled).thenReturn(false);
+
       await pumpOverlay(
         tester,
         pictureInPictureTheme: const StreamPictureInPictureThemeData(
           style: StreamPictureInPictureStyle(
             tileStyle: StreamParticipantTileStyle(
-              showParticipantLabel: true,
-              showConnectionQualityIndicator: true,
               showMoreButton: true,
+              labelStyle: StreamParticipantLabelStyle(
+                showAudioIndicator: true,
+                showVideoOffIcon: true,
+              ),
             ),
           ),
         ),
       );
 
-      expect(find.byType(StreamParticipantLabel), findsOneWidget);
-      expect(find.byType(StreamConnectionQualityIndicator), findsOneWidget);
       expect(find.byIcon(const StreamIcons().moreHorizontal), findsOneWidget);
+      expect(find.byIcon(const StreamIcons().videoOffFill), findsOneWidget);
+      expect(find.byType(StreamAudioIndicator), findsOneWidget);
     });
   });
 }
