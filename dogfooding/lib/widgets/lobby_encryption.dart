@@ -16,11 +16,15 @@ import '../utils/call_encryption.dart';
 /// - created and encrypted → a read-only banner, plus the key field, which is
 ///   all that is left to collect;
 /// - created and plain → the switch, greyed out.
+///
+/// On a platform that cannot encrypt at all — see [supported] — none of that
+/// applies and the card only reports where it stands.
 class LobbyEncryption extends StatelessWidget {
   const LobbyEncryption({
     super.key,
     required this.call,
     required this.callExists,
+    required this.supported,
     required this.encryptionEnabled,
     required this.encryptionKey,
     required this.busy,
@@ -34,6 +38,12 @@ class LobbyEncryption extends StatelessWidget {
 
   /// Whether [call] has already been created on the backend.
   final bool callExists;
+
+  /// Whether this platform can encrypt and decrypt at all.
+  ///
+  /// False on web, Windows and Linux. There is then nothing to switch and no
+  /// key worth collecting, so the card drops both.
+  final bool supported;
 
   /// The mode the switch is asking for, meaningful only before creation.
   final bool encryptionEnabled;
@@ -72,7 +82,12 @@ class LobbyEncryption extends StatelessWidget {
             ? isCallEncrypted(state.settings)
             : encryptionEnabled;
 
-        final needsKey = callExists && isOn && encryptionKey.isEmpty;
+        // An encrypted call this platform cannot decrypt: the key field would
+        // collect something nothing here can use, and the join is refused
+        // anyway, so all that is left is to say so.
+        final blocked = isOn && !supported;
+        final needsKey =
+            supported && callExists && isOn && encryptionKey.isEmpty;
 
         return SizedBox(
           // The same width as the join button below it, so the two line up.
@@ -82,9 +97,11 @@ class LobbyEncryption extends StatelessWidget {
               borderRadius: BorderRadius.all(radius.lg),
               color: colorScheme.backgroundSurfaceCard,
               border: Border.all(
-                color: isOn
-                    ? colorScheme.accentPrimary
-                    : colorScheme.borderSubtle,
+                color: switch ((isOn, supported)) {
+                  (true, false) => colorScheme.borderWarning,
+                  (true, true) => colorScheme.accentPrimary,
+                  (false, _) => colorScheme.borderSubtle,
+                },
               ),
             ),
             child: Padding(
@@ -93,7 +110,21 @@ class LobbyEncryption extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: spacing.md,
                 children: [
-                  if (callExists && isOn)
+                  if (!supported)
+                    _Header(
+                      title: 'End-to-end encryption',
+                      subtitle: blocked
+                          ? 'This call is encrypted and cannot be joined on '
+                                'this platform'
+                          : 'Not supported on this platform',
+                      isOn: isOn,
+                      warning: blocked,
+                      // Nothing to switch: the platform decides, not the user.
+                      trailing: blocked
+                          ? null
+                          : StreamSwitch(value: false, onChanged: null),
+                    )
+                  else if (callExists && isOn)
                     const _Header(
                       title: 'End-to-end encryption',
                       isOn: true,
@@ -118,7 +149,7 @@ class LobbyEncryption extends StatelessWidget {
                     duration: const Duration(milliseconds: 180),
                     curve: Curves.easeOut,
                     alignment: Alignment.topCenter,
-                    child: !isOn
+                    child: !isOn || !supported
                         ? const SizedBox(width: double.infinity)
                         : Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,12 +230,18 @@ class _Header extends StatelessWidget {
     required this.title,
     this.subtitle,
     required this.isOn,
+    this.warning = false,
     this.trailing,
   });
 
   final String title;
   final String? subtitle;
   final bool isOn;
+
+  /// Whether the state the header reports is one the user has to act on
+  /// elsewhere — an encrypted call this platform cannot join.
+  final bool warning;
+
   final Widget? trailing;
 
   @override
@@ -219,7 +256,11 @@ class _Header extends StatelessWidget {
       children: [
         Icon(
           isOn ? icons.lock : icons.unlock,
-          color: isOn ? colorScheme.accentPrimary : colorScheme.textSecondary,
+          color: switch ((isOn, warning)) {
+            (_, true) => colorScheme.accentWarning,
+            (true, false) => colorScheme.accentPrimary,
+            (false, false) => colorScheme.textSecondary,
+          },
         ),
         Expanded(
           child: Column(
