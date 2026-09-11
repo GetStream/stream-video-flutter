@@ -318,7 +318,7 @@ class _CallScreenState extends State<CallScreen>
 
     return CallSidePanelSurface(
       key: _panelKey,
-      showLeadingDivider: !fullScreen,
+      docked: !fullScreen,
       onClose: _closePanel,
       title: switch (panel) {
         CallSidePanel.participants => PartialCallStateBuilder(

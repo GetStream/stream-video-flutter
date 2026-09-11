@@ -25,7 +25,7 @@ class CallSidePanelSurface extends StatelessWidget {
     required this.title,
     required this.onClose,
     required this.child,
-    this.showLeadingDivider = true,
+    this.docked = true,
   });
 
   /// The panel's heading, centred in the header.
@@ -34,28 +34,28 @@ class CallSidePanelSurface extends StatelessWidget {
   /// Called when the header's close button is pressed.
   final VoidCallback onClose;
 
-  /// Whether to draw the line between the panel and the video grid beside it.
+  /// Whether the panel stands beside the video grid rather than over it.
   ///
-  /// False for a panel covering the whole screen, which has nothing to divide
-  /// itself from.
-  final bool showLeadingDivider;
+  /// Docked, it reads as a card: rounded, and inset from the grid beside it
+  /// and the window behind it. Covering the whole screen it fills its space
+  /// square and flush, having no edges to sit inside.
+  final bool docked;
 
   /// The panel's content, filling everything below the header.
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.streamColorScheme;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.backgroundElevation1,
-        border: showLeadingDivider
-            ? BorderDirectional(
-                start: BorderSide(color: colorScheme.borderDefault),
-              )
-            : null,
-      ),
+    // Lifted rather than outlined. Every light-theme elevation is the same
+    // white as the call behind it, so a docked card needs its shadow to read
+    // as separate at all; in the dark theme the fill already carries that and
+    // the shadow is barely there.
+    final surface = Material(
+      color: context.streamColorScheme.backgroundElevation1,
+      elevation: docked ? context.streamElevation.level2 : 0,
+      borderRadius: docked ? BorderRadius.all(context.streamRadius.xl) : null,
+      // The content scrolls, so clip it to the corners it is drawn inside.
+      clipBehavior: docked ? Clip.antiAlias : Clip.none,
       child: Column(
         children: [
           StreamSheetHeader(
@@ -73,6 +73,15 @@ class CallSidePanelSurface extends StatelessWidget {
           Expanded(child: child),
         ],
       ),
+    );
+
+    if (!docked) return surface;
+
+    // Inset from the grid and the window, but full height: the panel's top and
+    // bottom line up with the video beside it.
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: context.streamSpacing.sm),
+      child: surface,
     );
   }
 }
