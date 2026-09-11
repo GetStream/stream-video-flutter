@@ -66,9 +66,9 @@ class CallParticipantsPanelBody extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(16),
+              // Full-width buttons, one per row: the panel is too narrow to
+              // fit both labels across it.
               child: Column(
-                // Stacked rather than side by side: two labelled buttons do
-                // not fit across a side panel, and 'Add member' wraps.
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Builder provides the button's own context so the share
@@ -165,9 +165,11 @@ class CallParticipantsPanelBody extends StatelessWidget {
               TextField(
                 controller: controller,
                 autofocus: true,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'User ID',
-                  hintStyle: TextStyle(color: Colors.white30),
+                  hintStyle: TextStyle(
+                    color: context.streamColorScheme.textTertiary,
+                  ),
                 ),
                 onSubmitted: (value) => Navigator.of(context).pop(value.trim()),
               ),
@@ -323,7 +325,9 @@ class _MemberTile extends StatelessWidget {
             ),
           ),
           TextButton.icon(
-            style: TextButton.styleFrom(foregroundColor: Colors.white),
+            style: TextButton.styleFrom(
+              foregroundColor: context.streamColorScheme.textPrimary,
+            ),
             icon: const Icon(Icons.notifications_active_outlined),
             label: const Text('Ring'),
             onPressed: onRing,

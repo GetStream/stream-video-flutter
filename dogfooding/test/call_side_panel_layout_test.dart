@@ -72,10 +72,32 @@ void main() {
 
       await tester.pumpWidget(wrap(animation: controller, fullScreen: false));
 
-      // Half the width is given up by the grid...
+      // Half the panel's width is given up by the grid...
       expect(tester.getSize(find.byKey(gridKey)).width, bodySize.width - 180);
       // ...but the panel itself never reflows, it is only clipped.
       expect(tester.getSize(find.byKey(panelKey)).width, 360);
+      // Its leading edge travels with the growing box, so the content slides
+      // in rather than being uncovered in place.
+      expect(
+        tester.getRect(find.byKey(panelKey)).left,
+        body(tester).right - 180,
+      );
+    });
+
+    testWidgets('the covered extent is ignored beside the grid', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          animation: kAlwaysCompleteAnimation,
+          fullScreen: false,
+          coveredTopExtent: 56,
+        ),
+      );
+
+      // Nothing is covered when the panel is docked, so the grid keeps its
+      // full height.
+      expect(tester.getSize(find.byKey(gridKey)).height, bodySize.height);
     });
 
     testWidgets('no panel means no divided width', (tester) async {
@@ -126,6 +148,23 @@ void main() {
       expect(grid.top - body(tester).top, 56);
       // The grid keeps its full width — nothing is docked beside it.
       expect(grid.width, bodySize.width);
+    });
+
+    testWidgets('no panel means the covered chrome is not given back', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          animation: kAlwaysDismissedAnimation,
+          fullScreen: true,
+          withPanel: false,
+          coveredTopExtent: 56,
+        ),
+      );
+
+      // There is no panel covering the chrome, so padding the grid down would
+      // leave a gap under a bar that is still on screen.
+      expect(tester.getRect(find.byKey(gridKey)), body(tester));
     });
   });
 }

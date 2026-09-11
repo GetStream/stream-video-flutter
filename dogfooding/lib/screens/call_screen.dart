@@ -83,11 +83,20 @@ class _CallScreenState extends State<CallScreen>
   bool _moreMenuVisible = false;
 
   /// The panel the user asked for, or null once it starts closing.
+  ///
+  /// Drives the control bar's selected states, which let go as soon as the
+  /// panel starts leaving. Anything asking whether a panel is *on screen*
+  /// wants [_mountedPanel] instead.
   CallSidePanel? _openPanel;
 
-  /// The panel whose content is in the tree. Outlives [_openPanel], so the
-  /// exit animation still has something to animate.
+  /// The panel whose content is in the tree, or null when nothing is up.
+  ///
+  /// Outlives [_openPanel] by the length of the exit animation, so it is the
+  /// one to read for "is a panel on screen": what the back button dismisses,
+  /// and what the app bar makes room for.
   CallSidePanel? _mountedPanel;
+
+  StreamSubscription<CallStatus>? _callStatusSubscription;
 
   late final _panelController = AnimationController(
     duration: const Duration(milliseconds: 250),
@@ -102,7 +111,8 @@ class _CallScreenState extends State<CallScreen>
 
   /// Carries the panel's own state across the breakpoint: the docked and the
   /// full-screen layout hang it in different places, and without a global key
-  /// crossing 768px would remount it and lose the chat's scroll offset.
+  /// crossing the [StreamScreenSize.small] boundary would remount it and lose
+  /// the chat's scroll offset.
   final _panelKey = GlobalKey();
 
   @override
@@ -112,6 +122,32 @@ class _CallScreenState extends State<CallScreen>
     _speakingWhileMutedSubscription = _speakingWhileMuted.stream.listen(
       _onSpeakingWhileMutedChanged,
     );
+    _callStatusSubscription = widget.call
+        .partialState((state) => state.status)
+        .listen(_onCallStatusChanged);
+  }
+
+  /// Closes the panel when the call stops being connected.
+  ///
+  /// The SDK only builds the slot the panel lives in while the call is
+  /// connected, so a reconnect takes the panel off screen on its own. Without
+  /// this the state would still claim one is up, and on a phone the app bar
+  /// would stay collapsed around nothing — taking the only leave button with
+  /// it.
+  void _onCallStatusChanged(CallStatus status) {
+    if (!mounted || _mountedPanel == null) return;
+    if (status.isConnected || status.isFastReconnecting || status.isMigrating) {
+      return;
+    }
+
+    _logger.d(() => 'Closing the $_mountedPanel panel: call is $status');
+    setState(() {
+      _openPanel = null;
+      _mountedPanel = null;
+    });
+    // Straight to closed rather than reversed: the panel is already gone, so
+    // there is nothing left on screen to animate out.
+    _panelController.reset();
   }
 
   void _onSpeakingWhileMutedChanged(SpeakingWhileMutedState state) {
@@ -147,6 +183,7 @@ class _CallScreenState extends State<CallScreen>
     _speakingWhileMutedDebounce?.cancel();
     _speakingWhileMutedSubscription.cancel();
     _speakingWhileMuted.dispose();
+    _callStatusSubscription?.cancel();
     _chatConnectionRecoverySubscription?.cancel();
     _devices.dispose();
     _panelAnimation.dispose();
@@ -235,43 +272,46 @@ class _CallScreenState extends State<CallScreen>
   }
 
   void _onPanelStatusChanged(AnimationStatus status) {
-    // Held until the exit finishes: unmounting the panel any earlier would
-    // take the app bar's height back while the panel is still on screen.
+    // _mountedPanel is held until the exit finishes: unmounting the panel any
+    // earlier would take the app bar's height back while it is still on
+    // screen.
     if (status == AnimationStatus.dismissed) {
       setState(() => _mountedPanel = null);
     }
   }
 
   /// Opens [panel], or closes it if it is already the open one.
-  void togglePanel(CallSidePanel panel) {
-    if (_openPanel == panel) return closePanel();
+  void _togglePanel(CallSidePanel panel) {
+    if (_openPanel == panel) return _closePanel();
 
     setState(() {
       _openPanel = _mountedPanel = panel;
-      // The two never share the screen: both hang off the same control bar.
+      // A panel and the more menu never share the screen: both hang off the
+      // same control bar.
       _moreMenuVisible = false;
     });
     _panelController.forward();
   }
 
-  /// Closes whichever panel is open, animating it out.
-  void closePanel() {
-    if (_openPanel == null) return;
+  /// Closes whichever panel is up, animating it out.
+  void _closePanel() {
+    if (_mountedPanel == null) return;
 
     setState(() => _openPanel = null);
     _panelController.reverse();
   }
 
-  void toggleMoreMenu(BuildContext context) {
-    final visible = !_moreMenuVisible;
-    if (visible) closePanel();
+  void _toggleMoreMenu() {
+    if (_moreMenuVisible) return _closeMoreMenu();
 
-    setState(() {
-      _moreMenuVisible = visible;
-    });
+    // The mirror of the exclusion in [_togglePanel].
+    _closePanel();
+    setState(() => _moreMenuVisible = true);
   }
 
-  /// The open panel's chrome and content, or null when nothing is open.
+  void _closeMoreMenu() => setState(() => _moreMenuVisible = false);
+
+  /// The panel's chrome and content, or null when nothing is open or closing.
   Widget? _panelContent(Call call, {required bool fullScreen}) {
     final panel = _mountedPanel;
     if (panel == null) return null;
@@ -279,7 +319,7 @@ class _CallScreenState extends State<CallScreen>
     return CallSidePanelSurface(
       key: _panelKey,
       showLeadingDivider: !fullScreen,
-      onClose: closePanel,
+      onClose: _closePanel,
       title: switch (panel) {
         CallSidePanel.participants => PartialCallStateBuilder(
           call: call,
@@ -293,9 +333,9 @@ class _CallScreenState extends State<CallScreen>
         CallSidePanel.participants => CallParticipantsPanelBody(call: call),
         CallSidePanel.chat => switch (_channel) {
           final channel? => ChatPanelBody(channel: channel),
-          // The chat connects asynchronously and its control stays disabled
-          // until it does, but losing the channel must not take the panel
-          // down with it.
+          // Shown while the channel is still connecting. The control that
+          // opens this panel is disabled until it arrives, so this is only
+          // reached if the connection never lands.
           null => const Center(child: CircularProgressIndicator()),
         },
         CallSidePanel.stats => CallStatsPanelBody(call: call),
@@ -392,8 +432,8 @@ class _CallScreenState extends State<CallScreen>
     onError: _reportDeviceFailure,
   );
 
-  // Not StreamParticipantsButton: this app opens its own panel rather than
-  // the SDK's list, and only CallFeatureButton can show that the panel is up.
+  // CallFeatureButton rather than StreamParticipantsButton, which has no
+  // selected state to show that the panel is up.
   Widget _participantsControl(Call call) => PartialCallStateBuilder(
     call: call,
     selector: (state) => state.callParticipants.length,
@@ -403,7 +443,7 @@ class _CallScreenState extends State<CallScreen>
         icon: Icon(context.streamIcons.usersFill),
         tooltip: 'Participants',
         selected: _openPanel == CallSidePanel.participants,
-        onPressed: () => togglePanel(CallSidePanel.participants),
+        onPressed: () => _togglePanel(CallSidePanel.participants),
       ),
     ),
   );
@@ -413,7 +453,7 @@ class _CallScreenState extends State<CallScreen>
     final moreButton = CallFeatureButton(
       icon: Icon(context.streamIcons.moreVerticalFill),
       selected: _moreMenuVisible,
-      onPressed: () => toggleMoreMenu(context),
+      onPressed: _toggleMoreMenu,
     );
 
     final panels = [
@@ -421,7 +461,7 @@ class _CallScreenState extends State<CallScreen>
       _ShowChatButton(
         channel: _channel,
         selected: _openPanel == CallSidePanel.chat,
-        onPressed: () => togglePanel(CallSidePanel.chat),
+        onPressed: () => _togglePanel(CallSidePanel.chat),
       ),
     ];
 
@@ -456,7 +496,7 @@ class _CallScreenState extends State<CallScreen>
           CallFeatureButton(
             icon: Icon(context.streamIcons.settingsFill),
             selected: _moreMenuVisible,
-            onPressed: () => toggleMoreMenu(context),
+            onPressed: _toggleMoreMenu,
           ),
           _layoutToggle(),
         ],
@@ -473,7 +513,7 @@ class _CallScreenState extends State<CallScreen>
           CallFeatureButton(
             icon: Icon(context.streamIcons.statsFill),
             selected: _openPanel == CallSidePanel.stats,
-            onPressed: () => togglePanel(CallSidePanel.stats),
+            onPressed: () => _togglePanel(CallSidePanel.stats),
           ),
           ...panels,
         ],
@@ -486,8 +526,16 @@ class _CallScreenState extends State<CallScreen>
     // ignore: deprecated_member_use
     return WillPopScope(
       onWillPop: () async {
-        if (_openPanel != null) {
-          closePanel();
+        // Keyed to what is on screen, not to what was asked for: a panel is
+        // still visible while it animates out, and back should dismiss it
+        // rather than fall through and leave the call.
+        if (_mountedPanel != null) {
+          _closePanel();
+          return false;
+        }
+
+        if (_moreMenuVisible) {
+          _closeMoreMenu();
           return false;
         }
 
@@ -555,7 +603,7 @@ class _CallScreenState extends State<CallScreen>
                       ),
                       if (_moreMenuVisible) ...[
                         GestureDetector(
-                          onTap: () => setState(() => _moreMenuVisible = false),
+                          onTap: _closeMoreMenu,
                           child: Container(color: Colors.black12),
                         ),
                         Positioned(
@@ -569,17 +617,13 @@ class _CallScreenState extends State<CallScreen>
                               child: SettingsMenu(
                                 call: call,
                                 videoEffectsManager: _videoEffectsManager,
-                                onReactionSend: (_) =>
-                                    setState(() => _moreMenuVisible = false),
+                                onReactionSend: (_) => _closeMoreMenu(),
                                 onStatsPressed: () =>
-                                    togglePanel(CallSidePanel.stats),
+                                    _togglePanel(CallSidePanel.stats),
                                 onAudioOutputChange: (_, {closeMenu = true}) {
-                                  if (closeMenu) {
-                                    setState(() => _moreMenuVisible = false);
-                                  }
+                                  if (closeMenu) _closeMoreMenu();
                                 },
-                                onAudioInputChange: (_) =>
-                                    setState(() => _moreMenuVisible = false),
+                                onAudioInputChange: (_) => _closeMoreMenu(),
                               ),
                             ),
                           ),
@@ -667,6 +711,8 @@ class _ShowChatButton extends StatefulWidget {
     required this.onPressed,
   });
 
+  /// The call's chat channel, or null while it is still connecting — the
+  /// button is disabled until it arrives.
   final Channel? channel;
 
   /// Whether the chat panel is the one currently open.

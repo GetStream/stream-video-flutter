@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 ///  * Full screen — the panel covers [child] entirely, sliding in over it.
 ///
 /// Both are driven by [animation], which runs 0 (closed) to 1 (open). The
-/// widget itself holds no state: the call screen owns the controller, so the
-/// same animation can also collapse the app bar.
+/// widget itself holds no state — the caller owns the controller, and so also
+/// owns when the panel is mounted and unmounted.
 class CallSidePanelLayout extends StatelessWidget {
   /// Creates a layout showing [panel] against [child].
   const CallSidePanelLayout({
@@ -33,13 +33,18 @@ class CallSidePanelLayout extends StatelessWidget {
   final bool fullScreen;
 
   /// The width a docked panel takes from [child].
+  ///
+  /// Ignored when [fullScreen], where the panel takes everything.
   final double width;
 
   /// Height to re-add above [child] to replace chrome the panel has covered.
   ///
-  /// A full-screen panel takes over the app bar's row as well, and without
-  /// this the grid would jump up by that much — and re-tile — the moment a
-  /// panel opened.
+  /// A caller that hides its own chrome to make room for a full-screen panel
+  /// hands back what it gave up, so [child] neither moves nor re-lays-out the
+  /// moment a panel opens.
+  ///
+  /// Ignored unless [fullScreen], and unless there is a [panel] to make room
+  /// for.
   final double coveredTopExtent;
 
   /// The call content the panel is shown against.
@@ -61,9 +66,7 @@ class CallSidePanelLayout extends StatelessWidget {
               sizeFactor: animation,
               axis: Axis.horizontal,
               // Start-aligned, so the panel's leading edge travels with the
-              // growing box and the content appears to slide in from the
-              // window's edge rather than being wiped into place. End-aligned
-              // would hold it still and merely uncover it.
+              // growing box and the content slides in from the window's edge.
               alignment: AlignmentDirectional.topStart,
               // A fixed width inside the transition: the panel is laid out at
               // its final width throughout and only clipped, so a message
@@ -77,7 +80,7 @@ class CallSidePanelLayout extends StatelessWidget {
     return Stack(
       children: [
         Padding(
-          padding: EdgeInsets.only(top: coveredTopExtent),
+          padding: EdgeInsets.only(top: panel != null ? coveredTopExtent : 0),
           child: child,
         ),
         if (panel != null)
