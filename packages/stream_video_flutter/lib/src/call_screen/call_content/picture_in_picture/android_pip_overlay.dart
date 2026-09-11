@@ -4,8 +4,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import '../../../../stream_video_flutter.dart';
-import '../../../call_participants/indicators/connection_quality_indicator_defaults.dart';
 import '../../../call_participants/screen_share_call_participants_content.dart';
+import 'picture_in_picture_defaults.dart';
 
 /// A dedicated overlay widget for Android Picture-in-Picture mode.
 /// This widget creates a floating overlay that shows only the video content
@@ -111,7 +111,9 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
           rendererScopePrefix: 'pipVideo',
           call: widget.call,
           participant: pipParticipant,
-          style: _pipTileStyle(context),
+          style: pictureInPictureTileStyle(context).merge(
+            StreamPictureInPictureTheme.of(context).style?.tileStyle,
+          ),
         );
       }
     }
@@ -122,57 +124,5 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
         child: customBuilder?.call(context, widget.call) ?? pipBody,
       ),
     );
-  }
-
-  /// The tile the window draws, merged under
-  /// [StreamPictureInPictureStyle.tileStyle].
-  StreamParticipantTileStyle _pipTileStyle(BuildContext context) {
-    final radius = context.streamRadius;
-
-    // The chrome sits in the corners of the window, so the corner each piece
-    // occupies is square and only the inner one is rounded. Directional: the
-    // toolbar puts the pill at the start and the indicator at the end, and
-    // which corner each of those is comes out in the layout.
-    final cornerRadius = radius.lg;
-    final labelRadius = BorderRadiusDirectional.only(topEnd: cornerRadius);
-    final indicatorRadius = BorderRadiusDirectional.only(
-      topStart: cornerRadius,
-    );
-
-    return StreamParticipantTileStyle(
-      // The window is rounded by the system, so a tile rounding itself as well
-      // leaves the Material behind it showing in the corners. Which also rules
-      // out an outline: it would be drawn square and then have its corners
-      // clipped away by the window.
-      borderRadius: BorderRadius.zero,
-      border: const Border(),
-      showSpeakerBorder: false,
-      showMoreButton: false,
-      // Flush into the window's own corners: at this size an inset costs more
-      // video than it buys in breathing room.
-      toolbarPadding: EdgeInsets.zero,
-      labelStyle: StreamParticipantLabelStyle(
-        showAudioIndicator: false,
-        showVideoOffIcon: false,
-        borderRadius: labelRadius,
-      ),
-      connectionQualityIndicatorStyle: StreamConnectionQualityIndicatorStyle(
-        // Only the shape changes, so it is taken off the decoration the
-        // indicator would have drawn — resolved the way the indicator resolves
-        // it — rather than described again here, which would drop an app's own
-        // fill. A rounded rectangle where the default is a circle, and
-        // BoxDecoration allows a radius on neither shape but the rectangle.
-        decoration: _indicatorDecoration(
-          context,
-        ).copyWith(shape: BoxShape.rectangle, borderRadius: indicatorRadius),
-      ),
-    ).merge(StreamPictureInPictureTheme.of(context).style?.tileStyle);
-  }
-
-  /// The decoration the connection quality indicator would draw here.
-  BoxDecoration _indicatorDecoration(BuildContext context) {
-    final style = StreamConnectionQualityIndicatorTheme.of(context).style;
-    return style?.decoration ??
-        StreamConnectionQualityIndicatorStyleDefaults(context).decoration;
   }
 }

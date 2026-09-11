@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video_flutter/src/call_screen/call_content/picture_in_picture/picture_in_picture_defaults.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../../../test_utils/test_wrapper.dart';
@@ -164,6 +165,10 @@ void main() {
     testWidgets('anchors the chrome in the corners', (tester) async {
       await pumpOverlay(tester);
 
+      final expected = pictureInPictureTileStyle(
+        tester.element(find.byType(DefaultStreamParticipantTile)),
+      );
+
       final toolbarPadding = tester
           .widgetList<Padding>(
             find.descendant(
@@ -174,7 +179,7 @@ void main() {
           .map((it) => it.padding)
           .toList();
 
-      expect(toolbarPadding, contains(EdgeInsets.zero));
+      expect(toolbarPadding, contains(expected.toolbarPadding));
 
       final pill = tester.widget<ClipRRect>(
         find
@@ -184,9 +189,14 @@ void main() {
             )
             .first,
       );
+      expect(pill.borderRadius, expected.labelStyle?.borderRadius);
+      // Whatever the radius is, it is on the pill's inner corner alone.
       expect(
-        pill.borderRadius,
-        BorderRadiusDirectional.only(topEnd: const StreamRadius().lg),
+        pill.borderRadius.resolve(TextDirection.ltr),
+        isA<BorderRadius>()
+            .having((it) => it.topLeft, 'topLeft', Radius.zero)
+            .having((it) => it.topRight, 'topRight', isNot(Radius.zero))
+            .having((it) => it.bottomLeft, 'bottomLeft', Radius.zero),
       );
     });
 
@@ -221,7 +231,9 @@ void main() {
       expect(decoration.shape, BoxShape.rectangle);
       expect(
         decoration.borderRadius,
-        BorderRadiusDirectional.only(topStart: const StreamRadius().lg),
+        pictureInPictureTileStyle(
+          tester.element(find.byType(DefaultStreamParticipantTile)),
+        ).connectionQualityIndicatorStyle?.decoration?.borderRadius,
       );
     });
 
