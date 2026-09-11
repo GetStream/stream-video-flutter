@@ -2,6 +2,12 @@
 
 ### ✅ Added
 
+- Added `StreamModalDialog` and `showStreamModalDialog`, a centered modal surface with a title, header actions and a footer, over a blurred `StreamBlurScrim`.
+- Added `StreamTabBar`, a row of equal-width tabs whose selected index the caller owns. It, `StreamModalDialog` and `StreamBlurScrim` are design-system candidates, living in `src/widgets/design_system_candidates` until they graduate to core.
+- Added `StreamScreenShareSelector`, the redesigned grid of screens and windows behind the desktop screen share picker, and `StreamScreenShareThumbnail`, one tile of it.
+- Added `ScreenShareSourceController`, which holds the screens and windows on offer and the one that is picked.
+- Added `StreamScreenShareSelectorThemeData` on `StreamVideoTheme`, and `StreamScreenShareSelectorTheme` to restyle the selector over a subtree.
+- Added `desktopScreenShareRefresh` and `desktopScreenShareNoSources` to the localizations, in English and Dutch.
 - `StreamLayoutButton` draws the participant layout in effect and offers the rest through a `StreamAdaptiveMenuAnchor`.
 - `StreamLayoutButton.defaultLayouts` is `auto` and `speakerBottom`, so the button toggles unless it is given more.
 - Added layout strings to the localizations, in English and Dutch: `layoutMenuTitle`, `layoutSelectTooltip`, `layoutDefault`, `layoutGrid`, `layoutSpeakerTop`, `layoutSpeakerBottom`, `layoutSpeakerLeft`, `layoutSpeakerRight` and `layoutSpeakerOneToOne`.
@@ -204,6 +210,8 @@
 
 ### ⚠️ Breaking
 
+- The desktop screen share picker is rebuilt on the design system. `TabbedScreenSelectWidget`, `ThumbnailGrid`, `ScreenSelectorStateNotifier` and `ScreenSelectorState` are gone; `StreamScreenShareSelector` and `ScreenShareSourceController` replace them. `showDefaultScreenSelectionDialog` keeps its signature.
+- `ScreenShareThumbnailWidget` is `StreamScreenShareThumbnail` now, and takes the thumbnail from the source it is given rather than subscribing for one.
 - `ParticipantLayoutMode.auto` is the default layout of `StreamCallContent`, `StreamCallParticipants` and `RegularCallParticipantsContent`, and renders what `grid` used to. The livestream widgets still default to `grid`.
 - `ParticipantLayoutMode.grid` gives the local participant a tile of its own instead of floating them over the grid.
 - `ParticipantLayoutMode.auto` floats the self-view on mobile only while at most two other people are in the call, and gives the local participant a tile beyond that.
@@ -268,6 +276,9 @@
 
 ### 🔄 Changed
 
+- The desktop screen share picker reads the platform's screens and windows once, and again on its refresh button, instead of re-enumerating and re-capturing all of them every two seconds.
+- The picker asks the platform for 480x300 thumbnails instead of whatever size it defaults to.
+- The picker's sources are released whichever way it is dismissed, including the escape key and a tap outside.
 - `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
 - Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.
 
