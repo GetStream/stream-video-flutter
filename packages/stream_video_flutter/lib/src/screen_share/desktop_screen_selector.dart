@@ -250,6 +250,7 @@ class _SourceGrid extends StatelessWidget {
         return StreamScreenShareThumbnail(
           key: ValueKey(source.id),
           source: source,
+          thumbnail: state.thumbnailFor(source),
           selected: state.selectedSourceId == source.id,
           onTap: onSelectSource,
           style: this.style,

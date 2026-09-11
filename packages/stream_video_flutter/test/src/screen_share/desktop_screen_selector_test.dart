@@ -29,6 +29,7 @@ void main() {
 
   setUp(() {
     capturer = FakeDesktopCapturer(sources: [screen1, screen2, window]);
+    addTearDown(capturer.close);
   });
 
   Future<ScreenShareSourceController> pumpSelector(WidgetTester tester) async {
@@ -91,8 +92,12 @@ void main() {
 
     testWidgets('never polls the platform while it is open', (tester) async {
       await pumpSelector(tester);
-      // A leaked Timer.periodic would also fail the test outright, at
-      // teardown; this says which one it was.
+      // These sources came back with their bitmaps, so there is nothing left
+      // to capture. The old picker asked for a full capture pass every two
+      // seconds regardless. A leaked Timer.periodic would also fail the test
+      // outright, at teardown; this says which one it was.
+      expect(capturer.updateSourcesCallCount, 0);
+
       await tester.pump(const Duration(seconds: 10));
 
       expect(capturer.updateSourcesCallCount, 0);
