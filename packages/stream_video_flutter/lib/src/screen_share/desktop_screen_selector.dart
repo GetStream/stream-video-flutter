@@ -57,14 +57,29 @@ class _StreamScreenShareDialogState extends State<StreamScreenShareDialog> {
   ScreenShareSourceController? _ownedController;
 
   ScreenShareSourceController get _controller =>
-      widget.controller ?? (_ownedController ??= ScreenShareSourceController());
+      widget.controller ?? _ownedController!;
+
+  @override
+  void initState() {
+    super.initState();
+    // Built here rather than lazily on first build: a controller starts
+    // reading the platform as soon as it exists, which is not something to do
+    // as a side effect of building.
+    if (widget.controller == null) {
+      _ownedController = ScreenShareSourceController();
+    }
+  }
 
   @override
   void didUpdateWidget(StreamScreenShareDialog oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // A controller arriving where the dialog had been making its own leaves
-    // the owned one with nothing to drive.
-    if (widget.controller != null) {
+    if (widget.controller == oldWidget.controller) return;
+
+    if (widget.controller == null) {
+      _ownedController ??= ScreenShareSourceController();
+    } else {
+      // A controller arriving where the dialog had been making its own leaves
+      // the owned one with nothing to drive.
       _ownedController?.dispose();
       _ownedController = null;
     }
