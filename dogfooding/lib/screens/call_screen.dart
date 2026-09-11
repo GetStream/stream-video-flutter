@@ -766,26 +766,55 @@ class __ShowChatButtonState extends State<_ShowChatButton> {
 Future<DesktopCapturerSource?> _customDesktopScreenShareSelector(
   BuildContext context,
 ) {
-  final stateNotifier = ScreenSelectorStateNotifier(
-    sourceTypes: [SourceType.Screen],
-  );
-
   return showModalBottomSheet<DesktopCapturerSource?>(
     context: context,
-    builder: (BuildContext context) {
-      return ValueListenableBuilder(
-        valueListenable: stateNotifier,
-        builder:
-            (BuildContext context, ScreenSelectorState value, Widget? child) =>
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: ThumbnailGrid(
-                    sources: value.sources.values.toList(),
-                    selectedSource: value.selectedSource,
-                    onSelectSource: (source) => Navigator.pop(context, source),
-                  ),
-                ),
-      );
-    },
+    builder: (context) => const _ScreenOnlySelectorSheet(),
   );
+}
+
+class _ScreenOnlySelectorSheet extends StatefulWidget {
+  const _ScreenOnlySelectorSheet();
+
+  @override
+  State<_ScreenOnlySelectorSheet> createState() =>
+      _ScreenOnlySelectorSheetState();
+}
+
+class _ScreenOnlySelectorSheetState extends State<_ScreenOnlySelectorSheet> {
+  late final _controller = ScreenShareSourceController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: _controller,
+      builder: (context, state, _) {
+        final sources = [
+          for (final source in state.sources)
+            if (source.type == SourceType.Screen) source,
+        ];
+
+        return GridView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: sources.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            mainAxisExtent: 164,
+          ),
+          itemBuilder: (context, index) => StreamScreenShareThumbnail(
+            source: sources[index],
+            selected: false,
+            onTap: (source) => Navigator.pop(context, source),
+          ),
+        );
+      },
+    );
+  }
 }

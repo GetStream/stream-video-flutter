@@ -25,6 +25,12 @@ class StreamVideoFlutterLocalizationsNl
   String get desktopScreenShareWindow => 'Venster';
 
   @override
+  String get desktopScreenShareRefresh => 'Vernieuwen';
+
+  @override
+  String get desktopScreenShareNoSources => 'Hier valt niets te delen.';
+
+  @override
   String get layoutMenuTitle => 'Indeling';
 
   @override

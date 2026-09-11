@@ -4,6 +4,8 @@
   "desktopScreenShareChooseDialogCancel": "Annuleren",
   "desktopScreenShareEntireScreen": "Volledig scherm",
   "desktopScreenShareWindow": "Venster",
+  "desktopScreenShareRefresh": "Vernieuwen",
+  "desktopScreenShareNoSources": "Hier valt niets te delen.",
   "layoutMenuTitle": "Indeling",
   "layoutSelectTooltip": "Indeling wijzigen",
   "layoutDefault": "Standaard",

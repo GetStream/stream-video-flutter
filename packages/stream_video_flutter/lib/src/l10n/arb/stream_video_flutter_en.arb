@@ -19,6 +19,14 @@
   "@desktopScreenShareWindow": {
     "description": "Tab to select a single window to share"
   },
+  "desktopScreenShareRefresh": "Refresh",
+  "@desktopScreenShareRefresh": {
+    "description": "Tooltip of the action that re-reads the screens and windows on offer"
+  },
+  "desktopScreenShareNoSources": "Nothing to share here.",
+  "@desktopScreenShareNoSources": {
+    "description": "Shown in place of the grid when the platform offers no screen or window of the selected type"
+  },
   "layoutMenuTitle": "Layout",
   "@layoutMenuTitle": {
     "description": "Title of the sheet that picks how participants are laid out"

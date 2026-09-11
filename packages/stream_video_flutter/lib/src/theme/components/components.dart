@@ -5,3 +5,4 @@ export 'floating_participant_tile_theme.dart';
 export 'lobby_view_theme.dart';
 export 'participant_label_theme.dart';
 export 'participant_tile_theme.dart';
+export 'screen_share_selector_theme.dart';
