@@ -6,14 +6,16 @@ import '../../../stream_video_flutter.dart';
 /// The values a ringing screen falls back to when neither its theme nor its
 /// call site names one.
 ///
-/// Both screens share a layout and differ in their colors, so the geometry
-/// resolves here and each screen overrides the handful of properties that
-/// depend on what it is drawn on top of.
+/// Both screens share a layout and differ in their colors, so everything
+/// resolves here and the outgoing screen overrides the two properties that
+/// depend on it being drawn on top of the camera rather than on a surface.
 ///
-/// Never hand an instance of this to a theme: every getter is non-null, so
-/// merging one would pin every property of whatever it was merged into.
+/// Every getter is non-null, which is what lets the widgets below take one of
+/// these rather than a style full of nulls. For the same reason it must never
+/// be handed to a theme: merging one would pin every property of whatever it
+/// was merged into.
 @internal
-abstract class RingingCallStyleDefaults extends StreamRingingCallStyle {
+class RingingCallStyleDefaults extends StreamRingingCallStyle {
   /// Resolves a ringing screen's defaults from the theme on the given context.
   RingingCallStyleDefaults(this.context, this.style);
 
@@ -26,6 +28,20 @@ abstract class RingingCallStyleDefaults extends StreamRingingCallStyle {
   late final colorScheme = context.streamColorScheme;
   late final textTheme = context.streamTextTheme;
   late final spacing = context.streamSpacing;
+
+  @override
+  Color get backgroundColor =>
+      style?.backgroundColor ?? colorScheme.backgroundApp;
+
+  @override
+  TextStyle get titleTextStyle =>
+      style?.titleTextStyle ??
+      textTheme.headingLg.copyWith(color: colorScheme.textPrimary);
+
+  @override
+  TextStyle get statusTextStyle =>
+      style?.statusTextStyle ??
+      textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary);
 
   @override
   Color get scrimColor => style?.scrimColor ?? colorScheme.backgroundScrim;

@@ -60,7 +60,7 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
 
   @override
   Widget build(BuildContext context) {
-    final style = _StreamIncomingCallStyleDefaults(
+    final style = RingingCallStyleDefaults(
       context,
       StreamIncomingCallTheme.of(context).style?.merge(widget.style) ??
           widget.style,
@@ -156,26 +156,4 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
       return setState(() => {});
     }
   }
-}
-
-// Default style values for [StreamIncomingCallContent].
-//
-// The screen sits on a surface of its own, so its text is the ordinary text
-// of the app rather than text drawn on top of something.
-class _StreamIncomingCallStyleDefaults extends RingingCallStyleDefaults {
-  _StreamIncomingCallStyleDefaults(super.context, super.style);
-
-  @override
-  Color get backgroundColor =>
-      style?.backgroundColor ?? colorScheme.backgroundApp;
-
-  @override
-  TextStyle get titleTextStyle =>
-      style?.titleTextStyle ??
-      textTheme.headingLg.copyWith(color: colorScheme.textPrimary);
-
-  @override
-  TextStyle get statusTextStyle =>
-      style?.statusTextStyle ??
-      textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary);
 }

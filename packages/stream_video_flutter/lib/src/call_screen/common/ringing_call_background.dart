@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import 'ringing_call_style_defaults.dart';
 
 /// What an outgoing ringing screen is drawn on: the caller's own camera,
 /// blurred and washed out so the call details stay legible on top of it.
@@ -14,13 +15,16 @@ class RingingCallBackground extends StatelessWidget {
   /// Creates a new instance of [RingingCallBackground].
   const RingingCallBackground({
     super.key,
-    required this.style,
+    this.style,
     this.cameraTrack,
     required this.child,
   });
 
-  /// The resolved style of the screen.
-  final StreamRingingCallStyle style;
+  /// Overrides for the fill, the scrim and the blur.
+  ///
+  /// Anything left null falls back to what the outgoing screen resolves, so a
+  /// background built by hand does not have to name all three.
+  final StreamRingingCallStyle? style;
 
   /// The camera to draw, or null to draw the fill alone.
   final RtcLocalCameraTrack? cameraTrack;
@@ -30,12 +34,13 @@ class RingingCallBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final style = RingingCallStyleDefaults(context, this.style);
     final track = cameraTrack;
 
     return Stack(
       fit: StackFit.expand,
       children: [
-        ColoredBox(color: style.backgroundColor!),
+        ColoredBox(color: style.backgroundColor),
         if (track != null)
           VideoTrackRenderer(
             videoTrack: track,
@@ -47,10 +52,10 @@ class RingingCallBackground extends StatelessWidget {
         ClipRect(
           child: BackdropFilter(
             filter: ImageFilter.blur(
-              sigmaX: style.blurSigma!,
-              sigmaY: style.blurSigma!,
+              sigmaX: style.blurSigma,
+              sigmaY: style.blurSigma,
             ),
-            child: ColoredBox(color: style.scrimColor!),
+            child: ColoredBox(color: style.scrimColor),
           ),
         ),
         child,

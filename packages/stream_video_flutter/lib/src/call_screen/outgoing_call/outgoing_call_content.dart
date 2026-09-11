@@ -212,13 +212,10 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
 // Default style values for [StreamOutgoingCallContent].
 //
 // The screen is drawn on top of the caller's own camera, so its text is the
-// text used on an image rather than on a surface.
+// text used on an image rather than on a surface. Everything else is what a
+// ringing screen resolves anyway.
 class _StreamOutgoingCallStyleDefaults extends RingingCallStyleDefaults {
   _StreamOutgoingCallStyleDefaults(super.context, super.style);
-
-  @override
-  Color get backgroundColor =>
-      style?.backgroundColor ?? colorScheme.backgroundApp;
 
   @override
   TextStyle get titleTextStyle =>
