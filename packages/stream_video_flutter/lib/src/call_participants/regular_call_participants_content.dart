@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 import 'layout/call_participants_grid_view.dart';
-import 'layout/call_participants_spotlight_view.dart';
 
 /// A widget that represents the main area of the call when nobody is
 /// sharing their screen.
@@ -13,9 +12,9 @@ class RegularCallParticipantsContent extends StatelessWidget {
     required this.call,
     required this.participants,
     this.callParticipantBuilder = _defaultParticipantBuilder,
-    this.enableLocalVideo,
-    this.localVideoParticipantBuilder,
-    this.layoutMode = ParticipantLayoutMode.grid,
+    this.enableFloatingSelfView,
+    this.floatingSelfViewBuilder,
+    this.layoutMode = ParticipantLayoutMode.auto,
   });
 
   /// Represents a call.
@@ -24,17 +23,34 @@ class RegularCallParticipantsContent extends StatelessWidget {
   /// The list of participants to display.
   final Iterable<CallParticipantState> participants;
 
-  /// Enable local video view for the local participant.
-  final bool? enableLocalVideo;
+  /// Whether the local participant's self-view floats over the layout.
+  ///
+  /// Only [ParticipantLayoutMode.auto] and
+  /// [ParticipantLayoutMode.speakerOneToOne] read it, the layouts that leave
+  /// the local participant out of the arrangement. The grid and the four bar
+  /// layouts give them a tile, so a self-view would show them twice.
+  ///
+  /// Defaults to true under `speakerOneToOne`, which `auto` resolves to in a
+  /// one-on-one call. Under `auto` in a group call it defaults to true on
+  /// mobile while at most two other people are in the call, and to false
+  /// otherwise.
+  final bool? enableFloatingSelfView;
 
   /// Builder function used to build a participant grid item.
   final CallParticipantBuilder callParticipantBuilder;
 
-  /// Builder function used to build a local video participant widget.
-  final CallParticipantBuilder? localVideoParticipantBuilder;
+  /// Builder function used to build the floating self-view.
+  final CallParticipantBuilder? floatingSelfViewBuilder;
 
   /// The layout mode used to display the participants.
   final ParticipantLayoutMode layoutMode;
+
+  /// The most other participants [ParticipantLayoutMode.auto] floats a
+  /// self-view over on mobile.
+  ///
+  /// A grid past this many tiles is crowded enough on a phone that the inset
+  /// would cover one, so the local participant takes a tile of their own.
+  static const _maxRemotesBehindSelfView = 2;
 
   // The default participant builder.
   static Widget _defaultParticipantBuilder(
@@ -54,44 +70,86 @@ class RegularCallParticipantsContent extends StatelessWidget {
     final remoteParticipants = participants.where((e) => !e.isLocal);
     final localParticipant = participants.where((e) => e.isLocal).firstOrNull;
 
-    if (layoutMode == ParticipantLayoutMode.spotlight) {
+    // ParticipantLayoutMode.auto follows the call: one person on the other end
+    // is a conversation and gets their face full-frame, anything else is a
+    // group and gets a grid.
+    final requested = layoutMode.canonical;
+    final isAuto = requested == ParticipantLayoutMode.auto;
+    final effective = switch (isAuto) {
+      false => requested,
+      true when remoteParticipants.length == 1 =>
+        ParticipantLayoutMode.speakerOneToOne,
+      true => ParticipantLayoutMode.grid,
+    };
+
+    // Only these two layouts leave the local participant out of the
+    // arrangement, so only they can float a self-view. An explicitly
+    // requested grid and the four bar layouts give them a tile, where a
+    // self-view would show them twice, so every other case is false whatever
+    // enableFloatingSelfView says. auto's grid still floats one.
+    //
+    // speakerOneToOne floats on every platform: it shows nobody but the
+    // speaker, so without the inset the local participant is absent from the
+    // call entirely. auto's grid follows the platform and the size of the
+    // call instead.
+    final floatsSelfView = switch (effective) {
+      ParticipantLayoutMode.speakerOneToOne => enableFloatingSelfView ?? true,
+      ParticipantLayoutMode.grid when isAuto =>
+        enableFloatingSelfView ??
+            (!isDesktopDevice &&
+                remoteParticipants.length <= _maxRemotesBehindSelfView),
+      _ => false,
+    };
+
+    final floatLocalVideo =
+        floatsSelfView &&
+        localParticipant != null &&
+        remoteParticipants.isNotEmpty;
+
+    Widget child;
+    // A speaker layout has to have somebody to spotlight; with nobody in the
+    // call the grid renders its own empty state.
+    if (effective.isSpeakerLayout && participants.isNotEmpty) {
       var spotlight = participants.first;
 
-      // In a 1-on-1 call we don't spotlight the local participant.
-      if (remoteParticipants.length == 1) {
+      // A layout with no bar shows nobody but the spotlight, so it goes to a
+      // remote whenever there is one. A bar layout can spotlight whoever the
+      // sort put first, the local participant included, since everybody else
+      // is still in the bar — unless there is only one other person.
+      if (remoteParticipants.isNotEmpty &&
+          (effective.barAlignment == null || remoteParticipants.length == 1)) {
         spotlight = remoteParticipants.first;
       }
 
-      final barParticipants = [...participants]..remove(spotlight);
+      // speakerOneToOne shows the speaker alone. The spotlight view hides an
+      // empty bar and gives its space to the spotlight.
+      final barParticipants = effective.barAlignment == null
+          ? const <CallParticipantState>[]
+          : ([...participants]..remove(spotlight));
 
-      return CallParticipantsSpotlightView(
+      child = CallParticipantsSpotlightView(
         call: call,
         spotlight: spotlight,
         participants: barParticipants,
         participantBuilder: callParticipantBuilder,
+        barAlignment: effective.barAlignment ?? ParticipantsBarAlignment.bottom,
+      );
+    } else {
+      final gridParticipants = [...participants];
+      if (floatLocalVideo) gridParticipants.remove(localParticipant);
+
+      child = CallParticipantsGridView(
+        call: call,
+        participants: gridParticipants,
+        itemBuilder: callParticipantBuilder,
       );
     }
 
-    // By default we don't show local video on desktop devices.
-    final enableLocalVideo = this.enableLocalVideo ?? !isDesktopDevice;
-    final showLocalVideo = enableLocalVideo && remoteParticipants.isNotEmpty;
-
-    final gridParticipants = [...participants];
-    if (showLocalVideo && localParticipant != null) {
-      gridParticipants.remove(localParticipant);
-    }
-
-    Widget child = CallParticipantsGridView(
-      call: call,
-      participants: gridParticipants,
-      itemBuilder: callParticipantBuilder,
-    );
-
-    if (showLocalVideo && localParticipant != null) {
+    if (floatLocalVideo) {
       child = StreamLocalVideo(
         call: call,
         participant: localParticipant,
-        participantBuilder: localVideoParticipantBuilder,
+        participantBuilder: floatingSelfViewBuilder,
         child: child,
       );
     }

@@ -144,19 +144,28 @@ void main() {
   });
 
   group('density', () {
-    testWidgets('drops the name but keeps the pill on a narrow tile', (
-      tester,
-    ) async {
+    testWidgets('keeps the name on a narrow tile', (tester) async {
       await tester.pumpWidget(
         _tile(participant: _participant(), width: 130, height: 160),
       );
 
-      expect(find.text('Rene Floor'), findsNothing);
+      expect(find.text('Rene Floor'), findsOneWidget);
       expect(find.byType(DefaultStreamParticipantLabel), findsOneWidget);
       expect(
         find.byType(DefaultStreamConnectionQualityIndicator),
         findsOneWidget,
       );
+    });
+
+    // The size a tile comes out at in the spotlight view's strip, which is
+    // shorter than it is wide.
+    testWidgets('keeps the name on a short tile', (tester) async {
+      await tester.pumpWidget(
+        _tile(participant: _participant(), width: 96, height: 72),
+      );
+
+      expect(find.text('Rene Floor'), findsOneWidget);
+      expect(find.byType(DefaultStreamParticipantLabel), findsOneWidget);
     });
 
     testWidgets('drops the pill on a very narrow tile', (tester) async {

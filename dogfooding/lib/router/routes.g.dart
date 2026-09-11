@@ -12,8 +12,6 @@ List<RouteBase> get $appRoutes => [
   $lobbyRoute,
   $livestreamRoute,
   $callRoute,
-  $callParticipantsRoute,
-  $callStatsRoute,
 ];
 
 RouteBase get $homeRoute => GoRouteData.$route(
@@ -185,68 +183,6 @@ mixin $CallRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/call');
-
-  @override
-  void go(BuildContext context) => context.go(location, extra: _self.$extra);
-
-  @override
-  Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: _self.$extra);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: _self.$extra);
-
-  @override
-  void replace(BuildContext context) =>
-      context.replace(location, extra: _self.$extra);
-}
-
-RouteBase get $callParticipantsRoute => GoRouteData.$route(
-  path: '/call/participants',
-  name: 'participants',
-  factory: $CallParticipantsRoute._fromState,
-);
-
-mixin $CallParticipantsRoute on GoRouteData {
-  static CallParticipantsRoute _fromState(GoRouterState state) =>
-      CallParticipantsRoute($extra: state.extra as Call);
-
-  CallParticipantsRoute get _self => this as CallParticipantsRoute;
-
-  @override
-  String get location => GoRouteData.$location('/call/participants');
-
-  @override
-  void go(BuildContext context) => context.go(location, extra: _self.$extra);
-
-  @override
-  Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: _self.$extra);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: _self.$extra);
-
-  @override
-  void replace(BuildContext context) =>
-      context.replace(location, extra: _self.$extra);
-}
-
-RouteBase get $callStatsRoute => GoRouteData.$route(
-  path: '/call/stats',
-  name: 'stats',
-  factory: $CallStatsRoute._fromState,
-);
-
-mixin $CallStatsRoute on GoRouteData {
-  static CallStatsRoute _fromState(GoRouterState state) =>
-      CallStatsRoute($extra: state.extra as Call);
-
-  CallStatsRoute get _self => this as CallStatsRoute;
-
-  @override
-  String get location => GoRouteData.$location('/call/stats');
 
   @override
   void go(BuildContext context) => context.go(location, extra: _self.$extra);

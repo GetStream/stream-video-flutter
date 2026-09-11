@@ -46,6 +46,8 @@ class MockCallSettings extends Mock implements CallSettings {}
 
 class MockRtcLocalAudioTrack extends Mock implements RtcLocalAudioTrack {}
 
+class MockRtcLocalVideoTrack extends Mock implements RtcLocalVideoTrack {}
+
 class MockRtcLocalCameraTrack extends Mock implements RtcLocalCameraTrack {}
 
 /// Stubs what [StreamLobbyController] reads off a call: the state it takes its

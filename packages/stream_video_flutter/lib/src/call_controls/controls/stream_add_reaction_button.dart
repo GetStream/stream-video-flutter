@@ -4,9 +4,9 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../../../stream_video_flutter.dart';
 
 /// A widget that allows a user to add a reaction
-class AddReactionOption extends StatefulWidget {
-  /// Creates a new instance of [ToggleCameraOption].
-  const AddReactionOption({
+class StreamAddReactionButton extends StatefulWidget {
+  /// Creates a new instance of [StreamAddReactionButton].
+  const StreamAddReactionButton({
     super.key,
     required this.call,
     this.reactionIcon,
@@ -21,10 +21,11 @@ class AddReactionOption extends StatefulWidget {
   final IconData? reactionIcon;
 
   @override
-  State<AddReactionOption> createState() => _AddReactionOptionState();
+  State<StreamAddReactionButton> createState() =>
+      _StreamAddReactionButtonState();
 }
 
-class _AddReactionOptionState extends State<AddReactionOption> {
+class _StreamAddReactionButtonState extends State<StreamAddReactionButton> {
   OverlayEntry? overlayEntry;
   GlobalKey key = GlobalKey();
 
@@ -110,3 +111,10 @@ class _AddReactionOptionState extends State<AddReactionOption> {
     overlayEntry = null;
   }
 }
+
+/// AddReactionOption is [StreamAddReactionButton] now.
+@Deprecated(
+  'AddReactionOption is StreamAddReactionButton now, matching the rest of the '
+  'call controls. Will be removed in the next major version.',
+)
+typedef AddReactionOption = StreamAddReactionButton;

@@ -119,7 +119,9 @@ void main() {
 
     expect(find.text(_builtInMic.label), findsOneWidget);
     expect(find.text(_headset.label), findsOneWidget);
-    expect(find.text('System default'), findsOneWidget);
+    // Twice: the menu's row for it, and the select input's placeholder, which
+    // says the same thing while the platform's choice is the one in effect.
+    expect(find.text('Default'), findsNWidgets(2));
   });
 }
 

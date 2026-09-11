@@ -51,7 +51,7 @@ class StreamCallContent extends StatefulWidget {
     this.callControlsWidgetBuilder,
     this.callNotConnectedBuilder,
     this.callFastReconnectingOverlayBuilder,
-    this.layoutMode = ParticipantLayoutMode.grid,
+    this.layoutMode = ParticipantLayoutMode.auto,
     this.extendBody = false,
     this.pictureInPictureConfiguration = const PictureInPictureConfiguration(),
   });

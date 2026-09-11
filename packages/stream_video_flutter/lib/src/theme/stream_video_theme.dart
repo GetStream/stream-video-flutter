@@ -18,6 +18,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamCallControlsThemeData? callControlsTheme,
     StreamUserAvatarThemeData? userAvatarTheme,
     StreamLobbyViewThemeData? lobbyViewTheme,
+    CallControlBarThemeData? callControlBarTheme,
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -70,6 +71,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callControlsTheme: callControlsTheme,
       userAvatarTheme: userAvatarTheme,
       lobbyViewTheme: lobbyViewTheme,
+      callControlBarTheme: callControlBarTheme,
       callParticipantTheme: callParticipantTheme,
       localVideoTheme: localVideoTheme,
       incomingCallTheme: incomingCallTheme,
@@ -106,6 +108,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.callControlsTheme,
     required this.userAvatarTheme,
     this.lobbyViewTheme = const StreamLobbyViewThemeData(),
+    this.callControlBarTheme = const CallControlBarThemeData(),
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -360,6 +363,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the lobby, the waiting room shown before a call is joined.
   final StreamLobbyViewThemeData lobbyViewTheme;
 
+  /// Theme for the row of controls along the bottom of a call.
+  final CallControlBarThemeData callControlBarTheme;
+
   /// Theme for the call participant widget.
   ///
   /// `null` unless an app sets one: the participant tile takes its defaults
@@ -426,6 +432,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamCallControlsThemeData? callControlsTheme,
     StreamUserAvatarThemeData? userAvatarTheme,
     StreamLobbyViewThemeData? lobbyViewTheme,
+    CallControlBarThemeData? callControlBarTheme,
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -454,6 +461,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     callControlsTheme: this.callControlsTheme.merge(callControlsTheme),
     userAvatarTheme: this.userAvatarTheme.merge(userAvatarTheme),
     lobbyViewTheme: this.lobbyViewTheme.merge(lobbyViewTheme),
+    callControlBarTheme: this.callControlBarTheme.merge(callControlBarTheme),
     callParticipantTheme:
         this.callParticipantTheme?.merge(callParticipantTheme) ??
         callParticipantTheme,
@@ -486,6 +494,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callControlsTheme: callControlsTheme.merge(other.callControlsTheme),
       userAvatarTheme: userAvatarTheme.merge(other.userAvatarTheme),
       lobbyViewTheme: lobbyViewTheme.merge(other.lobbyViewTheme),
+      callControlBarTheme: callControlBarTheme.merge(other.callControlBarTheme),
       callParticipantTheme:
           callParticipantTheme?.merge(other.callParticipantTheme) ??
           other.callParticipantTheme,
@@ -531,6 +540,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           lobbyViewTheme,
+      callControlBarTheme:
+          CallControlBarThemeData.lerp(
+            callControlBarTheme,
+            other.callControlBarTheme,
+            t,
+          ) ??
+          callControlBarTheme,
       callParticipantTheme:
           callParticipantTheme != null && other.callParticipantTheme != null
           ? callParticipantTheme!.lerp(other.callParticipantTheme!, t)

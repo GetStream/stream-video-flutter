@@ -128,9 +128,7 @@ class _StreamLivestreamHostsState extends State<StreamLivestreamHosts>
       return _buildScreenShareContent(screenShareParticipant!);
     }
 
-    if (sortedParticipants.isNotEmpty &&
-        (widget.layoutMode == ParticipantLayoutMode.pictureInPicture ||
-            widget.layoutMode == ParticipantLayoutMode.spotlight)) {
+    if (sortedParticipants.isNotEmpty && widget.layoutMode.isSpeakerLayout) {
       return widget.callParticipantBuilder(
         context,
         widget.call,
