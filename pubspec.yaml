@@ -25,7 +25,7 @@ dev_dependencies:
 dependency_overrides:
   cli_util: ^0.5.1
   file_picker: ^12.0.0-beta.5
-  # Same commit as stream_core_flutter below: the published 0.5.0 predates
+  # A git commit rather than a release: the published 0.5.0 predates
   # CurrentPlatform.debugCurrentPlatformOverride, which the tests need.
   stream_core:
     git:
@@ -36,7 +36,7 @@ dependency_overrides:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core_flutter
-      ref: f4d49e9db343b48d890247fc9bf142805804daf1
+      ref: 2daa0a641519abe9ab637bcb41c69ed3ea4273b7
 
 melos:
   ignore:
