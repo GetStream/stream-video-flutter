@@ -40,5 +40,12 @@
   "lobbyCameraPermissionDenied": "Cameratoegang is geweigerd — sta het toe in je systeeminstellingen",
   "lobbyMicrophoneBusy": "Een andere app gebruikt de microfoon",
   "lobbyCameraBusy": "Een andere app gebruikt de camera",
-  "lobbyDevicesUnreadable": "Je apparaten konden niet worden gelezen"
+  "lobbyDevicesUnreadable": "Je apparaten konden niet worden gelezen",
+  "ringingIncomingCall": "Inkomende oproep",
+  "ringingCalling": "Bellen\u2026",
+  "ringingAccept": "Opnemen",
+  "ringingDecline": "Weigeren",
+  "ringingNobody": "Geen deelnemers",
+  "ringingTwoCallers": "{first} en {second}",
+  "ringingManyCallers": "{first}, {second} en {count, plural, =1{1 ander} other{{count} anderen}}"
 }

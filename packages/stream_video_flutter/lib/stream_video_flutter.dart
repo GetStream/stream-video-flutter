@@ -8,7 +8,6 @@ library stream_video_flutter;
 
 export 'package:stream_core_flutter/core.dart' hide StreamTextTheme;
 export 'package:stream_video/stream_video.dart';
-
 export 'src/call_background/background_service.dart';
 export 'src/call_background/model/notification_options.dart';
 export 'src/call_background/model/notification_payload.dart';
@@ -55,6 +54,7 @@ export 'src/call_screen/call_content/picture_in_picture/android_pip_overlay.dart
 export 'src/call_screen/call_content/picture_in_picture/picture_in_picture_configuration.dart';
 export 'src/call_screen/call_content/picture_in_picture/stream_picture_in_picture_android_view.dart';
 export 'src/call_screen/call_content/picture_in_picture/stream_picture_in_picture_ui_kit_view.dart';
+export 'src/call_screen/common/ringing_call_background.dart';
 export 'src/call_screen/incoming_call/incoming_call_content.dart';
 export 'src/call_screen/lobby_actions.dart';
 export 'src/call_screen/lobby_actions/lobby_device_menu.dart';
@@ -69,6 +69,7 @@ export 'src/call_screen/lobby_scope.dart';
 export 'src/call_screen/lobby_view.dart';
 export 'src/call_screen/media_devices_controller.dart';
 export 'src/call_screen/outgoing_call/outgoing_call_content.dart';
+export 'src/call_screen/outgoing_call/ringing_camera_controller.dart';
 export 'src/call_screen/stream_device_error.dart';
 export 'src/components/stream_video_component_builders.dart';
 export 'src/livestream/livestream_backstage_content.dart';

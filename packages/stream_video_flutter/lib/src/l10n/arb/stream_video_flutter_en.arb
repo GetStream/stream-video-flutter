@@ -166,5 +166,42 @@
   "lobbyDevicesUnreadable": "Your devices could not be read",
   "@lobbyDevicesUnreadable": {
     "description": "Tooltip on a lobby device picker when the platform could not be asked for its devices"
+  },
+  "ringingIncomingCall": "Incoming call",
+  "@ringingIncomingCall": {
+    "description": "Status line on the incoming ringing screen, under the caller's name"
+  },
+  "ringingCalling": "Calling\u2026",
+  "@ringingCalling": {
+    "description": "Status line on the outgoing ringing screen, while the other side is being rung"
+  },
+  "ringingAccept": "Accept",
+  "@ringingAccept": {
+    "description": "Label under the button that answers an incoming call"
+  },
+  "ringingDecline": "Decline",
+  "@ringingDecline": {
+    "description": "Label under the button that rejects an incoming call"
+  },
+  "ringingNobody": "No participants",
+  "@ringingNobody": {
+    "description": "Shown in place of a name on a ringing screen when the call has no members yet"
+  },
+  "ringingTwoCallers": "{first} and {second}",
+  "@ringingTwoCallers": {
+    "description": "The name line on a ringing screen with exactly two members",
+    "placeholders": {
+      "first": { "type": "String" },
+      "second": { "type": "String" }
+    }
+  },
+  "ringingManyCallers": "{first}, {second}, and {count, plural, =1{1 other} other{{count} others}}",
+  "@ringingManyCallers": {
+    "description": "The name line on a ringing screen with three or more members: two names and a count of the rest",
+    "placeholders": {
+      "first": { "type": "String" },
+      "second": { "type": "String" },
+      "count": { "type": "int" }
+    }
   }
 }

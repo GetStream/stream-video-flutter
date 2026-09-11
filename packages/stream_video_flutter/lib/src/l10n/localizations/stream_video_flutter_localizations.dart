@@ -352,6 +352,48 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'Your devices could not be read'**
   String get lobbyDevicesUnreadable;
+
+  /// Status line on the incoming ringing screen, under the caller's name
+  ///
+  /// In en, this message translates to:
+  /// **'Incoming call'**
+  String get ringingIncomingCall;
+
+  /// Status line on the outgoing ringing screen, while the other side is being rung
+  ///
+  /// In en, this message translates to:
+  /// **'Calling…'**
+  String get ringingCalling;
+
+  /// Label under the button that answers an incoming call
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get ringingAccept;
+
+  /// Label under the button that rejects an incoming call
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get ringingDecline;
+
+  /// Shown in place of a name on a ringing screen when the call has no members yet
+  ///
+  /// In en, this message translates to:
+  /// **'No participants'**
+  String get ringingNobody;
+
+  /// The name line on a ringing screen with exactly two members
+  ///
+  /// In en, this message translates to:
+  /// **'{first} and {second}'**
+  String ringingTwoCallers(String first, String second);
+
+  /// The name line on a ringing screen with three or more members: two names and a count of the rest
+  ///
+  /// In en, this message translates to:
+  /// **'{first}, {second}, and {count, plural, =1{1 other} other{{count} others}}'**
+  String ringingManyCallers(String first, String second, int count);
 }
 
 class _StreamVideoFlutterLocalizationsDelegate

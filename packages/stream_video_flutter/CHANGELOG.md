@@ -2,6 +2,13 @@
 
 ### ✅ Added
 
+- Redesigned the incoming and outgoing ringing screens. Both are an avatar over a name and a status line, with the call controls below. The incoming screen sits on the app surface; the outgoing one is drawn on top of the caller's own camera, blurred behind a scrim, and falls back to the flat scrim when the camera is off.
+- Added `CallRingingButton`, the 64px round button answering, declining and cancelling are drawn with. It is `CallControlButton` at the size the ringing designs give it, optionally with a label under it.
+- `CallControlButton` takes a `themeStyle`, handed to the button as `props.themeStyle`. It resolves after the ambient `StreamButtonTheme`, so it reaches that one button — where a nested `StreamButtonTheme` would be dropped for the `positive` tone, which brings one of its own.
+- Added `StreamRingingCameraController`, which opens the camera the outgoing screen previews and hands it to the call as `TrackOption.provided`, so the call carries on with the camera the caller was already previewing rather than opening a second one. `StreamOutgoingCallContent` makes one unless it is given one.
+- Added `StreamIncomingCallThemeData` and `StreamOutgoingCallThemeData` on `StreamVideoTheme`, with `StreamIncomingCallTheme` and `StreamOutgoingCallTheme` to restyle either over a subtree. Both carry a `StreamRingingCallStyle`, which `StreamIncomingCallContent.style` and `StreamOutgoingCallContent.style` override per call site.
+- Added `RingingCallBackground`, the outgoing screen's default background, so a `callBackgroundWidgetBuilder` has something to build on.
+- Added ringing strings to the localizations, in English and Dutch: `ringingIncomingCall`, `ringingCalling`, `ringingAccept`, `ringingDecline`, `ringingNobody`, `ringingTwoCallers` and `ringingManyCallers`. The ringing screens' text was hardcoded English.
 - `StreamLayoutButton` draws the participant layout in effect and offers the rest through a `StreamAdaptiveMenuAnchor`.
 - `StreamLayoutButton.defaultLayouts` is `auto` and `speakerBottom`, so the button toggles unless it is given more.
 - Added layout strings to the localizations, in English and Dutch: `layoutMenuTitle`, `layoutSelectTooltip`, `layoutDefault`, `layoutGrid`, `layoutSpeakerTop`, `layoutSpeakerBottom`, `layoutSpeakerLeft`, `layoutSpeakerRight` and `layoutSpeakerOneToOne`.
@@ -192,6 +199,8 @@
 
 ### ⚠️ Deprecated
 
+- `StreamIncomingOutgoingCallThemeData`, `StreamIncomingOutgoingCallTheme` and `StreamVideoTheme.incomingCallTheme` / `outgoingCallTheme` are deprecated in favour of `StreamIncomingCallThemeData` and `StreamOutgoingCallThemeData`. The ringing screens are built on the design system now and no longer read them, so a theme set through them has no effect. The old pair also shared one inherited widget, so the two screens could never be themed apart.
+
 - `ParticipantLayoutMode.spotlight` is `speakerTop` now, and `pictureInPicture` is `speakerOneToOne`. `dart fix --apply` migrates both.
 - `StreamLocalVideoThemeData`, `StreamLocalVideoTheme` and `StreamVideoTheme.localVideoTheme` are deprecated in favour of `StreamFloatingParticipantTileThemeData`. `StreamLocalVideo` only positions the self-view now, so nothing reads them.
 - Every call control is named `Stream<Thing>Button` now, matching the split buttons, the `CallControlButton` / `CallFeatureButton` primitives, and the design system's own components. `ToggleMicrophoneOption` is `StreamMicrophoneButton`, and alongside it `ToggleCameraOption`, `ToggleScreenShareOption`, `ToggleRecordingOption`, `ToggleClosedCaptionsOption`, `ToggleLayoutOption`, `ToggleSpeakerphoneOption`, `FlipCameraOption`, `AddReactionOption` and `LeaveCallOption` become `StreamCameraButton`, `StreamScreenShareButton`, `StreamRecordingButton`, `StreamClosedCaptionsButton`, `StreamLayoutButton`, `StreamSpeakerphoneButton`, `StreamFlipCameraButton`, `StreamAddReactionButton` and `StreamLeaveCallButton`.
@@ -203,6 +212,10 @@
 - `StreamCallParticipant` is deprecated in favour of `StreamParticipantTile`, matching the component name in the design system. It keeps its own full parameter list and now only wraps `DefaultStreamParticipantTile`. Swapping the name is a manual migration rather than a `dart fix`: `StreamParticipantTile` replaces the visual parameters with a single `style:` (see the Breaking entry below), so a rename would drop whatever a call site passed. `dart fix --apply` does still strip the parameters that no longer have any effect.
 
 ### ⚠️ Breaking
+
+- `StreamIncomingCallContent` and `StreamOutgoingCallContent` no longer take `singleParticipantAvatarTheme`, `multipleParticipantAvatarTheme`, `singleParticipantTextStyle`, `multipleParticipantTextStyle` or `callingLabelTextStyle`. The redesigned screens style one name and many the same, and size a group avatar on its own scale, so there is nothing left for a separate "multiple" theme to reach. Pass a `StreamRingingCallStyle` through `style:` or the new themes instead.
+- More than one person ringing is drawn as a `StreamAvatarGroup` rather than two or three separate avatars, and named "A, B, and N others" rather than "A, B and +N more".
+- The outgoing screen reads its camera state from `StreamRingingCameraController` rather than from `CallConnectOptions.camera.isEnabled`, which is false for a provided track.
 
 - `ParticipantLayoutMode.auto` is the default layout of `StreamCallContent`, `StreamCallParticipants` and `RegularCallParticipantsContent`, and renders what `grid` used to. The livestream widgets still default to `grid`.
 - `ParticipantLayoutMode.grid` gives the local participant a tile of its own instead of floating them over the grid.

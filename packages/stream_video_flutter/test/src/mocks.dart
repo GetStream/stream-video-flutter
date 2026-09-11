@@ -76,3 +76,59 @@ MutableSharedEmitter<StreamCallEvent> stubLobbyCall(
 
   return events;
 }
+
+/// Stubs what the ringing screens read off a call: the members being rung, the
+/// microphone and camera the call would be placed with, and the state stream
+/// [PartialCallStateBuilder] follows.
+///
+/// [MockCallState.ringingMembers] is a getter over `callMembers`, which a mock
+/// does not compute — it is stubbed directly instead.
+void stubRingingCall(
+  MockCall call,
+  MockCallState state, {
+  List<CallMemberState> ringingMembers = const [],
+  CallConnectOptions connectOptions = const CallConnectOptions(),
+  CallStatus? status,
+  UserInfo currentUser = const UserInfo(id: 'local'),
+}) {
+  when(() => state.currentUserId).thenReturn(currentUser.id);
+  when(() => state.ringingMembers).thenReturn(ringingMembers);
+  when(() => state.status).thenReturn(status ?? CallStatus.idle());
+  when(() => call.currentUser).thenReturn(currentUser);
+  when(() => call.callCid).thenReturn(StreamCallCid(cid: 'default:ringing'));
+  when(() => call.connectOptions).thenReturn(connectOptions);
+  when(() => call.state).thenAnswer(
+    (_) => MutableStateEmitter<CallState>(state, sync: true),
+  );
+  // Runs the real selector against the stubbed state, so a screen selecting
+  // something other than the ringing members still gets what it asked for.
+  when(() => call.partialState<List<UserInfo>>(any())).thenAnswer((invocation) {
+    final selector =
+        invocation.positionalArguments.first
+            as CallStateSelector<List<UserInfo>>;
+    return Stream.value(selector(state));
+  });
+}
+
+/// A member of a ringing call, named [name] and with no picture.
+CallMemberState ringingMember(String name) => CallMemberState(
+  userId: name.toLowerCase(),
+  name: name,
+  roles: const [],
+  custom: const {},
+);
+
+/// A camera track that answers the questions a renderer asks of it.
+///
+/// [RtcLocalCameraTrack.mediaConstraints] is what a preview reads the facing
+/// mode off, and a bare mock returns null for it.
+MockRtcLocalCameraTrack mockCameraTrack({
+  FacingMode facingMode = FacingMode.user,
+}) {
+  final track = MockRtcLocalCameraTrack();
+  when(
+    () => track.mediaConstraints,
+  ).thenReturn(CameraConstraints(facingMode: facingMode));
+  when(track.stop).thenAnswer((_) async {});
+  return track;
+}
