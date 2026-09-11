@@ -111,6 +111,13 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
           call: widget.call,
           participant: pipParticipant,
           style: const StreamParticipantTileStyle(
+            // The window is rounded by the system, so a tile rounding itself
+            // as well leaves the Material behind it showing in the corners.
+            // Which also rules out an outline: it would be drawn square and
+            // then have its corners clipped away by the window.
+            borderRadius: BorderRadius.zero,
+            border: Border(),
+            showSpeakerBorder: false,
             showMoreButton: false,
             labelStyle: StreamParticipantLabelStyle(
               showAudioIndicator: false,

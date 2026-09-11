@@ -110,6 +110,45 @@ void main() {
       expect(find.byType(StreamAudioIndicator), findsNothing);
     });
 
+    // The system rounds the window, and a tile rounding itself as well leaves
+    // the Material behind it showing through the corners.
+    testWidgets('draws square corners', (tester) async {
+      await pumpOverlay(tester);
+
+      final clip = tester.widget<ClipRRect>(
+        find
+            .descendant(
+              of: find.byType(DefaultStreamParticipantTile),
+              matching: find.byType(ClipRRect),
+            )
+            .first,
+      );
+
+      expect(clip.borderRadius, BorderRadius.zero);
+    });
+
+    // An outline runs into the same clip as the corners: drawn square, with the
+    // window cutting its corners off. Covers the speaking outline too, which
+    // is the one state that draws over video.
+    testWidgets('draws no outline, speaking or not', (tester) async {
+      when(() => participant.isVideoEnabled).thenReturn(false);
+      when(() => participant.isSpeaking).thenReturn(true);
+
+      await pumpOverlay(tester);
+
+      final container = tester.widget<Container>(
+        find
+            .descendant(
+              of: find.byType(DefaultStreamParticipantTile),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      final decoration = container.foregroundDecoration as BoxDecoration?;
+
+      expect(decoration?.border, const Border());
+    });
+
     testWidgets('draws the chrome the picture-in-picture theme asks back', (
       tester,
     ) async {
