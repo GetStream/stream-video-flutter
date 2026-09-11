@@ -35,7 +35,7 @@ class StreamParticipantLabelStyleDefaults extends StreamParticipantLabelStyle {
   Color get backgroundColor => _colorScheme.backgroundOverlayDarkStrong;
 
   @override
-  BorderRadius get borderRadius => BorderRadius.all(_radius.lg);
+  BorderRadiusGeometry get borderRadius => BorderRadius.all(_radius.lg);
 
   @override
   EdgeInsetsGeometry get padding => EdgeInsetsDirectional.fromSTEB(

@@ -186,7 +186,7 @@ void main() {
       );
       expect(
         pill.borderRadius,
-        BorderRadius.only(topRight: const StreamRadius().lg),
+        BorderRadiusDirectional.only(topEnd: const StreamRadius().lg),
       );
     });
 
@@ -221,7 +221,7 @@ void main() {
       expect(decoration.shape, BoxShape.rectangle);
       expect(
         decoration.borderRadius,
-        BorderRadius.only(topLeft: const StreamRadius().lg),
+        BorderRadiusDirectional.only(topStart: const StreamRadius().lg),
       );
     });
 

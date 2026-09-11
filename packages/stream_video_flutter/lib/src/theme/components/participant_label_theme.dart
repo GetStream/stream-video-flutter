@@ -141,7 +141,7 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
   /// The pill's corner radius.
   ///
   /// Defaults to `radius.lg`.
-  final BorderRadius? borderRadius;
+  final BorderRadiusGeometry? borderRadius;
 
   /// The inset around the pill's content.
   ///

@@ -104,7 +104,11 @@ mixin _$StreamParticipantLabelStyle {
 
     return StreamParticipantLabelStyle(
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
+      borderRadius: BorderRadiusGeometry.lerp(
+        a.borderRadius,
+        b.borderRadius,
+        t,
+      ),
       padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
       spacing: lerpDouble$(a.spacing, b.spacing, t),
       indicatorSpacing: lerpDouble$(a.indicatorSpacing, b.indicatorSpacing, t),
@@ -162,7 +166,7 @@ mixin _$StreamParticipantLabelStyle {
 
   StreamParticipantLabelStyle copyWith({
     Color? backgroundColor,
-    BorderRadius? borderRadius,
+    BorderRadiusGeometry? borderRadius,
     EdgeInsetsGeometry? padding,
     double? spacing,
     double? indicatorSpacing,

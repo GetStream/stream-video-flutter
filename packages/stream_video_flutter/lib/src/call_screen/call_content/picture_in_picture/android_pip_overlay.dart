@@ -130,18 +130,14 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
     final radius = context.streamRadius;
 
     // The chrome sits in the corners of the window, so the corner each piece
-    // occupies is square and only the inner one is rounded. Both styles take a
-    // plain BorderRadius, so which corner that is follows the text direction
-    // here: the toolbar puts the pill at the start and the indicator at the
-    // end.
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    // occupies is square and only the inner one is rounded. Directional: the
+    // toolbar puts the pill at the start and the indicator at the end, and
+    // which corner each of those is comes out in the layout.
     final cornerRadius = radius.lg;
-    final labelRadius = isRtl
-        ? BorderRadius.only(topLeft: cornerRadius)
-        : BorderRadius.only(topRight: cornerRadius);
-    final indicatorRadius = isRtl
-        ? BorderRadius.only(topRight: cornerRadius)
-        : BorderRadius.only(topLeft: cornerRadius);
+    final labelRadius = BorderRadiusDirectional.only(topEnd: cornerRadius);
+    final indicatorRadius = BorderRadiusDirectional.only(
+      topStart: cornerRadius,
+    );
 
     return StreamParticipantTileStyle(
       // The window is rounded by the system, so a tile rounding itself as well
