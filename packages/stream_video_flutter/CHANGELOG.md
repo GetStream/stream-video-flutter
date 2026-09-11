@@ -4,6 +4,7 @@
 
 - Added `StreamModalDialog` and `showStreamModalDialog`, a centered modal surface with a title, header actions and a footer, over a blurred `StreamBlurScrim`.
 - Added `StreamTabBar`, a row of equal-width tabs whose selected index the caller owns. It, `StreamModalDialog` and `StreamBlurScrim` are design-system candidates, living in `src/widgets/design_system_candidates` until they graduate to core.
+- Added `StreamScreenShareDialog`, the desktop screen share picker as a widget, so it can be presented some way other than through `showDefaultScreenSelectionDialog`.
 - Added `StreamScreenShareSelector`, the redesigned grid of screens and windows behind the desktop screen share picker, and `StreamScreenShareThumbnail`, one tile of it.
 - Added `ScreenShareSourceController`, which holds the screens and windows on offer and the one that is picked.
 - Added `StreamScreenShareSelectorThemeData` on `StreamVideoTheme`, and `StreamScreenShareSelectorTheme` to restyle the selector over a subtree.

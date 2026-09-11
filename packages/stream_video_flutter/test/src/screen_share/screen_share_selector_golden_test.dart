@@ -134,35 +134,6 @@ class _DisposingSelectorState extends State<_DisposingSelector> {
     );
   }
 
-  Widget _modal(BuildContext context) {
-    final selector = StreamScreenShareSelector(controller: widget.controller);
-
-    return ValueListenableBuilder(
-      valueListenable: widget.controller,
-      builder: (context, state, _) => StreamModalDialog(
-        title: const Text('Choose what to share'),
-        headerActions: [
-          StreamButton.icon(
-            icon: Icon(context.streamIcons.refresh),
-            style: StreamButtonStyle.secondary,
-            type: StreamButtonType.ghost,
-            onPressed: () {},
-          ),
-        ],
-        actions: [
-          StreamButton(
-            style: StreamButtonStyle.secondary,
-            type: StreamButtonType.ghost,
-            onPressed: () {},
-            child: const Text('Cancel'),
-          ),
-          StreamButton(
-            onPressed: state.selectedSource == null ? null : () {},
-            child: const Text('Share'),
-          ),
-        ],
-        child: selector,
-      ),
-    );
-  }
+  Widget _modal(BuildContext context) =>
+      StreamScreenShareDialog(controller: widget.controller);
 }

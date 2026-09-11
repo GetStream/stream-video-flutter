@@ -99,6 +99,49 @@ void main() {
     });
   });
 
+  group('StreamScreenShareDialog', () {
+    Future<ScreenShareSourceController> pumpDialog(WidgetTester tester) async {
+      final controller = ScreenShareSourceController(capturer: capturer);
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(
+        TestWrapper(
+          child: StreamScreenShareDialog(controller: controller),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return controller;
+    }
+
+    testWidgets('the refresh action re-reads the platform', (tester) async {
+      await pumpDialog(tester);
+      expect(capturer.getSourcesCalls, hasLength(1));
+
+      await tester.tap(find.byIcon(const StreamIcons().refresh));
+      await tester.pumpAndSettle();
+
+      expect(capturer.getSourcesCalls, hasLength(2));
+    });
+
+    testWidgets('Share is disabled until a source is picked', (tester) async {
+      await pumpDialog(tester);
+
+      StreamButton shareButton() => tester.widget<StreamButton>(
+        find.ancestor(
+          of: find.text('Share'),
+          matching: find.byType(StreamButton),
+        ),
+      );
+
+      expect(shareButton().props.onPressed, isNull);
+
+      await tester.tap(find.text('Screen 1'));
+      await tester.pumpAndSettle();
+
+      expect(shareButton().props.onPressed, isNotNull);
+    });
+  });
+
   group('showDefaultScreenSelectionDialog', () {
     testWidgets('opens the modal and cancels with nothing', (tester) async {
       // The real entry point, on the real global capturer: there is no
