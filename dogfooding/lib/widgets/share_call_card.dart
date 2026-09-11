@@ -196,20 +196,10 @@ class _ShareCardContent extends StatelessWidget {
             await Clipboard.setData(ClipboardData(text: callId));
 
             if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Row(
-                    spacing: spacing.xs,
-                    children: [
-                      Icon(
-                        context.streamIcons.checkmark,
-                        color: colorScheme.accentSuccess,
-                      ),
-                      // Unstyled, so the text keeps the light-on-dark colour
-                      // the SnackBar theme gives its content.
-                      const Text('Call ID copied to clipboard'),
-                    ],
-                  ),
+              StreamSnackbarMessenger.of(context).show(
+                StreamSnackbar(
+                  message: const Text('Call ID copied to clipboard'),
+                  variant: StreamSnackbarVariant.success,
                 ),
               );
             }
