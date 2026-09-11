@@ -22,6 +22,7 @@ class StreamScreenShareThumbnail extends StatelessWidget {
     required this.source,
     required this.selected,
     required this.onTap,
+    this.thumbnail,
     this.style,
   });
 
@@ -34,6 +35,13 @@ class StreamScreenShareThumbnail extends StatelessWidget {
   /// Called with [source] when the thumbnail is tapped.
   final OnThumbnailTapped onTap;
 
+  /// The bitmap to draw.
+  ///
+  /// Defaults to the one on [source]. Pass it explicitly where the platform
+  /// reports thumbnails separately from the source list, as
+  /// [ScreenShareSourceState.thumbnailFor] does.
+  final Uint8List? thumbnail;
+
   /// Overrides for the thumbnail's styling.
   ///
   /// Merged over the ambient [StreamScreenShareSelectorTheme].
@@ -42,7 +50,7 @@ class StreamScreenShareThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final style = resolveScreenShareSelectorStyle(context, this.style);
-    final thumbnail = source.thumbnail;
+    final thumbnail = this.thumbnail ?? source.thumbnail;
 
     return Semantics(
       selected: selected,

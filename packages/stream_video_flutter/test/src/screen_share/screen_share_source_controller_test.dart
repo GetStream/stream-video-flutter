@@ -19,7 +19,10 @@ void main() {
   );
 
   setUp(() {
+    screen.thumbnail = null;
+    window.thumbnail = null;
     capturer = FakeDesktopCapturer(sources: [screen, window]);
+    addTearDown(capturer.close);
   });
 
   ScreenShareSourceController controller({
@@ -61,11 +64,63 @@ void main() {
       );
     });
 
-    test('never polls the platform for updates', () async {
+    test(
+      'skips the capture pass when the sources carry their bitmaps',
+      () async {
+        screen.thumbnail = blueThumbnail;
+        window.thumbnail = greyThumbnail;
+
+        final subject = controller();
+        await pumpEventQueue();
+
+        expect(capturer.updateSourcesCallCount, 0);
+        expect(subject.value.thumbnailFor(screen), blueThumbnail);
+      },
+    );
+
+    test('asks for the thumbnails once per load, never on a timer', () async {
       controller();
       await pumpEventQueue();
 
-      expect(capturer.updateSourcesCallCount, 0);
+      expect(capturer.updateSourcesCallCount, 1);
+
+      // Whatever the old picker's two-second timer would have fired by now.
+      for (var i = 0; i < 10; i++) {
+        await Future<void>.delayed(Duration.zero);
+        await pumpEventQueue();
+      }
+
+      expect(capturer.updateSourcesCallCount, 1);
+    });
+
+    test(
+      'picks up a thumbnail the platform posts after the source list',
+      () async {
+        // macOS leaves the bitmaps out of the getSources result entirely.
+        capturer.pendingThumbnails = {screen.id: blueThumbnail};
+        final subject = controller();
+
+        expect(subject.value.thumbnailFor(screen), isNull);
+
+        await pumpEventQueue();
+
+        expect(subject.value.thumbnailFor(screen), blueThumbnail);
+      },
+    );
+
+    test('drops the thumbnail of a source that is gone', () async {
+      capturer.pendingThumbnails = {screen.id: blueThumbnail};
+      final subject = controller();
+      await pumpEventQueue();
+      expect(subject.value.thumbnails, hasLength(1));
+
+      capturer
+        ..sources = [window]
+        ..pendingThumbnails = {};
+      await subject.refresh();
+      await pumpEventQueue();
+
+      expect(subject.value.thumbnails, isEmpty);
     });
 
     test('switching source type filters rather than reloading', () async {
@@ -105,6 +160,7 @@ void main() {
 
     test('reports a failed load without throwing', () async {
       final failing = _FailingDesktopCapturer();
+      addTearDown(failing.close);
       final subject = ScreenShareSourceController(capturer: failing);
       addTearDown(subject.dispose);
       await pumpEventQueue();
@@ -116,13 +172,10 @@ void main() {
   });
 }
 
-class _FailingDesktopCapturer extends DesktopCapturer {
+class _FailingDesktopCapturer extends FakeDesktopCapturer {
   @override
   Future<List<DesktopCapturerSource>> getSources({
     required List<SourceType> types,
     ThumbnailSize? thumbnailSize,
   }) async => throw Exception('no capturer here');
-
-  @override
-  Future<bool> updateSources({required List<SourceType> types}) async => false;
 }

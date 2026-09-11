@@ -278,7 +278,7 @@
 ### 🔄 Changed
 
 - The desktop screen share picker reads the platform's screens and windows once, and again on its refresh button, instead of re-enumerating and re-capturing all of them every two seconds.
-- The picker asks the platform for 480x300 thumbnails instead of whatever size it defaults to.
+- The picker asks the platform for 480x300 thumbnails where the platform honours a size; macOS captures at its own.
 - The picker's sources are released whichever way it is dismissed, including the escape key and a tap outside.
 - `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
 - Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.
