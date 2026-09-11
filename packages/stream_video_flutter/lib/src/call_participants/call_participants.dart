@@ -154,9 +154,13 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
   void didUpdateWidget(covariant StreamCallParticipants oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // The sort follows layoutMode unless the caller supplied one, so picking
-    // a speaker layout swaps the preset and the list has to be ordered again.
-    final sortChanged = widget.sort != oldWidget.sort;
+    // Picking a speaker layout swaps the preset the list is ordered by, so it
+    // has to be ordered again. Compared through layoutMode rather than
+    // through sort: the presets are two cached instances, where a sort the
+    // caller passed is a function, and an inline closure is a new object on
+    // every build.
+    final sortChanged =
+        widget.layoutMode.sorting != oldWidget.layoutMode.sorting;
 
     if (widget.participants != null) {
       _participantsSubscription?.cancel();

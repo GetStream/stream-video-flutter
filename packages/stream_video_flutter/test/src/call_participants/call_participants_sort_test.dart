@@ -34,6 +34,47 @@ Widget _box(BuildContext _, Call __, CallParticipantState participant) =>
     SizedBox.expand(key: ValueKey('tile-${participant.sessionId}'));
 
 void main() {
+  testWidgets('a sort the caller passes inline does not re-sort every build', (
+    tester,
+  ) async {
+    final participants = [
+      _participant('first-to-join'),
+      _participant('speaker', isDominantSpeaker: true),
+    ];
+    var comparisons = 0;
+
+    // A fresh closure on every build, the way a call site written inline
+    // hands one over. Comparing these would be function identity, so every
+    // rebuild would look like a new sort.
+    Future<void> pumpAgain() => tester.pumpWidget(
+      TestWrapper(
+        child: SizedBox(
+          width: 800,
+          height: 600,
+          child: StreamCallParticipants(
+            call: MockCall(),
+            participants: participants,
+            sort: (a, b) {
+              comparisons++;
+              return a.sessionId.compareTo(b.sessionId);
+            },
+            callParticipantBuilder: _box,
+            floatingSelfViewBuilder: _box,
+          ),
+        ),
+      ),
+    );
+
+    await pumpAgain();
+    expect(comparisons, greaterThan(0), reason: 'sorted once on the way in');
+
+    final afterFirstBuild = comparisons;
+    await pumpAgain();
+    await pumpAgain();
+
+    expect(comparisons, afterFirstBuild);
+  });
+
   testWidgets('picking a speaker layout re-sorts with the speaker preset', (
     tester,
   ) async {
