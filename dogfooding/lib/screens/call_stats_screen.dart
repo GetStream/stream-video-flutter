@@ -10,19 +10,15 @@ import 'stats_thermal_chart.dart';
 /// The call's live statistics, as the body of a side panel.
 class CallStatsPanelBody extends StatelessWidget {
   /// Creates a stats body for [call].
-  CallStatsPanelBody({super.key, required this.call});
+  const CallStatsPanelBody({super.key, required this.call});
 
   /// The call whose statistics are reported.
   final Call call;
 
-  final _userAuthController = locator.get<UserAuthController>();
-
   @override
   Widget build(BuildContext context) {
-    final streamVideoTheme = StreamVideoTheme.of(context);
-    final textTheme = streamVideoTheme.textTheme;
     final colorScheme = context.streamColorScheme;
-    final currentUser = _userAuthController.currentUser;
+    final currentUser = locator.get<UserAuthController>().currentUser;
 
     return StreamBuilder<CallMetrics?>(
       stream: call.statsReporter?.stream,
@@ -49,7 +45,10 @@ class CallStatsPanelBody extends StatelessWidget {
           child: Column(
             children: [
               ListTile(
-                leading: StreamUserAvatar(user: currentUser!),
+                // No avatar rather than a crash if the session has gone.
+                leading: currentUser == null
+                    ? null
+                    : StreamUserAvatar(user: currentUser),
                 title: Text(
                   'Call ID',
                   style: TextStyle(color: colorScheme.textPrimary),
@@ -59,143 +58,47 @@ class CallStatsPanelBody extends StatelessWidget {
                   style: TextStyle(color: colorScheme.textPrimary),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Icon(Icons.network_check, color: colorScheme.textPrimary),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Call latency',
-                      style: textTheme.title3.apply(
-                        color: colorScheme.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'Very high latency values may reduce call quality, cause lag, and make the call less enjoyable.',
-                  style: TextStyle(color: colorScheme.textPrimary),
-                ),
+              _StatsSection(
+                icon: Icons.network_check,
+                title: 'Call latency',
+                description:
+                    'Very high latency values may reduce call quality, cause lag, and make the call less enjoyable.',
+                chart: StatsLatencyChart(latencyHistory: state.latencyHistory),
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                height: 200,
-                child: StatsLatencyChart(
-                  latencyHistory: state.latencyHistory,
-                ),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Icon(Icons.whatshot, color: colorScheme.textPrimary),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Thermal state',
-                      style: textTheme.title3.apply(
-                        color: colorScheme.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'Device thermal state history. Higher bars indicate more severe states.',
-                  style: TextStyle(color: colorScheme.textPrimary),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: 200,
-                child: StatsThermalChart(
+              _StatsSection(
+                icon: Icons.whatshot,
+                title: 'Thermal state',
+                description:
+                    'Device thermal state history. Higher bars indicate more severe states.',
+                chart: StatsThermalChart(
                   thermalSeverityHistory: state.thermalStatusHistory,
                 ),
               ),
-              const SizedBox(
-                height: 16,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.battery_full,
-                      color: colorScheme.textPrimary,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Battery level',
-                      style: textTheme.title3.apply(
-                        color: colorScheme.textPrimary,
-                      ),
-                    ),
-                  ],
+              const SizedBox(height: 16),
+              _StatsSection(
+                icon: Icons.battery_full,
+                title: 'Battery level',
+                description: 'Track device battery level throughout the call.',
+                chart: StatsBatteryChart(
+                  batteryLevelHistory: state.batteryLevelHistory,
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'Track device battery level throughout the call.',
+                footer: Text(
+                  'Battery percentage consumed during call: ${batteryDrained != null ? "$batteryDrained%" : "N/A"}',
                   style: TextStyle(color: colorScheme.textPrimary),
                 ),
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                height: 200,
-                child: StatsBatteryChart(
-                  batteryLevelHistory: state.batteryLevelHistory,
-                ),
+              const _StatsSection(
+                icon: Icons.bar_chart,
+                title: 'Call performance',
+                description:
+                    'Review the key data points below to assess call performance.',
               ),
-              Text(
-                'Battery percentage consumed during call: ${batteryDrained != null ? "$batteryDrained%" : "N/A"}',
-                style: TextStyle(color: colorScheme.textPrimary),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Icon(Icons.bar_chart, color: colorScheme.textPrimary),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Call performance',
-                      style: textTheme.title3.apply(
-                        color: colorScheme.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'Review the key data points below to assess call performance.',
-                  style: TextStyle(color: colorScheme.textPrimary),
-                ),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: LatencyOrJitterItem(
-                      title: 'Latency',
-                      value: state.publisher?.latency ?? 0,
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 16),
+              LatencyOrJitterItem(
+                title: 'Latency',
+                value: state.publisher?.latency ?? 0,
               ),
               Row(
                 children: [
@@ -220,7 +123,7 @@ class CallStatsPanelBody extends StatelessWidget {
                       title: 'Publish bitrate',
                       value: publisherBitrate == null
                           ? '--'
-                          : '${state.publisher?.bitrateKbps} Kbps',
+                          : '$publisherBitrate Kbps',
                     ),
                   ),
                   Expanded(
@@ -228,7 +131,7 @@ class CallStatsPanelBody extends StatelessWidget {
                       title: 'Receive bitrate',
                       value: subscriberBitrate == null
                           ? '--'
-                          : '${state.subscriber?.bitrateKbps} Kbps',
+                          : '$subscriberBitrate Kbps',
                     ),
                   ),
                 ],
@@ -276,22 +179,17 @@ class LatencyOrJitterItem extends StatelessWidget {
     super.key,
     required this.value,
     required this.title,
-    this.okRange,
   });
 
   final String title;
   final int? value;
-  final List<int>? okRange;
 
   @override
   Widget build(BuildContext context) {
     return StatsItem(
       title: title,
       value: value == null ? '--' : '$value ms',
-      trailing: StatIndicator(
-        value: value,
-        okRange: okRange ?? [for (var i = 75; i <= 100; i++) i],
-      ),
+      trailing: StatIndicator(value: value),
     );
   }
 }
@@ -311,7 +209,7 @@ class StatsItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
-    final colorScheme = StreamTheme.of(context).colorScheme;
+    final colorScheme = context.streamColorScheme;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -337,7 +235,7 @@ class StatsItem extends StatelessWidget {
               ],
             ),
           ),
-          if (trailing != null) ...[trailing!],
+          if (trailing case final trailing?) trailing,
         ],
       ),
     );
@@ -345,22 +243,26 @@ class StatsItem extends StatelessWidget {
 }
 
 class StatIndicator extends StatelessWidget {
-  const StatIndicator({super.key, required this.value, required this.okRange});
+  const StatIndicator({
+    super.key,
+    required this.value,
+    this.okMin = 75,
+    this.okMax = 100,
+  });
 
   final int? value;
-  final List<int> okRange;
 
-  (Color color, String text)? getIndicatorData() {
-    if (value == null) {
-      return null;
-    } else if (okRange.contains(value)) {
-      return (const Color(0xFFFFD646), 'Ok');
-    } else if (okRange.first > value!) {
-      return (const Color(0xFF00E2A1), 'Good');
-    } else {
-      return (const Color(0xFFDC433B), 'Bad');
-    }
-  }
+  /// Below this the reading is good; above [okMax] it is bad. Between the two
+  /// it is merely acceptable.
+  final int okMin;
+  final int okMax;
+
+  (Color color, String text)? getIndicatorData() => switch (value) {
+    null => null,
+    final value when value < okMin => (const Color(0xFF00E2A1), 'Good'),
+    final value when value <= okMax => (const Color(0xFFFFD646), 'Ok'),
+    _ => (const Color(0xFFDC433B), 'Bad'),
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -382,6 +284,67 @@ class StatIndicator extends StatelessWidget {
         indicatorData.$2,
         style: theme.textTheme.footnote.apply(color: indicatorData.$1),
       ),
+    );
+  }
+}
+
+/// One titled block of the stats panel: a heading, a line about what it
+/// shows, and optionally a chart under it.
+class _StatsSection extends StatelessWidget {
+  const _StatsSection({
+    required this.icon,
+    required this.title,
+    required this.description,
+    this.chart,
+    this.footer,
+  });
+
+  final IconData icon;
+  final String title;
+
+  /// What the section is for, under the heading.
+  final String description;
+
+  /// Charted history, given a fixed height so every section's is the same.
+  final Widget? chart;
+
+  /// A closing line below [chart], for a section that summarises itself.
+  final Widget? footer;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+    final textTheme = StreamVideoTheme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Icon(icon, color: colorScheme.textPrimary),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: textTheme.title3.apply(color: colorScheme.textPrimary),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            description,
+            style: TextStyle(color: colorScheme.textPrimary),
+          ),
+        ),
+        if (chart case final chart?) ...[
+          const SizedBox(height: 16),
+          SizedBox(height: 200, child: chart),
+        ],
+        if (footer case final footer?) footer,
+      ],
     );
   }
 }
