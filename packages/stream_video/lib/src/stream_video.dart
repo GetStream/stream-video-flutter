@@ -594,6 +594,19 @@ class StreamVideo extends Disposable {
     );
   }
 
+  /// Whether the capture session in use supports camera access while
+  /// multitasking, or `null` when it could not be read.
+  Future<bool?> _multitaskingCameraAccessSupported() async {
+    if (!CurrentPlatform.isIos) return null;
+
+    try {
+      return await rtc.Helper.isIOSMultitaskingCameraAccessSupported();
+    } catch (e) {
+      _logger.w(() => '[multitaskingCameraAccessSupported] failed: $e');
+      return null;
+    }
+  }
+
   Future<void> _onAppState(LifecycleState state) async {
     _logger.d(() => '[onAppState] state: $state');
     try {
@@ -612,6 +625,9 @@ class StreamVideo extends Disposable {
           _subscriptions.cancel(_idEvents);
           await _client.closeConnection();
         } else if (activeCalls.isNotEmpty) {
+          final multitaskingCameraAccessSupported =
+              await _multitaskingCameraAccessSupported();
+
           for (final activeCall in activeCalls) {
             final callState = activeCall.state.value;
             final isVideoEnabled =
@@ -622,8 +638,8 @@ class StreamVideo extends Disposable {
             if (shouldMuteCameraInBackground(
               isVideoEnabled: isVideoEnabled,
               muteVideoWhenInBackground: _options.muteVideoWhenInBackground,
-              multitaskingCameraAccessEnabled:
-                  callState.iOSMultitaskingCameraAccessEnabled,
+              multitaskingCameraAccessSupported:
+                  multitaskingCameraAccessSupported,
               platform: CurrentPlatform.type,
             )) {
               await activeCall.setCameraEnabled(enabled: false);
