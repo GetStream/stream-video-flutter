@@ -71,6 +71,7 @@
 - A coordinator WebSocket error frame that says nothing about the credentials — a rate limit, or an error about a single request — no longer closes an otherwise healthy connection. Only an expired or rejected token, or a rejected API key, closes the socket now; the rest are logged.
 - Fixed the participant sort reordering tiles that are visible on screen. One participant whose tile was not visible was enough to move the dominant speaker to the first tile.
 - A viewport visibility is now recorded whether or not the session accepts it. A dropped report left a participant recorded as something they were not for the rest of the call, since a viewport only ever reports what changed.
+- On iOS devices without multitasking camera access, the camera track is now muted while the app is in the background, so other participants see camera-off instead of a frozen frame.
 
 ## 1.6.0
 
