@@ -104,7 +104,11 @@ mixin _$StreamParticipantLabelStyle {
 
     return StreamParticipantLabelStyle(
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
+      borderRadius: BorderRadiusGeometry.lerp(
+        a.borderRadius,
+        b.borderRadius,
+        t,
+      ),
       padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
       spacing: lerpDouble$(a.spacing, b.spacing, t),
       indicatorSpacing: lerpDouble$(a.indicatorSpacing, b.indicatorSpacing, t),
@@ -156,12 +160,13 @@ mixin _$StreamParticipantLabelStyle {
         t,
       ),
       showAudioIndicator: t < 0.5 ? a.showAudioIndicator : b.showAudioIndicator,
+      showVideoOffIcon: t < 0.5 ? a.showVideoOffIcon : b.showVideoOffIcon,
     );
   }
 
   StreamParticipantLabelStyle copyWith({
     Color? backgroundColor,
-    BorderRadius? borderRadius,
+    BorderRadiusGeometry? borderRadius,
     EdgeInsetsGeometry? padding,
     double? spacing,
     double? indicatorSpacing,
@@ -181,6 +186,7 @@ mixin _$StreamParticipantLabelStyle {
     double? microphoneIconSize,
     Color? microphoneOffColor,
     bool? showAudioIndicator,
+    bool? showVideoOffIcon,
   }) {
     final _this = (this as StreamParticipantLabelStyle);
 
@@ -209,6 +215,7 @@ mixin _$StreamParticipantLabelStyle {
       microphoneIconSize: microphoneIconSize ?? _this.microphoneIconSize,
       microphoneOffColor: microphoneOffColor ?? _this.microphoneOffColor,
       showAudioIndicator: showAudioIndicator ?? _this.showAudioIndicator,
+      showVideoOffIcon: showVideoOffIcon ?? _this.showVideoOffIcon,
     );
   }
 
@@ -247,6 +254,7 @@ mixin _$StreamParticipantLabelStyle {
       microphoneIconSize: other.microphoneIconSize,
       microphoneOffColor: other.microphoneOffColor,
       showAudioIndicator: other.showAudioIndicator,
+      showVideoOffIcon: other.showVideoOffIcon,
     );
   }
 
@@ -284,7 +292,8 @@ mixin _$StreamParticipantLabelStyle {
         _other.speakingColor == _this.speakingColor &&
         _other.microphoneIconSize == _this.microphoneIconSize &&
         _other.microphoneOffColor == _this.microphoneOffColor &&
-        _other.showAudioIndicator == _this.showAudioIndicator;
+        _other.showAudioIndicator == _this.showAudioIndicator &&
+        _other.showVideoOffIcon == _this.showVideoOffIcon;
   }
 
   @override
@@ -314,6 +323,7 @@ mixin _$StreamParticipantLabelStyle {
       _this.microphoneIconSize,
       _this.microphoneOffColor,
       _this.showAudioIndicator,
+      _this.showVideoOffIcon,
     ]);
   }
 }

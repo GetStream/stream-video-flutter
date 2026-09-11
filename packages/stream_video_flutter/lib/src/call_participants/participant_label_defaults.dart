@@ -35,7 +35,7 @@ class StreamParticipantLabelStyleDefaults extends StreamParticipantLabelStyle {
   Color get backgroundColor => _colorScheme.backgroundOverlayDarkStrong;
 
   @override
-  BorderRadius get borderRadius => BorderRadius.all(_radius.lg);
+  BorderRadiusGeometry get borderRadius => BorderRadius.all(_radius.lg);
 
   @override
   EdgeInsetsGeometry get padding => EdgeInsetsDirectional.fromSTEB(
@@ -56,6 +56,9 @@ class StreamParticipantLabelStyleDefaults extends StreamParticipantLabelStyle {
 
   @override
   bool get showAudioIndicator => true;
+
+  @override
+  bool get showVideoOffIcon => true;
 
   // Whatever the sound indicator would have made it, so a pill drawing
   // something shorter in its place is the size it would have been with it.
@@ -161,7 +164,9 @@ double participantLabelMinWidth(
   final indicators = <double>[
     if (showMicrophoneOff)
       resolved?.microphoneIconSize ?? defaults.microphoneIconSize,
-    if (showVideoOff) resolved?.videoOffIconSize ?? defaults.videoOffIconSize,
+    if (showVideoOff &&
+        (resolved?.showVideoOffIcon ?? defaults.showVideoOffIcon))
+      resolved?.videoOffIconSize ?? defaults.videoOffIconSize,
     if (showVideoPaused)
       resolved?.videoPausedIconSize ?? defaults.videoPausedIconSize,
     // The sound indicator stands in for the microphone icon rather than

@@ -129,6 +129,7 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
     this.microphoneIconSize,
     this.microphoneOffColor,
     this.showAudioIndicator,
+    this.showVideoOffIcon,
   });
 
   /// The pill's fill.
@@ -140,7 +141,7 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
   /// The pill's corner radius.
   ///
   /// Defaults to `radius.lg`.
-  final BorderRadius? borderRadius;
+  final BorderRadiusGeometry? borderRadius;
 
   /// The inset around the pill's content.
   ///
@@ -256,6 +257,13 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
   /// goes without one whatever this says: there is nothing coming through a
   /// closed microphone for it to report.
   final bool? showAudioIndicator;
+
+  /// Whether to draw the camera-off icon.
+  ///
+  /// Defaults to true. Turn it off where the pill reports who a participant is
+  /// rather than what their devices are doing — the picture-in-picture window,
+  /// where the placeholder already stands in for the camera.
+  final bool? showVideoOffIcon;
 
   /// Linearly interpolate between two styles.
   static StreamParticipantLabelStyle? lerp(
