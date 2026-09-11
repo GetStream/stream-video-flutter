@@ -7,13 +7,13 @@ void main() {
     bool shouldMute({
       bool isVideoEnabled = true,
       bool muteVideoWhenInBackground = false,
-      bool multitaskingCameraAccessEnabled = false,
+      bool? multitaskingCameraAccessSupported = false,
       PlatformType platform = PlatformType.ios,
     }) {
       return shouldMuteCameraInBackground(
         isVideoEnabled: isVideoEnabled,
         muteVideoWhenInBackground: muteVideoWhenInBackground,
-        multitaskingCameraAccessEnabled: multitaskingCameraAccessEnabled,
+        multitaskingCameraAccessSupported: multitaskingCameraAccessSupported,
         platform: platform,
       );
     }
@@ -27,7 +27,11 @@ void main() {
     });
 
     test('does not mute on iOS with multitasking camera access', () {
-      expect(shouldMute(multitaskingCameraAccessEnabled: true), isFalse);
+      expect(shouldMute(multitaskingCameraAccessSupported: true), isFalse);
+    });
+
+    test('mutes on iOS when support could not be read', () {
+      expect(shouldMute(multitaskingCameraAccessSupported: null), isTrue);
     });
 
     test('does not mute on other platforms', () {
@@ -57,7 +61,7 @@ void main() {
       expect(
         shouldMute(
           muteVideoWhenInBackground: true,
-          multitaskingCameraAccessEnabled: true,
+          multitaskingCameraAccessSupported: true,
         ),
         isTrue,
       );
