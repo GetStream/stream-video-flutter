@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../common/ringing_call_style_defaults.dart';
 
 /// The controls of the outgoing ringing screen: the microphone and camera the
 /// call will be placed with, over the button that cancels it.
@@ -17,7 +18,7 @@ class OutgoingCallControls extends StatelessWidget {
   });
 
   /// The resolved style of the screen these controls sit on.
-  final StreamRingingCallStyle style;
+  final RingingCallStyleDefaults style;
 
   /// If camera is enabled.
   final bool isCameraEnabled;
@@ -40,11 +41,11 @@ class OutgoingCallControls extends StatelessWidget {
 
     return Column(
       mainAxisSize: MainAxisSize.min,
-      spacing: style.secondaryControlsSpacing!,
+      spacing: style.secondaryControlsSpacing,
       children: [
         Row(
           mainAxisSize: MainAxisSize.min,
-          spacing: style.controlsSpacing!,
+          spacing: style.controlsSpacing,
           children: [
             CallControlButton(
               icon: Icon(

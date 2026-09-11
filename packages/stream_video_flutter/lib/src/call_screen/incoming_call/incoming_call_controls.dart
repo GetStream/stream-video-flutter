@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 import '../../l10n/localization_extension.dart';
+import '../common/ringing_call_style_defaults.dart';
 
 /// The controls of the incoming ringing screen: answer and decline, over the
 /// microphone and camera the call will be joined with.
@@ -19,7 +20,7 @@ class IncomingCallControls extends StatelessWidget {
   });
 
   /// The resolved style of the screen these controls sit on.
-  final StreamRingingCallStyle style;
+  final RingingCallStyleDefaults style;
 
   /// If camera is enabled.
   final bool isCameraEnabled;
@@ -46,12 +47,12 @@ class IncomingCallControls extends StatelessWidget {
 
     return Column(
       mainAxisSize: MainAxisSize.min,
-      spacing: style.secondaryControlsSpacing!,
+      spacing: style.secondaryControlsSpacing,
       children: [
         Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: style.controlsSpacing!,
+          spacing: style.controlsSpacing,
           children: [
             CallRingingButton(
               icon: Icon(icons.phoneDownFill),

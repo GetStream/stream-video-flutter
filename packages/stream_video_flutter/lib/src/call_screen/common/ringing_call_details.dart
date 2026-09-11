@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 import '../../l10n/localization_extension.dart';
+import 'ringing_call_style_defaults.dart';
 
 /// Who is ringing and what the call is doing: an avatar over a name and a
 /// status line.
@@ -26,7 +27,7 @@ class RingingCallDetails extends StatelessWidget {
   final String status;
 
   /// The resolved style of the screen this block sits on.
-  final StreamRingingCallStyle style;
+  final RingingCallStyleDefaults style;
 
   /// Drawn in place of the avatar, when the host supplied one.
   final Widget? avatar;
@@ -38,12 +39,12 @@ class RingingCallDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      spacing: style.contentSpacing!,
+      spacing: style.contentSpacing,
       children: [
         avatar ?? _buildAvatar(),
         Column(
           mainAxisSize: MainAxisSize.min,
-          spacing: style.titleSpacing!,
+          spacing: style.titleSpacing,
           children: [
             nameLine ??
                 Text(
@@ -61,7 +62,7 @@ class RingingCallDetails extends StatelessWidget {
   Widget _buildAvatar() {
     if (participants.length == 1) {
       return StreamAvatarTheme(
-        data: style.avatarTheme!,
+        data: style.avatarTheme,
         child: StreamUserAvatar(user: participants.first),
       );
     }
