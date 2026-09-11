@@ -114,12 +114,14 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
           // be tapped: Android routes taps to the window itself, not to the
           // Flutter view. Suppressed through the style rather than the props so
           // an app-wide `participantTile` builder that adds an overflow menu to
-          // every tile does not put one back here.
+          // every tile does not put one back here. The tile merges this over
+          // the ambient participant tile theme, and the picture-in-picture
+          // theme's tileStyle over it, so that is what puts any of it back.
           style: const StreamParticipantTileStyle(
             showParticipantLabel: false,
             showConnectionQualityIndicator: false,
             showMoreButton: false,
-          ),
+          ).merge(StreamPictureInPictureTheme.of(context).style?.tileStyle),
         );
       }
     }

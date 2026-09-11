@@ -47,12 +47,13 @@ void main() {
       });
     });
 
-    // The PiP window shows the video and nothing else. An app that registers a
-    // `participantTile` builder adding an overflow menu to every tile — which
-    // the dogfooding app does — must not get one here either.
-    testWidgets('draws the participant without any tile chrome', (
-      tester,
-    ) async {
+    // An app that registers a `participantTile` builder adding an overflow menu
+    // to every tile — which the dogfooding app does — must not get one in the
+    // window either.
+    Future<void> pumpOverlay(
+      WidgetTester tester, {
+      StreamPictureInPictureThemeData? pictureInPictureTheme,
+    }) async {
       await tester.pumpWidget(
         StreamComponentFactory(
           builders: StreamComponentBuilders(
@@ -76,17 +77,50 @@ void main() {
             child: SizedBox(
               width: 200,
               height: 300,
-              child: AndroidPipOverlay(call: call),
+              child: switch (pictureInPictureTheme) {
+                final theme? => StreamPictureInPictureTheme(
+                  data: theme,
+                  child: AndroidPipOverlay(call: call),
+                ),
+                null => AndroidPipOverlay(call: call),
+              },
             ),
           ),
         ),
       );
       await tester.pumpAndSettle();
+    }
+
+    testWidgets('draws the participant without any tile chrome', (
+      tester,
+    ) async {
+      await pumpOverlay(tester);
 
       expect(find.text('renderer'), findsOneWidget);
       expect(find.byType(StreamParticipantLabel), findsNothing);
       expect(find.byType(StreamConnectionQualityIndicator), findsNothing);
       expect(find.byIcon(const StreamIcons().moreHorizontal), findsNothing);
+    });
+
+    testWidgets('draws the chrome the picture-in-picture theme asks back', (
+      tester,
+    ) async {
+      await pumpOverlay(
+        tester,
+        pictureInPictureTheme: const StreamPictureInPictureThemeData(
+          style: StreamPictureInPictureStyle(
+            tileStyle: StreamParticipantTileStyle(
+              showParticipantLabel: true,
+              showConnectionQualityIndicator: true,
+              showMoreButton: true,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(StreamParticipantLabel), findsOneWidget);
+      expect(find.byType(StreamConnectionQualityIndicator), findsOneWidget);
+      expect(find.byIcon(const StreamIcons().moreHorizontal), findsOneWidget);
     });
   });
 }
