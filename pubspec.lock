@@ -1939,12 +1939,13 @@ packages:
     source: hosted
     version: "10.4.0"
   stream_chat_flutter:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: stream_chat_flutter
-      sha256: "8d15749847498481e67e10ef71cb9400726881e78eee9a8322c04f17634ab426"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/stream_chat_flutter"
+      ref: "3f306e5b9f8767f998387ad7b79d100ad3797098"
+      resolved-ref: "3f306e5b9f8767f998387ad7b79d100ad3797098"
+      url: "https://github.com/GetStream/stream-chat-flutter.git"
+    source: git
     version: "10.4.0"
   stream_chat_flutter_core:
     dependency: transitive
@@ -1975,11 +1976,12 @@ packages:
   stream_thumbnail:
     dependency: transitive
     description:
-      name: stream_thumbnail
-      sha256: "14f562a5b25fb8d037ff34a182a4d7b99b16e0fc268392e3bb2754c964ba4069"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.0"
+      path: "packages/stream_thumbnail"
+      ref: "2aea1413997af886ee951921d71e6b8cb8c5cfbb"
+      resolved-ref: "2aea1413997af886ee951921d71e6b8cb8c5cfbb"
+      url: "https://github.com/GetStream/stream-core-flutter.git"
+    source: git
+    version: "0.1.0+1"
   stream_transform:
     dependency: transitive
     description:
@@ -2076,38 +2078,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.2"
-  thumblr:
-    dependency: transitive
-    description:
-      name: thumblr
-      sha256: bfdb4c3d6e95d9595d4d464b255b85845db5f7ab88d8648d3edfe4f19adf043b
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.4"
-  thumblr_macos:
-    dependency: transitive
-    description:
-      name: thumblr_macos
-      sha256: "3b5189db149ee4c6c2fabc6f4bf3d84ed09c96cc45a2153a53ae781742c404c6"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.0"
-  thumblr_platform_interface:
-    dependency: transitive
-    description:
-      name: thumblr_platform_interface
-      sha256: abfcd54b5567b3c8d9a5426b43ed4783c613c34194564c47ffba0ea51f328962
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.1+1"
-  thumblr_windows:
-    dependency: transitive
-    description:
-      name: thumblr_windows
-      sha256: a1d372ccb4d4981e6d55ff516ee5b102f65d0f905d5d36c9712a095358d9e91a
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.3+1"
   tint:
     dependency: transitive
     description:

@@ -35,6 +35,14 @@ dependency_overrides:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core_flutter
       ref: 944ae2833aafbccc53afd561d65d649980526667
+  # Until a release carries the fix: the 104px avatar sizes added to
+  # stream_core_flutter stop 10.4.0 compiling, whose size switches are
+  # exhaustive. Only the dogfooding app pulls chat in.
+  stream_chat_flutter:
+    git:
+      url: https://github.com/GetStream/stream-chat-flutter.git
+      path: packages/stream_chat_flutter
+      ref: 3f306e5b9f8767f998387ad7b79d100ad3797098
 
 melos:
   ignore:
