@@ -85,18 +85,16 @@ class _CallScreenState extends State<CallScreen>
   /// The panel the user asked for, or null once it starts closing.
   ///
   /// Drives the control bar's selected states, which let go as soon as the
-  /// panel starts leaving. Anything asking whether a panel is *on screen*
-  /// wants [_mountedPanel] instead.
+  /// panel starts leaving. What the screen is still *holding* open is
+  /// [_mountedPanel]; what is actually painted is [_panelOnScreen].
   CallSidePanel? _openPanel;
 
-  /// The panel whose content is in the tree, or null when nothing is up.
+  /// The panel the screen is holding open, or null when there is none.
   ///
-  /// Outlives [_openPanel] by the length of the exit animation, so it is the
-  /// one to read for "is a panel on screen": what the back button dismisses,
-  /// and what the app bar makes room for.
+  /// Outlives [_openPanel] by the length of the exit animation, and is what
+  /// the back button dismisses. It is not the same as being painted — see
+  /// [_panelOnScreen], which the app bar asks before making room.
   CallSidePanel? _mountedPanel;
-
-  StreamSubscription<CallStatus>? _callStatusSubscription;
 
   late final _panelController = AnimationController(
     duration: const Duration(milliseconds: 250),
@@ -122,32 +120,25 @@ class _CallScreenState extends State<CallScreen>
     _speakingWhileMutedSubscription = _speakingWhileMuted.stream.listen(
       _onSpeakingWhileMutedChanged,
     );
-    _callStatusSubscription = widget.call
-        .partialState((state) => state.status)
-        .listen(_onCallStatusChanged);
   }
 
-  /// Closes the panel when the call stops being connected.
+  /// Whether a panel is on screen, rather than merely asked for.
   ///
-  /// The SDK only builds the slot the panel lives in while the call is
-  /// connected, so a reconnect takes the panel off screen on its own. Without
-  /// this the state would still claim one is up, and on a phone the app bar
-  /// would stay collapsed around nothing — taking the only leave button with
-  /// it.
-  void _onCallStatusChanged(CallStatus status) {
-    if (!mounted || _mountedPanel == null) return;
-    if (status.isConnected || status.isFastReconnecting || status.isMigrating) {
-      return;
-    }
+  /// The SDK builds the slot the panel lives in only while the call is
+  /// connected, so through a reconnect the panel is gone while [_mountedPanel]
+  /// still names one. Anything that gives the panel room — the collapsed app
+  /// bar, and the height handed back to the grid — has to ask this instead, or
+  /// it makes room for a panel that is not there.
+  ///
+  /// Reading the status rather than listening to it is enough: the SDK rebuilds
+  /// its content, and with it these builders, whenever the status changes.
+  bool _panelOnScreen(Call call) {
+    if (_mountedPanel == null) return false;
 
-    _logger.d(() => 'Closing the $_mountedPanel panel: call is $status');
-    setState(() {
-      _openPanel = null;
-      _mountedPanel = null;
-    });
-    // Straight to closed rather than reversed: the panel is already gone, so
-    // there is nothing left on screen to animate out.
-    _panelController.reset();
+    final status = call.state.value.status;
+    return status.isConnected ||
+        status.isFastReconnecting ||
+        status.isMigrating;
   }
 
   void _onSpeakingWhileMutedChanged(SpeakingWhileMutedState state) {
@@ -183,7 +174,6 @@ class _CallScreenState extends State<CallScreen>
     _speakingWhileMutedDebounce?.cancel();
     _speakingWhileMutedSubscription.cancel();
     _speakingWhileMuted.dispose();
-    _callStatusSubscription?.cancel();
     _chatConnectionRecoverySubscription?.cancel();
     _devices.dispose();
     _panelAnimation.dispose();
@@ -526,9 +516,11 @@ class _CallScreenState extends State<CallScreen>
     // ignore: deprecated_member_use
     return WillPopScope(
       onWillPop: () async {
-        // Keyed to what is on screen, not to what was asked for: a panel is
-        // still visible while it animates out, and back should dismiss it
-        // rather than fall through and leave the call.
+        // Any panel the screen is holding, not just one being painted: a
+        // panel is still visible while it animates out, and through a
+        // reconnect it is off screen but still open. Either way back should
+        // dismiss it rather than fall through and leave the call — the one
+        // outcome no press of back should reach by accident.
         if (_mountedPanel != null) {
           _closePanel();
           return false;
@@ -579,7 +571,7 @@ class _CallScreenState extends State<CallScreen>
                   fullScreen: fullScreen,
                   // What the collapsed app bar gave up, handed back to the
                   // grid so it neither moves nor re-tiles while a panel is up.
-                  coveredTopExtent: _mountedPanel != null ? kToolbarHeight : 0,
+                  coveredTopExtent: _panelOnScreen(call) ? kToolbarHeight : 0,
                   child: Stack(
                     children: [
                       Column(
@@ -654,7 +646,7 @@ class _CallScreenState extends State<CallScreen>
                 // A narrow window gives the whole body to the panel, the app
                 // bar's row included. A zero-height bar rather than null,
                 // because null falls back to the SDK's own.
-                if (context.streamScreenSize.isSmall && _mountedPanel != null) {
+                if (context.streamScreenSize.isSmall && _panelOnScreen(call)) {
                   return PreferredSize(
                     preferredSize: Size.zero,
                     // Scaffold sizes this slot from the child rather than the
