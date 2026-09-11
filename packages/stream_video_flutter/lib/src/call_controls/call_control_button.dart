@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import 'call_button_badge.dart';
 
 /// The tone of a [CallControlButton].
 ///
@@ -73,7 +72,7 @@ class CallControlButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final button = CallButtonBadge(
+    final button = StreamCallButtonBadge(
       showErrorBadge: showErrorBadge,
       child: StreamButton.icon(
         icon: icon,

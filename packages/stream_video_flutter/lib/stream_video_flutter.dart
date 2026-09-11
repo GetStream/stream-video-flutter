@@ -32,6 +32,7 @@ export 'src/call_controls/controls/stream_speakerphone_button.dart';
 export 'src/call_controls/device_control.dart';
 export 'src/call_controls/device_split_buttons.dart';
 export 'src/call_controls/participants_button.dart';
+export 'src/call_controls/stream_call_button_badge.dart';
 export 'src/call_participants/call_participants.dart';
 export 'src/call_participants/call_participants_sorting_mixin.dart';
 export 'src/call_participants/floating_participant_tile.dart';
