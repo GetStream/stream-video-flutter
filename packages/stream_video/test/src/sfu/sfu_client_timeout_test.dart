@@ -6,8 +6,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart'
     as sfu;
 import 'package:stream_video/src/call/stats/tracer.dart';
+import 'package:stream_video/src/retry/retry_policy.dart';
 import 'package:stream_video/src/sfu/sfu_client.dart';
 import 'package:tart/tart.dart';
+
+Duration _zero(RetryConfig config, int retryAttempt) => Duration.zero;
+
+const _noDelayPolicy = RetryPolicy(backoff: _zero);
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -35,6 +40,7 @@ void main() {
           interceptors: [hangingInterceptor],
           rpcTimeout: const Duration(milliseconds: 100),
           rpcMaxRetries: 1,
+          retryPolicy: _noDelayPolicy,
         );
 
         final stopwatch = Stopwatch()..start();

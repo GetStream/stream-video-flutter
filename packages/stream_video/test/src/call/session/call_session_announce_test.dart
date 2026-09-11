@@ -57,6 +57,7 @@ CallSession _buildTestSession({
   when(() => streamVideo.apiKey).thenReturn('test-api-key');
 
   final session = CallSession(
+    retryPolicy: const RetryPolicy(),
     callCid: callCid,
     sessionSeq: 0,
     sessionId: 'test-session',

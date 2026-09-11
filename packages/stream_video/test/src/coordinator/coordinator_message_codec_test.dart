@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_core/stream_core.dart'
-    show StreamApiError, StreamApiErrorExtension;
+    show StreamApiError, StreamErrorCodePredicates;
 import 'package:stream_video/src/coordinator/models/coordinator_events.dart';
 import 'package:stream_video/src/coordinator/open_api/coordinator_message_codec.dart';
 
@@ -22,7 +22,9 @@ String _apiErrorMessage(int code) {
 
 void main() {
   group('CoordinatorMessageCodec', () {
-    const codec = CoordinatorMessageCodec();
+    late CoordinatorMessageCodec codec;
+
+    setUp(() => codec = CoordinatorMessageCodec());
 
     // The socket client reads `error` to close the connection with it, which is
     // what tells the next authentication attempt why the previous one was
@@ -34,15 +36,23 @@ void main() {
       expect(event.event, isNull);
       final error = event.error;
       expect(error, isA<StreamApiError>());
-      expect((error! as StreamApiError).isTokenExpiredError, isTrue);
+      expect((error! as StreamApiError).code.isTokenExpired, isTrue);
     });
 
-    test('surfaces an invalid-token error as the event error', () {
+    test('surfaces a not-yet-valid token as the event error', () {
       final event = codec.decode(_apiErrorMessage(41));
 
       final error = event.error;
       expect(error, isA<StreamApiError>());
-      expect((error! as StreamApiError).isInvalidTokenError, isTrue);
+      expect((error! as StreamApiError).code.isTokenNotYetValid, isTrue);
+    });
+
+    test('surfaces a refused token signature as the event error', () {
+      final event = codec.decode(_apiErrorMessage(43));
+
+      final error = event.error;
+      expect(error, isA<StreamApiError>());
+      expect((error! as StreamApiError).code.isTokenSignatureInvalid, isTrue);
     });
 
     test('surfaces a rejected API key as the event error', () {
@@ -50,7 +60,7 @@ void main() {
 
       final error = event.error;
       expect(error, isA<StreamApiError>());
-      expect((error! as StreamApiError).isInvalidTokenError, isTrue);
+      expect((error! as StreamApiError).code.isApiKeyInvalid, isTrue);
     });
 
     // The socket client closes the connection with any error it is handed, so
@@ -83,6 +93,46 @@ void main() {
 
       expect(event.event, isNull);
       expect(event.error, isNull);
+    });
+  });
+
+  // Dropping is the one sanctioned way a failure goes undelivered: there is no
+  // operation to fail, and closing a healthy connection over one bad frame
+  // would be worse. What the socket must never see is a half-decoded message.
+  group('CoordinatorMessageCodec suppresses what it cannot deliver', () {
+    late CoordinatorMessageCodec codec;
+
+    setUp(() => codec = CoordinatorMessageCodec());
+
+    void expectSuppressed(Object message) {
+      final event = codec.decode(message);
+
+      expect(event.event, isNull);
+      expect(event.error, isNull);
+      expect(event.healthCheckInfo, isNull);
+    }
+
+    test('a frame that is not text', () => expectSuppressed(const [1, 2, 3]));
+
+    test('a frame that is not JSON', () => expectSuppressed('not json'));
+
+    test('a server error it does not surface', () {
+      expectSuppressed(_apiErrorMessage(17));
+    });
+
+    test('an envelope it does not recognise', () {
+      expectSuppressed(json.encode({'nothing': 'recognisable'}));
+    });
+
+    // Suppressed by the codec, which still knows the type name to log, rather
+    // than handed to the socket as an event it can only discard unnamed.
+    test('an event type this SDK version has no model for', () {
+      expectSuppressed(
+        json.encode({
+          'type': 'call.invented_in_a_later_version',
+          'created_at': '2026-01-01T00:00:00.000Z',
+        }),
+      );
     });
   });
 }

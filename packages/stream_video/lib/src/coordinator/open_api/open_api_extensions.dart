@@ -3,7 +3,7 @@ import 'package:stream_core/stream_core.dart';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../../open_api/video/coordinator/api.dart';
-import '../../errors/video_error.dart';
+import '../../errors/stream_video_exception.dart';
 import '../../logger/stream_log.dart';
 import '../../models/models.dart';
 
@@ -655,7 +655,7 @@ extension CreateDeviceRequestPushProviderX
     } else if (this == open.CreateDeviceRequestPushProvider.apn) {
       return PushProvider.apn;
     }
-    throw VideoError(message: 'Unknown push provider: $this');
+    throw StreamVideoException(message: 'Unknown push provider: $this');
   }
 }
 

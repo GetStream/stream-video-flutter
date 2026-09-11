@@ -176,8 +176,8 @@ void main() {
       expect(token!.userId, 'server-guest-1');
       expect(manager.userId, 'server-guest-1');
 
-      // The guards (RpcRetryManager, coordinator WS) key off this: the guest
-      // token is fixed for the lifetime of the client.
+      // The guards (coordinator WS, auth interceptor) key off this: the
+      // guest token is fixed for the lifetime of the client.
       expect(manager.usesStaticProvider, isTrue);
       expect(await manager.getToken(), token);
 
@@ -290,7 +290,7 @@ void main() {
       );
 
       expect(result, isA<Failure>());
-      expect((result as Failure).videoError, isA<VideoError>());
+      expect((result as Failure).videoError, isA<StreamVideoException>());
       expect(manager.userId, isNull);
     });
   });

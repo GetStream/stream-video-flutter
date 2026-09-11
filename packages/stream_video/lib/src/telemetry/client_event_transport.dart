@@ -1,6 +1,7 @@
 import 'package:stream_core/stream_core.dart';
 
-import '../http/stream_api_interceptors.dart';
+import '../http/stream_auth_interceptor.dart';
+import '../http/stream_client_info_interceptor.dart';
 import '../logger/impl/tagged_logger.dart';
 import 'client_event.dart';
 

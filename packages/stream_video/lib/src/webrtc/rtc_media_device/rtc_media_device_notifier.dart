@@ -9,7 +9,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import '../../../stream_video.dart';
 import '../../call/stats/trace_tag.dart';
 import '../../call/stats/tracer.dart';
-import '../../errors/video_error_composer.dart';
+import '../../errors/stream_video_exception_composer.dart';
 import '../../utils/extensions.dart';
 import '../rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 
@@ -281,7 +281,7 @@ class RtcMediaDeviceNotifier {
       if (mediaDevices.isEmpty) return failureWithError('No devices found');
       return Result.success(mediaDevices.toList());
     } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
 

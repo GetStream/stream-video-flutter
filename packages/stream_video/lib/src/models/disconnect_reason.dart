@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../call/call_reject_reason.dart';
-import '../errors/video_error.dart';
+import '../errors/stream_video_exception.dart';
 import '../sfu/data/models/sfu_error.dart';
 
 @immutable
@@ -12,7 +12,7 @@ abstract class DisconnectReason extends Equatable {
   const factory DisconnectReason.timeout() = DisconnectReasonTimeout;
 
   const factory DisconnectReason.failure(
-    VideoError error,
+    StreamVideoException error,
   ) = DisconnectReasonFailure;
 
   const factory DisconnectReason.sfuError(
@@ -68,7 +68,7 @@ class DisconnectReasonTimeout extends DisconnectReason {
 class DisconnectReasonFailure extends DisconnectReason {
   const DisconnectReasonFailure(this.error);
 
-  final VideoError error;
+  final StreamVideoException error;
 
   @override
   List<Object?> get props => [error];

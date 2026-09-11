@@ -2,19 +2,22 @@ import 'dart:async';
 
 import 'package:stream_core/stream_core.dart';
 
-import '../errors/video_error.dart';
+import '../errors/stream_video_exception.dart';
 
 export 'package:stream_core/stream_core.dart'
     show Failure, PatternMatching, Result, Success, runSafely, runSafelySync;
 
-/// Attempts to map an error [Object] to a [VideoError] if it is already
-/// of that type; otherwise, creates a new [VideoError] using the object's
+/// Attempts to map an error [Object] to a [StreamVideoException] if it is already
+/// of that type; otherwise, creates a new [StreamVideoException] using the object's
 /// string representation as the message.
 extension ObjectToVideoError on Object {
-  VideoError toVideoError([StackTrace? stackTrace]) {
+  StreamVideoException toVideoError([StackTrace? stackTrace]) {
     final self = this;
-    if (self is VideoError) return self;
-    return VideoError(message: self.toString(), stackTrace: stackTrace);
+    if (self is StreamVideoException) return self;
+    return StreamVideoException(
+      message: self.toString(),
+      stackTrace: stackTrace,
+    );
   }
 }
 
@@ -24,7 +27,7 @@ extension ObjectToVideoError on Object {
 extension VideoResult<T> on Result<T> {
   T? getDataOrNull() => getOrNull();
 
-  VideoError? getErrorOrNull() =>
+  StreamVideoException? getErrorOrNull() =>
       exceptionOrNull()?.toVideoError(stackTraceOrNull());
 
   /// Pattern-matches the result, mirroring the previous `fold` which received
@@ -39,10 +42,10 @@ extension VideoResult<T> on Result<T> {
     };
   }
 
-  /// Equivalent to the previous `when`, exposing the failure as a [VideoError].
+  /// Equivalent to the previous `when`, exposing the failure as a [StreamVideoException].
   R when<R>({
     required R Function(T data) success,
-    required R Function(VideoError error) failure,
+    required R Function(StreamVideoException error) failure,
   }) {
     return fold(
       onSuccess: success,
@@ -51,12 +54,12 @@ extension VideoResult<T> on Result<T> {
   }
 }
 
-/// A typed [VideoError] view of a [Failure]'s error.
+/// A typed [StreamVideoException] view of a [Failure]'s error.
 extension VideoFailure on Failure {
-  VideoError get videoError => error.toVideoError(stackTrace);
+  StreamVideoException get videoError => error.toVideoError(stackTrace);
 }
 
-/// Creates a [Failure] with a [VideoError] or [VideoErrorWithCause] based on the presence of a [cause].
+/// Creates a [Failure] with a [StreamVideoException] or [StreamVideoExceptionWithCause] based on the presence of a [cause].
 Result<T> failureWithError<T>(
   String message, {
   Object? cause,
@@ -64,8 +67,8 @@ Result<T> failureWithError<T>(
 }) {
   return Result.failure(
     cause == null
-        ? VideoError(message: message, stackTrace: stackTrace)
-        : VideoErrorWithCause(
+        ? StreamVideoException(message: message, stackTrace: stackTrace)
+        : StreamVideoExceptionWithCause(
             message: message,
             cause: cause,
             stackTrace: stackTrace,
@@ -75,7 +78,7 @@ Result<T> failureWithError<T>(
 }
 
 /// Runs [fn] (which itself returns a [Result]) and converts any thrown error
-/// into a [VideoErrorWithCause] failure.
+/// into a [StreamVideoExceptionWithCause] failure.
 Future<Result<T>> runCatchingResult<T>(
   FutureOr<Result<T>> Function() fn,
 ) async {

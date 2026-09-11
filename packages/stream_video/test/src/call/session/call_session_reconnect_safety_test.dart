@@ -13,7 +13,6 @@ import 'package:stream_video/src/webrtc/peer_connection.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
-import 'package:stream_video/src/ws/ws.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
@@ -42,6 +41,7 @@ CallSession _buildTestSession({
   final stateManager = createTestCallStateManager();
 
   return CallSession(
+    retryPolicy: const RetryPolicy(),
     callCid: callCid,
     sessionSeq: 0,
     sessionId: 'test-session',
@@ -240,7 +240,7 @@ void main() {
         // Trigger the timer-cancelling close path. We do not await to keep
         // FakeAsync deterministic; the synchronous side effect we care about
         // (Timer.cancel) runs before any await suspension.
-        unawaited(session.close(StreamWebSocketCloseCode.normalClosure));
+        unawaited(session.close(CloseCode.normalClosure));
         async.elapse(const Duration(seconds: 20));
 
         expect(called, 0);
@@ -436,7 +436,7 @@ void main() {
       );
 
       expect(session.rtcManager, isNotNull);
-      await session.close(StreamWebSocketCloseCode.normalClosure);
+      await session.close(CloseCode.normalClosure);
 
       expect(session.rtcManager, isNull);
     });

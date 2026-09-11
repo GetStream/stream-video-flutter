@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../errors/video_error.dart';
+import '../errors/stream_video_exception.dart';
 
 sealed class ConnectionState extends Equatable {
   const ConnectionState();
@@ -23,7 +23,7 @@ sealed class ConnectionState extends Equatable {
 
   factory ConnectionState.failed(
     String userId, {
-    required VideoError error,
+    required StreamVideoException error,
   }) {
     return StateFailed(userId, error: error);
   }
@@ -96,7 +96,7 @@ class StateFailed extends ConnectionState {
   });
 
   final String userId;
-  final VideoError error;
+  final StreamVideoException error;
 
   @override
   List<Object?> get props => [userId, error];

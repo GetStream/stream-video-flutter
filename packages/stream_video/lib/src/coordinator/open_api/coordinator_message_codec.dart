@@ -1,16 +1,6 @@
 import 'dart:convert';
 
-import 'package:stream_core/stream_core.dart'
-    show
-        HealthCheckInfo,
-        HealthCheckPingEvent,
-        StreamApiErrorExtension,
-        WebSocketMessageCodec,
-        WsEvent,
-        WsRequest;
-
-import '../../logger/impl/tagged_logger.dart';
-import '../models/coordinator_events.dart';
+import '../../../stream_video.dart';
 import 'error/open_api_error.dart';
 import 'event/open_api_event.dart';
 import 'open_api_mapper_extensions.dart';
@@ -42,11 +32,46 @@ final class CoordinatorWsEvent extends WsEvent {
   static const suppressed = CoordinatorWsEvent(null);
 }
 
+/// Why a coordinator message was dropped instead of delivered.
+///
+/// Names the drop in the log line: a decode failure on a live event stream is
+/// the one failure deliberately not delivered — there is no operation to fail,
+/// and closing a healthy connection over one bad frame would be worse — so the
+/// log is the only account of it.
+enum _DropReason {
+  /// The frame was not text, so there is no JSON to read.
+  notText,
+
+  /// The frame was text, but not JSON — or not a JSON object.
+  malformedJson,
+
+  /// A server error that was not about the credentials. Reporting it would
+  /// have the socket client close a connection the error was never about.
+  serverError,
+
+  /// JSON the coordinator event envelope did not recognise.
+  unrecognisedEnvelope,
+
+  /// An envelope naming an event type this SDK version has no model for.
+  unknownEventType,
+
+  /// A recognised envelope this SDK version has no domain event for.
+  unmappedEvent,
+}
+
 /// Encodes/decodes messages between the coordinator WebSocket wire format
 /// (JSON) and [CoordinatorWsEvent].
 class CoordinatorMessageCodec
     implements WebSocketMessageCodec<WsEvent, WsRequest> {
-  const CoordinatorMessageCodec();
+  /// Logs a dropped message and suppresses it.
+  CoordinatorWsEvent _drop(_DropReason reason, [Object? detail]) {
+    _logger.w(
+      () =>
+          '[decode] dropped a message (${reason.name})'
+          '${detail == null ? '' : ': $detail'}',
+    );
+    return CoordinatorWsEvent.suppressed;
+  }
 
   @override
   Object encode(WsRequest message) {
@@ -59,33 +84,40 @@ class CoordinatorMessageCodec
 
   @override
   CoordinatorWsEvent decode(Object message) {
-    if (message is! String) return CoordinatorWsEvent.suppressed;
+    if (message is! String) {
+      return _drop(_DropReason.notText, message.runtimeType);
+    }
 
     final Map<String, dynamic> jsonMap;
     try {
       jsonMap = json.decode(message) as Map<String, dynamic>;
-    } catch (_) {
-      return CoordinatorWsEvent.suppressed;
+    } catch (e) {
+      return _drop(_DropReason.malformedJson, e);
     }
 
     final dtoError = OpenApiError.fromJson(jsonMap);
     if (dtoError != null) {
       final apiError = dtoError.apiError;
+      final code = apiError.code;
 
       // Only an error about the credentials is reported as the event's error:
       // the socket client closes the connection with whatever error it is
       // handed, so reporting the rest would drop a working connection over an
       // error that was never about it.
-      if (apiError.isTokenExpiredError || apiError.isInvalidTokenError) {
+      if (code.isTokenExpired ||
+          code.isTokenNotYetValid ||
+          code.isTokenSignatureInvalid ||
+          code.isApiKeyInvalid) {
         return CoordinatorWsEvent(null, error: apiError);
       }
 
-      _logger.w(() => '[decode] server reported an error: $apiError');
-      return CoordinatorWsEvent.suppressed;
+      return _drop(_DropReason.serverError, apiError);
     }
 
     final dtoEvent = OpenApiEvent.fromJson(jsonMap);
-    if (dtoEvent == null) return CoordinatorWsEvent.suppressed;
+    if (dtoEvent == null) {
+      return _drop(_DropReason.unrecognisedEnvelope, jsonMap['type']);
+    }
 
     // Connected — signals initial pong and carries the connection ID used
     // for subsequent health check pings.
@@ -114,7 +146,17 @@ class CoordinatorMessageCodec
     }
 
     final domainEvent = dtoEvent.toCoordinatorEvent();
-    if (domainEvent == null) return CoordinatorWsEvent.suppressed;
+    if (domainEvent == null) {
+      return _drop(_DropReason.unmappedEvent, jsonMap['type']);
+    }
+
+    // An event type this SDK version has no model for. Dropped here, where the
+    // type is still known, rather than delivered as an opaque event for the
+    // socket to discard without being able to name it.
+    if (domainEvent is CoordinatorUnknownEvent) {
+      return _drop(_DropReason.unknownEventType, jsonMap['type']);
+    }
+
     return CoordinatorWsEvent(domainEvent);
   }
 }

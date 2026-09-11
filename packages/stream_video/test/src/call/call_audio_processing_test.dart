@@ -186,7 +186,7 @@ void main() {
             mockStreamVideo.deviceSupportsAdvancedAudioProcessing,
           ).thenAnswer(
             (_) async => const Result.failure(
-              VideoError(message: 'check failed'),
+              StreamVideoException(message: 'check failed'),
             ),
           );
 
@@ -261,8 +261,9 @@ void main() {
           when(
             () => mockStreamVideo.setAudioProcessingEnabled(true),
           ).thenAnswer(
-            (_) async =>
-                const Result.failure(VideoError(message: 'enable failed')),
+            (_) async => const Result.failure(
+              StreamVideoException(message: 'enable failed'),
+            ),
           );
 
           final call = createTestCall(
@@ -406,8 +407,9 @@ void main() {
           when(
             () => mockStreamVideo.setAudioProcessingEnabled(false),
           ).thenAnswer(
-            (_) async =>
-                const Result.failure(VideoError(message: 'disable failed')),
+            (_) async => const Result.failure(
+              StreamVideoException(message: 'disable failed'),
+            ),
           );
           when(
             callSession.notifyNoiseCancellationStarted,
@@ -639,7 +641,7 @@ void main() {
             ),
           ).thenAnswer(
             (_) async => const Result.failure(
-              VideoError(message: 'fast reconnect failed'),
+              StreamVideoException(message: 'fast reconnect failed'),
             ),
           );
 

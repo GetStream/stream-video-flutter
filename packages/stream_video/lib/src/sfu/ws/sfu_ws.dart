@@ -5,8 +5,8 @@ import 'package:meta/meta.dart';
 import '../../../globals.dart';
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../stream_video.dart';
-import '../../errors/video_error_composer.dart';
-import '../../ws/ws.dart' show StreamWebSocketCloseCode;
+import '../../errors/stream_video_exception_composer.dart';
+import '../../ws/ws.dart' show StreamVideoCloseCode;
 import '../data/events/sfu_events.dart';
 import 'sfu_message_codec.dart';
 
@@ -107,7 +107,10 @@ class SfuWebSocket {
     return const Result.success(none);
   }
 
-  Future<Result<None>> disconnect([int? closeCode, String? closeReason]) async {
+  Future<Result<None>> disconnect([
+    CloseCode? closeCode,
+    String? closeReason,
+  ]) async {
     _logger.i(
       () => '[disconnect] closeCode: $closeCode, closeReason: $closeReason',
     );
@@ -116,9 +119,7 @@ class SfuWebSocket {
       return const Result.success(none);
     }
     await _client.disconnect(
-      closeCode: closeCode != null
-          ? CloseCode(closeCode)
-          : CloseCode.normalClosure,
+      closeCode: closeCode ?? CloseCode.normalClosure,
       source: closeCode != null
           ? const DisconnectionSource.systemInitiated()
           : const DisconnectionSource.userInitiated(),
@@ -129,7 +130,7 @@ class SfuWebSocket {
   Future<Result<None>> recreate() async {
     _logger.i(() => '[recreate] no args');
     await _client.disconnect(
-      closeCode: CloseCode(StreamWebSocketCloseCode.disposeOldSocket.value),
+      closeCode: StreamVideoCloseCode.disposeOldSocket,
       source: const DisconnectionSource.systemInitiated(),
     );
 
@@ -167,6 +168,12 @@ class SfuWebSocket {
 
   void send(sfu_events.SfuRequest message) {
     _logger.v(() => '[send] message: $message');
+
+    if (_client.connectionState.value is Initialized) {
+      _logger.w(() => '[send] rejected (connection not opened)');
+      return;
+    }
+
     _client.send(SfuWsRequest(message));
   }
 
@@ -190,23 +197,29 @@ class SfuWebSocket {
   void _handleDisconnected(DisconnectionSource source) {
     switch (source) {
       case ServerInitiated(:final error?):
-        if (error.error != null) {
-          _events.emit(
-            SfuSocketFailed(
-              sessionId: sessionId,
-              url: url,
-              error: VideoErrors.compose(error.error),
-            ),
-          );
-        } else {
+        // A bare closure — the socket closed with a code and a reason, with no
+        // error underneath it — is a plain disconnection. Everything else
+        // failed the connection: a server verdict, a transport error the
+        // closure wraps, or an SDK-side failure.
+        if (error case StreamNetworkException(cause: null, :final closeCode)) {
           _events.emit(
             SfuSocketDisconnected(
               sessionId: sessionId,
               url: url,
               reason: DisconnectionReason(
-                closeCode: error.code != 0 ? error.code : null,
-                closeReason: error.reason != 'Unknown' ? error.reason : null,
+                closeCode: closeCode == 0 ? null : closeCode,
+                closeReason: error.message,
+                isReconnectable: source.isReconnectable,
               ),
+            ),
+          );
+        } else {
+          _events.emit(
+            SfuSocketFailed(
+              sessionId: sessionId,
+              url: url,
+              isReconnectable: source.isReconnectable,
+              error: StreamVideoExceptions.compose(error),
             ),
           );
         }
@@ -215,8 +228,9 @@ class SfuWebSocket {
           SfuSocketDisconnected(
             sessionId: sessionId,
             url: url,
-            reason: const DisconnectionReason(
+            reason: DisconnectionReason(
               closeReason: 'Unhealthy connection',
+              isReconnectable: source.isReconnectable,
             ),
           ),
         );
@@ -225,8 +239,9 @@ class SfuWebSocket {
           SfuSocketDisconnected(
             sessionId: sessionId,
             url: url,
-            reason: const DisconnectionReason(
+            reason: DisconnectionReason(
               closeReason: 'Connection attempt timed out',
+              isReconnectable: source.isReconnectable,
             ),
           ),
         );
@@ -235,13 +250,22 @@ class SfuWebSocket {
           SfuSocketFailed(
             sessionId: sessionId,
             url: url,
-            error: VideoErrors.compose(
+            isReconnectable: source.isReconnectable,
+            error: StreamVideoExceptions.compose(
               source.error ?? 'SFU WS authentication failed',
             ),
           ),
         );
+      // A close this SDK asked for is not news for the call to act on:
+      // `UserInitiated` is a leave, `SystemInitiated` a recreate.
+      //
+      // `ServerInitiated` is listed only to keep the switch exhaustive — the
+      // arm above matches it whenever it carries an error, and core builds it
+      // no other way. Should that change, a reasonless server closure would
+      // land here and be suppressed, which `isReconnectable` calls worth
+      // recovering — so it would need an arm of its own rather than this one.
       case UserInitiated() || SystemInitiated() || ServerInitiated():
-        break; // manual close or recreate — suppress
+        break;
     }
   }
 }
