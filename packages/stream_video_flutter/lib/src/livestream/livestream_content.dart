@@ -229,7 +229,7 @@ class _LivestreamContentState extends State<LivestreamContent> {
         call: properties.call,
         layoutMode: widget.showMultipleHosts
             ? widget.layoutMode
-            : ParticipantLayoutMode.spotlight,
+            : ParticipantLayoutMode.speakerTop,
         screenShareMode: widget.screenShareMode,
         hosts: widget.showMultipleHosts
             ? properties.hosts

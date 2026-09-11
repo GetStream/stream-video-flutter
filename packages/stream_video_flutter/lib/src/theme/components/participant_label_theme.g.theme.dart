@@ -109,6 +109,7 @@ mixin _$StreamParticipantLabelStyle {
       spacing: lerpDouble$(a.spacing, b.spacing, t),
       indicatorSpacing: lerpDouble$(a.indicatorSpacing, b.indicatorSpacing, t),
       minHeight: lerpDouble$(a.minHeight, b.minHeight, t),
+      maxWidth: lerpDouble$(a.maxWidth, b.maxWidth, t),
       blurSigma: lerpDouble$(a.blurSigma, b.blurSigma, t),
       nameTextStyle: TextStyle.lerp(a.nameTextStyle, b.nameTextStyle, t),
       videoOffIconColor: Color.lerp(
@@ -165,6 +166,7 @@ mixin _$StreamParticipantLabelStyle {
     double? spacing,
     double? indicatorSpacing,
     double? minHeight,
+    double? maxWidth,
     double? blurSigma,
     TextStyle? nameTextStyle,
     Color? videoOffIconColor,
@@ -189,6 +191,7 @@ mixin _$StreamParticipantLabelStyle {
       spacing: spacing ?? _this.spacing,
       indicatorSpacing: indicatorSpacing ?? _this.indicatorSpacing,
       minHeight: minHeight ?? _this.minHeight,
+      maxWidth: maxWidth ?? _this.maxWidth,
       blurSigma: blurSigma ?? _this.blurSigma,
       nameTextStyle: nameTextStyle ?? _this.nameTextStyle,
       videoOffIconColor: videoOffIconColor ?? _this.videoOffIconColor,
@@ -227,6 +230,7 @@ mixin _$StreamParticipantLabelStyle {
       spacing: other.spacing,
       indicatorSpacing: other.indicatorSpacing,
       minHeight: other.minHeight,
+      maxWidth: other.maxWidth,
       blurSigma: other.blurSigma,
       nameTextStyle:
           _this.nameTextStyle?.merge(other.nameTextStyle) ??
@@ -265,6 +269,7 @@ mixin _$StreamParticipantLabelStyle {
         _other.spacing == _this.spacing &&
         _other.indicatorSpacing == _this.indicatorSpacing &&
         _other.minHeight == _this.minHeight &&
+        _other.maxWidth == _this.maxWidth &&
         _other.blurSigma == _this.blurSigma &&
         _other.nameTextStyle == _this.nameTextStyle &&
         _other.videoOffIconColor == _this.videoOffIconColor &&
@@ -294,6 +299,7 @@ mixin _$StreamParticipantLabelStyle {
       _this.spacing,
       _this.indicatorSpacing,
       _this.minHeight,
+      _this.maxWidth,
       _this.blurSigma,
       _this.nameTextStyle,
       _this.videoOffIconColor,

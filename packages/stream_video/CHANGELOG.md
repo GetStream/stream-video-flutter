@@ -43,6 +43,7 @@
 ### ⚠️ Deprecated
 
 - `VideoError` is renamed to `StreamVideoException`, and `VideoErrorWithCause` to `StreamVideoExceptionWithCause`. The old names remain as deprecated typedefs, so existing code still compiles; `dart fix --apply` migrates it. 
+- `ifInvisibleBy` takes a `ParticipantPriority` — a priority for one participant, higher first — instead of a `Comparator`. Pass the priority of the same name: `ifInvisibleBy(dominantSpeakerPriority)` where you passed `ifInvisibleBy(dominantSpeaker)`.
 
 ### ✅ Added
 
@@ -50,6 +51,8 @@
 - Anonymous users can now carry a token: pass `userToken` with a `UserType.anonymous` user to send call-restricted tokens (e.g. for closed livestreams). The token's `user_id` claim must be `!anon`; an invalid token fails fast at client construction.
 - `StreamCallDisconnectedEvent`, `CoordinatorDisconnectedEvent`, and `CoordinatorDisconnected` now carry `apiError`, the error the server reported before closing the WebSocket. A refused token or a rejected API key arrives as an error frame rather than a close frame, so this is the only account of why such a connection was closed; `closeReason` falls back to the error's message when the closure itself carried none.
 - `Call.currentUser` is the user the call is being watched or joined by.
+- `sortParticipants` sorts a participant list the way the SDK's own layouts do: the criteria that hold whether or not a tile is being watched order everybody, while what a participant is owed for being off screen costs the screen a single tile — they trade places with the tile that has the least claim to one, and nothing else moves.
+- `byPriority` builds a participant comparator from a `ParticipantPriority`, and every sorting criterion now ships one: `dominantSpeakerPriority`, `speakingPriority`, `screenSharingPriority`, `publishingVideoPriority`, `publishingAudioPriority`, `byReactionTypePriority`, `byParticipantSourcePriority`, `byVideoIngressSourcePriority` and `byRolePriority`. `0` is the priority of a participant already on screen: above it brings an off-screen participant into view, below it leaves them out.
 
 ### 🐞 Fixed
 
@@ -61,10 +64,13 @@
 - A request now honours the server's `Retry-After` when one is sent, instead of retrying on the computed backoff alone — which against a rate limit retried too early.
 - A call that is still ringing is now reloaded from the coordinator when the socket connects. Accept, reject and end for a ring arrive as coordinator events, so a socket drop while ringing left the local copy stale — an outgoing ring the callee had already answered still looked unanswered, and the caller never joined.
 - An SFU connection that closed in a way that will not change — a server verdict, refused credentials — no longer spends the call's whole reconnect budget. Reconnection is decided by the disconnection source rather than the WebSocket close code, which a server can set to a normal value even when something went wrong.
+- A camera, microphone or screen share the call refuses at join is now recorded as disabled in `connectOptions`.
 - Guest users are now created with their `name`, `image`, and `custom` data — previously only the id was sent.
 - An expired guest token no longer re-creates the guest, which minted a new server-side identity mid-session. The guest is created once, by whichever caller needs a token first — a coordinator API call, `connect()`, or the client's own eager fetch — and everyone arriving while that is in flight waits for it. After it, the client holds the server-assigned identity with a static token, so refresh guards treat guests like static tokens and a rejected guest token fails terminally instead of triggering refreshes that could only return the same token.
 - Fixed a potential permanent hang when guest creation received a 401: the guest-creation call authenticates with its own anonymous token, so it no longer attempts a user-token refresh — which re-entered the token loading already in progress.
 - A coordinator WebSocket error frame that says nothing about the credentials — a rate limit, or an error about a single request — no longer closes an otherwise healthy connection. Only an expired or rejected token, or a rejected API key, closes the socket now; the rest are logged.
+- Fixed the participant sort reordering tiles that are visible on screen. One participant whose tile was not visible was enough to move the dominant speaker to the first tile.
+- A viewport visibility is now recorded whether or not the session accepts it. A dropped report left a participant recorded as something they were not for the rest of the call, since a viewport only ever reports what changed.
 
 ## 1.6.0
 

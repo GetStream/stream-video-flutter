@@ -20,8 +20,6 @@ GoRouter initRouter(UserAuthController authNotifier) {
           $homeRoute,
           $lobbyRoute,
           $callRoute,
-          $callParticipantsRoute,
-          $callStatsRoute,
           $livestreamRoute,
         ],
         builder: (context, state, child) {

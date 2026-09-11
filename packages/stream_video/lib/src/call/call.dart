@@ -2988,17 +2988,24 @@ class Call {
   Future<void> _applyConnectOptions() async {
     _logger.d(() => '[applyConnectOptions] connectOptions: $_connectOptions');
 
-    void report(String option, Result<None> result) {
-      if (result is Failure) {
-        _logger.e(
-          () =>
-              '[applyConnectOptions] $option not applied: '
-              '${result.videoError.message}',
-        );
-      }
+    // A refused option leaves the device off, so the intent comes down with
+    // it: the setters only downgrade `_connectOptions` on success, and a
+    // control that reads the intent while no track has been reported would
+    // otherwise draw the device as live for the rest of the call — and refuse
+    // to toggle, having no track to mute.
+    bool failed(String option, Result<None> result) {
+      if (result is! Failure) return false;
+
+      _logger.e(
+        () =>
+            '[applyConnectOptions] $option not applied: '
+            '${result.videoError.message}',
+      );
+
+      return true;
     }
 
-    report(
+    final cameraFailed = failed(
       'camera',
       await _applyCameraOption(
         _connectOptions.camera,
@@ -3007,18 +3014,34 @@ class Call {
         _connectOptions.videoInputDevice?.id,
       ),
     );
+    if (cameraFailed) {
+      _connectOptions = _connectOptions.copyWith(
+        camera: TrackOption.disabled(),
+      );
+    }
 
-    report(
+    final microphoneFailed = failed(
       'microphone',
       await _applyMicrophoneOption(_connectOptions.microphone),
     );
-    report(
+    if (microphoneFailed) {
+      _connectOptions = _connectOptions.copyWith(
+        microphone: TrackOption.disabled(),
+      );
+    }
+
+    final screenShareFailed = failed(
       'screenShare',
       await _applyScreenShareOption(
         _connectOptions.screenShare,
         _connectOptions.screenShareTargetResolution,
       ),
     );
+    if (screenShareFailed) {
+      _connectOptions = _connectOptions.copyWith(
+        screenShare: TrackOption.disabled(),
+      );
+    }
 
     if (_connectOptions.audioInputDevice != null) {
       await setAudioInputDevice(_connectOptions.audioInputDevice!);
@@ -4393,11 +4416,6 @@ class Call {
       return const Result.success(none);
     }
 
-    final change = VisibilityChange(
-      sessionId: sessionId,
-      userId: userId,
-      visibility: visibility,
-    );
     if (trackType.isScreenShare) {
       _stateManager.participantUpdateScreenShareViewportVisibility(
         sessionId: sessionId,
@@ -4407,19 +4425,26 @@ class Call {
       return const Result.success(none);
     }
 
-    final result =
-        await _session?.updateViewportVisibility(change) ??
+    // Recorded before the session is told, and whatever it makes of it. The
+    // caller reports a change once — a viewport reports what changed, not what
+    // it holds — so a visibility dropped here is not offered again, and the
+    // participant stays recorded as something they are not for the rest of the
+    // call. The session's own handling of this is a debounce that ends in the
+    // UI reading this same state back, so there is nothing to wait for.
+    _stateManager.participantUpdateViewportVisibility(
+      sessionId: sessionId,
+      userId: userId,
+      visibility: visibility,
+    );
+
+    final change = VisibilityChange(
+      sessionId: sessionId,
+      userId: userId,
+      visibility: visibility,
+    );
+
+    return await _session?.updateViewportVisibility(change) ??
         failureWithError('Session is null');
-
-    if (result.isSuccess) {
-      _stateManager.participantUpdateViewportVisibility(
-        sessionId: sessionId,
-        userId: userId,
-        visibility: visibility,
-      );
-    }
-
-    return result;
   }
 
   Future<Result<None>> setSubscriptions(
