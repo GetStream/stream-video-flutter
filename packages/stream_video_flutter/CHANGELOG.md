@@ -152,6 +152,11 @@
   Every component follows the same shape: `StreamX` resolves the registered builder and falls back to `DefaultX`, which holds the default implementation. The parameters of `StreamX` are carried in a `StreamXProps`, exposed as `StreamX.props`, so a custom builder can read them and `copyWith` them to decorate the default rather than reimplement it.
 - Added `StreamParticipantTile`, the participant tile as a replaceable component: register a `participantTile` builder to replace it, or use `DefaultStreamParticipantTile` for the default implementation.
 
+### 🔄 Changed
+
+- The badge on the call control buttons is amber with no border, where it used to be red with one.
+- `accentWarning` is a lighter amber, which also repaints the fair bars on `StreamConnectionQualityIndicator`.
+
 ### 🐞 Fixed
 
 - Fixed the participant grid rearranging itself when a participant nobody can see starts speaking. They take the place of the tile with the least claim to one — the last one on screen — instead of the first, which used to move every tile below it down one.

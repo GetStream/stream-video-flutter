@@ -5,7 +5,8 @@ import '../../../stream_video_flutter.dart';
 
 part 'call_button_badge_theme.g.theme.dart';
 
-/// Applies a call button badge theme to descendant [StreamCallButtonBadge] widgets.
+/// Applies a call button badge theme to descendant [StreamCallButtonBadge]
+/// widgets.
 ///
 /// Wrap a subtree with [StreamCallButtonBadgeTheme] to override how the badge
 /// on a call control reads.
@@ -19,7 +20,6 @@ part 'call_button_badge_theme.g.theme.dart';
 ///   data: StreamCallButtonBadgeThemeData(
 ///     style: StreamCallButtonBadgeStyle(
 ///       badgeStyle: StreamErrorBadgeStyle.error,
-///       showBorder: true,
 ///     ),
 ///   ),
 ///   child: child,
@@ -97,11 +97,15 @@ class StreamCallButtonBadgeThemeData with _$StreamCallButtonBadgeThemeData {
 
 /// Visual styling properties for a [StreamCallButtonBadge].
 ///
-/// The badge is a `StreamErrorBadge` pinned to the top-end corner of a call
-/// control. Its colors come from the core design system's
-/// `StreamErrorBadgeTheme` rather than being repeated here, so this style
-/// selects *which* badge is drawn and where, and an app that wants different
-/// badge colors themes `StreamErrorBadge` itself.
+/// The badge is a [StreamErrorBadge] pinned to the top-end corner of a call
+/// control. This style selects which badge is drawn and where; its colors come
+/// from [StreamErrorBadgeTheme] rather than being repeated here, so an app that
+/// wants different badge colors themes [StreamErrorBadge] itself.
+///
+/// Size is the exception: [StreamCallButtonBadge] always passes it, so it comes
+/// from here and [StreamErrorBadgeThemeData.size] never reaches this badge.
+/// [StreamErrorBadgeThemeData.border] applies only when [showBorder] is set
+/// here.
 @themeGen
 @immutable
 class StreamCallButtonBadgeStyle with _$StreamCallButtonBadgeStyle {
@@ -110,34 +114,32 @@ class StreamCallButtonBadgeStyle with _$StreamCallButtonBadgeStyle {
     this.badgeStyle,
     this.size,
     this.showBorder,
-    this.alignmentOffset,
+    this.overhang,
   });
 
   /// The severity the badge conveys.
   ///
-  /// Defaults to [StreamErrorBadgeStyle.warning], which the design system
-  /// specifies for call controls: the shared error badge is red with a dark
-  /// border, which disappears into a red control and loses its edge over
-  /// video, while the warning badge separates from whatever sits underneath.
+  /// If null, [StreamCallButtonBadge] uses [StreamErrorBadgeStyle.warning],
+  /// which the design system specifies for call controls.
   final StreamErrorBadgeStyle? badgeStyle;
 
   /// The diameter of the badge.
   ///
-  /// Defaults to [StreamErrorBadgeSize.sm].
+  /// If null, [StreamCallButtonBadge] uses [StreamErrorBadgeSize.sm].
   final StreamErrorBadgeSize? size;
 
   /// Whether a border is drawn around the badge.
   ///
-  /// Defaults to false. The warning badge is legible against a call control
-  /// and over video without one, and a border on a badge this small reads as
-  /// a smudge rather than a separation.
+  /// If null, no border is drawn. Note that [StreamErrorBadge] draws one by
+  /// default, so this is a departure from the core badge.
   final bool? showBorder;
 
-  /// How far the badge overhangs the button's top-end corner.
+  /// How far the badge overhangs the button's top-end corner, in logical
+  /// pixels.
   ///
-  /// Applied as a directional offset, so it flips with the text direction.
-  /// Defaults to 4 logical pixels up and towards the end edge.
-  final double? alignmentOffset;
+  /// Applied upwards and towards the end edge, so the horizontal half follows
+  /// the text direction. If null, 4.
+  final double? overhang;
 
   /// Linearly interpolate between two styles.
   static StreamCallButtonBadgeStyle? lerp(

@@ -88,8 +88,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callParticipantsGridTheme:
           callParticipantsGridTheme ??
           legacy?.toCallParticipantsGridThemeData(),
-      callButtonBadgeTheme:
-          callButtonBadgeTheme ?? const StreamCallButtonBadgeThemeData(),
+      callButtonBadgeTheme: callButtonBadgeTheme,
       livestreamTheme: livestreamTheme,
     );
 

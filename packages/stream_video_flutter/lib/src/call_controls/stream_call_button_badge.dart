@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import 'stream_call_button_badge_defaults.dart';
 
 /// Overlays an error badge on the top-end corner of a call button.
 ///
@@ -36,11 +35,11 @@ class StreamCallButtonBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!showErrorBadge) return child;
 
-    const defaults = StreamCallButtonBadgeStyleDefaults();
+    const defaults = _StreamCallButtonBadgeStyleDefaults();
     final themeStyle = StreamCallButtonBadgeTheme.of(context).style;
     final effective = themeStyle?.merge(style) ?? style;
 
-    final offset = effective?.alignmentOffset ?? defaults.alignmentOffset;
+    final overhang = effective?.overhang ?? defaults.overhang;
 
     return Stack(
       // The badge deliberately overhangs the button's box, so the stack must
@@ -49,8 +48,8 @@ class StreamCallButtonBadge extends StatelessWidget {
       children: [
         child,
         PositionedDirectional(
-          top: -offset,
-          end: -offset,
+          top: -overhang,
+          end: -overhang,
           child: StreamErrorBadge(
             size: effective?.size ?? defaults.size,
             style: effective?.badgeStyle ?? defaults.badgeStyle,
@@ -60,4 +59,24 @@ class StreamCallButtonBadge extends StatelessWidget {
       ],
     );
   }
+}
+
+// Default style values for [StreamCallButtonBadge].
+//
+// The badge sits on a call control, which is itself often over video, so the
+// design system gives it the warning severity rather than the shared error one.
+class _StreamCallButtonBadgeStyleDefaults extends StreamCallButtonBadgeStyle {
+  const _StreamCallButtonBadgeStyleDefaults();
+
+  @override
+  StreamErrorBadgeStyle get badgeStyle => StreamErrorBadgeStyle.warning;
+
+  @override
+  StreamErrorBadgeSize get size => StreamErrorBadgeSize.sm;
+
+  @override
+  bool get showBorder => false;
+
+  @override
+  double get overhang => 4;
 }

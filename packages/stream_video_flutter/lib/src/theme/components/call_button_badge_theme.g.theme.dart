@@ -102,7 +102,7 @@ mixin _$StreamCallButtonBadgeStyle {
       badgeStyle: t < 0.5 ? a.badgeStyle : b.badgeStyle,
       size: t < 0.5 ? a.size : b.size,
       showBorder: t < 0.5 ? a.showBorder : b.showBorder,
-      alignmentOffset: lerpDouble$(a.alignmentOffset, b.alignmentOffset, t),
+      overhang: lerpDouble$(a.overhang, b.overhang, t),
     );
   }
 
@@ -110,7 +110,7 @@ mixin _$StreamCallButtonBadgeStyle {
     StreamErrorBadgeStyle? badgeStyle,
     StreamErrorBadgeSize? size,
     bool? showBorder,
-    double? alignmentOffset,
+    double? overhang,
   }) {
     final _this = (this as StreamCallButtonBadgeStyle);
 
@@ -118,7 +118,7 @@ mixin _$StreamCallButtonBadgeStyle {
       badgeStyle: badgeStyle ?? _this.badgeStyle,
       size: size ?? _this.size,
       showBorder: showBorder ?? _this.showBorder,
-      alignmentOffset: alignmentOffset ?? _this.alignmentOffset,
+      overhang: overhang ?? _this.overhang,
     );
   }
 
@@ -137,7 +137,7 @@ mixin _$StreamCallButtonBadgeStyle {
       badgeStyle: other.badgeStyle,
       size: other.size,
       showBorder: other.showBorder,
-      alignmentOffset: other.alignmentOffset,
+      overhang: other.overhang,
     );
   }
 
@@ -157,7 +157,7 @@ mixin _$StreamCallButtonBadgeStyle {
     return _other.badgeStyle == _this.badgeStyle &&
         _other.size == _this.size &&
         _other.showBorder == _this.showBorder &&
-        _other.alignmentOffset == _this.alignmentOffset;
+        _other.overhang == _this.overhang;
   }
 
   @override
@@ -169,7 +169,7 @@ mixin _$StreamCallButtonBadgeStyle {
       _this.badgeStyle,
       _this.size,
       _this.showBorder,
-      _this.alignmentOffset,
+      _this.overhang,
     );
   }
 }
