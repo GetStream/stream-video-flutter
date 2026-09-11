@@ -4,7 +4,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as webrtc;
 import 'protobuf/video/sfu/models/models.pb.dart';
 import 'src/video_environment_manager.dart';
 
-const String streamSdkName = 'stream-flutter';
+const String streamSdkName = 'stream-video-flutter';
 const String streamVideoVersion = '1.5.0';
 const String openapiModelsVersion = '225.14.0';
 const String protocolModelsVersion = '1.48.0';
@@ -14,8 +14,7 @@ const String macOsWebRTCVersion = webrtc.macOsWebRTCVersion;
 const String linuxWebRTCVersion = webrtc.linuxWebRTCVersion;
 const String windowsWebRTCVersion = webrtc.windowsWebRTCVersion;
 
-const String streamDefaultUserAgent =
-    'stream-video-flutter-v$streamVideoVersion';
+const String streamDefaultUserAgent = '$streamSdkName-v$streamVideoVersion';
 
 /// Manages the current video environment (OS, device, app info).
 @internal

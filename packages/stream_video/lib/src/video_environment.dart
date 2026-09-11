@@ -1,3 +1,5 @@
+import '../globals.dart' show streamSdkName;
+
 /// Immutable snapshot of the environment in which the Stream Video SDK runs.
 class VideoEnvironment {
   const VideoEnvironment({
@@ -67,7 +69,7 @@ class VideoEnvironment {
 extension VideoEnvironmentHeader on VideoEnvironment {
   /// Builds the `X-Stream-Client` header value.
   String get xStreamClientHeader => [
-    'stream-video-flutter-v$sdkVersion',
+    '$streamSdkName-v$sdkVersion',
     _headerSegment('app', [appName]),
     _headerSegment('app_version', [appVersion]),
     _headerSegment('os', [osName, osVersion]),
