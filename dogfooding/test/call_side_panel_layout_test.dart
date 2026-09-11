@@ -167,4 +167,59 @@ void main() {
       expect(tester.getRect(find.byKey(gridKey)), body(tester));
     });
   });
+
+  testWidgets('a panel behind a global key survives crossing the breakpoint', (
+    tester,
+  ) async {
+    // The two layouts hang the panel in different places — a Row in one, a
+    // Stack in the other — so without the key the chat would remount and lose
+    // its scroll offset when the window crossed the breakpoint.
+    _ScrollProbeState.mounts = 0;
+    final key = GlobalKey<_ScrollProbeState>();
+
+    Widget at({required bool fullScreen}) => MaterialApp(
+      home: CallSidePanelLayout(
+        animation: kAlwaysCompleteAnimation,
+        fullScreen: fullScreen,
+        panel: _ScrollProbe(key: key),
+        child: filler(gridKey),
+      ),
+    );
+
+    await tester.pumpWidget(at(fullScreen: false));
+    expect(_ScrollProbeState.mounts, 1);
+    key.currentState!.offset = 120;
+
+    await tester.pumpWidget(at(fullScreen: true));
+    expect(_ScrollProbeState.mounts, 1, reason: 'the panel was remounted');
+    expect(key.currentState!.offset, 120, reason: 'panel state was lost');
+
+    await tester.pumpWidget(at(fullScreen: false));
+    expect(_ScrollProbeState.mounts, 1, reason: 'the panel was remounted back');
+    expect(key.currentState!.offset, 120);
+  });
+}
+
+/// Stands in for the chat, whose scroll offset is what the key protects.
+class _ScrollProbe extends StatefulWidget {
+  const _ScrollProbe({super.key});
+
+  @override
+  State<_ScrollProbe> createState() => _ScrollProbeState();
+}
+
+class _ScrollProbeState extends State<_ScrollProbe> {
+  /// How many times any probe has been built from scratch.
+  static int mounts = 0;
+
+  double offset = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    mounts++;
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.expand();
 }
