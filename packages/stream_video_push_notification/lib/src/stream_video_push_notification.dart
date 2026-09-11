@@ -585,9 +585,10 @@ const _defaultPushConfiguration = StreamVideoPushConfiguration(
       subtitle: 'Missed call',
       callbackText: 'Call back',
     ),
+    // No colours: the plugin's own resources carry the design's, and naming
+    // one here would mean the default could only be changed in two places.
     incomingCallNotification: IncomingCallNotificationParams(
       fullScreenShowLogo: false,
-      fullScreenBackgroundColor: '#0955fa',
     ),
   ),
   ios: IOSPushConfiguration(

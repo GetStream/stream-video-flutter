@@ -15,6 +15,13 @@
 
 ### 🔄 Changed
 
+- [Android] The full-screen incoming call activity follows the redesigned ringing screen: the app surface instead of the blue `#0955fa`, a 104dp avatar, 64dp accept and decline buttons centred 80dp apart above the bottom, and the design system's `#00A46E` and `#D90D10` in place of the Material green and red. An app that sets `IncomingCallNotificationParams` keeps whatever it set.
+- [Android] `IncomingCallNotificationParams.fullScreenTextColor` no longer defaults to white. Left unset, the caller's name, the handle under it and the action labels each take the colour the design gives them rather than all four being painted the same. Setting it still paints all four.
+- [Android] `IncomingCallNotificationParams.fullScreenBackgroundColor` no longer defaults to `#0955fa` on the Dart side. The default is the plugin's own resource, so it can be overridden by an app's `colors.xml` as well as through the params.
+- [Android] A malformed colour in `IncomingCallNotificationParams` is logged rather than silently ignored. It still falls back to the default.
+
+  The heads-up notification is unchanged. From API 34 it is drawn by the platform's `NotificationCompat.CallStyle`, whose buttons and labels are the system's — `textAccept` and `textDecline` do not reach it. iOS ringing is CallKit, which is system UI throughout and has nothing to restyle.
+
 - [Android] The plugin now compiles against Java 17, matching the other Stream Video Flutter packages, and adds `androidx.core:core-telecom` and `org.jetbrains.kotlinx:kotlinx-coroutines-android` as dependencies. 
 - [Android] `androidx.core:core-telecom` contributes `BLUETOOTH_CONNECT` and two components of its own — `androidx.core.telecom.internal.JetpackConnectionService` and `MuteStateReceiver` — to your merged manifest. `BLUETOOTH_CONNECT` is now declared by this plugin too, so it is owned rather than inherited invisibly. It is optional: ringing does not depend on it, `CallsManager.addCall` requires only `MANAGE_OWN_CALLS`, and Jetpack Telecom checks the Bluetooth grant before every use. It is a runtime permission from API 31, and without it only the active Bluetooth device is surfaced, under a generic name.
 

@@ -26,10 +26,13 @@ import android.view.ViewGroup.MarginLayoutParams
 import android.os.PowerManager
 import android.text.TextUtils
 import android.util.Log
+import androidx.core.content.ContextCompat
 
 class IncomingCallActivity : Activity() {
 
     companion object {
+
+        private const val TAG = "IncomingCallActivity"
 
         private const val ACTION_ENDED_CALL_INCOMING =
             "io.getstream.video.ACTION_ENDED_CALL_INCOMING"
@@ -159,6 +162,17 @@ class IncomingCallActivity : Activity() {
     }
 
 
+    /** [color] as an ARGB int, or null when it is absent or malformed. */
+    private fun parseColorOrNull(color: String?): Int? {
+        if (color.isNullOrEmpty()) return null
+        return try {
+            Color.parseColor(color)
+        } catch (error: IllegalArgumentException) {
+            Log.w(TAG, "Ignoring unparseable colour \"$color\"", error)
+            null
+        }
+    }
+
     private fun incomingData(intent: Intent) {
         val data = intent.extras?.getBundle(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
         if (data == null) finish()
@@ -173,16 +187,20 @@ class IncomingCallActivity : Activity() {
             }
         }
 
-        val textColor = data?.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_TEXT_COLOR, "#ffffff")
+        // No default: without a colour from the integrator every label keeps
+        // the one the layout gives it, and the design does not paint the
+        // caller's name, the handle and the action labels the same.
+        val textColor = parseColorOrNull(
+            data?.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_TEXT_COLOR)
+        )
         val showCallHandle = data?.getBoolean(IncomingCallConstants.EXTRA_CALL_SHOW_CALL_HANDLE, false)
         tvCallerName.text = data?.getString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER, "")
         tvNumber.text = data?.getString(IncomingCallConstants.EXTRA_CALL_HANDLE, "")
         tvNumber.visibility = if (showCallHandle == true) View.VISIBLE else View.INVISIBLE
 
-        try {
-            tvCallerName.setTextColor(Color.parseColor(textColor))
-            tvNumber.setTextColor(Color.parseColor(textColor))
-        } catch (error: Exception) {
+        if (textColor != null) {
+            tvCallerName.setTextColor(textColor)
+            tvNumber.setTextColor(textColor)
         }
 
         val showLogo = data?.getBoolean(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_SHOW_LOGO, false)
@@ -230,18 +248,15 @@ class IncomingCallActivity : Activity() {
         tvDecline.text =
             if (TextUtils.isEmpty(textDecline)) getString(R.string.text_decline) else textDecline
 
-        try {
-            tvAccept.setTextColor(Color.parseColor(textColor))
-            tvDecline.setTextColor(Color.parseColor(textColor))
-        } catch (error: Exception) {
+        if (textColor != null) {
+            tvAccept.setTextColor(textColor)
+            tvDecline.setTextColor(textColor)
         }
 
-        val backgroundColor =
-            data?.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_COLOR, "#0955fa")
-        try {
-            ivBackground.setBackgroundColor(Color.parseColor(backgroundColor))
-        } catch (error: Exception) {
-        }
+        val backgroundColor = parseColorOrNull(
+            data?.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_COLOR)
+        ) ?: ContextCompat.getColor(this, R.color.incoming_call_background)
+        ivBackground.setBackgroundColor(backgroundColor)
         var backgroundUrl = data?.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_URL, "")
         if (!backgroundUrl.isNullOrEmpty()) {
             if (!backgroundUrl.startsWith("http://", true) && !backgroundUrl.startsWith(

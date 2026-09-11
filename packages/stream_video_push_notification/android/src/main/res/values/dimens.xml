@@ -14,12 +14,19 @@
     <dimen name="base_margin_x6">60dp</dimen>
 
     <dimen name="base_margin_revert_x5">-50dp</dimen>
-    <dimen name="size_avatar">120dp</dimen>
-    <dimen name="size_button">60dp</dimen>
-    <dimen name="size_button_x2">120dp</dimen>
+    <dimen name="size_avatar">104dp</dimen>
+    <dimen name="size_button">64dp</dimen>
+    <dimen name="size_button_x2">128dp</dimen>
     <dimen name="size_button_x2_5">150dp</dimen>
 
-    <dimen name="size_text_name">24sp</dimen>
-    <dimen name="size_text_action">14sp</dimen>
+    <!-- The two ripple boxes are 128dp around a 64dp button, so a 16dp gap
+         between them leaves the designed 80dp between the buttons. -->
+    <dimen name="size_action_gap">16dp</dimen>
+    <dimen name="size_action_bottom">104dp</dimen>
+    <dimen name="size_action_label_gap">12dp</dimen>
+
+    <dimen name="size_text_name">22sp</dimen>
+    <dimen name="size_text_status">17sp</dimen>
+    <dimen name="size_text_action">15sp</dimen>
     <dimen name="size_text_sub">12sp</dimen>
 </resources>
