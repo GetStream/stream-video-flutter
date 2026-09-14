@@ -24,17 +24,39 @@ else
 fi
 anr_check "login-android"
 
-# tap_until, not a fixed sleep: the home screen takes a variable moment to build
-# after login, and a tap that lands early hits the login screen's Google button.
-if tap_until $A_START_NEW_X $A_START_NEW_Y "$ANDROID_LOG" "getOrCreateCall" 4 15; then
+# The lobby is asserted from the UI tree, not from a log line, and that is the
+# whole repair. "Start New Call" used to call getOrCreate() and this step used
+# to wait for it; since #1312 the button only pushes the lobby route, because
+# the encryption mode is fixed at creation and the lobby is where it is chosen.
+# There is nothing left in the log to wait for here, so the old assertion could
+# never pass and the run died on "Lobby did not open" with a healthy app.
+#
+# tap_until_ui, not a fixed sleep: the home screen takes a variable moment to
+# build after login, and a tap that lands early hits the login screen.
+if tap_until_ui $A_START_NEW_X $A_START_NEW_Y "Start a test call" 4 15; then
   pass "lobby-android" "Lobby screen reached"
 else
   fail "lobby-android" "Lobby did not open"; shot "err-lobby"; exit 1
 fi
-sleep 3
+sleep 2
+assert_ui "lobby-e2ee-offered-android" \
+  "Lobby offers end-to-end encryption while the mode is still choosable" \
+  "End-to-end encryption" 10
 shot "02-android-lobby"
 
-if tap_until $A_TESTCALL_X $A_TESTCALL_Y "$ANDROID_LOG" "sfuJoinResponse" 3 30; then
+# One tap, two things to observe: the lobby creates the call and then joins it.
+# Asserting them separately keeps "the coordinator refused to create it" apart
+# from "it was created but the SFU handshake failed".
+M=$(logline "$ANDROID_LOG")
+if ! ui_tap "Start a test call" 20; then
+  fail "join-android" "the lobby's join button was not on screen"; shot "err-join"; exit 1
+fi
+if wait_log "$ANDROID_LOG" "getOrCreateCall" 30 "$M"; then
+  pass "create-android" "Lobby created the call on join"
+else
+  fail "create-android" "the lobby never created the call"
+fi
+if wait_log "$ANDROID_LOG" "sfuJoinResponse" 40 "$M"; then
   pass "join-android" "Android joined the call"
 else
   fail "join-android" "Android did not join"; shot "err-join"; exit 1
