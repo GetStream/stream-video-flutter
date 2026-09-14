@@ -45,11 +45,14 @@ class UserAuthController extends ChangeNotifier {
       userId: user.id,
       environment: environment,
     );
+
+    final effectiveUser = _withTokenUserId(user, tokenResponse.token);
+
     await _prefs.setApiKey(tokenResponse.apiKey);
     await _prefs.setEnvironment(environment);
 
     _authRepo ??= locator.get<UserAuthRepository>(
-      param1: user,
+      param1: effectiveUser,
       param2: tokenResponse,
     );
     final credentials = await _authRepo!.login();
@@ -84,4 +87,36 @@ class UserAuthController extends ChangeNotifier {
     await _prefs.clearUserCredentials();
     notifyListeners();
   }
+}
+
+/// Returns [user] with its id replaced by the `user_id` the [token] was issued
+/// for, when the two disagree.
+User _withTokenUserId(User user, String token) {
+  final String tokenUserId;
+  try {
+    tokenUserId = UserToken.jwt(token).userId;
+  } catch (e) {
+    debugPrint('Could not read the user id from the token: $e');
+    return user;
+  }
+
+  if (tokenUserId.isEmpty || tokenUserId == user.id) return user;
+
+  debugPrint(
+    'The token is issued for "$tokenUserId" but the login id is "${user.id}". '
+    'Continuing as "$tokenUserId".',
+  );
+
+  final info = user.info;
+  return User(
+    type: user.type,
+    info: UserInfo(
+      id: tokenUserId,
+      name: info.name.isEmpty ? tokenUserId : info.name,
+      image: info.image,
+      role: info.role,
+      teams: info.teams,
+      extraData: info.extraData,
+    ),
+  );
 }
