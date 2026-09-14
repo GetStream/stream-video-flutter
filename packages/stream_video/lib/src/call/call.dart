@@ -952,10 +952,17 @@ class Call {
     // Optimistically mark the call as accepted
     _stateManager.lifecycleCallAccepted();
 
+    // Before the request, not after. The coordinator cannot report this call as
+    // accepted by us until it receives this, so marking first guarantees the
+    // marker is already set whenever a teardown check observes the acceptance,
+    // however the two race.
+    _streamVideo.markCallAcceptedOnThisDevice(callCid);
+
     final result = await _coordinatorClient.acceptCall(cid: state.callCid);
     if (result is Failure) {
       // Revert the optimistic acceptance so the user can retry or reject.
       _stateManager.lifecycleCallAccepted(accepted: false);
+      _streamVideo.clearCallAcceptedOnThisDevice(callCid);
     }
 
     return result;
@@ -2824,6 +2831,7 @@ class Call {
     await dynascaleManager.dispose();
     await clearE2EEManager();
 
+    _streamVideo.clearCallAcceptedOnThisDevice(callCid);
     await _streamVideo.state.removeActiveCall(this);
     if (_streamVideo.state.outgoingCall.valueOrNull?.callCid == callCid) {
       await _streamVideo.state.setOutgoingCall(null);

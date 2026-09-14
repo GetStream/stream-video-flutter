@@ -12,6 +12,8 @@
 
 ### 🐞 Fixed
 
+- [iOS] Fixed a call answered from the CallKit screen being torn down when the app was answering it from a terminated state. A call is only added to `activeCalls` inside `join()`, which an app may not call until its own call UI is up, so between accepting and joining the SDK could not tell a call answered on this device from one answered on another — and ended the CallKit call the user had just picked up. iOS then released the app's process assertion and suspended it mid-join, so the join never completed and the caller was left alone in the call. The accept is now recorded before it is sent to the coordinator, which cannot report the call as accepted by this user any earlier than that.
+
 - [Android] Fixed a call hung up outside the app, from a paired watch, a Bluetooth headset or a car head unit, not leaving the Stream call. Ended events carrying `CallData.endedBySystem` are now applied on Android too, while the ambiguous ones, which on Android also mean the incoming call notification was merely dismissed, keep being ignored. Requires the Android Telecom integration in `stream_video_push_notification`.
 - Fixed the call reconnect loop retrying without a delay or an escalation when an unexpected error was thrown before the reconnect strategy ran. 
 

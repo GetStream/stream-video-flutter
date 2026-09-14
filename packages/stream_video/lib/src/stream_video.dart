@@ -338,6 +338,20 @@ class StreamVideo extends Disposable {
   final Map<String, Timer> _incomingAutoRejectTimers = {};
   final Set<String> _handledIncomingCallCids = {};
 
+  /// Cids this device has accepted, from the moment the accept is sent to the
+  /// coordinator until the call is cleaned up.
+  ///
+  /// The coordinator cannot report a call as accepted by the current user
+  /// before this device sent that accept, so a marker written before the
+  /// request is always in place by the time any "was this answered elsewhere?"
+  /// check runs.
+  ///
+  /// Neither of the other signals can stand in for it. A call only enters
+  /// [activeCalls] inside [Call.join], which the integrator may not call until
+  /// its own UI is up, and the native call entry disappears as soon as anything
+  /// ends the CallKit call.
+  final Set<String> _locallyAcceptedCallCids = {};
+
   /// Returns the current user.
   UserInfo get currentUser => _state.currentUser.info;
 
@@ -1149,9 +1163,41 @@ class StreamVideo extends Disposable {
     return callResult.data.metadata;
   }
 
+  /// Marks [callCid] as accepted on this device.
+  ///
+  /// Called by [Call.accept] before the accept is sent to the coordinator.
+  @internal
+  void markCallAcceptedOnThisDevice(StreamCallCid callCid) {
+    _logger.v(() => '[markCallAccepted] cid: $callCid');
+    _locallyAcceptedCallCids.add(callCid.value);
+  }
+
+  /// Clears the acceptance marker for [callCid], set by
+  /// [markCallAcceptedOnThisDevice].
+  @internal
+  void clearCallAcceptedOnThisDevice(StreamCallCid callCid) {
+    if (_locallyAcceptedCallCids.remove(callCid.value)) {
+      _logger.v(() => '[clearCallAccepted] cid: $callCid');
+    }
+  }
+
+  /// Whether the call with [cid] was accepted on this device.
+  ///
+  /// `true` from the moment the accept is sent to the coordinator until the
+  /// call is cleaned up. That deliberately includes the window in which the
+  /// call is accepted but not yet joined, which is where a cold start spends
+  /// most of its time: the incoming call UI must not be torn down there.
+  bool isCallAcceptedOnThisDevice(String cid) =>
+      _locallyAcceptedCallCids.contains(cid);
+
   /// Whether the call is already being answered on this device, either in the
   /// app or on the native call screen.
   Future<bool> _isAnsweredOnThisDevice(String cid) async {
+    // Covers the window between accepting and [Call.join] marking the call
+    // active, which is where the integrator's own navigation happens when the
+    // call is answered from a terminated state.
+    if (isCallAcceptedOnThisDevice(cid)) return true;
+
     if (activeCalls.any((call) => call.callCid.value == cid)) return true;
 
     // The native call is marked as accepted from the moment it's answered on the
