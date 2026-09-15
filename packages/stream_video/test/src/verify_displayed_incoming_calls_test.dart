@@ -407,6 +407,48 @@ void main() {
       expect(streamVideo.state.incomingCall.valueOrNull, isNull);
     });
 
+    test('an older call tearing down leaves a newer one for the same cid alone', () async {
+      // Two Calls can exist for one cid: consumeIncomingCall reuses an instance
+      // from state.incomingCall without caching it, and the ringing event only
+      // consults the cache, so it builds a second. If the older one's teardown
+      // cleared by cid alone it would wipe the newer one's acceptance, and the
+      // accepted-event handler would then end its native call.
+      when(
+        () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
+      ).thenAnswer((_) async => const Result.success(none));
+
+      final callCid = StreamCallCid(cid: cid);
+      final metadata = CallMetadata(
+        cid: callCid,
+        details: createTestCallDetails(createdByUserId: 'other-user'),
+        settings: const CallSettings(),
+        session: const CallSessionData(),
+        users: const {},
+        members: const {},
+      );
+
+      Call makeCall() => Call.fromRinging(
+        data: CallRingingData(
+          callCid: callCid,
+          ringing: true,
+          metadata: metadata,
+        ),
+        coordinatorClient: mockCoordinatorClient,
+        streamVideo: streamVideo,
+        networkMonitor: InternetConnection.createInstance(),
+      );
+
+      final older = makeCall();
+      final newer = makeCall();
+
+      await newer.accept();
+      expect(streamVideo.isCallAcceptedOnThisDevice(cid), isTrue);
+
+      await older.leave();
+
+      expect(streamVideo.isCallAcceptedOnThisDevice(cid), isTrue);
+    });
+
     test('rings again for a cid that already rang and ended', () async {
       // The reuse guard must not outlive the call it was protecting.
       when(
