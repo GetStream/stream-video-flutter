@@ -769,8 +769,10 @@ class _BottomToolbar extends StatelessWidget {
                       // that rather than against the tile.
                       builder: (context, constraints) {
                         for (final candidate in candidates) {
-                          final showsName =
-                              candidate.showName && participant.name.isNotEmpty;
+                          final showsName = participantLabelDrawsName(
+                            showName: candidate.showName,
+                            name: participant.name,
+                          );
 
                           // Neither a name nor an icon left: there is no pill
                           // to draw, so fall through to none at all rather

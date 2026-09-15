@@ -178,8 +178,10 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
               nameTextStyle.color ??
               defaults.microphoneOffColor,
         ),
-      if (!props.isVideoEnabled &&
-          (style?.showVideoOffIcon ?? defaults.showVideoOffIcon))
+      if (participantLabelDrawsVideoOffIcon(
+        isVideoEnabled: props.isVideoEnabled,
+        style: style,
+      ))
         Icon(
           context.streamIcons.videoOffFill,
           size: style?.videoOffIconSize ?? defaults.videoOffIconSize,
@@ -207,7 +209,10 @@ class DefaultStreamParticipantLabel extends StatelessWidget {
         StreamAudioIndicator(isSpeaking: props.isSpeaking, style: style),
     ];
 
-    final showsName = props.showName && props.name.isNotEmpty;
+    final showsName = participantLabelDrawsName(
+      showName: props.showName,
+      name: props.name,
+    );
 
     // A participant with no name set, under a style drawing none of the
     // indicators, leaves an empty pill sitting on the video.

@@ -130,6 +130,32 @@ bool participantLabelDrawsAudioIndicator({
   required StreamParticipantLabelStyle? style,
 }) => isAudioEnabled && (style?.showAudioIndicator ?? true);
 
+/// Whether a pill drawn for a participant in this state, under this style, ends
+/// up with the camera-off icon.
+///
+/// Two things suppress it: a style that switched it off — a tile with no room
+/// to spend on it beside the name does, and so does the picture-in-picture
+/// window — and a participant whose camera is on.
+///
+/// [style] is the style already merged over the ambient theme.
+@internal
+bool participantLabelDrawsVideoOffIcon({
+  required bool isVideoEnabled,
+  required StreamParticipantLabelStyle? style,
+}) => !isVideoEnabled && (style?.showVideoOffIcon ?? true);
+
+/// Whether a pill drawn for this participant ends up with a name in it.
+///
+/// A participant with no name set is not unusual, and an empty name draws a
+/// zero-width [Text] that still claims the gap in front of the indicators.
+/// Resolved in one place so the pill and the arithmetic that decides whether it
+/// fits agree on whether there is a name to make room for.
+@internal
+bool participantLabelDrawsName({
+  required bool showName,
+  required String name,
+}) => showName && name.isNotEmpty;
+
 /// Whether a pill drawn for a participant in this state, under this style,
 /// carries any of the icons that report their devices.
 ///
@@ -146,7 +172,12 @@ bool participantLabelDrawsIcons({
 }) {
   if (!isAudioEnabled) return true;
   if (isVideoPaused) return true;
-  if (!isVideoEnabled && (style?.showVideoOffIcon ?? true)) return true;
+  if (participantLabelDrawsVideoOffIcon(
+    isVideoEnabled: isVideoEnabled,
+    style: style,
+  )) {
+    return true;
+  }
   return participantLabelDrawsAudioIndicator(
     isAudioEnabled: isAudioEnabled,
     style: style,
@@ -191,8 +222,10 @@ double participantLabelMinWidth(
   final indicators = <double>[
     if (showMicrophoneOff)
       resolved?.microphoneIconSize ?? defaults.microphoneIconSize,
-    if (showVideoOff &&
-        (resolved?.showVideoOffIcon ?? defaults.showVideoOffIcon))
+    if (participantLabelDrawsVideoOffIcon(
+      isVideoEnabled: !showVideoOff,
+      style: resolved,
+    ))
       resolved?.videoOffIconSize ?? defaults.videoOffIconSize,
     if (showVideoPaused)
       resolved?.videoPausedIconSize ?? defaults.videoPausedIconSize,
