@@ -447,5 +447,42 @@ void main() {
       expect(find.byType(DefaultStreamParticipantTile), findsOneWidget);
       expect(find.text('renderer'), findsOneWidget);
     });
+
+    // It builds the default tile with props of its own rather than going
+    // through [StreamParticipantTile], so the chrome is resolved by the tile
+    // measuring itself. Nothing else takes that path.
+    testWidgets('steps its chrome down with its size', (tester) async {
+      final participant = MockCallParticipantState();
+      when(() => participant.name).thenReturn('Rene Floor');
+      when(() => participant.image).thenReturn(null);
+      when(() => participant.isSpeaking).thenReturn(false);
+      when(() => participant.isAudioEnabled).thenReturn(true);
+      when(() => participant.isVideoEnabled).thenReturn(true);
+      when(
+        () => participant.connectionQuality,
+      ).thenReturn(SfuConnectionQuality.excellent);
+      when(() => participant.reaction).thenReturn(null);
+
+      await tester.pumpWidget(
+        TestWrapper(
+          child: Center(
+            child: SizedBox(
+              width: 130,
+              height: 200,
+              // ignore: deprecated_member_use_from_same_package
+              child: StreamCallParticipant(
+                call: MockCall(),
+                participant: participant,
+                videoRendererBuilder: (_, _, _) => const Text('renderer'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.text('Rene Floor'), findsOneWidget);
+      expect(find.byType(StreamAudioIndicator), findsNothing);
+    });
   });
 }

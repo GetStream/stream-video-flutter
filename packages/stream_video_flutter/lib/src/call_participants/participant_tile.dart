@@ -95,18 +95,15 @@ class StreamParticipantTile extends StatelessWidget {
     // would have drawn with instead of having to measure again.
     return LayoutBuilder(
       builder: (context, constraints) {
-        final theme = StreamParticipantTileTheme.of(context);
         final size = constraints.biggest;
-        final chrome =
-            (theme.chromePolicy ?? StreamParticipantTileChromePolicy.bySize)
-                .resolve(
-                  StreamParticipantTileChromeDetails(
-                    size: size,
-                    participant: props.participant,
-                  ),
-                );
-
-        final measured = props.copyWith(size: size, chrome: chrome);
+        final measured = props.copyWith(
+          size: size,
+          chrome: resolveParticipantTileChrome(
+            context,
+            size: size,
+            participant: props.participant,
+          ),
+        );
         return builder?.call(context, measured) ??
             DefaultStreamParticipantTile(props: measured);
       },
@@ -296,15 +293,14 @@ class DefaultStreamParticipantTile extends StatelessWidget {
   Widget _build(BuildContext context, Size size) {
     final theme = StreamParticipantTileTheme.of(context);
     final participant = props.participant;
+    // Already resolved when the props came from [StreamParticipantTile].
     final chrome =
         props.chrome ??
-        (theme.chromePolicy ?? StreamParticipantTileChromePolicy.bySize)
-            .resolve(
-              StreamParticipantTileChromeDetails(
-                size: size,
-                participant: participant,
-              ),
-            );
+        resolveParticipantTileChrome(
+          context,
+          size: size,
+          participant: participant,
+        );
 
     final resolved = theme.styleResolver?.call(
       StreamParticipantTileStyleDetails(

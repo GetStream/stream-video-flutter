@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../stream_video_flutter.dart';
@@ -125,6 +126,28 @@ typedef StreamParticipantTileChromeResolver =
     StreamParticipantTileChrome Function(
       StreamParticipantTileChromeDetails details,
     );
+
+/// How much chrome a tile of [size] drawing [participant] draws, under the
+/// policy the ambient [StreamParticipantTileTheme] carries.
+///
+/// Resolved in one place so that a tile measured by [StreamParticipantTile] and
+/// one measuring itself — a [DefaultStreamParticipantTile] handed props nobody
+/// measured, as the deprecated `StreamCallParticipant` does — answer the same
+/// question the same way.
+@internal
+StreamParticipantTileChrome resolveParticipantTileChrome(
+  BuildContext context, {
+  required Size size,
+  required CallParticipantState participant,
+}) {
+  final policy =
+      StreamParticipantTileTheme.of(context).chromePolicy ??
+      StreamParticipantTileChromePolicy.bySize;
+
+  return policy.resolve(
+    StreamParticipantTileChromeDetails(size: size, participant: participant),
+  );
+}
 
 /// Decides how much chrome a [StreamParticipantTile] draws at the size it was
 /// given.
