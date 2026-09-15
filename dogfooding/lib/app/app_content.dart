@@ -208,7 +208,9 @@ class _StreamDogFoodingAppContentState
       builder: (context, child) {
         return StreamComponentFactory(
           builders: _componentBuilders,
-          child: child!,
+          // Above the router, so a snackbar shown from any route has a
+          // messenger to reach and outlives the screen that showed it.
+          child: StreamSnackbarScope(child: child!),
         );
       },
     );
