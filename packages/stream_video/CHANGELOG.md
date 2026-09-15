@@ -1,10 +1,11 @@
-## Upcoming
+## 1.6.0
 
 ### ✅ Added
 
-- Added the `ActionCallIncomingFailed` ringing event and `IncomingCallFailureReason`, raised when the platform call UI refuses to display an incoming call. iOS only, and most useful when Do Not Disturb or the block list filtered the call before it was ever shown. Observe it with `onRingingEvent<ActionCallIncomingFailed>` and decide what to do: the SDK deliberately takes no action, because rejecting a filtered call ends the ring on every device the user is being called on.
-- Added end-to-end encryption support: attach an `EncryptionManager` with `Call.setE2EEManager` before joining, request encryption at call creation with `StreamEncryptionSettings`, and read `CallState.isE2eeEnabled` to check whether it is in effect. Available on Android, iOS and macOS. See the [documentation](https://getstream.io/video/docs/flutter/guides/e2ee-encryption/) for details.
+- Added support for end-to-end encryption. Calls can now be encrypted by configuring an `EncryptionManager` with `Call.setE2EEManager` prior to joining, or by specifying encryption at call creation using `StreamEncryptionSettings`. Supported on Android, iOS, and macOS. For implementation details and examples, refer to the [encryption guide](https://getstream.io/video/docs/flutter/guides/e2ee-encryption/).
 - Added `CallPreferences.encryptionKeyResolver`, which supplies the key for calls your app does not join itself, such as those answered from a ringing notification. See the [documentation](https://getstream.io/video/docs/flutter/guides/e2ee-encryption/#ringing-calls) for details.
+- [iOS] Added `ActionCallIncomingFailed` and `IncomingCallFailureReason` to notify when the system blocks showing an incoming call (e.g. due to Do Not Disturb or block list). Listen via `onRingingEvent<ActionCallIncomingFailed>`.
+- [Android] Added a Telecom integration for the ringing flow, which registers ringing calls with the platform's [Telecom stack](https://developer.android.com/develop/connectivity/telecom). This gives the call proper audio focus and a place in the system call state, and lets it be answered or hung up from a paired watch, a car head unit or a Bluetooth headset. The incoming call notification and full-screen ringing UI are unchanged. It is on by default on Android 17 and above, where ringing from a push no longer works reliably without it, and off below that, so existing integrations are unaffected. Configure it with `AndroidPushConfiguration(telecom: TelecomPushConfiguration(...))`.
 
 ### 🔄 Changed
 
@@ -12,8 +13,9 @@
 
 ### 🐞 Fixed
 
-- [Android] Fixed a call hung up outside the app, from a paired watch, a Bluetooth headset or a car head unit, not leaving the Stream call. Ended events carrying `CallData.endedBySystem` are now applied on Android too, while the ambiguous ones, which on Android also mean the incoming call notification was merely dismissed, keep being ignored. Requires the Android Telecom integration in `stream_video_push_notification`.
-- Fixed the call reconnect loop retrying without a delay or an escalation when an unexpected error was thrown before the reconnect strategy ran. 
+- Fixed an issue where `consumeIncomingCall` could create multiple `Call` instances for the same ringing flow, causing state conflicts and UI issues.
+- [iOS] Fixed calls answered on the CallKit screen during a cold start or terminated state not being properly joined, or being incorrectly ended on the device. The SDK now reliably detects and joins answered calls in these scenarios.
+- Fixed the call reconnect loop retrying without a delay or an escalation when an unexpected error was thrown before the reconnect strategy ran.
 
 ## 1.5.0
 
