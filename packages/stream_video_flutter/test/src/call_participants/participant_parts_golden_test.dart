@@ -136,21 +136,26 @@ void main() {
               ),
             ),
           ),
+          // The composition that ships: the surface's own tile, which this used
+          // to stand in for with a hand-built one — and so snapshotted a tile
+          // stepping its chrome down with its size, where the self-view pins
+          // the full chrome because the indicator is all it draws. The renderer
+          // is stubbed through the factory instead, which the surface's tile
+          // reads like any other.
           GoldenTestScenario(
             name: 'default tile inside',
             child: Center(
-              child: StreamFloatingParticipantTile(
-                call: MockCall(),
-                participant: _participant(),
-                participantBuilder: (context, call, participant) =>
-                    StreamParticipantTile(
-                      call: call,
-                      participant: participant,
-                      showParticipantLabel: false,
-                      showSpeakerBorder: false,
-                      videoRendererBuilder: (_, _, _) =>
-                          const ColoredBox(color: Color(0xFF6E7A8A)),
-                    ),
+              child: StreamComponentFactory(
+                builders: StreamComponentBuilders(
+                  extensions: streamVideoComponentBuilders(
+                    participantVideo: (context, props) =>
+                        const ColoredBox(color: Color(0xFF6E7A8A)),
+                  ),
+                ),
+                child: StreamFloatingParticipantTile(
+                  call: MockCall(),
+                  participant: _participant(),
+                ),
               ),
             ),
           ),

@@ -79,10 +79,40 @@ class StreamParticipantTileTheme extends InheritedTheme {
 @immutable
 class StreamParticipantTileThemeData with _$StreamParticipantTileThemeData {
   /// Creates participant tile theme data.
-  const StreamParticipantTileThemeData({this.style});
+  const StreamParticipantTileThemeData({
+    this.style,
+    this.chromePolicy,
+    this.styleResolver,
+  });
 
   /// Visual styling for the tile.
   final StreamParticipantTileStyle? style;
+
+  /// How much chrome the tile draws at the size it was given.
+  ///
+  /// Defaults to [StreamParticipantTileChromePolicy.bySize].
+  final StreamParticipantTileChromePolicy? chromePolicy;
+
+  /// Styling that depends on the size the tile came out at, merged over
+  /// [style].
+  ///
+  /// Where [chromePolicy] chooses between the levels the tile ships,
+  /// this restyles whatever it draws:
+  ///
+  /// ```dart
+  /// StreamParticipantTileThemeData(
+  ///   styleResolver: (details) => details.chrome.isCompact
+  ///       ? const StreamParticipantTileStyle(
+  ///           showConnectionQualityIndicator: false,
+  ///         )
+  ///       : null,
+  /// )
+  /// ```
+  ///
+  /// Returning null leaves [style] alone. Hoist the function rather than
+  /// allocating a closure on each build, so that equal themes compare as
+  /// equal.
+  final StreamParticipantTileStyleResolver? styleResolver;
 
   /// Linearly interpolate between two theme data objects.
   static StreamParticipantTileThemeData? lerp(
@@ -91,6 +121,36 @@ class StreamParticipantTileThemeData with _$StreamParticipantTileThemeData {
     double t,
   ) => _$StreamParticipantTileThemeData.lerp(a, b, t);
 }
+
+/// What is available when resolving a [StreamParticipantTileStyle] for a tile.
+///
+/// Passed to a [StreamParticipantTileStyleResolver]. Not intended to be
+/// constructed directly.
+@immutable
+class StreamParticipantTileStyleDetails {
+  /// Creates a set of details describing a tile about to be drawn.
+  const StreamParticipantTileStyleDetails({
+    required this.size,
+    required this.chrome,
+    required this.participant,
+  });
+
+  /// The size the tile was laid out at.
+  final Size size;
+
+  /// How much chrome it draws, as resolved by
+  /// [StreamParticipantTileThemeData.chromePolicy].
+  final StreamParticipantTileChrome chrome;
+
+  /// The participant it draws.
+  final CallParticipantState participant;
+}
+
+/// Signature for resolving a [StreamParticipantTileStyle] for a tile.
+typedef StreamParticipantTileStyleResolver =
+    StreamParticipantTileStyle? Function(
+      StreamParticipantTileStyleDetails details,
+    );
 
 /// Visual styling properties for a [StreamParticipantTile].
 ///

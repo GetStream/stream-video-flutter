@@ -53,25 +53,38 @@ Widget _tile({
   required double height,
   List<StreamParticipantTileAction>? actions,
   StreamParticipantTileActionsBuilder? actionsBuilder,
+  StreamParticipantTileChromePolicy? chromePolicy,
 }) {
+  final tile = StreamParticipantTile(
+    call: MockCall(),
+    participant: participant,
+    actions: actions,
+    actionsBuilder: actionsBuilder,
+    // The renderer needs a live call to publish tracks.
+    videoRendererBuilder: (_, _, _) =>
+        const ColoredBox(color: Color(0xFF102030)),
+  );
+
   return TestWrapper(
     child: Center(
       child: SizedBox(
         width: width,
         height: height,
-        child: StreamParticipantTile(
-          call: MockCall(),
-          participant: participant,
-          actions: actions,
-          actionsBuilder: actionsBuilder,
-          // The renderer needs a live call to publish tracks.
-          videoRendererBuilder: (_, _, _) =>
-              const ColoredBox(color: Color(0xFF102030)),
-        ),
+        child: switch (chromePolicy) {
+          final policy? => StreamParticipantTileTheme(
+            data: StreamParticipantTileThemeData(chromePolicy: policy),
+            child: tile,
+          ),
+          null => tile,
+        },
       ),
     ),
   );
 }
+
+StreamParticipantTileChrome _minimalPolicy(
+  StreamParticipantTileChromeDetails details,
+) => StreamParticipantTileChrome.minimal;
 
 void main() {
   group('bottom toolbar', () {
@@ -143,29 +156,136 @@ void main() {
     });
   });
 
-  group('density', () {
-    testWidgets('keeps the name on a narrow tile', (tester) async {
+  group('chrome', () {
+    testWidgets('draws everything on a full tile', (tester) async {
       await tester.pumpWidget(
-        _tile(participant: _participant(), width: 130, height: 160),
+        _tile(participant: _participant(), width: 188, height: 160),
       );
 
       expect(find.text('Rene Floor'), findsOneWidget);
-      expect(find.byType(DefaultStreamParticipantLabel), findsOneWidget);
+      expect(find.byType(StreamAudioIndicator), findsOneWidget);
       expect(
         find.byType(DefaultStreamConnectionQualityIndicator),
         findsOneWidget,
       );
     });
 
-    // The size a tile comes out at in the spotlight view's strip, which is
-    // shorter than it is wide.
-    testWidgets('keeps the name on a short tile', (tester) async {
+    testWidgets('keeps the name on a narrow tile', (tester) async {
+      await tester.pumpWidget(
+        _tile(participant: _participant(), width: 130, height: 160),
+      );
+
+      expect(find.text('Rene Floor'), findsOneWidget);
+      expect(
+        find.byType(DefaultStreamConnectionQualityIndicator),
+        findsOneWidget,
+      );
+    });
+
+    // The sound indicator is what the name was being squeezed out by: it costs
+    // 24px plus the gap in front of it, which at this size is most of the room
+    // the name has.
+    testWidgets('drops the sound indicator on a narrow tile', (tester) async {
+      await tester.pumpWidget(
+        _tile(participant: _participant(), width: 130, height: 160),
+      );
+
+      expect(find.byType(StreamAudioIndicator), findsNothing);
+    });
+
+    testWidgets('drops the camera-off icon on a narrow tile', (tester) async {
+      await tester.pumpWidget(
+        _tile(
+          participant: _participant(isVideoEnabled: false),
+          width: 130,
+          height: 160,
+        ),
+      );
+
+      expect(find.text('Rene Floor'), findsOneWidget);
+      expect(find.byIcon(_icons.videoOffFill), findsNothing);
+    });
+
+    testWidgets('drops the overflow button on a narrow tile', (tester) async {
+      await tester.pumpWidget(
+        _tile(
+          participant: _participant(),
+          width: 130,
+          height: 160,
+          actions: [_pin()],
+        ),
+      );
+
+      expect(find.byType(StreamButton), findsNothing);
+    });
+
+    // The size a tile comes out at in the spotlight view's strip. The name used
+    // to be left with nothing here — the pill drew an ellipsis over the video
+    // and said nothing — and the corner-anchored chrome is what buys it back.
+    testWidgets('keeps a name on a strip-sized tile', (tester) async {
       await tester.pumpWidget(
         _tile(participant: _participant(), width: 96, height: 72),
       );
 
-      expect(find.text('Rene Floor'), findsOneWidget);
       expect(find.byType(DefaultStreamParticipantLabel), findsOneWidget);
+      expect(find.text('Rene Floor'), findsOneWidget);
+      expect(
+        find.byType(DefaultStreamConnectionQualityIndicator),
+        findsOneWidget,
+      );
+    });
+
+    // Flush against the tile's own corners, square on the corner each one
+    // occupies: what the inset was taking goes to the name.
+    testWidgets('anchors the chrome in the corners on a narrow tile', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _tile(participant: _participant(), width: 130, height: 160),
+      );
+
+      final tile = tester.getRect(find.byType(DefaultStreamParticipantTile));
+      final pill = tester.getRect(
+        find.byType(DefaultStreamParticipantLabel),
+      );
+      final indicator = tester.getRect(
+        find.byType(DefaultStreamConnectionQualityIndicator),
+      );
+
+      expect(pill.left, tile.left);
+      expect(pill.bottom, tile.bottom);
+      expect(indicator.right, tile.right);
+      expect(indicator.bottom, tile.bottom);
+    });
+
+    testWidgets('insets the chrome on a full tile', (tester) async {
+      await tester.pumpWidget(
+        _tile(participant: _participant(), width: 200, height: 200),
+      );
+
+      final tile = tester.getRect(find.byType(DefaultStreamParticipantTile));
+      final pill = tester.getRect(
+        find.byType(DefaultStreamParticipantLabel),
+      );
+
+      expect(pill.left, greaterThan(tile.left));
+      expect(pill.bottom, lessThan(tile.bottom));
+    });
+
+    // Being muted outlives the name: the pill keeps the icon after the name
+    // has gone, because a thumbnail saying nothing else still says this.
+    testWidgets('keeps the muted icon after the name has gone', (tester) async {
+      await tester.pumpWidget(
+        _tile(
+          participant: _participant(isAudioEnabled: false),
+          width: 96,
+          height: 120,
+        ),
+      );
+
+      expect(find.byType(DefaultStreamParticipantLabel), findsOneWidget);
+      expect(find.text('Rene Floor'), findsNothing);
+      expect(find.byIcon(_icons.voiceOffFill), findsOneWidget);
     });
 
     testWidgets('drops the pill on a very narrow tile', (tester) async {
@@ -212,10 +332,11 @@ void main() {
     }
 
     // The pill lays its state icons out at full size, so a muted camera-off
-    // participant needs more room than the ladder's widths — measured against a
-    // pill carrying nothing but the sound indicator — account for. The tile
-    // measures the pill instead.
-    testWidgets('drops the pill when state icons widen it past the room', (
+    // participant needs more room than the level's widths — measured against a
+    // pill carrying nothing but the sound indicator — account for. Growing the
+    // tile past a threshold must not cost it the name, so the pill gives up
+    // the icons rather than the tile giving up the pill.
+    testWidgets('gives up the state icons rather than the name', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -224,35 +345,95 @@ void main() {
             isAudioEnabled: false,
             isVideoEnabled: false,
           ),
-          width: 96,
+          width: 130,
           height: 300,
+          // The level says the tile is big enough for everything; the pill
+          // measures what this participant hands it and finds it is not.
+          chromePolicy: StreamParticipantTileChromePolicy.always,
         ),
       );
 
       expect(tester.takeException(), isNull);
-      expect(find.byType(DefaultStreamParticipantLabel), findsNothing);
-      expect(
-        find.byType(DefaultStreamConnectionQualityIndicator),
-        findsOneWidget,
-      );
+      expect(find.text('Rene Floor'), findsOneWidget);
+      expect(find.byIcon(_icons.videoOffFill), findsNothing);
     });
 
-    testWidgets('keeps the pill once the state icons do fit', (tester) async {
+    testWidgets('keeps every state icon once they all fit', (tester) async {
       await tester.pumpWidget(
         _tile(
           participant: _participant(
             isAudioEnabled: false,
             isVideoEnabled: false,
           ),
-          width: 120,
+          width: 220,
           height: 300,
         ),
       );
 
       expect(tester.takeException(), isNull);
-      expect(find.byType(DefaultStreamParticipantLabel), findsOneWidget);
       expect(find.byIcon(_icons.voiceOffFill), findsOneWidget);
       expect(find.byIcon(_icons.videoOffFill), findsOneWidget);
+    });
+  });
+
+  group('chrome policy', () {
+    testWidgets('always draws the full chrome on a narrow tile', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _tile(
+          participant: _participant(),
+          width: 130,
+          height: 160,
+          actions: [_pin()],
+          chromePolicy: StreamParticipantTileChromePolicy.always,
+        ),
+      );
+
+      expect(find.byType(StreamAudioIndicator), findsOneWidget);
+      expect(find.byType(StreamButton), findsOneWidget);
+    });
+
+    testWidgets('none draws no chrome on a tile with room for it', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _tile(
+          participant: _participant(),
+          width: 300,
+          height: 300,
+          actions: [_pin()],
+          chromePolicy: StreamParticipantTileChromePolicy.none,
+        ),
+      );
+
+      expect(find.byType(DefaultStreamParticipantLabel), findsNothing);
+      expect(
+        find.byType(DefaultStreamConnectionQualityIndicator),
+        findsNothing,
+      );
+      expect(find.byType(StreamButton), findsNothing);
+    });
+
+    testWidgets('a custom policy decides from the size it is given', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _tile(
+          participant: _participant(),
+          width: 300,
+          height: 300,
+          chromePolicy: const StreamParticipantTileChromePolicy.custom(
+            _minimalPolicy,
+          ),
+        ),
+      );
+
+      expect(find.byType(DefaultStreamParticipantLabel), findsNothing);
+      expect(
+        find.byType(DefaultStreamConnectionQualityIndicator),
+        findsOneWidget,
+      );
     });
   });
 
@@ -268,6 +449,7 @@ void main() {
           width: 110,
           height: 300,
           actions: [_pin()],
+          chromePolicy: StreamParticipantTileChromePolicy.always,
         ),
       );
 
@@ -283,6 +465,7 @@ void main() {
           width: 130,
           height: 300,
           actions: [_pin()],
+          chromePolicy: StreamParticipantTileChromePolicy.always,
         ),
       );
 

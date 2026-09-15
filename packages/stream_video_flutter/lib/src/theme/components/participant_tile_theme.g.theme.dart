@@ -31,13 +31,24 @@ mixin _$StreamParticipantTileThemeData {
 
     return StreamParticipantTileThemeData(
       style: StreamParticipantTileStyle.lerp(a.style, b.style, t),
+      chromePolicy: t < 0.5 ? a.chromePolicy : b.chromePolicy,
+      styleResolver: t < 0.5 ? a.styleResolver : b.styleResolver,
     );
   }
 
-  StreamParticipantTileThemeData copyWith({StreamParticipantTileStyle? style}) {
+  StreamParticipantTileThemeData copyWith({
+    StreamParticipantTileStyle? style,
+    StreamParticipantTileChromePolicy? chromePolicy,
+    StreamParticipantTileStyle? Function(StreamParticipantTileStyleDetails)?
+    styleResolver,
+  }) {
     final _this = (this as StreamParticipantTileThemeData);
 
-    return StreamParticipantTileThemeData(style: style ?? _this.style);
+    return StreamParticipantTileThemeData(
+      style: style ?? _this.style,
+      chromePolicy: chromePolicy ?? _this.chromePolicy,
+      styleResolver: styleResolver ?? _this.styleResolver,
+    );
   }
 
   StreamParticipantTileThemeData merge(StreamParticipantTileThemeData? other) {
@@ -51,7 +62,11 @@ mixin _$StreamParticipantTileThemeData {
       return other;
     }
 
-    return copyWith(style: _this.style?.merge(other.style) ?? other.style);
+    return copyWith(
+      style: _this.style?.merge(other.style) ?? other.style,
+      chromePolicy: other.chromePolicy,
+      styleResolver: other.styleResolver,
+    );
   }
 
   @override
@@ -67,14 +82,21 @@ mixin _$StreamParticipantTileThemeData {
     final _this = (this as StreamParticipantTileThemeData);
     final _other = (other as StreamParticipantTileThemeData);
 
-    return _other.style == _this.style;
+    return _other.style == _this.style &&
+        _other.chromePolicy == _this.chromePolicy &&
+        _other.styleResolver == _this.styleResolver;
   }
 
   @override
   int get hashCode {
     final _this = (this as StreamParticipantTileThemeData);
 
-    return Object.hash(runtimeType, _this.style);
+    return Object.hash(
+      runtimeType,
+      _this.style,
+      _this.chromePolicy,
+      _this.styleResolver,
+    );
   }
 }
 
