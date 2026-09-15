@@ -59,16 +59,6 @@ const _idActiveCall = 8;
 
 /// Decides whether a `call.accepted` event for the current user describes an acceptance that
 /// happened on this device.
-///
-/// Pulled out of the handler so the choice can be tested. The live path cannot be exercised in a
-/// unit test: it turns on a race between the coordinator delivering the event and `join()` marking
-/// the call active, which has been observed to resolve with about a millisecond to spare.
-///
-/// [acceptedLocally] is the only signal that covers the whole of that race. [activeCall] lags it,
-/// because a call is only added to `activeCalls` inside `join()` - which the integrator may not
-/// call until its own call UI is up. Reading [activeCall] alone makes an accept that is still
-/// waiting to be joined look exactly like an accept on another device, and ending the CallKit call
-/// there tears down the call the user has just answered.
 @visibleForTesting
 bool isAcceptedOnThisDevice({
   required bool acceptedLocally,

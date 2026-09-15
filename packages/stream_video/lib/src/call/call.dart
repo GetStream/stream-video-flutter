@@ -951,11 +951,6 @@ class Call {
 
     // Optimistically mark the call as accepted
     _stateManager.lifecycleCallAccepted();
-
-    // Before the request, not after. The coordinator cannot report this call as
-    // accepted by us until it receives this, so marking first guarantees the
-    // marker is already set whenever a teardown check observes the acceptance,
-    // however the two race.
     _streamVideo.markCallAcceptedOnThisDevice(callCid);
 
     final result = await _coordinatorClient.acceptCall(cid: state.callCid);
@@ -2832,9 +2827,14 @@ class Call {
     await clearE2EEManager();
 
     _streamVideo.clearCallAcceptedOnThisDevice(callCid);
+    _streamVideo.releaseRingingCall(callCid);
     await _streamVideo.state.removeActiveCall(this);
     if (_streamVideo.state.outgoingCall.valueOrNull?.callCid == callCid) {
       await _streamVideo.state.setOutgoingCall(null);
+    }
+
+    if (identical(_streamVideo.state.incomingCall.valueOrNull, this)) {
+      await _streamVideo.state.setIncomingCall(null);
     }
 
     _logger.v(() => '[clear] completed');

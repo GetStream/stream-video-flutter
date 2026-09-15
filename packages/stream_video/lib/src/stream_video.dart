@@ -337,19 +337,17 @@ class StreamVideo extends Disposable {
   final Map<String, bool> _mutedAudioByStateChange = {};
   final Map<String, Timer> _incomingAutoRejectTimers = {};
   final Set<String> _handledIncomingCallCids = {};
+  final Set<String> _acceptingCallCids = {};
+
+  /// Calls built for a ringing flow, by cid.
+  ///
+  /// Deliberately not [ClientState.incomingCall]: that one is the app-facing
+  /// signal for showing an incoming call. This only exists so that every path
+  /// consuming the same ringing flow ends up with the same [Call].
+  final Map<String, Call> _ringingCalls = {};
 
   /// Cids this device has accepted, from the moment the accept is sent to the
   /// coordinator until the call is cleaned up.
-  ///
-  /// The coordinator cannot report a call as accepted by the current user
-  /// before this device sent that accept, so a marker written before the
-  /// request is always in place by the time any "was this answered elsewhere?"
-  /// check runs.
-  ///
-  /// Neither of the other signals can stand in for it. A call only enters
-  /// [activeCalls] inside [Call.join], which the integrator may not call until
-  /// its own UI is up, and the native call entry disappears as soon as anything
-  /// ends the CallKit call.
   final Set<String> _locallyAcceptedCallCids = {};
 
   /// Returns the current user.
@@ -536,6 +534,10 @@ class StreamVideo extends Disposable {
     return super.dispose();
   }
 
+  /// Routes [event] through the coordinator event handling. Tests only.
+  @visibleForTesting
+  void debugHandleCoordinatorEvent(CoordinatorEvent event) => _onEvent(event);
+
   void _onEvent(CoordinatorEvent event) {
     final currentUserId = _state.currentUser.id;
     _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
@@ -552,7 +554,17 @@ class StreamVideo extends Disposable {
         return;
       }
 
+      final consumedCall = _ringingCalls[event.data.callCid.value];
+      if (consumedCall != null) {
+        _logger.v(
+          () => '[onCoordinatorEvent] reusing consumed call: ${event.data}',
+        );
+        _state.incomingCall.value = consumedCall;
+        return;
+      }
+
       final call = _makeCallFromRinging(data: event.data);
+      _ringingCalls[event.data.callCid.value] = call;
       _state.incomingCall.value = call;
     } else if (event is CoordinatorConnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] connected ${event.userId}');
@@ -805,54 +817,74 @@ class StreamVideo extends Disposable {
     final calls = allCalls?.where((c) => c.isAccepted).toList();
     if (calls == null || calls.isEmpty) return false;
 
-    // Ensure the coordinator WS is connected before proceeding.
-    // During cold start, autoConnect may still be in progress so we need to wait for it to complete.
-    final connectResult = await connect();
-    if (connectResult.isFailure) {
-      _logger.e(
-        () =>
-            '[consumeAndAcceptActiveCall] failed to connect: '
-            '${connectResult.getErrorOrNull()}',
-      );
+    final uuid = calls.first.uuid;
+    final cid = calls.first.callCid;
+    if (uuid == null || cid == null) return false;
+
+    if (!_acceptingCallCids.add(cid)) {
+      _logger.v(() => '[consumeAndAcceptActiveCall] already accepting: $cid');
       return false;
     }
 
-    final callResult = await consumeIncomingCall(
-      uuid: calls.first.uuid!,
-      cid: calls.first.callCid!,
-      preferences: callPreferences,
-    );
+    try {
+      final accepted = _acceptedElsewhereOnThisClient(cid);
+      if (accepted != null) {
+        _logger.v(() => '[consumeAndAcceptActiveCall] already accepted: $cid');
+        onCallAccepted?.call(accepted);
+        return true;
+      }
 
-    if (callResult.isFailure) {
-      _logger.d(
-        () =>
-            '[consumeAndAcceptActiveCall] error consuming incoming call: '
-            '${callResult.getErrorOrNull()}',
+      // Ensure the coordinator WS is connected before proceeding.
+      // During cold start, autoConnect may still be in progress so we need to wait for it to complete.
+      final connectResult = await connect();
+      if (connectResult.isFailure) {
+        _logger.e(
+          () =>
+              '[consumeAndAcceptActiveCall] failed to connect: '
+              '${connectResult.getErrorOrNull()}',
+        );
+        return false;
+      }
+
+      final callResult = await consumeIncomingCall(
+        uuid: uuid,
+        cid: cid,
+        preferences: callPreferences,
       );
-      return false;
+
+      if (callResult.isFailure) {
+        _logger.d(
+          () =>
+              '[consumeAndAcceptActiveCall] error consuming incoming call: '
+              '${callResult.getErrorOrNull()}',
+        );
+        return false;
+      }
+
+      final call = callResult.getDataOrNull();
+      if (call == null) return false;
+
+      final acceptResult = await call.accept();
+      if (acceptResult.isFailure) {
+        _logger.w(
+          () =>
+              '[consumeAndAcceptActiveCall] error accepting call: '
+              '${acceptResult.getErrorOrNull()}',
+        );
+
+        // The native UI (e.g. CallKit) has already answered the call at this
+        // point. End it there so the user isn't left on an answered call that
+        // never joins.
+        await pushNotificationManager?.endCallByCid(call.callCid.value);
+        return false;
+      }
+
+      onCallAccepted?.call(call);
+
+      return true;
+    } finally {
+      _acceptingCallCids.remove(cid);
     }
-
-    final call = callResult.getDataOrNull();
-    if (call == null) return false;
-
-    final acceptResult = await call.accept();
-    if (acceptResult.isFailure) {
-      _logger.w(
-        () =>
-            '[consumeAndAcceptActiveCall] error accepting call: '
-            '${acceptResult.getErrorOrNull()}',
-      );
-
-      // The native UI (e.g. CallKit) has already answered the call at this
-      // point. End it there so the user isn't left on an answered call that
-      // never joins.
-      await pushNotificationManager?.endCallByCid(call.callCid.value);
-      return false;
-    }
-
-    onCallAccepted?.call(call);
-
-    return true;
   }
 
   @Deprecated('Use observeCoreRingingEvents instead.')
@@ -884,10 +916,16 @@ class StreamVideo extends Disposable {
     observeCallDeclinedRingingEvent()?.addTo(ringingEventSubscriptions);
     observeCallEndedRingingEvent()?.addTo(ringingEventSubscriptions);
 
-    // The incoming call event can be emitted before this call (terminated state), in which case it
-    // isn't delivered to the subscription above at all, so incoming calls that
-    // are already displayed are picked up here.
-    unawaited(verifyDisplayedIncomingCalls());
+    // The incoming and accept events can be emitted before this call (terminated
+    // state), in which case they aren't delivered to the subscriptions above at
+    // all, so calls that are already displayed - ringing or answered - are
+    // picked up here.
+    unawaited(
+      verifyDisplayedIncomingCalls(
+        onCallAccepted: onCallAccepted,
+        acceptCallPreferences: acceptCallPreferences,
+      ),
+    );
 
     return ringingEventSubscriptions;
   }
@@ -965,43 +1003,75 @@ class StreamVideo extends Disposable {
     final cid = event.data.callCid;
     if (uuid == null || cid == null) return;
 
-    _cancelIncomingAutoRejectTimerByCid(cid);
-
-    final consumeResult = await consumeIncomingCall(
+    await _acceptIncomingCall(
       uuid: uuid,
       cid: cid,
-      preferences: callPreferences,
+      onCallAccepted: onCallAccepted,
+      callPreferences: callPreferences,
     );
+  }
 
-    if (consumeResult.isFailure) {
-      _logger.w(
-        () =>
-            '[onCallAccept] error consuming incoming call: ${consumeResult.getErrorOrNull()}',
-      );
+  /// Consumes, accepts and joins the call the user answered on the native call
+  /// screen.
+  Future<void> _acceptIncomingCall({
+    required String uuid,
+    required String cid,
+    void Function(Call)? onCallAccepted,
+    CallPreferences? callPreferences,
+  }) async {
+    if (!_acceptingCallCids.add(cid)) {
+      _logger.v(() => '[acceptIncomingCall] already accepting: $cid');
       return;
     }
 
-    final callToJoin = consumeResult.getDataOrNull();
-    if (callToJoin == null) return;
+    try {
+      _cancelIncomingAutoRejectTimerByCid(cid);
 
-    final acceptResult = await callToJoin.accept();
+      final accepted = _acceptedElsewhereOnThisClient(cid);
+      if (accepted != null) {
+        _logger.v(() => '[acceptIncomingCall] already accepted: $cid');
+        onCallAccepted?.call(accepted);
+        return;
+      }
 
-    if (acceptResult.isFailure) {
-      _logger.w(
-        () =>
-            '[onCallAccept] error accepting call ($callToJoin): '
-            '${acceptResult.getErrorOrNull()}',
+      final consumeResult = await consumeIncomingCall(
+        uuid: uuid,
+        cid: cid,
+        preferences: callPreferences,
       );
 
-      // The native UI (e.g. CallKit) has already answered the call at this
-      // point. End it there so the user isn't left on an answered call that
-      // never joins.
-      await pushNotificationManager?.endCallByCid(cid);
-      return;
-    }
+      if (consumeResult.isFailure) {
+        _logger.w(
+          () =>
+              '[acceptIncomingCall] error consuming incoming call: ${consumeResult.getErrorOrNull()}',
+        );
+        return;
+      }
 
-    unawaited(callToJoin.join());
-    onCallAccepted?.call(callToJoin);
+      final callToJoin = consumeResult.getDataOrNull();
+      if (callToJoin == null) return;
+
+      final acceptResult = await callToJoin.accept();
+
+      if (acceptResult.isFailure) {
+        _logger.w(
+          () =>
+              '[acceptIncomingCall] error accepting call ($callToJoin): '
+              '${acceptResult.getErrorOrNull()}',
+        );
+
+        // The native UI (e.g. CallKit) has already answered the call at this
+        // point. End it there so the user isn't left on an answered call that
+        // never joins.
+        await pushNotificationManager?.endCallByCid(cid);
+        return;
+      }
+
+      unawaited(callToJoin.join());
+      onCallAccepted?.call(callToJoin);
+    } finally {
+      _acceptingCallCids.remove(cid);
+    }
   }
 
   Future<void> _onCallIncoming(ActionCallIncoming event) async {
@@ -1014,18 +1084,18 @@ class StreamVideo extends Disposable {
     return _handleIncomingCall(uuid: uuid, cid: cid);
   }
 
-  /// Verifies the incoming calls that are currently displayed by the OS.
+  /// Checks incoming calls currently shown by the OS.
   ///
-  /// On iOS the incoming call UI is reported to CallKit as soon as the VoIP push
-  /// is received, which happens before the app is started when it was
-  /// terminated. The [ActionCallIncoming] event is then emitted while the app is
-  /// still setting up, before it subscribes to ringing events, and is missed
-  /// (the ringing events are broadcast, they are not replayed). Displayed calls
-  /// are therefore verified directly, so a ringing flow that was already
-  /// resolved is dismissed instead of ringing until the native timeout.
+  /// On iOS, CallKit may show the incoming call UI before Dart code runs,
+  /// so ringing events can be missed. This inspects all displayed calls:
+  /// - Still-ringing calls are verified so dismissed flows are ended.
+  /// - Calls already answered but not picked up by the app are accepted and joined.
   ///
   /// Called automatically by [observeCoreRingingEvents].
-  Future<void> verifyDisplayedIncomingCalls() async {
+  Future<void> verifyDisplayedIncomingCalls({
+    void Function(Call)? onCallAccepted,
+    CallPreferences? acceptCallPreferences,
+  }) async {
     final manager = pushNotificationManager;
     if (manager == null) return;
 
@@ -1039,11 +1109,49 @@ class StreamVideo extends Disposable {
       final cid = displayedCall.callCid;
       if (uuid == null || cid == null) continue;
 
-      // Answered calls are handled by the accept flow.
-      if (displayedCall.isAccepted) continue;
+      if (displayedCall.isAccepted) {
+        await _acceptDisplayedIncomingCall(
+          uuid: uuid,
+          cid: cid,
+          onCallAccepted: onCallAccepted,
+          callPreferences: acceptCallPreferences,
+        );
+        continue;
+      }
 
       await _handleIncomingCall(uuid: uuid, cid: cid);
     }
+  }
+
+  /// Picks up a call the user answered on the native call screen before the app
+  /// was able to observe the [ActionCallAccept] for it.
+  Future<void> _acceptDisplayedIncomingCall({
+    required String uuid,
+    required String cid,
+    void Function(Call)? onCallAccepted,
+    CallPreferences? callPreferences,
+  }) async {
+    // iOS only: handles accepting calls answered via CallKit before Dart runs.
+    if (!CurrentPlatform.isIos) return;
+
+    if (activeCalls.any((call) => call.callCid.value == cid)) {
+      _logger.v(() => '[acceptDisplayedCall] already joined: $cid');
+      return;
+    }
+
+    if (isCallAcceptedOnThisDevice(cid)) {
+      _logger.v(() => '[acceptDisplayedCall] already accepted: $cid');
+      return;
+    }
+
+    _logger.d(() => '[acceptDisplayedCall] answered before subscribing: $cid');
+
+    await _acceptIncomingCall(
+      uuid: uuid,
+      cid: cid,
+      onCallAccepted: onCallAccepted,
+      callPreferences: callPreferences,
+    );
   }
 
   Future<void> _handleIncomingCall({
@@ -1164,16 +1272,18 @@ class StreamVideo extends Disposable {
   }
 
   /// Marks [callCid] as accepted on this device.
-  ///
-  /// Called by [Call.accept] before the accept is sent to the coordinator.
   @internal
   void markCallAcceptedOnThisDevice(StreamCallCid callCid) {
     _logger.v(() => '[markCallAccepted] cid: $callCid');
     _locallyAcceptedCallCids.add(callCid.value);
   }
 
-  /// Clears the acceptance marker for [callCid], set by
-  /// [markCallAcceptedOnThisDevice].
+  /// Drops the [Call] cached for [callCid]'s ringing flow.
+  @internal
+  void releaseRingingCall(StreamCallCid callCid) {
+    _ringingCalls.remove(callCid.value);
+  }
+
   @internal
   void clearCallAcceptedOnThisDevice(StreamCallCid callCid) {
     if (_locallyAcceptedCallCids.remove(callCid.value)) {
@@ -1181,12 +1291,21 @@ class StreamVideo extends Disposable {
     }
   }
 
+  /// The [Call] for [cid] when another entry point on this client already
+  /// accepted it.
+  Call? _acceptedElsewhereOnThisClient(String cid) {
+    if (!isCallAcceptedOnThisDevice(cid)) return null;
+    return _findCall(cid);
+  }
+
+  /// The live [Call] for [cid], if this client already has one.
+  Call? _findCall(String cid) {
+    final ringing = _ringingCalls[cid] ?? _state.incomingCall.valueOrNull;
+    if (ringing?.callCid.value == cid) return ringing;
+    return activeCalls.firstWhereOrNull((call) => call.callCid.value == cid);
+  }
+
   /// Whether the call with [cid] was accepted on this device.
-  ///
-  /// `true` from the moment the accept is sent to the coordinator until the
-  /// call is cleaned up. That deliberately includes the window in which the
-  /// call is accepted but not yet joined, which is where a cold start spends
-  /// most of its time: the incoming call UI must not be torn down there.
   bool isCallAcceptedOnThisDevice(String cid) =>
       _locallyAcceptedCallCids.contains(cid);
 
@@ -1466,8 +1585,9 @@ class StreamVideo extends Disposable {
     }
 
     // If call was already created by consuming ringing event, use the same instance.
-    if (_state.incomingCall.valueOrNull?.callCid.value == cid) {
-      final call = _state.incomingCall.value!;
+    final existingCall = _ringingCalls[cid] ?? _state.incomingCall.valueOrNull;
+    if (existingCall?.callCid.value == cid) {
+      final call = existingCall!;
       if (preferences != null) {
         call.updateCallPreferences(preferences);
       }
@@ -1494,6 +1614,8 @@ class StreamVideo extends Disposable {
       ),
       preferences: preferences ?? _options.defaultCallPreferences,
     );
+
+    _ringingCalls[cid] = call;
 
     return Result.success(call);
   }
