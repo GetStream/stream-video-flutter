@@ -348,7 +348,7 @@ class StreamVideo extends Disposable {
 
   /// Cids this device has accepted, from the moment the accept is sent to the
   /// coordinator until the call is cleaned up.
-  final Set<String> _locallyAcceptedCallCids = {};
+  final Map<String, Call> _locallyAcceptedCalls = {};
 
   /// Returns the current user.
   UserInfo get currentUser => _state.currentUser.info;
@@ -502,7 +502,9 @@ class StreamVideo extends Disposable {
       await _client.disconnectUser();
       _subscriptions.cancelAll();
 
-      // Resetting the state.
+      _ringingCalls.clear();
+      _locallyAcceptedCalls.clear();
+      _acceptingCallCids.clear();
       await _state.clear();
       _connectionState = ConnectionState.disconnected(_state.currentUser.id);
       _logger.v(() => '[disconnect] completed');
@@ -843,6 +845,7 @@ class StreamVideo extends Disposable {
               '[consumeAndAcceptActiveCall] failed to connect: '
               '${connectResult.getErrorOrNull()}',
         );
+        await _endUnjoinableNativeCall(cid);
         return false;
       }
 
@@ -858,11 +861,15 @@ class StreamVideo extends Disposable {
               '[consumeAndAcceptActiveCall] error consuming incoming call: '
               '${callResult.getErrorOrNull()}',
         );
+        await _endUnjoinableNativeCall(cid);
         return false;
       }
 
       final call = callResult.getDataOrNull();
-      if (call == null) return false;
+      if (call == null) {
+        await _endUnjoinableNativeCall(cid);
+        return false;
+      }
 
       final acceptResult = await call.accept();
       if (acceptResult.isFailure) {
@@ -871,11 +878,7 @@ class StreamVideo extends Disposable {
               '[consumeAndAcceptActiveCall] error accepting call: '
               '${acceptResult.getErrorOrNull()}',
         );
-
-        // The native UI (e.g. CallKit) has already answered the call at this
-        // point. End it there so the user isn't left on an answered call that
-        // never joins.
-        await pushNotificationManager?.endCallByCid(call.callCid.value);
+        await _endUnjoinableNativeCall(cid);
         return false;
       }
 
@@ -1011,6 +1014,13 @@ class StreamVideo extends Disposable {
     );
   }
 
+  /// Ends the native call for [cid] after the user answered it but the call
+  /// could not be set up, so they are not left on an answered call screen with
+  /// nothing behind it.
+  Future<void> _endUnjoinableNativeCall(String cid) async {
+    await pushNotificationManager?.endCallByCid(cid);
+  }
+
   /// Consumes, accepts and joins the call the user answered on the native call
   /// screen.
   Future<void> _acceptIncomingCall({
@@ -1045,11 +1055,15 @@ class StreamVideo extends Disposable {
           () =>
               '[acceptIncomingCall] error consuming incoming call: ${consumeResult.getErrorOrNull()}',
         );
+        await _endUnjoinableNativeCall(cid);
         return;
       }
 
       final callToJoin = consumeResult.getDataOrNull();
-      if (callToJoin == null) return;
+      if (callToJoin == null) {
+        await _endUnjoinableNativeCall(cid);
+        return;
+      }
 
       final acceptResult = await callToJoin.accept();
 
@@ -1059,11 +1073,7 @@ class StreamVideo extends Disposable {
               '[acceptIncomingCall] error accepting call ($callToJoin): '
               '${acceptResult.getErrorOrNull()}',
         );
-
-        // The native UI (e.g. CallKit) has already answered the call at this
-        // point. End it there so the user isn't left on an answered call that
-        // never joins.
-        await pushNotificationManager?.endCallByCid(cid);
+        await _endUnjoinableNativeCall(cid);
         return;
       }
 
@@ -1271,24 +1281,28 @@ class StreamVideo extends Disposable {
     return callResult.data.metadata;
   }
 
-  /// Marks [callCid] as accepted on this device.
+  /// Marks [callCid] as accepted on this device, by [call].
   @internal
-  void markCallAcceptedOnThisDevice(StreamCallCid callCid) {
+  void markCallAcceptedOnThisDevice(StreamCallCid callCid, Call call) {
     _logger.v(() => '[markCallAccepted] cid: $callCid');
-    _locallyAcceptedCallCids.add(callCid.value);
+    _locallyAcceptedCalls[callCid.value] = call;
   }
 
-  /// Drops the [Call] cached for [callCid]'s ringing flow.
+  /// Drops the [Call] cached for [callCid]'s ringing flow, if it is still
+  /// [call]. A newer instance for the same cid is left alone.
   @internal
-  void releaseRingingCall(StreamCallCid callCid) {
-    _ringingCalls.remove(callCid.value);
-  }
-
-  @internal
-  void clearCallAcceptedOnThisDevice(StreamCallCid callCid) {
-    if (_locallyAcceptedCallCids.remove(callCid.value)) {
-      _logger.v(() => '[clearCallAccepted] cid: $callCid');
+  void releaseRingingCall(StreamCallCid callCid, Call call) {
+    if (identical(_ringingCalls[callCid.value], call)) {
+      _ringingCalls.remove(callCid.value);
     }
+  }
+
+  /// Clears the acceptance marker for [callCid], if it is still [call]'s.
+  @internal
+  void clearCallAcceptedOnThisDevice(StreamCallCid callCid, Call call) {
+    if (!identical(_locallyAcceptedCalls[callCid.value], call)) return;
+    _locallyAcceptedCalls.remove(callCid.value);
+    _logger.v(() => '[clearCallAccepted] cid: $callCid');
   }
 
   /// The [Call] for [cid] when another entry point on this client already
@@ -1307,7 +1321,7 @@ class StreamVideo extends Disposable {
 
   /// Whether the call with [cid] was accepted on this device.
   bool isCallAcceptedOnThisDevice(String cid) =>
-      _locallyAcceptedCallCids.contains(cid);
+      _locallyAcceptedCalls.containsKey(cid);
 
   /// Whether the call is already being answered on this device, either in the
   /// app or on the native call screen.

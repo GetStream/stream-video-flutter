@@ -951,13 +951,13 @@ class Call {
 
     // Optimistically mark the call as accepted
     _stateManager.lifecycleCallAccepted();
-    _streamVideo.markCallAcceptedOnThisDevice(callCid);
+    _streamVideo.markCallAcceptedOnThisDevice(callCid, this);
 
     final result = await _coordinatorClient.acceptCall(cid: state.callCid);
     if (result is Failure) {
       // Revert the optimistic acceptance so the user can retry or reject.
       _stateManager.lifecycleCallAccepted(accepted: false);
-      _streamVideo.clearCallAcceptedOnThisDevice(callCid);
+      _streamVideo.clearCallAcceptedOnThisDevice(callCid, this);
     }
 
     return result;
@@ -2826,8 +2826,8 @@ class Call {
     await dynascaleManager.dispose();
     await clearE2EEManager();
 
-    _streamVideo.clearCallAcceptedOnThisDevice(callCid);
-    _streamVideo.releaseRingingCall(callCid);
+    _streamVideo.clearCallAcceptedOnThisDevice(callCid, this);
+    _streamVideo.releaseRingingCall(callCid, this);
     await _streamVideo.state.removeActiveCall(this);
     if (_streamVideo.state.outgoingCall.valueOrNull?.callCid == callCid) {
       await _streamVideo.state.setOutgoingCall(null);
