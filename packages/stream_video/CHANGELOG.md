@@ -56,6 +56,7 @@
 
 ### 🐞 Fixed
 
+- A reconnect no longer drops the video of participants whose tracks have not been received yet. Track subscriptions now survive the join response, so a subscription update sent while the media is still arriving keeps every participant subscribed.
 - Guest creation no longer waits for a coordinator connection id. The call is unauthenticated and watches nothing, so an id could only add latency.
 - A request that could not be signed now reports a credentials failure rather than a network one.
 - A 4xx the server answered without a Stream error payload — an edge, proxy or WAF answering on its own — is no longer retried as if it were a timeout. The status is read off the failure itself, so a permission denial fails on the first attempt instead of spending the whole retry budget.
