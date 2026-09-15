@@ -132,8 +132,17 @@ class DefaultStreamFloatingParticipantTile extends StatelessWidget {
     //     the ambient theme, so a tile theme cannot restyle either away;
     //  4. an explicit tileStyle, which is a caller asking for exactly this —
     //     including the pill, and a radius that differs from the surface's.
+    final ambient = StreamParticipantTileTheme.of(context);
+
+    // The self-view draws nothing but the connection quality indicator, so it
+    // has no chrome to step down: the size ladder would anchor the indicator in
+    // the corner of a view this narrow, where the design keeps it inset and
+    // round. An app that set a policy of its own still outranks this.
+    final chromePolicy =
+        ambient.chromePolicy ?? StreamParticipantTileChromePolicy.always;
+
     final tileStyle = defaults.tileStyle
-        .merge(StreamParticipantTileTheme.of(context).style)
+        .merge(ambient.style)
         .merge(
           StreamParticipantTileStyle(
             borderRadius: borderRadius,
@@ -168,17 +177,22 @@ class DefaultStreamFloatingParticipantTile extends StatelessWidget {
                 props.call,
                 props.participant,
               ) ??
-              StreamParticipantTile(
-                call: props.call,
-                participant: props.participant,
-                // The same participant is in the grid until this view takes
-                // them over, and for the frame in between both are mounted.
-                // Two renderers of one participant sharing a scope share the
-                // keys their visibility is tracked under, and the one going
-                // away reports zero and clears the bookkeeping of the one
-                // arriving, leaving the self-view recorded as not visible.
-                rendererScopePrefix: 'selfView',
-                style: tileStyle,
+              StreamParticipantTileTheme(
+                data: StreamParticipantTileThemeData(
+                  chromePolicy: chromePolicy,
+                ),
+                child: StreamParticipantTile(
+                  call: props.call,
+                  participant: props.participant,
+                  // The same participant is in the grid until this view takes
+                  // them over, and for the frame in between both are mounted.
+                  // Two renderers of one participant sharing a scope share the
+                  // keys their visibility is tracked under, and the one going
+                  // away reports zero and clears the bookkeeping of the one
+                  // arriving, leaving the self-view recorded as not visible.
+                  rendererScopePrefix: 'selfView',
+                  style: tileStyle,
+                ),
               ),
         ),
       ),

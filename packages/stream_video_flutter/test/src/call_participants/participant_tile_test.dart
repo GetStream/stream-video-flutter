@@ -193,9 +193,7 @@ void main() {
   });
 
   group('StreamFloatingParticipantTile', () {
-    // Both floating goldens hand in their own participantBuilder, so the
-    // default composition — a StreamParticipantTile inside the surface — is
-    // only covered here.
+    // The default composition — a StreamParticipantTile inside the surface.
     testWidgets('clips the tile to the surface radius it was given', (
       tester,
     ) async {
@@ -244,6 +242,64 @@ void main() {
             .first,
       );
       expect(clip.borderRadius, radius);
+    });
+
+    // The self-view is 140px wide, which the ladder would call compact and
+    // anchor the indicator into the corner for. It draws nothing but that
+    // indicator, so there is no chrome to make room for and the design keeps
+    // it inset and round.
+    testWidgets('pins the full chrome whatever its size', (tester) async {
+      final participant = MockCallParticipantState();
+      when(() => participant.name).thenReturn('Rene Floor');
+      when(() => participant.isSpeaking).thenReturn(false);
+      when(() => participant.isAudioEnabled).thenReturn(true);
+      when(() => participant.isVideoEnabled).thenReturn(true);
+      when(
+        () => participant.connectionQuality,
+      ).thenReturn(SfuConnectionQuality.excellent);
+      when(() => participant.reaction).thenReturn(null);
+
+      await tester.pumpWidget(
+        StreamComponentFactory(
+          builders: StreamComponentBuilders(
+            extensions: streamVideoComponentBuilders(
+              participantVideo: (context, props) =>
+                  const ColoredBox(color: Color(0xFF102030)),
+            ),
+          ),
+          child: TestWrapper(
+            child: StreamFloatingParticipantTile(
+              call: MockCall(),
+              participant: participant,
+            ),
+          ),
+        ),
+      );
+
+      final tile = tester.widget<DefaultStreamParticipantTile>(
+        find.byType(DefaultStreamParticipantTile),
+      );
+      expect(tile.props.chrome, StreamParticipantTileChrome.full);
+
+      // Round rather than a corner-anchored rectangle, and clear of the edges.
+      final box = tester.widget<DecoratedBox>(
+        find
+            .descendant(
+              of: find.byType(StreamConnectionQualityIndicator),
+              matching: find.byType(DecoratedBox),
+            )
+            .first,
+      );
+      expect((box.decoration as BoxDecoration).shape, BoxShape.circle);
+
+      final surface = tester.getRect(
+        find.byType(StreamFloatingParticipantTile),
+      );
+      final indicator = tester.getRect(
+        find.byType(StreamConnectionQualityIndicator),
+      );
+      expect(indicator.right, lessThan(surface.right));
+      expect(indicator.bottom, lessThan(surface.bottom));
     });
   });
 

@@ -169,6 +169,7 @@
 - The Android picture-in-picture window draws the name and the connection quality in its corners, and no other chrome.
 - The name pill draws nothing at all when it has neither a name nor an indicator, instead of an empty rounded rectangle over the video.
 - The floating self-view draws no name pill, whatever an app-wide participant tile theme asks for. `StreamFloatingParticipantTileStyle.tileStyle` still can.
+- The floating self-view keeps the full chrome at its own size: the connection quality indicator is all it draws, so it stays round and inset rather than anchored in a corner.
 - A participant tile keeps the name in its label at every size it draws the label at, truncating with an ellipsis.
 - The participant label stops growing at 268px, set by `StreamParticipantLabelStyle.maxWidth`.
 - `StreamCallParticipants` re-sorts when the layout changes, so a speaker layout spotlights the speaker instead of whoever the previous layout put first.
