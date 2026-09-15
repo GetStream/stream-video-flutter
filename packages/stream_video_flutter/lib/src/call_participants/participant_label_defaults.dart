@@ -60,6 +60,9 @@ class StreamParticipantLabelStyleDefaults extends StreamParticipantLabelStyle {
   @override
   bool get showVideoOffIcon => true;
 
+  @override
+  double get minNameWidth => 24;
+
   // Whatever the sound indicator would have made it, so a pill drawing
   // something shorter in its place is the size it would have been with it.
   @override
@@ -127,6 +130,29 @@ bool participantLabelDrawsAudioIndicator({
   required StreamParticipantLabelStyle? style,
 }) => isAudioEnabled && (style?.showAudioIndicator ?? true);
 
+/// Whether a pill drawn for a participant in this state, under this style,
+/// carries any of the icons that report their devices.
+///
+/// A pill with neither a name nor one of these has nothing to say, and the
+/// label draws nothing at all rather than an empty rounded rectangle.
+///
+/// [style] is the style already merged over the ambient theme.
+@internal
+bool participantLabelDrawsIcons({
+  required bool isAudioEnabled,
+  required bool isVideoEnabled,
+  required bool isVideoPaused,
+  required StreamParticipantLabelStyle? style,
+}) {
+  if (!isAudioEnabled) return true;
+  if (isVideoPaused) return true;
+  if (!isVideoEnabled && (style?.showVideoOffIcon ?? true)) return true;
+  return participantLabelDrawsAudioIndicator(
+    isAudioEnabled: isAudioEnabled,
+    style: style,
+  );
+}
+
 /// The narrowest a [StreamParticipantLabel] can be laid out at, given what this
 /// participant makes it draw.
 ///
@@ -141,6 +167,7 @@ double participantLabelMinWidth(
   required bool showMicrophoneOff,
   required bool showVideoOff,
   required bool showVideoPaused,
+  bool showName = true,
   StreamParticipantLabelStyle? style,
 }) {
   // The same resolution order the label itself uses, so the two agree on what
@@ -176,6 +203,16 @@ double participantLabelMinWidth(
   ];
 
   var width = padding.horizontal;
+
+  // The name is the reason the pill is there. Below this it would be drawn as
+  // an ellipsis with nothing in front of it, which is chrome over video saying
+  // nothing, so the tile drops the pill instead.
+  if (showName) {
+    width += resolved?.minNameWidth ?? defaults.minNameWidth;
+    if (indicators.isNotEmpty) {
+      width += resolved?.spacing ?? defaults.spacing;
+    }
+  }
 
   // A pill can come down to a name alone — an unmuted, camera-on participant
   // under a style that switched the indicator off — leaving just the padding.

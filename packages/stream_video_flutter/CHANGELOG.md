@@ -2,6 +2,10 @@
 
 ### ✅ Added
 
+- Added `StreamParticipantTileChrome`, the levels of chrome a participant tile draws, and `StreamParticipantTileChromePolicy` to choose between them — `bySize` (the default), `always`, `none` or `custom`.
+- Added `StreamParticipantTileThemeData.chromePolicy` and `styleResolver`, which restyle a tile against the size it came out at.
+- `StreamParticipantTileProps` carries the `size` the tile was measured at and the `chrome` resolved for it, so a component registered on the factory lays out against the same numbers the default tile uses.
+- Added `StreamParticipantLabelStyle.minNameWidth`, the narrowest the name may be drawn at before the pill drops out.
 - Added `StreamPictureInPictureThemeData` on `StreamVideoTheme`, whose `StreamPictureInPictureStyle.tileStyle` restyles the participant tile the Android picture-in-picture window draws.
 - Added `StreamParticipantLabelStyle.showVideoOffIcon`, to leave the camera-off icon out of the name pill.
 - `StreamLayoutButton` draws the participant layout in effect and offers the rest through a `StreamAdaptiveMenuAnchor`.
@@ -158,6 +162,9 @@
 
 - Fixed the participant grid rearranging itself when a participant nobody can see starts speaking. They take the place of the tile with the least claim to one — the last one on screen — instead of the first, which used to move every tile below it down one.
 - Fixed a participant tile on screen being recorded as not visible, which kept it out of the running for a speaker's tile and could get its track unsubscribed. A renderer showing a participant now says so again when the call state disagrees, and the floating self-view no longer shares its visibility bookkeeping with the same participant's tile in the grid.
+- A small participant tile no longer covers its video with chrome it has no room for: the sound indicator, the camera-off icon and the overflow button go first, then the name, and a pill with nothing left to say is dropped.
+- A participant tile no longer draws a name pill with no name in it. Tiles between 92 and 100px wide did.
+- Growing a participant tile no longer costs it its name pill.
 - The Android picture-in-picture window draws the name and the connection quality in its corners, and no other chrome.
 - The name pill draws nothing at all when it has neither a name nor an indicator, instead of an empty rounded rectangle over the video.
 - The floating self-view draws no name pill, whatever an app-wide participant tile theme asks for. `StreamFloatingParticipantTileStyle.tileStyle` still can.

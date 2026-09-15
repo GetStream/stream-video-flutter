@@ -31,6 +31,9 @@ StreamParticipantTileStyle pictureInPictureTileStyle(BuildContext context) {
     // Flush into the window's own corners: at this size an inset costs more
     // video than it buys in breathing room.
     toolbarPadding: EdgeInsets.zero,
+    // The sound indicator and the camera-off icon are already out at the sizes
+    // a window comes in — see [StreamParticipantTileChrome.compact] — but the
+    // window drops them at any size, including one dragged large.
     labelStyle: StreamParticipantLabelStyle(
       showAudioIndicator: false,
       showVideoOffIcon: false,

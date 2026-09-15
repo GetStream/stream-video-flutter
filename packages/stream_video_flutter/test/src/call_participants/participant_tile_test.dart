@@ -6,6 +6,12 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import '../../test_utils/test_wrapper.dart';
 import '../mocks.dart';
 
+StreamParticipantTileStyle? _dropIndicatorWhenCompact(
+  StreamParticipantTileStyleDetails details,
+) => details.chrome.isCompact
+    ? const StreamParticipantTileStyle(showConnectionQualityIndicator: false)
+    : null;
+
 void main() {
   group('StreamParticipantTile', () {
     late MockCall call;
@@ -48,6 +54,118 @@ void main() {
       expect(receivedProps?.call, same(call));
       expect(receivedProps?.participant, same(participant));
       expect(receivedProps?.showParticipantLabel, isFalse);
+    });
+
+    testWidgets('hands the measured size and chrome to the builder', (
+      tester,
+    ) async {
+      StreamParticipantTileProps? receivedProps;
+
+      await tester.pumpWidget(
+        StreamComponentFactory(
+          builders: StreamComponentBuilders(
+            extensions: streamVideoComponentBuilders(
+              participantTile: (context, props) {
+                receivedProps = props;
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+          child: TestWrapper(
+            child: Center(
+              child: SizedBox(
+                width: 130,
+                height: 200,
+                child: StreamParticipantTile(
+                  call: call,
+                  participant: participant,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(receivedProps?.size, const Size(130, 200));
+      expect(receivedProps?.chrome, StreamParticipantTileChrome.compact);
+    });
+
+    testWidgets('resolves the chrome with the theme policy', (tester) async {
+      StreamParticipantTileProps? receivedProps;
+
+      await tester.pumpWidget(
+        StreamComponentFactory(
+          builders: StreamComponentBuilders(
+            extensions: streamVideoComponentBuilders(
+              participantTile: (context, props) {
+                receivedProps = props;
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+          child: TestWrapper(
+            child: StreamParticipantTileTheme(
+              data: const StreamParticipantTileThemeData(
+                chromePolicy: StreamParticipantTileChromePolicy.none,
+              ),
+              child: Center(
+                child: SizedBox(
+                  width: 300,
+                  height: 300,
+                  child: StreamParticipantTile(
+                    call: call,
+                    participant: participant,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(receivedProps?.chrome, StreamParticipantTileChrome.bare);
+    });
+
+    testWidgets('merges the style its resolver returns over the theme', (
+      tester,
+    ) async {
+      when(() => participant.name).thenReturn('Rene Floor');
+      when(() => participant.isSpeaking).thenReturn(false);
+      when(() => participant.isAudioEnabled).thenReturn(true);
+      when(() => participant.isVideoEnabled).thenReturn(true);
+      when(
+        () => participant.connectionQuality,
+      ).thenReturn(SfuConnectionQuality.excellent);
+      when(() => participant.reaction).thenReturn(null);
+
+      await tester.pumpWidget(
+        TestWrapper(
+          child: StreamParticipantTileTheme(
+            data: const StreamParticipantTileThemeData(
+              style: StreamParticipantTileStyle(
+                labelStyle: StreamParticipantLabelStyle(blurSigma: 0),
+              ),
+              styleResolver: _dropIndicatorWhenCompact,
+            ),
+            child: Center(
+              child: SizedBox(
+                width: 130,
+                height: 200,
+                child: StreamParticipantTile(
+                  call: call,
+                  participant: participant,
+                  videoRendererBuilder: (_, _, _) => const SizedBox.shrink(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // The resolver dropped the indicator at this size...
+      expect(find.byType(StreamConnectionQualityIndicator), findsNothing);
+      // ...and what it said nothing about still comes from the theme.
+      expect(find.text('Rene Floor'), findsOneWidget);
     });
 
     testWidgets('falls back to the default tile without a factory', (

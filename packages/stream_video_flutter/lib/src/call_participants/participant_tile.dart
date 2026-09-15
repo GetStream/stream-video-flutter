@@ -89,8 +89,28 @@ class StreamParticipantTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final builder = context.videoComponentBuilder<StreamParticipantTileProps>();
-    return builder?.call(context, props) ??
-        DefaultStreamParticipantTile(props: props);
+
+    // Measured here rather than inside the default tile, so a component
+    // registered on the factory is handed the same size and chrome the default
+    // would have drawn with instead of having to measure again.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final theme = StreamParticipantTileTheme.of(context);
+        final size = constraints.biggest;
+        final chrome =
+            (theme.chromePolicy ?? StreamParticipantTileChromePolicy.bySize)
+                .resolve(
+                  StreamParticipantTileChromeDetails(
+                    size: size,
+                    participant: props.participant,
+                  ),
+                );
+
+        final measured = props.copyWith(size: size, chrome: chrome);
+        return builder?.call(context, measured) ??
+            DefaultStreamParticipantTile(props: measured);
+      },
+    );
   }
 }
 
@@ -120,6 +140,8 @@ class StreamParticipantTileProps {
     this.videoPlaceholderBuilder,
     this.videoRendererBuilder,
     this.onSizeChanged,
+    this.size,
+    this.chrome,
   });
 
   /// Represents a call.
@@ -189,6 +211,20 @@ class StreamParticipantTileProps {
   /// Callback that is called when the size of the participant widget changes.
   final ValueSetter<Size>? onSizeChanged;
 
+  /// The size the tile was laid out at.
+  ///
+  /// Filled in by [StreamParticipantTile] once it has been measured, so a
+  /// component registered on the factory can lay out against it. Null in props
+  /// constructed directly.
+  final Size? size;
+
+  /// How much chrome the tile draws at [size].
+  ///
+  /// Resolved by [StreamParticipantTileThemeData.chromePolicy] and filled in
+  /// alongside [size]. Null in props constructed directly, in which case the
+  /// default tile resolves it itself.
+  final StreamParticipantTileChrome? chrome;
+
   /// Creates a copy of these properties but with the given fields replaced
   ///
   /// Passing null leaves a field alone rather than clearing it, so a decorator
@@ -209,6 +245,8 @@ class StreamParticipantTileProps {
     VideoPlaceholderBuilder? videoPlaceholderBuilder,
     VideoRendererBuilder? videoRendererBuilder,
     ValueSetter<Size>? onSizeChanged,
+    Size? size,
+    StreamParticipantTileChrome? chrome,
   }) {
     return StreamParticipantTileProps(
       call: call ?? this.call,
@@ -226,6 +264,8 @@ class StreamParticipantTileProps {
           videoPlaceholderBuilder ?? this.videoPlaceholderBuilder,
       videoRendererBuilder: videoRendererBuilder ?? this.videoRendererBuilder,
       onSizeChanged: onSizeChanged ?? this.onSizeChanged,
+      size: size ?? this.size,
+      chrome: chrome ?? this.chrome,
     );
   }
 }
@@ -240,11 +280,43 @@ class DefaultStreamParticipantTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeStyle = StreamParticipantTileTheme.of(context).style;
-    final style = themeStyle?.merge(props.style) ?? props.style;
-    final defaults = _StreamParticipantTileStyleDefaults(context);
+    // Normally the size arrives on the props, measured by
+    // [StreamParticipantTile]. Props built by hand carry none, so measure here
+    // instead of drawing against a size nothing has checked.
+    final size = props.size;
+    if (size == null) {
+      return LayoutBuilder(
+        builder: (context, constraints) => _build(context, constraints.biggest),
+      );
+    }
 
+    return _build(context, size);
+  }
+
+  Widget _build(BuildContext context, Size size) {
+    final theme = StreamParticipantTileTheme.of(context);
     final participant = props.participant;
+    final chrome =
+        props.chrome ??
+        (theme.chromePolicy ?? StreamParticipantTileChromePolicy.bySize)
+            .resolve(
+              StreamParticipantTileChromeDetails(
+                size: size,
+                participant: participant,
+              ),
+            );
+
+    final resolved = theme.styleResolver?.call(
+      StreamParticipantTileStyleDetails(
+        size: size,
+        chrome: chrome,
+        participant: participant,
+      ),
+    );
+    final themeStyle = theme.style?.merge(resolved) ?? resolved;
+    final style = themeStyle?.merge(props.style) ?? props.style;
+    final defaults = _StreamParticipantTileStyleDefaults(context, chrome);
+
     final borderRadius = style?.borderRadius ?? defaults.borderRadius;
     final hasVideo = participant.isVideoEnabled;
     final isSpeaking = participant.isSpeaking;
@@ -275,72 +347,16 @@ class DefaultStreamParticipantTile extends StatelessWidget {
           borderRadius: borderRadius,
           border: border,
         ),
-        child: LayoutBuilder(
-          builder: (context, constraints) => _TileContent(
-            props: props,
-            style: style,
-            defaults: defaults,
-            constraints: constraints,
-          ),
+        child: _TileContent(
+          props: props,
+          style: style,
+          defaults: defaults,
+          size: size,
+          chrome: chrome,
         ),
       ),
     );
   }
-}
-
-// How much of the tile's chrome fits at its current size.
-//
-// The same tile is a full-width desktop cell, a thumbnail in a spotlight strip
-// and a 140px floating self-view, so what it can show is a function of the
-// space it was given rather than of the platform.
-//
-// This ladder covers the bottom toolbar, whose widths come from the chrome's
-// own arithmetic — the toolbar's 8px inset on both sides, a 4px gap before the
-// indicator, and the narrowest the pill can be drawn at:
-//
-//   indicator only         8 + 32 + 8                     =  48
-//   pill and indicator     8 + (12 + 24 + 4) + 4 + 32 + 8 =  92
-//
-// The name needs no width of its own: it takes what is left after the
-// indicator and ellipsizes into it.
-//
-// The ladder is a floor: a muted participant's pill carries icons these widths
-// do not cover, and the top toolbar hangs off the opposite edge, so both are
-// measured against what they draw. See [_TileContent.build] and
-// [_BottomToolbar.build].
-enum _TileDensity {
-  /// Everything.
-  full,
-
-  /// The connection quality indicator alone.
-  minimal,
-
-  /// No chrome at all.
-  bare;
-
-  static const _fullWidth = 92.0;
-  static const _minimalWidth = 48.0;
-  static const _fullHeight = 72.0;
-  // The same arithmetic as the width: the toolbar's inset on both sides around
-  // the indicator, which is as tall as it is wide.
-  static const _minimalHeight = 48.0;
-
-  static _TileDensity resolve(BoxConstraints constraints) {
-    final width = constraints.maxWidth;
-    final height = constraints.maxHeight;
-
-    if (width >= _fullWidth && height >= _fullHeight) return full;
-    if (width >= _minimalWidth && height >= _minimalHeight) return minimal;
-    return bare;
-  }
-
-  bool get showsLabel => this == full;
-
-  bool get showsConnectionQuality => this != bare;
-
-  // Both live in the top toolbar. The ladder decides whether a tile is big
-  // enough to carry any of it; whether it actually fits is measured.
-  bool get carriesTopToolbar => this == full;
 }
 
 class _TileContent extends StatelessWidget {
@@ -348,18 +364,20 @@ class _TileContent extends StatelessWidget {
     required this.props,
     required this.style,
     required this.defaults,
-    required this.constraints,
+    required this.size,
+    required this.chrome,
   });
 
   final StreamParticipantTileProps props;
   final StreamParticipantTileStyle? style;
   final _StreamParticipantTileStyleDefaults defaults;
-  final BoxConstraints constraints;
+  final Size size;
+  final StreamParticipantTileChrome chrome;
 
   @override
   Widget build(BuildContext context) {
     final participant = props.participant;
-    final density = _TileDensity.resolve(constraints);
+    final density = chrome;
 
     final actions =
         props.actionsBuilder?.call(context, participant) ??
@@ -401,18 +419,18 @@ class _TileContent extends StatelessWidget {
         actions.isNotEmpty &&
         (style?.showMoreButton ?? defaults.showMoreButton) &&
         density.carriesTopToolbar &&
-        constraints.maxWidth >= topPadding.horizontal + _kTapTarget &&
-        constraints.maxHeight >= clearance + _kTapTarget;
+        size.width >= topPadding.horizontal + _kTapTarget &&
+        size.height >= clearance + _kTapTarget;
 
     final showReaction =
         reaction != null &&
         (props.showReaction ?? style?.showReaction ?? defaults.showReaction) &&
         density.carriesTopToolbar &&
-        constraints.maxWidth >=
+        size.width >=
             topPadding.horizontal +
                 (showMore ? _kTapTarget : 0) +
                 reactionSpan &&
-        constraints.maxHeight >=
+        size.height >=
             clearance + math.max(showMore ? _kTapTarget : 0, reactionSpan);
 
     return Stack(
@@ -634,17 +652,23 @@ class _BottomToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // What the pill needs to draw everything this participant gives it. A muted
-    // camera-off participant carries two icons the density ladder's widths know
-    // nothing about, and the pill lays its icons out at their full size rather
-    // than shrinking them.
-    final minLabelWidth = participantLabelMinWidth(
-      context,
-      showMicrophoneOff: !participant.isAudioEnabled,
-      showVideoOff: !participant.isVideoEnabled,
-      showVideoPaused: participant.isTrackPaused(SfuTrackType.video),
-      style: style?.labelStyle,
+    // The pill gives things up before it disappears. What the chrome level
+    // allows comes first; then the participant's state icons, which the level's
+    // widths measure against a pill carrying fewer of them than a muted
+    // camera-off participant hands it; then the name. Only a pill with nothing
+    // left to say is dropped. Resolved here rather than passed straight down,
+    // so the chrome's own defaults reach the pill and an explicit style still
+    // overrides them.
+    const extrasOff = StreamParticipantLabelStyle(
+      showAudioIndicator: false,
+      showVideoOffIcon: false,
     );
+    final explicit = style?.labelStyle;
+    final candidates = [
+      (style: defaults.labelStyle.merge(explicit), showName: true),
+      (style: extrasOff.merge(explicit), showName: true),
+      (style: extrasOff.merge(explicit), showName: false),
+    ];
 
     return Padding(
       padding: style?.toolbarPadding ?? defaults.toolbarPadding,
@@ -661,19 +685,53 @@ class _BottomToolbar extends StatelessWidget {
               alignment: AlignmentDirectional.centerStart,
               child: showLabel
                   ? LayoutBuilder(
-                      // The tile-level density check sizes the chrome against
-                      // the tile. What actually reaches the pill is whatever is
-                      // left after the indicator, which a replaced indicator can
-                      // shrink further. Below the pill's own fixed width there
-                      // is nothing left to truncate, so drop it rather than
-                      // overflow.
-                      builder: (context, constraints) =>
-                          constraints.maxWidth < minLabelWidth
-                          ? const SizedBox.shrink()
-                          : StreamParticipantLabel.fromParticipant(
-                              participant: participant,
-                              style: style?.labelStyle,
+                      // The chrome level sizes the toolbar against the tile.
+                      // What actually reaches the pill is whatever is left
+                      // after the indicator, which a replaced indicator can
+                      // shrink further, so the candidates are measured against
+                      // that rather than against the tile.
+                      builder: (context, constraints) {
+                        for (final candidate in candidates) {
+                          final showsName =
+                              candidate.showName && participant.name.isNotEmpty;
+
+                          // Neither a name nor an icon left: there is no pill
+                          // to draw, so fall through to none at all rather
+                          // than leaving an empty one in the tree.
+                          if (!showsName &&
+                              !participantLabelDrawsIcons(
+                                isAudioEnabled: participant.isAudioEnabled,
+                                isVideoEnabled: participant.isVideoEnabled,
+                                isVideoPaused: participant.isTrackPaused(
+                                  SfuTrackType.video,
+                                ),
+                                style: candidate.style,
+                              )) {
+                            continue;
+                          }
+
+                          final minWidth = participantLabelMinWidth(
+                            context,
+                            showMicrophoneOff: !participant.isAudioEnabled,
+                            showVideoOff: !participant.isVideoEnabled,
+                            showVideoPaused: participant.isTrackPaused(
+                              SfuTrackType.video,
                             ),
+                            showName: showsName,
+                            style: candidate.style,
+                          );
+
+                          if (constraints.maxWidth < minWidth) continue;
+
+                          return StreamParticipantLabel.fromParticipant(
+                            participant: participant,
+                            showName: candidate.showName,
+                            style: candidate.style,
+                          );
+                        }
+
+                        return const SizedBox.shrink();
+                      },
                     )
                   : const SizedBox.shrink(),
             ),
@@ -842,9 +900,10 @@ StreamParticipantPlaceholderStyle? _placeholderStyleOf(
 
 // Default style values for [StreamParticipantTile].
 class _StreamParticipantTileStyleDefaults extends StreamParticipantTileStyle {
-  _StreamParticipantTileStyleDefaults(this._context);
+  _StreamParticipantTileStyleDefaults(this._context, this._chrome);
 
   final BuildContext _context;
+  final StreamParticipantTileChrome _chrome;
 
   late final _colorScheme = _context.streamColorScheme;
   late final _spacing = _context.streamSpacing;
@@ -880,6 +939,14 @@ class _StreamParticipantTileStyleDefaults extends StreamParticipantTileStyle {
 
   @override
   bool get showReaction => true;
+
+  // The pill reports the participant's device state only where there is room
+  // for it beside the name. See [StreamParticipantTileChrome.showsLabelExtras].
+  @override
+  StreamParticipantLabelStyle get labelStyle => StreamParticipantLabelStyle(
+    showAudioIndicator: _chrome.showsLabelExtras,
+    showVideoOffIcon: _chrome.showsLabelExtras,
+  );
 
   @override
   EdgeInsetsGeometry get toolbarPadding => EdgeInsets.all(_spacing.xs);

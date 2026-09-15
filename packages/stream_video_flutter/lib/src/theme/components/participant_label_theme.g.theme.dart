@@ -160,6 +160,7 @@ mixin _$StreamParticipantLabelStyle {
         t,
       ),
       showAudioIndicator: t < 0.5 ? a.showAudioIndicator : b.showAudioIndicator,
+      minNameWidth: lerpDouble$(a.minNameWidth, b.minNameWidth, t),
       showVideoOffIcon: t < 0.5 ? a.showVideoOffIcon : b.showVideoOffIcon,
     );
   }
@@ -186,6 +187,7 @@ mixin _$StreamParticipantLabelStyle {
     double? microphoneIconSize,
     Color? microphoneOffColor,
     bool? showAudioIndicator,
+    double? minNameWidth,
     bool? showVideoOffIcon,
   }) {
     final _this = (this as StreamParticipantLabelStyle);
@@ -215,6 +217,7 @@ mixin _$StreamParticipantLabelStyle {
       microphoneIconSize: microphoneIconSize ?? _this.microphoneIconSize,
       microphoneOffColor: microphoneOffColor ?? _this.microphoneOffColor,
       showAudioIndicator: showAudioIndicator ?? _this.showAudioIndicator,
+      minNameWidth: minNameWidth ?? _this.minNameWidth,
       showVideoOffIcon: showVideoOffIcon ?? _this.showVideoOffIcon,
     );
   }
@@ -254,6 +257,7 @@ mixin _$StreamParticipantLabelStyle {
       microphoneIconSize: other.microphoneIconSize,
       microphoneOffColor: other.microphoneOffColor,
       showAudioIndicator: other.showAudioIndicator,
+      minNameWidth: other.minNameWidth,
       showVideoOffIcon: other.showVideoOffIcon,
     );
   }
@@ -293,6 +297,7 @@ mixin _$StreamParticipantLabelStyle {
         _other.microphoneIconSize == _this.microphoneIconSize &&
         _other.microphoneOffColor == _this.microphoneOffColor &&
         _other.showAudioIndicator == _this.showAudioIndicator &&
+        _other.minNameWidth == _this.minNameWidth &&
         _other.showVideoOffIcon == _this.showVideoOffIcon;
   }
 
@@ -323,6 +328,7 @@ mixin _$StreamParticipantLabelStyle {
       _this.microphoneIconSize,
       _this.microphoneOffColor,
       _this.showAudioIndicator,
+      _this.minNameWidth,
       _this.showVideoOffIcon,
     ]);
   }

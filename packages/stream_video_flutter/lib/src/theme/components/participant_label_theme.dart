@@ -130,6 +130,7 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
     this.microphoneOffColor,
     this.showAudioIndicator,
     this.showVideoOffIcon,
+    this.minNameWidth,
   });
 
   /// The pill's fill.
@@ -257,6 +258,13 @@ class StreamParticipantLabelStyle with _$StreamParticipantLabelStyle {
   /// goes without one whatever this says: there is nothing coming through a
   /// closed microphone for it to report.
   final bool? showAudioIndicator;
+
+  /// The narrowest the name may be drawn at.
+  ///
+  /// A pill left with less room than this for its name drops out entirely
+  /// rather than showing an ellipsis with nothing in front of it. Defaults to
+  /// 24 — about three characters.
+  final double? minNameWidth;
 
   /// Whether to draw the camera-off icon.
   ///
