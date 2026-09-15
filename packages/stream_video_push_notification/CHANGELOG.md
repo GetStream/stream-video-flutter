@@ -7,6 +7,8 @@
 
 ### 🐞 Fixed
 
+- Fixed an issue where `consumeIncomingCall` could create multiple `Call` instances for the same ringing flow, causing state conflicts and UI issues.
+- [iOS] Fixed calls answered on the CallKit screen during a cold start or terminated state not being properly joined, or being incorrectly ended on this device. The SDK now reliably detects and joins answered calls in these scenarios.
 - [iOS] Fixed the CallKit provider configuration being lost when a VoIP push woke the app before any Dart code had run, which dropped the configured ringtone, icon and Recents behaviour on a cold start.
 - [iOS] Fixed `reportNewIncomingCall` failures being swallowed, so a call CallKit refused to display simply vanished. It now emits an `ActionCallIncomingFailed` ringing event carrying why it was refused, most usefully when Do Not Disturb or the block list filtered the call before it was ever shown. The SDK reports it and takes no action: rejecting a filtered call ends the ring on every device the user is being called on, so whether to do that is left to the app.
 - [iOS] Fixed the CallKit call screen staying on screen after the call ended, when the call was one the system still knew about but the app no longer had the metadata for — a CallKit call that outlived the process that created it, after the app was killed, ran out of memory or was hot restarted. Such a call is reported by the platform with nothing but its uuid, so no call cid could match it and nothing ended it for the rest of the app's life.

@@ -1,3 +1,5 @@
+import 'package:meta/meta.dart';
+
 import 'platform_detector_stub.dart'
     if (dart.library.js_interop) 'platform_detector_web.dart'
     if (dart.library.io) 'platform_detector_io.dart';
@@ -83,6 +85,11 @@ class CurrentPlatform {
     }
   }
 
+  /// Overrides the detected platform. Tests only - set it back to `null` in
+  /// a tearDown.
+  @visibleForTesting
+  static PlatformType? debugPlatformOverride;
+
   /// Get current platform type
-  static PlatformType get type => currentPlatform;
+  static PlatformType get type => debugPlatformOverride ?? currentPlatform;
 }

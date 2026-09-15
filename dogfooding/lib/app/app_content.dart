@@ -32,6 +32,7 @@ class _StreamDogFoodingAppContentState
   final _compositeSubscription = CompositeSubscription();
   bool? _microphoneEnabledBeforeInterruption;
   bool _isInitialized = false;
+  String? _routedCallCid;
 
   @override
   void initState() {
@@ -92,6 +93,25 @@ class _StreamDogFoodingAppContentState
     );
   }
 
+  /// Opens the call screen for [call], at most once per call.
+  void _showCallScreen(Call call) {
+    if (_routedCallCid == call.callCid.value) return;
+    _routedCallCid = call.callCid.value;
+
+    final extra = (
+      call: call,
+      connectOptions: null,
+      effectsManager: null,
+      encryptionKey: null,
+    );
+
+    _router.push(CallRoute($extra: extra).location, extra: extra).whenComplete(
+      () {
+        if (_routedCallCid == call.callCid.value) _routedCallCid = null;
+      },
+    );
+  }
+
   void _tryConsumingIncomingCallFromTerminatedState() {
     if (!CurrentPlatform.isAndroid) return;
 
@@ -102,16 +122,7 @@ class _StreamDogFoodingAppContentState
 
         final streamVideo = locator.get<StreamVideo>();
         streamVideo.consumeAndAcceptActiveCall(
-          onCallAccepted: (call) {
-            final extra = (
-              call: call,
-              connectOptions: null,
-              effectsManager: null,
-              encryptionKey: null,
-            );
-
-            _router.push(CallRoute($extra: extra).location, extra: extra);
-          },
+          onCallAccepted: _showCallScreen,
         );
       });
     } else {
@@ -122,42 +133,20 @@ class _StreamDogFoodingAppContentState
   void _observeRingingEvents() {
     final streamVideo = locator.get<StreamVideo>();
 
-    // On mobile we depend on call kit notifications.
-    // On desktop and web they are (currently) not available, so we depend on a
-    // websocket which can receive a call when the app is open.
     if (CurrentPlatform.isMobile) {
+      // Answered on the platform call UI (CallKit, or the Android notification).
       _compositeSubscription.add(
-        streamVideo.observeCoreRingingEvents(
-          onCallAccepted: (callToJoin) {
-            // Navigate to the call screen.
-            final extra = (
-              call: callToJoin,
-              connectOptions: null,
-              effectsManager: null,
-              encryptionKey: null,
-            );
-
-            _router.push(CallRoute($extra: extra).location, extra: extra);
-          },
-        ),
-      );
-    } else {
-      _compositeSubscription.add(
-        streamVideo.state.incomingCall.listen((call) {
-          if (call == null) return;
-
-          // Navigate to the call screen.
-          final extra = (
-            call: call,
-            connectOptions: null,
-            effectsManager: null,
-            encryptionKey: null,
-          );
-
-          _router.push(CallRoute($extra: extra).location, extra: extra);
-        }),
+        streamVideo.observeCoreRingingEvents(onCallAccepted: _showCallScreen),
       );
     }
+
+    // The in-app incoming call UI.
+    _compositeSubscription.add(
+      streamVideo.state.incomingCall.listen((call) {
+        if (call == null) return;
+        _showCallScreen(call);
+      }),
+    );
   }
 
   void _observeFcmMessages() {
