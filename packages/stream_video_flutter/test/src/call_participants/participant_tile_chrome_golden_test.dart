@@ -53,10 +53,10 @@ Widget _tile(
 }
 
 // One width per level of the ladder, taken from the sizes the layouts produce:
-// a 4x4 grid cell on a phone is ~97, a 3x3 is ~130, and anything roomier is
-// full. The heights hold the level the width asks for.
+// the design's own small tile is 188, a 3x3 grid cell on a phone is ~130, a 4x4
+// is ~97. The heights hold the level the width asks for.
 const _sizes = <String, Size>{
-  'full 160': Size(160, 200),
+  'full 188': Size(188, 200),
   'compact 130': Size(130, 200),
   'compact 96': Size(96, 200),
   'minimal 72': Size(72, 120),

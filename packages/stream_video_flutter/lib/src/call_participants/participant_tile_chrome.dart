@@ -35,12 +35,17 @@ enum StreamParticipantTileChrome {
 
   /// Widths at or above this are [full], given [fullHeight].
   ///
-  /// The name is what sets it. A [full] pill spends 100px before the name gets
-  /// anything — the toolbar's 8px inset on both sides, the 32px indicator and
-  /// the 4px gap before it, the pill's own 16px of padding, the 24px sound
-  /// indicator and the 8px gap in front of it — so this is that plus a name
-  /// worth drawing.
-  static const fullWidth = 140.0;
+  /// Below the 188px the design gives a small tile, so that one draws the whole
+  /// chrome. A [full] pill spends 100px before the name gets anything — the
+  /// toolbar's 8px inset on both sides, the 32px indicator and the 4px gap
+  /// before it, the pill's own 16px of padding, the 24px sound indicator and
+  /// the 8px gap in front of it — which leaves 80px of name here and 88px
+  /// there.
+  ///
+  /// Crossing it costs the name 40px, since [compact] spends neither the inset
+  /// nor the sound indicator. A name short enough to fit either way does not
+  /// notice; a longer one re-truncates once as a tile grows past this.
+  static const fullWidth = 180.0;
 
   /// Widths at or above this — and below [fullWidth] — are [compact].
   static const compactWidth = 92.0;

@@ -159,7 +159,7 @@ void main() {
   group('chrome', () {
     testWidgets('draws everything on a full tile', (tester) async {
       await tester.pumpWidget(
-        _tile(participant: _participant(), width: 160, height: 160),
+        _tile(participant: _participant(), width: 188, height: 160),
       );
 
       expect(find.text('Rene Floor'), findsOneWidget);
@@ -345,8 +345,11 @@ void main() {
             isAudioEnabled: false,
             isVideoEnabled: false,
           ),
-          width: 140,
+          width: 130,
           height: 300,
+          // The level says the tile is big enough for everything; the pill
+          // measures what this participant hands it and finds it is not.
+          chromePolicy: StreamParticipantTileChromePolicy.always,
         ),
       );
 
@@ -362,7 +365,7 @@ void main() {
             isAudioEnabled: false,
             isVideoEnabled: false,
           ),
-          width: 200,
+          width: 220,
           height: 300,
         ),
       );
