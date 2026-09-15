@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_video_flutter/src/call_screen/call_content/picture_in_picture/picture_in_picture_defaults.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../../../test_utils/test_wrapper.dart';
@@ -55,6 +54,9 @@ void main() {
       StreamPictureInPictureThemeData? pictureInPictureTheme,
       StreamConnectionQualityIndicatorThemeData?
       connectionQualityIndicatorTheme,
+      // The size Android gave the window on a Pixel 8, which resolves
+      // [StreamParticipantTileChrome.compact].
+      Size size = const Size(128, 228),
     }) async {
       final overlay = switch (pictureInPictureTheme) {
         final theme? => StreamPictureInPictureTheme(
@@ -84,16 +86,19 @@ void main() {
             ),
           ),
           child: TestWrapper(
-            child: SizedBox(
-              width: 200,
-              height: 300,
-              child: switch (connectionQualityIndicatorTheme) {
-                final theme? => StreamConnectionQualityIndicatorTheme(
-                  data: theme,
-                  child: overlay,
-                ),
-                null => overlay,
-              },
+            // Centred so the box keeps the size it asks for: the wrapper hands
+            // down tight surface constraints, which a bare SizedBox takes on.
+            child: Center(
+              child: SizedBox.fromSize(
+                size: size,
+                child: switch (connectionQualityIndicatorTheme) {
+                  final theme? => StreamConnectionQualityIndicatorTheme(
+                    data: theme,
+                    child: overlay,
+                  ),
+                  null => overlay,
+                },
+              ),
             ),
           ),
         ),
@@ -165,10 +170,6 @@ void main() {
     testWidgets('anchors the chrome in the corners', (tester) async {
       await pumpOverlay(tester);
 
-      final expected = pictureInPictureTileStyle(
-        tester.element(find.byType(DefaultStreamParticipantTile)),
-      );
-
       final toolbarPadding = tester
           .widgetList<Padding>(
             find.descendant(
@@ -179,7 +180,7 @@ void main() {
           .map((it) => it.padding)
           .toList();
 
-      expect(toolbarPadding, contains(expected.toolbarPadding));
+      expect(toolbarPadding, contains(EdgeInsets.zero));
 
       final pill = tester.widget<ClipRRect>(
         find
@@ -189,7 +190,10 @@ void main() {
             )
             .first,
       );
-      expect(pill.borderRadius, expected.labelStyle?.borderRadius);
+      expect(
+        pill.borderRadius,
+        BorderRadiusDirectional.only(topEnd: const StreamRadius().lg),
+      );
       // Whatever the radius is, it is on the pill's inner corner alone.
       expect(
         pill.borderRadius.resolve(TextDirection.ltr),
@@ -231,9 +235,7 @@ void main() {
       expect(decoration.shape, BoxShape.rectangle);
       expect(
         decoration.borderRadius,
-        pictureInPictureTileStyle(
-          tester.element(find.byType(DefaultStreamParticipantTile)),
-        ).connectionQualityIndicatorStyle?.decoration?.borderRadius,
+        BorderRadiusDirectional.only(topStart: const StreamRadius().lg),
       );
     });
 
@@ -244,6 +246,9 @@ void main() {
 
       await pumpOverlay(
         tester,
+        // Big enough to resolve full, so the theme is the only thing left
+        // deciding what is drawn.
+        size: const Size(300, 300),
         pictureInPictureTheme: const StreamPictureInPictureThemeData(
           style: StreamPictureInPictureStyle(
             tileStyle: StreamParticipantTileStyle(

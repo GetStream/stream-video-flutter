@@ -464,6 +464,7 @@ class _TileContent extends StatelessWidget {
               participant: participant,
               showLabel: showLabel,
               showIndicator: showIndicator,
+              chrome: chrome,
               style: style,
               defaults: defaults,
             ),
@@ -635,11 +636,61 @@ class _ReactionIndicator extends StatelessWidget {
   }
 }
 
+// The geometry that puts the pill and the indicator in the tile's bottom
+// corners: each rounded where it meets the middle of the tile and where it
+// shares the tile's corner, square along the tile's edges.
+({
+  StreamParticipantLabelStyle label,
+  StreamConnectionQualityIndicatorStyle indicator,
+})
+_anchoredChrome(
+  BuildContext context, {
+  required BorderRadius tileBorderRadius,
+}) {
+  final inner = context.streamRadius.lg;
+  final isRtl = Directionality.of(context) == TextDirection.rtl;
+  final start = isRtl
+      ? tileBorderRadius.bottomRight
+      : tileBorderRadius.bottomLeft;
+  final end = isRtl
+      ? tileBorderRadius.bottomLeft
+      : tileBorderRadius.bottomRight;
+
+  return (
+    label: StreamParticipantLabelStyle(
+      borderRadius: BorderRadiusDirectional.only(
+        topEnd: inner,
+        bottomStart: start,
+      ),
+    ),
+    indicator: StreamConnectionQualityIndicatorStyle(
+      // Only the shape changes, so it comes off the decoration the indicator
+      // would have drawn — resolved the way the indicator resolves it — rather
+      // than being described again here, which would drop an app's own fill.
+      decoration:
+          (StreamConnectionQualityIndicatorTheme.of(
+                    context,
+                  ).style?.decoration ??
+                  StreamConnectionQualityIndicatorStyleDefaults(
+                    context,
+                  ).decoration)
+              .copyWith(
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadiusDirectional.only(
+                  topStart: inner,
+                  bottomEnd: end,
+                ),
+              ),
+    ),
+  );
+}
+
 class _BottomToolbar extends StatelessWidget {
   const _BottomToolbar({
     required this.participant,
     required this.showLabel,
     required this.showIndicator,
+    required this.chrome,
     required this.style,
     required this.defaults,
   });
@@ -647,8 +698,13 @@ class _BottomToolbar extends StatelessWidget {
   final CallParticipantState participant;
   final bool showLabel;
   final bool showIndicator;
+  final StreamParticipantTileChrome chrome;
   final StreamParticipantTileStyle? style;
   final _StreamParticipantTileStyleDefaults defaults;
+
+  /// The radius the tile is drawn with, which the chrome's outer corners follow.
+  BorderRadius get tileBorderRadius =>
+      style?.borderRadius ?? defaults.borderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -664,10 +720,31 @@ class _BottomToolbar extends StatelessWidget {
       showVideoOffIcon: false,
     );
     final explicit = style?.labelStyle;
+
+    // Anchored in a corner of the tile, so each piece is rounded on the corner
+    // it shares with the tile and on the one facing the middle, and square
+    // where it meets the tile's edges. The tile's own radius is what the outer
+    // corner follows: a square tile — the picture-in-picture window — gives a
+    // square corner, and a rounded one gives its own arc rather than a clipped
+    // approximation of it.
+    final anchored = chrome.isFull
+        ? null
+        : _anchoredChrome(context, tileBorderRadius: tileBorderRadius);
+
+    // Resolved the way the label's style is, so the corner the chrome anchors
+    // the indicator in reaches it and an explicit style still overrides it.
+    final indicatorStyle =
+        anchored?.indicator.merge(style?.connectionQualityIndicatorStyle) ??
+        style?.connectionQualityIndicatorStyle;
+
+    final geometry = anchored?.label;
     final candidates = [
-      (style: defaults.labelStyle.merge(explicit), showName: true),
-      (style: extrasOff.merge(explicit), showName: true),
-      (style: extrasOff.merge(explicit), showName: false),
+      (
+        style: defaults.labelStyle.merge(geometry).merge(explicit),
+        showName: true,
+      ),
+      (style: extrasOff.merge(geometry).merge(explicit), showName: true),
+      (style: extrasOff.merge(geometry).merge(explicit), showName: false),
     ];
 
     return Padding(
@@ -745,7 +822,7 @@ class _BottomToolbar extends StatelessWidget {
             RepaintBoundary(
               child: StreamConnectionQualityIndicator(
                 connectionQuality: participant.connectionQuality,
-                style: style?.connectionQualityIndicatorStyle,
+                style: indicatorStyle,
               ),
             ),
           ],
@@ -948,8 +1025,13 @@ class _StreamParticipantTileStyleDefaults extends StreamParticipantTileStyle {
     showVideoOffIcon: _chrome.showsLabelExtras,
   );
 
+  // Flush into the tile's corners below [StreamParticipantTileChrome.full]: the
+  // inset costs more video than it buys at that size, and the 16px it gives
+  // back go to the name. Which corners the chrome rounds is [_BottomToolbar]'s
+  // business — they follow the tile's own.
   @override
-  EdgeInsetsGeometry get toolbarPadding => EdgeInsets.all(_spacing.xs);
+  EdgeInsetsGeometry get toolbarPadding =>
+      _chrome.isFull ? EdgeInsets.all(_spacing.xs) : EdgeInsets.zero;
 
   @override
   double get toolbarSpacing => _spacing.xxs;

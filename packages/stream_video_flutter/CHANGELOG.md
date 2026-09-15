@@ -163,6 +163,7 @@
 - Fixed the participant grid rearranging itself when a participant nobody can see starts speaking. They take the place of the tile with the least claim to one — the last one on screen — instead of the first, which used to move every tile below it down one.
 - Fixed a participant tile on screen being recorded as not visible, which kept it out of the running for a speaker's tile and could get its track unsubscribed. A renderer showing a participant now says so again when the call state disagrees, and the floating self-view no longer shares its visibility bookkeeping with the same participant's tile in the grid.
 - A small participant tile no longer covers its video with chrome it has no room for: the sound indicator, the camera-off icon and the overflow button go first, then the name, and a pill with nothing left to say is dropped.
+- Below that size the name pill and the connection quality indicator sit in the tile's bottom corners rather than inset from it, rounded on the corner they share with the tile and the one facing its middle. The inset they give up goes to the name.
 - A participant tile no longer draws a name pill with no name in it. Tiles between 92 and 100px wide did.
 - Growing a participant tile no longer costs it its name pill.
 - The Android picture-in-picture window draws the name and the connection quality in its corners, and no other chrome.

@@ -219,21 +219,57 @@ void main() {
       expect(find.byType(StreamButton), findsNothing);
     });
 
-    // The size a tile comes out at in the spotlight view's strip. The name is
-    // left with 20px here, which draws as an ellipsis with nothing in front of
-    // it, so the pill goes rather than the video being covered for nothing.
-    testWidgets('drops the pill when the name has no room left', (
-      tester,
-    ) async {
+    // The size a tile comes out at in the spotlight view's strip. The name used
+    // to be left with nothing here — the pill drew an ellipsis over the video
+    // and said nothing — and the corner-anchored chrome is what buys it back.
+    testWidgets('keeps a name on a strip-sized tile', (tester) async {
       await tester.pumpWidget(
         _tile(participant: _participant(), width: 96, height: 72),
       );
 
-      expect(find.byType(DefaultStreamParticipantLabel), findsNothing);
+      expect(find.byType(DefaultStreamParticipantLabel), findsOneWidget);
+      expect(find.text('Rene Floor'), findsOneWidget);
       expect(
         find.byType(DefaultStreamConnectionQualityIndicator),
         findsOneWidget,
       );
+    });
+
+    // Flush against the tile's own corners, square on the corner each one
+    // occupies: what the inset was taking goes to the name.
+    testWidgets('anchors the chrome in the corners on a narrow tile', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _tile(participant: _participant(), width: 130, height: 160),
+      );
+
+      final tile = tester.getRect(find.byType(DefaultStreamParticipantTile));
+      final pill = tester.getRect(
+        find.byType(DefaultStreamParticipantLabel),
+      );
+      final indicator = tester.getRect(
+        find.byType(DefaultStreamConnectionQualityIndicator),
+      );
+
+      expect(pill.left, tile.left);
+      expect(pill.bottom, tile.bottom);
+      expect(indicator.right, tile.right);
+      expect(indicator.bottom, tile.bottom);
+    });
+
+    testWidgets('insets the chrome on a full tile', (tester) async {
+      await tester.pumpWidget(
+        _tile(participant: _participant(), width: 200, height: 200),
+      );
+
+      final tile = tester.getRect(find.byType(DefaultStreamParticipantTile));
+      final pill = tester.getRect(
+        find.byType(DefaultStreamParticipantLabel),
+      );
+
+      expect(pill.left, greaterThan(tile.left));
+      expect(pill.bottom, lessThan(tile.bottom));
     });
 
     // Being muted outlives the name: the pill keeps the icon after the name
