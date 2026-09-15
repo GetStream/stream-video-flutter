@@ -40,6 +40,9 @@ abstract class ClientState {
   /// Sets the call as a current outgoing call.
   Future<void> setOutgoingCall(Call? call);
 
+  /// Sets the call as the current incoming call.
+  Future<void> setIncomingCall(Call? call);
+
   /// Set the active call. Will end the currently active call if `options.allowMultipleActiveCalls` is `false.
   /// When `allowMultipleActiveCalls` is `true` calling this with `call: null` will have no effect.
   /// Otherwise the call is added to the list of active calls.
@@ -207,5 +210,10 @@ class MutableClientState implements ClientState {
   @override
   Future<void> setOutgoingCall(Call? call) async {
     outgoingCall.value = call;
+  }
+
+  @override
+  Future<void> setIncomingCall(Call? call) async {
+    incomingCall.value = call;
   }
 }
