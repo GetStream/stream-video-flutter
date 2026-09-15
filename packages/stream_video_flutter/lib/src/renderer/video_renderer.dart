@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -72,7 +73,7 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
 
     if (prevTrackState == null && newTrackState != null) {
       // The video track has been published.
-      _onVisibilityChanged(info, widget.participant.userId);
+      _reportVisibilityAfterBuild(info);
       return;
     }
 
@@ -89,8 +90,30 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
     // visible whenever any renderer has them on screen instead of ping-ponging
     // between two that disagree.
     if (_measuredVisibility(info).isVisible && !_recordedVisibility.isVisible) {
-      _onVisibilityChanged(info, widget.participant.userId);
+      _reportVisibilityAfterBuild(info);
     }
+  }
+
+  // Both reports above are made while this renderer is being rebuilt, and
+  // recording one writes call state — which the state emitter delivers
+  // synchronously, so a widget listening for participants would be asked to
+  // rebuild in the middle of a build that has already passed it, which throws.
+  // Nothing here is waiting on the answer, so it goes out at the end of the
+  // frame instead.
+  void _reportVisibilityAfterBuild(VisibilityInfo info) {
+    final userId = widget.participant.userId;
+
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      // Re-checked rather than trusted: a report that has since arrived from
+      // the detector, or a track that went away, may have settled it already.
+      final latest = latestVisibilityInfo ?? info;
+      if (!_measuredVisibility(latest).isVisible) return;
+      if (_recordedVisibility.isVisible) return;
+
+      _onVisibilityChanged(latest, userId);
+    });
   }
 
   /// What this renderer last measured for the track it draws.

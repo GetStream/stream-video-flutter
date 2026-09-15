@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -96,6 +97,54 @@ void main() {
     await tester.pump();
     await tester.pump();
   }
+
+  // The report writes call state, and the SDK's state emitter is synchronous:
+  // anything listening for participants — the participants view, through
+  // `CallParticipantsSortingMixin` — is asked to rebuild on the emitting stack.
+  // Made while this renderer is being rebuilt, that lands in the middle of a
+  // frame whose build has already passed the listener, and Flutter throws
+  // `setState() or markNeedsBuild() called during build`.
+  testWidgets('a report from a rebuild is made after the frame, not in it', (
+    tester,
+  ) async {
+    final call = callRecordingVisibility();
+    final phases = <SchedulerPhase>[];
+
+    when(
+      () => call.updateViewportVisibility(
+        sessionId: any(named: 'sessionId'),
+        userId: any(named: 'userId'),
+        visibility: any(named: 'visibility'),
+        trackType: any(named: 'trackType'),
+      ),
+    ).thenAnswer((_) async {
+      phases.add(SchedulerBinding.instance.schedulerPhase);
+      return const Result.success(none);
+    });
+
+    // The state still says unknown on the next build, so the renderer
+    // re-asserts what it measures from `didUpdateWidget`.
+    await pumpTile(
+      tester,
+      call: call,
+      participant: participant(visibility: ViewportVisibility.unknown),
+    );
+    await pumpTile(
+      tester,
+      call: call,
+      participant: participant(
+        visibility: ViewportVisibility.unknown,
+        audioLevel: 0.4,
+      ),
+    );
+
+    expect(phases, isNotEmpty);
+    expect(
+      phases,
+      everyElement(isNot(SchedulerPhase.persistentCallbacks)),
+      reason: 'a report was made while the frame was being built',
+    );
+  });
 
   testWidgets('a tile on screen is reported as visible', (tester) async {
     final call = callRecordingVisibility();
