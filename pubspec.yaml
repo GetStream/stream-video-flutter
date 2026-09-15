@@ -25,6 +25,12 @@ dev_dependencies:
 dependency_overrides:
   cli_util: ^0.5.1
   file_picker: ^12.0.0-beta.5
+  # TODO: drop once a release with the multitasking camera access fix is out.
+  # https://github.com/GetStream/webrtc-flutter/pull/88
+  stream_webrtc_flutter:
+    git:
+      url: https://github.com/GetStream/webrtc-flutter.git
+      ref: 3bb87874d59bb9276969daef356f5fefa01639c5
   stream_core_flutter:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
