@@ -183,7 +183,9 @@ void main() {
       displayCall(isAccepted: true);
       await streamVideo.verifyDisplayedIncomingCalls();
 
-      verifyNever(() => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')));
+      verifyNever(
+        () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
+      );
     });
 
     test('ignores a displayed call with no cid', () async {
@@ -485,54 +487,58 @@ void main() {
       await StreamVideo.reset();
     });
 
-    test('does not hang up a call the other entry point already accepted', () async {
-      // Both entry points are reachable on one Android cold start, because the
-      // carve-out meant to keep them apart reads a lifecycle state that is
-      // never `detached` there. A second accept fails the status guard in
-      // Call.accept, and that failure path ends the native call — hanging up a
-      // call that is already live.
-      when(
-        () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
-      ).thenAnswer((_) async => const Result.success(none));
+    test(
+      'does not hang up a call the other entry point already accepted',
+      () async {
+        // Both entry points are reachable on one Android cold start, because the
+        // carve-out meant to keep them apart reads a lifecycle state that is
+        // never `detached` there. A second accept fails the status guard in
+        // Call.accept, and that failure path ends the native call — hanging up a
+        // call that is already live.
+        when(
+          () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
+        ).thenAnswer((_) async => const Result.success(none));
 
-      final callCid = StreamCallCid(cid: cid);
-      final call = Call.fromRinging(
-        data: CallRingingData(
-          callCid: callCid,
-          ringing: true,
-          metadata: CallMetadata(
-            cid: callCid,
-            details: createTestCallDetails(createdByUserId: 'other-user'),
-            settings: const CallSettings(),
-            session: const CallSessionData(),
-            users: const {},
-            members: const {},
+        final callCid = StreamCallCid(cid: cid);
+        final call = Call.fromRinging(
+          data: CallRingingData(
+            callCid: callCid,
+            ringing: true,
+            metadata: CallMetadata(
+              cid: callCid,
+              details: createTestCallDetails(createdByUserId: 'other-user'),
+              settings: const CallSettings(),
+              session: const CallSessionData(),
+              users: const {},
+              members: const {},
+            ),
           ),
-        ),
-        coordinatorClient: mockCoordinatorClient,
-        streamVideo: streamVideo,
-        networkMonitor: InternetConnection.createInstance(),
-      );
-      (streamVideo.state as MutableClientState).incomingCall.value = call;
+          coordinatorClient: mockCoordinatorClient,
+          streamVideo: streamVideo,
+          networkMonitor: InternetConnection.createInstance(),
+        );
+        (streamVideo.state as MutableClientState).incomingCall.value = call;
 
-      // The ringing-event flow got there first.
-      await call.accept();
-      expect(streamVideo.isCallAcceptedOnThisDevice(cid), isTrue);
+        // The ringing-event flow got there first.
+        await call.accept();
+        expect(streamVideo.isCallAcceptedOnThisDevice(cid), isTrue);
 
-      Call? handed;
-      final result = await streamVideo.consumeAndAcceptActiveCall(
-        onCallAccepted: (call) => handed = call,
-      );
+        Call? handed;
+        final result = await streamVideo.consumeAndAcceptActiveCall(
+          onCallAccepted: (call) => handed = call,
+        );
 
-      expect(result, isTrue);
-      expect(handed, same(call));
-      verifyNever(
-        () => mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
-      );
-      // Still exactly the one accept the first flow sent.
-      verify(
-        () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
-      ).called(1);
-    });
+        expect(result, isTrue);
+        expect(handed, same(call));
+        verifyNever(
+          () =>
+              mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
+        );
+        // Still exactly the one accept the first flow sent.
+        verify(
+          () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
+        ).called(1);
+      },
+    );
   });
 }
