@@ -1642,6 +1642,16 @@ class StreamVideo extends Disposable {
       }
 
       callMetadata = callResult.data.metadata;
+
+      // Re-check: a concurrent consume for the same cid may have populated the
+      // cache while the fetch above was in flight.
+      final cached = _ringingCalls[cid] ?? _state.incomingCall.valueOrNull;
+      if (cached?.callCid.value == cid) {
+        if (preferences != null) {
+          cached!.updateCallPreferences(preferences);
+        }
+        return Result.success(cached!);
+      }
     }
 
     final call = _makeCallFromRinging(
