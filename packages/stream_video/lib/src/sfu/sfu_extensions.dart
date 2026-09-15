@@ -41,12 +41,37 @@ extension CodecX on sfu_models.Codec {
   }
 }
 
+/// The state a published track starts from when the SFU re-states who
+/// publishes what.
+///
+/// A remote track keeps [RemoteTrackState.subscribed] and its video dimension,
+/// which record what this client asked the SFU to send rather than what the SFU
+/// just reported. [RemoteTrackState.received] starts false again: a rejoin
+/// builds a new subscriber peer connection, so the media has to arrive on it
+/// before the track counts as received.
+TrackState _restoredTrackState(TrackState? previous, {required bool isLocal}) {
+  if (isLocal || previous is! RemoteTrackState) {
+    return TrackState.base(isLocal: isLocal);
+  }
+
+  return TrackState.remote(
+    subscribed: previous.subscribed,
+    videoDimension: previous.videoDimension,
+  );
+}
+
 extension SfuParticipantX on SfuParticipant {
   CallParticipantState toParticipantState(CallState state) {
     final isLocal =
         userId == state.currentUserId && sessionId == state.sessionId;
     final existing = state.callParticipants.firstWhereOrNull(
       (it) => it.userId == userId,
+    );
+
+    // Matched on the session as well, so track state is only carried over from
+    // the same participant session and not from another session of that user.
+    final previous = state.callParticipants.firstWhereOrNull(
+      (it) => it.userId == userId && it.sessionId == sessionId,
     );
 
     final existingName = existing?.name ?? '';
@@ -64,7 +89,10 @@ extension SfuParticipantX on SfuParticipant {
       trackIdPrefix: trackLookupPrefix,
       publishedTracks: {
         for (final track in publishedTracks)
-          track: TrackState.base(isLocal: isLocal),
+          track: _restoredTrackState(
+            previous?.publishedTracks[track],
+            isLocal: isLocal,
+          ),
       },
       isLocal: isLocal,
       isOnline: !isLocal,
