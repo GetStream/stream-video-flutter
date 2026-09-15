@@ -487,10 +487,21 @@ class StreamVideo extends Disposable {
     }
   }
 
+  /// Drops the per-connection ringing bookkeeping.
+  void _clearRingingState() {
+    _ringingCalls.clear();
+    _locallyAcceptedCalls.clear();
+    _acceptingCallCids.clear();
+    _handledIncomingCallCids.clear();
+  }
+
   Future<Result<None>> _disconnect() async {
     _logger.i(() => '[disconnect] currentUser.id: ${_state.currentUser.id}');
     if (_connectionState.isDisconnected) {
       _logger.w(() => '[disconnect] rejected (already disconnected)');
+      // Reachable with state still held: a dropped websocket marks the client
+      // disconnected without coming through here.
+      _clearRingingState();
       return const Result.success(none);
     }
     try {
@@ -502,9 +513,7 @@ class StreamVideo extends Disposable {
       await _client.disconnectUser();
       _subscriptions.cancelAll();
 
-      _ringingCalls.clear();
-      _locallyAcceptedCalls.clear();
-      _acceptingCallCids.clear();
+      _clearRingingState();
       await _state.clear();
       _connectionState = ConnectionState.disconnected(_state.currentUser.id);
       _logger.v(() => '[disconnect] completed');
@@ -527,6 +536,7 @@ class StreamVideo extends Disposable {
       timer.cancel();
     }
     _incomingAutoRejectTimers.clear();
+    _clearRingingState();
 
     _subscriptions.cancelAll();
     await pushNotificationManager?.dispose();
@@ -553,6 +563,13 @@ class StreamVideo extends Disposable {
       if (state.outgoingCall.valueOrNull?.callCid.value ==
           event.data.callCid.value) {
         _state.incomingCall.value = state.outgoingCall.valueOrNull;
+        return;
+      }
+
+      if (isCallAcceptedOnThisDevice(event.data.callCid.value)) {
+        _logger.v(
+          () => '[onCoordinatorEvent] already accepted here: ${event.data}',
+        );
         return;
       }
 
@@ -823,6 +840,10 @@ class StreamVideo extends Disposable {
     final cid = calls.first.callCid;
     if (uuid == null || cid == null) return false;
 
+    // Before connecting: on a cold start that is the slow part, and the timer
+    // would otherwise reject the call the user just answered.
+    _cancelIncomingAutoRejectTimerByCid(cid);
+
     if (!_acceptingCallCids.add(cid)) {
       _logger.v(() => '[consumeAndAcceptActiveCall] already accepting: $cid');
       return false;
@@ -867,6 +888,7 @@ class StreamVideo extends Disposable {
 
       final call = callResult.getDataOrNull();
       if (call == null) {
+        _logger.e(() => '[consumeAndAcceptActiveCall] no call consumed: $cid');
         await _endUnjoinableNativeCall(cid);
         return false;
       }
@@ -1029,14 +1051,16 @@ class StreamVideo extends Disposable {
     void Function(Call)? onCallAccepted,
     CallPreferences? callPreferences,
   }) async {
+    // Before the dedupe guard: the user has answered, so the call must not be
+    // auto-rejected no matter which path ends up handling it.
+    _cancelIncomingAutoRejectTimerByCid(cid);
+
     if (!_acceptingCallCids.add(cid)) {
       _logger.v(() => '[acceptIncomingCall] already accepting: $cid');
       return;
     }
 
     try {
-      _cancelIncomingAutoRejectTimerByCid(cid);
-
       final accepted = _acceptedElsewhereOnThisClient(cid);
       if (accepted != null) {
         _logger.v(() => '[acceptIncomingCall] already accepted: $cid');
@@ -1061,6 +1085,7 @@ class StreamVideo extends Disposable {
 
       final callToJoin = consumeResult.getDataOrNull();
       if (callToJoin == null) {
+        _logger.e(() => '[acceptIncomingCall] no call consumed: $cid');
         await _endUnjoinableNativeCall(cid);
         return;
       }
@@ -1099,9 +1124,12 @@ class StreamVideo extends Disposable {
   /// On iOS, CallKit may show the incoming call UI before Dart code runs,
   /// so ringing events can be missed. This inspects all displayed calls:
   /// - Still-ringing calls are verified so dismissed flows are ended.
-  /// - Calls already answered but not picked up by the app are accepted and joined.
+  /// - Calls already answered but not picked up by the app are accepted and
+  ///   joined. **iOS only** - on Android a call answered from the app's own
+  ///   notification is picked up by [consumeAndAcceptActiveCall] instead.
   ///
-  /// Called automatically by [observeCoreRingingEvents].
+  /// Called automatically by [observeCoreRingingEvents], which passes its own
+  /// [onCallAccepted] and [acceptCallPreferences] on.
   Future<void> verifyDisplayedIncomingCalls({
     void Function(Call)? onCallAccepted,
     CallPreferences? acceptCallPreferences,
@@ -1142,7 +1170,10 @@ class StreamVideo extends Disposable {
     CallPreferences? callPreferences,
   }) async {
     // iOS only: handles accepting calls answered via CallKit before Dart runs.
-    if (!CurrentPlatform.isIos) return;
+    if (!CurrentPlatform.isIos) {
+      _logger.v(() => '[acceptDisplayedCall] skipped (not iOS): $cid');
+      return;
+    }
 
     if (activeCalls.any((call) => call.callCid.value == cid)) {
       _logger.v(() => '[acceptDisplayedCall] already joined: $cid');
@@ -1307,17 +1338,8 @@ class StreamVideo extends Disposable {
 
   /// The [Call] for [cid] when another entry point on this client already
   /// accepted it.
-  Call? _acceptedElsewhereOnThisClient(String cid) {
-    if (!isCallAcceptedOnThisDevice(cid)) return null;
-    return _findCall(cid);
-  }
-
-  /// The live [Call] for [cid], if this client already has one.
-  Call? _findCall(String cid) {
-    final ringing = _ringingCalls[cid] ?? _state.incomingCall.valueOrNull;
-    if (ringing?.callCid.value == cid) return ringing;
-    return activeCalls.firstWhereOrNull((call) => call.callCid.value == cid);
-  }
+  Call? _acceptedElsewhereOnThisClient(String cid) =>
+      _locallyAcceptedCalls[cid];
 
   /// Whether the call with [cid] was accepted on this device.
   bool isCallAcceptedOnThisDevice(String cid) =>
@@ -1362,7 +1384,7 @@ class StreamVideo extends Disposable {
       ),
     );
 
-    if (_state.incomingCall.valueOrNull == incomingCall) {
+    if (identical(_state.incomingCall.valueOrNull, incomingCall)) {
       _state.incomingCall.value = null;
     }
   }
@@ -1445,6 +1467,8 @@ class StreamVideo extends Disposable {
     _incomingAutoRejectTimers[cid]?.cancel();
     _incomingAutoRejectTimers[cid] = Timer(timeout, () async {
       try {
+        // Also guards against a stale timer: an accepted call is never
+        // rejected here, whoever forgot to cancel.
         final status = call.state.value.status;
         if (status is CallStatusIncoming && !status.acceptedByMe) {
           await call.reject(reason: CallRejectReason.timeout());

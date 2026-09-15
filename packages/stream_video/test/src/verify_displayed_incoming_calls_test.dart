@@ -364,6 +364,54 @@ void main() {
       );
     });
 
+    test('does not ring for a call already answered on this device', () async {
+      // The cold-start order: push, consume, accept, then the coordinator
+      // connects and the ring event lands on a call that is already joining.
+      // Publishing it would raise a ringing UI over an active call.
+      when(
+        () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
+      ).thenAnswer((_) async => const Result.success(none));
+
+      final callCid = StreamCallCid(cid: cid);
+      final metadata = CallMetadata(
+        cid: callCid,
+        details: createTestCallDetails(createdByUserId: 'other-user'),
+        settings: const CallSettings(),
+        session: const CallSessionData(),
+        users: const {},
+        members: const {},
+      );
+
+      final call = Call.fromRinging(
+        data: CallRingingData(
+          callCid: callCid,
+          ringing: true,
+          metadata: metadata,
+        ),
+        coordinatorClient: mockCoordinatorClient,
+        streamVideo: streamVideo,
+        networkMonitor: InternetConnection.createInstance(),
+      );
+
+      await call.accept();
+      expect(streamVideo.isCallAcceptedOnThisDevice(cid), isTrue);
+
+      streamVideo.debugHandleCoordinatorEvent(
+        CoordinatorCallRingingEvent(
+          data: CallRingingData(
+            callCid: callCid,
+            ringing: true,
+            metadata: metadata,
+          ),
+          video: false,
+          sessionId: 'session-id',
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      expect(streamVideo.state.incomingCall.valueOrNull, isNull);
+    });
+
     test('clears the incoming call once it is cleaned up', () async {
       // Nothing else clears it. A stale entry makes a later ring for the same
       // cid look like one that is already on screen, so it is dropped.
@@ -530,6 +578,53 @@ void main() {
 
     tearDown(() async {
       await StreamVideo.reset();
+    });
+
+    test('hands back an accepted call held in no other registry', () async {
+      // The acceptance marker stores the accepted Call itself. Looking it up in
+      // the ringing cache, incomingCall or activeCalls instead can miss it, or
+      // find a different instance for the same cid - and falling through would
+      // accept a second time, which fails Call.accept's status guard and ends
+      // the native call.
+      when(
+        () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
+      ).thenAnswer((_) async => const Result.success(none));
+
+      final callCid = StreamCallCid(cid: cid);
+      final call = Call.fromRinging(
+        data: CallRingingData(
+          callCid: callCid,
+          ringing: true,
+          metadata: CallMetadata(
+            cid: callCid,
+            details: createTestCallDetails(createdByUserId: 'other-user'),
+            settings: const CallSettings(),
+            session: const CallSessionData(),
+            users: const {},
+            members: const {},
+          ),
+        ),
+        coordinatorClient: mockCoordinatorClient,
+        streamVideo: streamVideo,
+        networkMonitor: InternetConnection.createInstance(),
+      );
+
+      // Deliberately not published to incomingCall and never consumed, so the
+      // marker is the only registry holding it.
+      await call.accept();
+      expect(streamVideo.state.incomingCall.valueOrNull, isNull);
+      expect(streamVideo.activeCalls, isEmpty);
+
+      Call? handed;
+      final result = await streamVideo.consumeAndAcceptActiveCall(
+        onCallAccepted: (accepted) => handed = accepted,
+      );
+
+      expect(result, isTrue);
+      expect(handed, same(call));
+      verifyNever(
+        () => mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
+      );
     });
 
     test(
