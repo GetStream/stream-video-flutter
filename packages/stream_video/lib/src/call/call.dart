@@ -8,6 +8,7 @@ import 'package:async/async.dart' show CancelableOperation;
 import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
@@ -442,22 +443,46 @@ class Call {
   /// stays immediate, so a lookup that has to see a participant the moment
   /// they join keeps working.
   ///
-  /// Each window emits the most recent list to arrive during it, so a
-  /// listener's first value is delayed by up to one interval. Read
-  /// [CallState.callParticipants] for a value to render before then.
+  /// One window is shared by every listener, so two widgets rendering the same
+  /// call always show the same list. It carries the latest value, which a new
+  /// listener receives on subscribing.
   ///
-  /// Every listener gets its own window, and it is torn down with that
-  /// listener's subscription. The interval comes from
-  /// [CallPreferences.participantsThrottleInterval], read each time this getter
-  /// is called, so a later `updateCallPreferences` reaches new listeners; set
-  /// it to null to emit every update.
-  Stream<List<CallParticipantState>> get participantsStream {
+  /// The interval comes from [CallPreferences.participantsThrottleInterval],
+  /// read the first time this is used; set it to null to emit every update.
+  late final Stream<List<CallParticipantState>> participantsStream =
+      _participantsSubject.stream;
+
+  // Closed when the state it reads from closes; nothing else owns it.
+  // ignore: close_sinks
+  late final BehaviorSubject<List<CallParticipantState>> _participantsSubject =
+      _buildParticipantsSubject();
+
+  BehaviorSubject<List<CallParticipantState>> _buildParticipantsSubject() {
+    final subject = BehaviorSubject<List<CallParticipantState>>.seeded(
+      _stateManager.callState.callParticipants,
+    );
+
     final participants = partialState((state) => state.callParticipants);
     final interval =
         _stateManager.callState.preferences.participantsThrottleInterval;
 
-    if (interval == null) return participants;
-    return participants.throttleByCollectionSize(interval: interval);
+    // Kept for the lifetime of the call, like the state it reads from.
+    // ignore: cancel_subscriptions
+    (interval == null
+            ? participants
+            : participants.throttleByCollectionSize(interval: interval))
+        .listen(
+          (value) {
+            // The seed and the state's own replay are the same list, so the
+            // first window would otherwise repeat it.
+            if (identical(subject.valueOrNull, value)) return;
+            subject.add(value);
+          },
+          onError: subject.addError,
+          onDone: subject.close,
+        );
+
+    return subject;
   }
 
   SharedEmitter<

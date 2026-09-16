@@ -2,7 +2,7 @@
 
 ### ✅ Added
 
-- Added `Call.participantsStream`, which emits the participant list at an interval that grows with the participant count. `CallState.callParticipants` is unchanged.
+- Added `Call.participantsStream`, which emits the participant list at an interval that grows with the participant count. One window is shared by every listener, and it carries the latest value. `CallState.callParticipants` is unchanged.
 - Added `CallPreferences.participantsThrottleInterval` to override that interval, or set it to `null` to emit every update.
 
 ### 🔄 Changed
