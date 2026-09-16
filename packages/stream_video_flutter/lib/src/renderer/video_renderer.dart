@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -71,8 +72,10 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
         widget.participant.publishedTracks[widget.videoTrackType];
 
     if (prevTrackState == null && newTrackState != null) {
-      // The video track has been published.
-      _onVisibilityChanged(info, widget.participant.userId);
+      // The video track has been published. The size this renderer measures is
+      // what dynascale subscribes at, and it has not been told any yet, so this
+      // is reported whatever the state already records.
+      _reportAfterBuild(info);
       return;
     }
 
@@ -89,8 +92,35 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
     // visible whenever any renderer has them on screen instead of ping-ponging
     // between two that disagree.
     if (_measuredVisibility(info).isVisible && !_recordedVisibility.isVisible) {
-      _onVisibilityChanged(info, widget.participant.userId);
+      _reportAfterBuild(info, reasserting: true);
     }
+  }
+
+  // Both reports above are made while this renderer is being rebuilt, and
+  // recording one writes call state — which the state emitter delivers
+  // synchronously, so a widget listening for participants would be asked to
+  // rebuild in the middle of a build that has already passed it, which throws.
+  // Nothing here is waiting on the answer, so it goes out at the end of the
+  // frame instead.
+  //
+  // A re-assert is checked again by then, since it only says something while
+  // this renderer still measures the participant as visible and the call state
+  // still does not: a report from the detector, or another renderer, may have
+  // settled it during the frame.
+  void _reportAfterBuild(VisibilityInfo info, {bool reasserting = false}) {
+    final userId = widget.participant.userId;
+
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      final latest = latestVisibilityInfo ?? info;
+      if (reasserting) {
+        if (!_measuredVisibility(latest).isVisible) return;
+        if (_recordedVisibility.isVisible) return;
+      }
+
+      _onVisibilityChanged(latest, userId);
+    });
   }
 
   /// What this renderer last measured for the track it draws.

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -26,6 +27,7 @@ void main() {
   CallParticipantState participant({
     required ViewportVisibility visibility,
     double audioLevel = 0,
+    Map<SfuTrackType, TrackState> publishedTracks = const {},
   }) {
     return CallParticipantState(
       name: 'Alice',
@@ -36,6 +38,7 @@ void main() {
       trackIdPrefix: 'alice',
       audioLevel: audioLevel,
       viewportVisibility: visibility,
+      publishedTracks: publishedTracks,
     );
   }
 
@@ -51,6 +54,23 @@ void main() {
         sessionId: any(named: 'sessionId'),
         userId: any(named: 'userId'),
         visibility: any(named: 'visibility'),
+        trackType: any(named: 'trackType'),
+      ),
+    ).thenAnswer((_) async => const Result.success(none));
+    when(
+      () => call.updateSubscription(
+        userId: any(named: 'userId'),
+        sessionId: any(named: 'sessionId'),
+        trackIdPrefix: any(named: 'trackIdPrefix'),
+        trackType: any(named: 'trackType'),
+        videoDimension: any(named: 'videoDimension'),
+      ),
+    ).thenAnswer((_) async => const Result.success(none));
+    when(
+      () => call.removeSubscription(
+        userId: any(named: 'userId'),
+        sessionId: any(named: 'sessionId'),
+        trackIdPrefix: any(named: 'trackIdPrefix'),
         trackType: any(named: 'trackType'),
       ),
     ).thenAnswer((_) async => const Result.success(none));
@@ -96,6 +116,94 @@ void main() {
     await tester.pump();
     await tester.pump();
   }
+
+  // The report writes call state, and the SDK's state emitter is synchronous:
+  // anything listening for participants — the participants view, through
+  // `CallParticipantsSortingMixin` — is asked to rebuild on the emitting stack.
+  // Made while this renderer is being rebuilt, that lands in the middle of a
+  // frame whose build has already passed the listener, and Flutter throws
+  // `setState() or markNeedsBuild() called during build`.
+  testWidgets('a report from a rebuild is made after the frame, not in it', (
+    tester,
+  ) async {
+    final call = callRecordingVisibility();
+    final phases = <SchedulerPhase>[];
+
+    when(
+      () => call.updateViewportVisibility(
+        sessionId: any(named: 'sessionId'),
+        userId: any(named: 'userId'),
+        visibility: any(named: 'visibility'),
+        trackType: any(named: 'trackType'),
+      ),
+    ).thenAnswer((_) async {
+      phases.add(SchedulerBinding.instance.schedulerPhase);
+      return const Result.success(none);
+    });
+
+    // The state still says unknown on the next build, so the renderer
+    // re-asserts what it measures from `didUpdateWidget`.
+    await pumpTile(
+      tester,
+      call: call,
+      participant: participant(visibility: ViewportVisibility.unknown),
+    );
+    await pumpTile(
+      tester,
+      call: call,
+      participant: participant(
+        visibility: ViewportVisibility.unknown,
+        audioLevel: 0.4,
+      ),
+    );
+
+    expect(phases, isNotEmpty);
+    expect(
+      phases,
+      everyElement(isNot(SchedulerPhase.persistentCallbacks)),
+      reason: 'a report was made while the frame was being built',
+    );
+  });
+
+  // A published track is the one thing a [VisibilityDetector] has nothing to
+  // say about: the tile was already on screen, so nothing it measures changed.
+  // What is new is that there is now a track to size, and dynascale learns the
+  // size from this report — so it is made even though the call state has the
+  // participant as visible already and the visibility itself is unchanged.
+  testWidgets('a track published under a visible tile is sized', (
+    tester,
+  ) async {
+    final call = callRecordingVisibility();
+
+    await pumpTile(
+      tester,
+      call: call,
+      participant: participant(visibility: ViewportVisibility.visible),
+    );
+    await pumpTile(
+      tester,
+      call: call,
+      participant: participant(
+        visibility: ViewportVisibility.visible,
+        publishedTracks: {SfuTrackType.video: TrackState.remote()},
+      ),
+    );
+
+    final dimensions = verify(
+      () => call.updateSubscription(
+        userId: any(named: 'userId'),
+        sessionId: any(named: 'sessionId'),
+        trackIdPrefix: any(named: 'trackIdPrefix'),
+        trackType: any(named: 'trackType'),
+        videoDimension: captureAny(named: 'videoDimension'),
+      ),
+    ).captured.cast<RtcVideoDimension?>();
+
+    expect(dimensions, isNotEmpty);
+    expect(dimensions.last, isNotNull);
+    expect(dimensions.last!.width, greaterThan(0));
+    expect(dimensions.last!.height, greaterThan(0));
+  });
 
   testWidgets('a tile on screen is reported as visible', (tester) async {
     final call = callRecordingVisibility();
