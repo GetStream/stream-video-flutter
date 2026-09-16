@@ -442,24 +442,23 @@ class Call {
   /// stays immediate, so a lookup that has to see a participant the moment
   /// they join keeps working.
   ///
-  /// Each window emits the most recent list to arrive during it, so the first
-  /// emission to a listener is delayed by up to one interval. Read
+  /// Each window emits the most recent list to arrive during it, so a
+  /// listener's first value is delayed by up to one interval. Read
   /// [CallState.callParticipants] for a value to render before then.
   ///
-  /// Override the interval, or turn the throttle off altogether, with
-  /// [CallPreferences.participantsThrottleInterval]. The preference is read
-  /// once, when this stream is first listened to, and the throttle is shared by
-  /// every listener.
-  late final Stream<List<CallParticipantState>> participantsStream = () {
+  /// Every listener gets its own window, and it is torn down with that
+  /// listener's subscription. The interval comes from
+  /// [CallPreferences.participantsThrottleInterval], read each time this getter
+  /// is called, so a later `updateCallPreferences` reaches new listeners; set
+  /// it to null to emit every update.
+  Stream<List<CallParticipantState>> get participantsStream {
     final participants = partialState((state) => state.callParticipants);
     final interval =
         _stateManager.callState.preferences.participantsThrottleInterval;
 
-    return (interval == null
-            ? participants
-            : participants.throttleByCollectionSize(interval: interval))
-        .asBroadcastStream();
-  }();
+    if (interval == null) return participants;
+    return participants.throttleByCollectionSize(interval: interval);
+  }
 
   SharedEmitter<
     ({

@@ -148,8 +148,9 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
             participant.sessionId,
           )];
 
-      // A silent participant who was already silent carries no new information,
-      // so keep the existing instance and leave the list identical.
+      // A participant who was silent and still is keeps their existing
+      // instance, so the list stays identical. Their `audioLevel` and
+      // `audioLevels` hold at the last value from while they were speaking.
       if (levelInfo == null ||
           (!levelInfo.isSpeaking && !participant.isSpeaking)) {
         return participant;
@@ -174,13 +175,16 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
       () => '[sfuDominantSpeakerChanged] ${state.sessionId}; event: $event',
     );
 
-    final current = state.callParticipants.firstWhereOrNull(
-      (participant) => participant.isDominantSpeaker,
-    );
+    // Nothing stops two participants carrying the flag — `sfuJoinResponse` and
+    // `sfuParticipantUpdated` both take it straight off the wire — so this only
+    // skips the pass when the event's participant is the sole one marked.
+    final flagged = state.callParticipants
+        .where((participant) => participant.isDominantSpeaker)
+        .toList();
 
-    if (current != null &&
-        current.userId == event.userId &&
-        current.sessionId == event.sessionId) {
+    if (flagged.length == 1 &&
+        flagged.first.userId == event.userId &&
+        flagged.first.sessionId == event.sessionId) {
       return;
     }
 

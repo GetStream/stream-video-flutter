@@ -1,110 +1,271 @@
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/utils/adaptive_throttle.dart';
 import 'package:stream_video/stream_video.dart';
 
+/// Drives a source through the throttle inside a `fakeAsync` zone and hands the
+/// body a recorder for what came out.
+void _throttled(
+  CollectionThrottleInterval interval,
+  void Function(
+    FakeAsync async,
+    StreamController<List<int>> source,
+    List<List<int>> received,
+    List<bool> done,
+  )
+  body,
+) {
+  fakeAsync((async) {
+    // Closed by the caller where it matters; these all end with the zone.
+    // ignore: close_sinks
+    final source = StreamController<List<int>>();
+    final received = <List<int>>[];
+    final done = <bool>[];
+
+    final subscription = source.stream
+        .throttleByCollectionSize(interval: interval)
+        .listen(received.add, onDone: () => done.add(true));
+
+    body(async, source, received, done);
+
+    subscription.cancel();
+    async.flushMicrotasks();
+  });
+}
+
 void main() {
-  test('interval grows with the size of the collection', () {
-    expect(
-      defaultParticipantsThrottleInterval(1),
-      const Duration(milliseconds: 16),
-    );
-    expect(
-      defaultParticipantsThrottleInterval(20),
-      const Duration(milliseconds: 250),
-    );
-    expect(
-      defaultParticipantsThrottleInterval(60),
-      const Duration(milliseconds: 500),
-    );
-    expect(
-      defaultParticipantsThrottleInterval(500),
-      const Duration(seconds: 1),
-    );
+  group('interval tiers', () {
+    test('grow with the size of the collection', () {
+      expect(
+        defaultParticipantsThrottleInterval(1),
+        const Duration(milliseconds: 16),
+      );
+      expect(
+        defaultParticipantsThrottleInterval(20),
+        const Duration(milliseconds: 250),
+      );
+      expect(
+        defaultParticipantsThrottleInterval(60),
+        const Duration(milliseconds: 500),
+      );
+      expect(
+        defaultParticipantsThrottleInterval(500),
+        const Duration(seconds: 1),
+      );
+    });
+
+    test('change on the documented boundaries', () {
+      expect(
+        defaultParticipantsThrottleInterval(15),
+        const Duration(milliseconds: 16),
+      );
+      expect(
+        defaultParticipantsThrottleInterval(16),
+        const Duration(milliseconds: 250),
+      );
+      expect(
+        defaultParticipantsThrottleInterval(49),
+        const Duration(milliseconds: 250),
+      );
+      expect(
+        defaultParticipantsThrottleInterval(50),
+        const Duration(milliseconds: 500),
+      );
+      expect(
+        defaultParticipantsThrottleInterval(99),
+        const Duration(milliseconds: 500),
+      );
+      expect(
+        defaultParticipantsThrottleInterval(100),
+        const Duration(seconds: 1),
+      );
+    });
   });
 
-  test('emits the last value of a burst', () async {
-    final controller = StreamController<List<int>>();
-    final received = <List<int>>[];
+  group('throttleByCollectionSize', () {
+    test('emits the last value of a burst, once the window closes', () {
+      _throttled((_) => const Duration(milliseconds: 50), (
+        async,
+        source,
+        received,
+        _,
+      ) {
+        source
+          ..add([1])
+          ..add([2])
+          ..add([3]);
 
-    final subscription = controller.stream
-        .throttleByCollectionSize(
-          interval: (_) => const Duration(milliseconds: 50),
-        )
-        .listen(received.add);
+        async.elapse(const Duration(milliseconds: 49));
+        expect(received, isEmpty, reason: 'window has not closed yet');
 
-    controller
-      ..add([1])
-      ..add([2])
-      ..add([3]);
+        async.elapse(const Duration(milliseconds: 1));
+        expect(received, [
+          [3],
+        ]);
+      });
+    });
 
-    await Future<void>.delayed(const Duration(milliseconds: 120));
+    test('emits exactly once per window under a continuous source', () {
+      _throttled((_) => const Duration(milliseconds: 100), (
+        async,
+        source,
+        received,
+        _,
+      ) {
+        for (var tick = 0; tick < 50; tick++) {
+          source.add([tick]);
+          async.elapse(const Duration(milliseconds: 10));
+        }
 
-    expect(received, [
-      [3],
-    ]);
+        // 500ms of source at 10ms intervals, 100ms windows. A leading emission
+        // on top of the trailing one would roughly double this.
+        expect(received.length, 5);
+      });
+    });
 
-    await subscription.cancel();
-    await controller.close();
-  });
+    test('measures the window from the list that opened it', () {
+      _throttled((size) => Duration(milliseconds: size < 3 ? 20 : 300), (
+        async,
+        source,
+        received,
+        _,
+      ) {
+        // A small list opens a short window.
+        source.add([1]);
+        async.elapse(const Duration(milliseconds: 20));
+        expect(received, [
+          [1],
+        ]);
 
-  test('emits once per window under a continuous source', () async {
-    final controller = StreamController<List<int>>();
-    final received = <List<int>>[];
+        // A large list opens a long one, and growing mid-window does not
+        // re-measure it.
+        source
+          ..add([1, 2, 3])
+          ..add([1, 2, 3, 4])
+          ..add([1, 2, 3, 4, 5]);
 
-    final subscription = controller.stream
-        .throttleByCollectionSize(
-          interval: (_) => const Duration(milliseconds: 100),
-        )
-        .listen(received.add);
+        async.elapse(const Duration(milliseconds: 299));
+        expect(received.length, 1, reason: 'still inside the long window');
 
-    var value = 0;
-    final timer = Timer.periodic(
-      const Duration(milliseconds: 10),
-      (_) => controller.add([value++]),
-    );
-    await Future<void>.delayed(const Duration(milliseconds: 520));
-    timer.cancel();
+        async.elapse(const Duration(milliseconds: 1));
+        expect(received.last, [1, 2, 3, 4, 5]);
+      });
+    });
 
-    // Five 100ms windows over ~500ms. A leading emission on top of the
-    // trailing one would roughly double this.
-    expect(received.length, inInclusiveRange(4, 6));
+    // Completion is about ordering, not timing, so these run on the real event
+    // loop; `fakeAsync` does not turn this transformer's close path.
+    test('completes when the source closes while idle', () async {
+      final source = StreamController<List<int>>();
+      final received = <List<int>>[];
+      var done = false;
 
-    await subscription.cancel();
-    await controller.close();
-  });
+      source.stream
+          .throttleByCollectionSize(
+            interval: (_) => const Duration(milliseconds: 20),
+          )
+          .listen(received.add, onDone: () => done = true);
 
-  test('a larger collection is throttled for longer', () async {
-    final controller = StreamController<List<int>>();
-    final received = <List<int>>[];
+      source.add([1]);
+      await Future<void>.delayed(const Duration(milliseconds: 60));
+      expect(received, [
+        [1],
+      ]);
+      expect(done, isFalse);
 
-    final subscription = controller.stream
-        .throttleByCollectionSize(
-          interval: (size) => Duration(milliseconds: size < 3 ? 20 : 300),
-        )
-        .listen(received.add);
+      await source.close();
+      await Future<void>.delayed(const Duration(milliseconds: 20));
 
-    // A small list opens a short window, so its value lands quickly.
-    controller.add([1]);
-    await Future<void>.delayed(const Duration(milliseconds: 60));
-    expect(received, [
-      [1],
-    ]);
+      expect(done, isTrue, reason: 'an idle throttle must still close');
+    });
 
-    // A large list opens a long window that holds everything behind it.
-    controller
-      ..add([1, 2, 3])
-      ..add([1, 2, 3, 4])
-      ..add([1, 2, 3, 4, 5]);
-    await Future<void>.delayed(const Duration(milliseconds: 100));
-    expect(received.length, 1);
+    test('emits the held value when the source closes mid-window', () async {
+      final source = StreamController<List<int>>();
+      final received = <List<int>>[];
+      var done = false;
 
-    await Future<void>.delayed(const Duration(milliseconds: 300));
-    expect(received.last, [1, 2, 3, 4, 5]);
+      source.stream
+          .throttleByCollectionSize(
+            interval: (_) => const Duration(seconds: 10),
+          )
+          .listen(received.add, onDone: () => done = true);
 
-    await subscription.cancel();
-    await controller.close();
+      source.add([1]);
+      await source.close();
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      expect(received, [
+        [1],
+      ], reason: 'a single held value must not be swallowed on close');
+      expect(done, isTrue);
+    });
+
+    test('emits the latest of several held values on close', () async {
+      final source = StreamController<List<int>>();
+      final received = <List<int>>[];
+      var done = false;
+
+      source.stream
+          .throttleByCollectionSize(
+            interval: (_) => const Duration(seconds: 10),
+          )
+          .listen(received.add, onDone: () => done = true);
+
+      source
+        ..add([1])
+        ..add([1, 2]);
+      await source.close();
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      expect(received, [
+        [1, 2],
+      ]);
+      expect(done, isTrue);
+    });
+
+    test('forwards errors', () {
+      fakeAsync((async) {
+        final source = StreamController<List<int>>();
+        final errors = <Object>[];
+
+        final subscription = source.stream
+            .throttleByCollectionSize(
+              interval: (_) => const Duration(milliseconds: 50),
+            )
+            .listen(null, onError: errors.add);
+
+        source.addError('boom');
+        async.elapse(Duration.zero);
+
+        expect(errors, ['boom']);
+
+        subscription.cancel();
+        source.close();
+        async.elapse(Duration.zero);
+      });
+    });
+
+    test('stops its window when the listener cancels', () {
+      fakeAsync((async) {
+        // ignore: close_sinks
+        final source = StreamController<List<int>>();
+        final received = <List<int>>[];
+
+        final subscription = source.stream
+            .throttleByCollectionSize(
+              interval: (_) => const Duration(milliseconds: 50),
+            )
+            .listen(received.add);
+
+        source.add([1]);
+        subscription.cancel();
+        async.elapse(const Duration(milliseconds: 100));
+
+        expect(received, isEmpty);
+        expect(async.pendingTimers, isEmpty);
+      });
+    });
   });
 
   group('CallPreferences.participantsThrottleInterval', () {

@@ -57,7 +57,12 @@ class CallParticipantsBuilder extends StatelessWidget {
     return StreamBuilder<List<CallParticipantState>>(
       stream: call.participantsStream,
       initialData: call.state.value.callParticipants,
-      builder: (context, snapshot) => builder(context, snapshot.data!),
+      // `StreamBuilder` builds an error snapshot with no data, so fall back to
+      // the current state rather than throwing a null check over the real error.
+      builder: (context, snapshot) => builder(
+        context,
+        snapshot.data ?? call.state.value.callParticipants,
+      ),
     );
   }
 }

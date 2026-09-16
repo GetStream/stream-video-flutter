@@ -72,7 +72,9 @@ abstract class CallPreferences {
   /// set this to `null` to emit every update.
   ///
   /// This does not affect `CallState.callParticipants`, which is always
-  /// up to date.
+  /// up to date. It is read each time `Call.participantsStream` is used, so
+  /// changing it through `updateCallPreferences` reaches new listeners but
+  /// leaves existing ones on the interval they subscribed with.
   ParticipantsThrottleInterval? get participantsThrottleInterval;
 
   /// Supplies the shared key for this call when no `EncryptionManager` has been
