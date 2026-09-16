@@ -64,6 +64,12 @@ class _LobbyScreenState extends State<LobbyScreen> {
   final _userAuthController = locator.get<UserAuthController>();
   late final StreamVideoEffectsManager _videoEffectsManager;
 
+  /// Whether this platform can encrypt and decrypt at all.
+  ///
+  /// Only Android, iOS and macOS ship the encryption manager, so everywhere
+  /// else the switch is gone and an encrypted call cannot be joined.
+  final bool _encryptionSupported = EncryptionManager.isSupported;
+
   /// Whether to create the call encrypted. Only meaningful until the call
   /// exists, after which the call itself is the answer.
   bool _encryptionEnabled = false;
@@ -82,6 +88,12 @@ class _LobbyScreenState extends State<LobbyScreen> {
   /// Whether the call exists: either it already did, or this screen made it.
   bool get _callExists => widget.callExists || _created;
 
+  /// Whether the call being joined is encrypted: its own setting once it
+  /// exists, the switch until then.
+  bool get _willBeEncrypted => _callExists
+      ? isCallEncrypted(widget.call.state.value.settings)
+      : _encryptionEnabled;
+
   /// Set once the call has been handed to the call screen, which owns the
   /// encryption manager from then on.
   bool _joining = false;
@@ -93,9 +105,11 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
     // An invite that carries a key is an invite to an encrypted call, so the
     // user has nothing to fill in. For a call that does not exist yet, it also
-    // decides that the call is created encrypted.
+    // decides that the call is created encrypted — which is why a platform
+    // that cannot encrypt ignores the key rather than creating a call it
+    // would then be locked out of.
     final invitedKey = widget.initialEncryptionKey;
-    if (invitedKey != null && invitedKey.isNotEmpty) {
+    if (_encryptionSupported && invitedKey != null && invitedKey.isNotEmpty) {
       _encryptionEnabled = true;
       _setEncryptionKey(invitedKey);
     }
@@ -116,6 +130,13 @@ class _LobbyScreenState extends State<LobbyScreen> {
   Future<bool> _joinCallPressed(CallConnectOptions options) async {
     if (_creatingCall) return false;
 
+    // The button is disabled in this state, so this only catches a join that
+    // came from somewhere else — a deep link, or a host driving the view.
+    if (!_encryptionSupported && _willBeEncrypted) {
+      _showError('This call is encrypted, which this platform cannot do.');
+      return false;
+    }
+
     // Creation is deferred to here so the encryption switch stays live for as
     // long as it means anything: the mode is fixed at creation, and this is
     // the last moment before it is.
@@ -126,6 +147,14 @@ class _LobbyScreenState extends State<LobbyScreen> {
     // The manager has to be attached before any peer connection exists, and
     // the join happens on the next screen — so this is the last moment.
     final isEncrypted = isCallEncrypted(widget.call.state.value.settings);
+
+    // `getOrCreate` may have found a call somebody else created encrypted,
+    // whatever this screen asked for.
+    if (isEncrypted && !_encryptionSupported) {
+      _showError('This call is encrypted, which this platform cannot do.');
+      return false;
+    }
+
     if (isEncrypted && _encryptionKey.isNotEmpty) {
       if (!await _attachE2EE() || !mounted) return false;
     }
@@ -144,7 +173,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
 
   /// Derives the shared key and attaches a manager to the call.
   Future<bool> _attachE2EE() async {
-    if (!EncryptionManager.isSupported) {
+    if (!_encryptionSupported) {
       _showError('End-to-end encryption is not available on this platform.');
       return false;
     }
@@ -171,7 +200,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
     try {
       final result = await widget.call.getOrCreate(
         video: true,
-        encryption: _encryptionEnabled
+        encryption: _encryptionEnabled && _encryptionSupported
             ? const StreamEncryptionSettings(mode: StreamEncryptionMode.autoOn)
             : null,
       );
@@ -278,16 +307,20 @@ class _LobbyScreenState extends State<LobbyScreen> {
                   ? isEncrypted
                   : _encryptionEnabled;
               final needsKey = willBeEncrypted && _encryptionKey.isEmpty;
+              // An encrypted call is unreachable from a platform without the
+              // encryption manager: every frame would arrive undecryptable.
+              final blocked = willBeEncrypted && !_encryptionSupported;
 
               return StreamLobbyView(
                 call: widget.call,
                 actions: actions,
                 title: Text('Set up your call', style: textTheme.headingLg),
                 joinButtonLabel: const Text('Start a test call'),
-                joinEnabled: !needsKey && !_creatingCall,
+                joinEnabled: !needsKey && !blocked && !_creatingCall,
                 footer: LobbyEncryption(
                   call: widget.call,
                   callExists: _callExists,
+                  supported: _encryptionSupported,
                   encryptionEnabled: _encryptionEnabled,
                   encryptionKey: _encryptionKey,
                   busy: _creatingCall,
