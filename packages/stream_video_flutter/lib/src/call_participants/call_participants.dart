@@ -129,6 +129,7 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
     if (widget.participants == null) {
       _participantsSubscription = widget.call
           .partialState((state) => state.callParticipants)
+          .throttleByCollectionSize()
           .listen(recalculateParticipants);
     }
   }
@@ -156,6 +157,7 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
       _participantsSubscription?.cancel();
       _participantsSubscription = widget.call
           .partialState((state) => state.callParticipants)
+          .throttleByCollectionSize()
           .listen(recalculateParticipants);
 
       recalculateParticipants(widget.call.state.value.callParticipants);

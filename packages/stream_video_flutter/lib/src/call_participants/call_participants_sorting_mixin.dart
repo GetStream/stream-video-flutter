@@ -28,31 +28,42 @@ mixin CallParticipantsSortingMixin<T extends StatefulWidget> on State<T> {
   /// Call this method whenever the participant list changes, typically from
   /// a stream subscription or in [didUpdateWidget].
   void recalculateParticipants(List<CallParticipantState> newParticipants) {
-    final participants = [
-      ...newParticipants,
-    ].where(participantFilter ?? (_) => true).toList();
+    final filter = participantFilter;
+    final participants = filter == null
+        ? newParticipants
+        : newParticipants.where(filter).toList();
 
-    for (final participant in participants) {
-      final index = _sortedParticipantKeys.indexOf(
-        participant.uniqueParticipantKey,
+    // Position of each key in the previous order, so the sort below reads a
+    // participant's previous slot in constant time.
+    final previousOrder = <String, int>{
+      for (var index = 0; index < _sortedParticipantKeys.length; index++)
+        _sortedParticipantKeys[index]: index,
+    };
+
+    // Participants that weren't in the previous order are appended, in the
+    // order they arrived.
+    var nextOrder = previousOrder.length;
+    final entries = [
+      for (final participant in participants)
+        (
+          key: participant.uniqueParticipantKey,
+          order: previousOrder[participant.uniqueParticipantKey] ?? nextOrder++,
+          participant: participant,
+        ),
+    ]..sort((a, b) => a.order.compareTo(b.order));
+
+    final sort = participantSort;
+    if (sort != null) {
+      mergeSort(
+        entries,
+        compare: (a, b) => sort(a.participant, b.participant),
       );
-      if (index == -1) {
-        _sortedParticipantKeys.add(participant.uniqueParticipantKey);
-      }
     }
 
-    // First apply previous sorting on new participants list
-    participants.sort(
-      (a, b) => _sortedParticipantKeys
-          .indexOf(a.uniqueParticipantKey)
-          .compareTo(_sortedParticipantKeys.indexOf(b.uniqueParticipantKey)),
-    );
+    final sortedKeys = [for (final entry in entries) entry.key];
+    final sortedParticipants = [for (final entry in entries) entry.participant];
 
-    if (participantSort != null) {
-      mergeSort(participants, compare: participantSort);
-    }
-
-    final screenShareParticipant = participants.firstWhereOrNull(
+    final screenShareParticipant = sortedParticipants.firstWhereOrNull(
       (it) {
         final screenShareTrack = it.screenShareTrack;
         final isScreenShareEnabled = it.isScreenShareEnabled;
@@ -63,13 +74,24 @@ mixin CallParticipantsSortingMixin<T extends StatefulWidget> on State<T> {
       },
     );
 
-    _sortedParticipantKeys = participants
-        .map((e) => e.uniqueParticipantKey)
-        .toList();
+    _sortedParticipantKeys = sortedKeys;
+
+    // The state layer hands back the same participant instance when an event
+    // leaves that participant untouched, so identity is enough to tell whether
+    // anything on screen would actually differ.
+    final unchanged =
+        identical(screenShareParticipant, _screenShareParticipant) &&
+        sortedParticipants.length == _participants.length &&
+        sortedParticipants.foldIndexed(
+          true,
+          (index, acc, it) => acc && identical(it, _participants[index]),
+        );
+
+    if (unchanged) return;
 
     if (mounted) {
       setState(() {
-        _participants = participants.toList();
+        _participants = sortedParticipants;
         _screenShareParticipant = screenShareParticipant;
       });
     }

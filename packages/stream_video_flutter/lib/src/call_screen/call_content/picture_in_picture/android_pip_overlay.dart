@@ -57,6 +57,7 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
 
     _participantsSubscription = widget.call
         .partialState((state) => state.callParticipants)
+        .throttleByCollectionSize()
         .listen(recalculateParticipants);
   }
 

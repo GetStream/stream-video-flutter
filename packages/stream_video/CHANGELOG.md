@@ -1,3 +1,14 @@
+## Upcoming
+
+### 🔄 Changed
+
+- SFU participant events no longer emit a new call state when they leave every participant unchanged.
+- Added `throttleByCollectionSize`, which rate-limits a list stream at an interval that grows with the list size.
+
+### 🐞 Fixed
+
+- Fixed `CallParticipantState.copyWithUpdatedAudioLevels` mutating the audio level history it shares with the previous state.
+
 ## 1.6.0
 
 ### ✅ Added

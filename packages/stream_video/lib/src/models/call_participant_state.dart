@@ -165,15 +165,14 @@ class CallParticipantState extends Equatable
     required double audioLevel,
     bool? isSpeaking,
   }) {
-    final levels = audioLevels;
-    levels.add(audioLevel);
-    while (levels.length > 10) {
-      levels.removeAt(0);
+    final levels = [...audioLevels, audioLevel];
+    if (levels.length > 10) {
+      levels.removeRange(0, levels.length - 10);
     }
 
     return copyWith(
       audioLevel: audioLevel,
-      audioLevels: audioLevels,
+      audioLevels: levels,
       isSpeaking: isSpeaking,
     );
   }

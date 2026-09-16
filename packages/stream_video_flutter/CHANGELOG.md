@@ -1,3 +1,10 @@
+## Upcoming
+
+### 🔄 Changed
+
+- Participant list subscriptions are now throttled at an interval that grows with the participant count.
+- `StreamCallParticipants` and `StreamLivestreamHosts` no longer rebuild when an update leaves the rendered participants unchanged.
+
 ## 1.6.0
 
 ### ✅ Added
