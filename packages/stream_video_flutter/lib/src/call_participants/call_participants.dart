@@ -127,10 +127,9 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
     );
 
     if (widget.participants == null) {
-      _participantsSubscription = widget.call
-          .partialState((state) => state.callParticipants)
-          .throttleByCollectionSize()
-          .listen(recalculateParticipants);
+      _participantsSubscription = widget.call.participantsStream.listen(
+        recalculateParticipants,
+      );
     }
   }
 
@@ -155,10 +154,9 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
       }
     } else if (widget.call != oldWidget.call) {
       _participantsSubscription?.cancel();
-      _participantsSubscription = widget.call
-          .partialState((state) => state.callParticipants)
-          .throttleByCollectionSize()
-          .listen(recalculateParticipants);
+      _participantsSubscription = widget.call.participantsStream.listen(
+        recalculateParticipants,
+      );
 
       recalculateParticipants(widget.call.state.value.callParticipants);
     }

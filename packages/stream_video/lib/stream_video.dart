@@ -57,7 +57,6 @@ export 'src/state_emitter.dart' show MutableStateEmitter, StateEmitter;
 export 'src/stream_video.dart';
 export 'src/token/token.dart';
 export 'src/types/other.dart';
-export 'src/utils/adaptive_throttle.dart';
 export 'src/utils/none.dart';
 export 'src/utils/result.dart';
 export 'src/utils/string.dart';

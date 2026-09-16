@@ -151,8 +151,7 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
       // A silent participant who was already silent carries no new information,
       // so keep the existing instance and leave the list identical.
       if (levelInfo == null ||
-          (!levelInfo.isSpeaking &&
-              participant.isSpeaking == levelInfo.isSpeaking)) {
+          (!levelInfo.isSpeaking && !participant.isSpeaking)) {
         return participant;
       }
 

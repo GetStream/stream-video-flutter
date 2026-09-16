@@ -37,6 +37,7 @@ import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import '../stream_video.dart';
 import '../telemetry/client_event_types.dart';
+import '../utils/adaptive_throttle.dart';
 import '../utils/cancelable_operation.dart';
 import '../utils/cancelables.dart';
 import '../utils/extensions.dart';
@@ -431,6 +432,34 @@ class Call {
   Stream<T> partialState<T>(CallStateSelector<T> selector) {
     return _stateManager.partialCallStateStream(selector);
   }
+
+  /// The participants in this call, rate-limited at an interval that grows with
+  /// the participant count.
+  ///
+  /// Prefer this over `partialState((state) => state.callParticipants)` for
+  /// anything that renders the list: in a large call the raw state emits far
+  /// faster than a screen can usefully repaint. [CallState.callParticipants]
+  /// stays immediate, so a lookup that has to see a participant the moment
+  /// they join keeps working.
+  ///
+  /// Each window emits the most recent list to arrive during it, so the first
+  /// emission to a listener is delayed by up to one interval. Read
+  /// [CallState.callParticipants] for a value to render before then.
+  ///
+  /// Override the interval, or turn the throttle off altogether, with
+  /// [CallPreferences.participantsThrottleInterval]. The preference is read
+  /// once, when this stream is first listened to, and the throttle is shared by
+  /// every listener.
+  late final Stream<List<CallParticipantState>> participantsStream = () {
+    final participants = partialState((state) => state.callParticipants);
+    final interval =
+        _stateManager.callState.preferences.participantsThrottleInterval;
+
+    return (interval == null
+            ? participants
+            : participants.throttleByCollectionSize(interval: interval))
+        .asBroadcastStream();
+  }();
 
   SharedEmitter<
     ({

@@ -2,6 +2,7 @@ import '../webrtc/e2ee/call_encryption_key.dart';
 import 'audio_configuration_policy.dart';
 import 'call_client_publish_options.dart';
 import 'moderation_blur_config.dart';
+import 'participants_throttle.dart';
 
 abstract class CallPreferences {
   /// The maximum duration to wait when establishing a connection to the call.
@@ -62,6 +63,18 @@ abstract class CallPreferences {
   /// the client-level default `StreamVideoOptions.audioConfigurationPolicy`.
   AudioConfigurationPolicy? get audioConfigurationPolicy;
 
+  /// How long `Call.participantsStream` holds participant updates back, as a
+  /// function of the participant count.
+  ///
+  /// A large call emits participant updates far faster than a screen can
+  /// usefully repaint, so the default returns a longer interval the more
+  /// participants there are. Return a shorter one to trade CPU for latency, or
+  /// set this to `null` to emit every update.
+  ///
+  /// This does not affect `CallState.callParticipants`, which is always
+  /// up to date.
+  ParticipantsThrottleInterval? get participantsThrottleInterval;
+
   /// Supplies the shared key for this call when no `EncryptionManager` has been
   /// attached to it by hand.
   ///
@@ -97,6 +110,7 @@ class DefaultCallPreferences implements CallPreferences {
     this.closedCaptionsVisibleCaptions = 2,
     this.videoModerationConfig = const VideoModerationConfig.disabled(),
     this.audioConfigurationPolicy,
+    this.participantsThrottleInterval = defaultParticipantsThrottleInterval,
     this.encryptionKeyResolver,
   });
 
@@ -187,6 +201,14 @@ class DefaultCallPreferences implements CallPreferences {
   /// Defaults to null (falls back to `StreamVideoOptions.audioConfigurationPolicy`).
   @override
   final AudioConfigurationPolicy? audioConfigurationPolicy;
+
+  /// How long `Call.participantsStream` holds participant updates back, as a
+  /// function of the participant count. See
+  /// [CallPreferences.participantsThrottleInterval].
+  ///
+  /// Defaults to [defaultParticipantsThrottleInterval].
+  @override
+  final ParticipantsThrottleInterval? participantsThrottleInterval;
 
   /// Supplies the shared key for this call when no manager was attached by
   /// hand. See [CallPreferences.encryptionKeyResolver].

@@ -3,7 +3,8 @@
 ### 🔄 Changed
 
 - SFU participant events no longer emit a new call state when they leave every participant unchanged.
-- Added `throttleByCollectionSize`, which rate-limits a list stream at an interval that grows with the list size.
+- Added `Call.participantsStream`, which emits the participant list at an interval that grows with the participant count. `CallState.callParticipants` is unchanged.
+- Added `CallPreferences.participantsThrottleInterval` to override that interval, or set it to `null` to emit every update.
 
 ### 🐞 Fixed
 
