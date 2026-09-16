@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
@@ -38,10 +40,10 @@ class CallParticipantState extends Equatable
     this.viewportVisibility = ViewportVisibility.unknown,
     this.screenShareViewportVisibility = ViewportVisibility.unknown,
     this.participantSource,
-  }) : audioLevels = audioLevels ?? [audioLevel];
+  }) : audioLevels = _sealLevels(audioLevels ?? [audioLevel]);
 
   /// Internal constructor to be used with copyWith methods
-  const CallParticipantState._({
+  CallParticipantState._({
     required this.userId,
     required this.roles,
     required this.name,
@@ -56,7 +58,7 @@ class CallParticipantState extends Equatable
     required this.connectionQuality,
     required this.isOnline,
     required this.audioLevel,
-    required this.audioLevels,
+    required List<double> audioLevels,
     required this.isSpeaking,
     required this.isDominantSpeaker,
     required this.pin,
@@ -64,7 +66,7 @@ class CallParticipantState extends Equatable
     required this.viewportVisibility,
     required this.screenShareViewportVisibility,
     required this.participantSource,
-  });
+  }) : audioLevels = _sealLevels(audioLevels);
 
   final String userId;
   final List<String> roles;
@@ -103,6 +105,15 @@ class CallParticipantState extends Equatable
   final ViewportVisibility screenShareViewportVisibility;
 
   bool get isPinned => pin != null;
+
+  /// Identity is used all over the SDK to tell whether a participant changed,
+  /// which only holds while nothing mutates a collection in place. Handing out
+  /// an unmodifiable view makes that an error rather than a silently stale UI.
+  static List<double> _sealLevels(List<double> levels) {
+    if (levels is UnmodifiableListView<double>) return levels;
+    return UnmodifiableListView(levels);
+  }
+
   String get uniqueParticipantKey => '$userId-$sessionId';
 
   /// Returns a copy of this [CallParticipantState] with the given fields

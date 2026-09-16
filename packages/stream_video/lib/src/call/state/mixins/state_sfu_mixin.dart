@@ -220,27 +220,39 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
       for (final pin in pins) _participantKey(pin.userId, pin.sessionId),
     };
 
-    state = state.copyWith(
-      callParticipants: state.callParticipants.map((participant) {
-        final isPinned = pinnedKeys.contains(
-          _participantKey(participant.userId, participant.sessionId),
+    var changed = false;
+    final participants = state.callParticipants.map((participant) {
+      final isPinned = pinnedKeys.contains(
+        _participantKey(participant.userId, participant.sessionId),
+      );
+      final serverPin = participant.pin != null && !participant.pin!.isLocalPin;
+
+      if (isPinned) {
+        // `pinnedAt` orders pinned participants, so an already-pinned one keeps
+        // the time it was pinned at rather than jumping to the front of the
+        // order on every pins event.
+        if (serverPin) return participant;
+
+        changed = true;
+        return participant.copyWithPin(
+          participantPin: CallParticipantPin(
+            isLocalPin: false,
+            pinnedAt: DateTime.now(),
+          ),
         );
-        if (isPinned) {
-          return participant.copyWithPin(
-            participantPin: CallParticipantPin(
-              isLocalPin: false,
-              pinnedAt: DateTime.now(),
-            ),
-          );
-        } else if (participant.pin != null && !participant.pin!.isLocalPin) {
-          return participant.copyWithPin(
-            participantPin: null,
-          );
-        } else {
-          return participant;
-        }
-      }).toList(),
-    );
+      }
+
+      if (serverPin) {
+        changed = true;
+        return participant.copyWithPin(participantPin: null);
+      }
+
+      return participant;
+    }).toList();
+
+    if (!changed) return;
+
+    state = state.copyWith(callParticipants: participants);
   }
 
   void sfuConnectionQualityChanged(

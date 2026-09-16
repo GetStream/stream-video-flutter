@@ -1,14 +1,19 @@
 ## Upcoming
 
+### ✅ Added
+
+- Added `Call.participantsStream`, which emits the participant list at an interval that grows with the participant count. `CallState.callParticipants` is unchanged.
+- Added `CallPreferences.participantsThrottleInterval` to override that interval, or set it to `null` to emit every update.
+
 ### 🔄 Changed
 
 - SFU participant events no longer emit a new call state when they leave every participant unchanged.
 - `CallParticipantState.audioLevel` and `audioLevels` now hold at their last value while a participant is silent, instead of tracking every below-threshold reading.
-- Added `Call.participantsStream`, which emits the participant list at an interval that grows with the participant count. `CallState.callParticipants` is unchanged.
-- Added `CallPreferences.participantsThrottleInterval` to override that interval, or set it to `null` to emit every update.
+- `CallParticipantState.audioLevels` is now unmodifiable.
 
 ### 🐞 Fixed
 
+- Fixed server-pinned participants being reordered on every pins event, as their `pinnedAt` was refreshed each time.
 - Fixed `CallParticipantState.copyWithUpdatedAudioLevels` mutating the audio level history it shares with the previous state.
 
 ## 1.6.0

@@ -4,6 +4,7 @@ import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_audio_level.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_connection_info.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_inbound_video_state.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_pin.dart';
 import 'package:stream_video/stream_video.dart';
 
 CallParticipantState _participant({
@@ -350,6 +351,83 @@ void main() {
       expect(
         identical(notifier.callState.callParticipants[1], bobBefore),
         isTrue,
+      );
+    });
+  });
+
+  group('sfuPinsUpdated', () {
+    test('keeps the original pinnedAt for an already pinned participant', () {
+      final notifier = _notifier([_participant(userId: 'alice')]);
+      const pin = SfuPin(userId: 'alice', sessionId: 'alice-session');
+
+      notifier.sfuPinsUpdated([pin]);
+      final first = notifier.callState.callParticipants.single;
+      expect(first.pin, isNotNull);
+
+      notifier.sfuPinsUpdated([pin]);
+
+      expect(
+        notifier.callState.callParticipants.single.pin!.pinnedAt,
+        first.pin!.pinnedAt,
+        reason: 'pinnedAt orders pinned participants, so it must not move',
+      );
+    });
+
+    test('does not emit when the pins are unchanged', () {
+      final notifier = _notifier([_participant(userId: 'alice')]);
+      const pin = SfuPin(userId: 'alice', sessionId: 'alice-session');
+
+      notifier.sfuPinsUpdated([pin]);
+      final before = notifier.callState.callParticipants;
+
+      notifier.sfuPinsUpdated([pin]);
+
+      expect(identical(notifier.callState.callParticipants, before), isTrue);
+    });
+
+    test('clears a server pin that is no longer sent', () {
+      final notifier = _notifier([_participant(userId: 'alice')]);
+
+      notifier.sfuPinsUpdated([
+        const SfuPin(userId: 'alice', sessionId: 'alice-session'),
+      ]);
+      expect(notifier.callState.callParticipants.single.pin, isNotNull);
+
+      notifier.sfuPinsUpdated([]);
+      expect(notifier.callState.callParticipants.single.pin, isNull);
+    });
+  });
+
+  group('audioLevels', () {
+    test('cannot be mutated through the participant', () {
+      final participant = _participant(userId: 'alice');
+
+      expect(
+        () => participant.audioLevels.add(0.5),
+        throwsUnsupportedError,
+        reason: 'identity checks rely on collections never changing in place',
+      );
+    });
+
+    test('stays unmodifiable after an audio level update', () {
+      final notifier = _notifier([_participant(userId: 'alice')]);
+
+      notifier.sfuUpdateAudioLevelChanged(
+        const SfuAudioLevelChangedEvent(
+          audioLevels: [
+            SfuAudioLevel(
+              userId: 'alice',
+              sessionId: 'alice-session',
+              level: 0.8,
+              isSpeaking: true,
+            ),
+          ],
+        ),
+      );
+
+      expect(
+        () => notifier.callState.callParticipants.single.audioLevels.add(0.1),
+        throwsUnsupportedError,
       );
     });
   });
