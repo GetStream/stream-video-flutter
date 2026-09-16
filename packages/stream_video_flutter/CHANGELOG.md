@@ -15,6 +15,7 @@
 - Added `DesktopScreenShareSourceController`, which holds the screens and windows on offer and the one that is picked.
 - Added `StreamDesktopScreenShareSelectorThemeData` on `StreamVideoTheme`, and `StreamDesktopScreenShareSelectorTheme` to restyle the selector over a subtree.
 - Added `desktopScreenShareRefresh`, `desktopScreenShareNoSources`, `desktopScreenShareLoadFailed` and `desktopScreenShareRetry` to the localizations, in English and Dutch.
+- Added `ViewportVisibilityReporter`, which measures how much of its child is on screen and reports it to `Call.viewportVisibility`. Wrap a custom widget drawing a participant's track in one and it takes part in what the call subscribes to.
 - `StreamLayoutButton` draws the participant layout in effect and offers the rest through a `StreamAdaptiveMenuAnchor`.
 - `StreamLayoutButton.defaultLayouts` is `auto` and `speakerBottom`, so the button toggles unless it is given more.
 - Added layout strings to the localizations, in English and Dutch: `layoutMenuTitle`, `layoutSelectTooltip`, `layoutDefault`, `layoutGrid`, `layoutSpeakerTop`, `layoutSpeakerBottom`, `layoutSpeakerLeft`, `layoutSpeakerRight` and `layoutSpeakerOneToOne`.
@@ -232,6 +233,7 @@
 
 - The desktop screen share picker is rebuilt on the design system. `TabbedScreenSelectWidget`, `ThumbnailGrid`, `ScreenSelectorStateNotifier` and `ScreenSelectorState` are gone; `StreamDesktopScreenShareSelector` and `DesktopScreenShareSourceController` replace them. `showDefaultScreenSelectionDialog` keeps its signature.
 - `ScreenShareThumbnailWidget` is `StreamDesktopScreenShareThumbnail` now, and takes the thumbnail from the source it is given rather than subscribing for one.
+- `StreamVideoRenderer` is a `StatelessWidget`. Measuring and reporting its viewport moved to `ViewportVisibilityReporter`, which it wraps its child in, and nothing was left for it to keep.
 - `ParticipantLayoutMode.auto` is the default layout of `StreamCallContent`, `StreamCallParticipants` and `RegularCallParticipantsContent`, and renders what `grid` used to. The livestream widgets still default to `grid`.
 - `ParticipantLayoutMode.grid` gives the local participant a tile of its own instead of floating them over the grid.
 - `ParticipantLayoutMode.auto` floats the self-view on mobile only while at most two other people are in the call, and gives the local participant a tile beyond that.

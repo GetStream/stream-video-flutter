@@ -8,7 +8,8 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../../test_utils/test_wrapper.dart';
 import '../mocks.dart';
 
-// A renderer reports only what it measures of itself, into the call's viewport
+// A renderer reports only what it measures of itself, through the
+// `ViewportVisibilityReporter` it wraps its child in, into the call's viewport
 // registry. What the participant's visibility and subscription become is the
 // registry's to decide, over every renderer drawing them — these tests are
 // about what each renderer puts in, and that it goes in at a safe moment.
