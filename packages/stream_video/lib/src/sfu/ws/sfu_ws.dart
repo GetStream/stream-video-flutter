@@ -65,7 +65,7 @@ class SfuWebSocket {
     Iterable<String>? protocols,
   }) {
     _logger.i(() => '<init> sessionId: $sessionId');
-    _client = StreamWebSocketClient(
+    _client = _SfuWebSocketClient(
       tag: '$_tag-$sessionSeq',
       optionsBuilder: () => WebSocketOptions(url: url, protocols: protocols),
       messageCodec: const SfuMessageCodec(),
@@ -267,5 +267,31 @@ class SfuWebSocket {
       case UserInitiated() || SystemInitiated() || ServerInitiated():
         break;
     }
+  }
+}
+
+class _SfuWebSocketClient extends StreamWebSocketClient {
+  _SfuWebSocketClient({
+    required super.optionsBuilder,
+    required super.messageCodec,
+    required super.pingRequestBuilder,
+    required super.tag,
+  });
+
+  @override
+  // ignore: unnecessary_overrides
+  Future<void> dispose() => super.dispose();
+
+  @override
+  void onUnhealthy() {
+    // Use a connection-unhealthy code on missed pong, not [CloseCode.normalClosure],
+    // so the SFU keeps this participant/session alive for a fast reconnect.
+    // Normal closure would have the SFU treat it as a leave and release resources.
+    unawaited(
+      disconnect(
+        closeCode: StreamVideoCloseCode.connectionUnhealthy,
+        source: const DisconnectionSource.unHealthyConnection(),
+      ),
+    );
   }
 }
