@@ -40,6 +40,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamParticipantTileThemeData? participantTileTheme,
     StreamFloatingParticipantTileThemeData? floatingParticipantTileTheme,
     StreamParticipantLabelThemeData? participantLabelTheme,
+    StreamPictureInPictureThemeData? pictureInPictureTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
     StreamLivestreamThemeData? livestreamTheme,
@@ -81,6 +82,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       floatingParticipantTileTheme: floatingParticipantTileTheme,
       participantLabelTheme:
           participantLabelTheme ?? legacy?.toParticipantLabelThemeData(),
+      pictureInPictureTheme: pictureInPictureTheme,
       connectionQualityIndicatorTheme:
           connectionQualityIndicatorTheme ??
           legacy?.toConnectionQualityIndicatorThemeData(),
@@ -127,6 +129,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     this.floatingParticipantTileTheme =
         const StreamFloatingParticipantTileThemeData(),
     this.participantLabelTheme = const StreamParticipantLabelThemeData(),
+    this.pictureInPictureTheme = const StreamPictureInPictureThemeData(),
     this.connectionQualityIndicatorTheme =
         const StreamConnectionQualityIndicatorThemeData(),
     this.callParticipantsGridTheme =
@@ -407,6 +410,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the participant tile's name pill.
   final StreamParticipantLabelThemeData participantLabelTheme;
 
+  /// Theme for the picture-in-picture window.
+  final StreamPictureInPictureThemeData pictureInPictureTheme;
+
   /// Theme for the connection quality indicator.
   final StreamConnectionQualityIndicatorThemeData
   connectionQualityIndicatorTheme;
@@ -452,6 +458,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamParticipantTileThemeData? participantTileTheme,
     StreamFloatingParticipantTileThemeData? floatingParticipantTileTheme,
     StreamParticipantLabelThemeData? participantLabelTheme,
+    StreamPictureInPictureThemeData? pictureInPictureTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
     StreamLivestreamThemeData? livestreamTheme,
@@ -475,6 +482,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     ),
     participantLabelTheme: this.participantLabelTheme.merge(
       participantLabelTheme,
+    ),
+    pictureInPictureTheme: this.pictureInPictureTheme.merge(
+      pictureInPictureTheme,
     ),
     connectionQualityIndicatorTheme: this.connectionQualityIndicatorTheme.merge(
       connectionQualityIndicatorTheme,
@@ -510,6 +520,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       ),
       participantLabelTheme: participantLabelTheme.merge(
         other.participantLabelTheme,
+      ),
+      pictureInPictureTheme: pictureInPictureTheme.merge(
+        other.pictureInPictureTheme,
       ),
       connectionQualityIndicatorTheme: connectionQualityIndicatorTheme.merge(
         other.connectionQualityIndicatorTheme,
@@ -577,6 +590,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           participantLabelTheme,
+      pictureInPictureTheme:
+          StreamPictureInPictureThemeData.lerp(
+            pictureInPictureTheme,
+            other.pictureInPictureTheme,
+            t,
+          ) ??
+          pictureInPictureTheme,
       connectionQualityIndicatorTheme:
           StreamConnectionQualityIndicatorThemeData.lerp(
             connectionQualityIndicatorTheme,

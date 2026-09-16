@@ -35,7 +35,7 @@ class StreamParticipantLabelStyleDefaults extends StreamParticipantLabelStyle {
   Color get backgroundColor => _colorScheme.backgroundOverlayDarkStrong;
 
   @override
-  BorderRadius get borderRadius => BorderRadius.all(_radius.lg);
+  BorderRadiusGeometry get borderRadius => BorderRadius.all(_radius.lg);
 
   @override
   EdgeInsetsGeometry get padding => EdgeInsetsDirectional.fromSTEB(
@@ -56,6 +56,12 @@ class StreamParticipantLabelStyleDefaults extends StreamParticipantLabelStyle {
 
   @override
   bool get showAudioIndicator => true;
+
+  @override
+  bool get showVideoOffIcon => true;
+
+  @override
+  double get minNameWidth => 24;
 
   // Whatever the sound indicator would have made it, so a pill drawing
   // something shorter in its place is the size it would have been with it.
@@ -124,6 +130,60 @@ bool participantLabelDrawsAudioIndicator({
   required StreamParticipantLabelStyle? style,
 }) => isAudioEnabled && (style?.showAudioIndicator ?? true);
 
+/// Whether a pill drawn for a participant in this state, under this style, ends
+/// up with the camera-off icon.
+///
+/// Two things suppress it: a style that switched it off — a tile with no room
+/// to spend on it beside the name does, and so does the picture-in-picture
+/// window — and a participant whose camera is on.
+///
+/// [style] is the style already merged over the ambient theme.
+@internal
+bool participantLabelDrawsVideoOffIcon({
+  required bool isVideoEnabled,
+  required StreamParticipantLabelStyle? style,
+}) => !isVideoEnabled && (style?.showVideoOffIcon ?? true);
+
+/// Whether a pill drawn for this participant ends up with a name in it.
+///
+/// A participant with no name set is not unusual, and an empty name draws a
+/// zero-width [Text] that still claims the gap in front of the indicators.
+/// Resolved in one place so the pill and the arithmetic that decides whether it
+/// fits agree on whether there is a name to make room for.
+@internal
+bool participantLabelDrawsName({
+  required bool showName,
+  required String name,
+}) => showName && name.isNotEmpty;
+
+/// Whether a pill drawn for a participant in this state, under this style,
+/// carries any of the icons that report their devices.
+///
+/// A pill with neither a name nor one of these has nothing to say, and the
+/// label draws nothing at all rather than an empty rounded rectangle.
+///
+/// [style] is the style already merged over the ambient theme.
+@internal
+bool participantLabelDrawsIcons({
+  required bool isAudioEnabled,
+  required bool isVideoEnabled,
+  required bool isVideoPaused,
+  required StreamParticipantLabelStyle? style,
+}) {
+  if (!isAudioEnabled) return true;
+  if (isVideoPaused) return true;
+  if (participantLabelDrawsVideoOffIcon(
+    isVideoEnabled: isVideoEnabled,
+    style: style,
+  )) {
+    return true;
+  }
+  return participantLabelDrawsAudioIndicator(
+    isAudioEnabled: isAudioEnabled,
+    style: style,
+  );
+}
+
 /// The narrowest a [StreamParticipantLabel] can be laid out at, given what this
 /// participant makes it draw.
 ///
@@ -138,6 +198,7 @@ double participantLabelMinWidth(
   required bool showMicrophoneOff,
   required bool showVideoOff,
   required bool showVideoPaused,
+  bool showName = true,
   StreamParticipantLabelStyle? style,
 }) {
   // The same resolution order the label itself uses, so the two agree on what
@@ -161,7 +222,11 @@ double participantLabelMinWidth(
   final indicators = <double>[
     if (showMicrophoneOff)
       resolved?.microphoneIconSize ?? defaults.microphoneIconSize,
-    if (showVideoOff) resolved?.videoOffIconSize ?? defaults.videoOffIconSize,
+    if (participantLabelDrawsVideoOffIcon(
+      isVideoEnabled: !showVideoOff,
+      style: resolved,
+    ))
+      resolved?.videoOffIconSize ?? defaults.videoOffIconSize,
     if (showVideoPaused)
       resolved?.videoPausedIconSize ?? defaults.videoPausedIconSize,
     // The sound indicator stands in for the microphone icon rather than
@@ -171,6 +236,16 @@ double participantLabelMinWidth(
   ];
 
   var width = padding.horizontal;
+
+  // The name is the reason the pill is there. Below this it would be drawn as
+  // an ellipsis with nothing in front of it, which is chrome over video saying
+  // nothing, so the tile drops the pill instead.
+  if (showName) {
+    width += resolved?.minNameWidth ?? defaults.minNameWidth;
+    if (indicators.isNotEmpty) {
+      width += resolved?.spacing ?? defaults.spacing;
+    }
+  }
 
   // A pill can come down to a name alone — an unmuted, camera-on participant
   // under a style that switched the indicator off — leaving just the padding.

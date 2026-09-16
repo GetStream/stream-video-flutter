@@ -6,6 +6,12 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import '../../test_utils/test_wrapper.dart';
 import '../mocks.dart';
 
+StreamParticipantTileStyle? _dropIndicatorWhenCompact(
+  StreamParticipantTileStyleDetails details,
+) => details.chrome.isCompact
+    ? const StreamParticipantTileStyle(showConnectionQualityIndicator: false)
+    : null;
+
 void main() {
   group('StreamParticipantTile', () {
     late MockCall call;
@@ -50,6 +56,118 @@ void main() {
       expect(receivedProps?.showParticipantLabel, isFalse);
     });
 
+    testWidgets('hands the measured size and chrome to the builder', (
+      tester,
+    ) async {
+      StreamParticipantTileProps? receivedProps;
+
+      await tester.pumpWidget(
+        StreamComponentFactory(
+          builders: StreamComponentBuilders(
+            extensions: streamVideoComponentBuilders(
+              participantTile: (context, props) {
+                receivedProps = props;
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+          child: TestWrapper(
+            child: Center(
+              child: SizedBox(
+                width: 130,
+                height: 200,
+                child: StreamParticipantTile(
+                  call: call,
+                  participant: participant,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(receivedProps?.size, const Size(130, 200));
+      expect(receivedProps?.chrome, StreamParticipantTileChrome.compact);
+    });
+
+    testWidgets('resolves the chrome with the theme policy', (tester) async {
+      StreamParticipantTileProps? receivedProps;
+
+      await tester.pumpWidget(
+        StreamComponentFactory(
+          builders: StreamComponentBuilders(
+            extensions: streamVideoComponentBuilders(
+              participantTile: (context, props) {
+                receivedProps = props;
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+          child: TestWrapper(
+            child: StreamParticipantTileTheme(
+              data: const StreamParticipantTileThemeData(
+                chromePolicy: StreamParticipantTileChromePolicy.none,
+              ),
+              child: Center(
+                child: SizedBox(
+                  width: 300,
+                  height: 300,
+                  child: StreamParticipantTile(
+                    call: call,
+                    participant: participant,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(receivedProps?.chrome, StreamParticipantTileChrome.bare);
+    });
+
+    testWidgets('merges the style its resolver returns over the theme', (
+      tester,
+    ) async {
+      when(() => participant.name).thenReturn('Rene Floor');
+      when(() => participant.isSpeaking).thenReturn(false);
+      when(() => participant.isAudioEnabled).thenReturn(true);
+      when(() => participant.isVideoEnabled).thenReturn(true);
+      when(
+        () => participant.connectionQuality,
+      ).thenReturn(SfuConnectionQuality.excellent);
+      when(() => participant.reaction).thenReturn(null);
+
+      await tester.pumpWidget(
+        TestWrapper(
+          child: StreamParticipantTileTheme(
+            data: const StreamParticipantTileThemeData(
+              style: StreamParticipantTileStyle(
+                labelStyle: StreamParticipantLabelStyle(blurSigma: 0),
+              ),
+              styleResolver: _dropIndicatorWhenCompact,
+            ),
+            child: Center(
+              child: SizedBox(
+                width: 130,
+                height: 200,
+                child: StreamParticipantTile(
+                  call: call,
+                  participant: participant,
+                  videoRendererBuilder: (_, _, _) => const SizedBox.shrink(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // The resolver dropped the indicator at this size...
+      expect(find.byType(StreamConnectionQualityIndicator), findsNothing);
+      // ...and what it said nothing about still comes from the theme.
+      expect(find.text('Rene Floor'), findsOneWidget);
+    });
+
     testWidgets('falls back to the default tile without a factory', (
       tester,
     ) async {
@@ -75,9 +193,7 @@ void main() {
   });
 
   group('StreamFloatingParticipantTile', () {
-    // Both floating goldens hand in their own participantBuilder, so the
-    // default composition — a StreamParticipantTile inside the surface — is
-    // only covered here.
+    // The default composition — a StreamParticipantTile inside the surface.
     testWidgets('clips the tile to the surface radius it was given', (
       tester,
     ) async {
@@ -126,6 +242,64 @@ void main() {
             .first,
       );
       expect(clip.borderRadius, radius);
+    });
+
+    // The self-view is 140px wide, which the ladder would call compact and
+    // anchor the indicator into the corner for. It draws nothing but that
+    // indicator, so there is no chrome to make room for and the design keeps
+    // it inset and round.
+    testWidgets('pins the full chrome whatever its size', (tester) async {
+      final participant = MockCallParticipantState();
+      when(() => participant.name).thenReturn('Rene Floor');
+      when(() => participant.isSpeaking).thenReturn(false);
+      when(() => participant.isAudioEnabled).thenReturn(true);
+      when(() => participant.isVideoEnabled).thenReturn(true);
+      when(
+        () => participant.connectionQuality,
+      ).thenReturn(SfuConnectionQuality.excellent);
+      when(() => participant.reaction).thenReturn(null);
+
+      await tester.pumpWidget(
+        StreamComponentFactory(
+          builders: StreamComponentBuilders(
+            extensions: streamVideoComponentBuilders(
+              participantVideo: (context, props) =>
+                  const ColoredBox(color: Color(0xFF102030)),
+            ),
+          ),
+          child: TestWrapper(
+            child: StreamFloatingParticipantTile(
+              call: MockCall(),
+              participant: participant,
+            ),
+          ),
+        ),
+      );
+
+      final tile = tester.widget<DefaultStreamParticipantTile>(
+        find.byType(DefaultStreamParticipantTile),
+      );
+      expect(tile.props.chrome, StreamParticipantTileChrome.full);
+
+      // Round rather than a corner-anchored rectangle, and clear of the edges.
+      final box = tester.widget<DecoratedBox>(
+        find
+            .descendant(
+              of: find.byType(StreamConnectionQualityIndicator),
+              matching: find.byType(DecoratedBox),
+            )
+            .first,
+      );
+      expect((box.decoration as BoxDecoration).shape, BoxShape.circle);
+
+      final surface = tester.getRect(
+        find.byType(StreamFloatingParticipantTile),
+      );
+      final indicator = tester.getRect(
+        find.byType(StreamConnectionQualityIndicator),
+      );
+      expect(indicator.right, lessThan(surface.right));
+      expect(indicator.bottom, lessThan(surface.bottom));
     });
   });
 
@@ -328,6 +502,43 @@ void main() {
 
       expect(find.byType(DefaultStreamParticipantTile), findsOneWidget);
       expect(find.text('renderer'), findsOneWidget);
+    });
+
+    // It builds the default tile with props of its own rather than going
+    // through [StreamParticipantTile], so the chrome is resolved by the tile
+    // measuring itself. Nothing else takes that path.
+    testWidgets('steps its chrome down with its size', (tester) async {
+      final participant = MockCallParticipantState();
+      when(() => participant.name).thenReturn('Rene Floor');
+      when(() => participant.image).thenReturn(null);
+      when(() => participant.isSpeaking).thenReturn(false);
+      when(() => participant.isAudioEnabled).thenReturn(true);
+      when(() => participant.isVideoEnabled).thenReturn(true);
+      when(
+        () => participant.connectionQuality,
+      ).thenReturn(SfuConnectionQuality.excellent);
+      when(() => participant.reaction).thenReturn(null);
+
+      await tester.pumpWidget(
+        TestWrapper(
+          child: Center(
+            child: SizedBox(
+              width: 130,
+              height: 200,
+              // ignore: deprecated_member_use_from_same_package
+              child: StreamCallParticipant(
+                call: MockCall(),
+                participant: participant,
+                videoRendererBuilder: (_, _, _) => const Text('renderer'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.text('Rene Floor'), findsOneWidget);
+      expect(find.byType(StreamAudioIndicator), findsNothing);
     });
   });
 }

@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../stream_video_flutter.dart';
 import '../../../call_participants/screen_share_call_participants_content.dart';
+import 'picture_in_picture_defaults.dart';
 
 /// A dedicated overlay widget for Android Picture-in-Picture mode.
 /// This widget creates a floating overlay that shows only the video content
@@ -110,6 +111,9 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
           rendererScopePrefix: 'pipVideo',
           call: widget.call,
           participant: pipParticipant,
+          style: pictureInPictureTileStyle(context).merge(
+            StreamPictureInPictureTheme.of(context).style?.tileStyle,
+          ),
         );
       }
     }
