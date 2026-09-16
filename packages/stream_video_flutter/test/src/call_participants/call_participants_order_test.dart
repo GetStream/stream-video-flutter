@@ -55,14 +55,6 @@ void main() {
     when(() => call.state).thenAnswer(
       (_) => MutableStateEmitter<CallState>(state, sync: true),
     );
-    when(
-      () => call.updateViewportVisibility(
-        sessionId: any(named: 'sessionId'),
-        userId: any(named: 'userId'),
-        visibility: any(named: 'visibility'),
-        trackType: any(named: 'trackType'),
-      ),
-    ).thenAnswer((_) async => const Result.success(none));
 
     return call;
   }

@@ -8,6 +8,10 @@ import '../../stream_video_flutter.dart';
 /// A builder for the widget that is displayed when there's no video stream.
 Widget _defaultPlaceholderBuilder(BuildContext context) => Container();
 
+/// Names each renderer for the call's viewport registry. Nothing outside this
+/// process reads it; it only has to tell two live renderers apart.
+int _viewportSeq = 0;
+
 /// Widget that renders a single video track for a call participant.
 class StreamVideoRenderer extends StatefulWidget {
   /// Creates a new instance of [StreamVideoRenderer].
@@ -57,11 +61,36 @@ class StreamVideoRenderer extends StatefulWidget {
 }
 
 class _StreamVideoRendererState extends State<StreamVideoRenderer> {
+  // This renderer's name in the call's viewport registry, which holds one
+  // measurement per renderer. Two renderers drawing the same participant — a
+  // tile in the grid and a picture-in-picture overlay — must not share it, or
+  // they are back to overwriting each other.
+  final String _viewportId = '${_viewportSeq++}';
+
   VisibilityInfo? latestVisibilityInfo;
+
+  /// The track this renderer last reported a measurement for, which it owes a
+  /// release. Null until it has measured anything.
+  ViewportTrack? _reportedTrack;
+
+  ViewportTrack get _track => ViewportTrack(
+    userId: widget.participant.userId,
+    sessionId: widget.participant.sessionId,
+    trackIdPrefix: widget.participant.trackIdPrefix,
+    trackType: widget.videoTrackType,
+  );
 
   @override
   void didUpdateWidget(covariant StreamVideoRenderer oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    // An element recycled onto a different participant carries no measurement
+    // from the one it drew before.
+    final reported = _reportedTrack;
+    if (reported != null && reported != _track) {
+      _releaseAfterFrame(widget.call, _viewportId, reported);
+      _reportedTrack = null;
+    }
 
     final info = latestVisibilityInfo;
     if (info == null) return;
@@ -72,67 +101,91 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
         widget.participant.publishedTracks[widget.videoTrackType];
 
     if (prevTrackState == null && newTrackState != null) {
-      // The video track has been published. The size this renderer measures is
-      // what dynascale subscribes at, and it has not been told any yet, so this
-      // is reported whatever the state already records.
-      _reportAfterBuild(info);
-      return;
-    }
+      // The track has only now been published. Nothing this renderer measures
+      // changed — it has been drawing a placeholder at the same size all along
+      // — but that size has never been subscribed at, so the registry is asked
+      // to say it again.
+      //
+      // Deferred, because acting on it writes call state, which the SDK's
+      // emitter delivers synchronously: from the middle of this rebuild it
+      // would ask a widget that has already been built this frame to build
+      // again, and that throws. Nothing is waiting on the answer.
+      final track = _track;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
 
-    // A [VisibilityDetector] reports changes, and only its own: it will not
-    // report this renderer again until what it measures changes. So a report
-    // that was dropped — the call was reconnecting, or another renderer of the
-    // same participant reported zero as it was unmounted — would leave a tile
-    // that is plainly on screen recorded as not visible for the rest of the
-    // call, out of the running for a speaker's tile and liable to have its
-    // track unsubscribed.
-    //
-    // Re-assert it. Only upwards: a renderer that is showing the participant
-    // insists, and one that is not stays quiet, so the record settles on
-    // visible whenever any renderer has them on screen instead of ping-ponging
-    // between two that disagree.
-    if (_measuredVisibility(info).isVisible && !_recordedVisibility.isVisible) {
-      _reportAfterBuild(info, reasserting: true);
+        _report(latestVisibilityInfo ?? info);
+        widget.call.viewportVisibility.reapply(track);
+      });
     }
   }
 
-  // Both reports above are made while this renderer is being rebuilt, and
-  // recording one writes call state — which the state emitter delivers
-  // synchronously, so a widget listening for participants would be asked to
-  // rebuild in the middle of a build that has already passed it, which throws.
-  // Nothing here is waiting on the answer, so it goes out at the end of the
-  // frame instead.
-  //
-  // A re-assert is checked again by then, since it only says something while
-  // this renderer still measures the participant as visible and the call state
-  // still does not: a report from the detector, or another renderer, may have
-  // settled it during the frame.
-  void _reportAfterBuild(VisibilityInfo info, {bool reasserting = false}) {
-    final userId = widget.participant.userId;
+  @override
+  void dispose() {
+    final reported = _reportedTrack;
+    if (reported != null) {
+      _releaseAfterFrame(widget.call, _viewportId, reported);
+    }
 
+    super.dispose();
+  }
+
+  /// Takes this renderer's measurement out of the registry at the end of the
+  /// frame.
+  ///
+  /// Deferred for the same reason a report is, and taking what it needs by
+  /// value: by the time it runs this [State] may be disposed, and the widget
+  /// it would have read is gone.
+  static void _releaseAfterFrame(
+    Call call,
+    String viewportId,
+    ViewportTrack track,
+  ) {
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-
-      final latest = latestVisibilityInfo ?? info;
-      if (reasserting) {
-        if (!_measuredVisibility(latest).isVisible) return;
-        if (_recordedVisibility.isVisible) return;
-      }
-
-      _onVisibilityChanged(latest, userId);
+      call.viewportVisibility.release(viewportId: viewportId, track: track);
     });
   }
 
-  /// What this renderer last measured for the track it draws.
-  ViewportVisibility _measuredVisibility(VisibilityInfo info) {
-    return ViewportVisibility.fromVisibleFraction(info.visibleFraction);
-  }
+  /// Hands the call what this renderer now measures for the track it draws.
+  ///
+  /// Only ever about itself: what the participant's visibility and
+  /// subscription become is the registry's to decide, across every renderer
+  /// drawing them.
+  void _report(VisibilityInfo info) {
+    latestVisibilityInfo = info;
 
-  /// What the call state records for the track this renderer draws.
-  ViewportVisibility get _recordedVisibility {
-    return widget.videoTrackType.isScreenShare
-        ? widget.participant.screenShareViewportVisibility
-        : widget.participant.viewportVisibility;
+    final visibility = ViewportVisibility.fromVisibleFraction(
+      info.visibleFraction,
+    );
+
+    var size = Size.zero;
+    if (visibility.isVisible) {
+      // VisibilityDetector measures in logical, device-independent pixels, and
+      // a track is subscribed in device pixels.
+      final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+      size = Size(
+        info.size.width * devicePixelRatio,
+        info.size.height * devicePixelRatio,
+      );
+    }
+
+    widget.onSizeChanged?.call(size);
+
+    final track = _track;
+    _reportedTrack = track;
+
+    widget.call.viewportVisibility.report(
+      viewportId: _viewportId,
+      track: track,
+      measurement: ViewportMeasurement(
+        visibility: visibility,
+        dimension: RtcVideoDimension(
+          width: size.width.toInt(),
+          height: size.height.toInt(),
+        ),
+        persistWhenHidden: widget.persistTrackIfNotVisible,
+      ),
+    );
   }
 
   @override
@@ -174,8 +227,7 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
       key: Key(
         '${widget.rendererScopePrefix ?? ''}${widget.participant.uniqueParticipantKey}${widget.videoTrackType}-visibility',
       ),
-      onVisibilityChanged: (info) =>
-          _onVisibilityChanged(info, widget.participant.userId),
+      onVisibilityChanged: _report,
       child: child,
     );
   }
@@ -222,79 +274,6 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
       mirror: mirror,
       placeholderBuilder: widget.placeholderBuilder,
     );
-  }
-
-  void _onVisibilityChanged(VisibilityInfo info, String participantId) {
-    latestVisibilityInfo = info;
-
-    final prevVisibility = _recordedVisibility;
-    final visibility = _measuredVisibility(info);
-
-    // Update the viewport visibility of the participant.
-    if (prevVisibility != visibility) {
-      widget.call.updateViewportVisibility(
-        sessionId: widget.participant.sessionId,
-        userId: widget.participant.userId,
-        visibility: visibility,
-        trackType: widget.videoTrackType,
-      );
-    }
-
-    var size = info.size;
-    if (visibility != ViewportVisibility.visible) {
-      // If the visibility is not visible, set the size to zero.
-      size = Size.zero;
-    } else {
-      // VisibilityDetector measures the size in logical, device-independent pixels.
-      // We need to convert it to device pixels to get the correct size for the video track.
-      final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
-      size = Size(
-        size.width * devicePixelRatio,
-        size.height * devicePixelRatio,
-      );
-    }
-
-    return _onSizeChanged(size, participantId);
-  }
-
-  void _onSizeChanged(Size size, String participantId) {
-    // Notify the listener.
-    if (widget.onSizeChanged != null) {
-      widget.onSizeChanged!.call(size);
-    }
-
-    // We only care about remote tracks.
-    final trackState =
-        widget.participant.publishedTracks[widget.videoTrackType];
-    if (trackState is! RemoteTrackState) return;
-
-    final prevDim = trackState.videoDimension;
-    final newDim = RtcVideoDimension(
-      width: size.width.toInt(),
-      height: size.height.toInt(),
-    );
-
-    // If the dimension hasn't changed, don't update the subscription.
-    if (prevDim == newDim) return;
-
-    if (newDim.isEmpty && !widget.persistTrackIfNotVisible) {
-      // Remove the video subscription of the track.
-      widget.call.removeSubscription(
-        userId: widget.participant.userId,
-        sessionId: widget.participant.sessionId,
-        trackIdPrefix: widget.participant.trackIdPrefix,
-        trackType: widget.videoTrackType,
-      );
-    } else {
-      // Update the video subscription of the track.
-      widget.call.updateSubscription(
-        userId: widget.participant.userId,
-        sessionId: widget.participant.sessionId,
-        trackIdPrefix: widget.participant.trackIdPrefix,
-        trackType: widget.videoTrackType,
-        videoDimension: newDim,
-      );
-    }
   }
 }
 
