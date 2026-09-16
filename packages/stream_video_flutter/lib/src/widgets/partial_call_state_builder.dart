@@ -38,7 +38,7 @@ class PartialCallStateBuilder<T> extends StatelessWidget {
 /// derived value is needed — a count, whether anyone is speaking — select that
 /// through [PartialCallStateBuilder] instead, so the widget doesn't rebuild on
 /// participant updates that leave it the same.
-class CallParticipantsBuilder extends StatelessWidget {
+class CallParticipantsBuilder extends StatefulWidget {
   const CallParticipantsBuilder({
     required this.call,
     required this.builder,
@@ -53,15 +53,38 @@ class CallParticipantsBuilder extends StatelessWidget {
   builder;
 
   @override
+  State<CallParticipantsBuilder> createState() =>
+      _CallParticipantsBuilderState();
+}
+
+class _CallParticipantsBuilderState extends State<CallParticipantsBuilder> {
+  // `Call.participantsStream` hands out a new stream per access, and each one
+  // starts its own throttle window. Reading it in `build` would make
+  // `StreamBuilder` resubscribe on every rebuild, so an ancestor rebuilding
+  // faster than the interval would restart the window forever and the list
+  // would stop updating.
+  late Stream<List<CallParticipantState>> _participants =
+      widget.call.participantsStream;
+
+  @override
+  void didUpdateWidget(covariant CallParticipantsBuilder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.call != oldWidget.call) {
+      _participants = widget.call.participantsStream;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<CallParticipantState>>(
-      stream: call.participantsStream,
-      initialData: call.state.value.callParticipants,
+      stream: _participants,
+      initialData: widget.call.state.value.callParticipants,
       // `StreamBuilder` builds an error snapshot with no data, so fall back to
       // the current state rather than throwing a null check over the real error.
-      builder: (context, snapshot) => builder(
+      builder: (context, snapshot) => widget.builder(
         context,
-        snapshot.data ?? call.state.value.callParticipants,
+        snapshot.data ?? widget.call.state.value.callParticipants,
       ),
     );
   }

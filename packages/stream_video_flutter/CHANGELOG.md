@@ -2,7 +2,7 @@
 
 ### ✅ Added
 
-- Added `CallParticipantsBuilder`, which builds from `Call.participantsStream` and seeds its first frame from the current call state.
+- Added `CallParticipantsBuilder`, which builds from `Call.participantsStream`, holds one subscription across rebuilds, and seeds its first frame from the current call state.
 
 ### 🔄 Changed
 
