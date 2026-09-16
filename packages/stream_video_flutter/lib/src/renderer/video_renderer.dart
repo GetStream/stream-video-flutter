@@ -72,8 +72,10 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
         widget.participant.publishedTracks[widget.videoTrackType];
 
     if (prevTrackState == null && newTrackState != null) {
-      // The video track has been published.
-      _reportVisibilityAfterBuild(info);
+      // The video track has been published. The size this renderer measures is
+      // what dynascale subscribes at, and it has not been told any yet, so this
+      // is reported whatever the state already records.
+      _reportAfterBuild(info);
       return;
     }
 
@@ -90,7 +92,7 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
     // visible whenever any renderer has them on screen instead of ping-ponging
     // between two that disagree.
     if (_measuredVisibility(info).isVisible && !_recordedVisibility.isVisible) {
-      _reportVisibilityAfterBuild(info);
+      _reportAfterBuild(info, reasserting: true);
     }
   }
 
@@ -100,17 +102,22 @@ class _StreamVideoRendererState extends State<StreamVideoRenderer> {
   // rebuild in the middle of a build that has already passed it, which throws.
   // Nothing here is waiting on the answer, so it goes out at the end of the
   // frame instead.
-  void _reportVisibilityAfterBuild(VisibilityInfo info) {
+  //
+  // A re-assert is checked again by then, since it only says something while
+  // this renderer still measures the participant as visible and the call state
+  // still does not: a report from the detector, or another renderer, may have
+  // settled it during the frame.
+  void _reportAfterBuild(VisibilityInfo info, {bool reasserting = false}) {
     final userId = widget.participant.userId;
 
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
-      // Re-checked rather than trusted: a report that has since arrived from
-      // the detector, or a track that went away, may have settled it already.
       final latest = latestVisibilityInfo ?? info;
-      if (!_measuredVisibility(latest).isVisible) return;
-      if (_recordedVisibility.isVisible) return;
+      if (reasserting) {
+        if (!_measuredVisibility(latest).isVisible) return;
+        if (_recordedVisibility.isVisible) return;
+      }
 
       _onVisibilityChanged(latest, userId);
     });
