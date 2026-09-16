@@ -35,8 +35,8 @@ void main() {
     when(() => callState.callParticipants).thenReturn(const []);
     when(() => stateEmitter.value).thenReturn(callState);
     when(() => call.state).thenReturn(stateEmitter);
-    // `Call.participantsStream` is a getter that builds a fresh chain each
-    // time, so count how often the widget reaches for it.
+    // Count how often the widget reaches for the stream: it must take one and
+    // keep it, whatever `Call.participantsStream` does internally.
     when(() => call.participantsStream).thenAnswer((_) {
       streamAccesses++;
       return participants.stream;
@@ -73,7 +73,7 @@ void main() {
     expect(
       streamAccesses,
       1,
-      reason: 'resubscribing would restart the throttle window each rebuild',
+      reason: 'a subscription must span rebuilds, not restart on each one',
     );
   });
 

@@ -58,11 +58,8 @@ class CallParticipantsBuilder extends StatefulWidget {
 }
 
 class _CallParticipantsBuilderState extends State<CallParticipantsBuilder> {
-  // `Call.participantsStream` hands out a new stream per access, and each one
-  // starts its own throttle window. Reading it in `build` would make
-  // `StreamBuilder` resubscribe on every rebuild, so an ancestor rebuilding
-  // faster than the interval would restart the window forever and the list
-  // would stop updating.
+  // Held in state so one subscription spans every rebuild, and re-taken only
+  // when the call changes.
   late Stream<List<CallParticipantState>> _participants =
       widget.call.participantsStream;
 
