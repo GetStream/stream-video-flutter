@@ -27,6 +27,41 @@ class PartialCallStateBuilder<T> extends StatelessWidget {
   }
 }
 
+/// Convenience widget to build a part of the call screen from the call's
+/// participants.
+///
+/// Reads [Call.participantsStream], which is rate-limited by participant count,
+/// and seeds the first frame from `call.state.value.callParticipants` so
+/// nothing waits on the first throttle window.
+///
+/// Use this wherever the participants themselves get rendered. When only a
+/// derived value is needed — a count, whether anyone is speaking — select that
+/// through [PartialCallStateBuilder] instead, so the widget doesn't rebuild on
+/// participant updates that leave it the same.
+class CallParticipantsBuilder extends StatelessWidget {
+  const CallParticipantsBuilder({
+    required this.call,
+    required this.builder,
+    super.key,
+  });
+
+  final Call call;
+  final Widget Function(
+    BuildContext context,
+    List<CallParticipantState> participants,
+  )
+  builder;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<CallParticipantState>>(
+      stream: call.participantsStream,
+      initialData: call.state.value.callParticipants,
+      builder: (context, snapshot) => builder(context, snapshot.data!),
+    );
+  }
+}
+
 /// Builder for parts of the call screen that need a regular Widget.
 typedef CallWidgetBuilder =
     Widget Function(
