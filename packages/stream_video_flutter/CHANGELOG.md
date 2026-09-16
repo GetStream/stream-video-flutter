@@ -8,6 +8,7 @@
 - Added `StreamParticipantLabelStyle.minNameWidth`, the narrowest the name may be drawn at before the pill drops out.
 - Added `StreamPictureInPictureThemeData` on `StreamVideoTheme`, whose `StreamPictureInPictureStyle.tileStyle` restyles the participant tile the Android picture-in-picture window draws.
 - Added `StreamParticipantLabelStyle.showVideoOffIcon`, to leave the camera-off icon out of the name pill.
+- Added `ViewportVisibilityReporter`, which measures how much of its child is on screen and reports it to `Call.viewportVisibility`. Wrap a custom widget drawing a participant's track in one and it takes part in what the call subscribes to.
 - `StreamLayoutButton` draws the participant layout in effect and offers the rest through a `StreamAdaptiveMenuAnchor`.
 - `StreamLayoutButton.defaultLayouts` is `auto` and `speakerBottom`, so the button toggles unless it is given more.
 - Added layout strings to the localizations, in English and Dutch: `layoutMenuTitle`, `layoutSelectTooltip`, `layoutDefault`, `layoutGrid`, `layoutSpeakerTop`, `layoutSpeakerBottom`, `layoutSpeakerLeft`, `layoutSpeakerRight` and `layoutSpeakerOneToOne`.
@@ -218,6 +219,7 @@
 
 ### ⚠️ Breaking
 
+- `StreamVideoRenderer` is a `StatelessWidget`. Measuring and reporting its viewport moved to `ViewportVisibilityReporter`, which it wraps its child in, and nothing was left for it to keep.
 - `ParticipantLayoutMode.auto` is the default layout of `StreamCallContent`, `StreamCallParticipants` and `RegularCallParticipantsContent`, and renders what `grid` used to. The livestream widgets still default to `grid`.
 - `ParticipantLayoutMode.grid` gives the local participant a tile of its own instead of floating them over the grid.
 - `ParticipantLayoutMode.auto` floats the self-view on mobile only while at most two other people are in the call, and gives the local participant a tile beyond that.
