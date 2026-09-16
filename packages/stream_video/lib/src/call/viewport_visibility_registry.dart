@@ -30,6 +30,14 @@ class ViewportVisibilityRegistry {
   /// Told the new answer whenever one of them moves.
   final OnViewportAggregate onAggregate;
 
+  int _viewportSeq = 0;
+
+  /// A name no other viewport reporting here has.
+  ///
+  /// Two viewports drawing the same track must not share one, or they are back
+  /// to overwriting each other. Nothing outside this process reads it.
+  String nextViewportId() => '${_viewportSeq++}';
+
   /// Per track, what each viewport drawing it last measured.
   final _measurements = <ViewportTrack, Map<String, ViewportMeasurement>>{};
 

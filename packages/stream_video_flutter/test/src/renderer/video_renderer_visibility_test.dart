@@ -241,6 +241,37 @@ void main() {
     expect(aggregates.single.dimension.isEmpty, isTrue);
   });
 
+  testWidgets(
+    'a renderer moved to another call stops speaking to the old one',
+    (
+      tester,
+    ) async {
+      final left = <ViewportAggregate>[];
+      final joined = <ViewportAggregate>[];
+
+      await pumpTile(
+        tester,
+        call: callWithRegistry(left),
+        participant: participant(),
+      );
+      left.clear();
+
+      await pumpTile(
+        tester,
+        call: callWithRegistry(joined),
+        participant: participant(),
+      );
+
+      expect(
+        left.single.visibility,
+        ViewportVisibility.hidden,
+        reason: 'the old call was left thinking the track is still on screen',
+      );
+      expect(joined.last.visibility, ViewportVisibility.visible);
+      expect(joined.last.dimension.isEmpty, isFalse);
+    },
+  );
+
   testWidgets('a tile scrolled off screen is reported hidden once', (
     tester,
   ) async {
