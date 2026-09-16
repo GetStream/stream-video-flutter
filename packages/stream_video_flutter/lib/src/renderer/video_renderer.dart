@@ -87,7 +87,7 @@ class StreamVideoRenderer extends StatelessWidget {
     // What the call knows about this participant being on screen, and at what
     // size, comes from here — every viewport drawing them reports its own.
     return ViewportVisibilityReporter(
-      call: call,
+      registry: call.viewportVisibility,
       track: ViewportTrack(
         userId: participant.userId,
         sessionId: participant.sessionId,

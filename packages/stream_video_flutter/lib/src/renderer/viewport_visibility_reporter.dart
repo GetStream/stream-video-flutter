@@ -4,12 +4,8 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../stream_video_flutter.dart';
 
-/// Names each reporter for the call's viewport registry. Nothing outside this
-/// process reads it; it only has to tell two live reporters apart.
-int _viewportSeq = 0;
-
 /// Measures how much of [child] is on screen and at what size, and reports it
-/// to [Call.viewportVisibility] as one viewport's view of [track].
+/// to a [ViewportVisibilityRegistry] as one viewport's view of [track].
 ///
 /// Only ever about itself. A participant can be drawn in several places at
 /// once — a tile in the grid, a picture-in-picture overlay, a livestream's
@@ -21,7 +17,7 @@ class ViewportVisibilityReporter extends StatefulWidget {
   /// Creates a new instance of [ViewportVisibilityReporter].
   const ViewportVisibilityReporter({
     super.key,
-    required this.call,
+    required this.registry,
     required this.track,
     required this.child,
     this.isTrackPublished = false,
@@ -30,8 +26,8 @@ class ViewportVisibilityReporter extends StatefulWidget {
     this.scopePrefix,
   });
 
-  /// The call whose registry is told what this viewport measures.
-  final Call call;
+  /// Told what this viewport measures, and what it stops measuring.
+  final ViewportVisibilityRegistry registry;
 
   /// The track [child] draws.
   final ViewportTrack track;
@@ -65,10 +61,10 @@ class ViewportVisibilityReporter extends StatefulWidget {
 
 class _ViewportVisibilityReporterState
     extends State<ViewportVisibilityReporter> {
-  /// This viewport's name in the registry, which holds one measurement per
-  /// viewport. Two of them drawing the same track must not share it, or they
-  /// are back to overwriting each other.
-  final String _viewportId = '${_viewportSeq++}';
+  /// This viewport's name in [ViewportVisibilityReporter.registry], which
+  /// holds one measurement per viewport. Re-minted if the registry changes,
+  /// since the name is only unique within the one that gave it out.
+  late String _viewportId = widget.registry.nextViewportId();
 
   VisibilityInfo? _latest;
 
@@ -80,37 +76,51 @@ class _ViewportVisibilityReporterState
   void didUpdateWidget(covariant ViewportVisibilityReporter oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // An element recycled onto a different track carries no measurement from
-    // the one it drew before.
+    // An element recycled onto a different track — or onto another call's
+    // registry — carries no measurement from the one it drew before. Left
+    // behind, it would speak for a track this viewport no longer draws.
+    final registryChanged = oldWidget.registry != widget.registry;
     final reported = _reported;
-    if (reported != null && reported != widget.track) {
-      _releaseAfterFrame(widget.call, _viewportId, reported);
+    if (reported != null && (registryChanged || reported != widget.track)) {
+      _releaseAfterFrame(oldWidget.registry, _viewportId, reported);
       _reported = null;
     }
+
+    if (registryChanged) _viewportId = widget.registry.nextViewportId();
 
     final latest = _latest;
     if (latest == null) return;
 
-    if (!oldWidget.isTrackPublished && widget.isTrackPublished) {
-      // Deferred, because acting on a report writes call state, which the
-      // SDK's emitter delivers synchronously: from the middle of this rebuild
-      // it would ask a widget that has already been built this frame to build
-      // again, and that throws. Nothing is waiting on the answer.
-      final track = widget.track;
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
+    // A registry that has never heard from this viewport, and a track that has
+    // only now been published, both need the standing measurement said again.
+    // Nothing this viewport measures changed — the same area was being given
+    // to a placeholder, and a detector reports only what changes — so without
+    // this neither would learn the size it has been holding all along.
+    final publishedNow = !oldWidget.isTrackPublished && widget.isTrackPublished;
+    if (!registryChanged && !publishedNow) return;
 
-        _report(_latest ?? latest);
-        widget.call.viewportVisibility.reapply(track);
-      });
-    }
+    // Deferred, because acting on a report writes call state, which the SDK's
+    // emitter delivers synchronously: from the middle of this rebuild it would
+    // ask a widget that has already been built this frame to build again, and
+    // that throws. Nothing is waiting on the answer.
+    final track = widget.track;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      _report(_latest ?? latest);
+
+      // A registry hearing this viewport for the first time has moved on the
+      // report alone; one that has held the same answer throughout has to be
+      // asked for it again.
+      if (!registryChanged) widget.registry.reapply(track);
+    });
   }
 
   @override
   void dispose() {
     final reported = _reported;
     if (reported != null) {
-      _releaseAfterFrame(widget.call, _viewportId, reported);
+      _releaseAfterFrame(widget.registry, _viewportId, reported);
     }
 
     super.dispose();
@@ -123,12 +133,12 @@ class _ViewportVisibilityReporterState
   /// value: by the time it runs this [State] may be disposed, and the widget
   /// it would have read is gone.
   static void _releaseAfterFrame(
-    Call call,
+    ViewportVisibilityRegistry registry,
     String viewportId,
     ViewportTrack track,
   ) {
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      call.viewportVisibility.release(viewportId: viewportId, track: track);
+      registry.release(viewportId: viewportId, track: track);
     });
   }
 
@@ -153,7 +163,7 @@ class _ViewportVisibilityReporterState
     widget.onSizeChanged?.call(size);
 
     _reported = widget.track;
-    widget.call.viewportVisibility.report(
+    widget.registry.report(
       viewportId: _viewportId,
       track: widget.track,
       measurement: ViewportMeasurement(

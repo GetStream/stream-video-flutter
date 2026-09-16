@@ -42,6 +42,12 @@ void main() {
     registry = ViewportVisibilityRegistry(onAggregate: aggregates.add);
   });
 
+  test('every viewport gets a name of its own', () {
+    final ids = List.generate(3, (_) => registry.nextViewportId());
+
+    expect(ids.toSet(), hasLength(3));
+  });
+
   test('one viewport speaks for the track', () {
     registry.report(
       viewportId: 'grid',
