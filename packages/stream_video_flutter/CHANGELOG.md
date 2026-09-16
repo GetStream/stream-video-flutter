@@ -172,6 +172,7 @@
 
 ### 🐞 Fixed
 
+- `StreamVideoRenderer` now reports only what it measures of itself, into `Call.viewportVisibility`. A picture-in-picture overlay can no longer unsubscribe a participant the grid is showing, or pull their subscription down to its own size.
 - Fixed the participant grid rearranging itself when a participant nobody can see starts speaking. They take the place of the tile with the least claim to one — the last one on screen — instead of the first, which used to move every tile below it down one.
 - Fixed a participant tile on screen being recorded as not visible, which kept it out of the running for a speaker's tile and could get its track unsubscribed. A renderer showing a participant now says so again when the call state disagrees, and the floating self-view no longer shares its visibility bookkeeping with the same participant's tile in the grid.
 - A small participant tile no longer covers its video with chrome it has no room for: the sound indicator, the camera-off icon and the overflow button go first, then the name, and a pill with nothing left to say is dropped.

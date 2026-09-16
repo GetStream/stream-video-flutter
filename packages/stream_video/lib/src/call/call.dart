@@ -64,6 +64,7 @@ import 'state/call_state_notifier.dart';
 import 'stats/sfu_stats_reporter.dart';
 import 'stats/stats_reporter.dart';
 import 'stats/trace_tag.dart';
+import 'viewport_visibility_registry.dart';
 
 typedef OnCallPermissionRequest =
     void Function(
@@ -273,6 +274,14 @@ class Call {
   final CallStateNotifier _stateManager;
   final PermissionsManager _permissionsManager;
   final DynascaleManager dynascaleManager;
+
+  /// What each viewport drawing a participant measures for it, and the one
+  /// answer per track that the call acts on. Viewports report themselves here
+  /// rather than writing visibility and subscriptions directly, so several
+  /// drawing the same participant cannot overwrite each other.
+  late final viewportVisibility = ViewportVisibilityRegistry(
+    onAggregate: _applyViewportAggregate,
+  );
   final InternetConnection networkMonitor;
   final RtcMediaDeviceNotifier _rtcMediaDeviceNotifier;
 
@@ -1647,6 +1656,10 @@ class Call {
         sessionId: _session!.sessionId,
       );
 
+      // A new session knows nothing of what is on screen, and the viewports
+      // have nothing new to say — they report what changes about them.
+      viewportVisibility.reapplyAll();
+
       if (_callLifecycleCompleter.isCompleted) {
         _logger.w(
           () => '[join] rejected (call was left during session creation)',
@@ -2861,6 +2874,7 @@ class Call {
     }
 
     await dynascaleManager.dispose();
+    viewportVisibility.clear();
     await clearE2EEManager();
 
     await _streamVideo.state.removeActiveCall(this);
@@ -4403,6 +4417,59 @@ class Call {
     }
 
     return result;
+  }
+
+  /// Acts on what every viewport drawing a track adds up to: the visibility is
+  /// recorded and the session told, and the subscription is moved to the size
+  /// the largest viewport showing it draws at — or dropped, once none does.
+  void _applyViewportAggregate(ViewportAggregate aggregate) {
+    final track = aggregate.track;
+
+    unawaited(
+      updateViewportVisibility(
+        sessionId: track.sessionId,
+        userId: track.userId,
+        visibility: aggregate.visibility,
+        trackType: track.trackType,
+      ),
+    );
+
+    // Only a remote track is subscribed to; a local one is drawn from the
+    // camera it is already coming out of, and a track nobody has published yet
+    // has nothing to ask for.
+    final trackState = _publishedTrack(track);
+    if (trackState is! RemoteTrackState) return;
+
+    if (aggregate.dimension.isEmpty && !aggregate.persistWhenHidden) {
+      unawaited(
+        removeSubscription(
+          userId: track.userId,
+          sessionId: track.sessionId,
+          trackIdPrefix: track.trackIdPrefix,
+          trackType: track.trackType,
+        ),
+      );
+      return;
+    }
+
+    unawaited(
+      updateSubscription(
+        userId: track.userId,
+        sessionId: track.sessionId,
+        trackIdPrefix: track.trackIdPrefix,
+        trackType: track.trackType,
+        videoDimension: aggregate.dimension,
+      ),
+    );
+  }
+
+  TrackState? _publishedTrack(ViewportTrack track) {
+    for (final participant in _stateManager.callState.callParticipants) {
+      if (participant.sessionId != track.sessionId) continue;
+      return participant.publishedTracks[track.trackType];
+    }
+
+    return null;
   }
 
   Future<Result<None>> updateViewportVisibility({
