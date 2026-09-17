@@ -48,8 +48,8 @@ class _ShareCallWelcomeCardState extends State<ShareCallWelcomeCard> {
         padding: gridPadding + EdgeInsets.all(spacing.xs),
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            // A phone gives the card the full width between those insets; a
-            // wider window keeps it at the width the web design draws.
+            // Below the small breakpoint the card spans the whole width
+            // between those insets; a wider window holds it at 360.
             maxWidth: context.streamScreenSize.isSmall ? double.infinity : 360,
           ),
           child: Material(
@@ -60,8 +60,7 @@ class _ShareCallWelcomeCardState extends State<ShareCallWelcomeCard> {
             shape: RoundedRectangleBorder(borderRadius: borderRadius),
             clipBehavior: Clip.antiAlias,
             child: DecoratedBox(
-              // Drawn over the children, which the Material clips to its own
-              // shape — an outward-aligned border would be eaten otherwise.
+              // Painted in front, so the tile's own surface does not cover it.
               position: DecorationPosition.foreground,
               decoration: BoxDecoration(
                 borderRadius: borderRadius,
@@ -74,10 +73,11 @@ class _ShareCallWelcomeCardState extends State<ShareCallWelcomeCard> {
                     color: colorScheme.textPrimary,
                   ),
                 ),
-                shape: const Border(
-                  top: BorderSide(color: Colors.transparent),
-                  bottom: BorderSide(color: Colors.transparent),
-                ),
+                // A shape, even an empty one, replaces the tile's default
+                // dividers. BorderSide.none also contributes no padding, which
+                // a transparent side would: its width still counts.
+                shape: const Border(),
+                collapsedShape: const Border(),
                 trailing: Icon(
                   _isExpanded
                       ? context.streamIcons.chevronUp
@@ -227,7 +227,7 @@ class _ShareCardContent extends StatelessWidget {
               ),
               child: AspectRatio(
                 aspectRatio: 1,
-                child: QrImageView(data: callUrl, size: 200),
+                child: QrImageView(data: callUrl),
               ),
             ),
           ),
