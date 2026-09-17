@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import 'call_button_badge.dart';
 
 /// The colour a [CallFeatureButton] takes while it is on.
 ///
@@ -76,7 +75,7 @@ class CallFeatureButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CallButtonBadge(
+    return StreamCallButtonBadge(
       showErrorBadge: showErrorBadge,
       child: StreamButton.icon(
         icon: icon,

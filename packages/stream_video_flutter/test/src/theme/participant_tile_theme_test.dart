@@ -96,12 +96,34 @@ void main() {
             const StreamFloatingParticipantTileThemeData(
               style: StreamFloatingParticipantTileStyle(elevation: 9),
             ),
+        callButtonBadgeTheme: const StreamCallButtonBadgeThemeData(
+          style: StreamCallButtonBadgeStyle(overhang: 6),
+        ),
       );
 
       expect(theme.participantLabelTheme.style?.blurSigma, 4);
       expect(theme.connectionQualityIndicatorTheme.style?.size, 40);
       expect(theme.callParticipantsGridTheme.mainAxisSpacing, 2);
       expect(theme.floatingParticipantTileTheme.style?.elevation, 9);
+      expect(theme.callButtonBadgeTheme.style?.overhang, 6);
+    });
+
+    test('merge carries every component theme of the other theme', () {
+      final theme = StreamVideoTheme.light();
+      final other = StreamVideoTheme.light().copyWith(
+        connectionQualityIndicatorTheme:
+            const StreamConnectionQualityIndicatorThemeData(
+              style: StreamConnectionQualityIndicatorStyle(size: 40),
+            ),
+        callButtonBadgeTheme: const StreamCallButtonBadgeThemeData(
+          style: StreamCallButtonBadgeStyle(overhang: 6),
+        ),
+      );
+
+      final merged = theme.merge(other);
+
+      expect(merged.connectionQualityIndicatorTheme.style?.size, 40);
+      expect(merged.callButtonBadgeTheme.style?.overhang, 6);
     });
 
     test('defaults every new component theme to an empty instance', () {
@@ -114,6 +136,7 @@ void main() {
       expect(theme.connectionQualityIndicatorTheme.style, isNull);
       expect(theme.floatingParticipantTileTheme.style, isNull);
       expect(theme.callParticipantsGridTheme.padding, isNull);
+      expect(theme.callButtonBadgeTheme.style, isNull);
     });
 
     test('lerp interpolates the new component themes', () {
@@ -133,6 +156,23 @@ void main() {
       final mid = a.lerp(b, 0.5) as StreamVideoTheme;
 
       expect(mid.connectionQualityIndicatorTheme.style?.size, 30);
+    });
+
+    test('lerp interpolates the call button badge overhang', () {
+      final a = StreamVideoTheme.light().copyWith(
+        callButtonBadgeTheme: const StreamCallButtonBadgeThemeData(
+          style: StreamCallButtonBadgeStyle(overhang: 4),
+        ),
+      );
+      final b = StreamVideoTheme.light().copyWith(
+        callButtonBadgeTheme: const StreamCallButtonBadgeThemeData(
+          style: StreamCallButtonBadgeStyle(overhang: 8),
+        ),
+      );
+
+      final mid = a.lerp(b, 0.5) as StreamVideoTheme;
+
+      expect(mid.callButtonBadgeTheme.style?.overhang, 6);
     });
   });
 }
