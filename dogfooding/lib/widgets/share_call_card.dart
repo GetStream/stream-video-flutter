@@ -114,6 +114,10 @@ class _ShareCallWelcomeCardState extends State<ShareCallWelcomeCard> {
   }
 }
 
+/// The share content laid out for the participants panel: no accordion, a
+/// heading above it instead.
+///
+/// No call sites today, kept for the panel to show again.
 class ShareCallParticipantsCard extends StatelessWidget {
   const ShareCallParticipantsCard({
     required this.call,
