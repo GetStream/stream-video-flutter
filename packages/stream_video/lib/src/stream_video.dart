@@ -25,6 +25,7 @@ import 'core/connection_state.dart';
 import 'core/internet_connection_network_state_provider.dart';
 import 'errors/stream_video_exception.dart';
 import 'errors/stream_video_exception_composer.dart';
+import 'internal/_background_mute_policy.dart';
 import 'internal/_instance_holder.dart';
 import 'latency/latency_service.dart';
 import 'latency/latency_settings.dart';
@@ -593,6 +594,19 @@ class StreamVideo extends Disposable {
     );
   }
 
+  /// Whether the capture session in use supports camera access while
+  /// multitasking, or `null` when it could not be read.
+  Future<bool?> _multitaskingCameraAccessSupported() async {
+    if (!CurrentPlatform.isIos) return null;
+
+    try {
+      return await rtc.Helper.isIOSMultitaskingCameraAccessSupported();
+    } catch (e) {
+      _logger.w(() => '[multitaskingCameraAccessSupported] failed: $e');
+      return null;
+    }
+  }
+
   Future<void> _onAppState(LifecycleState state) async {
     _logger.d(() => '[onAppState] state: $state');
     try {
@@ -611,6 +625,9 @@ class StreamVideo extends Disposable {
           _subscriptions.cancel(_idEvents);
           await _client.closeConnection();
         } else if (activeCalls.isNotEmpty) {
+          final multitaskingCameraAccessSupported =
+              await _multitaskingCameraAccessSupported();
+
           for (final activeCall in activeCalls) {
             final callState = activeCall.state.value;
             final isVideoEnabled =
@@ -618,7 +635,13 @@ class StreamVideo extends Disposable {
             final isAudioEnabled =
                 callState.localParticipant?.isAudioEnabled ?? false;
 
-            if (_options.muteVideoWhenInBackground && isVideoEnabled) {
+            if (shouldMuteCameraInBackground(
+              isVideoEnabled: isVideoEnabled,
+              muteVideoWhenInBackground: _options.muteVideoWhenInBackground,
+              multitaskingCameraAccessSupported:
+                  multitaskingCameraAccessSupported,
+              platform: CurrentPlatform.type,
+            )) {
               await activeCall.setCameraEnabled(enabled: false);
               _mutedCameraByStateChange[activeCall.callCid.value] = true;
               _logger.v(() => 'Muted camera track since app was paused.');
@@ -1611,6 +1634,10 @@ class StreamVideoOptions {
 
   final AudioProcessor? audioProcessor;
 
+  /// Mutes the camera track while the app is in the background.
+  ///
+  /// On iOS devices without multitasking camera access the camera track is
+  /// muted in the background regardless of this option.
   final bool muteVideoWhenInBackground;
   final bool muteAudioWhenInBackground;
   final bool autoConnect;
