@@ -30,8 +30,6 @@ import '../widgets/side_panel/chat_panel_body.dart';
 import 'call_participants_list.dart';
 import 'call_stats_screen.dart';
 
-const _useCustomDesktopScreenShareOption = false;
-
 class CallScreen extends StatefulWidget {
   const CallScreen({
     super.key,
@@ -370,11 +368,6 @@ class _CallScreenState extends State<CallScreen>
           useiOSBroadcastExtension: true,
           captureScreenAudio: true,
         ),
-        desktopScreenSelectorBuilder:
-            // ignore: avoid_redundant_argument_values
-            _useCustomDesktopScreenShareOption
-            ? _customDesktopScreenShareSelector
-            : null,
       );
 
   // The phone bar's microphone and camera: plain round buttons, no caret. A
@@ -757,64 +750,6 @@ class __ShowChatButtonState extends State<_ShowChatButton> {
         onPressed: widget.channel != null ? widget.onPressed : null,
       ),
       badgeCount: _unreadCount == 0 ? null : _unreadCount,
-    );
-  }
-}
-
-// This is an example of a bottom sheet that only allows the selection of a screen.
-// After tapping a screen the bottom sheet is directly closed and the screen is shared.
-Future<DesktopCapturerSource?> _customDesktopScreenShareSelector(
-  BuildContext context,
-) {
-  return showModalBottomSheet<DesktopCapturerSource?>(
-    context: context,
-    builder: (context) => const _ScreenOnlySelectorSheet(),
-  );
-}
-
-class _ScreenOnlySelectorSheet extends StatefulWidget {
-  const _ScreenOnlySelectorSheet();
-
-  @override
-  State<_ScreenOnlySelectorSheet> createState() =>
-      _ScreenOnlySelectorSheetState();
-}
-
-class _ScreenOnlySelectorSheetState extends State<_ScreenOnlySelectorSheet> {
-  late final _controller = ScreenShareSourceController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: _controller,
-      builder: (context, state, _) {
-        final sources = [
-          for (final source in state.sources)
-            if (source.type == SourceType.Screen) source,
-        ];
-
-        return GridView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: sources.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            mainAxisExtent: 164,
-          ),
-          itemBuilder: (context, index) => StreamScreenShareThumbnail(
-            source: sources[index],
-            selected: false,
-            onTap: (source) => Navigator.pop(context, source),
-          ),
-        );
-      },
     );
   }
 }
