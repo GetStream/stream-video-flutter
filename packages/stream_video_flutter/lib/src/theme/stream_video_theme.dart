@@ -43,6 +43,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamPictureInPictureThemeData? pictureInPictureTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
+    StreamCallParticipantsSpotlightThemeData? callParticipantsSpotlightTheme,
     StreamLivestreamThemeData? livestreamTheme,
   }) {
     final isDark = brightness == Brightness.dark;
@@ -89,6 +90,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callParticipantsGridTheme:
           callParticipantsGridTheme ??
           legacy?.toCallParticipantsGridThemeData(),
+      callParticipantsSpotlightTheme: callParticipantsSpotlightTheme,
       livestreamTheme: livestreamTheme,
     );
 
@@ -134,6 +136,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         const StreamConnectionQualityIndicatorThemeData(),
     this.callParticipantsGridTheme =
         const StreamCallParticipantsGridThemeData(),
+    this.callParticipantsSpotlightTheme =
+        const StreamCallParticipantsSpotlightThemeData(),
     required this.livestreamTheme,
   });
 
@@ -420,6 +424,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the participants grid layout.
   final StreamCallParticipantsGridThemeData callParticipantsGridTheme;
 
+  /// Theme for the speaker layouts, where one participant holds the stage.
+  final StreamCallParticipantsSpotlightThemeData callParticipantsSpotlightTheme;
+
   /// Theme for the outgoing call widget.
   final StreamLivestreamThemeData livestreamTheme;
 
@@ -461,6 +468,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamPictureInPictureThemeData? pictureInPictureTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
+    StreamCallParticipantsSpotlightThemeData? callParticipantsSpotlightTheme,
     StreamLivestreamThemeData? livestreamTheme,
   }) => StreamVideoTheme.raw(
     textTheme: this.textTheme.merge(textTheme),
@@ -491,6 +499,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     ),
     callParticipantsGridTheme: this.callParticipantsGridTheme.merge(
       callParticipantsGridTheme,
+    ),
+    callParticipantsSpotlightTheme: this.callParticipantsSpotlightTheme.merge(
+      callParticipantsSpotlightTheme,
     ),
     livestreamTheme: this.livestreamTheme.merge(livestreamTheme),
   );
@@ -529,6 +540,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       ),
       callParticipantsGridTheme: callParticipantsGridTheme.merge(
         other.callParticipantsGridTheme,
+      ),
+      callParticipantsSpotlightTheme: callParticipantsSpotlightTheme.merge(
+        other.callParticipantsSpotlightTheme,
       ),
       livestreamTheme: livestreamTheme.merge(other.livestreamTheme),
     );
@@ -611,6 +625,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           callParticipantsGridTheme,
+      callParticipantsSpotlightTheme:
+          StreamCallParticipantsSpotlightThemeData.lerp(
+            callParticipantsSpotlightTheme,
+            other.callParticipantsSpotlightTheme,
+            t,
+          ) ??
+          callParticipantsSpotlightTheme,
       livestreamTheme: livestreamTheme.lerp(other.livestreamTheme, t),
     );
   }

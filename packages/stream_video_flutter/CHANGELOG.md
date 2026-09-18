@@ -2,6 +2,7 @@
 
 ### ✅ Added
 
+- Added `StreamCallParticipantsSpotlightThemeData` on `StreamVideoTheme`, and `StreamCallParticipantsSpotlightTheme` to restyle the speaker layouts over a subtree.
 - Added `StreamParticipantTileChrome`, the levels of chrome a participant tile draws, and `StreamParticipantTileChromePolicy` to choose between them — `bySize` (the default), `always`, `none` or `custom`.
 - Added `StreamParticipantTileThemeData.chromePolicy` and `styleResolver`, which restyle a tile against the size it came out at.
 - `StreamParticipantTileProps` carries the `size` the tile was measured at and the `chrome` resolved for it, so a component registered on the factory lays out against the same numbers the default tile uses.
@@ -281,6 +282,9 @@
 
 ### 🔄 Changed
 
+- The speaker layouts give the bar its edge and the spotlight everything else, never drawing the spotlight wider than 16:9.
+- The participants bar draws fixed-size tiles per breakpoint, centred until they overflow.
+- `CallParticipantsSpotlightView.padding` defaults to 8px horizontal, and a new `spacing` sets the gaps.
 - `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
 - Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.
 
