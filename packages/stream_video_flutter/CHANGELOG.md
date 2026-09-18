@@ -2,6 +2,8 @@
 
 ### ✅ Added
 
+- Added `solveParticipantGrid`, the rule the participants grid arranges a page by, and `StreamCallParticipantsGridThemeData.columnResolver` to override it.
+- Added `StreamCallParticipantsGridThemeData.maxTileAspectRatio`, `compactPageSize` and `pageSize`.
 - Added `StreamCallParticipantsSpotlightThemeData` on `StreamVideoTheme`, and `StreamCallParticipantsSpotlightTheme` to restyle the speaker layouts over a subtree.
 - Added `StreamParticipantTileChrome`, the levels of chrome a participant tile draws, and `StreamParticipantTileChromePolicy` to choose between them — `bySize` (the default), `always`, `none` or `custom`.
 - Added `StreamParticipantTileThemeData.chromePolicy` and `styleResolver`, which restyle a tile against the size it came out at.
@@ -305,6 +307,8 @@
 - The picker asks the platform for 480x300 thumbnails where the platform honours a size; macOS captures at its own.
 - The picker's sources are released whichever way it is dismissed, including the escape key and a tap outside.
 - The picker says when it could not read the screens and windows, and offers a retry, instead of showing its empty state.
+- The participants grid arranges itself against the shape of the space it is given rather than the platform it runs on, so a short wide window puts its tiles in a row instead of a square.
+- The grid pages with chevrons at every size, and still swipes on a touch screen.
 - The speaker layouts give the bar its edge and the spotlight everything else, never drawing the spotlight wider than 16:9.
 - The participants bar draws fixed-size tiles per breakpoint, centred until they overflow.
 - `CallParticipantsSpotlightView.padding` defaults to 8px horizontal, and a new `spacing` sets the gaps.
