@@ -20,6 +20,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamLobbyViewThemeData? lobbyViewTheme,
     CallControlBarThemeData? callControlBarTheme,
     CallAppBarThemeData? callAppBarTheme,
+    CallDurationBadgeThemeData? callDurationBadgeTheme,
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -75,6 +76,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       lobbyViewTheme: lobbyViewTheme,
       callControlBarTheme: callControlBarTheme,
       callAppBarTheme: callAppBarTheme,
+      callDurationBadgeTheme: callDurationBadgeTheme,
       callParticipantTheme: callParticipantTheme,
       localVideoTheme: localVideoTheme,
       incomingCallTheme: incomingCallTheme,
@@ -114,6 +116,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     this.lobbyViewTheme = const StreamLobbyViewThemeData(),
     this.callControlBarTheme = const CallControlBarThemeData(),
     this.callAppBarTheme = const CallAppBarThemeData(),
+    this.callDurationBadgeTheme = const CallDurationBadgeThemeData(),
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -375,6 +378,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the bar along the top of a call.
   final CallAppBarThemeData callAppBarTheme;
 
+  /// Theme for the pill showing how long a call has been running.
+  final CallDurationBadgeThemeData callDurationBadgeTheme;
+
   /// Theme for the call participant widget.
   ///
   /// `null` unless an app sets one: the participant tile takes its defaults
@@ -446,6 +452,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamLobbyViewThemeData? lobbyViewTheme,
     CallControlBarThemeData? callControlBarTheme,
     CallAppBarThemeData? callAppBarTheme,
+    CallDurationBadgeThemeData? callDurationBadgeTheme,
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -477,6 +484,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     lobbyViewTheme: this.lobbyViewTheme.merge(lobbyViewTheme),
     callControlBarTheme: this.callControlBarTheme.merge(callControlBarTheme),
     callAppBarTheme: this.callAppBarTheme.merge(callAppBarTheme),
+    callDurationBadgeTheme: this.callDurationBadgeTheme.merge(
+      callDurationBadgeTheme,
+    ),
     callParticipantTheme:
         this.callParticipantTheme?.merge(callParticipantTheme) ??
         callParticipantTheme,
@@ -514,6 +524,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       lobbyViewTheme: lobbyViewTheme.merge(other.lobbyViewTheme),
       callControlBarTheme: callControlBarTheme.merge(other.callControlBarTheme),
       callAppBarTheme: callAppBarTheme.merge(other.callAppBarTheme),
+      callDurationBadgeTheme: callDurationBadgeTheme.merge(
+        other.callDurationBadgeTheme,
+      ),
       callParticipantTheme:
           callParticipantTheme?.merge(other.callParticipantTheme) ??
           other.callParticipantTheme,
@@ -576,6 +589,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           callAppBarTheme,
+      callDurationBadgeTheme:
+          CallDurationBadgeThemeData.lerp(
+            callDurationBadgeTheme,
+            other.callDurationBadgeTheme,
+            t,
+          ) ??
+          callDurationBadgeTheme,
       callParticipantTheme:
           callParticipantTheme != null && other.callParticipantTheme != null
           ? callParticipantTheme!.lerp(other.callParticipantTheme!, t)

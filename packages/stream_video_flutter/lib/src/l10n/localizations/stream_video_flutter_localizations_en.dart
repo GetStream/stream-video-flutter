@@ -147,4 +147,13 @@ class StreamVideoFlutterLocalizationsEn
 
   @override
   String get lobbyDevicesUnreadable => 'Your devices could not be read';
+
+  @override
+  String get callEncryptedTooltip => 'This call is end-to-end encrypted';
+
+  @override
+  String get callRecordingTooltip => 'This call is being recorded';
+
+  @override
+  String get callScreenSharingTooltip => 'Someone is sharing their screen';
 }

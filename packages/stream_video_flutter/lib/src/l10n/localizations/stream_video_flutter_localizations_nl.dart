@@ -149,4 +149,13 @@ class StreamVideoFlutterLocalizationsNl
   @override
   String get lobbyDevicesUnreadable =>
       'Je apparaten konden niet worden gelezen';
+
+  @override
+  String get callEncryptedTooltip => 'Deze oproep is end-to-end versleuteld';
+
+  @override
+  String get callRecordingTooltip => 'Deze oproep wordt opgenomen';
+
+  @override
+  String get callScreenSharingTooltip => 'Iemand deelt zijn scherm';
 }

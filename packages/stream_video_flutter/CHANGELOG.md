@@ -160,6 +160,9 @@
 - Added `CallAppBarThemeData` on `StreamVideoTheme`, and `CallAppBarTheme` to restyle the bar over a subtree.
 - `CallAppBar` takes a `style` and a `primary`, and reports its themed height through `CallAppBar.heightOf`.
 - Added `StreamFlipCameraButton.isSupported`, false off iOS and Android.
+- Added `CallDurationBadge`, the pill showing how long a call has been running, with encryption, recording and screen-share indicators.
+- Added `CallDurationBadgeThemeData` on `StreamVideoTheme`, and `CallDurationBadgeTheme` to restyle the badge over a subtree.
+- Added `callEncryptedTooltip`, `callRecordingTooltip` and `callScreenSharingTooltip` to the localizations, in English and Dutch.
 
 ### 🐞 Fixed
 

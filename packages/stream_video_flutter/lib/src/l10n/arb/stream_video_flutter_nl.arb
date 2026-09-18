@@ -40,5 +40,8 @@
   "lobbyCameraPermissionDenied": "Cameratoegang is geweigerd — sta het toe in je systeeminstellingen",
   "lobbyMicrophoneBusy": "Een andere app gebruikt de microfoon",
   "lobbyCameraBusy": "Een andere app gebruikt de camera",
-  "lobbyDevicesUnreadable": "Je apparaten konden niet worden gelezen"
+  "lobbyDevicesUnreadable": "Je apparaten konden niet worden gelezen",
+  "callEncryptedTooltip": "Deze oproep is end-to-end versleuteld",
+  "callRecordingTooltip": "Deze oproep wordt opgenomen",
+  "callScreenSharingTooltip": "Iemand deelt zijn scherm"
 }
