@@ -42,9 +42,9 @@ class StreamVideoRenderer extends StatelessWidget {
   /// Called when the size of the widget changes.
   final ValueSetter<Size>? onSizeChanged;
 
-  /// If the track should be persisted when not visible. Otherwise it will be unnsubscribed.
-  /// This is useful for screen sharing, where the track should be persisted even when not visible.
-  /// Defaults to false.
+  /// Whether this renderer wants the track kept while it is off screen, as a
+  /// screen share does. The track is unsubscribed once no renderer shows it
+  /// and none asks for it. Defaults to false.
   final bool persistTrackIfNotVisible;
 
   /// Optional prefix to scope renderer keys (e.g. PiP vs main view).

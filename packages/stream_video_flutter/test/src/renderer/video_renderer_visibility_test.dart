@@ -15,17 +15,13 @@ import '../mocks.dart';
 // about what each renderer puts in, and that it goes in at a safe moment.
 
 void main() {
-  setUpAll(() {
-    registerFallbackValue(ViewportVisibility.unknown);
-    registerFallbackValue(SfuTrackType.video);
-  });
-
   setUp(() {
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
   });
 
   CallParticipantState participant({
     String userId = 'alice',
+    String? trackIdPrefix,
     double audioLevel = 0,
     Map<SfuTrackType, TrackState> publishedTracks = const {},
   }) {
@@ -35,7 +31,7 @@ void main() {
       sessionId: '$userId-session',
       custom: const {},
       roles: const [],
-      trackIdPrefix: userId,
+      trackIdPrefix: trackIdPrefix ?? userId,
       audioLevel: audioLevel,
       publishedTracks: publishedTracks,
     );
@@ -51,7 +47,12 @@ void main() {
       (_) => MutableStateEmitter<CallState>(state, sync: true),
     );
     when(() => call.viewportVisibility).thenReturn(
-      ViewportVisibilityRegistry(onAggregate: aggregates.add),
+      ViewportVisibilityRegistry(
+        onAggregate: (aggregate) async {
+          aggregates.add(aggregate);
+          return true;
+        },
+      ),
     );
 
     return call;
@@ -115,15 +116,16 @@ void main() {
               child: StreamParticipantTile(call: call, participant: alice),
             ),
             // The same participant in a strip that scrolls, as a livestream's
-            // hosts or a filmstrip beside the speaker do.
+            // hosts or a filmstrip beside the speaker do. A quarter of the
+            // grid's area, so what it asks for is not what the grid needs.
             SizedBox(
-              width: 300,
-              height: 200,
+              width: 150,
+              height: 100,
               child: ListView(
                 controller: scroll,
                 children: [
                   SizedBox(
-                    height: 200,
+                    height: 100,
                     child: StreamParticipantTile(
                       call: call,
                       participant: alice,
@@ -141,12 +143,22 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    // Both are showing them, and the grid is the larger of the two.
+    final dpr = tester.view.devicePixelRatio;
+    final gridSize = RtcVideoDimension(
+      width: (300 * dpr).toInt(),
+      height: (200 * dpr).toInt(),
+    );
+
+    // Both are showing them, and the larger of the two sizes the track.
     expect(aggregates.last.visibility, ViewportVisibility.visible);
-    final sized = aggregates.last.dimension;
+    expect(
+      aggregates.last.dimension,
+      gridSize,
+      reason: 'the smaller strip pulled the grid tile down to its own size',
+    );
 
     // The strip scrolls away. It measures nothing, and says so.
-    scroll.jumpTo(180);
+    scroll.jumpTo(90);
     await tester.pump();
     await tester.pump();
 
@@ -157,7 +169,7 @@ void main() {
     );
     expect(
       aggregates.last.dimension,
-      sized,
+      gridSize,
       reason: 'the grid tile still needs the size it is drawing at',
     );
   });
@@ -176,8 +188,10 @@ void main() {
 
     when(() => call.viewportVisibility).thenReturn(
       ViewportVisibilityRegistry(
-        onAggregate: (_) =>
-            phases.add(SchedulerBinding.instance.schedulerPhase),
+        onAggregate: (_) async {
+          phases.add(SchedulerBinding.instance.schedulerPhase);
+          return true;
+        },
       ),
     );
 
@@ -195,8 +209,10 @@ void main() {
     expect(phases, isNotEmpty);
     expect(
       phases,
-      everyElement(isNot(SchedulerPhase.persistentCallbacks)),
-      reason: 'a report was made while the frame was being built',
+      everyElement(
+        anyOf(SchedulerPhase.postFrameCallbacks, SchedulerPhase.idle),
+      ),
+      reason: 'a report was made from inside the frame',
     );
   });
 
@@ -237,8 +253,97 @@ void main() {
     await tester.pumpWidget(const TestWrapper(child: SizedBox()));
     await tester.pump();
 
-    expect(aggregates.single.visibility, ViewportVisibility.hidden);
+    // A detector delivers one last, hidden report after it is gone, which
+    // lands after the release has already taken this viewport out.
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+      aggregates.single.visibility,
+      ViewportVisibility.hidden,
+      reason: 'the release is the last word for a viewport that is gone',
+    );
     expect(aggregates.single.dimension.isEmpty, isTrue);
+  });
+
+  testWidgets('a renderer pointed at a new track speaks for that one', (
+    tester,
+  ) async {
+    final aggregates = <ViewportAggregate>[];
+    final call = callWithRegistry(aggregates);
+
+    await pumpTile(tester, call: call, participant: participant());
+    aggregates.clear();
+
+    // A migration hands the same participant a new track prefix. The viewport
+    // has not moved and measures exactly what it did before, so nothing but
+    // the track it is about has changed.
+    await pumpTile(
+      tester,
+      call: call,
+      participant: participant(trackIdPrefix: 'alice-migrated'),
+    );
+
+    final spokenFor = aggregates.map((it) => it.track.trackIdPrefix).toSet();
+    expect(
+      spokenFor,
+      contains('alice-migrated'),
+      reason: 'the new track was never measured, so nothing subscribed it',
+    );
+    expect(
+      aggregates
+          .lastWhere((it) => it.track.trackIdPrefix == 'alice-migrated')
+          .visibility,
+      ViewportVisibility.visible,
+    );
+    expect(
+      aggregates
+          .lastWhere((it) => it.track.trackIdPrefix == 'alice')
+          .visibility,
+      ViewportVisibility.hidden,
+      reason: 'the track it stopped drawing was left recorded as on screen',
+    );
+  });
+
+  testWidgets('a detector reporting after its renderer is gone is ignored', (
+    tester,
+  ) async {
+    // The timer path, which is what runs outside a test: a detector delivers
+    // one last, hidden report once its render object is gone, after the
+    // release has already taken this viewport out of the registry.
+    VisibilityDetectorController.instance.updateInterval = const Duration(
+      milliseconds: 500,
+    );
+
+    final aggregates = <ViewportAggregate>[];
+    final call = callWithRegistry(aggregates);
+
+    await tester.pumpWidget(
+      TestWrapper(
+        child: SizedBox(
+          width: 300,
+          height: 200,
+          child: StreamParticipantTile(call: call, participant: participant()),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+
+    expect(aggregates.single.visibility, ViewportVisibility.visible);
+    aggregates.clear();
+
+    await tester.pumpWidget(const TestWrapper(child: SizedBox()));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(
+      aggregates.single.visibility,
+      ViewportVisibility.hidden,
+      reason:
+          'a report after the release put the viewport back, with nothing '
+          'left alive to take it out again',
+    );
   });
 
   testWidgets(

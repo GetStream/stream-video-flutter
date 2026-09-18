@@ -276,9 +276,7 @@ class Call {
   final DynascaleManager dynascaleManager;
 
   /// What each viewport drawing a participant measures for it, and the one
-  /// answer per track that the call acts on. Viewports report themselves here
-  /// rather than writing visibility and subscriptions directly, so several
-  /// drawing the same participant cannot overwrite each other.
+  /// answer per track the call acts on.
   late final viewportVisibility = ViewportVisibilityRegistry(
     onAggregate: _applyViewportAggregate,
   );
@@ -1656,10 +1654,6 @@ class Call {
         sessionId: _session!.sessionId,
       );
 
-      // A new session knows nothing of what is on screen, and the viewports
-      // have nothing new to say — they report what changes about them.
-      viewportVisibility.reapplyAll();
-
       if (_callLifecycleCompleter.isCompleted) {
         _logger.w(
           () => '[join] rejected (call was left during session creation)',
@@ -1754,6 +1748,11 @@ class Call {
         }),
       );
     }
+    // A join response rebuilds every participant from the SFU, and what it
+    // builds carries no viewport visibility. The viewports report what changes
+    // about them, so nothing on screen would be said again on its own.
+    viewportVisibility.reapplyAll();
+
     _logger.v(() => '[join] completed');
     return const Result.success(none);
   }
@@ -4419,54 +4418,90 @@ class Call {
     return result;
   }
 
-  /// Acts on what every viewport drawing a track adds up to: the visibility is
-  /// recorded and the session told, and the subscription is moved to the size
-  /// the largest viewport showing it draws at — or dropped, once none does.
-  void _applyViewportAggregate(ViewportAggregate aggregate) {
+  /// Acts on a track's aggregate: the visibility goes into call state and to
+  /// the session, and the subscription moves to the size the largest viewport
+  /// showing it draws at — or is removed, once none does and no viewport asked
+  /// to keep it.
+  ///
+  /// Answers whether it landed. A report that did not is forgotten by the
+  /// registry, so the next measurement drives it again instead of being
+  /// deduplicated against a write that never happened.
+  Future<bool> _applyViewportAggregate(ViewportAggregate aggregate) async {
     final track = aggregate.track;
 
-    unawaited(
-      updateViewportVisibility(
-        sessionId: track.sessionId,
-        userId: track.userId,
-        visibility: aggregate.visibility,
-        trackType: track.trackType,
-      ),
+    if (state.value.status.isDisconnected) {
+      _logger.d(() => '[applyViewportAggregate] rejected (disconnected)');
+      return false;
+    }
+
+    // The visibility and the subscription are independent of each other, so
+    // one failing does not stop the other being tried; either failing means
+    // the aggregate did not land.
+    var applied = true;
+
+    final visibilityResult = await updateViewportVisibility(
+      sessionId: track.sessionId,
+      userId: track.userId,
+      visibility: aggregate.visibility,
+      trackType: track.trackType,
     );
+
+    if (visibilityResult.isFailure) {
+      _logger.w(
+        () => '[applyViewportAggregate] visibility failed: $visibilityResult',
+      );
+      applied = false;
+    }
+
+    // A viewport can measure a track for somebody the call does not have yet,
+    // or has already lost. Not applied, so the participant list catching up
+    // drives it again.
+    final participant = _participantBySessionId(track.sessionId);
+    if (participant == null) {
+      _logger.w(() => '[applyViewportAggregate] no participant for $track');
+      return false;
+    }
 
     // Only a remote track is subscribed to; a local one is drawn from the
     // camera it is already coming out of, and a track nobody has published yet
     // has nothing to ask for.
-    final trackState = _publishedTrack(track);
-    if (trackState is! RemoteTrackState) return;
+    final trackState = participant.publishedTracks[track.trackType];
+    if (trackState is! RemoteTrackState) return applied;
 
-    if (aggregate.dimension.isEmpty && !aggregate.persistWhenHidden) {
-      unawaited(
-        removeSubscription(
-          userId: track.userId,
-          sessionId: track.sessionId,
-          trackIdPrefix: track.trackIdPrefix,
-          trackType: track.trackType,
-        ),
+    // Dropped once no viewport shows the track, rather than once the size
+    // comes out empty: a viewport drawing a sliver of a track still wants it.
+    final Result<None> subscriptionResult;
+    if (!aggregate.visibility.isVisible && !aggregate.persistWhenHidden) {
+      subscriptionResult = await removeSubscription(
+        userId: track.userId,
+        sessionId: track.sessionId,
+        trackIdPrefix: track.trackIdPrefix,
+        trackType: track.trackType,
       );
-      return;
-    }
-
-    unawaited(
-      updateSubscription(
+    } else {
+      subscriptionResult = await updateSubscription(
         userId: track.userId,
         sessionId: track.sessionId,
         trackIdPrefix: track.trackIdPrefix,
         trackType: track.trackType,
         videoDimension: aggregate.dimension,
-      ),
-    );
+      );
+    }
+
+    if (subscriptionResult.isFailure) {
+      _logger.w(
+        () =>
+            '[applyViewportAggregate] subscription failed: $subscriptionResult',
+      );
+      applied = false;
+    }
+
+    return applied;
   }
 
-  TrackState? _publishedTrack(ViewportTrack track) {
+  CallParticipantState? _participantBySessionId(String sessionId) {
     for (final participant in _stateManager.callState.callParticipants) {
-      if (participant.sessionId != track.sessionId) continue;
-      return participant.publishedTracks[track.trackType];
+      if (participant.sessionId == sessionId) return participant;
     }
 
     return null;
@@ -4492,12 +4527,9 @@ class Call {
       return const Result.success(none);
     }
 
-    // Recorded before the session is told, and whatever it makes of it. The
-    // caller reports a change once — a viewport reports what changed, not what
-    // it holds — so a visibility dropped here is not offered again, and the
-    // participant stays recorded as something they are not for the rest of the
-    // call. The session's own handling of this is a debounce that ends in the
-    // UI reading this same state back, so there is nothing to wait for.
+    // Recorded before the session is told. The session debounces this and
+    // ends in the UI reading the same state back, so there is nothing to wait
+    // for.
     _stateManager.participantUpdateViewportVisibility(
       sessionId: sessionId,
       userId: userId,
