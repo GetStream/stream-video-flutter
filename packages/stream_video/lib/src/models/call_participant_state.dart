@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
@@ -38,10 +40,10 @@ class CallParticipantState extends Equatable
     this.viewportVisibility = ViewportVisibility.unknown,
     this.screenShareViewportVisibility = ViewportVisibility.unknown,
     this.participantSource,
-  }) : audioLevels = audioLevels ?? [audioLevel];
+  }) : audioLevels = _sealLevels(audioLevels ?? [audioLevel]);
 
   /// Internal constructor to be used with copyWith methods
-  const CallParticipantState._({
+  CallParticipantState._({
     required this.userId,
     required this.roles,
     required this.name,
@@ -56,7 +58,7 @@ class CallParticipantState extends Equatable
     required this.connectionQuality,
     required this.isOnline,
     required this.audioLevel,
-    required this.audioLevels,
+    required List<double> audioLevels,
     required this.isSpeaking,
     required this.isDominantSpeaker,
     required this.pin,
@@ -64,7 +66,7 @@ class CallParticipantState extends Equatable
     required this.viewportVisibility,
     required this.screenShareViewportVisibility,
     required this.participantSource,
-  });
+  }) : audioLevels = _sealLevels(audioLevels);
 
   final String userId;
   final List<String> roles;
@@ -81,10 +83,18 @@ class CallParticipantState extends Equatable
   final SfuParticipantSource? participantSource;
   final bool isOnline;
 
-  /// The latest audio level for the user.
+  /// The most recent audio level retained for the user.
+  ///
+  /// Updates stop while a participant is silent, so this holds at the reading
+  /// that took them below the speaking threshold rather than tracking every
+  /// quiet sample after it. Use [isSpeaking] to tell the two apart.
   final double audioLevel;
 
-  /// List of the last 10 audio levels.
+  /// The last 10 values [audioLevel] took, oldest first.
+  ///
+  /// Unmodifiable — a participant's identity is how the SDK detects change, so
+  /// mutating this in place would leave the UI stale rather than update it.
+  /// Build a new list instead.
   final List<double> audioLevels;
 
   /// A list of tracks that are currently paused by our servers.
@@ -103,6 +113,16 @@ class CallParticipantState extends Equatable
   final ViewportVisibility screenShareViewportVisibility;
 
   bool get isPinned => pin != null;
+
+  /// Identity is used all over the SDK to tell whether a participant changed,
+  /// which only holds while nothing mutates a collection in place. Handing out
+  /// an unmodifiable view makes that an error rather than a silently stale UI.
+  static List<double> _sealLevels(List<double> levels) {
+    // Always copied, never just wrapped: a view writes through to whatever list
+    // it was built over, including one an unmodifiable view already hides.
+    return UnmodifiableListView(List<double>.of(levels));
+  }
+
   String get uniqueParticipantKey => '$userId-$sessionId';
 
   /// Returns a copy of this [CallParticipantState] with the given fields
@@ -165,15 +185,14 @@ class CallParticipantState extends Equatable
     required double audioLevel,
     bool? isSpeaking,
   }) {
-    final levels = audioLevels;
-    levels.add(audioLevel);
-    while (levels.length > 10) {
-      levels.removeAt(0);
+    final levels = [...audioLevels, audioLevel];
+    if (levels.length > 10) {
+      levels.removeRange(0, levels.length - 10);
     }
 
     return copyWith(
       audioLevel: audioLevel,
-      audioLevels: audioLevels,
+      audioLevels: levels,
       isSpeaking: isSpeaking,
     );
   }

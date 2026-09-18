@@ -127,9 +127,9 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
     );
 
     if (widget.participants == null) {
-      _participantsSubscription = widget.call
-          .partialState((state) => state.callParticipants)
-          .listen(recalculateParticipants);
+      _participantsSubscription = widget.call.participantsStream.listen(
+        recalculateParticipants,
+      );
     }
   }
 
@@ -145,6 +145,7 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
 
     if (widget.participants != null) {
       _participantsSubscription?.cancel();
+      _participantsSubscription = null;
 
       if (!const ListEquality<CallParticipantState>().equals(
         widget.participants!.toList(),
@@ -152,11 +153,14 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
       )) {
         recalculateParticipants(widget.participants!);
       }
-    } else if (widget.call != oldWidget.call) {
+    } else if (widget.call != oldWidget.call ||
+        // Going back to the call's own list after a controlled one: the
+        // subscription was cancelled above and has to be re-taken.
+        _participantsSubscription == null) {
       _participantsSubscription?.cancel();
-      _participantsSubscription = widget.call
-          .partialState((state) => state.callParticipants)
-          .listen(recalculateParticipants);
+      _participantsSubscription = widget.call.participantsStream.listen(
+        recalculateParticipants,
+      );
 
       recalculateParticipants(widget.call.state.value.callParticipants);
     }
