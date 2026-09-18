@@ -34,7 +34,10 @@ class ViewportMeasurement extends Equatable {
     required this.visibility,
     this.dimension = const RtcVideoDimension.zero(),
     this.persistWhenHidden = false,
-  });
+  }) : assert(
+         visibility != ViewportVisibility.unknown,
+         'a viewport reports what it measures, not that it does not know',
+       );
 
   /// Whether this viewport has the track on screen.
   final ViewportVisibility visibility;
@@ -70,7 +73,8 @@ class ViewportAggregate extends Equatable {
 
   final ViewportTrack track;
 
-  /// Visible while any viewport has the track on screen.
+  /// Visible while any viewport has the track on screen, hidden once none
+  /// does. Never [ViewportVisibility.unknown].
   final ViewportVisibility visibility;
 
   /// The largest size any viewport showing the track draws it at — the one

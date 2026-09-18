@@ -8,7 +8,7 @@
 - Added `StreamParticipantLabelStyle.minNameWidth`, the narrowest the name may be drawn at before the pill drops out.
 - Added `StreamPictureInPictureThemeData` on `StreamVideoTheme`, whose `StreamPictureInPictureStyle.tileStyle` restyles the participant tile the Android picture-in-picture window draws.
 - Added `StreamParticipantLabelStyle.showVideoOffIcon`, to leave the camera-off icon out of the name pill.
-- Added `ViewportVisibilityReporter`, which measures how much of its child is on screen and reports it to `Call.viewportVisibility`. Wrap a custom widget drawing a participant's track in one and it takes part in what the call subscribes to.
+- Added `ViewportVisibilityReporter`, which measures how much of its child is on screen and reports it to `Call.viewportVisibility`.
 - `StreamLayoutButton` draws the participant layout in effect and offers the rest through a `StreamAdaptiveMenuAnchor`.
 - `StreamLayoutButton.defaultLayouts` is `auto` and `speakerBottom`, so the button toggles unless it is given more.
 - Added layout strings to the localizations, in English and Dutch: `layoutMenuTitle`, `layoutSelectTooltip`, `layoutDefault`, `layoutGrid`, `layoutSpeakerTop`, `layoutSpeakerBottom`, `layoutSpeakerLeft`, `layoutSpeakerRight` and `layoutSpeakerOneToOne`.
@@ -161,9 +161,9 @@
 
 ### 🐞 Fixed
 
-- `StreamVideoRenderer` now reports only what it measures of itself, into `Call.viewportVisibility`. A picture-in-picture overlay can no longer unsubscribe a participant the grid is showing, or pull their subscription down to its own size.
+- A picture-in-picture overlay no longer unsubscribes a participant the grid is showing, or pulls their subscription down to its own size.
 - Fixed the participant grid rearranging itself when a participant nobody can see starts speaking. They take the place of the tile with the least claim to one — the last one on screen — instead of the first, which used to move every tile below it down one.
-- Fixed a participant tile on screen being recorded as not visible, which kept it out of the running for a speaker's tile and could get its track unsubscribed. A renderer showing a participant now says so again when the call state disagrees, and the floating self-view no longer shares its visibility bookkeeping with the same participant's tile in the grid.
+- Fixed a participant tile on screen being recorded as not visible, which kept it out of the running for a speaker's tile and could get its track unsubscribed.
 - A small participant tile no longer covers its video with chrome it has no room for: the sound indicator, the camera-off icon and the overflow button go first, then the name, and a pill with nothing left to say is dropped.
 - Below that size the name pill and the connection quality indicator sit in the tile's bottom corners rather than inset from it, rounded on the corner they share with the tile and the one facing its middle. The inset they give up goes to the name.
 - A participant tile no longer draws a name pill with no name in it. Tiles between 92 and 100px wide did.
@@ -219,7 +219,7 @@
 
 ### ⚠️ Breaking
 
-- `StreamVideoRenderer` is a `StatelessWidget`. Measuring and reporting its viewport moved to `ViewportVisibilityReporter`, which it wraps its child in, and nothing was left for it to keep.
+- `StreamVideoRenderer` is a `StatelessWidget` and wraps its child in a `ViewportVisibilityReporter`, which does the measuring.
 - `ParticipantLayoutMode.auto` is the default layout of `StreamCallContent`, `StreamCallParticipants` and `RegularCallParticipantsContent`, and renders what `grid` used to. The livestream widgets still default to `grid`.
 - `ParticipantLayoutMode.grid` gives the local participant a tile of its own instead of floating them over the grid.
 - `ParticipantLayoutMode.auto` floats the self-view on mobile only while at most two other people are in the call, and gives the local participant a tile beyond that.

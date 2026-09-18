@@ -13,11 +13,6 @@ import '../mocks.dart';
 // listens to, and read the order back off the tiles.
 
 void main() {
-  setUpAll(() {
-    registerFallbackValue(ViewportVisibility.unknown);
-    registerFallbackValue(SfuTrackType.video);
-  });
-
   setUp(() {
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
   });

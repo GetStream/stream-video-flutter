@@ -47,7 +47,7 @@
 
 ### ✅ Added
 
-- Added `Call.viewportVisibility`, a registry each viewport drawing a participant reports its own measurement to. The call derives one visibility and one subscription size per track from all of them.
+- Added `Call.viewportVisibility`, which derives one visibility and one subscription size per track from every viewport drawing it.
 - `CallReceivedData`, what `Call.get()` returns, is exported. Handling that result meant naming a type the package kept to itself.
 - Anonymous users can now carry a token: pass `userToken` with a `UserType.anonymous` user to send call-restricted tokens (e.g. for closed livestreams). The token's `user_id` claim must be `!anon`; an invalid token fails fast at client construction.
 - `StreamCallDisconnectedEvent`, `CoordinatorDisconnectedEvent`, and `CoordinatorDisconnected` now carry `apiError`, the error the server reported before closing the WebSocket. A refused token or a rejected API key arrives as an error frame rather than a close frame, so this is the only account of why such a connection was closed; `closeReason` falls back to the error's message when the closure itself carried none.
@@ -58,8 +58,8 @@
 ### 🐞 Fixed
 
 - A reconnect no longer drops the video of participants whose tracks have not been received yet. Track subscriptions now survive the join response, so a subscription update sent while the media is still arriving keeps every participant subscribed.
-- A participant drawn in two places at once is now visible while either shows them, and subscribed at the size of the larger. Whichever viewport reported last used to decide both.
-- Every track on screen is reported again to a new session, so one that was visible across a reconnect is no longer unknown to the SFU until its viewport happens to move.
+- A participant drawn in two places at once is now visible while either shows them, and subscribed at the size of the larger.
+- Every track on screen is reported again to the new session after a reconnect.
 - Guest creation no longer waits for a coordinator connection id. The call is unauthenticated and watches nothing, so an id could only add latency.
 - A request that could not be signed now reports a credentials failure rather than a network one.
 - A 4xx the server answered without a Stream error payload — an edge, proxy or WAF answering on its own — is no longer retried as if it were a timeout. The status is read off the failure itself, so a permission denial fails on the first attempt instead of spending the whole retry budget.

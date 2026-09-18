@@ -8,9 +8,9 @@ class MockCall extends Mock implements Call {
     // Every renderer reports what it measures into the call's viewport
     // registry. Most tests are not about what those add up to, so they go into
     // one nobody is listening to; `when` in a test still overrides this.
-    when(
-      () => viewportVisibility,
-    ).thenReturn(ViewportVisibilityRegistry(onAggregate: (_) {}));
+    when(() => viewportVisibility).thenReturn(
+      ViewportVisibilityRegistry(onAggregate: (_) async => true),
+    );
   }
 }
 

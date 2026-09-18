@@ -37,9 +37,18 @@ void main() {
   late List<ViewportAggregate> aggregates;
   late ViewportVisibilityRegistry registry;
 
+  /// What the call answers for an aggregate: whether it acted on it.
+  late bool applied;
+
   setUp(() {
     aggregates = [];
-    registry = ViewportVisibilityRegistry(onAggregate: aggregates.add);
+    applied = true;
+    registry = ViewportVisibilityRegistry(
+      onAggregate: (aggregate) async {
+        aggregates.add(aggregate);
+        return applied;
+      },
+    );
   });
 
   test('every viewport gets a name of its own', () {
@@ -232,6 +241,68 @@ void main() {
     registry
       ..clear()
       ..reapplyAll();
+
+    expect(aggregates, isEmpty);
+  });
+
+  test('an answer the call acted on is not offered again', () async {
+    registry.report(
+      viewportId: 'grid',
+      track: track,
+      measurement: showing(640, 360),
+    );
+    await pumpEventQueue();
+
+    // A smaller viewport does not move the answer: the largest one showing the
+    // track still sizes it.
+    registry.report(
+      viewportId: 'strip',
+      track: track,
+      measurement: showing(320, 180),
+    );
+    await pumpEventQueue();
+
+    expect(aggregates, hasLength(1));
+  });
+
+  test('an answer the call could not act on is offered again', () async {
+    applied = false;
+    registry.report(
+      viewportId: 'grid',
+      track: track,
+      measurement: showing(640, 360),
+    );
+    await pumpEventQueue();
+
+    expect(aggregates, hasLength(1));
+
+    applied = true;
+    registry.report(
+      viewportId: 'strip',
+      track: track,
+      measurement: showing(320, 180),
+    );
+    await pumpEventQueue();
+
+    expect(
+      aggregates,
+      hasLength(2),
+      reason: 'the first answer never landed, so it was not said again',
+    );
+    expect(aggregates.last, aggregates.first);
+  });
+
+  test('a track every viewport released is forgotten', () async {
+    registry.report(
+      viewportId: 'grid',
+      track: track,
+      measurement: showing(640, 360),
+    );
+    registry.release(viewportId: 'grid', track: track);
+    await pumpEventQueue();
+
+    aggregates.clear();
+    registry.reapplyAll();
 
     expect(aggregates, isEmpty);
   });

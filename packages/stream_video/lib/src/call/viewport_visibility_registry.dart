@@ -1,27 +1,36 @@
+import 'dart:async';
+
 import '../logger/impl/tagged_logger.dart';
 import '../models/viewport_measurement.dart';
 import '../models/viewport_visibility.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
 
-/// Called when what every viewport adds up to for a track has moved, and with
-/// every track a new session has to be told about again.
-typedef OnViewportAggregate = void Function(ViewportAggregate aggregate);
+/// Called with a track's aggregate whenever it changes, and again for every
+/// track on [ViewportVisibilityRegistry.reapplyAll].
+///
+/// Called synchronously, from inside the [ViewportVisibilityRegistry.report],
+/// [ViewportVisibilityRegistry.release] or [ViewportVisibilityRegistry.reapply]
+/// that moved it, so it must not call back into the registry.
+///
+/// Answers whether the aggregate was acted on. An answer of `false` is
+/// forgotten rather than remembered as said, so the next report drives it
+/// again.
+typedef OnViewportAggregate =
+    Future<bool> Function(ViewportAggregate aggregate);
 
 /// Holds what each viewport measures for the tracks it draws, and derives the
 /// one answer the call has to act on per track.
 ///
 /// A participant can be drawn by several viewports at once — a tile in the
 /// grid, a picture-in-picture overlay, a livestream's host strip — while the
-/// call has a single visibility and a single subscription per track. Left to
-/// report on their own, whichever viewport spoke last would decide both, so a
-/// participant on screen in the grid could be recorded as hidden and have
-/// their track unsubscribed by an overlay that is not showing them, and a
-/// small overlay could pull a full-screen tile's subscription down to its own
-/// size.
+/// call has a single visibility and a single subscription per track. Each
+/// viewport reports only about itself, under a name from [nextViewportId], and
+/// the registry answers for the track: visible while any viewport has it on
+/// screen, sized for the largest viewport that does, and never
+/// [ViewportVisibility.unknown].
 ///
-/// Each viewport reports only about itself, through [report], and the registry
-/// answers for the track: visible while any viewport has it on screen, sized
-/// for the largest viewport that does.
+/// A viewport that stops drawing a track must [release] it; nothing here
+/// expires on its own.
 class ViewportVisibilityRegistry {
   ViewportVisibilityRegistry({required this.onAggregate});
 
@@ -32,17 +41,18 @@ class ViewportVisibilityRegistry {
 
   int _viewportSeq = 0;
 
-  /// A name no other viewport reporting here has.
+  /// A name no other viewport reporting to this registry has.
   ///
-  /// Two viewports drawing the same track must not share one, or they are back
-  /// to overwriting each other. Nothing outside this process reads it.
+  /// Reporting again under the same name replaces that viewport's measurement
+  /// for the track, so two viewports drawing one track must not share a name.
+  /// A viewport releases each track it reported separately.
   String nextViewportId() => '${_viewportSeq++}';
 
   /// Per track, what each viewport drawing it last measured.
   final _measurements = <ViewportTrack, Map<String, ViewportMeasurement>>{};
 
-  /// What was last handed to [onAggregate], so an unchanged answer is not
-  /// reported again.
+  /// What was last handed to [onAggregate] and acted on, so an unchanged
+  /// answer is not reported again.
   final _reported = <ViewportTrack, ViewportAggregate>{};
 
   /// Records what the viewport known as [viewportId] measures for [track].
@@ -54,18 +64,26 @@ class ViewportVisibilityRegistry {
     final measurements = _measurements.putIfAbsent(track, () => {});
     if (measurements[viewportId] == measurement) return;
 
+    _logger.v(() => '[report] $viewportId on $track: $measurement');
+
     measurements[viewportId] = measurement;
     _emit(track);
   }
 
   /// Drops what [viewportId] measured for [track]: it has stopped drawing it.
   ///
-  /// A track no viewport draws any more is hidden and sized for nobody, which
-  /// is reported once before it is forgotten.
+  /// A track no viewport draws any more is hidden and sized for nobody,
+  /// reported once if that is a change, then forgotten.
   void release({required String viewportId, required ViewportTrack track}) {
     final measurements = _measurements[track];
     if (measurements == null) return;
-    if (measurements.remove(viewportId) == null) return;
+
+    if (measurements.remove(viewportId) == null) {
+      _logger.w(() => '[release] $viewportId measured nothing for $track');
+      return;
+    }
+
+    _logger.v(() => '[release] $viewportId on $track');
 
     if (measurements.isNotEmpty) return _emit(track);
 
@@ -78,7 +96,8 @@ class ViewportVisibilityRegistry {
   ///
   /// For what happens outside a viewport and leaves its measurement standing:
   /// a track that has only now been published has to be subscribed at a size
-  /// the viewports drawing it have been holding all along.
+  /// the viewports drawing it have been holding all along. Does nothing for a
+  /// track no viewport is measuring.
   void reapply(ViewportTrack track) {
     if (!_measurements.containsKey(track)) return;
 
@@ -89,9 +108,7 @@ class ViewportVisibilityRegistry {
   /// Reports every track again, for a session that has not been told any of it.
   ///
   /// A viewport reports what changes about itself, so nothing here would be
-  /// said a second time on its own: without this, a track that was visible
-  /// across a reconnect would stay unknown to the new session until the
-  /// viewport drawing it happened to move.
+  /// said a second time on its own.
   void reapplyAll() {
     _logger.d(() => '[reapplyAll] tracks: ${_measurements.length}');
 
@@ -100,6 +117,8 @@ class ViewportVisibilityRegistry {
   }
 
   /// Forgets everything, without reporting it.
+  ///
+  /// [reapplyAll] then has nothing to say until each viewport reports again.
   void clear() {
     _measurements.clear();
     _reported.clear();
@@ -111,8 +130,18 @@ class ViewportVisibilityRegistry {
 
     _logger.v(() => '[emit] aggregate: $aggregate');
 
+    // Recorded before it is acted on, so an emit for the same answer while
+    // this one is in flight does not repeat it, and dropped again if it turns
+    // out not to have landed.
     _reported[track] = aggregate;
-    onAggregate(aggregate);
+    unawaited(
+      onAggregate(aggregate).then((applied) {
+        if (applied) return;
+
+        _logger.w(() => '[emit] not applied, forgetting: $aggregate');
+        if (_reported[track] == aggregate) _reported.remove(track);
+      }),
+    );
   }
 
   static ViewportAggregate _aggregate(
