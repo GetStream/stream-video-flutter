@@ -157,6 +157,12 @@
 
   Every component follows the same shape: `StreamX` resolves the registered builder and falls back to `DefaultX`, which holds the default implementation. The parameters of `StreamX` are carried in a `StreamXProps`, exposed as `StreamX.props`, so a custom builder can read them and `copyWith` them to decorate the default rather than reimplement it.
 - Added `StreamParticipantTile`, the participant tile as a replaceable component: register a `participantTile` builder to replace it, or use `DefaultStreamParticipantTile` for the default implementation.
+- Added `CallAppBarThemeData` on `StreamVideoTheme`, and `CallAppBarTheme` to restyle the bar over a subtree.
+- `CallAppBar` takes a `style` and a `primary`, and reports its themed height through `CallAppBar.heightOf`.
+- Added `StreamFlipCameraButton.isSupported`, false off iOS and Android.
+- Added `StreamCallDurationBadge`, the pill showing how long a call has been running, with encryption, recording and screen-share indicators.
+- Added `StreamCallDurationBadgeThemeData` on `StreamVideoTheme`, and `StreamCallDurationBadgeTheme` to restyle the badge over a subtree.
+- Added `callEncryptedTooltip`, `callRecordingTooltip` and `callScreenSharingTooltip` to the localizations, in English and Dutch.
 
 ### 🐞 Fixed
 
@@ -203,6 +209,10 @@
 - The lobby no longer lists someone twice. `getOrCreate` returns a snapshot of the session while the event subscription is already live, so a join already reflected in that snapshot still arrives as a `ParticipantJoined` event — and the lobby appended it blindly. Participants are now upserted by session id, which leaves a genuine second session of the same user (a phone and a laptop) listed separately, as it should be. A join event for the local user is ignored, matching the snapshot, which always filtered them out.
 - The lobby no longer adds and drops people on another call's events.
 
+### 🔄 Changed
+
+- `CallAppBar` is laid out by `StreamToolbar` at the design system's 72 with `spacing.sm` edge padding, matching `CallControlBar`.
+
 ### ⚠️ Deprecated
 
 - `ParticipantLayoutMode.spotlight` is `speakerTop` now, and `pictureInPicture` is `speakerOneToOne`. `dart fix --apply` migrates both.
@@ -227,6 +237,7 @@
 - `translations.defaultDevice` replaces `lobbySystemDefaultDevice` and `lobbyDefaultDeviceHint`, and reads "Default" rather than "System default". The two strings were shown side by side — the menu's row and the field's placeholder — so a translation could make them disagree about the same choice.
 - `StreamLayoutButton` takes `layout` instead of `initialLayout` and keeps no state, so the caller passes the mode back in through it. `dart fix --apply` renames the parameter.
 - `onError` on the device controls takes a `StreamDeviceErrorCallback`, receiving a typed `VideoError` and the action that failed.
+- `CallAppBar` no longer takes `elevation` or `leadingWidth`.
 - `StreamCallContent` no longer shows `CallDiagnosticsContent` on a double tap. The gesture held the pointer arena for `kDoubleTapTimeout`, so every tap in the call body — a participant tile's overflow menu above all — waited 300ms to be recognized, and the overlay it toggled only ever appeared in debug builds. `CallDiagnosticsContent` is still public: show it from an affordance of your own, the way `StreamLivestreamContent` does with `displayDiagnostics`.
 - `StreamLobbyViewThemeData`'s properties are replaced by a single `style:` taking a `StreamLobbyViewStyle`. `backgroundColor` and `cardBackgroundColor` are gone — the lobby paints no background of its own now that it builds no `Scaffold`, and the preview's fill is `previewBackgroundColor`. `userAvatarTheme` and `participantAvatarTheme` are gone with them; size and colour the avatars through `StreamAvatarTheme`. `participantListHeight` went with the participants card, and `optionOffBackgroundColor` / `optionOffIconColor` were already read by nothing.
 - `StreamLobbyViewThemeData`'s properties are replaced by a single `style:` taking a `StreamLobbyViewStyle`. `backgroundColor` and `cardBackgroundColor` are gone — the lobby paints no background of its own now that it builds no `Scaffold`, and the preview's fill comes from `StreamParticipantTileTheme` along with the rest of the tile, with `previewTileStyle` to make the preview differ from the call's tiles. `userAvatarTheme` and `participantAvatarTheme` are gone with them; size and colour the avatars through `StreamAvatarTheme`. `participantListHeight` went with the participants card, and `optionOffBackgroundColor` / `optionOffIconColor` were already read by nothing.

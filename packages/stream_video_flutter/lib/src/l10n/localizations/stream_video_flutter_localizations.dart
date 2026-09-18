@@ -352,6 +352,24 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'Your devices could not be read'**
   String get lobbyDevicesUnreadable;
+
+  /// Tooltip on the encryption indicator in the call duration badge
+  ///
+  /// In en, this message translates to:
+  /// **'This call is end-to-end encrypted'**
+  String get callEncryptedTooltip;
+
+  /// Tooltip on the recording indicator in the call duration badge
+  ///
+  /// In en, this message translates to:
+  /// **'This call is being recorded'**
+  String get callRecordingTooltip;
+
+  /// Tooltip on the screen share indicator in the call duration badge
+  ///
+  /// In en, this message translates to:
+  /// **'Someone is sharing their screen'**
+  String get callScreenSharingTooltip;
 }
 
 class _StreamVideoFlutterLocalizationsDelegate
