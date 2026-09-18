@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/stream_video.dart';
@@ -181,6 +183,47 @@ void main() {
 
       await earlySubscription.cancel();
       await lateSubscription.cancel();
+    });
+
+    test('delivers the next value after an error is replayed', () async {
+      final manager = _stateManager(null);
+      final call = createTestCall(stateManager: manager);
+
+      final early = call.participantsStream.listen((_) {}, onError: (_) {});
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      // The emitter exposes a plain `Sink`, but it is a `BehaviorSubject`
+      // underneath, which is what caches the error for the next listener.
+      (manager.callStateStream.valueSink as EventSink<CallState>).addError(
+        'boom',
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+
+      // A listener arriving now is opened with the cached error rather than a
+      // value, so the flag that drops the replay must be set by either.
+      final seen = <int>[];
+      final errors = <Object>[];
+      final late = call.participantsStream.listen(
+        (value) => seen.add(value.length),
+        onError: errors.add,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      seen.clear();
+
+      _setParticipants(manager, ['alice']);
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+
+      expect(
+        seen,
+        [1],
+        reason:
+            'the first value after a replayed error must not be eaten as '
+            'if it were the replay',
+      );
+      expect(errors, isNotEmpty);
+
+      await early.cancel();
+      await late.cancel();
     });
   });
 }

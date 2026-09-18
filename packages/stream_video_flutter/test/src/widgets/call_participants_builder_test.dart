@@ -183,4 +183,59 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('does not show the previous call on the frame the call changes', (
+    tester,
+  ) async {
+    final otherCall = MockCall();
+    final otherState = MockCallState();
+    final otherEmitter = MockStateEmitter<CallState>();
+    final otherParticipants =
+        StreamController<List<CallParticipantState>>.broadcast();
+    addTearDown(otherParticipants.close);
+
+    when(() => callState.callParticipants).thenReturn([_participant('alice')]);
+    when(() => otherState.callParticipants).thenReturn([_participant('bob')]);
+    when(() => otherEmitter.value).thenReturn(otherState);
+    when(() => otherCall.state).thenReturn(otherEmitter);
+    when(
+      () => otherCall.participantsStream,
+    ).thenAnswer((_) => otherParticipants.stream);
+
+    late StateSetter setCall;
+    var useOther = false;
+    var built = <CallParticipantState>[];
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (context, setState) {
+            setCall = setState;
+            return CallParticipantsBuilder(
+              call: useOther ? otherCall : call,
+              builder: (context, participants) {
+                built = participants;
+                return const SizedBox.shrink();
+              },
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(built.map((it) => it.userId), ['alice']);
+
+    setCall(() => useOther = true);
+    await tester.pump();
+
+    expect(
+      built.map((it) => it.userId),
+      ['bob'],
+      reason:
+          '`StreamBuilder` carries its snapshot across a stream swap, so '
+          'without a new key the previous call renders until the new stream '
+          'emits',
+    );
+  });
 }

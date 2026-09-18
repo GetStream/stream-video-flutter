@@ -468,10 +468,11 @@ class Call {
         var latest = _stateManager.callState.callParticipants;
         controller.add(latest);
 
+        // The subject opens with whatever it currently holds, which is a value
+        // or — since it caches the latest error too — an error.
         var replayed = false;
         final subscription = _participantsSubject.stream.listen(
           (value) {
-            // The subject always opens with its current value.
             if (!replayed) {
               replayed = true;
               return;
@@ -480,7 +481,10 @@ class Call {
             latest = value;
             controller.add(value);
           },
-          onError: controller.addError,
+          onError: (Object error, StackTrace stackTrace) {
+            replayed = true;
+            controller.addError(error, stackTrace);
+          },
           onDone: controller.close,
         );
 

@@ -91,6 +91,10 @@ class _CallParticipantsBuilderState extends State<CallParticipantsBuilder> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<CallParticipantState>>(
+      // `StreamBuilder` carries its snapshot across a stream swap, so without
+      // this the previous call's participants render until the new stream
+      // emits. A new key rebuilds it against the new `initialData`.
+      key: ObjectKey(widget.call),
       stream: _participants,
       initialData: widget.call.state.value.callParticipants,
       builder: (context, snapshot) {

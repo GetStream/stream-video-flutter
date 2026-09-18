@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
@@ -558,6 +560,23 @@ void main() {
       expect(participant.audioLevels, hasLength(10));
       expect(participant.audioLevels.last, 0.12);
       expect(participant.audioLevels.first, 0.03);
+    });
+
+    test('cannot be mutated through an unmodifiable view of a live list', () {
+      final backing = <double>[0.1];
+      final participant = _participant(
+        userId: 'alice',
+      ).copyWith(audioLevels: UnmodifiableListView(backing));
+
+      backing.add(0.9);
+
+      expect(
+        participant.audioLevels,
+        [0.1],
+        reason:
+            'an unmodifiable view still writes through to the list it was '
+            'built over, so it cannot be trusted as already sealed',
+      );
     });
 
     test('cannot be mutated through the list handed to the constructor', () {

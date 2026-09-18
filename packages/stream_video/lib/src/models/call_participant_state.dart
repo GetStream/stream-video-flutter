@@ -83,12 +83,11 @@ class CallParticipantState extends Equatable
   final SfuParticipantSource? participantSource;
   final bool isOnline;
 
-  /// The user's most recent audio level while they were above the speaking
-  /// threshold.
+  /// The most recent audio level retained for the user.
   ///
   /// Updates stop while a participant is silent, so this holds at the reading
-  /// that took them below the threshold rather than tracking every quiet
-  /// sample. Use [isSpeaking] to tell the two apart.
+  /// that took them below the speaking threshold rather than tracking every
+  /// quiet sample after it. Use [isSpeaking] to tell the two apart.
   final double audioLevel;
 
   /// The last 10 values [audioLevel] took, oldest first.
@@ -119,9 +118,8 @@ class CallParticipantState extends Equatable
   /// which only holds while nothing mutates a collection in place. Handing out
   /// an unmodifiable view makes that an error rather than a silently stale UI.
   static List<double> _sealLevels(List<double> levels) {
-    if (levels is UnmodifiableListView<double>) return levels;
-    // Copied, not just wrapped: a view would still write through to whatever
-    // list the caller passed in and kept a reference to.
+    // Always copied, never just wrapped: a view writes through to whatever list
+    // it was built over, including one an unmodifiable view already hides.
     return UnmodifiableListView(List<double>.of(levels));
   }
 
