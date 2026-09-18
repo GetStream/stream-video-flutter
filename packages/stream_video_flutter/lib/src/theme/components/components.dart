@@ -1,3 +1,4 @@
+export 'call_app_bar_theme.dart';
 export 'call_button_badge_theme.dart';
 export 'call_control_bar_theme.dart';
 export 'call_participants_grid_theme.dart';

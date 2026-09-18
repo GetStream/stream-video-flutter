@@ -659,22 +659,24 @@ class _CallScreenState extends State<CallScreen>
 
                 return CallAppBar(
                   call: call,
-                  leadingWidth: 120,
                   showLeaveCallAction: isCompact,
                   leading: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       if (isCompact)
                         _layoutToggle(
                           menuDirection: StreamMenuDirection.down,
                         ),
-                      PartialCallStateBuilder(
-                        call: call,
-                        selector: (state) => state.localParticipant != null,
-                        builder: (context, hasLocalParticipant) =>
-                            hasLocalParticipant
-                            ? StreamFlipCameraButton(call: call)
-                            : const SizedBox.shrink(),
-                      ),
+                      // Only a phone has a second camera to flip to.
+                      if (StreamFlipCameraButton.isSupported)
+                        PartialCallStateBuilder(
+                          call: call,
+                          selector: (state) => state.localParticipant != null,
+                          builder: (context, hasLocalParticipant) =>
+                              hasLocalParticipant
+                              ? StreamFlipCameraButton(call: call)
+                              : const SizedBox.shrink(),
+                        ),
                     ],
                   ),
                   title: CallDurationTitle(call: call),
