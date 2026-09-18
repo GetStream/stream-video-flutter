@@ -3,12 +3,12 @@ import 'package:theme_extensions_builder_annotation/theme_extensions_builder_ann
 
 import '../../../stream_video_flutter.dart';
 
-part 'screen_share_selector_theme.g.theme.dart';
+part 'desktop_screen_share_selector_theme.g.theme.dart';
 
-/// Applies a screen share selector theme to descendant
-/// [StreamScreenShareSelector] widgets.
+/// Applies a desktop screen share selector theme to descendant
+/// [StreamDesktopScreenShareSelector] widgets.
 ///
-/// Wrap a subtree with [StreamScreenShareSelectorTheme] to override the
+/// Wrap a subtree with [StreamDesktopScreenShareSelectorTheme] to override the
 /// styling of the grid a desktop user picks a screen or window from.
 ///
 /// {@tool snippet}
@@ -16,9 +16,9 @@ part 'screen_share_selector_theme.g.theme.dart';
 /// Draw the sources two to a row, in taller tiles:
 ///
 /// ```dart
-/// StreamScreenShareSelectorTheme(
-///   data: StreamScreenShareSelectorThemeData(
-///     style: StreamScreenShareSelectorStyle(
+/// StreamDesktopScreenShareSelectorTheme(
+///   data: StreamDesktopScreenShareSelectorThemeData(
+///     style: StreamDesktopScreenShareSelectorStyle(
 ///       crossAxisCount: 2,
 ///       tileHeight: 220,
 ///     ),
@@ -30,82 +30,85 @@ part 'screen_share_selector_theme.g.theme.dart';
 ///
 /// See also:
 ///
-///  * [StreamScreenShareSelectorThemeData], which describes the theme.
-///  * [StreamScreenShareSelectorStyle], the visual style it carries.
-class StreamScreenShareSelectorTheme extends InheritedTheme {
+///  * [StreamDesktopScreenShareSelectorThemeData], which describes the theme.
+///  * [StreamDesktopScreenShareSelectorStyle], the visual style it carries.
+class StreamDesktopScreenShareSelectorTheme extends InheritedTheme {
   /// Creates a screen share selector theme.
-  const StreamScreenShareSelectorTheme({
+  const StreamDesktopScreenShareSelectorTheme({
     super.key,
     required this.data,
     required super.child,
   });
 
   /// The selector theme data for descendant widgets.
-  final StreamScreenShareSelectorThemeData data;
+  final StreamDesktopScreenShareSelectorThemeData data;
 
-  /// Returns the [StreamScreenShareSelectorThemeData] merged from local and
+  /// Returns the [StreamDesktopScreenShareSelectorThemeData] merged from local and
   /// global themes.
   ///
-  /// Local values from the nearest [StreamScreenShareSelectorTheme] ancestor
+  /// Local values from the nearest [StreamDesktopScreenShareSelectorTheme] ancestor
   /// take precedence over the global values from
-  /// [StreamVideoTheme.screenShareSelectorTheme]. This allows partial
-  /// overrides: setting only [StreamScreenShareSelectorStyle.crossAxisCount]
+  /// [StreamVideoTheme.desktopScreenShareSelectorTheme]. This allows partial
+  /// overrides: setting only [StreamDesktopScreenShareSelectorStyle.crossAxisCount]
   /// leaves the remaining properties coming from the global theme.
-  static StreamScreenShareSelectorThemeData of(BuildContext context) {
+  static StreamDesktopScreenShareSelectorThemeData of(BuildContext context) {
     final localTheme = context
-        .dependOnInheritedWidgetOfExactType<StreamScreenShareSelectorTheme>();
+        .dependOnInheritedWidgetOfExactType<
+          StreamDesktopScreenShareSelectorTheme
+        >();
     return StreamVideoTheme.of(
       context,
-    ).screenShareSelectorTheme.merge(localTheme?.data);
+    ).desktopScreenShareSelectorTheme.merge(localTheme?.data);
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    return StreamScreenShareSelectorTheme(data: data, child: child);
+    return StreamDesktopScreenShareSelectorTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(StreamScreenShareSelectorTheme oldWidget) =>
+  bool updateShouldNotify(StreamDesktopScreenShareSelectorTheme oldWidget) =>
       data != oldWidget.data;
 }
 
-/// Theme data for customizing [StreamScreenShareSelector] widgets.
+/// Theme data for customizing [StreamDesktopScreenShareSelector] widgets.
 ///
-/// Wraps a [StreamScreenShareSelectorStyle] so it can be served by
-/// [StreamScreenShareSelectorTheme] and slotted into [StreamVideoTheme]
+/// Wraps a [StreamDesktopScreenShareSelectorStyle] so it can be served by
+/// [StreamDesktopScreenShareSelectorTheme] and slotted into [StreamVideoTheme]
 /// alongside the other component theme data classes.
 ///
 /// See also:
 ///
-///  * [StreamScreenShareSelectorStyle], the style embedded here.
-///  * [StreamScreenShareSelectorTheme], for overriding it in a subtree.
+///  * [StreamDesktopScreenShareSelectorStyle], the style embedded here.
+///  * [StreamDesktopScreenShareSelectorTheme], for overriding it in a subtree.
 @themeGen
 @immutable
-class StreamScreenShareSelectorThemeData
-    with _$StreamScreenShareSelectorThemeData {
+class StreamDesktopScreenShareSelectorThemeData
+    with _$StreamDesktopScreenShareSelectorThemeData {
   /// Creates screen share selector theme data.
-  const StreamScreenShareSelectorThemeData({this.style});
+  const StreamDesktopScreenShareSelectorThemeData({this.style});
 
   /// Visual styling for the selector.
-  final StreamScreenShareSelectorStyle? style;
+  final StreamDesktopScreenShareSelectorStyle? style;
 
   /// Linearly interpolate between two theme data objects.
-  static StreamScreenShareSelectorThemeData? lerp(
-    StreamScreenShareSelectorThemeData? a,
-    StreamScreenShareSelectorThemeData? b,
+  static StreamDesktopScreenShareSelectorThemeData? lerp(
+    StreamDesktopScreenShareSelectorThemeData? a,
+    StreamDesktopScreenShareSelectorThemeData? b,
     double t,
-  ) => _$StreamScreenShareSelectorThemeData.lerp(a, b, t);
+  ) => _$StreamDesktopScreenShareSelectorThemeData.lerp(a, b, t);
 }
 
-/// Visual styling properties for a [StreamScreenShareSelector].
+/// Visual styling properties for a [StreamDesktopScreenShareSelector].
 ///
 /// The selector is a grid of thumbnails, one per screen or window the platform
 /// offers, with the picked one outlined in the accent color.
 @themeGen
 @immutable
-class StreamScreenShareSelectorStyle with _$StreamScreenShareSelectorStyle {
+class StreamDesktopScreenShareSelectorStyle
+    with _$StreamDesktopScreenShareSelectorStyle {
   /// Creates a selector style with optional property overrides.
-  const StreamScreenShareSelectorStyle({
+  const StreamDesktopScreenShareSelectorStyle({
     this.padding,
     this.crossAxisCount,
     this.spacing,
@@ -206,9 +209,9 @@ class StreamScreenShareSelectorStyle with _$StreamScreenShareSelectorStyle {
   final Color? selectedLabelColor;
 
   /// Linearly interpolate between two styles.
-  static StreamScreenShareSelectorStyle? lerp(
-    StreamScreenShareSelectorStyle? a,
-    StreamScreenShareSelectorStyle? b,
+  static StreamDesktopScreenShareSelectorStyle? lerp(
+    StreamDesktopScreenShareSelectorStyle? a,
+    StreamDesktopScreenShareSelectorStyle? b,
     double t,
-  ) => _$StreamScreenShareSelectorStyle.lerp(a, b, t);
+  ) => _$StreamDesktopScreenShareSelectorStyle.lerp(a, b, t);
 }

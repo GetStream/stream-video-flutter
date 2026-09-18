@@ -17,46 +17,47 @@ typedef DesktopScreenSelectorBuilder =
 /// Resolves to the picked source, or null when the dialog was cancelled or
 /// dismissed.
 ///
-/// Style it through [StreamScreenShareSelectorTheme]. For a picker of a
-/// different shape, build one out of [StreamScreenShareDialog],
-/// [StreamScreenShareSelector] or [StreamScreenShareThumbnail] and pass it to
+/// Style it through [StreamDesktopScreenShareSelectorTheme]. For a picker of a
+/// different shape, build one out of [StreamDesktopScreenShareDialog],
+/// [StreamDesktopScreenShareSelector] or [StreamDesktopScreenShareThumbnail] and pass it to
 /// [StreamScreenShareButton.desktopScreenSelectorBuilder].
 Future<DesktopCapturerSource?> showDefaultScreenSelectionDialog(
   BuildContext context,
 ) {
   return showStreamModalDialog<DesktopCapturerSource>(
     context: context,
-    builder: (context) => const StreamScreenShareDialog(),
+    builder: (context) => const StreamDesktopScreenShareDialog(),
   );
 }
 
-/// The default screen share picker, as a widget: a [StreamModalDialog] around
-/// a [StreamScreenShareSelector], with a refresh action in the header and
-/// Cancel and Share in the footer.
+/// The default desktop screen share picker, as a widget: a [StreamModalDialog]
+/// around a [StreamDesktopScreenShareSelector], with a refresh action in the
+/// header and Cancel and Share in the footer.
 ///
 /// Pops the [Navigator] with the picked source, or with nothing when
 /// cancelled. [showDefaultScreenSelectionDialog] shows it over a scrim; use
 /// this directly to present it some other way.
-class StreamScreenShareDialog extends StatefulWidget {
+class StreamDesktopScreenShareDialog extends StatefulWidget {
   /// Creates a screen share dialog.
-  const StreamScreenShareDialog({super.key, this.controller});
+  const StreamDesktopScreenShareDialog({super.key, this.controller});
 
   /// Holds the sources on offer and the one that is picked.
   ///
   /// Null builds one — and disposes it — for the life of the dialog, which is
   /// what [showDefaultScreenSelectionDialog] does. A controller passed here
   /// belongs to the caller, who disposes it.
-  final ScreenShareSourceController? controller;
+  final DesktopScreenShareSourceController? controller;
 
   @override
-  State<StreamScreenShareDialog> createState() =>
+  State<StreamDesktopScreenShareDialog> createState() =>
       _StreamScreenShareDialogState();
 }
 
-class _StreamScreenShareDialogState extends State<StreamScreenShareDialog> {
-  ScreenShareSourceController? _ownedController;
+class _StreamScreenShareDialogState
+    extends State<StreamDesktopScreenShareDialog> {
+  DesktopScreenShareSourceController? _ownedController;
 
-  ScreenShareSourceController get _controller =>
+  DesktopScreenShareSourceController get _controller =>
       widget.controller ?? _ownedController!;
 
   @override
@@ -65,17 +66,17 @@ class _StreamScreenShareDialogState extends State<StreamScreenShareDialog> {
     // A controller starts reading the platform as soon as it exists, so it is
     // built here rather than during build.
     if (widget.controller == null) {
-      _ownedController = ScreenShareSourceController();
+      _ownedController = DesktopScreenShareSourceController();
     }
   }
 
   @override
-  void didUpdateWidget(StreamScreenShareDialog oldWidget) {
+  void didUpdateWidget(StreamDesktopScreenShareDialog oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller == oldWidget.controller) return;
 
     if (widget.controller == null) {
-      _ownedController ??= ScreenShareSourceController();
+      _ownedController ??= DesktopScreenShareSourceController();
     } else {
       // A controller arriving where the dialog had been making its own leaves
       // the owned one with nothing to drive.
@@ -126,14 +127,18 @@ class _StreamScreenShareDialogState extends State<StreamScreenShareDialog> {
             child: Text(translations.desktopScreenShareChooseDialogShare),
           ),
         ],
-        child: StreamScreenShareSelector(controller: controller),
+        child: StreamDesktopScreenShareSelector(controller: controller),
       ),
     );
   }
 }
 
-/// The body of the screen share picker: a tab per source type over a grid of
-/// [StreamScreenShareThumbnail]s.
+/// The body of the desktop screen share picker: a tab per source type over a
+/// grid of [StreamDesktopScreenShareThumbnail]s.
+///
+/// Desktop only. Android shares through the system's own picker and iOS
+/// through a broadcast extension, neither of which offers a source to choose
+/// here.
 ///
 /// Reports a pick to the [controller], which the caller reads to find out what
 /// to share. The caller owns the controller and disposes it.
@@ -141,29 +146,29 @@ class _StreamScreenShareDialogState extends State<StreamScreenShareDialog> {
 /// {@tool snippet}
 ///
 /// ```dart
-/// StreamScreenShareSelector(controller: _controller)
+/// StreamDesktopScreenShareSelector(controller: _controller)
 /// ```
 /// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [showDefaultScreenSelectionDialog], which shows this in a dialog.
-///  * [StreamScreenShareSelectorTheme], for restyling it over a subtree.
-class StreamScreenShareSelector extends StatelessWidget {
+///  * [StreamDesktopScreenShareSelectorTheme], for restyling it over a subtree.
+class StreamDesktopScreenShareSelector extends StatelessWidget {
   /// Creates a screen share selector.
-  const StreamScreenShareSelector({
+  const StreamDesktopScreenShareSelector({
     super.key,
     required this.controller,
     this.style,
   });
 
   /// Holds the sources on offer and the one that is picked.
-  final ScreenShareSourceController controller;
+  final DesktopScreenShareSourceController controller;
 
   /// Overrides for the selector's styling.
   ///
-  /// Merged over the ambient [StreamScreenShareSelectorTheme].
-  final StreamScreenShareSelectorStyle? style;
+  /// Merged over the ambient [StreamDesktopScreenShareSelectorTheme].
+  final StreamDesktopScreenShareSelectorStyle? style;
 
   @override
   Widget build(BuildContext context) {
@@ -208,14 +213,14 @@ class _SourceGrid extends StatelessWidget {
     required this.onRetry,
   });
 
-  final ScreenShareSourceState state;
-  final StreamScreenShareSelectorStyle? style;
+  final DesktopScreenShareSourceState state;
+  final StreamDesktopScreenShareSelectorStyle? style;
   final OnThumbnailTapped onSelectSource;
   final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    final style = resolveScreenShareSelectorStyle(context, this.style);
+    final style = resolveDesktopScreenShareSelectorStyle(context, this.style);
     final sources = state.visibleSources;
 
     if (sources.isEmpty) {
@@ -256,7 +261,7 @@ class _SourceGrid extends StatelessWidget {
       ),
       itemBuilder: (context, index) {
         final source = sources[index];
-        return StreamScreenShareThumbnail(
+        return StreamDesktopScreenShareThumbnail(
           key: ValueKey(source.id),
           source: source,
           thumbnail: state.thumbnailFor(source),

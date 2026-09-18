@@ -3,37 +3,38 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 
-/// Resolves the style a [StreamScreenShareSelector] draws itself with.
+/// Resolves the style a [StreamDesktopScreenShareSelector] draws itself with.
 ///
-/// Merges the ambient [StreamScreenShareSelectorTheme] with [style] and fills
+/// Merges the ambient [StreamDesktopScreenShareSelectorTheme] with [style] and fills
 /// in whatever neither supplied, so callers can read every property without a
 /// fallback of their own.
 @internal
-StreamScreenShareSelectorStyleDefaults resolveScreenShareSelectorStyle(
+StreamDesktopScreenShareSelectorStyleDefaults
+resolveDesktopScreenShareSelectorStyle(
   BuildContext context,
-  StreamScreenShareSelectorStyle? style,
+  StreamDesktopScreenShareSelectorStyle? style,
 ) {
-  final themeStyle = StreamScreenShareSelectorTheme.of(context).style;
-  return StreamScreenShareSelectorStyleDefaults(
+  final themeStyle = StreamDesktopScreenShareSelectorTheme.of(context).style;
+  return StreamDesktopScreenShareSelectorStyleDefaults(
     context,
     themeStyle?.merge(style) ?? style,
   );
 }
 
-/// Default style values for [StreamScreenShareSelector].
+/// Default style values for [StreamDesktopScreenShareSelector].
 ///
 /// Shared with the thumbnails the grid is built from, so a default lives in
 /// one place rather than once per widget that draws it. Deliberately not
-/// exported; reach it through [resolveScreenShareSelectorStyle].
+/// exported; reach it through [resolveDesktopScreenShareSelectorStyle].
 @internal
-class StreamScreenShareSelectorStyleDefaults
-    extends StreamScreenShareSelectorStyle {
+class StreamDesktopScreenShareSelectorStyleDefaults
+    extends StreamDesktopScreenShareSelectorStyle {
   /// Resolves the selector's defaults from the theme on the given context,
   /// letting [_style] win wherever it has a value.
-  StreamScreenShareSelectorStyleDefaults(this._context, [this._style]);
+  StreamDesktopScreenShareSelectorStyleDefaults(this._context, [this._style]);
 
   final BuildContext _context;
-  final StreamScreenShareSelectorStyle? _style;
+  final StreamDesktopScreenShareSelectorStyle? _style;
 
   late final _colorScheme = _context.streamColorScheme;
   late final _textTheme = _context.streamTextTheme;

@@ -3,18 +3,18 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, unused_element
 
-part of 'screen_share_selector_theme.dart';
+part of 'desktop_screen_share_selector_theme.dart';
 
 // **************************************************************************
 // ThemeGenGenerator
 // **************************************************************************
 
-mixin _$StreamScreenShareSelectorThemeData {
+mixin _$StreamDesktopScreenShareSelectorThemeData {
   bool get canMerge => true;
 
-  static StreamScreenShareSelectorThemeData? lerp(
-    StreamScreenShareSelectorThemeData? a,
-    StreamScreenShareSelectorThemeData? b,
+  static StreamDesktopScreenShareSelectorThemeData? lerp(
+    StreamDesktopScreenShareSelectorThemeData? a,
+    StreamDesktopScreenShareSelectorThemeData? b,
     double t,
   ) {
     if (identical(a, b)) {
@@ -29,23 +29,25 @@ mixin _$StreamScreenShareSelectorThemeData {
       return t == 0.0 ? a : null;
     }
 
-    return StreamScreenShareSelectorThemeData(
-      style: StreamScreenShareSelectorStyle.lerp(a.style, b.style, t),
+    return StreamDesktopScreenShareSelectorThemeData(
+      style: StreamDesktopScreenShareSelectorStyle.lerp(a.style, b.style, t),
     );
   }
 
-  StreamScreenShareSelectorThemeData copyWith({
-    StreamScreenShareSelectorStyle? style,
+  StreamDesktopScreenShareSelectorThemeData copyWith({
+    StreamDesktopScreenShareSelectorStyle? style,
   }) {
-    final _this = (this as StreamScreenShareSelectorThemeData);
+    final _this = (this as StreamDesktopScreenShareSelectorThemeData);
 
-    return StreamScreenShareSelectorThemeData(style: style ?? _this.style);
+    return StreamDesktopScreenShareSelectorThemeData(
+      style: style ?? _this.style,
+    );
   }
 
-  StreamScreenShareSelectorThemeData merge(
-    StreamScreenShareSelectorThemeData? other,
+  StreamDesktopScreenShareSelectorThemeData merge(
+    StreamDesktopScreenShareSelectorThemeData? other,
   ) {
-    final _this = (this as StreamScreenShareSelectorThemeData);
+    final _this = (this as StreamDesktopScreenShareSelectorThemeData);
 
     if (other == null || identical(_this, other)) {
       return _this;
@@ -68,26 +70,26 @@ mixin _$StreamScreenShareSelectorThemeData {
       return false;
     }
 
-    final _this = (this as StreamScreenShareSelectorThemeData);
-    final _other = (other as StreamScreenShareSelectorThemeData);
+    final _this = (this as StreamDesktopScreenShareSelectorThemeData);
+    final _other = (other as StreamDesktopScreenShareSelectorThemeData);
 
     return _other.style == _this.style;
   }
 
   @override
   int get hashCode {
-    final _this = (this as StreamScreenShareSelectorThemeData);
+    final _this = (this as StreamDesktopScreenShareSelectorThemeData);
 
     return Object.hash(runtimeType, _this.style);
   }
 }
 
-mixin _$StreamScreenShareSelectorStyle {
+mixin _$StreamDesktopScreenShareSelectorStyle {
   bool get canMerge => true;
 
-  static StreamScreenShareSelectorStyle? lerp(
-    StreamScreenShareSelectorStyle? a,
-    StreamScreenShareSelectorStyle? b,
+  static StreamDesktopScreenShareSelectorStyle? lerp(
+    StreamDesktopScreenShareSelectorStyle? a,
+    StreamDesktopScreenShareSelectorStyle? b,
     double t,
   ) {
     if (identical(a, b)) {
@@ -102,7 +104,7 @@ mixin _$StreamScreenShareSelectorStyle {
       return t == 0.0 ? a : null;
     }
 
-    return StreamScreenShareSelectorStyle(
+    return StreamDesktopScreenShareSelectorStyle(
       padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
       crossAxisCount: t < 0.5 ? a.crossAxisCount : b.crossAxisCount,
       spacing: lerpDouble$(a.spacing, b.spacing, t),
@@ -142,7 +144,7 @@ mixin _$StreamScreenShareSelectorStyle {
     );
   }
 
-  StreamScreenShareSelectorStyle copyWith({
+  StreamDesktopScreenShareSelectorStyle copyWith({
     EdgeInsetsGeometry? padding,
     int? crossAxisCount,
     double? spacing,
@@ -160,9 +162,9 @@ mixin _$StreamScreenShareSelectorStyle {
     Color? labelColor,
     Color? selectedLabelColor,
   }) {
-    final _this = (this as StreamScreenShareSelectorStyle);
+    final _this = (this as StreamDesktopScreenShareSelectorStyle);
 
-    return StreamScreenShareSelectorStyle(
+    return StreamDesktopScreenShareSelectorStyle(
       padding: padding ?? _this.padding,
       crossAxisCount: crossAxisCount ?? _this.crossAxisCount,
       spacing: spacing ?? _this.spacing,
@@ -182,8 +184,10 @@ mixin _$StreamScreenShareSelectorStyle {
     );
   }
 
-  StreamScreenShareSelectorStyle merge(StreamScreenShareSelectorStyle? other) {
-    final _this = (this as StreamScreenShareSelectorStyle);
+  StreamDesktopScreenShareSelectorStyle merge(
+    StreamDesktopScreenShareSelectorStyle? other,
+  ) {
+    final _this = (this as StreamDesktopScreenShareSelectorStyle);
 
     if (other == null || identical(_this, other)) {
       return _this;
@@ -225,8 +229,8 @@ mixin _$StreamScreenShareSelectorStyle {
       return false;
     }
 
-    final _this = (this as StreamScreenShareSelectorStyle);
-    final _other = (other as StreamScreenShareSelectorStyle);
+    final _this = (this as StreamDesktopScreenShareSelectorStyle);
+    final _other = (other as StreamDesktopScreenShareSelectorStyle);
 
     return _other.padding == _this.padding &&
         _other.crossAxisCount == _this.crossAxisCount &&
@@ -248,7 +252,7 @@ mixin _$StreamScreenShareSelectorStyle {
 
   @override
   int get hashCode {
-    final _this = (this as StreamScreenShareSelectorStyle);
+    final _this = (this as StreamDesktopScreenShareSelectorStyle);
 
     return Object.hash(
       runtimeType,

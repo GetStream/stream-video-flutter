@@ -10,10 +10,10 @@
 - Added `StreamParticipantLabelStyle.showVideoOffIcon`, to leave the camera-off icon out of the name pill.
 - Added `StreamModalDialog` and `showStreamModalDialog`, a centered modal surface with a title, header actions and a footer, over a blurred `StreamBlurScrim`.
 - Added `StreamTabBar`, a row of equal-width tabs whose selected index the caller owns. It, `StreamModalDialog` and `StreamBlurScrim` are design-system candidates, living in `src/widgets/design_system_candidates` until they graduate to core.
-- Added `StreamScreenShareDialog`, the desktop screen share picker as a widget, so it can be presented some way other than through `showDefaultScreenSelectionDialog`.
-- Added `StreamScreenShareSelector`, the redesigned grid of screens and windows behind the desktop screen share picker, and `StreamScreenShareThumbnail`, one tile of it.
-- Added `ScreenShareSourceController`, which holds the screens and windows on offer and the one that is picked.
-- Added `StreamScreenShareSelectorThemeData` on `StreamVideoTheme`, and `StreamScreenShareSelectorTheme` to restyle the selector over a subtree.
+- Added `StreamDesktopScreenShareDialog`, the desktop screen share picker as a widget, so it can be presented some way other than through `showDefaultScreenSelectionDialog`.
+- Added `StreamDesktopScreenShareSelector`, the redesigned grid of screens and windows behind the desktop screen share picker, and `StreamDesktopScreenShareThumbnail`, one tile of it.
+- Added `DesktopScreenShareSourceController`, which holds the screens and windows on offer and the one that is picked.
+- Added `StreamDesktopScreenShareSelectorThemeData` on `StreamVideoTheme`, and `StreamDesktopScreenShareSelectorTheme` to restyle the selector over a subtree.
 - Added `desktopScreenShareRefresh`, `desktopScreenShareNoSources`, `desktopScreenShareLoadFailed` and `desktopScreenShareRetry` to the localizations, in English and Dutch.
 - `StreamLayoutButton` draws the participant layout in effect and offers the rest through a `StreamAdaptiveMenuAnchor`.
 - `StreamLayoutButton.defaultLayouts` is `auto` and `speakerBottom`, so the button toggles unless it is given more.
@@ -224,8 +224,8 @@
 
 ### ⚠️ Breaking
 
-- The desktop screen share picker is rebuilt on the design system. `TabbedScreenSelectWidget`, `ThumbnailGrid`, `ScreenSelectorStateNotifier` and `ScreenSelectorState` are gone; `StreamScreenShareSelector` and `ScreenShareSourceController` replace them. `showDefaultScreenSelectionDialog` keeps its signature.
-- `ScreenShareThumbnailWidget` is `StreamScreenShareThumbnail` now, and takes the thumbnail from the source it is given rather than subscribing for one.
+- The desktop screen share picker is rebuilt on the design system. `TabbedScreenSelectWidget`, `ThumbnailGrid`, `ScreenSelectorStateNotifier` and `ScreenSelectorState` are gone; `StreamDesktopScreenShareSelector` and `DesktopScreenShareSourceController` replace them. `showDefaultScreenSelectionDialog` keeps its signature.
+- `ScreenShareThumbnailWidget` is `StreamDesktopScreenShareThumbnail` now, and takes the thumbnail from the source it is given rather than subscribing for one.
 - `ParticipantLayoutMode.auto` is the default layout of `StreamCallContent`, `StreamCallParticipants` and `RegularCallParticipantsContent`, and renders what `grid` used to. The livestream widgets still default to `grid`.
 - `ParticipantLayoutMode.grid` gives the local participant a tile of its own instead of floating them over the grid.
 - `ParticipantLayoutMode.auto` floats the self-view on mobile only while at most two other people are in the call, and gives the local participant a tile beyond that.

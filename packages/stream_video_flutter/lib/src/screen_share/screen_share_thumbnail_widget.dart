@@ -7,17 +7,18 @@ import 'screen_share_selector_defaults.dart';
 /// Called with the source a thumbnail stands for.
 typedef OnThumbnailTapped = void Function(DesktopCapturerSource);
 
-/// One screen or window in a [StreamScreenShareSelector]: a still of the
+/// One screen or window in a [StreamDesktopScreenShareSelector]: a still of the
 /// source over its name, outlined in the accent color while it is picked.
 ///
 /// Mirrors the `Web / Screen Share Thumbnail` component from the design.
 ///
 /// The still is the bitmap the platform captured when the source was loaded,
-/// which is what [ScreenShareSourceController] holds. It is not a live preview
-/// and does not update on its own.
-class StreamScreenShareThumbnail extends StatelessWidget {
+/// which is what [DesktopScreenShareSourceController] holds. It is a still, not
+/// a live preview: it changes only when the platform reports a new bitmap,
+/// which it does around a load.
+class StreamDesktopScreenShareThumbnail extends StatelessWidget {
   /// Creates a screen share thumbnail.
-  const StreamScreenShareThumbnail({
+  const StreamDesktopScreenShareThumbnail({
     super.key,
     required this.source,
     required this.selected,
@@ -39,17 +40,17 @@ class StreamScreenShareThumbnail extends StatelessWidget {
   ///
   /// Defaults to the one on [source]. Pass it explicitly where the platform
   /// reports thumbnails separately from the source list, as
-  /// [ScreenShareSourceState.thumbnailFor] does.
+  /// [DesktopScreenShareSourceState.thumbnailFor] does.
   final Uint8List? thumbnail;
 
   /// Overrides for the thumbnail's styling.
   ///
-  /// Merged over the ambient [StreamScreenShareSelectorTheme].
-  final StreamScreenShareSelectorStyle? style;
+  /// Merged over the ambient [StreamDesktopScreenShareSelectorTheme].
+  final StreamDesktopScreenShareSelectorStyle? style;
 
   @override
   Widget build(BuildContext context) {
-    final style = resolveScreenShareSelectorStyle(context, this.style);
+    final style = resolveDesktopScreenShareSelectorStyle(context, this.style);
     final thumbnail = this.thumbnail ?? source.thumbnail;
 
     return Semantics(

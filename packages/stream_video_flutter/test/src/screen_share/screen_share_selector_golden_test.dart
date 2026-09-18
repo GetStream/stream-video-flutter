@@ -39,7 +39,7 @@ void main() {
   ];
 
   Widget selector(SourceType sourceType) => _DisposingSelector(
-    controller: ScreenShareSourceController(
+    controller: DesktopScreenShareSourceController(
       capturer: FakeDesktopCapturer(sources: sources),
       sourceType: sourceType,
     ),
@@ -55,7 +55,7 @@ void main() {
       constraints: const BoxConstraints.tightFor(width: 800, height: 720),
       pumpBeforeTest: (tester) => _settle(tester, tap: 'Screen 1'),
       builder: () => _DisposingSelector(
-        controller: ScreenShareSourceController(
+        controller: DesktopScreenShareSourceController(
           capturer: FakeDesktopCapturer(sources: sources),
         ),
         asModal: true,
@@ -63,7 +63,7 @@ void main() {
     );
 
     streamGoldenTest(
-      'StreamScreenShareSelector outlines the picked screen',
+      'StreamDesktopScreenShareSelector outlines the picked screen',
       fileName: 'screen_share_selector_screens',
       brightness: brightness,
       // The selection is made by tapping, which is also what proves the
@@ -73,7 +73,7 @@ void main() {
     );
 
     streamGoldenTest(
-      'StreamScreenShareSelector ellipsises a long window name',
+      'StreamDesktopScreenShareSelector ellipsises a long window name',
       fileName: 'screen_share_selector_windows',
       brightness: brightness,
       pumpBeforeTest: _settle,
@@ -99,7 +99,7 @@ Future<void> _settle(WidgetTester tester, {String? tap}) async {
 class _DisposingSelector extends StatefulWidget {
   const _DisposingSelector({required this.controller, this.asModal = false});
 
-  final ScreenShareSourceController controller;
+  final DesktopScreenShareSourceController controller;
   final bool asModal;
 
   @override
@@ -115,7 +115,9 @@ class _DisposingSelectorState extends State<_DisposingSelector> {
 
   @override
   Widget build(BuildContext context) {
-    final selector = StreamScreenShareSelector(controller: widget.controller);
+    final selector = StreamDesktopScreenShareSelector(
+      controller: widget.controller,
+    );
 
     if (!widget.asModal) {
       return SizedBox(width: 720, height: 464, child: selector);
@@ -135,5 +137,5 @@ class _DisposingSelectorState extends State<_DisposingSelector> {
   }
 
   Widget _modal(BuildContext context) =>
-      StreamScreenShareDialog(controller: widget.controller);
+      StreamDesktopScreenShareDialog(controller: widget.controller);
 }

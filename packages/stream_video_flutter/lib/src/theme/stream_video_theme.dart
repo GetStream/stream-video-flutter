@@ -43,7 +43,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamPictureInPictureThemeData? pictureInPictureTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
-    StreamScreenShareSelectorThemeData? screenShareSelectorTheme,
+    StreamDesktopScreenShareSelectorThemeData? desktopScreenShareSelectorTheme,
     StreamLivestreamThemeData? livestreamTheme,
   }) {
     final isDark = brightness == Brightness.dark;
@@ -90,7 +90,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callParticipantsGridTheme:
           callParticipantsGridTheme ??
           legacy?.toCallParticipantsGridThemeData(),
-      screenShareSelectorTheme: screenShareSelectorTheme,
+      desktopScreenShareSelectorTheme: desktopScreenShareSelectorTheme,
       livestreamTheme: livestreamTheme,
     );
 
@@ -136,7 +136,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         const StreamConnectionQualityIndicatorThemeData(),
     this.callParticipantsGridTheme =
         const StreamCallParticipantsGridThemeData(),
-    this.screenShareSelectorTheme = const StreamScreenShareSelectorThemeData(),
+    this.desktopScreenShareSelectorTheme =
+        const StreamDesktopScreenShareSelectorThemeData(),
     required this.livestreamTheme,
   });
 
@@ -424,7 +425,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   final StreamCallParticipantsGridThemeData callParticipantsGridTheme;
 
   /// Theme for the desktop screen share selector.
-  final StreamScreenShareSelectorThemeData screenShareSelectorTheme;
+  final StreamDesktopScreenShareSelectorThemeData
+  desktopScreenShareSelectorTheme;
 
   /// Theme for the outgoing call widget.
   final StreamLivestreamThemeData livestreamTheme;
@@ -467,7 +469,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamPictureInPictureThemeData? pictureInPictureTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
-    StreamScreenShareSelectorThemeData? screenShareSelectorTheme,
+    StreamDesktopScreenShareSelectorThemeData? desktopScreenShareSelectorTheme,
     StreamLivestreamThemeData? livestreamTheme,
   }) => StreamVideoTheme.raw(
     textTheme: this.textTheme.merge(textTheme),
@@ -499,8 +501,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     callParticipantsGridTheme: this.callParticipantsGridTheme.merge(
       callParticipantsGridTheme,
     ),
-    screenShareSelectorTheme: this.screenShareSelectorTheme.merge(
-      screenShareSelectorTheme,
+    desktopScreenShareSelectorTheme: this.desktopScreenShareSelectorTheme.merge(
+      desktopScreenShareSelectorTheme,
     ),
     livestreamTheme: this.livestreamTheme.merge(livestreamTheme),
   );
@@ -540,8 +542,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callParticipantsGridTheme: callParticipantsGridTheme.merge(
         other.callParticipantsGridTheme,
       ),
-      screenShareSelectorTheme: screenShareSelectorTheme.merge(
-        other.screenShareSelectorTheme,
+      desktopScreenShareSelectorTheme: desktopScreenShareSelectorTheme.merge(
+        other.desktopScreenShareSelectorTheme,
       ),
       livestreamTheme: livestreamTheme.merge(other.livestreamTheme),
     );
@@ -624,13 +626,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           callParticipantsGridTheme,
-      screenShareSelectorTheme:
-          StreamScreenShareSelectorThemeData.lerp(
-            screenShareSelectorTheme,
-            other.screenShareSelectorTheme,
+      desktopScreenShareSelectorTheme:
+          StreamDesktopScreenShareSelectorThemeData.lerp(
+            desktopScreenShareSelectorTheme,
+            other.desktopScreenShareSelectorTheme,
             t,
           ) ??
-          screenShareSelectorTheme,
+          desktopScreenShareSelectorTheme,
       livestreamTheme: livestreamTheme.lerp(other.livestreamTheme, t),
     );
   }

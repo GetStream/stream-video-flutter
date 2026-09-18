@@ -8,7 +8,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 /// counts what was asked of it.
 ///
 /// The real one is a global reached through `desktopCapturer`, which is why
-/// [ScreenShareSourceController] takes one.
+/// [DesktopScreenShareSourceController] takes one.
 ///
 /// Models how the platform actually delivers bitmaps: macOS leaves them out
 /// of the `getSources` result and posts them as events instead. A source built

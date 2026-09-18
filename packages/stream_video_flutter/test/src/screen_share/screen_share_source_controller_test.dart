@@ -27,10 +27,10 @@ void main() {
     addTearDown(capturer.close);
   });
 
-  ScreenShareSourceController controller({
+  DesktopScreenShareSourceController controller({
     SourceType sourceType = SourceType.Screen,
   }) {
-    final controller = ScreenShareSourceController(
+    final controller = DesktopScreenShareSourceController(
       capturer: capturer,
       sourceType: sourceType,
     );
@@ -38,7 +38,7 @@ void main() {
     return controller;
   }
 
-  group('ScreenShareSourceController', () {
+  group('DesktopScreenShareSourceController', () {
     test('loads both source types in a single call', () async {
       final subject = controller();
       await pumpEventQueue();
@@ -58,11 +58,11 @@ void main() {
       expect(size, isNotNull);
       expect(
         size!.width,
-        ScreenShareSourceController.defaultThumbnailSize.width,
+        DesktopScreenShareSourceController.defaultThumbnailSize.width,
       );
       expect(
         size.height,
-        ScreenShareSourceController.defaultThumbnailSize.height,
+        DesktopScreenShareSourceController.defaultThumbnailSize.height,
       );
     });
 
@@ -194,7 +194,7 @@ void main() {
     test('reports a failed load without throwing', () async {
       final failing = _FailingDesktopCapturer();
       addTearDown(failing.close);
-      final subject = ScreenShareSourceController(capturer: failing);
+      final subject = DesktopScreenShareSourceController(capturer: failing);
       addTearDown(subject.dispose);
       await pumpEventQueue();
 

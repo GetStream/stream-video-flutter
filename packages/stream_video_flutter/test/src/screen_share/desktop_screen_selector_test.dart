@@ -32,8 +32,10 @@ void main() {
     addTearDown(capturer.close);
   });
 
-  Future<ScreenShareSourceController> pumpSelector(WidgetTester tester) async {
-    final controller = ScreenShareSourceController(capturer: capturer);
+  Future<DesktopScreenShareSourceController> pumpSelector(
+    WidgetTester tester,
+  ) async {
+    final controller = DesktopScreenShareSourceController(capturer: capturer);
     addTearDown(controller.dispose);
 
     await tester.pumpWidget(
@@ -41,7 +43,7 @@ void main() {
         child: SizedBox(
           width: 720,
           height: 500,
-          child: StreamScreenShareSelector(controller: controller),
+          child: StreamDesktopScreenShareSelector(controller: controller),
         ),
       ),
     );
@@ -49,7 +51,7 @@ void main() {
     return controller;
   }
 
-  group('StreamScreenShareSelector', () {
+  group('StreamDesktopScreenShareSelector', () {
     testWidgets('shows the screens of the selected tab', (tester) async {
       await pumpSelector(tester);
 
@@ -127,14 +129,16 @@ void main() {
     });
   });
 
-  group('StreamScreenShareDialog', () {
-    Future<ScreenShareSourceController> pumpDialog(WidgetTester tester) async {
-      final controller = ScreenShareSourceController(capturer: capturer);
+  group('StreamDesktopScreenShareDialog', () {
+    Future<DesktopScreenShareSourceController> pumpDialog(
+      WidgetTester tester,
+    ) async {
+      final controller = DesktopScreenShareSourceController(capturer: capturer);
       addTearDown(controller.dispose);
 
       await tester.pumpWidget(
         TestWrapper(
-          child: StreamScreenShareDialog(controller: controller),
+          child: StreamDesktopScreenShareDialog(controller: controller),
         ),
       );
       await tester.pumpAndSettle();
@@ -217,7 +221,7 @@ void main() {
       // Handed a controller so the fake capturer drives the real dialog; left
       // to itself it would build one off the global capturer, which a test
       // cannot reach.
-      final controller = ScreenShareSourceController(capturer: capturer);
+      final controller = DesktopScreenShareSourceController(capturer: capturer);
       addTearDown(controller.dispose);
 
       DesktopCapturerSource? result;
@@ -231,7 +235,7 @@ void main() {
                 result = await showStreamModalDialog<DesktopCapturerSource>(
                   context: context,
                   builder: (context) =>
-                      StreamScreenShareDialog(controller: controller),
+                      StreamDesktopScreenShareDialog(controller: controller),
                 );
                 popped = true;
               },

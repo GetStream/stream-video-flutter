@@ -17,19 +17,19 @@ import 'screen_share_logger.dart';
 /// bitmap of each, which is expensive enough to be visible, so the list is a
 /// snapshot: it is read on construction and again on [refresh], and never on a
 /// timer. A source opened afterwards appears once the user asks for it.
-class ScreenShareSourceController
-    extends ValueNotifier<ScreenShareSourceState> {
+class DesktopScreenShareSourceController
+    extends ValueNotifier<DesktopScreenShareSourceState> {
   /// Creates a controller and starts loading.
   ///
   /// [sourceType] is the type shown first. Both types are loaded either way,
   /// so switching between them costs nothing.
-  ScreenShareSourceController({
+  DesktopScreenShareSourceController({
     DesktopCapturer? capturer,
     SourceType sourceType = SourceType.Screen,
     Size thumbnailSize = defaultThumbnailSize,
   }) : _capturer = capturer ?? desktopCapturer,
        _thumbnailSize = thumbnailSize,
-       super(ScreenShareSourceState(sourceType: sourceType)) {
+       super(DesktopScreenShareSourceState(sourceType: sourceType)) {
     // Subscribed before the first load, because the enumeration raises its
     // events while it runs. These getters have no implementation to fall back
     // on in the platform interface, so a capturer that reports its bitmaps
@@ -71,7 +71,7 @@ class ScreenShareSourceController
 
   /// Shows the sources of [sourceType], leaving the loaded list alone.
   ///
-  /// Both types are already in [ScreenShareSourceState.sources], so this is a
+  /// Both types are already in [DesktopScreenShareSourceState.sources], so this is a
   /// filter rather than a reload.
   void setSourceType(SourceType sourceType) {
     if (sourceType == value.sourceType) return;
@@ -143,11 +143,11 @@ class ScreenShareSourceController
   }
 }
 
-/// The state a [ScreenShareSourceController] holds.
+/// The state a [DesktopScreenShareSourceController] holds.
 @immutable
-class ScreenShareSourceState {
+class DesktopScreenShareSourceState {
   /// Creates a screen share source state.
-  const ScreenShareSourceState({
+  const DesktopScreenShareSourceState({
     required this.sourceType,
     this.sources = const [],
     this.thumbnails = const {},
@@ -202,10 +202,12 @@ class ScreenShareSourceState {
   /// sources that are no longer on offer dropped. The load is left running,
   /// since the capture pass that fills in the missing bitmaps still has to
   /// follow.
-  ScreenShareSourceState _withSources(List<DesktopCapturerSource> sources) {
+  DesktopScreenShareSourceState _withSources(
+    List<DesktopCapturerSource> sources,
+  ) {
     final ids = {for (final source in sources) source.id};
 
-    return ScreenShareSourceState(
+    return DesktopScreenShareSourceState(
       sources: sources,
       thumbnails: {
         for (final entry in thumbnails.entries)
@@ -223,7 +225,7 @@ class ScreenShareSourceState {
   ///
   /// [error] is cleared by passing null explicitly; the other nullable fields
   /// are left alone when omitted.
-  ScreenShareSourceState copyWith({
+  DesktopScreenShareSourceState copyWith({
     List<DesktopCapturerSource>? sources,
     Map<String, Uint8List>? thumbnails,
     SourceType? sourceType,
@@ -231,7 +233,7 @@ class ScreenShareSourceState {
     bool? isLoading,
     Object? error = _unchanged,
   }) {
-    return ScreenShareSourceState(
+    return DesktopScreenShareSourceState(
       sources: sources ?? this.sources,
       thumbnails: thumbnails ?? this.thumbnails,
       sourceType: sourceType ?? this.sourceType,
