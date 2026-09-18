@@ -678,7 +678,7 @@ class _CallScreenState extends State<CallScreen>
                         ),
                     ],
                   ),
-                  title: CallDurationBadge(call: call),
+                  title: StreamCallDurationBadge(call: call),
                 );
               },
               callControlsWidgetBuilder: _callControls,

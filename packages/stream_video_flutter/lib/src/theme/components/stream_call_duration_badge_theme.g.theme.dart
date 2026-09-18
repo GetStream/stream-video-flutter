@@ -3,18 +3,18 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, unused_element
 
-part of 'call_duration_badge_theme.dart';
+part of 'stream_call_duration_badge_theme.dart';
 
 // **************************************************************************
 // ThemeGenGenerator
 // **************************************************************************
 
-mixin _$CallDurationBadgeThemeData {
+mixin _$StreamCallDurationBadgeThemeData {
   bool get canMerge => true;
 
-  static CallDurationBadgeThemeData? lerp(
-    CallDurationBadgeThemeData? a,
-    CallDurationBadgeThemeData? b,
+  static StreamCallDurationBadgeThemeData? lerp(
+    StreamCallDurationBadgeThemeData? a,
+    StreamCallDurationBadgeThemeData? b,
     double t,
   ) {
     if (identical(a, b)) {
@@ -29,19 +29,23 @@ mixin _$CallDurationBadgeThemeData {
       return t == 0.0 ? a : null;
     }
 
-    return CallDurationBadgeThemeData(
-      style: CallDurationBadgeStyle.lerp(a.style, b.style, t),
+    return StreamCallDurationBadgeThemeData(
+      style: StreamCallDurationBadgeStyle.lerp(a.style, b.style, t),
     );
   }
 
-  CallDurationBadgeThemeData copyWith({CallDurationBadgeStyle? style}) {
-    final _this = (this as CallDurationBadgeThemeData);
+  StreamCallDurationBadgeThemeData copyWith({
+    StreamCallDurationBadgeStyle? style,
+  }) {
+    final _this = (this as StreamCallDurationBadgeThemeData);
 
-    return CallDurationBadgeThemeData(style: style ?? _this.style);
+    return StreamCallDurationBadgeThemeData(style: style ?? _this.style);
   }
 
-  CallDurationBadgeThemeData merge(CallDurationBadgeThemeData? other) {
-    final _this = (this as CallDurationBadgeThemeData);
+  StreamCallDurationBadgeThemeData merge(
+    StreamCallDurationBadgeThemeData? other,
+  ) {
+    final _this = (this as StreamCallDurationBadgeThemeData);
 
     if (other == null || identical(_this, other)) {
       return _this;
@@ -64,26 +68,26 @@ mixin _$CallDurationBadgeThemeData {
       return false;
     }
 
-    final _this = (this as CallDurationBadgeThemeData);
-    final _other = (other as CallDurationBadgeThemeData);
+    final _this = (this as StreamCallDurationBadgeThemeData);
+    final _other = (other as StreamCallDurationBadgeThemeData);
 
     return _other.style == _this.style;
   }
 
   @override
   int get hashCode {
-    final _this = (this as CallDurationBadgeThemeData);
+    final _this = (this as StreamCallDurationBadgeThemeData);
 
     return Object.hash(runtimeType, _this.style);
   }
 }
 
-mixin _$CallDurationBadgeStyle {
+mixin _$StreamCallDurationBadgeStyle {
   bool get canMerge => true;
 
-  static CallDurationBadgeStyle? lerp(
-    CallDurationBadgeStyle? a,
-    CallDurationBadgeStyle? b,
+  static StreamCallDurationBadgeStyle? lerp(
+    StreamCallDurationBadgeStyle? a,
+    StreamCallDurationBadgeStyle? b,
     double t,
   ) {
     if (identical(a, b)) {
@@ -98,7 +102,7 @@ mixin _$CallDurationBadgeStyle {
       return t == 0.0 ? a : null;
     }
 
-    return CallDurationBadgeStyle(
+    return StreamCallDurationBadgeStyle(
       padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
       contentHeight: lerpDouble$(a.contentHeight, b.contentHeight, t),
       spacing: lerpDouble$(a.spacing, b.spacing, t),
@@ -118,7 +122,7 @@ mixin _$CallDurationBadgeStyle {
     );
   }
 
-  CallDurationBadgeStyle copyWith({
+  StreamCallDurationBadgeStyle copyWith({
     EdgeInsetsGeometry? padding,
     double? contentHeight,
     double? spacing,
@@ -132,9 +136,9 @@ mixin _$CallDurationBadgeStyle {
     Color? recordingColor,
     Color? screenShareColor,
   }) {
-    final _this = (this as CallDurationBadgeStyle);
+    final _this = (this as StreamCallDurationBadgeStyle);
 
-    return CallDurationBadgeStyle(
+    return StreamCallDurationBadgeStyle(
       padding: padding ?? _this.padding,
       contentHeight: contentHeight ?? _this.contentHeight,
       spacing: spacing ?? _this.spacing,
@@ -150,8 +154,8 @@ mixin _$CallDurationBadgeStyle {
     );
   }
 
-  CallDurationBadgeStyle merge(CallDurationBadgeStyle? other) {
-    final _this = (this as CallDurationBadgeStyle);
+  StreamCallDurationBadgeStyle merge(StreamCallDurationBadgeStyle? other) {
+    final _this = (this as StreamCallDurationBadgeStyle);
 
     if (other == null || identical(_this, other)) {
       return _this;
@@ -187,8 +191,8 @@ mixin _$CallDurationBadgeStyle {
       return false;
     }
 
-    final _this = (this as CallDurationBadgeStyle);
-    final _other = (other as CallDurationBadgeStyle);
+    final _this = (this as StreamCallDurationBadgeStyle);
+    final _other = (other as StreamCallDurationBadgeStyle);
 
     return _other.padding == _this.padding &&
         _other.contentHeight == _this.contentHeight &&
@@ -206,7 +210,7 @@ mixin _$CallDurationBadgeStyle {
 
   @override
   int get hashCode {
-    final _this = (this as CallDurationBadgeStyle);
+    final _this = (this as StreamCallDurationBadgeStyle);
 
     return Object.hash(
       runtimeType,

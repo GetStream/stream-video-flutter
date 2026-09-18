@@ -56,8 +56,8 @@ void main() {
 
   for (final brightness in Brightness.values) {
     streamGoldenTest(
-      'CallDurationBadge across its states',
-      fileName: 'call_duration_badge',
+      'StreamCallDurationBadge across its states',
+      fileName: 'stream_call_duration_badge',
       brightness: brightness,
       builder: () => GoldenTestGroup(
         columns: 2,
@@ -67,7 +67,7 @@ void main() {
               name: name,
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: CallDurationBadge(call: it),
+                child: StreamCallDurationBadge(call: it),
               ),
             ),
         ],

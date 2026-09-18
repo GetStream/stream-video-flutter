@@ -3,19 +3,19 @@ import 'package:theme_extensions_builder_annotation/theme_extensions_builder_ann
 
 import '../../../stream_video_flutter.dart';
 
-part 'call_duration_badge_theme.g.theme.dart';
+part 'stream_call_duration_badge_theme.g.theme.dart';
 
-/// Applies a badge theme to descendant [CallDurationBadge] widgets.
+/// Applies a badge theme to descendant [StreamCallDurationBadge] widgets.
 ///
-/// Wrap a subtree with [CallDurationBadgeTheme] to override how the call's
+/// Wrap a subtree with [StreamCallDurationBadgeTheme] to override how the call's
 /// elapsed time is drawn.
 ///
 /// {@tool snippet}
 ///
 /// ```dart
-/// CallDurationBadgeTheme(
-///   data: CallDurationBadgeThemeData(
-///     style: CallDurationBadgeStyle(recordingColor: Colors.orange),
+/// StreamCallDurationBadgeTheme(
+///   data: StreamCallDurationBadgeThemeData(
+///     style: StreamCallDurationBadgeStyle(recordingColor: Colors.orange),
 ///   ),
 ///   child: child,
 /// )
@@ -24,30 +24,30 @@ part 'call_duration_badge_theme.g.theme.dart';
 ///
 /// See also:
 ///
-///  * [CallDurationBadgeThemeData], which describes the theme.
-///  * [CallDurationBadgeStyle], the visual style it carries.
-class CallDurationBadgeTheme extends InheritedTheme {
+///  * [StreamCallDurationBadgeThemeData], which describes the theme.
+///  * [StreamCallDurationBadgeStyle], the visual style it carries.
+class StreamCallDurationBadgeTheme extends InheritedTheme {
   /// Creates a badge theme.
-  const CallDurationBadgeTheme({
+  const StreamCallDurationBadgeTheme({
     super.key,
     required this.data,
     required super.child,
   });
 
   /// The badge theme data for descendant widgets.
-  final CallDurationBadgeThemeData data;
+  final StreamCallDurationBadgeThemeData data;
 
-  /// Returns the [CallDurationBadgeThemeData] merged from local and global
+  /// Returns the [StreamCallDurationBadgeThemeData] merged from local and global
   /// themes.
   ///
-  /// Local values from the nearest [CallDurationBadgeTheme] ancestor take
+  /// Local values from the nearest [StreamCallDurationBadgeTheme] ancestor take
   /// precedence over the global values from
   /// [StreamVideoTheme.callDurationBadgeTheme]. This allows partial overrides:
-  /// setting only [CallDurationBadgeStyle.backgroundColor] leaves the remaining
+  /// setting only [StreamCallDurationBadgeStyle.backgroundColor] leaves the remaining
   /// properties coming from the global theme.
-  static CallDurationBadgeThemeData of(BuildContext context) {
+  static StreamCallDurationBadgeThemeData of(BuildContext context) {
     final localTheme = context
-        .dependOnInheritedWidgetOfExactType<CallDurationBadgeTheme>();
+        .dependOnInheritedWidgetOfExactType<StreamCallDurationBadgeTheme>();
     return StreamVideoTheme.of(
       context,
     ).callDurationBadgeTheme.merge(localTheme?.data);
@@ -55,43 +55,43 @@ class CallDurationBadgeTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    return CallDurationBadgeTheme(data: data, child: child);
+    return StreamCallDurationBadgeTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(CallDurationBadgeTheme oldWidget) =>
+  bool updateShouldNotify(StreamCallDurationBadgeTheme oldWidget) =>
       data != oldWidget.data;
 }
 
-/// Theme data for customizing [CallDurationBadge] widgets.
+/// Theme data for customizing [StreamCallDurationBadge] widgets.
 ///
 /// See also:
 ///
-///  * [CallDurationBadgeStyle], the style embedded here.
-///  * [CallDurationBadgeTheme], for overriding it in a subtree.
+///  * [StreamCallDurationBadgeStyle], the style embedded here.
+///  * [StreamCallDurationBadgeTheme], for overriding it in a subtree.
 @themeGen
 @immutable
-class CallDurationBadgeThemeData with _$CallDurationBadgeThemeData {
+class StreamCallDurationBadgeThemeData with _$StreamCallDurationBadgeThemeData {
   /// Creates badge theme data.
-  const CallDurationBadgeThemeData({this.style});
+  const StreamCallDurationBadgeThemeData({this.style});
 
   /// Visual styling for the badge.
-  final CallDurationBadgeStyle? style;
+  final StreamCallDurationBadgeStyle? style;
 
   /// Linearly interpolate between two theme data objects.
-  static CallDurationBadgeThemeData? lerp(
-    CallDurationBadgeThemeData? a,
-    CallDurationBadgeThemeData? b,
+  static StreamCallDurationBadgeThemeData? lerp(
+    StreamCallDurationBadgeThemeData? a,
+    StreamCallDurationBadgeThemeData? b,
     double t,
-  ) => _$CallDurationBadgeThemeData.lerp(a, b, t);
+  ) => _$StreamCallDurationBadgeThemeData.lerp(a, b, t);
 }
 
-/// Visual styling properties for a [CallDurationBadge].
+/// Visual styling properties for a [StreamCallDurationBadge].
 @themeGen
 @immutable
-class CallDurationBadgeStyle with _$CallDurationBadgeStyle {
+class StreamCallDurationBadgeStyle with _$StreamCallDurationBadgeStyle {
   /// Creates a badge style with optional property overrides.
-  const CallDurationBadgeStyle({
+  const StreamCallDurationBadgeStyle({
     this.padding,
     this.contentHeight,
     this.spacing,
@@ -164,9 +164,9 @@ class CallDurationBadgeStyle with _$CallDurationBadgeStyle {
   final Color? screenShareColor;
 
   /// Linearly interpolate between two styles.
-  static CallDurationBadgeStyle? lerp(
-    CallDurationBadgeStyle? a,
-    CallDurationBadgeStyle? b,
+  static StreamCallDurationBadgeStyle? lerp(
+    StreamCallDurationBadgeStyle? a,
+    StreamCallDurationBadgeStyle? b,
     double t,
-  ) => _$CallDurationBadgeStyle.lerp(a, b, t);
+  ) => _$StreamCallDurationBadgeStyle.lerp(a, b, t);
 }
