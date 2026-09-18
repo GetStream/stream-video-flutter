@@ -97,8 +97,9 @@ void main() {
   });
 
   test('the track is sized for the largest viewport showing it', () {
-    pip.report(track, showing(320, 180));
+    // The largest speaks first, so the answer is not simply the last one in.
     grid.report(track, showing(1280, 720));
+    pip.report(track, showing(320, 180));
 
     expect(
       aggregates.last.dimension,
