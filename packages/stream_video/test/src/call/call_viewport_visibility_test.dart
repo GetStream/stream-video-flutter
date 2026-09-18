@@ -62,8 +62,8 @@ void main() {
   late ViewportHandle strip;
   late ViewportHandle selfView;
 
-  CallParticipantState? participantOf(String sessionId) {
-    for (final it in call.state.value.callParticipants) {
+  CallParticipantState? participantOf(String sessionId, [Call? of]) {
+    for (final it in (of ?? call).state.value.callParticipants) {
       if (it.sessionId == sessionId) return it;
     }
     return null;
@@ -293,6 +293,56 @@ void main() {
     verify(
       () => callSession.updateViewportVisibility(any()),
     ).called(greaterThan(0));
+  });
+
+  test('leaving a call forgets what its viewports measured', () async {
+    final stateManager = CallStateNotifier(
+      createActiveCallState().copyWith(
+        callParticipants: [
+          participant(sessionId: aliceSession, userId: 'alice'),
+        ],
+      ),
+    );
+    final leaving = createTestCall(
+      stateManager: stateManager,
+      sessionFactory: setupMockSessionFactory(),
+    );
+    leaving.dynascaleManager.init(
+      sfuClient: sfuClient,
+      sessionId: 'sfu-session',
+    );
+
+    leaving.viewportVisibility.attach().report(
+      trackOf(aliceSession, 'alice'),
+      showing(640, 360),
+    );
+    await settle();
+    expect(
+      participantOf(aliceSession, leaving)!.viewportVisibility,
+      ViewportVisibility.visible,
+    );
+
+    await leaving.leave();
+
+    // What the registry holds only tells once the call is not disconnected:
+    // every path out of a disconnected one returns early whatever it says. So
+    // this puts the state back where a reapply would be acted on, and takes
+    // back what the report recorded.
+    stateManager.state = stateManager.state.copyWith(
+      status: CallStatus.connected(),
+      callParticipants: [
+        participant(sessionId: aliceSession, userId: 'alice'),
+      ],
+    );
+
+    leaving.viewportVisibility.reapplyAll();
+    await settle();
+
+    expect(
+      participantOf(aliceSession, leaving)!.viewportVisibility,
+      ViewportVisibility.unknown,
+      reason: 'a call that was left still had a viewport standing in it',
+    );
   });
 
   test('a track for nobody in the call is not said to have landed', () async {
