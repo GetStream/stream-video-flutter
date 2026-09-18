@@ -62,6 +62,21 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
   }
 
   @override
+  void didUpdateWidget(covariant AndroidPipOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.call == oldWidget.call) return;
+
+    // The subscription was taken from the call this widget was given, while
+    // the tiles below are drawn for whichever call it holds now.
+    _participantsSubscription?.cancel();
+    recalculateParticipants(widget.call.state.value.callParticipants);
+
+    _participantsSubscription = widget.call
+        .partialState((state) => state.callParticipants)
+        .listen(recalculateParticipants);
+  }
+
+  @override
   void dispose() {
     _participantsSubscription?.cancel();
     super.dispose();

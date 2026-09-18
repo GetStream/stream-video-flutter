@@ -174,6 +174,7 @@
 ### 🐞 Fixed
 
 - The iOS picture-in-picture window keeps its participant's track subscribed while the app is backgrounded.
+- The picture-in-picture views follow the call they are given when it changes, rather than the one they were built with.
 - A picture-in-picture overlay no longer unsubscribes a participant the grid is showing, or pulls their subscription down to its own size.
 - Fixed the participant grid rearranging itself when a participant nobody can see starts speaking. They take the place of the tile with the least claim to one — the last one on screen — instead of the first, which used to move every tile below it down one.
 - Fixed a participant tile on screen being recorded as not visible, which kept it out of the running for a speaker's tile and could get its track unsubscribed.
