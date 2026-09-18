@@ -4417,13 +4417,8 @@ class Call {
     return result;
   }
 
-  /// Acts on a track's aggregate: the visibility goes into call state and to
-  /// the session, and the subscription moves to the size the largest viewport
-  /// showing it draws at — or is removed, once none does and no viewport asked
-  /// to keep it.
-  ///
-  /// Answers whether it landed; the registry forgets one that did not, so the
-  /// next measurement drives it again.
+  /// Acts on a track's aggregate, and answers whether it landed: the registry
+  /// forgets one that did not, so the next measurement drives it again.
   Future<bool> _applyViewportAggregate(ViewportAggregate aggregate) async {
     final track = aggregate.track;
 
@@ -4432,8 +4427,8 @@ class Call {
       return false;
     }
 
-    // Independent of each other: one failing does not stop the other being
-    // tried, and either failing means the aggregate did not land.
+    // One failing does not stop the other being tried; either means the
+    // aggregate did not land.
     var applied = true;
 
     final visibilityResult = await updateViewportVisibility(
