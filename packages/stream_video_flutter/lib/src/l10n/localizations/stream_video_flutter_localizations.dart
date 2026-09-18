@@ -143,6 +143,18 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'Nothing to share here.'**
   String get desktopScreenShareNoSources;
 
+  /// Shown in place of the grid when the sources could not be read
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read the screens and windows to share.'**
+  String get desktopScreenShareLoadFailed;
+
+  /// Action that reads the screens and windows again after a failure
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get desktopScreenShareRetry;
+
   /// Title of the sheet that picks how participants are laid out
   ///
   /// In en, this message translates to:

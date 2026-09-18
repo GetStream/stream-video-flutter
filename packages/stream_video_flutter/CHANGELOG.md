@@ -14,7 +14,7 @@
 - Added `StreamScreenShareSelector`, the redesigned grid of screens and windows behind the desktop screen share picker, and `StreamScreenShareThumbnail`, one tile of it.
 - Added `ScreenShareSourceController`, which holds the screens and windows on offer and the one that is picked.
 - Added `StreamScreenShareSelectorThemeData` on `StreamVideoTheme`, and `StreamScreenShareSelectorTheme` to restyle the selector over a subtree.
-- Added `desktopScreenShareRefresh` and `desktopScreenShareNoSources` to the localizations, in English and Dutch.
+- Added `desktopScreenShareRefresh`, `desktopScreenShareNoSources`, `desktopScreenShareLoadFailed` and `desktopScreenShareRetry` to the localizations, in English and Dutch.
 - `StreamLayoutButton` draws the participant layout in effect and offers the rest through a `StreamAdaptiveMenuAnchor`.
 - `StreamLayoutButton.defaultLayouts` is `auto` and `speakerBottom`, so the button toggles unless it is given more.
 - Added layout strings to the localizations, in English and Dutch: `layoutMenuTitle`, `layoutSelectTooltip`, `layoutDefault`, `layoutGrid`, `layoutSpeakerTop`, `layoutSpeakerBottom`, `layoutSpeakerLeft`, `layoutSpeakerRight` and `layoutSpeakerOneToOne`.
@@ -293,6 +293,7 @@
 - The desktop screen share picker reads the platform's screens and windows once, and again on its refresh button, instead of re-enumerating and re-capturing all of them every two seconds.
 - The picker asks the platform for 480x300 thumbnails where the platform honours a size; macOS captures at its own.
 - The picker's sources are released whichever way it is dismissed, including the escape key and a tap outside.
+- The picker says when it could not read the screens and windows, and offers a retry, instead of showing its empty state.
 - `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
 - Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.
 

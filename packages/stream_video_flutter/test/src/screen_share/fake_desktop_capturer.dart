@@ -36,6 +36,9 @@ class FakeDesktopCapturer extends DesktopCapturer {
   /// How many times [updateSources] was called.
   int updateSourcesCallCount = 0;
 
+  /// What [getSources] throws instead of answering, if anything.
+  Exception? getSourcesError;
+
   /// Holds [updateSources] open until it completes, so a test can act while
   /// the capture pass is still running.
   Completer<void>? updateSourcesGate;
@@ -55,6 +58,7 @@ class FakeDesktopCapturer extends DesktopCapturer {
   }) async {
     getSourcesCalls.add(types);
     requestedThumbnailSizes.add(thumbnailSize);
+    if (getSourcesError case final error?) throw error;
     return sources;
   }
 

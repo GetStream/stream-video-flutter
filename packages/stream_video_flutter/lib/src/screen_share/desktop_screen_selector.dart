@@ -62,9 +62,8 @@ class _StreamScreenShareDialogState extends State<StreamScreenShareDialog> {
   @override
   void initState() {
     super.initState();
-    // Built here rather than lazily on first build: a controller starts
-    // reading the platform as soon as it exists, which is not something to do
-    // as a side effect of building.
+    // A controller starts reading the platform as soon as it exists, so it is
+    // built here rather than during build.
     if (widget.controller == null) {
       _ownedController = ScreenShareSourceController();
     }
@@ -192,6 +191,7 @@ class StreamScreenShareSelector extends StatelessWidget {
               state: state,
               style: style,
               onSelectSource: controller.setSelectedSource,
+              onRetry: controller.refresh,
             ),
           ),
         ],
@@ -205,11 +205,13 @@ class _SourceGrid extends StatelessWidget {
     required this.state,
     required this.style,
     required this.onSelectSource,
+    required this.onRetry,
   });
 
   final ScreenShareSourceState state;
   final StreamScreenShareSelectorStyle? style;
   final OnThumbnailTapped onSelectSource;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -222,17 +224,24 @@ class _SourceGrid extends StatelessWidget {
         return const Center(child: CircularProgressIndicator.adaptive());
       }
 
-      return Padding(
-        padding: style.padding,
-        child: Center(
-          child: Text(
-            context.translations.desktopScreenShareNoSources,
-            textAlign: TextAlign.center,
-            style: context.streamTextTheme.bodyDefault.copyWith(
-              color: context.streamColorScheme.textSecondary,
-            ),
+      // A load that failed says so, rather than borrowing the wording for a
+      // machine that genuinely has nothing to share.
+      if (state.error != null) {
+        return _GridMessage(
+          padding: style.padding,
+          text: context.translations.desktopScreenShareLoadFailed,
+          action: StreamButton(
+            style: StreamButtonStyle.secondary,
+            type: StreamButtonType.ghost,
+            onPressed: onRetry,
+            child: Text(context.translations.desktopScreenShareRetry),
           ),
-        ),
+        );
+      }
+
+      return _GridMessage(
+        padding: style.padding,
+        text: context.translations.desktopScreenShareNoSources,
       );
     }
 
@@ -256,6 +265,43 @@ class _SourceGrid extends StatelessWidget {
           style: this.style,
         );
       },
+    );
+  }
+}
+
+/// What the grid draws in place of the tiles: a line of text, and an action
+/// under it where there is something to do about it.
+class _GridMessage extends StatelessWidget {
+  const _GridMessage({
+    required this.padding,
+    required this.text,
+    this.action,
+  });
+
+  final EdgeInsetsGeometry padding;
+  final String text;
+  final Widget? action;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: padding,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: context.streamSpacing.md,
+          children: [
+            Text(
+              text,
+              textAlign: TextAlign.center,
+              style: context.streamTextTheme.bodyDefault.copyWith(
+                color: context.streamColorScheme.textSecondary,
+              ),
+            ),
+            if (action case final action?) action,
+          ],
+        ),
+      ),
     );
   }
 }

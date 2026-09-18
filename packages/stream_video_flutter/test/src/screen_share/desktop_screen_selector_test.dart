@@ -90,6 +90,29 @@ void main() {
       expect(find.text('Nothing to share here.'), findsOneWidget);
     });
 
+    testWidgets('says when it could not read the sources, and retries', (
+      tester,
+    ) async {
+      capturer.getSourcesError = Exception('the platform said no');
+      await pumpSelector(tester);
+
+      expect(
+        find.text("Couldn't read the screens and windows to share."),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Nothing to share here.'),
+        findsNothing,
+        reason: 'a failure is not an empty machine',
+      );
+
+      capturer.getSourcesError = null;
+      await tester.tap(find.text('Try again'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Screen 1'), findsOneWidget);
+    });
+
     testWidgets('never polls the platform while it is open', (tester) async {
       await pumpSelector(tester);
       // These sources came back with their bitmaps, so there is nothing left

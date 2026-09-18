@@ -5,21 +5,25 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import '../../../test_utils/test_wrapper.dart';
 
 void main() {
-  Future<String?> openDialog(
+  /// Opens a dialog and leaves it open.
+  ///
+  /// [onResult] is called once the dialog is dismissed, which is the only
+  /// point at which what it was popped with is known.
+  Future<void> openDialog(
     WidgetTester tester, {
     required Widget Function(BuildContext context) builder,
+    ValueChanged<String?>? onResult,
   }) async {
-    String? result;
-
     await tester.pumpWidget(
       TestWrapper(
         child: Builder(
           builder: (context) => TextButton(
             onPressed: () async {
-              result = await showStreamModalDialog<String>(
+              final result = await showStreamModalDialog<String>(
                 context: context,
                 builder: builder,
               );
+              onResult?.call(result);
             },
             child: const Text('open'),
           ),
@@ -29,7 +33,6 @@ void main() {
 
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
-    return result;
   }
 
   group('StreamModalDialog', () {
@@ -62,15 +65,24 @@ void main() {
     });
 
     testWidgets('the close button dismisses with no value', (tester) async {
+      String? result;
+      var popped = false;
+
       await openDialog(
         tester,
         builder: (context) => const StreamModalDialog(child: Text('body')),
+        onResult: (value) {
+          result = value;
+          popped = true;
+        },
       );
 
       await tester.tap(find.byIcon(const StreamIcons().xmark));
       await tester.pumpAndSettle();
 
       expect(find.text('body'), findsNothing);
+      expect(popped, isTrue);
+      expect(result, isNull);
     });
 
     testWidgets('draws no footer without actions', (tester) async {

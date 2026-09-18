@@ -27,6 +27,14 @@
   "@desktopScreenShareNoSources": {
     "description": "Shown in place of the grid when the platform offers no screen or window of the selected type"
   },
+  "desktopScreenShareLoadFailed": "Couldn't read the screens and windows to share.",
+  "@desktopScreenShareLoadFailed": {
+    "description": "Shown in place of the grid when the sources could not be read"
+  },
+  "desktopScreenShareRetry": "Try again",
+  "@desktopScreenShareRetry": {
+    "description": "Action that reads the screens and windows again after a failure"
+  },
   "layoutMenuTitle": "Layout",
   "@layoutMenuTitle": {
     "description": "Title of the sheet that picks how participants are laid out"

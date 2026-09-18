@@ -33,18 +33,25 @@ class ScreenShareSourceController
     // Subscribed before the first load, because the enumeration raises its
     // events while it runs. These getters have no implementation to fall back
     // on in the platform interface, so a capturer that reports its bitmaps
-    // inline and raises no events need not provide them.
-    try {
-      _events.addAll([
-        _capturer.onAdded.stream.listen(_onThumbnail),
-        _capturer.onThumbnailChanged.stream.listen(_onThumbnail),
-      ]);
-      // The platform interface reports "this capturer has no such stream" by
-      // throwing from the getter, so there is nothing else to catch here.
-      // ignore: avoid_catching_errors
-    } on UnimplementedError catch (e) {
-      screenShareLogger.w(() => '[init] capturer posts no thumbnails: $e');
+    // inline and raises no events need not provide them. Taken one at a time,
+    // so a capturer offering one stream and not the other still has the one it
+    // offers cancelled on dispose.
+    void listenIfOffered(
+      StreamController<DesktopCapturerSource> Function() stream,
+      String name,
+    ) {
+      try {
+        _events.add(stream().stream.listen(_onThumbnail));
+        // The platform interface reports "this capturer has no such stream" by
+        // throwing from the getter, so there is nothing else to catch here.
+        // ignore: avoid_catching_errors
+      } on UnimplementedError catch (e) {
+        screenShareLogger.w(() => '[init] capturer posts no $name: $e');
+      }
     }
+
+    listenIfOffered(() => _capturer.onAdded, 'onAdded');
+    listenIfOffered(() => _capturer.onThumbnailChanged, 'onThumbnailChanged');
 
     unawaited(refresh());
   }
@@ -101,9 +108,7 @@ class ScreenShareSourceController
       // macOS leaves them out and reports them through the events the
       // enumeration raises, which is what the subscriptions above are for.
       // Only if something is still missing is it worth asking for a capture
-      // pass, since that recaptures every screen and window. Deliberately not
-      // on a timer: the old picker's two-second one spent exactly this to
-      // redraw what was already on screen.
+      // pass, since that recaptures every screen and window.
       if (value.sources.any((it) => value.thumbnailFor(it) == null)) {
         await _capturer.updateSources(types: _types);
       }
@@ -193,9 +198,10 @@ class ScreenShareSourceState {
   Uint8List? thumbnailFor(DesktopCapturerSource source) =>
       thumbnails[source.id] ?? source.thumbnail;
 
-  /// A copy holding [sources], with the thumbnails of sources that are no
-  /// longer on offer dropped. The load is left running, since the capture pass
-  /// that fills in the missing bitmaps still has to follow.
+  /// A copy holding [sources], with the selection and the thumbnails of
+  /// sources that are no longer on offer dropped. The load is left running,
+  /// since the capture pass that fills in the missing bitmaps still has to
+  /// follow.
   ScreenShareSourceState _withSources(List<DesktopCapturerSource> sources) {
     final ids = {for (final source in sources) source.id};
 
@@ -206,7 +212,9 @@ class ScreenShareSourceState {
           if (ids.contains(entry.key)) entry.key: entry.value,
       },
       sourceType: sourceType,
-      selectedSourceId: selectedSourceId,
+      selectedSourceId: ids.contains(selectedSourceId)
+          ? selectedSourceId
+          : null,
       isLoading: isLoading,
     );
   }

@@ -86,7 +86,9 @@ void main() {
 
       expect(capturer.updateSourcesCallCount, 1);
 
-      // Whatever the old picker's two-second timer would have fired by now.
+      // Churning the event loop, which is all this reaches: a periodic timer
+      // needs a clock to advance, so the picker's no-timer promise is pinned
+      // by the widget test that pumps ten seconds of one instead.
       for (var i = 0; i < 10; i++) {
         await Future<void>.delayed(Duration.zero);
         await pumpEventQueue();
@@ -184,6 +186,9 @@ void main() {
       await subject.refresh();
 
       expect(subject.value.selectedSource, isNull);
+      // The id goes too, so a source that comes back under the same id does
+      // not silently arrive selected.
+      expect(subject.value.selectedSourceId, isNull);
     });
 
     test('reports a failed load without throwing', () async {

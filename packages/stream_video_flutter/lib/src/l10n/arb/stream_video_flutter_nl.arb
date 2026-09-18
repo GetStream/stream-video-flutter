@@ -6,6 +6,8 @@
   "desktopScreenShareWindow": "Venster",
   "desktopScreenShareRefresh": "Vernieuwen",
   "desktopScreenShareNoSources": "Hier valt niets te delen.",
+  "desktopScreenShareLoadFailed": "Kon de schermen en vensters niet ophalen.",
+  "desktopScreenShareRetry": "Opnieuw proberen",
   "layoutMenuTitle": "Indeling",
   "layoutSelectTooltip": "Indeling wijzigen",
   "layoutDefault": "Standaard",
