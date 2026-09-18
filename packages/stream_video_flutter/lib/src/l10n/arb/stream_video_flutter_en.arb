@@ -182,5 +182,17 @@
   "lobbyDevicesUnreadable": "Your devices could not be read",
   "@lobbyDevicesUnreadable": {
     "description": "Tooltip on a lobby device picker when the platform could not be asked for its devices"
+  },
+  "callEncryptedTooltip": "This call is end-to-end encrypted",
+  "@callEncryptedTooltip": {
+    "description": "Tooltip on the encryption indicator in the call duration badge"
+  },
+  "callRecordingTooltip": "This call is being recorded",
+  "@callRecordingTooltip": {
+    "description": "Tooltip on the recording indicator in the call duration badge"
+  },
+  "callScreenSharingTooltip": "Someone is sharing their screen",
+  "@callScreenSharingTooltip": {
+    "description": "Tooltip on the screen share indicator in the call duration badge"
   }
 }

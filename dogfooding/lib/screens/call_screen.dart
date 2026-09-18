@@ -19,7 +19,6 @@ import '../core/repos/user_chat_repository.dart';
 import '../di/injector.dart';
 import '../utils/feedback_dialog.dart';
 import '../widgets/badged_call_option.dart';
-import '../widgets/call_duration_title.dart';
 import '../widgets/closed_captions_widget.dart';
 import '../widgets/e2ee_key_notification.dart';
 import '../widgets/settings_menu/settings_menu.dart';
@@ -679,7 +678,7 @@ class _CallScreenState extends State<CallScreen>
                         ),
                     ],
                   ),
-                  title: CallDurationTitle(call: call),
+                  title: CallDurationBadge(call: call),
                 );
               },
               callControlsWidgetBuilder: _callControls,
