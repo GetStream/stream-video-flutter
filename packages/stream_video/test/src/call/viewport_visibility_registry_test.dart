@@ -37,6 +37,10 @@ void main() {
   late List<ViewportAggregate> aggregates;
   late ViewportVisibilityRegistry registry;
 
+  /// The viewports most of these are about: a grid tile and an overlay.
+  late ViewportHandle grid;
+  late ViewportHandle pip;
+
   /// What the call answers for an aggregate: whether it acted on it.
   late bool applied;
 
@@ -49,20 +53,12 @@ void main() {
         return applied;
       },
     );
-  });
-
-  test('every viewport gets a name of its own', () {
-    final ids = List.generate(3, (_) => registry.nextViewportId());
-
-    expect(ids.toSet(), hasLength(3));
+    grid = registry.attach();
+    pip = registry.attach();
   });
 
   test('one viewport speaks for the track', () {
-    registry.report(
-      viewportId: 'grid',
-      track: track,
-      measurement: showing(640, 360),
-    );
+    grid.report(track, showing(640, 360));
 
     expect(aggregates.single.visibility, ViewportVisibility.visible);
     expect(
@@ -72,21 +68,16 @@ void main() {
   });
 
   test('a viewport saying the same thing again is not passed on', () {
-    registry
-      ..report(viewportId: 'grid', track: track, measurement: showing(640, 360))
-      ..report(
-        viewportId: 'grid',
-        track: track,
-        measurement: showing(640, 360),
-      );
+    grid
+      ..report(track, showing(640, 360))
+      ..report(track, showing(640, 360));
 
     expect(aggregates, hasLength(1));
   });
 
   test('a track stays visible while any viewport still shows it', () {
-    registry
-      ..report(viewportId: 'grid', track: track, measurement: showing(640, 360))
-      ..report(viewportId: 'pip', track: track, measurement: hidden);
+    grid.report(track, showing(640, 360));
+    pip.report(track, hidden);
 
     // What the off-screen overlay measures is true of the overlay, not of the
     // participant: they are still on screen in the grid.
@@ -97,23 +88,17 @@ void main() {
   });
 
   test('a track goes hidden once the last viewport showing it stops', () {
-    registry
-      ..report(viewportId: 'grid', track: track, measurement: showing(640, 360))
-      ..report(viewportId: 'pip', track: track, measurement: hidden)
-      ..report(viewportId: 'grid', track: track, measurement: hidden);
+    grid.report(track, showing(640, 360));
+    pip.report(track, hidden);
+    grid.report(track, hidden);
 
     expect(aggregates.last.visibility, ViewportVisibility.hidden);
     expect(aggregates.last.dimension.isEmpty, isTrue);
   });
 
   test('the track is sized for the largest viewport showing it', () {
-    registry
-      ..report(viewportId: 'pip', track: track, measurement: showing(320, 180))
-      ..report(
-        viewportId: 'spotlight',
-        track: track,
-        measurement: showing(1280, 720),
-      );
+    pip.report(track, showing(320, 180));
+    grid.report(track, showing(1280, 720));
 
     expect(
       aggregates.last.dimension,
@@ -122,14 +107,10 @@ void main() {
   });
 
   test('a viewport that is not showing the track does not size it', () {
-    registry
-      ..report(
-        viewportId: 'spotlight',
-        track: track,
-        measurement: showing(1280, 720),
-      )
-      ..report(viewportId: 'pip', track: track, measurement: showing(320, 180))
-      ..report(viewportId: 'pip', track: track, measurement: hidden);
+    grid.report(track, showing(1280, 720));
+    pip
+      ..report(track, showing(320, 180))
+      ..report(track, hidden);
 
     expect(
       aggregates.last.dimension,
@@ -138,14 +119,9 @@ void main() {
   });
 
   test('releasing the largest viewport drops the track to the next one', () {
-    registry
-      ..report(
-        viewportId: 'spotlight',
-        track: track,
-        measurement: showing(1280, 720),
-      )
-      ..report(viewportId: 'pip', track: track, measurement: showing(320, 180))
-      ..release(viewportId: 'spotlight', track: track);
+    grid.report(track, showing(1280, 720));
+    pip.report(track, showing(320, 180));
+    grid.release();
 
     expect(aggregates.last.visibility, ViewportVisibility.visible);
     expect(
@@ -155,52 +131,68 @@ void main() {
   });
 
   test('a track no viewport draws any more is reported hidden once', () {
-    registry
-      ..report(viewportId: 'grid', track: track, measurement: showing(640, 360))
-      ..release(viewportId: 'grid', track: track)
-      ..release(viewportId: 'grid', track: track);
+    grid
+      ..report(track, showing(640, 360))
+      ..release()
+      ..release();
 
     expect(aggregates.last.visibility, ViewportVisibility.hidden);
     expect(aggregates, hasLength(2));
   });
 
   test('a viewport that wants the track kept while hidden says so for all', () {
-    registry
-      ..report(viewportId: 'grid', track: track, measurement: hidden)
-      ..report(
-        viewportId: 'screenshare',
-        track: track,
-        measurement: const ViewportMeasurement(
-          visibility: ViewportVisibility.hidden,
-          persistWhenHidden: true,
-        ),
-      );
+    grid.report(track, hidden);
+    pip.report(
+      track,
+      const ViewportMeasurement(
+        visibility: ViewportVisibility.hidden,
+        persistWhenHidden: true,
+      ),
+    );
 
     expect(aggregates.last.persistWhenHidden, isTrue);
   });
 
   test('tracks are kept apart', () {
-    registry
-      ..report(viewportId: 'grid', track: track, measurement: showing(640, 360))
-      ..report(
-        viewportId: 'grid',
-        track: otherTrack,
-        measurement: showing(320, 180),
-      );
+    grid.report(track, showing(640, 360));
+    pip.report(otherTrack, showing(320, 180));
 
     expect(aggregates.map((aggregate) => aggregate.track), [track, otherTrack]);
+  });
+
+  // A handle is one viewport, and a viewport draws one track at a time. Left
+  // behind, the track it drew before would still be counted as on screen.
+  test('a viewport reporting a new track lets go of the one before', () {
+    grid.report(track, showing(640, 360));
+    aggregates.clear();
+
+    grid.report(otherTrack, showing(320, 180));
+
+    expect(
+      aggregates.map((aggregate) => (aggregate.track, aggregate.visibility)),
+      [
+        (track, ViewportVisibility.hidden),
+        (otherTrack, ViewportVisibility.visible),
+      ],
+    );
+  });
+
+  test('a viewport that has been disposed of says nothing more', () {
+    grid.report(track, showing(640, 360));
+    grid.dispose();
+    aggregates.clear();
+
+    grid.report(track, showing(640, 360));
+
+    expect(grid.isDisposed, isTrue);
+    expect(aggregates, isEmpty);
   });
 
   test(
     'reapply says a standing answer again, for a track only now published',
     () {
-      registry
-        ..report(
-          viewportId: 'grid',
-          track: track,
-          measurement: showing(640, 360),
-        )
-        ..reapply(track);
+      grid.report(track, showing(640, 360));
+      registry.reapply(track);
 
       expect(aggregates, hasLength(2));
       expect(aggregates.last, aggregates.first);
@@ -216,13 +208,8 @@ void main() {
   // A viewport reports what changes about itself, so a new session would never
   // be told about a tile that has been sitting on screen throughout.
   test('a new session is told every track again', () {
-    registry
-      ..report(viewportId: 'grid', track: track, measurement: showing(640, 360))
-      ..report(
-        viewportId: 'pip',
-        track: otherTrack,
-        measurement: showing(320, 180),
-      );
+    grid.report(track, showing(640, 360));
+    pip.report(otherTrack, showing(320, 180));
 
     aggregates.clear();
     registry.reapplyAll();
@@ -231,11 +218,7 @@ void main() {
   });
 
   test('a cleared registry has nothing left to say', () {
-    registry.report(
-      viewportId: 'grid',
-      track: track,
-      measurement: showing(640, 360),
-    );
+    grid.report(track, showing(640, 360));
 
     aggregates.clear();
     registry
@@ -246,20 +229,12 @@ void main() {
   });
 
   test('an answer the call acted on is not offered again', () async {
-    registry.report(
-      viewportId: 'grid',
-      track: track,
-      measurement: showing(640, 360),
-    );
+    grid.report(track, showing(640, 360));
     await pumpEventQueue();
 
     // A smaller viewport does not move the answer: the largest one showing the
     // track still sizes it.
-    registry.report(
-      viewportId: 'strip',
-      track: track,
-      measurement: showing(320, 180),
-    );
+    pip.report(track, showing(320, 180));
     await pumpEventQueue();
 
     expect(aggregates, hasLength(1));
@@ -267,21 +242,13 @@ void main() {
 
   test('an answer the call could not act on is offered again', () async {
     applied = false;
-    registry.report(
-      viewportId: 'grid',
-      track: track,
-      measurement: showing(640, 360),
-    );
+    grid.report(track, showing(640, 360));
     await pumpEventQueue();
 
     expect(aggregates, hasLength(1));
 
     applied = true;
-    registry.report(
-      viewportId: 'strip',
-      track: track,
-      measurement: showing(320, 180),
-    );
+    pip.report(track, showing(320, 180));
     await pumpEventQueue();
 
     expect(
@@ -293,12 +260,9 @@ void main() {
   });
 
   test('a track every viewport released is forgotten', () async {
-    registry.report(
-      viewportId: 'grid',
-      track: track,
-      measurement: showing(640, 360),
-    );
-    registry.release(viewportId: 'grid', track: track);
+    grid
+      ..report(track, showing(640, 360))
+      ..release();
     await pumpEventQueue();
 
     aggregates.clear();

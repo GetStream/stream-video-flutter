@@ -68,10 +68,10 @@ class _ViewportVisibilityReporterState
     extends State<ViewportVisibilityReporter> {
   static int _detectorSeq = 0;
 
-  /// This viewport's name in [ViewportVisibilityReporter.registry], which
-  /// holds one measurement per viewport. Re-minted if the registry changes,
-  /// since the name is only unique within the one that gave it out.
-  late String _viewportId = widget.registry.nextViewportId();
+  /// This viewport's place in [ViewportVisibilityReporter.registry]. Replaced
+  /// if the registry changes, since a handle belongs to the one that gave it
+  /// out.
+  late ViewportHandle _handle = widget.registry.attach();
 
   /// This reporter's own detector key.
   ///
@@ -86,26 +86,18 @@ class _ViewportVisibilityReporterState
 
   VisibilityInfo? _latest;
 
-  /// The track last reported for, which is owed a release. Null until this
-  /// viewport has measured anything.
-  ViewportTrack? _reported;
-
   @override
   void didUpdateWidget(covariant ViewportVisibilityReporter oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // The registry still holds this viewport's measurement for the track it
-    // drew before. Left there, it would speak for a track this viewport no
-    // longer draws.
+    // A handle belongs to the registry that gave it out, so a reporter moved
+    // to another call retires the old one rather than leaving a track recorded
+    // as on screen in a call it has left.
     final registryChanged = oldWidget.registry != widget.registry;
-    final reported = _reported;
-    final trackChanged = reported != null && reported != widget.track;
-    if (reported != null && (registryChanged || trackChanged)) {
-      _releaseAfterFrame(oldWidget.registry, _viewportId, reported);
-      _reported = null;
+    if (registryChanged) {
+      _disposeAfterFrame(_handle);
+      _handle = widget.registry.attach();
     }
-
-    if (registryChanged) _viewportId = widget.registry.nextViewportId();
 
     final latest = _latest;
     if (latest == null) return;
@@ -114,7 +106,9 @@ class _ViewportVisibilityReporterState
     // given to a placeholder, or to another participant — and a detector
     // reports only what changes. So a registry that has never heard from this
     // viewport, a track it has only now been pointed at, and a track only now
-    // published all need the standing measurement said again.
+    // published all need the standing measurement said again. Reporting for a
+    // new track releases the one before it, which the handle does itself.
+    final trackChanged = oldWidget.track != widget.track;
     final publishedNow = !oldWidget.isTrackPublished && widget.isTrackPublished;
     if (!registryChanged && !trackChanged && !publishedNow) return;
 
@@ -138,28 +132,18 @@ class _ViewportVisibilityReporterState
 
   @override
   void dispose() {
-    final reported = _reported;
-    if (reported != null) {
-      _releaseAfterFrame(widget.registry, _viewportId, reported);
-    }
+    _disposeAfterFrame(_handle);
 
     super.dispose();
   }
 
-  /// Takes this viewport's measurement out of the registry at the end of the
-  /// frame.
+  /// Retires [handle] at the end of the frame, releasing whatever it measured.
   ///
-  /// Deferred for the same reason a report is, and taking what it needs by
-  /// value: by the time it runs this [State] may be disposed, and the widget
-  /// it would have read is gone.
-  static void _releaseAfterFrame(
-    ViewportVisibilityRegistry registry,
-    String viewportId,
-    ViewportTrack track,
-  ) {
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      registry.release(viewportId: viewportId, track: track);
-    });
+  /// Deferred for the same reason a report is, and taking the handle by value:
+  /// by the time it runs this [State] may be disposed, and the widget it would
+  /// have read is gone.
+  static void _disposeAfterFrame(ViewportHandle handle) {
+    SchedulerBinding.instance.addPostFrameCallback((_) => handle.dispose());
   }
 
   void _report(VisibilityInfo info) {
@@ -187,11 +171,9 @@ class _ViewportVisibilityReporterState
 
     widget.onSizeChanged?.call(size);
 
-    _reported = widget.track;
-    widget.registry.report(
-      viewportId: _viewportId,
-      track: widget.track,
-      measurement: ViewportMeasurement(
+    _handle.report(
+      widget.track,
+      ViewportMeasurement(
         visibility: visibility,
         dimension: RtcVideoDimension(
           width: size.width.toInt(),
