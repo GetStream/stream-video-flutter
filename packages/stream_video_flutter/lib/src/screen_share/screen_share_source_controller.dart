@@ -78,7 +78,8 @@ class ScreenShareSourceController
 
   /// Re-reads the screens and windows from the platform.
   ///
-  /// Does nothing while a load is already running. A selection that is no
+  /// Does nothing while a load is already running — the capture pass that
+  /// fills in the missing bitmaps counts as part of it. A selection that is no
   /// longer on offer is dropped.
   Future<void> refresh() async {
     if (value.isLoading) return;
@@ -109,7 +110,12 @@ class ScreenShareSourceController
     } catch (e, stk) {
       screenShareLogger.e(() => '[refresh] failed: $e, $stk');
       if (_disposed) return;
-      value = value.copyWith(isLoading: false, error: e);
+      value = value.copyWith(error: e);
+    } finally {
+      // Cleared once the capture pass is done rather than with the sources, so
+      // that the whole load sits behind the guard above and behind whatever the
+      // caller disables while it runs.
+      if (!_disposed) value = value.copyWith(isLoading: false);
     }
   }
 
@@ -188,7 +194,8 @@ class ScreenShareSourceState {
       thumbnails[source.id] ?? source.thumbnail;
 
   /// A copy holding [sources], with the thumbnails of sources that are no
-  /// longer on offer dropped and the load marked finished.
+  /// longer on offer dropped. The load is left running, since the capture pass
+  /// that fills in the missing bitmaps still has to follow.
   ScreenShareSourceState _withSources(List<DesktopCapturerSource> sources) {
     final ids = {for (final source in sources) source.id};
 
@@ -200,6 +207,7 @@ class ScreenShareSourceState {
       },
       sourceType: sourceType,
       selectedSourceId: selectedSourceId,
+      isLoading: isLoading,
     );
   }
 

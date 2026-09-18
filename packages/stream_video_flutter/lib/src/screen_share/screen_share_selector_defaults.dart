@@ -95,8 +95,4 @@ class StreamScreenShareSelectorStyleDefaults
   @override
   Color get selectedLabelColor =>
       _style?.selectedLabelColor ?? _colorScheme.accentPrimary;
-
-  @override
-  Size get thumbnailSize =>
-      _style?.thumbnailSize ?? ScreenShareSourceController.defaultThumbnailSize;
 }

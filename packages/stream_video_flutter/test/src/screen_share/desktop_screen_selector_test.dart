@@ -191,9 +191,9 @@ void main() {
     testWidgets('shares the picked source and cancels with nothing', (
       tester,
     ) async {
-      // The dialog builds its own controller off the global capturer, which a
-      // test cannot reach, so the dialog chrome is exercised around a selector
-      // driven by the fake.
+      // Handed a controller so the fake capturer drives the real dialog; left
+      // to itself it would build one off the global capturer, which a test
+      // cannot reach.
       final controller = ScreenShareSourceController(capturer: capturer);
       addTearDown(controller.dispose);
 
@@ -207,28 +207,8 @@ void main() {
               onPressed: () async {
                 result = await showStreamModalDialog<DesktopCapturerSource>(
                   context: context,
-                  builder: (context) => ValueListenableBuilder(
-                    valueListenable: controller,
-                    builder: (context, state, _) => StreamModalDialog(
-                      title: const Text('Choose what to share'),
-                      actions: [
-                        StreamButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Cancel'),
-                        ),
-                        StreamButton(
-                          onPressed: state.selectedSource == null
-                              ? null
-                              : () => Navigator.pop(
-                                  context,
-                                  state.selectedSource,
-                                ),
-                          child: const Text('Share'),
-                        ),
-                      ],
-                      child: StreamScreenShareSelector(controller: controller),
-                    ),
-                  ),
+                  builder: (context) =>
+                      StreamScreenShareDialog(controller: controller),
                 );
                 popped = true;
               },

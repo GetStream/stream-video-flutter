@@ -36,6 +36,10 @@ class FakeDesktopCapturer extends DesktopCapturer {
   /// How many times [updateSources] was called.
   int updateSourcesCallCount = 0;
 
+  /// Holds [updateSources] open until it completes, so a test can act while
+  /// the capture pass is still running.
+  Completer<void>? updateSourcesGate;
+
   @override
   final StreamController<DesktopCapturerSource> onAdded =
       StreamController.broadcast(sync: true);
@@ -57,6 +61,7 @@ class FakeDesktopCapturer extends DesktopCapturer {
   @override
   Future<bool> updateSources({required List<SourceType> types}) async {
     updateSourcesCallCount++;
+    if (updateSourcesGate case final gate?) await gate.future;
     for (final source in sources) {
       final pending = pendingThumbnails[source.id];
       if (pending != null && source is FakeDesktopCapturerSource) {

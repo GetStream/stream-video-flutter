@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
@@ -143,6 +145,32 @@ void main() {
       await subject.refresh();
 
       expect(capturer.getSourcesCalls, hasLength(2));
+    });
+
+    test('stays loading until the capture pass is done', () async {
+      // The capture pass recaptures every screen and window, so it is the
+      // expensive half of a load and has to sit behind the same guard the
+      // enumeration does.
+      capturer.pendingThumbnails = {screen.id: blueThumbnail};
+      final gate = Completer<void>();
+      capturer.updateSourcesGate = gate;
+
+      final subject = controller();
+      await pumpEventQueue();
+
+      expect(subject.value.isLoading, isTrue);
+      expect(capturer.updateSourcesCallCount, 1);
+
+      // A refresh arriving while the capture pass runs is turned away rather
+      // than starting a second enumeration alongside it.
+      unawaited(subject.refresh());
+      await pumpEventQueue();
+      expect(capturer.getSourcesCalls, hasLength(1));
+
+      gate.complete();
+      await pumpEventQueue();
+
+      expect(subject.value.isLoading, isFalse);
     });
 
     test('drops a selection the platform no longer offers', () async {

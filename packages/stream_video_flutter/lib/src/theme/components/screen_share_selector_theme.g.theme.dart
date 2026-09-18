@@ -139,7 +139,6 @@ mixin _$StreamScreenShareSelectorStyle {
         b.selectedLabelColor,
         t,
       ),
-      thumbnailSize: Size.lerp(a.thumbnailSize, b.thumbnailSize, t),
     );
   }
 
@@ -160,7 +159,6 @@ mixin _$StreamScreenShareSelectorStyle {
     TextStyle? labelTextStyle,
     Color? labelColor,
     Color? selectedLabelColor,
-    Size? thumbnailSize,
   }) {
     final _this = (this as StreamScreenShareSelectorStyle);
 
@@ -181,7 +179,6 @@ mixin _$StreamScreenShareSelectorStyle {
       labelTextStyle: labelTextStyle ?? _this.labelTextStyle,
       labelColor: labelColor ?? _this.labelColor,
       selectedLabelColor: selectedLabelColor ?? _this.selectedLabelColor,
-      thumbnailSize: thumbnailSize ?? _this.thumbnailSize,
     );
   }
 
@@ -215,7 +212,6 @@ mixin _$StreamScreenShareSelectorStyle {
           other.labelTextStyle,
       labelColor: other.labelColor,
       selectedLabelColor: other.selectedLabelColor,
-      thumbnailSize: other.thumbnailSize,
     );
   }
 
@@ -247,8 +243,7 @@ mixin _$StreamScreenShareSelectorStyle {
         _other.placeholderColor == _this.placeholderColor &&
         _other.labelTextStyle == _this.labelTextStyle &&
         _other.labelColor == _this.labelColor &&
-        _other.selectedLabelColor == _this.selectedLabelColor &&
-        _other.thumbnailSize == _this.thumbnailSize;
+        _other.selectedLabelColor == _this.selectedLabelColor;
   }
 
   @override
@@ -273,7 +268,6 @@ mixin _$StreamScreenShareSelectorStyle {
       _this.labelTextStyle,
       _this.labelColor,
       _this.selectedLabelColor,
-      _this.thumbnailSize,
     );
   }
 }

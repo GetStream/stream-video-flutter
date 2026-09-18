@@ -122,7 +122,6 @@ class StreamScreenShareSelectorStyle with _$StreamScreenShareSelectorStyle {
     this.labelTextStyle,
     this.labelColor,
     this.selectedLabelColor,
-    this.thumbnailSize,
   });
 
   /// The inset around the grid.
@@ -205,14 +204,6 @@ class StreamScreenShareSelectorStyle with _$StreamScreenShareSelectorStyle {
   ///
   /// Defaults to `colorScheme.accentPrimary`.
   final Color? selectedLabelColor;
-
-  /// The resolution asked of the platform for each thumbnail.
-  ///
-  /// Defaults to 480x300. The platform captures and encodes one bitmap per
-  /// screen and window at this size, and the grid decodes all of them, so a
-  /// larger value costs on both sides for detail a tile this size cannot
-  /// show.
-  final Size? thumbnailSize;
 
   /// Linearly interpolate between two styles.
   static StreamScreenShareSelectorStyle? lerp(
