@@ -79,6 +79,12 @@ class _StreamPictureInPictureUiKitViewState
 
   final Subscriptions _subscriptions = Subscriptions();
 
+  /// The native window's place in the call's viewport registry.
+  ///
+  /// It draws one participant's track at a time, like any other viewport, and
+  /// is the one still drawing once the app is backgrounded.
+  late final ViewportHandle _viewport = widget.call.viewportVisibility.attach();
+
   Future<void> _handleParticipantsChange(
     List<CallParticipantState> callParticipants,
     bool includeLocalParticipantVideo,
@@ -121,19 +127,28 @@ class _StreamPictureInPictureUiKitViewState
         priorityTrack,
       );
 
-      if (videoTrack == null &&
-          (pipParticipant.isVideoEnabled ||
-              pipParticipant.isScreenShareEnabled)) {
-        // If the video track is not available, we need to update the subscription
-        // to ensure that the participant's video is displayed correctly.
-        await widget.call.updateSubscription(
+      // What this window draws, reported like any other viewport. Kept while
+      // hidden: the Flutter tiles go off screen when the app is backgrounded,
+      // which is exactly when this window is the one being watched.
+      _viewport.report(
+        ViewportTrack(
           userId: pipParticipant.userId,
           sessionId: pipParticipant.sessionId,
           trackIdPrefix: pipParticipant.trackIdPrefix,
           trackType: priorityTrack,
-          videoDimension: RtcVideoDimensionPresets.h360_169,
-        );
+        ),
+        const ViewportMeasurement(
+          visibility: ViewportVisibility.visible,
+          dimension: RtcVideoDimensionPresets.h360_169,
+          persistWhenHidden: true,
+        ),
+      );
 
+      if (videoTrack == null &&
+          (pipParticipant.isVideoEnabled ||
+              pipParticipant.isScreenShareEnabled)) {
+        // The track has not arrived yet. The report above is what asks for
+        // it; the state change it causes comes back through here.
         return;
       }
 
@@ -170,6 +185,9 @@ class _StreamPictureInPictureUiKitViewState
               widget.configuration?.showConnectionQualityIndicator,
         },
       );
+    } else {
+      // Nobody to draw, so nothing to hold a track for.
+      _viewport.release();
     }
   }
 
@@ -307,6 +325,7 @@ class _StreamPictureInPictureUiKitViewState
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _subscriptions.cancelAll();
+    _viewport.dispose();
     unawaited(
       _channel.invokeMethod('callEnded').catchError((_) {
         // Best-effort cleanup; intentionally ignored.
