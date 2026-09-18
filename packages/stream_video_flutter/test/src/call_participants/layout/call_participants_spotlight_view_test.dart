@@ -67,35 +67,35 @@ void main() {
     ) async {
       await pump(tester, size: const Size(400, 656), barParticipants: 1);
 
-      // 8px of padding either side, and the bar's 141 plus the 8 gap below.
-      // 507 of height would allow 901 of width at 16:9, so nothing holds it
+      // 8px of padding either side, and the bar's 125 plus the 8 gap below.
+      // 523 of height would allow 929 of width at 16:9, so nothing holds it
       // back and it takes all 384.
       expect(
         tester.getSize(_tile('stage')),
-        const Size(400 - 16, 656 - 141 - 8),
+        const Size(400 - 16, 656 - 125 - 8),
       );
     });
 
     testWidgets('fills a tall view rather than keeping 16:9', (tester) async {
       await pump(tester, size: const Size(768, 880), barParticipants: 1);
 
-      // 712 of height allows 1265 of width, well past the 752 there is.
-      expect(tester.getSize(_tile('stage')), const Size(752, 880 - 160 - 8));
+      // 747 of height allows 1328 of width, well past the 752 there is.
+      expect(tester.getSize(_tile('stage')), const Size(752, 880 - 125 - 8));
     });
 
     testWidgets('stops at 16:9 in a view wider than that', (tester) async {
-      await pump(tester, size: const Size(1440, 936), barParticipants: 1);
+      await pump(tester, size: const Size(1440, 600), barParticipants: 1);
 
-      // 936 less the bar's 166 and the 8 gap leaves 762, which caps the width
-      // at 1354.7 — narrower than the 1424 the padding leaves.
-      const height = 936.0 - 166 - 8;
+      // 600 less the bar's 125 and the 8 gap leaves 467, which allows 830 of
+      // width — well short of the 1424 the padding leaves, so the cap binds.
+      const height = 600.0 - 125 - 8;
       final stage = tester.getSize(_tile('stage'));
       expect(stage.height, height);
       expect(stage.width, closeTo(height * 16 / 9, 0.01));
     });
 
     testWidgets('is centred in the room it does not take', (tester) async {
-      await pump(tester, size: const Size(1440, 936), barParticipants: 1);
+      await pump(tester, size: const Size(1440, 600), barParticipants: 1);
 
       expect(tester.getCenter(_tile('stage')).dx, 720);
     });
@@ -121,18 +121,18 @@ void main() {
   });
 
   group('the bar', () {
-    for (final (size, tileSize) in const <(Size, Size)>[
-      (Size(400, 656), Size(188, 141)),
-      (Size(768, 880), Size(284, 160)),
-      (Size(1440, 936), Size(295, 166)),
+    for (final size in const [
+      Size(400, 656),
+      Size(768, 880),
+      Size(1440, 936),
     ]) {
-      testWidgets('draws ${tileSize}px tiles at ${size.width}px wide', (
+      testWidgets('draws the same tiles at ${size.width}px wide', (
         tester,
       ) async {
         await pump(tester, size: size, barParticipants: 2);
 
-        expect(tester.getSize(_tile('bar0')), tileSize);
-        expect(tester.getSize(_tile('bar1')), tileSize);
+        expect(tester.getSize(_tile('bar0')), const Size(222, 125));
+        expect(tester.getSize(_tile('bar1')), const Size(222, 125));
       });
     }
 
@@ -145,11 +145,11 @@ void main() {
     testWidgets('bleeds off both edges once they do not', (tester) async {
       await pump(tester, size: const Size(400, 656), barParticipants: 3);
 
-      // 3 × 188 plus two 8px gaps is 580, wider than the 384 the padding
+      // 3 x 222 plus two 8px gaps is 682, wider than the 384 the padding
       // leaves, so the row starts flush and scrolls instead of centring.
       expect(tester.getTopLeft(_tile('bar0')).dx, 8);
       final bar = tester.state<ScrollableState>(find.byType(Scrollable));
-      expect(bar.position.maxScrollExtent, 580 - 384);
+      expect(bar.position.maxScrollExtent, 682 + 16 - 400);
     });
 
     testWidgets('runs to the edge of the view when it overflows', (
@@ -170,9 +170,9 @@ void main() {
         barAlignment: ParticipantsBarAlignment.right,
       );
 
-      expect(tester.getSize(_tile('bar0')), const Size(284, 160));
+      expect(tester.getSize(_tile('bar0')), const Size(222, 125));
       // The stage keeps the rest: 1024 less the padding, the bar and the gap.
-      expect(tester.getSize(_tile('stage')).width, 1024 - 16 - 284 - 8);
+      expect(tester.getSize(_tile('stage')).width, 1024 - 16 - 222 - 8);
     });
 
     testWidgets('scales down rather than crowding out the stage', (
@@ -180,11 +180,11 @@ void main() {
     ) async {
       await pump(tester, size: const Size(400, 300), barParticipants: 1);
 
-      // A third of 300 is 100, so the 141-high tile scales to it.
+      // A third of 300 is 100, so the 125-high tile scales to it.
       expect(tester.getSize(_tile('bar0')).height, 100);
       expect(
         tester.getSize(_tile('bar0')).width,
-        closeTo(188 * 100 / 141, 0.01),
+        closeTo(222 * 100 / 125, 0.01),
       );
     });
   });
@@ -196,7 +196,7 @@ void main() {
         size: const Size(400, 656),
         barParticipants: 1,
         style: const StreamCallParticipantsSpotlightStyle(
-          compactBarTileSize: Size(120, 90),
+          barTileSize: Size(120, 90),
         ),
       );
 
@@ -211,9 +211,9 @@ void main() {
         style: const StreamCallParticipantsSpotlightStyle(spacing: 24),
       );
 
-      expect(tester.getSize(_tile('bar0')), const Size(188, 141));
+      expect(tester.getSize(_tile('bar0')), const Size(222, 125));
       // The gap grew but the padding did not: the stage loses the extra 16.
-      expect(tester.getSize(_tile('stage')).height, 656 - 141 - 24);
+      expect(tester.getSize(_tile('stage')).height, 656 - 125 - 24);
     });
   });
 }

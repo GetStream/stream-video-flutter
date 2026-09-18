@@ -15,9 +15,8 @@ enum ParticipantsBarAlignment { top, bottom, left, right }
 /// [StreamCallParticipantsSpotlightStyle.maxSpotlightAspectRatio]: a view wider
 /// than that leaves room to either side of the stage rather than stretching it.
 ///
-/// The bar's tiles are a fixed size per [StreamScreenSize]. They are centred
-/// while they fit, and once they do not the bar runs to the edge of the view
-/// and scrolls.
+/// The bar's tiles are a fixed size. They are centred while they fit, and once
+/// they do not the bar runs to the edge of the view and scrolls.
 class CallParticipantsSpotlightView extends StatelessWidget {
   const CallParticipantsSpotlightView({
     super.key,
@@ -70,7 +69,6 @@ class CallParticipantsSpotlightView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = context.streamScreenSize;
     final style = _StreamCallParticipantsSpotlightStyleDefaults(
       context,
       StreamCallParticipantsSpotlightTheme.of(context).style,
@@ -119,7 +117,7 @@ class CallParticipantsSpotlightView extends StatelessWidget {
           }
 
           final tileSize = _resolveBarTileSize(
-            style.barTileSizeFor(screenSize),
+            style.barTileSize,
             constraints,
             isHorizontal: isHorizontal,
           );
@@ -286,20 +284,5 @@ class _StreamCallParticipantsSpotlightStyleDefaults
       _style?.maxSpotlightAspectRatio ?? 16 / 9;
 
   @override
-  Size get compactBarTileSize =>
-      _style?.compactBarTileSize ?? const Size(188, 141);
-
-  @override
-  Size get barTileSize => _style?.barTileSize ?? const Size(284, 160);
-
-  @override
-  Size get expandedBarTileSize =>
-      _style?.expandedBarTileSize ?? const Size(295, 166);
-
-  /// The size a bar tile takes at [screenSize].
-  Size barTileSizeFor(StreamScreenSize screenSize) => switch (screenSize) {
-    StreamScreenSize.small => compactBarTileSize,
-    StreamScreenSize.medium => barTileSize,
-    StreamScreenSize.large => expandedBarTileSize,
-  };
+  Size get barTileSize => _style?.barTileSize ?? const Size(222, 125);
 }

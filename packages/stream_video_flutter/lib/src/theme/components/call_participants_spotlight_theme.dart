@@ -13,13 +13,13 @@ part 'call_participants_spotlight_theme.g.theme.dart';
 ///
 /// {@tool snippet}
 ///
-/// Give the bar taller tiles than the default on a phone:
+/// Give the bar larger tiles than the default:
 ///
 /// ```dart
 /// StreamCallParticipantsSpotlightTheme(
 ///   data: StreamCallParticipantsSpotlightThemeData(
 ///     style: StreamCallParticipantsSpotlightStyle(
-///       compactBarTileSize: Size(212, 159),
+///       barTileSize: Size(284, 160),
 ///     ),
 ///   ),
 ///   child: child,
@@ -98,8 +98,7 @@ class StreamCallParticipantsSpotlightThemeData
 /// Visual styling properties for a [CallParticipantsSpotlightView].
 ///
 /// The layout is a stage and a bar of the participants who are not on it. The
-/// bar's tile size follows the window's [StreamScreenSize], so it comes in one
-/// property per breakpoint; the stage takes whatever the bar leaves.
+/// bar's tiles are a fixed size and the stage takes whatever they leave.
 ///
 /// Deliberately small. The tiles are `StreamParticipantTile`s, so their
 /// surface, corner radius and name pill come from `StreamParticipantTileTheme`
@@ -113,9 +112,7 @@ class StreamCallParticipantsSpotlightStyle
     this.padding,
     this.spacing,
     this.maxSpotlightAspectRatio,
-    this.compactBarTileSize,
     this.barTileSize,
-    this.expandedBarTileSize,
   });
 
   /// Padding around the stage and the bar together.
@@ -143,20 +140,14 @@ class StreamCallParticipantsSpotlightStyle
   /// Defaults to `16 / 9`.
   final double? maxSpotlightAspectRatio;
 
-  /// The size of a bar tile at [StreamScreenSize.small].
+  /// The size of a bar tile.
   ///
-  /// Defaults to `Size(188, 141)`.
-  final Size? compactBarTileSize;
-
-  /// The size of a bar tile at [StreamScreenSize.medium].
+  /// The same at every size: the bar carries the people who are not on the
+  /// stage, and how much room the window has says nothing about how large they
+  /// need to be.
   ///
-  /// Defaults to `Size(284, 160)`.
+  /// Defaults to `Size(222, 125)`.
   final Size? barTileSize;
-
-  /// The size of a bar tile at [StreamScreenSize.large].
-  ///
-  /// Defaults to `Size(295, 166)`.
-  final Size? expandedBarTileSize;
 
   /// Linearly interpolate between two styles.
   static StreamCallParticipantsSpotlightStyle? lerp(
