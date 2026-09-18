@@ -18,6 +18,30 @@ final _logger = taggedLogger(tag: 'SV:CallState:Sfu');
 String _participantKey(String userId, String sessionId) => '$userId:$sessionId';
 
 mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
+  /// Rewrites the participant list through [update], writing the state only if
+  /// some participant came back a different instance.
+  ///
+  /// [update] returns the participant it was given to mean "nothing to do".
+  void _updateParticipants(
+    CallParticipantState Function(CallParticipantState participant) update,
+  ) {
+    final participants = state.callParticipants;
+    List<CallParticipantState>? updated;
+
+    for (var index = 0; index < participants.length; index++) {
+      final participant = participants[index];
+      final next = update(participant);
+      if (identical(next, participant)) continue;
+
+      updated ??= [...participants];
+      updated[index] = next;
+    }
+
+    if (updated == null) return;
+
+    state = state.copyWith(callParticipants: updated);
+  }
+
   void sfuParticipantLeft(
     SfuParticipantLeftEvent event,
   ) {
@@ -142,8 +166,7 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
         _participantKey(level.userId, level.sessionId): level,
     };
 
-    var changed = false;
-    final participants = state.callParticipants.map((participant) {
+    _updateParticipants((participant) {
       final levelInfo =
           levelsByParticipant[_participantKey(
             participant.userId,
@@ -159,16 +182,11 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
         return participant;
       }
 
-      changed = true;
       return participant.copyWithUpdatedAudioLevels(
         audioLevel: levelInfo.level,
         isSpeaking: levelInfo.isSpeaking,
       );
-    }).toList();
-
-    if (!changed) return;
-
-    state = state.copyWith(callParticipants: participants);
+    });
   }
 
   void sfuDominantSpeakerChanged(
@@ -178,37 +196,20 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
       () => '[sfuDominantSpeakerChanged] ${state.sessionId}; event: $event',
     );
 
-    // Nothing stops two participants carrying the flag — `sfuJoinResponse` and
-    // `sfuParticipantUpdated` both take it straight off the wire — so this only
-    // skips the pass when the event's participant is the sole one marked.
-    final flagged = state.callParticipants
-        .where((participant) => participant.isDominantSpeaker)
-        .toList();
+    _updateParticipants((participant) {
+      // Every participant is checked, not just the one the event names:
+      // nothing stops two carrying the flag, since `sfuJoinResponse` and
+      // `sfuParticipantUpdated` both take it straight off the wire.
+      final isDominantSpeaker =
+          participant.userId == event.userId &&
+          participant.sessionId == event.sessionId;
 
-    if (flagged.length == 1 &&
-        flagged.first.userId == event.userId &&
-        flagged.first.sessionId == event.sessionId) {
-      return;
-    }
-
-    state = state.copyWith(
-      callParticipants: state.callParticipants.map((participant) {
-        // Mark the new dominant speaker
-        if (participant.userId == event.userId &&
-            participant.sessionId == event.sessionId) {
-          return participant.copyWith(
-            isDominantSpeaker: true,
-          );
-        }
-        // Unmark the old dominant speaker
-        if (participant.isDominantSpeaker) {
-          return participant.copyWith(
-            isDominantSpeaker: false,
-          );
-        }
+      if (isDominantSpeaker == participant.isDominantSpeaker) {
         return participant;
-      }).toList(),
-    );
+      }
+
+      return participant.copyWith(isDominantSpeaker: isDominantSpeaker);
+    });
   }
 
   /// Records whether the SFU considers this call end-to-end encrypted.
@@ -223,8 +224,7 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
       for (final pin in pins) _participantKey(pin.userId, pin.sessionId),
     };
 
-    var changed = false;
-    final participants = state.callParticipants.map((participant) {
+    _updateParticipants((participant) {
       final isPinned = pinnedKeys.contains(
         _participantKey(participant.userId, participant.sessionId),
       );
@@ -235,7 +235,6 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
         // the time it was pinned at.
         if (serverPin) return participant;
 
-        changed = true;
         return participant.copyWithPin(
           participantPin: CallParticipantPin(
             isLocalPin: false,
@@ -244,17 +243,10 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
         );
       }
 
-      if (serverPin) {
-        changed = true;
-        return participant.copyWithPin(participantPin: null);
-      }
+      if (serverPin) return participant.copyWithPin(participantPin: null);
 
       return participant;
-    }).toList();
-
-    if (!changed) return;
-
-    state = state.copyWith(callParticipants: participants);
+    });
   }
 
   void sfuConnectionQualityChanged(
@@ -267,8 +259,7 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
         _participantKey(update.userId, update.sessionId): update,
     };
 
-    var changed = false;
-    final participants = state.callParticipants.map((participant) {
+    _updateParticipants((participant) {
       final update =
           updatesByParticipant[_participantKey(
             participant.userId,
@@ -281,13 +272,8 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
       );
       if (quality == participant.connectionQuality) return participant;
 
-      changed = true;
       return participant.copyWith(connectionQuality: quality);
-    }).toList();
-
-    if (!changed) return;
-
-    state = state.copyWith(callParticipants: participants);
+    });
   }
 
   void sfuParticipantJoined(
@@ -406,8 +392,7 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
           .add(inboundState);
     }
 
-    var changed = false;
-    final participants = state.callParticipants.map((participant) {
+    _updateParticipants((participant) {
       final inboundStates =
           statesByParticipant[_participantKey(
             participant.userId,
@@ -434,14 +419,9 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
         return participant;
       }
 
-      changed = true;
       return participant.copyWith(
         pausedTracks: pausedTracks,
       );
-    }).toList();
-
-    if (!changed) return;
-
-    state = state.copyWith(callParticipants: participants);
+    });
   }
 }
