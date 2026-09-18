@@ -83,10 +83,19 @@ class CallParticipantState extends Equatable
   final SfuParticipantSource? participantSource;
   final bool isOnline;
 
-  /// The latest audio level for the user.
+  /// The user's most recent audio level while they were above the speaking
+  /// threshold.
+  ///
+  /// Updates stop while a participant is silent, so this holds at the reading
+  /// that took them below the threshold rather than tracking every quiet
+  /// sample. Use [isSpeaking] to tell the two apart.
   final double audioLevel;
 
-  /// List of the last 10 audio levels.
+  /// The last 10 values [audioLevel] took, oldest first.
+  ///
+  /// Unmodifiable — a participant's identity is how the SDK detects change, so
+  /// mutating this in place would leave the UI stale rather than update it.
+  /// Build a new list instead.
   final List<double> audioLevels;
 
   /// A list of tracks that are currently paused by our servers.
@@ -111,7 +120,9 @@ class CallParticipantState extends Equatable
   /// an unmodifiable view makes that an error rather than a silently stale UI.
   static List<double> _sealLevels(List<double> levels) {
     if (levels is UnmodifiableListView<double>) return levels;
-    return UnmodifiableListView(levels);
+    // Copied, not just wrapped: a view would still write through to whatever
+    // list the caller passed in and kept a reference to.
+    return UnmodifiableListView(List<double>.of(levels));
   }
 
   String get uniqueParticipantKey => '$userId-$sessionId';

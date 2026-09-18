@@ -151,4 +151,36 @@ void main() {
 
     verify(() => otherCall.participantsStream).called(1);
   });
+
+  testWidgets('falls back to the current state when the stream errors', (
+    tester,
+  ) async {
+    when(() => callState.callParticipants).thenReturn([_participant('alice')]);
+
+    var built = <CallParticipantState>[];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CallParticipantsBuilder(
+          call: call,
+          builder: (context, participants) {
+            built = participants;
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+
+    participants.addError('boom');
+    await tester.pump();
+
+    expect(
+      built.map((it) => it.userId),
+      ['alice'],
+      reason:
+          'an error snapshot carries no data, so the widget has to fall '
+          'back rather than throw a null check over the real error',
+    );
+    expect(tester.takeException(), isNull);
+  });
 }

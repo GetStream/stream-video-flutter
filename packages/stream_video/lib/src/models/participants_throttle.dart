@@ -1,10 +1,12 @@
 /// How long `Call.participantsStream` holds participant updates back, given
 /// how many participants the call currently has.
 ///
-/// See `CallPreferences.participantsThrottleInterval`.
-typedef ParticipantsThrottleInterval = Duration Function(int participantCount);
+/// See `CallPreferences.participantsThrottleIntervalResolver`.
+typedef ParticipantsThrottleIntervalResolver =
+    Duration Function(int participantCount);
 
-/// The interval `Call.participantsStream` uses unless a call overrides it.
+/// The interval `Call.participantsStream` uses unless a call overrides it:
+/// roughly a frame below 16 participants, widening to a second at 100 or more.
 ///
 /// The tiers were taken from stream-video-swift's
 /// `CollectionDelayedUpdateObserver` (v1.52.0, September 2026). Nothing in this

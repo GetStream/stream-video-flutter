@@ -76,9 +76,10 @@ mixin CallParticipantsSortingMixin<T extends StatefulWidget> on State<T> {
 
     _sortedParticipantKeys = sortedKeys;
 
-    // The state layer hands back the same participant instance when an event
-    // leaves that participant untouched, so identity is enough to tell whether
-    // anything on screen would actually differ.
+    // The SFU state handlers hand back the same participant instance when an
+    // event leaves that participant untouched, so identical instances mean
+    // nothing on screen changed. Only sufficient, never necessary: a handler
+    // that stops preserving identity costs a repaint here, not correctness.
     final unchanged =
         identical(screenShareParticipant, _screenShareParticipant) &&
         sortedParticipants.length == _participants.length &&

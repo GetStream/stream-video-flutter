@@ -11,8 +11,10 @@ import 'state_pending_tracks_mixin.dart';
 
 final _logger = taggedLogger(tag: 'SV:CallState:Sfu');
 
-/// Identifies a participant the way the SFU does: a user can be in the same
-/// call from several devices, so the session is part of the identity.
+/// Keys a participant for lookup within one event.
+///
+/// `userId` alone is not unique — a user can be in the call from several
+/// devices — so the session is part of the key.
 String _participantKey(String userId, String sessionId) => '$userId:$sessionId';
 
 mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
@@ -148,9 +150,10 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
             participant.sessionId,
           )];
 
-      // A participant who was silent and still is keeps their existing
-      // instance, so the list stays identical. Their `audioLevel` and
-      // `audioLevels` hold at the last value from while they were speaking.
+      // A participant the event does not mention, or who was silent and still
+      // is, keeps their existing instance. The event that takes them below the
+      // speaking threshold is still applied, so their `audioLevel` and
+      // `audioLevels` hold at that reading until they speak again.
       if (levelInfo == null ||
           (!levelInfo.isSpeaking && !participant.isSpeaking)) {
         return participant;
@@ -229,8 +232,7 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
 
       if (isPinned) {
         // `pinnedAt` orders pinned participants, so an already-pinned one keeps
-        // the time it was pinned at rather than jumping to the front of the
-        // order on every pins event.
+        // the time it was pinned at.
         if (serverPin) return participant;
 
         changed = true;
@@ -348,7 +350,14 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
           it.userId == participant.userId &&
           it.sessionId == participant.sessionId,
     );
-    if (!isKnown) return;
+    if (!isKnown) {
+      _logger.w(
+        () =>
+            '[sfuParticipantUpdated] dropped, unknown participant '
+            '${participant.userId}/${participant.sessionId}',
+      );
+      return;
+    }
 
     final participants = state.callParticipants.map((it) {
       if (it.userId == participant.userId &&

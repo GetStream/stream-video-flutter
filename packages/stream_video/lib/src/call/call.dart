@@ -434,8 +434,9 @@ class Call {
     return _stateManager.partialCallStateStream(selector);
   }
 
-  /// The participants in this call, rate-limited at an interval that grows with
-  /// the participant count.
+  /// The participants in this call, rate-limited by
+  /// [CallPreferences.participantsThrottleIntervalResolver], which by default
+  /// returns a longer interval the more participants there are.
   ///
   /// Prefer this over `partialState((state) => state.callParticipants)` for
   /// anything that renders the list: in a large call the raw state emits far
@@ -444,15 +445,53 @@ class Call {
   /// they join keeps working.
   ///
   /// One window is shared by every listener, so two widgets rendering the same
-  /// call always show the same list. It carries the latest value, which a new
-  /// listener receives on subscribing.
+  /// call always show the same list. A new listener starts from the current
+  /// [CallState.callParticipants] rather than from the last window, so it never
+  /// begins on a list older than the state it was built against.
   ///
-  /// The interval comes from [CallPreferences.participantsThrottleInterval],
-  /// read the first time this is used; set it to null to emit every update.
+  /// The interval comes from
+  /// [CallPreferences.participantsThrottleIntervalResolver], read the first
+  /// time this is used; set it to null to emit every change.
   late final Stream<List<CallParticipantState>> participantsStream =
-      _participantsSubject.stream;
+      _buildParticipantsStream();
 
-  // Closed when the state it reads from closes; nothing else owns it.
+  /// Each listener is given the live participant list first, then the shared
+  /// throttled ones.
+  ///
+  /// The subject replays the list the last window closed on, which can be older
+  /// than the state a listener is starting from — forwarding it would walk the
+  /// list backwards for up to one interval. That replay is dropped, and so is
+  /// any later value the listener has already been given.
+  Stream<List<CallParticipantState>> _buildParticipantsStream() {
+    return Stream<List<CallParticipantState>>.multi(
+      (controller) {
+        var latest = _stateManager.callState.callParticipants;
+        controller.add(latest);
+
+        var replayed = false;
+        final subscription = _participantsSubject.stream.listen(
+          (value) {
+            // The subject always opens with its current value.
+            if (!replayed) {
+              replayed = true;
+              return;
+            }
+            if (identical(value, latest)) return;
+            latest = value;
+            controller.add(value);
+          },
+          onError: controller.addError,
+          onDone: controller.close,
+        );
+
+        controller.onCancel = subscription.cancel;
+      },
+      isBroadcast: true,
+    );
+  }
+
+  // Lives as long as this call: nothing closes `callStateStream` today, so the
+  // `onDone` below is a teardown path rather than one that runs in practice.
   // ignore: close_sinks
   late final BehaviorSubject<List<CallParticipantState>> _participantsSubject =
       _buildParticipantsSubject();
@@ -463,8 +502,10 @@ class Call {
     );
 
     final participants = partialState((state) => state.callParticipants);
-    final interval =
-        _stateManager.callState.preferences.participantsThrottleInterval;
+    final interval = _stateManager
+        .callState
+        .preferences
+        .participantsThrottleIntervalResolver;
 
     // Kept for the lifetime of the call, like the state it reads from.
     // ignore: cancel_subscriptions

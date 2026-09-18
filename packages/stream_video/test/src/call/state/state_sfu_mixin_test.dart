@@ -431,4 +431,150 @@ void main() {
       );
     });
   });
+
+  group('guard regressions', () {
+    test('applies the event that takes a speaker below the threshold', () {
+      final notifier = _notifier([
+        _participant(userId: 'alice', isSpeaking: true),
+      ]);
+      final before = notifier.callState.callParticipants;
+
+      notifier.sfuUpdateAudioLevelChanged(
+        const SfuAudioLevelChangedEvent(
+          audioLevels: [
+            SfuAudioLevel(
+              userId: 'alice',
+              sessionId: 'alice-session',
+              level: 0.05,
+              isSpeaking: false,
+            ),
+          ],
+        ),
+      );
+
+      final alice = notifier.callState.callParticipants.single;
+      expect(
+        alice.isSpeaking,
+        isFalse,
+        reason:
+            'a speaker falling silent must still be written through, or '
+            'every speaking indicator latches on for the rest of the call',
+      );
+      expect(alice.audioLevel, 0.05);
+      expect(identical(notifier.callState.callParticipants, before), isFalse);
+    });
+
+    test('keeps a local pin when the server sends its pins', () {
+      final notifier = _notifier([_participant(userId: 'alice')]);
+      notifier.setParticipantPinned(
+        sessionId: 'alice-session',
+        userId: 'alice',
+        pinned: true,
+      );
+      final pinned = notifier.callState.callParticipants.single;
+      expect(pinned.pin!.isLocalPin, isTrue);
+
+      notifier.sfuPinsUpdated([]);
+
+      expect(
+        notifier.callState.callParticipants.single.pin,
+        isNotNull,
+        reason: "a pin the user placed is not the server's to clear",
+      );
+    });
+
+    test('an unspecified quality does not downgrade a known one', () {
+      final notifier = _notifier([
+        _participant(
+          userId: 'alice',
+          connectionQuality: SfuConnectionQuality.good,
+        ),
+      ]);
+      final before = notifier.callState.callParticipants;
+
+      notifier.sfuConnectionQualityChanged(
+        const SfuConnectionQualityChangedEvent(
+          connectionQualityUpdates: [
+            SfuConnectionQualityInfo(
+              userId: 'alice',
+              sessionId: 'alice-session',
+              connectionQuality: SfuConnectionQuality.unspecified,
+            ),
+          ],
+        ),
+      );
+
+      expect(
+        notifier.callState.callParticipants.single.connectionQuality,
+        SfuConnectionQuality.good,
+      );
+      expect(identical(notifier.callState.callParticipants, before), isTrue);
+    });
+
+    test('a no-op event does not push a new call state', () async {
+      final notifier = _notifier([_participant(userId: 'alice')]);
+
+      final seen = <CallState>[];
+      final sub = notifier.callStateStream.valueStream.listen(seen.add);
+      await Future<void>.delayed(Duration.zero);
+      seen.clear();
+
+      notifier.sfuUpdateAudioLevelChanged(
+        const SfuAudioLevelChangedEvent(
+          audioLevels: [
+            SfuAudioLevel(
+              userId: 'alice',
+              sessionId: 'alice-session',
+              level: 0.2,
+              isSpeaking: false,
+            ),
+          ],
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(
+        seen,
+        isEmpty,
+        reason:
+            'the call state is written unconditionally, so an identical '
+            'participant list is not enough to prove nothing was re-emitted',
+      );
+
+      await sub.cancel();
+    });
+  });
+
+  group('CallParticipantState.audioLevels', () {
+    test('keeps only the last 10 levels, newest last', () {
+      var participant = _participant(userId: 'alice');
+      for (var i = 1; i <= 12; i++) {
+        participant = participant.copyWithUpdatedAudioLevels(
+          audioLevel: i / 100,
+          isSpeaking: true,
+        );
+      }
+
+      expect(participant.audioLevels, hasLength(10));
+      expect(participant.audioLevels.last, 0.12);
+      expect(participant.audioLevels.first, 0.03);
+    });
+
+    test('cannot be mutated through the list handed to the constructor', () {
+      final levels = <double>[0.1];
+      final participant = _participant(
+        userId: 'alice',
+      ).copyWith(audioLevels: levels);
+
+      levels.add(0.9);
+
+      expect(
+        participant.audioLevels,
+        [0.1],
+        reason:
+            'the state copies, so a caller keeping the list cannot write '
+            'through it and leave identity unchanged',
+      );
+    });
+  });
 }

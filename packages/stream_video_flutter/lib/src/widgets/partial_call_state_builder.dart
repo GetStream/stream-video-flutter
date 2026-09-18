@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
+final _logger = taggedLogger(tag: 'SV:PartialCallStateBuilder');
+
 /// Convenience widget to build a part of the call screen based on a partial call state.
 ///
 /// It wraps a [StreamBuilder] and uses the [call] and the [selector] to
@@ -19,10 +21,24 @@ class PartialCallStateBuilder<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
+    return StreamBuilder<T>(
       stream: call.partialState(selector),
       initialData: selector(call.state.value),
-      builder: (context, snapshot) => builder(context, snapshot.data as T),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          // An error snapshot carries no data, so fall back to the current
+          // state rather than letting the cast below fail over the real error.
+          _logger.e(
+            () =>
+                '[PartialCallStateBuilder] partial state error: '
+                '${snapshot.error}',
+          );
+          return builder(context, selector(call.state.value));
+        }
+
+        // Not `??`: a selector whose `T` is nullable may legitimately hold null.
+        return builder(context, snapshot.data as T);
+      },
     );
   }
 }
@@ -31,8 +47,8 @@ class PartialCallStateBuilder<T> extends StatelessWidget {
 /// participants.
 ///
 /// Reads [Call.participantsStream], which is rate-limited by participant count,
-/// and seeds the first frame from `call.state.value.callParticipants` so
-/// nothing waits on the first throttle window.
+/// and seeds the first frame from `call.state.value.callParticipants`, since
+/// the stream delivers its first value asynchronously.
 ///
 /// Use this wherever the participants themselves get rendered. When only a
 /// derived value is needed — a count, whether anyone is speaking — select that
@@ -58,8 +74,8 @@ class CallParticipantsBuilder extends StatefulWidget {
 }
 
 class _CallParticipantsBuilderState extends State<CallParticipantsBuilder> {
-  // Held in state so one subscription spans every rebuild, and re-taken only
-  // when the call changes.
+  // Pins the stream identity across rebuilds, so `StreamBuilder` never tears
+  // down its subscription and restarts the throttle window.
   late Stream<List<CallParticipantState>> _participants =
       widget.call.participantsStream;
 
@@ -77,12 +93,23 @@ class _CallParticipantsBuilderState extends State<CallParticipantsBuilder> {
     return StreamBuilder<List<CallParticipantState>>(
       stream: _participants,
       initialData: widget.call.state.value.callParticipants,
-      // `StreamBuilder` builds an error snapshot with no data, so fall back to
-      // the current state rather than throwing a null check over the real error.
-      builder: (context, snapshot) => widget.builder(
-        context,
-        snapshot.data ?? widget.call.state.value.callParticipants,
-      ),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          // `StreamBuilder` builds an error snapshot with no data, so fall back
+          // to the current state rather than throwing a null check over the
+          // real error — but don't let the error itself go unrecorded.
+          _logger.e(
+            () =>
+                '[CallParticipantsBuilder] participantsStream error: '
+                '${snapshot.error}',
+          );
+        }
+
+        return widget.builder(
+          context,
+          snapshot.data ?? widget.call.state.value.callParticipants,
+        );
+      },
     );
   }
 }

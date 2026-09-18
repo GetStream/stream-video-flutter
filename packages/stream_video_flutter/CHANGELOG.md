@@ -2,13 +2,17 @@
 
 ### ✅ Added
 
-- Added `CallParticipantsBuilder`, which builds from `Call.participantsStream`, holds one subscription across rebuilds, and seeds its first frame from the current call state.
+- Added `CallParticipantsBuilder`, which builds from `Call.participantsStream`.
+
+### 🐞 Fixed
+
+- Fixed `PartialCallStateBuilder` throwing a cast error instead of surfacing a partial state error.
 
 ### 🔄 Changed
 
 - Participant list widgets now subscribe to `Call.participantsStream`, which is throttled by participant count.
 - `StreamCallParticipants` and `StreamLivestreamHosts` no longer rebuild when an update leaves the rendered participants unchanged.
-- `LivestreamContent` renders participants from `Call.participantsStream` instead of the raw call state. Call status is still read immediately.
+- `LivestreamContent` renders participants from `Call.participantsStream` instead of the raw call state.
 - `LivestreamBackstageContent` only rebuilds when the participant count changes.
 
 ## 1.6.0

@@ -268,10 +268,10 @@ void main() {
     });
   });
 
-  group('CallPreferences.participantsThrottleInterval', () {
+  group('CallPreferences.participantsThrottleIntervalResolver', () {
     test('defaults to the size-based tiers', () {
       expect(
-        DefaultCallPreferences().participantsThrottleInterval,
+        DefaultCallPreferences().participantsThrottleIntervalResolver,
         defaultParticipantsThrottleInterval,
       );
     });
@@ -279,19 +279,70 @@ void main() {
     test('can be overridden with a fixed interval', () {
       const fixed = Duration(milliseconds: 100);
       final preferences = DefaultCallPreferences(
-        participantsThrottleInterval: (_) => fixed,
+        participantsThrottleIntervalResolver: (_) => fixed,
       );
 
-      expect(preferences.participantsThrottleInterval!(1), fixed);
-      expect(preferences.participantsThrottleInterval!(500), fixed);
+      expect(preferences.participantsThrottleIntervalResolver!(1), fixed);
+      expect(preferences.participantsThrottleIntervalResolver!(500), fixed);
     });
 
     test('can be turned off', () {
       final preferences = DefaultCallPreferences(
-        participantsThrottleInterval: null,
+        participantsThrottleIntervalResolver: null,
       );
 
-      expect(preferences.participantsThrottleInterval, isNull);
+      expect(preferences.participantsThrottleIntervalResolver, isNull);
+    });
+  });
+
+  group('a hostile interval callback', () {
+    test('surfaces a throw as a stream error instead of stalling', () {
+      fakeAsync((async) {
+        // ignore: close_sinks
+        final source = StreamController<List<int>>();
+        final received = <List<int>>[];
+        final errors = <Object>[];
+
+        final subscription = source.stream
+            .throttleByCollectionSize(
+              interval: (size) => throw StateError('boom'),
+            )
+            .listen(received.add, onError: errors.add);
+
+        source.add([1]);
+        async.flushMicrotasks();
+        async.elapse(const Duration(seconds: 2));
+
+        expect(
+          errors,
+          hasLength(1),
+          reason:
+              'a throw reaching the zone would leave the stream silently '
+              'stalled with no window ever armed',
+        );
+        expect(errors.single, isStateError);
+        expect(received, isEmpty);
+
+        subscription.cancel();
+        async.flushMicrotasks();
+      });
+    });
+
+    test('treats a negative interval as zero', () {
+      _throttled((_) => const Duration(milliseconds: -100), (
+        async,
+        source,
+        received,
+        done,
+      ) {
+        source.add([1]);
+        async.flushMicrotasks();
+        async.elapse(Duration.zero);
+
+        expect(received, [
+          [1],
+        ]);
+      });
     });
   });
 }

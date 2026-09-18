@@ -69,13 +69,14 @@ abstract class CallPreferences {
   /// A large call emits participant updates far faster than a screen can
   /// usefully repaint, so the default returns a longer interval the more
   /// participants there are. Return a shorter one to trade CPU for latency, or
-  /// set this to `null` to emit every update.
+  /// set this to `null` to emit every change.
   ///
-  /// This does not affect `CallState.callParticipants`, which is always
-  /// up to date. It is read each time `Call.participantsStream` is used, so
-  /// changing it through `updateCallPreferences` reaches new listeners but
-  /// leaves existing ones on the interval they subscribed with.
-  ParticipantsThrottleInterval? get participantsThrottleInterval;
+  /// This does not affect `CallState.callParticipants`, which is always up to
+  /// date. It is read once, the first time `Call.participantsStream` is used;
+  /// changing it through `updateCallPreferences` after that has no effect for
+  /// that call.
+  ParticipantsThrottleIntervalResolver?
+  get participantsThrottleIntervalResolver;
 
   /// Supplies the shared key for this call when no `EncryptionManager` has been
   /// attached to it by hand.
@@ -112,7 +113,8 @@ class DefaultCallPreferences implements CallPreferences {
     this.closedCaptionsVisibleCaptions = 2,
     this.videoModerationConfig = const VideoModerationConfig.disabled(),
     this.audioConfigurationPolicy,
-    this.participantsThrottleInterval = defaultParticipantsThrottleInterval,
+    this.participantsThrottleIntervalResolver =
+        defaultParticipantsThrottleInterval,
     this.encryptionKeyResolver,
   });
 
@@ -206,11 +208,12 @@ class DefaultCallPreferences implements CallPreferences {
 
   /// How long `Call.participantsStream` holds participant updates back, as a
   /// function of the participant count. See
-  /// [CallPreferences.participantsThrottleInterval].
+  /// [CallPreferences.participantsThrottleIntervalResolver].
   ///
   /// Defaults to [defaultParticipantsThrottleInterval].
   @override
-  final ParticipantsThrottleInterval? participantsThrottleInterval;
+  final ParticipantsThrottleIntervalResolver?
+  participantsThrottleIntervalResolver;
 
   /// Supplies the shared key for this call when no manager was attached by
   /// hand. See [CallPreferences.encryptionKeyResolver].
