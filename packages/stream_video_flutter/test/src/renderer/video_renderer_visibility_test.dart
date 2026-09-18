@@ -8,275 +8,383 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../../test_utils/test_wrapper.dart';
 import '../mocks.dart';
 
-// A VisibilityDetector reports what changed about itself, once. Everything the
-// SDK knows about which tiles are on screen rests on those reports arriving, so
-// a renderer showing a participant the call state does not have as visible
-// says so again — and one that is off screen keeps quiet, so two renderers
-// disagreeing settle instead of arguing.
+// A renderer reports only what it measures of itself, through the
+// `ViewportVisibilityReporter` it wraps its child in, into the call's viewport
+// registry. What the participant's visibility and subscription become is the
+// registry's to decide, over every renderer drawing them — these tests are
+// about what each renderer puts in, and that it goes in at a safe moment.
 
 void main() {
-  setUpAll(() {
-    registerFallbackValue(ViewportVisibility.unknown);
-    registerFallbackValue(SfuTrackType.video);
-  });
-
   setUp(() {
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
   });
 
   CallParticipantState participant({
-    required ViewportVisibility visibility,
+    String userId = 'alice',
+    String? trackIdPrefix,
     double audioLevel = 0,
     Map<SfuTrackType, TrackState> publishedTracks = const {},
   }) {
     return CallParticipantState(
-      name: 'Alice',
-      userId: 'alice',
-      sessionId: 'alice-session',
+      name: userId,
+      userId: userId,
+      sessionId: '$userId-session',
       custom: const {},
       roles: const [],
-      trackIdPrefix: 'alice',
+      trackIdPrefix: trackIdPrefix ?? userId,
       audioLevel: audioLevel,
-      viewportVisibility: visibility,
       publishedTracks: publishedTracks,
     );
   }
 
-  MockCall callRecordingVisibility() {
+  /// A call whose registry hands every answer it reaches to [aggregates],
+  /// instead of writing call state and subscriptions.
+  MockCall callWithRegistry(List<ViewportAggregate> aggregates) {
     final call = MockCall();
     final state = MockCallState();
 
     when(() => call.state).thenAnswer(
       (_) => MutableStateEmitter<CallState>(state, sync: true),
     );
-    when(
-      () => call.updateViewportVisibility(
-        sessionId: any(named: 'sessionId'),
-        userId: any(named: 'userId'),
-        visibility: any(named: 'visibility'),
-        trackType: any(named: 'trackType'),
+    when(() => call.viewportVisibility).thenReturn(
+      ViewportVisibilityRegistry(
+        onAggregate: (aggregate) async {
+          aggregates.add(aggregate);
+          return true;
+        },
       ),
-    ).thenAnswer((_) async => const Result.success(none));
-    when(
-      () => call.updateSubscription(
-        userId: any(named: 'userId'),
-        sessionId: any(named: 'sessionId'),
-        trackIdPrefix: any(named: 'trackIdPrefix'),
-        trackType: any(named: 'trackType'),
-        videoDimension: any(named: 'videoDimension'),
-      ),
-    ).thenAnswer((_) async => const Result.success(none));
-    when(
-      () => call.removeSubscription(
-        userId: any(named: 'userId'),
-        sessionId: any(named: 'sessionId'),
-        trackIdPrefix: any(named: 'trackIdPrefix'),
-        trackType: any(named: 'trackType'),
-      ),
-    ).thenAnswer((_) async => const Result.success(none));
+    );
 
     return call;
-  }
-
-  List<ViewportVisibility> reported(MockCall call) {
-    return verify(
-      () => call.updateViewportVisibility(
-        sessionId: any(named: 'sessionId'),
-        userId: any(named: 'userId'),
-        visibility: captureAny(named: 'visibility'),
-        trackType: any(named: 'trackType'),
-      ),
-    ).captured.cast<ViewportVisibility>();
   }
 
   Future<void> pumpTile(
     WidgetTester tester, {
     required Call call,
     required CallParticipantState participant,
-    bool offScreen = false,
   }) async {
-    final tile = SizedBox(
-      width: 300,
-      height: 200,
-      child: StreamParticipantTile(call: call, participant: participant),
-    );
-
     await tester.pumpWidget(
       TestWrapper(
-        child: offScreen
-            // Laid out past the right edge of the test surface, so the
-            // detector measures none of it.
-            ? Stack(children: [Positioned(left: 5000, top: 0, child: tile)])
-            : tile,
+        child: SizedBox(
+          width: 300,
+          height: 200,
+          child: StreamParticipantTile(call: call, participant: participant),
+        ),
       ),
     );
 
-    // The detector defers its callbacks to the end of a frame, and the report
-    // is asynchronous from there.
+    // The detector defers its callbacks to the end of a frame, and a report
+    // from a rebuild is deferred again from there.
     await tester.pump();
     await tester.pump();
   }
 
-  // The report writes call state, and the SDK's state emitter is synchronous:
-  // anything listening for participants — the participants view, through
-  // `CallParticipantsSortingMixin` — is asked to rebuild on the emitting stack.
-  // Made while this renderer is being rebuilt, that lands in the middle of a
-  // frame whose build has already passed the listener, and Flutter throws
-  // `setState() or markNeedsBuild() called during build`.
+  testWidgets('a tile on screen is reported visible, at the size it draws', (
+    tester,
+  ) async {
+    final aggregates = <ViewportAggregate>[];
+
+    await pumpTile(
+      tester,
+      call: callWithRegistry(aggregates),
+      participant: participant(),
+    );
+
+    expect(aggregates.single.visibility, ViewportVisibility.visible);
+    expect(aggregates.single.dimension.isEmpty, isFalse);
+  });
+
+  // The case a single shared field could never hold: the same participant
+  // drawn twice, in two places that do not agree.
+  testWidgets('a second renderer leaving the screen does not hide the '
+      'participant', (tester) async {
+    final aggregates = <ViewportAggregate>[];
+    final call = callWithRegistry(aggregates);
+    final alice = participant();
+
+    final scroll = ScrollController();
+    addTearDown(scroll.dispose);
+
+    await tester.pumpWidget(
+      TestWrapper(
+        child: Column(
+          children: [
+            // The grid, which shows the participant throughout.
+            SizedBox(
+              width: 300,
+              height: 200,
+              child: StreamParticipantTile(call: call, participant: alice),
+            ),
+            // The same participant in a strip that scrolls, as a livestream's
+            // hosts or a filmstrip beside the speaker do. A quarter of the
+            // grid's area, so what it asks for is not what the grid needs.
+            SizedBox(
+              width: 150,
+              height: 100,
+              child: ListView(
+                controller: scroll,
+                children: [
+                  SizedBox(
+                    height: 100,
+                    child: StreamParticipantTile(
+                      call: call,
+                      participant: alice,
+                      rendererScopePrefix: 'strip',
+                    ),
+                  ),
+                  const SizedBox(height: 2000),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    final dpr = tester.view.devicePixelRatio;
+    final gridSize = RtcVideoDimension(
+      width: (300 * dpr).toInt(),
+      height: (200 * dpr).toInt(),
+    );
+
+    // Both are showing them, and the larger of the two sizes the track.
+    expect(aggregates.last.visibility, ViewportVisibility.visible);
+    expect(
+      aggregates.last.dimension,
+      gridSize,
+      reason: 'the smaller strip pulled the grid tile down to its own size',
+    );
+
+    // The strip scrolls away. It measures nothing, and says so.
+    scroll.jumpTo(90);
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+      aggregates.map((aggregate) => aggregate.visibility),
+      everyElement(ViewportVisibility.visible),
+      reason: 'a renderer spoke for a participant another one was showing',
+    );
+    expect(
+      aggregates.last.dimension,
+      gridSize,
+      reason: 'the grid tile still needs the size it is drawing at',
+    );
+  });
+
+  // Acting on a report writes call state, and the SDK's state emitter is
+  // synchronous: anything listening for participants — the participants view,
+  // through `CallParticipantsSortingMixin` — is asked to rebuild on the
+  // emitting stack. Made while a renderer is being rebuilt, that lands in the
+  // middle of a frame whose build has already passed the listener, and Flutter
+  // throws `setState() or markNeedsBuild() called during build`.
   testWidgets('a report from a rebuild is made after the frame, not in it', (
     tester,
   ) async {
-    final call = callRecordingVisibility();
     final phases = <SchedulerPhase>[];
+    final call = callWithRegistry([]);
 
-    when(
-      () => call.updateViewportVisibility(
-        sessionId: any(named: 'sessionId'),
-        userId: any(named: 'userId'),
-        visibility: any(named: 'visibility'),
-        trackType: any(named: 'trackType'),
+    when(() => call.viewportVisibility).thenReturn(
+      ViewportVisibilityRegistry(
+        onAggregate: (_) async {
+          phases.add(SchedulerBinding.instance.schedulerPhase);
+          return true;
+        },
       ),
-    ).thenAnswer((_) async {
-      phases.add(SchedulerBinding.instance.schedulerPhase);
-      return const Result.success(none);
-    });
-
-    // The state still says unknown on the next build, so the renderer
-    // re-asserts what it measures from `didUpdateWidget`.
-    await pumpTile(
-      tester,
-      call: call,
-      participant: participant(visibility: ViewportVisibility.unknown),
     );
+
+    // A track published under a tile that is already on screen: the report
+    // comes out of `didUpdateWidget`, mid-build.
+    await pumpTile(tester, call: call, participant: participant());
     await pumpTile(
       tester,
       call: call,
       participant: participant(
-        visibility: ViewportVisibility.unknown,
-        audioLevel: 0.4,
+        publishedTracks: {SfuTrackType.video: TrackState.remote()},
       ),
     );
 
     expect(phases, isNotEmpty);
     expect(
       phases,
-      everyElement(isNot(SchedulerPhase.persistentCallbacks)),
-      reason: 'a report was made while the frame was being built',
+      everyElement(
+        anyOf(SchedulerPhase.postFrameCallbacks, SchedulerPhase.idle),
+      ),
+      reason: 'a report was made from inside the frame',
     );
   });
 
-  // A published track is the one thing a [VisibilityDetector] has nothing to
-  // say about: the tile was already on screen, so nothing it measures changed.
-  // What is new is that there is now a track to size, and dynascale learns the
-  // size from this report — so it is made even though the call state has the
-  // participant as visible already and the visibility itself is unchanged.
-  testWidgets('a track published under a visible tile is sized', (
+  // Nothing the renderer measures changes when a track appears — it has been
+  // drawing a placeholder the same size all along — so without asking for the
+  // answer again, the track would never be subscribed at any size.
+  testWidgets('a track published under a visible tile is sized again', (
     tester,
   ) async {
-    final call = callRecordingVisibility();
+    final aggregates = <ViewportAggregate>[];
+    final call = callWithRegistry(aggregates);
 
-    await pumpTile(
-      tester,
-      call: call,
-      participant: participant(visibility: ViewportVisibility.visible),
-    );
+    await pumpTile(tester, call: call, participant: participant());
+    aggregates.clear();
+
     await pumpTile(
       tester,
       call: call,
       participant: participant(
-        visibility: ViewportVisibility.visible,
         publishedTracks: {SfuTrackType.video: TrackState.remote()},
       ),
     );
 
-    final dimensions = verify(
-      () => call.updateSubscription(
-        userId: any(named: 'userId'),
-        sessionId: any(named: 'sessionId'),
-        trackIdPrefix: any(named: 'trackIdPrefix'),
-        trackType: any(named: 'trackType'),
-        videoDimension: captureAny(named: 'videoDimension'),
-      ),
-    ).captured.cast<RtcVideoDimension?>();
-
-    expect(dimensions, isNotEmpty);
-    expect(dimensions.last, isNotNull);
-    expect(dimensions.last!.width, greaterThan(0));
-    expect(dimensions.last!.height, greaterThan(0));
+    expect(aggregates, hasLength(1));
+    expect(aggregates.single.visibility, ViewportVisibility.visible);
+    expect(aggregates.single.dimension.isEmpty, isFalse);
   });
 
-  testWidgets('a tile on screen is reported as visible', (tester) async {
-    final call = callRecordingVisibility();
-
-    await pumpTile(
-      tester,
-      call: call,
-      participant: participant(visibility: ViewportVisibility.unknown),
-    );
-
-    expect(reported(call), [ViewportVisibility.visible]);
-  });
-
-  testWidgets('a visible tile the call state does not have is reported again', (
+  testWidgets('a renderer that is gone stops speaking for the track', (
     tester,
   ) async {
-    final call = callRecordingVisibility();
+    final aggregates = <ViewportAggregate>[];
+    final call = callWithRegistry(aggregates);
 
-    // The state still says unknown on the next build: the first report was
-    // dropped — the call was reconnecting, or another renderer of the same
-    // participant reported zero as it went away.
-    await pumpTile(
-      tester,
-      call: call,
-      participant: participant(visibility: ViewportVisibility.unknown),
-    );
-    await pumpTile(
-      tester,
-      call: call,
-      participant: participant(
-        visibility: ViewportVisibility.unknown,
-        audioLevel: 0.4,
-      ),
-    );
+    await pumpTile(tester, call: call, participant: participant());
+    aggregates.clear();
 
-    expect(reported(call), [
-      ViewportVisibility.visible,
-      ViewportVisibility.visible,
-    ]);
+    await tester.pumpWidget(const TestWrapper(child: SizedBox()));
+    await tester.pump();
+
+    // A detector delivers one last, hidden report after it is gone, which
+    // lands after the release has already taken this viewport out.
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+      aggregates.single.visibility,
+      ViewportVisibility.hidden,
+      reason: 'the release is the last word for a viewport that is gone',
+    );
+    expect(aggregates.single.dimension.isEmpty, isTrue);
   });
 
-  testWidgets('nothing more is reported once the call state agrees', (
+  testWidgets('a renderer pointed at a new track speaks for that one', (
     tester,
   ) async {
-    final call = callRecordingVisibility();
+    final aggregates = <ViewportAggregate>[];
+    final call = callWithRegistry(aggregates);
 
+    await pumpTile(tester, call: call, participant: participant());
+    aggregates.clear();
+
+    // A migration hands the same participant a new track prefix. The viewport
+    // has not moved and measures exactly what it did before, so nothing but
+    // the track it is about has changed.
     await pumpTile(
       tester,
       call: call,
-      participant: participant(visibility: ViewportVisibility.unknown),
-    );
-    await pumpTile(
-      tester,
-      call: call,
-      participant: participant(visibility: ViewportVisibility.visible),
+      participant: participant(trackIdPrefix: 'alice-migrated'),
     );
 
-    expect(reported(call), [ViewportVisibility.visible]);
+    final spokenFor = aggregates.map((it) => it.track.trackIdPrefix).toSet();
+    expect(
+      spokenFor,
+      contains('alice-migrated'),
+      reason: 'the new track was never measured, so nothing subscribed it',
+    );
+    expect(
+      aggregates
+          .lastWhere((it) => it.track.trackIdPrefix == 'alice-migrated')
+          .visibility,
+      ViewportVisibility.visible,
+    );
+    expect(
+      aggregates
+          .lastWhere((it) => it.track.trackIdPrefix == 'alice')
+          .visibility,
+      ViewportVisibility.hidden,
+      reason: 'the track it stopped drawing was left recorded as on screen',
+    );
   });
 
-  testWidgets('a tile scrolled off screen is reported hidden once and left '
-      'alone', (tester) async {
-    final call = callRecordingVisibility();
+  testWidgets('a detector reporting after its renderer is gone is ignored', (
+    tester,
+  ) async {
+    // The timer path, which is what runs outside a test: a detector delivers
+    // one last, hidden report once its render object is gone, after the
+    // release has already taken this viewport out of the registry.
+    VisibilityDetectorController.instance.updateInterval = const Duration(
+      milliseconds: 500,
+    );
+
+    final aggregates = <ViewportAggregate>[];
+    final call = callWithRegistry(aggregates);
+
+    await tester.pumpWidget(
+      TestWrapper(
+        child: SizedBox(
+          width: 300,
+          height: 200,
+          child: StreamParticipantTile(call: call, participant: participant()),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+
+    expect(aggregates.single.visibility, ViewportVisibility.visible);
+    aggregates.clear();
+
+    await tester.pumpWidget(const TestWrapper(child: SizedBox()));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(
+      aggregates.single.visibility,
+      ViewportVisibility.hidden,
+      reason:
+          'a report after the release put the viewport back, with nothing '
+          'left alive to take it out again',
+    );
+  });
+
+  testWidgets(
+    'a renderer moved to another call stops speaking to the old one',
+    (
+      tester,
+    ) async {
+      final left = <ViewportAggregate>[];
+      final joined = <ViewportAggregate>[];
+
+      await pumpTile(
+        tester,
+        call: callWithRegistry(left),
+        participant: participant(),
+      );
+      left.clear();
+
+      await pumpTile(
+        tester,
+        call: callWithRegistry(joined),
+        participant: participant(),
+      );
+
+      expect(
+        left.single.visibility,
+        ViewportVisibility.hidden,
+        reason: 'the old call was left thinking the track is still on screen',
+      );
+      expect(joined.last.visibility, ViewportVisibility.visible);
+      expect(joined.last.dimension.isEmpty, isFalse);
+    },
+  );
+
+  testWidgets('a tile scrolled off screen is reported hidden once', (
+    tester,
+  ) async {
+    final aggregates = <ViewportAggregate>[];
+    final call = callWithRegistry(aggregates);
 
     final scroll = ScrollController();
     addTearDown(scroll.dispose);
-
-    // The state says visible throughout, as it would while a second renderer
-    // has the participant on screen. This one must not insist on hidden.
-    final current = ValueNotifier(
-      participant(visibility: ViewportVisibility.visible),
-    );
-    addTearDown(current.dispose);
 
     await tester.pumpWidget(
       TestWrapper(
@@ -287,13 +395,9 @@ void main() {
             children: [
               SizedBox(
                 height: 200,
-                child: ValueListenableBuilder(
-                  valueListenable: current,
-                  builder: (context, participant, child) =>
-                      StreamParticipantTile(
-                        call: call,
-                        participant: participant,
-                      ),
+                child: StreamParticipantTile(
+                  call: call,
+                  participant: participant(),
                 ),
               ),
               const SizedBox(height: 2000),
@@ -304,31 +408,16 @@ void main() {
     );
     await tester.pump();
     await tester.pump();
-
-    // On screen and recorded as such: there is nothing to report.
-    verifyNever(
-      () => call.updateViewportVisibility(
-        sessionId: any(named: 'sessionId'),
-        userId: any(named: 'userId'),
-        visibility: any(named: 'visibility'),
-        trackType: any(named: 'trackType'),
-      ),
-    );
+    aggregates.clear();
 
     // Only 30 of the tile's 200 pixels are left in the viewport.
     scroll.jumpTo(170);
     await tester.pump();
     await tester.pump();
 
-    // A rebuild while the state still disagrees: this is where a renderer
-    // showing the participant would insist, and this one may not.
-    current.value = participant(
-      visibility: ViewportVisibility.visible,
-      audioLevel: 0.4,
+    expect(
+      aggregates.map((aggregate) => aggregate.visibility),
+      [ViewportVisibility.hidden],
     );
-    await tester.pump();
-    await tester.pump();
-
-    expect(reported(call), [ViewportVisibility.hidden]);
   });
 }

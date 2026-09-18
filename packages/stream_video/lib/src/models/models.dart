@@ -30,5 +30,6 @@ export 'queried_members.dart';
 export 'subscription_change.dart';
 export 'user.dart';
 export 'user_info.dart';
+export 'viewport_measurement.dart';
 export 'viewport_visibility.dart';
 export 'visibility_change.dart';
