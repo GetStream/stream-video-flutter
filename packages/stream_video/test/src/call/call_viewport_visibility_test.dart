@@ -17,6 +17,7 @@ void main() {
   const aliceSession = 'alice-session';
   const localSession = 'local-session';
   const carolSession = 'carol-session';
+  const bobSession = 'bob-session';
 
   CallParticipantState participant({
     required String sessionId,
@@ -111,6 +112,7 @@ void main() {
             userId: 'carol',
             publishesVideo: false,
           ),
+          participant(sessionId: bobSession, userId: 'bob'),
         ],
       ),
     );
@@ -208,6 +210,51 @@ void main() {
     await settle();
 
     verifyNever(() => sfuClient.updateSubscriptions(any()));
+  });
+
+  // A viewport draws one track at a time. What it stops drawing is not what
+  // the call stops subscribing to — that depends on everyone else.
+  test(
+    'a viewport moved to another track unsubscribes the one it left',
+    () async {
+      grid.report(trackOf(aliceSession, 'alice'), showing(640, 360));
+      await settle();
+      expect(videoOf(aliceSession)!.subscribed, isTrue);
+
+      grid.report(trackOf(bobSession, 'bob'), showing(640, 360));
+      await settle();
+
+      expect(
+        videoOf(aliceSession)!.subscribed,
+        isFalse,
+        reason: 'nobody draws the track it left',
+      );
+      expect(videoOf(bobSession)!.subscribed, isTrue);
+    },
+  );
+
+  test('a track another viewport still shows keeps it, at that size', () async {
+    final alice = trackOf(aliceSession, 'alice');
+
+    grid.report(alice, showing(640, 360));
+    strip.report(alice, showing(160, 90));
+    await settle();
+
+    expect(
+      videoOf(aliceSession)!.videoDimension,
+      const RtcVideoDimension(width: 640, height: 360),
+      reason: 'the strip reported last, but the grid is the larger',
+    );
+
+    grid.report(trackOf(bobSession, 'bob'), showing(640, 360));
+    await settle();
+
+    expect(videoOf(aliceSession)!.subscribed, isTrue);
+    expect(
+      videoOf(aliceSession)!.videoDimension,
+      const RtcVideoDimension(width: 160, height: 90),
+      reason: 'the strip is the largest viewport left showing it',
+    );
   });
 
   test('a track on screen is told to the session a join creates', () async {
