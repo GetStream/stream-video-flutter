@@ -1748,9 +1748,8 @@ class Call {
         }),
       );
     }
-    // A join response rebuilds every participant from the SFU, and what it
-    // builds carries no viewport visibility. The viewports report what changes
-    // about them, so nothing on screen would be said again on its own.
+    // A join response rebuilds every participant carrying no viewport
+    // visibility, and viewports report only what changes about them.
     viewportVisibility.reapplyAll();
 
     _logger.v(() => '[join] completed');
@@ -4423,9 +4422,8 @@ class Call {
   /// showing it draws at — or is removed, once none does and no viewport asked
   /// to keep it.
   ///
-  /// Answers whether it landed. A report that did not is forgotten by the
-  /// registry, so the next measurement drives it again instead of being
-  /// deduplicated against a write that never happened.
+  /// Answers whether it landed; the registry forgets one that did not, so the
+  /// next measurement drives it again.
   Future<bool> _applyViewportAggregate(ViewportAggregate aggregate) async {
     final track = aggregate.track;
 
@@ -4434,9 +4432,8 @@ class Call {
       return false;
     }
 
-    // The visibility and the subscription are independent of each other, so
-    // one failing does not stop the other being tried; either failing means
-    // the aggregate did not land.
+    // Independent of each other: one failing does not stop the other being
+    // tried, and either failing means the aggregate did not land.
     var applied = true;
 
     final visibilityResult = await updateViewportVisibility(
@@ -4454,22 +4451,20 @@ class Call {
     }
 
     // A viewport can measure a track for somebody the call does not have yet,
-    // or has already lost. Not applied, so the participant list catching up
-    // drives it again.
+    // or has already lost. Not applied, so it is driven again.
     final participant = _participantBySessionId(track.sessionId);
     if (participant == null) {
       _logger.w(() => '[applyViewportAggregate] no participant for $track');
       return false;
     }
 
-    // Only a remote track is subscribed to; a local one is drawn from the
-    // camera it is already coming out of, and a track nobody has published yet
-    // has nothing to ask for.
+    // Only a remote track is subscribed to: a local one is already coming out
+    // of the camera, and an unpublished one has nothing to ask for.
     final trackState = participant.publishedTracks[track.trackType];
     if (trackState is! RemoteTrackState) return applied;
 
-    // Dropped once no viewport shows the track, rather than once the size
-    // comes out empty: a viewport drawing a sliver of a track still wants it.
+    // Dropped on the track being hidden, not on an empty size: a viewport
+    // drawing a sliver of one still wants it.
     final Result<None> subscriptionResult;
     if (!aggregate.visibility.isVisible && !aggregate.persistWhenHidden) {
       subscriptionResult = await removeSubscription(
@@ -4527,9 +4522,8 @@ class Call {
       return const Result.success(none);
     }
 
-    // Recorded before the session is told. The session debounces this and
-    // ends in the UI reading the same state back, so there is nothing to wait
-    // for.
+    // Recorded before the session is told, which debounces and ends in the UI
+    // reading this same state back, so there is nothing to wait for.
     _stateManager.participantUpdateViewportVisibility(
       sessionId: sessionId,
       userId: userId,

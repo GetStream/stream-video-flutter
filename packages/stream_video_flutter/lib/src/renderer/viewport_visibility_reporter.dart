@@ -7,12 +7,10 @@ import '../../stream_video_flutter.dart';
 /// Measures how much of [child] is on screen and at what size, and reports it
 /// to a [ViewportVisibilityRegistry] as one viewport's view of [track].
 ///
-/// Only ever about itself. A participant can be drawn in several places at
-/// once — a tile in the grid, a picture-in-picture overlay, a livestream's
-/// host strip — and what their visibility and subscription become is the
-/// registry's to decide across all of them. Wrap any widget drawing a
-/// participant's track in one of these and it takes part in that; draw one
-/// without and the call cannot tell the track is on screen.
+/// Only ever about itself; what the participant's visibility and subscription
+/// become is the registry's to decide across every viewport drawing them. Wrap
+/// a widget drawing a participant's track in one of these and it takes part in
+/// that; draw one without and the call cannot tell the track is on screen.
 class ViewportVisibilityReporter extends StatefulWidget {
   /// Creates a new instance of [ViewportVisibilityReporter].
   const ViewportVisibilityReporter({
@@ -32,10 +30,9 @@ class ViewportVisibilityReporter extends StatefulWidget {
   /// The track [child] draws.
   final ViewportTrack track;
 
-  /// Whether [track] is published.
-  ///
-  /// When this turns true, the measurement this viewport has been holding is
-  /// reported again, so the track is subscribed at the size already on screen.
+  /// Whether [track] is published. When it turns true this viewport's standing
+  /// measurement is reported again, so the new track is subscribed at the size
+  /// already on screen.
   final bool isTrackPublished;
 
   /// Whether this viewport wants the track subscribed even while it is hidden,
@@ -43,17 +40,12 @@ class ViewportVisibilityReporter extends StatefulWidget {
   final bool persistWhenHidden;
 
   /// Called with the size this viewport draws the track at, in device pixels,
-  /// and with [Size.zero] once it is off screen.
-  ///
-  /// Not called once this viewport is disposed, so the last size a listener
-  /// was given stays whatever it was.
+  /// and with [Size.zero] once it is off screen. Not called on dispose.
   final ValueSetter<Size>? onSizeChanged;
 
   /// Labels this viewport's visibility detector, for reading a widget tree
-  /// (e.g. `pipVideo` against the main view).
-  ///
-  /// Each reporter keys its own detector, so this does not have to be unique
-  /// and nothing depends on it.
+  /// (e.g. `pipVideo` against the main view). Each reporter keys its own
+  /// detector, so nothing depends on this.
   final String? scopePrefix;
 
   /// The widget drawing the track.
@@ -68,18 +60,16 @@ class _ViewportVisibilityReporterState
     extends State<ViewportVisibilityReporter> {
   static int _detectorSeq = 0;
 
-  /// This viewport's place in [ViewportVisibilityReporter.registry]. Replaced
-  /// if the registry changes, since a handle belongs to the one that gave it
-  /// out.
+  /// This viewport's place in the registry, replaced if the registry changes:
+  /// a handle belongs to the one that gave it out.
   late ViewportHandle _handle = widget.registry.attach();
 
   /// This reporter's own detector key.
   ///
-  /// [VisibilityDetector] keys a process-wide map of what it last saw, so two
-  /// sharing a key drop each other's reports — which two viewports drawing one
-  /// track otherwise would. Held for this reporter's lifetime: a viewport
-  /// pointed at a different track is the same viewport, measuring the same
-  /// area, and says so itself rather than through a new detector.
+  /// [VisibilityDetector] keys a process-wide map, so two sharing a key drop
+  /// each other's reports — which two viewports drawing one track otherwise
+  /// would. Held for this reporter's lifetime: pointed at a different track it
+  /// is still the same viewport, and reports for it itself.
   late final Key _detectorKey = Key(
     '${widget.scopePrefix ?? ''}viewport-${_detectorSeq++}-visibility',
   );
@@ -90,9 +80,9 @@ class _ViewportVisibilityReporterState
   void didUpdateWidget(covariant ViewportVisibilityReporter oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // A handle belongs to the registry that gave it out, so a reporter moved
-    // to another call retires the old one rather than leaving a track recorded
-    // as on screen in a call it has left.
+    // A handle belongs to the registry that gave it out, so one moved to
+    // another call retires it rather than leaving a track recorded as on
+    // screen in a call it has left.
     final registryChanged = oldWidget.registry != widget.registry;
     if (registryChanged) {
       _disposeAfterFrame(_handle);
@@ -102,20 +92,17 @@ class _ViewportVisibilityReporterState
     final latest = _latest;
     if (latest == null) return;
 
-    // Nothing this viewport measures has changed — the same area was being
-    // given to a placeholder, or to another participant — and a detector
-    // reports only what changes. So a registry that has never heard from this
-    // viewport, a track it has only now been pointed at, and a track only now
-    // published all need the standing measurement said again. Reporting for a
-    // new track releases the one before it, which the handle does itself.
+    // A detector reports only what changes, and nothing here measures
+    // differently — the same area was being given to a placeholder, or to
+    // another participant. So a new registry, a new track, and a track only
+    // now published each need the standing measurement said again.
     final trackChanged = oldWidget.track != widget.track;
     final publishedNow = !oldWidget.isTrackPublished && widget.isTrackPublished;
     if (!registryChanged && !trackChanged && !publishedNow) return;
 
-    // Deferred, because acting on a report writes call state, which the SDK's
-    // emitter delivers synchronously: from the middle of this rebuild it would
-    // ask a widget that has already been built this frame to build again, and
-    // that throws. Nothing is waiting on the answer.
+    // Deferred: acting on a report writes call state, which the SDK's emitter
+    // delivers synchronously, and from this rebuild that would ask a widget
+    // already built this frame to build again, which throws.
     final track = widget.track;
     final standing = !registryChanged && !trackChanged;
     SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -123,9 +110,8 @@ class _ViewportVisibilityReporterState
 
       _report(_latest ?? latest);
 
-      // A registry or a track it has not heard of has moved on the report
-      // alone; one that has held the same answer throughout has to be asked
-      // for it again.
+      // A registry or track it has not heard of moves on the report alone;
+      // one holding the same answer throughout has to be asked again.
       if (standing) widget.registry.reapply(track);
     });
   }
@@ -137,19 +123,15 @@ class _ViewportVisibilityReporterState
     super.dispose();
   }
 
-  /// Retires [handle] at the end of the frame, releasing whatever it measured.
-  ///
-  /// Deferred for the same reason a report is, and taking the handle by value:
-  /// by the time it runs this [State] may be disposed, and the widget it would
-  /// have read is gone.
+  /// Retires [handle] at the end of the frame, deferred for the same reason a
+  /// report is. Takes the handle by value: by then this [State] may be gone.
   static void _disposeAfterFrame(ViewportHandle handle) {
     SchedulerBinding.instance.addPostFrameCallback((_) => handle.dispose());
   }
 
   void _report(VisibilityInfo info) {
     // A detector delivers one last, hidden report after it is gone. Taken, it
-    // would put this viewport back into a registry that has already released
-    // it, with nothing left alive to release it a second time.
+    // would put this viewport back with nothing left alive to release it.
     if (!mounted) return;
 
     _latest = info;
@@ -160,8 +142,8 @@ class _ViewportVisibilityReporterState
 
     var size = Size.zero;
     if (visibility.isVisible) {
-      // VisibilityDetector measures in logical, device-independent pixels, and
-      // a track is subscribed in device pixels.
+      // VisibilityDetector measures in logical pixels; a track is subscribed
+      // in device pixels.
       final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
       size = Size(
         info.size.width * devicePixelRatio,

@@ -5,45 +5,34 @@ import '../models/viewport_measurement.dart';
 import '../models/viewport_visibility.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
 
-/// Called with a track's aggregate whenever it changes, and again for every
-/// track on [ViewportVisibilityRegistry.reapplyAll].
+/// Called with a track's aggregate whenever it changes, synchronously from
+/// the call that moved it, so it must not call back into the registry.
 ///
-/// Called synchronously, from inside the [ViewportHandle.report],
-/// [ViewportHandle.release] or [ViewportVisibilityRegistry.reapply] that moved
-/// it, so it must not call back into the registry.
-///
-/// Answers whether the aggregate was acted on. An answer of `false` is
-/// forgotten rather than remembered as said, so the next report drives it
-/// again.
+/// Answers whether it was acted on; a `false` is forgotten, so the next report
+/// drives it again.
 typedef OnViewportAggregate =
     Future<bool> Function(ViewportAggregate aggregate);
 
-/// One viewport's place in a [ViewportVisibilityRegistry], from
-/// [ViewportVisibilityRegistry.attach].
+/// One viewport's place in a [ViewportVisibilityRegistry].
 ///
-/// A handle speaks only for the viewport that holds it: what it reports cannot
-/// overwrite another viewport's measurement, and it can take out only what it
-/// put in. Holding one is the whole of a viewport's part in the registry, so a
-/// viewport that stops drawing must [dispose] of its handle — nothing here
-/// expires on its own.
+/// Speaks only for the viewport holding it: it cannot overwrite another's
+/// measurement, and takes out only what it put in. [dispose] it when the
+/// viewport stops drawing; nothing expires on its own.
 final class ViewportHandle {
   ViewportHandle._(this._registry);
 
   final ViewportVisibilityRegistry _registry;
 
-  /// The track this handle last reported for, and so the one it owes a
-  /// release. Null while it is measuring nothing.
+  /// The track this handle owes a release for. Null while measuring nothing.
   ViewportTrack? _track;
 
   bool _disposed = false;
 
-  /// Whether this handle has been disposed of and reports nothing further.
+  /// Whether this handle reports nothing further.
   bool get isDisposed => _disposed;
 
-  /// Records what this viewport measures for [track].
-  ///
-  /// Reporting for a different track releases the one before it, so a viewport
-  /// pointed at somebody new stops speaking for whoever it drew last.
+  /// Records what this viewport measures for [track], releasing the track it
+  /// reported for before, if that was a different one.
   void report(ViewportTrack track, ViewportMeasurement measurement) {
     if (_disposed) {
       _registry._logger.w(() => '[report] handle is disposed: $track');
@@ -59,10 +48,8 @@ final class ViewportHandle {
     _registry._report(this, track, measurement);
   }
 
-  /// Takes this viewport's measurement out of the registry: it has stopped
-  /// drawing the track.
-  ///
-  /// Does nothing if it is measuring none, so calling it twice is safe.
+  /// Takes this viewport's measurement out of the registry. Does nothing if it
+  /// is measuring none, so calling it twice is safe.
   void release() {
     final track = _track;
     if (track == null) return;
@@ -71,26 +58,23 @@ final class ViewportHandle {
     _registry._release(this, track);
   }
 
-  /// Releases whatever this viewport was measuring and retires the handle.
-  ///
-  /// A report after this is refused rather than silently reviving a viewport
-  /// that is gone.
+  /// Releases whatever this viewport was measuring. A report after this is
+  /// refused.
   void dispose() {
     release();
     _disposed = true;
   }
 }
 
-/// Holds what each viewport measures for the tracks it draws, and derives the
-/// one answer the call has to act on per track.
+/// Derives the one answer a call acts on per track from what every viewport
+/// drawing it measures.
 ///
-/// A participant can be drawn by several viewports at once — a tile in the
-/// grid, a picture-in-picture overlay, a livestream's host strip — while the
-/// call has a single visibility and a single subscription per track. Each
-/// viewport [attach]es for a [ViewportHandle] of its own and reports only
-/// about itself, and the registry answers for the track: visible while any
-/// viewport has it on screen, sized for the largest viewport that does, and
-/// never [ViewportVisibility.unknown].
+/// A participant can be drawn by several viewports at once — a grid tile, a
+/// picture-in-picture overlay, a livestream's host strip — while the call has
+/// one visibility and one subscription per track. Each viewport [attach]es for
+/// a [ViewportHandle] and reports only about itself; the track comes out
+/// visible while any viewport has it on screen, sized for the largest that
+/// does, and never [ViewportVisibility.unknown].
 class ViewportVisibilityRegistry {
   ViewportVisibilityRegistry({required this.onAggregate});
 
@@ -103,14 +87,10 @@ class ViewportVisibilityRegistry {
   final _measurements =
       <ViewportTrack, Map<ViewportHandle, ViewportMeasurement>>{};
 
-  /// What was last handed to [onAggregate] and acted on, so an unchanged
-  /// answer is not reported again.
+  /// What [onAggregate] last acted on, so an unchanged answer is not repeated.
   final _reported = <ViewportTrack, ViewportAggregate>{};
 
-  /// A place for one viewport to report from.
-  ///
-  /// The viewport holds the handle for as long as it draws anything, and
-  /// disposes of it when it stops.
+  /// A place for one viewport to report from, held for as long as it draws.
   // Registers a new viewport rather than converting the registry.
   // ignore: use_to_and_as_if_applicable
   ViewportHandle attach() => ViewportHandle._(this);
@@ -143,12 +123,9 @@ class ViewportVisibilityRegistry {
     _reported.remove(track);
   }
 
-  /// Reports [track]'s answer again even though it has not moved.
-  ///
-  /// For what happens outside a viewport and leaves its measurement standing:
-  /// a track that has only now been published has to be subscribed at a size
-  /// the viewports drawing it have been holding all along. Does nothing for a
-  /// track no viewport is measuring.
+  /// Reports [track]'s answer again though it has not moved, for a track only
+  /// now published under viewports that have been holding a size all along.
+  /// Does nothing for a track no viewport is measuring.
   void reapply(ViewportTrack track) {
     if (!_measurements.containsKey(track)) return;
 
@@ -156,10 +133,9 @@ class ViewportVisibilityRegistry {
     _emit(track);
   }
 
-  /// Reports every track again, for a session that has not been told any of it.
-  ///
-  /// A viewport reports what changes about itself, so nothing here would be
-  /// said a second time on its own.
+  /// Reports every track again, for a session that has not been told any of
+  /// it. Viewports report what changes about them, so nothing would be said a
+  /// second time on its own.
   void reapplyAll() {
     _logger.d(() => '[reapplyAll] tracks: ${_measurements.length}');
 
@@ -167,9 +143,8 @@ class ViewportVisibilityRegistry {
     _measurements.keys.toList().forEach(_emit);
   }
 
-  /// Forgets everything, without reporting it.
-  ///
-  /// [reapplyAll] then has nothing to say until each viewport reports again.
+  /// Forgets everything, without reporting it. [reapplyAll] then has nothing
+  /// to say until each viewport reports again.
   void clear() {
     _measurements.clear();
     _reported.clear();
@@ -181,9 +156,8 @@ class ViewportVisibilityRegistry {
 
     _logger.v(() => '[emit] aggregate: $aggregate');
 
-    // Recorded before it is acted on, so an emit for the same answer while
-    // this one is in flight does not repeat it, and dropped again if it turns
-    // out not to have landed.
+    // Recorded before it is acted on, so an emit in flight is not repeated,
+    // and dropped again if it turns out not to have landed.
     _reported[track] = aggregate;
     unawaited(
       onAggregate(aggregate).then((applied) {
