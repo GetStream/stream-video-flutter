@@ -2,6 +2,9 @@
 
 ### ✅ Added
 
+- Added `solveParticipantGrid`, the rule the participants grid arranges a page by, and `StreamCallParticipantsGridThemeData.columnResolver` to override it.
+- Added `StreamCallParticipantsGridThemeData.maxTileAspectRatio`, `compactPageSize` and `pageSize`.
+- Added `StreamCallParticipantsSpotlightThemeData` on `StreamVideoTheme`, and `StreamCallParticipantsSpotlightTheme` to restyle the speaker layouts over a subtree.
 - Added `StreamParticipantTileChrome`, the levels of chrome a participant tile draws, and `StreamParticipantTileChromePolicy` to choose between them — `bySize` (the default), `always`, `none` or `custom`.
 - Added `StreamParticipantTileThemeData.chromePolicy` and `styleResolver`, which restyle a tile against the size it came out at.
 - `StreamParticipantTileProps` carries the `size` the tile was measured at and the `chrome` resolved for it, so a component registered on the factory lays out against the same numbers the default tile uses.
@@ -281,6 +284,11 @@
 
 ### 🔄 Changed
 
+- The participants grid arranges itself against the shape of the space it is given rather than the platform it runs on, so a short wide window puts its tiles in a row instead of a square.
+- The grid pages with chevrons at every size, and still swipes on a touch screen.
+- The speaker layouts give the bar its edge and the spotlight everything else, never drawing the spotlight wider than 16:9.
+- The participants bar draws 222x125 tiles at every size, centred until they overflow.
+- `CallParticipantsSpotlightView.padding` defaults to 8px horizontal, and a new `spacing` sets the gaps.
 - `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
 - Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.
 
