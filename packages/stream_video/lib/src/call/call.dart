@@ -4502,6 +4502,11 @@ class Call {
     return null;
   }
 
+  /// Records a track's viewport visibility and tells the session.
+  ///
+  /// Driven by [viewportVisibility], which every viewport reports to; a
+  /// viewport writing here directly is back to overwriting the others.
+  @internal
   Future<Result<None>> updateViewportVisibility({
     required String sessionId,
     required String userId,
@@ -4602,6 +4607,11 @@ class Call {
     return result;
   }
 
+  /// Drops a track's subscription.
+  ///
+  /// Driven by [viewportVisibility], which removes a track once no viewport
+  /// shows it and none asked to keep it.
+  @internal
   Future<Result<None>> removeSubscription({
     required String userId,
     required String sessionId,
