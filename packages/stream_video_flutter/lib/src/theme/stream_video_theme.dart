@@ -20,7 +20,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamLobbyViewThemeData? lobbyViewTheme,
     CallControlBarThemeData? callControlBarTheme,
     CallAppBarThemeData? callAppBarTheme,
-    CallDurationBadgeThemeData? callDurationBadgeTheme,
+    StreamCallDurationBadgeThemeData? callDurationBadgeTheme,
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -116,7 +116,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     this.lobbyViewTheme = const StreamLobbyViewThemeData(),
     this.callControlBarTheme = const CallControlBarThemeData(),
     this.callAppBarTheme = const CallAppBarThemeData(),
-    this.callDurationBadgeTheme = const CallDurationBadgeThemeData(),
+    this.callDurationBadgeTheme = const StreamCallDurationBadgeThemeData(),
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -379,7 +379,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   final CallAppBarThemeData callAppBarTheme;
 
   /// Theme for the pill showing how long a call has been running.
-  final CallDurationBadgeThemeData callDurationBadgeTheme;
+  final StreamCallDurationBadgeThemeData callDurationBadgeTheme;
 
   /// Theme for the call participant widget.
   ///
@@ -452,7 +452,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamLobbyViewThemeData? lobbyViewTheme,
     CallControlBarThemeData? callControlBarTheme,
     CallAppBarThemeData? callAppBarTheme,
-    CallDurationBadgeThemeData? callDurationBadgeTheme,
+    StreamCallDurationBadgeThemeData? callDurationBadgeTheme,
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -590,7 +590,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           ) ??
           callAppBarTheme,
       callDurationBadgeTheme:
-          CallDurationBadgeThemeData.lerp(
+          StreamCallDurationBadgeThemeData.lerp(
             callDurationBadgeTheme,
             other.callDurationBadgeTheme,
             t,

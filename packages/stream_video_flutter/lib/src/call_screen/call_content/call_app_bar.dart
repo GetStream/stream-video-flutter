@@ -20,7 +20,7 @@ import '../../../stream_video_flutter.dart';
 /// CallAppBar(
 ///   call: call,
 ///   leading: StreamFlipCameraButton(call: call),
-///   title: CallDurationBadge(call: call),
+///   title: StreamCallDurationBadge(call: call),
 /// )
 /// ```
 /// {@end-tool}

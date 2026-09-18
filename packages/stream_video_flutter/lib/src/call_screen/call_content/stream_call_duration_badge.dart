@@ -25,16 +25,16 @@ import '../../l10n/localization_extension.dart';
 /// {@tool snippet}
 ///
 /// ```dart
-/// CallAppBar(call: call, title: CallDurationBadge(call: call))
+/// CallAppBar(call: call, title: StreamCallDurationBadge(call: call))
 /// ```
 /// {@end-tool}
 ///
 /// See also:
 ///
-///  * [CallDurationBadgeTheme], for restyling the badge in a subtree.
-class CallDurationBadge extends StatelessWidget {
+///  * [StreamCallDurationBadgeTheme], for restyling the badge in a subtree.
+class StreamCallDurationBadge extends StatelessWidget {
   /// Creates a duration badge.
-  const CallDurationBadge({
+  const StreamCallDurationBadge({
     super.key,
     required this.call,
     this.showEncryption = true,
@@ -58,13 +58,13 @@ class CallDurationBadge extends StatelessWidget {
   /// The visual style applied to this badge.
   ///
   /// Resolution order per field: this [style], then the ambient
-  /// [CallDurationBadgeTheme], then token-backed defaults.
-  final CallDurationBadgeStyle? style;
+  /// [StreamCallDurationBadgeTheme], then token-backed defaults.
+  final StreamCallDurationBadgeStyle? style;
 
   @override
   Widget build(BuildContext context) {
-    final themeStyle = CallDurationBadgeTheme.of(context).style;
-    final resolved = _CallDurationBadgeStyleDefaults(
+    final themeStyle = StreamCallDurationBadgeTheme.of(context).style;
+    final resolved = _StreamCallDurationBadgeStyleDefaults(
       context,
       themeStyle?.merge(style) ?? style,
     );
@@ -113,7 +113,7 @@ class CallDurationBadge extends StatelessWidget {
   /// The indicators [status] calls for, or null when it calls for none.
   Widget? _indicators(
     BuildContext context,
-    _CallDurationBadgeStyleDefaults style,
+    _StreamCallDurationBadgeStyleDefaults style,
     ({bool encrypted, bool recording, bool presenting}) status,
   ) {
     if (!status.encrypted && !status.recording && !status.presenting) {
@@ -179,7 +179,7 @@ class _Duration extends StatelessWidget {
   const _Duration({required this.call, required this.style});
 
   final Call call;
-  final _CallDurationBadgeStyleDefaults style;
+  final _StreamCallDurationBadgeStyleDefaults style;
 
   @override
   Widget build(BuildContext context) {
@@ -259,14 +259,15 @@ class _Duration extends StatelessWidget {
   }
 }
 
-// Default style values for [CallDurationBadge], resolved against the ambient
+// Default style values for [StreamCallDurationBadge], resolved against the ambient
 // tokens. Every getter is non-null, so the widget never spells a fallback out
 // twice.
-class _CallDurationBadgeStyleDefaults extends CallDurationBadgeStyle {
-  _CallDurationBadgeStyleDefaults(this._context, this._style);
+class _StreamCallDurationBadgeStyleDefaults
+    extends StreamCallDurationBadgeStyle {
+  _StreamCallDurationBadgeStyleDefaults(this._context, this._style);
 
   final BuildContext _context;
-  final CallDurationBadgeStyle? _style;
+  final StreamCallDurationBadgeStyle? _style;
 
   late final StreamSpacing _spacing = _context.streamSpacing;
   late final StreamColorScheme _colorScheme = _context.streamColorScheme;

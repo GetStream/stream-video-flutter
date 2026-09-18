@@ -52,7 +52,7 @@ void main() {
   Future<void> pump(
     WidgetTester tester, {
     Duration elapsed = Duration.zero,
-    CallDurationBadge? badge,
+    StreamCallDurationBadge? badge,
   }) async {
     when(
       () => call.callDurationStream,
@@ -62,7 +62,7 @@ void main() {
       // Centred rather than handed straight to the wrapper: the badge hugs its
       // content, and the surface would stretch it if anything let it.
       TestWrapper(
-        child: Center(child: badge ?? CallDurationBadge(call: call)),
+        child: Center(child: badge ?? StreamCallDurationBadge(call: call)),
       ),
     );
     await tester.pumpAndSettle();
@@ -210,7 +210,7 @@ void main() {
 
       await pump(
         tester,
-        badge: CallDurationBadge(call: call, showRecording: false),
+        badge: StreamCallDurationBadge(call: call, showRecording: false),
       );
 
       expect(indicator(icons.verifiedFill), findsOneWidget);
@@ -224,23 +224,25 @@ void main() {
     testWidgets('is 32 tall with indicators and without', (tester) async {
       await pump(tester);
 
-      expect(tester.getSize(find.byType(CallDurationBadge)).height, 32);
+      expect(tester.getSize(find.byType(StreamCallDurationBadge)).height, 32);
 
       when(() => callState.isE2eeEnabled).thenReturn(true);
       await pump(tester);
 
-      expect(tester.getSize(find.byType(CallDurationBadge)).height, 32);
+      expect(tester.getSize(find.byType(StreamCallDurationBadge)).height, 32);
     });
 
     testWidgets('charges no gap for indicators it is not showing', (
       tester,
     ) async {
       await pump(tester);
-      final bare = tester.getSize(find.byType(CallDurationBadge)).width;
+      final bare = tester.getSize(find.byType(StreamCallDurationBadge)).width;
 
       when(() => callState.isE2eeEnabled).thenReturn(true);
       await pump(tester);
-      final withIcon = tester.getSize(find.byType(CallDurationBadge)).width;
+      final withIcon = tester
+          .getSize(find.byType(StreamCallDurationBadge))
+          .width;
 
       // The icon and the gap in front of the time, and nothing else.
       expect(withIcon - bare, 28);
@@ -251,9 +253,9 @@ void main() {
 
       await pump(
         tester,
-        badge: CallDurationBadge(
+        badge: StreamCallDurationBadge(
           call: call,
-          style: const CallDurationBadgeStyle(
+          style: const StreamCallDurationBadgeStyle(
             encryptedColor: Color(0xFFABCDEF),
           ),
         ),
