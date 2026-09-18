@@ -56,6 +56,11 @@ void main() {
   late MockSfuClient sfuClient;
   late Call call;
 
+  /// The viewports these are about: a grid tile, a filmstrip and a self-view.
+  late ViewportHandle grid;
+  late ViewportHandle strip;
+  late ViewportHandle selfView;
+
   CallParticipantState? participantOf(String sessionId) {
     for (final it in call.state.value.callParticipants) {
       if (it.sessionId == sessionId) return it;
@@ -111,16 +116,16 @@ void main() {
     );
 
     call.dynascaleManager.init(sfuClient: sfuClient, sessionId: 'sfu-session');
+
+    grid = call.viewportVisibility.attach();
+    strip = call.viewportVisibility.attach();
+    selfView = call.viewportVisibility.attach();
   });
 
   test(
     'a viewport showing a remote track subscribes it at that size',
     () async {
-      call.viewportVisibility.report(
-        viewportId: 'grid',
-        track: trackOf(aliceSession, 'alice'),
-        measurement: showing(640, 360),
-      );
+      grid.report(trackOf(aliceSession, 'alice'), showing(640, 360));
       await settle();
 
       expect(
@@ -138,16 +143,8 @@ void main() {
   test('the largest viewport showing a track sizes the subscription', () async {
     final track = trackOf(aliceSession, 'alice');
 
-    call.viewportVisibility.report(
-      viewportId: 'strip',
-      track: track,
-      measurement: showing(160, 90),
-    );
-    call.viewportVisibility.report(
-      viewportId: 'grid',
-      track: track,
-      measurement: showing(640, 360),
-    );
+    strip.report(track, showing(160, 90));
+    grid.report(track, showing(640, 360));
     await settle();
 
     expect(
@@ -160,14 +157,10 @@ void main() {
   test('the last viewport leaving unsubscribes the track', () async {
     final track = trackOf(aliceSession, 'alice');
 
-    call.viewportVisibility.report(
-      viewportId: 'grid',
-      track: track,
-      measurement: showing(640, 360),
-    );
+    grid.report(track, showing(640, 360));
     await settle();
 
-    call.viewportVisibility.release(viewportId: 'grid', track: track);
+    grid.release();
     await settle();
 
     expect(
@@ -180,17 +173,12 @@ void main() {
   test('a viewport keeping a hidden track leaves it subscribed', () async {
     final track = trackOf(aliceSession, 'alice');
 
-    call.viewportVisibility.report(
-      viewportId: 'grid',
-      track: track,
-      measurement: showing(640, 360),
-    );
+    grid.report(track, showing(640, 360));
     await settle();
 
-    call.viewportVisibility.report(
-      viewportId: 'grid',
-      track: track,
-      measurement: const ViewportMeasurement(
+    grid.report(
+      track,
+      const ViewportMeasurement(
         visibility: ViewportVisibility.hidden,
         persistWhenHidden: true,
       ),
@@ -205,11 +193,7 @@ void main() {
   });
 
   test('a local track is not subscribed', () async {
-    call.viewportVisibility.report(
-      viewportId: 'selfView',
-      track: trackOf(localSession, 'local'),
-      measurement: showing(320, 180),
-    );
+    selfView.report(trackOf(localSession, 'local'), showing(320, 180));
     await settle();
 
     expect(
@@ -220,11 +204,7 @@ void main() {
   });
 
   test('a track nobody has published is not subscribed', () async {
-    call.viewportVisibility.report(
-      viewportId: 'grid',
-      track: trackOf(carolSession, 'carol'),
-      measurement: showing(320, 180),
-    );
+    grid.report(trackOf(carolSession, 'carol'), showing(320, 180));
     await settle();
 
     verifyNever(() => sfuClient.updateSubscriptions(any()));
@@ -250,15 +230,12 @@ void main() {
       sfuClient: sfuClient,
       sessionId: 'sfu-session',
     );
+    final joiningGrid = joining.viewportVisibility.attach();
 
     // The tile is already on screen when the call joins. A viewport reports
     // what changes about it, so it has nothing to say to the new session on
     // its own.
-    joining.viewportVisibility.report(
-      viewportId: 'grid',
-      track: trackOf(aliceSession, 'alice'),
-      measurement: showing(640, 360),
-    );
+    joiningGrid.report(trackOf(aliceSession, 'alice'), showing(640, 360));
     await settle();
     clearInteractions(callSession);
 
@@ -274,11 +251,7 @@ void main() {
   test('a track for nobody in the call is not said to have landed', () async {
     final ghost = trackOf('ghost-session', 'ghost');
 
-    call.viewportVisibility.report(
-      viewportId: 'grid',
-      track: ghost,
-      measurement: showing(640, 360),
-    );
+    grid.report(ghost, showing(640, 360));
     await settle();
 
     verifyNever(() => sfuClient.updateSubscriptions(any()));
@@ -286,11 +259,7 @@ void main() {
     // Not remembered as said: a second viewport that does not move the answer
     // still has it offered again, so the track is subscribed once whoever
     // draws it joins the call.
-    call.viewportVisibility.report(
-      viewportId: 'strip',
-      track: ghost,
-      measurement: showing(320, 180),
-    );
+    strip.report(ghost, showing(320, 180));
     await settle();
 
     expect(

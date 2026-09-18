@@ -8,9 +8,9 @@ import '../webrtc/model/rtc_video_dimension.dart';
 /// Called with a track's aggregate whenever it changes, and again for every
 /// track on [ViewportVisibilityRegistry.reapplyAll].
 ///
-/// Called synchronously, from inside the [ViewportVisibilityRegistry.report],
-/// [ViewportVisibilityRegistry.release] or [ViewportVisibilityRegistry.reapply]
-/// that moved it, so it must not call back into the registry.
+/// Called synchronously, from inside the [ViewportHandle.report],
+/// [ViewportHandle.release] or [ViewportVisibilityRegistry.reapply] that moved
+/// it, so it must not call back into the registry.
 ///
 /// Answers whether the aggregate was acted on. An answer of `false` is
 /// forgotten rather than remembered as said, so the next report drives it
@@ -18,19 +18,79 @@ import '../webrtc/model/rtc_video_dimension.dart';
 typedef OnViewportAggregate =
     Future<bool> Function(ViewportAggregate aggregate);
 
+/// One viewport's place in a [ViewportVisibilityRegistry], from
+/// [ViewportVisibilityRegistry.attach].
+///
+/// A handle speaks only for the viewport that holds it: what it reports cannot
+/// overwrite another viewport's measurement, and it can take out only what it
+/// put in. Holding one is the whole of a viewport's part in the registry, so a
+/// viewport that stops drawing must [dispose] of its handle — nothing here
+/// expires on its own.
+final class ViewportHandle {
+  ViewportHandle._(this._registry);
+
+  final ViewportVisibilityRegistry _registry;
+
+  /// The track this handle last reported for, and so the one it owes a
+  /// release. Null while it is measuring nothing.
+  ViewportTrack? _track;
+
+  bool _disposed = false;
+
+  /// Whether this handle has been disposed of and reports nothing further.
+  bool get isDisposed => _disposed;
+
+  /// Records what this viewport measures for [track].
+  ///
+  /// Reporting for a different track releases the one before it, so a viewport
+  /// pointed at somebody new stops speaking for whoever it drew last.
+  void report(ViewportTrack track, ViewportMeasurement measurement) {
+    if (_disposed) {
+      _registry._logger.w(() => '[report] handle is disposed: $track');
+      return;
+    }
+
+    final previous = _track;
+    if (previous != null && previous != track) {
+      _registry._release(this, previous);
+    }
+
+    _track = track;
+    _registry._report(this, track, measurement);
+  }
+
+  /// Takes this viewport's measurement out of the registry: it has stopped
+  /// drawing the track.
+  ///
+  /// Does nothing if it is measuring none, so calling it twice is safe.
+  void release() {
+    final track = _track;
+    if (track == null) return;
+
+    _track = null;
+    _registry._release(this, track);
+  }
+
+  /// Releases whatever this viewport was measuring and retires the handle.
+  ///
+  /// A report after this is refused rather than silently reviving a viewport
+  /// that is gone.
+  void dispose() {
+    release();
+    _disposed = true;
+  }
+}
+
 /// Holds what each viewport measures for the tracks it draws, and derives the
 /// one answer the call has to act on per track.
 ///
 /// A participant can be drawn by several viewports at once — a tile in the
 /// grid, a picture-in-picture overlay, a livestream's host strip — while the
 /// call has a single visibility and a single subscription per track. Each
-/// viewport reports only about itself, under a name from [nextViewportId], and
-/// the registry answers for the track: visible while any viewport has it on
-/// screen, sized for the largest viewport that does, and never
-/// [ViewportVisibility.unknown].
-///
-/// A viewport that stops drawing a track must [release] it; nothing here
-/// expires on its own.
+/// viewport [attach]es for a [ViewportHandle] of its own and reports only
+/// about itself, and the registry answers for the track: visible while any
+/// viewport has it on screen, sized for the largest viewport that does, and
+/// never [ViewportVisibility.unknown].
 class ViewportVisibilityRegistry {
   ViewportVisibilityRegistry({required this.onAggregate});
 
@@ -39,51 +99,42 @@ class ViewportVisibilityRegistry {
   /// Told the new answer whenever one of them moves.
   final OnViewportAggregate onAggregate;
 
-  int _viewportSeq = 0;
-
-  /// A name no other viewport reporting to this registry has.
-  ///
-  /// Reporting again under the same name replaces that viewport's measurement
-  /// for the track, so two viewports drawing one track must not share a name.
-  /// A viewport releases each track it reported separately.
-  String nextViewportId() => '${_viewportSeq++}';
-
   /// Per track, what each viewport drawing it last measured.
-  final _measurements = <ViewportTrack, Map<String, ViewportMeasurement>>{};
+  final _measurements =
+      <ViewportTrack, Map<ViewportHandle, ViewportMeasurement>>{};
 
   /// What was last handed to [onAggregate] and acted on, so an unchanged
   /// answer is not reported again.
   final _reported = <ViewportTrack, ViewportAggregate>{};
 
-  /// Records what the viewport known as [viewportId] measures for [track].
-  void report({
-    required String viewportId,
-    required ViewportTrack track,
-    required ViewportMeasurement measurement,
-  }) {
+  /// A place for one viewport to report from.
+  ///
+  /// The viewport holds the handle for as long as it draws anything, and
+  /// disposes of it when it stops.
+  // Registers a new viewport rather than converting the registry.
+  // ignore: use_to_and_as_if_applicable
+  ViewportHandle attach() => ViewportHandle._(this);
+
+  void _report(
+    ViewportHandle handle,
+    ViewportTrack track,
+    ViewportMeasurement measurement,
+  ) {
     final measurements = _measurements.putIfAbsent(track, () => {});
-    if (measurements[viewportId] == measurement) return;
+    if (measurements[handle] == measurement) return;
 
-    _logger.v(() => '[report] $viewportId on $track: $measurement');
+    _logger.v(() => '[report] $track: $measurement');
 
-    measurements[viewportId] = measurement;
+    measurements[handle] = measurement;
     _emit(track);
   }
 
-  /// Drops what [viewportId] measured for [track]: it has stopped drawing it.
-  ///
-  /// A track no viewport draws any more is hidden and sized for nobody,
-  /// reported once if that is a change, then forgotten.
-  void release({required String viewportId, required ViewportTrack track}) {
+  void _release(ViewportHandle handle, ViewportTrack track) {
     final measurements = _measurements[track];
     if (measurements == null) return;
+    if (measurements.remove(handle) == null) return;
 
-    if (measurements.remove(viewportId) == null) {
-      _logger.w(() => '[release] $viewportId measured nothing for $track');
-      return;
-    }
-
-    _logger.v(() => '[release] $viewportId on $track');
+    _logger.v(() => '[release] $track');
 
     if (measurements.isNotEmpty) return _emit(track);
 
