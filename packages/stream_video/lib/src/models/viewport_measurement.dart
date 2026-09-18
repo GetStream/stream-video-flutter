@@ -46,8 +46,8 @@ class ViewportMeasurement extends Equatable {
   /// it draws none.
   final RtcVideoDimension dimension;
 
-  /// Whether this viewport wants the track subscribed even while it is hidden,
-  /// as a screen share is.
+  /// Whether this viewport wants the track kept while hidden, as a screen
+  /// share does.
   final bool persistWhenHidden;
 
   @override
@@ -60,8 +60,8 @@ class ViewportMeasurement extends Equatable {
   }
 }
 
-/// What every viewport measuring a track adds up to: what the call state
-/// records for it, and what it is subscribed at.
+/// What every viewport measuring a track adds up to: what the call records
+/// for it, and what it is subscribed at.
 @immutable
 class ViewportAggregate extends Equatable {
   const ViewportAggregate({
@@ -73,13 +73,12 @@ class ViewportAggregate extends Equatable {
 
   final ViewportTrack track;
 
-  /// Visible while any viewport has the track on screen, hidden once none
-  /// does. Never [ViewportVisibility.unknown].
+  /// Visible while any viewport has the track on screen. Never
+  /// [ViewportVisibility.unknown].
   final ViewportVisibility visibility;
 
-  /// The largest size any viewport showing the track draws it at — the one
-  /// that has to be subscribed for every viewport to be served. Empty while no
-  /// viewport shows it.
+  /// The largest size any viewport showing the track draws it at, which is
+  /// what has to be subscribed. Empty while none shows it.
   final RtcVideoDimension dimension;
 
   /// Whether any viewport wants the track kept while it is hidden.
