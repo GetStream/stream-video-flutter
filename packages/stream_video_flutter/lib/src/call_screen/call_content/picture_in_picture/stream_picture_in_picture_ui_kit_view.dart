@@ -83,7 +83,7 @@ class _StreamPictureInPictureUiKitViewState
   ///
   /// It draws one participant's track at a time, like any other viewport, and
   /// is the one still drawing once the app is backgrounded.
-  late final ViewportHandle _viewport = widget.call.viewportVisibility.attach();
+  late ViewportHandle _viewport = widget.call.viewportVisibility.attach();
 
   Future<void> _handleParticipantsChange(
     List<CallParticipantState> callParticipants,
@@ -223,6 +223,28 @@ class _StreamPictureInPictureUiKitViewState
   void initState() {
     WidgetsBinding.instance.addObserver(this);
 
+    _listenForCallEnded();
+
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant StreamPictureInPictureUiKitView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.call == oldWidget.call) return;
+
+    // Everything here was taken from the call it was given: the handle belongs
+    // to that call's registry, and the listeners to its state.
+    _viewport.dispose();
+    _viewport = widget.call.viewportVisibility.attach();
+
+    final wasFollowingParticipants = _subscriptions.contains(_idCallState);
+    _subscriptions.cancelAll();
+    _listenForCallEnded();
+    if (wasFollowingParticipants) _subscribeToCallEvents();
+  }
+
+  void _listenForCallEnded() {
     _subscriptions.add(
       _idCallEnded,
       widget.call.state.listen(
@@ -235,8 +257,6 @@ class _StreamPictureInPictureUiKitViewState
         },
       ),
     );
-
-    super.initState();
   }
 
   @override

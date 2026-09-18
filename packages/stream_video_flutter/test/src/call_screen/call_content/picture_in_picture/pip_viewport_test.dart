@@ -73,6 +73,30 @@ void main() {
         .setMockMethodCallHandler(channel, null);
   });
 
+  /// A second call the window can be moved to, with a registry of its own.
+  MockCall otherCall(List<ViewportAggregate> into) {
+    final other = MockCall();
+    final otherState = MockCallState();
+
+    when(() => otherState.status).thenReturn(CallStatus.connected());
+    when(() => otherState.callParticipants).thenReturn([participant]);
+    when(() => otherState.iOSMultitaskingCameraAccessEnabled).thenReturn(true);
+    when(() => other.state).thenAnswer(
+      (_) => MutableStateEmitter<CallState>(otherState, sync: true),
+    );
+    when(() => other.viewportVisibility).thenReturn(
+      ViewportVisibilityRegistry(
+        onAggregate: (aggregate) async {
+          into.add(aggregate);
+          return true;
+        },
+      ),
+    );
+    when(() => other.getTrack(any(), any())).thenReturn(null);
+
+    return other;
+  }
+
   Future<void> pumpPip(WidgetTester tester) async {
     await tester.pumpWidget(
       TestWrapper(
@@ -141,4 +165,48 @@ void main() {
       reason: 'the window held a track nobody is drawing any more',
     );
   });
+
+  testWidgets(
+    'the window moved to another call stops speaking to the old one',
+    (
+      tester,
+    ) async {
+      await pumpPip(tester);
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      emitter.value = callState;
+      // Past the delay backgrounding schedules to re-check the call status.
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(
+        aggregates,
+        isNotEmpty,
+        reason: 'precondition: the window reported',
+      );
+      aggregates.clear();
+
+      // Back to the foreground: a backgrounded binding produces no frames, so
+      // nothing would be rebuilt to notice the new call.
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
+
+      final joined = <ViewportAggregate>[];
+      await tester.pumpWidget(
+        TestWrapper(
+          child: StreamPictureInPictureUiKitView(
+            call: otherCall(joined),
+            pictureInPictureConfiguration: const PictureInPictureConfiguration(
+              enablePictureInPicture: true,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        aggregates.single.visibility,
+        ViewportVisibility.hidden,
+        reason: 'the call it left still had the window drawing in it',
+      );
+    },
+  );
 }
