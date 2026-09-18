@@ -56,6 +56,8 @@
 
 ### 🐞 Fixed
 
+- A desktop screen share no longer sends `mandatory: {frameRate: null}` to the platform when no `maxFrameRate` is set.
+
 - A reconnect no longer drops the video of participants whose tracks have not been received yet. Track subscriptions now survive the join response, so a subscription update sent while the media is still arriving keeps every participant subscribed.
 - Guest creation no longer waits for a coordinator connection id. The call is unauthenticated and watches nothing, so an id could only add latency.
 - A request that could not be signed now reports a credentials failure rather than a network one.

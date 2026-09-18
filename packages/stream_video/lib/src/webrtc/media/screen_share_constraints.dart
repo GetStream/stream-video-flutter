@@ -38,7 +38,10 @@ class ScreenShareConstraints extends VideoConstraints {
       if (deviceId != null) {
         constraints['deviceId'] = {'exact': deviceId};
       }
-      if (maxFrameRate != 0.0) {
+      // Left out entirely when there is no cap to ask for: a null here reaches
+      // the platform as a null `frameRate`, which every implementation has to
+      // defend against to fall back to its own default.
+      if (maxFrameRate != null && maxFrameRate != 0.0) {
         constraints['mandatory'] = {'frameRate': maxFrameRate};
       }
     }
