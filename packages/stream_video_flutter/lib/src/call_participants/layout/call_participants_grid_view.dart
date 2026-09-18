@@ -1,12 +1,19 @@
-import 'dart:math' as math;
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../../widgets/tile_view.dart';
 
-class CallParticipantsGridView extends StatelessWidget {
+/// Arranges every participant in a grid, a page at a time.
+///
+/// The arrangement follows the shape of the space the grid is given rather than
+/// the width of the window: for each column count it could use, the grid works
+/// out how large the video would render, and takes the best. A window far wider
+/// than it is tall puts its participants in a row; a phone stacks the same
+/// people down the screen.
+///
+/// See [solveParticipantGrid] for the rule, and
+/// [StreamCallParticipantsGridThemeData.columnResolver] to override it.
+class CallParticipantsGridView extends StatefulWidget {
   const CallParticipantsGridView({
     super.key,
     required this.call,
@@ -42,228 +49,13 @@ class CallParticipantsGridView extends StatelessWidget {
   final EdgeInsets? padding;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = StreamCallParticipantsGridTheme.of(context);
-    final spacing = context.streamSpacing;
-
-    final padding =
-        this.padding ??
-        theme.padding?.resolve(Directionality.maybeOf(context)) ??
-        EdgeInsets.all(spacing.xs);
-    final mainAxisSpacing =
-        this.mainAxisSpacing ?? theme.mainAxisSpacing ?? spacing.xs;
-    final crossAxisSpacing =
-        this.crossAxisSpacing ?? theme.crossAxisSpacing ?? spacing.xs;
-
-    if (CurrentPlatform.isIos || CurrentPlatform.isAndroid) {
-      return MobileCallParticipantsGrid(
-        call: call,
-        participants: participants,
-        itemBuilder: itemBuilder,
-        padding: padding,
-        mainAxisSpacing: mainAxisSpacing,
-        crossAxisSpacing: crossAxisSpacing,
-      );
-    }
-
-    return DesktopCallParticipantsGrid(
-      call: call,
-      participants: participants,
-      itemBuilder: itemBuilder,
-      padding: padding,
-      mainAxisSpacing: mainAxisSpacing,
-      crossAxisSpacing: crossAxisSpacing,
-    );
-  }
+  State<CallParticipantsGridView> createState() =>
+      _CallParticipantsGridViewState();
 }
 
-class MobileCallParticipantsGrid extends StatelessWidget {
-  const MobileCallParticipantsGrid({
-    super.key,
-    required this.call,
-    required this.participants,
-    required this.itemBuilder,
-    required this.padding,
-    required this.mainAxisSpacing,
-    required this.crossAxisSpacing,
-  });
-
-  /// Represents a call.
-  final Call call;
-
-  /// The widgets to display.
-  final List<CallParticipantState> participants;
-
-  /// Builder function used to build a participant item.
-  final CallParticipantBuilder itemBuilder;
-
-  /// Space between the items in the main axis.
-  final double mainAxisSpacing;
-
-  /// Space between the items in the cross axis.
-  final double crossAxisSpacing;
-
-  /// Padding around the grid.
-  final EdgeInsetsGeometry padding;
-
-  @override
-  Widget build(BuildContext context) {
-    const pageSize = 6;
-    final pages = participants.slices(pageSize);
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final maxWidth = constraints.maxWidth;
-        final maxHeight = constraints.maxHeight;
-
-        var mainAxisCount = 3;
-        var crossAxisCount = 2;
-
-        // If the width is greater than the height, we need to swap the
-        // main and cross axis.
-        if (maxWidth > maxHeight) {
-          final temp = mainAxisCount;
-          mainAxisCount = crossAxisCount;
-          crossAxisCount = temp;
-        }
-
-        return PageView.builder(
-          itemCount: pages.length,
-          scrollDirection: Axis.vertical,
-          itemBuilder: (context, index) {
-            final pageParticipants = pages.elementAt(index);
-            final pageParticipantsCount = pageParticipants.length;
-
-            Widget page(Widget child) =>
-                Padding(padding: padding, child: child);
-
-            Widget getParticipantTile(int index) {
-              if (index < pageParticipantsCount) {
-                return Expanded(
-                  key: ValueKey(pageParticipants[index].uniqueParticipantKey),
-                  child: itemBuilder(context, call, pageParticipants[index]),
-                );
-              }
-
-              return const Spacer();
-            }
-
-            if (index == 0) {
-              return page(
-                Column(
-                  children: [
-                    if (pageParticipantsCount == 1) ...[
-                      Expanded(
-                        child: itemBuilder(context, call, pageParticipants[0]),
-                      ),
-                    ],
-                    if (pageParticipantsCount == 2) ...[
-                      getParticipantTile(0),
-                      SizedBox(height: mainAxisSpacing),
-                      getParticipantTile(1),
-                    ],
-                    if (pageParticipantsCount >= 3) ...[
-                      ...pageParticipants.mapIndexed((index, element) {
-                        if (index.isEven) {
-                          return Expanded(
-                            child: Row(
-                              children: [
-                                getParticipantTile(index),
-                                SizedBox(width: crossAxisSpacing),
-                                getParticipantTile(index + 1),
-                              ],
-                            ),
-                          );
-                        } else {
-                          return SizedBox(height: mainAxisSpacing);
-                        }
-                      }),
-                    ],
-                  ],
-                ),
-              );
-            }
-
-            return page(
-              Column(
-                children: [
-                  ...List.generate(pageSize, (index) => index).map((index) {
-                    if (index.isEven) {
-                      return Expanded(
-                        child: Row(
-                          children: [
-                            getParticipantTile(index),
-                            SizedBox(width: crossAxisSpacing),
-                            getParticipantTile(index + 1),
-                          ],
-                        ),
-                      );
-                    } else {
-                      return SizedBox(height: mainAxisSpacing);
-                    }
-                  }),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
-class DesktopCallParticipantsGrid extends StatefulWidget {
-  const DesktopCallParticipantsGrid({
-    super.key,
-    required this.call,
-    required this.participants,
-    required this.itemBuilder,
-    required this.padding,
-    required this.mainAxisSpacing,
-    required this.crossAxisSpacing,
-    this.pageSize = 16,
-  }) : assert(pageSize <= 49, 'We currently support a maximum of 49 items');
-
-  /// Represents a call.
-  final Call call;
-
-  /// The widgets to display.
-  final List<CallParticipantState> participants;
-
-  /// Builder function used to build a participant item.
-  final CallParticipantBuilder itemBuilder;
-
-  /// Number of participants to display in a single page.
-  final int pageSize;
-
-  /// Space between the items in the main axis.
-  final double mainAxisSpacing;
-
-  /// Space between the items in the cross axis.
-  final double crossAxisSpacing;
-
-  /// Padding around the grid.
-  final EdgeInsetsGeometry padding;
-
-  @override
-  State<DesktopCallParticipantsGrid> createState() =>
-      _DesktopCallParticipantsGridState();
-}
-
-class _DesktopCallParticipantsGridState
-    extends State<DesktopCallParticipantsGrid> {
-  late final _pageController = PageController();
-  late final _currentPage = ValueNotifier<int>(0);
-  late var _pages = widget.participants.slices(widget.pageSize);
-
-  @override
-  void didUpdateWidget(covariant DesktopCallParticipantsGrid oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.participants != widget.participants ||
-        oldWidget.pageSize != widget.pageSize) {
-      _pages = widget.participants.slices(widget.pageSize);
-    }
-  }
+class _CallParticipantsGridViewState extends State<CallParticipantsGridView> {
+  final _pageController = PageController();
+  final _currentPage = ValueNotifier<int>(0);
 
   @override
   void dispose() {
@@ -272,110 +64,179 @@ class _DesktopCallParticipantsGridState
     super.dispose();
   }
 
+  Future<void> _goToPage(int page) async {
+    await _pageController.animateToPage(
+      page,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+
+    // The notifier drives the chevrons, which should not swap over until the
+    // page they belong to has arrived.
+    _currentPage.value = page;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<int>(
-      valueListenable: _currentPage,
-      builder: (context, currentPage, child) {
-        return Stack(
-          children: [
-            child!,
-            if (_pages.length > 1)
-              Padding(
-                padding: widget.padding,
-                child: Center(
-                  child: Row(
-                    children: [
-                      AnimatedScale(
-                        scale: currentPage > 0 ? 1 : 0,
-                        duration: kThemeAnimationDuration,
-                        child: PageNavigationButton(
-                          icon: Icon(context.streamIcons.chevronLeft),
-                          onPressed: () async {
-                            final previousPage = currentPage - 1;
-                            await _pageController.animateToPage(
-                              previousPage,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
+    final theme = StreamCallParticipantsGridTheme.of(context);
+    final spacing = context.streamSpacing;
+    final screenSize = context.streamScreenSize;
 
-                            // We need to set the value after the animation
-                            _currentPage.value = previousPage;
-                          },
-                        ),
-                      ),
-                      const Spacer(),
-                      AnimatedScale(
-                        scale: currentPage < _pages.length - 1 ? 1 : 0,
-                        duration: kThemeAnimationDuration,
-                        child: PageNavigationButton(
-                          icon: Icon(context.streamIcons.chevronRight),
-                          onPressed: () async {
-                            final nextPage = currentPage + 1;
-                            await _pageController.animateToPage(
-                              nextPage,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
+    final padding =
+        widget.padding ??
+        theme.padding?.resolve(Directionality.maybeOf(context)) ??
+        EdgeInsets.all(spacing.xs);
+    final mainAxisSpacing =
+        widget.mainAxisSpacing ?? theme.mainAxisSpacing ?? spacing.xs;
+    final crossAxisSpacing =
+        widget.crossAxisSpacing ?? theme.crossAxisSpacing ?? spacing.xs;
+    final maxTileAspectRatio = theme.maxTileAspectRatio ?? 16 / 9;
 
-                            // We need to set the value after the animation
-                            _currentPage.value = nextPage;
-                          },
-                        ),
+    final pageSize = switch (screenSize) {
+      StreamScreenSize.small => theme.compactPageSize ?? 6,
+      _ => theme.pageSize ?? 12,
+    };
+
+    final pages = widget.participants.slices(pageSize).toList();
+    if (pages.isEmpty) return const SizedBox.shrink();
+
+    // People leaving can take the page the grid is on with them. The physics
+    // are fixed, so a stranded page would have no way back. Corrected after
+    // the frame rather than during it, since this runs inside build.
+    final lastPage = pages.length - 1;
+    if (_currentPage.value > lastPage) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _currentPage.value = lastPage;
+        if (_pageController.hasClients) _pageController.jumpToPage(lastPage);
+      });
+    }
+
+    return Padding(
+      padding: padding,
+      child: ValueListenableBuilder<int>(
+        valueListenable: _currentPage,
+        builder: (context, value, child) {
+          if (pages.length <= 1) return child!;
+
+          final currentPage = value.clamp(0, lastPage);
+
+          return Stack(
+            children: [
+              child!,
+              Center(
+                child: Row(
+                  children: [
+                    AnimatedScale(
+                      scale: currentPage > 0 ? 1 : 0,
+                      duration: kThemeAnimationDuration,
+                      child: PageNavigationButton(
+                        icon: Icon(context.streamIcons.chevronLeft),
+                        onPressed: () => _goToPage(currentPage - 1),
                       ),
-                    ],
-                  ),
+                    ),
+                    const Spacer(),
+                    AnimatedScale(
+                      scale: currentPage < lastPage ? 1 : 0,
+                      duration: kThemeAnimationDuration,
+                      child: PageNavigationButton(
+                        icon: Icon(context.streamIcons.chevronRight),
+                        onPressed: () => _goToPage(currentPage + 1),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-          ],
-        );
-      },
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final maxWidth = constraints.maxWidth;
-          final maxHeight = constraints.maxHeight;
-
-          return PageView.builder(
-            itemCount: _pages.length,
-            controller: _pageController,
-            physics: const NeverScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-              final page = _pages.elementAt(index);
-
-              final participantsCount = page.length;
-              final pageSize = math.min(widget.pageSize, participantsCount);
-              var crossAxisCount = math.sqrt(pageSize - 1).floor() + 1;
-              var mainAxisCount = (pageSize / crossAxisCount).ceil();
-
-              // If the height is greater than the width, we need to swap the
-              // main and cross axis.
-              if (maxHeight > maxWidth) {
-                final temp = mainAxisCount;
-                mainAxisCount = crossAxisCount;
-                crossAxisCount = temp;
-              }
-
-              return TileView(
-                key: ValueKey(index),
-                padding: widget.padding,
-                mainAxisSpacing: widget.mainAxisSpacing,
-                crossAxisSpacing: widget.crossAxisSpacing,
-                mainAxisCount: mainAxisCount,
-                crossAxisCount: crossAxisCount,
-                children: page.map(
-                  (participant) {
-                    return widget.itemBuilder(
-                      context,
-                      widget.call,
-                      participant,
-                    );
-                  },
-                ),
-              );
-            },
+            ],
           );
         },
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return PageView.builder(
+              itemCount: pages.length,
+              controller: _pageController,
+              // Swiping is how the grid was paged on a phone before the
+              // chevrons arrived, and Flutter's default drag devices leave a
+              // mouse out, so this is touch only.
+              physics: const PageScrollPhysics(),
+              onPageChanged: (page) => _currentPage.value = page,
+              itemBuilder: (context, index) {
+                final page = pages[index];
+
+                final details = StreamParticipantGridDetails(
+                  box: constraints.biggest,
+                  count: page.length,
+                  mainAxisSpacing: mainAxisSpacing,
+                  crossAxisSpacing: crossAxisSpacing,
+                  maxTileAspectRatio: maxTileAspectRatio,
+                  screenSize: screenSize,
+                );
+
+                final columns = theme.columnResolver?.call(details);
+                final arrangement = columns == null
+                    ? solveParticipantGrid(details)
+                    : arrangeParticipantGrid(details, columns);
+
+                return _GridPage(
+                  call: widget.call,
+                  participants: page,
+                  itemBuilder: widget.itemBuilder,
+                  arrangement: arrangement,
+                  mainAxisSpacing: mainAxisSpacing,
+                  crossAxisSpacing: crossAxisSpacing,
+                );
+              },
+            );
+          },
+        ),
       ),
+    );
+  }
+}
+
+/// One page of tiles, laid out to [arrangement].
+///
+/// Rows are packed and the block is centred on both axes, so a short last row
+/// sits under the middle of the one above it.
+class _GridPage extends StatelessWidget {
+  const _GridPage({
+    required this.call,
+    required this.participants,
+    required this.itemBuilder,
+    required this.arrangement,
+    required this.mainAxisSpacing,
+    required this.crossAxisSpacing,
+  });
+
+  final Call call;
+  final List<CallParticipantState> participants;
+  final CallParticipantBuilder itemBuilder;
+  final ParticipantGridArrangement arrangement;
+  final double mainAxisSpacing;
+  final double crossAxisSpacing;
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = participants.slices(arrangement.columns).toList();
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      spacing: mainAxisSpacing,
+      children: [
+        for (final row in rows)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: crossAxisSpacing,
+            children: [
+              for (final participant in row)
+                SizedBox.fromSize(
+                  key: ValueKey(participant.uniqueParticipantKey),
+                  size: arrangement.tileSize,
+                  child: itemBuilder(context, call, participant),
+                ),
+            ],
+          ),
+      ],
     );
   }
 }
