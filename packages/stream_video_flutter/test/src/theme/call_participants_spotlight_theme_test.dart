@@ -137,20 +137,20 @@ void main() {
       const a = StreamCallParticipantsSpotlightThemeData(
         style: StreamCallParticipantsSpotlightStyle(
           spacing: 0,
-          compactBarTileSize: Size(100, 50),
+          barTileSize: Size(100, 50),
         ),
       );
       const b = StreamCallParticipantsSpotlightThemeData(
         style: StreamCallParticipantsSpotlightStyle(
           spacing: 10,
-          compactBarTileSize: Size(200, 150),
+          barTileSize: Size(200, 150),
         ),
       );
 
       final mid = StreamCallParticipantsSpotlightThemeData.lerp(a, b, 0.5);
 
       expect(mid?.style?.spacing, 5);
-      expect(mid?.style?.compactBarTileSize, const Size(150, 100));
+      expect(mid?.style?.barTileSize, const Size(150, 100));
     });
   });
 
@@ -158,12 +158,12 @@ void main() {
     test('carries the spotlight theme through copyWith', () {
       final theme = themeWith(
         const StreamCallParticipantsSpotlightStyle(
-          expandedBarTileSize: Size(320, 180),
+          barTileSize: Size(320, 180),
         ),
       );
 
       expect(
-        theme.callParticipantsSpotlightTheme.style?.expandedBarTileSize,
+        theme.callParticipantsSpotlightTheme.style?.barTileSize,
         const Size(320, 180),
       );
     });

@@ -310,7 +310,7 @@
 - The participants grid arranges itself against the shape of the space it is given rather than the platform it runs on, so a short wide window puts its tiles in a row instead of a square.
 - The grid pages with chevrons at every size, and still swipes on a touch screen.
 - The speaker layouts give the bar its edge and the spotlight everything else, never drawing the spotlight wider than 16:9.
-- The participants bar draws fixed-size tiles per breakpoint, centred until they overflow.
+- The participants bar draws 222x125 tiles at every size, centred until they overflow.
 - `CallParticipantsSpotlightView.padding` defaults to 8px horizontal, and a new `spacing` sets the gaps.
 - `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
 - Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.

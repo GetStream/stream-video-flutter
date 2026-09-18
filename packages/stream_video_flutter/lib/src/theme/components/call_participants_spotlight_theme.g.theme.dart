@@ -112,17 +112,7 @@ mixin _$StreamCallParticipantsSpotlightStyle {
         b.maxSpotlightAspectRatio,
         t,
       ),
-      compactBarTileSize: Size.lerp(
-        a.compactBarTileSize,
-        b.compactBarTileSize,
-        t,
-      ),
       barTileSize: Size.lerp(a.barTileSize, b.barTileSize, t),
-      expandedBarTileSize: Size.lerp(
-        a.expandedBarTileSize,
-        b.expandedBarTileSize,
-        t,
-      ),
     );
   }
 
@@ -130,9 +120,7 @@ mixin _$StreamCallParticipantsSpotlightStyle {
     EdgeInsetsGeometry? padding,
     double? spacing,
     double? maxSpotlightAspectRatio,
-    Size? compactBarTileSize,
     Size? barTileSize,
-    Size? expandedBarTileSize,
   }) {
     final _this = (this as StreamCallParticipantsSpotlightStyle);
 
@@ -141,9 +129,7 @@ mixin _$StreamCallParticipantsSpotlightStyle {
       spacing: spacing ?? _this.spacing,
       maxSpotlightAspectRatio:
           maxSpotlightAspectRatio ?? _this.maxSpotlightAspectRatio,
-      compactBarTileSize: compactBarTileSize ?? _this.compactBarTileSize,
       barTileSize: barTileSize ?? _this.barTileSize,
-      expandedBarTileSize: expandedBarTileSize ?? _this.expandedBarTileSize,
     );
   }
 
@@ -164,9 +150,7 @@ mixin _$StreamCallParticipantsSpotlightStyle {
       padding: other.padding,
       spacing: other.spacing,
       maxSpotlightAspectRatio: other.maxSpotlightAspectRatio,
-      compactBarTileSize: other.compactBarTileSize,
       barTileSize: other.barTileSize,
-      expandedBarTileSize: other.expandedBarTileSize,
     );
   }
 
@@ -186,9 +170,7 @@ mixin _$StreamCallParticipantsSpotlightStyle {
     return _other.padding == _this.padding &&
         _other.spacing == _this.spacing &&
         _other.maxSpotlightAspectRatio == _this.maxSpotlightAspectRatio &&
-        _other.compactBarTileSize == _this.compactBarTileSize &&
-        _other.barTileSize == _this.barTileSize &&
-        _other.expandedBarTileSize == _this.expandedBarTileSize;
+        _other.barTileSize == _this.barTileSize;
   }
 
   @override
@@ -200,9 +182,7 @@ mixin _$StreamCallParticipantsSpotlightStyle {
       _this.padding,
       _this.spacing,
       _this.maxSpotlightAspectRatio,
-      _this.compactBarTileSize,
       _this.barTileSize,
-      _this.expandedBarTileSize,
     );
   }
 }
