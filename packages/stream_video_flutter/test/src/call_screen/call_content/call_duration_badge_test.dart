@@ -80,39 +80,44 @@ void main() {
   }
 
   group('the timestamp', () {
-    // The rule the design states: leading zeros stay light, the first non-zero
-    // digit and everything after it goes dark, and the colon stays light
-    // whatever is around it.
+    /// The part of the timestamp drawn in the darker colour.
+    String elapsedOf(WidgetTester tester) =>
+        spans(tester).where((it) => it.$2 != null).map((it) => it.$1).join();
+
+    String wholeOf(WidgetTester tester) =>
+        spans(tester).map((it) => it.$1).join();
+
+    // The seconds are the exception to emphasising a unit whole: they run
+    // through 01 to 09 once a minute, and carrying their leading zero would
+    // have the badge flicker every minute.
     testWidgets('darkens only the 8 in 00:08', (tester) async {
       await pump(tester, elapsed: const Duration(seconds: 8));
 
-      final colors = spans(tester);
-
-      expect(colors.map((it) => it.$1).join(), '00:08');
-      expect(colors.where((it) => it.$2 != null).map((it) => it.$1), ['8']);
+      expect(wholeOf(tester), '00:08');
+      expect(elapsedOf(tester), '8');
     });
 
-    testWidgets('darkens everything from the 1 in 01:00, colon aside', (
-      tester,
-    ) async {
+    // A unit the clock has reached is emphasised whole, so the minutes carry
+    // their leading zero and the colon after them.
+    testWidgets('darkens 04:28 throughout', (tester) async {
+      await pump(tester, elapsed: const Duration(minutes: 4, seconds: 28));
+
+      expect(wholeOf(tester), '04:28');
+      expect(elapsedOf(tester), '04:28');
+    });
+
+    testWidgets('darkens 01:00 throughout', (tester) async {
       await pump(tester, elapsed: const Duration(minutes: 1));
 
-      final colors = spans(tester);
-
-      expect(colors.map((it) => it.$1).join(), '01:00');
-      expect(colors.where((it) => it.$2 != null).map((it) => it.$1), [
-        '1',
-        '00',
-      ]);
+      expect(wholeOf(tester), '01:00');
+      expect(elapsedOf(tester), '01:00');
     });
 
     testWidgets('darkens nothing in 00:00', (tester) async {
       await pump(tester);
 
-      final colors = spans(tester);
-
-      expect(colors.map((it) => it.$1).join(), '00:00');
-      expect(colors.where((it) => it.$2 != null), isEmpty);
+      expect(wholeOf(tester), '00:00');
+      expect(elapsedOf(tester), isEmpty);
     });
 
     testWidgets('rolls into hours rather than counting minutes up', (
@@ -123,7 +128,8 @@ void main() {
         elapsed: const Duration(hours: 1, minutes: 3, seconds: 5),
       );
 
-      expect(spans(tester).map((it) => it.$1).join(), '1:03:05');
+      expect(wholeOf(tester), '1:03:05');
+      expect(elapsedOf(tester), '1:03:05');
     });
 
     // The reason for tabular figures: without them the pill twitches every

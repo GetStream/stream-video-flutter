@@ -16,9 +16,11 @@ import '../../l10n/localization_extension.dart';
 /// badge is the time alone, which is the resting state for a call with nothing
 /// to report.
 ///
-/// The timestamp dims its leading zeros: it darkens from the first non-zero
-/// digit on, colons aside. So `00:08` darkens the `8` alone, `01:00` everything
-/// from the `1`, and `00:00` nothing at all.
+/// The timestamp dims what the clock has not reached yet: it darkens from the
+/// first non-zero digit on, extended back over the unit that digit sits in. So
+/// `04:28` is dark throughout, `00:00` is light throughout, and `00:08` darkens
+/// the `8` alone — the seconds keep their leading zero light, or the badge
+/// would flicker as they roll past `09` every minute.
 ///
 /// {@tool snippet}
 ///
@@ -208,48 +210,40 @@ class _Duration extends StatelessWidget {
     return '${duration.inHours}:$minutes:$seconds';
   }
 
-  /// [timestamp] split into runs, [elapsed] from its first non-zero digit on.
-  ///
-  /// What comes before that digit is padding rather than time anyone has spent
-  /// in the call, and stays in the ambient lighter colour — as does every
-  /// colon, whether or not the time has reached it.
-  ///
-  /// Grouped into runs rather than one span per character: the two differ only
-  /// in how many spans the paragraph is built from.
+  /// [timestamp] split in two, [elapsed] from the point the clock has reached.
   static List<TextSpan> _spans(String timestamp, Color elapsed) {
+    final from = _elapsedFrom(timestamp);
+    if (from == null) return [TextSpan(text: timestamp)];
+
+    final style = TextStyle(color: elapsed);
+    if (from == 0) return [TextSpan(text: timestamp, style: style)];
+
+    return [
+      // Null leaves the run in the ambient colour rather than restating it.
+      TextSpan(text: timestamp.substring(0, from)),
+      TextSpan(text: timestamp.substring(from), style: style),
+    ];
+  }
+
+  /// Where [timestamp] starts reading as time that has elapsed, or null when
+  /// none of it has.
+  ///
+  /// The first non-zero digit, extended back over the unit it sits in: a unit
+  /// the clock has reached is emphasised whole, so `04:28` is emphasised
+  /// throughout rather than from its `4`, and the colon goes with it.
+  ///
+  /// The last unit is the exception. Its leading zero is left alone, because
+  /// the seconds run through `01` to `09` once a minute and emphasising that
+  /// zero would have the badge flicker every minute — which is why `00:08`
+  /// emphasises the `8` alone.
+  static int? _elapsedFrom(String timestamp) {
     final significant = timestamp.indexOf(RegExp('[1-9]'));
-    if (significant < 0) return [TextSpan(text: timestamp)];
+    if (significant < 0) return null;
 
-    final spans = <TextSpan>[];
-    final run = StringBuffer();
-    bool? runIsElapsed;
+    final isLastUnit = !timestamp.substring(significant).contains(':');
+    if (isLastUnit) return significant;
 
-    void flush() {
-      if (run.isEmpty) return;
-      spans.add(
-        TextSpan(
-          text: run.toString(),
-          // Null leaves the run in the ambient colour rather than restating it.
-          style: runIsElapsed! ? TextStyle(color: elapsed) : null,
-        ),
-      );
-      run.clear();
-    }
-
-    for (var index = 0; index < timestamp.length; index++) {
-      final character = timestamp[index];
-      final isElapsed = index >= significant && character != ':';
-
-      if (runIsElapsed != isElapsed) {
-        flush();
-        runIsElapsed = isElapsed;
-      }
-
-      run.write(character);
-    }
-
-    flush();
-    return spans;
+    return timestamp.lastIndexOf(':', significant) + 1;
   }
 
   // Screen readers read '05:03' out as digits, which says nothing about a call
