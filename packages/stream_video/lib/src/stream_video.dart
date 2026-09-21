@@ -1333,10 +1333,9 @@ class StreamVideo extends Disposable {
     }
 
     // Only handle messages from stream.video
-    final sender = payload['sender'] as String?;
-    if (sender != 'stream.video') return false;
+    if (!StreamPushPayload.isStreamPush(payload)) return false;
 
-    final callCid = payload['call_cid'] as String?;
+    final callCid = StreamPushPayload.callCidOf(payload);
     if (callCid == null) return false;
 
     final callUUID = const Uuid().v4();
@@ -1349,14 +1348,15 @@ class StreamVideo extends Disposable {
       callId = splitCid.last;
     }
 
-    final createdById = payload['created_by_id'] as String?;
-    final createdByName = payload['created_by_display_name'] as String?;
-    final callDisplayName = payload['call_display_name'] as String?;
+    final createdById = payload[StreamPushPayload.createdByIdKey] as String?;
+    final createdByName =
+        payload[StreamPushPayload.createdByDisplayNameKey] as String?;
+    final callDisplayName =
+        payload[StreamPushPayload.callDisplayNameKey] as String?;
 
-    final hasVideo = payload['video'] as String?;
+    final hasVideo = payload[StreamPushPayload.videoKey] as String?;
 
-    final type = payload['type'] as String?;
-    if (handleMissedCall && type == 'call.missed') {
+    if (handleMissedCall && StreamPushPayload.isMissedCallPush(payload)) {
       unawaited(
         manager.showMissedCall(
           uuid: callUUID,
@@ -1369,7 +1369,7 @@ class StreamVideo extends Disposable {
       );
 
       return true;
-    } else if (type != 'call.ring') {
+    } else if (!StreamPushPayload.isRingingPush(payload)) {
       return false;
     }
 

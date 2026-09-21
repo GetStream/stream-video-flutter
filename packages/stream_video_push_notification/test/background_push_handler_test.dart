@@ -19,13 +19,35 @@ class MockStreamVideo extends Mock implements StreamVideo {
 void _ignore(RingingEvent _) {}
 
 /// The payload of a ringing push, the only one whose flow waits for the user.
-const _ringingPush = {'sender': 'stream.video', 'type': 'call.ring'};
+///
+/// The cid is what ties the push to the event that eventually resolves it, and
+/// the SDK reports a ringing push without one as unhandled, so every fixture
+/// here carries one.
+///
+/// Spelled out rather than built from `StreamPushPayload`: these fixtures are
+/// what pins the wire format, and a constant gone wrong would otherwise agree
+/// with itself on both sides and pass.
+Map<String, dynamic> _ringingPushFor(String callCid) => {
+  'sender': 'stream.video',
+  'type': 'call.ring',
+  'call_cid': callCid,
+};
+
+final _ringingPush = _ringingPushFor('default:call-a');
 
 /// A missed call: reported as handled, but nothing ever resolves it.
 const _missedCallPush = {'sender': 'stream.video', 'type': 'call.missed'};
 
-RemoteMessage _message([Map<String, dynamic> data = _ringingPush]) =>
-    RemoteMessage(data: data);
+/// A push from somebody else's integration, sharing the app's FCM channel.
+const _foreignPush = {'sender': 'some.other.app', 'body': 'hello'};
+
+/// The resolution the platform sends back for [callCid].
+ActionCallDecline _declined(String callCid) => ActionCallDecline(
+  data: CallData(uuid: 'u', callCid: callCid),
+);
+
+RemoteMessage _message([Map<String, dynamic>? data]) =>
+    RemoteMessage(data: data ?? _ringingPush);
 
 void main() {
   registerFallbackValue((RingingEvent _) {});
@@ -49,7 +71,7 @@ void main() {
   Future<bool> handle({
     required CreateStreamVideo createStreamVideo,
     ResolveExistingClient? existingClient,
-    Map<String, dynamic> data = _ringingPush,
+    Map<String, dynamic>? data,
   }) {
     return StreamVideoPushHandler.handleBackgroundMessage(
       _message(data),
@@ -83,7 +105,15 @@ void main() {
     return stub;
   }
 
+  /// Long enough that nothing resolves inside it by accident, short enough
+  /// that a test can sleep through it.
+  const grace = Duration(milliseconds: 20);
+
+  /// Comfortably past a scheduled release falling due.
+  Future<void> pastTheGrace() => Future<void>.delayed(grace * 6);
+
   setUp(() {
+    StreamVideoPushHandler.resolutionGrace = grace;
     ringing = StreamController<RingingEvent>.broadcast();
     onRingingEvent = null;
     factoryCalls = 0;
@@ -94,6 +124,7 @@ void main() {
   tearDown(() async {
     await StreamVideoPushHandler.releaseForTesting();
     await ringing.close();
+    StreamVideoPushHandler.resolutionGrace = const Duration(seconds: 1);
   });
 
   group('StreamVideoPushHandler', () {
@@ -123,11 +154,11 @@ void main() {
     test('releases once the user resolves the notification', () async {
       await handle(createStreamVideo: factoryReturning(client));
 
-      onRingingEvent!(const ActionCallDecline(data: CallData(uuid: 'u')));
+      onRingingEvent!(_declined('default:call-a'));
       // Teardown is deferred so the flow resolving the call finishes first.
       verifyNever(() => client.dispose());
 
-      await Future<void>.delayed(const Duration(milliseconds: 1200));
+      await pastTheGrace();
 
       verify(() => client.dispose()).called(1);
       expect(onDisposeCalled, isTrue);
@@ -137,7 +168,7 @@ void main() {
       await handle(createStreamVideo: factoryReturning(client));
 
       onRingingEvent!(const ActionCallIncoming(data: CallData(uuid: 'u')));
-      await Future<void>.delayed(const Duration(milliseconds: 1200));
+      await pastTheGrace();
 
       // An incoming call is the *start* of the flow this isolate exists for.
       verifyNever(() => client.dispose());
@@ -153,6 +184,7 @@ void main() {
       expect(handled, isFalse);
       // No ringing event is ever coming, so nothing else would let go of the
       // isolate.
+      await pastTheGrace();
       verify(() => client.dispose()).called(1);
       expect(onDisposeCalled, isTrue);
     });
@@ -187,6 +219,83 @@ void main() {
       },
     );
 
+    test('reaches the app teardown even when dispose throws', () async {
+      when(client.dispose).thenThrow(Exception('boom'));
+
+      await handle(
+        createStreamVideo: factoryReturning(client),
+        data: _missedCallPush,
+      );
+      await pastTheGrace();
+
+      // The client's teardown failing must not strand the app's own: nothing
+      // can retry this release, and the dependencies would stay registered.
+      expect(onDisposeCalled, isTrue);
+
+      // And the isolate still has to be able to take the next call.
+      onDisposeCalled = false;
+      final handled = await handle(
+        createStreamVideo: factoryReturning(stubbedClient()),
+      );
+
+      expect(handled, isTrue);
+      expect(factoryCalls, 2);
+    });
+
+    test('a failing setup is torn down before the next push tries', () async {
+      var disposeCalls = 0;
+      var setUp = 0;
+      Future<bool> race() => StreamVideoPushHandler.handleBackgroundMessage(
+        _message(),
+        createStreamVideo: () async {
+          factoryCalls++;
+          setUp++;
+          await Future<void>.delayed(grace);
+          throw Exception('no network');
+        },
+        onDispose: () {
+          // Resetting the app's dependencies while the other push is still
+          // using them would wipe them mid-flight.
+          expect(setUp, 1);
+          setUp--;
+          disposeCalls++;
+        },
+      );
+
+      final handled = await Future.wait([race(), race()]);
+
+      expect(handled, [false, false]);
+      // Each push gets its own attempt—the second is a retry, not a rider on
+      // a failure it never saw—and the two never overlap.
+      expect(factoryCalls, 2);
+      expect(disposeCalls, 2);
+    });
+
+    test('two pushes racing the setup share one session', () async {
+      CreateStreamVideo slowFactory(StreamVideo value) => () async {
+        factoryCalls++;
+        await Future<void>.delayed(grace);
+        return value;
+      };
+
+      // Firebase drains the messages buffered during a cold start back to
+      // back, so the second push lands while the first is still awaiting its
+      // token fetch.
+      final handled = await Future.wait([
+        handle(createStreamVideo: slowFactory(client)),
+        handle(createStreamVideo: slowFactory(client)),
+      ]);
+
+      // A second client would leak: nothing disposes it, and the app's own
+      // factory is the thing that trips over being called twice.
+      expect(factoryCalls, 1);
+      expect(handled, [true, true]);
+      // One session means one set of observers and one teardown.
+      verify(client.observeCoreRingingEventsForBackground).called(1);
+      verify(() => client.handleRingingFlowNotifications(any())).called(2);
+      expect(onDisposeCalled, isFalse);
+    });
+
     test('releases when handling throws', () async {
       when(
         () => client.handleRingingFlowNotifications(any()),
@@ -195,6 +304,7 @@ void main() {
       final handled = await handle(createStreamVideo: factoryReturning(client));
 
       expect(handled, isFalse);
+      await pastTheGrace();
       verify(() => client.dispose()).called(1);
       expect(onDisposeCalled, isTrue);
     });
@@ -211,7 +321,7 @@ void main() {
       // Not immediately: the SDK posts the notification without waiting.
       verifyNever(() => client.dispose());
 
-      await Future<void>.delayed(const Duration(milliseconds: 1200));
+      await pastTheGrace();
 
       verify(() => client.dispose()).called(1);
       expect(onDisposeCalled, isTrue);
@@ -226,7 +336,64 @@ void main() {
           data: _missedCallPush,
         );
 
-        await Future<void>.delayed(const Duration(milliseconds: 1200));
+        await pastTheGrace();
+
+        verifyNever(() => client.dispose());
+        expect(onDisposeCalled, isFalse);
+      },
+    );
+
+    test(
+      'a ring still in flight when the release falls due survives',
+      () async {
+        await handle(
+          createStreamVideo: factoryReturning(client),
+          data: _missedCallPush,
+        );
+
+        // The ring lands just before the missed call's release falls due and
+        // takes longer than the grace to handle, so the release comes up while
+        // the ring is still in flight.
+        await Future<void>.delayed(grace ~/ 2);
+        when(() => client.handleRingingFlowNotifications(any())).thenAnswer((
+          _,
+        ) async {
+          await Future<void>.delayed(grace * 2);
+          return true;
+        });
+        await handle(createStreamVideo: factoryReturning(client));
+
+        verifyNever(() => client.dispose());
+        expect(onDisposeCalled, isFalse);
+      },
+    );
+
+    test('a ring arriving after a missed call is not cut short', () async {
+      await handle(
+        createStreamVideo: factoryReturning(client),
+        data: _missedCallPush,
+      );
+      // Inside the grace window the missed call opened, the caller rings.
+      await handle(createStreamVideo: factoryReturning(client));
+
+      await pastTheGrace();
+
+      // The release the missed call scheduled would otherwise have taken the
+      // ringing client with it.
+      verifyNever(() => client.dispose());
+      expect(onDisposeCalled, isFalse);
+    });
+
+    test(
+      'a ring arriving inside the resolution grace keeps the client',
+      () async {
+        await handle(createStreamVideo: factoryReturning(client));
+
+        onRingingEvent!(_declined('default:call-a'));
+        // The caller rings straight back, before the deferred teardown runs.
+        await handle(createStreamVideo: factoryReturning(client));
+
+        await pastTheGrace();
 
         verifyNever(() => client.dispose());
         expect(onDisposeCalled, isFalse);
@@ -291,7 +458,7 @@ void main() {
 
       Future<bool> handleOnAppIsolate({
         CreateStreamVideo? createStreamVideo,
-        Map<String, dynamic> data = _ringingPush,
+        Map<String, dynamic>? data,
       }) {
         return handle(
           createStreamVideo: createStreamVideo ?? factoryReturning(client),
@@ -357,7 +524,170 @@ void main() {
         // No resolution observer was registered, so nothing is scheduled.
         expect(onRingingEvent, isNull);
 
-        await Future<void>.delayed(const Duration(milliseconds: 1200));
+        await pastTheGrace();
+
+        verifyNever(() => client.dispose());
+        expect(onDisposeCalled, isFalse);
+      });
+    });
+
+    group('when more than one call is ringing', () {
+      test('resolving one leaves the other one ringing', () async {
+        // Caller A rings, then caller B rings while A is still up.
+        await handle(createStreamVideo: factoryReturning(client));
+        await handle(
+          createStreamVideo: factoryReturning(client),
+          data: _ringingPushFor('default:call-b'),
+        );
+
+        // The user declines B. A is still on screen.
+        onRingingEvent!(_declined('default:call-b'));
+        await pastTheGrace();
+
+        // Disposing here would leave A ringing with nothing behind it to
+        // deliver whatever the user does next.
+        verifyNever(() => client.dispose());
+        expect(onDisposeCalled, isFalse);
+      });
+
+      test('releases once the last one is resolved', () async {
+        await handle(createStreamVideo: factoryReturning(client));
+        await handle(
+          createStreamVideo: factoryReturning(client),
+          data: _ringingPushFor('default:call-b'),
+        );
+
+        onRingingEvent!(_declined('default:call-b'));
+        onRingingEvent!(_declined('default:call-a'));
+        await pastTheGrace();
+
+        verify(() => client.dispose()).called(1);
+        expect(onDisposeCalled, isTrue);
+      });
+
+      test(
+        'a late event for a call already let go of changes nothing',
+        () async {
+          await handle(createStreamVideo: factoryReturning(client));
+          await handle(
+            createStreamVideo: factoryReturning(client),
+            data: _ringingPushFor('default:call-b'),
+          );
+
+          onRingingEvent!(_declined('default:call-b'));
+          // The platform reports B ending as well as being declined. It is not
+          // a second resolution, and must not be taken for A's.
+          onRingingEvent!(
+            const ActionCallEnded(
+              data: CallData(uuid: 'u', callCid: 'default:call-b'),
+            ),
+          );
+          await pastTheGrace();
+
+          verifyNever(() => client.dispose());
+        },
+      );
+
+      test('an event without a cid resolves everything', () async {
+        await handle(createStreamVideo: factoryReturning(client));
+        await handle(
+          createStreamVideo: factoryReturning(client),
+          data: _ringingPushFor('default:call-b'),
+        );
+
+        // Nothing says which call this resolves, so the session cannot be
+        // reasoned about any more. Letting go beats holding the isolate open
+        // for a call nothing will ever resolve.
+        onRingingEvent!(const ActionCallDecline(data: CallData(uuid: 'u')));
+        await pastTheGrace();
+
+        verify(() => client.dispose()).called(1);
+        expect(onDisposeCalled, isTrue);
+      });
+    });
+
+    group('when the push is not ours', () {
+      test('builds nothing for it', () async {
+        final handled = await handle(
+          createStreamVideo: factoryReturning(client),
+          data: _foreignPush,
+        );
+
+        expect(handled, isFalse);
+        // A token fetch and everything the app's factory sets up around it,
+        // spent on a push the SDK could never have acted on.
+        expect(factoryCalls, 0);
+        verifyNever(() => client.handleRingingFlowNotifications(any()));
+      });
+
+      test('does not disturb a call that is ringing', () async {
+        await handle(createStreamVideo: factoryReturning(client));
+
+        final handled = await handle(
+          createStreamVideo: factoryReturning(client),
+          data: _foreignPush,
+        );
+
+        expect(handled, isFalse);
+        verifyNever(() => client.dispose());
+        expect(onDisposeCalled, isFalse);
+      });
+
+      test('is turned away on the app isolate too', () async {
+        final handled = await handle(
+          createStreamVideo: factoryReturning(client),
+          existingClient: () => client,
+          data: _foreignPush,
+        );
+
+        expect(handled, isFalse);
+        verifyNever(() => client.handleRingingFlowNotifications(any()));
+      });
+    });
+
+    group('when two pushes race the setup', () {
+      /// A factory slow enough that the second push lands mid-setup.
+      CreateStreamVideo slowFactory() => () async {
+        factoryCalls++;
+        await Future<void>.delayed(grace);
+        return client;
+      };
+
+      test('an unhandled one does not release under a live ring', () async {
+        // The first push is for a call answered on another device, so the SDK
+        // reports it unhandled; the second is a real ring.
+        var calls = 0;
+        when(
+          () => client.handleRingingFlowNotifications(any()),
+        ).thenAnswer((_) async => calls++ != 0);
+
+        await Future.wait([
+          handle(createStreamVideo: slowFactory()),
+          handle(createStreamVideo: slowFactory()),
+        ]);
+        await pastTheGrace();
+
+        expect(factoryCalls, 1);
+        // Both were handed the one session, so the first must not tear it
+        // down before the second has even asked the client.
+        verifyNever(() => client.dispose());
+        expect(onDisposeCalled, isFalse);
+      });
+
+      test('one that throws does not release under a live ring', () async {
+        var calls = 0;
+        when(() => client.handleRingingFlowNotifications(any())).thenAnswer((
+          _,
+        ) async {
+          if (calls++ == 0) throw Exception('boom');
+          return true;
+        });
+
+        await Future.wait([
+          handle(createStreamVideo: slowFactory()),
+          handle(createStreamVideo: slowFactory()),
+        ]);
+        await pastTheGrace();
 
         verifyNever(() => client.dispose());
         expect(onDisposeCalled, isFalse);
@@ -371,6 +701,7 @@ void main() {
           () => client.handleRingingFlowNotifications(any()),
         ).thenAnswer((_) async => false);
         await handle(createStreamVideo: factoryReturning(client));
+        await pastTheGrace();
 
         when(
           () => client.handleRingingFlowNotifications(any()),

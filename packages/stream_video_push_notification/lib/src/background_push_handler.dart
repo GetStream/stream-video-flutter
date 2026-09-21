@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:synchronized/synchronized.dart';
 
 /// Builds the client a background push needs, or returns null when there is
 /// nobody to build it for.
@@ -63,15 +64,24 @@ class StreamVideoPushHandler {
 
   static const _tag = 'SV:BackgroundPush';
 
-  /// How long to wait after the user resolves the notification before tearing
-  /// the client down, so the flow that is resolving it finishes first.
-  static const _resolutionGrace = Duration(seconds: 1);
+  /// How long to wait before tearing the client down, so the flow that is
+  /// resolving the notification finishes first.
+  ///
+  /// Not const only so a test does not have to sleep through it.
+  @visibleForTesting
+  static Duration resolutionGrace = const Duration(seconds: 1);
 
   /// The client and observers for this isolate, or null when none is running.
   ///
   /// Static because the isolate outlives a single message: a second push can
   /// arrive while the first call is still ringing.
   static _BackgroundSession? _session;
+
+  /// Serialises everything that touches [_session].
+  ///
+  /// Firebase delivers background messages concurrently on the same isolate,
+  /// so a mutex prevents race conditions creating duplicate clients and losing cleanup.
+  static final _lock = Lock();
 
   /// Handles a background [message] that may be a Stream ringing push notification.
   ///
@@ -93,42 +103,67 @@ class StreamVideoPushHandler {
   /// callback provides access to the current client; if not provided, the default is
   /// the [StreamVideo] singleton (which may not reflect your app's actual client instance).
   ///
-  /// Any background message not intended for Stream Video is ignored and reported as
-  /// unhandled, allowing your application to process its own background notifications
-  /// after this handler completes.
+  /// Any background message not intended for Stream Video is turned away before
+  /// anything is built for it and reported as unhandled, so your application can
+  /// go on to process its own background notifications after this handler
+  /// completes without having paid for a client it had no use for.
+  ///
+  /// More than one call can be ringing at a time. The client is kept alive until
+  /// every one of them has been resolved, not just the first.
   static Future<bool> handleBackgroundMessage(
     RemoteMessage message, {
     required CreateStreamVideo createStreamVideo,
     ResolveExistingClient? existingClient,
     FutureOr<void> Function()? onDispose,
-  }) async {
+  }) {
+    if (!StreamPushPayload.isStreamPush(message.data)) {
+      return Future.value(false);
+    }
+
+    return _lock.synchronized(
+      () => _handleStreamPush(
+        message,
+        createStreamVideo,
+        existingClient,
+        onDispose,
+      ),
+    );
+  }
+
+  /// Handles one Stream push, with this isolate's session to itself.
+  static Future<bool> _handleStreamPush(
+    RemoteMessage message,
+    CreateStreamVideo createStreamVideo,
+    ResolveExistingClient? existingClient,
+    FutureOr<void> Function()? onDispose,
+  ) async {
+    var mine = _session;
     try {
-      final running = _session;
-      if (running != null) return await _handleWithSession(running, message);
+      if (mine == null) {
+        final appClient = _existingClient(existingClient);
+        if (appClient != null) {
+          streamLog.d(
+            _tag,
+            () => '[handleStreamPush] forwarding to the running client',
+          );
 
-      final appClient = _existingClient(existingClient);
-      if (appClient != null) {
-        streamLog.d(
-          _tag,
-          () => '[handleBackgroundMessage] forwarding to the running client',
-        );
+          return await appClient.handleRingingFlowNotifications(message.data);
+        }
 
-        return await appClient.handleRingingFlowNotifications(message.data);
+        mine = await _startSession(createStreamVideo, onDispose);
+
+        // Nobody is logged in, so there is no client to show anything with and
+        // nothing to tear down but what the app itself set up.
+        if (mine == null) {
+          await onDispose?.call();
+          return false;
+        }
       }
 
-      final session = await _startSession(createStreamVideo, onDispose);
-
-      // Nobody is logged in, so there is no client to show anything with and
-      // nothing to tear down but what the app itself set up.
-      if (session == null) {
-        await onDispose?.call();
-        return false;
-      }
-
-      return await _handleWithSession(session, message);
+      return await _handleWithSession(mine, message);
     } catch (e, stk) {
-      streamLog.e(_tag, () => '[handleBackgroundMessage] failed: $e; $stk');
-      await _session?.release();
+      streamLog.e(_tag, () => '[handleStreamPush] failed: $e; $stk');
+      mine?.releaseAfter(resolutionGrace);
       return false;
     }
   }
@@ -143,30 +178,17 @@ class StreamVideoPushHandler {
       message.data,
     );
 
-    if (handled && _isRingingPush(message.data)) {
-      session.awaitingResolution = true;
-    } else if (!session.awaitingResolution) {
-      // Nothing that would release the session is coming: the message was
-      // either not ours, or one that only posts a notification and is done.
-      if (handled) {
-        session.releaseAfter(_resolutionGrace);
-      } else {
-        await session.release();
-      }
+    final ringing = StreamPushPayload.ringingCallCid(message.data);
+    if (handled && ringing != null) {
+      // The user has to answer this one, and whatever they do arms the
+      // release.
+      session.pendingRings.add(ringing);
+    } else {
+      session.releaseAfter(resolutionGrace);
     }
 
     return handled;
   }
-
-  /// Whether [payload] is the ringing push, the only one whose flow waits for
-  /// the user.
-  ///
-  /// The SDK reports a missed call as handled too, but a missed call
-  /// notification has no ringing lifecycle: no accept, decline, timeout or end
-  /// is ever emitted for it, so treating it as pending would hold the client
-  /// and the app's dependencies for as long as the isolate lives.
-  static bool _isRingingPush(Map<String, dynamic> payload) =>
-      payload['sender'] == 'stream.video' && payload['type'] == 'call.ring';
 
   /// The client already living in this isolate, if there is a usable one.
   ///
@@ -224,11 +246,14 @@ class StreamVideoPushHandler {
       // Whatever the user does with the notification is what ends this
       // isolate's work.
       session.resolution = streamVideo.onRingingEvent<RingingEvent>((event) {
-        if (event is ActionCallAccept ||
-            event is ActionCallDecline ||
-            event is ActionCallTimeout ||
-            event is ActionCallEnded) {
-          session.releaseAfter(_resolutionGrace);
+        if (event
+            case ActionCallAccept(:final data) ||
+                ActionCallDecline(:final data) ||
+                ActionCallTimeout(:final data) ||
+                ActionCallEnded(:final data)) {
+          if (session.resolveRing(data.callCid)) {
+            session.releaseAfter(resolutionGrace);
+          }
         }
       });
 
@@ -248,8 +273,9 @@ class StreamVideoPushHandler {
   /// Drops the session this isolate is holding, for tests that run more than
   /// one case in the same isolate.
   @visibleForTesting
-  static Future<void> releaseForTesting() =>
-      _session?.release() ?? Future.value();
+  static Future<void> releaseForTesting() => _lock.synchronized(() async {
+    await _session?.release();
+  });
 }
 
 /// One isolate's client, its observers, and how to let go of them.
@@ -266,37 +292,94 @@ class _BackgroundSession {
 
   StreamSubscription<RingingEvent>? resolution;
 
-  /// Whether a ringing flow is still waiting to be resolved by the user.
-  bool awaitingResolution = false;
+  /// The ringing flows still waiting on the user, by call cid.
+  final pendingRings = <String>{};
 
   bool _released = false;
 
+  /// The release this session has scheduled, if it has one.
+  Timer? _pendingRelease;
+
   /// Releases after [delay], so a flow that is still running finishes first.
-  void releaseAfter(Duration delay) =>
-      unawaited(Future<void>.delayed(delay, release));
+  void releaseAfter(Duration delay) {
+    _pendingRelease?.cancel();
+    _pendingRelease = Timer(delay, () => unawaited(_release()));
+  }
+
+  /// Marks the flow for [callCid] resolved, and reports whether this session
+  /// is left with nothing to wait for.
+  bool resolveRing(String? callCid) {
+    if (callCid == null) {
+      streamLog.w(
+        StreamVideoPushHandler._tag,
+        () => '[resolveRing] no call cid; releasing every pending ring',
+      );
+
+      pendingRings.clear();
+    } else {
+      pendingRings.remove(callCid);
+    }
+
+    return pendingRings.isEmpty;
+  }
+
+  /// The scheduled release, once it falls due.
+  ///
+  /// Nothing awaits this, and `onDispose` is the app's own code: an error
+  /// escaping here would land in a background isolate that has no zone
+  /// handler to catch it.
+  Future<void> _release() async {
+    try {
+      await StreamVideoPushHandler._lock.synchronized(() async {
+        // A ringing flow is live. Whatever resolves it arms the next release.
+        if (pendingRings.isNotEmpty) return;
+
+        await release();
+      });
+    } catch (e, stk) {
+      streamLog.e(
+        StreamVideoPushHandler._tag,
+        () => '[releaseAfter] release failed: $e; $stk',
+      );
+    }
+  }
 
   /// Tears the session down, once.
   ///
-  /// Idempotent because more than one thing can decide the isolate is done: a
-  /// resolved notification, a message that turned out not to be ours, or a
-  /// failure part way through.
+  /// Only ever called holding the handler's lock. Still idempotent, because a
+  /// release that falls due and one forced by a test can both decide the
+  /// isolate is done.
   Future<void> release() async {
     if (_released) return;
     _released = true;
+
+    _pendingRelease?.cancel();
+    _pendingRelease = null;
 
     if (StreamVideoPushHandler._session == this) {
       StreamVideoPushHandler._session = null;
     }
 
-    await resolution?.cancel();
-    await observers.cancel();
-    await streamVideo.dispose();
+    try {
+      await resolution?.cancel();
+      await observers.cancel();
+      await streamVideo.dispose();
+    } catch (e, stk) {
+      streamLog.e(
+        StreamVideoPushHandler._tag,
+        () => '[release] teardown failed: $e; $stk',
+      );
+    } finally {
+      try {
+        await StreamVideoPushHandler._releaseSingleton(streamVideo);
+      } catch (e, stk) {
+        streamLog.e(
+          StreamVideoPushHandler._tag,
+          () => '[release] clearing the singleton failed: $e; $stk',
+        );
+      }
 
-    // `dispose` leaves the singleton installed, if this client is what is
-    // installed at all: one built with `StreamVideo.create` never took the
-    // slot.
-    await StreamVideoPushHandler._releaseSingleton(streamVideo);
-
-    await onDispose?.call();
+      await onDispose?.call();
+    }
   }
 }

@@ -47,6 +47,7 @@
 
 ### ✅ Added
 
+- Added `StreamPushPayload`, the wire contract for the push payloads Stream sends: the keys it sets, the `sender` that marks a payload as ours, and predicates for recognising a ringing or missed call push. `handleRingingFlowNotifications` reads payloads through it, so anything that has to recognise a Stream push before handing it over — a background handler deciding whether to build a client, or tracking which call is still ringing — can match on exactly what the SDK matches on instead of restating the format.
 - `CallReceivedData`, what `Call.get()` returns, is exported. Handling that result meant naming a type the package kept to itself.
 - Anonymous users can now carry a token: pass `userToken` with a `UserType.anonymous` user to send call-restricted tokens (e.g. for closed livestreams). The token's `user_id` claim must be `!anon`; an invalid token fails fast at client construction.
 - `StreamCallDisconnectedEvent`, `CoordinatorDisconnectedEvent`, and `CoordinatorDisconnected` now carry `apiError`, the error the server reported before closing the WebSocket. A refused token or a rejected API key arrives as an error frame rather than a close frame, so this is the only account of why such a connection was closed; `closeReason` falls back to the error's message when the closure itself carried none.
