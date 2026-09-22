@@ -415,24 +415,6 @@ class Call {
   final Map<String, Timer> _captionsTimers = {};
   Timer? _videoModerationTimer;
 
-  /// How long a reported network drop has to hold before it is believed.
-  ///
-  /// The monitor decides connectivity by probing public endpoints rather than
-  /// by asking the platform, so a probe that cannot run reads as an outage. An
-  /// app resuming is the common case: on iOS the process is frozen while
-  /// backgrounded, and the first probe after a wake fails while the radio is
-  /// still coming up. For an app that rings, that is every call answered from
-  /// the lock screen.
-  ///
-  /// Long enough to ride out that artefact, short enough that a real outage is
-  /// still acted on promptly.
-  static const _networkDropGracePeriod = Duration(milliseconds: 500);
-
-  /// Counts down a reported network drop before it is acted on.
-  ///
-  /// Null or inactive means there is no unconfirmed drop.
-  Timer? _networkDropDebounce;
-
   void Function()? _onModerationBlurApply;
   void Function()? _onModerationBlurClear;
   final List<CancelableOperation<void>> _sfuStatsTimers = [];
@@ -676,36 +658,14 @@ class Call {
       _idReconnect,
       networkMonitor.onStatusChange.listen(
         (status) {
-          // The monitor only emits on a change, so anything other than a drop
-          // means the connection came back and the pending one never held.
-          if (status != InternetStatus.disconnected) {
-            if (_networkDropDebounce?.isActive ?? false) {
-              _logger.d(
-                () => '[observeReconnectEvents] network drop did not hold',
-              );
-            }
-
-            _networkDropDebounce?.cancel();
-            _networkDropDebounce = null;
-            return;
-          }
-
-          if (_networkDropDebounce?.isActive ?? false) return;
-
-          _logger.d(
-            () =>
-                '[observeReconnectEvents] network disconnected; confirming over '
-                '${_networkDropGracePeriod.inMilliseconds}ms',
-          );
-
-          _networkDropDebounce = Timer(_networkDropGracePeriod, () {
-            _logger.d(() => '[observeReconnectEvents] network drop confirmed');
+          if (status == InternetStatus.disconnected) {
+            _logger.d(() => '[observeReconnectEvents] network disconnected');
             _reconnect(
               SfuReconnectionStrategy.fast,
               reconnectReason: 'network disconnected',
               triggeredByNetwork: true,
             );
-          });
+          }
         },
       ),
     );
@@ -2995,9 +2955,6 @@ class Call {
 
     _videoModerationTimer?.cancel();
     _videoModerationTimer = null;
-
-    _networkDropDebounce?.cancel();
-    _networkDropDebounce = null;
 
     for (final operation in _sfuStatsTimers) {
       await operation.cancel();

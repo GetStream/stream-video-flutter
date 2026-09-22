@@ -219,8 +219,7 @@ void main() {
         // Toggle network to trigger fast reconnect via _observeReconnectEvents.
         final stopwatch = Stopwatch()..start();
         internetStatusController.add(InternetStatus.disconnected);
-        // The drop has to hold to count as one.
-        await Future<void>.delayed(testConfirmedNetworkDrop);
+        await Future<void>.delayed(const Duration(milliseconds: 10));
         internetStatusController.add(InternetStatus.connected);
 
         // fastReconnect must be invoked well before the 3s stability window
@@ -782,8 +781,7 @@ void main() {
         // A network-triggered reconnect reports `networkAvailable`, so the
         // throwing telemetry call is reached on the `fast` strategy too.
         internetStatusController.add(InternetStatus.disconnected);
-        // The drop has to hold to count as one.
-        await Future<void>.delayed(testConfirmedNetworkDrop);
+        await Future<void>.delayed(const Duration(milliseconds: 10));
         internetStatusController.add(InternetStatus.connected);
 
         // Three throws back off by ~200ms, ~400ms and ~600ms and then escalate

@@ -69,15 +69,6 @@ Call createStubCall({
   );
 }
 
-/// How long a reported network drop has to hold before a call acts on it.
-///
-/// Mirrors `Call._networkDropGracePeriod`, which is a constant rather than a
-/// setting, so a test can wait past it without restating the number.
-const testNetworkDropGracePeriod = Duration(milliseconds: 500);
-
-/// Comfortably past [testNetworkDropGracePeriod].
-const testConfirmedNetworkDrop = Duration(milliseconds: 600);
-
 /// How long the reconnect loop pauses between attempts in a fixture-built
 /// client.
 ///
