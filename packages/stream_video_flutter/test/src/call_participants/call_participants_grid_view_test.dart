@@ -30,6 +30,12 @@ Widget _box(BuildContext _, Call __, CallParticipantState participant) =>
 
 Finder _tile(String id) => find.byKey(ValueKey('tile-$id'));
 
+// The chevrons scale to 0 when there is nowhere to go that way.
+List<double> _chevronScales(WidgetTester tester) => tester
+    .widgetList<AnimatedScale>(find.byType(AnimatedScale))
+    .map((scale) => scale.scale)
+    .toList();
+
 List<CallParticipantState> _participants(int count) => [
   for (var i = 0; i < count; i++) _participant('p$i'),
 ];
@@ -278,6 +284,106 @@ void main() {
 
       expect(_tile('p0'), findsOneWidget);
       expect(find.byType(PageNavigationButton), findsNothing);
+    });
+
+    testWidgets('a page that comes back is reachable again', (tester) async {
+      // Three pages of six, sitting on the last one.
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(18),
+      );
+      await tester.tap(find.byType(PageNavigationButton).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(PageNavigationButton).last);
+      await tester.pumpAndSettle();
+      expect(_tile('p12'), findsOneWidget);
+
+      // A page's worth leave, taking the page the grid is on, and come back.
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(12),
+      );
+      await tester.pumpAndSettle();
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(18),
+      );
+      await tester.pumpAndSettle();
+
+      // Both chevrons live: the grid is on the middle page of three, not
+      // stranded on a third page it has no way back from.
+      expect(_chevronScales(tester), [1.0, 1.0]);
+    });
+  });
+
+  group('the resolver details', () {
+    testWidgets('describe this page at this breakpoint', (tester) async {
+      final seen = <StreamParticipantGridDetails>[];
+
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(7),
+        theme: StreamCallParticipantsGridThemeData(
+          columnResolver: (details) {
+            seen.add(details);
+            return null;
+          },
+        ),
+      );
+
+      // Six of the seven are on the page being arranged, and the breakpoint
+      // is the window's, not the box's.
+      expect(seen.first.count, 6);
+      expect(seen.first.screenSize, StreamScreenSize.small);
+      expect(seen.first.maxTileAspectRatio, 16 / 9);
+    });
+  });
+
+  group('the theme sizes the pages', () {
+    testWidgets('pageSize splits a roomy window', (tester) async {
+      await pump(
+        tester,
+        size: const Size(1440, 960),
+        participants: _participants(6),
+        theme: const StreamCallParticipantsGridThemeData(pageSize: 4),
+      );
+
+      expect(find.byType(PageNavigationButton), findsNWidgets(2));
+      expect(_tile('p3'), findsOneWidget);
+      expect(_tile('p4'), findsNothing);
+    });
+
+    testWidgets('compactPageSize splits a narrow one', (tester) async {
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(3),
+        theme: const StreamCallParticipantsGridThemeData(compactPageSize: 2),
+      );
+
+      expect(find.byType(PageNavigationButton), findsNWidgets(2));
+      expect(_tile('p1'), findsOneWidget);
+      expect(_tile('p2'), findsNothing);
+    });
+
+    testWidgets('maxTileAspectRatio caps the tile', (tester) async {
+      await pump(
+        tester,
+        size: const Size(1440, 960),
+        participants: _participants(1),
+        theme: const StreamCallParticipantsGridThemeData(
+          maxTileAspectRatio: 1,
+        ),
+      );
+
+      // A square cap on a box wider than it is tall: the tile takes the
+      // height and leaves the rest of the width alone.
+      final tile = tester.getSize(_tile('p0'));
+      expect(tile.width, tile.height);
     });
   });
 }

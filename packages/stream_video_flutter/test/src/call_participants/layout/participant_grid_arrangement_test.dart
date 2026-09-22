@@ -6,15 +6,30 @@ StreamParticipantGridArrangement solve(
   Size box,
   int count, {
   double spacing = 8,
+  double maxTileAspectRatio = 16 / 9,
 }) => solveParticipantGrid(
   StreamParticipantGridDetails(
     box: box,
     count: count,
     mainAxisSpacing: spacing,
     crossAxisSpacing: spacing,
-    maxTileAspectRatio: 16 / 9,
+    maxTileAspectRatio: maxTileAspectRatio,
     screenSize: StreamScreenSize.fromWidth(box.width),
   ),
+);
+
+StreamParticipantGridDetails details(
+  Size box,
+  int count, {
+  double spacing = 8,
+  double maxTileAspectRatio = 16 / 9,
+}) => StreamParticipantGridDetails(
+  box: box,
+  count: count,
+  mainAxisSpacing: spacing,
+  crossAxisSpacing: spacing,
+  maxTileAspectRatio: maxTileAspectRatio,
+  screenSize: StreamScreenSize.fromWidth(box.width),
 );
 
 void main() {
@@ -171,13 +186,72 @@ void main() {
       expect(solve(const Size(1884, 330), 4).columns, 4);
     });
 
-    test('one participant takes the whole box, capped at the ratio', () {
+    test('one participant takes the whole box', () {
       final grid = solve(const Size(1008, 624), 1);
 
       expect(grid.columns, 1);
       expect(grid.rows, 1);
       expect(grid.tileSize.width, closeTo(1008, 0.01));
       expect(grid.tileSize.height, 624);
+    });
+  });
+
+  group('an overridden column count', () {
+    test('is clamped to the participant count', () {
+      // Four people cannot fill ten columns; the extra six would shrink every
+      // tile for nothing.
+      expect(
+        arrangeParticipantGrid(details(const Size(1008, 624), 4), 10).columns,
+        4,
+      );
+    });
+
+    test('is clamped to at least one', () {
+      expect(
+        arrangeParticipantGrid(details(const Size(1008, 624), 4), 0).columns,
+        1,
+      );
+      expect(
+        arrangeParticipantGrid(details(const Size(1008, 624), 4), -3).columns,
+        1,
+      );
+    });
+
+    test('an empty page arranges to nothing whatever the override', () {
+      expect(
+        arrangeParticipantGrid(details(const Size(1008, 624), 0), 3),
+        StreamParticipantGridArrangement.empty,
+      );
+    });
+  });
+
+  group('the square preference cuts off at 2:1', () {
+    // At 16:9 the scoring agrees with the preference either side of 2:1, so
+    // the cutoff only shows with a tile ratio that moves the scoring's own
+    // crossover below it. At 0.9 the scorer wants four in a row from 1.8:1,
+    // and these two boxes sit either side of 2:1.
+    test('holds at 1.9:1, where the scoring would put four in a row', () {
+      expect(
+        solve(const Size(950, 500), 4, maxTileAspectRatio: 0.9).columns,
+        2,
+      );
+    });
+
+    test('drops at 2.2:1', () {
+      expect(
+        solve(const Size(1100, 500), 4, maxTileAspectRatio: 0.9).columns,
+        4,
+      );
+    });
+  });
+
+  group('one tile is capped at the ratio', () {
+    test('a box wider than 16:9 leaves space either side', () {
+      final grid = solve(const Size(1600, 400), 1);
+
+      // 400 tall at 16:9 is 711.1 wide, well short of the 1600 on offer.
+      expect(grid.tileSize.height, 400);
+      expect(grid.tileSize.width, closeTo(400 * 16 / 9, 0.01));
     });
   });
 

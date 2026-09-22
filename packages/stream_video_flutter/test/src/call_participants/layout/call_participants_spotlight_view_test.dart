@@ -26,6 +26,14 @@ Widget _box(BuildContext _, Call __, CallParticipantState participant) =>
 
 Finder _tile(String id) => find.byKey(ValueKey('tile-$id'));
 
+Widget _stageBox(BuildContext _, Call __, CallParticipantState participant) =>
+    SizedBox.expand(
+      key: ValueKey('stage-${participant.sessionId}'),
+      child: const ColoredBox(color: Color(0xFF123456)),
+    );
+
+Finder _stageTile(String id) => find.byKey(ValueKey('stage-$id'));
+
 void main() {
   // StreamScreenSize reads MediaQuery.sizeOf, so the case's width has to come
   // from the surface itself — a SizedBox inside the default 800x600 one leaves
@@ -36,6 +44,8 @@ void main() {
     required int barParticipants,
     ParticipantsBarAlignment barAlignment = ParticipantsBarAlignment.bottom,
     StreamCallParticipantsSpotlightStyle? style,
+    EdgeInsetsGeometry? padding,
+    CallParticipantBuilder? spotlightBuilder,
   }) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = size;
@@ -48,7 +58,9 @@ void main() {
         for (var i = 0; i < barParticipants; i++) _participant('bar$i'),
       ],
       participantBuilder: _box,
+      spotlightBuilder: spotlightBuilder,
       barAlignment: barAlignment,
+      padding: padding,
     );
 
     if (style != null) {
@@ -214,6 +226,113 @@ void main() {
       expect(tester.getSize(_tile('bar0')), const Size(222, 125));
       // The gap grew but the padding did not: the stage loses the extra 16.
       expect(tester.getSize(_tile('stage')).height, 656 - 125 - 24);
+    });
+  });
+
+  group('the spotlight builder', () {
+    testWidgets('builds the stage when one is given', (tester) async {
+      await pump(
+        tester,
+        size: const Size(400, 656),
+        barParticipants: 2,
+        spotlightBuilder: _stageBox,
+      );
+
+      // The stage is the spotlight builder's; the bar is still the other one.
+      expect(_stageTile('stage'), findsOneWidget);
+      expect(_tile('stage'), findsNothing);
+      expect(_tile('bar0'), findsOneWidget);
+    });
+
+    testWidgets('falls back to the participant builder', (tester) async {
+      await pump(tester, size: const Size(400, 656), barParticipants: 2);
+
+      expect(_tile('stage'), findsOneWidget);
+      expect(_stageTile('stage'), findsNothing);
+    });
+  });
+
+  group('the bar takes the edge it is aligned to', () {
+    testWidgets('top', (tester) async {
+      await pump(
+        tester,
+        size: const Size(400, 656),
+        barParticipants: 2,
+        barAlignment: ParticipantsBarAlignment.top,
+      );
+
+      expect(
+        tester.getRect(_tile('bar0')).bottom,
+        lessThanOrEqualTo(tester.getRect(_tile('stage')).top),
+      );
+    });
+
+    testWidgets('bottom', (tester) async {
+      await pump(
+        tester,
+        size: const Size(400, 656),
+        barParticipants: 2,
+        barAlignment: ParticipantsBarAlignment.bottom,
+      );
+
+      expect(
+        tester.getRect(_tile('bar0')).top,
+        greaterThanOrEqualTo(tester.getRect(_tile('stage')).bottom),
+      );
+    });
+
+    testWidgets('left', (tester) async {
+      await pump(
+        tester,
+        size: const Size(1024, 656),
+        barParticipants: 2,
+        barAlignment: ParticipantsBarAlignment.left,
+      );
+
+      expect(
+        tester.getRect(_tile('bar0')).right,
+        lessThanOrEqualTo(tester.getRect(_tile('stage')).left),
+      );
+    });
+
+    testWidgets('right', (tester) async {
+      await pump(
+        tester,
+        size: const Size(1024, 656),
+        barParticipants: 2,
+        barAlignment: ParticipantsBarAlignment.right,
+      );
+
+      expect(
+        tester.getRect(_tile('bar0')).left,
+        greaterThanOrEqualTo(tester.getRect(_tile('stage')).right),
+      );
+    });
+  });
+
+  group('the padding argument', () {
+    testWidgets('overrides the style', (tester) async {
+      await pump(
+        tester,
+        size: const Size(400, 656),
+        barParticipants: 1,
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+      );
+
+      expect(tester.getRect(_tile('stage')).left, 24);
+    });
+
+    testWidgets('leaves the style in charge when it is null', (tester) async {
+      await pump(
+        tester,
+        size: const Size(400, 656),
+        barParticipants: 1,
+        style: const StreamCallParticipantsSpotlightStyle(
+          padding: EdgeInsets.symmetric(horizontal: 32),
+        ),
+      );
+
+      expect(tester.getRect(_tile('stage')).left, 32);
     });
   });
 }
