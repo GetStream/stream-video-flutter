@@ -34,7 +34,7 @@ Widget _box(BuildContext _, Call __, CallParticipantState participant) =>
     SizedBox.expand(key: ValueKey('tile-${participant.sessionId}'));
 
 void main() {
-  testWidgets('a sort the caller passes inline does not re-sort every build', (
+  testWidgets('a sort built inline but identified does not re-sort every build', (
     tester,
   ) async {
     final participants = [
@@ -43,9 +43,9 @@ void main() {
     ];
     var comparisons = 0;
 
-    // A fresh closure on every build, the way a call site written inline
-    // hands one over. Comparing these would be function identity, so every
-    // rebuild would look like a new sort.
+    // A fresh instance around a fresh closure on every build, the way a call
+    // site written inline hands one over. The identity is what says it is
+    // still the same sort; without one every rebuild would look like a new one.
     Future<void> pumpAgain() => tester.pumpWidget(
       TestWrapper(
         child: SizedBox(
@@ -54,10 +54,13 @@ void main() {
           child: StreamCallParticipants(
             call: MockCall(),
             participants: participants,
-            sort: (a, b) {
-              comparisons++;
-              return a.sessionId.compareTo(b.sessionId);
-            },
+            sort: CallParticipantSort(
+              (a, b) {
+                comparisons++;
+                return a.sessionId.compareTo(b.sessionId);
+              },
+              identity: 'by-session-id',
+            ),
             callParticipantBuilder: _box,
             floatingSelfViewBuilder: _box,
           ),

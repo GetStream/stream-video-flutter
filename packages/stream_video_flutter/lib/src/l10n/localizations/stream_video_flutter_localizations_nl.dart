@@ -25,6 +25,19 @@ class StreamVideoFlutterLocalizationsNl
   String get desktopScreenShareWindow => 'Venster';
 
   @override
+  String get desktopScreenShareRefresh => 'Vernieuwen';
+
+  @override
+  String get desktopScreenShareNoSources => 'Hier valt niets te delen.';
+
+  @override
+  String get desktopScreenShareLoadFailed =>
+      'Kon de schermen en vensters niet ophalen.';
+
+  @override
+  String get desktopScreenShareRetry => 'Opnieuw proberen';
+
+  @override
   String get layoutMenuTitle => 'Indeling';
 
   @override
@@ -149,4 +162,51 @@ class StreamVideoFlutterLocalizationsNl
   @override
   String get lobbyDevicesUnreadable =>
       'Je apparaten konden niet worden gelezen';
+
+  @override
+  String get callEncryptedTooltip => 'Deze oproep is end-to-end versleuteld';
+
+  @override
+  String get callRecordingTooltip => 'Deze oproep wordt opgenomen';
+
+  @override
+  String get callScreenSharingTooltip => 'Iemand deelt zijn scherm';
+
+  @override
+  String callDurationSpoken(String duration) {
+    return 'Gespreksduur $duration';
+  }
+
+  @override
+  String callDurationHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count uur',
+      one: '1 uur',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callDurationMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minuten',
+      one: '1 minuut',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callDurationSeconds(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count seconden',
+      one: '1 seconde',
+    );
+    return '$_temp0';
+  }
 }

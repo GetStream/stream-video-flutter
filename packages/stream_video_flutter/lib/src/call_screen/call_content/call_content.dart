@@ -235,10 +235,18 @@ class _StreamCallContentState extends State<StreamCallContent> {
           context.streamColorScheme.backgroundApp,
       appBar:
           widget.callAppBarWidgetBuilder?.call(context, call) ??
-          CallAppBar(
-            call: call,
-            onBackPressed: widget.onBackPressed,
-            onLeaveCallTap: widget.onLeaveCallTap,
+          // `Scaffold` reserves `preferredSize.height` and adds the top inset
+          // itself, and the bar cannot read a themed height without a context —
+          // so the height a `CallAppBarTheme` sets is measured out here.
+          PreferredSize(
+            preferredSize: Size.fromHeight(
+              CallAppBar.heightOf(context, primary: false),
+            ),
+            child: CallAppBar(
+              call: call,
+              onBackPressed: widget.onBackPressed,
+              onLeaveCallTap: widget.onLeaveCallTap,
+            ),
           ),
       body: Stack(
         children: [

@@ -5,6 +5,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../stream_video_flutter.dart';
 import '../../../call_participants/screen_share_call_participants_content.dart';
+import 'picture_in_picture_defaults.dart';
+
+final _logger = taggedLogger(tag: 'SV:AndroidPipOverlay');
 
 /// A dedicated overlay widget for Android Picture-in-Picture mode.
 /// This widget creates a floating overlay that shows only the video content
@@ -48,11 +51,35 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
   CallParticipantSort<CallParticipantState> get participantSort =>
       widget.pictureInPictureConfiguration?.sort ??
       widget.sort ??
-      CallParticipantSortingPresets.pictureInPicture;
+      CallParticipantSorts.pictureInPicture;
 
   @override
   void initState() {
     super.initState();
+    recalculateParticipants(widget.call.state.value.callParticipants);
+
+    // A custom `participantsThrottleIntervalResolver` that throws surfaces as
+    // an error here; without `onError` it would reach the zone uncaught.
+    _participantsSubscription = widget.call.participantsStream.listen(
+      recalculateParticipants,
+      onError: (Object error, StackTrace stackTrace) {
+        _logger.e(
+          () =>
+              '[AndroidPipOverlay] participantsStream error: $error; '
+              '$stackTrace',
+        );
+      },
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant AndroidPipOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.call == oldWidget.call) return;
+
+    // The subscription was taken from the call this widget was given, while
+    // the tiles below are drawn for whichever call it holds now.
+    _participantsSubscription?.cancel();
     recalculateParticipants(widget.call.state.value.callParticipants);
 
     _participantsSubscription = widget.call
@@ -110,6 +137,9 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
           rendererScopePrefix: 'pipVideo',
           call: widget.call,
           participant: pipParticipant,
+          style: pictureInPictureTileStyle(context).merge(
+            StreamPictureInPictureTheme.of(context).style?.tileStyle,
+          ),
         );
       }
     }

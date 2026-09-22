@@ -19,6 +19,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamUserAvatarThemeData? userAvatarTheme,
     StreamLobbyViewThemeData? lobbyViewTheme,
     CallControlBarThemeData? callControlBarTheme,
+    CallAppBarThemeData? callAppBarTheme,
+    StreamCallDurationBadgeThemeData? callDurationBadgeTheme,
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -40,8 +42,12 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamParticipantTileThemeData? participantTileTheme,
     StreamFloatingParticipantTileThemeData? floatingParticipantTileTheme,
     StreamParticipantLabelThemeData? participantLabelTheme,
+    StreamPictureInPictureThemeData? pictureInPictureTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
+    StreamDesktopScreenShareSelectorThemeData? desktopScreenShareSelectorTheme,
+    StreamCallButtonBadgeThemeData? callButtonBadgeTheme,
+    StreamCallParticipantsSpotlightThemeData? callParticipantsSpotlightTheme,
     StreamLivestreamThemeData? livestreamTheme,
   }) {
     final isDark = brightness == Brightness.dark;
@@ -72,6 +78,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       userAvatarTheme: userAvatarTheme,
       lobbyViewTheme: lobbyViewTheme,
       callControlBarTheme: callControlBarTheme,
+      callAppBarTheme: callAppBarTheme,
+      callDurationBadgeTheme: callDurationBadgeTheme,
       callParticipantTheme: callParticipantTheme,
       localVideoTheme: localVideoTheme,
       incomingCallTheme: incomingCallTheme,
@@ -81,12 +89,16 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       floatingParticipantTileTheme: floatingParticipantTileTheme,
       participantLabelTheme:
           participantLabelTheme ?? legacy?.toParticipantLabelThemeData(),
+      pictureInPictureTheme: pictureInPictureTheme,
       connectionQualityIndicatorTheme:
           connectionQualityIndicatorTheme ??
           legacy?.toConnectionQualityIndicatorThemeData(),
       callParticipantsGridTheme:
           callParticipantsGridTheme ??
           legacy?.toCallParticipantsGridThemeData(),
+      desktopScreenShareSelectorTheme: desktopScreenShareSelectorTheme,
+      callButtonBadgeTheme: callButtonBadgeTheme,
+      callParticipantsSpotlightTheme: callParticipantsSpotlightTheme,
       livestreamTheme: livestreamTheme,
     );
 
@@ -109,6 +121,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.userAvatarTheme,
     this.lobbyViewTheme = const StreamLobbyViewThemeData(),
     this.callControlBarTheme = const CallControlBarThemeData(),
+    this.callAppBarTheme = const CallAppBarThemeData(),
+    this.callDurationBadgeTheme = const StreamCallDurationBadgeThemeData(),
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -127,10 +141,16 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     this.floatingParticipantTileTheme =
         const StreamFloatingParticipantTileThemeData(),
     this.participantLabelTheme = const StreamParticipantLabelThemeData(),
+    this.pictureInPictureTheme = const StreamPictureInPictureThemeData(),
     this.connectionQualityIndicatorTheme =
         const StreamConnectionQualityIndicatorThemeData(),
     this.callParticipantsGridTheme =
         const StreamCallParticipantsGridThemeData(),
+    this.desktopScreenShareSelectorTheme =
+        const StreamDesktopScreenShareSelectorThemeData(),
+    this.callButtonBadgeTheme = const StreamCallButtonBadgeThemeData(),
+    this.callParticipantsSpotlightTheme =
+        const StreamCallParticipantsSpotlightThemeData(),
     required this.livestreamTheme,
   });
 
@@ -366,6 +386,12 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the row of controls along the bottom of a call.
   final CallControlBarThemeData callControlBarTheme;
 
+  /// Theme for the bar along the top of a call.
+  final CallAppBarThemeData callAppBarTheme;
+
+  /// Theme for the pill showing how long a call has been running.
+  final StreamCallDurationBadgeThemeData callDurationBadgeTheme;
+
   /// Theme for the call participant widget.
   ///
   /// `null` unless an app sets one: the participant tile takes its defaults
@@ -407,12 +433,25 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the participant tile's name pill.
   final StreamParticipantLabelThemeData participantLabelTheme;
 
+  /// Theme for the picture-in-picture window.
+  final StreamPictureInPictureThemeData pictureInPictureTheme;
+
   /// Theme for the connection quality indicator.
   final StreamConnectionQualityIndicatorThemeData
   connectionQualityIndicatorTheme;
 
   /// Theme for the participants grid layout.
   final StreamCallParticipantsGridThemeData callParticipantsGridTheme;
+
+  /// Theme for the desktop screen share selector.
+  final StreamDesktopScreenShareSelectorThemeData
+  desktopScreenShareSelectorTheme;
+
+  /// Theme for the badge overlaid on a call control button.
+  final StreamCallButtonBadgeThemeData callButtonBadgeTheme;
+
+  /// Theme for the speaker layouts, where one participant holds the stage.
+  final StreamCallParticipantsSpotlightThemeData callParticipantsSpotlightTheme;
 
   /// Theme for the outgoing call widget.
   final StreamLivestreamThemeData livestreamTheme;
@@ -433,6 +472,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamUserAvatarThemeData? userAvatarTheme,
     StreamLobbyViewThemeData? lobbyViewTheme,
     CallControlBarThemeData? callControlBarTheme,
+    CallAppBarThemeData? callAppBarTheme,
+    StreamCallDurationBadgeThemeData? callDurationBadgeTheme,
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -452,8 +493,12 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamParticipantTileThemeData? participantTileTheme,
     StreamFloatingParticipantTileThemeData? floatingParticipantTileTheme,
     StreamParticipantLabelThemeData? participantLabelTheme,
+    StreamPictureInPictureThemeData? pictureInPictureTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
+    StreamDesktopScreenShareSelectorThemeData? desktopScreenShareSelectorTheme,
+    StreamCallButtonBadgeThemeData? callButtonBadgeTheme,
+    StreamCallParticipantsSpotlightThemeData? callParticipantsSpotlightTheme,
     StreamLivestreamThemeData? livestreamTheme,
   }) => StreamVideoTheme.raw(
     textTheme: this.textTheme.merge(textTheme),
@@ -462,6 +507,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     userAvatarTheme: this.userAvatarTheme.merge(userAvatarTheme),
     lobbyViewTheme: this.lobbyViewTheme.merge(lobbyViewTheme),
     callControlBarTheme: this.callControlBarTheme.merge(callControlBarTheme),
+    callAppBarTheme: this.callAppBarTheme.merge(callAppBarTheme),
+    callDurationBadgeTheme: this.callDurationBadgeTheme.merge(
+      callDurationBadgeTheme,
+    ),
     callParticipantTheme:
         this.callParticipantTheme?.merge(callParticipantTheme) ??
         callParticipantTheme,
@@ -476,11 +525,21 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     participantLabelTheme: this.participantLabelTheme.merge(
       participantLabelTheme,
     ),
+    pictureInPictureTheme: this.pictureInPictureTheme.merge(
+      pictureInPictureTheme,
+    ),
     connectionQualityIndicatorTheme: this.connectionQualityIndicatorTheme.merge(
       connectionQualityIndicatorTheme,
     ),
     callParticipantsGridTheme: this.callParticipantsGridTheme.merge(
       callParticipantsGridTheme,
+    ),
+    desktopScreenShareSelectorTheme: this.desktopScreenShareSelectorTheme.merge(
+      desktopScreenShareSelectorTheme,
+    ),
+    callButtonBadgeTheme: this.callButtonBadgeTheme.merge(callButtonBadgeTheme),
+    callParticipantsSpotlightTheme: this.callParticipantsSpotlightTheme.merge(
+      callParticipantsSpotlightTheme,
     ),
     livestreamTheme: this.livestreamTheme.merge(livestreamTheme),
   );
@@ -495,6 +554,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       userAvatarTheme: userAvatarTheme.merge(other.userAvatarTheme),
       lobbyViewTheme: lobbyViewTheme.merge(other.lobbyViewTheme),
       callControlBarTheme: callControlBarTheme.merge(other.callControlBarTheme),
+      callAppBarTheme: callAppBarTheme.merge(other.callAppBarTheme),
+      callDurationBadgeTheme: callDurationBadgeTheme.merge(
+        other.callDurationBadgeTheme,
+      ),
       callParticipantTheme:
           callParticipantTheme?.merge(other.callParticipantTheme) ??
           other.callParticipantTheme,
@@ -511,11 +574,23 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       participantLabelTheme: participantLabelTheme.merge(
         other.participantLabelTheme,
       ),
+      pictureInPictureTheme: pictureInPictureTheme.merge(
+        other.pictureInPictureTheme,
+      ),
       connectionQualityIndicatorTheme: connectionQualityIndicatorTheme.merge(
         other.connectionQualityIndicatorTheme,
       ),
       callParticipantsGridTheme: callParticipantsGridTheme.merge(
         other.callParticipantsGridTheme,
+      ),
+      desktopScreenShareSelectorTheme: desktopScreenShareSelectorTheme.merge(
+        other.desktopScreenShareSelectorTheme,
+      ),
+      callButtonBadgeTheme: callButtonBadgeTheme.merge(
+        other.callButtonBadgeTheme,
+      ),
+      callParticipantsSpotlightTheme: callParticipantsSpotlightTheme.merge(
+        other.callParticipantsSpotlightTheme,
       ),
       livestreamTheme: livestreamTheme.merge(other.livestreamTheme),
     );
@@ -547,6 +622,20 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           callControlBarTheme,
+      callAppBarTheme:
+          CallAppBarThemeData.lerp(
+            callAppBarTheme,
+            other.callAppBarTheme,
+            t,
+          ) ??
+          callAppBarTheme,
+      callDurationBadgeTheme:
+          StreamCallDurationBadgeThemeData.lerp(
+            callDurationBadgeTheme,
+            other.callDurationBadgeTheme,
+            t,
+          ) ??
+          callDurationBadgeTheme,
       callParticipantTheme:
           callParticipantTheme != null && other.callParticipantTheme != null
           ? callParticipantTheme!.lerp(other.callParticipantTheme!, t)
@@ -577,6 +666,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           participantLabelTheme,
+      pictureInPictureTheme:
+          StreamPictureInPictureThemeData.lerp(
+            pictureInPictureTheme,
+            other.pictureInPictureTheme,
+            t,
+          ) ??
+          pictureInPictureTheme,
       connectionQualityIndicatorTheme:
           StreamConnectionQualityIndicatorThemeData.lerp(
             connectionQualityIndicatorTheme,
@@ -591,6 +687,27 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           callParticipantsGridTheme,
+      desktopScreenShareSelectorTheme:
+          StreamDesktopScreenShareSelectorThemeData.lerp(
+            desktopScreenShareSelectorTheme,
+            other.desktopScreenShareSelectorTheme,
+            t,
+          ) ??
+          desktopScreenShareSelectorTheme,
+      callButtonBadgeTheme:
+          StreamCallButtonBadgeThemeData.lerp(
+            callButtonBadgeTheme,
+            other.callButtonBadgeTheme,
+            t,
+          ) ??
+          callButtonBadgeTheme,
+      callParticipantsSpotlightTheme:
+          StreamCallParticipantsSpotlightThemeData.lerp(
+            callParticipantsSpotlightTheme,
+            other.callParticipantsSpotlightTheme,
+            t,
+          ) ??
+          callParticipantsSpotlightTheme,
       livestreamTheme: livestreamTheme.lerp(other.livestreamTheme, t),
     );
   }

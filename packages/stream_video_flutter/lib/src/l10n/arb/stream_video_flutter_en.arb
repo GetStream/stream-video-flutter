@@ -19,6 +19,22 @@
   "@desktopScreenShareWindow": {
     "description": "Tab to select a single window to share"
   },
+  "desktopScreenShareRefresh": "Refresh",
+  "@desktopScreenShareRefresh": {
+    "description": "Tooltip of the action that re-reads the screens and windows on offer"
+  },
+  "desktopScreenShareNoSources": "Nothing to share here.",
+  "@desktopScreenShareNoSources": {
+    "description": "Shown in place of the grid when the platform offers no screen or window of the selected type"
+  },
+  "desktopScreenShareLoadFailed": "Couldn't read the screens and windows to share.",
+  "@desktopScreenShareLoadFailed": {
+    "description": "Shown in place of the grid when the sources could not be read"
+  },
+  "desktopScreenShareRetry": "Try again",
+  "@desktopScreenShareRetry": {
+    "description": "Action that reads the screens and windows again after a failure"
+  },
   "layoutMenuTitle": "Layout",
   "@layoutMenuTitle": {
     "description": "Title of the sheet that picks how participants are laid out"
@@ -166,5 +182,53 @@
   "lobbyDevicesUnreadable": "Your devices could not be read",
   "@lobbyDevicesUnreadable": {
     "description": "Tooltip on a lobby device picker when the platform could not be asked for its devices"
+  },
+  "callEncryptedTooltip": "This call is end-to-end encrypted",
+  "@callEncryptedTooltip": {
+    "description": "Tooltip on the encryption indicator in the call duration badge"
+  },
+  "callRecordingTooltip": "This call is being recorded",
+  "@callRecordingTooltip": {
+    "description": "Tooltip on the recording indicator in the call duration badge"
+  },
+  "callScreenSharingTooltip": "Someone is sharing their screen",
+  "@callScreenSharingTooltip": {
+    "description": "Tooltip on the screen share indicator in the call duration badge"
+  },
+  "callDurationSpoken": "Call duration {duration}",
+  "@callDurationSpoken": {
+    "description": "Accessible label for the call duration badge, read in place of the digits",
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "callDurationHours": "{count, plural, one{1 hour} other{{count} hours}}",
+  "@callDurationHours": {
+    "description": "Hours part of the spoken call duration",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "callDurationMinutes": "{count, plural, one{1 minute} other{{count} minutes}}",
+  "@callDurationMinutes": {
+    "description": "Minutes part of the spoken call duration",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "callDurationSeconds": "{count, plural, one{1 second} other{{count} seconds}}",
+  "@callDurationSeconds": {
+    "description": "Seconds part of the spoken call duration",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../../../call_participants/call_participants.dart';
 import 'picture_in_picture_configuration.dart';
 
 /// A widget that handles the picture-in-picture mode on iOS.
@@ -58,7 +59,7 @@ class StreamPictureInPictureUiKitView extends StatefulWidget {
   final Call call;
   final PictureInPictureConfiguration? pictureInPictureConfiguration;
   @Deprecated('Use [pictureInPictureConfiguration.sort] instead')
-  final Comparator<CallParticipantState>? participantSort;
+  final CallParticipantSort<CallParticipantState>? participantSort;
   @Deprecated('Use [pictureInPictureConfiguration.iOSPiPConfiguration] instead')
   final IOSPictureInPictureConfiguration? configuration;
 
@@ -79,6 +80,12 @@ class _StreamPictureInPictureUiKitViewState
 
   final Subscriptions _subscriptions = Subscriptions();
 
+  /// The native window's place in the call's viewport registry.
+  ///
+  /// It draws one participant's track at a time, like any other viewport, and
+  /// is the one still drawing once the app is backgrounded.
+  late ViewportHandle _viewport = widget.call.viewportVisibility.attach();
+
   Future<void> _handleParticipantsChange(
     List<CallParticipantState> callParticipants,
     bool includeLocalParticipantVideo,
@@ -88,13 +95,11 @@ class _StreamPictureInPictureUiKitViewState
         : callParticipants.where((element) => !element.isLocal).toList();
 
     final sorted = List<CallParticipantState>.from(participants);
-    mergeSort(
-      sorted,
-      compare:
-          widget.pictureInPictureConfiguration?.sort ??
-          widget.participantSort ??
-          CallParticipantSortingPresets.pictureInPicture,
-    );
+    final sort =
+        widget.pictureInPictureConfiguration?.sort ??
+        widget.participantSort ??
+        CallParticipantSorts.pictureInPicture;
+    mergeSort(sorted, compare: sort.compare);
 
     if (sorted.isNotEmpty) {
       final pipParticipant = sorted.first;
@@ -121,19 +126,28 @@ class _StreamPictureInPictureUiKitViewState
         priorityTrack,
       );
 
-      if (videoTrack == null &&
-          (pipParticipant.isVideoEnabled ||
-              pipParticipant.isScreenShareEnabled)) {
-        // If the video track is not available, we need to update the subscription
-        // to ensure that the participant's video is displayed correctly.
-        await widget.call.updateSubscription(
+      // What this window draws, reported like any other viewport. Kept while
+      // hidden: the Flutter tiles go off screen when the app is backgrounded,
+      // which is exactly when this window is the one being watched.
+      _viewport.report(
+        ViewportTrack(
           userId: pipParticipant.userId,
           sessionId: pipParticipant.sessionId,
           trackIdPrefix: pipParticipant.trackIdPrefix,
           trackType: priorityTrack,
-          videoDimension: RtcVideoDimensionPresets.h360_169,
-        );
+        ),
+        const ViewportMeasurement(
+          visibility: ViewportVisibility.visible,
+          dimension: RtcVideoDimensionPresets.h360_169,
+          persistWhenHidden: true,
+        ),
+      );
 
+      if (videoTrack == null &&
+          (pipParticipant.isVideoEnabled ||
+              pipParticipant.isScreenShareEnabled)) {
+        // The track has not arrived yet. The report above is what asks for
+        // it; the state change it causes comes back through here.
         return;
       }
 
@@ -170,6 +184,9 @@ class _StreamPictureInPictureUiKitViewState
               widget.configuration?.showConnectionQualityIndicator,
         },
       );
+    } else {
+      // Nobody to draw, so nothing to hold a track for.
+      _viewport.release();
     }
   }
 
@@ -205,6 +222,28 @@ class _StreamPictureInPictureUiKitViewState
   void initState() {
     WidgetsBinding.instance.addObserver(this);
 
+    _listenForCallEnded();
+
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant StreamPictureInPictureUiKitView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.call == oldWidget.call) return;
+
+    // Everything here was taken from the call it was given: the handle belongs
+    // to that call's registry, and the listeners to its state.
+    _viewport.dispose();
+    _viewport = widget.call.viewportVisibility.attach();
+
+    final wasFollowingParticipants = _subscriptions.contains(_idCallState);
+    _subscriptions.cancelAll();
+    _listenForCallEnded();
+    if (wasFollowingParticipants) _subscribeToCallEvents();
+  }
+
+  void _listenForCallEnded() {
     _subscriptions.add(
       _idCallEnded,
       widget.call.state.listen(
@@ -217,8 +256,6 @@ class _StreamPictureInPictureUiKitViewState
         },
       ),
     );
-
-    super.initState();
   }
 
   @override
@@ -307,6 +344,7 @@ class _StreamPictureInPictureUiKitViewState
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _subscriptions.cancelAll();
+    _viewport.dispose();
     unawaited(
       _channel.invokeMethod('callEnded').catchError((_) {
         // Best-effort cleanup; intentionally ignored.

@@ -683,6 +683,50 @@ void main() {
     );
 
     test(
+      'a flapping monitor does not spin the stability window',
+      () async {
+        final networkMonitor = setupMockInternetConnection(
+          statusStream: internetStatusController,
+        );
+
+        final call = createTestCall(
+          networkMonitor: networkMonitor,
+          coordinatorClient: coordinatorClient,
+          sessionFactory: sessionFactory,
+        );
+
+        await call.join();
+        expect(capturedCallback, isNotNull);
+
+        // A rejoin waits for the network to hold steady before it proceeds,
+        // and starts that wait over on every drop.
+        capturedCallback!(mockPc, SfuReconnectionStrategy.rejoin);
+        await Future<void>.delayed(const Duration(milliseconds: 50));
+
+        // A monitor flapping is what an app resume looks like: it decides
+        // connectivity by probing, and probes that cannot run read as drops.
+        // Each flap fails the window, and without a pause between attempts the
+        // loop runs once per emission for as long as the budget lasts.
+        final flapping = Timer.periodic(const Duration(milliseconds: 1), (_) {
+          internetStatusController
+            ..add(InternetStatus.disconnected)
+            ..add(InternetStatus.connected);
+        });
+
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+        flapping.cancel();
+
+        // Two reads of the status stream per attempt. Paced by the check
+        // interval, 300ms of flapping allows a couple of dozen attempts;
+        // unpaced it is one per emission — hundreds.
+        verify(() => networkMonitor.onStatusChange).called(lessThan(100));
+
+        await call.leave();
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
+
+    test(
       'unexpected error inside the reconnect loop backs off instead of spinning',
       () async {
         // A long fastReconnectDeadline keeps mustPerformRejoin false so the

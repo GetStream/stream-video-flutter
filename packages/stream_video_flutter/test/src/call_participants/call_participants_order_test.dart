@@ -13,11 +13,6 @@ import '../mocks.dart';
 // listens to, and read the order back off the tiles.
 
 void main() {
-  setUpAll(() {
-    registerFallbackValue(ViewportVisibility.unknown);
-    registerFallbackValue(SfuTrackType.video);
-  });
-
   setUp(() {
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
   });
@@ -55,14 +50,6 @@ void main() {
     when(() => call.state).thenAnswer(
       (_) => MutableStateEmitter<CallState>(state, sync: true),
     );
-    when(
-      () => call.updateViewportVisibility(
-        sessionId: any(named: 'sessionId'),
-        userId: any(named: 'userId'),
-        visibility: any(named: 'visibility'),
-        trackType: any(named: 'trackType'),
-      ),
-    ).thenAnswer((_) async => const Result.success(none));
 
     return call;
   }

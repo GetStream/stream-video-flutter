@@ -7,6 +7,7 @@ import 'package:async/async.dart' show CancelableOperation;
 import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
@@ -32,6 +33,7 @@ import '../sfu/data/models/sfu_error.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../stream_video.dart';
 import '../telemetry/client_event_types.dart';
+import '../utils/adaptive_throttle.dart';
 import '../utils/cancelable_operation.dart';
 import '../utils/cancelables.dart';
 import '../utils/extensions.dart';
@@ -64,6 +66,7 @@ import 'state/call_state_notifier.dart';
 import 'stats/sfu_stats_reporter.dart';
 import 'stats/stats_reporter.dart';
 import 'stats/trace_tag.dart';
+import 'viewport_visibility_registry.dart';
 
 typedef OnCallPermissionRequest =
     void Function(
@@ -273,6 +276,12 @@ class Call {
   final CallStateNotifier _stateManager;
   final PermissionsManager _permissionsManager;
   final DynascaleManager dynascaleManager;
+
+  /// What each viewport drawing a participant measures for it, and the one
+  /// answer per track the call acts on.
+  late final viewportVisibility = ViewportVisibilityRegistry(
+    onAggregate: _applyViewportAggregate,
+  );
   final InternetConnection networkMonitor;
   final RtcMediaDeviceNotifier _rtcMediaDeviceNotifier;
 
@@ -405,6 +414,7 @@ class Call {
   final Map<String, Timer> _reactionTimers = {};
   final Map<String, Timer> _captionsTimers = {};
   Timer? _videoModerationTimer;
+
   void Function()? _onModerationBlurApply;
   void Function()? _onModerationBlurClear;
   final List<CancelableOperation<void>> _sfuStatsTimers = [];
@@ -425,6 +435,102 @@ class Call {
 
   Stream<T> partialState<T>(CallStateSelector<T> selector) {
     return _stateManager.partialCallStateStream(selector);
+  }
+
+  /// The participants in this call, rate-limited by
+  /// [CallPreferences.participantsThrottleIntervalResolver], which by default
+  /// returns a longer interval the more participants there are.
+  ///
+  /// Prefer this over `partialState((state) => state.callParticipants)` for
+  /// anything that renders the list: in a large call the raw state emits far
+  /// faster than a screen can usefully repaint. [CallState.callParticipants]
+  /// stays immediate, so a lookup that has to see a participant the moment
+  /// they join keeps working.
+  ///
+  /// One window is shared by every listener, so two widgets rendering the same
+  /// call always show the same list. A new listener starts from the current
+  /// [CallState.callParticipants] rather than from the last window, so it never
+  /// begins on a list older than the state it was built against.
+  ///
+  /// The interval comes from
+  /// [CallPreferences.participantsThrottleIntervalResolver], read the first
+  /// time this is used; set it to null to emit every change.
+  late final Stream<List<CallParticipantState>> participantsStream =
+      _buildParticipantsStream();
+
+  /// Each listener is given the live participant list first, then the shared
+  /// throttled ones.
+  ///
+  /// The subject replays the list the last window closed on, which can be older
+  /// than the state a listener is starting from — forwarding it would walk the
+  /// list backwards for up to one interval. That replay is dropped, and so is
+  /// any later value the listener has already been given.
+  Stream<List<CallParticipantState>> _buildParticipantsStream() {
+    return Stream<List<CallParticipantState>>.multi(
+      (controller) {
+        var latest = _stateManager.callState.callParticipants;
+        controller.add(latest);
+
+        // The subject opens with whatever it currently holds, which is a value
+        // or — since it caches the latest error too — an error.
+        var replayed = false;
+        final subscription = _participantsSubject.stream.listen(
+          (value) {
+            if (!replayed) {
+              replayed = true;
+              return;
+            }
+            if (identical(value, latest)) return;
+            latest = value;
+            controller.add(value);
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            replayed = true;
+            controller.addError(error, stackTrace);
+          },
+          onDone: controller.close,
+        );
+
+        controller.onCancel = subscription.cancel;
+      },
+      isBroadcast: true,
+    );
+  }
+
+  // Lives as long as this call: nothing closes `callStateStream` today, so the
+  // `onDone` below is a teardown path rather than one that runs in practice.
+  // ignore: close_sinks
+  late final BehaviorSubject<List<CallParticipantState>> _participantsSubject =
+      _buildParticipantsSubject();
+
+  BehaviorSubject<List<CallParticipantState>> _buildParticipantsSubject() {
+    final subject = BehaviorSubject<List<CallParticipantState>>.seeded(
+      _stateManager.callState.callParticipants,
+    );
+
+    final participants = partialState((state) => state.callParticipants);
+    final interval = _stateManager
+        .callState
+        .preferences
+        .participantsThrottleIntervalResolver;
+
+    // Kept for the lifetime of the call, like the state it reads from.
+    // ignore: cancel_subscriptions
+    (interval == null
+            ? participants
+            : participants.throttleByCollectionSize(interval: interval))
+        .listen(
+          (value) {
+            // The seed and the state's own replay are the same list, so the
+            // first window would otherwise repeat it.
+            if (identical(subject.valueOrNull, value)) return;
+            subject.add(value);
+          },
+          onError: subject.addError,
+          onDone: subject.close,
+        );
+
+    return subject;
   }
 
   SharedEmitter<
@@ -959,11 +1065,13 @@ class Call {
 
     // Optimistically mark the call as accepted
     _stateManager.lifecycleCallAccepted();
+    _streamVideo.markCallAcceptedOnThisDevice(callCid, this);
 
     final result = await _coordinatorClient.acceptCall(cid: state.callCid);
     if (result is Failure) {
       // Revert the optimistic acceptance so the user can retry or reject.
       _stateManager.lifecycleCallAccepted(accepted: false);
+      _streamVideo.clearCallAcceptedOnThisDevice(callCid, this);
     }
 
     return result;
@@ -1595,7 +1703,24 @@ class Call {
             reason: reconnectReason,
           );
 
-    if (!performingFastReconnect) {
+    // A fast reconnect resumes the previous SFU session, so it needs both that
+    // session and the details describing what to resume. A strategy set by a
+    // network blip before this call ever joined has neither.
+    final resumableSession = _previousSession;
+    final canFastReconnect =
+        performingFastReconnect &&
+        resumableSession != null &&
+        reconnectDetails != null;
+
+    if (performingFastReconnect && !canFastReconnect) {
+      _logger.w(
+        () =>
+            '[join] fast reconnect asked for with nothing to resume '
+            'creating a new sfu session instead',
+      );
+    }
+
+    if (!canFastReconnect) {
       _logger.v(
         () =>
             '[join] creating new sfu session (rejoin: $performingRejoin, migration: $performingMigration)',
@@ -1677,11 +1802,11 @@ class Call {
             '[join] reusing previous sfu session (rejoin: $performingRejoin, migration: $performingMigration)',
       );
 
-      _session = _previousSession;
+      _session = resumableSession;
 
       _logger.d(() => '[join] fast reconnecting');
-      final result = await _session!.fastReconnect(
-        reconnectDetails: reconnectDetails!,
+      final result = await resumableSession.fastReconnect(
+        reconnectDetails: reconnectDetails,
         capabilities: _sfuClientCapabilities,
         unifiedSessionId: _unifiedSessionId,
       );
@@ -1741,6 +1866,10 @@ class Call {
         }),
       );
     }
+    // A join response rebuilds every participant carrying no viewport
+    // visibility, and viewports report only what changes about them.
+    viewportVisibility.reapplyAll();
+
     _logger.v(() => '[join] completed');
     return const Result.success(none);
   }
@@ -2270,6 +2399,14 @@ class Call {
       return;
     }
 
+    // A call that has never established a session has nothing to reconnect to.
+    if (_session == null && _previousSession == null) {
+      _logger.w(
+        () => '[reconnect] rejected $strategy (call has never been joined)',
+      );
+      return;
+    }
+
     if (_callReconnectLock.locked) {
       if (strategy == SfuReconnectionStrategy.rejoin) _isRejoinPending = true;
       _logger.w(
@@ -2626,6 +2763,19 @@ class Call {
           _session?.trace(TraceTag.awaitNetworkUnstable, {
             'stabilityWindowSeconds': stabilityWindow.inSeconds,
           });
+
+          // Wait out one check interval before looking again. The monitor
+          // cannot report anything new before its next probe, so retrying
+          // sooner only spins — a flapping monitor otherwise drives this loop
+          // thousands of times a minute for as long as the budget lasts.
+          final checkInterval =
+              _streamVideo.options.networkMonitorSettings.offlineCheckInterval;
+          final left = budget - deadline.elapsed;
+          final settleDelay = left < checkInterval ? left : checkInterval;
+
+          if (settleDelay > Duration.zero) {
+            await Future<void>.delayed(settleDelay);
+          }
         } on TimeoutException {
           // No drop detected within the window — network is stable.
           _logger.v(
@@ -2861,11 +3011,18 @@ class Call {
     }
 
     await dynascaleManager.dispose();
+    viewportVisibility.clear();
     await clearE2EEManager();
 
+    _streamVideo.clearCallAcceptedOnThisDevice(callCid, this);
+    _streamVideo.releaseRingingCall(callCid, this);
     await _streamVideo.state.removeActiveCall(this);
     if (_streamVideo.state.outgoingCall.value?.callCid == callCid) {
       await _streamVideo.state.setOutgoingCall(null);
+    }
+
+    if (identical(_streamVideo.state.incomingCall.value, this)) {
+      await _streamVideo.state.setIncomingCall(null);
     }
 
     _logger.v(() => '[clear] completed');
@@ -4405,6 +4562,91 @@ class Call {
     return result;
   }
 
+  /// Acts on a track's aggregate, and answers whether it landed: the registry
+  /// forgets one that did not, so the next measurement drives it again.
+  Future<bool> _applyViewportAggregate(ViewportAggregate aggregate) async {
+    final track = aggregate.track;
+
+    if (state.value.status.isDisconnected) {
+      _logger.d(() => '[applyViewportAggregate] rejected (disconnected)');
+      return false;
+    }
+
+    // One failing does not stop the other being tried; either means the
+    // aggregate did not land.
+    var applied = true;
+
+    final visibilityResult = await updateViewportVisibility(
+      sessionId: track.sessionId,
+      userId: track.userId,
+      visibility: aggregate.visibility,
+      trackType: track.trackType,
+    );
+
+    if (visibilityResult.isFailure) {
+      _logger.w(
+        () => '[applyViewportAggregate] visibility failed: $visibilityResult',
+      );
+      applied = false;
+    }
+
+    // A viewport can measure a track for somebody the call does not have yet,
+    // or has already lost. Not applied, so it is driven again.
+    final participant = _participantBySessionId(track.sessionId);
+    if (participant == null) {
+      _logger.w(() => '[applyViewportAggregate] no participant for $track');
+      return false;
+    }
+
+    // Only a remote track is subscribed to: a local one is already coming out
+    // of the camera, and an unpublished one has nothing to ask for.
+    final trackState = participant.publishedTracks[track.trackType];
+    if (trackState is! RemoteTrackState) return applied;
+
+    // Dropped on the track being hidden, not on an empty size: a viewport
+    // drawing a sliver of one still wants it.
+    final Result<None> subscriptionResult;
+    if (!aggregate.visibility.isVisible && !aggregate.persistWhenHidden) {
+      subscriptionResult = await removeSubscription(
+        userId: track.userId,
+        sessionId: track.sessionId,
+        trackIdPrefix: track.trackIdPrefix,
+        trackType: track.trackType,
+      );
+    } else {
+      subscriptionResult = await updateSubscription(
+        userId: track.userId,
+        sessionId: track.sessionId,
+        trackIdPrefix: track.trackIdPrefix,
+        trackType: track.trackType,
+        videoDimension: aggregate.dimension,
+      );
+    }
+
+    if (subscriptionResult.isFailure) {
+      _logger.w(
+        () =>
+            '[applyViewportAggregate] subscription failed: $subscriptionResult',
+      );
+      applied = false;
+    }
+
+    return applied;
+  }
+
+  CallParticipantState? _participantBySessionId(String sessionId) {
+    for (final participant in _stateManager.callState.callParticipants) {
+      if (participant.sessionId == sessionId) return participant;
+    }
+
+    return null;
+  }
+
+  /// Records a track's viewport visibility and tells the session.
+  ///
+  /// Driven by [viewportVisibility], which every viewport reports to; a
+  /// viewport writing here directly is back to overwriting the others.
+  @internal
   Future<Result<None>> updateViewportVisibility({
     required String sessionId,
     required String userId,
@@ -4425,12 +4667,8 @@ class Call {
       return const Result.success(none);
     }
 
-    // Recorded before the session is told, and whatever it makes of it. The
-    // caller reports a change once — a viewport reports what changed, not what
-    // it holds — so a visibility dropped here is not offered again, and the
-    // participant stays recorded as something they are not for the rest of the
-    // call. The session's own handling of this is a debounce that ends in the
-    // UI reading this same state back, so there is nothing to wait for.
+    // Recorded before the session is told, which debounces and ends in the UI
+    // reading this same state back, so there is nothing to wait for.
     _stateManager.participantUpdateViewportVisibility(
       sessionId: sessionId,
       userId: userId,
@@ -4474,6 +4712,11 @@ class Call {
     return result;
   }
 
+  /// Moves a track's subscription to [videoDimension].
+  ///
+  /// Driven by [viewportVisibility], which sizes a track for the largest
+  /// viewport showing it.
+  @internal
   Future<Result<None>> updateSubscription({
     required String userId,
     required String sessionId,
@@ -4509,6 +4752,11 @@ class Call {
     return result;
   }
 
+  /// Drops a track's subscription.
+  ///
+  /// Driven by [viewportVisibility], which removes a track once no viewport
+  /// shows it and none asked to keep it.
+  @internal
   Future<Result<None>> removeSubscription({
     required String userId,
     required String sessionId,
