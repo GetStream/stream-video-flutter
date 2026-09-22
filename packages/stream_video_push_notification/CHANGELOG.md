@@ -1,5 +1,10 @@
 ## Upcoming
 
+### 🔄 Changed
+
+- [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
+- Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.
+
 ### ✅ Added
 
 - [Android] Added a Telecom integration for the ringing flow, which registers incoming and outgoing ringing calls with the platform's [Telecom stack](https://developer.android.com/develop/connectivity/telecom) through Jetpack Telecom. This gives the call proper audio focus and a place in the system call state, and lets it be answered or hung up from a paired watch, a car head unit or a Bluetooth headset. The incoming call notification and full-screen ringing UI are unchanged. It is **on by default from Android 17**: for an app targeting API 37 the platform will not play a ringtone from a service started by a push unless the call is in the Telecom stack, so ringing does not work correctly without it. The default follows the Android version of the device rather than your `targetSdk`, so it is on for any app running on Android 17 — if you target below API 37 the restriction does not apply to you and you can opt out with `AndroidPushConfiguration(telecom: TelecomPushConfiguration(enabled: false))`. It is **off by default below Android 17**, where ringing works either way, so an existing integration is unaffected unless you pass `enabled: true`.

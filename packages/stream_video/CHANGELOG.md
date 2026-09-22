@@ -36,14 +36,19 @@
   - `OnTokenUpdated` changed from `Future<void> Function(UserToken)` to `void Function(UserToken)` and is **no longer awaited**. Async callbacks still compile, but the SDK may start using a token before your callback has persisted it.
   - `onTokenUpdated` for a static token now fires on first token use and after every refresh, instead of once at client construction.
 - A coordinator WebSocket connection whose token could not be loaded is now closed as an authentication failure instead of being retried indefinitely. A `tokenLoader` that throws on a reconnect therefore ends the connection — the error is reported on `StreamCallDisconnectedEvent`/`CoordinatorDisconnected` — where before the socket kept retrying with nothing reported.
-- `StreamVideoExceptionWithCause.cause` now carries the `StreamApiException` for a failure the server answered, where it previously carried the parsed `StreamApiError` payload. Code matching on `cause is StreamApiError` still compiles but no longer matches, so this change is silent. Read the verdict through the accessors on `StreamVideoException` instead: `apiStatusCode`, `apiErrorCode`, `isUnrecoverable`, `retryAfter`, and `apiError` for the payload itself. They answer from either shape. 
+- `StreamVideoExceptionWithCause.cause` now carries the `StreamApiException` for a failure the server answered, where it previously carried the parsed `StreamApiError` payload. Code matching on `cause is StreamApiError` still compiles but no longer matches, so this change is silent. Read the verdict through the accessors on `StreamVideoException` instead: `apiStatusCode`, `apiErrorCode`, `isUnrecoverable`, `retryAfter`, and `apiError` for the payload itself. They answer from either shape.
 - `StreamVideoExceptionWithCause.cause` is deprecated. Its runtime type is not part of this API - it is chosen by whatever mapped the failure — so matching on it compiles but can stop matching without warning, which is what happened to the change above. Read the failure through the accessors on `StreamVideoException` instead.
 - `StreamVideoException` (formerly `VideoError`) now implements `Exception` rather than `Error`. An `on Error catch` clause no longer matches it — these are runtime conditions to handle, not programming bugs. Catch `Exception`, or `StreamVideoException` directly.
 
 ### ⚠️ Deprecated
 
-- `VideoError` is renamed to `StreamVideoException`, and `VideoErrorWithCause` to `StreamVideoExceptionWithCause`. The old names remain as deprecated typedefs, so existing code still compiles; `dart fix --apply` migrates it. 
+- `VideoError` is renamed to `StreamVideoException`, and `VideoErrorWithCause` to `StreamVideoExceptionWithCause`. The old names remain as deprecated typedefs, so existing code still compiles; `dart fix --apply` migrates it.
 - `ifInvisibleBy` takes a `ParticipantPriority` — a priority for one participant, higher first — instead of a `Comparator`. Pass the priority of the same name: `ifInvisibleBy(dominantSpeakerPriority)` where you passed `ifInvisibleBy(dominantSpeaker)`.
+
+### 🔄 Changed
+
+- [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
+- Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.
 
 ### ✅ Added
 
