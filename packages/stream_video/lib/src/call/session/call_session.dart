@@ -145,6 +145,9 @@ class CallSession extends Disposable {
 
   bool _isLeavingOrClosed = false;
 
+  /// The manager whose subscriber the last join response was applied against.
+  RtcManager? _joinedRtcManager;
+
   SharedEmitter<SfuEvent> get events => sfuWS.events;
 
   late final _vvBuffer = DebounceBuffer<VisibilityChange, Result<None>>(
@@ -724,6 +727,8 @@ class CallSession extends Disposable {
       });
 
       rtcManager = null;
+      // Held only to be compared against, so it must not outlive what it names.
+      _joinedRtcManager = null;
     }
   }
 
@@ -796,7 +801,13 @@ class CallSession extends Disposable {
       }
 
       if (event is SfuJoinResponseEvent) {
-        stateManager.sfuJoinResponse(event);
+        final manager = rtcManager;
+        stateManager.sfuJoinResponse(
+          event,
+          subscriberReused:
+              manager != null && identical(manager, _joinedRtcManager),
+        );
+        _joinedRtcManager = manager;
         // The participant list just landed, so tracks that arrived before it
         // can finally resolve a user id and attach their decryptor.
         await rtcManager?.flushPendingDecryptors();
