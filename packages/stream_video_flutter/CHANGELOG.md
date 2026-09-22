@@ -1,3 +1,22 @@
+## Upcoming
+
+### ✅ Added
+
+- Added `CallParticipantsBuilder`, which builds from `Call.participantsStream`.
+
+### 🐞 Fixed
+
+- Fixed `PartialCallStateBuilder` throwing a cast error instead of surfacing a partial state error.
+- Fixed `StreamCallParticipants` not applying a changed `sort` or `filter` until the participant list changed.
+- Fixed a `Call.participantsStream` error reaching the zone uncaught instead of being logged.
+
+### 🔄 Changed
+
+- Participant list widgets now subscribe to `Call.participantsStream`, which is throttled by participant count.
+- `StreamCallParticipants` and `StreamLivestreamHosts` no longer rebuild when an update leaves the rendered participants unchanged.
+- `LivestreamContent` renders participants from `Call.participantsStream` instead of the raw call state.
+- `LivestreamBackstageContent` only rebuilds when the participant count changes.
+
 ## 1.6.0
 
 ### ✅ Added
