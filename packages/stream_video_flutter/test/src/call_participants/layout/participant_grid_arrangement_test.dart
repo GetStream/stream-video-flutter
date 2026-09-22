@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-ParticipantGridArrangement solve(
+StreamParticipantGridArrangement solve(
   Size box,
   int count, {
   double spacing = 8,
@@ -152,8 +152,6 @@ void main() {
 
   group('the shape of the window', () {
     test('a short wide window puts four in a row', () {
-      // The case the rework is for: a window far wider than it is tall used to
-      // draw 2x2 and waste the height.
       final grid = solve(const Size(1884, 330), 4);
 
       expect(grid.columns, 4);
@@ -167,9 +165,8 @@ void main() {
     });
 
     test('a window far wider than it is tall drops the square preference', () {
-      // The preference is what keeps four square on a phone. Left unbounded it
-      // would also force 2x2 on the short wide window, which is the layout the
-      // rework is getting rid of, so it stops applying past 2:1.
+      // The preference is what keeps four square on a phone. It stops applying
+      // past 2:1, where four in a row is the point.
       expect(solve(const Size(660, 330), 4).columns, 2);
       expect(solve(const Size(1884, 330), 4).columns, 4);
     });

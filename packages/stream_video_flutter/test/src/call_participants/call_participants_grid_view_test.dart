@@ -65,8 +65,8 @@ void main() {
   }
 
   group('padding', () {
-    // The grid's padding used to reach only a page holding one participant, so
-    // the theme did nothing in the common case.
+    // The padding reaches every page, not only one holding a single
+    // participant.
     for (final count in [1, 2, 4]) {
       testWidgets('insets a page of $count participants', (tester) async {
         await pump(

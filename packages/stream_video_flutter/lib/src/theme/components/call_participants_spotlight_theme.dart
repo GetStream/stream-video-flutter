@@ -113,7 +113,10 @@ class StreamCallParticipantsSpotlightStyle
     this.spacing,
     this.maxSpotlightAspectRatio,
     this.barTileSize,
-  });
+  }) : assert(
+         maxSpotlightAspectRatio == null || maxSpotlightAspectRatio > 0,
+         'A stage ratio of zero or less leaves the stage nothing to draw.',
+       );
 
   /// Padding around the stage and the bar together.
   ///
@@ -142,9 +145,9 @@ class StreamCallParticipantsSpotlightStyle
 
   /// The size of a bar tile.
   ///
-  /// The same at every size: the bar carries the people who are not on the
-  /// stage, and how much room the window has says nothing about how large they
-  /// need to be.
+  /// A size of its own rather than a share of the view, scaled down
+  /// proportionally only where the bar would otherwise take more than a third
+  /// of the view across the axis it runs on.
   ///
   /// Defaults to `Size(222, 125)`.
   final Size? barTileSize;

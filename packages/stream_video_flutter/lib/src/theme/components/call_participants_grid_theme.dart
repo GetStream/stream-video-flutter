@@ -66,7 +66,18 @@ class StreamCallParticipantsGridThemeData
     this.maxTileAspectRatio,
     this.compactPageSize,
     this.pageSize,
-  });
+  }) : assert(
+         maxTileAspectRatio == null || maxTileAspectRatio > 0,
+         'A tile ratio of zero or less leaves the grid nothing to draw.',
+       ),
+       assert(
+         compactPageSize == null || compactPageSize > 0,
+         'A page holds at least one participant.',
+       ),
+       assert(
+         pageSize == null || pageSize > 0,
+         'A page holds at least one participant.',
+       );
 
   /// The inset around the grid.
   ///

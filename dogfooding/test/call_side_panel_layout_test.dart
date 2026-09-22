@@ -205,7 +205,7 @@ void main() {
     // The content moves between the two shapes the same way the panel does,
     // and it carries every video renderer in the call. Remounting it tears
     // those down, so the whole call blanks until the tracks decode a frame
-    // again — which is what a window dragged across the breakpoint used to do.
+    // again.
     _ScrollProbeState.mounts = 0;
 
     Widget at({required bool fullScreen}) => MaterialApp(

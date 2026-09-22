@@ -115,7 +115,6 @@ void main() {
       ),
     );
 
-    // The case the rework is for: this used to draw 2x2 and waste the height.
     streamGoldenTest(
       'CallParticipantsGridView puts four in a row when the window is short',
       fileName: 'stream_call_participants_grid_short',

@@ -250,6 +250,7 @@
 - The desktop screen share picker is rebuilt on the design system. `TabbedScreenSelectWidget`, `ThumbnailGrid`, `ScreenSelectorStateNotifier` and `ScreenSelectorState` are gone; `StreamDesktopScreenShareSelector` and `DesktopScreenShareSourceController` replace them. `showDefaultScreenSelectionDialog` keeps its signature.
 - `ScreenShareThumbnailWidget` is `StreamDesktopScreenShareThumbnail` now, and takes the thumbnail from the source it is given rather than subscribing for one.
 - `StreamVideoRenderer` is a `StatelessWidget` and wraps its child in a `ViewportVisibilityReporter`, which does the measuring.
+- `CallParticipantsSpotlightView.padding` is a nullable `EdgeInsetsGeometry?` rather than a non-nullable `EdgeInsets`, and falls back to `StreamCallParticipantsSpotlightStyle.padding` (8px horizontal) when it is null. Code reading the field needs to handle null; code passing one is unaffected. A new `spacing` sets the gaps.
 - `ParticipantLayoutMode.auto` is the default layout of `StreamCallContent`, `StreamCallParticipants` and `RegularCallParticipantsContent`, and renders what `grid` used to. The livestream widgets still default to `grid`.
 - `ParticipantLayoutMode.grid` gives the local participant a tile of its own instead of floating them over the grid.
 - `ParticipantLayoutMode.auto` floats the self-view on mobile only while at most two other people are in the call, and gives the local participant a tile beyond that.
@@ -320,10 +321,9 @@
 - The picker's sources are released whichever way it is dismissed, including the escape key and a tap outside.
 - The picker says when it could not read the screens and windows, and offers a retry, instead of showing its empty state.
 - The participants grid arranges itself against the shape of the space it is given rather than the platform it runs on, so a short wide window puts its tiles in a row instead of a square.
-- The grid pages with chevrons at every size, and still swipes on a touch screen.
+- The grid pages with chevrons at every size, and also by swipe, wheel or trackpad.
 - The speaker layouts give the bar its edge and the spotlight everything else, never drawing the spotlight wider than 16:9.
-- The participants bar draws 222x125 tiles at every size, centred until they overflow.
-- `CallParticipantsSpotlightView.padding` defaults to 8px horizontal, and a new `spacing` sets the gaps.
+- The participants bar draws 222x125 tiles, centred until they overflow and scaled down only where they would take more than a third of the view.
 - `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
 - Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.
 

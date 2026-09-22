@@ -6,13 +6,21 @@ import '../../utils/screen_size.dart';
 
 /// How a page of the participants grid is arranged.
 @immutable
-class ParticipantGridArrangement {
+class StreamParticipantGridArrangement {
   /// Creates an arrangement of [columns] by [rows] tiles of [tileSize].
-  const ParticipantGridArrangement({
+  const StreamParticipantGridArrangement({
     required this.columns,
     required this.rows,
     required this.tileSize,
-  });
+  }) : assert(columns >= 0 && rows >= 0, 'A grid cannot have negative extent.'),
+       assert((columns == 0) == (rows == 0), 'Empty is 0 x 0 or nothing.');
+
+  /// A page with nothing to arrange.
+  static const empty = StreamParticipantGridArrangement(
+    columns: 0,
+    rows: 0,
+    tileSize: Size.zero,
+  );
 
   /// How many tiles a full row holds.
   final int columns;
@@ -26,7 +34,7 @@ class ParticipantGridArrangement {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is ParticipantGridArrangement &&
+      other is StreamParticipantGridArrangement &&
           other.columns == columns &&
           other.rows == rows &&
           other.tileSize == tileSize;
@@ -36,7 +44,7 @@ class ParticipantGridArrangement {
 
   @override
   String toString() =>
-      'ParticipantGridArrangement($columns x $rows, tile: $tileSize)';
+      'StreamParticipantGridArrangement($columns x $rows, tile: $tileSize)';
 }
 
 /// Describes the space a page of the participants grid has to fill.
@@ -68,20 +76,26 @@ class StreamParticipantGridDetails {
   final double maxTileAspectRatio;
 
   /// The breakpoint of the surrounding window.
+  ///
+  /// Carried for an override's benefit; the default rule does not read it.
   final StreamScreenSize screenSize;
 }
 
 /// Returns how many columns a page should use, or null to keep the default.
 ///
 /// The rows and the tile size follow from the count, so an override cannot
-/// produce an arrangement that disagrees with itself.
+/// produce an arrangement that disagrees with itself. A count outside
+/// `1..details.count` is clamped into it.
+///
+/// Hoist the function rather than allocating a closure on each build, so that
+/// equal themes compare as equal.
 ///
 /// {@tool snippet}
 ///
 /// Two people side by side, whatever the window says:
 ///
 /// ```dart
-/// StreamCallParticipantsGridStyle(
+/// StreamCallParticipantsGridThemeData(
 ///   columnResolver: (details) => details.count == 2 ? 2 : null,
 /// )
 /// ```
@@ -98,47 +112,39 @@ typedef StreamParticipantGridColumnResolver =
 /// the preference stops applying past this.
 const _maxSquareAspectRatio = 2.0;
 
-/// Arranges [details] into the grid that renders the video largest.
+/// Arranges [details] into the grid that renders the video largest, except
+/// that a square count stays square while the box is no wider than 2:1.
 ///
 /// Each candidate column count is scored by the largest
 /// [StreamParticipantGridDetails.maxTileAspectRatio] rectangle that fits one of
 /// its cells — how big a participant actually appears, rather than how much of
 /// the cell they are handed. The tile is then drawn filling its cell, except
 /// that it is never wider than that ratio allows.
-ParticipantGridArrangement solveParticipantGrid(
+///
+/// A page of no participants comes back as
+/// [StreamParticipantGridArrangement.empty].
+StreamParticipantGridArrangement solveParticipantGrid(
   StreamParticipantGridDetails details,
 ) {
-  if (details.count <= 0) {
-    return const ParticipantGridArrangement(
-      columns: 0,
-      rows: 0,
-      tileSize: Size.zero,
-    );
-  }
+  if (details.count <= 0) return StreamParticipantGridArrangement.empty;
 
   return arrangeParticipantGrid(details, _bestColumns(details));
 }
 
 /// Arranges [details] into [columns], however many that leaves per row.
 ///
-/// The count is clamped to something the page can actually hold, so an override
+/// The count is clamped to between 1 and the participant count, so an override
 /// returning a number out of range still produces a grid.
-ParticipantGridArrangement arrangeParticipantGrid(
+StreamParticipantGridArrangement arrangeParticipantGrid(
   StreamParticipantGridDetails details,
   int columns,
 ) {
-  if (details.count <= 0) {
-    return const ParticipantGridArrangement(
-      columns: 0,
-      rows: 0,
-      tileSize: Size.zero,
-    );
-  }
+  if (details.count <= 0) return StreamParticipantGridArrangement.empty;
 
   final resolved = columns.clamp(1, details.count);
   final cell = _cellSize(details, resolved);
 
-  return ParticipantGridArrangement(
+  return StreamParticipantGridArrangement(
     columns: resolved,
     rows: (details.count / resolved).ceil(),
     tileSize: Size(

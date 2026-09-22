@@ -449,6 +449,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
 
   /// Theme for the badge overlaid on a call control button.
   final StreamCallButtonBadgeThemeData callButtonBadgeTheme;
+
   /// Theme for the speaker layouts, where one participant holds the stage.
   final StreamCallParticipantsSpotlightThemeData callParticipantsSpotlightTheme;
 

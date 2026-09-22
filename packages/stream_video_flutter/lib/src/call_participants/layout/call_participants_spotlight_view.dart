@@ -15,8 +15,10 @@ enum ParticipantsBarAlignment { top, bottom, left, right }
 /// [StreamCallParticipantsSpotlightStyle.maxSpotlightAspectRatio]: a view wider
 /// than that leaves room to either side of the stage rather than stretching it.
 ///
-/// The bar's tiles are a fixed size. They are centred while they fit, and once
-/// they do not the bar runs to the edge of the view and scrolls.
+/// The bar's tiles have a size of their own rather than a share of the view,
+/// scaled down only where they would otherwise take more than a third of it.
+/// They are centred while they fit, and once they do not the bar runs to the
+/// edge of the view and scrolls.
 class CallParticipantsSpotlightView extends StatelessWidget {
   const CallParticipantsSpotlightView({
     super.key,
@@ -186,12 +188,11 @@ class CallParticipantsSpotlightView extends StatelessWidget {
         ? constraints.maxWidth
         : constraints.maxHeight;
 
-    final content =
-        participants.length * tileExtent + (participants.length - 1) * spacing;
+    final tiles = participants.toList(growable: false);
+    final content = tiles.length * tileExtent + (tiles.length - 1) * spacing;
 
     // Centred on the whole view while the tiles fit. Once they do not, the
-    // list falls back to the padding and the rest runs off both edges, which
-    // is what the design draws for a crowded call.
+    // list falls back to the padding and the rest runs off both edges.
     final slack = viewport.isFinite ? (viewport - content) / 2 : 0.0;
     final (start, end) = isHorizontal
         ? (padding.left, padding.right)
@@ -210,12 +211,12 @@ class CallParticipantsSpotlightView extends StatelessWidget {
                 top: math.max(start, slack),
                 bottom: math.max(end, slack),
               ),
-        itemCount: participants.length,
+        itemCount: tiles.length,
         scrollDirection: isHorizontal ? Axis.horizontal : Axis.vertical,
         separatorBuilder: (context, index) =>
             SizedBox.square(dimension: spacing),
         itemBuilder: (context, index) {
-          final participant = participants.elementAt(index);
+          final participant = tiles[index];
           return SizedBox.fromSize(
             size: tileSize,
             child: participantBuilder.call(context, call, participant),
@@ -235,6 +236,10 @@ class CallParticipantsSpotlightView extends StatelessWidget {
         ? constraints.maxHeight
         : constraints.maxWidth;
     final extent = isHorizontal ? tileSize.height : tileSize.width;
+    assert(
+      extent > 0,
+      'A bar tile of zero or less hides every participant in the bar.',
+    );
     if (!available.isFinite || extent <= 0) return tileSize;
 
     final maxExtent = available * _maxBarFraction;

@@ -7,9 +7,9 @@ import '../../../stream_video_flutter.dart';
 ///
 /// The arrangement follows the shape of the space the grid is given rather than
 /// the width of the window: for each column count it could use, the grid works
-/// out how large the video would render, and takes the best. A window far wider
-/// than it is tall puts its participants in a row; a phone stacks the same
-/// people down the screen.
+/// out how large the video would render, and takes the best. A square count
+/// stays square while the box is no wider than 2:1, so four people go two by
+/// two on a phone and four in a row on a short wide window.
 ///
 /// See [solveParticipantGrid] for the rule, and
 /// [StreamCallParticipantsGridThemeData.columnResolver] to override it.
@@ -64,17 +64,11 @@ class _CallParticipantsGridViewState extends State<CallParticipantsGridView> {
     super.dispose();
   }
 
-  Future<void> _goToPage(int page) async {
-    await _pageController.animateToPage(
-      page,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-
-    // The notifier drives the chevrons, which should not swap over until the
-    // page they belong to has arrived.
-    _currentPage.value = page;
-  }
+  Future<void> _goToPage(int page) => _pageController.animateToPage(
+    page,
+    duration: const Duration(milliseconds: 300),
+    curve: Curves.easeInOut,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -155,9 +149,8 @@ class _CallParticipantsGridViewState extends State<CallParticipantsGridView> {
             return PageView.builder(
               itemCount: pages.length,
               controller: _pageController,
-              // Swiping is how the grid was paged on a phone before the
-              // chevrons arrived, and Flutter's default drag devices leave a
-              // mouse out, so this is touch only.
+              // A page at a time rather than the platform's own physics, so a
+              // drag, a wheel or a trackpad settles on a page boundary.
               physics: const PageScrollPhysics(),
               onPageChanged: (page) => _currentPage.value = page,
               itemBuilder: (context, index) {
@@ -211,7 +204,7 @@ class _GridPage extends StatelessWidget {
   final Call call;
   final List<CallParticipantState> participants;
   final CallParticipantBuilder itemBuilder;
-  final ParticipantGridArrangement arrangement;
+  final StreamParticipantGridArrangement arrangement;
   final double mainAxisSpacing;
   final double crossAxisSpacing;
 
