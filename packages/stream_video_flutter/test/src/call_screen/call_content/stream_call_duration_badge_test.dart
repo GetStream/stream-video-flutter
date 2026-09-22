@@ -290,6 +290,26 @@ void main() {
       expect(withIcon - bare, 28);
     });
 
+    // The default carries the properties that hold the pill still, so a style
+    // naming only a size has to keep them.
+    testWidgets('a style merges onto the default text style', (tester) async {
+      await pump(
+        tester,
+        badge: StreamCallDurationBadge(
+          call: call,
+          style: const StreamCallDurationBadgeStyle(
+            textStyle: TextStyle(fontSize: 18),
+          ),
+        ),
+      );
+
+      final style = tester.widget<Text>(find.byType(Text)).style!;
+
+      expect(style.fontSize, 18);
+      expect(style.fontFeatures, contains(const FontFeature.tabularFigures()));
+      expect(style.height, 1);
+    });
+
     testWidgets('a style overrides the indicator colours', (tester) async {
       when(() => callState.isE2eeEnabled).thenReturn(true);
 

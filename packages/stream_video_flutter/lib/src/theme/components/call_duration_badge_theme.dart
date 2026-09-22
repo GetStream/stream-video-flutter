@@ -3,7 +3,7 @@ import 'package:theme_extensions_builder_annotation/theme_extensions_builder_ann
 
 import '../../../stream_video_flutter.dart';
 
-part 'stream_call_duration_badge_theme.g.theme.dart';
+part 'call_duration_badge_theme.g.theme.dart';
 
 /// Applies a badge theme to descendant [StreamCallDurationBadge] widgets.
 ///

@@ -315,15 +315,16 @@ class _StreamCallDurationBadgeStyleDefaults
   // `height: 1` so the digits centre against the indicators rather than sitting
   // in the 20pt line box `bodyEmphasis` carries, and tabular figures so the
   // pill holds still as the seconds tick — a proportional `1` is narrower than
-  // a `9`.
+  // a `9`. A style of the caller's merges onto both, so naming a size or a
+  // colour does not drop them.
   @override
-  TextStyle get textStyle =>
-      _style?.textStyle ??
-      _context.streamTextTheme.bodyEmphasis.copyWith(
+  TextStyle get textStyle => _context.streamTextTheme.bodyEmphasis
+      .copyWith(
         color: _colorScheme.textTertiary,
         height: 1,
         fontFeatures: const [FontFeature.tabularFigures()],
-      );
+      )
+      .merge(_style?.textStyle);
 
   @override
   Color get elapsedTextColor =>

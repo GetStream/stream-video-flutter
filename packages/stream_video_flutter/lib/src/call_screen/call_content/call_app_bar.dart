@@ -61,8 +61,9 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// The background color for this [CallAppBar].
   ///
-  /// Wins over [CallAppBarStyle.backgroundColor], from either [style] or the
-  /// ambient [CallAppBarTheme].
+  /// Wins over [CallAppBarStyle.backgroundColor] and
+  /// [CallAppBarStyle.floatingBackgroundColor], from either [style] or the
+  /// ambient [CallAppBarTheme], so it colours the bar on either surface.
   final Color? backgroundColor;
 
   /// The action to perform when the back button is pressed.
@@ -142,12 +143,17 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// [_effectiveStyle] with the [backgroundColor] override folded in, so the
   /// constructor argument wins over both [style] and the ambient theme.
+  ///
+  /// It covers both surfaces' colours: a floating bar paints from
+  /// [CallAppBarStyle.floatingBackgroundColor], which the argument would
+  /// otherwise leave alone.
   CallAppBarStyle? _resolvedStyle(BuildContext context) {
     final effective = _effectiveStyle(context, style);
     if (backgroundColor == null) return effective;
 
     return (effective ?? const CallAppBarStyle()).copyWith(
       backgroundColor: backgroundColor,
+      floatingBackgroundColor: backgroundColor,
     );
   }
 

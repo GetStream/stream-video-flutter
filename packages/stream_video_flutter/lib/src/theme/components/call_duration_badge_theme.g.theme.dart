@@ -3,7 +3,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, unused_element
 
-part of 'stream_call_duration_badge_theme.dart';
+part of 'call_duration_badge_theme.dart';
 
 // **************************************************************************
 // ThemeGenGenerator

@@ -204,6 +204,46 @@ void main() {
       expect(tester.getSize(find.byType(CallAppBar)).height, 120);
     });
 
+    // A floating bar paints from `floatingBackgroundColor`, which the
+    // constructor argument has to reach as well or it silently does nothing.
+    testWidgets('a backgroundColor colours a floating bar', (tester) async {
+      await pumpBar(
+        tester,
+        CallAppBar(
+          call: call,
+          showBackButton: false,
+          title: const Text('title'),
+          actions: const [],
+          backgroundColor: const Color(0xFFABCDEF),
+          style: const CallAppBarStyle(
+            surfaceStyle: StreamSurfaceStyle.floating,
+          ),
+        ),
+      );
+
+      final decoration =
+          tester
+                  .widget<DecoratedBox>(
+                    find
+                        .descendant(
+                          of: find.byType(CallAppBar),
+                          matching: find.byType(DecoratedBox),
+                        )
+                        .first,
+                  )
+                  .decoration
+              as BoxDecoration;
+
+      expect(
+        decoration.gradient,
+        isA<LinearGradient>().having(
+          (it) => it.colors,
+          'colors',
+          contains(const Color(0xFFABCDEF)),
+        ),
+      );
+    });
+
     // `Scaffold` reserves `preferredSize.height` for the slot, so a bar that
     // reports a constant is clipped to it however it is themed.
     testWidgets('an instance style survives a Scaffold.appBar slot', (
