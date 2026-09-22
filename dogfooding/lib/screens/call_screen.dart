@@ -22,7 +22,7 @@ import '../widgets/badged_call_option.dart';
 import '../widgets/call_duration_title.dart';
 import '../widgets/closed_captions_widget.dart';
 import '../widgets/e2ee_key_notification.dart';
-import '../widgets/settings_menu/settings_menu.dart';
+import '../widgets/settings_menu/more_menu.dart';
 import '../widgets/share_call_card.dart';
 import '../widgets/side_panel/call_side_panel.dart';
 import '../widgets/side_panel/call_side_panel_layout.dart';
@@ -78,7 +78,6 @@ class _CallScreenState extends State<CallScreen>
   Channel? _channel;
   StreamSubscription<Event>? _chatConnectionRecoverySubscription;
   ParticipantLayoutMode _currentLayoutMode = ParticipantLayoutMode.auto;
-  bool _moreMenuVisible = false;
 
   /// The panel the user asked for, or null once it starts closing.
   ///
@@ -272,12 +271,7 @@ class _CallScreenState extends State<CallScreen>
   void _togglePanel(CallSidePanel panel) {
     if (_openPanel == panel) return _closePanel();
 
-    setState(() {
-      _openPanel = _mountedPanel = panel;
-      // A panel and the more menu never share the screen: both hang off the
-      // same control bar.
-      _moreMenuVisible = false;
-    });
+    setState(() => _openPanel = _mountedPanel = panel);
     _panelController.forward();
   }
 
@@ -288,16 +282,6 @@ class _CallScreenState extends State<CallScreen>
     setState(() => _openPanel = null);
     _panelController.reverse();
   }
-
-  void _toggleMoreMenu() {
-    if (_moreMenuVisible) return _closeMoreMenu();
-
-    // The mirror of the exclusion in [_togglePanel].
-    _closePanel();
-    setState(() => _moreMenuVisible = true);
-  }
-
-  void _closeMoreMenu() => setState(() => _moreMenuVisible = false);
 
   /// The panel's chrome and content, or null when nothing is open or closing.
   Widget? _panelContent(Call call, {required bool fullScreen}) {
@@ -361,14 +345,27 @@ class _CallScreenState extends State<CallScreen>
     );
   }
 
+  static const _screenShareConstraints = ScreenShareConstraints(
+    useiOSBroadcastExtension: true,
+    captureScreenAudio: true,
+  );
+
   StreamScreenShareButton _screenShareOption(Call call) =>
       StreamScreenShareButton(
         call: call,
-        screenShareConstraints: const ScreenShareConstraints(
-          useiOSBroadcastExtension: true,
-          captureScreenAudio: true,
-        ),
+        screenShareConstraints: _screenShareConstraints,
       );
+
+  /// The overflow menu, drawn with [icon] because the design gives the wide
+  /// bar a gear where the narrow one has a kebab.
+  CallMoreMenu _moreMenu(Call call, IconData icon) => CallMoreMenu(
+    call: call,
+    devices: _devices,
+    videoEffectsManager: _videoEffectsManager,
+    icon: icon,
+    screenShareConstraints: _screenShareConstraints,
+    onStatsPressed: () => _togglePanel(CallSidePanel.stats),
+  );
 
   // The phone bar's microphone and camera: plain round buttons, no caret. A
   // phone has one microphone and two cameras, and the design gives the narrow
@@ -433,11 +430,7 @@ class _CallScreenState extends State<CallScreen>
 
   /// The call's control bar, laid out per screen size.
   CallControlBar _callControls(BuildContext context, Call call) {
-    final moreButton = CallFeatureButton(
-      icon: Icon(context.streamIcons.moreVerticalFill),
-      selected: _moreMenuVisible,
-      onPressed: _toggleMoreMenu,
-    );
+    final moreButton = _moreMenu(call, context.streamIcons.moreVerticalFill);
 
     final panels = [
       _participantsControl(call),
@@ -476,11 +469,7 @@ class _CallScreenState extends State<CallScreen>
       ),
       large: CallControlBarLayout(
         leading: [
-          CallFeatureButton(
-            icon: Icon(context.streamIcons.settingsFill),
-            selected: _moreMenuVisible,
-            onPressed: _toggleMoreMenu,
-          ),
+          _moreMenu(call, context.streamIcons.settingsFill),
           _layoutToggle(),
         ],
         center: [
@@ -516,11 +505,6 @@ class _CallScreenState extends State<CallScreen>
         // outcome no press of back should reach by accident.
         if (_mountedPanel != null) {
           _closePanel();
-          return false;
-        }
-
-        if (_moreMenuVisible) {
-          _closeMoreMenu();
           return false;
         }
 
@@ -586,51 +570,21 @@ class _CallScreenState extends State<CallScreen>
                               setState(() => _encryptionKey = key),
                         ),
                       ),
-                      if (_moreMenuVisible) ...[
-                        GestureDetector(
-                          onTap: _closeMoreMenu,
-                          child: Container(color: Colors.black12),
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: PartialCallStateBuilder(
+                          call: call,
+                          selector: (state) => state.otherParticipants.isEmpty,
+                          builder: (context, isEmpty) => isEmpty
+                              ? ShareCallWelcomeCard(
+                                  call: call,
+                                  encryptionKey: _encryptionKey,
+                                )
+                              : const SizedBox.shrink(),
                         ),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: Align(
-                            alignment: Alignment.bottomLeft,
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 500),
-                              child: SettingsMenu(
-                                call: call,
-                                videoEffectsManager: _videoEffectsManager,
-                                onReactionSend: (_) => _closeMoreMenu(),
-                                onStatsPressed: () =>
-                                    _togglePanel(CallSidePanel.stats),
-                                onAudioOutputChange: (_, {closeMenu = true}) {
-                                  if (closeMenu) _closeMoreMenu();
-                                },
-                                onAudioInputChange: (_) => _closeMoreMenu(),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                      if (!_moreMenuVisible)
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: PartialCallStateBuilder(
-                            call: call,
-                            selector: (state) =>
-                                state.otherParticipants.isEmpty,
-                            builder: (context, isEmpty) => isEmpty
-                                ? ShareCallWelcomeCard(
-                                    call: call,
-                                    encryptionKey: _encryptionKey,
-                                  )
-                                : const SizedBox.shrink(),
-                          ),
-                        ),
+                      ),
                     ],
                   ),
                 );

@@ -309,7 +309,7 @@ void main() {
         child: _Menu(
           useSheet: false,
           sections: [
-            StreamMenuSection(heading: 'Speaker', options: []),
+            StreamMenuSection(heading: 'Speaker'),
             StreamMenuSection(
               heading: 'Microphone',
               options: [StreamMenuOption(label: 'Jabra Evolve2 65')],
@@ -327,15 +327,114 @@ void main() {
   });
 
   test('says when a set of sections has nothing to offer', () {
-    expect(const [StreamMenuSection(options: [])].hasNoOptions, isTrue);
+    expect(const [StreamMenuSection()].hasNoOptions, isTrue);
     expect(
       const [
-        StreamMenuSection(options: []),
+        StreamMenuSection(),
         StreamMenuSection(options: [StreamMenuOption(label: 'Headset')]),
       ].hasNoOptions,
       isFalse,
     );
   });
+
+  test('a section of content alone still has something to offer', () {
+    // Otherwise a menu built only of strips — reactions, video filters —
+    // reports itself empty and every anchor over it disables its own button.
+    final sections = [
+      StreamMenuSection(content: (context, handle) => const Text('reactions')),
+    ];
+
+    expect(sections.hasNoOptions, isFalse);
+  });
+
+  // The value a row reports, which both presentations draw at the far end of
+  // the row: the On beside a toggle, the resolution beside a quality picker.
+  for (final platform in [TargetPlatform.android, TargetPlatform.macOS]) {
+    testWidgets("draws an option's trailing on ${platform.name}", (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          platform: platform,
+          child: const _Menu(
+            sections: [
+              StreamMenuSection(
+                options: [
+                  StreamMenuOption(
+                    label: 'Noise cancellation',
+                    trailing: Text('On'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Noise cancellation'), findsOneWidget);
+      expect(find.text('On'), findsOneWidget);
+    });
+
+    testWidgets("draws a section's content on ${platform.name}", (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          platform: platform,
+          child: _Menu(
+            sections: [
+              StreamMenuSection(
+                heading: 'Reactions',
+                content: (context, handle) => const Text('strip'),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('strip'), findsOneWidget);
+      // A heading labels content as readily as it labels rows.
+      expect(find.text('Reactions'), findsOneWidget);
+      // Content is not a row, so it carries none of the row's chrome.
+      expect(find.byType(StreamListTile), findsNothing);
+      expect(find.byType(StreamContextMenuAction<void>), findsNothing);
+    });
+
+    testWidgets('content closes the menu through the handle on '
+        '${platform.name}', (tester) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          platform: platform,
+          child: _Menu(
+            sections: [
+              StreamMenuSection(
+                content: (context, handle) => TextButton(
+                  onPressed: handle.close,
+                  child: const Text('send'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      expect(find.text('showing'), findsOneWidget);
+
+      await tester.tap(find.text('send'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('closed'), findsOneWidget);
+      expect(find.text('send'), findsNothing);
+    });
+  }
 
   // The sheet branch opens by pushing a route and closes by popping one, so
   // both directions are guarded: a second push stacks a sheet the handle can

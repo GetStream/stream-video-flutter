@@ -2,6 +2,9 @@
 
 ### ✅ Added
 
+- Added `StreamMenuOption.trailing`, the value a menu row reports at its far end.
+- Added `StreamMenuSection.content`, which draws arbitrary content in place of a section's rows.
+- Added `toggleScreenShare`, the action `StreamScreenShareButton` performs, so another control can offer the same one.
 - Added `StreamParticipantTileChrome`, the levels of chrome a participant tile draws, and `StreamParticipantTileChromePolicy` to choose between them — `bySize` (the default), `always`, `none` or `custom`.
 - Added `StreamParticipantTileThemeData.chromePolicy` and `styleResolver`, which restyle a tile against the size it came out at.
 - `StreamParticipantTileProps` carries the `size` the tile was measured at and the `chrome` resolved for it, so a component registered on the factory lays out against the same numbers the default tile uses.

@@ -32,6 +32,7 @@ class StreamMenuOption {
   const StreamMenuOption({
     required this.label,
     this.leading,
+    this.trailing,
     this.selected,
     this.onSelected,
   });
@@ -44,6 +45,12 @@ class StreamMenuOption {
   /// Defaults to a radio indicator when [selected] is set, and to nothing
   /// otherwise.
   final Widget? leading;
+
+  /// Drawn after the label, at the far end of the row.
+  ///
+  /// The value a row reports rather than a second control — the `On` beside a
+  /// toggle, the resolution beside a quality picker.
+  final Widget? trailing;
 
   /// Whether this is the option currently in effect.
   ///
@@ -58,11 +65,27 @@ class StreamMenuOption {
   final VoidCallback? onSelected;
 }
 
+/// Builds the body of a [StreamMenuSection] that is not a list of rows.
+///
+/// Handed the menu's handle so the content can dismiss the menu on its own: a
+/// strip of reactions closes once one is sent, a strip of video filters stays
+/// open so several can be tried.
+typedef StreamMenuContentBuilder =
+    Widget Function(BuildContext context, StreamMenuHandle handle);
+
 /// A group of [StreamMenuOption]s, optionally under a [heading].
+///
+/// A section normally draws [options] as rows. Give it [content] instead where
+/// the group is not a list at all — a row of emoji, a strip of video
+/// backgrounds — and it draws that in their place.
 @immutable
 class StreamMenuSection {
   /// Creates a menu section.
-  const StreamMenuSection({required this.options, this.heading});
+  const StreamMenuSection({
+    this.options = const [],
+    this.heading,
+    this.content,
+  });
 
   /// The label above the group, e.g. "Microphone".
   ///
@@ -72,6 +95,15 @@ class StreamMenuSection {
 
   /// The rows in the group.
   final List<StreamMenuOption> options;
+
+  /// Drawn in place of [options], for a group that is not a list of rows.
+  ///
+  /// It is laid out outside the menu's row widget, so it is not held to the
+  /// row metrics and sizes itself.
+  final StreamMenuContentBuilder? content;
+
+  /// Whether this section would draw nothing.
+  bool get isEmpty => content == null && options.isEmpty;
 }
 
 /// Whether a menu built from these sections has anything to offer.
@@ -79,8 +111,8 @@ class StreamMenuSection {
 /// A caret or a field with nothing to open is disabled rather than opening an
 /// empty popup, so every caller needs this.
 extension StreamMenuSectionsX on Iterable<StreamMenuSection> {
-  /// True when no section has a row in it.
-  bool get hasNoOptions => every((section) => section.options.isEmpty);
+  /// True when no section has a row or any content in it.
+  bool get hasNoOptions => every((section) => section.isEmpty);
 }
 
 /// Opens and closes the menu a [StreamAdaptiveMenuAnchor] hosts.
@@ -292,6 +324,7 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
         title: widget.title,
         sections: widget.sections,
         scrollController: scrollController,
+        handle: this,
         onSelected: _select,
       ),
     );
@@ -381,10 +414,13 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
         sections: [
           for (final section in widget.sections)
             [
-              // A heading with no rows under it would label nothing.
-              if (section.options.isNotEmpty)
+              // A heading with nothing under it would label nothing.
+              if (!section.isEmpty)
                 if (section.heading case final heading?)
                   StreamContextMenuHeading(label: Text(heading)),
+              // Outside StreamContextMenuAction, so the content sizes itself
+              // rather than being held to the design's 200x32 row.
+              if (section.content case final content?) content(context, this),
               for (final option in section.options)
                 _selectedBackground(
                   context,
@@ -400,6 +436,7 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
                     // like the people already in a call, would render every
                     // name as though that person were unavailable.
                     leading: _leadingOf(option),
+                    trailing: option.trailing,
                     label: Text(
                       option.label,
                       maxLines: 1,
@@ -421,12 +458,14 @@ class _MenuSheet extends StatelessWidget {
     required this.title,
     required this.sections,
     required this.scrollController,
+    required this.handle,
     required this.onSelected,
   });
 
   final String? title;
   final List<StreamMenuSection> sections;
   final ScrollController scrollController;
+  final StreamMenuHandle handle;
   final ValueChanged<StreamMenuOption> onSelected;
 
   @override
@@ -446,8 +485,8 @@ class _MenuSheet extends StatelessWidget {
             shrinkWrap: true,
             children: [
               for (final section in sections) ...[
-                // See the anchored rows: a heading needs rows under it.
-                if (section.options.isNotEmpty)
+                // See the anchored rows: a heading needs something under it.
+                if (!section.isEmpty)
                   if (section.heading case final heading?)
                     Padding(
                       // Everything in the sheet is inset by spacing.xxs so a
@@ -458,6 +497,11 @@ class _MenuSheet extends StatelessWidget {
                       padding: EdgeInsets.symmetric(horizontal: spacing.xs),
                       child: StreamContextMenuHeading(label: Text(heading)),
                     ),
+                if (section.content case final content?)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
+                    child: content(context, handle),
+                  ),
                 for (final option in section.options)
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
@@ -470,6 +514,7 @@ class _MenuSheet extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      trailing: option.trailing,
                       selected: option.selected ?? false,
                       // See the anchored rows: enabled is the look, not the
                       // interactivity. A null onTap already makes the row
