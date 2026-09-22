@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 import '../../l10n/localization_extension.dart';
+import 'participants_navigation_button.dart';
 
 /// Defines the alignment of the participants bar.
 enum ParticipantsBarAlignment { top, bottom, left, right }
@@ -391,10 +392,9 @@ class _ParticipantsBarState extends State<_ParticipantsBar> {
     required bool isStart,
     required _BarEdges edges,
   }) {
-    // The design insets the button's visual, which carries a tap target wider
-    // than itself so that a finger has something to land on.
-    final offset =
-        inset - (kMinInteractiveDimension - _barButtonSize.value) / 2;
+    // The design insets the button's visual, which sits inside a wider tap
+    // target.
+    final offset = inset - participantsNavigationButtonTapInset;
 
     final translations = context.translations;
 
@@ -403,11 +403,11 @@ class _ParticipantsBarState extends State<_ParticipantsBar> {
     final button = AnimatedScale(
       scale: (isStart ? edges.start : edges.end) ? 1 : 0,
       duration: kThemeAnimationDuration,
-      child: _BarScrollButton(
+      child: ParticipantsNavigationButton(
         icon: icon,
         tooltip: isStart
-            ? translations.participantsBarPrevious
-            : translations.participantsBarNext,
+            ? translations.participantsPrevious
+            : translations.participantsNext,
         onPressed: () => _scroll(forward: !isStart),
       ),
     );
@@ -428,38 +428,6 @@ class _ParticipantsBarState extends State<_ParticipantsBar> {
       left: 0,
       right: 0,
       child: Center(heightFactor: 1, child: button),
-    );
-  }
-}
-
-/// The size the bar's buttons take, which is [StreamButton]'s own default.
-const _barButtonSize = StreamButtonSize.medium;
-
-/// A round floating button that moves the participants bar along.
-///
-/// [tooltip] names the button for a screen reader as well as on hover: the
-/// chevron is all there is to go on otherwise.
-class _BarScrollButton extends StatelessWidget {
-  const _BarScrollButton({
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamButton.icon(
-      icon: Icon(icon),
-      style: .secondary,
-      type: .ghost,
-      isFloating: true,
-      tooltip: tooltip,
-      onPressed: onPressed,
-      themeStyle: StreamButtonThemeStyle(iconSize: .all(16)),
     );
   }
 }
