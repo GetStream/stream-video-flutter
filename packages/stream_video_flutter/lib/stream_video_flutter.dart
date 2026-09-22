@@ -19,6 +19,7 @@ export 'src/call_controls/call_control_option.dart';
 export 'src/call_controls/call_controls.dart';
 export 'src/call_controls/call_feature_button.dart';
 export 'src/call_controls/controls/default_control_options.dart';
+export 'src/call_controls/controls/screen_share_action.dart';
 export 'src/call_controls/controls/stream_add_reaction_button.dart';
 export 'src/call_controls/controls/stream_camera_button.dart';
 export 'src/call_controls/controls/stream_closed_captions_button.dart';

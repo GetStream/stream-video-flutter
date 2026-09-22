@@ -309,7 +309,7 @@ void main() {
         child: _Menu(
           useSheet: false,
           sections: [
-            StreamMenuSection(heading: 'Speaker', options: []),
+            StreamMenuSection(heading: 'Speaker'),
             StreamMenuSection(
               heading: 'Microphone',
               options: [StreamMenuOption(label: 'Jabra Evolve2 65')],
@@ -327,15 +327,325 @@ void main() {
   });
 
   test('says when a set of sections has nothing to offer', () {
-    expect(const [StreamMenuSection(options: [])].hasNoOptions, isTrue);
+    expect(const [StreamMenuSection()].hasNoOptions, isTrue);
     expect(
       const [
-        StreamMenuSection(options: []),
+        StreamMenuSection(),
         StreamMenuSection(options: [StreamMenuOption(label: 'Headset')]),
       ].hasNoOptions,
       isFalse,
     );
   });
+
+  test('a section of content alone still has something to offer', () {
+    // Otherwise a menu built only of strips — reactions, video filters —
+    // reports itself empty and every anchor over it disables its own button.
+    final sections = [
+      StreamMenuSection(content: (context, handle) => const Text('reactions')),
+    ];
+
+    expect(sections.hasNoOptions, isFalse);
+  });
+
+  // The value a row reports, which both presentations draw at the far end of
+  // the row: the On beside a toggle, the resolution beside a quality picker.
+  for (final platform in [TargetPlatform.android, TargetPlatform.macOS]) {
+    testWidgets("draws an option's trailing on ${platform.name}", (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          platform: platform,
+          child: const _Menu(
+            sections: [
+              StreamMenuSection(
+                options: [
+                  StreamMenuOption(
+                    label: 'Noise cancellation',
+                    trailing: Text('On'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Noise cancellation'), findsOneWidget);
+      expect(find.text('On'), findsOneWidget);
+    });
+
+    testWidgets("draws a section's content on ${platform.name}", (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          platform: platform,
+          child: _Menu(
+            sections: [
+              StreamMenuSection(
+                heading: 'Reactions',
+                content: (context, handle) => const Text('strip'),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('strip'), findsOneWidget);
+      // A heading labels content as readily as it labels rows.
+      expect(find.text('Reactions'), findsOneWidget);
+      // Content is not a row, so it carries none of the row's chrome.
+      expect(find.byType(StreamListTile), findsNothing);
+      expect(find.byType(StreamContextMenuAction<void>), findsNothing);
+    });
+
+    testWidgets('content closes the menu through the handle on '
+        '${platform.name}', (tester) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          platform: platform,
+          child: _Menu(
+            sections: [
+              StreamMenuSection(
+                content: (context, handle) => TextButton(
+                  onPressed: handle.close,
+                  child: const Text('send'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      expect(find.text('showing'), findsOneWidget);
+
+      await tester.tap(find.text('send'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('closed'), findsOneWidget);
+      expect(find.text('send'), findsNothing);
+    });
+  }
+
+  // A row reporting state the menu is showing keeps the menu up, so the value
+  // it just changed is visible rather than hidden behind the dismissal.
+  for (final platform in [TargetPlatform.android, TargetPlatform.macOS]) {
+    testWidgets('closesMenu false leaves the menu up on ${platform.name}', (
+      tester,
+    ) async {
+      var picked = 0;
+
+      await tester.pumpWidget(
+        TestWrapper(
+          platform: platform,
+          child: _Menu(
+            sections: [
+              StreamMenuSection(
+                options: [
+                  StreamMenuOption(
+                    label: 'Closed captions',
+                    closesMenu: false,
+                    onSelected: () => picked++,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Closed captions'));
+      await tester.pumpAndSettle();
+
+      expect(picked, 1);
+      expect(find.text('showing'), findsOneWidget);
+      expect(find.text('Closed captions'), findsOneWidget);
+    });
+
+    testWidgets('a collapsible section starts folded on ${platform.name}', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          platform: platform,
+          child: const _Menu(
+            sections: [
+              StreamMenuSection(
+                heading: 'Input device',
+                collapsible: true,
+                options: [StreamMenuOption(label: 'Jabra Evolve2 65')],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      // The heading is what is left to press; its rows are away.
+      expect(find.text('Input device'), findsOneWidget);
+      expect(find.text('Jabra Evolve2 65'), findsNothing);
+
+      await tester.tap(find.text('Input device'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Jabra Evolve2 65'), findsOneWidget);
+
+      await tester.tap(find.text('Input device'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Jabra Evolve2 65'), findsNothing);
+    });
+
+    testWidgets('an expanded section stays open across a rebuild on '
+        '${platform.name}', (tester) async {
+      // The sections are rebuilt whenever the anchor's parent rebuilds, which
+      // a menu over live call state does constantly. The fold is keyed by
+      // heading precisely so it survives that.
+      Widget menu(String label) => TestWrapper(
+        platform: platform,
+        child: _Menu(
+          sections: [
+            StreamMenuSection(
+              heading: 'Input device',
+              collapsible: true,
+              options: [StreamMenuOption(label: label)],
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(menu('Jabra Evolve2 65'));
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Input device'));
+      await tester.pumpAndSettle();
+      expect(find.text('Jabra Evolve2 65'), findsOneWidget);
+
+      await tester.pumpWidget(menu('MacBook Pro Microphone'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('MacBook Pro Microphone'), findsOneWidget);
+    });
+  }
+
+  // The fold is a pure read of what the user chose, so a section they have not
+  // touched shows its own default however many times the menu is built. An
+  // earlier version registered each default on first sight, from inside the
+  // build, which made the answer depend on the build order.
+  for (final platform in [TargetPlatform.android, TargetPlatform.macOS]) {
+    testWidgets('an untouched section keeps its default on ${platform.name}', (
+      tester,
+    ) async {
+      Widget build(int tick) => TestWrapper(
+        platform: platform,
+        child: _Menu(
+          sections: [
+            // Two defaults at once: whichever order they are built in, each
+            // has to come out the way it asked for.
+            StreamMenuSection(
+              heading: 'Input device',
+              collapsible: true,
+              options: [StreamMenuOption(label: 'Jabra $tick')],
+            ),
+            StreamMenuSection(
+              heading: 'Quality',
+              collapsible: true,
+              initiallyCollapsed: false,
+              options: [StreamMenuOption(label: 'Auto $tick')],
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(build(0));
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      // The menu rebuilds constantly off call state while it is open.
+      for (var tick = 1; tick <= 3; tick++) {
+        await tester.pumpWidget(build(tick));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Jabra $tick'), findsNothing);
+        expect(find.text('Auto $tick'), findsOneWidget);
+      }
+    });
+
+    testWidgets('an untouched section follows a changed default on '
+        '${platform.name}', (tester) async {
+      Widget build({required bool initiallyCollapsed}) => TestWrapper(
+        platform: platform,
+        child: _Menu(
+          sections: [
+            StreamMenuSection(
+              heading: 'Quality',
+              collapsible: true,
+              initiallyCollapsed: initiallyCollapsed,
+              options: const [StreamMenuOption(label: 'Auto')],
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(build(initiallyCollapsed: true));
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      expect(find.text('Auto'), findsNothing);
+
+      // Nobody has touched this section, so the default still speaks for it.
+      await tester.pumpWidget(build(initiallyCollapsed: false));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Auto'), findsOneWidget);
+    });
+
+    testWidgets('a fold outlives the section it was made on '
+        '${platform.name}', (tester) async {
+      Widget build(int tick) => TestWrapper(
+        platform: platform,
+        child: _Menu(
+          sections: [
+            StreamMenuSection(
+              heading: 'Quality',
+              collapsible: true,
+              initiallyCollapsed: false,
+              options: [StreamMenuOption(label: 'Auto $tick')],
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(build(0));
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      expect(find.text('Auto 0'), findsOneWidget);
+
+      await tester.tap(find.text('Quality'));
+      await tester.pumpAndSettle();
+
+      // Folded by hand, so it stays folded even though every rebuild hands
+      // over a brand new section that says it opens expanded.
+      for (var tick = 1; tick <= 3; tick++) {
+        await tester.pumpWidget(build(tick));
+        await tester.pumpAndSettle();
+        expect(find.text('Auto $tick'), findsNothing);
+      }
+    });
+  }
 
   // The sheet branch opens by pushing a route and closes by popping one, so
   // both directions are guarded: a second push stacks a sheet the handle can
