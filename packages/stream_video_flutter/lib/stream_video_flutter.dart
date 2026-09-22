@@ -81,6 +81,7 @@ export 'src/livestream/livestream_speakerphone_option.dart';
 export 'src/models/mute_toggle_titles.dart';
 export 'src/models/stream_icon_toggle.dart';
 export 'src/renderer/video_renderer.dart';
+export 'src/renderer/viewport_visibility_reporter.dart';
 export 'src/screen_share/screen_share.dart';
 export 'src/theme/themes.dart';
 export 'src/utils/device_segmentation.dart';
