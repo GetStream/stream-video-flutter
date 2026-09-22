@@ -25,6 +25,8 @@ void main() {
   });
 
   setUp(() {
+    ViewportVisibilityRegistry.defaultReleaseGrace = Duration.zero;
+
     aggregates = [];
     call = MockCall();
     callState = MockCallState();

@@ -75,6 +75,7 @@
 - A desktop screen share no longer sends `mandatory: {frameRate: null}` to the platform when no `maxFrameRate` is set.
 - A reconnect no longer drops the video of participants whose tracks have not been received yet. Track subscriptions now survive the join response, so a subscription update sent while the media is still arriving keeps every participant subscribed.
 - A participant drawn in two places at once is now visible while either shows them, and subscribed at the size of the larger.
+- A participant moving between layouts no longer flashes a placeholder. A track the last viewport lets go of is held for `ViewportVisibilityRegistry.releaseGrace` before it is reported hidden, so the viewport taking over keeps the subscription.
 - Every track on screen is reported again to the new session after a reconnect.
 - Guest creation no longer waits for a coordinator connection id. The call is unauthenticated and watches nothing, so an id could only add latency.
 - A request that could not be signed now reports a credentials failure rather than a network one.
