@@ -542,6 +542,111 @@ void main() {
     });
   }
 
+  // The fold is a pure read of what the user chose, so a section they have not
+  // touched shows its own default however many times the menu is built. An
+  // earlier version registered each default on first sight, from inside the
+  // build, which made the answer depend on the build order.
+  for (final platform in [TargetPlatform.android, TargetPlatform.macOS]) {
+    testWidgets('an untouched section keeps its default on ${platform.name}', (
+      tester,
+    ) async {
+      Widget build(int tick) => TestWrapper(
+        platform: platform,
+        child: _Menu(
+          sections: [
+            // Two defaults at once: whichever order they are built in, each
+            // has to come out the way it asked for.
+            StreamMenuSection(
+              heading: 'Input device',
+              collapsible: true,
+              options: [StreamMenuOption(label: 'Jabra $tick')],
+            ),
+            StreamMenuSection(
+              heading: 'Quality',
+              collapsible: true,
+              initiallyCollapsed: false,
+              options: [StreamMenuOption(label: 'Auto $tick')],
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(build(0));
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      // The menu rebuilds constantly off call state while it is open.
+      for (var tick = 1; tick <= 3; tick++) {
+        await tester.pumpWidget(build(tick));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Jabra $tick'), findsNothing);
+        expect(find.text('Auto $tick'), findsOneWidget);
+      }
+    });
+
+    testWidgets('an untouched section follows a changed default on '
+        '${platform.name}', (tester) async {
+      Widget build({required bool initiallyCollapsed}) => TestWrapper(
+        platform: platform,
+        child: _Menu(
+          sections: [
+            StreamMenuSection(
+              heading: 'Quality',
+              collapsible: true,
+              initiallyCollapsed: initiallyCollapsed,
+              options: const [StreamMenuOption(label: 'Auto')],
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(build(initiallyCollapsed: true));
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      expect(find.text('Auto'), findsNothing);
+
+      // Nobody has touched this section, so the default still speaks for it.
+      await tester.pumpWidget(build(initiallyCollapsed: false));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Auto'), findsOneWidget);
+    });
+
+    testWidgets('a fold outlives the section it was made on '
+        '${platform.name}', (tester) async {
+      Widget build(int tick) => TestWrapper(
+        platform: platform,
+        child: _Menu(
+          sections: [
+            StreamMenuSection(
+              heading: 'Quality',
+              collapsible: true,
+              initiallyCollapsed: false,
+              options: [StreamMenuOption(label: 'Auto $tick')],
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(build(0));
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      expect(find.text('Auto 0'), findsOneWidget);
+
+      await tester.tap(find.text('Quality'));
+      await tester.pumpAndSettle();
+
+      // Folded by hand, so it stays folded even though every rebuild hands
+      // over a brand new section that says it opens expanded.
+      for (var tick = 1; tick <= 3; tick++) {
+        await tester.pumpWidget(build(tick));
+        await tester.pumpAndSettle();
+        expect(find.text('Auto $tick'), findsNothing);
+      }
+    });
+  }
+
   // The sheet branch opens by pushing a route and closes by popping one, so
   // both directions are guarded: a second push stacks a sheet the handle can
   // no longer reach, and a pop with nothing open takes the host screen.

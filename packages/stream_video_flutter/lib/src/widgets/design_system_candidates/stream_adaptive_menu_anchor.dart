@@ -275,16 +275,18 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
   final _menuController = MenuController();
   bool _isOpen = false;
 
-  /// Headings of the sections currently folded away.
+  /// What the user has folded and unfolded by hand, by heading.
+  ///
+  /// Only their choices: a section they have not touched falls back to its own
+  /// [StreamMenuSection.initiallyCollapsed] on every build. Holding it this way
+  /// keeps [_isCollapsed] a pure read — nothing is registered while building —
+  /// so the fold cannot come out differently because the sections were built a
+  /// different number of times, or in a different order.
   ///
   /// Keyed by heading rather than by section, because the sections are rebuilt
   /// from scratch whenever the anchor's parent rebuilds — which a menu holding
   /// live state does constantly — and the fold has to survive that.
-  final _collapsed = <String>{};
-
-  /// Seen headings, so a section is only collapsed by default once: reopening
-  /// a section the user expanded must not fold it again on the next rebuild.
-  final _known = <String>{};
+  final _toggled = <String, bool>{};
 
   /// Bumped whenever what the menu draws changes.
   ///
@@ -312,23 +314,21 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
     super.dispose();
   }
 
-  /// Whether [section] is folded away, registering its default the first time
-  /// it is seen.
+  /// Whether [section] is folded away: what the user last chose for it, or its
+  /// own default until they choose.
   bool _isCollapsed(StreamMenuSection section) {
     final heading = section.heading;
     if (!section.collapsible || heading == null) return false;
 
-    if (_known.add(heading) && section.initiallyCollapsed) {
-      _collapsed.add(heading);
-    }
-
-    return _collapsed.contains(heading);
+    return _toggled[heading] ?? section.initiallyCollapsed;
   }
 
-  void _toggleCollapsed(String heading) {
-    setState(() {
-      if (!_collapsed.remove(heading)) _collapsed.add(heading);
-    });
+  void _toggleCollapsed(StreamMenuSection section) {
+    final heading = section.heading;
+    if (heading == null) return;
+
+    final collapsed = _isCollapsed(section);
+    setState(() => _toggled[heading] = !collapsed);
     _revision.value++;
   }
 
@@ -525,7 +525,7 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
                     label: heading,
                     collapsible: section.collapsible,
                     collapsed: _isCollapsed(section),
-                    onToggle: () => _toggleCollapsed(heading),
+                    onToggle: () => _toggleCollapsed(section),
                   ),
               // Outside StreamContextMenuAction, so the content sizes itself
               // rather than being held to the design's 200x32 row.
@@ -580,7 +580,7 @@ class _MenuSheet extends StatelessWidget {
   final ScrollController scrollController;
   final StreamMenuHandle handle;
   final bool Function(StreamMenuSection) isCollapsed;
-  final ValueChanged<String> onToggleCollapsed;
+  final ValueChanged<StreamMenuSection> onToggleCollapsed;
   final ValueChanged<StreamMenuOption> onSelected;
 
   @override
@@ -615,7 +615,7 @@ class _MenuSheet extends StatelessWidget {
                         label: heading,
                         collapsible: section.collapsible,
                         collapsed: isCollapsed(section),
-                        onToggle: () => onToggleCollapsed(heading),
+                        onToggle: () => onToggleCollapsed(section),
                       ),
                     ),
                 if (!isCollapsed(section))
