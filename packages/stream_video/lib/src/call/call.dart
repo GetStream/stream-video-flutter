@@ -414,6 +414,7 @@ class Call {
   final Map<String, Timer> _reactionTimers = {};
   final Map<String, Timer> _captionsTimers = {};
   Timer? _videoModerationTimer;
+
   void Function()? _onModerationBlurApply;
   void Function()? _onModerationBlurClear;
   final List<CancelableOperation<void>> _sfuStatsTimers = [];
@@ -1702,7 +1703,24 @@ class Call {
             reason: reconnectReason,
           );
 
-    if (!performingFastReconnect) {
+    // A fast reconnect resumes the previous SFU session, so it needs both that
+    // session and the details describing what to resume. A strategy set by a
+    // network blip before this call ever joined has neither.
+    final resumableSession = _previousSession;
+    final canFastReconnect =
+        performingFastReconnect &&
+        resumableSession != null &&
+        reconnectDetails != null;
+
+    if (performingFastReconnect && !canFastReconnect) {
+      _logger.w(
+        () =>
+            '[join] fast reconnect asked for with nothing to resume '
+            'creating a new sfu session instead',
+      );
+    }
+
+    if (!canFastReconnect) {
       _logger.v(
         () =>
             '[join] creating new sfu session (rejoin: $performingRejoin, migration: $performingMigration)',
@@ -1784,11 +1802,11 @@ class Call {
             '[join] reusing previous sfu session (rejoin: $performingRejoin, migration: $performingMigration)',
       );
 
-      _session = _previousSession;
+      _session = resumableSession;
 
       _logger.d(() => '[join] fast reconnecting');
-      final result = await _session!.fastReconnect(
-        reconnectDetails: reconnectDetails!,
+      final result = await resumableSession.fastReconnect(
+        reconnectDetails: reconnectDetails,
         capabilities: _sfuClientCapabilities,
         unifiedSessionId: _unifiedSessionId,
       );
@@ -2381,6 +2399,14 @@ class Call {
       return;
     }
 
+    // A call that has never established a session has nothing to reconnect to.
+    if (_session == null && _previousSession == null) {
+      _logger.w(
+        () => '[reconnect] rejected $strategy (call has never been joined)',
+      );
+      return;
+    }
+
     if (_callReconnectLock.locked) {
       if (strategy == SfuReconnectionStrategy.rejoin) _isRejoinPending = true;
       _logger.w(
@@ -2737,6 +2763,19 @@ class Call {
           _session?.trace(TraceTag.awaitNetworkUnstable, {
             'stabilityWindowSeconds': stabilityWindow.inSeconds,
           });
+
+          // Wait out one check interval before looking again. The monitor
+          // cannot report anything new before its next probe, so retrying
+          // sooner only spins — a flapping monitor otherwise drives this loop
+          // thousands of times a minute for as long as the budget lasts.
+          final checkInterval =
+              _streamVideo.options.networkMonitorSettings.offlineCheckInterval;
+          final left = budget - deadline.elapsed;
+          final settleDelay = left < checkInterval ? left : checkInterval;
+
+          if (settleDelay > Duration.zero) {
+            await Future<void>.delayed(settleDelay);
+          }
         } on TimeoutException {
           // No drop detected within the window — network is stable.
           _logger.v(

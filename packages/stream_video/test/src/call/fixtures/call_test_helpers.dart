@@ -69,6 +69,14 @@ Call createStubCall({
   );
 }
 
+/// How long the reconnect loop pauses between attempts in a fixture-built
+/// client.
+///
+/// Production paces this by the monitor's own check interval, which is
+/// seconds; tests drive the status stream themselves and only need it long
+/// enough to tell a paced loop from a spinning one.
+const testReconnectSettleDelay = Duration(milliseconds: 20);
+
 Call createTestCall({
   CoordinatorClient? coordinatorClient,
   StreamVideo? streamVideo,
@@ -176,7 +184,13 @@ MockStreamVideo setupMockStreamVideo({ClientState? clientState}) {
   final effectiveClientState = clientState ?? setupMockClientState();
 
   when(() => streamVideo.state).thenReturn(effectiveClientState);
-  when(() => streamVideo.options).thenReturn(StreamVideoOptions());
+  when(() => streamVideo.options).thenReturn(
+    StreamVideoOptions(
+      networkMonitorSettings: const NetworkMonitorSettings(
+        offlineCheckInterval: testReconnectSettleDelay,
+      ),
+    ),
+  );
   when(
     () => streamVideo.currentUser,
   ).thenReturn(SampleCallData.defaultUserInfo);
