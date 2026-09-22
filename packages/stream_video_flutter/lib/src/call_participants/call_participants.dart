@@ -38,8 +38,88 @@ typedef ScreenShareParticipantBuilder =
 /// A function used to sort the participants.
 typedef CallParticipantFilter<T> = bool Function(T element);
 
-/// Comparator used to sort the participants.
-typedef CallParticipantSort<T> = Comparator<T>;
+/// A comparator for participants, and what says when it has changed.
+///
+/// [StreamCallParticipants] orders the list again when the sort it was given
+/// is no longer the one it has, which it decides with `==`. A comparator on its
+/// own cannot answer that — a closure written inline is a new function on every
+/// build, and comparing those would reorder the list every time. So the
+/// comparator is paired with an [identity]: two sorts carrying equal identities
+/// are the same sort, whatever functions they hold.
+///
+/// ```dart
+/// StreamCallParticipants(
+///   sort: CallParticipantSort(
+///     (a, b) => a.name.compareTo(b.name),
+///     identity: 'by-name',
+///   ),
+/// )
+/// ```
+///
+/// Without an [identity] a sort is only ever equal to itself, so one built
+/// inline reorders the list on every build. Give it an identity, or hold onto
+/// the instance.
+@immutable
+class CallParticipantSort<T> {
+  /// Creates a sort from [compare], identified by [identity].
+  const CallParticipantSort(this.compare, {this.identity});
+
+  /// Orders two participants, as [Comparator] does.
+  final Comparator<T> compare;
+
+  /// What tells this sort apart from another.
+  ///
+  /// Anything with a meaningful `==` — a string naming the sort is the usual
+  /// choice. Null means the sort cannot be told apart from another, so it is
+  /// only equal to itself.
+  final Object? identity;
+
+  /// Orders two participants, so that this can be passed wherever a
+  /// [Comparator] is expected.
+  int call(T a, T b) => compare(a, b);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is CallParticipantSort<T> &&
+        identity != null &&
+        other.identity == identity;
+  }
+
+  @override
+  int get hashCode => identity?.hashCode ?? identityHashCode(this);
+}
+
+/// The sorts the SDK's own layouts order their participants with.
+///
+/// Each wraps the matching [CallParticipantSortingPresets] comparator and is
+/// held once, so a layout that has not changed hands back the same sort and
+/// nothing is reordered for it.
+abstract final class CallParticipantSorts {
+  /// Orders participants the way the grid and the default layout want them.
+  static final regular = CallParticipantSort(
+    CallParticipantSortingPresets.regular,
+    identity: 'stream:regular',
+  );
+
+  /// Orders participants the way the speaker layouts want them.
+  static final speaker = CallParticipantSort(
+    CallParticipantSortingPresets.speaker,
+    identity: 'stream:speaker',
+  );
+
+  /// Orders participants the way picture-in-picture wants them.
+  static final pictureInPicture = CallParticipantSort(
+    CallParticipantSortingPresets.pictureInPicture,
+    identity: 'stream:picture-in-picture',
+  );
+
+  /// Orders participants the way livestreams and audio rooms want them.
+  static final livestreamOrAudioRoom = CallParticipantSort(
+    CallParticipantSortingPresets.livestreamOrAudioRoom,
+    identity: 'stream:livestream-or-audio-room',
+  );
+}
 
 /// Widget that renders all the [StreamParticipantTile], based on the number
 /// of people in a call.
@@ -71,9 +151,9 @@ class StreamCallParticipants extends StatefulWidget {
 
   /// Used for sorting the call participants.
   ///
-  /// Compared by identity to decide whether the list has to be ordered again,
-  /// so a comparator built inline re-sorts on every build. Hoist it to sort
-  /// only when it actually changes.
+  /// Defaults to [layoutMode]'s own sort. Replacing it reorders the list on the
+  /// spot when the new sort is not equal to the old one, which
+  /// [CallParticipantSort.identity] is what decides.
   final CallParticipantSort<CallParticipantState> sort;
 
   /// Whether the local participant's self-view floats over the layout.
@@ -177,11 +257,9 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
   void didUpdateWidget(covariant StreamCallParticipants oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Both compared by identity. `sort` defaults to `layoutMode.sorting`, and
-    // the presets are cached instances, so picking a layout is a change here
-    // while an unchanged layout is not. A comparator the caller built inline is
-    // a new object on every build and so re-sorts, which `recalculateParticipants`
-    // absorbs — it skips the `setState` when the order comes out the same.
+    // A sort carries an identity, so this is a change of sorting rather than
+    // the new closure every build would otherwise produce. Picking a layout
+    // swaps the sort too, since `sort` defaults to the layout's own.
     final orderingChanged =
         widget.sort != oldWidget.sort || widget.filter != oldWidget.filter;
 
