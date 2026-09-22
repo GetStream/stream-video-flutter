@@ -65,6 +65,10 @@ class _StreamPictureInPictureAndroidViewState
       _callStateSubscription?.cancel();
       _startListeningToCallState();
       _updatePictureInPictureAllowedState();
+
+      // The entry draws the overlay for the call this widget holds, and
+      // nothing else asks it to build again.
+      _overlayEntry?.markNeedsBuild();
     }
   }
 

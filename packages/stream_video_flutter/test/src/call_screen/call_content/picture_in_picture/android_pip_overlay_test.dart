@@ -51,6 +51,7 @@ void main() {
     // the dogfooding app does.
     Future<void> pumpOverlay(
       WidgetTester tester, {
+      Call? of,
       StreamPictureInPictureThemeData? pictureInPictureTheme,
       StreamConnectionQualityIndicatorThemeData?
       connectionQualityIndicatorTheme,
@@ -58,12 +59,13 @@ void main() {
       // [StreamParticipantTileChrome.compact].
       Size size = const Size(128, 228),
     }) async {
+      final drawn = AndroidPipOverlay(call: of ?? call);
       final overlay = switch (pictureInPictureTheme) {
         final theme? => StreamPictureInPictureTheme(
           data: theme,
-          child: AndroidPipOverlay(call: call),
+          child: drawn,
         ),
-        null => AndroidPipOverlay(call: call),
+        null => drawn,
       };
 
       await tester.pumpWidget(
@@ -105,6 +107,60 @@ void main() {
       );
       await tester.pumpAndSettle();
     }
+
+    testWidgets('follows the call it is given, when that changes', (
+      tester,
+    ) async {
+      await pumpOverlay(tester);
+      expect(find.text('Rene Floor'), findsOneWidget);
+
+      final other = MockCall();
+      final otherState = MockCallState();
+      final otherParticipant = MockCallParticipantState();
+
+      when(() => otherParticipant.userId).thenReturn('someone');
+      when(
+        () => otherParticipant.uniqueParticipantKey,
+      ).thenReturn('someone-session');
+      when(() => otherParticipant.name).thenReturn('Someone Else');
+      when(() => otherParticipant.isLocal).thenReturn(true);
+      when(() => otherParticipant.isPinned).thenReturn(false);
+      when(() => otherParticipant.isSpeaking).thenReturn(false);
+      when(() => otherParticipant.isAudioEnabled).thenReturn(true);
+      when(() => otherParticipant.isVideoEnabled).thenReturn(true);
+      when(() => otherParticipant.isScreenShareEnabled).thenReturn(false);
+      when(() => otherParticipant.screenShareTrack).thenReturn(null);
+      when(() => otherParticipant.reaction).thenReturn(null);
+      when(
+        () => otherParticipant.connectionQuality,
+      ).thenReturn(SfuConnectionQuality.excellent);
+      when(
+        () => otherParticipant.viewportVisibility,
+      ).thenReturn(ViewportVisibility.visible);
+      when(() => otherState.callParticipants).thenReturn([otherParticipant]);
+
+      final otherEmitter = MutableStateEmitter<CallState>(
+        otherState,
+        sync: true,
+      );
+      when(() => other.state).thenAnswer((_) => otherEmitter);
+      when(
+        () => other.partialState<List<CallParticipantState>>(any()),
+      ).thenAnswer((invocation) {
+        final CallStateSelector<List<CallParticipantState>> selector =
+            invocation.positionalArguments[0];
+        return Stream.value(selector(otherState));
+      });
+
+      await pumpOverlay(tester, of: other);
+
+      expect(
+        find.text('Someone Else'),
+        findsOneWidget,
+        reason: 'the overlay drew the call it was moved away from',
+      );
+      expect(find.text('Rene Floor'), findsNothing);
+    });
 
     testWidgets('draws the name and the connection quality', (tester) async {
       await pumpOverlay(tester);

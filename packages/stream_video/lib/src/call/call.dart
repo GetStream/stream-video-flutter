@@ -4567,6 +4567,11 @@ class Call {
     return result;
   }
 
+  /// Moves a track's subscription to [videoDimension].
+  ///
+  /// Driven by [viewportVisibility], which sizes a track for the largest
+  /// viewport showing it.
+  @internal
   Future<Result<None>> updateSubscription({
     required String userId,
     required String sessionId,
