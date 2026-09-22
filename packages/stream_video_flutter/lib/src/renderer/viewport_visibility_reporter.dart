@@ -94,25 +94,32 @@ class _ViewportVisibilityReporterState
 
     // A detector reports only what changes, and nothing here measures
     // differently — the same area was being given to a placeholder, or to
-    // another participant. So a new registry, a new track, and a track only
-    // now published each need the standing measurement said again.
+    // another participant. So a new registry, a new track, a track only now
+    // published, and a change to what this viewport asks for each need the
+    // standing measurement said again.
     final trackChanged = oldWidget.track != widget.track;
     final publishedNow = !oldWidget.isTrackPublished && widget.isTrackPublished;
-    if (!registryChanged && !trackChanged && !publishedNow) return;
+    final persistChanged =
+        oldWidget.persistWhenHidden != widget.persistWhenHidden;
+    if (!registryChanged && !trackChanged && !publishedNow && !persistChanged) {
+      return;
+    }
 
     // Deferred: acting on a report writes call state, which the SDK's emitter
     // delivers synchronously, and from this rebuild that would ask a widget
     // already built this frame to build again, which throws.
     final track = widget.track;
-    final standing = !registryChanged && !trackChanged;
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
+      // Reads what this viewport asks for as it stands, so a deferred report
+      // carries the current [ViewportVisibilityReporter.persistWhenHidden].
       _report(_latest ?? latest);
 
-      // A registry or track it has not heard of moves on the report alone;
-      // one holding the same answer throughout has to be asked again.
-      if (standing) widget.registry.reapply(track);
+      // A registry, track or persistence it has not heard of moves on the
+      // report alone; a measurement identical to the one it holds is
+      // deduplicated, so a track only now published has to be asked again.
+      if (publishedNow) widget.registry.reapply(track);
     });
   }
 

@@ -420,4 +420,73 @@ void main() {
       [ViewportVisibility.hidden],
     );
   });
+
+  // `ScreenShareContent` flips this at runtime, off the zoom an
+  // `InteractiveViewer` reports, and a viewport measures exactly what it did
+  // before — only what it asks for has moved. Left unsaid, a screen share
+  // zoomed while it is mostly off screen is unsubscribed under its viewer.
+  testWidgets('a viewport asking to keep a hidden track says so', (
+    tester,
+  ) async {
+    final aggregates = <ViewportAggregate>[];
+    final call = callWithRegistry(aggregates);
+
+    final scroll = ScrollController();
+    addTearDown(scroll.dispose);
+
+    Future<void> pumpScreenShare({required bool persist}) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          child: SizedBox(
+            height: 400,
+            child: ListView(
+              controller: scroll,
+              children: [
+                SizedBox(
+                  height: 200,
+                  child: StreamVideoRenderer(
+                    call: call,
+                    participant: participant(
+                      publishedTracks: {
+                        SfuTrackType.screenShare: TrackState.remote(),
+                      },
+                    ),
+                    videoTrackType: SfuTrackType.screenShare,
+                    persistTrackIfNotVisible: persist,
+                  ),
+                ),
+                const SizedBox(height: 2000),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+    }
+
+    await pumpScreenShare(persist: false);
+
+    // Only 30 of the renderer's 200 pixels are left in the viewport: hidden,
+    // and nothing asking for the track to be kept.
+    scroll.jumpTo(170);
+    await tester.pump();
+    await tester.pump();
+
+    expect(aggregates.last.visibility, ViewportVisibility.hidden);
+    expect(aggregates.last.persistWhenHidden, isFalse);
+    aggregates.clear();
+
+    // Zoomed on the sliver still showing. Nothing scrolled, so the detector
+    // has nothing to report on its own.
+    await pumpScreenShare(persist: true);
+
+    final asked = aggregates.where((it) => it.persistWhenHidden);
+    expect(
+      asked,
+      isNotEmpty,
+      reason: 'the track was let go though this viewport asked to keep it',
+    );
+    expect(asked.last.visibility, ViewportVisibility.hidden);
+  });
 }
