@@ -43,6 +43,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamPictureInPictureThemeData? pictureInPictureTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
+    StreamDesktopScreenShareSelectorThemeData? desktopScreenShareSelectorTheme,
     StreamCallButtonBadgeThemeData? callButtonBadgeTheme,
     StreamLivestreamThemeData? livestreamTheme,
   }) {
@@ -90,6 +91,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callParticipantsGridTheme:
           callParticipantsGridTheme ??
           legacy?.toCallParticipantsGridThemeData(),
+      desktopScreenShareSelectorTheme: desktopScreenShareSelectorTheme,
       callButtonBadgeTheme: callButtonBadgeTheme,
       livestreamTheme: livestreamTheme,
     );
@@ -136,6 +138,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         const StreamConnectionQualityIndicatorThemeData(),
     this.callParticipantsGridTheme =
         const StreamCallParticipantsGridThemeData(),
+    this.desktopScreenShareSelectorTheme =
+        const StreamDesktopScreenShareSelectorThemeData(),
     this.callButtonBadgeTheme = const StreamCallButtonBadgeThemeData(),
     required this.livestreamTheme,
   });
@@ -423,6 +427,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the participants grid layout.
   final StreamCallParticipantsGridThemeData callParticipantsGridTheme;
 
+  /// Theme for the desktop screen share selector.
+  final StreamDesktopScreenShareSelectorThemeData
+  desktopScreenShareSelectorTheme;
+
   /// Theme for the badge overlaid on a call control button.
   final StreamCallButtonBadgeThemeData callButtonBadgeTheme;
 
@@ -467,6 +475,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamPictureInPictureThemeData? pictureInPictureTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
+    StreamDesktopScreenShareSelectorThemeData? desktopScreenShareSelectorTheme,
     StreamCallButtonBadgeThemeData? callButtonBadgeTheme,
     StreamLivestreamThemeData? livestreamTheme,
   }) => StreamVideoTheme.raw(
@@ -498,6 +507,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     ),
     callParticipantsGridTheme: this.callParticipantsGridTheme.merge(
       callParticipantsGridTheme,
+    ),
+    desktopScreenShareSelectorTheme: this.desktopScreenShareSelectorTheme.merge(
+      desktopScreenShareSelectorTheme,
     ),
     callButtonBadgeTheme: this.callButtonBadgeTheme.merge(callButtonBadgeTheme),
     livestreamTheme: this.livestreamTheme.merge(livestreamTheme),
@@ -537,6 +549,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       ),
       callParticipantsGridTheme: callParticipantsGridTheme.merge(
         other.callParticipantsGridTheme,
+      ),
+      desktopScreenShareSelectorTheme: desktopScreenShareSelectorTheme.merge(
+        other.desktopScreenShareSelectorTheme,
       ),
       callButtonBadgeTheme: callButtonBadgeTheme.merge(
         other.callButtonBadgeTheme,
@@ -622,6 +637,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           callParticipantsGridTheme,
+      desktopScreenShareSelectorTheme:
+          StreamDesktopScreenShareSelectorThemeData.lerp(
+            desktopScreenShareSelectorTheme,
+            other.desktopScreenShareSelectorTheme,
+            t,
+          ) ??
+          desktopScreenShareSelectorTheme,
       callButtonBadgeTheme:
           StreamCallButtonBadgeThemeData.lerp(
             callButtonBadgeTheme,
