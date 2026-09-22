@@ -7,6 +7,8 @@ import '../../../../stream_video_flutter.dart';
 import '../../../call_participants/screen_share_call_participants_content.dart';
 import 'picture_in_picture_defaults.dart';
 
+final _logger = taggedLogger(tag: 'SV:AndroidPipOverlay');
+
 /// A dedicated overlay widget for Android Picture-in-Picture mode.
 /// This widget creates a floating overlay that shows only the video content
 /// optimized for PiP viewing.
@@ -56,9 +58,18 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
     super.initState();
     recalculateParticipants(widget.call.state.value.callParticipants);
 
-    _participantsSubscription = widget.call
-        .partialState((state) => state.callParticipants)
-        .listen(recalculateParticipants);
+    // A custom `participantsThrottleIntervalResolver` that throws surfaces as
+    // an error here; without `onError` it would reach the zone uncaught.
+    _participantsSubscription = widget.call.participantsStream.listen(
+      recalculateParticipants,
+      onError: (Object error, StackTrace stackTrace) {
+        _logger.e(
+          () =>
+              '[AndroidPipOverlay] participantsStream error: $error; '
+              '$stackTrace',
+        );
+      },
+    );
   }
 
   @override

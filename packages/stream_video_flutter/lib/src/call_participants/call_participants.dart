@@ -9,6 +9,8 @@ import '../../stream_video_flutter.dart';
 import 'regular_call_participants_content.dart';
 import 'screen_share_call_participants_content.dart';
 
+final _logger = taggedLogger(tag: 'SV:CallParticipants');
+
 /// Builder function used to build a participant item.
 typedef CallParticipantBuilder =
     Widget Function(
@@ -138,10 +140,27 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
     );
 
     if (widget.participants == null) {
-      _participantsSubscription = widget.call
-          .partialState((state) => state.callParticipants)
-          .listen(recalculateParticipants);
+      _subscribeToParticipants();
     }
+  }
+
+  /// Subscribes to the call's own participant list.
+  ///
+  /// [Call.participantsStream] carries an error when a custom
+  /// [CallPreferences.participantsThrottleIntervalResolver] throws. Without an
+  /// `onError` that would go to the zone as an uncaught async error, once per
+  /// event, so it is logged here and the last known list stays on screen.
+  void _subscribeToParticipants() {
+    _participantsSubscription = widget.call.participantsStream.listen(
+      recalculateParticipants,
+      onError: (Object error, StackTrace stackTrace) {
+        _logger.e(
+          () =>
+              '[StreamCallParticipants] participantsStream error: $error; '
+              '$stackTrace',
+        );
+      },
+    );
   }
 
   @override
@@ -154,32 +173,38 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
   void didUpdateWidget(covariant StreamCallParticipants oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Picking a speaker layout swaps the preset the list is ordered by, so it
-    // has to be ordered again. Compared through layoutMode rather than
-    // through sort: the presets are two cached instances, where a sort the
-    // caller passed is a function, and an inline closure is a new object on
-    // every build.
-    final sortChanged =
-        widget.layoutMode.sorting != oldWidget.layoutMode.sorting;
+    // Picking a layout swaps the preset the list is ordered by. The presets
+    // are cached instances, so an unchanged layout compares equal here; a sort
+    // the caller passed is a function, and an inline closure is a new object on
+    // every build, which the `recalculateParticipants` below absorbs.
+    final orderingChanged =
+        widget.sort != oldWidget.sort || widget.filter != oldWidget.filter;
 
     if (widget.participants != null) {
       _participantsSubscription?.cancel();
+      _participantsSubscription = null;
 
-      if (sortChanged ||
+      if (orderingChanged ||
           !const ListEquality<CallParticipantState>().equals(
             widget.participants!.toList(),
             oldWidget.participants?.toList(),
           )) {
         recalculateParticipants(widget.participants!);
       }
-    } else if (widget.call != oldWidget.call) {
+    } else if (widget.call != oldWidget.call ||
+        // Going back to the call's own list after a controlled one: the
+        // subscription was cancelled above and has to be re-taken.
+        _participantsSubscription == null) {
       _participantsSubscription?.cancel();
-      _participantsSubscription = widget.call
-          .partialState((state) => state.callParticipants)
-          .listen(recalculateParticipants);
+      _subscribeToParticipants();
 
       recalculateParticipants(widget.call.state.value.callParticipants);
-    } else if (sortChanged) {
+    } else if (orderingChanged) {
+      // Nothing re-sorts on its own: the stream only emits when the list
+      // changes, so in a quiet call a new comparator would otherwise wait for
+      // the next join or speaker. Sorting an unchanged list is cheap here —
+      // `recalculateParticipants` skips the `setState` when the result is the
+      // same, which is also what absorbs a `sort` closure built in `build`.
       recalculateParticipants(widget.call.state.value.callParticipants);
     }
   }

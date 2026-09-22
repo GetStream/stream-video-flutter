@@ -40,6 +40,8 @@
 - `StreamVideoExceptionWithCause.cause` now carries the `StreamApiException` for a failure the server answered, where it previously carried the parsed `StreamApiError` payload. Code matching on `cause is StreamApiError` still compiles but no longer matches, so this change is silent. Read the verdict through the accessors on `StreamVideoException` instead: `apiStatusCode`, `apiErrorCode`, `isUnrecoverable`, `retryAfter`, and `apiError` for the payload itself. They answer from either shape. 
 - `StreamVideoExceptionWithCause.cause` is deprecated. Its runtime type is not part of this API - it is chosen by whatever mapped the failure — so matching on it compiles but can stop matching without warning, which is what happened to the change above. Read the failure through the accessors on `StreamVideoException` instead.
 - `StreamVideoException` (formerly `VideoError`) now implements `Exception` rather than `Error`. An `on Error catch` clause no longer matches it — these are runtime conditions to handle, not programming bugs. Catch `Exception`, or `StreamVideoException` directly.
+- `CallPreferences` now requires a `participantsThrottleIntervalResolver`; custom implementations must provide it.
+- `CallParticipantState.audioLevels` is now unmodifiable.
 
 ### ⚠️ Deprecated
 
@@ -55,11 +57,17 @@
 - `Call.currentUser` is the user the call is being watched or joined by.
 - `sortParticipants` sorts a participant list the way the SDK's own layouts do: the criteria that hold whether or not a tile is being watched order everybody, while what a participant is owed for being off screen costs the screen a single tile — they trade places with the tile that has the least claim to one, and nothing else moves.
 - `byPriority` builds a participant comparator from a `ParticipantPriority`, and every sorting criterion now ships one: `dominantSpeakerPriority`, `speakingPriority`, `screenSharingPriority`, `publishingVideoPriority`, `publishingAudioPriority`, `byReactionTypePriority`, `byParticipantSourcePriority`, `byVideoIngressSourcePriority` and `byRolePriority`. `0` is the priority of a participant already on screen: above it brings an off-screen participant into view, below it leaves them out.
+- Added `Call.participantsStream`, which emits the participant list at an interval that grows with the participant count.
+- Added `CallPreferences.participantsThrottleIntervalResolver` to override that interval, or set it to `null` to emit every change.
+
+### 🔄 Changed
+
+- SFU participant events no longer emit a new call state when they leave every participant unchanged.
+- `CallParticipantState.audioLevel` and `audioLevels` now hold at their last value while a participant is silent.
 
 ### 🐞 Fixed
 
 - A desktop screen share no longer sends `mandatory: {frameRate: null}` to the platform when no `maxFrameRate` is set.
-
 - A reconnect no longer drops the video of participants whose tracks have not been received yet. Track subscriptions now survive the join response, so a subscription update sent while the media is still arriving keeps every participant subscribed.
 - A participant drawn in two places at once is now visible while either shows them, and subscribed at the size of the larger.
 - Every track on screen is reported again to the new session after a reconnect.
@@ -78,14 +86,17 @@
 - A coordinator WebSocket error frame that says nothing about the credentials — a rate limit, or an error about a single request — no longer closes an otherwise healthy connection. Only an expired or rejected token, or a rejected API key, closes the socket now; the rest are logged.
 - Fixed the participant sort reordering tiles that are visible on screen. One participant whose tile was not visible was enough to move the dominant speaker to the first tile.
 - A viewport visibility is now recorded whether or not the session accepts it. A dropped report left a participant recorded as something they were not for the rest of the call, since a viewport only ever reports what changed.
+- Fixed server-pinned participants being reordered on every pins event.
+- Fixed `CallParticipantState.copyWithUpdatedAudioLevels` mutating the audio level history of the previous state.
 
 ## 1.6.0
 
 ### ✅ Added
 
-- Added the `ActionCallIncomingFailed` ringing event and `IncomingCallFailureReason`, raised when the platform call UI refuses to display an incoming call. iOS only, and most useful when Do Not Disturb or the block list filtered the call before it was ever shown. Observe it with `onRingingEvent<ActionCallIncomingFailed>` and decide what to do: the SDK deliberately takes no action, because rejecting a filtered call ends the ring on every device the user is being called on.
-- Added end-to-end encryption support: attach an `EncryptionManager` with `Call.setE2EEManager` before joining, request encryption at call creation with `StreamEncryptionSettings`, and read `CallState.isE2eeEnabled` to check whether it is in effect. Available on Android, iOS and macOS. See the [documentation](https://getstream.io/video/docs/flutter/guides/e2ee-encryption/) for details.
+- Added support for end-to-end encryption. Calls can now be encrypted by configuring an `EncryptionManager` with `Call.setE2EEManager` prior to joining, or by specifying encryption at call creation using `StreamEncryptionSettings`. Supported on Android, iOS, and macOS. For implementation details and examples, refer to the [encryption guide](https://getstream.io/video/docs/flutter/guides/e2ee-encryption/).
 - Added `CallPreferences.encryptionKeyResolver`, which supplies the key for calls your app does not join itself, such as those answered from a ringing notification. See the [documentation](https://getstream.io/video/docs/flutter/guides/e2ee-encryption/#ringing-calls) for details.
+- [iOS] Added `ActionCallIncomingFailed` and `IncomingCallFailureReason` to notify when the system blocks showing an incoming call (e.g. due to Do Not Disturb or block list). Listen via `onRingingEvent<ActionCallIncomingFailed>`.
+- [Android] Added a Telecom integration for the ringing flow, which registers ringing calls with the platform's [Telecom stack](https://developer.android.com/develop/connectivity/telecom). This gives the call proper audio focus and a place in the system call state, and lets it be answered or hung up from a paired watch, a car head unit or a Bluetooth headset. The incoming call notification and full-screen ringing UI are unchanged. It is on by default on Android 17 and above, where ringing from a push no longer works reliably without it, and off below that, so existing integrations are unaffected. Configure it with `AndroidPushConfiguration(telecom: TelecomPushConfiguration(...))`.
 
 ### 🔄 Changed
 
@@ -94,6 +105,8 @@
 ### 🐞 Fixed
 
 - [Android] Fixed a call hung up outside the app, from a paired watch, a Bluetooth headset or a car head unit, not leaving the Stream call. Ended events carrying `CallData.endedBySystem` are now applied on Android too, while the ambiguous ones, which on Android also mean the incoming call notification was merely dismissed, keep being ignored. Requires the Android Telecom integration in `stream_video_push_notification`.
+- Fixed an issue where `consumeIncomingCall` could create multiple `Call` instances for the same ringing flow, causing state conflicts and UI issues.
+- [iOS] Fixed calls answered on the CallKit screen during a cold start or terminated state not being properly joined, or being incorrectly ended on the device. The SDK now reliably detects and joins answered calls in these scenarios.
 - Fixed the call reconnect loop retrying without a delay or an escalation when an unexpected error was thrown before the reconnect strategy ran.
 
 ## 1.5.0

@@ -147,6 +147,7 @@ MockClientState setupMockClientState() {
     sync: true,
   );
   final outgoingCallEmitter = MutableStateEmitter<Call?>(null, sync: true);
+  final incomingCallEmitter = MutableStateEmitter<Call?>(null, sync: true);
 
   final clientState = MockClientState();
   when(() => clientState.user).thenAnswer((_) => userStateEmitter);
@@ -161,6 +162,10 @@ MockClientState setupMockClientState() {
   when(() => clientState.outgoingCall).thenAnswer((_) => outgoingCallEmitter);
   when(
     () => clientState.setOutgoingCall(any()),
+  ).thenAnswer((_) => Future.value());
+  when(() => clientState.incomingCall).thenAnswer((_) => incomingCallEmitter);
+  when(
+    () => clientState.setIncomingCall(any()),
   ).thenAnswer((_) => Future.value());
 
   return clientState;

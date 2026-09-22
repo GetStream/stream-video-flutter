@@ -64,9 +64,23 @@ mixin CallParticipantsSortingMixin<T extends StatefulWidget> on State<T> {
       },
     );
 
-    _sortedParticipantKeys = participants
-        .map((e) => e.uniqueParticipantKey)
-        .toList();
+    _sortedParticipantKeys = [
+      for (final participant in participants) participant.uniqueParticipantKey,
+    ];
+
+    // The SFU state handlers hand back the same participant instance when an
+    // event leaves that participant untouched, so identical instances mean
+    // nothing on screen changed. Only sufficient, never necessary: a handler
+    // that stops preserving identity costs a repaint here, not correctness.
+    final unchanged =
+        identical(screenShareParticipant, _screenShareParticipant) &&
+        participants.length == _participants.length &&
+        participants.foldIndexed(
+          true,
+          (index, acc, it) => acc && identical(it, _participants[index]),
+        );
+
+    if (unchanged) return;
 
     if (mounted) {
       setState(() {

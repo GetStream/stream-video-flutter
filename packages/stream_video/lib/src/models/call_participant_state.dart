@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
@@ -38,10 +40,10 @@ class CallParticipantState extends Equatable
     this.viewportVisibility = ViewportVisibility.unknown,
     this.screenShareViewportVisibility = ViewportVisibility.unknown,
     this.participantSource,
-  }) : audioLevels = audioLevels ?? [audioLevel];
+  }) : audioLevels = _sealLevels(audioLevels ?? [audioLevel]);
 
   /// Internal constructor to be used with copyWith methods
-  const CallParticipantState._({
+  CallParticipantState._({
     required this.userId,
     required this.roles,
     required this.name,
@@ -56,7 +58,7 @@ class CallParticipantState extends Equatable
     required this.connectionQuality,
     required this.isOnline,
     required this.audioLevel,
-    required this.audioLevels,
+    required List<double> audioLevels,
     required this.isSpeaking,
     required this.isDominantSpeaker,
     required this.pin,
@@ -64,7 +66,7 @@ class CallParticipantState extends Equatable
     required this.viewportVisibility,
     required this.screenShareViewportVisibility,
     required this.participantSource,
-  });
+  }) : audioLevels = _sealLevels(audioLevels);
 
   final String userId;
   final List<String> roles;
@@ -81,10 +83,18 @@ class CallParticipantState extends Equatable
   final SfuParticipantSource? participantSource;
   final bool isOnline;
 
-  /// The latest audio level for the user.
+  /// The most recent audio level retained for the user.
+  ///
+  /// Updates stop while a participant is silent, so this holds at the reading
+  /// that took them below the speaking threshold rather than tracking every
+  /// quiet sample after it. Use [isSpeaking] to tell the two apart.
   final double audioLevel;
 
-  /// List of the last 10 audio levels.
+  /// The last 10 values [audioLevel] took, oldest first.
+  ///
+  /// Unmodifiable — a participant's identity is how the SDK detects change, so
+  /// mutating this in place would leave the UI stale rather than update it.
+  /// Build a new list instead.
   final List<double> audioLevels;
 
   /// A list of tracks that are currently paused by our servers.
@@ -103,6 +113,24 @@ class CallParticipantState extends Equatable
   final ViewportVisibility screenShareViewportVisibility;
 
   bool get isPinned => pin != null;
+
+  /// Identity is used all over the SDK to tell whether a participant changed,
+  /// which only holds while nothing mutates a collection in place. Handing out
+  /// an unmodifiable view makes that an error rather than a silently stale UI.
+  static List<double> _sealLevels(List<double> levels) {
+    // Already sealed here, over a list nothing outside can reach, so it is
+    // shared rather than copied again. This is the common case: every
+    // `copyWith` that leaves audio alone — a pin, a reaction, viewport
+    // visibility, connection quality — passes the current field straight back.
+    if (levels is _SealedLevels) return levels;
+
+    // Anything else is copied, never just wrapped: a view writes through to
+    // whatever list it was built over, including one an unmodifiable view
+    // already hides. `_SealedLevels` is private, so a caller cannot smuggle a
+    // list it still holds past the check above.
+    return _SealedLevels(List<double>.of(levels, growable: false));
+  }
+
   String get uniqueParticipantKey => '$userId-$sessionId';
 
   /// Returns a copy of this [CallParticipantState] with the given fields
@@ -165,15 +193,20 @@ class CallParticipantState extends Equatable
     required double audioLevel,
     bool? isSpeaking,
   }) {
-    final levels = audioLevels;
-    levels.add(audioLevel);
-    while (levels.length > 10) {
-      levels.removeAt(0);
-    }
+    // Dropped from the front while building rather than with a `removeRange`
+    // afterwards, so the window costs one list instead of two.
+    final start = audioLevels.length >= 10 ? audioLevels.length - 9 : 0;
+    final levels = <double>[
+      for (var index = start; index < audioLevels.length; index++)
+        audioLevels[index],
+      audioLevel,
+    ];
 
     return copyWith(
       audioLevel: audioLevel,
-      audioLevels: audioLevels,
+      // Built here and never handed out, so it is sealed by adoption instead
+      // of copied a second time inside the constructor.
+      audioLevels: _SealedLevels(levels),
       isSpeaking: isSpeaking,
     );
   }
@@ -333,4 +366,15 @@ class CallParticipantState extends Equatable
     name: name.ifEmpty(() => userId),
     image: image,
   );
+}
+
+/// A `CallParticipantState.audioLevels` list owned by [CallParticipantState].
+///
+/// Private on purpose: it is the proof that the backing list came from inside
+/// that class and is unreachable from anywhere else, which is what lets the
+/// seal skip the copy. A public marker — testing for [UnmodifiableListView] —
+/// would let a caller pass a view over a list they still hold and keep writing
+/// through the seal.
+class _SealedLevels extends UnmodifiableListView<double> {
+  _SealedLevels(super.source);
 }

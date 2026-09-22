@@ -310,9 +310,43 @@
 
 ## Upcoming (minor)
 
+### ✅ Added
+
+- Added `CallParticipantsBuilder`, which builds from `Call.participantsStream`.
+
 ### 🐞 Fixed
 
-- Fixed the call reconnect loop retrying without a delay or an escalation when an unexpected error was thrown before the reconnect strategy ran. 
+- Fixed `PartialCallStateBuilder` throwing a cast error instead of surfacing a partial state error.
+- Fixed `StreamCallParticipants` not applying a changed `sort` or `filter` until the participant list changed.
+- Fixed a `Call.participantsStream` error reaching the zone uncaught instead of being logged.
+
+### 🔄 Changed
+
+- Participant list widgets now subscribe to `Call.participantsStream`, which is throttled by participant count.
+- `StreamCallParticipants` and `StreamLivestreamHosts` no longer rebuild when an update leaves the rendered participants unchanged.
+- `LivestreamContent` renders participants from `Call.participantsStream` instead of the raw call state.
+- `LivestreamBackstageContent` only rebuilds when the participant count changes.
+
+## 1.6.0
+
+### ✅ Added
+
+- Added support for end-to-end encryption. Calls can now be encrypted by configuring an `EncryptionManager` with `Call.setE2EEManager` prior to joining, or by specifying encryption at call creation using `StreamEncryptionSettings`. Supported on Android, iOS, and macOS. For implementation details and examples, refer to the [encryption guide](https://getstream.io/video/docs/flutter/guides/e2ee-encryption/).
+- Added `CallPreferences.encryptionKeyResolver`, which supplies the key for calls your app does not join itself, such as those answered from a ringing notification. See the [documentation](https://getstream.io/video/docs/flutter/guides/e2ee-encryption/#ringing-calls) for details.
+- [iOS] Added `ActionCallIncomingFailed` and `IncomingCallFailureReason` to notify when the system blocks showing an incoming call (e.g. due to Do Not Disturb or block list). Listen via `onRingingEvent<ActionCallIncomingFailed>`.
+- [Android] Added a Telecom integration for the ringing flow, which registers ringing calls with the platform's [Telecom stack](https://developer.android.com/develop/connectivity/telecom). This gives the call proper audio focus and a place in the system call state, and lets it be answered or hung up from a paired watch, a car head unit or a Bluetooth headset. The incoming call notification and full-screen ringing UI are unchanged. It is on by default on Android 17 and above, where ringing from a push no longer works reliably without it, and off below that, so existing integrations are unaffected. Configure it with `AndroidPushConfiguration(telecom: TelecomPushConfiguration(...))`.
+
+### 🔄 Changed
+
+- Raised the minimum `dart_webrtc` to `1.8.2`, required for WebAssembly builds.
+
+### 🐞 Fixed
+
+- Fixed the call reconnect loop retrying without a delay or an escalation when an unexpected error was thrown before the reconnect strategy ran.
+- [iOS] Fixed the CallKit provider configuration being lost when a VoIP push woke the app before any Dart code had run, which dropped the configured ringtone, icon and Recents behaviour on a cold start.
+- [Android] Fixed the incoming call ringtone being silently muted on Android 17. The ringtone is now played from a `phoneCall` foreground service, which Android 17's background audio hardening requires for audio played while no activity is visible.
+- Fixed an issue where `consumeIncomingCall` could create multiple `Call` instances for the same ringing flow, causing state conflicts and UI issues.
+- [iOS] Fixed calls answered on the CallKit screen during a cold start or terminated state not being properly joined, or being incorrectly ended on the device. The SDK now reliably detects and joins answered calls in these scenarios.
 
 ## 1.5.0
 
