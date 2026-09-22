@@ -65,6 +65,12 @@ class StreamVideoFlutterLocalizationsNl
   String get layoutSpeakerOneToOne => 'Spreker 1:1';
 
   @override
+  String get participantsBarPrevious => 'Vorige deelnemers';
+
+  @override
+  String get participantsBarNext => 'Volgende deelnemers';
+
+  @override
   String get livestreamBackstageStartingSoon => 'Livestream begint binnenkort';
 
   @override

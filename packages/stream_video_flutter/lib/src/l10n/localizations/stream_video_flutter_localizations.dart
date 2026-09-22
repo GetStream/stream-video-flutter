@@ -209,6 +209,18 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'Speaker 1:1'**
   String get layoutSpeakerOneToOne;
 
+  /// Tooltip of the button that scrolls the participants bar back towards its first tile
+  ///
+  /// In en, this message translates to:
+  /// **'Previous participants'**
+  String get participantsBarPrevious;
+
+  /// Tooltip of the button that scrolls the participants bar on towards its last tile
+  ///
+  /// In en, this message translates to:
+  /// **'Next participants'**
+  String get participantsBarNext;
+
   /// Label for livestream backstage when live stream will soon start
   ///
   /// In en, this message translates to:

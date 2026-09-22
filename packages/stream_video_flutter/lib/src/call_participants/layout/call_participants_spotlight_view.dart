@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../../l10n/localization_extension.dart';
 
 /// Defines the alignment of the participants bar.
 enum ParticipantsBarAlignment { top, bottom, left, right }
@@ -395,6 +396,8 @@ class _ParticipantsBarState extends State<_ParticipantsBar> {
     final offset =
         inset - (kMinInteractiveDimension - _barButtonSize.value) / 2;
 
+    final translations = context.translations;
+
     // Scaled away rather than taken out, which also drops it out of the hit
     // test: a zero transform cannot be inverted.
     final button = AnimatedScale(
@@ -402,6 +405,9 @@ class _ParticipantsBarState extends State<_ParticipantsBar> {
       duration: kThemeAnimationDuration,
       child: _BarScrollButton(
         icon: icon,
+        tooltip: isStart
+            ? translations.participantsBarPrevious
+            : translations.participantsBarNext,
         onPressed: () => _scroll(forward: !isStart),
       ),
     );
@@ -430,10 +436,18 @@ class _ParticipantsBarState extends State<_ParticipantsBar> {
 const _barButtonSize = StreamButtonSize.medium;
 
 /// A round floating button that moves the participants bar along.
+///
+/// [tooltip] names the button for a screen reader as well as on hover: the
+/// chevron is all there is to go on otherwise.
 class _BarScrollButton extends StatelessWidget {
-  const _BarScrollButton({required this.icon, required this.onPressed});
+  const _BarScrollButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+  });
 
   final IconData icon;
+  final String tooltip;
   final VoidCallback onPressed;
 
   @override
@@ -443,6 +457,7 @@ class _BarScrollButton extends StatelessWidget {
       style: .secondary,
       type: .ghost,
       isFloating: true,
+      tooltip: tooltip,
       onPressed: onPressed,
       themeStyle: StreamButtonThemeStyle(iconSize: .all(16)),
     );

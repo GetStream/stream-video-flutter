@@ -484,6 +484,34 @@ void main() {
       });
     }
 
+    testWidgets('name themselves for a screen reader', (tester) async {
+      // Disposed inline: a tear-down runs after the check that every handle
+      // was let go of.
+      final semantics = tester.ensureSemantics();
+
+      await pumpBar(tester);
+
+      // Both of them, so the one at the start is named as well as the one on.
+      await tester.tap(find.byIcon(StreamIconData.chevronRight));
+      await tester.pumpAndSettle();
+
+      // The chevron each label belongs to, so they cannot be the wrong way
+      // round, and then the semantics the label actually reaches.
+      for (final (icon, label) in [
+        (StreamIconData.chevronLeft, 'Previous participants'),
+        (StreamIconData.chevronRight, 'Next participants'),
+      ]) {
+        final button = find.ancestor(
+          of: find.byIcon(icon),
+          matching: find.byTooltip(label),
+        );
+        expect(button, findsOneWidget, reason: '$label is on the wrong button');
+        expect(tester.getSemantics(button).tooltip, label);
+      }
+
+      semantics.dispose();
+    });
+
     testWidgets('lead the other way when the bar reads right to left', (
       tester,
     ) async {

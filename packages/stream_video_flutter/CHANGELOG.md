@@ -182,6 +182,7 @@
 - Added `StreamCallDurationBadgeThemeData` on `StreamVideoTheme`, and `StreamCallDurationBadgeTheme` to restyle the badge over a subtree.
 - Added `callEncryptedTooltip`, `callRecordingTooltip` and `callScreenSharingTooltip` to the localizations, in English and Dutch.
 - Added `callDurationSpoken`, `callDurationHours`, `callDurationMinutes` and `callDurationSeconds` to the localizations, in English and Dutch.
+- Added `participantsBarPrevious` and `participantsBarNext` to the localizations, in English and Dutch.
 
 ### 🔄 Changed
 
