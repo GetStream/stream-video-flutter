@@ -35,6 +35,7 @@ class StreamMenuOption {
     this.trailing,
     this.selected,
     this.onSelected,
+    this.closesMenu = true,
   });
 
   /// The text of the row.
@@ -60,9 +61,17 @@ class StreamMenuOption {
 
   /// Called when the user picks this option.
   ///
-  /// The menu closes itself first, so this does not have to. Null renders the
-  /// row as something to read rather than something to press.
+  /// The menu closes itself first unless [closesMenu] says otherwise, so this
+  /// does not have to. Null renders the row as something to read rather than
+  /// something to press.
   final VoidCallback? onSelected;
+
+  /// Whether picking this option dismisses the menu.
+  ///
+  /// True for a choice, which is answered once the choice is made. False for a
+  /// row that reports state the menu is showing — a toggle whose `On` the user
+  /// has just pressed for, and should see change.
+  final bool closesMenu;
 }
 
 /// Builds the body of a [StreamMenuSection] that is not a list of rows.
@@ -85,6 +94,8 @@ class StreamMenuSection {
     this.options = const [],
     this.heading,
     this.content,
+    this.collapsible = false,
+    this.initiallyCollapsed = true,
   });
 
   /// The label above the group, e.g. "Microphone".
@@ -101,6 +112,16 @@ class StreamMenuSection {
   /// It is laid out outside the menu's row widget, so it is not held to the
   /// row metrics and sizes itself.
   final StreamMenuContentBuilder? content;
+
+  /// Whether the [heading] folds the section away.
+  ///
+  /// For the long tail of a menu — a list of devices, a set of resolutions —
+  /// which would otherwise push everything after it out of reach. Ignored
+  /// without a [heading], since there would be nothing to press.
+  final bool collapsible;
+
+  /// Whether a [collapsible] section starts folded away.
+  final bool initiallyCollapsed;
 
   /// Whether this section would draw nothing.
   bool get isEmpty => content == null && options.isEmpty;
@@ -254,6 +275,63 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
   final _menuController = MenuController();
   bool _isOpen = false;
 
+  /// Headings of the sections currently folded away.
+  ///
+  /// Keyed by heading rather than by section, because the sections are rebuilt
+  /// from scratch whenever the anchor's parent rebuilds — which a menu holding
+  /// live state does constantly — and the fold has to survive that.
+  final _collapsed = <String>{};
+
+  /// Seen headings, so a section is only collapsed by default once: reopening
+  /// a section the user expanded must not fold it again on the next rebuild.
+  final _known = <String>{};
+
+  /// Bumped whenever what the menu draws changes.
+  ///
+  /// The sheet presentation is a route, built once, so it has to be told to
+  /// rebuild — both for a fold and for a row whose value moved under it.
+  final _revision = ValueNotifier(0);
+
+  @override
+  void didUpdateWidget(StreamAdaptiveMenuAnchor oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (identical(oldWidget.sections, widget.sections)) return;
+
+    // After the frame, not now: an open sheet is a route elsewhere in the
+    // tree, and notifying it mid-build rebuilds a subtree that has already
+    // been built. It only listens while it is up, so this costs nothing when
+    // it is not.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _revision.value++;
+    });
+  }
+
+  @override
+  void dispose() {
+    _revision.dispose();
+    super.dispose();
+  }
+
+  /// Whether [section] is folded away, registering its default the first time
+  /// it is seen.
+  bool _isCollapsed(StreamMenuSection section) {
+    final heading = section.heading;
+    if (!section.collapsible || heading == null) return false;
+
+    if (_known.add(heading) && section.initiallyCollapsed) {
+      _collapsed.add(heading);
+    }
+
+    return _collapsed.contains(heading);
+  }
+
+  void _toggleCollapsed(String heading) {
+    setState(() {
+      if (!_collapsed.remove(heading)) _collapsed.add(heading);
+    });
+    _revision.value++;
+  }
+
   @override
   bool get isOpen => _isOpen;
 
@@ -301,7 +379,7 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
       };
 
   void _select(StreamMenuOption option) {
-    close();
+    if (option.closesMenu) close();
     option.onSelected?.call();
   }
 
@@ -320,12 +398,17 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
     await showStreamSheet<void>(
       context: context,
       isDismissible: true,
-      builder: (context, scrollController) => _MenuSheet(
-        title: widget.title,
-        sections: widget.sections,
-        scrollController: scrollController,
-        handle: this,
-        onSelected: _select,
+      builder: (context, scrollController) => ListenableBuilder(
+        listenable: _revision,
+        builder: (context, _) => _MenuSheet(
+          title: widget.title,
+          sections: widget.sections,
+          scrollController: scrollController,
+          handle: this,
+          isCollapsed: _isCollapsed,
+          onToggleCollapsed: _toggleCollapsed,
+          onSelected: _select,
+        ),
       ),
     );
     if (mounted) setState(() => _isOpen = false);
@@ -384,6 +467,26 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
     );
   }
 
+  /// A section's heading, carrying a chevron and a press when the section
+  /// folds away.
+  static Widget sectionHeading(
+    BuildContext context, {
+    required String label,
+    required bool collapsible,
+    required bool collapsed,
+    required VoidCallback onToggle,
+  }) {
+    if (!collapsible) return StreamContextMenuHeading(label: Text(label));
+
+    final icons = context.streamIcons;
+
+    return StreamContextMenuHeading(
+      label: Text(label),
+      trailing: Icon(collapsed ? icons.chevronDown : icons.chevronUp, size: 16),
+      onTap: onToggle,
+    );
+  }
+
   Widget _anchored(BuildContext context, {double? width}) {
     return StreamContextMenuAnchor(
       controller: _menuController,
@@ -417,33 +520,41 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
               // A heading with nothing under it would label nothing.
               if (!section.isEmpty)
                 if (section.heading case final heading?)
-                  StreamContextMenuHeading(label: Text(heading)),
+                  _StreamAdaptiveMenuAnchorState.sectionHeading(
+                    context,
+                    label: heading,
+                    collapsible: section.collapsible,
+                    collapsed: _isCollapsed(section),
+                    onToggle: () => _toggleCollapsed(heading),
+                  ),
               // Outside StreamContextMenuAction, so the content sizes itself
               // rather than being held to the design's 200x32 row.
-              if (section.content case final content?) content(context, this),
-              for (final option in section.options)
-                _selectedBackground(
-                  context,
-                  selected: option.selected ?? false,
-                  child: StreamContextMenuAction<void>(
-                    onTap: option.onSelected == null
-                        ? null
-                        : () => _select(option),
-                    // Deliberately left enabled for a row with nothing to
-                    // press. `enabled: false` is the design system's
-                    // *unavailable* look — it paints the label in
-                    // `textDisabled` — and a list that only shows something,
-                    // like the people already in a call, would render every
-                    // name as though that person were unavailable.
-                    leading: _leadingOf(option),
-                    trailing: option.trailing,
-                    label: Text(
-                      option.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+              if (!_isCollapsed(section))
+                if (section.content case final content?) content(context, this),
+              if (!_isCollapsed(section))
+                for (final option in section.options)
+                  _selectedBackground(
+                    context,
+                    selected: option.selected ?? false,
+                    child: StreamContextMenuAction<void>(
+                      onTap: option.onSelected == null
+                          ? null
+                          : () => _select(option),
+                      // Deliberately left enabled for a row with nothing to
+                      // press. `enabled: false` is the design system's
+                      // *unavailable* look — it paints the label in
+                      // `textDisabled` — and a list that only shows something,
+                      // like the people already in a call, would render every
+                      // name as though that person were unavailable.
+                      leading: _leadingOf(option),
+                      trailing: option.trailing,
+                      label: Text(
+                        option.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                   ),
-                ),
             ],
         ],
       ),
@@ -459,6 +570,8 @@ class _MenuSheet extends StatelessWidget {
     required this.sections,
     required this.scrollController,
     required this.handle,
+    required this.isCollapsed,
+    required this.onToggleCollapsed,
     required this.onSelected,
   });
 
@@ -466,6 +579,8 @@ class _MenuSheet extends StatelessWidget {
   final List<StreamMenuSection> sections;
   final ScrollController scrollController;
   final StreamMenuHandle handle;
+  final bool Function(StreamMenuSection) isCollapsed;
+  final ValueChanged<String> onToggleCollapsed;
   final ValueChanged<StreamMenuOption> onSelected;
 
   @override
@@ -495,35 +610,43 @@ class _MenuSheet extends StatelessWidget {
                       // itself by spacing.xs and a list tile by spacing.sm, so the
                       // heading takes the larger outer pad and the two line up.
                       padding: EdgeInsets.symmetric(horizontal: spacing.xs),
-                      child: StreamContextMenuHeading(label: Text(heading)),
-                    ),
-                if (section.content case final content?)
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
-                    child: content(context, handle),
-                  ),
-                for (final option in section.options)
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
-                    child: StreamListTile(
-                      leading: _StreamAdaptiveMenuAnchorState._leadingOf(
-                        option,
+                      child: _StreamAdaptiveMenuAnchorState.sectionHeading(
+                        context,
+                        label: heading,
+                        collapsible: section.collapsible,
+                        collapsed: isCollapsed(section),
+                        onToggle: () => onToggleCollapsed(heading),
                       ),
-                      title: Text(
-                        option.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      trailing: option.trailing,
-                      selected: option.selected ?? false,
-                      // See the anchored rows: enabled is the look, not the
-                      // interactivity. A null onTap already makes the row
-                      // inert and gives it a non-interactive cursor.
-                      onTap: option.onSelected == null
-                          ? null
-                          : () => onSelected(option),
                     ),
-                  ),
+                if (!isCollapsed(section))
+                  if (section.content case final content?)
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
+                      child: content(context, handle),
+                    ),
+                if (!isCollapsed(section))
+                  for (final option in section.options)
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
+                      child: StreamListTile(
+                        leading: _StreamAdaptiveMenuAnchorState._leadingOf(
+                          option,
+                        ),
+                        title: Text(
+                          option.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: option.trailing,
+                        selected: option.selected ?? false,
+                        // See the anchored rows: enabled is the look, not the
+                        // interactivity. A null onTap already makes the row
+                        // inert and gives it a non-interactive cursor.
+                        onTap: option.onSelected == null
+                            ? null
+                            : () => onSelected(option),
+                      ),
+                    ),
               ],
             ],
           ),

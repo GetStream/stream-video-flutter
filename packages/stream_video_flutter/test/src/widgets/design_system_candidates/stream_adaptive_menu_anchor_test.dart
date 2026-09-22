@@ -436,6 +436,112 @@ void main() {
     });
   }
 
+  // A row reporting state the menu is showing keeps the menu up, so the value
+  // it just changed is visible rather than hidden behind the dismissal.
+  for (final platform in [TargetPlatform.android, TargetPlatform.macOS]) {
+    testWidgets('closesMenu false leaves the menu up on ${platform.name}', (
+      tester,
+    ) async {
+      var picked = 0;
+
+      await tester.pumpWidget(
+        TestWrapper(
+          platform: platform,
+          child: _Menu(
+            sections: [
+              StreamMenuSection(
+                options: [
+                  StreamMenuOption(
+                    label: 'Closed captions',
+                    closesMenu: false,
+                    onSelected: () => picked++,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Closed captions'));
+      await tester.pumpAndSettle();
+
+      expect(picked, 1);
+      expect(find.text('showing'), findsOneWidget);
+      expect(find.text('Closed captions'), findsOneWidget);
+    });
+
+    testWidgets('a collapsible section starts folded on ${platform.name}', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          platform: platform,
+          child: const _Menu(
+            sections: [
+              StreamMenuSection(
+                heading: 'Input device',
+                collapsible: true,
+                options: [StreamMenuOption(label: 'Jabra Evolve2 65')],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      // The heading is what is left to press; its rows are away.
+      expect(find.text('Input device'), findsOneWidget);
+      expect(find.text('Jabra Evolve2 65'), findsNothing);
+
+      await tester.tap(find.text('Input device'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Jabra Evolve2 65'), findsOneWidget);
+
+      await tester.tap(find.text('Input device'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Jabra Evolve2 65'), findsNothing);
+    });
+
+    testWidgets('an expanded section stays open across a rebuild on '
+        '${platform.name}', (tester) async {
+      // The sections are rebuilt whenever the anchor's parent rebuilds, which
+      // a menu over live call state does constantly. The fold is keyed by
+      // heading precisely so it survives that.
+      Widget menu(String label) => TestWrapper(
+        platform: platform,
+        child: _Menu(
+          sections: [
+            StreamMenuSection(
+              heading: 'Input device',
+              collapsible: true,
+              options: [StreamMenuOption(label: label)],
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(menu('Jabra Evolve2 65'));
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Input device'));
+      await tester.pumpAndSettle();
+      expect(find.text('Jabra Evolve2 65'), findsOneWidget);
+
+      await tester.pumpWidget(menu('MacBook Pro Microphone'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('MacBook Pro Microphone'), findsOneWidget);
+    });
+  }
+
   // The sheet branch opens by pushing a route and closes by popping one, so
   // both directions are guarded: a second push stacks a sheet the handle can
   // no longer reach, and a pop with nothing open takes the host screen.

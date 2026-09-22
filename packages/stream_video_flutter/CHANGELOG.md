@@ -4,6 +4,9 @@
 
 - Added `StreamMenuOption.trailing`, the value a menu row reports at its far end.
 - Added `StreamMenuSection.content`, which draws arbitrary content in place of a section's rows.
+- Added `StreamMenuSection.collapsible`, whose heading folds the section away, and `initiallyCollapsed` for how it starts.
+- Added `StreamMenuOption.closesMenu`, so a row reporting state the menu shows can leave it up.
+- `StreamContextMenuHeading` takes a `trailing` and an `onTap`.
 - Added `toggleScreenShare`, the action `StreamScreenShareButton` performs, so another control can offer the same one.
 - Added `StreamParticipantTileChrome`, the levels of chrome a participant tile draws, and `StreamParticipantTileChromePolicy` to choose between them — `bySize` (the default), `always`, `none` or `custom`.
 - Added `StreamParticipantTileThemeData.chromePolicy` and `styleResolver`, which restyle a tile against the size it came out at.

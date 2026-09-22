@@ -127,13 +127,26 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
           ),
         ),
       StreamMenuSection(options: _actions(context, state, size)),
-      if (!size.hasDevicePickers) ...[
-        ...widget.devices.audioSections(context),
-        ...widget.devices.videoSections(context),
-      ],
+      if (!size.hasDevicePickers)
+        ...[
+          ...widget.devices.audioSections(context),
+          ...widget.devices.videoSections(context),
+        ].map(_folded),
       if (!kIsProd) ..._developerSections(context, state),
     ];
   }
+
+  /// The same section, folded away until its heading is pressed.
+  ///
+  /// The device lists are the long tail of the menu on a phone, where they are
+  /// the only way to pick a microphone.
+  static StreamMenuSection _folded(StreamMenuSection section) =>
+      StreamMenuSection(
+        heading: section.heading,
+        options: section.options,
+        content: section.content,
+        collapsible: true,
+      );
 
   List<StreamMenuOption> _actions(
     BuildContext context,
@@ -153,6 +166,9 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
           label: 'Noise cancellation',
           leading: Icon(icons.audio),
           trailing: _OnOff(on: state.isAudioProcessing),
+          // Leaves the menu up: the row reports the state the press changes,
+          // and closing over it would hide the answer.
+          closesMenu: false,
           onSelected: () => state.isAudioProcessing
               ? call.stopAudioProcessing()
               : call.startAudioProcessing(),
@@ -164,6 +180,7 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
           label: 'Closed captions',
           leading: Icon(icons.captionFill),
           trailing: _OnOff(on: state.isCaptioning),
+          closesMenu: false,
           onSelected: () => state.isCaptioning
               ? call.stopClosedCaptions()
               : call.startClosedCaptions(),
@@ -190,6 +207,7 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
             state.isRecording ? icons.recordingStopFill : icons.recordingFill,
           ),
           trailing: _OnOff(on: state.isRecording),
+          closesMenu: false,
           onSelected: () =>
               state.isRecording ? call.stopRecording() : call.startRecording(),
         ),
@@ -214,6 +232,7 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
     return [
       StreamMenuSection(
         heading: 'Developer options',
+        collapsible: true,
         options: [
           StreamMenuOption(
             label: 'Provide feedback',
@@ -224,6 +243,7 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
       ),
       StreamMenuSection(
         heading: 'Incoming video quality',
+        collapsible: true,
         options: [
           for (final value in IncomingVideoQuality.values)
             StreamMenuOption(
