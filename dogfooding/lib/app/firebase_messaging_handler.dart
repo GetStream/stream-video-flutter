@@ -10,31 +10,29 @@ import '../core/repos/token_service.dart';
 import '../di/injector.dart';
 import '../firebase_options.dart';
 
-// On Android this runs in a separate isolate, which never ran main(), so the
-// app has to be set up again from scratch. The SDK owns the client's lifecycle
-// from there: observing the ringing events a background isolate can act on,
-// and disposing once the user has answered, declined, or let the call time
-// out.
+// Firebase only spins up a background isolate on Android. There it never ran
+// main(), so the app has to be set up from scratch and the SDK owns the
+// client's lifecycle: observing the ringing events a background isolate can act
+// on, and disposing once the user has answered, declined, or let the call time
+// out. On Apple platforms this is called on the app's own isolate, where the
+// SDK builds nothing and leaves the ringing flow to PushKit and CallKit.
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  final ownsInjector = !locator.isRegistered<AppPreferences>();
-
   await StreamVideoPushHandler.handleBackgroundMessage(
     message,
-    createStreamVideo: () =>
-        _createStreamVideo(initialiseInjector: ownsInjector),
-    onDispose: ownsInjector ? AppInjector.reset : null,
+    createStreamVideo: _createStreamVideo,
+    onDispose: AppInjector.reset,
   );
 }
 
 /// Builds the client for the background isolate, or nothing when nobody is
 /// logged in.
-Future<StreamVideo?> _createStreamVideo({
-  required bool initialiseInjector,
-}) async {
-  if (initialiseInjector) await AppInjector.init();
+Future<StreamVideo?> _createStreamVideo() async {
+  // A second push can land in an isolate an earlier one already set up, so this
+  // has to be able to run more than once.
+  if (!locator.isRegistered<AppPreferences>()) await AppInjector.init();
 
   final prefs = locator.get<AppPreferences>();
   final credentials = prefs.userCredentials;

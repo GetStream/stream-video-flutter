@@ -32,12 +32,12 @@ typedef ResolveExistingClient = StreamVideo? Function();
 /// On Android, Firebase delivers background messages to an isolate that never
 /// ran `main()`, so nothing you set up at launch exists there. Everything
 /// from building the client to tearing it down again needs to happen inside the
-/// handler. On Apple platforms, the same handler is called on the app's own
-/// isolate, where the client already exists and must be left alone—both cases
-/// are handled here.
+/// handler, and that is what this does.
 ///
-/// You keep the parts that are genuinely yours, such as Firebase
-/// initialization and credential management, and hand the rest over:
+/// Firebase spins up that background isolate on Android alone. On Apple
+/// platforms your handler is called on the app's own isolate instead, where the
+/// client belongs to the running app: the push is forwarded to it and nothing is
+/// built or torn down. The same call site works on both:
 ///
 /// ```dart
 /// @pragma('vm:entry-point')
@@ -54,6 +54,9 @@ typedef ResolveExistingClient = StreamVideo? Function();
 ///   );
 /// }
 /// ```
+///
+/// You keep the parts that are genuinely yours, such as Firebase
+/// initialization and credential management, and hand the rest over.
 ///
 /// The `@pragma('vm:entry-point')` function remains your responsibility on
 /// purpose. It is the only thing the background isolate can reach, so the
@@ -83,41 +86,50 @@ class StreamVideoPushHandler {
   /// so a mutex prevents race conditions creating duplicate clients and losing cleanup.
   static final _lock = Lock();
 
-  /// Handles a background [message] that may be a Stream ringing push notification.
+  /// Whether this handler owns the client's lifecycle where it is running.
   ///
-  /// Returns `true` if the message was successfully identified and processed as a
-  /// Stream call notification; otherwise, returns `false`.
+  /// It does on Android, where Firebase delivers background messages to an
+  /// isolate that never ran `main()`: nothing else is there to build a client
+  /// or take it down again. Everywhere else the handler is called on the app's
+  /// own isolate, where that belongs to the running app — a second client
+  /// installed over the app's would be disposed again a second after the user
+  /// answers, taking the app's own and its ringing observers with it.
   ///
-  /// On the first relevant message, this method uses [createStreamVideo] to
-  /// construct a [StreamVideo] client within the background isolate, sets up
-  /// observers to process ringing events, and manages client disposal after the
-  /// notification flow completes—whether the user answers, declines, or the call
-  /// times out. The [onDispose] callback is always executed last to allow the app
-  /// to clean up resources established in [createStreamVideo], including scenarios
-  /// where initialization fails.
+  /// The one thing that genuinely differs by platform, and the only place this
+  /// class asks. A function rather than a constant so a test can stand
+  /// somewhere other than the host it happens to run on.
+  @visibleForTesting
+  static bool Function() ownsClientLifecycle = () => CurrentPlatform.isAndroid;
+
+  /// Handles a Stream call notification in the background.
   ///
-  /// If a [StreamVideo] client already exists (i.e., not constructed by this handler),
-  /// it indicates the message was delivered on the main isolate, which owns the
-  /// client's lifecycle. In this case, the notification is simply forwarded to the
-  /// running client, and no new observers or teardowns occur. The [existingClient]
-  /// callback provides access to the current client; if not provided, the default is
-  /// the [StreamVideo] singleton (which may not reflect your app's actual client instance).
+  /// Returns `true` if the push was a Stream Video notification and was handled;
+  /// otherwise returns `false`.
   ///
-  /// Any background message not intended for Stream Video is turned away before
-  /// anything is built for it and reported as unhandled, so your application can
-  /// go on to process its own background notifications after this handler
-  /// completes without having paid for a client it had no use for.
+  /// If no client exists in the isolate, this builds one using [createStreamVideo],
+  /// sets up observers, and disposes of all resources (optionally via [onDispose])
+  /// once the notification is resolved (answered, declined, or missed).
   ///
-  /// More than one call can be ringing at a time. The client is kept alive until
-  /// every one of them has been resolved, not just the first.
+  /// If a client already exists (e.g., on the main app isolate), the notification
+  /// is simply forwarded to it—no extra lifecycle or teardown logic runs.
+  /// The [existingClient] callback lets you provide that own client if needed.
+  ///
+  /// Messages not intended for Stream Video are ignored, so your app can handle
+  /// its own background notifications as usual.
+  ///
+  /// Handles multiple concurrent calls; the client stays alive until all calls finish.
   static Future<bool> handleBackgroundMessage(
     RemoteMessage message, {
     required CreateStreamVideo createStreamVideo,
     ResolveExistingClient? existingClient,
     FutureOr<void> Function()? onDispose,
   }) {
-    if (!StreamPushPayload.isStreamPush(message.data)) {
-      return Future.value(false);
+    final payload = message.data;
+    if (!StreamPushPayload.isStreamPush(payload)) return Future.value(false);
+
+    final ownsLifecycle = ownsClientLifecycle();
+    if (!ownsLifecycle) {
+      return _handleOnAppIsolate(message, existingClient);
     }
 
     return _lock.synchronized(
@@ -128,6 +140,33 @@ class StreamVideoPushHandler {
         onDispose,
       ),
     );
+  }
+
+  /// Handles a push that arrived on the app's own isolate.
+  ///
+  /// Every push is forwarded to the client the app is already running, whatever
+  /// it carries: an iOS app that rings over Firebase rather than PushKit needs
+  /// its ringing pushes handled here just as much as its missed calls. What
+  /// does not happen is building one — that client is the app's.
+  static Future<bool> _handleOnAppIsolate(
+    RemoteMessage message,
+    ResolveExistingClient? existingClient,
+  ) async {
+    final appClient = _existingClient(existingClient);
+    if (appClient == null) {
+      streamLog.w(
+        _tag,
+        () => '[handleOnAppIsolate] no running client; leaving the push alone',
+      );
+
+      return false;
+    }
+
+    final handled = await appClient.handleRingingFlowNotifications(
+      message.data,
+    );
+
+    return handled;
   }
 
   /// Handles one Stream push, with this isolate's session to itself.
@@ -332,7 +371,16 @@ class _BackgroundSession {
     try {
       await StreamVideoPushHandler._lock.synchronized(() async {
         // A ringing flow is live. Whatever resolves it arms the next release.
-        if (pendingRings.isNotEmpty) return;
+        if (pendingRings.isNotEmpty) {
+          streamLog.d(
+            StreamVideoPushHandler._tag,
+            () =>
+                '[release] still ringing (${pendingRings.length}); '
+                'standing down',
+          );
+
+          return;
+        }
 
         await release();
       });

@@ -113,6 +113,9 @@ void main() {
   Future<void> pastTheGrace() => Future<void>.delayed(grace * 6);
 
   setUp(() {
+    // Everything outside the group below is the Android background isolate:
+    // the only place this handler owns a client.
+    StreamVideoPushHandler.ownsClientLifecycle = () => true;
     StreamVideoPushHandler.resolutionGrace = grace;
     ringing = StreamController<RingingEvent>.broadcast();
     onRingingEvent = null;
@@ -125,6 +128,8 @@ void main() {
     await StreamVideoPushHandler.releaseForTesting();
     await ringing.close();
     StreamVideoPushHandler.resolutionGrace = const Duration(seconds: 1);
+    StreamVideoPushHandler.ownsClientLifecycle = () =>
+        CurrentPlatform.isAndroid;
   });
 
   group('StreamVideoPushHandler', () {
@@ -689,6 +694,77 @@ void main() {
         ]);
         await pastTheGrace();
 
+        verifyNever(() => client.dispose());
+        expect(onDisposeCalled, isFalse);
+      });
+    });
+
+    group("on the app's own isolate", () {
+      // Firebase spins up a background isolate on Android alone. On Apple
+      // platforms the handler is called where the app already lives, and the
+      // device is registered for both a VoIP and a regular push, so a ring
+      // arrives twice.
+      setUp(() => StreamVideoPushHandler.ownsClientLifecycle = () => false);
+
+      test('forwards a ringing push to the running client', () async {
+        final handled = await handle(
+          createStreamVideo: factoryReturning(client),
+          existingClient: () => client,
+        );
+
+        // An iOS app that rings over Firebase rather than PushKit gets its
+        // incoming calls from here; dropping them would show nothing at all.
+        expect(handled, isTrue);
+        verify(() => client.handleRingingFlowNotifications(any())).called(1);
+        expect(factoryCalls, 0);
+      });
+
+      test('builds nothing for a ringing push with no running client', () async {
+        final handled = await handle(
+          createStreamVideo: factoryReturning(client),
+        );
+
+        expect(handled, isFalse);
+        // A client built here would be the app's second, and would be disposed
+        // a second after the user answers — taking the app's own down with it.
+        expect(factoryCalls, 0);
+        verifyNever(() => client.dispose());
+        expect(onDisposeCalled, isFalse);
+      });
+
+      test('forwards a missed call to the running client', () async {
+        final handled = await handle(
+          createStreamVideo: factoryReturning(client),
+          existingClient: () => client,
+          data: _missedCallPush,
+        );
+
+        // A missed call has no VoIP counterpart, so nothing else would post it.
+        expect(handled, isTrue);
+        verify(() => client.handleRingingFlowNotifications(any())).called(1);
+        expect(factoryCalls, 0);
+      });
+
+      test('builds nothing for a missed call with no running client', () async {
+        final handled = await handle(
+          createStreamVideo: factoryReturning(client),
+          data: _missedCallPush,
+        );
+
+        expect(handled, isFalse);
+        expect(factoryCalls, 0);
+      });
+
+      test('never observes ringing events or schedules a teardown', () async {
+        await handle(
+          createStreamVideo: factoryReturning(client),
+          existingClient: () => client,
+          data: _missedCallPush,
+        );
+
+        await pastTheGrace();
+
+        verifyNever(client.observeCoreRingingEventsForBackground);
         verifyNever(() => client.dispose());
         expect(onDisposeCalled, isFalse);
       });

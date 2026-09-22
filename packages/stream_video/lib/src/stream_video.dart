@@ -782,10 +782,15 @@ class StreamVideo extends Disposable {
     return manager.on<T>(onEvent);
   }
 
-  /// This method is used to dispose the StreamVideo instance after the ringing event is resolved.
-  /// It is used primarily for Firebase Messaging background handler where separate isolate is used to handle the message.
+  /// Disposes this client a second after the ringing flow resolves — once the
+  /// user has answered, declined, or let the call time out.
   ///
-  /// [disposingCallback] is a callback that allows to perform any additional disposing operations after the ringing event is resolved.
+  /// [disposingCallback] runs first, for whatever the caller set up alongside
+  /// the client.
+  @Deprecated(
+    'Use StreamVideoPushHandler.handleBackgroundMessage instead, which runs the '
+    'whole background lifecycle.',
+  )
   StreamSubscription<RingingEvent>? disposeAfterResolvingRinging({
     void Function()? disposingCallback,
   }) {
