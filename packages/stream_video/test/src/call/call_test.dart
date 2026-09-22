@@ -165,8 +165,10 @@ void main() {
           ),
         );
 
+        // The drop has to hold: one that recovers within the grace period is
+        // the monitor's own probe failing, not an outage.
         internetStatusController.add(InternetStatus.disconnected);
-        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(testConfirmedNetworkDrop);
         internetStatusController.add(InternetStatus.connected);
         await Future<void>.delayed(Duration.zero);
 
@@ -178,6 +180,51 @@ void main() {
           ),
         ).called(1);
 
+        await internetStatusController.close();
+      },
+    );
+
+    test(
+      'should not reconnect when a reported network drop does not hold',
+      () async {
+        final internetStatusController = BehaviorSubject<InternetStatus>.seeded(
+          InternetStatus.connected,
+        );
+
+        final coordinatorClient = setupMockCoordinatorClient();
+        final callSession = setupMockCallSession();
+
+        final call = createTestCall(
+          networkMonitor: setupMockInternetConnection(
+            statusStream: internetStatusController,
+          ),
+          coordinatorClient: coordinatorClient,
+          sessionFactory: setupMockSessionFactory(
+            callSession: callSession,
+          ),
+        );
+
+        final result = await call.join();
+        expect(result.isSuccess, isTrue);
+
+        // The monitor decides connectivity by probing public endpoints, so a
+        // probe that cannot run reads as an outage — which is what every app
+        // resume looks like. Tearing a healthy session down over one would
+        // reconnect on every call answered from a locked screen.
+        internetStatusController.add(InternetStatus.disconnected);
+        await Future<void>.delayed(testNetworkDropGracePeriod ~/ 2);
+        internetStatusController.add(InternetStatus.connected);
+        await Future<void>.delayed(testConfirmedNetworkDrop);
+
+        verifyNever(
+          () => callSession.fastReconnect(
+            reconnectDetails: any(named: 'reconnectDetails'),
+            capabilities: any(named: 'capabilities'),
+            unifiedSessionId: any(named: 'unifiedSessionId'),
+          ),
+        );
+
+        await call.leave();
         await internetStatusController.close();
       },
     );

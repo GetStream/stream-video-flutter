@@ -682,7 +682,8 @@ void main() {
           // Trigger network reconnection — fast reconnect will fail,
           // causing a fallback to rejoin which hits the rebind path.
           internetStatusController.add(InternetStatus.disconnected);
-          await Future<void>.delayed(Duration.zero);
+          // The drop has to hold to count as one.
+          await Future<void>.delayed(testConfirmedNetworkDrop);
           internetStatusController.add(InternetStatus.connected);
 
           // Fast reconnect failure now correctly propagates to the outer
@@ -717,7 +718,8 @@ void main() {
           verifyNever(() => mockStreamVideo.setAudioProcessingEnabled(any()));
 
           internetStatusController.add(InternetStatus.disconnected);
-          await Future<void>.delayed(Duration.zero);
+          // The drop has to hold to count as one.
+          await Future<void>.delayed(testConfirmedNetworkDrop);
           internetStatusController.add(InternetStatus.connected);
           await Future<void>.delayed(const Duration(milliseconds: 100));
 
@@ -744,7 +746,8 @@ void main() {
           expect(joinResult.isSuccess, isTrue);
 
           internetStatusController.add(InternetStatus.disconnected);
-          await Future<void>.delayed(Duration.zero);
+          // The drop has to hold to count as one.
+          await Future<void>.delayed(testConfirmedNetworkDrop);
           internetStatusController.add(InternetStatus.connected);
           await Future<void>.delayed(const Duration(milliseconds: 100));
 
