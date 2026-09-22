@@ -2,12 +2,6 @@ plugins {
     id "com.android.library"
 }
 
-def agpMajor = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')[0].toInteger()
-def builtInKotlin = project.findProperty("android.builtInKotlin")?.toBoolean()
-if (agpMajor < 9 || builtInKotlin == false) {
-    apply plugin: "kotlin-android"
-}
-
 allprojects {
     repositories {
         google()
