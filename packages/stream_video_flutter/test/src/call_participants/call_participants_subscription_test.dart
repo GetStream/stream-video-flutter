@@ -33,7 +33,7 @@ void main() {
 
     when(() => callState.callParticipants).thenReturn([_participant('alice')]);
     when(() => stateEmitter.value).thenReturn(callState);
-    when(() => call.state).thenReturn(stateEmitter);
+    when(() => call.state).thenAnswer((_) => stateEmitter);
     when(() => call.participantsStream).thenAnswer((_) => participants.stream);
   });
 

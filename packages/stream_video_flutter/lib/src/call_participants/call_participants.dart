@@ -70,6 +70,10 @@ class StreamCallParticipants extends StatefulWidget {
   final CallParticipantFilter<CallParticipantState> filter;
 
   /// Used for sorting the call participants.
+  ///
+  /// Compared by identity to decide whether the list has to be ordered again,
+  /// so a comparator built inline re-sorts on every build. Hoist it to sort
+  /// only when it actually changes.
   final CallParticipantSort<CallParticipantState> sort;
 
   /// Whether the local participant's self-view floats over the layout.
@@ -173,10 +177,11 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
   void didUpdateWidget(covariant StreamCallParticipants oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Picking a layout swaps the preset the list is ordered by. The presets
-    // are cached instances, so an unchanged layout compares equal here; a sort
-    // the caller passed is a function, and an inline closure is a new object on
-    // every build, which the `recalculateParticipants` below absorbs.
+    // Both compared by identity. `sort` defaults to `layoutMode.sorting`, and
+    // the presets are cached instances, so picking a layout is a change here
+    // while an unchanged layout is not. A comparator the caller built inline is
+    // a new object on every build and so re-sorts, which `recalculateParticipants`
+    // absorbs — it skips the `setState` when the order comes out the same.
     final orderingChanged =
         widget.sort != oldWidget.sort || widget.filter != oldWidget.filter;
 

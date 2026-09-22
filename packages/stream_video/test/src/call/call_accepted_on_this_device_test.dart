@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_video/src/shared_emitter.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
@@ -34,13 +33,16 @@ void main() {
     setUp(() {
       mockCoordinatorClient = MockCoordinatorClient();
 
-      when(
-        () => mockCoordinatorClient.events,
-      ).thenReturn(MutableSharedEmitterImpl<CoordinatorEvent>());
+      // `thenAnswer`, not `thenReturn`: a SharedEmitter is a Stream, which
+      // mocktail refuses to hand back from `thenReturn`.
+      final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+      when(() => mockCoordinatorClient.events).thenAnswer(
+        (_) => coordinatorEvents,
+      );
 
       streamVideo = StreamVideo.create(
         'test-api-key',
-        user: User.regular(userId: 'test-user', name: 'Test User'),
+        user: User(id: 'test-user', name: 'Test User'),
         userToken:
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiSm9obiBEb2UifQ.hrrtiYCtfs2cowE2sx2dypxoXhsEE8pQl-V6Nq4i8qU',
         options: StreamVideoOptions(
@@ -125,7 +127,7 @@ void main() {
     test('is cleared when the coordinator accept fails', () async {
       when(
         () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
-      ).thenAnswer((_) async => Result.error('network error'));
+      ).thenAnswer((_) async => failureWithError('network error'));
 
       final call = createIncomingCall();
       final result = await call.accept();

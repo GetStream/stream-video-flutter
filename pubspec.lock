@@ -1955,12 +1955,13 @@ packages:
     source: hosted
     version: "10.4.0"
   stream_core:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: stream_core
-      sha256: "25c19466b96050354e9a64fb13767956b48b9405576472005598733502ef219c"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/stream_core"
+      ref: f4d49e9db343b48d890247fc9bf142805804daf1
+      resolved-ref: f4d49e9db343b48d890247fc9bf142805804daf1
+      url: "https://github.com/GetStream/stream-core-flutter.git"
+    source: git
     version: "0.5.0"
   stream_core_flutter:
     dependency: "direct overridden"

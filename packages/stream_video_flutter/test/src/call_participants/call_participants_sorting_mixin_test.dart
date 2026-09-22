@@ -22,8 +22,8 @@ CallParticipantState _participant(
 class _Host extends StatefulWidget {
   const _Host({super.key, this.filter, this.sort});
 
-  final Filter<CallParticipantState>? filter;
-  final Sort<CallParticipantState>? sort;
+  final CallParticipantFilter<CallParticipantState>? filter;
+  final CallParticipantSort<CallParticipantState>? sort;
 
   @override
   State<_Host> createState() => _HostState();
@@ -33,10 +33,11 @@ class _HostState extends State<_Host> with CallParticipantsSortingMixin {
   int builds = 0;
 
   @override
-  Filter<CallParticipantState>? get participantFilter => widget.filter;
+  CallParticipantFilter<CallParticipantState>? get participantFilter =>
+      widget.filter;
 
   @override
-  Sort<CallParticipantState>? get participantSort => widget.sort;
+  CallParticipantSort<CallParticipantState>? get participantSort => widget.sort;
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +48,8 @@ class _HostState extends State<_Host> with CallParticipantsSortingMixin {
 
 Future<_HostState> _pumpHost(
   WidgetTester tester, {
-  Filter<CallParticipantState>? filter,
-  Sort<CallParticipantState>? sort,
+  CallParticipantFilter<CallParticipantState>? filter,
+  CallParticipantSort<CallParticipantState>? sort,
 }) async {
   final key = GlobalKey<_HostState>();
   await tester.pumpWidget(

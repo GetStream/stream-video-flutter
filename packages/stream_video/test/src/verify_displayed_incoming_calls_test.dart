@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/core/client_state.dart';
-import 'package:stream_video/src/shared_emitter.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../test_helpers.dart';
@@ -39,13 +38,16 @@ void main() {
 
     setUp(() {
       // The lost-accept recovery is iOS only; see _acceptDisplayedIncomingCall.
-      CurrentPlatform.debugPlatformOverride = PlatformType.ios;
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
       mockCoordinatorClient = MockCoordinatorClient();
       mockPushManager = MockPushNotificationManager();
 
-      when(
-        () => mockCoordinatorClient.events,
-      ).thenReturn(MutableSharedEmitterImpl<CoordinatorEvent>());
+      // `thenAnswer`, not `thenReturn`: a SharedEmitter is a Stream, which
+      // mocktail refuses to hand back from `thenReturn`.
+      final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+      when(() => mockCoordinatorClient.events).thenAnswer(
+        (_) => coordinatorEvents,
+      );
 
       when(
         () => mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
@@ -53,7 +55,7 @@ void main() {
 
       streamVideo = StreamVideo.create(
         'test-api-key',
-        user: User.regular(userId: 'test-user', name: 'Test User'),
+        user: User(id: 'test-user', name: 'Test User'),
         userToken:
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiSm9obiBEb2UifQ.hrrtiYCtfs2cowE2sx2dypxoXhsEE8pQl-V6Nq4i8qU',
         options: StreamVideoOptions(
@@ -65,7 +67,7 @@ void main() {
     });
 
     tearDown(() async {
-      CurrentPlatform.debugPlatformOverride = null;
+      CurrentPlatform.debugCurrentPlatformOverride = null;
       await StreamVideo.reset();
     });
 
@@ -110,7 +112,7 @@ void main() {
       // and never joined.
       when(
         () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
-      ).thenAnswer((_) async => Result.error('accept rejected'));
+      ).thenAnswer((_) async => failureWithError('accept rejected'));
 
       displayCall(isAccepted: true);
       seedIncomingCall();
@@ -127,7 +129,7 @@ void main() {
       // must not be left there when the call cannot be accepted.
       when(
         () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
-      ).thenAnswer((_) async => Result.error('accept rejected'));
+      ).thenAnswer((_) async => failureWithError('accept rejected'));
 
       displayCall(isAccepted: true);
       seedIncomingCall();
@@ -154,7 +156,7 @@ void main() {
           membersLimit: any(named: 'membersLimit'),
           e2ee: any(named: 'e2ee'),
         ),
-      ).thenAnswer((_) async => Result.error('join rejected'));
+      ).thenAnswer((_) async => failureWithError('join rejected'));
 
       displayCall(isAccepted: true);
       final seeded = seedIncomingCall();
@@ -207,7 +209,7 @@ void main() {
       // not lost there and a terminated-state answer is owned by
       // consumeAndAcceptActiveCall. Accepting here too would hand the app a
       // second onCallAccepted and navigate it twice.
-      CurrentPlatform.debugPlatformOverride = PlatformType.android;
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
 
       when(
         () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
@@ -233,13 +235,16 @@ void main() {
       mockCoordinatorClient = MockCoordinatorClient();
       mockPushManager = MockPushNotificationManager();
 
-      when(
-        () => mockCoordinatorClient.events,
-      ).thenReturn(MutableSharedEmitterImpl<CoordinatorEvent>());
+      // `thenAnswer`, not `thenReturn`: a SharedEmitter is a Stream, which
+      // mocktail refuses to hand back from `thenReturn`.
+      final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+      when(() => mockCoordinatorClient.events).thenAnswer(
+        (_) => coordinatorEvents,
+      );
 
       streamVideo = StreamVideo.create(
         'test-api-key',
-        user: User.regular(userId: 'test-user', name: 'Test User'),
+        user: User(id: 'test-user', name: 'Test User'),
         userToken:
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiSm9obiBEb2UifQ.hrrtiYCtfs2cowE2sx2dypxoXhsEE8pQl-V6Nq4i8qU',
         options: StreamVideoOptions(
@@ -286,7 +291,7 @@ void main() {
       // Consuming must not raise the app-facing incoming-call signal: the
       // native screen is already showing this call, and an app that renders its
       // own incoming UI from it would end up with two.
-      expect(streamVideo.state.incomingCall.valueOrNull, isNull);
+      expect(streamVideo.state.incomingCall.value, isNull);
     });
 
     test('reuses the call the ringing event already created', () async {
@@ -359,7 +364,7 @@ void main() {
       );
 
       expect(
-        streamVideo.state.incomingCall.valueOrNull,
+        streamVideo.state.incomingCall.value,
         same(consumed.getDataOrNull()),
       );
     });
@@ -409,7 +414,7 @@ void main() {
         ),
       );
 
-      expect(streamVideo.state.incomingCall.valueOrNull, isNull);
+      expect(streamVideo.state.incomingCall.value, isNull);
     });
 
     test('clears the incoming call once it is cleaned up', () async {
@@ -448,11 +453,11 @@ void main() {
           createdAt: DateTime.now(),
         ),
       );
-      expect(streamVideo.state.incomingCall.valueOrNull, isNotNull);
+      expect(streamVideo.state.incomingCall.value, isNotNull);
 
       await consumed.getDataOrNull()!.leave();
 
-      expect(streamVideo.state.incomingCall.valueOrNull, isNull);
+      expect(streamVideo.state.incomingCall.value, isNull);
     });
 
     test(
@@ -536,7 +541,7 @@ void main() {
         ),
       );
 
-      final second = streamVideo.state.incomingCall.valueOrNull;
+      final second = streamVideo.state.incomingCall.value;
       expect(second, isNotNull);
       expect(second, isNot(same(first.getDataOrNull())));
     });
@@ -551,9 +556,12 @@ void main() {
       mockCoordinatorClient = MockCoordinatorClient();
       mockPushManager = MockPushNotificationManager();
 
-      when(
-        () => mockCoordinatorClient.events,
-      ).thenReturn(MutableSharedEmitterImpl<CoordinatorEvent>());
+      // `thenAnswer`, not `thenReturn`: a SharedEmitter is a Stream, which
+      // mocktail refuses to hand back from `thenReturn`.
+      final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+      when(() => mockCoordinatorClient.events).thenAnswer(
+        (_) => coordinatorEvents,
+      );
       when(
         () => mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
       ).thenAnswer((_) async {});
@@ -565,7 +573,7 @@ void main() {
 
       streamVideo = StreamVideo.create(
         'test-api-key',
-        user: User.regular(userId: 'test-user', name: 'Test User'),
+        user: User(id: 'test-user', name: 'Test User'),
         userToken:
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiSm9obiBEb2UifQ.hrrtiYCtfs2cowE2sx2dypxoXhsEE8pQl-V6Nq4i8qU',
         options: StreamVideoOptions(
@@ -612,7 +620,7 @@ void main() {
       // Deliberately not published to incomingCall and never consumed, so the
       // marker is the only registry holding it.
       await call.accept();
-      expect(streamVideo.state.incomingCall.valueOrNull, isNull);
+      expect(streamVideo.state.incomingCall.value, isNull);
       expect(streamVideo.activeCalls, isEmpty);
 
       Call? handed;

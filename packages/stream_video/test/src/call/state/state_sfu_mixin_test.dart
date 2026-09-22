@@ -544,7 +544,7 @@ void main() {
       final notifier = _notifier([_participant(userId: 'alice')]);
 
       final seen = <CallState>[];
-      final sub = notifier.callStateStream.valueStream.listen(seen.add);
+      final sub = notifier.callStateStream.listen(seen.add);
       await Future<void>.delayed(Duration.zero);
       seen.clear();
 

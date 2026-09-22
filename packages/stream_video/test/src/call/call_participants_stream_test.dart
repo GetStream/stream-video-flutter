@@ -186,18 +186,23 @@ void main() {
     });
 
     test('delivers the next value after an error is replayed', () async {
-      final manager = _stateManager(null);
+      // A throwing resolver is the integrator-supplied path that puts an error
+      // into the stream; the subject underneath caches it for the next
+      // listener.
+      var resolverThrows = false;
+      final manager = _stateManager((_) {
+        if (resolverThrows) throw 'boom';
+        return const Duration(milliseconds: 1);
+      });
       final call = createTestCall(stateManager: manager);
 
       final early = call.participantsStream.listen((_) {}, onError: (_) {});
       await Future<void>.delayed(const Duration(milliseconds: 20));
 
-      // The emitter exposes a plain `Sink`, but it is a `BehaviorSubject`
-      // underneath, which is what caches the error for the next listener.
-      (manager.callStateStream.valueSink as EventSink<CallState>).addError(
-        'boom',
-      );
+      resolverThrows = true;
+      _setParticipants(manager, ['alice', 'bob']);
       await Future<void>.delayed(const Duration(milliseconds: 20));
+      resolverThrows = false;
 
       // A listener arriving now is opened with the cached error rather than a
       // value, so the flag that drops the replay must be set by either.

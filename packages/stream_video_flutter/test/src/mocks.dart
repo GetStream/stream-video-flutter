@@ -11,10 +11,19 @@ class MockCall extends Mock implements Call {
     when(() => viewportVisibility).thenReturn(
       ViewportVisibilityRegistry(onAggregate: (_) async => true),
     );
+
+    // Anything drawing a participant list subscribes to this. Most tests hand
+    // the list over directly or drive `state`, so they only need it to be a
+    // stream that stays quiet; `when` in a test still overrides this.
+    when(() => participantsStream).thenAnswer(
+      (_) => const Stream<List<CallParticipantState>>.empty(),
+    );
   }
 }
 
 class MockCallState extends Mock implements CallState {}
+
+class MockStateEmitter<T> extends Mock implements StateEmitter<T> {}
 
 class MockCallParticipantState extends Mock implements CallParticipantState {
   MockCallParticipantState() {

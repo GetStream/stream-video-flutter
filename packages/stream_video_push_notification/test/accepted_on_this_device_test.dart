@@ -21,7 +21,9 @@ Call _callWith(CallStatus status) {
       preferences: DefaultCallPreferences(),
     ).copyWith(status: status),
   );
-  when(() => call.state).thenReturn(emitter);
+  // `thenAnswer`, not `thenReturn`: a StateEmitter is a Stream, which mocktail
+  // refuses to hand back from `thenReturn`.
+  when(() => call.state).thenAnswer((_) => emitter);
 
   return call;
 }

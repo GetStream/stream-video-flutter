@@ -34,7 +34,7 @@ void main() {
 
     when(() => callState.callParticipants).thenReturn(const []);
     when(() => stateEmitter.value).thenReturn(callState);
-    when(() => call.state).thenReturn(stateEmitter);
+    when(() => call.state).thenAnswer((_) => stateEmitter);
     // Count how often the widget reaches for the stream: it must take one and
     // keep it, whatever `Call.participantsStream` does internally.
     when(() => call.participantsStream).thenAnswer((_) {
@@ -123,7 +123,7 @@ void main() {
         StreamController<List<CallParticipantState>>.broadcast();
     addTearDown(otherParticipants.close);
 
-    when(() => otherCall.state).thenReturn(stateEmitter);
+    when(() => otherCall.state).thenAnswer((_) => stateEmitter);
     when(
       () => otherCall.participantsStream,
     ).thenAnswer((_) => otherParticipants.stream);
@@ -197,7 +197,7 @@ void main() {
     when(() => callState.callParticipants).thenReturn([_participant('alice')]);
     when(() => otherState.callParticipants).thenReturn([_participant('bob')]);
     when(() => otherEmitter.value).thenReturn(otherState);
-    when(() => otherCall.state).thenReturn(otherEmitter);
+    when(() => otherCall.state).thenAnswer((_) => otherEmitter);
     when(
       () => otherCall.participantsStream,
     ).thenAnswer((_) => otherParticipants.stream);

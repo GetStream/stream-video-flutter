@@ -94,7 +94,7 @@ class UserAuthController extends ChangeNotifier {
 User _withTokenUserId(User user, String token) {
   final String tokenUserId;
   try {
-    tokenUserId = UserToken.jwt(token).userId;
+    tokenUserId = UserToken(token).userId;
   } catch (e) {
     debugPrint('Could not read the user id from the token: $e');
     return user;
@@ -107,16 +107,15 @@ User _withTokenUserId(User user, String token) {
     'Continuing as "$tokenUserId".',
   );
 
-  final info = user.info;
   return User(
+    id: tokenUserId,
     type: user.type,
-    info: UserInfo(
-      id: tokenUserId,
-      name: info.name.isEmpty ? tokenUserId : info.name,
-      image: info.image,
-      role: info.role,
-      teams: info.teams,
-      extraData: info.extraData,
-    ),
+    // `name` falls back to the id, so the name the login actually carried is
+    // read off `originalName` — otherwise the old id would become the name.
+    name: user.originalName ?? tokenUserId,
+    image: user.image,
+    role: user.role,
+    teams: user.teams,
+    custom: user.custom,
   );
 }

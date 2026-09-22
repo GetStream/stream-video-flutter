@@ -34,7 +34,7 @@ Widget _box(BuildContext _, Call __, CallParticipantState participant) =>
     SizedBox.expand(key: ValueKey('tile-${participant.sessionId}'));
 
 void main() {
-  testWidgets('a sort the caller passes inline does not re-sort every build', (
+  testWidgets('a sort that stays the same does not re-sort every build', (
     tester,
   ) async {
     final participants = [
@@ -43,9 +43,15 @@ void main() {
     ];
     var comparisons = 0;
 
-    // A fresh closure on every build, the way a call site written inline
-    // hands one over. Comparing these would be function identity, so every
-    // rebuild would look like a new sort.
+    // Hoisted, so every build hands over the same function. A comparator built
+    // inline is a new object each time and does re-sort — `sort` is compared by
+    // identity, which is the only way a caller's new comparator can be noticed
+    // at all (see `re-sorts when the sort comparator changes`).
+    int bySessionId(CallParticipantState a, CallParticipantState b) {
+      comparisons++;
+      return a.sessionId.compareTo(b.sessionId);
+    }
+
     Future<void> pumpAgain() => tester.pumpWidget(
       TestWrapper(
         child: SizedBox(
@@ -54,10 +60,7 @@ void main() {
           child: StreamCallParticipants(
             call: MockCall(),
             participants: participants,
-            sort: (a, b) {
-              comparisons++;
-              return a.sessionId.compareTo(b.sessionId);
-            },
+            sort: bySessionId,
             callParticipantBuilder: _box,
             floatingSelfViewBuilder: _box,
           ),
