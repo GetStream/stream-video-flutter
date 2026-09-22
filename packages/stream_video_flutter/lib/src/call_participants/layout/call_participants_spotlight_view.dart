@@ -18,7 +18,8 @@ enum ParticipantsBarAlignment { top, bottom, left, right }
 /// The bar's tiles have a size of their own rather than a share of the view,
 /// scaled down only where they would otherwise take more than a third of it.
 /// They are centred while they fit, and once they do not the bar runs to the
-/// edge of the view and scrolls.
+/// edge of the view and scrolls, with a button at either end of it for the
+/// tiles that way.
 class CallParticipantsSpotlightView extends StatelessWidget {
   const CallParticipantsSpotlightView({
     super.key,
@@ -201,8 +202,13 @@ class CallParticipantsSpotlightView extends StatelessWidget {
     return SizedBox(
       width: isHorizontal ? constraints.maxWidth : tileSize.width,
       height: isHorizontal ? tileSize.height : constraints.maxHeight,
-      child: ListView.separated(
-        padding: isHorizontal
+      child: _ParticipantsBar(
+        call: call,
+        participants: tiles,
+        participantBuilder: participantBuilder,
+        tileSize: tileSize,
+        spacing: spacing,
+        listPadding: isHorizontal
             ? EdgeInsets.only(
                 left: math.max(start, slack),
                 right: math.max(end, slack),
@@ -211,17 +217,7 @@ class CallParticipantsSpotlightView extends StatelessWidget {
                 top: math.max(start, slack),
                 bottom: math.max(end, slack),
               ),
-        itemCount: tiles.length,
-        scrollDirection: isHorizontal ? Axis.horizontal : Axis.vertical,
-        separatorBuilder: (context, index) =>
-            SizedBox.square(dimension: spacing),
-        itemBuilder: (context, index) {
-          final participant = tiles[index];
-          return SizedBox.fromSize(
-            size: tileSize,
-            child: participantBuilder.call(context, call, participant),
-          );
-        },
+        isHorizontal: isHorizontal,
       ),
     );
   }
@@ -246,6 +242,210 @@ class CallParticipantsSpotlightView extends StatelessWidget {
     if (extent <= maxExtent) return tileSize;
 
     return tileSize * (maxExtent / extent);
+  }
+}
+
+/// Which ends of the bar have tiles beyond them.
+typedef _BarEdges = ({bool start, bool end});
+
+/// The bar's tiles, with a button at either end for the ones it hides.
+///
+/// A mouse can neither drag a list nor turn a wheel across a horizontal one,
+/// so on desktop the buttons are the only way to the tiles off screen. Each
+/// appears while there is something further that way and scrolls a viewport
+/// towards it.
+class _ParticipantsBar extends StatefulWidget {
+  const _ParticipantsBar({
+    required this.call,
+    required this.participants,
+    required this.participantBuilder,
+    required this.tileSize,
+    required this.spacing,
+    required this.listPadding,
+    required this.isHorizontal,
+  });
+
+  final Call call;
+  final List<CallParticipantState> participants;
+  final CallParticipantBuilder participantBuilder;
+  final Size tileSize;
+  final double spacing;
+  final EdgeInsets listPadding;
+  final bool isHorizontal;
+
+  @override
+  State<_ParticipantsBar> createState() => _ParticipantsBarState();
+}
+
+class _ParticipantsBarState extends State<_ParticipantsBar> {
+  final _controller = ScrollController();
+  final _edges = ValueNotifier<_BarEdges>((start: false, end: false));
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _edges.dispose();
+    super.dispose();
+  }
+
+  // Returns false so the notification carries on to the listeners above.
+  bool _syncEdges(ScrollMetrics metrics) {
+    _edges.value = (
+      start: metrics.extentBefore > 0,
+      end: metrics.extentAfter > 0,
+    );
+    return false;
+  }
+
+  /// Scrolls a viewport towards the end of the list, or towards its start
+  /// when [forward] is false.
+  Future<void> _scroll({required bool forward}) async {
+    if (!_controller.hasClients) return;
+
+    final position = _controller.position;
+    final step = forward
+        ? position.viewportDimension
+        : -position.viewportDimension;
+
+    await _controller.animateTo(
+      (position.pixels + step).clamp(
+        position.minScrollExtent,
+        position.maxScrollExtent,
+      ),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final icons = context.streamIcons;
+    final inset = context.streamSpacing.sm;
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+
+    final (startIcon, endIcon) = switch ((widget.isHorizontal, isRtl)) {
+      (false, _) => (icons.chevronUp, icons.chevronDown),
+      (true, false) => (icons.chevronLeft, icons.chevronRight),
+      (true, true) => (icons.chevronRight, icons.chevronLeft),
+    };
+
+    return ValueListenableBuilder<_BarEdges>(
+      valueListenable: _edges,
+      builder: (context, edges, child) => Stack(
+        children: [
+          Positioned.fill(child: child!),
+          _buildButton(
+            icon: startIcon,
+            inset: inset,
+            isStart: true,
+            edges: edges,
+          ),
+          _buildButton(
+            icon: endIcon,
+            inset: inset,
+            isStart: false,
+            edges: edges,
+          ),
+        ],
+      ),
+      child: _buildList(),
+    );
+  }
+
+  Widget _buildList() {
+    // A metrics notification covers the layout the list settles into, and a
+    // scroll notification everything after it.
+    return NotificationListener<ScrollMetricsNotification>(
+      onNotification: (notification) => _syncEdges(notification.metrics),
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (notification) => _syncEdges(notification.metrics),
+        child: ListView.separated(
+          controller: _controller,
+          padding: widget.listPadding,
+          itemCount: widget.participants.length,
+          scrollDirection: widget.isHorizontal
+              ? Axis.horizontal
+              : Axis.vertical,
+          separatorBuilder: (context, index) =>
+              SizedBox.square(dimension: widget.spacing),
+          itemBuilder: (context, index) {
+            final participant = widget.participants[index];
+            return SizedBox.fromSize(
+              size: widget.tileSize,
+              child: widget.participantBuilder.call(
+                context,
+                widget.call,
+                participant,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildButton({
+    required IconData icon,
+    required double inset,
+    required bool isStart,
+    required _BarEdges edges,
+  }) {
+    // The design insets the button's visual, which carries a tap target wider
+    // than itself so that a finger has something to land on.
+    final offset =
+        inset - (kMinInteractiveDimension - _barButtonSize.value) / 2;
+
+    // Scaled away rather than taken out, which also drops it out of the hit
+    // test: a zero transform cannot be inverted.
+    final button = AnimatedScale(
+      scale: (isStart ? edges.start : edges.end) ? 1 : 0,
+      duration: kThemeAnimationDuration,
+      child: _BarScrollButton(
+        icon: icon,
+        onPressed: () => _scroll(forward: !isStart),
+      ),
+    );
+
+    if (widget.isHorizontal) {
+      return PositionedDirectional(
+        start: isStart ? offset : null,
+        end: isStart ? null : offset,
+        top: 0,
+        bottom: 0,
+        child: Center(widthFactor: 1, child: button),
+      );
+    }
+
+    return Positioned(
+      top: isStart ? offset : null,
+      bottom: isStart ? null : offset,
+      left: 0,
+      right: 0,
+      child: Center(heightFactor: 1, child: button),
+    );
+  }
+}
+
+/// The size the bar's buttons take, which is [StreamButton]'s own default.
+const _barButtonSize = StreamButtonSize.medium;
+
+/// A round floating button that moves the participants bar along.
+class _BarScrollButton extends StatelessWidget {
+  const _BarScrollButton({required this.icon, required this.onPressed});
+
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamButton.icon(
+      icon: Icon(icon),
+      style: .secondary,
+      type: .ghost,
+      isFloating: true,
+      onPressed: onPressed,
+      themeStyle: StreamButtonThemeStyle(iconSize: .all(16)),
+    );
   }
 }
 

@@ -34,6 +34,21 @@ Widget _stageBox(BuildContext _, Call __, CallParticipantState participant) =>
 
 Finder _stageTile(String id) => find.byKey(ValueKey('stage-$id'));
 
+/// The target scale of the [AnimatedScale] around the button carrying [icon].
+///
+/// The bar's buttons are scaled away rather than taken out, so this reads what
+/// the button is meant to be doing without waiting on the animation.
+double _buttonScale(WidgetTester tester, IconData icon) => tester
+    .widget<AnimatedScale>(
+      find
+          .ancestor(of: find.byIcon(icon), matching: find.byType(AnimatedScale))
+          .first,
+    )
+    .scale;
+
+double _scrolled(WidgetTester tester) =>
+    tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
+
 void main() {
   // StreamScreenSize reads MediaQuery.sizeOf, so the case's width has to come
   // from the surface itself — a SizedBox inside the default 800x600 one leaves
@@ -46,6 +61,7 @@ void main() {
     StreamCallParticipantsSpotlightStyle? style,
     EdgeInsetsGeometry? padding,
     CallParticipantBuilder? spotlightBuilder,
+    TextDirection textDirection = TextDirection.ltr,
   }) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = size;
@@ -70,7 +86,14 @@ void main() {
       );
     }
 
-    return tester.pumpWidget(TestWrapper(child: SizedBox.expand(child: view)));
+    return tester.pumpWidget(
+      TestWrapper(
+        child: Directionality(
+          textDirection: textDirection,
+          child: SizedBox.expand(child: view),
+        ),
+      ),
+    );
   }
 
   group('the stage', () {
@@ -307,6 +330,174 @@ void main() {
         tester.getRect(_tile('bar0')).left,
         greaterThanOrEqualTo(tester.getRect(_tile('stage')).right),
       );
+    });
+  });
+
+  group("the bar's scroll buttons", () {
+    const overflowing = Size(400, 656);
+
+    Future<void> pumpBar(
+      WidgetTester tester, {
+      int barParticipants = 5,
+      Size size = overflowing,
+      ParticipantsBarAlignment barAlignment = ParticipantsBarAlignment.bottom,
+      TextDirection textDirection = TextDirection.ltr,
+    }) async {
+      await pump(
+        tester,
+        size: size,
+        barParticipants: barParticipants,
+        barAlignment: barAlignment,
+        textDirection: textDirection,
+      );
+      // The list reports its metrics in a microtask after it lays out, so the
+      // buttons come in a frame behind the first one, and then scale up.
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('stay away while the tiles fit', (tester) async {
+      await pumpBar(tester, barParticipants: 1);
+
+      expect(_buttonScale(tester, StreamIconData.chevronLeft), 0);
+      expect(_buttonScale(tester, StreamIconData.chevronRight), 0);
+    });
+
+    testWidgets('offer the way on once they do not', (tester) async {
+      await pumpBar(tester);
+
+      // Nothing behind the bar to start with, and the rest of it ahead.
+      expect(_buttonScale(tester, StreamIconData.chevronLeft), 0);
+      expect(_buttonScale(tester, StreamIconData.chevronRight), 1);
+    });
+
+    testWidgets('scroll a viewport on', (tester) async {
+      await pumpBar(tester);
+
+      await tester.tap(find.byIcon(StreamIconData.chevronRight));
+      await tester.pumpAndSettle();
+
+      expect(_scrolled(tester), 400);
+    });
+
+    testWidgets('scroll a viewport back', (tester) async {
+      await pumpBar(tester);
+
+      await tester.tap(find.byIcon(StreamIconData.chevronRight));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(StreamIconData.chevronLeft));
+      await tester.pumpAndSettle();
+
+      expect(_scrolled(tester), 0);
+    });
+
+    testWidgets('stop at the end rather than overshooting it', (tester) async {
+      await pumpBar(tester, barParticipants: 3);
+
+      await tester.tap(find.byIcon(StreamIconData.chevronRight));
+      await tester.pumpAndSettle();
+
+      // 3 x 222 and two 8px gaps is 682, plus the 16 of padding, less the 400
+      // the view is wide.
+      expect(_scrolled(tester), 298);
+    });
+
+    testWidgets('turn around at the end of the bar', (tester) async {
+      await pumpBar(tester, barParticipants: 3);
+
+      await tester.tap(find.byIcon(StreamIconData.chevronRight));
+      await tester.pumpAndSettle();
+
+      expect(_buttonScale(tester, StreamIconData.chevronRight), 0);
+      expect(_buttonScale(tester, StreamIconData.chevronLeft), 1);
+    });
+
+    testWidgets('both show in the middle of the bar', (tester) async {
+      await pumpBar(tester);
+
+      await tester.tap(find.byIcon(StreamIconData.chevronRight));
+      await tester.pumpAndSettle();
+
+      // 5 tiles run to 1142, so 400 in leaves something either way.
+      expect(_buttonScale(tester, StreamIconData.chevronLeft), 1);
+      expect(_buttonScale(tester, StreamIconData.chevronRight), 1);
+    });
+
+    testWidgets('sit at the ends of the bar, inside it', (tester) async {
+      // Both of them, so the one at the start is drawn rather than scaled to
+      // nothing — a zero transform leaves it no position to read.
+      await pumpBar(tester);
+      await tester.tap(find.byIcon(StreamIconData.chevronRight));
+      await tester.pumpAndSettle();
+
+      final bar = tester.getRect(find.byType(ListView));
+      final back = tester.getCenter(find.byIcon(StreamIconData.chevronLeft));
+      final on = tester.getCenter(find.byIcon(StreamIconData.chevronRight));
+
+      // 12 of inset and half of the 40-wide button.
+      expect(back.dx - bar.left, 32);
+      expect(bar.right - on.dx, 32);
+      expect(back.dy, bar.center.dy);
+      expect(on.dy, bar.center.dy);
+    });
+
+    for (final alignment in const [
+      ParticipantsBarAlignment.top,
+      ParticipantsBarAlignment.bottom,
+    ]) {
+      testWidgets('run along a bar aligned ${alignment.name}', (tester) async {
+        await pumpBar(tester, barAlignment: alignment);
+
+        expect(_buttonScale(tester, StreamIconData.chevronRight), 1);
+
+        await tester.tap(find.byIcon(StreamIconData.chevronRight));
+        await tester.pumpAndSettle();
+
+        expect(_scrolled(tester), 400);
+      });
+    }
+
+    for (final alignment in const [
+      ParticipantsBarAlignment.left,
+      ParticipantsBarAlignment.right,
+    ]) {
+      testWidgets('run up and down a bar aligned ${alignment.name}', (
+        tester,
+      ) async {
+        // 8 tiles of 125 and seven 8px gaps is 1056 against the 656 the view
+        // is tall, so 400 of the bar hangs below it.
+        await pumpBar(
+          tester,
+          size: const Size(1024, 656),
+          barParticipants: 8,
+          barAlignment: alignment,
+        );
+
+        expect(_buttonScale(tester, StreamIconData.chevronUp), 0);
+        expect(_buttonScale(tester, StreamIconData.chevronDown), 1);
+
+        await tester.tap(find.byIcon(StreamIconData.chevronDown));
+        await tester.pumpAndSettle();
+
+        expect(_scrolled(tester), 400);
+        expect(_buttonScale(tester, StreamIconData.chevronUp), 1);
+        expect(_buttonScale(tester, StreamIconData.chevronDown), 0);
+      });
+    }
+
+    testWidgets('lead the other way when the bar reads right to left', (
+      tester,
+    ) async {
+      await pumpBar(tester, textDirection: TextDirection.rtl);
+
+      // The bar starts at its right-hand edge, so the button pointing further
+      // along it is the one on the left.
+      expect(_buttonScale(tester, StreamIconData.chevronLeft), 1);
+      expect(_buttonScale(tester, StreamIconData.chevronRight), 0);
+
+      await tester.tap(find.byIcon(StreamIconData.chevronLeft));
+      await tester.pumpAndSettle();
+
+      expect(_scrolled(tester), 400);
     });
   });
 

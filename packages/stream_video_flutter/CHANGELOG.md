@@ -185,6 +185,7 @@
 
 ### 🔄 Changed
 
+- The participants bar in `CallParticipantsSpotlightView` carries a button at either end for the tiles it cannot fit.
 - The badge on the call control buttons is amber with no border, where it used to be red with one.
 - `accentWarning` is a lighter amber, which also repaints the fair bars on `StreamConnectionQualityIndicator`.
 - `CallAppBar` is laid out by `StreamToolbar` at the design system's 72 with `spacing.sm` edge padding, matching `CallControlBar`'s horizontal inset.
