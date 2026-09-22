@@ -345,34 +345,39 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
       return;
     }
 
-    final participants = state.callParticipants.map((it) {
-      if (it.userId == participant.userId &&
-          it.sessionId == participant.sessionId) {
-        return it
-            .copyWith(
-              name: participant.userName,
-              custom: participant.custom,
-              customData: participant.customData,
-              image: participant.userImage,
-              trackIdPrefix: participant.trackLookupPrefix,
-              isSpeaking: participant.isSpeaking,
-              isDominantSpeaker: participant.isDominantSpeaker,
-              connectionQuality: participant.connectionQuality
-                  .mergeWithPrevious(
-                    it.connectionQuality,
-                  ),
-              roles: participant.roles,
-            )
-            .copyWithUpdatedAudioLevels(audioLevel: participant.audioLevel);
-      } else {
+    _updateParticipants((it) {
+      if (it.userId != participant.userId ||
+          it.sessionId != participant.sessionId) {
         return it;
       }
+
+      final updated = it.copyWith(
+        name: participant.userName,
+        custom: participant.custom,
+        customData: participant.customData,
+        image: participant.userImage,
+        trackIdPrefix: participant.trackLookupPrefix,
+        isSpeaking: participant.isSpeaking,
+        isDominantSpeaker: participant.isDominantSpeaker,
+        connectionQuality: participant.connectionQuality.mergeWithPrevious(
+          it.connectionQuality,
+        ),
+        roles: participant.roles,
+      );
+
+      // Same rule as `sfuUpdateAudioLevelChanged`: a participant who was
+      // silent and still is keeps the reading that took them below the
+      // speaking threshold, so the two paths that write audio levels agree.
+      // Without this, a `ParticipantUpdated` would advance the levels this
+      // handler's counterpart deliberately holds.
+      if (!participant.isSpeaking && !it.isSpeaking) {
+        return updated == it ? it : updated;
+      }
+
+      return updated.copyWithUpdatedAudioLevels(
+        audioLevel: participant.audioLevel,
+      );
     });
-    state = state.copyWith(
-      callParticipants: [
-        ...participants,
-      ],
-    );
   }
 
   void sfuInboundStateNotification(SfuInboundStateNotificationEvent event) {

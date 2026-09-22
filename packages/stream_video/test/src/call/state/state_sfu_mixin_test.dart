@@ -6,6 +6,7 @@ import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_audio_level.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_connection_info.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_inbound_video_state.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_participant.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_pin.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -25,6 +26,32 @@ CallParticipantState _participant({
     isSpeaking: isSpeaking,
     isDominantSpeaker: isDominantSpeaker,
     connectionQuality: connectionQuality,
+  );
+}
+
+SfuParticipant _sfuParticipant({
+  required String userId,
+  bool isSpeaking = false,
+  double audioLevel = 0,
+  String? userName,
+  SfuConnectionQuality connectionQuality = SfuConnectionQuality.unspecified,
+}) {
+  return SfuParticipant(
+    userId: userId,
+    userName: userName ?? userId,
+    userImage: '',
+    sessionId: '$userId-session',
+    custom: const <String, Object?>{},
+    customData: const <String, Object?>{},
+    publishedTracks: const <SfuTrackType>[],
+    joinedAt: DateTime.utc(2026),
+    trackLookupPrefix: '$userId-prefix',
+    connectionQuality: connectionQuality,
+    isSpeaking: isSpeaking,
+    isDominantSpeaker: false,
+    audioLevel: audioLevel,
+    roles: const <String>[],
+    participantSource: SfuParticipantSource.webrtc,
   );
 }
 
@@ -544,6 +571,146 @@ void main() {
       );
 
       await sub.cancel();
+    });
+  });
+
+  group('sfuParticipantUpdated', () {
+    test('holds the audio level of a participant who is still silent', () {
+      // `image` matches what the event carries, so the only thing this event
+      // could change is the audio level.
+      var alice = _participant(
+        userId: 'alice',
+        isSpeaking: true,
+      ).copyWith(image: '');
+      alice = alice.copyWithUpdatedAudioLevels(audioLevel: 0.4);
+      // The reading that took her below the threshold.
+      alice = alice.copyWithUpdatedAudioLevels(
+        audioLevel: 0.05,
+        isSpeaking: false,
+      );
+
+      final notifier = _notifier([alice]);
+      final before = notifier.callState.callParticipants.single;
+
+      notifier.sfuParticipantUpdated(
+        SfuParticipantUpdatedEvent(
+          callCid: notifier.callState.callCid.value,
+          participant: _sfuParticipant(userId: 'alice', audioLevel: 0.01),
+        ),
+      );
+
+      final after = notifier.callState.callParticipants.single;
+      expect(
+        after.audioLevel,
+        0.05,
+        reason:
+            'the hold-while-silent rule has to hold on both paths that write '
+            'audio levels, not just on sfuUpdateAudioLevelChanged',
+      );
+      expect(after.audioLevels, before.audioLevels);
+      expect(
+        identical(after, before),
+        isTrue,
+        reason: 'an event that changes nothing keeps the instance',
+      );
+    });
+
+    test('advances the audio level once the participant speaks again', () {
+      final notifier = _notifier([_participant(userId: 'alice')]);
+
+      notifier.sfuParticipantUpdated(
+        SfuParticipantUpdatedEvent(
+          callCid: notifier.callState.callCid.value,
+          participant: _sfuParticipant(
+            userId: 'alice',
+            isSpeaking: true,
+            audioLevel: 0.7,
+          ),
+        ),
+      );
+
+      final after = notifier.callState.callParticipants.single;
+      expect(after.audioLevel, 0.7);
+      expect(after.audioLevels, [0.0, 0.7]);
+      expect(after.isSpeaking, isTrue);
+    });
+
+    test('still writes the participant through when a field changed', () {
+      final notifier = _notifier([_participant(userId: 'alice')]);
+
+      notifier.sfuParticipantUpdated(
+        SfuParticipantUpdatedEvent(
+          callCid: notifier.callState.callCid.value,
+          participant: _sfuParticipant(userId: 'alice', userName: 'Alice B.'),
+        ),
+      );
+
+      expect(notifier.callState.callParticipants.single.name, 'Alice B.');
+    });
+
+    test('leaves the other participants on their own instances', () {
+      final notifier = _notifier([
+        _participant(userId: 'alice'),
+        _participant(userId: 'bob'),
+      ]);
+      final bobBefore = notifier.callState.callParticipants[1];
+
+      notifier.sfuParticipantUpdated(
+        SfuParticipantUpdatedEvent(
+          callCid: notifier.callState.callCid.value,
+          participant: _sfuParticipant(userId: 'alice', userName: 'Alice B.'),
+        ),
+      );
+
+      expect(
+        identical(notifier.callState.callParticipants[1], bobBefore),
+        isTrue,
+      );
+    });
+  });
+
+  group('CallParticipantState audio level sealing', () {
+    test('a copy that leaves audio alone shares the level list', () {
+      final alice = _participant(
+        userId: 'alice',
+      ).copyWithUpdatedAudioLevels(audioLevel: 0.4, isSpeaking: true);
+
+      final repinned = alice.copyWith(isDominantSpeaker: true);
+
+      expect(
+        identical(repinned.audioLevels, alice.audioLevels),
+        isTrue,
+        reason:
+            'the list is already sealed over a list nothing outside can reach, '
+            'so re-copying it on every unrelated copyWith is pure waste',
+      );
+    });
+
+    test('a level update does not share history with the previous copy', () {
+      final alice = _participant(
+        userId: 'alice',
+      ).copyWithUpdatedAudioLevels(audioLevel: 0.4, isSpeaking: true);
+
+      final next = alice.copyWithUpdatedAudioLevels(
+        audioLevel: 0.6,
+        isSpeaking: true,
+      );
+
+      expect(alice.audioLevels, [0.0, 0.4]);
+      expect(next.audioLevels, [0.0, 0.4, 0.6]);
+      expect(identical(next.audioLevels, alice.audioLevels), isFalse);
+    });
+
+    test('a sealed list is still unmodifiable', () {
+      final alice = _participant(
+        userId: 'alice',
+      ).copyWithUpdatedAudioLevels(audioLevel: 0.4, isSpeaking: true);
+
+      expect(() => alice.audioLevels.add(0.5), throwsUnsupportedError);
+      expect(
+        () => alice.copyWith(isLocal: true).audioLevels.add(0.5),
+        throwsUnsupportedError,
+      );
     });
   });
 

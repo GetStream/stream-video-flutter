@@ -118,9 +118,17 @@ class CallParticipantState extends Equatable
   /// which only holds while nothing mutates a collection in place. Handing out
   /// an unmodifiable view makes that an error rather than a silently stale UI.
   static List<double> _sealLevels(List<double> levels) {
-    // Always copied, never just wrapped: a view writes through to whatever list
-    // it was built over, including one an unmodifiable view already hides.
-    return UnmodifiableListView(List<double>.of(levels));
+    // Already sealed here, over a list nothing outside can reach, so it is
+    // shared rather than copied again. This is the common case: every
+    // `copyWith` that leaves audio alone — a pin, a reaction, viewport
+    // visibility, connection quality — passes the current field straight back.
+    if (levels is _SealedLevels) return levels;
+
+    // Anything else is copied, never just wrapped: a view writes through to
+    // whatever list it was built over, including one an unmodifiable view
+    // already hides. `_SealedLevels` is private, so a caller cannot smuggle a
+    // list it still holds past the check above.
+    return _SealedLevels(List<double>.of(levels, growable: false));
   }
 
   String get uniqueParticipantKey => '$userId-$sessionId';
@@ -185,14 +193,20 @@ class CallParticipantState extends Equatable
     required double audioLevel,
     bool? isSpeaking,
   }) {
-    final levels = [...audioLevels, audioLevel];
-    if (levels.length > 10) {
-      levels.removeRange(0, levels.length - 10);
-    }
+    // Dropped from the front while building rather than with a `removeRange`
+    // afterwards, so the window costs one list instead of two.
+    final start = audioLevels.length >= 10 ? audioLevels.length - 9 : 0;
+    final levels = <double>[
+      for (var index = start; index < audioLevels.length; index++)
+        audioLevels[index],
+      audioLevel,
+    ];
 
     return copyWith(
       audioLevel: audioLevel,
-      audioLevels: levels,
+      // Built here and never handed out, so it is sealed by adoption instead
+      // of copied a second time inside the constructor.
+      audioLevels: _SealedLevels(levels),
       isSpeaking: isSpeaking,
     );
   }
@@ -352,4 +366,15 @@ class CallParticipantState extends Equatable
     name: name.ifEmpty(() => userId),
     image: image,
   );
+}
+
+/// A `CallParticipantState.audioLevels` list owned by [CallParticipantState].
+///
+/// Private on purpose: it is the proof that the backing list came from inside
+/// that class and is unreachable from anywhere else, which is what lets the
+/// seal skip the copy. A public marker — testing for [UnmodifiableListView] —
+/// would let a caller pass a view over a list they still hold and keep writing
+/// through the seal.
+class _SealedLevels extends UnmodifiableListView<double> {
+  _SealedLevels(super.source);
 }

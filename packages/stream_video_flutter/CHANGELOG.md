@@ -7,6 +7,8 @@
 ### 🐞 Fixed
 
 - Fixed `PartialCallStateBuilder` throwing a cast error instead of surfacing a partial state error.
+- Fixed `StreamCallParticipants` not applying a changed `sort` or `filter` until the participant list changed.
+- Fixed a `Call.participantsStream` error reaching the zone uncaught instead of being logged.
 
 ### 🔄 Changed
 
