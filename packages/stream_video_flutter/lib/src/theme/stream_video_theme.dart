@@ -552,6 +552,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       ),
       desktopScreenShareSelectorTheme: desktopScreenShareSelectorTheme.merge(
         other.desktopScreenShareSelectorTheme,
+      ),
       callButtonBadgeTheme: callButtonBadgeTheme.merge(
         other.callButtonBadgeTheme,
       ),
