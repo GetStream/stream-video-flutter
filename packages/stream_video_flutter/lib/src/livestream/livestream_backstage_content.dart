@@ -97,10 +97,14 @@ class _LivestreamBackstageContentState
 
     return PartialCallStateBuilder(
       call: widget.call,
-      selector: (state) =>
-          (callParticipants: state.callParticipants, startsAt: state.startsAt),
+      // Selecting the count rather than the list keeps this off every
+      // participant update that doesn't change how many there are.
+      selector: (state) => (
+        participantCount: state.callParticipants.length,
+        startsAt: state.startsAt,
+      ),
       builder: (context, callData) {
-        final participants = callData.callParticipants;
+        final participantCount = callData.participantCount;
         final startsAt = callData.startsAt;
 
         return Scaffold(
@@ -122,11 +126,11 @@ class _LivestreamBackstageContentState
                     style: liveTheme.backstageCounterTextStyle,
                   ),
                 ],
-                if (participants.isNotEmpty) ...[
+                if (participantCount > 0) ...[
                   const SizedBox(height: 12),
                   Text(
                     translations.livestreamBackstageParticipants(
-                      participants.length,
+                      participantCount,
                     ),
                     style: liveTheme.backstageParticipantsTextStyle,
                   ),

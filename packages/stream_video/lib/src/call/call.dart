@@ -8,6 +8,7 @@ import 'package:async/async.dart' show CancelableOperation;
 import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
@@ -37,6 +38,7 @@ import '../shared_emitter.dart';
 import '../state_emitter.dart';
 import '../stream_video.dart';
 import '../telemetry/client_event_types.dart';
+import '../utils/adaptive_throttle.dart';
 import '../utils/cancelable_operation.dart';
 import '../utils/cancelables.dart';
 import '../utils/extensions.dart';
@@ -430,6 +432,102 @@ class Call {
 
   Stream<T> partialState<T>(CallStateSelector<T> selector) {
     return _stateManager.partialCallStateStream(selector);
+  }
+
+  /// The participants in this call, rate-limited by
+  /// [CallPreferences.participantsThrottleIntervalResolver], which by default
+  /// returns a longer interval the more participants there are.
+  ///
+  /// Prefer this over `partialState((state) => state.callParticipants)` for
+  /// anything that renders the list: in a large call the raw state emits far
+  /// faster than a screen can usefully repaint. [CallState.callParticipants]
+  /// stays immediate, so a lookup that has to see a participant the moment
+  /// they join keeps working.
+  ///
+  /// One window is shared by every listener, so two widgets rendering the same
+  /// call always show the same list. A new listener starts from the current
+  /// [CallState.callParticipants] rather than from the last window, so it never
+  /// begins on a list older than the state it was built against.
+  ///
+  /// The interval comes from
+  /// [CallPreferences.participantsThrottleIntervalResolver], read the first
+  /// time this is used; set it to null to emit every change.
+  late final Stream<List<CallParticipantState>> participantsStream =
+      _buildParticipantsStream();
+
+  /// Each listener is given the live participant list first, then the shared
+  /// throttled ones.
+  ///
+  /// The subject replays the list the last window closed on, which can be older
+  /// than the state a listener is starting from — forwarding it would walk the
+  /// list backwards for up to one interval. That replay is dropped, and so is
+  /// any later value the listener has already been given.
+  Stream<List<CallParticipantState>> _buildParticipantsStream() {
+    return Stream<List<CallParticipantState>>.multi(
+      (controller) {
+        var latest = _stateManager.callState.callParticipants;
+        controller.add(latest);
+
+        // The subject opens with whatever it currently holds, which is a value
+        // or — since it caches the latest error too — an error.
+        var replayed = false;
+        final subscription = _participantsSubject.stream.listen(
+          (value) {
+            if (!replayed) {
+              replayed = true;
+              return;
+            }
+            if (identical(value, latest)) return;
+            latest = value;
+            controller.add(value);
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            replayed = true;
+            controller.addError(error, stackTrace);
+          },
+          onDone: controller.close,
+        );
+
+        controller.onCancel = subscription.cancel;
+      },
+      isBroadcast: true,
+    );
+  }
+
+  // Lives as long as this call: nothing closes `callStateStream` today, so the
+  // `onDone` below is a teardown path rather than one that runs in practice.
+  // ignore: close_sinks
+  late final BehaviorSubject<List<CallParticipantState>> _participantsSubject =
+      _buildParticipantsSubject();
+
+  BehaviorSubject<List<CallParticipantState>> _buildParticipantsSubject() {
+    final subject = BehaviorSubject<List<CallParticipantState>>.seeded(
+      _stateManager.callState.callParticipants,
+    );
+
+    final participants = partialState((state) => state.callParticipants);
+    final interval = _stateManager
+        .callState
+        .preferences
+        .participantsThrottleIntervalResolver;
+
+    // Kept for the lifetime of the call, like the state it reads from.
+    // ignore: cancel_subscriptions
+    (interval == null
+            ? participants
+            : participants.throttleByCollectionSize(interval: interval))
+        .listen(
+          (value) {
+            // The seed and the state's own replay are the same list, so the
+            // first window would otherwise repeat it.
+            if (identical(subject.valueOrNull, value)) return;
+            subject.add(value);
+          },
+          onError: subject.addError,
+          onDone: subject.close,
+        );
+
+    return subject;
   }
 
   SharedEmitter<
@@ -951,11 +1049,13 @@ class Call {
 
     // Optimistically mark the call as accepted
     _stateManager.lifecycleCallAccepted();
+    _streamVideo.markCallAcceptedOnThisDevice(callCid, this);
 
     final result = await _coordinatorClient.acceptCall(cid: state.callCid);
     if (result is Failure) {
       // Revert the optimistic acceptance so the user can retry or reject.
       _stateManager.lifecycleCallAccepted(accepted: false);
+      _streamVideo.clearCallAcceptedOnThisDevice(callCid, this);
     }
 
     return result;
@@ -2824,9 +2924,15 @@ class Call {
     await dynascaleManager.dispose();
     await clearE2EEManager();
 
+    _streamVideo.clearCallAcceptedOnThisDevice(callCid, this);
+    _streamVideo.releaseRingingCall(callCid, this);
     await _streamVideo.state.removeActiveCall(this);
     if (_streamVideo.state.outgoingCall.valueOrNull?.callCid == callCid) {
       await _streamVideo.state.setOutgoingCall(null);
+    }
+
+    if (identical(_streamVideo.state.incomingCall.valueOrNull, this)) {
+      await _streamVideo.state.setIncomingCall(null);
     }
 
     _logger.v(() => '[clear] completed');

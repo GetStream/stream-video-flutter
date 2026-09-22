@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   StreamSubscription<GoogleSignInAuthenticationEvent>? _googleAuthSubscription;
   bool _isLoggingIn = false;
-  var _userNameHasError = false;
+  String? _usernameError;
 
   @override
   void initState() {
@@ -130,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     final userInfo = UserInfo(
-      id: createValidId(email),
+      id: sanitizeUserId(email),
       name: name,
       image: image,
     );
@@ -139,23 +139,21 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _loginWithUsername() async {
-    final username = _usernameController.text;
-    if (username.isEmpty) {
-      setState(() {
-        _userNameHasError = true;
-      });
-      _showSnackBar('Please enter a name');
+    final username = _usernameController.text.trim();
+    final error = validateUserId(username);
+
+    if (error != null) {
+      setState(() => _usernameError = error);
+      _showSnackBar(error);
       return;
     }
 
-    if (_userNameHasError) {
-      setState(() {
-        _userNameHasError = false;
-      });
+    if (_usernameError != null) {
+      setState(() => _usernameError = null);
     }
 
     final userInfo = UserInfo(
-      id: createValidId(username),
+      id: username,
       name: username,
     );
 
@@ -265,12 +263,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: Colors.white,
                       ),
                       decoration: InputDecoration(
-                        labelText: 'Enter Username',
+                        labelText: 'Enter user ID',
                         isDense: true,
                         border: const OutlineInputBorder(),
-                        errorText: _userNameHasError
-                            ? 'Please enter a name'
-                            : null,
+                        errorText: _usernameError,
                       ),
                     ),
                   ),
@@ -402,6 +398,28 @@ String randomId({int size = 21}) {
   return buffer.toString();
 }
 
-String createValidId(String id) {
-  return id.replaceAll(RegExp(r'[^\w]'), '_');
+final _userIdRegExp = RegExp(r'^[@\w .-]+$');
+
+const _maxUserIdLength = 255;
+
+String? validateUserId(String id) {
+  if (id.isEmpty) return 'Please enter a user ID';
+  if (id.length > _maxUserIdLength) {
+    return 'A user ID can be at most $_maxUserIdLength characters long';
+  }
+  if (!_userIdRegExp.hasMatch(id)) {
+    return 'A user ID can only contain a-z, 0-9, @, _, ., - and spaces';
+  }
+  return null;
+}
+
+/// Replaces the characters that are not allowed in a Stream user id.
+///
+/// Only use this for ids *derived* from something else (such as a Google
+/// email address). Ids typed in by the tester are checked with
+/// [validateUserId] instead and are never rewritten.
+String sanitizeUserId(String id) {
+  final sanitized = id.replaceAll(RegExp(r'[^@\w.-]'), '_');
+  if (sanitized.length <= _maxUserIdLength) return sanitized;
+  return sanitized.substring(0, _maxUserIdLength);
 }

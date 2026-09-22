@@ -9,6 +9,8 @@ import '../../stream_video_flutter.dart';
 import 'regular_call_participants_content.dart';
 import 'screen_share_call_participants_content.dart';
 
+final _logger = taggedLogger(tag: 'SV:CallParticipants');
+
 /// Builder function used to build a participant item.
 typedef CallParticipantBuilder =
     Widget Function(
@@ -127,10 +129,27 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
     );
 
     if (widget.participants == null) {
-      _participantsSubscription = widget.call
-          .partialState((state) => state.callParticipants)
-          .listen(recalculateParticipants);
+      _subscribeToParticipants();
     }
+  }
+
+  /// Subscribes to the call's own participant list.
+  ///
+  /// [Call.participantsStream] carries an error when a custom
+  /// [CallPreferences.participantsThrottleIntervalResolver] throws. Without an
+  /// `onError` that would go to the zone as an uncaught async error, once per
+  /// event, so it is logged here and the last known list stays on screen.
+  void _subscribeToParticipants() {
+    _participantsSubscription = widget.call.participantsStream.listen(
+      recalculateParticipants,
+      onError: (Object error, StackTrace stackTrace) {
+        _logger.e(
+          () =>
+              '[StreamCallParticipants] participantsStream error: $error; '
+              '$stackTrace',
+        );
+      },
+    );
   }
 
   @override
@@ -143,21 +162,34 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
   void didUpdateWidget(covariant StreamCallParticipants oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    final orderingChanged =
+        widget.sort != oldWidget.sort || widget.filter != oldWidget.filter;
+
     if (widget.participants != null) {
       _participantsSubscription?.cancel();
+      _participantsSubscription = null;
 
-      if (!const ListEquality<CallParticipantState>().equals(
-        widget.participants!.toList(),
-        oldWidget.participants?.toList(),
-      )) {
+      if (orderingChanged ||
+          !const ListEquality<CallParticipantState>().equals(
+            widget.participants!.toList(),
+            oldWidget.participants?.toList(),
+          )) {
         recalculateParticipants(widget.participants!);
       }
-    } else if (widget.call != oldWidget.call) {
+    } else if (widget.call != oldWidget.call ||
+        // Going back to the call's own list after a controlled one: the
+        // subscription was cancelled above and has to be re-taken.
+        _participantsSubscription == null) {
       _participantsSubscription?.cancel();
-      _participantsSubscription = widget.call
-          .partialState((state) => state.callParticipants)
-          .listen(recalculateParticipants);
+      _subscribeToParticipants();
 
+      recalculateParticipants(widget.call.state.value.callParticipants);
+    } else if (orderingChanged) {
+      // Nothing re-sorts on its own: the stream only emits when the list
+      // changes, so in a quiet call a new comparator would otherwise wait for
+      // the next join or speaker. Sorting an unchanged list is cheap here —
+      // `recalculateParticipants` skips the `setState` when the result is the
+      // same, which is also what absorbs a `sort` closure built in `build`.
       recalculateParticipants(widget.call.state.value.callParticipants);
     }
   }
