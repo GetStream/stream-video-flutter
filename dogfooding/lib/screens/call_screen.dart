@@ -19,7 +19,6 @@ import '../core/repos/user_chat_repository.dart';
 import '../di/injector.dart';
 import '../utils/feedback_dialog.dart';
 import '../widgets/badged_call_option.dart';
-import '../widgets/call_duration_title.dart';
 import '../widgets/closed_captions_widget.dart';
 import '../widgets/e2ee_key_notification.dart';
 import '../widgets/settings_menu/settings_menu.dart';
@@ -659,25 +658,26 @@ class _CallScreenState extends State<CallScreen>
 
                 return CallAppBar(
                   call: call,
-                  leadingWidth: 120,
                   showLeaveCallAction: isCompact,
                   leading: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       if (isCompact)
                         _layoutToggle(
                           menuDirection: StreamMenuDirection.down,
                         ),
-                      PartialCallStateBuilder(
-                        call: call,
-                        selector: (state) => state.localParticipant != null,
-                        builder: (context, hasLocalParticipant) =>
-                            hasLocalParticipant
-                            ? StreamFlipCameraButton(call: call)
-                            : const SizedBox.shrink(),
-                      ),
+                      if (StreamFlipCameraButton.isSupported)
+                        PartialCallStateBuilder(
+                          call: call,
+                          selector: (state) => state.localParticipant != null,
+                          builder: (context, hasLocalParticipant) =>
+                              hasLocalParticipant
+                              ? StreamFlipCameraButton(call: call)
+                              : const SizedBox.shrink(),
+                        ),
                     ],
                   ),
-                  title: CallDurationTitle(call: call),
+                  title: StreamCallDurationBadge(call: call),
                 );
               },
               callControlsWidgetBuilder: _callControls,
