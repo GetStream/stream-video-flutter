@@ -82,7 +82,7 @@ class CallAppBarThemeData with _$CallAppBarThemeData {
 
 /// Visual styling properties for a [CallAppBar].
 ///
-/// The mirror of [CallControlBarStyle], and deliberately as small: the bar
+/// The mirror of [CallControlBarStyle]: the bar
 /// draws no controls of its own, so a control's appearance belongs to
 /// `StreamButtonTheme` and the tone it is given. What is left is the bar's own
 /// geometry and surface, plus the style of the title it falls back to.
@@ -104,17 +104,18 @@ class CallAppBarStyle with _$CallAppBarStyle {
   /// The bar's height, below the top safe-area inset. Defaults to
   /// `kStreamToolbarHeight` (72), as [CallControlBarStyle.height] does.
   ///
-  /// The slots are centred in it rather than padded to it, so this has to clear
-  /// the tallest control the bar is given — 48 for the icon buttons the design
-  /// system draws, which is the button's tap target rather than its visible 40.
+  /// The slots are laid out in what [padding] leaves of it, so this has to
+  /// clear the tallest control the bar is given plus that padding — 72 for the
+  /// design system's 48 icon buttons at the default padding, 48 being the
+  /// button's tap target rather than its visible 40.
   final double? height;
 
   /// The padding around all three slots.
   ///
   /// Defaults to `EdgeInsets.all(spacing.sm)` — 12, which puts the visible edge
   /// of a control on the design's 16 once its tap target's own 4 is added. The
-  /// same inset the control bar along the bottom uses, so the two ends of a
-  /// call line up.
+  /// same horizontal inset the control bar along the bottom uses, so the two
+  /// ends of a call line up.
   final EdgeInsetsGeometry? padding;
 
   /// The minimum gap kept between the centre slot and either side slot.

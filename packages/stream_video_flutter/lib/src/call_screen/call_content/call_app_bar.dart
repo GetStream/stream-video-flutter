@@ -5,7 +5,7 @@ import '../../../stream_video_flutter.dart';
 /// The bar along the top of a call, laid out in three slots.
 ///
 /// The counterpart of [CallControlBar]: same `StreamToolbar` layout, same
-/// height, same edge padding, so the two ends of a call screen line up. A
+/// height, same horizontal inset, so the two ends of a call screen line up. A
 /// [leading] widget sits against the bar's start edge and [actions] against its
 /// end; [title] is centred in the bar's full width, however lopsided the two
 /// sides are.
@@ -74,8 +74,8 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// The widget anchored at the bar's start edge.
   ///
   /// Null falls back to a back button when [showBackButton] is set, and to an
-  /// empty slot otherwise — which reserves no room, so the [title] stays
-  /// centred in the bar's full width.
+  /// empty slot otherwise — which reserves no room, so the [title] has the
+  /// bar's full width to lay out in.
   final Widget? leading;
 
   /// The widget centred in the bar's full width.
@@ -115,10 +115,11 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// The height the bar occupies in [context], including the top inset a
   /// [primary] bar clears.
   ///
-  /// [preferredSize] reports the unthemed height, which is all it can: it has
-  /// no [BuildContext] to read a themed one from. A caller that has to match a
-  /// restyled bar — to inset content out from under a floating one, say — wraps
-  /// it in a [PreferredSize] built from this.
+  /// [preferredSize] reads the height off [style] alone and leaves the inset
+  /// out, for want of a [BuildContext] to resolve a theme or a [MediaQuery]
+  /// against. A caller that has to match a bar restyled through
+  /// [CallAppBarTheme] — or that needs the inset counted, to lay content out
+  /// from under a floating bar — wraps it in a [PreferredSize] built from this.
   ///
   /// Pass [primary] to match the bar being measured.
   static double heightOf(
@@ -136,7 +137,8 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kStreamToolbarHeight);
+  Size get preferredSize =>
+      Size.fromHeight(style?.height ?? kStreamToolbarHeight);
 
   /// [_effectiveStyle] with the [backgroundColor] override folded in, so the
   /// constructor argument wins over both [style] and the ambient theme.
@@ -170,8 +172,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
             StreamLeaveCallButton(call: call, onLeaveCallTap: onLeaveCallTap),
         ];
 
-    // Null rather than an empty Row: the toolbar reserves space for a slot that
-    // exists, so an empty trailing would push the title off centre.
+    // No trailing slot when there is nothing to put in it.
     final trailingSlot = actionSlot.isEmpty
         ? null
         : Row(
@@ -186,9 +187,9 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
       child: title ?? Text(call.state.value.status.toStatusString()),
     );
 
-    // The slots are centred in what the padding leaves of the bar's height
-    // rather than padded down to it, so one height covers both a control's tap
-    // target and its smaller visible box.
+    // The slots are centred in what the padding leaves of the bar's height, so
+    // one height covers both a control's tap target and its smaller visible
+    // box.
     Widget bar = SizedBox(
       height: resolved.height,
       child: StreamToolbar(
@@ -205,8 +206,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
     final surfaceStyle = resolved.surfaceStyle;
 
     // A docked bar is opaque; a floating one fades into the call below it.
-    // Neither draws a line along its bottom edge, unlike the design system's
-    // own app bar — a call is a surface, not a page of content.
+    // Neither draws a line along its bottom edge.
     //
     // The outer [Semantics] keeps the slots grouped for screen readers so they
     // aren't intermixed with the call below. The inner one forces each control
@@ -268,8 +268,7 @@ class _CallAppBarStyleDefaults extends CallAppBarStyle {
   // `sm` rather than `md`, so the visible inset lands on the design's 16: a
   // control is 40 visible inside a 48 tap target, which contributes the other 4
   // on every edge. The vertical 12 changes nothing at the default height — 72
-  // less 24 is the 48 the tap target already wants — and keeps a shortened bar
-  // from cropping its controls.
+  // less 24 is the 48 the tap target already wants.
   @override
   EdgeInsetsGeometry get padding =>
       _style?.padding ?? EdgeInsets.all(_spacing.sm);

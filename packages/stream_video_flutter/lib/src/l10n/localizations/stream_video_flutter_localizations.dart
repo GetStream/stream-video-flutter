@@ -394,6 +394,30 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'Someone is sharing their screen'**
   String get callScreenSharingTooltip;
+
+  /// Accessible label for the call duration badge, read in place of the digits
+  ///
+  /// In en, this message translates to:
+  /// **'Call duration {duration}'**
+  String callDurationSpoken(String duration);
+
+  /// Hours part of the spoken call duration
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 hour} other{{count} hours}}'**
+  String callDurationHours(int count);
+
+  /// Minutes part of the spoken call duration
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 minute} other{{count} minutes}}'**
+  String callDurationMinutes(int count);
+
+  /// Seconds part of the spoken call duration
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 second} other{{count} seconds}}'**
+  String callDurationSeconds(int count);
 }
 
 class _StreamVideoFlutterLocalizationsDelegate

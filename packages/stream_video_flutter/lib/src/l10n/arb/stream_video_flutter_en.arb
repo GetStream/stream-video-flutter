@@ -194,5 +194,41 @@
   "callScreenSharingTooltip": "Someone is sharing their screen",
   "@callScreenSharingTooltip": {
     "description": "Tooltip on the screen share indicator in the call duration badge"
+  },
+  "callDurationSpoken": "Call duration {duration}",
+  "@callDurationSpoken": {
+    "description": "Accessible label for the call duration badge, read in place of the digits",
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "callDurationHours": "{count, plural, one{1 hour} other{{count} hours}}",
+  "@callDurationHours": {
+    "description": "Hours part of the spoken call duration",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "callDurationMinutes": "{count, plural, one{1 minute} other{{count} minutes}}",
+  "@callDurationMinutes": {
+    "description": "Minutes part of the spoken call duration",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "callDurationSeconds": "{count, plural, one{1 second} other{{count} seconds}}",
+  "@callDurationSeconds": {
+    "description": "Seconds part of the spoken call duration",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

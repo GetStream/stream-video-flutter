@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 import '../../l10n/localization_extension.dart';
+import '../../l10n/localizations/stream_video_flutter_localizations.dart';
 
 /// How long a call has been running, with whatever is worth flagging about it
 /// leading the time.
@@ -16,11 +17,11 @@ import '../../l10n/localization_extension.dart';
 /// badge is the time alone, which is the resting state for a call with nothing
 /// to report.
 ///
-/// The timestamp dims what the clock has not reached yet: it darkens from the
-/// first non-zero digit on, extended back over the unit that digit sits in. So
-/// `04:28` is dark throughout, `00:00` is light throughout, and `00:08` darkens
-/// the `8` alone — the seconds keep their leading zero light, or the badge
-/// would flicker as they roll past `09` every minute.
+/// The timestamp emphasises what the clock has reached: from the first non-zero
+/// digit on, extended back over the unit that digit sits in. So `04:28` is
+/// emphasised throughout, `00:00` not at all, and `00:08` emphasises the `8`
+/// alone — the seconds keep their leading zero unemphasised, or the badge would
+/// flicker as they roll past `09` every minute.
 ///
 /// {@tool snippet}
 ///
@@ -81,10 +82,8 @@ class StreamCallDurationBadge extends StatelessWidget {
         // indicators — the timestamp's own box is shorter than an icon.
         child: SizedBox(
           height: resolved.contentHeight,
-          // One selector rather than one builder per indicator, and wrapped
-          // around the whole row rather than around the icons: a row with
-          // nothing to show has to leave no child behind, or a badge holding
-          // only the time is still charged the gap in front of it.
+          // A row with no indicators leaves no child behind, so a badge
+          // holding only the time is not charged the gap in front of it.
           //
           // A record compares by value, so the stream stays distinct.
           child: PartialCallStateBuilder(
@@ -186,14 +185,17 @@ class _Duration extends StatelessWidget {
     return StreamBuilder<Duration>(
       stream: call.callDurationStream,
       builder: (context, snapshot) {
-        final duration = snapshot.data ?? Duration.zero;
+        // A device clock behind the server's `startedAt` makes the difference
+        // negative, which has no reading as elapsed time.
+        final elapsed = snapshot.data ?? Duration.zero;
+        final duration = elapsed.isNegative ? Duration.zero : elapsed;
 
         // One weight throughout — the design separates the leading zeros from
         // the time that has elapsed by colour, not by boldness.
         return Text.rich(
           TextSpan(children: _spans(_format(duration), style.elapsedTextColor)),
           style: style.textStyle,
-          semanticsLabel: _spokenDuration(duration),
+          semanticsLabel: _spokenDuration(context.translations, duration),
         );
       },
     );
@@ -248,14 +250,23 @@ class _Duration extends StatelessWidget {
 
   // Screen readers read '05:03' out as digits, which says nothing about a call
   // that has been running five minutes.
-  static String _spokenDuration(Duration duration) {
+  static String _spokenDuration(
+    StreamVideoFlutterLocalizations translations,
+    Duration duration,
+  ) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+
+    // Each unit is dropped once it reads zero, except the seconds, so a call
+    // that has just started still has something to announce.
     final parts = [
-      if (duration.inHours > 0) '${duration.inHours} hours',
-      if (duration.inMinutes > 0) '${duration.inMinutes.remainder(60)} minutes',
-      '${duration.inSeconds.remainder(60)} seconds',
+      if (hours > 0) translations.callDurationHours(hours),
+      if (minutes > 0) translations.callDurationMinutes(minutes),
+      translations.callDurationSeconds(seconds),
     ];
 
-    return 'Call duration ${parts.join(' ')}';
+    return translations.callDurationSpoken(parts.join(' '));
   }
 }
 
@@ -277,9 +288,7 @@ class _StreamCallDurationBadgeStyleDefaults
       _style?.padding ??
       EdgeInsets.symmetric(
         horizontal: _spacing.xs,
-        // The design splits the 6 into 4 on the pill and 2 on the row inside
-        // it, which only matters to a design tool; 6 here is the same 32 tall
-        // pill around a 20 icon.
+        // 6 around a 20 icon is the design's 32 tall pill.
         vertical: _spacing.xxs + _spacing.xxxs,
       );
 

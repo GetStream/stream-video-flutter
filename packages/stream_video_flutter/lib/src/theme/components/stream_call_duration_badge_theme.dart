@@ -138,15 +138,15 @@ class StreamCallDurationBadgeStyle with _$StreamCallDurationBadgeStyle {
   /// The pill's corners. Defaults to `radius.xxxl` on every corner.
   final BorderRadiusGeometry? borderRadius;
 
-  /// The timestamp's style, and the colour its leading zeros take.
+  /// The timestamp's style, and the colour the time not yet elapsed takes.
   ///
   /// Defaults to `textTheme.bodyEmphasis` in `colorScheme.textTertiary`, at
   /// `height: 1` and with tabular figures — so the digits centre against the
   /// indicators and the pill holds still as the seconds tick.
   final TextStyle? textStyle;
 
-  /// The colour of the time that has elapsed — everything from the timestamp's
-  /// first non-zero digit on, the colons aside.
+  /// The colour of the time that has elapsed — everything from the unit the
+  /// clock has reached on, the colon between units included.
   ///
   /// Defaults to `colorScheme.textPrimary`.
   final Color? elapsedTextColor;

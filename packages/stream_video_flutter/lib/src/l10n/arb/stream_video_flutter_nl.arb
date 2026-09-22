@@ -47,5 +47,9 @@
   "lobbyDevicesUnreadable": "Je apparaten konden niet worden gelezen",
   "callEncryptedTooltip": "Deze oproep is end-to-end versleuteld",
   "callRecordingTooltip": "Deze oproep wordt opgenomen",
-  "callScreenSharingTooltip": "Iemand deelt zijn scherm"
+  "callScreenSharingTooltip": "Iemand deelt zijn scherm",
+  "callDurationSpoken": "Gespreksduur {duration}",
+  "callDurationHours": "{count, plural, one{1 uur} other{{count} uur}}",
+  "callDurationMinutes": "{count, plural, one{1 minuut} other{{count} minuten}}",
+  "callDurationSeconds": "{count, plural, one{1 seconde} other{{count} seconden}}"
 }

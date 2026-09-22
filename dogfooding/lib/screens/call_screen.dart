@@ -666,7 +666,6 @@ class _CallScreenState extends State<CallScreen>
                         _layoutToggle(
                           menuDirection: StreamMenuDirection.down,
                         ),
-                      // Only a phone has a second camera to flip to.
                       if (StreamFlipCameraButton.isSupported)
                         PartialCallStateBuilder(
                           call: call,

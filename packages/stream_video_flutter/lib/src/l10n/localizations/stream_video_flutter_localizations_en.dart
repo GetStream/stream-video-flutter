@@ -169,4 +169,42 @@ class StreamVideoFlutterLocalizationsEn
 
   @override
   String get callScreenSharingTooltip => 'Someone is sharing their screen';
+
+  @override
+  String callDurationSpoken(String duration) {
+    return 'Call duration $duration';
+  }
+
+  @override
+  String callDurationHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hours',
+      one: '1 hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callDurationMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minutes',
+      one: '1 minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callDurationSeconds(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count seconds',
+      one: '1 second',
+    );
+    return '$_temp0';
+  }
 }

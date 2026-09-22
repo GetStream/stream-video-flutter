@@ -104,9 +104,9 @@ void main() {
       expect(barRight - tester.getTopRight(find.text('action')).dx, 12);
     });
 
-    // The reason the empty slots are dropped rather than rendered empty: the
-    // toolbar reserves the wider side's width on *both* sides of the middle,
-    // so an empty trailing Row would still shift the title.
+    // The toolbar reserves the wider side's width on *both* sides of the
+    // middle, so the title holds the bar's centre however lopsided the sides
+    // are.
     testWidgets('centres the title against a populated leading', (
       tester,
     ) async {
@@ -197,6 +197,23 @@ void main() {
               alignment: Alignment.topCenter,
               child: bar(leading: const Text('leading')),
             ),
+          ),
+        ),
+      );
+
+      expect(tester.getSize(find.byType(CallAppBar)).height, 120);
+    });
+
+    // `Scaffold` reserves `preferredSize.height` for the slot, so a bar that
+    // reports a constant is clipped to it however it is themed.
+    testWidgets('an instance style survives a Scaffold.appBar slot', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          child: Scaffold(
+            appBar: bar(style: const CallAppBarStyle(height: 120)),
+            body: const SizedBox(),
           ),
         ),
       );

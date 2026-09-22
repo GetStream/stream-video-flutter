@@ -171,4 +171,42 @@ class StreamVideoFlutterLocalizationsNl
 
   @override
   String get callScreenSharingTooltip => 'Iemand deelt zijn scherm';
+
+  @override
+  String callDurationSpoken(String duration) {
+    return 'Gespreksduur $duration';
+  }
+
+  @override
+  String callDurationHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count uur',
+      one: '1 uur',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callDurationMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minuten',
+      one: '1 minuut',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callDurationSeconds(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count seconden',
+      one: '1 seconde',
+    );
+    return '$_temp0';
+  }
 }

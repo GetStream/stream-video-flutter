@@ -79,6 +79,39 @@ void main() {
     ];
   }
 
+  group('the spoken duration', () {
+    String spokenOf(WidgetTester tester) =>
+        tester.widget<Text>(find.byType(Text)).semanticsLabel!;
+
+    // Screen readers read the digits out one by one, so the badge announces
+    // the elapsed time in words instead.
+    testWidgets('announces the units rather than the digits', (tester) async {
+      await pump(tester, elapsed: const Duration(minutes: 5, seconds: 3));
+
+      expect(spokenOf(tester), 'Call duration 5 minutes 3 seconds');
+    });
+
+    testWidgets('says one of a unit in the singular', (tester) async {
+      await pump(tester, elapsed: const Duration(minutes: 1, seconds: 1));
+
+      expect(spokenOf(tester), 'Call duration 1 minute 1 second');
+    });
+
+    // `inMinutes` is 60 on the hour, so a guard on the total rather than on
+    // the remainder announces a minutes part that reads zero.
+    testWidgets('leaves out a unit that reads zero', (tester) async {
+      await pump(tester, elapsed: const Duration(hours: 1));
+
+      expect(spokenOf(tester), 'Call duration 1 hour 0 seconds');
+    });
+
+    testWidgets('announces a negative elapsed time as zero', (tester) async {
+      await pump(tester, elapsed: const Duration(seconds: -8));
+
+      expect(spokenOf(tester), 'Call duration 0 seconds');
+    });
+  });
+
   group('the timestamp', () {
     /// The part of the timestamp drawn in the darker colour.
     String elapsedOf(WidgetTester tester) =>
@@ -115,6 +148,15 @@ void main() {
 
     testWidgets('darkens nothing in 00:00', (tester) async {
       await pump(tester);
+
+      expect(wholeOf(tester), '00:00');
+      expect(elapsedOf(tester), isEmpty);
+    });
+
+    // A device clock behind the server's `startedAt` makes the elapsed time
+    // negative, which `padLeft` renders as `00:-8` rather than padding it.
+    testWidgets('reads a negative elapsed time as 00:00', (tester) async {
+      await pump(tester, elapsed: const Duration(seconds: -8));
 
       expect(wholeOf(tester), '00:00');
       expect(elapsedOf(tester), isEmpty);

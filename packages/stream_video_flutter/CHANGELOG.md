@@ -171,6 +171,7 @@
 - Added `StreamCallDurationBadge`, the pill showing how long a call has been running, with encryption, recording and screen-share indicators.
 - Added `StreamCallDurationBadgeThemeData` on `StreamVideoTheme`, and `StreamCallDurationBadgeTheme` to restyle the badge over a subtree.
 - Added `callEncryptedTooltip`, `callRecordingTooltip` and `callScreenSharingTooltip` to the localizations, in English and Dutch.
+- Added `callDurationSpoken`, `callDurationHours`, `callDurationMinutes` and `callDurationSeconds` to the localizations, in English and Dutch.
 
 ### 🔄 Changed
 
