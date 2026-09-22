@@ -33,6 +33,14 @@ mixin _$StreamCallParticipantsGridThemeData {
       padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
       mainAxisSpacing: lerpDouble$(a.mainAxisSpacing, b.mainAxisSpacing, t),
       crossAxisSpacing: lerpDouble$(a.crossAxisSpacing, b.crossAxisSpacing, t),
+      columnResolver: t < 0.5 ? a.columnResolver : b.columnResolver,
+      maxTileAspectRatio: lerpDouble$(
+        a.maxTileAspectRatio,
+        b.maxTileAspectRatio,
+        t,
+      ),
+      compactPageSize: t < 0.5 ? a.compactPageSize : b.compactPageSize,
+      pageSize: t < 0.5 ? a.pageSize : b.pageSize,
     );
   }
 
@@ -40,6 +48,10 @@ mixin _$StreamCallParticipantsGridThemeData {
     EdgeInsetsGeometry? padding,
     double? mainAxisSpacing,
     double? crossAxisSpacing,
+    int? Function(StreamParticipantGridDetails)? columnResolver,
+    double? maxTileAspectRatio,
+    int? compactPageSize,
+    int? pageSize,
   }) {
     final _this = (this as StreamCallParticipantsGridThemeData);
 
@@ -47,6 +59,10 @@ mixin _$StreamCallParticipantsGridThemeData {
       padding: padding ?? _this.padding,
       mainAxisSpacing: mainAxisSpacing ?? _this.mainAxisSpacing,
       crossAxisSpacing: crossAxisSpacing ?? _this.crossAxisSpacing,
+      columnResolver: columnResolver ?? _this.columnResolver,
+      maxTileAspectRatio: maxTileAspectRatio ?? _this.maxTileAspectRatio,
+      compactPageSize: compactPageSize ?? _this.compactPageSize,
+      pageSize: pageSize ?? _this.pageSize,
     );
   }
 
@@ -67,6 +83,10 @@ mixin _$StreamCallParticipantsGridThemeData {
       padding: other.padding,
       mainAxisSpacing: other.mainAxisSpacing,
       crossAxisSpacing: other.crossAxisSpacing,
+      columnResolver: other.columnResolver,
+      maxTileAspectRatio: other.maxTileAspectRatio,
+      compactPageSize: other.compactPageSize,
+      pageSize: other.pageSize,
     );
   }
 
@@ -85,7 +105,11 @@ mixin _$StreamCallParticipantsGridThemeData {
 
     return _other.padding == _this.padding &&
         _other.mainAxisSpacing == _this.mainAxisSpacing &&
-        _other.crossAxisSpacing == _this.crossAxisSpacing;
+        _other.crossAxisSpacing == _this.crossAxisSpacing &&
+        _other.columnResolver == _this.columnResolver &&
+        _other.maxTileAspectRatio == _this.maxTileAspectRatio &&
+        _other.compactPageSize == _this.compactPageSize &&
+        _other.pageSize == _this.pageSize;
   }
 
   @override
@@ -97,6 +121,10 @@ mixin _$StreamCallParticipantsGridThemeData {
       _this.padding,
       _this.mainAxisSpacing,
       _this.crossAxisSpacing,
+      _this.columnResolver,
+      _this.maxTileAspectRatio,
+      _this.compactPageSize,
+      _this.pageSize,
     );
   }
 }
