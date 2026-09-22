@@ -19,7 +19,6 @@ import '../core/repos/user_chat_repository.dart';
 import '../di/injector.dart';
 import '../utils/feedback_dialog.dart';
 import '../widgets/badged_call_option.dart';
-import '../widgets/call_duration_title.dart';
 import '../widgets/closed_captions_widget.dart';
 import '../widgets/e2ee_key_notification.dart';
 import '../widgets/settings_menu/settings_menu.dart';
@@ -29,8 +28,6 @@ import '../widgets/side_panel/call_side_panel_layout.dart';
 import '../widgets/side_panel/chat_panel_body.dart';
 import 'call_participants_list.dart';
 import 'call_stats_screen.dart';
-
-const _useCustomDesktopScreenShareOption = false;
 
 class CallScreen extends StatefulWidget {
   const CallScreen({
@@ -370,11 +367,6 @@ class _CallScreenState extends State<CallScreen>
           useiOSBroadcastExtension: true,
           captureScreenAudio: true,
         ),
-        desktopScreenSelectorBuilder:
-            // ignore: avoid_redundant_argument_values
-            _useCustomDesktopScreenShareOption
-            ? _customDesktopScreenShareSelector
-            : null,
       );
 
   // The phone bar's microphone and camera: plain round buttons, no caret. A
@@ -666,25 +658,26 @@ class _CallScreenState extends State<CallScreen>
 
                 return CallAppBar(
                   call: call,
-                  leadingWidth: 120,
                   showLeaveCallAction: isCompact,
                   leading: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       if (isCompact)
                         _layoutToggle(
                           menuDirection: StreamMenuDirection.down,
                         ),
-                      PartialCallStateBuilder(
-                        call: call,
-                        selector: (state) => state.localParticipant != null,
-                        builder: (context, hasLocalParticipant) =>
-                            hasLocalParticipant
-                            ? StreamFlipCameraButton(call: call)
-                            : const SizedBox.shrink(),
-                      ),
+                      if (StreamFlipCameraButton.isSupported)
+                        PartialCallStateBuilder(
+                          call: call,
+                          selector: (state) => state.localParticipant != null,
+                          builder: (context, hasLocalParticipant) =>
+                              hasLocalParticipant
+                              ? StreamFlipCameraButton(call: call)
+                              : const SizedBox.shrink(),
+                        ),
                     ],
                   ),
-                  title: CallDurationTitle(call: call),
+                  title: StreamCallDurationBadge(call: call),
                 );
               },
               callControlsWidgetBuilder: _callControls,
@@ -759,33 +752,4 @@ class __ShowChatButtonState extends State<_ShowChatButton> {
       badgeCount: _unreadCount == 0 ? null : _unreadCount,
     );
   }
-}
-
-// This is an example of a bottom sheet that only allows the selection of a screen.
-// After tapping a screen the bottom sheet is directly closed and the screen is shared.
-Future<DesktopCapturerSource?> _customDesktopScreenShareSelector(
-  BuildContext context,
-) {
-  final stateNotifier = ScreenSelectorStateNotifier(
-    sourceTypes: [SourceType.Screen],
-  );
-
-  return showModalBottomSheet<DesktopCapturerSource?>(
-    context: context,
-    builder: (BuildContext context) {
-      return ValueListenableBuilder(
-        valueListenable: stateNotifier,
-        builder:
-            (BuildContext context, ScreenSelectorState value, Widget? child) =>
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: ThumbnailGrid(
-                    sources: value.sources.values.toList(),
-                    selectedSource: value.selectedSource,
-                    onSelectSource: (source) => Navigator.pop(context, source),
-                  ),
-                ),
-      );
-    },
-  );
 }

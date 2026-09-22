@@ -57,6 +57,17 @@ const _idActiveCall = 8;
   return (endAll: false, calls: [...matching, ...unidentified]);
 }
 
+/// Decides whether a `call.accepted` event for the current user describes an acceptance that
+/// happened on this device.
+@visibleForTesting
+bool isAcceptedOnThisDevice({
+  required bool acceptedLocally,
+  required Call? activeCall,
+}) {
+  if (acceptedLocally) return true;
+  return activeCall?.state.value.status is CallStatusActive;
+}
+
 /// Implementation of [PushNotificationManager] for Stream Video.
 class StreamVideoPushNotificationManager implements PushNotificationManager {
   StreamVideoPushNotificationManager._({
@@ -165,8 +176,15 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
             (call) => call.callCid == event.callCid,
           );
 
+          final acceptedOnThisDevice = isAcceptedOnThisDevice(
+            acceptedLocally: streamVideo.isCallAcceptedOnThisDevice(
+              event.callCid.toString(),
+            ),
+            activeCall: activeCall,
+          );
+
           // End the CallKit call on this device if the call was accepted on another device
-          if (activeCall?.state.value.status is! CallStatusActive) {
+          if (!acceptedOnThisDevice) {
             _logger.v(
               () =>
                   '[subscribeToEvents] Call accepted on other device, ending call: ${event.callCid}',

@@ -68,7 +68,7 @@ extension SortingExtension on ParticipantLayoutMode {
     switch (this) {
       case ParticipantLayoutMode.auto:
       case ParticipantLayoutMode.grid:
-        return CallParticipantSortingPresets.regular;
+        return CallParticipantSorts.regular;
       case ParticipantLayoutMode.speakerTop:
       case ParticipantLayoutMode.speakerBottom:
       case ParticipantLayoutMode.speakerLeft:
@@ -76,7 +76,7 @@ extension SortingExtension on ParticipantLayoutMode {
       case ParticipantLayoutMode.speakerOneToOne:
       case ParticipantLayoutMode.spotlight:
       case ParticipantLayoutMode.pictureInPicture:
-        return CallParticipantSortingPresets.speaker;
+        return CallParticipantSorts.speaker;
     }
   }
 }

@@ -131,6 +131,30 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'Window'**
   String get desktopScreenShareWindow;
 
+  /// Tooltip of the action that re-reads the screens and windows on offer
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get desktopScreenShareRefresh;
+
+  /// Shown in place of the grid when the platform offers no screen or window of the selected type
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to share here.'**
+  String get desktopScreenShareNoSources;
+
+  /// Shown in place of the grid when the sources could not be read
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read the screens and windows to share.'**
+  String get desktopScreenShareLoadFailed;
+
+  /// Action that reads the screens and windows again after a failure
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get desktopScreenShareRetry;
+
   /// Title of the sheet that picks how participants are laid out
   ///
   /// In en, this message translates to:
@@ -352,6 +376,48 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'Your devices could not be read'**
   String get lobbyDevicesUnreadable;
+
+  /// Tooltip on the encryption indicator in the call duration badge
+  ///
+  /// In en, this message translates to:
+  /// **'This call is end-to-end encrypted'**
+  String get callEncryptedTooltip;
+
+  /// Tooltip on the recording indicator in the call duration badge
+  ///
+  /// In en, this message translates to:
+  /// **'This call is being recorded'**
+  String get callRecordingTooltip;
+
+  /// Tooltip on the screen share indicator in the call duration badge
+  ///
+  /// In en, this message translates to:
+  /// **'Someone is sharing their screen'**
+  String get callScreenSharingTooltip;
+
+  /// Accessible label for the call duration badge, read in place of the digits
+  ///
+  /// In en, this message translates to:
+  /// **'Call duration {duration}'**
+  String callDurationSpoken(String duration);
+
+  /// Hours part of the spoken call duration
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 hour} other{{count} hours}}'**
+  String callDurationHours(int count);
+
+  /// Minutes part of the spoken call duration
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 minute} other{{count} minutes}}'**
+  String callDurationMinutes(int count);
+
+  /// Seconds part of the spoken call duration
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 second} other{{count} seconds}}'**
+  String callDurationSeconds(int count);
 }
 
 class _StreamVideoFlutterLocalizationsDelegate

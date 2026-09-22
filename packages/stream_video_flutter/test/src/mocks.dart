@@ -3,9 +3,27 @@
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-class MockCall extends Mock implements Call {}
+class MockCall extends Mock implements Call {
+  MockCall() {
+    // Every renderer reports what it measures into the call's viewport
+    // registry. Most tests are not about what those add up to, so they go into
+    // one nobody is listening to; `when` in a test still overrides this.
+    when(() => viewportVisibility).thenReturn(
+      ViewportVisibilityRegistry(onAggregate: (_) async => true),
+    );
+
+    // Anything drawing a participant list subscribes to this. Most tests hand
+    // the list over directly or drive `state`, so they only need it to be a
+    // stream that stays quiet; `when` in a test still overrides this.
+    when(() => participantsStream).thenAnswer(
+      (_) => const Stream<List<CallParticipantState>>.empty(),
+    );
+  }
+}
 
 class MockCallState extends Mock implements CallState {}
+
+class MockStateEmitter<T> extends Mock implements StateEmitter<T> {}
 
 class MockCallParticipantState extends Mock implements CallParticipantState {
   MockCallParticipantState() {
