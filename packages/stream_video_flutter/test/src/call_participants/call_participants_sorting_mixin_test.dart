@@ -98,7 +98,10 @@ void main() {
 
   testWidgets('the sort is stable across equal participants', (tester) async {
     // Everyone compares equal, so the previous order has to survive.
-    final host = await _pumpHost(tester, sort: (_, __) => 0);
+    final host = await _pumpHost(
+      tester,
+      sort: CallParticipantSort((_, __) => 0),
+    );
 
     host.recalculateParticipants([
       _participant('a'),
@@ -119,7 +122,7 @@ void main() {
   testWidgets('the sort comparator wins over arrival order', (tester) async {
     final host = await _pumpHost(
       tester,
-      sort: (a, b) => a.userId.compareTo(b.userId),
+      sort: CallParticipantSort((a, b) => a.userId.compareTo(b.userId)),
     );
 
     host.recalculateParticipants([

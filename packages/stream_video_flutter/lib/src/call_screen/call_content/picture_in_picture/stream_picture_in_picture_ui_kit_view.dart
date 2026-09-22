@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../../../call_participants/call_participants.dart';
 import 'picture_in_picture_configuration.dart';
 
 /// A widget that handles the picture-in-picture mode on iOS.
@@ -58,7 +59,7 @@ class StreamPictureInPictureUiKitView extends StatefulWidget {
   final Call call;
   final PictureInPictureConfiguration? pictureInPictureConfiguration;
   @Deprecated('Use [pictureInPictureConfiguration.sort] instead')
-  final Comparator<CallParticipantState>? participantSort;
+  final CallParticipantSort<CallParticipantState>? participantSort;
   @Deprecated('Use [pictureInPictureConfiguration.iOSPiPConfiguration] instead')
   final IOSPictureInPictureConfiguration? configuration;
 
@@ -94,13 +95,11 @@ class _StreamPictureInPictureUiKitViewState
         : callParticipants.where((element) => !element.isLocal).toList();
 
     final sorted = List<CallParticipantState>.from(participants);
-    mergeSort(
-      sorted,
-      compare:
-          widget.pictureInPictureConfiguration?.sort ??
-          widget.participantSort ??
-          CallParticipantSortingPresets.pictureInPicture,
-    );
+    final sort =
+        widget.pictureInPictureConfiguration?.sort ??
+        widget.participantSort ??
+        CallParticipantSorts.pictureInPicture;
+    mergeSort(sorted, compare: sort.compare);
 
     if (sorted.isNotEmpty) {
       final pipParticipant = sorted.first;
