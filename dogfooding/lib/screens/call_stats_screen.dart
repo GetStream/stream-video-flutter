@@ -65,29 +65,34 @@ class CallStatsPanelBody extends StatelessWidget {
                     'Very high latency values may reduce call quality, cause lag, and make the call less enjoyable.',
                 chart: StatsLatencyChart(latencyHistory: state.latencyHistory),
               ),
-              const SizedBox(height: 16),
-              _StatsSection(
-                icon: Icons.whatshot,
-                title: 'Thermal state',
-                description:
-                    'Device thermal state history. Higher bars indicate more severe states.',
-                chart: StatsThermalChart(
-                  thermalSeverityHistory: state.thermalStatusHistory,
+              if (state.thermalStatusHistory.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                _StatsSection(
+                  icon: Icons.whatshot,
+                  title: 'Thermal state',
+                  description:
+                      'Device thermal state history. Higher bars indicate more severe states.',
+                  chart: StatsThermalChart(
+                    thermalSeverityHistory: state.thermalStatusHistory,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              _StatsSection(
-                icon: Icons.battery_full,
-                title: 'Battery level',
-                description: 'Track device battery level throughout the call.',
-                chart: StatsBatteryChart(
-                  batteryLevelHistory: state.batteryLevelHistory,
+              ],
+              if (state.batteryLevelHistory.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                _StatsSection(
+                  icon: Icons.battery_full,
+                  title: 'Battery level',
+                  description:
+                      'Track device battery level throughout the call.',
+                  chart: StatsBatteryChart(
+                    batteryLevelHistory: state.batteryLevelHistory,
+                  ),
+                  footer: Text(
+                    'Battery percentage consumed during call: ${batteryDrained != null ? "$batteryDrained%" : "N/A"}',
+                    style: TextStyle(color: colorScheme.textPrimary),
+                  ),
                 ),
-                footer: Text(
-                  'Battery percentage consumed during call: ${batteryDrained != null ? "$batteryDrained%" : "N/A"}',
-                  style: TextStyle(color: colorScheme.textPrimary),
-                ),
-              ),
+              ],
               const SizedBox(height: 16),
               const _StatsSection(
                 icon: Icons.bar_chart,
@@ -162,10 +167,11 @@ class CallStatsPanelBody extends StatelessWidget {
                 title: 'SDK Version',
                 value: state.clientEnvironment.sdkVersion,
               ),
-              StatsItem(
-                title: 'WebRTC Version',
-                value: state.clientEnvironment.webRtcVersion,
-              ),
+              if (state.clientEnvironment.webRtcVersion.isNotEmpty)
+                StatsItem(
+                  title: 'WebRTC Version',
+                  value: state.clientEnvironment.webRtcVersion,
+                ),
             ],
           ),
         );
