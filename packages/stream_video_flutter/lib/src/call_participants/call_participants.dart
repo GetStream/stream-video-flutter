@@ -209,6 +209,22 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
     with CallParticipantsSortingMixin {
   StreamSubscription<List<CallParticipantState>?>? _participantsSubscription;
 
+  /// One key per participant, for the tiles this widget arranges.
+  ///
+  /// A participant moving between layouts — out of the spotlight and into the
+  /// bar below it — is a tile in a new place, which without a [GlobalKey]
+  /// means the old element torn down and another built. That costs a new video
+  /// renderer, and the tile draws nothing until the first frame reaches it.
+  /// Keyed, the element moves instead, and the picture comes with it.
+  ///
+  /// Held here rather than derived from the participant, so two of these
+  /// widgets on screen at once do not hand the same key to two tiles.
+  final _tileKeys = <String, GlobalKey>{};
+
+  /// The same, for the bar beside a screen share. Kept apart from [_tileKeys]:
+  /// these tiles are built by another builder, and a key names one tile.
+  final _screenShareTileKeys = <String, GlobalKey>{};
+
   @override
   CallParticipantFilter<CallParticipantState> get participantFilter =>
       widget.filter;
@@ -292,15 +308,53 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
     }
   }
 
+  /// Wraps [builder] so the tile it returns carries the participant's key from
+  /// [keys].
+  ///
+  /// Around the builder rather than inside it, so an app that replaces the
+  /// builder keeps the reparenting.
+  CallParticipantBuilder _keyed(
+    Map<String, GlobalKey> keys,
+    CallParticipantBuilder builder,
+  ) {
+    return (context, call, participant) {
+      final key = keys.putIfAbsent(
+        participant.uniqueParticipantKey,
+        GlobalKey.new,
+      );
+
+      return KeyedSubtree(key: key, child: builder(context, call, participant));
+    };
+  }
+
+  /// Lets go of the keys of participants who have left, which nothing else
+  /// would: a key is minted on first sight and would otherwise be held for the
+  /// length of the call.
+  void _pruneTileKeys(Iterable<CallParticipantState> participants) {
+    if (_tileKeys.isEmpty && _screenShareTileKeys.isEmpty) return;
+
+    final present = {
+      for (final participant in participants) participant.uniqueParticipantKey,
+    };
+
+    _tileKeys.removeWhere((key, _) => !present.contains(key));
+    _screenShareTileKeys.removeWhere((key, _) => !present.contains(key));
+  }
+
   @override
   Widget build(BuildContext context) {
+    _pruneTileKeys(sortedParticipants);
+
     if (screenShareParticipant != null) {
       return ScreenShareCallParticipantsContent(
         call: widget.call,
         participants: sortedParticipants,
         screenSharingParticipant: screenShareParticipant!,
         screenShareContentBuilder: widget.screenShareContentBuilder,
-        screenShareParticipantBuilder: widget.screenShareParticipantBuilder,
+        screenShareParticipantBuilder: _keyed(
+          _screenShareTileKeys,
+          widget.screenShareParticipantBuilder,
+        ),
       );
     }
 
@@ -309,7 +363,9 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
       participants: sortedParticipants,
       layoutMode: widget.layoutMode,
       enableFloatingSelfView: widget.enableFloatingSelfView,
-      callParticipantBuilder: widget.callParticipantBuilder,
+      callParticipantBuilder: _keyed(_tileKeys, widget.callParticipantBuilder),
+      // Not keyed: the self-view draws the local participant while the layout
+      // leaves them out, so a shared key would be two tiles claiming one.
       floatingSelfViewBuilder: widget.floatingSelfViewBuilder,
     );
   }

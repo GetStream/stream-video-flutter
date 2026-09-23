@@ -186,6 +186,7 @@
 
 ### 🐞 Fixed
 
+- A participant moving between the spotlight and the bar no longer loses their picture on the way. Their tile carries its element across the move rather than being built again where it lands.
 - The iOS picture-in-picture window keeps its participant's track subscribed while the app is backgrounded.
 - The picture-in-picture views follow the call they are given when it changes, rather than the one they were built with.
 - A picture-in-picture overlay no longer unsubscribes a participant the grid is showing, or pulls their subscription down to its own size.

@@ -15,6 +15,7 @@ import '../mocks.dart';
 void main() {
   setUp(() {
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
+    ViewportVisibilityRegistry.defaultReleaseGrace = Duration.zero;
   });
 
   CallParticipantState participant(
