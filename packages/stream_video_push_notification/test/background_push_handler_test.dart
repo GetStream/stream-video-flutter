@@ -7,6 +7,8 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 
+class MockCall extends Mock implements Call {}
+
 class MockStreamVideo extends Mock implements StreamVideo {
   // StreamVideo marks dispose as @mustBeOverridden. Routed back through the
   // mock rather than stubbed out here, since teardown is what these tests
@@ -87,6 +89,7 @@ void main() {
     final stub = MockStreamVideo();
 
     when(() => stub.isDisposed).thenReturn(false);
+    when(() => stub.activeCalls).thenReturn([]);
     when(stub.dispose).thenAnswer((_) async {});
     when(
       stub.observeCoreRingingEventsForBackground,
@@ -609,6 +612,27 @@ void main() {
         verify(() => client.dispose()).called(1);
         expect(onDisposeCalled, isTrue);
       });
+    });
+
+    test('leaves the client alone when the app is in a call on it', () async {
+      await handle(createStreamVideo: factoryReturning(client));
+
+      // The app answered on this client and joined. On Android the accept
+      // lands on this isolate whenever the app is alive but backgrounded, so
+      // the resolution that normally means "this session is done" is instead
+      // the moment the app starts using the client.
+      when(() => client.activeCalls).thenReturn([MockCall()]);
+      onRingingEvent!(
+        const ActionCallAccept(
+          data: CallData(uuid: 'u', callCid: 'default:call-a'),
+        ),
+      );
+
+      await pastTheGrace();
+
+      // Disposing here drops a call that has just connected.
+      verifyNever(() => client.dispose());
+      expect(onDisposeCalled, isFalse);
     });
 
     group('when the push is not ours', () {

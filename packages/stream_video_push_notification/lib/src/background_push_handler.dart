@@ -382,6 +382,23 @@ class _BackgroundSession {
           return;
         }
 
+        // The app answered on this client and is in the call, so the client is
+        // the app's now and its lifecycle goes with it. Android delivers the
+        // accept to whichever isolate is running, which is this one whenever
+        // the app is alive but backgrounded - and there the accept is the
+        // moment the app starts using the client, not the moment this session
+        // is done with it. Disposing here drops a call that just connected.
+        if (streamVideo.activeCalls.isNotEmpty) {
+          streamLog.d(
+            StreamVideoPushHandler._tag,
+            () =>
+                '[release] the app is in a call on this client; '
+                'standing down',
+          );
+
+          return;
+        }
+
         await release();
       });
     } catch (e, stk) {

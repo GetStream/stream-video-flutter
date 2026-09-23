@@ -247,6 +247,10 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   /// Stores if the livestream is in cover or contain mode.
   bool _fullscreen = false;
 
+  /// Whether the livestream is over and this player still owes its route a
+  /// pop. See [_popSelf].
+  var _popPending = false;
+
   @override
   void initState() {
     super.initState();
@@ -384,7 +388,25 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   }
 
   @override
+  void didUpdateWidget(LivestreamPlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.call != widget.call) _popPending = false;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_popPending) {
+      // `ModalRoute.of` depends on the route's own status, so this rebuilds
+      // once this player's route becomes the top one and the pop it owes can
+      // finally happen.
+      if (ModalRoute.of(context)?.isCurrent ?? false) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) unawaited(_popSelf());
+        });
+      }
+    }
+
     return PartialCallStateBuilder(
       call: call,
       selector: (state) =>
@@ -514,16 +536,30 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
       _logger.d(() => '[leave] no args');
       await call.leave();
       // play tone
-      final bool popped;
-      if (mounted) {
-        popped = await Navigator.maybePop(context);
-      } else {
-        popped = false;
-      }
-      _logger.v(() => '[leave] popped: $popped');
+      await _popSelf();
     } finally {
       await _joinSubscription?.cancel();
       _joinSubscription = null;
     }
+  }
+
+  /// Closes the route this player is in, once that is the route a pop would
+  /// actually close.
+  Future<void> _popSelf() async {
+    if (!mounted) {
+      _logger.v(() => '[leave] popped: false');
+      return;
+    }
+
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) {
+      _logger.v(() => '[leave] not the top route; waiting to pop');
+      _popPending = true;
+      setState(() {});
+      return;
+    }
+
+    _popPending = false;
+    final popped = await Navigator.maybePop(context);
+    _logger.v(() => '[leave] popped: $popped');
   }
 }

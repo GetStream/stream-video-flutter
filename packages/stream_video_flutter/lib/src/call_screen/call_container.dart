@@ -76,6 +76,9 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
   /// Holds only status information about the call.
   late CallStatus _callStatus;
 
+  /// Whether the call is over and this container still owes its route a pop.
+  var _popPending = false;
+
   @override
   void initState() {
     super.initState();
@@ -91,6 +94,10 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
       _callStateSubscription = null;
       _callStatusSubscription?.cancel();
       _callStatusSubscription = null;
+
+      // A pop owed for the call that just left is not owed for this one: the
+      // container has been given something to show again.
+      _popPending = false;
 
       _listenToCallStatus();
     }
@@ -138,6 +145,14 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
     final status = _callStatus;
     _logger.v(() => '[build] status: $status');
 
+    if (_popPending) {
+      if (ModalRoute.of(context)?.isCurrent ?? false) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) unawaited(_leave());
+        });
+      }
+    }
+
     if (status is CallStatusIncoming && !status.acceptedByMe) {
       return _buildIncomingCall();
     }
@@ -161,14 +176,25 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
 
   Future<void> _leave() async {
     _logger.d(() => '[leave] no args');
-    // play tone
-    final bool popped;
-
-    if (mounted) {
-      popped = await Navigator.maybePop(context);
-    } else {
-      popped = false;
+    if (!mounted) {
+      _logger.v(() => '[leave] popped: false');
+      return;
     }
+
+    // `maybePop` closes the topmost route, which is not always the one this
+    // container is in: a dialog can sit above it, and so can another screen.
+    // The call ending is not the user asking to leave whatever that is, so a
+    // container that is not on top waits its turn instead. Null means there
+    // is no route to reason about, which is left to `maybePop` as before.
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) {
+      _logger.v(() => '[leave] not the top route; waiting to pop');
+      _popPending = true;
+      if (mounted) setState(() {});
+      return;
+    }
+
+    _popPending = false;
+    final popped = await Navigator.maybePop(context);
     _logger.v(() => '[leave] popped: $popped');
   }
 

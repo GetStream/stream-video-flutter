@@ -603,6 +603,8 @@ class StreamVideo extends Disposable {
       final call = _makeCallFromRinging(data: event.data);
       _ringingCalls[event.data.callCid.value] = call;
       _state.incomingCall.value = call;
+    } else if (event is CoordinatorCallRejectedEvent) {
+      unawaited(_onRingingCancelled(event));
     } else if (event is CoordinatorConnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] connected ${event.userId}');
       _connectionState = ConnectionState.connected(_state.currentUser.id);
@@ -613,6 +615,33 @@ class StreamVideo extends Disposable {
     } else if (event is CoordinatorReconnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] reconnected ${event.userId}');
     }
+  }
+
+  /// Ends a ringing call cancelled by the caller.
+  ///
+  /// Applies only when the caller rejects; other rejections are handled elsewhere.
+  Future<void> _onRingingCancelled(CoordinatorCallRejectedEvent event) async {
+    final cid = event.callCid.value;
+    if (event.rejectedBy.id != event.metadata.details.createdBy.id) return;
+
+    final call = _ringingCalls[cid] ?? _state.incomingCall.value;
+    if (call == null || call.callCid.value != cid) return;
+
+    final status = call.state.value.status;
+    if (status is! CallStatusIncoming || status.acceptedByMe) return;
+
+    _logger.i(
+      () => '[onCoordinatorEvent] ringing cancelled by the caller, cid: $cid',
+    );
+
+    _cancelIncomingAutoRejectTimerByCid(cid);
+
+    // Leaving, not rejecting: the caller has already withdrawn the call, so
+    // there is nothing to tell the coordinator. `leave` clears the ringing
+    // cache and `incomingCall` on its way out.
+    await call.leave(
+      reason: DisconnectReason.cancelled(byUserId: event.rejectedBy.id),
+    );
   }
 
   void _rewatchCalls() {

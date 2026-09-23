@@ -7,6 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 // �🐦 Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart'
     hide CurrentPlatform;
 import 'package:stream_video_filters/video_effects_manager.dart';
@@ -103,6 +104,9 @@ class _CallScreenState extends State<CallScreen>
     curve: Curves.easeOutCubic,
     reverseCurve: Curves.easeInCubic,
   );
+
+  /// Whether this screen has asked to close and is waiting its turn.
+  var _closeRequested = false;
 
   /// Carries the panel's own state across the breakpoint: the docked and the
   /// full-screen layout hang it in different places, and without a global key
@@ -505,6 +509,21 @@ class _CallScreenState extends State<CallScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (_closeRequested) {
+      // `ModalRoute.of` depends on the route's own status, so this rebuilds
+      // when the screen becomes the top one and can finally close. A plain
+      // Scaffold rather than nothing, so a frame spent waiting shows the
+      // app's background instead of bare black.
+      final isCurrent = ModalRoute.of(context)?.isCurrent ?? false;
+      if (isCurrent) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && context.mounted) context.pop();
+        });
+      }
+
+      return const Scaffold();
+    }
+
     // ignore: deprecated_member_use
     return WillPopScope(
       onWillPop: () async {
@@ -536,7 +555,16 @@ class _CallScreenState extends State<CallScreen>
           onCallDisconnected: (disconnectedProperties) {
             final reason = disconnectedProperties.reason;
 
-            Navigator.of(context).pop();
+            // `pop` closes the topmost route, which is not always this
+            // screen: a dialog can sit above it, and so can a second call
+            // screen. Closing that instead would take down whatever the user
+            // is actually looking at.
+            if (!(ModalRoute.of(context)?.isCurrent ?? false)) {
+              setState(() => _closeRequested = true);
+              return;
+            }
+
+            context.pop();
 
             if (reason is DisconnectReasonCancelled ||
                 reason is DisconnectReasonEnded ||
