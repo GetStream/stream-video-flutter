@@ -8,19 +8,16 @@
     <clip-path
         android:pathData="M0,0h107v107h-107z"/>
     <path
-        android:pathData="M107,0H0V107H107V0Z"
-        android:fillColor="#005FFF"/>
-    <path
         android:pathData="M107,0H0V107H107V0Z">
       <aapt:attr name="android:fillColor">
-        <gradient 
-            android:startX="107"
-            android:startY="-0"
+        <gradient
+            android:startX="0"
+            android:startY="0"
             android:endX="0"
             android:endY="107"
             android:type="linear">
-          <item android:offset="0" android:color="#FF49DDED"/>
-          <item android:offset="1" android:color="#0049DDED"/>
+          <item android:offset="0" android:color="#FF0A86FF"/>
+          <item android:offset="1" android:color="#FF005FFF"/>
         </gradient>
       </aapt:attr>
     </path>
