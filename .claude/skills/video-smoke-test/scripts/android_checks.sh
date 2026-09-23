@@ -130,6 +130,42 @@ else
   fail "reaction-android" "no reaction event in log"; shot "err-reaction"
 fi
 
+# --- raise hand ------------------------------------------------------------
+# Raise hand is a reaction with its own type, and like the emoji row it closes
+# the sheet, so it gets its own MORE tap.
+#
+# Asserted on a SECOND call.reaction_new arriving after this step's own mark,
+# not on the reaction type: the SDK logs the raw event type and nothing of the
+# payload, so "raise-hand" never appears in any log and a check looking for it
+# fails with a working app. The mark is taken before the MORE tap and the emoji
+# reaction above has already landed by then, so an event after it can only be
+# this one — but it does prove "a reaction was sent", not "that exact emoji".
+M=$(logline "$ANDROID_LOG")
+tap $A_MORE $A_BAR_Y; sleep 2
+if ui_tap "Raise hand" 10; then
+  sleep 4
+  assert_log_since "raise-hand-android" "Raise hand sends a reaction through the coordinator" \
+    "$ANDROID_LOG" "call\.reaction_new" "$M"
+else
+  fail "raise-hand-android" "the Raise hand row was not on the sheet"
+fi
+
+# --- noise cancellation / closed captions ----------------------------------
+# Both live on the options sheet, neither pops it, and both are asserted from
+# the row's own state word (see assert_menu_toggle in lib.sh for why not logs).
+# One MORE tap covers both.
+tap $A_MORE $A_BAR_Y; sleep 2
+assert_menu_toggle "noise-cancellation-android" \
+  "Noise cancellation toggles the call's audio processing" \
+  "Toggle Noise Cancellation"
+assert_menu_toggle "closed-captions-android" \
+  "Closed captions start and stop" \
+  "Toggle Closed Caption"
+shot "11b-android-menu-toggles"
+# Close the sheet again so the filter step below starts from the plain call
+# screen, exactly as it did before these two checks existed.
+tap $A_MORE $A_BAR_Y; sleep 2
+
 # --- video filter ----------------------------------------------------------
 # Selecting a filter does NOT close the options sheet (selecting a reaction
 # does). The sheet is therefore still open when this step ends, and the stats

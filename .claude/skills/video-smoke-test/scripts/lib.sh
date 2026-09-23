@@ -134,6 +134,238 @@ tap_until() {
   return 1
 }
 
+# ---------------------------------------------------------------- ui tree
+# A tap table is a guess about a layout; the accessibility tree is what the app
+# actually built. Flutter puts every Semantics label into it, so a control that
+# carries a label can be found by NAME, and it does not move when the screen
+# above it grows a new section.
+#
+# That is not a nicety. The E2EE card added to the lobby in #1312 pushed
+# "Start a test call" down 195px and every tap from the pixel table landed in
+# dead space below the button. Anything with a label is addressed through here;
+# the in-call icon bar and the options-sheet icon rows carry no labels and stay
+# in the table below.
+#
+# Reading the tree is NOT screenshot interpretation. It is exact text pulled
+# from the app's own semantics, and the SKILL.md rule against interpreting
+# screenshots still stands.
+UI_XML="$SMOKE_DIR/ui.xml"
+
+# ui_dump — refresh the cached tree.
+# Returns 1 when uiautomator cannot dump, which it genuinely cannot while an
+# animation is in flight. Callers poll rather than treat that as an answer.
+ui_dump() {
+  adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1 || return 1
+  adb shell cat /sdcard/ui.xml >"$UI_XML" 2>/dev/null || return 1
+  [ -s "$UI_XML" ]
+}
+
+# ui_nodes — "<centre-x> <centre-y> <class> <label>" per labelled node, in tree
+# order, from the cache. Reads `text` first and falls back to `content-desc`:
+# Flutter fills in one or the other depending on the widget.
+ui_nodes() {
+  python3 - "$UI_XML" <<'PY' 2>/dev/null
+import html, re, sys
+try:
+    xml = open(sys.argv[1], encoding='utf-8', errors='replace').read()
+except OSError:
+    sys.exit(0)
+for tag in re.findall(r'<node[^>]*>', xml):
+    box = re.search(r'\bbounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"', tag)
+    if not box:
+        continue
+    text = re.search(r'\btext="([^"]*)"', tag)
+    desc = re.search(r'\bcontent-desc="([^"]*)"', tag)
+    label = (text.group(1) if text else '') or (desc.group(1) if desc else '')
+    if not label:
+        continue
+    cls = re.search(r'\bclass="([^"]*)"', tag)
+    cls = cls.group(1).rsplit('.', 1)[-1] if cls else 'View'
+    x1, y1, x2, y2 = map(int, box.groups())
+    # Two-line labels arrive as &#10;, and the label is one field here, so the
+    # whole thing is flattened to single spaces.
+    label = ' '.join(html.unescape(label).split())
+    print((x1 + x2) // 2, (y1 + y2) // 2, cls, label)
+PY
+}
+
+# _ui_pick <regex> <field-program> — shared matcher for the three readers below.
+# Prefers an interactive node over a decorative one: Flutter emits BOTH a View
+# and a Button for the same control (the lobby's device pickers are two nodes
+# each), and tapping the View is a no-op.
+_ui_pick() {
+  ui_nodes | awk -v pat="$1" -v want="$2" '
+    { label = $0; sub(/^[0-9]+ [0-9]+ [^ ]+ /, "", label)
+      if (label !~ pat) next
+      if ($3 ~ /Button|EditText|CheckBox|Switch|ImageView/) {
+        if (want == "xy") print $1, $2; else print label
+        found = 1; exit
+      }
+      if (!seen) { fx = $1; fy = $2; flabel = label; seen = 1 } }
+    END { if (!found && seen) { if (want == "xy") print fx, fy; else print flabel } }'
+}
+
+# ui_find <extended-regex> — "x y" of the first node whose label matches.
+# Coordinates come straight from the tree and are already device pixels, so
+# they go to `adb shell input tap` directly and must NOT go through tap(),
+# which would scale them a second time.
+ui_find() { _ui_pick "$1" xy; }
+
+# ui_label <extended-regex> — the full label text of the first matching node.
+# This is how a control's own state is read when the SDK logs nothing: the
+# options sheet renders "Toggle Noise Cancellation Off" and flips the trailing
+# word, so the sheet itself is the assertion.
+ui_label() { _ui_pick "$1" label; }
+
+# ui_wait <regex> [timeout] — poll until a matching label is on screen.
+ui_wait() {
+  local pat="$1" timeout="${2:-15}" deadline
+  deadline=$(( $(date +%s) + timeout ))
+  while [ "$(date +%s)" -lt "$deadline" ]; do
+    if ui_dump && [ -n "$(ui_find "$pat")" ]; then return 0; fi
+    sleep 1
+  done
+  return 1
+}
+
+# ui_tap <regex> [timeout] — tap the element with that label, once it exists.
+ui_tap() {
+  local pat="$1" timeout="${2:-15}" xy
+  ui_wait "$pat" "$timeout" || return 1
+  xy=$(ui_find "$pat")
+  [ -n "$xy" ] || return 1
+  # Unquoted on purpose: "x y" has to split into two arguments.
+  # shellcheck disable=SC2086
+  adb shell input tap $xy
+}
+
+# ui_type <regex> <text> — focus a text field by label and replace its contents.
+# The select-all/delete is what makes it *replace*: the lobby pre-fills the key
+# field with generated words, and typing into it without clearing produces a
+# key that only one side of the call has.
+ui_type() {
+  local pat="$1" text="$2"
+  ui_tap "$pat" || return 1
+  sleep 2
+  adb shell input keyevent KEYCODE_MOVE_END
+  local i
+  for i in $(seq 1 60); do adb shell input keyevent KEYCODE_DEL; done
+  adb shell input text "$text"
+}
+
+# ui_field <class-regex> [nth] — the label of the nth node of that class.
+# For reading a value that has no label to match on, such as the lobby's
+# generated encryption key.
+ui_field() {
+  ui_nodes | awk -v cls="$1" -v n="${2:-1}" '
+    $3 ~ cls { c++
+      if (c == n) { label = $0; sub(/^[0-9]+ [0-9]+ [^ ]+ /, "", label); print label; exit } }'
+}
+
+# ui_scroll_to <regex> [swipes] — swipe the page up until the label is visible.
+#
+# Turning the lobby's E2EE switch on grows its card by a key field, two buttons
+# and two lines of help text, and that pushes "Start a test call" off the bottom
+# of a 2424px screen. Nothing about that is a defect, so the scripts scroll for
+# it instead of failing. The swipe starts high on the screen, over the preview
+# tile, because starting it low lands on the E2EE card's own controls.
+ui_scroll_to() {
+  local pat="$1" n="${2:-4}" i
+  for i in $(seq 1 "$n"); do
+    if ui_dump && [ -n "$(ui_find "$pat")" ]; then return 0; fi
+    adb shell input swipe 540 1500 540 900 300
+    sleep 1
+  done
+  ui_dump && [ -n "$(ui_find "$pat")" ]
+}
+
+# tap_until_ui <ref-x> <ref-y> <regex> [attempts] [per-attempt-timeout]
+# tap_until's sibling for a transition that produces no log line of its own.
+#
+# "Start New Call" is exactly that since #1312: it no longer creates the call,
+# it only pushes the lobby route, because the encryption mode is fixed at
+# creation and the lobby is where it is chosen. Waiting for `getOrCreateCall`
+# there — which is what this skill used to do — can now never succeed, and the
+# run died on "Lobby did not open" with a perfectly healthy app.
+tap_until_ui() {
+  local x="$1" y="$2" pat="$3" tries="${4:-4}" t="${5:-12}" i
+  for i in $(seq 1 "$tries"); do
+    tap "$x" "$y"
+    if ui_wait "$pat" "$t"; then return 0; fi
+    info "retry $i/$tries: tap ($x,$y) did not bring up '$pat'"
+  done
+  return 1
+}
+
+# assert_ui <id> <desc> <regex> [timeout] — pass when a label is on screen.
+assert_ui() {
+  local id="$1" desc="$2" pat="$3" t="${4:-15}"
+  if ui_wait "$pat" "$t"; then pass "$id" "$desc"; else fail "$id" "$desc"; fi
+}
+
+# assert_menu_toggle <id> <desc> <label-regex>
+# Taps a labelled options-sheet row and passes when that row's own trailing
+# state word flips, then puts it back.
+#
+# These rows are why ui_label exists. Noise cancellation is an SFU RPC logged at
+# verbose and closed captions only log on failure, and the dogfooding app runs
+# at Priority.debug — so for both there is nothing in the log to assert in the
+# success case, and a log-based check would "pass" while observing nothing. The
+# sheet renders live call state ("… On" / "… Off"), so the sheet is the
+# assertion.
+#
+# Neither row pops the sheet, so the sheet is still open when this returns.
+# It is left in the state it was found in, because the sheet's running order
+# depends on which rows are rendered at all.
+assert_menu_toggle() {
+  local id="$1" desc="$2" pat="$3" before after deadline
+  ui_dump || true
+  before=$(ui_label "$pat")
+  # The row is conditional on call settings: noise cancellation and closed
+  # captions are not rendered at all when the call type has them disabled.
+  # That is a property of the call, not a defect, so it is a skip.
+  if [ -z "$before" ]; then
+    skip "$id" "$desc (row not offered on this call)"; return 1
+  fi
+  ui_tap "$pat" 10 || { fail "$id" "$desc (row could not be tapped)"; return 1; }
+  deadline=$(( $(date +%s) + 15 ))
+  while [ "$(date +%s)" -lt "$deadline" ]; do
+    if ui_dump; then
+      after=$(ui_label "$pat")
+      if [ -n "$after" ] && [ "$after" != "$before" ]; then
+        pass "$id" "$desc ($before -> $after)"
+        ui_tap "$pat" 10 >/dev/null 2>&1 || true
+        sleep 2
+        return 0
+      fi
+    fi
+    sleep 1
+  done
+  fail "$id" "$desc (stayed '"'"'$before'"'"')"
+  return 1
+}
+
+# dismiss_feedback — clear the "We Value Your Feedback!" modal that follows
+# every leave on both platforms.
+#
+# Its close X is the one control on the modal with no label, so it stays a
+# coordinate — and that coordinate only holds with the keyboard CLOSED, because
+# an open keyboard shifts the whole modal up by ~330px. Hence the BACK first,
+# which either closes the keyboard or dismisses the modal outright; both are
+# wins. Safe to call when no modal appeared: it returns immediately.
+dismiss_feedback() {
+  ui_wait "We Value Your Feedback" 10 || return 0
+  local i
+  for i in 1 2 3; do
+    adb shell input keyevent KEYCODE_BACK; sleep 1
+    if ui_dump && [ -z "$(ui_find 'We Value Your Feedback')" ]; then return 0; fi
+    tap $A_FEEDBACK_X $A_FEEDBACK_Y; sleep 2
+    if ui_dump && [ -z "$(ui_find 'We Value Your Feedback')" ]; then return 0; fi
+  done
+  info "feedback modal did not dismiss"
+  return 1
+}
+
 # wait_pip <timeout-seconds>
 # Returns 0 once the app's task is actually in PiP. Polls, so it cannot lose a
 # race against the PiP transition.
@@ -464,18 +696,31 @@ A_END_X=998; A_TOP_Y=215
 # Login screen (reached deterministically via `pm clear`)
 A_USER_X=539;   A_USER_Y=1469
 A_SIGNUP_X=539; A_SIGNUP_Y=1632
-# Home screen
-A_START_NEW_X=577; A_START_NEW_Y=1871
-A_CALLID_X=350;    A_CALLID_Y=1683
-A_JOIN_X=875;      A_JOIN_Y=1683
-# Lobby
-A_TESTCALL_X=538;  A_TESTCALL_Y=2084
-# "Your meeting is live" banner chevron
-A_BANNER_X=922;    A_BANNER_Y=945
-# Options sheet
+# Home screen. Reference positions only: everything here carries a semantics
+# label, so the scripts resolve it with ui_find/ui_tap and these are the
+# fallback for the very first tap, before a tree is worth dumping.
+A_START_NEW_X=540; A_START_NEW_Y=1876
+A_CALLID_X=359;    A_CALLID_Y=1687
+A_JOIN_X=878;      A_JOIN_Y=1687
+# Lobby. "Start a test call" moved 2084 -> 2279 when #1312 added the E2EE card
+# above it; it is addressed by label now, and this is only a fallback.
+A_TESTCALL_X=540;  A_TESTCALL_Y=2279
+# Lobby E2EE card. The switch itself is a bare Switch.adaptive with no label of
+# its own, so it is the one lobby control that has to stay a coordinate. It sits
+# on the row titled "End-to-end encryption", at the right-hand edge of the card.
+A_E2EE_SW_X=890;   A_E2EE_SW_Y=1830
+# Options sheet. The reaction row and the filter row are icon-only — no labels
+# in the tree at all — so those two stay coordinates. The rows below them are
+# labelled and are tapped with ui_tap; the y values are kept as documentation of
+# the sheet's running order, which is what makes a mis-tap readable.
 A_REACT_X=224;     A_REACT_Y=413      # first reaction (party popper)
-A_BLUR_X=217;      A_BLUR_Y=688       # blur filter
-A_STATS_X=202;     A_STATS_Y=1277
+A_BLUR_X=217;      A_BLUR_Y=688       # blur filter (2nd icon; 1st is "none")
+A_RAISE_Y=544                         # ✋ Raise hand
+A_NC_Y=838                            # Toggle Noise Cancellation
+A_AUDIO_OUT_Y=985                     # Choose audio output
+A_CC_Y=1132                           # Toggle Closed Caption
+A_STATS_X=202;     A_STATS_Y=1279
+A_IVQ_Y=1941                          # Incoming video quality
 # Leave the stats screen with the top-LEFT back arrow, never the top-right X.
 # The X sits ~16px from the call screen's END CALL button, so if the stats screen
 # ever fails to open, that tap silently ends the call. The top-left position is
