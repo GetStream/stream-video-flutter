@@ -295,7 +295,7 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
   void _captureLastFrame() {
     final onLastFrame = widget.onLastFrame;
     if (onLastFrame == null || !_isInitialized) return;
-    if (!_videoRenderer.value.renderVideo) return;
+    if (!_hasFirstFrame(_videoRenderer.value)) return;
 
     if (kIsWeb) {
       // The web video is an HTML element, invisible to a layer snapshot. It
@@ -349,19 +349,34 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
     return ValueListenableBuilder<rtc.RTCVideoValue>(
       valueListenable: _videoRenderer,
       builder: (context, value, _) {
-        return RepaintBoundary(
+        final video = RepaintBoundary(
           key: _boundaryKey,
           child: rtc.RTCVideoView(
             _videoRenderer,
             mirror: widget.mirror,
             objectFit: _getVideoViewObjectFit(videoFit, value),
             filterQuality: FilterQuality.medium,
-            placeholderBuilder: widget.placeholderBuilder,
           ),
+        );
+        if (_hasFirstFrame(value)) return video;
+
+        // The video stays in the tree so it can load, covered until it has a
+        // frame to show.
+        return Stack(
+          fit: StackFit.expand,
+          children: [video, widget.placeholderBuilder(context)],
         );
       },
     );
   }
+
+  /// Whether the renderer has a decoded frame to show.
+  ///
+  /// On the web [rtc.RTCVideoValue.renderVideo] turns true as soon as a stream
+  /// is attached, before its first frame; the video size is only known once
+  /// one is.
+  bool _hasFirstFrame(rtc.RTCVideoValue value) =>
+      value.renderVideo && value.width > 0 && value.height > 0;
 
   rtc.RTCVideoViewObjectFit _getVideoViewObjectFit(
     VideoFit videoFit,
