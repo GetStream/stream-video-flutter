@@ -113,6 +113,18 @@ Props carry data and decisions; appearance goes in the style object. A `show*`
 toggle that an app sets globally *and* a call site overrides lives in both, with
 the prop winning.
 
+## Right-to-left
+
+Every widget has to work right to left. Lay out by start and end, not left and
+right: `EdgeInsetsDirectional`, `PositionedDirectional`,
+`AlignmentDirectional`. A public padding or alignment is typed as the
+`…Geometry` base, so a caller can pass the directional form. Code that needs
+numbers out of one resolves it against `Directionality.of(context)` first, and
+from then on `left` and `right` are physical sides already swapped for the
+direction. A chevron or arrow that points along the reading direction swaps
+its glyph under RTL. Each layout gets at least one widget test under
+`TextDirection.rtl`, with a start and end that differ.
+
 ## Tokens
 
 Read them from the context extensions — `context.streamColorScheme`,
