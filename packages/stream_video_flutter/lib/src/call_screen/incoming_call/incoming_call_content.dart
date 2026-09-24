@@ -71,38 +71,42 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
       child: Material(
         color: Colors.transparent,
         child: SafeArea(
-          child: Stack(
+          child: Column(
             children: [
-              Center(
-                child: RingingCallDetails(
-                  participants: users,
-                  status: context.translations.ringingIncomingCall,
-                  style: style,
-                  avatar: widget.participantsAvatarWidgetBuilder?.call(
-                    context,
-                    widget.call,
-                    ParticipantsData(participants: users),
-                  ),
-                  nameLine: widget.participantsDisplayNameWidgetBuilder?.call(
-                    context,
-                    widget.call,
-                    ParticipantsData(participants: users),
+              // The details are centred in the space above the controls, and
+              // scroll rather than overflow when that space is too short.
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: RingingCallDetails(
+                      participants: users,
+                      status: context.translations.ringingIncomingCall,
+                      style: style,
+                      avatar: widget.participantsAvatarWidgetBuilder?.call(
+                        context,
+                        widget.call,
+                        ParticipantsData(participants: users),
+                      ),
+                      nameLine: widget.participantsDisplayNameWidgetBuilder
+                          ?.call(
+                            context,
+                            widget.call,
+                            ParticipantsData(participants: users),
+                          ),
+                    ),
                   ),
                 ),
               ),
-              Align(
-                alignment: AlignmentDirectional.bottomCenter,
-                child: Padding(
-                  padding: style.controlsPadding,
-                  child: IncomingCallControls(
-                    style: style,
-                    isMicrophoneEnabled: connectOptions.microphone.isEnabled,
-                    isCameraEnabled: connectOptions.camera.isEnabled,
-                    onAcceptCallTap: _onAcceptCallTap,
-                    onDeclineCallTap: () => _onDeclineCallTap(context),
-                    onMicrophoneTap: () => _onMicrophoneTap(context),
-                    onCameraTap: () => _onCameraTap(context),
-                  ),
+              Padding(
+                padding: style.controlsPadding,
+                child: IncomingCallControls(
+                  style: style,
+                  isMicrophoneEnabled: connectOptions.microphone.isEnabled,
+                  isCameraEnabled: connectOptions.camera.isEnabled,
+                  onAcceptCallTap: _onAcceptCallTap,
+                  onDeclineCallTap: () => _onDeclineCallTap(context),
+                  onMicrophoneTap: () => _onMicrophoneTap(context),
+                  onCameraTap: () => _onCameraTap(context),
                 ),
               ),
             ],

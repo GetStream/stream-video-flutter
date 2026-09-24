@@ -126,37 +126,41 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
       final child = Material(
         color: Colors.transparent,
         child: SafeArea(
-          child: Stack(
+          child: Column(
             children: [
-              Center(
-                child: RingingCallDetails(
-                  participants: participants,
-                  status: context.translations.ringingCalling,
-                  style: style,
-                  avatar: widget.participantsAvatarWidgetBuilder?.call(
-                    context,
-                    widget.call,
-                    ParticipantsData(participants: participants),
-                  ),
-                  nameLine: widget.participantsDisplayNameWidgetBuilder?.call(
-                    context,
-                    widget.call,
-                    ParticipantsData(participants: participants),
+              // The details are centred in the space above the controls, and
+              // scroll rather than overflow when that space is too short.
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: RingingCallDetails(
+                      participants: participants,
+                      status: context.translations.ringingCalling,
+                      style: style,
+                      avatar: widget.participantsAvatarWidgetBuilder?.call(
+                        context,
+                        widget.call,
+                        ParticipantsData(participants: participants),
+                      ),
+                      nameLine: widget.participantsDisplayNameWidgetBuilder
+                          ?.call(
+                            context,
+                            widget.call,
+                            ParticipantsData(participants: participants),
+                          ),
+                    ),
                   ),
                 ),
               ),
-              Align(
-                alignment: AlignmentDirectional.bottomCenter,
-                child: Padding(
-                  padding: style.controlsPadding,
-                  child: OutgoingCallControls(
-                    style: style,
-                    isMicrophoneEnabled: _controller.microphoneEnabled,
-                    isCameraEnabled: _controller.cameraEnabled,
-                    onCancelCallTap: () => _onCancelCallTap(context),
-                    onMicrophoneTap: _onMicrophoneTap,
-                    onCameraTap: _onCameraTap,
-                  ),
+              Padding(
+                padding: style.controlsPadding,
+                child: OutgoingCallControls(
+                  style: style,
+                  isMicrophoneEnabled: _controller.microphoneEnabled,
+                  isCameraEnabled: _controller.cameraEnabled,
+                  onCancelCallTap: () => _onCancelCallTap(context),
+                  onMicrophoneTap: _onMicrophoneTap,
+                  onCameraTap: _onCameraTap,
                 ),
               ),
             ],
