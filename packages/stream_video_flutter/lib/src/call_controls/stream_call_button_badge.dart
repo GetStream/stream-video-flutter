@@ -2,25 +2,35 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 
-/// Overlays an error badge on the top-end corner of a call button.
+/// Overlays an error badge or a count on the top-end corner of a call button.
 ///
 /// Shared by [CallControlButton] and [CallFeatureButton] so the badge sits in
 /// the same place on both.
 ///
-/// Styling resolves from [StreamCallButtonBadgeTheme], falling back to the
-/// design system's defaults for a call control — see
-/// [StreamCallButtonBadgeStyle].
+/// The error badge's styling resolves from [StreamCallButtonBadgeTheme],
+/// falling back to the design system's defaults for a call control — see
+/// [StreamCallButtonBadgeStyle]. The count is a [StreamBadgeNotification], and
+/// takes its styling from [StreamBadgeNotificationTheme].
 class StreamCallButtonBadge extends StatelessWidget {
   /// Creates a new instance of [StreamCallButtonBadge].
   const StreamCallButtonBadge({
     super.key,
-    required this.showErrorBadge,
+    this.showErrorBadge = false,
+    this.count,
     required this.child,
     this.style,
   });
 
-  /// Whether to draw the badge at all.
+  /// Whether to draw the error badge.
+  ///
+  /// Takes the corner over [count] while it is true.
   final bool showErrorBadge;
+
+  /// The number to show on the button, such as participants or unread
+  /// messages.
+  ///
+  /// Null or zero draws no count.
+  final int? count;
 
   /// The button to badge.
   final Widget child;
@@ -33,7 +43,12 @@ class StreamCallButtonBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!showErrorBadge) return child;
+    if (!showErrorBadge) {
+      final count = this.count;
+      if (count == null || count <= 0) return child;
+
+      return StreamBadgeNotification(label: '$count', child: child);
+    }
 
     const defaults = _StreamCallButtonBadgeStyleDefaults();
     final themeStyle = StreamCallButtonBadgeTheme.of(context).style;

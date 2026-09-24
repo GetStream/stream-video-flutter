@@ -46,7 +46,7 @@ void main() {
   testWidgets('opens the built-in list when no onTap is given', (tester) async {
     await pump(tester);
 
-    await tester.tap(find.byType(CallControlButton));
+    await tester.tap(find.byType(StreamButton));
     await tester.pumpAndSettle();
 
     expect(find.text('Rene iPad'), findsOneWidget);
@@ -58,7 +58,7 @@ void main() {
     var tapped = 0;
     await pump(tester, onTap: () => tapped++);
 
-    await tester.tap(find.byType(CallControlButton));
+    await tester.tap(find.byType(StreamButton));
     await tester.pumpAndSettle();
 
     expect(tapped, 1);
@@ -86,7 +86,7 @@ void main() {
     var tapped = 0;
     await pump(tester, participants: const [], onTap: () => tapped++);
 
-    await tester.tap(find.byType(CallControlButton));
+    await tester.tap(find.byType(StreamButton));
     await tester.pump();
 
     expect(tapped, 1);
@@ -100,7 +100,7 @@ void main() {
     tester,
   ) async {
     await pump(tester);
-    await tester.tap(find.byType(CallControlButton));
+    await tester.tap(find.byType(StreamButton));
     await tester.pumpAndSettle();
 
     final rows = tester
@@ -120,7 +120,7 @@ void main() {
     tester,
   ) async {
     await pump(tester, platform: TargetPlatform.iOS);
-    await tester.tap(find.byType(CallControlButton));
+    await tester.tap(find.byType(StreamButton));
     await tester.pumpAndSettle();
 
     final rows = tester
@@ -192,7 +192,7 @@ void main() {
       givenParticipants([participant('a', 'Rene iPad')]);
 
       await pumpCall(tester);
-      await tester.tap(find.byType(CallControlButton));
+      await tester.tap(find.byType(StreamButton));
       await tester.pumpAndSettle();
 
       expect(find.text('Rene iPad'), findsOneWidget);
@@ -206,7 +206,7 @@ void main() {
       givenParticipants([participant('user-7', '')]);
 
       await pumpCall(tester);
-      await tester.tap(find.byType(CallControlButton));
+      await tester.tap(find.byType(StreamButton));
       await tester.pumpAndSettle();
 
       expect(find.text('user-7'), findsOneWidget);
@@ -232,7 +232,7 @@ void main() {
       var tapped = 0;
 
       await pumpCall(tester, onTap: () => tapped++);
-      await tester.tap(find.byType(CallControlButton));
+      await tester.tap(find.byType(StreamButton));
       await tester.pumpAndSettle();
 
       expect(tapped, 1);

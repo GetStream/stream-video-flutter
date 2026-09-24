@@ -70,30 +70,14 @@ class StreamParticipantsButton extends StatelessWidget {
   }
 
   Widget _build(BuildContext context, List<UserInfo> participants) {
-    final colorScheme = context.streamColorScheme;
     final translations = context.translations;
     final spacing = context.streamSpacing;
 
-    Widget badged(Widget button) {
-      if (participants.isEmpty) return button;
-
-      return StreamBadgeNotificationTheme(
-        data: StreamBadgeNotificationThemeData(
-          primaryBackgroundColor: colorScheme.accentSuccess,
-        ),
-        child: StreamBadgeNotification(
-          label: '${participants.length}',
-          child: button,
-        ),
-      );
-    }
-
-    Widget button(VoidCallback? onPressed) => badged(
-      CallControlButton(
-        icon: Icon(context.streamIcons.usersFill),
-        tooltip: translations.lobbyParticipants,
-        onPressed: onPressed,
-      ),
+    Widget button(VoidCallback? onPressed) => CallControlButton(
+      icon: Icon(context.streamIcons.usersFill),
+      tooltip: translations.lobbyParticipants,
+      badgeCount: participants.length,
+      onPressed: onPressed,
     );
 
     // Nothing to anchor a menu to when the press is the caller's to handle.

@@ -44,6 +44,7 @@ class CallControlButton extends StatelessWidget {
     required this.icon,
     this.tone = .neutral,
     this.showErrorBadge = false,
+    this.badgeCount,
     this.onPressed,
     this.tooltip,
     this.themeStyle,
@@ -62,6 +63,13 @@ class CallControlButton extends StatelessWidget {
   /// [tone] and of whether the button can be pressed. A button that simply
   /// cannot be used right now takes a null [onPressed] instead.
   final bool showErrorBadge;
+
+  /// A count to show on the button's top-end corner, such as the people in a
+  /// call.
+  ///
+  /// Null or zero draws no count, and [showErrorBadge] takes the corner over
+  /// it.
+  final int? badgeCount;
 
   /// The callback to invoke when the user taps on the button.
   ///
@@ -83,6 +91,7 @@ class CallControlButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final button = StreamCallButtonBadge(
       showErrorBadge: showErrorBadge,
+      count: badgeCount,
       child: StreamButton.icon(
         icon: icon,
         onPressed: onPressed,

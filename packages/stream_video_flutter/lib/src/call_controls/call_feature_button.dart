@@ -45,6 +45,7 @@ class CallFeatureButton extends StatelessWidget {
     this.selected = false,
     this.tone = .accent,
     this.showErrorBadge = false,
+    this.badgeCount,
     this.onPressed,
     this.tooltip,
   });
@@ -65,6 +66,12 @@ class CallFeatureButton extends StatelessWidget {
   /// [onPressed] instead.
   final bool showErrorBadge;
 
+  /// A count to show on the button's top-end corner, such as unread messages.
+  ///
+  /// Null or zero draws no count, and [showErrorBadge] takes the corner over
+  /// it.
+  final int? badgeCount;
+
   /// The callback to invoke when the user taps on the button.
   ///
   /// Null renders the button disabled.
@@ -77,6 +84,7 @@ class CallFeatureButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return StreamCallButtonBadge(
       showErrorBadge: showErrorBadge,
+      count: badgeCount,
       child: StreamButton.icon(
         icon: icon,
         onPressed: onPressed,

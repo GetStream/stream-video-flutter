@@ -17,7 +17,7 @@ void main() {
     testWidgets('draws nothing when showErrorBadge is false', (tester) async {
       await tester.pumpWidget(
         const TestWrapper(
-          child: StreamCallButtonBadge(showErrorBadge: false, child: child),
+          child: StreamCallButtonBadge(child: child),
         ),
       );
 
@@ -25,6 +25,51 @@ void main() {
       // unwrapped — so the badge is what has to be absent.
       expect(find.byType(StreamErrorBadge), findsNothing);
       expect(find.byType(Stack), findsNothing);
+    });
+
+    testWidgets('draws no count for null or zero', (tester) async {
+      for (final count in [null, 0]) {
+        await tester.pumpWidget(
+          TestWrapper(
+            child: StreamCallButtonBadge(count: count, child: child),
+          ),
+        );
+
+        expect(find.byType(StreamBadgeNotification), findsNothing);
+      }
+    });
+
+    testWidgets('draws the count', (tester) async {
+      await tester.pumpWidget(
+        const TestWrapper(
+          child: StreamCallButtonBadge(count: 3, child: child),
+        ),
+      );
+
+      final notification = tester.widget<StreamBadgeNotification>(
+        find.byType(StreamBadgeNotification),
+      );
+      expect(notification.props.label, '3');
+      // The design system's badge colour, not one the button picks.
+      expect(notification.props.type, isNull);
+      expect(find.byType(StreamErrorBadge), findsNothing);
+    });
+
+    testWidgets('the error badge takes the corner over the count', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const TestWrapper(
+          child: StreamCallButtonBadge(
+            showErrorBadge: true,
+            count: 3,
+            child: child,
+          ),
+        ),
+      );
+
+      expect(find.byType(StreamErrorBadge), findsOneWidget);
+      expect(find.byType(StreamBadgeNotification), findsNothing);
     });
 
     testWidgets('takes the design system defaults for a call control', (
