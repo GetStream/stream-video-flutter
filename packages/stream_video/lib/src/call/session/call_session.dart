@@ -49,6 +49,19 @@ class _UnresolvedTrackMidError extends StreamVideoException {
     : super(message: 'Could not resolve the mid of every published track');
 }
 
+/// A fast reconnect the SFU answered with `reconnected: false`.
+///
+/// The SFU no longer held the session, so it seated the join as a brand-new
+/// participant, one it never subscribes to anything. Another fast reconnect
+/// would resume that participant and report success over a subscriber that
+/// can never receive media. Only a rejoin recovers from this.
+class SfuSessionNotResumedException extends StreamVideoException {
+  const SfuSessionNotResumedException()
+    : super(
+        message: 'The SFU no longer holds this session (reconnected: false)',
+      );
+}
+
 class CallSession extends Disposable {
   CallSession({
     required this.callCid,
@@ -69,6 +82,7 @@ class CallSession extends Disposable {
     this.clientPublishOptions,
     this.e2eeManager,
     this.joinResponseTimeout = const Duration(seconds: 5),
+    this.fastReconnectJoinResponseTimeout = const Duration(seconds: 15),
   }) : _tracer = tracer,
        _streamVideo = streamVideo,
        sfuClient = SfuClient(
@@ -123,6 +137,9 @@ class CallSession extends Disposable {
   final StreamVideo _streamVideo;
 
   final Duration joinResponseTimeout;
+
+  /// How long a fast reconnect waits for the SFU to answer its join.
+  final Duration fastReconnectJoinResponseTimeout;
 
   final Lock _sfuEventsLock = Lock();
   final Lock _negotiationLock = Lock();
@@ -507,17 +524,26 @@ class CallSession extends Disposable {
       Result<({SfuCallState callState, Duration fastReconnectDeadline})?>?
       result;
 
+      // Every way out of here before the join settles is a failure worth
+      // seeing in the trace: these are the ones that left no mark before.
+      Result<Never> failed(StreamVideoException error) {
+        _logger.w(() => '[fastReconnect] failed: $error');
+        _tracer.trace(TraceTag.fastReconnectFailure, error.toString());
+        return Result.failure(error);
+      }
+
       _logger.d(() => '[fastReconnect] sfu not connected, recreating');
       final wsResult = await sfuWS.recreate();
-      if (wsResult.isFailure) {
-        _logger.w(() => '[fastReconnect] sfu recreate failed: $wsResult');
-        return const Result.failure(
-          StreamVideoException(message: 'SFU WS reconnect failed'),
+      if (wsResult is Failure) {
+        return failed(
+          StreamVideoException(
+            message: 'SFU WS reconnect failed: ${wsResult.videoError.message}',
+          ),
         );
       }
 
       _logger.d(() => '[fastReconnect] sfu connected, sending join request');
-      sfuWS.send(
+      final sendResult = sfuWS.send(
         sfu_events.SfuRequest(
           joinRequest: sfu_events.JoinRequest(
             clientDetails: clientDetails,
@@ -538,29 +564,40 @@ class CallSession extends Disposable {
         ),
       );
 
-      _logger.v(() => '[fastReconnect] wait for SfuJoinResponseEvent');
-      final event = await sfuWS.events.waitFor<SfuJoinResponseEvent>(
-        timeLimit: const Duration(seconds: 30),
-      );
-
-      if (event.isReconnected) {
-        _logger.v(() => '[fastReconnect] fast-reconnect done');
-
-        stateManager.sfuPinsUpdated(event.callState.pins);
-        stateManager.sfuE2eeEnabledUpdated(event.callState.e2eeEnabled);
-
-        result = Result.success(
-          (
-            callState: event.callState,
-            fastReconnectDeadline: event.fastReconnectDeadline,
+      if (sendResult is Failure) {
+        return failed(
+          StreamVideoException(
+            message: 'Join request not sent: ${sendResult.videoError.message}',
           ),
         );
-      } else {
-        _logger.v(() => '[fastReconnect] fast-reconnect not possible');
-        return const Result.failure(
-          StreamVideoException(message: 'Fast reconnect not possible'),
-        );
       }
+
+      // Nothing is awaited between sending and subscribing, so the answer
+      // cannot slip past.
+      _logger.v(() => '[fastReconnect] wait for SfuJoinResponseEvent');
+      final joinResponse = await sfuWS.waitForJoinResponse(
+        timeLimit: fastReconnectJoinResponseTimeout,
+      );
+      if (joinResponse is Failure) {
+        return failed(joinResponse.videoError);
+      }
+
+      final event = joinResponse.getDataOrNull()!;
+      if (!event.isReconnected) {
+        return failed(const SfuSessionNotResumedException());
+      }
+
+      _logger.v(() => '[fastReconnect] fast-reconnect done');
+
+      stateManager.sfuPinsUpdated(event.callState.pins);
+      stateManager.sfuE2eeEnabledUpdated(event.callState.e2eeEnabled);
+
+      result = Result.success(
+        (
+          callState: event.callState,
+          fastReconnectDeadline: event.fastReconnectDeadline,
+        ),
+      );
 
       _logger.v(() => '[fastReconnect] restarting ICE');
       await rtcManager?.publisher?.pc.restartIce();
@@ -805,7 +842,9 @@ class CallSession extends Disposable {
         stateManager.sfuJoinResponse(
           event,
           subscriberReused:
-              manager != null && identical(manager, _joinedRtcManager),
+              event.isReconnected &&
+              manager != null &&
+              identical(manager, _joinedRtcManager),
         );
         _joinedRtcManager = manager;
         // The participant list just landed, so tracks that arrived before it

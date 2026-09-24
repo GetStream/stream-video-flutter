@@ -399,6 +399,13 @@ class Call {
   String? _unifiedSessionId;
 
   int _reconnectAttempts = 0;
+
+  /// The attempt [CallStatusReconnecting.attempt] reports: every attempt of
+  /// the running reconnect, fast or rejoin, counting from 1.
+  ///
+  /// Kept apart from [_reconnectAttempts], which counts only rejoins and
+  /// migrations and drives their backoff.
+  int _reconnectStatusAttempt = 0;
   Duration _fastReconnectDeadline = Duration.zero;
   SfuReconnectionStrategy _reconnectStrategy =
       SfuReconnectionStrategy.unspecified;
@@ -1662,8 +1669,10 @@ class Call {
       return failureWithError('call was left');
     }
 
+    // Within a reconnect this restates the joining status the loop set just
+    // before dispatching the attempt, and so changes nothing.
     _stateManager.lifecycleCallConnecting(
-      attempt: _reconnectAttempts,
+      attempt: _reconnectStatusAttempt,
       strategy: _reconnectStrategy,
     );
 
@@ -1813,6 +1822,17 @@ class Call {
 
       if (result.isFailure) {
         _logger.e(() => '[join] fast reconnecting failed: $result');
+
+        // The SFU dropped the session and seated this join as a new, empty
+        // participant. Another fast attempt would resume that one and succeed
+        // over a subscriber that never receives media, so the next attempt has
+        // to be a rejoin. Raised as a hint rather than by switching strategy
+        // here, so the escalation stays with the reconnect loop.
+        if (result.getErrorOrNull() is SfuSessionNotResumedException) {
+          _logger.w(() => '[join] sfu session not resumable, rejoin pending');
+          _isRejoinPending = true;
+        }
+
         return failureWithError('fast reconnecting failed');
       }
 
@@ -2418,6 +2438,7 @@ class Call {
 
     await _callReconnectLock.synchronized(() async {
       _reconnectAttempts = 0;
+      _reconnectStatusAttempt = 0;
       _reconnectStrategy = strategy;
       _isRejoinPending = false;
 
@@ -2434,6 +2455,10 @@ class Call {
       // Shared post-failure handling: back off, then decide whether to
       // escalate to `rejoin` or retry with `fast`.
       Future<void> handleReconnectFailure({required bool wasMigrating}) async {
+        // The attempt is over, and the next one has not started: the backoff
+        // below is waiting, not joining.
+        _stateManager.lifecycleCallReconnectPhase(CallReconnectPhase.waiting);
+
         final strategyAttempt =
             _reconnectStrategy == SfuReconnectionStrategy.fast
             ? fastReconnectAttemptsCount
@@ -2484,10 +2509,6 @@ class Call {
             ? const Duration(seconds: 3)
             : Duration.zero;
 
-        _awaitNetworkAvailableFuture = _awaitNetworkAvailable(
-          stabilityWindow: stabilityWindow,
-        );
-
         if (state.value.preferences.reconnectTimeout > Duration.zero) {
           final elapsed = DateTime.now().difference(reconnectStartTime);
           if (elapsed > state.value.preferences.reconnectTimeout) {
@@ -2507,14 +2528,28 @@ class Call {
           'reason': reconnectReason,
         });
 
+        _reconnectStatusAttempt++;
         _stateManager.lifecycleCallConnecting(
-          attempt: _reconnectAttempts,
+          attempt: _reconnectStatusAttempt,
           strategy: _reconnectStrategy,
+          phase: CallReconnectPhase.waiting,
+        );
+
+        // Started only once the status says waiting, so an offline report
+        // from the wait cannot be overwritten by it.
+        _awaitNetworkAvailableFuture = _awaitNetworkAvailable(
+          stabilityWindow: stabilityWindow,
+          onStatus: (status) => _stateManager.lifecycleCallReconnectPhase(
+            status == InternetStatus.connected
+                ? CallReconnectPhase.waiting
+                : CallReconnectPhase.offline,
+          ),
         );
 
         _logger.d(
           () =>
-              '[reconnect] strategy: $_reconnectStrategy, attempt: $_reconnectAttempts',
+              '[reconnect] strategy: $_reconnectStrategy, '
+              'attempt: $_reconnectStatusAttempt',
         );
 
         // capture BEFORE dispatch — strategy may change inside the helper
@@ -2557,6 +2592,8 @@ class Call {
               reason: joinReason,
             );
           }
+
+          _stateManager.lifecycleCallReconnectPhase(CallReconnectPhase.joining);
 
           final reconnectResult = switch (_reconnectStrategy) {
             SfuReconnectionStrategy.fast => await _reconnectFast(
@@ -2691,8 +2728,12 @@ class Call {
   /// [CallPreferences.networkAvailabilityTimeout]. If the network keeps
   /// flickering (connecting then dropping within the stability window),
   /// the remaining budget shrinks on each iteration until it is exhausted.
+  ///
+  /// [onStatus] hears every network status the wait sees, so the reconnect can
+  /// tell being offline from waiting on a network that is up.
   Future<InternetStatus> _awaitNetworkAvailable({
     Duration stabilityWindow = Duration.zero,
+    void Function(InternetStatus status)? onStatus,
   }) async {
     final previousCheckInterval = networkMonitor.checkInterval;
     final budget = state.value.preferences.networkAvailabilityTimeout;
@@ -2714,6 +2755,7 @@ class Call {
 
         final networkFuture = networkMonitor.onStatusChange
             .startWithFuture(networkMonitor.internetStatus)
+            .doOnData((status) => onStatus?.call(status))
             .firstWhere((status) => status == InternetStatus.connected)
             .timeout(
               remaining,
@@ -2755,6 +2797,7 @@ class Call {
               .timeout(stabilityWindow);
 
           // Stream emitted before timeout → network dropped during window.
+          onStatus?.call(InternetStatus.disconnected);
           _logger.w(
             () =>
                 '[_awaitNetworkAvailable] network dropped during '

@@ -42,6 +42,7 @@
 - `StreamVideoException` (formerly `VideoError`) now implements `Exception` rather than `Error`. An `on Error catch` clause no longer matches it — these are runtime conditions to handle, not programming bugs. Catch `Exception`, or `StreamVideoException` directly.
 - `CallPreferences` now requires a `participantsThrottleIntervalResolver`; custom implementations must provide it.
 - `CallParticipantState.audioLevels` is now unmodifiable.
+- `CallStatusReconnecting.attempt` now counts every attempt of a reconnect, fast and rejoin alike, starting at 1. It used to start at 0, stay there across fast attempts, and count only rejoins — reaching a different value twice within one rejoin.
 
 ### ⚠️ Deprecated
 
