@@ -72,6 +72,9 @@ class _CallScreenState extends State<CallScreen>
   Timer? _speakingWhileMutedDebounce;
   DateTime? _lastSnackbarShownAt;
 
+  /// Shows snackbars floating above the control bar rather than over it.
+  final _controlsMessenger = StreamSnackbarMessenger();
+
   static const _snackbarDebounce = Duration(seconds: 1);
   static const _snackbarCooldown = Duration(seconds: 5);
 
@@ -161,11 +164,9 @@ class _CallScreenState extends State<CallScreen>
       }
 
       _lastSnackbarShownAt = now;
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        const SnackBar(
-          content: Text('You are muted. Unmute to speak.'),
-          behavior: SnackBarBehavior.floating,
-        ),
+      _controlsMessenger.show(
+        StreamSnackbar(message: const Text('You are muted. Unmute to speak.')),
+        replace: true,
       );
     });
   }
@@ -175,6 +176,7 @@ class _CallScreenState extends State<CallScreen>
     _speakingWhileMutedDebounce?.cancel();
     _speakingWhileMutedSubscription.cancel();
     _speakingWhileMuted.dispose();
+    _controlsMessenger.dispose();
     _chatConnectionRecoverySubscription?.cancel();
     _devices.dispose();
     _panelAnimation.dispose();
@@ -435,7 +437,7 @@ class _CallScreenState extends State<CallScreen>
   );
 
   /// The call's control bar, laid out per screen size.
-  CallControlBar _callControls(BuildContext context, Call call) {
+  Widget _callControls(BuildContext context, Call call) {
     final moreButton = CallFeatureButton(
       icon: Icon(context.streamIcons.moreVerticalFill),
       selected: _moreMenuVisible,
@@ -451,7 +453,7 @@ class _CallScreenState extends State<CallScreen>
       ),
     ];
 
-    return CallControlBar(
+    final controlBar = CallControlBar(
       // A phone splits its controls between the two edges: there
       // is not enough width for a centre row and sides both. Five
       // controls, as the design draws it — screen sharing and the
@@ -504,6 +506,11 @@ class _CallScreenState extends State<CallScreen>
           ...panels,
         ],
       ),
+    );
+
+    return StreamSnackbarPopup.withState(
+      messenger: _controlsMessenger,
+      child: controlBar,
     );
   }
 

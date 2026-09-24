@@ -11,3 +11,4 @@ export 'lobby_view_theme.dart';
 export 'participant_label_theme.dart';
 export 'participant_tile_theme.dart';
 export 'picture_in_picture_theme.dart';
+export 'ringing_call_theme.dart';

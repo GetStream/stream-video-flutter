@@ -10,7 +10,7 @@
         android:id="@+id/ivBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#0955fa"
+        android:background="@color/incoming_call_background"
         android:scaleType="centerCrop"
         tools:ignore="ContentDescription" />
 
@@ -50,7 +50,7 @@
                 android:visibility="invisible"
                 android:layout_centerInParent="true"
                 android:src="@drawable/ic_default_avatar"
-                app:civ_border_color="#80ffffff"
+                app:civ_border_color="@color/incoming_call_avatar_border"
                 app:civ_border_width="1dp" />
 
 
@@ -73,7 +73,7 @@
                     android:autoSizeTextType="uniform"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:textColor="@android:color/white"
+                    android:textColor="@color/incoming_call_text_primary"
                     android:textSize="@dimen/size_text_name"
                     app:autoSizeMaxTextSize="@dimen/size_text_name"
                     app:autoSizeMinTextSize="12sp"
@@ -90,8 +90,8 @@
                     android:layout_marginTop="4dp"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:textColor="@color/action_text"
-                    android:textSize="@dimen/size_text_action"
+                    android:textColor="@color/incoming_call_text_secondary"
+                    android:textSize="@dimen/size_text_status"
                     tools:text="Some info" />
 
             </LinearLayout>
@@ -104,7 +104,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:layout_marginBottom="0dp"
+            android:layout_marginBottom="@dimen/size_action_bottom"
             android:fitsSystemWindows="true"
             android:gravity="center"
             android:orientation="horizontal">
@@ -116,8 +116,8 @@
                 tools:ignore="UseCompoundDrawables">
 
                 <io.getstream.video.flutter.stream_video_push_notification.widgets.RippleRelativeLayout
-                    android:layout_width="@dimen/size_button_x2_5"
-                    android:layout_height="@dimen/size_button_x2_5"
+                    android:layout_width="@dimen/size_button_x2"
+                    android:layout_height="@dimen/size_button_x2"
                     app:ripple_amount="4"
                     app:ripple_radius="@dimen/base_margin_x1_5"
                     app:ripple_scale="4.5">
@@ -135,12 +135,12 @@
                     <TextView
                         android:id="@+id/tvDecline"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_below="@id/ivDeclineCall"
-                        android:layout_marginBottom="@dimen/base_margin"
+                        android:layout_marginTop="@dimen/size_action_label_gap"
                         android:gravity="center"
                         android:text="@string/text_decline"
-                        android:textColor="@color/action_text"
+                        android:textColor="@color/incoming_call_text_secondary"
                         android:textSize="@dimen/size_text_action" />
 
                 </io.getstream.video.flutter.stream_video_push_notification.widgets.RippleRelativeLayout>
@@ -148,20 +148,19 @@
             </LinearLayout>
 
             <Space
-                android:layout_width="@dimen/base_margin_x5"
+                android:layout_width="@dimen/size_action_gap"
                 android:layout_height="0dp" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="end"
                 android:orientation="vertical"
                 tools:ignore="UseCompoundDrawables">
 
 
                 <io.getstream.video.flutter.stream_video_push_notification.widgets.RippleRelativeLayout
-                    android:layout_width="@dimen/size_button_x2_5"
-                    android:layout_height="@dimen/size_button_x2_5"
+                    android:layout_width="@dimen/size_button_x2"
+                    android:layout_height="@dimen/size_button_x2"
                     app:ripple_amount="4"
                     app:ripple_radius="@dimen/base_margin_x1_5"
                     app:ripple_scale="4.5">
@@ -180,12 +179,12 @@
                     <TextView
                         android:id="@+id/tvAccept"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_below="@id/ivAcceptCall"
-                        android:layout_marginBottom="@dimen/base_margin"
+                        android:layout_marginTop="@dimen/size_action_label_gap"
                         android:gravity="center"
                         android:text="@string/text_accept"
-                        android:textColor="@color/action_text"
+                        android:textColor="@color/incoming_call_text_secondary"
                         android:textSize="@dimen/size_text_action" />
 
 

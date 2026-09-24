@@ -181,4 +181,61 @@ void main() {
       );
     },
   );
+
+  test(
+    'a join response over a kept subscriber leaves the media it is receiving',
+    () async {
+      await dynascale.updateSubscriptions(
+        _remoteIds.map(_videoChange).toList(),
+      );
+
+      // What a fast reconnect applies: the WS came back, but the subscriber
+      // peer connection was never replaced and the media on it never stopped.
+      stateNotifier.sfuJoinResponse(_joinResponse(), subscriberReused: true);
+
+      for (final id in _remoteIds) {
+        final track =
+            stateNotifier.state.callParticipants
+                    .firstWhere((it) => it.userId == id)
+                    .publishedTracks[SfuTrackType.video]!
+                as RemoteTrackState;
+
+        expect(
+          track.received,
+          isTrue,
+          reason:
+              'blanking $id here shows the avatar over video that is still '
+              'arriving, until the session re-announces the track',
+        );
+        expect(track.subscribed, isTrue);
+        expect(track.videoDimension, _dimension);
+      }
+    },
+  );
+
+  test('a track that was not being received stays that way', () async {
+    await dynascale.updateSubscriptions(_remoteIds.map(_videoChange).toList());
+
+    // Carol's media had not arrived yet when the reconnect happened.
+    stateNotifier.participantRemoveSubscription(
+      userId: 'carol',
+      sessionId: 'carol-session',
+      trackIdPrefix: 'carol-prefix',
+      trackType: SfuTrackType.video,
+    );
+
+    stateNotifier.sfuJoinResponse(_joinResponse(), subscriberReused: true);
+
+    final track =
+        stateNotifier.state.callParticipants
+                .firstWhere((it) => it.userId == 'carol')
+                .publishedTracks[SfuTrackType.video]!
+            as RemoteTrackState;
+
+    expect(
+      track.subscribed,
+      isFalse,
+      reason: 'a kept subscriber does not resubscribe what was dropped',
+    );
+  });
 }
