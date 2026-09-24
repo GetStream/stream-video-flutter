@@ -1,8 +1,10 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import '../../test_utils/goldens.dart';
 import '../../test_utils/test_wrapper.dart';
 import '../mocks.dart';
 
@@ -28,6 +30,37 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+  }
+
+  for (final brightness in Brightness.values) {
+    streamGoldenTest(
+      'StreamParticipantsButton badges how many people there are',
+      fileName: 'participants_button',
+      brightness: brightness,
+      builder: () => GoldenTestGroup(
+        columns: 3,
+        children: [
+          for (final (name, count) in [
+            ('nobody', 0),
+            ('two people', 2),
+            ('twelve people', 12),
+          ])
+            GoldenTestScenario(
+              name: name,
+              child: Padding(
+                // Room for the badge, which overhangs the button.
+                padding: const EdgeInsets.all(8),
+                child: StreamParticipantsButton.forParticipants(
+                  participants: [
+                    for (var i = 0; i < count; i++)
+                      UserInfo(id: 'user-$i', name: 'User $i'),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   testWidgets('badges how many people there are', (tester) async {
