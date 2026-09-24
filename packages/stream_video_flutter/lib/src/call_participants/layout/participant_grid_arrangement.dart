@@ -112,22 +112,24 @@ typedef StreamParticipantGridColumnResolver =
 /// the preference stops applying past this.
 const _maxSquareAspectRatio = 2.0;
 
-/// How much taller than wide a container must be before its tiles are scored
-/// as squares rather than at the tile ratio.
+/// How many times taller than wide a container must be before its tiles are
+/// scored no wider than a square, rather than at
+/// [StreamParticipantGridDetails.maxTileAspectRatio].
 ///
-/// Five people on a phone are drawn two by two by one, not stacked five deep.
-/// Scored at 16:9, a column of short wide tiles wins, though it leaves most of
-/// the width empty; scored as squares, the grid does.
+/// Five people on an upright phone are drawn two by two by one, not stacked
+/// five deep, until the box is about 2.5 times taller than wide.
 const _minTallAspectRatio = 1.5;
 
 /// Arranges [details] into the grid that renders the video largest, except
-/// that a square count stays square while the box is no wider than 2:1.
+/// that a square count stays square while the box is no wider than 2:1, and a
+/// tall box scores its tiles as squares.
 ///
 /// Each candidate column count is scored by the largest
 /// [StreamParticipantGridDetails.maxTileAspectRatio] rectangle that fits one of
 /// its cells — how big a participant actually appears, rather than how much of
 /// the cell they are handed. In a box more than 1.5 times taller than wide,
-/// such as an upright phone, the largest square is scored instead. The tile is
+/// such as an upright phone, the largest rectangle no wider than a square is
+/// scored instead. The tile is
 /// then drawn filling its cell, except that it is never wider than
 /// [StreamParticipantGridDetails.maxTileAspectRatio] allows.
 ///

@@ -11,7 +11,7 @@ import '../../../stream_video_flutter.dart';
 /// stays square while the box is no wider than 2:1, so four people go two by
 /// two on a phone and four in a row on a short wide window. A box more than
 /// 1.5 times taller than wide scores its tiles as squares, so five people on
-/// an upright phone fill two columns rather than stacking in one.
+/// an upright phone go two by two by one rather than stacking.
 ///
 /// See [solveParticipantGrid] for the rule, and
 /// [StreamCallParticipantsGridThemeData.columnResolver] to override it.

@@ -207,13 +207,22 @@ void main() {
       expect(solve(const Size(1884, 330), 4).columns, 4);
     });
 
-    test('an upright phone keeps five in two columns', () {
-      // A 412x917 Android frame, less the app bar and the controls.
+    test('an upright phone keeps five and six in two columns', () {
+      // A 412x917 Android frame, less the app bar, the controls and the grid's
+      // 8px padding.
       const box = Size(396, 720);
 
       expect(solve(box, 2).columns, 1);
       expect(solve(box, 3).columns, 1);
       expect(solve(box, 5).columns, 2);
+      expect(solve(box, 6).columns, 2);
+    });
+
+    test('a tall box keeps a tile ratio narrower than a square', () {
+      const box = Size(396, 720);
+
+      expect(solve(box, 3, maxTileAspectRatio: 3 / 4).columns, 2);
+      expect(solve(box, 5, maxTileAspectRatio: 9 / 16).columns, 2);
     });
 
     test('one participant takes the whole box', () {
