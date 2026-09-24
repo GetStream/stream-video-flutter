@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_video/src/call/session/call_session.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/telemetry/client_event.dart';
 import 'package:stream_video/src/telemetry/client_event_reporter.dart';
@@ -681,6 +682,220 @@ void main() {
       },
       timeout: const Timeout(Duration(seconds: 10)),
     );
+
+    test(
+      'a fast reconnect the SFU answers with reconnected: false escalates '
+      'straight to rejoin',
+      () async {
+        // A long deadline and a single failure keep the deadline and the
+        // attempt cap out of it: only the answer itself can drive the rejoin.
+        when(
+          () => callSession.start(
+            reconnectDetails: any(named: 'reconnectDetails'),
+            onRtcManagerCreatedCallback: any(
+              named: 'onRtcManagerCreatedCallback',
+            ),
+            isAnonymousUser: any(named: 'isAnonymousUser'),
+            capabilities: any(named: 'capabilities'),
+            unifiedSessionId: any(named: 'unifiedSessionId'),
+            clientEventRetryCount: any(named: 'clientEventRetryCount'),
+          ),
+        ).thenAnswer(
+          (_) => Future.value(
+            Result.success((
+              callState: createTestSfuCallState(),
+              fastReconnectDeadline: const Duration(minutes: 5),
+            )),
+          ),
+        );
+
+        var fastReconnectCallCount = 0;
+        when(
+          () => callSession.fastReconnect(
+            reconnectDetails: any(named: 'reconnectDetails'),
+            capabilities: any(named: 'capabilities'),
+            unifiedSessionId: any(named: 'unifiedSessionId'),
+          ),
+        ).thenAnswer((_) async {
+          fastReconnectCallCount++;
+          return const Result.failure(SfuSessionNotResumedException());
+        });
+
+        final call = buildCall();
+        await call.join();
+
+        verify(
+          () => coordinatorClient.joinCall(
+            callCid: any(named: 'callCid'),
+            ringing: any(named: 'ringing'),
+            create: any(named: 'create'),
+            migratingFrom: any(named: 'migratingFrom'),
+            migratingFromList: any(named: 'migratingFromList'),
+            video: any(named: 'video'),
+            membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
+          ),
+        ).called(1);
+
+        capturedCallback!(mockPc, SfuReconnectionStrategy.fast);
+
+        // One fast attempt + the 3 s stability window of the rejoin + margin.
+        await Future<void>.delayed(const Duration(milliseconds: 3500));
+
+        expect(
+          fastReconnectCallCount,
+          1,
+          reason:
+              'a second fast attempt would resume the empty participant the '
+              'SFU seated in place of the lost session',
+        );
+
+        verify(
+          () => coordinatorClient.joinCall(
+            callCid: any(named: 'callCid'),
+            ringing: any(named: 'ringing'),
+            create: any(named: 'create'),
+            migratingFrom: any(named: 'migratingFrom'),
+            migratingFromList: any(named: 'migratingFromList'),
+            video: any(named: 'video'),
+            membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
+          ),
+        ).called(1);
+      },
+      timeout: const Timeout(Duration(seconds: 10)),
+    );
+
+    group('reconnect status', () {
+      List<CallStatus> recordStatuses(Call call) {
+        final statuses = <CallStatus>[];
+        final subscription = call.state
+            .map((state) => state.status)
+            .distinct()
+            .listen(statuses.add);
+        addTearDown(subscription.cancel);
+        return statuses;
+      }
+
+      test('a fast reconnect waits, then joins, then connects', () async {
+        final call = buildCall();
+        await call.join();
+        final statuses = recordStatuses(call);
+
+        capturedCallback!(mockPc, SfuReconnectionStrategy.fast);
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+
+        expect(
+          statuses,
+          containsAllInOrder(<CallStatus>[
+            const CallStatusReconnecting(
+              attempt: 1,
+              isFastReconnectAttempt: true,
+              phase: CallReconnectPhase.waiting,
+            ),
+            const CallStatusReconnecting(
+              attempt: 1,
+              isFastReconnectAttempt: true,
+              phase: CallReconnectPhase.joining,
+            ),
+            CallStatus.connected(),
+          ]),
+        );
+      });
+
+      test(
+        'a reconnect reports offline until the network comes back',
+        () async {
+          final call = buildCall();
+          await call.join();
+          final statuses = recordStatuses(call);
+
+          internetStatusController.add(InternetStatus.disconnected);
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+
+          expect(call.state.value.status.isOffline, isTrue);
+          verifyNever(
+            () => callSession.fastReconnect(
+              reconnectDetails: any(named: 'reconnectDetails'),
+              capabilities: any(named: 'capabilities'),
+              unifiedSessionId: any(named: 'unifiedSessionId'),
+            ),
+          );
+
+          internetStatusController.add(InternetStatus.connected);
+          await Future<void>.delayed(const Duration(milliseconds: 300));
+
+          expect(
+            statuses,
+            containsAllInOrder(<CallStatus>[
+              const CallStatusReconnecting(
+                attempt: 1,
+                isFastReconnectAttempt: true,
+                phase: CallReconnectPhase.offline,
+              ),
+              const CallStatusReconnecting(
+                attempt: 1,
+                isFastReconnectAttempt: true,
+                phase: CallReconnectPhase.waiting,
+              ),
+              const CallStatusReconnecting(
+                attempt: 1,
+                isFastReconnectAttempt: true,
+                phase: CallReconnectPhase.joining,
+              ),
+              CallStatus.connected(),
+            ]),
+          );
+        },
+      );
+
+      test(
+        'attempts are numbered across an escalation to rejoin',
+        () async {
+          // A single fast failure the SFU answers with reconnected: false
+          // escalates at once, so attempt 2 is the rejoin.
+          when(
+            () => callSession.fastReconnect(
+              reconnectDetails: any(named: 'reconnectDetails'),
+              capabilities: any(named: 'capabilities'),
+              unifiedSessionId: any(named: 'unifiedSessionId'),
+            ),
+          ).thenAnswer(
+            (_) async => const Result.failure(SfuSessionNotResumedException()),
+          );
+
+          final call = buildCall();
+          await call.join();
+          final statuses = recordStatuses(call);
+
+          capturedCallback!(mockPc, SfuReconnectionStrategy.fast);
+
+          // One fast attempt + the 3 s stability window of the rejoin + margin.
+          await Future<void>.delayed(const Duration(milliseconds: 3500));
+
+          expect(
+            statuses,
+            containsAllInOrder(<CallStatus>[
+              const CallStatusReconnecting(
+                attempt: 1,
+                isFastReconnectAttempt: true,
+                phase: CallReconnectPhase.joining,
+              ),
+              const CallStatusReconnecting(
+                attempt: 2,
+                phase: CallReconnectPhase.waiting,
+              ),
+              const CallStatusReconnecting(
+                attempt: 2,
+                phase: CallReconnectPhase.joining,
+              ),
+              CallStatus.connected(),
+            ]),
+          );
+        },
+        timeout: const Timeout(Duration(seconds: 10)),
+      );
+    });
 
     test(
       'a flapping monitor does not spin the stability window',

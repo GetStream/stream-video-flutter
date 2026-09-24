@@ -193,9 +193,14 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     );
   }
 
+  /// Reports the call connecting, or reconnecting with [strategy].
+  ///
+  /// [attempt] and [phase] only apply to a reconnect, the one strategy that
+  /// reports them.
   void lifecycleCallConnecting({
     required int attempt,
     SfuReconnectionStrategy? strategy,
+    CallReconnectPhase phase = CallReconnectPhase.joining,
   }) {
     _logWithState('lifecycleCallConnectingAction');
     final CallStatus status;
@@ -206,12 +211,32 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       status = CallStatus.reconnecting(
         attempt,
         isFastReconnectAttempt: strategy == SfuReconnectionStrategy.fast,
+        phase: phase,
       );
     } else {
       status = CallStatus.connecting();
     }
     state = state.copyWith(
       status: status,
+    );
+  }
+
+  /// Moves a reconnect in progress to [phase], leaving its attempt and
+  /// strategy as they are.
+  ///
+  /// Does nothing unless the call is reconnecting: what the network does after
+  /// the call connected again, or left, is not the reconnect's to report.
+  void lifecycleCallReconnectPhase(CallReconnectPhase phase) {
+    final status = state.status;
+    if (status is! CallStatusReconnecting || status.phase == phase) return;
+
+    _logWithState('lifecycleCallReconnectPhase', 'phase: ${phase.name}');
+    state = state.copyWith(
+      status: CallStatus.reconnecting(
+        status.attempt,
+        isFastReconnectAttempt: status.isFastReconnectAttempt,
+        phase: phase,
+      ),
     );
   }
 

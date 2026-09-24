@@ -19,6 +19,7 @@ import '../core/repos/user_chat_repository.dart';
 import '../di/injector.dart';
 import '../utils/feedback_dialog.dart';
 import '../widgets/badged_call_option.dart';
+import '../widgets/call_connection_banner.dart';
 import '../widgets/closed_captions_widget.dart';
 import '../widgets/e2ee_key_notification.dart';
 import '../widgets/settings_menu/settings_menu.dart';
@@ -542,8 +543,20 @@ class _CallScreenState extends State<CallScreen>
           },
           onCallDisconnected: (disconnectedProperties) {
             final reason = disconnectedProperties.reason;
+            // The app's messenger outlives this screen, so what went wrong
+            // can still be said on the one the pop lands on.
+            final messenger = ScaffoldMessenger.maybeOf(context);
 
             Navigator.of(context).pop();
+
+            if (reason is DisconnectReasonReconnectionFailed) {
+              messenger?.showSnackBar(
+                const SnackBar(
+                  content: Text("Couldn't restore the connection to the call."),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
 
             if (reason is DisconnectReasonCancelled ||
                 reason is DisconnectReasonEnded ||
@@ -583,6 +596,10 @@ class _CallScreenState extends State<CallScreen>
                           ),
                           ClosedCaptionsWidget(call: call),
                         ],
+                      ),
+                      Align(
+                        alignment: Alignment.topCenter,
+                        child: CallConnectionBanner(call: call),
                       ),
                       Align(
                         alignment: Alignment.bottomCenter,
@@ -688,6 +705,13 @@ class _CallScreenState extends State<CallScreen>
                 );
               },
               callControlsWidgetBuilder: _callControls,
+              callNotConnectedBuilder: (context, properties) => Align(
+                alignment: Alignment.topCenter,
+                child: CallConnectionBanner(call: properties.call),
+              ),
+              // The banner already says a fast reconnect is under way.
+              callFastReconnectingOverlayBuilder: (_, _) =>
+                  const SizedBox.shrink(),
             );
           },
         ),
