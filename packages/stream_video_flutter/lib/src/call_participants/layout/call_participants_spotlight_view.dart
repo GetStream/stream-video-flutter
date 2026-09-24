@@ -252,10 +252,8 @@ typedef _BarEdges = ({bool start, bool end});
 
 /// The bar's tiles, with a button at either end for the ones it hides.
 ///
-/// A mouse can neither drag a list nor turn a wheel across a horizontal one,
-/// so on desktop the buttons are the only way to the tiles off screen. Each
-/// appears while there is something further that way and scrolls a viewport
-/// towards it.
+/// Each button appears while there is something further that way and
+/// scrolls towards it.
 class _ParticipantsBar extends StatefulWidget {
   const _ParticipantsBar({
     required this.call,
@@ -299,18 +297,58 @@ class _ParticipantsBarState extends State<_ParticipantsBar> {
     return false;
   }
 
-  /// Scrolls a viewport towards the end of the list, or towards its start
-  /// when [forward] is false.
+  /// Scrolls towards the end of the list, or towards its start when
+  /// [forward] is false, by up to a viewport.
+  ///
+  /// Forward brings the tile cut off at the end to the start of the view,
+  /// and back brings the one cut off at the start to its end, each as far in
+  /// from the edge as the list's padding.
   Future<void> _scroll({required bool forward}) async {
     if (!_controller.hasClients) return;
 
     final position = _controller.position;
-    final step = forward
-        ? position.viewportDimension
-        : -position.viewportDimension;
+    final pixels = position.pixels;
+    final viewport = position.viewportDimension;
+
+    final padding = widget.listPadding;
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final (leading, trailing) = switch ((widget.isHorizontal, isRtl)) {
+      (false, _) => (padding.top, padding.bottom),
+      (true, false) => (padding.left, padding.right),
+      (true, true) => (padding.right, padding.left),
+    };
+    final tile = widget.isHorizontal
+        ? widget.tileSize.width
+        : widget.tileSize.height;
+    final stride = tile + widget.spacing;
+    final count = widget.participants.length;
+
+    double tileStart(int index) => leading + index * stride;
+
+    double? target;
+    if (forward) {
+      for (var i = 0; i < count; i++) {
+        if (tileStart(i) + tile > pixels + viewport) {
+          target = tileStart(i) - leading;
+          break;
+        }
+      }
+    } else {
+      for (var i = count - 1; i >= 0; i--) {
+        if (tileStart(i) < pixels) {
+          target = tileStart(i) + tile + trailing - viewport;
+          break;
+        }
+      }
+    }
+
+    // A tile longer than the view never fits, so it moves a whole viewport.
+    final fallback = forward ? pixels + viewport : pixels - viewport;
+    final moves =
+        target != null && (forward ? target > pixels : target < pixels);
 
     await _controller.animateTo(
-      (position.pixels + step).clamp(
+      (moves ? target : fallback).clamp(
         position.minScrollExtent,
         position.maxScrollExtent,
       ),
@@ -355,8 +393,8 @@ class _ParticipantsBarState extends State<_ParticipantsBar> {
   }
 
   Widget _buildList() {
-    // A metrics notification covers the layout the list settles into, and a
-    // scroll notification everything after it.
+    // Metrics notifications cover layout changes, such as a participant
+    // joining or the view resizing, and scroll notifications cover scrolling.
     return NotificationListener<ScrollMetricsNotification>(
       onNotification: (notification) => _syncEdges(notification.metrics),
       child: NotificationListener<ScrollNotification>(
@@ -398,18 +436,13 @@ class _ParticipantsBarState extends State<_ParticipantsBar> {
 
     final translations = context.translations;
 
-    // Scaled away rather than taken out, which also drops it out of the hit
-    // test: a zero transform cannot be inverted.
-    final button = AnimatedScale(
-      scale: (isStart ? edges.start : edges.end) ? 1 : 0,
-      duration: kThemeAnimationDuration,
-      child: ParticipantsNavigationButton(
-        icon: icon,
-        tooltip: isStart
-            ? translations.participantsPrevious
-            : translations.participantsNext,
-        onPressed: () => _scroll(forward: !isStart),
-      ),
+    final button = ParticipantsNavigationButton(
+      icon: icon,
+      tooltip: isStart
+          ? translations.participantsPrevious
+          : translations.participantsNext,
+      visible: isStart ? edges.start : edges.end,
+      onPressed: () => _scroll(forward: !isStart),
     );
 
     if (widget.isHorizontal) {

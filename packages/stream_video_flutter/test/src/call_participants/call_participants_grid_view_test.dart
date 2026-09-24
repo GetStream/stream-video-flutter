@@ -49,8 +49,9 @@ void main() {
     WidgetTester tester, {
     required Size size,
     required List<CallParticipantState> participants,
-    EdgeInsets? padding,
+    EdgeInsetsGeometry? padding,
     StreamCallParticipantsGridThemeData? theme,
+    TextDirection textDirection = TextDirection.ltr,
   }) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = size;
@@ -68,7 +69,12 @@ void main() {
     }
 
     return tester.pumpWidget(
-      TestWrapper(child: SizedBox.expand(child: grid)),
+      TestWrapper(
+        child: Directionality(
+          textDirection: textDirection,
+          child: SizedBox.expand(child: grid),
+        ),
+      ),
     );
   }
 
@@ -315,6 +321,25 @@ void main() {
       expect(tester.getRect(_tile('p6')).left, 8);
     });
 
+    testWidgets('a narrow window insets each chevron by its own side', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(18),
+        padding: const EdgeInsetsDirectional.fromSTEB(24, 8, 8, 8),
+        textDirection: TextDirection.rtl,
+      );
+      await tester.tap(find.byType(ParticipantsNavigationButton).last);
+      await tester.pumpAndSettle();
+
+      // Right to left, back sits at the start, on the right: 24 of padding
+      // and 8 inside it. Forward gets the 8 at the end, on the left.
+      expect(400 - chevron(tester, 0).right, 32);
+      expect(chevron(tester, 1).left, 16);
+    });
+
     testWidgets('a wider window sets the grid between the chevrons', (
       tester,
     ) async {
@@ -345,11 +370,14 @@ void main() {
       // was let go of.
       final semantics = tester.ensureSemantics();
 
+      // The middle page of three, so both are shown.
       await pump(
         tester,
         size: const Size(400, 672),
-        participants: _participants(12),
+        participants: _participants(18),
       );
+      await tester.tap(find.byType(ParticipantsNavigationButton).last);
+      await tester.pumpAndSettle();
 
       for (final (icon, label) in [
         (StreamIconData.chevronLeft, 'Previous participants'),
@@ -364,6 +392,105 @@ void main() {
       }
 
       semantics.dispose();
+    });
+
+    testWidgets('only offer the way on from the first page', (tester) async {
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(12),
+      );
+
+      expect(_chevronScales(tester), [0.0, 1.0]);
+    });
+
+    testWidgets('only offer the way back from the last page', (tester) async {
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(12),
+      );
+      await tester.tap(find.byType(ParticipantsNavigationButton).last);
+      await tester.pumpAndSettle();
+
+      expect(_tile('p6'), findsOneWidget);
+      expect(_chevronScales(tester), [1.0, 0.0]);
+    });
+
+    testWidgets('go back a page', (tester) async {
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(12),
+      );
+      await tester.tap(find.byType(ParticipantsNavigationButton).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ParticipantsNavigationButton).first);
+      await tester.pumpAndSettle();
+
+      expect(_tile('p0'), findsOneWidget);
+      expect(_tile('p6'), findsNothing);
+      expect(_chevronScales(tester), [0.0, 1.0]);
+    });
+
+    testWidgets('a hidden chevron is not read out', (tester) async {
+      // Disposed inline: a tear-down runs after the check that every handle
+      // was let go of.
+      final semantics = tester.ensureSemantics();
+
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(12),
+      );
+
+      SemanticsFinder tooltip(String label) =>
+          find.semantics.byPredicate((node) => node.tooltip == label);
+
+      expect(tooltip('Previous participants'), findsNothing);
+      expect(tooltip('Next participants'), findsOne);
+
+      semantics.dispose();
+    });
+
+    testWidgets('lead the other way when the grid reads right to left', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(12),
+        textDirection: TextDirection.rtl,
+      );
+
+      // On the first page only the way on shows, on the left, pointing left.
+      final on = find.ancestor(
+        of: find.byIcon(StreamIconData.chevronLeft),
+        matching: find.byType(ParticipantsNavigationButton),
+      );
+      expect(tester.getCenter(on).dx, lessThan(200));
+      expect(_chevronScales(tester), [0.0, 1.0]);
+
+      await tester.tap(on);
+      await tester.pumpAndSettle();
+
+      expect(_tile('p6'), findsOneWidget);
+    });
+
+    testWidgets('a wider window keeps the grid the same size on every page', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        size: const Size(768, 880),
+        participants: _participants(24),
+      );
+      final first = tester.getRect(_tile('p0'));
+
+      await tester.tap(find.byType(ParticipantsNavigationButton).last);
+      await tester.pumpAndSettle();
+
+      expect(tester.getRect(_tile('p12')), first);
     });
 
     testWidgets('a page that comes back is reachable again', (tester) async {

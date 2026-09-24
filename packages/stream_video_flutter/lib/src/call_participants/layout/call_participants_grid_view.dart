@@ -50,7 +50,7 @@ class CallParticipantsGridView extends StatefulWidget {
   /// Padding around the grid.
   ///
   /// Overrides [StreamCallParticipantsGridThemeData.padding].
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
 
   @override
   State<CallParticipantsGridView> createState() =>
@@ -81,9 +81,9 @@ class _CallParticipantsGridViewState extends State<CallParticipantsGridView> {
     final screenSize = context.streamScreenSize;
 
     final padding =
-        widget.padding ??
-        theme.padding?.resolve(Directionality.maybeOf(context)) ??
-        EdgeInsets.all(spacing.xs);
+        (widget.padding ?? theme.padding ?? EdgeInsets.all(spacing.xs)).resolve(
+          Directionality.maybeOf(context),
+        );
     final mainAxisSpacing =
         widget.mainAxisSpacing ?? theme.mainAxisSpacing ?? spacing.xs;
     final crossAxisSpacing =
@@ -122,23 +122,19 @@ class _CallParticipantsGridViewState extends State<CallParticipantsGridView> {
         final translations = context.translations;
         final isRtl = Directionality.of(context) == TextDirection.rtl;
 
-        // Scaled away rather than taken out, which also drops it out of the
-        // hit test: a zero transform cannot be inverted. It keeps its place
-        // either way, so the grid is the same size on every page.
+        // A hidden button keeps its place, so the grid is the same size on
+        // every page.
         Widget button({required bool isBack, required bool visible}) {
           final pointsLeft = isBack != isRtl;
 
-          return AnimatedScale(
-            scale: visible ? 1 : 0,
-            duration: kThemeAnimationDuration,
-            child: ParticipantsNavigationButton(
-              icon: pointsLeft ? icons.chevronLeft : icons.chevronRight,
-              tooltip: isBack
-                  ? translations.participantsPrevious
-                  : translations.participantsNext,
-              onPressed: () =>
-                  _goToPage(isBack ? currentPage - 1 : currentPage + 1),
-            ),
+          return ParticipantsNavigationButton(
+            icon: pointsLeft ? icons.chevronLeft : icons.chevronRight,
+            tooltip: isBack
+                ? translations.participantsPrevious
+                : translations.participantsNext,
+            visible: visible,
+            onPressed: () =>
+                _goToPage(isBack ? currentPage - 1 : currentPage + 1),
           );
         }
 
@@ -148,8 +144,7 @@ class _CallParticipantsGridViewState extends State<CallParticipantsGridView> {
           visible: currentPage < lastPage,
         );
 
-        // Every inset below is to the button's visual, so each one gives up
-        // the tap target reaching past it.
+        // Insets are to the button's visual, less the tap inset.
         final tapInset = participantsNavigationButtonTapInset;
 
         // A narrow window has no width to spare, so its buttons sit over the
@@ -162,11 +157,9 @@ class _CallParticipantsGridViewState extends State<CallParticipantsGridView> {
               grid,
               Positioned.fill(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: math.max(
-                      0,
-                      padding.left + spacing.xs - tapInset,
-                    ),
+                  padding: EdgeInsets.only(
+                    left: math.max(0, padding.left + spacing.xs - tapInset),
+                    right: math.max(0, padding.right + spacing.xs - tapInset),
                   ),
                   child: Center(
                     child: Row(children: [back, const Spacer(), forward]),

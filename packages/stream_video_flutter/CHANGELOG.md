@@ -187,7 +187,8 @@
 ### 🔄 Changed
 
 - The participants bar in `CallParticipantsSpotlightView` carries a button at either end for the tiles it cannot fit.
-- The chevrons that page `CallParticipantsGridView` are the same floating button, and sit either side of the grid rather than over it above the small breakpoint.
+- `CallParticipantsGridView` pages with the same button as the participants bar.
+- Above the small breakpoint, the grid's page buttons sit either side of the grid rather than over it.
 - The badge on the call control buttons is amber with no border, where it used to be red with one.
 - `accentWarning` is a lighter amber, which also repaints the fair bars on `StreamConnectionQualityIndicator`.
 - `CallAppBar` is laid out by `StreamToolbar` at the design system's 72 with `spacing.sm` edge padding, matching `CallControlBar`'s horizontal inset.

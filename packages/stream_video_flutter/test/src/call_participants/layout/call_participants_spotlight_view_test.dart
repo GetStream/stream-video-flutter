@@ -61,6 +61,7 @@ void main() {
     StreamCallParticipantsSpotlightStyle? style,
     EdgeInsetsGeometry? padding,
     CallParticipantBuilder? spotlightBuilder,
+    CallParticipantBuilder participantBuilder = _box,
     TextDirection textDirection = TextDirection.ltr,
   }) async {
     tester.view.devicePixelRatio = 1;
@@ -73,7 +74,7 @@ void main() {
       participants: [
         for (var i = 0; i < barParticipants; i++) _participant('bar$i'),
       ],
-      participantBuilder: _box,
+      participantBuilder: participantBuilder,
       spotlightBuilder: spotlightBuilder,
       barAlignment: barAlignment,
       padding: padding,
@@ -370,16 +371,39 @@ void main() {
       expect(_buttonScale(tester, StreamIconData.chevronRight), 1);
     });
 
-    testWidgets('scroll a viewport on', (tester) async {
+    testWidgets('bring the tile cut off at the end to the start', (
+      tester,
+    ) async {
       await pumpBar(tester);
 
       await tester.tap(find.byIcon(StreamIconData.chevronRight));
       await tester.pumpAndSettle();
 
-      expect(_scrolled(tester), 400);
+      // The second 222 tile ran from 238 to 460, past the 400 the view is
+      // wide. It now starts the 8 of padding in, where the first one did.
+      expect(_scrolled(tester), 230);
+      expect(tester.getRect(_tile('bar1')).left, 8);
     });
 
-    testWidgets('scroll a viewport back', (tester) async {
+    testWidgets('bring the tile cut off at the start to the end', (
+      tester,
+    ) async {
+      await pumpBar(tester);
+
+      for (var i = 0; i < 2; i++) {
+        await tester.tap(find.byIcon(StreamIconData.chevronRight));
+        await tester.pumpAndSettle();
+      }
+      await tester.tap(find.byIcon(StreamIconData.chevronLeft));
+      await tester.pumpAndSettle();
+
+      // Two steps on, at 460, the third tile starts the view and the second,
+      // at 238 to 460, sits just before it. Back ends that one 8 short of
+      // the far edge.
+      expect(tester.getRect(_tile('bar1')).right, 392);
+    });
+
+    testWidgets('scroll back to the start', (tester) async {
       await pumpBar(tester);
 
       await tester.tap(find.byIcon(StreamIconData.chevronRight));
@@ -393,8 +417,10 @@ void main() {
     testWidgets('stop at the end rather than overshooting it', (tester) async {
       await pumpBar(tester, barParticipants: 3);
 
-      await tester.tap(find.byIcon(StreamIconData.chevronRight));
-      await tester.pumpAndSettle();
+      for (var i = 0; i < 2; i++) {
+        await tester.tap(find.byIcon(StreamIconData.chevronRight));
+        await tester.pumpAndSettle();
+      }
 
       // 3 x 222 and two 8px gaps is 682, plus the 16 of padding, less the 400
       // the view is wide.
@@ -404,8 +430,10 @@ void main() {
     testWidgets('turn around at the end of the bar', (tester) async {
       await pumpBar(tester, barParticipants: 3);
 
-      await tester.tap(find.byIcon(StreamIconData.chevronRight));
-      await tester.pumpAndSettle();
+      for (var i = 0; i < 2; i++) {
+        await tester.tap(find.byIcon(StreamIconData.chevronRight));
+        await tester.pumpAndSettle();
+      }
 
       expect(_buttonScale(tester, StreamIconData.chevronRight), 0);
       expect(_buttonScale(tester, StreamIconData.chevronLeft), 1);
@@ -452,7 +480,7 @@ void main() {
         await tester.tap(find.byIcon(StreamIconData.chevronRight));
         await tester.pumpAndSettle();
 
-        expect(_scrolled(tester), 400);
+        expect(_scrolled(tester), 230);
       });
     }
 
@@ -525,7 +553,91 @@ void main() {
       await tester.tap(find.byIcon(StreamIconData.chevronLeft));
       await tester.pumpAndSettle();
 
-      expect(_scrolled(tester), 400);
+      // Measured from the right, the second tile now starts where the first
+      // did.
+      expect(_scrolled(tester), 230);
+      expect(400 - tester.getRect(_tile('bar1')).right, 8);
+    });
+
+    testWidgets('sit at the ends of a bar that reads right to left', (
+      tester,
+    ) async {
+      await pumpBar(tester, textDirection: TextDirection.rtl);
+      await tester.tap(find.byIcon(StreamIconData.chevronLeft));
+      await tester.pumpAndSettle();
+
+      // The start is on the right, so the chevron back along the bar is the
+      // right-hand one.
+      final bar = tester.getRect(find.byType(ListView));
+      final back = tester.getCenter(find.byIcon(StreamIconData.chevronRight));
+      final on = tester.getCenter(find.byIcon(StreamIconData.chevronLeft));
+
+      expect(bar.right - back.dx, 32);
+      expect(on.dx - bar.left, 32);
+    });
+
+    testWidgets('sit at the ends of a vertical bar', (tester) async {
+      await pumpBar(
+        tester,
+        size: const Size(1024, 656),
+        barParticipants: 8,
+        barAlignment: ParticipantsBarAlignment.right,
+      );
+      await tester.tap(find.byIcon(StreamIconData.chevronDown));
+      await tester.pumpAndSettle();
+
+      final bar = tester.getRect(find.byType(ListView));
+      final up = tester.getCenter(find.byIcon(StreamIconData.chevronUp));
+      final down = tester.getCenter(find.byIcon(StreamIconData.chevronDown));
+
+      expect(up.dy - bar.top, 32);
+      expect(bar.bottom - down.dy, 32);
+      expect(up.dx, bar.center.dx);
+    });
+
+    testWidgets('come in when a participant joins a bar that fit', (
+      tester,
+    ) async {
+      await pumpBar(tester, barParticipants: 1);
+      expect(_buttonScale(tester, StreamIconData.chevronRight), 0);
+
+      // Nothing scrolls: the list only changes length.
+      await pumpBar(tester);
+
+      expect(_buttonScale(tester, StreamIconData.chevronRight), 1);
+    });
+
+    testWidgets('go away when the window grows to fit the bar', (
+      tester,
+    ) async {
+      await pumpBar(tester, barParticipants: 3);
+      expect(_buttonScale(tester, StreamIconData.chevronRight), 1);
+
+      await pumpBar(tester, barParticipants: 3, size: const Size(1024, 656));
+
+      expect(_buttonScale(tester, StreamIconData.chevronRight), 0);
+    });
+
+    testWidgets('a hidden button lets a tap through to the tile', (
+      tester,
+    ) async {
+      var tapped = 0;
+      await pump(
+        tester,
+        size: overflowing,
+        barParticipants: 5,
+        participantBuilder: (context, call, participant) => GestureDetector(
+          onTap: () => tapped++,
+          child: _box(context, call, participant),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Where the back button would be, were there anything before the bar.
+      final bar = tester.getRect(find.byType(ListView));
+      await tester.tapAt(Offset(bar.left + 32, bar.center.dy));
+
+      expect(tapped, 1);
     });
   });
 
