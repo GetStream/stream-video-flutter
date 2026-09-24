@@ -51,5 +51,12 @@
   "callDurationSpoken": "Gespreksduur {duration}",
   "callDurationHours": "{count, plural, one{1 uur} other{{count} uur}}",
   "callDurationMinutes": "{count, plural, one{1 minuut} other{{count} minuten}}",
-  "callDurationSeconds": "{count, plural, one{1 seconde} other{{count} seconden}}"
+  "callDurationSeconds": "{count, plural, one{1 seconde} other{{count} seconden}}",
+  "ringingIncomingCall": "Inkomende oproep",
+  "ringingCalling": "Bellen\u2026",
+  "ringingAccept": "Opnemen",
+  "ringingDecline": "Weigeren",
+  "ringingNobody": "Geen deelnemers",
+  "ringingTwoCallers": "{first} en {second}",
+  "ringingManyCallers": "{first}, {second} en {count, plural, =1{1 ander} other{{count} anderen}}"
 }

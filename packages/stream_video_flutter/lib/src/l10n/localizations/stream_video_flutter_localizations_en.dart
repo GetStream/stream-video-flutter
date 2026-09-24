@@ -207,4 +207,35 @@ class StreamVideoFlutterLocalizationsEn
     );
     return '$_temp0';
   }
+
+  @override
+  String get ringingIncomingCall => 'Incoming call';
+
+  @override
+  String get ringingCalling => 'Calling…';
+
+  @override
+  String get ringingAccept => 'Accept';
+
+  @override
+  String get ringingDecline => 'Decline';
+
+  @override
+  String get ringingNobody => 'No participants';
+
+  @override
+  String ringingTwoCallers(String first, String second) {
+    return '$first and $second';
+  }
+
+  @override
+  String ringingManyCallers(String first, String second, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count others',
+      one: '1 other',
+    );
+    return '$first, $second, and $_temp0';
+  }
 }
