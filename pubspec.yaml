@@ -23,9 +23,29 @@ dev_dependencies:
   yaml: ^3.1.3
 
 dependency_overrides:
+  # flutter_launcher_icons ^0.14.4 depends on cli_util ^0.4.1
+  # melos >=8.7.0 depends on cli_util >=0.5.0 <0.7.0
   cli_util: ^0.5.1
-  file_picker: ^12.0.0-beta.5
-  # Same commit as stream_core_flutter below: the published 0.5.0 predates
+  # Until a release carries the fix: the 104px avatar sizes added to
+  # stream_core_flutter stop 10.4.0 compiling, whose size switches are
+  # exhaustive. Only the dogfooding app pulls chat in. The chat packages share
+  # one ref so they stay in step.
+  stream_chat:
+    git:
+      url: https://github.com/GetStream/stream-chat-flutter.git
+      path: packages/stream_chat
+      ref: 686a9980966872eee4b64abad2d5e8ffcdb8c29c
+  stream_chat_flutter:
+    git:
+      url: https://github.com/GetStream/stream-chat-flutter.git
+      path: packages/stream_chat_flutter
+      ref: 686a9980966872eee4b64abad2d5e8ffcdb8c29c
+  stream_chat_flutter_core:
+    git:
+      url: https://github.com/GetStream/stream-chat-flutter.git
+      path: packages/stream_chat_flutter_core
+      ref: 686a9980966872eee4b64abad2d5e8ffcdb8c29c
+  # A git commit rather than a release: the published 0.5.0 predates
   # CurrentPlatform.debugCurrentPlatformOverride, which the tests need.
   stream_core:
     git:
@@ -36,7 +56,7 @@ dependency_overrides:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core_flutter
-      ref: f4d49e9db343b48d890247fc9bf142805804daf1
+      ref: 2daa0a641519abe9ab637bcb41c69ed3ea4273b7
 
 melos:
   ignore:
@@ -46,8 +66,8 @@ melos:
     bootstrap:
       # Environment synced into every package during bootstrap.
       environment:
-        sdk: ">=3.10.0 <4.0.0"
-        flutter: ">=3.38.1"
+        sdk: ">=3.12.0 <4.0.0"
+        flutter: ">=3.44.0"
 
       # Dependency constraints synced into every package that declares them.
       dependencies:

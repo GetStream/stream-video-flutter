@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -5,9 +7,23 @@ import '../../stream_video_flutter.dart';
 
 /// Defines default property values for [StreamIncomingCallContent] and
 /// [StreamOutgoingCallContent] widgets.
+///
+/// Nothing reads this any more: both ringing screens are built on the design
+/// system, and are styled by [StreamIncomingCallThemeData] and
+/// [StreamOutgoingCallThemeData], which can differ from each other.
+@Deprecated(
+  'Use StreamIncomingCallThemeData and StreamOutgoingCallThemeData instead. '
+  'The ringing screens are built on the design system now and no longer read '
+  'this, so a theme set here has no effect. '
+  'Will be removed in the next major version.',
+)
 @immutable
 class StreamIncomingOutgoingCallThemeData with Diagnosticable {
   /// Creates a new instance of [StreamIncomingOutgoingCallThemeData].
+  @Deprecated(
+    'Use StreamIncomingCallThemeData and StreamOutgoingCallThemeData instead. '
+    'Will be removed in the next major version.',
+  )
   const StreamIncomingOutgoingCallThemeData({
     this.singleParticipantAvatarTheme = const StreamUserAvatarThemeData(
       initialsTextStyle: TextStyle(
@@ -203,8 +219,18 @@ class StreamIncomingOutgoingCallThemeData with Diagnosticable {
 
 /// Applies a incoming/outgoing call theme to descendant [StreamIncomingCallContent]
 /// and [StreamOutgoingCallContent] widgets.
+@Deprecated(
+  'Use StreamIncomingCallTheme and StreamOutgoingCallTheme instead. The '
+  'ringing screens are built on the design system now and no longer read '
+  'this, so wrapping a subtree in one has no effect. '
+  'Will be removed in the next major version.',
+)
 class StreamIncomingOutgoingCallTheme extends InheritedWidget {
   /// Creates a new instance of [StreamIncomingOutgoingCallTheme].
+  @Deprecated(
+    'Use StreamIncomingCallTheme and StreamOutgoingCallTheme instead. '
+    'Will be removed in the next major version.',
+  )
   const StreamIncomingOutgoingCallTheme({
     super.key,
     required this.data,

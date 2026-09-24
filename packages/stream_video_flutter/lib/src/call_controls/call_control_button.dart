@@ -46,6 +46,7 @@ class CallControlButton extends StatelessWidget {
     this.showErrorBadge = false,
     this.onPressed,
     this.tooltip,
+    this.themeStyle,
   });
 
   /// The icon of the button.
@@ -70,6 +71,14 @@ class CallControlButton extends StatelessWidget {
   /// The message shown when the button is long-pressed or hovered.
   final String? tooltip;
 
+  /// Overrides handed to this button alone.
+  ///
+  /// Resolved after the ambient [StreamButtonTheme], so it reaches this button
+  /// without restyling every other control around it. A nested
+  /// [StreamButtonTheme] would not compose the same way: only the nearest one
+  /// is read.
+  final StreamButtonThemeStyle? themeStyle;
+
   @override
   Widget build(BuildContext context) {
     final button = StreamCallButtonBadge(
@@ -78,6 +87,7 @@ class CallControlButton extends StatelessWidget {
         icon: icon,
         onPressed: onPressed,
         tooltip: tooltip,
+        themeStyle: themeStyle,
         style: switch (tone) {
           .positive => .primary,
           .neutral => .secondary,

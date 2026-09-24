@@ -33,6 +33,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "12.1.0"
+  android_file_picker:
+    dependency: transitive
+    description:
+      name: android_file_picker
+      sha256: "14ab27769b54c48d5a8a71aa9858372b7a3ae77572ea0a8aee744643c5d8c53d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   ansi_styles:
     dependency: transitive
     description:
@@ -498,13 +506,45 @@ packages:
     source: hosted
     version: "7.0.1"
   file_picker:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
       name: file_picker
-      sha256: fdc6a37f715d19f35b131decf1ce39242eeed5ddae18c0818c3eccb731ab76be
+      sha256: "98c0b156b6380ba55bc767a14e2e6b3feb246e713ad40092424596fa79005bea"
       url: "https://pub.dev"
     source: hosted
-    version: "12.0.0-beta.7"
+    version: "13.1.0"
+  file_picker_darwin:
+    dependency: transitive
+    description:
+      name: file_picker_darwin
+      sha256: "51aef9f4c80449c736e7cc02198675fda73689f0bd45a84da642cfeab0250d46"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.2"
+  file_picker_linux:
+    dependency: transitive
+    description:
+      name: file_picker_linux
+      sha256: e7db600f50672ce5ebbe422ac0906e0f3d2a476188cc93e7126afee12bf08063
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
+  file_picker_platform_interface:
+    dependency: transitive
+    description:
+      name: file_picker_platform_interface
+      sha256: bbdc085a6f168e63f147e9ce8988f79fa0800a58e7f25a48f762c60837107ba5
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0"
+  file_picker_web:
+    dependency: transitive
+    description:
+      name: file_picker_web
+      sha256: b3004268da0c1b52baa18df430e7ec4438194de855a807d26b447cbf07ef3496
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0"
   file_selector:
     dependency: transitive
     description:
@@ -1931,28 +1971,31 @@ packages:
     source: hosted
     version: "2.1.4"
   stream_chat:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: stream_chat
-      sha256: bde4a4174b1450546a183ed3e255617d0aff5c074398c6b3919aaee78f76bc8f
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/stream_chat"
+      ref: "686a9980966872eee4b64abad2d5e8ffcdb8c29c"
+      resolved-ref: "686a9980966872eee4b64abad2d5e8ffcdb8c29c"
+      url: "https://github.com/GetStream/stream-chat-flutter.git"
+    source: git
     version: "10.4.0"
   stream_chat_flutter:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: stream_chat_flutter
-      sha256: "8d15749847498481e67e10ef71cb9400726881e78eee9a8322c04f17634ab426"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/stream_chat_flutter"
+      ref: "686a9980966872eee4b64abad2d5e8ffcdb8c29c"
+      resolved-ref: "686a9980966872eee4b64abad2d5e8ffcdb8c29c"
+      url: "https://github.com/GetStream/stream-chat-flutter.git"
+    source: git
     version: "10.4.0"
   stream_chat_flutter_core:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: stream_chat_flutter_core
-      sha256: "4bbfe3f50150cb51b230abd06b1eded7dd7feea0548ccc57bef48a23aa14f9ec"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/stream_chat_flutter_core"
+      ref: "686a9980966872eee4b64abad2d5e8ffcdb8c29c"
+      resolved-ref: "686a9980966872eee4b64abad2d5e8ffcdb8c29c"
+      url: "https://github.com/GetStream/stream-chat-flutter.git"
+    source: git
     version: "10.4.0"
   stream_core:
     dependency: "direct overridden"
@@ -1967,19 +2010,20 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/stream_core_flutter"
-      ref: f4d49e9db343b48d890247fc9bf142805804daf1
-      resolved-ref: f4d49e9db343b48d890247fc9bf142805804daf1
+      ref: "2daa0a641519abe9ab637bcb41c69ed3ea4273b7"
+      resolved-ref: "2daa0a641519abe9ab637bcb41c69ed3ea4273b7"
       url: "https://github.com/GetStream/stream-core-flutter.git"
     source: git
     version: "0.5.1"
   stream_thumbnail:
     dependency: transitive
     description:
-      name: stream_thumbnail
-      sha256: "14f562a5b25fb8d037ff34a182a4d7b99b16e0fc268392e3bb2754c964ba4069"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.0"
+      path: "packages/stream_thumbnail"
+      ref: "2aea1413997af886ee951921d71e6b8cb8c5cfbb"
+      resolved-ref: "2aea1413997af886ee951921d71e6b8cb8c5cfbb"
+      url: "https://github.com/GetStream/stream-core-flutter.git"
+    source: git
+    version: "0.1.0+1"
   stream_transform:
     dependency: transitive
     description:
@@ -2076,38 +2120,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.2"
-  thumblr:
-    dependency: transitive
-    description:
-      name: thumblr
-      sha256: bfdb4c3d6e95d9595d4d464b255b85845db5f7ab88d8648d3edfe4f19adf043b
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.4"
-  thumblr_macos:
-    dependency: transitive
-    description:
-      name: thumblr_macos
-      sha256: "3b5189db149ee4c6c2fabc6f4bf3d84ed09c96cc45a2153a53ae781742c404c6"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.0"
-  thumblr_platform_interface:
-    dependency: transitive
-    description:
-      name: thumblr_platform_interface
-      sha256: abfcd54b5567b3c8d9a5426b43ed4783c613c34194564c47ffba0ea51f328962
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.1+1"
-  thumblr_windows:
-    dependency: transitive
-    description:
-      name: thumblr_windows
-      sha256: a1d372ccb4d4981e6d55ff516ee5b102f65d0f905d5d36c9712a095358d9e91a
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.3+1"
   tint:
     dependency: transitive
     description:
@@ -2380,6 +2392,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.3"
+  windows_file_picker:
+    dependency: transitive
+    description:
+      name: windows_file_picker
+      sha256: "9f3aa833068b09e380fdc59560ad260a4a14e9397173abb533699f967443602e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   x509:
     dependency: transitive
     description:
