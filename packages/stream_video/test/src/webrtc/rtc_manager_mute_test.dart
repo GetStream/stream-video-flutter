@@ -625,4 +625,45 @@ void main() {
       });
     },
   );
+
+  group('RtcManager unmute of a track that was never muted', () {
+    // Joining with a track from the lobby publishes it and then enables it,
+    // which reaches unmuteTrack while the track is still live. Recreating it
+    // there stops the device and acquires it a second time.
+    test('leaves a live camera track running', () async {
+      final mediaTrack = _FakeMediaStreamTrack(kind: 'video');
+      final mediaStream = _FakeMediaStream();
+      final track = RtcLocalCameraTrack(
+        trackIdPrefix: 'test-publisher',
+        trackType: SfuTrackType.video,
+        mediaStream: mediaStream,
+        mediaTrack: mediaTrack,
+        mediaConstraints: const CameraConstraints(),
+      );
+      rtcManager.tracks[track.trackId] = track;
+
+      final result = await rtcManager.setCameraEnabled();
+
+      expect(result.isSuccess, isTrue);
+      expect(mediaTrack.stopCallCount, 0);
+      expect(mediaStream.disposeCallCount, 0);
+      expect(rtcManager.tracks[track.trackId]!.mediaTrack, same(mediaTrack));
+    });
+
+    test('leaves a live microphone track running', () async {
+      final mediaTrack = _FakeMediaStreamTrack(kind: 'audio');
+      final mediaStream = _FakeMediaStream();
+      final track = addAudioTrack(
+        mediaTrack: mediaTrack,
+        mediaStream: mediaStream,
+      );
+
+      final result = await rtcManager.unmuteTrack(trackId: track.trackId);
+
+      expect(result.isSuccess, isTrue);
+      expect(mediaTrack.stopCallCount, 0);
+      expect(mediaStream.disposeCallCount, 0);
+      expect(rtcManager.tracks[track.trackId]!.mediaTrack, same(mediaTrack));
+    });
+  });
 }

@@ -73,6 +73,7 @@
 
 ### 🐞 Fixed
 
+- Joining with the camera or microphone track from the lobby no longer stops it and acquires it again. The camera no longer restarts when the call connects.
 - A desktop screen share no longer sends `mandatory: {frameRate: null}` to the platform when no `maxFrameRate` is set.
 - A reconnect no longer drops the video of participants whose tracks have not been received yet. Track subscriptions now survive the join response, so a subscription update sent while the media is still arriving keeps every participant subscribed.
 - A participant drawn in two places at once is now visible while either shows them, and subscribed at the size of the larger.
