@@ -96,6 +96,23 @@ void main() {
     );
 
     streamGoldenTest(
+      'CallParticipantsGridView keeps five in two columns on an upright phone',
+      fileName: 'stream_call_participants_grid_upright',
+      brightness: brightness,
+      pumpBeforeTest: pumpBeforeTest,
+      builder: () => GoldenTestGroup(
+        columns: 1,
+        children: [
+          GoldenTestScenario(
+            name: '5 participants',
+            // A 412x917 Android frame, less the app bar and the controls.
+            child: _grid(const Size(412, 736), count: 5),
+          ),
+        ],
+      ),
+    );
+
+    streamGoldenTest(
       'CallParticipantsGridView fills a roomier window',
       fileName: 'stream_call_participants_grid_wide',
       brightness: brightness,

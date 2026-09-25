@@ -67,6 +67,15 @@ void main() {
         expect(grid.tileSize, const Size(188, 324));
       });
 
+      test('5 go two by three', () {
+        final grid = solve(box, 5);
+
+        expect(grid.columns, 2);
+        expect(grid.rows, 3);
+        expect(grid.tileSize.width, 188);
+        expect(grid.tileSize.height, closeTo(213.33, 0.01));
+      });
+
       test('6 go two by three', () {
         final grid = solve(box, 6);
 
@@ -78,12 +87,24 @@ void main() {
     });
 
     // 768x1024 frame, 880 of content.
-    test('medium, 752x880, 3 stack', () {
-      final grid = solve(const Size(752, 880), 3);
+    group('medium, 752x880', () {
+      const box = Size(752, 880);
 
-      expect(grid.columns, 1);
-      expect(grid.rows, 3);
-      expect(grid.tileSize, const Size(512, 288));
+      test('3 stack', () {
+        final grid = solve(box, 3);
+
+        expect(grid.columns, 1);
+        expect(grid.rows, 3);
+        expect(grid.tileSize, const Size(512, 288));
+      });
+
+      test('5 go two by three', () {
+        final grid = solve(box, 5);
+
+        expect(grid.columns, 2);
+        expect(grid.rows, 3);
+        expect(grid.tileSize, const Size(372, 288));
+      });
     });
 
     // 1024x768 frame, 624 of content.
@@ -184,6 +205,24 @@ void main() {
       // past 2:1, where four in a row is the point.
       expect(solve(const Size(660, 330), 4).columns, 2);
       expect(solve(const Size(1884, 330), 4).columns, 4);
+    });
+
+    test('an upright phone keeps five and six in two columns', () {
+      // A 412x917 Android frame, less the app bar, the controls and the grid's
+      // 8px padding.
+      const box = Size(396, 720);
+
+      expect(solve(box, 2).columns, 1);
+      expect(solve(box, 3).columns, 1);
+      expect(solve(box, 5).columns, 2);
+      expect(solve(box, 6).columns, 2);
+    });
+
+    test('a tall box keeps a tile ratio narrower than a square', () {
+      const box = Size(396, 720);
+
+      expect(solve(box, 3, maxTileAspectRatio: 3 / 4).columns, 2);
+      expect(solve(box, 5, maxTileAspectRatio: 9 / 16).columns, 2);
     });
 
     test('one participant takes the whole box', () {
