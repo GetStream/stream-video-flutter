@@ -614,6 +614,36 @@ void main() {
       });
     });
 
+    test(
+      'starts over when the app disposed the client it stood down for',
+      () async {
+        await handle(createStreamVideo: factoryReturning(client));
+
+        // The app answered on this client, so the session stood down and kept
+        // it. The app owns it from then on, and eventually lets it go.
+        when(() => client.activeCalls).thenReturn([MockCall()]);
+        onRingingEvent!(
+          const ActionCallAccept(
+            data: CallData(uuid: 'u', callCid: 'default:call-a'),
+          ),
+        );
+        await pastTheGrace();
+        verifyNever(() => client.dispose());
+
+        when(() => client.isDisposed).thenReturn(true);
+
+        // The next push must not be forwarded into a dead client.
+        final fresh = stubbedClient();
+        final handled = await handle(
+          createStreamVideo: factoryReturning(fresh),
+        );
+
+        expect(handled, isTrue);
+        expect(factoryCalls, 2);
+        verify(() => fresh.handleRingingFlowNotifications(any())).called(1);
+      },
+    );
+
     test('leaves the client alone when the app is in a call on it', () async {
       await handle(createStreamVideo: factoryReturning(client));
 

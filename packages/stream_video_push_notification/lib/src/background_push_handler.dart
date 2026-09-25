@@ -177,6 +177,22 @@ class StreamVideoPushHandler {
     FutureOr<void> Function()? onDispose,
   ) async {
     var mine = _session;
+
+    // A session that stood down because the app was in a call keeps its
+    // client, and the app owns that client from then on — so it can be
+    // disposed without this session hearing about it. Forwarding a push to a
+    // dead client would drop it silently, so let the session go and start
+    // over. `_existingClient` makes the same check for the app's own client.
+    if (mine != null && mine.streamVideo.isDisposed) {
+      streamLog.w(
+        _tag,
+        () => '[handleStreamPush] the session client is gone; starting over',
+      );
+
+      await mine.release();
+      mine = null;
+    }
+
     try {
       if (mine == null) {
         final appClient = _existingClient(existingClient);

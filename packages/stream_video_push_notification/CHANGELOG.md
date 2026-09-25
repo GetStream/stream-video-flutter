@@ -9,6 +9,10 @@
 
   The heads-up notification is unchanged. From API 34 it is drawn by the platform's `NotificationCompat.CallStyle`, whose buttons and labels are the system's — `textAccept` and `textDecline` do not reach it. iOS ringing is CallKit, which is system UI throughout and has nothing to restyle.
 
+### ✅ Added
+
+- Added `StreamVideoPushHandler.handleBackgroundMessage`, which simplifies the ringing setup by running a Stream ringing push through its whole background lifecycle from your Firebase background handler: it builds the client through the factory you give it, observes the ringing events a background isolate can act on, and disposes the client — along with whatever that factory set up — once the user has answered, declined, or let the call time out. It replaces the setup and teardown each integration had to write by hand.
+
 ## 1.6.0
 
 ### 🔄 Changed
@@ -18,8 +22,6 @@
 
 ### ✅ Added
 
-- Added `StreamVideoPushHandler.handleBackgroundMessage`, which simplifies the ringing setup by running a Stream ringing push through its whole background lifecycle from your Firebase background handler: it builds the client through the factory you give it, observes the ringing events a background isolate can act on, and disposes the client — along with whatever that factory set up — once the user has answered, declined, or let the call time out. It replaces the setup and teardown each integration had to write by hand.
-- [Android] Added a Telecom integration for the ringing flow, which registers incoming and outgoing ringing calls with the platform's [Telecom stack](https://developer.android.com/develop/connectivity/telecom) through Jetpack Telecom. This gives the call proper audio focus and a place in the system call state, and lets it be answered or hung up from a paired watch, a car head unit or a Bluetooth headset. The incoming call notification and full-screen ringing UI are unchanged. It is **on by default from Android 17**: for an app targeting API 37 the platform will not play a ringtone from a service started by a push unless the call is in the Telecom stack, so ringing does not work correctly without it. The default follows the Android version of the device rather than your `targetSdk`, so it is on for any app running on Android 17 — if you target below API 37 the restriction does not apply to you and you can opt out with `AndroidPushConfiguration(telecom: TelecomPushConfiguration(enabled: false))`. It is **off by default below Android 17**, where ringing works either way, so an existing integration is unaffected unless you pass `enabled: true`.
 - [iOS] Added `reportCallEnded`, which reports how a call ended to CallKit so it is listed correctly in the system Recents.
 - [iOS] Added `ActionCallIncomingFailed` and `IncomingCallFailureReason` to notify when the system blocks showing an incoming call (e.g. due to Do Not Disturb or block list). Listen via `onRingingEvent<ActionCallIncomingFailed>`.
 - [Android] Added a Telecom integration for the ringing flow, which registers ringing calls with the platform's [Telecom stack](https://developer.android.com/develop/connectivity/telecom). This gives the call proper audio focus and a place in the system call state, and lets it be answered or hung up from a paired watch, a car head unit or a Bluetooth headset. The incoming call notification and full-screen ringing UI are unchanged. It is on by default on Android 17 and above, where ringing from a push no longer works reliably without it, and off below that, so existing integrations are unaffected. Configure it with `AndroidPushConfiguration(telecom: TelecomPushConfiguration(...))`.
