@@ -2,6 +2,7 @@
 
 ### ✅ Added
 
+- A video tile shows the last frame it had while its track is subscribed again, instead of the placeholder.
 - Added `solveParticipantGrid`, the rule the participants grid arranges a page by, and `StreamCallParticipantsGridThemeData.columnResolver` to override it.
 - Added `StreamCallParticipantsGridThemeData.maxTileAspectRatio`, `compactPageSize` and `pageSize`.
 - Added `StreamCallParticipantsSpotlightThemeData` on `StreamVideoTheme`, and `StreamCallParticipantsSpotlightTheme` to restyle the speaker layouts over a subtree.
