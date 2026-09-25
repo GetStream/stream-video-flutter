@@ -2036,8 +2036,8 @@ packages:
     dependency: "direct overridden"
     description:
       path: "."
-      ref: "397bf03bdbd5ecbe6f7a89b49aa9df42744a15ee"
-      resolved-ref: "397bf03bdbd5ecbe6f7a89b49aa9df42744a15ee"
+      ref: f2c91fde82d2620777b57f1fb3b654d9754e3430
+      resolved-ref: f2c91fde82d2620777b57f1fb3b654d9754e3430
       url: "https://github.com/GetStream/webrtc-flutter.git"
     source: git
     version: "3.2.0"
