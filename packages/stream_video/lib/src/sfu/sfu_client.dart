@@ -24,7 +24,7 @@ class SfuClient {
     required String baseUrl,
     required this.sfuToken,
     required this.sessionSeq,
-    required this._tracer,
+    required Tracer tracer,
     String prefix = '',
     ClientHooks? hooks,
     List<Interceptor> interceptors = const [],
@@ -36,7 +36,8 @@ class SfuClient {
          hooks: hooks,
          interceptor: chainInterceptor(interceptors),
        ),
-       _logger = taggedLogger(tag: '$sessionSeq-SV:SfuClient');
+       _logger = taggedLogger(tag: '$sessionSeq-SV:SfuClient'),
+       _tracer = tracer;
 
   final TaggedLogger _logger;
   final Tracer _tracer;

@@ -38,8 +38,8 @@ class HealthMonitorImpl implements HealthMonitor {
   HealthMonitorImpl(
     this.owner,
     this.listener, {
-    required this._networkMonitor,
-  });
+    required NetworkMonitor networkMonitor,
+  }) : _networkMonitor = networkMonitor;
 
   final String owner;
   final HealthListener listener;

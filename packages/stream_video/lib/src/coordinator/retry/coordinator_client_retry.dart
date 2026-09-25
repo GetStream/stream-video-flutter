@@ -27,10 +27,11 @@ import '../models/coordinator_models.dart';
 
 class CoordinatorClientRetry extends CoordinatorClient {
   CoordinatorClientRetry({
-    required this._delegate,
+    required CoordinatorClient delegate,
     required RetryPolicy retryPolicy,
     TokenManager? tokenManager,
-  }) : _retryManager = RpcRetryManager(
+  }) : _delegate = delegate,
+       _retryManager = RpcRetryManager(
          retryPolicy,
          tokenManager: tokenManager,
        );

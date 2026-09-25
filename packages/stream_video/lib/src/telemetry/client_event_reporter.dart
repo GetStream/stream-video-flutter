@@ -27,8 +27,8 @@ String _defaultId() => const Uuid().v4();
 class ClientEventContext {
   ClientEventContext({
     required this.resolveUserId,
-    this._now = DateTime.now,
-  });
+    Clock now = DateTime.now,
+  }) : _now = now;
 
   final UserIdResolver resolveUserId;
   final Clock _now;
@@ -196,9 +196,10 @@ class _ClientEventReporterImpl implements ClientEventReporter {
     required UserIdResolver resolveUserId,
     this.errorMapper = const ClientEventErrorMapper(),
     Clock now = DateTime.now,
-    this._generateId = _defaultId,
+    IdGenerator generateId = _defaultId,
   }) : _context = ClientEventContext(resolveUserId: resolveUserId, now: now),
-       _now = now;
+       _now = now,
+       _generateId = generateId;
 
   final ClientEventTransport transport;
   final ClientEventErrorMapper errorMapper;

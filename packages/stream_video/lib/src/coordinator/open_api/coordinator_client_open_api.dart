@@ -34,16 +34,23 @@ const _waitForConnectionTimeout = 5000;
 /// An accessor that allows us to communicate with the API around video calls.
 class CoordinatorClientOpenApi extends CoordinatorClient {
   CoordinatorClientOpenApi({
-    required this._rpcUrl,
-    required this._wsUrl,
-    required this._apiKey,
-    required this._tokenManager,
-    required this._latencyService,
-    required this._retryPolicy,
-    required this._networkMonitor,
+    required String rpcUrl,
+    required String wsUrl,
+    required String apiKey,
+    required TokenManager tokenManager,
+    required LatencyService latencyService,
+    required RetryPolicy retryPolicy,
+    required InternetConnection networkMonitor,
     this.isAnonymous = false,
-    this._clientEventReporter = const ClientEventReporter.noOp(),
-  });
+    ClientEventReporter clientEventReporter = const ClientEventReporter.noOp(),
+  }) : _rpcUrl = rpcUrl,
+       _wsUrl = wsUrl,
+       _apiKey = apiKey,
+       _tokenManager = tokenManager,
+       _latencyService = latencyService,
+       _networkMonitor = networkMonitor,
+       _retryPolicy = retryPolicy,
+       _clientEventReporter = clientEventReporter;
 
   final _logger = taggedLogger(tag: 'SV:CoordClient');
   final String _rpcUrl;

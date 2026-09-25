@@ -64,12 +64,12 @@ class RtcManager extends Disposable {
     required this.subscriber,
     required this.publishOptions,
     required this.stateManager,
-    required this._streamVideo,
+    required StreamVideo streamVideo,
     required this.pcFactory,
     this.e2eeManager,
     this.sfuId,
     this.clientEventRetryCount = 0,
-  }) {
+  }) : _streamVideo = streamVideo {
     subscriber.onTrack = _onRemoteTrack;
     _initClientEventReporting();
   }

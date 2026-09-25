@@ -15,8 +15,8 @@ typedef Backoff = Duration Function(RetryConfig config, int retryAttempt);
 class RetryPolicy {
   const RetryPolicy({
     this.config = const RetryConfig(),
-    this._backoff = _defaultBackoff,
-  });
+    Backoff backoff = _defaultBackoff,
+  }) : _backoff = backoff;
 
   final RetryConfig config;
   final Backoff _backoff;

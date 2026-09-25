@@ -54,9 +54,9 @@ Future<DesktopCapturerSource?> showDefaultScreenSelectionDialog(
 
 class TabbedScreenSelectWidget extends StatelessWidget {
   const TabbedScreenSelectWidget({
-    required this._screenSelectorState,
+    required ScreenSelectorStateNotifier screenSelectorState,
     super.key,
-  });
+  }) : _screenSelectorState = screenSelectorState;
   final ScreenSelectorStateNotifier _screenSelectorState;
   Map<String, DesktopCapturerSource> get _sources =>
       _screenSelectorState.value.sources;
