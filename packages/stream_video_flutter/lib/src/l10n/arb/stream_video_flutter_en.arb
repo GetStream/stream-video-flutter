@@ -71,6 +71,14 @@
   "@layoutSpeakerOneToOne": {
     "description": "The participant layout showing only the speaker and the local participant"
   },
+  "participantsPrevious": "Previous participants",
+  "@participantsPrevious": {
+    "description": "Tooltip of the button that moves a participant layout back — the bar towards its first tile, the grid to the page before"
+  },
+  "participantsNext": "Next participants",
+  "@participantsNext": {
+    "description": "Tooltip of the button that moves a participant layout on — the bar towards its last tile, the grid to the page after"
+  },
   "livestreamBackstageStartingSoon": "Livestream will start soon",
   "@livestreamBackstageStartingSoon": {
     "description": "Label for livestream backstage when live stream will soon start"

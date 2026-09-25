@@ -5,6 +5,8 @@ import 'package:mocktail/mocktail.dart';
 // content — so it is reached directly.
 // ignore: implementation_imports
 import 'package:stream_video_flutter/src/call_participants/layout/call_participants_grid_view.dart';
+// ignore: implementation_imports
+import 'package:stream_video_flutter/src/call_participants/layout/participants_navigation_button.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart' hide Finder;
 
 import '../../test_utils/test_wrapper.dart';
@@ -47,8 +49,9 @@ void main() {
     WidgetTester tester, {
     required Size size,
     required List<CallParticipantState> participants,
-    EdgeInsets? padding,
+    EdgeInsetsGeometry? padding,
     StreamCallParticipantsGridThemeData? theme,
+    TextDirection textDirection = TextDirection.ltr,
   }) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = size;
@@ -66,7 +69,12 @@ void main() {
     }
 
     return tester.pumpWidget(
-      TestWrapper(child: SizedBox.expand(child: grid)),
+      TestWrapper(
+        child: Directionality(
+          textDirection: textDirection,
+          child: SizedBox.expand(child: grid),
+        ),
+      ),
     );
   }
 
@@ -235,7 +243,7 @@ void main() {
         participants: _participants(6),
       );
 
-      expect(find.byType(PageNavigationButton), findsNothing);
+      expect(find.byType(ParticipantsNavigationButton), findsNothing);
     });
 
     testWidgets('chevrons once there is a second page', (tester) async {
@@ -245,7 +253,7 @@ void main() {
         participants: _participants(7),
       );
 
-      expect(find.byType(PageNavigationButton), findsNWidgets(2));
+      expect(find.byType(ParticipantsNavigationButton), findsNWidgets(2));
       // Six of the seven are on the first page.
       expect(_tile('p5'), findsOneWidget);
       expect(_tile('p6'), findsNothing);
@@ -258,7 +266,7 @@ void main() {
         participants: _participants(12),
       );
 
-      expect(find.byType(PageNavigationButton), findsNothing);
+      expect(find.byType(ParticipantsNavigationButton), findsNothing);
     });
 
     testWidgets('the last page is not stranded when people leave', (
@@ -270,7 +278,7 @@ void main() {
         participants: _participants(12),
       );
 
-      await tester.tap(find.byType(PageNavigationButton).last);
+      await tester.tap(find.byType(ParticipantsNavigationButton).last);
       await tester.pumpAndSettle();
       expect(_tile('p6'), findsOneWidget);
 
@@ -283,7 +291,206 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(_tile('p0'), findsOneWidget);
-      expect(find.byType(PageNavigationButton), findsNothing);
+      expect(find.byType(ParticipantsNavigationButton), findsNothing);
+    });
+
+    /// The visual of the [index]th chevron, without the tap target that
+    /// reaches past it.
+    Rect chevron(WidgetTester tester, int index) => tester
+        .getRect(find.byType(ParticipantsNavigationButton).at(index))
+        .deflate((kMinInteractiveDimension - 40) / 2);
+
+    testWidgets('a narrow window keeps its width and is overlaid', (
+      tester,
+    ) async {
+      // Three pages of six, moved onto the middle one so both chevrons are
+      // drawn — a hidden one is scaled to nothing and has no width to read.
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(18),
+      );
+      await tester.tap(find.byType(ParticipantsNavigationButton).last);
+      await tester.pumpAndSettle();
+
+      // The design draws the chevron 16 in from the view: the grid's own 8 of
+      // padding and 8 more inside it. The tiles keep the full width and run
+      // underneath.
+      expect(chevron(tester, 0).left, 16);
+      expect(400 - chevron(tester, 1).right, 16);
+      expect(tester.getRect(_tile('p6')).left, 8);
+    });
+
+    testWidgets('a narrow window insets each chevron by its own side', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(18),
+        padding: const EdgeInsetsDirectional.fromSTEB(24, 8, 8, 8),
+        textDirection: TextDirection.rtl,
+      );
+      await tester.tap(find.byType(ParticipantsNavigationButton).last);
+      await tester.pumpAndSettle();
+
+      // Right to left, back sits at the start, on the right: 24 of padding
+      // and 8 inside it. Forward gets the 8 at the end, on the left.
+      expect(400 - chevron(tester, 0).right, 32);
+      expect(chevron(tester, 1).left, 16);
+    });
+
+    testWidgets('a wider window sets the grid between the chevrons', (
+      tester,
+    ) async {
+      // Three pages of twelve at this width, again on the middle one.
+      await pump(
+        tester,
+        size: const Size(768, 880),
+        participants: _participants(36),
+      );
+      await tester.tap(find.byType(ParticipantsNavigationButton).last);
+      await tester.pumpAndSettle();
+
+      // 8 of padding, the 40 chevron, then 8 before the tiles start.
+      final back = chevron(tester, 0);
+      expect(back.left, 8);
+      expect(back.width, 40);
+      expect(768 - chevron(tester, 1).right, 8);
+      expect(
+        tester.getRect(_tile('p12')).left,
+        greaterThanOrEqualTo(back.right + 8),
+      );
+    });
+
+    testWidgets('the chevrons name themselves for a screen reader', (
+      tester,
+    ) async {
+      // Disposed inline: a tear-down runs after the check that every handle
+      // was let go of.
+      final semantics = tester.ensureSemantics();
+
+      // The middle page of three, so both are shown.
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(18),
+      );
+      await tester.tap(find.byType(ParticipantsNavigationButton).last);
+      await tester.pumpAndSettle();
+
+      for (final (icon, label) in [
+        (StreamIconData.chevronLeft, 'Previous participants'),
+        (StreamIconData.chevronRight, 'Next participants'),
+      ]) {
+        final button = find.ancestor(
+          of: find.byIcon(icon),
+          matching: find.byTooltip(label),
+        );
+        expect(button, findsOneWidget, reason: '$label is on the wrong button');
+        expect(tester.getSemantics(button).tooltip, label);
+      }
+
+      semantics.dispose();
+    });
+
+    testWidgets('only offer the way on from the first page', (tester) async {
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(12),
+      );
+
+      expect(_chevronScales(tester), [0.0, 1.0]);
+    });
+
+    testWidgets('only offer the way back from the last page', (tester) async {
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(12),
+      );
+      await tester.tap(find.byType(ParticipantsNavigationButton).last);
+      await tester.pumpAndSettle();
+
+      expect(_tile('p6'), findsOneWidget);
+      expect(_chevronScales(tester), [1.0, 0.0]);
+    });
+
+    testWidgets('go back a page', (tester) async {
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(12),
+      );
+      await tester.tap(find.byType(ParticipantsNavigationButton).last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ParticipantsNavigationButton).first);
+      await tester.pumpAndSettle();
+
+      expect(_tile('p0'), findsOneWidget);
+      expect(_tile('p6'), findsNothing);
+      expect(_chevronScales(tester), [0.0, 1.0]);
+    });
+
+    testWidgets('a hidden chevron is not read out', (tester) async {
+      // Disposed inline: a tear-down runs after the check that every handle
+      // was let go of.
+      final semantics = tester.ensureSemantics();
+
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(12),
+      );
+
+      SemanticsFinder tooltip(String label) =>
+          find.semantics.byPredicate((node) => node.tooltip == label);
+
+      expect(tooltip('Previous participants'), findsNothing);
+      expect(tooltip('Next participants'), findsOne);
+
+      semantics.dispose();
+    });
+
+    testWidgets('lead the other way when the grid reads right to left', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        size: const Size(400, 672),
+        participants: _participants(12),
+        textDirection: TextDirection.rtl,
+      );
+
+      // On the first page only the way on shows, on the left, pointing left.
+      final on = find.ancestor(
+        of: find.byIcon(StreamIconData.chevronLeft),
+        matching: find.byType(ParticipantsNavigationButton),
+      );
+      expect(tester.getCenter(on).dx, lessThan(200));
+      expect(_chevronScales(tester), [0.0, 1.0]);
+
+      await tester.tap(on);
+      await tester.pumpAndSettle();
+
+      expect(_tile('p6'), findsOneWidget);
+    });
+
+    testWidgets('a wider window keeps the grid the same size on every page', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        size: const Size(768, 880),
+        participants: _participants(24),
+      );
+      final first = tester.getRect(_tile('p0'));
+
+      await tester.tap(find.byType(ParticipantsNavigationButton).last);
+      await tester.pumpAndSettle();
+
+      expect(tester.getRect(_tile('p12')), first);
     });
 
     testWidgets('a page that comes back is reachable again', (tester) async {
@@ -293,9 +500,9 @@ void main() {
         size: const Size(400, 672),
         participants: _participants(18),
       );
-      await tester.tap(find.byType(PageNavigationButton).last);
+      await tester.tap(find.byType(ParticipantsNavigationButton).last);
       await tester.pumpAndSettle();
-      await tester.tap(find.byType(PageNavigationButton).last);
+      await tester.tap(find.byType(ParticipantsNavigationButton).last);
       await tester.pumpAndSettle();
       expect(_tile('p12'), findsOneWidget);
 
@@ -352,7 +559,7 @@ void main() {
         theme: const StreamCallParticipantsGridThemeData(pageSize: 4),
       );
 
-      expect(find.byType(PageNavigationButton), findsNWidgets(2));
+      expect(find.byType(ParticipantsNavigationButton), findsNWidgets(2));
       expect(_tile('p3'), findsOneWidget);
       expect(_tile('p4'), findsNothing);
     });
@@ -365,7 +572,7 @@ void main() {
         theme: const StreamCallParticipantsGridThemeData(compactPageSize: 2),
       );
 
-      expect(find.byType(PageNavigationButton), findsNWidgets(2));
+      expect(find.byType(ParticipantsNavigationButton), findsNWidgets(2));
       expect(_tile('p1'), findsOneWidget);
       expect(_tile('p2'), findsNothing);
     });

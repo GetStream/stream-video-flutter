@@ -20,12 +20,14 @@ const _names = [
   'Alex Cole',
 ];
 
-MockCallParticipantState _participant(String name) {
+/// A participant called [name], identified by [id] where the names run out.
+MockCallParticipantState _participant(String name, {String? id}) {
   final participant = MockCallParticipantState();
+  final key = id ?? name;
   when(() => participant.name).thenReturn(name);
-  when(() => participant.userId).thenReturn(name);
-  when(() => participant.sessionId).thenReturn(name);
-  when(() => participant.uniqueParticipantKey).thenReturn(name);
+  when(() => participant.userId).thenReturn(key);
+  when(() => participant.sessionId).thenReturn(key);
+  when(() => participant.uniqueParticipantKey).thenReturn(key);
   when(() => participant.image).thenReturn(null);
   when(() => participant.isLocal).thenReturn(false);
   when(() => participant.isSpeaking).thenReturn(false);
@@ -59,7 +61,10 @@ Widget _grid(Size size, {required int count}) => MediaQuery(
     size: size,
     child: CallParticipantsGridView(
       call: MockCall(),
-      participants: [for (var i = 0; i < count; i++) _participant(_names[i])],
+      participants: [
+        for (var i = 0; i < count; i++)
+          _participant(_names[i % _names.length], id: 'p$i'),
+      ],
       itemBuilder: _tile,
     ),
   ),
@@ -110,6 +115,28 @@ void main() {
           GoldenTestScenario(
             name: '5 participants',
             child: _grid(const Size(1000, 560), count: 5),
+          ),
+        ],
+      ),
+    );
+
+    streamGoldenTest(
+      'CallParticipantsGridView offers the pages it cannot fit',
+      fileName: 'stream_call_participants_grid_paged',
+      brightness: brightness,
+      pumpBeforeTest: pumpBeforeTest,
+      builder: () => GoldenTestGroup(
+        columns: 2,
+        children: [
+          // More people than a page holds, so the chevrons come in: over the
+          // grid while the window is narrow, either side of it once it is not.
+          GoldenTestScenario(
+            name: '7 on a narrow window',
+            child: _grid(const Size(400, 560), count: 7),
+          ),
+          GoldenTestScenario(
+            name: '13 on a wider one',
+            child: _grid(const Size(768, 560), count: 13),
           ),
         ],
       ),
