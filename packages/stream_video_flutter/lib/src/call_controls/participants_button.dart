@@ -77,6 +77,7 @@ class StreamParticipantsButton extends StatelessWidget {
       icon: Icon(context.streamIcons.usersFill),
       tooltip: translations.lobbyParticipants,
       badgeCount: participants.length,
+      badgeType: .neutral,
       onPressed: onPressed,
     );
 

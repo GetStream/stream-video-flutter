@@ -17,6 +17,7 @@ class StreamCallButtonBadge extends StatelessWidget {
     super.key,
     this.showErrorBadge = false,
     this.count,
+    this.countType,
     required this.child,
     this.style,
   });
@@ -31,6 +32,11 @@ class StreamCallButtonBadge extends StatelessWidget {
   ///
   /// Null or zero draws no count.
   final int? count;
+
+  /// The colour the count is drawn in.
+  ///
+  /// Null uses [StreamBadgeNotificationType.primary].
+  final StreamBadgeNotificationType? countType;
 
   /// The button to badge.
   final Widget child;
@@ -47,7 +53,11 @@ class StreamCallButtonBadge extends StatelessWidget {
       final count = this.count;
       if (count == null || count <= 0) return child;
 
-      return StreamBadgeNotification(label: '$count', child: child);
+      return StreamBadgeNotification(
+        type: countType,
+        label: '$count',
+        child: child,
+      );
     }
 
     const defaults = _StreamCallButtonBadgeStyleDefaults();

@@ -21,7 +21,7 @@
 - Added `ViewportVisibilityReporter`, which measures how much of its child is on screen and reports it to `Call.viewportVisibility`.
 - Redesigned the incoming and outgoing ringing screens. Both are an avatar over a name and a status line, with the call controls below. The incoming screen sits on the app surface; the outgoing one is drawn on top of the caller's own camera, blurred behind a scrim, and falls back to the flat scrim when the camera is off.
 - Added `CallRingingButton`, the 64px round button answering, declining and cancelling are drawn with. It is `CallControlButton` at the size the ringing designs give it, optionally with a label under it.
-- `CallControlButton` and `CallFeatureButton` take a `badgeCount`, drawn as a `StreamBadgeNotification` on the button's corner. `StreamCallButtonBadge` takes a `count` for the same.
+- `CallControlButton` and `CallFeatureButton` take a `badgeCount` and `badgeType`, drawn as a `StreamBadgeNotification` on the button's corner. `StreamCallButtonBadge` takes a `count` and `countType` for the same.
 - `CallControlButton` takes a `themeStyle`, handed to the button as `props.themeStyle`. It resolves after the ambient `StreamButtonTheme`, so it reaches that one button — where a nested `StreamButtonTheme` would be dropped for the `positive` tone, which brings one of its own.
 - Added `StreamRingingCameraController`, which opens the camera the outgoing screen previews and hands it to the call as `TrackOption.provided`, so the call carries on with the camera the caller was already previewing rather than opening a second one. `StreamOutgoingCallContent` makes one unless it is given one.
 - Added `StreamIncomingCallThemeData` and `StreamOutgoingCallThemeData` on `StreamVideoTheme`, with `StreamIncomingCallTheme` and `StreamOutgoingCallTheme` to restyle either over a subtree. Both carry a `StreamRingingCallStyle`, which `StreamIncomingCallContent.style` and `StreamOutgoingCallContent.style` override per call site.
@@ -187,7 +187,7 @@
 ### 🔄 Changed
 
 - The badge on the call control buttons is amber with no border, where it used to be red with one.
-- The count on `StreamParticipantsButton` uses the design system's badge colour instead of `accentSuccess`.
+- The count on `StreamParticipantsButton` uses the design system's neutral badge instead of `accentSuccess`.
 - `StreamCallButtonBadge.showErrorBadge` defaults to false.
 - `accentWarning` is a lighter amber, which also repaints the fair bars on `StreamConnectionQualityIndicator`.
 - `CallAppBar` is laid out by `StreamToolbar` at the design system's 72 with `spacing.sm` edge padding, matching `CallControlBar`'s horizontal inset.

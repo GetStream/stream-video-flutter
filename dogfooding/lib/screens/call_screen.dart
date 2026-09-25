@@ -426,6 +426,7 @@ class _CallScreenState extends State<CallScreen>
       tooltip: 'Participants',
       selected: _openPanel == CallSidePanel.participants,
       badgeCount: count,
+      badgeType: .neutral,
       onPressed: () => _togglePanel(CallSidePanel.participants),
     ),
   );

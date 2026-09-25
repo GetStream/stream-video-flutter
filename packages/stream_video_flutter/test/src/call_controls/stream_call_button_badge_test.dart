@@ -55,6 +55,23 @@ void main() {
       expect(find.byType(StreamErrorBadge), findsNothing);
     });
 
+    testWidgets('draws the count in countType', (tester) async {
+      await tester.pumpWidget(
+        const TestWrapper(
+          child: StreamCallButtonBadge(
+            count: 3,
+            countType: .neutral,
+            child: child,
+          ),
+        ),
+      );
+
+      final notification = tester.widget<StreamBadgeNotification>(
+        find.byType(StreamBadgeNotification),
+      );
+      expect(notification.props.type, StreamBadgeNotificationType.neutral);
+    });
+
     testWidgets('the error badge takes the corner over the count', (
       tester,
     ) async {

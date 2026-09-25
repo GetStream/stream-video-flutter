@@ -45,6 +45,7 @@ class CallControlButton extends StatelessWidget {
     this.tone = .neutral,
     this.showErrorBadge = false,
     this.badgeCount,
+    this.badgeType,
     this.onPressed,
     this.tooltip,
     this.themeStyle,
@@ -71,6 +72,11 @@ class CallControlButton extends StatelessWidget {
   /// it.
   final int? badgeCount;
 
+  /// The colour [badgeCount] is drawn in.
+  ///
+  /// Null uses [StreamBadgeNotificationType.primary].
+  final StreamBadgeNotificationType? badgeType;
+
   /// The callback to invoke when the user taps on the button.
   ///
   /// Null renders the button disabled.
@@ -92,6 +98,7 @@ class CallControlButton extends StatelessWidget {
     final button = StreamCallButtonBadge(
       showErrorBadge: showErrorBadge,
       count: badgeCount,
+      countType: badgeType,
       child: StreamButton.icon(
         icon: icon,
         onPressed: onPressed,
