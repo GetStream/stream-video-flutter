@@ -1,11 +1,11 @@
 {
-    "name": "dogfooding",
-    "short_name": "dogfooding",
+    "name": "Stream Video Calls",
+    "short_name": "Stream Video",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#005FFF",
+    "theme_color": "#005FFF",
+    "description": "Video calling sample app built with the Stream Video Flutter SDK.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

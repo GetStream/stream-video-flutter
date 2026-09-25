@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "io.getstream.video.flutter.dogfooding" "\0"
-            VALUE "FileDescription", "dogfooding" "\0"
+            VALUE "FileDescription", "Stream Video Calls" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "dogfooding" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2022 io.getstream.video.flutter.dogfooding. All rights reserved." "\0"
             VALUE "OriginalFilename", "dogfooding.exe" "\0"
-            VALUE "ProductName", "dogfooding" "\0"
+            VALUE "ProductName", "Stream Video Calls" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
