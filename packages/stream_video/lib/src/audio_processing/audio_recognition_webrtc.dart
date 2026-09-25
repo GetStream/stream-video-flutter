@@ -12,8 +12,8 @@ import '../../stream_video.dart';
 class AudioRecognitionWebRTC implements AudioRecognition {
   AudioRecognitionWebRTC({
     this.config = const AudioRecognitionConfig(),
-    Stream<SpeechActivityEvent>? speechActivityStream,
-  }) : _speechActivityStream = speechActivityStream;
+    this._speechActivityStream,
+  });
 
   final AudioRecognitionConfig config;
 

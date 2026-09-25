@@ -93,10 +93,9 @@ class _StaticProvider implements TokenProvider {
 class _DynamicProvider implements TokenProvider {
   _DynamicProvider(
     this.loader, {
-    UserToken? initialToken,
-    OnTokenUpdated? onTokenUpdated,
-  }) : _initialToken = initialToken,
-       _onTokenUpdated = onTokenUpdated;
+    this._initialToken,
+    this._onTokenUpdated,
+  });
 
   final _logger = taggedLogger(tag: 'SV:DynamicToken');
 

@@ -231,15 +231,15 @@ class Call {
   }
 
   Call._({
-    required CoordinatorClient coordinatorClient,
-    required StreamVideo streamVideo,
+    required this._coordinatorClient,
+    required this._streamVideo,
     required CallStateNotifier stateManager,
     required PermissionsManager permissionManager,
     required this.networkMonitor,
-    required RetryPolicy retryPolicy,
+    required this._retryPolicy,
     required SdpPolicy sdpPolicy,
-    required RtcMediaDeviceNotifier rtcMediaDeviceNotifier,
-    CallCredentials? credentials,
+    required this._rtcMediaDeviceNotifier,
+    this._credentials,
     CallSessionFactory? sessionFactory,
   }) : _sessionFactory =
            sessionFactory ??
@@ -251,11 +251,6 @@ class Call {
            ),
        _stateManager = stateManager,
        _permissionsManager = permissionManager,
-       _coordinatorClient = coordinatorClient,
-       _streamVideo = streamVideo,
-       _retryPolicy = retryPolicy,
-       _credentials = credentials,
-       _rtcMediaDeviceNotifier = rtcMediaDeviceNotifier,
        dynascaleManager = DynascaleManager(stateManager: stateManager) {
     streamLog.i(_tag, () => '<init> state: ${stateManager.callState}');
 

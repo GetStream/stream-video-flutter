@@ -9,23 +9,21 @@ final class StreamVideoPushProvider {
     required this.name,
     required this.type,
     required this.isVoIP,
-    required TokenStreamProvider tokenStreamProvider,
-  }) : _tokenStreamProvider = tokenStreamProvider;
+    required this._tokenStreamProvider,
+  });
 
   /// Creates a new push provider for APN.
   const StreamVideoPushProvider.apn({
     required this.name,
-    TokenStreamProvider tokenStreamProvider = _voIPTokenStreamProvider,
+    this._tokenStreamProvider = _voIPTokenStreamProvider,
   }) : isVoIP = true,
-       _tokenStreamProvider = tokenStreamProvider,
        type = PushProvider.apn;
 
   /// Creates a new push provider for Firebase.
   const StreamVideoPushProvider.firebase({
     required this.name,
-    TokenStreamProvider tokenStreamProvider = _firebaseTokenStreamProvider,
+    this._tokenStreamProvider = _firebaseTokenStreamProvider,
   }) : isVoIP = false,
-       _tokenStreamProvider = tokenStreamProvider,
        type = PushProvider.firebase;
 
   static Stream<String> _firebaseTokenStreamProvider() async* {
