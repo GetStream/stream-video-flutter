@@ -1873,7 +1873,13 @@ extension PublisherRtcManager on RtcManager {
     // the constraints it was created with — enabling it again would leave it
     // on the stale ones and skip the publish-options update below. So it is
     // recreated too whenever [_defaultAudioConstraints] moved on since.
-    if (track.stopTrackOnMute || _hasStaleAudioConstraints(track)) {
+    //
+    // A track that is still enabled was never muted — joining with a track
+    // from the lobby unmutes it straight after publishing. Recreating it would
+    // stop the camera or microphone and acquire it again for nothing, so only
+    // stale constraints justify it.
+    final wasReleased = track.stopTrackOnMute && !track.mediaTrack.enabled;
+    if (wasReleased || _hasStaleAudioConstraints(track)) {
       final transceivers = transceiversManager
           .getTransceiversForTrack(track.trackId)
           .toList();
