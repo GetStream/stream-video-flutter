@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -114,6 +116,12 @@ class _StreamDogFoodingAppContentState
   /// Opens the call screen for [call], at most once per call.
   void _showCallScreen(Call call) {
     if (_routedCallCid == call.callCid.value) return;
+
+    // The call may already be over. A ringing call the caller cancels while
+    // this app is in the background never gets a screen, and routing to one
+    // now would only build a screen that tears itself straight back down.
+    if (call.state.value.status.isDisconnected) return;
+
     _routedCallCid = call.callCid.value;
 
     final extra = (
@@ -162,6 +170,17 @@ class _StreamDogFoodingAppContentState
     _compositeSubscription.add(
       streamVideo.state.incomingCall.listen((call) {
         if (call == null) return;
+
+        // Only while the app is on screen. In the background the platform
+        // notification is the incoming call UI, and routing here would queue
+        // a screen that is not built until the app resumes - by which time
+        // the call can be long over. Answering from the notification brings
+        // the screen up through `onCallAccepted` instead.
+        if (WidgetsBinding.instance.lifecycleState !=
+            AppLifecycleState.resumed) {
+          return;
+        }
+
         _showCallScreen(call);
       }),
     );
@@ -170,7 +189,11 @@ class _StreamDogFoodingAppContentState
   void _observeFcmMessages() {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     _compositeSubscription.add(
-      FirebaseMessaging.onMessage.listen(handleRemoteMessage),
+      FirebaseMessaging.onMessage.listen(
+        (message) => unawaited(
+          StreamVideo.instance.handleRingingFlowNotifications(message.data),
+        ),
+      ),
     );
   }
 

@@ -1380,6 +1380,11 @@ class Call {
   }) async {
     await _init();
 
+    if (_callLifecycleCompleter.isCompleted) {
+      _logger.w(() => '[join] rejected (call was left)');
+      return failureWithError('call was left');
+    }
+
     if (state.value.status is CallStatusConnected) {
       _logger.w(() => '[join] rejected (connected)');
       return const Result.success(none);

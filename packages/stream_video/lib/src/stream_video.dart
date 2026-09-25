@@ -604,6 +604,8 @@ class StreamVideo extends Disposable {
       final call = _makeCallFromRinging(data: event.data);
       _ringingCalls[event.data.callCid.value] = call;
       _state.incomingCall.value = call;
+    } else if (event is CoordinatorCallRejectedEvent) {
+      unawaited(_onRingingCancelled(event));
     } else if (event is CoordinatorConnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] connected ${event.userId}');
       _connectionState = ConnectionState.connected(_state.currentUser.id);
@@ -614,6 +616,33 @@ class StreamVideo extends Disposable {
     } else if (event is CoordinatorReconnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] reconnected ${event.userId}');
     }
+  }
+
+  /// Ends a ringing call cancelled by the caller.
+  ///
+  /// Applies only when the caller rejects; other rejections are handled elsewhere.
+  Future<void> _onRingingCancelled(CoordinatorCallRejectedEvent event) async {
+    final cid = event.callCid.value;
+    if (event.rejectedBy.id != event.metadata.details.createdBy.id) return;
+
+    final call = _ringingCalls[cid] ?? _state.incomingCall.value;
+    if (call == null || call.callCid.value != cid) return;
+
+    final status = call.state.value.status;
+    if (status is! CallStatusIncoming || status.acceptedByMe) return;
+
+    _logger.i(
+      () => '[onCoordinatorEvent] ringing cancelled by the caller, cid: $cid',
+    );
+
+    _cancelIncomingAutoRejectTimerByCid(cid);
+
+    // Leaving, not rejecting: the caller has already withdrawn the call, so
+    // there is nothing to tell the coordinator. `leave` clears the ringing
+    // cache and `incomingCall` on its way out.
+    await call.leave(
+      reason: DisconnectReason.cancelled(byUserId: event.rejectedBy.id),
+    );
   }
 
   void _rewatchCalls() {
@@ -850,10 +879,15 @@ class StreamVideo extends Disposable {
     return manager.on<T>(onEvent);
   }
 
-  /// This method is used to dispose the StreamVideo instance after the ringing event is resolved.
-  /// It is used primarily for Firebase Messaging background handler where separate isolate is used to handle the message.
+  /// Disposes this client a second after the ringing flow resolves — once the
+  /// user has answered, declined, or let the call time out.
   ///
-  /// [disposingCallback] is a callback that allows to perform any additional disposing operations after the ringing event is resolved.
+  /// [disposingCallback] runs first, for whatever the caller set up alongside
+  /// the client.
+  @Deprecated(
+    'Use StreamVideoPushHandler.handleBackgroundMessage instead, which runs the '
+    'whole background lifecycle.',
+  )
   StreamSubscription<RingingEvent>? disposeAfterResolvingRinging({
     void Function()? disposingCallback,
   }) {
@@ -1559,10 +1593,9 @@ class StreamVideo extends Disposable {
     }
 
     // Only handle messages from stream.video
-    final sender = payload['sender'] as String?;
-    if (sender != 'stream.video') return false;
+    if (!StreamPushPayload.isStreamPush(payload)) return false;
 
-    final callCid = payload['call_cid'] as String?;
+    final callCid = StreamPushPayload.callCidOf(payload);
     if (callCid == null) return false;
 
     final callUUID = const Uuid().v4();
@@ -1575,14 +1608,15 @@ class StreamVideo extends Disposable {
       callId = splitCid.last;
     }
 
-    final createdById = payload['created_by_id'] as String?;
-    final createdByName = payload['created_by_display_name'] as String?;
-    final callDisplayName = payload['call_display_name'] as String?;
+    final createdById = payload[StreamPushPayload.createdByIdKey] as String?;
+    final createdByName =
+        payload[StreamPushPayload.createdByDisplayNameKey] as String?;
+    final callDisplayName =
+        payload[StreamPushPayload.callDisplayNameKey] as String?;
 
-    final hasVideo = payload['video'] as String?;
+    final hasVideo = payload[StreamPushPayload.videoKey] as String?;
 
-    final type = payload['type'] as String?;
-    if (handleMissedCall && type == 'call.missed') {
+    if (handleMissedCall && StreamPushPayload.isMissedCallPush(payload)) {
       unawaited(
         manager.showMissedCall(
           uuid: callUUID,
@@ -1595,7 +1629,7 @@ class StreamVideo extends Disposable {
       );
 
       return true;
-    } else if (type != 'call.ring') {
+    } else if (!StreamPushPayload.isRingingPush(payload)) {
       return false;
     }
 
