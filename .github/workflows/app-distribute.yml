@@ -124,6 +124,9 @@ jobs:
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
 
+      - name: Setup FlutterFire CLI
+        run: flutter pub global activate flutterfire_cli
+
       - name: Setup Melos
         uses: ./.github/actions/setup-melos
 
