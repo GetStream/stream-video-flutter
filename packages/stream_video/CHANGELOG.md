@@ -42,6 +42,7 @@
 - `StreamVideoException` (formerly `VideoError`) now implements `Exception` rather than `Error`. An `on Error catch` clause no longer matches it — these are runtime conditions to handle, not programming bugs. Catch `Exception`, or `StreamVideoException` directly.
 - `CallPreferences` now requires a `participantsThrottleIntervalResolver`; custom implementations must provide it.
 - `CallParticipantState.audioLevels` is now unmodifiable.
+- `CallStatusReconnecting.attempt` now counts every attempt of a reconnect, fast and rejoin alike, starting at 1. It used to start at 0, stay there across fast attempts, and count only rejoins — reaching a different value twice within one rejoin.
 
 ### ⚠️ Deprecated
 
@@ -96,6 +97,7 @@
 - A viewport visibility is now recorded whether or not the session accepts it. A dropped report left a participant recorded as something they were not for the rest of the call, since a viewport only ever reports what changed.
 - Fixed server-pinned participants being reordered on every pins event.
 - Fixed `CallParticipantState.copyWithUpdatedAudioLevels` mutating the audio level history of the previous state.
+- On iOS devices without multitasking camera access, the camera track is now muted while the app is in the background, so other participants see camera-off instead of a frozen frame.
 
 ## 1.6.0
 
