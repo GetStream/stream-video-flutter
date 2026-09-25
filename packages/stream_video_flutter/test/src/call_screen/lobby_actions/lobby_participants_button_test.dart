@@ -95,7 +95,7 @@ void main() {
   testWidgets('opens an anchored menu on macOS', (tester) async {
     await pumpControl(tester, TargetPlatform.macOS);
 
-    await tester.tap(find.byType(CallControlButton));
+    await tester.tap(find.byType(StreamButton));
     await tester.pumpAndSettle();
 
     expect(find.byType(StreamContextMenuAction<void>), findsOneWidget);
@@ -106,7 +106,7 @@ void main() {
   testWidgets('opens a bottom sheet on Android', (tester) async {
     await pumpControl(tester, TargetPlatform.android);
 
-    await tester.tap(find.byType(CallControlButton));
+    await tester.tap(find.byType(StreamButton));
     await tester.pumpAndSettle();
 
     expect(find.byType(StreamSheetHeader), findsOneWidget);
@@ -120,7 +120,7 @@ void main() {
   testWidgets('gives an avatar row room in the anchored menu', (tester) async {
     await pumpControl(tester, TargetPlatform.macOS);
 
-    await tester.tap(find.byType(CallControlButton));
+    await tester.tap(find.byType(StreamButton));
     await tester.pumpAndSettle();
 
     final panel = tester.getRect(find.byType(StreamContextMenu));

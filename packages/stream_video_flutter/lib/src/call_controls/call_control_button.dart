@@ -43,7 +43,7 @@ class CallControlButton extends StatelessWidget {
     super.key,
     required this.icon,
     this.tone = .neutral,
-    this.showErrorBadge = false,
+    this.badge,
     this.onPressed,
     this.tooltip,
     this.themeStyle,
@@ -55,13 +55,15 @@ class CallControlButton extends StatelessWidget {
   /// What pressing this button means.
   final CallControlTone tone;
 
-  /// Whether to draw an error badge on the button's top-end corner.
+  /// The badge on the button's top-end corner.
   ///
-  /// This marks a control the user should look at — a microphone permission
-  /// that was refused, a camera that failed to start — and is independent of
-  /// [tone] and of whether the button can be pressed. A button that simply
-  /// cannot be used right now takes a null [onPressed] instead.
-  final bool showErrorBadge;
+  /// A [CallControlErrorBadge] marks a control the user should look at — a
+  /// microphone permission that was refused, a camera that failed to start —
+  /// and is independent of [tone] and of whether the button can be pressed. A
+  /// [CallControlNotificationBadge] shows a count, such as the people in a
+  /// call. A button that simply cannot be used right now takes a null
+  /// [onPressed] instead.
+  final CallControlBadge? badge;
 
   /// The callback to invoke when the user taps on the button.
   ///
@@ -82,7 +84,7 @@ class CallControlButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final button = StreamCallButtonBadge(
-      showErrorBadge: showErrorBadge,
+      badge: badge,
       child: StreamButton.icon(
         icon: icon,
         onPressed: onPressed,

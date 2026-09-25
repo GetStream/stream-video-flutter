@@ -18,7 +18,6 @@ import '../core/repos/app_preferences.dart';
 import '../core/repos/user_chat_repository.dart';
 import '../di/injector.dart';
 import '../utils/feedback_dialog.dart';
-import '../widgets/badged_call_option.dart';
 import '../widgets/call_connection_banner.dart';
 import '../widgets/closed_captions_widget.dart';
 import '../widgets/e2ee_key_notification.dart';
@@ -422,14 +421,12 @@ class _CallScreenState extends State<CallScreen>
   Widget _participantsControl(Call call) => PartialCallStateBuilder(
     call: call,
     selector: (state) => state.callParticipants.length,
-    builder: (context, count) => BadgedCallOption(
-      badgeCount: count == 0 ? null : count,
-      callControlOption: CallFeatureButton(
-        icon: Icon(context.streamIcons.usersFill),
-        tooltip: 'Participants',
-        selected: _openPanel == CallSidePanel.participants,
-        onPressed: () => _togglePanel(CallSidePanel.participants),
-      ),
+    builder: (context, count) => CallFeatureButton(
+      icon: Icon(context.streamIcons.usersFill),
+      tooltip: 'Participants',
+      selected: _openPanel == CallSidePanel.participants,
+      badge: CallControlNotificationBadge(count: count, type: .neutral),
+      onPressed: () => _togglePanel(CallSidePanel.participants),
     ),
   );
 
@@ -774,13 +771,11 @@ class __ShowChatButtonState extends State<_ShowChatButton> {
 
   @override
   Widget build(BuildContext context) {
-    return BadgedCallOption(
-      callControlOption: CallFeatureButton(
-        icon: Icon(context.streamIcons.messageBubblesFill),
-        selected: widget.selected,
-        onPressed: widget.channel != null ? widget.onPressed : null,
-      ),
-      badgeCount: _unreadCount == 0 ? null : _unreadCount,
+    return CallFeatureButton(
+      icon: Icon(context.streamIcons.messageBubblesFill),
+      selected: widget.selected,
+      badge: CallControlNotificationBadge(count: _unreadCount),
+      onPressed: widget.channel != null ? widget.onPressed : null,
     );
   }
 }

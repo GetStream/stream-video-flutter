@@ -44,7 +44,7 @@ class CallFeatureButton extends StatelessWidget {
     required this.icon,
     this.selected = false,
     this.tone = .accent,
-    this.showErrorBadge = false,
+    this.badge,
     this.onPressed,
     this.tooltip,
   });
@@ -58,12 +58,13 @@ class CallFeatureButton extends StatelessWidget {
   /// The colour to paint while [selected]. Ignored while it is false.
   final CallFeatureTone tone;
 
-  /// Whether to draw an error badge on the button's top-end corner.
+  /// The badge on the button's top-end corner.
   ///
-  /// Marks a feature that needs attention — a screen share the platform
-  /// refused, say. A feature that merely cannot be used right now takes a null
-  /// [onPressed] instead.
-  final bool showErrorBadge;
+  /// A [CallControlErrorBadge] marks a feature that needs attention — a screen
+  /// share the platform refused, say. A [CallControlNotificationBadge] shows a
+  /// count, such as unread messages. A feature that merely cannot be used right
+  /// now takes a null [onPressed] instead.
+  final CallControlBadge? badge;
 
   /// The callback to invoke when the user taps on the button.
   ///
@@ -76,7 +77,7 @@ class CallFeatureButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamCallButtonBadge(
-      showErrorBadge: showErrorBadge,
+      badge: badge,
       child: StreamButton.icon(
         icon: icon,
         onPressed: onPressed,

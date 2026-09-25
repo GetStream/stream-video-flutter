@@ -14,17 +14,66 @@ void main() {
       tester.widget<PositionedDirectional>(find.byType(PositionedDirectional));
 
   group('StreamCallButtonBadge', () {
-    testWidgets('draws nothing when showErrorBadge is false', (tester) async {
+    testWidgets('draws nothing without a badge', (tester) async {
       await tester.pumpWidget(
         const TestWrapper(
-          child: StreamCallButtonBadge(showErrorBadge: false, child: child),
+          child: StreamCallButtonBadge(child: child),
         ),
       );
 
       // The widget itself is always in the tree — it returns the child
       // unwrapped — so the badge is what has to be absent.
       expect(find.byType(StreamErrorBadge), findsNothing);
+      expect(find.byType(StreamBadgeNotification), findsNothing);
       expect(find.byType(Stack), findsNothing);
+    });
+
+    testWidgets('draws no count for zero', (tester) async {
+      await tester.pumpWidget(
+        const TestWrapper(
+          child: StreamCallButtonBadge(
+            badge: CallControlNotificationBadge(count: 0),
+            child: child,
+          ),
+        ),
+      );
+
+      expect(find.byType(StreamBadgeNotification), findsNothing);
+    });
+
+    testWidgets('draws the count', (tester) async {
+      await tester.pumpWidget(
+        const TestWrapper(
+          child: StreamCallButtonBadge(
+            badge: CallControlNotificationBadge(count: 3),
+            child: child,
+          ),
+        ),
+      );
+
+      final notification = tester.widget<StreamBadgeNotification>(
+        find.byType(StreamBadgeNotification),
+      );
+      expect(notification.props.label, '3');
+      // The design system's badge colour, not one the button picks.
+      expect(notification.props.type, isNull);
+      expect(find.byType(StreamErrorBadge), findsNothing);
+    });
+
+    testWidgets('draws the count in its type', (tester) async {
+      await tester.pumpWidget(
+        const TestWrapper(
+          child: StreamCallButtonBadge(
+            badge: CallControlNotificationBadge(count: 3, type: .neutral),
+            child: child,
+          ),
+        ),
+      );
+
+      final notification = tester.widget<StreamBadgeNotification>(
+        find.byType(StreamBadgeNotification),
+      );
+      expect(notification.props.type, StreamBadgeNotificationType.neutral);
     });
 
     testWidgets('takes the design system defaults for a call control', (
@@ -32,7 +81,10 @@ void main() {
     ) async {
       await tester.pumpWidget(
         const TestWrapper(
-          child: StreamCallButtonBadge(showErrorBadge: true, child: child),
+          child: StreamCallButtonBadge(
+            badge: CallControlErrorBadge(),
+            child: child,
+          ),
         ),
       );
 
@@ -61,7 +113,7 @@ void main() {
             ],
           ),
           home: const StreamCallButtonBadge(
-            showErrorBadge: true,
+            badge: CallControlErrorBadge(),
             child: child,
           ),
         ),
@@ -93,7 +145,10 @@ void main() {
             data: StreamCallButtonBadgeThemeData(
               style: StreamCallButtonBadgeStyle(size: StreamErrorBadgeSize.xs),
             ),
-            child: StreamCallButtonBadge(showErrorBadge: true, child: child),
+            child: StreamCallButtonBadge(
+              badge: CallControlErrorBadge(),
+              child: child,
+            ),
           ),
         ),
       );
@@ -123,7 +178,7 @@ void main() {
             ],
           ),
           home: const StreamCallButtonBadge(
-            showErrorBadge: true,
+            badge: CallControlErrorBadge(),
             style: StreamCallButtonBadgeStyle(size: StreamErrorBadgeSize.xs),
             child: child,
           ),
@@ -139,7 +194,10 @@ void main() {
         const TestWrapper(
           child: Directionality(
             textDirection: TextDirection.rtl,
-            child: StreamCallButtonBadge(showErrorBadge: true, child: child),
+            child: StreamCallButtonBadge(
+              badge: CallControlErrorBadge(),
+              child: child,
+            ),
           ),
         ),
       );
