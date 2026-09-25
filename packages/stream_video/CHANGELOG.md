@@ -96,6 +96,7 @@
 - A viewport visibility is now recorded whether or not the session accepts it. A dropped report left a participant recorded as something they were not for the rest of the call, since a viewport only ever reports what changed.
 - Fixed server-pinned participants being reordered on every pins event.
 - Fixed `CallParticipantState.copyWithUpdatedAudioLevels` mutating the audio level history of the previous state.
+- On iOS devices without multitasking camera access, the camera track is now muted while the app is in the background, so other participants see camera-off instead of a frozen frame.
 
 ## 1.6.0
 
