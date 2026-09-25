@@ -76,8 +76,10 @@ class StreamParticipantsButton extends StatelessWidget {
     Widget button(VoidCallback? onPressed) => CallControlButton(
       icon: Icon(context.streamIcons.usersFill),
       tooltip: translations.lobbyParticipants,
-      badgeCount: participants.length,
-      badgeType: .neutral,
+      badge: CallControlNotificationBadge(
+        count: participants.length,
+        type: .neutral,
+      ),
       onPressed: onPressed,
     );
 

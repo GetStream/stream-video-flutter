@@ -47,7 +47,7 @@ void main() {
             name: 'error badge',
             child: CallFeatureButton(
               icon: Icon(icons.recordingFill),
-              showErrorBadge: true,
+              badge: const CallControlErrorBadge(),
               onPressed: () {},
             ),
           ),

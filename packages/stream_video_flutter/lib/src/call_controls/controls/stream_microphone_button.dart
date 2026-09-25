@@ -124,7 +124,7 @@ class StreamMicrophoneButton extends StatelessWidget {
       // An absent device is not a user choice, so it is badged rather than
       // drawn as a deliberate mute.
       tone: enabled || unavailable ? .neutral : .negative,
-      showErrorBadge: unavailable,
+      badge: unavailable ? const CallControlErrorBadge() : null,
       onPressed: unavailable
           ? null
           : () => applyDeviceChange(

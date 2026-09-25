@@ -425,8 +425,7 @@ class _CallScreenState extends State<CallScreen>
       icon: Icon(context.streamIcons.usersFill),
       tooltip: 'Participants',
       selected: _openPanel == CallSidePanel.participants,
-      badgeCount: count,
-      badgeType: .neutral,
+      badge: CallControlNotificationBadge(count: count, type: .neutral),
       onPressed: () => _togglePanel(CallSidePanel.participants),
     ),
   );
@@ -775,7 +774,7 @@ class __ShowChatButtonState extends State<_ShowChatButton> {
     return CallFeatureButton(
       icon: Icon(context.streamIcons.messageBubblesFill),
       selected: widget.selected,
-      badgeCount: _unreadCount,
+      badge: CallControlNotificationBadge(count: _unreadCount),
       onPressed: widget.channel != null ? widget.onPressed : null,
     );
   }

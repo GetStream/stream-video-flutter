@@ -408,7 +408,7 @@ class _DeviceSplitButton extends StatelessWidget {
       // open is worth retrying — while the caret follows what it has to
       // offer, which is nothing when the platform named no device.
       builder: (context, handle) => StreamCallButtonBadge(
-        showErrorBadge: unavailable,
+        badge: unavailable ? const CallControlErrorBadge() : null,
         child: StreamSplitButton.icon(
           leadingIcon: Icon(icon),
           trailingIcon: Icon(caret(isOpen: handle.isOpen)),

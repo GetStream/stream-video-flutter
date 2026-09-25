@@ -14,7 +14,7 @@ void main() {
       tester.widget<PositionedDirectional>(find.byType(PositionedDirectional));
 
   group('StreamCallButtonBadge', () {
-    testWidgets('draws nothing when showErrorBadge is false', (tester) async {
+    testWidgets('draws nothing without a badge', (tester) async {
       await tester.pumpWidget(
         const TestWrapper(
           child: StreamCallButtonBadge(child: child),
@@ -24,25 +24,30 @@ void main() {
       // The widget itself is always in the tree — it returns the child
       // unwrapped — so the badge is what has to be absent.
       expect(find.byType(StreamErrorBadge), findsNothing);
+      expect(find.byType(StreamBadgeNotification), findsNothing);
       expect(find.byType(Stack), findsNothing);
     });
 
-    testWidgets('draws no count for null or zero', (tester) async {
-      for (final count in [null, 0]) {
-        await tester.pumpWidget(
-          TestWrapper(
-            child: StreamCallButtonBadge(count: count, child: child),
+    testWidgets('draws no count for zero', (tester) async {
+      await tester.pumpWidget(
+        const TestWrapper(
+          child: StreamCallButtonBadge(
+            badge: CallControlNotificationBadge(count: 0),
+            child: child,
           ),
-        );
+        ),
+      );
 
-        expect(find.byType(StreamBadgeNotification), findsNothing);
-      }
+      expect(find.byType(StreamBadgeNotification), findsNothing);
     });
 
     testWidgets('draws the count', (tester) async {
       await tester.pumpWidget(
         const TestWrapper(
-          child: StreamCallButtonBadge(count: 3, child: child),
+          child: StreamCallButtonBadge(
+            badge: CallControlNotificationBadge(count: 3),
+            child: child,
+          ),
         ),
       );
 
@@ -55,12 +60,11 @@ void main() {
       expect(find.byType(StreamErrorBadge), findsNothing);
     });
 
-    testWidgets('draws the count in countType', (tester) async {
+    testWidgets('draws the count in its type', (tester) async {
       await tester.pumpWidget(
         const TestWrapper(
           child: StreamCallButtonBadge(
-            count: 3,
-            countType: .neutral,
+            badge: CallControlNotificationBadge(count: 3, type: .neutral),
             child: child,
           ),
         ),
@@ -72,29 +76,15 @@ void main() {
       expect(notification.props.type, StreamBadgeNotificationType.neutral);
     });
 
-    testWidgets('the error badge takes the corner over the count', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        const TestWrapper(
-          child: StreamCallButtonBadge(
-            showErrorBadge: true,
-            count: 3,
-            child: child,
-          ),
-        ),
-      );
-
-      expect(find.byType(StreamErrorBadge), findsOneWidget);
-      expect(find.byType(StreamBadgeNotification), findsNothing);
-    });
-
     testWidgets('takes the design system defaults for a call control', (
       tester,
     ) async {
       await tester.pumpWidget(
         const TestWrapper(
-          child: StreamCallButtonBadge(showErrorBadge: true, child: child),
+          child: StreamCallButtonBadge(
+            badge: CallControlErrorBadge(),
+            child: child,
+          ),
         ),
       );
 
@@ -123,7 +113,7 @@ void main() {
             ],
           ),
           home: const StreamCallButtonBadge(
-            showErrorBadge: true,
+            badge: CallControlErrorBadge(),
             child: child,
           ),
         ),
@@ -155,7 +145,10 @@ void main() {
             data: StreamCallButtonBadgeThemeData(
               style: StreamCallButtonBadgeStyle(size: StreamErrorBadgeSize.xs),
             ),
-            child: StreamCallButtonBadge(showErrorBadge: true, child: child),
+            child: StreamCallButtonBadge(
+              badge: CallControlErrorBadge(),
+              child: child,
+            ),
           ),
         ),
       );
@@ -185,7 +178,7 @@ void main() {
             ],
           ),
           home: const StreamCallButtonBadge(
-            showErrorBadge: true,
+            badge: CallControlErrorBadge(),
             style: StreamCallButtonBadgeStyle(size: StreamErrorBadgeSize.xs),
             child: child,
           ),
@@ -201,7 +194,10 @@ void main() {
         const TestWrapper(
           child: Directionality(
             textDirection: TextDirection.rtl,
-            child: StreamCallButtonBadge(showErrorBadge: true, child: child),
+            child: StreamCallButtonBadge(
+              badge: CallControlErrorBadge(),
+              child: child,
+            ),
           ),
         ),
       );

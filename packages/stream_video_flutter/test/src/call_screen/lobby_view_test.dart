@@ -417,7 +417,7 @@ void main() {
         .toList();
     expect(buttons, hasLength(2));
     for (final button in buttons) {
-      expect(button.showErrorBadge, isTrue);
+      expect(button.badge, isA<CallControlErrorBadge>());
       // Neutral, not negative: red would read as "you muted this".
       expect(button.tone, CallControlTone.neutral);
       // Pressable, because opening again is the only thing that clears the
