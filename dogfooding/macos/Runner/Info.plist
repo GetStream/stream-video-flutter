@@ -34,6 +34,8 @@
     <string>$(PRODUCT_NAME) Camera Usage!</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>$(PRODUCT_NAME) Microphone Usage!</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Grant access to your photo library to allow users access to send media on your device to a chat while on a call</string>
     <key>CFBundleURLTypes</key>
     <array>
     	<dict>
