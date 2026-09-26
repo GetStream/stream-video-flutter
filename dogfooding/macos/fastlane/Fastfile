@@ -59,19 +59,17 @@ platform :mac do
       force_for_new_devices: false,
     )
 
-    # Continue from the highest build on either platform, so macOS numbering
-    # starts above iOS when no macOS build has been uploaded yet.
-    current_build_number = %w[osx ios].map do |platform|
-      app_store_build_number(
-        api_key: appstore_api_key,
-        live: false,
-        app_identifier: bundle_id,
-        username: ENV['FASTLANE_APPLE_ID'],
-        team_id: 'EHV7XZLAHA',
-        platform: platform,
-        initial_build_number: 0,
-      )
-    end.max
+    # App Store Connect no longer returns the expired macOS build 2, so the
+    # lookup falls back to it until a newer macOS build exists.
+    current_build_number = app_store_build_number(
+      api_key: appstore_api_key,
+      live: false,
+      app_identifier: bundle_id,
+      username: ENV['FASTLANE_APPLE_ID'],
+      team_id: 'EHV7XZLAHA',
+      platform: 'osx',
+      initial_build_number: 2,
+    )
 
     build(
       flavor: options[:flavor],
