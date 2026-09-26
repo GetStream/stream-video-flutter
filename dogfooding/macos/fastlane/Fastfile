@@ -59,9 +59,6 @@ platform :mac do
       force_for_new_devices: false,
     )
 
-    # App Store Connect does not return the expired macOS build 2 or the build 3
-    # that failed processing, so the lookup falls back to 3 until a newer macOS
-    # build exists.
     current_build_number = app_store_build_number(
       api_key: appstore_api_key,
       live: false,
@@ -69,7 +66,6 @@ platform :mac do
       username: ENV['FASTLANE_APPLE_ID'],
       team_id: 'EHV7XZLAHA',
       platform: 'osx',
-      initial_build_number: 3,
     )
 
     build(
