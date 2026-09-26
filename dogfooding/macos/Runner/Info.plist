@@ -20,6 +20,10 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.business</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 	<key>NSHumanReadableCopyright</key>
@@ -32,6 +36,8 @@
     <string>$(PRODUCT_NAME) Camera Usage!</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>$(PRODUCT_NAME) Microphone Usage!</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Grant access to your photo library to allow users access to send media on your device to a chat while on a call</string>
     <key>CFBundleURLTypes</key>
     <array>
     	<dict>

@@ -19,6 +19,10 @@ on:
         type: boolean
         description: iOS
         default: true
+      build_macos:
+        type: boolean
+        description: macOS
+        default: true
       build_android:
         type: boolean
         description: Android
@@ -99,6 +103,54 @@ jobs:
         run: |
           cd dogfooding/ios
           bundle exec fastlane ios build_and_deploy flavor:${{ env.FLAVOR }}
+
+  build_and_deploy_macos:
+    name: Build and Distribute Dogfooding macOS
+    runs-on: xcode-27
+    timeout-minutes: 60
+    if: ${{ github.event_name == 'push' || github.event_name == 'release'  || inputs.build_macos == true }}
+    steps:
+      - name: Install Bot SSH Key
+        uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Select Xcode
+        uses: ./.github/actions/select-xcode
+
+      - name: Setup Flutter
+        uses: ./.github/actions/setup-flutter
+
+      - name: Setup FlutterFire CLI
+        run: flutter pub global activate flutterfire_cli
+
+      - name: Setup Melos
+        uses: ./.github/actions/setup-melos
+
+      - name: Setup Ruby and Gems
+        uses: ruby/setup-ruby@v1
+        with:
+          working-directory: dogfooding/macos
+          bundler-cache: true
+
+      - name: Set build flavor to Env
+        run: |
+          if [[ ${{ github.event_name == 'workflow_dispatch' }} == true ]]; then
+            FLAVOR=${{ inputs.flavor }}
+          elif [[ ${{ github.event_name == 'release' }} == true ]]; then
+            FLAVOR=prod
+          else
+            FLAVOR=beta
+          fi
+          echo "FLAVOR=$FLAVOR" >> $GITHUB_ENV
+
+      - name: Build and Distribute
+        run: |
+          cd dogfooding/macos
+          bundle exec fastlane mac build_and_deploy flavor:${{ env.FLAVOR }}
 
   build_and_deploy_android:
     name: Build and Distribute Dogfooding Android
