@@ -86,6 +86,8 @@ platform :mac do
       groups: ['Internal Testers'],
       changelog: 'Lots of amazing new features to test out!',
       skip_waiting_for_build_processing: true,
+      # A build that fails processing never appears, so stop waiting for it.
+      wait_processing_timeout_duration: 900,
     )
   end
 
