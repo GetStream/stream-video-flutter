@@ -14,11 +14,13 @@
 
 - SFU participant events no longer emit a new call state when they leave every participant unchanged.
 - `CallParticipantState.audioLevel` and `audioLevels` now hold at their last value while a participant is silent.
+- Simulcast layers are now announced to the SFU and bitrate-capped from the resolution the camera actually captures on iOS and Android, instead of the requested resolution. A camera that captures below the requested size, or at a different aspect ratio, no longer over-reports its layers or over-allocates their bitrate.
 
 ### 🐞 Fixed
 
 - Fixed server-pinned participants being reordered on every pins event.
 - Fixed `CallParticipantState.copyWithUpdatedAudioLevels` mutating the audio level history of the previous state.
+- Fixed leaving a call calling `removeTrack` on the publisher for received tracks, which failed and logged `sender is null` on every leave.
 
 ## 1.6.0
 
