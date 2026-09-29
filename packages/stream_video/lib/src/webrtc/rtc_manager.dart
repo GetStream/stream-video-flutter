@@ -378,8 +378,8 @@ class RtcManager extends Disposable {
     }
   }
 
-  /// Stops the local track / clones / media stream for [trackId] and calls
-  /// `pc.removeTrack` on every sender that referenced it.
+  /// Stops the track / clones / media stream for [trackId]. For a local
+  /// track, also calls `pc.removeTrack` on every sender that referenced it.
   Future<void> unpublishTrack({
     required String trackId,
   }) async {
@@ -392,17 +392,10 @@ class RtcManager extends Disposable {
 
     await publishedTrack.stop();
 
-    if (publishedTrack is RtcRemoteTrack) {
-      final sender = publishedTrack.transceiver?.sender;
-
-      if (sender != null) {
-        try {
-          await publisher?.pc.removeTrack(sender);
-        } catch (e) {
-          _logger.w(() => '[unpublishTrack] removeTrack failed: $e');
-        }
-      }
-    } else if (publishedTrack is RtcLocalTrack) {
+    // A remote track's transceiver belongs to the receive-only subscriber
+    // PC, so there is no sender to remove. Passing it to the publisher PC
+    // only failed with "sender is null". Stopping the track is enough.
+    if (publishedTrack is RtcLocalTrack) {
       for (final publishOption in publishOptions) {
         if (publishOption.trackType != publishedTrack.trackType) continue;
 
@@ -900,7 +893,7 @@ extension PublisherRtcManager on RtcManager {
     });
 
     if (track == null) {
-      _logger.w(() => '[getPublisherTrackByType] track not found: $trackType');
+      _logger.d(() => '[getPublisherTrackByType] track not found: $trackType');
       return null;
     }
 
@@ -1393,7 +1386,12 @@ extension PublisherRtcManager on RtcManager {
       // Create a clone of the track so each transceiver has a unique trackId
       // in the SDP, matching the JS SDK pattern.
       final mediaTrackClone = await videoTrack.mediaTrack.clone();
-      final trackToPublish = videoTrack.copyWith(mediaTrack: mediaTrackClone);
+      // Carry the resolved size over: on Android the clone has no settings,
+      // so it could not work out the capture size itself.
+      final trackToPublish = videoTrack.copyWith(
+        mediaTrack: mediaTrackClone,
+        videoDimension: updatedTrack.videoDimension,
+      );
 
       // Another publish may have claimed this key and still be waiting on the
       // platform. Let it settle, then re-read: whoever claimed first creates
@@ -2587,32 +2585,33 @@ extension RtcManagerTrackHelper on RtcManager {
 }
 
 extension on RtcLocalTrack<VideoConstraints> {
+  /// The size the camera actually captures at, which the layers are announced
+  /// and budgeted from. It can differ from what was requested: a 4:3 camera
+  /// asked for 2560x1440 captures at 1920x1440.
+  ///
+  /// Falls back to the size already resolved for this track, then to the
+  /// requested constraints. The first fallback matters for clones on Android,
+  /// which carry no settings of their own.
   RtcVideoDimension getVideoDimension() {
-    // use constraints passed to getUserMedia by default
-    var dimension = mediaConstraints.params.dimension;
+    var dimension = videoDimension ?? mediaConstraints.params.dimension;
 
-    if (CurrentPlatform.isWeb) {
-      // getSettings() is only implemented for Web
-      try {
-        // try to use getSettings for more accurate resolution
-        final settings = mediaTrack.getSettings();
-        streamLog.v(_tag, () => '[publishVideoTrack] settings: $settings');
-        if (settings['width'] is num) {
-          dimension = dimension.copyWith(
-            width: (settings['width'] as num).toInt(),
-          );
-        }
-        if (settings['height'] is num) {
-          dimension = dimension.copyWith(
-            height: (settings['height'] as num).toInt(),
-          );
-        }
-      } catch (_) {
-        streamLog.w(
-          _tag,
-          () => '[publishVideoTrack] `mediaStreamTrack.getSettings()` failed',
-        );
+    try {
+      // Implemented on web and, via the webrtc fork, on iOS and Android.
+      final settings = mediaTrack.getSettings();
+      streamLog.v(_tag, () => '[publishVideoTrack] settings: $settings');
+      final width = settings['width'];
+      final height = settings['height'];
+      if (width is num && width > 0) {
+        dimension = dimension.copyWith(width: width.toInt());
       }
+      if (height is num && height > 0) {
+        dimension = dimension.copyWith(height: height.toInt());
+      }
+    } catch (_) {
+      streamLog.w(
+        _tag,
+        () => '[publishVideoTrack] `mediaStreamTrack.getSettings()` failed',
+      );
     }
     return dimension;
   }
