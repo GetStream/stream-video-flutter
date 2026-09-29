@@ -4,7 +4,9 @@ import 'package:stream_video/src/call/stats/tracer.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_codec.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_publish_options.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
+import 'package:stream_video/src/webrtc/media/media_constraints.dart';
 import 'package:stream_video/src/webrtc/model/rtc_tracks_info.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_dimension.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/rtc_track/rtc_local_track.dart';
@@ -25,6 +27,8 @@ class _MockTransceiver extends Mock implements rtc.RTCRtpTransceiver {}
 class _MockSender extends Mock implements rtc.RTCRtpSender {}
 
 class _MockMediaStreamTrack extends Mock implements rtc.MediaStreamTrack {}
+
+class _MockMediaStream extends Mock implements rtc.MediaStream {}
 
 class _MockLocalAudioTrack extends Mock implements RtcLocalAudioTrack {}
 
@@ -464,6 +468,116 @@ void main() {
 
         expect(reported, hasLength(1));
         expect(reported.single.trackId, 'track-a');
+      },
+    );
+  });
+
+  group('announced video layers', () {
+    final videoOption = SfuPublishOptions(
+      id: 3,
+      codec: const SfuCodec(
+        name: 'h264',
+        payloadType: 96,
+        fmtpLine: '',
+        clockRate: 90000,
+        encodingParameters: '',
+      ),
+      trackType: SfuTrackType.video,
+    );
+
+    /// Caches a camera track that asked for 1280x720 (the default
+    /// constraints) and whose platform reports [settings] for it.
+    void cacheVideoTrack(
+      RtcManager manager, {
+      required String trackId,
+      required Map<String, dynamic> settings,
+      RtcVideoDimension? resolved,
+    }) {
+      final mediaTrack = _MockMediaStreamTrack();
+      when(() => mediaTrack.id).thenReturn(trackId);
+      when(() => mediaTrack.kind).thenReturn('video');
+      when(() => mediaTrack.enabled).thenReturn(true);
+      when(mediaTrack.getSettings).thenReturn(settings);
+
+      final track = RtcLocalTrack<CameraConstraints>(
+        trackIdPrefix: 'pub',
+        trackType: SfuTrackType.video,
+        mediaStream: _MockMediaStream(),
+        mediaTrack: mediaTrack,
+        mediaConstraints: const CameraConstraints(),
+        videoDimension: resolved,
+      );
+
+      final transceiver = _transceiver(trackId: trackId, mid: '0');
+      manager.transceiversManager.add(
+        track,
+        videoOption,
+        transceiver,
+        const RtcTrackPublishOptions(),
+      );
+    }
+
+    Future<List<RtcVideoDimension>> announcedLayers({
+      required Map<String, dynamic> settings,
+      RtcVideoDimension? resolved,
+    }) async {
+      final wires = buildManager();
+      wires.manager.publishOptions = [videoOption];
+      cacheVideoTrack(
+        wires.manager,
+        trackId: 'camera',
+        settings: settings,
+        resolved: resolved,
+      );
+      stubPeerConnection(
+        wires.pc,
+        liveTransceivers: [_transceiver(trackId: 'camera', mid: '0')],
+      );
+
+      final announced = await wires.manager.getAnnouncedTracks();
+      return announced!.single.layers!
+          .map((layer) => layer.parameters.dimension)
+          .toList();
+    }
+
+    test(
+      'are sized from the capture the platform reports, not from what was '
+      'requested',
+      () async {
+        // A 4:3 camera asked for 1280x720 captures at 960x720.
+        final layers = await announcedLayers(
+          settings: {'width': 960, 'height': 720},
+        );
+
+        // q, h, f
+        expect(layers, const [
+          RtcVideoDimension(width: 240, height: 180),
+          RtcVideoDimension(width: 480, height: 360),
+          RtcVideoDimension(width: 960, height: 720),
+        ]);
+      },
+    );
+
+    test(
+      'fall back to the size resolved at publish for a clone that reports no '
+      'settings',
+      () async {
+        // Clones on Android carry no settings of their own.
+        final layers = await announcedLayers(
+          settings: const {},
+          resolved: const RtcVideoDimension(width: 960, height: 720),
+        );
+
+        expect(layers.last, const RtcVideoDimension(width: 960, height: 720));
+      },
+    );
+
+    test(
+      'fall back to the requested size when nothing better is known',
+      () async {
+        final layers = await announcedLayers(settings: const {});
+
+        expect(layers.last, const RtcVideoDimension(width: 1280, height: 720));
       },
     );
   });

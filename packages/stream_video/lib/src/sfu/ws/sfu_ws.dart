@@ -204,7 +204,7 @@ class SfuWebSocket extends StreamWebSocket implements HealthListener {
     healthMonitor.stop();
 
     if (connectionState == ConnectionState.disconnected) {
-      _logger.w(() => '[disconnect] rejected (already disconnected)');
+      _logger.d(() => '[disconnect] rejected (already disconnected)');
       return const Result.success(none);
     }
 
