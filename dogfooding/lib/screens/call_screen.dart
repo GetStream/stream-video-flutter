@@ -358,6 +358,7 @@ class _CallScreenState extends State<CallScreen>
   StreamScreenShareButton _screenShareOption(Call call) =>
       StreamScreenShareButton(
         call: call,
+        desktopScreenPickerType: ScreenSharePickerType.system,
         screenShareConstraints: _screenShareConstraints,
       );
 
