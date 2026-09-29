@@ -67,11 +67,19 @@
 - `byPriority` builds a participant comparator from a `ParticipantPriority`, and every sorting criterion now ships one: `dominantSpeakerPriority`, `speakingPriority`, `screenSharingPriority`, `publishingVideoPriority`, `publishingAudioPriority`, `byReactionTypePriority`, `byParticipantSourcePriority`, `byVideoIngressSourcePriority` and `byRolePriority`. `0` is the priority of a participant already on screen: above it brings an off-screen participant into view, below it leaves them out.
 - Added `Call.participantsStream`, which emits the participant list at an interval that grows with the participant count.
 - Added `CallPreferences.participantsThrottleIntervalResolver` to override that interval, or set it to `null` to emit every change.
+- The caller of a ringing call now polls the ring state when `call.accepted` or `call.rejected` does not arrive. The WebSocket does not redeliver them, and a caller that missed one kept ringing until its timeout, then rejected a call the callee was already in. After 15 seconds without a ring event, the ring state is read every 5 seconds until the ring settles or times out. Tune it, or turn it off, with `StreamVideoOptions.ringStatePolling`.
+- Added `RingingSnapshot`, which resolves a ringing flow for the caller as well as the callee. `CallMetadata.ringingStateFor` goes through it.
 
 ### 🔄 Changed
 
 - SFU participant events no longer emit a new call state when they leave every participant unchanged.
 - `CallParticipantState.audioLevel` and `audioLevels` now hold at their last value while a participant is silent.
+- A `call.rejected` event now settles a ring by the same rules as the push and ring-state checks (`RingingSnapshot`), so the paths can no longer disagree. These cases change:
+  - A callee hangs up once every other member has rejected, even if the caller isn't a member of the call.
+  - A callee whose acceptance already reached the server stays in the call when the caller cancels, instead of hanging up.
+  - A caller that is the only member keeps ringing until its timeout, instead of hanging up on the first rejection.
+  - A caller whose callee accepted keeps the call, even if that callee also shows up as having rejected.
+- An incoming ring is now dismissed when the caller cancels, even if another callee has already accepted. `CallMetadata.ringingStateFor` and `StreamVideo.getCallRingingState` report it as rejected rather than ringing.
 
 ### 🐞 Fixed
 

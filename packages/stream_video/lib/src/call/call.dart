@@ -57,8 +57,10 @@ import '../ws/ws.dart';
 import 'call_connect_options.dart';
 import 'call_events.dart';
 import 'call_reject_reason.dart';
+import 'call_ringing_state.dart';
 import 'call_type.dart';
 import 'permissions/permissions_manager.dart';
+import 'ring_state_poller.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 import 'session/dynascale_manager.dart';
@@ -421,6 +423,8 @@ class Call {
   final Map<String, Timer> _reactionTimers = {};
   final Map<String, Timer> _captionsTimers = {};
   Timer? _videoModerationTimer;
+  RingStatePoller? _ringStatePoller;
+  StreamSubscription<CallState>? _ringStatePollerStatusSubscription;
 
   void Function()? _onModerationBlurApply;
   void Function()? _onModerationBlurClear;
@@ -792,9 +796,11 @@ class Call {
         // Notify the client about the permission request.
         return onPermissionRequest?.call(event);
       case StreamCallRejectedEvent _:
+        _ringStatePoller?.restartQuietPeriod();
         await _handleCoordinatorCallRejected(event);
         return;
       case StreamCallAcceptedEvent _:
+        _ringStatePoller?.restartQuietPeriod();
         await _handleCoordinatorCallAccepted(event);
         return;
       case StreamCallEndedEvent _:
@@ -883,6 +889,7 @@ class Call {
       case StreamCallRingingEvent _:
         return _stateManager.callMetadataChanged(event.metadata);
       case StreamCallMissedEvent _:
+        _ringStatePoller?.restartQuietPeriod();
         return _stateManager.callMetadataChanged(event.metadata);
       case StreamCallSessionEndedEvent _:
         return _stateManager.callMetadataChanged(
@@ -3004,6 +3011,8 @@ class Call {
     _videoModerationTimer?.cancel();
     _videoModerationTimer = null;
 
+    _stopRingStatePolling();
+
     for (final operation in _sfuStatsTimers) {
       await operation.cancel();
     }
@@ -3610,6 +3619,7 @@ class Call {
           ringing: ringing,
           notify: notify,
         );
+        _startRingStatePollingIfNeeded(data.metadata);
 
         return data.metadata;
       },
@@ -3720,9 +3730,93 @@ class Call {
           callConnectOptions: connectOptions,
         );
 
+        _startRingStatePollingIfNeeded(data.data.metadata);
         return data.data.metadata;
       },
     );
+  }
+
+  /// Starts polling for the outcome of a ring the current user just started,
+  /// in case the `call.accepted` or `call.rejected` event never arrives.
+  void _startRingStatePollingIfNeeded(CallMetadata metadata) {
+    final settings = _streamVideo.options.ringStatePolling;
+    if (!settings.enabled) return;
+    if (_ringStatePoller?.isStopped == false) return;
+
+    // A zero interval would fire the poll timer on every event-loop turn.
+    if (settings.interval <= Duration.zero) {
+      _logger.w(
+        () =>
+            '[startRingStatePolling] rejected (interval is not positive): '
+            '${settings.interval}',
+      );
+      return;
+    }
+
+    final status = _stateManager.callState.status;
+    if (status is! CallStatusOutgoing || status.acceptedByCallee) return;
+
+    // Captured once: the ring state is read for the session that rang.
+    final sessionId = metadata.session.id;
+    if (sessionId.isEmpty) {
+      _logger.w(() => '[startRingStatePolling] rejected (no session)');
+      return;
+    }
+
+    final ringTimeout = metadata.settings.ring.autoCancelTimeout;
+    if (ringTimeout <= Duration.zero) return;
+
+    final poller = RingStatePoller(
+      settings: settings,
+      ringTimeout: ringTimeout,
+      fetchRingState: () => _coordinatorClient.getCallRingState(
+        callCid: callCid,
+        sessionId: sessionId,
+      ),
+      onRingState: _onPolledRingState,
+    );
+    _ringStatePoller = poller;
+
+    unawaited(_ringStatePollerStatusSubscription?.cancel());
+    _ringStatePollerStatusSubscription = _stateManager.callStateStream.listen((
+      state,
+    ) {
+      final status = state.status;
+      if (status is! CallStatusOutgoing || status.acceptedByCallee) {
+        _stopRingStatePolling();
+      }
+    });
+
+    poller.start();
+  }
+
+  /// Applies a polled ring state, returning whether the ring is settled.
+  bool _onPolledRingState(GetCallRingStateResponse ringState) {
+    final callState = _stateManager.callState;
+    final status = callState.status;
+    if (status is! CallStatusOutgoing || status.acceptedByCallee) return true;
+
+    final snapshot = ringState.toRingingSnapshot(
+      memberIds: callState.callMembers.map((member) => member.userId),
+    );
+
+    final ringingState = snapshot.resolveFor(callState.currentUserId);
+    if (!ringingState.isRinging) {
+      // A settled ring here means the event that carried it was dropped.
+      _logger.i(
+        () => '[onPolledRingState] resolved by polling: $ringingState',
+      );
+    }
+
+    _stateManager.coordinatorOutgoingRingResolved(ringingState, snapshot);
+    return !ringingState.isRinging;
+  }
+
+  void _stopRingStatePolling() {
+    _ringStatePoller?.stop();
+    _ringStatePoller = null;
+    unawaited(_ringStatePollerStatusSubscription?.cancel());
+    _ringStatePollerStatusSubscription = null;
   }
 
   /// Sends a ring notification to the provided users who are not already in the call.

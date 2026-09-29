@@ -569,6 +569,34 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     }
   }
 
+  @override
+  Future<Result<open.GetCallRingStateResponse>> getCallRingState({
+    required StreamCallCid callCid,
+    required String sessionId,
+  }) async {
+    try {
+      _logger.v(
+        () => '[getCallRingState] cid: $callCid, sessionId: $sessionId',
+      );
+
+      final result = await _defaultApi.getCallRingState(
+        type: callCid.type.value,
+        id: callCid.id,
+        callSessionId: sessionId,
+      );
+
+      return result.fold(
+        onSuccess: Result.success,
+        onFailure: (error, stackTrace) => Result.failure(
+          StreamVideoExceptions.compose(error, stackTrace),
+          stackTrace,
+        ),
+      );
+    } catch (e, stk) {
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
+    }
+  }
+
   /// Gets the call if already exists or attempts to create a new call.
   @override
   Future<Result<CallReceivedOrCreatedData>> getOrCreateCall({
