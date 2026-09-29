@@ -18,6 +18,21 @@ enum SuspendedTrackState {
   neverStarted,
 }
 
+// Participant views derived from `CallState.callParticipants`, computed at
+// most once per state instance. `CallState` is immutable, so a view never goes
+// stale, and the const constructor rules out `late final` fields. Each is an
+// O(n) scan that UI selectors read on every emission, which adds up in large
+// calls.
+final _localParticipantCache = Expando<({CallParticipantState? value})>(
+  'CallState.localParticipant',
+);
+final _otherParticipantsCache = Expando<List<CallParticipantState>>(
+  'CallState.otherParticipants',
+);
+final _activeSpeakersCache = Expando<List<CallParticipantState>>(
+  'CallState.activeSpeakers',
+);
+
 /// Represents the call's state.
 @immutable
 class CallState extends Equatable {
@@ -175,15 +190,27 @@ class CallState extends Equatable {
   StreamCallType get callType => callCid.type;
 
   CallParticipantState? get localParticipant {
-    return callParticipants.firstWhereOrNull((element) => element.isLocal);
+    return (_localParticipantCache[this] ??= (
+      value: callParticipants.firstWhereOrNull((element) => element.isLocal),
+    )).value;
   }
 
+  /// All participants except the local one.
+  ///
+  /// The list is unmodifiable and shared by every reader of this state.
   List<CallParticipantState> get otherParticipants {
-    return callParticipants.where((element) => !element.isLocal).toList();
+    return _otherParticipantsCache[this] ??= List.unmodifiable(
+      callParticipants.where((element) => !element.isLocal),
+    );
   }
 
+  /// The participants currently speaking.
+  ///
+  /// The list is unmodifiable and shared by every reader of this state.
   List<CallParticipantState> get activeSpeakers {
-    return callParticipants.where((element) => element.isSpeaking).toList();
+    return _activeSpeakersCache[this] ??= List.unmodifiable(
+      callParticipants.where((element) => element.isSpeaking),
+    );
   }
 
   bool get createdByMe => createdByUserId == currentUserId;

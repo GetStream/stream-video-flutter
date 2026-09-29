@@ -501,6 +501,13 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     unawaited(_joinSubscription?.cancel());
     _joinSubscription = null;
 
+    // A player mounted on a call that is already joined has nothing
+    // to join.
+    if (call.state.value.status.isConnected) {
+      _logger.d(() => '[connect] skipped, call already connected');
+      return;
+    }
+
     try {
       _logger.d(() => '[connect] no args');
       final connectOptions =
