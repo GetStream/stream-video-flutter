@@ -8,7 +8,7 @@ enum ScreenSharePickerType {
 
   /// The picker of the operating system.
   ///
-  /// Only available when [isContentSharingPickerSupported] is true; anywhere
+  /// Only available when [isSystemContentPickerSupported] is true; anywhere
   /// else [inApp] is used instead.
   system,
 }
@@ -16,5 +16,5 @@ enum ScreenSharePickerType {
 /// Whether the operating system offers its own picker to choose what to share.
 ///
 /// Only true on macOS 14 or newer.
-Future<bool> isContentSharingPickerSupported() =>
-    desktopCapturer.isContentSharingPickerSupported();
+Future<bool> isSystemContentPickerSupported() =>
+    desktopCapturer.isSystemContentPickerSupported();

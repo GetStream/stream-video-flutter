@@ -52,7 +52,7 @@ class StreamScreenShareButton extends StatelessWidget {
   /// Which picker chooses what to share on desktop.
   ///
   /// [ScreenSharePickerType.system] uses the picker of the operating system
-  /// where [isContentSharingPickerSupported] is true, and falls back to the
+  /// where [isSystemContentPickerSupported] is true, and falls back to the
   /// selector from [desktopScreenSelectorBuilder] everywhere else.
   final ScreenSharePickerType desktopScreenPickerType;
 
