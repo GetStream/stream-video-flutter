@@ -35,9 +35,18 @@ typedef ResolveExistingClient = StreamVideo? Function();
 /// handler, and that is what this does.
 ///
 /// Firebase spins up that background isolate on Android alone. On Apple
-/// platforms your handler is called on the app's own isolate instead, where the
-/// client belongs to the running app: the push is forwarded to it and nothing is
-/// built or torn down. The same call site works on both:
+/// platforms your handler is called on the app's own isolate instead, and only
+/// for data-only messages, so there is no isolate to set up: the client belongs
+/// to the running app, the push is forwarded to it, and nothing is built or
+/// torn down.
+///
+/// That is not where iOS ringing is set up. A ringing push normally reaches an
+/// Apple device as a VoIP push over APNs, which PushKit and CallKit handle
+/// without Firebase in the picture at all. What this covers on Apple platforms
+/// is whatever Firebase does deliver, such as a missed call, or a ringing push
+/// in an app that rings over Firebase rather than PushKit.
+///
+/// The same call site is safe on both:
 ///
 /// ```dart
 /// @pragma('vm:entry-point')
