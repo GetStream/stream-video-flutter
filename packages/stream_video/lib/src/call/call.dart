@@ -305,6 +305,8 @@ class Call {
   CallSession? _previousSession;
   StreamPeerConnectionFactory? _pcFactory;
 
+  Future<Result<None>>? _pendingJoin;
+
   /// Audio track states captured at suspension time.
   final _suspendedTrackStates = <String, SuspendedTrackState>{};
 
@@ -1349,7 +1351,35 @@ class Call {
   /// - [connectOptions]: optional initial call configuration
   /// - [membersLimit]: Sets the maximum number of members to return as part of the response.
   /// - [hintHighScaleLivestreamPublisher]: Whether the local user is a high-scale livestream publisher.
+  ///
+  /// Calling [join] again while a join on this call is still in flight
+  /// returns the same result as that join instead of starting another one.
   Future<Result<None>> join({
+    CallConnectOptions? connectOptions,
+    int? membersLimit,
+    int maxJoinRetries = 3,
+    bool? hintHighScaleLivestreamPublisher,
+  }) {
+    final pendingJoin = _pendingJoin;
+    if (pendingJoin != null) {
+      _logger.d(() => '[join] awaiting the join already in progress');
+      return pendingJoin;
+    }
+
+    final joinFuture = _joinOnce(
+      connectOptions: connectOptions,
+      membersLimit: membersLimit,
+      maxJoinRetries: maxJoinRetries,
+      hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
+    );
+
+    _pendingJoin = joinFuture;
+    return joinFuture.whenComplete(() {
+      if (identical(_pendingJoin, joinFuture)) _pendingJoin = null;
+    });
+  }
+
+  Future<Result<None>> _joinOnce({
     CallConnectOptions? connectOptions,
     int? membersLimit,
     int maxJoinRetries = 3,
@@ -2879,9 +2909,9 @@ class Call {
     // Call, so stopping it on this call's teardown would silently drop noise
     // cancellation on any other still-active call that also wants it. Only
     // stop the global processor when no other active call is configured for
-    // NoiseCancellationSettingsMode.autoOn.
-    if (state.value.settings.audio.noiseCancellation?.mode ==
-        NoiseCancellationSettingsMode.autoOn) {
+    if (_streamVideo.isAudioProcessorConfigured() &&
+        state.value.settings.audio.noiseCancellation?.mode ==
+            NoiseCancellationSettingsMode.autoOn) {
       final anotherCallWantsAutoOn = _streamVideo.state.activeCalls.value.any(
         (other) =>
             other.callCid != callCid &&

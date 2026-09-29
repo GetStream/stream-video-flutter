@@ -20,6 +20,8 @@
 
 - Fixed server-pinned participants being reordered on every pins event.
 - Fixed `CallParticipantState.copyWithUpdatedAudioLevels` mutating the audio level history of the previous state.
+- Fixed `Call.join` being rejected with "a call with the same cid is in progress" when called again while a join was in progress. A repeated call now returns the result of the join already in flight.
+- Fixed leaving a call trying to stop noise cancellation when no audio processor is configured.
 - Fixed leaving a call calling `removeTrack` on the publisher for received tracks, which failed and logged `sender is null` on every leave.
 
 ## 1.6.0

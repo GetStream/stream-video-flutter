@@ -232,6 +232,9 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   StreamSubscription? _joinSubscription;
   StreamSubscription? _leaveSubscription;
 
+  /// Set once the auto-join has fired, so it fires only once per player.
+  bool _connectStarted = false;
+
   final CompositeSubscription _compositeSubscription = CompositeSubscription();
 
   /// Represents a call.
@@ -489,6 +492,15 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
 
   /// Joins a call.
   Future<void> _connect() async {
+    // Stop listening before the first await. The join stream also emits on
+    // every status change the join itself causes (Idle -> Connecting ->
+    // Connected), and each of those emissions would otherwise start another
+    // join while this one is still in flight.
+    if (_connectStarted) return;
+    _connectStarted = true;
+    unawaited(_joinSubscription?.cancel());
+    _joinSubscription = null;
+
     try {
       _logger.d(() => '[connect] no args');
       final connectOptions =
