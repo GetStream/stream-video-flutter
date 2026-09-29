@@ -22,6 +22,12 @@ class ScreenShareConstraints extends VideoConstraints {
          params: constraints.params,
        );
 
+  /// The [sourceId] that makes macOS show the system content sharing picker
+  /// instead of capturing a source chosen in-app.
+  ///
+  /// macOS 14 or newer only.
+  static const systemPickerSourceId = 'system-picker';
+
   /// iOS only flag: Use Broadcast Extension for screen share capturing.
   /// See instructions on how to setup your Broadcast Extension here:
   /// https://github.com/flutter-webrtc/flutter-webrtc/wiki/iOS-Screen-Sharing#broadcast-extension-quick-setup
