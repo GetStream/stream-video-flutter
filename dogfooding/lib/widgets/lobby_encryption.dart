@@ -99,8 +99,7 @@ class LobbyEncryption extends StatelessWidget {
               border: Border.all(
                 color: switch ((isOn, supported)) {
                   (true, false) => colorScheme.borderWarning,
-                  (true, true) => colorScheme.accentPrimary,
-                  (false, _) => colorScheme.borderSubtle,
+                  (_, _) => colorScheme.borderSubtle,
                 },
               ),
             ),
@@ -108,7 +107,6 @@ class LobbyEncryption extends StatelessWidget {
               padding: EdgeInsets.all(spacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: spacing.md,
                 children: [
                   if (!supported)
                     _Header(
@@ -151,7 +149,11 @@ class LobbyEncryption extends StatelessWidget {
                     alignment: Alignment.topCenter,
                     child: !isOn || !supported
                         ? const SizedBox(width: double.infinity)
-                        : Column(
+                        : Padding(
+                            // Inside the animated slot, so a closed card has no
+                            // gap below its header.
+                            padding: EdgeInsets.only(top: spacing.md),
+                            child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             spacing: spacing.sm,
                             children: [
@@ -159,6 +161,14 @@ class LobbyEncryption extends StatelessWidget {
                                 controller: keyController,
                                 onChanged: onEncryptionKeyChanged,
                                 hintText: 'Shared room key',
+                                // Small buttons keep the field at its 40px
+                                // height instead of growing around 40px ones.
+                                style: StreamTextInputStyle(
+                                  contentPadding: EdgeInsetsDirectional.symmetric(
+                                    vertical: spacing.xs,
+                                    horizontal: spacing.md,
+                                  ),
+                                ),
                                 // A key is matched verbatim, so iOS
                                 // auto-capitalizing the first letter turns a
                                 // valid key into one that will not decrypt.
@@ -172,6 +182,7 @@ class LobbyEncryption extends StatelessWidget {
                                         child: StreamButton.icon(
                                           style: .secondary,
                                           type: .ghost,
+                                          size: .small,
                                           icon: Icon(
                                             context.streamIcons.refresh,
                                           ),
@@ -185,6 +196,7 @@ class LobbyEncryption extends StatelessWidget {
                                       child: StreamButton.icon(
                                         style: .secondary,
                                         type: .ghost,
+                                        size: .small,
                                         icon: Icon(context.streamIcons.copy),
                                         onPressed: encryptionKey.isEmpty
                                             ? null
@@ -203,6 +215,7 @@ class LobbyEncryption extends StatelessWidget {
                                 ),
                               ),
                             ],
+                          ),
                           ),
                   ),
                 ],
