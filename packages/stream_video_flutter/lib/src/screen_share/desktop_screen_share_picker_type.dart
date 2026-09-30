@@ -1,7 +1,7 @@
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 
 /// How the user chooses what to share on desktop.
-enum ScreenSharePickerType {
+enum DesktopScreenSharePickerType {
   /// The picker built into the SDK, listing screens and windows with
   /// thumbnails. Works on every desktop platform.
   inApp,
