@@ -50,7 +50,7 @@ mixin CallParticipantsSortingMixin<T extends StatefulWidget> on State<T> {
     if (sort != null) {
       // Not a plain sort: `sortParticipants` leaves the tiles that are on
       // screen where the order above has them.
-      participants = sortParticipants(participants, sort: sort);
+      participants = sortParticipants(participants, sort: sort.compare);
     }
 
     final screenShareParticipant = participants.firstWhereOrNull(

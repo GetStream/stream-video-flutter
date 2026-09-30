@@ -60,12 +60,28 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
     clearPendingTracks(event.participant.trackLookupPrefix);
   }
 
+  /// Replaces the participant list with the one the SFU states on a join.
+  ///
+  /// [subscriberReused] is what a fast reconnect passes: it kept the subscriber
+  /// peer connection, so remote media never stopped arriving and the tracks
+  /// already being received stay that way. A rejoin builds a new subscriber and
+  /// leaves it false, which blanks the renderers until the media lands again.
   void sfuJoinResponse(
-    SfuJoinResponseEvent event,
-  ) {
-    _logger.d(() => '[sfuJoinResponse] ${state.sessionId}; event: $event');
+    SfuJoinResponseEvent event, {
+    bool subscriberReused = false,
+  }) {
+    _logger.d(
+      () =>
+          '[sfuJoinResponse] ${state.sessionId}; '
+          'subscriberReused: $subscriberReused; event: $event',
+    );
     final participants = event.callState.participants
-        .map((sfuParticipant) => sfuParticipant.toParticipantState(state))
+        .map(
+          (sfuParticipant) => sfuParticipant.toParticipantState(
+            state,
+            subscriberReused: subscriberReused,
+          ),
+        )
         .toList();
 
     state = state.copyWith(

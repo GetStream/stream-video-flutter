@@ -4,9 +4,11 @@ import 'package:equatable/equatable.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../coordinator/coordinator_client.dart';
+import '../coordinator/open_api/event/event_type.dart';
 import '../stream_video.dart';
 
 part 'call_kit_events.dart';
+part 'push_payload.dart';
 
 /// Signature for a function which provides a new instance of
 /// [PushNotificationManager].

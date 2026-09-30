@@ -30,10 +30,12 @@ abstract class CallStatus extends Equatable {
   factory CallStatus.reconnecting(
     int attempt, {
     bool isFastReconnectAttempt = false,
+    CallReconnectPhase phase = CallReconnectPhase.waiting,
   }) {
     return CallStatusReconnecting(
       attempt: attempt,
       isFastReconnectAttempt: isFastReconnectAttempt,
+      phase: phase,
     );
   }
 
@@ -80,6 +82,12 @@ abstract class CallStatus extends Equatable {
   bool get isFastReconnecting =>
       this is CallStatusReconnecting &&
       (this as CallStatusReconnecting).isFastReconnectAttempt;
+
+  /// Whether a reconnect is waiting for the network to come back.
+  bool get isOffline => switch (this) {
+    CallStatusReconnecting(phase: CallReconnectPhase.offline) => true,
+    _ => false,
+  };
 
   bool get isMigrating => this is CallStatusMigrating;
 
@@ -179,22 +187,56 @@ class CallStatusConnecting extends CallStatusActive {
   String toString() => 'Connecting';
 }
 
+/// Where a reconnect is, from losing the connection to having it back.
+///
+/// A reconnect runs as a loop of attempts, and each attempt passes through
+/// these in order: it waits for the network, then joins. A failed attempt goes
+/// back to [waiting] for the next one.
+enum CallReconnectPhase {
+  /// The network is down, and the next attempt waits for it to come back.
+  offline,
+
+  /// The network is up, and the next attempt is about to start: it is backing
+  /// off after a failed one, or making sure the network holds before a rejoin.
+  waiting,
+
+  /// An attempt is in flight: the call is joining the SFU again.
+  joining,
+}
+
+/// The call lost its connection to the SFU and is getting it back.
+///
+/// Only the fast and rejoin strategies report this; a migration to another
+/// SFU reports [CallStatusMigrating] instead.
 class CallStatusReconnecting extends CallStatusConnecting
     implements CallStatusConnectable {
   const CallStatusReconnecting({
     required this.attempt,
     this.isFastReconnectAttempt = false,
+    this.phase = CallReconnectPhase.waiting,
   }) : super._internal();
 
+  /// Which attempt of this reconnect is running, or about to, counting from 1.
+  ///
+  /// Counts fast and rejoin attempts alike, so it keeps rising across an
+  /// escalation from one to the other.
   final int attempt;
+
+  /// Whether the attempt is a fast reconnect, which keeps the peer connections,
+  /// rather than a rejoin, which builds new ones.
   final bool isFastReconnectAttempt;
 
+  /// Where the attempt is.
+  final CallReconnectPhase phase;
+
   @override
-  List<Object?> get props => [attempt, isFastReconnectAttempt];
+  List<Object?> get props => [attempt, isFastReconnectAttempt, phase];
 
   @override
   String toString() {
-    return 'Reconnecting{attempt: $attempt} ${isFastReconnectAttempt ? "" : "(fast)"}';
+    final strategy = isFastReconnectAttempt ? 'fast' : 'rejoin';
+    return 'Reconnecting{attempt: $attempt, strategy: $strategy, '
+        'phase: ${phase.name}}';
   }
 }
 

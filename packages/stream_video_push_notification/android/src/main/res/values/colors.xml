@@ -1,11 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="accept">#4CAF50</color>
-    <color name="accept_ripple">#A6FFA9</color>
-    <color name="decline">#F44336</color>
-    <color name="decline_ripple">#FB8D85</color>
+    <!-- The design system's accent/success and accent/error. -->
+    <color name="accept">#00A46E</color>
+    <color name="accept_ripple">#8000A46E</color>
+    <color name="decline">#D90D10</color>
+    <color name="decline_ripple">#80D90D10</color>
 
+    <!-- The label under a notification's accept and decline buttons, which
+         sits on the coloured fill above and stays white with it. -->
     <color name="action_text">#FFFFFF</color>
-    <color name="ripple_main_color">#80ffffff</color>
+
+    <!-- The full-screen incoming call activity: background/core/app, and the
+         text drawn on it. Overridable per call through
+         IncomingCallNotificationParams. -->
+    <color name="incoming_call_background">#FFFFFF</color>
+    <color name="incoming_call_text_primary">#1A1B25</color>
+    <color name="incoming_call_text_secondary">#414552</color>
+    <color name="incoming_call_avatar_border">#1A1A1B25</color>
+
+    <!-- The ripple pulsing out from the avatar, at 8% of the text colour so it
+         reads on the light background without competing with the name. -->
+    <color name="ripple_main_color">#141A1B25</color>
 </resources>

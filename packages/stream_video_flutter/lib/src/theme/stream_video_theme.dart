@@ -19,6 +19,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamUserAvatarThemeData? userAvatarTheme,
     StreamLobbyViewThemeData? lobbyViewTheme,
     CallControlBarThemeData? callControlBarTheme,
+    CallAppBarThemeData? callAppBarTheme,
+    StreamCallDurationBadgeThemeData? callDurationBadgeTheme,
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -35,7 +37,19 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       'effect. Will be removed in the next major version.',
     )
     StreamLocalVideoThemeData? localVideoTheme,
+    @Deprecated(
+      'Use incomingCallContentTheme and outgoingCallContentTheme instead. The '
+      'ringing screens are built on the design system now and no longer read '
+      'this, so a theme set here has no effect. '
+      'Will be removed in the next major version.',
+    )
     StreamIncomingOutgoingCallThemeData? incomingCallTheme,
+    @Deprecated(
+      'Use incomingCallContentTheme and outgoingCallContentTheme instead. The '
+      'ringing screens are built on the design system now and no longer read '
+      'this, so a theme set here has no effect. '
+      'Will be removed in the next major version.',
+    )
     StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
     StreamParticipantTileThemeData? participantTileTheme,
     StreamFloatingParticipantTileThemeData? floatingParticipantTileTheme,
@@ -45,7 +59,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
     StreamDesktopScreenShareSelectorThemeData? desktopScreenShareSelectorTheme,
     StreamCallButtonBadgeThemeData? callButtonBadgeTheme,
+    StreamCallParticipantsSpotlightThemeData? callParticipantsSpotlightTheme,
     StreamLivestreamThemeData? livestreamTheme,
+    StreamIncomingCallThemeData? incomingCallContentTheme,
+    StreamOutgoingCallThemeData? outgoingCallContentTheme,
   }) {
     final isDark = brightness == Brightness.dark;
     textTheme ??= isDark
@@ -75,6 +92,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       userAvatarTheme: userAvatarTheme,
       lobbyViewTheme: lobbyViewTheme,
       callControlBarTheme: callControlBarTheme,
+      callAppBarTheme: callAppBarTheme,
+      callDurationBadgeTheme: callDurationBadgeTheme,
       callParticipantTheme: callParticipantTheme,
       localVideoTheme: localVideoTheme,
       incomingCallTheme: incomingCallTheme,
@@ -93,7 +112,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           legacy?.toCallParticipantsGridThemeData(),
       desktopScreenShareSelectorTheme: desktopScreenShareSelectorTheme,
       callButtonBadgeTheme: callButtonBadgeTheme,
+      callParticipantsSpotlightTheme: callParticipantsSpotlightTheme,
       livestreamTheme: livestreamTheme,
+      incomingCallContentTheme: incomingCallContentTheme,
+      outgoingCallContentTheme: outgoingCallContentTheme,
     );
 
     return defaultTheme.merge(customizedTheme);
@@ -115,6 +137,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     required this.userAvatarTheme,
     this.lobbyViewTheme = const StreamLobbyViewThemeData(),
     this.callControlBarTheme = const CallControlBarThemeData(),
+    this.callAppBarTheme = const CallAppBarThemeData(),
+    this.callDurationBadgeTheme = const StreamCallDurationBadgeThemeData(),
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -126,8 +150,20 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       'Will be removed in the next major version.',
     )
     required this.localVideoTheme,
+    @Deprecated(
+      'Use incomingCallContentTheme and outgoingCallContentTheme instead. The '
+      'ringing screens are built on the design system now and no longer read '
+      'this, so a theme set here has no effect. '
+      'Will be removed in the next major version.',
+    )
     required this.incomingCallTheme,
     required this.callContentTheme,
+    @Deprecated(
+      'Use incomingCallContentTheme and outgoingCallContentTheme instead. The '
+      'ringing screens are built on the design system now and no longer read '
+      'this, so a theme set here has no effect. '
+      'Will be removed in the next major version.',
+    )
     required this.outgoingCallTheme,
     this.participantTileTheme = const StreamParticipantTileThemeData(),
     this.floatingParticipantTileTheme =
@@ -141,7 +177,11 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     this.desktopScreenShareSelectorTheme =
         const StreamDesktopScreenShareSelectorThemeData(),
     this.callButtonBadgeTheme = const StreamCallButtonBadgeThemeData(),
+    this.callParticipantsSpotlightTheme =
+        const StreamCallParticipantsSpotlightThemeData(),
     required this.livestreamTheme,
+    this.incomingCallContentTheme = const StreamIncomingCallThemeData(),
+    this.outgoingCallContentTheme = const StreamOutgoingCallThemeData(),
   });
 
   /// Creates a theme from a Material [Theme]
@@ -376,6 +416,12 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the row of controls along the bottom of a call.
   final CallControlBarThemeData callControlBarTheme;
 
+  /// Theme for the bar along the top of a call.
+  final CallAppBarThemeData callAppBarTheme;
+
+  /// Theme for the pill showing how long a call has been running.
+  final StreamCallDurationBadgeThemeData callDurationBadgeTheme;
+
   /// Theme for the call participant widget.
   ///
   /// `null` unless an app sets one: the participant tile takes its defaults
@@ -399,13 +445,25 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   )
   final StreamLocalVideoThemeData localVideoTheme;
 
-  /// Theme for the outgoing call widget.
+  /// Theme for the incoming call widget.
+  @Deprecated(
+    'Use incomingCallContentTheme and outgoingCallContentTheme instead. The '
+    'ringing screens are built on the design system now and no longer read '
+    'this, so a theme set here has no effect. '
+    'Will be removed in the next major version.',
+  )
   final StreamIncomingOutgoingCallThemeData incomingCallTheme;
 
   /// Theme for the call content widget.
   final StreamCallContentThemeData callContentTheme;
 
   /// Theme for the outgoing call widget.
+  @Deprecated(
+    'Use incomingCallContentTheme and outgoingCallContentTheme instead. The '
+    'ringing screens are built on the design system now and no longer read '
+    'this, so a theme set here has no effect. '
+    'Will be removed in the next major version.',
+  )
   final StreamIncomingOutgoingCallThemeData outgoingCallTheme;
 
   /// Theme for the participant tile.
@@ -434,8 +492,17 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the badge overlaid on a call control button.
   final StreamCallButtonBadgeThemeData callButtonBadgeTheme;
 
+  /// Theme for the speaker layouts, where one participant holds the stage.
+  final StreamCallParticipantsSpotlightThemeData callParticipantsSpotlightTheme;
+
   /// Theme for the outgoing call widget.
   final StreamLivestreamThemeData livestreamTheme;
+
+  /// Theme for the incoming ringing screen.
+  final StreamIncomingCallThemeData incomingCallContentTheme;
+
+  /// Theme for the outgoing ringing screen.
+  final StreamOutgoingCallThemeData outgoingCallContentTheme;
 
   /// Creates a copy of [StreamVideoTheme] with specified attributes
   /// overridden.
@@ -453,6 +520,8 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamUserAvatarThemeData? userAvatarTheme,
     StreamLobbyViewThemeData? lobbyViewTheme,
     CallControlBarThemeData? callControlBarTheme,
+    CallAppBarThemeData? callAppBarTheme,
+    StreamCallDurationBadgeThemeData? callDurationBadgeTheme,
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -466,8 +535,20 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       'reads this. Will be removed in the next major version.',
     )
     StreamLocalVideoThemeData? localVideoTheme,
+    @Deprecated(
+      'Use incomingCallContentTheme and outgoingCallContentTheme instead. The '
+      'ringing screens are built on the design system now and no longer read '
+      'this, so a theme set here has no effect. '
+      'Will be removed in the next major version.',
+    )
     StreamIncomingOutgoingCallThemeData? incomingCallTheme,
     StreamCallContentThemeData? callContentTheme,
+    @Deprecated(
+      'Use incomingCallContentTheme and outgoingCallContentTheme instead. The '
+      'ringing screens are built on the design system now and no longer read '
+      'this, so a theme set here has no effect. '
+      'Will be removed in the next major version.',
+    )
     StreamIncomingOutgoingCallThemeData? outgoingCallTheme,
     StreamParticipantTileThemeData? participantTileTheme,
     StreamFloatingParticipantTileThemeData? floatingParticipantTileTheme,
@@ -477,7 +558,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
     StreamDesktopScreenShareSelectorThemeData? desktopScreenShareSelectorTheme,
     StreamCallButtonBadgeThemeData? callButtonBadgeTheme,
+    StreamCallParticipantsSpotlightThemeData? callParticipantsSpotlightTheme,
     StreamLivestreamThemeData? livestreamTheme,
+    StreamIncomingCallThemeData? incomingCallContentTheme,
+    StreamOutgoingCallThemeData? outgoingCallContentTheme,
   }) => StreamVideoTheme.raw(
     textTheme: this.textTheme.merge(textTheme),
     colorTheme: this.colorTheme.merge(colorTheme),
@@ -485,6 +569,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     userAvatarTheme: this.userAvatarTheme.merge(userAvatarTheme),
     lobbyViewTheme: this.lobbyViewTheme.merge(lobbyViewTheme),
     callControlBarTheme: this.callControlBarTheme.merge(callControlBarTheme),
+    callAppBarTheme: this.callAppBarTheme.merge(callAppBarTheme),
+    callDurationBadgeTheme: this.callDurationBadgeTheme.merge(
+      callDurationBadgeTheme,
+    ),
     callParticipantTheme:
         this.callParticipantTheme?.merge(callParticipantTheme) ??
         callParticipantTheme,
@@ -512,7 +600,16 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       desktopScreenShareSelectorTheme,
     ),
     callButtonBadgeTheme: this.callButtonBadgeTheme.merge(callButtonBadgeTheme),
+    callParticipantsSpotlightTheme: this.callParticipantsSpotlightTheme.merge(
+      callParticipantsSpotlightTheme,
+    ),
     livestreamTheme: this.livestreamTheme.merge(livestreamTheme),
+    incomingCallContentTheme: this.incomingCallContentTheme.merge(
+      incomingCallContentTheme,
+    ),
+    outgoingCallContentTheme: this.outgoingCallContentTheme.merge(
+      outgoingCallContentTheme,
+    ),
   );
 
   /// Merge themes
@@ -525,6 +622,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       userAvatarTheme: userAvatarTheme.merge(other.userAvatarTheme),
       lobbyViewTheme: lobbyViewTheme.merge(other.lobbyViewTheme),
       callControlBarTheme: callControlBarTheme.merge(other.callControlBarTheme),
+      callAppBarTheme: callAppBarTheme.merge(other.callAppBarTheme),
+      callDurationBadgeTheme: callDurationBadgeTheme.merge(
+        other.callDurationBadgeTheme,
+      ),
       callParticipantTheme:
           callParticipantTheme?.merge(other.callParticipantTheme) ??
           other.callParticipantTheme,
@@ -556,7 +657,16 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callButtonBadgeTheme: callButtonBadgeTheme.merge(
         other.callButtonBadgeTheme,
       ),
+      callParticipantsSpotlightTheme: callParticipantsSpotlightTheme.merge(
+        other.callParticipantsSpotlightTheme,
+      ),
       livestreamTheme: livestreamTheme.merge(other.livestreamTheme),
+      incomingCallContentTheme: incomingCallContentTheme.merge(
+        other.incomingCallContentTheme,
+      ),
+      outgoingCallContentTheme: outgoingCallContentTheme.merge(
+        other.outgoingCallContentTheme,
+      ),
     );
   }
 
@@ -586,6 +696,20 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           callControlBarTheme,
+      callAppBarTheme:
+          CallAppBarThemeData.lerp(
+            callAppBarTheme,
+            other.callAppBarTheme,
+            t,
+          ) ??
+          callAppBarTheme,
+      callDurationBadgeTheme:
+          StreamCallDurationBadgeThemeData.lerp(
+            callDurationBadgeTheme,
+            other.callDurationBadgeTheme,
+            t,
+          ) ??
+          callDurationBadgeTheme,
       callParticipantTheme:
           callParticipantTheme != null && other.callParticipantTheme != null
           ? callParticipantTheme!.lerp(other.callParticipantTheme!, t)
@@ -651,7 +775,28 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           callButtonBadgeTheme,
+      callParticipantsSpotlightTheme:
+          StreamCallParticipantsSpotlightThemeData.lerp(
+            callParticipantsSpotlightTheme,
+            other.callParticipantsSpotlightTheme,
+            t,
+          ) ??
+          callParticipantsSpotlightTheme,
       livestreamTheme: livestreamTheme.lerp(other.livestreamTheme, t),
+      incomingCallContentTheme:
+          StreamIncomingCallThemeData.lerp(
+            incomingCallContentTheme,
+            other.incomingCallContentTheme,
+            t,
+          ) ??
+          incomingCallContentTheme,
+      outgoingCallContentTheme:
+          StreamOutgoingCallThemeData.lerp(
+            outgoingCallContentTheme,
+            other.outgoingCallContentTheme,
+            t,
+          ) ??
+          outgoingCallContentTheme,
     );
   }
 }

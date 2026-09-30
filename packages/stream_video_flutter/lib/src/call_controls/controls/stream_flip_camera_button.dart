@@ -30,6 +30,19 @@ class StreamFlipCameraButton extends StatelessWidget {
   /// Defaults to `context.streamIcons.cameraFlipFill`. See [frontCameraIcon].
   final IconData? backCameraIcon;
 
+  /// Whether the platform can switch between a front and a back camera.
+  ///
+  /// True on iOS and Android only. [Call.flipCamera] fails on web, and a
+  /// desktop has no second camera to flip to.
+  ///
+  /// The button builds wherever it is placed; this getter says whether flipping
+  /// can work there:
+  ///
+  /// ```dart
+  /// if (StreamFlipCameraButton.isSupported) StreamFlipCameraButton(call: call),
+  /// ```
+  static bool get isSupported => CurrentPlatform.isMobile;
+
   @override
   Widget build(BuildContext context) {
     final icons = context.streamIcons;

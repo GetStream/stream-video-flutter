@@ -94,6 +94,32 @@ void main() {
       expect(taps, 1);
     });
 
+    // The default bar goes into a `Scaffold.appBar` slot, which reserves
+    // `preferredSize.height` — a constant the bar cannot theme. The height a
+    // `CallAppBarTheme` sets is measured out for the slot instead.
+    testWidgets('the default app bar takes its height from the theme', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          child: CallAppBarTheme(
+            data: const CallAppBarThemeData(
+              style: CallAppBarStyle(height: 120),
+            ),
+            child: StreamCallContent(
+              call: mockCall,
+              callControlsWidgetBuilder: (context, call) => const SizedBox(),
+              callParticipantsWidgetBuilder: (context, call) =>
+                  const SizedBox(),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.getSize(find.byType(CallAppBar)).height, 120);
+    });
+
     goldenTest(
       'renders correctly with extendBody true',
       fileName: 'stream_call_content_extend_body_true',

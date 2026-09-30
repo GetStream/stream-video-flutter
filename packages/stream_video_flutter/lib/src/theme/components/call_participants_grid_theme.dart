@@ -62,7 +62,22 @@ class StreamCallParticipantsGridThemeData
     this.padding,
     this.mainAxisSpacing,
     this.crossAxisSpacing,
-  });
+    this.columnResolver,
+    this.maxTileAspectRatio,
+    this.compactPageSize,
+    this.pageSize,
+  }) : assert(
+         maxTileAspectRatio == null || maxTileAspectRatio > 0,
+         'A tile ratio of zero or less leaves the grid nothing to draw.',
+       ),
+       assert(
+         compactPageSize == null || compactPageSize > 0,
+         'A page holds at least one participant.',
+       ),
+       assert(
+         pageSize == null || pageSize > 0,
+         'A page holds at least one participant.',
+       );
 
   /// The inset around the grid.
   ///
@@ -78,6 +93,37 @@ class StreamCallParticipantsGridThemeData
   ///
   /// Defaults to `spacing.xs`.
   final double? crossAxisSpacing;
+
+  /// Overrides how many columns a page is arranged into.
+  ///
+  /// The grid otherwise picks the count that renders the video largest, which
+  /// follows the shape of the window rather than its width alone. Return null
+  /// for the counts an app has no opinion about, and they keep that default —
+  /// `solveParticipantGrid` is public, so an override can also delegate to it
+  /// and adjust the result.
+  ///
+  /// Interpolates as a step, like every other callback carried by a theme.
+  final StreamParticipantGridColumnResolver? columnResolver;
+
+  /// The widest a tile may be drawn, as a width-to-height ratio.
+  ///
+  /// A tile fills its cell, except that a cell wider than this leaves space to
+  /// either side of the tile rather than stretching it. It is also what the
+  /// grid scores arrangements by: the column count is the one that fits the
+  /// largest rectangle of this shape.
+  ///
+  /// Defaults to `16 / 9`.
+  final double? maxTileAspectRatio;
+
+  /// How many participants a page holds at [StreamScreenSize.small].
+  ///
+  /// Defaults to 6.
+  final int? compactPageSize;
+
+  /// How many participants a page holds above [StreamScreenSize.small].
+  ///
+  /// Defaults to 12.
+  final int? pageSize;
 
   /// Linearly interpolate between two theme data objects.
   static StreamCallParticipantsGridThemeData? lerp(

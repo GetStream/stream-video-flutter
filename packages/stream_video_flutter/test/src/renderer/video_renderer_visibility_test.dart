@@ -17,6 +17,7 @@ import '../mocks.dart';
 void main() {
   setUp(() {
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
+    ViewportVisibilityRegistry.defaultReleaseGrace = Duration.zero;
   });
 
   CallParticipantState participant({
@@ -39,7 +40,10 @@ void main() {
 
   /// A call whose registry hands every answer it reaches to [aggregates],
   /// instead of writing call state and subscriptions.
-  MockCall callWithRegistry(List<ViewportAggregate> aggregates) {
+  MockCall callWithRegistry(
+    List<ViewportAggregate> aggregates, {
+    Duration? releaseGrace,
+  }) {
     final call = MockCall();
     final state = MockCallState();
 
@@ -48,6 +52,7 @@ void main() {
     );
     when(() => call.viewportVisibility).thenReturn(
       ViewportVisibilityRegistry(
+        releaseGrace: releaseGrace,
         onAggregate: (aggregate) async {
           aggregates.add(aggregate);
           return true;
@@ -344,6 +349,75 @@ void main() {
           'a report after the release put the viewport back, with nothing '
           'left alive to take it out again',
     );
+  });
+
+  // The bug this is here for: the speaker moving out of the spotlight and into
+  // the bar is a tile torn down and another built somewhere else, and the
+  // detector in the new one takes an update interval to say anything. Reported
+  // hidden in between, the track is unsubscribed and resubscribed a moment
+  // later, and the tile sits on a placeholder until the picture comes back.
+  testWidgets('a tile moving somewhere else keeps the track on screen', (
+    tester,
+  ) async {
+    const interval = Duration(milliseconds: 500);
+    VisibilityDetectorController.instance.updateInterval = interval;
+
+    final aggregates = <ViewportAggregate>[];
+    final call = callWithRegistry(
+      aggregates,
+      releaseGrace: const Duration(milliseconds: 600),
+    );
+
+    Widget tileIn({required Widget Function(Widget) place}) {
+      return TestWrapper(
+        child: place(
+          StreamParticipantTile(call: call, participant: participant()),
+        ),
+      );
+    }
+
+    // The spotlight.
+    await tester.pumpWidget(
+      tileIn(
+        place: (tile) =>
+            Center(child: SizedBox(width: 300, height: 200, child: tile)),
+      ),
+    );
+    await tester.pump(interval);
+    await tester.pump();
+
+    expect(aggregates.single.visibility, ViewportVisibility.visible);
+
+    // The bar below it: another place in the tree, so another element.
+    await tester.pumpWidget(
+      tileIn(
+        place: (tile) => Align(
+          alignment: Alignment.bottomRight,
+          child: SizedBox(width: 100, height: 60, child: tile),
+        ),
+      ),
+    );
+    await tester.pump(interval);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(
+      aggregates.map((aggregate) => aggregate.visibility),
+      everyElement(ViewportVisibility.visible),
+      reason: 'the track was drawn throughout, only somewhere else',
+    );
+    expect(
+      aggregates.last.dimension.area,
+      lessThan(aggregates.first.dimension.area),
+      reason: 'resized for the tile that took it over',
+    );
+
+    // Nothing takes the track up this time, so the grace runs out on it.
+    await tester.pumpWidget(const TestWrapper(child: SizedBox()));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(aggregates.last.visibility, ViewportVisibility.hidden);
   });
 
   testWidgets(

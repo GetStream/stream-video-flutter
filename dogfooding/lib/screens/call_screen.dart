@@ -7,6 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 // �🐦 Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart'
     hide CurrentPlatform;
 import 'package:stream_video_filters/video_effects_manager.dart';
@@ -19,7 +20,7 @@ import '../core/repos/user_chat_repository.dart';
 import '../di/injector.dart';
 import '../utils/feedback_dialog.dart';
 import '../widgets/badged_call_option.dart';
-import '../widgets/call_duration_title.dart';
+import '../widgets/call_connection_banner.dart';
 import '../widgets/closed_captions_widget.dart';
 import '../widgets/e2ee_key_notification.dart';
 import '../widgets/settings_menu/more_menu.dart';
@@ -72,6 +73,9 @@ class _CallScreenState extends State<CallScreen>
   Timer? _speakingWhileMutedDebounce;
   DateTime? _lastSnackbarShownAt;
 
+  /// Shows snackbars floating above the control bar rather than over it.
+  final _controlsMessenger = StreamSnackbarMessenger();
+
   static const _snackbarDebounce = Duration(seconds: 1);
   static const _snackbarCooldown = Duration(seconds: 5);
 
@@ -103,6 +107,9 @@ class _CallScreenState extends State<CallScreen>
     curve: Curves.easeOutCubic,
     reverseCurve: Curves.easeInCubic,
   );
+
+  /// Whether this screen has asked to close and is waiting its turn.
+  var _closeRequested = false;
 
   /// Carries the panel's own state across the breakpoint: the docked and the
   /// full-screen layout hang it in different places, and without a global key
@@ -157,11 +164,9 @@ class _CallScreenState extends State<CallScreen>
       }
 
       _lastSnackbarShownAt = now;
-      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-        const SnackBar(
-          content: Text('You are muted. Unmute to speak.'),
-          behavior: SnackBarBehavior.floating,
-        ),
+      _controlsMessenger.show(
+        StreamSnackbar(message: const Text('You are muted. Unmute to speak.')),
+        replace: true,
       );
     });
   }
@@ -171,6 +176,7 @@ class _CallScreenState extends State<CallScreen>
     _speakingWhileMutedDebounce?.cancel();
     _speakingWhileMutedSubscription.cancel();
     _speakingWhileMuted.dispose();
+    _controlsMessenger.dispose();
     _chatConnectionRecoverySubscription?.cancel();
     _devices.dispose();
     _panelAnimation.dispose();
@@ -429,7 +435,7 @@ class _CallScreenState extends State<CallScreen>
   );
 
   /// The call's control bar, laid out per screen size.
-  CallControlBar _callControls(BuildContext context, Call call) {
+  Widget _callControls(BuildContext context, Call call) {
     final moreButton = _moreMenu(call, context.streamIcons.moreVerticalFill);
 
     final panels = [
@@ -441,7 +447,7 @@ class _CallScreenState extends State<CallScreen>
       ),
     ];
 
-    return CallControlBar(
+    final controlBar = CallControlBar(
       // A phone splits its controls between the two edges: there
       // is not enough width for a centre row and sides both. Five
       // controls, as the design draws it — screen sharing and the
@@ -491,10 +497,30 @@ class _CallScreenState extends State<CallScreen>
         ],
       ),
     );
+
+    return StreamSnackbarPopup.withState(
+      messenger: _controlsMessenger,
+      child: controlBar,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_closeRequested) {
+      // `ModalRoute.of` depends on the route's own status, so this rebuilds
+      // when the screen becomes the top one and can finally close. A plain
+      // Scaffold rather than nothing, so a frame spent waiting shows the
+      // app's background instead of bare black.
+      final isCurrent = ModalRoute.of(context)?.isCurrent ?? false;
+      if (isCurrent) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && context.mounted) context.pop();
+        });
+      }
+
+      return const Scaffold();
+    }
+
     // ignore: deprecated_member_use
     return WillPopScope(
       onWillPop: () async {
@@ -520,8 +546,29 @@ class _CallScreenState extends State<CallScreen>
           },
           onCallDisconnected: (disconnectedProperties) {
             final reason = disconnectedProperties.reason;
+            // The app's messenger outlives this screen, so what went wrong
+            // can still be said on the one the pop lands on.
+            final messenger = ScaffoldMessenger.maybeOf(context);
 
-            Navigator.of(context).pop();
+            // `pop` closes the topmost route, which is not always this
+            // screen: a dialog can sit above it, and so can a second call
+            // screen. Closing that instead would take down whatever the user
+            // is actually looking at.
+            if (!(ModalRoute.of(context)?.isCurrent ?? false)) {
+              setState(() => _closeRequested = true);
+              return;
+            }
+
+            context.pop();
+
+            if (reason is DisconnectReasonReconnectionFailed) {
+              messenger?.showSnackBar(
+                const SnackBar(
+                  content: Text("Couldn't restore the connection to the call."),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
 
             if (reason is DisconnectReasonCancelled ||
                 reason is DisconnectReasonEnded ||
@@ -561,6 +608,10 @@ class _CallScreenState extends State<CallScreen>
                           ),
                           ClosedCaptionsWidget(call: call),
                         ],
+                      ),
+                      Align(
+                        alignment: Alignment.topCenter,
+                        child: CallConnectionBanner(call: call),
                       ),
                       Align(
                         alignment: Alignment.bottomCenter,
@@ -613,28 +664,36 @@ class _CallScreenState extends State<CallScreen>
 
                 return CallAppBar(
                   call: call,
-                  leadingWidth: 120,
                   showLeaveCallAction: isCompact,
                   leading: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       if (isCompact)
                         _layoutToggle(
                           menuDirection: StreamMenuDirection.down,
                         ),
-                      PartialCallStateBuilder(
-                        call: call,
-                        selector: (state) => state.localParticipant != null,
-                        builder: (context, hasLocalParticipant) =>
-                            hasLocalParticipant
-                            ? StreamFlipCameraButton(call: call)
-                            : const SizedBox.shrink(),
-                      ),
+                      if (StreamFlipCameraButton.isSupported)
+                        PartialCallStateBuilder(
+                          call: call,
+                          selector: (state) => state.localParticipant != null,
+                          builder: (context, hasLocalParticipant) =>
+                              hasLocalParticipant
+                              ? StreamFlipCameraButton(call: call)
+                              : const SizedBox.shrink(),
+                        ),
                     ],
                   ),
-                  title: CallDurationTitle(call: call),
+                  title: StreamCallDurationBadge(call: call),
                 );
               },
               callControlsWidgetBuilder: _callControls,
+              callNotConnectedBuilder: (context, properties) => Align(
+                alignment: Alignment.topCenter,
+                child: CallConnectionBanner(call: properties.call),
+              ),
+              // The banner already says a fast reconnect is under way.
+              callFastReconnectingOverlayBuilder: (_, _) =>
+                  const SizedBox.shrink(),
             );
           },
         ),

@@ -135,7 +135,7 @@ void main() {
     );
   });
 
-  testWidgets('re-sorts when the sort comparator changes', (tester) async {
+  testWidgets('re-sorts when the sort identity changes', (tester) async {
     late StateSetter setSort;
     var descending = false;
     final rendered = <String>[];
@@ -152,8 +152,14 @@ void main() {
             return StreamCallParticipants(
               call: call,
               sort: descending
-                  ? (a, b) => b.userId.compareTo(a.userId)
-                  : (a, b) => a.userId.compareTo(b.userId),
+                  ? CallParticipantSort(
+                      (a, b) => b.userId.compareTo(a.userId),
+                      identity: 'descending',
+                    )
+                  : CallParticipantSort(
+                      (a, b) => a.userId.compareTo(b.userId),
+                      identity: 'ascending',
+                    ),
               callParticipantBuilder: (context, _, participant) {
                 rendered.add(participant.userId);
                 return const SizedBox.shrink();
@@ -176,8 +182,8 @@ void main() {
       rendered,
       ['bob', 'alice'],
       reason:
-          'a new comparator has to be applied on the spot, not on the next '
-          'join or audio level change',
+          'a sort with a new identity has to be applied on the spot, not on '
+          'the next join or audio level change',
     );
   });
 

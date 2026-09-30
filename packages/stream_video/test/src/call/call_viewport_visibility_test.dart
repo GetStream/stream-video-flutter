@@ -79,6 +79,12 @@ void main() {
   Future<void> settle() =>
       Future<void>.delayed(const Duration(milliseconds: 400));
 
+  // A track the last viewport let go of waits out the registry's grace before
+  // the call hears it is hidden.
+  Future<void> settleRelease() => Future<void>.delayed(
+    call.viewportVisibility.releaseGrace + const Duration(milliseconds: 400),
+  );
+
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
     registerMockFallbackValues();
@@ -163,13 +169,40 @@ void main() {
     await settle();
 
     grid.release();
-    await settle();
+    await settleRelease();
 
     expect(
       participantOf(aliceSession)!.viewportVisibility,
       ViewportVisibility.hidden,
     );
     expect(videoOf(aliceSession)!.subscribed, isFalse);
+  });
+
+  // The spotlight handing a participant to the bar below it: the tile drawing
+  // them is torn down and another built, and the subscription has to survive
+  // the gap or the new tile comes up on a placeholder.
+  test('a track handed to another viewport is never unsubscribed', () async {
+    final track = trackOf(aliceSession, 'alice');
+
+    grid.report(track, showing(1280, 720));
+    await settle();
+    expect(videoOf(aliceSession)!.subscribed, isTrue);
+
+    // The tile is gone before the one taking over has measured itself.
+    grid.release();
+    strip.report(track, showing(320, 180));
+    await settleRelease();
+
+    expect(
+      videoOf(aliceSession)!.subscribed,
+      isTrue,
+      reason: 'another viewport took the track up within the grace',
+    );
+    expect(
+      videoOf(aliceSession)!.videoDimension,
+      const RtcVideoDimension(width: 320, height: 180),
+      reason: 'resized for the viewport that took it, not dropped and re-added',
+    );
   });
 
   test('a viewport keeping a hidden track leaves it subscribed', () async {
@@ -222,7 +255,7 @@ void main() {
       expect(videoOf(aliceSession)!.subscribed, isTrue);
 
       grid.report(trackOf(bobSession, 'bob'), showing(640, 360));
-      await settle();
+      await settleRelease();
 
       expect(
         videoOf(aliceSession)!.subscribed,

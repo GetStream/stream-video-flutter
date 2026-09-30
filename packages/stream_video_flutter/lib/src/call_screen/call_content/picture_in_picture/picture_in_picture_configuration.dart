@@ -42,7 +42,7 @@ class PictureInPictureConfiguration {
   /// Sorting function for participants in picture-in-picture mode.
   /// The first participant will be displayed in the PiP view.
   /// If not provided, the default sorting prioritising speaker / screen sharer will be used.
-  final Comparator<CallParticipantState>? sort;
+  final CallParticipantSort<CallParticipantState>? sort;
 
   /// Configuration for picture-in-picture mode on Android.
   final AndroidPictureInPictureConfiguration androidPiPConfiguration;

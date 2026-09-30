@@ -37,19 +37,27 @@
   - `OnTokenUpdated` changed from `Future<void> Function(UserToken)` to `void Function(UserToken)` and is **no longer awaited**. Async callbacks still compile, but the SDK may start using a token before your callback has persisted it.
   - `onTokenUpdated` for a static token now fires on first token use and after every refresh, instead of once at client construction.
 - A coordinator WebSocket connection whose token could not be loaded is now closed as an authentication failure instead of being retried indefinitely. A `tokenLoader` that throws on a reconnect therefore ends the connection — the error is reported on `StreamCallDisconnectedEvent`/`CoordinatorDisconnected` — where before the socket kept retrying with nothing reported.
-- `StreamVideoExceptionWithCause.cause` now carries the `StreamApiException` for a failure the server answered, where it previously carried the parsed `StreamApiError` payload. Code matching on `cause is StreamApiError` still compiles but no longer matches, so this change is silent. Read the verdict through the accessors on `StreamVideoException` instead: `apiStatusCode`, `apiErrorCode`, `isUnrecoverable`, `retryAfter`, and `apiError` for the payload itself. They answer from either shape. 
+- `StreamVideoExceptionWithCause.cause` now carries the `StreamApiException` for a failure the server answered, where it previously carried the parsed `StreamApiError` payload. Code matching on `cause is StreamApiError` still compiles but no longer matches, so this change is silent. Read the verdict through the accessors on `StreamVideoException` instead: `apiStatusCode`, `apiErrorCode`, `isUnrecoverable`, `retryAfter`, and `apiError` for the payload itself. They answer from either shape.
 - `StreamVideoExceptionWithCause.cause` is deprecated. Its runtime type is not part of this API - it is chosen by whatever mapped the failure — so matching on it compiles but can stop matching without warning, which is what happened to the change above. Read the failure through the accessors on `StreamVideoException` instead.
 - `StreamVideoException` (formerly `VideoError`) now implements `Exception` rather than `Error`. An `on Error catch` clause no longer matches it — these are runtime conditions to handle, not programming bugs. Catch `Exception`, or `StreamVideoException` directly.
 - `CallPreferences` now requires a `participantsThrottleIntervalResolver`; custom implementations must provide it.
 - `CallParticipantState.audioLevels` is now unmodifiable.
+- `CallStatusReconnecting.attempt` now counts every attempt of a reconnect, fast and rejoin alike, starting at 1. It used to start at 0, stay there across fast attempts, and count only rejoins — reaching a different value twice within one rejoin.
 
 ### ⚠️ Deprecated
 
-- `VideoError` is renamed to `StreamVideoException`, and `VideoErrorWithCause` to `StreamVideoExceptionWithCause`. The old names remain as deprecated typedefs, so existing code still compiles; `dart fix --apply` migrates it. 
+- `StreamVideo.disposeAfterResolvingRinging` is deprecated in favour of `StreamVideoPushHandler.handleBackgroundMessage` from `stream_video_push_notification`. Use it to handle the whole background ringing lifecycle.
+- `VideoError` is renamed to `StreamVideoException`, and `VideoErrorWithCause` to `StreamVideoExceptionWithCause`. The old names remain as deprecated typedefs, so existing code still compiles; `dart fix --apply` migrates it.
 - `ifInvisibleBy` takes a `ParticipantPriority` — a priority for one participant, higher first — instead of a `Comparator`. Pass the priority of the same name: `ifInvisibleBy(dominantSpeakerPriority)` where you passed `ifInvisibleBy(dominantSpeaker)`.
+
+### 🔄 Changed
+
+- [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
+- Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.
 
 ### ✅ Added
 
+- Added `StreamPushPayload`, the wire contract for the push payloads Stream sends: the keys it sets, the `sender` that marks a payload as ours, and predicates for recognising a ringing or missed call push. `handleRingingFlowNotifications` reads payloads through it, so anything that has to recognise a Stream push before handing it over — a background handler deciding whether to build a client, or tracking which call is still ringing — can match on exactly what the SDK matches on instead of restating the format.
 - Added `Call.viewportVisibility`, which derives one visibility and one subscription size per track from every viewport reporting through a `ViewportHandle` of its own.
 - `CallReceivedData`, what `Call.get()` returns, is exported. Handling that result meant naming a type the package kept to itself.
 - Anonymous users can now carry a token: pass `userToken` with a `UserType.anonymous` user to send call-restricted tokens (e.g. for closed livestreams). The token's `user_id` claim must be `!anon`; an invalid token fails fast at client construction.
@@ -70,6 +78,7 @@
 - A desktop screen share no longer sends `mandatory: {frameRate: null}` to the platform when no `maxFrameRate` is set.
 - A reconnect no longer drops the video of participants whose tracks have not been received yet. Track subscriptions now survive the join response, so a subscription update sent while the media is still arriving keeps every participant subscribed.
 - A participant drawn in two places at once is now visible while either shows them, and subscribed at the size of the larger.
+- A participant moving between layouts no longer flashes a placeholder. A track the last viewport lets go of is held for `ViewportVisibilityRegistry.releaseGrace` before it is reported hidden, so the viewport taking over keeps the subscription.
 - Every track on screen is reported again to the new session after a reconnect.
 - Guest creation no longer waits for a coordinator connection id. The call is unauthenticated and watches nothing, so an id could only add latency.
 - A request that could not be signed now reports a credentials failure rather than a network one.
@@ -88,6 +97,7 @@
 - A viewport visibility is now recorded whether or not the session accepts it. A dropped report left a participant recorded as something they were not for the rest of the call, since a viewport only ever reports what changed.
 - Fixed server-pinned participants being reordered on every pins event.
 - Fixed `CallParticipantState.copyWithUpdatedAudioLevels` mutating the audio level history of the previous state.
+- On iOS devices without multitasking camera access, the camera track is now muted while the app is in the background, so other participants see camera-off instead of a frozen frame.
 
 ## 1.6.0
 

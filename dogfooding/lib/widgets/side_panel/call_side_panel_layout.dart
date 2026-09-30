@@ -9,9 +9,11 @@ import 'package:flutter/material.dart';
 ///  * Full screen — the panel covers [child] entirely, sliding in over it.
 ///
 /// Both are driven by [animation], which runs 0 (closed) to 1 (open). The
-/// widget itself holds no state — the caller owns the controller, and so also
-/// owns when the panel is mounted and unmounted.
-class CallSidePanelLayout extends StatelessWidget {
+/// caller owns the controller, and so also owns when the panel is mounted and
+/// unmounted. Keep the widget at a stable position in the tree: the key that
+/// carries [child] between the two shapes lives in this widget's state, so a
+/// rebuild that replaces the state tears the call content down anyway.
+class CallSidePanelLayout extends StatefulWidget {
   /// Creates a layout showing [panel] against [child].
   const CallSidePanelLayout({
     super.key,
@@ -51,10 +53,24 @@ class CallSidePanelLayout extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    final panel = this.panel;
+  State<CallSidePanelLayout> createState() => _CallSidePanelLayoutState();
+}
 
-    if (!fullScreen) {
+class _CallSidePanelLayoutState extends State<CallSidePanelLayout> {
+  /// Carries the call content between the docked and full-screen shapes.
+  ///
+  /// The two shapes hang [CallSidePanelLayout.child] in different places, so
+  /// without a global key crossing the boundary rebuilds it from scratch —
+  /// which tears down every video renderer under it and blanks the call until
+  /// the tracks decode a frame again.
+  final _childKey = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    final panel = widget.panel;
+    final child = KeyedSubtree(key: _childKey, child: widget.child);
+
+    if (!widget.fullScreen) {
       return Row(
         // Stretch, so the panel fills the available height rather than
         // settling at its intrinsic one.
@@ -63,7 +79,7 @@ class CallSidePanelLayout extends StatelessWidget {
           Expanded(child: child),
           if (panel != null)
             SizeTransition(
-              sizeFactor: animation,
+              sizeFactor: widget.animation,
               axis: Axis.horizontal,
               // Start-aligned, so the panel's leading edge travels with the
               // growing box and the content slides in from the window's edge.
@@ -71,7 +87,7 @@ class CallSidePanelLayout extends StatelessWidget {
               // A fixed width inside the transition: the panel is laid out at
               // its final width throughout and only clipped, so a message
               // list or a chart never reflows mid-animation.
-              child: SizedBox(width: width, child: panel),
+              child: SizedBox(width: widget.width, child: panel),
             ),
         ],
       );
@@ -80,13 +96,15 @@ class CallSidePanelLayout extends StatelessWidget {
     return Stack(
       children: [
         Padding(
-          padding: EdgeInsets.only(top: panel != null ? coveredTopExtent : 0),
+          padding: EdgeInsets.only(
+            top: panel != null ? widget.coveredTopExtent : 0,
+          ),
           child: child,
         ),
         if (panel != null)
           Positioned.fill(
             child: SlideTransition(
-              position: animation.drive(
+              position: widget.animation.drive(
                 Tween(begin: const Offset(1, 0), end: Offset.zero),
               ),
               child: panel,

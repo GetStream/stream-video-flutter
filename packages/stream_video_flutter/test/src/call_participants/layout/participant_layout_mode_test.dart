@@ -106,7 +106,7 @@ void main() {
       )) {
         expect(
           mode.sorting,
-          CallParticipantSortingPresets.speaker,
+          CallParticipantSorts.speaker,
           reason: '$mode',
         );
       }
@@ -119,7 +119,7 @@ void main() {
       ]) {
         expect(
           mode.sorting,
-          CallParticipantSortingPresets.regular,
+          CallParticipantSorts.regular,
           reason: '$mode',
         );
       }

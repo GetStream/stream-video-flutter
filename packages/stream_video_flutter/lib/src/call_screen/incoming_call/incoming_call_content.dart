@@ -1,11 +1,9 @@
-// ignore_for_file: deprecated_member_use_from_same_package
-
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../common/call_background.dart';
-import '../common/calling_participants.dart';
-import '../common/participant_avatars.dart';
+import '../../l10n/localization_extension.dart';
+import '../common/ringing_call_details.dart';
+import '../common/ringing_call_style_defaults.dart';
 import 'incoming_call_controls.dart';
 
 /// Represents the Incoming Call state and UI, when the user is called by
@@ -18,11 +16,7 @@ class StreamIncomingCallContent extends StatefulWidget {
     this.onDeclineCallTap,
     this.onMicrophoneTap,
     this.onCameraTap,
-    this.singleParticipantAvatarTheme,
-    this.multipleParticipantAvatarTheme,
-    this.singleParticipantTextStyle,
-    this.multipleParticipantTextStyle,
-    this.callingLabelTextStyle,
+    this.style,
     this.participantsAvatarWidgetBuilder,
     this.participantsDisplayNameWidgetBuilder,
   });
@@ -42,20 +36,11 @@ class StreamIncomingCallContent extends StatefulWidget {
   /// The action to perform when the camera button is tapped.
   final VoidCallback? onCameraTap;
 
-  /// Theme for the avatar in a call with one participant.
-  final StreamUserAvatarThemeData? singleParticipantAvatarTheme;
-
-  /// Theme for the avatar in a call with multiple participants.
-  final StreamUserAvatarThemeData? multipleParticipantAvatarTheme;
-
-  /// Text style for the participant label in a call with one participant.
-  final TextStyle? singleParticipantTextStyle;
-
-  /// Text style for the participant label in a call with multiple participants.
-  final TextStyle? multipleParticipantTextStyle;
-
-  /// Text style for the calling label.
-  final TextStyle? callingLabelTextStyle;
+  /// Overrides for this screen alone.
+  ///
+  /// Resolved over [StreamIncomingCallTheme], so setting one property here
+  /// leaves the rest coming from the theme.
+  final StreamRingingCallStyle? style;
 
   /// Builder used to create a custom widget for participants avatars.
   final CallWidgetBuilderWithData<ParticipantsData>?
@@ -75,72 +60,57 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamIncomingOutgoingCallTheme.incomingCallThemeOf(context);
+    final style = RingingCallStyleDefaults(
+      context,
+      StreamIncomingCallTheme.of(context).style?.merge(widget.style) ??
+          widget.style,
+    );
 
-    final singleParticipantAvatarTheme =
-        widget.singleParticipantAvatarTheme ??
-        theme.singleParticipantAvatarTheme;
-    final multipleParticipantAvatarTheme =
-        widget.multipleParticipantAvatarTheme ??
-        theme.multipleParticipantAvatarTheme;
-    final singleParticipantTextStyle =
-        widget.singleParticipantTextStyle ?? theme.singleParticipantTextStyle;
-    final multipleParticipantTextStyle =
-        widget.multipleParticipantTextStyle ??
-        theme.multipleParticipantTextStyle;
-    final callingLabelTextStyle =
-        widget.callingLabelTextStyle ?? theme.callingLabelTextStyle;
-
-    Widget buildContent(List<UserInfo> users) => CallBackground(
-      participants: users,
+    Widget buildContent(List<UserInfo> users) => ColoredBox(
+      color: style.backgroundColor,
       child: Material(
         color: Colors.transparent,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Spacer(),
-            widget.participantsAvatarWidgetBuilder?.call(
-                  context,
-                  widget.call,
-                  ParticipantsData(participants: users),
-                ) ??
-                ParticipantAvatars(
-                  participants: users,
-                  singleParticipantAvatarTheme: singleParticipantAvatarTheme,
-                  multipleParticipantAvatarTheme:
-                      multipleParticipantAvatarTheme,
-                ),
-            widget.participantsDisplayNameWidgetBuilder?.call(
-                  context,
-                  widget.call,
-                  ParticipantsData(participants: users),
-                ) ??
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 64,
-                    vertical: 32,
-                  ),
-                  child: CallingParticipants(
-                    participants: users,
-                    singleParticipantTextStyle: singleParticipantTextStyle,
-                    multipleParticipantTextStyle: multipleParticipantTextStyle,
+        child: SafeArea(
+          child: Column(
+            children: [
+              // The details are centred in the space above the controls, and
+              // scroll rather than overflow when that space is too short.
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    child: RingingCallDetails(
+                      participants: users,
+                      status: context.translations.ringingIncomingCall,
+                      style: style,
+                      avatar: widget.participantsAvatarWidgetBuilder?.call(
+                        context,
+                        widget.call,
+                        ParticipantsData(participants: users),
+                      ),
+                      nameLine: widget.participantsDisplayNameWidgetBuilder
+                          ?.call(
+                            context,
+                            widget.call,
+                            ParticipantsData(participants: users),
+                          ),
+                    ),
                   ),
                 ),
-            Text(
-              // TODO hardcoded text
-              'Incoming Call...',
-              style: callingLabelTextStyle,
-            ),
-            const Spacer(),
-            IncomingCallControls(
-              isMicrophoneEnabled: connectOptions.microphone.isEnabled,
-              isCameraEnabled: connectOptions.camera.isEnabled,
-              onAcceptCallTap: _onAcceptCallTap,
-              onDeclineCallTap: () => _onDeclineCallTap(context),
-              onMicrophoneTap: () => _onMicrophoneTap(context),
-              onCameraTap: () => _onCameraTap(context),
-            ),
-          ],
+              ),
+              Padding(
+                padding: style.controlsPadding,
+                child: IncomingCallControls(
+                  style: style,
+                  isMicrophoneEnabled: connectOptions.microphone.isEnabled,
+                  isCameraEnabled: connectOptions.camera.isEnabled,
+                  onAcceptCallTap: _onAcceptCallTap,
+                  onDeclineCallTap: () => _onDeclineCallTap(context),
+                  onMicrophoneTap: () => _onMicrophoneTap(context),
+                  onCameraTap: () => _onCameraTap(context),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

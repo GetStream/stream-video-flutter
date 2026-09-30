@@ -104,7 +104,7 @@ class SfuWebSocket {
       () => '[connect] connectionState: ${_client.connectionState.value}',
     );
     await _client.connect();
-    return const Result.success(none);
+    return _openResult('connect');
   }
 
   Future<Result<None>> disconnect([
@@ -142,7 +142,76 @@ class SfuWebSocket {
         .catchError((_) => _client.connectionState.value);
 
     await _client.connect();
-    return const Result.success(none);
+    return _openResult('recreate');
+  }
+
+  /// What the `connect()` that just returned amounted to.
+  ///
+  /// Core never throws from `connect()`: an attempt that fails is recorded in
+  /// the connection state instead, which has already moved to [Disconnecting]
+  /// or [Disconnected] by the time the future completes. On web the socket
+  /// error lands inside that same call. Reading the state is the only way to
+  /// tell a socket that opened from one that did not — and `connect()` also
+  /// returns without opening anything while a previous socket is still
+  /// closing, which reads the same way.
+  Result<None> _openResult(String operation) {
+    final state = _client.connectionState.value;
+    if (state is! Disconnecting && state is! Disconnected) {
+      return const Result.success(none);
+    }
+
+    _logger.w(() => '[$operation] socket did not open, state: $state');
+    return Result.failure(
+      StreamVideoException(message: 'SFU WS did not open (state: $state)'),
+    );
+  }
+
+  /// Waits for the SFU to answer a join request just sent on this socket.
+  ///
+  /// Settles on whichever comes first: the [SfuJoinResponseEvent], an
+  /// [SfuErrorEvent], the socket going down, or [timeLimit]. A socket that
+  /// drops while the request is in flight takes the answer with it, so waiting
+  /// out [timeLimit] after that would only burn the time a reconnect has left.
+  ///
+  /// Call it straight after sending the request, before anything is awaited,
+  /// so the answer cannot arrive unobserved.
+  Future<Result<SfuJoinResponseEvent>> waitForJoinResponse({
+    required Duration timeLimit,
+  }) {
+    final completer = Completer<Result<SfuJoinResponseEvent>>();
+    void settle(Result<SfuJoinResponseEvent> result) {
+      if (!completer.isCompleted) completer.complete(result);
+    }
+
+    final eventSubscription = _events.listen((event) {
+      if (event is SfuJoinResponseEvent) {
+        settle(Result.success(event));
+      } else if (event is SfuErrorEvent) {
+        settle(failureWithError(event.error.message, cause: event.error));
+      }
+    });
+
+    // The state replays its current value, so a socket already down settles
+    // this at once.
+    final stateSubscription = _client.connectionState.listen((state) {
+      if (state is Disconnecting || state is Disconnected) {
+        settle(failureWithError('SFU WS closed before the join response'));
+      }
+    });
+
+    final timer = Timer(timeLimit, () {
+      settle(
+        failureWithError(
+          'No join response within ${timeLimit.inMilliseconds}ms',
+        ),
+      );
+    });
+
+    return completer.future.whenComplete(() {
+      timer.cancel();
+      unawaited(eventSubscription.cancel());
+      unawaited(stateSubscription.cancel());
+    });
   }
 
   void leave({String? sessionId, String? reason}) {
@@ -166,15 +235,16 @@ class SfuWebSocket {
     );
   }
 
-  void send(sfu_events.SfuRequest message) {
+  /// Sends [message], failing when there is no open socket to carry it.
+  Result<void> send(sfu_events.SfuRequest message) {
     _logger.v(() => '[send] message: $message');
 
     if (_client.connectionState.value is Initialized) {
       _logger.w(() => '[send] rejected (connection not opened)');
-      return;
+      return failureWithError('SFU WS not opened');
     }
 
-    _client.send(SfuWsRequest(message));
+    return _client.send(SfuWsRequest(message));
   }
 
   void _onWsEvent(WsEvent wsEvent) {

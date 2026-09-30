@@ -62,14 +62,16 @@ data class Data(val args: Map<String, Any?>) {
     @JsonProperty("ringtonePath")
     var ringtonePath: String
 
+    // Empty rather than a colour: unset lets IncomingCallActivity fall back to
+    // the plugin's own resources, which an app can override in its colors.xml.
     @JsonProperty("fullScreenBackgroundColor")
-    var fullScreenBackgroundColor: String = "#0955fa"
+    var fullScreenBackgroundColor: String = ""
 
     @JsonProperty("fullScreenBackgroundUrl")
     var fullScreenBackgroundUrl: String = ""
 
     @JsonProperty("fullScreenTextColor")
-    var fullScreenTextColor: String = "#FFFFFF"
+    var fullScreenTextColor: String = ""
 
     @JsonProperty("incomingCallNotificationChannelName")
     var incomingCallNotificationChannelName: String? = null
@@ -148,9 +150,9 @@ data class Data(val args: Map<String, Any?>) {
         if (incomingNotification != null) {
             fullScreenShowLogo = incomingNotification["fullScreenShowLogo"] as? Boolean ?: false
             fullScreenLogoUrl = incomingNotification["fullScreenLogoUrl"] as? String? ?: ""
-            fullScreenBackgroundColor = incomingNotification["fullScreenBackgroundColor"] as? String ?: "#0955fa"
+            fullScreenBackgroundColor = incomingNotification["fullScreenBackgroundColor"] as? String ?: ""
             fullScreenBackgroundUrl = incomingNotification["fullScreenBackgroundUrl"] as? String ?: ""
-            fullScreenTextColor = incomingNotification["fullScreenTextColor"] as? String ?: "#ffffff"
+            fullScreenTextColor = incomingNotification["fullScreenTextColor"] as? String ?: ""
             textAccept = incomingNotification["textAccept"] as? String ?: ""
             textDecline = incomingNotification["textDecline"] as? String ?: ""
             showCallHandle = incomingNotification["showCallHandle"] as? Boolean ?: false
@@ -315,14 +317,14 @@ data class Data(val args: Map<String, Any?>) {
             )
             data.fullScreenBackgroundColor = bundle.getString(
                 IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_COLOR,
-                "#0955fa"
+                ""
             )
             data.fullScreenBackgroundUrl =
                 bundle.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_URL, "")
 
             data.fullScreenTextColor = bundle.getString(
                 IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_TEXT_COLOR,
-                "#FFFFFF"
+                ""
             )
             data.from =
                 bundle.getString(IncomingCallConstants.EXTRA_CALL_ACTION_FROM, "")

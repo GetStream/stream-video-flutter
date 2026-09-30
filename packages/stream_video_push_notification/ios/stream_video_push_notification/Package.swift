@@ -11,12 +11,14 @@ let package = Package(
             name: "stream-video-push-notification", targets: ["stream_video_push_notification"])
     ],
     dependencies: [
+        .package(name: "FlutterFramework", path: "../FlutterFramework"),
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.8.2")
     ],
     targets: [
         .target(
             name: "stream_video_push_notification",
             dependencies: [
+                .product(name: "FlutterFramework", package: "FlutterFramework"),
                 .product(name: "CryptoSwift", package: "CryptoSwift")
             ],
             resources: [

@@ -75,17 +75,55 @@ final class ViewportHandle {
 /// a [ViewportHandle] and reports only about itself; the track comes out
 /// visible while any viewport has it on screen, sized for the largest that
 /// does, and never [ViewportVisibility.unknown].
+///
+/// A track the last viewport lets go of is held for [releaseGrace] before it
+/// is reported hidden, so a participant moving from one viewport to another
+/// does not lose their subscription in between.
 class ViewportVisibilityRegistry {
-  ViewportVisibilityRegistry({required this.onAggregate});
+  ViewportVisibilityRegistry({
+    required this.onAggregate,
+    Duration? releaseGrace,
+  }) : releaseGrace = releaseGrace ?? defaultReleaseGrace;
+
+  /// The [releaseGrace] a registry built without one uses — every call's,
+  /// since a call builds its own registry.
+  ///
+  /// Set alongside `VisibilityDetectorController.updateInterval`, which is
+  /// what the grace has to outlast: raised, this is raised with it, and taken
+  /// out, this is taken out too.
+  static Duration defaultReleaseGrace = const Duration(milliseconds: 600);
 
   late final _logger = taggedLogger(tag: 'SV:ViewportVisibility');
 
   /// Told the new answer whenever one of them moves.
   final OnViewportAggregate onAggregate;
 
+  /// How long a track the last viewport let go of is held before it is
+  /// reported hidden.
+  ///
+  /// A participant moving between layouts — out of the spotlight and into the
+  /// bar below it — is a new widget in a new place, so the viewport measuring
+  /// them is torn down and another built. In between, nothing measures the
+  /// track. Reported hidden right then it is unsubscribed and resubscribed a
+  /// moment later, and the tile shows a placeholder until the picture comes
+  /// back.
+  ///
+  /// So the answer waits for the viewport taking over. Long enough for one to
+  /// measure and report: on Flutter that is a `VisibilityDetector`, whose
+  /// first report is up to `VisibilityDetectorController.updateInterval`
+  /// (500ms by default) after it is built. A track nothing picks up is
+  /// reported hidden once this elapses.
+  ///
+  /// [Duration.zero] reports it straight away.
+  final Duration releaseGrace;
+
   /// Per track, what each viewport drawing it last measured.
   final _measurements =
       <ViewportTrack, Map<ViewportHandle, ViewportMeasurement>>{};
+
+  /// Per track, the [releaseGrace] running for it. Only ever for a track no
+  /// longer in [_measurements]: a track measured again cancels its own.
+  final _pendingReleases = <ViewportTrack, Timer>{};
 
   /// What [onAggregate] last acted on, so an unchanged answer is not repeated.
   final _reported = <ViewportTrack, ViewportAggregate>{};
@@ -100,6 +138,9 @@ class ViewportVisibilityRegistry {
     ViewportTrack track,
     ViewportMeasurement measurement,
   ) {
+    // A viewport measuring it again is the handover the grace was held for.
+    _pendingReleases.remove(track)?.cancel();
+
     final measurements = _measurements.putIfAbsent(track, () => {});
     if (measurements[handle] == measurement) return;
 
@@ -119,6 +160,17 @@ class ViewportVisibilityRegistry {
     if (measurements.isNotEmpty) return _emit(track);
 
     _measurements.remove(track);
+
+    if (releaseGrace <= Duration.zero) return _reportGone(track);
+
+    _logger.v(() => '[release] holding $track for $releaseGrace');
+    _pendingReleases[track] = Timer(releaseGrace, () => _reportGone(track));
+  }
+
+  /// Reports [track] hidden, the grace having passed with no viewport taking
+  /// it up.
+  void _reportGone(ViewportTrack track) {
+    _pendingReleases.remove(track);
     _emit(track);
     _reported.remove(track);
   }
@@ -146,6 +198,10 @@ class ViewportVisibilityRegistry {
   /// Forgets everything, without reporting it. [reapplyAll] then has nothing
   /// to say until each viewport reports again.
   void clear() {
+    for (final timer in _pendingReleases.values) {
+      timer.cancel();
+    }
+    _pendingReleases.clear();
     _measurements.clear();
     _reported.clear();
   }

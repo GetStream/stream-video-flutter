@@ -182,5 +182,90 @@
   "lobbyDevicesUnreadable": "Your devices could not be read",
   "@lobbyDevicesUnreadable": {
     "description": "Tooltip on a lobby device picker when the platform could not be asked for its devices"
+  },
+  "callEncryptedTooltip": "This call is end-to-end encrypted",
+  "@callEncryptedTooltip": {
+    "description": "Tooltip on the encryption indicator in the call duration badge"
+  },
+  "callRecordingTooltip": "This call is being recorded",
+  "@callRecordingTooltip": {
+    "description": "Tooltip on the recording indicator in the call duration badge"
+  },
+  "callScreenSharingTooltip": "Someone is sharing their screen",
+  "@callScreenSharingTooltip": {
+    "description": "Tooltip on the screen share indicator in the call duration badge"
+  },
+  "callDurationSpoken": "Call duration {duration}",
+  "@callDurationSpoken": {
+    "description": "Accessible label for the call duration badge, read in place of the digits",
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "callDurationHours": "{count, plural, one{1 hour} other{{count} hours}}",
+  "@callDurationHours": {
+    "description": "Hours part of the spoken call duration",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "callDurationMinutes": "{count, plural, one{1 minute} other{{count} minutes}}",
+  "@callDurationMinutes": {
+    "description": "Minutes part of the spoken call duration",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "callDurationSeconds": "{count, plural, one{1 second} other{{count} seconds}}",
+  "@callDurationSeconds": {
+    "description": "Seconds part of the spoken call duration",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ringingIncomingCall": "Incoming call",
+  "@ringingIncomingCall": {
+    "description": "Status line on the incoming ringing screen, under the caller's name"
+  },
+  "ringingCalling": "Calling\u2026",
+  "@ringingCalling": {
+    "description": "Status line on the outgoing ringing screen, while the other side is being rung"
+  },
+  "ringingAccept": "Accept",
+  "@ringingAccept": {
+    "description": "Label under the button that answers an incoming call"
+  },
+  "ringingDecline": "Decline",
+  "@ringingDecline": {
+    "description": "Label under the button that rejects an incoming call"
+  },
+  "ringingNobody": "No participants",
+  "@ringingNobody": {
+    "description": "Shown in place of a name on a ringing screen when the call has no members yet"
+  },
+  "ringingTwoCallers": "{first} and {second}",
+  "@ringingTwoCallers": {
+    "description": "The name line on a ringing screen with exactly two members",
+    "placeholders": {
+      "first": { "type": "String" },
+      "second": { "type": "String" }
+    }
+  },
+  "ringingManyCallers": "{first}, {second}, and {count, plural, =1{1 other} other{{count} others}}",
+  "@ringingManyCallers": {
+    "description": "The name line on a ringing screen with three or more members: two names and a count of the rest",
+    "placeholders": {
+      "first": { "type": "String" },
+      "second": { "type": "String" },
+      "count": { "type": "int" }
+    }
   }
 }

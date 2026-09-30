@@ -46,10 +46,18 @@ extension CodecX on sfu_models.Codec {
 ///
 /// A remote track keeps [RemoteTrackState.subscribed] and its video dimension,
 /// which record what this client asked the SFU to send rather than what the SFU
-/// just reported. [RemoteTrackState.received] starts false again: a rejoin
-/// builds a new subscriber peer connection, so the media has to arrive on it
-/// before the track counts as received.
-TrackState _restoredTrackState(TrackState? previous, {required bool isLocal}) {
+/// just reported.
+///
+/// [RemoteTrackState.received] only survives when [subscriberReused] says the
+/// track is still arriving on the subscriber peer connection it arrived on
+/// before. A rejoin builds a new one, so the media has to land on it before the
+/// track counts as received; a fast reconnect keeps it, and the media on it
+/// never stopped.
+TrackState _restoredTrackState(
+  TrackState? previous, {
+  required bool isLocal,
+  required bool subscriberReused,
+}) {
   if (isLocal || previous is! RemoteTrackState) {
     return TrackState.base(isLocal: isLocal);
   }
@@ -57,11 +65,20 @@ TrackState _restoredTrackState(TrackState? previous, {required bool isLocal}) {
   return TrackState.remote(
     subscribed: previous.subscribed,
     videoDimension: previous.videoDimension,
+    received: subscriberReused && previous.received,
   );
 }
 
 extension SfuParticipantX on SfuParticipant {
-  CallParticipantState toParticipantState(CallState state) {
+  /// The participant state the SFU's own account of them restores to.
+  ///
+  /// [subscriberReused] is passed on to the track state: it says the subscriber
+  /// peer connection carrying their media is the same one as before, so a track
+  /// that was already being received still is.
+  CallParticipantState toParticipantState(
+    CallState state, {
+    bool subscriberReused = false,
+  }) {
     final isLocal =
         userId == state.currentUserId && sessionId == state.sessionId;
     final existing = state.callParticipants.firstWhereOrNull(
@@ -92,6 +109,7 @@ extension SfuParticipantX on SfuParticipant {
           track: _restoredTrackState(
             previous?.publishedTracks[track],
             isLocal: isLocal,
+            subscriberReused: subscriberReused,
           ),
       },
       isLocal: isLocal,

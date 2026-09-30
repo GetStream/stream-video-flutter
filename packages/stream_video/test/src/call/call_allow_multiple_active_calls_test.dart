@@ -107,6 +107,26 @@ void main() {
         expect(call2.isActiveCall, false);
       });
 
+      test('a call that was left does not evict the live one', () async {
+        // The live call holds the single active slot.
+        await streamVideo.state.setActiveCall(call2);
+        expect(call2.isActiveCall, isTrue);
+
+        // The other call ended while the app was backgrounded - declined from
+        // the notification, or cancelled by the caller.
+        await call1.leave();
+
+        // Its screen was queued while it was still ringing, so it builds on
+        // resume and connects. Joining fails either way; what matters is that
+        // it does not take the live call with it by claiming the active slot
+        // on the way down.
+        final result = await call1.join();
+
+        expect(result, isA<Failure>());
+        expect(streamVideo.activeCalls, [call2]);
+        expect(call2.state.value.status.isDisconnected, isFalse);
+      });
+
       test(
         'isActiveCall returns false when call is not in activeCalls',
         () async {

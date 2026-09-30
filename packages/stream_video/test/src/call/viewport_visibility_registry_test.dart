@@ -1,3 +1,4 @@
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/call/viewport_visibility_registry.dart';
 import 'package:stream_video/src/models/viewport_measurement.dart';
@@ -132,13 +133,93 @@ void main() {
   });
 
   test('a track no viewport draws any more is reported hidden once', () {
-    grid
+    fakeAsync((async) {
+      grid
+        ..report(track, showing(640, 360))
+        ..release()
+        ..release();
+      async.elapse(registry.releaseGrace);
+
+      expect(aggregates.last.visibility, ViewportVisibility.hidden);
+      expect(aggregates, hasLength(2));
+    });
+  });
+
+  // A participant moving between layouts is a viewport torn down and another
+  // built, and nothing measures their track in between. Reported hidden there,
+  // the track is unsubscribed and resubscribed a moment later, which costs the
+  // tile its picture.
+  test('a track another viewport picks up within the grace is not dropped', () {
+    fakeAsync((async) {
+      grid.report(track, showing(1280, 720));
+      grid.release();
+      async.elapse(registry.releaseGrace - const Duration(milliseconds: 1));
+
+      expect(
+        aggregates.last.visibility,
+        ViewportVisibility.visible,
+        reason: 'the handover has not been given up on yet',
+      );
+      expect(aggregates, hasLength(1));
+
+      // The tile the participant moved into, now that it has measured itself.
+      registry.attach().report(track, showing(320, 180));
+      async.elapse(registry.releaseGrace);
+
+      expect(
+        aggregates.map((aggregate) => aggregate.visibility),
+        everyElement(ViewportVisibility.visible),
+        reason: 'the track was on screen throughout, at two sizes',
+      );
+      expect(
+        aggregates.last.dimension,
+        const RtcVideoDimension(width: 320, height: 180),
+      );
+    });
+  });
+
+  test('the grace runs from the release, not from the report before it', () {
+    fakeAsync((async) {
+      grid.report(track, showing(640, 360));
+      async.elapse(const Duration(seconds: 5));
+      grid.release();
+      async.elapse(registry.releaseGrace - const Duration(milliseconds: 1));
+
+      expect(aggregates, hasLength(1));
+
+      async.elapse(const Duration(milliseconds: 1));
+
+      expect(aggregates.last.visibility, ViewportVisibility.hidden);
+    });
+  });
+
+  test('a grace of zero reports the track hidden at once', () {
+    final immediate = ViewportVisibilityRegistry(
+      onAggregate: (aggregate) async {
+        aggregates.add(aggregate);
+        return true;
+      },
+      releaseGrace: Duration.zero,
+    );
+
+    immediate.attach()
       ..report(track, showing(640, 360))
-      ..release()
       ..release();
 
     expect(aggregates.last.visibility, ViewportVisibility.hidden);
-    expect(aggregates, hasLength(2));
+  });
+
+  test('a call cleared mid-grace never reports the track hidden', () {
+    fakeAsync((async) {
+      grid
+        ..report(track, showing(640, 360))
+        ..release();
+      registry.clear();
+      async.elapse(registry.releaseGrace * 2);
+
+      expect(aggregates, hasLength(1));
+      expect(aggregates.single.visibility, ViewportVisibility.visible);
+    });
   });
 
   test('a viewport that wants the track kept while hidden says so for all', () {
@@ -164,18 +245,22 @@ void main() {
   // A handle is one viewport, and a viewport draws one track at a time. Left
   // behind, the track it drew before would still be counted as on screen.
   test('a viewport reporting a new track lets go of the one before', () {
-    grid.report(track, showing(640, 360));
-    aggregates.clear();
+    fakeAsync((async) {
+      grid.report(track, showing(640, 360));
+      aggregates.clear();
 
-    grid.report(otherTrack, showing(320, 180));
+      grid.report(otherTrack, showing(320, 180));
+      async.elapse(registry.releaseGrace);
 
-    expect(
-      aggregates.map((aggregate) => (aggregate.track, aggregate.visibility)),
-      [
-        (track, ViewportVisibility.hidden),
-        (otherTrack, ViewportVisibility.visible),
-      ],
-    );
+      expect(
+        aggregates.map((aggregate) => (aggregate.track, aggregate.visibility)),
+        [
+          (otherTrack, ViewportVisibility.visible),
+          (track, ViewportVisibility.hidden),
+        ],
+        reason: 'the track it left is held for the grace, the new one is not',
+      );
+    });
   });
 
   test('a viewport that has been disposed of says nothing more', () {

@@ -2,6 +2,9 @@
 
 ### ✅ Added
 
+- Added `solveParticipantGrid`, the rule the participants grid arranges a page by, and `StreamCallParticipantsGridThemeData.columnResolver` to override it.
+- Added `StreamCallParticipantsGridThemeData.maxTileAspectRatio`, `compactPageSize` and `pageSize`.
+- Added `StreamCallParticipantsSpotlightThemeData` on `StreamVideoTheme`, and `StreamCallParticipantsSpotlightTheme` to restyle the speaker layouts over a subtree.
 - Added `StreamMenuOption.trailing`, the value a menu row reports at its far end.
 - Added `StreamMenuSection.content`, which draws arbitrary content in place of a section's rows.
 - Added `StreamMenuSection.collapsible`, whose heading folds the section away, and `initiallyCollapsed` for how it starts.
@@ -22,6 +25,13 @@
 - Added `StreamDesktopScreenShareSelectorThemeData` on `StreamVideoTheme`, and `StreamDesktopScreenShareSelectorTheme` to restyle the selector over a subtree.
 - Added `desktopScreenShareRefresh`, `desktopScreenShareNoSources`, `desktopScreenShareLoadFailed` and `desktopScreenShareRetry` to the localizations, in English and Dutch.
 - Added `ViewportVisibilityReporter`, which measures how much of its child is on screen and reports it to `Call.viewportVisibility`.
+- Redesigned the incoming and outgoing ringing screens. Both are an avatar over a name and a status line, with the call controls below. The incoming screen sits on the app surface; the outgoing one is drawn on top of the caller's own camera, blurred behind a scrim, and falls back to the flat scrim when the camera is off.
+- Added `CallRingingButton`, the 64px round button answering, declining and cancelling are drawn with. It is `CallControlButton` at the size the ringing designs give it, optionally with a label under it.
+- `CallControlButton` takes a `themeStyle`, handed to the button as `props.themeStyle`. It resolves after the ambient `StreamButtonTheme`, so it reaches that one button — where a nested `StreamButtonTheme` would be dropped for the `positive` tone, which brings one of its own.
+- Added `StreamRingingCameraController`, which opens the camera the outgoing screen previews and hands it to the call as `TrackOption.provided`, so the call carries on with the camera the caller was already previewing rather than opening a second one. `StreamOutgoingCallContent` makes one unless it is given one.
+- Added `StreamIncomingCallThemeData` and `StreamOutgoingCallThemeData` on `StreamVideoTheme`, with `StreamIncomingCallTheme` and `StreamOutgoingCallTheme` to restyle either over a subtree. Both carry a `StreamRingingCallStyle`, which `StreamIncomingCallContent.style` and `StreamOutgoingCallContent.style` override per call site.
+- Added `RingingCallBackground`, the outgoing screen's default background, so a `callBackgroundWidgetBuilder` has something to build on.
+- Added ringing strings to the localizations, in English and Dutch: `ringingIncomingCall`, `ringingCalling`, `ringingAccept`, `ringingDecline`, `ringingNobody`, `ringingTwoCallers` and `ringingManyCallers`. The ringing screens' text was hardcoded English.
 - `StreamLayoutButton` draws the participant layout in effect and offers the rest through a `StreamAdaptiveMenuAnchor`.
 - `StreamLayoutButton.defaultLayouts` is `auto` and `speakerBottom`, so the button toggles unless it is given more.
 - Added layout strings to the localizations, in English and Dutch: `layoutMenuTitle`, `layoutSelectTooltip`, `layoutDefault`, `layoutGrid`, `layoutSpeakerTop`, `layoutSpeakerBottom`, `layoutSpeakerLeft`, `layoutSpeakerRight` and `layoutSpeakerOneToOne`.
@@ -171,14 +181,25 @@
 
   Every component follows the same shape: `StreamX` resolves the registered builder and falls back to `DefaultX`, which holds the default implementation. The parameters of `StreamX` are carried in a `StreamXProps`, exposed as `StreamX.props`, so a custom builder can read them and `copyWith` them to decorate the default rather than reimplement it.
 - Added `StreamParticipantTile`, the participant tile as a replaceable component: register a `participantTile` builder to replace it, or use `DefaultStreamParticipantTile` for the default implementation.
+- Added `CallAppBarThemeData` on `StreamVideoTheme`, and `CallAppBarTheme` to restyle the bar over a subtree.
+- `CallAppBar` takes a `style` and a `primary`, and reports its themed height through `CallAppBar.heightOf`.
+- Added `StreamFlipCameraButton.isSupported`, false off iOS and Android.
+- Added `StreamCallDurationBadge`, the pill showing how long a call has been running, with encryption, recording and screen-share indicators.
+- Added `StreamCallDurationBadgeThemeData` on `StreamVideoTheme`, and `StreamCallDurationBadgeTheme` to restyle the badge over a subtree.
+- Added `callEncryptedTooltip`, `callRecordingTooltip` and `callScreenSharingTooltip` to the localizations, in English and Dutch.
+- Added `callDurationSpoken`, `callDurationHours`, `callDurationMinutes` and `callDurationSeconds` to the localizations, in English and Dutch.
 
 ### 🔄 Changed
 
 - The badge on the call control buttons is amber with no border, where it used to be red with one.
 - `accentWarning` is a lighter amber, which also repaints the fair bars on `StreamConnectionQualityIndicator`.
+- `CallAppBar` is laid out by `StreamToolbar` at the design system's 72 with `spacing.sm` edge padding, matching `CallControlBar`'s horizontal inset.
+- `CallAppBar.backgroundColor` colours a floating bar as well as a docked one.
+- `StreamCallDurationBadgeStyle.textStyle` merges onto the default rather than replacing it.
 
 ### 🐞 Fixed
 
+- A participant moving between the spotlight and the bar no longer loses their picture on the way. Their tile carries its element across the move rather than being built again where it lands.
 - The iOS picture-in-picture window keeps its participant's track subscribed while the app is backgrounded.
 - The picture-in-picture views follow the call they are given when it changes, rather than the one they were built with.
 - A picture-in-picture overlay no longer unsubscribes a participant the grid is showing, or pulls their subscription down to its own size.
@@ -227,6 +248,8 @@
 
 ### ⚠️ Deprecated
 
+- `StreamIncomingOutgoingCallThemeData`, `StreamIncomingOutgoingCallTheme` and `StreamVideoTheme.incomingCallTheme` / `outgoingCallTheme` are deprecated in favour of `StreamIncomingCallThemeData` and `StreamOutgoingCallThemeData`. The ringing screens are built on the design system now and no longer read them, so a theme set through them has no effect. The old pair also shared one inherited widget, so the two screens could never be themed apart.
+
 - `ParticipantLayoutMode.spotlight` is `speakerTop` now, and `pictureInPicture` is `speakerOneToOne`. `dart fix --apply` migrates both.
 - `StreamLocalVideoThemeData`, `StreamLocalVideoTheme` and `StreamVideoTheme.localVideoTheme` are deprecated in favour of `StreamFloatingParticipantTileThemeData`. `StreamLocalVideo` only positions the self-view now, so nothing reads them.
 - Every call control is named `Stream<Thing>Button` now, matching the split buttons, the `CallControlButton` / `CallFeatureButton` primitives, and the design system's own components. `ToggleMicrophoneOption` is `StreamMicrophoneButton`, and alongside it `ToggleCameraOption`, `ToggleScreenShareOption`, `ToggleRecordingOption`, `ToggleClosedCaptionsOption`, `ToggleLayoutOption`, `ToggleSpeakerphoneOption`, `FlipCameraOption`, `AddReactionOption` and `LeaveCallOption` become `StreamCameraButton`, `StreamScreenShareButton`, `StreamRecordingButton`, `StreamClosedCaptionsButton`, `StreamLayoutButton`, `StreamSpeakerphoneButton`, `StreamFlipCameraButton`, `StreamAddReactionButton` and `StreamLeaveCallButton`.
@@ -239,9 +262,15 @@
 
 ### ⚠️ Breaking
 
+- `CallParticipantSort` is a class rather than an alias for `Comparator`. It pairs the comparator with an `identity`, which is what `StreamCallParticipants` compares to notice the sorting has changed — a bare closure is a new function on every build, so comparing those reordered the list every time. Wrap an existing comparator as `CallParticipantSort(compare, identity: 'my-sort')`; without an identity a sort is only equal to itself. The SDK's own sorts are on `CallParticipantSorts`. `PictureInPictureConfiguration.sort` and `StreamPictureInPictureUiKitView.participantSort` take one too.
 - The desktop screen share picker is rebuilt on the design system. `TabbedScreenSelectWidget`, `ThumbnailGrid`, `ScreenSelectorStateNotifier` and `ScreenSelectorState` are gone; `StreamDesktopScreenShareSelector` and `DesktopScreenShareSourceController` replace them. `showDefaultScreenSelectionDialog` keeps its signature.
 - `ScreenShareThumbnailWidget` is `StreamDesktopScreenShareThumbnail` now, and takes the thumbnail from the source it is given rather than subscribing for one.
 - `StreamVideoRenderer` is a `StatelessWidget` and wraps its child in a `ViewportVisibilityReporter`, which does the measuring.
+- `CallParticipantsSpotlightView.padding` is a nullable `EdgeInsetsGeometry?` rather than a non-nullable `EdgeInsets`, and falls back to `StreamCallParticipantsSpotlightStyle.padding` (8px horizontal) when it is null. Code reading the field needs to handle null; code passing one is unaffected. A new `spacing` sets the gaps.
+- `StreamIncomingCallContent` and `StreamOutgoingCallContent` no longer take `singleParticipantAvatarTheme`, `multipleParticipantAvatarTheme`, `singleParticipantTextStyle`, `multipleParticipantTextStyle` or `callingLabelTextStyle`. The redesigned screens style one name and many the same, and size a group avatar on its own scale, so there is nothing left for a separate "multiple" theme to reach. Pass a `StreamRingingCallStyle` through `style:` or the new themes instead.
+- More than one person ringing is drawn as a `StreamAvatarGroup` rather than two or three separate avatars, and named "A, B, and N others" rather than "A, B and +N more".
+- The outgoing screen reads its camera state from `StreamRingingCameraController` rather than from `CallConnectOptions.camera.isEnabled`, which is false for a provided track.
+
 - `ParticipantLayoutMode.auto` is the default layout of `StreamCallContent`, `StreamCallParticipants` and `RegularCallParticipantsContent`, and renders what `grid` used to. The livestream widgets still default to `grid`.
 - `ParticipantLayoutMode.grid` gives the local participant a tile of its own instead of floating them over the grid.
 - `ParticipantLayoutMode.auto` floats the self-view on mobile only while at most two other people are in the call, and gives the local participant a tile beyond that.
@@ -252,6 +281,7 @@
 - `translations.defaultDevice` replaces `lobbySystemDefaultDevice` and `lobbyDefaultDeviceHint`, and reads "Default" rather than "System default". The two strings were shown side by side — the menu's row and the field's placeholder — so a translation could make them disagree about the same choice.
 - `StreamLayoutButton` takes `layout` instead of `initialLayout` and keeps no state, so the caller passes the mode back in through it. `dart fix --apply` renames the parameter.
 - `onError` on the device controls takes a `StreamDeviceErrorCallback`, receiving a typed `VideoError` and the action that failed.
+- `CallAppBar` no longer takes `elevation` or `leadingWidth`.
 - `StreamCallContent` no longer shows `CallDiagnosticsContent` on a double tap. The gesture held the pointer arena for `kDoubleTapTimeout`, so every tap in the call body — a participant tile's overflow menu above all — waited 300ms to be recognized, and the overlay it toggled only ever appeared in debug builds. `CallDiagnosticsContent` is still public: show it from an affordance of your own, the way `StreamLivestreamContent` does with `displayDiagnostics`.
 - `StreamLobbyViewThemeData`'s properties are replaced by a single `style:` taking a `StreamLobbyViewStyle`. `backgroundColor` and `cardBackgroundColor` are gone — the lobby paints no background of its own now that it builds no `Scaffold`, and the preview's fill is `previewBackgroundColor`. `userAvatarTheme` and `participantAvatarTheme` are gone with them; size and colour the avatars through `StreamAvatarTheme`. `participantListHeight` went with the participants card, and `optionOffBackgroundColor` / `optionOffIconColor` were already read by nothing.
 - `StreamLobbyViewThemeData`'s properties are replaced by a single `style:` taking a `StreamLobbyViewStyle`. `backgroundColor` and `cardBackgroundColor` are gone — the lobby paints no background of its own now that it builds no `Scaffold`, and the preview's fill comes from `StreamParticipantTileTheme` along with the rest of the tile, with `previewTileStyle` to make the preview differ from the call's tiles. `userAvatarTheme` and `participantAvatarTheme` are gone with them; size and colour the avatars through `StreamAvatarTheme`. `participantListHeight` went with the participants card, and `optionOffBackgroundColor` / `optionOffIconColor` were already read by nothing.
@@ -310,6 +340,10 @@
 - The picker asks the platform for 480x300 thumbnails where the platform honours a size; macOS captures at its own.
 - The picker's sources are released whichever way it is dismissed, including the escape key and a tap outside.
 - The picker says when it could not read the screens and windows, and offers a retry, instead of showing its empty state.
+- The participants grid arranges itself against the shape of the space it is given rather than the platform it runs on, so a short wide window puts its tiles in a row instead of a square.
+- The grid pages with chevrons at every size, and also by swipe, wheel or trackpad.
+- The speaker layouts give the bar its edge and the spotlight everything else, never drawing the spotlight wider than 16:9.
+- The participants bar draws 222x125 tiles, centred until they overflow and scaled down only where they would take more than a third of the view.
 - `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
 - Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.
 
@@ -328,6 +362,9 @@
 
 ### 🔄 Changed
 
+- [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
+- [Android] Replaced `kotlin-parcelize` with hand-written `Parcelable` implementations for the notification payloads. `kotlin-parcelize` is a Kotlin compiler plugin and does not run under built-in Kotlin: it applies without error but generates no `writeToParcel`, so `@Parcelize` classes fail to compile. Behaviour is unchanged.
+- Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.
 - Participant list widgets now subscribe to `Call.participantsStream`, which is throttled by participant count.
 - `StreamCallParticipants` and `StreamLivestreamHosts` no longer rebuild when an update leaves the rendered participants unchanged.
 - `LivestreamContent` renders participants from `Call.participantsStream` instead of the raw call state.

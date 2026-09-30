@@ -51,7 +51,7 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
   CallParticipantSort<CallParticipantState> get participantSort =>
       widget.pictureInPictureConfiguration?.sort ??
       widget.sort ??
-      CallParticipantSortingPresets.pictureInPicture;
+      CallParticipantSorts.pictureInPicture;
 
   @override
   void initState() {

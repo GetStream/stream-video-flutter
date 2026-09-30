@@ -376,6 +376,90 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'Your devices could not be read'**
   String get lobbyDevicesUnreadable;
+
+  /// Tooltip on the encryption indicator in the call duration badge
+  ///
+  /// In en, this message translates to:
+  /// **'This call is end-to-end encrypted'**
+  String get callEncryptedTooltip;
+
+  /// Tooltip on the recording indicator in the call duration badge
+  ///
+  /// In en, this message translates to:
+  /// **'This call is being recorded'**
+  String get callRecordingTooltip;
+
+  /// Tooltip on the screen share indicator in the call duration badge
+  ///
+  /// In en, this message translates to:
+  /// **'Someone is sharing their screen'**
+  String get callScreenSharingTooltip;
+
+  /// Accessible label for the call duration badge, read in place of the digits
+  ///
+  /// In en, this message translates to:
+  /// **'Call duration {duration}'**
+  String callDurationSpoken(String duration);
+
+  /// Hours part of the spoken call duration
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 hour} other{{count} hours}}'**
+  String callDurationHours(int count);
+
+  /// Minutes part of the spoken call duration
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 minute} other{{count} minutes}}'**
+  String callDurationMinutes(int count);
+
+  /// Seconds part of the spoken call duration
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 second} other{{count} seconds}}'**
+  String callDurationSeconds(int count);
+
+  /// Status line on the incoming ringing screen, under the caller's name
+  ///
+  /// In en, this message translates to:
+  /// **'Incoming call'**
+  String get ringingIncomingCall;
+
+  /// Status line on the outgoing ringing screen, while the other side is being rung
+  ///
+  /// In en, this message translates to:
+  /// **'Calling…'**
+  String get ringingCalling;
+
+  /// Label under the button that answers an incoming call
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get ringingAccept;
+
+  /// Label under the button that rejects an incoming call
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get ringingDecline;
+
+  /// Shown in place of a name on a ringing screen when the call has no members yet
+  ///
+  /// In en, this message translates to:
+  /// **'No participants'**
+  String get ringingNobody;
+
+  /// The name line on a ringing screen with exactly two members
+  ///
+  /// In en, this message translates to:
+  /// **'{first} and {second}'**
+  String ringingTwoCallers(String first, String second);
+
+  /// The name line on a ringing screen with three or more members: two names and a count of the rest
+  ///
+  /// In en, this message translates to:
+  /// **'{first}, {second}, and {count, plural, =1{1 other} other{{count} others}}'**
+  String ringingManyCallers(String first, String second, int count);
 }
 
 class _StreamVideoFlutterLocalizationsDelegate

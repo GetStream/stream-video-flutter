@@ -198,6 +198,38 @@ void main() {
     expect(_ScrollProbeState.mounts, 1, reason: 'the panel was remounted back');
     expect(key.currentState!.offset, 120);
   });
+
+  testWidgets('the call content survives crossing the breakpoint', (
+    tester,
+  ) async {
+    // The content moves between the two shapes the same way the panel does,
+    // and it carries every video renderer in the call. Remounting it tears
+    // those down, so the whole call blanks until the tracks decode a frame
+    // again.
+    _ScrollProbeState.mounts = 0;
+
+    Widget at({required bool fullScreen}) => MaterialApp(
+      home: CallSidePanelLayout(
+        animation: kAlwaysCompleteAnimation,
+        fullScreen: fullScreen,
+        panel: filler(panelKey),
+        child: const _ScrollProbe(),
+      ),
+    );
+
+    await tester.pumpWidget(at(fullScreen: false));
+    expect(_ScrollProbeState.mounts, 1);
+
+    await tester.pumpWidget(at(fullScreen: true));
+    expect(_ScrollProbeState.mounts, 1, reason: 'the content was remounted');
+
+    await tester.pumpWidget(at(fullScreen: false));
+    expect(
+      _ScrollProbeState.mounts,
+      1,
+      reason: 'the content was remounted back',
+    );
+  });
 }
 
 /// Stands in for the chat, whose scroll offset is what the key protects.
