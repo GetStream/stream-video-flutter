@@ -182,9 +182,13 @@
 - Added `StreamCallDurationBadgeThemeData` on `StreamVideoTheme`, and `StreamCallDurationBadgeTheme` to restyle the badge over a subtree.
 - Added `callEncryptedTooltip`, `callRecordingTooltip` and `callScreenSharingTooltip` to the localizations, in English and Dutch.
 - Added `callDurationSpoken`, `callDurationHours`, `callDurationMinutes` and `callDurationSeconds` to the localizations, in English and Dutch.
+- Added `participantsPrevious` and `participantsNext` to the localizations, in English and Dutch.
 
 ### 🔄 Changed
 
+- The participants bar in `CallParticipantsSpotlightView` carries a button at either end for the tiles it cannot fit.
+- `CallParticipantsGridView` pages with the same button as the participants bar.
+- Above the small breakpoint, the grid's page buttons sit either side of the grid rather than over it.
 - The badge on the call control buttons is amber with no border, where it used to be red with one.
 - `accentWarning` is a lighter amber, which also repaints the fair bars on `StreamConnectionQualityIndicator`.
 - `CallAppBar` is laid out by `StreamToolbar` at the design system's 72 with `spacing.sm` edge padding, matching `CallControlBar`'s horizontal inset.
