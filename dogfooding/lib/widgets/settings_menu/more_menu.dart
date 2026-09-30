@@ -198,6 +198,7 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
             call: call,
             enabled: !sharing,
             constraints: widget.screenShareConstraints,
+            desktopScreenPickerType: ScreenSharePickerType.system,
           ),
         ),
       if (!size.hasRecording)
