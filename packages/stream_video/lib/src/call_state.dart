@@ -19,8 +19,9 @@ enum SuspendedTrackState {
 }
 
 // Participant views derived from `CallState.callParticipants`, computed at
-// most once per participant list. `CallState` always stores an unmodifiable
-// copy of that list, so a view never goes stale, and states produced by
+// most once per participant list. `CallState` only exposes that list through
+// an unmodifiable view, and callers of `copyWith` hand over a fresh list they
+// never touch again, so a view never goes stale. States produced by
 // `copyWith` calls that leave the participants untouched share the list and
 // its views. Each view is an O(n) scan that UI selectors read on every
 // emission, which adds up in large calls.
@@ -300,7 +301,7 @@ class CallState extends Equatable {
       ownCapabilities: ownCapabilities ?? this.ownCapabilities,
       callParticipants: callParticipants == null
           ? this.callParticipants
-          : List.unmodifiable(callParticipants),
+          : UnmodifiableListView(callParticipants),
       callMembers: callMembers ?? this.callMembers,
       capabilitiesByRole: capabilitiesByRole ?? this.capabilitiesByRole,
       createdAt: createdAt ?? this.createdAt,

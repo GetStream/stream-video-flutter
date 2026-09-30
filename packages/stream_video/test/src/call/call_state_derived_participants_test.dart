@@ -80,15 +80,18 @@ void main() {
       expect(state.localParticipant, isNull);
     });
 
-    test('do not go stale when the list passed to copyWith is mutated', () {
-      final participants = [me, alice];
-      final state = _state(participants);
-      expect(state.otherParticipants, [alice]);
+    test('do not go stale because readers cannot mutate the source list', () {
+      final state = _state([me, alice, bob]);
+      expect(state.otherParticipants, [alice, bob]);
 
-      participants.add(bob);
+      expect(
+        () => state.callParticipants.sort((a, b) => 0),
+        throwsUnsupportedError,
+      );
+      expect(() => state.callParticipants.add(me), throwsUnsupportedError);
 
-      expect(state.callParticipants, [me, alice]);
-      expect(state.otherParticipants, [alice]);
+      expect(state.callParticipants, [me, alice, bob]);
+      expect(state.otherParticipants, [alice, bob]);
     });
 
     test('are unmodifiable, so one reader cannot corrupt another', () {
