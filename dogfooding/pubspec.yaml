@@ -68,9 +68,9 @@ flutter:
 flutter_launcher_icons:
   image_path: "assets/ic_launcher.png"
 
-  android: true
-  adaptive_icon_background: "assets/ic_launcher_background.png"
-  adaptive_icon_foreground: "assets/ic_launcher_foreground.png"
+  # The Android adaptive icon uses a gradient background drawable, which the
+  # generator cannot produce, so it is maintained by hand.
+  android: false
   ios: true
   remove_alpha_ios: true
   web:
