@@ -154,68 +154,71 @@ class LobbyEncryption extends StatelessWidget {
                             // gap below its header.
                             padding: EdgeInsets.only(top: spacing.md),
                             child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            spacing: spacing.sm,
-                            children: [
-                              StreamTextInput(
-                                controller: keyController,
-                                onChanged: onEncryptionKeyChanged,
-                                hintText: 'Shared room key',
-                                // Small buttons keep the field at its 40px
-                                // height instead of growing around 40px ones.
-                                style: StreamTextInputStyle(
-                                  contentPadding: EdgeInsetsDirectional.symmetric(
-                                    vertical: spacing.xs,
-                                    horizontal: spacing.md,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              spacing: spacing.sm,
+                              children: [
+                                StreamTextInput(
+                                  controller: keyController,
+                                  onChanged: onEncryptionKeyChanged,
+                                  hintText: 'Shared room key',
+                                  // Small buttons keep the field at its 40px
+                                  // height instead of growing around 40px ones.
+                                  style: StreamTextInputStyle(
+                                    contentPadding:
+                                        EdgeInsetsDirectional.symmetric(
+                                          vertical: spacing.xs,
+                                          horizontal: spacing.md,
+                                        ),
                                   ),
-                                ),
-                                // A key is matched verbatim, so iOS
-                                // auto-capitalizing the first letter turns a
-                                // valid key into one that will not decrypt.
-                                textCapitalization: .none,
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    if (!callExists)
+                                  // A key is matched verbatim, so iOS
+                                  // auto-capitalizing the first letter turns a
+                                  // valid key into one that will not decrypt.
+                                  textCapitalization: .none,
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (!callExists)
+                                        Tooltip(
+                                          message: 'Generate a new key',
+                                          child: StreamButton.icon(
+                                            style: .secondary,
+                                            type: .ghost,
+                                            size: .small,
+                                            themeStyle: _compactButton,
+                                            icon: Icon(
+                                              context.streamIcons.refresh,
+                                            ),
+                                            onPressed: busy
+                                                ? null
+                                                : onGenerateKey,
+                                          ),
+                                        ),
                                       Tooltip(
-                                        message: 'Generate a new key',
+                                        message: 'Copy key',
                                         child: StreamButton.icon(
                                           style: .secondary,
                                           type: .ghost,
                                           size: .small,
-                                          icon: Icon(
-                                            context.streamIcons.refresh,
-                                          ),
-                                          onPressed: busy
+                                          themeStyle: _compactButton,
+                                          icon: Icon(context.streamIcons.copy),
+                                          onPressed: encryptionKey.isEmpty
                                               ? null
-                                              : onGenerateKey,
+                                              : () => _copyKey(context),
                                         ),
                                       ),
-                                    Tooltip(
-                                      message: 'Copy key',
-                                      child: StreamButton.icon(
-                                        style: .secondary,
-                                        type: .ghost,
-                                        size: .small,
-                                        icon: Icon(context.streamIcons.copy),
-                                        onPressed: encryptionKey.isEmpty
-                                            ? null
-                                            : () => _copyKey(context),
-                                      ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                needsKey
-                                    ? 'Ask the call creator for the shared key, then enter it here to join.'
-                                    : 'Anyone with this key can join and decrypt the call. Share it only with people you trust.',
-                                style: textTheme.captionDefault.copyWith(
-                                  color: colorScheme.textSecondary,
+                                Text(
+                                  needsKey
+                                      ? 'Ask the call creator for the shared key, then enter it here to join.'
+                                      : 'Anyone with this key can join and decrypt the call. Share it only with people you trust.',
+                                  style: textTheme.captionDefault.copyWith(
+                                    color: colorScheme.textSecondary,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
                           ),
                   ),
                 ],
@@ -237,6 +240,12 @@ class LobbyEncryption extends StatelessWidget {
     );
   }
 }
+
+// The default padded tap target grows a 32px button to 48px, which is what
+// made the key field too tall.
+const _compactButton = StreamButtonThemeStyle(
+  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+);
 
 class _Header extends StatelessWidget {
   const _Header({
