@@ -112,14 +112,26 @@ typedef StreamParticipantGridColumnResolver =
 /// the preference stops applying past this.
 const _maxSquareAspectRatio = 2.0;
 
+/// How many times taller than wide a container must be before its tiles are
+/// scored no wider than a square, rather than at
+/// [StreamParticipantGridDetails.maxTileAspectRatio].
+///
+/// Five people on an upright phone are drawn two by two by one, not stacked
+/// five deep, until the box is about 2.5 times taller than wide.
+const _minTallAspectRatio = 1.5;
+
 /// Arranges [details] into the grid that renders the video largest, except
-/// that a square count stays square while the box is no wider than 2:1.
+/// that a square count stays square while the box is no wider than 2:1, and a
+/// tall box scores its tiles as squares.
 ///
 /// Each candidate column count is scored by the largest
 /// [StreamParticipantGridDetails.maxTileAspectRatio] rectangle that fits one of
 /// its cells — how big a participant actually appears, rather than how much of
-/// the cell they are handed. The tile is then drawn filling its cell, except
-/// that it is never wider than that ratio allows.
+/// the cell they are handed. In a box more than 1.5 times taller than wide,
+/// such as an upright phone, the largest rectangle no wider than a square is
+/// scored instead. The tile is
+/// then drawn filling its cell, except that it is never wider than
+/// [StreamParticipantGridDetails.maxTileAspectRatio] allows.
 ///
 /// A page of no participants comes back as
 /// [StreamParticipantGridArrangement.empty].
@@ -163,15 +175,17 @@ int _bestColumns(StreamParticipantGridDetails details) {
     return root;
   }
 
+  final scoredAspectRatio =
+      details.box.height > details.box.width * _minTallAspectRatio
+      ? math.min(1, details.maxTileAspectRatio).toDouble()
+      : details.maxTileAspectRatio;
+
   var best = 1;
   var bestArea = -1.0;
   for (var columns = 1; columns <= count; columns++) {
     final cell = _cellSize(details, columns);
-    final width = math.min(
-      cell.width,
-      cell.height * details.maxTileAspectRatio,
-    );
-    final area = width * width / details.maxTileAspectRatio;
+    final width = math.min(cell.width, cell.height * scoredAspectRatio);
+    final area = width * width / scoredAspectRatio;
 
     if (area > bestArea) {
       bestArea = area;

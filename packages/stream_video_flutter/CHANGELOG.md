@@ -5,6 +5,12 @@
 - Added `solveParticipantGrid`, the rule the participants grid arranges a page by, and `StreamCallParticipantsGridThemeData.columnResolver` to override it.
 - Added `StreamCallParticipantsGridThemeData.maxTileAspectRatio`, `compactPageSize` and `pageSize`.
 - Added `StreamCallParticipantsSpotlightThemeData` on `StreamVideoTheme`, and `StreamCallParticipantsSpotlightTheme` to restyle the speaker layouts over a subtree.
+- Added `StreamMenuOption.trailing`, the value a menu row reports at its far end.
+- Added `StreamMenuSection.content`, which draws arbitrary content in place of a section's rows.
+- Added `StreamMenuSection.collapsible`, whose heading folds the section away, and `initiallyCollapsed` for how it starts.
+- Added `StreamMenuOption.closesMenu`, so a row reporting state the menu shows can leave it up.
+- `StreamContextMenuHeading` takes a `trailing` and an `onTap`.
+- Added `toggleScreenShare`, the action `StreamScreenShareButton` performs, so another control can offer the same one.
 - Added `StreamParticipantTileChrome`, the levels of chrome a participant tile draws, and `StreamParticipantTileChromePolicy` to choose between them — `bySize` (the default), `always`, `none` or `custom`.
 - Added `StreamParticipantTileThemeData.chromePolicy` and `styleResolver`, which restyle a tile against the size it came out at.
 - `StreamParticipantTileProps` carries the `size` the tile was measured at and the `chrome` resolved for it, so a component registered on the factory lays out against the same numbers the default tile uses.
@@ -21,6 +27,7 @@
 - Added `ViewportVisibilityReporter`, which measures how much of its child is on screen and reports it to `Call.viewportVisibility`.
 - Redesigned the incoming and outgoing ringing screens. Both are an avatar over a name and a status line, with the call controls below. The incoming screen sits on the app surface; the outgoing one is drawn on top of the caller's own camera, blurred behind a scrim, and falls back to the flat scrim when the camera is off.
 - Added `CallRingingButton`, the 64px round button answering, declining and cancelling are drawn with. It is `CallControlButton` at the size the ringing designs give it, optionally with a label under it.
+- Added `CallControlNotificationBadge`, a `CallControlBadge` that draws a count as a `StreamBadgeNotification`, optionally in a `StreamBadgeNotificationType`.
 - `CallControlButton` takes a `themeStyle`, handed to the button as `props.themeStyle`. It resolves after the ambient `StreamButtonTheme`, so it reaches that one button — where a nested `StreamButtonTheme` would be dropped for the `positive` tone, which brings one of its own.
 - Added `StreamRingingCameraController`, which opens the camera the outgoing screen previews and hands it to the call as `TrackOption.provided`, so the call carries on with the camera the caller was already previewing rather than opening a second one. `StreamOutgoingCallContent` makes one unless it is given one.
 - Added `StreamIncomingCallThemeData` and `StreamOutgoingCallThemeData` on `StreamVideoTheme`, with `StreamIncomingCallTheme` and `StreamOutgoingCallTheme` to restyle either over a subtree. Both carry a `StreamRingingCallStyle`, which `StreamIncomingCallContent.style` and `StreamOutgoingCallContent.style` override per call site.
@@ -72,7 +79,7 @@
     onPressed: toggleScreenShare,
   )
   ```
-- Both buttons take a `showErrorBadge` flag, which draws a `StreamErrorBadge` on the top-end corner. It is independent of the tone and of whether the button can be pressed, so a control can be red, badged and still tappable — a microphone whose permission was refused, say. A button that simply cannot be used takes a null `onPressed`.
+- Both buttons take a `badge`, a `CallControlBadge`. A `CallControlErrorBadge` draws a `StreamErrorBadge` on the top-end corner. It is independent of the tone and of whether the button can be pressed, so a control can be red, badged and still tappable — a microphone whose permission was refused, say. A button that simply cannot be used takes a null `onPressed`.
 - The lobby theme follows the `@themeGen` pattern the other component themes use: `StreamLobbyViewThemeData` carries one nullable `StreamLobbyViewStyle`, every property of which means "no override", and `StreamLobbyViewTheme` is an `InheritedTheme` that merges with the ambient theme instead of replacing it. The style is deliberately small — the preview's appearance belongs to `StreamParticipantTileTheme`, the gaps between rows to `StreamSpacing` and the headings to `StreamTextTheme`, so an app restyles them by restyling those. What is left is the lobby's own geometry: `previewTileStyle`, `compactPreviewAspectRatio`, `expandedPreviewSize`, `maxOverlaidControls` and `joinButtonWidth`.
 
 - The lobby's preview is a `StreamParticipantTile` — the same component the call draws — so its surface, corner radius, name pill and placeholder avatar cannot drift from the tiles it leads to, and an app that themes its participant tiles themes the lobby too. The tile is handed its renderer directly, because the lobby's camera track is warmed up locally and never registered with the call, so the tile's usual lookup by session id would find nothing. The overflow menu, sound indicator, connection quality and reactions are switched off — nobody has joined, so there is nothing to pin or mute, no connection to rate, no reactions to receive, and no local audio level for an indicator to animate. The overflow button is suppressed through the tile's style rather than its props, so it stays suppressed even under an app-wide `participantTile` builder that adds actions to every tile. The speaking outline is left on but never triggers yet: the in-call speaking state comes from the SFU, and a local microphone level pre-join is still to come. `StreamLobbyController.localParticipant` exposes the `CallParticipantState` this is built from.
@@ -182,10 +189,15 @@
 - Added `StreamCallDurationBadgeThemeData` on `StreamVideoTheme`, and `StreamCallDurationBadgeTheme` to restyle the badge over a subtree.
 - Added `callEncryptedTooltip`, `callRecordingTooltip` and `callScreenSharingTooltip` to the localizations, in English and Dutch.
 - Added `callDurationSpoken`, `callDurationHours`, `callDurationMinutes` and `callDurationSeconds` to the localizations, in English and Dutch.
+- Added `participantsPrevious` and `participantsNext` to the localizations, in English and Dutch.
 
 ### 🔄 Changed
 
+- The participants bar in `CallParticipantsSpotlightView` carries a button at either end for the tiles it cannot fit.
+- `CallParticipantsGridView` pages with the same button as the participants bar.
+- Above the small breakpoint, the grid's page buttons sit either side of the grid rather than over it.
 - The badge on the call control buttons is amber with no border, where it used to be red with one.
+- The count on `StreamParticipantsButton` uses the design system's neutral badge instead of `accentSuccess`.
 - `accentWarning` is a lighter amber, which also repaints the fair bars on `StreamConnectionQualityIndicator`.
 - `CallAppBar` is laid out by `StreamToolbar` at the design system's 72 with `spacing.sm` edge padding, matching `CallControlBar`'s horizontal inset.
 - `CallAppBar.backgroundColor` colours a floating bar as well as a docked one.
@@ -250,7 +262,7 @@
 
   Each old name survives as a deprecated typedef, so an unmigrated call site keeps compiling. `dart fix --apply` renames them all.
 
-- `CallControlOption` is deprecated in favour of `CallControlButton` and `CallFeatureButton`, and has been restored to the shape it has in the last release: it takes `iconColor`, `disabledIconColor`, `elevation`, `backgroundColor`, `disabledBackgroundColor`, `shape` and `padding`, and draws an `ElevatedButton` styled from `StreamCallControlsTheme`. Code written against the released SDK keeps compiling and keeps looking the way it did. Migrating is manual rather than a `dart fix`: neither replacement takes per-instance colours, so a rename would drop whatever the call site passed. Map `state`-free call sites and the old `on` state onto `CallControlButton(tone: .neutral)`, `off` onto `.negative`, `positive` onto `.positive` for a control or `CallFeatureButton(selected: true)` for a feature, `negative` onto `.negative`, and `disabled` onto `CallControlButton(tone: .negative, showErrorBadge: true)`.
+- `CallControlOption` is deprecated in favour of `CallControlButton` and `CallFeatureButton`, and has been restored to the shape it has in the last release: it takes `iconColor`, `disabledIconColor`, `elevation`, `backgroundColor`, `disabledBackgroundColor`, `shape` and `padding`, and draws an `ElevatedButton` styled from `StreamCallControlsTheme`. Code written against the released SDK keeps compiling and keeps looking the way it did. Migrating is manual rather than a `dart fix`: neither replacement takes per-instance colours, so a rename would drop whatever the call site passed. Map `state`-free call sites and the old `on` state onto `CallControlButton(tone: .neutral)`, `off` onto `.negative`, `positive` onto `.positive` for a control or `CallFeatureButton(selected: true)` for a feature, `negative` onto `.negative`, and `disabled` onto `CallControlButton(tone: .negative, badge: CallControlErrorBadge())`.
 - `StreamCallParticipantThemeData` and `StreamCallParticipantTheme` are deprecated. Their properties now live in `StreamParticipantTileThemeData`, `StreamParticipantLabelThemeData`, `StreamConnectionQualityIndicatorThemeData` and `StreamCallParticipantsGridThemeData`. A theme passed to `StreamVideoTheme(callParticipantTheme: ...)` is still applied — in full, so a tile styled the old way keeps looking the way it did. Stop passing it to pick up the redesign, and pass a theme in the new shape to replace it outright. The translation runs in that factory only: setting `callParticipantTheme` through `copyWith`, or wrapping a subtree in the `StreamCallParticipantTheme` widget, changes the field without restyling anything.
 - `StreamCallParticipant` is deprecated in favour of `StreamParticipantTile`, matching the component name in the design system. It keeps its own full parameter list and now only wraps `DefaultStreamParticipantTile`. Swapping the name is a manual migration rather than a `dart fix`: `StreamParticipantTile` replaces the visual parameters with a single `style:` (see the Breaking entry below), so a rename would drop whatever a call site passed. `dart fix --apply` does still strip the parameters that no longer have any effect.
 

@@ -100,7 +100,7 @@ void main() {
       deviceChanges.add(const []);
       await tester.pumpAndSettle();
 
-      expect(button(tester).showErrorBadge, isTrue);
+      expect(button(tester).badge, isA<CallControlErrorBadge>());
       expect(button(tester).onPressed, isNull);
       // Badged, not muted: an absent device is not a choice the user made.
       expect(button(tester).tone, CallControlTone.neutral);
@@ -119,14 +119,14 @@ void main() {
       ]);
       await tester.pumpAndSettle();
 
-      expect(button(tester).showErrorBadge, isFalse);
+      expect(button(tester).badge, isNull);
       expect(button(tester).onPressed, isNotNull);
     });
 
     testWidgets('says nothing until the platform has answered', (tester) async {
       await pump(tester);
 
-      expect(button(tester).showErrorBadge, isFalse);
+      expect(button(tester).badge, isNull);
       expect(button(tester).onPressed, isNotNull);
     });
 
@@ -143,7 +143,7 @@ void main() {
       ]);
       await tester.pumpAndSettle();
 
-      expect(button(tester).showErrorBadge, isFalse);
+      expect(button(tester).badge, isNull);
       expect(button(tester).onPressed, isNotNull);
     });
   });

@@ -50,7 +50,6 @@ class StreamScreenShareButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var screenShareConstraints = this.screenShareConstraints;
     final presentIcon = context.streamPresentIcon;
 
     Widget buildContent(bool enabled) => CallFeatureButton(
@@ -62,54 +61,13 @@ class StreamScreenShareButton extends StatelessWidget {
             : disabledScreenShareIcon ?? presentIcon,
       ),
       selected: enabled,
-      onPressed: () async {
-        final toggledEnabled = !enabled;
-
-        if (CurrentPlatform.isDesktop && toggledEnabled) {
-          final source =
-              await (desktopScreenSelectorBuilder?.call(context) ??
-                  showDefaultScreenSelectionDialog(context));
-
-          if (source != null) {
-            screenShareConstraints =
-                (screenShareConstraints ?? const ScreenShareConstraints())
-                    .copyWith(deviceId: source.id);
-          } else {
-            return;
-          }
-        }
-
-        if (CurrentPlatform.isAndroid) {
-          if (toggledEnabled) {
-            if (!await call.requestScreenSharePermission()) {
-              return;
-            }
-
-            final serviceStarted = await StreamBackgroundService()
-                .startScreenSharingNotificationService(call);
-
-            if (!serviceStarted) {
-              return;
-            }
-          } else {
-            await StreamBackgroundService()
-                .stopScreenSharingNotificationService(
-                  call.callCid.value,
-                );
-          }
-        }
-
-        final result = await call.setScreenShareEnabled(
-          enabled: toggledEnabled,
-          constraints: screenShareConstraints,
-        );
-
-        if (CurrentPlatform.isAndroid && result.isFailure) {
-          await StreamBackgroundService().stopScreenSharingNotificationService(
-            call.callCid.value,
-          );
-        }
-      },
+      onPressed: () => toggleScreenShare(
+        context,
+        call: call,
+        enabled: !enabled,
+        constraints: screenShareConstraints,
+        desktopScreenSelectorBuilder: desktopScreenSelectorBuilder,
+      ),
     );
 
     if (localParticipant != null) {
