@@ -43,11 +43,11 @@ void main() {
             child: CallControlButton(
               icon: Icon(icons.voiceOffFill),
               tone: .negative,
-              showErrorBadge: true,
+              badge: const CallControlErrorBadge(),
               onPressed: () {},
             ),
           ),
-          // A null callback is what disables the button; `showErrorBadge` is a
+          // A null callback is what disables the button; the badge is a
           // separate axis, so both can be true at once.
           GoldenTestScenario(
             name: 'disabled',
@@ -58,7 +58,7 @@ void main() {
             child: CallControlButton(
               icon: Icon(icons.videoOffFill),
               tone: .negative,
-              showErrorBadge: true,
+              badge: const CallControlErrorBadge(),
             ),
           ),
         ],

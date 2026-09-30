@@ -25,6 +25,7 @@ import 'core/connection_state.dart';
 import 'core/internet_connection_network_state_provider.dart';
 import 'errors/stream_video_exception.dart';
 import 'errors/stream_video_exception_composer.dart';
+import 'internal/_background_mute_policy.dart';
 import 'internal/_instance_holder.dart';
 import 'latency/latency_service.dart';
 import 'latency/latency_settings.dart';
@@ -603,6 +604,8 @@ class StreamVideo extends Disposable {
       final call = _makeCallFromRinging(data: event.data);
       _ringingCalls[event.data.callCid.value] = call;
       _state.incomingCall.value = call;
+    } else if (event is CoordinatorCallRejectedEvent) {
+      unawaited(_onRingingCancelled(event));
     } else if (event is CoordinatorConnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] connected ${event.userId}');
       _connectionState = ConnectionState.connected(_state.currentUser.id);
@@ -613,6 +616,33 @@ class StreamVideo extends Disposable {
     } else if (event is CoordinatorReconnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] reconnected ${event.userId}');
     }
+  }
+
+  /// Ends a ringing call cancelled by the caller.
+  ///
+  /// Applies only when the caller rejects; other rejections are handled elsewhere.
+  Future<void> _onRingingCancelled(CoordinatorCallRejectedEvent event) async {
+    final cid = event.callCid.value;
+    if (event.rejectedBy.id != event.metadata.details.createdBy.id) return;
+
+    final call = _ringingCalls[cid] ?? _state.incomingCall.value;
+    if (call == null || call.callCid.value != cid) return;
+
+    final status = call.state.value.status;
+    if (status is! CallStatusIncoming || status.acceptedByMe) return;
+
+    _logger.i(
+      () => '[onCoordinatorEvent] ringing cancelled by the caller, cid: $cid',
+    );
+
+    _cancelIncomingAutoRejectTimerByCid(cid);
+
+    // Leaving, not rejecting: the caller has already withdrawn the call, so
+    // there is nothing to tell the coordinator. `leave` clears the ringing
+    // cache and `incomingCall` on its way out.
+    await call.leave(
+      reason: DisconnectReason.cancelled(byUserId: event.rejectedBy.id),
+    );
   }
 
   void _rewatchCalls() {
@@ -638,6 +668,19 @@ class StreamVideo extends Disposable {
     );
   }
 
+  /// Whether the capture session in use supports camera access while
+  /// multitasking, or `null` when it could not be read.
+  Future<bool?> _multitaskingCameraAccessSupported() async {
+    if (!CurrentPlatform.isIos) return null;
+
+    try {
+      return await rtc.Helper.isIOSMultitaskingCameraAccessSupported();
+    } catch (e) {
+      _logger.w(() => '[multitaskingCameraAccessSupported] failed: $e');
+      return null;
+    }
+  }
+
   Future<void> _onAppState(LifecycleState state) async {
     _logger.d(() => '[onAppState] state: $state');
     try {
@@ -656,6 +699,9 @@ class StreamVideo extends Disposable {
           _subscriptions.cancel(_idEvents);
           await _client.closeConnection();
         } else if (activeCalls.isNotEmpty) {
+          final multitaskingCameraAccessSupported =
+              await _multitaskingCameraAccessSupported();
+
           for (final activeCall in activeCalls) {
             final callState = activeCall.state.value;
             final isVideoEnabled =
@@ -663,7 +709,13 @@ class StreamVideo extends Disposable {
             final isAudioEnabled =
                 callState.localParticipant?.isAudioEnabled ?? false;
 
-            if (_options.muteVideoWhenInBackground && isVideoEnabled) {
+            if (shouldMuteCameraInBackground(
+              isVideoEnabled: isVideoEnabled,
+              muteVideoWhenInBackground: _options.muteVideoWhenInBackground,
+              multitaskingCameraAccessSupported:
+                  multitaskingCameraAccessSupported,
+              platform: CurrentPlatform.type,
+            )) {
               await activeCall.setCameraEnabled(enabled: false);
               _mutedCameraByStateChange[activeCall.callCid.value] = true;
               _logger.v(() => 'Muted camera track since app was paused.');
@@ -827,10 +879,15 @@ class StreamVideo extends Disposable {
     return manager.on<T>(onEvent);
   }
 
-  /// This method is used to dispose the StreamVideo instance after the ringing event is resolved.
-  /// It is used primarily for Firebase Messaging background handler where separate isolate is used to handle the message.
+  /// Disposes this client a second after the ringing flow resolves — once the
+  /// user has answered, declined, or let the call time out.
   ///
-  /// [disposingCallback] is a callback that allows to perform any additional disposing operations after the ringing event is resolved.
+  /// [disposingCallback] runs first, for whatever the caller set up alongside
+  /// the client.
+  @Deprecated(
+    'Use StreamVideoPushHandler.handleBackgroundMessage instead, which runs the '
+    'whole background lifecycle.',
+  )
   StreamSubscription<RingingEvent>? disposeAfterResolvingRinging({
     void Function()? disposingCallback,
   }) {
@@ -1536,10 +1593,9 @@ class StreamVideo extends Disposable {
     }
 
     // Only handle messages from stream.video
-    final sender = payload['sender'] as String?;
-    if (sender != 'stream.video') return false;
+    if (!StreamPushPayload.isStreamPush(payload)) return false;
 
-    final callCid = payload['call_cid'] as String?;
+    final callCid = StreamPushPayload.callCidOf(payload);
     if (callCid == null) return false;
 
     final callUUID = const Uuid().v4();
@@ -1552,14 +1608,15 @@ class StreamVideo extends Disposable {
       callId = splitCid.last;
     }
 
-    final createdById = payload['created_by_id'] as String?;
-    final createdByName = payload['created_by_display_name'] as String?;
-    final callDisplayName = payload['call_display_name'] as String?;
+    final createdById = payload[StreamPushPayload.createdByIdKey] as String?;
+    final createdByName =
+        payload[StreamPushPayload.createdByDisplayNameKey] as String?;
+    final callDisplayName =
+        payload[StreamPushPayload.callDisplayNameKey] as String?;
 
-    final hasVideo = payload['video'] as String?;
+    final hasVideo = payload[StreamPushPayload.videoKey] as String?;
 
-    final type = payload['type'] as String?;
-    if (handleMissedCall && type == 'call.missed') {
+    if (handleMissedCall && StreamPushPayload.isMissedCallPush(payload)) {
       unawaited(
         manager.showMissedCall(
           uuid: callUUID,
@@ -1572,7 +1629,7 @@ class StreamVideo extends Disposable {
       );
 
       return true;
-    } else if (type != 'call.ring') {
+    } else if (!StreamPushPayload.isRingingPush(payload)) {
       return false;
     }
 
@@ -1827,6 +1884,10 @@ class StreamVideoOptions {
 
   final AudioProcessor? audioProcessor;
 
+  /// Mutes the camera track while the app is in the background.
+  ///
+  /// On iOS devices without multitasking camera access the camera track is
+  /// muted in the background regardless of this option.
   final bool muteVideoWhenInBackground;
   final bool muteAudioWhenInBackground;
   final bool autoConnect;

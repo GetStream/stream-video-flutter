@@ -126,6 +126,32 @@ void main() {
     );
 
     streamGoldenTest(
+      'CallParticipantsSpotlightView offers the bar it cannot fit',
+      fileName: 'stream_call_participants_spotlight_bar_buttons',
+      brightness: brightness,
+      pumpBeforeTest: pumpBeforeTest,
+      builder: () => GoldenTestGroup(
+        columns: 2,
+        children: [
+          // More people than either bar has room for, so each carries the
+          // button that leads to the rest of them.
+          GoldenTestScenario(
+            name: 'bar below',
+            child: _layout(const Size(560, 520), others: 5),
+          ),
+          GoldenTestScenario(
+            name: 'bar to the right',
+            child: _layout(
+              const Size(768, 400),
+              others: 5,
+              barAlignment: ParticipantsBarAlignment.right,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    streamGoldenTest(
       'CallParticipantsSpotlightView stops the stage at 16:9',
       fileName: 'stream_call_participants_spotlight_large',
       brightness: brightness,

@@ -7,6 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 // �🐦 Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart'
     hide CurrentPlatform;
 import 'package:stream_video_filters/video_effects_manager.dart';
@@ -18,7 +19,6 @@ import '../core/repos/app_preferences.dart';
 import '../core/repos/user_chat_repository.dart';
 import '../di/injector.dart';
 import '../utils/feedback_dialog.dart';
-import '../widgets/badged_call_option.dart';
 import '../widgets/call_connection_banner.dart';
 import '../widgets/closed_captions_widget.dart';
 import '../widgets/e2ee_key_notification.dart';
@@ -107,6 +107,9 @@ class _CallScreenState extends State<CallScreen>
     curve: Curves.easeOutCubic,
     reverseCurve: Curves.easeInCubic,
   );
+
+  /// Whether this screen has asked to close and is waiting its turn.
+  var _closeRequested = false;
 
   /// Carries the panel's own state across the breakpoint: the docked and the
   /// full-screen layout hang it in different places, and without a global key
@@ -422,14 +425,12 @@ class _CallScreenState extends State<CallScreen>
   Widget _participantsControl(Call call) => PartialCallStateBuilder(
     call: call,
     selector: (state) => state.callParticipants.length,
-    builder: (context, count) => BadgedCallOption(
-      badgeCount: count == 0 ? null : count,
-      callControlOption: CallFeatureButton(
-        icon: Icon(context.streamIcons.usersFill),
-        tooltip: 'Participants',
-        selected: _openPanel == CallSidePanel.participants,
-        onPressed: () => _togglePanel(CallSidePanel.participants),
-      ),
+    builder: (context, count) => CallFeatureButton(
+      icon: Icon(context.streamIcons.usersFill),
+      tooltip: 'Participants',
+      selected: _openPanel == CallSidePanel.participants,
+      badge: CallControlNotificationBadge(count: count, type: .neutral),
+      onPressed: () => _togglePanel(CallSidePanel.participants),
     ),
   );
 
@@ -513,6 +514,21 @@ class _CallScreenState extends State<CallScreen>
 
   @override
   Widget build(BuildContext context) {
+    if (_closeRequested) {
+      // `ModalRoute.of` depends on the route's own status, so this rebuilds
+      // when the screen becomes the top one and can finally close. A plain
+      // Scaffold rather than nothing, so a frame spent waiting shows the
+      // app's background instead of bare black.
+      final isCurrent = ModalRoute.of(context)?.isCurrent ?? false;
+      if (isCurrent) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && context.mounted) context.pop();
+        });
+      }
+
+      return const Scaffold();
+    }
+
     // ignore: deprecated_member_use
     return WillPopScope(
       onWillPop: () async {
@@ -547,7 +563,16 @@ class _CallScreenState extends State<CallScreen>
             // can still be said on the one the pop lands on.
             final messenger = ScaffoldMessenger.maybeOf(context);
 
-            Navigator.of(context).pop();
+            // `pop` closes the topmost route, which is not always this
+            // screen: a dialog can sit above it, and so can a second call
+            // screen. Closing that instead would take down whatever the user
+            // is actually looking at.
+            if (!(ModalRoute.of(context)?.isCurrent ?? false)) {
+              setState(() => _closeRequested = true);
+              return;
+            }
+
+            context.pop();
 
             if (reason is DisconnectReasonReconnectionFailed) {
               messenger?.showSnackBar(
@@ -774,13 +799,11 @@ class __ShowChatButtonState extends State<_ShowChatButton> {
 
   @override
   Widget build(BuildContext context) {
-    return BadgedCallOption(
-      callControlOption: CallFeatureButton(
-        icon: Icon(context.streamIcons.messageBubblesFill),
-        selected: widget.selected,
-        onPressed: widget.channel != null ? widget.onPressed : null,
-      ),
-      badgeCount: _unreadCount == 0 ? null : _unreadCount,
+    return CallFeatureButton(
+      icon: Icon(context.streamIcons.messageBubblesFill),
+      selected: widget.selected,
+      badge: CallControlNotificationBadge(count: _unreadCount),
+      onPressed: widget.channel != null ? widget.onPressed : null,
     );
   }
 }
