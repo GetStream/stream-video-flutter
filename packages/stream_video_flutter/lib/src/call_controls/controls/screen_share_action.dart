@@ -27,7 +27,7 @@ Future<void> toggleScreenShare(
       CurrentPlatform.isDesktop &&
       enabled &&
       desktopScreenPickerType == ScreenSharePickerType.system &&
-      await isSystemContentPickerSupported();
+      await isDesktopSystemContentPickerSupported();
 
   if (useSystemPicker) {
     shareConstraints = (shareConstraints ?? const ScreenShareConstraints())
