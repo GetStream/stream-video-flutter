@@ -74,12 +74,14 @@ platform :mac do
     )
     archive(flavor: options[:flavor])
 
+    is_prod = options[:flavor] == 'prod'
+
     upload_to_testflight(
       api_key: appstore_api_key,
       app_platform: 'osx',
       pkg: lane_context[SharedValues::PKG_OUTPUT_PATH],
       distribute_external: false,
-      submit_beta_review: false,
+      submit_beta_review: is_prod,
       groups: ['Internal Testers'],
       changelog: 'Lots of amazing new features to test out!',
       skip_waiting_for_build_processing: true,
