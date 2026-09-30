@@ -10,7 +10,7 @@ final StreamCallType kCallType = StreamCallType.defaultType();
 /// Chat channel type used on Stream's own environments.
 const String kMessageChannelType = 'videocall';
 
-const String kAppName = 'Stream Dogfooding';
+const String kAppName = 'Stream Video Calls';
 const double kMaxWidthRegularScreen = 500;
 
 /// Whether the app runs as the production build.
