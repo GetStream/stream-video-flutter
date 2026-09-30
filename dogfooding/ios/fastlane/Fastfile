@@ -74,6 +74,7 @@ platform :ios do
       upload_to_testflight(
         api_key: appstore_api_key,
         distribute_external: is_prod,
+        submit_beta_review: is_prod,
         notify_external_testers: false,
         groups: is_prod ? ['Internal Testers', 'External Testers'] : ['Internal Testers'],
         changelog: 'Lots of amazing new features to test out!',
