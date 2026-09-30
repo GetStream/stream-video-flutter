@@ -17,8 +17,9 @@ Future<void> showFeedbackDialog(
       final colorScheme = StreamTheme.of(context).colorScheme;
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Scaffold(
-          body: Align(
+        child: Material(
+          type: MaterialType.transparency,
+          child: Align(
             child: Stack(
               children: [
                 Container(
