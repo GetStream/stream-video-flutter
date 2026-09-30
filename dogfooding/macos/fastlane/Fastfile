@@ -80,9 +80,9 @@ platform :mac do
       api_key: appstore_api_key,
       app_platform: 'osx',
       pkg: lane_context[SharedValues::PKG_OUTPUT_PATH],
-      distribute_external: false,
+      distribute_external: is_prod,
       submit_beta_review: is_prod,
-      groups: ['Internal Testers'],
+      groups: is_prod ? ['Internal Testers', 'External Testers'] : ['Internal Testers'],
       changelog: 'Lots of amazing new features to test out!',
       skip_waiting_for_build_processing: true,
     )
