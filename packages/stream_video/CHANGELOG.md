@@ -26,6 +26,7 @@
 - Fixed `Call.join` being rejected with "a call with the same cid is in progress" when called again while a join was in progress. A repeated call now returns the result of the join already in flight.
 - Fixed leaving a call trying to stop noise cancellation when no audio processor is configured.
 - Fixed leaving a call calling `removeTrack` on the publisher for received tracks, which failed and logged `sender is null` on every leave.
+- [iOS/Android] Fixed camera video layers being announced to the SFU in landscape while a phone held upright publishes portrait frames. The announced size now follows the orientation stream_webrtc_flutter reports for the camera, and falls back to the orientation of the app's window on versions that report the sensor's size.
 
 ## 1.6.0
 

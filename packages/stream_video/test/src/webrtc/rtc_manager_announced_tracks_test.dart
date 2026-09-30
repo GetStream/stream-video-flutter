@@ -1,6 +1,9 @@
+import 'dart:ui' show Size;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/call/stats/tracer.dart';
+import 'package:stream_video/src/platform_detector/platform_detector.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_codec.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_publish_options.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
@@ -580,5 +583,110 @@ void main() {
         expect(layers.last, const RtcVideoDimension(width: 1280, height: 720));
       },
     );
+
+    group('orientation', () {
+      // The sensor reports a landscape capture size.
+      const sensorSettings = {'width': 2560, 'height': 1280};
+
+      void setScreen(Size size) {
+        final view =
+            TestWidgetsFlutterBinding.instance.platformDispatcher.views.first;
+        view.physicalSize = size;
+        addTearDown(view.resetPhysicalSize);
+      }
+
+      void setPlatform(PlatformType platform) {
+        CurrentPlatform.debugPlatformOverride = platform;
+        addTearDown(() => CurrentPlatform.debugPlatformOverride = null);
+      }
+
+      for (final platform in [PlatformType.android, PlatformType.ios]) {
+        test(
+          'are announced portrait on a portrait $platform screen, matching '
+          'the rotated frames the encoder produces',
+          () async {
+            setPlatform(platform);
+            setScreen(const Size(1080, 2400));
+
+            final layers = await announcedLayers(settings: sensorSettings);
+
+            expect(layers, const [
+              RtcVideoDimension(width: 320, height: 640),
+              RtcVideoDimension(width: 640, height: 1280),
+              RtcVideoDimension(width: 1280, height: 2560),
+            ]);
+          },
+        );
+      }
+
+      test('stay landscape on a landscape phone screen', () async {
+        setPlatform(PlatformType.android);
+        setScreen(const Size(2400, 1080));
+
+        final layers = await announcedLayers(settings: sensorSettings);
+
+        expect(layers.last, const RtcVideoDimension(width: 2560, height: 1280));
+      });
+
+      test('are left as reported on desktop', () async {
+        setPlatform(PlatformType.macOS);
+        setScreen(const Size(1080, 2400));
+
+        final layers = await announcedLayers(settings: sensorSettings);
+
+        expect(layers.last, const RtcVideoDimension(width: 2560, height: 1280));
+      });
+
+      test('are left as reported when the screen has no size yet', () async {
+        setPlatform(PlatformType.android);
+        setScreen(Size.zero);
+
+        final layers = await announcedLayers(settings: sensorSettings);
+
+        expect(layers.last, const RtcVideoDimension(width: 2560, height: 1280));
+      });
+
+      group('when the platform reports the size in frame orientation', () {
+        test(
+          'trust it over the Flutter view, e.g. a tall split-screen window '
+          'on a landscape display',
+          () async {
+            setPlatform(PlatformType.android);
+            setScreen(const Size(1080, 2400));
+
+            final layers = await announcedLayers(
+              settings: const {
+                'width': 2560,
+                'height': 1280,
+                'sensorOrientation': 90,
+              },
+            );
+
+            expect(
+              layers.last,
+              const RtcVideoDimension(width: 2560, height: 1280),
+            );
+          },
+        );
+
+        test('keep a portrait size on a landscape view', () async {
+          setPlatform(PlatformType.android);
+          setScreen(const Size(2400, 1080));
+
+          final layers = await announcedLayers(
+            settings: const {
+              'width': 1280,
+              'height': 2560,
+              'sensorOrientation': 90,
+            },
+          );
+
+          expect(
+            layers.last,
+            const RtcVideoDimension(width: 1280, height: 2560),
+          );
+        });
+      });
+    });
   });
 }

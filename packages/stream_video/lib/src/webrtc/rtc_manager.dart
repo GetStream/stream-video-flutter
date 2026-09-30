@@ -1479,20 +1479,39 @@ extension PublisherRtcManager on RtcManager {
     var dimension = track.getVideoDimension();
 
     if (track.trackType == SfuTrackType.screenShare) {
-      final physicalSize =
-          WidgetsBinding.instance.platformDispatcher.views.first.physicalSize;
-
-      final screenDimension = RtcVideoDimension(
-        width: physicalSize.width.toInt(),
-        height: physicalSize.height.toInt(),
-      );
-
+      final screenDimension = _getScreenDimension();
       _logger.v(() => '[publishVideoTrack] screenDimension: $screenDimension');
 
-      dimension = screenDimension;
+      if (screenDimension != null) dimension = screenDimension;
+    } else if (track.trackType == SfuTrackType.video &&
+        CurrentPlatform.isMobile &&
+        !track.reportsFrameOrientedSize()) {
+      // Mobile cameras report the sensor's capture size, which is landscape,
+      // but frames are rotated to the display orientation before encoding: a
+      // phone held upright encodes portrait frames. Announce what is encoded.
+      // Skipped when the platform already reports the size in frame
+      // orientation, which it knows better than the shape of the Flutter view.
+      final screenDimension = _getScreenDimension();
+      if (screenDimension != null) {
+        dimension = dimension.orientedLike(screenDimension);
+      }
     }
 
     return dimension;
+  }
+
+  /// The physical size of the first Flutter view, or null when there is no
+  /// view or it has no size yet (e.g. the app was started in the background).
+  RtcVideoDimension? _getScreenDimension() {
+    final view = WidgetsBinding.instance.platformDispatcher.views.firstOrNull;
+    if (view == null) return null;
+
+    final dimension = RtcVideoDimension(
+      width: view.physicalSize.width.toInt(),
+      height: view.physicalSize.height.toInt(),
+    );
+
+    return dimension.isEmpty ? null : dimension;
   }
 
   /// In SVC, we need to send only one video encoding (layer).
@@ -2614,6 +2633,19 @@ extension on RtcLocalTrack<VideoConstraints> {
       );
     }
     return dimension;
+  }
+
+  /// Whether the platform reports the capture size already rotated to the
+  /// orientation of the delivered frames.
+  ///
+  /// stream_webrtc_flutter marks such settings with the camera's
+  /// `sensorOrientation`; older versions report the size in sensor space.
+  bool reportsFrameOrientedSize() {
+    try {
+      return mediaTrack.getSettings().containsKey('sensorOrientation');
+    } catch (_) {
+      return false;
+    }
   }
 }
 

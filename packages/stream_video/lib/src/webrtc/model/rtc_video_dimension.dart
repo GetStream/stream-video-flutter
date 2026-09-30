@@ -53,6 +53,21 @@ extension RtcVideoDimensionHelpers on RtcVideoDimension {
 
   /// Simply returns the area
   int area() => width * height;
+
+  /// Returns this dimension with width and height swapped if needed so its
+  /// orientation (portrait or landscape) matches [reference].
+  ///
+  /// Square or empty dimensions, on either side, are returned unchanged.
+  RtcVideoDimension orientedLike(RtcVideoDimension reference) {
+    if (isEmpty || reference.isEmpty) return this;
+    if (width == height || reference.width == reference.height) return this;
+
+    final isPortrait = height > width;
+    final isReferencePortrait = reference.height > reference.width;
+    if (isPortrait == isReferencePortrait) return this;
+
+    return RtcVideoDimension(width: height, height: width);
+  }
 }
 
 extension RtcVideoDimensionPresets on RtcVideoDimension {
