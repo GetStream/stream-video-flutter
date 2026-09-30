@@ -45,7 +45,10 @@ void main() {
     test('are computed once per state instance', () {
       final state = _state([me, alice, bob]);
 
-      expect(identical(state.otherParticipants, state.otherParticipants), isTrue);
+      expect(
+        identical(state.otherParticipants, state.otherParticipants),
+        isTrue,
+      );
       expect(identical(state.activeSpeakers, state.activeSpeakers), isTrue);
     });
 
@@ -63,6 +66,17 @@ void main() {
 
       expect(state.localParticipant, isNull);
       expect(state.localParticipant, isNull);
+    });
+
+    test('do not go stale when the list passed to copyWith is mutated', () {
+      final participants = [me, alice];
+      final state = _state(participants);
+      expect(state.otherParticipants, [alice]);
+
+      participants.add(bob);
+
+      expect(state.callParticipants, [me, alice]);
+      expect(state.otherParticipants, [alice]);
     });
 
     test('are unmodifiable, so one reader cannot corrupt another', () {

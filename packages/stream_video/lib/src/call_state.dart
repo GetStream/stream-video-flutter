@@ -295,7 +295,9 @@ class CallState extends Equatable {
       audioInputDevice: audioInputDevice ?? this.audioInputDevice,
       audioOutputDevice: audioOutputDevice ?? this.audioOutputDevice,
       ownCapabilities: ownCapabilities ?? this.ownCapabilities,
-      callParticipants: callParticipants ?? this.callParticipants,
+      callParticipants: callParticipants == null
+          ? this.callParticipants
+          : List.unmodifiable(callParticipants),
       callMembers: callMembers ?? this.callMembers,
       capabilitiesByRole: capabilitiesByRole ?? this.capabilitiesByRole,
       createdAt: createdAt ?? this.createdAt,

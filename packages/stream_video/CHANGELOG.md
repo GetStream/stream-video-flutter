@@ -14,7 +14,7 @@
 
 - SFU participant events no longer emit a new call state when they leave every participant unchanged.
 - `CallParticipantState.audioLevel` and `audioLevels` now hold at their last value while a participant is silent.
-- `CallState.localParticipant`, `otherParticipants` and `activeSpeakers` are now computed once per state instead of on every read, which keeps them cheap in calls with many participants.
+- `CallState.localParticipant`, `otherParticipants` and `activeSpeakers` are now computed once per state instead of on every read, which keeps them cheap in calls with many participants. `callParticipants`, `otherParticipants` and `activeSpeakers` now return unmodifiable lists shared by every reader, so call `.toList()` before sorting or otherwise mutating them.
 - Simulcast layers are now announced to the SFU and bitrate-capped from the resolution the camera actually captures on iOS and Android, instead of the requested resolution. A camera that captures below the requested size, or at a different aspect ratio, no longer over-reports its layers or over-allocates their bitrate.
 
 ### 🐞 Fixed
