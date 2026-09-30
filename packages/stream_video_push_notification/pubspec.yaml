@@ -26,6 +26,7 @@ dependencies:
   stream_video: ^2.0.0-alpha
   stream_video_flutter: ^2.0.0-alpha
   stream_webrtc_flutter: ^3.2.0
+  synchronized: ^3.1.0
   uuid: ^4.5.1
 
 dev_dependencies:

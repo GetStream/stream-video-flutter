@@ -1,7 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../../l10n/localization_extension.dart';
+import 'participants_navigation_button.dart';
 
 /// Arranges every participant in a grid, a page at a time.
 ///
@@ -9,7 +13,9 @@ import '../../../stream_video_flutter.dart';
 /// the width of the window: for each column count it could use, the grid works
 /// out how large the video would render, and takes the best. A square count
 /// stays square while the box is no wider than 2:1, so four people go two by
-/// two on a phone and four in a row on a short wide window.
+/// two on a phone and four in a row on a short wide window. A box more than
+/// 1.5 times taller than wide scores its tiles as squares, so five people on
+/// an upright phone go two by two by one rather than stacking.
 ///
 /// See [solveParticipantGrid] for the rule, and
 /// [StreamCallParticipantsGridThemeData.columnResolver] to override it.
@@ -46,7 +52,7 @@ class CallParticipantsGridView extends StatefulWidget {
   /// Padding around the grid.
   ///
   /// Overrides [StreamCallParticipantsGridThemeData.padding].
-  final EdgeInsets? padding;
+  final EdgeInsetsGeometry? padding;
 
   @override
   State<CallParticipantsGridView> createState() =>
@@ -77,9 +83,9 @@ class _CallParticipantsGridViewState extends State<CallParticipantsGridView> {
     final screenSize = context.streamScreenSize;
 
     final padding =
-        widget.padding ??
-        theme.padding?.resolve(Directionality.maybeOf(context)) ??
-        EdgeInsets.all(spacing.xs);
+        (widget.padding ?? theme.padding ?? EdgeInsets.all(spacing.xs)).resolve(
+          Directionality.maybeOf(context),
+        );
     final mainAxisSpacing =
         widget.mainAxisSpacing ?? theme.mainAxisSpacing ?? spacing.xs;
     final crossAxisSpacing =
@@ -106,82 +112,127 @@ class _CallParticipantsGridViewState extends State<CallParticipantsGridView> {
       });
     }
 
-    return Padding(
-      padding: padding,
-      child: ValueListenableBuilder<int>(
-        valueListenable: _currentPage,
-        builder: (context, value, child) {
-          if (pages.length <= 1) return child!;
+    return ValueListenableBuilder<int>(
+      valueListenable: _currentPage,
+      builder: (context, value, child) {
+        final content = child!;
+        final grid = Padding(padding: padding, child: content);
+        if (pages.length <= 1) return grid;
 
-          final currentPage = value.clamp(0, lastPage);
+        final currentPage = value.clamp(0, lastPage);
+        final icons = context.streamIcons;
+        final translations = context.translations;
+        final isRtl = Directionality.of(context) == TextDirection.rtl;
 
+        // A hidden button keeps its place, so the grid is the same size on
+        // every page.
+        Widget button({required bool isBack, required bool visible}) {
+          final pointsLeft = isBack != isRtl;
+
+          return ParticipantsNavigationButton(
+            icon: pointsLeft ? icons.chevronLeft : icons.chevronRight,
+            tooltip: isBack
+                ? translations.participantsPrevious
+                : translations.participantsNext,
+            visible: visible,
+            onPressed: () =>
+                _goToPage(isBack ? currentPage - 1 : currentPage + 1),
+          );
+        }
+
+        final back = button(isBack: true, visible: currentPage > 0);
+        final forward = button(
+          isBack: false,
+          visible: currentPage < lastPage,
+        );
+
+        // Insets are to the button's visual, less the tap inset.
+        final tapInset = participantsNavigationButtonTapInset;
+
+        // A narrow window has no width to spare, so its buttons sit over the
+        // grid, a gap inside its padding. Wider ones set the grid in between
+        // them instead, each button a gap out from the grid and the padding
+        // in from the edge.
+        if (screenSize == StreamScreenSize.small) {
           return Stack(
             children: [
-              child!,
-              Center(
-                child: Row(
-                  children: [
-                    AnimatedScale(
-                      scale: currentPage > 0 ? 1 : 0,
-                      duration: kThemeAnimationDuration,
-                      child: PageNavigationButton(
-                        icon: Icon(context.streamIcons.chevronLeft),
-                        onPressed: () => _goToPage(currentPage - 1),
-                      ),
-                    ),
-                    const Spacer(),
-                    AnimatedScale(
-                      scale: currentPage < lastPage ? 1 : 0,
-                      duration: kThemeAnimationDuration,
-                      child: PageNavigationButton(
-                        icon: Icon(context.streamIcons.chevronRight),
-                        onPressed: () => _goToPage(currentPage + 1),
-                      ),
-                    ),
-                  ],
+              grid,
+              Positioned.fill(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: math.max(0, padding.left + spacing.xs - tapInset),
+                    right: math.max(0, padding.right + spacing.xs - tapInset),
+                  ),
+                  child: Center(
+                    child: Row(children: [back, const Spacer(), forward]),
+                  ),
                 ),
               ),
             ],
           );
+        }
+
+        return Padding(
+          padding: EdgeInsets.only(
+            left: math.max(0, padding.left - tapInset),
+            right: math.max(0, padding.right - tapInset),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: math.max(0, spacing.xs - tapInset),
+            children: [
+              Center(widthFactor: 1, child: back),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: padding.top,
+                    bottom: padding.bottom,
+                  ),
+                  child: content,
+                ),
+              ),
+              Center(widthFactor: 1, child: forward),
+            ],
+          ),
+        );
+      },
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return PageView.builder(
+            itemCount: pages.length,
+            controller: _pageController,
+            // A page at a time rather than the platform's own physics, so a
+            // drag, a wheel or a trackpad settles on a page boundary.
+            physics: const PageScrollPhysics(),
+            onPageChanged: (page) => _currentPage.value = page,
+            itemBuilder: (context, index) {
+              final page = pages[index];
+
+              final details = StreamParticipantGridDetails(
+                box: constraints.biggest,
+                count: page.length,
+                mainAxisSpacing: mainAxisSpacing,
+                crossAxisSpacing: crossAxisSpacing,
+                maxTileAspectRatio: maxTileAspectRatio,
+                screenSize: screenSize,
+              );
+
+              final columns = theme.columnResolver?.call(details);
+              final arrangement = columns == null
+                  ? solveParticipantGrid(details)
+                  : arrangeParticipantGrid(details, columns);
+
+              return _GridPage(
+                call: widget.call,
+                participants: page,
+                itemBuilder: widget.itemBuilder,
+                arrangement: arrangement,
+                mainAxisSpacing: mainAxisSpacing,
+                crossAxisSpacing: crossAxisSpacing,
+              );
+            },
+          );
         },
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return PageView.builder(
-              itemCount: pages.length,
-              controller: _pageController,
-              // A page at a time rather than the platform's own physics, so a
-              // drag, a wheel or a trackpad settles on a page boundary.
-              physics: const PageScrollPhysics(),
-              onPageChanged: (page) => _currentPage.value = page,
-              itemBuilder: (context, index) {
-                final page = pages[index];
-
-                final details = StreamParticipantGridDetails(
-                  box: constraints.biggest,
-                  count: page.length,
-                  mainAxisSpacing: mainAxisSpacing,
-                  crossAxisSpacing: crossAxisSpacing,
-                  maxTileAspectRatio: maxTileAspectRatio,
-                  screenSize: screenSize,
-                );
-
-                final columns = theme.columnResolver?.call(details);
-                final arrangement = columns == null
-                    ? solveParticipantGrid(details)
-                    : arrangeParticipantGrid(details, columns);
-
-                return _GridPage(
-                  call: widget.call,
-                  participants: page,
-                  itemBuilder: widget.itemBuilder,
-                  arrangement: arrangement,
-                  mainAxisSpacing: mainAxisSpacing,
-                  crossAxisSpacing: crossAxisSpacing,
-                );
-              },
-            );
-          },
-        ),
       ),
     );
   }
@@ -230,45 +281,6 @@ class _GridPage extends StatelessWidget {
             ],
           ),
       ],
-    );
-  }
-}
-
-class PageNavigationButton extends StatelessWidget {
-  const PageNavigationButton({
-    super.key,
-    required this.icon,
-    this.iconColor,
-    this.iconSize,
-    this.onPressed,
-  });
-
-  final Widget icon;
-  final Color? iconColor;
-  final double? iconSize;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final streamVideoTheme = StreamVideoTheme.of(context);
-    final colorTheme = streamVideoTheme.colorTheme;
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        minimumSize: const Size(48, 48),
-        padding: EdgeInsets.zero,
-        backgroundColor: colorTheme.barsBg,
-      ),
-      child: IconTheme.merge(
-        data: IconThemeData(
-          size: iconSize,
-          color: iconColor ?? colorTheme.textHighEmphasis,
-        ),
-        child: icon,
-      ),
     );
   }
 }
