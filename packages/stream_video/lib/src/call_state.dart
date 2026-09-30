@@ -19,10 +19,11 @@ enum SuspendedTrackState {
 }
 
 // Participant views derived from `CallState.callParticipants`, computed at
-// most once per state instance. `CallState` is immutable, so a view never goes
-// stale, and the const constructor rules out `late final` fields. Each is an
-// O(n) scan that UI selectors read on every emission, which adds up in large
-// calls.
+// most once per participant list. `CallState` always stores an unmodifiable
+// copy of that list, so a view never goes stale, and states produced by
+// `copyWith` calls that leave the participants untouched share the list and
+// its views. Each view is an O(n) scan that UI selectors read on every
+// emission, which adds up in large calls.
 final _localParticipantCache = Expando<({CallParticipantState? value})>(
   'CallState.localParticipant',
 );
@@ -190,25 +191,27 @@ class CallState extends Equatable {
   StreamCallType get callType => callCid.type;
 
   CallParticipantState? get localParticipant {
-    return (_localParticipantCache[this] ??= (
+    return (_localParticipantCache[callParticipants] ??= (
       value: callParticipants.firstWhereOrNull((element) => element.isLocal),
     )).value;
   }
 
   /// All participants except the local one.
   ///
-  /// The list is unmodifiable and shared by every reader of this state.
+  /// The list is unmodifiable and shared by every state with the same
+  /// [callParticipants] list.
   List<CallParticipantState> get otherParticipants {
-    return _otherParticipantsCache[this] ??= List.unmodifiable(
+    return _otherParticipantsCache[callParticipants] ??= List.unmodifiable(
       callParticipants.where((element) => !element.isLocal),
     );
   }
 
   /// The participants currently speaking.
   ///
-  /// The list is unmodifiable and shared by every reader of this state.
+  /// The list is unmodifiable and shared by every state with the same
+  /// [callParticipants] list.
   List<CallParticipantState> get activeSpeakers {
-    return _activeSpeakersCache[this] ??= List.unmodifiable(
+    return _activeSpeakersCache[callParticipants] ??= List.unmodifiable(
       callParticipants.where((element) => element.isSpeaking),
     );
   }

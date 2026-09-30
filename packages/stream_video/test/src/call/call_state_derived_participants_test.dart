@@ -42,7 +42,7 @@ void main() {
       expect(state.activeSpeakers, [alice]);
     });
 
-    test('are computed once per state instance', () {
+    test('are computed once per participant list', () {
       final state = _state([me, alice, bob]);
 
       expect(
@@ -50,6 +50,18 @@ void main() {
         isTrue,
       );
       expect(identical(state.activeSpeakers, state.activeSpeakers), isTrue);
+    });
+
+    test('are shared by states with the same participant list', () {
+      final before = _state([me, alice, bob]);
+      final beforeOthers = before.otherParticipants;
+      final beforeSpeakers = before.activeSpeakers;
+
+      final after = before.copyWith(isRecording: true);
+
+      expect(identical(after.otherParticipants, beforeOthers), isTrue);
+      expect(identical(after.activeSpeakers, beforeSpeakers), isTrue);
+      expect(after.localParticipant, me);
     });
 
     test('reflect a new state, not the one they were first read from', () {
