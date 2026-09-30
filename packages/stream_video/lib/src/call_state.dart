@@ -18,6 +18,23 @@ enum SuspendedTrackState {
   neverStarted,
 }
 
+// Participant views derived from `CallState.callParticipants`, computed at
+// most once per participant list. `CallState` only exposes that list through
+// an unmodifiable view, and callers of `copyWith` hand over a fresh list they
+// never touch again, so a view never goes stale. States produced by
+// `copyWith` calls that leave the participants untouched share the list and
+// its views. Each view is an O(n) scan that UI selectors read on every
+// emission, which adds up in large calls.
+final _localParticipantCache = Expando<({CallParticipantState? value})>(
+  'CallState.localParticipant',
+);
+final _otherParticipantsCache = Expando<List<CallParticipantState>>(
+  'CallState.otherParticipants',
+);
+final _activeSpeakersCache = Expando<List<CallParticipantState>>(
+  'CallState.activeSpeakers',
+);
+
 /// Represents the call's state.
 @immutable
 class CallState extends Equatable {
@@ -175,15 +192,29 @@ class CallState extends Equatable {
   StreamCallType get callType => callCid.type;
 
   CallParticipantState? get localParticipant {
-    return callParticipants.firstWhereOrNull((element) => element.isLocal);
+    return (_localParticipantCache[callParticipants] ??= (
+      value: callParticipants.firstWhereOrNull((element) => element.isLocal),
+    )).value;
   }
 
+  /// All participants except the local one.
+  ///
+  /// The list is unmodifiable and shared by every state with the same
+  /// [callParticipants] list.
   List<CallParticipantState> get otherParticipants {
-    return callParticipants.where((element) => !element.isLocal).toList();
+    return _otherParticipantsCache[callParticipants] ??= List.unmodifiable(
+      callParticipants.where((element) => !element.isLocal),
+    );
   }
 
+  /// The participants currently speaking.
+  ///
+  /// The list is unmodifiable and shared by every state with the same
+  /// [callParticipants] list.
   List<CallParticipantState> get activeSpeakers {
-    return callParticipants.where((element) => element.isSpeaking).toList();
+    return _activeSpeakersCache[callParticipants] ??= List.unmodifiable(
+      callParticipants.where((element) => element.isSpeaking),
+    );
   }
 
   bool get createdByMe => createdByUserId == currentUserId;
@@ -268,7 +299,9 @@ class CallState extends Equatable {
       audioInputDevice: audioInputDevice ?? this.audioInputDevice,
       audioOutputDevice: audioOutputDevice ?? this.audioOutputDevice,
       ownCapabilities: ownCapabilities ?? this.ownCapabilities,
-      callParticipants: callParticipants ?? this.callParticipants,
+      callParticipants: callParticipants == null
+          ? this.callParticipants
+          : UnmodifiableListView(callParticipants),
       callMembers: callMembers ?? this.callMembers,
       capabilitiesByRole: capabilitiesByRole ?? this.capabilitiesByRole,
       createdAt: createdAt ?? this.createdAt,
