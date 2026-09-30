@@ -4392,8 +4392,15 @@ class Call {
         enabled: enabled,
       );
 
+      // The system picker's choice cannot be replayed; keeping it would show
+      // the picker again whenever the connect options are re-applied.
+      final replayable =
+          enabled &&
+          updatedConstraints.deviceId !=
+              ScreenShareConstraints.systemPickerSourceId;
+
       _connectOptions = _connectOptions.copyWith(
-        screenShare: enabled
+        screenShare: replayable
             ? TrackOption.enabled(constraints: updatedConstraints)
             : TrackOption.disabled(),
       );
