@@ -1122,6 +1122,16 @@ class CallSession extends Disposable {
     return _negotiationLock.synchronized(() async {
       _logger.d(() => '[negotiate] type: ${pc.type}');
 
+      // A subscribe-only client's publisher has no transceivers. There is
+      // nothing to negotiate. Covers fast reconnect and ICE restart alike.
+      final manager = rtcManager;
+      if (pc.type == StreamPeerType.publisher &&
+          manager != null &&
+          await manager.isPublisherEmpty()) {
+        _logger.d(() => '[negotiate] skipped — publisher has no transceivers');
+        return const Result.success(null);
+      }
+
       final offer = await pc.createOffer();
       if (offer is! Success<rtc.RTCSessionDescription>) {
         return Result<void>.error(
@@ -1130,7 +1140,6 @@ class CallSession extends Disposable {
       }
 
       final sdp = offer.data.sdp;
-      final manager = rtcManager;
       final tracksInfo = manager == null
           ? const <RtcTrackInfo>[]
           : await manager.getAnnouncedTracks(sdp: sdp);
