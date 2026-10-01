@@ -7,38 +7,44 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../stream_video_flutter.dart';
 
-typedef LivestreamEndedBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallState callState,
-);
+typedef LivestreamEndedBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+    );
 
-typedef LivestreamBackstageBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallState callState,
-);
+typedef LivestreamBackstageBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+    );
 
-typedef LivestreamControlsBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-  CallState callState,
-);
+typedef LivestreamControlsBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+    );
 
-typedef LivestreamEndedWidgetBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-);
+typedef LivestreamEndedWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+    );
 
-typedef LivestreamBackstageWidgetBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-);
+typedef LivestreamBackstageWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+    );
 
-typedef LivestreamControlsWidgetBuilder = Widget Function(
-  BuildContext context,
-  Call call,
-);
+typedef LivestreamControlsWidgetBuilder =
+    Widget Function(
+      BuildContext context,
+      Call call,
+    );
 
 enum LivestreamJoinBehaviour {
   /// Automatically join the livestream backstage or live call when the widget is initialized. Depending on permissions.
