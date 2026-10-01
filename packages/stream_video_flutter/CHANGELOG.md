@@ -10,6 +10,7 @@
 - Fixed `StreamCallParticipants` not applying a changed `sort` or `filter` until the participant list changed.
 - Fixed a `Call.participantsStream` error reaching the zone uncaught instead of being logged.
 - Fixed `LivestreamPlayer` calling `Call.join` again on each call status change while its automatic join was still in progress.
+- Fixed `LivestreamPlayer` repainting the whole screen it is embedded in every second as the call duration updates.
 
 ### 🔄 Changed
 
