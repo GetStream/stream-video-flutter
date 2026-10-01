@@ -27,6 +27,7 @@
 - Fixed leaving a call trying to stop noise cancellation when no audio processor is configured.
 - Fixed leaving a call calling `removeTrack` on the publisher for received tracks, which failed and logged `sender is null` on every leave.
 - [iOS/Android] Fixed camera video layers being announced in landscape while the phone is held upright.
+- Fixed fast reconnect failing for participants who are not publishing any tracks, such as livestream viewers. Instead of recovering the existing session, they fell back to a full rejoin with a new session after every network drop.
 
 ## 1.6.0
 
