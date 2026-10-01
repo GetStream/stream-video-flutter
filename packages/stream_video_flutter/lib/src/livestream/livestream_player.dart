@@ -8,22 +8,43 @@ import 'package:rxdart/rxdart.dart';
 import '../../stream_video_flutter.dart';
 
 typedef LivestreamEndedBuilder =
-    Widget Function(BuildContext context, Call call, CallState callState);
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+    );
 
 typedef LivestreamBackstageBuilder =
-    Widget Function(BuildContext context, Call call, CallState callState);
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+    );
 
 typedef LivestreamControlsBuilder =
-    Widget Function(BuildContext context, Call call, CallState callState);
+    Widget Function(
+      BuildContext context,
+      Call call,
+      CallState callState,
+    );
 
 typedef LivestreamEndedWidgetBuilder =
-    Widget Function(BuildContext context, Call call);
+    Widget Function(
+      BuildContext context,
+      Call call,
+    );
 
 typedef LivestreamBackstageWidgetBuilder =
-    Widget Function(BuildContext context, Call call);
+    Widget Function(
+      BuildContext context,
+      Call call,
+    );
 
 typedef LivestreamControlsWidgetBuilder =
-    Widget Function(BuildContext context, Call call);
+    Widget Function(
+      BuildContext context,
+      Call call,
+    );
 
 enum LivestreamJoinBehaviour {
   /// Automatically join the livestream backstage or live call when the widget is initialized. Depending on permissions.
@@ -388,6 +409,12 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
 
   @override
   Widget build(BuildContext context) {
+    // The controls repaint every second as the duration ticks; the boundary
+    // keeps that from repainting the screen the player is embedded in.
+    return RepaintBoundary(child: _buildPlayer(context));
+  }
+
+  Widget _buildPlayer(BuildContext context) {
     return PartialCallStateBuilder(
       call: call,
       selector: (state) =>
@@ -459,27 +486,31 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
                     ) ??
                     Align(
                       alignment: Alignment.bottomCenter,
-                      child: StreamBuilder<Duration>(
-                        stream: call.callDurationStream,
-                        builder: (context, snapshot) {
-                          final duration = snapshot.data ?? Duration.zero;
+                      // Repaints once a second, so it doesn't repaint the
+                      // video content underneath with it.
+                      child: RepaintBoundary(
+                        child: StreamBuilder<Duration>(
+                          stream: call.callDurationStream,
+                          builder: (context, snapshot) {
+                            final duration = snapshot.data ?? Duration.zero;
 
-                          return LivestreamInfo(
-                            call: call,
-                            fullscreen: _fullscreen,
-                            onFullscreenTapped: () {
-                              if (widget.onFullscreenTapped != null) {
-                                widget.onFullscreenTapped?.call();
-                              } else {
-                                setState(() {
-                                  _fullscreen = !_fullscreen;
-                                });
-                              }
-                            },
-                            duration: duration,
-                            showParticipantCount: widget.showParticipantCount,
-                          );
-                        },
+                            return LivestreamInfo(
+                              call: call,
+                              fullscreen: _fullscreen,
+                              onFullscreenTapped: () {
+                                if (widget.onFullscreenTapped != null) {
+                                  widget.onFullscreenTapped?.call();
+                                } else {
+                                  setState(() {
+                                    _fullscreen = !_fullscreen;
+                                  });
+                                }
+                              },
+                              duration: duration,
+                              showParticipantCount: widget.showParticipantCount,
+                            );
+                          },
+                        ),
                       ),
                     ),
               ],
