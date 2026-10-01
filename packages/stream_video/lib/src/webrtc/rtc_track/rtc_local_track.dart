@@ -8,6 +8,7 @@ import '../../sfu/data/models/sfu_track_type.dart';
 import '../../utils/result.dart';
 import '../media/media_constraints.dart';
 import '../model/rtc_video_dimension.dart';
+import '../rtc_media_device/device_enumeration_trigger.dart';
 import '../rtc_media_device/rtc_media_device.dart';
 import '../rtc_media_device/rtc_media_device_notifier.dart';
 import 'rtc_track.dart';
@@ -343,7 +344,8 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
     final isFrontCamera = await rtc.Helper.switchCamera(mediaTrack);
 
     final mediaDevicesResult = await RtcMediaDeviceNotifier.instance
-        .enumerateDevices(
+        .enumerateDevicesFor(
+          DeviceEnumerationTrigger.flipCamera,
           kind: RtcMediaDeviceKind.videoInput,
         );
 
