@@ -270,8 +270,11 @@ class RtcMediaDeviceNotifier {
     final allDevices = result.getDataOrNull();
     if (allDevices == null) return result;
 
-    // The shared list is unmodifiable, so give each caller its own copy.
-    if (kind == null) return Result.success(allDevices.toList());
+    if (kind == null) {
+      if (allDevices.isEmpty) return Result.error('No devices found');
+      // The shared list is unmodifiable, so give each caller its own copy.
+      return Result.success(allDevices.toList());
+    }
 
     final devices = allDevices.where((d) => d.kind == kind).toList();
     if (devices.isEmpty) {
@@ -328,7 +331,6 @@ class RtcMediaDeviceNotifier {
 
       _devicesController.add(mediaDevices);
 
-      if (mediaDevices.isEmpty) return Result.error('No devices found');
       return Result.success(mediaDevices);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
