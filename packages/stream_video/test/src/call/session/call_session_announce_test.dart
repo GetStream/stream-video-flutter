@@ -94,10 +94,14 @@ CallSession _buildTestSession({
 /// production. With [sendingTrack] there is one cached transceiver whose mid
 /// resolves from nowhere (no live transceivers, no local description, no mid on
 /// the transceiver itself), which is what makes the announce come back null.
+/// With [idleTransceiver] there is one cached transceiver with no track on its
+/// sender (a publisher that stopped sending). With neither, the publisher has
+/// no transceivers at all, as for a subscribe-only client.
 ({RtcManager rtcManager, _MockTracedStreamPeerConnection publisher})
 _wireStalledPublisher(
   CallSession session, {
   required bool sendingTrack,
+  bool idleTransceiver = false,
 }) {
   final publisher = _MockTracedStreamPeerConnection();
   final pc = _MockRTCPeerConnection();
@@ -152,13 +156,13 @@ _wireStalledPublisher(
     pcFactory: StreamPeerConnectionFactory(callCid: SampleCallData.defaultCid),
   );
 
-  if (sendingTrack) {
+  if (sendingTrack || idleTransceiver) {
     final mediaTrack = _MockMediaStreamTrack();
     when(() => mediaTrack.id).thenReturn('media-track-id');
     when(() => mediaTrack.kind).thenReturn('audio');
 
     final sender = _MockSender();
-    when(() => sender.track).thenReturn(mediaTrack);
+    when(() => sender.track).thenReturn(sendingTrack ? mediaTrack : null);
 
     final transceiver = _MockTransceiver();
     when(() => transceiver.sender).thenReturn(sender);
@@ -223,7 +227,11 @@ void main() {
         );
 
         // Nothing is sending — a no-op, not a broken announce.
-        final wires = _wireStalledPublisher(session, sendingTrack: false);
+        final wires = _wireStalledPublisher(
+          session,
+          sendingTrack: false,
+          idleTransceiver: true,
+        );
 
         session.startPublisherConnectionCheck();
         async.elapse(const Duration(seconds: 16));
@@ -236,6 +244,46 @@ void main() {
           reason: 'nothing to publish must not escalate to a rejoin',
         );
       });
+    });
+  });
+
+  // A subscribe-only client's publisher has no transceivers, so an offer would
+  // carry no BUNDLE group and `max-bundle` would reject it in
+  // setLocalDescription — failing fast reconnect into a full rejoin.
+  group('a publisher with no transceivers', () {
+    test('is not negotiated by the watchdog', () {
+      fakeAsync((async) {
+        final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
+        final session = _buildTestSession(
+          onReconnectionNeeded: (pc, strategy) =>
+              reconnects.add((pc, strategy)),
+        );
+
+        final wires = _wireStalledPublisher(session, sendingTrack: false);
+
+        session.startPublisherConnectionCheck();
+        async.elapse(const Duration(seconds: 16));
+        async.flushMicrotasks();
+
+        verifyNever(wires.publisher.createOffer);
+        verifyNever(wires.publisher.rollbackLocalDescription);
+        expect(reconnects, isEmpty);
+      });
+    });
+
+    test('is not negotiated on renegotiation or ICE restart', () async {
+      final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
+      final session = _buildTestSession(
+        onReconnectionNeeded: (pc, strategy) => reconnects.add((pc, strategy)),
+      );
+
+      final wires = _wireStalledPublisher(session, sendingTrack: false);
+
+      await session.negotiateOrRecover(wires.publisher);
+
+      verifyNever(wires.publisher.createOffer);
+      verifyNever(wires.publisher.rollbackLocalDescription);
+      expect(reconnects, isEmpty);
     });
   });
 
@@ -266,7 +314,11 @@ void main() {
         onReconnectionNeeded: (pc, strategy) => reconnects.add((pc, strategy)),
       );
 
-      final wires = _wireStalledPublisher(session, sendingTrack: false);
+      final wires = _wireStalledPublisher(
+        session,
+        sendingTrack: false,
+        idleTransceiver: true,
+      );
 
       await session.negotiateOrRecover(wires.publisher);
 
