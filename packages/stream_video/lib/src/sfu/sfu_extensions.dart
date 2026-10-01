@@ -45,8 +45,8 @@ extension SfuParticipantListX on Iterable<SfuParticipant> {
   /// Maps every SFU participant to a [CallParticipantState], carrying over
   /// what [state] already knows about each user.
   ///
-  /// The existing participants are indexed once up front, so a join response
-  /// with P participants costs O(P + N) instead of one scan per participant.
+  /// Prefer this over mapping with [SfuParticipantX.toParticipantState] one
+  /// participant at a time: the existing participants are indexed once here.
   List<CallParticipantState> toParticipantStates(CallState state) {
     final existingByUserId = <String, CallParticipantState>{};
     for (final participant in state.callParticipants) {

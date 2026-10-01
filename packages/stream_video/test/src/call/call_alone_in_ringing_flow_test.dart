@@ -164,6 +164,41 @@ void main() {
       expect(call.state.value.status.isDisconnected, isFalse);
     });
 
+    test(
+      'keeps the call when a remote user leaves on one of two devices',
+      () async {
+        await joinWith(
+          participants: [
+            _participant(_me),
+            _participant('bob'),
+            _participant('bob', sessionId: 'bob-tablet'),
+          ],
+        );
+
+        await emitLeft(_sfuParticipant('bob', sessionId: 'bob-tablet'));
+
+        verifyNever(permissionsManager.endCall);
+        expect(call.state.value.status.isDisconnected, isFalse);
+      },
+    );
+
+    test(
+      'ends the call once the last device of a remote user leaves',
+      () async {
+        await joinWith(
+          participants: [
+            _participant(_me),
+            _participant('bob', sessionId: 'bob-tablet'),
+          ],
+        );
+
+        await emitLeft(_sfuParticipant('bob', sessionId: 'bob-tablet'));
+
+        verify(permissionsManager.endCall).called(1);
+        expect(call.state.value.status.isDisconnected, isTrue);
+      },
+    );
+
     test('keeps the call when the one who left is the local user', () async {
       await joinWith(participants: [_participant(_me), _participant('bob')]);
 

@@ -178,9 +178,8 @@ class _StreamPictureInPictureUiKitViewState
       return;
     }
 
-    // The throttled list rather than the raw state: the raw state emits once
-    // per SFU event, and sorting the participants on every one of them is
-    // wasted work in a large call.
+    // Follows the participant list, so a status-only state change does not
+    // re-run the sort.
     _subscriptions.add(
       _idCallState,
       widget.call.participantsStream.listen(

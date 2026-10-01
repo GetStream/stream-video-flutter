@@ -169,6 +169,8 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
     };
 
     _updateParticipants((participant) {
+      // Keyed by session, matched on both IDs: the SFU identifies a
+      // participant by user and session together.
       final levelInfo = levelsBySession[participant.sessionId];
 
       // A participant the event does not mention, or who was silent and still
@@ -226,6 +228,7 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
     };
 
     _updateParticipants((participant) {
+      // Both IDs must match, as in `sfuUpdateAudioLevelChanged`.
       final isPinned =
           pinnedUserIdBySession[participant.sessionId] == participant.userId;
       final serverPin = participant.pin != null && !participant.pin!.isLocalPin;
@@ -260,6 +263,7 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
     };
 
     _updateParticipants((participant) {
+      // Both IDs must match, as in `sfuUpdateAudioLevelChanged`.
       final update = updatesBySession[participant.sessionId];
       if (update == null || update.userId != participant.userId) {
         return participant;
@@ -394,6 +398,7 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
 
       final pausedTracks = {...participant.pausedTracks};
       for (final inboundState in inboundStates) {
+        // Both IDs must match, as in `sfuUpdateAudioLevelChanged`.
         if (inboundState.userId != participant.userId) continue;
 
         if (inboundState.paused) {

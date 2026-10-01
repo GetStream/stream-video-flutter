@@ -261,10 +261,9 @@ class StreamBackgroundService {
           try {
             final updateOptions = optionsBuilder.call(call);
 
-            // The state emits once per SFU event, which in a large call is
-            // far more often than the notification changes.
+            // Skips the service update when the notification options are
+            // unchanged.
             if (updateOptions == lastOptions) return;
-            lastOptions = updateOptions;
 
             final updateResult =
                 await StreamVideoFlutterBackground.updateService(
@@ -278,6 +277,10 @@ class StreamBackgroundService {
               () =>
                   '<$callCid> [_startManagingCall] call service update result: $updateResult',
             );
+
+            // Only a delivered update is remembered, so a failed one is
+            // retried on the next emission rather than skipped as unchanged.
+            if (updateResult) lastOptions = updateOptions;
           } catch (e, stk) {
             _logger.e(
               () =>

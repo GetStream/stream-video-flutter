@@ -368,8 +368,7 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
     required int totalCount,
     required int anonymousCount,
   }) {
-    // Health checks repeat the count every few seconds; an unchanged count
-    // does not emit a state.
+    // An unchanged count does not emit a state.
     if (state.participantCount == totalCount &&
         state.anonymousParticipantCount == anonymousCount) {
       return;

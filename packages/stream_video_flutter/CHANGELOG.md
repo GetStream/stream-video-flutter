@@ -4,10 +4,6 @@
 
 - Added `CallParticipantsBuilder`, which builds from `Call.participantsStream`.
 
-### 🔄 Changed
-
-- The iOS picture-in-picture view and the Android background service now update only when the participant list or notification options change, instead of on every call state emission.
-
 ### 🐞 Fixed
 
 - Fixed `PartialCallStateBuilder` throwing a cast error instead of surfacing a partial state error.
@@ -17,6 +13,7 @@
 
 ### 🔄 Changed
 
+- The iOS picture-in-picture view and the Android background service now update only when the participant list or notification options change, instead of on every call state emission.
 - [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
 - [Android] Replaced `kotlin-parcelize` with hand-written `Parcelable` implementations for the notification payloads. `kotlin-parcelize` is a Kotlin compiler plugin and does not run under built-in Kotlin: it applies without error but generates no `writeToParcel`, so `@Parcelize` classes fail to compile. Behaviour is unchanged.
 - Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.

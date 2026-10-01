@@ -2219,8 +2219,8 @@ class Call {
     );
   }
 
-  /// Whether only the current user remains once [leaving] is removed from
-  /// the participant list.
+  /// Whether exactly one participant, a session of the current user, remains
+  /// once [leaving] is removed.
   bool _isAloneAfterLeave(SfuParticipant leaving) {
     final currentUserId = _streamVideo.currentUser.id;
     var remaining = 0;
@@ -2242,8 +2242,6 @@ class Call {
     if (sfuEvent is SfuParticipantLeftEvent) {
       if (sfuEvent.callCid != callCid.value) return;
 
-      // Only a ringing call that should drop when alone needs to know who is
-      // left, so other calls skip the scan of the participant list.
       if (state.value.isRingingFlow &&
           _stateManager.callState.preferences.dropIfAloneInRingingFlow &&
           _isAloneAfterLeave(sfuEvent.participant)) {

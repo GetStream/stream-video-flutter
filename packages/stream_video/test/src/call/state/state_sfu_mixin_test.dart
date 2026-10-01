@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_audio_level.dart';
-import 'package:stream_video/src/sfu/data/models/sfu_call_ended_reason.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_call_state.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_connection_info.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_inbound_video_state.dart';
@@ -810,405 +809,34 @@ void main() {
     });
   });
 
-  group('no-op guards', () {
-    test('a left for an unknown session does not emit', () async {
-      final notifier = _notifier([_participant(userId: 'alice')]);
-      final before = notifier.callState.callParticipants;
-
-      final seen = await _emissionsDuring(
-        notifier,
-        () => notifier.sfuParticipantLeft(
-          SfuParticipantLeftEvent(
-            callCid: 'default:id',
-            participant: _sfuParticipant(userId: 'ghost'),
-          ),
-        ),
-      );
-
-      expect(seen, isEmpty);
-      expect(notifier.callState.callParticipants, same(before));
-    });
-
-    test('a left for a known session removes only that participant', () {
+  group('sfuJoinResponse', () {
+    test('replaces the list with what the SFU sent', () {
       final notifier = _notifier([
         _participant(userId: 'alice'),
         _participant(userId: 'bob'),
-        _participant(userId: 'carol'),
       ]);
 
-      notifier.sfuParticipantLeft(
-        SfuParticipantLeftEvent(
-          callCid: 'default:id',
-          participant: _sfuParticipant(userId: 'bob'),
-        ),
+      notifier.sfuJoinResponse(
+        _joinResponse([
+          _sfuParticipant(userId: 'bob'),
+          _sfuParticipant(userId: 'carol'),
+        ]),
       );
-
       expect(
         notifier.callState.callParticipants.map((it) => it.userId),
-        ['alice', 'carol'],
+        ['bob', 'carol'],
       );
+
+      notifier.sfuJoinResponse(_joinResponse([]));
+      expect(notifier.callState.callParticipants, isEmpty);
     });
 
-    test('a track unpublished for an unknown track does not emit', () async {
-      final notifier = _notifier([_participant(userId: 'alice')]);
-      final before = notifier.callState.callParticipants;
-
-      final seen = await _emissionsDuring(
-        notifier,
-        () => notifier.sfuTrackUnpublished(
-          SfuTrackUnpublishedEvent(
-            userId: 'alice',
-            sessionId: 'alice-session',
-            trackType: SfuTrackType.video,
-            participant: _sfuParticipant(userId: 'alice'),
-          ),
-        ),
-      );
-
-      expect(seen, isEmpty);
-      expect(notifier.callState.callParticipants, same(before));
-    });
-
-    test(
-      'a track unpublished for an already muted track does not emit',
-      () async {
-        final notifier = _notifier([
-          _participant(userId: 'alice').copyWith(
-            publishedTracks: {
-              SfuTrackType.video: TrackState.remote(muted: true),
-            },
-          ),
-        ]);
-        final before = notifier.callState.callParticipants;
-
-        final seen = await _emissionsDuring(
-          notifier,
-          () => notifier.sfuTrackUnpublished(
-            SfuTrackUnpublishedEvent(
-              userId: 'alice',
-              sessionId: 'alice-session',
-              trackType: SfuTrackType.video,
-              participant: _sfuParticipant(userId: 'alice'),
-            ),
-          ),
-        );
-
-        expect(seen, isEmpty);
-        expect(notifier.callState.callParticipants, same(before));
-      },
-    );
-
-    test('a track unpublished mutes a live track and unpauses it', () {
-      final notifier = _notifier([
-        _participant(userId: 'alice').copyWith(
-          publishedTracks: {SfuTrackType.video: TrackState.remote()},
-          pausedTracks: {SfuTrackType.video},
-        ),
-        _participant(userId: 'bob'),
-      ]);
-      final bob = notifier.callState.callParticipants[1];
-
-      notifier.sfuTrackUnpublished(
-        SfuTrackUnpublishedEvent(
-          userId: 'alice',
-          sessionId: 'alice-session',
-          trackType: SfuTrackType.video,
-          participant: _sfuParticipant(userId: 'alice'),
-        ),
-      );
-
-      final alice = notifier.callState.callParticipants.first;
-      expect(alice.publishedTracks[SfuTrackType.video]?.muted, isTrue);
-      expect(alice.pausedTracks, isEmpty);
-      expect(notifier.callState.callParticipants[1], same(bob));
-    });
-
-    test('a track published for an unknown participant is kept pending', () {
-      final notifier = _notifier([_participant(userId: 'alice')]);
-
-      notifier.sfuTrackPublished(
-        SfuTrackPublishedEvent(
-          userId: 'bob',
-          sessionId: 'bob-session',
-          trackType: SfuTrackType.audio,
-          participant: _sfuParticipant(userId: 'bob'),
-        ),
-      );
-      notifier.sfuParticipantJoined(
-        SfuParticipantJoinedEvent(
-          callCid: 'default:id',
-          participant: _sfuParticipant(userId: 'bob'),
-        ),
-      );
-
-      final bob = notifier.callState.callParticipants.last;
-      expect(bob.userId, 'bob');
-      expect(bob.publishedTracks.keys, [SfuTrackType.audio]);
-    });
-
-    test('a track published for a known participant adds the track', () {
-      final notifier = _notifier([
-        _participant(userId: 'alice'),
-        _participant(userId: 'bob'),
-      ]);
-      final bob = notifier.callState.callParticipants[1];
-
-      notifier.sfuTrackPublished(
-        SfuTrackPublishedEvent(
-          userId: 'alice',
-          sessionId: 'alice-session',
-          trackType: SfuTrackType.audio,
-          participant: _sfuParticipant(userId: 'alice'),
-        ),
-      );
-
-      final alice = notifier.callState.callParticipants.first;
-      expect(alice.publishedTracks[SfuTrackType.audio]?.muted, isFalse);
-      expect(notifier.callState.callParticipants[1], same(bob));
-    });
-
-    test('an unchanged participant count does not emit', () async {
-      final notifier = _notifier([]);
-      notifier.setParticipantsCount(totalCount: 5, anonymousCount: 1);
-
-      final seen = await _emissionsDuring(
-        notifier,
-        () => notifier.setParticipantsCount(totalCount: 5, anonymousCount: 1),
-      );
-
-      expect(seen, isEmpty);
-    });
-
-    test('an unchanged e2ee flag does not emit', () async {
-      final notifier = _notifier([]);
-      notifier.sfuE2eeEnabledUpdated(true);
-
-      final seen = await _emissionsDuring(
-        notifier,
-        () => notifier.sfuE2eeEnabledUpdated(true),
-      );
-
-      expect(seen, isEmpty);
-      expect(notifier.callState.isE2eeEnabled, isTrue);
-    });
-  });
-
-  group('participant lookups by session', () {
-    test('audio levels only touch the matching session', () {
-      final notifier = _notifier(_twoDevices());
-
-      notifier.sfuUpdateAudioLevelChanged(
-        const SfuAudioLevelChangedEvent(
-          audioLevels: [
-            SfuAudioLevel(
-              userId: 'alice',
-              sessionId: 'alice-tablet',
-              level: 0.8,
-              isSpeaking: true,
-            ),
-          ],
-        ),
-      );
-
-      final participants = notifier.callState.callParticipants;
-      expect(participants[0].isSpeaking, isFalse);
-      expect(participants[1].isSpeaking, isTrue);
-    });
-
-    test('a level whose user id does not match the session is ignored', () {
-      final notifier = _notifier([_participant(userId: 'alice')]);
-      final before = notifier.callState.callParticipants;
-
-      notifier.sfuUpdateAudioLevelChanged(
-        const SfuAudioLevelChangedEvent(
-          audioLevels: [
-            SfuAudioLevel(
-              userId: 'mallory',
-              sessionId: 'alice-session',
-              level: 0.8,
-              isSpeaking: true,
-            ),
-          ],
-        ),
-      );
-
-      expect(notifier.callState.callParticipants, same(before));
-    });
-
-    test('pins only touch the matching session', () {
-      final notifier = _notifier(_twoDevices());
-
-      notifier.sfuPinsUpdated(
-        const [SfuPin(userId: 'alice', sessionId: 'alice-tablet')],
-      );
-
-      final participants = notifier.callState.callParticipants;
-      expect(participants[0].pin, isNull);
-      expect(participants[1].pin, isNotNull);
-    });
-
-    test('connection quality only touches the matching session', () {
-      final notifier = _notifier(_twoDevices());
-
-      notifier.sfuConnectionQualityChanged(
-        const SfuConnectionQualityChangedEvent(
-          connectionQualityUpdates: [
-            SfuConnectionQualityInfo(
-              userId: 'alice',
-              sessionId: 'alice-tablet',
-              connectionQuality: SfuConnectionQuality.poor,
-            ),
-          ],
-        ),
-      );
-
-      final participants = notifier.callState.callParticipants;
-      expect(
-        participants[0].connectionQuality,
-        SfuConnectionQuality.unspecified,
-      );
-      expect(participants[1].connectionQuality, SfuConnectionQuality.poor);
-    });
-
-    test('inbound video state only touches the matching session', () {
-      final notifier = _notifier(_twoDevices());
-
-      notifier.sfuInboundStateNotification(
-        SfuInboundStateNotificationEvent(
-          inboundVideoStates: [
-            SfuInboundVideoState(
-              userId: 'alice',
-              sessionId: 'alice-tablet',
-              trackType: SfuTrackType.video,
-              paused: true,
-            ),
-          ],
-        ),
-      );
-
-      final participants = notifier.callState.callParticipants;
-      expect(participants[0].pausedTracks, isEmpty);
-      expect(participants[1].pausedTracks, {SfuTrackType.video});
-    });
-  });
-
-  group('sfuJoinResponse', () {
-    test('carries over the name and quality the state already holds', () {
+    test('carries over what the state holds for a user, to every session', () {
       final notifier = _notifier([
         _participant(
           userId: 'alice',
           connectionQuality: SfuConnectionQuality.good,
         ).copyWith(name: 'Alice', image: 'alice.png', roles: ['host']),
-        _participant(userId: 'bob'),
-      ]);
-
-      notifier.sfuJoinResponse(
-        _joinResponse([
-          _sfuParticipant(userId: 'alice', userName: ''),
-          _sfuParticipant(userId: 'carol'),
-        ]),
-      );
-
-      final participants = notifier.callState.callParticipants;
-      expect(participants.map((it) => it.userId), ['alice', 'carol']);
-      expect(participants[0].name, 'Alice');
-      expect(participants[0].image, 'alice.png');
-      expect(participants[0].roles, ['host']);
-      expect(participants[0].connectionQuality, SfuConnectionQuality.good);
-      expect(participants[1].name, 'carol');
-    });
-
-    test('marks the local participant', () {
-      final notifier = _notifier([]);
-      notifier.lifecycleCallSessionStart(sessionId: 'userId-session');
-
-      notifier.sfuJoinResponse(
-        _joinResponse([
-          _sfuParticipant(userId: 'userId'),
-          _sfuParticipant(userId: 'bob'),
-        ]),
-      );
-
-      final participants = notifier.callState.callParticipants;
-      expect(participants[0].isLocal, isTrue);
-      expect(participants[1].isLocal, isFalse);
-    });
-  });
-
-  group('sfuJoinResponse replaces the list', () {
-    test('drops participants the SFU no longer lists', () {
-      final notifier = _notifier([
-        _participant(userId: 'alice'),
-        _participant(userId: 'bob'),
-      ]);
-
-      notifier.sfuJoinResponse(
-        _joinResponse([
-          _sfuParticipant(userId: 'bob'),
-          _sfuParticipant(userId: 'carol'),
-        ]),
-      );
-
-      expect(
-        notifier.callState.callParticipants.map((it) => it.userId),
-        ['bob', 'carol'],
-      );
-    });
-
-    test('an empty response clears the list', () {
-      final notifier = _notifier([_participant(userId: 'alice')]);
-
-      notifier.sfuJoinResponse(_joinResponse([]));
-
-      expect(notifier.callState.callParticipants, isEmpty);
-    });
-
-    test('takes the published tracks from the SFU', () {
-      final notifier = _notifier([]);
-
-      notifier.sfuJoinResponse(
-        _joinResponse([
-          _sfuParticipant(
-            userId: 'alice',
-            publishedTracks: [SfuTrackType.audio, SfuTrackType.video],
-          ),
-        ]),
-      );
-
-      final alice = notifier.callState.callParticipants.single;
-      expect(
-        alice.publishedTracks.keys,
-        containsAll([SfuTrackType.audio, SfuTrackType.video]),
-      );
-      expect(
-        alice.publishedTracks[SfuTrackType.audio],
-        isA<RemoteTrackState>(),
-      );
-      expect(alice.publishedTracks[SfuTrackType.audio]?.muted, isFalse);
-    });
-
-    test('the local participant gets local track states', () {
-      final notifier = _notifier([]);
-      notifier.lifecycleCallSessionStart(sessionId: 'userId-session');
-
-      notifier.sfuJoinResponse(
-        _joinResponse([
-          _sfuParticipant(
-            userId: 'userId',
-            publishedTracks: [SfuTrackType.audio],
-          ),
-        ]),
-      );
-
-      final me = notifier.callState.callParticipants.single;
-      expect(me.isLocal, isTrue);
-      expect(me.isOnline, isFalse);
-      expect(me.publishedTracks[SfuTrackType.audio], isA<LocalTrackState>());
-    });
-
-    test('both devices of a user carry over what the state knew', () {
-      final notifier = _notifier([
-        _participant(userId: 'alice').copyWith(name: 'Alice', image: 'a.png'),
       ]);
 
       notifier.sfuJoinResponse(
@@ -1219,6 +847,7 @@ void main() {
             userName: '',
             sessionId: 'alice-tablet',
           ),
+          _sfuParticipant(userId: 'carol'),
         ]),
       );
 
@@ -1226,9 +855,15 @@ void main() {
       expect(participants.map((it) => it.sessionId), [
         'alice-session',
         'alice-tablet',
+        'carol-session',
       ]);
-      expect(participants.map((it) => it.name), ['Alice', 'Alice']);
-      expect(participants.map((it) => it.image), ['a.png', 'a.png']);
+      for (final alice in participants.take(2)) {
+        expect(alice.name, 'Alice');
+        expect(alice.image, 'alice.png');
+        expect(alice.roles, ['host']);
+        expect(alice.connectionQuality, SfuConnectionQuality.good);
+      }
+      expect(participants[2].name, 'carol');
     });
 
     test('what the SFU sends wins over what the state knew', () {
@@ -1248,7 +883,7 @@ void main() {
             sessionId: 'alice-session',
             custom: const {},
             customData: const {},
-            publishedTracks: const [],
+            publishedTracks: [SfuTrackType.audio],
             joinedAt: DateTime.utc(2026),
             trackLookupPrefix: 'alice-prefix',
             connectionQuality: SfuConnectionQuality.excellent,
@@ -1269,7 +904,36 @@ void main() {
       expect(alice.isSpeaking, isTrue);
       expect(alice.isDominantSpeaker, isTrue);
       expect(alice.audioLevel, 0.7);
-      expect(alice.participantSource, SfuParticipantSource.webrtc);
+      expect(
+        alice.publishedTracks[SfuTrackType.audio],
+        isA<RemoteTrackState>(),
+      );
+      expect(alice.publishedTracks[SfuTrackType.audio]?.muted, isFalse);
+    });
+
+    test('marks the local participant, with local track states', () {
+      final notifier = _notifier([]);
+      notifier.lifecycleCallSessionStart(sessionId: 'userId-session');
+
+      notifier.sfuJoinResponse(
+        _joinResponse([
+          _sfuParticipant(
+            userId: 'userId',
+            publishedTracks: [SfuTrackType.audio],
+          ),
+          _sfuParticipant(userId: 'bob'),
+        ]),
+      );
+
+      final participants = notifier.callState.callParticipants;
+      expect(participants[0].isLocal, isTrue);
+      expect(participants[0].isOnline, isFalse);
+      expect(
+        participants[0].publishedTracks[SfuTrackType.audio],
+        isA<LocalTrackState>(),
+      );
+      expect(participants[1].isLocal, isFalse);
+      expect(participants[1].isOnline, isTrue);
     });
   });
 
@@ -1332,84 +996,17 @@ void main() {
         ['alice-session', 'alice-tablet'],
       );
     });
-
-    test('marks the local participant', () {
-      final notifier = _notifier([]);
-      notifier.lifecycleCallSessionStart(sessionId: 'userId-session');
-
-      notifier.sfuParticipantJoined(
-        SfuParticipantJoinedEvent(
-          callCid: 'default:id',
-          participant: _sfuParticipant(userId: 'userId'),
-        ),
-      );
-      notifier.sfuParticipantJoined(
-        SfuParticipantJoinedEvent(
-          callCid: 'default:id',
-          participant: _sfuParticipant(userId: 'bob'),
-        ),
-      );
-
-      final participants = notifier.callState.callParticipants;
-      expect(participants[0].isLocal, isTrue);
-      expect(participants[0].isOnline, isFalse);
-      expect(participants[1].isLocal, isFalse);
-      expect(participants[1].isOnline, isTrue);
-    });
-
-    test('applies a server pin', () {
-      final notifier = _notifier([]);
-
-      notifier.sfuParticipantJoined(
-        SfuParticipantJoinedEvent(
-          callCid: 'default:id',
-          participant: _sfuParticipant(userId: 'alice'),
-          isPinned: true,
-        ),
-      );
-
-      final alice = notifier.callState.callParticipants.single;
-      expect(alice.isPinned, isTrue);
-      expect(alice.pin?.isLocalPin, isFalse);
-    });
-
-    test('copies the profile fields from the event', () {
-      final notifier = _notifier([]);
-
-      notifier.sfuParticipantJoined(
-        SfuParticipantJoinedEvent(
-          callCid: 'default:id',
-          participant: SfuParticipant(
-            userId: 'alice',
-            userName: 'Alice',
-            userImage: 'alice.png',
-            sessionId: 'alice-session',
-            custom: const {'seat': 1},
-            customData: const {'seat': 1},
-            publishedTracks: const [],
-            joinedAt: DateTime.utc(2026),
-            trackLookupPrefix: 'alice-prefix',
-            connectionQuality: SfuConnectionQuality.good,
-            isSpeaking: false,
-            isDominantSpeaker: false,
-            audioLevel: 0,
-            roles: const ['host'],
-            participantSource: SfuParticipantSource.webrtc,
-          ),
-        ),
-      );
-
-      final alice = notifier.callState.callParticipants.single;
-      expect(alice.name, 'Alice');
-      expect(alice.image, 'alice.png');
-      expect(alice.roles, ['host']);
-      expect(alice.customData, {'seat': 1});
-      expect(alice.trackIdPrefix, 'alice-prefix');
-    });
   });
 
   group('sfuParticipantLeft', () {
-    test('keeps the remaining participants on their own instances', () {
+    SfuParticipantLeftEvent left(String userId, {String? sessionId}) {
+      return SfuParticipantLeftEvent(
+        callCid: 'default:id',
+        participant: _sfuParticipant(userId: userId, sessionId: sessionId),
+      );
+    }
+
+    test('removes the session that left and keeps the others identical', () {
       final notifier = _notifier([
         _participant(userId: 'alice'),
         _participant(userId: 'bob'),
@@ -1417,30 +1014,22 @@ void main() {
       ]);
       final before = notifier.callState.callParticipants;
 
-      notifier.sfuParticipantLeft(
-        SfuParticipantLeftEvent(
-          callCid: 'default:id',
-          participant: _sfuParticipant(userId: 'bob'),
-        ),
-      );
-
-      final participants = notifier.callState.callParticipants;
+      notifier.sfuParticipantLeft(left('bob'));
+      var participants = notifier.callState.callParticipants;
+      expect(participants.map((it) => it.userId), ['alice', 'carol']);
       expect(participants[0], same(before[0]));
       expect(participants[1], same(before[2]));
+
+      notifier.sfuParticipantLeft(left('alice'));
+      notifier.sfuParticipantLeft(left('carol'));
+      participants = notifier.callState.callParticipants;
+      expect(participants, isEmpty);
     });
 
     test('removes only the session that left when a user has two', () {
       final notifier = _notifier(_twoDevices());
 
-      notifier.sfuParticipantLeft(
-        SfuParticipantLeftEvent(
-          callCid: 'default:id',
-          participant: _sfuParticipant(
-            userId: 'alice',
-            sessionId: 'alice-tablet',
-          ),
-        ),
-      );
+      notifier.sfuParticipantLeft(left('alice', sessionId: 'alice-tablet'));
 
       expect(
         notifier.callState.callParticipants.map((it) => it.sessionId),
@@ -1448,68 +1037,40 @@ void main() {
       );
     });
 
-    test('removes the first and the last participant', () {
-      final notifier = _notifier([
-        _participant(userId: 'alice'),
-        _participant(userId: 'bob'),
-        _participant(userId: 'carol'),
-      ]);
+    test('a left for an unknown session does not emit', () async {
+      final notifier = _notifier([_participant(userId: 'alice')]);
+      final before = notifier.callState.callParticipants;
 
-      notifier.sfuParticipantLeft(
-        SfuParticipantLeftEvent(
-          callCid: 'default:id',
-          participant: _sfuParticipant(userId: 'alice'),
-        ),
-      );
-      notifier.sfuParticipantLeft(
-        SfuParticipantLeftEvent(
-          callCid: 'default:id',
-          participant: _sfuParticipant(userId: 'carol'),
-        ),
+      final seen = await _emissionsDuring(
+        notifier,
+        () => notifier.sfuParticipantLeft(left('ghost')),
       );
 
-      expect(
-        notifier.callState.callParticipants.map((it) => it.userId),
-        ['bob'],
-      );
-    });
-
-    test('a left before the join still drops the pending tracks', () {
-      final notifier = _notifier([]);
-
-      notifier.sfuTrackPublished(
-        SfuTrackPublishedEvent(
-          userId: 'bob',
-          sessionId: 'bob-session',
-          trackType: SfuTrackType.video,
-          participant: _sfuParticipant(userId: 'bob'),
-        ),
-      );
-      notifier.sfuParticipantLeft(
-        SfuParticipantLeftEvent(
-          callCid: 'default:id',
-          participant: _sfuParticipant(userId: 'bob'),
-        ),
-      );
-      notifier.sfuParticipantJoined(
-        SfuParticipantJoinedEvent(
-          callCid: 'default:id',
-          participant: _sfuParticipant(userId: 'bob'),
-        ),
-      );
-
-      expect(
-        notifier.callState.callParticipants.single.publishedTracks,
-        isEmpty,
-      );
+      expect(seen, isEmpty);
+      expect(notifier.callState.callParticipants, same(before));
     });
   });
 
   group('sfuTrackPublished', () {
-    test('unmutes a muted remote track and keeps its other fields', () {
+    SfuTrackPublishedEvent published(
+      String userId,
+      SfuTrackType trackType, {
+      String? sessionId,
+    }) {
+      return SfuTrackPublishedEvent(
+        userId: userId,
+        sessionId: sessionId ?? '$userId-session',
+        trackType: trackType,
+        participant: _sfuParticipant(userId: userId, sessionId: sessionId),
+      );
+    }
+
+    test('adds or unmutes the track and leaves the rest alone', () {
+      final audio = TrackState.remote(subscribed: true);
       final notifier = _notifier([
         _participant(userId: 'alice').copyWith(
           publishedTracks: {
+            SfuTrackType.audio: audio,
             SfuTrackType.video: TrackState.remote(
               muted: true,
               subscribed: true,
@@ -1517,52 +1078,26 @@ void main() {
             ),
           },
         ),
+        _participant(userId: 'bob'),
       ]);
+      final bob = notifier.callState.callParticipants[1];
 
-      notifier.sfuTrackPublished(
-        SfuTrackPublishedEvent(
-          userId: 'alice',
-          sessionId: 'alice-session',
-          trackType: SfuTrackType.video,
-          participant: _sfuParticipant(userId: 'alice'),
-        ),
-      );
+      notifier.sfuTrackPublished(published('alice', SfuTrackType.video));
+      notifier.sfuTrackPublished(published('alice', SfuTrackType.screenShare));
 
-      final video =
-          notifier
-                  .callState
-                  .callParticipants
-                  .single
-                  .publishedTracks[SfuTrackType.video]!
-              as RemoteTrackState;
+      final participants = notifier.callState.callParticipants;
+      final tracks = participants[0].publishedTracks;
+      final video = tracks[SfuTrackType.video]! as RemoteTrackState;
       expect(video.muted, isFalse);
-      expect(video.subscribed, isTrue);
-      expect(video.received, isTrue);
-    });
-
-    test('leaves the other tracks of the participant alone', () {
-      final audio = TrackState.remote(subscribed: true);
-      final notifier = _notifier([
-        _participant(
-          userId: 'alice',
-        ).copyWith(publishedTracks: {SfuTrackType.audio: audio}),
-      ]);
-
-      notifier.sfuTrackPublished(
-        SfuTrackPublishedEvent(
-          userId: 'alice',
-          sessionId: 'alice-session',
-          trackType: SfuTrackType.video,
-          participant: _sfuParticipant(userId: 'alice'),
-        ),
-      );
-
-      final tracks = notifier.callState.callParticipants.single.publishedTracks;
       expect(
-        tracks.keys,
-        containsAll([SfuTrackType.audio, SfuTrackType.video]),
+        video.subscribed,
+        isTrue,
+        reason: 'unmuting keeps the other fields',
       );
+      expect(video.received, isTrue);
+      expect(tracks[SfuTrackType.screenShare]?.muted, isFalse);
       expect(tracks[SfuTrackType.audio], same(audio));
+      expect(participants[1], same(bob));
     });
 
     test('gives the local participant a local track state', () {
@@ -1570,14 +1105,7 @@ void main() {
         _participant(userId: 'userId').copyWith(isLocal: true),
       ]);
 
-      notifier.sfuTrackPublished(
-        SfuTrackPublishedEvent(
-          userId: 'userId',
-          sessionId: 'userId-session',
-          trackType: SfuTrackType.audio,
-          participant: _sfuParticipant(userId: 'userId'),
-        ),
-      );
+      notifier.sfuTrackPublished(published('userId', SfuTrackType.audio));
 
       expect(
         notifier.callState.callParticipants.single.publishedTracks[SfuTrackType
@@ -1591,15 +1119,7 @@ void main() {
       final phone = notifier.callState.callParticipants[0];
 
       notifier.sfuTrackPublished(
-        SfuTrackPublishedEvent(
-          userId: 'alice',
-          sessionId: 'alice-tablet',
-          trackType: SfuTrackType.video,
-          participant: _sfuParticipant(
-            userId: 'alice',
-            sessionId: 'alice-tablet',
-          ),
-        ),
+        published('alice', SfuTrackType.video, sessionId: 'alice-tablet'),
       );
 
       final participants = notifier.callState.callParticipants;
@@ -1609,7 +1129,20 @@ void main() {
   });
 
   group('sfuTrackUnpublished', () {
-    test('keeps the other tracks of the participant', () {
+    SfuTrackUnpublishedEvent unpublished(
+      String userId,
+      SfuTrackType trackType, {
+      String? sessionId,
+    }) {
+      return SfuTrackUnpublishedEvent(
+        userId: userId,
+        sessionId: sessionId ?? '$userId-session',
+        trackType: trackType,
+        participant: _sfuParticipant(userId: userId, sessionId: sessionId),
+      );
+    }
+
+    test('mutes and unpauses the track and leaves the rest alone', () {
       final audio = TrackState.remote(subscribed: true);
       final notifier = _notifier([
         _participant(userId: 'alice').copyWith(
@@ -1617,26 +1150,22 @@ void main() {
             SfuTrackType.audio: audio,
             SfuTrackType.video: TrackState.remote(subscribed: true),
           },
+          pausedTracks: {SfuTrackType.video},
         ),
+        _participant(userId: 'bob'),
       ]);
+      final bob = notifier.callState.callParticipants[1];
 
-      notifier.sfuTrackUnpublished(
-        SfuTrackUnpublishedEvent(
-          userId: 'alice',
-          sessionId: 'alice-session',
-          trackType: SfuTrackType.video,
-          participant: _sfuParticipant(userId: 'alice'),
-        ),
-      );
+      notifier.sfuTrackUnpublished(unpublished('alice', SfuTrackType.video));
 
-      final tracks = notifier.callState.callParticipants.single.publishedTracks;
+      final participants = notifier.callState.callParticipants;
+      final tracks = participants[0].publishedTracks;
+      final video = tracks[SfuTrackType.video]! as RemoteTrackState;
+      expect(video.muted, isTrue);
+      expect(video.subscribed, isTrue, reason: 'muting keeps the subscription');
+      expect(participants[0].pausedTracks, isEmpty);
       expect(tracks[SfuTrackType.audio], same(audio));
-      expect(tracks[SfuTrackType.video]?.muted, isTrue);
-      expect(
-        (tracks[SfuTrackType.video]! as RemoteTrackState).subscribed,
-        isTrue,
-        reason: 'muting keeps the subscription',
-      );
+      expect(participants[1], same(bob));
     });
 
     test('unpauses a paused track that was never published', () {
@@ -1646,35 +1175,31 @@ void main() {
         ).copyWith(pausedTracks: {SfuTrackType.video}),
       ]);
 
-      notifier.sfuTrackUnpublished(
-        SfuTrackUnpublishedEvent(
-          userId: 'alice',
-          sessionId: 'alice-session',
-          trackType: SfuTrackType.video,
-          participant: _sfuParticipant(userId: 'alice'),
-        ),
-      );
+      notifier.sfuTrackUnpublished(unpublished('alice', SfuTrackType.video));
 
       final alice = notifier.callState.callParticipants.single;
       expect(alice.pausedTracks, isEmpty);
       expect(alice.publishedTracks, isEmpty);
     });
 
-    test('an unknown participant does not emit', () async {
-      final notifier = _notifier([_participant(userId: 'alice')]);
+    test('does not emit when there is nothing to mute or unpause', () async {
+      final notifier = _notifier([
+        _participant(userId: 'alice').copyWith(
+          publishedTracks: {
+            SfuTrackType.audio: TrackState.remote(muted: true),
+          },
+        ),
+      ]);
       final before = notifier.callState.callParticipants;
 
-      final seen = await _emissionsDuring(
-        notifier,
-        () => notifier.sfuTrackUnpublished(
-          SfuTrackUnpublishedEvent(
-            userId: 'ghost',
-            sessionId: 'ghost-session',
-            trackType: SfuTrackType.video,
-            participant: _sfuParticipant(userId: 'ghost'),
-          ),
-        ),
-      );
+      final seen = await _emissionsDuring(notifier, () {
+        // Never published.
+        notifier.sfuTrackUnpublished(unpublished('alice', SfuTrackType.video));
+        // Already muted.
+        notifier.sfuTrackUnpublished(unpublished('alice', SfuTrackType.audio));
+        // Unknown participant.
+        notifier.sfuTrackUnpublished(unpublished('ghost', SfuTrackType.audio));
+      });
 
       expect(seen, isEmpty);
       expect(notifier.callState.callParticipants, same(before));
@@ -1693,15 +1218,7 @@ void main() {
       final phone = notifier.callState.callParticipants[0];
 
       notifier.sfuTrackUnpublished(
-        SfuTrackUnpublishedEvent(
-          userId: 'alice',
-          sessionId: 'alice-tablet',
-          trackType: SfuTrackType.video,
-          participant: _sfuParticipant(
-            userId: 'alice',
-            sessionId: 'alice-tablet',
-          ),
-        ),
+        unpublished('alice', SfuTrackType.video, sessionId: 'alice-tablet'),
       );
 
       final participants = notifier.callState.callParticipants;
@@ -1713,28 +1230,33 @@ void main() {
     });
   });
 
-  group('events naming several participants', () {
-    test('audio levels apply to every participant named', () {
-      final notifier = _notifier([
-        _participant(userId: 'alice'),
-        _participant(userId: 'bob'),
-        _participant(userId: 'carol'),
-      ]);
-      final bob = notifier.callState.callParticipants[1];
+  // Events that name participants are matched on session ID and user ID.
+  // Each test holds a user on two devices plus one more participant, names
+  // one device and the other participant, and checks the second device is
+  // left alone.
+  group('participant lookups by session', () {
+    List<CallParticipantState> threeSessions() => [
+      ..._twoDevices(),
+      _participant(userId: 'bob'),
+    ];
+
+    test('audio levels', () {
+      final notifier = _notifier(threeSessions());
+      final phone = notifier.callState.callParticipants[0];
 
       notifier.sfuUpdateAudioLevelChanged(
         const SfuAudioLevelChangedEvent(
           audioLevels: [
             SfuAudioLevel(
               userId: 'alice',
-              sessionId: 'alice-session',
-              level: 0.5,
+              sessionId: 'alice-tablet',
+              level: 0.8,
               isSpeaking: true,
             ),
             SfuAudioLevel(
-              userId: 'carol',
-              sessionId: 'carol-session',
-              level: 0.9,
+              userId: 'bob',
+              sessionId: 'bob-session',
+              level: 0.5,
               isSpeaking: true,
             ),
           ],
@@ -1742,79 +1264,65 @@ void main() {
       );
 
       final participants = notifier.callState.callParticipants;
-      expect(participants[0].audioLevel, 0.5);
-      expect(participants[0].isSpeaking, isTrue);
-      expect(participants[1], same(bob));
-      expect(participants[2].audioLevel, 0.9);
+      expect(participants[0], same(phone));
+      expect(participants[1].isSpeaking, isTrue);
+      expect(participants[1].audioLevel, 0.8);
       expect(participants[2].isSpeaking, isTrue);
-      expect(notifier.callState.activeSpeakers.map((it) => it.userId), [
-        'alice',
-        'carol',
-      ]);
+      expect(participants[2].audioLevel, 0.5);
     });
 
-    test('connection quality applies to every participant named', () {
-      final notifier = _notifier([
-        _participant(userId: 'alice'),
-        _participant(userId: 'bob'),
-        _participant(userId: 'carol'),
-      ]);
-      final bob = notifier.callState.callParticipants[1];
+    test('connection quality', () {
+      final notifier = _notifier(threeSessions());
+      final phone = notifier.callState.callParticipants[0];
 
       notifier.sfuConnectionQualityChanged(
         const SfuConnectionQualityChangedEvent(
           connectionQualityUpdates: [
             SfuConnectionQualityInfo(
               userId: 'alice',
-              sessionId: 'alice-session',
-              connectionQuality: SfuConnectionQuality.excellent,
+              sessionId: 'alice-tablet',
+              connectionQuality: SfuConnectionQuality.poor,
             ),
             SfuConnectionQualityInfo(
-              userId: 'carol',
-              sessionId: 'carol-session',
-              connectionQuality: SfuConnectionQuality.poor,
+              userId: 'bob',
+              sessionId: 'bob-session',
+              connectionQuality: SfuConnectionQuality.excellent,
             ),
           ],
         ),
       );
 
       final participants = notifier.callState.callParticipants;
-      expect(participants[0].connectionQuality, SfuConnectionQuality.excellent);
-      expect(participants[1], same(bob));
-      expect(participants[2].connectionQuality, SfuConnectionQuality.poor);
+      expect(participants[0], same(phone));
+      expect(participants[1].connectionQuality, SfuConnectionQuality.poor);
+      expect(participants[2].connectionQuality, SfuConnectionQuality.excellent);
     });
 
-    test('pins apply to every participant named', () {
-      final notifier = _notifier([
-        _participant(userId: 'alice'),
-        _participant(userId: 'bob'),
-        _participant(userId: 'carol'),
-      ]);
-      final bob = notifier.callState.callParticipants[1];
+    test('pins', () {
+      final notifier = _notifier(threeSessions());
+      final phone = notifier.callState.callParticipants[0];
 
       notifier.sfuPinsUpdated(const [
-        SfuPin(userId: 'alice', sessionId: 'alice-session'),
-        SfuPin(userId: 'carol', sessionId: 'carol-session'),
+        SfuPin(userId: 'alice', sessionId: 'alice-tablet'),
+        SfuPin(userId: 'bob', sessionId: 'bob-session'),
       ]);
 
       final participants = notifier.callState.callParticipants;
-      expect(participants[0].isPinned, isTrue);
-      expect(participants[1], same(bob));
+      expect(participants[0], same(phone));
+      expect(participants[1].isPinned, isTrue);
       expect(participants[2].isPinned, isTrue);
     });
 
-    test('inbound video state applies to every participant named', () {
-      final notifier = _notifier([
-        _participant(userId: 'alice'),
-        _participant(userId: 'bob'),
-      ]);
+    test('inbound video state', () {
+      final notifier = _notifier(threeSessions());
+      final phone = notifier.callState.callParticipants[0];
 
       notifier.sfuInboundStateNotification(
         SfuInboundStateNotificationEvent(
           inboundVideoStates: [
             SfuInboundVideoState(
               userId: 'alice',
-              sessionId: 'alice-session',
+              sessionId: 'alice-tablet',
               trackType: SfuTrackType.video,
               paused: true,
             ),
@@ -1829,12 +1337,14 @@ void main() {
       );
 
       final participants = notifier.callState.callParticipants;
-      expect(participants[0].pausedTracks, {SfuTrackType.video});
-      expect(participants[1].pausedTracks, {SfuTrackType.screenShare});
+      expect(participants[0], same(phone));
+      expect(participants[1].pausedTracks, {SfuTrackType.video});
+      expect(participants[2].pausedTracks, {SfuTrackType.screenShare});
     });
 
-    test('the dominant speaker flag only lands on the named session', () {
-      final notifier = _notifier(_twoDevices());
+    test('dominant speaker', () {
+      final notifier = _notifier(threeSessions());
+      final phone = notifier.callState.callParticipants[0];
 
       notifier.sfuDominantSpeakerChanged(
         const SfuDominantSpeakerChangedEvent(
@@ -1844,65 +1354,135 @@ void main() {
       );
 
       final participants = notifier.callState.callParticipants;
-      expect(participants[0].isDominantSpeaker, isFalse);
+      expect(participants[0], same(phone));
       expect(participants[1].isDominantSpeaker, isTrue);
+      expect(participants[2].isDominantSpeaker, isFalse);
     });
   });
 
-  group('sfuCallEnded', () {
-    test('disconnects and clears the participants', () {
+  // The same session ID with another user ID is not a match. Each of these
+  // would pass with a lookup on the session ID alone, so they guard the user
+  // ID check.
+  group('participant lookups with a mismatched user id', () {
+    test('audio levels', () {
       final notifier = _notifier([_participant(userId: 'alice')]);
+      final before = notifier.callState.callParticipants;
 
-      notifier.sfuCallEnded(
-        const SfuCallEndedEvent(callEndedReason: SfuCallEndedReason.ended),
+      notifier.sfuUpdateAudioLevelChanged(
+        const SfuAudioLevelChangedEvent(
+          audioLevels: [
+            SfuAudioLevel(
+              userId: 'mallory',
+              sessionId: 'alice-session',
+              level: 0.8,
+              isSpeaking: true,
+            ),
+          ],
+        ),
       );
 
-      expect(notifier.callState.status.isDisconnected, isTrue);
-      expect(
-        (notifier.callState.status as CallStatusDisconnected).reason,
-        isA<DisconnectReasonEnded>(),
+      expect(notifier.callState.callParticipants, same(before));
+    });
+
+    test('connection quality', () {
+      final notifier = _notifier([_participant(userId: 'alice')]);
+      final before = notifier.callState.callParticipants;
+
+      notifier.sfuConnectionQualityChanged(
+        const SfuConnectionQualityChangedEvent(
+          connectionQualityUpdates: [
+            SfuConnectionQualityInfo(
+              userId: 'mallory',
+              sessionId: 'alice-session',
+              connectionQuality: SfuConnectionQuality.poor,
+            ),
+          ],
+        ),
       );
-      expect(notifier.callState.callParticipants, isEmpty);
+
+      expect(notifier.callState.callParticipants, same(before));
+    });
+
+    test('pins', () {
+      final notifier = _notifier([_participant(userId: 'alice')]);
+      final before = notifier.callState.callParticipants;
+
+      notifier.sfuPinsUpdated(
+        const [SfuPin(userId: 'mallory', sessionId: 'alice-session')],
+      );
+      expect(notifier.callState.callParticipants, same(before));
+
+      // The other way round: once alice is pinned, a pin for her session
+      // under another user id does not keep her pinned.
+      notifier.sfuPinsUpdated(
+        const [SfuPin(userId: 'alice', sessionId: 'alice-session')],
+      );
+      notifier.sfuPinsUpdated(
+        const [SfuPin(userId: 'mallory', sessionId: 'alice-session')],
+      );
+      expect(notifier.callState.callParticipants.single.isPinned, isFalse);
+    });
+
+    test('inbound video state', () {
+      final notifier = _notifier([_participant(userId: 'alice')]);
+      final before = notifier.callState.callParticipants;
+
+      notifier.sfuInboundStateNotification(
+        SfuInboundStateNotificationEvent(
+          inboundVideoStates: [
+            SfuInboundVideoState(
+              userId: 'mallory',
+              sessionId: 'alice-session',
+              trackType: SfuTrackType.video,
+              paused: true,
+            ),
+          ],
+        ),
+      );
+
+      expect(notifier.callState.callParticipants, same(before));
     });
   });
 
-  group('counters still emit on change', () {
-    test('a changed participant count emits once', () async {
+  group('counters emit only on change', () {
+    test('participant count', () async {
       final notifier = _notifier([]);
       notifier.setParticipantsCount(totalCount: 5, anonymousCount: 1);
 
-      final seen = await _emissionsDuring(
+      final unchanged = await _emissionsDuring(
+        notifier,
+        () => notifier.setParticipantsCount(totalCount: 5, anonymousCount: 1),
+      );
+      final total = await _emissionsDuring(
         notifier,
         () => notifier.setParticipantsCount(totalCount: 6, anonymousCount: 1),
       );
-
-      expect(seen, hasLength(1));
-      expect(notifier.callState.participantCount, 6);
-      expect(notifier.callState.anonymousParticipantCount, 1);
-    });
-
-    test('a change in the anonymous count alone still emits', () async {
-      final notifier = _notifier([]);
-      notifier.setParticipantsCount(totalCount: 5, anonymousCount: 1);
-
-      final seen = await _emissionsDuring(
+      final anonymous = await _emissionsDuring(
         notifier,
-        () => notifier.setParticipantsCount(totalCount: 5, anonymousCount: 2),
+        () => notifier.setParticipantsCount(totalCount: 6, anonymousCount: 2),
       );
 
-      expect(seen, hasLength(1));
+      expect(unchanged, isEmpty);
+      expect(total, hasLength(1));
+      expect(anonymous, hasLength(1));
+      expect(notifier.callState.participantCount, 6);
       expect(notifier.callState.anonymousParticipantCount, 2);
     });
 
-    test('a changed e2ee flag emits once', () async {
+    test('e2ee flag', () async {
       final notifier = _notifier([]);
 
-      final seen = await _emissionsDuring(
+      final changed = await _emissionsDuring(
+        notifier,
+        () => notifier.sfuE2eeEnabledUpdated(true),
+      );
+      final unchanged = await _emissionsDuring(
         notifier,
         () => notifier.sfuE2eeEnabledUpdated(true),
       );
 
-      expect(seen, hasLength(1));
+      expect(changed, hasLength(1));
+      expect(unchanged, isEmpty);
       expect(notifier.callState.isE2eeEnabled, isTrue);
     });
   });

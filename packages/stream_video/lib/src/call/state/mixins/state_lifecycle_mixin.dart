@@ -256,8 +256,6 @@ extension on CallMetadata {
   List<CallParticipantState> toCallParticipants(CallState state) {
     final result = <CallParticipantState>[];
 
-    // Indexed once, so a call with P session participants costs O(P + N)
-    // rather than one scan of the held list per participant.
     final currentBySessionId = {
       for (final it in state.callParticipants) it.sessionId: it,
     };
