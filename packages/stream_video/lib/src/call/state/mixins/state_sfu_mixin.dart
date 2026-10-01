@@ -11,12 +11,6 @@ import 'state_pending_tracks_mixin.dart';
 
 final _logger = taggedLogger(tag: 'SV:CallState:Sfu');
 
-/// Keys a participant for lookup within one event.
-///
-/// `userId` alone is not unique — a user can be in the call from several
-/// devices — so the session is part of the key.
-String _participantKey(String userId, String sessionId) => '$userId:$sessionId';
-
 mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
   /// Rewrites the participant list through [update], writing the state only if
   /// some participant came back a different instance.
@@ -46,30 +40,37 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
     SfuParticipantLeftEvent event,
   ) {
     _logger.d(() => '[sfuParticipantLeft] ${state.sessionId}; event: $event');
-    final callParticipants = [...state.callParticipants]
-      ..removeWhere(
-        (participant) =>
-            participant.userId == event.participant.userId &&
-            participant.sessionId == event.participant.sessionId,
-      );
+    // Tracks announced before the join are dropped either way; the participant
+    // may have left before their join reached us.
+    clearPendingTracks(event.participant.trackLookupPrefix);
 
-    state = state.copyWith(
-      callParticipants: callParticipants,
+    final userId = event.participant.userId;
+    final sessionId = event.participant.sessionId;
+    final callParticipants = state.callParticipants;
+
+    final index = callParticipants.indexWhere(
+      (participant) =>
+          participant.userId == userId && participant.sessionId == sessionId,
     );
 
-    clearPendingTracks(event.participant.trackLookupPrefix);
+    if (index < 0) return;
+
+    state = state.copyWith(
+      callParticipants: [
+        ...callParticipants.take(index),
+        ...callParticipants.skip(index + 1),
+      ],
+    );
   }
 
   void sfuJoinResponse(
     SfuJoinResponseEvent event,
   ) {
     _logger.d(() => '[sfuJoinResponse] ${state.sessionId}; event: $event');
-    final participants = event.callState.participants
-        .map((sfuParticipant) => sfuParticipant.toParticipantState(state))
-        .toList();
-
     state = state.copyWith(
-      callParticipants: participants,
+      callParticipants: event.callState.participants.toParticipantStates(
+        state,
+      ),
     );
   }
 
@@ -92,28 +93,33 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
     _logger.d(
       () => '[sfuTrackUnpublished] ${state.sessionId}; event: $event',
     );
-    state = state.copyWith(
-      callParticipants: state.callParticipants.map((participant) {
-        if (participant.userId == event.userId &&
-            participant.sessionId == event.sessionId) {
-          final trackState = participant.publishedTracks[event.trackType]
-              ?.copyWith(muted: true);
 
-          return participant.copyWith(
-            publishedTracks: {
-              ...participant.publishedTracks,
-              if (trackState != null) event.trackType: trackState,
-            },
-            pausedTracks: participant.pausedTracks
-                .toList()
-                .where((track) => track != event.trackType)
-                .toSet(),
-          );
-        }
-
+    _updateParticipants((participant) {
+      if (participant.userId != event.userId ||
+          participant.sessionId != event.sessionId) {
         return participant;
-      }).toList(),
-    );
+      }
+
+      final trackState = participant.publishedTracks[event.trackType];
+      final isPaused = participant.pausedTracks.contains(event.trackType);
+
+      // Nothing to mute and nothing to unpause: an unknown track, or one
+      // already muted. Keep the instance so nothing is emitted.
+      if ((trackState == null || trackState.muted) && !isPaused) {
+        return participant;
+      }
+
+      return participant.copyWith(
+        publishedTracks: {
+          ...participant.publishedTracks,
+          if (trackState != null)
+            event.trackType: trackState.copyWith(muted: true),
+        },
+        pausedTracks: isPaused
+            ? ({...participant.pausedTracks}..remove(event.trackType))
+            : participant.pausedTracks,
+      );
+    });
   }
 
   void sfuTrackPublished(
@@ -121,39 +127,36 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
   ) {
     _logger.d(() => '[sfuTrackPublished] ${state.sessionId}; event: $event');
 
-    final participant = state.callParticipants.firstWhereOrNull(
-      (p) => p.userId == event.userId && p.sessionId == event.sessionId,
-    );
+    var isKnown = false;
+    _updateParticipants((participant) {
+      if (participant.userId != event.userId ||
+          participant.sessionId != event.sessionId) {
+        return participant;
+      }
 
-    if (participant == null) {
+      isKnown = true;
+      _logger.v(() => '[sfuTrackPublished] pFound: $participant');
+
+      final trackState =
+          participant.publishedTracks[event.trackType]?.copyWith(
+            muted: false,
+          ) ??
+          TrackState.base(isLocal: participant.isLocal);
+
+      return participant.copyWith(
+        publishedTracks: {
+          ...participant.publishedTracks,
+          event.trackType: trackState,
+        },
+      );
+    });
+
+    if (!isKnown) {
       addPendingTrack(
         event.participant.trackLookupPrefix,
         event.trackType,
       );
-      return;
     }
-
-    final trackState =
-        participant.publishedTracks[event.trackType]?.copyWith(
-          muted: false,
-        ) ??
-        TrackState.base(isLocal: participant.isLocal);
-
-    state = state.copyWith(
-      callParticipants: state.callParticipants.map((p) {
-        if (p.userId == event.userId && p.sessionId == event.sessionId) {
-          _logger.v(() => '[sfuTrackPublished] pFound: $p');
-          return p.copyWith(
-            publishedTracks: {
-              ...p.publishedTracks,
-              event.trackType: trackState,
-            },
-          );
-        } else {
-          return p;
-        }
-      }).toList(),
-    );
   }
 
   void sfuUpdateAudioLevelChanged(
@@ -161,23 +164,21 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
   ) {
     if (event.audioLevels.isEmpty) return;
 
-    final levelsByParticipant = {
-      for (final level in event.audioLevels)
-        _participantKey(level.userId, level.sessionId): level,
+    final levelsBySession = {
+      for (final level in event.audioLevels) level.sessionId: level,
     };
 
     _updateParticipants((participant) {
-      final levelInfo =
-          levelsByParticipant[_participantKey(
-            participant.userId,
-            participant.sessionId,
-          )];
+      // Keyed by session, matched on both IDs: the SFU identifies a
+      // participant by user and session together.
+      final levelInfo = levelsBySession[participant.sessionId];
 
       // A participant the event does not mention, or who was silent and still
       // is, keeps their existing instance. The event that takes them below the
       // speaking threshold is still applied, so their `audioLevel` and
       // `audioLevels` hold at that reading until they speak again.
       if (levelInfo == null ||
+          levelInfo.userId != participant.userId ||
           (!levelInfo.isSpeaking && !participant.isSpeaking)) {
         return participant;
       }
@@ -214,20 +215,22 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
 
   /// Records whether the SFU considers this call end-to-end encrypted.
   void sfuE2eeEnabledUpdated(bool isE2eeEnabled) {
+    if (state.isE2eeEnabled == isE2eeEnabled) return;
+
     state = state.copyWith(isE2eeEnabled: isE2eeEnabled);
   }
 
   void sfuPinsUpdated(
     List<SfuPin> pins,
   ) {
-    final pinnedKeys = {
-      for (final pin in pins) _participantKey(pin.userId, pin.sessionId),
+    final pinnedUserIdBySession = {
+      for (final pin in pins) pin.sessionId: pin.userId,
     };
 
     _updateParticipants((participant) {
-      final isPinned = pinnedKeys.contains(
-        _participantKey(participant.userId, participant.sessionId),
-      );
+      // Both IDs must match, as in `sfuUpdateAudioLevelChanged`.
+      final isPinned =
+          pinnedUserIdBySession[participant.sessionId] == participant.userId;
       final serverPin = participant.pin != null && !participant.pin!.isLocalPin;
 
       if (isPinned) {
@@ -254,18 +257,17 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
   ) {
     if (event.connectionQualityUpdates.isEmpty) return;
 
-    final updatesByParticipant = {
+    final updatesBySession = {
       for (final update in event.connectionQualityUpdates)
-        _participantKey(update.userId, update.sessionId): update,
+        update.sessionId: update,
     };
 
     _updateParticipants((participant) {
-      final update =
-          updatesByParticipant[_participantKey(
-            participant.userId,
-            participant.sessionId,
-          )];
-      if (update == null) return participant;
+      // Both IDs must match, as in `sfuUpdateAudioLevelChanged`.
+      final update = updatesBySession[participant.sessionId];
+      if (update == null || update.userId != participant.userId) {
+        return participant;
+      }
 
       final quality = update.connectionQuality.mergeWithPrevious(
         participant.connectionQuality,
@@ -304,22 +306,17 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
           : null,
     );
 
-    var isExisting = false;
-    final participants = state.callParticipants.map((it) {
-      if (it.userId == participant.userId &&
-          it.sessionId == participant.sessionId) {
-        isExisting = true;
-        return participant;
-      } else {
-        return it;
-      }
-    });
+    final callParticipants = state.callParticipants;
+    final index = callParticipants.indexWhere(
+      (it) =>
+          it.userId == participant.userId &&
+          it.sessionId == participant.sessionId,
+    );
 
     state = state.copyWith(
-      callParticipants: [
-        ...participants,
-        if (!isExisting) participant,
-      ],
+      callParticipants: index < 0
+          ? [...callParticipants, participant]
+          : ([...callParticipants]..[index] = participant),
     );
   }
 
@@ -387,22 +384,13 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
 
     if (event.inboundVideoStates.isEmpty) return;
 
-    final statesByParticipant = <String, List<SfuInboundVideoState>>{};
+    final statesBySession = <String, List<SfuInboundVideoState>>{};
     for (final inboundState in event.inboundVideoStates) {
-      statesByParticipant
-          .putIfAbsent(
-            _participantKey(inboundState.userId, inboundState.sessionId),
-            () => [],
-          )
-          .add(inboundState);
+      (statesBySession[inboundState.sessionId] ??= []).add(inboundState);
     }
 
     _updateParticipants((participant) {
-      final inboundStates =
-          statesByParticipant[_participantKey(
-            participant.userId,
-            participant.sessionId,
-          )];
+      final inboundStates = statesBySession[participant.sessionId];
 
       if (inboundStates == null) {
         return participant;
@@ -410,6 +398,9 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
 
       final pausedTracks = {...participant.pausedTracks};
       for (final inboundState in inboundStates) {
+        // Both IDs must match, as in `sfuUpdateAudioLevelChanged`.
+        if (inboundState.userId != participant.userId) continue;
+
         if (inboundState.paused) {
           pausedTracks.add(inboundState.trackType);
         } else {

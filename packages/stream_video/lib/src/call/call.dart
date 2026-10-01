@@ -33,6 +33,7 @@ import '../sfu/data/events/sfu_events.dart';
 import '../sfu/data/models/sfu_audio_bitrate.dart';
 import '../sfu/data/models/sfu_client_capability.dart';
 import '../sfu/data/models/sfu_error.dart';
+import '../sfu/data/models/sfu_participant.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../shared_emitter.dart';
 import '../state_emitter.dart';
@@ -2219,21 +2220,32 @@ class Call {
     );
   }
 
+  /// Whether exactly one participant, a session of the current user, remains
+  /// once [leaving] is removed.
+  bool _isAloneAfterLeave(SfuParticipant leaving) {
+    final currentUserId = _streamVideo.currentUser.id;
+    var remaining = 0;
+
+    for (final participant in state.value.callParticipants) {
+      if (participant.userId == leaving.userId &&
+          participant.sessionId == leaving.sessionId) {
+        continue;
+      }
+      if (participant.userId != currentUserId || ++remaining > 1) {
+        return false;
+      }
+    }
+
+    return remaining == 1;
+  }
+
   Future<void> _onSfuEvent(SfuEvent sfuEvent) async {
     if (sfuEvent is SfuParticipantLeftEvent) {
       if (sfuEvent.callCid != callCid.value) return;
 
-      final callParticipants = [...state.value.callParticipants]
-        ..removeWhere(
-          (participant) =>
-              participant.userId == sfuEvent.participant.userId &&
-              participant.sessionId == sfuEvent.participant.sessionId,
-        );
-
-      if (callParticipants.length == 1 &&
-          callParticipants.first.userId == _streamVideo.currentUser.id &&
-          state.value.isRingingFlow &&
-          _stateManager.callState.preferences.dropIfAloneInRingingFlow) {
+      if (state.value.isRingingFlow &&
+          _stateManager.callState.preferences.dropIfAloneInRingingFlow &&
+          _isAloneAfterLeave(sfuEvent.participant)) {
         final endResult = await end(
           reason: 'last participant left the call (ringing flow)',
         );

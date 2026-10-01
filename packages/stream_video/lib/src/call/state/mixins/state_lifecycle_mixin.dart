@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
 
 import '../../../call_state.dart';
@@ -257,13 +256,16 @@ extension on CallMetadata {
   List<CallParticipantState> toCallParticipants(CallState state) {
     final result = <CallParticipantState>[];
 
+    final currentBySessionId = {
+      for (final it in state.callParticipants) it.sessionId: it,
+    };
+
     for (final participant in session.participants.values) {
       final userId = participant.userId;
       final sessionId = participant.userSessionId;
       final user = users[userId];
-      final currentState = state.callParticipants.firstWhereOrNull(
-        (it) => it.userId == userId && it.sessionId == sessionId,
-      );
+      var currentState = currentBySessionId[sessionId];
+      if (currentState?.userId != userId) currentState = null;
 
       final isLocal =
           state.currentUserId == userId && state.sessionId == sessionId;

@@ -178,16 +178,18 @@ class _StreamPictureInPictureUiKitViewState
       return;
     }
 
+    // Follows the participant list, so a status-only state change does not
+    // re-run the sort.
     _subscriptions.add(
       _idCallState,
-      widget.call.state.listen(
-        (state) {
-          if (state.status is CallStatusDisconnected) {
+      widget.call.participantsStream.listen(
+        (callParticipants) {
+          if (widget.call.state.value.status is CallStatusDisconnected) {
             return;
           }
 
           _handleParticipantsChange(
-            state.callParticipants,
+            callParticipants,
             (widget
                         .pictureInPictureConfiguration
                         ?.iOSPiPConfiguration

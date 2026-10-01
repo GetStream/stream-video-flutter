@@ -368,6 +368,12 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
     required int totalCount,
     required int anonymousCount,
   }) {
+    // An unchanged count does not emit a state.
+    if (state.participantCount == totalCount &&
+        state.anonymousParticipantCount == anonymousCount) {
+      return;
+    }
+
     state = state.copyWith(
       participantCount: totalCount,
       anonymousParticipantCount: anonymousCount,
