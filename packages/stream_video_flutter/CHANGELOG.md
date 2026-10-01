@@ -4,6 +4,10 @@
 
 - Added `CallParticipantsBuilder`, which builds from `Call.participantsStream`.
 
+### 🔄 Changed
+
+- The iOS picture-in-picture view and the Android background service now update only when the participant list or notification options change, instead of on every call state emission.
+
 ### 🐞 Fixed
 
 - Fixed `PartialCallStateBuilder` throwing a cast error instead of surfacing a partial state error.

@@ -41,13 +41,44 @@ extension CodecX on sfu_models.Codec {
   }
 }
 
+extension SfuParticipantListX on Iterable<SfuParticipant> {
+  /// Maps every SFU participant to a [CallParticipantState], carrying over
+  /// what [state] already knows about each user.
+  ///
+  /// The existing participants are indexed once up front, so a join response
+  /// with P participants costs O(P + N) instead of one scan per participant.
+  List<CallParticipantState> toParticipantStates(CallState state) {
+    final existingByUserId = <String, CallParticipantState>{};
+    for (final participant in state.callParticipants) {
+      existingByUserId[participant.userId] ??= participant;
+    }
+
+    return [
+      for (final participant in this)
+        participant._toParticipantState(
+          state,
+          existing: existingByUserId[participant.userId],
+        ),
+    ];
+  }
+}
+
 extension SfuParticipantX on SfuParticipant {
   CallParticipantState toParticipantState(CallState state) {
+    return _toParticipantState(
+      state,
+      existing: state.callParticipants.firstWhereOrNull(
+        (it) => it.userId == userId,
+      ),
+    );
+  }
+
+  CallParticipantState _toParticipantState(
+    CallState state, {
+    required CallParticipantState? existing,
+  }) {
     final isLocal =
         userId == state.currentUserId && sessionId == state.sessionId;
-    final existing = state.callParticipants.firstWhereOrNull(
-      (it) => it.userId == userId,
-    );
 
     final existingName = existing?.name ?? '';
     final existingRoles = existing?.roles ?? [];

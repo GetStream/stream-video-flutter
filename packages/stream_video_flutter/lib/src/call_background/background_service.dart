@@ -245,6 +245,8 @@ class StreamBackgroundService {
       );
 
       if (result) {
+        var lastOptions = options;
+
         // ignore: cancel_subscriptions
         final stateSubscription = call.state.listen((CallState value) async {
           _logger.v(
@@ -259,7 +261,11 @@ class StreamBackgroundService {
           try {
             final updateOptions = optionsBuilder.call(call);
 
-            // TODO: That is a lot of service updates. We should only update the service if the options have changed.
+            // The state emits once per SFU event, which in a large call is
+            // far more often than the notification changes.
+            if (updateOptions == lastOptions) return;
+            lastOptions = updateOptions;
+
             final updateResult =
                 await StreamVideoFlutterBackground.updateService(
                   NotificationPayload(

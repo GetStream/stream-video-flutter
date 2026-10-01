@@ -178,16 +178,19 @@ class _StreamPictureInPictureUiKitViewState
       return;
     }
 
+    // The throttled list rather than the raw state: the raw state emits once
+    // per SFU event, and sorting the participants on every one of them is
+    // wasted work in a large call.
     _subscriptions.add(
       _idCallState,
-      widget.call.state.listen(
-        (state) {
-          if (state.status is CallStatusDisconnected) {
+      widget.call.participantsStream.listen(
+        (callParticipants) {
+          if (widget.call.state.value.status is CallStatusDisconnected) {
             return;
           }
 
           _handleParticipantsChange(
-            state.callParticipants,
+            callParticipants,
             (widget
                         .pictureInPictureConfiguration
                         ?.iOSPiPConfiguration
