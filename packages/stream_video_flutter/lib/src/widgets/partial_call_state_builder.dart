@@ -31,11 +31,9 @@ class PartialCallStateBuilder<T> extends StatelessWidget {
   }
 }
 
-// Subscribes once per call rather than once per build: a stream created in
-// `build` would be replaced on every rebuild of a parent, cancelling and
-// re-subscribing each time. The value is read from the call's current state on
-// every build, so a new [selector] applies immediately; the subscription only
-// schedules a rebuild when the selected value changes.
+// Listens to the call's partial state while mounted, re-subscribing only when
+// [call] changes. Holds the last selected value, and selects it again from the
+// current state when [selector] changes.
 class _PartialCallStateListener<T> extends StatefulWidget {
   const _PartialCallStateListener({
     required this.call,
@@ -56,17 +54,26 @@ class _PartialCallStateListener<T> extends StatefulWidget {
 class _PartialCallStateListenerState<T>
     extends State<_PartialCallStateListener<T>> {
   StreamSubscription<T>? _subscription;
+  late T _data;
+
+  T _select() => widget.selector(widget.call.state.value);
 
   @override
   void initState() {
     super.initState();
+    _data = _select();
     _subscribe();
   }
 
   @override
   void didUpdateWidget(covariant _PartialCallStateListener<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.call != widget.call) _subscribe();
+    if (oldWidget.call != widget.call) {
+      _data = _select();
+      _subscribe();
+    } else if (oldWidget.selector != widget.selector) {
+      _data = _select();
+    }
   }
 
   void _subscribe() {
@@ -76,8 +83,9 @@ class _PartialCallStateListenerState<T>
     _subscription = widget.call
         .partialState((state) => widget.selector(state))
         .listen(
-          (_) {
-            if (mounted) setState(() {});
+          (data) {
+            if (!mounted || data == _data) return;
+            setState(() => _data = data);
           },
           onError: (Object error) {
             _logger.e(
@@ -95,7 +103,7 @@ class _PartialCallStateListenerState<T>
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context, widget.selector(widget.call.state.value));
+    return widget.builder(context, _data);
   }
 }
 
