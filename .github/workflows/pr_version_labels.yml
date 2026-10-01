@@ -41,7 +41,11 @@ jobs:
               return;
             }
 
-            const current = new Set(pr.labels.map((l) => l.name));
+            // Read live labels; the event payload can be stale by the time this runs.
+            const labels = await github.paginate(github.rest.issues.listLabelsOnIssue, {
+              owner, repo, issue_number: number, per_page: 100,
+            });
+            const current = new Set(labels.map((l) => l.name));
 
             // Drop the version label that no longer matches the base branch.
             for (const label of Object.values(BRANCH_LABELS)) {

@@ -2,8 +2,8 @@ name: "PR Review Labels"
 
 # Keeps three status labels in sync with the review state of a pull request:
 #
-#   ready    - set manually by the PR owner when the PR is ready for review.
-#              Re-added automatically once every review thread is resolved.
+#   ready    - set manually by the PR owner when the PR is ready for review,
+#              and again after review feedback has been addressed.
 #   pending  - replaces "ready" as soon as a reviewer leaves a comment or
 #              requests changes without approving.
 #   approved - replaces "ready" when a reviewer approves. Removed when a
@@ -17,8 +17,6 @@ on:
     types: [submitted, dismissed]
   pull_request_review_comment:
     types: [created]
-  pull_request_review_thread:
-    types: [resolved]
 
 permissions:
   contents: read
@@ -113,27 +111,6 @@ jobs:
               return [...latest.values()].includes('APPROVED');
             }
 
-            async function allThreadsResolved() {
-              let cursor = null;
-              while (true) {
-                const result = await github.graphql(`
-                  query($owner: String!, $repo: String!, $number: Int!, $cursor: String) {
-                    repository(owner: $owner, name: $repo) {
-                      pullRequest(number: $number) {
-                        reviewThreads(first: 100, after: $cursor) {
-                          nodes { isResolved }
-                          pageInfo { hasNextPage endCursor }
-                        }
-                      }
-                    }
-                  }`, { owner, repo, number, cursor });
-                const threads = result.repository.pullRequest.reviewThreads;
-                if (threads.nodes.some((t) => !t.isResolved)) return false;
-                if (!threads.pageInfo.hasNextPage) return true;
-                cursor = threads.pageInfo.endCursor;
-              }
-            }
-
             switch (context.eventName) {
               case 'pull_request_review': {
                 const review = context.payload.review;
@@ -172,21 +149,6 @@ jobs:
                   break;
                 }
                 await markPending();
-                break;
-              }
-
-              case 'pull_request_review_thread': {
-                const labels = await currentLabels();
-                if (!labels.has(PENDING)) {
-                  core.info(`"${PENDING}" is not set, nothing to do`);
-                  break;
-                }
-                if (!(await allThreadsResolved())) {
-                  core.info('Unresolved review threads remain');
-                  break;
-                }
-                await removeLabel(PENDING);
-                await addLabel(READY);
                 break;
               }
             }
