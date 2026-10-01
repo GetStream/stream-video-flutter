@@ -31,9 +31,10 @@ class PartialCallStateBuilder<T> extends StatelessWidget {
   }
 }
 
-// Listens to the call's partial state while mounted, re-subscribing only when
-// [call] changes. Holds the last selected value, and selects it again from the
-// current state when [selector] changes.
+// Listens to the call's partial state while mounted, and subscribes again when
+// [call] or [selector] changes, so every value comes from the current selector.
+// A selector that keeps its identity across rebuilds, such as a method
+// tear-off, keeps a single subscription. Holds the last selected value.
 class _PartialCallStateListener<T> extends StatefulWidget {
   const _PartialCallStateListener({
     required this.call,
@@ -68,20 +69,17 @@ class _PartialCallStateListenerState<T>
   @override
   void didUpdateWidget(covariant _PartialCallStateListener<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.call != widget.call) {
+    if (oldWidget.call != widget.call ||
+        oldWidget.selector != widget.selector) {
       _data = _select();
       _subscribe();
-    } else if (oldWidget.selector != widget.selector) {
-      _data = _select();
     }
   }
 
   void _subscribe() {
     _subscription?.cancel();
-    // Reads `widget.selector` when each state arrives, so the subscription
-    // follows the latest selector without being recreated.
     _subscription = widget.call
-        .partialState((state) => widget.selector(state))
+        .partialState(widget.selector)
         .listen(
           (data) {
             if (!mounted || data == _data) return;

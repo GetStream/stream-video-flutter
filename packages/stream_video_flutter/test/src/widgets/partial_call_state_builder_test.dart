@@ -52,13 +52,14 @@ void main() {
   }
 
   testWidgets(
-    'PartialCallStateBuilder keeps one subscription when its parent rebuilds',
+    'PartialCallStateBuilder keeps one subscription when its parent rebuilds with the same selector',
     (tester) async {
       final call = _FakeCall(initialState);
+      String recording(CallState state) => 'recording: ${state.isRecording}';
 
-      await tester.pumpWidget(subject(call));
-      await tester.pumpWidget(subject(call));
-      await tester.pumpWidget(subject(call));
+      await tester.pumpWidget(subject(call, selector: recording));
+      await tester.pumpWidget(subject(call, selector: recording));
+      await tester.pumpWidget(subject(call, selector: recording));
 
       expect(call.subscriptions, 1);
     },
@@ -101,4 +102,25 @@ void main() {
 
     expect(call._changes.hasListener, isFalse);
   });
+
+  testWidgets(
+    'PartialCallStateBuilder shows a change that a new selector selects',
+    (tester) async {
+      final call = _FakeCall(initialState);
+      String recording(CallState state) => state.isRecording ? 'x' : 'y';
+      String broadcasting(CallState state) => state.isBroadcasting ? 'x' : 'y';
+
+      await tester.pumpWidget(subject(call, selector: recording));
+      call.callState = initialState.copyWith(isRecording: true);
+      await tester.pump();
+      await tester.pumpWidget(subject(call, selector: broadcasting));
+      expect(find.text('y'), findsOneWidget);
+
+      call.callState = call.state.value.copyWith(isBroadcasting: true);
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('x'), findsOneWidget);
+    },
+  );
 }
