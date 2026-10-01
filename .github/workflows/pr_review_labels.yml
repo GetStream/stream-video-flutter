@@ -1,0 +1,192 @@
+name: "PR Review Labels"
+
+# Keeps three status labels in sync with the review state of a pull request:
+#
+#   ready    - set manually by the PR owner when the PR is ready for review.
+#              Re-added automatically once every review thread is resolved.
+#   pending  - replaces "ready" as soon as a reviewer leaves a comment or
+#              requests changes without approving.
+#   approved - replaces "ready" when a reviewer approves. Removed when a
+#              reviewer requests changes, or when the approval is dismissed
+#              and no other approval remains.
+#
+# Comments made by the PR author or by bots never change the labels.
+
+on:
+  pull_request_review:
+    types: [submitted, dismissed]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review_thread:
+    types: [resolved]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  sync_labels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@v8
+        with:
+          script: |
+            const READY = 'ready';
+            const PENDING = 'pending';
+            const APPROVED = 'approved';
+
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const number = pr.number;
+            const author = pr.user.login;
+
+            const isExternal = (user) =>
+              user && user.login !== author && user.type !== 'Bot';
+
+            // Labels are created on first use so nobody has to set them up by hand.
+            const LABEL_DEFS = {
+              [READY]: { color: '0E8A16', description: 'Ready for review' },
+              [PENDING]: { color: 'FBCA04', description: 'Review comments waiting to be addressed' },
+              [APPROVED]: { color: '2EA44F', description: 'Approved by a reviewer' },
+            };
+
+            async function ensureLabel(name) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name });
+              } catch (e) {
+                if (e.status !== 404) throw e;
+                await github.rest.issues.createLabel({ owner, repo, name, ...LABEL_DEFS[name] });
+              }
+            }
+
+            async function currentLabels() {
+              const labels = await github.paginate(github.rest.issues.listLabelsOnIssue, {
+                owner, repo, issue_number: number, per_page: 100,
+              });
+              return new Set(labels.map((l) => l.name));
+            }
+
+            async function addLabel(name) {
+              await ensureLabel(name);
+              await github.rest.issues.addLabels({ owner, repo, issue_number: number, labels: [name] });
+              core.info(`Added "${name}"`);
+            }
+
+            async function removeLabel(name) {
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number: number, name });
+                core.info(`Removed "${name}"`);
+              } catch (e) {
+                if (e.status !== 404) throw e;
+              }
+            }
+
+            // "ready" -> "pending" when a reviewer comments without approving.
+            // With `dropApproved`, an existing "approved" is also replaced by "pending".
+            async function markPending({ dropApproved = false } = {}) {
+              const labels = await currentLabels();
+              const wasReady = labels.has(READY);
+              const wasApproved = dropApproved && labels.has(APPROVED);
+              if (!wasReady && !wasApproved) {
+                core.info('Neither "ready" nor a droppable "approved" is set, nothing to do');
+                return;
+              }
+              if (wasReady) await removeLabel(READY);
+              if (wasApproved) await removeLabel(APPROVED);
+              await addLabel(PENDING);
+            }
+
+            // True when at least one reviewer's latest review is an approval.
+            async function hasActiveApproval() {
+              const reviews = await github.paginate(github.rest.pulls.listReviews, {
+                owner, repo, pull_number: number, per_page: 100,
+              });
+              const latest = new Map();
+              for (const r of reviews) {
+                if (!isExternal(r.user)) continue;
+                // A plain comment review does not change the reviewer's verdict.
+                if (r.state === 'COMMENTED') continue;
+                latest.set(r.user.login, r.state);
+              }
+              return [...latest.values()].includes('APPROVED');
+            }
+
+            async function allThreadsResolved() {
+              let cursor = null;
+              while (true) {
+                const result = await github.graphql(`
+                  query($owner: String!, $repo: String!, $number: Int!, $cursor: String) {
+                    repository(owner: $owner, name: $repo) {
+                      pullRequest(number: $number) {
+                        reviewThreads(first: 100, after: $cursor) {
+                          nodes { isResolved }
+                          pageInfo { hasNextPage endCursor }
+                        }
+                      }
+                    }
+                  }`, { owner, repo, number, cursor });
+                const threads = result.repository.pullRequest.reviewThreads;
+                if (threads.nodes.some((t) => !t.isResolved)) return false;
+                if (!threads.pageInfo.hasNextPage) return true;
+                cursor = threads.pageInfo.endCursor;
+              }
+            }
+
+            switch (context.eventName) {
+              case 'pull_request_review': {
+                const review = context.payload.review;
+                if (context.payload.action === 'dismissed') {
+                  if (!(await hasActiveApproval())) await removeLabel(APPROVED);
+                  break;
+                }
+                if (!isExternal(review.user)) {
+                  core.info('Review by the PR author or a bot, ignoring');
+                  break;
+                }
+                if (review.state === 'approved') {
+                  await addLabel(APPROVED);
+                  await removeLabel(READY);
+                  await removeLabel(PENDING);
+                } else {
+                  // "commented" or "changes_requested"
+                  await markPending({ dropApproved: review.state === 'changes_requested' });
+                }
+                break;
+              }
+
+              case 'pull_request_review_comment': {
+                const comment = context.payload.comment;
+                if (!isExternal(comment.user)) {
+                  core.info('Comment by the PR author or a bot, ignoring');
+                  break;
+                }
+                // Inline comments that belong to an approving review should not
+                // knock the PR back to "pending".
+                const { data: parent } = await github.rest.pulls.getReview({
+                  owner, repo, pull_number: number, review_id: comment.pull_request_review_id,
+                });
+                if (parent.state === 'APPROVED') {
+                  core.info('Comment is part of an approving review, ignoring');
+                  break;
+                }
+                await markPending();
+                break;
+              }
+
+              case 'pull_request_review_thread': {
+                const labels = await currentLabels();
+                if (!labels.has(PENDING)) {
+                  core.info(`"${PENDING}" is not set, nothing to do`);
+                  break;
+                }
+                if (!(await allThreadsResolved())) {
+                  core.info('Unresolved review threads remain');
+                  break;
+                }
+                await removeLabel(PENDING);
+                await addLabel(READY);
+                break;
+              }
+            }
