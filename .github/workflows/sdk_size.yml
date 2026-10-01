@@ -12,6 +12,7 @@ on:
       - "metrics/sdk_size/**"
       - "pubspec.yaml"
       - ".github/workflows/sdk_size.yml"
+      - ".github/actions/sdk-size-report/**"
   push:
     branches:
       - main
@@ -25,56 +26,76 @@ permissions:
   contents: read
 
 jobs:
-  measure:
-    name: measure (${{ matrix.platform }})
+  measure-android:
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     timeout-minutes: 60
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: android
-            os: ubuntu-latest
-          - platform: ios
-            os: macos-latest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Flutter
+        uses: ./.github/actions/setup-flutter
+        with:
+          java-version: "17"
+
+      - name: Measure app size
+        run: dart run metrics/sdk_size/tool/measure.dart --platform android
+
+      - name: Measure pub archives
+        run: dart run metrics/sdk_size/tool/measure.dart --platform pub
+
+      - name: Upload results
+        uses: actions/upload-artifact@v7
+        with:
+          name: sdk-size-results-android
+          path: build/sdk_size/results/*.json
+
+      - name: Upload size analysis
+        uses: actions/upload-artifact@v7
+        with:
+          name: sdk-size-analysis-android
+          path: build/sdk_size/results/analysis/
+          retention-days: 90
+
+  measure-ios:
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    timeout-minutes: 60
+    runs-on: macos-latest
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
 
       - name: Select Xcode
-        if: matrix.platform == 'ios'
         uses: maxim-lobanov/setup-xcode@v1.7.0
         with:
           xcode-version: latest-stable
 
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter
-        with:
-          java-version: ${{ matrix.platform == 'android' && '17' || '' }}
 
       - name: Measure app size
-        run: dart run metrics/sdk_size/tool/measure.dart --platform ${{ matrix.platform }}
-
-      - name: Measure pub archives
-        if: matrix.platform == 'android'
-        run: dart run metrics/sdk_size/tool/measure.dart --platform pub
+        run: dart run metrics/sdk_size/tool/measure.dart --platform ios
 
       - name: Upload results
         uses: actions/upload-artifact@v7
         with:
-          name: sdk-size-results-${{ matrix.platform }}
+          name: sdk-size-results-ios
           path: build/sdk_size/results/*.json
 
       - name: Upload size analysis
         uses: actions/upload-artifact@v7
         with:
-          name: sdk-size-analysis-${{ matrix.platform }}
+          name: sdk-size-analysis-ios
           path: build/sdk_size/results/analysis/
           retention-days: 90
 
-  report:
-    needs: measure
+  # Reports Android while iOS is still queued or building. Only on pull
+  # requests: on a push, the report stores the benchmark, which has to be
+  # complete.
+  report-android:
+    needs: measure-android
+    if: github.event_name == 'pull_request'
     timeout-minutes: 15
     runs-on: ubuntu-latest
     permissions:
@@ -89,30 +110,34 @@ jobs:
       - name: Git Checkout
         uses: actions/checkout@v7
 
-      - name: Download results
-        uses: actions/download-artifact@v8
-        with:
-          pattern: sdk-size-results-*
-          path: build/sdk_size/results
-          merge-multiple: true
-
-      - name: Connect Bot
-        uses: webfactory/ssh-agent@v0.10.0
+      - name: Report sizes
+        uses: ./.github/actions/sdk-size-report
         with:
           ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.3"
-          bundler-cache: true
-          working-directory: metrics/sdk_size
-
-      - name: Configure Git
-        run: |
-          git config --global user.name "Stream Bot"
-          git config --global user.email "ci@getstream.io"
+  # Waits for report-android as well, so the complete report always replaces
+  # the partial one rather than racing it.
+  report:
+    needs: [measure-android, measure-ios, report-android]
+    if: >-
+      !cancelled()
+      && needs.measure-android.result == 'success'
+      && needs.measure-ios.result == 'success'
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_PR_NUM: ${{ github.event.pull_request.number }}
+      BASE_BRANCH: ${{ github.base_ref || github.ref_name }}
+      GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
 
       - name: Report sizes
-        working-directory: metrics/sdk_size
-        run: bundle exec fastlane sdk_size
+        uses: ./.github/actions/sdk-size-report
+        with:
+          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}

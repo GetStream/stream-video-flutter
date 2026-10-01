@@ -81,6 +81,12 @@ def render_breakdown(breakdown, benchmark, base_branch)
            "Dart sizes are uncompressed symbol sizes. Open #{artifacts} " \
            'in the DevTools App Size tool to drill down further.'
   lines << ''
+  # A pull request reports Android before iOS is done.
+  pending = %w[android ios] - breakdown.keys
+  unless pending.empty?
+    lines << "⏳ Still measuring #{pending.join(', ')}. Both size comments update when it finishes."
+    lines << ''
+  end
   breakdown.each do |platform, variants|
     variants.each do |variant, components|
       base = benchmark.dig(platform, variant) || {}
