@@ -151,6 +151,43 @@ Shadows come from `StreamElevation` through a `Material`, not a hand-painted
 `src/widgets/design_system_candidates/` holds components that implement a design
 the core package does not ship yet, staged to graduate to core later.
 
+## Reading call state in widgets
+
+`CallState` is one immutable object, replaced on every change — many times a
+second in a large call. Build from the part that is shown, not from the whole
+state:
+
+- `PartialCallStateBuilder` in a build, `call.partialState(selector)` in code.
+  Both run the selector on each emission and pass a value on only when it
+  differs from the previous one.
+- **Pass a selector that keeps its identity.** The builder subscribes again
+  whenever its `selector` changes, so an inline closure — a new object on every
+  build — makes it resubscribe each time the parent rebuilds. Use a static
+  method or a top-level function:
+
+  ```dart
+  static bool _isRecording(CallState state) => state.isRecording;
+
+  PartialCallStateBuilder(
+    call: call,
+    selector: _isRecording,
+    builder: (context, isRecording) => ...,
+  );
+  ```
+
+  Not an instance method of a `StatelessWidget`: the widget is a new instance
+  on every build, and so is its tear-off.
+- Select a value with `==`: a primitive, an enum, or a record of them. Records
+  compare field by field. Lists compare element by element, so their elements
+  need `==` too.
+- Select the derived value the widget shows — `state.callParticipants.length`,
+  not the list.
+- Render participants through `CallParticipantsBuilder` or
+  `Call.participantsStream`, which are throttled, not by selecting
+  `state.callParticipants`.
+- A `call.partialState(...)` listener is subscribed in `initState` and
+  cancelled in `dispose`.
+
 ## Testing
 
 Golden tests use `alchemist`, through `streamGoldenTest` and `TestWrapper` in
