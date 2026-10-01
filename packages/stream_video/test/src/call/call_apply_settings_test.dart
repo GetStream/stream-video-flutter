@@ -2,6 +2,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/shared_emitter.dart';
+import 'package:stream_video/src/webrtc/rtc_media_device/device_enumeration_trigger.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
@@ -47,8 +48,7 @@ void main() {
 
       // Default device enumeration mocking - returns built-in devices only
       when(
-        () =>
-            mockDeviceNotifier.enumerateDevices(trigger: any(named: 'trigger')),
+        () => mockDeviceNotifier.enumerateDevicesFor(any()),
       ).thenAnswer(
         (_) async => Result.success(TestDeviceScenarios.builtInDevicesOnly),
       );
@@ -204,9 +204,7 @@ void main() {
 
         // Override default device enumeration for this test - add Bluetooth headphones
         when(
-          () => mockDeviceNotifier.enumerateDevices(
-            trigger: any(named: 'trigger'),
-          ),
+          () => mockDeviceNotifier.enumerateDevicesFor(any()),
         ).thenAnswer(
           (_) async =>
               Result.success(TestDeviceScenarios.withBluetoothHeadphones),
@@ -284,9 +282,7 @@ void main() {
 
           // Override default device enumeration for this test - add Bluetooth headphones
           when(
-            () => mockDeviceNotifier.enumerateDevices(
-              trigger: any(named: 'trigger'),
-            ),
+            () => mockDeviceNotifier.enumerateDevicesFor(any()),
           ).thenAnswer(
             (_) async =>
                 Result.success(TestDeviceScenarios.withBluetoothHeadphones),

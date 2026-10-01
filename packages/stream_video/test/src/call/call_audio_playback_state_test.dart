@@ -36,7 +36,7 @@ void main() {
       deviceNotifier = _PlaybackNotifier();
       // `Call.join` enumerates devices while applying the call settings.
       when(
-        () => deviceNotifier.enumerateDevices(trigger: any(named: 'trigger')),
+        () => deviceNotifier.enumerateDevicesFor(any()),
       ).thenAnswer((_) async => const Result.success([]));
     });
 

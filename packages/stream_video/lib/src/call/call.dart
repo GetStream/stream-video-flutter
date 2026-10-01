@@ -54,6 +54,7 @@ import '../webrtc/model/rtc_video_parameters.dart';
 import '../webrtc/peer_connection_factory.dart';
 import '../webrtc/rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 import '../webrtc/rtc_manager.dart';
+import '../webrtc/rtc_media_device/device_enumeration_trigger.dart';
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
 import '../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../webrtc/rtc_track/rtc_track.dart';
@@ -2997,9 +2998,10 @@ class Call {
   }
 
   Future<void> _applyCallSettingsToConnectOptions(CallSettings settings) async {
-    final mediaDevicesResult = await _rtcMediaDeviceNotifier.enumerateDevices(
-      trigger: DeviceEnumerationTrigger.callSettings,
-    );
+    final mediaDevicesResult = await _rtcMediaDeviceNotifier
+        .enumerateDevicesFor(
+          DeviceEnumerationTrigger.callSettings,
+        );
 
     final mediaDevices = mediaDevicesResult.fold(
       success: (success) => success.data,
@@ -3935,7 +3937,7 @@ class Call {
     await result.fold(
       success: (success) async {
         final mediaDevicesResult = await _rtcMediaDeviceNotifier
-            .enumerateDevices(trigger: DeviceEnumerationTrigger.flipCamera);
+            .enumerateDevicesFor(DeviceEnumerationTrigger.flipCamera);
 
         final mediaDevices = mediaDevicesResult.fold(
           success: (success) => success.data,

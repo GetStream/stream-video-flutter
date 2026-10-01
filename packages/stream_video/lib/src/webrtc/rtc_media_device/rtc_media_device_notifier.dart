@@ -12,6 +12,7 @@ import '../../call/stats/tracer.dart';
 import '../../errors/video_error_composer.dart';
 import '../../utils/extensions.dart';
 import '../rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
+import 'device_enumeration_trigger.dart';
 
 abstract class InterruptionEvent {}
 
@@ -52,32 +53,11 @@ class SpeechActivityEnded extends SpeechActivityEvent {
   const SpeechActivityEnded();
 }
 
-/// What caused a [RtcMediaDeviceNotifier.enumerateDevices] call.
-///
-/// Recorded in the RTC trace next to each enumeration so a dump shows why the
-/// device list was read.
-enum DeviceEnumerationTrigger {
-  /// The first enumeration, when the notifier is created.
-  initial,
-
-  /// The platform reported that the set of media devices changed.
-  deviceChange,
-
-  /// The call settings are being applied on join.
-  callSettings,
-
-  /// The camera was flipped and the current camera is being resolved.
-  flipCamera,
-
-  /// Called by the app or a widget, e.g. to list the available devices.
-  explicit,
-}
-
 class RtcMediaDeviceNotifier {
   RtcMediaDeviceNotifier._internal() {
     rtc.navigator.mediaDevices.ondevicechange = _onDeviceChange;
     // Reads the initial devices list.
-    enumerateDevices(trigger: DeviceEnumerationTrigger.initial);
+    enumerateDevicesFor(DeviceEnumerationTrigger.initial);
 
     // Routes remote audio playback traces (web only).
     rtc_audio.setAudioTraceHandler(_tracer.trace);
@@ -249,7 +229,7 @@ class RtcMediaDeviceNotifier {
     // Android it blocks the main thread), so enumerate once per burst.
     _deviceChangeTimer?.cancel();
     _deviceChangeTimer = Timer(deviceChangeDebounce, () {
-      enumerateDevices(trigger: DeviceEnumerationTrigger.deviceChange);
+      enumerateDevicesFor(DeviceEnumerationTrigger.deviceChange);
     });
   }
 
@@ -257,11 +237,19 @@ class RtcMediaDeviceNotifier {
   /// emits the full list on [onDeviceChange].
   ///
   /// Calls made while an enumeration is already running share its result
-  /// instead of starting another one. [trigger] records why the devices are
-  /// read in the RTC trace.
+  /// instead of starting another one.
   Future<Result<List<RtcMediaDevice>>> enumerateDevices({
     RtcMediaDeviceKind? kind,
-    DeviceEnumerationTrigger trigger = DeviceEnumerationTrigger.explicit,
+  }) {
+    return enumerateDevicesFor(DeviceEnumerationTrigger.explicit, kind: kind);
+  }
+
+  /// [enumerateDevices], recording [trigger] in the RTC trace as the reason
+  /// the devices are read.
+  @internal
+  Future<Result<List<RtcMediaDevice>>> enumerateDevicesFor(
+    DeviceEnumerationTrigger trigger, {
+    RtcMediaDeviceKind? kind,
   }) async {
     var pending = _pendingEnumeration;
 
@@ -280,7 +268,10 @@ class RtcMediaDeviceNotifier {
     final result = await (pending ?? _startEnumeration());
 
     final allDevices = result.getDataOrNull();
-    if (kind == null || allDevices == null) return result;
+    if (allDevices == null) return result;
+
+    // The shared list is unmodifiable, so give each caller its own copy.
+    if (kind == null) return Result.success(allDevices.toList());
 
     final devices = allDevices.where((d) => d.kind == kind).toList();
     if (devices.isEmpty) {
@@ -304,7 +295,9 @@ class RtcMediaDeviceNotifier {
     try {
       final devices = await rtc.navigator.mediaDevices.enumerateDevices();
 
-      final mediaDevices = [
+      // Shared by every caller of a coalesced enumeration and every
+      // [onDeviceChange] listener, so it must not be mutated.
+      final mediaDevices = List<RtcMediaDevice>.unmodifiable([
         ...devices.map((it) {
           return RtcMediaDevice(
             id: it.deviceId,
@@ -326,7 +319,7 @@ class RtcMediaDeviceNotifier {
                 .capitalizeFirstLetter(),
             kind: RtcMediaDeviceKind.audioOutput,
           ),
-      ];
+      ]);
 
       _tracer.trace(
         TraceTag.enumerateDevices,

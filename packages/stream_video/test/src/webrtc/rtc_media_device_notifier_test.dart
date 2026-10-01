@@ -101,6 +101,27 @@ void main() {
     expect(videoInputs.getDataOrNull()?.map((d) => d.id), ['0']);
   });
 
+  test(
+    'callers get their own list and listeners an unmodifiable one',
+    () async {
+      getSourcesGate = Completer<void>();
+
+      final first = notifier.enumerateDevices();
+      final second = notifier.enumerateDevices();
+      getSourcesGate!.complete();
+
+      final firstDevices = (await first).getDataOrNull()!;
+      final secondDevices = (await second).getDataOrNull()!;
+      firstDevices.removeLast();
+
+      expect(secondDevices, hasLength(3));
+
+      final emitted = await notifier.onDeviceChange.first;
+      expect(emitted, hasLength(3));
+      expect(emitted.clear, throwsUnsupportedError);
+    },
+  );
+
   test('sequential calls each enumerate', () async {
     await notifier.enumerateDevices();
     await notifier.enumerateDevices();
