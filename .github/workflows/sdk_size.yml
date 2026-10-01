@@ -92,10 +92,12 @@ jobs:
 
   # Reports Android while iOS is still queued or building. Only on pull
   # requests: on a push, the report stores the benchmark, which has to be
-  # complete.
+  # complete. A fork gets neither the bot key nor a token that can comment.
   report-android:
     needs: measure-android
-    if: github.event_name == 'pull_request'
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
     timeout-minutes: 15
     runs-on: ubuntu-latest
     permissions:
@@ -121,6 +123,8 @@ jobs:
     needs: [measure-android, measure-ios, report-android]
     if: >-
       !cancelled()
+      && (github.event_name != 'pull_request'
+        || github.event.pull_request.head.repo.full_name == github.repository)
       && needs.measure-android.result == 'success'
       && needs.measure-ios.result == 'success'
     timeout-minutes: 15

@@ -89,12 +89,17 @@ class _Options {
 _Options _parseArgs(List<String> args) {
   String? platform;
   final variants = <String>[];
+  String value(int i) {
+    if (i >= args.length) _fail('Missing a value for ${args[i - 1]}.');
+    return args[i];
+  }
+
   for (var i = 0; i < args.length; i++) {
     switch (args[i]) {
       case '--platform':
-        platform = args[++i];
+        platform = value(++i);
       case '--variant':
-        variants.add(args[++i]);
+        variants.add(value(++i));
       default:
         _fail('Unknown argument: ${args[i]}');
     }
