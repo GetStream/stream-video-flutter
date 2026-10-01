@@ -100,6 +100,8 @@ abstract class TraceTag {
       'audioProcessingStateChanged';
   static const String enumerateDevices =
       'navigator.mediaDevices.enumeratedevices';
+  static const String enumerateDevicesTrigger =
+      'navigator.mediaDevices.enumeratedevices.trigger';
   static const String pauseAudioPlayout =
       'navigator.mediaDevices.pauseAudioPlayout';
   static const String resumeAudioPlayout =

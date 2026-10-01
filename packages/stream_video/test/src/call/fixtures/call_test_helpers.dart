@@ -17,6 +17,7 @@ import 'package:stream_video/src/sfu/data/models/sfu_participant.dart';
 import 'package:stream_video/src/shared_emitter.dart';
 import 'package:stream_video/src/state_emitter.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
+import 'package:stream_video/src/webrtc/rtc_media_device/device_enumeration_trigger.dart';
 import 'package:stream_video/src/webrtc/sdp/policy/sdp_policy.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -24,6 +25,7 @@ import '../../../test_helpers.dart';
 import 'data.dart';
 
 void registerMockFallbackValues() {
+  registerFallbackValue(DeviceEnumerationTrigger.explicit);
   registerFallbackValue(SampleCallData.defaultCid);
   registerFallbackValue(createStubCall());
   registerFallbackValue(SampleCallData.defaultCredentials);
@@ -259,7 +261,7 @@ MockInternetConnection setupMockInternetConnection({
 MockRtcMediaDeviceNotifier setupMockRtcMediaDeviceNotifier() {
   final rtcMediaDeviceNotifier = MockRtcMediaDeviceNotifier();
   when(
-    rtcMediaDeviceNotifier.enumerateDevices,
+    () => rtcMediaDeviceNotifier.enumerateDevicesFor(any()),
   ).thenAnswer((_) => Future.value(const Result.success([])));
   return rtcMediaDeviceNotifier;
 }
