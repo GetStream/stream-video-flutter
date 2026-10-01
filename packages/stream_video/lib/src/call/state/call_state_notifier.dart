@@ -43,6 +43,10 @@ class CallStateNotifier extends StateNotifier<CallState>
   /// passive OS audio-route change (`AudioRouteChangedEvent`).
   bool audioOutputSelectedByUser = false;
 
+  // The value stream is already a broadcast stream, and `map` and `distinct`
+  // keep it one. Converting it with `asBroadcastStream` would keep the
+  // selector subscribed after its last listener cancels, so every stream ever
+  // listened to would keep running on each state change.
   Stream<T> partialCallStateStream<T>(T Function(CallState state) selector) {
     return callStateStream.valueStream
         .map(selector)
@@ -53,8 +57,7 @@ class CallStateNotifier extends StateNotifier<CallState>
               (previous is List &&
                   current is List &&
                   const ListEquality<dynamic>().equals(previous, current)),
-        )
-        .asBroadcastStream();
+        );
   }
 
   Stream<Duration> get durationStream =>

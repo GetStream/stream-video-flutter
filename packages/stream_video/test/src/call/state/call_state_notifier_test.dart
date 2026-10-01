@@ -112,4 +112,36 @@ void main() {
 
     await subscription.cancel();
   });
+
+  test(
+    'partialCallStateStream stops running its selector once cancelled',
+    () async {
+      var callState = CallState(
+        callCid: StreamCallCid.from(
+          type: StreamCallType.defaultType(),
+          id: 'id',
+        ),
+        currentUserId: 'userId',
+        preferences: DefaultCallPreferences(),
+      );
+      final notifier = CallStateNotifier(callState);
+      var selectorRuns = 0;
+
+      final subscription = notifier
+          .partialCallStateStream((state) {
+            selectorRuns++;
+            return state.status;
+          })
+          .listen((_) {});
+      await Future<void>.delayed(Duration.zero);
+      await subscription.cancel();
+      selectorRuns = 0;
+
+      callState = callState.copyWith(status: CallStatus.incoming());
+      notifier.state = callState;
+      await Future<void>.delayed(Duration.zero);
+
+      expect(selectorRuns, 0);
+    },
+  );
 }

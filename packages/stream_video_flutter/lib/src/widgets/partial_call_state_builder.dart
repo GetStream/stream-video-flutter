@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -21,25 +23,79 @@ class PartialCallStateBuilder<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<T>(
-      stream: call.partialState(selector),
-      initialData: selector(call.state.value),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          // An error snapshot carries no data, so fall back to the current
-          // state rather than letting the cast below fail over the real error.
-          _logger.e(
-            () =>
-                '[PartialCallStateBuilder] partial state error: '
-                '${snapshot.error}',
-          );
-          return builder(context, selector(call.state.value));
-        }
-
-        // Not `??`: a selector whose `T` is nullable may legitimately hold null.
-        return builder(context, snapshot.data as T);
-      },
+    return _PartialCallStateListener<T>(
+      call: call,
+      selector: selector,
+      builder: builder,
     );
+  }
+}
+
+// Subscribes once per call rather than once per build: a stream created in
+// `build` would be replaced on every rebuild of a parent, cancelling and
+// re-subscribing each time. The value is read from the call's current state on
+// every build, so a new [selector] applies immediately; the subscription only
+// schedules a rebuild when the selected value changes.
+class _PartialCallStateListener<T> extends StatefulWidget {
+  const _PartialCallStateListener({
+    required this.call,
+    required this.selector,
+    required this.builder,
+    super.key,
+  });
+
+  final Call call;
+  final CallStateSelector<T> selector;
+  final Widget Function(BuildContext context, T data) builder;
+
+  @override
+  State<_PartialCallStateListener<T>> createState() =>
+      _PartialCallStateListenerState<T>();
+}
+
+class _PartialCallStateListenerState<T>
+    extends State<_PartialCallStateListener<T>> {
+  StreamSubscription<T>? _subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscribe();
+  }
+
+  @override
+  void didUpdateWidget(covariant _PartialCallStateListener<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.call != widget.call) _subscribe();
+  }
+
+  void _subscribe() {
+    _subscription?.cancel();
+    // Reads `widget.selector` when each state arrives, so the subscription
+    // follows the latest selector without being recreated.
+    _subscription = widget.call
+        .partialState((state) => widget.selector(state))
+        .listen(
+          (_) {
+            if (mounted) setState(() {});
+          },
+          onError: (Object error) {
+            _logger.e(
+              () => '[PartialCallStateBuilder] partial state error: $error',
+            );
+          },
+        );
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(context, widget.selector(widget.call.state.value));
   }
 }
 
