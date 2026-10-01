@@ -1,0 +1,126 @@
+require 'json'
+
+skip_docs
+
+GITHUB_REPO = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-flutter'
+RESULTS_DIR = File.expand_path('../../../build/sdk_size/results', __dir__)
+BREAKDOWN_HEADER = '## Size Breakdown'
+# Rows smaller than this, on the branch and in the diff, are folded into "other".
+BREAKDOWN_MIN_BYTES = 1024
+BREAKDOWN_MAX_ROWS = 15
+
+# Reports the sizes measure.dart wrote, against the base branch's benchmark in
+# GetStream/stream-internal-metrics. On a push to the base branch, the new
+# sizes become the benchmark.
+lane :sdk_size do
+  base_branch = ENV['BASE_BRANCH'] || git_branch
+
+  sizes = {}
+  %w[android ios pub].each do |platform|
+    read_results("sizes-#{platform}.json")&.each do |name, kb|
+      sizes["#{platform}_#{name}"] = kb
+    end
+  end
+  UI.user_error!("No sizes found in #{RESULTS_DIR}") if sizes.empty?
+
+  # Clones the metrics repo into ./metrics, and pushes the sizes on a push to
+  # the base branch.
+  show_sdk_size(branch_sizes: sizes, github_repo: GITHUB_REPO, base_branch: base_branch)
+
+  show_size_breakdown(base_branch)
+end
+
+def show_size_breakdown(base_branch)
+  repo = GITHUB_REPO.split('/').last
+  benchmark_path = "metrics/flutter-breakdown/#{repo}/#{base_branch}.json"
+  benchmark = File.exist?(benchmark_path) ? JSON.parse(File.read(benchmark_path)) : {}
+
+  breakdown = {}
+  %w[android ios].each do |platform|
+    platform_breakdown = read_results("breakdown-#{platform}.json")
+    breakdown[platform] = platform_breakdown if platform_breakdown
+  end
+  return UI.important('No breakdown found, skipping it.') if breakdown.empty?
+
+  markdown = render_breakdown(breakdown, benchmark, base_branch)
+  UI.message(markdown)
+  summary = ENV['GITHUB_STEP_SUMMARY']
+  File.write(summary, "#{markdown}\n", mode: 'a') if summary
+
+  return unless is_ci
+
+  if ENV['GITHUB_EVENT_NAME'] == 'push' && git_branch == base_branch
+    FileUtils.mkdir_p(File.dirname(benchmark_path))
+    File.write(benchmark_path, "#{JSON.pretty_generate(breakdown)}\n")
+    Dir.chdir('metrics') do
+      if sh('git status -s').to_s.empty?
+        UI.important('No changes in the size breakdown.')
+      else
+        sh('git add -A')
+        sh("git commit -m 'Update flutter-breakdown/#{repo}/#{base_branch}.json'")
+        sh('git push')
+      end
+    end
+  end
+
+  pr_comment(text: markdown, edit_last_comment_with_text: BREAKDOWN_HEADER)
+end
+
+def read_results(name)
+  path = File.join(RESULTS_DIR, name)
+  File.exist?(path) ? JSON.parse(File.read(path)) : nil
+end
+
+# One collapsible table per platform and variant: what the variant adds on top
+# of an empty app, per component, with the change against the base branch.
+def render_breakdown(breakdown, benchmark, base_branch)
+  lines = [BREAKDOWN_HEADER, '']
+  run_url = "#{ENV['GITHUB_SERVER_URL']}/#{GITHUB_REPO}/actions/runs/#{ENV['GITHUB_RUN_ID']}"
+  artifacts = ENV['GITHUB_RUN_ID'] ? "the `sdk-size-analysis` artifacts of [this run](#{run_url})" : 'the analysis files'
+  lines << 'What each SDK adds to an empty release app, per Dart package and native library. ' \
+           "Dart sizes are uncompressed symbol sizes. Open #{artifacts} " \
+           'in the DevTools App Size tool to drill down further.'
+  lines << ''
+  breakdown.each do |platform, variants|
+    variants.each do |variant, components|
+      base = benchmark.dig(platform, variant) || {}
+      total = components.values.sum
+      lines << "<details><summary><b>#{platform}</b> · <code>#{variant}</code>: " \
+               "#{format_size(total)} (#{format_delta(total - base.values.sum)})</summary>"
+      lines << ''
+      lines << "| Component | Size | Δ vs `#{base_branch}` |"
+      lines << '| - | -: | -: |'
+
+      rows = (components.keys | base.keys).map do |key|
+        [key, components[key] || 0, (components[key] || 0) - (base[key] || 0)]
+      end
+      shown, folded = rows.sort_by { |_, size, _| -size }.partition do |_, size, delta|
+        size.abs >= BREAKDOWN_MIN_BYTES || delta.abs >= BREAKDOWN_MIN_BYTES
+      end
+      folded += shown.drop(BREAKDOWN_MAX_ROWS)
+      shown.take(BREAKDOWN_MAX_ROWS).each do |key, size, delta|
+        lines << "| `#{key}` | #{format_size(size)} | #{format_delta(delta)} |"
+      end
+      unless folded.empty?
+        lines << "| other (#{folded.size}) | #{format_size(folded.sum { |_, s, _| s })} | " \
+                 "#{format_delta(folded.sum { |_, _, d| d })} |"
+      end
+      lines << ''
+      lines << '</details>'
+      lines << ''
+    end
+  end
+  lines.join("\n")
+end
+
+def format_size(bytes)
+  return "#{(bytes / 1024.0 / 1024.0).round(2)} MB" if bytes.abs >= 1024 * 1024
+
+  "#{(bytes / 1024.0).round(1)} KB"
+end
+
+def format_delta(bytes)
+  return '0' if bytes.zero?
+
+  "#{bytes.positive? ? '+' : '-'}#{format_size(bytes.abs)}"
+end
