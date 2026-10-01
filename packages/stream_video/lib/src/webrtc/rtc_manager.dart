@@ -916,6 +916,14 @@ extension PublisherRtcManager on RtcManager {
     }
   }
 
+  /// True when the publisher has nothing to offer: no cached, in-flight or
+  /// live transceivers.
+  Future<bool> isPublisherEmpty() async {
+    if (transceiversManager.items().isNotEmpty) return false;
+    if (_pendingTransceivers.isNotEmpty) return false;
+    return (await _liveTransceivers()).isEmpty;
+  }
+
   /// The SDP of the publisher's local description, or null when unavailable.
   ///
   /// Never throws as it would abort a renegotiation (leaving the
