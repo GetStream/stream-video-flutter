@@ -345,6 +345,7 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
     final mediaDevicesResult = await RtcMediaDeviceNotifier.instance
         .enumerateDevices(
           kind: RtcMediaDeviceKind.videoInput,
+          trigger: DeviceEnumerationTrigger.flipCamera,
         );
 
     final mediaDevices = mediaDevicesResult.fold(

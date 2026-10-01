@@ -12,6 +12,7 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
 
     // Register fallback values for types used with any() matchers
+    registerFallbackValue(DeviceEnumerationTrigger.explicit);
     registerFallbackValue(
       StreamCallCid.from(
         type: StreamCallType.defaultType(),
@@ -45,7 +46,10 @@ void main() {
       ).thenReturn(MutableSharedEmitterImpl<CoordinatorEvent>());
 
       // Default device enumeration mocking - returns built-in devices only
-      when(mockDeviceNotifier.enumerateDevices).thenAnswer(
+      when(
+        () =>
+            mockDeviceNotifier.enumerateDevices(trigger: any(named: 'trigger')),
+      ).thenAnswer(
         (_) async => Result.success(TestDeviceScenarios.builtInDevicesOnly),
       );
 
@@ -199,7 +203,11 @@ void main() {
         );
 
         // Override default device enumeration for this test - add Bluetooth headphones
-        when(mockDeviceNotifier.enumerateDevices).thenAnswer(
+        when(
+          () => mockDeviceNotifier.enumerateDevices(
+            trigger: any(named: 'trigger'),
+          ),
+        ).thenAnswer(
           (_) async =>
               Result.success(TestDeviceScenarios.withBluetoothHeadphones),
         );
@@ -275,7 +283,11 @@ void main() {
           );
 
           // Override default device enumeration for this test - add Bluetooth headphones
-          when(mockDeviceNotifier.enumerateDevices).thenAnswer(
+          when(
+            () => mockDeviceNotifier.enumerateDevices(
+              trigger: any(named: 'trigger'),
+            ),
+          ).thenAnswer(
             (_) async =>
                 Result.success(TestDeviceScenarios.withBluetoothHeadphones),
           );

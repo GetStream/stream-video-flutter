@@ -24,6 +24,7 @@ import '../../../test_helpers.dart';
 import 'data.dart';
 
 void registerMockFallbackValues() {
+  registerFallbackValue(DeviceEnumerationTrigger.explicit);
   registerFallbackValue(SampleCallData.defaultCid);
   registerFallbackValue(createStubCall());
   registerFallbackValue(SampleCallData.defaultCredentials);
@@ -259,7 +260,8 @@ MockInternetConnection setupMockInternetConnection({
 MockRtcMediaDeviceNotifier setupMockRtcMediaDeviceNotifier() {
   final rtcMediaDeviceNotifier = MockRtcMediaDeviceNotifier();
   when(
-    rtcMediaDeviceNotifier.enumerateDevices,
+    () =>
+        rtcMediaDeviceNotifier.enumerateDevices(trigger: any(named: 'trigger')),
   ).thenAnswer((_) => Future.value(const Result.success([])));
   return rtcMediaDeviceNotifier;
 }

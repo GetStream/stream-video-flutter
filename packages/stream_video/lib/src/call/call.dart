@@ -2997,7 +2997,9 @@ class Call {
   }
 
   Future<void> _applyCallSettingsToConnectOptions(CallSettings settings) async {
-    final mediaDevicesResult = await _rtcMediaDeviceNotifier.enumerateDevices();
+    final mediaDevicesResult = await _rtcMediaDeviceNotifier.enumerateDevices(
+      trigger: DeviceEnumerationTrigger.callSettings,
+    );
 
     final mediaDevices = mediaDevicesResult.fold(
       success: (success) => success.data,
@@ -3933,7 +3935,7 @@ class Call {
     await result.fold(
       success: (success) async {
         final mediaDevicesResult = await _rtcMediaDeviceNotifier
-            .enumerateDevices();
+            .enumerateDevices(trigger: DeviceEnumerationTrigger.flipCamera);
 
         final mediaDevices = mediaDevicesResult.fold(
           success: (success) => success.data,
