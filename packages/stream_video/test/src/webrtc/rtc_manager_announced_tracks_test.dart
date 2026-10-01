@@ -488,49 +488,82 @@ void main() {
       trackType: SfuTrackType.video,
     );
 
-    /// Caches a camera track that asked for 1280x720 (the default
-    /// constraints) and whose platform reports [settings] for it.
+    final screenShareOption = SfuPublishOptions(
+      id: 4,
+      codec: videoOption.codec,
+      trackType: SfuTrackType.screenShare,
+    );
+
+    /// Caches a camera (or screen share) track that asked for 1280x720 (the
+    /// default constraints) and whose platform reports [settings] for it, or
+    /// throws [settingsError] when asked for them.
     void cacheVideoTrack(
       RtcManager manager, {
       required String trackId,
-      required Map<String, dynamic> settings,
+      Map<String, dynamic> settings = const {},
+      Object? settingsError,
       RtcVideoDimension? resolved,
+      SfuTrackType? trackType,
     }) {
       final mediaTrack = _MockMediaStreamTrack();
       when(() => mediaTrack.id).thenReturn(trackId);
       when(() => mediaTrack.kind).thenReturn('video');
       when(() => mediaTrack.enabled).thenReturn(true);
-      when(mediaTrack.getSettings).thenReturn(settings);
+      if (settingsError != null) {
+        when(mediaTrack.getSettings).thenThrow(settingsError);
+      } else {
+        when(mediaTrack.getSettings).thenReturn(settings);
+      }
 
-      final track = RtcLocalTrack<CameraConstraints>(
-        trackIdPrefix: 'pub',
-        trackType: SfuTrackType.video,
-        mediaStream: _MockMediaStream(),
-        mediaTrack: mediaTrack,
-        mediaConstraints: const CameraConstraints(),
-        videoDimension: resolved,
-      );
+      final isScreenShare = trackType == SfuTrackType.screenShare;
+      final type = trackType ?? SfuTrackType.video;
+      final track = isScreenShare
+          ? RtcLocalTrack<ScreenShareConstraints>(
+              trackIdPrefix: 'pub',
+              trackType: type,
+              mediaStream: _MockMediaStream(),
+              mediaTrack: mediaTrack,
+              mediaConstraints: const ScreenShareConstraints(),
+              videoDimension: resolved,
+            )
+          : RtcLocalTrack<CameraConstraints>(
+              trackIdPrefix: 'pub',
+              trackType: type,
+              mediaStream: _MockMediaStream(),
+              mediaTrack: mediaTrack,
+              mediaConstraints: const CameraConstraints(),
+              videoDimension: resolved,
+            );
 
       final transceiver = _transceiver(trackId: trackId, mid: '0');
       manager.transceiversManager.add(
         track,
-        videoOption,
+        isScreenShare ? screenShareOption : videoOption,
         transceiver,
         const RtcTrackPublishOptions(),
       );
     }
 
     Future<List<RtcVideoDimension>> announcedLayers({
-      required Map<String, dynamic> settings,
+      Map<String, dynamic> settings = const {},
+      Object? settingsError,
       RtcVideoDimension? resolved,
+      SfuTrackType? trackType,
     }) async {
       final wires = buildManager();
-      wires.manager.publishOptions = [videoOption];
+      wires.manager.publishOptions = [
+        if (trackType == SfuTrackType.screenShare)
+          screenShareOption
+        else
+          videoOption,
+      ];
       cacheVideoTrack(
         wires.manager,
         trackId: 'camera',
         settings: settings,
+        settingsError: settingsError,
         resolved: resolved,
+        trackType: trackType,
       );
       stubPeerConnection(
         wires.pc,
@@ -567,7 +600,6 @@ void main() {
       () async {
         // Clones on Android carry no settings of their own.
         final layers = await announcedLayers(
-          settings: const {},
           resolved: const RtcVideoDimension(width: 960, height: 720),
         );
 
@@ -578,7 +610,7 @@ void main() {
     test(
       'fall back to the requested size when nothing better is known',
       () async {
-        final layers = await announcedLayers(settings: const {});
+        final layers = await announcedLayers();
 
         expect(layers.last, const RtcVideoDimension(width: 1280, height: 720));
       },
@@ -644,6 +676,70 @@ void main() {
         final layers = await announcedLayers(settings: sensorSettings);
 
         expect(layers.last, const RtcVideoDimension(width: 2560, height: 1280));
+      });
+
+      test('are left as reported on web', () async {
+        // Browsers already report the size rotated.
+        setPlatform(PlatformType.web);
+        setScreen(const Size(1080, 2400));
+
+        final layers = await announcedLayers(settings: sensorSettings);
+
+        expect(layers.last, const RtcVideoDimension(width: 2560, height: 1280));
+      });
+
+      test(
+        'fall back to the resolved size, still oriented like the view, when '
+        'getSettings() throws on Android',
+        () async {
+          setPlatform(PlatformType.android);
+          setScreen(const Size(1080, 2400));
+
+          final layers = await announcedLayers(
+            settingsError: Exception('getSettings failed'),
+            resolved: const RtcVideoDimension(width: 960, height: 720),
+          );
+
+          expect(
+            layers.last,
+            const RtcVideoDimension(width: 720, height: 960),
+          );
+        },
+      );
+
+      group('for screen share', () {
+        test('announce the view size', () async {
+          setPlatform(PlatformType.android);
+          setScreen(const Size(1080, 2400));
+
+          final layers = await announcedLayers(
+            settings: sensorSettings,
+            trackType: SfuTrackType.screenShare,
+          );
+
+          expect(
+            layers.last,
+            const RtcVideoDimension(width: 1080, height: 2400),
+          );
+        });
+
+        test(
+          'fall back to the track size, not 0x0, when the view has no size',
+          () async {
+            setPlatform(PlatformType.android);
+            setScreen(Size.zero);
+
+            final layers = await announcedLayers(
+              settings: sensorSettings,
+              trackType: SfuTrackType.screenShare,
+            );
+
+            expect(
+              layers.last,
+              const RtcVideoDimension(width: 2560, height: 1280),
+            );
+          },
+        );
       });
 
       group('when the platform reports the size in frame orientation', () {

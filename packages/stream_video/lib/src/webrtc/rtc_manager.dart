@@ -1490,7 +1490,7 @@ extension PublisherRtcManager on RtcManager {
       // but frames are rotated to the display orientation before encoding: a
       // phone held upright encodes portrait frames. Announce what is encoded.
       // Skipped when the platform already reports the size in frame
-      // orientation, which it knows better than the shape of the Flutter view.
+      // orientation.
       final screenDimension = _getScreenDimension();
       if (screenDimension != null) {
         dimension = dimension.orientedLike(screenDimension);
@@ -2638,12 +2638,15 @@ extension on RtcLocalTrack<VideoConstraints> {
   /// Whether the platform reports the capture size already rotated to the
   /// orientation of the delivered frames.
   ///
-  /// stream_webrtc_flutter marks such settings with the camera's
-  /// `sensorOrientation`; older versions report the size in sensor space.
+  /// Android only: stream_webrtc_flutter marks such settings with the
+  /// camera's `sensorOrientation`. iOS never sets the marker, so
+  /// it always falls back to the Flutter view's orientation.
   bool reportsFrameOrientedSize() {
     try {
       return mediaTrack.getSettings().containsKey('sensorOrientation');
     } catch (_) {
+      // Already logged by getVideoDimension(), which makes the same call
+      // first.
       return false;
     }
   }
