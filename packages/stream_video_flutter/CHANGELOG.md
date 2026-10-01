@@ -12,6 +12,7 @@
 - Fixed a `Call.participantsStream` error reaching the zone uncaught instead of being logged.
 - Fixed `LivestreamPlayer` calling `Call.join` again on each call status change while its automatic join was still in progress.
 - Fixed `LivestreamPlayer` repainting the whole screen it is embedded in every second as the call duration updates.
+- Fixed the call controls, livestream widgets and call screens re-subscribing to the call state each time their parent rebuilt.
 
 ### 🔄 Changed
 

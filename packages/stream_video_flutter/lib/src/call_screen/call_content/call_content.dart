@@ -176,6 +176,9 @@ class _StreamCallContentState extends State<StreamCallContent> {
     });
   }
 
+  static CallParticipantState? _localParticipant(CallState state) =>
+      state.localParticipant;
+
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
@@ -278,7 +281,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
       extendBody: widget.extendBody,
       bottomNavigationBar: PartialCallStateBuilder(
         call: call,
-        selector: (state) => state.localParticipant,
+        selector: _localParticipant,
         builder: (_, localParticipant) => localParticipant != null
             ? widget.callControlsWidgetBuilder?.call(context, call) ??
                   StreamCallControls.withDefaultOptions(

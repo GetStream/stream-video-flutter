@@ -50,6 +50,9 @@ class ToggleMicrophoneOption extends StatelessWidget {
   /// Setting to `false` is necessary for "speaking-while-muted" detection on iOS and macOS.
   final bool? stopTrackOnMute;
 
+  static bool _isAudioEnabled(CallState state) =>
+      state.localParticipant?.isAudioEnabled ?? false;
+
   @override
   Widget build(BuildContext context) {
     Widget buildContent(bool enabled) {
@@ -77,7 +80,7 @@ class ToggleMicrophoneOption extends StatelessWidget {
     }
     return PartialCallStateBuilder(
       call: call,
-      selector: (state) => state.localParticipant?.isAudioEnabled ?? false,
+      selector: _isAudioEnabled,
       builder: (_, enabled) => buildContent(enabled),
     );
   }

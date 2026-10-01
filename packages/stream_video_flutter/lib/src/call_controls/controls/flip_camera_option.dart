@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 
 import 'package:flutter/material.dart';
+
 import '../../../stream_video_flutter.dart';
 
 /// A widget that represents a call control option to flip the active camera.
@@ -27,6 +28,9 @@ class FlipCameraOption extends StatelessWidget {
   /// The icon that is shown when the back icon is active.
   final IconData backCameraIcon;
 
+  static TrackState? _videoTrack(CallState state) =>
+      state.localParticipant?.videoTrack;
+
   @override
   Widget build(BuildContext context) {
     Widget buildContent(TrackState? trackState) {
@@ -52,7 +56,7 @@ class FlipCameraOption extends StatelessWidget {
     }
     return PartialCallStateBuilder(
       call: call,
-      selector: (state) => state.localParticipant?.videoTrack,
+      selector: _videoTrack,
       builder: (_, trackState) => buildContent(trackState),
     );
   }
