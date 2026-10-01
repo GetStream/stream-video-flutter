@@ -15,9 +15,11 @@
 - [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
 - Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.
 - SFU participant events no longer emit a new call state when they leave every participant unchanged.
+- Reduced the cost of participant state updates in large calls.
 - `CallParticipantState.audioLevel` and `audioLevels` now hold at their last value while a participant is silent.
 - `CallState.localParticipant`, `otherParticipants` and `activeSpeakers` are now computed once per participant list instead of on every read, which keeps them cheap in calls with many participants. `callParticipants`, `otherParticipants` and `activeSpeakers` now return unmodifiable lists shared by every reader, so call `.toList()` before sorting or otherwise mutating them.
 - Simulcast layers are now announced to the SFU and bitrate-capped from the resolution the camera actually captures on iOS and Android, instead of the requested resolution. A camera that captures below the requested size, or at a different aspect ratio, no longer over-reports its layers or over-allocates their bitrate.
+- `RtcMediaDeviceNotifier` now enumerates devices once per burst of device-change events, and calls made while an enumeration is running share its result instead of starting another one. The device list emitted by `RtcMediaDeviceNotifier.onDeviceChange` is now unmodifiable, so copy it with `.toList()` before sorting or otherwise mutating it.
 
 ### 🐞 Fixed
 
@@ -26,6 +28,8 @@
 - Fixed `Call.join` being rejected with "a call with the same cid is in progress" when called again while a join was in progress. A repeated call now returns the result of the join already in flight.
 - Fixed leaving a call trying to stop noise cancellation when no audio processor is configured.
 - Fixed leaving a call calling `removeTrack` on the publisher for received tracks, which failed and logged `sender is null` on every leave.
+- [iOS/Android] Fixed camera video layers being announced in landscape while the phone is held upright.
+- Fixed fast reconnect failing for participants who are not publishing any tracks, such as livestream viewers. Instead of recovering the existing session, they fell back to a full rejoin with a new session after every network drop.
 
 ## 1.6.0
 

@@ -98,9 +98,15 @@ int getComputedMaxBitrate(
   int currentHeight,
 ) {
   // if the current resolution is lower than the target resolution,
-  // we want to proportionally reduce the target bitrate
-  final targetWidth = videoDimension.width;
-  final targetHeight = videoDimension.height;
+  // we want to proportionally reduce the target bitrate.
+  // The target is compared in the capture's orientation: the publish option
+  // target is landscape, so a portrait capture would otherwise read its short
+  // side as below the target and scale the bitrate up instead.
+  final target = videoDimension.orientedLike(
+    RtcVideoDimension(width: currentWidth, height: currentHeight),
+  );
+  final targetWidth = target.width;
+  final targetHeight = target.height;
 
   if (currentWidth < targetWidth || currentHeight < targetHeight) {
     final currentPixels = currentWidth * currentHeight;
