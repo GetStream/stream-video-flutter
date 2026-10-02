@@ -1,47 +1,28 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/stream_video.dart';
 
+import 'call/fixtures/data.dart';
+
 void main() {
+  const member = CallMember(userId: 'member', roles: ['user'], custom: {});
+
   CallMetadata metadata({
     List<String> blockedUserIds = const ['blocked'],
     Map<String, Object> custom = const {'topic': 'news'},
     List<CallPermission> ownCapabilities = const [CallPermission.sendAudio],
   }) {
-    return CallMetadata(
-      cid: StreamCallCid(cid: 'default:test'),
-      details: CallDetails(
-        createdBy: const CallUser(
-          id: 'creator',
-          name: 'creator',
-          roles: ['host'],
-          image: '',
-        ),
-        team: '',
-        // Copied, as a parsed response holds new lists and maps every time.
-        ownCapabilities: [...ownCapabilities],
-        blockedUserIds: [...blockedUserIds],
-        broadcasting: false,
-        recording: false,
-        backstage: false,
-        transcribing: false,
-        captioning: false,
-        custom: {...custom},
-        egress: const CallEgress(),
-        rtmpIngress: '',
-      ),
-      settings: const CallSettings(),
-      session: const CallSessionData(),
-      users: const {},
-      members: const {
-        'member': CallMember(userId: 'member', roles: ['user'], custom: {}),
-      },
+    return SampleCallData.createCallMetadata(
+      members: const {'member': member},
+      blockedUserIds: blockedUserIds,
+      custom: custom,
+      ownCapabilities: ownCapabilities,
     );
   }
 
   final initial =
       CallState(
         currentUserId: 'user',
-        callCid: StreamCallCid(cid: 'default:test'),
+        callCid: SampleCallData.defaultCid,
         preferences: DefaultCallPreferences(),
       ).copyFromMetadata(
         metadata(),

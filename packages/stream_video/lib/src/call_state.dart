@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 import 'call/call_type.dart';
 import 'models/models.dart';
 import 'sfu/data/models/sfu_audio_bitrate.dart';
+import 'utils/collection_changes.dart';
 import 'webrtc/rtc_media_device/rtc_media_device.dart';
 
 enum SuspendedTrackState {
@@ -34,16 +35,6 @@ final _otherParticipantsCache = Expando<List<CallParticipantState>>(
 final _activeSpeakersCache = Expando<List<CallParticipantState>>(
   'CallState.activeSpeakers',
 );
-
-// Returns null, which makes `copyWith` keep [current], when [next] has the same
-// contents. A metadata update then keeps the collections it didn't change, so
-// a selector that returns one, or a record that holds one, sees no change.
-C? _changedOrNull<C extends Object>(C current, C? next) {
-  if (next == null || const DeepCollectionEquality().equals(current, next)) {
-    return null;
-  }
-  return next;
-}
 
 /// Represents the call's state.
 @immutable
@@ -351,7 +342,7 @@ class CallState extends Equatable {
       isTranscribing: metadata.details.transcribing,
       isCaptioning: metadata.details.captioning,
       isBroadcasting: metadata.details.broadcasting,
-      blockedUserIds: _changedOrNull(
+      blockedUserIds: changedOrNull(
         blockedUserIds,
         metadata.details.blockedUserIds.toList(),
       ),
@@ -361,22 +352,22 @@ class CallState extends Equatable {
       endedAt: metadata.details.endedAt,
       startedAt: metadata.session.startedAt ?? metadata.session.liveStartedAt,
       createdByUser: metadata.details.createdBy,
-      custom: _changedOrNull(custom, metadata.details.custom),
+      custom: changedOrNull(custom, metadata.details.custom),
       egress: metadata.details.egress,
       rtmpIngress: metadata.details.rtmpIngress,
       settings: metadata.settings,
       ownCapabilities: capabilities.isEmpty
           ? null
-          : _changedOrNull(ownCapabilities, capabilities),
+          : changedOrNull(ownCapabilities, capabilities),
       liveStartedAt: metadata.session.liveStartedAt,
       liveEndedAt: metadata.session.liveEndedAt,
       timerEndsAt: metadata.session.timerEndsAt,
-      capabilitiesByRole: _changedOrNull(
+      capabilitiesByRole: changedOrNull(
         this.capabilitiesByRole,
         capabilitiesByRole,
       ),
       callMembers: updateMembers
-          ? _changedOrNull(callMembers, metadata.toCallMembers())
+          ? changedOrNull(callMembers, metadata.toCallMembers())
           : null,
     );
   }

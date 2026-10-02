@@ -9,6 +9,7 @@ import '../../../models/call_metadata.dart';
 import '../../../models/call_reaction.dart';
 import '../../../models/call_status.dart';
 import '../../../models/disconnect_reason.dart';
+import '../../../utils/collection_changes.dart';
 import '../../call_events.dart';
 import '../../call_reject_reason.dart';
 
@@ -191,8 +192,9 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     }
 
     state = state.copyWith(
-      ownCapabilities: List.unmodifiable(
-        event.ownCapabilities,
+      ownCapabilities: changedOrNull(
+        state.ownCapabilities,
+        List.unmodifiable(event.ownCapabilities),
       ),
     );
   }
@@ -572,21 +574,26 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     List<CallMember> members, {
     Map<String, List<String>>? capabilitiesByRole,
   }) {
-    state = state.copyWith(
-      callMembers: state.callMembers.map((member) {
-        final updatedMember = members.firstWhereOrNull(
-          (m) => m.userId == member.userId,
+    final callMembers = state.callMembers.map((member) {
+      final updatedMember = members.firstWhereOrNull(
+        (m) => m.userId == member.userId,
+      );
+      if (updatedMember != null) {
+        return member.copyWith(
+          roles: updatedMember.roles,
+          custom: updatedMember.custom,
         );
-        if (updatedMember != null) {
-          return member.copyWith(
-            roles: updatedMember.roles,
-            custom: updatedMember.custom,
-          );
-        } else {
-          return member;
-        }
-      }).toList(),
-      capabilitiesByRole: capabilitiesByRole,
+      } else {
+        return member;
+      }
+    }).toList();
+
+    state = state.copyWith(
+      callMembers: changedOrNull(state.callMembers, callMembers),
+      capabilitiesByRole: changedOrNull(
+        state.capabilitiesByRole,
+        capabilitiesByRole,
+      ),
     );
   }
 
