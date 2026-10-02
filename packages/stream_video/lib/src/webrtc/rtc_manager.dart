@@ -634,7 +634,8 @@ class RtcManager extends Disposable {
     if (!changed) {
       _logger.i(
         () =>
-            '[onPublishQualityChanged] Update publish quality, no change: ${activeLayers.map((e) => e.rid)}',
+            '[onPublishQualityChanged] Update publish quality, no change: '
+            '${activeLayers.map(describeEncoding).join(', ')}',
       );
       return;
     }
@@ -642,7 +643,8 @@ class RtcManager extends Disposable {
     await sender.setParameters(params);
     _logger.i(
       () =>
-          '[onPublishQualityChanged] Update publish quality, enabled rids: ${activeLayers.map((e) => e.rid)}',
+          '[onPublishQualityChanged] Update publish quality, enabled: '
+          '${activeLayers.map(describeEncoding).join(', ')}',
     );
   }
 
@@ -1522,35 +1524,6 @@ extension PublisherRtcManager on RtcManager {
     return dimension.isEmpty ? null : dimension;
   }
 
-  /// In SVC, we need to send only one video encoding (layer).
-  /// this layer will have the additional spatial and temporal layers
-  /// defined via the scalabilityMode property.
-  List<rtc.RTCRtpEncoding> toSvcEncodings(List<rtc.RTCRtpEncoding> layers) {
-    rtc.RTCRtpEncoding? findByRid(String rid) {
-      for (final layer in layers) {
-        if (layer.rid == rid) return layer;
-      }
-      return null;
-    }
-
-    final highestLayer = findByRid('f') ?? findByRid('h') ?? findByRid('q');
-    if (highestLayer == null) return [];
-
-    return [
-      rtc.RTCRtpEncoding(
-        rid: 'q',
-        active: highestLayer.active,
-        maxBitrate: highestLayer.maxBitrate,
-        maxFramerate: highestLayer.maxFramerate,
-        minBitrate: highestLayer.minBitrate,
-        numTemporalLayers: highestLayer.numTemporalLayers,
-        scaleResolutionDownBy: highestLayer.scaleResolutionDownBy,
-        ssrc: highestLayer.ssrc,
-        scalabilityMode: highestLayer.scalabilityMode,
-      ),
-    ];
-  }
-
   /// Explicitly triggers a publisher renegotiation.
   void _forceRenegotiation(String tag) {
     final pub = publisher;
@@ -1699,8 +1672,9 @@ extension PublisherRtcManager on RtcManager {
         encodings: audioEncodings,
       );
     } else if (track is RtcLocalVideoTrack) {
+      final captureDimension = _getTrackDimension(track);
       final videoEncodings = codecs.findOptimalVideoLayers(
-        dimensions: _getTrackDimension(track),
+        dimensions: captureDimension,
         publishOptions: publishOptions,
       );
 
@@ -1708,9 +1682,17 @@ extension PublisherRtcManager on RtcManager {
           ? toSvcEncodings(videoEncodings)
           : videoEncodings;
 
-      for (final encoding in sendEncodings) {
-        _logger.v(() => '[addTransceiver] encoding: ${encoding.toMap()}');
-      }
+      _logger.d(
+        () =>
+            '[addTransceiver] ${publishOptions.trackType} layers: '
+            'publishOption(id: ${publishOptions.id}, '
+            'codec: ${publishOptions.codec.name}, '
+            'bitrate: ${publishOptions.bitrate}, '
+            'dimension: ${publishOptions.videoDimension}, '
+            'useSingleLayer: ${publishOptions.useSingleLayer}), '
+            'capture: $captureDimension, '
+            'encodings: ${sendEncodings.map(describeEncoding).join(', ')}',
+      );
 
       transceiverResult = await publisher!.addVideoTransceiver(
         track: track.mediaTrack,
