@@ -114,7 +114,7 @@ void main() {
     });
 
     test('falls back to the per-layer defaults when the publish option '
-        'bitrate is 0, as JS and Android do', () {
+        'bitrate is 0', () {
       // The SFU's protobuf decodes an unset bitrate as 0.
       final layers = findOptimalVideoLayers(
         dimensions: const RtcVideoDimension(width: 1280, height: 720),

@@ -1682,8 +1682,6 @@ extension PublisherRtcManager on RtcManager {
           ? toSvcEncodings(videoEncodings)
           : videoEncodings;
 
-      // Every input to the bitrate bound on one line, so a wrong bound can be
-      // traced without a stats dump. The Android SDK logs the same set.
       _logger.d(
         () =>
             '[addTransceiver] ${publishOptions.trackType} layers: '

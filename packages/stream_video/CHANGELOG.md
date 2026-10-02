@@ -33,7 +33,7 @@
 - Fixed leaving a call calling `removeTrack` on the publisher for received tracks, which failed and logged `sender is null` on every leave.
 - [iOS/Android] Fixed camera video layers being announced in landscape while the phone is held upright.
 - Fixed fast reconnect failing for participants who are not publishing any tracks, such as livestream viewers. Instead of recovering the existing session, they fell back to a full rejoin with a new session after every network drop.
-- Fixed video layers being given a `maxBitrate` of 0 when the SFU's publish option carries no bitrate, and an empty publish option dimension being used as the bitrate target instead of the 1280x720 default. Both now fall back the way the JS and Android SDKs do. Publishing a video track now logs the publish option, the capture size and the computed encodings at debug level.
+- Fixed video layers being given a `maxBitrate` of 0 when the SFU's publish option carries no bitrate, and an empty publish option dimension being used as the bitrate target instead of the 1280x720 default. Publishing a video track now logs the publish option, the capture size and the computed encodings at debug level.
 
 ## 1.6.0
 
