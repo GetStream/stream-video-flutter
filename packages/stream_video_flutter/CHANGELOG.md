@@ -25,8 +25,7 @@
 - `StreamCallParticipants` and `StreamLivestreamHosts` no longer rebuild when an update leaves the rendered participants unchanged.
 - `LivestreamContent` renders participants from `Call.participantsStream` instead of the raw call state.
 - `LivestreamBackstageContent` only rebuilds when the participant count changes.
-- `ToggleScreenShareOption` no longer rebuilds on other local participant changes.
-- `StreamCallContent` no longer rebuilds its call controls when the local participant's state changes.
+- `ToggleScreenShareOption` and the call controls of `StreamCallContent` no longer rebuild on local participant changes they don't use.
 
 ## 1.6.0
 
