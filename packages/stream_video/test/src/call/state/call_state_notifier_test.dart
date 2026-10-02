@@ -191,4 +191,46 @@ void main() {
       await subscription.cancel();
     },
   );
+
+  test(
+    'a partialCallStateStream can be listened to more than once',
+    () async {
+      var callState = CallState(
+        callCid: StreamCallCid.from(
+          type: StreamCallType.defaultType(),
+          id: 'id',
+        ),
+        currentUserId: 'userId',
+        preferences: DefaultCallPreferences(),
+      );
+      final initialStatus = callState.status;
+      final notifier = CallStateNotifier(callState);
+      var selectorRuns = 0;
+      final stream = notifier.partialCallStateStream((state) {
+        selectorRuns++;
+        return state.status;
+      });
+
+      final first = <CallStatus>[];
+      final second = <CallStatus>[];
+      final firstSubscription = stream.listen(first.add);
+      final secondSubscription = stream.listen(second.add);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(first, [initialStatus]);
+      expect(second, [initialStatus]);
+      expect(selectorRuns, 2);
+
+      await firstSubscription.cancel();
+      callState = callState.copyWith(status: CallStatus.incoming());
+      notifier.state = callState;
+      await Future<void>.delayed(Duration.zero);
+
+      expect(first, hasLength(1));
+      expect(second, [initialStatus, callState.status]);
+      expect(selectorRuns, 3);
+
+      await secondSubscription.cancel();
+    },
+  );
 }

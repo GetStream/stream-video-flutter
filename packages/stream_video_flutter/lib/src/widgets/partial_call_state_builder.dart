@@ -34,11 +34,8 @@ class PartialCallStateBuilder<T> extends StatelessWidget {
   }
 }
 
-// Listens to the call's partial state while mounted, and subscribes again when
-// [call] or [selector] changes, so every value comes from the current selector.
-// A selector that keeps its identity across rebuilds, such as a static or
-// top-level function, keeps a single subscription. Holds the last selected
-// value, and reports the first error of each subscription to [FlutterError].
+// Holds the last selected value. Reports a partial state error to
+// [FlutterError] once, and again only after a new value has arrived.
 class _PartialCallStateListener<T> extends StatefulWidget {
   const _PartialCallStateListener({
     required this.call,
@@ -60,6 +57,8 @@ class _PartialCallStateListenerState<T>
     extends State<_PartialCallStateListener<T>> {
   StreamSubscription<T>? _subscription;
   late T _data;
+  // The first value of a subscription replays the current state.
+  bool _awaitingReplay = true;
   bool _errorReported = false;
 
   T _select() => widget.selector(widget.call.state.value);
@@ -83,34 +82,39 @@ class _PartialCallStateListenerState<T>
 
   void _subscribe() {
     _subscription?.cancel();
-    _errorReported = false;
+    _awaitingReplay = true;
     _subscription = widget.call
         .partialState(widget.selector)
-        .listen(
-          (data) {
-            if (!mounted || isSameCallStateSelection(data, _data)) return;
-            setState(() => _data = data);
-          },
-          onError: (Object error, StackTrace stackTrace) {
-            _logger.e(
-              () =>
-                  '[PartialCallStateBuilder] partial state error: $error\n'
-                  '$stackTrace',
-            );
-            if (_errorReported) return;
-            _errorReported = true;
-            FlutterError.reportError(
-              FlutterErrorDetails(
-                exception: error,
-                stack: stackTrace,
-                library: 'stream_video_flutter',
-                context: ErrorDescription(
-                  'while selecting a partial call state',
-                ),
-              ),
-            );
-          },
-        );
+        .listen(_onData, onError: _onError);
+  }
+
+  void _onData(T data) {
+    _errorReported = false;
+    final isReplay = _awaitingReplay;
+    _awaitingReplay = false;
+    if (!mounted || (isReplay && isSameCallStateSelection(data, _data))) return;
+    setState(() => _data = data);
+  }
+
+  void _onError(Object error, StackTrace stackTrace) {
+    if (_errorReported) {
+      _logger.e(() => '[PartialCallStateBuilder] partial state error: $error');
+      return;
+    }
+    _errorReported = true;
+    _logger.e(
+      () =>
+          '[PartialCallStateBuilder] partial state error: $error\n'
+          '$stackTrace',
+    );
+    FlutterError.reportError(
+      FlutterErrorDetails(
+        exception: error,
+        stack: stackTrace,
+        library: 'stream_video_flutter',
+        context: ErrorDescription('while listening to a partial call state'),
+      ),
+    );
   }
 
   @override

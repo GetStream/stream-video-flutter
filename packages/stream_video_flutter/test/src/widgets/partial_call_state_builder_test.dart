@@ -27,7 +27,7 @@ class _FakeCall extends Mock implements Call {
   @override
   Stream<T> partialState<T>(CallStateSelector<T> selector) {
     subscriptions++;
-    return _changes.stream.map(selector).distinct();
+    return _changes.stream.map(selector).distinct(isSameCallStateSelection);
   }
 }
 
@@ -244,6 +244,66 @@ void main() {
       await tester.pump();
 
       expect(find.text('broadcasting: true'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'PartialCallStateBuilder reports an error again after a new value',
+    (tester) async {
+      String recording(CallState state) {
+        if (state.isRecording) throw StateError('selector failed');
+        return 'broadcasting: ${state.isBroadcasting}';
+      }
+
+      final call = _FakeCall(initialState);
+      await tester.pumpWidget(subject(call, selector: recording));
+
+      call.callState = initialState.copyWith(isRecording: true);
+      await tester.pump();
+      expect(tester.takeException(), isA<StateError>());
+
+      call.callState = initialState.copyWith(isBroadcasting: true);
+      await tester.pump();
+      call.callState = initialState.copyWith(isRecording: true);
+      await tester.pump();
+
+      expect(tester.takeException(), isA<StateError>());
+    },
+  );
+
+  testWidgets(
+    'PartialCallStateBuilder reports the first error of a new selector',
+    (tester) async {
+      String failing(CallState state) {
+        if (state.isRecording) throw StateError('first selector failed');
+        return 'first';
+      }
+
+      String alsoFailing(CallState state) {
+        if (state.isBroadcasting) throw StateError('second selector failed');
+        return 'second';
+      }
+
+      final call = _FakeCall(initialState);
+      await tester.pumpWidget(subject(call, selector: failing));
+      call.callState = initialState.copyWith(isRecording: true);
+      await tester.pump();
+      expect(tester.takeException(), isA<StateError>());
+
+      call.callState = initialState;
+      await tester.pumpWidget(subject(call, selector: alsoFailing));
+      await tester.pump();
+      call.callState = initialState.copyWith(isBroadcasting: true);
+      await tester.pump();
+
+      expect(
+        tester.takeException(),
+        isA<StateError>().having(
+          (error) => error.message,
+          'message',
+          'second selector failed',
+        ),
+      );
     },
   );
 }
