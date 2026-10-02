@@ -1,30 +1,25 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../mocks.dart';
 
 // A call whose state can be changed from the test, counting partial-state
-// subscriptions.
+// subscriptions. Like the real call, each subscription starts with the current
+// state.
 class _FakeCall extends Mock implements Call {
-  _FakeCall(this._callState) {
-    when(() => _emitter.value).thenAnswer((_) => _callState);
+  _FakeCall(CallState callState)
+    : _changes = BehaviorSubject.seeded(callState, sync: true) {
+    when(() => _emitter.value).thenAnswer((_) => _changes.value);
   }
 
-  CallState _callState;
+  final BehaviorSubject<CallState> _changes;
   final _emitter = MockStateEmitter<CallState>();
-  final _changes = StreamController<CallState>.broadcast(sync: true);
   int subscriptions = 0;
 
-  set callState(CallState value) {
-    _callState = value;
-    _changes.add(value);
-  }
-
-  void addError(Object error) => _changes.addError(error);
+  set callState(CallState value) => _changes.add(value);
 
   @override
   StateEmitter<CallState> get state => _emitter;
@@ -59,6 +54,8 @@ void main() {
     preferences: DefaultCallPreferences(),
   );
 
+  String recording(CallState state) => 'recording: ${state.isRecording}';
+
   Widget subject(Call call, {CallStateSelector<String>? selector}) {
     return MaterialApp(
       home: PartialCallStateBuilder<String>(
@@ -73,7 +70,6 @@ void main() {
     'PartialCallStateBuilder keeps one subscription when its parent rebuilds with the same selector',
     (tester) async {
       final call = _FakeCall(initialState);
-      String recording(CallState state) => 'recording: ${state.isRecording}';
 
       await tester.pumpWidget(subject(call, selector: recording));
       await tester.pumpWidget(subject(call, selector: recording));
@@ -97,6 +93,44 @@ void main() {
   );
 
   testWidgets(
+    'PartialCallStateBuilder does not rebuild for the current value it receives on subscribing',
+    (tester) async {
+      final call = _FakeCall(initialState);
+      var builds = 0;
+      var listBuilds = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Column(
+            children: [
+              PartialCallStateBuilder<String>(
+                call: call,
+                selector: recording,
+                builder: (context, data) {
+                  builds++;
+                  return Text(data);
+                },
+              ),
+              PartialCallStateBuilder<List<String>>(
+                call: call,
+                selector: (state) => [state.callCid.id],
+                builder: (context, data) {
+                  listBuilds++;
+                  return Text(data.join());
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(builds, 1);
+      expect(listBuilds, 1);
+    },
+  );
+
+  testWidgets(
     'PartialCallStateBuilder applies a new selector without a state change',
     (tester) async {
       final call = _FakeCall(initialState);
@@ -107,6 +141,25 @@ void main() {
       );
 
       expect(find.text('id: test'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'PartialCallStateBuilder moves to a new call with the same selector',
+    (tester) async {
+      final callA = _FakeCall(initialState);
+      final callB = _FakeCall(initialState.copyWith(isRecording: true));
+
+      await tester.pumpWidget(subject(callA, selector: recording));
+      await tester.pumpWidget(subject(callB, selector: recording));
+
+      expect(find.text('recording: true'), findsOneWidget);
+      expect(callA._changes.hasListener, isFalse);
+
+      callB.callState = initialState.copyWith(isRecording: false);
+      await tester.pump();
+
+      expect(find.text('recording: false'), findsOneWidget);
     },
   );
 
@@ -142,7 +195,7 @@ void main() {
   );
 
   testWidgets(
-    'PartialCallStateBuilder keeps its value and listening after a partial state error',
+    'PartialCallStateBuilder reports a throwing selector once, keeps its value and keeps listening',
     (tester) async {
       final logger = _RecordingLogger();
       StreamLog()
@@ -153,20 +206,32 @@ void main() {
           ..logger = const SilentStreamLogger()
           ..priority = Priority.none;
       });
+      String broadcasting(CallState state) {
+        if (state.isRecording) throw StateError('selector failed');
+        return 'broadcasting: ${state.isBroadcasting}';
+      }
+
       final call = _FakeCall(initialState);
-      await tester.pumpWidget(subject(call));
+      await tester.pumpWidget(subject(call, selector: broadcasting));
+
       call.callState = initialState.copyWith(isRecording: true);
       await tester.pump();
-
-      call.addError(StateError('selector failed'));
+      call.callState = initialState.copyWith(
+        isRecording: true,
+        isBroadcasting: true,
+      );
       await tester.pump();
+
+      expect(tester.takeException(), isA<StateError>());
       expect(tester.takeException(), isNull);
-      expect(find.text('recording: true'), findsOneWidget);
-      expect(logger.messages.single, contains('selector failed'));
+      expect(find.text('broadcasting: false'), findsOneWidget);
+      expect(logger.messages, hasLength(2));
+      expect(logger.messages.first, contains('selector failed'));
 
-      call.callState = initialState.copyWith(isRecording: false);
+      call.callState = initialState.copyWith(isBroadcasting: true);
       await tester.pump();
-      expect(find.text('recording: false'), findsOneWidget);
+
+      expect(find.text('broadcasting: true'), findsOneWidget);
     },
   );
 }

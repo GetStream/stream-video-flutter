@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -7,8 +8,11 @@ final _logger = taggedLogger(tag: 'SV:PartialCallStateBuilder');
 
 /// Convenience widget to build a part of the call screen based on a partial call state.
 ///
-/// It wraps a [StreamBuilder] and uses the [call] and the [selector] to
-/// rebuild the widget when the relevant state changes.
+/// Listens to `call.partialState(selector)` while mounted and rebuilds with
+/// [builder] when the selected value changes. It subscribes again when [call]
+/// or [selector] changes. A [selector] that keeps its identity across
+/// rebuilds, such as a static or top-level function, keeps a single
+/// subscription.
 class PartialCallStateBuilder<T> extends StatelessWidget {
   const PartialCallStateBuilder({
     required this.call,
@@ -33,8 +37,9 @@ class PartialCallStateBuilder<T> extends StatelessWidget {
 
 // Listens to the call's partial state while mounted, and subscribes again when
 // [call] or [selector] changes, so every value comes from the current selector.
-// A selector that keeps its identity across rebuilds, such as a method
-// tear-off, keeps a single subscription. Holds the last selected value.
+// A selector that keeps its identity across rebuilds, such as a static or
+// top-level function, keeps a single subscription. Holds the last selected
+// value, and reports the first error of each subscription to [FlutterError].
 class _PartialCallStateListener<T> extends StatefulWidget {
   const _PartialCallStateListener({
     required this.call,
@@ -56,6 +61,7 @@ class _PartialCallStateListenerState<T>
     extends State<_PartialCallStateListener<T>> {
   StreamSubscription<T>? _subscription;
   late T _data;
+  bool _errorReported = false;
 
   T _select() => widget.selector(widget.call.state.value);
 
@@ -76,18 +82,41 @@ class _PartialCallStateListenerState<T>
     }
   }
 
+  // Matches the equality `Call.partialState` uses to skip repeated values.
+  bool _isSame(T data) =>
+      identical(data, _data) ||
+      data == _data ||
+      (data is List &&
+          _data is List &&
+          const ListEquality<dynamic>().equals(data, _data as List));
+
   void _subscribe() {
     _subscription?.cancel();
+    _errorReported = false;
     _subscription = widget.call
         .partialState(widget.selector)
         .listen(
           (data) {
-            if (!mounted || data == _data) return;
+            if (!mounted || _isSame(data)) return;
             setState(() => _data = data);
           },
-          onError: (Object error) {
+          onError: (Object error, StackTrace stackTrace) {
             _logger.e(
-              () => '[PartialCallStateBuilder] partial state error: $error',
+              () =>
+                  '[PartialCallStateBuilder] partial state error: $error\n'
+                  '$stackTrace',
+            );
+            if (_errorReported) return;
+            _errorReported = true;
+            FlutterError.reportError(
+              FlutterErrorDetails(
+                exception: error,
+                stack: stackTrace,
+                library: 'stream_video_flutter',
+                context: ErrorDescription(
+                  'while selecting a partial call state',
+                ),
+              ),
             );
           },
         );

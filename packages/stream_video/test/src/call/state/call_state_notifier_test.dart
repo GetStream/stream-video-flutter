@@ -134,6 +134,7 @@ void main() {
           })
           .listen((_) {});
       await Future<void>.delayed(Duration.zero);
+      expect(selectorRuns, isPositive);
       await subscription.cancel();
       selectorRuns = 0;
 

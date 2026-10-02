@@ -6,7 +6,8 @@
 
 ### 🐞 Fixed
 
-- Fixed `PartialCallStateBuilder` re-subscribing to the call state on every rebuild, and showing the previous selector's value after its `selector` changed until the next state change.
+- Fixed `PartialCallStateBuilder` re-subscribing to the call state on every rebuild when its `selector` is unchanged.
+- Fixed `PartialCallStateBuilder` showing the previous selector's value after its `selector` changed.
 - Fixed `PartialCallStateBuilder` throwing a cast error instead of surfacing a partial state error.
 - Fixed `StreamCallParticipants` not applying a changed `sort` or `filter` until the participant list changed.
 - Fixed a `Call.participantsStream` error reaching the zone uncaught instead of being logged.

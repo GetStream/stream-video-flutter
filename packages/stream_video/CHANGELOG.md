@@ -23,7 +23,7 @@
 
 ### 🐞 Fixed
 
-- Fixed `Call.partialState` streams staying subscribed to the call state after their last listener cancelled, so their selectors kept running on every state change.
+- Fixed `Call.partialState` streams staying subscribed to the call state after their last listener cancelled.
 - Fixed server-pinned participants being reordered on every pins event.
 - Fixed `CallParticipantState.copyWithUpdatedAudioLevels` mutating the audio level history of the previous state.
 - Fixed `Call.join` being rejected with "a call with the same cid is in progress" when called again while a join was in progress. A repeated call now returns the result of the join already in flight.
