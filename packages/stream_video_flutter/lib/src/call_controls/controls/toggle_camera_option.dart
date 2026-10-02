@@ -45,6 +45,9 @@ class ToggleCameraOption extends StatelessWidget {
   /// Color of the background when camera is disabled
   final Color? disabledCameraBackgroundColor;
 
+  static bool _isVideoEnabled(CallState state) =>
+      state.localParticipant?.isVideoEnabled ?? false;
+
   @override
   Widget build(BuildContext context) {
     Widget buildContent(bool enabled) {
@@ -65,7 +68,7 @@ class ToggleCameraOption extends StatelessWidget {
     }
     return PartialCallStateBuilder(
       call: call,
-      selector: (state) => state.localParticipant?.isVideoEnabled ?? false,
+      selector: _isVideoEnabled,
       builder: (_, enabled) => buildContent(enabled),
     );
   }
