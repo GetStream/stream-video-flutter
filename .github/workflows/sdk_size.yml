@@ -109,6 +109,8 @@ jobs:
       GITHUB_PR_NUM: ${{ github.event.pull_request.number }}
       BASE_BRANCH: ${{ github.base_ref || github.ref_name }}
       GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
+      # On a pull request, github.sha is the merge commit, not the pushed one.
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
@@ -138,6 +140,8 @@ jobs:
       GITHUB_PR_NUM: ${{ github.event.pull_request.number }}
       BASE_BRANCH: ${{ github.base_ref || github.ref_name }}
       GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
+      # On a pull request, github.sha is the merge commit, not the pushed one.
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7

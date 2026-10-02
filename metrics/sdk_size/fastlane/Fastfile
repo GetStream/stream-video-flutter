@@ -1,10 +1,16 @@
+require 'base64'
 require 'json'
+require 'shellwords'
 
 skip_docs
 
 GITHUB_REPO = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-flutter'
 RESULTS_DIR = File.expand_path('../../../build/sdk_size/results', __dir__)
+SIZE_HEADER = '## SDK Size'
 BREAKDOWN_HEADER = '## Size Breakdown'
+# The breakdown comment carries the numbers it shows, so a later report that
+# still waits for a platform can show that platform's previous numbers.
+DATA_PATTERN = /<!-- sdk-size-data:(\S+) -->/
 # Rows smaller than this, on the branch and in the diff, are folded into "other".
 BREAKDOWN_MIN_BYTES = 1024
 BREAKDOWN_MAX_ROWS = 15
@@ -14,35 +20,53 @@ BREAKDOWN_MAX_ROWS = 15
 # sizes become the benchmark.
 lane :sdk_size do
   base_branch = ENV['BASE_BRANCH'] || git_branch
+  sha = ENV['HEAD_SHA'] || sh('git rev-parse HEAD', log: false).strip
+
+  results = {}
+  %w[android ios pub].each do |platform|
+    platform_sizes = read_results("sizes-#{platform}.json")
+    next unless platform_sizes
+
+    results[platform] = {
+      'sha' => sha,
+      'sizes' => platform_sizes,
+      'breakdown' => read_results("breakdown-#{platform}.json")
+    }
+  end
+  UI.user_error!("No sizes found in #{RESULTS_DIR}") if results.empty?
+
+  # A pull request reports Android before iOS is done. Until then, iOS shows
+  # the numbers of the previous report, marked as outdated.
+  outdated = {}
+  previous_report_data.each do |platform, data|
+    next if results.key?(platform)
+
+    results[platform] = data
+    outdated[platform] = data['sha'] unless data['sha'] == sha
+  end
 
   sizes = {}
-  %w[android ios pub].each do |platform|
-    read_results("sizes-#{platform}.json")&.each do |name, kb|
-      sizes["#{platform}_#{name}"] = kb
-    end
+  results.each do |platform, data|
+    data['sizes'].each { |name, kb| sizes["#{platform}_#{name}"] = kb }
   end
-  UI.user_error!("No sizes found in #{RESULTS_DIR}") if sizes.empty?
 
   # Clones the metrics repo into ./metrics, and pushes the sizes on a push to
   # the base branch.
   show_sdk_size(branch_sizes: sizes, github_repo: GITHUB_REPO, base_branch: base_branch)
+  add_commit_note(outdated, sha)
 
-  show_size_breakdown(base_branch)
+  show_size_breakdown(base_branch, results, outdated, sha)
 end
 
-def show_size_breakdown(base_branch)
+def show_size_breakdown(base_branch, results, outdated, sha)
   repo = GITHUB_REPO.split('/').last
   benchmark_path = "metrics/flutter-breakdown/#{repo}/#{base_branch}.json"
   benchmark = File.exist?(benchmark_path) ? JSON.parse(File.read(benchmark_path)) : {}
 
-  breakdown = {}
-  %w[android ios].each do |platform|
-    platform_breakdown = read_results("breakdown-#{platform}.json")
-    breakdown[platform] = platform_breakdown if platform_breakdown
-  end
+  breakdown = results.slice('android', 'ios').transform_values { |data| data['breakdown'] }.compact
   return UI.important('No breakdown found, skipping it.') if breakdown.empty?
 
-  markdown = render_breakdown(breakdown, benchmark, base_branch)
+  markdown = render_breakdown(breakdown, benchmark, base_branch, outdated, sha)
   UI.message(markdown)
   summary = ENV['GITHUB_STEP_SUMMARY']
   File.write(summary, "#{markdown}\n", mode: 'a') if summary
@@ -63,7 +87,56 @@ def show_size_breakdown(base_branch)
     end
   end
 
-  pr_comment(text: markdown, edit_last_comment_with_text: BREAKDOWN_HEADER)
+  data = Base64.strict_encode64(JSON.generate(results.slice('android', 'ios')))
+  pr_comment(text: "#{markdown}\n<!-- sdk-size-data:#{data} -->", edit_last_comment_with_text: BREAKDOWN_HEADER)
+end
+
+# The platforms in the pull request's current breakdown comment, each with the
+# commit it was measured on.
+def previous_report_data
+  pr = ENV['GITHUB_PR_NUM'].to_s
+  return {} if pr.empty? || !is_ci
+
+  body = latest_comment(pr, BREAKDOWN_HEADER)&.fetch('body')
+  match = body && DATA_PATTERN.match(body)
+  match ? JSON.parse(Base64.strict_decode64(match[1])) : {}
+rescue ArgumentError, JSON::ParserError => e
+  UI.important("Ignoring the previous size report: #{e.message}")
+  {}
+end
+
+# Adds the measured commit under the `## SDK Size` table, which show_sdk_size
+# renders.
+def add_commit_note(outdated, sha)
+  pr = ENV['GITHUB_PR_NUM'].to_s
+  return if pr.empty? || !is_ci
+
+  comment = latest_comment(pr, SIZE_HEADER)
+  return UI.important('No SDK size comment found to add the commit to.') unless comment
+
+  body = "#{comment['body'].rstrip}\n\n#{commit_note(outdated, sha, 'rows')}\n"
+  sh("gh api --method PATCH repos/#{GITHUB_REPO}/issues/comments/#{comment['id']} " \
+     "-f body=#{Shellwords.escape(body)} --silent", log: false)
+end
+
+def latest_comment(pr, header)
+  json = sh("gh api --paginate repos/#{GITHUB_REPO}/issues/#{pr}/comments " \
+            "--jq '.[] | select(.body | startswith(\"#{header}\")) | {id, body}'", log: false)
+  json.lines.map(&:strip).reject(&:empty?).map { |line| JSON.parse(line) }.last
+end
+
+def commit_note(outdated, sha, what)
+  measured = "Measured on #{commit_link(sha)}"
+  return "#{measured}." if outdated.empty?
+
+  except = outdated.map do |platform, platform_sha|
+    "#{platform}, which is still being measured: its #{what} are from #{commit_link(platform_sha)}"
+  end
+  "⏳ #{measured}, except #{except.join('; and ')}."
+end
+
+def commit_link(sha)
+  "[`#{sha[0, 7]}`](#{ENV['GITHUB_SERVER_URL'] || 'https://github.com'}/#{GITHUB_REPO}/commit/#{sha})"
 end
 
 def read_results(name)
@@ -73,7 +146,7 @@ end
 
 # One collapsible table per platform and variant: what the variant adds on top
 # of an empty app, per component, with the change against the base branch.
-def render_breakdown(breakdown, benchmark, base_branch)
+def render_breakdown(breakdown, benchmark, base_branch, outdated, sha)
   lines = [BREAKDOWN_HEADER, '']
   run_url = "#{ENV['GITHUB_SERVER_URL']}/#{GITHUB_REPO}/actions/runs/#{ENV['GITHUB_RUN_ID']}"
   artifacts = ENV['GITHUB_RUN_ID'] ? "the `sdk-size-analysis` artifacts of [this run](#{run_url})" : 'the analysis files'
@@ -81,17 +154,19 @@ def render_breakdown(breakdown, benchmark, base_branch)
            "Dart sizes are uncompressed symbol sizes. Open #{artifacts} " \
            'in the DevTools App Size tool to drill down further.'
   lines << ''
-  # A pull request reports Android before iOS is done.
   pending = %w[android ios] - breakdown.keys
   unless pending.empty?
     lines << "⏳ Still measuring #{pending.join(', ')}. Both size comments update when it finishes."
     lines << ''
   end
+  lines << commit_note(outdated, sha, 'tables')
+  lines << ''
   breakdown.each do |platform, variants|
+    label = outdated.key?(platform) ? ' (outdated)' : ''
     variants.each do |variant, components|
       base = benchmark.dig(platform, variant) || {}
       total = components.values.sum
-      lines << "<details><summary><b>#{platform}</b> · <code>#{variant}</code>: " \
+      lines << "<details><summary><b>#{platform}</b>#{label} · <code>#{variant}</code>: " \
                "#{format_size(total)} (#{format_delta(total - base.values.sum)})</summary>"
       lines << ''
       lines << "| Component | Size | Δ vs `#{base_branch}` |"
