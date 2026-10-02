@@ -36,6 +36,14 @@ final _activeSpeakersCache = Expando<List<CallParticipantState>>(
   'CallState.activeSpeakers',
 );
 
+// The members still ringing, computed at most once per member list and current
+// user. Metadata updates keep the member list when it is unchanged, so the
+// view stays shared across those updates too.
+final _ringingMembersCache =
+    Expando<({String currentUserId, List<CallMemberState> value})>(
+      'CallState.ringingMembers',
+    );
+
 /// Represents the call's state.
 @immutable
 class CallState extends Equatable {
@@ -222,15 +230,30 @@ class CallState extends Equatable {
 
   String get createdByUserId => createdByUser.id;
 
+  /// The members, other than the current user, who have neither accepted nor
+  /// rejected the call.
+  ///
+  /// The list is unmodifiable and shared by every state with the same
+  /// [callMembers] list and [currentUserId].
   List<CallMemberState> get ringingMembers {
-    return callMembers
-        .where(
-          (member) =>
-              member.callAcceptedAt == null &&
-              member.callRejectedAt == null &&
-              member.userId != currentUserId,
-        )
-        .toList();
+    final cached = _ringingMembersCache[callMembers];
+    if (cached != null && cached.currentUserId == currentUserId) {
+      return cached.value;
+    }
+
+    final value = List<CallMemberState>.unmodifiable(
+      callMembers.where(
+        (member) =>
+            member.callAcceptedAt == null &&
+            member.callRejectedAt == null &&
+            member.userId != currentUserId,
+      ),
+    );
+    _ringingMembersCache[callMembers] = (
+      currentUserId: currentUserId,
+      value: value,
+    );
+    return value;
   }
 
   /// Returns a copy of this [CallState] with the given fields replaced
