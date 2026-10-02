@@ -590,7 +590,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
 
     state = state.copyWith(
       callMembers: changedOrNull(state.callMembers, callMembers),
-      capabilitiesByRole: changedOrNull(
+      capabilitiesByRole: changedCapabilitiesByRoleOrNull(
         state.capabilitiesByRole,
         capabilitiesByRole,
       ),

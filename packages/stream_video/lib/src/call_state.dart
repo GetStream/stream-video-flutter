@@ -385,7 +385,7 @@ class CallState extends Equatable {
       liveStartedAt: metadata.session.liveStartedAt,
       liveEndedAt: metadata.session.liveEndedAt,
       timerEndsAt: metadata.session.timerEndsAt,
-      capabilitiesByRole: changedOrNull(
+      capabilitiesByRole: changedCapabilitiesByRoleOrNull(
         this.capabilitiesByRole,
         capabilitiesByRole,
       ),
