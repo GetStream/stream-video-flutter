@@ -414,11 +414,13 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     return RepaintBoundary(child: _buildPlayer(context));
   }
 
+  static ({bool isBackstage, bool hasEnded}) _playerData(CallState state) =>
+      (isBackstage: state.isBackstage, hasEnded: state.endedAt != null);
+
   Widget _buildPlayer(BuildContext context) {
     return PartialCallStateBuilder(
       call: call,
-      selector: (state) =>
-          (isBackstage: state.isBackstage, hasEnded: state.endedAt != null),
+      selector: _playerData,
       builder: (context, data) {
         final isBackstage = data.isBackstage;
         final hasEnded = data.hasEnded;

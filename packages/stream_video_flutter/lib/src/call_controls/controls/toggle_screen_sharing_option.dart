@@ -54,6 +54,9 @@ class ToggleScreenShareOption extends StatelessWidget {
 
   final DesktopScreenSelectorBuilder? desktopScreenSelectorBuilder;
 
+  static bool _isScreenShareEnabled(CallState state) =>
+      state.localParticipant?.isScreenShareEnabled ?? false;
+
   @override
   Widget build(BuildContext context) {
     var screenShareConstraints = this.screenShareConstraints;
@@ -122,11 +125,10 @@ class ToggleScreenShareOption extends StatelessWidget {
       return buildContent(localParticipant!.isScreenShareEnabled);
     }
 
-    return PartialCallStateBuilder(
+    return PartialCallStateBuilder<bool>(
       call: call,
-      selector: (state) => state.localParticipant,
-      builder: (_, participant) =>
-          buildContent(participant?.isScreenShareEnabled ?? false),
+      selector: _isScreenShareEnabled,
+      builder: (_, enabled) => buildContent(enabled),
     );
   }
 }

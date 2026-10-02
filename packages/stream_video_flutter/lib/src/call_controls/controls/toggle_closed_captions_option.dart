@@ -38,11 +38,13 @@ class ToggleClosedCaptionsOption extends StatelessWidget {
   /// Color of the background when closed caption is disabled
   final Color? disabledClosedCaptionBackgroundColor;
 
+  static bool _isCaptioning(CallState state) => state.isCaptioning;
+
   @override
   Widget build(BuildContext context) {
     return PartialCallStateBuilder<bool>(
       call: call,
-      selector: (state) => state.isCaptioning,
+      selector: _isCaptioning,
       builder: (_, enabled) => CallControlOption(
         icon: enabled
             ? Icon(enabledClosedCaptionIcon)
