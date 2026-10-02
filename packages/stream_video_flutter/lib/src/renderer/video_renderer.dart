@@ -1,7 +1,14 @@
+import 'dart:ui' as ui;
+
+import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../stream_video_flutter.dart';
+import 'element_frame_capture.dart';
+import 'last_frame_cache.dart';
 
 /// A builder for the widget that is displayed when there's no video stream.
 Widget _defaultPlaceholderBuilder(BuildContext context) => Container();
@@ -57,6 +64,12 @@ class StreamVideoRenderer extends StatelessWidget {
       videoTrackType,
     );
 
+    // A track that is gone or turned off must not come back showing the
+    // picture from before.
+    if (trackState == null || trackState.muted) {
+      _lastFrameCache.remove(_lastFrameKey);
+    }
+
     final Widget child;
     if (trackState == null || isTrackPaused) {
       // The video track hasn't been published or subscribed yet.
@@ -80,8 +93,9 @@ class StreamVideoRenderer extends StatelessWidget {
         child = _buildVideoTrackRenderer(context, trackState);
       }
     } else {
-      // The video track is remote and hasn't been received yet.
-      child = placeholderBuilder.call(context);
+      // The video track is remote and hasn't been received yet: show what it
+      // last showed, if anything, until it is.
+      child = _buildLastFrameOrPlaceholder(context);
     }
 
     // What the call knows about this participant being on screen, and at what
@@ -115,7 +129,7 @@ class StreamVideoRenderer extends StatelessWidget {
 
     // If the track is not available, display the placeholder.
     if (videoTrack == null) {
-      return placeholderBuilder.call(context);
+      return _buildLastFrameOrPlaceholder(context);
     }
 
     var mirror =
@@ -142,8 +156,38 @@ class StreamVideoRenderer extends StatelessWidget {
       videoFit: videoFit,
       videoTrack: videoTrack,
       mirror: mirror,
+      placeholderBuilder: _buildLastFrameOrPlaceholder,
+      onLastFrame: _storeLastFrame,
+    );
+  }
+
+  LastVideoFrameCache get _lastFrameCache => LastVideoFrameCache.of(call);
+
+  String get _lastFrameKey =>
+      LastVideoFrameCache.keyFor(participant, videoTrackType);
+
+  Widget _buildLastFrameOrPlaceholder(BuildContext context) {
+    return LastVideoFrameOrPlaceholder(
+      cache: _lastFrameCache,
+      frameKey: _lastFrameKey,
+      videoFit: videoFit,
       placeholderBuilder: placeholderBuilder,
     );
+  }
+
+  void _storeLastFrame(LastVideoFrame frame) {
+    // A capture can finish after the track was turned off or unpublished;
+    // keep it only while the track is still there to come back.
+    final current = call.state.value.callParticipants.firstWhereOrNull(
+      (it) => it.sessionId == participant.sessionId,
+    );
+    final trackState = current?.publishedTracks[videoTrackType];
+    if (trackState == null || trackState.muted) {
+      frame.image.dispose();
+      return;
+    }
+
+    _lastFrameCache.put(_lastFrameKey, frame);
   }
 }
 
@@ -181,6 +225,7 @@ class VideoTrackRenderer extends StatefulWidget {
     this.mirror = false,
     this.videoFit,
     this.placeholderBuilder = _defaultPlaceholderBuilder,
+    this.onLastFrame,
   });
 
   /// The video track to display.
@@ -198,6 +243,10 @@ class VideoTrackRenderer extends StatefulWidget {
   /// A builder for the placeholder.
   final WidgetBuilder placeholderBuilder;
 
+  /// Called with the last frame shown when this renderer is taken out of the
+  /// tree, so it can be shown while the track comes back.
+  final ValueSetter<LastVideoFrame>? onLastFrame;
+
   @override
   State<VideoTrackRenderer> createState() => _VideoTrackRendererState();
 }
@@ -208,6 +257,9 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
 
   /// If [rtc.RTCVideoRenderer] is initialized.
   bool _isInitialized = false;
+
+  /// Marks what is painted of the video, for capturing its last frame.
+  final _boundaryKey = GlobalKey();
 
   @override
   void initState() {
@@ -231,6 +283,53 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
   }
 
   @override
+  void deactivate() {
+    _captureLastFrame();
+    super.deactivate();
+  }
+
+  /// Hands the frame on screen to [VideoTrackRenderer.onLastFrame].
+  ///
+  /// Runs as the renderer leaves the tree, while its layer still holds the
+  /// last frame painted.
+  void _captureLastFrame() {
+    final onLastFrame = widget.onLastFrame;
+    if (onLastFrame == null || !_isInitialized) return;
+    if (!_hasFirstFrame(_videoRenderer.value)) return;
+
+    if (kIsWeb) {
+      // The web video is an HTML element, invisible to a layer snapshot. It
+      // is read unmirrored, so the mirroring is applied when it is drawn.
+      final mirror = widget.mirror;
+      captureElementFrame(_videoRenderer.textureId).then(
+        (image) {
+          if (image != null) {
+            onLastFrame(LastVideoFrame(image: image, mirror: mirror));
+          }
+        },
+        onError: (Object e) =>
+            debugPrint('VideoTrackRenderer: last frame capture failed, $e'),
+      );
+      return;
+    }
+
+    final boundary = _boundaryKey.currentContext?.findRenderObject();
+    if (boundary is! RenderRepaintBoundary || !boundary.hasSize) return;
+
+    final ui.Image image;
+    try {
+      final pixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ?? 1;
+      image = boundary.toImageSync(pixelRatio: pixelRatio);
+    } catch (e) {
+      debugPrint('VideoTrackRenderer: last frame capture failed, $e');
+      return;
+    }
+
+    // The snapshot is taken as painted, so mirroring is already applied.
+    onLastFrame(LastVideoFrame(image: image));
+  }
+
+  @override
   Future<void> dispose() async {
     super.dispose();
     if (_isInitialized) _videoRenderer.srcObject = null;
@@ -250,16 +349,34 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
     return ValueListenableBuilder<rtc.RTCVideoValue>(
       valueListenable: _videoRenderer,
       builder: (context, value, _) {
-        return rtc.RTCVideoView(
-          _videoRenderer,
-          mirror: widget.mirror,
-          objectFit: _getVideoViewObjectFit(videoFit, value),
-          filterQuality: FilterQuality.medium,
-          placeholderBuilder: widget.placeholderBuilder,
+        final video = RepaintBoundary(
+          key: _boundaryKey,
+          child: rtc.RTCVideoView(
+            _videoRenderer,
+            mirror: widget.mirror,
+            objectFit: _getVideoViewObjectFit(videoFit, value),
+            filterQuality: FilterQuality.medium,
+          ),
+        );
+        if (_hasFirstFrame(value)) return video;
+
+        // The video stays in the tree so it can load, covered until it has a
+        // frame to show.
+        return Stack(
+          fit: StackFit.expand,
+          children: [video, widget.placeholderBuilder(context)],
         );
       },
     );
   }
+
+  /// Whether the renderer has a decoded frame to show.
+  ///
+  /// On the web [rtc.RTCVideoValue.renderVideo] turns true as soon as a stream
+  /// is attached, before its first frame; the video size is only known once
+  /// one is.
+  bool _hasFirstFrame(rtc.RTCVideoValue value) =>
+      value.renderVideo && value.width > 0 && value.height > 0;
 
   rtc.RTCVideoViewObjectFit _getVideoViewObjectFit(
     VideoFit videoFit,
