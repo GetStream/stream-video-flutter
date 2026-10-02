@@ -14,6 +14,7 @@ class StreamScreenShareButton extends StatelessWidget {
     this.screenShareConstraints,
     this.screenSharingNotificationOptionsBuilder,
     this.desktopScreenSelectorBuilder,
+    this.desktopScreenPickerType = DesktopScreenSharePickerType.inApp,
   });
 
   /// Represents a call.
@@ -48,6 +49,13 @@ class StreamScreenShareButton extends StatelessWidget {
   /// the built-in selector.
   final DesktopScreenSelectorBuilder? desktopScreenSelectorBuilder;
 
+  /// Which picker chooses what to share on desktop.
+  ///
+  /// [DesktopScreenSharePickerType.system] uses the picker of the operating system
+  /// where [isDesktopSystemContentPickerSupported] is true, and falls back to the
+  /// selector from [desktopScreenSelectorBuilder] everywhere else.
+  final DesktopScreenSharePickerType desktopScreenPickerType;
+
   @override
   Widget build(BuildContext context) {
     final presentIcon = context.streamPresentIcon;
@@ -67,6 +75,7 @@ class StreamScreenShareButton extends StatelessWidget {
         enabled: !enabled,
         constraints: screenShareConstraints,
         desktopScreenSelectorBuilder: desktopScreenSelectorBuilder,
+        desktopScreenPickerType: desktopScreenPickerType,
       ),
     );
 
