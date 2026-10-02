@@ -10,6 +10,9 @@ import '../mocks.dart';
 class _FakeCall extends Mock implements Call {
   _FakeCall(this._callState) {
     when(() => _emitter.value).thenReturn(_callState);
+    when(
+      () => _emitter.valueStream,
+    ).thenAnswer((_) => Stream.value(_callState));
   }
 
   final CallState _callState;
@@ -24,6 +27,13 @@ class _FakeCall extends Mock implements Call {
     subscriptions++;
     return Stream.value(selector(_callState));
   }
+
+  @override
+  Stream<List<CallParticipantState>> get participantsStream =>
+      Stream.value(const []);
+
+  @override
+  Stream<Duration> get callDurationStream => Stream.value(Duration.zero);
 }
 
 void main() {
@@ -46,6 +56,16 @@ void main() {
       fullscreen: false,
       onFullscreenTapped: () {},
       duration: Duration.zero,
+    ),
+    'LivestreamPlayer': (call) => LivestreamPlayer(
+      call: call,
+      joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+    ),
+    'StreamCallContent': (call) => StreamCallContent(
+      call: call,
+      callAppBarWidgetBuilder: (context, call) => AppBar(),
+      callParticipantsWidgetBuilder: (context, call) => const SizedBox(),
+      callControlsWidgetBuilder: (context, call) => const SizedBox(),
     ),
   };
 

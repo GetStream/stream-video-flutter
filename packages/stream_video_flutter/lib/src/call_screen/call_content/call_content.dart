@@ -176,8 +176,8 @@ class _StreamCallContentState extends State<StreamCallContent> {
     });
   }
 
-  static CallParticipantState? _localParticipant(CallState state) =>
-      state.localParticipant;
+  static bool _hasLocalParticipant(CallState state) =>
+      state.localParticipant != null;
 
   @override
   Widget build(BuildContext context) {
@@ -279,10 +279,10 @@ class _StreamCallContentState extends State<StreamCallContent> {
         ],
       ),
       extendBody: widget.extendBody,
-      bottomNavigationBar: PartialCallStateBuilder(
+      bottomNavigationBar: PartialCallStateBuilder<bool>(
         call: call,
-        selector: _localParticipant,
-        builder: (_, localParticipant) => localParticipant != null
+        selector: _hasLocalParticipant,
+        builder: (_, hasLocalParticipant) => hasLocalParticipant
             ? widget.callControlsWidgetBuilder?.call(context, call) ??
                   StreamCallControls.withDefaultOptions(
                     call: call,
