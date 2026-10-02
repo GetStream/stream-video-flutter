@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
 
 import '../../call_state.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/models.dart';
 import '../../state_emitter.dart';
+import 'call_state_selection.dart';
 import 'mixins/state_call_actions_mixin.dart';
 import 'mixins/state_coordinator_mixin.dart';
 import 'mixins/state_lifecycle_mixin.dart';
@@ -43,18 +43,12 @@ class CallStateNotifier extends StateNotifier<CallState>
   /// passive OS audio-route change (`AudioRouteChangedEvent`).
   bool audioOutputSelectedByUser = false;
 
+  // Each listener gets its own selector chain on the value stream, which ends
+  // when that listener cancels.
   Stream<T> partialCallStateStream<T>(T Function(CallState state) selector) {
     return callStateStream.valueStream
         .map(selector)
-        .distinct(
-          (previous, current) =>
-              identical(previous, current) ||
-              previous == current ||
-              (previous is List &&
-                  current is List &&
-                  const ListEquality<dynamic>().equals(previous, current)),
-        )
-        .asBroadcastStream();
+        .distinct(isSameCallStateSelection);
   }
 
   Stream<Duration> get durationStream =>

@@ -71,6 +71,7 @@ import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 import 'session/dynascale_manager.dart';
 import 'state/call_state_notifier.dart';
+import 'state/call_state_selection.dart';
 import 'stats/sfu_stats_reporter.dart';
 import 'stats/stats_reporter.dart';
 import 'stats/trace_tag.dart';
@@ -434,6 +435,11 @@ class Call {
   Stream<Duration> get callDurationStream => _stateManager.durationStream;
   StatsReporter? get statsReporter => _session?.statsReporter;
 
+  /// Emits the value [selector] returns from the call state: the current value
+  /// when listened to, then each value that differs from the one before, as
+  /// compared by [isSameCallStateSelection].
+  ///
+  /// Each listener runs its own [selector] until it cancels.
   Stream<T> partialState<T>(CallStateSelector<T> selector) {
     return _stateManager.partialCallStateStream(selector);
   }
