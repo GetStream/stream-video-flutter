@@ -9,9 +9,11 @@
 
 - Added `Call.participantsStream`, which emits the participant list at an interval that grows with the participant count.
 - Added `CallPreferences.participantsThrottleIntervalResolver` to override that interval, or set it to `null` to emit every change.
+- Added `isSameCallStateSelection`, which compares two selected values the way `Call.partialState` does.
 
 ### 🔄 Changed
 
+- `Call.partialState` now compares maps, sets and nested collections by their contents.
 - [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
 - Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.
 - SFU participant events no longer emit a new call state when they leave every participant unchanged.
@@ -23,6 +25,7 @@
 
 ### 🐞 Fixed
 
+- Fixed `Call.partialState` streams staying subscribed to the call state after their last listener cancelled.
 - Fixed server-pinned participants being reordered on every pins event.
 - Fixed `CallParticipantState.copyWithUpdatedAudioLevels` mutating the audio level history of the previous state.
 - Fixed `Call.join` being rejected with "a call with the same cid is in progress" when called again while a join was in progress. A repeated call now returns the result of the join already in flight.
