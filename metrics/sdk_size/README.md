@@ -3,13 +3,15 @@
 Measures how much each SDK adds to a release app, and how large each package's
 pub.dev archive is. The `sdk_size` workflow runs this on every pull request and
 reports it in two comments, `## SDK Size` and `## Size Breakdown`. Pushes to
-`main` store the numbers as the benchmark in `GetStream/stream-internal-metrics`.
+`main` and `v2` store the numbers as that branch's benchmark in
+`GetStream/stream-internal-metrics`.
 
 ## How it works
 
 Every folder under `variants/` is one app. `measure.dart` creates an empty app
 with `flutter create --empty`, adds the variant's `dependencies.yaml` and
-`main.dart`, and builds a release with `--analyze-size`:
+`main.dart`, copies the root `pubspec.lock`, and builds a release with
+`--analyze-size`:
 
 - Android: an arm64 APK.
 - iOS: `Runner.app`, built with `--no-codesign`.
@@ -61,6 +63,11 @@ cd metrics/sdk_size && bundle install && BASE_BRANCH=main bundle exec fastlane s
 
 Add a folder under `variants/` with:
 
-- a `dependencies.yaml` that lists the packages, for example `  stream_video: any`.
-  Every package in `packages/` is resolved from its path.
+- a `dependencies.yaml` that lists the packages, indented as under
+  `dependencies:`. Every package in `packages/` is resolved from its path.
+
+  ```yaml
+    stream_video: any
+  ```
+
 - a `main.dart` that uses them.

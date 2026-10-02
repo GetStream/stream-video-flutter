@@ -11,6 +11,7 @@ on:
       - "packages/**"
       - "metrics/sdk_size/**"
       - "pubspec.yaml"
+      - "pubspec.lock"
       - ".github/workflows/sdk_size.yml"
       - ".github/actions/sdk-size-report/**"
   push:
@@ -21,7 +22,8 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # A push stores the benchmark, so it always runs to the end.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -62,7 +64,8 @@ jobs:
   measure-ios:
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     timeout-minutes: 60
-    runs-on: macos-latest
+    # Pinned, so a runner image update doesn't change the iOS numbers.
+    runs-on: macos-15
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
@@ -70,7 +73,7 @@ jobs:
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1.7.0
         with:
-          xcode-version: latest-stable
+          xcode-version: "26.3"
 
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter
@@ -91,9 +94,8 @@ jobs:
           path: build/sdk_size/results/analysis/
           retention-days: 90
 
-  # Reports Android while iOS is still queued or building. Only on pull
-  # requests: on a push, the report stores the benchmark, which has to be
-  # complete. A fork gets neither the bot key nor a token that can comment.
+  # Reports Android while iOS is still building. Pull requests from this
+  # repository only; a push needs the complete report.
   report-android:
     needs: measure-android
     if: >-
@@ -121,15 +123,18 @@ jobs:
           ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
   # Waits for report-android as well, so the complete report always replaces
-  # the partial one rather than racing it.
+  # the partial one rather than racing it. On a pull request, it also reports
+  # a platform that failed to measure; a push only reports a complete run.
   report:
     needs: [measure-android, measure-ios, report-android]
     if: >-
       !cancelled()
-      && (github.event_name != 'pull_request'
-        || github.event.pull_request.head.repo.full_name == github.repository)
-      && needs.measure-android.result == 'success'
-      && needs.measure-ios.result == 'success'
+      && ((github.event_name == 'pull_request'
+          && github.event.pull_request.head.repo.full_name == github.repository
+          && (needs.measure-android.result == 'success' || needs.measure-ios.result == 'success'))
+        || (github.event_name != 'pull_request'
+          && needs.measure-android.result == 'success'
+          && needs.measure-ios.result == 'success'))
     timeout-minutes: 15
     runs-on: ubuntu-latest
     permissions:
@@ -142,6 +147,8 @@ jobs:
       GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
       # On a pull request, github.sha is the merge commit, not the pushed one.
       HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      FAILED_PLATFORMS: >-
+        ${{ needs.measure-android.result != 'success' && 'android' || '' }},${{ needs.measure-ios.result != 'success' && 'ios' || '' }}
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7

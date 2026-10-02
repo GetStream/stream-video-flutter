@@ -6,6 +6,10 @@ skip_docs
 
 GITHUB_REPO = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-flutter'
 RESULTS_DIR = File.expand_path('../../../build/sdk_size/results', __dir__)
+# Where show_sdk_size clones GetStream/stream-internal-metrics. Actions run from
+# metrics/sdk_size, the lane's own Ruby from metrics/sdk_size/fastlane.
+METRICS_DIR = File.expand_path('../metrics', __dir__)
+PLATFORMS = %w[android ios pub].freeze
 SIZE_HEADER = '## SDK Size'
 BREAKDOWN_HEADER = '## Size Breakdown'
 # The breakdown comment carries the numbers it shows, so a later report that
@@ -21,9 +25,11 @@ BREAKDOWN_MAX_ROWS = 15
 lane :sdk_size do
   base_branch = ENV['BASE_BRANCH'] || git_branch
   sha = ENV['HEAD_SHA'] || sh('git rev-parse HEAD', log: false).strip
+  # Platforms whose measure job failed, such as `ios`. `android` includes `pub`.
+  failed = ENV['FAILED_PLATFORMS'].to_s.split(',').map(&:strip).reject(&:empty?)
 
   results = {}
-  %w[android ios pub].each do |platform|
+  PLATFORMS.each do |platform|
     platform_sizes = read_results("sizes-#{platform}.json")
     next unless platform_sizes
 
@@ -34,9 +40,13 @@ lane :sdk_size do
     }
   end
   UI.user_error!("No sizes found in #{RESULTS_DIR}") if results.empty?
+  missing = PLATFORMS - results.keys
+  if push_event? && !missing.empty?
+    UI.user_error!("A benchmark needs every platform, missing: #{missing.join(', ')}")
+  end
 
-  # A pull request reports Android before iOS is done. Until then, iOS shows
-  # the numbers of the previous report, marked as outdated.
+  # A pull request reports Android before iOS is done, or after iOS failed.
+  # Meanwhile iOS shows the numbers of the previous report, marked as outdated.
   outdated = {}
   previous_report_data.each do |platform, data|
     next if results.key?(platform)
@@ -50,45 +60,66 @@ lane :sdk_size do
     data['sizes'].each { |name, kb| sizes["#{platform}_#{name}"] = kb }
   end
 
-  # Clones the metrics repo into ./metrics, and pushes the sizes on a push to
+  # Clones the metrics repo into METRICS_DIR, and pushes the sizes on a push to
   # the base branch.
   show_sdk_size(branch_sizes: sizes, github_repo: GITHUB_REPO, base_branch: base_branch)
-  add_commit_note(outdated, sha)
+  add_commit_note(outdated, failed, sha)
 
-  show_size_breakdown(base_branch, results, outdated, sha)
+  show_size_breakdown(base_branch, results, outdated, failed, sha)
 end
 
-def show_size_breakdown(base_branch, results, outdated, sha)
+def show_size_breakdown(base_branch, results, outdated, failed, sha)
   repo = GITHUB_REPO.split('/').last
-  benchmark_path = "metrics/flutter-breakdown/#{repo}/#{base_branch}.json"
-  benchmark = File.exist?(benchmark_path) ? JSON.parse(File.read(benchmark_path)) : {}
+  benchmark_file = "flutter-breakdown/#{repo}/#{base_branch}.json"
+  benchmark_path = File.join(METRICS_DIR, benchmark_file)
+  benchmark = File.exist?(benchmark_path) ? JSON.parse(File.read(benchmark_path)) : nil
 
   breakdown = results.slice('android', 'ios').transform_values { |data| data['breakdown'] }.compact
   return UI.important('No breakdown found, skipping it.') if breakdown.empty?
 
-  markdown = render_breakdown(breakdown, benchmark, base_branch, outdated, sha)
+  markdown = render_breakdown(breakdown, benchmark, base_branch, outdated, failed, sha)
   UI.message(markdown)
   summary = ENV['GITHUB_STEP_SUMMARY']
   File.write(summary, "#{markdown}\n", mode: 'a') if summary
 
   return unless is_ci
 
-  if ENV['GITHUB_EVENT_NAME'] == 'push' && git_branch == base_branch
+  if push_event? && git_branch == base_branch
     FileUtils.mkdir_p(File.dirname(benchmark_path))
     File.write(benchmark_path, "#{JSON.pretty_generate(breakdown)}\n")
-    Dir.chdir('metrics') do
+    Dir.chdir(METRICS_DIR) do
       if sh('git status -s').to_s.empty?
         UI.important('No changes in the size breakdown.')
       else
         sh('git add -A')
-        sh("git commit -m 'Update flutter-breakdown/#{repo}/#{base_branch}.json'")
-        sh('git push')
+        sh("git commit -m 'Update #{benchmark_file}'")
+        push_metrics
       end
     end
   end
 
   data = Base64.strict_encode64(JSON.generate(results.slice('android', 'ios')))
   pr_comment(text: "#{markdown}\n<!-- sdk-size-data:#{data} -->", edit_last_comment_with_text: BREAKDOWN_HEADER)
+end
+
+def push_event?
+  ENV['GITHUB_EVENT_NAME'] == 'push'
+end
+
+# Other repositories push to the metrics repo too, so a push can be rejected
+# until it is rebased on theirs.
+def push_metrics(attempts: 3)
+  attempt = 0
+  begin
+    attempt += 1
+    sh('git pull --rebase')
+    sh('git push')
+  rescue FastlaneCore::Interface::FastlaneShellError
+    raise if attempt >= attempts
+
+    UI.important("Pushing the size breakdown failed, retrying (#{attempt}/#{attempts}).")
+    retry
+  end
 end
 
 # The platforms in the pull request's current breakdown comment, each with the
@@ -107,14 +138,14 @@ end
 
 # Adds the measured commit under the `## SDK Size` table, which show_sdk_size
 # renders.
-def add_commit_note(outdated, sha)
+def add_commit_note(outdated, failed, sha)
   pr = ENV['GITHUB_PR_NUM'].to_s
   return if pr.empty? || !is_ci
 
   comment = latest_comment(pr, SIZE_HEADER)
   return UI.important('No SDK size comment found to add the commit to.') unless comment
 
-  body = "#{comment['body'].rstrip}\n\n#{commit_note(outdated, sha, 'rows')}\n"
+  body = "#{comment['body'].rstrip}\n\n#{commit_note(outdated, failed, sha, 'rows')}\n"
   sh("gh api --method PATCH repos/#{GITHUB_REPO}/issues/comments/#{comment['id']} " \
      "-f body=#{Shellwords.escape(body)} --silent", log: false)
 end
@@ -125,14 +156,21 @@ def latest_comment(pr, header)
   json.lines.map(&:strip).reject(&:empty?).map { |line| JSON.parse(line) }.last
 end
 
-def commit_note(outdated, sha, what)
+def commit_note(outdated, failed, sha, what)
   measured = "Measured on #{commit_link(sha)}"
   return "#{measured}." if outdated.empty?
 
   except = outdated.map do |platform, platform_sha|
-    "#{platform}, which is still being measured: its #{what} are from #{commit_link(platform_sha)}"
+    state = failed.include?(platform) ? "which failed to measure (see #{run_link})" : 'which is still being measured'
+    "#{platform}, #{state}: its #{what} are from #{commit_link(platform_sha)}"
   end
-  "⏳ #{measured}, except #{except.join('; and ')}."
+  "#{failed.empty? ? '⏳' : '⚠️'} #{measured}, except #{except.join('; and ')}."
+end
+
+def run_link
+  return 'the workflow run' unless ENV['GITHUB_RUN_ID']
+
+  "[this run](#{ENV['GITHUB_SERVER_URL']}/#{GITHUB_REPO}/actions/runs/#{ENV['GITHUB_RUN_ID']})"
 end
 
 def commit_link(sha)
@@ -146,45 +184,50 @@ end
 
 # One collapsible table per platform and variant: what the variant adds on top
 # of an empty app, per component, with the change against the base branch.
-def render_breakdown(breakdown, benchmark, base_branch, outdated, sha)
+def render_breakdown(breakdown, benchmark, base_branch, outdated, failed, sha)
   lines = [BREAKDOWN_HEADER, '']
-  run_url = "#{ENV['GITHUB_SERVER_URL']}/#{GITHUB_REPO}/actions/runs/#{ENV['GITHUB_RUN_ID']}"
-  artifacts = ENV['GITHUB_RUN_ID'] ? "the `sdk-size-analysis` artifacts of [this run](#{run_url})" : 'the analysis files'
+  artifacts = ENV['GITHUB_RUN_ID'] ? "the `sdk-size-analysis` artifacts of #{run_link}" : 'the analysis files'
   lines << 'What each SDK adds to an empty release app, per Dart package and native library. ' \
            "Dart sizes are uncompressed symbol sizes. Open #{artifacts} " \
            'in the DevTools App Size tool to drill down further.'
   lines << ''
-  pending = %w[android ios] - breakdown.keys
-  unless pending.empty?
-    lines << "⏳ Still measuring #{pending.join(', ')}. Both size comments update when it finishes."
-    lines << ''
-  end
-  lines << commit_note(outdated, sha, 'tables')
+  missing = %w[android ios] - breakdown.keys
+  failed_missing = missing & failed
+  pending = missing - failed
+  notes = []
+  notes << "❌ Couldn't measure #{failed_missing.join(', ')}, see #{run_link}." unless failed_missing.empty?
+  notes << "⏳ Still measuring #{pending.join(', ')}. Both size comments update when it finishes." unless pending.empty?
+  notes << "No `#{base_branch}` benchmark for the breakdown yet." unless benchmark
+  notes.each { |note| lines << note << '' }
+  lines << commit_note(outdated, failed, sha, 'tables')
   lines << ''
   breakdown.each do |platform, variants|
     label = outdated.key?(platform) ? ' (outdated)' : ''
     variants.each do |variant, components|
-      base = benchmark.dig(platform, variant) || {}
+      # Without a benchmark for this variant, there is nothing to compare to.
+      base = benchmark&.dig(platform, variant)
       total = components.values.sum
+      total_delta = base ? " (#{format_delta(total - base.values.sum)})" : ' (new)'
       lines << "<details><summary><b>#{platform}</b>#{label} · <code>#{variant}</code>: " \
-               "#{format_size(total)} (#{format_delta(total - base.values.sum)})</summary>"
+               "#{format_size(total)}#{total_delta}</summary>"
       lines << ''
       lines << "| Component | Size | Δ vs `#{base_branch}` |"
       lines << '| - | -: | -: |'
 
-      rows = (components.keys | base.keys).map do |key|
-        [key, components[key] || 0, (components[key] || 0) - (base[key] || 0)]
+      rows = (components.keys | (base || {}).keys).map do |key|
+        [key, components[key] || 0, base && ((components[key] || 0) - (base[key] || 0))]
       end
       shown, folded = rows.sort_by { |_, size, _| -size }.partition do |_, size, delta|
-        size.abs >= BREAKDOWN_MIN_BYTES || delta.abs >= BREAKDOWN_MIN_BYTES
+        size.abs >= BREAKDOWN_MIN_BYTES || delta.to_i.abs >= BREAKDOWN_MIN_BYTES
       end
       folded += shown.drop(BREAKDOWN_MAX_ROWS)
       shown.take(BREAKDOWN_MAX_ROWS).each do |key, size, delta|
         lines << "| `#{key}` | #{format_size(size)} | #{format_delta(delta)} |"
       end
       unless folded.empty?
+        folded_delta = base && folded.sum { |_, _, d| d }
         lines << "| other (#{folded.size}) | #{format_size(folded.sum { |_, s, _| s })} | " \
-                 "#{format_delta(folded.sum { |_, _, d| d })} |"
+                 "#{format_delta(folded_delta)} |"
       end
       lines << ''
       lines << '</details>'
@@ -201,6 +244,7 @@ def format_size(bytes)
 end
 
 def format_delta(bytes)
+  return 'n/a' if bytes.nil?
   return '0' if bytes.zero?
 
   "#{bytes.positive? ? '+' : '-'}#{format_size(bytes.abs)}"

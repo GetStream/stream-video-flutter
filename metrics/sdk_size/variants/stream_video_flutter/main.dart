@@ -6,7 +6,6 @@ Future<void> main() async {
 
   final client = StreamVideo(
     'api-key',
-    // The one constructor shared by v1 and v2.
     user: User.anonymous(),
     userToken: 'user-token',
   );

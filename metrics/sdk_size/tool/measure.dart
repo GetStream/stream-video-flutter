@@ -53,9 +53,13 @@ Future<void> main(List<String> args) async {
     analysis.copySync(copy.path);
 
     totals[variant] = _artifactSize(app, platform);
-    components[variant] = _flatten(
+    final parts = _flatten(
       jsonDecode(analysis.readAsStringSync()) as Map<String, dynamic>,
     );
+    if (!parts.keys.any((it) => it.startsWith('package:'))) {
+      _fail('No Dart packages found in ${analysis.path}');
+    }
+    components[variant] = parts;
   }
 
   final sizes = <String, double>{};
@@ -110,8 +114,8 @@ _Options _parseArgs(List<String> args) {
   return _Options(platform, variants);
 }
 
-/// Every variant under `variants/`, with `baseline` first since the others are
-/// measured against it.
+/// The variants under `variants/` passed with `--variant`, or all of them, with
+/// `baseline` first since the others are measured against it.
 List<String> _variants({required List<String> only}) {
   final all =
       Directory('${_metricsDir.path}/variants')
@@ -127,8 +131,7 @@ List<String> _variants({required List<String> only}) {
   return [_baseline, ...all.where((it) => it != _baseline)];
 }
 
-/// A fresh `flutter create --empty` app, so every variant starts from the
-/// template of the Flutter version doing the measuring.
+/// A fresh `flutter create --empty` app.
 Future<Directory> _createTemplate() async {
   final template = Directory('${_buildDir.path}/template');
   if (template.existsSync()) template.deleteSync(recursive: true);
@@ -170,12 +173,13 @@ flutter:
   uses-material-design: true
 ''');
   File('$variantDir/main.dart').copySync('${app.path}/lib/main.dart');
+  // Keeps the versions the workspace locked; pub drops the unused entries.
+  File('${_root.path}/pubspec.lock').copySync('${app.path}/pubspec.lock');
   return app;
 }
 
-/// Resolves every package in the repository from its path, as the workspace
-/// does, plus the root pubspec's own `dependency_overrides`, so a variant
-/// builds against the same pinned dependencies as the workspace.
+/// Path overrides for every repository package, plus the root pubspec's
+/// `dependency_overrides`.
 String _dependencyOverrides() {
   final block = ['dependency_overrides:'];
   for (final package in _packages()) {
@@ -185,13 +189,24 @@ String _dependencyOverrides() {
   }
 
   final lines = File('${_root.path}/pubspec.yaml').readAsLinesSync();
-  final start = lines.indexOf('dependency_overrides:');
+  final start = lines.indexWhere(
+    (it) => it.startsWith('dependency_overrides:'),
+  );
   if (start != -1) {
+    if (lines[start].trimRight() != 'dependency_overrides:') {
+      _fail(
+        'Unsupported dependency_overrides in pubspec.yaml: ${lines[start]}',
+      );
+    }
+    final pathOverrides = block.length;
     for (final line in lines.skip(start + 1)) {
       if (line.isNotEmpty && !line.startsWith(' ') && !line.startsWith('#')) {
         break;
       }
       block.add(line);
+    }
+    if (block.skip(pathOverrides).every((it) => it.trim().isEmpty)) {
+      stderr.writeln('No dependency_overrides copied from pubspec.yaml.');
     }
   }
   return '${block.join('\n').trimRight()}\n';
@@ -218,8 +233,7 @@ Future<File> _build(Directory app, String platform) async {
     if (platform == 'android') ...[
       'apk',
       '--target-platform=android-arm64',
-      // `--target-platform` only limits Flutter's own libraries. Splitting
-      // leaves a plugin's native libraries out of the APK for other ABIs too.
+      // Also drops plugins' native libraries for other ABIs.
       '--split-per-abi',
     ] else ...[
       'ios',
@@ -261,7 +275,7 @@ Map<String, int> _flatten(Map<String, dynamic> root) {
 
   void visit(Map<String, dynamic> node, String topLevel) {
     final name = node['n'] as String;
-    final value = (node['value'] as num?)?.toInt() ?? 0;
+    final value = _value(node);
     final children = (node['children'] as List?)?.cast<Map<String, dynamic>>();
 
     if (name.contains('(Dart AOT)')) {
