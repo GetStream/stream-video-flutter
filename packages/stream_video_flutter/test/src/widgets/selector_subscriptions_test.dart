@@ -34,6 +34,9 @@ class _FakeCall extends Mock implements Call {
 
   @override
   Stream<Duration> get callDurationStream => Stream.value(Duration.zero);
+
+  @override
+  CallConnectOptions get connectOptions => CallConnectOptions();
 }
 
 void main() {
@@ -51,12 +54,15 @@ void main() {
     'ToggleCameraOption': (call) => ToggleCameraOption(call: call),
     'FlipCameraOption': (call) => FlipCameraOption(call: call),
     'ToggleScreenShareOption': (call) => ToggleScreenShareOption(call: call),
+    'ToggleSpeakerphoneOption': (call) => ToggleSpeakerphoneOption(call: call),
     'LivestreamInfo': (call) => LivestreamInfo(
       call: call,
       fullscreen: false,
       onFullscreenTapped: () {},
       duration: Duration.zero,
     ),
+    'LivestreamBackstageContent': (call) =>
+        LivestreamBackstageContent(call: call),
     'LivestreamPlayer': (call) => LivestreamPlayer(
       call: call,
       joinBehaviour: LivestreamJoinBehaviour.manualJoin,
@@ -67,6 +73,10 @@ void main() {
       callParticipantsWidgetBuilder: (context, call) => const SizedBox(),
       callControlsWidgetBuilder: (context, call) => const SizedBox(),
     ),
+    'StreamIncomingCallContent': (call) =>
+        StreamIncomingCallContent(call: call),
+    'StreamOutgoingCallContent': (call) =>
+        StreamOutgoingCallContent(call: call),
   };
 
   for (final MapEntry(key: name, value: build) in widgets.entries) {
@@ -84,4 +94,26 @@ void main() {
       expect(call.subscriptions, subscriptions);
     });
   }
+
+  testWidgets('LivestreamPlayer builds the livestream widgets it covers', (
+    tester,
+  ) async {
+    final call = _FakeCall(
+      callState.copyWith(status: CallStatus.connected()),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: LivestreamPlayer(
+          call: call,
+          joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(LivestreamContent), findsOneWidget);
+    expect(find.byType(LivestreamInfo), findsOneWidget);
+    expect(find.byType(LivestreamSpeakerphoneOption), findsOneWidget);
+  });
 }
