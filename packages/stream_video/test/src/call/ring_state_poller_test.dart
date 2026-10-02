@@ -123,25 +123,37 @@ void main() {
     });
   });
 
-  test('gives up on a session the server does not know', () {
+  test('keeps polling at the interval through a failed request', () {
     fakeAsync((async) {
       final poller = createPoller()..start();
-      nextResult = _failure(404);
+      nextResult = _failure(503);
 
-      async.elapse(const Duration(seconds: 15));
-      expect(polls, 1);
-      expect(poller.isStopped, isTrue);
+      async.elapse(const Duration(seconds: 25));
+      // At 15s, 20s and 25s.
+      expect(polls, 3);
+      expect(poller.isStopped, isFalse);
     });
   });
 
-  test('keeps polling through a transient failure', () {
+  test('stops when a callback throws', () {
     fakeAsync((async) {
-      final poller = createPoller()..start();
-      nextResult = _failure(500);
+      final poller = RingStatePoller(
+        settings: _settings,
+        ringTimeout: const Duration(seconds: 30),
+        fetchRingState: () async {
+          polls++;
+          return nextResult;
+        },
+        onRingState: (_) => throw StateError('applied after dispose'),
+      )..start();
 
-      async.elapse(const Duration(seconds: 20));
-      expect(polls, 2);
-      expect(poller.isStopped, isFalse);
+      // fakeAsync would surface the throw if it escaped the poll.
+      async.elapse(const Duration(seconds: 15));
+      expect(polls, 1);
+      expect(poller.isStopped, isTrue);
+
+      async.elapse(const Duration(seconds: 10));
+      expect(polls, 1);
     });
   });
 

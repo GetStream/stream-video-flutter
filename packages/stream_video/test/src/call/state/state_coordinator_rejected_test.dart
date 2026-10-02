@@ -61,6 +61,7 @@ StreamCallRejectedEvent _rejected({
   Map<String, DateTime> acceptedBy = const {},
   required Map<String, DateTime> rejectedBy,
   Map<String, DateTime> missedBy = const {},
+  DateTime? sessionEndedAt,
 }) {
   final metadata = SampleCallData.createCallMetadata(
     createdByUser: _creator,
@@ -84,6 +85,7 @@ StreamCallRejectedEvent _rejected({
         acceptedBy: acceptedBy,
         rejectedBy: rejectedBy,
         missedBy: missedBy,
+        endedAt: sessionEndedAt,
       ),
     ),
   );
@@ -227,7 +229,7 @@ void main() {
       );
     });
 
-    test('keeps ringing when it missed the ring', () {
+    test('disconnects when it missed the ring', () {
       final notifier =
           _ringing(
             currentUserId: _currentUserId,
@@ -240,7 +242,37 @@ void main() {
             ),
           );
 
-      expect(notifier.callState.status, CallStatus.incoming());
+      expect(
+        _disconnectReason(notifier),
+        DisconnectReason.rejected(
+          byUserId: 'callee-2',
+          reason: CallRejectReason.timeout(),
+        ),
+      );
+    });
+
+    test('settles a cancel that also ended the call', () {
+      // `ended` stays out of the event's snapshot, so the rejection settles
+      // the ring rather than leaving it to `call.ended`.
+      final notifier =
+          _ringing(
+            currentUserId: _currentUserId,
+            memberIds: [_creator.id, _currentUserId],
+          )..coordinatorCallRejected(
+            _rejected(
+              byUserId: _creator.id,
+              rejectedBy: _at([_creator.id]),
+              sessionEndedAt: DateTime.utc(2026),
+            ),
+          );
+
+      expect(
+        _disconnectReason(notifier),
+        DisconnectReason.rejected(
+          byUserId: _creator.id,
+          reason: CallRejectReason.creatorRejected(),
+        ),
+      );
     });
 
     test('disconnects when everyone else rejected', () {

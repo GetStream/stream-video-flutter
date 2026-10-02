@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import '../../open_api/video/coordinator/api.dart' as open;
-import '../errors/stream_video_exception.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../ring_state_polling_settings.dart';
 import '../utils/result.dart';
@@ -104,15 +103,14 @@ class RingStatePoller {
             stop();
           }
         case final Failure failure:
-          final videoError = failure.videoError;
-          final status = videoError.apiStatusCode;
-          if (status == 400 || status == 404) {
-            _logger.w(() => '[poll] stopped polling: $videoError');
-            stop();
-          } else {
-            _logger.d(() => '[poll] failed, retrying: $videoError');
-          }
+          // Only a few polls fit in a ring, so a failure is simply retried.
+          _logger.w(() => '[poll] failed, retrying: ${failure.videoError}');
       }
+    } catch (e, stk) {
+      // The polls run unawaited from timers, so a throw would otherwise be an
+      // unhandled error. It is a bug, which polling again won't heal.
+      _logger.e(() => '[poll] threw, stopping: $e\n$stk');
+      stop();
     } finally {
       _inFlight = false;
     }

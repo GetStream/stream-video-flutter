@@ -50,6 +50,7 @@ void main() {
   Call startRing({
     RingStatePollingSettings pollingSettings = const RingStatePollingSettings(),
     String sessionId = _sessionId,
+    Map<String, CallParticipant> participants = const {},
   }) {
     coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
     coordinatorClient = setupMockCoordinatorClient(
@@ -61,6 +62,7 @@ void main() {
         },
         createdByUser: _currentUser,
         sessionId: sessionId,
+        participants: participants,
       ),
     );
 
@@ -156,6 +158,37 @@ void main() {
           reason: CallRejectReason.allOtherParticipantsRejected(),
         ),
       );
+    });
+  });
+
+  test('keeps the ring every callee rejected while a guest is in the call', () {
+    fakeAsync((async) {
+      startRing(
+        participants: const {
+          'guest-session': CallParticipant(
+            userSessionId: 'guest-session',
+            userId: 'guest',
+            role: 'user',
+          ),
+        },
+      );
+      async.flushMicrotasks();
+      expect(stateManager.callState.otherParticipants, isNotEmpty);
+
+      polledRingState = _ringState(
+        rejectedBy: {
+          _callee1.id: DateTime.utc(2026),
+          _callee2.id: DateTime.utc(2026),
+        },
+      );
+      async.elapse(const Duration(seconds: 15));
+
+      // The same outcome as a `call.rejected` event carrying this state.
+      expect(stateManager.callState.status, CallStatus.outgoing());
+      final callee = stateManager.callState.callMembers.firstWhere(
+        (member) => member.userId == _callee1.id,
+      );
+      expect(callee.callRejectedAt, DateTime.utc(2026));
     });
   });
 

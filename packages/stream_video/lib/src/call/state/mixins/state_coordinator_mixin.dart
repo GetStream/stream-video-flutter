@@ -102,21 +102,24 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     final session = event.metadata.session;
     final snapshot = RingingSnapshot(
       creatorId: state.createdByUserId,
-      memberIds: state.callMembers.map((m) => m.userId).toSet(),
+      memberIds: state.callMembers.map((m) => m.userId),
       acceptedBy: session.acceptedBy,
       rejectedBy: session.rejectedBy,
+      missedBy: session.missedBy,
+      // `ended` is left out on purpose. `resolveFor` checks it first, so a
+      // cancel that also ended the call would resolve as ended, which this
+      // handler leaves to [coordinatorCallEnded], instead of being settled
+      // by the rejection that carried it.
     );
 
     final ringingState = snapshot.resolveFor(state.currentUserId);
 
-    // The caller never tears down a call somebody else is already in.
     if (ringingState == CallRingingState.rejected &&
-        (!state.createdByMe || state.otherParticipants.isEmpty)) {
-      _disconnectRejectedRing(
-        byUserId: event.rejectedByUserId,
-        reason: _ringRejectReason(snapshot),
-        members: members,
-      );
+        _disconnectRejectedRing(
+          byUserId: event.rejectedByUserId,
+          reason: _ringRejectReason(snapshot),
+          members: members,
+        )) {
       return;
     }
 
@@ -138,14 +141,33 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       return CallRejectReason.userRespondedElsewhere();
     }
 
+    // The server already timed the ring out for this callee.
+    if (snapshot.missedBy.containsKey(currentUserId)) {
+      return CallRejectReason.timeout();
+    }
+
     return CallRejectReason.allOtherParticipantsRejected();
   }
 
-  void _disconnectRejectedRing({
+  /// Disconnects a ring that resolved as rejected, returning whether it did.
+  ///
+  /// Shared by the `call.rejected` event and the ring state poller, so both
+  /// settle a rejected ring the same way.
+  bool _disconnectRejectedRing({
     required String byUserId,
     required CallRejectReason reason,
     required List<CallMemberState> members,
   }) {
+    // The caller never tears down a call somebody else is already in.
+    if (state.createdByMe && state.otherParticipants.isNotEmpty) {
+      _logger.d(
+        () =>
+            '[disconnectRejectedRing] rejected '
+            '(others already in the call): $reason',
+      );
+      return false;
+    }
+
     _logger.d(() => '[disconnectRejectedRing] reason: $reason');
     state = state.copyWith(
       status: CallStatus.disconnected(
@@ -155,6 +177,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
       callParticipants: const [],
       callMembers: members,
     );
+    return true;
   }
 
   /// Applies the outcome of an outgoing ring that was read from the ring state
@@ -197,11 +220,12 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
           snapshot.rejectedBy.entries,
           (entry) => entry.value,
         );
-        _disconnectRejectedRing(
+        final disconnected = _disconnectRejectedRing(
           byUserId: lastRejection?.key ?? '',
           reason: _ringRejectReason(snapshot),
           members: members,
         );
+        if (!disconnected) state = state.copyWith(callMembers: members);
       case CallRingingState.ended:
         state = state.copyWith(
           status: CallStatus.disconnected(DisconnectReason.ended()),

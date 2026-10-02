@@ -260,6 +260,38 @@ void main() {
     });
   });
 
+  group('RingingSnapshot', () {
+    test('copies its collections from the source', () {
+      final acceptedBy = <String, DateTime>{};
+      final memberIds = <String>{_creatorId};
+      final snapshot = RingingSnapshot(
+        creatorId: _creatorId,
+        memberIds: memberIds,
+        acceptedBy: acceptedBy,
+      );
+
+      acceptedBy['other-1'] = DateTime.utc(2026);
+      memberIds.add('other-1');
+
+      expect(snapshot.acceptedBy, isEmpty);
+      expect(snapshot.memberIds, {_creatorId});
+    });
+
+    test('cannot be changed through its collections', () {
+      final snapshot = _metadata(
+        acceptedBy: _at(['other-1']),
+      ).ringingSnapshot;
+
+      expect(
+        () => snapshot.acceptedBy['other-2'] = DateTime.utc(2026),
+        throwsUnsupportedError,
+      );
+      expect(snapshot.rejectedBy.clear, throwsUnsupportedError);
+      expect(snapshot.missedBy.clear, throwsUnsupportedError);
+      expect(() => snapshot.memberIds.add('other-2'), throwsUnsupportedError);
+    });
+  });
+
   group('toRingingSnapshot', () {
     open.GetCallRingStateResponse ringState({
       DateTime? callEndedAt,

@@ -29,16 +29,22 @@ extension CallRingingStateX on CallRingingState {
 
 /// The parts of a call a ringing flow is decided by, whichever way they were
 /// fetched: a full [CallMetadata], a coordinator event or a polled ring state.
+///
+/// The collections are copied, so a snapshot never changes with, or changes,
+/// the session it was taken from.
 @immutable
 class RingingSnapshot {
-  const RingingSnapshot({
+  RingingSnapshot({
     required this.creatorId,
-    required this.memberIds,
-    this.acceptedBy = const {},
-    this.rejectedBy = const {},
-    this.missedBy = const {},
+    required Iterable<String> memberIds,
+    Map<String, DateTime> acceptedBy = const {},
+    Map<String, DateTime> rejectedBy = const {},
+    Map<String, DateTime> missedBy = const {},
     this.ended = false,
-  });
+  }) : memberIds = Set.unmodifiable(memberIds),
+       acceptedBy = Map.unmodifiable(acceptedBy),
+       rejectedBy = Map.unmodifiable(rejectedBy),
+       missedBy = Map.unmodifiable(missedBy);
 
   /// The user that started the ring.
   final String creatorId;
@@ -114,7 +120,7 @@ class RingingSnapshot {
 extension CallMetadataRingingStateX on CallMetadata {
   RingingSnapshot get ringingSnapshot => RingingSnapshot(
     creatorId: details.createdBy.id,
-    memberIds: members.keys.toSet(),
+    memberIds: members.keys,
     acceptedBy: session.acceptedBy,
     rejectedBy: session.rejectedBy,
     missedBy: session.missedBy,
@@ -136,7 +142,7 @@ extension GetCallRingStateResponseX on open.GetCallRingStateResponse {
   RingingSnapshot toRingingSnapshot({required Iterable<String> memberIds}) {
     return RingingSnapshot(
       creatorId: createdByUserId,
-      memberIds: memberIds.toSet(),
+      memberIds: memberIds,
       acceptedBy: acceptedBy,
       rejectedBy: rejectedBy,
       missedBy: missedBy,

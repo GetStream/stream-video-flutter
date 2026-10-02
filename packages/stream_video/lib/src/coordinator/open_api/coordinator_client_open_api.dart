@@ -593,6 +593,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
     } catch (e, stk) {
+      _logger.e(() => '[getCallRingState] failed: $e; $stk');
       return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
