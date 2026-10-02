@@ -9,6 +9,7 @@
 
 - Added `Call.participantsStream`, which emits the participant list at an interval that grows with the participant count.
 - Added `CallPreferences.participantsThrottleIntervalResolver` to override that interval, or set it to `null` to emit every change.
+- Added `isSameCallStateSelection`, which compares two selected values the way `Call.partialState` does.
 
 ### 🔄 Changed
 

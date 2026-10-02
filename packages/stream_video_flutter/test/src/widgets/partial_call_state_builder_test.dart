@@ -98,6 +98,7 @@ void main() {
       final call = _FakeCall(initialState);
       var builds = 0;
       var listBuilds = 0;
+      var mapBuilds = 0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -119,6 +120,16 @@ void main() {
                   return Text(data.join());
                 },
               ),
+              PartialCallStateBuilder<Map<String, List<String>>>(
+                call: call,
+                selector: (state) => {
+                  'ids': [state.callCid.id],
+                },
+                builder: (context, data) {
+                  mapBuilds++;
+                  return Text('${data['ids']}');
+                },
+              ),
             ],
           ),
         ),
@@ -127,6 +138,7 @@ void main() {
 
       expect(builds, 1);
       expect(listBuilds, 1);
+      expect(mapBuilds, 1);
     },
   );
 

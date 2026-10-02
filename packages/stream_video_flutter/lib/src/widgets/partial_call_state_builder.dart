@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -82,14 +81,6 @@ class _PartialCallStateListenerState<T>
     }
   }
 
-  // Matches the equality `Call.partialState` uses to skip repeated values.
-  bool _isSame(T data) =>
-      identical(data, _data) ||
-      data == _data ||
-      (data is List &&
-          _data is List &&
-          const ListEquality<dynamic>().equals(data, _data as List));
-
   void _subscribe() {
     _subscription?.cancel();
     _errorReported = false;
@@ -97,7 +88,7 @@ class _PartialCallStateListenerState<T>
         .partialState(widget.selector)
         .listen(
           (data) {
-            if (!mounted || _isSame(data)) return;
+            if (!mounted || isSameCallStateSelection(data, _data)) return;
             setState(() => _data = data);
           },
           onError: (Object error, StackTrace stackTrace) {

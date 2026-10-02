@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
 
 import '../../call_state.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/models.dart';
 import '../../state_emitter.dart';
+import 'call_state_selection.dart';
 import 'mixins/state_call_actions_mixin.dart';
 import 'mixins/state_coordinator_mixin.dart';
 import 'mixins/state_lifecycle_mixin.dart';
@@ -14,20 +14,6 @@ import 'mixins/state_participant_mixin.dart';
 import 'mixins/state_pending_tracks_mixin.dart';
 import 'mixins/state_rtc_mixin.dart';
 import 'mixins/state_sfu_mixin.dart';
-
-// Whether two values returned by a partial state selector are the same: equal
-// by `==`, or collections with equal contents. Collections are compared deeply,
-// so a map of lists counts as unchanged when only its instances are new. A
-// record compares its fields with `==`, so a list inside a record is compared
-// by identity.
-bool _isSameSelection(Object? previous, Object? current) {
-  if (identical(previous, current) || previous == current) return true;
-  if ((previous is Iterable && current is Iterable) ||
-      (previous is Map && current is Map)) {
-    return const DeepCollectionEquality().equals(previous, current);
-  }
-  return false;
-}
 
 class CallStateNotifier extends StateNotifier<CallState>
     with
@@ -60,7 +46,9 @@ class CallStateNotifier extends StateNotifier<CallState>
   // Each listener gets its own selector chain on the value stream, which ends
   // when that listener cancels.
   Stream<T> partialCallStateStream<T>(T Function(CallState state) selector) {
-    return callStateStream.valueStream.map(selector).distinct(_isSameSelection);
+    return callStateStream.valueStream
+        .map(selector)
+        .distinct(isSameCallStateSelection);
   }
 
   Stream<Duration> get durationStream =>
