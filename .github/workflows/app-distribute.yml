@@ -233,3 +233,4 @@ jobs:
         with:
           baseHref: /stream-video-flutter/
           workingDir: dogfooding
+          compileToWasm: true
