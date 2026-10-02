@@ -16,13 +16,15 @@ class _FakeCall extends Mock implements Call {
 
   CallState _callState;
   final _emitter = MockStateEmitter<CallState>();
-  final _changes = StreamController<CallState>.broadcast();
+  final _changes = StreamController<CallState>.broadcast(sync: true);
   int subscriptions = 0;
 
   set callState(CallState value) {
     _callState = value;
     _changes.add(value);
   }
+
+  void addError(Object error) => _changes.addError(error);
 
   @override
   StateEmitter<CallState> get state => _emitter;
@@ -31,6 +33,22 @@ class _FakeCall extends Mock implements Call {
   Stream<T> partialState<T>(CallStateSelector<T> selector) {
     subscriptions++;
     return _changes.stream.map(selector).distinct();
+  }
+}
+
+// Records the messages of every log call.
+class _RecordingLogger extends StreamLogger {
+  final messages = <String>[];
+
+  @override
+  void log(
+    Priority priority,
+    String tag,
+    MessageBuilder message, [
+    Object? error,
+    StackTrace? stk,
+  ]) {
+    messages.add(message());
   }
 }
 
@@ -118,9 +136,37 @@ void main() {
 
       call.callState = call.state.value.copyWith(isBroadcasting: true);
       await tester.pump();
-      await tester.pump();
 
       expect(find.text('x'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'PartialCallStateBuilder keeps its value and listening after a partial state error',
+    (tester) async {
+      final logger = _RecordingLogger();
+      StreamLog()
+        ..logger = logger
+        ..priority = Priority.error;
+      addTearDown(() {
+        StreamLog()
+          ..logger = const SilentStreamLogger()
+          ..priority = Priority.none;
+      });
+      final call = _FakeCall(initialState);
+      await tester.pumpWidget(subject(call));
+      call.callState = initialState.copyWith(isRecording: true);
+      await tester.pump();
+
+      call.addError(StateError('selector failed'));
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(find.text('recording: true'), findsOneWidget);
+      expect(logger.messages.single, contains('selector failed'));
+
+      call.callState = initialState.copyWith(isRecording: false);
+      await tester.pump();
+      expect(find.text('recording: false'), findsOneWidget);
     },
   );
 }
