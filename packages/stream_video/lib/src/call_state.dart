@@ -36,9 +36,9 @@ final _activeSpeakersCache = Expando<List<CallParticipantState>>(
   'CallState.activeSpeakers',
 );
 
-// The members still ringing, computed at most once per member list and current
-// user. Metadata updates keep the member list when it is unchanged, so the
-// view stays shared across those updates too.
+// The members still ringing, computed once per member list. Callers of
+// `copyWith` hand over a fresh member list they never touch again, so the
+// view never goes stale.
 final _ringingMembersCache =
     Expando<({String currentUserId, List<CallMemberState> value})>(
       'CallState.ringingMembers',

@@ -9,15 +9,35 @@ void main() {
   const member = CallMember(userId: 'member', roles: ['user'], custom: {});
 
   CallMetadata metadata({
+    Map<String, CallMember> members = const {'member': member},
+    List<String> blockedUserIds = const ['blocked'],
+    Map<String, Object> custom = const {'topic': 'news'},
     List<CallPermission> ownCapabilities = const [CallPermission.sendAudio],
   }) {
     return SampleCallData.createCallMetadata(
-      members: const {'member': member},
-      blockedUserIds: const ['blocked'],
-      custom: const {'topic': 'news'},
+      members: members,
+      blockedUserIds: blockedUserIds,
+      custom: custom,
       ownCapabilities: ownCapabilities,
     );
   }
+
+  CallJoinedData joined(CallMetadata metadata) => CallJoinedData(
+    callCid: SampleCallData.defaultCid,
+    wasCreated: false,
+    credentials: SampleCallData.defaultCredentials,
+    statsOptions: StatsOptions(enableRtcStats: false, reportingIntervalMs: 500),
+    metadata: metadata,
+  );
+
+  StreamCallPermissionsUpdatedEvent permissionsUpdated(
+    List<CallPermission> ownCapabilities,
+  ) => StreamCallPermissionsUpdatedEvent(
+    SampleCallData.defaultCid,
+    createdAt: DateTime(2026),
+    ownCapabilities: ownCapabilities,
+    user: const CallUser(id: 'user', name: 'user', roles: [], image: ''),
+  );
 
   late CallStateNotifier notifier;
 
@@ -101,5 +121,101 @@ void main() {
     );
 
     expect(notifier.state.callMembers.single.roles, ['host']);
+  });
+
+  test('received call data takes the collections it changes', () {
+    notifier.updateFromCallReceivedData(
+      CallReceivedData(
+        callCid: SampleCallData.defaultCid,
+        metadata: metadata(
+          members: const {
+            'member': CallMember(
+              userId: 'member',
+              roles: ['host'],
+              custom: {},
+            ),
+          },
+          blockedUserIds: const ['blocked', 'spammer'],
+          custom: const {'topic': 'sports'},
+          ownCapabilities: const [
+            CallPermission.sendAudio,
+            CallPermission.sendVideo,
+          ],
+        ),
+      ),
+    );
+
+    expect(notifier.state.blockedUserIds, ['blocked', 'spammer']);
+    expect(notifier.state.custom, {'topic': 'sports'});
+    expect(notifier.state.ownCapabilities, [
+      CallPermission.sendAudio,
+      CallPermission.sendVideo,
+    ]);
+    expect(notifier.state.callMembers.single.roles, ['host']);
+  });
+
+  test(
+    'joining keeps unchanged capabilities and takes changed ones',
+    () {
+      final before = notifier.state;
+
+      notifier.lifecycleCallJoined(joined(metadata()));
+      expect(notifier.state.ownCapabilities, same(before.ownCapabilities));
+
+      notifier.lifecycleCallJoined(
+        joined(metadata(ownCapabilities: const [CallPermission.sendVideo])),
+      );
+      expect(notifier.state.ownCapabilities, [CallPermission.sendVideo]);
+    },
+  );
+
+  group('a permissions update', () {
+    setUp(() {
+      notifier.state = notifier.state.copyWith(status: CallStatus.connected());
+    });
+
+    test('keeps the same capabilities', () {
+      final before = notifier.state;
+
+      notifier.coordinatorCallPermissionsUpdated(
+        permissionsUpdated(const [CallPermission.sendAudio]),
+      );
+
+      expect(notifier.state.ownCapabilities, same(before.ownCapabilities));
+    });
+
+    test('takes a reduced list', () {
+      notifier
+        ..coordinatorCallPermissionsUpdated(
+          permissionsUpdated(const [
+            CallPermission.sendAudio,
+            CallPermission.sendVideo,
+          ]),
+        )
+        ..coordinatorCallPermissionsUpdated(
+          permissionsUpdated(const [CallPermission.sendVideo]),
+        );
+
+      expect(notifier.state.ownCapabilities, [CallPermission.sendVideo]);
+    });
+
+    test('takes an empty list', () {
+      notifier.coordinatorCallPermissionsUpdated(permissionsUpdated(const []));
+
+      expect(notifier.state.ownCapabilities, isEmpty);
+    });
+  });
+
+  test('a member update takes changed role capabilities', () {
+    notifier.coordinatorCallMemberUpdated(
+      const [member],
+      capabilitiesByRole: {
+        'host': ['send-audio', 'send-video'],
+      },
+    );
+
+    expect(notifier.state.capabilitiesByRole, {
+      'host': ['send-audio', 'send-video'],
+    });
   });
 }

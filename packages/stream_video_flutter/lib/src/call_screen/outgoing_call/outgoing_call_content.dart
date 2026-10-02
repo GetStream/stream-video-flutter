@@ -84,8 +84,6 @@ class StreamOutgoingCallContent extends StatefulWidget {
 class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
   CallConnectOptions get connectOptions => widget.call.connectOptions;
 
-  // The cached member list keeps its identity across emissions, so the builder
-  // only rebuilds when the ringing members change.
   static List<CallMemberState> _ringingMembers(CallState state) =>
       state.ringingMembers;
 

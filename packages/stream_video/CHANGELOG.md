@@ -3,7 +3,7 @@
 ### ⚠️ Breaking
 
 - `CallPreferences` now requires a `participantsThrottleIntervalResolver`; custom implementations must provide it.
-- `CallParticipantState.audioLevels` is now unmodifiable.
+- `CallParticipantState.audioLevels` and `CallState.ringingMembers` are now unmodifiable.
 
 ### ✅ Added
 
@@ -14,8 +14,7 @@
 ### 🔄 Changed
 
 - `Call.partialState` now compares maps, sets and nested collections by their contents.
-- `CallState.ringingMembers` now returns an unmodifiable list, computed once and shared by every state with the same members and current user. Code that changes the returned list must copy it first, for example with `List.of(state.ringingMembers)`.
-- `CallState` keeps its `ownCapabilities`, `blockedUserIds`, `custom`, `capabilitiesByRole` and `callMembers` instances when a call update leaves their contents unchanged, so a `Call.partialState` selector that returns them, or a record holding them, no longer emits on every update.
+- `CallState` keeps its `ownCapabilities`, `blockedUserIds`, `custom`, `capabilitiesByRole` and `callMembers` instances when a call update leaves their contents unchanged.
 - [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
 - Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.
 - SFU participant events no longer emit a new call state when they leave every participant unchanged.

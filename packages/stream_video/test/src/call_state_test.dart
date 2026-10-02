@@ -7,12 +7,13 @@ void main() {
   const member = CallMember(userId: 'member', roles: ['user'], custom: {});
 
   CallMetadata metadata({
+    Map<String, CallMember> members = const {'member': member},
     List<String> blockedUserIds = const ['blocked'],
     Map<String, Object> custom = const {'topic': 'news'},
     List<CallPermission> ownCapabilities = const [CallPermission.sendAudio],
   }) {
     return SampleCallData.createCallMetadata(
-      members: const {'member': member},
+      members: members,
       blockedUserIds: blockedUserIds,
       custom: custom,
       ownCapabilities: ownCapabilities,
@@ -75,6 +76,59 @@ void main() {
       expect(updated.capabilitiesByRole, {
         'host': ['send-audio', 'send-video'],
       });
+    },
+  );
+
+  const host = CallMember(userId: 'member', roles: ['host'], custom: {});
+
+  test('CallState.copyFromMetadata takes a changed member list', () {
+    final updated = initial.copyFromMetadata(
+      metadata(members: const {'member': host}),
+    );
+
+    expect(updated.callMembers.single.roles, ['host']);
+  });
+
+  test(
+    'CallState.copyFromMetadata leaves the members alone without updateMembers',
+    () {
+      final updated = initial.copyFromMetadata(
+        metadata(members: const {'member': host}),
+        updateMembers: false,
+      );
+
+      expect(updated.callMembers, same(initial.callMembers));
+    },
+  );
+
+  test(
+    'CallState.copyFromMetadata keeps the role capabilities without new ones',
+    () {
+      final updated = initial.copyFromMetadata(metadata());
+
+      expect(updated.capabilitiesByRole, same(initial.capabilitiesByRole));
+    },
+  );
+
+  test(
+    'CallState.copyFromMetadata takes empty blocked users and custom data',
+    () {
+      final updated = initial.copyFromMetadata(
+        metadata(blockedUserIds: const [], custom: const {}),
+      );
+
+      expect(updated.blockedUserIds, isEmpty);
+      expect(updated.custom, isEmpty);
+    },
+  );
+
+  test(
+    'CallState.ringingMembers stays the same across an unchanged metadata update',
+    () {
+      final updated = initial.copyFromMetadata(metadata());
+
+      expect(updated.ringingMembers, isNotEmpty);
+      expect(updated.ringingMembers, same(initial.ringingMembers));
     },
   );
 }

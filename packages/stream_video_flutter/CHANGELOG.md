@@ -17,7 +17,6 @@
 ### 🔄 Changed
 
 - `PartialCallStateBuilder` now reports partial state errors to `FlutterError.onError`.
-- The incoming and outgoing call screens no longer rebuild on call state changes that leave the ringing members unchanged.
 - The iOS picture-in-picture view and the Android background service now update only when the participant list or notification options change, instead of on every call state emission.
 - [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
 - [Android] Replaced `kotlin-parcelize` with hand-written `Parcelable` implementations for the notification payloads. `kotlin-parcelize` is a Kotlin compiler plugin and does not run under built-in Kotlin: it applies without error but generates no `writeToParcel`, so `@Parcelize` classes fail to compile. Behaviour is unchanged.
