@@ -31,8 +31,7 @@ class RTCRtpEncodingWithDimensions extends rtc.RTCRtpEncoding {
   final double height;
 }
 
-/// The bitrate a layer falls back to when the publish option gives none, as
-/// in the JS and Android SDKs.
+/// The bitrate a layer falls back to when the publish option gives none.
 const defaultBitratePerRid = {'q': 300000, 'h': 750000, 'f': 1250000};
 
 /// Determines the most optimal video layers for the given track.
@@ -44,7 +43,7 @@ List<RTCRtpEncodingWithDimensions> findOptimalVideoLayers({
   const defaultVideoPreset = RtcVideoParametersPresets.h720_16x9;
 
   // The SFU's protobuf decodes an unset dimension as 0x0, so an empty one is
-  // as absent as a null one. JS and Android fall back to 1280x720 for it too.
+  // as absent as a null one.
   final targetDimension = publishOptions.videoDimension;
   final maxBitrate = getComputedMaxBitrate(
     targetDimension == null || targetDimension.isEmpty
@@ -65,8 +64,7 @@ List<RTCRtpEncodingWithDimensions> findOptimalVideoLayers({
   final rids = ['f', 'h', 'q'].sublist(0, maxSpatialLayers);
   for (final rid in rids) {
     // An unset bitrate decodes as 0 and a tiny capture can round down to 0;
-    // neither must reach the encoder as a 0 bps bound. JS and Android fall
-    // back to a per-layer default in that case.
+    // neither must reach the encoder as a 0 bps bound.
     final layerBitrate = (maxBitrate / bitrateFactor).round();
     final layer = RTCRtpEncodingWithDimensions(
       rid: rid,
@@ -193,9 +191,8 @@ List<rtc.RTCRtpEncoding> findOptimalScreenSharingLayers({
 }
 
 /// In SVC, only one video encoding (layer) is sent: the highest-quality one,
-/// renamed to `q`. The codec handles the spatial and temporal layers through
-/// its `scalabilityMode`. Mirrors `toSvcEncodings` in the JS and Android SDKs,
-/// which also keep the `f` layer's bitrate, frame rate and scalability mode.
+/// renamed to `q`, keeping its bitrate, frame rate and scalability mode. The
+/// codec handles the spatial and temporal layers through its `scalabilityMode`.
 List<rtc.RTCRtpEncoding> toSvcEncodings(List<rtc.RTCRtpEncoding> layers) {
   rtc.RTCRtpEncoding? findByRid(String rid) =>
       layers.firstWhereOrNull((layer) => layer.rid == rid);
