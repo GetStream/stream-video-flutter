@@ -73,8 +73,8 @@ class StreamIncomingCallContent extends StatefulWidget {
 class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
   CallConnectOptions get connectOptions => widget.call.connectOptions;
 
-  static List<UserInfo> _ringingMembers(CallState state) =>
-      state.ringingMembers.map((e) => e.toUserInfo()).toList();
+  static List<CallMemberState> _ringingMembers(CallState state) =>
+      state.ringingMembers;
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +151,8 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
     return PartialCallStateBuilder(
       call: widget.call,
       selector: _ringingMembers,
-      builder: (_, members) => buildContent(members),
+      builder: (_, members) =>
+          buildContent(members.map((e) => e.toUserInfo()).toList()),
     );
   }
 

@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 import 'call/call_type.dart';
 import 'models/models.dart';
 import 'sfu/data/models/sfu_audio_bitrate.dart';
+import 'utils/collection_changes.dart';
 import 'webrtc/rtc_media_device/rtc_media_device.dart';
 
 enum SuspendedTrackState {
@@ -34,6 +35,14 @@ final _otherParticipantsCache = Expando<List<CallParticipantState>>(
 final _activeSpeakersCache = Expando<List<CallParticipantState>>(
   'CallState.activeSpeakers',
 );
+
+// The members still ringing, computed once per member list. Callers of
+// `copyWith` hand over a fresh member list they never touch again, so the
+// view never goes stale.
+final _ringingMembersCache =
+    Expando<({String currentUserId, List<CallMemberState> value})>(
+      'CallState.ringingMembers',
+    );
 
 /// Represents the call's state.
 @immutable
@@ -221,15 +230,30 @@ class CallState extends Equatable {
 
   String get createdByUserId => createdByUser.id;
 
+  /// The members, other than the current user, who have neither accepted nor
+  /// rejected the call.
+  ///
+  /// The list is unmodifiable and shared by every state with the same
+  /// [callMembers] list and [currentUserId].
   List<CallMemberState> get ringingMembers {
-    return callMembers
-        .where(
-          (member) =>
-              member.callAcceptedAt == null &&
-              member.callRejectedAt == null &&
-              member.userId != currentUserId,
-        )
-        .toList();
+    final cached = _ringingMembersCache[callMembers];
+    if (cached != null && cached.currentUserId == currentUserId) {
+      return cached.value;
+    }
+
+    final value = List<CallMemberState>.unmodifiable(
+      callMembers.where(
+        (member) =>
+            member.callAcceptedAt == null &&
+            member.callRejectedAt == null &&
+            member.userId != currentUserId,
+      ),
+    );
+    _ringingMembersCache[callMembers] = (
+      currentUserId: currentUserId,
+      value: value,
+    );
+    return value;
   }
 
   /// Returns a copy of this [CallState] with the given fields replaced
@@ -341,23 +365,33 @@ class CallState extends Equatable {
       isTranscribing: metadata.details.transcribing,
       isCaptioning: metadata.details.captioning,
       isBroadcasting: metadata.details.broadcasting,
-      blockedUserIds: metadata.details.blockedUserIds.toList(),
+      blockedUserIds: changedOrNull(
+        blockedUserIds,
+        metadata.details.blockedUserIds.toList(),
+      ),
       createdAt: metadata.details.createdAt,
       updatedAt: metadata.details.updatedAt,
       startsAt: metadata.details.startsAt,
       endedAt: metadata.details.endedAt,
       startedAt: metadata.session.startedAt ?? metadata.session.liveStartedAt,
       createdByUser: metadata.details.createdBy,
-      custom: metadata.details.custom,
+      custom: changedOrNull(custom, metadata.details.custom),
       egress: metadata.details.egress,
       rtmpIngress: metadata.details.rtmpIngress,
       settings: metadata.settings,
-      ownCapabilities: capabilities.isEmpty ? null : capabilities,
+      ownCapabilities: capabilities.isEmpty
+          ? null
+          : changedOrNull(ownCapabilities, capabilities),
       liveStartedAt: metadata.session.liveStartedAt,
       liveEndedAt: metadata.session.liveEndedAt,
       timerEndsAt: metadata.session.timerEndsAt,
-      capabilitiesByRole: capabilitiesByRole,
-      callMembers: updateMembers ? metadata.toCallMembers() : null,
+      capabilitiesByRole: changedCapabilitiesByRoleOrNull(
+        this.capabilitiesByRole,
+        capabilitiesByRole,
+      ),
+      callMembers: updateMembers
+          ? changedOrNull(callMembers, metadata.toCallMembers())
+          : null,
     );
   }
 

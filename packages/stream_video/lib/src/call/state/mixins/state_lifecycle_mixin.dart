@@ -6,6 +6,7 @@ import '../../../logger/stream_logger.dart';
 import '../../../models/call_received_data.dart';
 import '../../../models/models.dart';
 import '../../../sfu/data/models/sfu_error.dart';
+import '../../../utils/collection_changes.dart';
 import '../../../utils/none.dart';
 import '../../../utils/result.dart';
 import '../../call_connect_options.dart';
@@ -87,7 +88,10 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       isTranscribing: data.metadata.details.transcribing,
       isCaptioning: data.metadata.details.captioning,
       isBroadcasting: data.metadata.details.broadcasting,
-      blockedUserIds: data.metadata.details.blockedUserIds.toList(),
+      blockedUserIds: changedOrNull(
+        state.blockedUserIds,
+        data.metadata.details.blockedUserIds.toList(),
+      ),
       createdAt: data.metadata.details.createdAt,
       updatedAt: data.metadata.details.updatedAt,
       startsAt: data.metadata.details.startsAt,
@@ -96,15 +100,21 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
           data.metadata.session.startedAt ??
           data.metadata.session.liveStartedAt,
       createdByUser: data.metadata.details.createdBy,
-      custom: data.metadata.details.custom,
+      custom: changedOrNull(state.custom, data.metadata.details.custom),
       egress: data.metadata.details.egress,
       rtmpIngress: data.metadata.details.rtmpIngress,
       settings: data.metadata.settings,
-      ownCapabilities: data.metadata.details.ownCapabilities.toList(),
+      ownCapabilities: changedOrNull(
+        state.ownCapabilities,
+        data.metadata.details.ownCapabilities.toList(),
+      ),
       callParticipants: callParticipants,
       liveStartedAt: data.metadata.session.liveStartedAt,
       liveEndedAt: data.metadata.session.liveEndedAt,
-      callMembers: data.metadata.toCallMembers(),
+      callMembers: changedOrNull(
+        state.callMembers,
+        data.metadata.toCallMembers(),
+      ),
     );
   }
 
@@ -137,7 +147,10 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     state = newState.copyWith(
       status: data.toCallStatus(state: newState),
       isRingingFlow: data.ringing,
-      ownCapabilities: data.metadata.details.ownCapabilities.toList(),
+      ownCapabilities: changedOrNull(
+        newState.ownCapabilities,
+        data.metadata.details.ownCapabilities.toList(),
+      ),
       callParticipants: data.metadata.toCallParticipants(newState),
     );
   }
@@ -161,7 +174,10 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
 
     state = newState.copyWith(
       status: status,
-      ownCapabilities: data.metadata.details.ownCapabilities.toList(),
+      ownCapabilities: changedOrNull(
+        newState.ownCapabilities,
+        data.metadata.details.ownCapabilities.toList(),
+      ),
       callParticipants: data.metadata.toCallParticipants(newState),
       audioOutputDevice: callConnectOptions?.audioOutputDevice,
       audioInputDevice: callConnectOptions?.audioInputDevice,
