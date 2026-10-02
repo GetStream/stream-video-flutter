@@ -145,4 +145,50 @@ void main() {
       expect(selectorRuns, 0);
     },
   );
+
+  test(
+    'partialCallStateStream skips a map that is a new instance with the same entries',
+    () async {
+      var callState =
+          CallState(
+            callCid: StreamCallCid.from(
+              type: StreamCallType.defaultType(),
+              id: 'id',
+            ),
+            currentUserId: 'userId',
+            preferences: DefaultCallPreferences(),
+          ).copyWith(
+            capabilitiesByRole: {
+              'host': ['send-audio'],
+            },
+          );
+      final notifier = CallStateNotifier(callState);
+      final updates = <Map<String, List<String>>>[];
+
+      final subscription = notifier
+          .partialCallStateStream((state) => state.capabilitiesByRole)
+          .listen(updates.add);
+      await Future<void>.delayed(Duration.zero);
+
+      callState = callState.copyWith(
+        capabilitiesByRole: {
+          'host': ['send-audio'],
+        },
+      );
+      notifier.state = callState;
+      await Future<void>.delayed(Duration.zero);
+      expect(updates, hasLength(1));
+
+      callState = callState.copyWith(
+        capabilitiesByRole: {
+          'host': ['send-audio', 'send-video'],
+        },
+      );
+      notifier.state = callState;
+      await Future<void>.delayed(Duration.zero);
+      expect(updates, hasLength(2));
+
+      await subscription.cancel();
+    },
+  );
 }
