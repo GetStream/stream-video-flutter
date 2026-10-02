@@ -6,7 +6,8 @@ Future<void> main() async {
 
   final client = StreamVideo(
     'api-key',
-    user: User.regular(userId: 'sdk-size'),
+    // The one constructor shared by v1 and v2.
+    user: User.anonymous(),
     userToken: 'user-token',
   );
   await client.connect();
