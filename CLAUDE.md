@@ -178,8 +178,11 @@ state:
   Not an instance method of a `StatelessWidget`: the widget is a new instance
   on every build, and so is its tear-off.
 - Select a value with `==`: a primitive, an enum, or a record of them. Records
-  compare field by field. Lists compare element by element, so their elements
-  need `==` too.
+  compare field by field with `==`. Lists, maps and sets selected on their own
+  compare by content, so their elements need `==` too — but inside a record a
+  collection compares by identity. Keep `CallState` fields in a record as they
+  are; a list the selector builds itself (`.where(...).toList()`) is new on
+  every run, so select its length or a flag instead.
 - Select the derived value the widget shows — `state.callParticipants.length`,
   not the list.
 - Render participants through `CallParticipantsBuilder` or
