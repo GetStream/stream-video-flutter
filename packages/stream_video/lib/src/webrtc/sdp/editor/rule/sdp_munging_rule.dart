@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../../../platform_detector/platform_detector.dart';
 import '../../sdp.dart';
-import 'rule_mirror_sprop_stereo.dart';
+import 'rule_enable_opus_stereo.dart';
 
 abstract class SdpMungingRule extends Equatable {
   const SdpMungingRule({
@@ -10,10 +10,10 @@ abstract class SdpMungingRule extends Equatable {
     this.types = const [],
   });
 
-  const factory SdpMungingRule.mirrorSpropStereo({
+  const factory SdpMungingRule.enableOpusStereo({
     List<PlatformType> platforms,
     List<SdpType> types,
-  }) = MirrorSpropStereoRule;
+  }) = EnableOpusStereoRule;
 
   String get key;
 

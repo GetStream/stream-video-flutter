@@ -24,6 +24,7 @@
 - `CallState.localParticipant`, `otherParticipants` and `activeSpeakers` are now computed once per participant list instead of on every read, which keeps them cheap in calls with many participants. `callParticipants`, `otherParticipants` and `activeSpeakers` now return unmodifiable lists shared by every reader, so call `.toList()` before sorting or otherwise mutating them.
 - Simulcast layers are now announced to the SFU and bitrate-capped from the resolution the camera actually captures on iOS and Android, instead of the requested resolution. A camera that captures below the requested size, or at a different aspect ratio, no longer over-reports its layers or over-allocates their bitrate.
 - `RtcMediaDeviceNotifier` now enumerates devices once per burst of device-change events, and calls made while an enumeration is running share its result instead of starting another one. The device list emitted by `RtcMediaDeviceNotifier.onDeviceChange` is now unmodifiable, so copy it with `.toList()` before sorting or otherwise mutating it.
+- Remote audio is now always negotiated as stereo: the subscriber answer adds `stereo=1` to every Opus track, as the iOS SDK does, instead of only when the SFU's offer contained `sprop-stereo=1`. Stereo playout still depends on the audio policy (for example `HiFiAudioPolicy`); otherwise the stereo audio is mixed down to mono.
 
 ### 🐞 Fixed
 
