@@ -25,6 +25,7 @@ import '../errors/video_error.dart';
 import '../errors/video_error_composer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../logger/stream_log.dart';
+import '../models/audio_configuration_policy.dart';
 import '../models/call_received_data.dart';
 import '../models/models.dart';
 import '../platform_detector/platform_detector.dart';
@@ -313,12 +314,14 @@ class Call {
   /// Audio track states captured at suspension time.
   final _suspendedTrackStates = <String, SuspendedTrackState>{};
 
+  AudioConfigurationPolicy get _effectiveAudioConfigurationPolicy =>
+      _stateManager.callState.preferences.audioConfigurationPolicy ??
+      _streamVideo.options.audioConfigurationPolicy;
+
   StreamPeerConnectionFactory _ensurePcFactory() {
     return _pcFactory ??= StreamPeerConnectionFactory(
       callCid: callCid,
-      audioConfigurationPolicy:
-          _stateManager.callState.preferences.audioConfigurationPolicy ??
-          _streamVideo.options.audioConfigurationPolicy,
+      audioConfigurationPolicy: _effectiveAudioConfigurationPolicy,
     );
   }
 
@@ -1001,9 +1004,36 @@ class Call {
     _session?.trace(tag, data);
   }
 
+  /// Replaces this call's preferences.
+  ///
+  /// The audio configuration policy is applied when the per-call peer
+  /// connection factory is built. Changing it before joining discards a
+  /// factory built earlier (for example by a lobby preview), so the next one
+  /// uses the new policy; stop any tracks created from the old factory first.
+  /// After joining, a new policy only takes effect on the next call.
   void updateCallPreferences(CallPreferences preferences) {
     _logger.i(() => '[updateCallPreferences] $preferences');
+    final previousPolicy = _effectiveAudioConfigurationPolicy;
     _stateManager.updateCallPreferences(preferences);
+
+    final pcFactory = _pcFactory;
+    if (pcFactory != null &&
+        _session == null &&
+        _effectiveAudioConfigurationPolicy != previousPolicy) {
+      _logger.i(
+        () =>
+            '[updateCallPreferences] audio policy changed, '
+            'discarding the pre-join factory',
+      );
+      _pcFactory = null;
+      unawaited(
+        pcFactory.dispose().catchError((Object e) {
+          _logger.w(
+            () => '[updateCallPreferences] pcFactory dispose failed: $e',
+          );
+        }),
+      );
+    }
   }
 
   /// Enables the given SFU client capabilities for this call.
@@ -4367,12 +4397,7 @@ class Call {
     }
 
     _session?.rtcManager?.changeDefaultAudioConstraints(
-      AudioConstraints(
-        noiseSuppression: !stereo,
-        echoCancellation: !stereo,
-        autoGainControl: !stereo,
-        channelCount: stereo ? 2 : 1,
-      ),
+      AudioConstraints.forBitrateProfile(profile),
     );
 
     return const Result.success(none);

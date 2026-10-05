@@ -12,6 +12,7 @@ import '../di/injector.dart';
 import '../utils/assets.dart';
 import '../utils/call_encryption.dart';
 import '../utils/e2ee.dart';
+import '../utils/hifi_audio.dart';
 import '../utils/random_words.dart';
 import '../widgets/lobby_encryption.dart';
 import '../widgets/stream_button.dart';
@@ -100,11 +101,23 @@ class _LobbyScreenState extends State<LobbyScreen> {
   bool _hasMicrophonePermission = false;
   bool _hasCameraPermission = false;
 
+  /// Whether to join with HiFi (stereo, music quality) audio.
+  bool _hifiEnabled = false;
+
+  /// Whether the HiFi switch is rebuilding the preview; the switch is inert
+  /// meanwhile.
+  bool _switchingHiFi = false;
+
+  /// Bumped to remount the preview, which builds a new peer connection
+  /// factory and new tracks on the way.
+  int _previewGeneration = 0;
+
   @override
   void initState() {
     super.initState();
     _call = widget.call;
     _videoEffectsManager = StreamVideoEffectsManager(_call);
+    _hifiEnabled = isHiFiAudioPolicy(_call.state.value.preferences);
 
     // If an invite includes a key, the call should be encrypted and the user doesn't need to input anything.
     // For new calls, an invite key will also trigger encrypted call creation.
@@ -143,6 +156,11 @@ class _LobbyScreenState extends State<LobbyScreen> {
     if (isEncrypted && _encryptionKey.isNotEmpty) {
       final attached = await _attachE2EE();
       if (!attached || !mounted) return;
+    }
+
+    if (_hifiEnabled) {
+      final prepared = await _prepareHiFi();
+      if (!prepared || !mounted) return;
     }
 
     var options = const CallConnectOptions();
@@ -197,6 +215,70 @@ class _LobbyScreenState extends State<LobbyScreen> {
       _showError('Could not enable encryption: $e');
       return false;
     }
+  }
+
+  /// Allows HiFi audio on the call and selects the music profile, which the
+  /// SDK then publishes in stereo with voice processing off.
+  Future<bool> _prepareHiFi() async {
+    try {
+      final audio = _call.state.value.settings.audio;
+      if (!audio.hifiAudioEnabled) {
+        final updated = await _call.update(audio: withHiFiAudioEnabled(audio));
+        if (updated is Failure) {
+          _showError('Could not enable HiFi audio: ${updated.error.message}');
+          return false;
+        }
+
+        // The update does not touch the local call state, and the profile
+        // below is refused until the state says HiFi is allowed.
+        final reloaded = await _call.get();
+        if (reloaded is Failure) {
+          _showError('Could not enable HiFi audio: ${reloaded.error.message}');
+          return false;
+        }
+      }
+
+      final result = _call.setAudioBitrateProfile(
+        SfuAudioBitrateProfile.musicHighQuality,
+      );
+      if (result is Failure) {
+        _showError('Could not enable HiFi audio: ${result.error.message}');
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      _showError('Could not enable HiFi audio: $e');
+      return false;
+    }
+  }
+
+  /// Switches the audio policy the call will be joined with.
+  ///
+  /// The policy is fixed when the call's peer connection factory is built,
+  /// and the preview has already built one. Its tracks are stopped so the SDK
+  /// can drop that factory, then the preview is remounted to build a new one
+  /// with the new policy.
+  Future<void> _toggleHiFi() async {
+    if (_switchingHiFi) return;
+    final enabled = !_hifiEnabled;
+    setState(() => _switchingHiFi = true);
+
+    await _cameraTrack?.stop();
+    await _microphoneTrack?.stop();
+    _cameraTrack = null;
+    _microphoneTrack = null;
+
+    _call.updateCallPreferences(
+      withHiFiAudioPolicy(_call.state.value.preferences, enabled: enabled),
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _hifiEnabled = enabled;
+      _switchingHiFi = false;
+      _previewGeneration++;
+    });
   }
 
   Future<bool> _createCall() async {
@@ -376,8 +458,11 @@ class _LobbyScreenState extends State<LobbyScreen> {
                 StreamLobbyVideo(
                   // Keyed on the selected camera, since the preview owns the
                   // track it renders and has no way to be handed a different
-                  // one — remounting is how the device change reaches it.
-                  key: ValueKey(_selectedVideoInputDevice?.id),
+                  // one — remounting is how the device change reaches it. The
+                  // HiFi switch remounts it the same way.
+                  key: ValueKey(
+                    (_selectedVideoInputDevice?.id, _previewGeneration),
+                  ),
                   call: _call,
                   initialCameraDevice: _selectedVideoInputDevice,
                   onMicrophoneTrackSet: (track) => _microphoneTrack = track,
@@ -418,6 +503,19 @@ class _LobbyScreenState extends State<LobbyScreen> {
                               );
                             }
                           },
+                        ),
+                      ),
+                      Tooltip(
+                        message: _hifiEnabled
+                            ? 'Disable HiFi stereo audio'
+                            : 'Enable HiFi stereo audio',
+                        child: CallControlOption(
+                          icon: _hifiEnabled
+                              ? const Icon(Icons.music_note)
+                              : const Icon(Icons.music_off),
+                          onPressed: _switchingHiFi || _creatingCall
+                              ? null
+                              : _toggleHiFi,
                         ),
                       ),
                     ];

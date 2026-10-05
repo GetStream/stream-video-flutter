@@ -13,6 +13,7 @@
 
 ### 🔄 Changed
 
+- Changing the audio configuration policy with `Call.updateCallPreferences` before joining now takes effect even after a lobby preview has started the camera or microphone: the peer connection factory built for the preview is discarded and rebuilt with the new policy. Stop the preview tracks before changing the policy.
 - `Call.partialState` now compares maps, sets and nested collections by their contents.
 - `CallState` keeps its `ownCapabilities`, `blockedUserIds`, `custom`, `capabilitiesByRole` and `callMembers` instances when a call update leaves their contents unchanged.
 - Reduced the cost of call updates in calls with many members.
@@ -27,6 +28,7 @@
 
 ### 🐞 Fixed
 
+- Fixed the microphone ignoring an audio bitrate profile set before joining, and losing it after a reconnect: with `musicHighQuality` it was captured in mono with voice processing on until the profile was set again.
 - Fixed `Call.partialState` streams staying subscribed to the call state after their last listener cancelled.
 - Fixed server-pinned participants being reordered on every pins event.
 - Fixed `CallParticipantState.copyWithUpdatedAudioLevels` mutating the audio level history of the previous state.
