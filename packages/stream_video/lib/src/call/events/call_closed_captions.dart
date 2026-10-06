@@ -33,33 +33,33 @@ class CallClosedCaptions {
   /// `closedCaptionsVisibleCaptions`, and removes it after
   /// `closedCaptionsVisibilityDurationMs`. Duplicates are ignored. Nothing is
   /// added when the visibility duration is 0.
-  void onClosedCaption(StreamCallClosedCaptionsEvent event) {
-    _lock.synchronized(() {
-      _logger.v(() => '[onClosedCaption] event: $event');
-
-      String keyFor(StreamClosedCaption caption) {
-        return '${caption.speakerId}_${caption.startTime}';
-      }
-
-      final queue = _closedCaptions.value;
-      final currentCaption = StreamClosedCaption.fromEvent(event);
-      final currentKey = keyFor(currentCaption);
-
-      // Ignore duplicates from backend
-      if (queue.any((caption) => keyFor(caption) == currentKey)) {
-        return;
-      }
-
-      final newQueue = [...queue, currentCaption];
-
-      final visibilityDurationMs = _stateManager
-          .callState
-          .preferences
-          .closedCaptionsVisibilityDurationMs;
-      final visibleCaptions =
-          _stateManager.callState.preferences.closedCaptionsVisibleCaptions;
-
+  Future<void> onClosedCaption(StreamCallClosedCaptionsEvent event) {
+    return _lock.synchronized(() {
       try {
+        _logger.v(() => '[onClosedCaption] event: $event');
+
+        String keyFor(StreamClosedCaption caption) {
+          return '${caption.speakerId}_${caption.startTime}';
+        }
+
+        final queue = _closedCaptions.value;
+        final currentCaption = StreamClosedCaption.fromEvent(event);
+        final currentKey = keyFor(currentCaption);
+
+        // Ignore duplicates from backend
+        if (queue.any((caption) => keyFor(caption) == currentKey)) {
+          return;
+        }
+
+        final newQueue = [...queue, currentCaption];
+
+        final visibilityDurationMs = _stateManager
+            .callState
+            .preferences
+            .closedCaptionsVisibilityDurationMs;
+        final visibleCaptions =
+            _stateManager.callState.preferences.closedCaptionsVisibleCaptions;
+
         // schedule the removal of the closed caption after the retention time
         if (visibilityDurationMs > 0) {
           _expiryTimers.start(
@@ -79,14 +79,19 @@ class CallClosedCaptions {
               ? newQueue.sublist(newQueue.length - visibleCaptions)
               : newQueue;
         }
-      } catch (error) {
-        _logger.e(() => '[onClosedCaption] failed: $error');
+      } catch (error, stackTrace) {
+        _logger.e(
+          () => '[onClosedCaption] failed: $error, stackTrace: $stackTrace',
+        );
       }
     });
   }
 
-  /// Stops every pending caption removal.
-  void cancelTimers() => _expiryTimers.cancelAll();
+  /// Stops every pending caption removal and clears [closedCaptions].
+  void reset() {
+    _expiryTimers.cancelAll();
+    _closedCaptions.value = const [];
+  }
 
   Future<void> _removeExpiredCaption(
     String Function(StreamClosedCaption) keyFor,

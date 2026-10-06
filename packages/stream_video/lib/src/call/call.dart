@@ -2751,7 +2751,7 @@ class Call {
     _logger.d(() => '[clear] src: $src');
 
     _reactions.cancelTimers();
-    _closedCaptions.cancelTimers();
+    _closedCaptions.reset();
     _moderation.cancelTimer();
 
     _stopRingStatePolling();

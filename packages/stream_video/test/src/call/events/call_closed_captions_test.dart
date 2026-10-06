@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/call/events/call_closed_captions.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../../logger/impl/test_logger.dart';
 import '../fixtures/call_test_helpers.dart';
 import '../fixtures/data.dart';
 
@@ -61,15 +65,37 @@ void main() {
     });
   });
 
-  test('cancelTimers keeps captions from being removed', () {
+  test('reset clears the captions and stops their removal', () {
     fakeAsync((async) {
       captions.onClosedCaption(caption('one'));
       async.flushMicrotasks();
 
-      captions.cancelTimers();
-      async.elapse(visibleFor * 2);
+      captions.reset();
 
-      expect(texts(), ['one']);
+      expect(texts(), isEmpty);
+      expect(async.pendingTimers, isEmpty);
     });
   });
+
+  test('an error while handling a caption is logged', () async {
+    final logger = installRecordingLogger();
+    final stateManager = _MockCallStateNotifier();
+    when(() => stateManager.callState).thenThrow(StateError('boom'));
+    captions = CallClosedCaptions(
+      stateManager: stateManager,
+      logger: taggedLogger(tag: 'test'),
+    );
+
+    final uncaught = <Object>[];
+    runZonedGuarded(
+      () => unawaited(captions.onClosedCaption(caption('one'))),
+      (error, _) => uncaught.add(error),
+    );
+    await pumpEventQueue();
+
+    expect(uncaught, isEmpty);
+    expect(logger.errors, [contains('boom')]);
+  });
 }
+
+class _MockCallStateNotifier extends Mock implements CallStateNotifier {}
