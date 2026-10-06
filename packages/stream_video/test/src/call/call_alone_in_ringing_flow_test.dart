@@ -10,6 +10,7 @@ import 'package:stream_video/src/sfu/data/models/sfu_participant.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
+import '../logger/impl/test_logger.dart';
 import 'fixtures/call_test_helpers.dart';
 import 'fixtures/data.dart';
 
@@ -265,15 +266,7 @@ void main() {
     });
 
     test('an error thrown while ending is logged', () async {
-      final logger = _RecordingLogger();
-      StreamLog()
-        ..logger = logger
-        ..priority = Priority.error;
-      addTearDown(() {
-        StreamLog()
-          ..logger = const SilentStreamLogger()
-          ..priority = Priority.none;
-      });
+      final logger = installRecordingLogger();
       when(permissionsManager.endCall).thenThrow(StateError('boom'));
 
       final uncaught = <Object>[];
@@ -296,19 +289,4 @@ void main() {
       );
     });
   });
-}
-
-class _RecordingLogger extends StreamLogger {
-  final errors = <String>[];
-
-  @override
-  void log(
-    Priority priority,
-    String tag,
-    MessageBuilder message, [
-    Object? error,
-    StackTrace? stk,
-  ]) {
-    if (priority == Priority.error) errors.add(message());
-  }
 }

@@ -4,6 +4,7 @@ import 'package:stream_video/src/call/events/call_video_moderation.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../../logger/impl/test_logger.dart';
 import '../fixtures/call_test_helpers.dart';
 import '../fixtures/data.dart';
 
@@ -17,6 +18,7 @@ void main() {
   void setUpModeration(
     VideoModerationConfig config, {
     Result<None> microphoneResult = const Result.success(none),
+    Result<None> cameraResult = const Result.success(none),
   }) {
     toggles = [];
     stateManager = CallStateNotifier(
@@ -33,7 +35,7 @@ void main() {
       },
       setCameraEnabled: ({required enabled}) async {
         toggles.add('camera: $enabled');
-        return const Result.success(none);
+        return cameraResult;
       },
       logger: taggedLogger(tag: 'SV:CallVideoModerationTest'),
     );
@@ -56,33 +58,36 @@ void main() {
       expect(toggles, ['microphone: false', 'camera: false']);
     });
 
-    test('a failed mute is logged and the moderation still applies', () async {
-      final logger = _RecordingLogger();
-      StreamLog()
-        ..logger = logger
-        ..priority = Priority.error;
-      addTearDown(() {
-        StreamLog()
-          ..logger = const SilentStreamLogger()
-          ..priority = Priority.none;
-      });
-      var applied = false;
-      setUpModeration(
-        VideoModerationConfig(
-          muteAudio: true,
-          muteVideo: true,
-          onApply: () => applied = true,
-        ),
-        microphoneResult: failureWithError('Session is null'),
+    for (final track in ['microphone', 'camera']) {
+      test(
+        'a failed $track mute is logged and the moderation still applies',
+        () async {
+          final logger = installRecordingLogger();
+          var applied = false;
+          final failure = failureWithError<None>('Session is null');
+          setUpModeration(
+            VideoModerationConfig(
+              muteAudio: true,
+              muteVideo: true,
+              onApply: () => applied = true,
+            ),
+            microphoneResult: track == 'microphone'
+                ? failure
+                : const Result.success(none),
+            cameraResult: track == 'camera'
+                ? failure
+                : const Result.success(none),
+          );
+
+          await moderation.onBlur(blur());
+
+          expect(logger.warnings, [contains(track)]);
+          expect(toggles, ['microphone: false', 'camera: false']);
+          expect(stateManager.callState.isVideoModerated, isTrue);
+          expect(applied, isTrue);
+        },
       );
-
-      await moderation.onBlur(blur());
-
-      expect(logger.errors, [contains('microphone')]);
-      expect(toggles, ['microphone: false', 'camera: false']);
-      expect(stateManager.callState.isVideoModerated, isTrue);
-      expect(applied, isTrue);
-    });
+    }
 
     test('a blur-only config leaves the microphone and camera alone', () async {
       setUpModeration(const VideoModerationConfig.blur());
@@ -144,19 +149,4 @@ void main() {
       });
     });
   });
-}
-
-class _RecordingLogger extends StreamLogger {
-  final errors = <String>[];
-
-  @override
-  void log(
-    Priority priority,
-    String tag,
-    MessageBuilder message, [
-    Object? error,
-    StackTrace? stk,
-  ]) {
-    if (priority == Priority.error) errors.add(message());
-  }
 }

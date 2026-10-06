@@ -64,13 +64,13 @@ class CallVideoModeration {
     if (config.muteAudio) {
       final result = await _setMicrophoneEnabled(enabled: false);
       if (result.isFailure) {
-        _logger.e(() => '[onBlur] failed to mute the microphone: $result');
+        _logger.w(() => '[onBlur] failed to mute the microphone: $result');
       }
     }
     if (config.muteVideo) {
       final result = await _setCameraEnabled(enabled: false);
       if (result.isFailure) {
-        _logger.e(() => '[onBlur] failed to mute the camera: $result');
+        _logger.w(() => '[onBlur] failed to mute the camera: $result');
       }
     }
     if (config.applyBlur) _onModerationBlurApply?.call();
