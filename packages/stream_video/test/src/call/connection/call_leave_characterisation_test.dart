@@ -311,6 +311,17 @@ void main() {
   });
 
   group('client state', () {
+    test('joining makes the call active and leaving removes it', () async {
+      final call = harness.buildCall();
+      final clientState = harness.streamVideo.state;
+
+      await call.join();
+      verify(() => clientState.setActiveCall(call)).called(1);
+
+      await call.leave();
+      verify(() => clientState.removeActiveCall(call)).called(greaterThan(0));
+    });
+
     test('leaving the incoming call clears it', () async {
       final call = harness.buildCall();
       final clientState = harness.streamVideo.state;

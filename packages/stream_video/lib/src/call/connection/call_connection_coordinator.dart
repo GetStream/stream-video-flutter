@@ -365,7 +365,8 @@ class CallConnectionCoordinator {
         SfuReconnectionStrategy.disconnect;
   }
 
-  /// Whether the coordinator refused the join in a way that will not change.
+  /// Whether the coordinator API refused the join in a way that will not
+  /// change.
   bool _isUnrecoverableCoordinatorError(StreamVideoException? error) {
     if (error == null) return false;
 
@@ -373,7 +374,7 @@ class CallConnectionCoordinator {
     if (error.isUnrecoverable) return true;
 
     // No status means the join never reached a server verdict, so the refusal
-    // is not the coordinator's — a reconnect can still get through.
+    // is not the coordinator API's — a reconnect can still get through.
     final status = error.apiStatusCode;
     if (status == null) return false;
     if (status < 400 || status >= 500) return false;
@@ -693,7 +694,7 @@ class CallConnectionCoordinator {
               : null);
 
       // When migrating, include the current SFU in the exclusion list
-      // so the coordinator picks a different SFU.
+      // so the coordinator API picks a different SFU.
       final effectiveMigratingFromList = [
         ...migratingFromList,
         if (migratingFrom != null && !migratingFromList.contains(migratingFrom))
