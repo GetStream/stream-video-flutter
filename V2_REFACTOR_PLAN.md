@@ -39,7 +39,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 | 9 | A2 | `feat/flu-855-call-connection-coordinator` | #1415 |
 | 10 | A3 | `feat/flu-860-connection-phase` | #1417 |
 | 11 | A4 | `fix/flu-864-single-leave-decision` | #1418 |
-| 12 | A5 | `feat/flu-865-serial-join-executor` | |
+| 12 | A5 | `feat/flu-865-serial-join-executor` | #1419 |
 | 13 | A6 | `fix/flu-861-session-ownership` | |
 | 14 | A7 | `feat/flu-862-call-dispose` | |
 | 15 | B1 | `feat/flu-848-local-media-controller` | |
