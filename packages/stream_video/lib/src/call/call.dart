@@ -691,7 +691,7 @@ class Call {
     _subscriptions.cancel(_idCoordEvents);
     _subscriptions.add(
       _idCoordEvents,
-      _coordinatorClient.events.on<CoordinatorCallEvent>((event) async {
+      _coordinatorClient.events.on<CoordinatorCallEvent>((event) {
         event
             .mapToCallEvent(state.value)
             .emitIfNotNull(_callEvents)
@@ -1901,7 +1901,17 @@ class Call {
       _idSessionEvents,
       session.events.listen((event) {
         event.mapToCallEvent(state.value).emitIfNotNull(_callEvents);
-        _onSfuEvent(event);
+        unawaited(
+          _onSfuEvent(event).catchError(
+            (Object error, StackTrace stackTrace) {
+              _logger.e(
+                () =>
+                    '[onSfuEvent] failed to handle ${event.runtimeType}: '
+                    '$error, stackTrace: $stackTrace',
+              );
+            },
+          ),
+        );
       }),
     );
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
@@ -261,5 +263,52 @@ void main() {
 
       verifyNever(permissionsManager.endCall);
     });
+
+    test('an error thrown while ending is logged', () async {
+      final logger = _RecordingLogger();
+      StreamLog()
+        ..logger = logger
+        ..priority = Priority.error;
+      addTearDown(() {
+        StreamLog()
+          ..logger = const SilentStreamLogger()
+          ..priority = Priority.none;
+      });
+      when(permissionsManager.endCall).thenThrow(StateError('boom'));
+
+      final uncaught = <Object>[];
+      await runZonedGuarded(
+        () async {
+          await joinWith(
+            participants: [_participant(_me), _participant('bob')],
+          );
+          await emitLeft(_sfuParticipant('bob'));
+        },
+        (error, _) => uncaught.add(error),
+      );
+
+      expect(uncaught, isEmpty);
+      expect(
+        logger.errors,
+        contains(
+          allOf(contains('SfuParticipantLeftEvent'), contains('boom')),
+        ),
+      );
+    });
   });
+}
+
+class _RecordingLogger extends StreamLogger {
+  final errors = <String>[];
+
+  @override
+  void log(
+    Priority priority,
+    String tag,
+    MessageBuilder message, [
+    Object? error,
+    StackTrace? stk,
+  ]) {
+    if (priority == Priority.error) errors.add(message());
+  }
 }
