@@ -14,7 +14,10 @@ void main() {
   late CallVideoModeration moderation;
   late List<String> toggles;
 
-  void setUpModeration(VideoModerationConfig config) {
+  void setUpModeration(
+    VideoModerationConfig config, {
+    Result<None> microphoneResult = const Result.success(none),
+  }) {
     toggles = [];
     stateManager = CallStateNotifier(
       createActiveCallState().copyWith(
@@ -26,12 +29,13 @@ void main() {
       currentUserId: () => currentUserId,
       setMicrophoneEnabled: ({required enabled}) async {
         toggles.add('microphone: $enabled');
-        return const Result.success(none);
+        return microphoneResult;
       },
       setCameraEnabled: ({required enabled}) async {
         toggles.add('camera: $enabled');
         return const Result.success(none);
       },
+      logger: taggedLogger(tag: 'SV:CallVideoModerationTest'),
     );
   }
 
@@ -50,6 +54,34 @@ void main() {
       await moderation.onBlur(blur());
 
       expect(toggles, ['microphone: false', 'camera: false']);
+    });
+
+    test('a failed mute is logged and the moderation still applies', () async {
+      final logger = _RecordingLogger();
+      StreamLog()
+        ..logger = logger
+        ..priority = Priority.error;
+      addTearDown(() {
+        StreamLog()
+          ..logger = const SilentStreamLogger()
+          ..priority = Priority.none;
+      });
+      var applied = false;
+      setUpModeration(
+        VideoModerationConfig(
+          muteAudio: true,
+          muteVideo: true,
+          onApply: () => applied = true,
+        ),
+        microphoneResult: failureWithError('Session is null'),
+      );
+
+      await moderation.onBlur(blur());
+
+      expect(logger.errors, [contains('microphone')]);
+      expect(toggles, ['microphone: false', 'camera: false']);
+      expect(stateManager.callState.isVideoModerated, isTrue);
+      expect(applied, isTrue);
     });
 
     test('a blur-only config leaves the microphone and camera alone', () async {
@@ -112,4 +144,19 @@ void main() {
       });
     });
   });
+}
+
+class _RecordingLogger extends StreamLogger {
+  final errors = <String>[];
+
+  @override
+  void log(
+    Priority priority,
+    String tag,
+    MessageBuilder message, [
+    Object? error,
+    StackTrace? stk,
+  ]) {
+    if (priority == Priority.error) errors.add(message());
+  }
 }
