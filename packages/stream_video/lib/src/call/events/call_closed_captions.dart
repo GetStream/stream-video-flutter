@@ -32,8 +32,9 @@ class CallClosedCaptions {
 
   /// Adds the caption to [closedCaptions], keeping only the newest
   /// `closedCaptionsVisibleCaptions`, and removes it after
-  /// `closedCaptionsVisibilityDurationMs`. Duplicates are ignored. Nothing is
-  /// added when the visibility duration is 0.
+  /// `closedCaptionsVisibilityDurationMs`. Duplicates are ignored. When the
+  /// visibility duration is 0 or less, captions stay until newer ones push
+  /// them out.
   Future<void> onClosedCaption(StreamCallClosedCaptionsEvent event) {
     return _lock.synchronized(() {
       try {
@@ -68,20 +69,20 @@ class CallClosedCaptions {
             Duration(milliseconds: visibilityDurationMs),
             () => _removeExpiredCaption(keyFor, currentCaption),
           );
-
-          // cancel the removal of the captions that drop out of the queue
-          if (newQueue.length > visibleCaptions) {
-            for (var i = 0; i < newQueue.length - visibleCaptions; i++) {
-              _expiryTimers.cancel(keyFor(newQueue[i]));
-            }
-          }
-
-          _closedCaptions.value = List.unmodifiable(
-            newQueue.length > visibleCaptions
-                ? newQueue.sublist(newQueue.length - visibleCaptions)
-                : newQueue,
-          );
         }
+
+        // cancel the removal of the captions that drop out of the queue
+        if (newQueue.length > visibleCaptions) {
+          for (var i = 0; i < newQueue.length - visibleCaptions; i++) {
+            _expiryTimers.cancel(keyFor(newQueue[i]));
+          }
+        }
+
+        _closedCaptions.value = List.unmodifiable(
+          newQueue.length > visibleCaptions
+              ? newQueue.sublist(newQueue.length - visibleCaptions)
+              : newQueue,
+        );
       } catch (error, stackTrace) {
         _logger.e(
           () => '[onClosedCaption] failed: $error, stackTrace: $stackTrace',

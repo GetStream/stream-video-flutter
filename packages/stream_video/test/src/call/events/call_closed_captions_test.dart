@@ -16,19 +16,21 @@ void main() {
 
   late CallClosedCaptions captions;
 
-  setUp(() {
+  CallClosedCaptions createCaptions(Duration visibility) {
     final stateManager = CallStateNotifier(
       createActiveCallState().copyWith(
         preferences: DefaultCallPreferences(
-          closedCaptionsVisibilityDurationMs: visibleFor.inMilliseconds,
+          closedCaptionsVisibilityDurationMs: visibility.inMilliseconds,
         ),
       ),
     );
-    captions = CallClosedCaptions(
+    return CallClosedCaptions(
       stateManager: stateManager,
       logger: taggedLogger(tag: 'test'),
     );
-  });
+  }
+
+  setUp(() => captions = createCaptions(visibleFor));
 
   StreamCallClosedCaptionsEvent caption(String text, {int second = 0}) {
     final start = DateTime(2026, 1, 1, 0, 0, second);
@@ -62,6 +64,27 @@ void main() {
       async.elapse(visibleFor);
 
       expect(texts(), isEmpty);
+    });
+  });
+
+  test('with a zero visibility duration, captions stay until pushed out', () {
+    fakeAsync((async) {
+      captions = createCaptions(Duration.zero)
+        ..onClosedCaption(caption('one'))
+        ..onClosedCaption(caption('two', second: 1));
+      async.flushMicrotasks();
+
+      expect(texts(), ['one', 'two']);
+
+      async.elapse(const Duration(hours: 1));
+
+      expect(texts(), ['one', 'two']);
+      expect(async.pendingTimers, isEmpty);
+
+      captions.onClosedCaption(caption('three', second: 2));
+      async.flushMicrotasks();
+
+      expect(texts(), ['two', 'three']);
     });
   });
 

@@ -58,7 +58,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 - [x] 5. **Fix** [FLU-924](https://linear.app/stream/issue/FLU-924): log errors thrown while routing coordinator events (S, bug). Before A2, so A2 moves `_observeEvents` with the fix already in.
 - [x] 6. **Fix** [FLU-926](https://linear.app/stream/issue/FLU-926): video moderation ignores a failed mic or camera mute (S, bug).
 - [x] 7. **Fix** [FLU-927](https://linear.app/stream/issue/FLU-927): reset closed captions on leave and catch errors across the whole handler (S, bug). Closing the emitter stays with A7.
-- [ ] 8. **Fix** [FLU-928](https://linear.app/stream/issue/FLU-928): closed captions never show when the visibility duration is 0 (S, bug). Settle the option from the ticket in the plan; option 1 needs a changelog line.
+- [x] 8. **Fix** [FLU-928](https://linear.app/stream/issue/FLU-928): closed captions never show when the visibility duration is 0 (S, bug). Settle the option from the ticket in the plan; option 1 needs a changelog line.
 - [ ] 9. **A2** [FLU-855](https://linear.app/stream/issue/FLU-855): verbatim `CallConnectionCoordinator` (L, high risk). Zero behaviour change; existing tests and A1 stay green untouched.
 - [ ] 10. **A3** [FLU-860](https://linear.app/stream/issue/FLU-860): sealed `ConnectionPhase` replaces the connection flags (L, high risk).
 - [ ] 11. **A4** [FLU-864](https://linear.app/stream/issue/FLU-864): one leave decision and one cancellation scope per attempt (M). Fixes bugs 1 and 2 from FLU-859.
