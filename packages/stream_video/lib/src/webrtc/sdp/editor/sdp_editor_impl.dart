@@ -75,7 +75,7 @@ class SdpEditorImpl implements SdpEditor {
         continue;
       }
       if (rule.types.isNotEmpty && !rule.types.contains(sdpType)) {
-        _logger.w(() => '[edit] rejected (mismatched sdpType): $sdpType');
+        _logger.v(() => '[edit] rejected (mismatched sdpType): $sdpType');
         continue;
       }
       _actionFactory.create(rule, sdp: sdp).execute(lines);

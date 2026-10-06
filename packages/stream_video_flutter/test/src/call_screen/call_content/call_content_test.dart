@@ -26,9 +26,9 @@ void main() {
 
       when(() => mockCall.state).thenAnswer((_) => callStateEmitter);
       when(
-        () => mockCall.partialState<CallParticipantState?>(any()),
+        () => mockCall.partialState<bool>(any()),
       ).thenAnswer((invocation) {
-        final CallStateSelector<CallParticipantState?> selector =
+        final CallStateSelector<bool> selector =
             invocation.positionalArguments[0];
         final filtered = selector(mockCallState);
         return Stream.value(filtered);

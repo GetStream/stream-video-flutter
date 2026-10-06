@@ -91,6 +91,7 @@ class SampleCallData {
     Map<String, DateTime>? rejectedBy,
     Map<String, CallMember> members = const {},
     CallUser? createdByUser,
+    String sessionId = '',
   }) => CallReceivedOrCreatedData(
     wasCreated: true,
     data: CallCreatedData(
@@ -100,6 +101,7 @@ class SampleCallData {
         members: members,
         participants: participants,
         createdByUser: createdByUser,
+        sessionId: sessionId,
       ),
     ),
   );
@@ -143,9 +145,14 @@ class SampleCallData {
     CallUser? createdByUser,
     bool recording = false,
     bool broadcasting = false,
+    String sessionId = '',
+    List<CallPermission> ownCapabilities = const [],
+    List<String> blockedUserIds = const [],
+    Map<String, Object> custom = const {},
   }) {
     return CallMetadata(
       session: CallSessionData(
+        id: sessionId,
         rejectedBy: rejectedBy ?? const {},
         participants: participants,
       ),
@@ -165,14 +172,15 @@ class SampleCallData {
               image: 'creator-image',
             ),
         team: 'test-team',
-        ownCapabilities: const [],
-        blockedUserIds: const [],
+        // Copied, as a parsed response holds new collections every time.
+        ownCapabilities: [...ownCapabilities],
+        blockedUserIds: [...blockedUserIds],
         broadcasting: broadcasting,
         recording: recording,
         backstage: false,
         transcribing: false,
         captioning: false,
-        custom: const {},
+        custom: {...custom},
         egress: const CallEgress(),
         rtmpIngress: '',
       ),

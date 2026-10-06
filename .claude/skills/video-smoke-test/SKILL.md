@@ -3,9 +3,10 @@ name: video-smoke-test
 description: >
   Run a basic smoke test of the Stream Video Flutter SDK by driving the dogfooding app through a
   two-party call on an Android emulator and an iOS simulator. Covers join, mute/unmute, microphone
-  input and dominant speaker, speaking-while-muted detection, camera on/off, reactions, video
-  filter, stats, chat, Picture-in-Picture, reconnect after network loss, deep link joins, and clean
-  teardown. Does not test ringing.
+  input and dominant speaker, speaking-while-muted detection, camera on/off, reactions, raise hand,
+  noise cancellation, closed captions, video filter, stats, chat, Picture-in-Picture, reconnect
+  after network loss, deep link joins, end-to-end encryption, and clean teardown. Does not test
+  ringing.
 disable-model-invocation: true
 allowed-tools:
   - Bash
@@ -15,11 +16,24 @@ allowed-tools:
 
 # Video SDK smoke test
 
-Drive the dogfooding app through one two-party call and assert SDK behaviour from logs.
-Android is fully scripted. iOS is driven by you through the simulator tool using the
-**exact coordinates in the tables below**.
+Drive the dogfooding app through two two-party calls — one plain, one end-to-end encrypted — and
+assert SDK behaviour from logs and from the app's own accessibility tree. Android is fully
+scripted. iOS is driven by you through the simulator tool using the **exact coordinates in the
+tables below**.
 
-Budget: ~2 minutes of checks once both apps are built. The iOS build dominates a cold run.
+Budget: ~5 minutes of checks once both apps are built. The iOS build dominates a cold run.
+
+The plain call is the diagnostic baseline and the encrypted call is a separate round on top of it.
+That split is deliberate: encryption sits on top of the ordinary publish/subscribe path, so running
+every check inside an encrypted call would cover more code — and would also turn one E2EE
+regression into a wholly red report that hides whatever else broke.
+
+**Where the coordinates come from.** Android controls that carry a semantics label are resolved at
+run time from the accessibility tree (`ui_tap`, `ui_find`, `ui_wait` in `lib.sh`), not from a pixel
+table, so a screen growing a new section does not break them. Only unlabelled icons — the in-call
+control bar, the options-sheet reaction and filter rows, the lobby's encryption switch — are still
+coordinates. Reading the tree is not screenshot interpretation: it is exact text from the app's own
+semantics, and rule 3 below still stands.
 
 ## Prerequisites
 
@@ -51,8 +65,10 @@ is affected either way.
    Root-cause only if the user asks afterwards.
 2. **Do not read logs looking for problems.** The scripts assert what matters. Do not grep for
    extra errors, do not comment on warnings.
-3. **Do not interpret screenshots.** They are evidence for the human. The only screenshot you look
-   at is the one in step 4.
+3. **Do not interpret screenshots.** They are evidence for the human. The only screenshots you look
+   at are the one in step 4 and the encrypted lobby in step 9, and both are checked against a
+   stated expectation rather than read for problems. Reading the Android accessibility tree is not
+   screenshot interpretation and is what the scripts already do.
 4. **Do not improvise coordinates.** Every tap is in a table here. If a tap misses, report `FAIL`
    for that step and continue — do not hunt for the control.
 5. **Do not deviate from the step order.** State depends on it: sheets stay open, keyboards move
@@ -61,8 +77,11 @@ is affected either way.
    closes the sheet; a third leaves the call.
 7. **Out of scope:** ringing, CallKit, push, screen sharing. Do not test them and do not list them
    as gaps.
-8. If a setup phase (preflight, launch, android_join) exits non-zero, **stop** and report the single
-   `FATAL:` line. Do not repair the environment beyond what the scripts already do.
+8. If a setup phase (preflight, launch, android_join) exits non-zero, **stop** and report the
+   `FATAL:` or `FAIL` line it ended on. Do not repair the environment beyond what the scripts
+   already do — except for one case the scripts themselves warn about: if `launch.sh` printed
+   `WARN: permissions not granted`, grant them and retry the phase once, because a permission
+   dialog eats the first taps and the failure that follows names the wrong thing.
 
 ## Known non-issues — never report these as findings
 
@@ -71,8 +90,13 @@ is affected either way.
 - **iOS simulator supports neither PiP nor CallKit.** PiP is Android-only here.
 - **Emulator camera output is blocky colour bands.** That is the AVD's synthetic camera.
 - **Krisp logs `Failed to set wt file`** on the emulator. Emulator-specific.
-- **A browsable `https` intent opens Chrome, not the app.** A debug build is not a verified App
-  Links handler, so `finish.sh` names the activity explicitly. Not a deep link defect.
+- **A browsable `https` intent opens Chrome, not the app** on Android. A debug build is not a
+  verified App Links handler, so `finish.sh` names the activity explicitly. Not a deep link defect.
+  iOS does not have this problem: `open_url` opens the app directly, which is why step 9 uses it.
+- **The iOS keyboard autocapitalises** the first character of what you type (`Smoke_ios_1`). The
+  assertions match case-insensitively.
+- **The iOS lobby's camera control is already red** and the preview shows an avatar. Simulator, no
+  camera.
 
 ## Steps
 
@@ -84,8 +108,14 @@ is affected either way.
 
 Pins the emulator serial (so a plugged-in phone cannot break the run), forces Flutter's Swift
 Package Manager off (the iOS build cannot link with it on), and pre-grants mic/camera/notification/
-phone permissions on both platforms so **no system dialog can swallow a tap**. On `FATAL:`, relay
-that line and stop.
+phone permissions on both platforms so system dialogs cannot swallow taps. On `FATAL:`, relay that
+line and stop.
+
+Two gaps it does not close, both handled in the step tables rather than here:
+the **iOS notification dialog** still appears once after the first login (step 4a row 4), and
+`flutter run`'s install resets the **Android** runtime grants — `launch.sh` re-grants afterwards and
+prints `WARN: permissions not granted` if that did not take. Heed that warning: an ungranted camera
+permission surfaces three steps later as "Lobby did not open".
 
 ### 2. Launch both apps
 
@@ -104,6 +134,10 @@ Wipes Android app state so the login screen is guaranteed. It waits — do not p
 
 Prints `CALL_ID=<id>`. Keep it for step 4. A `retry n/4` line is normal, not a failure.
 
+The lobby is now where the call is *created*, not just previewed — since #1312 the encryption mode
+is fixed at creation, so "Start New Call" only opens the lobby and `getOrCreateCall` fires on
+"Start a test call". `lobby-android` and `create-android` are separate checks for that reason.
+
 ### 4. iOS: join the same call
 
 Take one screenshot. Confirm the tool reports a **402x874** coordinate space — if not, stop and ask
@@ -111,7 +145,7 @@ for an iPhone 17 simulator, because these coordinates will not work.
 
 Then pick a branch:
 
-- Shows **"Enter Username"** → do 4a, then 4b.
+- Shows **"Enter user ID"** → do 4a, then 4b.
 - Shows **"Start New Call"** with an **empty** call-id field → do 4b only.
 - Shows a **non-empty call-id field** → the app is not freshly launched. The field cannot be cleared
   with the tools available, so **re-run `launch.sh`** and start step 4 again.
@@ -120,9 +154,14 @@ Then pick a branch:
 
 | # | Action | Coordinate |
 |---|--------|-----------|
-| 1 | tap username field | `201, 532` |
+| 1 | tap user ID field | `201, 532` |
 | 2 | type | `smoke_b1` |
 | 3 | tap "Sign up with username" | `201, 594` |
+| 4 | tap **Allow** on the notifications dialog | `275, 543` |
+
+Row 4 is not optional. iOS asks for notification permission the first time the app reaches the home
+screen, and preflight's pre-grant does not cover it. The dialog sits over the call-id field, so
+without dismissing it every tap in 4b lands on the dialog.
 
 **4b. Join by call ID**
 
@@ -131,7 +170,12 @@ Then pick a branch:
 | 1 | tap "Enter call id" field | `131, 622` |
 | 2 | type | the `CALL_ID` from step 3 |
 | 3 | tap "Join call" | `325, 621` |
-| 4 | tap "Start a test call" | `201, 774` |
+| 4 | swipe up `201, 700` → `201, 480` | |
+| 5 | tap "Start a test call" | `201, 778` |
+
+Row 4 is not optional either, and it is new. The lobby's end-to-end-encryption card pushed the join
+button past the bottom of the screen, so without the swipe the tap lands on the cut-off edge or
+misses entirely.
 
 Confirm with **one** command — do not screenshot to check:
 
@@ -148,8 +192,9 @@ Non-zero means joined. Zero means `FAIL join-ios`; record it and continue anyway
 ```
 
 Microphone level and dominant speaker, mute/unmute with speaking-while-muted detection, camera
-off/on, reaction, blur filter, stats, PiP enter+restore, the full network-loss reconnect cycle, and
-chat send plus its delivery to iOS. One `PASS`/`FAIL` line per check, ~3 min. Read only those lines.
+off/on, reaction, raise hand, noise cancellation, closed captions, blur filter, stats, PiP
+enter+restore, the full network-loss reconnect cycle, and chat send plus its delivery to iOS. One
+`PASS`/`FAIL` line per check, ~4 min. Read only those lines.
 
 The audio checks talk out loud through the Mac's speakers — that is the script, not a stray
 process. It stops on its own.
@@ -161,9 +206,9 @@ run's early taps would land on that sheet instead of the control bar.
 
 Control bar is at **y = 818**. If iOS is not showing the call, tap the app icon at `247, 223`.
 
-Step 7 is not optional. The chat sheet opened in step 3 covers the lower screen and dims the
-rest; END CALL is visible above it but sits under the sheet's scrim, so tapping it just dismisses
-the sheet and the call keeps running. Swipe the sheet away first.
+Row 7 is not optional. The chat sheet opened in row 3 covers the lower screen and dims the rest;
+END CALL is visible above it but sits under the sheet's scrim, so tapping it just dismisses the
+sheet and the call keeps running. Swipe the sheet away first.
 
 | # | Action | Coordinate | Why |
 |---|--------|-----------|-----|
@@ -172,14 +217,14 @@ the sheet and the call keeps running. Swipe the sheet away first.
 | 3 | tap chat | `371, 818` | opens the chat sheet |
 | 4 | tap composer | `227, 815` | |
 | 5 | type | `smoke_ios_1` | exact string — `finish.sh` greps for it |
-| 6 | tap send | `361, 824` | |
+| 6 | tap send | `361, 818` | |
 | 7 | swipe down `201, 325` → `201, 790` | grabber → below | closes the chat sheet; END CALL is behind its scrim and a tap there is eaten by the sheet |
 | 8 | tap end call | `371, 90` | |
 | 9 | dismiss the feedback modal | `362, 181` | a "We Value Your Feedback!" sheet appears after every leave and blocks the screen |
 
 Do not verify any of this yourself — `finish.sh` asserts it from the log.
 
-### 7. Finish
+### 7. Finish the plain call
 
 ```bash
 .claude/skills/video-smoke-test/scripts/finish.sh
@@ -187,12 +232,74 @@ Do not verify any of this yourself — `finish.sh` asserts it from the log.
 
 Asserts the iOS-side behaviour, the iOS chat send and its delivery to Android, Android leave, then
 joins the same call again through a deep link and leaves it, and finally that no call foreground
-service or ongoing-call notification leaked. Prints the summary; exits non-zero on unexpected failure.
-It also stops the run's background processes.
+service or ongoing-call notification leaked.
+
+This no longer prints the summary or stops anything — the run continues into the encrypted round,
+and `report.sh` (step 11) is the single place that reports.
+
+### 8. Android: create the encrypted call
+
+```bash
+.claude/skills/video-smoke-test/scripts/e2ee_start.sh
+```
+
+Turns on the lobby's end-to-end-encryption switch, reads back the key the app generated, creates
+and joins the call, and asserts the encryption manager and the publish-side encryptors. Prints
+`E2EE_CALL_ID=<id>` and `E2EE_KEY=<words>`. Keep both for step 9.
+
+### 9. iOS: join the encrypted call
+
+**Use the deep link, not the call-id field.** The field still holds the plain call's id from step 4
+and cannot be cleared with the tools available; the link routes straight to the right lobby and
+costs nothing. `open_url` opens the app directly on iOS — it does not bounce to Safari the way the
+Android browsable intent does.
+
+| # | Action | Value |
+|---|--------|-------|
+| 1 | `open_url` | `https://pronto.getstream.io/join/<E2EE_CALL_ID>` |
+| 2 | tap the "Shared room key" field | `177, 746` |
+| 3 | type | the `E2EE_KEY` from step 8 |
+| 4 | swipe up `201, 600` → `201, 330` | |
+| 5 | tap "Start a test call" | `201, 778` |
+
+The lobby must show a **green** lock, the title "End-to-end encryption" with no switch, and the
+hint "Ask the call creator for the shared key". That is the created-and-encrypted variant. A grey
+lock with "This call was created without encryption" means the link opened the wrong call — check
+the id before typing the key.
+
+Do not screenshot to confirm the join; step 10 asserts it.
+
+### 10. Verify and tear down the encrypted call
+
+```bash
+.claude/skills/video-smoke-test/scripts/e2ee_verify.sh
+```
+
+Asserts both sides attached a manager, both encrypt what they publish, both attached a **decryptor
+for the peer**, and that no decryption failure or cleartext-frame event fired on either. Then
+Android leaves.
+
+Then end the call on iOS — it is still in it, because the decryptor assertions need the peer
+present while that script runs:
+
+| # | Action | Coordinate |
+|---|--------|-----------|
+| 1 | tap end call | `371, 90` |
+| 2 | dismiss the feedback modal | `362, 181` |
+
+### 11. Report
+
+```bash
+.claude/skills/video-smoke-test/scripts/report.sh
+```
+
+Asserts the iOS leave, prints the summary table for the whole run, and stops the run's background
+processes. Exits non-zero if anything failed.
+
 
 ### If the run is abandoned partway
 
-A failed phase is normally retried, so the phases between `launch.sh` and `finish.sh` deliberately
+A failed phase is normally retried, so the phases between `launch.sh` and `report.sh` deliberately
 leave the apps running — killing them would cost another full build. When a run is given up on
 instead of retried, run:
 
@@ -209,7 +316,7 @@ kept. `launch.sh` also calls it implicitly at the start of the next run.
 Terminal only, in this order, nothing more:
 
 1. One line: `N passed, N failed, N known-fail` plus wall-clock.
-2. **The table `finish.sh` prints, relayed verbatim** — one row per check, what it verifies, and
+2. **The table `report.sh` prints, relayed verbatim** — one row per check, what it verifies, and
    whether it works. Do not rebuild it by hand, do not reorder or reword rows, do not drop the
    rows that passed: the point is that the reader sees the whole surface that was covered, not
    only the damage.
@@ -224,6 +331,9 @@ asked**.
 
 | id | proves |
 |----|--------|
+| `lobby-android` | "Start New Call" reaches the lobby (asserted from the UI tree — this transition logs nothing) |
+| `lobby-e2ee-offered-android` | the lobby offers the encryption switch while the mode is still choosable |
+| `create-android` | the lobby creates the call, which is where the encryption mode is fixed |
 | `join-android` / `join-ios` | SFU join handshake completes on both platforms |
 | `publish-audio-*` / `publish-video-android` | local tracks reach the SFU |
 | `peer-seen-*` | both clients see each other in call state |
@@ -234,6 +344,9 @@ asked**.
 | `adm-mute-ios` / `adm-unmute-ios` | iOS mutes at the audio-device-module level and keeps the track alive — the path speaking-while-muted detection depends on |
 | `camera-off-android` / `camera-on-android` | video track unpublish/republish |
 | `reaction-android` | custom event round-trips through the coordinator |
+| `raise-hand-android` | the raise-hand row sends a reaction (the type is never logged, so this proves "a reaction", not "that emoji") |
+| `noise-cancellation-android` | toggling noise cancellation flips the call's audio-processing state |
+| `closed-captions-android` | closed captions start and stop |
 | `filter-android` | video frame processor initialises on the capture pipeline |
 | `stats-android` | the stats route opens and closes without hanging or dropping the call (numbers are for a human, in shot 13) |
 | `pip-android` / `pip-restore-android` | PiP entry and restore keep the call alive |
@@ -246,11 +359,50 @@ asked**.
 | `deeplink-leave-android` | leaving a call a link opened tears down without emptying the stack |
 | `leave-*` | call teardown runs |
 | `no-service-leak` / `no-notif-leak` | no orphaned call foreground service or ongoing-call notification |
+| `e2ee-enable-android` | the lobby switch arms encryption before the call is created |
+| `e2ee-key-android` | the lobby generates a shared key |
+| `e2ee-join-*` | both clients join the encrypted call |
+| `e2ee-manager-*` | both attach an encryption manager before any peer connection exists |
+| `e2ee-encrypt-*` | both attach an encryptor to what they publish — the SDK refuses to publish cleartext, so a miss means no encryptor or a refused publish |
+| `e2ee-decrypt-*` | each side attached a decryptor **for the peer** — only possible once the peer's encrypted media actually arrived, so this is the half a single client cannot prove |
+| `e2ee-clean-*` | no missing-key, decryption-failure or cleartext-frame event fired on either side |
+| `e2ee-leave-*` | the encrypted call tears down on both sides |
 
 ## Traps already handled (do not "fix" these)
 
 These are encoded in the scripts for reasons found the hard way:
 
+- **The lobby, not the home screen, creates the call.** Since #1312 "Start New Call" only pushes the
+  lobby route, because the encryption mode is fixed at creation and the lobby is where it is chosen.
+  Waiting for `getOrCreateCall` after that tap — which this skill used to do — can never succeed,
+  and the whole run died on "Lobby did not open" against a perfectly healthy app. The transition is
+  asserted from the UI tree instead; `getOrCreateCall` is asserted on the lobby's join button.
+- **Labelled controls are resolved from the accessibility tree, not from pixels.** The same #1312
+  change pushed the lobby's "Start a test call" down 195px and every tap from the old table landed
+  in dead space. Do not convert `ui_tap` calls back into coordinates to "make them faster".
+- **Enabling encryption pushes the lobby's join button off-screen** on both platforms. Android
+  scrolls with `ui_scroll_to`; the iOS tables have an explicit swipe row. Neither is a defect.
+- **Noise cancellation and closed captions are asserted from the sheet, not the log.** The SFU noise
+  cancellation RPC logs at verbose and closed captions only log on failure, and the app runs at
+  `Priority.debug` — so in the success case there is nothing in the log at all, and a log-based
+  check would "pass" while observing nothing. Both rows render their own live state ("… On" /
+  "… Off"), which is what `assert_menu_toggle` reads.
+- **Raise hand cannot be asserted on the reaction type.** The SDK logs the raw event type
+  (`call.reaction_new`) and nothing of the payload, so `raise-hand` never appears in any log. The
+  check is scoped to a mark taken after the emoji reaction, which is what makes the second event
+  attributable — it proves a reaction was sent, not which one.
+- **iOS joins the encrypted call by deep link, not by typing the id.** The call-id field still holds
+  the plain call's id and cannot be cleared with the available tools. On iOS `open_url` opens the
+  app directly, so unlike the Android browsable intent there is no Safari detour.
+- **The iOS notification dialog appears after the first login** and preflight's pre-grant does not
+  cover it. It covers the call-id field, so an undismissed dialog reads as "the join taps did
+  nothing".
+- **`e2ee-peer-seen` deliberately does not exist.** `assert_two_participants` counts distinct user
+  ids across the whole log, and both rounds use the same two users, so in the encrypted round it
+  would pass on the plain call's participants without the peer ever arriving. `e2ee-decrypt-android`
+  is the stronger claim and cannot be true unless the peer's media showed up.
+- **The summary lives in `report.sh`, not `finish.sh`.** The run has two calls to get through, and
+  one place that reports on both.
 - Android username must contain a digit/underscore — the emulator IME autocorrects `smokea` to
   `smokes`.
 - The soft keyboard covers the sign-up button; it is dismissed before tapping.
@@ -311,6 +463,7 @@ These are encoded in the scripts for reasons found the hard way:
 
 ## Files
 
-`/tmp/stream-video-smoke/`: `results.tsv`, `android.log`, `ios.log`, `shots/*.png`. Reset by
-`launch.sh`, so re-running it after a failed attempt starts a clean report.
+`/tmp/stream-video-smoke/`: `results.tsv`, `android.log`, `ios.log`, `ui.xml` (the last
+accessibility-tree dump), `shots/*.png`. Reset by `launch.sh`, so re-running it after a failed
+attempt starts a clean report.
 `service-leak.txt` is written only when `no-service-leak` fails.

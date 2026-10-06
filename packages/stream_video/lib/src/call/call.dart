@@ -30,6 +30,7 @@ import '../sfu/data/events/sfu_events.dart';
 import '../sfu/data/models/sfu_audio_bitrate.dart';
 import '../sfu/data/models/sfu_client_capability.dart';
 import '../sfu/data/models/sfu_error.dart';
+import '../sfu/data/models/sfu_participant.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../stream_video.dart';
 import '../telemetry/client_event_types.dart';
@@ -48,6 +49,7 @@ import '../webrtc/model/rtc_video_parameters.dart';
 import '../webrtc/peer_connection_factory.dart';
 import '../webrtc/rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 import '../webrtc/rtc_manager.dart';
+import '../webrtc/rtc_media_device/device_enumeration_trigger.dart';
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
 import '../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../webrtc/rtc_track/rtc_track.dart';
@@ -57,12 +59,15 @@ import '../ws/ws.dart';
 import 'call_connect_options.dart';
 import 'call_events.dart';
 import 'call_reject_reason.dart';
+import 'call_ringing_state.dart';
 import 'call_type.dart';
 import 'permissions/permissions_manager.dart';
+import 'ring_state_poller.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 import 'session/dynascale_manager.dart';
 import 'state/call_state_notifier.dart';
+import 'state/call_state_selection.dart';
 import 'stats/sfu_stats_reporter.dart';
 import 'stats/stats_reporter.dart';
 import 'stats/trace_tag.dart';
@@ -307,6 +312,8 @@ class Call {
   CallSession? _previousSession;
   StreamPeerConnectionFactory? _pcFactory;
 
+  Future<Result<None>>? _pendingJoin;
+
   /// Audio track states captured at suspension time.
   final _suspendedTrackStates = <String, SuspendedTrackState>{};
 
@@ -421,6 +428,8 @@ class Call {
   final Map<String, Timer> _reactionTimers = {};
   final Map<String, Timer> _captionsTimers = {};
   Timer? _videoModerationTimer;
+  RingStatePoller? _ringStatePoller;
+  StreamSubscription<CallState>? _ringStatePollerStatusSubscription;
 
   void Function()? _onModerationBlurApply;
   void Function()? _onModerationBlurClear;
@@ -440,6 +449,11 @@ class Call {
   Stream<Duration> get callDurationStream => _stateManager.durationStream;
   StatsReporter? get statsReporter => _session?.statsReporter;
 
+  /// Emits the value [selector] returns from the call state: the current value
+  /// when listened to, then each value that differs from the one before, as
+  /// compared by [isSameCallStateSelection].
+  ///
+  /// Each listener runs its own [selector] until it cancels.
   Stream<T> partialState<T>(CallStateSelector<T> selector) {
     return _stateManager.partialCallStateStream(selector);
   }
@@ -792,9 +806,11 @@ class Call {
         // Notify the client about the permission request.
         return onPermissionRequest?.call(event);
       case StreamCallRejectedEvent _:
+        _ringStatePoller?.restartQuietPeriod();
         await _handleCoordinatorCallRejected(event);
         return;
       case StreamCallAcceptedEvent _:
+        _ringStatePoller?.restartQuietPeriod();
         await _handleCoordinatorCallAccepted(event);
         return;
       case StreamCallEndedEvent _:
@@ -883,6 +899,7 @@ class Call {
       case StreamCallRingingEvent _:
         return _stateManager.callMetadataChanged(event.metadata);
       case StreamCallMissedEvent _:
+        _ringStatePoller?.restartQuietPeriod();
         return _stateManager.callMetadataChanged(event.metadata);
       case StreamCallSessionEndedEvent _:
         return _stateManager.callMetadataChanged(
@@ -1372,7 +1389,35 @@ class Call {
   /// - [connectOptions]: optional initial call configuration
   /// - [membersLimit]: Sets the maximum number of members to return as part of the response.
   /// - [hintHighScaleLivestreamPublisher]: Whether the local user is a high-scale livestream publisher.
+  ///
+  /// Calling [join] again while a join on this call is still in flight
+  /// returns the same result as that join instead of starting another one.
   Future<Result<None>> join({
+    CallConnectOptions? connectOptions,
+    int? membersLimit,
+    int maxJoinRetries = 3,
+    bool? hintHighScaleLivestreamPublisher,
+  }) {
+    final pendingJoin = _pendingJoin;
+    if (pendingJoin != null) {
+      _logger.d(() => '[join] awaiting the join already in progress');
+      return pendingJoin;
+    }
+
+    final joinFuture = _joinOnce(
+      connectOptions: connectOptions,
+      membersLimit: membersLimit,
+      maxJoinRetries: maxJoinRetries,
+      hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
+    );
+
+    _pendingJoin = joinFuture;
+    return joinFuture.whenComplete(() {
+      if (identical(_pendingJoin, joinFuture)) _pendingJoin = null;
+    });
+  }
+
+  Future<Result<None>> _joinOnce({
     CallConnectOptions? connectOptions,
     int? membersLimit,
     int maxJoinRetries = 3,
@@ -2252,21 +2297,32 @@ class Call {
     );
   }
 
+  /// Whether exactly one participant, a session of the current user, remains
+  /// once [leaving] is removed.
+  bool _isAloneAfterLeave(SfuParticipant leaving) {
+    final currentUserId = _streamVideo.currentUser.id;
+    var remaining = 0;
+
+    for (final participant in state.value.callParticipants) {
+      if (participant.userId == leaving.userId &&
+          participant.sessionId == leaving.sessionId) {
+        continue;
+      }
+      if (participant.userId != currentUserId || ++remaining > 1) {
+        return false;
+      }
+    }
+
+    return remaining == 1;
+  }
+
   Future<void> _onSfuEvent(SfuEvent sfuEvent) async {
     if (sfuEvent is SfuParticipantLeftEvent) {
       if (sfuEvent.callCid != callCid.value) return;
 
-      final callParticipants = [...state.value.callParticipants]
-        ..removeWhere(
-          (participant) =>
-              participant.userId == sfuEvent.participant.userId &&
-              participant.sessionId == sfuEvent.participant.sessionId,
-        );
-
-      if (callParticipants.length == 1 &&
-          callParticipants.first.userId == _streamVideo.currentUser.id &&
-          state.value.isRingingFlow &&
-          _stateManager.callState.preferences.dropIfAloneInRingingFlow) {
+      if (state.value.isRingingFlow &&
+          _stateManager.callState.preferences.dropIfAloneInRingingFlow &&
+          _isAloneAfterLeave(sfuEvent.participant)) {
         final endResult = await end(
           reason: 'last participant left the call (ringing flow)',
         );
@@ -3004,6 +3060,8 @@ class Call {
     _videoModerationTimer?.cancel();
     _videoModerationTimer = null;
 
+    _stopRingStatePolling();
+
     for (final operation in _sfuStatsTimers) {
       await operation.cancel();
     }
@@ -3016,9 +3074,9 @@ class Call {
     // Call, so stopping it on this call's teardown would silently drop noise
     // cancellation on any other still-active call that also wants it. Only
     // stop the global processor when no other active call is configured for
-    // NoiseCancellationSettingsMode.autoOn.
-    if (state.value.settings.audio.noiseCancellation?.mode ==
-        NoiseCancellationSettingsMode.autoOn) {
+    if (_streamVideo.isAudioProcessorConfigured() &&
+        state.value.settings.audio.noiseCancellation?.mode ==
+            NoiseCancellationSettingsMode.autoOn) {
       final anotherCallWantsAutoOn = _streamVideo.state.activeCalls.value.any(
         (other) =>
             other.callCid != callCid &&
@@ -3105,7 +3163,10 @@ class Call {
   }
 
   Future<void> _applyCallSettingsToConnectOptions(CallSettings settings) async {
-    final mediaDevicesResult = await _rtcMediaDeviceNotifier.enumerateDevices();
+    final mediaDevicesResult = await _rtcMediaDeviceNotifier
+        .enumerateDevicesFor(
+          DeviceEnumerationTrigger.callSettings,
+        );
 
     final mediaDevices = mediaDevicesResult.foldResult(
       success: (success) => success.data,
@@ -3610,6 +3671,7 @@ class Call {
           ringing: ringing,
           notify: notify,
         );
+        _startRingStatePollingIfNeeded(data.metadata);
 
         return data.metadata;
       },
@@ -3720,9 +3782,93 @@ class Call {
           callConnectOptions: connectOptions,
         );
 
+        _startRingStatePollingIfNeeded(data.data.metadata);
         return data.data.metadata;
       },
     );
+  }
+
+  /// Starts polling for the outcome of a ring the current user just started,
+  /// in case the `call.accepted` or `call.rejected` event never arrives.
+  void _startRingStatePollingIfNeeded(CallMetadata metadata) {
+    final settings = _streamVideo.options.ringStatePolling;
+    if (!settings.enabled) return;
+    if (_ringStatePoller?.isStopped == false) return;
+
+    // A zero interval would fire the poll timer on every event-loop turn.
+    if (settings.interval <= Duration.zero) {
+      _logger.w(
+        () =>
+            '[startRingStatePolling] rejected (interval is not positive): '
+            '${settings.interval}',
+      );
+      return;
+    }
+
+    final status = _stateManager.callState.status;
+    if (status is! CallStatusOutgoing || status.acceptedByCallee) return;
+
+    // Captured once: the ring state is read for the session that rang.
+    final sessionId = metadata.session.id;
+    if (sessionId.isEmpty) {
+      _logger.w(() => '[startRingStatePolling] rejected (no session)');
+      return;
+    }
+
+    final ringTimeout = metadata.settings.ring.autoCancelTimeout;
+    if (ringTimeout <= Duration.zero) return;
+
+    final poller = RingStatePoller(
+      settings: settings,
+      ringTimeout: ringTimeout,
+      fetchRingState: () => _coordinatorClient.getCallRingState(
+        callCid: callCid,
+        sessionId: sessionId,
+      ),
+      onRingState: _onPolledRingState,
+    );
+    _ringStatePoller = poller;
+
+    unawaited(_ringStatePollerStatusSubscription?.cancel());
+    _ringStatePollerStatusSubscription = _stateManager.callStateStream.listen((
+      state,
+    ) {
+      final status = state.status;
+      if (status is! CallStatusOutgoing || status.acceptedByCallee) {
+        _stopRingStatePolling();
+      }
+    });
+
+    poller.start();
+  }
+
+  /// Applies a polled ring state, returning whether the ring is settled.
+  bool _onPolledRingState(GetCallRingStateResponse ringState) {
+    final callState = _stateManager.callState;
+    final status = callState.status;
+    if (status is! CallStatusOutgoing || status.acceptedByCallee) return true;
+
+    final snapshot = ringState.toRingingSnapshot(
+      memberIds: callState.callMembers.map((member) => member.userId),
+    );
+
+    final ringingState = snapshot.resolveFor(callState.currentUserId);
+    if (!ringingState.isRinging) {
+      // A settled ring here means the event that carried it was dropped.
+      _logger.i(
+        () => '[onPolledRingState] resolved by polling: $ringingState',
+      );
+    }
+
+    _stateManager.coordinatorOutgoingRingResolved(ringingState, snapshot);
+    return !ringingState.isRinging;
+  }
+
+  void _stopRingStatePolling() {
+    _ringStatePoller?.stop();
+    _ringStatePoller = null;
+    unawaited(_ringStatePollerStatusSubscription?.cancel());
+    _ringStatePollerStatusSubscription = null;
   }
 
   /// Sends a ring notification to the provided users who are not already in the call.
@@ -4066,7 +4212,7 @@ class Call {
     await result.foldResult(
       success: (success) async {
         final mediaDevicesResult = await _rtcMediaDeviceNotifier
-            .enumerateDevices();
+            .enumerateDevicesFor(DeviceEnumerationTrigger.flipCamera);
 
         final mediaDevices = mediaDevicesResult.foldResult(
           success: (success) => success.data,

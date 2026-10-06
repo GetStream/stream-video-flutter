@@ -249,6 +249,8 @@ class _LivestreamContentState extends State<LivestreamContent> {
             ),
       );
 
+  static CallStatus _status(CallState state) => state.status;
+
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
@@ -261,7 +263,7 @@ class _LivestreamContentState extends State<LivestreamContent> {
     // participants come through the throttled stream.
     return PartialCallStateBuilder(
       call: call,
-      selector: (state) => state.status,
+      selector: _status,
       builder: (context, status) {
         return CallParticipantsBuilder(
           call: call,

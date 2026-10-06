@@ -56,6 +56,7 @@ import 'models/user_info.dart';
 import 'network_monitor_settings.dart';
 import 'push_notification/push_notification_manager.dart';
 import 'retry/retry_policy.dart';
+import 'ring_state_polling_settings.dart';
 import 'telemetry/client_event_reporter.dart';
 import 'telemetry/client_event_transport.dart';
 import 'token/token.dart';
@@ -1859,6 +1860,7 @@ class StreamVideoOptions {
     this.allowMultipleActiveCalls = false,
     this.multiCallAudioPolicy = MultiCallAudioPolicy.suspendExisting,
     this.clientEventsReportingEnabled = true,
+    this.ringStatePolling = const RingStatePollingSettings(),
     @Deprecated(
       'Use audioConfigurationPolicy instead. This parameter will be removed in the next major release.',
     )
@@ -1903,6 +1905,11 @@ class StreamVideoOptions {
 
   /// Whether to report join-lifecycle telemetry
   final bool clientEventsReportingEnabled;
+
+  /// Caller-side polling for the ring outcome, used when `call.accepted` or
+  /// `call.rejected` never arrives over the WebSocket. Enabled by default; pass
+  /// [RingStatePollingSettings.disabled] to turn it off.
+  final RingStatePollingSettings ringStatePolling;
 
   /// Returns the current [NetworkMonitorSettings].
   final NetworkMonitorSettings networkMonitorSettings;

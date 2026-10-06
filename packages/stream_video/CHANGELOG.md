@@ -1,4 +1,4 @@
-## Upcoming
+## Upcoming (major)
 
 ### ⚠️ Breaking
 
@@ -40,8 +40,6 @@
 - `StreamVideoExceptionWithCause.cause` now carries the `StreamApiException` for a failure the server answered, where it previously carried the parsed `StreamApiError` payload. Code matching on `cause is StreamApiError` still compiles but no longer matches, so this change is silent. Read the verdict through the accessors on `StreamVideoException` instead: `apiStatusCode`, `apiErrorCode`, `isUnrecoverable`, `retryAfter`, and `apiError` for the payload itself. They answer from either shape.
 - `StreamVideoExceptionWithCause.cause` is deprecated. Its runtime type is not part of this API - it is chosen by whatever mapped the failure — so matching on it compiles but can stop matching without warning, which is what happened to the change above. Read the failure through the accessors on `StreamVideoException` instead.
 - `StreamVideoException` (formerly `VideoError`) now implements `Exception` rather than `Error`. An `on Error catch` clause no longer matches it — these are runtime conditions to handle, not programming bugs. Catch `Exception`, or `StreamVideoException` directly.
-- `CallPreferences` now requires a `participantsThrottleIntervalResolver`; custom implementations must provide it.
-- `CallParticipantState.audioLevels` is now unmodifiable.
 - `CallStatusReconnecting.attempt` now counts every attempt of a reconnect, fast and rejoin alike, starting at 1. It used to start at 0, stay there across fast attempts, and count only rejoins — reaching a different value twice within one rejoin.
 
 ### ⚠️ Deprecated
@@ -49,11 +47,6 @@
 - `StreamVideo.disposeAfterResolvingRinging` is deprecated in favour of `StreamVideoPushHandler.handleBackgroundMessage` from `stream_video_push_notification`. Use it to handle the whole background ringing lifecycle.
 - `VideoError` is renamed to `StreamVideoException`, and `VideoErrorWithCause` to `StreamVideoExceptionWithCause`. The old names remain as deprecated typedefs, so existing code still compiles; `dart fix --apply` migrates it.
 - `ifInvisibleBy` takes a `ParticipantPriority` — a priority for one participant, higher first — instead of a `Comparator`. Pass the priority of the same name: `ifInvisibleBy(dominantSpeakerPriority)` where you passed `ifInvisibleBy(dominantSpeaker)`.
-
-### 🔄 Changed
-
-- [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
-- Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.
 
 ### ✅ Added
 
@@ -65,13 +58,17 @@
 - `Call.currentUser` is the user the call is being watched or joined by.
 - `sortParticipants` sorts a participant list the way the SDK's own layouts do: the criteria that hold whether or not a tile is being watched order everybody, while what a participant is owed for being off screen costs the screen a single tile — they trade places with the tile that has the least claim to one, and nothing else moves.
 - `byPriority` builds a participant comparator from a `ParticipantPriority`, and every sorting criterion now ships one: `dominantSpeakerPriority`, `speakingPriority`, `screenSharingPriority`, `publishingVideoPriority`, `publishingAudioPriority`, `byReactionTypePriority`, `byParticipantSourcePriority`, `byVideoIngressSourcePriority` and `byRolePriority`. `0` is the priority of a participant already on screen: above it brings an off-screen participant into view, below it leaves them out.
-- Added `Call.participantsStream`, which emits the participant list at an interval that grows with the participant count.
-- Added `CallPreferences.participantsThrottleIntervalResolver` to override that interval, or set it to `null` to emit every change.
+- The caller of a ringing call now polls the ring state when `call.accepted` or `call.rejected` does not arrive. The WebSocket does not redeliver them, and a caller that missed one kept ringing until its timeout, then rejected a call the callee was already in. After 15 seconds without a ring event, the ring state is read every 5 seconds until the ring settles or times out. Tune it, or turn it off, with `StreamVideoOptions.ringStatePolling`.
+- Added `RingingSnapshot`, which resolves a ringing flow for the caller as well as the callee. `CallMetadata.ringingStateFor` goes through it.
 
 ### 🔄 Changed
 
-- SFU participant events no longer emit a new call state when they leave every participant unchanged.
-- `CallParticipantState.audioLevel` and `audioLevels` now hold at their last value while a participant is silent.
+- A `call.rejected` event now settles a ring by the same rules as the push and ring-state checks (`RingingSnapshot`), so the paths can no longer disagree. These cases change:
+  - A callee hangs up once every other member has rejected, even if the caller isn't a member of the call.
+  - A callee whose acceptance already reached the server stays in the call when the caller cancels, instead of hanging up.
+  - A caller that is the only member keeps ringing until its timeout, instead of hanging up on the first rejection.
+  - A caller whose callee accepted keeps the call, even if that callee also shows up as having rejected.
+- An incoming ring is now dismissed when the caller cancels, even if another callee has already accepted. `CallMetadata.ringingStateFor` and `StreamVideo.getCallRingingState` report it as rejected rather than ringing.
 
 ### 🐞 Fixed
 
@@ -96,9 +93,46 @@
 - A coordinator WebSocket error frame that says nothing about the credentials — a rate limit, or an error about a single request — no longer closes an otherwise healthy connection. Only an expired or rejected token, or a rejected API key, closes the socket now; the rest are logged.
 - Fixed the participant sort reordering tiles that are visible on screen. One participant whose tile was not visible was enough to move the dominant speaker to the first tile.
 - A viewport visibility is now recorded whether or not the session accepts it. A dropped report left a participant recorded as something they were not for the rest of the call, since a viewport only ever reports what changed.
+- On iOS devices without multitasking camera access, the camera track is now muted while the app is in the background, so other participants see camera-off instead of a frozen frame.
+
+## Upcoming (minor)
+
+### ⚠️ Breaking
+
+- `CallPreferences` now requires a `participantsThrottleIntervalResolver`; custom implementations must provide it.
+- `CallParticipantState.audioLevels` and `CallState.ringingMembers` are now unmodifiable.
+
+### ✅ Added
+
+- Added `Call.participantsStream`, which emits the participant list at an interval that grows with the participant count.
+- Added `CallPreferences.participantsThrottleIntervalResolver` to override that interval, or set it to `null` to emit every change.
+- Added `isSameCallStateSelection`, which compares two selected values the way `Call.partialState` does.
+
+### 🔄 Changed
+
+- `Call.partialState` now compares maps, sets and nested collections by their contents.
+- `CallState` keeps its `ownCapabilities`, `blockedUserIds`, `custom`, `capabilitiesByRole` and `callMembers` instances when a call update leaves their contents unchanged.
+- Reduced the cost of call updates in calls with many members.
+- [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
+- Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.
+- SFU participant events no longer emit a new call state when they leave every participant unchanged.
+- Reduced the cost of participant state updates in large calls.
+- `CallParticipantState.audioLevel` and `audioLevels` now hold at their last value while a participant is silent.
+- `CallState.localParticipant`, `otherParticipants` and `activeSpeakers` are now computed once per participant list instead of on every read, which keeps them cheap in calls with many participants. `callParticipants`, `otherParticipants` and `activeSpeakers` now return unmodifiable lists shared by every reader, so call `.toList()` before sorting or otherwise mutating them.
+- Simulcast layers are now announced to the SFU and bitrate-capped from the resolution the camera actually captures on iOS and Android, instead of the requested resolution. A camera that captures below the requested size, or at a different aspect ratio, no longer over-reports its layers or over-allocates their bitrate.
+- `RtcMediaDeviceNotifier` now enumerates devices once per burst of device-change events, and calls made while an enumeration is running share its result instead of starting another one. The device list emitted by `RtcMediaDeviceNotifier.onDeviceChange` is now unmodifiable, so copy it with `.toList()` before sorting or otherwise mutating it.
+
+### 🐞 Fixed
+
+- Fixed `Call.partialState` streams staying subscribed to the call state after their last listener cancelled.
 - Fixed server-pinned participants being reordered on every pins event.
 - Fixed `CallParticipantState.copyWithUpdatedAudioLevels` mutating the audio level history of the previous state.
-- On iOS devices without multitasking camera access, the camera track is now muted while the app is in the background, so other participants see camera-off instead of a frozen frame.
+- Fixed `Call.join` being rejected with "a call with the same cid is in progress" when called again while a join was in progress. A repeated call now returns the result of the join already in flight.
+- Fixed leaving a call trying to stop noise cancellation when no audio processor is configured.
+- Fixed leaving a call calling `removeTrack` on the publisher for received tracks, which failed and logged `sender is null` on every leave.
+- [iOS/Android] Fixed camera video layers being announced in landscape while the phone is held upright.
+- Fixed fast reconnect failing for participants who are not publishing any tracks, such as livestream viewers. Instead of recovering the existing session, they fell back to a full rejoin with a new session after every network drop.
+- Fixed video layers being given a `maxBitrate` of 0 when the SFU's publish option carries no bitrate, and an empty publish option dimension being used as the bitrate target instead of the 1280x720 default. Publishing a video track now logs the publish option, the capture size and the computed encodings at debug level.
 
 ## 1.6.0
 

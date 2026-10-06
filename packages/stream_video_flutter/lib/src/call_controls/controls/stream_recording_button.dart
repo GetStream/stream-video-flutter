@@ -25,13 +25,15 @@ class StreamRecordingButton extends StatelessWidget {
   /// Defaults to `context.streamIcons.recordingFill`.
   final IconData? disabledRecordingIcon;
 
+  static bool _isRecording(CallState state) => state.isRecording;
+
   @override
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
 
     return PartialCallStateBuilder<bool>(
       call: call,
-      selector: (state) => state.isRecording,
+      selector: _isRecording,
       builder: (_, enabled) => CallFeatureButton(
         icon: Icon(
           enabled

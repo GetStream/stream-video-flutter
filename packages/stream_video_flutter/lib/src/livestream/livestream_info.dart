@@ -51,6 +51,17 @@ class LivestreamInfo extends StatelessWidget {
   /// Defaults to true.
   final bool includeAnonymousParticipantsCount;
 
+  static ({
+    bool isBackstage,
+    int participantCount,
+    int anonymousParticipantCount,
+  })
+  _callData(CallState state) => (
+    isBackstage: state.isBackstage,
+    participantCount: state.participantCount,
+    anonymousParticipantCount: state.anonymousParticipantCount,
+  );
+
   @override
   Widget build(BuildContext context) {
     final streamVideoTheme = StreamVideoTheme.of(context);
@@ -82,11 +93,7 @@ class LivestreamInfo extends StatelessWidget {
 
     return PartialCallStateBuilder(
       call: call,
-      selector: (state) => (
-        isBackstage: state.isBackstage,
-        participantCount: state.participantCount,
-        anonymousParticipantCount: state.anonymousParticipantCount,
-      ),
+      selector: _callData,
       builder: (context, callData) {
         return ColoredBox(
           // ignore: deprecated_member_use

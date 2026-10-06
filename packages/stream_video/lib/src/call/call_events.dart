@@ -1577,9 +1577,7 @@ extension SfuEventX on SfuEvent {
     return switch (this) {
       final SfuJoinResponseEvent event => StreamCallJoinedEvent(
         state.callCid,
-        participants: event.callState.participants
-            .map((sfuParticipant) => sfuParticipant.toParticipantState(state))
-            .toList(),
+        participants: event.callState.participants.toParticipantStates(state),
         participantCount: event.callState.participantCount.total,
         anonymousCount: event.callState.participantCount.anonymous,
         startedAt: event.callState.startedAt,

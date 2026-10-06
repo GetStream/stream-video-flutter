@@ -120,10 +120,12 @@ void stubRingingCall(
   );
   // Runs the real selector against the stubbed state, so a screen selecting
   // something other than the ringing members still gets what it asked for.
-  when(() => call.partialState<List<UserInfo>>(any())).thenAnswer((invocation) {
+  when(
+    () => call.partialState<List<CallMemberState>>(any()),
+  ).thenAnswer((invocation) {
     final selector =
         invocation.positionalArguments.first
-            as CallStateSelector<List<UserInfo>>;
+            as CallStateSelector<List<CallMemberState>>;
     return Stream.value(selector(state));
   });
 }

@@ -139,8 +139,7 @@ class StreamMicrophoneSplitButton extends StatelessWidget {
           // joined with, since that is where it is about to be.
           return PartialCallStateBuilder<bool?>(
             call: call,
-            selector: (state) =>
-                state.localParticipant?.trackEnabled(SfuTrackType.audio),
+            selector: _audioEnabled,
             builder: (context, reported) {
               final enabled =
                   reported ?? call.connectOptions.microphone.wantsOn;
@@ -261,8 +260,7 @@ class StreamCameraSplitButton extends StatelessWidget {
           // joined with, since that is where it is about to be.
           return PartialCallStateBuilder<bool?>(
             call: call,
-            selector: (state) =>
-                state.localParticipant?.trackEnabled(SfuTrackType.video),
+            selector: _videoEnabled,
             builder: (context, reported) {
               final enabled = reported ?? call.connectOptions.camera.wantsOn;
 
@@ -293,6 +291,12 @@ class StreamCameraSplitButton extends StatelessWidget {
     );
   }
 }
+
+bool? _audioEnabled(CallState state) =>
+    state.localParticipant?.trackEnabled(SfuTrackType.audio);
+
+bool? _videoEnabled(CallState state) =>
+    state.localParticipant?.trackEnabled(SfuTrackType.video);
 
 /// Supplies a [StreamMediaDevicesController] for [call], and rebuilds
 /// [builder] as its lists and selection change.
