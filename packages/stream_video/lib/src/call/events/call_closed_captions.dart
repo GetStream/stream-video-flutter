@@ -90,7 +90,7 @@ class CallClosedCaptions {
   /// Stops every pending caption removal and clears [closedCaptions].
   void reset() {
     _expiryTimers.cancelAll();
-    _closedCaptions.value = const [];
+    _closedCaptions.value = [];
   }
 
   Future<void> _removeExpiredCaption(
