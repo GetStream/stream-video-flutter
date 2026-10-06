@@ -182,11 +182,8 @@ void main() {
         reason: any(named: 'reason'),
       ),
     ).thenAnswer((_) async => const Result.success(none));
-    final call = harness.buildCall();
-    // Set with the status: CallSettings equality ignores the ring settings,
-    // so a settings-only change would not reach the call's state.
+    final call = harness.buildCall(status: CallStatus.outgoing());
     harness.stateManager.state = harness.stateManager.callState.copyWith(
-      status: CallStatus.outgoing(),
       settings: harness.stateManager.callState.settings.copyWith(
         ring: const StreamRingSettings(
           autoCancelTimeout: Duration(milliseconds: 50),

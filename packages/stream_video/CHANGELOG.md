@@ -75,6 +75,7 @@
 
 ### 🐞 Fixed
 
+- `CallSettings` equality now compares every section, so a change to only the ring, recording or other settings reaches the call state.
 - Closed captions are now cleared when leaving a call.
 - A failed microphone or camera mute during video moderation is now logged.
 - Errors thrown while handling a call's coordinator and SFU events, including from `onPermissionRequest`, are now logged instead of surfacing as unhandled errors.
