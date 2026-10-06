@@ -8,6 +8,11 @@ This file tracks the **order** of the 22 sub-issues and how each one is
 delivered. What a ticket changes is in the ticket itself and in the analysis
 doc. The decisions in FLU-859 are settled; do not reopen them.
 
+This is the v2 major release, so a ticket may break the public API when that
+makes it safer or simpler. Each break gets a `### ⚠️ Breaking` changelog line
+and a `!` in its commit title. Tickets marked zero behaviour change, such as A2,
+stay that way.
+
 Tickets 5-8 are bugs found in the B2 review (FLU-924 to FLU-928). FLU-925 is
 folded into A6.
 
