@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
@@ -411,6 +413,40 @@ void main() {
       // throw, since a disposed manager holds no keys.
       verify(() => e2ee.dispose()).called(1);
       expect(call.e2eeManager, isNull);
+    });
+
+    group('the manager event subscription', () {
+      late StreamController<E2eeEvent> events;
+      late bool cancelled;
+
+      setUp(() {
+        cancelled = false;
+        events = StreamController<E2eeEvent>(
+          onCancel: () => cancelled = true,
+        );
+        when(() => e2ee.events).thenAnswer((_) => events.stream);
+      });
+      tearDown(() => events.close());
+
+      test('is cancelled when the call is left', () async {
+        final call = createTestCall();
+        await call.setE2EEManager(e2ee);
+        await call.join();
+        expect(cancelled, isFalse);
+
+        await call.leave();
+
+        expect(cancelled, isTrue);
+      });
+
+      test('is cancelled when the manager is cleared', () async {
+        final call = createTestCall();
+        await call.setE2EEManager(e2ee);
+
+        await call.clearE2EEManager();
+
+        expect(cancelled, isTrue);
+      });
     });
 
     test('releasing the claim lets the next instance attach', () async {

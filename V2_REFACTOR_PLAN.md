@@ -21,7 +21,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 | # | Ticket | Branch (proposed) | PR |
 |---|---|---|---|
 | 1 | A1 | `feat/flu-847-call-characterisation-tests` | #1405 |
-| 2 | B4 | `feat/flu-850-call-pass-through-extensions` | |
+| 2 | B4 | `feat/flu-850-call-pass-through-extensions` | #1406 |
 | 3 | B5 | `feat/flu-851-e2ee-claims` | |
 | 4 | B2 | `feat/flu-849-call-event-router` | |
 | 5 | A2 | `feat/flu-855-call-connection-coordinator` | |
@@ -41,7 +41,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 
 - [x] 1. **A1** [FLU-847](https://linear.app/stream/issue/FLU-847): characterisation tests for Call join, leave and reconnect (M). Gates A2, so it goes first. Ships with this plan.
 - [x] 2. **B4** [FLU-850](https://linear.app/stream/issue/FLU-850): Call pass-throughs to extension methods (S, low risk). Removes about 380 lines from `call.dart` before the risky moves, with no overlap with the connection code.
-- [ ] 3. **B5** [FLU-851](https://linear.app/stream/issue/FLU-851): E2EE manager resolution and the claims registry out of Call (S, low risk).
+- [x] 3. **B5** [FLU-851](https://linear.app/stream/issue/FLU-851): E2EE manager resolution and the claims registry out of Call (S, low risk).
 - [ ] 4. **B2** [FLU-849](https://linear.app/stream/issue/FLU-849): coordinator event router and the reactions and captions helper (S, low risk). Takes `_reactionTimers` out before A6 has to deal with it.
 - [ ] 5. **A2** [FLU-855](https://linear.app/stream/issue/FLU-855): verbatim `CallConnectionCoordinator` (L, high risk). Zero behaviour change; existing tests and A1 stay green untouched.
 - [ ] 6. **A3** [FLU-860](https://linear.app/stream/issue/FLU-860): sealed `ConnectionPhase` replaces the connection flags (L, high risk).
