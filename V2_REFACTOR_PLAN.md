@@ -61,7 +61,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 - [x] 8. **Fix** [FLU-928](https://linear.app/stream/issue/FLU-928): closed captions never show when the visibility duration is 0 (S, bug). Settle the option from the ticket in the plan; option 1 needs a changelog line.
 - [x] 9. **A2** [FLU-855](https://linear.app/stream/issue/FLU-855): verbatim `CallConnectionCoordinator` (L, high risk). Zero behaviour change; existing tests and A1 stay green untouched.
 - [x] 10. **A3** [FLU-860](https://linear.app/stream/issue/FLU-860): sealed `ConnectionPhase` replaces the connection flags (L, high risk). Leaving is final, which fixes bug 2 from FLU-859 here instead of in A4.
-- [ ] 11. **A4** [FLU-864](https://linear.app/stream/issue/FLU-864): one leave decision and one cancellation scope per attempt (M). Fixes bug 1 from FLU-859.
+- [ ] 11. **A4** [FLU-864](https://linear.app/stream/issue/FLU-864): one leave decision and one cancellation scope per attempt (M). Fixes bug 1 from FLU-859. Also replace the `Future.any` races against `_whenLeft` in `_awaitNetworkAvailable` and `_awaitIfNeeded` with `takeUntil(_phase.where(isLeftOrLeaving))`: the losing `firstWhere` subscription is never cancelled, so waits pile up and each logs "call was left" on leave.
 - [ ] 12. **A5** [FLU-865](https://linear.app/stream/issue/FLU-865): serial executor for join and reconnect (M).
 - [ ] 13. **A6** [FLU-861](https://linear.app/stream/issue/FLU-861): single session ownership and a complete teardown (S). Fixes bugs 3 and 5, and folds in [FLU-925](https://linear.app/stream/issue/FLU-925) (timers re-armed during leave).
 - [ ] 14. **A7** [FLU-862](https://linear.app/stream/issue/FLU-862): `Call.dispose` and the single-use-after-leave error (S, v2 breaking).
