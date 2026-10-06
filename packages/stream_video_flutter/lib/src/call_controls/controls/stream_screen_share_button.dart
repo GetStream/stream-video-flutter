@@ -56,6 +56,9 @@ class StreamScreenShareButton extends StatelessWidget {
   /// selector from [desktopScreenSelectorBuilder] everywhere else.
   final DesktopScreenSharePickerType desktopScreenPickerType;
 
+  static bool _isScreenShareEnabled(CallState state) =>
+      state.localParticipant?.isScreenShareEnabled ?? false;
+
   @override
   Widget build(BuildContext context) {
     final presentIcon = context.streamPresentIcon;
@@ -83,11 +86,10 @@ class StreamScreenShareButton extends StatelessWidget {
       return buildContent(localParticipant!.isScreenShareEnabled);
     }
 
-    return PartialCallStateBuilder(
+    return PartialCallStateBuilder<bool>(
       call: call,
-      selector: (state) => state.localParticipant,
-      builder: (_, participant) =>
-          buildContent(participant?.isScreenShareEnabled ?? false),
+      selector: _isScreenShareEnabled,
+      builder: (_, enabled) => buildContent(enabled),
     );
   }
 }

@@ -102,19 +102,21 @@ class _StreamSpeakerphoneButtonState extends State<StreamSpeakerphoneButton> {
     super.dispose();
   }
 
+  static bool _isSpeakerphoneEnabled(CallState state) {
+    final audioOutputDevice = state.audioOutputDevice;
+    if (audioOutputDevice != null) {
+      return audioOutputDevice.id.equalsIgnoreCase(deviceIdSpeaker);
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
 
     return PartialCallStateBuilder<bool>(
       call: widget.call,
-      selector: (state) {
-        final audioOutputDevice = state.audioOutputDevice;
-        if (audioOutputDevice != null) {
-          return audioOutputDevice.id.equalsIgnoreCase(deviceIdSpeaker);
-        }
-        return false;
-      },
+      selector: _isSpeakerphoneEnabled,
       // Routing audio to the speaker is a mode this control cycles, not a
       // feature that is off by default, so it stays a neutral control.
       builder: (_, enabled) => CallControlButton(

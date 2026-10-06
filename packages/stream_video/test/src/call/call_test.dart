@@ -28,6 +28,33 @@ void main() {
     });
 
     test(
+      'join called again while a join is in flight shares that join',
+      () async {
+        final coordinatorClient = setupMockCoordinatorClient();
+        final call = createTestCall(coordinatorClient: coordinatorClient);
+
+        final first = call.join();
+        final second = call.join();
+
+        final results = await Future.wait([first, second]);
+        expect(results.every((result) => result.isSuccess), isTrue);
+
+        verify(
+          () => coordinatorClient.joinCall(
+            callCid: any(named: 'callCid'),
+            ringing: any(named: 'ringing'),
+            create: any(named: 'create'),
+            migratingFrom: any(named: 'migratingFrom'),
+            migratingFromList: any(named: 'migratingFromList'),
+            video: any(named: 'video'),
+            membersLimit: any(named: 'membersLimit'),
+            e2ee: any(named: 'e2ee'),
+          ),
+        ).called(1);
+      },
+    );
+
+    test(
       'join call should migrate to new SFU after 2 failures, and make 3 attempts to join the call',
       () async {
         final mockCallSession = setupMockCallSession();

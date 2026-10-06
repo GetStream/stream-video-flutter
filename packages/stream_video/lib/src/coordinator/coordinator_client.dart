@@ -53,6 +53,14 @@ abstract class CoordinatorClient {
     bool? video,
   });
 
+  /// Reads who accepted, rejected or missed the ring of [sessionId].
+  ///
+  /// Performs no writes and emits no events, so it is safe to poll.
+  Future<Result<open.GetCallRingStateResponse>> getCallRingState({
+    required StreamCallCid callCid,
+    required String sessionId,
+  });
+
   Future<Result<CallReceivedOrCreatedData>> getOrCreateCall({
     required StreamCallCid callCid,
     bool? ringing,

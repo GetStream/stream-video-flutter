@@ -1,4 +1,4 @@
-## Upcoming
+## Upcoming (minor)
 
 ### 🔄 Changed
 

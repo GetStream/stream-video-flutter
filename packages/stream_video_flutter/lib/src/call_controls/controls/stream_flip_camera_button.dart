@@ -43,6 +43,9 @@ class StreamFlipCameraButton extends StatelessWidget {
   /// ```
   static bool get isSupported => CurrentPlatform.isMobile;
 
+  static TrackState? _videoTrack(CallState state) =>
+      state.localParticipant?.videoTrack;
+
   @override
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
@@ -72,7 +75,7 @@ class StreamFlipCameraButton extends StatelessWidget {
     }
     return PartialCallStateBuilder(
       call: call,
-      selector: (state) => state.localParticipant?.videoTrack,
+      selector: _videoTrack,
       builder: (_, trackState) => buildContent(trackState),
     );
   }

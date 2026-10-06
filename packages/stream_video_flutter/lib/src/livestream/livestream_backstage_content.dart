@@ -89,6 +89,15 @@ class _LivestreamBackstageContentState
     }
   }
 
+  // Selecting the count rather than the list keeps the builder off every
+  // participant update that doesn't change how many there are.
+  static ({int participantCount, DateTime? startsAt}) _callData(
+    CallState state,
+  ) => (
+    participantCount: state.callParticipants.length,
+    startsAt: state.startsAt,
+  );
+
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
@@ -97,12 +106,7 @@ class _LivestreamBackstageContentState
 
     return PartialCallStateBuilder(
       call: widget.call,
-      // Selecting the count rather than the list keeps this off every
-      // participant update that doesn't change how many there are.
-      selector: (state) => (
-        participantCount: state.callParticipants.length,
-        startsAt: state.startsAt,
-      ),
+      selector: _callData,
       builder: (context, callData) {
         final participantCount = callData.participantCount;
         final startsAt = callData.startsAt;

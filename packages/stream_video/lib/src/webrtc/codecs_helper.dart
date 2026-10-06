@@ -31,6 +31,9 @@ class RTCRtpEncodingWithDimensions extends rtc.RTCRtpEncoding {
   final double height;
 }
 
+/// The bitrate a layer falls back to when the publish option gives none.
+const defaultBitratePerRid = {'q': 300000, 'h': 750000, 'f': 1250000};
+
 /// Determines the most optimal video layers for the given track.
 List<RTCRtpEncodingWithDimensions> findOptimalVideoLayers({
   required RtcVideoDimension dimensions,
@@ -39,8 +42,13 @@ List<RTCRtpEncodingWithDimensions> findOptimalVideoLayers({
   final optimalVideoLayers = <RTCRtpEncodingWithDimensions>[];
   const defaultVideoPreset = RtcVideoParametersPresets.h720_16x9;
 
+  // The SFU's protobuf decodes an unset dimension as 0x0, so an empty one is
+  // as absent as a null one.
+  final targetDimension = publishOptions.videoDimension;
   final maxBitrate = getComputedMaxBitrate(
-    publishOptions.videoDimension ?? defaultVideoPreset.dimension,
+    targetDimension == null || targetDimension.isEmpty
+        ? defaultVideoPreset.dimension
+        : targetDimension,
     publishOptions.bitrate ?? defaultVideoPreset.encoding.maxBitrate,
     dimensions.width,
     dimensions.height,
@@ -55,9 +63,12 @@ List<RTCRtpEncodingWithDimensions> findOptimalVideoLayers({
 
   final rids = ['f', 'h', 'q'].sublist(0, maxSpatialLayers);
   for (final rid in rids) {
+    // An unset bitrate decodes as 0 and a tiny capture can round down to 0;
+    // neither must reach the encoder as a 0 bps bound.
+    final layerBitrate = (maxBitrate / bitrateFactor).round();
     final layer = RTCRtpEncodingWithDimensions(
       rid: rid,
-      maxBitrate: (maxBitrate / bitrateFactor).round(),
+      maxBitrate: layerBitrate > 0 ? layerBitrate : defaultBitratePerRid[rid],
       maxFramerate: publishOptions.fps,
       width: dimensions.width / downscaleFactor,
       height: dimensions.height / downscaleFactor,
@@ -98,9 +109,15 @@ int getComputedMaxBitrate(
   int currentHeight,
 ) {
   // if the current resolution is lower than the target resolution,
-  // we want to proportionally reduce the target bitrate
-  final targetWidth = videoDimension.width;
-  final targetHeight = videoDimension.height;
+  // we want to proportionally reduce the target bitrate.
+  // The target is compared in the capture's orientation: the publish option
+  // target is landscape, so a portrait capture would otherwise read its short
+  // side as below the target and scale the bitrate up instead.
+  final target = videoDimension.orientedLike(
+    RtcVideoDimension(width: currentWidth, height: currentHeight),
+  );
+  final targetWidth = target.width;
+  final targetHeight = target.height;
 
   if (currentWidth < targetWidth || currentHeight < targetHeight) {
     final currentPixels = currentWidth * currentHeight;
@@ -172,6 +189,40 @@ List<rtc.RTCRtpEncoding> findOptimalScreenSharingLayers({
 
   return optimalVideoLayers;
 }
+
+/// In SVC, only one video encoding (layer) is sent: the highest-quality one,
+/// renamed to `q`, keeping its bitrate, frame rate and scalability mode. The
+/// codec handles the spatial and temporal layers through its `scalabilityMode`.
+List<rtc.RTCRtpEncoding> toSvcEncodings(List<rtc.RTCRtpEncoding> layers) {
+  rtc.RTCRtpEncoding? findByRid(String rid) =>
+      layers.firstWhereOrNull((layer) => layer.rid == rid);
+
+  final highestLayer = findByRid('f') ?? findByRid('h') ?? findByRid('q');
+  if (highestLayer == null) return [];
+
+  return [
+    rtc.RTCRtpEncoding(
+      rid: 'q',
+      active: highestLayer.active,
+      maxBitrate: highestLayer.maxBitrate,
+      maxFramerate: highestLayer.maxFramerate,
+      minBitrate: highestLayer.minBitrate,
+      numTemporalLayers: highestLayer.numTemporalLayers,
+      scaleResolutionDownBy: highestLayer.scaleResolutionDownBy,
+      ssrc: highestLayer.ssrc,
+      scalabilityMode: highestLayer.scalabilityMode,
+    ),
+  ];
+}
+
+/// One encoding on a log line, with the fields the SFU and the encoder act on.
+String describeEncoding(rtc.RTCRtpEncoding encoding) =>
+    '${encoding.rid ?? '-'}('
+    'active: ${encoding.active}, '
+    'maxBitrate: ${encoding.maxBitrate}, '
+    'maxFramerate: ${encoding.maxFramerate}, '
+    'scaleResolutionDownBy: ${encoding.scaleResolutionDownBy}, '
+    'scalabilityMode: ${encoding.scalabilityMode})';
 
 bool isSvcCodec(String? codecOrMimeType) {
   if (codecOrMimeType == null) return false;

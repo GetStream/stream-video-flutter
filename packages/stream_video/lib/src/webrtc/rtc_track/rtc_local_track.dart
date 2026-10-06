@@ -3,6 +3,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../../stream_video.dart';
 import '../../exceptions/video_exception.dart';
+import '../rtc_media_device/device_enumeration_trigger.dart';
 
 const kLocalTrackIdPrefix = 'local';
 
@@ -335,7 +336,8 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
     final isFrontCamera = await rtc.Helper.switchCamera(mediaTrack);
 
     final mediaDevicesResult = await RtcMediaDeviceNotifier.instance
-        .enumerateDevices(
+        .enumerateDevicesFor(
+          DeviceEnumerationTrigger.flipCamera,
           kind: RtcMediaDeviceKind.videoInput,
         );
 

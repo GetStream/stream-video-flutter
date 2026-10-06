@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -5,8 +7,11 @@ final _logger = taggedLogger(tag: 'SV:PartialCallStateBuilder');
 
 /// Convenience widget to build a part of the call screen based on a partial call state.
 ///
-/// It wraps a [StreamBuilder] and uses the [call] and the [selector] to
-/// rebuild the widget when the relevant state changes.
+/// Listens to `call.partialState(selector)` while mounted and rebuilds with
+/// [builder] when the selected value changes. It subscribes again when [call]
+/// or [selector] changes. A [selector] that keeps its identity across
+/// rebuilds, such as a static or top-level function, keeps a single
+/// subscription.
 class PartialCallStateBuilder<T> extends StatelessWidget {
   const PartialCallStateBuilder({
     required this.call,
@@ -21,25 +26,106 @@ class PartialCallStateBuilder<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<T>(
-      stream: call.partialState(selector),
-      initialData: selector(call.state.value),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          // An error snapshot carries no data, so fall back to the current
-          // state rather than letting the cast below fail over the real error.
-          _logger.e(
-            () =>
-                '[PartialCallStateBuilder] partial state error: '
-                '${snapshot.error}',
-          );
-          return builder(context, selector(call.state.value));
-        }
-
-        // Not `??`: a selector whose `T` is nullable may legitimately hold null.
-        return builder(context, snapshot.data as T);
-      },
+    return _PartialCallStateListener<T>(
+      call: call,
+      selector: selector,
+      builder: builder,
     );
+  }
+}
+
+// Holds the last selected value. Reports a partial state error to
+// [FlutterError] once, and again only after a new value has arrived.
+class _PartialCallStateListener<T> extends StatefulWidget {
+  const _PartialCallStateListener({
+    required this.call,
+    required this.selector,
+    required this.builder,
+    super.key,
+  });
+
+  final Call call;
+  final CallStateSelector<T> selector;
+  final Widget Function(BuildContext context, T data) builder;
+
+  @override
+  State<_PartialCallStateListener<T>> createState() =>
+      _PartialCallStateListenerState<T>();
+}
+
+class _PartialCallStateListenerState<T>
+    extends State<_PartialCallStateListener<T>> {
+  StreamSubscription<T>? _subscription;
+  late T _data;
+  // The first value of a subscription replays the current state.
+  bool _awaitingReplay = true;
+  bool _errorReported = false;
+
+  T _select() => widget.selector(widget.call.state.value);
+
+  @override
+  void initState() {
+    super.initState();
+    _data = _select();
+    _subscribe();
+  }
+
+  @override
+  void didUpdateWidget(covariant _PartialCallStateListener<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.call != widget.call ||
+        oldWidget.selector != widget.selector) {
+      _data = _select();
+      _subscribe();
+    }
+  }
+
+  void _subscribe() {
+    _subscription?.cancel();
+    _awaitingReplay = true;
+    _subscription = widget.call
+        .partialState(widget.selector)
+        .listen(_onData, onError: _onError);
+  }
+
+  void _onData(T data) {
+    _errorReported = false;
+    final isReplay = _awaitingReplay;
+    _awaitingReplay = false;
+    if (!mounted || (isReplay && isSameCallStateSelection(data, _data))) return;
+    setState(() => _data = data);
+  }
+
+  void _onError(Object error, StackTrace stackTrace) {
+    if (_errorReported) {
+      _logger.e(() => '[PartialCallStateBuilder] partial state error: $error');
+      return;
+    }
+    _errorReported = true;
+    _logger.e(
+      () =>
+          '[PartialCallStateBuilder] partial state error: $error\n'
+          '$stackTrace',
+    );
+    FlutterError.reportError(
+      FlutterErrorDetails(
+        exception: error,
+        stack: stackTrace,
+        library: 'stream_video_flutter',
+        context: ErrorDescription('while listening to a partial call state'),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(context, _data);
   }
 }
 

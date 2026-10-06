@@ -81,6 +81,7 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
   void initState() {
     super.initState();
     _createOwnedController();
+    _controller.addListener(_onControllerChanged);
   }
 
   @override
@@ -88,31 +89,36 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller ||
         widget.call != oldWidget.call) {
+      (oldWidget.controller ?? _ownedController)?.removeListener(
+        _onControllerChanged,
+      );
       _disposeOwnedController();
       _createOwnedController();
+      _controller.addListener(_onControllerChanged);
     }
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_onControllerChanged);
     _disposeOwnedController();
     super.dispose();
   }
 
   void _createOwnedController() {
     if (widget.controller != null) return;
-    _ownedController = StreamRingingCameraController(call: widget.call)
-      ..addListener(_onControllerChanged);
+    _ownedController = StreamRingingCameraController(call: widget.call);
   }
 
   void _disposeOwnedController() {
-    _ownedController
-      ?..removeListener(_onControllerChanged)
-      ..dispose();
+    _ownedController?.dispose();
     _ownedController = null;
   }
 
   void _onControllerChanged() => setState(() {});
+
+  static List<CallMemberState> _ringingMembers(CallState state) =>
+      state.ringingMembers;
 
   @override
   Widget build(BuildContext context) {
@@ -182,9 +188,9 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
 
     return PartialCallStateBuilder(
       call: widget.call,
-      selector: (state) =>
-          state.ringingMembers.map((e) => e.toUserInfo()).toList(),
-      builder: (_, members) => buildContent(members),
+      selector: _ringingMembers,
+      builder: (_, members) =>
+          buildContent(members.map((e) => e.toUserInfo()).toList()),
     );
   }
 

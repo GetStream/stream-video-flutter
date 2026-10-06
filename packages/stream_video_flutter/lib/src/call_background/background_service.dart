@@ -245,6 +245,8 @@ class StreamBackgroundService {
       );
 
       if (result) {
+        var lastOptions = options;
+
         // ignore: cancel_subscriptions
         final stateSubscription = call.state.listen((CallState value) async {
           _logger.v(
@@ -259,7 +261,10 @@ class StreamBackgroundService {
           try {
             final updateOptions = optionsBuilder.call(call);
 
-            // TODO: That is a lot of service updates. We should only update the service if the options have changed.
+            // Skips the service update when the notification options are
+            // unchanged.
+            if (updateOptions == lastOptions) return;
+
             final updateResult =
                 await StreamVideoFlutterBackground.updateService(
                   NotificationPayload(
@@ -272,6 +277,10 @@ class StreamBackgroundService {
               () =>
                   '<$callCid> [_startManagingCall] call service update result: $updateResult',
             );
+
+            // Only a delivered update is remembered, so a failed one is
+            // retried on the next emission rather than skipped as unchanged.
+            if (updateResult) lastOptions = updateOptions;
           } catch (e, stk) {
             _logger.e(
               () =>

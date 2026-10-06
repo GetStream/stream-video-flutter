@@ -88,7 +88,6 @@
 - `StreamLobbyView` is rebuilt around `StreamLobbyActions` and the lobby controller. It lays itself out per the window's `StreamScreenSize` — under 768px the controls sit below the preview, above it a short row is overlaid on the preview itself. A row of more than `StreamLobbyViewStyle.maxOverlaidControls` (3 by default) always sits below it instead: the overlaid row is centred on a preview whose bottom-start corner is already taken by the participant label, so a longer row runs into it, and the preview goes from a 370×264 aspect to 640×360 at most — while *which* actions are shown does not follow the screen: `actions` defaults to `StreamLobbyActions.simple()` at every width, and choosing a richer preset for a roomier window is the host's call.
 - `StreamLobbyView` takes a `footer`, drawn between the controls and the join button, and a `joinEnabled` flag that says whether the join button can be pressed. Together they let a lobby ask for something the SDK knows nothing about — a shared encryption key, a display name — and refuse to join until it is there.
 
-
 - Added `StreamLobbyHeader`, the heading above the lobby's preview: the design's icon, a title and a line below it. It is registered as `lobbyHeader` on `streamVideoComponentBuilders`, so an app can replace the whole heading — a logo, a call name, a countdown — without touching the rest of the lobby. `StreamLobbyView`'s `title` and `subtitle` are passed through to it. The title falls back to a localized default; the subtitle has none, because the design puts a single line under the icon — pass one to get a second.
 
 - `StreamLobbyActions` carries the `Stream` prefix every other public type in this package has, and its two lanes are unmodifiable where it builds them — `StreamLobbyActions.simple().controls.add(...)` used to quietly mutate something annotated `@immutable`. `StreamLobbyActions.custom` still passes the lists it is given straight through, and is still `const`.
@@ -355,7 +354,6 @@
 - `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
 - Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.
 
-
 ## Upcoming (minor)
 
 ### ✅ Added
@@ -364,12 +362,18 @@
 
 ### 🐞 Fixed
 
+- Fixed `PartialCallStateBuilder` re-subscribing to the call state on every rebuild with an unchanged `selector`, and showing the previous selector's value after it changed.
 - Fixed `PartialCallStateBuilder` throwing a cast error instead of surfacing a partial state error.
 - Fixed `StreamCallParticipants` not applying a changed `sort` or `filter` until the participant list changed.
 - Fixed a `Call.participantsStream` error reaching the zone uncaught instead of being logged.
+- Fixed `LivestreamPlayer` calling `Call.join` again on each call status change while its automatic join was still in progress.
+- Fixed `LivestreamPlayer` repainting the whole screen it is embedded in every second as the call duration updates.
+- Fixed the call controls, livestream widgets and call screens re-subscribing to the call state each time their parent rebuilt.
 
 ### 🔄 Changed
 
+- `PartialCallStateBuilder` now reports partial state errors to `FlutterError.onError`.
+- The iOS picture-in-picture view and the Android background service now update only when the participant list or notification options change, instead of on every call state emission.
 - [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
 - [Android] Replaced `kotlin-parcelize` with hand-written `Parcelable` implementations for the notification payloads. `kotlin-parcelize` is a Kotlin compiler plugin and does not run under built-in Kotlin: it applies without error but generates no `writeToParcel`, so `@Parcelize` classes fail to compile. Behaviour is unchanged.
 - Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.
@@ -377,6 +381,7 @@
 - `StreamCallParticipants` and `StreamLivestreamHosts` no longer rebuild when an update leaves the rendered participants unchanged.
 - `LivestreamContent` renders participants from `Call.participantsStream` instead of the raw call state.
 - `LivestreamBackstageContent` only rebuilds when the participant count changes.
+- `ToggleScreenShareOption` and the call controls of `StreamCallContent` no longer rebuild on local participant changes they don't use.
 
 ## 1.6.0
 
