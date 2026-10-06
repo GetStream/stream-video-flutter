@@ -66,6 +66,19 @@ class CallConnectionCoordinator {
     }
   }
 
+  /// Starts the reconnect that was asked for while a join or reconnect ran,
+  /// once that work has finished. Called from [_serially] after every task.
+  ///
+  /// The trigger arrived too late for the work to act on: a socket or peer
+  /// connection of the session that is now current failed after that session
+  /// had started, for example while a migration waited for the new SFU. The
+  /// work still ended connected, so Connected here does not mean the session
+  /// is healthy, and the reconnect runs now.
+  ///
+  /// In any other phase there is nothing to reconnect: the call is leaving,
+  /// has left, or its join or reconnect failed and it leaves next. A held
+  /// request for a session that has since been replaced is dropped by
+  /// [_takeHeldReconnect].
   void _startHeldReconnect() {
     final held = _takeHeldReconnect();
     if (held == null) return;
