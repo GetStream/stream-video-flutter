@@ -10,6 +10,17 @@ import '../fixtures/data.dart';
 
 /// Pins how `Call.join` behaves today, including where it races `leave`, so
 /// moving the connection code out of `Call` cannot change it unnoticed.
+/// Idle, then connecting, then disconnected by the user's own leave.
+final cancelledFromConnecting = [
+  isA<CallStatusIdle>(),
+  isA<CallStatusConnecting>(),
+  isA<CallStatusDisconnected>().having(
+    (s) => s.reason,
+    'reason',
+    isA<DisconnectReasonCancelled>(),
+  ),
+];
+
 void main() {
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -109,10 +120,9 @@ void main() {
       final second = call.join();
 
       final results = await Future.wait([first, second]);
-      expect(results.every((r) => r.isFailure), isTrue);
       expect(
-        results[1].getErrorOrNull()?.message,
-        results[0].getErrorOrNull()?.message,
+        results.map((r) => r.getErrorOrNull()?.message),
+        ['connect cancelled', 'connect cancelled'],
       );
       harness.verifyJoinCallCount(1);
     });
@@ -172,14 +182,14 @@ void main() {
       await pumpEventQueue();
 
       harness.verifyMakeCallSessionCount(0);
-      expect(call.state.value.status, isA<CallStatusDisconnected>());
-      expect(statuses.last, isA<CallStatusDisconnected>());
+      expect(statuses, cancelledFromConnecting);
     });
 
     test('while the SFU session is being created', () async {
       final gate = Completer<void>();
       harness.stubMakeCallSession(() => gate.future);
       final call = harness.buildCall();
+      final statuses = recordStatuses(call);
 
       final join = call.join();
       await pumpEventQueue();
@@ -203,7 +213,7 @@ void main() {
           clientEventRetryCount: any(named: 'clientEventRetryCount'),
         ),
       );
-      expect(call.state.value.status, isA<CallStatusDisconnected>());
+      expect(statuses, cancelledFromConnecting);
     });
 
     test('while the SFU session is starting', () async {
@@ -213,6 +223,7 @@ void main() {
         return sessionStartSuccess();
       });
       final call = harness.buildCall();
+      final statuses = recordStatuses(call);
 
       final join = call.join();
       await pumpEventQueue();
@@ -224,7 +235,7 @@ void main() {
       gate.complete();
       await pumpEventQueue();
 
-      expect(call.state.value.status, isA<CallStatusDisconnected>());
+      expect(statuses, cancelledFromConnecting);
     });
   });
 

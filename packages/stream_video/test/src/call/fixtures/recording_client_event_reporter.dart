@@ -6,7 +6,8 @@ import 'package:stream_video/stream_video.dart';
 /// Reporter that records the aborts and join attempts a call reports.
 ///
 /// Every other member delegates to the no-op reporter. Set
-/// [onReportJoinAttempt] to make [reportJoinAttempt] throw.
+/// [onReportJoinAttempt] to run code, such as a throw, inside
+/// [reportJoinAttempt].
 class RecordingClientEventReporter implements ClientEventReporter {
   RecordingClientEventReporter({this.onReportJoinAttempt});
 

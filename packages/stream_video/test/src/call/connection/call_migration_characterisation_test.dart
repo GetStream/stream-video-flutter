@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
@@ -30,6 +32,14 @@ void main() {
     () async {
       harness = ConnectionHarness(sessionCount: 2);
       final [first, second] = harness.sessions;
+      final migrationGate = Completer<Result<None>>();
+      when(
+        second.waitForMigrationComplete,
+      ).thenAnswer((_) => migrationGate.future);
+      var firstClosed = false;
+      when(
+        () => first.close(any(), closeReason: any(named: 'closeReason')),
+      ).thenAnswer((_) async => firstClosed = true);
       final call = harness.buildCall();
       await call.join();
       final statuses = recordStatuses(call);
@@ -38,7 +48,17 @@ void main() {
         first,
         const SfuGoAwayEvent(goAwayReason: SfuGoAwayReason.rebalance),
       );
+      // The wait for the new SFU's confirmation is asked for when the session
+      // is made, before the old socket closes; the status stays migrating
+      // until it arrives.
+      await waitUntil(() => firstClosed);
       expect(call.state.value.status, isA<CallStatusMigrating>());
+      verifyInOrder([
+        second.waitForMigrationComplete,
+        () => first.close(StreamVideoCloseCode.disposeOldSocket),
+      ]);
+
+      migrationGate.complete(const Result.success(none));
       await waitUntil(() => call.state.value.status is CallStatusConnected);
 
       verify(
@@ -60,16 +80,44 @@ void main() {
           reason: 'go away',
         ),
       ).called(1);
-      verify(second.waitForMigrationComplete).called(1);
-      verify(
-        () => first.close(StreamVideoCloseCode.disposeOldSocket),
-      ).called(1);
       verifyNever(() => first.leave(reason: any(named: 'reason')));
-      harness.verifyMakeCallSessionCount(2);
-      expect(statuses.last, isA<CallStatusConnected>());
+      expect(harness.captureMakeCallSessionIds(), [
+        (sessionId: null, sessionSeq: 0),
+        (sessionId: 'session-0', sessionSeq: 1),
+      ]);
+      expect(statuses, [
+        isA<CallStatusConnected>(),
+        isA<CallStatusMigrating>(),
+        isA<CallStatusConnected>(),
+      ]);
     },
     timeout: const Timeout(Duration(seconds: 30)),
   );
+
+  group('known hazard', () {
+    // Changes with FLU-861: a migration disposes the session it moved off.
+    test(
+      'a migration closes the old session but never disposes it',
+      () async {
+        harness = ConnectionHarness(sessionCount: 2);
+        final [first, _] = harness.sessions;
+        final call = harness.buildCall();
+        await call.join();
+
+        await harness.emitSfu(
+          first,
+          const SfuGoAwayEvent(goAwayReason: SfuGoAwayReason.rebalance),
+        );
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+
+        verify(
+          () => first.close(StreamVideoCloseCode.disposeOldSocket),
+        ).called(1);
+        verifyNever(first.dispose);
+      },
+      timeout: const Timeout(Duration(seconds: 30)),
+    );
+  });
 
   test(
     'a migration that does not complete escalates to a rejoin',
@@ -119,8 +167,13 @@ void main() {
       ).called(1);
       verify(() => second.leave(reason: any(named: 'reason'))).called(1);
       verify(second.dispose).called(1);
-      harness.verifyMakeCallSessionCount(3);
       verifyNever(third.waitForMigrationComplete);
+      // A migration keeps the session id, a rejoin starts a new one.
+      expect(harness.captureMakeCallSessionIds(), [
+        (sessionId: null, sessionSeq: 0),
+        (sessionId: 'session-0', sessionSeq: 1),
+        (sessionId: null, sessionSeq: 2),
+      ]);
     },
     timeout: const Timeout(Duration(seconds: 40)),
   );

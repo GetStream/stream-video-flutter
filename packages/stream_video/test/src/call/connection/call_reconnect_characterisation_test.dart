@@ -46,8 +46,8 @@ void main() {
         );
         await call.join();
 
-        // From here on every attempt fails: fast reconnects, and the SFU
-        // sessions the rejoin they escalate to creates.
+        // From here on every attempt fails: the fast reconnects, and the
+        // session starts of the rejoins they escalate to.
         harness
           ..stubFastReconnect(
             harness.session,
@@ -66,7 +66,20 @@ void main() {
         await harness.emitSfu(harness.session, sfuSocketDropped);
         await waitUntil(() => call.state.value.status.isDisconnected);
 
-        expect(statuses, contains(isA<CallStatusReconnectionFailed>()));
+        // How many attempts fit in the timeout varies; every status between
+        // connected and giving up is a reconnecting one.
+        expect(statuses.first, isA<CallStatusConnected>());
+        expect(
+          statuses.sublist(1, statuses.length - 2),
+          everyElement(isA<CallStatusReconnecting>()),
+        );
+        expect(statuses.sublist(statuses.length - 2), [
+          isA<CallStatusReconnectionFailed>(),
+          isA<CallStatusDisconnected>(),
+        ]);
+        verify(
+          () => harness.session.leave(reason: 'reconnection failed'),
+        ).called(1);
         final status = call.state.value.status as CallStatusDisconnected;
         expect(status.reason, isA<DisconnectReasonReconnectionFailed>());
         expect(harness.reporter.aborts, [
@@ -90,7 +103,8 @@ void main() {
         final statuses = recordStatuses(call);
 
         // A reconnect triggered by the network reports a join attempt, which
-        // is where the error is raised.
+        // is where the error is raised. That call sits in the loop body
+        // outside the join, so this pins the scope of the loop's catch.
         harness.internetStatus.add(InternetStatus.disconnected);
         await pumpEventQueue();
         harness.internetStatus.add(InternetStatus.connected);
@@ -105,8 +119,8 @@ void main() {
     );
 
     test(
-      'the same error thrown by a fast reconnect leaves the call as a join '
-      'failure, without ReconnectionFailed',
+      'an unrecoverable API error thrown by a fast reconnect leaves the call '
+      'as a join failure, without ReconnectionFailed',
       () async {
         final call = harness.buildCall();
         await call.join();
@@ -134,6 +148,25 @@ void main() {
         ]);
       },
     );
+  });
+
+  test('a socket drop during a leave does not reconnect', () async {
+    final call = harness.buildCall();
+    await call.join();
+    final statuses = recordStatuses(call);
+    final disposeGate = Completer<void>();
+    when(harness.session.dispose).thenAnswer((_) => disposeGate.future);
+
+    final leave = call.leave();
+    await pumpEventQueue();
+    await harness.emitSfu(harness.session, sfuSocketDropped);
+    disposeGate.complete();
+    await leave;
+    await pumpEventQueue();
+
+    verifyFastReconnectCount(0);
+    expect(statuses, isNot(contains(isA<CallStatusReconnecting>())));
+    expect(call.state.value.status, isA<CallStatusDisconnected>());
   });
 
   group('known hazard', () {

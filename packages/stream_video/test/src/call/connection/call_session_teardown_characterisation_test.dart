@@ -1,5 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/call/stats/tracer.dart';
+import 'package:stream_video/src/webrtc/rtc_manager.dart';
+import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../fixtures/call_test_helpers.dart';
@@ -26,6 +29,10 @@ void main() {
       'the next attempt flushes',
       () async {
         final first = harness.sessions.first;
+        final rtcManager = _MockRtcManager();
+        when(() => rtcManager.subscriber).thenReturn(_FakeSubscriber());
+        when(() => rtcManager.publisher).thenReturn(null);
+        when(() => first.rtcManager).thenReturn(rtcManager);
         harness.stubSessionStart(
           first,
           () async => const Result.failure(
@@ -38,11 +45,39 @@ void main() {
 
         expect(result.isSuccess, isTrue);
         harness.verifyMakeCallSessionCount(2);
-        // Nothing reads the peer connections of a session that never started,
-        // except the stats reporter it was given anyway: flushing it on the
-        // next attempt asks for publisher and subscriber stats.
-        verify(() => first.rtcManager).called(2);
+        // The next attempt flushes the failed session's stats reporter.
+        verify(() => first.sfuClient.sendStats(any())).called(1);
       },
     );
   });
+}
+
+class _MockRtcManager extends Mock implements RtcManager {
+  @override
+  Future<void> dispose() async {}
+}
+
+/// A subscriber whose stats are empty but present, so a flush sends them.
+class _FakeSubscriber extends Fake implements TracedStreamPeerConnection {
+  @override
+  Future<void> dispose() async {}
+
+  @override
+  final Tracer tracer = Tracer('subscriber');
+
+  @override
+  Future<
+    ({
+      List<RtcStats> rtcStats,
+      RtcPrintableStats printable,
+      List<Map<String, dynamic>> rawStats,
+    })
+  >
+  getStats() async {
+    return (
+      rtcStats: <RtcStats>[],
+      printable: const RtcPrintableStats(local: '', remote: ''),
+      rawStats: <Map<String, dynamic>>[],
+    );
+  }
 }

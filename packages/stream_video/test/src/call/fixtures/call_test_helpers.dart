@@ -391,8 +391,9 @@ MockCallSession setupMockCallSession() {
   return callSession;
 }
 
-/// A session factory handing out [callSession], or each of [callSessions] in
-/// turn and then the last one again.
+/// A session factory handing out each of [callSessions] in turn and then the
+/// last one again. Without [callSessions] it hands out [callSession], or a
+/// fresh mock on every call when that is null too.
 MockSessionFactory setupMockSessionFactory({
   MockCallSession? callSession,
   List<MockCallSession>? callSessions,

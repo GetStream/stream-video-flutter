@@ -20,7 +20,11 @@ import 'recording_client_event_reporter.dart';
 /// order, and a telemetry reporter that records aborts.
 class ConnectionHarness {
   ConnectionHarness({int sessionCount = 1})
-    : sessions = List.generate(sessionCount, (_) => setupMockCallSession()) {
+    : sessions = List.generate(sessionCount, (i) {
+        final session = setupMockCallSession();
+        when(() => session.sessionId).thenReturn('session-$i');
+        return session;
+      }) {
     coordinatorClient = setupMockCoordinatorClient(events: coordinatorEvents);
     sessionFactory = setupMockSessionFactory(callSessions: sessions);
     streamVideo = setupMockStreamVideo()
@@ -41,10 +45,13 @@ class ConnectionHarness {
   late final MockStreamVideo streamVideo;
   final permissionsManager = MockPermissionsManager();
 
+  /// The first SFU session, the one the initial join gets.
   MockCallSession get session => sessions.first;
 
   /// The state manager of the call [buildCall] built last.
   late CallStateNotifier stateManager;
+
+  final _calls = <Call>[];
 
   Call buildCall({
     CallPreferences? preferences,
@@ -59,7 +66,7 @@ class ConnectionHarness {
     if (status != null) callState = callState.copyWith(status: status);
     stateManager = CallStateNotifier(callState);
 
-    return createTestCall(
+    final call = createTestCall(
       coordinatorClient: coordinatorClient,
       streamVideo: streamVideo,
       stateManager: stateManager,
@@ -68,6 +75,8 @@ class ConnectionHarness {
       retryPolicy: retryPolicy,
       sessionFactory: sessionFactory,
     );
+    _calls.add(call);
+    return call;
   }
 
   /// Answers every coordinator join with [answer].
@@ -187,7 +196,60 @@ class ConnectionHarness {
     await pumpEventQueue();
   }
 
-  Future<void> dispose() => internetStatus.close();
+  /// Leaves every call [buildCall] built, so no join or reconnect keeps
+  /// running into the next test, and closes the streams.
+  Future<void> dispose() async {
+    for (final call in _calls) {
+      await call.leave();
+    }
+    await coordinatorEvents.close();
+    await internetStatus.close();
+  }
+
+  /// Captures the `sessionId` and `sessionSeq` of every SFU session made.
+  List<({String? sessionId, int sessionSeq})> captureMakeCallSessionIds() {
+    final captured = verify(
+      () => sessionFactory.makeCallSession(
+        onSuspendedAudioTrackRecorded: any(
+          named: 'onSuspendedAudioTrackRecorded',
+        ),
+        sessionId: captureAny(named: 'sessionId'),
+        sessionSeq: captureAny(named: 'sessionSeq'),
+        credentials: any(named: 'credentials'),
+        stateManager: any(named: 'stateManager'),
+        dynascaleManager: any(named: 'dynascaleManager'),
+        networkMonitor: any(named: 'networkMonitor'),
+        statsOptions: any(named: 'statsOptions'),
+        onReconnectionNeeded: any(named: 'onReconnectionNeeded'),
+        clientPublishOptions: any(named: 'clientPublishOptions'),
+        streamVideo: any(named: 'streamVideo'),
+        leftoverTraceRecords: any(named: 'leftoverTraceRecords'),
+        pcFactory: any(named: 'pcFactory'),
+        e2eeManager: any(named: 'e2eeManager'),
+      ),
+    ).captured;
+    // Each call contributes both captures, in an order mocktail picks.
+    return [
+      for (var i = 0; i < captured.length; i += 2)
+        (
+          sessionId: [
+            captured[i],
+            captured[i + 1],
+          ].whereType<String>().firstOrNull,
+          sessionSeq: [captured[i], captured[i + 1]].whereType<int>().single,
+        ),
+    ];
+  }
+
+  /// Waits for the abort count to reach [count], then for a grace period in
+  /// which no further abort may arrive.
+  Future<void> settleAborts(
+    int count, {
+    Duration grace = const Duration(seconds: 1),
+  }) async {
+    await waitUntil(() => reporter.aborts.length >= count);
+    await Future<void>.delayed(grace);
+  }
 }
 
 /// What a successful SFU session start or fast reconnect returns.
@@ -213,7 +275,7 @@ Result<CoordinatorJoined> unrecoverableJoinFailure() {
   );
 }
 
-/// A coordinator failure the join retries.
+/// A coordinator failure the join classes as retryable (503).
 Result<CoordinatorJoined> recoverableJoinFailure() {
   return const Result.failure(
     StreamVideoExceptionWithCause(
@@ -249,7 +311,7 @@ const sfuSocketDropped = SfuSocketDisconnected(
   ),
 );
 
-/// Records every distinct status [call] moves through, from now on.
+/// Records every distinct status of [call], starting with the current one.
 List<CallStatus> recordStatuses(Call call) {
   final statuses = <CallStatus>[];
   call.state.map((s) => s.status).distinct().listen(statuses.add);
