@@ -1090,7 +1090,11 @@ class Call {
     return remaining == 1;
   }
 
-  Future<void> _onSfuEvent(SfuEvent sfuEvent) async {
+  /// Handles [sfuEvent], sent by [session].
+  Future<void> _onSfuEvent(
+    SfuEvent sfuEvent, {
+    required CallSession session,
+  }) async {
     if (sfuEvent is SfuParticipantLeftEvent) {
       if (sfuEvent.callCid != callCid.value) return;
 
@@ -1119,7 +1123,7 @@ class Call {
       _stateManager.sfuCallEnded(sfuEvent);
     }
 
-    await _connection._onSfuConnectionEvent(sfuEvent);
+    await _connection._onSfuConnectionEvent(sfuEvent, session: session);
   }
 
   Future<Result<None>> setLocalTrack(RtcLocalTrack track) async {

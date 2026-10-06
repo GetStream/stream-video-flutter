@@ -54,23 +54,42 @@ class CallConnectionCoordinator {
 
   /// Runs [task] once the join and reconnect work before it has finished.
   /// A reconnect asked for meanwhile, and not taken by [task], starts once
-  /// it is done.
+  /// it is done, if the call is still connected.
+  ///
+  /// Every task goes through here: whichever finishes last is the one that
+  /// starts the held reconnect.
   Future<T> _serially<T>(Future<T> Function() task) async {
     try {
       return await _executor.run(task);
     } finally {
-      final held = _takeHeldReconnect();
-      if (held != null && _phase.value is ConnectionConnected) {
-        _call._logger.d(() => '[reconnect] starting held $held');
-        unawaited(
-          _reconnect(
-            held.strategy,
-            reconnectReason: held.reason,
-            triggeredByNetwork: held.triggeredByNetwork,
-          ),
-        );
-      }
+      _startHeldReconnect();
     }
+  }
+
+  void _startHeldReconnect() {
+    final held = _takeHeldReconnect();
+    if (held == null) return;
+
+    final phase = _phase.value;
+    if (phase is! ConnectionConnected) {
+      _call._logger.v(() => '[reconnect] dropped held $held (phase: $phase)');
+      return;
+    }
+
+    _call._logger.d(() => '[reconnect] starting held $held');
+    unawaited(
+      _reconnect(
+        held.strategy,
+        reconnectReason: held.reason,
+        triggeredByNetwork: held.triggeredByNetwork,
+      ).catchError((Object error, StackTrace stackTrace) {
+        _call._logger.e(
+          () =>
+              '[reconnect] held reconnect failed: $error, '
+              'stackTrace: $stackTrace',
+        );
+      }),
+    );
   }
 
   /// The held reconnect, unless the session it was asked for has been
@@ -278,17 +297,20 @@ class CallConnectionCoordinator {
     if (_phase.value is ConnectionReconnecting) {
       _call._logger.v(() => '[join] await the running reconnect');
 
+      final ConnectionPhase settled;
       try {
-        // Queued behind the reconnect, so it runs once the reconnect is done.
-        await _executor
-            .run(() async {})
-            .timeout(_call._stateManager.callState.preferences.connectTimeout);
+        // Queued behind the reconnect, so it reads the phase the reconnect
+        // ended on. Through _serially, so a reconnect held meanwhile starts
+        // after that read.
+        settled = await _serially(
+          () async => _phase.value,
+        ).timeout(_call._stateManager.callState.preferences.connectTimeout);
       } on TimeoutException {
         _call._logger.e(() => '[join] timed out waiting for ongoing connect');
         return failureWithError('timed out waiting for ongoing connect');
       }
 
-      if (_phase.value is ConnectionConnected) {
+      if (settled is ConnectionConnected) {
         _call._logger.v(() => '[join] ongoing connect succeeded');
         return const Result.success(none);
       }
@@ -1056,7 +1078,7 @@ class CallConnectionCoordinator {
             .mapToCallEvent(_call.state.value)
             .emitIfNotNull(_call._callEvents);
         unawaited(
-          _call._onSfuEvent(event).catchError(
+          _call._onSfuEvent(event, session: session).catchError(
             (Object error, StackTrace stackTrace) {
               _call._logger.e(
                 () =>
@@ -1151,9 +1173,12 @@ class CallConnectionCoordinator {
     );
   }
 
-  Future<void> _onSfuConnectionEvent(SfuEvent sfuEvent) async {
-    // The session that sent the event; a reconnect it asks for is for it.
-    final session = _session;
+  /// Handles the connection events of [session], the session that sent
+  /// [sfuEvent]; a reconnect it asks for is for that session.
+  Future<void> _onSfuConnectionEvent(
+    SfuEvent sfuEvent, {
+    required CallSession session,
+  }) async {
     if (sfuEvent is SfuSocketDisconnected) {
       await _sfuStatsReporter?.sendSfuStats();
       // Don't attempt reconnection if leaving the call was triggered, or if the
@@ -1279,7 +1304,8 @@ class CallConnectionCoordinator {
 
   /// Reconnects with [strategy], or, while other join or reconnect work runs,
   /// holds the request for it. [source] is the session the reconnect is for;
-  /// by default the current one.
+  /// by default the current one. A held request is always for the current
+  /// session: one for a replaced session is dropped.
   Future<void> _reconnect(
     SfuReconnectionStrategy strategy, {
     String? reconnectReason,
@@ -1292,6 +1318,14 @@ class CallConnectionCoordinator {
     }
 
     if (_executor.isBusy) {
+      // From a session already replaced, such as the old one during a rejoin.
+      if (source != null && !identical(source, _session)) {
+        _call._logger.v(
+          () => '[reconnect] dropped $strategy (session replaced)',
+        );
+        return;
+      }
+
       _call._logger.w(
         () => '[reconnect] held $strategy (connection work running)',
       );
@@ -1348,10 +1382,14 @@ class CallConnectionCoordinator {
             DateTime.now().difference(reconnectStartTime) >
             _fastReconnectDeadline;
 
-        // A reconnect asked for during the attempt or its backoff.
+        // A rejoin or migrate asked for during the attempt or its backoff;
+        // either one makes the next attempt a rejoin.
         final held = _takeHeldReconnect();
         final hasPendingRejoin =
             held != null && held.isStrongerThan(SfuReconnectionStrategy.fast);
+        if (held != null && !hasPendingRejoin) {
+          _call._logger.v(() => '[reconnect] next attempt covers held $held');
+        }
 
         final hasClosedPeerConnection =
             (_session?.rtcManager?.publisher?.isClosed() ?? false) ||
@@ -1482,11 +1520,13 @@ class CallConnectionCoordinator {
           // Reconnects asked for since the loop started, such as the other
           // peer connection dropping too, are taken into this attempt.
           final held = _takeHeldReconnect();
-          if (held != null && held.isStrongerThan(_reconnectStrategy)) {
+          if (held != null) {
             _call._logger.d(() => '[reconnect] taking held $held');
-            _updateReconnect(
-              (phase) => phase.copyWith(strategy: held.strategy),
-            );
+            if (held.isStrongerThan(_reconnectStrategy)) {
+              _updateReconnect(
+                (phase) => phase.copyWith(strategy: held.strategy),
+              );
+            }
           }
 
           _setReconnectStep(CallReconnectPhase.joining);

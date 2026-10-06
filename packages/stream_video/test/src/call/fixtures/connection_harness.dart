@@ -114,8 +114,8 @@ class ConnectionHarness {
   /// order the sessions were made.
   final reconnectionCallbacks = <OnReconnectionNeeded>[];
 
-  /// Asks for a reconnect with [strategy] the way the publisher of the
-  /// [index]th session made would.
+  /// Asks for a reconnect with [strategy] through the publisher of
+  /// `sessions[index]`, the way its peer connection would.
   void requestReconnect(int index, SfuReconnectionStrategy strategy) {
     final publisher = _MockStreamPeerConnection();
     when(() => publisher.type).thenReturn(StreamPeerType.publisher);

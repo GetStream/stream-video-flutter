@@ -28,18 +28,26 @@ final class ReconnectRequest {
       _rank(strategy) > _rank(other);
 
   /// This request combined with [next], which was asked for later. A request
-  /// for another session replaces this one; for the same session the stronger
-  /// strategy wins.
+  /// for another session replaces this one, since sessions only move forward.
+  /// For the same session the stronger strategy wins, and the result counts
+  /// as triggered by the network if either request was.
   ReconnectRequest mergedWith(ReconnectRequest next) {
     if (!identical(next.session, session)) return next;
-    return isStrongerThan(next.strategy) ? this : next;
+    final stronger = isStrongerThan(next.strategy) ? this : next;
+    return ReconnectRequest(
+      stronger.strategy,
+      reason: stronger.reason,
+      triggeredByNetwork: triggeredByNetwork || next.triggeredByNetwork,
+      session: session,
+    );
   }
 
   static int _rank(SfuReconnectionStrategy strategy) => switch (strategy) {
+    SfuReconnectionStrategy.unspecified => 0,
+    SfuReconnectionStrategy.disconnect => 0,
     SfuReconnectionStrategy.fast => 1,
     SfuReconnectionStrategy.migrate => 2,
     SfuReconnectionStrategy.rejoin => 3,
-    _ => 0,
   };
 
   @override
@@ -54,7 +62,7 @@ final class ReconnectRequest {
 /// keeps it, merged with any other held request, for the running task or the
 /// one after it to take.
 @internal
-class ConnectionExecutor {
+final class ConnectionExecutor {
   final _lock = Lock();
   ReconnectRequest? _held;
 
