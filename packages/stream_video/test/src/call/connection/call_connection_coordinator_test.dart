@@ -2,16 +2,18 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/telemetry/client_event_types.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../fixtures/call_test_helpers.dart';
 import '../fixtures/connection_harness.dart';
+import '../fixtures/data.dart';
 
-/// Pins what the connection coordinator owns beyond the A1 characterisation:
-/// leaving is terminal, waits end on leave, a failed join leaves once, a join
-/// refused before it starts leaves the call idle, and each reconnect counts
-/// its attempts afresh.
+/// Pins what the connection coordinator owns: leaving is terminal, waits end
+/// on leave, a failed join leaves once, a remote end leaves like a local
+/// leave, a join refused before it starts leaves the call idle, and each
+/// reconnect counts its attempts afresh.
 void main() {
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -159,7 +161,7 @@ void main() {
       harness.stubJoinCall(() async => recoverableJoinFailure());
       final call = harness.buildCall(
         retryPolicy: RetryPolicy(
-          backoff: (_, _) => const Duration(milliseconds: 300),
+          backoff: (_, _) => const Duration(seconds: 1),
         ),
       );
 
@@ -169,7 +171,7 @@ void main() {
       await call.leave();
 
       expect((await join).isFailure, isTrue);
-      await Future<void>.delayed(const Duration(milliseconds: 400));
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
       harness.verifyJoinCallCount(1);
     },
   );
@@ -205,4 +207,212 @@ void main() {
     final status = call.state.value.status as CallStatusDisconnected;
     expect(status.reason, isA<DisconnectReasonRejected>());
   });
+
+  void stubRejectCall() {
+    when(
+      () => harness.coordinatorClient.rejectCall(
+        cid: any(named: 'cid'),
+        reason: any(named: 'reason'),
+      ),
+    ).thenAnswer((_) async => const Result.success(none));
+  }
+
+  test(
+    'a leave while the call is being marked active leaves it neither active '
+    'nor registered',
+    () async {
+      final gate = Completer<void>();
+      final clientState = harness.streamVideo.state;
+      when(() => clientState.setActiveCall(any())).thenAnswer(
+        (_) => gate.future,
+      );
+      final call = harness.buildCall();
+
+      final join = call.join();
+      await pumpEventQueue();
+      await call.leave();
+      clearInteractions(clientState);
+      gate.complete();
+
+      expect((await join).getErrorOrNull()?.message, 'call was left');
+      verify(() => clientState.removeActiveCall(call)).called(1);
+      expect(harness.reporter.registered, isEmpty);
+      harness.verifyJoinCallCount(0);
+    },
+  );
+
+  test(
+    'a leave during the outgoing ring wait cancels the join without '
+    'rejecting the call',
+    () async {
+      stubRejectCall();
+      final call = harness.buildCall(status: CallStatus.outgoing());
+
+      final join = call.join();
+      await pumpEventQueue();
+      await call.leave();
+
+      expect((await join).getErrorOrNull()?.message, 'connect cancelled');
+      verifyNever(
+        () => harness.coordinatorClient.rejectCall(
+          cid: any(named: 'cid'),
+          reason: any(named: 'reason'),
+        ),
+      );
+      await harness.settleAborts(1);
+      expect(harness.reporter.aborts, [ClientEventStandardCode.clientAborted]);
+    },
+  );
+
+  test(
+    'a callee rejecting during the ring wait ends the join with the '
+    'rejection, without rejecting back',
+    () async {
+      stubRejectCall();
+      final call = harness.buildCall(status: CallStatus.outgoing());
+
+      final join = call.join();
+      await pumpEventQueue();
+      harness.stateManager.state = harness.stateManager.callState.copyWith(
+        status: CallStatus.disconnected(
+          const DisconnectReason.rejected(byUserId: 'callee'),
+        ),
+      );
+
+      final error = (await join).getErrorOrNull();
+      expect(error?.message, 'connect cancelled');
+      expect(
+        (error! as StreamVideoExceptionWithCause).cause,
+        isA<DisconnectReasonRejected>(),
+      );
+      verifyNever(
+        () => harness.coordinatorClient.rejectCall(
+          cid: any(named: 'cid'),
+          reason: any(named: 'reason'),
+        ),
+      );
+      final status = call.state.value.status as CallStatusDisconnected;
+      expect(status.reason, isA<DisconnectReasonRejected>());
+      await harness.settleAborts(1);
+      expect(harness.reporter.aborts, hasLength(1));
+    },
+  );
+
+  test(
+    'a remote end during the coordinator join cancels the join before any '
+    'SFU session',
+    () async {
+      final gate = Completer<void>();
+      harness.stubJoinCall(() async {
+        await gate.future;
+        return Result.success(SampleCallData.coordinatorJoinedSuccess);
+      });
+      final call = harness.buildCall();
+
+      final join = call.join();
+      await pumpEventQueue();
+      harness.stateManager.state = harness.stateManager.callState.copyWith(
+        status: CallStatus.disconnected(DisconnectReason.ended()),
+      );
+      gate.complete();
+
+      final error = (await join).getErrorOrNull();
+      expect(
+        (error! as StreamVideoExceptionWithCause).cause,
+        isA<DisconnectReasonEnded>(),
+      );
+      await pumpEventQueue();
+      harness.verifyMakeCallSessionCount(0);
+      final status = call.state.value.status as CallStatusDisconnected;
+      expect(status.reason, isA<DisconnectReasonEnded>());
+    },
+  );
+
+  test(
+    'a leave during the reconnect backoff stops the reconnect',
+    () async {
+      final call = harness.buildCall(
+        retryPolicy: RetryPolicy(
+          backoff: (_, _) => const Duration(seconds: 1),
+        ),
+      );
+      await call.join();
+      harness.stubFastReconnect(
+        harness.session,
+        () async => const Result.failure(
+          StreamVideoException(message: 'sfu unreachable'),
+        ),
+      );
+
+      await harness.emitSfu(harness.session, sfuSocketDropped);
+      await waitUntil(() {
+        final status = call.state.value.status;
+        return status is CallStatusReconnecting &&
+            status.phase == CallReconnectPhase.waiting &&
+            status.attempt == 1;
+      });
+      await pumpEventQueue();
+      await call.leave();
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
+
+      verify(
+        () => harness.session.fastReconnect(
+          reconnectDetails: any(named: 'reconnectDetails'),
+          capabilities: any(named: 'capabilities'),
+          unifiedSessionId: any(named: 'unifiedSessionId'),
+        ),
+      ).called(1);
+      harness.verifyMakeCallSessionCount(1);
+      expect(call.state.value.status, isA<CallStatusDisconnected>());
+    },
+  );
+
+  test(
+    'a session that throws while being made is retried, then the join leaves '
+    'once',
+    () async {
+      harness.stubMakeCallSession(() async => throw StateError('no session'));
+      final call = harness.buildCall();
+
+      final result = await call.join();
+
+      expect(result.isFailure, isTrue);
+      harness.verifyMakeCallSessionCount(3);
+      await harness.settleAborts(1);
+      expect(harness.reporter.aborts, [ClientEventStandardCode.clientAborted]);
+    },
+  );
+
+  test(
+    'a leave during the migration wait settles disconnected without a '
+    'failed reconnect',
+    () async {
+      harness = ConnectionHarness(sessionCount: 2);
+      final [first, second] = harness.sessions;
+      when(
+        second.waitForMigrationComplete,
+      ).thenAnswer((_) => Completer<Result<None>>().future);
+      var firstClosed = false;
+      when(
+        () => first.close(any(), closeReason: any(named: 'closeReason')),
+      ).thenAnswer((_) async => firstClosed = true);
+      final call = harness.buildCall();
+      await call.join();
+      final statuses = recordStatuses(call);
+
+      await harness.emitSfu(
+        first,
+        const SfuGoAwayEvent(goAwayReason: SfuGoAwayReason.rebalance),
+      );
+      await waitUntil(() => firstClosed);
+      await call.leave();
+      await pumpEventQueue();
+
+      expect(call.state.value.status, isA<CallStatusDisconnected>());
+      expect(statuses, isNot(contains(isA<CallStatusReconnectionFailed>())));
+      harness.verifyMakeCallSessionCount(2);
+      expect(harness.reporter.aborts, [ClientEventStandardCode.clientAborted]);
+    },
+    timeout: const Timeout(Duration(seconds: 30)),
+  );
 }

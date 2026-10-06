@@ -181,7 +181,13 @@ class CallConnectionCoordinator {
     // was deleted, or the user was blocked. It leaves like a local leave. A
     // leave already running settles the phase itself.
     if (status is CallStatusDisconnected && !_isLeftOrLeaving) {
-      await _leave(reason: status.reason, remote: true);
+      try {
+        await _leave(reason: status.reason, remote: true);
+      } catch (error, stackTrace) {
+        _call._logger.e(
+          () => '[leave] remote leave failed: $error, stackTrace: $stackTrace',
+        );
+      }
     }
   }
 
@@ -284,7 +290,21 @@ class CallConnectionCoordinator {
       return e2eeResult;
     }
 
+    if (_isLeftOrLeaving) {
+      _call._logger.w(() => '[join] rejected (call was left)');
+      return failureWithError('call was left');
+    }
+
     await _call._streamVideo.state.setActiveCall(_call);
+
+    // Marking the call active can wait on another call leaving. A leave of
+    // this call in that time has already cleaned up, so undo the marking
+    // rather than register a call nothing would unregister.
+    if (_isLeftOrLeaving) {
+      _call._logger.w(() => '[join] rejected (call was left)');
+      await _call._streamVideo.state.removeActiveCall(_call);
+      return failureWithError('call was left');
+    }
 
     _call._streamVideo.clientEventReporter
       ..registerCall(_call.callCid)
@@ -302,20 +322,24 @@ class CallConnectionCoordinator {
             .storeIn(_idConnect, _cancelables)
             .valueOrDefault(const JoinCancelled());
 
-    // The only place a failed join leaves the call.
+    // The join's leave decision; the reconnect loop makes its own.
     switch (outcome) {
       case JoinSucceeded():
         _call._logger.v(() => '[join] finished');
         return const Result.success(none);
       case JoinCancelled():
         _call._logger.w(() => '[join] cancelled (call was left)');
-        return failureWithError('connect cancelled');
-      case JoinGiveUp(rejectRing: true, :final error, :final stackTrace):
+        // The cause says why: a local leave, or a remote end or rejection.
+        final status = _call.state.value.status;
+        return failureWithError(
+          'connect cancelled',
+          cause: status is CallStatusDisconnected ? status.reason : null,
+        );
+      case JoinRingUnanswered(:final error, :final stackTrace):
         _call._logger.e(() => '[join] ring not answered: $error');
         await _call.reject(reason: CallRejectReason.timeout());
         return Result.failure(error, stackTrace);
-      case JoinGiveUp(:final error, :final stackTrace) ||
-          JoinRetry(:final error, :final stackTrace):
+      case JoinFailed(:final error, :final stackTrace):
         _call._logger.e(() => '[join] failed: $error');
         await leave(reason: DisconnectReason.failure(error));
         return Result.failure(error, stackTrace);
@@ -378,7 +402,7 @@ class CallConnectionCoordinator {
             _call._logger.e(
               () => '[join] unrecoverable coordinator error, not retrying',
             );
-            return JoinGiveUp(error, stackTrace: outcome.stackTrace);
+            return JoinGiveUp(error, outcome.stackTrace);
           }
 
           final joinCause = error.rawCause;
@@ -389,7 +413,7 @@ class CallConnectionCoordinator {
               _call._logger.e(
                 () => '[join] unrecoverable SFU error, not retrying',
               );
-              return JoinGiveUp(error, stackTrace: outcome.stackTrace);
+              return JoinGiveUp(error, outcome.stackTrace);
             }
 
             final switchSfu = _isJoinErrorCode(connectionFailure);
@@ -438,8 +462,8 @@ class CallConnectionCoordinator {
     });
   }
 
-  /// Runs [_doJoin], turning a thrown error into [JoinRetry], or into
-  /// [JoinGiveUp] when retrying cannot help.
+  /// Runs [_doJoin], turning a thrown error into [JoinRetry]. [_join] then
+  /// decides whether the error is worth retrying.
   Future<JoinOutcome> _doJoinCatching({
     CallConnectOptions? connectOptions,
     int? membersLimit,
@@ -538,6 +562,9 @@ class CallConnectionCoordinator {
     final performingFastReconnect =
         _reconnectStrategy == SfuReconnectionStrategy.fast;
 
+    final ringing =
+        _call.state.value.status is CallStatusOutgoing ||
+        _call.state.value.status is CallStatusIncoming;
     final result = await _awaitIfNeeded();
     if (_isLeftOrLeaving) {
       _call._logger.w(() => '[join] rejected (call was left)');
@@ -546,11 +573,9 @@ class CallConnectionCoordinator {
 
     if (result is Failure) {
       _call._logger.e(() => '[join] waiting failed: $result');
-      return JoinGiveUp(
-        result.videoError,
-        stackTrace: result.stackTrace,
-        rejectRing: true,
-      );
+      return ringing
+          ? JoinRingUnanswered(result.videoError, result.stackTrace)
+          : JoinGiveUp(result.videoError, result.stackTrace);
     }
 
     // Within a reconnect this restates the joining status the loop set just
@@ -1444,7 +1469,7 @@ class CallConnectionCoordinator {
             case JoinCancelled():
               _call._logger.w(() => '[reconnect] cancelled (call was left)');
               return;
-            case JoinGiveUp(:final error):
+            case JoinGiveUp(:final error) || JoinRingUnanswered(:final error):
               _call._logger.e(() => '[reconnect] giving up: $error');
               await leave(reason: DisconnectReason.failure(error));
               return;
@@ -1789,9 +1814,11 @@ class CallConnectionCoordinator {
   /// Shared cleanup sequence for [leave] and [end].
   ///
   /// Moves to [ConnectionLeaving], which stops in-flight join and reconnect
-  /// work at its next check, sends the SFU leave message, and runs [_clear]. Returns `true`
-  /// when the cleanup actually ran; `false` if it was short-circuited because
-  /// a disconnect was already in flight or the call was already disconnected.
+  /// work at its next check, sends the SFU leave message, and runs [_clear].
+  /// Returns `true` when the cleanup ran; `false` if it was short-circuited
+  /// because a disconnect was already in flight or the call had left. A
+  /// [remote] disconnect runs even though the status already says
+  /// disconnected, since that status is what started it.
   Future<bool> _disconnect({
     required String sfuLeaveReason,
     bool remote = false,

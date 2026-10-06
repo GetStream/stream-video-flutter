@@ -19,6 +19,9 @@ class RecordingClientEventReporter implements ClientEventReporter {
   /// Every abort code reported, in order.
   final aborts = <ClientEventStandardCode>[];
 
+  /// The calls registered and not unregistered since.
+  final registered = <String>{};
+
   /// Every join attempt reason reported, in order.
   final joinAttempts = <JoinReason>[];
 
@@ -34,10 +37,16 @@ class RecordingClientEventReporter implements ClientEventReporter {
   }
 
   @override
-  void registerCall(StreamCallCid cid) => _delegate.registerCall(cid);
+  void registerCall(StreamCallCid cid) {
+    registered.add(cid.value);
+    _delegate.registerCall(cid);
+  }
 
   @override
-  void unregisterCall(StreamCallCid cid) => _delegate.unregisterCall(cid);
+  void unregisterCall(StreamCallCid cid) {
+    registered.remove(cid.value);
+    _delegate.unregisterCall(cid);
+  }
 
   @override
   void newJoinAttempt(StreamCallCid cid, {required JoinReason reason}) =>

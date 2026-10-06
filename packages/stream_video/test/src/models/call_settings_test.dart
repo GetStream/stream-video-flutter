@@ -26,4 +26,16 @@ void main() {
       expect(settings, isNot(base));
     }
   });
+
+  test('call settings with the same sections are equal', () {
+    const a = CallSettings(
+      ring: StreamRingSettings(autoCancelTimeout: Duration(seconds: 5)),
+    );
+    const b = CallSettings(
+      ring: StreamRingSettings(autoCancelTimeout: Duration(seconds: 5)),
+    );
+
+    expect(a, b);
+    expect(a.hashCode, b.hashCode);
+  });
 }
