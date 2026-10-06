@@ -16,11 +16,15 @@ void main() {
 
   late CallClosedCaptions captions;
 
-  CallClosedCaptions createCaptions(Duration visibility) {
+  CallClosedCaptions createCaptions(
+    Duration visibility, {
+    int visibleCaptions = 2,
+  }) {
     final stateManager = CallStateNotifier(
       createActiveCallState().copyWith(
         preferences: DefaultCallPreferences(
           closedCaptionsVisibilityDurationMs: visibility.inMilliseconds,
+          closedCaptionsVisibleCaptions: visibleCaptions,
         ),
       ),
     );

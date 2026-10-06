@@ -9,7 +9,7 @@ import '../state/call_state_notifier.dart';
 import 'keyed_timers.dart';
 
 /// Holds a call's closed captions, and removes each one again after
-/// `closedCaptionsVisibilityDurationMs`.
+/// `closedCaptionsVisibilityDurationMs`, unless that is 0 or less.
 @internal
 class CallClosedCaptions {
   CallClosedCaptions({
