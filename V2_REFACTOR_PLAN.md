@@ -27,7 +27,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 | 2 | B4 | `feat/flu-850-call-pass-through-extensions` | #1406 |
 | 3 | B5 | `feat/flu-851-e2ee-claims` | #1408 |
 | 4 | B2 | `feat/flu-849-call-event-router` | #1409 |
-| 5 | FLU-924 | `fix/flu-924-log-coordinator-event-errors` | |
+| 5 | FLU-924 | `fix/flu-924-log-coordinator-event-errors` | #1411 |
 | 6 | FLU-926 | `fix/flu-926-moderation-mute-failure` | |
 | 7 | FLU-927 | `fix/flu-927-closed-captions-reset` | |
 | 8 | FLU-928 | `fix/flu-928-captions-zero-duration` | |
