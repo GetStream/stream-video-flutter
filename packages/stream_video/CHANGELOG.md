@@ -2,6 +2,7 @@
 
 ### ⚠️ Breaking
 
+- `Call`'s permission, moderation, recording, broadcasting, mute, pin, go-live, member, reaction, custom-event and feedback methods are now extension methods on `CallActions`, so a mocked `Call` can no longer stub them.
 - `Call.updateViewportVisibility`, `Call.updateSubscription` and `Call.removeSubscription` are internal; report to `Call.viewportVisibility` instead.
 - `RetryConfig.callRejoinTimeout` is removed. It was deprecated and had no readers. Use `CallPreferences.networkAvailabilityTimeout`, which is what actually bounds waiting for the network.
 - Generated enum types no longer use the `Enum` suffix (e.g. `AudioSettingsRequestDefaultDeviceEnum` → `AudioSettingsRequestDefaultDevice`). The old names remain available as deprecated aliases and will be removed in a future release — please migrate to the new names.
