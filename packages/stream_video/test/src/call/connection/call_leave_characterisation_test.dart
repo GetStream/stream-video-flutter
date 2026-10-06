@@ -191,7 +191,8 @@ void main() {
   });
 
   test(
-    'a leave while another is tearing down short-circuits until it finishes',
+    'a leave while another is tearing down short-circuits, and so does every '
+    'leave after it',
     () async {
       final call = harness.buildCall();
       await call.join();

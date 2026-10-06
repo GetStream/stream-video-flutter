@@ -24,8 +24,9 @@ class CallConnectionCoordinator {
   Future<InternetStatus>? _awaitNetworkAvailableFuture;
   Future<Result<None>>? _awaitMigrationCompleteFuture;
 
-  /// Where the connection is. The connection statuses in [CallState.status]
-  /// are projected from it by [_publishStatus].
+  /// Where the connection is. [_publishStatus] writes the connection status
+  /// it projects to; a disconnect written into the state elsewhere moves it to
+  /// [ConnectionDisconnected] through [_onStateChanged].
   final _phase = MutableStateEmitter<ConnectionPhase>(
     const ConnectionIdle(),
     sync: true,
@@ -56,8 +57,9 @@ class CallConnectionCoordinator {
     _ => 0,
   };
 
-  /// Moves to [next], unless the call is leaving or has left: from leaving,
-  /// only [ConnectionDisconnected] follows, and nothing follows that.
+  /// Moves to [next], unless the call is leaving or has left: from
+  /// [ConnectionLeaving] only [ConnectionDisconnected] follows, and nothing
+  /// follows that.
   void _setPhase(ConnectionPhase next) {
     final current = _phase.value;
     final allowed = switch (current) {
@@ -702,7 +704,7 @@ class CallConnectionCoordinator {
     }
 
     // For migration we have to wait for confirmation before we can complete the flow
-    if (_reconnectStrategy != SfuReconnectionStrategy.migrate) {
+    if (!performingMigration) {
       _call._logger.v(() => '[join] connected');
       _previousSession = null;
       _setPhase(const ConnectionConnected());
@@ -1322,24 +1324,13 @@ class CallConnectionCoordinator {
               'attempt: $_reconnectStatusAttempt',
         );
 
-        // capture BEFORE dispatch — strategy may change inside the helper
+        // Captured before dispatch: a failed attempt changes the strategy.
         final wasMigrating =
             _reconnectStrategy == SfuReconnectionStrategy.migrate;
 
         try {
           final networkStatus = await _awaitNetworkAvailableFuture;
           _call._logger.v(() => '[reconnect] network: $networkStatus');
-
-          if (networkStatus == InternetStatus.disconnected) {
-            _call._logger.w(() => '[reconnect] reconnection timeout');
-            _session?.trace(TraceTag.callReconnectFailed, {
-              'strategy': strategy.name,
-              'error': 'reconnection timeout',
-            });
-            _setPhase(const ConnectionReconnectFailed());
-            _publishStatus();
-            return;
-          }
 
           if (_isLeftOrLeaving) {
             _call._logger.w(
@@ -1349,6 +1340,17 @@ class CallConnectionCoordinator {
               'strategy': strategy.name,
               'error': 'call was left',
             });
+            return;
+          }
+
+          if (networkStatus == InternetStatus.disconnected) {
+            _call._logger.w(() => '[reconnect] reconnection timeout');
+            _session?.trace(TraceTag.callReconnectFailed, {
+              'strategy': strategy.name,
+              'error': 'reconnection timeout',
+            });
+            _setPhase(const ConnectionReconnectFailed());
+            _publishStatus();
             return;
           }
 
@@ -1539,8 +1541,8 @@ class CallConnectionCoordinator {
           return InternetStatus.disconnected;
         });
 
-        // Race the network future against the call lifecycle cancellable
-        // to ensure we don't wait for the network if the call was left
+        // Race the network against leaving, so a call that is left stops
+        // waiting for the network.
         final connectionStatus =
             await Future.any([
                   networkFuture,
@@ -1640,8 +1642,8 @@ class CallConnectionCoordinator {
         },
       );
 
-      // Race the await future against the call lifecycle cancellable
-      // to ensure we don't wait for the call status change if it was left
+      // Race the wait against leaving, so a call that is left stops waiting
+      // for the call status to change.
       return Future.any([
         futureResult,
         lifecycleFuture,
@@ -1699,6 +1701,8 @@ class CallConnectionCoordinator {
         sfuLeaveReason: reason ?? 'user is ending the call',
       );
     } catch (_) {
+      // The teardown failed here, but the call still ends for everyone.
+      await _call._permissionsManager.endCall();
       _settleDisconnected(DisconnectReason.ended());
       rethrow;
     }
@@ -1728,8 +1732,8 @@ class CallConnectionCoordinator {
 
   /// Shared cleanup sequence for [leave] and [end].
   ///
-  /// Moves to [ConnectionLeaving], which cancels in-flight join and reconnect
-  /// work, sends the SFU leave message, and runs [_clear]. Returns `true`
+  /// Moves to [ConnectionLeaving], which stops in-flight join and reconnect
+  /// work at its next check, sends the SFU leave message, and runs [_clear]. Returns `true`
   /// when the cleanup actually ran; `false` if it was short-circuited because
   /// a disconnect was already in flight or the call was already disconnected.
   Future<bool> _disconnect({required String sfuLeaveReason}) async {
@@ -1803,80 +1807,89 @@ class CallConnectionCoordinator {
   Future<void> _clear(String src) async {
     _call._logger.d(() => '[clear] src: $src');
 
-    _call._reactions.cancelTimers();
-    _call._closedCaptions.reset();
-    _call._moderation.cancelTimer();
+    // The client state is cleared even when an earlier step throws, so a
+    // call that failed to tear down fully is not left looking active.
+    try {
+      _call._reactions.cancelTimers();
+      _call._closedCaptions.reset();
+      _call._moderation.cancelTimer();
 
-    _call._stopRingStatePolling();
+      _call._stopRingStatePolling();
 
-    for (final operation in _call._sfuStatsTimers) {
-      await operation.cancel();
-    }
+      for (final operation in _call._sfuStatsTimers) {
+        await operation.cancel();
+      }
 
-    await _flushAndStopSfuStatsReporter();
-    _call._subscriptions.cancelAll();
-    _cancelables.cancelAll();
+      await _flushAndStopSfuStatsReporter();
+      _call._subscriptions.cancelAll();
+      _cancelables.cancelAll();
 
-    // The audio processor is owned by StreamVideo, not by an individual
-    // Call, so stopping it on this call's teardown would silently drop noise
-    // cancellation on any other still-active call that also wants it. Only
-    // stop the global processor when no other active call is configured for
-    if (_call._streamVideo.isAudioProcessorConfigured() &&
-        _call.state.value.settings.audio.noiseCancellation?.mode ==
-            NoiseCancellationSettingsMode.autoOn) {
-      final anotherCallWantsAutoOn = _call._streamVideo.state.activeCalls.value
-          .any(
-            (other) =>
-                other.callCid != _call.callCid &&
-                other.state.value.status is! CallStatusDisconnected &&
-                other.state.value.settings.audio.noiseCancellation?.mode ==
-                    NoiseCancellationSettingsMode.autoOn,
+      // The audio processor is owned by StreamVideo, not by an individual
+      // Call, so stopping it on this call's teardown would silently drop noise
+      // cancellation on any other still-active call that also wants it. Only
+      // stop the global processor when no other active call is configured for
+      if (_call._streamVideo.isAudioProcessorConfigured() &&
+          _call.state.value.settings.audio.noiseCancellation?.mode ==
+              NoiseCancellationSettingsMode.autoOn) {
+        final anotherCallWantsAutoOn = _call
+            ._streamVideo
+            .state
+            .activeCalls
+            .value
+            .any(
+              (other) =>
+                  other.callCid != _call.callCid &&
+                  other.state.value.status is! CallStatusDisconnected &&
+                  other.state.value.settings.audio.noiseCancellation?.mode ==
+                      NoiseCancellationSettingsMode.autoOn,
+            );
+        if (!anotherCallWantsAutoOn) {
+          unawaited(
+            _call.stopAudioProcessing().catchError((Object e) {
+              _call._logger.w(() => '[clear] stopAudioProcessing failed: $e');
+              return const Result.success(none);
+            }),
           );
-      if (!anotherCallWantsAutoOn) {
+        } else {
+          _call._logger.d(
+            () =>
+                '[clear] keeping audio processor running '
+                '(another active call has autoOn)',
+          );
+        }
+      }
+
+      if (_session != null) {
+        await _session!.dispose().catchError((Object e) {
+          _call._logger.w(() => '[clear] session dispose failed: $e');
+        });
+      }
+
+      final pcFactory = _pcFactory;
+      _pcFactory = null;
+      if (pcFactory != null) {
         unawaited(
-          _call.stopAudioProcessing().catchError((Object e) {
-            _call._logger.w(() => '[clear] stopAudioProcessing failed: $e');
-            return const Result.success(none);
+          pcFactory.dispose().catchError((Object e) {
+            _call._logger.w(() => '[clear] pcFactory dispose failed: $e');
           }),
         );
-      } else {
-        _call._logger.d(
-          () =>
-              '[clear] keeping audio processor running '
-              '(another active call has autoOn)',
-        );
       }
-    }
 
-    if (_session != null) {
-      await _session!.dispose().catchError((Object e) {
-        _call._logger.w(() => '[clear] session dispose failed: $e');
-      });
-    }
+      await _call.dynascaleManager.dispose();
+      _call.viewportVisibility.clear();
+      await _call.clearE2EEManager();
+    } finally {
+      _call._streamVideo.clearCallAcceptedOnThisDevice(_call.callCid, _call);
+      _call._streamVideo.releaseRingingCall(_call.callCid, _call);
+      await _call._streamVideo.state.removeActiveCall(_call);
+      if (_call._streamVideo.state.outgoingCall.value?.callCid ==
+          _call.callCid) {
+        await _call._streamVideo.state.setOutgoingCall(null);
+      }
 
-    final pcFactory = _pcFactory;
-    _pcFactory = null;
-    if (pcFactory != null) {
-      unawaited(
-        pcFactory.dispose().catchError((Object e) {
-          _call._logger.w(() => '[clear] pcFactory dispose failed: $e');
-        }),
-      );
-    }
-
-    await _call.dynascaleManager.dispose();
-    _call.viewportVisibility.clear();
-    await _call.clearE2EEManager();
-
-    _call._streamVideo.clearCallAcceptedOnThisDevice(_call.callCid, _call);
-    _call._streamVideo.releaseRingingCall(_call.callCid, _call);
-    await _call._streamVideo.state.removeActiveCall(_call);
-    if (_call._streamVideo.state.outgoingCall.value?.callCid == _call.callCid) {
-      await _call._streamVideo.state.setOutgoingCall(null);
-    }
-
-    if (identical(_call._streamVideo.state.incomingCall.value, _call)) {
-      await _call._streamVideo.state.setIncomingCall(null);
+      if (identical(_call._streamVideo.state.incomingCall.value, _call)) {
+        await _call._streamVideo.state.setIncomingCall(null);
+      }
     }
 
     _call._logger.v(() => '[clear] completed');

@@ -512,7 +512,7 @@ void main() {
       'rejoin hint received while reconnect lock is held is not dropped',
       () async {
         // Override start() to return a long fastReconnectDeadline so
-        // mustPerformRejoin stays false — this isolates the _isRejoinPending
+        // mustPerformRejoin stays false — this isolates the phase's rejoinPending
         // flag as the sole driver of escalation.
         when(
           () => callSession.start(
@@ -571,11 +571,11 @@ void main() {
         await Future<void>.delayed(const Duration(milliseconds: 50));
 
         // Signal a rejoin hint while the reconnect lock is held. The call
-        // must record _isRejoinPending=true and not discard the hint.
+        // must record rejoinPending on the phase and not discard the hint.
         capturedCallback!(mockPc, SfuReconnectionStrategy.rejoin);
 
         // Release the gate: fast reconnect fails. The loop sees
-        // _isRejoinPending=true → shouldRejoin=true → strategy switches to
+        // rejoinPending on the phase → shouldRejoin=true → strategy switches to
         // rejoin → awaits 3s stability window → issues a second joinCall.
         fastReconnectGate.complete();
 

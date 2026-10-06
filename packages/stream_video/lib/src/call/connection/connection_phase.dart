@@ -8,8 +8,8 @@ import '../../utils/result.dart';
 
 /// Where a call's connection to the SFU is.
 ///
-/// [ConnectionLeaving] and [ConnectionDisconnected] are final: once a call
-/// leaves, it never connects again.
+/// [ConnectionLeaving] and [ConnectionDisconnected] are terminal: once a call
+/// starts leaving, it never connects again.
 @internal
 sealed class ConnectionPhase {
   const ConnectionPhase();
@@ -62,8 +62,9 @@ final class ConnectionReconnecting extends ConnectionPhase {
   /// How the current attempt reconnects: fast, rejoin or migrate.
   final SfuReconnectionStrategy strategy;
 
-  /// Every attempt of this reconnect so far, counting from 1, as
-  /// [CallStatusReconnecting.attempt] reports it.
+  /// The attempts of this reconnect so far, as
+  /// [CallStatusReconnecting.attempt] reports them: 0 until the first one
+  /// starts.
   final int attempt;
 
   /// Rejoin and migrate attempts so far, which drive their backoff and the
@@ -73,8 +74,8 @@ final class ConnectionReconnecting extends ConnectionPhase {
   /// What the current attempt is doing.
   final CallReconnectPhase step;
 
-  /// Whether a rejoin was asked for while an attempt was running, so the next
-  /// attempt rejoins.
+  /// Whether the next attempt has to rejoin: a rejoin was asked for while an
+  /// attempt was running, or a fast reconnect found the SFU session gone.
   final bool rejoinPending;
 
   ConnectionReconnecting copyWith({
@@ -101,7 +102,7 @@ final class ConnectionReconnecting extends ConnectionPhase {
   }
 }
 
-/// The reconnect gave up; the call leaves next.
+/// The reconnect gave up. The status this projects to makes the call leave.
 @internal
 final class ConnectionReconnectFailed extends ConnectionPhase {
   const ConnectionReconnectFailed();
@@ -119,7 +120,8 @@ final class ConnectionLeaving extends ConnectionPhase {
   String toString() => 'ConnectionLeaving';
 }
 
-/// Left the call, for [reason].
+/// The call is over: left, ended, or disconnected by the server, for
+/// [reason].
 @internal
 final class ConnectionDisconnected extends ConnectionPhase {
   const ConnectionDisconnected([this.reason]);
