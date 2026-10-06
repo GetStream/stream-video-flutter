@@ -1,3 +1,4 @@
+import 'package:meta/meta.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 
 import '../../models/call_cid.dart';
@@ -6,6 +7,11 @@ import '../../models/call_cid.dart';
 /// Each manager must be mapped to just one call, and vice versa; both mappings
 /// are weak to allow cleanup.
 class E2eeClaims {
+  /// A separate registry. Production code claims through [instance], since a
+  /// second registry would not see the first one's claims.
+  @visibleForTesting
+  E2eeClaims();
+
   /// The registry every call claims through.
   static final instance = E2eeClaims();
 

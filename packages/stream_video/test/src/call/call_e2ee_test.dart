@@ -449,6 +449,22 @@ void main() {
       });
     });
 
+    test('a cleared call can take a new manager', () async {
+      final call = createTestCall();
+      final other = MockEncryptionManager();
+      when(() => other.userId).thenReturn('test-user');
+      when(() => other.isDisposed).thenReturn(false);
+      when(
+        () => other.events,
+      ).thenAnswer((_) => const Stream<E2eeEvent>.empty());
+
+      await call.setE2EEManager(e2ee);
+      await call.clearE2EEManager();
+      await call.setE2EEManager(other);
+
+      expect(call.e2eeManager, same(other));
+    });
+
     test('releasing the claim lets the next instance attach', () async {
       final first = createTestCall();
       await first.setE2EEManager(e2ee);

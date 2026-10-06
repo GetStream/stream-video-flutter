@@ -11,8 +11,8 @@ import '../../utils/result.dart';
 import 'call_encryption_key.dart';
 import 'e2ee_claims.dart';
 
-/// The end-to-end encryption manager of one call: attaching it, building it
-/// from the app's key resolver, and releasing it.
+/// Holds one call's [EncryptionManager]: attaching it, building it from the
+/// app's key resolver, and releasing it.
 class CallE2ee {
   CallE2ee({
     required this._callCid,
@@ -36,7 +36,8 @@ class CallE2ee {
   EncryptionManager? get manager => _manager;
 
   /// Attaches [manager] to the call. Throws a [StateError] once the join has
-  /// begun, or when the manager is disposed or claimed elsewhere.
+  /// begun, when a different manager is already attached, or when [manager]
+  /// is disposed or claimed elsewhere.
   Future<void> attach(EncryptionManager manager) async {
     final status = _state().status;
     final joinUnderWay =
@@ -163,9 +164,10 @@ class CallE2ee {
     final manager = _manager;
     if (manager == null) return;
 
-    // `isDisposed` matters: leave() tears the session down and then calls this,
-    // and a disposed CallSession still holds its RtcManager, so without it
-    // every encrypted call would warn on the way out.
+    // `isDisposed` matters: leave() tears the session down and then calls
+    // Call.clearE2EEManager, and a disposed CallSession still holds its
+    // RtcManager, so without that check every encrypted call would warn on the
+    // way out.
     final session = _session();
     if (session != null && !session.isDisposed && session.rtcManager != null) {
       _logger.w(

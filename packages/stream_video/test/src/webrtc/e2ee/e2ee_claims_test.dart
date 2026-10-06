@@ -26,9 +26,9 @@ void main() {
   });
 
   test('an owner can claim a cid, and claim it again', () {
-    claims
-      ..claim(cidA, owner, manager)
-      ..claim(cidA, owner, manager);
+    claims.claim(cidA, owner, manager);
+
+    expect(() => claims.claim(cidA, owner, manager), returnsNormally);
   });
 
   test('refuses another owner for a claimed cid', () {
@@ -60,16 +60,26 @@ void main() {
   test('a release by the owner frees the cid and the manager', () {
     claims
       ..claim(cidA, owner, manager)
-      ..release(cidA, owner)
-      ..claim(cidA, otherOwner, _MockEncryptionManager())
-      ..claim(cidB, owner, manager);
+      ..release(cidA, owner);
+
+    expect(
+      () => claims
+        ..claim(cidA, otherOwner, _MockEncryptionManager())
+        ..claim(cidB, owner, manager),
+      returnsNormally,
+    );
   });
 
   test('reset drops every claim', () {
     claims
       ..claim(cidA, owner, manager)
-      ..reset()
-      ..claim(cidA, otherOwner, _MockEncryptionManager())
-      ..claim(cidB, owner, manager);
+      ..reset();
+
+    expect(
+      () => claims
+        ..claim(cidA, otherOwner, _MockEncryptionManager())
+        ..claim(cidB, owner, manager),
+      returnsNormally,
+    );
   });
 }

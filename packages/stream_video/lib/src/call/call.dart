@@ -296,7 +296,7 @@ class Call {
   CallCredentials? _credentials;
   CallSession? _session;
 
-  /// End-to-end encryption for this call, set via [setE2EEManager].
+  /// Attaches, resolves and releases this call's [EncryptionManager].
   late final _e2ee = CallE2ee(
     callCid: callCid,
     state: () => state.value,
