@@ -42,7 +42,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 - [x] 1. **A1** [FLU-847](https://linear.app/stream/issue/FLU-847): characterisation tests for Call join, leave and reconnect (M). Gates A2, so it goes first. Ships with this plan.
 - [x] 2. **B4** [FLU-850](https://linear.app/stream/issue/FLU-850): Call pass-throughs to extension methods (S, low risk). Removes about 380 lines from `call.dart` before the risky moves, with no overlap with the connection code.
 - [x] 3. **B5** [FLU-851](https://linear.app/stream/issue/FLU-851): E2EE manager resolution and the claims registry out of Call (S, low risk).
-- [ ] 4. **B2** [FLU-849](https://linear.app/stream/issue/FLU-849): coordinator event router and the reactions and captions helper (S, low risk). Takes `_reactionTimers` out before A6 has to deal with it.
+- [x] 4. **B2** [FLU-849](https://linear.app/stream/issue/FLU-849): coordinator event router and the reactions and captions helper (S, low risk). Takes `_reactionTimers` out before A6 has to deal with it.
 - [ ] 5. **A2** [FLU-855](https://linear.app/stream/issue/FLU-855): verbatim `CallConnectionCoordinator` (L, high risk). Zero behaviour change; existing tests and A1 stay green untouched.
 - [ ] 6. **A3** [FLU-860](https://linear.app/stream/issue/FLU-860): sealed `ConnectionPhase` replaces the connection flags (L, high risk).
 - [ ] 7. **A4** [FLU-864](https://linear.app/stream/issue/FLU-864): one leave decision and one cancellation scope per attempt (M). Fixes bugs 1 and 2 from FLU-859.
