@@ -30,6 +30,7 @@ import '../sfu/data/events/sfu_events.dart';
 import '../sfu/data/models/sfu_audio_bitrate.dart';
 import '../sfu/data/models/sfu_client_capability.dart';
 import '../sfu/data/models/sfu_error.dart';
+import '../sfu/data/models/sfu_participant.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../stream_video.dart';
 import '../telemetry/client_event_types.dart';
@@ -48,6 +49,7 @@ import '../webrtc/model/rtc_video_parameters.dart';
 import '../webrtc/peer_connection_factory.dart';
 import '../webrtc/rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 import '../webrtc/rtc_manager.dart';
+import '../webrtc/rtc_media_device/device_enumeration_trigger.dart';
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
 import '../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../webrtc/rtc_track/rtc_track.dart';
@@ -65,6 +67,7 @@ import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 import 'session/dynascale_manager.dart';
 import 'state/call_state_notifier.dart';
+import 'state/call_state_selection.dart';
 import 'stats/sfu_stats_reporter.dart';
 import 'stats/stats_reporter.dart';
 import 'stats/trace_tag.dart';
@@ -309,6 +312,8 @@ class Call {
   CallSession? _previousSession;
   StreamPeerConnectionFactory? _pcFactory;
 
+  Future<Result<None>>? _pendingJoin;
+
   /// Audio track states captured at suspension time.
   final _suspendedTrackStates = <String, SuspendedTrackState>{};
 
@@ -444,6 +449,11 @@ class Call {
   Stream<Duration> get callDurationStream => _stateManager.durationStream;
   StatsReporter? get statsReporter => _session?.statsReporter;
 
+  /// Emits the value [selector] returns from the call state: the current value
+  /// when listened to, then each value that differs from the one before, as
+  /// compared by [isSameCallStateSelection].
+  ///
+  /// Each listener runs its own [selector] until it cancels.
   Stream<T> partialState<T>(CallStateSelector<T> selector) {
     return _stateManager.partialCallStateStream(selector);
   }
@@ -1379,7 +1389,35 @@ class Call {
   /// - [connectOptions]: optional initial call configuration
   /// - [membersLimit]: Sets the maximum number of members to return as part of the response.
   /// - [hintHighScaleLivestreamPublisher]: Whether the local user is a high-scale livestream publisher.
+  ///
+  /// Calling [join] again while a join on this call is still in flight
+  /// returns the same result as that join instead of starting another one.
   Future<Result<None>> join({
+    CallConnectOptions? connectOptions,
+    int? membersLimit,
+    int maxJoinRetries = 3,
+    bool? hintHighScaleLivestreamPublisher,
+  }) {
+    final pendingJoin = _pendingJoin;
+    if (pendingJoin != null) {
+      _logger.d(() => '[join] awaiting the join already in progress');
+      return pendingJoin;
+    }
+
+    final joinFuture = _joinOnce(
+      connectOptions: connectOptions,
+      membersLimit: membersLimit,
+      maxJoinRetries: maxJoinRetries,
+      hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
+    );
+
+    _pendingJoin = joinFuture;
+    return joinFuture.whenComplete(() {
+      if (identical(_pendingJoin, joinFuture)) _pendingJoin = null;
+    });
+  }
+
+  Future<Result<None>> _joinOnce({
     CallConnectOptions? connectOptions,
     int? membersLimit,
     int maxJoinRetries = 3,
@@ -2259,21 +2297,32 @@ class Call {
     );
   }
 
+  /// Whether exactly one participant, a session of the current user, remains
+  /// once [leaving] is removed.
+  bool _isAloneAfterLeave(SfuParticipant leaving) {
+    final currentUserId = _streamVideo.currentUser.id;
+    var remaining = 0;
+
+    for (final participant in state.value.callParticipants) {
+      if (participant.userId == leaving.userId &&
+          participant.sessionId == leaving.sessionId) {
+        continue;
+      }
+      if (participant.userId != currentUserId || ++remaining > 1) {
+        return false;
+      }
+    }
+
+    return remaining == 1;
+  }
+
   Future<void> _onSfuEvent(SfuEvent sfuEvent) async {
     if (sfuEvent is SfuParticipantLeftEvent) {
       if (sfuEvent.callCid != callCid.value) return;
 
-      final callParticipants = [...state.value.callParticipants]
-        ..removeWhere(
-          (participant) =>
-              participant.userId == sfuEvent.participant.userId &&
-              participant.sessionId == sfuEvent.participant.sessionId,
-        );
-
-      if (callParticipants.length == 1 &&
-          callParticipants.first.userId == _streamVideo.currentUser.id &&
-          state.value.isRingingFlow &&
-          _stateManager.callState.preferences.dropIfAloneInRingingFlow) {
+      if (state.value.isRingingFlow &&
+          _stateManager.callState.preferences.dropIfAloneInRingingFlow &&
+          _isAloneAfterLeave(sfuEvent.participant)) {
         final endResult = await end(
           reason: 'last participant left the call (ringing flow)',
         );
@@ -3025,9 +3074,9 @@ class Call {
     // Call, so stopping it on this call's teardown would silently drop noise
     // cancellation on any other still-active call that also wants it. Only
     // stop the global processor when no other active call is configured for
-    // NoiseCancellationSettingsMode.autoOn.
-    if (state.value.settings.audio.noiseCancellation?.mode ==
-        NoiseCancellationSettingsMode.autoOn) {
+    if (_streamVideo.isAudioProcessorConfigured() &&
+        state.value.settings.audio.noiseCancellation?.mode ==
+            NoiseCancellationSettingsMode.autoOn) {
       final anotherCallWantsAutoOn = _streamVideo.state.activeCalls.value.any(
         (other) =>
             other.callCid != callCid &&
@@ -3114,7 +3163,10 @@ class Call {
   }
 
   Future<void> _applyCallSettingsToConnectOptions(CallSettings settings) async {
-    final mediaDevicesResult = await _rtcMediaDeviceNotifier.enumerateDevices();
+    final mediaDevicesResult = await _rtcMediaDeviceNotifier
+        .enumerateDevicesFor(
+          DeviceEnumerationTrigger.callSettings,
+        );
 
     final mediaDevices = mediaDevicesResult.foldResult(
       success: (success) => success.data,
@@ -4160,7 +4212,7 @@ class Call {
     await result.foldResult(
       success: (success) async {
         final mediaDevicesResult = await _rtcMediaDeviceNotifier
-            .enumerateDevices();
+            .enumerateDevicesFor(DeviceEnumerationTrigger.flipCamera);
 
         final mediaDevices = mediaDevicesResult.foldResult(
           success: (success) => success.data,

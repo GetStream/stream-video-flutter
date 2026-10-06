@@ -54,6 +54,9 @@ void main() {
 
     emitter = MutableStateEmitter<CallState>(callState, sync: true);
     when(() => call.state).thenAnswer((_) => emitter);
+    when(
+      () => call.participantsStream,
+    ).thenAnswer((_) => emitter.map((state) => state.callParticipants));
     when(() => call.viewportVisibility).thenReturn(
       ViewportVisibilityRegistry(
         onAggregate: (aggregate) async {
@@ -86,6 +89,9 @@ void main() {
     when(() => other.state).thenAnswer(
       (_) => MutableStateEmitter<CallState>(otherState, sync: true),
     );
+    when(
+      () => other.participantsStream,
+    ).thenAnswer((_) => Stream.value([participant]));
     when(() => other.viewportVisibility).thenReturn(
       ViewportVisibilityRegistry(
         onAggregate: (aggregate) async {

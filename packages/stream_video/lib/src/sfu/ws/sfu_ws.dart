@@ -115,7 +115,7 @@ class SfuWebSocket {
       () => '[disconnect] closeCode: $closeCode, closeReason: $closeReason',
     );
     if (_client.connectionState.value is Disconnected) {
-      _logger.w(() => '[disconnect] rejected (already disconnected)');
+      _logger.d(() => '[disconnect] rejected (already disconnected)');
       return const Result.success(none);
     }
     await _client.disconnect(

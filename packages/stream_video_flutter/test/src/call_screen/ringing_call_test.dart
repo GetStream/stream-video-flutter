@@ -12,10 +12,7 @@ void main() {
   setUpAll(() {
     // The selector `partialState` is called with, which mocktail's `any()`
     // needs a stand-in for.
-    registerFallbackValue(
-      (CallState state) =>
-          state.ringingMembers.map((it) => it.toUserInfo()).toList(),
-    );
+    registerFallbackValue((CallState state) => state.ringingMembers);
   });
 
   ({MockCall call, MockCallState state}) ringing(

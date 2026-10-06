@@ -69,6 +69,42 @@ TrackState _restoredTrackState(
   );
 }
 
+extension SfuParticipantListX on Iterable<SfuParticipant> {
+  /// Maps every SFU participant to a [CallParticipantState], carrying over
+  /// what [state] already knows about each user.
+  ///
+  /// Prefer this over mapping with [SfuParticipantX.toParticipantState] one
+  /// participant at a time: the existing participants are indexed once here.
+  ///
+  /// [subscriberReused] is passed on to each participant, as in
+  /// [SfuParticipantX.toParticipantState].
+  List<CallParticipantState> toParticipantStates(
+    CallState state, {
+    bool subscriberReused = false,
+  }) {
+    final existingByUserId = <String, CallParticipantState>{};
+    final previousBySessionId = <String, CallParticipantState>{};
+    for (final participant in state.callParticipants) {
+      existingByUserId[participant.userId] ??= participant;
+      previousBySessionId[participant.sessionId] ??= participant;
+    }
+
+    return [
+      for (final participant in this)
+        participant._toParticipantState(
+          state,
+          existing: existingByUserId[participant.userId],
+          previous: switch (previousBySessionId[participant.sessionId]) {
+            final previous? when previous.userId == participant.userId =>
+              previous,
+            _ => null,
+          },
+          subscriberReused: subscriberReused,
+        ),
+    ];
+  }
+}
+
 extension SfuParticipantX on SfuParticipant {
   /// The participant state the SFU's own account of them restores to.
   ///
@@ -79,17 +115,29 @@ extension SfuParticipantX on SfuParticipant {
     CallState state, {
     bool subscriberReused = false,
   }) {
+    return _toParticipantState(
+      state,
+      existing: state.callParticipants.firstWhereOrNull(
+        (it) => it.userId == userId,
+      ),
+      // Matched on the session as well, so track state is only carried over
+      // from the same participant session and not from another session of
+      // that user.
+      previous: state.callParticipants.firstWhereOrNull(
+        (it) => it.userId == userId && it.sessionId == sessionId,
+      ),
+      subscriberReused: subscriberReused,
+    );
+  }
+
+  CallParticipantState _toParticipantState(
+    CallState state, {
+    required CallParticipantState? existing,
+    required CallParticipantState? previous,
+    required bool subscriberReused,
+  }) {
     final isLocal =
         userId == state.currentUserId && sessionId == state.sessionId;
-    final existing = state.callParticipants.firstWhereOrNull(
-      (it) => it.userId == userId,
-    );
-
-    // Matched on the session as well, so track state is only carried over from
-    // the same participant session and not from another session of that user.
-    final previous = state.callParticipants.firstWhereOrNull(
-      (it) => it.userId == userId && it.sessionId == sessionId,
-    );
 
     final existingName = existing?.name ?? '';
     final existingRoles = existing?.roles ?? [];

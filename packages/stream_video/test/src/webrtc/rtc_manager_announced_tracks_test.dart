@@ -1,12 +1,17 @@
 // ignore_for_file: missing_override_of_must_be_overridden
 
+import 'dart:ui' show Size;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_core/stream_core.dart';
 import 'package:stream_video/src/call/stats/tracer.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_codec.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_publish_options.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
+import 'package:stream_video/src/webrtc/media/media_constraints.dart';
 import 'package:stream_video/src/webrtc/model/rtc_tracks_info.dart';
+import 'package:stream_video/src/webrtc/model/rtc_video_dimension.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/rtc_track/rtc_local_track.dart';
@@ -27,6 +32,8 @@ class _MockTransceiver extends Mock implements rtc.RTCRtpTransceiver {}
 class _MockSender extends Mock implements rtc.RTCRtpSender {}
 
 class _MockMediaStreamTrack extends Mock implements rtc.MediaStreamTrack {}
+
+class _MockMediaStream extends Mock implements rtc.MediaStream {}
 
 class _MockLocalAudioTrack extends Mock implements RtcLocalAudioTrack {}
 
@@ -468,5 +475,316 @@ void main() {
         expect(reported.single.trackId, 'track-a');
       },
     );
+  });
+
+  group('announced video layers', () {
+    final videoOption = SfuPublishOptions(
+      id: 3,
+      codec: const SfuCodec(
+        name: 'h264',
+        payloadType: 96,
+        fmtpLine: '',
+        clockRate: 90000,
+        encodingParameters: '',
+      ),
+      trackType: SfuTrackType.video,
+    );
+
+    final screenShareOption = SfuPublishOptions(
+      id: 4,
+      codec: videoOption.codec,
+      trackType: SfuTrackType.screenShare,
+    );
+
+    /// Caches a camera (or screen share) track that asked for 1280x720 (the
+    /// default constraints) and whose platform reports [settings] for it, or
+    /// throws [settingsError] when asked for them.
+    void cacheVideoTrack(
+      RtcManager manager, {
+      required String trackId,
+      Map<String, dynamic> settings = const {},
+      Object? settingsError,
+      RtcVideoDimension? resolved,
+      SfuTrackType? trackType,
+    }) {
+      final mediaTrack = _MockMediaStreamTrack();
+      when(() => mediaTrack.id).thenReturn(trackId);
+      when(() => mediaTrack.kind).thenReturn('video');
+      when(() => mediaTrack.enabled).thenReturn(true);
+      if (settingsError != null) {
+        when(mediaTrack.getSettings).thenThrow(settingsError);
+      } else {
+        when(mediaTrack.getSettings).thenReturn(settings);
+      }
+
+      final isScreenShare = trackType == SfuTrackType.screenShare;
+      final type = trackType ?? SfuTrackType.video;
+      final track = isScreenShare
+          ? RtcLocalTrack<ScreenShareConstraints>(
+              trackIdPrefix: 'pub',
+              trackType: type,
+              mediaStream: _MockMediaStream(),
+              mediaTrack: mediaTrack,
+              mediaConstraints: const ScreenShareConstraints(),
+              videoDimension: resolved,
+            )
+          : RtcLocalTrack<CameraConstraints>(
+              trackIdPrefix: 'pub',
+              trackType: type,
+              mediaStream: _MockMediaStream(),
+              mediaTrack: mediaTrack,
+              mediaConstraints: const CameraConstraints(),
+              videoDimension: resolved,
+            );
+
+      final transceiver = _transceiver(trackId: trackId, mid: '0');
+      manager.transceiversManager.add(
+        track,
+        isScreenShare ? screenShareOption : videoOption,
+        transceiver,
+        const RtcTrackPublishOptions(),
+      );
+    }
+
+    Future<List<RtcVideoDimension>> announcedLayers({
+      Map<String, dynamic> settings = const {},
+      Object? settingsError,
+      RtcVideoDimension? resolved,
+      SfuTrackType? trackType,
+    }) async {
+      final wires = buildManager();
+      wires.manager.publishOptions = [
+        if (trackType == SfuTrackType.screenShare)
+          screenShareOption
+        else
+          videoOption,
+      ];
+      cacheVideoTrack(
+        wires.manager,
+        trackId: 'camera',
+        settings: settings,
+        settingsError: settingsError,
+        resolved: resolved,
+        trackType: trackType,
+      );
+      stubPeerConnection(
+        wires.pc,
+        liveTransceivers: [_transceiver(trackId: 'camera', mid: '0')],
+      );
+
+      final announced = await wires.manager.getAnnouncedTracks();
+      return announced!.single.layers!
+          .map((layer) => layer.parameters.dimension)
+          .toList();
+    }
+
+    test(
+      'are sized from the capture the platform reports, not from what was '
+      'requested',
+      () async {
+        // A 4:3 camera asked for 1280x720 captures at 960x720.
+        final layers = await announcedLayers(
+          settings: {'width': 960, 'height': 720},
+        );
+
+        // q, h, f
+        expect(layers, const [
+          RtcVideoDimension(width: 240, height: 180),
+          RtcVideoDimension(width: 480, height: 360),
+          RtcVideoDimension(width: 960, height: 720),
+        ]);
+      },
+    );
+
+    test(
+      'fall back to the size resolved at publish for a clone that reports no '
+      'settings',
+      () async {
+        // Clones on Android carry no settings of their own.
+        final layers = await announcedLayers(
+          resolved: const RtcVideoDimension(width: 960, height: 720),
+        );
+
+        expect(layers.last, const RtcVideoDimension(width: 960, height: 720));
+      },
+    );
+
+    test(
+      'fall back to the requested size when nothing better is known',
+      () async {
+        final layers = await announcedLayers();
+
+        expect(layers.last, const RtcVideoDimension(width: 1280, height: 720));
+      },
+    );
+
+    group('orientation', () {
+      // The sensor reports a landscape capture size.
+      const sensorSettings = {'width': 2560, 'height': 1280};
+
+      void setScreen(Size size) {
+        final view =
+            TestWidgetsFlutterBinding.instance.platformDispatcher.views.first;
+        view.physicalSize = size;
+        addTearDown(view.resetPhysicalSize);
+      }
+
+      void setPlatform(PlatformType platform) {
+        CurrentPlatform.debugCurrentPlatformOverride = platform;
+        addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+      }
+
+      for (final platform in [PlatformType.android, PlatformType.ios]) {
+        test(
+          'are announced portrait on a portrait $platform screen, matching '
+          'the rotated frames the encoder produces',
+          () async {
+            setPlatform(platform);
+            setScreen(const Size(1080, 2400));
+
+            final layers = await announcedLayers(settings: sensorSettings);
+
+            expect(layers, const [
+              RtcVideoDimension(width: 320, height: 640),
+              RtcVideoDimension(width: 640, height: 1280),
+              RtcVideoDimension(width: 1280, height: 2560),
+            ]);
+          },
+        );
+      }
+
+      test('stay landscape on a landscape phone screen', () async {
+        setPlatform(PlatformType.android);
+        setScreen(const Size(2400, 1080));
+
+        final layers = await announcedLayers(settings: sensorSettings);
+
+        expect(layers.last, const RtcVideoDimension(width: 2560, height: 1280));
+      });
+
+      test('are left as reported on desktop', () async {
+        setPlatform(PlatformType.macOS);
+        setScreen(const Size(1080, 2400));
+
+        final layers = await announcedLayers(settings: sensorSettings);
+
+        expect(layers.last, const RtcVideoDimension(width: 2560, height: 1280));
+      });
+
+      test('are left as reported when the screen has no size yet', () async {
+        setPlatform(PlatformType.android);
+        setScreen(Size.zero);
+
+        final layers = await announcedLayers(settings: sensorSettings);
+
+        expect(layers.last, const RtcVideoDimension(width: 2560, height: 1280));
+      });
+
+      test('are left as reported on web', () async {
+        // Browsers already report the size rotated.
+        setPlatform(PlatformType.web);
+        setScreen(const Size(1080, 2400));
+
+        final layers = await announcedLayers(settings: sensorSettings);
+
+        expect(layers.last, const RtcVideoDimension(width: 2560, height: 1280));
+      });
+
+      test(
+        'fall back to the resolved size, still oriented like the view, when '
+        'getSettings() throws on Android',
+        () async {
+          setPlatform(PlatformType.android);
+          setScreen(const Size(1080, 2400));
+
+          final layers = await announcedLayers(
+            settingsError: Exception('getSettings failed'),
+            resolved: const RtcVideoDimension(width: 960, height: 720),
+          );
+
+          expect(
+            layers.last,
+            const RtcVideoDimension(width: 720, height: 960),
+          );
+        },
+      );
+
+      group('for screen share', () {
+        test('announce the view size', () async {
+          setPlatform(PlatformType.android);
+          setScreen(const Size(1080, 2400));
+
+          final layers = await announcedLayers(
+            settings: sensorSettings,
+            trackType: SfuTrackType.screenShare,
+          );
+
+          expect(
+            layers.last,
+            const RtcVideoDimension(width: 1080, height: 2400),
+          );
+        });
+
+        test(
+          'fall back to the track size, not 0x0, when the view has no size',
+          () async {
+            setPlatform(PlatformType.android);
+            setScreen(Size.zero);
+
+            final layers = await announcedLayers(
+              settings: sensorSettings,
+              trackType: SfuTrackType.screenShare,
+            );
+
+            expect(
+              layers.last,
+              const RtcVideoDimension(width: 2560, height: 1280),
+            );
+          },
+        );
+      });
+
+      group('when the platform reports the size in frame orientation', () {
+        test(
+          'trust it over the Flutter view, e.g. a tall split-screen window '
+          'on a landscape display',
+          () async {
+            setPlatform(PlatformType.android);
+            setScreen(const Size(1080, 2400));
+
+            final layers = await announcedLayers(
+              settings: const {
+                'width': 2560,
+                'height': 1280,
+                'sensorOrientation': 90,
+              },
+            );
+
+            expect(
+              layers.last,
+              const RtcVideoDimension(width: 2560, height: 1280),
+            );
+          },
+        );
+
+        test('keep a portrait size on a landscape view', () async {
+          setPlatform(PlatformType.android);
+          setScreen(const Size(2400, 1080));
+
+          final layers = await announcedLayers(
+            settings: const {
+              'width': 1280,
+              'height': 2560,
+              'sensorOrientation': 90,
+            },
+          );
+
+          expect(
+            layers.last,
+            const RtcVideoDimension(width: 1280, height: 2560),
+          );
+        });
+      });
+    });
   });
 }

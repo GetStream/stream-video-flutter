@@ -377,8 +377,8 @@ class RtcManager extends Disposable {
     }
   }
 
-  /// Stops the local track / clones / media stream for [trackId] and calls
-  /// `pc.removeTrack` on every sender that referenced it.
+  /// Stops the track / clones / media stream for [trackId]. For a local
+  /// track, also calls `pc.removeTrack` on every sender that referenced it.
   Future<void> unpublishTrack({
     required String trackId,
   }) async {
@@ -391,17 +391,10 @@ class RtcManager extends Disposable {
 
     await publishedTrack.stop();
 
-    if (publishedTrack is RtcRemoteTrack) {
-      final sender = publishedTrack.transceiver?.sender;
-
-      if (sender != null) {
-        try {
-          await publisher?.pc.removeTrack(sender);
-        } catch (e) {
-          _logger.w(() => '[unpublishTrack] removeTrack failed: $e');
-        }
-      }
-    } else if (publishedTrack is RtcLocalTrack) {
+    // A remote track's transceiver belongs to the receive-only subscriber
+    // PC, so there is no sender to remove. Passing it to the publisher PC
+    // only failed with "sender is null". Stopping the track is enough.
+    if (publishedTrack is RtcLocalTrack) {
       for (final publishOption in publishOptions) {
         if (publishOption.trackType != publishedTrack.trackType) continue;
 
@@ -640,7 +633,8 @@ class RtcManager extends Disposable {
     if (!changed) {
       _logger.i(
         () =>
-            '[onPublishQualityChanged] Update publish quality, no change: ${activeLayers.map((e) => e.rid)}',
+            '[onPublishQualityChanged] Update publish quality, no change: '
+            '${activeLayers.map(describeEncoding).join(', ')}',
       );
       return;
     }
@@ -648,7 +642,8 @@ class RtcManager extends Disposable {
     await sender.setParameters(params);
     _logger.i(
       () =>
-          '[onPublishQualityChanged] Update publish quality, enabled rids: ${activeLayers.map((e) => e.rid)}',
+          '[onPublishQualityChanged] Update publish quality, enabled: '
+          '${activeLayers.map(describeEncoding).join(', ')}',
     );
   }
 
@@ -899,7 +894,7 @@ extension PublisherRtcManager on RtcManager {
     });
 
     if (track == null) {
-      _logger.w(() => '[getPublisherTrackByType] track not found: $trackType');
+      _logger.d(() => '[getPublisherTrackByType] track not found: $trackType');
       return null;
     }
 
@@ -920,6 +915,14 @@ extension PublisherRtcManager on RtcManager {
       _logger.w(() => '[liveTransceivers] failed: $e\n$stk');
       return const [];
     }
+  }
+
+  /// True when the publisher has nothing to offer: no cached, in-flight or
+  /// live transceivers.
+  Future<bool> isPublisherEmpty() async {
+    if (transceiversManager.items().isNotEmpty) return false;
+    if (_pendingTransceivers.isNotEmpty) return false;
+    return (await _liveTransceivers()).isEmpty;
   }
 
   /// The SDP of the publisher's local description, or null when unavailable.
@@ -1392,7 +1395,12 @@ extension PublisherRtcManager on RtcManager {
       // Create a clone of the track so each transceiver has a unique trackId
       // in the SDP, matching the JS SDK pattern.
       final mediaTrackClone = await videoTrack.mediaTrack.clone();
-      final trackToPublish = videoTrack.copyWith(mediaTrack: mediaTrackClone);
+      // Carry the resolved size over: on Android the clone has no settings,
+      // so it could not work out the capture size itself.
+      final trackToPublish = videoTrack.copyWith(
+        mediaTrack: mediaTrackClone,
+        videoDimension: updatedTrack.videoDimension,
+      );
 
       // Another publish may have claimed this key and still be waiting on the
       // platform. Let it settle, then re-read: whoever claimed first creates
@@ -1480,49 +1488,39 @@ extension PublisherRtcManager on RtcManager {
     var dimension = track.getVideoDimension();
 
     if (track.trackType == SfuTrackType.screenShare) {
-      final physicalSize =
-          WidgetsBinding.instance.platformDispatcher.views.first.physicalSize;
-
-      final screenDimension = RtcVideoDimension(
-        width: physicalSize.width.toInt(),
-        height: physicalSize.height.toInt(),
-      );
-
+      final screenDimension = _getScreenDimension();
       _logger.v(() => '[publishVideoTrack] screenDimension: $screenDimension');
 
-      dimension = screenDimension;
+      if (screenDimension != null) dimension = screenDimension;
+    } else if (track.trackType == SfuTrackType.video &&
+        CurrentPlatform.isMobile &&
+        !track.reportsFrameOrientedSize()) {
+      // Mobile cameras report the sensor's capture size, which is landscape,
+      // but frames are rotated to the display orientation before encoding: a
+      // phone held upright encodes portrait frames. Announce what is encoded.
+      // Skipped when the platform already reports the size in frame
+      // orientation.
+      final screenDimension = _getScreenDimension();
+      if (screenDimension != null) {
+        dimension = dimension.orientedLike(screenDimension);
+      }
     }
 
     return dimension;
   }
 
-  /// In SVC, we need to send only one video encoding (layer).
-  /// this layer will have the additional spatial and temporal layers
-  /// defined via the scalabilityMode property.
-  List<rtc.RTCRtpEncoding> toSvcEncodings(List<rtc.RTCRtpEncoding> layers) {
-    rtc.RTCRtpEncoding? findByRid(String rid) {
-      for (final layer in layers) {
-        if (layer.rid == rid) return layer;
-      }
-      return null;
-    }
+  /// The physical size of the first Flutter view, or null when there is no
+  /// view or it has no size yet (e.g. the app was started in the background).
+  RtcVideoDimension? _getScreenDimension() {
+    final view = WidgetsBinding.instance.platformDispatcher.views.firstOrNull;
+    if (view == null) return null;
 
-    final highestLayer = findByRid('f') ?? findByRid('h') ?? findByRid('q');
-    if (highestLayer == null) return [];
+    final dimension = RtcVideoDimension(
+      width: view.physicalSize.width.toInt(),
+      height: view.physicalSize.height.toInt(),
+    );
 
-    return [
-      rtc.RTCRtpEncoding(
-        rid: 'q',
-        active: highestLayer.active,
-        maxBitrate: highestLayer.maxBitrate,
-        maxFramerate: highestLayer.maxFramerate,
-        minBitrate: highestLayer.minBitrate,
-        numTemporalLayers: highestLayer.numTemporalLayers,
-        scaleResolutionDownBy: highestLayer.scaleResolutionDownBy,
-        ssrc: highestLayer.ssrc,
-        scalabilityMode: highestLayer.scalabilityMode,
-      ),
-    ];
+    return dimension.isEmpty ? null : dimension;
   }
 
   /// Explicitly triggers a publisher renegotiation.
@@ -1675,8 +1673,9 @@ extension PublisherRtcManager on RtcManager {
         encodings: audioEncodings,
       );
     } else if (track is RtcLocalVideoTrack) {
+      final captureDimension = _getTrackDimension(track);
       final videoEncodings = codecs.findOptimalVideoLayers(
-        dimensions: _getTrackDimension(track),
+        dimensions: captureDimension,
         publishOptions: publishOptions,
       );
 
@@ -1684,9 +1683,17 @@ extension PublisherRtcManager on RtcManager {
           ? toSvcEncodings(videoEncodings)
           : videoEncodings;
 
-      for (final encoding in sendEncodings) {
-        _logger.v(() => '[addTransceiver] encoding: ${encoding.toMap()}');
-      }
+      _logger.d(
+        () =>
+            '[addTransceiver] ${publishOptions.trackType} layers: '
+            'publishOption(id: ${publishOptions.id}, '
+            'codec: ${publishOptions.codec.name}, '
+            'bitrate: ${publishOptions.bitrate}, '
+            'dimension: ${publishOptions.videoDimension}, '
+            'useSingleLayer: ${publishOptions.useSingleLayer}), '
+            'capture: $captureDimension, '
+            'encodings: ${sendEncodings.map(describeEncoding).join(', ')}',
+      );
 
       transceiverResult = await publisher!.addVideoTransceiver(
         track: track.mediaTrack,
@@ -2594,34 +2601,51 @@ extension RtcManagerTrackHelper on RtcManager {
 }
 
 extension on RtcLocalTrack<VideoConstraints> {
+  /// The size the camera actually captures at, which the layers are announced
+  /// and budgeted from. It can differ from what was requested: a 4:3 camera
+  /// asked for 2560x1440 captures at 1920x1440.
+  ///
+  /// Falls back to the size already resolved for this track, then to the
+  /// requested constraints. The first fallback matters for clones on Android,
+  /// which carry no settings of their own.
   RtcVideoDimension getVideoDimension() {
-    // use constraints passed to getUserMedia by default
-    var dimension = mediaConstraints.params.dimension;
+    var dimension = videoDimension ?? mediaConstraints.params.dimension;
 
-    if (CurrentPlatform.isWeb) {
-      // getSettings() is only implemented for Web
-      try {
-        // try to use getSettings for more accurate resolution
-        final settings = mediaTrack.getSettings();
-        streamLog.v(_tag, () => '[publishVideoTrack] settings: $settings');
-        if (settings['width'] is num) {
-          dimension = dimension.copyWith(
-            width: (settings['width'] as num).toInt(),
-          );
-        }
-        if (settings['height'] is num) {
-          dimension = dimension.copyWith(
-            height: (settings['height'] as num).toInt(),
-          );
-        }
-      } catch (_) {
-        streamLog.w(
-          _tag,
-          () => '[publishVideoTrack] `mediaStreamTrack.getSettings()` failed',
-        );
+    try {
+      // Implemented on web and, via the webrtc fork, on iOS and Android.
+      final settings = mediaTrack.getSettings();
+      streamLog.v(_tag, () => '[publishVideoTrack] settings: $settings');
+      final width = settings['width'];
+      final height = settings['height'];
+      if (width is num && width > 0) {
+        dimension = dimension.copyWith(width: width.toInt());
       }
+      if (height is num && height > 0) {
+        dimension = dimension.copyWith(height: height.toInt());
+      }
+    } catch (_) {
+      streamLog.w(
+        _tag,
+        () => '[publishVideoTrack] `mediaStreamTrack.getSettings()` failed',
+      );
     }
     return dimension;
+  }
+
+  /// Whether the platform reports the capture size already rotated to the
+  /// orientation of the delivered frames.
+  ///
+  /// Android only: stream_webrtc_flutter marks such settings with the
+  /// camera's `sensorOrientation`. iOS never sets the marker, so
+  /// it always falls back to the Flutter view's orientation.
+  bool reportsFrameOrientedSize() {
+    try {
+      return mediaTrack.getSettings().containsKey('sensorOrientation');
+    } catch (_) {
+      // Already logged by getVideoDimension(), which makes the same call
+      // first.
+      return false;
+    }
   }
 }
 

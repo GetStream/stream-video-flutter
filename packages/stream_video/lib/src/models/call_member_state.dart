@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
@@ -78,9 +77,7 @@ class CallMemberState extends Equatable {
 extension CallMemberStateMetadataX on CallMetadata {
   List<CallMemberState> toCallMembers() {
     return members.values.map((member) {
-      final user = users.values.firstWhereOrNull(
-        (user) => user.id == member.userId,
-      );
+      final user = users[member.userId];
       return CallMemberState(
         userId: member.userId,
         roles: member.roles,
