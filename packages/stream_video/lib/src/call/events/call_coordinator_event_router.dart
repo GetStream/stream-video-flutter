@@ -1,3 +1,5 @@
+import 'package:meta/meta.dart';
+
 import '../call_events.dart';
 import '../state/call_state_notifier.dart';
 import 'call_closed_captions.dart';
@@ -7,6 +9,7 @@ import 'call_video_moderation.dart';
 /// Applies a coordinator event for one call to that call's state.
 ///
 /// The events that need the call itself go to the hooks.
+@internal
 class CallCoordinatorEventRouter {
   CallCoordinatorEventRouter({
     required this._stateManager,

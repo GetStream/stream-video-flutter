@@ -1,9 +1,12 @@
+import 'package:meta/meta.dart';
+
 import '../call_events.dart';
 import '../state/call_state_notifier.dart';
 import 'keyed_timers.dart';
 
 /// Sets reactions on a call's participants, and clears each one again after
 /// `reactionAutoDismissTime`.
+@internal
 class CallReactions {
   CallReactions({required this._stateManager});
 

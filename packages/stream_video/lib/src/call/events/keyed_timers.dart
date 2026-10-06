@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 /// One-shot timers, at most one per key.
+@internal
 class KeyedTimers {
   final Map<String, Timer> _timers = {};
 

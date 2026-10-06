@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../../models/models.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
@@ -8,6 +10,7 @@ import '../state/call_state_notifier.dart';
 
 /// Applies and clears video moderation on one call, as set up by the call's
 /// [VideoModerationConfig].
+@internal
 class CallVideoModeration {
   CallVideoModeration({
     required this._stateManager,

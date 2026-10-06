@@ -1,3 +1,4 @@
+import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -9,6 +10,7 @@ import 'keyed_timers.dart';
 
 /// Holds a call's closed captions, and removes each one again after
 /// `closedCaptionsVisibilityDurationMs`.
+@internal
 class CallClosedCaptions {
   CallClosedCaptions({
     required this._stateManager,
