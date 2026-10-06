@@ -37,7 +37,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 | 7 | FLU-927 | `fix/flu-927-closed-captions-reset` | #1413 |
 | 8 | FLU-928 | `fix/flu-928-captions-zero-duration` | #1414 |
 | 9 | A2 | `feat/flu-855-call-connection-coordinator` | #1415 |
-| 10 | A3 | `feat/flu-860-connection-phase` | |
+| 10 | A3 | `feat/flu-860-connection-phase` | #1417 |
 | 11 | A4 | `fix/flu-864-single-leave-decision` | |
 | 12 | A5 | `feat/flu-865-serial-join-executor` | |
 | 13 | A6 | `fix/flu-861-session-ownership` | |
