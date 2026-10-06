@@ -62,8 +62,9 @@ import 'call_events.dart';
 import 'call_reject_reason.dart';
 import 'call_ringing_state.dart';
 import 'call_type.dart';
+import 'events/call_closed_captions.dart';
 import 'events/call_coordinator_event_router.dart';
-import 'events/call_reactions_and_captions.dart';
+import 'events/call_reactions.dart';
 import 'events/call_video_moderation.dart';
 import 'permissions/permissions_manager.dart';
 import 'ring_state_poller.dart';
@@ -571,13 +572,16 @@ class Call {
   final _callEvents = MutableSharedEmitter<StreamCallEvent>();
 
   Stream<List<StreamClosedCaption>> get closedCaptions =>
-      _reactionsAndCaptions.closedCaptions;
+      _closedCaptions.closedCaptions;
 
-  /// Holds the reactions and closed captions, and the timers that clear them.
-  late final _reactionsAndCaptions = CallReactionsAndCaptions(
+  /// Holds the closed captions, and removes them once they expire.
+  late final _closedCaptions = CallClosedCaptions(
     stateManager: _stateManager,
     logger: _logger,
   );
+
+  /// Sets reactions on participants, and clears them after a while.
+  late final _reactions = CallReactions(stateManager: _stateManager);
 
   /// Applies and clears video moderation.
   late final _moderation = CallVideoModeration(
@@ -590,7 +594,8 @@ class Call {
   /// Applies coordinator events for this call to its state.
   late final _eventRouter = CallCoordinatorEventRouter(
     stateManager: _stateManager,
-    reactionsAndCaptions: _reactionsAndCaptions,
+    reactions: _reactions,
+    closedCaptions: _closedCaptions,
     moderation: _moderation,
     onPermissionRequest: (event) => onPermissionRequest?.call(event),
     onAccepted: _handleCoordinatorCallAccepted,
@@ -2722,7 +2727,8 @@ class Call {
   Future<void> _clear(String src) async {
     _logger.d(() => '[clear] src: $src');
 
-    _reactionsAndCaptions.cancelTimers();
+    _reactions.cancelTimers();
+    _closedCaptions.cancelTimers();
     _moderation.cancelTimer();
 
     _stopRingStatePolling();

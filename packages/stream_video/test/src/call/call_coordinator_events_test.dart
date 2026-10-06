@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
@@ -2073,22 +2075,32 @@ void main() {
     });
 
     test('leaving cancels a pending timed clear', () async {
-      var cleared = 0;
-      final (:call, :events) = await setupModeratedCall(
-        VideoModerationConfig(
-          applyBlur: true,
-          duration: const Duration(milliseconds: 50),
-          onClear: () => cleared++,
+      const duration = Duration(hours: 1);
+      final timers = <Timer>[];
+
+      // Records the timers the call creates, so the test can check the timed
+      // clear is cancelled without waiting for it.
+      await runZoned(
+        () async {
+          final (:call, :events) = await setupModeratedCall(
+            const VideoModerationConfig(applyBlur: true, duration: duration),
+          );
+
+          events.emit(blurEvent(call, currentUserId));
+          await Future<void>.delayed(Duration.zero);
+          await call.leave();
+        },
+        zoneSpecification: ZoneSpecification(
+          createTimer: (self, parent, zone, timerDuration, callback) {
+            final timer = parent.createTimer(zone, timerDuration, callback);
+            if (timerDuration == duration) timers.add(timer);
+            return timer;
+          },
         ),
       );
 
-      events.emit(blurEvent(call, currentUserId));
-      await Future<void>.delayed(Duration.zero);
-      await call.leave();
-
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-
-      expect(cleared, 0);
+      expect(timers, hasLength(1));
+      expect(timers.single.isActive, isFalse);
     });
   });
 }

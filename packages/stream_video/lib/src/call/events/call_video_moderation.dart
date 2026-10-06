@@ -60,8 +60,8 @@ class CallVideoModeration {
     config.onApply?.call();
   }
 
-  /// Clears the moderation action. Does nothing when the call is not
-  /// moderated.
+  /// Cancels a pending timed clear, then clears the moderation action if the
+  /// call is moderated.
   void clear() {
     cancelTimer();
 

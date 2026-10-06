@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_video/src/call/events/call_closed_captions.dart';
 import 'package:stream_video/src/call/events/call_coordinator_event_router.dart';
-import 'package:stream_video/src/call/events/call_reactions_and_captions.dart';
+import 'package:stream_video/src/call/events/call_reactions.dart';
 import 'package:stream_video/src/call/events/call_video_moderation.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/stream_video.dart';
@@ -21,7 +22,8 @@ void main() {
     stateManager = CallStateNotifier(createActiveCallState(status: status));
     router = CallCoordinatorEventRouter(
       stateManager: stateManager,
-      reactionsAndCaptions: CallReactionsAndCaptions(
+      reactions: CallReactions(stateManager: stateManager),
+      closedCaptions: CallClosedCaptions(
         stateManager: stateManager,
         logger: taggedLogger(tag: 'test'),
       ),

@@ -1,6 +1,7 @@
 import '../call_events.dart';
 import '../state/call_state_notifier.dart';
-import 'call_reactions_and_captions.dart';
+import 'call_closed_captions.dart';
+import 'call_reactions.dart';
 import 'call_video_moderation.dart';
 
 /// Applies a coordinator event for one call to that call's state.
@@ -9,7 +10,8 @@ import 'call_video_moderation.dart';
 class CallCoordinatorEventRouter {
   CallCoordinatorEventRouter({
     required this._stateManager,
-    required this._reactionsAndCaptions,
+    required this._reactions,
+    required this._closedCaptions,
     required this._moderation,
     required this._onPermissionRequest,
     required this._onAccepted,
@@ -18,16 +20,22 @@ class CallCoordinatorEventRouter {
   });
 
   final CallStateNotifier _stateManager;
-  final CallReactionsAndCaptions _reactionsAndCaptions;
+  final CallReactions _reactions;
+  final CallClosedCaptions _closedCaptions;
   final CallVideoModeration _moderation;
 
   /// Hands a permission request to the app.
   final void Function(StreamCallPermissionRequestEvent event)
   _onPermissionRequest;
+
+  /// Applies an accepted call, after [_onRingActivity].
   final Future<void> Function(StreamCallAcceptedEvent event) _onAccepted;
+
+  /// Applies a rejected call, after [_onRingActivity].
   final Future<void> Function(StreamCallRejectedEvent event) _onRejected;
 
-  /// Called when someone accepts, rejects or misses the call.
+  /// Called when someone accepts, rejects or misses the call, before the
+  /// accept or reject hook runs.
   final void Function() _onRingActivity;
 
   /// Routes [event], which the caller has already matched to this call.
@@ -80,9 +88,9 @@ class CallCoordinatorEventRouter {
       case StreamCallDeletedEvent _:
         return _stateManager.coordinatorCallDeleted(event);
       case StreamCallClosedCaptionsEvent _:
-        return _reactionsAndCaptions.onClosedCaption(event);
+        return _closedCaptions.onClosedCaption(event);
       case StreamCallReactionEvent _:
-        return _reactionsAndCaptions.onReaction(event);
+        return _reactions.onReaction(event);
       case StreamCallSessionParticipantCountUpdatedEvent _:
         final status = _stateManager.callState.status;
         if (status.isConnected || status.isJoined) {
