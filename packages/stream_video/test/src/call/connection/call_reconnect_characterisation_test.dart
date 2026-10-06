@@ -192,36 +192,36 @@ void main() {
     },
   );
 
-  group('known hazard', () {
-    // Changes with FLU-864: a remote end goes through the same leaving
-    // transition as a local one, which tells the SFU.
-    test(
-      'an SFU call end during a reconnect settles disconnected without an '
-      'SFU leave',
-      () async {
-        final call = harness.buildCall();
-        await call.join();
+  test(
+    'an SFU call end during a reconnect leaves like a local leave: it tells '
+    'the SFU and reports a backend leave',
+    () async {
+      final call = harness.buildCall();
+      await call.join();
 
-        final reconnectGate = Completer<void>();
-        harness.stubFastReconnect(harness.session, () async {
-          await reconnectGate.future;
-          return sessionStartSuccess();
-        });
-        await harness.emitSfu(harness.session, sfuSocketDropped);
-        expect(call.state.value.status, isA<CallStatusReconnecting>());
+      final reconnectGate = Completer<void>();
+      harness.stubFastReconnect(harness.session, () async {
+        await reconnectGate.future;
+        return sessionStartSuccess();
+      });
+      await harness.emitSfu(harness.session, sfuSocketDropped);
+      expect(call.state.value.status, isA<CallStatusReconnecting>());
 
-        await harness.emitSfu(
-          harness.session,
-          const SfuCallEndedEvent(callEndedReason: SfuCallEndedReason.ended),
-        );
-        reconnectGate.complete();
-        await pumpEventQueue();
+      await harness.emitSfu(
+        harness.session,
+        const SfuCallEndedEvent(callEndedReason: SfuCallEndedReason.ended),
+      );
+      reconnectGate.complete();
+      await pumpEventQueue();
 
-        final status = call.state.value.status as CallStatusDisconnected;
-        expect(status.reason, isA<DisconnectReasonEnded>());
-        verifyNever(() => harness.session.leave(reason: any(named: 'reason')));
-        expect(harness.reporter.aborts, isEmpty);
-      },
-    );
-  });
+      final status = call.state.value.status as CallStatusDisconnected;
+      expect(status.reason, isA<DisconnectReasonEnded>());
+      verify(
+        () => harness.session.leave(reason: 'call ended'),
+      ).called(1);
+      expect(harness.reporter.aborts, [
+        ClientEventStandardCode.backendLeave,
+      ]);
+    },
+  );
 }

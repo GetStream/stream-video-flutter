@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/telemetry/client_event_types.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../fixtures/call_test_helpers.dart';
 import '../fixtures/connection_harness.dart';
 
-/// Pins the behaviour the connection phase owns: leaving is terminal, a join
+/// Pins what the connection coordinator owns beyond the A1 characterisation:
+/// leaving is terminal, waits end on leave, a failed join leaves once, a join
 /// refused before it starts leaves the call idle, and each reconnect counts
 /// its attempts afresh.
 void main() {
@@ -148,5 +150,62 @@ void main() {
     expect(attempts, {1});
     // The status recorded on listening, then one per reconnect.
     expect(statuses.whereType<CallStatusConnected>(), hasLength(3));
+  });
+
+  test(
+    'a leave during the backoff between join attempts ends the join without '
+    'another coordinator join',
+    () async {
+      harness.stubJoinCall(() async => recoverableJoinFailure());
+      final call = harness.buildCall(
+        retryPolicy: RetryPolicy(
+          backoff: (_, _) => const Duration(milliseconds: 300),
+        ),
+      );
+
+      final join = call.join();
+      await waitUntil(() => call.state.value.status is CallStatusConnecting);
+      await pumpEventQueue();
+      await call.leave();
+
+      expect((await join).isFailure, isTrue);
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      harness.verifyJoinCallCount(1);
+    },
+  );
+
+  test('a ring that is not answered in time rejects once and reports one '
+      'abort', () async {
+    when(
+      () => harness.coordinatorClient.rejectCall(
+        cid: any(named: 'cid'),
+        reason: any(named: 'reason'),
+      ),
+    ).thenAnswer((_) async => const Result.success(none));
+    final call = harness.buildCall();
+    // Set with the status: CallSettings equality ignores the ring settings,
+    // so a settings-only change would not reach the call's state.
+    harness.stateManager.state = harness.stateManager.callState.copyWith(
+      status: CallStatus.outgoing(),
+      settings: harness.stateManager.callState.settings.copyWith(
+        ring: const StreamRingSettings(
+          autoCancelTimeout: Duration(milliseconds: 50),
+        ),
+      ),
+    );
+
+    final result = await call.join();
+
+    expect(result.isFailure, isTrue);
+    verify(
+      () => harness.coordinatorClient.rejectCall(
+        cid: any(named: 'cid'),
+        reason: CallRejectReason.timeout().value,
+      ),
+    ).called(1);
+    await harness.settleAborts(1);
+    expect(harness.reporter.aborts, [ClientEventStandardCode.clientAborted]);
+    final status = call.state.value.status as CallStatusDisconnected;
+    expect(status.reason, isA<DisconnectReasonRejected>());
   });
 }

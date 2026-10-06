@@ -88,58 +88,46 @@ void main() {
     });
   });
 
-  group('known hazard', () {
-    // Changes with FLU-864: a failed join decides to leave in one place,
-    // reports one abort and returns the error it failed with.
+  group('a failed join leaves once', () {
     test(
-      'an unrecoverable coordinator refusal returns connect cancelled and '
-      'reports three aborts, the last after join returns',
+      'an unrecoverable coordinator refusal reports one abort and returns '
+      'the refusal',
       () async {
         harness.stubJoinCall(() async => unrecoverableJoinFailure());
         final call = harness.buildCall();
 
         final result = await call.join();
 
-        expect(result.getErrorOrNull()?.message, 'connect cancelled');
-        // The join loop the first leave cancelled still runs to its own
-        // unrecoverable-error leave.
-        await harness.settleAborts(3);
+        expect(result.getErrorOrNull()?.message, 'forbidden');
+        harness.verifyJoinCallCount(1);
+        await harness.settleAborts(1);
         expect(harness.reporter.aborts, [
-          ClientEventStandardCode.clientAborted,
-          ClientEventStandardCode.clientAborted,
           ClientEventStandardCode.clientAborted,
         ]);
       },
     );
 
-    // Changes with FLU-864: a retryable coordinator failure is retried, and
-    // the join reports one abort.
     test(
-      'a retryable coordinator failure is never retried, returns connect '
-      'cancelled and reports three aborts, the last after join returns',
+      'a retryable coordinator failure is retried, then reports one abort and '
+      'returns the last failure',
       () async {
         harness.stubJoinCall(() async => recoverableJoinFailure());
         final call = harness.buildCall();
 
         final result = await call.join();
 
-        expect(result.getErrorOrNull()?.message, 'connect cancelled');
-        // The cancelled join loop runs out its attempts against a call that
-        // was left, then leaves once more for running out.
-        await harness.settleAborts(3);
-        harness.verifyJoinCallCount(1);
+        expect(result.getErrorOrNull()?.message, 'unavailable');
+        harness.verifyJoinCallCount(3);
+        await harness.settleAborts(1);
         expect(harness.reporter.aborts, [
-          ClientEventStandardCode.clientAborted,
-          ClientEventStandardCode.clientAborted,
           ClientEventStandardCode.clientAborted,
         ]);
       },
     );
 
-    // Changes with FLU-864: reports one abort and returns the SFU error.
     test(
-      'an unrecoverable SFU join error reports two aborts and returns '
-      'connect cancelled',
+      'an unrecoverable SFU join error reports one abort and returns the SFU '
+      'error',
       () async {
         harness.stubSessionStart(
           harness.session,
@@ -150,19 +138,17 @@ void main() {
         final result = await call.join();
 
         harness.verifyJoinCallCount(1);
-        expect(result.getErrorOrNull()?.message, 'connect cancelled');
-        await harness.settleAborts(2);
+        expect(result.getErrorOrNull()?.message, 'SFU disconnect');
+        await harness.settleAborts(1);
         expect(harness.reporter.aborts, [
-          ClientEventStandardCode.clientAborted,
           ClientEventStandardCode.clientAborted,
         ]);
       },
     );
 
-    // Changes with FLU-864: reports one abort and returns the last SFU error.
     test(
-      'an SFU join that runs out of retries reports two aborts and returns '
-      'connect cancelled',
+      'an SFU join that runs out of retries reports one abort and returns the '
+      'last SFU error',
       () async {
         harness.stubSessionStart(
           harness.session,
@@ -180,10 +166,9 @@ void main() {
         harness
           ..verifyMakeCallSessionCount(3)
           ..verifyJoinCallCount(2);
-        expect(result.getErrorOrNull()?.message, 'connect cancelled');
-        await harness.settleAborts(2);
+        expect(result.getErrorOrNull()?.message, 'sfu unreachable');
+        await harness.settleAborts(1);
         expect(harness.reporter.aborts, [
-          ClientEventStandardCode.clientAborted,
           ClientEventStandardCode.clientAborted,
         ]);
       },
