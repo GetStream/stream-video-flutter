@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 
 import '../../call/session/call_session.dart';
@@ -13,6 +14,7 @@ import 'e2ee_claims.dart';
 
 /// Holds one call's [EncryptionManager]: attaching it, building it from the
 /// app's key resolver, and releasing it.
+@internal
 class CallE2ee {
   CallE2ee({
     required this._callCid,
