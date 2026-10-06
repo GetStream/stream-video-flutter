@@ -1,7 +1,8 @@
 part of 'call.dart';
 
 /// Call actions that forward to the call's permissions manager or the
-/// coordinator client, updating the call state where the action changes it.
+/// coordinator client, updating the call state where the action changes it,
+/// plus pinning a participant locally, which only changes the call state.
 extension CallActions on Call {
   /// Adds members to the current call.
   Future<Result<None>> addMembers(List<UserInfo> users) {

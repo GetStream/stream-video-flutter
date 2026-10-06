@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/open_api/video/coordinator/api.dart' as open;
+import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
@@ -8,8 +9,9 @@ import 'fixtures/call_test_helpers.dart';
 import 'fixtures/connection_harness.dart';
 import 'fixtures/data.dart';
 
-/// Pins what the `Call` actions that forward to the permissions manager and
-/// the coordinator client pass on, and which state flags they set.
+/// Covers what the `Call` actions that forward to the permissions manager and
+/// the coordinator client pass on, which state flags they set, and the
+/// argument checks of `collectUserFeedback`.
 void main() {
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -70,6 +72,31 @@ void main() {
       ).called(1);
       verifyNever(
         () => permissions.pinForEveryone(
+          userId: any(named: 'userId'),
+          sessionId: any(named: 'sessionId'),
+        ),
+      );
+    });
+
+    test('pinning for everyone asks to pin', () async {
+      when(
+        () => permissions.pinForEveryone(
+          userId: any(named: 'userId'),
+          sessionId: any(named: 'sessionId'),
+        ),
+      ).thenAnswer((_) async => const Result.success(none));
+
+      await harness.buildCall().setParticipantPinnedForEveryone(
+        sessionId: 's1',
+        userId: 'alice',
+        pinned: true,
+      );
+
+      verify(
+        () => permissions.pinForEveryone(userId: 'alice', sessionId: 's1'),
+      ).called(1);
+      verifyNever(
+        () => permissions.unpinForEveryone(
           userId: any(named: 'userId'),
           sessionId: any(named: 'sessionId'),
         ),
@@ -199,15 +226,6 @@ void main() {
       expect(call.state.value.isRecording, isFalse);
     });
 
-    test('a refused start leaves recording off', () async {
-      stubRecording(refused);
-      final call = harness.buildCall();
-
-      await call.startRecording();
-
-      expect(call.state.value.isRecording, isFalse);
-    });
-
     test('transcribing follows a successful start and stop', () async {
       when(
         () => permissions.startTranscription(
@@ -266,56 +284,217 @@ void main() {
       expect(call.state.value.isBroadcasting, isFalse);
     });
 
-    test('a refused HLS start leaves broadcasting off', () async {
-      when(permissions.startBroadcasting).thenAnswer((_) async => refused);
-      final call = harness.buildCall();
-
-      await call.startHLS();
-
-      expect(call.state.value.isBroadcasting, isFalse);
-    });
-
-    test('going live leaves the backstage, stopping returns to it', () async {
-      final metadata = Result.success(SampleCallData.defaultCallMetadata);
-      when(
-        () => harness.coordinatorClient.goLive(
-          callCid: any(named: 'callCid'),
-          startHls: any(named: 'startHls'),
-          startRecording: any(named: 'startRecording'),
-          startCompositeRecording: any(named: 'startCompositeRecording'),
-          startIndividualRecording: any(named: 'startIndividualRecording'),
-          startRawRecording: any(named: 'startRawRecording'),
-          startTranscription: any(named: 'startTranscription'),
-          startClosedCaption: any(named: 'startClosedCaption'),
-          recordingStorageName: any(named: 'recordingStorageName'),
-          transcriptionStorageName: any(named: 'transcriptionStorageName'),
-        ),
-      ).thenAnswer((_) async => metadata);
-      when(
-        () => harness.coordinatorClient.stopLive(
-          any(),
-          continueClosedCaption: any(named: 'continueClosedCaption'),
-          continueCompositeRecording: any(named: 'continueCompositeRecording'),
-          continueHls: any(named: 'continueHls'),
-          continueIndividualRecording: any(
-            named: 'continueIndividualRecording',
+    test(
+      'stopping the livestream enters the backstage, going live leaves it',
+      () async {
+        final metadata = Result.success(SampleCallData.defaultCallMetadata);
+        when(
+          () => harness.coordinatorClient.goLive(
+            callCid: any(named: 'callCid'),
+            startHls: any(named: 'startHls'),
+            startRecording: any(named: 'startRecording'),
+            startCompositeRecording: any(named: 'startCompositeRecording'),
+            startIndividualRecording: any(named: 'startIndividualRecording'),
+            startRawRecording: any(named: 'startRawRecording'),
+            startTranscription: any(named: 'startTranscription'),
+            startClosedCaption: any(named: 'startClosedCaption'),
+            recordingStorageName: any(named: 'recordingStorageName'),
+            transcriptionStorageName: any(named: 'transcriptionStorageName'),
           ),
-          continueRawRecording: any(named: 'continueRawRecording'),
-          continueRecording: any(named: 'continueRecording'),
-          continueRtmpBroadcasts: any(named: 'continueRtmpBroadcasts'),
-          continueTranscription: any(named: 'continueTranscription'),
-        ),
-      ).thenAnswer((_) async => metadata);
-      final call = harness.buildCall();
+        ).thenAnswer((_) async => metadata);
+        when(
+          () => harness.coordinatorClient.stopLive(
+            any(),
+            continueClosedCaption: any(named: 'continueClosedCaption'),
+            continueCompositeRecording: any(
+              named: 'continueCompositeRecording',
+            ),
+            continueHls: any(named: 'continueHls'),
+            continueIndividualRecording: any(
+              named: 'continueIndividualRecording',
+            ),
+            continueRawRecording: any(named: 'continueRawRecording'),
+            continueRecording: any(named: 'continueRecording'),
+            continueRtmpBroadcasts: any(named: 'continueRtmpBroadcasts'),
+            continueTranscription: any(named: 'continueTranscription'),
+          ),
+        ).thenAnswer((_) async => metadata);
+        final call = harness.buildCall();
 
-      await call.goLive(startHls: true);
-      expect(call.state.value.isBackstage, isFalse);
-      verify(
-        () => harness.coordinatorClient.goLive(callCid: cid, startHls: true),
-      ).called(1);
-      await call.stopLive();
-      expect(call.state.value.isBackstage, isTrue);
-    });
+        await call.stopLive();
+        expect(call.state.value.isBackstage, isTrue);
+        await call.goLive(startHls: true);
+        expect(call.state.value.isBackstage, isFalse);
+        verify(
+          () => harness.coordinatorClient.goLive(callCid: cid, startHls: true),
+        ).called(1);
+      },
+    );
+  });
+
+  group('a refused action leaves its flag alone', () {
+    final cases =
+        <
+          ({
+            String name,
+            void Function() stubRefused,
+            void Function(CallStateNotifier state) seed,
+            Future<void> Function(Call call) act,
+            bool Function(CallState state) flag,
+          })
+        >[
+          (
+            name: 'startRecording',
+            stubRefused: () => when(
+              () => permissions.startRecording(
+                recordingType: any(named: 'recordingType'),
+                recordingExternalStorage: any(
+                  named: 'recordingExternalStorage',
+                ),
+              ),
+            ).thenAnswer((_) async => refused),
+            seed: (s) => s.setCallRecording(isRecording: false),
+            act: (c) => c.startRecording(),
+            flag: (s) => s.isRecording,
+          ),
+          (
+            name: 'stopRecording',
+            stubRefused: () => when(
+              () => permissions.stopRecording(
+                recordingType: any(named: 'recordingType'),
+              ),
+            ).thenAnswer((_) async => refused),
+            seed: (s) => s.setCallRecording(isRecording: true),
+            act: (c) => c.stopRecording(),
+            flag: (s) => s.isRecording,
+          ),
+          (
+            name: 'startTranscription',
+            stubRefused: () => when(
+              () => permissions.startTranscription(
+                enableClosedCaptions: any(named: 'enableClosedCaptions'),
+                language: any(named: 'language'),
+                transcriptionExternalStorage: any(
+                  named: 'transcriptionExternalStorage',
+                ),
+              ),
+            ).thenAnswer((_) async => refused),
+            seed: (s) => s.setCallTranscribing(isTranscribing: false),
+            act: (c) => c.startTranscription(),
+            flag: (s) => s.isTranscribing,
+          ),
+          (
+            name: 'stopTranscription',
+            stubRefused: () => when(
+              permissions.stopTranscription,
+            ).thenAnswer((_) async => refused),
+            seed: (s) => s.setCallTranscribing(isTranscribing: true),
+            act: (c) => c.stopTranscription(),
+            flag: (s) => s.isTranscribing,
+          ),
+          (
+            name: 'startClosedCaptions',
+            stubRefused: () => when(
+              () => permissions.startClosedCaptions(
+                enableTranscription: any(named: 'enableTranscription'),
+                language: any(named: 'language'),
+                transcriptionExternalStorage: any(
+                  named: 'transcriptionExternalStorage',
+                ),
+              ),
+            ).thenAnswer((_) async => refused),
+            seed: (s) => s.setCallClosedCaptioning(isCaptioning: false),
+            act: (c) => c.startClosedCaptions(),
+            flag: (s) => s.isCaptioning,
+          ),
+          (
+            name: 'stopClosedCaptions',
+            stubRefused: () => when(
+              permissions.stopClosedCaptions,
+            ).thenAnswer((_) async => refused),
+            seed: (s) => s.setCallClosedCaptioning(isCaptioning: true),
+            act: (c) => c.stopClosedCaptions(),
+            flag: (s) => s.isCaptioning,
+          ),
+          (
+            name: 'startHLS',
+            stubRefused: () => when(
+              permissions.startBroadcasting,
+            ).thenAnswer((_) async => refused),
+            seed: (s) => s.setCallBroadcasting(isBroadcasting: false),
+            act: (c) => c.startHLS(),
+            flag: (s) => s.isBroadcasting,
+          ),
+          (
+            name: 'stopHLS',
+            stubRefused: () => when(
+              permissions.stopBroadcasting,
+            ).thenAnswer((_) async => refused),
+            seed: (s) => s.setCallBroadcasting(isBroadcasting: true),
+            act: (c) => c.stopHLS(),
+            flag: (s) => s.isBroadcasting,
+          ),
+          (
+            name: 'goLive',
+            stubRefused: () => when(
+              () => harness.coordinatorClient.goLive(
+                callCid: any(named: 'callCid'),
+                startHls: any(named: 'startHls'),
+                startRecording: any(named: 'startRecording'),
+                startCompositeRecording: any(named: 'startCompositeRecording'),
+                startIndividualRecording: any(
+                  named: 'startIndividualRecording',
+                ),
+                startRawRecording: any(named: 'startRawRecording'),
+                startTranscription: any(named: 'startTranscription'),
+                startClosedCaption: any(named: 'startClosedCaption'),
+                recordingStorageName: any(named: 'recordingStorageName'),
+                transcriptionStorageName: any(
+                  named: 'transcriptionStorageName',
+                ),
+              ),
+            ).thenAnswer((_) async => refused),
+            seed: (s) => s.setCallLive(isLive: false),
+            act: (c) => c.goLive(),
+            flag: (s) => s.isBackstage,
+          ),
+          (
+            name: 'stopLive',
+            stubRefused: () => when(
+              () => harness.coordinatorClient.stopLive(
+                any(),
+                continueClosedCaption: any(named: 'continueClosedCaption'),
+                continueCompositeRecording: any(
+                  named: 'continueCompositeRecording',
+                ),
+                continueHls: any(named: 'continueHls'),
+                continueIndividualRecording: any(
+                  named: 'continueIndividualRecording',
+                ),
+                continueRawRecording: any(named: 'continueRawRecording'),
+                continueRecording: any(named: 'continueRecording'),
+                continueRtmpBroadcasts: any(named: 'continueRtmpBroadcasts'),
+                continueTranscription: any(named: 'continueTranscription'),
+              ),
+            ).thenAnswer((_) async => refused),
+            seed: (s) => s.setCallLive(isLive: true),
+            act: (c) => c.stopLive(),
+            flag: (s) => s.isBackstage,
+          ),
+        ];
+
+    for (final c in cases) {
+      test(c.name, () async {
+        c.stubRefused();
+        final call = harness.buildCall();
+        c.seed(harness.stateManager);
+        final before = c.flag(call.state.value);
+
+        await c.act(call);
+
+        expect(c.flag(call.state.value), before);
+      });
+    }
   });
 
   group('collectUserFeedback', () {
