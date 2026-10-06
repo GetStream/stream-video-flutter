@@ -25,13 +25,15 @@ class StreamClosedCaptionsButton extends StatelessWidget {
   /// Defaults to `context.streamIcons.captionFill`.
   final IconData? disabledClosedCaptionIcon;
 
+  static bool _isCaptioning(CallState state) => state.isCaptioning;
+
   @override
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
 
     return PartialCallStateBuilder<bool>(
       call: call,
-      selector: (state) => state.isCaptioning,
+      selector: _isCaptioning,
       builder: (_, enabled) => CallFeatureButton(
         // The design system has one caption glyph: whether captions are on is
         // carried by the selected state, not by a second icon.

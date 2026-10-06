@@ -64,6 +64,9 @@ class StreamMicrophoneButton extends StatelessWidget {
   /// well. The callback receives the action that failed alongside the error.
   final StreamDeviceErrorCallback? onError;
 
+  static bool? _audioEnabled(CallState state) =>
+      state.localParticipant?.trackEnabled(SfuTrackType.audio);
+
   @override
   Widget build(BuildContext context) {
     if (devices case final devices?) {
@@ -98,8 +101,7 @@ class StreamMicrophoneButton extends StatelessWidget {
 
     return PartialCallStateBuilder<bool?>(
       call: call,
-      selector: (state) =>
-          state.localParticipant?.trackEnabled(SfuTrackType.audio),
+      selector: _audioEnabled,
       builder: (context, reported) => _button(
         context,
         enabled: _resolve(reported),

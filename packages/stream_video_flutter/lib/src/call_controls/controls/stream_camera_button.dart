@@ -51,6 +51,9 @@ class StreamCameraButton extends StatelessWidget {
   /// [StreamMicrophoneButton.onError].
   final StreamDeviceErrorCallback? onError;
 
+  static bool? _videoEnabled(CallState state) =>
+      state.localParticipant?.trackEnabled(SfuTrackType.video);
+
   @override
   Widget build(BuildContext context) {
     if (devices case final devices?) {
@@ -85,8 +88,7 @@ class StreamCameraButton extends StatelessWidget {
 
     return PartialCallStateBuilder<bool?>(
       call: call,
-      selector: (state) =>
-          state.localParticipant?.trackEnabled(SfuTrackType.video),
+      selector: _videoEnabled,
       builder: (context, reported) => _button(
         context,
         enabled: _resolve(reported),

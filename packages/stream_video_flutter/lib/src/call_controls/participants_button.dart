@@ -45,6 +45,9 @@ class StreamParticipantsButton extends StatelessWidget {
   /// The control is disabled when this is null and there is nobody to list.
   final VoidCallback? onTap;
 
+  static List<CallParticipantState> _callParticipants(CallState state) =>
+      state.callParticipants;
+
   @override
   Widget build(BuildContext context) {
     if (_participants case final participants?) {
@@ -53,7 +56,7 @@ class StreamParticipantsButton extends StatelessWidget {
 
     return PartialCallStateBuilder<List<CallParticipantState>>(
       call: _call!,
-      selector: (state) => state.callParticipants,
+      selector: _callParticipants,
       builder: (context, participants) => _build(context, [
         for (final participant in participants)
           UserInfo(
