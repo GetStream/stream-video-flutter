@@ -77,6 +77,23 @@ void main() {
     });
   });
 
+  test('the emitted lists are unmodifiable', () {
+    fakeAsync((async) {
+      captions.onClosedCaption(caption('one'));
+      async.flushMicrotasks();
+
+      final shown = captions.closedCaptions.value.single;
+      expect(captions.closedCaptions.value.clear, throwsUnsupportedError);
+
+      captions.reset();
+
+      expect(
+        () => captions.closedCaptions.value.add(shown),
+        throwsUnsupportedError,
+      );
+    });
+  });
+
   test('an error while handling a caption is logged', () async {
     final logger = installRecordingLogger();
     final stateManager = _MockCallStateNotifier();

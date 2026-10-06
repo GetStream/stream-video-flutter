@@ -23,10 +23,11 @@ class CallClosedCaptions {
   final _expiryTimers = KeyedTimers();
   final _lock = Lock();
 
-  /// The closed captions currently on screen, oldest first.
+  /// The closed captions currently on screen, oldest first. The list is
+  /// unmodifiable.
   StateEmitter<List<StreamClosedCaption>> get closedCaptions => _closedCaptions;
   final _closedCaptions = MutableStateEmitter<List<StreamClosedCaption>>(
-    [],
+    const [],
   );
 
   /// Adds the caption to [closedCaptions], keeping only the newest
@@ -75,9 +76,11 @@ class CallClosedCaptions {
             }
           }
 
-          _closedCaptions.value = newQueue.length > visibleCaptions
-              ? newQueue.sublist(newQueue.length - visibleCaptions)
-              : newQueue;
+          _closedCaptions.value = List.unmodifiable(
+            newQueue.length > visibleCaptions
+                ? newQueue.sublist(newQueue.length - visibleCaptions)
+                : newQueue,
+          );
         }
       } catch (error, stackTrace) {
         _logger.e(
@@ -90,7 +93,7 @@ class CallClosedCaptions {
   /// Stops every pending caption removal and clears [closedCaptions].
   void reset() {
     _expiryTimers.cancelAll();
-    _closedCaptions.value = [];
+    _closedCaptions.value = const [];
   }
 
   Future<void> _removeExpiredCaption(
@@ -98,9 +101,9 @@ class CallClosedCaptions {
     StreamClosedCaption caption,
   ) async {
     return _lock.synchronized(() {
-      _closedCaptions.value = _closedCaptions.value.where((c) {
-        return keyFor(c) != keyFor(caption);
-      }).toList();
+      _closedCaptions.value = List.unmodifiable(
+        _closedCaptions.value.where((c) => keyFor(c) != keyFor(caption)),
+      );
     });
   }
 }
