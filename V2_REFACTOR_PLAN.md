@@ -23,7 +23,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 | 1 | A1 | `feat/flu-847-call-characterisation-tests` | #1405 |
 | 2 | B4 | `feat/flu-850-call-pass-through-extensions` | #1406 |
 | 3 | B5 | `feat/flu-851-e2ee-claims` | #1408 |
-| 4 | B2 | `feat/flu-849-call-event-router` | |
+| 4 | B2 | `feat/flu-849-call-event-router` | #1409 |
 | 5 | A2 | `feat/flu-855-call-connection-coordinator` | |
 | 6 | A3 | `feat/flu-860-connection-phase` | |
 | 7 | A4 | `fix/flu-864-single-leave-decision` | |
