@@ -22,7 +22,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 |---|---|---|---|
 | 1 | A1 | `feat/flu-847-call-characterisation-tests` | #1405 |
 | 2 | B4 | `feat/flu-850-call-pass-through-extensions` | #1406 |
-| 3 | B5 | `feat/flu-851-e2ee-claims` | |
+| 3 | B5 | `feat/flu-851-e2ee-claims` | #1408 |
 | 4 | B2 | `feat/flu-849-call-event-router` | |
 | 5 | A2 | `feat/flu-855-call-connection-coordinator` | |
 | 6 | A3 | `feat/flu-860-connection-phase` | |
@@ -95,8 +95,9 @@ out the next.
      the sub-issue to In Review when the PR opens. Below that: a link to
      FLU-859, the position in the stack (`2/18, stacked on #…`), what moved or
      changed, and the tests.
-   - Fill in the PR column of the table in the next ticket's commit (the
-     number does not exist yet when this one is committed).
+   - Once the PR exists, fill in its number in the PR column in a follow-up
+     commit on the same branch, and push it (it is the top of the stack, so
+     nothing needs restacking).
 7. **Finish.** Report the PR link, then ask the user to run `/compact`
    before the next ticket starts. Do not begin the next ticket in the same
    context.
