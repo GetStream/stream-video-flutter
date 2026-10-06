@@ -68,6 +68,49 @@ lane :sdk_size do
   show_size_breakdown(base_branch, results, outdated, failed, sha)
 end
 
+README_PATH = File.expand_path('../../../README.md', __dir__)
+
+# Writes the base branch's benchmark into the size badges of the root README.
+# The `stream_video_flutter` badges show what the UI adds on top of
+# `stream_video`. The plugin badges show their pub.dev archive size.
+lane :update_readme_badges do
+  base_branch = ENV['BASE_BRANCH'] || 'main'
+  repo = GITHUB_REPO.split('/').last
+
+  FileUtils.rm_rf(METRICS_DIR)
+  sh("git clone --depth 1 git@github.com:GetStream/stream-internal-metrics.git #{METRICS_DIR.shellescape}")
+  benchmark = JSON.parse(File.read(File.join(METRICS_DIR, "#{repo}-size.json")))[base_branch]
+  UI.user_error!("No benchmark for #{base_branch} in stream-internal-metrics") unless benchmark
+
+  size = lambda do |key|
+    benchmark.fetch(key) { UI.user_error!("The #{base_branch} benchmark has no #{key}") }
+  end
+  badges = {
+    'android:stream_video' => size.call('android_stream_video'),
+    'android:stream_video_flutter' => size.call('android_stream_video_flutter') - size.call('android_stream_video'),
+    'ios:stream_video' => size.call('ios_stream_video'),
+    'ios:stream_video_flutter' => size.call('ios_stream_video_flutter') - size.call('ios_stream_video'),
+    'stream_video_push_notification' => size.call('pub_stream_video_push_notification'),
+    'stream_video_screen_sharing' => size.call('pub_stream_video_screen_sharing')
+  }
+
+  readme = File.read(README_PATH)
+  badges.each do |label, kb|
+    pattern = %r{(https://img\.shields\.io/badge/#{Regexp.escape(label)}-)[^"]*?(-blue")}
+    UI.user_error!("No #{label} badge in README.md") unless readme.match?(pattern)
+
+    readme = readme.sub(pattern) { "#{Regexp.last_match(1)}#{badge_size(kb)}#{Regexp.last_match(2)}" }
+    UI.message("#{label}: #{badge_size(kb).sub('%20', ' ')}")
+  end
+  File.write(README_PATH, readme)
+end
+
+def badge_size(kb)
+  return "#{(kb / 1024.0).round(1)}%20MB" if kb >= 1024
+
+  "#{kb.round}%20KB"
+end
+
 def show_size_breakdown(base_branch, results, outdated, failed, sha)
   repo = GITHUB_REPO.split('/').last
   benchmark_file = "flutter-breakdown/#{repo}/#{base_branch}.json"
