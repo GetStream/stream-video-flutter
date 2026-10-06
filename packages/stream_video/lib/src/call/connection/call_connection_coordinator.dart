@@ -8,8 +8,7 @@ class CallConnectionCoordinator {
   final Call _call;
 
   late final _cancelables = Cancelables();
-  late final _callJoinLock = Lock();
-  late final _callReconnectLock = Lock();
+  final _executor = ConnectionExecutor();
   CallCredentials? _credentials;
   CallSession? _session;
 
@@ -51,6 +50,41 @@ class CallConnectionCoordinator {
   /// Waits [duration], or less if the call starts leaving first.
   Future<void> _delayUnlessLeft(Duration duration) {
     return _untilLeft(Future<void>.delayed(duration));
+  }
+
+  /// Runs [task] once the join and reconnect work before it has finished.
+  /// A reconnect asked for meanwhile, and not taken by [task], starts once
+  /// it is done.
+  Future<T> _serially<T>(Future<T> Function() task) async {
+    try {
+      return await _executor.run(task);
+    } finally {
+      final held = _takeHeldReconnect();
+      if (held != null && _phase.value is ConnectionConnected) {
+        _call._logger.d(() => '[reconnect] starting held $held');
+        unawaited(
+          _reconnect(
+            held.strategy,
+            reconnectReason: held.reason,
+            triggeredByNetwork: held.triggeredByNetwork,
+          ),
+        );
+      }
+    }
+  }
+
+  /// The held reconnect, unless the session it was asked for has been
+  /// replaced since.
+  ReconnectRequest? _takeHeldReconnect() {
+    final held = _executor.takeHeld();
+    if (held == null) return null;
+    if (!identical(held.session, _session)) {
+      _call._logger.v(
+        () => '[reconnect] dropped held $held (session replaced)',
+      );
+      return null;
+    }
+    return held;
   }
 
   /// The strategy of the running reconnect, or
@@ -239,6 +273,31 @@ class CallConnectionCoordinator {
       return const Result.success(none);
     }
 
+    // A reconnecting call is already the active call, so this comes before
+    // the check for one.
+    if (_phase.value is ConnectionReconnecting) {
+      _call._logger.v(() => '[join] await the running reconnect');
+
+      try {
+        // Queued behind the reconnect, so it runs once the reconnect is done.
+        await _executor
+            .run(() async {})
+            .timeout(_call._stateManager.callState.preferences.connectTimeout);
+      } on TimeoutException {
+        _call._logger.e(() => '[join] timed out waiting for ongoing connect');
+        return failureWithError('timed out waiting for ongoing connect');
+      }
+
+      if (_phase.value is ConnectionConnected) {
+        _call._logger.v(() => '[join] ongoing connect succeeded');
+        return const Result.success(none);
+      }
+
+      final status = _call.state.value.status;
+      _call._logger.e(() => '[join] ongoing connect failed: $status');
+      return failureWithError('ongoing connect failed: $status');
+    }
+
     if (_call._streamVideo.state.activeCalls.value.any(
       (call) => call.callCid == _call.callCid,
     )) {
@@ -247,37 +306,6 @@ class CallConnectionCoordinator {
       );
 
       return failureWithError('a call with the same cid is in progress');
-    }
-
-    if (_call.state.value.status is CallStatusConnecting ||
-        _call.state.value.status is CallStatusJoining) {
-      _call._logger.v(() => '[join] await ongoing connect to resolve');
-
-      try {
-        final currentState = await _call.state
-            .firstWhere(
-              (it) =>
-                  it.status is! CallStatusConnecting &&
-                  it.status is! CallStatusJoining,
-            )
-            .timeout(_call._stateManager.callState.preferences.connectTimeout);
-
-        if (currentState.status is CallStatusConnected ||
-            currentState.status is CallStatusJoined) {
-          _call._logger.v(() => '[join] ongoing connect succeeded');
-          return const Result.success(none);
-        } else {
-          _call._logger.e(
-            () => '[join] ongoing connect failed: ${currentState.status}',
-          );
-          return failureWithError(
-            'ongoing connect failed: ${currentState.status}',
-          );
-        }
-      } on TimeoutException {
-        _call._logger.e(() => '[join] timed out waiting for ongoing connect');
-        return failureWithError('timed out waiting for ongoing connect');
-      }
     }
 
     // Before the call is marked active, because a call that cannot get its key
@@ -311,12 +339,14 @@ class CallConnectionCoordinator {
       ..reportEvent(_call.callCid, ClientEventStage.joinInitiated);
 
     final outcome =
-        await _join(
-              connectOptions: connectOptions,
-              membersLimit: membersLimit,
-              maxJoinRetries: maxJoinRetries,
-              hintHighScaleLivestreamPublisher:
-                  hintHighScaleLivestreamPublisher,
+        await _serially(
+              () => _join(
+                connectOptions: connectOptions,
+                membersLimit: membersLimit,
+                maxJoinRetries: maxJoinRetries,
+                hintHighScaleLivestreamPublisher:
+                    hintHighScaleLivestreamPublisher,
+              ),
             )
             .asCancelable()
             .storeIn(_idConnect, _cancelables)
@@ -355,111 +385,103 @@ class CallConnectionCoordinator {
     String? reconnectReason,
     bool? hintHighScaleLivestreamPublisher,
   }) async {
-    if (_callJoinLock.locked) {
-      _call._logger.w(() => '[join] rejected (already joining)');
-      return const JoinRetry(StreamVideoException(message: 'already joining'));
-    }
+    final sfuJoinFailures = <String, int>{};
+    String? sfuToForceExclude;
+    final sfusToExclude = <String>[];
 
-    return _callJoinLock.synchronized(() async {
-      final sfuJoinFailures = <String, int>{};
-      String? sfuToForceExclude;
-      final sfusToExclude = <String>[];
+    // What the last attempt failed with, so an exhausted budget reports the
+    // verdict rather than only the fact that it ran out.
+    StreamVideoException? lastError;
+    StackTrace? lastStackTrace;
 
-      // What the last attempt failed with, so an exhausted budget reports the
-      // verdict rather than only the fact that it ran out.
-      StreamVideoException? lastError;
-      StackTrace? lastStackTrace;
+    for (var attempt = 0; attempt < max(maxJoinRetries, 1); attempt++) {
+      final outcome = await _doJoinCatching(
+        connectOptions: connectOptions,
+        membersLimit: membersLimit,
+        sfuToForceExclude: sfuToForceExclude,
+        sfusToExclude: List.unmodifiable(sfusToExclude),
+        reconnectReason: reconnectReason,
+        hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
+        joinAttempt: attempt,
+      );
 
-      for (var attempt = 0; attempt < max(maxJoinRetries, 1); attempt++) {
-        final outcome = await _doJoinCatching(
-          connectOptions: connectOptions,
-          membersLimit: membersLimit,
-          sfuToForceExclude: sfuToForceExclude,
-          sfusToExclude: List.unmodifiable(sfusToExclude),
-          reconnectReason: reconnectReason,
-          hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
-          joinAttempt: attempt,
+      if (outcome is! JoinRetry) {
+        _call._logger.v(
+          () =>
+              '[join] attempt $attempt, cid: ${_call.callCid}, '
+              'outcome: ${outcome.runtimeType}',
+        );
+        return outcome;
+      } else {
+        final error = outcome.error;
+        _call._logger.e(
+          () =>
+              '[join] attempt $attempt, cid: ${_call.callCid}, failed: $error',
         );
 
-        if (outcome is! JoinRetry) {
-          _call._logger.v(
-            () =>
-                '[join] attempt $attempt, cid: ${_call.callCid}, '
-                'outcome: ${outcome.runtimeType}',
-          );
-          return outcome;
-        } else {
-          final error = outcome.error;
+        lastError = error;
+        lastStackTrace = outcome.stackTrace;
+
+        if (_isUnrecoverableCoordinatorError(error)) {
           _call._logger.e(
-            () =>
-                '[join] attempt $attempt, cid: ${_call.callCid}, failed: $error',
+            () => '[join] unrecoverable coordinator error, not retrying',
           );
+          return JoinGiveUp(error, outcome.stackTrace);
+        }
 
-          lastError = error;
-          lastStackTrace = outcome.stackTrace;
+        final joinCause = error.rawCause;
+        if (joinCause is SessionConnectionFailure) {
+          final connectionFailure = joinCause;
 
-          if (_isUnrecoverableCoordinatorError(error)) {
+          if (_isUnrecoverableSfuError(connectionFailure)) {
             _call._logger.e(
-              () => '[join] unrecoverable coordinator error, not retrying',
+              () => '[join] unrecoverable SFU error, not retrying',
             );
             return JoinGiveUp(error, outcome.stackTrace);
           }
 
-          final joinCause = error.rawCause;
-          if (joinCause is SessionConnectionFailure) {
-            final connectionFailure = joinCause;
+          final switchSfu = _isJoinErrorCode(connectionFailure);
+          final sfuName = _credentials?.sfuServer.name ?? '';
 
-            if (_isUnrecoverableSfuError(connectionFailure)) {
-              _call._logger.e(
-                () => '[join] unrecoverable SFU error, not retrying',
-              );
-              return JoinGiveUp(error, outcome.stackTrace);
-            }
-
-            final switchSfu = _isJoinErrorCode(connectionFailure);
-            final sfuName = _credentials?.sfuServer.name ?? '';
-
-            sfuJoinFailures.update(
-              sfuName,
-              (value) => value + 1,
-              ifAbsent: () => 1,
-            );
-
-            if (switchSfu || sfuJoinFailures[sfuName]! >= 2) {
-              final sfuMigrateReason = switchSfu
-                  ? 'join error code'
-                  : 'too many failures';
-
-              _call._logger.e(
-                () =>
-                    '[join] $sfuMigrateReason for SFU: $sfuName, migrating...',
-              );
-
-              _session?.trace(TraceTag.callJoinMigrate, {
-                'migrateFrom': sfuName,
-                'reason': sfuMigrateReason,
-              });
-
-              sfuToForceExclude = sfuName;
-              sfusToExclude
-                ..clear()
-                ..addAll(sfuJoinFailures.keys);
-            }
-          }
-        }
-
-        await _delayUnlessLeft(_call._retryPolicy.backoff(attempt));
-        if (_isLeftOrLeaving) return const JoinCancelled();
-      }
-
-      final failure =
-          lastError ??
-          StreamVideoException(
-            message: 'failed to join after $maxJoinRetries attempts',
+          sfuJoinFailures.update(
+            sfuName,
+            (value) => value + 1,
+            ifAbsent: () => 1,
           );
 
-      return JoinRetry(failure, lastStackTrace);
-    });
+          if (switchSfu || sfuJoinFailures[sfuName]! >= 2) {
+            final sfuMigrateReason = switchSfu
+                ? 'join error code'
+                : 'too many failures';
+
+            _call._logger.e(
+              () => '[join] $sfuMigrateReason for SFU: $sfuName, migrating...',
+            );
+
+            _session?.trace(TraceTag.callJoinMigrate, {
+              'migrateFrom': sfuName,
+              'reason': sfuMigrateReason,
+            });
+
+            sfuToForceExclude = sfuName;
+            sfusToExclude
+              ..clear()
+              ..addAll(sfuJoinFailures.keys);
+          }
+        }
+      }
+
+      await _delayUnlessLeft(_call._retryPolicy.backoff(attempt));
+      if (_isLeftOrLeaving) return const JoinCancelled();
+    }
+
+    final failure =
+        lastError ??
+        StreamVideoException(
+          message: 'failed to join after $maxJoinRetries attempts',
+        );
+
+    return JoinRetry(failure, lastStackTrace);
   }
 
   /// Runs [_doJoin], turning a thrown error into [JoinRetry]. [_join] then
@@ -641,7 +663,10 @@ class CallConnectionCoordinator {
             '[join] creating new sfu session (rejoin: $performingRejoin, migration: $performingMigration)',
       );
 
-      _session = await _call._sessionFactory.makeCallSession(
+      // Read by the session's own callbacks, so a reconnect it asks for names
+      // it rather than whichever session is current by then.
+      late final CallSession session;
+      session = await _call._sessionFactory.makeCallSession(
         // a new session_id is necessary for the REJOIN strategy.
         // we use the previous session_id if available
         sessionId: performingRejoin ? null : _previousSession?.sessionId,
@@ -673,11 +698,13 @@ class CallConnectionCoordinator {
           _reconnect(
             strategy,
             reconnectReason: '${pc.type.name} pc disconnected',
+            source: session,
           );
         },
         clientPublishOptions:
             _call._stateManager.callState.preferences.clientPublishOptions,
       );
+      _session = session;
 
       if (performingMigration) {
         migrationComplete = _session!.waitForMigrationComplete();
@@ -743,7 +770,13 @@ class CallConnectionCoordinator {
           _call._logger.w(
             () => '[join] sfu session not resumable, rejoin pending',
           );
-          _updateReconnect((phase) => phase.copyWith(rejoinPending: true));
+          _executor.hold(
+            ReconnectRequest(
+              SfuReconnectionStrategy.rejoin,
+              reason: 'sfu session not resumed',
+              session: _session,
+            ),
+          );
         }
 
         return const JoinRetry(
@@ -1119,6 +1152,8 @@ class CallConnectionCoordinator {
   }
 
   Future<void> _onSfuConnectionEvent(SfuEvent sfuEvent) async {
+    // The session that sent the event; a reconnect it asks for is for it.
+    final session = _session;
     if (sfuEvent is SfuSocketDisconnected) {
       await _sfuStatsReporter?.sendSfuStats();
       // Don't attempt reconnection if leaving the call was triggered, or if the
@@ -1136,6 +1171,7 @@ class CallConnectionCoordinator {
           SfuReconnectionStrategy.fast,
           reconnectReason:
               'sfu socket disconnected, closeCode: ${sfuEvent.reason.closeCode}, closeReason: ${sfuEvent.reason.closeReason}',
+          source: session,
         );
       } else if (_isLeftOrLeaving) {
         _call._logger.d(
@@ -1181,6 +1217,7 @@ class CallConnectionCoordinator {
         await _reconnect(
           SfuReconnectionStrategy.fast,
           reconnectReason: 'sfu socket failed: ${sfuEvent.error.message}',
+          source: session,
         );
       }
     } else if (sfuEvent is SfuGoAwayEvent) {
@@ -1191,6 +1228,7 @@ class CallConnectionCoordinator {
       await _reconnect(
         SfuReconnectionStrategy.migrate,
         reconnectReason: 'go away',
+        source: session,
       );
     }
     // error event
@@ -1223,6 +1261,7 @@ class CallConnectionCoordinator {
           await _reconnect(
             sfuEvent.error.reconnectStrategy,
             reconnectReason: 'sfu error: ${sfuEvent.error.message}',
+            source: session,
           );
           break;
         case SfuReconnectionStrategy.disconnect:
@@ -1238,23 +1277,32 @@ class CallConnectionCoordinator {
     }
   }
 
+  /// Reconnects with [strategy], or, while other join or reconnect work runs,
+  /// holds the request for it. [source] is the session the reconnect is for;
+  /// by default the current one.
   Future<void> _reconnect(
     SfuReconnectionStrategy strategy, {
     String? reconnectReason,
     bool triggeredByNetwork = false,
+    CallSession? source,
   }) async {
-    if (_callJoinLock.locked) {
-      if (strategy == SfuReconnectionStrategy.rejoin) {
-        _updateReconnect((phase) => phase.copyWith(rejoinPending: true));
-      }
-      _call._logger.w(
-        () => '[_reconnect] skipping reconnect (join in progress)',
-      );
+    if (_isLeftOrLeaving) {
+      _call._logger.w(() => '[reconnect] rejected (call was left)');
       return;
     }
 
-    if (_isLeftOrLeaving) {
-      _call._logger.w(() => '[reconnect] rejected (call was left)');
+    if (_executor.isBusy) {
+      _call._logger.w(
+        () => '[reconnect] held $strategy (connection work running)',
+      );
+      _executor.hold(
+        ReconnectRequest(
+          strategy,
+          reason: reconnectReason,
+          triggeredByNetwork: triggeredByNetwork,
+          session: source ?? _session,
+        ),
+      );
       return;
     }
 
@@ -1266,18 +1314,7 @@ class CallConnectionCoordinator {
       return;
     }
 
-    if (_callReconnectLock.locked) {
-      if (strategy == SfuReconnectionStrategy.rejoin) {
-        _updateReconnect((phase) => phase.copyWith(rejoinPending: true));
-      }
-      _call._logger.w(
-        () =>
-            '[reconnect] rejected $strategy (reconnect in progress: $_reconnectStrategy)',
-      );
-      return;
-    }
-
-    await _callReconnectLock.synchronized(() async {
+    await _serially(() async {
       _setPhase(ConnectionReconnecting(strategy: strategy));
 
       final reconnectStartTime = DateTime.now();
@@ -1311,9 +1348,10 @@ class CallConnectionCoordinator {
             DateTime.now().difference(reconnectStartTime) >
             _fastReconnectDeadline;
 
-        final current = _phase.value;
+        // A reconnect asked for during the attempt or its backoff.
+        final held = _takeHeldReconnect();
         final hasPendingRejoin =
-            current is ConnectionReconnecting && current.rejoinPending;
+            held != null && held.isStrongerThan(SfuReconnectionStrategy.fast);
 
         final hasClosedPeerConnection =
             (_session?.rtcManager?.publisher?.isClosed() ?? false) ||
@@ -1341,7 +1379,6 @@ class CallConnectionCoordinator {
             strategy: shouldRejoin
                 ? SfuReconnectionStrategy.rejoin
                 : SfuReconnectionStrategy.fast,
-            rejoinPending: false,
           ),
         );
       }
@@ -1439,6 +1476,16 @@ class CallConnectionCoordinator {
             _call._streamVideo.clientEventReporter.reportJoinAttempt(
               _call.callCid,
               reason: joinReason,
+            );
+          }
+
+          // Reconnects asked for since the loop started, such as the other
+          // peer connection dropping too, are taken into this attempt.
+          final held = _takeHeldReconnect();
+          if (held != null && held.isStrongerThan(_reconnectStrategy)) {
+            _call._logger.d(() => '[reconnect] taking held $held');
+            _updateReconnect(
+              (phase) => phase.copyWith(strategy: held.strategy),
             );
           }
 

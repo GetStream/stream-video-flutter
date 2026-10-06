@@ -509,11 +509,11 @@ void main() {
     );
 
     test(
-      'rejoin hint received while reconnect lock is held is not dropped',
+      'rejoin hint received while a reconnect attempt runs is not dropped',
       () async {
         // Override start() to return a long fastReconnectDeadline so
-        // mustPerformRejoin stays false — this isolates the phase's rejoinPending
-        // flag as the sole driver of escalation.
+        // mustPerformRejoin stays false — this isolates the held rejoin
+        // request as the sole driver of escalation.
         when(
           () => callSession.start(
             reconnectDetails: any(named: 'reconnectDetails'),
@@ -564,19 +564,19 @@ void main() {
           ),
         ).called(1);
 
-        // Start a fast reconnect — the loop acquires the reconnect lock and
-        // hangs waiting for fastReconnectGate.
+        // Start a fast reconnect — the attempt hangs waiting for
+        // fastReconnectGate.
         capturedCallback!(mockPc, SfuReconnectionStrategy.fast);
-        // Wait long enough for the lock to be acquired.
+        // Wait long enough for the attempt to start.
         await Future<void>.delayed(const Duration(milliseconds: 50));
 
-        // Signal a rejoin hint while the reconnect lock is held. The call
-        // must record rejoinPending on the phase and not discard the hint.
+        // Signal a rejoin hint while the attempt runs. The call must hold it
+        // for the reconnect rather than discard it.
         capturedCallback!(mockPc, SfuReconnectionStrategy.rejoin);
 
-        // Release the gate: fast reconnect fails. The loop sees
-        // rejoinPending on the phase → shouldRejoin=true → strategy switches to
-        // rejoin → awaits 3s stability window → issues a second joinCall.
+        // Release the gate: fast reconnect fails. The loop takes the held
+        // rejoin → shouldRejoin=true → strategy switches to rejoin → awaits
+        // 3s stability window → issues a second joinCall.
         fastReconnectGate.complete();
 
         // 3 s stability window + margin.
