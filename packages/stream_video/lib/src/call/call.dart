@@ -62,6 +62,7 @@ import 'call_events.dart';
 import 'call_reject_reason.dart';
 import 'call_ringing_state.dart';
 import 'call_type.dart';
+import 'connection/connection_phase.dart';
 import 'events/call_closed_captions.dart';
 import 'events/call_coordinator_event_router.dart';
 import 'events/call_reactions.dart';
@@ -934,35 +935,8 @@ class Call {
   }
 
   /// Ends the call for all participants.
-  Future<Result<None>> end({String? reason}) async {
-    _logger.d(() => '[end] status: ${state.value.status}');
-
-    if (state.value.status is! CallStatusActive) {
-      _logger.w(() => '[end] rejected (invalid status): ${state.value.status}');
-      return failureWithError('invalid status: ${state.value.status}');
-    }
-
-    try {
-      final didDisconnect = await _connection._disconnect(
-        sfuLeaveReason: reason ?? 'user is ending the call',
-      );
-
-      // If another disconnect already ran (or is running), don't fire the
-      // server-side endCall a second time and don't re-emit the lifecycle
-      // event.
-      if (!didDisconnect) {
-        _logger.v(() => '[end] disconnect short-circuited');
-        return const Result.success(none);
-      }
-
-      final result = await _permissionsManager.endCall();
-      _stateManager.lifecycleCallEnded();
-
-      _logger.v(() => '[end] completed: $result');
-      return result;
-    } finally {
-      _connection._leaveCallTriggered = false;
-    }
+  Future<Result<None>> end({String? reason}) {
+    return _connection.end(reason: reason);
   }
 
   /// The end-to-end encryption manager attached via [setE2EEManager].

@@ -16,30 +16,106 @@ class CallConnectionCoordinator {
   CallSession? _previousSession;
   StreamPeerConnectionFactory? _pcFactory;
 
-  Future<Result<None>>? _pendingJoin;
-
   StatsOptions? _sfuStatsOptions;
   SfuStatsReporter? _sfuStatsReporter;
   String? _unifiedSessionId;
 
-  int _reconnectAttempts = 0;
-
-  /// The attempt [CallStatusReconnecting.attempt] reports: every attempt of
-  /// the running reconnect, fast or rejoin, counting from 1.
-  ///
-  /// Kept apart from [_reconnectAttempts], which counts only rejoins and
-  /// migrations and drives their backoff.
-  int _reconnectStatusAttempt = 0;
   Duration _fastReconnectDeadline = Duration.zero;
-  SfuReconnectionStrategy _reconnectStrategy =
-      SfuReconnectionStrategy.unspecified;
-  bool _isRejoinPending = false;
   Future<InternetStatus>? _awaitNetworkAvailableFuture;
   Future<Result<None>>? _awaitMigrationCompleteFuture;
-  bool _leaveCallTriggered = false;
 
-  // Completer that will be completed when call lifecycle ends (call leave is called)
-  final Completer<void> _callLifecycleCompleter = Completer<void>();
+  /// Where the connection is. The connection statuses in [CallState.status]
+  /// are projected from it by [_publishStatus].
+  final _phase = MutableStateEmitter<ConnectionPhase>(
+    const ConnectionIdle(),
+    sync: true,
+  );
+
+  bool get _isLeftOrLeaving => _phase.value.isLeftOrLeaving;
+
+  /// Completes once the call is leaving or has left.
+  Future<void> get _whenLeft =>
+      _phase.firstWhere((phase) => phase.isLeftOrLeaving);
+
+  /// The strategy of the running reconnect, or
+  /// [SfuReconnectionStrategy.unspecified] outside one.
+  SfuReconnectionStrategy get _reconnectStrategy => switch (_phase.value) {
+    ConnectionReconnecting(:final strategy) => strategy,
+    _ => SfuReconnectionStrategy.unspecified,
+  };
+
+  /// Rejoin and migrate attempts of the running reconnect.
+  int get _reconnectAttempts => switch (_phase.value) {
+    ConnectionReconnecting(:final rejoinAttempts) => rejoinAttempts,
+    _ => 0,
+  };
+
+  /// The attempt [CallStatusReconnecting.attempt] reports.
+  int get _reconnectStatusAttempt => switch (_phase.value) {
+    ConnectionReconnecting(:final attempt) => attempt,
+    _ => 0,
+  };
+
+  /// Moves to [next], unless the call is leaving or has left: from leaving,
+  /// only [ConnectionDisconnected] follows, and nothing follows that.
+  void _setPhase(ConnectionPhase next) {
+    final current = _phase.value;
+    final allowed = switch (current) {
+      ConnectionLeaving() => next is ConnectionDisconnected,
+      ConnectionDisconnected() => false,
+      _ => true,
+    };
+
+    if (!allowed) {
+      _call._logger.v(() => '[phase] rejected $next (phase: $current)');
+      return;
+    }
+
+    _call._logger.v(() => '[phase] $current -> $next');
+    _phase.value = next;
+  }
+
+  /// Updates the running reconnect, if there is one.
+  void _updateReconnect(
+    ConnectionReconnecting Function(ConnectionReconnecting phase) update,
+  ) {
+    final phase = _phase.value;
+    if (phase is ConnectionReconnecting) _setPhase(update(phase));
+  }
+
+  /// Moves the running reconnect, if there is one, to [step] and reports it.
+  void _setReconnectStep(CallReconnectPhase step) {
+    if (_phase.value is! ConnectionReconnecting) return;
+    _updateReconnect((phase) => phase.copyWith(step: step));
+    _publishStatus();
+  }
+
+  /// Writes the call status the current phase projects to.
+  void _publishStatus() {
+    final stateManager = _call._stateManager;
+    switch (_phase.value) {
+      case ConnectionJoining():
+        stateManager.lifecycleCallConnecting(
+          attempt: 0,
+          strategy: SfuReconnectionStrategy.unspecified,
+        );
+      case ConnectionConnected():
+        stateManager.lifecycleCallConnected();
+      case ConnectionReconnecting(:final strategy, :final attempt, :final step):
+        stateManager.lifecycleCallConnecting(
+          attempt: attempt,
+          strategy: strategy,
+          phase: step,
+        );
+      case ConnectionReconnectFailed():
+        stateManager.lifecycleCallReconnectingFailed();
+      case ConnectionDisconnected(:final reason):
+        stateManager.lifecycleCallDisconnected(reason: reason);
+      case ConnectionIdle():
+      case ConnectionLeaving():
+        break;
+    }
+  }
 
   final Set<SfuClientCapability> _sfuClientCapabilities = {
     SfuClientCapability.subscriberVideoPause, // on by default
@@ -85,19 +161,9 @@ class CallConnectionCoordinator {
     }
 
     if (status is CallStatusDisconnected) {
-      _releaseCallLifecycle();
+      _setPhase(ConnectionDisconnected(status.reason));
       await _clear('status-disconnected');
     }
-  }
-
-  /// Releases everything waiting on this call's lifecycle.
-  ///
-  /// [_callLifecycleCompleter] is what cancels in-flight join and reconnect
-  /// work — see [_disconnect], which is the other caller. Every path to a
-  /// terminal state has to go through here.
-  void _releaseCallLifecycle() {
-    if (_callLifecycleCompleter.isCompleted) return;
-    _callLifecycleCompleter.complete();
   }
 
   Future<Result<None>> join({
@@ -106,22 +172,27 @@ class CallConnectionCoordinator {
     int maxJoinRetries = 3,
     bool? hintHighScaleLivestreamPublisher,
   }) {
-    final pendingJoin = _pendingJoin;
-    if (pendingJoin != null) {
+    final phase = _phase.value;
+    if (phase is ConnectionJoining) {
       _call._logger.d(() => '[join] awaiting the join already in progress');
-      return pendingJoin;
+      return phase.request;
     }
 
-    final joinFuture = _joinOnce(
+    final request = _joinOnce(
       connectOptions: connectOptions,
       membersLimit: membersLimit,
       maxJoinRetries: maxJoinRetries,
       hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
     );
 
-    _pendingJoin = joinFuture;
-    return joinFuture.whenComplete(() {
-      if (identical(_pendingJoin, joinFuture)) _pendingJoin = null;
+    // Only a first join counts as joining. From any other phase _joinOnce
+    // settles on its own: connected, left, or a reconnect in progress.
+    if (phase is! ConnectionIdle) return request;
+
+    final joining = ConnectionJoining(request);
+    _setPhase(joining);
+    return request.whenComplete(() {
+      if (identical(_phase.value, joining)) _setPhase(const ConnectionIdle());
     });
   }
 
@@ -133,7 +204,7 @@ class CallConnectionCoordinator {
   }) async {
     await _call._init();
 
-    if (_callLifecycleCompleter.isCompleted) {
+    if (_isLeftOrLeaving) {
       _call._logger.w(() => '[join] rejected (call was left)');
       return failureWithError('call was left');
     }
@@ -428,17 +499,14 @@ class CallConnectionCoordinator {
       return result;
     }
 
-    if (_callLifecycleCompleter.isCompleted) {
+    if (_isLeftOrLeaving) {
       _call._logger.w(() => '[join] rejected (call was left)');
       return failureWithError('call was left');
     }
 
     // Within a reconnect this restates the joining status the loop set just
     // before dispatching the attempt, and so changes nothing.
-    _call._stateManager.lifecycleCallConnecting(
-      attempt: _reconnectStatusAttempt,
-      strategy: _reconnectStrategy,
-    );
+    _publishStatus();
 
     final clientEventRetryCount = _clientEventRetryCount(joinAttempt);
 
@@ -462,7 +530,7 @@ class CallConnectionCoordinator {
     _credentials = joinedResult.data;
     _previousSession = _session;
 
-    if (_callLifecycleCompleter.isCompleted) {
+    if (_isLeftOrLeaving) {
       _call._logger.w(() => '[join] rejected (call was left during joining)');
       return failureWithError('call was left');
     }
@@ -546,7 +614,7 @@ class CallConnectionCoordinator {
         sessionId: _session!.sessionId,
       );
 
-      if (_callLifecycleCompleter.isCompleted) {
+      if (_isLeftOrLeaving) {
         _call._logger.w(
           () => '[join] rejected (call was left during session creation)',
         );
@@ -599,7 +667,7 @@ class CallConnectionCoordinator {
           _call._logger.w(
             () => '[join] sfu session not resumable, rejoin pending',
           );
-          _isRejoinPending = true;
+          _updateReconnect((phase) => phase.copyWith(rejoinPending: true));
         }
 
         return failureWithError('fast reconnecting failed');
@@ -637,7 +705,8 @@ class CallConnectionCoordinator {
     if (_reconnectStrategy != SfuReconnectionStrategy.migrate) {
       _call._logger.v(() => '[join] connected');
       _previousSession = null;
-      _call._stateManager.lifecycleCallConnected();
+      _setPhase(const ConnectionConnected());
+      _publishStatus();
     }
 
     // Re-bind audio filter after rejoin/migrate, as iOS may drop it.
@@ -755,7 +824,7 @@ class CallConnectionCoordinator {
           '[joinCall] cid: ${_call.callCid}, migratingFrom: $migratingFrom, migratingFromList: $migratingFromList',
     );
 
-    if (_callLifecycleCompleter.isCompleted) {
+    if (_isLeftOrLeaving) {
       _call._logger.w(() => '[joinCall] rejected (call was left)');
       return failureWithError('call was left');
     }
@@ -893,7 +962,7 @@ class CallConnectionCoordinator {
       sessionId: session.sessionId,
     );
 
-    if (_callLifecycleCompleter.isCompleted) {
+    if (_isLeftOrLeaving) {
       _call._logger.w(() => '[startSession] rejected (call was left)');
       return failureWithError('call was left');
     }
@@ -978,7 +1047,7 @@ class CallConnectionCoordinator {
       // closure itself says another attempt is pointless. That verdict comes
       // from the disconnection source rather than the close code, which a
       // server can set to a normal value even when something went wrong.
-      if (!_leaveCallTriggered && sfuEvent.reason.isReconnectable) {
+      if (!_isLeftOrLeaving && sfuEvent.reason.isReconnectable) {
         _call._logger.w(() => '[onSfuEvent] socket disconnected');
 
         _session?.trace(TraceTag.sfuSocketDisconnected, {
@@ -990,7 +1059,7 @@ class CallConnectionCoordinator {
           reconnectReason:
               'sfu socket disconnected, closeCode: ${sfuEvent.reason.closeCode}, closeReason: ${sfuEvent.reason.closeReason}',
         );
-      } else if (_leaveCallTriggered) {
+      } else if (_isLeftOrLeaving) {
         _call._logger.d(
           () =>
               '[onSfuEvent] socket disconnected, leaving call was triggered - no reconnection',
@@ -1017,7 +1086,7 @@ class CallConnectionCoordinator {
         'error': sfuEvent.error.message,
       });
 
-      if (_leaveCallTriggered) {
+      if (_isLeftOrLeaving) {
         _call._logger.d(
           () =>
               '[onSfuEvent] socket failed, leaving call was triggered - no reconnection',
@@ -1097,17 +1166,17 @@ class CallConnectionCoordinator {
     bool triggeredByNetwork = false,
   }) async {
     if (_callJoinLock.locked) {
-      if (strategy == SfuReconnectionStrategy.rejoin) _isRejoinPending = true;
+      if (strategy == SfuReconnectionStrategy.rejoin) {
+        _updateReconnect((phase) => phase.copyWith(rejoinPending: true));
+      }
       _call._logger.w(
         () => '[_reconnect] skipping reconnect (join in progress)',
       );
       return;
     }
 
-    if (_call.state.value.status is CallStatusDisconnected) {
-      _call._logger.w(
-        () => '[reconnect] rejected (call is already disconnected)',
-      );
+    if (_isLeftOrLeaving) {
+      _call._logger.w(() => '[reconnect] rejected (call was left)');
       return;
     }
 
@@ -1120,7 +1189,9 @@ class CallConnectionCoordinator {
     }
 
     if (_callReconnectLock.locked) {
-      if (strategy == SfuReconnectionStrategy.rejoin) _isRejoinPending = true;
+      if (strategy == SfuReconnectionStrategy.rejoin) {
+        _updateReconnect((phase) => phase.copyWith(rejoinPending: true));
+      }
       _call._logger.w(
         () =>
             '[reconnect] rejected $strategy (reconnect in progress: $_reconnectStrategy)',
@@ -1129,10 +1200,7 @@ class CallConnectionCoordinator {
     }
 
     await _callReconnectLock.synchronized(() async {
-      _reconnectAttempts = 0;
-      _reconnectStatusAttempt = 0;
-      _reconnectStrategy = strategy;
-      _isRejoinPending = false;
+      _setPhase(ConnectionReconnecting(strategy: strategy));
 
       final reconnectStartTime = DateTime.now();
       var fastReconnectAttemptsCount = 0;
@@ -1149,9 +1217,7 @@ class CallConnectionCoordinator {
       Future<void> handleReconnectFailure({required bool wasMigrating}) async {
         // The attempt is over, and the next one has not started: the backoff
         // below is waiting, not joining.
-        _call._stateManager.lifecycleCallReconnectPhase(
-          CallReconnectPhase.waiting,
-        );
+        _setReconnectStep(CallReconnectPhase.waiting);
 
         final strategyAttempt =
             _reconnectStrategy == SfuReconnectionStrategy.fast
@@ -1167,8 +1233,9 @@ class CallConnectionCoordinator {
             DateTime.now().difference(reconnectStartTime) >
             _fastReconnectDeadline;
 
-        final hasPendingRejoin = _isRejoinPending;
-        _isRejoinPending = false;
+        final current = _phase.value;
+        final hasPendingRejoin =
+            current is ConnectionReconnecting && current.rejoinPending;
 
         final hasClosedPeerConnection =
             (_session?.rtcManager?.publisher?.isClosed() ?? false) ||
@@ -1191,9 +1258,14 @@ class CallConnectionCoordinator {
           fastReconnectAttemptsCount++;
         }
 
-        _reconnectStrategy = shouldRejoin
-            ? SfuReconnectionStrategy.rejoin
-            : SfuReconnectionStrategy.fast;
+        _updateReconnect(
+          (phase) => phase.copyWith(
+            strategy: shouldRejoin
+                ? SfuReconnectionStrategy.rejoin
+                : SfuReconnectionStrategy.fast,
+            rejoinPending: false,
+          ),
+        );
       }
 
       do {
@@ -1209,12 +1281,13 @@ class CallConnectionCoordinator {
           final elapsed = DateTime.now().difference(reconnectStartTime);
           if (elapsed > _call.state.value.preferences.reconnectTimeout) {
             _call._logger.w(() => '[reconnect] reconnection timeout');
-            _call._stateManager.lifecycleCallReconnectingFailed();
+            _setPhase(const ConnectionReconnectFailed());
+            _publishStatus();
             return;
           }
         }
 
-        if (_callLifecycleCompleter.isCompleted) {
+        if (_isLeftOrLeaving) {
           _call._logger.w(() => '[reconnect] rejected (call was left)');
           return;
         }
@@ -1224,18 +1297,19 @@ class CallConnectionCoordinator {
           'reason': reconnectReason,
         });
 
-        _reconnectStatusAttempt++;
-        _call._stateManager.lifecycleCallConnecting(
-          attempt: _reconnectStatusAttempt,
-          strategy: _reconnectStrategy,
-          phase: CallReconnectPhase.waiting,
+        _updateReconnect(
+          (phase) => phase.copyWith(
+            attempt: phase.attempt + 1,
+            step: CallReconnectPhase.waiting,
+          ),
         );
+        _publishStatus();
 
         // Started only once the status says waiting, so an offline report
         // from the wait cannot be overwritten by it.
         _awaitNetworkAvailableFuture = _awaitNetworkAvailable(
           stabilityWindow: stabilityWindow,
-          onStatus: (status) => _call._stateManager.lifecycleCallReconnectPhase(
+          onStatus: (status) => _setReconnectStep(
             status == InternetStatus.connected
                 ? CallReconnectPhase.waiting
                 : CallReconnectPhase.offline,
@@ -1262,11 +1336,12 @@ class CallConnectionCoordinator {
               'strategy': strategy.name,
               'error': 'reconnection timeout',
             });
-            _call._stateManager.lifecycleCallReconnectingFailed();
+            _setPhase(const ConnectionReconnectFailed());
+            _publishStatus();
             return;
           }
 
-          if (_callLifecycleCompleter.isCompleted) {
+          if (_isLeftOrLeaving) {
             _call._logger.w(
               () => '[reconnect] rejected (call was left during network wait)',
             );
@@ -1289,9 +1364,7 @@ class CallConnectionCoordinator {
             );
           }
 
-          _call._stateManager.lifecycleCallReconnectPhase(
-            CallReconnectPhase.joining,
-          );
+          _setReconnectStep(CallReconnectPhase.joining);
 
           final reconnectResult = switch (_reconnectStrategy) {
             SfuReconnectionStrategy.fast => await _reconnectFast(
@@ -1328,7 +1401,8 @@ class CallConnectionCoordinator {
             case StreamApiException(unrecoverable: true):
             case StreamApiError() when error.unrecoverable ?? false:
               _call._logger.w(() => '[reconnect] unrecoverable error');
-              _call._stateManager.lifecycleCallReconnectingFailed();
+              _setPhase(const ConnectionReconnectFailed());
+              _publishStatus();
 
               _session?.trace(TraceTag.callReconnectFailed, {
                 'strategy': strategy.name,
@@ -1350,17 +1424,11 @@ class CallConnectionCoordinator {
               await handleReconnectFailure(wasMigrating: wasMigrating);
           }
         }
-      } while (_call.state.value.status is! CallStatusConnected &&
-          _call.state.value.status is! CallStatusDisconnected &&
-          _call.state.value.status is! CallStatusReconnectionFailed);
-
-      // reset the reconnect strategy to unspecified after a successful reconnection
-      _reconnectStrategy = SfuReconnectionStrategy.unspecified;
+      } while (_phase.value is ConnectionReconnecting);
     });
   }
 
   Future<Result<None>> _reconnectFast({String? reason}) async {
-    _reconnectStrategy = SfuReconnectionStrategy.fast;
     return _join(
       reconnectReason: reason,
       maxJoinRetries: 1,
@@ -1369,16 +1437,18 @@ class CallConnectionCoordinator {
   }
 
   Future<Result<None>> _reconnectRejoin({String? reason}) async {
-    _reconnectAttempts++;
-    _reconnectStrategy = SfuReconnectionStrategy.rejoin;
+    _updateReconnect(
+      (phase) => phase.copyWith(rejoinAttempts: phase.rejoinAttempts + 1),
+    );
     return _join(reconnectReason: reason, disconnectOnMaxRetries: false);
   }
 
   Future<Result<None>> _reconnectMigrate({String? reason}) async {
     final migrateTimeStopwatch = Stopwatch()..start();
 
-    _reconnectAttempts++;
-    _reconnectStrategy = SfuReconnectionStrategy.migrate;
+    _updateReconnect(
+      (phase) => phase.copyWith(rejoinAttempts: phase.rejoinAttempts + 1),
+    );
     final joinResult = await _join(
       reconnectReason: reason,
       disconnectOnMaxRetries: false,
@@ -1399,12 +1469,13 @@ class CallConnectionCoordinator {
 
     return migrationResult.foldResult(
       success: (_) {
-        _call._stateManager.lifecycleCallConnected();
+        _setPhase(const ConnectionConnected());
+        _publishStatus();
         migrateTimeStopwatch.stop();
         unawaited(
           _sfuStatsReporter?.sendSfuStats(
             connectionTimeMs: migrateTimeStopwatch.elapsedMilliseconds,
-            reconnectionStrategy: _reconnectStrategy,
+            reconnectionStrategy: SfuReconnectionStrategy.migrate,
           ),
         );
         return const Result.success(none);
@@ -1463,7 +1534,7 @@ class CallConnectionCoordinator {
               },
             );
 
-        final lifecycleFuture = _callLifecycleCompleter.future.then((_) {
+        final lifecycleFuture = _whenLeft.then((_) {
           _call._logger.w(() => '[_awaitNetworkAvailable] call was left');
           return InternetStatus.disconnected;
         });
@@ -1562,7 +1633,7 @@ class CallConnectionCoordinator {
     if (futureResult != null) {
       _call._logger.v(() => '[awaitIfNeeded] return cancelable');
 
-      final lifecycleFuture = _callLifecycleCompleter.future.then<Result<None>>(
+      final lifecycleFuture = _whenLeft.then<Result<None>>(
         (_) {
           _call._logger.w(() => '[awaitIfNeeded] call was left');
           return const Result.failure('call was left');
@@ -1595,46 +1666,91 @@ class CallConnectionCoordinator {
       ..abort(_call.callCid, abortCode)
       ..unregisterCall(_call.callCid);
 
+    final bool didDisconnect;
     try {
-      final didDisconnect = await _disconnect(
+      didDisconnect = await _disconnect(
         sfuLeaveReason: _sfuLeaveReason(reason),
       );
-
-      if (didDisconnect) {
-        _call._stateManager.lifecycleCallDisconnected(reason: reason);
-      }
-
-      _call._logger.v(() => '[leave] finished');
-      return const Result.success(none);
-    } finally {
-      _leaveCallTriggered = false;
+    } catch (_) {
+      // A teardown that throws still leaves the call.
+      _settleDisconnected(reason);
+      rethrow;
     }
+
+    if (didDisconnect) _settleDisconnected(reason);
+
+    _call._logger.v(() => '[leave] finished');
+    return const Result.success(none);
   }
 
-  /// Shared cleanup sequence for [leave] and [Call.end].
+  Future<Result<None>> end({String? reason}) async {
+    _call._logger.d(() => '[end] status: ${_call.state.value.status}');
+
+    if (_call.state.value.status is! CallStatusActive) {
+      _call._logger.w(
+        () => '[end] rejected (invalid status): ${_call.state.value.status}',
+      );
+      return failureWithError('invalid status: ${_call.state.value.status}');
+    }
+
+    final bool didDisconnect;
+    try {
+      didDisconnect = await _disconnect(
+        sfuLeaveReason: reason ?? 'user is ending the call',
+      );
+    } catch (_) {
+      _settleDisconnected(DisconnectReason.ended());
+      rethrow;
+    }
+
+    // If another disconnect already ran (or is running), don't fire the
+    // server-side endCall a second time and don't re-emit the lifecycle
+    // event.
+    if (!didDisconnect) {
+      _call._logger.v(() => '[end] disconnect short-circuited');
+      return const Result.success(none);
+    }
+
+    final result = await _call._permissionsManager.endCall();
+    _setPhase(ConnectionDisconnected(DisconnectReason.ended()));
+    _call._stateManager.lifecycleCallEnded();
+
+    _call._logger.v(() => '[end] completed: $result');
+    return result;
+  }
+
+  /// Moves to [ConnectionDisconnected] and reports the call disconnected for
+  /// [reason].
+  void _settleDisconnected(DisconnectReason? reason) {
+    _setPhase(ConnectionDisconnected(reason));
+    _publishStatus();
+  }
+
+  /// Shared cleanup sequence for [leave] and [end].
   ///
-  /// Sets [_leaveCallTriggered], completes [_callLifecycleCompleter], sends
-  /// the SFU leave message, and runs [_clear]. Returns `true` when the
-  /// cleanup actually ran; `false` if it was short-circuited because a
-  /// concurrent disconnect was already in flight or the call was already
-  /// disconnected.
+  /// Moves to [ConnectionLeaving], which cancels in-flight join and reconnect
+  /// work, sends the SFU leave message, and runs [_clear]. Returns `true`
+  /// when the cleanup actually ran; `false` if it was short-circuited because
+  /// a disconnect was already in flight or the call was already disconnected.
   Future<bool> _disconnect({required String sfuLeaveReason}) async {
-    if (_leaveCallTriggered) {
+    if (_phase.value is ConnectionLeaving) {
       _call._logger.i(() => '[disconnect] rejected (already disconnecting)');
       return false;
     }
 
-    _leaveCallTriggered = true;
-
-    // Cancels ongoing operations awaiting it (e.g. _startSession). This must
-    // run regardless of whether the disconnect proceeds further so that
-    // nothing gets stuck waiting.
-    _releaseCallLifecycle();
-
-    if (_call.state.value.status.isDisconnected) {
+    final status = _call.state.value.status;
+    if (_phase.value is ConnectionDisconnected ||
+        status is CallStatusDisconnected) {
+      _setPhase(
+        ConnectionDisconnected(
+          status is CallStatusDisconnected ? status.reason : null,
+        ),
+      );
       _call._logger.d(() => '[disconnect] rejected (status is disconnected)');
       return false;
     }
+
+    _setPhase(const ConnectionLeaving());
 
     try {
       _session?.leave(reason: sfuLeaveReason);
