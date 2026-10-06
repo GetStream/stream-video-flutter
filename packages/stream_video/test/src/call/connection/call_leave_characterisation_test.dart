@@ -309,4 +309,23 @@ void main() {
       },
     );
   });
+
+  group('client state', () {
+    test('leaving the incoming call clears it', () async {
+      final call = harness.buildCall();
+      final clientState = harness.streamVideo.state;
+      final incomingCall =
+          clientState.incomingCall as MutableStateEmitter<Call?>;
+      when(() => clientState.setIncomingCall(any())).thenAnswer((invocation) {
+        incomingCall.value = invocation.positionalArguments.first as Call?;
+        return Future.value();
+      });
+      incomingCall.value = call;
+      await call.join();
+
+      await call.leave();
+
+      expect(incomingCall.value, isNull);
+    });
+  });
 }
