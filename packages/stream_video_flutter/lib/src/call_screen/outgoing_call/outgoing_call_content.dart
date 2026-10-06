@@ -81,6 +81,7 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
   void initState() {
     super.initState();
     _createOwnedController();
+    _controller.addListener(_onControllerChanged);
   }
 
   @override
@@ -88,27 +89,29 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller ||
         widget.call != oldWidget.call) {
+      (oldWidget.controller ?? _ownedController)?.removeListener(
+        _onControllerChanged,
+      );
       _disposeOwnedController();
       _createOwnedController();
+      _controller.addListener(_onControllerChanged);
     }
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_onControllerChanged);
     _disposeOwnedController();
     super.dispose();
   }
 
   void _createOwnedController() {
     if (widget.controller != null) return;
-    _ownedController = StreamRingingCameraController(call: widget.call)
-      ..addListener(_onControllerChanged);
+    _ownedController = StreamRingingCameraController(call: widget.call);
   }
 
   void _disposeOwnedController() {
-    _ownedController
-      ?..removeListener(_onControllerChanged)
-      ..dispose();
+    _ownedController?.dispose();
     _ownedController = null;
   }
 
