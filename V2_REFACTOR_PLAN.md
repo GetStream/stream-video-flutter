@@ -50,7 +50,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 - [x] 2. **B4** [FLU-850](https://linear.app/stream/issue/FLU-850): Call pass-throughs to extension methods (S, low risk). Removes about 380 lines from `call.dart` before the risky moves, with no overlap with the connection code.
 - [x] 3. **B5** [FLU-851](https://linear.app/stream/issue/FLU-851): E2EE manager resolution and the claims registry out of Call (S, low risk).
 - [x] 4. **B2** [FLU-849](https://linear.app/stream/issue/FLU-849): coordinator event router, and the reactions, closed captions and video moderation helpers (S, low risk). Takes `_reactionTimers` out before A6 has to deal with it.
-- [ ] 5. **Fix** [FLU-924](https://linear.app/stream/issue/FLU-924): log errors thrown while routing coordinator events (S, bug). Before A2, so A2 moves `_observeEvents` with the fix already in.
+- [x] 5. **Fix** [FLU-924](https://linear.app/stream/issue/FLU-924): log errors thrown while routing coordinator events (S, bug). Before A2, so A2 moves `_observeEvents` with the fix already in.
 - [ ] 6. **Fix** [FLU-926](https://linear.app/stream/issue/FLU-926): video moderation ignores a failed mic or camera mute (S, bug).
 - [ ] 7. **Fix** [FLU-927](https://linear.app/stream/issue/FLU-927): reset closed captions on leave and catch errors across the whole handler (S, bug). Closing the emitter stays with A7.
 - [ ] 8. **Fix** [FLU-928](https://linear.app/stream/issue/FLU-928): closed captions never show when the visibility duration is 0 (S, bug). Settle the option from the ticket in the plan; option 1 needs a changelog line.

@@ -695,7 +695,19 @@ class Call {
         event
             .mapToCallEvent(state.value)
             .emitIfNotNull(_callEvents)
-            ?.also(_onCoordinatorEvent);
+            ?.also(
+              (event) => unawaited(
+                _onCoordinatorEvent(event).catchError(
+                  (Object error, StackTrace stackTrace) {
+                    _logger.e(
+                      () =>
+                          '[onCoordinatorEvent] failed to handle ${event.runtimeType}: '
+                          '$error, stackTrace: $stackTrace',
+                    );
+                  },
+                ),
+              ),
+            );
       }),
     );
   }
