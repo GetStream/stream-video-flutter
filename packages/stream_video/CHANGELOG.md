@@ -79,6 +79,7 @@
 - A failed `Call.join` now returns the error it failed with, retries a retryable coordinator failure, and reports one telemetry abort.
 - A call ended remotely now sends the SFU leave message, like a local leave.
 - A reconnect asked for while a call is joining or reconnecting is no longer dropped.
+- A failed peer connection now rejoins the call instead of retrying a fast reconnect.
 - Closed captions are now cleared when leaving a call.
 - A failed microphone or camera mute during video moderation is now logged.
 - Errors thrown while handling a call's coordinator and SFU events, including from `onPermissionRequest`, are now logged instead of surfacing as unhandled errors.

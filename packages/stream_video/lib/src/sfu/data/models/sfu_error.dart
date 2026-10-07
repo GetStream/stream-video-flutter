@@ -58,21 +58,24 @@ enum SfuErrorCode {
   String toString() => name;
 }
 
+/// How a call reconnects to the SFU. Which one each cause asks for, and when
+/// a failed attempt escalates, is listed on the call's reconnect entry point
+/// (`CallConnectionCoordinator._reconnect`).
 enum SfuReconnectionStrategy {
   unspecified,
 
-  /// Sent after reaching the maximum reconnection attempts, leading to permanent disconnect.
+  /// Leave the call; the SFU will not take it back.
   disconnect,
 
-  /// SDK should maintaining existing publisher/subscriber pc instances
-  /// and establish a new WebSocket connection.
+  /// Keep the session and its peer connections: open a new socket to the same
+  /// SFU, resume the session, and restart ICE.
   fast,
 
-  /// SDK should obtain new credentials from the coordinator, drops existing pc instances, and initializes
-  /// a completely new WebSocket connection, ensuring a comprehensive reset.
+  /// Start over: new credentials from the coordinator, a new session and new
+  /// peer connections.
   rejoin,
 
-  /// SDK should migrate to a new SFU instance
+  /// Move the session to another SFU, keeping its id.
   migrate;
 
   @override

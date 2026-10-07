@@ -7,6 +7,7 @@ import 'package:synchronized/synchronized.dart';
 
 import '../../protobuf/video/sfu/models/models.pbenum.dart';
 import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart';
+import '../errors/stream_video_exception.dart';
 import '../errors/stream_video_exception_composer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
@@ -171,13 +172,20 @@ class StreamPeerConnection extends Disposable {
     }
 
     restartIce().then((result) {
-      if (result.isFailure) {
-        onReconnectionNeeded?.call(
-          this,
-          SfuReconnectionStrategy.fast,
-          ReconnectionNeededReason.connectionFailed,
-        );
-      }
+      if (result is! Failure) return;
+
+      // A lost signalling socket only needs a fast reconnect to bring it back;
+      // any other failed restart leaves a connection only a rejoin recovers.
+      final signalLost =
+          result.videoError.sfuError?.code ==
+          SfuErrorCode.participantSignalLost;
+      onReconnectionNeeded?.call(
+        this,
+        signalLost
+            ? SfuReconnectionStrategy.fast
+            : SfuReconnectionStrategy.rejoin,
+        ReconnectionNeededReason.connectionFailed,
+      );
     });
   }
 
@@ -463,15 +471,6 @@ class StreamPeerConnection extends Disposable {
             rtc.RTCPeerConnectionState.RTCPeerConnectionStateConnected;
   }
 
-  /// Whether the `RTCPeerConnection` is permanently closed and therefore
-  /// cannot be recovered by an ICE restart / fast reconnect.
-  bool isClosed() {
-    return pc.iceConnectionState ==
-            rtc.RTCIceConnectionState.RTCIceConnectionStateClosed ||
-        pc.connectionState ==
-            rtc.RTCPeerConnectionState.RTCPeerConnectionStateClosed;
-  }
-
   void _initRtcCallbacks() {
     pc
       ..onAddStream = _onAddStream
@@ -578,9 +577,11 @@ class StreamPeerConnection extends Disposable {
 
     if (state == rtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
       _logger.w(() => '[onConnectionState] state: $state');
+      // A failed connection is not recovered by an ICE restart, so it needs
+      // new peer connections.
       onReconnectionNeeded?.call(
         this,
-        SfuReconnectionStrategy.fast,
+        SfuReconnectionStrategy.rejoin,
         ReconnectionNeededReason.connectionFailed,
       );
     } else {

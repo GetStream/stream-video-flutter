@@ -4,9 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/call/stats/trace_tag.dart';
+import 'package:stream_video/src/call/stats/tracer.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/telemetry/client_event_types.dart';
 import 'package:stream_video/src/webrtc/peer_connection.dart';
+import 'package:stream_video/src/webrtc/rtc_manager.dart';
+import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../fixtures/call_test_helpers.dart';
@@ -984,4 +987,85 @@ void main() {
       expect(status.reason, isA<DisconnectReasonReconnectionFailed>());
     },
   );
+
+  group('a failed fast reconnect attempt', () {
+    /// Fails the first fast reconnect on [harness]'s first session, with
+    /// the publisher reporting [publisherHealthy] by then, and returns the
+    /// number of fast reconnects made.
+    Future<int Function()> failFirstFastAttempt({
+      required bool publisherHealthy,
+    }) async {
+      // A long deadline, so only the peer connections decide the escalation.
+      harness.stubSessionStart(
+        harness.session,
+        () async => Result.success((
+          callState: createTestSfuCallState(),
+          fastReconnectDeadline: const Duration(minutes: 5),
+        )),
+      );
+      final call = harness.buildCall();
+      await call.join();
+
+      final publisher = _MockTracedStreamPeerConnection();
+      final subscriber = _MockTracedStreamPeerConnection();
+      when(publisher.isHealthy).thenReturn(publisherHealthy);
+      when(subscriber.isHealthy).thenReturn(true);
+      when(() => publisher.tracer).thenReturn(Tracer('publisher'));
+      when(() => subscriber.tracer).thenReturn(Tracer('subscriber'));
+      final rtcManager = _MockRtcManager();
+      when(() => rtcManager.publisher).thenReturn(publisher);
+      when(() => rtcManager.subscriber).thenReturn(subscriber);
+      when(() => harness.session.rtcManager).thenReturn(rtcManager);
+
+      var fastReconnects = 0;
+      harness.stubFastReconnect(harness.session, () async {
+        if (++fastReconnects == 1) {
+          return failureWithError('fast reconnect failed');
+        }
+        return sessionStartSuccess();
+      });
+
+      await harness.emitSfu(harness.session, sfuSocketDropped);
+      return () => fastReconnects;
+    }
+
+    test(
+      'rejoins when a peer connection has failed',
+      () async {
+        harness = ConnectionHarness(sessionCount: 2);
+        final fastReconnects = await failFirstFastAttempt(
+          publisherHealthy: false,
+        );
+
+        // The rejoin waits out its stability window, then makes a session.
+        await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+        expect(fastReconnects(), 1);
+      },
+      timeout: const Timeout(Duration(seconds: 20)),
+    );
+
+    test(
+      'retries fast while the peer connections are only disconnected',
+      () async {
+        harness = ConnectionHarness(sessionCount: 2);
+        final fastReconnects = await failFirstFastAttempt(
+          publisherHealthy: true,
+        );
+
+        await waitUntil(() => fastReconnects() == 2);
+        expect(harness.reconnectionCallbacks, hasLength(1));
+      },
+    );
+  });
+}
+
+class _MockRtcManager extends Mock implements RtcManager {
+  @override
+  Future<void> dispose() async {}
+}
+
+class _MockTracedStreamPeerConnection extends Mock
+    implements TracedStreamPeerConnection {
+  @override
+  Future<void> dispose() async {}
 }

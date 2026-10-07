@@ -1342,6 +1342,25 @@ class CallConnectionCoordinator {
   /// the session the reconnect is for; by default the current one. A held
   /// request is always for the current session: one for a replaced session
   /// is dropped.
+  ///
+  /// Every reconnect starts here. The strategy each cause asks for:
+  ///
+  /// | Cause | Strategy |
+  /// |---|---|
+  /// | The SFU socket drops or fails | fast |
+  /// | The device goes offline | fast |
+  /// | A peer connection's state turns failed | rejoin |
+  /// | An ICE restart fails | rejoin; fast when the SFU reports the signal lost |
+  /// | The publisher has not connected 15 s after joining | rejoin |
+  /// | A stalled publisher offer, or a track mid that does not resolve | fast |
+  /// | The SFU sends a GoAway | migrate |
+  /// | The SFU sends an error | the strategy it names |
+  /// | A fast reconnect the SFU did not resume | rejoin |
+  ///
+  /// A failed attempt is retried as a rejoin once the fast-reconnect deadline
+  /// has passed, after two failed fast attempts, after a failed migration,
+  /// while a peer connection is failed or closed, or when a rejoin or migrate
+  /// was asked for meanwhile. Otherwise it is retried as fast.
   Future<void> _reconnect(
     SfuReconnectionStrategy strategy, {
     required ReconnectTrigger trigger,
@@ -1459,9 +1478,11 @@ class CallConnectionCoordinator {
         _call._logger.v(() => '[reconnect] next attempt covers held $held');
       }
 
-      final hasClosedPeerConnection =
-          (_session?.rtcManager?.publisher?.isClosed() ?? false) ||
-          (_session?.rtcManager?.subscriber.isClosed() ?? false);
+      // A failed or closed peer connection is not recovered by a fast
+      // reconnect.
+      final hasUnhealthyPeerConnection =
+          !(_session?.rtcManager?.publisher?.isHealthy() ?? true) ||
+          !(_session?.rtcManager?.subscriber.isHealthy() ?? true);
 
       final hasReachedFastReconnectLimit = fastReconnectAttemptsCount >= 2;
 
@@ -1474,7 +1495,7 @@ class CallConnectionCoordinator {
           mustPerformRejoin ||
           wasMigrating ||
           hasReachedFastReconnectLimit ||
-          hasClosedPeerConnection;
+          hasUnhealthyPeerConnection;
 
       final next = shouldRejoin
           ? SfuReconnectionStrategy.rejoin

@@ -297,7 +297,7 @@ void main() {
 
   group('StreamPeerConnection.onConnectionState', () {
     test(
-      'fires onReconnectionNeeded with fast when the peer enters Failed',
+      'fires onReconnectionNeeded with rejoin when the peer enters Failed',
       () {
         final pc = _FakeRtcPeerConnection();
         final sp = _build(pc: pc, type: StreamPeerType.publisher);
@@ -319,19 +319,62 @@ void main() {
 
         expect(calls, hasLength(1));
         expect(calls.single.$1, same(sp));
-        expect(calls.single.$2, SfuReconnectionStrategy.fast);
+        expect(calls.single.$2, SfuReconnectionStrategy.rejoin);
         expect(calls.single.$3, ReconnectionNeededReason.connectionFailed);
       },
     );
 
     test(
-      'fires onReconnectionNeeded with fast when its ICE restart fails',
+      'fires onReconnectionNeeded with rejoin when its ICE restart fails',
       () async {
         final pc = _FakeRtcPeerConnection();
         final sfuClient = MockSfuClient();
         when(() => sfuClient.restartIce(any())).thenAnswer(
           (_) async => const Result.failure(
             StreamVideoException(message: 'ice restart refused'),
+          ),
+        );
+        final sp = _build(
+          pc: pc,
+          type: StreamPeerType.subscriber,
+          sfuClient: sfuClient,
+        );
+
+        final calls = <(SfuReconnectionStrategy, ReconnectionNeededReason)>[];
+        sp.onReconnectionNeeded = (_, strategy, reason) =>
+            calls.add((strategy, reason));
+
+        pc.capturedOnIceConnectionState!(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateFailed,
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        expect(calls, [
+          (
+            SfuReconnectionStrategy.rejoin,
+            ReconnectionNeededReason.connectionFailed,
+          ),
+        ]);
+      },
+    );
+
+    test(
+      'fires onReconnectionNeeded with fast when its ICE restart fails '
+      'because the signalling socket is lost',
+      () async {
+        final pc = _FakeRtcPeerConnection();
+        final sfuClient = MockSfuClient();
+        when(() => sfuClient.restartIce(any())).thenAnswer(
+          (_) async => const Result.failure(
+            StreamVideoExceptionWithCause(
+              message: 'signal lost',
+              cause: SfuError(
+                message: 'signal lost',
+                code: SfuErrorCode.participantSignalLost,
+                shouldRetry: false,
+                reconnectStrategy: SfuReconnectionStrategy.fast,
+              ),
+            ),
           ),
         );
         final sp = _build(
