@@ -798,6 +798,13 @@ class CallConnectionCoordinator {
         handOverFrom: {..._supersededSessions},
       );
 
+      if (_isLeftOrLeaving) {
+        _call._logger.w(
+          () => '[join] rejected (call was left during session start)',
+        );
+        return const JoinCancelled();
+      }
+
       if (sessionResult is! Success<None>) {
         _call._logger.e(
           () => '[join] sfu session start failed: $sessionResult',
@@ -1140,6 +1147,11 @@ class CallConnectionCoordinator {
     _call._subscriptions.cancel(_idSessionStats);
     _call._subscriptions.cancel(_idSessionEvents);
 
+    if (_isLeftOrLeaving) {
+      _call._logger.w(() => '[startSession] rejected (call was left)');
+      return failureWithError('call was left');
+    }
+
     _call._subscriptions.add(
       _idSessionEvents,
       session.events.listen((event) {
@@ -1163,11 +1175,6 @@ class CallConnectionCoordinator {
     _call._stateManager.lifecycleCallSessionStart(
       sessionId: session.sessionId,
     );
-
-    if (_isLeftOrLeaving) {
-      _call._logger.w(() => '[startSession] rejected (call was left)');
-      return failureWithError('call was left');
-    }
 
     final result = await session.start(
       reconnectDetails: reconnectDetails,
