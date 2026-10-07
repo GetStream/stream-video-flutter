@@ -1353,15 +1353,16 @@ class CallConnectionCoordinator {
       return;
     }
 
-    if (_executor.isBusy) {
-      // From a session already replaced, such as the old one during a rejoin.
-      if (source != null && !identical(source, _session)) {
-        _call._logger.v(
-          () => '[reconnect] dropped $strategy (session replaced)',
-        );
-        return;
-      }
+    // From a session already replaced, such as the old one during or after a
+    // rejoin.
+    if (source != null && !identical(source, _session)) {
+      _call._logger.v(
+        () => '[reconnect] dropped $strategy (session replaced)',
+      );
+      return;
+    }
 
+    if (_executor.isBusy) {
       _call._logger.w(
         () =>
             '[reconnect] held $strategy from $trigger (connection work running)',
@@ -1391,256 +1392,279 @@ class CallConnectionCoordinator {
     }
 
     await _serially(() async {
-      _setPhase(ConnectionReconnecting(strategy: strategy));
-
-      final reconnectStartTime = DateTime.now();
-      var fastReconnectAttemptsCount = 0;
-
-      // Counts consecutive unexpected throws. The per-strategy counters only
-      // advance when a strategy actually runs, so a throw raised before the
-      // dispatch (telemetry, network wait, stats) would otherwise keep the
-      // backoff pinned at zero. Reset as soon as an attempt completes without
-      // throwing.
-      var unexpectedErrorCount = 0;
-
-      // Shared post-failure handling: back off, then decide whether to
-      // escalate to `rejoin` or retry with `fast`.
-      Future<void> handleReconnectFailure({required bool wasMigrating}) async {
-        // The attempt is over, and the next one has not started: the backoff
-        // below is waiting, not joining.
-        _setReconnectStep(CallReconnectPhase.waiting);
-
-        final strategyAttempt =
-            _reconnectStrategy == SfuReconnectionStrategy.fast
-            ? fastReconnectAttemptsCount
-            : _reconnectAttempts;
-        await _delayUnlessLeft(
-          _call._retryPolicy.backoff(
-            max(strategyAttempt, unexpectedErrorCount),
-          ),
+      try {
+        await _reconnectLoop(strategy, reconnectReason, trigger);
+      } catch (error, stackTrace) {
+        _call._logger.e(
+          () =>
+              '[reconnect] failed outside an attempt: $error, '
+              'stackTrace: $stackTrace',
         );
-
-        final mustPerformRejoin =
-            DateTime.now().difference(reconnectStartTime) >
-            _fastReconnectDeadline;
-
-        // A rejoin or migrate asked for during the attempt or its backoff;
-        // either one makes the next attempt a rejoin.
-        final held = _takeHeldReconnect();
-        final hasPendingRejoin =
-            held != null && held.isStrongerThan(SfuReconnectionStrategy.fast);
-        if (held != null && !hasPendingRejoin) {
-          _call._logger.v(() => '[reconnect] next attempt covers held $held');
+        // Nothing would move the call on from Reconnecting, so give up as a
+        // failed reconnect, which leaves the call.
+        if (_phase.value is ConnectionReconnecting) {
+          _setPhase(const ConnectionReconnectFailed());
+          _publishStatus();
         }
+      }
+    });
+  }
 
-        final hasClosedPeerConnection =
-            (_session?.rtcManager?.publisher?.isClosed() ?? false) ||
-            (_session?.rtcManager?.subscriber.isClosed() ?? false);
+  /// Runs reconnect attempts with [strategy] until the call is connected, the
+  /// reconnect fails, or the call is left.
+  Future<void> _reconnectLoop(
+    SfuReconnectionStrategy strategy,
+    String? reconnectReason,
+    ReconnectTrigger trigger,
+  ) async {
+    _setPhase(ConnectionReconnecting(strategy: strategy));
 
-        final hasReachedFastReconnectLimit = fastReconnectAttemptsCount >= 2;
+    final reconnectStartTime = DateTime.now();
+    var fastReconnectAttemptsCount = 0;
 
-        final isAlreadyRejoining =
-            _reconnectStrategy == SfuReconnectionStrategy.rejoin;
+    // Counts consecutive unexpected throws. The per-strategy counters only
+    // advance when a strategy actually runs, so a throw raised before the
+    // dispatch (telemetry, network wait, stats) would otherwise keep the
+    // backoff pinned at zero. Reset as soon as an attempt completes without
+    // throwing.
+    var unexpectedErrorCount = 0;
 
-        final shouldRejoin =
-            isAlreadyRejoining ||
-            hasPendingRejoin ||
-            mustPerformRejoin ||
-            wasMigrating ||
-            hasReachedFastReconnectLimit ||
-            hasClosedPeerConnection;
+    // Shared post-failure handling: back off, then decide whether to
+    // escalate to `rejoin` or retry with `fast`.
+    Future<void> handleReconnectFailure({required bool wasMigrating}) async {
+      // The attempt is over, and the next one has not started: the backoff
+      // below is waiting, not joining.
+      _setReconnectStep(CallReconnectPhase.waiting);
 
-        if (!shouldRejoin) {
-          fastReconnectAttemptsCount++;
-        }
+      final strategyAttempt = _reconnectStrategy == SfuReconnectionStrategy.fast
+          ? fastReconnectAttemptsCount
+          : _reconnectAttempts;
+      await _delayUnlessLeft(
+        _call._retryPolicy.backoff(
+          max(strategyAttempt, unexpectedErrorCount),
+        ),
+      );
 
-        _updateReconnect(
-          (phase) => phase.copyWith(
-            strategy: shouldRejoin
-                ? SfuReconnectionStrategy.rejoin
-                : SfuReconnectionStrategy.fast,
-          ),
-        );
+      final mustPerformRejoin =
+          DateTime.now().difference(reconnectStartTime) >
+          _fastReconnectDeadline;
+
+      // A rejoin or migrate asked for during the attempt or its backoff;
+      // either one makes the next attempt a rejoin.
+      final held = _takeHeldReconnect();
+      final hasPendingRejoin =
+          held != null && held.isStrongerThan(SfuReconnectionStrategy.fast);
+      if (held != null && !hasPendingRejoin) {
+        _call._logger.v(() => '[reconnect] next attempt covers held $held');
       }
 
-      do {
-        // Wait for a stable network before reconnecting with rejoin/migrate
-        // to prevent starting an SDP exchange on a transient connection that drops before the answer arrives.
-        final stabilityWindow =
-            (_reconnectStrategy == SfuReconnectionStrategy.rejoin ||
-                _reconnectStrategy == SfuReconnectionStrategy.migrate)
-            ? const Duration(seconds: 3)
-            : Duration.zero;
+      final hasClosedPeerConnection =
+          (_session?.rtcManager?.publisher?.isClosed() ?? false) ||
+          (_session?.rtcManager?.subscriber.isClosed() ?? false);
 
-        if (_call.state.value.preferences.reconnectTimeout > Duration.zero) {
-          final elapsed = DateTime.now().difference(reconnectStartTime);
-          if (elapsed > _call.state.value.preferences.reconnectTimeout) {
-            _call._logger.w(() => '[reconnect] reconnection timeout');
-            _setPhase(const ConnectionReconnectFailed());
-            _publishStatus();
-            return;
-          }
+      final hasReachedFastReconnectLimit = fastReconnectAttemptsCount >= 2;
+
+      final isAlreadyRejoining =
+          _reconnectStrategy == SfuReconnectionStrategy.rejoin;
+
+      final shouldRejoin =
+          isAlreadyRejoining ||
+          hasPendingRejoin ||
+          mustPerformRejoin ||
+          wasMigrating ||
+          hasReachedFastReconnectLimit ||
+          hasClosedPeerConnection;
+
+      if (!shouldRejoin) {
+        fastReconnectAttemptsCount++;
+      }
+
+      _updateReconnect(
+        (phase) => phase.copyWith(
+          strategy: shouldRejoin
+              ? SfuReconnectionStrategy.rejoin
+              : SfuReconnectionStrategy.fast,
+        ),
+      );
+    }
+
+    do {
+      // Wait for a stable network before reconnecting with rejoin/migrate
+      // to prevent starting an SDP exchange on a transient connection that drops before the answer arrives.
+      final stabilityWindow =
+          (_reconnectStrategy == SfuReconnectionStrategy.rejoin ||
+              _reconnectStrategy == SfuReconnectionStrategy.migrate)
+          ? const Duration(seconds: 3)
+          : Duration.zero;
+
+      if (_call.state.value.preferences.reconnectTimeout > Duration.zero) {
+        final elapsed = DateTime.now().difference(reconnectStartTime);
+        if (elapsed > _call.state.value.preferences.reconnectTimeout) {
+          _call._logger.w(() => '[reconnect] reconnection timeout');
+          _setPhase(const ConnectionReconnectFailed());
+          _publishStatus();
+          return;
         }
+      }
+
+      if (_isLeftOrLeaving) {
+        _call._logger.w(() => '[reconnect] rejected (call was left)');
+        return;
+      }
+
+      _session?.trace(TraceTag.callReconnect, {
+        'strategy': strategy.name,
+        'reason': reconnectReason,
+      });
+
+      _updateReconnect(
+        (phase) => phase.copyWith(
+          attempt: phase.attempt + 1,
+          step: CallReconnectPhase.waiting,
+        ),
+      );
+      _publishStatus();
+
+      // Started only once the status says waiting, so an offline report
+      // from the wait cannot be overwritten by it.
+      final networkAvailable = _awaitNetworkAvailable(
+        stabilityWindow: stabilityWindow,
+        onStatus: (status) => _setReconnectStep(
+          status == InternetStatus.connected
+              ? CallReconnectPhase.waiting
+              : CallReconnectPhase.offline,
+        ),
+      );
+
+      _call._logger.d(
+        () =>
+            '[reconnect] strategy: $_reconnectStrategy, '
+            'attempt: $_reconnectStatusAttempt',
+      );
+
+      // Captured before dispatch: a failed attempt changes the strategy.
+      final wasMigrating =
+          _reconnectStrategy == SfuReconnectionStrategy.migrate;
+
+      try {
+        final networkStatus = await networkAvailable;
+        _call._logger.v(() => '[reconnect] network: $networkStatus');
 
         if (_isLeftOrLeaving) {
-          _call._logger.w(() => '[reconnect] rejected (call was left)');
+          _call._logger.w(
+            () => '[reconnect] rejected (call was left during network wait)',
+          );
+          _session?.trace(TraceTag.callReconnectFailed, {
+            'strategy': strategy.name,
+            'error': 'call was left',
+          });
           return;
         }
 
-        _session?.trace(TraceTag.callReconnect, {
-          'strategy': strategy.name,
-          'reason': reconnectReason,
-        });
+        if (networkStatus == InternetStatus.disconnected) {
+          _call._logger.w(() => '[reconnect] reconnection timeout');
+          _session?.trace(TraceTag.callReconnectFailed, {
+            'strategy': strategy.name,
+            'error': 'reconnection timeout',
+          });
+          _setPhase(const ConnectionReconnectFailed());
+          _publishStatus();
+          return;
+        }
 
-        _updateReconnect(
-          (phase) => phase.copyWith(
-            attempt: phase.attempt + 1,
-            step: CallReconnectPhase.waiting,
-          ),
-        );
-        _publishStatus();
+        unawaited(_sfuStatsReporter?.sendSfuStats());
 
-        // Started only once the status says waiting, so an offline report
-        // from the wait cannot be overwritten by it.
-        final networkAvailable = _awaitNetworkAvailable(
-          stabilityWindow: stabilityWindow,
-          onStatus: (status) => _setReconnectStep(
-            status == InternetStatus.connected
-                ? CallReconnectPhase.waiting
-                : CallReconnectPhase.offline,
-          ),
-        );
+        final joinReason = trigger is NetworkLost
+            ? JoinReason.networkAvailable
+            : _reconnectStrategy.joinReason;
+        if (joinReason != null) {
+          _call._streamVideo.clientEventReporter.reportJoinAttempt(
+            _call.callCid,
+            reason: joinReason,
+          );
+        }
 
-        _call._logger.d(
-          () =>
-              '[reconnect] strategy: $_reconnectStrategy, '
-              'attempt: $_reconnectStatusAttempt',
-        );
-
-        // Captured before dispatch: a failed attempt changes the strategy.
-        final wasMigrating =
-            _reconnectStrategy == SfuReconnectionStrategy.migrate;
-
-        try {
-          final networkStatus = await networkAvailable;
-          _call._logger.v(() => '[reconnect] network: $networkStatus');
-
-          if (_isLeftOrLeaving) {
-            _call._logger.w(
-              () => '[reconnect] rejected (call was left during network wait)',
+        // Reconnects asked for since the loop started, such as the other
+        // peer connection dropping too, are taken into this attempt.
+        final held = _takeHeldReconnect();
+        if (held != null) {
+          _call._logger.d(() => '[reconnect] taking held $held');
+          if (held.isStrongerThan(_reconnectStrategy)) {
+            _updateReconnect(
+              (phase) => phase.copyWith(strategy: held.strategy),
             );
-            _session?.trace(TraceTag.callReconnectFailed, {
-              'strategy': strategy.name,
-              'error': 'call was left',
-            });
-            return;
-          }
-
-          if (networkStatus == InternetStatus.disconnected) {
-            _call._logger.w(() => '[reconnect] reconnection timeout');
-            _session?.trace(TraceTag.callReconnectFailed, {
-              'strategy': strategy.name,
-              'error': 'reconnection timeout',
-            });
-            _setPhase(const ConnectionReconnectFailed());
-            _publishStatus();
-            return;
-          }
-
-          unawaited(_sfuStatsReporter?.sendSfuStats());
-
-          final joinReason = trigger is NetworkLost
-              ? JoinReason.networkAvailable
-              : _reconnectStrategy.joinReason;
-          if (joinReason != null) {
-            _call._streamVideo.clientEventReporter.reportJoinAttempt(
-              _call.callCid,
-              reason: joinReason,
-            );
-          }
-
-          // Reconnects asked for since the loop started, such as the other
-          // peer connection dropping too, are taken into this attempt.
-          final held = _takeHeldReconnect();
-          if (held != null) {
-            _call._logger.d(() => '[reconnect] taking held $held');
-            if (held.isStrongerThan(_reconnectStrategy)) {
-              _updateReconnect(
-                (phase) => phase.copyWith(strategy: held.strategy),
-              );
-            }
-          }
-
-          _setReconnectStep(CallReconnectPhase.joining);
-
-          final outcome = switch (_reconnectStrategy) {
-            SfuReconnectionStrategy.fast => await _reconnectFast(
-              reason: reconnectReason,
-            ),
-            SfuReconnectionStrategy.rejoin => await _reconnectRejoin(
-              reason: reconnectReason,
-            ),
-            SfuReconnectionStrategy.migrate => await _reconnectMigrate(
-              reason: reconnectReason,
-            ),
-            _ => const JoinSucceeded(),
-          };
-
-          // The attempt ran to completion, so the throw counter no longer
-          // applies to the backoff.
-          unexpectedErrorCount = 0;
-
-          switch (outcome) {
-            case JoinSucceeded():
-              _session?.trace(TraceTag.callReconnectSuccess, {
-                'strategy': strategy.name,
-              });
-            case JoinCancelled():
-              _call._logger.w(() => '[reconnect] cancelled (call was left)');
-              return;
-            case JoinGiveUp(:final error) || JoinRingUnanswered(:final error):
-              _call._logger.e(() => '[reconnect] giving up: $error');
-              await leave(reason: DisconnectReason.failure(error));
-              return;
-            case JoinRetry(:final error):
-              _call._logger.w(
-                () =>
-                    '[reconnect] failed: $error, '
-                    'strategy: $_reconnectStrategy, attempt: $_reconnectAttempts',
-              );
-
-              await handleReconnectFailure(wasMigrating: wasMigrating);
-          }
-        } catch (error) {
-          switch (error) {
-            case StreamApiException(unrecoverable: true):
-            case StreamApiError() when error.unrecoverable ?? false:
-              _call._logger.w(() => '[reconnect] unrecoverable error');
-              _setPhase(const ConnectionReconnectFailed());
-              _publishStatus();
-
-              _session?.trace(TraceTag.callReconnectFailed, {
-                'strategy': strategy.name,
-                'error': error.toString(),
-              });
-
-              return;
-            default:
-              _call._logger.e(
-                () =>
-                    '[reconnect] unexpected error: $error, strategy: $_reconnectStrategy, attempt: $_reconnectAttempts',
-              );
-
-              // Treat an unexpected throw like a failed reconnect result.
-              // Without this the loop retries the same strategy with no delay
-              // and no escalation, and since `reconnectTimeout` defaults to
-              // zero it spins until the call is left.
-              unexpectedErrorCount++;
-              await handleReconnectFailure(wasMigrating: wasMigrating);
           }
         }
-      } while (_phase.value is ConnectionReconnecting);
-    });
+
+        _setReconnectStep(CallReconnectPhase.joining);
+
+        final outcome = switch (_reconnectStrategy) {
+          SfuReconnectionStrategy.fast => await _reconnectFast(
+            reason: reconnectReason,
+          ),
+          SfuReconnectionStrategy.rejoin => await _reconnectRejoin(
+            reason: reconnectReason,
+          ),
+          SfuReconnectionStrategy.migrate => await _reconnectMigrate(
+            reason: reconnectReason,
+          ),
+          _ => const JoinSucceeded(),
+        };
+
+        // The attempt ran to completion, so the throw counter no longer
+        // applies to the backoff.
+        unexpectedErrorCount = 0;
+
+        switch (outcome) {
+          case JoinSucceeded():
+            _session?.trace(TraceTag.callReconnectSuccess, {
+              'strategy': strategy.name,
+            });
+          case JoinCancelled():
+            _call._logger.w(() => '[reconnect] cancelled (call was left)');
+            return;
+          case JoinGiveUp(:final error) || JoinRingUnanswered(:final error):
+            _call._logger.e(() => '[reconnect] giving up: $error');
+            await leave(reason: DisconnectReason.failure(error));
+            return;
+          case JoinRetry(:final error):
+            _call._logger.w(
+              () =>
+                  '[reconnect] failed: $error, '
+                  'strategy: $_reconnectStrategy, attempt: $_reconnectAttempts',
+            );
+
+            await handleReconnectFailure(wasMigrating: wasMigrating);
+        }
+      } catch (error) {
+        switch (error) {
+          case StreamApiException(unrecoverable: true):
+          case StreamApiError() when error.unrecoverable ?? false:
+            _call._logger.w(() => '[reconnect] unrecoverable error');
+            _setPhase(const ConnectionReconnectFailed());
+            _publishStatus();
+
+            _session?.trace(TraceTag.callReconnectFailed, {
+              'strategy': strategy.name,
+              'error': error.toString(),
+            });
+
+            return;
+          default:
+            _call._logger.e(
+              () =>
+                  '[reconnect] unexpected error: $error, strategy: $_reconnectStrategy, attempt: $_reconnectAttempts',
+            );
+
+            // Treat an unexpected throw like a failed reconnect result.
+            // Without this the loop retries the same strategy with no delay
+            // and no escalation, and since `reconnectTimeout` defaults to
+            // zero it spins until the call is left.
+            unexpectedErrorCount++;
+            await handleReconnectFailure(wasMigrating: wasMigrating);
+        }
+      }
+    } while (_phase.value is ConnectionReconnecting);
   }
 
   Future<JoinOutcome> _reconnectFast({String? reason}) async {
