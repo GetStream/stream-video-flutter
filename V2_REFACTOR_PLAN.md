@@ -43,7 +43,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 | 11 | A4 | `fix/flu-864-single-leave-decision` | #1418 |
 | 12 | A5 | `feat/flu-865-serial-join-executor` | #1419 |
 | 13 | FLU-931 | `fix/flu-931-rejoin-on-peer-connection-failure` | #1421 |
-| 14 | FLU-936 | `feat/flu-936-connection-failure-simulator` | |
+| 14 | FLU-936 | `feat/flu-936-connection-failure-simulator` | #1422 |
 | 15 | FLU-932 | `fix/flu-932-migration-complete-old-socket` | |
 | 16 | A6 | `fix/flu-861-session-ownership` | |
 | 17 | A7 | `feat/flu-862-call-dispose` | |
