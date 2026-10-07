@@ -18,10 +18,12 @@ void main() {
   const textureChannel = MethodChannel('FlutterWebRTC/Texture$_textureId');
 
   late Completer<void> createRenderer;
+  late bool createFails;
   late List<MethodCall> calls;
 
   setUp(() {
     createRenderer = Completer<void>();
+    createFails = false;
     calls = [];
 
     final messenger =
@@ -30,6 +32,7 @@ void main() {
       calls.add(call);
       if (call.method == 'createVideoRenderer') {
         await createRenderer.future;
+        if (createFails) throw PlatformException(code: 'failed');
         return {'textureId': _textureId};
       }
       return null;
@@ -61,10 +64,19 @@ void main() {
     await tester.pump();
   }
 
-  // Unmounts and lets the disposal's platform calls land in this test.
+  int disposeCalls() =>
+      calls.where((call) => call.method == 'videoRendererDispose').length;
+
+  // Waits for the renderer's release, so no platform call outlives the test.
+  Future<void> released(WidgetTester tester) async {
+    for (var i = 0; i < 10 && disposeCalls() == 0; i++) {
+      await settle(tester);
+    }
+  }
+
   Future<void> unmount(WidgetTester tester) async {
     await tester.pumpWidget(const SizedBox());
-    await settle(tester);
+    await released(tester);
   }
 
   List<String> setStreamIds() => [
@@ -90,6 +102,8 @@ void main() {
       expect(setStreamIds(), ['second']);
 
       await unmount(tester);
+      expect(setStreamIds(), ['second', '']);
+      expect(disposeCalls(), 1);
     },
   );
 
@@ -105,6 +119,8 @@ void main() {
     expect(setStreamIds(), ['first', 'second']);
 
     await unmount(tester);
+    expect(setStreamIds(), ['first', 'second', '']);
+    expect(disposeCalls(), 1);
   });
 
   testWidgets(
@@ -115,14 +131,34 @@ void main() {
       await tester.pumpWidget(const SizedBox());
 
       createRenderer.complete();
-      await settle(tester);
+      await released(tester);
 
       expect(tester.takeException(), isNull);
       expect(setStreamIds(), isEmpty);
-      expect(
-        calls.where((call) => call.method == 'videoRendererDispose'),
-        hasLength(1),
-      );
+      expect(disposeCalls(), 1);
     },
   );
+
+  testWidgets('keeps the placeholder when initialisation fails', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      VideoTrackRenderer(
+        videoTrack: track('first'),
+        placeholderBuilder: (_) =>
+            const Text('placeholder', textDirection: TextDirection.ltr),
+      ),
+    );
+
+    createFails = true;
+    createRenderer.complete();
+    await settle(tester);
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('placeholder'), findsOneWidget);
+    expect(setStreamIds(), isEmpty);
+
+    await tester.pumpWidget(const SizedBox());
+    expect(tester.takeException(), isNull);
+  });
 }

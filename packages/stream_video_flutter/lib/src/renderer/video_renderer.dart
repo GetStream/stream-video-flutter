@@ -203,6 +203,8 @@ class VideoTrackRenderer extends StatefulWidget {
 }
 
 class _VideoTrackRendererState extends State<VideoTrackRenderer> {
+  final _logger = taggedLogger(tag: 'SV:VideoTrackRenderer');
+
   /// Renderer to display WebRTC video stream.
   final _videoRenderer = rtc.RTCVideoRenderer();
 
@@ -216,10 +218,16 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
   }
 
   Future<void> _initializeRenderer() async {
-    await _videoRenderer.initialize();
+    try {
+      await _videoRenderer.initialize();
+    } catch (e, stk) {
+      _logger.e(() => 'Could not initialise the video renderer: $e\n$stk');
+      _disposeRenderer();
+      return;
+    }
     if (!mounted) {
       // Disposed while initialising; the texture only exists now.
-      await _videoRenderer.dispose();
+      _disposeRenderer();
       return;
     }
     // Reads the current widget, so a track swapped in meanwhile is the one set.
@@ -241,12 +249,18 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
 
   @override
   void dispose() {
-    // Before initialisation completes, [_initializeRenderer] disposes it.
+    // Until initialised, [_initializeRenderer] disposes it once it resolves.
     if (_isInitialized) {
       _videoRenderer.srcObject = null;
-      _videoRenderer.dispose();
+      _disposeRenderer();
     }
     super.dispose();
+  }
+
+  void _disposeRenderer() {
+    _videoRenderer.dispose().catchError((Object e, StackTrace stk) {
+      _logger.e(() => 'Could not dispose the video renderer: $e\n$stk');
+    });
   }
 
   @override
