@@ -90,12 +90,41 @@ void main() {
       ring();
       final ringing = streamVideo.state.incomingCall.value!;
       final stateDone = ringing.state.drain<void>();
+      // The calls go first, while the push manager can still end theirs.
+      Call? incomingWhenPushDisposed = ringing;
+      when(mockPushManager.dispose).thenAnswer((_) async {
+        incomingWhenPushDisposed = streamVideo.state.incomingCall.value;
+      });
 
       await streamVideo.dispose();
 
+      expect(incomingWhenPushDisposed, isNull);
+
       await stateDone.timeout(const Duration(seconds: 5));
-      expect(ringing.state.value.status.isDisconnected, isTrue);
+      expect(streamVideo.state.incomingCall.value, isNull);
       expect((await ringing.join()).getErrorOrNull(), isA<CallLeftException>());
+    });
+
+    test('disposes an outgoing and a watched call', () async {
+      final outgoing = streamVideo.makeCall(
+        callType: StreamCallType.defaultType(),
+        id: 'outgoing',
+      );
+      final watched = streamVideo.makeCall(
+        callType: StreamCallType.defaultType(),
+        id: 'watched',
+      );
+      await streamVideo.state.setOutgoingCall(outgoing);
+      streamVideo.state.setWatchedCall(watched);
+      final done = Future.wait([
+        outgoing.state.drain<void>(),
+        watched.state.drain<void>(),
+      ]);
+
+      await streamVideo.dispose();
+
+      await done.timeout(const Duration(seconds: 5));
+      expect(streamVideo.state.watchedCalls.value, isEmpty);
     });
   });
 }

@@ -33,7 +33,7 @@ class StreamVideoException extends Equatable implements Exception {
   List<Object?> get props => [message];
 }
 
-/// A `Call.join` on a call that was already left.
+/// A `Call.join` on a call that was already left or ended.
 ///
 /// A `Call` is joined once. Create a new one with `StreamVideo.makeCall` to
 /// join the same call again.

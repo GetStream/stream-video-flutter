@@ -305,6 +305,12 @@ class CallConnectionCoordinator {
     int maxJoinRetries = 3,
     bool? hintHighScaleLivestreamPublisher,
   }) async {
+    // Before init, so a left call does not observe anything again.
+    if (_isLeftOrLeaving) {
+      _call._logger.w(() => '[join] rejected (call was left)');
+      return const Result.failure(CallLeftException());
+    }
+
     await _call._init();
 
     if (_isLeftOrLeaving) {
@@ -2075,16 +2081,45 @@ class CallConnectionCoordinator {
 
   /// Leaves the call unless it is left already, waits for a leave in progress
   /// to finish, then closes [_phase].
+  ///
+  /// A call that never joined is not left: it only releases what this
+  /// instance holds, so a live call with the same cid is not touched.
   Future<void> dispose() async {
-    try {
-      if (!_isLeftOrLeaving) await leave();
-    } catch (e, stk) {
-      _call._logger.e(() => '[dispose] leave failed: $e\n$stk');
-    }
-    if (_phase.value is ConnectionLeaving) {
-      await _phase.firstWhere((phase) => phase is ConnectionDisconnected);
+    if (_phase.value is ConnectionIdle) {
+      _setPhase(const ConnectionDisconnected(null));
+      await _releaseUnjoined();
+    } else {
+      try {
+        if (!_isLeftOrLeaving) await leave();
+      } catch (e, stk) {
+        _call._logger.e(() => '[dispose] leave failed: $e\n$stk');
+      }
+      if (_phase.value is ConnectionLeaving) {
+        await _phase.firstWhere((phase) => phase is ConnectionDisconnected);
+      }
     }
     await _phase.close();
+  }
+
+  /// Releases what a call that never joined holds, and drops this instance
+  /// from the client's ringing, incoming, outgoing and watched calls.
+  Future<void> _releaseUnjoined() async {
+    _cancelables.cancelAll();
+    await _call.dynascaleManager.dispose();
+    _call.viewportVisibility.clear();
+    await _call.clearE2EEManager();
+
+    final client = _call._streamVideo;
+    client
+      ..clearCallAcceptedOnThisDevice(_call.callCid, _call)
+      ..releaseRingingCall(_call.callCid, _call);
+    client.state.removeWatchedCall(_call);
+    if (identical(client.state.outgoingCall.value, _call)) {
+      await client.state.setOutgoingCall(null);
+    }
+    if (identical(client.state.incomingCall.value, _call)) {
+      await client.state.setIncomingCall(null);
+    }
   }
 
   /// Leaves the call for [reason]. A [remote] leave follows a disconnect

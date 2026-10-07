@@ -47,6 +47,9 @@ abstract class ClientState {
   /// Adds the call to the list of watched calls.
   void setWatchedCall(Call call);
 
+  /// Stops watching [call]. Another instance with the same cid stays watched.
+  void removeWatchedCall(Call call);
+
   /// Removes the call from the list of active calls.
   /// It won't `leave` the call, just removes it from the list.
   Future<void> removeActiveCall(Call call);
@@ -200,6 +203,13 @@ class MutableClientState implements ClientState {
     }
 
     watchedCalls.value = [...watchedCalls.value, call];
+  }
+
+  @override
+  void removeWatchedCall(Call call) {
+    watchedCalls.value = [
+      ...watchedCalls.value.where((it) => !identical(it, call)),
+    ];
   }
 
   @override

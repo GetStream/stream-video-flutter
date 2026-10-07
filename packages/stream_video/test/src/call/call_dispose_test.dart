@@ -6,6 +6,7 @@ import 'package:stream_video/stream_video.dart';
 
 import 'fixtures/call_test_helpers.dart';
 import 'fixtures/connection_harness.dart';
+import 'fixtures/data.dart';
 
 /// Pins that a `Call` is joined once, and what `Call.dispose` releases.
 void main() {
@@ -18,6 +19,42 @@ void main() {
 
   setUp(() => harness = ConnectionHarness());
   tearDown(() => harness.dispose());
+
+  CallParticipantState participant(String userId) => CallParticipantState(
+    userId: userId,
+    roles: const [],
+    name: userId,
+    custom: const {},
+    sessionId: '$userId-session',
+    trackIdPrefix: '$userId-prefix',
+  );
+
+  void stubGetCall() {
+    when(
+      () => harness.coordinatorClient.getCall(
+        callCid: any(named: 'callCid'),
+        membersLimit: any(named: 'membersLimit'),
+        ringing: any(named: 'ringing'),
+        notify: any(named: 'notify'),
+        video: any(named: 'video'),
+      ),
+    ).thenAnswer(
+      (_) async => const Result.failure(StreamVideoException(message: 'n/a')),
+    );
+  }
+
+  /// A coordinator event for the call, which it forwards to its events.
+  CoordinatorCallEvent caption() => CoordinatorCallClosedCaptionEvent(
+    callCid: SampleCallData.defaultCid,
+    createdAt: DateTime.now(),
+    startTime: DateTime.now(),
+    endTime: DateTime.now().add(const Duration(seconds: 3)),
+    speakerId: 'speaker1',
+    text: 'Hello',
+    user: SampleCallData.testCallUser1,
+    language: 'en',
+    translated: false,
+  );
 
   /// Completes once every stream of [call] is done.
   Future<void> streamsDone(Call call) {
@@ -138,4 +175,103 @@ void main() {
     await done;
     harness.verifyMakeCallSessionCount(0);
   });
+
+  test(
+    'dispose after leave, while the participants are still throttled, does '
+    'not throw',
+    () async {
+      final call = harness.buildCall();
+      await call.join();
+      harness.stateManager.state = harness.stateManager.callState.copyWith(
+        callParticipants: [participant('a'), participant('b')],
+      );
+      final listening = call.participantsStream.listen((_) {});
+      await pumpEventQueue();
+
+      await call.leave();
+      await call.dispose();
+      await pumpEventQueue();
+      await Future<void>.delayed(const Duration(milliseconds: 1100));
+
+      await listening.cancel();
+    },
+  );
+
+  test(
+    'a watched call ended remotely and then disposed drops later events',
+    () async {
+      stubGetCall();
+      final call = harness.buildCall();
+      await call.get();
+      harness.stateManager.state = harness.stateManager.callState.copyWith(
+        status: CallStatus.disconnected(DisconnectReason.ended()),
+      );
+
+      await call.dispose();
+      harness.coordinatorEvents.emit(caption());
+      await pumpEventQueue();
+    },
+  );
+
+  test('a get after dispose does not watch the call again', () async {
+    stubGetCall();
+    final call = harness.buildCall();
+    await call.dispose();
+
+    await call.get();
+    harness.coordinatorEvents.emit(caption());
+    await pumpEventQueue();
+
+    final clientState = harness.streamVideo.state;
+    verifyNever(() => clientState.setWatchedCall(call));
+  });
+
+  test('dispose while a join is in flight cancels the join', () async {
+    final gate = Completer<void>();
+    final clientState = harness.streamVideo.state;
+    when(() => clientState.setActiveCall(any())).thenAnswer(
+      (_) => gate.future,
+    );
+    final call = harness.buildCall();
+
+    final join = call.join();
+    await pumpEventQueue();
+    final disposing = call.dispose();
+    await pumpEventQueue();
+    gate.complete();
+
+    expect((await join).getErrorOrNull(), isA<CallLeftException>());
+    await disposing;
+    harness.verifyJoinCallCount(0);
+  });
+
+  test('dispose still closes the streams when the leave throws', () async {
+    final call = harness.buildCall();
+    await call.join();
+    when(
+      () => harness.streamVideo.state.removeActiveCall(any()),
+    ).thenThrow(StateError('teardown failed'));
+    final done = streamsDone(call);
+
+    await call.dispose();
+
+    await done;
+  });
+
+  test(
+    'dispose on a call that never joined leaves the client state of another '
+    'call with the same cid alone',
+    () async {
+      final live = harness.buildCall();
+      await live.join();
+      final other = harness.buildCall();
+      final clientState = harness.streamVideo.state;
+      clearInteractions(clientState);
+
+      await other.dispose();
+
+      verifyNever(() => clientState.removeActiveCall(any()));
+      expect(harness.reporter.aborts, isEmpty);
+    },
+  );
 }

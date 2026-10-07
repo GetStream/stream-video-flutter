@@ -63,7 +63,7 @@ class CallStateNotifier extends StateNotifier<CallState>
   @override
   set state(CallState value) {
     if (!mounted) {
-      _logger.v(() => '[setState] dropped (disposed): ${value.status}');
+      _logger.w(() => '[setState] dropped (disposed): ${value.status}');
       return;
     }
 

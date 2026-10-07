@@ -549,8 +549,9 @@ class StreamVideo extends Disposable {
   @override
   Future<void> dispose() async {
     _logger.i(() => '[dispose]');
-    // Taken before the ringing state is cleared below.
-    final calls = _trackedCalls();
+    // First, while the push manager still ends the native call of each call
+    // that leaves.
+    await _disposeCalls(_trackedCalls());
 
     if (!_connectionState.isDisconnected) {
       await _client.disconnectUser();
@@ -564,7 +565,6 @@ class StreamVideo extends Disposable {
 
     _subscriptions.cancelAll();
     await pushNotificationManager?.dispose();
-    await _disposeCalls(calls);
     _clientEventReporter.dispose();
     await _state.clear();
 
