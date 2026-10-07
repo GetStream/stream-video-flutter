@@ -2,6 +2,7 @@
 
 ### ⚠️ Breaking
 
+- Joining a `Call` after it was left fails with `CallLeftException`; a `Call` is single use.
 - The lists emitted by `Call.closedCaptions` are unmodifiable; copy one before changing it.
 - `Call`'s action methods (members, permissions, moderation, recording, transcription, captions, broadcasting, mute, pin, go-live, reactions, custom events, feedback) are now extension methods on `CallActions`; they can't be stubbed or overridden, and a `show Call` import must also show `CallActions`.
 - `Call.updateViewportVisibility`, `Call.updateSubscription` and `Call.removeSubscription` are internal; report to `Call.viewportVisibility` instead.
@@ -52,6 +53,7 @@
 
 ### ✅ Added
 
+- `Call.dispose()` leaves the call if needed and closes its streams.
 - Added `StreamPushPayload`, the wire contract for the push payloads Stream sends: the keys it sets, the `sender` that marks a payload as ours, and predicates for recognising a ringing or missed call push. `handleRingingFlowNotifications` reads payloads through it, so anything that has to recognise a Stream push before handing it over — a background handler deciding whether to build a client, or tracking which call is still ringing — can match on exactly what the SDK matches on instead of restating the format.
 - Added `Call.viewportVisibility`, which derives one visibility and one subscription size per track from every viewport reporting through a `ViewportHandle` of its own.
 - `CallReceivedData`, what `Call.get()` returns, is exported. Handling that result meant naming a type the package kept to itself.
@@ -65,6 +67,7 @@
 
 ### 🔄 Changed
 
+- `StreamVideo.dispose()` leaves and disposes the calls it tracks.
 - With `closedCaptionsVisibilityDurationMs` at 0 or less, closed captions are now shown and stay until newer ones replace them, instead of never being shown.
 - A `call.rejected` event now settles a ring by the same rules as the push and ring-state checks (`RingingSnapshot`), so the paths can no longer disagree. These cases change:
   - A callee hangs up once every other member has rejected, even if the caller isn't a member of the call.

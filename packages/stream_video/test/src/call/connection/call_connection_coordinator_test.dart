@@ -52,7 +52,7 @@ void main() {
         () => harness.session.leave(reason: any(named: 'reason')),
       ).called(1);
       final rejoin = await call.join();
-      expect(rejoin.getErrorOrNull()?.message, 'call was left');
+      expect(rejoin.getErrorOrNull(), isA<CallLeftException>());
     },
   );
 
@@ -241,7 +241,7 @@ void main() {
       clearInteractions(clientState);
       gate.complete();
 
-      expect((await join).getErrorOrNull()?.message, 'call was left');
+      expect((await join).getErrorOrNull(), isA<CallLeftException>());
       verify(() => clientState.removeActiveCall(call)).called(1);
       expect(harness.reporter.registered, isEmpty);
       harness.verifyJoinCallCount(0);

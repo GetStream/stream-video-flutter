@@ -309,7 +309,7 @@ class CallConnectionCoordinator {
 
     if (_isLeftOrLeaving) {
       _call._logger.w(() => '[join] rejected (call was left)');
-      return failureWithError('call was left');
+      return const Result.failure(CallLeftException());
     }
 
     if (_call.state.value.status is CallStatusConnected) {
@@ -367,7 +367,7 @@ class CallConnectionCoordinator {
 
     if (_isLeftOrLeaving) {
       _call._logger.w(() => '[join] rejected (call was left)');
-      return failureWithError('call was left');
+      return const Result.failure(CallLeftException());
     }
 
     await _call._streamVideo.state.setActiveCall(_call);
@@ -378,7 +378,7 @@ class CallConnectionCoordinator {
     if (_isLeftOrLeaving) {
       _call._logger.w(() => '[join] rejected (call was left)');
       await _call._streamVideo.state.removeActiveCall(_call);
-      return failureWithError('call was left');
+      return const Result.failure(CallLeftException());
     }
 
     _call._streamVideo.clientEventReporter
@@ -2071,6 +2071,20 @@ class CallConnectionCoordinator {
 
   Future<Result<None>> leave({DisconnectReason? reason}) {
     return _leave(reason: reason);
+  }
+
+  /// Leaves the call unless it is left already, waits for a leave in progress
+  /// to finish, then closes [_phase].
+  Future<void> dispose() async {
+    try {
+      if (!_isLeftOrLeaving) await leave();
+    } catch (e, stk) {
+      _call._logger.e(() => '[dispose] leave failed: $e\n$stk');
+    }
+    if (_phase.value is ConnectionLeaving) {
+      await _phase.firstWhere((phase) => phase is ConnectionDisconnected);
+    }
+    await _phase.close();
   }
 
   /// Leaves the call for [reason]. A [remote] leave follows a disconnect

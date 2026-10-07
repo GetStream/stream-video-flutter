@@ -117,6 +117,8 @@ const _tag = 'SV:Call';
 int _callSeq = 1;
 
 /// Represents a [Call] in which you can connect to.
+///
+/// A call is joined once: [join], then [leave], then [dispose].
 class Call {
   /// Do not use the factory directly,
   /// use the [StreamVideo.makeCall] method to construct a `Call` instance.
@@ -506,11 +508,10 @@ class Call {
     );
   }
 
-  // Lives as long as this call: nothing closes `callStateStream` today, so the
-  // `onDone` below is a teardown path rather than one that runs in practice.
-  // ignore: close_sinks
-  late final BehaviorSubject<List<CallParticipantState>> _participantsSubject =
-      _buildParticipantsSubject();
+  /// Built the first time it is read. [dispose] closes it.
+  BehaviorSubject<List<CallParticipantState>> get _participantsSubject =>
+      _participantsSubjectOrNull ??= _buildParticipantsSubject();
+  BehaviorSubject<List<CallParticipantState>>? _participantsSubjectOrNull;
 
   BehaviorSubject<List<CallParticipantState>> _buildParticipantsSubject() {
     final subject = BehaviorSubject<List<CallParticipantState>>.seeded(
@@ -523,7 +524,7 @@ class Call {
         .preferences
         .participantsThrottleIntervalResolver;
 
-    // Kept for the lifetime of the call, like the state it reads from.
+    // Ends when [dispose] closes the state it reads from.
     // ignore: cancel_subscriptions
     (interval == null
             ? participants
@@ -993,6 +994,10 @@ class Call {
   ///
   /// Calling [join] again while a join on this call is still in flight
   /// returns the same result as that join instead of starting another one.
+  ///
+  /// A call is joined once. After it is left, ended or disconnected, [join]
+  /// fails with [CallLeftException]; use [StreamVideo.makeCall] to create a
+  /// new [Call] for the same call.
   Future<Result<None>> join({
     CallConnectOptions? connectOptions,
     int? membersLimit,
@@ -1009,9 +1014,33 @@ class Call {
 
   /// Leaves the call.
   ///
+  /// The call cannot be joined again. Its [state] stays readable until
+  /// [dispose].
+  ///
   /// - [reason]: optional reason for leaving the call
   Future<Result<None>> leave({DisconnectReason? reason}) {
     return _connection.leave(reason: reason);
+  }
+
+  /// Leaves the call if it has not been left, then closes its streams:
+  /// [state], [partialState], [participantsStream], [callEvents], [stats],
+  /// [closedCaptions] and [callDurationStream] complete, and later state
+  /// changes are dropped. [state] keeps its last value.
+  ///
+  /// Calling it again does nothing.
+  Future<void> dispose() => _disposed ??= _dispose();
+  Future<void>? _disposed;
+
+  Future<void> _dispose() async {
+    _logger.i(() => '[dispose]');
+    await _connection.dispose();
+    _stopRingStatePolling();
+
+    await _participantsSubjectOrNull?.close();
+    await _callEvents.close();
+    await _stats.close();
+    await _closedCaptions.dispose();
+    _stateManager.dispose();
   }
 
   /// Updates the configuration of the call.

@@ -97,6 +97,12 @@ class CallClosedCaptions {
     _closedCaptions.value = const [];
   }
 
+  /// Runs [reset], then closes [closedCaptions].
+  Future<void> dispose() async {
+    reset();
+    await _closedCaptions.close();
+  }
+
   Future<void> _removeExpiredCaption(
     String Function(StreamClosedCaption) keyFor,
     StreamClosedCaption caption,

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:async/async.dart' as async;
 import 'package:collection/collection.dart';
@@ -548,6 +549,8 @@ class StreamVideo extends Disposable {
   @override
   Future<void> dispose() async {
     _logger.i(() => '[dispose]');
+    // Taken before the ringing state is cleared below.
+    final calls = _trackedCalls();
 
     if (!_connectionState.isDisconnected) {
       await _client.disconnectUser();
@@ -561,10 +564,33 @@ class StreamVideo extends Disposable {
 
     _subscriptions.cancelAll();
     await pushNotificationManager?.dispose();
+    await _disposeCalls(calls);
     _clientEventReporter.dispose();
     await _state.clear();
 
     return super.dispose();
+  }
+
+  /// Every call this client tracks, each once.
+  Set<Call> _trackedCalls() {
+    final calls = LinkedHashSet<Call>.identity()
+      ..addAll(_state.activeCalls.value)
+      ..addAll(_ringingCalls.values)
+      ..addAll(_state.watchedCalls.value);
+    if (_state.incomingCall.value case final call?) calls.add(call);
+    if (_state.outgoingCall.value case final call?) calls.add(call);
+    return calls;
+  }
+
+  /// Disposes [calls], which leaves the ones still joined.
+  Future<void> _disposeCalls(Set<Call> calls) async {
+    for (final call in calls) {
+      try {
+        await call.dispose();
+      } catch (e, stk) {
+        _logger.e(() => '[dispose] call ${call.callCid} failed: $e\n$stk');
+      }
+    }
   }
 
   /// Routes [event] through the coordinator event handling. Tests only.
