@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
-import 'package:stream_video/src/ws/ws.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../fixtures/call_test_helpers.dart';
@@ -59,7 +58,7 @@ void main() {
       await waitUntil(() => call.state.value.status is CallStatusConnected);
 
       verify(
-        () => first.close(StreamVideoCloseCode.disposeOldSocket),
+        () => first.close(CloseCode.normalClosure),
       ).called(1);
       verifyNever(second.waitForMigrationComplete);
       verify(
@@ -112,7 +111,7 @@ void main() {
         await waitUntil(() => call.state.value.status is CallStatusConnected);
 
         verify(
-          () => first.close(StreamVideoCloseCode.disposeOldSocket),
+          () => first.close(CloseCode.normalClosure),
         ).called(1);
         verifyNever(first.dispose);
       },
@@ -156,7 +155,7 @@ void main() {
         ]),
       );
       verify(
-        () => first.close(StreamVideoCloseCode.disposeOldSocket),
+        () => first.close(CloseCode.normalClosure),
       ).called(1);
       verify(
         () => second.getReconnectDetails(

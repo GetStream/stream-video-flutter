@@ -10,7 +10,6 @@ import 'package:stream_video/src/telemetry/client_event_types.dart';
 import 'package:stream_video/src/webrtc/peer_connection.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
-import 'package:stream_video/src/ws/ws.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../fixtures/call_test_helpers.dart';
@@ -418,7 +417,7 @@ void main() {
       expect(call.state.value.status, isA<CallStatusDisconnected>());
       // The old socket stayed open for the confirmation; the leave closes it.
       verify(
-        () => first.close(StreamVideoCloseCode.disposeOldSocket),
+        () => first.close(CloseCode.normalClosure),
       ).called(1);
       expect(statuses, isNot(contains(isA<CallStatusReconnectionFailed>())));
       harness.verifyMakeCallSessionCount(2);

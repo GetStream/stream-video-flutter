@@ -1795,7 +1795,9 @@ class CallConnectionCoordinator {
     }
 
     // The old socket carries the confirmation, so it closes only once the
-    // wait is over.
+    // wait is over. Nothing resumes the old session after that, so the close
+    // is a normal one: after a timeout it lets the old SFU drop the
+    // participant at once.
     final previousSession = _previousSession;
     final Result<None>? migrationResult;
     try {
@@ -1809,7 +1811,7 @@ class CallConnectionCoordinator {
 
       migrationResult = await _untilLeft(migrationComplete);
     } finally {
-      await previousSession?.close(StreamVideoCloseCode.disposeOldSocket);
+      await previousSession?.close(CloseCode.normalClosure);
     }
 
     if (migrationResult == null) {
