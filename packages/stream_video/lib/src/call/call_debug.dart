@@ -14,8 +14,9 @@ extension CallDebug on Call {
   /// Handles a rejoin request from the [type] peer connection, as if its state
   /// had turned failed.
   ///
-  /// The peer connection itself stays connected, so a request held behind
-  /// other connection work is dropped when that work takes it.
+  /// The peer connection itself stays connected. While a join or reconnect
+  /// runs, the request waits for it and is then dropped, since the connection
+  /// is healthy.
   void debugFailPeerConnection(StreamPeerType type) {
     final session = _session;
     final rtcManager = session?.rtcManager;

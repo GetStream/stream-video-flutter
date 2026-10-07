@@ -8,9 +8,9 @@ import '../../utils/simulated_internet_connection.dart';
 /// How long each offline preset holds the network down, and what a call
 /// should do about it.
 ///
-/// The presets match `tools/simulate_network_loss.sh`. Here the SFU socket
-/// drops at the start and the network monitor reports the outage right away,
-/// so even a blip ends in a fast reconnect.
+/// The durations match `tools/simulate_network_loss.sh`, the results do not
+/// quite: here the SFU socket drops at the start and the network monitor
+/// reports the outage right away, so even a blip ends in a fast reconnect.
 enum _Outage {
   /// A short outage: a fast reconnect once it ends.
   blip('blip', Duration(seconds: 2)),

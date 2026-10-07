@@ -1,40 +1,46 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/foundation.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// A network monitor that reports the device's real status, except while
 /// [goOffline] holds it offline.
 ///
-/// Built like the monitor `StreamVideo` makes when the app passes none.
+/// The real status comes from a monitor built from the settings passed in,
+/// the way `StreamVideo` builds its own when the app passes none.
 class SimulatedInternetConnection implements InternetConnection {
-  SimulatedInternetConnection()
-    : _real = InternetConnection.createInstance(
-        checkInterval: const Duration(seconds: 5),
-        triggerStream: Connectivity().onConnectivityChanged,
-      );
+  SimulatedInternetConnection({
+    NetworkMonitorSettings settings = const NetworkMonitorSettings(),
+  }) : _real = InternetConnection.createInstance(
+         checkInterval: settings.checkInterval,
+         triggerStream: Connectivity().onConnectivityChanged,
+         useDefaultOptions: settings.customEndpoints.isEmpty,
+         customCheckOptions: settings.customEndpoints.isEmpty
+             ? null
+             : [
+                 for (final endpoint in settings.customEndpoints)
+                   endpoint.toInternetCheckOption(),
+               ],
+       );
 
   final InternetConnection _real;
   final _simulated = StreamController<InternetStatus>.broadcast();
   Timer? _offlineTimer;
 
-  /// When the simulated outage ends, or null while there is none.
-  final offlineUntil = ValueNotifier<DateTime?>(null);
-
-  bool get isOffline => offlineUntil.value != null;
+  /// Whether [goOffline] is holding the status offline.
+  bool get isOffline => _offlineTimer?.isActive ?? false;
 
   /// Reports offline for [duration], then the real status again. A second
   /// call replaces the first one's duration.
   void goOffline(Duration duration) {
     _offlineTimer?.cancel();
-    offlineUntil.value = DateTime.now().add(duration);
-    _simulated.add(InternetStatus.disconnected);
     _offlineTimer = Timer(duration, () async {
-      offlineUntil.value = null;
-      _simulated.add(await _real.internetStatus);
+      final status = await _real.internetStatus;
+      if (!_simulated.isClosed) _simulated.add(status);
     });
+    _simulated.add(InternetStatus.disconnected);
   }
 
   @override
@@ -75,7 +81,6 @@ class SimulatedInternetConnection implements InternetConnection {
   @override
   Future<void> dispose() async {
     _offlineTimer?.cancel();
-    offlineUntil.dispose();
     await _simulated.close();
     await _real.dispose();
   }
