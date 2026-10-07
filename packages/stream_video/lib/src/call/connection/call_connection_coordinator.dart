@@ -1345,22 +1345,29 @@ class CallConnectionCoordinator {
   ///
   /// Every reconnect starts here. The strategy each cause asks for:
   ///
-  /// | Cause | Strategy |
-  /// |---|---|
-  /// | The SFU socket drops or fails | fast |
-  /// | The device goes offline | fast |
-  /// | A peer connection's state turns failed | rejoin |
-  /// | An ICE restart fails | rejoin; fast when the SFU reports the signal lost |
-  /// | The publisher has not connected 15 s after joining | rejoin |
-  /// | A stalled publisher offer, or a track mid that does not resolve | fast |
-  /// | The SFU sends a GoAway | migrate |
-  /// | The SFU sends an error | the strategy it names |
-  /// | A fast reconnect the SFU did not resume | rejoin |
+  /// | Cause                                      | Strategy         |
+  /// | ------------------------------------------ | ---------------- |
+  /// | The SFU socket drops or fails              | fast             |
+  /// | The device goes offline                    | fast             |
+  /// | A peer connection's state turns failed     | rejoin           |
+  /// | An ICE restart fails as the signal is lost | fast             |
+  /// | Any other ICE restart fails                | rejoin           |
+  /// | The publisher is not connected after 15 s  | rejoin           |
+  /// | A stalled publisher offer                  | fast             |
+  /// | A track mid that does not resolve          | fast             |
+  /// | The SFU sends a GoAway                     | migrate          |
+  /// | The SFU sends an error                     | the one it names |
+  /// | A fast reconnect the SFU did not resume    | rejoin           |
   ///
-  /// A failed attempt is retried as a rejoin once the fast-reconnect deadline
-  /// has passed, after two failed fast attempts, after a failed migration,
-  /// while a peer connection is failed or closed, or when a rejoin or migrate
-  /// was asked for meanwhile. Otherwise it is retried as fast.
+  /// A failed attempt is retried as a rejoin when:
+  ///
+  /// - the fast-reconnect deadline has passed;
+  /// - two fast attempts have failed;
+  /// - a migration has failed;
+  /// - a peer connection is failed or closed;
+  /// - a rejoin or migrate was asked for meanwhile.
+  ///
+  /// Otherwise it is retried as fast.
   Future<void> _reconnect(
     SfuReconnectionStrategy strategy, {
     required ReconnectTrigger trigger,
