@@ -116,6 +116,9 @@ class _CallScreenState extends State<CallScreen> {
     _chatConnectionRecoverySubscription?.cancel();
     widget.call.leave();
     _userChatRepo.disconnectUser();
+    // Release the natively registered filter processors along with the manager;
+    // they are registered again the next time a filter is applied.
+    _videoEffectsManager.unregisterAllFilters();
     _videoEffectsManager.dispose();
     super.dispose();
   }

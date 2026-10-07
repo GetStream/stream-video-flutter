@@ -3,6 +3,10 @@ import UIKit
 import stream_webrtc_flutter
 
 public class StreamVideoFiltersPlugin: NSObject, FlutterPlugin {
+  // Names we add to the global ProcessorProvider, so unregisterAllFilters can
+  // release them. Otherwise the processors live for the app's lifetime.
+  private static var registeredNames = Set<String>()
+
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(
       name: "stream_video_filters", binaryMessenger: registrar.messenger())
@@ -29,6 +33,9 @@ public class StreamVideoFiltersPlugin: NSObject, FlutterPlugin {
         ProcessorProvider.addProcessor(
           BlurBackgroundVideoFrameProcessor(blurIntensity: BlurIntensity.heavy),
           forName: "BackgroundBlurHeavy")
+        Self.registeredNames.formUnion([
+          "BackgroundBlurLight", "BackgroundBlurMedium", "BackgroundBlurHeavy",
+        ])
       } else {
         print("Background blur effects are not supported on iOS versions earlier than 15.0")
       }
@@ -55,10 +62,12 @@ public class StreamVideoFiltersPlugin: NSObject, FlutterPlugin {
         return
       }
 
+      let name = "VirtualBackground-\(backgroundImageUrl)"
       ProcessorProvider.addProcessor(
         ImageBackgroundVideoFrameProcessor(backgroundImageUrl),
-        forName: "VirtualBackground-\(backgroundImageUrl)"
+        forName: name
       )
+      Self.registeredNames.insert(name)
 
       result(nil)
     case "registerFullFrameBlurEffectProcessor":
@@ -66,9 +75,16 @@ public class StreamVideoFiltersPlugin: NSObject, FlutterPlugin {
         ProcessorProvider.addProcessor(
           FullFrameBlurVideoFrameProcessor(),
           forName: "FullFrameBlur")
+        Self.registeredNames.insert("FullFrameBlur")
       } else {
         print("Full frame blur effect is not supported on iOS versions earlier than 15.0")
       }
+      result(nil)
+    case "unregisterAllFilters":
+      for name in Self.registeredNames {
+        ProcessorProvider.removeProcessor(name)
+      }
+      Self.registeredNames.removeAll()
       result(nil)
     default:
       result(FlutterMethodNotImplemented)

@@ -2,47 +2,31 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import CoreImage
+import CoreVideo
 import Foundation
 import stream_webrtc_flutter
 
-#if canImport(UIKit)
-    import Foundation
-    import UIKit
-
-    extension UIInterfaceOrientation {
-        /// Values of `CGImagePropertyOrientation` define the position of the pixel coordinate origin
-        /// point (0,0) and the directions of the coordinate axes relative to the intended display orientation of
-        /// the image. While `UIInterfaceOrientation` uses a different point as its (0,0), this extension
-        /// provides a simple way of mapping device orientation to image orientation.
-        var cgOrientation: CGImagePropertyOrientation {
-            switch self {
-            /// Handle known portrait orientations
-            case .portrait:
-                return .left
-
-            case .portraitUpsideDown:
-                return .right
-
-            /// Handle known landscape orientations
-            case .landscapeLeft:
-                return .up
-
-            case .landscapeRight:
-                return .down
-
-            /// Unknown case, return `up` for consistency
-            case .unknown:
-                return .up
-
-            /// Default case for unknown orientations or future additions
-            /// Returns `up` for consistency.
-            @unknown default:
-                return .up
-            }
+extension RTCVideoRotation {
+    /// Maps the capture pipeline's frame rotation to the image orientation used when orienting
+    /// the background image. Using the frame's own rotation metadata keeps the background in sync
+    /// with the outgoing video even when the app UI is orientation-locked or mid-rotation, unlike
+    /// reading the UI's interface orientation.
+    var cgOrientation: CGImagePropertyOrientation {
+        switch self {
+        case ._0:
+            return .up
+        case ._90:
+            return .left
+        case ._180:
+            return .down
+        case ._270:
+            return .right
+        @unknown default:
+            return .up
         }
     }
-
-#endif  // #if canImport(UIKit)
+}
 
 open class VideoFilter: NSObject, VideoFrameProcessorDelegate {
 
@@ -62,7 +46,26 @@ open class VideoFilter: NSObject, VideoFrameProcessorDelegate {
 
     private let context: CIContext
 
-    var sceneOrientation: UIInterfaceOrientation = .unknown
+    // Output buffers for the filtered frame. Rendering into a buffer other than the
+    // one the CIImage graph reads from keeps neighbour-sampling kernels (blur, blend)
+    // from reading tiles that have already been written. The pool matches the camera
+    // buffer's format and size and is recreated when either changes. Only touched
+    // from the capture thread, which delivers frames serially.
+    private var outputPool: CVPixelBufferPool?
+    private var outputPoolFormat: OSType = 0
+    private var outputPoolWidth = 0
+    private var outputPoolHeight = 0
+
+    // Frames handed to WebRTC stay alive until encoded and rendered locally, so a few
+    // buffers are in use at once. Above this many we fall back to in-place rendering
+    // instead of letting the pool grow without bound.
+    private static let maxOutputBuffers = 6
+
+    private static let poolablePixelFormats: Set<OSType> = [
+        kCVPixelFormatType_420YpCbCr8BiPlanarFullRange,
+        kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
+        kCVPixelFormatType_32BGRA,
+    ]
 
     /// Initializes a new VideoFilter instance with the provided parameters.
     public init(
@@ -71,21 +74,6 @@ open class VideoFilter: NSObject, VideoFrameProcessorDelegate {
         self.filter = filter
         self.context = CIContext(options: [CIContextOption.useSoftwareRenderer: false])
         super.init()
-        // listen to when the device's orientation changes
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(updateRotation),
-            name: UIDevice.orientationDidChangeNotification,
-            object: nil
-        )
-        updateRotation()
-    }
-
-    @objc private func updateRotation() {
-        DispatchQueue.main.async {
-            self.sceneOrientation =
-                UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
-        }
     }
 
     public func capturer(_ capturer: RTCVideoCapturer!, didCapture frame: RTCVideoFrame!)
@@ -99,14 +87,90 @@ open class VideoFilter: NSObject, VideoFrameProcessorDelegate {
                 Input(
                     originalImage: CIImage(cvPixelBuffer: pixelBuffer),
                     originalPixelBuffer: pixelBuffer,
-                    originalImageOrientation: self.sceneOrientation.cgOrientation
+                    originalImageOrientation: frame.rotation.cgOrientation
                 )
             )
             CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly)
+
+            if let output = makeOutputBuffer(matching: pixelBuffer) {
+                // Carry the colour attachments over so Core Image converts to the same
+                // YCbCr matrix / range the encoder expects for the camera format.
+                CVBufferPropagateAttachments(pixelBuffer, output)
+                context.render(outputImage, to: output)
+                return RTCVideoFrame.init(
+                    buffer: RTCCVPixelBuffer(pixelBuffer: output),
+                    rotation: frame.rotation,
+                    timeStampNs: frame.timeStampNs
+                )
+            }
+
+            // Fallback: render in place when no output buffer is available.
             context.render(outputImage, to: pixelBuffer)
             return RTCVideoFrame.init(
                 buffer: rtcCVPixelBuffer, rotation: frame.rotation, timeStampNs: frame.timeStampNs)
         }
         return frame
+    }
+
+    /// Returns a pooled pixel buffer with the same format and dimensions as `source`,
+    /// or `nil` when the format can't be rendered to or the pool is exhausted.
+    private func makeOutputBuffer(matching source: CVPixelBuffer) -> CVPixelBuffer? {
+        let format = CVPixelBufferGetPixelFormatType(source)
+        let width = CVPixelBufferGetWidth(source)
+        let height = CVPixelBufferGetHeight(source)
+
+        guard Self.poolablePixelFormats.contains(format),
+            let pool = outputPool(format: format, width: width, height: height)
+        else {
+            return nil
+        }
+
+        let auxAttributes: [CFString: Any] = [
+            kCVPixelBufferPoolAllocationThresholdKey: Self.maxOutputBuffers
+        ]
+        var output: CVPixelBuffer?
+        let status = CVPixelBufferPoolCreatePixelBufferWithAuxAttributes(
+            nil, pool, auxAttributes as CFDictionary, &output)
+        guard status == kCVReturnSuccess else {
+            // kCVReturnWouldExceedAllocationThreshold: downstream is holding on to
+            // too many frames; render in place for this one.
+            return nil
+        }
+        return output
+    }
+
+    private func outputPool(format: OSType, width: Int, height: Int) -> CVPixelBufferPool? {
+        if let pool = outputPool, outputPoolFormat == format, outputPoolWidth == width,
+            outputPoolHeight == height
+        {
+            return pool
+        }
+
+        let attributes: [CFString: Any] = [
+            kCVPixelBufferPixelFormatTypeKey: format,
+            kCVPixelBufferWidthKey: width,
+            kCVPixelBufferHeightKey: height,
+            kCVPixelBufferIOSurfacePropertiesKey: [:] as CFDictionary,
+        ]
+        let poolAttributes: [CFString: Any] = [
+            kCVPixelBufferPoolMinimumBufferCountKey: 3
+        ]
+
+        var pool: CVPixelBufferPool?
+        let status = CVPixelBufferPoolCreate(
+            nil, poolAttributes as CFDictionary, attributes as CFDictionary, &pool)
+        guard status == kCVReturnSuccess, let createdPool = pool else {
+            outputPool = nil
+            outputPoolFormat = 0
+            outputPoolWidth = 0
+            outputPoolHeight = 0
+            return nil
+        }
+
+        outputPool = createdPool
+        outputPoolFormat = format
+        outputPoolWidth = width
+        outputPoolHeight = height
+        return createdPool
     }
 }

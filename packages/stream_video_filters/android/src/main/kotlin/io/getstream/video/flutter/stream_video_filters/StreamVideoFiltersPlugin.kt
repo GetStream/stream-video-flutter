@@ -23,6 +23,14 @@ class StreamVideoFiltersPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var channel: MethodChannel
   private lateinit var applicationContext: Context
   private val TAG = "StreamVideoFiltersPlugin"
+
+  companion object {
+    // Names we add to the global ProcessorProvider, so unregisterAllFilters can
+    // release them. Otherwise the factories live for the app's lifetime. Kept
+    // static because ProcessorProvider is a process-wide map that outlives any
+    // single plugin instance (engine detach/re-attach).
+    private val registeredNames = mutableSetOf<String>()
+  }
   
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     Log.d(TAG, "Plugin attached to engine")
@@ -52,16 +60,21 @@ class StreamVideoFiltersPlugin: FlutterPlugin, MethodCallHandler {
                     "BackgroundBlurHeavy",
                     BackgroundBlurFactory(BlurIntensity.HEAVY)
                 )
+                registeredNames.addAll(
+                    listOf("BackgroundBlurLight", "BackgroundBlurMedium", "BackgroundBlurHeavy")
+                )
 
                 result.success(null)
             }
             "registerImageEffectProcessors" -> {
                 val backgroundImageUrl = call.argument<String>("backgroundImageUrl")
                 backgroundImageUrl?.let {
+                    val name = "VirtualBackground-$backgroundImageUrl"
                     ProcessorProvider.addProcessor(
-                        "VirtualBackground-$backgroundImageUrl",
+                        name,
                         VirtualBackgroundFactory(applicationContext, backgroundImageUrl)
                     )
+                    registeredNames.add(name)
                 }
 
                 result.success(null)
@@ -71,6 +84,19 @@ class StreamVideoFiltersPlugin: FlutterPlugin, MethodCallHandler {
                     "FullFrameBlur",
                     FullFrameBlurFactory()
                 )
+                registeredNames.add("FullFrameBlur")
+
+                result.success(null)
+            }
+      "unregisterAllFilters" -> {
+                for (name in registeredNames) {
+                    try {
+                        ProcessorProvider.removeProcessor(name)
+                    } catch (e: RuntimeException) {
+                        // Already removed; nothing to release.
+                    }
+                }
+                registeredNames.clear()
 
                 result.success(null)
             }

@@ -28,30 +28,24 @@ final class ImageBackgroundVideoFrameProcessor: VideoFilter {
         }
     }
 
+    private static let supportedUrlSchemes: Set<String> = ["http", "https", "file"]
+
     private var cachedValue: CacheValue?
     private var backgroundImageUrl: String
 
     private lazy var backgroundImageFilterProcessor = { return BackgroundImageFilterProcessor() }()
 
-    private lazy var backgroundCIImage: CIImage? = {
-        var bgUIImage: UIImage?
-        // if let url = URL(string: backgroundImageUrl) {
-        // check if its a local asset
-        bgUIImage = UIImage.flutterImage(named: backgroundImageUrl)  //RCTImageFromLocalAssetURL(url)
-        if bgUIImage == nil {
-            // if its not a local asset, then try to get it as a remote asset
-            if let url = URL(string: backgroundImageUrl), let data = try? Data(contentsOf: url) {
-                bgUIImage = UIImage(data: data)
-            } else {
-                NSLog("Failed to convert uri to image: -\(backgroundImageUrl)")
-            }
-        }
-        // }
-        if bgUIImage != nil {
-            return CIImage.init(image: bgUIImage!)
-        }
-        return nil
-    }()
+    // Loaded on a background queue so a slow URL doesn't block the capture thread.
+    // NSLock because the load thread writes it and the capture thread reads it.
+    private let backgroundImageLock = NSLock()
+    private var _backgroundCIImage: CIImage?
+    private var backgroundImageTask: URLSessionDataTask?
+
+    private var backgroundCIImage: CIImage? {
+        backgroundImageLock.lock()
+        defer { backgroundImageLock.unlock() }
+        return _backgroundCIImage
+    }
 
     @available(*, unavailable)
     override public init(
@@ -64,8 +58,15 @@ final class ImageBackgroundVideoFrameProcessor: VideoFilter {
             filter: { input in input.originalImage }
         )
 
-        self.filter = { input in
-            guard let bgImage = self.backgroundCIImage else { return input.originalImage }
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            self?.loadBackgroundImage()
+        }
+
+        self.filter = { [weak self] input in
+            // `[weak self]`: the closure is stored on `self` — a strong capture would leak the processor.
+            guard let self = self, let bgImage = self.backgroundCIImage else {
+                return input.originalImage
+            }
             let cachedBackgroundImage = self.backgroundImage(
                 image: bgImage, originalImage: input.originalImage,
                 originalImageOrientation: input.originalImageOrientation)
@@ -79,6 +80,56 @@ final class ImageBackgroundVideoFrameProcessor: VideoFilter {
 
             return outputImage
         }
+    }
+
+    private func loadBackgroundImage() {
+        // Check if it's a Flutter asset first.
+        if let bgUIImage = UIImage.flutterImage(named: backgroundImageUrl) {
+            setBackgroundImage(bgUIImage)
+            return
+        }
+        // If it's not a local asset, try to fetch it as a remote asset. Only hand
+        // real URLs to URLSession: a plain asset path that failed the lookup above
+        // would otherwise be treated as a relative URL and fail after a round trip
+        // with a misleading network error.
+        guard
+            let url = URL(string: backgroundImageUrl),
+            let scheme = url.scheme?.lowercased(),
+            Self.supportedUrlSchemes.contains(scheme)
+        else {
+            NSLog(
+                "Failed to load virtual-background image: '\(backgroundImageUrl)' is neither a bundled Flutter asset nor an http(s)/file URL"
+            )
+            return
+        }
+        // Bounded timeout (matches Android's 10s) so a hanging remote URL
+        // doesn't keep this processor alive for the OS-default ~75s.
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 10
+        let task = URLSession.shared.dataTask(with: request) { [weak self] data, _, _ in
+            // `[weak self]`: if the processor is released while the task is in flight
+            // (deinit calls cancel()), the closure no-ops and the task is freed.
+            guard let self = self else { return }
+            guard let data = data, let bgUIImage = UIImage(data: data) else {
+                // URLs may carry signed-access query tokens; log only the host.
+                let host = url.host ?? "local"
+                NSLog("Failed to load virtual-background image (host=\(host))")
+                return
+            }
+            self.setBackgroundImage(bgUIImage)
+        }
+        backgroundImageTask = task
+        task.resume()
+    }
+
+    private func setBackgroundImage(_ image: UIImage) {
+        backgroundImageLock.lock()
+        _backgroundCIImage = CIImage(image: image)
+        backgroundImageLock.unlock()
+    }
+
+    deinit {
+        backgroundImageTask?.cancel()
     }
 
     /// Returns the cached or processed background image for a given original image (frame image).
