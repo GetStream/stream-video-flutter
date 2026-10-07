@@ -29,6 +29,12 @@ symbol name.
 One PR per ticket, each based on the branch of the ticket before it. The first
 PR targets `v2`. Tick a box in the ticket's own commit.
 
+The stack is split in two after ticket 18. Tickets 1-18 (#1405 to #1429) are the
+connection work and merge into `v2` first, bottom up. Ticket 19 (B1) starts the
+second stack. It branches off `feat/flu-862-call-dispose` and targets it until
+the first stack has merged, then it is retargeted to `v2`. The numbering
+continues across both stacks.
+
 | # | Ticket | Branch (proposed) | PR |
 |---|---|---|---|
 | 1 | A1 | `feat/flu-847-call-characterisation-tests` | #1405 |
