@@ -460,8 +460,8 @@ void main() {
     );
 
     test(
-      'fires onReconnectionNeeded with fast when its ICE restart request '
-      'does not reach the SFU',
+      'does not fire onReconnectionNeeded when its ICE restart times out '
+      'without an answer from the SFU',
       () async {
         final pc = _FakeRtcPeerConnection();
         final sfuClient = MockSfuClient();
@@ -484,12 +484,12 @@ void main() {
         );
         await Future<void>.delayed(Duration.zero);
 
-        expect(strategies, [SfuReconnectionStrategy.fast]);
+        expect(strategies, isEmpty);
       },
     );
 
     test(
-      'fires onReconnectionNeeded with fast when its ICE restart fails '
+      'does not fire onReconnectionNeeded when its ICE restart fails '
       'offline, as a connection error',
       () async {
         final pc = _FakeRtcPeerConnection();
@@ -519,7 +519,7 @@ void main() {
         );
         await Future<void>.delayed(Duration.zero);
 
-        expect(strategies, [SfuReconnectionStrategy.fast]);
+        expect(strategies, isEmpty);
       },
     );
 

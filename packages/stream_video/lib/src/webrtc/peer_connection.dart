@@ -188,8 +188,9 @@ class StreamPeerConnection extends Disposable {
       _logger.w(
         () =>
             '[_tryRestartIce] #$type; restart failed: $error, '
-            'asking for ${strategy.name}',
+            'asking for ${strategy?.name ?? 'no reconnect'}',
       );
+      if (strategy == null) return;
       onReconnectionNeeded?.call(
         this,
         strategy,
@@ -198,13 +199,15 @@ class StreamPeerConnection extends Disposable {
     });
   }
 
-  /// The reconnect to ask for after an ICE restart failed with [error].
+  /// The reconnect to ask for after an ICE restart failed with [error], or
+  /// null for none.
   ///
-  /// Fast when the SFU reports the signal lost, or when the subscriber's
-  /// restart request failed without an answer from the SFU, such as while
-  /// offline. Rejoin when the SFU refused the restart, or when the publisher's
-  /// local restart failed.
-  SfuReconnectionStrategy _strategyAfterFailedIceRestart(
+  /// Fast when the SFU reports the signal lost. Rejoin when the SFU refused
+  /// the restart, or when the publisher's local restart failed. None when the
+  /// subscriber's restart request failed without an answer from the SFU, such
+  /// as while offline: the SFU socket asks for its own reconnect then, and a
+  /// connection that does fail asks for a rejoin when its state turns failed.
+  SfuReconnectionStrategy? _strategyAfterFailedIceRestart(
     StreamVideoException error,
   ) {
     final sfuError = error.sfuError;
@@ -215,7 +218,7 @@ class StreamPeerConnection extends Disposable {
     }
 
     return type == StreamPeerType.subscriber
-        ? SfuReconnectionStrategy.fast
+        ? null
         : SfuReconnectionStrategy.rejoin;
   }
 

@@ -1352,7 +1352,7 @@ class CallConnectionCoordinator {
   /// | A peer connection's state turns failed               | rejoin        |
   /// | The SFU refuses an ICE restart: signal lost          | fast          |
   /// | The SFU refuses an ICE restart: otherwise            | rejoin        |
-  /// | An ICE restart fails without an answer from the SFU  | fast          |
+  /// | An ICE restart fails without an answer from the SFU  | none, logged  |
   /// | A local publisher ICE restart fails                  | rejoin        |
   /// | The publisher has not started connecting after 15 s  | rejoin        |
   /// | A stalled publisher offer renegotiation does not fix | fast          |
@@ -1361,8 +1361,11 @@ class CallConnectionCoordinator {
   /// | An SFU error naming fast, rejoin or migrate          | that strategy |
   ///
   /// A socket closure that is not reconnectable, and an SFU error naming
-  /// disconnect, leave the call instead. An SFU error with a join error code
-  /// is left to the join's own retries.
+  /// disconnect, leave the call instead. An SFU error naming no strategy is
+  /// ignored, and one with a join error code is left to the join's own
+  /// retries. The SFU refusing an ICE restart because the session is
+  /// migrating out counts as refusing it otherwise; that request is dropped
+  /// once the migration replaces the session.
   ///
   /// A failed attempt is retried as a rejoin when:
   ///
