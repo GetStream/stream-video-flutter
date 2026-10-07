@@ -131,6 +131,30 @@ void main() {
     expect(camera.stream.disposeCallCount, 1);
   });
 
+  test(
+    'a track recreated after the handover is stopped in full on dispose',
+    () async {
+      addCameraTrack();
+      rtcManager.handOverLocalTracks();
+      // A recreate that finishes after the handover stores a new capture
+      // under the same id; this manager is the only one holding it.
+      final recreated = _FakeMediaStreamTrack();
+      final recreatedStream = _FakeMediaStream();
+      final trackId = rtcManager.tracks.keys.single;
+      rtcManager.tracks[trackId] =
+          (rtcManager.tracks[trackId]! as RtcLocalCameraTrack).copyWith(
+            mediaTrack: recreated,
+            mediaStream: recreatedStream,
+            clonedTracks: const [],
+          );
+
+      await rtcManager.dispose();
+
+      expect(recreated.stopCallCount, 1);
+      expect(recreatedStream.disposeCallCount, 1);
+    },
+  );
+
   test('a second handover returns nothing', () {
     addCameraTrack();
 

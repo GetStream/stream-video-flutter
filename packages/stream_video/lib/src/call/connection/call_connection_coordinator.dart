@@ -776,8 +776,10 @@ class CallConnectionCoordinator {
         _session!,
         reconnectDetails: reconnectDetails,
         clientEventRetryCount: clientEventRetryCount,
-        // A failed migration attempt may have taken the tracks from the
-        // session the migration started from, or never got that far.
+        // After a failed migration attempt the tracks are on the session the
+        // migration started from, or on the failed attempt's session if it
+        // got as far as taking them. Asking both is safe: a session hands
+        // its tracks over only once.
         handOverFrom: {_previousSession, sessionLeft},
       );
 
@@ -1146,15 +1148,20 @@ class CallConnectionCoordinator {
         ];
         _call._logger.v(() => '[startSession] applying connect options');
         unawaited(
-          _call._applyConnectOptions(inheritedTracks: inheritedTracks).catchError((
-            dynamic error,
-            StackTrace stackTrace,
-          ) {
-            _call._logger.e(
-              () =>
-                  '[startSession] failed to apply connect options: $error, stackTrace: $stackTrace',
-            );
-          }),
+          _call
+              ._applyConnectOptions(
+                session: session,
+                inheritedTracks: inheritedTracks,
+              )
+              .catchError((
+                dynamic error,
+                StackTrace stackTrace,
+              ) {
+                _call._logger.e(
+                  () =>
+                      '[startSession] failed to apply connect options: $error, stackTrace: $stackTrace',
+                );
+              }),
         );
       },
       isAnonymousUser:

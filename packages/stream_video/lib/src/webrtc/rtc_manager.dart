@@ -143,9 +143,10 @@ class RtcManager extends Disposable {
 
   final tracks = </*trackId*/ String, RtcTrack>{};
 
-  /// Local tracks given to the next session's manager by
-  /// [handOverLocalTracks]. Unpublishing one stops only this manager's clones.
-  final _handedOverTrackIds = <String>{};
+  /// The media tracks given to the next session's manager by
+  /// [handOverLocalTracks], by track id. Unpublishing a track that still holds
+  /// that media track stops only this manager's clones.
+  final _handedOverMediaTracks = <String, rtc.MediaStreamTrack>{};
 
   set onPublisherIceCandidate(OnIceCandidate? cb) {
     publisher?.onIceCandidate = cb;
@@ -393,8 +394,9 @@ class RtcManager extends Disposable {
       return;
     }
 
-    if (_handedOverTrackIds.remove(trackId) &&
-        publishedTrack is RtcLocalTrack) {
+    final handedOver = _handedOverMediaTracks.remove(trackId);
+    if (publishedTrack is RtcLocalTrack &&
+        identical(handedOver, publishedTrack.mediaTrack)) {
       await publishedTrack.stopClones();
     } else {
       await publishedTrack.stop();
@@ -427,13 +429,14 @@ class RtcManager extends Disposable {
   /// Each returned track carries the local prefix and no clones, ready to be
   /// published by the next manager. This manager keeps sending through its
   /// own clones until it is disposed, and then stops only those. Muted tracks
-  /// stay here and are stopped as before. A second call returns nothing.
+  /// stay here and are stopped on dispose. A second call returns nothing.
   List<RtcLocalTrack> handOverLocalTracks() {
     final handedOver = <RtcLocalTrack>[];
     for (final MapEntry(key: trackId, value: track) in tracks.entries) {
       if (track is! RtcLocalTrack) continue;
       if (!track.mediaTrack.enabled) continue;
-      if (!_handedOverTrackIds.add(trackId)) continue;
+      if (_handedOverMediaTracks.containsKey(trackId)) continue;
+      _handedOverMediaTracks[trackId] = track.mediaTrack;
 
       handedOver.add(
         track.copyWith(

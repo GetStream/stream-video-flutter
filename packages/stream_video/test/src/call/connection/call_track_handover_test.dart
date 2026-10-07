@@ -70,7 +70,10 @@ void main() {
 
   // The default mock never runs the callback that applies the connect
   // options, so each session hands it an rtc manager itself.
-  void startInvokesRtcManagerCreated(MockCallSession session) {
+  void startInvokesRtcManagerCreated(
+    MockCallSession session, {
+    bool succeeds = true,
+  }) {
     when(
       () => session.start(
         reconnectDetails: any(named: 'reconnectDetails'),
@@ -86,6 +89,11 @@ void main() {
               as FutureOr<void> Function(RtcManager)?;
       await onCreated?.call(_MockRtcManager());
 
+      if (!succeeds) {
+        return const Result.failure(
+          StreamVideoException(message: 'sfu unreachable'),
+        );
+      }
       return Result.success((
         callState: createTestSfuCallState(),
         fastReconnectDeadline: Duration.zero,
@@ -141,9 +149,30 @@ void main() {
     );
   }
 
+  int stopCount(RtcLocalTrack track) {
+    return (track.mediaTrack as _FakeMediaStreamTrack).stopCallCount;
+  }
+
+  /// Joins with [connectOptions], has `sessions.first` hand over [tracks],
+  /// and migrates to the next session.
+  Future<Call> migrateWith(
+    List<RtcLocalTrack> tracks,
+    CallConnectOptions connectOptions,
+  ) async {
+    when(harness.sessions.first.handOverLocalTracks).thenReturn(tracks);
+    final call = harness.buildCall();
+    await call.join(connectOptions: connectOptions);
+
+    await goAway(harness.sessions.first);
+    await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+    await waitUntil(() => call.state.value.status is CallStatusConnected);
+    await pumpEventQueue();
+    return call;
+  }
+
   test(
-    'a migration publishes the old session\'s camera on the new one before '
-    'the old one closes',
+    'a migration takes the old session\'s camera before the old one closes, '
+    'and publishes it on the new one',
     () async {
       final [first, second] = setUpHarness(2).sessions;
       final camera = liveTrack(SfuTrackType.video, const CameraConstraints());
@@ -170,15 +199,15 @@ void main() {
           constraints: any(named: 'constraints'),
         ),
       ).called(1);
-      expect((camera.mediaTrack as _FakeMediaStreamTrack).stopCallCount, 0);
+      expect(stopCount(camera), 0);
       verifyNever(second.handOverLocalTracks);
     },
     timeout: const Timeout(Duration(seconds: 30)),
   );
 
   test(
-    'a rejoin publishes the old session\'s tracks on the new one before the '
-    'old one is disposed',
+    'a rejoin takes the old session\'s tracks before the old one is '
+    'disposed, and publishes them on the new one',
     () async {
       final [first, second] = setUpHarness(2).sessions;
       final camera = liveTrack(SfuTrackType.video, const CameraConstraints());
@@ -208,14 +237,21 @@ void main() {
   );
 
   test(
-    'an inherited track whose option is disabled is stopped, not published',
+    'inherited tracks whose options are disabled are stopped, not published',
     () async {
       final [first, second] = setUpHarness(2).sessions;
       final camera = liveTrack(SfuTrackType.video, const CameraConstraints());
-      when(first.handOverLocalTracks).thenReturn([camera]);
+      final microphone = liveTrack(
+        SfuTrackType.audio,
+        const AudioConstraints(),
+      );
+      when(first.handOverLocalTracks).thenReturn([camera, microphone]);
       final call = harness.buildCall();
       await call.join(
-        connectOptions: CallConnectOptions(camera: TrackOption.disabled()),
+        connectOptions: CallConnectOptions(
+          camera: TrackOption.disabled(),
+          microphone: TrackOption.disabled(),
+        ),
       );
 
       await goAway(first);
@@ -224,7 +260,8 @@ void main() {
       await pumpEventQueue();
 
       verifyNever(() => second.setLocalTrack(any()));
-      expect((camera.mediaTrack as _FakeMediaStreamTrack).stopCallCount, 1);
+      expect(stopCount(camera), 1);
+      expect(stopCount(microphone), 1);
     },
     timeout: const Timeout(Duration(seconds: 30)),
   );
@@ -289,6 +326,173 @@ void main() {
       verify(() => third.setLocalTrack(camera)).called(1);
       verify(first.handOverLocalTracks).called(1);
       verify(second.handOverLocalTracks).called(1);
+    },
+    timeout: const Timeout(Duration(seconds: 40)),
+  );
+
+  test(
+    'an inherited track the new session fails to publish is stopped and its '
+    'option turned off',
+    () async {
+      final [_, second] = setUpHarness(2).sessions;
+      final camera = liveTrack(SfuTrackType.video, const CameraConstraints());
+      when(() => second.setLocalTrack(camera)).thenAnswer(
+        (_) async => const Result.failure(
+          StreamVideoException(message: 'Call not connected'),
+        ),
+      );
+
+      final call = await migrateWith(
+        [camera],
+        CallConnectOptions(camera: TrackOption.enabled()),
+      );
+
+      expect(stopCount(camera), 1);
+      expect(call.connectOptions.camera, isA<TrackDisabled>());
+    },
+    timeout: const Timeout(Duration(seconds: 30)),
+  );
+
+  test(
+    'an inherited track the call may no longer send is stopped, not '
+    'published',
+    () async {
+      final [first, second] = setUpHarness(2).sessions;
+      final camera = liveTrack(SfuTrackType.video, const CameraConstraints());
+      final screenShare = liveTrack(
+        SfuTrackType.screenShare,
+        const ScreenShareConstraints(),
+      );
+      when(first.handOverLocalTracks).thenReturn([camera, screenShare]);
+      final call = harness.buildCall();
+      await call.join(
+        connectOptions: CallConnectOptions(
+          camera: TrackOption.enabled(),
+          screenShare: TrackOption.enabled(),
+        ),
+      );
+      for (final permission in [
+        CallPermission.sendVideo,
+        CallPermission.screenshare,
+      ]) {
+        when(
+          () => harness.permissionsManager.hasPermission(permission),
+        ).thenReturn(false);
+      }
+
+      await goAway(first);
+      await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+      await waitUntil(() => call.state.value.status is CallStatusConnected);
+      await pumpEventQueue();
+
+      verifyNever(() => second.setLocalTrack(any()));
+      expect(stopCount(camera), 1);
+      expect(stopCount(screenShare), 1);
+      expect(call.connectOptions.camera, isA<TrackDisabled>());
+      expect(call.connectOptions.screenShare, isA<TrackDisabled>());
+    },
+    timeout: const Timeout(Duration(seconds: 30)),
+  );
+
+  test(
+    'a publish that throws still stops the inherited tracks not yet published',
+    () async {
+      final [_, second] = setUpHarness(2).sessions;
+      final camera = liveTrack(SfuTrackType.video, const CameraConstraints());
+      final microphone = liveTrack(
+        SfuTrackType.audio,
+        const AudioConstraints(),
+      );
+      when(
+        () => second.setLocalTrack(camera),
+      ).thenThrow(StateError('publisher closed'));
+
+      await migrateWith(
+        [camera, microphone],
+        CallConnectOptions(
+          camera: TrackOption.enabled(),
+          microphone: TrackOption.enabled(),
+        ),
+      );
+
+      expect(stopCount(camera), 1);
+      expect(stopCount(microphone), 1);
+      verifyNever(() => second.setLocalTrack(microphone));
+    },
+    timeout: const Timeout(Duration(seconds: 30)),
+  );
+
+  test(
+    'an inherited track is not published once the call has moved on to '
+    'another session',
+    () async {
+      final [first, second, third] = setUpHarness(3).sessions;
+      final camera = liveTrack(SfuTrackType.video, const CameraConstraints());
+      final microphone = liveTrack(
+        SfuTrackType.audio,
+        const AudioConstraints(),
+      );
+      when(first.handOverLocalTracks).thenReturn([camera, microphone]);
+      final cameraPublished = Completer<Result<None>>();
+      when(
+        () => second.setLocalTrack(camera),
+      ).thenAnswer((_) => cameraPublished.future);
+      final call = harness.buildCall();
+      await call.join(
+        connectOptions: CallConnectOptions(
+          camera: TrackOption.enabled(),
+          microphone: TrackOption.enabled(),
+        ),
+      );
+
+      await goAway(first);
+      await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+      await waitUntil(() => call.state.value.status is CallStatusConnected);
+      harness.requestReconnect(1, SfuReconnectionStrategy.rejoin);
+      await waitUntil(() => harness.reconnectionCallbacks.length == 3);
+      await waitUntil(() => call.state.value.status is CallStatusConnected);
+      cameraPublished.complete(const Result.success(none));
+      await pumpEventQueue();
+
+      verifyNever(() => second.setLocalTrack(microphone));
+      verifyNever(() => third.setLocalTrack(microphone));
+      expect(stopCount(microphone), 1);
+    },
+    timeout: const Timeout(Duration(seconds: 40)),
+  );
+
+  test(
+    'a migration retried after a failed attempt that took the tracks takes '
+    'them from that attempt\'s session',
+    () async {
+      final [first, second, third] = setUpHarness(3).sessions;
+      startInvokesRtcManagerCreated(second, succeeds: false);
+      final camera = liveTrack(SfuTrackType.video, const CameraConstraints());
+      final cameraOnSecond = liveTrack(
+        SfuTrackType.video,
+        const CameraConstraints(),
+      );
+      var firstHandOvers = 0;
+      when(first.handOverLocalTracks).thenAnswer(
+        (_) => firstHandOvers++ == 0 ? [camera] : const [],
+      );
+      when(second.handOverLocalTracks).thenReturn([cameraOnSecond]);
+      final call = harness.buildCall();
+      await call.join(
+        connectOptions: CallConnectOptions(camera: TrackOption.enabled()),
+      );
+
+      await goAway(first);
+      await waitUntil(
+        () => harness.reconnectionCallbacks.length == 3,
+        timeout: const Duration(seconds: 15),
+      );
+      await waitUntil(() => call.state.value.status is CallStatusConnected);
+      await pumpEventQueue();
+
+      verify(() => second.setLocalTrack(camera)).called(1);
+      verify(() => third.setLocalTrack(cameraOnSecond)).called(1);
+      verifyNever(() => third.setLocalTrack(camera));
     },
     timeout: const Timeout(Duration(seconds: 40)),
   );

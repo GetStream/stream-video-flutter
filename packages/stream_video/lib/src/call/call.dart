@@ -1248,12 +1248,14 @@ class Call {
     );
   }
 
-  /// Applies [_connectOptions] to a newly started session.
+  /// Applies [_connectOptions] to [session], a newly started session.
   ///
   /// [inheritedTracks] are the live local tracks of the session it replaces.
-  /// An enabled option publishes its inherited track instead of opening the
-  /// device again; inherited tracks no option takes are stopped.
+  /// An enabled or provided option publishes its inherited track instead of
+  /// opening the device again. Inherited tracks that are not published are
+  /// stopped.
   Future<void> _applyConnectOptions({
+    CallSession? session,
     List<RtcLocalTrack> inheritedTracks = const [],
   }) async {
     _logger.d(
@@ -1262,12 +1264,37 @@ class Call {
           'inheritedTracks: $inheritedTracks',
     );
 
-    final inherited = {
-      for (final track in inheritedTracks) track.trackType: track,
-    };
-    RtcLocalTrack? takeInherited(SfuTrackType trackType, TrackOption option) {
+    final inherited = <SfuTrackType, RtcLocalTrack>{};
+    final duplicates = <RtcLocalTrack>[];
+    for (final track in inheritedTracks) {
+      final replaced = inherited[track.trackType];
+      if (replaced != null) duplicates.add(replaced);
+      inherited[track.trackType] = track;
+    }
+
+    RtcLocalTrack? take(SfuTrackType trackType, TrackOption option) {
       if (option is! TrackEnabled && option is! TrackProvided) return null;
       return inherited.remove(trackType);
+    }
+
+    final camera = take(SfuTrackType.video, _connectOptions.camera);
+    final microphone = take(SfuTrackType.audio, _connectOptions.microphone);
+    final screenShare = take(
+      SfuTrackType.screenShare,
+      _connectOptions.screenShare,
+    );
+
+    // Stopped up front: a screen share picker can keep the apply waiting.
+    for (final track in [...duplicates, ...inherited.values]) {
+      _logger.v(() => '[applyConnectOptions] stopping unused $track');
+      await track.stop();
+    }
+
+    // Taken tracks are stopped if the apply fails before they are published.
+    final unpublished = {?camera, ?microphone, ?screenShare};
+    Future<Result<None>> adopt(RtcLocalTrack track) {
+      unpublished.remove(track);
+      return _adoptInheritedTrack(session, track);
     }
 
     // A refused option leaves the device off, so the intent comes down with
@@ -1287,58 +1314,55 @@ class Call {
       return true;
     }
 
-    final cameraFailed = failed(
-      'camera',
-      await _applyCameraOption(
-        _connectOptions.camera,
-        _connectOptions.cameraFacingMode,
-        _connectOptions.targetResolution,
-        _connectOptions.videoInputDevice?.id,
-        inherited: takeInherited(SfuTrackType.video, _connectOptions.camera),
-      ),
-    );
-    if (cameraFailed) {
-      _connectOptions = _connectOptions.copyWith(
-        camera: TrackOption.disabled(),
+    try {
+      final cameraFailed = failed(
+        'camera',
+        camera != null
+            ? await adopt(camera)
+            : await _applyCameraOption(
+                _connectOptions.camera,
+                _connectOptions.cameraFacingMode,
+                _connectOptions.targetResolution,
+                _connectOptions.videoInputDevice?.id,
+              ),
       );
-    }
+      if (cameraFailed) {
+        _connectOptions = _connectOptions.copyWith(
+          camera: TrackOption.disabled(),
+        );
+      }
 
-    final microphoneFailed = failed(
-      'microphone',
-      await _applyMicrophoneOption(
-        _connectOptions.microphone,
-        inherited: takeInherited(
-          SfuTrackType.audio,
-          _connectOptions.microphone,
-        ),
-      ),
-    );
-    if (microphoneFailed) {
-      _connectOptions = _connectOptions.copyWith(
-        microphone: TrackOption.disabled(),
+      final microphoneFailed = failed(
+        'microphone',
+        microphone != null
+            ? await adopt(microphone)
+            : await _applyMicrophoneOption(_connectOptions.microphone),
       );
-    }
+      if (microphoneFailed) {
+        _connectOptions = _connectOptions.copyWith(
+          microphone: TrackOption.disabled(),
+        );
+      }
 
-    final screenShareFailed = failed(
-      'screenShare',
-      await _applyScreenShareOption(
-        _connectOptions.screenShare,
-        _connectOptions.screenShareTargetResolution,
-        inherited: takeInherited(
-          SfuTrackType.screenShare,
-          _connectOptions.screenShare,
-        ),
-      ),
-    );
-    if (screenShareFailed) {
-      _connectOptions = _connectOptions.copyWith(
-        screenShare: TrackOption.disabled(),
+      final screenShareFailed = failed(
+        'screenShare',
+        screenShare != null
+            ? await adopt(screenShare)
+            : await _applyScreenShareOption(
+                _connectOptions.screenShare,
+                _connectOptions.screenShareTargetResolution,
+              ),
       );
-    }
-
-    for (final track in inherited.values) {
-      _logger.v(() => '[applyConnectOptions] stopping unused $track');
-      await track.stop();
+      if (screenShareFailed) {
+        _connectOptions = _connectOptions.copyWith(
+          screenShare: TrackOption.disabled(),
+        );
+      }
+    } finally {
+      for (final track in unpublished) {
+        _logger.w(() => '[applyConnectOptions] stopping unpublished $track');
+        await track.stop();
+      }
     }
 
     if (_connectOptions.audioInputDevice != null) {
@@ -1365,18 +1389,8 @@ class Call {
     TrackOption cameraOption,
     FacingMode facingMode,
     StreamTargetResolution? targetResolution,
-    String? deviceId, {
-    RtcLocalTrack? inherited,
-  }) async {
-    if (inherited != null) {
-      final blocked = _sendVideoBlockedReason();
-      if (blocked != null) {
-        await inherited.stop();
-        return failureWithError(blocked);
-      }
-      return _setLocalTrack(inherited);
-    }
-
+    String? deviceId,
+  ) async {
     if (cameraOption is TrackProvided) {
       return _setLocalTrack(cameraOption.track);
     } else if (cameraOption is TrackEnabled) {
@@ -1402,18 +1416,8 @@ class Call {
   }
 
   Future<Result<None>> _applyMicrophoneOption(
-    TrackOption microphoneOption, {
-    RtcLocalTrack? inherited,
-  }) async {
-    if (inherited != null) {
-      final blocked = _sendAudioBlockedReason();
-      if (blocked != null) {
-        await inherited.stop();
-        return failureWithError(blocked);
-      }
-      return _setLocalTrack(inherited);
-    }
-
+    TrackOption microphoneOption,
+  ) async {
     if (microphoneOption is TrackProvided) {
       return _setLocalTrack(microphoneOption.track);
     } else if (microphoneOption is TrackEnabled) {
@@ -1428,13 +1432,8 @@ class Call {
 
   Future<Result<None>> _applyScreenShareOption(
     TrackOption screenShareOption,
-    StreamTargetResolution? targetResolution, {
-    RtcLocalTrack? inherited,
-  }) async {
-    if (inherited != null) {
-      return _adoptScreenShareTrack(inherited);
-    }
-
+    StreamTargetResolution? targetResolution,
+  ) async {
     if (screenShareOption is TrackProvided) {
       return _setLocalTrack(screenShareOption.track);
     } else if (screenShareOption is TrackEnabled) {
@@ -1460,30 +1459,63 @@ class Call {
     return const Result.success(none);
   }
 
-  /// Publishes a screen share track taken over from the previous session.
+  /// Publishes [track], taken over from the session [target] replaced, on
+  /// [target], while that is still the call's session. A track that is not
+  /// published is stopped.
   ///
-  /// Not through [setScreenShareEnabled], which always captures a new screen
-  /// and so asks the user to pick one again.
-  Future<Result<None>> _adoptScreenShareTrack(RtcLocalTrack track) async {
+  /// A screen share is not published through [setScreenShareEnabled], which
+  /// always captures a new screen and so asks the user to pick one again.
+  Future<Result<None>> _adoptInheritedTrack(
+    CallSession? target,
+    RtcLocalTrack track,
+  ) async {
+    _logger.d(() => '[adoptInheritedTrack] track: $track');
+
     final constraints = track.mediaConstraints;
-    if (!hasPermission(CallPermission.screenshare) ||
-        constraints is! ScreenShareConstraints) {
-      await track.stop();
-      return failureWithError(
-        'Missing permission to share screen for the user',
-      );
+    final String? refused;
+    if (track.trackType == SfuTrackType.video) {
+      refused = _sendVideoBlockedReason();
+    } else if (track.trackType == SfuTrackType.audio) {
+      refused = _sendAudioBlockedReason();
+    } else if (track.trackType != SfuTrackType.screenShare) {
+      refused = 'Unsupported track type: ${track.trackType}';
+    } else if (constraints is! ScreenShareConstraints) {
+      refused =
+          'Unexpected screen share constraints: ${constraints.runtimeType}';
+    } else if (!hasPermission(CallPermission.screenshare)) {
+      refused = 'Missing permission to share screen for the user';
+    } else {
+      refused = null;
     }
 
-    final result =
-        await _session?.setLocalTrack(track) ??
-        failureWithError('Call session is null, cannot start screen share');
+    final Result<None> result;
+    try {
+      if (refused != null) {
+        result = failureWithError(refused);
+      } else if (target == null || !identical(_session, target)) {
+        result = failureWithError('the call moved on to another session');
+      } else {
+        result = await target.setLocalTrack(track);
+      }
+    } catch (_) {
+      await track.stop();
+      rethrow;
+    }
 
-    if (result.isSuccess) {
+    _logger.v(() => '[adoptInheritedTrack] completed: $result');
+    if (result.isFailure) {
+      await track.stop();
+      return result;
+    }
+
+    if (constraints is ScreenShareConstraints) {
       _onScreenShareEnabled(
         enabled: true,
         constraints: constraints,
         track: track,
       );
+    } else {
+      await _onLocalTrackSet(track);
     }
 
     return result;
@@ -1498,34 +1530,37 @@ class Call {
     }
     final result = await session.setLocalTrack(track);
     _logger.v(() => '[setLocalTrack] completed: $result');
-    if (result.isSuccess) {
-      final mediaConstraints = track.mediaConstraints;
-      if (mediaConstraints is AudioConstraints) {
-        _logger.v(() => '[setLocalTrack]: setMicrophoneEnabled true');
-        await setMicrophoneEnabled(
-          enabled: track.mediaTrack.enabled,
-          constraints: mediaConstraints,
-        );
-      } else if (mediaConstraints is CameraConstraints) {
-        _logger.v(() => '[setLocalTrack]: setCameraEnabled true');
-        await setCameraEnabled(
-          enabled: track.mediaTrack.enabled,
-          constraints: mediaConstraints,
-        );
-      } else if (mediaConstraints is ScreenShareConstraints) {
-        _logger.v(() => '[setLocalTrack] setScreenShareEnabled true');
-        await setScreenShareEnabled(
-          enabled: track.mediaTrack.enabled,
-          constraints: mediaConstraints,
-        );
-      } else {
-        streamLog.e(
-          _tag,
-          () => '[_setLocalTrack] failed: $mediaConstraints',
-        );
-      }
-    }
+    if (result.isSuccess) await _onLocalTrackSet(track);
     return result;
+  }
+
+  /// Brings the device state in line with [track], just published.
+  Future<void> _onLocalTrackSet(RtcLocalTrack track) async {
+    final mediaConstraints = track.mediaConstraints;
+    if (mediaConstraints is AudioConstraints) {
+      _logger.v(() => '[setLocalTrack]: setMicrophoneEnabled true');
+      await setMicrophoneEnabled(
+        enabled: track.mediaTrack.enabled,
+        constraints: mediaConstraints,
+      );
+    } else if (mediaConstraints is CameraConstraints) {
+      _logger.v(() => '[setLocalTrack]: setCameraEnabled true');
+      await setCameraEnabled(
+        enabled: track.mediaTrack.enabled,
+        constraints: mediaConstraints,
+      );
+    } else if (mediaConstraints is ScreenShareConstraints) {
+      _logger.v(() => '[setLocalTrack] setScreenShareEnabled true');
+      await setScreenShareEnabled(
+        enabled: track.mediaTrack.enabled,
+        constraints: mediaConstraints,
+      );
+    } else {
+      streamLog.e(
+        _tag,
+        () => '[_setLocalTrack] failed: $mediaConstraints',
+      );
+    }
   }
 
   Future<Result<None>> _awaitIncomingToBeAccepted(Duration timeLimit) async {

@@ -176,16 +176,16 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   /// track.
   Future<void> stopClones() async {
     streamLog.i(_tag, () => 'Stopping clones of track: $trackId');
-    try {
-      await _stopClones();
-    } catch (e) {
-      streamLog.w(_tag, () => 'Error stopping cloned tracks: $e');
-    }
+    await _stopClones();
   }
 
   Future<void> _stopClones() async {
     for (final track in clonedTracks) {
-      await track.stop();
+      try {
+        await track.stop();
+      } catch (e) {
+        streamLog.w(_tag, () => 'Error stopping clone ${track.id}: $e');
+      }
     }
   }
 
