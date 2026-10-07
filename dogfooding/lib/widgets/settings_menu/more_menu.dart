@@ -5,6 +5,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import '../../utils/consts.dart';
 import '../../utils/feedback_dialog.dart';
 import 'background_filters_menu_item.dart';
+import 'connection_failure_section.dart';
 import 'incoming_video_quality.dart';
 import 'reactions_menu_content.dart';
 
@@ -253,6 +254,7 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
             ),
         ],
       ),
+      connectionFailureSection(context, widget.call),
     ];
   }
 

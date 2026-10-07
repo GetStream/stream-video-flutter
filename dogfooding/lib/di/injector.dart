@@ -16,7 +16,9 @@ import '../core/repos/token_service.dart';
 import '../core/repos/user_auth_repository.dart';
 import '../core/repos/user_chat_repository.dart';
 import '../log_config.dart';
+import '../utils/consts.dart';
 import '../utils/ringing_encryption.dart';
+import '../utils/simulated_internet_connection.dart';
 
 GetIt locator = GetIt.instance;
 
@@ -157,6 +159,14 @@ StreamVideo _initStreamVideo(
   String? initialToken,
   TokenLoader? tokenLoader,
 }) {
+  // Outside prod, the call screen's more menu can take the network offline.
+  if (!kIsProd && !locator.isRegistered<SimulatedInternetConnection>()) {
+    locator.registerSingleton(
+      SimulatedInternetConnection(),
+      dispose: (connection) => connection.dispose(),
+    );
+  }
+
   final streamVideoClient = StreamVideo(
     apiKey,
     user: user,
@@ -165,6 +175,11 @@ StreamVideo _initStreamVideo(
     options: StreamVideoOptions(
       logPriority: Priority.debug,
       keepConnectionsAliveWhenInBackground: true,
+      networkMonitorSettings: NetworkMonitorSettings(
+        internetConnectionInstance: kIsProd
+            ? null
+            : locator<SimulatedInternetConnection>(),
+      ),
       audioProcessor: NoiseCancellationAudioProcessor(),
       defaultCallPreferences: DefaultCallPreferences(
         encryptionKeyResolver: resolveRingingEncryptionKey,
