@@ -20,10 +20,13 @@
 # Targets:
 #   --android [SERIAL]  An Android device or emulator, through adb. Turns
 #                       airplane mode on, or Wi-Fi and mobile data off where
-#                       airplane mode cannot be set from the shell.
+#                       airplane mode cannot be set from the shell. Connect
+#                       over USB: wireless adb drops with the network.
 #   --host              This Mac, for the macOS dogfooding app and the iOS
 #                       simulator. Blocks all traffic except loopback with a
 #                       pf rule; needs sudo, and the Mac is offline meanwhile.
+#                       Refuses when another tool has replaced the stock pf
+#                       ruleset.
 #
 # An iOS device cannot be scripted: use Settings > Developer > Network Link
 # Conditioner with the "100% Loss" profile, and time it by hand.
@@ -34,7 +37,7 @@
 set -euo pipefail
 
 usage() {
-  sed -n '3,32p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '3,35p' "$0" | sed 's/^# \{0,1\}//'
   exit 1
 }
 
@@ -85,9 +88,9 @@ host_reachable() {
 network_off() {
   case $target in
     --android)
-      [[ $(adb_cmd settings get global wifi_on | tr -d '\r') != 0 ]] &&
+      [[ $(adb_cmd settings get global wifi_on | tr -d '\r') =~ ^[1-9] ]] &&
         wifi_was_on=true
-      [[ $(adb_cmd settings get global mobile_data | tr -d '\r') != 0 ]] &&
+      [[ $(adb_cmd settings get global mobile_data | tr -d '\r') =~ ^[1-9] ]] &&
         data_was_on=true
 
       cut_at=$SECONDS
@@ -116,9 +119,12 @@ network_off() {
     --host)
       sudo -v
       # The anchor only applies while the main ruleset refers to it, as the
-      # stock /etc/pf.conf does.
+      # stock /etc/pf.conf does. Another ruleset belongs to some other tool,
+      # so it is left alone.
       if ! sudo pfctl -s Anchors 2>/dev/null | grep -q 'com.apple'; then
-        sudo pfctl -q -f /etc/pf.conf
+        echo 'The pf ruleset has no com.apple anchor; not touching it.' >&2
+        echo 'If no other tool uses pf: sudo pfctl -f /etc/pf.conf' >&2
+        exit 1
       fi
       printf 'block drop quick all\npass quick on lo0 all\n' |
         sudo pfctl -q -a "$pf_anchor" -f -
