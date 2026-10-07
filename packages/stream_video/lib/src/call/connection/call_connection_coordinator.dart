@@ -1618,8 +1618,8 @@ class CallConnectionCoordinator {
           return;
         }
 
-        // Offline for longer than the SFU keeps a session for, so a fast
-        // reconnect could not resume it.
+        // Offline past the fast-reconnect deadline: the attempt rejoins
+        // instead.
         final offlinePastDeadline =
             wasOffline &&
             _fastReconnectDeadline > Duration.zero &&
