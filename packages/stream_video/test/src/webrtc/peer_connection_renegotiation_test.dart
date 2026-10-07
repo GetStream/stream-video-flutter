@@ -249,7 +249,7 @@ void main() {
         final sp = _build(pc: pc, type: StreamPeerType.publisher);
 
         final calls = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
-        sp.onReconnectionNeeded = (peer, strategy) =>
+        sp.onReconnectionNeeded = (peer, strategy, _) =>
             calls.add((peer, strategy));
 
         pc.capturedOnConnectionState!(
@@ -267,7 +267,7 @@ void main() {
       final sp = _build(pc: pc, type: StreamPeerType.publisher);
 
       var calls = 0;
-      sp.onReconnectionNeeded = (_, __) => calls++;
+      sp.onReconnectionNeeded = (_, __, ___) => calls++;
 
       [
         rtc.RTCPeerConnectionState.RTCPeerConnectionStateNew,

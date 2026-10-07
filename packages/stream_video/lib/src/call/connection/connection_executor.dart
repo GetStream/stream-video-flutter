@@ -3,43 +3,46 @@ import 'package:synchronized/synchronized.dart';
 
 import '../../sfu/data/models/sfu_error.dart';
 import '../session/call_session.dart';
+import 'reconnect_trigger.dart';
 
 /// A reconnect asked for while other connection work was running.
 @internal
 final class ReconnectRequest {
   const ReconnectRequest(
     this.strategy, {
+    required this.trigger,
     this.reason,
-    this.triggeredByNetwork = false,
     this.session,
   });
 
   final SfuReconnectionStrategy strategy;
+
+  /// What asked for it.
+  final ReconnectTrigger trigger;
+
   final String? reason;
-  final bool triggeredByNetwork;
 
   /// The session the reconnect was asked for. Once another session has
   /// replaced it, the request no longer applies.
   final CallSession? session;
+
+  bool get triggeredByNetwork => trigger is NetworkLost;
 
   /// Whether [strategy] asks for more than [other]: rejoin over migrate over
   /// fast.
   bool isStrongerThan(SfuReconnectionStrategy other) =>
       _rank(strategy) > _rank(other);
 
-  /// This request combined with [next], which was asked for later. A request
-  /// for another session replaces this one, since sessions only move forward.
-  /// For the same session the stronger strategy wins, and the result counts
-  /// as triggered by the network if either request was.
-  ReconnectRequest mergedWith(ReconnectRequest next) {
-    if (!identical(next.session, session)) return next;
-    final stronger = isStrongerThan(next.strategy) ? this : next;
-    return ReconnectRequest(
-      stronger.strategy,
-      reason: stronger.reason,
-      triggeredByNetwork: triggeredByNetwork || next.triggeredByNetwork,
-      session: session,
-    );
+  /// The request with the strongest strategy among [requests], the later one
+  /// on a tie, or null when there are none.
+  static ReconnectRequest? strongest(Iterable<ReconnectRequest> requests) {
+    ReconnectRequest? strongest;
+    for (final request in requests) {
+      if (strongest == null || !strongest.isStrongerThan(request.strategy)) {
+        strongest = request;
+      }
+    }
+    return strongest;
   }
 
   static int _rank(SfuReconnectionStrategy strategy) => switch (strategy) {
@@ -52,19 +55,20 @@ final class ReconnectRequest {
 
   @override
   String toString() =>
-      'ReconnectRequest(strategy: ${strategy.name}, reason: $reason)';
+      'ReconnectRequest(strategy: ${strategy.name}, trigger: $trigger, '
+      'reason: $reason)';
 }
 
 /// Runs a call's join and reconnect work one task at a time, in the order it
 /// was asked for.
 ///
 /// A reconnect asked for while a task runs is not queued behind it: [hold]
-/// keeps it, merged with any other held request, for the running task or the
-/// one after it to take.
+/// keeps it, alongside the other held requests for the same session, for the
+/// running task or the one after it to take.
 @internal
 final class ConnectionExecutor {
   final _lock = Lock();
-  ReconnectRequest? _held;
+  final _held = <ReconnectRequest>[];
 
   /// Whether a task is running or queued.
   bool get isBusy => _lock.locked;
@@ -72,15 +76,18 @@ final class ConnectionExecutor {
   /// Runs [task] once every task queued before it has finished.
   Future<T> run<T>(Future<T> Function() task) => _lock.synchronized(task);
 
-  /// Keeps [request] for the running work to take.
+  /// Keeps [request] for the running work to take. Requests held for another
+  /// session are dropped, since sessions only move forward.
   void hold(ReconnectRequest request) {
-    _held = _held?.mergedWith(request) ?? request;
+    _held
+      ..removeWhere((held) => !identical(held.session, request.session))
+      ..add(request);
   }
 
-  /// Returns the held request, if there is one, and stops holding it.
-  ReconnectRequest? takeHeld() {
-    final held = _held;
-    _held = null;
+  /// Returns the held requests, oldest first, and stops holding them.
+  List<ReconnectRequest> takeHeld() {
+    final held = List.of(_held);
+    _held.clear();
     return held;
   }
 }

@@ -115,11 +115,19 @@ class ConnectionHarness {
   final reconnectionCallbacks = <OnReconnectionNeeded>[];
 
   /// Asks for a reconnect with [strategy] through the publisher of
-  /// `sessions[index]`, the way its peer connection would.
-  void requestReconnect(int index, SfuReconnectionStrategy strategy) {
+  /// `sessions[index]`, the way its peer connection would, and returns that
+  /// publisher. It reports itself as not connected until a test stubs
+  /// `isConnected` otherwise.
+  StreamPeerConnection requestReconnect(
+    int index,
+    SfuReconnectionStrategy strategy, {
+    ReconnectionNeededReason reason = ReconnectionNeededReason.connectionFailed,
+  }) {
     final publisher = _MockStreamPeerConnection();
     when(() => publisher.type).thenReturn(StreamPeerType.publisher);
-    reconnectionCallbacks[index](publisher, strategy);
+    when(publisher.isConnected).thenReturn(false);
+    reconnectionCallbacks[index](publisher, strategy, reason);
+    return publisher;
   }
 
   /// Runs [before] ahead of handing out each session.

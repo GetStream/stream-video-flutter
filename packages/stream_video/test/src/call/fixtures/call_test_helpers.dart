@@ -336,6 +336,7 @@ MockCallSession setupMockCallSession() {
   when(() => callSession.sessionId).thenReturn('test-session-id');
   final callSessionEvents = MutableSharedEmitter<SfuEvent>();
   when(() => callSession.events).thenAnswer((_) => callSessionEvents);
+  when(() => callSession.isSfuConnected).thenReturn(false);
   when(() => callSession.config).thenReturn(
     CallSessionConfig(
       sfuName: SampleCallData.defaultCredentials.sfuServer.name,

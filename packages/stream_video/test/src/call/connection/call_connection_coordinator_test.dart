@@ -5,6 +5,7 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/telemetry/client_event_types.dart';
+import 'package:stream_video/src/webrtc/peer_connection.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../fixtures/call_test_helpers.dart';
@@ -712,5 +713,116 @@ void main() {
       expect(fastReconnects, 0);
       expect(call.state.value.status, isA<CallStatusDisconnected>());
     });
+
+    test(
+      'from a peer connection that is connected again by then is dropped',
+      () async {
+        final call = harness.buildCall();
+        await call.join();
+        final attemptGate = Completer<void>();
+        var fastReconnects = 0;
+        harness.stubFastReconnect(harness.session, () async {
+          if (++fastReconnects == 1) await attemptGate.future;
+          return sessionStartSuccess();
+        });
+
+        await harness.emitSfu(harness.session, sfuSocketDropped);
+        await waitUntil(() => fastReconnects == 1);
+        final publisher = harness.requestReconnect(
+          0,
+          SfuReconnectionStrategy.fast,
+        );
+        // The attempt's ICE restart brings the peer connection back.
+        when(publisher.isConnected).thenReturn(true);
+        attemptGate.complete();
+
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+        expect(fastReconnects, 1);
+      },
+    );
+
+    test(
+      'from a stuck peer connection still runs, even when it looks connected',
+      () async {
+        final call = harness.buildCall();
+        await call.join();
+        final attemptGate = Completer<void>();
+        var fastReconnects = 0;
+        harness.stubFastReconnect(harness.session, () async {
+          if (++fastReconnects == 1) await attemptGate.future;
+          return sessionStartSuccess();
+        });
+
+        await harness.emitSfu(harness.session, sfuSocketDropped);
+        await waitUntil(() => fastReconnects == 1);
+        final publisher = harness.requestReconnect(
+          0,
+          SfuReconnectionStrategy.fast,
+          reason: ReconnectionNeededReason.stuck,
+        );
+        when(publisher.isConnected).thenReturn(true);
+        attemptGate.complete();
+
+        await waitUntil(() => fastReconnects == 2);
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+      },
+    );
+
+    test(
+      'for a socket that is connected again by then is dropped',
+      () async {
+        final sessionStartGate = Completer<void>();
+        harness.stubSessionStart(harness.session, () async {
+          await sessionStartGate.future;
+          return sessionStartSuccess();
+        });
+        var fastReconnects = 0;
+        harness.stubFastReconnect(harness.session, () async {
+          fastReconnects++;
+          return sessionStartSuccess();
+        });
+        final call = harness.buildCall();
+
+        final join = call.join();
+        await waitUntil(() => harness.reconnectionCallbacks.length == 1);
+        await pumpEventQueue();
+        await harness.emitSfu(harness.session, sfuSocketDropped);
+        when(() => harness.session.isSfuConnected).thenReturn(true);
+        sessionStartGate.complete();
+
+        expect((await join).isSuccess, isTrue);
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+        expect(fastReconnects, 0);
+        expect(call.state.value.status, isA<CallStatusConnected>());
+      },
+    );
+
+    test(
+      'from a network drop still runs once the network is back',
+      () async {
+        final call = harness.buildCall();
+        await call.join();
+        final attemptGate = Completer<void>();
+        var fastReconnects = 0;
+        harness.stubFastReconnect(harness.session, () async {
+          if (++fastReconnects == 1) await attemptGate.future;
+          return sessionStartSuccess();
+        });
+
+        await harness.emitSfu(harness.session, sfuSocketDropped);
+        await waitUntil(() => fastReconnects == 1);
+        // The network drops and comes back while the attempt runs; the
+        // connections it set up may be stale.
+        harness.internetStatus.add(InternetStatus.disconnected);
+        await pumpEventQueue();
+        harness.internetStatus.add(InternetStatus.connected);
+        await pumpEventQueue();
+        attemptGate.complete();
+
+        await waitUntil(() => fastReconnects == 2);
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+      },
+    );
   });
 }

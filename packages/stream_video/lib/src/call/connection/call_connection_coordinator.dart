@@ -77,8 +77,8 @@ class CallConnectionCoordinator {
   ///
   /// In any other phase there is nothing to reconnect: the call is leaving,
   /// has left, or its join or reconnect failed and it leaves next. A held
-  /// request for a session that has since been replaced is dropped by
-  /// [_takeHeldReconnect].
+  /// request whose session has since been replaced, or whose cause has
+  /// cleared during the work, is dropped by [_takeHeldReconnect].
   void _startHeldReconnect() {
     final held = _takeHeldReconnect();
     if (held == null) return;
@@ -94,7 +94,7 @@ class CallConnectionCoordinator {
       _reconnect(
         held.strategy,
         reconnectReason: held.reason,
-        triggeredByNetwork: held.triggeredByNetwork,
+        trigger: held.trigger,
       ).catchError((Object error, StackTrace stackTrace) {
         _call._logger.e(
           () =>
@@ -105,18 +105,23 @@ class CallConnectionCoordinator {
     );
   }
 
-  /// The held reconnect, unless the session it was asked for has been
-  /// replaced since.
+  /// The strongest held reconnect that still applies. A request is dropped
+  /// when the session it was asked for has been replaced, or when its
+  /// trigger shows the cause has cleared.
   ReconnectRequest? _takeHeldReconnect() {
-    final held = _executor.takeHeld();
-    if (held == null) return null;
-    if (!identical(held.session, _session)) {
-      _call._logger.v(
-        () => '[reconnect] dropped held $held (session replaced)',
-      );
-      return null;
+    final applicable = <ReconnectRequest>[];
+    for (final held in _executor.takeHeld()) {
+      if (!identical(held.session, _session)) {
+        _call._logger.v(
+          () => '[reconnect] dropped held $held (session replaced)',
+        );
+      } else if (!held.trigger.isStillNeeded) {
+        _call._logger.v(() => '[reconnect] dropped held $held (cleared)');
+      } else {
+        applicable.add(held);
+      }
     }
-    return held;
+    return ReconnectRequest.strongest(applicable);
   }
 
   /// The strategy of the running reconnect, or
@@ -228,7 +233,7 @@ class CallConnectionCoordinator {
             _reconnect(
               SfuReconnectionStrategy.fast,
               reconnectReason: 'network disconnected',
-              triggeredByNetwork: true,
+              trigger: const NetworkLost(),
             );
           }
         },
@@ -724,7 +729,7 @@ class CallConnectionCoordinator {
           _call._suspendedTrackStates[trackId] =
               SuspendedTrackState.neverStarted;
         },
-        onReconnectionNeeded: (pc, strategy) {
+        onReconnectionNeeded: (pc, strategy, reason) {
           _session?.trace(TraceTag.pcReconnectionNeeded, {
             'peerConnectionId': pc.type.name,
             'reconnectionStrategy': strategy.name,
@@ -733,6 +738,12 @@ class CallConnectionCoordinator {
           _reconnect(
             strategy,
             reconnectReason: '${pc.type.name} pc disconnected',
+            trigger: switch (reason) {
+              ReconnectionNeededReason.connectionFailed => PeerConnectionFailed(
+                pc,
+              ),
+              ReconnectionNeededReason.stuck => PeerConnectionStuck(pc),
+            },
             source: session,
           );
         },
@@ -808,6 +819,7 @@ class CallConnectionCoordinator {
           _executor.hold(
             ReconnectRequest(
               SfuReconnectionStrategy.rejoin,
+              trigger: const SfuRequested(),
               reason: 'sfu session not resumed',
               session: _session,
             ),
@@ -1209,6 +1221,7 @@ class CallConnectionCoordinator {
           SfuReconnectionStrategy.fast,
           reconnectReason:
               'sfu socket disconnected, closeCode: ${sfuEvent.reason.closeCode}, closeReason: ${sfuEvent.reason.closeReason}',
+          trigger: SfuSocketLost(session),
           source: session,
         );
       } else if (_isLeftOrLeaving) {
@@ -1255,6 +1268,7 @@ class CallConnectionCoordinator {
         await _reconnect(
           SfuReconnectionStrategy.fast,
           reconnectReason: 'sfu socket failed: ${sfuEvent.error.message}',
+          trigger: SfuSocketLost(session),
           source: session,
         );
       }
@@ -1266,6 +1280,7 @@ class CallConnectionCoordinator {
       await _reconnect(
         SfuReconnectionStrategy.migrate,
         reconnectReason: 'go away',
+        trigger: const SfuRequested(),
         source: session,
       );
     }
@@ -1299,6 +1314,7 @@ class CallConnectionCoordinator {
           await _reconnect(
             sfuEvent.error.reconnectStrategy,
             reconnectReason: 'sfu error: ${sfuEvent.error.message}',
+            trigger: const SfuRequested(),
             source: session,
           );
           break;
@@ -1316,13 +1332,14 @@ class CallConnectionCoordinator {
   }
 
   /// Reconnects with [strategy], or, while other join or reconnect work runs,
-  /// holds the request for it. [source] is the session the reconnect is for;
-  /// by default the current one. A held request is always for the current
-  /// session: one for a replaced session is dropped.
+  /// holds the request for it. [trigger] is what asked for it. [source] is
+  /// the session the reconnect is for; by default the current one. A held
+  /// request is always for the current session: one for a replaced session
+  /// is dropped.
   Future<void> _reconnect(
     SfuReconnectionStrategy strategy, {
+    required ReconnectTrigger trigger,
     String? reconnectReason,
-    bool triggeredByNetwork = false,
     CallSession? source,
   }) async {
     if (_isLeftOrLeaving) {
@@ -1340,13 +1357,14 @@ class CallConnectionCoordinator {
       }
 
       _call._logger.w(
-        () => '[reconnect] held $strategy (connection work running)',
+        () =>
+            '[reconnect] held $strategy from $trigger (connection work running)',
       );
       _executor.hold(
         ReconnectRequest(
           strategy,
+          trigger: trigger,
           reason: reconnectReason,
-          triggeredByNetwork: triggeredByNetwork,
           session: source ?? _session,
         ),
       );
@@ -1520,7 +1538,7 @@ class CallConnectionCoordinator {
 
           unawaited(_sfuStatsReporter?.sendSfuStats());
 
-          final joinReason = triggeredByNetwork
+          final joinReason = trigger is NetworkLost
               ? JoinReason.networkAvailable
               : _reconnectStrategy.joinReason;
           if (joinReason != null) {

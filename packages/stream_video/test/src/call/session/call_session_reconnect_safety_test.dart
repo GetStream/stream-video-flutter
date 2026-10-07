@@ -34,8 +34,7 @@ MockStreamVideo _buildMockStreamVideo() {
 }
 
 CallSession _buildTestSession({
-  required void Function(StreamPeerConnection, SfuReconnectionStrategy)
-  onReconnectionNeeded,
+  required OnReconnectionNeeded onReconnectionNeeded,
 }) {
   final callCid = SampleCallData.defaultCid;
   final stateManager = createTestCallStateManager();
@@ -106,7 +105,7 @@ void main() {
           final reconnects =
               <(StreamPeerConnection, SfuReconnectionStrategy)>[];
           final session = _buildTestSession(
-            onReconnectionNeeded: (pc, strategy) =>
+            onReconnectionNeeded: (pc, strategy, _) =>
                 reconnects.add((pc, strategy)),
           );
           final wires = _wirePublisher(
@@ -135,7 +134,7 @@ void main() {
         fakeAsync((async) {
           var called = 0;
           final session = _buildTestSession(
-            onReconnectionNeeded: (_, __) => called++,
+            onReconnectionNeeded: (_, __, ___) => called++,
           );
           _wirePublisher(
             session,
@@ -158,7 +157,7 @@ void main() {
       fakeAsync((async) {
         var called = 0;
         final session = _buildTestSession(
-          onReconnectionNeeded: (_, __) => called++,
+          onReconnectionNeeded: (_, __, ___) => called++,
         );
         final rtcManager = MockRtcManager();
         when(() => rtcManager.publisher).thenReturn(null);
@@ -175,7 +174,7 @@ void main() {
       fakeAsync((async) {
         var called = 0;
         final session = _buildTestSession(
-          onReconnectionNeeded: (_, __) => called++,
+          onReconnectionNeeded: (_, __, ___) => called++,
         );
         _wirePublisher(
           session,
@@ -200,7 +199,7 @@ void main() {
         fakeAsync((async) {
           var called = 0;
           final session = _buildTestSession(
-            onReconnectionNeeded: (_, __) => called++,
+            onReconnectionNeeded: (_, __, ___) => called++,
           );
           _wirePublisher(
             session,
@@ -228,7 +227,7 @@ void main() {
       fakeAsync((async) {
         var called = 0;
         final session = _buildTestSession(
-          onReconnectionNeeded: (_, __) => called++,
+          onReconnectionNeeded: (_, __, ___) => called++,
         );
         _wirePublisher(
           session,
@@ -255,7 +254,7 @@ void main() {
           final reconnects =
               <(StreamPeerConnection, SfuReconnectionStrategy)>[];
           final session = _buildTestSession(
-            onReconnectionNeeded: (pc, strategy) =>
+            onReconnectionNeeded: (pc, strategy, _) =>
                 reconnects.add((pc, strategy)),
           );
           // ICE progressed past "new", so the ICE-stall branch does NOT fire.
@@ -293,7 +292,7 @@ void main() {
         fakeAsync((async) {
           var called = 0;
           final session = _buildTestSession(
-            onReconnectionNeeded: (_, __) => called++,
+            onReconnectionNeeded: (_, __, ___) => called++,
           );
           final wires = _wirePublisher(
             session,
@@ -322,7 +321,9 @@ void main() {
     test(
       'rejoin includes the current sessionId as previousSessionId',
       () async {
-        final session = _buildTestSession(onReconnectionNeeded: (_, __) {});
+        final session = _buildTestSession(
+          onReconnectionNeeded: (_, __, ___) {},
+        );
 
         final details = await session.getReconnectDetails(
           SfuReconnectionStrategy.rejoin,
@@ -341,7 +342,7 @@ void main() {
     );
 
     test('fast leaves previousSessionId unset', () async {
-      final session = _buildTestSession(onReconnectionNeeded: (_, __) {});
+      final session = _buildTestSession(onReconnectionNeeded: (_, __, ___) {});
 
       final details = await session.getReconnectDetails(
         SfuReconnectionStrategy.fast,
@@ -362,7 +363,9 @@ void main() {
     test(
       'migrate carries fromSfuId and leaves previousSessionId unset',
       () async {
-        final session = _buildTestSession(onReconnectionNeeded: (_, __) {});
+        final session = _buildTestSession(
+          onReconnectionNeeded: (_, __, ___) {},
+        );
 
         final details = await session.getReconnectDetails(
           SfuReconnectionStrategy.migrate,
@@ -379,7 +382,7 @@ void main() {
     );
 
     test('omits announcedTracks when rtcManager is null', () async {
-      final session = _buildTestSession(onReconnectionNeeded: (_, __) {});
+      final session = _buildTestSession(onReconnectionNeeded: (_, __, ___) {});
 
       final details = await session.getReconnectDetails(
         SfuReconnectionStrategy.rejoin,
@@ -398,7 +401,7 @@ void main() {
         fakeAsync((async) {
           var called = 0;
           final session = _buildTestSession(
-            onReconnectionNeeded: (_, __) => called++,
+            onReconnectionNeeded: (_, __, ___) => called++,
           );
           _wirePublisher(
             session,
@@ -421,7 +424,7 @@ void main() {
     );
 
     test('repeatedly calling leave is safe', () {
-      final session = _buildTestSession(onReconnectionNeeded: (_, __) {});
+      final session = _buildTestSession(onReconnectionNeeded: (_, __, ___) {});
       expect(() => session.leave(reason: 'first'), returnsNormally);
       expect(() => session.leave(reason: 'second'), returnsNormally);
     });
@@ -429,7 +432,7 @@ void main() {
 
   group('CallSession.close', () {
     test('clears rtcManager so subsequent track lookups return null', () async {
-      final session = _buildTestSession(onReconnectionNeeded: (_, __) {});
+      final session = _buildTestSession(onReconnectionNeeded: (_, __, ___) {});
       _wirePublisher(
         session,
         iceState: rtc.RTCIceConnectionState.RTCIceConnectionStateConnected,

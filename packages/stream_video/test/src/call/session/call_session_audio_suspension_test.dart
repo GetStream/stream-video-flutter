@@ -204,7 +204,7 @@ CallSession _buildTestSession({
     ),
     stateManager: stateManager,
     dynascaleManager: DynascaleManager(stateManager: stateManager),
-    onReconnectionNeeded: (_, __) {},
+    onReconnectionNeeded: (_, __, ___) {},
     onSuspendedAudioTrackRecorded: onSuspendedAudioTrackRecorded ?? (_) {},
     sdpEditor: MockSdpEditor(),
     networkMonitor: setupMockInternetConnection(),

@@ -48,8 +48,7 @@ final _publishOption = SfuPublishOptions(
 );
 
 CallSession _buildTestSession({
-  required void Function(StreamPeerConnection, SfuReconnectionStrategy)
-  onReconnectionNeeded,
+  required OnReconnectionNeeded onReconnectionNeeded,
 }) {
   final callCid = SampleCallData.defaultCid;
   final stateManager = createTestCallStateManager();
@@ -211,7 +210,7 @@ void main() {
       fakeAsync((async) {
         final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
         final session = _buildTestSession(
-          onReconnectionNeeded: (pc, strategy) =>
+          onReconnectionNeeded: (pc, strategy, _) =>
               reconnects.add((pc, strategy)),
         );
 
@@ -237,7 +236,7 @@ void main() {
       fakeAsync((async) {
         final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
         final session = _buildTestSession(
-          onReconnectionNeeded: (pc, strategy) =>
+          onReconnectionNeeded: (pc, strategy, _) =>
               reconnects.add((pc, strategy)),
         );
 
@@ -270,7 +269,7 @@ void main() {
       fakeAsync((async) {
         final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
         final session = _buildTestSession(
-          onReconnectionNeeded: (pc, strategy) =>
+          onReconnectionNeeded: (pc, strategy, _) =>
               reconnects.add((pc, strategy)),
         );
 
@@ -289,7 +288,8 @@ void main() {
     test('is not negotiated on renegotiation or ICE restart', () async {
       final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
       final session = _buildTestSession(
-        onReconnectionNeeded: (pc, strategy) => reconnects.add((pc, strategy)),
+        onReconnectionNeeded: (pc, strategy, _) =>
+            reconnects.add((pc, strategy)),
       );
 
       final wires = _wireStalledPublisher(session, sendingTrack: false);
@@ -310,7 +310,8 @@ void main() {
     test('escalates rather than leaving the track unpublished', () async {
       final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
       final session = _buildTestSession(
-        onReconnectionNeeded: (pc, strategy) => reconnects.add((pc, strategy)),
+        onReconnectionNeeded: (pc, strategy, _) =>
+            reconnects.add((pc, strategy)),
       );
 
       final wires = _wireStalledPublisher(session, sendingTrack: true);
@@ -326,7 +327,8 @@ void main() {
     test('does not escalate when there was nothing to announce', () async {
       final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
       final session = _buildTestSession(
-        onReconnectionNeeded: (pc, strategy) => reconnects.add((pc, strategy)),
+        onReconnectionNeeded: (pc, strategy, _) =>
+            reconnects.add((pc, strategy)),
       );
 
       final wires = _wireStalledPublisher(
@@ -344,7 +346,8 @@ void main() {
     test('does not escalate on a failure that recovers on its own', () async {
       final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
       final session = _buildTestSession(
-        onReconnectionNeeded: (pc, strategy) => reconnects.add((pc, strategy)),
+        onReconnectionNeeded: (pc, strategy, _) =>
+            reconnects.add((pc, strategy)),
       );
 
       final wires = _wireStalledPublisher(session, sendingTrack: true);

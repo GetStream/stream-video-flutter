@@ -2,27 +2,26 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/call/connection/connection_executor.dart';
+import 'package:stream_video/src/call/connection/reconnect_trigger.dart';
 import 'package:stream_video/src/call/session/call_session.dart';
 import 'package:stream_video/stream_video.dart';
 
 void main() {
-  group('ReconnectRequest.mergedWith', () {
-    final session = _FakeCallSession();
+  ReconnectRequest request(
+    SfuReconnectionStrategy strategy, {
+    String? reason,
+    CallSession? session,
+  }) {
+    return ReconnectRequest(
+      strategy,
+      trigger: const SfuRequested(),
+      reason: reason,
+      session: session,
+    );
+  }
 
-    ReconnectRequest request(
-      SfuReconnectionStrategy strategy, {
-      String? reason,
-      bool network = false,
-    }) {
-      return ReconnectRequest(
-        strategy,
-        reason: reason,
-        triggeredByNetwork: network,
-        session: session,
-      );
-    }
-
-    test('keeps the stronger strategy, in either order', () {
+  group('ReconnectRequest.strongest', () {
+    test('picks the strongest strategy, in any order', () {
       final fast = request(SfuReconnectionStrategy.fast, reason: 'fast');
       final migrate = request(
         SfuReconnectionStrategy.migrate,
@@ -30,38 +29,30 @@ void main() {
       );
       final rejoin = request(SfuReconnectionStrategy.rejoin, reason: 'rejoin');
 
-      expect(fast.mergedWith(rejoin).strategy, SfuReconnectionStrategy.rejoin);
-      expect(rejoin.mergedWith(fast).strategy, SfuReconnectionStrategy.rejoin);
-      expect(fast.mergedWith(migrate).reason, 'migrate');
-      expect(migrate.mergedWith(rejoin).reason, 'rejoin');
-      expect(rejoin.mergedWith(migrate).reason, 'rejoin');
+      expect(ReconnectRequest.strongest([fast, rejoin, migrate]), rejoin);
+      expect(ReconnectRequest.strongest([rejoin, migrate, fast]), rejoin);
+      expect(ReconnectRequest.strongest([fast, migrate]), migrate);
     });
 
     test('takes the later request on equal strength', () {
       final first = request(SfuReconnectionStrategy.fast, reason: 'first');
       final second = request(SfuReconnectionStrategy.fast, reason: 'second');
 
-      expect(first.mergedWith(second).reason, 'second');
+      expect(ReconnectRequest.strongest([first, second]), second);
     });
 
-    test('counts as triggered by the network if either request was', () {
-      final network = request(SfuReconnectionStrategy.fast, network: true);
-      final rejoin = request(SfuReconnectionStrategy.rejoin);
-
-      expect(network.mergedWith(rejoin).triggeredByNetwork, isTrue);
-      expect(rejoin.mergedWith(network).triggeredByNetwork, isTrue);
+    test('is null for no requests', () {
+      expect(ReconnectRequest.strongest(const []), isNull);
     });
 
-    test('a request for another session replaces this one', () {
-      final rejoin = request(SfuReconnectionStrategy.rejoin);
-      final other = ReconnectRequest(
+    test('counts as triggered by the network for a network trigger', () {
+      const network = ReconnectRequest(
         SfuReconnectionStrategy.fast,
-        session: _FakeCallSession(),
+        trigger: NetworkLost(),
       );
 
-      final merged = rejoin.mergedWith(other);
-
-      expect(merged, same(other));
+      expect(network.triggeredByNetwork, isTrue);
+      expect(request(SfuReconnectionStrategy.fast).triggeredByNetwork, isFalse);
     });
   });
 
@@ -102,21 +93,38 @@ void main() {
       expect(executor.isBusy, isFalse);
     });
 
-    test('merges held requests, and takeHeld clears them', () {
+    test('holds every request for the same session, and takeHeld clears '
+        'them', () {
       final executor = ConnectionExecutor();
       final session = _FakeCallSession();
-      expect(executor.takeHeld(), isNull);
+      expect(executor.takeHeld(), isEmpty);
+
+      final fast = request(SfuReconnectionStrategy.fast, session: session);
+      final rejoin = request(SfuReconnectionStrategy.rejoin, session: session);
+      executor
+        ..hold(fast)
+        ..hold(rejoin);
+
+      expect(executor.takeHeld(), [fast, rejoin]);
+      expect(executor.takeHeld(), isEmpty);
+    });
+
+    test('drops held requests for another session', () {
+      final executor = ConnectionExecutor();
+      final older = request(
+        SfuReconnectionStrategy.rejoin,
+        session: _FakeCallSession(),
+      );
+      final newer = request(
+        SfuReconnectionStrategy.fast,
+        session: _FakeCallSession(),
+      );
 
       executor
-        ..hold(
-          ReconnectRequest(SfuReconnectionStrategy.fast, session: session),
-        )
-        ..hold(
-          ReconnectRequest(SfuReconnectionStrategy.rejoin, session: session),
-        );
+        ..hold(older)
+        ..hold(newer);
 
-      expect(executor.takeHeld()?.strategy, SfuReconnectionStrategy.rejoin);
-      expect(executor.takeHeld(), isNull);
+      expect(executor.takeHeld(), [newer]);
     });
   });
 }

@@ -29,14 +29,29 @@ typedef OnStreamAdded = void Function(StreamPeerConnection, rtc.MediaStream);
 /// {@endtemplate}
 typedef OnRenegotiationNeeded = void Function(StreamPeerConnection);
 
+/// Why a peer connection asks for a reconnect.
+enum ReconnectionNeededReason {
+  /// The connection failed: its state turned failed, or an ICE restart did
+  /// not bring it back. Once it is connected again, it no longer needs the
+  /// reconnect.
+  connectionFailed,
+
+  /// The connection cannot recover by itself even though its state may look
+  /// connected, such as a negotiation that failed or a publisher that never
+  /// connected.
+  stuck,
+}
+
 /// {@template onReconnectionNeeded}
 /// Handler when a reconnection is needed.
-/// The [SfuReconnectionStrategy] indicates how the reconnection should be handled.
+/// The [SfuReconnectionStrategy] indicates how the reconnection should be
+/// handled, and the [ReconnectionNeededReason] why it is needed.
 /// {@endtemplate}
 typedef OnReconnectionNeeded =
     void Function(
       StreamPeerConnection,
       SfuReconnectionStrategy,
+      ReconnectionNeededReason,
     );
 
 /// {@template onIceCandidate}
@@ -155,7 +170,11 @@ class StreamPeerConnection extends Disposable {
 
     restartIce().then((result) {
       if (result.isFailure) {
-        onReconnectionNeeded?.call(this, SfuReconnectionStrategy.fast);
+        onReconnectionNeeded?.call(
+          this,
+          SfuReconnectionStrategy.fast,
+          ReconnectionNeededReason.connectionFailed,
+        );
       }
     });
   }
@@ -431,6 +450,17 @@ class StreamPeerConnection extends Disposable {
         !failedStates.contains(connectionState);
   }
 
+  /// Whether both ICE and the connection itself are connected.
+  bool isConnected() {
+    final iceState = pc.iceConnectionState;
+    return (iceState ==
+                rtc.RTCIceConnectionState.RTCIceConnectionStateConnected ||
+            iceState ==
+                rtc.RTCIceConnectionState.RTCIceConnectionStateCompleted) &&
+        pc.connectionState ==
+            rtc.RTCPeerConnectionState.RTCPeerConnectionStateConnected;
+  }
+
   /// Whether the `RTCPeerConnection` is permanently closed and therefore
   /// cannot be recovered by an ICE restart / fast reconnect.
   bool isClosed() {
@@ -546,7 +576,11 @@ class StreamPeerConnection extends Disposable {
 
     if (state == rtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
       _logger.w(() => '[onConnectionState] state: $state');
-      onReconnectionNeeded?.call(this, SfuReconnectionStrategy.fast);
+      onReconnectionNeeded?.call(
+        this,
+        SfuReconnectionStrategy.fast,
+        ReconnectionNeededReason.connectionFailed,
+      );
     } else {
       _logger.v(() => '[onConnectionState] state: $state');
     }
