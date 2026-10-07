@@ -8,22 +8,22 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 /// A network monitor that reports the device's real status, except while
 /// [goOffline] holds it offline.
 ///
-/// The real status comes from a monitor built from the settings passed in,
-/// the way `StreamVideo` builds its own when the app passes none.
+/// The real status comes from a monitor built from `settings`, the way
+/// `StreamVideo` builds its own when the app passes none. Pass the settings
+/// given to `StreamVideo`, so both check alike.
 class SimulatedInternetConnection implements InternetConnection {
-  SimulatedInternetConnection({
-    NetworkMonitorSettings settings = const NetworkMonitorSettings(),
-  }) : _real = InternetConnection.createInstance(
-         checkInterval: settings.checkInterval,
-         triggerStream: Connectivity().onConnectivityChanged,
-         useDefaultOptions: settings.customEndpoints.isEmpty,
-         customCheckOptions: settings.customEndpoints.isEmpty
-             ? null
-             : [
-                 for (final endpoint in settings.customEndpoints)
-                   endpoint.toInternetCheckOption(),
-               ],
-       );
+  SimulatedInternetConnection({required NetworkMonitorSettings settings})
+    : _real = InternetConnection.createInstance(
+        checkInterval: settings.checkInterval,
+        triggerStream: Connectivity().onConnectivityChanged,
+        useDefaultOptions: settings.customEndpoints.isEmpty,
+        customCheckOptions: settings.customEndpoints.isEmpty
+            ? null
+            : [
+                for (final endpoint in settings.customEndpoints)
+                  endpoint.toInternetCheckOption(),
+              ],
+      );
 
   final InternetConnection _real;
   final _simulated = StreamController<InternetStatus>.broadcast();

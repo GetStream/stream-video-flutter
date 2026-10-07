@@ -159,10 +159,12 @@ StreamVideo _initStreamVideo(
   String? initialToken,
   TokenLoader? tokenLoader,
 }) {
+  const networkMonitorSettings = NetworkMonitorSettings();
+
   // Outside prod, the call screen's more menu can take the network offline.
   if (!kIsProd && !locator.isRegistered<SimulatedInternetConnection>()) {
     locator.registerSingleton(
-      SimulatedInternetConnection(),
+      SimulatedInternetConnection(settings: networkMonitorSettings),
       dispose: (connection) => connection.dispose(),
     );
   }
@@ -176,6 +178,9 @@ StreamVideo _initStreamVideo(
       logPriority: Priority.debug,
       keepConnectionsAliveWhenInBackground: true,
       networkMonitorSettings: NetworkMonitorSettings(
+        checkInterval: networkMonitorSettings.checkInterval,
+        offlineCheckInterval: networkMonitorSettings.offlineCheckInterval,
+        customEndpoints: networkMonitorSettings.customEndpoints,
         internetConnectionInstance: kIsProd
             ? null
             : locator<SimulatedInternetConnection>(),
