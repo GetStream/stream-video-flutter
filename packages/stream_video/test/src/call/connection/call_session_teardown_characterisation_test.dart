@@ -12,7 +12,8 @@ import '../fixtures/call_test_helpers.dart';
 import '../fixtures/connection_harness.dart';
 import '../fixtures/data.dart';
 
-/// Pins what an SFU session that fails to start, and a leave, leave behind.
+/// Pins what is left behind by an SFU session that fails to start, and by a
+/// leave.
 void main() {
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -37,8 +38,9 @@ void main() {
     'a session that fails to start gets no SFU stats reporter, and is '
     'disposed once the next attempt succeeds',
     () async {
-      final first = harness.sessions.first;
+      final [first, second] = harness.sessions;
       final subscriber = flushableStats(first);
+      final nextSubscriber = flushableStats(second);
       harness.stubSessionStart(
         first,
         () async => const Result.failure(
@@ -51,14 +53,16 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       harness.verifyMakeCallSessionCount(2);
-      // No reporter ever sampled the failed session.
+      await pumpEventQueue();
+      // No reporter ever sampled the failed session; the next one's does.
       expect(subscriber.statsCount, 0);
+      expect(nextSubscriber.statsCount, greaterThan(0));
       verify(first.dispose).called(1);
     },
   );
 
   test(
-    'a caption that arrives while leave flushes the SFU stats is dropped',
+    'a caption that arrives while the leave flushes the SFU stats is dropped',
     () async {
       final subscriber = flushableStats(harness.session);
       final call = harness.buildCall();
@@ -90,13 +94,65 @@ void main() {
     },
   );
 
-  test('a leave lets go of the SFU session', () async {
+  test(
+    'a join whose every attempt fails to start disposes each session once',
+    () async {
+      harness = ConnectionHarness(sessionCount: 3);
+      for (final session in harness.sessions) {
+        harness.stubSessionStart(
+          session,
+          () async => const Result.failure(
+            StreamVideoException(message: 'sfu unreachable'),
+          ),
+        );
+      }
+      final call = harness.buildCall();
+
+      final result = await call.join();
+
+      expect(result.isFailure, isTrue);
+      harness.verifyMakeCallSessionCount(3);
+      for (final session in harness.sessions) {
+        verify(session.dispose).called(1);
+      }
+    },
+    timeout: const Timeout(Duration(seconds: 30)),
+  );
+
+  test('feedback can still be sent after a leave', () async {
+    when(
+      () => harness.coordinatorClient.collectUserFeedback(
+        callType: any(named: 'callType'),
+        callId: any(named: 'callId'),
+        sessionId: any(named: 'sessionId'),
+        rating: any(named: 'rating'),
+        sdk: any(named: 'sdk'),
+        sdkVersion: any(named: 'sdkVersion'),
+        userSessionId: any(named: 'userSessionId'),
+        reason: any(named: 'reason'),
+        custom: any(named: 'custom'),
+      ),
+    ).thenAnswer((_) async => const Result.success(none));
     final call = harness.buildCall();
     await call.join();
-
     await call.leave();
 
-    expect(call.callSession, isNull);
+    final result = await call.collectUserFeedback(rating: 4);
+
+    expect(result.isSuccess, isTrue);
+    verify(
+      () => harness.coordinatorClient.collectUserFeedback(
+        callType: any(named: 'callType'),
+        callId: any(named: 'callId'),
+        sessionId: 'session-0',
+        rating: 4,
+        sdk: any(named: 'sdk'),
+        sdkVersion: any(named: 'sdkVersion'),
+        userSessionId: 'session-0',
+        reason: any(named: 'reason'),
+        custom: any(named: 'custom'),
+      ),
+    ).called(1);
   });
 }
 

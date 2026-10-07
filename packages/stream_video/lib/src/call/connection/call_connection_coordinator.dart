@@ -12,8 +12,7 @@ class CallConnectionCoordinator {
   CallCredentials? _credentials;
   CallSession? _session;
 
-  /// Sessions the call has moved off and not released yet: the one a
-  /// reconnect started from, and those of its failed attempts.
+  /// Sessions a newer session has replaced and that are not released yet.
   final _supersededSessions = <CallSession>{};
   StreamPeerConnectionFactory? _pcFactory;
 
@@ -678,16 +677,16 @@ class CallConnectionCoordinator {
       return JoinRetry(failure.videoError, failure.stackTrace);
     }
 
+    if (_isLeftOrLeaving) {
+      _call._logger.w(() => '[join] rejected (call was left during joining)');
+      return const JoinCancelled();
+    }
+
     _credentials = joinedResult.data;
     final previousSession = _session;
     final sessionLeft = performingMigration
         ? migratingFrom ?? previousSession
         : previousSession;
-
-    if (_isLeftOrLeaving) {
-      _call._logger.w(() => '[join] rejected (call was left during joining)');
-      return const JoinCancelled();
-    }
 
     final reconnectDetails =
         _reconnectStrategy == SfuReconnectionStrategy.unspecified
@@ -713,6 +712,13 @@ class CallConnectionCoordinator {
             '[join] fast reconnect asked for with nothing to resume '
             'creating a new sfu session instead',
       );
+    }
+
+    if (_isLeftOrLeaving) {
+      _call._logger.w(
+        () => '[join] rejected (call was left during reconnect details)',
+      );
+      return const JoinCancelled();
     }
 
     Future<Result<None>>? migrationComplete;
@@ -753,6 +759,20 @@ class CallConnectionCoordinator {
         clientPublishOptions:
             _call._stateManager.callState.preferences.clientPublishOptions,
       );
+      // The teardown has already released the sessions it knows about.
+      if (_isLeftOrLeaving) {
+        _call._logger.w(
+          () => '[join] rejected (call was left during session creation)',
+        );
+        await session.dispose().catchError((Object e, StackTrace stackTrace) {
+          _call._logger.w(
+            () =>
+                '[join] disposing $session failed: $e, stackTrace: $stackTrace',
+          );
+        });
+        return const JoinCancelled();
+      }
+
       _replaceSession(session);
 
       // The SFU being left confirms the migration, on its own socket.
@@ -764,13 +784,6 @@ class CallConnectionCoordinator {
         sfuClient: _session!.sfuClient,
         sessionId: _session!.sessionId,
       );
-
-      if (_isLeftOrLeaving) {
-        _call._logger.w(
-          () => '[join] rejected (call was left during session creation)',
-        );
-        return const JoinCancelled();
-      }
 
       _call._logger.d(() => '[join] starting sfu session');
 
@@ -1082,9 +1095,12 @@ class CallConnectionCoordinator {
   }
 
   /// Makes [session] the call's session; the one it replaces is superseded.
+  /// The first session's id becomes the unified session id.
   void _replaceSession(CallSession session) {
     final replaced = _session;
-    if (replaced != null) _supersededSessions.add(replaced);
+    if (replaced != null && !identical(replaced, session)) {
+      _supersededSessions.add(replaced);
+    }
     _session = session;
     _unifiedSessionId ??= session.sessionId;
   }
@@ -1097,9 +1113,11 @@ class CallConnectionCoordinator {
     for (final session in sessions) {
       _call._logger.v(() => '[releaseSupersededSessions] $session');
       if (leaveReason != null) session.leave(reason: leaveReason);
-      await session.dispose().catchError((Object e) {
+      await session.dispose().catchError((Object e, StackTrace stackTrace) {
         _call._logger.w(
-          () => '[releaseSupersededSessions] dispose failed: $e',
+          () =>
+              '[releaseSupersededSessions] disposing $session failed: $e, '
+              'stackTrace: $stackTrace',
         );
       });
     }
@@ -1192,6 +1210,11 @@ class CallConnectionCoordinator {
       case final Failure failure:
         _call._logger.e(() => '[startSession] failed: $failure');
         return failure;
+    }
+
+    if (_isLeftOrLeaving) {
+      _call._logger.w(() => '[startSession] rejected (call was left)');
+      return failureWithError('call was left');
     }
 
     if (session.statsReporter != null) {
@@ -1839,16 +1862,17 @@ class CallConnectionCoordinator {
       migratingFrom: previousSession,
     );
 
+    // The old session stays superseded for the rejoin that follows, which
+    // takes its tracks and then releases it.
     if (outcome is! JoinSucceeded) {
       _call._logger.e(() => '[reconnectMigrate] join failed: $outcome');
       return outcome;
     }
 
-    // The old socket carries the confirmation, so it closes only once the
-    // wait is over. Nothing resumes the old session after that, so it is
-    // disposed with a normal close: after a timeout that lets the old SFU
-    // drop the participant at once. A failed join returns above and leaves
-    // the old session to the rejoin that follows, which takes its tracks.
+    // The old socket carries the confirmation, so the superseded sessions
+    // are released only once the wait is over. Nothing resumes them after
+    // that, so each is disposed with a normal close: after a timeout that
+    // lets the old SFU drop the participant at once.
     final Result<None>? migrationResult;
     try {
       final migrationComplete = outcome.migrationComplete;
@@ -2159,6 +2183,9 @@ class CallConnectionCoordinator {
 
     try {
       _session?.leave(reason: sfuLeaveReason);
+      for (final session in _supersededSessions) {
+        session.leave(reason: sfuLeaveReason);
+      }
     } finally {
       await _clear('disconnect');
     }
@@ -2266,8 +2293,8 @@ class CallConnectionCoordinator {
           _call._logger.w(() => '[clear] session dispose failed: $e');
         });
       }
+      // The disposed session stays, so feedback can name it after leave.
       await _releaseSupersededSessions();
-      _session = null;
       _credentials = null;
       _sfuStatsOptions = null;
       _unifiedSessionId = null;

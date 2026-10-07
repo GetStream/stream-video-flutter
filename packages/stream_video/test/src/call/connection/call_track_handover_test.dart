@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/call/stats/stats_reporter.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
@@ -17,6 +18,8 @@ class _MockRtcManager extends Mock implements RtcManager {
   @override
   Future<void> dispose() async {}
 }
+
+class _MockStatsReporter extends Mock implements StatsReporter {}
 
 class _FakeMediaStreamTrack extends Fake implements rtc.MediaStreamTrack {
   int stopCallCount = 0;
@@ -49,6 +52,7 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
     registerMockFallbackValues();
     registerFallbackValue(MockRtcLocalTrack());
+    registerFallbackValue(Duration.zero);
   });
 
   late ConnectionHarness harness;
@@ -574,8 +578,8 @@ void main() {
   );
 
   test(
-    "a leave during a reconnect attempt disposes the attempt's session and "
-    'the one it started from, and lets go of both',
+    'a leave during a reconnect attempt sends the SFU leave on the '
+    "attempt's session and the one it started from, and disposes both",
     () async {
       final [first, second, _] = setUpHarness(3).sessions;
       final startGate = Completer<Result<SessionStartResult>>();
@@ -594,10 +598,83 @@ void main() {
       await left;
       await pumpEventQueue();
 
+      // Both get the SFU leave, then are disposed.
+      verify(() => first.leave(reason: any(named: 'reason'))).called(1);
+      verify(() => second.leave(reason: any(named: 'reason'))).called(1);
       verify(first.dispose).called(1);
       verify(second.dispose).called(1);
       harness.verifyMakeCallSessionCount(2);
-      expect(call.callSession, isNull);
+    },
+    timeout: const Timeout(Duration(seconds: 30)),
+  );
+
+  test(
+    'a leave while a reconnect creates its session disposes that session '
+    'and never installs it',
+    () async {
+      final [first, second] = setUpHarness(2).sessions;
+      final gate = Completer<void>();
+      var made = 0;
+      var creating = false;
+      // Holds only the reconnect's session, not the join's.
+      harness.stubMakeCallSession(() async {
+        if (made++ == 0) return;
+        creating = true;
+        await gate.future;
+      });
+      final call = harness.buildCall();
+      await call.join();
+
+      harness.requestReconnect(0, SfuReconnectionStrategy.rejoin);
+      await waitUntil(() => creating);
+      await call.leave();
+      gate.complete();
+      await pumpEventQueue();
+
+      verify(first.dispose).called(1);
+      verify(second.dispose).called(1);
+      expect(call.callSession, same(first));
+      verifyNever(
+        () => second.start(
+          reconnectDetails: any(named: 'reconnectDetails'),
+          onRtcManagerCreatedCallback: any(
+            named: 'onRtcManagerCreatedCallback',
+          ),
+          isAnonymousUser: any(named: 'isAnonymousUser'),
+          capabilities: any(named: 'capabilities'),
+          unifiedSessionId: any(named: 'unifiedSessionId'),
+          clientEventRetryCount: any(named: 'clientEventRetryCount'),
+        ),
+      );
+    },
+    timeout: const Timeout(Duration(seconds: 30)),
+  );
+
+  test(
+    'a session that starts after a leave gets no stats subscription',
+    () async {
+      final [first, second] = setUpHarness(2).sessions;
+      final statsReporter = _MockStatsReporter();
+      when(() => second.statsReporter).thenReturn(statsReporter);
+      final startGate = Completer<Result<SessionStartResult>>();
+      var starting = false;
+      harness.stubSessionStart(second, () {
+        starting = true;
+        return startGate.future;
+      });
+      final call = harness.buildCall();
+      await call.join();
+
+      harness.requestReconnect(0, SfuReconnectionStrategy.rejoin);
+      await waitUntil(() => starting);
+      final left = call.leave();
+      startGate.complete(sessionStartSuccess());
+      await left;
+      await pumpEventQueue();
+
+      verifyNever(() => statsReporter.run(interval: any(named: 'interval')));
+      verify(first.dispose).called(1);
+      verify(second.dispose).called(1);
     },
     timeout: const Timeout(Duration(seconds: 30)),
   );

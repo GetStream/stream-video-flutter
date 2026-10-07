@@ -201,6 +201,9 @@ void main() {
       gate.complete();
       await pumpEventQueue();
 
+      // The session made after the leave is disposed, never kept.
+      verify(harness.session.dispose).called(1);
+      expect(call.callSession, isNull);
       verifyNever(
         () => harness.session.start(
           reconnectDetails: any(named: 'reconnectDetails'),
