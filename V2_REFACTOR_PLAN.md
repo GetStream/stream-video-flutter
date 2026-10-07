@@ -98,6 +98,7 @@ Pick them up after the stack, or alongside it on their own branch off `v2`.
 
 - [ ] [FLU-933](https://linear.app/stream/issue/FLU-933): give up reconnecting after repeated rejoins (S). A rejoin rate limit like the other SDKs (10 per 120 s, then leave).
 - [ ] [FLU-934](https://linear.app/stream/issue/FLU-934): keep backstage hosts in the call when a livestream ends (S, behaviour change). The SFU's call-ended reason is mapped but ignored.
+- [ ] [FLU-939](https://linear.app/stream/issue/FLU-939): keep the participant tile order after a reconnect (S). The join response rebuilds the participants without their viewport visibility, pin and reaction.
 
 ## Working on a ticket
 
