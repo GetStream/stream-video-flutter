@@ -4,7 +4,6 @@ import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:synchronized/synchronized.dart';
-import 'package:tart/tart.dart' show TwirpError;
 
 import '../../protobuf/video/sfu/models/models.pbenum.dart';
 import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart';
@@ -202,8 +201,9 @@ class StreamPeerConnection extends Disposable {
   /// The reconnect to ask for after an ICE restart failed with [error].
   ///
   /// Fast when the SFU reports the signal lost, or when the subscriber's
-  /// restart request did not reach the SFU at all. Rejoin when the SFU
-  /// refused the restart, or when the publisher's local restart failed.
+  /// restart request failed without an answer from the SFU, such as while
+  /// offline. Rejoin when the SFU refused the restart, or when the publisher's
+  /// local restart failed.
   SfuReconnectionStrategy _strategyAfterFailedIceRestart(
     StreamVideoException error,
   ) {
@@ -214,8 +214,7 @@ class StreamPeerConnection extends Disposable {
           : SfuReconnectionStrategy.rejoin;
     }
 
-    final reachedSfu = error.rawCause is TwirpError;
-    return type == StreamPeerType.subscriber && !reachedSfu
+    return type == StreamPeerType.subscriber
         ? SfuReconnectionStrategy.fast
         : SfuReconnectionStrategy.rejoin;
   }

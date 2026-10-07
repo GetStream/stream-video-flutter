@@ -12,6 +12,7 @@ import 'package:stream_video/src/sfu/sfu_client.dart';
 import 'package:stream_video/src/webrtc/peer_connection.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:tart/tart.dart' show Context, TwirpError;
 
 import '../../test_helpers.dart';
 import '../call/fixtures/data.dart';
@@ -467,6 +468,41 @@ void main() {
         when(() => sfuClient.restartIce(any())).thenAnswer(
           (_) async => Result.failure(
             StreamVideoExceptions.compose(TimeoutException('offline')),
+          ),
+        );
+        final sp = _build(
+          pc: pc,
+          type: StreamPeerType.subscriber,
+          sfuClient: sfuClient,
+        );
+
+        final strategies = <SfuReconnectionStrategy>[];
+        sp.onReconnectionNeeded = (_, strategy, _) => strategies.add(strategy);
+
+        pc.capturedOnIceConnectionState!(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateFailed,
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        expect(strategies, [SfuReconnectionStrategy.fast]);
+      },
+    );
+
+    test(
+      'fires onReconnectionNeeded with fast when its ICE restart fails '
+      'offline, as a connection error',
+      () async {
+        final pc = _FakeRtcPeerConnection();
+        final sfuClient = MockSfuClient();
+        // How the generated SFU client reports a request it could not send.
+        when(() => sfuClient.restartIce(any())).thenAnswer(
+          (_) async => Result.failure(
+            StreamVideoExceptions.compose(
+              TwirpError.fromConnectionError(
+                'SocketException: Failed host lookup',
+                Context(),
+              ),
+            ),
           ),
         );
         final sp = _build(

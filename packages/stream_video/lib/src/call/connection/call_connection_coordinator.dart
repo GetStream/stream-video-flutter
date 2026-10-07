@@ -1352,7 +1352,7 @@ class CallConnectionCoordinator {
   /// | A peer connection's state turns failed               | rejoin        |
   /// | The SFU refuses an ICE restart: signal lost          | fast          |
   /// | The SFU refuses an ICE restart: otherwise            | rejoin        |
-  /// | An ICE restart request does not reach the SFU        | fast          |
+  /// | An ICE restart fails without an answer from the SFU  | fast          |
   /// | A local publisher ICE restart fails                  | rejoin        |
   /// | The publisher has not started connecting after 15 s  | rejoin        |
   /// | A stalled publisher offer renegotiation does not fix | fast          |
