@@ -988,6 +988,64 @@ void main() {
     },
   );
 
+  group('after the device was offline', () {
+    /// Takes the device offline for [offline], with the SFU giving a
+    /// fast-reconnect deadline of [deadline], and returns getters for the
+    /// fast reconnects made.
+    Future<int Function()> goOffline({
+      required Duration offline,
+      required Duration deadline,
+    }) async {
+      harness.stubSessionStart(
+        harness.session,
+        () async => Result.success((
+          callState: createTestSfuCallState(),
+          fastReconnectDeadline: deadline,
+        )),
+      );
+      final call = harness.buildCall();
+      await call.join();
+      var fastReconnects = 0;
+      for (final session in harness.sessions) {
+        harness.stubFastReconnect(session, () async {
+          fastReconnects++;
+          return sessionStartSuccess();
+        });
+      }
+
+      harness.internetStatus.add(InternetStatus.disconnected);
+      await waitUntil(() => call.state.value.status is CallStatusReconnecting);
+      await Future<void>.delayed(offline);
+      harness.internetStatus.add(InternetStatus.connected);
+      return () => fastReconnects;
+    }
+
+    test(
+      'longer than the fast-reconnect deadline rejoins without trying fast',
+      () async {
+        harness = ConnectionHarness(sessionCount: 2);
+        final fastReconnects = await goOffline(
+          offline: const Duration(milliseconds: 400),
+          deadline: const Duration(milliseconds: 100),
+        );
+
+        await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+        expect(fastReconnects(), 0);
+      },
+    );
+
+    test('shorter than the fast-reconnect deadline reconnects fast', () async {
+      harness = ConnectionHarness(sessionCount: 2);
+      final fastReconnects = await goOffline(
+        offline: const Duration(milliseconds: 100),
+        deadline: const Duration(seconds: 5),
+      );
+
+      await waitUntil(() => fastReconnects() == 1);
+      expect(harness.reconnectionCallbacks, hasLength(1));
+    });
+  });
+
   group('a failed fast reconnect attempt', () {
     /// Fails the first fast reconnect on [harness]'s first session, with the
     /// peer connections reporting [publisherHealthy] and [subscriberHealthy]

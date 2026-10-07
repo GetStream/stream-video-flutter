@@ -1367,6 +1367,9 @@ class CallConnectionCoordinator {
   /// migrating out counts as refusing it otherwise; that request is dropped
   /// once the migration replaces the session.
   ///
+  /// An attempt that would be fast is a rejoin instead when the device was
+  /// offline for longer than the fast-reconnect deadline.
+  ///
   /// A failed attempt is retried as a rejoin when:
   ///
   /// - it was a rejoin;
@@ -1566,13 +1569,17 @@ class CallConnectionCoordinator {
 
       // Started only once the status says waiting, so an offline report
       // from the wait cannot be overwritten by it.
+      var wasOffline = false;
       final networkAvailable = _awaitNetworkAvailable(
         stabilityWindow: stabilityWindow,
-        onStatus: (status) => _setReconnectStep(
-          status == InternetStatus.connected
-              ? CallReconnectPhase.waiting
-              : CallReconnectPhase.offline,
-        ),
+        onStatus: (status) {
+          if (status != InternetStatus.connected) wasOffline = true;
+          _setReconnectStep(
+            status == InternetStatus.connected
+                ? CallReconnectPhase.waiting
+                : CallReconnectPhase.offline,
+          );
+        },
       );
 
       _call._logger.d(
@@ -1609,6 +1616,23 @@ class CallConnectionCoordinator {
           _setPhase(const ConnectionReconnectFailed());
           _publishStatus();
           return;
+        }
+
+        // Offline for longer than the SFU keeps a session for, so a fast
+        // reconnect could not resume it.
+        final offlinePastDeadline =
+            wasOffline &&
+            _fastReconnectDeadline > Duration.zero &&
+            DateTime.now().difference(reconnectStartTime) >
+                _fastReconnectDeadline;
+        if (offlinePastDeadline &&
+            _reconnectStrategy == SfuReconnectionStrategy.fast) {
+          _call._logger.d(
+            () => '[reconnect] offline past the fast-reconnect deadline',
+          );
+          _updateReconnect(
+            (phase) => phase.copyWith(strategy: SfuReconnectionStrategy.rejoin),
+          );
         }
 
         unawaited(_sfuStatsReporter?.sendSfuStats());
