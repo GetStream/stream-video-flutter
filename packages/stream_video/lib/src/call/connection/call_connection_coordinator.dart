@@ -1345,27 +1345,34 @@ class CallConnectionCoordinator {
   ///
   /// Every reconnect starts here. The strategy each cause asks for:
   ///
-  /// | Cause                                      | Strategy         |
-  /// | ------------------------------------------ | ---------------- |
-  /// | The SFU socket drops or fails              | fast             |
-  /// | The device goes offline                    | fast             |
-  /// | A peer connection's state turns failed     | rejoin           |
-  /// | An ICE restart fails as the signal is lost | fast             |
-  /// | Any other ICE restart fails                | rejoin           |
-  /// | The publisher is not connected after 15 s  | rejoin           |
-  /// | A stalled publisher offer                  | fast             |
-  /// | A track mid that does not resolve          | fast             |
-  /// | The SFU sends a GoAway                     | migrate          |
-  /// | The SFU sends an error                     | the one it names |
-  /// | A fast reconnect the SFU did not resume    | rejoin           |
+  /// | Cause                                                | Strategy      |
+  /// | ---------------------------------------------------- | ------------- |
+  /// | The SFU socket closes or fails                       | fast          |
+  /// | The device goes offline                              | fast          |
+  /// | A peer connection's state turns failed               | rejoin        |
+  /// | The SFU refuses an ICE restart: signal lost          | fast          |
+  /// | The SFU refuses an ICE restart: otherwise            | rejoin        |
+  /// | An ICE restart request does not reach the SFU        | fast          |
+  /// | A local publisher ICE restart fails                  | rejoin        |
+  /// | The publisher has not started connecting after 15 s  | rejoin        |
+  /// | A stalled publisher offer renegotiation does not fix | fast          |
+  /// | A track mid that does not resolve                    | fast          |
+  /// | The SFU sends a GoAway                               | migrate       |
+  /// | An SFU error naming fast, rejoin or migrate          | that strategy |
+  ///
+  /// A socket closure that is not reconnectable, and an SFU error naming
+  /// disconnect, leave the call instead. An SFU error with a join error code
+  /// is left to the join's own retries.
   ///
   /// A failed attempt is retried as a rejoin when:
   ///
+  /// - it was a rejoin;
   /// - the fast-reconnect deadline has passed;
-  /// - two fast attempts have failed;
+  /// - three fast attempts have failed;
   /// - a migration has failed;
   /// - a peer connection is failed or closed;
-  /// - a rejoin or migrate was asked for meanwhile.
+  /// - a rejoin or migrate was asked for meanwhile, which includes the SFU not
+  ///   resuming the session on a fast reconnect.
   ///
   /// Otherwise it is retried as fast.
   Future<void> _reconnect(

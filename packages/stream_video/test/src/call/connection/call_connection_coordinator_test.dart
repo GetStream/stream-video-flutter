@@ -989,11 +989,13 @@ void main() {
   );
 
   group('a failed fast reconnect attempt', () {
-    /// Fails the first fast reconnect on [harness]'s first session, with
-    /// the publisher reporting [publisherHealthy] by then, and returns the
-    /// number of fast reconnects made.
+    /// Fails the first fast reconnect on [harness]'s first session, with the
+    /// peer connections reporting [publisherHealthy] and [subscriberHealthy]
+    /// by then; a null [publisherHealthy] means the call does not publish.
+    /// Returns a getter for the number of fast reconnects made.
     Future<int Function()> failFirstFastAttempt({
-      required bool publisherHealthy,
+      required bool? publisherHealthy,
+      bool subscriberHealthy = true,
     }) async {
       // A long deadline, so only the peer connections decide the escalation.
       harness.stubSessionStart(
@@ -1006,12 +1008,15 @@ void main() {
       final call = harness.buildCall();
       await call.join();
 
-      final publisher = _MockTracedStreamPeerConnection();
       final subscriber = _MockTracedStreamPeerConnection();
-      when(publisher.isHealthy).thenReturn(publisherHealthy);
-      when(subscriber.isHealthy).thenReturn(true);
-      when(() => publisher.tracer).thenReturn(Tracer('publisher'));
+      when(subscriber.isHealthy).thenReturn(subscriberHealthy);
       when(() => subscriber.tracer).thenReturn(Tracer('subscriber'));
+      _MockTracedStreamPeerConnection? publisher;
+      if (publisherHealthy != null) {
+        publisher = _MockTracedStreamPeerConnection();
+        when(publisher.isHealthy).thenReturn(publisherHealthy);
+        when(() => publisher!.tracer).thenReturn(Tracer('publisher'));
+      }
       final rtcManager = _MockRtcManager();
       when(() => rtcManager.publisher).thenReturn(publisher);
       when(() => rtcManager.subscriber).thenReturn(subscriber);
@@ -1045,7 +1050,35 @@ void main() {
     );
 
     test(
-      'retries fast while the peer connections are only disconnected',
+      'rejoins when the subscriber has failed',
+      () async {
+        harness = ConnectionHarness(sessionCount: 2);
+        final fastReconnects = await failFirstFastAttempt(
+          publisherHealthy: true,
+          subscriberHealthy: false,
+        );
+
+        await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+        expect(fastReconnects(), 1);
+      },
+      timeout: const Timeout(Duration(seconds: 20)),
+    );
+
+    test(
+      'retries fast for a call that does not publish and a healthy subscriber',
+      () async {
+        harness = ConnectionHarness(sessionCount: 2);
+        final fastReconnects = await failFirstFastAttempt(
+          publisherHealthy: null,
+        );
+
+        await waitUntil(() => fastReconnects() == 2);
+        expect(harness.reconnectionCallbacks, hasLength(1));
+      },
+    );
+
+    test(
+      'retries fast while the peer connections are healthy',
       () async {
         harness = ConnectionHarness(sessionCount: 2);
         final fastReconnects = await failFirstFastAttempt(

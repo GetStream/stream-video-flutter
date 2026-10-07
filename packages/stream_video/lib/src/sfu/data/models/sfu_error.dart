@@ -58,13 +58,12 @@ enum SfuErrorCode {
   String toString() => name;
 }
 
-/// How a call reconnects to the SFU. Which one each cause asks for, and when
-/// a failed attempt escalates, is listed on the call's reconnect entry point
-/// (`CallConnectionCoordinator._reconnect`).
+/// How a call reconnects to the SFU.
 enum SfuReconnectionStrategy {
+  /// No strategy given.
   unspecified,
 
-  /// Leave the call; the SFU will not take it back.
+  /// Leave the call without reconnecting.
   disconnect,
 
   /// Keep the session and its peer connections: open a new socket to the same

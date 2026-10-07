@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:synchronized/synchronized.dart';
+import 'package:tart/tart.dart' show TwirpError;
 
 import '../../protobuf/video/sfu/models/models.pbenum.dart';
 import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart';
@@ -174,19 +175,49 @@ class StreamPeerConnection extends Disposable {
     restartIce().then((result) {
       if (result is! Failure) return;
 
-      // A lost signalling socket only needs a fast reconnect to bring it back;
-      // any other failed restart leaves a connection only a rejoin recovers.
-      final signalLost =
-          result.videoError.sfuError?.code ==
-          SfuErrorCode.participantSignalLost;
+      // A reconnect that started while the restart was in flight restarts ICE
+      // itself.
+      if (_isReconnecting) {
+        _logger.i(
+          () => '[_tryRestartIce] #$type; restart failed during a reconnect',
+        );
+        return;
+      }
+
+      final error = result.videoError;
+      final strategy = _strategyAfterFailedIceRestart(error);
+      _logger.w(
+        () =>
+            '[_tryRestartIce] #$type; restart failed: $error, '
+            'asking for ${strategy.name}',
+      );
       onReconnectionNeeded?.call(
         this,
-        signalLost
-            ? SfuReconnectionStrategy.fast
-            : SfuReconnectionStrategy.rejoin,
+        strategy,
         ReconnectionNeededReason.connectionFailed,
       );
     });
+  }
+
+  /// The reconnect to ask for after an ICE restart failed with [error].
+  ///
+  /// Fast when the SFU reports the signal lost, or when the subscriber's
+  /// restart request did not reach the SFU at all. Rejoin when the SFU
+  /// refused the restart, or when the publisher's local restart failed.
+  SfuReconnectionStrategy _strategyAfterFailedIceRestart(
+    StreamVideoException error,
+  ) {
+    final sfuError = error.sfuError;
+    if (sfuError != null) {
+      return sfuError.code == SfuErrorCode.participantSignalLost
+          ? SfuReconnectionStrategy.fast
+          : SfuReconnectionStrategy.rejoin;
+    }
+
+    final reachedSfu = error.rawCause is TwirpError;
+    return type == StreamPeerType.subscriber && !reachedSfu
+        ? SfuReconnectionStrategy.fast
+        : SfuReconnectionStrategy.rejoin;
   }
 
   Future<Result<void>> restartIce() async {
@@ -577,8 +608,7 @@ class StreamPeerConnection extends Disposable {
 
     if (state == rtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
       _logger.w(() => '[onConnectionState] state: $state');
-      // A failed connection is not recovered by an ICE restart, so it needs
-      // new peer connections.
+      // A failed connection asks for new peer connections.
       onReconnectionNeeded?.call(
         this,
         SfuReconnectionStrategy.rejoin,
