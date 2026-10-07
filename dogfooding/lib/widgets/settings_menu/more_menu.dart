@@ -46,6 +46,7 @@ class CallMoreMenu extends StatefulWidget {
     required this.icon,
     this.screenShareConstraints,
     this.onStatsPressed,
+    this.snackbarMessenger,
     super.key,
   });
 
@@ -63,6 +64,9 @@ class CallMoreMenu extends StatefulWidget {
   final ScreenShareConstraints? screenShareConstraints;
 
   final VoidCallback? onStatsPressed;
+
+  /// Shows the menu's confirmations above the control bar.
+  final StreamSnackbarMessenger? snackbarMessenger;
 
   @override
   State<CallMoreMenu> createState() => _CallMoreMenuState();
@@ -254,7 +258,10 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
             ),
         ],
       ),
-      connectionFailureSection(context, widget.call),
+      connectionFailureSection(
+        widget.call,
+        messenger: widget.snackbarMessenger,
+      ),
     ];
   }
 

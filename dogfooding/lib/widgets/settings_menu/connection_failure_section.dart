@@ -39,15 +39,22 @@ enum _Outage {
 }
 
 /// The more menu's section for triggering the call's reconnect paths by hand.
-StreamMenuSection connectionFailureSection(BuildContext context, Call call) {
-  final messenger = ScaffoldMessenger.maybeOf(context);
+///
+/// Each option confirms what it triggered through [messenger].
+StreamMenuSection connectionFailureSection(
+  Call call, {
+  StreamSnackbarMessenger? messenger,
+}) {
   final network = locator.isRegistered<SimulatedInternetConnection>()
       ? locator<SimulatedInternetConnection>()
       : null;
 
   void simulate(String what, VoidCallback trigger) {
     trigger();
-    messenger?.showSnackBar(SnackBar(content: Text('Simulated: $what')));
+    messenger?.show(
+      StreamSnackbar(message: Text('Simulated: $what')),
+      replace: true,
+    );
   }
 
   return StreamMenuSection(
