@@ -776,6 +776,9 @@ class CallConnectionCoordinator {
         _session!,
         reconnectDetails: reconnectDetails,
         clientEventRetryCount: clientEventRetryCount,
+        // A failed migration attempt may have taken the tracks from the
+        // session the migration started from, or never got that far.
+        handOverFrom: {_previousSession, sessionLeft},
       );
 
       if (sessionResult is! Success<None>) {
@@ -1082,10 +1085,14 @@ class CallConnectionCoordinator {
     return Result.success(joined);
   }
 
+  /// Starts [session]. The live local tracks of the sessions in
+  /// [handOverFrom] move to it, so the camera, microphone and screen share
+  /// are published again without being opened again.
   Future<Result<None>> _startSession(
     CallSession session, {
     ReconnectDetails? reconnectDetails,
     int clientEventRetryCount = 0,
+    Set<CallSession?> handOverFrom = const {},
   }) async {
     _call._logger.d(
       () => '[startSession] sessionId: $session',
@@ -1132,9 +1139,14 @@ class CallConnectionCoordinator {
       capabilities: _sfuClientCapabilities,
       clientEventRetryCount: clientEventRetryCount,
       onRtcManagerCreatedCallback: (_) async {
+        final inheritedTracks = [
+          for (final previous in handOverFrom)
+            if (previous != null && !identical(previous, session))
+              ...previous.handOverLocalTracks(),
+        ];
         _call._logger.v(() => '[startSession] applying connect options');
         unawaited(
-          _call._applyConnectOptions().catchError((
+          _call._applyConnectOptions(inheritedTracks: inheritedTracks).catchError((
             dynamic error,
             StackTrace stackTrace,
           ) {

@@ -1248,8 +1248,27 @@ class Call {
     );
   }
 
-  Future<void> _applyConnectOptions() async {
-    _logger.d(() => '[applyConnectOptions] connectOptions: $_connectOptions');
+  /// Applies [_connectOptions] to a newly started session.
+  ///
+  /// [inheritedTracks] are the live local tracks of the session it replaces.
+  /// An enabled option publishes its inherited track instead of opening the
+  /// device again; inherited tracks no option takes are stopped.
+  Future<void> _applyConnectOptions({
+    List<RtcLocalTrack> inheritedTracks = const [],
+  }) async {
+    _logger.d(
+      () =>
+          '[applyConnectOptions] connectOptions: $_connectOptions, '
+          'inheritedTracks: $inheritedTracks',
+    );
+
+    final inherited = {
+      for (final track in inheritedTracks) track.trackType: track,
+    };
+    RtcLocalTrack? takeInherited(SfuTrackType trackType, TrackOption option) {
+      if (option is! TrackEnabled && option is! TrackProvided) return null;
+      return inherited.remove(trackType);
+    }
 
     // A refused option leaves the device off, so the intent comes down with
     // it: the setters only downgrade `_connectOptions` on success, and a
@@ -1275,6 +1294,7 @@ class Call {
         _connectOptions.cameraFacingMode,
         _connectOptions.targetResolution,
         _connectOptions.videoInputDevice?.id,
+        inherited: takeInherited(SfuTrackType.video, _connectOptions.camera),
       ),
     );
     if (cameraFailed) {
@@ -1285,7 +1305,13 @@ class Call {
 
     final microphoneFailed = failed(
       'microphone',
-      await _applyMicrophoneOption(_connectOptions.microphone),
+      await _applyMicrophoneOption(
+        _connectOptions.microphone,
+        inherited: takeInherited(
+          SfuTrackType.audio,
+          _connectOptions.microphone,
+        ),
+      ),
     );
     if (microphoneFailed) {
       _connectOptions = _connectOptions.copyWith(
@@ -1298,12 +1324,21 @@ class Call {
       await _applyScreenShareOption(
         _connectOptions.screenShare,
         _connectOptions.screenShareTargetResolution,
+        inherited: takeInherited(
+          SfuTrackType.screenShare,
+          _connectOptions.screenShare,
+        ),
       ),
     );
     if (screenShareFailed) {
       _connectOptions = _connectOptions.copyWith(
         screenShare: TrackOption.disabled(),
       );
+    }
+
+    for (final track in inherited.values) {
+      _logger.v(() => '[applyConnectOptions] stopping unused $track');
+      await track.stop();
     }
 
     if (_connectOptions.audioInputDevice != null) {
@@ -1330,8 +1365,18 @@ class Call {
     TrackOption cameraOption,
     FacingMode facingMode,
     StreamTargetResolution? targetResolution,
-    String? deviceId,
-  ) async {
+    String? deviceId, {
+    RtcLocalTrack? inherited,
+  }) async {
+    if (inherited != null) {
+      final blocked = _sendVideoBlockedReason();
+      if (blocked != null) {
+        await inherited.stop();
+        return failureWithError(blocked);
+      }
+      return _setLocalTrack(inherited);
+    }
+
     if (cameraOption is TrackProvided) {
       return _setLocalTrack(cameraOption.track);
     } else if (cameraOption is TrackEnabled) {
@@ -1357,8 +1402,18 @@ class Call {
   }
 
   Future<Result<None>> _applyMicrophoneOption(
-    TrackOption microphoneOption,
-  ) async {
+    TrackOption microphoneOption, {
+    RtcLocalTrack? inherited,
+  }) async {
+    if (inherited != null) {
+      final blocked = _sendAudioBlockedReason();
+      if (blocked != null) {
+        await inherited.stop();
+        return failureWithError(blocked);
+      }
+      return _setLocalTrack(inherited);
+    }
+
     if (microphoneOption is TrackProvided) {
       return _setLocalTrack(microphoneOption.track);
     } else if (microphoneOption is TrackEnabled) {
@@ -1373,8 +1428,13 @@ class Call {
 
   Future<Result<None>> _applyScreenShareOption(
     TrackOption screenShareOption,
-    StreamTargetResolution? targetResolution,
-  ) async {
+    StreamTargetResolution? targetResolution, {
+    RtcLocalTrack? inherited,
+  }) async {
+    if (inherited != null) {
+      return _adoptScreenShareTrack(inherited);
+    }
+
     if (screenShareOption is TrackProvided) {
       return _setLocalTrack(screenShareOption.track);
     } else if (screenShareOption is TrackEnabled) {
@@ -1398,6 +1458,35 @@ class Call {
     }
 
     return const Result.success(none);
+  }
+
+  /// Publishes a screen share track taken over from the previous session.
+  ///
+  /// Not through [setScreenShareEnabled], which always captures a new screen
+  /// and so asks the user to pick one again.
+  Future<Result<None>> _adoptScreenShareTrack(RtcLocalTrack track) async {
+    final constraints = track.mediaConstraints;
+    if (!hasPermission(CallPermission.screenshare) ||
+        constraints is! ScreenShareConstraints) {
+      await track.stop();
+      return failureWithError(
+        'Missing permission to share screen for the user',
+      );
+    }
+
+    final result =
+        await _session?.setLocalTrack(track) ??
+        failureWithError('Call session is null, cannot start screen share');
+
+    if (result.isSuccess) {
+      _onScreenShareEnabled(
+        enabled: true,
+        constraints: constraints,
+        track: track,
+      );
+    }
+
+    return result;
   }
 
   Future<Result<None>> _setLocalTrack(RtcLocalTrack track) async {
@@ -2003,18 +2092,38 @@ class Call {
     return result.map((_) => none);
   }
 
+  /// Why the camera may not be turned on, or null when it may.
+  String? _sendVideoBlockedReason() {
+    if (state.value.isVideoModerated &&
+        state.value.preferences.videoModerationConfig.muteVideo) {
+      return 'Blocked by video moderation';
+    }
+    if (!hasPermission(CallPermission.sendVideo)) {
+      return 'Missing permission to send video';
+    }
+    return null;
+  }
+
+  /// Why the microphone may not be turned on, or null when it may.
+  String? _sendAudioBlockedReason() {
+    if (state.value.isVideoModerated &&
+        state.value.preferences.videoModerationConfig.muteAudio) {
+      return 'Blocked by video moderation';
+    }
+    if (!hasPermission(CallPermission.sendAudio)) {
+      return 'Missing permission to send audio';
+    }
+    return null;
+  }
+
   Future<Result<None>> setCameraEnabled({
     required bool enabled,
     CameraConstraints? constraints,
   }) async {
-    if (enabled &&
-        state.value.isVideoModerated &&
-        state.value.preferences.videoModerationConfig.muteVideo) {
-      _logger.w(() => '[setCameraEnabled] blocked by video moderation');
-      return failureWithError('Blocked by video moderation');
-    }
-    if (enabled && !hasPermission(CallPermission.sendVideo)) {
-      return failureWithError('Missing permission to send video');
+    final blocked = enabled ? _sendVideoBlockedReason() : null;
+    if (blocked != null) {
+      _logger.w(() => '[setCameraEnabled] rejected: $blocked');
+      return failureWithError(blocked);
     }
     final result =
         await _session?.setCameraEnabled(enabled, constraints: constraints) ??
@@ -2095,14 +2204,10 @@ class Call {
     AudioConstraints? constraints,
     bool? stopTrackOnMute,
   }) async {
-    if (enabled &&
-        state.value.isVideoModerated &&
-        state.value.preferences.videoModerationConfig.muteAudio) {
-      _logger.w(() => '[setMicrophoneEnabled] blocked by video moderation');
-      return failureWithError('Blocked by video moderation');
-    }
-    if (enabled && !hasPermission(CallPermission.sendAudio)) {
-      return failureWithError('Missing permission to send audio');
+    final blocked = enabled ? _sendAudioBlockedReason() : null;
+    if (blocked != null) {
+      _logger.w(() => '[setMicrophoneEnabled] rejected: $blocked');
+      return failureWithError(blocked);
     }
 
     final result =
@@ -2195,25 +2300,37 @@ class Call {
     }
 
     if (result.isSuccess) {
-      _stateManager.participantSetScreenShareEnabled(
+      _onScreenShareEnabled(
         enabled: enabled,
+        constraints: updatedConstraints,
+        track: result.getDataOrNull(),
       );
-
-      _connectOptions = _connectOptions.copyWith(
-        screenShare: enabled
-            ? TrackOption.enabled(constraints: updatedConstraints)
-            : TrackOption.disabled(),
-      );
-
-      if (enabled) {
-        // [web only] Automatically stop screen share when the track ends
-        result.getDataOrNull()?.mediaTrack.onEnded = () {
-          setScreenShareEnabled(enabled: false);
-        };
-      }
     }
 
     return result.map((_) => none);
+  }
+
+  void _onScreenShareEnabled({
+    required bool enabled,
+    required ScreenShareConstraints constraints,
+    RtcLocalTrack? track,
+  }) {
+    _stateManager.participantSetScreenShareEnabled(
+      enabled: enabled,
+    );
+
+    _connectOptions = _connectOptions.copyWith(
+      screenShare: enabled
+          ? TrackOption.enabled(constraints: constraints)
+          : TrackOption.disabled(),
+    );
+
+    if (enabled) {
+      // [web only] Automatically stop screen share when the track ends
+      track?.mediaTrack.onEnded = () {
+        setScreenShareEnabled(enabled: false);
+      };
+    }
   }
 
   Future<Result<None>> setAudioInputDevice(RtcMediaDevice device) async {
