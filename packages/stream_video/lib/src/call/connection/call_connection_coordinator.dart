@@ -299,6 +299,12 @@ class CallConnectionCoordinator {
     });
   }
 
+  /// The answer to a join on a call that is left or leaving.
+  Result<None> _rejectJoinOfLeftCall() {
+    _call._logger.w(() => '[join] rejected (call was left)');
+    return const Result.failure(CallLeftException());
+  }
+
   Future<Result<None>> _joinOnce({
     CallConnectOptions? connectOptions,
     int? membersLimit,
@@ -306,17 +312,11 @@ class CallConnectionCoordinator {
     bool? hintHighScaleLivestreamPublisher,
   }) async {
     // Before init, so a left call does not observe anything again.
-    if (_isLeftOrLeaving) {
-      _call._logger.w(() => '[join] rejected (call was left)');
-      return const Result.failure(CallLeftException());
-    }
+    if (_isLeftOrLeaving) return _rejectJoinOfLeftCall();
 
     await _call._init();
 
-    if (_isLeftOrLeaving) {
-      _call._logger.w(() => '[join] rejected (call was left)');
-      return const Result.failure(CallLeftException());
-    }
+    if (_isLeftOrLeaving) return _rejectJoinOfLeftCall();
 
     if (_call.state.value.status is CallStatusConnected) {
       _call._logger.w(() => '[join] rejected (connected)');
@@ -371,10 +371,7 @@ class CallConnectionCoordinator {
       return e2eeResult;
     }
 
-    if (_isLeftOrLeaving) {
-      _call._logger.w(() => '[join] rejected (call was left)');
-      return const Result.failure(CallLeftException());
-    }
+    if (_isLeftOrLeaving) return _rejectJoinOfLeftCall();
 
     await _call._streamVideo.state.setActiveCall(_call);
 
@@ -382,9 +379,8 @@ class CallConnectionCoordinator {
     // this call in that time has already cleaned up, so undo the marking
     // rather than register a call nothing would unregister.
     if (_isLeftOrLeaving) {
-      _call._logger.w(() => '[join] rejected (call was left)');
       await _call._streamVideo.state.removeActiveCall(_call);
-      return const Result.failure(CallLeftException());
+      return _rejectJoinOfLeftCall();
     }
 
     _call._streamVideo.clientEventReporter
