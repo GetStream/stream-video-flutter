@@ -208,10 +208,17 @@ void main() {
   group('publisher negotiation with an unresolvable track mid', () {
     test('rolls the offer back and escalates to a reconnect', () {
       fakeAsync((async) {
-        final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
+        final reconnects =
+            <
+              (
+                StreamPeerConnection,
+                SfuReconnectionStrategy,
+                ReconnectionNeededReason,
+              )
+            >[];
         final session = _buildTestSession(
-          onReconnectionNeeded: (pc, strategy, _) =>
-              reconnects.add((pc, strategy)),
+          onReconnectionNeeded: (pc, strategy, reason) =>
+              reconnects.add((pc, strategy, reason)),
         );
 
         // One track is sending but its mid cannot be resolved from anywhere.
@@ -229,15 +236,23 @@ void main() {
         expect(reconnects, hasLength(1));
         expect(reconnects.single.$1, same(wires.publisher));
         expect(reconnects.single.$2, SfuReconnectionStrategy.fast);
+        expect(reconnects.single.$3, ReconnectionNeededReason.stuck);
       });
     });
 
     test('an empty announce rolls back without failing the negotiation', () {
       fakeAsync((async) {
-        final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
+        final reconnects =
+            <
+              (
+                StreamPeerConnection,
+                SfuReconnectionStrategy,
+                ReconnectionNeededReason,
+              )
+            >[];
         final session = _buildTestSession(
-          onReconnectionNeeded: (pc, strategy, _) =>
-              reconnects.add((pc, strategy)),
+          onReconnectionNeeded: (pc, strategy, reason) =>
+              reconnects.add((pc, strategy, reason)),
         );
 
         // Nothing is sending — a no-op, not a broken announce.
@@ -267,10 +282,17 @@ void main() {
   group('a publisher with no transceivers', () {
     test('is not negotiated by the watchdog', () {
       fakeAsync((async) {
-        final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
+        final reconnects =
+            <
+              (
+                StreamPeerConnection,
+                SfuReconnectionStrategy,
+                ReconnectionNeededReason,
+              )
+            >[];
         final session = _buildTestSession(
-          onReconnectionNeeded: (pc, strategy, _) =>
-              reconnects.add((pc, strategy)),
+          onReconnectionNeeded: (pc, strategy, reason) =>
+              reconnects.add((pc, strategy, reason)),
         );
 
         final wires = _wireStalledPublisher(session, sendingTrack: false);
@@ -286,10 +308,17 @@ void main() {
     });
 
     test('is not negotiated on renegotiation or ICE restart', () async {
-      final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
+      final reconnects =
+          <
+            (
+              StreamPeerConnection,
+              SfuReconnectionStrategy,
+              ReconnectionNeededReason,
+            )
+          >[];
       final session = _buildTestSession(
-        onReconnectionNeeded: (pc, strategy, _) =>
-            reconnects.add((pc, strategy)),
+        onReconnectionNeeded: (pc, strategy, reason) =>
+            reconnects.add((pc, strategy, reason)),
       );
 
       final wires = _wireStalledPublisher(session, sendingTrack: false);
@@ -308,10 +337,17 @@ void main() {
   // publisher to `stable`, where the watchdog sees nothing to recover.
   group('a fire-and-forget renegotiation', () {
     test('escalates rather than leaving the track unpublished', () async {
-      final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
+      final reconnects =
+          <
+            (
+              StreamPeerConnection,
+              SfuReconnectionStrategy,
+              ReconnectionNeededReason,
+            )
+          >[];
       final session = _buildTestSession(
-        onReconnectionNeeded: (pc, strategy, _) =>
-            reconnects.add((pc, strategy)),
+        onReconnectionNeeded: (pc, strategy, reason) =>
+            reconnects.add((pc, strategy, reason)),
       );
 
       final wires = _wireStalledPublisher(session, sendingTrack: true);
@@ -322,13 +358,21 @@ void main() {
       expect(reconnects, hasLength(1));
       expect(reconnects.single.$1, same(wires.publisher));
       expect(reconnects.single.$2, SfuReconnectionStrategy.fast);
+      expect(reconnects.single.$3, ReconnectionNeededReason.stuck);
     });
 
     test('does not escalate when there was nothing to announce', () async {
-      final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
+      final reconnects =
+          <
+            (
+              StreamPeerConnection,
+              SfuReconnectionStrategy,
+              ReconnectionNeededReason,
+            )
+          >[];
       final session = _buildTestSession(
-        onReconnectionNeeded: (pc, strategy, _) =>
-            reconnects.add((pc, strategy)),
+        onReconnectionNeeded: (pc, strategy, reason) =>
+            reconnects.add((pc, strategy, reason)),
       );
 
       final wires = _wireStalledPublisher(
@@ -344,10 +388,17 @@ void main() {
     });
 
     test('does not escalate on a failure that recovers on its own', () async {
-      final reconnects = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
+      final reconnects =
+          <
+            (
+              StreamPeerConnection,
+              SfuReconnectionStrategy,
+              ReconnectionNeededReason,
+            )
+          >[];
       final session = _buildTestSession(
-        onReconnectionNeeded: (pc, strategy, _) =>
-            reconnects.add((pc, strategy)),
+        onReconnectionNeeded: (pc, strategy, reason) =>
+            reconnects.add((pc, strategy, reason)),
       );
 
       final wires = _wireStalledPublisher(session, sendingTrack: true);

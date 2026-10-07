@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:synchronized/synchronized.dart';
@@ -30,6 +31,7 @@ typedef OnStreamAdded = void Function(StreamPeerConnection, rtc.MediaStream);
 typedef OnRenegotiationNeeded = void Function(StreamPeerConnection);
 
 /// Why a peer connection asks for a reconnect.
+@internal
 enum ReconnectionNeededReason {
   /// The connection failed: its state turned failed, or an ICE restart did
   /// not bring it back. Once it is connected again, it no longer needs the

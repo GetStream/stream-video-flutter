@@ -824,5 +824,35 @@ void main() {
         await waitUntil(() => call.state.value.status is CallStatusConnected);
       },
     );
+
+    test(
+      'that is stronger but cleared does not hide a weaker one still needed',
+      () async {
+        final call = harness.buildCall();
+        await call.join();
+        final attemptGate = Completer<void>();
+        var fastReconnects = 0;
+        harness.stubFastReconnect(harness.session, () async {
+          if (++fastReconnects == 1) await attemptGate.future;
+          return sessionStartSuccess();
+        });
+
+        await harness.emitSfu(harness.session, sfuSocketDropped);
+        await waitUntil(() => fastReconnects == 1);
+        final publisher = harness.requestReconnect(
+          0,
+          SfuReconnectionStrategy.rejoin,
+        );
+        when(publisher.isConnected).thenReturn(true);
+        // The socket drops again and stays down.
+        await harness.emitSfu(harness.session, sfuSocketDropped);
+        attemptGate.complete();
+
+        await waitUntil(() => fastReconnects == 2);
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+        // A fast reconnect, not the cleared rejoin: no new session.
+        expect(harness.reconnectionCallbacks, hasLength(1));
+      },
+    );
   });
 }

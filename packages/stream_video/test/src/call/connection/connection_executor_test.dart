@@ -44,16 +44,6 @@ void main() {
     test('is null for no requests', () {
       expect(ReconnectRequest.strongest(const []), isNull);
     });
-
-    test('counts as triggered by the network for a network trigger', () {
-      const network = ReconnectRequest(
-        SfuReconnectionStrategy.fast,
-        trigger: NetworkLost(),
-      );
-
-      expect(network.triggeredByNetwork, isTrue);
-      expect(request(SfuReconnectionStrategy.fast).triggeredByNetwork, isFalse);
-    });
   });
 
   group('ConnectionExecutor', () {
@@ -120,9 +110,8 @@ void main() {
         session: _FakeCallSession(),
       );
 
-      executor
-        ..hold(older)
-        ..hold(newer);
+      expect(executor.hold(older), isEmpty);
+      expect(executor.hold(newer), [older]);
 
       expect(executor.takeHeld(), [newer]);
     });

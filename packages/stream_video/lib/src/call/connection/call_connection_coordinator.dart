@@ -62,23 +62,29 @@ class CallConnectionCoordinator {
     try {
       return await _executor.run(task);
     } finally {
-      _startHeldReconnect();
+      try {
+        _startHeldReconnect();
+      } catch (error, stackTrace) {
+        _call._logger.e(
+          () =>
+              '[reconnect] starting a held reconnect failed: $error, '
+              'stackTrace: $stackTrace',
+        );
+      }
     }
   }
 
-  /// Starts the reconnect that was asked for while a join or reconnect ran,
-  /// once that work has finished. Called from [_serially] after every task.
+  /// Starts the strongest reconnect that was asked for while a join or
+  /// reconnect ran, once that work has finished. Called from [_serially]
+  /// after every task.
   ///
-  /// The trigger arrived too late for the work to act on: a socket or peer
-  /// connection of the session that is now current failed after that session
-  /// had started, for example while a migration waited for the new SFU. The
-  /// work still ended connected, so Connected here does not mean the session
-  /// is healthy, and the reconnect runs now.
-  ///
-  /// In any other phase there is nothing to reconnect: the call is leaving,
-  /// has left, or its join or reconnect failed and it leaves next. A held
-  /// request whose session has since been replaced, or whose cause has
-  /// cleared during the work, is dropped by [_takeHeldReconnect].
+  /// A request is held whatever raised it: a socket or peer connection of the
+  /// current session, a network drop, or the SFU. The work can still end
+  /// connected after it arrived, so the reconnect starts only while the call
+  /// is Connected. In any other phase the call is leaving, has left, or its
+  /// join or reconnect failed and it leaves next. [_takeHeldReconnect] has
+  /// already dropped requests whose session was replaced or whose cause has
+  /// cleared.
   void _startHeldReconnect() {
     final held = _takeHeldReconnect();
     if (held == null) return;
@@ -1360,7 +1366,7 @@ class CallConnectionCoordinator {
         () =>
             '[reconnect] held $strategy from $trigger (connection work running)',
       );
-      _executor.hold(
+      final replaced = _executor.hold(
         ReconnectRequest(
           strategy,
           trigger: trigger,
@@ -1368,6 +1374,11 @@ class CallConnectionCoordinator {
           session: source ?? _session,
         ),
       );
+      for (final request in replaced) {
+        _call._logger.v(
+          () => '[reconnect] dropped held $request (session replaced)',
+        );
+      }
       return;
     }
 

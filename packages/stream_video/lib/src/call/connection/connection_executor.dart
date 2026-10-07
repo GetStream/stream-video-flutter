@@ -26,8 +26,6 @@ final class ReconnectRequest {
   /// replaced it, the request no longer applies.
   final CallSession? session;
 
-  bool get triggeredByNetwork => trigger is NetworkLost;
-
   /// Whether [strategy] asks for more than [other]: rejoin over migrate over
   /// fast.
   bool isStrongerThan(SfuReconnectionStrategy other) =>
@@ -77,11 +75,15 @@ final class ConnectionExecutor {
   Future<T> run<T>(Future<T> Function() task) => _lock.synchronized(task);
 
   /// Keeps [request] for the running work to take. Requests held for another
-  /// session are dropped, since sessions only move forward.
-  void hold(ReconnectRequest request) {
+  /// session are dropped, since sessions only move forward, and returned.
+  List<ReconnectRequest> hold(ReconnectRequest request) {
+    final replaced = _held
+        .where((held) => !identical(held.session, request.session))
+        .toList();
     _held
-      ..removeWhere((held) => !identical(held.session, request.session))
+      ..removeWhere(replaced.contains)
       ..add(request);
+    return replaced;
   }
 
   /// Returns the held requests, oldest first, and stops holding them.

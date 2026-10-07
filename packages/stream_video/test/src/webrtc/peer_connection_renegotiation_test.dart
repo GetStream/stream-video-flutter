@@ -94,6 +94,11 @@ class _FakeRtcPeerConnection extends Fake implements rtc.RTCPeerConnection {
   rtc.RTCIceConnectionState? get iceConnectionState =>
       stubbedIceConnectionState;
 
+  rtc.RTCPeerConnectionState? stubbedConnectionState;
+
+  @override
+  rtc.RTCPeerConnectionState? get connectionState => stubbedConnectionState;
+
   // --- Remote description / ICE candidate plumbing ------------------------
 
   rtc.RTCSessionDescription? _remoteDescription;
@@ -241,6 +246,55 @@ void main() {
     });
   });
 
+  group('StreamPeerConnection.isConnected', () {
+    bool isConnected(
+      rtc.RTCIceConnectionState ice,
+      rtc.RTCPeerConnectionState connection,
+    ) {
+      final pc = _FakeRtcPeerConnection()
+        ..stubbedIceConnectionState = ice
+        ..stubbedConnectionState = connection;
+      return _build(pc: pc, type: StreamPeerType.publisher).isConnected();
+    }
+
+    test('is true once ICE and the connection are both connected', () {
+      expect(
+        isConnected(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateConnected,
+          rtc.RTCPeerConnectionState.RTCPeerConnectionStateConnected,
+        ),
+        isTrue,
+      );
+      expect(
+        isConnected(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateCompleted,
+          rtc.RTCPeerConnectionState.RTCPeerConnectionStateConnected,
+        ),
+        isTrue,
+      );
+    });
+
+    test('is false while the connection is still connecting', () {
+      expect(
+        isConnected(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateConnected,
+          rtc.RTCPeerConnectionState.RTCPeerConnectionStateConnecting,
+        ),
+        isFalse,
+      );
+    });
+
+    test('is false while ICE is still checking', () {
+      expect(
+        isConnected(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateChecking,
+          rtc.RTCPeerConnectionState.RTCPeerConnectionStateConnected,
+        ),
+        isFalse,
+      );
+    });
+  });
+
   group('StreamPeerConnection.onConnectionState', () {
     test(
       'fires onReconnectionNeeded with fast when the peer enters Failed',
@@ -248,9 +302,16 @@ void main() {
         final pc = _FakeRtcPeerConnection();
         final sp = _build(pc: pc, type: StreamPeerType.publisher);
 
-        final calls = <(StreamPeerConnection, SfuReconnectionStrategy)>[];
-        sp.onReconnectionNeeded = (peer, strategy, _) =>
-            calls.add((peer, strategy));
+        final calls =
+            <
+              (
+                StreamPeerConnection,
+                SfuReconnectionStrategy,
+                ReconnectionNeededReason,
+              )
+            >[];
+        sp.onReconnectionNeeded = (peer, strategy, reason) =>
+            calls.add((peer, strategy, reason));
 
         pc.capturedOnConnectionState!(
           rtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed,
@@ -259,6 +320,41 @@ void main() {
         expect(calls, hasLength(1));
         expect(calls.single.$1, same(sp));
         expect(calls.single.$2, SfuReconnectionStrategy.fast);
+        expect(calls.single.$3, ReconnectionNeededReason.connectionFailed);
+      },
+    );
+
+    test(
+      'fires onReconnectionNeeded with fast when its ICE restart fails',
+      () async {
+        final pc = _FakeRtcPeerConnection();
+        final sfuClient = MockSfuClient();
+        when(() => sfuClient.restartIce(any())).thenAnswer(
+          (_) async => const Result.failure(
+            StreamVideoException(message: 'ice restart refused'),
+          ),
+        );
+        final sp = _build(
+          pc: pc,
+          type: StreamPeerType.subscriber,
+          sfuClient: sfuClient,
+        );
+
+        final calls = <(SfuReconnectionStrategy, ReconnectionNeededReason)>[];
+        sp.onReconnectionNeeded = (_, strategy, reason) =>
+            calls.add((strategy, reason));
+
+        pc.capturedOnIceConnectionState!(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateFailed,
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        expect(calls, [
+          (
+            SfuReconnectionStrategy.fast,
+            ReconnectionNeededReason.connectionFailed,
+          ),
+        ]);
       },
     );
 

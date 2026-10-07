@@ -80,8 +80,8 @@ final class NetworkLost extends ReconnectTrigger {
   String toString() => 'NetworkLost';
 }
 
-/// The SFU asked for the reconnect: an error event, a GoAway, or a session it
-/// did not resume.
+/// The SFU asked for the reconnect with an error event or a GoAway, or did
+/// not resume the session on a fast reconnect.
 @internal
 final class SfuRequested extends ReconnectTrigger {
   const SfuRequested();

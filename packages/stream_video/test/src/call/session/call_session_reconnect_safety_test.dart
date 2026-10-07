@@ -103,10 +103,16 @@ void main() {
       () {
         fakeAsync((async) {
           final reconnects =
-              <(StreamPeerConnection, SfuReconnectionStrategy)>[];
+              <
+                (
+                  StreamPeerConnection,
+                  SfuReconnectionStrategy,
+                  ReconnectionNeededReason,
+                )
+              >[];
           final session = _buildTestSession(
-            onReconnectionNeeded: (pc, strategy, _) =>
-                reconnects.add((pc, strategy)),
+            onReconnectionNeeded: (pc, strategy, reason) =>
+                reconnects.add((pc, strategy, reason)),
           );
           final wires = _wirePublisher(
             session,
@@ -124,6 +130,7 @@ void main() {
           expect(reconnects, hasLength(1));
           expect(reconnects.single.$1, same(wires.publisher));
           expect(reconnects.single.$2, SfuReconnectionStrategy.rejoin);
+          expect(reconnects.single.$3, ReconnectionNeededReason.stuck);
         });
       },
     );
@@ -252,10 +259,16 @@ void main() {
       () {
         fakeAsync((async) {
           final reconnects =
-              <(StreamPeerConnection, SfuReconnectionStrategy)>[];
+              <
+                (
+                  StreamPeerConnection,
+                  SfuReconnectionStrategy,
+                  ReconnectionNeededReason,
+                )
+              >[];
           final session = _buildTestSession(
-            onReconnectionNeeded: (pc, strategy, _) =>
-                reconnects.add((pc, strategy)),
+            onReconnectionNeeded: (pc, strategy, reason) =>
+                reconnects.add((pc, strategy, reason)),
           );
           // ICE progressed past "new", so the ICE-stall branch does NOT fire.
           final wires = _wirePublisher(
@@ -281,6 +294,7 @@ void main() {
           expect(reconnects, hasLength(1));
           expect(reconnects.single.$1, same(wires.publisher));
           expect(reconnects.single.$2, SfuReconnectionStrategy.fast);
+          expect(reconnects.single.$3, ReconnectionNeededReason.stuck);
         });
       },
     );
