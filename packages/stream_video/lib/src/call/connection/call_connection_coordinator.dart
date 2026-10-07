@@ -742,8 +742,9 @@ class CallConnectionCoordinator {
       );
       _session = session;
 
+      // The SFU being left confirms the migration, on its own socket.
       if (performingMigration) {
-        migrationComplete = _session!.waitForMigrationComplete();
+        migrationComplete = _previousSession?.waitForMigrationComplete();
       }
 
       _call.dynascaleManager.init(
@@ -1793,17 +1794,24 @@ class CallConnectionCoordinator {
       return outcome;
     }
 
-    await _previousSession?.close(StreamVideoCloseCode.disposeOldSocket);
+    // The old socket carries the confirmation, so it closes only once the
+    // wait is over.
+    final previousSession = _previousSession;
+    final Result<None>? migrationResult;
+    try {
+      final migrationComplete = outcome.migrationComplete;
+      if (migrationComplete == null) {
+        _call._logger.e(() => '[reconnectMigrate] migration failed');
+        return const JoinRetry(
+          StreamVideoException(message: 'migration failed'),
+        );
+      }
 
-    final migrationComplete = outcome.migrationComplete;
-    if (migrationComplete == null) {
-      _call._logger.e(() => '[reconnectMigrate] migration failed');
-      return const JoinRetry(
-        StreamVideoException(message: 'migration failed'),
-      );
+      migrationResult = await _untilLeft(migrationComplete);
+    } finally {
+      await previousSession?.close(StreamVideoCloseCode.disposeOldSocket);
     }
 
-    final migrationResult = await _untilLeft(migrationComplete);
     if (migrationResult == null) {
       _call._logger.w(() => '[reconnectMigrate] cancelled (call was left)');
       return const JoinCancelled();

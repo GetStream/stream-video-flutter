@@ -68,12 +68,12 @@ void main() {
   );
 
   test(
-    'a GoAway migrates and waits for the new SFU to confirm',
+    'a GoAway migrates and waits for the old SFU to confirm',
     () async {
       harness = ConnectionHarness(sessionCount: 2);
-      final [_, second] = harness.sessions;
+      final [first, _] = harness.sessions;
       when(
-        second.waitForMigrationComplete,
+        first.waitForMigrationComplete,
       ).thenAnswer((_) => Completer<Result<None>>().future);
       final call = harness.buildCall();
       await call.join();
@@ -82,7 +82,7 @@ void main() {
 
       await waitUntil(() => call.state.value.status is CallStatusMigrating);
       await waitUntil(() => harness.reconnectionCallbacks.length == 2);
-      verify(second.waitForMigrationComplete).called(1);
+      verify(first.waitForMigrationComplete).called(1);
     },
     timeout: const Timeout(Duration(seconds: 20)),
   );

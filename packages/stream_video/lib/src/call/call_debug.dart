@@ -36,8 +36,8 @@ extension CallDebug on Call {
     );
   }
 
-  /// Handles a GoAway as if the SFU had sent one. The SFU knows nothing about
-  /// it, so the migration waits for a migration complete that never comes.
+  /// Handles a GoAway as if the SFU had sent one. The SFU did not ask for the
+  /// move, but the call migrates to another SFU as it would for a real one.
   void debugReceiveGoAway() {
     final session = _session;
     if (session == null) return;

@@ -28,18 +28,15 @@ void main() {
   tearDown(() => harness.dispose());
 
   test(
-    'a go-away migrates to a new SFU session and closes the old one',
+    'a go-away migrates to a new SFU session and closes the old one once '
+    'the old SFU confirms',
     () async {
       harness = ConnectionHarness(sessionCount: 2);
       final [first, second] = harness.sessions;
       final migrationGate = Completer<Result<None>>();
       when(
-        second.waitForMigrationComplete,
+        first.waitForMigrationComplete,
       ).thenAnswer((_) => migrationGate.future);
-      var firstClosed = false;
-      when(
-        () => first.close(any(), closeReason: any(named: 'closeReason')),
-      ).thenAnswer((_) async => firstClosed = true);
       final call = harness.buildCall();
       await call.join();
       final statuses = recordStatuses(call);
@@ -48,19 +45,23 @@ void main() {
         first,
         const SfuGoAwayEvent(goAwayReason: SfuGoAwayReason.rebalance),
       );
-      // The wait for the new SFU's confirmation is asked for when the session
-      // is made, before the old socket closes; the status stays migrating
-      // until it arrives.
-      await waitUntil(() => firstClosed);
+      // The old SFU sends the confirmation on the old socket, so that socket
+      // stays open until it arrives; the status stays migrating meanwhile.
+      await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+      await pumpEventQueue();
       expect(call.state.value.status, isA<CallStatusMigrating>());
-      verifyInOrder([
-        second.waitForMigrationComplete,
-        () => first.close(StreamVideoCloseCode.disposeOldSocket),
-      ]);
+      verify(first.waitForMigrationComplete).called(1);
+      verifyNever(
+        () => first.close(any(), closeReason: any(named: 'closeReason')),
+      );
 
       migrationGate.complete(const Result.success(none));
       await waitUntil(() => call.state.value.status is CallStatusConnected);
 
+      verify(
+        () => first.close(StreamVideoCloseCode.disposeOldSocket),
+      ).called(1);
+      verifyNever(second.waitForMigrationComplete);
       verify(
         () => harness.coordinatorClient.joinCall(
           callCid: any(named: 'callCid'),
@@ -124,7 +125,7 @@ void main() {
     () async {
       harness = ConnectionHarness(sessionCount: 3);
       final [first, second, third] = harness.sessions;
-      when(second.waitForMigrationComplete).thenAnswer(
+      when(first.waitForMigrationComplete).thenAnswer(
         (_) async => const Result.failure(
           StreamVideoException(message: 'migration timed out'),
         ),
