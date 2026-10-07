@@ -51,6 +51,7 @@
 ### ✅ Added
 
 - Added `StreamPushPayload`, the wire contract for the push payloads Stream sends: the keys it sets, the `sender` that marks a payload as ours, and predicates for recognising a ringing or missed call push. `handleRingingFlowNotifications` reads payloads through it, so anything that has to recognise a Stream push before handing it over — a background handler deciding whether to build a client, or tracking which call is still ringing — can match on exactly what the SDK matches on instead of restating the format.
+- Added `ScreenShareConstraints.systemPickerSourceId`, the `sourceId` that makes macOS choose what to share with its system picker.
 - Added `Call.viewportVisibility`, which derives one visibility and one subscription size per track from every viewport reporting through a `ViewportHandle` of its own.
 - `CallReceivedData`, what `Call.get()` returns, is exported. Handling that result meant naming a type the package kept to itself.
 - Anonymous users can now carry a token: pass `userToken` with a `UserType.anonymous` user to send call-restricted tokens (e.g. for closed livestreams). The token's `user_id` claim must be `!anon`; an invalid token fails fast at client construction.

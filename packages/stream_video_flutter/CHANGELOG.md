@@ -2,6 +2,8 @@
 
 ### ✅ Added
 
+- Added `DesktopScreenSharePickerType` and `StreamScreenShareButton.desktopScreenPickerType` to share with the macOS system picker instead of the built-in selector.
+- Added `isDesktopSystemContentPickerSupported`, true on macOS 14 or newer.
 - Added `solveParticipantGrid`, the rule the participants grid arranges a page by, and `StreamCallParticipantsGridThemeData.columnResolver` to override it.
 - Added `StreamCallParticipantsGridThemeData.maxTileAspectRatio`, `compactPageSize` and `pageSize`.
 - Added `StreamCallParticipantsSpotlightThemeData` on `StreamVideoTheme`, and `StreamCallParticipantsSpotlightTheme` to restyle the speaker layouts over a subtree.
