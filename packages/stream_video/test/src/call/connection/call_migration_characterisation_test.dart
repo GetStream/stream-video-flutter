@@ -61,6 +61,9 @@ void main() {
         () => first.close(CloseCode.normalClosure),
       ).called(1);
       verifyNever(second.waitForMigrationComplete);
+      verifyNever(
+        () => second.close(any(), closeReason: any(named: 'closeReason')),
+      );
       verify(
         () => harness.coordinatorClient.joinCall(
           callCid: any(named: 'callCid'),
@@ -92,6 +95,59 @@ void main() {
       ]);
     },
     timeout: const Timeout(Duration(seconds: 30)),
+  );
+
+  test(
+    'a migration whose first attempt fails still waits on and closes the '
+    'session it started from',
+    () async {
+      harness = ConnectionHarness(sessionCount: 3);
+      final [first, second, third] = harness.sessions;
+      harness.stubSessionStart(
+        second,
+        () async => const Result.failure(
+          StreamVideoException(message: 'sfu unreachable'),
+        ),
+      );
+      final call = harness.buildCall();
+      await call.join();
+
+      await harness.emitSfu(
+        first,
+        const SfuGoAwayEvent(goAwayReason: SfuGoAwayReason.rebalance),
+      );
+      await waitUntil(
+        () => harness.reconnectionCallbacks.length == 3,
+        timeout: const Duration(seconds: 15),
+      );
+      await waitUntil(() => call.state.value.status is CallStatusConnected);
+
+      // Each attempt waits on the session the call migrated from, never on
+      // the failed attempt's session, which the old SFU knows nothing about.
+      verify(first.waitForMigrationComplete).called(2);
+      verifyNever(second.waitForMigrationComplete);
+      verifyNever(third.waitForMigrationComplete);
+      verify(
+        () => first.close(CloseCode.normalClosure),
+      ).called(1);
+      verify(
+        () => first.getReconnectDetails(
+          SfuReconnectionStrategy.migrate,
+          migratingFromSfuId: any(named: 'migratingFromSfuId'),
+          reconnectAttempts: any(named: 'reconnectAttempts'),
+          reason: any(named: 'reason'),
+        ),
+      ).called(2);
+      verifyNever(
+        () => second.getReconnectDetails(
+          any(),
+          migratingFromSfuId: any(named: 'migratingFromSfuId'),
+          reconnectAttempts: any(named: 'reconnectAttempts'),
+          reason: any(named: 'reason'),
+        ),
+      );
+    },
+    timeout: const Timeout(Duration(seconds: 40)),
   );
 
   group('known hazard', () {
