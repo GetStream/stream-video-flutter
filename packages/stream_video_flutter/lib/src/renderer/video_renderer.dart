@@ -212,29 +212,41 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
   @override
   void initState() {
     super.initState();
-    (() async {
-      await _videoRenderer.initialize();
-      _videoRenderer.srcObject = widget.videoTrack.mediaStream;
-      if (mounted) setState(() => _isInitialized = true);
-    })();
+    _initializeRenderer();
+  }
+
+  Future<void> _initializeRenderer() async {
+    await _videoRenderer.initialize();
+    if (!mounted) {
+      // Disposed while initialising; the texture only exists now.
+      await _videoRenderer.dispose();
+      return;
+    }
+    // Reads the current widget, so a track swapped in meanwhile is the one set.
+    _videoRenderer.srcObject = widget.videoTrack.mediaStream;
+    setState(() => _isInitialized = true);
   }
 
   @override
   void didUpdateWidget(covariant VideoTrackRenderer oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // Until initialised, [_initializeRenderer] sets the stream itself.
+    if (!_isInitialized) return;
     final streamChanged =
         widget.videoTrack.mediaStream != oldWidget.videoTrack.mediaStream;
     if (widget.videoTrack != oldWidget.videoTrack || streamChanged) {
       _videoRenderer.srcObject = widget.videoTrack.mediaStream;
-      if (mounted) setState(() {});
     }
   }
 
   @override
-  Future<void> dispose() async {
+  void dispose() {
+    // Before initialisation completes, [_initializeRenderer] disposes it.
+    if (_isInitialized) {
+      _videoRenderer.srcObject = null;
+      _videoRenderer.dispose();
+    }
     super.dispose();
-    if (_isInitialized) _videoRenderer.srcObject = null;
-    await _videoRenderer.dispose();
   }
 
   @override
