@@ -80,7 +80,7 @@
 - A call ended remotely now sends the SFU leave message, like a local leave.
 - A reconnect asked for while a call is joining or reconnecting is no longer dropped.
 - A failed peer connection now rejoins the call instead of retrying a fast reconnect.
-- A call that was offline for longer than the fast-reconnect deadline now rejoins without first trying a fast reconnect.
+- A call that reconnects after being offline past the fast-reconnect deadline now rejoins instead of trying a fast reconnect.
 - Closed captions are now cleared when leaving a call.
 - A failed microphone or camera mute during video moderation is now logged.
 - Errors thrown while handling a call's coordinator and SFU events, including from `onPermissionRequest`, are now logged instead of surfacing as unhandled errors.

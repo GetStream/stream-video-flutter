@@ -990,8 +990,8 @@ void main() {
 
   group('after the device was offline', () {
     /// Takes the device offline for [offline], with the SFU giving a
-    /// fast-reconnect deadline of [deadline], and returns getters for the
-    /// fast reconnects made.
+    /// fast-reconnect deadline of [deadline], and returns a getter for the
+    /// number of fast reconnects made.
     Future<int Function()> goOffline({
       required Duration offline,
       required Duration deadline,
@@ -1029,9 +1029,57 @@ void main() {
           deadline: const Duration(milliseconds: 100),
         );
 
+        // The rejoin first waits for the network to stay up for a while.
+        await Future<void>.delayed(const Duration(seconds: 1));
+        expect(harness.reconnectionCallbacks, hasLength(1));
         await waitUntil(() => harness.reconnectionCallbacks.length == 2);
         expect(fastReconnects(), 0);
       },
+    );
+
+    test(
+      'reconnects fast when the SFU gave no fast-reconnect deadline',
+      () async {
+        harness = ConnectionHarness(sessionCount: 2);
+        final fastReconnects = await goOffline(
+          offline: const Duration(milliseconds: 200),
+          deadline: Duration.zero,
+        );
+
+        await waitUntil(() => fastReconnects() == 1);
+        expect(harness.reconnectionCallbacks, hasLength(1));
+      },
+    );
+
+    test(
+      'past the fast-reconnect deadline keeps a migration a migration',
+      () async {
+        harness = ConnectionHarness(sessionCount: 2);
+        final [first, _] = harness.sessions;
+        harness.stubSessionStart(
+          first,
+          () async => Result.success((
+            callState: createTestSfuCallState(),
+            fastReconnectDeadline: const Duration(milliseconds: 100),
+          )),
+        );
+        final call = harness.buildCall();
+        await call.join();
+
+        await harness.emitSfu(
+          first,
+          const SfuGoAwayEvent(goAwayReason: SfuGoAwayReason.rebalance),
+        );
+        harness.internetStatus.add(InternetStatus.disconnected);
+        await pumpEventQueue();
+        await Future<void>.delayed(const Duration(milliseconds: 400));
+        harness.internetStatus.add(InternetStatus.connected);
+
+        await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+        // A migration keeps the session id; a rejoin would start a new one.
+        expect(harness.captureMakeCallSessionIds().last.sessionId, 'session-0');
+      },
+      timeout: const Timeout(Duration(seconds: 20)),
     );
 
     test('shorter than the fast-reconnect deadline reconnects fast', () async {
@@ -1093,7 +1141,7 @@ void main() {
     }
 
     test(
-      'rejoins when a peer connection has failed',
+      'rejoins when the publisher has failed',
       () async {
         harness = ConnectionHarness(sessionCount: 2);
         final fastReconnects = await failFirstFastAttempt(

@@ -154,9 +154,9 @@ class StreamPeerConnection extends Disposable {
   /// Serializes [setRemoteDescription] and [addIceCandidate]
   final _candidateLock = Lock();
 
-  /// Attempts to restart ICE on the `RTCPeerConnection`.
-  /// If the restart fails, this method will trigger onReconnectionNeeded with
-  /// the appropriate reconnection strategy based on the error.
+  /// Attempts to restart ICE on the `RTCPeerConnection`. A failed restart asks
+  /// for the reconnect [_strategyAfterFailedIceRestart] picks, if any, unless a
+  /// fast reconnect started while it was in flight.
   void _tryRestartIce() {
     _logger.v(
       () => '[_tryRestartIce] #$type; isReconnecting: $_isReconnecting',
@@ -165,8 +165,7 @@ class StreamPeerConnection extends Disposable {
     // Skip automatic ICE restart if a reconnect is in progress.
     if (_isReconnecting) {
       _logger.i(
-        () =>
-            '[_tryRestartIce] skipping - reconnect in progress for subscriber',
+        () => '[_tryRestartIce] #$type; skipping - reconnect in progress',
       );
       return;
     }
@@ -174,8 +173,8 @@ class StreamPeerConnection extends Disposable {
     restartIce().then((result) {
       if (result is! Failure) return;
 
-      // A reconnect that started while the restart was in flight restarts ICE
-      // itself.
+      // A fast reconnect that started while the restart was in flight
+      // restarts ICE itself.
       if (_isReconnecting) {
         _logger.i(
           () => '[_tryRestartIce] #$type; restart failed during a reconnect',
@@ -204,9 +203,8 @@ class StreamPeerConnection extends Disposable {
   ///
   /// Fast when the SFU reports the signal lost. Rejoin when the SFU refused
   /// the restart, or when the publisher's local restart failed. None when the
-  /// subscriber's restart request failed without an answer from the SFU, such
-  /// as while offline: the SFU socket asks for its own reconnect then, and a
-  /// connection that does fail asks for a rejoin when its state turns failed.
+  /// subscriber's restart request got no answer from the SFU, such as while
+  /// offline.
   SfuReconnectionStrategy? _strategyAfterFailedIceRestart(
     StreamVideoException error,
   ) {

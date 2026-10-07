@@ -423,8 +423,8 @@ void main() {
     );
 
     test(
-      'fires onReconnectionNeeded with fast when its ICE restart fails '
-      'because the signalling socket is lost',
+      'fires onReconnectionNeeded with fast when the SFU reports the '
+      'participant signal lost',
       () async {
         final pc = _FakeRtcPeerConnection();
         final sfuClient = MockSfuClient();
@@ -485,6 +485,7 @@ void main() {
         await Future<void>.delayed(Duration.zero);
 
         expect(strategies, isEmpty);
+        verify(() => sfuClient.restartIce(any())).called(1);
       },
     );
 
@@ -520,6 +521,7 @@ void main() {
         await Future<void>.delayed(Duration.zero);
 
         expect(strategies, isEmpty);
+        verify(() => sfuClient.restartIce(any())).called(1);
       },
     );
 
