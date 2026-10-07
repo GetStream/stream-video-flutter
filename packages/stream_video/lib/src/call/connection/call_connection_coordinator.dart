@@ -12,7 +12,9 @@ class CallConnectionCoordinator {
   CallCredentials? _credentials;
   CallSession? _session;
 
-  CallSession? _previousSession;
+  /// Sessions the call has moved off and not released yet: the one a
+  /// reconnect started from, and those of its failed attempts.
+  final _supersededSessions = <CallSession>{};
   StreamPeerConnectionFactory? _pcFactory;
 
   StatsOptions? _sfuStatsOptions;
@@ -677,10 +679,10 @@ class CallConnectionCoordinator {
     }
 
     _credentials = joinedResult.data;
-    _previousSession = _session;
+    final previousSession = _session;
     final sessionLeft = performingMigration
-        ? migratingFrom ?? _previousSession
-        : _previousSession;
+        ? migratingFrom ?? previousSession
+        : previousSession;
 
     if (_isLeftOrLeaving) {
       _call._logger.w(() => '[join] rejected (call was left during joining)');
@@ -699,7 +701,7 @@ class CallConnectionCoordinator {
     // A fast reconnect resumes the previous SFU session, so it needs both that
     // session and the details describing what to resume. A strategy set by a
     // network blip before this call ever joined has neither.
-    final resumableSession = _previousSession;
+    final resumableSession = previousSession;
     final canFastReconnect =
         performingFastReconnect &&
         resumableSession != null &&
@@ -726,7 +728,7 @@ class CallConnectionCoordinator {
       session = await _call._sessionFactory.makeCallSession(
         // a new session_id is necessary for the REJOIN strategy.
         // we use the previous session_id if available
-        sessionId: performingRejoin ? null : _previousSession?.sessionId,
+        sessionId: performingRejoin ? null : previousSession?.sessionId,
         sessionSeq: _reconnectAttempts,
         credentials: _credentials!,
         stateManager: _call._stateManager,
@@ -737,7 +739,7 @@ class CallConnectionCoordinator {
         pcFactory: _call._ensurePcFactory(),
         e2eeManager: _call._e2ee.manager,
         leftoverTraceRecords:
-            _previousSession
+            previousSession
                 ?.getTrace()
                 .expand((slice) => slice.snapshot)
                 .toList() ??
@@ -751,7 +753,7 @@ class CallConnectionCoordinator {
         clientPublishOptions:
             _call._stateManager.callState.preferences.clientPublishOptions,
       );
-      _session = session;
+      _replaceSession(session);
 
       // The SFU being left confirms the migration, on its own socket.
       if (performingMigration) {
@@ -776,11 +778,11 @@ class CallConnectionCoordinator {
         _session!,
         reconnectDetails: reconnectDetails,
         clientEventRetryCount: clientEventRetryCount,
-        // After a failed migration attempt the tracks are on the session the
-        // migration started from, or on the failed attempt's session if it
-        // got as far as taking them. Asking both is safe: a session hands
-        // its tracks over only once.
-        handOverFrom: {_previousSession, sessionLeft},
+        // After a failed attempt the tracks are on the session the reconnect
+        // started from, or on a failed attempt's session if it got as far as
+        // taking them. Asking all of them is safe: a session hands its tracks
+        // over only once.
+        handOverFrom: {..._supersededSessions},
       );
 
       if (sessionResult is! Success<None>) {
@@ -801,8 +803,6 @@ class CallConnectionCoordinator {
         () =>
             '[join] reusing previous sfu session (rejoin: $performingRejoin, migration: $performingMigration)',
       );
-
-      _session = resumableSession;
 
       _call._logger.d(() => '[join] fast reconnecting');
       final result = await resumableSession.fastReconnect(
@@ -857,19 +857,14 @@ class CallConnectionCoordinator {
       );
     }
 
-    if (performingRejoin) {
-      _call._logger.v(() => '[join] leaving previous session');
-      _previousSession?.leave(
-        reason:
-            'Closing previous WS after reconnect with strategy: ${_reconnectStrategy.name}',
-      );
-      await _previousSession?.dispose();
-    }
-
     // For migration we have to wait for confirmation before we can complete the flow
     if (!performingMigration) {
+      await _releaseSupersededSessions(
+        leaveReason: performingRejoin
+            ? 'Closing previous WS after reconnect with strategy: ${_reconnectStrategy.name}'
+            : null,
+      );
       _call._logger.v(() => '[join] connected');
-      _previousSession = null;
       _setPhase(const ConnectionConnected());
       _publishStatus();
     }
@@ -947,7 +942,6 @@ class CallConnectionCoordinator {
 
       return joinedResult.foldResult(
         success: (success) {
-          _credentials = success.data.credentials;
           _sfuStatsOptions = success.data.statsOptions;
 
           _session?.rtcManager?.subscriber.tracer.setEnabled(
@@ -1087,6 +1081,30 @@ class CallConnectionCoordinator {
     return Result.success(joined);
   }
 
+  /// Makes [session] the call's session; the one it replaces is superseded.
+  void _replaceSession(CallSession session) {
+    final replaced = _session;
+    if (replaced != null) _supersededSessions.add(replaced);
+    _session = session;
+    _unifiedSessionId ??= session.sessionId;
+  }
+
+  /// Disposes the superseded sessions, after sending each a leave with
+  /// [leaveReason] when one is given.
+  Future<void> _releaseSupersededSessions({String? leaveReason}) async {
+    final sessions = [..._supersededSessions];
+    _supersededSessions.clear();
+    for (final session in sessions) {
+      _call._logger.v(() => '[releaseSupersededSessions] $session');
+      if (leaveReason != null) session.leave(reason: leaveReason);
+      await session.dispose().catchError((Object e) {
+        _call._logger.w(
+          () => '[releaseSupersededSessions] dispose failed: $e',
+        );
+      });
+    }
+  }
+
   /// Starts [session]. The live local tracks of the sessions in
   /// [handOverFrom] move to it, so the camera, microphone and screen share
   /// are published again without being opened again.
@@ -1099,9 +1117,6 @@ class CallConnectionCoordinator {
     _call._logger.d(
       () => '[startSession] sessionId: $session',
     );
-
-    _session = session;
-    _unifiedSessionId ??= _session?.sessionId;
 
     await _flushAndStopSfuStatsReporter();
     _call._subscriptions.cancel(_idSessionStats);
@@ -1169,6 +1184,16 @@ class CallConnectionCoordinator {
       unifiedSessionId: _unifiedSessionId,
     );
 
+    final Duration fastReconnectDeadline;
+    switch (result) {
+      case Success(:final data):
+        _call._logger.v(() => '[startSession] success: $result');
+        fastReconnectDeadline = data.fastReconnectDeadline;
+      case final Failure failure:
+        _call._logger.e(() => '[startSession] failed: $failure');
+        return failure;
+    }
+
     if (session.statsReporter != null) {
       _call._subscriptions.add(
         _idSessionStats,
@@ -1206,17 +1231,8 @@ class CallConnectionCoordinator {
           );
     }
 
-    return result.foldResult(
-      success: (success) {
-        _call._logger.v(() => '[startSession] success: $success');
-        _fastReconnectDeadline = success.data.fastReconnectDeadline;
-        return const Result.success(none);
-      },
-      failure: (failure) {
-        _call._logger.e(() => '[startSession] failed: $failure');
-        return failure;
-      },
-    );
+    _fastReconnectDeadline = fastReconnectDeadline;
+    return const Result.success(none);
   }
 
   /// Handles a reconnect that a peer connection of [session] asks for.
@@ -1461,7 +1477,7 @@ class CallConnectionCoordinator {
     }
 
     // A call that has never established a session has nothing to reconnect to.
-    if (_session == null && _previousSession == null) {
+    if (_session == null) {
       _call._logger.w(
         () => '[reconnect] rejected $strategy (call has never been joined)',
       );
@@ -1829,9 +1845,10 @@ class CallConnectionCoordinator {
     }
 
     // The old socket carries the confirmation, so it closes only once the
-    // wait is over. Nothing resumes the old session after that, so the close
-    // is a normal one: after a timeout it lets the old SFU drop the
-    // participant at once.
+    // wait is over. Nothing resumes the old session after that, so it is
+    // disposed with a normal close: after a timeout that lets the old SFU
+    // drop the participant at once. A failed join returns above and leaves
+    // the old session to the rejoin that follows, which takes its tracks.
     final Result<None>? migrationResult;
     try {
       final migrationComplete = outcome.migrationComplete;
@@ -1844,7 +1861,7 @@ class CallConnectionCoordinator {
 
       migrationResult = await _untilLeft(migrationComplete);
     } finally {
-      await previousSession?.close(CloseCode.normalClosure);
+      await _releaseSupersededSessions();
     }
 
     if (migrationResult == null) {
@@ -2194,6 +2211,8 @@ class CallConnectionCoordinator {
     // The client state is cleared even when an earlier step throws, so a
     // call that failed to tear down fully is not left looking active.
     try {
+      // Events stop first, so none can arm a timer after it is cancelled.
+      _call._subscriptions.cancelAll();
       _call._reactions.cancelTimers();
       _call._closedCaptions.reset();
       _call._moderation.cancelTimer();
@@ -2205,7 +2224,6 @@ class CallConnectionCoordinator {
       }
 
       await _flushAndStopSfuStatsReporter();
-      _call._subscriptions.cancelAll();
       _cancelables.cancelAll();
 
       // The audio processor is owned by StreamVideo, not by an individual
@@ -2248,6 +2266,11 @@ class CallConnectionCoordinator {
           _call._logger.w(() => '[clear] session dispose failed: $e');
         });
       }
+      await _releaseSupersededSessions();
+      _session = null;
+      _credentials = null;
+      _sfuStatsOptions = null;
+      _unifiedSessionId = null;
 
       final pcFactory = _pcFactory;
       _pcFactory = null;

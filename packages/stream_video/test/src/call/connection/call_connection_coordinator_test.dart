@@ -415,10 +415,9 @@ void main() {
       await pumpEventQueue();
 
       expect(call.state.value.status, isA<CallStatusDisconnected>());
-      // The old socket stayed open for the confirmation; the leave closes it.
-      verify(
-        () => first.close(CloseCode.normalClosure),
-      ).called(1);
+      // The old socket stayed open for the confirmation; the leave disposes
+      // it, once.
+      verify(first.dispose).called(1);
       expect(statuses, isNot(contains(isA<CallStatusReconnectionFailed>())));
       harness.verifyMakeCallSessionCount(2);
       expect(harness.reporter.aborts, [ClientEventStandardCode.clientAborted]);

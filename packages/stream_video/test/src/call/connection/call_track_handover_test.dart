@@ -189,7 +189,7 @@ void main() {
 
       verifyInOrder([
         first.handOverLocalTracks,
-        () => first.close(CloseCode.normalClosure),
+        first.dispose,
       ]);
       verify(() => second.setLocalTrack(camera)).called(1);
       // Only unmutes the published track; a new one is never captured.
@@ -495,5 +495,110 @@ void main() {
       verifyNever(() => third.setLocalTrack(camera));
     },
     timeout: const Timeout(Duration(seconds: 40)),
+  );
+
+  Result<SessionStartResult> unreachable() => const Result.failure(
+    StreamVideoException(message: 'sfu unreachable'),
+  );
+
+  test(
+    'a rejoin whose first attempt fails still takes the tracks from the '
+    'session it started from, and disposes both',
+    () async {
+      final [first, second, third] = setUpHarness(3).sessions;
+      final camera = liveTrack(SfuTrackType.video, const CameraConstraints());
+      when(first.handOverLocalTracks).thenReturn([camera]);
+      harness.stubSessionStart(second, () async => unreachable());
+      final call = harness.buildCall();
+      await call.join(
+        connectOptions: CallConnectOptions(camera: TrackOption.enabled()),
+      );
+
+      harness.requestReconnect(0, SfuReconnectionStrategy.rejoin);
+      await waitUntil(
+        () => harness.reconnectionCallbacks.length == 3,
+        timeout: const Duration(seconds: 15),
+      );
+      await waitUntil(() => call.state.value.status is CallStatusConnected);
+      await pumpEventQueue();
+
+      verify(() => third.setLocalTrack(camera)).called(1);
+      verify(first.dispose).called(1);
+      verify(second.dispose).called(1);
+      verifyNever(third.dispose);
+    },
+    timeout: const Timeout(Duration(seconds: 40)),
+  );
+
+  test(
+    'a migration whose join fails hands the old session to the rejoin that '
+    'follows, which takes its tracks and disposes it',
+    () async {
+      final sessions = setUpHarness(5).sessions;
+      final [first, second, third, fourth, fifth] = sessions;
+      final camera = liveTrack(SfuTrackType.video, const CameraConstraints());
+      when(first.handOverLocalTracks).thenReturn([camera]);
+      for (final failing in [second, third, fourth]) {
+        harness.stubSessionStart(failing, () async => unreachable());
+      }
+      final call = harness.buildCall();
+      await call.join(
+        connectOptions: CallConnectOptions(camera: TrackOption.enabled()),
+      );
+      final statuses = recordStatuses(call);
+
+      await goAway(first);
+      await waitUntil(
+        () => harness.reconnectionCallbacks.length == 5,
+        timeout: const Duration(seconds: 40),
+      );
+      await waitUntil(() => call.state.value.status is CallStatusConnected);
+      await pumpEventQueue();
+
+      expect(
+        statuses,
+        containsAllInOrder([
+          isA<CallStatusMigrating>(),
+          isA<CallStatusReconnecting>(),
+          isA<CallStatusConnected>(),
+        ]),
+      );
+      verify(() => fifth.setLocalTrack(camera)).called(1);
+      verify(() => first.leave(reason: any(named: 'reason'))).called(1);
+      for (final released in [first, second, third, fourth]) {
+        verify(released.dispose).called(1);
+      }
+      verifyNever(fifth.dispose);
+    },
+    timeout: const Timeout(Duration(seconds: 60)),
+  );
+
+  test(
+    "a leave during a reconnect attempt disposes the attempt's session and "
+    'the one it started from, and lets go of both',
+    () async {
+      final [first, second, _] = setUpHarness(3).sessions;
+      final startGate = Completer<Result<SessionStartResult>>();
+      var starting = false;
+      harness.stubSessionStart(second, () {
+        starting = true;
+        return startGate.future;
+      });
+      final call = harness.buildCall();
+      await call.join();
+
+      harness.requestReconnect(0, SfuReconnectionStrategy.rejoin);
+      await waitUntil(() => starting);
+      final left = call.leave();
+      startGate.complete(unreachable());
+      await left;
+      await pumpEventQueue();
+
+      verify(first.dispose).called(1);
+      verify(second.dispose).called(1);
+      harness.verifyMakeCallSessionCount(2);
+      expect(call.callSession, isNull);
+    },
+    timeout: const Timeout(Duration(seconds: 30)),
   );
 }
