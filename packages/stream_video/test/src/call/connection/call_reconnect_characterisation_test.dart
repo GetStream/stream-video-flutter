@@ -169,34 +169,30 @@ void main() {
     expect(call.state.value.status, isA<CallStatusDisconnected>());
   });
 
+  test(
+    'leave during the network wait settles disconnected without '
+    'ReconnectionFailed and reports one abort',
+    () async {
+      final call = harness.buildCall();
+      await call.join();
+      final statuses = recordStatuses(call);
+
+      harness.internetStatus.add(InternetStatus.disconnected);
+      await pumpEventQueue();
+      expect(call.state.value.status, isA<CallStatusReconnecting>());
+
+      await call.leave();
+      await pumpEventQueue();
+
+      expect(statuses, isNot(contains(isA<CallStatusReconnectionFailed>())));
+      expect(call.state.value.status, isA<CallStatusDisconnected>());
+      expect(harness.reporter.aborts, [
+        ClientEventStandardCode.clientAborted,
+      ]);
+    },
+  );
+
   group('known hazard', () {
-    // Changes with FLU-864: leaving during the network wait settles
-    // disconnected without passing through ReconnectionFailed or reporting
-    // the network as offline.
-    test(
-      'leave during the network wait passes through ReconnectionFailed and '
-      'reports a second, offline abort',
-      () async {
-        final call = harness.buildCall();
-        await call.join();
-        final statuses = recordStatuses(call);
-
-        harness.internetStatus.add(InternetStatus.disconnected);
-        await pumpEventQueue();
-        expect(call.state.value.status, isA<CallStatusReconnecting>());
-
-        await call.leave();
-        await pumpEventQueue();
-
-        expect(statuses, contains(isA<CallStatusReconnectionFailed>()));
-        expect(call.state.value.status, isA<CallStatusDisconnected>());
-        expect(harness.reporter.aborts, [
-          ClientEventStandardCode.clientAborted,
-          ClientEventStandardCode.networkOffline,
-        ]);
-      },
-    );
-
     // Changes with FLU-864: a remote end goes through the same leaving
     // transition as a local one, which tells the SFU.
     test(

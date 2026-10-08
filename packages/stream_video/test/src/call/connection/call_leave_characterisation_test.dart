@@ -188,34 +188,33 @@ void main() {
         ]);
       },
     );
-
-    // Changes with FLU-864: one leave owns the teardown until it finishes.
-    test(
-      'a leave that short-circuits reopens the gate, so a third leave tears '
-      'down again while the first is still running',
-      () async {
-        final call = harness.buildCall();
-        await call.join();
-        final disposeGate = Completer<void>();
-        when(harness.session.dispose).thenAnswer((_) => disposeGate.future);
-
-        final first = call.leave();
-        await pumpEventQueue();
-        await call.leave();
-        final third = call.leave();
-        await pumpEventQueue();
-
-        disposeGate.complete();
-        await Future.wait([first, third]);
-
-        verify(
-          () => harness.session.leave(reason: any(named: 'reason')),
-        ).called(2);
-        verify(harness.session.dispose).called(2);
-        expect(call.state.value.status, isA<CallStatusDisconnected>());
-      },
-    );
   });
+
+  test(
+    'a leave while another is tearing down short-circuits, and so does every '
+    'leave after it',
+    () async {
+      final call = harness.buildCall();
+      await call.join();
+      final disposeGate = Completer<void>();
+      when(harness.session.dispose).thenAnswer((_) => disposeGate.future);
+
+      final first = call.leave();
+      await pumpEventQueue();
+      await call.leave();
+      final third = call.leave();
+      await pumpEventQueue();
+
+      disposeGate.complete();
+      await Future.wait([first, third]);
+
+      verify(
+        () => harness.session.leave(reason: any(named: 'reason')),
+      ).called(1);
+      verify(harness.session.dispose).called(1);
+      expect(call.state.value.status, isA<CallStatusDisconnected>());
+    },
+  );
 
   group('end', () {
     test('ends the call on the server and settles disconnected', () async {
