@@ -21,8 +21,6 @@ class CallConnectionCoordinator {
   String? _unifiedSessionId;
 
   Duration _fastReconnectDeadline = Duration.zero;
-  Future<InternetStatus>? _awaitNetworkAvailableFuture;
-  Future<Result<None>>? _awaitMigrationCompleteFuture;
 
   /// Where the connection is. [_publishStatus] writes the connection status
   /// it projects to; a disconnect written into the state elsewhere moves it to
@@ -34,9 +32,26 @@ class CallConnectionCoordinator {
 
   bool get _isLeftOrLeaving => _phase.value.isLeftOrLeaving;
 
-  /// Completes once the call is leaving or has left.
-  Future<void> get _whenLeft =>
-      _phase.firstWhere((phase) => phase.isLeftOrLeaving);
+  /// Waits for [future], or returns null as soon as the call is leaving.
+  Future<T?> _untilLeft<T>(Future<T> future) async {
+    final left = Completer<T?>();
+    final subscription = _phase.where((phase) => phase.isLeftOrLeaving).listen((
+      _,
+    ) {
+      if (!left.isCompleted) left.complete(null);
+    });
+
+    try {
+      return await Future.any<T?>([future, left.future]);
+    } finally {
+      await subscription.cancel();
+    }
+  }
+
+  /// Waits [duration], or less if the call starts leaving first.
+  Future<void> _delayUnlessLeft(Duration duration) {
+    return _untilLeft(Future<void>.delayed(duration));
+  }
 
   /// The strategy of the running reconnect, or
   /// [SfuReconnectionStrategy.unspecified] outside one.
@@ -162,9 +177,17 @@ class CallConnectionCoordinator {
       await leave(reason: DisconnectReason.reconnectionFailed());
     }
 
-    if (status is CallStatusDisconnected) {
-      _setPhase(ConnectionDisconnected(status.reason));
-      await _clear('status-disconnected');
+    // A disconnect this coordinator did not start: the call ended remotely,
+    // was deleted, or the user was blocked. It leaves like a local leave. A
+    // leave already running settles the phase itself.
+    if (status is CallStatusDisconnected && !_isLeftOrLeaving) {
+      try {
+        await _leave(reason: status.reason, remote: true);
+      } catch (error, stackTrace) {
+        _call._logger.e(
+          () => '[leave] remote leave failed: $error, stackTrace: $stackTrace',
+        );
+      }
     }
   }
 
@@ -267,13 +290,27 @@ class CallConnectionCoordinator {
       return e2eeResult;
     }
 
+    if (_isLeftOrLeaving) {
+      _call._logger.w(() => '[join] rejected (call was left)');
+      return failureWithError('call was left');
+    }
+
     await _call._streamVideo.state.setActiveCall(_call);
+
+    // Marking the call active can wait on another call leaving. A leave of
+    // this call in that time has already cleaned up, so undo the marking
+    // rather than register a call nothing would unregister.
+    if (_isLeftOrLeaving) {
+      _call._logger.w(() => '[join] rejected (call was left)');
+      await _call._streamVideo.state.removeActiveCall(_call);
+      return failureWithError('call was left');
+    }
 
     _call._streamVideo.clientEventReporter
       ..registerCall(_call.callCid)
       ..reportEvent(_call.callCid, ClientEventStage.joinInitiated);
 
-    final result =
+    final outcome =
         await _join(
               connectOptions: connectOptions,
               membersLimit: membersLimit,
@@ -283,34 +320,44 @@ class CallConnectionCoordinator {
             )
             .asCancelable()
             .storeIn(_idConnect, _cancelables)
-            .valueOrDefault(failureWithError('connect cancelled'));
+            .valueOrDefault(const JoinCancelled());
 
-    if (result.isSuccess) {
-      _call._logger.v(() => '[join] finished: $result');
-    } else {
-      _call._logger.e(() => '[join] failed: $result');
-      final videoError = result.getErrorOrNull();
-      await leave(
-        reason: videoError != null
-            ? DisconnectReason.failure(videoError)
-            : null,
-      );
+    // The join's leave decision; the reconnect loop makes its own.
+    switch (outcome) {
+      case JoinSucceeded():
+        _call._logger.v(() => '[join] finished');
+        return const Result.success(none);
+      case JoinCancelled():
+        _call._logger.w(() => '[join] cancelled (call was left)');
+        // The cause says why: a local leave, or a remote end or rejection.
+        final status = _call.state.value.status;
+        return failureWithError(
+          'connect cancelled',
+          cause: status is CallStatusDisconnected ? status.reason : null,
+        );
+      case JoinRingUnanswered(:final error, :final stackTrace):
+        _call._logger.e(() => '[join] ring not answered: $error');
+        await _call.reject(reason: CallRejectReason.timeout());
+        return Result.failure(error, stackTrace);
+      case JoinFailed(:final error, :final stackTrace):
+        _call._logger.e(() => '[join] failed: $error');
+        await leave(reason: DisconnectReason.failure(error));
+        return Result.failure(error, stackTrace);
     }
-
-    return result;
   }
 
-  Future<Result<None>> _join({
+  /// Runs up to [maxJoinRetries] join attempts. Never leaves the call; the
+  /// caller decides from the outcome.
+  Future<JoinOutcome> _join({
     CallConnectOptions? connectOptions,
     int? membersLimit,
     int maxJoinRetries = 3,
     String? reconnectReason,
     bool? hintHighScaleLivestreamPublisher,
-    bool disconnectOnMaxRetries = true,
   }) async {
     if (_callJoinLock.locked) {
       _call._logger.w(() => '[join] rejected (already joining)');
-      return failureWithError('already joining');
+      return const JoinRetry(StreamVideoException(message: 'already joining'));
     }
 
     return _callJoinLock.synchronized(() async {
@@ -324,54 +371,49 @@ class CallConnectionCoordinator {
       StackTrace? lastStackTrace;
 
       for (var attempt = 0; attempt < max(maxJoinRetries, 1); attempt++) {
-        final result = await runCatchingResult(
-          () => _doJoin(
-            connectOptions: connectOptions,
-            membersLimit: membersLimit,
-            sfuToForceExclude: sfuToForceExclude,
-            sfusToExclude: List.unmodifiable(sfusToExclude),
-            reconnectReason: reconnectReason,
-            hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
-            joinAttempt: attempt,
-          ),
+        final outcome = await _doJoinCatching(
+          connectOptions: connectOptions,
+          membersLimit: membersLimit,
+          sfuToForceExclude: sfuToForceExclude,
+          sfusToExclude: List.unmodifiable(sfusToExclude),
+          reconnectReason: reconnectReason,
+          hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
+          joinAttempt: attempt,
         );
 
-        if (result.isSuccess) {
+        if (outcome is! JoinRetry) {
           _call._logger.v(
-            () => '[join] attempt $attempt, cid: ${_call.callCid}, success',
+            () =>
+                '[join] attempt $attempt, cid: ${_call.callCid}, '
+                'outcome: ${outcome.runtimeType}',
           );
-          sfuToForceExclude = null;
-          return result;
+          return outcome;
         } else {
+          final error = outcome.error;
           _call._logger.e(
             () =>
-                '[join] attempt $attempt, cid: ${_call.callCid}, failed: $result',
+                '[join] attempt $attempt, cid: ${_call.callCid}, failed: $error',
           );
 
-          final error = result.getErrorOrNull();
           lastError = error;
-          lastStackTrace = result.stackTraceOrNull();
+          lastStackTrace = outcome.stackTrace;
 
           if (_isUnrecoverableCoordinatorError(error)) {
             _call._logger.e(
               () => '[join] unrecoverable coordinator error, not retrying',
             );
-            await leave(reason: DisconnectReason.failure(error!));
-            return result;
+            return JoinGiveUp(error, outcome.stackTrace);
           }
 
-          final joinCause = error?.rawCause;
-          if (error != null && joinCause is SessionConnectionFailure) {
+          final joinCause = error.rawCause;
+          if (joinCause is SessionConnectionFailure) {
             final connectionFailure = joinCause;
 
             if (_isUnrecoverableSfuError(connectionFailure)) {
               _call._logger.e(
                 () => '[join] unrecoverable SFU error, not retrying',
               );
-              await leave(
-                reason: DisconnectReason.failure(error),
-              );
-              return result;
+              return JoinGiveUp(error, outcome.stackTrace);
             }
 
             final switchSfu = _isJoinErrorCode(connectionFailure);
@@ -406,9 +448,8 @@ class CallConnectionCoordinator {
           }
         }
 
-        await Future<void>.delayed(
-          _call._retryPolicy.backoff(attempt),
-        );
+        await _delayUnlessLeft(_call._retryPolicy.backoff(attempt));
+        if (_isLeftOrLeaving) return const JoinCancelled();
       }
 
       final failure =
@@ -417,12 +458,41 @@ class CallConnectionCoordinator {
             message: 'failed to join after $maxJoinRetries attempts',
           );
 
-      if (disconnectOnMaxRetries) {
-        await leave(reason: DisconnectReason.failure(failure));
-      }
-
-      return Result.failure(failure, lastStackTrace);
+      return JoinRetry(failure, lastStackTrace);
     });
+  }
+
+  /// Runs [_doJoin], turning a thrown error into [JoinRetry]. [_join] then
+  /// decides whether the error is worth retrying.
+  Future<JoinOutcome> _doJoinCatching({
+    CallConnectOptions? connectOptions,
+    int? membersLimit,
+    String? sfuToForceExclude,
+    List<String> sfusToExclude = const [],
+    String? reconnectReason,
+    bool? hintHighScaleLivestreamPublisher,
+    int joinAttempt = 0,
+  }) async {
+    try {
+      return await _doJoin(
+        connectOptions: connectOptions,
+        membersLimit: membersLimit,
+        sfuToForceExclude: sfuToForceExclude,
+        sfusToExclude: sfusToExclude,
+        reconnectReason: reconnectReason,
+        hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
+        joinAttempt: joinAttempt,
+      );
+    } catch (error, stackTrace) {
+      return JoinRetry(
+        StreamVideoExceptionWithCause(
+          message: error.toString(),
+          cause: error,
+          stackTrace: stackTrace,
+        ),
+        stackTrace,
+      );
+    }
   }
 
   SfuError? _extractSfuError(SessionConnectionFailure failure) {
@@ -462,7 +532,7 @@ class CallConnectionCoordinator {
         : _reconnectAttempts;
   }
 
-  Future<Result<None>> _doJoin({
+  Future<JoinOutcome> _doJoin({
     CallConnectOptions? connectOptions,
     int? membersLimit,
     String? sfuToForceExclude,
@@ -478,9 +548,9 @@ class CallConnectionCoordinator {
       _call._streamVideo.currentUser.id,
     );
 
-    if (validation.isFailure) {
+    if (validation is Failure) {
       _call._logger.w(() => '[join] rejected (validation): $validation');
-      return validation;
+      return JoinRetry(validation.videoError, validation.stackTrace);
     }
 
     _call._logger.v(() => '[join] validated');
@@ -492,18 +562,20 @@ class CallConnectionCoordinator {
     final performingFastReconnect =
         _reconnectStrategy == SfuReconnectionStrategy.fast;
 
+    final ringing =
+        _call.state.value.status is CallStatusOutgoing ||
+        _call.state.value.status is CallStatusIncoming;
     final result = await _awaitIfNeeded();
-    if (result.isFailure) {
-      _call._logger.e(() => '[join] waiting failed: $result');
-
-      await _call.reject(reason: CallRejectReason.timeout());
-
-      return result;
-    }
-
     if (_isLeftOrLeaving) {
       _call._logger.w(() => '[join] rejected (call was left)');
-      return failureWithError('call was left');
+      return const JoinCancelled();
+    }
+
+    if (result is Failure) {
+      _call._logger.e(() => '[join] waiting failed: $result');
+      return ringing
+          ? JoinRingUnanswered(result.videoError, result.stackTrace)
+          : JoinGiveUp(result.videoError, result.stackTrace);
     }
 
     // Within a reconnect this restates the joining status the loop set just
@@ -524,9 +596,8 @@ class CallConnectionCoordinator {
     if (joinedResult is! Success<CallCredentials>) {
       _call._logger.e(() => '[join] coordinator joining failed: $joinedResult');
 
-      final error = (joinedResult as Failure).videoError;
-      await leave(reason: DisconnectReason.failure(error));
-      return joinedResult;
+      final failure = joinedResult as Failure;
+      return JoinRetry(failure.videoError, failure.stackTrace);
     }
 
     _credentials = joinedResult.data;
@@ -534,7 +605,7 @@ class CallConnectionCoordinator {
 
     if (_isLeftOrLeaving) {
       _call._logger.w(() => '[join] rejected (call was left during joining)');
-      return failureWithError('call was left');
+      return const JoinCancelled();
     }
 
     final reconnectDetails =
@@ -563,6 +634,7 @@ class CallConnectionCoordinator {
       );
     }
 
+    Future<Result<None>>? migrationComplete;
     if (!canFastReconnect) {
       _call._logger.v(
         () =>
@@ -608,7 +680,7 @@ class CallConnectionCoordinator {
       );
 
       if (performingMigration) {
-        _awaitMigrationCompleteFuture = _session!.waitForMigrationComplete();
+        migrationComplete = _session!.waitForMigrationComplete();
       }
 
       _call.dynascaleManager.init(
@@ -620,7 +692,7 @@ class CallConnectionCoordinator {
         _call._logger.w(
           () => '[join] rejected (call was left during session creation)',
         );
-        return failureWithError('call was left');
+        return const JoinCancelled();
       }
 
       _call._logger.d(() => '[join] starting sfu session');
@@ -637,9 +709,11 @@ class CallConnectionCoordinator {
         );
 
         final error = (sessionResult as Failure).videoError;
-        return failureWithError(
-          error.message,
-          cause: SessionConnectionFailure(error: error),
+        return JoinRetry(
+          StreamVideoExceptionWithCause(
+            message: error.message,
+            cause: SessionConnectionFailure(error: error),
+          ),
         );
       }
     } else {
@@ -672,7 +746,9 @@ class CallConnectionCoordinator {
           _updateReconnect((phase) => phase.copyWith(rejoinPending: true));
         }
 
-        return failureWithError('fast reconnecting failed');
+        return const JoinRetry(
+          StreamVideoException(message: 'fast reconnecting failed'),
+        );
       }
 
       _call._logger.v(() => '[join] fast reconnecting success');
@@ -731,7 +807,7 @@ class CallConnectionCoordinator {
     _call.viewportVisibility.reapplyAll();
 
     _call._logger.v(() => '[join] completed');
-    return const Result.success(none);
+    return JoinSucceeded(migrationComplete: migrationComplete);
   }
 
   Future<Result<CallCredentials>> _joinIfNeeded({
@@ -1225,7 +1301,7 @@ class CallConnectionCoordinator {
             _reconnectStrategy == SfuReconnectionStrategy.fast
             ? fastReconnectAttemptsCount
             : _reconnectAttempts;
-        await Future<void>.delayed(
+        await _delayUnlessLeft(
           _call._retryPolicy.backoff(
             max(strategyAttempt, unexpectedErrorCount),
           ),
@@ -1309,7 +1385,7 @@ class CallConnectionCoordinator {
 
         // Started only once the status says waiting, so an offline report
         // from the wait cannot be overwritten by it.
-        _awaitNetworkAvailableFuture = _awaitNetworkAvailable(
+        final networkAvailable = _awaitNetworkAvailable(
           stabilityWindow: stabilityWindow,
           onStatus: (status) => _setReconnectStep(
             status == InternetStatus.connected
@@ -1329,7 +1405,7 @@ class CallConnectionCoordinator {
             _reconnectStrategy == SfuReconnectionStrategy.migrate;
 
         try {
-          final networkStatus = await _awaitNetworkAvailableFuture;
+          final networkStatus = await networkAvailable;
           _call._logger.v(() => '[reconnect] network: $networkStatus');
 
           if (_isLeftOrLeaving) {
@@ -1368,7 +1444,7 @@ class CallConnectionCoordinator {
 
           _setReconnectStep(CallReconnectPhase.joining);
 
-          final reconnectResult = switch (_reconnectStrategy) {
+          final outcome = switch (_reconnectStrategy) {
             SfuReconnectionStrategy.fast => await _reconnectFast(
               reason: reconnectReason,
             ),
@@ -1378,25 +1454,33 @@ class CallConnectionCoordinator {
             SfuReconnectionStrategy.migrate => await _reconnectMigrate(
               reason: reconnectReason,
             ),
-            _ => const Result.success(none),
+            _ => const JoinSucceeded(),
           };
 
           // The attempt ran to completion, so the throw counter no longer
           // applies to the backoff.
           unexpectedErrorCount = 0;
 
-          if (reconnectResult.isSuccess) {
-            _session?.trace(TraceTag.callReconnectSuccess, {
-              'strategy': strategy.name,
-            });
-          } else {
-            _call._logger.w(
-              () =>
-                  '[reconnect] failed: ${reconnectResult.getErrorOrNull()}, '
-                  'strategy: $_reconnectStrategy, attempt: $_reconnectAttempts',
-            );
+          switch (outcome) {
+            case JoinSucceeded():
+              _session?.trace(TraceTag.callReconnectSuccess, {
+                'strategy': strategy.name,
+              });
+            case JoinCancelled():
+              _call._logger.w(() => '[reconnect] cancelled (call was left)');
+              return;
+            case JoinGiveUp(:final error) || JoinRingUnanswered(:final error):
+              _call._logger.e(() => '[reconnect] giving up: $error');
+              await leave(reason: DisconnectReason.failure(error));
+              return;
+            case JoinRetry(:final error):
+              _call._logger.w(
+                () =>
+                    '[reconnect] failed: $error, '
+                    'strategy: $_reconnectStrategy, attempt: $_reconnectAttempts',
+              );
 
-            await handleReconnectFailure(wasMigrating: wasMigrating);
+              await handleReconnectFailure(wasMigrating: wasMigrating);
           }
         } catch (error) {
           switch (error) {
@@ -1430,43 +1514,44 @@ class CallConnectionCoordinator {
     });
   }
 
-  Future<Result<None>> _reconnectFast({String? reason}) async {
-    return _join(
-      reconnectReason: reason,
-      maxJoinRetries: 1,
-      disconnectOnMaxRetries: false,
-    );
+  Future<JoinOutcome> _reconnectFast({String? reason}) async {
+    return _join(reconnectReason: reason, maxJoinRetries: 1);
   }
 
-  Future<Result<None>> _reconnectRejoin({String? reason}) async {
+  Future<JoinOutcome> _reconnectRejoin({String? reason}) async {
     _updateReconnect(
       (phase) => phase.copyWith(rejoinAttempts: phase.rejoinAttempts + 1),
     );
-    return _join(reconnectReason: reason, disconnectOnMaxRetries: false);
+    return _join(reconnectReason: reason);
   }
 
-  Future<Result<None>> _reconnectMigrate({String? reason}) async {
+  Future<JoinOutcome> _reconnectMigrate({String? reason}) async {
     final migrateTimeStopwatch = Stopwatch()..start();
 
     _updateReconnect(
       (phase) => phase.copyWith(rejoinAttempts: phase.rejoinAttempts + 1),
     );
-    final joinResult = await _join(
-      reconnectReason: reason,
-      disconnectOnMaxRetries: false,
-    );
+    final outcome = await _join(reconnectReason: reason);
 
-    if (joinResult.isFailure) {
-      _call._logger.e(() => '[reconnectMigrate] join failed: $joinResult');
-      return joinResult;
+    if (outcome is! JoinSucceeded) {
+      _call._logger.e(() => '[reconnectMigrate] join failed: $outcome');
+      return outcome;
     }
 
     await _previousSession?.close(StreamVideoCloseCode.disposeOldSocket);
 
-    final migrationResult = await _awaitMigrationCompleteFuture;
-    if (migrationResult == null) {
+    final migrationComplete = outcome.migrationComplete;
+    if (migrationComplete == null) {
       _call._logger.e(() => '[reconnectMigrate] migration failed');
-      return failureWithError('migration failed');
+      return const JoinRetry(
+        StreamVideoException(message: 'migration failed'),
+      );
+    }
+
+    final migrationResult = await _untilLeft(migrationComplete);
+    if (migrationResult == null) {
+      _call._logger.w(() => '[reconnectMigrate] cancelled (call was left)');
+      return const JoinCancelled();
     }
 
     return migrationResult.foldResult(
@@ -1480,13 +1565,17 @@ class CallConnectionCoordinator {
             reconnectionStrategy: SfuReconnectionStrategy.migrate,
           ),
         );
-        return const Result.success(none);
+        return const JoinSucceeded();
       },
       failure: (_) {
         _call._logger.e(
           () => '[reconnectMigrate] migration did not complete correctly',
         );
-        return failureWithError('migration did not complete correctly');
+        return const JoinRetry(
+          StreamVideoException(
+            message: 'migration did not complete correctly',
+          ),
+        );
       },
     );
   }
@@ -1536,21 +1625,11 @@ class CallConnectionCoordinator {
               },
             );
 
-        final lifecycleFuture = _whenLeft.then((_) {
+        final connectionStatus = await _untilLeft(networkFuture);
+        if (connectionStatus == null) {
           _call._logger.w(() => '[_awaitNetworkAvailable] call was left');
           return InternetStatus.disconnected;
-        });
-
-        // Race the network against leaving, so a call that is left stops
-        // waiting for the network.
-        final connectionStatus =
-            await Future.any([
-                  networkFuture,
-                  lifecycleFuture,
-                ])
-                .asCancelable()
-                .storeIn(_idFastReconnectTimeout, _cancelables)
-                .valueOrDefault(InternetStatus.disconnected);
+        }
 
         if (connectionStatus == InternetStatus.disconnected) {
           return connectionStatus;
@@ -1591,7 +1670,7 @@ class CallConnectionCoordinator {
           final settleDelay = left < checkInterval ? left : checkInterval;
 
           if (settleDelay > Duration.zero) {
-            await Future<void>.delayed(settleDelay);
+            await _delayUnlessLeft(settleDelay);
           }
         } on TimeoutException {
           // No drop detected within the window — network is stable.
@@ -1633,28 +1712,29 @@ class CallConnectionCoordinator {
     }
 
     if (futureResult != null) {
-      _call._logger.v(() => '[awaitIfNeeded] return cancelable');
-
-      final lifecycleFuture = _whenLeft.then<Result<None>>(
-        (_) {
-          _call._logger.w(() => '[awaitIfNeeded] call was left');
-          return const Result.failure('call was left');
-        },
-      );
-
-      // Race the wait against leaving, so a call that is left stops waiting
-      // for the call status to change.
-      return Future.any([
-        futureResult,
-        lifecycleFuture,
-      ]).asCancelable().storeIn(_idAwait, _cancelables).value;
+      final result = await _untilLeft(futureResult);
+      if (result == null) {
+        _call._logger.w(() => '[awaitIfNeeded] call was left');
+        return failureWithError('call was left');
+      }
+      return result;
     }
 
     return const Result.success(none);
   }
 
-  Future<Result<None>> leave({DisconnectReason? reason}) async {
-    _call._logger.i(() => '[leave] reason: $reason');
+  Future<Result<None>> leave({DisconnectReason? reason}) {
+    return _leave(reason: reason);
+  }
+
+  /// Leaves the call for [reason]. A [remote] leave follows a disconnect
+  /// written into the state from elsewhere, so the status is already
+  /// disconnected.
+  Future<Result<None>> _leave({
+    DisconnectReason? reason,
+    bool remote = false,
+  }) async {
+    _call._logger.i(() => '[leave] reason: $reason, remote: $remote');
 
     final abortCode = switch (reason) {
       DisconnectReasonEnded() ||
@@ -1672,6 +1752,7 @@ class CallConnectionCoordinator {
     try {
       didDisconnect = await _disconnect(
         sfuLeaveReason: _sfuLeaveReason(reason),
+        remote: remote,
       );
     } catch (_) {
       // A teardown that throws still leaves the call.
@@ -1733,10 +1814,15 @@ class CallConnectionCoordinator {
   /// Shared cleanup sequence for [leave] and [end].
   ///
   /// Moves to [ConnectionLeaving], which stops in-flight join and reconnect
-  /// work at its next check, sends the SFU leave message, and runs [_clear]. Returns `true`
-  /// when the cleanup actually ran; `false` if it was short-circuited because
-  /// a disconnect was already in flight or the call was already disconnected.
-  Future<bool> _disconnect({required String sfuLeaveReason}) async {
+  /// work at its next check, sends the SFU leave message, and runs [_clear].
+  /// Returns `true` when the cleanup ran; `false` if it was short-circuited
+  /// because a disconnect was already in flight or the call had left. A
+  /// [remote] disconnect runs even though the status already says
+  /// disconnected, since that status is what started it.
+  Future<bool> _disconnect({
+    required String sfuLeaveReason,
+    bool remote = false,
+  }) async {
     if (_phase.value is ConnectionLeaving) {
       _call._logger.i(() => '[disconnect] rejected (already disconnecting)');
       return false;
@@ -1744,7 +1830,7 @@ class CallConnectionCoordinator {
 
     final status = _call.state.value.status;
     if (_phase.value is ConnectionDisconnected ||
-        status is CallStatusDisconnected) {
+        (!remote && status is CallStatusDisconnected)) {
       _setPhase(
         ConnectionDisconnected(
           status is CallStatusDisconnected ? status.reason : null,

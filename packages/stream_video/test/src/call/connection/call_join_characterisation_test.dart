@@ -122,7 +122,7 @@ void main() {
       final results = await Future.wait([first, second]);
       expect(
         results.map((r) => r.getErrorOrNull()?.message),
-        ['connect cancelled', 'connect cancelled'],
+        ['forbidden', 'forbidden'],
       );
       harness.verifyJoinCallCount(1);
     });

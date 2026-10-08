@@ -38,7 +38,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 | 8 | FLU-928 | `fix/flu-928-captions-zero-duration` | #1414 |
 | 9 | A2 | `feat/flu-855-call-connection-coordinator` | #1415 |
 | 10 | A3 | `feat/flu-860-connection-phase` | #1417 |
-| 11 | A4 | `fix/flu-864-single-leave-decision` | |
+| 11 | A4 | `fix/flu-864-single-leave-decision` | #1418 |
 | 12 | A5 | `feat/flu-865-serial-join-executor` | |
 | 13 | A6 | `fix/flu-861-session-ownership` | |
 | 14 | A7 | `feat/flu-862-call-dispose` | |
@@ -61,8 +61,8 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 - [x] 8. **Fix** [FLU-928](https://linear.app/stream/issue/FLU-928): closed captions never show when the visibility duration is 0 (S, bug). Settle the option from the ticket in the plan; option 1 needs a changelog line.
 - [x] 9. **A2** [FLU-855](https://linear.app/stream/issue/FLU-855): verbatim `CallConnectionCoordinator` (L, high risk). Zero behaviour change; existing tests and A1 stay green untouched.
 - [x] 10. **A3** [FLU-860](https://linear.app/stream/issue/FLU-860): sealed `ConnectionPhase` replaces the connection flags (L, high risk). Leaving is final, which fixes bug 2 from FLU-859 here instead of in A4.
-- [ ] 11. **A4** [FLU-864](https://linear.app/stream/issue/FLU-864): one leave decision and one cancellation scope per attempt (M). Fixes bug 1 from FLU-859.
-- [ ] 12. **A5** [FLU-865](https://linear.app/stream/issue/FLU-865): serial executor for join and reconnect (M).
+- [x] 11. **A4** [FLU-864](https://linear.app/stream/issue/FLU-864): one leave decision and one cancellation scope per attempt (M). Fixes bug 1 from FLU-859. Waits end on leave, and a remote end leaves like a local leave.
+- [ ] 12. **A5** [FLU-865](https://linear.app/stream/issue/FLU-865): serial executor for join and reconnect (M). This removes `_join`'s "already joining" guard along with `_callJoinLock`. Today it returns `JoinRetry`, which would make `join()` leave a call another join is connecting, and make the reconnect loop count a failed attempt. Nothing reaches it today, because the join dedupe and `_reconnect`'s lock check come first.
 - [ ] 13. **A6** [FLU-861](https://linear.app/stream/issue/FLU-861): single session ownership and a complete teardown (S). Fixes bugs 3 and 5, and folds in [FLU-925](https://linear.app/stream/issue/FLU-925) (timers re-armed during leave).
 - [ ] 14. **A7** [FLU-862](https://linear.app/stream/issue/FLU-862): `Call.dispose` and the single-use-after-leave error (S, v2 breaking).
 - [ ] 15. **B1** [FLU-848](https://linear.app/stream/issue/FLU-848): `LocalMediaController` (M). After the A chain, so `_connectOptions` moves once with A2 and then gets one owner here.
