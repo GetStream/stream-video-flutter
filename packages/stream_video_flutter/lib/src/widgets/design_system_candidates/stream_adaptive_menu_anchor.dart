@@ -630,11 +630,14 @@ class _MenuSheet extends StatelessWidget {
                       padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
                       child: StreamListTile(
                         // The design's mobile list item is 48 tall: the tile's
-                        // 40 minimum plus spacing.xxs above and below.
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: spacing.sm,
-                          vertical: spacing.xxs,
-                        ),
+                        // 40 minimum plus spacing.xxs above and below. An app
+                        // that themes the padding keeps its own.
+                        contentPadding:
+                            StreamListTileTheme.of(context).contentPadding ??
+                            EdgeInsets.symmetric(
+                              horizontal: spacing.sm,
+                              vertical: spacing.xxs,
+                            ),
                         leading: _StreamAdaptiveMenuAnchorState._leadingOf(
                           option,
                         ),

@@ -117,6 +117,7 @@ void main() {
       await tester.tap(find.text('open'));
       await tester.pumpAndSettle();
 
+      expect(find.byType(StreamSheetHeader), findsOneWidget);
       final row = tester.getSize(find.byType(StreamListTile).first);
       expect(row.height, 48);
     });
