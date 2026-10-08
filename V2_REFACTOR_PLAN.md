@@ -55,7 +55,7 @@ stacks.
 | 17 | A6 | `fix/flu-861-session-ownership` | #1427 |
 | 18 | A7 | `feat/flu-862-call-dispose` | #1429 |
 | 19 | B1 | `feat/flu-848-local-media-controller` | #1434 |
-| 20 | C2 | `feat/flu-853-stream-video-test-seams` | |
+| 20 | C2 | `feat/flu-853-stream-video-test-seams` | #1435 |
 | 21 | C3 | `fix/flu-857-coordinator-connection` | |
 | 22 | C1 | `feat/flu-856-ringing-call-coordinator` | |
 | 23 | B3 | `feat/flu-863-call-ringing-controller` | |
