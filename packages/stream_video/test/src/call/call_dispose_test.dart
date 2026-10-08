@@ -245,6 +245,38 @@ void main() {
     harness.verifyJoinCallCount(0);
   });
 
+  group('dispose after an end whose server call throws completes', () {
+    Future<Call> joinWithEndCallThrowing() async {
+      final call = harness.buildCall();
+      await call.join();
+      when(
+        harness.permissionsManager.endCall,
+      ).thenThrow(StateError('end call failed'));
+      return call;
+    }
+
+    test('after a teardown that succeeded', () async {
+      final call = await joinWithEndCallThrowing();
+
+      await expectLater(call.end(), throwsStateError);
+      await call.dispose().timeout(const Duration(seconds: 5));
+
+      expect(call.state.value.status, isA<CallStatusDisconnected>());
+    });
+
+    test('after a teardown that threw', () async {
+      final call = await joinWithEndCallThrowing();
+      when(
+        () => harness.streamVideo.state.removeActiveCall(any()),
+      ).thenThrow(StateError('teardown failed'));
+
+      await expectLater(call.end(), throwsStateError);
+      await call.dispose().timeout(const Duration(seconds: 5));
+
+      expect(call.state.value.status, isA<CallStatusDisconnected>());
+    });
+  });
+
   test('dispose still closes the streams when the leave throws', () async {
     final call = harness.buildCall();
     await call.join();

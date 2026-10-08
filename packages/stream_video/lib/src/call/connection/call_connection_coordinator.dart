@@ -2174,8 +2174,11 @@ class CallConnectionCoordinator {
       );
     } catch (_) {
       // The teardown failed here, but the call still ends for everyone.
-      await _call._permissionsManager.endCall();
-      _settleDisconnected(DisconnectReason.ended());
+      try {
+        await _call._permissionsManager.endCall();
+      } finally {
+        _settleDisconnected(DisconnectReason.ended());
+      }
       rethrow;
     }
 
@@ -2187,9 +2190,13 @@ class CallConnectionCoordinator {
       return const Result.success(none);
     }
 
-    final result = await _call._permissionsManager.endCall();
-    _setPhase(ConnectionDisconnected(DisconnectReason.ended()));
-    _call._stateManager.lifecycleCallEnded();
+    final Result<None> result;
+    try {
+      result = await _call._permissionsManager.endCall();
+    } finally {
+      _setPhase(ConnectionDisconnected(DisconnectReason.ended()));
+      _call._stateManager.lifecycleCallEnded();
+    }
 
     _call._logger.v(() => '[end] completed: $result');
     return result;
