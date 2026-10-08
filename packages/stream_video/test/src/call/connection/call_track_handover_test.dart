@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/call/stats/stats_reporter.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
@@ -17,6 +18,8 @@ class _MockRtcManager extends Mock implements RtcManager {
   @override
   Future<void> dispose() async {}
 }
+
+class _MockStatsReporter extends Mock implements StatsReporter {}
 
 class _FakeMediaStreamTrack extends Fake implements rtc.MediaStreamTrack {
   int stopCallCount = 0;
@@ -49,6 +52,7 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
     registerMockFallbackValues();
     registerFallbackValue(MockRtcLocalTrack());
+    registerFallbackValue(Duration.zero);
   });
 
   late ConnectionHarness harness;
@@ -189,7 +193,7 @@ void main() {
 
       verifyInOrder([
         first.handOverLocalTracks,
-        () => first.close(CloseCode.normalClosure),
+        first.dispose,
       ]);
       verify(() => second.setLocalTrack(camera)).called(1);
       // Only unmutes the published track; a new one is never captured.
@@ -495,5 +499,183 @@ void main() {
       verifyNever(() => third.setLocalTrack(camera));
     },
     timeout: const Timeout(Duration(seconds: 40)),
+  );
+
+  Result<SessionStartResult> unreachable() => const Result.failure(
+    StreamVideoException(message: 'sfu unreachable'),
+  );
+
+  test(
+    'a rejoin whose first attempt fails still takes the tracks from the '
+    'session it started from, and disposes both',
+    () async {
+      final [first, second, third] = setUpHarness(3).sessions;
+      final camera = liveTrack(SfuTrackType.video, const CameraConstraints());
+      when(first.handOverLocalTracks).thenReturn([camera]);
+      harness.stubSessionStart(second, () async => unreachable());
+      final call = harness.buildCall();
+      await call.join(
+        connectOptions: CallConnectOptions(camera: TrackOption.enabled()),
+      );
+
+      harness.requestReconnect(0, SfuReconnectionStrategy.rejoin);
+      await waitUntil(
+        () => harness.reconnectionCallbacks.length == 3,
+        timeout: const Duration(seconds: 15),
+      );
+      await waitUntil(() => call.state.value.status is CallStatusConnected);
+      await pumpEventQueue();
+
+      verify(() => third.setLocalTrack(camera)).called(1);
+      verify(first.dispose).called(1);
+      verify(second.dispose).called(1);
+      verifyNever(third.dispose);
+    },
+    timeout: const Timeout(Duration(seconds: 40)),
+  );
+
+  test(
+    'a migration whose join fails hands the old session to the rejoin that '
+    'follows, which takes its tracks and disposes it',
+    () async {
+      final sessions = setUpHarness(5).sessions;
+      final [first, second, third, fourth, fifth] = sessions;
+      final camera = liveTrack(SfuTrackType.video, const CameraConstraints());
+      when(first.handOverLocalTracks).thenReturn([camera]);
+      for (final failing in [second, third, fourth]) {
+        harness.stubSessionStart(failing, () async => unreachable());
+      }
+      final call = harness.buildCall();
+      await call.join(
+        connectOptions: CallConnectOptions(camera: TrackOption.enabled()),
+      );
+      final statuses = recordStatuses(call);
+
+      await goAway(first);
+      await waitUntil(
+        () => harness.reconnectionCallbacks.length == 5,
+        timeout: const Duration(seconds: 40),
+      );
+      await waitUntil(() => call.state.value.status is CallStatusConnected);
+      await pumpEventQueue();
+
+      expect(
+        statuses,
+        containsAllInOrder([
+          isA<CallStatusMigrating>(),
+          isA<CallStatusReconnecting>(),
+          isA<CallStatusConnected>(),
+        ]),
+      );
+      verify(() => fifth.setLocalTrack(camera)).called(1);
+      verify(() => first.leave(reason: any(named: 'reason'))).called(1);
+      for (final released in [first, second, third, fourth]) {
+        verify(released.dispose).called(1);
+      }
+      verifyNever(fifth.dispose);
+    },
+    timeout: const Timeout(Duration(seconds: 60)),
+  );
+
+  test(
+    'a leave during a reconnect attempt sends the SFU leave on the '
+    "attempt's session and the one it started from, and disposes both",
+    () async {
+      final [first, second, _] = setUpHarness(3).sessions;
+      final startGate = Completer<Result<SessionStartResult>>();
+      var starting = false;
+      harness.stubSessionStart(second, () {
+        starting = true;
+        return startGate.future;
+      });
+      final call = harness.buildCall();
+      await call.join();
+
+      harness.requestReconnect(0, SfuReconnectionStrategy.rejoin);
+      await waitUntil(() => starting);
+      final left = call.leave();
+      startGate.complete(unreachable());
+      await left;
+      await pumpEventQueue();
+
+      // Both get the SFU leave, then are disposed.
+      verify(() => first.leave(reason: any(named: 'reason'))).called(1);
+      verify(() => second.leave(reason: any(named: 'reason'))).called(1);
+      verify(first.dispose).called(1);
+      verify(second.dispose).called(1);
+      harness.verifyMakeCallSessionCount(2);
+    },
+    timeout: const Timeout(Duration(seconds: 30)),
+  );
+
+  test(
+    'a leave while a reconnect creates its session disposes that session '
+    'and never installs it',
+    () async {
+      final [first, second] = setUpHarness(2).sessions;
+      final gate = Completer<void>();
+      var made = 0;
+      var creating = false;
+      // Holds only the reconnect's session, not the join's.
+      harness.stubMakeCallSession(() async {
+        if (made++ == 0) return;
+        creating = true;
+        await gate.future;
+      });
+      final call = harness.buildCall();
+      await call.join();
+
+      harness.requestReconnect(0, SfuReconnectionStrategy.rejoin);
+      await waitUntil(() => creating);
+      await call.leave();
+      gate.complete();
+      await pumpEventQueue();
+
+      verify(first.dispose).called(1);
+      verify(second.dispose).called(1);
+      expect(call.callSession, same(first));
+      verifyNever(
+        () => second.start(
+          reconnectDetails: any(named: 'reconnectDetails'),
+          onRtcManagerCreatedCallback: any(
+            named: 'onRtcManagerCreatedCallback',
+          ),
+          isAnonymousUser: any(named: 'isAnonymousUser'),
+          capabilities: any(named: 'capabilities'),
+          unifiedSessionId: any(named: 'unifiedSessionId'),
+          clientEventRetryCount: any(named: 'clientEventRetryCount'),
+        ),
+      );
+    },
+    timeout: const Timeout(Duration(seconds: 30)),
+  );
+
+  test(
+    'a session that starts after a leave gets no stats subscription',
+    () async {
+      final [first, second] = setUpHarness(2).sessions;
+      final statsReporter = _MockStatsReporter();
+      when(() => second.statsReporter).thenReturn(statsReporter);
+      final startGate = Completer<Result<SessionStartResult>>();
+      var starting = false;
+      harness.stubSessionStart(second, () {
+        starting = true;
+        return startGate.future;
+      });
+      final call = harness.buildCall();
+      await call.join();
+
+      harness.requestReconnect(0, SfuReconnectionStrategy.rejoin);
+      await waitUntil(() => starting);
+      final left = call.leave();
+      startGate.complete(sessionStartSuccess());
+      await left;
+      await pumpEventQueue();
+
+      verifyNever(() => statsReporter.run(interval: any(named: 'interval')));
+      verify(first.dispose).called(1);
+      verify(second.dispose).called(1);
+    },
+    timeout: const Timeout(Duration(seconds: 30)),
   );
 }

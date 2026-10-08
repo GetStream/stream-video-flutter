@@ -27,7 +27,7 @@ void main() {
   tearDown(() => harness.dispose());
 
   test(
-    'a go-away migrates to a new SFU session and closes the old one once '
+    'a go-away migrates to a new SFU session and disposes the old one once '
     'the old SFU confirms',
     () async {
       harness = ConnectionHarness(sessionCount: 2);
@@ -50,20 +50,14 @@ void main() {
       await pumpEventQueue();
       expect(call.state.value.status, isA<CallStatusMigrating>());
       verify(first.waitForMigrationComplete).called(1);
-      verifyNever(
-        () => first.close(any(), closeReason: any(named: 'closeReason')),
-      );
+      verifyNever(first.dispose);
 
       migrationGate.complete(const Result.success(none));
       await waitUntil(() => call.state.value.status is CallStatusConnected);
 
-      verify(
-        () => first.close(CloseCode.normalClosure),
-      ).called(1);
+      verify(first.dispose).called(1);
       verifyNever(second.waitForMigrationComplete);
-      verifyNever(
-        () => second.close(any(), closeReason: any(named: 'closeReason')),
-      );
+      verifyNever(second.dispose);
       verify(
         () => harness.coordinatorClient.joinCall(
           callCid: any(named: 'callCid'),
@@ -98,8 +92,8 @@ void main() {
   );
 
   test(
-    'a migration whose first attempt fails still waits on and closes the '
-    'session it started from',
+    'a migration whose first attempt fails still waits on the session it '
+    'started from, then disposes it and the failed attempt',
     () async {
       harness = ConnectionHarness(sessionCount: 3);
       final [first, second, third] = harness.sessions;
@@ -127,9 +121,9 @@ void main() {
       verify(first.waitForMigrationComplete).called(2);
       verifyNever(second.waitForMigrationComplete);
       verifyNever(third.waitForMigrationComplete);
-      verify(
-        () => first.close(CloseCode.normalClosure),
-      ).called(1);
+      verify(first.dispose).called(1);
+      verify(second.dispose).called(1);
+      verifyNever(third.dispose);
       verify(
         () => first.getReconnectDetails(
           SfuReconnectionStrategy.migrate,
@@ -149,31 +143,6 @@ void main() {
     },
     timeout: const Timeout(Duration(seconds: 40)),
   );
-
-  group('known hazard', () {
-    // Changes with FLU-861: a migration disposes the session it moved off.
-    test(
-      'a migration closes the old session but never disposes it',
-      () async {
-        harness = ConnectionHarness(sessionCount: 2);
-        final [first, _] = harness.sessions;
-        final call = harness.buildCall();
-        await call.join();
-
-        await harness.emitSfu(
-          first,
-          const SfuGoAwayEvent(goAwayReason: SfuGoAwayReason.rebalance),
-        );
-        await waitUntil(() => call.state.value.status is CallStatusConnected);
-
-        verify(
-          () => first.close(CloseCode.normalClosure),
-        ).called(1);
-        verifyNever(first.dispose);
-      },
-      timeout: const Timeout(Duration(seconds: 30)),
-    );
-  });
 
   test(
     'a migration that does not complete escalates to a rejoin',
@@ -210,9 +179,7 @@ void main() {
           isA<CallStatusConnected>(),
         ]),
       );
-      verify(
-        () => first.close(CloseCode.normalClosure),
-      ).called(1);
+      verify(first.dispose).called(1);
       verify(
         () => second.getReconnectDetails(
           SfuReconnectionStrategy.rejoin,
