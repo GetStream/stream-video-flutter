@@ -216,9 +216,6 @@ class CallConnectionCoordinator {
     SfuClientCapability.subscriberVideoPause, // on by default
   };
 
-  CallConnectOptions _connectOptions = const CallConnectOptions();
-  CallConnectOptions? _connectOptionsOverride;
-
   void _observeState() {
     _call._subscriptions.add(
       _idState,
@@ -620,7 +617,7 @@ class CallConnectionCoordinator {
     int joinAttempt = 0,
     CallSession? migratingFrom,
   }) async {
-    _call._logger.d(() => '[join] options: $_connectOptions');
+    _call._logger.d(() => '[join] options: ${_call.connectOptions}');
     final connectionTimeStopwatch = Stopwatch()..start();
 
     final validation = await _call._stateManager.validateUserId(
@@ -1057,18 +1054,10 @@ class CallConnectionCoordinator {
 
     // Apply call settings to connect options only when not reconnecting.
     if (_reconnectStrategy == SfuReconnectionStrategy.unspecified) {
-      await _call._applyCallSettingsToConnectOptions(
+      await _call._media.applyJoinSettings(
         receivedOrCreated.data.metadata.settings,
+        joinOptions: connectOptions,
       );
-
-      if (connectOptions != null) {
-        _connectOptions = _connectOptions.merge(connectOptions);
-      }
-
-      if (_connectOptionsOverride != null) {
-        _connectOptions = _connectOptions.merge(_connectOptionsOverride!);
-        _connectOptionsOverride = null;
-      }
     }
 
     _call._logger.v(
@@ -1190,8 +1179,8 @@ class CallConnectionCoordinator {
         ];
         _call._logger.v(() => '[startSession] applying connect options');
         unawaited(
-          _call
-              ._applyConnectOptions(
+          _call._media
+              .applyConnectOptions(
                 session: session,
                 inheritedTracks: inheritedTracks,
               )
@@ -2361,9 +2350,7 @@ class CallConnectionCoordinator {
 
       _call._stopRingStatePolling();
 
-      for (final operation in _call._sfuStatsTimers) {
-        await operation.cancel();
-      }
+      await _call._media.cancelSfuStatsTimers();
 
       await _flushAndStopSfuStatsReporter();
       _cancelables.cancelAll();
