@@ -7,6 +7,7 @@ import 'package:synchronized/synchronized.dart';
 
 import '../../protobuf/video/sfu/models/models.pbenum.dart';
 import '../../protobuf/video/sfu/signal_rpc/signal.pb.dart';
+import '../errors/stream_video_exception.dart';
 import '../errors/stream_video_exception_composer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
@@ -153,9 +154,9 @@ class StreamPeerConnection extends Disposable {
   /// Serializes [setRemoteDescription] and [addIceCandidate]
   final _candidateLock = Lock();
 
-  /// Attempts to restart ICE on the `RTCPeerConnection`.
-  /// If the restart fails, this method will trigger onReconnectionNeeded with
-  /// the appropriate reconnection strategy based on the error.
+  /// Attempts to restart ICE on the `RTCPeerConnection`. A failed restart asks
+  /// for the reconnect [_strategyAfterFailedIceRestart] picks, if any, unless a
+  /// fast reconnect started while it was in flight.
   void _tryRestartIce() {
     _logger.v(
       () => '[_tryRestartIce] #$type; isReconnecting: $_isReconnecting',
@@ -164,21 +165,61 @@ class StreamPeerConnection extends Disposable {
     // Skip automatic ICE restart if a reconnect is in progress.
     if (_isReconnecting) {
       _logger.i(
-        () =>
-            '[_tryRestartIce] skipping - reconnect in progress for subscriber',
+        () => '[_tryRestartIce] #$type; skipping - reconnect in progress',
       );
       return;
     }
 
     restartIce().then((result) {
-      if (result.isFailure) {
-        onReconnectionNeeded?.call(
-          this,
-          SfuReconnectionStrategy.fast,
-          ReconnectionNeededReason.connectionFailed,
+      if (result is! Failure) return;
+
+      // A fast reconnect that started while the restart was in flight
+      // restarts ICE itself.
+      if (_isReconnecting) {
+        _logger.i(
+          () => '[_tryRestartIce] #$type; restart failed during a reconnect',
         );
+        return;
       }
+
+      final error = result.videoError;
+      final strategy = _strategyAfterFailedIceRestart(error);
+      _logger.w(
+        () =>
+            '[_tryRestartIce] #$type; restart failed: $error, '
+            'asking for ${strategy?.name ?? 'no reconnect'}',
+      );
+      if (strategy == null) return;
+      onReconnectionNeeded?.call(
+        this,
+        strategy,
+        ReconnectionNeededReason.connectionFailed,
+      );
     });
+  }
+
+  /// The reconnect to ask for after an ICE restart failed with [error], or
+  /// null for none.
+  ///
+  /// Fast when the SFU reports the signal lost. Rejoin when the SFU refused
+  /// the restart, or when the publisher's local restart failed. None when the
+  /// subscriber's restart request got no answer from the SFU, such as while
+  /// offline.
+  SfuReconnectionStrategy? _strategyAfterFailedIceRestart(
+    StreamVideoException error,
+  ) {
+    final sfuError = error.sfuError;
+    if (sfuError != null) {
+      // The restart is answered by an RPC error, which carries no reconnect
+      // strategy, so the code decides.
+      return sfuError.code == SfuErrorCode.participantSignalLost
+          ? SfuReconnectionStrategy.fast
+          : SfuReconnectionStrategy.rejoin;
+    }
+
+    return type == StreamPeerType.subscriber
+        ? null
+        : SfuReconnectionStrategy.rejoin;
   }
 
   Future<Result<void>> restartIce() async {
@@ -463,15 +504,6 @@ class StreamPeerConnection extends Disposable {
             rtc.RTCPeerConnectionState.RTCPeerConnectionStateConnected;
   }
 
-  /// Whether the `RTCPeerConnection` is permanently closed and therefore
-  /// cannot be recovered by an ICE restart / fast reconnect.
-  bool isClosed() {
-    return pc.iceConnectionState ==
-            rtc.RTCIceConnectionState.RTCIceConnectionStateClosed ||
-        pc.connectionState ==
-            rtc.RTCPeerConnectionState.RTCPeerConnectionStateClosed;
-  }
-
   void _initRtcCallbacks() {
     pc
       ..onAddStream = _onAddStream
@@ -578,9 +610,10 @@ class StreamPeerConnection extends Disposable {
 
     if (state == rtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
       _logger.w(() => '[onConnectionState] state: $state');
+      // A failed connection asks for new peer connections.
       onReconnectionNeeded?.call(
         this,
-        SfuReconnectionStrategy.fast,
+        SfuReconnectionStrategy.rejoin,
         ReconnectionNeededReason.connectionFailed,
       );
     } else {

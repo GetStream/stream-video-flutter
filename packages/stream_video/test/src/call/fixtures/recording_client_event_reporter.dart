@@ -25,6 +25,9 @@ class RecordingClientEventReporter implements ClientEventReporter {
   /// Every join attempt reason reported, in order.
   final joinAttempts = <JoinReason>[];
 
+  /// The reason of every new join attempt asked for directly, in order.
+  final newJoinAttempts = <JoinReason>[];
+
   @override
   void abort(StreamCallCid cid, ClientEventStandardCode code) {
     aborts.add(code);
@@ -49,8 +52,10 @@ class RecordingClientEventReporter implements ClientEventReporter {
   }
 
   @override
-  void newJoinAttempt(StreamCallCid cid, {required JoinReason reason}) =>
-      _delegate.newJoinAttempt(cid, reason: reason);
+  void newJoinAttempt(StreamCallCid cid, {required JoinReason reason}) {
+    newJoinAttempts.add(reason);
+    _delegate.newJoinAttempt(cid, reason: reason);
+  }
 
   @override
   void setCallSessionId(StreamCallCid cid, String callSessionId) =>

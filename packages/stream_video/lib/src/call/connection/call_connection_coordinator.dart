@@ -1342,6 +1342,45 @@ class CallConnectionCoordinator {
   /// the session the reconnect is for; by default the current one. A held
   /// request is always for the current session: one for a replaced session
   /// is dropped.
+  ///
+  /// Every reconnect starts here. The strategy each cause asks for:
+  ///
+  /// | Cause                                               | Strategy      |
+  /// | --------------------------------------------------- | ------------- |
+  /// | The SFU socket closes or fails                      | fast          |
+  /// | The device goes offline                             | fast          |
+  /// | A peer connection's state turns failed              | rejoin        |
+  /// | The SFU refuses an ICE restart: signal lost         | fast          |
+  /// | The SFU refuses an ICE restart: otherwise           | rejoin        |
+  /// | An ICE restart fails without an answer from the SFU | none, logged  |
+  /// | A local publisher ICE restart fails                 | rejoin        |
+  /// | The publisher has not started connecting after 15 s | rejoin        |
+  /// | Renegotiating a publisher stuck on its offer fails  | fast          |
+  /// | A track mid that does not resolve                   | fast          |
+  /// | The SFU sends a GoAway                              | migrate       |
+  /// | An SFU error naming fast, rejoin or migrate         | that strategy |
+  ///
+  /// A socket closure or failure that is not reconnectable, and an SFU error
+  /// naming disconnect, leave the call instead. An SFU error naming no strategy
+  /// is ignored, and one with a join error code is left to the join's own
+  /// retries. The SFU refusing an ICE restart because the session is migrating
+  /// out counts as refusing it otherwise; that request is dropped once the
+  /// migration replaces the session.
+  ///
+  /// An attempt that would be fast is a rejoin instead when the device was
+  /// offline and the fast-reconnect deadline has passed.
+  ///
+  /// A failed attempt is retried as a rejoin when:
+  ///
+  /// - it was a rejoin;
+  /// - the fast-reconnect deadline has passed;
+  /// - three fast attempts have failed;
+  /// - a migration has failed;
+  /// - a peer connection is failed or closed;
+  /// - a rejoin or migrate was asked for meanwhile, which includes the SFU not
+  ///   resuming the session on a fast reconnect.
+  ///
+  /// Otherwise it is retried as fast.
   Future<void> _reconnect(
     SfuReconnectionStrategy strategy, {
     required ReconnectTrigger trigger,
@@ -1459,9 +1498,11 @@ class CallConnectionCoordinator {
         _call._logger.v(() => '[reconnect] next attempt covers held $held');
       }
 
-      final hasClosedPeerConnection =
-          (_session?.rtcManager?.publisher?.isClosed() ?? false) ||
-          (_session?.rtcManager?.subscriber.isClosed() ?? false);
+      // A failed or closed peer connection is not recovered by a fast
+      // reconnect.
+      final hasUnhealthyPeerConnection =
+          !(_session?.rtcManager?.publisher?.isHealthy() ?? true) ||
+          !(_session?.rtcManager?.subscriber.isHealthy() ?? true);
 
       final hasReachedFastReconnectLimit = fastReconnectAttemptsCount >= 2;
 
@@ -1474,7 +1515,7 @@ class CallConnectionCoordinator {
           mustPerformRejoin ||
           wasMigrating ||
           hasReachedFastReconnectLimit ||
-          hasClosedPeerConnection;
+          hasUnhealthyPeerConnection;
 
       final next = shouldRejoin
           ? SfuReconnectionStrategy.rejoin
@@ -1514,7 +1555,7 @@ class CallConnectionCoordinator {
       }
 
       _session?.trace(TraceTag.callReconnect, {
-        'strategy': strategy.name,
+        'strategy': _reconnectStrategy.name,
         'reason': reconnectReason,
       });
 
@@ -1526,15 +1567,51 @@ class CallConnectionCoordinator {
       );
       _publishStatus();
 
+      var wasOffline = false;
+      void onNetworkStatus(InternetStatus status) {
+        if (status != InternetStatus.connected) wasOffline = true;
+        _setReconnectStep(
+          status == InternetStatus.connected
+              ? CallReconnectPhase.waiting
+              : CallReconnectPhase.offline,
+        );
+      }
+
+      // Whether the loop stops after a network wait ended with [status]:
+      // the call was left, or the network did not come back in time.
+      bool stopsAfterNetworkWait(InternetStatus status) {
+        _call._logger.v(() => '[reconnect] network: $status');
+
+        if (_isLeftOrLeaving) {
+          _call._logger.w(
+            () => '[reconnect] rejected (call was left during network wait)',
+          );
+          _session?.trace(TraceTag.callReconnectFailed, {
+            'strategy': _reconnectStrategy.name,
+            'error': 'call was left',
+          });
+          return true;
+        }
+
+        if (status == InternetStatus.disconnected) {
+          _call._logger.w(() => '[reconnect] reconnection timeout');
+          _session?.trace(TraceTag.callReconnectFailed, {
+            'strategy': _reconnectStrategy.name,
+            'error': 'reconnection timeout',
+          });
+          _setPhase(const ConnectionReconnectFailed());
+          _publishStatus();
+          return true;
+        }
+
+        return false;
+      }
+
       // Started only once the status says waiting, so an offline report
       // from the wait cannot be overwritten by it.
       final networkAvailable = _awaitNetworkAvailable(
         stabilityWindow: stabilityWindow,
-        onStatus: (status) => _setReconnectStep(
-          status == InternetStatus.connected
-              ? CallReconnectPhase.waiting
-              : CallReconnectPhase.offline,
-        ),
+        onStatus: onNetworkStatus,
       );
 
       _call._logger.d(
@@ -1548,40 +1625,25 @@ class CallConnectionCoordinator {
           _reconnectStrategy == SfuReconnectionStrategy.migrate;
 
       try {
-        final networkStatus = await networkAvailable;
-        _call._logger.v(() => '[reconnect] network: $networkStatus');
+        if (stopsAfterNetworkWait(await networkAvailable)) return;
 
-        if (_isLeftOrLeaving) {
-          _call._logger.w(
-            () => '[reconnect] rejected (call was left during network wait)',
+        // Offline past the fast-reconnect deadline: the attempt rejoins
+        // instead. The deadline runs from when the reconnect started.
+        final elapsed = DateTime.now().difference(reconnectStartTime);
+        final offlinePastDeadline =
+            wasOffline &&
+            _fastReconnectDeadline > Duration.zero &&
+            elapsed > _fastReconnectDeadline;
+        if (offlinePastDeadline &&
+            _reconnectStrategy == SfuReconnectionStrategy.fast) {
+          _call._logger.i(
+            () =>
+                '[reconnect] offline past the fast-reconnect deadline '
+                '(elapsed: $elapsed, deadline: $_fastReconnectDeadline), '
+                'rejoining',
           );
-          _session?.trace(TraceTag.callReconnectFailed, {
-            'strategy': strategy.name,
-            'error': 'call was left',
-          });
-          return;
-        }
-
-        if (networkStatus == InternetStatus.disconnected) {
-          _call._logger.w(() => '[reconnect] reconnection timeout');
-          _session?.trace(TraceTag.callReconnectFailed, {
-            'strategy': strategy.name,
-            'error': 'reconnection timeout',
-          });
-          _setPhase(const ConnectionReconnectFailed());
-          _publishStatus();
-          return;
-        }
-
-        unawaited(_sfuStatsReporter?.sendSfuStats());
-
-        final joinReason = trigger is NetworkLost
-            ? JoinReason.networkAvailable
-            : _reconnectStrategy.joinReason;
-        if (joinReason != null) {
-          _call._streamVideo.clientEventReporter.reportJoinAttempt(
-            _call.callCid,
-            reason: joinReason,
+          _updateReconnect(
+            (phase) => phase.copyWith(strategy: SfuReconnectionStrategy.rejoin),
           );
         }
 
@@ -1595,6 +1657,38 @@ class CallConnectionCoordinator {
               (phase) => phase.copyWith(strategy: held.strategy),
             );
           }
+        }
+
+        // An attempt that became a rejoin or migrate after a wait without a
+        // stability window waits for a stable network first, like one that
+        // started as either.
+        final needsStableNetwork =
+            _reconnectStrategy == SfuReconnectionStrategy.rejoin ||
+            _reconnectStrategy == SfuReconnectionStrategy.migrate;
+        if (needsStableNetwork && stabilityWindow == Duration.zero) {
+          final status = await _awaitNetworkAvailable(
+            stabilityWindow: const Duration(seconds: 3),
+            onStatus: onNetworkStatus,
+          );
+          if (stopsAfterNetworkWait(status)) return;
+        }
+
+        unawaited(_sfuStatsReporter?.sendSfuStats());
+
+        // A rejoin or migrate starts a new join attempt, also when it follows
+        // an offline period; only a fast reconnect continues the last one.
+        final strategyReason = _reconnectStrategy.joinReason;
+        final joinReason =
+            strategyReason != JoinReason.migration &&
+                (trigger is NetworkLost || wasOffline)
+            ? JoinReason.networkAvailable
+            : strategyReason;
+        if (joinReason != null) {
+          final reporter = _call._streamVideo.clientEventReporter;
+          if (strategyReason != null && !joinReason.mintsNewAttempt) {
+            reporter.newJoinAttempt(_call.callCid, reason: joinReason);
+          }
+          reporter.reportJoinAttempt(_call.callCid, reason: joinReason);
         }
 
         _setReconnectStep(CallReconnectPhase.joining);
@@ -1619,7 +1713,7 @@ class CallConnectionCoordinator {
         switch (outcome) {
           case JoinSucceeded():
             _session?.trace(TraceTag.callReconnectSuccess, {
-              'strategy': strategy.name,
+              'strategy': _reconnectStrategy.name,
             });
           case JoinCancelled():
             _call._logger.w(() => '[reconnect] cancelled (call was left)');
@@ -1646,7 +1740,7 @@ class CallConnectionCoordinator {
             _publishStatus();
 
             _session?.trace(TraceTag.callReconnectFailed, {
-              'strategy': strategy.name,
+              'strategy': _reconnectStrategy.name,
               'error': error.toString(),
             });
 

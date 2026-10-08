@@ -3,12 +3,16 @@ import 'dart:async';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
+    as sfu_models;
 import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart'
     as sfu;
+import 'package:stream_video/src/errors/stream_video_exception_composer.dart';
 import 'package:stream_video/src/sfu/sfu_client.dart';
 import 'package:stream_video/src/webrtc/peer_connection.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:tart/tart.dart' show Context, TwirpError;
 
 import '../../test_helpers.dart';
 import '../call/fixtures/data.dart';
@@ -78,9 +82,13 @@ class _FakeRtcPeerConnection extends Fake implements rtc.RTCPeerConnection {
   int restartIceCallCount = 0;
   int disposeCallCount = 0;
 
+  /// Thrown by [restartIce] when set.
+  Exception? restartIceError;
+
   @override
   Future<void> restartIce() async {
     restartIceCallCount++;
+    if (restartIceError case final error?) throw error;
   }
 
   @override
@@ -246,6 +254,57 @@ void main() {
     });
   });
 
+  group('StreamPeerConnection.isHealthy', () {
+    bool isHealthy(
+      rtc.RTCIceConnectionState? ice,
+      rtc.RTCPeerConnectionState? connection,
+    ) {
+      final pc = _FakeRtcPeerConnection()
+        ..stubbedIceConnectionState = ice
+        ..stubbedConnectionState = connection;
+      return _build(pc: pc, type: StreamPeerType.publisher).isHealthy();
+    }
+
+    test('is false when ICE or the connection has failed or closed', () {
+      for (final (ice, connection) in [
+        (
+          rtc.RTCIceConnectionState.RTCIceConnectionStateFailed,
+          rtc.RTCPeerConnectionState.RTCPeerConnectionStateConnected,
+        ),
+        (
+          rtc.RTCIceConnectionState.RTCIceConnectionStateClosed,
+          rtc.RTCPeerConnectionState.RTCPeerConnectionStateConnected,
+        ),
+        (
+          rtc.RTCIceConnectionState.RTCIceConnectionStateConnected,
+          rtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed,
+        ),
+        (
+          rtc.RTCIceConnectionState.RTCIceConnectionStateConnected,
+          rtc.RTCPeerConnectionState.RTCPeerConnectionStateClosed,
+        ),
+      ]) {
+        expect(isHealthy(ice, connection), isFalse, reason: '$ice $connection');
+      }
+    });
+
+    test('is true while disconnected, checking or not yet known', () {
+      for (final (ice, connection) in [
+        (
+          rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected,
+          rtc.RTCPeerConnectionState.RTCPeerConnectionStateDisconnected,
+        ),
+        (
+          rtc.RTCIceConnectionState.RTCIceConnectionStateChecking,
+          rtc.RTCPeerConnectionState.RTCPeerConnectionStateConnecting,
+        ),
+        (null, null),
+      ]) {
+        expect(isHealthy(ice, connection), isTrue, reason: '$ice $connection');
+      }
+    });
+  });
+
   group('StreamPeerConnection.isConnected', () {
     bool isConnected(
       rtc.RTCIceConnectionState ice,
@@ -297,7 +356,7 @@ void main() {
 
   group('StreamPeerConnection.onConnectionState', () {
     test(
-      'fires onReconnectionNeeded with fast when the peer enters Failed',
+      'fires onReconnectionNeeded with rejoin when the peer enters Failed',
       () {
         final pc = _FakeRtcPeerConnection();
         final sp = _build(pc: pc, type: StreamPeerType.publisher);
@@ -319,19 +378,61 @@ void main() {
 
         expect(calls, hasLength(1));
         expect(calls.single.$1, same(sp));
-        expect(calls.single.$2, SfuReconnectionStrategy.fast);
+        expect(calls.single.$2, SfuReconnectionStrategy.rejoin);
         expect(calls.single.$3, ReconnectionNeededReason.connectionFailed);
       },
     );
 
     test(
-      'fires onReconnectionNeeded with fast when its ICE restart fails',
+      'fires onReconnectionNeeded with rejoin when the SFU refuses its ICE '
+      'restart',
       () async {
         final pc = _FakeRtcPeerConnection();
         final sfuClient = MockSfuClient();
         when(() => sfuClient.restartIce(any())).thenAnswer(
-          (_) async => const Result.failure(
-            StreamVideoException(message: 'ice restart refused'),
+          (_) async => Result.failure(
+            _sfuRefusal(
+              sfu_models
+                  .ErrorCode
+                  .ERROR_CODE_PARTICIPANT_MEDIA_TRANSPORT_FAILURE,
+            ),
+          ),
+        );
+        final sp = _build(
+          pc: pc,
+          type: StreamPeerType.subscriber,
+          sfuClient: sfuClient,
+        );
+
+        final calls = <(SfuReconnectionStrategy, ReconnectionNeededReason)>[];
+        sp.onReconnectionNeeded = (_, strategy, reason) =>
+            calls.add((strategy, reason));
+
+        pc.capturedOnIceConnectionState!(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateFailed,
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        expect(calls, [
+          (
+            SfuReconnectionStrategy.rejoin,
+            ReconnectionNeededReason.connectionFailed,
+          ),
+        ]);
+      },
+    );
+
+    test(
+      'fires onReconnectionNeeded with fast when the SFU reports the '
+      'participant signal lost',
+      () async {
+        final pc = _FakeRtcPeerConnection();
+        final sfuClient = MockSfuClient();
+        when(() => sfuClient.restartIce(any())).thenAnswer(
+          (_) async => Result.failure(
+            _sfuRefusal(
+              sfu_models.ErrorCode.ERROR_CODE_PARTICIPANT_SIGNAL_LOST,
+            ),
           ),
         );
         final sp = _build(
@@ -355,6 +456,131 @@ void main() {
             ReconnectionNeededReason.connectionFailed,
           ),
         ]);
+      },
+    );
+
+    test(
+      'does not fire onReconnectionNeeded when its ICE restart times out '
+      'without an answer from the SFU',
+      () async {
+        final pc = _FakeRtcPeerConnection();
+        final sfuClient = MockSfuClient();
+        when(() => sfuClient.restartIce(any())).thenAnswer(
+          (_) async => Result.failure(
+            StreamVideoExceptions.compose(TimeoutException('offline')),
+          ),
+        );
+        final sp = _build(
+          pc: pc,
+          type: StreamPeerType.subscriber,
+          sfuClient: sfuClient,
+        );
+
+        final strategies = <SfuReconnectionStrategy>[];
+        sp.onReconnectionNeeded = (_, strategy, _) => strategies.add(strategy);
+
+        pc.capturedOnIceConnectionState!(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateFailed,
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        expect(strategies, isEmpty);
+        verify(() => sfuClient.restartIce(any())).called(1);
+      },
+    );
+
+    test(
+      'does not fire onReconnectionNeeded when its ICE restart fails '
+      'offline, as a connection error',
+      () async {
+        final pc = _FakeRtcPeerConnection();
+        final sfuClient = MockSfuClient();
+        // How the generated SFU client reports a request it could not send.
+        when(() => sfuClient.restartIce(any())).thenAnswer(
+          (_) async => Result.failure(
+            StreamVideoExceptions.compose(
+              TwirpError.fromConnectionError(
+                'SocketException: Failed host lookup',
+                Context(),
+              ),
+            ),
+          ),
+        );
+        final sp = _build(
+          pc: pc,
+          type: StreamPeerType.subscriber,
+          sfuClient: sfuClient,
+        );
+
+        final strategies = <SfuReconnectionStrategy>[];
+        sp.onReconnectionNeeded = (_, strategy, _) => strategies.add(strategy);
+
+        pc.capturedOnIceConnectionState!(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateFailed,
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        expect(strategies, isEmpty);
+        verify(() => sfuClient.restartIce(any())).called(1);
+      },
+    );
+
+    test(
+      'fires onReconnectionNeeded with rejoin when the publisher fails to '
+      'restart ICE locally',
+      () async {
+        final pc = _FakeRtcPeerConnection()
+          ..restartIceError = Exception('restart failed');
+        final sp = _build(pc: pc, type: StreamPeerType.publisher);
+
+        final strategies = <SfuReconnectionStrategy>[];
+        sp.onReconnectionNeeded = (_, strategy, _) => strategies.add(strategy);
+
+        pc.capturedOnIceConnectionState!(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateFailed,
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        expect(strategies, [SfuReconnectionStrategy.rejoin]);
+      },
+    );
+
+    test(
+      'does not fire onReconnectionNeeded when a reconnect started while the '
+      'ICE restart was in flight',
+      () async {
+        final pc = _FakeRtcPeerConnection();
+        final sfuClient = MockSfuClient();
+        final response = Completer<Result<sfu.ICERestartResponse>>();
+        when(
+          () => sfuClient.restartIce(any()),
+        ).thenAnswer((_) => response.future);
+        final sp = _build(
+          pc: pc,
+          type: StreamPeerType.subscriber,
+          sfuClient: sfuClient,
+        );
+
+        var calls = 0;
+        sp.onReconnectionNeeded = (_, _, _) => calls++;
+
+        pc.capturedOnIceConnectionState!(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateFailed,
+        );
+        await Future<void>.delayed(Duration.zero);
+        sp.setReconnecting(true);
+        response.complete(
+          Result.failure(
+            _sfuRefusal(
+              sfu_models
+                  .ErrorCode
+                  .ERROR_CODE_PARTICIPANT_MEDIA_TRANSPORT_FAILURE,
+            ),
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+
+        expect(calls, 0);
       },
     );
 
@@ -771,3 +997,10 @@ class _FakeMediaStream extends Fake implements rtc.MediaStream {
 }
 
 class _FakeTrackEvent extends Fake implements rtc.RTCTrackEvent {}
+
+/// An SFU error the way the SFU client turns one into a failure.
+StreamVideoException _sfuRefusal(sfu_models.ErrorCode code) {
+  return StreamVideoExceptions.compose(
+    sfu_models.Error(code: code, message: code.name),
+  );
+}
