@@ -4,6 +4,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart'
     as sfu_events;
+import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart'
+    as sfu_models;
 import 'package:stream_video/src/call/call.dart';
 import 'package:stream_video/src/call/permissions/permissions_manager.dart';
 import 'package:stream_video/src/call/session/call_session_config.dart';
@@ -17,6 +19,7 @@ import 'package:stream_video/src/sfu/data/models/sfu_participant.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/webrtc/rtc_media_device/device_enumeration_trigger.dart';
 import 'package:stream_video/src/webrtc/sdp/policy/sdp_policy.dart';
+import 'package:stream_video/src/ws/ws.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../../test_helpers.dart';
@@ -39,6 +42,8 @@ void registerMockFallbackValues() {
   registerFallbackValue(SampleCallData.defaultMediaDevice);
   registerFallbackValue(MockStreamVideo());
   registerFallbackValue(sfu_events.ReconnectDetails());
+  registerFallbackValue(sfu_models.SendStatsRequest());
+  registerFallbackValue(StreamVideoCloseCode.disposeOldSocket);
   registerFallbackValue(
     StreamPeerConnectionFactory(callCid: SampleCallData.defaultCid),
   );
@@ -297,6 +302,9 @@ SfuCallState createTestSfuCallState({bool e2eeEnabled = false}) {
 
 MockCallSession setupMockCallSession() {
   final sfuClient = MockSfuClient();
+  when(() => sfuClient.sendStats(any())).thenAnswer(
+    (_) => Future.value(Result.success(sfu_models.SendStatsResponse())),
+  );
 
   final callSession = MockCallSession();
 
@@ -373,12 +381,25 @@ MockCallSession setupMockCallSession() {
   );
 
   when(callSession.dispose).thenAnswer((_) => Future.value());
+  when(
+    () => callSession.close(any(), closeReason: any(named: 'closeReason')),
+  ).thenAnswer((_) => Future.value());
+  when(
+    callSession.waitForMigrationComplete,
+  ).thenAnswer((_) => Future.value(const Result.success(none)));
 
   return callSession;
 }
 
-MockSessionFactory setupMockSessionFactory({MockCallSession? callSession}) {
+/// A session factory handing out each of [callSessions] in turn and then the
+/// last one again. Without [callSessions] it hands out [callSession], or a
+/// fresh mock on every call when that is null too.
+MockSessionFactory setupMockSessionFactory({
+  MockCallSession? callSession,
+  List<MockCallSession>? callSessions,
+}) {
   final sessionFactory = MockSessionFactory();
+  final sessions = [...?callSessions];
 
   when(() => sessionFactory.sdpEditor).thenReturn(MockSdpEditor());
   when(
@@ -401,7 +422,13 @@ MockSessionFactory setupMockSessionFactory({MockCallSession? callSession}) {
       e2eeManager: any(named: 'e2eeManager'),
     ),
   ).thenAnswer(
-    (_) => Future.value(callSession ?? setupMockCallSession()),
+    (_) => Future.value(
+      switch (sessions) {
+        [_, _, ...] => sessions.removeAt(0),
+        [final last] => last,
+        _ => callSession ?? setupMockCallSession(),
+      },
+    ),
   );
 
   return sessionFactory;
