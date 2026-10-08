@@ -17,7 +17,7 @@ void main() {
     late BehaviorSubject<InternetStatus> internetStatusController;
     late MockCoordinatorClient coordinatorClient;
     late MockCallSession callSession;
-    late MockStreamVideo mockStreamVideo;
+    late MockCallHost mockStreamVideo;
 
     setUp(() {
       internetStatusController = BehaviorSubject<InternetStatus>.seeded(
@@ -25,7 +25,7 @@ void main() {
       );
       coordinatorClient = setupMockCoordinatorClient();
       callSession = setupMockCallSession();
-      mockStreamVideo = setupMockStreamVideo();
+      mockStreamVideo = setupMockCallHost();
     });
 
     tearDown(() async {
@@ -171,7 +171,7 @@ void main() {
         () => mockClientState.setOutgoingCall(any()),
       ).thenAnswer((_) async {});
 
-      final customStreamVideo = setupMockStreamVideo(
+      final customStreamVideo = setupMockCallHost(
         clientState: mockClientState,
       );
 

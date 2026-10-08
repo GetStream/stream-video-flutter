@@ -27,8 +27,8 @@ class MockTracedStreamPeerConnection extends Mock
 
 class MockRTCPeerConnection extends Mock implements rtc.RTCPeerConnection {}
 
-MockStreamVideo _buildMockStreamVideo() {
-  final mock = setupMockStreamVideo();
+MockCallHost _buildMockStreamVideo() {
+  final mock = setupMockCallHost();
   when(() => mock.apiKey).thenReturn('test-api-key');
   return mock;
 }
