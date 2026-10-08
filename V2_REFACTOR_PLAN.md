@@ -61,7 +61,7 @@ stacks.
 | 23 | B3 | `feat/flu-863-call-ringing-controller` | #1438 |
 | 24 | C4 | `feat/flu-858-app-lifecycle-controller` | #1439 |
 | 25 | B6 | `feat/flu-852-call-host` | #1440 |
-| 26 | C5 | `feat/flu-854-stream-video-constructor` | |
+| 26 | C5 | `feat/flu-854-stream-video-constructor` | #1441 |
 
 - [x] 1. **A1** [FLU-847](https://linear.app/stream/issue/FLU-847): characterisation tests for Call join, leave and reconnect (M). Gates A2, so it goes first. Ships with this plan.
 - [x] 2. **B4** [FLU-850](https://linear.app/stream/issue/FLU-850): Call pass-throughs to extension methods (S, low risk). Removes about 380 lines from `call.dart` before the risky moves, with no overlap with the connection code.
