@@ -13,6 +13,7 @@ import 'package:stream_video/src/call/session/call_session_factory.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/call/stats/tracer.dart';
 import 'package:stream_video/src/core/client_state.dart';
+import 'package:stream_video/src/lifecycle/lifecycle_state.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_call_state.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_participant.dart';
@@ -182,6 +183,13 @@ MockClientState setupMockClientState() {
   when(
     () => clientState.setIncomingCall(any()),
   ).thenAnswer((_) => Future.value());
+  final appLifecycleStateEmitter = MutableStateEmitter<LifecycleState?>(
+    null,
+    sync: true,
+  );
+  when(
+    () => clientState.appLifecycleState,
+  ).thenAnswer((_) => appLifecycleStateEmitter);
 
   return clientState;
 }
