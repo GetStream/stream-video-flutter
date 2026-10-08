@@ -26,6 +26,10 @@ dev_dependencies:
 dependency_overrides:
   cli_util: ^0.5.1
   file_picker: ^12.0.0-beta.5
+  stream_webrtc_flutter:
+    git:
+      url: https://github.com/GetStream/webrtc-flutter.git
+      ref: 9de5cf907ecbb36ca37c41118e8c8f28e3c3002f
 
 melos:
   ignore:
