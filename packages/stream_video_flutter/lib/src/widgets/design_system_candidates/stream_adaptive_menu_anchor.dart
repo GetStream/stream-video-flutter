@@ -397,8 +397,8 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
     return null;
   }
 
-  /// The anchored rows' style: the theme's, with [widget.menuItemStyle] on
-  /// top.
+  /// The anchored rows' style: the theme's, with
+  /// [StreamAdaptiveMenuAnchor.menuItemStyle] on top.
   StreamContextMenuActionStyle? _menuItemStyle(BuildContext context) {
     final themed = StreamAdaptiveMenuAnchorTheme.of(
       context,
@@ -408,11 +408,6 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
 
   Future<void> _openSheet() async {
     setState(() => _isOpen = true);
-    // Read here rather than in the sheet: the sheet is a route of its own, so
-    // a theme wrapped around the anchor does not reach it.
-    final sheetTileStyle = StreamAdaptiveMenuAnchorTheme.of(
-      context,
-    ).style?.sheetTileStyle;
     await showStreamSheet<void>(
       context: context,
       isDismissible: true,
@@ -422,7 +417,6 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
           title: widget.title,
           sections: widget.sections,
           scrollController: scrollController,
-          sheetTileStyle: sheetTileStyle,
           handle: this,
           isCollapsed: _isCollapsed,
           onToggleCollapsed: _toggleCollapsed,
@@ -588,7 +582,6 @@ class _MenuSheet extends StatelessWidget {
     required this.title,
     required this.sections,
     required this.scrollController,
-    required this.sheetTileStyle,
     required this.handle,
     required this.isCollapsed,
     required this.onToggleCollapsed,
@@ -598,7 +591,6 @@ class _MenuSheet extends StatelessWidget {
   final String? title;
   final List<StreamMenuSection> sections;
   final ScrollController scrollController;
-  final StreamListTileThemeData? sheetTileStyle;
   final StreamMenuHandle handle;
   final bool Function(StreamMenuSection) isCollapsed;
   final ValueChanged<StreamMenuSection> onToggleCollapsed;
@@ -618,12 +610,17 @@ class _MenuSheet extends StatelessWidget {
             // The design's mobile list item is 48 tall: the tile's 40 minimum
             // plus spacing.xxs above and below. Set here rather than left to
             // the app's list tile theme, which sizes list tiles in general.
-            data: StreamListTileThemeData(
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: spacing.sm,
-                vertical: spacing.xxs,
-              ),
-            ).merge(sheetTileStyle),
+            data:
+                StreamListTileThemeData(
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: spacing.sm,
+                    vertical: spacing.xxs,
+                  ),
+                ).merge(
+                  StreamAdaptiveMenuAnchorTheme.of(
+                    context,
+                  ).style?.sheetTileStyle,
+                ),
             child: ListView(
               // The sheet hands this down so that dragging the list past its
               // top drags the sheet instead of overscrolling.

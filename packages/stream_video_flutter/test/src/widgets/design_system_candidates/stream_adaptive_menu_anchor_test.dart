@@ -129,11 +129,11 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        _ThemedApp(
-          listTileTheme: const StreamListTileThemeData(
+        const _ThemedApp(
+          listTileTheme: StreamListTileThemeData(
             contentPadding: EdgeInsets.all(24),
           ),
-          child: const _Menu(),
+          child: _Menu(),
         ),
       );
 
@@ -146,15 +146,15 @@ void main() {
 
     testWidgets('sheetTileStyle reaches the sheet rows', (tester) async {
       await tester.pumpWidget(
-        _ThemedApp(
-          menuTheme: const StreamAdaptiveMenuAnchorThemeData(
+        const _ThemedApp(
+          menuTheme: StreamAdaptiveMenuAnchorThemeData(
             style: StreamAdaptiveMenuAnchorStyle(
               sheetTileStyle: StreamListTileThemeData(
                 contentPadding: EdgeInsets.symmetric(vertical: 8),
               ),
             ),
           ),
-          child: const _Menu(),
+          child: _Menu(),
         ),
       );
 
@@ -165,8 +165,8 @@ void main() {
       expect(row.height, 56);
     });
 
-    // The sheet is a route of its own, so a theme wrapped around the anchor
-    // only reaches it because the anchor reads it for the sheet.
+    // The sheet is a route of its own; a theme wrapped around the anchor
+    // still reaches it.
     testWidgets('a local theme around the anchor reaches its sheet', (
       tester,
     ) async {
@@ -196,16 +196,16 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        _ThemedApp(
+        const _ThemedApp(
           platform: .macOS,
-          menuTheme: const StreamAdaptiveMenuAnchorThemeData(
+          menuTheme: StreamAdaptiveMenuAnchorThemeData(
             style: StreamAdaptiveMenuAnchorStyle(
               menuItemStyle: StreamContextMenuActionStyle(
                 minimumSize: WidgetStatePropertyAll(Size(200, 48)),
               ),
             ),
           ),
-          child: const _Menu(),
+          child: _Menu(),
         ),
       );
 
@@ -220,16 +220,16 @@ void main() {
 
     testWidgets('the menuItemStyle prop wins over the theme', (tester) async {
       await tester.pumpWidget(
-        _ThemedApp(
+        const _ThemedApp(
           platform: .macOS,
-          menuTheme: const StreamAdaptiveMenuAnchorThemeData(
+          menuTheme: StreamAdaptiveMenuAnchorThemeData(
             style: StreamAdaptiveMenuAnchorStyle(
               menuItemStyle: StreamContextMenuActionStyle(
                 minimumSize: WidgetStatePropertyAll(Size(200, 48)),
               ),
             ),
           ),
-          child: const _Menu(
+          child: _Menu(
             menuItemStyle: StreamContextMenuActionStyle(
               minimumSize: WidgetStatePropertyAll(Size(200, 56)),
             ),
