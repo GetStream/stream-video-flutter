@@ -4,13 +4,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../test_helpers.dart';
 import 'fixtures/call_test_helpers.dart';
+import 'fixtures/connection_harness.dart';
 
 class _MockRtcManager extends Mock implements RtcManager {
   @override
   Future<void> dispose() async {}
+}
+
+class _FakeMediaStreamTrack extends Fake implements rtc.MediaStreamTrack {
+  @override
+  bool enabled = true;
 }
 
 void main() {
@@ -71,6 +78,8 @@ void main() {
         permissionManager: permissionManager,
         sessionFactory: setupMockSessionFactory(callSession: callSession),
       );
+      // Cancels the stats sends the published tracks schedule.
+      addTearDown(call.dispose);
 
       await call.join(connectOptions: connectOptions);
       // `_applyConnectOptions` is started unawaited, so let it settle.
@@ -152,6 +161,97 @@ void main() {
       );
 
       expect(call.connectOptions.microphone.isDisabled, isFalse);
+    });
+  });
+
+  group('setCameraTargetResolution', () {
+    const resolution = StreamTargetResolution(
+      width: 640,
+      height: 360,
+      bitrate: 500000,
+    );
+
+    late ConnectionHarness harness;
+
+    setUp(() {
+      harness = ConnectionHarness(sessionCount: 2);
+      for (final permission in CallPermission.values) {
+        when(
+          () => harness.permissionsManager.hasPermission(permission),
+        ).thenReturn(true);
+      }
+      for (final session in harness.sessions) {
+        final published = MockRtcLocalTrack();
+        when(() => published.mediaTrack).thenReturn(_FakeMediaStreamTrack());
+        when(
+          () => session.setCameraEnabled(
+            any(),
+            constraints: any(named: 'constraints'),
+          ),
+        ).thenAnswer((_) async => Result.success(published));
+        when(
+          () => session.start(
+            reconnectDetails: any(named: 'reconnectDetails'),
+            onRtcManagerCreatedCallback: any(
+              named: 'onRtcManagerCreatedCallback',
+            ),
+            isAnonymousUser: any(named: 'isAnonymousUser'),
+            capabilities: any(named: 'capabilities'),
+            unifiedSessionId: any(named: 'unifiedSessionId'),
+            clientEventRetryCount: any(named: 'clientEventRetryCount'),
+          ),
+        ).thenAnswer((invocation) async {
+          final onCreated =
+              invocation.namedArguments[#onRtcManagerCreatedCallback]
+                  as FutureOr<void> Function(RtcManager)?;
+          await onCreated?.call(_MockRtcManager());
+          return Result.success((
+            callState: createTestSfuCallState(),
+            fastReconnectDeadline: Duration.zero,
+          ));
+        });
+      }
+    });
+
+    tearDown(() => harness.dispose());
+
+    test(
+      'a resolution set during the call is used by the camera a rejoin opens',
+      () async {
+        final [_, second] = harness.sessions;
+        final call = harness.buildCall();
+        await call.join();
+        await pumpEventQueue();
+
+        await call.setCameraTargetResolution(resolution);
+        await call.setCameraEnabled(enabled: true);
+        expect(call.connectOptions.targetResolution, resolution);
+
+        harness.requestReconnect(0, SfuReconnectionStrategy.rejoin);
+        await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+        await pumpEventQueue();
+
+        final constraints =
+            verify(
+                  () => second.setCameraEnabled(
+                    true,
+                    constraints: captureAny(named: 'constraints'),
+                  ),
+                ).captured.single
+                as CameraConstraints;
+        expect(constraints.params, resolution.toVideoParams());
+      },
+      timeout: const Timeout(Duration(seconds: 30)),
+    );
+
+    test('carries a resolution set before the join through it', () async {
+      final call = harness.buildCall();
+
+      await call.setCameraTargetResolution(resolution);
+      await call.join();
+
+      expect(call.connectOptions.targetResolution, resolution);
     });
   });
 }
