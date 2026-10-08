@@ -26,6 +26,7 @@
 - `LivestreamContent` renders participants from `Call.participantsStream` instead of the raw call state.
 - `LivestreamBackstageContent` only rebuilds when the participant count changes.
 - `ToggleScreenShareOption` and the call controls of `StreamCallContent` no longer rebuild on local participant changes they don't use.
+- [Android] Added the Stream Maven repository (`https://stream-io-repo.com`) to the Android build repositories.
 
 ## 1.6.0
 
