@@ -143,6 +143,10 @@ melos:
       run: melos exec -c 1 --depends-on="build_runner" --flutter -- "flutter pub run build_runner build --delete-conflicting-outputs"
       description: Build all generated files for Flutter packages in this project.
 
+    generate:protobuf:
+      run: bash packages/stream_video/generate-protobuf.sh
+      description: Regenerate the SFU protobuf models from GetStream/protocol (requires protoc; set PROTOCOL_REF for a branch other than main).
+
     gen-l10n: >
       melos exec -c 1 --fail-fast --depends-on=flutter_localizations -- \
        "flutter gen-l10n && dart format ."

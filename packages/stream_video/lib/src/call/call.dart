@@ -2203,7 +2203,6 @@ class Call {
       _sfuStatsReporter =
           SfuStatsReporter(
             callSession: session,
-            stateManager: _stateManager,
             statsOptions: _sfuStatsOptions!,
             unifiedSessionId: _unifiedSessionId,
           )..run(
