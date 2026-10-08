@@ -107,6 +107,20 @@ void main() {
       expect(row.height, 32);
     });
 
+    testWidgets('draws the design mobile list item in a sheet', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const TestWrapper(platform: .android, child: _Menu()),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      final row = tester.getSize(find.byType(StreamListTile).first);
+      expect(row.height, 48);
+    });
+
     // MenuAnchor clips its panel to the panel's own bounds by default, which
     // cuts off the shadow the menu's Material draws outside them — the shadow
     // stops dead along the bottom edge rather than fading out, and raising the

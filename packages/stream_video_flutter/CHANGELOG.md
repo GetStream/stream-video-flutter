@@ -204,6 +204,7 @@
 
 ### 🐞 Fixed
 
+- The rows of a `StreamAdaptiveMenuAnchor` sheet are 48px tall, as the design has them, rather than 56.
 - The lobby control buttons are 8px apart, as the design has them, rather than 16.
 - A participant moving between the spotlight and the bar no longer loses their picture on the way. Their tile carries its element across the move rather than being built again where it lands.
 - The iOS picture-in-picture window keeps its participant's track subscribed while the app is backgrounded.
