@@ -1039,7 +1039,7 @@ class _StreamParticipantTileStyleDefaults extends StreamParticipantTileStyle {
   double get toolbarSpacing => _spacing.xxs;
 
   @override
-  EdgeInsetsGeometry get topToolbarPadding => EdgeInsets.all(_spacing.xxs);
+  EdgeInsetsGeometry get topToolbarPadding => EdgeInsets.zero;
 
   @override
   double get reactionSize => 48;

@@ -192,6 +192,7 @@
 
 ### 🔄 Changed
 
+- `StreamParticipantTileStyle.topToolbarPadding` defaults to none, so the overflow button sits 8px in from the tile corner, as the design has it.
 - The participants bar in `CallParticipantsSpotlightView` carries a button at either end for the tiles it cannot fit.
 - `CallParticipantsGridView` pages with the same button as the participants bar.
 - Above the small breakpoint, the grid's page buttons sit either side of the grid rather than over it.

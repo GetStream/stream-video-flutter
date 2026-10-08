@@ -491,7 +491,7 @@ void main() {
         _tile(
           participant: _participant(),
           width: 300,
-          height: 96,
+          height: 88,
           actions: [_pin()],
         ),
       );
@@ -699,6 +699,16 @@ void main() {
           );
           expect(target.size, const Size.square(kMinInteractiveDimension));
           expect(button.center, target.center);
+
+          // 8px in from the tile's top-start corner, as the design has it.
+          final tile = tester.getRect(find.byType(StreamParticipantTile));
+          expect(button.top - tile.top, 8);
+          switch (direction) {
+            case TextDirection.ltr:
+              expect(button.left - tile.left, 8);
+            case TextDirection.rtl:
+              expect(tile.right - button.right, 8);
+          }
           expect(menu.top - button.bottom, 8);
         },
       );

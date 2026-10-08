@@ -265,8 +265,8 @@ class StreamParticipantTileStyle with _$StreamParticipantTileStyle {
 
   /// The inset around the top toolbar's content.
   ///
-  /// Defaults to `spacing.xxs`, which lets the overflow button's tap target
-  /// reach close to the tile corner while its visual stays inset.
+  /// Defaults to none, which puts the overflow button's tap target in the
+  /// tile corner and its visual 8px in from both edges.
   final EdgeInsetsGeometry? topToolbarPadding;
 
   /// The button style applied to the overflow button.
