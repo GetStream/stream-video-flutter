@@ -177,7 +177,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
           );
 
           final acceptedOnThisDevice = isAcceptedOnThisDevice(
-            acceptedLocally: streamVideo.isCallAcceptedOnThisDevice(
+            acceptedLocally: streamVideo.ringing.isCallAcceptedOnThisDevice(
               event.callCid.toString(),
             ),
             activeCall: activeCall,

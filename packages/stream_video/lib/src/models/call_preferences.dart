@@ -89,7 +89,7 @@ abstract class CallPreferences {
   /// for a key — so pass it in with the preferences the accept already carries:
   ///
   /// ```dart
-  /// streamVideo.observeCoreRingingEvents(
+  /// streamVideo.ringing.observeCoreRingingEvents(
   ///   acceptCallPreferences: DefaultCallPreferences(
   ///     encryptionKeyResolver: myResolver,
   ///   ),

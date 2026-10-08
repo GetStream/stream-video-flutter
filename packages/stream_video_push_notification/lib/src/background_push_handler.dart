@@ -171,7 +171,7 @@ class StreamVideoPushHandler {
       return false;
     }
 
-    final handled = await appClient.handleRingingFlowNotifications(
+    final handled = await appClient.ringing.handleRingingFlowNotifications(
       message.data,
     );
 
@@ -211,7 +211,9 @@ class StreamVideoPushHandler {
             () => '[handleStreamPush] forwarding to the running client',
           );
 
-          return await appClient.handleRingingFlowNotifications(message.data);
+          return await appClient.ringing.handleRingingFlowNotifications(
+            message.data,
+          );
         }
 
         mine = await _startSession(createStreamVideo, onDispose);
@@ -238,9 +240,10 @@ class StreamVideoPushHandler {
     _BackgroundSession session,
     RemoteMessage message,
   ) async {
-    final handled = await session.streamVideo.handleRingingFlowNotifications(
-      message.data,
-    );
+    final handled = await session.streamVideo.ringing
+        .handleRingingFlowNotifications(
+          message.data,
+        );
 
     final ringing = StreamPushPayload.ringingCallCid(message.data);
     if (handled && ringing != null) {
@@ -299,7 +302,8 @@ class StreamVideoPushHandler {
       if (streamVideo == null) return null;
 
       // ignore: cancel_subscriptions -- cancelled by _BackgroundSession.release.
-      final observers = streamVideo.observeCoreRingingEventsForBackground();
+      final observers = streamVideo.ringing
+          .observeCoreRingingEventsForBackground();
 
       final session = _BackgroundSession(
         streamVideo: streamVideo,
@@ -309,7 +313,9 @@ class StreamVideoPushHandler {
 
       // Whatever the user does with the notification is what ends this
       // isolate's work.
-      session.resolution = streamVideo.onRingingEvent<RingingEvent>((event) {
+      session.resolution = streamVideo.ringing.onRingingEvent<RingingEvent>((
+        event,
+      ) {
         if (event
             case ActionCallAccept(:final data) ||
                 ActionCallDecline(:final data) ||

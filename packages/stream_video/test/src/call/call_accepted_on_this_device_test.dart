@@ -26,7 +26,7 @@ void main() {
     );
   });
 
-  group('StreamVideo.isCallAcceptedOnThisDevice', () {
+  group('RingingCallCoordinator.isCallAcceptedOnThisDevice', () {
     late StreamVideo streamVideo;
     late MockCoordinatorClient mockCoordinatorClient;
 
@@ -86,7 +86,7 @@ void main() {
     test('is false for a call that was never accepted', () {
       createIncomingCall();
 
-      expect(streamVideo.isCallAcceptedOnThisDevice(cid), isFalse);
+      expect(streamVideo.ringing.isCallAcceptedOnThisDevice(cid), isFalse);
     });
 
     test('is set before the coordinator accept completes', () async {
@@ -102,12 +102,12 @@ void main() {
       final call = createIncomingCall();
       final acceptFuture = call.accept();
 
-      expect(streamVideo.isCallAcceptedOnThisDevice(cid), isTrue);
+      expect(streamVideo.ringing.isCallAcceptedOnThisDevice(cid), isTrue);
 
       acceptCompleter.complete(const Result.success(none));
       await acceptFuture;
 
-      expect(streamVideo.isCallAcceptedOnThisDevice(cid), isTrue);
+      expect(streamVideo.ringing.isCallAcceptedOnThisDevice(cid), isTrue);
     });
 
     test('stays set while the call is accepted but not yet joined', () async {
@@ -121,7 +121,7 @@ void main() {
       // Exactly the state a cold start is in while the integrator navigates to
       // its call screen: accepted, but `join()` has not run.
       expect(streamVideo.activeCalls, isEmpty);
-      expect(streamVideo.isCallAcceptedOnThisDevice(cid), isTrue);
+      expect(streamVideo.ringing.isCallAcceptedOnThisDevice(cid), isTrue);
     });
 
     test('is cleared when the coordinator accept fails', () async {
@@ -133,7 +133,7 @@ void main() {
       final result = await call.accept();
 
       expect(result.isFailure, isTrue);
-      expect(streamVideo.isCallAcceptedOnThisDevice(cid), isFalse);
+      expect(streamVideo.ringing.isCallAcceptedOnThisDevice(cid), isFalse);
     });
 
     test('is cleared once the call is cleaned up', () async {
@@ -143,11 +143,11 @@ void main() {
 
       final call = createIncomingCall();
       await call.accept();
-      expect(streamVideo.isCallAcceptedOnThisDevice(cid), isTrue);
+      expect(streamVideo.ringing.isCallAcceptedOnThisDevice(cid), isTrue);
 
       await call.leave();
 
-      expect(streamVideo.isCallAcceptedOnThisDevice(cid), isFalse);
+      expect(streamVideo.ringing.isCallAcceptedOnThisDevice(cid), isFalse);
     });
 
     test('is tracked per cid', () async {
@@ -158,9 +158,11 @@ void main() {
       final call = createIncomingCall();
       await call.accept();
 
-      expect(streamVideo.isCallAcceptedOnThisDevice(cid), isTrue);
+      expect(streamVideo.ringing.isCallAcceptedOnThisDevice(cid), isTrue);
       expect(
-        streamVideo.isCallAcceptedOnThisDevice('default:some-other-call'),
+        streamVideo.ringing.isCallAcceptedOnThisDevice(
+          'default:some-other-call',
+        ),
         isFalse,
       );
     });

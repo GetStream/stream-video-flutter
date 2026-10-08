@@ -60,6 +60,8 @@ export 'src/sfu/data/models/sfu_track_type.dart';
 export 'src/sorting/call_participant_sorting_presets.dart';
 export 'src/sorting/call_participant_state_sorting.dart';
 export 'src/sorting/sort_participants.dart';
+export 'src/ringing/ringing_call_coordinator.dart'
+    hide EnsureConnected, RingingCallFactory;
 export 'src/stream_video.dart';
 export 'src/token/token.dart';
 export 'src/types/other.dart';
