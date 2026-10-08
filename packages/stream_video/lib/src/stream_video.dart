@@ -150,6 +150,34 @@ class StreamVideo extends Disposable {
     return instance;
   }
 
+  /// Creates a client unassociated with the singleton, like
+  /// [StreamVideo.create], that talks to [coordinatorClient] instead of
+  /// building one, and follows [appState] instead of the app's lifecycle.
+  @visibleForTesting
+  factory StreamVideo.forTesting(
+    String apiKey, {
+    required User user,
+    StreamVideoOptions? options,
+    String? userToken,
+    TokenLoader? tokenLoader,
+    OnTokenUpdated? onTokenUpdated,
+    PNManagerProvider? pushNotificationManagerProvider,
+    CoordinatorClient? coordinatorClient,
+    Stream<LifecycleState>? appState,
+  }) {
+    return StreamVideo._(
+      apiKey,
+      user: user,
+      options: options ?? StreamVideoOptions(),
+      userToken: userToken,
+      tokenLoader: tokenLoader,
+      onTokenUpdated: onTokenUpdated,
+      pushNotificationManagerProvider: pushNotificationManagerProvider,
+      coordinatorClient: coordinatorClient,
+      appState: appState,
+    );
+  }
+
   StreamVideo._(
     this.apiKey, {
     required User user,
@@ -158,7 +186,10 @@ class StreamVideo extends Disposable {
     TokenLoader? tokenLoader,
     OnTokenUpdated? onTokenUpdated,
     PNManagerProvider? pushNotificationManagerProvider,
+    CoordinatorClient? coordinatorClient,
+    Stream<LifecycleState>? appState,
   }) : _options = options,
+       _appStateOverride = appState,
        _state = MutableClientState(user, options) {
     _networkMonitor =
         _options.networkMonitorSettings.internetConnectionInstance ??
@@ -208,17 +239,19 @@ class StreamVideo extends Disposable {
       _tokens = TokenSource(_tokenManager);
     }
 
-    _client = buildCoordinatorClient(
-      user: user,
-      apiKey: apiKey,
-      tokenSource: _tokens,
-      latencySettings: _options.latencySettings,
-      retryPolicy: _options.retryPolicy,
-      rpcUrl: _options.coordinatorRpcUrl,
-      wsUrl: _options.coordinatorWsUrl,
-      networkMonitor: _networkMonitor,
-      clientEventReporter: _clientEventReporter,
-    );
+    _client =
+        coordinatorClient ??
+        buildCoordinatorClient(
+          user: user,
+          apiKey: apiKey,
+          tokenSource: _tokens,
+          latencySettings: _options.latencySettings,
+          retryPolicy: _options.retryPolicy,
+          rpcUrl: _options.coordinatorRpcUrl,
+          wsUrl: _options.coordinatorWsUrl,
+          networkMonitor: _networkMonitor,
+          clientEventReporter: _clientEventReporter,
+        );
 
     // Initialize the push notification manager if the provider is provided.
     pushNotificationManager = pushNotificationManagerProvider?.call(
@@ -337,6 +370,9 @@ class StreamVideo extends Disposable {
   final _subscriptions = Subscriptions();
 
   late final CoordinatorClient _client;
+
+  /// Replaces the app's lifecycle stream in tests.
+  final Stream<LifecycleState>? _appStateOverride;
   late final InternetConnection _networkMonitor;
   late final PushNotificationManager? pushNotificationManager;
 
@@ -495,7 +531,10 @@ class StreamVideo extends Disposable {
       }
       _connectionState = ConnectionState.connected(_state.currentUser.id);
       _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
-      _subscriptions.add(_idAppState, lifecycle.appState.listen(_onAppState));
+      _subscriptions.add(
+        _idAppState,
+        (_appStateOverride ?? lifecycle.appState).listen(_onAppState),
+      );
 
       // Register device with push notification manager.
       if (registerPushDevice) {
