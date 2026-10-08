@@ -2,6 +2,7 @@
 
 ### 🔄 Changed
 
+- `StreamVideoPushHandler.handleBackgroundMessage` builds its client through `StreamVideo.runWithoutMedia`, so the background isolate applies no audio configuration and creates no media device notifier.
 - [Android] The full-screen incoming call activity follows the redesigned ringing screen: the app surface instead of the blue `#0955fa`, a 104dp avatar, 64dp accept and decline buttons centred 80dp apart above the bottom, and the design system's `#00A46E` and `#D90D10` in place of the Material green and red. An app that sets `IncomingCallNotificationParams` keeps whatever it set.
 - [Android] `IncomingCallNotificationParams.fullScreenTextColor` no longer defaults to white. Left unset, the caller's name, the handle under it and the action labels each take the colour the design gives them rather than all four being painted the same. Setting it still paints all four.
 - [Android] `IncomingCallNotificationParams.fullScreenBackgroundColor` no longer defaults to `#0955fa` on the Dart side. The default is the plugin's own resource, so it can be overridden by an app's `colors.xml` as well as through the params.

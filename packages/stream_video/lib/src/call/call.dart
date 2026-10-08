@@ -238,8 +238,7 @@ class Call {
       retryPolicy: finalRetryPolicy,
       sdpPolicy: finalSdpPolicy,
       permissionManager: permissionManager,
-      rtcMediaDeviceNotifier:
-          rtcMediaDeviceNotifier ?? RtcMediaDeviceNotifier.instance,
+      rtcMediaDeviceNotifier: rtcMediaDeviceNotifier,
     );
   }
 
@@ -251,7 +250,7 @@ class Call {
     required this.networkMonitor,
     required RetryPolicy retryPolicy,
     required SdpPolicy sdpPolicy,
-    required RtcMediaDeviceNotifier rtcMediaDeviceNotifier,
+    RtcMediaDeviceNotifier? rtcMediaDeviceNotifier,
     CallCredentials? credentials,
     CallSessionFactory? sessionFactory,
   }) : _sessionFactory =
@@ -268,7 +267,7 @@ class Call {
        _coordinatorClient = coordinatorClient,
        _host = streamVideo,
        _retryPolicy = retryPolicy,
-       _rtcMediaDeviceNotifier = rtcMediaDeviceNotifier,
+       _injectedRtcMediaDeviceNotifier = rtcMediaDeviceNotifier,
        dynascaleManager = DynascaleManager(stateManager: stateManager) {
     _connection._credentials = credentials;
     streamLog.i(_tag, () => '<init> state: ${stateManager.callState}');
@@ -296,7 +295,11 @@ class Call {
     onAggregate: _applyViewportAggregate,
   );
   final InternetConnection networkMonitor;
-  final RtcMediaDeviceNotifier _rtcMediaDeviceNotifier;
+  final RtcMediaDeviceNotifier? _injectedRtcMediaDeviceNotifier;
+
+  /// Created on first use, so a call that sets up no media never creates it.
+  late final _rtcMediaDeviceNotifier =
+      _injectedRtcMediaDeviceNotifier ?? RtcMediaDeviceNotifier.instance;
 
   /// Joins, reconnects and leaves this call, and owns its SFU session.
   late final _connection = CallConnectionCoordinator(this);
@@ -308,7 +311,7 @@ class Call {
     session: () => _session,
     sfuStatsReporter: () => _sfuStatsReporter,
     hasPermission: hasPermission,
-    rtcMediaDeviceNotifier: _rtcMediaDeviceNotifier,
+    rtcMediaDeviceNotifier: () => _rtcMediaDeviceNotifier,
     audioConfigurationPolicy: () =>
         _stateManager.callState.preferences.audioConfigurationPolicy ??
         _host.options.audioConfigurationPolicy,
@@ -659,8 +662,10 @@ class Call {
       _connection._observeState();
       _connection._observeReconnectEvents();
       _observeUserId();
-      _observeNativeWebRtcEventStream();
-      _observeWebAudioPlaybackBlocked();
+      if (_host.setsUpMedia) {
+        _observeNativeWebRtcEventStream();
+        _observeWebAudioPlaybackBlocked();
+      }
       _observeAppLifecycle();
 
       _logger.v(() => '[_init] initialized');
@@ -1851,7 +1856,7 @@ class BaseCallFactory {
     required InternetConnection networkMonitor,
     required RetryPolicy retryPolicy,
     required SdpPolicy sdpPolicy,
-    required RtcMediaDeviceNotifier rtcMediaDeviceNotifier,
+    required RtcMediaDeviceNotifier? rtcMediaDeviceNotifier,
     required CallCredentials? credentials,
     required CallSessionFactory? sessionFactory,
   }) => Call._(
