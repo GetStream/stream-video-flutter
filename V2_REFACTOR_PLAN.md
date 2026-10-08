@@ -58,7 +58,7 @@ stacks.
 | 20 | C2 | `feat/flu-853-stream-video-test-seams` | #1435 |
 | 21 | C3 | `fix/flu-857-coordinator-connection` | #1436 |
 | 22 | C1 | `feat/flu-856-ringing-call-coordinator` | #1437 |
-| 23 | B3 | `feat/flu-863-call-ringing-controller` | |
+| 23 | B3 | `feat/flu-863-call-ringing-controller` | #1438 |
 | 24 | C4 | `feat/flu-858-app-lifecycle-controller` | |
 | 25 | B6 | `feat/flu-852-call-host` | |
 | 26 | C5 | `feat/flu-854-stream-video-constructor` | |
