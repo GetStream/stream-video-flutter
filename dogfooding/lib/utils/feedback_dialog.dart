@@ -37,6 +37,8 @@ Future<void> showFeedbackDialog(
                     end: 0,
                     top: 0,
                     child: StreamButton.icon(
+                      style: .secondary,
+                      type: .ghost,
                       icon: Icon(context.streamIcons.xmark),
                       onPressed: () => hideFeedbackDialog(context),
                     ),
