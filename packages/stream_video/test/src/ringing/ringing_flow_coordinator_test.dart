@@ -734,4 +734,35 @@ void main() {
       verifyNever(() => fixture.client.acceptCall(cid: any(named: 'cid')));
     });
   });
+
+  group('accepting a ring', () {
+    test('cancels the current user\'s outgoing ring of another call', () async {
+      final outgoing = fixture.streamVideo.makeCall(
+        callType: StreamCallType.defaultType(),
+        id: 'outgoing-call',
+      );
+      await fixture.streamVideo.state.setOutgoingCall(outgoing);
+      final incoming = ring();
+
+      await incoming.accept();
+
+      verify(
+        () => fixture.client.rejectCall(
+          cid: outgoing.callCid,
+          reason: CallRejectReason.cancel().value,
+        ),
+      ).called(1);
+      expect(fixture.streamVideo.state.outgoingCall.value, isNull);
+    });
+
+    test('marks the call accepted in the same turn when nothing is '
+        'replaced', () {
+      final incoming = ring();
+
+      unawaited(incoming.accept());
+
+      final status = incoming.state.value.status as CallStatusIncoming;
+      expect(status.acceptedByMe, isTrue);
+    });
+  });
 }
