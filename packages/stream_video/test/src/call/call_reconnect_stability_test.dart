@@ -195,7 +195,7 @@ void main() {
 
     Call buildCall({
       CallStateNotifier? stateManager,
-      StreamVideo? streamVideo,
+      CallHost? streamVideo,
       RetryPolicy? retryPolicy,
     }) {
       return createTestCall(
@@ -1031,7 +1031,7 @@ void main() {
         // throttles the loop: without a throw counter feeding the backoff and
         // the escalation it retries `fast` with zero delay forever.
         final reporter = _ThrowingJoinAttemptReporter();
-        final streamVideo = setupMockStreamVideo()
+        final streamVideo = setupMockCallHost()
           ..clientEventReporterOverride = reporter;
 
         final call = buildCall(

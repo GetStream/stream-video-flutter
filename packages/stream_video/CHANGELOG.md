@@ -73,6 +73,7 @@
 ### 🔄 Changed
 
 - Updated `stream_webrtc_flutter` to `^4.0.0`.
+- `Call`'s factories take a `CallHost`, the part of the client a call uses; `StreamVideo` implements it, so passing a `StreamVideo` still works.
 - `StreamVideo.dispose()` leaves and disposes the calls it tracks, and disconnects the user like `disconnect()` but keeps the push device registered.
 - `StreamVideo.connect()` registers the push device whenever it is asked to, also while the user is connected.
 - `StreamVideo.disconnect()` leaves the user disconnected even when unregistering the push device fails, or when the connection had dropped and was reconnecting.

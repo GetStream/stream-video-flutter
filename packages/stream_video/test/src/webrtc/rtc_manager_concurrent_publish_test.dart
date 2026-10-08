@@ -161,7 +161,7 @@ void main() {
       subscriber: subscriber,
       publishOptions: publishOptions,
       stateManager: createTestCallStateManager(),
-      streamVideo: setupMockStreamVideo(),
+      streamVideo: setupMockCallHost(),
       pcFactory:
           pcFactory ??
           StreamPeerConnectionFactory(callCid: SampleCallData.defaultCid),

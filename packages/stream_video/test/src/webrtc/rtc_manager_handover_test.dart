@@ -46,7 +46,7 @@ void main() {
   late RtcManager rtcManager;
 
   setUp(() {
-    final streamVideo = MockStreamVideo();
+    final streamVideo = MockCallHost();
     when(() => streamVideo.options).thenReturn(
       StreamVideoOptions(clientEventsReportingEnabled: false),
     );

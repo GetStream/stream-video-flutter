@@ -61,7 +61,7 @@ void main() {
       () => pcFactory.isAppleAdmMicrophoneMuted(),
     ).thenAnswer((_) async => false);
 
-    final streamVideo = MockStreamVideo();
+    final streamVideo = MockCallHost();
     when(() => streamVideo.options).thenReturn(
       StreamVideoOptions(clientEventsReportingEnabled: false),
     );

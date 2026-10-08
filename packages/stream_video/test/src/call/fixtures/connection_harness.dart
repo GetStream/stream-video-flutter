@@ -29,8 +29,7 @@ class ConnectionHarness {
     coordinatorClient = setupMockCoordinatorClient(events: coordinatorEvents);
     sessionFactory = setupMockSessionFactory(callSessions: sessions);
     stubMakeCallSession(() async {});
-    streamVideo = setupMockStreamVideo()
-      ..clientEventReporterOverride = reporter;
+    streamVideo = setupMockCallHost()..clientEventReporterOverride = reporter;
   }
 
   final internetStatus = BehaviorSubject<InternetStatus>.seeded(
@@ -44,7 +43,7 @@ class ConnectionHarness {
 
   late final MockCoordinatorClient coordinatorClient;
   late final MockSessionFactory sessionFactory;
-  late final MockStreamVideo streamVideo;
+  late final MockCallHost streamVideo;
   final permissionsManager = MockPermissionsManager();
 
   /// The first SFU session, the one the initial join gets.

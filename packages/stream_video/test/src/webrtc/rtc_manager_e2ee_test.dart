@@ -121,7 +121,7 @@ void main() {
       subscriber: _MockTracedStreamPeerConnection(),
       publishOptions: [_vp8],
       stateManager: createTestCallStateManager(),
-      streamVideo: setupMockStreamVideo(),
+      streamVideo: setupMockCallHost(),
       pcFactory: StreamPeerConnectionFactory(
         callCid: SampleCallData.defaultCid,
       ),

@@ -55,6 +55,7 @@ import '../webrtc/rtc_track/rtc_track.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
 import '../webrtc/sdp/policy/sdp_policy.dart';
 import 'call_connect_options.dart';
+import 'call_host.dart';
 import 'call_events.dart';
 import 'call_reject_reason.dart';
 import 'call_type.dart';
@@ -122,7 +123,7 @@ class Call {
   factory Call({
     required StreamCallCid callCid,
     required CoordinatorClient coordinatorClient,
-    required StreamVideo streamVideo,
+    required CallHost streamVideo,
     required InternetConnection networkMonitor,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
@@ -148,7 +149,7 @@ class Call {
   factory Call.fromCreated({
     required CallCreatedData data,
     required CoordinatorClient coordinatorClient,
-    required StreamVideo streamVideo,
+    required CallHost streamVideo,
     required InternetConnection networkMonitor,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
@@ -179,7 +180,7 @@ class Call {
   factory Call.fromRinging({
     required CallRingingData data,
     required CoordinatorClient coordinatorClient,
-    required StreamVideo streamVideo,
+    required CallHost streamVideo,
     required InternetConnection networkMonitor,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
@@ -202,7 +203,7 @@ class Call {
   factory Call._internal({
     required StreamCallCid callCid,
     required CoordinatorClient coordinatorClient,
-    required StreamVideo streamVideo,
+    required CallHost streamVideo,
     required InternetConnection networkMonitor,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
@@ -244,7 +245,7 @@ class Call {
 
   Call._({
     required CoordinatorClient coordinatorClient,
-    required StreamVideo streamVideo,
+    required CallHost streamVideo,
     required CallStateNotifier stateManager,
     required PermissionsManager permissionManager,
     required this.networkMonitor,
@@ -265,7 +266,7 @@ class Call {
        _stateManager = stateManager,
        _permissionsManager = permissionManager,
        _coordinatorClient = coordinatorClient,
-       _streamVideo = streamVideo,
+       _host = streamVideo,
        _retryPolicy = retryPolicy,
        _rtcMediaDeviceNotifier = rtcMediaDeviceNotifier,
        dynascaleManager = DynascaleManager(stateManager: stateManager) {
@@ -282,7 +283,7 @@ class Call {
   late final _callInitLock = Lock();
 
   final CoordinatorClient _coordinatorClient;
-  final StreamVideo _streamVideo;
+  final CallHost _host;
   final RetryPolicy _retryPolicy;
   final CallSessionFactory _sessionFactory;
   final CallStateNotifier _stateManager;
@@ -310,13 +311,11 @@ class Call {
     rtcMediaDeviceNotifier: _rtcMediaDeviceNotifier,
     audioConfigurationPolicy: () =>
         _stateManager.callState.preferences.audioConfigurationPolicy ??
-        _streamVideo.options.audioConfigurationPolicy,
-    muteVideoWhenInBackground: () =>
-        _streamVideo.options.muteVideoWhenInBackground,
-    muteAudioWhenInBackground: () =>
-        _streamVideo.options.muteAudioWhenInBackground,
-    onMicrophoneMuted: (muted) async => _streamVideo.pushNotificationManager
-        ?.setCallMutedByCid(callCid.value, muted),
+        _host.options.audioConfigurationPolicy,
+    muteVideoWhenInBackground: () => _host.options.muteVideoWhenInBackground,
+    muteAudioWhenInBackground: () => _host.options.muteAudioWhenInBackground,
+    onMicrophoneMuted: (muted) async =>
+        _host.pushNotificationManager?.setCallMutedByCid(callCid.value, muted),
     logger: _logger,
   );
 
@@ -325,9 +324,9 @@ class Call {
     call: this,
     stateManager: _stateManager,
     coordinatorClient: _coordinatorClient,
-    clientState: _streamVideo.state,
-    prepareToAccept: () => _streamVideo.prepareToAccept(this),
-    pollingSettings: () => _streamVideo.options.ringStatePolling,
+    clientState: _host.state,
+    prepareToAccept: () => _host.prepareToAccept(this),
+    pollingSettings: () => _host.options.ringStatePolling,
     trace: (tag, data) => _session?.trace(tag, data),
     logger: _logger,
   );
@@ -364,7 +363,7 @@ class Call {
       callCid: callCid,
       audioConfigurationPolicy:
           _stateManager.callState.preferences.audioConfigurationPolicy ??
-          _streamVideo.options.audioConfigurationPolicy,
+          _host.options.audioConfigurationPolicy,
     );
   }
 
@@ -448,7 +447,7 @@ class Call {
   String get id => state.value.callId;
   StreamCallCid get callCid => state.value.callCid;
   StreamCallType get type => state.value.callType;
-  bool get isActiveCall => _streamVideo.state.activeCalls.value.any(
+  bool get isActiveCall => _host.state.activeCalls.value.any(
     (call) => call.callCid == callCid,
   );
 
@@ -599,7 +598,7 @@ class Call {
   /// Applies and clears video moderation.
   late final _moderation = CallVideoModeration(
     stateManager: _stateManager,
-    currentUserId: () => _streamVideo.currentUser.id,
+    currentUserId: () => _host.currentUser.id,
     setMicrophoneEnabled: setMicrophoneEnabled,
     setCameraEnabled: setCameraEnabled,
     logger: _logger,
@@ -647,7 +646,7 @@ class Call {
       _media.setConnectOptions(connectOptions);
 
   /// The user this call is being watched or joined by.
-  UserInfo get currentUser => _streamVideo.currentUser;
+  UserInfo get currentUser => _host.currentUser;
 
   Future<void> _init() {
     return _callInitLock.synchronized(() async {
@@ -695,7 +694,7 @@ class Call {
   void _observeAppLifecycle() {
     _subscriptions.add(
       _idAppLifecycle,
-      _streamVideo.state.appLifecycleState.listen(_onAppLifecycleState),
+      _host.state.appLifecycleState.listen(_onAppLifecycleState),
     );
   }
 
@@ -742,7 +741,7 @@ class Call {
   void _observeUserId() {
     _subscriptions.add(
       _idUserId,
-      _streamVideo.state.user.map((u) => u.id).distinct().listen((
+      _host.state.user.map((u) => u.id).distinct().listen((
         userId,
       ) {
         final stateUserId = _stateManager.callState.currentUserId;
@@ -1013,7 +1012,7 @@ class Call {
   /// Whether exactly one participant, a session of the current user, remains
   /// once [leaving] is removed.
   bool _isAloneAfterLeave(SfuParticipant leaving) {
-    final currentUserId = _streamVideo.currentUser.id;
+    final currentUserId = _host.currentUser.id;
     var remaining = 0;
 
     for (final participant in state.value.callParticipants) {
@@ -1099,7 +1098,7 @@ class Call {
   }) async {
     if (watch && !_isDisposed) {
       _observeEvents();
-      _streamVideo.state.setWatchedCall(this);
+      _host.state.setWatchedCall(this);
     }
 
     final response = await coordinatorCall();
@@ -1251,7 +1250,7 @@ class Call {
     ];
 
     if (ringing) {
-      await _streamVideo.state.setOutgoingCall(this);
+      await _host.state.setOutgoingCall(this);
     }
 
     return _performGetOperation<CallReceivedOrCreatedData>(
@@ -1302,7 +1301,7 @@ class Call {
   Future<Result<None>> startAudioProcessing({
     bool requireAdvancedAudioProcessingSupport = false,
   }) async {
-    if (!_streamVideo.isAudioProcessorConfigured()) {
+    if (!_host.isAudioProcessorConfigured()) {
       _logger.w(() => '[startAudioProcessing] rejected (not configured)');
       return failureWithError(
         'Cannot start audio processing (not configured)',
@@ -1319,8 +1318,7 @@ class Call {
     }
 
     if (requireAdvancedAudioProcessingSupport) {
-      final supportResult = await _streamVideo
-          .deviceSupportsAdvancedAudioProcessing();
+      final supportResult = await _host.deviceSupportsAdvancedAudioProcessing();
 
       if (supportResult.isFailure) {
         return failureWithError(
@@ -1335,7 +1333,7 @@ class Call {
       }
     }
 
-    final result = await _streamVideo.setAudioProcessingEnabled(true);
+    final result = await _host.setAudioProcessingEnabled(true);
 
     if (result.isSuccess) {
       await _session?.notifyNoiseCancellationStarted();
@@ -1347,14 +1345,14 @@ class Call {
 
   /// Stops audio processing for the call.
   Future<Result<None>> stopAudioProcessing() async {
-    if (!_streamVideo.isAudioProcessorConfigured()) {
+    if (!_host.isAudioProcessorConfigured()) {
       _logger.w(() => '[stopAudioProcessing] rejected (not configured)');
       return failureWithError(
         'Cannot stop audio processing (not configured)',
       );
     }
 
-    final result = await _streamVideo.setAudioProcessingEnabled(false);
+    final result = await _host.setAudioProcessingEnabled(false);
 
     if (result.isSuccess) {
       await _session?.notifyNoiseCancellationStopped();
@@ -1438,7 +1436,7 @@ class Call {
       );
     }
 
-    if (_streamVideo.isAudioProcessorConfigured()) {
+    if (_host.isAudioProcessorConfigured()) {
       final disableAudioProcessing =
           profile == SfuAudioBitrateProfile.musicHighQuality;
 
@@ -1847,7 +1845,7 @@ extension FutureStartWithEx<T> on Stream<T> {
 class BaseCallFactory {
   static Call makeCall({
     required CoordinatorClient coordinatorClient,
-    required StreamVideo streamVideo,
+    required CallHost streamVideo,
     required CallStateNotifier stateManager,
     required PermissionsManager permissionManager,
     required InternetConnection networkMonitor,

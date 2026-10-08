@@ -113,7 +113,7 @@ void main() {
       subscriber: _MockTracedStreamPeerConnection(),
       publishOptions: [_option(1), _option(2)],
       stateManager: createTestCallStateManager(),
-      streamVideo: setupMockStreamVideo(),
+      streamVideo: setupMockCallHost(),
       pcFactory: StreamPeerConnectionFactory(
         callCid: SampleCallData.defaultCid,
       ),

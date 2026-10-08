@@ -52,7 +52,7 @@ class CallSessionFactory {
     required void Function(String trackId) onSuspendedAudioTrackRecorded,
     required InternetConnection networkMonitor,
     required StatsOptions statsOptions,
-    required StreamVideo streamVideo,
+    required CallHost streamVideo,
     required StreamPeerConnectionFactory pcFactory,
     ClientPublishOptions? clientPublishOptions,
     EncryptionManager? e2eeManager,
