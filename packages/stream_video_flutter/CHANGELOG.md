@@ -2,6 +2,7 @@
 
 ### ✅ Added
 
+- Added `StreamAdaptiveMenuAnchorThemeData` on `StreamVideoTheme`, and `StreamAdaptiveMenuAnchorTheme` to restyle the menu's sheet and anchored rows over a subtree.
 - Added `solveParticipantGrid`, the rule the participants grid arranges a page by, and `StreamCallParticipantsGridThemeData.columnResolver` to override it.
 - Added `StreamCallParticipantsGridThemeData.maxTileAspectRatio`, `compactPageSize` and `pageSize`.
 - Added `StreamCallParticipantsSpotlightThemeData` on `StreamVideoTheme`, and `StreamCallParticipantsSpotlightTheme` to restyle the speaker layouts over a subtree.
