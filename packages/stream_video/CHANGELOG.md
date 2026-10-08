@@ -82,6 +82,7 @@
 
 ### 🐞 Fixed
 
+- `StreamVideo.connect()` and `disconnect()` run one at a time in the order they are called, so a disconnect during a connect no longer leaves the user connected.
 - `Call.setCameraTargetResolution` during a call is now kept for later sessions.
 - `CallSettings` equality now compares every section.
 - A failed `Call.join` now returns the error it failed with, retries a retryable coordinator failure, and reports one telemetry abort.
