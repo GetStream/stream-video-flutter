@@ -43,7 +43,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 | 11 | A4 | `fix/flu-864-single-leave-decision` | #1418 |
 | 12 | A5 | `feat/flu-865-serial-join-executor` | #1419 |
 | 13 | FLU-931 | `fix/flu-931-rejoin-on-peer-connection-failure` | #1421 |
-| 14 | FLU-936 | `feat/flu-936-connection-failure-simulator` | |
+| 14 | FLU-936 | `feat/flu-936-connection-failure-simulator` | #1422 |
 | 15 | FLU-932 | `fix/flu-932-migration-complete-old-socket` | |
 | 16 | A6 | `fix/flu-861-session-ownership` | |
 | 17 | A7 | `feat/flu-862-call-dispose` | |
@@ -69,7 +69,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 - [x] 11. **A4** [FLU-864](https://linear.app/stream/issue/FLU-864): one leave decision and one cancellation scope per attempt (M). Fixes bug 1 from FLU-859. Waits end on leave, and a remote end leaves like a local leave.
 - [x] 12. **A5** [FLU-865](https://linear.app/stream/issue/FLU-865): serial executor for join and reconnect (M). A reconnect asked for during a join or another reconnect is held for it instead of dropped.
 - [x] 13. **Fix** [FLU-931](https://linear.app/stream/issue/FLU-931): rejoin when a peer connection fails (S, bug). A failed connection state, or an ICE restart the SFU refuses, asks for rejoin, as the SFU and the other SDKs do; fast stays for a lost participant signal, and a restart that gets no answer from the SFU is only logged. A call offline past the fast-reconnect deadline rejoins right away. The strategy each cause asks for is documented on `_reconnect`.
-- [ ] 14. **Tool** [FLU-936](https://linear.app/stream/issue/FLU-936): simulate connection failures from the dogfooding app (S–M). An in-app menu backed by small SDK debug hooks (offline for N s, socket drop, peer connection failed, GoAway), and `tools/simulate_network_loss.sh` for real network loss. After FLU-931, because the hooks attach to `CallConnectionCoordinator`; it is how FLU-932 and the rest of the A chain get checked on a device.
+- [x] 14. **Tool** [FLU-936](https://linear.app/stream/issue/FLU-936): simulate connection failures from the dogfooding app (S–M). An in-app menu backed by small SDK debug hooks (offline for N s, socket drop, peer connection failed, GoAway), and `tools/simulate_network_loss.sh` for real network loss. After FLU-931, because the hooks attach to `CallConnectionCoordinator`; it is how FLU-932 and the rest of the A chain get checked on a device.
 - [ ] 15. **Fix** [FLU-932](https://linear.app/stream/issue/FLU-932): wait for migration complete on the old SFU socket (S, bug). Confirm on a real migration first. Before A6, so A6 sets and clears `_previousSession` on top of the corrected order.
 - [ ] 16. **A6** [FLU-861](https://linear.app/stream/issue/FLU-861): single session ownership and a complete teardown (S). Fixes bugs 3 and 5, and folds in [FLU-925](https://linear.app/stream/issue/FLU-925) (timers re-armed during leave).
 - [ ] 17. **A7** [FLU-862](https://linear.app/stream/issue/FLU-862): `Call.dispose` and the single-use-after-leave error (S, v2 breaking).

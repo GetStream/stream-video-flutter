@@ -30,6 +30,7 @@ import '../sfu/data/events/sfu_events.dart';
 import '../sfu/data/models/sfu_audio_bitrate.dart';
 import '../sfu/data/models/sfu_client_capability.dart';
 import '../sfu/data/models/sfu_error.dart';
+import '../sfu/data/models/sfu_goaway_reason.dart';
 import '../sfu/data/models/sfu_participant.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../stream_video.dart';
@@ -49,6 +50,7 @@ import '../webrtc/model/rtc_video_dimension.dart';
 import '../webrtc/model/rtc_video_parameters.dart';
 import '../webrtc/peer_connection.dart';
 import '../webrtc/peer_connection_factory.dart';
+import '../webrtc/peer_type.dart';
 import '../webrtc/rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 import '../webrtc/rtc_manager.dart';
 import '../webrtc/rtc_media_device/device_enumeration_trigger.dart';
@@ -84,6 +86,7 @@ import 'stats/trace_tag.dart';
 import 'viewport_visibility_registry.dart';
 
 part 'call_actions.dart';
+part 'call_debug.dart';
 part 'connection/call_connection_coordinator.dart';
 
 typedef OnCallPermissionRequest =

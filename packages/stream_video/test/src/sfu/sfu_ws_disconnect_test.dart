@@ -154,4 +154,23 @@ void main() {
       );
     });
   });
+
+  // Closing as an unhealthy connection is what makes the SFU layer report a
+  // reconnectable disconnection, pinned above.
+  test('a simulated connection loss closes as an unhealthy connection', () {
+    final socket = _socket();
+    (socket.client.connectionState as MutableConnectionStateEmitter).value =
+        const WebSocketConnectionState.connected(
+          healthCheck: HealthCheckInfo(),
+        );
+
+    socket.simulateConnectionLoss();
+
+    final state = socket.client.connectionState.value;
+    expect(state, isA<Disconnecting>());
+    expect(
+      (state as Disconnecting).source,
+      isA<UnHealthyConnection>(),
+    );
+  });
 }

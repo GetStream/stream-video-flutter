@@ -735,24 +735,8 @@ class CallConnectionCoordinator {
           _call._suspendedTrackStates[trackId] =
               SuspendedTrackState.neverStarted;
         },
-        onReconnectionNeeded: (pc, strategy, reason) {
-          _session?.trace(TraceTag.pcReconnectionNeeded, {
-            'peerConnectionId': pc.type.name,
-            'reconnectionStrategy': strategy.name,
-          });
-
-          _reconnect(
-            strategy,
-            reconnectReason: '${pc.type.name} pc disconnected',
-            trigger: switch (reason) {
-              ReconnectionNeededReason.connectionFailed => PeerConnectionFailed(
-                pc,
-              ),
-              ReconnectionNeededReason.stuck => PeerConnectionStuck(pc),
-            },
-            source: session,
-          );
-        },
+        onReconnectionNeeded: (pc, strategy, reason) =>
+            _onReconnectionNeeded(pc, strategy, reason, session: session),
         clientPublishOptions:
             _call._stateManager.callState.preferences.clientPublishOptions,
       );
@@ -1201,6 +1185,29 @@ class CallConnectionCoordinator {
         _call._logger.e(() => '[startSession] failed: $failure');
         return failure;
       },
+    );
+  }
+
+  /// Handles a reconnect that a peer connection of [session] asks for.
+  void _onReconnectionNeeded(
+    StreamPeerConnection pc,
+    SfuReconnectionStrategy strategy,
+    ReconnectionNeededReason reason, {
+    required CallSession session,
+  }) {
+    _session?.trace(TraceTag.pcReconnectionNeeded, {
+      'peerConnectionId': pc.type.name,
+      'reconnectionStrategy': strategy.name,
+    });
+
+    _reconnect(
+      strategy,
+      reconnectReason: '${pc.type.name} pc disconnected',
+      trigger: switch (reason) {
+        ReconnectionNeededReason.connectionFailed => PeerConnectionFailed(pc),
+        ReconnectionNeededReason.stuck => PeerConnectionStuck(pc),
+      },
+      source: session,
     );
   }
 

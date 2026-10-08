@@ -370,6 +370,7 @@ class _CallScreenState extends State<CallScreen>
     icon: icon,
     screenShareConstraints: _screenShareConstraints,
     onStatsPressed: () => _togglePanel(CallSidePanel.stats),
+    snackbarMessenger: _controlsMessenger,
   );
 
   // The phone bar's microphone and camera: plain round buttons, no caret. A

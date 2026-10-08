@@ -127,6 +127,15 @@ class SfuWebSocket {
     return const Result.success(none);
   }
 
+  /// Closes the socket the way a missed pong does: the SFU keeps the session
+  /// for a fast reconnect, and [events] reports a reconnectable
+  /// [SfuSocketDisconnected].
+  @internal
+  void simulateConnectionLoss() {
+    _logger.i(() => '[simulateConnectionLoss] no args');
+    _client.onUnhealthy();
+  }
+
   Future<Result<None>> recreate() async {
     _logger.i(() => '[recreate] no args');
     await _client.disconnect(
