@@ -60,7 +60,7 @@ stacks.
 | 22 | C1 | `feat/flu-856-ringing-call-coordinator` | #1437 |
 | 23 | B3 | `feat/flu-863-call-ringing-controller` | #1438 |
 | 24 | C4 | `feat/flu-858-app-lifecycle-controller` | #1439 |
-| 25 | B6 | `feat/flu-852-call-host` | |
+| 25 | B6 | `feat/flu-852-call-host` | #1440 |
 | 26 | C5 | `feat/flu-854-stream-video-constructor` | |
 
 - [x] 1. **A1** [FLU-847](https://linear.app/stream/issue/FLU-847): characterisation tests for Call join, leave and reconnect (M). Gates A2, so it goes first. Ships with this plan.
