@@ -268,10 +268,11 @@ class _LobbyBody extends StatelessWidget {
 
     final controlRow = actions.controls.isEmpty
         ? null
+        // No spacing: each control's tap target already pads it on either
+        // side, which together make the gap the design draws.
         : Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
-            spacing: spacing.xs,
             children: actions.controls,
           );
 
