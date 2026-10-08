@@ -928,7 +928,7 @@ void main() {
       );
 
       test(
-        'starts audio processing when switching away from musicHighQuality',
+        'restores audio processing when switching away from musicHighQuality',
         () async {
           const hifiSettings = CallSettings(
             audio: StreamAudioSettings(hifiAudioEnabled: true),
@@ -960,10 +960,13 @@ void main() {
             ),
           ).thenReturn(true);
           when(
-            () => mockStreamVideo.setAudioProcessingEnabled(true),
+            () => mockStreamVideo.setAudioProcessingEnabled(any()),
           ).thenAnswer((_) async => const Result.success(none));
           when(
             callSession.notifyNoiseCancellationStarted,
+          ).thenAnswer((_) async => const Result.success(none));
+          when(
+            callSession.notifyNoiseCancellationStopped,
           ).thenAnswer((_) async => const Result.success(none));
 
           final call = createTestCall(
@@ -977,6 +980,10 @@ void main() {
           );
 
           await call.join();
+          await call.startAudioProcessing();
+
+          call.setAudioBitrateProfile(SfuAudioBitrateProfile.musicHighQuality);
+          await Future<void>.delayed(Duration.zero);
 
           final result = call.setAudioBitrateProfile(
             SfuAudioBitrateProfile.voiceStandard,
@@ -985,9 +992,10 @@ void main() {
           expect(result.isSuccess, isTrue);
           await Future<void>.delayed(Duration.zero);
 
+          // Once to start it, once to restore it after music.
           verify(
             () => mockStreamVideo.setAudioProcessingEnabled(true),
-          ).called(1);
+          ).called(2);
         },
       );
 
