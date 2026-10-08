@@ -105,6 +105,37 @@ void main() {
       expect((await ringing.join()).getErrorOrNull(), isA<CallLeftException>());
     });
 
+    test('ends the native call of a ringing call', () async {
+      ring();
+      final ringing = streamVideo.state.incomingCall.value!;
+
+      await streamVideo.dispose();
+
+      verify(() => mockPushManager.endCallByCid(cid, silent: true)).called(1);
+      expect(ringing.state.value.status, isA<CallStatusDisconnected>());
+    });
+
+    test(
+      'leaves the native call alone when another instance joined the call',
+      () async {
+        ring();
+        final ringing = streamVideo.state.incomingCall.value!;
+        final joined = streamVideo.makeCall(
+          callType: StreamCallType.defaultType(),
+          id: StreamCallCid(cid: cid).id,
+        );
+        await streamVideo.state.setActiveCall(joined);
+
+        await ringing.dispose();
+
+        verifyNever(
+          () =>
+              mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
+        );
+        expect(ringing.state.value.status, isA<CallStatusDisconnected>());
+      },
+    );
+
     test('disposes an outgoing and a watched call', () async {
       final outgoing = streamVideo.makeCall(
         callType: StreamCallType.defaultType(),

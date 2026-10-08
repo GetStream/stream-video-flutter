@@ -2099,6 +2099,9 @@ class CallConnectionCoordinator {
 
   /// Releases what a call that never joined holds, and drops this instance
   /// from the client's ringing, incoming, outgoing and watched calls.
+  ///
+  /// A call that is still ringing is reported disconnected, and its native
+  /// call ends unless another instance has joined the same call.
   Future<void> _releaseUnjoined() async {
     _cancelables.cancelAll();
     await _call.dynascaleManager.dispose();
@@ -2106,6 +2109,26 @@ class CallConnectionCoordinator {
     await _call.clearE2EEManager();
 
     final client = _call._streamVideo;
+    final status = _call.state.value.status;
+    if (status is CallStatusIncoming || status is CallStatusOutgoing) {
+      _call._stateManager.lifecycleCallDisconnected();
+      final joinedElsewhere = client.state.activeCalls.value.any(
+        (call) => call.callCid == _call.callCid,
+      );
+      if (!joinedElsewhere) {
+        try {
+          await client.pushNotificationManager?.endCallByCid(
+            _call.callCid.value,
+            silent: true,
+          );
+        } catch (e, stk) {
+          _call._logger.e(
+            () => '[dispose] ending the native call failed: $e\n$stk',
+          );
+        }
+      }
+    }
+
     client
       ..clearCallAcceptedOnThisDevice(_call.callCid, _call)
       ..releaseRingingCall(_call.callCid, _call);

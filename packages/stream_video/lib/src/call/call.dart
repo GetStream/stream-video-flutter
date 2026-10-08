@@ -1033,6 +1033,10 @@ class Call {
   /// [closedCaptions] and [callDurationStream] complete, and later state
   /// changes are dropped. [state] keeps its last value.
   ///
+  /// A call that is still ringing is reported disconnected and its native
+  /// call ends. The ring is not rejected or cancelled on the server; use
+  /// [reject] for that.
+  ///
   /// Calling it again does nothing.
   Future<void> dispose() => _disposed ??= _dispose();
   Future<void>? _disposed;
