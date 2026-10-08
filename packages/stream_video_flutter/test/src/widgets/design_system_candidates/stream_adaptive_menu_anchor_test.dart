@@ -111,7 +111,7 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        const TestWrapper(platform: .android, child: _Menu()),
+        const TestWrapper(child: _Menu()),
       );
 
       await tester.tap(find.text('open'));
