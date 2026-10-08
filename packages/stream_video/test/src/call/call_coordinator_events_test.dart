@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
@@ -1914,5 +1916,191 @@ void main() {
         expect(status.acceptedByCallee, isTrue);
       },
     );
+  });
+
+  group('Video moderation events', () {
+    final currentUserId = SampleCallData.defaultUserInfo.id;
+
+    Future<({Call call, MutableSharedEmitter<CoordinatorEvent> events})>
+    setupModeratedCall(VideoModerationConfig config) async {
+      final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+
+      final initialState = createActiveCallState().copyWith(
+        preferences: DefaultCallPreferences(videoModerationConfig: config),
+      );
+
+      final call = createTestCall(
+        coordinatorClient: setupMockCoordinatorClient(
+          events: coordinatorEvents,
+        ),
+        stateManager: CallStateNotifier(initialState),
+      );
+      await call.getOrCreate();
+
+      return (call: call, events: coordinatorEvents);
+    }
+
+    CoordinatorCallModerationBlurEvent blurEvent(Call call, String userId) {
+      return CoordinatorCallModerationBlurEvent(
+        callCid: call.callCid,
+        createdAt: DateTime.now(),
+        userId: userId,
+      );
+    }
+
+    test('a warning for the current user reaches onWarning', () async {
+      final warnings = <String>[];
+      final (:call, :events) = await setupModeratedCall(
+        VideoModerationConfig(onWarning: warnings.add),
+      );
+
+      events
+        ..emit(
+          CoordinatorCallModerationWarningEvent(
+            callCid: call.callCid,
+            createdAt: DateTime.now(),
+            userId: 'someone-else',
+            message: 'not for me',
+          ),
+        )
+        ..emit(
+          CoordinatorCallModerationWarningEvent(
+            callCid: call.callCid,
+            createdAt: DateTime.now(),
+            userId: currentUserId,
+            message: 'for me',
+          ),
+        );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(warnings, ['for me']);
+    });
+
+    test('a blur for the current user applies the moderation', () async {
+      var applied = 0;
+      var blurHandlerApplied = 0;
+      final (:call, :events) = await setupModeratedCall(
+        VideoModerationConfig(applyBlur: true, onApply: () => applied++),
+      );
+      call.setModerationBlurEffectHandlers(
+        onApply: () => blurHandlerApplied++,
+        onClear: () {},
+      );
+
+      events.emit(blurEvent(call, currentUserId));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(call.state.value.isVideoModerated, isTrue);
+      expect(applied, 1);
+      expect(blurHandlerApplied, 1);
+    });
+
+    test('a blur for another user is ignored', () async {
+      var applied = 0;
+      final (:call, :events) = await setupModeratedCall(
+        VideoModerationConfig(applyBlur: true, onApply: () => applied++),
+      );
+
+      events.emit(blurEvent(call, 'someone-else'));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(call.state.value.isVideoModerated, isFalse);
+      expect(applied, 0);
+    });
+
+    test('a disabled config ignores a blur', () async {
+      final (:call, :events) = await setupModeratedCall(
+        const VideoModerationConfig.disabled(),
+      );
+
+      events.emit(blurEvent(call, currentUserId));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(call.state.value.isVideoModerated, isFalse);
+    });
+
+    test('a muting blur blocks turning the camera and mic back on', () async {
+      final (:call, :events) = await setupModeratedCall(
+        const VideoModerationConfig.mute(),
+      );
+
+      events.emit(blurEvent(call, currentUserId));
+      await Future<void>.delayed(Duration.zero);
+
+      final camera = await call.setCameraEnabled(enabled: true);
+      final mic = await call.setMicrophoneEnabled(enabled: true);
+
+      expect(
+        camera.getErrorOrNull()?.message,
+        'Blocked by video moderation',
+      );
+      expect(mic.getErrorOrNull()?.message, 'Blocked by video moderation');
+    });
+
+    test('a blur with a duration clears itself', () async {
+      var cleared = 0;
+      var blurHandlerCleared = 0;
+      final (:call, :events) = await setupModeratedCall(
+        VideoModerationConfig(
+          applyBlur: true,
+          duration: const Duration(milliseconds: 50),
+          onClear: () => cleared++,
+        ),
+      );
+      call.setModerationBlurEffectHandlers(
+        onApply: () {},
+        onClear: () => blurHandlerCleared++,
+      );
+
+      events.emit(blurEvent(call, currentUserId));
+      await Future<void>.delayed(Duration.zero);
+      expect(call.state.value.isVideoModerated, isTrue);
+
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(call.state.value.isVideoModerated, isFalse);
+      expect(cleared, 1);
+      expect(blurHandlerCleared, 1);
+    });
+
+    test('clearModerationBlur does nothing when not moderated', () async {
+      var cleared = 0;
+      final (:call, events: _) = await setupModeratedCall(
+        VideoModerationConfig(applyBlur: true, onClear: () => cleared++),
+      );
+
+      call.clearModerationBlur();
+
+      expect(cleared, 0);
+    });
+
+    test('leaving cancels a pending timed clear', () async {
+      const duration = Duration(hours: 1);
+      final timers = <Timer>[];
+
+      // Records the timers the call creates, so the test can check the timed
+      // clear is cancelled without waiting for it.
+      await runZoned(
+        () async {
+          final (:call, :events) = await setupModeratedCall(
+            const VideoModerationConfig(applyBlur: true, duration: duration),
+          );
+
+          events.emit(blurEvent(call, currentUserId));
+          await Future<void>.delayed(Duration.zero);
+          await call.leave();
+        },
+        zoneSpecification: ZoneSpecification(
+          createTimer: (self, parent, zone, timerDuration, callback) {
+            final timer = parent.createTimer(zone, timerDuration, callback);
+            if (timerDuration == duration) timers.add(timer);
+            return timer;
+          },
+        ),
+      );
+
+      expect(timers, hasLength(1));
+      expect(timers.single.isActive, isFalse);
+    });
   });
 }

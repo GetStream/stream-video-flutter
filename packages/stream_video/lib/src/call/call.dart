@@ -62,6 +62,10 @@ import 'call_events.dart';
 import 'call_reject_reason.dart';
 import 'call_ringing_state.dart';
 import 'call_type.dart';
+import 'events/call_closed_captions.dart';
+import 'events/call_coordinator_event_router.dart';
+import 'events/call_reactions.dart';
+import 'events/call_video_moderation.dart';
 import 'permissions/permissions_manager.dart';
 import 'ring_state_poller.dart';
 import 'session/call_session.dart';
@@ -274,7 +278,6 @@ class Call {
   late final _callInitLock = Lock();
   late final _callJoinLock = Lock();
   late final _callReconnectLock = Lock();
-  late final _callClosedCaptionsLock = Lock();
   late final _multitaskingCameraLock = Lock();
 
   final CoordinatorClient _coordinatorClient;
@@ -426,14 +429,9 @@ class Call {
   // Completer that will be completed when call lifecycle ends (call leave is called)
   final Completer<void> _callLifecycleCompleter = Completer<void>();
 
-  final Map<String, Timer> _reactionTimers = {};
-  final Map<String, Timer> _captionsTimers = {};
-  Timer? _videoModerationTimer;
   RingStatePoller? _ringStatePoller;
   StreamSubscription<CallState>? _ringStatePollerStatusSubscription;
 
-  void Function()? _onModerationBlurApply;
-  void Function()? _onModerationBlurClear;
   final List<CancelableOperation<void>> _sfuStatsTimers = [];
   final Set<SfuClientCapability> _sfuClientCapabilities = {
     SfuClientCapability.subscriberVideoPause, // on by default
@@ -573,9 +571,36 @@ class Call {
   SharedEmitter<StreamCallEvent> get callEvents => _callEvents;
   final _callEvents = MutableSharedEmitter<StreamCallEvent>();
 
-  Stream<List<StreamClosedCaption>> get closedCaptions => _closedCaptions;
-  final _closedCaptions = MutableStateEmitter<List<StreamClosedCaption>>(
-    [],
+  Stream<List<StreamClosedCaption>> get closedCaptions =>
+      _closedCaptions.closedCaptions;
+
+  /// Holds the closed captions, and removes them once they expire.
+  late final _closedCaptions = CallClosedCaptions(
+    stateManager: _stateManager,
+    logger: _logger,
+  );
+
+  /// Sets reactions on participants, and clears them after a while.
+  late final _reactions = CallReactions(stateManager: _stateManager);
+
+  /// Applies and clears video moderation.
+  late final _moderation = CallVideoModeration(
+    stateManager: _stateManager,
+    currentUserId: () => _streamVideo.currentUser.id,
+    setMicrophoneEnabled: setMicrophoneEnabled,
+    setCameraEnabled: setCameraEnabled,
+  );
+
+  /// Applies coordinator events for this call to its state.
+  late final _eventRouter = CallCoordinatorEventRouter(
+    stateManager: _stateManager,
+    reactions: _reactions,
+    closedCaptions: _closedCaptions,
+    moderation: _moderation,
+    onPermissionRequest: (event) => onPermissionRequest?.call(event),
+    onAccepted: _handleCoordinatorCallAccepted,
+    onRejected: _handleCoordinatorCallRejected,
+    onRingActivity: () => _ringStatePoller?.restartQuietPeriod(),
   );
 
   OnCallPermissionRequest? onPermissionRequest;
@@ -802,123 +827,7 @@ class Call {
           '[onCoordinatorEvent] event.type: ${event.runtimeType}, calStatus: ${state.value.status}',
     );
 
-    switch (event) {
-      case StreamCallPermissionRequestEvent _:
-        // Notify the client about the permission request.
-        return onPermissionRequest?.call(event);
-      case StreamCallRejectedEvent _:
-        _ringStatePoller?.restartQuietPeriod();
-        await _handleCoordinatorCallRejected(event);
-        return;
-      case StreamCallAcceptedEvent _:
-        _ringStatePoller?.restartQuietPeriod();
-        await _handleCoordinatorCallAccepted(event);
-        return;
-      case StreamCallEndedEvent _:
-        return _stateManager.coordinatorCallEnded(event);
-      case StreamCallPermissionsUpdatedEvent _:
-        return _stateManager.coordinatorCallPermissionsUpdated(event);
-      case StreamCallRecordingStartedEvent _:
-        return _stateManager.coordinatorCallRecordingStarted(event);
-      case StreamCallRecordingStoppedEvent _:
-        return _stateManager.coordinatorCallRecordingStopped(event);
-      case StreamCallRecordingFailedEvent _:
-        return _stateManager.coordinatorCallRecordingFailed(event);
-      case StreamCallTranscriptionStartedEvent _:
-        return _stateManager.coordinatorCallTranscriptionStarted(event);
-      case StreamCallTranscriptionStoppedEvent _:
-        return _stateManager.coordinatorCallTranscriptionStopped(event);
-      case StreamCallTranscriptionFailedEvent _:
-        return _stateManager.coordinatorCallTranscriptionFailed(event);
-      case StreamCallClosedCaptionsStartedEvent _:
-        return _stateManager.coordinatorCallClosedCaptionsStarted(event);
-      case StreamCallClosedCaptionsStoppedEvent _:
-        return _stateManager.coordinatorCallClosedCaptionsStopped(event);
-      case StreamCallClosedCaptionsFailedEvent _:
-        return _stateManager.coordinatorCallClosedCaptionsFailed(event);
-      case StreamCallBroadcastingStartedEvent _:
-        return _stateManager.coordinatorCallBroadcastingStarted(event);
-      case StreamCallBroadcastingStoppedEvent _:
-        return _stateManager.coordinatorCallBroadcastingStopped(event);
-      case StreamCallBroadcastingFailedEvent _:
-        return _stateManager.coordinatorCallBroadcastingFailed(event);
-      case StreamCallRtmpBroadcastStartedEvent _:
-        return _stateManager.coordinatorCallRtmpBroadcastStarted(event);
-      case StreamCallRtmpBroadcastStoppedEvent _:
-        return _stateManager.coordinatorCallRtmpBroadcastStopped(event);
-      case StreamCallRtmpBroadcastFailedEvent _:
-        return _stateManager.coordinatorCallRtmpBroadcastFailed(event);
-      case StreamCallDeletedEvent _:
-        return _stateManager.coordinatorCallDeleted(event);
-      case StreamCallClosedCaptionsEvent _:
-        return _handleClosedCaptionEvent(event);
-      case StreamCallReactionEvent _:
-        _reactionTimers[event.user.id]?.cancel();
-
-        _reactionTimers[event.user.id] = Timer(
-          _stateManager.callState.preferences.reactionAutoDismissTime,
-          () {
-            _stateManager.resetCallReaction(event.user.id);
-            _reactionTimers.remove(event.user.id);
-          },
-        );
-        return _stateManager.coordinatorCallReaction(event);
-      case StreamCallSessionParticipantCountUpdatedEvent _:
-        if (state.value.status.isConnected || state.value.status.isJoined) {
-          return;
-        }
-
-        return _stateManager.setParticipantsCount(
-          totalCount: event.participantsCountByRole.values.fold(
-            0,
-            (a, b) => a + b,
-          ),
-          anonymousCount: event.anonymousParticipantCount,
-        );
-      case StreamCallMemberAddedEvent _:
-        return _stateManager.coordinatorCallMemberAdded(event);
-      case StreamCallMemberRemovedEvent _:
-        return _stateManager.coordinatorCallMemberRemoved(event);
-      case StreamCallMemberUpdatedEvent _:
-        return _stateManager.coordinatorCallMemberUpdated(event.members);
-      case StreamCallMemberUpdatedPermissionEvent _:
-        return _stateManager.coordinatorCallMemberUpdated(
-          event.updatedMembers,
-          capabilitiesByRole: event.capabilitiesByRole,
-        );
-      case StreamCallUserBlockedEvent _:
-        return _stateManager.coordinatorCallUserBlocked(event);
-      case StreamCallUserUnblockedEvent _:
-        return _stateManager.coordinatorCallUserUnblocked(event);
-      case StreamCallUpdatedEvent _:
-        return _stateManager.callMetadataChanged(
-          event.metadata,
-          capabilitiesByRole: event.capabilitiesByRole,
-        );
-      case StreamCallLiveStartedEvent _:
-        return _stateManager.callMetadataChanged(event.metadata);
-      case StreamCallRingingEvent _:
-        return _stateManager.callMetadataChanged(event.metadata);
-      case StreamCallMissedEvent _:
-        _ringStatePoller?.restartQuietPeriod();
-        return _stateManager.callMetadataChanged(event.metadata);
-      case StreamCallSessionEndedEvent _:
-        return _stateManager.callMetadataChanged(
-          event.metadata,
-          updateMembers: false,
-        );
-      case StreamCallSessionStartedEvent _:
-        return _stateManager.callMetadataChanged(
-          event.metadata,
-          updateMembers: false,
-        );
-      case StreamCallModerationWarningEvent _:
-        return _handleModerationWarningEvent(event);
-      case StreamCallModerationBlurEvent _:
-        return _handleModerationBlurEvent(event);
-      default:
-        break;
-    }
+    await _eventRouter.route(event);
   }
 
   Future<void> _handleCoordinatorCallAccepted(
@@ -963,56 +872,12 @@ class Call {
     _stateManager.coordinatorCallRejected(event);
   }
 
-  void _handleModerationWarningEvent(
-    StreamCallModerationWarningEvent event,
-  ) {
-    final config = state.value.preferences.videoModerationConfig;
-    if (config.isDisabled || event.userId != _streamVideo.currentUser.id) {
-      return;
-    }
-
-    config.onWarning?.call(event.message);
-  }
-
-  Future<void> _handleModerationBlurEvent(
-    StreamCallModerationBlurEvent event,
-  ) async {
-    final config = state.value.preferences.videoModerationConfig;
-    if (config.isDisabled || event.userId != _streamVideo.currentUser.id) {
-      return;
-    }
-
-    _stateManager.coordinatorCallModerationBlur(event.userId);
-
-    _videoModerationTimer?.cancel();
-    _videoModerationTimer = null;
-    if (config.duration != null) {
-      _videoModerationTimer = Timer(config.duration!, clearModerationBlur);
-    }
-
-    if (config.muteAudio) await setMicrophoneEnabled(enabled: false);
-    if (config.muteVideo) await setCameraEnabled(enabled: false);
-    if (config.applyBlur) _onModerationBlurApply?.call();
-    config.onApply?.call();
-  }
-
   /// Clears the moderation action, restoring normal operation.
   ///
   /// When [VideoModerationConfig.muteAudio] / [VideoModerationConfig.muteVideo]
   /// were active, re-enabling mic/camera is allowed again but they stay off
   /// until the user manually re-enables them.
-  void clearModerationBlur() {
-    _videoModerationTimer?.cancel();
-    _videoModerationTimer = null;
-
-    if (!state.value.isVideoModerated) return;
-
-    final config = state.value.preferences.videoModerationConfig;
-    _stateManager.clearModerationBlur();
-
-    if (config.applyBlur) _onModerationBlurClear?.call();
-    config.onClear?.call();
-  }
+  void clearModerationBlur() => _moderation.clear();
 
   /// Registers handlers for the native blur effect pipeline.
   ///
@@ -1022,10 +887,7 @@ class Call {
   void setModerationBlurEffectHandlers({
     required void Function() onApply,
     required void Function() onClear,
-  }) {
-    _onModerationBlurApply = onApply;
-    _onModerationBlurClear = onClear;
-  }
+  }) => _moderation.setBlurEffectHandlers(onApply: onApply, onClear: onClear);
 
   @internal
   void traceSessionLog(String tag, dynamic data) {
@@ -2865,15 +2727,9 @@ class Call {
   Future<void> _clear(String src) async {
     _logger.d(() => '[clear] src: $src');
 
-    for (final timer in [
-      ..._reactionTimers.values,
-      ..._captionsTimers.values,
-    ]) {
-      timer.cancel();
-    }
-
-    _videoModerationTimer?.cancel();
-    _videoModerationTimer = null;
+    _reactions.cancelTimers();
+    _closedCaptions.cancelTimers();
+    _moderation.cancelTimer();
 
     _stopRingStatePolling();
 
@@ -3311,74 +3167,6 @@ class Call {
           _logger.e(() => '[awaitCallToBeJoined] failed: $e');
           return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
         });
-  }
-
-  void _handleClosedCaptionEvent(StreamCallClosedCaptionsEvent event) {
-    _callClosedCaptionsLock.synchronized(() {
-      _logger.v(() => '[handleClosedCaptionEvent] event: $event');
-
-      String keyFor(StreamClosedCaption caption) {
-        return '${caption.speakerId}_${caption.startTime}';
-      }
-
-      final queue = _closedCaptions.value;
-      final currentCaption = StreamClosedCaption.fromEvent(event);
-      final currentKey = keyFor(currentCaption);
-
-      // Ignore duplicates from backend
-      if (queue.any((caption) => keyFor(caption) == currentKey)) {
-        return;
-      }
-
-      final newQueue = [...queue, currentCaption];
-
-      final visibilityDurationMs = _stateManager
-          .callState
-          .preferences
-          .closedCaptionsVisibilityDurationMs;
-      final visibileCaptions =
-          _stateManager.callState.preferences.closedCaptionsVisibleCaptions;
-
-      try {
-        // schedule the removal of the closed caption after the retention time
-        if (visibilityDurationMs > 0) {
-          final timer = Timer(Duration(milliseconds: visibilityDurationMs), () {
-            _removeExpiredCaption(keyFor, currentCaption);
-            _captionsTimers.remove(currentKey);
-          });
-
-          _captionsTimers[currentKey] = timer;
-
-          // cancel the cleanup tasks for the closed captions that are no longer in the queue
-          if (newQueue.length > visibileCaptions) {
-            for (var i = 0; i < newQueue.length - visibileCaptions; i++) {
-              final key = keyFor(newQueue[i]);
-              final timer = _captionsTimers[key];
-
-              timer?.cancel();
-              _captionsTimers.remove(key);
-            }
-          }
-
-          _closedCaptions.value = newQueue.length > visibileCaptions
-              ? newQueue.sublist(newQueue.length - visibileCaptions)
-              : newQueue;
-        }
-      } catch (error) {
-        _logger.e(() => '[handleClosedCaptionEvent] failed: $error');
-      }
-    });
-  }
-
-  Future<void> _removeExpiredCaption(
-    String Function(StreamClosedCaption) keyFor,
-    StreamClosedCaption caption,
-  ) async {
-    return _callClosedCaptionsLock.synchronized(() {
-      _closedCaptions.value = _closedCaptions.value.where((c) {
-        return keyFor(c) != keyFor(caption);
-      }).toList();
-    });
   }
 
   Future<Result<T>> _performGetOperation<T>({
