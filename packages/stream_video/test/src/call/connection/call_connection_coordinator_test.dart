@@ -894,6 +894,47 @@ void main() {
         expect(harness.reconnectionCallbacks, hasLength(1));
       },
     );
+
+    test(
+      'that is a migration makes the attempt after a failed one a migration',
+      () async {
+        harness = ConnectionHarness(sessionCount: 2);
+        final [first, _] = harness.sessions;
+        // A long deadline, so only the held migration decides the next attempt.
+        harness.stubSessionStart(
+          first,
+          () async => Result.success((
+            callState: createTestSfuCallState(),
+            fastReconnectDeadline: const Duration(minutes: 5),
+          )),
+        );
+        final call = harness.buildCall();
+        await call.join();
+        final attemptGate = Completer<void>();
+        var fastReconnects = 0;
+        harness.stubFastReconnect(first, () async {
+          if (++fastReconnects == 1) {
+            await attemptGate.future;
+            return failureWithError('fast reconnect failed');
+          }
+          return sessionStartSuccess();
+        });
+
+        await harness.emitSfu(first, sfuSocketDropped);
+        await waitUntil(() => fastReconnects == 1);
+        await harness.emitSfu(
+          first,
+          const SfuGoAwayEvent(goAwayReason: SfuGoAwayReason.rebalance),
+        );
+        attemptGate.complete();
+
+        await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+        // A migration keeps the session id; a rejoin would start a new one.
+        expect(harness.captureMakeCallSessionIds().last.sessionId, 'session-0');
+        expect(fastReconnects, 1);
+      },
+      timeout: const Timeout(Duration(seconds: 20)),
+    );
   });
 
   test(

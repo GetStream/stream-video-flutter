@@ -1449,12 +1449,13 @@ class CallConnectionCoordinator {
           DateTime.now().difference(reconnectStartTime) >
           _fastReconnectDeadline;
 
-      // A rejoin or migrate asked for during the attempt or its backoff;
-      // either one makes the next attempt a rejoin.
+      // A rejoin or migrate asked for during the attempt or its backoff makes
+      // the next attempt the same, unless something below asks for a rejoin.
       final held = _takeHeldReconnect();
-      final hasPendingRejoin =
-          held != null && held.isStrongerThan(SfuReconnectionStrategy.fast);
-      if (held != null && !hasPendingRejoin) {
+      final heldStrategy = held?.strategy;
+      final hasPendingRejoin = heldStrategy == SfuReconnectionStrategy.rejoin;
+      final hasPendingMigrate = heldStrategy == SfuReconnectionStrategy.migrate;
+      if (held != null && !hasPendingRejoin && !hasPendingMigrate) {
         _call._logger.v(() => '[reconnect] next attempt covers held $held');
       }
 
@@ -1475,17 +1476,17 @@ class CallConnectionCoordinator {
           hasReachedFastReconnectLimit ||
           hasClosedPeerConnection;
 
-      if (!shouldRejoin) {
+      final next = shouldRejoin
+          ? SfuReconnectionStrategy.rejoin
+          : hasPendingMigrate
+          ? SfuReconnectionStrategy.migrate
+          : SfuReconnectionStrategy.fast;
+
+      if (next == SfuReconnectionStrategy.fast) {
         fastReconnectAttemptsCount++;
       }
 
-      _updateReconnect(
-        (phase) => phase.copyWith(
-          strategy: shouldRejoin
-              ? SfuReconnectionStrategy.rejoin
-              : SfuReconnectionStrategy.fast,
-        ),
-      );
+      _updateReconnect((phase) => phase.copyWith(strategy: next));
     }
 
     do {
