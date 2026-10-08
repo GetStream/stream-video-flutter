@@ -192,7 +192,7 @@
 
 ### 🔄 Changed
 
-- `StreamParticipantTileStyle.topToolbarPadding` defaults to none, so the overflow button sits 8px in from the tile corner, as the design has it.
+- `StreamParticipantTileStyle.topToolbarPadding` defaults to none.
 - The participants bar in `CallParticipantsSpotlightView` carries a button at either end for the tiles it cannot fit.
 - `CallParticipantsGridView` pages with the same button as the participants bar.
 - Above the small breakpoint, the grid's page buttons sit either side of the grid rather than over it.
@@ -205,9 +205,9 @@
 
 ### 🐞 Fixed
 
-- The participant tile's overflow menu lines up with the edge of its button. It used to sit 8px out.
-- The rows of a `StreamAdaptiveMenuAnchor` sheet are 48px tall, as the design has them, rather than 56.
-- The lobby control buttons are 8px apart, as the design has them, rather than 16.
+- The participant tile's overflow menu lines up with the edge of its button.
+- `StreamAdaptiveMenuAnchor` sheet rows are 48px tall.
+- The lobby control buttons are 8px apart.
 - A participant moving between the spotlight and the bar no longer loses their picture on the way. Their tile carries its element across the move rather than being built again where it lands.
 - The iOS picture-in-picture window keeps its participant's track subscribed while the app is backgrounded.
 - The picture-in-picture views follow the call they are given when it changes, rather than the one they were built with.

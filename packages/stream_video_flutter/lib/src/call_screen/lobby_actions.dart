@@ -85,6 +85,9 @@ class StreamLobbyActions {
   ///
   /// Unmodifiable where a preset built it. A list given to
   /// [StreamLobbyActions.custom] is passed through as it is.
+  ///
+  /// The row adds no gap between them: each control brings its own tap target
+  /// around what it paints, and that inset is the spacing.
   final List<Widget> controls;
 
   /// The fields that pick which device to use. As [controls] is.
