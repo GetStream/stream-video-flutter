@@ -47,6 +47,7 @@ import '../webrtc/e2ee/e2ee_claims.dart';
 import '../webrtc/media/media_constraints.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
 import '../webrtc/model/rtc_video_parameters.dart';
+import '../webrtc/peer_connection.dart';
 import '../webrtc/peer_connection_factory.dart';
 import '../webrtc/rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 import '../webrtc/rtc_manager.dart';
@@ -62,8 +63,10 @@ import 'call_events.dart';
 import 'call_reject_reason.dart';
 import 'call_ringing_state.dart';
 import 'call_type.dart';
+import 'connection/connection_executor.dart';
 import 'connection/connection_phase.dart';
 import 'connection/join_outcome.dart';
+import 'connection/reconnect_trigger.dart';
 import 'events/call_closed_captions.dart';
 import 'events/call_coordinator_event_router.dart';
 import 'events/call_reactions.dart';
@@ -1089,7 +1092,11 @@ class Call {
     return remaining == 1;
   }
 
-  Future<void> _onSfuEvent(SfuEvent sfuEvent) async {
+  /// Handles [sfuEvent], sent by [session].
+  Future<void> _onSfuEvent(
+    SfuEvent sfuEvent, {
+    required CallSession session,
+  }) async {
     if (sfuEvent is SfuParticipantLeftEvent) {
       if (sfuEvent.callCid != callCid.value) return;
 
@@ -1118,7 +1125,7 @@ class Call {
       _stateManager.sfuCallEnded(sfuEvent);
     }
 
-    await _connection._onSfuConnectionEvent(sfuEvent);
+    await _connection._onSfuConnectionEvent(sfuEvent, session: session);
   }
 
   Future<Result<None>> setLocalTrack(RtcLocalTrack track) async {

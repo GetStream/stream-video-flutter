@@ -8,6 +8,7 @@ import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_call_state.dart';
+import 'package:stream_video/src/webrtc/peer_connection.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../../test_helpers.dart';
@@ -27,6 +28,7 @@ class ConnectionHarness {
       }) {
     coordinatorClient = setupMockCoordinatorClient(events: coordinatorEvents);
     sessionFactory = setupMockSessionFactory(callSessions: sessions);
+    stubMakeCallSession(() async {});
     streamVideo = setupMockStreamVideo()
       ..clientEventReporterOverride = reporter;
   }
@@ -108,6 +110,26 @@ class ConnectionHarness {
     ).called(count);
   }
 
+  /// The `onReconnectionNeeded` callback each session was made with, in the
+  /// order the sessions were made.
+  final reconnectionCallbacks = <OnReconnectionNeeded>[];
+
+  /// Asks for a reconnect with [strategy] through the publisher of
+  /// `sessions[index]`, the way its peer connection would, and returns that
+  /// publisher. It reports itself as not connected until a test stubs
+  /// `isConnected` otherwise.
+  StreamPeerConnection requestReconnect(
+    int index,
+    SfuReconnectionStrategy strategy, {
+    ReconnectionNeededReason reason = ReconnectionNeededReason.connectionFailed,
+  }) {
+    final publisher = _MockStreamPeerConnection();
+    when(() => publisher.type).thenReturn(StreamPeerType.publisher);
+    when(publisher.isConnected).thenReturn(false);
+    reconnectionCallbacks[index](publisher, strategy, reason);
+    return publisher;
+  }
+
   /// Runs [before] ahead of handing out each session.
   void stubMakeCallSession(Future<void> Function() before) {
     final queue = [...sessions];
@@ -130,7 +152,11 @@ class ConnectionHarness {
         pcFactory: any(named: 'pcFactory'),
         e2eeManager: any(named: 'e2eeManager'),
       ),
-    ).thenAnswer((_) async {
+    ).thenAnswer((invocation) async {
+      reconnectionCallbacks.add(
+        invocation.namedArguments[#onReconnectionNeeded]
+            as OnReconnectionNeeded,
+      );
       await before();
       return queue.length > 1 ? queue.removeAt(0) : queue.first;
     });
@@ -330,4 +356,9 @@ Future<void> waitUntil(
     }
     await Future<void>.delayed(const Duration(milliseconds: 5));
   }
+}
+
+class _MockStreamPeerConnection extends Mock implements StreamPeerConnection {
+  @override
+  Future<void> dispose() async {}
 }

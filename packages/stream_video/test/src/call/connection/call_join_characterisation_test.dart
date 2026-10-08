@@ -32,50 +32,50 @@ void main() {
   setUp(() => harness = ConnectionHarness());
   tearDown(() => harness.dispose());
 
-  group('join while a connect is already running', () {
-    test('succeeds once the running connect lands', () async {
-      final call = harness.buildCall(status: CallStatus.connecting());
+  group('join while a reconnect is running', () {
+    test('fails with the status the reconnect ended on', () async {
+      final call = harness.buildCall();
+      await call.join();
+
+      final reconnectGate = Completer<void>();
+      harness.stubFastReconnect(harness.session, () async {
+        await reconnectGate.future;
+        throw const StreamApiException(
+          message: 'forbidden',
+          statusCode: 403,
+          unrecoverable: true,
+        );
+      });
+      await harness.emitSfu(harness.session, sfuSocketDropped);
+      expect(call.state.value.status, isA<CallStatusReconnecting>());
 
       final join = call.join();
       await pumpEventQueue();
-      harness.stateManager.lifecycleCallConnected();
-
-      expect((await join).isSuccess, isTrue);
-      harness.verifyJoinCallCount(0);
-    });
-
-    test('also waits while the status is joining', () async {
-      final call = harness.buildCall(status: CallStatus.joining());
-
-      final join = call.join();
-      await pumpEventQueue();
-      harness.stateManager.lifecycleCallConnected();
-
-      expect((await join).isSuccess, isTrue);
-      harness.verifyJoinCallCount(0);
-    });
-
-    test('fails with the status the running connect ended on', () async {
-      final call = harness.buildCall(status: CallStatus.connecting());
-
-      final join = call.join();
-      await pumpEventQueue();
-      harness.stateManager.lifecycleCallReconnectingFailed();
+      reconnectGate.complete();
 
       final result = await join;
       expect(
         result.getErrorOrNull()?.message,
         startsWith('ongoing connect failed: '),
       );
+      harness.verifyJoinCallCount(1);
     });
 
     test('times out after connectTimeout', () async {
       final call = harness.buildCall(
-        status: CallStatus.connecting(),
         preferences: DefaultCallPreferences(
           connectTimeout: const Duration(milliseconds: 50),
         ),
       );
+      await call.join();
+
+      final reconnectGate = Completer<void>();
+      addTearDown(reconnectGate.complete);
+      harness.stubFastReconnect(harness.session, () async {
+        await reconnectGate.future;
+        return sessionStartSuccess();
+      });
+      await harness.emitSfu(harness.session, sfuSocketDropped);
 
       final result = await call.join();
 
@@ -83,7 +83,7 @@ void main() {
         result.getErrorOrNull()?.message,
         'timed out waiting for ongoing connect',
       );
-      expect(call.state.value.status, isA<CallStatusConnecting>());
+      expect(call.state.value.status, isA<CallStatusReconnecting>());
     });
 
     test('waits for a reconnect, which counts as connecting', () async {

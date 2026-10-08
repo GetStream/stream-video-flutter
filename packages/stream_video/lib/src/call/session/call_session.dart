@@ -167,6 +167,9 @@ class CallSession extends Disposable {
 
   SharedEmitter<SfuEvent> get events => sfuWS.events;
 
+  /// Whether the SFU signalling socket is connected.
+  bool get isSfuConnected => sfuWS.isConnected;
+
   late final _vvBuffer = DebounceBuffer<VisibilityChange, Result<None>>(
     duration: _debounceDuration,
     onBuffered: updateViewportVisibilities,
@@ -674,7 +677,11 @@ class CallSession extends Disposable {
             'timeoutSeconds': _publisherConnectionCheckDelay.inSeconds,
           });
 
-          onReconnectionNeeded(publisher, SfuReconnectionStrategy.rejoin);
+          onReconnectionNeeded(
+            publisher,
+            SfuReconnectionStrategy.rejoin,
+            ReconnectionNeededReason.stuck,
+          );
           return;
         }
 
@@ -703,7 +710,11 @@ class CallSession extends Disposable {
                   '[publisherConnectionCheck] recovery renegotiation failed '
                   '(${result.getErrorOrNull()}) — triggering fast reconnect',
             );
-            onReconnectionNeeded(publisher, SfuReconnectionStrategy.fast);
+            onReconnectionNeeded(
+              publisher,
+              SfuReconnectionStrategy.fast,
+              ReconnectionNeededReason.stuck,
+            );
           }
           return;
         }
@@ -1280,7 +1291,11 @@ class CallSession extends Disposable {
       () => '[negotiate] unresolved track mid — triggering fast reconnect',
     );
 
-    onReconnectionNeeded(pc, SfuReconnectionStrategy.fast);
+    onReconnectionNeeded(
+      pc,
+      SfuReconnectionStrategy.fast,
+      ReconnectionNeededReason.stuck,
+    );
   }
 
   Future<void> _onRemoteTrackReceived(

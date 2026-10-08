@@ -56,7 +56,6 @@ final class ConnectionReconnecting extends ConnectionPhase {
     this.attempt = 0,
     this.rejoinAttempts = 0,
     this.step = CallReconnectPhase.waiting,
-    this.rejoinPending = false,
   });
 
   /// How the current attempt reconnects: fast, rejoin or migrate.
@@ -74,23 +73,17 @@ final class ConnectionReconnecting extends ConnectionPhase {
   /// What the current attempt is doing.
   final CallReconnectPhase step;
 
-  /// Whether the next attempt has to rejoin: a rejoin was asked for while an
-  /// attempt was running, or a fast reconnect found the SFU session gone.
-  final bool rejoinPending;
-
   ConnectionReconnecting copyWith({
     SfuReconnectionStrategy? strategy,
     int? attempt,
     int? rejoinAttempts,
     CallReconnectPhase? step,
-    bool? rejoinPending,
   }) {
     return ConnectionReconnecting(
       strategy: strategy ?? this.strategy,
       attempt: attempt ?? this.attempt,
       rejoinAttempts: rejoinAttempts ?? this.rejoinAttempts,
       step: step ?? this.step,
-      rejoinPending: rejoinPending ?? this.rejoinPending,
     );
   }
 
@@ -98,7 +91,7 @@ final class ConnectionReconnecting extends ConnectionPhase {
   String toString() {
     return 'ConnectionReconnecting(strategy: ${strategy.name}, '
         'attempt: $attempt, rejoinAttempts: $rejoinAttempts, '
-        'step: ${step.name}, rejoinPending: $rejoinPending)';
+        'step: ${step.name})';
   }
 }
 

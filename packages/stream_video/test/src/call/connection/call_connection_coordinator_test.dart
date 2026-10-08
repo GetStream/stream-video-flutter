@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/call/stats/trace_tag.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/telemetry/client_event_types.dart';
+import 'package:stream_video/src/webrtc/peer_connection.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../fixtures/call_test_helpers.dart';
@@ -12,8 +15,9 @@ import '../fixtures/data.dart';
 
 /// Pins what the connection coordinator owns: leaving is terminal, waits end
 /// on leave, a failed join leaves once, a remote end leaves like a local
-/// leave, a join refused before it starts leaves the call idle, and each
-/// reconnect counts its attempts afresh.
+/// leave, a join refused before it starts leaves the call idle, each
+/// reconnect counts its attempts afresh, and a reconnect asked for during
+/// other connection work is held for it rather than dropped.
 void main() {
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -414,5 +418,570 @@ void main() {
       expect(harness.reporter.aborts, [ClientEventStandardCode.clientAborted]);
     },
     timeout: const Timeout(Duration(seconds: 30)),
+  );
+
+  group('a reconnect asked for while other connection work runs', () {
+    test(
+      'from a failed join attempt is taken by the next attempt, with no '
+      'reconnect after it',
+      () async {
+        harness = ConnectionHarness(sessionCount: 2);
+        final [first, second] = harness.sessions;
+        harness.stubSessionStart(
+          first,
+          () async => const Result.failure(
+            StreamVideoException(message: 'sfu unreachable'),
+          ),
+        );
+        var fastReconnects = 0;
+        for (final session in harness.sessions) {
+          harness.stubFastReconnect(session, () async {
+            fastReconnects++;
+            return sessionStartSuccess();
+          });
+        }
+        final call = harness.buildCall(
+          retryPolicy: RetryPolicy(
+            backoff: (_, _) => const Duration(milliseconds: 300),
+          ),
+        );
+
+        final join = call.join();
+        await waitUntil(() => harness.reconnectionCallbacks.length == 1);
+        await pumpEventQueue();
+        // The first attempt has failed and the join is backing off.
+        await harness.emitSfu(first, sfuSocketDropped);
+
+        expect((await join).isSuccess, isTrue);
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+
+        harness.verifyMakeCallSessionCount(2);
+        expect(fastReconnects, 0);
+        expect(call.state.value.status, isA<CallStatusConnected>());
+        verifyNever(() => second.leave(reason: any(named: 'reason')));
+      },
+    );
+
+    test(
+      'on the session a join is starting runs once the join returns',
+      () async {
+        final sessionStartGate = Completer<void>();
+        harness.stubSessionStart(harness.session, () async {
+          await sessionStartGate.future;
+          return sessionStartSuccess();
+        });
+        var fastReconnects = 0;
+        harness.stubFastReconnect(harness.session, () async {
+          fastReconnects++;
+          return sessionStartSuccess();
+        });
+        final call = harness.buildCall();
+
+        final join = call.join();
+        await waitUntil(() => harness.reconnectionCallbacks.length == 1);
+        await pumpEventQueue();
+        await harness.emitSfu(harness.session, sfuSocketDropped);
+        expect(fastReconnects, 0);
+
+        sessionStartGate.complete();
+        expect((await join).isSuccess, isTrue);
+
+        await waitUntil(() => fastReconnects == 1);
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+      },
+    );
+
+    test(
+      'during a reconnect attempt that succeeds runs another reconnect',
+      () async {
+        final call = harness.buildCall();
+        await call.join();
+        final attemptGate = Completer<void>();
+        var fastReconnects = 0;
+        harness.stubFastReconnect(harness.session, () async {
+          if (++fastReconnects == 1) await attemptGate.future;
+          return sessionStartSuccess();
+        });
+
+        await harness.emitSfu(harness.session, sfuSocketDropped);
+        await waitUntil(() => fastReconnects == 1);
+        harness.requestReconnect(0, SfuReconnectionStrategy.fast);
+        attemptGate.complete();
+
+        await waitUntil(() => fastReconnects == 2);
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+      },
+    );
+
+    test(
+      'before the reconnect attempt starts is taken into it, so a burst of '
+      'triggers reconnects once',
+      () async {
+        final call = harness.buildCall();
+        await call.join();
+        var fastReconnects = 0;
+        harness.stubFastReconnect(harness.session, () async {
+          fastReconnects++;
+          return sessionStartSuccess();
+        });
+
+        harness.internetStatus.add(InternetStatus.disconnected);
+        await waitUntil(
+          () => call.state.value.status is CallStatusReconnecting,
+        );
+        await harness.emitSfu(harness.session, sfuSocketDropped);
+        harness
+          ..requestReconnect(0, SfuReconnectionStrategy.fast)
+          ..requestReconnect(0, SfuReconnectionStrategy.fast);
+        harness.internetStatus.add(InternetStatus.connected);
+
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+
+        expect(fastReconnects, 1);
+        expect(call.state.value.status, isA<CallStatusConnected>());
+      },
+    );
+
+    test(
+      'by a session a rejoin has replaced is dropped',
+      () async {
+        harness = ConnectionHarness(sessionCount: 2);
+        final [first, second] = harness.sessions;
+        final makeSessionGate = Completer<void>();
+        var made = 0;
+        harness.stubMakeCallSession(() async {
+          if (made++ == 1) await makeSessionGate.future;
+        });
+        var fastReconnects = 0;
+        for (final session in harness.sessions) {
+          harness.stubFastReconnect(session, () async {
+            fastReconnects++;
+            return sessionStartSuccess();
+          });
+        }
+        final call = harness.buildCall();
+        await call.join();
+
+        harness.requestReconnect(0, SfuReconnectionStrategy.rejoin);
+        // The rejoin waits out its stability window, then makes a session.
+        await waitUntil(() => made == 2);
+        await harness.emitSfu(first, sfuSocketDropped);
+        harness.requestReconnect(0, SfuReconnectionStrategy.fast);
+        makeSessionGate.complete();
+
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+
+        expect(fastReconnects, 0);
+        harness.verifyMakeCallSessionCount(2);
+        verifyNever(() => second.leave(reason: any(named: 'reason')));
+      },
+      timeout: const Timeout(Duration(seconds: 20)),
+    );
+
+    test(
+      'during the first join is not lost: a rejoin asked for then runs once '
+      'the join returns',
+      () async {
+        harness = ConnectionHarness(sessionCount: 2);
+        final sessionStartGate = Completer<void>();
+        harness.stubSessionStart(harness.session, () async {
+          await sessionStartGate.future;
+          return sessionStartSuccess();
+        });
+        final call = harness.buildCall();
+
+        final join = call.join();
+        await waitUntil(() => harness.reconnectionCallbacks.length == 1);
+        harness.requestReconnect(0, SfuReconnectionStrategy.rejoin);
+        sessionStartGate.complete();
+        expect((await join).isSuccess, isTrue);
+
+        await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+        harness.verifyMakeCallSessionCount(2);
+      },
+      timeout: const Timeout(Duration(seconds: 20)),
+    );
+
+    test(
+      'and still held when a join waiting behind the reconnect finishes runs '
+      'then',
+      () async {
+        final call = harness.buildCall();
+        await call.join();
+        final attemptGate = Completer<void>();
+        var fastReconnects = 0;
+        harness.stubFastReconnect(harness.session, () async {
+          if (++fastReconnects == 1) await attemptGate.future;
+          return sessionStartSuccess();
+        });
+
+        await harness.emitSfu(harness.session, sfuSocketDropped);
+        await waitUntil(() => fastReconnects == 1);
+        final join = call.join();
+        await pumpEventQueue();
+        harness.requestReconnect(0, SfuReconnectionStrategy.fast);
+        attemptGate.complete();
+
+        expect((await join).isSuccess, isTrue);
+        await waitUntil(() => fastReconnects == 2);
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+      },
+    );
+
+    test(
+      'is not displaced by a later one from a session already replaced',
+      () async {
+        harness = ConnectionHarness(sessionCount: 3);
+        final [_, second, _] = harness.sessions;
+        final call = harness.buildCall();
+        await call.join();
+        harness.requestReconnect(0, SfuReconnectionStrategy.rejoin);
+        await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+
+        final attemptGate = Completer<void>();
+        var fastReconnects = 0;
+        harness.stubFastReconnect(second, () async {
+          if (++fastReconnects == 1) await attemptGate.future;
+          return sessionStartSuccess();
+        });
+        await harness.emitSfu(second, sfuSocketDropped);
+        await waitUntil(() => fastReconnects == 1);
+        harness
+          ..requestReconnect(1, SfuReconnectionStrategy.rejoin)
+          // The first session's publisher, long replaced, fires late.
+          ..requestReconnect(0, SfuReconnectionStrategy.fast);
+        attemptGate.complete();
+
+        // The held rejoin runs: a third session after its stability window.
+        await waitUntil(() => harness.reconnectionCallbacks.length == 3);
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+      },
+      timeout: const Timeout(Duration(seconds: 30)),
+    );
+
+    test(
+      'with a stronger strategy upgrades the attempt that takes it',
+      () async {
+        harness = ConnectionHarness(sessionCount: 2);
+        final call = harness.buildCall();
+        await call.join();
+        var fastReconnects = 0;
+        for (final session in harness.sessions) {
+          harness.stubFastReconnect(session, () async {
+            fastReconnects++;
+            return sessionStartSuccess();
+          });
+        }
+
+        harness.internetStatus.add(InternetStatus.disconnected);
+        await waitUntil(
+          () => call.state.value.status is CallStatusReconnecting,
+        );
+        harness.requestReconnect(0, SfuReconnectionStrategy.rejoin);
+        harness.internetStatus.add(InternetStatus.connected);
+
+        await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+        expect(fastReconnects, 0);
+      },
+    );
+
+    test('is dropped when the call leaves before the work finishes', () async {
+      final sessionStartGate = Completer<void>();
+      harness.stubSessionStart(harness.session, () async {
+        await sessionStartGate.future;
+        return sessionStartSuccess();
+      });
+      var fastReconnects = 0;
+      harness.stubFastReconnect(harness.session, () async {
+        fastReconnects++;
+        return sessionStartSuccess();
+      });
+      final call = harness.buildCall();
+
+      final join = call.join();
+      await waitUntil(() => harness.reconnectionCallbacks.length == 1);
+      harness.requestReconnect(0, SfuReconnectionStrategy.fast);
+      await call.leave();
+      sessionStartGate.complete();
+
+      expect((await join).isFailure, isTrue);
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+      expect(fastReconnects, 0);
+      expect(call.state.value.status, isA<CallStatusDisconnected>());
+    });
+
+    test(
+      'from a peer connection that is connected again by then is dropped',
+      () async {
+        final call = harness.buildCall();
+        await call.join();
+        final attemptGate = Completer<void>();
+        var fastReconnects = 0;
+        harness.stubFastReconnect(harness.session, () async {
+          if (++fastReconnects == 1) await attemptGate.future;
+          return sessionStartSuccess();
+        });
+
+        await harness.emitSfu(harness.session, sfuSocketDropped);
+        await waitUntil(() => fastReconnects == 1);
+        final publisher = harness.requestReconnect(
+          0,
+          SfuReconnectionStrategy.fast,
+        );
+        // The attempt's ICE restart brings the peer connection back.
+        when(publisher.isConnected).thenReturn(true);
+        attemptGate.complete();
+
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+        expect(fastReconnects, 1);
+      },
+    );
+
+    test(
+      'from a stuck peer connection still runs, even when it looks connected',
+      () async {
+        final call = harness.buildCall();
+        await call.join();
+        final attemptGate = Completer<void>();
+        var fastReconnects = 0;
+        harness.stubFastReconnect(harness.session, () async {
+          if (++fastReconnects == 1) await attemptGate.future;
+          return sessionStartSuccess();
+        });
+
+        await harness.emitSfu(harness.session, sfuSocketDropped);
+        await waitUntil(() => fastReconnects == 1);
+        final publisher = harness.requestReconnect(
+          0,
+          SfuReconnectionStrategy.fast,
+          reason: ReconnectionNeededReason.stuck,
+        );
+        when(publisher.isConnected).thenReturn(true);
+        attemptGate.complete();
+
+        await waitUntil(() => fastReconnects == 2);
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+      },
+    );
+
+    test(
+      'for a socket that is connected again by then is dropped',
+      () async {
+        final sessionStartGate = Completer<void>();
+        harness.stubSessionStart(harness.session, () async {
+          await sessionStartGate.future;
+          return sessionStartSuccess();
+        });
+        var fastReconnects = 0;
+        harness.stubFastReconnect(harness.session, () async {
+          fastReconnects++;
+          return sessionStartSuccess();
+        });
+        final call = harness.buildCall();
+
+        final join = call.join();
+        await waitUntil(() => harness.reconnectionCallbacks.length == 1);
+        await pumpEventQueue();
+        await harness.emitSfu(harness.session, sfuSocketDropped);
+        when(() => harness.session.isSfuConnected).thenReturn(true);
+        sessionStartGate.complete();
+
+        expect((await join).isSuccess, isTrue);
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+        expect(fastReconnects, 0);
+        expect(call.state.value.status, isA<CallStatusConnected>());
+      },
+    );
+
+    test(
+      'from a network drop still runs once the network is back',
+      () async {
+        final call = harness.buildCall();
+        await call.join();
+        final attemptGate = Completer<void>();
+        var fastReconnects = 0;
+        harness.stubFastReconnect(harness.session, () async {
+          if (++fastReconnects == 1) await attemptGate.future;
+          return sessionStartSuccess();
+        });
+
+        await harness.emitSfu(harness.session, sfuSocketDropped);
+        await waitUntil(() => fastReconnects == 1);
+        // The network drops and comes back while the attempt runs; the
+        // connections it set up may be stale.
+        harness.internetStatus.add(InternetStatus.disconnected);
+        await pumpEventQueue();
+        harness.internetStatus.add(InternetStatus.connected);
+        await pumpEventQueue();
+        attemptGate.complete();
+
+        await waitUntil(() => fastReconnects == 2);
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+      },
+    );
+
+    test(
+      'that is stronger but cleared does not hide a weaker one still needed',
+      () async {
+        final call = harness.buildCall();
+        await call.join();
+        final attemptGate = Completer<void>();
+        var fastReconnects = 0;
+        harness.stubFastReconnect(harness.session, () async {
+          if (++fastReconnects == 1) await attemptGate.future;
+          return sessionStartSuccess();
+        });
+
+        await harness.emitSfu(harness.session, sfuSocketDropped);
+        await waitUntil(() => fastReconnects == 1);
+        final publisher = harness.requestReconnect(
+          0,
+          SfuReconnectionStrategy.rejoin,
+        );
+        when(publisher.isConnected).thenReturn(true);
+        // The socket drops again and stays down.
+        await harness.emitSfu(harness.session, sfuSocketDropped);
+        attemptGate.complete();
+
+        await waitUntil(() => fastReconnects == 2);
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+        // A fast reconnect, not the cleared rejoin: no new session.
+        expect(harness.reconnectionCallbacks, hasLength(1));
+      },
+    );
+
+    test(
+      'that cleared does not escalate a failed attempt to a rejoin',
+      () async {
+        // A long deadline, so only a held rejoin could force the escalation.
+        harness.stubSessionStart(
+          harness.session,
+          () async => Result.success((
+            callState: createTestSfuCallState(),
+            fastReconnectDeadline: const Duration(minutes: 5),
+          )),
+        );
+        final call = harness.buildCall();
+        await call.join();
+        final attemptGate = Completer<void>();
+        var fastReconnects = 0;
+        harness.stubFastReconnect(harness.session, () async {
+          if (++fastReconnects == 1) {
+            await attemptGate.future;
+            return failureWithError('fast reconnect failed');
+          }
+          return sessionStartSuccess();
+        });
+
+        await harness.emitSfu(harness.session, sfuSocketDropped);
+        await waitUntil(() => fastReconnects == 1);
+        final publisher = harness.requestReconnect(
+          0,
+          SfuReconnectionStrategy.rejoin,
+        );
+        when(publisher.isConnected).thenReturn(true);
+        attemptGate.complete();
+
+        await waitUntil(() => fastReconnects == 2);
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+        // The retry stayed fast: no new session was made.
+        expect(harness.reconnectionCallbacks, hasLength(1));
+      },
+    );
+
+    test(
+      'that is a migration makes the attempt after a failed one a migration',
+      () async {
+        harness = ConnectionHarness(sessionCount: 2);
+        final [first, _] = harness.sessions;
+        // A long deadline, so only the held migration decides the next attempt.
+        harness.stubSessionStart(
+          first,
+          () async => Result.success((
+            callState: createTestSfuCallState(),
+            fastReconnectDeadline: const Duration(minutes: 5),
+          )),
+        );
+        final call = harness.buildCall();
+        await call.join();
+        final attemptGate = Completer<void>();
+        var fastReconnects = 0;
+        harness.stubFastReconnect(first, () async {
+          if (++fastReconnects == 1) {
+            await attemptGate.future;
+            return failureWithError('fast reconnect failed');
+          }
+          return sessionStartSuccess();
+        });
+
+        await harness.emitSfu(first, sfuSocketDropped);
+        await waitUntil(() => fastReconnects == 1);
+        await harness.emitSfu(
+          first,
+          const SfuGoAwayEvent(goAwayReason: SfuGoAwayReason.rebalance),
+        );
+        attemptGate.complete();
+
+        await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+        // A migration keeps the session id; a rejoin would start a new one.
+        expect(harness.captureMakeCallSessionIds().last.sessionId, 'session-0');
+        expect(fastReconnects, 1);
+      },
+      timeout: const Timeout(Duration(seconds: 20)),
+    );
+  });
+
+  test(
+    'a reconnect asked for by a replaced session after its rejoin has '
+    'finished is dropped',
+    () async {
+      harness = ConnectionHarness(sessionCount: 2);
+      var fastReconnects = 0;
+      for (final session in harness.sessions) {
+        harness.stubFastReconnect(session, () async {
+          fastReconnects++;
+          return sessionStartSuccess();
+        });
+      }
+      final call = harness.buildCall();
+      await call.join();
+      harness.requestReconnect(0, SfuReconnectionStrategy.rejoin);
+      await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+      await waitUntil(() => call.state.value.status is CallStatusConnected);
+
+      // The first session's publisher, long replaced, fires with no work
+      // running.
+      harness.requestReconnect(0, SfuReconnectionStrategy.fast);
+      await Future<void>.delayed(const Duration(milliseconds: 200));
+
+      expect(fastReconnects, 0);
+      expect(harness.reconnectionCallbacks, hasLength(2));
+      expect(call.state.value.status, isA<CallStatusConnected>());
+    },
+    timeout: const Timeout(Duration(seconds: 20)),
+  );
+
+  test(
+    'a reconnect that throws outside an attempt fails and leaves instead of '
+    'staying reconnecting',
+    () async {
+      final call = harness.buildCall();
+      await call.join();
+      when(
+        () => harness.session.trace(TraceTag.callReconnect, any<Object?>()),
+      ).thenThrow(StateError('trace failed'));
+
+      await harness.emitSfu(harness.session, sfuSocketDropped);
+      await waitUntil(() => call.state.value.status is CallStatusDisconnected);
+
+      final status = call.state.value.status as CallStatusDisconnected;
+      expect(status.reason, isA<DisconnectReasonReconnectionFailed>());
+    },
   );
 }

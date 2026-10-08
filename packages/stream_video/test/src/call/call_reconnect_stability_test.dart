@@ -186,6 +186,7 @@ void main() {
 
       mockPc = _MockPeerConnection();
       when(() => mockPc.type).thenReturn(StreamPeerType.publisher);
+      when(() => mockPc.isConnected()).thenReturn(false);
     });
 
     tearDown(() async {
@@ -271,7 +272,11 @@ void main() {
         // Trigger a rejoin while the network is still reported as
         // connected. The reconnect path must wait the stability window
         // before re-issuing joinCall.
-        capturedCallback!(mockPc, SfuReconnectionStrategy.rejoin);
+        capturedCallback!(
+          mockPc,
+          SfuReconnectionStrategy.rejoin,
+          ReconnectionNeededReason.connectionFailed,
+        );
 
         await Future<void>.delayed(const Duration(milliseconds: 500));
 
@@ -299,7 +304,11 @@ void main() {
         await call.join();
         expect(capturedCallback, isNotNull);
 
-        capturedCallback!(mockPc, SfuReconnectionStrategy.rejoin);
+        capturedCallback!(
+          mockPc,
+          SfuReconnectionStrategy.rejoin,
+          ReconnectionNeededReason.connectionFailed,
+        );
 
         // Wait past the 3s stability window with the network steady.
         await Future<void>.delayed(const Duration(milliseconds: 3500));
@@ -345,7 +354,11 @@ void main() {
           ),
         ).called(1);
 
-        capturedCallback!(mockPc, SfuReconnectionStrategy.rejoin);
+        capturedCallback!(
+          mockPc,
+          SfuReconnectionStrategy.rejoin,
+          ReconnectionNeededReason.connectionFailed,
+        );
 
         // Halfway through the first stability window, drop the network so
         // the wait must restart from scratch.
@@ -422,7 +435,11 @@ void main() {
           ),
         ).called(1);
 
-        capturedCallback!(mockPc, SfuReconnectionStrategy.rejoin);
+        capturedCallback!(
+          mockPc,
+          SfuReconnectionStrategy.rejoin,
+          ReconnectionNeededReason.connectionFailed,
+        );
 
         // Let the initial connectivity check pass, then drop the network
         // inside the stability window so the wait loop iterates with a
@@ -488,7 +505,11 @@ void main() {
           ),
         ).called(1);
 
-        capturedCallback!(mockPc, SfuReconnectionStrategy.migrate);
+        capturedCallback!(
+          mockPc,
+          SfuReconnectionStrategy.migrate,
+          ReconnectionNeededReason.connectionFailed,
+        );
 
         // Within the stability window, no extra joinCall should be issued.
         await Future<void>.delayed(const Duration(milliseconds: 500));
@@ -509,11 +530,11 @@ void main() {
     );
 
     test(
-      'rejoin hint received while reconnect lock is held is not dropped',
+      'rejoin hint received while a reconnect attempt runs is not dropped',
       () async {
         // Override start() to return a long fastReconnectDeadline so
-        // mustPerformRejoin stays false — this isolates the phase's rejoinPending
-        // flag as the sole driver of escalation.
+        // mustPerformRejoin stays false — this isolates the held rejoin
+        // request as the sole driver of escalation.
         when(
           () => callSession.start(
             reconnectDetails: any(named: 'reconnectDetails'),
@@ -564,19 +585,27 @@ void main() {
           ),
         ).called(1);
 
-        // Start a fast reconnect — the loop acquires the reconnect lock and
-        // hangs waiting for fastReconnectGate.
-        capturedCallback!(mockPc, SfuReconnectionStrategy.fast);
-        // Wait long enough for the lock to be acquired.
+        // Start a fast reconnect — the attempt hangs waiting for
+        // fastReconnectGate.
+        capturedCallback!(
+          mockPc,
+          SfuReconnectionStrategy.fast,
+          ReconnectionNeededReason.connectionFailed,
+        );
+        // Wait long enough for the attempt to start.
         await Future<void>.delayed(const Duration(milliseconds: 50));
 
-        // Signal a rejoin hint while the reconnect lock is held. The call
-        // must record rejoinPending on the phase and not discard the hint.
-        capturedCallback!(mockPc, SfuReconnectionStrategy.rejoin);
+        // Signal a rejoin hint while the attempt runs. The call must hold it
+        // for the reconnect rather than discard it.
+        capturedCallback!(
+          mockPc,
+          SfuReconnectionStrategy.rejoin,
+          ReconnectionNeededReason.connectionFailed,
+        );
 
-        // Release the gate: fast reconnect fails. The loop sees
-        // rejoinPending on the phase → shouldRejoin=true → strategy switches to
-        // rejoin → awaits 3s stability window → issues a second joinCall.
+        // Release the gate: fast reconnect fails. The loop takes the held
+        // rejoin → shouldRejoin=true → strategy switches to rejoin → awaits
+        // 3s stability window → issues a second joinCall.
         fastReconnectGate.complete();
 
         // 3 s stability window + margin.
@@ -653,7 +682,11 @@ void main() {
 
         // Trigger the reconnect loop. Fast reconnect fails 3 times before
         // fastReconnectAttemptsCount >= 2 causes escalation to rejoin.
-        capturedCallback!(mockPc, SfuReconnectionStrategy.fast);
+        capturedCallback!(
+          mockPc,
+          SfuReconnectionStrategy.fast,
+          ReconnectionNeededReason.connectionFailed,
+        );
 
         // 3 fast-reconnect failures (near-instant with zero backoff) +
         // 3 s stability window for the subsequent rejoin + margin.
@@ -737,7 +770,11 @@ void main() {
           ),
         ).called(1);
 
-        capturedCallback!(mockPc, SfuReconnectionStrategy.fast);
+        capturedCallback!(
+          mockPc,
+          SfuReconnectionStrategy.fast,
+          ReconnectionNeededReason.connectionFailed,
+        );
 
         // One fast attempt + the 3 s stability window of the rejoin + margin.
         await Future<void>.delayed(const Duration(milliseconds: 3500));
@@ -782,7 +819,11 @@ void main() {
         await call.join();
         final statuses = recordStatuses(call);
 
-        capturedCallback!(mockPc, SfuReconnectionStrategy.fast);
+        capturedCallback!(
+          mockPc,
+          SfuReconnectionStrategy.fast,
+          ReconnectionNeededReason.connectionFailed,
+        );
         await Future<void>.delayed(const Duration(milliseconds: 300));
 
         expect(
@@ -868,7 +909,11 @@ void main() {
           await call.join();
           final statuses = recordStatuses(call);
 
-          capturedCallback!(mockPc, SfuReconnectionStrategy.fast);
+          capturedCallback!(
+            mockPc,
+            SfuReconnectionStrategy.fast,
+            ReconnectionNeededReason.connectionFailed,
+          );
 
           // One fast attempt + the 3 s stability window of the rejoin + margin.
           await Future<void>.delayed(const Duration(milliseconds: 3500));
@@ -915,7 +960,11 @@ void main() {
 
         // A rejoin waits for the network to hold steady before it proceeds,
         // and starts that wait over on every drop.
-        capturedCallback!(mockPc, SfuReconnectionStrategy.rejoin);
+        capturedCallback!(
+          mockPc,
+          SfuReconnectionStrategy.rejoin,
+          ReconnectionNeededReason.connectionFailed,
+        );
         await Future<void>.delayed(const Duration(milliseconds: 50));
 
         // A monitor flapping is what an app resume looks like: it decides
