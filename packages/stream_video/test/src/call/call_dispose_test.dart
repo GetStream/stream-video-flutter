@@ -277,6 +277,112 @@ void main() {
     });
   });
 
+  group('a ringing call', () {
+    /// Puts [call] in [status], created by the current user or by [createdBy].
+    void ringing(CallStatus status, {String? createdBy}) {
+      final state = harness.stateManager.callState;
+      harness.stateManager.state = state.copyWith(
+        status: status,
+        createdByUser: CallUser(
+          id: createdBy ?? state.currentUserId,
+          name: '',
+          roles: const [],
+          image: '',
+        ),
+      );
+    }
+
+    void stubRejectCall() {
+      when(
+        () => harness.coordinatorClient.rejectCall(
+          cid: any(named: 'cid'),
+          reason: any(named: 'reason'),
+        ),
+      ).thenAnswer((_) async => const Result.success(none));
+    }
+
+    void verifyRejectCall(String reason, {int times = 1}) {
+      verify(
+        () => harness.coordinatorClient.rejectCall(
+          cid: any(named: 'cid'),
+          reason: reason,
+        ),
+      ).called(times);
+    }
+
+    void verifyNoRejectCall() {
+      verifyNever(
+        () => harness.coordinatorClient.rejectCall(
+          cid: any(named: 'cid'),
+          reason: any(named: 'reason'),
+        ),
+      );
+    }
+
+    setUp(stubRejectCall);
+
+    test('that is outgoing and unanswered is cancelled by dispose', () async {
+      final call = harness.buildCall();
+      ringing(CallStatus.outgoing());
+
+      await call.dispose();
+
+      verifyRejectCall('cancel');
+    });
+
+    test('that is outgoing and unanswered is cancelled by leave', () async {
+      final call = harness.buildCall();
+      ringing(CallStatus.outgoing());
+
+      await call.leave();
+
+      verifyRejectCall('cancel');
+    });
+
+    test('that the caller rejects is rejected once', () async {
+      final call = harness.buildCall();
+      ringing(CallStatus.outgoing());
+
+      await call.reject(reason: CallRejectReason.timeout());
+
+      verifyRejectCall('timeout');
+      verifyNever(
+        () => harness.coordinatorClient.rejectCall(
+          cid: any(named: 'cid'),
+          reason: 'cancel',
+        ),
+      );
+    });
+
+    test('that the callee accepted is not cancelled', () async {
+      final call = harness.buildCall();
+      ringing(CallStatus.outgoing(acceptedByCallee: true));
+
+      await call.dispose();
+
+      verifyNoRejectCall();
+    });
+
+    test('that another user created is not cancelled', () async {
+      final call = harness.buildCall();
+      ringing(CallStatus.outgoing(), createdBy: 'someone-else');
+
+      await call.dispose();
+
+      verifyNoRejectCall();
+    });
+
+    test('that is incoming is not rejected by dispose', () async {
+      final call = harness.buildCall();
+      ringing(CallStatus.incoming(), createdBy: 'caller');
+
+      await call.dispose();
+
+      verifyNoRejectCall();
+      expect(call.state.value.status, isA<CallStatusDisconnected>());
+    });
+  });
+
   test('dispose still closes the streams when the leave throws', () async {
     final call = harness.buildCall();
     await call.join();

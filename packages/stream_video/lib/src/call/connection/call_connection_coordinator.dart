@@ -2097,11 +2097,38 @@ class CallConnectionCoordinator {
     await _phase.close();
   }
 
+  /// Cancels the ring of an outgoing call this user created, while nobody has
+  /// accepted or joined it, so the callees stop ringing.
+  Future<void> _cancelUnansweredRing() async {
+    final state = _call.state.value;
+    final status = state.status;
+    if (status is! CallStatusOutgoing ||
+        status.acceptedByCallee ||
+        !state.createdByMe ||
+        state.otherParticipants.isNotEmpty) {
+      return;
+    }
+
+    _call._logger.d(() => '[leave] cancelling the unanswered ring');
+    try {
+      final result = await _call._coordinatorClient.rejectCall(
+        cid: _call.callCid,
+        reason: CallRejectReason.cancel().value,
+      );
+      if (result is Failure) {
+        _call._logger.w(() => '[leave] cancelling the ring failed: $result');
+      }
+    } catch (e, stk) {
+      _call._logger.e(() => '[leave] cancelling the ring failed: $e\n$stk');
+    }
+  }
+
   /// Releases what a call that never joined holds, and drops this instance
   /// from the client's ringing, incoming, outgoing and watched calls.
   ///
   /// A call that is still ringing is reported disconnected, and its native
-  /// call ends unless another instance has joined the same call.
+  /// call ends unless another instance has joined the same call. An
+  /// unanswered outgoing ring is cancelled first.
   Future<void> _releaseUnjoined() async {
     _cancelables.cancelAll();
     await _call.dynascaleManager.dispose();
@@ -2111,6 +2138,7 @@ class CallConnectionCoordinator {
     final client = _call._streamVideo;
     final status = _call.state.value.status;
     if (status is CallStatusIncoming || status is CallStatusOutgoing) {
+      await _cancelUnansweredRing();
       _call._stateManager.lifecycleCallDisconnected();
       final joinedElsewhere = client.state.activeCalls.value.any(
         (call) => call.callCid == _call.callCid,
@@ -2161,6 +2189,11 @@ class CallConnectionCoordinator {
     _call._streamVideo.clientEventReporter
       ..abort(_call.callCid, abortCode)
       ..unregisterCall(_call.callCid);
+
+    // A reject already told the server, and a remote end needs no answer.
+    if (!remote && !_isLeftOrLeaving && reason is! DisconnectReasonRejected) {
+      await _cancelUnansweredRing();
+    }
 
     final bool didDisconnect;
     try {

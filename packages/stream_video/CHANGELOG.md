@@ -68,6 +68,7 @@
 ### 🔄 Changed
 
 - `StreamVideo.dispose()` leaves and disposes the calls it tracks.
+- Leaving or disposing an outgoing call you created while it still rings cancels the ring.
 - With `closedCaptionsVisibilityDurationMs` at 0 or less, closed captions are now shown and stay until newer ones replace them, instead of never being shown.
 - A `call.rejected` event now settles a ring by the same rules as the push and ring-state checks (`RingingSnapshot`), so the paths can no longer disagree. These cases change:
   - A callee hangs up once every other member has rejected, even if the caller isn't a member of the call.

@@ -1022,6 +1022,9 @@ class Call {
   /// The call cannot be joined again. Its [state] stays readable, also after
   /// [dispose].
   ///
+  /// Leaving an outgoing call this user created while it still rings, with
+  /// nobody accepted or joined, cancels the ring for the callees.
+  ///
   /// - [reason]: optional reason for leaving the call
   Future<Result<None>> leave({DisconnectReason? reason}) {
     return _connection.leave(reason: reason);
@@ -1034,8 +1037,8 @@ class Call {
   /// changes are dropped. [state] keeps its last value.
   ///
   /// A call that is still ringing is reported disconnected and its native
-  /// call ends. The ring is not rejected or cancelled on the server; use
-  /// [reject] for that.
+  /// call ends. An outgoing ring is cancelled as by [leave]; an incoming ring
+  /// is not rejected, use [reject] for that.
   ///
   /// Calling it again does nothing.
   Future<void> dispose() => _disposed ??= _dispose();
