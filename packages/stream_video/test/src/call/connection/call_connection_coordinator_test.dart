@@ -1034,6 +1034,9 @@ void main() {
         expect(harness.reconnectionCallbacks, hasLength(1));
         await waitUntil(() => harness.reconnectionCallbacks.length == 2);
         expect(fastReconnects(), 0);
+        // Reported as network-available, but as a new join attempt.
+        expect(harness.reporter.joinAttempts, [JoinReason.networkAvailable]);
+        expect(harness.reporter.newJoinAttempts, [JoinReason.networkAvailable]);
       },
     );
 
@@ -1078,6 +1081,7 @@ void main() {
         await waitUntil(() => harness.reconnectionCallbacks.length == 2);
         // A migration keeps the session id; a rejoin would start a new one.
         expect(harness.captureMakeCallSessionIds().last.sessionId, 'session-0');
+        expect(harness.reporter.joinAttempts, [JoinReason.migration]);
       },
       timeout: const Timeout(Duration(seconds: 20)),
     );
@@ -1091,6 +1095,9 @@ void main() {
 
       await waitUntil(() => fastReconnects() == 1);
       expect(harness.reconnectionCallbacks, hasLength(1));
+      // A fast reconnect continues the join attempt it interrupted.
+      expect(harness.reporter.joinAttempts, [JoinReason.networkAvailable]);
+      expect(harness.reporter.newJoinAttempts, isEmpty);
     });
   });
 

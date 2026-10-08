@@ -210,6 +210,8 @@ class StreamPeerConnection extends Disposable {
   ) {
     final sfuError = error.sfuError;
     if (sfuError != null) {
+      // The restart is answered by an RPC error, which carries no reconnect
+      // strategy, so the code decides.
       return sfuError.code == SfuErrorCode.participantSignalLost
           ? SfuReconnectionStrategy.fast
           : SfuReconnectionStrategy.rejoin;

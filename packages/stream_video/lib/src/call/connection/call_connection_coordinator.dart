@@ -1675,14 +1675,20 @@ class CallConnectionCoordinator {
 
         unawaited(_sfuStatsReporter?.sendSfuStats());
 
-        final joinReason = trigger is NetworkLost || wasOffline
+        // A rejoin or migrate starts a new join attempt, also when it follows
+        // an offline period; only a fast reconnect continues the last one.
+        final strategyReason = _reconnectStrategy.joinReason;
+        final joinReason =
+            strategyReason != JoinReason.migration &&
+                (trigger is NetworkLost || wasOffline)
             ? JoinReason.networkAvailable
-            : _reconnectStrategy.joinReason;
+            : strategyReason;
         if (joinReason != null) {
-          _call._streamVideo.clientEventReporter.reportJoinAttempt(
-            _call.callCid,
-            reason: joinReason,
-          );
+          final reporter = _call._streamVideo.clientEventReporter;
+          if (strategyReason != null && !joinReason.mintsNewAttempt) {
+            reporter.newJoinAttempt(_call.callCid, reason: joinReason);
+          }
+          reporter.reportJoinAttempt(_call.callCid, reason: joinReason);
         }
 
         _setReconnectStep(CallReconnectPhase.joining);
