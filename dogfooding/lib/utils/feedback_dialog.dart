@@ -15,33 +15,34 @@ Future<void> showFeedbackDialog(
     context: context,
     builder: (BuildContext context) {
       final colorScheme = StreamTheme.of(context).colorScheme;
+      final spacing = context.streamSpacing;
       return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.all(spacing.md),
         child: Material(
           type: MaterialType.transparency,
           child: Align(
-            child: Stack(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 32,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Stack(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(spacing.lg),
+                    decoration: BoxDecoration(
+                      color: colorScheme.backgroundElevation1,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: _FeedbackRatingContent(call),
                   ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.backgroundElevation1,
-                    borderRadius: BorderRadius.circular(16),
+                  PositionedDirectional(
+                    end: 0,
+                    top: 0,
+                    child: StreamButton.icon(
+                      icon: Icon(context.streamIcons.xmark),
+                      onPressed: () => hideFeedbackDialog(context),
+                    ),
                   ),
-                  child: _FeedbackRatingContent(call),
-                ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: StreamButton.icon(
-                    icon: Icon(context.streamIcons.xmark),
-                    onPressed: () => hideFeedbackDialog(context),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
