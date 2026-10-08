@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../logger/impl/test_logger.dart';
 import 'fixtures/call_test_helpers.dart';
 import 'fixtures/data.dart';
 
@@ -110,15 +111,7 @@ void main() {
     );
 
     test('an error thrown while handling an event is logged', () async {
-      final logger = _RecordingLogger();
-      StreamLog()
-        ..logger = logger
-        ..priority = Priority.error;
-      addTearDown(() {
-        StreamLog()
-          ..logger = const SilentStreamLogger()
-          ..priority = Priority.none;
-      });
+      final logger = installRecordingLogger();
 
       final uncaught = <Object>[];
       await runZonedGuarded(
@@ -2145,19 +2138,4 @@ void main() {
       expect(timers.single.isActive, isFalse);
     });
   });
-}
-
-class _RecordingLogger extends StreamLogger {
-  final errors = <String>[];
-
-  @override
-  void log(
-    Priority priority,
-    String tag,
-    MessageBuilder message, [
-    Object? error,
-    StackTrace? stk,
-  ]) {
-    if (priority == Priority.error) errors.add(message());
-  }
 }

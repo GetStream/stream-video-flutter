@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../../logger/impl/tagged_logger.dart';
 import '../../models/models.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
@@ -17,6 +18,7 @@ class CallVideoModeration {
     required this._currentUserId,
     required this._setMicrophoneEnabled,
     required this._setCameraEnabled,
+    required this._logger,
   });
 
   final CallStateNotifier _stateManager;
@@ -25,6 +27,7 @@ class CallVideoModeration {
   _setMicrophoneEnabled;
   final Future<Result<None>> Function({required bool enabled})
   _setCameraEnabled;
+  final TaggedLogger _logger;
 
   Timer? _videoModerationTimer;
   void Function()? _onModerationBlurApply;
@@ -42,7 +45,8 @@ class CallVideoModeration {
   }
 
   /// Applies the moderation configured for a blur of the current user, and
-  /// schedules [clear] when the config has a duration.
+  /// schedules [clear] when the config has a duration. A failed mute is
+  /// logged, and the rest of the moderation is still applied.
   Future<void> onBlur(StreamCallModerationBlurEvent event) async {
     final config = _stateManager.callState.preferences.videoModerationConfig;
     if (config.isDisabled || event.userId != _currentUserId()) {
@@ -57,8 +61,18 @@ class CallVideoModeration {
       _videoModerationTimer = Timer(config.duration!, clear);
     }
 
-    if (config.muteAudio) await _setMicrophoneEnabled(enabled: false);
-    if (config.muteVideo) await _setCameraEnabled(enabled: false);
+    if (config.muteAudio) {
+      final result = await _setMicrophoneEnabled(enabled: false);
+      if (result.isFailure) {
+        _logger.w(() => '[onBlur] failed to mute the microphone: $result');
+      }
+    }
+    if (config.muteVideo) {
+      final result = await _setCameraEnabled(enabled: false);
+      if (result.isFailure) {
+        _logger.w(() => '[onBlur] failed to mute the camera: $result');
+      }
+    }
     if (config.applyBlur) _onModerationBlurApply?.call();
     config.onApply?.call();
   }

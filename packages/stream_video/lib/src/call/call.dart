@@ -589,6 +589,7 @@ class Call {
     currentUserId: () => _streamVideo.currentUser.id,
     setMicrophoneEnabled: setMicrophoneEnabled,
     setCameraEnabled: setCameraEnabled,
+    logger: _logger,
   );
 
   /// Applies coordinator events for this call to its state.

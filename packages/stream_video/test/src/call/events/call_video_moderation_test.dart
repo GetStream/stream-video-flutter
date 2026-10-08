@@ -4,6 +4,7 @@ import 'package:stream_video/src/call/events/call_video_moderation.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../../logger/impl/test_logger.dart';
 import '../fixtures/call_test_helpers.dart';
 import '../fixtures/data.dart';
 
@@ -14,7 +15,11 @@ void main() {
   late CallVideoModeration moderation;
   late List<String> toggles;
 
-  void setUpModeration(VideoModerationConfig config) {
+  void setUpModeration(
+    VideoModerationConfig config, {
+    Result<None> microphoneResult = const Result.success(none),
+    Result<None> cameraResult = const Result.success(none),
+  }) {
     toggles = [];
     stateManager = CallStateNotifier(
       createActiveCallState().copyWith(
@@ -26,12 +31,13 @@ void main() {
       currentUserId: () => currentUserId,
       setMicrophoneEnabled: ({required enabled}) async {
         toggles.add('microphone: $enabled');
-        return const Result.success(none);
+        return microphoneResult;
       },
       setCameraEnabled: ({required enabled}) async {
         toggles.add('camera: $enabled');
-        return const Result.success(none);
+        return cameraResult;
       },
+      logger: taggedLogger(tag: 'SV:CallVideoModerationTest'),
     );
   }
 
@@ -51,6 +57,37 @@ void main() {
 
       expect(toggles, ['microphone: false', 'camera: false']);
     });
+
+    for (final track in ['microphone', 'camera']) {
+      test(
+        'a failed $track mute is logged and the moderation still applies',
+        () async {
+          final logger = installRecordingLogger();
+          var applied = false;
+          final failure = failureWithError<None>('Session is null');
+          setUpModeration(
+            VideoModerationConfig(
+              muteAudio: true,
+              muteVideo: true,
+              onApply: () => applied = true,
+            ),
+            microphoneResult: track == 'microphone'
+                ? failure
+                : const Result.success(none),
+            cameraResult: track == 'camera'
+                ? failure
+                : const Result.success(none),
+          );
+
+          await moderation.onBlur(blur());
+
+          expect(logger.warnings, [contains(track)]);
+          expect(toggles, ['microphone: false', 'camera: false']);
+          expect(stateManager.callState.isVideoModerated, isTrue);
+          expect(applied, isTrue);
+        },
+      );
+    }
 
     test('a blur-only config leaves the microphone and camera alone', () async {
       setUpModeration(const VideoModerationConfig.blur());

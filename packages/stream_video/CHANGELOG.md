@@ -73,6 +73,7 @@
 
 ### 🐞 Fixed
 
+- A failed microphone or camera mute during video moderation is now logged.
 - Errors thrown while handling a call's coordinator and SFU events, including from `onPermissionRequest`, are now logged instead of surfacing as unhandled errors.
 - Joining with the camera or microphone track from the lobby no longer stops it and acquires it again. The camera no longer restarts when the call connects.
 - A desktop screen share no longer sends `mandatory: {frameRate: null}` to the platform when no `maxFrameRate` is set.
