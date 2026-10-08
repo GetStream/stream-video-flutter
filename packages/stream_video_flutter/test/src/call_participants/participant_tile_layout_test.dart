@@ -500,6 +500,24 @@ void main() {
       expect(find.byType(DefaultStreamParticipantLabel), findsOneWidget);
     });
 
+    testWidgets(
+      'keeps the button on a tile just tall enough to clear the pill',
+      (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          _tile(
+            participant: _participant(),
+            width: 300,
+            height: 96,
+            actions: [_pin()],
+          ),
+        );
+
+        expect(find.byType(StreamButton), findsOneWidget);
+      },
+    );
+
     testWidgets('keeps the button clear of the pill when both are shown', (
       tester,
     ) async {
@@ -713,6 +731,21 @@ void main() {
         },
       );
     }
+
+    testWidgets('gives the button a full-size tap target', (tester) async {
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _tile(
+          participant: _participant(),
+          width: 300,
+          height: 300,
+          actions: [action('Pin')],
+        ),
+      );
+
+      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+      handle.dispose();
+    });
 
     testWidgets('opens the menu from the padding around the button', (
       tester,

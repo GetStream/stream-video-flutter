@@ -275,6 +275,9 @@ class StreamParticipantTileStyle with _$StreamParticipantTileStyle {
   /// by a custom component builder picks it up too. Not a scoped
   /// [StreamButtonTheme]: it reaches that one button rather than every button
   /// under the tile.
+  ///
+  /// Its `tapTargetSize` is ignored: the tile pads the button to a 48px tap
+  /// target itself.
   final StreamButtonThemeStyle? moreButtonStyle;
 
   /// The font size of the reaction emoji.
