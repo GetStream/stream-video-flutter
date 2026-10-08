@@ -776,6 +776,11 @@ class CallConnectionCoordinator {
         _session!,
         reconnectDetails: reconnectDetails,
         clientEventRetryCount: clientEventRetryCount,
+        // After a failed migration attempt the tracks are on the session the
+        // migration started from, or on the failed attempt's session if it
+        // got as far as taking them. Asking both is safe: a session hands
+        // its tracks over only once.
+        handOverFrom: {_previousSession, sessionLeft},
       );
 
       if (sessionResult is! Success<None>) {
@@ -1082,10 +1087,14 @@ class CallConnectionCoordinator {
     return Result.success(joined);
   }
 
+  /// Starts [session]. The live local tracks of the sessions in
+  /// [handOverFrom] move to it, so the camera, microphone and screen share
+  /// are published again without being opened again.
   Future<Result<None>> _startSession(
     CallSession session, {
     ReconnectDetails? reconnectDetails,
     int clientEventRetryCount = 0,
+    Set<CallSession?> handOverFrom = const {},
   }) async {
     _call._logger.d(
       () => '[startSession] sessionId: $session',
@@ -1132,17 +1141,27 @@ class CallConnectionCoordinator {
       capabilities: _sfuClientCapabilities,
       clientEventRetryCount: clientEventRetryCount,
       onRtcManagerCreatedCallback: (_) async {
+        final inheritedTracks = [
+          for (final previous in handOverFrom)
+            if (previous != null && !identical(previous, session))
+              ...previous.handOverLocalTracks(),
+        ];
         _call._logger.v(() => '[startSession] applying connect options');
         unawaited(
-          _call._applyConnectOptions().catchError((
-            dynamic error,
-            StackTrace stackTrace,
-          ) {
-            _call._logger.e(
-              () =>
-                  '[startSession] failed to apply connect options: $error, stackTrace: $stackTrace',
-            );
-          }),
+          _call
+              ._applyConnectOptions(
+                session: session,
+                inheritedTracks: inheritedTracks,
+              )
+              .catchError((
+                dynamic error,
+                StackTrace stackTrace,
+              ) {
+                _call._logger.e(
+                  () =>
+                      '[startSession] failed to apply connect options: $error, stackTrace: $stackTrace',
+                );
+              }),
         );
       },
       isAnonymousUser:

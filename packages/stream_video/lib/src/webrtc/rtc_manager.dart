@@ -143,6 +143,11 @@ class RtcManager extends Disposable {
 
   final tracks = </*trackId*/ String, RtcTrack>{};
 
+  /// The media tracks given to the next session's manager by
+  /// [handOverLocalTracks], by track id. Unpublishing a track that still holds
+  /// that media track stops only this manager's clones.
+  final _handedOverMediaTracks = <String, rtc.MediaStreamTrack>{};
+
   set onPublisherIceCandidate(OnIceCandidate? cb) {
     publisher?.onIceCandidate = cb;
   }
@@ -389,7 +394,13 @@ class RtcManager extends Disposable {
       return;
     }
 
-    await publishedTrack.stop();
+    final handedOver = _handedOverMediaTracks.remove(trackId);
+    if (publishedTrack is RtcLocalTrack &&
+        identical(handedOver, publishedTrack.mediaTrack)) {
+      await publishedTrack.stopClones();
+    } else {
+      await publishedTrack.stop();
+    }
 
     // A remote track's transceiver belongs to the receive-only subscriber
     // PC, so there is no sender to remove. Passing it to the publisher PC
@@ -409,6 +420,34 @@ class RtcManager extends Disposable {
         }
       }
     }
+  }
+
+  /// Gives the live local tracks to the manager of the session that replaces
+  /// this one, so the camera, microphone and screen share are not opened
+  /// again.
+  ///
+  /// Each returned track carries the local prefix and no clones, ready to be
+  /// published by the next manager. This manager keeps sending through its
+  /// own clones until it is disposed, and then stops only those. Muted tracks
+  /// stay here and are stopped on dispose. A second call returns nothing.
+  List<RtcLocalTrack> handOverLocalTracks() {
+    final handedOver = <RtcLocalTrack>[];
+    for (final MapEntry(key: trackId, value: track) in tracks.entries) {
+      if (track is! RtcLocalTrack) continue;
+      if (!track.mediaTrack.enabled) continue;
+      if (_handedOverMediaTracks.containsKey(trackId)) continue;
+      _handedOverMediaTracks[trackId] = track.mediaTrack;
+
+      handedOver.add(
+        track.copyWith(
+          trackIdPrefix: kLocalTrackIdPrefix,
+          clonedTracks: const [],
+        ),
+      );
+    }
+
+    _logger.i(() => '[handOverLocalTracks] tracks: $handedOver');
+    return handedOver;
   }
 
   bool isPublishing(SfuTrackType trackType) {

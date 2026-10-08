@@ -388,6 +388,7 @@ MockCallSession setupMockCallSession() {
   when(
     callSession.waitForMigrationComplete,
   ).thenAnswer((_) => Future.value(const Result.success(none)));
+  when(callSession.handOverLocalTracks).thenReturn(const []);
 
   return callSession;
 }

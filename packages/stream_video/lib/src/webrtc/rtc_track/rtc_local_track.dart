@@ -159,9 +159,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     streamLog.i(_tag, () => 'Stopping track: $trackId');
     try {
       await mediaTrack.stop();
-      for (final track in clonedTracks) {
-        await track.stop();
-      }
+      await _stopClones();
     } catch (e) {
       streamLog.w(_tag, () => 'Error stopping mediaTrack: $e');
     }
@@ -170,6 +168,24 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       await mediaStream.dispose();
     } catch (e) {
       streamLog.w(_tag, () => 'Error disposing mediaStream: $e');
+    }
+  }
+
+  /// Stops the clones given to senders, but not [mediaTrack] or
+  /// [mediaStream], so the device keeps capturing for whoever else holds the
+  /// track.
+  Future<void> stopClones() async {
+    streamLog.i(_tag, () => 'Stopping clones of track: $trackId');
+    await _stopClones();
+  }
+
+  Future<void> _stopClones() async {
+    for (final track in clonedTracks) {
+      try {
+        await track.stop();
+      } catch (e) {
+        streamLog.w(_tag, () => 'Error stopping clone ${track.id}: $e');
+      }
     }
   }
 

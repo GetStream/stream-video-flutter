@@ -803,6 +803,12 @@ class CallSession extends Disposable {
     return result.map((_) => none);
   }
 
+  /// Gives this session's live local tracks to the session that replaces it.
+  /// See [RtcManager.handOverLocalTracks].
+  List<RtcLocalTrack> handOverLocalTracks() {
+    return rtcManager?.handOverLocalTracks() ?? const [];
+  }
+
   RtcTrack? getTrack(String trackIdPrefix, SfuTrackType trackType) {
     final trackId = '$trackIdPrefix:$trackType';
     return rtcManager?.getTrack(trackId);
