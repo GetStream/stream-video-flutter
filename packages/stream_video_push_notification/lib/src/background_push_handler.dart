@@ -298,7 +298,8 @@ class StreamVideoPushHandler {
 
     StreamVideo? streamVideo;
     try {
-      streamVideo = await createStreamVideo();
+      // This isolate only handles the push, so its client sets up no media.
+      streamVideo = await StreamVideo.runWithoutMedia(createStreamVideo);
       if (streamVideo == null) return null;
 
       // ignore: cancel_subscriptions -- cancelled by _BackgroundSession.release.

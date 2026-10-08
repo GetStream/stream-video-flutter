@@ -38,6 +38,9 @@ class MockCallHost extends Mock implements CallHost {
   /// Accepting clears nothing unless a test stubs it.
   @override
   Future<void>? prepareToAccept(Call call) => null;
+
+  @override
+  bool get setsUpMedia => true;
 }
 
 class MockCallStateNotifier extends Mock implements CallStateNotifier {}

@@ -1,3 +1,4 @@
+import 'package:stream_core/stream_core.dart' show UserToken;
 import 'package:uuid/uuid.dart';
 
 import '../../globals.dart';
@@ -79,6 +80,26 @@ abstract interface class ClientEventReporter {
 
   /// A reporter that does nothing — used when reporting is disabled.
   const factory ClientEventReporter.noOp() = _NoOpClientEventReporter;
+
+  /// A reporter sending to [baseUrl], or [ClientEventReporter.noOp] when
+  /// reporting is not [enabled].
+  factory ClientEventReporter.create({
+    required bool enabled,
+    required String baseUrl,
+    required String apiKey,
+    required Future<UserToken> Function() getToken,
+    required UserIdResolver resolveUserId,
+  }) {
+    if (!enabled) return const ClientEventReporter.noOp();
+    return ClientEventReporter(
+      transport: ClientEventTransport(
+        baseUrl: baseUrl,
+        apiKey: apiKey,
+        getToken: getToken,
+      ),
+      resolveUserId: resolveUserId,
+    );
+  }
 
   /// Starts tracking [cid] and generates its initial `join_attempt_id`.
   void registerCall(StreamCallCid cid);

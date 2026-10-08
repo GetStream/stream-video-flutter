@@ -25,10 +25,10 @@ class InstanceHolder {
         'InstanceHolder',
         () =>
             'StreamVideo has already been initialised, '
-            'disconnecting the existing instance '
+            'disposing the existing instance '
             'and overriding it with the new instance.',
       );
-      unawaited(_instance!.disconnect());
+      unawaited(_instance!.dispose());
     }
     _instance = instance;
   }

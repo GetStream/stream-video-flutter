@@ -54,7 +54,7 @@ class LocalMediaController {
   final CallSession? Function() _session;
   final SfuStatsReporter? Function() _sfuStatsReporter;
   final bool Function(CallPermission permission) _hasPermission;
-  final RtcMediaDeviceNotifier _rtcMediaDeviceNotifier;
+  final RtcMediaDeviceNotifier Function() _rtcMediaDeviceNotifier;
   final AudioConfigurationPolicy Function() _audioConfigurationPolicy;
   final bool Function() _muteVideoWhenInBackground;
   final bool Function() _muteAudioWhenInBackground;
@@ -144,7 +144,7 @@ class LocalMediaController {
   /// the devices present ask for over the connect options, starting from an
   /// override when one is set. A requested camera resolution is kept.
   Future<void> applyCallSettings(CallSettings settings) async {
-    final mediaDevicesResult = await _rtcMediaDeviceNotifier
+    final mediaDevicesResult = await _rtcMediaDeviceNotifier()
         .enumerateDevicesFor(
           DeviceEnumerationTrigger.callSettings,
         );
@@ -626,7 +626,7 @@ class LocalMediaController {
 
     await result.foldResult(
       success: (success) async {
-        final mediaDevicesResult = await _rtcMediaDeviceNotifier
+        final mediaDevicesResult = await _rtcMediaDeviceNotifier()
             .enumerateDevicesFor(DeviceEnumerationTrigger.flipCamera);
 
         final mediaDevices = mediaDevicesResult.foldResult(
