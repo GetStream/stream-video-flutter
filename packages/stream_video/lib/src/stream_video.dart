@@ -5,17 +5,13 @@ import 'package:collection/collection.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:stream_core/stream_core.dart' hide LifecycleState;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
-import 'package:uuid/uuid.dart';
 
 import '../globals.dart';
 import '../open_api/video/coordinator/api.dart' hide User;
 import 'audio_processing/audio_processor.dart';
 import 'call/call.dart';
-import 'call/call_reject_reason.dart';
-import 'call/call_ringing_state.dart';
 import 'call/call_type.dart';
 import 'coordinator/coordinator_client.dart';
 import 'coordinator/models/coordinator_events.dart';
@@ -40,12 +36,8 @@ import 'logger/logger_api.dart';
 import 'logger/stream_log.dart';
 import 'models/audio_configuration_policy.dart';
 import 'models/call_cid.dart';
-import 'models/call_metadata.dart';
 import 'models/call_preferences.dart';
-import 'models/call_received_data.dart';
 import 'models/call_ringing_data.dart';
-import 'models/call_status.dart';
-import 'models/disconnect_reason.dart';
 import 'models/multi_call_audio_policy.dart';
 import 'models/push_device.dart';
 import 'models/push_provider.dart';
@@ -54,6 +46,7 @@ import 'models/user.dart';
 import 'models/user_info.dart';
 import 'network_monitor_settings.dart';
 import 'push_notification/push_notification_manager.dart';
+import 'ringing/ringing_call_coordinator.dart';
 import 'retry/retry_policy.dart';
 import 'ring_state_polling_settings.dart';
 import 'telemetry/client_event_reporter.dart';
@@ -393,20 +386,17 @@ class StreamVideo extends Disposable {
 
   final Map<String, bool> _mutedCameraByStateChange = {};
   final Map<String, bool> _mutedAudioByStateChange = {};
-  final Map<String, Timer> _incomingAutoRejectTimers = {};
-  final Set<String> _handledIncomingCallCids = {};
-  final Set<String> _acceptingCallCids = {};
 
-  /// Calls built for a ringing flow, by cid.
-  ///
-  /// Deliberately not [ClientState.incomingCall]: that one is the app-facing
-  /// signal for showing an incoming call. This only exists so that every path
-  /// consuming the same ringing flow ends up with the same [Call].
-  final Map<String, Call> _ringingCalls = {};
-
-  /// Cids this device has accepted, from the moment the accept is sent to the
-  /// coordinator until the call is cleaned up.
-  final Map<String, Call> _locallyAcceptedCalls = {};
+  /// Handles ringing calls: the incoming ring, the native call screen's
+  /// actions, the ringing pushes, and the auto-reject of an unanswered call.
+  late final RingingCallCoordinator ringing = RingingCallCoordinator(
+    state: _state,
+    client: _client,
+    pushNotificationManager: pushNotificationManager,
+    options: _options,
+    makeRingingCall: _makeCallFromRinging,
+    ensureConnected: connect,
+  );
 
   /// Returns the current user.
   UserInfo get currentUser => _state.currentUser.toUserInfo();
@@ -451,7 +441,7 @@ class StreamVideo extends Disposable {
     },
     onDisconnected: () async {
       _subscriptions.cancelAll();
-      _clearRingingState();
+      ringing.clear();
       await _state.clear();
     },
   );
@@ -479,14 +469,6 @@ class StreamVideo extends Disposable {
   /// result reports a failure to close the connection.
   Future<Result<None>> disconnect() => _connection.disconnect();
 
-  /// Drops the per-connection ringing bookkeeping.
-  void _clearRingingState() {
-    _ringingCalls.clear();
-    _locallyAcceptedCalls.clear();
-    _acceptingCallCids.clear();
-    _handledIncomingCallCids.clear();
-  }
-
   @override
   Future<void> dispose() async {
     _logger.i(() => '[dispose]');
@@ -498,11 +480,7 @@ class StreamVideo extends Disposable {
     // push in the background must not stop the next one.
     await _connection.dispose();
 
-    for (final timer in _incomingAutoRejectTimers.values) {
-      timer.cancel();
-    }
-    _incomingAutoRejectTimers.clear();
-    _clearRingingState();
+    ringing.dispose();
 
     _subscriptions.cancelAll();
     await pushNotificationManager?.dispose();
@@ -516,7 +494,7 @@ class StreamVideo extends Disposable {
   Set<Call> _trackedCalls() {
     final calls = LinkedHashSet<Call>.identity()
       ..addAll(_state.activeCalls.value)
-      ..addAll(_ringingCalls.values)
+      ..addAll(ringing.ringingCalls)
       ..addAll(_state.watchedCalls.value);
     if (_state.incomingCall.value case final call?) calls.add(call);
     if (_state.outgoingCall.value case final call?) calls.add(call);
@@ -539,72 +517,13 @@ class StreamVideo extends Disposable {
   void debugHandleCoordinatorEvent(CoordinatorEvent event) => _onEvent(event);
 
   void _onEvent(CoordinatorEvent event) {
-    final currentUserId = _state.currentUser.id;
     _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
-    if (event is CoordinatorCallRingingEvent &&
-        event.metadata.details.createdBy.id != currentUserId &&
-        event.data.ringing) {
-      _logger.v(() => '[onCoordinatorEvent] onCallRinging: ${event.data}');
-
-      // In a edge case where call with the same CID as the incoming call is also an outgoing call
-      // we want to use the same Call instance.
-      if (state.outgoingCall.value?.callCid.value == event.data.callCid.value) {
-        _state.incomingCall.value = state.outgoingCall.value;
-        return;
-      }
-
-      if (isCallAcceptedOnThisDevice(event.data.callCid.value)) {
-        _logger.v(
-          () => '[onCoordinatorEvent] already accepted here: ${event.data}',
-        );
-        return;
-      }
-
-      final consumedCall = _ringingCalls[event.data.callCid.value];
-      if (consumedCall != null) {
-        _logger.v(
-          () => '[onCoordinatorEvent] reusing consumed call: ${event.data}',
-        );
-        _state.incomingCall.value = consumedCall;
-        return;
-      }
-
-      final call = _makeCallFromRinging(data: event.data);
-      _ringingCalls[event.data.callCid.value] = call;
-      _state.incomingCall.value = call;
-    } else if (event is CoordinatorCallRejectedEvent) {
-      unawaited(_onRingingCancelled(event));
+    if (ringing.handleCoordinatorEvent(event)) {
+      return;
     } else {
       _connection.handleEvent(event);
       if (event is CoordinatorConnectedEvent) _rewatchCalls();
     }
-  }
-
-  /// Ends a ringing call cancelled by the caller.
-  ///
-  /// Applies only when the caller rejects; other rejections are handled elsewhere.
-  Future<void> _onRingingCancelled(CoordinatorCallRejectedEvent event) async {
-    final cid = event.callCid.value;
-    if (event.rejectedBy.id != event.metadata.details.createdBy.id) return;
-
-    final call = _ringingCalls[cid] ?? _state.incomingCall.value;
-    if (call == null || call.callCid.value != cid) return;
-
-    final status = call.state.value.status;
-    if (status is! CallStatusIncoming || status.acceptedByMe) return;
-
-    _logger.i(
-      () => '[onCoordinatorEvent] ringing cancelled by the caller, cid: $cid',
-    );
-
-    _cancelIncomingAutoRejectTimerByCid(cid);
-
-    // Leaving, not rejecting: the caller has already withdrawn the call, so
-    // there is nothing to tell the coordinator. `leave` clears the ringing
-    // cache and `incomingCall` on its way out.
-    await call.leave(
-      reason: DisconnectReason.cancelled(byUserId: event.rejectedBy.id),
-    );
   }
 
   void _rewatchCalls() {
@@ -754,8 +673,8 @@ class StreamVideo extends Disposable {
     );
   }
 
-  Call _makeCallFromRinging({
-    required CallRingingData data,
+  Call _makeCallFromRinging(
+    CallRingingData data, {
     CallPreferences? preferences,
   }) {
     return Call.fromRinging(
@@ -829,18 +748,6 @@ class StreamVideo extends Disposable {
     return result;
   }
 
-  StreamSubscription<T>? onRingingEvent<T extends RingingEvent>(
-    void Function(T event)? onEvent,
-  ) {
-    final manager = pushNotificationManager;
-    if (manager == null) {
-      _logger.e(() => '[onRingingEvent] rejected (no manager)');
-      return null;
-    }
-
-    return manager.on<T>(onEvent);
-  }
-
   /// Disposes this client a second after the ringing flow resolves — once the
   /// user has answered, declined, or let the call time out.
   ///
@@ -853,7 +760,7 @@ class StreamVideo extends Disposable {
   StreamSubscription<RingingEvent>? disposeAfterResolvingRinging({
     void Function()? disposingCallback,
   }) {
-    return onRingingEvent((event) {
+    return ringing.onRingingEvent((event) {
       if (event is ActionCallAccept ||
           event is ActionCallDecline ||
           event is ActionCallTimeout ||
@@ -865,850 +772,6 @@ class StreamVideo extends Disposable {
         });
       }
     });
-  }
-
-  Future<bool> consumeAndAcceptActiveCall({
-    void Function(Call)? onCallAccepted,
-    CallPreferences? callPreferences,
-  }) async {
-    final allCalls = await pushNotificationManager?.activeCalls();
-
-    // Only consume calls that the user explicitly accepted via the native notification UI.
-    final calls = allCalls?.where((c) => c.isAccepted).toList();
-    if (calls == null || calls.isEmpty) return false;
-
-    final uuid = calls.first.uuid;
-    final cid = calls.first.callCid;
-    if (uuid == null || cid == null) return false;
-
-    // Before connecting: on a cold start that is the slow part, and the timer
-    // would otherwise reject the call the user just answered.
-    _cancelIncomingAutoRejectTimerByCid(cid);
-
-    if (!_acceptingCallCids.add(cid)) {
-      _logger.v(() => '[consumeAndAcceptActiveCall] already accepting: $cid');
-      return false;
-    }
-
-    try {
-      final accepted = _acceptedElsewhereOnThisClient(cid);
-      if (accepted != null) {
-        _logger.v(() => '[consumeAndAcceptActiveCall] already accepted: $cid');
-        onCallAccepted?.call(accepted);
-        return true;
-      }
-
-      // Ensure the coordinator WS is connected before proceeding.
-      // During cold start, autoConnect may still be in progress so we need to wait for it to complete.
-      final connectResult = await connect();
-      if (connectResult.isFailure) {
-        _logger.e(
-          () =>
-              '[consumeAndAcceptActiveCall] failed to connect: '
-              '${connectResult.getErrorOrNull()}',
-        );
-        await _endUnjoinableNativeCall(cid);
-        return false;
-      }
-
-      final callResult = await consumeIncomingCall(
-        uuid: uuid,
-        cid: cid,
-        preferences: callPreferences,
-      );
-
-      if (callResult.isFailure) {
-        _logger.d(
-          () =>
-              '[consumeAndAcceptActiveCall] error consuming incoming call: '
-              '${callResult.getErrorOrNull()}',
-        );
-        await _endUnjoinableNativeCall(cid);
-        return false;
-      }
-
-      final call = callResult.getDataOrNull();
-      if (call == null) {
-        _logger.e(() => '[consumeAndAcceptActiveCall] no call consumed: $cid');
-        await _endUnjoinableNativeCall(cid);
-        return false;
-      }
-
-      final acceptResult = await call.accept();
-      if (acceptResult.isFailure) {
-        _logger.w(
-          () =>
-              '[consumeAndAcceptActiveCall] error accepting call: '
-              '${acceptResult.getErrorOrNull()}',
-        );
-        await _endUnjoinableNativeCall(cid);
-        return false;
-      }
-
-      onCallAccepted?.call(call);
-
-      return true;
-    } finally {
-      _acceptingCallCids.remove(cid);
-    }
-  }
-
-  @Deprecated('Use observeCoreRingingEvents instead.')
-  CompositeSubscription observeCoreCallKitEvents({
-    void Function(Call)? onCallAccepted,
-    CallPreferences? acceptCallPreferences,
-  }) {
-    return observeCoreRingingEvents(
-      onCallAccepted: onCallAccepted,
-      acceptCallPreferences: acceptCallPreferences,
-    );
-  }
-
-  /// Helper method to observe core ringing events.
-  /// Should be used as soon as the app is launched when handling incoming calls.
-  CompositeSubscription observeCoreRingingEvents({
-    void Function(Call)? onCallAccepted,
-    CallPreferences? acceptCallPreferences,
-  }) {
-    final ringingEventSubscriptions = CompositeSubscription();
-
-    observeCallIncomingRingingEvent()?.addTo(ringingEventSubscriptions);
-
-    observeCallAcceptRingingEvent(
-      onCallAccepted: onCallAccepted,
-      acceptCallPreferences: acceptCallPreferences,
-    )?.addTo(ringingEventSubscriptions);
-
-    observeCallDeclinedRingingEvent()?.addTo(ringingEventSubscriptions);
-    observeCallEndedRingingEvent()?.addTo(ringingEventSubscriptions);
-
-    // The incoming and accept events can be emitted before this call (terminated
-    // state), in which case they aren't delivered to the subscriptions above at
-    // all, so calls that are already displayed - ringing or answered - are
-    // picked up here.
-    unawaited(
-      verifyDisplayedIncomingCalls(
-        onCallAccepted: onCallAccepted,
-        acceptCallPreferences: acceptCallPreferences,
-      ),
-    );
-
-    return ringingEventSubscriptions;
-  }
-
-  /// Helper method to observe core ringing events for background.
-  /// Should be used in the background handler when handling incoming calls.
-  CompositeSubscription observeCoreRingingEventsForBackground() {
-    final ringingEventSubscriptions = CompositeSubscription();
-
-    observeCallIncomingRingingEvent()?.addTo(ringingEventSubscriptions);
-    observeCallDeclinedRingingEvent()?.addTo(ringingEventSubscriptions);
-
-    return ringingEventSubscriptions;
-  }
-
-  @Deprecated('Use observeCallAcceptRingingEvent instead.')
-  StreamSubscription<ActionCallAccept>? observeCallAcceptCallKitEvent({
-    void Function(Call)? onCallAccepted,
-    CallPreferences? acceptCallPreferences,
-  }) {
-    return observeCallAcceptRingingEvent(
-      onCallAccepted: onCallAccepted,
-      acceptCallPreferences: acceptCallPreferences,
-    );
-  }
-
-  StreamSubscription<ActionCallAccept>? observeCallAcceptRingingEvent({
-    void Function(Call)? onCallAccepted,
-    CallPreferences? acceptCallPreferences,
-  }) {
-    return onRingingEvent<ActionCallAccept>((event) {
-      // Ignore call accept event when app is in detached state on Android.
-      // The call flow should be handled by consuming the call like in the terminated state.
-      if (!CurrentPlatform.isAndroid ||
-          _state.appLifecycleState.value != LifecycleState.detached) {
-        _onCallAccept(
-          event,
-          onCallAccepted: onCallAccepted,
-          callPreferences: acceptCallPreferences,
-        );
-      }
-    });
-  }
-
-  StreamSubscription<ActionCallIncoming>? observeCallIncomingRingingEvent() {
-    return onRingingEvent<ActionCallIncoming>(_onCallIncoming);
-  }
-
-  @Deprecated('Use observeCallDeclinedRingingEvent instead.')
-  StreamSubscription<ActionCallDecline>? observeCallDeclinedCallKitEvent() {
-    return observeCallDeclinedRingingEvent();
-  }
-
-  StreamSubscription<ActionCallDecline>? observeCallDeclinedRingingEvent() {
-    return onRingingEvent<ActionCallDecline>(_onCallDecline);
-  }
-
-  @Deprecated('Use observeCallEndedRingingEvent instead.')
-  StreamSubscription<ActionCallEnded>? observeCallEndedCallKitEvent() {
-    return observeCallEndedRingingEvent();
-  }
-
-  StreamSubscription<ActionCallEnded>? observeCallEndedRingingEvent() {
-    return onRingingEvent<ActionCallEnded>(_onCallEnded);
-  }
-
-  Future<void> _onCallAccept(
-    ActionCallAccept event, {
-    void Function(Call)? onCallAccepted,
-    CallPreferences? callPreferences,
-  }) async {
-    _logger.d(() => '[onCallAccept] event: $event');
-
-    final uuid = event.data.uuid;
-    final cid = event.data.callCid;
-    if (uuid == null || cid == null) return;
-
-    await _acceptIncomingCall(
-      uuid: uuid,
-      cid: cid,
-      onCallAccepted: onCallAccepted,
-      callPreferences: callPreferences,
-    );
-  }
-
-  /// Ends the native call for [cid] after the user answered it but the call
-  /// could not be set up, so they are not left on an answered call screen with
-  /// nothing behind it.
-  Future<void> _endUnjoinableNativeCall(String cid) async {
-    await pushNotificationManager?.endCallByCid(cid);
-  }
-
-  /// Consumes, accepts and joins the call the user answered on the native call
-  /// screen.
-  Future<void> _acceptIncomingCall({
-    required String uuid,
-    required String cid,
-    void Function(Call)? onCallAccepted,
-    CallPreferences? callPreferences,
-  }) async {
-    // Before the dedupe guard: the user has answered, so the call must not be
-    // auto-rejected no matter which path ends up handling it.
-    _cancelIncomingAutoRejectTimerByCid(cid);
-
-    if (!_acceptingCallCids.add(cid)) {
-      _logger.v(() => '[acceptIncomingCall] already accepting: $cid');
-      return;
-    }
-
-    try {
-      final accepted = _acceptedElsewhereOnThisClient(cid);
-      if (accepted != null) {
-        _logger.v(() => '[acceptIncomingCall] already accepted: $cid');
-        onCallAccepted?.call(accepted);
-        return;
-      }
-
-      final consumeResult = await consumeIncomingCall(
-        uuid: uuid,
-        cid: cid,
-        preferences: callPreferences,
-      );
-
-      if (consumeResult.isFailure) {
-        _logger.w(
-          () =>
-              '[acceptIncomingCall] error consuming incoming call: ${consumeResult.getErrorOrNull()}',
-        );
-        await _endUnjoinableNativeCall(cid);
-        return;
-      }
-
-      final callToJoin = consumeResult.getDataOrNull();
-      if (callToJoin == null) {
-        _logger.e(() => '[acceptIncomingCall] no call consumed: $cid');
-        await _endUnjoinableNativeCall(cid);
-        return;
-      }
-
-      final acceptResult = await callToJoin.accept();
-
-      if (acceptResult.isFailure) {
-        _logger.w(
-          () =>
-              '[acceptIncomingCall] error accepting call ($callToJoin): '
-              '${acceptResult.getErrorOrNull()}',
-        );
-        await _endUnjoinableNativeCall(cid);
-        return;
-      }
-
-      unawaited(callToJoin.join());
-      onCallAccepted?.call(callToJoin);
-    } finally {
-      _acceptingCallCids.remove(cid);
-    }
-  }
-
-  Future<void> _onCallIncoming(ActionCallIncoming event) async {
-    _logger.d(() => '[onCallIncoming] event: $event');
-
-    final uuid = event.data.uuid;
-    final cid = event.data.callCid;
-    if (uuid == null || cid == null) return;
-
-    return _handleIncomingCall(uuid: uuid, cid: cid);
-  }
-
-  /// Checks incoming calls currently shown by the OS.
-  ///
-  /// On iOS, CallKit may show the incoming call UI before Dart code runs,
-  /// so ringing events can be missed. This inspects all displayed calls:
-  /// - Still-ringing calls are verified so dismissed flows are ended.
-  /// - Calls already answered but not picked up by the app are accepted and
-  ///   joined. **iOS only** - on Android a call answered from the app's own
-  ///   notification is picked up by [consumeAndAcceptActiveCall] instead.
-  ///
-  /// Called automatically by [observeCoreRingingEvents], which passes its own
-  /// [onCallAccepted] and [acceptCallPreferences] on.
-  Future<void> verifyDisplayedIncomingCalls({
-    void Function(Call)? onCallAccepted,
-    CallPreferences? acceptCallPreferences,
-  }) async {
-    final manager = pushNotificationManager;
-    if (manager == null) return;
-
-    final displayedCalls = await manager.activeCalls();
-    _logger.d(
-      () => '[verifyDisplayedIncomingCalls] calls: $displayedCalls',
-    );
-
-    for (final displayedCall in displayedCalls) {
-      final uuid = displayedCall.uuid;
-      final cid = displayedCall.callCid;
-      if (uuid == null || cid == null) continue;
-
-      if (displayedCall.isAccepted) {
-        await _acceptDisplayedIncomingCall(
-          uuid: uuid,
-          cid: cid,
-          onCallAccepted: onCallAccepted,
-          callPreferences: acceptCallPreferences,
-        );
-        continue;
-      }
-
-      await _handleIncomingCall(uuid: uuid, cid: cid);
-    }
-  }
-
-  /// Picks up a call the user answered on the native call screen before the app
-  /// was able to observe the [ActionCallAccept] for it.
-  Future<void> _acceptDisplayedIncomingCall({
-    required String uuid,
-    required String cid,
-    void Function(Call)? onCallAccepted,
-    CallPreferences? callPreferences,
-  }) async {
-    // iOS only: handles accepting calls answered via CallKit before Dart runs.
-    if (!CurrentPlatform.isIos) {
-      _logger.v(() => '[acceptDisplayedCall] skipped (not iOS): $cid');
-      return;
-    }
-
-    if (activeCalls.any((call) => call.callCid.value == cid)) {
-      _logger.v(() => '[acceptDisplayedCall] already joined: $cid');
-      return;
-    }
-
-    if (isCallAcceptedOnThisDevice(cid)) {
-      _logger.v(() => '[acceptDisplayedCall] already accepted: $cid');
-      return;
-    }
-
-    _logger.d(() => '[acceptDisplayedCall] answered before subscribing: $cid');
-
-    await _acceptIncomingCall(
-      uuid: uuid,
-      cid: cid,
-      onCallAccepted: onCallAccepted,
-      callPreferences: callPreferences,
-    );
-  }
-
-  Future<void> _handleIncomingCall({
-    required String uuid,
-    required String cid,
-  }) async {
-    // The same call can be reported by the incoming call event and by the
-    // displayed calls verification at the same time.
-    if (!_handledIncomingCallCids.add(cid)) {
-      _logger.v(() => '[handleIncomingCall] already handling: $cid');
-      return;
-    }
-
-    try {
-      await _verifyAndConsumeIncomingCall(uuid: uuid, cid: cid);
-    } finally {
-      _handledIncomingCallCids.remove(cid);
-    }
-  }
-
-  Future<void> _verifyAndConsumeIncomingCall({
-    required String uuid,
-    required String cid,
-  }) async {
-    // The incoming call UI is already on screen at this point on iOS where the OS
-    // requires the CallKit call to be reported as soon as the VoIP push is
-    // received. Verify the call is still ringing and dismiss it if it isn't.
-    final callCid = StreamCallCid(cid: cid);
-    final metadata = await _getCallForRingingEvent(callCid);
-
-    if (metadata == null) {
-      // The state couldn't be verified. Keep ringing instead of dismissing a
-      // call that might still be valid, consumeIncomingCall retries the fetch.
-      _logger.w(
-        () => '[verifyIncomingCall] could not verify ringing state: $cid',
-      );
-    } else {
-      final ringingState = metadata.ringingStateFor(_state.currentUser.id);
-
-      if (!ringingState.isRinging) {
-        // Never end the native call when it's already being answered on this
-        // device (in the app or on the native call screen while the state was
-        // still being verified), as that would tear down the ongoing call.
-        if (await _isAnsweredOnThisDevice(cid)) {
-          _logger.d(
-            () =>
-                '[verifyIncomingCall] call is no longer ringing ($ringingState) '
-                'but is answered on this device, keeping it: $cid',
-          );
-          return;
-        }
-
-        _logger.d(
-          () =>
-              '[verifyIncomingCall] call is no longer ringing ($ringingState), '
-              'dismissing incoming call UI: $cid',
-        );
-
-        // Silently, as the ringing flow is already resolved and the native end
-        // must not be reported back as a decline/ended action.
-        await pushNotificationManager?.endCallByCid(cid, silent: true);
-
-        _cancelIncomingAutoRejectTimerByCid(cid);
-        await _resolveStaleIncomingCall(cid, ringingState);
-        return;
-      }
-    }
-
-    final consumeResult = await consumeIncomingCall(
-      uuid: uuid,
-      cid: cid,
-      metadata: metadata,
-    );
-
-    final incomingCall = consumeResult.getDataOrNull();
-    if (incomingCall == null) return;
-
-    final timeout = incomingCall.state.value.settings.ring.autoRejectTimeout;
-    _startIncomingAutoRejectTimer(incomingCall, timeout);
-  }
-
-  /// Fetches the call state used to decide whether the incoming call UI should
-  /// stay on screen. Returns `null` when the state can't be established.
-  ///
-  /// The push is often delivered while the client is still starting up (cold
-  /// start after the app was terminated), and `getCall` only waits for the
-  /// coordinator connection, it doesn't establish it. Connecting first is what
-  /// makes the check work in that case instead of timing out and leaving a
-  /// resolved call ringing.
-  Future<CallMetadata?> _getCallForRingingEvent(StreamCallCid callCid) async {
-    final connectResult = await connect(
-      includeUserDetails: _options.includeUserDetailsForAutoConnect,
-      // The device is registered already, otherwise the push wouldn't have been
-      // delivered. Registering it is not this flow's concern.
-      registerPushDevice: false,
-    );
-
-    if (connectResult.isFailure) {
-      _logger.e(
-        () =>
-            '[getCallForRingingEvent] failed to connect: '
-            '${connectResult.getErrorOrNull()}',
-      );
-      return null;
-    }
-
-    final callResult = await _client.getCall(callCid: callCid);
-    if (callResult is! Success<CallReceivedData>) {
-      _logger.e(
-        () =>
-            '[getCallForRingingEvent] failed to get call: '
-            '${callResult.getErrorOrNull()}',
-      );
-      return null;
-    }
-
-    return callResult.data.metadata;
-  }
-
-  /// Marks [callCid] as accepted on this device, by [call].
-  @internal
-  void markCallAcceptedOnThisDevice(StreamCallCid callCid, Call call) {
-    _logger.v(() => '[markCallAccepted] cid: $callCid');
-    _locallyAcceptedCalls[callCid.value] = call;
-  }
-
-  /// Drops the [Call] cached for [callCid]'s ringing flow, if it is still
-  /// [call]. A newer instance for the same cid is left alone.
-  @internal
-  void releaseRingingCall(StreamCallCid callCid, Call call) {
-    if (identical(_ringingCalls[callCid.value], call)) {
-      _ringingCalls.remove(callCid.value);
-    }
-  }
-
-  /// Clears the acceptance marker for [callCid], if it is still [call]'s.
-  @internal
-  void clearCallAcceptedOnThisDevice(StreamCallCid callCid, Call call) {
-    if (!identical(_locallyAcceptedCalls[callCid.value], call)) return;
-    _locallyAcceptedCalls.remove(callCid.value);
-    _logger.v(() => '[clearCallAccepted] cid: $callCid');
-  }
-
-  /// The [Call] for [cid] when another entry point on this client already
-  /// accepted it.
-  Call? _acceptedElsewhereOnThisClient(String cid) =>
-      _locallyAcceptedCalls[cid];
-
-  /// Whether the call with [cid] was accepted on this device.
-  bool isCallAcceptedOnThisDevice(String cid) =>
-      _locallyAcceptedCalls.containsKey(cid);
-
-  /// Whether the call is already being answered on this device, either in the
-  /// app or on the native call screen.
-  Future<bool> _isAnsweredOnThisDevice(String cid) async {
-    // Covers the window between accepting and [Call.join] marking the call
-    // active, which is where the integrator's own navigation happens when the
-    // call is answered from a terminated state.
-    if (isCallAcceptedOnThisDevice(cid)) return true;
-
-    if (activeCalls.any((call) => call.callCid.value == cid)) return true;
-
-    // The native call is marked as accepted from the moment it's answered on the
-    // native call screen, before the call is joined in the app.
-    final nativeCalls = await pushNotificationManager?.activeCalls();
-    return nativeCalls?.any(
-          (call) => call.callCid == cid && call.isAccepted,
-        ) ??
-        false;
-  }
-
-  /// Brings the in-app incoming call in sync with a ringing flow that turned
-  /// out to be already resolved.
-  Future<void> _resolveStaleIncomingCall(
-    String cid,
-    CallRingingState ringingState,
-  ) async {
-    final incomingCall = _state.incomingCall.value;
-    if (incomingCall == null || incomingCall.callCid.value != cid) return;
-
-    _logger.d(
-      () => '[resolveStaleIncomingCall] cid: $cid, state: $ringingState',
-    );
-
-    await incomingCall.leave(
-      reason: DisconnectReason.rejected(
-        byUserId: _state.currentUser.id,
-        reason: ringingState.toReason(),
-      ),
-    );
-
-    if (identical(_state.incomingCall.value, incomingCall)) {
-      _state.incomingCall.value = null;
-    }
-  }
-
-  Future<void> _onCallDecline(ActionCallDecline event) async {
-    _logger.d(() => '[onCallDecline] event: $event');
-
-    final uuid = event.data.uuid;
-    final cid = event.data.callCid;
-    if (uuid == null || cid == null) return;
-
-    _cancelIncomingAutoRejectTimerByCid(cid);
-
-    final call = await consumeIncomingCall(uuid: uuid, cid: cid);
-    final callToReject = call.getDataOrNull();
-    if (callToReject == null) return;
-
-    final result = await callToReject.reject(
-      reason: CallRejectReason.decline(),
-    );
-
-    if (result is Failure) {
-      _logger.d(() => '[onCallDecline] error rejecting call: ${result.error}');
-    }
-  }
-
-  /// ActionCallEnded event is sent by native side of stream_video_push_notification package when the call is ended.
-  /// On iOS this is connected to CallKit and should end active call or reject incoming call.
-  /// On Android this is connected to push notification being dismissed.
-  /// When app is terminated it can be send even when accepting the call. That's why we only handle
-  /// it on iOS, unless the event carries [CallData.endedBySystem]: a hang-up reported by the
-  /// Android Telecom stack (paired watch, headset, car head unit) is unambiguous and has to be
-  /// applied, otherwise the call keeps running after the system has already ended it.
-  Future<void> _onCallEnded(ActionCallEnded event) async {
-    if (CurrentPlatform.isAndroid && !event.data.endedBySystem) return;
-
-    _logger.d(() => '[onCallEnded] event: $event');
-
-    final uuid = event.data.uuid;
-    final cid = event.data.callCid;
-    if (uuid == null || cid == null) return;
-
-    _cancelIncomingAutoRejectTimerByCid(cid);
-
-    final activeCall = activeCalls.firstWhereOrNull(
-      (call) => call.callCid.value == cid,
-    );
-    final incomingCall = _state.incomingCall.value;
-
-    if (activeCall?.callCid.value == cid) {
-      final result = await activeCall?.leave(
-        reason: DisconnectReason.callEnded(),
-      );
-
-      if (result is Failure) {
-        _logger.d(() => '[onCallEnded] error leaving call: ${result.error}');
-      }
-    } else if (incomingCall?.callCid.value == cid) {
-      final status = incomingCall?.state.value.status;
-      if (status is CallStatusIncoming && !status.acceptedByMe) {
-        final result = await incomingCall?.reject(
-          reason: CallRejectReason.callEnded(),
-        );
-        if (result is Failure) {
-          _logger.d(
-            () =>
-                '[onCallEnded] error rejecting incoming call: ${result.error}',
-          );
-        }
-      } else {
-        _logger.v(() => '[onCallEnded] skip reject (status: $status)');
-      }
-    }
-  }
-
-  void _startIncomingAutoRejectTimer(Call call, Duration timeout) {
-    if (timeout <= Duration.zero) return;
-    final cid = call.callCid.value;
-
-    _incomingAutoRejectTimers[cid]?.cancel();
-    _incomingAutoRejectTimers[cid] = Timer(timeout, () async {
-      try {
-        // Also guards against a stale timer: an accepted call is never
-        // rejected here, whoever forgot to cancel.
-        final status = call.state.value.status;
-        if (status is CallStatusIncoming && !status.acceptedByMe) {
-          await call.reject(reason: CallRejectReason.timeout());
-        }
-      } catch (e) {
-        _logger.e(() => '[incomingTimeout] failed cid: $cid: $e');
-      } finally {
-        _incomingAutoRejectTimers.remove(cid);
-      }
-    });
-  }
-
-  void _cancelIncomingAutoRejectTimerByCid(String cid) {
-    final timer = _incomingAutoRejectTimers.remove(cid);
-    timer?.cancel();
-  }
-
-  @Deprecated('Use handleRingingFlowNotifications instead.')
-  Future<bool> handleVoipPushNotification(
-    Map<String, dynamic> payload, {
-    bool handleMissedCall = true,
-  }) {
-    return handleRingingFlowNotifications(
-      payload,
-      handleMissedCall: handleMissedCall,
-    );
-  }
-
-  /// This method is used to handle incoming call notifications.
-  /// It will show an incoming call notification if the call is ringing.
-  /// It will show a missed call notification if the call is missed.
-  ///
-  /// Returns `true` if the notification was handled, `false` otherwise.
-  Future<bool> handleRingingFlowNotifications(
-    Map<String, dynamic> payload, {
-    bool handleMissedCall = true,
-  }) async {
-    _logger.d(() => '[handleRingingFlowNotifications] payload: $payload');
-    final manager = pushNotificationManager;
-    if (manager == null) {
-      _logger.e(() => '[handleRingingFlowNotifications] rejected (no manager)');
-      return false;
-    }
-
-    // Only handle messages from stream.video
-    if (!StreamPushPayload.isStreamPush(payload)) return false;
-
-    final callCid = StreamPushPayload.callCidOf(payload);
-    if (callCid == null) return false;
-
-    final callUUID = const Uuid().v4();
-    var callId = const Uuid().v4();
-    var callType = StreamCallType.defaultType();
-
-    final splitCid = callCid.split(':');
-    if (splitCid.length == 2) {
-      callType = StreamCallType.fromString(splitCid.first);
-      callId = splitCid.last;
-    }
-
-    final createdById = payload[StreamPushPayload.createdByIdKey] as String?;
-    final createdByName =
-        payload[StreamPushPayload.createdByDisplayNameKey] as String?;
-    final callDisplayName =
-        payload[StreamPushPayload.callDisplayNameKey] as String?;
-
-    final hasVideo = payload[StreamPushPayload.videoKey] as String?;
-
-    if (handleMissedCall && StreamPushPayload.isMissedCallPush(payload)) {
-      unawaited(
-        manager.showMissedCall(
-          uuid: callUUID,
-          handle: createdById,
-          callerName: (callDisplayName?.isNotEmpty ?? false)
-              ? callDisplayName
-              : createdByName,
-          callCid: callCid,
-        ),
-      );
-
-      return true;
-    } else if (!StreamPushPayload.isRingingPush(payload)) {
-      return false;
-    }
-
-    final callRingingState = await getCallRingingState(
-      callType: callType,
-      id: callId,
-    );
-
-    switch (callRingingState) {
-      case CallRingingState.ringing:
-        unawaited(
-          manager.showIncomingCall(
-            uuid: callUUID,
-            handle: createdById,
-            callerName: (callDisplayName?.isNotEmpty ?? false)
-                ? callDisplayName
-                : createdByName,
-            callCid: callCid,
-            hasVideo: hasVideo != 'false',
-          ),
-        );
-        return true;
-      case CallRingingState.accepted:
-        return false;
-      case CallRingingState.rejected:
-        return false;
-      case CallRingingState.ended:
-        return false;
-    }
-  }
-
-  Future<CallRingingState> getCallRingingState({
-    required StreamCallType callType,
-    required String id,
-  }) async {
-    final call = makeCall(callType: callType, id: id);
-    final callResult = await call.get(watch: false);
-
-    return callResult.foldResult(
-      failure: (failure) {
-        _logger.e(() => '[getCallRingingState] failed: $failure');
-        return CallRingingState.ended;
-      },
-      success: (success) {
-        final state = success.data.metadata.ringingStateFor(
-          _state.currentUser.id,
-        );
-        _logger.d(() => '[getCallRingingState] state: $state');
-        return state;
-      },
-    );
-  }
-
-  /// Consumes incoming voIP call and returns the [Call] object.
-  ///
-  /// Pass [metadata] when the caller already fetched the call state to avoid
-  /// requesting it a second time.
-  Future<Result<Call>> consumeIncomingCall({
-    required String uuid,
-    required String cid,
-    CallPreferences? preferences,
-    CallMetadata? metadata,
-  }) async {
-    _logger.d(() => '[consumeIncomingCall] uuid: $uuid, cid: $cid');
-    final manager = pushNotificationManager;
-    if (manager == null) {
-      return const Result.failure(
-        StreamVideoException(
-          message: 'Push notification manager not initialized.',
-        ),
-      );
-    }
-
-    // If call was already created by consuming ringing event, use the same instance.
-    final existingCall = _ringingCalls[cid] ?? _state.incomingCall.value;
-    if (existingCall?.callCid.value == cid) {
-      final call = existingCall!;
-      if (preferences != null) {
-        call.updateCallPreferences(preferences);
-      }
-      return Result.success(call);
-    }
-
-    final callCid = StreamCallCid(cid: cid);
-
-    var callMetadata = metadata;
-    if (callMetadata == null) {
-      final callResult = await _client.getCall(callCid: callCid);
-      if (callResult is! Success<CallReceivedData>) {
-        return callResult as Failure;
-      }
-
-      callMetadata = callResult.data.metadata;
-
-      // Re-check: a concurrent consume for the same cid may have populated the
-      // cache while the fetch above was in flight.
-      final cached = _ringingCalls[cid] ?? _state.incomingCall.value;
-      if (cached?.callCid.value == cid) {
-        if (preferences != null) {
-          cached!.updateCallPreferences(preferences);
-        }
-        return Result.success(cached!);
-      }
-    }
-
-    final call = _makeCallFromRinging(
-      data: CallRingingData(
-        callCid: callCid,
-        ringing: true,
-        metadata: callMetadata,
-      ),
-      preferences: preferences ?? _options.defaultCallPreferences,
-    );
-
-    _ringingCalls[cid] = call;
-
-    return Result.success(call);
   }
 
   @internal

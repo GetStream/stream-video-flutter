@@ -2,6 +2,8 @@
 
 ### ⚠️ Breaking
 
+- The ringing API moves from `StreamVideo` to `StreamVideo.ringing`, a `RingingCallCoordinator`: call `observeCoreRingingEvents`, `observeCoreRingingEventsForBackground`, the `observeCall*RingingEvent` methods, `onRingingEvent`, `consumeAndAcceptActiveCall`, `verifyDisplayedIncomingCalls`, `handleRingingFlowNotifications`, `getCallRingingState`, `consumeIncomingCall` and `isCallAcceptedOnThisDevice` on `streamVideo.ringing`.
+- The deprecated `observeCoreCallKitEvents`, `observeCallAcceptCallKitEvent`, `observeCallDeclinedCallKitEvent`, `observeCallEndedCallKitEvent` and `handleVoipPushNotification` are removed; use their `Ringing` counterparts on `StreamVideo.ringing`.
 - Joining a `Call` after it was left or ended fails with `CallLeftException`; a `Call` is single use.
 - The lists emitted by `Call.closedCaptions` are unmodifiable; copy one before changing it.
 - `Call`'s action methods (members, permissions, moderation, recording, transcription, captions, broadcasting, mute, pin, go-live, reactions, custom events, feedback) are now extension methods on `CallActions`; they can't be stubbed or overridden, and a `show Call` import must also show `CallActions`.
@@ -79,7 +81,7 @@
   - A callee whose acceptance already reached the server stays in the call when the caller cancels, instead of hanging up.
   - A caller that is the only member keeps ringing until its timeout, instead of hanging up on the first rejection.
   - A caller whose callee accepted keeps the call, even if that callee also shows up as having rejected.
-- An incoming ring is now dismissed when the caller cancels, even if another callee has already accepted. `CallMetadata.ringingStateFor` and `StreamVideo.getCallRingingState` report it as rejected rather than ringing.
+- An incoming ring is now dismissed when the caller cancels, even if another callee has already accepted. `CallMetadata.ringingStateFor` and `StreamVideo.ringing.getCallRingingState` report it as rejected rather than ringing.
 
 ### 🐞 Fixed
 

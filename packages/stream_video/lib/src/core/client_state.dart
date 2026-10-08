@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
 
 import '../../stream_video.dart';
 import '../lifecycle/lifecycle_state.dart';
@@ -56,6 +57,19 @@ abstract class ClientState {
 
   // Current app's lifecycle state.
   StateEmitter<LifecycleState?> get appLifecycleState;
+
+  /// Marks [callCid] as accepted on this device, by [call].
+  @internal
+  void markCallAcceptedOnThisDevice(StreamCallCid callCid, Call call);
+
+  /// Clears the acceptance marker for [callCid], if it is still [call]'s.
+  @internal
+  void clearCallAcceptedOnThisDevice(StreamCallCid callCid, Call call);
+
+  /// Drops the [Call] cached for [callCid]'s ringing flow, if it is still
+  /// [call]. A newer instance for the same cid is left alone.
+  @internal
+  void releaseRingingCall(StreamCallCid callCid, Call call);
 }
 
 class MutableClientState implements ClientState {
@@ -99,6 +113,35 @@ class MutableClientState implements ClientState {
 
   @override
   final MutableStateEmitter<LifecycleState?> appLifecycleState;
+
+  /// Calls built for a ringing flow, by cid.
+  ///
+  /// Deliberately not [incomingCall]: that one is the app-facing signal for
+  /// showing an incoming call. This only exists so that every path consuming
+  /// the same ringing flow ends up with the same [Call].
+  final Map<String, Call> ringingCalls = {};
+
+  /// Calls this device has accepted, by cid, from the moment the accept is
+  /// sent to the coordinator until the call is cleaned up.
+  final Map<String, Call> locallyAcceptedCalls = {};
+
+  @override
+  void markCallAcceptedOnThisDevice(StreamCallCid callCid, Call call) {
+    locallyAcceptedCalls[callCid.value] = call;
+  }
+
+  @override
+  void clearCallAcceptedOnThisDevice(StreamCallCid callCid, Call call) {
+    if (!identical(locallyAcceptedCalls[callCid.value], call)) return;
+    locallyAcceptedCalls.remove(callCid.value);
+  }
+
+  @override
+  void releaseRingingCall(StreamCallCid callCid, Call call) {
+    if (identical(ringingCalls[callCid.value], call)) {
+      ringingCalls.remove(callCid.value);
+    }
+  }
 
   /// Drops the active and outgoing calls. The connection state is left to
   /// the client's connection.

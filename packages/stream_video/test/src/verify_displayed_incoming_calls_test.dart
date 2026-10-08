@@ -117,7 +117,7 @@ void main() {
       displayCall(isAccepted: true);
       seedIncomingCall();
 
-      await streamVideo.verifyDisplayedIncomingCalls();
+      await streamVideo.ringing.verifyDisplayedIncomingCalls();
 
       verify(
         () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
@@ -134,7 +134,7 @@ void main() {
       displayCall(isAccepted: true);
       seedIncomingCall();
 
-      await streamVideo.verifyDisplayedIncomingCalls();
+      await streamVideo.ringing.verifyDisplayedIncomingCalls();
 
       verify(() => mockPushManager.endCallByCid(cid)).called(1);
     });
@@ -162,12 +162,12 @@ void main() {
       final seeded = seedIncomingCall();
 
       Call? accepted;
-      await streamVideo.verifyDisplayedIncomingCalls(
+      await streamVideo.ringing.verifyDisplayedIncomingCalls(
         onCallAccepted: (call) => accepted = call,
       );
 
       expect(accepted, same(seeded));
-      expect(streamVideo.isCallAcceptedOnThisDevice(cid), isTrue);
+      expect(streamVideo.ringing.isCallAcceptedOnThisDevice(cid), isTrue);
     });
 
     test('does not accept a call that is already accepted here', () async {
@@ -183,7 +183,7 @@ void main() {
       // accept: `verifyDisplayedIncomingCalls` runs on every
       // `observeCoreRingingEvents`.
       displayCall(isAccepted: true);
-      await streamVideo.verifyDisplayedIncomingCalls();
+      await streamVideo.ringing.verifyDisplayedIncomingCalls();
 
       verifyNever(
         () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
@@ -197,7 +197,7 @@ void main() {
 
       seedIncomingCall();
 
-      await streamVideo.verifyDisplayedIncomingCalls();
+      await streamVideo.ringing.verifyDisplayedIncomingCalls();
 
       verifyNever(
         () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
@@ -218,7 +218,7 @@ void main() {
       displayCall(isAccepted: true);
       seedIncomingCall();
 
-      await streamVideo.verifyDisplayedIncomingCalls();
+      await streamVideo.ringing.verifyDisplayedIncomingCalls();
 
       verifyNever(
         () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
@@ -274,12 +274,12 @@ void main() {
         members: const {},
       );
 
-      final first = await streamVideo.consumeIncomingCall(
+      final first = await streamVideo.ringing.consumeIncomingCall(
         uuid: uuid,
         cid: cid,
         metadata: metadata,
       );
-      final second = await streamVideo.consumeIncomingCall(
+      final second = await streamVideo.ringing.consumeIncomingCall(
         uuid: uuid,
         cid: cid,
         metadata: metadata,
@@ -319,7 +319,7 @@ void main() {
       );
       (streamVideo.state as MutableClientState).incomingCall.value = fromEvent;
 
-      final consumed = await streamVideo.consumeIncomingCall(
+      final consumed = await streamVideo.ringing.consumeIncomingCall(
         uuid: uuid,
         cid: cid,
         metadata: metadata,
@@ -344,7 +344,7 @@ void main() {
         members: const {},
       );
 
-      final consumed = await streamVideo.consumeIncomingCall(
+      final consumed = await streamVideo.ringing.consumeIncomingCall(
         uuid: uuid,
         cid: cid,
         metadata: metadata,
@@ -399,7 +399,7 @@ void main() {
       );
 
       await call.accept();
-      expect(streamVideo.isCallAcceptedOnThisDevice(cid), isTrue);
+      expect(streamVideo.ringing.isCallAcceptedOnThisDevice(cid), isTrue);
 
       streamVideo.debugHandleCoordinatorEvent(
         CoordinatorCallRingingEvent(
@@ -434,7 +434,7 @@ void main() {
         members: const {},
       );
 
-      final consumed = await streamVideo.consumeIncomingCall(
+      final consumed = await streamVideo.ringing.consumeIncomingCall(
         uuid: uuid,
         cid: cid,
         metadata: metadata,
@@ -497,11 +497,11 @@ void main() {
         final newer = makeCall();
 
         await newer.accept();
-        expect(streamVideo.isCallAcceptedOnThisDevice(cid), isTrue);
+        expect(streamVideo.ringing.isCallAcceptedOnThisDevice(cid), isTrue);
 
         await older.leave();
 
-        expect(streamVideo.isCallAcceptedOnThisDevice(cid), isTrue);
+        expect(streamVideo.ringing.isCallAcceptedOnThisDevice(cid), isTrue);
       },
     );
 
@@ -521,7 +521,7 @@ void main() {
         members: const {},
       );
 
-      final first = await streamVideo.consumeIncomingCall(
+      final first = await streamVideo.ringing.consumeIncomingCall(
         uuid: uuid,
         cid: cid,
         metadata: metadata,
@@ -624,7 +624,7 @@ void main() {
       expect(streamVideo.activeCalls, isEmpty);
 
       Call? handed;
-      final result = await streamVideo.consumeAndAcceptActiveCall(
+      final result = await streamVideo.ringing.consumeAndAcceptActiveCall(
         onCallAccepted: (accepted) => handed = accepted,
       );
 
@@ -669,10 +669,10 @@ void main() {
 
         // The ringing-event flow got there first.
         await call.accept();
-        expect(streamVideo.isCallAcceptedOnThisDevice(cid), isTrue);
+        expect(streamVideo.ringing.isCallAcceptedOnThisDevice(cid), isTrue);
 
         Call? handed;
-        final result = await streamVideo.consumeAndAcceptActiveCall(
+        final result = await streamVideo.ringing.consumeAndAcceptActiveCall(
           onCallAccepted: (call) => handed = call,
         );
 
