@@ -641,8 +641,8 @@ class CallConnectionCoordinator {
     final ringing =
         _call.state.value.status is CallStatusOutgoing ||
         _call.state.value.status is CallStatusIncoming;
-    final result = await _awaitIfNeeded();
-    if (_isLeftOrLeaving) {
+    final result = await _awaitAnswer();
+    if (result == null || _isLeftOrLeaving) {
       _call._logger.w(() => '[join] rejected (call was left)');
       return const JoinCancelled();
     }
@@ -2028,36 +2028,21 @@ class CallConnectionCoordinator {
     }
   }
 
-  Future<Result<None>> _awaitIfNeeded() async {
-    final state = _call.state.value;
-    final status = state.status;
-    final settings = state.settings;
+  /// Waits for a ringing call to be answered; `null` when the call is left
+  /// first.
+  Future<Result<None>?> _awaitAnswer() async {
+    final left = Completer<void>();
+    final subscription = _phase.where((phase) => phase.isLeftOrLeaving).listen((
+      _,
+    ) {
+      if (!left.isCompleted) left.complete();
+    });
 
-    Future<Result<None>>? futureResult;
-    if (status is CallStatusOutgoing && !status.acceptedByCallee) {
-      final timeout = settings.ring.autoCancelTimeout;
-      _call._logger.d(() => '[awaitIfNeeded] outgoing timeout: $timeout');
-      futureResult = _call._awaitOutgoingToBeAccepted(timeout);
-    } else if (status is CallStatusIncoming && !status.acceptedByMe) {
-      final timeout = settings.ring.autoRejectTimeout;
-      _call._logger.d(() => '[awaitIfNeeded] incoming timeout: $timeout');
-      futureResult = _call._awaitIncomingToBeAccepted(timeout);
-    } else if (status is CallStatusJoining) {
-      // TODO we don't need this case, since we no longer join from LobbyView
-      _call._logger.d(() => '[awaitIfNeeded] joining to become joined');
-      futureResult = _call._awaitCallToBeJoined();
+    try {
+      return await _call._ringing.awaitAnswer(left: left.future);
+    } finally {
+      await subscription.cancel();
     }
-
-    if (futureResult != null) {
-      final result = await _untilLeft(futureResult);
-      if (result == null) {
-        _call._logger.w(() => '[awaitIfNeeded] call was left');
-        return failureWithError('call was left');
-      }
-      return result;
-    }
-
-    return const Result.success(none);
   }
 
   Future<Result<None>> leave({DisconnectReason? reason}) {
@@ -2146,10 +2131,8 @@ class CallConnectionCoordinator {
       }
     }
 
-    client.state
-      ..clearCallAcceptedOnThisDevice(_call.callCid, _call)
-      ..releaseRingingCall(_call.callCid, _call)
-      ..removeWatchedCall(_call);
+    _call._ringing.release();
+    client.state.removeWatchedCall(_call);
     if (identical(client.state.outgoingCall.value, _call)) {
       await client.state.setOutgoingCall(null);
     }
@@ -2348,7 +2331,7 @@ class CallConnectionCoordinator {
       _call._closedCaptions.reset();
       _call._moderation.cancelTimer();
 
-      _call._stopRingStatePolling();
+      _call._ringing.stopRingStatePolling();
 
       await _call._media.cancelSfuStatsTimers();
 
@@ -2415,11 +2398,7 @@ class CallConnectionCoordinator {
       _call.viewportVisibility.clear();
       await _call.clearE2EEManager();
     } finally {
-      _call._streamVideo.state.clearCallAcceptedOnThisDevice(
-        _call.callCid,
-        _call,
-      );
-      _call._streamVideo.state.releaseRingingCall(_call.callCid, _call);
+      _call._ringing.release();
       await _call._streamVideo.state.removeActiveCall(_call);
       if (_call._streamVideo.state.outgoingCall.value?.callCid ==
           _call.callCid) {

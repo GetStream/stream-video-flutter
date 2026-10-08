@@ -404,6 +404,11 @@ class StreamVideo extends Disposable {
     ensureConnected: connect,
   );
 
+  /// Clears the way for [call] to be accepted. See
+  /// [RingingFlowCoordinatorImpl.prepareToAccept].
+  @internal
+  Future<void>? prepareToAccept(Call call) => _ringing.prepareToAccept(call);
+
   /// Returns the current user.
   UserInfo get currentUser => _state.currentUser.toUserInfo();
 

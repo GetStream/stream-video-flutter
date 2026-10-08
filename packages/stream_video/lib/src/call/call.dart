@@ -19,7 +19,6 @@ import '../coordinator/coordinator_client.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../coordinator/models/coordinator_models.dart';
 import '../errors/stream_video_exception.dart';
-import '../errors/stream_video_exception_composer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../logger/stream_log.dart';
 import '../models/models.dart';
@@ -57,7 +56,6 @@ import '../webrtc/sdp/policy/sdp_policy.dart';
 import 'call_connect_options.dart';
 import 'call_events.dart';
 import 'call_reject_reason.dart';
-import 'call_ringing_state.dart';
 import 'call_type.dart';
 import 'connection/connection_executor.dart';
 import 'connection/connection_phase.dart';
@@ -69,7 +67,7 @@ import 'events/call_reactions.dart';
 import 'events/call_video_moderation.dart';
 import 'media/local_media_controller.dart';
 import 'permissions/permissions_manager.dart';
-import 'ring_state_poller.dart';
+import 'ringing/call_ringing_controller.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 import 'session/dynascale_manager.dart';
@@ -318,6 +316,18 @@ class Call {
     logger: _logger,
   );
 
+  /// Accepts and rejects this call's ring, and waits for it to be answered.
+  late final _ringing = CallRingingController(
+    call: this,
+    stateManager: _stateManager,
+    coordinatorClient: _coordinatorClient,
+    clientState: _streamVideo.state,
+    prepareToAccept: () => _streamVideo.prepareToAccept(this),
+    pollingSettings: () => _streamVideo.options.ringStatePolling,
+    trace: (tag, data) => _session?.trace(tag, data),
+    logger: _logger,
+  );
+
   /// Attaches, resolves and releases this call's [EncryptionManager].
   late final _e2ee = CallE2ee(
     callCid: callCid,
@@ -430,8 +440,6 @@ class Call {
   }
 
   bool _initialized = false;
-  RingStatePoller? _ringStatePoller;
-  StreamSubscription<CallState>? _ringStatePollerStatusSubscription;
 
   String get id => state.value.callId;
   StreamCallCid get callCid => state.value.callCid;
@@ -600,9 +608,9 @@ class Call {
     closedCaptions: _closedCaptions,
     moderation: _moderation,
     onPermissionRequest: (event) => onPermissionRequest?.call(event),
-    onAccepted: _handleCoordinatorCallAccepted,
-    onRejected: _handleCoordinatorCallRejected,
-    onRingActivity: () => _ringStatePoller?.restartQuietPeriod(),
+    onAccepted: _ringing.onCallAccepted,
+    onRejected: _ringing.onCallRejected,
+    onRingActivity: _ringing.onRingActivity,
   );
 
   OnCallPermissionRequest? onPermissionRequest;
@@ -732,48 +740,6 @@ class Call {
     await _eventRouter.route(event);
   }
 
-  Future<void> _handleCoordinatorCallAccepted(
-    StreamCallAcceptedEvent event,
-  ) async {
-    final currentUserId = _stateManager.callState.currentUserId;
-    final status = state.value.status;
-
-    if (event.acceptedByUserId == currentUserId &&
-        status is CallStatusIncoming &&
-        !status.acceptedByMe) {
-      _logger.i(
-        () =>
-            '[onCoordinatorEvent] call accepted on another device, '
-            'rejecting locally with userRespondedElsewhere',
-      );
-      await reject(reason: CallRejectReason.userRespondedElsewhere());
-      return;
-    }
-
-    _stateManager.coordinatorCallAccepted(event);
-  }
-
-  Future<void> _handleCoordinatorCallRejected(
-    StreamCallRejectedEvent event,
-  ) async {
-    final currentUserId = _stateManager.callState.currentUserId;
-    final status = state.value.status;
-
-    if (event.rejectedByUserId == currentUserId &&
-        status is CallStatusIncoming &&
-        !status.acceptedByMe) {
-      _logger.i(
-        () =>
-            '[onCoordinatorEvent] call rejected on another device, '
-            'rejecting locally with userRespondedElsewhere',
-      );
-      await reject(reason: CallRejectReason.userRespondedElsewhere());
-      return;
-    }
-
-    _stateManager.coordinatorCallRejected(event);
-  }
-
   /// Clears the moderation action, restoring normal operation.
   ///
   /// When [VideoModerationConfig.muteAudio] / [VideoModerationConfig.muteVideo]
@@ -824,71 +790,14 @@ class Call {
   }
 
   /// Accepts the incoming call.
-  Future<Result<None>> accept() async {
-    final state = this.state.value;
-    _logger.i(() => '[accept] state: $state');
+  ///
+  /// Cancels the current user's outgoing ring of another call and, unless
+  /// several calls may be active, leaves the active call first.
+  Future<Result<None>> accept() => _ringing.accept();
 
-    final status = state.status;
-    if (status is! CallStatusIncoming || status.acceptedByMe) {
-      _logger.w(() => '[accept] rejected (invalid status): $status');
-      return failureWithError('invalid status: $status');
-    }
-
-    final outgoingCall = _streamVideo.state.outgoingCall.value;
-    if (outgoingCall != null && outgoingCall.callCid != callCid) {
-      _logger.i(() => '[accept] canceling outgoing call: $outgoingCall');
-      await outgoingCall.reject(reason: CallRejectReason.cancel());
-      await _streamVideo.state.setOutgoingCall(null);
-    }
-
-    if (!_streamVideo.options.allowMultipleActiveCalls) {
-      final activeCall = _streamVideo.activeCall;
-      if (activeCall != null && activeCall.callCid != callCid) {
-        _logger.i(() => '[accept] canceling another active call: $activeCall');
-        await activeCall.leave(reason: DisconnectReason.replaced());
-        await _streamVideo.state.removeActiveCall(activeCall);
-      }
-    }
-
-    _session?.trace(TraceTag.callAccept, null);
-
-    // Optimistically mark the call as accepted
-    _stateManager.lifecycleCallAccepted();
-    _streamVideo.state.markCallAcceptedOnThisDevice(callCid, this);
-
-    final result = await _coordinatorClient.acceptCall(cid: state.callCid);
-    if (result is Failure) {
-      // Revert the optimistic acceptance so the user can retry or reject.
-      _stateManager.lifecycleCallAccepted(accepted: false);
-      _streamVideo.state.clearCallAcceptedOnThisDevice(callCid, this);
-    }
-
-    return result;
-  }
-
-  /// Rejects the incoming call.
-  Future<Result<None>> reject({CallRejectReason? reason}) async {
-    final state = this.state.value;
-    _logger.i(() => '[reject] reason: $reason');
-
-    _session?.trace(TraceTag.callReject, reason?.value);
-    final result = await _coordinatorClient.rejectCall(
-      cid: state.callCid,
-      reason: reason?.value,
-    );
-
-    // Always leave the call after rejecting it.
-    await leave(
-      reason: result is Success<None>
-          ? DisconnectReason.rejected(
-              byUserId: state.currentUserId,
-              reason: reason,
-            )
-          : null,
-    );
-
-    return result;
-  }
+  /// Rejects the incoming call, then leaves it.
+  Future<Result<None>> reject({CallRejectReason? reason}) =>
+      _ringing.reject(reason: reason);
 
   /// Ends the call for all participants.
   Future<Result<None>> end({String? reason}) {
@@ -999,7 +908,7 @@ class Call {
     _subscriptions.cancelAll();
     _reactions.cancelTimers();
     _moderation.cancelTimer();
-    _stopRingStatePolling();
+    _ringing.stopRingStatePolling();
     await _media.cancelSfuStatsTimers();
 
     // First, so the participants subject gets the last list before it closes.
@@ -1154,62 +1063,6 @@ class Call {
     return track?.captureScreenshot();
   }
 
-  Future<Result<None>> _awaitIncomingToBeAccepted(Duration timeLimit) async {
-    return state
-        .firstWhere(
-          (state) {
-            final status = state.status;
-            return status is CallStatusIncoming && status.acceptedByMe;
-          },
-        )
-        .timeout(timeLimit)
-        .then((value) {
-          _logger.i(() => '[awaitIncomingToBeAccepted] completed');
-          return const Result.success(none);
-        })
-        .onError((e, stk) {
-          _logger.e(() => '[awaitIncomingToBeAccepted] failed: $e');
-          return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
-        });
-  }
-
-  Future<Result<None>> _awaitOutgoingToBeAccepted(Duration timeLimit) async {
-    return state
-        .firstWhere(
-          (state) {
-            final status = state.status;
-            return status is CallStatusOutgoing && status.acceptedByCallee;
-          },
-        )
-        .timeout(timeLimit)
-        .then((value) {
-          _logger.i(() => '[awaitOutgoingToBeAccepted] completed');
-          return const Result.success(none);
-        })
-        .onError((e, stk) {
-          _logger.e(() => '[awaitOutgoingToBeAccepted] failed: $e');
-          return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
-        });
-  }
-
-  Future<Result<None>> _awaitCallToBeJoined() async {
-    return state
-        .firstWhere(
-          (state) {
-            return state.status is CallStatusJoined;
-          },
-        )
-        .timeout(const Duration(seconds: 60))
-        .then((value) {
-          _logger.d(() => '[awaitCallToBeJoined] completed');
-          return const Result.success(none);
-        })
-        .onError((e, stk) {
-          _logger.e(() => '[awaitCallToBeJoined] failed: $e');
-          return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
-        });
-  }
-
   Future<Result<T>> _performGetOperation<T>({
     required bool watch,
     required Future<Result<T>> Function() coordinatorCall,
@@ -1282,7 +1135,7 @@ class Call {
           ringing: ringing,
           notify: notify,
         );
-        _startRingStatePollingIfNeeded(data.metadata);
+        _ringing.startRingStatePollingIfNeeded(data.metadata);
 
         return data.metadata;
       },
@@ -1393,93 +1246,10 @@ class Call {
           callConnectOptions: connectOptions,
         );
 
-        _startRingStatePollingIfNeeded(data.data.metadata);
+        _ringing.startRingStatePollingIfNeeded(data.data.metadata);
         return data.data.metadata;
       },
     );
-  }
-
-  /// Starts polling for the outcome of a ring the current user just started,
-  /// in case the `call.accepted` or `call.rejected` event never arrives.
-  void _startRingStatePollingIfNeeded(CallMetadata metadata) {
-    final settings = _streamVideo.options.ringStatePolling;
-    if (!settings.enabled) return;
-    if (_ringStatePoller?.isStopped == false) return;
-
-    // A zero interval would fire the poll timer on every event-loop turn.
-    if (settings.interval <= Duration.zero) {
-      _logger.w(
-        () =>
-            '[startRingStatePolling] rejected (interval is not positive): '
-            '${settings.interval}',
-      );
-      return;
-    }
-
-    final status = _stateManager.callState.status;
-    if (status is! CallStatusOutgoing || status.acceptedByCallee) return;
-
-    // Captured once: the ring state is read for the session that rang.
-    final sessionId = metadata.session.id;
-    if (sessionId.isEmpty) {
-      _logger.w(() => '[startRingStatePolling] rejected (no session)');
-      return;
-    }
-
-    final ringTimeout = metadata.settings.ring.autoCancelTimeout;
-    if (ringTimeout <= Duration.zero) return;
-
-    final poller = RingStatePoller(
-      settings: settings,
-      ringTimeout: ringTimeout,
-      fetchRingState: () => _coordinatorClient.getCallRingState(
-        callCid: callCid,
-        sessionId: sessionId,
-      ),
-      onRingState: _onPolledRingState,
-    );
-    _ringStatePoller = poller;
-
-    unawaited(_ringStatePollerStatusSubscription?.cancel());
-    _ringStatePollerStatusSubscription = _stateManager.callStateStream.listen((
-      state,
-    ) {
-      final status = state.status;
-      if (status is! CallStatusOutgoing || status.acceptedByCallee) {
-        _stopRingStatePolling();
-      }
-    });
-
-    poller.start();
-  }
-
-  /// Applies a polled ring state, returning whether the ring is settled.
-  bool _onPolledRingState(GetCallRingStateResponse ringState) {
-    final callState = _stateManager.callState;
-    final status = callState.status;
-    if (status is! CallStatusOutgoing || status.acceptedByCallee) return true;
-
-    final snapshot = ringState.toRingingSnapshot(
-      memberIds: callState.callMembers.map((member) => member.userId),
-    );
-
-    final ringingState = snapshot.resolveFor(callState.currentUserId);
-    if (!ringingState.isRinging) {
-      // A settled ring here means the event that carried it was dropped.
-      _logger.i(
-        () => '[onPolledRingState] resolved by polling: $ringingState',
-      );
-    }
-
-    _stateManager.coordinatorOutgoingRingResolved(ringingState, snapshot);
-    return !ringingState.isRinging;
-  }
-
-  void _stopRingStatePolling() {
-    _ringStatePoller?.stop();
-    _ringStatePoller = null;
-    unawaited(_ringStatePollerStatusSubscription?.cancel());
-    _ringStatePollerStatusSubscription = null;
   }
 
   /// Sends a ring notification to the provided users who are not already in the call.
