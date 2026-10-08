@@ -65,6 +65,7 @@
 
 ### 🔄 Changed
 
+- With `closedCaptionsVisibilityDurationMs` at 0 or less, closed captions are now shown and stay until newer ones replace them, instead of never being shown.
 - A `call.rejected` event now settles a ring by the same rules as the push and ring-state checks (`RingingSnapshot`), so the paths can no longer disagree. These cases change:
   - A callee hangs up once every other member has rejected, even if the caller isn't a member of the call.
   - A callee whose acceptance already reached the server stays in the call when the caller cancels, instead of hanging up.

@@ -48,6 +48,8 @@ abstract class CallPreferences {
 
   /// The duration in milliseconds that closed captions remain visible
   /// on screen before being automatically hidden.
+  ///
+  /// 0 or less keeps each caption until newer ones push it out.
   int get closedCaptionsVisibilityDurationMs;
 
   /// The maximum number of closed caption lines that can be visible
@@ -180,6 +182,8 @@ class DefaultCallPreferences implements CallPreferences {
 
   /// The duration in milliseconds that closed captions remain visible
   /// on screen before being automatically hidden.
+  ///
+  /// 0 or less keeps each caption until newer ones push it out.
   ///
   /// Defaults to 2700ms (2.7 seconds).
   @override
