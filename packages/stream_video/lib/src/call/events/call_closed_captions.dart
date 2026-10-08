@@ -23,43 +23,44 @@ class CallClosedCaptions {
   final _expiryTimers = KeyedTimers();
   final _lock = Lock();
 
-  /// The closed captions currently on screen, oldest first.
+  /// The closed captions currently on screen, oldest first. The list is
+  /// unmodifiable.
   StateEmitter<List<StreamClosedCaption>> get closedCaptions => _closedCaptions;
   final _closedCaptions = MutableStateEmitter<List<StreamClosedCaption>>(
-    [],
+    const [],
   );
 
   /// Adds the caption to [closedCaptions], keeping only the newest
   /// `closedCaptionsVisibleCaptions`, and removes it after
   /// `closedCaptionsVisibilityDurationMs`. Duplicates are ignored. Nothing is
   /// added when the visibility duration is 0.
-  void onClosedCaption(StreamCallClosedCaptionsEvent event) {
-    _lock.synchronized(() {
-      _logger.v(() => '[onClosedCaption] event: $event');
-
-      String keyFor(StreamClosedCaption caption) {
-        return '${caption.speakerId}_${caption.startTime}';
-      }
-
-      final queue = _closedCaptions.value;
-      final currentCaption = StreamClosedCaption.fromEvent(event);
-      final currentKey = keyFor(currentCaption);
-
-      // Ignore duplicates from backend
-      if (queue.any((caption) => keyFor(caption) == currentKey)) {
-        return;
-      }
-
-      final newQueue = [...queue, currentCaption];
-
-      final visibilityDurationMs = _stateManager
-          .callState
-          .preferences
-          .closedCaptionsVisibilityDurationMs;
-      final visibleCaptions =
-          _stateManager.callState.preferences.closedCaptionsVisibleCaptions;
-
+  Future<void> onClosedCaption(StreamCallClosedCaptionsEvent event) {
+    return _lock.synchronized(() {
       try {
+        _logger.v(() => '[onClosedCaption] event: $event');
+
+        String keyFor(StreamClosedCaption caption) {
+          return '${caption.speakerId}_${caption.startTime}';
+        }
+
+        final queue = _closedCaptions.value;
+        final currentCaption = StreamClosedCaption.fromEvent(event);
+        final currentKey = keyFor(currentCaption);
+
+        // Ignore duplicates from backend
+        if (queue.any((caption) => keyFor(caption) == currentKey)) {
+          return;
+        }
+
+        final newQueue = [...queue, currentCaption];
+
+        final visibilityDurationMs = _stateManager
+            .callState
+            .preferences
+            .closedCaptionsVisibilityDurationMs;
+        final visibleCaptions =
+            _stateManager.callState.preferences.closedCaptionsVisibleCaptions;
+
         // schedule the removal of the closed caption after the retention time
         if (visibilityDurationMs > 0) {
           _expiryTimers.start(
@@ -75,27 +76,34 @@ class CallClosedCaptions {
             }
           }
 
-          _closedCaptions.value = newQueue.length > visibleCaptions
-              ? newQueue.sublist(newQueue.length - visibleCaptions)
-              : newQueue;
+          _closedCaptions.value = List.unmodifiable(
+            newQueue.length > visibleCaptions
+                ? newQueue.sublist(newQueue.length - visibleCaptions)
+                : newQueue,
+          );
         }
-      } catch (error) {
-        _logger.e(() => '[onClosedCaption] failed: $error');
+      } catch (error, stackTrace) {
+        _logger.e(
+          () => '[onClosedCaption] failed: $error, stackTrace: $stackTrace',
+        );
       }
     });
   }
 
-  /// Stops every pending caption removal.
-  void cancelTimers() => _expiryTimers.cancelAll();
+  /// Stops every pending caption removal and clears [closedCaptions].
+  void reset() {
+    _expiryTimers.cancelAll();
+    _closedCaptions.value = const [];
+  }
 
   Future<void> _removeExpiredCaption(
     String Function(StreamClosedCaption) keyFor,
     StreamClosedCaption caption,
   ) async {
     return _lock.synchronized(() {
-      _closedCaptions.value = _closedCaptions.value.where((c) {
-        return keyFor(c) != keyFor(caption);
-      }).toList();
+      _closedCaptions.value = List.unmodifiable(
+        _closedCaptions.value.where((c) => keyFor(c) != keyFor(caption)),
+      );
     });
   }
 }

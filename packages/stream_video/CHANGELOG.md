@@ -2,6 +2,7 @@
 
 ### ⚠️ Breaking
 
+- The lists emitted by `Call.closedCaptions` are unmodifiable; copy one before changing it.
 - `Call`'s action methods (members, permissions, moderation, recording, transcription, captions, broadcasting, mute, pin, go-live, reactions, custom events, feedback) are now extension methods on `CallActions`; they can't be stubbed or overridden, and a `show Call` import must also show `CallActions`.
 - `Call.updateViewportVisibility`, `Call.updateSubscription` and `Call.removeSubscription` are internal; report to `Call.viewportVisibility` instead.
 - `RetryConfig.callRejoinTimeout` is removed. It was deprecated and had no readers. Use `CallPreferences.networkAvailabilityTimeout`, which is what actually bounds waiting for the network.
@@ -73,6 +74,7 @@
 
 ### 🐞 Fixed
 
+- Closed captions are now cleared when leaving a call.
 - A failed microphone or camera mute during video moderation is now logged.
 - Errors thrown while handling a call's coordinator and SFU events, including from `onPermissionRequest`, are now logged instead of surfacing as unhandled errors.
 - Joining with the camera or microphone track from the lobby no longer stops it and acquires it again. The camera no longer restarts when the call connects.

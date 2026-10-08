@@ -1318,6 +1318,30 @@ void main() {
   });
 
   group('Closed Captions Events', () {
+    test('leaving clears the captions', () async {
+      final setup = await setupCallForEventTesting();
+
+      setup.events.emit(
+        CoordinatorCallClosedCaptionEvent(
+          callCid: setup.call.callCid,
+          createdAt: DateTime.now(),
+          startTime: DateTime.now(),
+          endTime: DateTime.now().add(const Duration(seconds: 3)),
+          speakerId: 'speaker1',
+          text: 'Hello',
+          user: SampleCallData.testCallUser1,
+          language: 'en',
+          translated: false,
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(await setup.call.closedCaptions.first, hasLength(1));
+
+      await setup.call.leave();
+
+      expect(await setup.call.closedCaptions.first, isEmpty);
+    });
+
     test(
       'closed caption event - should add caption to queue',
       () async {

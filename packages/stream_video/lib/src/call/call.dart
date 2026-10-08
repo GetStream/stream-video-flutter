@@ -571,6 +571,8 @@ class Call {
   SharedEmitter<StreamCallEvent> get callEvents => _callEvents;
   final _callEvents = MutableSharedEmitter<StreamCallEvent>();
 
+  /// The closed captions currently on screen, oldest first. Each emitted
+  /// list is unmodifiable.
   Stream<List<StreamClosedCaption>> get closedCaptions =>
       _closedCaptions.closedCaptions;
 
@@ -2751,7 +2753,7 @@ class Call {
     _logger.d(() => '[clear] src: $src');
 
     _reactions.cancelTimers();
-    _closedCaptions.cancelTimers();
+    _closedCaptions.reset();
     _moderation.cancelTimer();
 
     _stopRingStatePolling();

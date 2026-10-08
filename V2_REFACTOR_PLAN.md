@@ -8,6 +8,11 @@ This file tracks the **order** of the 22 sub-issues and how each one is
 delivered. What a ticket changes is in the ticket itself and in the analysis
 doc. The decisions in FLU-859 are settled; do not reopen them.
 
+This is the v2 major release, so a ticket may break the public API when that
+makes it safer or simpler. Each break gets a `### ⚠️ Breaking` changelog line
+and a `!` in its commit title. Tickets marked zero behaviour change, such as A2,
+stay that way.
+
 Tickets 5-8 are bugs found in the B2 review (FLU-924 to FLU-928). FLU-925 is
 folded into A6.
 
@@ -29,7 +34,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 | 4 | B2 | `feat/flu-849-call-event-router` | #1409 |
 | 5 | FLU-924 | `fix/flu-924-log-coordinator-event-errors` | #1411 |
 | 6 | FLU-926 | `fix/flu-926-moderation-mute-failure` | #1412 |
-| 7 | FLU-927 | `fix/flu-927-closed-captions-reset` | |
+| 7 | FLU-927 | `fix/flu-927-closed-captions-reset` | #1413 |
 | 8 | FLU-928 | `fix/flu-928-captions-zero-duration` | |
 | 9 | A2 | `feat/flu-855-call-connection-coordinator` | |
 | 10 | A3 | `feat/flu-860-connection-phase` | |
@@ -52,7 +57,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 - [x] 4. **B2** [FLU-849](https://linear.app/stream/issue/FLU-849): coordinator event router, and the reactions, closed captions and video moderation helpers (S, low risk). Takes `_reactionTimers` out before A6 has to deal with it.
 - [x] 5. **Fix** [FLU-924](https://linear.app/stream/issue/FLU-924): log errors thrown while routing coordinator events (S, bug). Before A2, so A2 moves `_observeEvents` with the fix already in.
 - [x] 6. **Fix** [FLU-926](https://linear.app/stream/issue/FLU-926): video moderation ignores a failed mic or camera mute (S, bug).
-- [ ] 7. **Fix** [FLU-927](https://linear.app/stream/issue/FLU-927): reset closed captions on leave and catch errors across the whole handler (S, bug). Closing the emitter stays with A7.
+- [x] 7. **Fix** [FLU-927](https://linear.app/stream/issue/FLU-927): reset closed captions on leave and catch errors across the whole handler (S, bug). Closing the emitter stays with A7.
 - [ ] 8. **Fix** [FLU-928](https://linear.app/stream/issue/FLU-928): closed captions never show when the visibility duration is 0 (S, bug). Settle the option from the ticket in the plan; option 1 needs a changelog line.
 - [ ] 9. **A2** [FLU-855](https://linear.app/stream/issue/FLU-855): verbatim `CallConnectionCoordinator` (L, high risk). Zero behaviour change; existing tests and A1 stay green untouched.
 - [ ] 10. **A3** [FLU-860](https://linear.app/stream/issue/FLU-860): sealed `ConnectionPhase` replaces the connection flags (L, high risk).
