@@ -33,6 +33,20 @@ class StreamVideoException extends Equatable implements Exception {
   List<Object?> get props => [message];
 }
 
+/// A `Call.join` on a call that was already left or ended.
+///
+/// A `Call` is joined once. Create a new one with `StreamVideo.makeCall` to
+/// join the same call again.
+class CallLeftException extends StreamVideoException {
+  /// Creates a [CallLeftException].
+  const CallLeftException()
+    : super(
+        message:
+            'This call was left and cannot be joined again. Create a new Call '
+            'to join again.',
+      );
+}
+
 /// A failure that carries what caused it.
 class StreamVideoExceptionWithCause extends StreamVideoException {
   /// Creates a [StreamVideoExceptionWithCause].

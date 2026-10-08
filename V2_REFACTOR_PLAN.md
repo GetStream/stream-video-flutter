@@ -29,6 +29,12 @@ symbol name.
 One PR per ticket, each based on the branch of the ticket before it. The first
 PR targets `v2`. Tick a box in the ticket's own commit.
 
+The stack is split in two after ticket 18. Tickets 1-18 (#1405 to #1429) are the
+connection work and merge into `v2` first, bottom up. Ticket 19 (B1) starts the
+second stack. It branches off `feat/flu-862-call-dispose` and targets it until
+the first stack has merged, then it is retargeted to `v2`. The numbering
+continues across both stacks.
+
 | # | Ticket | Branch (proposed) | PR |
 |---|---|---|---|
 | 1 | A1 | `feat/flu-847-call-characterisation-tests` | #1405 |
@@ -48,7 +54,7 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 | 15 | FLU-932 | `fix/flu-932-migration-complete-old-socket` | #1424 |
 | 16 | FLU-938 | `fix/flu-938-reuse-local-tracks` | #1426 |
 | 17 | A6 | `fix/flu-861-session-ownership` | #1427 |
-| 18 | A7 | `feat/flu-862-call-dispose` | |
+| 18 | A7 | `feat/flu-862-call-dispose` | #1429 |
 | 19 | B1 | `feat/flu-848-local-media-controller` | |
 | 20 | C2 | `feat/flu-853-stream-video-test-seams` | |
 | 21 | C3 | `fix/flu-857-coordinator-connection` | |
@@ -75,15 +81,15 @@ PR targets `v2`. Tick a box in the ticket's own commit.
 - [x] 15. **Fix** [FLU-932](https://linear.app/stream/issue/FLU-932): wait for migration complete on the old SFU socket (S, bug). Confirmed on a device with a migration to another SFU. Before A6, so A6 reworks session ownership on top of the corrected order.
 - [x] 16. **Fix** [FLU-938](https://linear.app/stream/issue/FLU-938): reuse local tracks across a migration and a rejoin (S–M). The new session takes over the old one's camera, microphone and screen-share tracks instead of opening them again. Right after FLU-932, whose order (the old session stays open until the old SFU confirms) is what the handover has to respect, and before A6 and B1, which then build on its `_startSession` and `_applyConnectOptions` changes.
 - [x] 17. **A6** [FLU-861](https://linear.app/stream/issue/FLU-861): single session ownership and a complete teardown (S). Fixes bugs 3 and 5, and folds in [FLU-925](https://linear.app/stream/issue/FLU-925) (timers re-armed during leave). Also releases the session a migration started from when the migration's join fails: `_reconnectMigrate` returned before closing it, and the rejoin that followed only left the failed new session. The same went for a rejoin whose first attempt failed before the new session took the local tracks: the retry asked only the failed session for them, so it opened the devices again and the original session was never disposed.
-- [ ] 18. **A7** [FLU-862](https://linear.app/stream/issue/FLU-862): `Call.dispose` and the single-use-after-leave error (S, v2 breaking).
+- [x] 18. **A7** [FLU-862](https://linear.app/stream/issue/FLU-862): `Call.dispose` and the single-use-after-leave error (S, v2 breaking).
 - [ ] 19. **B1** [FLU-848](https://linear.app/stream/issue/FLU-848): `LocalMediaController` (M). After the A chain, so `_connectOptions` moves once with A2 and then gets one owner here.
 - [ ] 20. **C2** [FLU-853](https://linear.app/stream/issue/FLU-853): injection seams in StreamVideo (S). Needed to test C3 and C4.
 - [ ] 21. **C3** [FLU-857](https://linear.app/stream/issue/FLU-857): `CoordinatorConnection` with a real single-flight guard (M). Fixes bug 4.
 - [ ] 22. **C1** [FLU-856](https://linear.app/stream/issue/FLU-856): `RingingCallCoordinator` as `streamVideo.ringing` (L, v2 breaking). Its `ensureConnected` callback comes from C3.
-- [ ] 23. **B3** [FLU-863](https://linear.app/stream/issue/FLU-863): `CallRingingController` (M). After C1, which takes the cross-call orchestration from `Call.accept`.
+- [ ] 23. **B3** [FLU-863](https://linear.app/stream/issue/FLU-863): `CallRingingController` (M). After C1, which takes the cross-call orchestration from `Call.accept`. The accept waits stop on leave, so a cancelled ring no longer logs a timeout error 25 s later.
 - [ ] 24. **C4** [FLU-858](https://linear.app/stream/issue/FLU-858): `AppLifecycleController`; background mute and restore moves into Call (S).
 - [ ] 25. **B6** [FLU-852](https://linear.app/stream/issue/FLU-852): `CallHost` interface (M). Late on purpose: after C1, B3 and C4 the interface no longer needs the ringing hooks or the mute maps.
-- [ ] 26. **C5** [FLU-854](https://linear.app/stream/issue/FLU-854): StreamVideo constructor and options cleanup (M, v2 breaking). Last, because every earlier C ticket wires into the constructor.
+- [ ] 26. **C5** [FLU-854](https://linear.app/stream/issue/FLU-854): StreamVideo constructor and options cleanup (M, v2 breaking). Last, because every earlier C ticket wires into the constructor. Also covers a client built for background push handling, which must do no media setup.
 
 ### Later, outside the stack
 
@@ -92,6 +98,7 @@ Pick them up after the stack, or alongside it on their own branch off `v2`.
 
 - [ ] [FLU-933](https://linear.app/stream/issue/FLU-933): give up reconnecting after repeated rejoins (S). A rejoin rate limit like the other SDKs (10 per 120 s, then leave).
 - [ ] [FLU-934](https://linear.app/stream/issue/FLU-934): keep backstage hosts in the call when a livestream ends (S, behaviour change). The SFU's call-ended reason is mapped but ignored.
+- [ ] [FLU-939](https://linear.app/stream/issue/FLU-939): keep the participant tile order after a reconnect (S). The join response rebuilds the participants without their viewport visibility, pin and reaction.
 
 ## Working on a ticket
 

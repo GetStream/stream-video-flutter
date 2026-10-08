@@ -117,6 +117,9 @@ const _tag = 'SV:Call';
 int _callSeq = 1;
 
 /// Represents a [Call] in which you can connect to.
+///
+/// A call is joined once. Call [dispose] when it is no longer used, whether it
+/// was joined or not.
 class Call {
   /// Do not use the factory directly,
   /// use the [StreamVideo.makeCall] method to construct a `Call` instance.
@@ -506,11 +509,10 @@ class Call {
     );
   }
 
-  // Lives as long as this call: nothing closes `callStateStream` today, so the
-  // `onDone` below is a teardown path rather than one that runs in practice.
-  // ignore: close_sinks
-  late final BehaviorSubject<List<CallParticipantState>> _participantsSubject =
-      _buildParticipantsSubject();
+  /// Built the first time it is read. [dispose] closes it.
+  BehaviorSubject<List<CallParticipantState>> get _participantsSubject =>
+      _participantsSubjectOrNull ??= _buildParticipantsSubject();
+  BehaviorSubject<List<CallParticipantState>>? _participantsSubjectOrNull;
 
   BehaviorSubject<List<CallParticipantState>> _buildParticipantsSubject() {
     final subject = BehaviorSubject<List<CallParticipantState>>.seeded(
@@ -523,7 +525,7 @@ class Call {
         .preferences
         .participantsThrottleIntervalResolver;
 
-    // Kept for the lifetime of the call, like the state it reads from.
+    // Ends when [dispose] closes the state it reads from.
     // ignore: cancel_subscriptions
     (interval == null
             ? participants
@@ -532,10 +534,14 @@ class Call {
           (value) {
             // The seed and the state's own replay are the same list, so the
             // first window would otherwise repeat it.
-            if (identical(subject.valueOrNull, value)) return;
+            if (subject.isClosed || identical(subject.valueOrNull, value)) {
+              return;
+            }
             subject.add(value);
           },
-          onError: subject.addError,
+          onError: (Object error, StackTrace stackTrace) {
+            if (!subject.isClosed) subject.addError(error, stackTrace);
+          },
           onDone: subject.close,
         );
 
@@ -631,7 +637,7 @@ class Call {
     return _callInitLock.synchronized(() async {
       _logger.v(() => '[_init] no args');
 
-      if (_initialized) return;
+      if (_initialized || _isDisposed) return;
       _logger.d(() => '[_init] initializing');
 
       _observeEvents();
@@ -993,6 +999,10 @@ class Call {
   ///
   /// Calling [join] again while a join on this call is still in flight
   /// returns the same result as that join instead of starting another one.
+  ///
+  /// A call is joined once. After it is left or ended, including after a
+  /// failed join or reconnect, [join] fails with [CallLeftException]; use
+  /// [StreamVideo.makeCall] to create a new [Call] for the same call.
   Future<Result<None>> join({
     CallConnectOptions? connectOptions,
     int? membersLimit,
@@ -1009,9 +1019,52 @@ class Call {
 
   /// Leaves the call.
   ///
+  /// The call cannot be joined again. Its [state] stays readable, also after
+  /// [dispose].
+  ///
+  /// Leaving an outgoing call this user created while it still rings, with
+  /// nobody accepted or joined, cancels the ring for the callees.
+  ///
   /// - [reason]: optional reason for leaving the call
   Future<Result<None>> leave({DisconnectReason? reason}) {
     return _connection.leave(reason: reason);
+  }
+
+  /// Leaves the call if it joined and has not been left, then closes its
+  /// streams:
+  /// [state], [partialState], [participantsStream], [callEvents], [stats],
+  /// [closedCaptions] and [callDurationStream] complete, and later state
+  /// changes are dropped. [state] keeps its last value.
+  ///
+  /// A call that is still ringing is reported disconnected and its native
+  /// call ends. An outgoing ring is cancelled as by [leave]; an incoming ring
+  /// is not rejected, use [reject] for that.
+  ///
+  /// Calling it again does nothing.
+  Future<void> dispose() => _disposed ??= _dispose();
+  Future<void>? _disposed;
+  bool get _isDisposed => _disposed != null;
+
+  Future<void> _dispose() async {
+    _logger.i(() => '[dispose]');
+    await _connection.dispose();
+
+    // A leave can end without this teardown, when the call was already
+    // disconnected.
+    _subscriptions.cancelAll();
+    _reactions.cancelTimers();
+    _moderation.cancelTimer();
+    _stopRingStatePolling();
+    for (final operation in _sfuStatsTimers) {
+      await operation.cancel();
+    }
+
+    // First, so the participants subject gets the last list before it closes.
+    _stateManager.dispose();
+    await _closedCaptions.dispose();
+    await _callEvents.close();
+    await _stats.close();
+    await _participantsSubjectOrNull?.close();
   }
 
   /// Updates the configuration of the call.
@@ -1624,7 +1677,7 @@ class Call {
     required Future<Result<T>> Function() coordinatorCall,
     required CallMetadata Function(T data) onSuccess,
   }) async {
-    if (watch) {
+    if (watch && !_isDisposed) {
       _observeEvents();
       _streamVideo.state.setWatchedCall(this);
     }

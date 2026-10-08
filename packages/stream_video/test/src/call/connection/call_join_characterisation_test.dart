@@ -135,7 +135,7 @@ void main() {
 
       final result = await call.join();
 
-      expect(result.getErrorOrNull()?.message, 'call was left');
+      expect(result.getErrorOrNull(), isA<CallLeftException>());
       harness.verifyJoinCallCount(0);
     });
 
@@ -156,7 +156,7 @@ void main() {
 
       final result = await call.join();
 
-      expect(result.getErrorOrNull()?.message, 'call was left');
+      expect(result.getErrorOrNull(), isA<CallLeftException>());
       harness.verifyJoinCallCount(1);
     });
   });

@@ -299,18 +299,24 @@ class CallConnectionCoordinator {
     });
   }
 
+  /// The answer to a join on a call that is left or leaving.
+  Result<None> _rejectJoinOfLeftCall() {
+    _call._logger.w(() => '[join] rejected (call was left)');
+    return const Result.failure(CallLeftException());
+  }
+
   Future<Result<None>> _joinOnce({
     CallConnectOptions? connectOptions,
     int? membersLimit,
     int maxJoinRetries = 3,
     bool? hintHighScaleLivestreamPublisher,
   }) async {
+    // Before init, so a left call does not observe anything again.
+    if (_isLeftOrLeaving) return _rejectJoinOfLeftCall();
+
     await _call._init();
 
-    if (_isLeftOrLeaving) {
-      _call._logger.w(() => '[join] rejected (call was left)');
-      return failureWithError('call was left');
-    }
+    if (_isLeftOrLeaving) return _rejectJoinOfLeftCall();
 
     if (_call.state.value.status is CallStatusConnected) {
       _call._logger.w(() => '[join] rejected (connected)');
@@ -365,10 +371,7 @@ class CallConnectionCoordinator {
       return e2eeResult;
     }
 
-    if (_isLeftOrLeaving) {
-      _call._logger.w(() => '[join] rejected (call was left)');
-      return failureWithError('call was left');
-    }
+    if (_isLeftOrLeaving) return _rejectJoinOfLeftCall();
 
     await _call._streamVideo.state.setActiveCall(_call);
 
@@ -376,9 +379,8 @@ class CallConnectionCoordinator {
     // this call in that time has already cleaned up, so undo the marking
     // rather than register a call nothing would unregister.
     if (_isLeftOrLeaving) {
-      _call._logger.w(() => '[join] rejected (call was left)');
       await _call._streamVideo.state.removeActiveCall(_call);
-      return failureWithError('call was left');
+      return _rejectJoinOfLeftCall();
     }
 
     _call._streamVideo.clientEventReporter
@@ -2073,6 +2075,100 @@ class CallConnectionCoordinator {
     return _leave(reason: reason);
   }
 
+  /// Leaves the call unless it is left already, waits for a leave in progress
+  /// to finish, then closes [_phase].
+  ///
+  /// A call that never joined is not left: it only releases what this
+  /// instance holds, so a live call with the same cid is not touched.
+  Future<void> dispose() async {
+    if (_phase.value is ConnectionIdle) {
+      _setPhase(const ConnectionDisconnected(null));
+      await _releaseUnjoined();
+    } else {
+      try {
+        if (!_isLeftOrLeaving) await leave();
+      } catch (e, stk) {
+        _call._logger.e(() => '[dispose] leave failed: $e\n$stk');
+      }
+      if (_phase.value is ConnectionLeaving) {
+        await _phase.firstWhere((phase) => phase is ConnectionDisconnected);
+      }
+    }
+    await _phase.close();
+  }
+
+  /// Cancels the ring of an outgoing call this user created, while nobody has
+  /// accepted or joined it, so the callees stop ringing.
+  Future<void> _cancelUnansweredRing() async {
+    final state = _call.state.value;
+    final status = state.status;
+    if (status is! CallStatusOutgoing ||
+        status.acceptedByCallee ||
+        !state.createdByMe ||
+        state.otherParticipants.isNotEmpty) {
+      return;
+    }
+
+    _call._logger.d(() => '[leave] cancelling the unanswered ring');
+    try {
+      final result = await _call._coordinatorClient.rejectCall(
+        cid: _call.callCid,
+        reason: CallRejectReason.cancel().value,
+      );
+      if (result is Failure) {
+        _call._logger.w(() => '[leave] cancelling the ring failed: $result');
+      }
+    } catch (e, stk) {
+      _call._logger.e(() => '[leave] cancelling the ring failed: $e\n$stk');
+    }
+  }
+
+  /// Releases what a call that never joined holds, and drops this instance
+  /// from the client's ringing, incoming, outgoing and watched calls.
+  ///
+  /// A call that is still ringing is reported disconnected, and its native
+  /// call ends unless another instance has joined the same call. An
+  /// unanswered outgoing ring is cancelled first.
+  Future<void> _releaseUnjoined() async {
+    _cancelables.cancelAll();
+    await _call.dynascaleManager.dispose();
+    _call.viewportVisibility.clear();
+    await _call.clearE2EEManager();
+
+    final client = _call._streamVideo;
+    final status = _call.state.value.status;
+    if (status is CallStatusIncoming || status is CallStatusOutgoing) {
+      await _cancelUnansweredRing();
+      _call._stateManager.lifecycleCallDisconnected();
+      final joinedElsewhere = client.state.activeCalls.value.any(
+        (call) => call.callCid == _call.callCid,
+      );
+      if (!joinedElsewhere) {
+        try {
+          await client.pushNotificationManager?.endCallByCid(
+            _call.callCid.value,
+            silent: true,
+          );
+        } catch (e, stk) {
+          _call._logger.e(
+            () => '[dispose] ending the native call failed: $e\n$stk',
+          );
+        }
+      }
+    }
+
+    client
+      ..clearCallAcceptedOnThisDevice(_call.callCid, _call)
+      ..releaseRingingCall(_call.callCid, _call);
+    client.state.removeWatchedCall(_call);
+    if (identical(client.state.outgoingCall.value, _call)) {
+      await client.state.setOutgoingCall(null);
+    }
+    if (identical(client.state.incomingCall.value, _call)) {
+      await client.state.setIncomingCall(null);
+    }
+  }
+
   /// Leaves the call for [reason]. A [remote] leave follows a disconnect
   /// written into the state from elsewhere, so the status is already
   /// disconnected.
@@ -2093,6 +2189,11 @@ class CallConnectionCoordinator {
     _call._streamVideo.clientEventReporter
       ..abort(_call.callCid, abortCode)
       ..unregisterCall(_call.callCid);
+
+    // A reject already told the server, and a remote end needs no answer.
+    if (!remote && !_isLeftOrLeaving && reason is! DisconnectReasonRejected) {
+      await _cancelUnansweredRing();
+    }
 
     final bool didDisconnect;
     try {
@@ -2129,8 +2230,11 @@ class CallConnectionCoordinator {
       );
     } catch (_) {
       // The teardown failed here, but the call still ends for everyone.
-      await _call._permissionsManager.endCall();
-      _settleDisconnected(DisconnectReason.ended());
+      try {
+        await _call._permissionsManager.endCall();
+      } finally {
+        _settleDisconnected(DisconnectReason.ended());
+      }
       rethrow;
     }
 
@@ -2142,9 +2246,13 @@ class CallConnectionCoordinator {
       return const Result.success(none);
     }
 
-    final result = await _call._permissionsManager.endCall();
-    _setPhase(ConnectionDisconnected(DisconnectReason.ended()));
-    _call._stateManager.lifecycleCallEnded();
+    final Result<None> result;
+    try {
+      result = await _call._permissionsManager.endCall();
+    } finally {
+      _setPhase(ConnectionDisconnected(DisconnectReason.ended()));
+      _call._stateManager.lifecycleCallEnded();
+    }
 
     _call._logger.v(() => '[end] completed: $result');
     return result;

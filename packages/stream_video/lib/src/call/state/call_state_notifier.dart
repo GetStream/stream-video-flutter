@@ -55,8 +55,18 @@ class CallStateNotifier extends StateNotifier<CallState>
   late final StreamController<Duration> _durationTimerController;
   Timer? _durationTimer;
 
+  /// Stays readable after [dispose]: it is the last state set.
+  @override
+  CallState get state => callStateStream.value;
+
+  /// After [dispose] a new state is dropped.
   @override
   set state(CallState value) {
+    if (!mounted) {
+      _logger.w(() => '[setState] dropped (disposed): ${value.status}');
+      return;
+    }
+
     if (value.status != super.state.status) {
       _logger.v(() => '[setState] ${value.status} <= ${super.state.status}');
     }
