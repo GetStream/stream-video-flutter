@@ -424,12 +424,16 @@ class CallConnectionCoordinator {
 
   /// Runs up to [maxJoinRetries] join attempts. Never leaves the call; the
   /// caller decides from the outcome.
+  ///
+  /// [migratingFrom] is the session a migration moves off, which keeps that
+  /// role across attempts even after a failed attempt has replaced `_session`.
   Future<JoinOutcome> _join({
     CallConnectOptions? connectOptions,
     int? membersLimit,
     int maxJoinRetries = 3,
     String? reconnectReason,
     bool? hintHighScaleLivestreamPublisher,
+    CallSession? migratingFrom,
   }) async {
     final sfuJoinFailures = <String, int>{};
     String? sfuToForceExclude;
@@ -449,6 +453,7 @@ class CallConnectionCoordinator {
         reconnectReason: reconnectReason,
         hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
         joinAttempt: attempt,
+        migratingFrom: migratingFrom,
       );
 
       if (outcome is! JoinRetry) {
@@ -540,6 +545,7 @@ class CallConnectionCoordinator {
     String? reconnectReason,
     bool? hintHighScaleLivestreamPublisher,
     int joinAttempt = 0,
+    CallSession? migratingFrom,
   }) async {
     try {
       return await _doJoin(
@@ -550,6 +556,7 @@ class CallConnectionCoordinator {
         reconnectReason: reconnectReason,
         hintHighScaleLivestreamPublisher: hintHighScaleLivestreamPublisher,
         joinAttempt: joinAttempt,
+        migratingFrom: migratingFrom,
       );
     } catch (error, stackTrace) {
       return JoinRetry(
@@ -608,6 +615,7 @@ class CallConnectionCoordinator {
     String? reconnectReason,
     bool? hintHighScaleLivestreamPublisher,
     int joinAttempt = 0,
+    CallSession? migratingFrom,
   }) async {
     _call._logger.d(() => '[join] options: $_connectOptions');
     final connectionTimeStopwatch = Stopwatch()..start();
@@ -670,6 +678,9 @@ class CallConnectionCoordinator {
 
     _credentials = joinedResult.data;
     _previousSession = _session;
+    final sessionLeft = performingMigration
+        ? migratingFrom ?? _previousSession
+        : _previousSession;
 
     if (_isLeftOrLeaving) {
       _call._logger.w(() => '[join] rejected (call was left during joining)');
@@ -679,7 +690,7 @@ class CallConnectionCoordinator {
     final reconnectDetails =
         _reconnectStrategy == SfuReconnectionStrategy.unspecified
         ? null
-        : await _previousSession?.getReconnectDetails(
+        : await sessionLeft?.getReconnectDetails(
             _reconnectStrategy,
             reconnectAttempts: _reconnectAttempts,
             reason: reconnectReason,
@@ -742,8 +753,9 @@ class CallConnectionCoordinator {
       );
       _session = session;
 
+      // The SFU being left confirms the migration, on its own socket.
       if (performingMigration) {
-        migrationComplete = _session!.waitForMigrationComplete();
+        migrationComplete = sessionLeft?.waitForMigrationComplete();
       }
 
       _call.dynascaleManager.init(
@@ -1786,24 +1798,36 @@ class CallConnectionCoordinator {
     _updateReconnect(
       (phase) => phase.copyWith(rejoinAttempts: phase.rejoinAttempts + 1),
     );
-    final outcome = await _join(reconnectReason: reason);
+    final previousSession = _session;
+    final outcome = await _join(
+      reconnectReason: reason,
+      migratingFrom: previousSession,
+    );
 
     if (outcome is! JoinSucceeded) {
       _call._logger.e(() => '[reconnectMigrate] join failed: $outcome');
       return outcome;
     }
 
-    await _previousSession?.close(StreamVideoCloseCode.disposeOldSocket);
+    // The old socket carries the confirmation, so it closes only once the
+    // wait is over. Nothing resumes the old session after that, so the close
+    // is a normal one: after a timeout it lets the old SFU drop the
+    // participant at once.
+    final Result<None>? migrationResult;
+    try {
+      final migrationComplete = outcome.migrationComplete;
+      if (migrationComplete == null) {
+        _call._logger.e(() => '[reconnectMigrate] migration failed');
+        return const JoinRetry(
+          StreamVideoException(message: 'migration failed'),
+        );
+      }
 
-    final migrationComplete = outcome.migrationComplete;
-    if (migrationComplete == null) {
-      _call._logger.e(() => '[reconnectMigrate] migration failed');
-      return const JoinRetry(
-        StreamVideoException(message: 'migration failed'),
-      );
+      migrationResult = await _untilLeft(migrationComplete);
+    } finally {
+      await previousSession?.close(CloseCode.normalClosure);
     }
 
-    final migrationResult = await _untilLeft(migrationComplete);
     if (migrationResult == null) {
       _call._logger.w(() => '[reconnectMigrate] cancelled (call was left)');
       return const JoinCancelled();

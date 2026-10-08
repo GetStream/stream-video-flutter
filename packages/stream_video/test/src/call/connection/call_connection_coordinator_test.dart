@@ -395,14 +395,12 @@ void main() {
     'failed reconnect',
     () async {
       harness = ConnectionHarness(sessionCount: 2);
-      final [first, second] = harness.sessions;
-      when(
-        second.waitForMigrationComplete,
-      ).thenAnswer((_) => Completer<Result<None>>().future);
-      var firstClosed = false;
-      when(
-        () => first.close(any(), closeReason: any(named: 'closeReason')),
-      ).thenAnswer((_) async => firstClosed = true);
+      final [first, _] = harness.sessions;
+      var waitingForMigration = false;
+      when(first.waitForMigrationComplete).thenAnswer((_) {
+        waitingForMigration = true;
+        return Completer<Result<None>>().future;
+      });
       final call = harness.buildCall();
       await call.join();
       final statuses = recordStatuses(call);
@@ -411,11 +409,16 @@ void main() {
         first,
         const SfuGoAwayEvent(goAwayReason: SfuGoAwayReason.rebalance),
       );
-      await waitUntil(() => firstClosed);
+      await waitUntil(() => waitingForMigration);
+      await pumpEventQueue();
       await call.leave();
       await pumpEventQueue();
 
       expect(call.state.value.status, isA<CallStatusDisconnected>());
+      // The old socket stayed open for the confirmation; the leave closes it.
+      verify(
+        () => first.close(CloseCode.normalClosure),
+      ).called(1);
       expect(statuses, isNot(contains(isA<CallStatusReconnectionFailed>())));
       harness.verifyMakeCallSessionCount(2);
       expect(harness.reporter.aborts, [ClientEventStandardCode.clientAborted]);

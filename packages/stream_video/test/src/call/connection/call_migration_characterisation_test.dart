@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
-import 'package:stream_video/src/ws/ws.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../fixtures/call_test_helpers.dart';
@@ -28,18 +27,15 @@ void main() {
   tearDown(() => harness.dispose());
 
   test(
-    'a go-away migrates to a new SFU session and closes the old one',
+    'a go-away migrates to a new SFU session and closes the old one once '
+    'the old SFU confirms',
     () async {
       harness = ConnectionHarness(sessionCount: 2);
       final [first, second] = harness.sessions;
       final migrationGate = Completer<Result<None>>();
       when(
-        second.waitForMigrationComplete,
+        first.waitForMigrationComplete,
       ).thenAnswer((_) => migrationGate.future);
-      var firstClosed = false;
-      when(
-        () => first.close(any(), closeReason: any(named: 'closeReason')),
-      ).thenAnswer((_) async => firstClosed = true);
       final call = harness.buildCall();
       await call.join();
       final statuses = recordStatuses(call);
@@ -48,19 +44,26 @@ void main() {
         first,
         const SfuGoAwayEvent(goAwayReason: SfuGoAwayReason.rebalance),
       );
-      // The wait for the new SFU's confirmation is asked for when the session
-      // is made, before the old socket closes; the status stays migrating
-      // until it arrives.
-      await waitUntil(() => firstClosed);
+      // The old SFU sends the confirmation on the old socket, so that socket
+      // stays open until it arrives; the status stays migrating meanwhile.
+      await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+      await pumpEventQueue();
       expect(call.state.value.status, isA<CallStatusMigrating>());
-      verifyInOrder([
-        second.waitForMigrationComplete,
-        () => first.close(StreamVideoCloseCode.disposeOldSocket),
-      ]);
+      verify(first.waitForMigrationComplete).called(1);
+      verifyNever(
+        () => first.close(any(), closeReason: any(named: 'closeReason')),
+      );
 
       migrationGate.complete(const Result.success(none));
       await waitUntil(() => call.state.value.status is CallStatusConnected);
 
+      verify(
+        () => first.close(CloseCode.normalClosure),
+      ).called(1);
+      verifyNever(second.waitForMigrationComplete);
+      verifyNever(
+        () => second.close(any(), closeReason: any(named: 'closeReason')),
+      );
       verify(
         () => harness.coordinatorClient.joinCall(
           callCid: any(named: 'callCid'),
@@ -94,6 +97,59 @@ void main() {
     timeout: const Timeout(Duration(seconds: 30)),
   );
 
+  test(
+    'a migration whose first attempt fails still waits on and closes the '
+    'session it started from',
+    () async {
+      harness = ConnectionHarness(sessionCount: 3);
+      final [first, second, third] = harness.sessions;
+      harness.stubSessionStart(
+        second,
+        () async => const Result.failure(
+          StreamVideoException(message: 'sfu unreachable'),
+        ),
+      );
+      final call = harness.buildCall();
+      await call.join();
+
+      await harness.emitSfu(
+        first,
+        const SfuGoAwayEvent(goAwayReason: SfuGoAwayReason.rebalance),
+      );
+      await waitUntil(
+        () => harness.reconnectionCallbacks.length == 3,
+        timeout: const Duration(seconds: 15),
+      );
+      await waitUntil(() => call.state.value.status is CallStatusConnected);
+
+      // Each attempt waits on the session the call migrated from, never on
+      // the failed attempt's session, which the old SFU knows nothing about.
+      verify(first.waitForMigrationComplete).called(2);
+      verifyNever(second.waitForMigrationComplete);
+      verifyNever(third.waitForMigrationComplete);
+      verify(
+        () => first.close(CloseCode.normalClosure),
+      ).called(1);
+      verify(
+        () => first.getReconnectDetails(
+          SfuReconnectionStrategy.migrate,
+          migratingFromSfuId: any(named: 'migratingFromSfuId'),
+          reconnectAttempts: any(named: 'reconnectAttempts'),
+          reason: any(named: 'reason'),
+        ),
+      ).called(2);
+      verifyNever(
+        () => second.getReconnectDetails(
+          any(),
+          migratingFromSfuId: any(named: 'migratingFromSfuId'),
+          reconnectAttempts: any(named: 'reconnectAttempts'),
+          reason: any(named: 'reason'),
+        ),
+      );
+    },
+    timeout: const Timeout(Duration(seconds: 40)),
+  );
+
   group('known hazard', () {
     // Changes with FLU-861: a migration disposes the session it moved off.
     test(
@@ -111,7 +167,7 @@ void main() {
         await waitUntil(() => call.state.value.status is CallStatusConnected);
 
         verify(
-          () => first.close(StreamVideoCloseCode.disposeOldSocket),
+          () => first.close(CloseCode.normalClosure),
         ).called(1);
         verifyNever(first.dispose);
       },
@@ -124,7 +180,7 @@ void main() {
     () async {
       harness = ConnectionHarness(sessionCount: 3);
       final [first, second, third] = harness.sessions;
-      when(second.waitForMigrationComplete).thenAnswer(
+      when(first.waitForMigrationComplete).thenAnswer(
         (_) async => const Result.failure(
           StreamVideoException(message: 'migration timed out'),
         ),
@@ -155,7 +211,7 @@ void main() {
         ]),
       );
       verify(
-        () => first.close(StreamVideoCloseCode.disposeOldSocket),
+        () => first.close(CloseCode.normalClosure),
       ).called(1);
       verify(
         () => second.getReconnectDetails(
