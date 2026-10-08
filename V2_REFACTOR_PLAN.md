@@ -59,7 +59,7 @@ stacks.
 | 21 | C3 | `fix/flu-857-coordinator-connection` | #1436 |
 | 22 | C1 | `feat/flu-856-ringing-call-coordinator` | #1437 |
 | 23 | B3 | `feat/flu-863-call-ringing-controller` | #1438 |
-| 24 | C4 | `feat/flu-858-app-lifecycle-controller` | |
+| 24 | C4 | `feat/flu-858-app-lifecycle-controller` | #1439 |
 | 25 | B6 | `feat/flu-852-call-host` | |
 | 26 | C5 | `feat/flu-854-stream-video-constructor` | |
 
