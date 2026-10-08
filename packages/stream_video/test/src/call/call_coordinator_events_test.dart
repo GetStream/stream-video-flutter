@@ -109,6 +109,48 @@ void main() {
       },
     );
 
+    test('an error thrown while handling an event is logged', () async {
+      final logger = _RecordingLogger();
+      StreamLog()
+        ..logger = logger
+        ..priority = Priority.error;
+      addTearDown(() {
+        StreamLog()
+          ..logger = const SilentStreamLogger()
+          ..priority = Priority.none;
+      });
+
+      final uncaught = <Object>[];
+      await runZonedGuarded(
+        () async {
+          final setup = await setupCallForEventTesting();
+          setup.call.onPermissionRequest = (_) => throw StateError('boom');
+
+          setup.events.emit(
+            CoordinatorCallPermissionRequestEvent(
+              callCid: setup.call.callCid,
+              createdAt: DateTime.now(),
+              permissions: const [CallPermission.sendAudio],
+              user: SampleCallData.defaultCallUser,
+            ),
+          );
+          await Future<void>.delayed(Duration.zero);
+        },
+        (error, _) => uncaught.add(error),
+      );
+
+      expect(uncaught, isEmpty);
+      expect(
+        logger.errors,
+        contains(
+          allOf(
+            contains('StreamCallPermissionRequestEvent'),
+            contains('boom'),
+          ),
+        ),
+      );
+    });
+
     test(
       'call ended event - should disconnect with ended reason',
       () async {
@@ -2103,4 +2145,19 @@ void main() {
       expect(timers.single.isActive, isFalse);
     });
   });
+}
+
+class _RecordingLogger extends StreamLogger {
+  final errors = <String>[];
+
+  @override
+  void log(
+    Priority priority,
+    String tag,
+    MessageBuilder message, [
+    Object? error,
+    StackTrace? stk,
+  ]) {
+    if (priority == Priority.error) errors.add(message());
+  }
 }
