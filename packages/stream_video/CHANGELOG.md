@@ -70,6 +70,7 @@
 
 ### 🔄 Changed
 
+- When the app comes back to the foreground, the client reopens the coordinator connection only when it closed it in the background or the connection dropped.
 - `StreamVideo.dispose()` leaves and disposes the calls it tracks, and disconnects the user like `disconnect()` but keeps the push device registered.
 - A `StreamVideo.connect()` that registers the push device now does so even when the connect that opened the connection skipped it.
 - `StreamVideo.disconnect()` leaves the user disconnected even when unregistering the push device fails, or when the connection had dropped and was reconnecting.
