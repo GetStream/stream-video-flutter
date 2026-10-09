@@ -426,6 +426,71 @@ void main() {
       },
     );
 
+    test('applies a change made while a retry is connecting', () async {
+      final h = _harnessWithCamera(2);
+      addTearDown(h.dispose);
+      final [first, second] = h.sessions;
+      late final Call call;
+      Result<None>? result;
+
+      void stubStart(
+        MockCallSession session,
+        Result<SessionStartResult> Function() answer, {
+        void Function()? beforeApplying,
+      }) {
+        when(
+          () => session.start(
+            reconnectDetails: any(named: 'reconnectDetails'),
+            onRtcManagerCreatedCallback: any(
+              named: 'onRtcManagerCreatedCallback',
+            ),
+            isAnonymousUser: any(named: 'isAnonymousUser'),
+            capabilities: any(named: 'capabilities'),
+            unifiedSessionId: any(named: 'unifiedSessionId'),
+            clientEventRetryCount: any(named: 'clientEventRetryCount'),
+          ),
+        ).thenAnswer((invocation) async {
+          beforeApplying?.call();
+          final onCreated =
+              invocation.namedArguments[#onRtcManagerCreatedCallback]
+                  as FutureOr<void> Function(RtcManager)?;
+          await onCreated?.call(_MockRtcManager());
+          return answer();
+        });
+      }
+
+      // The first session applies the options, then fails to start.
+      stubStart(
+        first,
+        () => const Result.failure(
+          StreamVideoException(message: 'sfu unreachable'),
+        ),
+      );
+      stubStart(
+        second,
+        () => Result.success((
+          callState: createTestSfuCallState(),
+          fastReconnectDeadline: Duration.zero,
+        )),
+        beforeApplying: () => result = call.setConnectOptions(
+          call.connectOptions.copyWith(camera: TrackOption.disabled()),
+        ),
+      );
+      call = h.buildCall();
+
+      expect((await call.join()).isSuccess, isTrue);
+      await pumpEventQueue();
+
+      expect(result?.isSuccess, isTrue);
+      // The call settings open the camera by default.
+      verifyNever(
+        () => second.setCameraEnabled(
+          true,
+          constraints: any(named: 'constraints'),
+        ),
+      );
+    }, timeout: const Timeout(Duration(seconds: 30)));
+
     group('the deprecated setter', () {
       test('applies a write before the join', () async {
         final call = harness.buildCall();

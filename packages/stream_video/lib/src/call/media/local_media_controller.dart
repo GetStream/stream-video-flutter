@@ -72,9 +72,9 @@ class LocalMediaController {
   /// is written into the resolved options instead of the override.
   bool _joinSettingsApplied = false;
 
-  /// Whether a session has started applying the options, after which they
-  /// can only change through the device methods.
-  bool _connectOptionsApplied = false;
+  /// The session that started applying the options. While it is the call's
+  /// session, they can only change through the device methods.
+  CallSession? _optionsAppliedBy;
 
   CallState get _state => _stateManager.callState;
 
@@ -83,10 +83,13 @@ class LocalMediaController {
   CallConnectOptions get connectOptions =>
       _connectOptionsOverride ?? _connectOptions;
 
-  /// Changes the options the pending join applies. Fails once a session
-  /// has started applying them.
+  /// Changes the options the pending join applies. Fails once the call's
+  /// session has started applying them.
   Result<None> setConnectOptions(CallConnectOptions connectOptions) {
-    if (_connectOptionsApplied) {
+    // A session that failed and was replaced, as by a join retry, leaves the
+    // options to the next one.
+    final appliedBy = _optionsAppliedBy;
+    if (appliedBy != null && identical(appliedBy, _session())) {
       _logger.w(
         () =>
             '[setConnectOptions] rejected (the session already applied the '
@@ -232,7 +235,7 @@ class LocalMediaController {
     CallSession? session,
     List<RtcLocalTrack> inheritedTracks = const [],
   }) async {
-    _connectOptionsApplied = true;
+    _optionsAppliedBy = session;
     _logger.d(
       () =>
           '[applyConnectOptions] connectOptions: $_connectOptions, '
