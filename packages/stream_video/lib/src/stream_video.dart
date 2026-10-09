@@ -155,8 +155,8 @@ class StreamVideo extends Disposable {
   ///
   /// When given, it talks to [coordinatorClient] instead of building one,
   /// and follows the stream [appState] returns instead of the app's
-  /// lifecycle. [appState] is called on each connect, and its stream emits
-  /// nothing until the test adds a state.
+  /// lifecycle. [appState] is called on each connect; unlike the app's
+  /// lifecycle, its stream need not emit the current state on listen.
   @visibleForTesting
   factory StreamVideo.forTesting(
     String apiKey, {

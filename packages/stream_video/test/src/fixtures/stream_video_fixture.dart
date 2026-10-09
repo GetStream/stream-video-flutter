@@ -23,7 +23,7 @@ String fakeJwt(String userId) {
 /// [appState] the test drives it with.
 ///
 /// The default options turn `autoConnect` off; options a test passes keep
-/// their own. With an [initialState], each connect first gets that state, as
+/// their own. With an `initialState`, each connect first gets that state, as
 /// the app's lifecycle stream emits the current state on listen.
 class StreamVideoFixture {
   StreamVideoFixture({
