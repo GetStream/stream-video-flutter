@@ -566,7 +566,7 @@ void main() {
           data: _ringingPushFor('default:call-b'),
         );
 
-        // The user declines B. A is still on screen.ringing.
+        // The user declines B. A is still on screen.
         onRingingEvent!(_declined('default:call-b'));
         await pastTheGrace();
 
@@ -602,7 +602,7 @@ void main() {
 
           onRingingEvent!(_declined('default:call-b'));
           // The platform reports B ending as well as being declined. It is not
-          // a second resolution, and must not be taken for A's.ringing.
+          // a second resolution, and must not be taken for A's.
           onRingingEvent!(
             const ActionCallEnded(
               data: CallData(uuid: 'u', callCid: 'default:call-b'),
@@ -623,7 +623,7 @@ void main() {
 
         // Nothing says which call this resolves, so the session cannot be
         // reasoned about any more. Letting go beats holding the isolate open
-        // for a call nothing will ever resolve.ringing.
+        // for a call nothing will ever resolve.
         onRingingEvent!(const ActionCallDecline(data: CallData(uuid: 'u')));
         await pastTheGrace();
 

@@ -2,8 +2,7 @@
 
 ### ⚠️ Breaking
 
-- The ringing API moves from `StreamVideo` to `StreamVideo.ringing`, a `RingingCallCoordinator`: call `observeCoreRingingEvents`, `observeCoreRingingEventsForBackground`, the `observeCall*RingingEvent` methods, `onRingingEvent`, `consumeAndAcceptActiveCall`, `verifyDisplayedIncomingCalls`, `handleRingingFlowNotifications`, `getCallRingingState`, `consumeIncomingCall` and `isCallAcceptedOnThisDevice` on `streamVideo.ringing`.
-- The deprecated `observeCoreCallKitEvents`, `observeCallAcceptCallKitEvent`, `observeCallDeclinedCallKitEvent`, `observeCallEndedCallKitEvent` and `handleVoipPushNotification` are removed; use their `Ringing` counterparts on `StreamVideo.ringing`.
+- The deprecated `observeCoreCallKitEvents`, `observeCall*CallKitEvent` and `handleVoipPushNotification` methods are removed; use `observeCoreRingingEvents`, `observeCall*RingingEvent` and `handleRingingFlowNotifications` on `StreamVideo.ringing`.
 - Joining a `Call` after it was left or ended fails with `CallLeftException`; a `Call` is single use.
 - The lists emitted by `Call.closedCaptions` are unmodifiable; copy one before changing it.
 - `Call`'s action methods (members, permissions, moderation, recording, transcription, captions, broadcasting, mute, pin, go-live, reactions, custom events, feedback) are now extension methods on `CallActions`; they can't be stubbed or overridden, and a `show Call` import must also show `CallActions`.
@@ -49,6 +48,7 @@
 
 ### ⚠️ Deprecated
 
+- The ringing methods on `StreamVideo` are deprecated; call them on `StreamVideo.ringing`, which has the same method names.
 - The `Call.connectOptions` setter is deprecated in favour of `Call.setConnectOptions`, which reports whether the options were applied; there is no `dart fix` for it, since a setter can't be rewritten into a method call.
 - `StreamVideo.disposeAfterResolvingRinging` is deprecated in favour of `StreamVideoPushHandler.handleBackgroundMessage` from `stream_video_push_notification`. Use it to handle the whole background ringing lifecycle.
 - `VideoError` is renamed to `StreamVideoException`, and `VideoErrorWithCause` to `StreamVideoExceptionWithCause`. The old names remain as deprecated typedefs, so existing code still compiles; `dart fix --apply` migrates it.

@@ -50,6 +50,8 @@ export 'src/network_monitor_settings.dart';
 export 'src/push_notification/push_notification_manager.dart';
 export 'src/retry/retry_policy.dart';
 export 'src/ring_state_polling_settings.dart';
+export 'src/ringing/ringing_call_coordinator.dart'
+    hide EnsureConnected, RingingCallFactory;
 export 'src/sfu/data/models/sfu_audio_bitrate.dart';
 export 'src/sfu/data/models/sfu_client_capability.dart';
 export 'src/sfu/data/models/sfu_connection_quality.dart';
@@ -60,8 +62,6 @@ export 'src/sfu/data/models/sfu_track_type.dart';
 export 'src/sorting/call_participant_sorting_presets.dart';
 export 'src/sorting/call_participant_state_sorting.dart';
 export 'src/sorting/sort_participants.dart';
-export 'src/ringing/ringing_call_coordinator.dart'
-    hide EnsureConnected, RingingCallFactory;
 export 'src/stream_video.dart';
 export 'src/token/token.dart';
 export 'src/types/other.dart';

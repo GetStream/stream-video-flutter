@@ -1,7 +1,10 @@
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/core/client_state.dart';
+import 'package:stream_video/src/lifecycle/lifecycle_state.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
@@ -82,6 +85,46 @@ void main() {
     () => fixture.client.rejectCall(cid: callCid, reason: reason.value),
   );
 
+  void verifyNeverRejected(CallRejectReason reason) => verifyNever(
+    () => fixture.client.rejectCall(cid: callCid, reason: reason.value),
+  );
+
+  VerificationResult verifyJoined() => verify(
+    () => fixture.client.joinCall(
+      callCid: any(named: 'callCid'),
+      ringing: any(named: 'ringing'),
+      create: any(named: 'create'),
+      migratingFrom: any(named: 'migratingFrom'),
+      migratingFromList: any(named: 'migratingFromList'),
+      video: any(named: 'video'),
+      membersLimit: any(named: 'membersLimit'),
+      hintHighScaleLivestreamPublisher: any(
+        named: 'hintHighScaleLivestreamPublisher',
+      ),
+      e2ee: any(named: 'e2ee'),
+    ),
+  );
+
+  void acceptSucceeds() => when(
+    () => fixture.client.acceptCall(cid: any(named: 'cid')),
+  ).thenAnswer((_) async => const Result.success(none));
+
+  void nativeCallAccepted() => when(push.activeCalls).thenAnswer(
+    (_) async => [CallData(uuid: uuid, callCid: cid, isAccepted: true)],
+  );
+
+  void incoming() => nativeEvents.add(
+    ActionCallIncoming(
+      data: CallData(uuid: uuid, callCid: cid),
+    ),
+  );
+
+  void accept() => nativeEvents.add(
+    ActionCallAccept(
+      data: CallData(uuid: uuid, callCid: cid),
+    ),
+  );
+
   setUp(() {
     push = _MockPushNotificationManager();
     nativeEvents = StreamController<RingingEvent>.broadcast();
@@ -126,6 +169,21 @@ void main() {
     when(
       () => fixture.client.acceptCall(cid: any(named: 'cid')),
     ).thenAnswer((_) async => failureWithError('accept refused'));
+    when(
+      () => fixture.client.joinCall(
+        callCid: any(named: 'callCid'),
+        ringing: any(named: 'ringing'),
+        create: any(named: 'create'),
+        migratingFrom: any(named: 'migratingFrom'),
+        migratingFromList: any(named: 'migratingFromList'),
+        video: any(named: 'video'),
+        membersLimit: any(named: 'membersLimit'),
+        hintHighScaleLivestreamPublisher: any(
+          named: 'hintHighScaleLivestreamPublisher',
+        ),
+        e2ee: any(named: 'e2ee'),
+      ),
+    ).thenAnswer((_) async => failureWithError('join refused'));
     getCallReturns(metadata());
   });
 
@@ -194,75 +252,173 @@ void main() {
   });
 
   group('the auto-reject timer', () {
-    const timeout = Duration(milliseconds: 50);
+    const timeout = Duration(seconds: 10);
 
     setUp(() => getCallReturns(metadata(autoRejectTimeout: timeout)));
 
+    // A rejected call leaves on timers of its own, so the two tests that
+    // reject run on real time.
     test('rejects a ring nobody answers', () async {
+      getCallReturns(
+        metadata(autoRejectTimeout: const Duration(milliseconds: 50)),
+      );
       ringing().observeCallIncomingRingingEvent();
 
-      nativeEvents.add(
-        ActionCallIncoming(
-          data: CallData(uuid: uuid, callCid: cid),
-        ),
-      );
+      incoming();
       await pumpEventQueue();
-      verifyNever(
-        () => fixture.client.rejectCall(
-          cid: any(named: 'cid'),
-          reason: any(named: 'reason'),
-        ),
-      );
+      verifyNeverRejected(CallRejectReason.timeout());
 
-      await Future<void>.delayed(timeout * 3);
+      await Future<void>.delayed(const Duration(milliseconds: 150));
       verifyRejected(CallRejectReason.timeout()).called(1);
     });
 
     test('is cancelled by a decline', () async {
+      getCallReturns(
+        metadata(autoRejectTimeout: const Duration(milliseconds: 50)),
+      );
       ringing()
         ..observeCallIncomingRingingEvent()
         ..observeCallDeclinedRingingEvent();
 
-      nativeEvents.add(
-        ActionCallIncoming(
-          data: CallData(uuid: uuid, callCid: cid),
-        ),
-      );
+      incoming();
       await pumpEventQueue();
       nativeEvents.add(
         ActionCallDecline(
           data: CallData(uuid: uuid, callCid: cid),
         ),
       );
-      await Future<void>.delayed(timeout * 3);
+      await Future<void>.delayed(const Duration(milliseconds: 150));
 
       verifyRejected(CallRejectReason.decline()).called(1);
+      verifyNeverRejected(CallRejectReason.timeout());
+    });
+
+    test('is cancelled when the client is disposed', () {
+      fakeAsync((async) {
+        ringing().observeCallIncomingRingingEvent();
+        incoming();
+        async.flushMicrotasks();
+
+        ringing().dispose();
+        async.elapse(timeout * 2);
+
+        verifyNeverRejected(CallRejectReason.timeout());
+      });
+    });
+
+    test('is cancelled by an accept while the user is connecting', () {
+      fakeAsync((async) {
+        ringing().observeCallIncomingRingingEvent();
+        incoming();
+        async.flushMicrotasks();
+
+        // A cold start: connecting outlasts the ring.
+        final connecting = Completer<Result<None>>();
+        when(
+          () => fixture.client.connectUser(
+            any(),
+            includeUserDetails: any(named: 'includeUserDetails'),
+          ),
+        ).thenAnswer((_) => connecting.future);
+        nativeCallAccepted();
+        unawaited(ringing().consumeAndAcceptActiveCall());
+        async.elapse(timeout * 2);
+
+        verifyNeverRejected(CallRejectReason.timeout());
+
+        connecting.complete(const Result.success(none));
+        async.flushMicrotasks();
+      });
+    });
+  });
+
+  group('a ring the native call screen shows', () {
+    CallMetadata rejectedByCaller() => metadata(
+      session: CallSessionData(rejectedBy: {caller: DateTime.now()}),
+    );
+
+    test('is ended silently when the caller already cancelled', () async {
+      getCallReturns(rejectedByCaller());
+      ringing().observeCallIncomingRingingEvent();
+
+      incoming();
+      await pumpEventQueue();
+
+      verify(() => push.endCallByCid(cid, silent: true)).called(1);
+    });
+
+    test('is ended silently when the call already ended', () async {
+      getCallReturns(
+        metadata(session: CallSessionData(endedAt: DateTime.now())),
+      );
+      ringing().observeCallIncomingRingingEvent();
+
+      incoming();
+      await pumpEventQueue();
+
+      verify(() => push.endCallByCid(cid, silent: true)).called(1);
+    });
+
+    test('is kept when this device already accepted it', () async {
+      final call = ring();
+      fixture.streamVideo.state.markCallAcceptedOnThisDevice(callCid, call);
+      getCallReturns(rejectedByCaller());
+      ringing().observeCallIncomingRingingEvent();
+
+      incoming();
+      await pumpEventQueue();
+
       verifyNever(
-        () => fixture.client.rejectCall(
-          cid: callCid,
-          reason: CallRejectReason.timeout().value,
-        ),
+        () => push.endCallByCid(any(), silent: any(named: 'silent')),
       );
     });
 
-    test('is cancelled when the client is disposed', () async {
+    test('is kept when it was accepted on the native call screen', () async {
+      nativeCallAccepted();
+      getCallReturns(rejectedByCaller());
       ringing().observeCallIncomingRingingEvent();
-      nativeEvents.add(
-        ActionCallIncoming(
-          data: CallData(uuid: uuid, callCid: cid),
+
+      incoming();
+      await pumpEventQueue();
+
+      verifyNever(
+        () => push.endCallByCid(any(), silent: any(named: 'silent')),
+      );
+    });
+
+    test('is verified once while a verification is in flight', () async {
+      final fetching = Completer<Result<CallReceivedData>>();
+      when(
+        () => fixture.client.getCall(
+          callCid: any(named: 'callCid'),
+          membersLimit: any(named: 'membersLimit'),
+          ringing: any(named: 'ringing'),
+          notify: any(named: 'notify'),
+          video: any(named: 'video'),
+        ),
+      ).thenAnswer((_) => fetching.future);
+      ringing().observeCallIncomingRingingEvent();
+
+      incoming();
+      incoming();
+      await pumpEventQueue();
+
+      verify(
+        () => fixture.client.getCall(
+          callCid: any(named: 'callCid'),
+          membersLimit: any(named: 'membersLimit'),
+          ringing: any(named: 'ringing'),
+          notify: any(named: 'notify'),
+          video: any(named: 'video'),
+        ),
+      ).called(1);
+
+      fetching.complete(
+        Result.success(
+          CallReceivedData(callCid: callCid, metadata: metadata()),
         ),
       );
       await pumpEventQueue();
-
-      ringing().dispose();
-      await Future<void>.delayed(timeout * 3);
-
-      verifyNever(
-        () => fixture.client.rejectCall(
-          cid: callCid,
-          reason: CallRejectReason.timeout().value,
-        ),
-      );
     });
   });
 
@@ -331,6 +487,19 @@ void main() {
       ).called(1);
     });
 
+    test(
+      'is still reachable through the deprecated StreamVideo method',
+      () async {
+        // ignore: deprecated_member_use_from_same_package
+        final handled = await fixture.streamVideo
+            .handleRingingFlowNotifications(
+              pushOf('call.ring'),
+            );
+
+        expect(handled, isTrue);
+      },
+    );
+
     test('ignores a push that is not from Stream', () async {
       final handled = await ringing().handleRingingFlowNotifications(const {
         'sender': 'some.other.app',
@@ -348,6 +517,22 @@ void main() {
       );
 
       expect(state, CallRingingState.ringing);
+    });
+
+    test('does not ring the call again', () async {
+      await ringing().getCallRingingState(
+        callType: StreamCallType.defaultType(),
+        id: 'ringing-call',
+      );
+
+      verify(
+        () => fixture.client.getCall(
+          callCid: callCid,
+          ringing: false,
+          notify: false,
+          video: false,
+        ),
+      ).called(1);
     });
 
     test('is ended when the call cannot be read', () async {
@@ -413,6 +598,102 @@ void main() {
           includeUserDetails: any(named: 'includeUserDetails'),
         ),
       );
+    });
+
+    test('an accept event joins the call once it is accepted', () async {
+      acceptSucceeds();
+      ring();
+      Call? handed;
+      ringing().observeCallAcceptRingingEvent(
+        onCallAccepted: (call) => handed = call,
+      );
+
+      accept();
+      await pumpEventQueue();
+
+      expect(handed, isNotNull);
+      // A refused join is retried, so it is reached at least once.
+      verifyJoined().called(greaterThanOrEqualTo(1));
+      verifyNever(() => push.endCallByCid(cid));
+    });
+
+    test('consumeAndAcceptActiveCall leaves joining to the app', () async {
+      acceptSucceeds();
+      nativeCallAccepted();
+
+      final accepted = await ringing().consumeAndAcceptActiveCall();
+      await pumpEventQueue();
+
+      expect(accepted, isTrue);
+      verify(() => fixture.client.acceptCall(cid: callCid)).called(1);
+      verifyNever(
+        () => fixture.client.joinCall(
+          callCid: any(named: 'callCid'),
+          ringing: any(named: 'ringing'),
+          create: any(named: 'create'),
+          migratingFrom: any(named: 'migratingFrom'),
+          migratingFromList: any(named: 'migratingFromList'),
+          video: any(named: 'video'),
+          membersLimit: any(named: 'membersLimit'),
+          hintHighScaleLivestreamPublisher: any(
+            named: 'hintHighScaleLivestreamPublisher',
+          ),
+          e2ee: any(named: 'e2ee'),
+        ),
+      );
+    });
+
+    test(
+      'consumeAndAcceptActiveCall ends the native call when connecting fails',
+      () async {
+        when(
+          () => fixture.client.connectUser(
+            any(),
+            includeUserDetails: any(named: 'includeUserDetails'),
+          ),
+        ).thenAnswer((_) async => failureWithError('offline'));
+        nativeCallAccepted();
+
+        final accepted = await ringing().consumeAndAcceptActiveCall();
+
+        expect(accepted, isFalse);
+        verify(() => push.endCallByCid(cid)).called(1);
+        verifyNever(() => fixture.client.getCall(callCid: callCid));
+        verifyNever(() => fixture.client.acceptCall(cid: any(named: 'cid')));
+      },
+    );
+
+    test('two accepts at once accept the call once', () async {
+      final accepting = Completer<Result<None>>();
+      when(
+        () => fixture.client.acceptCall(cid: any(named: 'cid')),
+      ).thenAnswer((_) => accepting.future);
+      ring();
+      ringing().observeCallAcceptRingingEvent();
+
+      accept();
+      accept();
+      await pumpEventQueue();
+      verify(() => fixture.client.acceptCall(cid: callCid)).called(1);
+
+      accepting.complete(const Result.success(none));
+      await pumpEventQueue();
+      verifyNever(() => fixture.client.acceptCall(cid: callCid));
+    });
+
+    test('an accept on Android while the app is detached is ignored', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      (fixture.streamVideo.state as MutableClientState)
+              .appLifecycleState
+              .value =
+          LifecycleState.detached;
+      ring();
+      ringing().observeCallAcceptRingingEvent();
+
+      accept();
+      await pumpEventQueue();
+
+      verifyNever(() => fixture.client.acceptCall(cid: any(named: 'cid')));
     });
 
     test('a call accepted elsewhere on this client is handed over', () async {
