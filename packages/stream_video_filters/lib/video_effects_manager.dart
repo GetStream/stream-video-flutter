@@ -222,6 +222,45 @@ class StreamVideoEffectsManager {
     return trackId;
   }
 
+  /// Unregisters every built-in effect processor (blur, full-frame blur and
+  /// image backgrounds) registered natively by this plugin so it can be
+  /// deallocated, and resets the registration bookkeeping so the processors
+  /// are registered again on the next apply.
+  ///
+  /// Custom effects registered through [applyCustomEffect] are owned by the
+  /// integrator's own native code and are left untouched.
+  ///
+  /// Call this once filters are no longer needed (for example when the call
+  /// ends). Any effect still attached to the local video track is detached
+  /// first so the processors can actually be released.
+  Future<void> unregisterAllFilters() async {
+    if (!(await isSupported())) {
+      return;
+    }
+
+    _appliedVideoEffects = [];
+    await _localVideoTrackSubscription?.cancel();
+    _localVideoTrackSubscription = null;
+
+    // Detach before removing from the registry: the native effect chain holds
+    // strong references to the processors, so without this they would keep
+    // running (and stay alive) while appliedVideoEffects reports nothing.
+    final trackId = await _getTrackId();
+    if (trackId != null) {
+      await rtc.setVideoEffects(trackId, names: []);
+    }
+
+    // Reset the shared flags before the native call so another manager that
+    // applies a filter meanwhile re-registers instead of trusting a processor
+    // that is about to be removed. Platform-channel calls are processed in
+    // order, so its register lands after this unregister.
+    isBlurRegistered = false;
+    isFullFrameBlurRegistered = false;
+    isImageRegistered.clear();
+
+    await StreamVideoFilters().unregisterAllFilters();
+  }
+
   Future<void> dispose() async {
     await _localVideoTrackSubscription?.cancel();
     _localVideoTrackSubscription = null;
