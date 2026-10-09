@@ -52,6 +52,7 @@ import 'push_notification/push_notification_manager.dart';
 import 'retry/retry_policy.dart';
 import 'ring_state_polling_settings.dart';
 import 'ringing/ringing_call_coordinator.dart';
+import 'ringing/ringing_call_coordinator_impl.dart';
 import 'telemetry/client_event_reporter.dart';
 import 'telemetry/client_event_transport.dart';
 import 'token/token.dart';
@@ -397,7 +398,9 @@ class StreamVideo extends Disposable {
 
   /// Handles ringing calls: the incoming ring, the native call screen's
   /// actions, the ringing pushes, and the auto-reject of an unanswered call.
-  late final RingingCallCoordinator ringing = RingingCallCoordinator(
+  RingingCallCoordinator get ringing => _ringing;
+
+  late final _ringing = RingingCallCoordinatorImpl(
     state: _state,
     client: _client,
     pushNotificationManager: () => pushNotificationManager,
@@ -449,7 +452,7 @@ class StreamVideo extends Disposable {
     },
     onDisconnected: () async {
       _subscriptions.cancelAll();
-      ringing.clear();
+      _ringing.clear();
       await _state.clear();
     },
   );
@@ -488,7 +491,7 @@ class StreamVideo extends Disposable {
     // push in the background must not stop the next one.
     await _connection.dispose();
 
-    ringing.dispose();
+    _ringing.dispose();
 
     _subscriptions.cancelAll();
     await pushNotificationManager?.dispose();
@@ -502,7 +505,7 @@ class StreamVideo extends Disposable {
   Set<Call> _trackedCalls() {
     final calls = LinkedHashSet<Call>.identity()
       ..addAll(_state.activeCalls.value)
-      ..addAll(ringing.ringingCalls)
+      ..addAll(_ringing.ringingCalls)
       ..addAll(_state.watchedCalls.value);
     if (_state.incomingCall.value case final call?) calls.add(call);
     if (_state.outgoingCall.value case final call?) calls.add(call);
@@ -526,7 +529,7 @@ class StreamVideo extends Disposable {
 
   void _onEvent(CoordinatorEvent event) {
     _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
-    if (ringing.handleCoordinatorEvent(event)) {
+    if (_ringing.handleCoordinatorEvent(event)) {
       return;
     } else {
       _connection.handleEvent(event);
