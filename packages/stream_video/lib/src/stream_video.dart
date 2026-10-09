@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
+import 'package:rxdart/rxdart.dart' show CompositeSubscription;
 import 'package:stream_core/stream_core.dart' hide LifecycleState;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
@@ -12,6 +13,7 @@ import '../globals.dart';
 import '../open_api/video/coordinator/api.dart' hide User;
 import 'audio_processing/audio_processor.dart';
 import 'call/call.dart';
+import 'call/call_ringing_state.dart';
 import 'call/call_type.dart';
 import 'coordinator/coordinator_client.dart';
 import 'coordinator/models/coordinator_events.dart';
@@ -36,6 +38,7 @@ import 'logger/logger_api.dart';
 import 'logger/stream_log.dart';
 import 'models/audio_configuration_policy.dart';
 import 'models/call_cid.dart';
+import 'models/call_metadata.dart';
 import 'models/call_preferences.dart';
 import 'models/call_ringing_data.dart';
 import 'models/multi_call_audio_policy.dart';
@@ -46,9 +49,9 @@ import 'models/user.dart';
 import 'models/user_info.dart';
 import 'network_monitor_settings.dart';
 import 'push_notification/push_notification_manager.dart';
-import 'ringing/ringing_call_coordinator.dart';
 import 'retry/retry_policy.dart';
 import 'ring_state_polling_settings.dart';
+import 'ringing/ringing_call_coordinator.dart';
 import 'telemetry/client_event_reporter.dart';
 import 'telemetry/client_event_transport.dart';
 import 'token/token.dart';
@@ -392,7 +395,7 @@ class StreamVideo extends Disposable {
   late final RingingCallCoordinator ringing = RingingCallCoordinator(
     state: _state,
     client: _client,
-    pushNotificationManager: pushNotificationManager,
+    pushNotificationManager: () => pushNotificationManager,
     options: _options,
     makeRingingCall: _makeCallFromRinging,
     ensureConnected: connect,
@@ -747,6 +750,109 @@ class StreamVideo extends Disposable {
     _logger.v(() => '[listRecordings] result: $result');
     return result;
   }
+
+  /// Forwards to [RingingCallCoordinator.onRingingEvent].
+  @Deprecated('Use ringing.onRingingEvent instead.')
+  StreamSubscription<T>? onRingingEvent<T extends RingingEvent>(
+    void Function(T event)? onEvent,
+  ) => ringing.onRingingEvent<T>(onEvent);
+
+  /// Forwards to [RingingCallCoordinator.consumeAndAcceptActiveCall].
+  @Deprecated('Use ringing.consumeAndAcceptActiveCall instead.')
+  Future<bool> consumeAndAcceptActiveCall({
+    void Function(Call)? onCallAccepted,
+    CallPreferences? callPreferences,
+  }) => ringing.consumeAndAcceptActiveCall(
+    onCallAccepted: onCallAccepted,
+    callPreferences: callPreferences,
+  );
+
+  /// Forwards to [RingingCallCoordinator.observeCoreRingingEvents].
+  @Deprecated('Use ringing.observeCoreRingingEvents instead.')
+  CompositeSubscription observeCoreRingingEvents({
+    void Function(Call)? onCallAccepted,
+    CallPreferences? acceptCallPreferences,
+  }) => ringing.observeCoreRingingEvents(
+    onCallAccepted: onCallAccepted,
+    acceptCallPreferences: acceptCallPreferences,
+  );
+
+  /// Forwards to
+  /// [RingingCallCoordinator.observeCoreRingingEventsForBackground].
+  @Deprecated('Use ringing.observeCoreRingingEventsForBackground instead.')
+  CompositeSubscription observeCoreRingingEventsForBackground() =>
+      ringing.observeCoreRingingEventsForBackground();
+
+  /// Forwards to [RingingCallCoordinator.observeCallAcceptRingingEvent].
+  @Deprecated('Use ringing.observeCallAcceptRingingEvent instead.')
+  StreamSubscription<ActionCallAccept>? observeCallAcceptRingingEvent({
+    void Function(Call)? onCallAccepted,
+    CallPreferences? acceptCallPreferences,
+  }) => ringing.observeCallAcceptRingingEvent(
+    onCallAccepted: onCallAccepted,
+    acceptCallPreferences: acceptCallPreferences,
+  );
+
+  /// Forwards to [RingingCallCoordinator.observeCallIncomingRingingEvent].
+  @Deprecated('Use ringing.observeCallIncomingRingingEvent instead.')
+  StreamSubscription<ActionCallIncoming>? observeCallIncomingRingingEvent() =>
+      ringing.observeCallIncomingRingingEvent();
+
+  /// Forwards to [RingingCallCoordinator.observeCallDeclinedRingingEvent].
+  @Deprecated('Use ringing.observeCallDeclinedRingingEvent instead.')
+  StreamSubscription<ActionCallDecline>? observeCallDeclinedRingingEvent() =>
+      ringing.observeCallDeclinedRingingEvent();
+
+  /// Forwards to [RingingCallCoordinator.observeCallEndedRingingEvent].
+  @Deprecated('Use ringing.observeCallEndedRingingEvent instead.')
+  StreamSubscription<ActionCallEnded>? observeCallEndedRingingEvent() =>
+      ringing.observeCallEndedRingingEvent();
+
+  /// Forwards to [RingingCallCoordinator.verifyDisplayedIncomingCalls].
+  @Deprecated('Use ringing.verifyDisplayedIncomingCalls instead.')
+  Future<void> verifyDisplayedIncomingCalls({
+    void Function(Call)? onCallAccepted,
+    CallPreferences? acceptCallPreferences,
+  }) => ringing.verifyDisplayedIncomingCalls(
+    onCallAccepted: onCallAccepted,
+    acceptCallPreferences: acceptCallPreferences,
+  );
+
+  /// Forwards to [RingingCallCoordinator.isCallAcceptedOnThisDevice].
+  @Deprecated('Use ringing.isCallAcceptedOnThisDevice instead.')
+  bool isCallAcceptedOnThisDevice(String cid) =>
+      ringing.isCallAcceptedOnThisDevice(cid);
+
+  /// Forwards to [RingingCallCoordinator.handleRingingFlowNotifications].
+  @Deprecated('Use ringing.handleRingingFlowNotifications instead.')
+  Future<bool> handleRingingFlowNotifications(
+    Map<String, dynamic> payload, {
+    bool handleMissedCall = true,
+  }) => ringing.handleRingingFlowNotifications(
+    payload,
+    handleMissedCall: handleMissedCall,
+  );
+
+  /// Forwards to [RingingCallCoordinator.getCallRingingState].
+  @Deprecated('Use ringing.getCallRingingState instead.')
+  Future<CallRingingState> getCallRingingState({
+    required StreamCallType callType,
+    required String id,
+  }) => ringing.getCallRingingState(callType: callType, id: id);
+
+  /// Forwards to [RingingCallCoordinator.consumeIncomingCall].
+  @Deprecated('Use ringing.consumeIncomingCall instead.')
+  Future<Result<Call>> consumeIncomingCall({
+    required String uuid,
+    required String cid,
+    CallPreferences? preferences,
+    CallMetadata? metadata,
+  }) => ringing.consumeIncomingCall(
+    uuid: uuid,
+    cid: cid,
+    preferences: preferences,
+    metadata: metadata,
+  );
 
   /// Disposes this client a second after the ringing flow resolves — once the
   /// user has answered, declined, or let the call time out.

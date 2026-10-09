@@ -5,6 +5,8 @@ import '../../stream_video.dart';
 import '../lifecycle/lifecycle_state.dart';
 import 'connection_state.dart';
 
+final _logger = taggedLogger(tag: 'SV:ClientState');
+
 abstract class ClientState {
   /// Returns the current user.
   User get currentUser;
@@ -114,19 +116,20 @@ class MutableClientState implements ClientState {
   @override
   final MutableStateEmitter<LifecycleState?> appLifecycleState;
 
-  /// Calls built for a ringing flow, by cid.
-  ///
-  /// Deliberately not [incomingCall]: that one is the app-facing signal for
-  /// showing an incoming call. This only exists so that every path consuming
-  /// the same ringing flow ends up with the same [Call].
+  /// Calls built for a ringing flow, by cid, so that every path consuming the
+  /// same ringing flow gets the same [Call]. Separate from [incomingCall],
+  /// which is the app-facing incoming call.
+  @internal
   final Map<String, Call> ringingCalls = {};
 
   /// Calls this device has accepted, by cid, from the moment the accept is
   /// sent to the coordinator until the call is cleaned up.
+  @internal
   final Map<String, Call> locallyAcceptedCalls = {};
 
   @override
   void markCallAcceptedOnThisDevice(StreamCallCid callCid, Call call) {
+    _logger.v(() => '[markCallAccepted] cid: $callCid');
     locallyAcceptedCalls[callCid.value] = call;
   }
 
@@ -134,6 +137,7 @@ class MutableClientState implements ClientState {
   void clearCallAcceptedOnThisDevice(StreamCallCid callCid, Call call) {
     if (!identical(locallyAcceptedCalls[callCid.value], call)) return;
     locallyAcceptedCalls.remove(callCid.value);
+    _logger.v(() => '[clearCallAccepted] cid: $callCid');
   }
 
   @override

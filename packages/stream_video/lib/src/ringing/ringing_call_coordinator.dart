@@ -58,7 +58,7 @@ class RingingCallCoordinator {
 
   final MutableClientState _state;
   final CoordinatorClient _client;
-  final PushNotificationManager? _pushNotificationManager;
+  final PushNotificationManager? Function() _pushNotificationManager;
   final StreamVideoOptions _options;
   final RingingCallFactory _makeRingingCall;
   final EnsureConnected _ensureConnected;
@@ -71,7 +71,8 @@ class RingingCallCoordinator {
 
   List<Call> get _activeCalls => _state.activeCalls.value;
 
-  /// Drops the per-connection ringing bookkeeping.
+  /// Drops the per-connection ringing bookkeeping. The auto-reject timers
+  /// keep running; [dispose] cancels them.
   @internal
   void clear() {
     _state.ringingCalls.clear();
@@ -121,7 +122,7 @@ class RingingCallCoordinator {
     // In a edge case where call with the same CID as the incoming call is also an outgoing call
     // we want to use the same Call instance.
     if (_state.outgoingCall.value?.callCid.value == cid) {
-      unawaited(_state.setIncomingCall(_state.outgoingCall.value));
+      _state.incomingCall.value = _state.outgoingCall.value;
       return;
     }
 
@@ -137,13 +138,13 @@ class RingingCallCoordinator {
       _logger.v(
         () => '[onCoordinatorEvent] reusing consumed call: ${event.data}',
       );
-      unawaited(_state.setIncomingCall(consumedCall));
+      _state.incomingCall.value = consumedCall;
       return;
     }
 
     final call = _makeRingingCall(event.data);
     _state.ringingCalls[cid] = call;
-    unawaited(_state.setIncomingCall(call));
+    _state.incomingCall.value = call;
   }
 
   /// Ends a ringing call cancelled by the caller.
@@ -178,7 +179,7 @@ class RingingCallCoordinator {
   StreamSubscription<T>? onRingingEvent<T extends RingingEvent>(
     void Function(T event)? onEvent,
   ) {
-    final manager = _pushNotificationManager;
+    final manager = _pushNotificationManager();
     if (manager == null) {
       _logger.e(() => '[onRingingEvent] rejected (no manager)');
       return null;
@@ -195,7 +196,7 @@ class RingingCallCoordinator {
     void Function(Call)? onCallAccepted,
     CallPreferences? callPreferences,
   }) async {
-    final allCalls = await _pushNotificationManager?.activeCalls();
+    final allCalls = await _pushNotificationManager()?.activeCalls();
 
     // Only consume calls that the user explicitly accepted via the native notification UI.
     final calls = allCalls?.where((c) => c.isAccepted).toList();
@@ -261,6 +262,8 @@ class RingingCallCoordinator {
     return ringingEventSubscriptions;
   }
 
+  /// Accepts the ringing call when the user accepts it on the native call
+  /// screen, then joins it. [onCallAccepted] gets the accepted call.
   StreamSubscription<ActionCallAccept>? observeCallAcceptRingingEvent({
     void Function(Call)? onCallAccepted,
     CallPreferences? acceptCallPreferences,
@@ -279,14 +282,20 @@ class RingingCallCoordinator {
     });
   }
 
+  /// Checks that an incoming call the native call screen shows is still
+  /// ringing, ending it there if not, and starts its auto-reject timer.
   StreamSubscription<ActionCallIncoming>? observeCallIncomingRingingEvent() {
     return onRingingEvent<ActionCallIncoming>(_onCallIncoming);
   }
 
+  /// Rejects the ringing call when the user declines it on the native call
+  /// screen.
   StreamSubscription<ActionCallDecline>? observeCallDeclinedRingingEvent() {
     return onRingingEvent<ActionCallDecline>(_onCallDecline);
   }
 
+  /// Leaves or rejects the call when the user ends it on the native call
+  /// screen.
   StreamSubscription<ActionCallEnded>? observeCallEndedRingingEvent() {
     return onRingingEvent<ActionCallEnded>(_onCallEnded);
   }
@@ -317,7 +326,7 @@ class RingingCallCoordinator {
   /// could not be set up, so they are not left on an answered call screen with
   /// nothing behind it.
   Future<void> _endUnjoinableNativeCall(String cid) async {
-    await _pushNotificationManager?.endCallByCid(cid);
+    await _pushNotificationManager()?.endCallByCid(cid);
   }
 
   /// Consumes and accepts the call the user answered on the native call
@@ -437,7 +446,7 @@ class RingingCallCoordinator {
     void Function(Call)? onCallAccepted,
     CallPreferences? acceptCallPreferences,
   }) async {
-    final manager = _pushNotificationManager;
+    final manager = _pushNotificationManager();
     if (manager == null) return;
 
     final displayedCalls = await manager.activeCalls();
@@ -559,7 +568,7 @@ class RingingCallCoordinator {
 
         // Silently, as the ringing flow is already resolved and the native end
         // must not be reported back as a decline/ended action.
-        await _pushNotificationManager?.endCallByCid(cid, silent: true);
+        await _pushNotificationManager()?.endCallByCid(cid, silent: true);
 
         _cancelIncomingAutoRejectTimerByCid(cid);
         await _resolveStaleIncomingCall(cid, ringingState);
@@ -634,7 +643,7 @@ class RingingCallCoordinator {
 
     // The native call is marked as accepted from the moment it's answered on the
     // native call screen, before the call is joined in the app.
-    final nativeCalls = await _pushNotificationManager?.activeCalls();
+    final nativeCalls = await _pushNotificationManager()?.activeCalls();
     return nativeCalls?.any(
           (call) => call.callCid == cid && call.isAccepted,
         ) ??
@@ -773,7 +782,7 @@ class RingingCallCoordinator {
     bool handleMissedCall = true,
   }) async {
     _logger.d(() => '[handleRingingFlowNotifications] payload: $payload');
-    final manager = _pushNotificationManager;
+    final manager = _pushNotificationManager();
     if (manager == null) {
       _logger.e(() => '[handleRingingFlowNotifications] rejected (no manager)');
       return false;
@@ -848,7 +857,8 @@ class RingingCallCoordinator {
     }
   }
 
-  /// Reads whether the call is still ringing for the current user.
+  /// Reads the call's ringing state for the current user: still ringing,
+  /// accepted, rejected or ended. It does not ring the call.
   ///
   /// A call that can't be read counts as [CallRingingState.ended].
   Future<CallRingingState> getCallRingingState({
@@ -877,7 +887,8 @@ class RingingCallCoordinator {
     );
   }
 
-  /// Consumes incoming voIP call and returns the [Call] object.
+  /// Returns the [Call] for an incoming VoIP call. A [Call] already built for
+  /// the same ringing flow is reused, with [preferences] applied to it.
   ///
   /// Pass [metadata] when the caller already fetched the call state to avoid
   /// requesting it a second time.
@@ -888,7 +899,7 @@ class RingingCallCoordinator {
     CallMetadata? metadata,
   }) async {
     _logger.d(() => '[consumeIncomingCall] uuid: $uuid, cid: $cid');
-    final manager = _pushNotificationManager;
+    final manager = _pushNotificationManager();
     if (manager == null) {
       return const Result.failure(
         StreamVideoException(
