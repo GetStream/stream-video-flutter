@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:stream_core_flutter/core.dart';
 
+import '../../theme/components/adaptive_menu_anchor_theme.dart';
 import 'stream_context_menu_anchor.dart';
 import 'stream_context_menu_heading.dart';
 import 'stream_radio_indicator.dart';
@@ -243,6 +244,9 @@ class StreamAdaptiveMenuAnchor extends StatefulWidget {
   /// whose rows carry something bigger needs a taller one. The sheet's rows
   /// are `StreamListTile`s and are already sized for it, so this does not
   /// apply to them.
+  ///
+  /// Merged over [StreamAdaptiveMenuAnchorStyle.menuItemStyle], so a value set
+  /// here wins.
   final StreamContextMenuActionStyle? menuItemStyle;
 
   /// How high the anchored menu floats above the page.
@@ -393,6 +397,15 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
     return null;
   }
 
+  /// The anchored rows' style: the theme's, with
+  /// [StreamAdaptiveMenuAnchor.menuItemStyle] on top.
+  StreamContextMenuActionStyle? _menuItemStyle(BuildContext context) {
+    final themed = StreamAdaptiveMenuAnchorTheme.of(
+      context,
+    ).style?.menuItemStyle;
+    return themed?.merge(widget.menuItemStyle) ?? widget.menuItemStyle;
+  }
+
   Future<void> _openSheet() async {
     setState(() => _isOpen = true);
     await showStreamSheet<void>(
@@ -454,7 +467,7 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
     return StreamContextMenuActionTheme(
       data: StreamContextMenuActionThemeData(
         style: StreamContextMenuAnchor.defaultActionStyle(context)
-            .merge(widget.menuItemStyle)
+            .merge(_menuItemStyle(context))
             .merge(
               StreamContextMenuActionStyle(
                 backgroundColor: WidgetStatePropertyAll(
@@ -496,7 +509,7 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
             StreamMenuDirection.down => const Offset(0, 8),
             StreamMenuDirection.up => const Offset(0, -8),
           },
-      actionStyle: widget.menuItemStyle,
+      actionStyle: _menuItemStyle(context),
       elevation: widget.menuElevation,
       // StreamContextMenu is an IntrinsicWidth, so a tight width overrides
       // what its content would otherwise ask for — including the 200px
@@ -593,62 +606,78 @@ class _MenuSheet extends StatelessWidget {
       children: [
         if (title != null) StreamSheetHeader(title: Text(title)),
         Flexible(
-          child: ListView(
-            // The sheet hands this down so that dragging the list past its
-            // top drags the sheet instead of overscrolling.
-            controller: scrollController,
-            shrinkWrap: true,
-            children: [
-              for (final section in sections) ...[
-                // See the anchored rows: a heading needs something under it.
-                if (!section.isEmpty)
-                  if (section.heading case final heading?)
-                    Padding(
-                      // Everything in the sheet is inset by spacing.xxs so a
-                      // selected row's rounded fill has room to breathe rather
-                      // than running into the sheet's edges. A heading insets
-                      // itself by spacing.xs and a list tile by spacing.sm, so the
-                      // heading takes the larger outer pad and the two line up.
-                      padding: EdgeInsets.symmetric(horizontal: spacing.xs),
-                      child: _StreamAdaptiveMenuAnchorState.sectionHeading(
-                        context,
-                        label: heading,
-                        collapsible: section.collapsible,
-                        collapsed: isCollapsed(section),
-                        onToggle: () => onToggleCollapsed(section),
-                      ),
-                    ),
-                if (!isCollapsed(section))
-                  if (section.content case final content?)
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
-                      child: content(context, handle),
-                    ),
-                if (!isCollapsed(section))
-                  for (final option in section.options)
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
-                      child: StreamListTile(
-                        leading: _StreamAdaptiveMenuAnchorState._leadingOf(
-                          option,
+          child: StreamListTileTheme(
+            // The design's mobile list item is 48 tall: the tile's 40 minimum
+            // plus spacing.xxs above and below. Set here rather than left to
+            // the app's list tile theme, which sizes list tiles in general.
+            data:
+                StreamListTileThemeData(
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: spacing.sm,
+                    vertical: spacing.xxs,
+                  ),
+                ).merge(
+                  StreamAdaptiveMenuAnchorTheme.of(
+                    context,
+                  ).style?.sheetTileStyle,
+                ),
+            child: ListView(
+              // The sheet hands this down so that dragging the list past its
+              // top drags the sheet instead of overscrolling.
+              controller: scrollController,
+              shrinkWrap: true,
+              children: [
+                for (final section in sections) ...[
+                  // See the anchored rows: a heading needs something under it.
+                  if (!section.isEmpty)
+                    if (section.heading case final heading?)
+                      Padding(
+                        // Everything in the sheet is inset by spacing.xxs so a
+                        // selected row's rounded fill has room to breathe rather
+                        // than running into the sheet's edges. A heading insets
+                        // itself by spacing.xs and a list tile by spacing.sm, so the
+                        // heading takes the larger outer pad and the two line up.
+                        padding: EdgeInsets.symmetric(horizontal: spacing.xs),
+                        child: _StreamAdaptiveMenuAnchorState.sectionHeading(
+                          context,
+                          label: heading,
+                          collapsible: section.collapsible,
+                          collapsed: isCollapsed(section),
+                          onToggle: () => onToggleCollapsed(section),
                         ),
-                        title: Text(
-                          option.label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: option.trailing,
-                        selected: option.selected ?? false,
-                        // See the anchored rows: enabled is the look, not the
-                        // interactivity. A null onTap already makes the row
-                        // inert and gives it a non-interactive cursor.
-                        onTap: option.onSelected == null
-                            ? null
-                            : () => onSelected(option),
                       ),
-                    ),
+                  if (!isCollapsed(section))
+                    if (section.content case final content?)
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
+                        child: content(context, handle),
+                      ),
+                  if (!isCollapsed(section))
+                    for (final option in section.options)
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
+                        child: StreamListTile(
+                          leading: _StreamAdaptiveMenuAnchorState._leadingOf(
+                            option,
+                          ),
+                          title: Text(
+                            option.label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          trailing: option.trailing,
+                          selected: option.selected ?? false,
+                          // See the anchored rows: enabled is the look, not the
+                          // interactivity. A null onTap already makes the row
+                          // inert and gives it a non-interactive cursor.
+                          onTap: option.onSelected == null
+                              ? null
+                              : () => onSelected(option),
+                        ),
+                      ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ],

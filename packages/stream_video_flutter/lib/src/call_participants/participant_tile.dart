@@ -898,47 +898,54 @@ class _MoreMenuButtonState extends State<_MoreMenuButton> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamContextMenuAnchor(
-      controller: _controller,
-      alignmentOffset: Offset(0, context.streamSpacing.xxs),
-      menuChildren: [
-        // Destructive entries go below the rest, whatever order the caller
-        // listed them in, so "Remove" never lands between two ordinary items.
-        // A stable partition, so the relative order within each group is the
-        // caller's.
-        for (final action in [
-          ...widget.actions.where((it) => !it.isDestructive),
-          ...widget.actions.where((it) => it.isDestructive),
-        ])
-          StreamContextMenuAction<void>(
-            enabled: action.enabled,
-            isDestructive: action.isDestructive,
-            leading: Icon(action.icon),
-            // The menu sizes itself to its widest item, so a long label has to
-            // truncate rather than stretch the panel.
-            label: Text(
-              action.label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            onTap: () {
-              // A MenuAnchor panel is an overlay rather than a route, so
-              // selecting an item does not dismiss it on its own.
-              _controller.close();
-              action.onPressed();
-            },
-          ),
-      ],
-      builder: (context, controller, child) => StreamTapTargetPadding(
+    // The tap target pads the anchor from outside, so the anchor is the button
+    // as drawn and the menu lines up with its edge. The merge lifts the
+    // button's semantics node up to the full tap target.
+    return MergeSemantics(
+      child: StreamTapTargetPadding(
         minSize: const Size.square(kMinInteractiveDimension),
-        alignment: AlignmentDirectional.topStart,
-        child: StreamButton.icon(
-          style: .secondary,
-          size: .small,
-          themeStyle: widget.style?.moreButtonStyle,
-          icon: Icon(context.streamIcons.moreHorizontal),
-          onPressed: () =>
-              controller.isOpen ? controller.close() : controller.open(),
+        child: StreamContextMenuAnchor(
+          controller: _controller,
+          alignmentOffset: Offset(0, context.streamSpacing.xs),
+          menuChildren: [
+            // Destructive entries go below the rest, whatever order the caller
+            // listed them in, so "Remove" never lands between two ordinary items.
+            // A stable partition, so the relative order within each group is the
+            // caller's.
+            for (final action in [
+              ...widget.actions.where((it) => !it.isDestructive),
+              ...widget.actions.where((it) => it.isDestructive),
+            ])
+              StreamContextMenuAction<void>(
+                enabled: action.enabled,
+                isDestructive: action.isDestructive,
+                leading: Icon(action.icon),
+                // The menu sizes itself to its widest item, so a long label has to
+                // truncate rather than stretch the panel.
+                label: Text(
+                  action.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                onTap: () {
+                  // A MenuAnchor panel is an overlay rather than a route, so
+                  // selecting an item does not dismiss it on its own.
+                  _controller.close();
+                  action.onPressed();
+                },
+              ),
+          ],
+          builder: (context, controller, child) => StreamButton.icon(
+            style: .secondary,
+            size: .small,
+            themeStyle:
+                (widget.style?.moreButtonStyle ??
+                        const StreamButtonThemeStyle())
+                    .copyWith(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+            icon: Icon(context.streamIcons.moreHorizontal),
+            onPressed: () =>
+                controller.isOpen ? controller.close() : controller.open(),
+          ),
         ),
       ),
     );
@@ -1035,7 +1042,7 @@ class _StreamParticipantTileStyleDefaults extends StreamParticipantTileStyle {
   double get toolbarSpacing => _spacing.xxs;
 
   @override
-  EdgeInsetsGeometry get topToolbarPadding => EdgeInsets.all(_spacing.xxs);
+  EdgeInsetsGeometry get topToolbarPadding => EdgeInsets.zero;
 
   @override
   double get reactionSize => 48;
