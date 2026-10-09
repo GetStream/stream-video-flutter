@@ -27,6 +27,7 @@ import '../../webrtc/rtc_media_device/device_enumeration_trigger.dart';
 import '../../webrtc/rtc_media_device/rtc_media_device.dart';
 import '../../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../../webrtc/rtc_track/rtc_track.dart';
+import '../../internal/_background_mute_policy.dart';
 import '../call_connect_options.dart';
 import '../session/call_session.dart';
 import '../state/call_state_notifier.dart';
@@ -44,6 +45,7 @@ class LocalMediaController {
     required this._rtcMediaDeviceNotifier,
     required this._audioConfigurationPolicy,
     required this._muteVideoWhenInBackground,
+    required this._muteAudioWhenInBackground,
     required this._onMicrophoneMuted,
     required this._logger,
   });
@@ -55,11 +57,17 @@ class LocalMediaController {
   final RtcMediaDeviceNotifier _rtcMediaDeviceNotifier;
   final AudioConfigurationPolicy Function() _audioConfigurationPolicy;
   final bool Function() _muteVideoWhenInBackground;
+  final bool Function() _muteAudioWhenInBackground;
   final Future<void> Function(bool muted) _onMicrophoneMuted;
   final TaggedLogger _logger;
 
   final _multitaskingCameraLock = Lock();
   final _sfuStatsTimers = <CancelableOperation<void>>{};
+
+  /// Whether going to the background turned the camera or microphone off,
+  /// so coming back turns it on again.
+  bool _cameraMutedInBackground = false;
+  bool _microphoneMutedInBackground = false;
 
   CallConnectOptions _connectOptions = const CallConnectOptions();
   CallConnectOptions? _connectOptionsOverride;
@@ -1032,5 +1040,58 @@ class LocalMediaController {
     }
 
     return result;
+  }
+
+  /// Whether the capture session in use supports camera access while
+  /// multitasking, or `null` when it could not be read.
+  Future<bool?> _multitaskingCameraAccessSupported() async {
+    if (!CurrentPlatform.isIos) return null;
+
+    try {
+      return await rtc.Helper.isIOSMultitaskingCameraAccessSupported();
+    } catch (e) {
+      _logger.w(() => '[multitaskingCameraAccessSupported] failed: $e');
+      return null;
+    }
+  }
+
+  /// Turns the camera and microphone off as the app goes to the background,
+  /// as the options and the platform ask.
+  Future<void> onAppPaused() async {
+    final localParticipant = _state.localParticipant;
+    final isVideoEnabled = localParticipant?.isVideoEnabled ?? false;
+    final isAudioEnabled = localParticipant?.isAudioEnabled ?? false;
+
+    if (shouldMuteCameraInBackground(
+      isVideoEnabled: isVideoEnabled,
+      muteVideoWhenInBackground: _muteVideoWhenInBackground(),
+      multitaskingCameraAccessSupported: isVideoEnabled
+          ? await _multitaskingCameraAccessSupported()
+          : null,
+      platform: CurrentPlatform.type,
+    )) {
+      await setCameraEnabled(enabled: false);
+      _cameraMutedInBackground = true;
+      _logger.v(() => 'Muted camera track since app was paused.');
+    }
+    if (_muteAudioWhenInBackground() && isAudioEnabled) {
+      await setMicrophoneEnabled(enabled: false);
+      _microphoneMutedInBackground = true;
+      _logger.v(() => 'Muted audio track since app was paused.');
+    }
+  }
+
+  /// Turns on again what [onAppPaused] turned off.
+  Future<void> onAppResumed() async {
+    if (_cameraMutedInBackground) {
+      await setCameraEnabled(enabled: true);
+      _cameraMutedInBackground = false;
+      _logger.v(() => 'Unmuted camera track since app was unpaused.');
+    }
+    if (_microphoneMutedInBackground) {
+      await setMicrophoneEnabled(enabled: true);
+      _microphoneMutedInBackground = false;
+      _logger.v(() => 'Unmuted audio track since app was unpaused.');
+    }
   }
 }

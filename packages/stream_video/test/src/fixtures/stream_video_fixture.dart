@@ -49,6 +49,8 @@ class StreamVideoFixture {
     when(client.disconnectUser).thenAnswer(
       (_) async => const Result.success(none),
     );
+    // Connected unless a test says otherwise; a resume reads it.
+    when(() => client.isConnected).thenReturn(true);
 
     streamVideo = StreamVideo.forTesting(
       'test-api-key',

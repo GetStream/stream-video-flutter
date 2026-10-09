@@ -6,7 +6,7 @@ import 'dart:math';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_core/stream_core.dart';
+import 'package:stream_core/stream_core.dart' hide LifecycleState;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
@@ -19,6 +19,7 @@ import '../coordinator/coordinator_client.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../coordinator/models/coordinator_models.dart';
 import '../errors/stream_video_exception.dart';
+import '../lifecycle/lifecycle_state.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../logger/stream_log.dart';
 import '../models/models.dart';
@@ -105,6 +106,7 @@ const _idConnect = 6;
 const _idReconnect = 9;
 const _idNativeWebRtc = 10;
 const _idAudioPlayback = 11;
+const _idAppLifecycle = 12;
 
 const _tag = 'SV:Call';
 int _callSeq = 1;
@@ -311,6 +313,8 @@ class Call {
         _streamVideo.options.audioConfigurationPolicy,
     muteVideoWhenInBackground: () =>
         _streamVideo.options.muteVideoWhenInBackground,
+    muteAudioWhenInBackground: () =>
+        _streamVideo.options.muteAudioWhenInBackground,
     onMicrophoneMuted: (muted) async => _streamVideo.pushNotificationManager
         ?.setCallMutedByCid(callCid.value, muted),
     logger: _logger,
@@ -658,6 +662,7 @@ class Call {
       _observeUserId();
       _observeNativeWebRtcEventStream();
       _observeWebAudioPlaybackBlocked();
+      _observeAppLifecycle();
 
       _logger.v(() => '[_init] initialized');
       _initialized = true;
@@ -683,6 +688,30 @@ class Call {
         _stateManager.rtcSetWebAudioPlaybackBlocked(isBlocked: blocked);
       }),
     );
+  }
+
+  /// Mutes and restores this call's media as the app goes to the background
+  /// and comes back, while the call is active.
+  void _observeAppLifecycle() {
+    _subscriptions.add(
+      _idAppLifecycle,
+      _streamVideo.state.appLifecycleState.listen(_onAppLifecycleState),
+    );
+  }
+
+  Future<void> _onAppLifecycleState(LifecycleState? state) async {
+    if (state == null || !isActiveCall) return;
+    try {
+      if (state.isPaused) {
+        traceSessionLog('device.stateChange', 'paused');
+        await _media.onAppPaused();
+      } else if (state.isResumed) {
+        traceSessionLog('device.stateChange', 'resumed');
+        await _media.onAppResumed();
+      }
+    } catch (e, stk) {
+      _logger.e(() => '[onAppLifecycleState] $state failed: $e\n$stk');
+    }
   }
 
   void _observeEvents() {

@@ -22,10 +22,10 @@ import 'core/client_state.dart';
 import 'core/coordinator_connection.dart';
 import 'core/internet_connection_network_state_provider.dart';
 import 'errors/stream_video_exception.dart';
-import 'internal/_background_mute_policy.dart';
 import 'internal/_instance_holder.dart';
 import 'latency/latency_service.dart';
 import 'latency/latency_settings.dart';
+import 'lifecycle/app_lifecycle_controller.dart';
 import 'lifecycle/lifecycle_state.dart';
 import 'lifecycle/lifecycle_utils.dart'
     if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart'
@@ -388,8 +388,22 @@ class StreamVideo extends Disposable {
     return tokenResult.data;
   }
 
-  final Map<String, bool> _mutedCameraByStateChange = {};
-  final Map<String, bool> _mutedAudioByStateChange = {};
+  /// Records the app's lifecycle, and closes the connection in the
+  /// background while no call is active.
+  late final _lifecycle = AppLifecycleController(
+    state: _state,
+    keepConnectionAliveInBackground: () =>
+        _options.keepConnectionsAliveWhenInBackground,
+    isConnected: () => _client.isConnected,
+    closeConnection: () async {
+      _subscriptions.cancel(_idEvents);
+      await _client.closeConnection();
+    },
+    openConnection: () async {
+      await _client.openConnection();
+      _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
+    },
+  );
 
   /// Handles ringing calls: the incoming ring, the native call screen's
   /// actions, the ringing pushes, and the auto-reject of an unanswered call.
@@ -447,7 +461,9 @@ class StreamVideo extends Disposable {
       _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
       _subscriptions.add(
         _idAppState,
-        (_appStateOverride?.call() ?? lifecycle.appState).listen(_onAppState),
+        (_appStateOverride?.call() ?? lifecycle.appState).listen(
+          _lifecycle.onAppState,
+        ),
       );
     },
     onDisconnected: () async {
@@ -558,96 +574,6 @@ class StreamVideo extends Disposable {
         }
       }),
     );
-  }
-
-  /// Whether the capture session in use supports camera access while
-  /// multitasking, or `null` when it could not be read.
-  Future<bool?> _multitaskingCameraAccessSupported() async {
-    if (!CurrentPlatform.isIos) return null;
-
-    try {
-      return await rtc.Helper.isIOSMultitaskingCameraAccessSupported();
-    } catch (e) {
-      _logger.w(() => '[multitaskingCameraAccessSupported] failed: $e');
-      return null;
-    }
-  }
-
-  Future<void> _onAppState(LifecycleState state) async {
-    _logger.d(() => '[onAppState] state: $state');
-    try {
-      final activeCalls = _state.activeCalls.value;
-      _state.appLifecycleState.value = state;
-
-      if (state.isPaused) {
-        for (final activeCall in activeCalls) {
-          activeCall.traceSessionLog('device.stateChange', 'paused');
-        }
-
-        // Handle app paused state
-        if (activeCalls.isEmpty &&
-            !_options.keepConnectionsAliveWhenInBackground) {
-          _logger.i(() => '[onAppState] close connection');
-          _subscriptions.cancel(_idEvents);
-          await _client.closeConnection();
-        } else if (activeCalls.isNotEmpty) {
-          final multitaskingCameraAccessSupported =
-              await _multitaskingCameraAccessSupported();
-
-          for (final activeCall in activeCalls) {
-            final callState = activeCall.state.value;
-            final isVideoEnabled =
-                callState.localParticipant?.isVideoEnabled ?? false;
-            final isAudioEnabled =
-                callState.localParticipant?.isAudioEnabled ?? false;
-
-            if (shouldMuteCameraInBackground(
-              isVideoEnabled: isVideoEnabled,
-              muteVideoWhenInBackground: _options.muteVideoWhenInBackground,
-              multitaskingCameraAccessSupported:
-                  multitaskingCameraAccessSupported,
-              platform: CurrentPlatform.type,
-            )) {
-              await activeCall.setCameraEnabled(enabled: false);
-              _mutedCameraByStateChange[activeCall.callCid.value] = true;
-              _logger.v(() => 'Muted camera track since app was paused.');
-            }
-            if (_options.muteAudioWhenInBackground && isAudioEnabled) {
-              await activeCall.setMicrophoneEnabled(enabled: false);
-              _mutedAudioByStateChange[activeCall.callCid.value] = true;
-              _logger.v(() => 'Muted audio track since app was paused.');
-            }
-          }
-        }
-      } else if (state.isResumed) {
-        // Handle app resumed state
-        _logger.i(() => '[onAppState] open connection');
-        await _client.openConnection();
-        _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
-
-        for (final activeCall in activeCalls) {
-          activeCall.traceSessionLog('device.stateChange', 'resumed');
-
-          final wasCameraMuted =
-              _mutedCameraByStateChange[activeCall.callCid.value] ?? false;
-          if (wasCameraMuted) {
-            await activeCall.setCameraEnabled(enabled: true);
-            _mutedCameraByStateChange[activeCall.callCid.value] = false;
-            _logger.v(() => 'Unmuted camera track since app was unpaused.');
-          }
-
-          final wasAudioMuted =
-              _mutedAudioByStateChange[activeCall.callCid.value] ?? false;
-          if (wasAudioMuted) {
-            await activeCall.setMicrophoneEnabled(enabled: true);
-            _mutedAudioByStateChange[activeCall.callCid.value] = false;
-            _logger.v(() => 'Unmuted audio track since app was unpaused.');
-          }
-        }
-      }
-    } catch (e) {
-      _logger.e(() => '[onAppState] failed: $e');
-    }
   }
 
   StreamSubscription<Call?> listenActiveCall(
