@@ -854,13 +854,13 @@ class Call {
 
     // Optimistically mark the call as accepted
     _stateManager.lifecycleCallAccepted();
-    _streamVideo.markCallAcceptedOnThisDevice(callCid, this);
+    _streamVideo.state.markCallAcceptedOnThisDevice(callCid, this);
 
     final result = await _coordinatorClient.acceptCall(cid: state.callCid);
     if (result is Failure) {
       // Revert the optimistic acceptance so the user can retry or reject.
       _stateManager.lifecycleCallAccepted(accepted: false);
-      _streamVideo.clearCallAcceptedOnThisDevice(callCid, this);
+      _streamVideo.state.clearCallAcceptedOnThisDevice(callCid, this);
     }
 
     return result;

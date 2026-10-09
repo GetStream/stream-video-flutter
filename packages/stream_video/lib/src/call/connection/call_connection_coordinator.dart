@@ -2146,10 +2146,10 @@ class CallConnectionCoordinator {
       }
     }
 
-    client
+    client.state
       ..clearCallAcceptedOnThisDevice(_call.callCid, _call)
-      ..releaseRingingCall(_call.callCid, _call);
-    client.state.removeWatchedCall(_call);
+      ..releaseRingingCall(_call.callCid, _call)
+      ..removeWatchedCall(_call);
     if (identical(client.state.outgoingCall.value, _call)) {
       await client.state.setOutgoingCall(null);
     }
@@ -2415,8 +2415,11 @@ class CallConnectionCoordinator {
       _call.viewportVisibility.clear();
       await _call.clearE2EEManager();
     } finally {
-      _call._streamVideo.clearCallAcceptedOnThisDevice(_call.callCid, _call);
-      _call._streamVideo.releaseRingingCall(_call.callCid, _call);
+      _call._streamVideo.state.clearCallAcceptedOnThisDevice(
+        _call.callCid,
+        _call,
+      );
+      _call._streamVideo.state.releaseRingingCall(_call.callCid, _call);
       await _call._streamVideo.state.removeActiveCall(_call);
       if (_call._streamVideo.state.outgoingCall.value?.callCid ==
           _call.callCid) {

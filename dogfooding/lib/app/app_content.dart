@@ -147,7 +147,7 @@ class _StreamDogFoodingAppContentState
         if (!locator.isRegistered<StreamVideo>()) return;
 
         final streamVideo = locator.get<StreamVideo>();
-        streamVideo.consumeAndAcceptActiveCall(
+        streamVideo.ringing.consumeAndAcceptActiveCall(
           onCallAccepted: _showCallScreen,
         );
       });
@@ -162,7 +162,9 @@ class _StreamDogFoodingAppContentState
     if (CurrentPlatform.isMobile) {
       // Answered on the platform call UI (CallKit, or the Android notification).
       _compositeSubscription.add(
-        streamVideo.observeCoreRingingEvents(onCallAccepted: _showCallScreen),
+        streamVideo.ringing.observeCoreRingingEvents(
+          onCallAccepted: _showCallScreen,
+        ),
       );
     }
 
@@ -191,7 +193,9 @@ class _StreamDogFoodingAppContentState
     _compositeSubscription.add(
       FirebaseMessaging.onMessage.listen(
         (message) => unawaited(
-          StreamVideo.instance.handleRingingFlowNotifications(message.data),
+          StreamVideo.instance.ringing.handleRingingFlowNotifications(
+            message.data,
+          ),
         ),
       ),
     );

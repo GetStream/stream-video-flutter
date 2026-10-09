@@ -40,7 +40,7 @@ class _MyAppState extends State<MyApp> {
     // websocket which can receive a call when the app is open.
     if (CurrentPlatform.isMobile) {
       _compositeSubscription.add(
-        StreamVideo.instance.observeCoreRingingEvents(
+        StreamVideo.instance.ringing.observeCoreRingingEvents(
           onCallAccepted: _navigateToCall,
         ),
       );

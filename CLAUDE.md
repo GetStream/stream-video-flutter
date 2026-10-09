@@ -200,3 +200,8 @@ Flutter's defaults instead of the pinned theme, platform and locale.
   `lib/fix_data.yaml`, so `dart fix --apply` migrates call sites. A bulk `rename`
   is only safe when the old and new APIs accept the same parameters.
 - Conventional Commit titles: `feat(ui):`, `fix(llc):`, `chore(repo):`.
+- A public interface that only the SDK implements, such as
+  `RingingFlowCoordinator`, is annotated `@sealed` from `package:meta`. Not the
+  `sealed` / `final` / `base` modifiers: those are enforced per library, so the
+  implementation could not live in its own file and nothing could mock it. A
+  test mock in another package adds `// ignore: subtype_of_sealed_class`.
