@@ -151,8 +151,12 @@ class StreamVideo extends Disposable {
   }
 
   /// Creates a client unassociated with the singleton, like
-  /// [StreamVideo.create], that talks to [coordinatorClient] instead of
-  /// building one, and follows [appState] instead of the app's lifecycle.
+  /// [StreamVideo.create].
+  ///
+  /// When given, it talks to [coordinatorClient] instead of building one,
+  /// and follows the stream [appState] returns instead of the app's
+  /// lifecycle. [appState] is called on each connect, and its stream emits
+  /// nothing until the test adds a state.
   @visibleForTesting
   factory StreamVideo.forTesting(
     String apiKey, {
@@ -163,7 +167,7 @@ class StreamVideo extends Disposable {
     OnTokenUpdated? onTokenUpdated,
     PNManagerProvider? pushNotificationManagerProvider,
     CoordinatorClient? coordinatorClient,
-    Stream<LifecycleState>? appState,
+    Stream<LifecycleState> Function()? appState,
   }) {
     return StreamVideo._(
       apiKey,
@@ -187,7 +191,7 @@ class StreamVideo extends Disposable {
     OnTokenUpdated? onTokenUpdated,
     PNManagerProvider? pushNotificationManagerProvider,
     CoordinatorClient? coordinatorClient,
-    Stream<LifecycleState>? appState,
+    Stream<LifecycleState> Function()? appState,
   }) : _options = options,
        _appStateOverride = appState,
        _state = MutableClientState(user, options) {
@@ -372,7 +376,7 @@ class StreamVideo extends Disposable {
   late final CoordinatorClient _client;
 
   /// Replaces the app's lifecycle stream in tests.
-  final Stream<LifecycleState>? _appStateOverride;
+  final Stream<LifecycleState> Function()? _appStateOverride;
   late final InternetConnection _networkMonitor;
   late final PushNotificationManager? pushNotificationManager;
 
@@ -533,7 +537,7 @@ class StreamVideo extends Disposable {
       _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
       _subscriptions.add(
         _idAppState,
-        (_appStateOverride ?? lifecycle.appState).listen(_onAppState),
+        (_appStateOverride?.call() ?? lifecycle.appState).listen(_onAppState),
       );
 
       // Register device with push notification manager.

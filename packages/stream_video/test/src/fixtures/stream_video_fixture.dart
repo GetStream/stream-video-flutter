@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:mocktail/mocktail.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/src/lifecycle/lifecycle_state.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
 
-/// An unsigned JWT carrying [userId], enough for [UserToken]'s parsing.
+/// A JWT with a fake signature carrying [userId]; [UserToken] parses it
+/// without verifying.
 String fakeJwt(String userId) {
   String encode(Map<String, dynamic> json) =>
       base64Url.encode(utf8.encode(jsonEncode(json))).replaceAll('=', '');
@@ -17,14 +19,20 @@ String fakeJwt(String userId) {
   return '$header.$payload.$signature';
 }
 
-/// A [StreamVideo] on a mocked coordinator client and a lifecycle stream the
-/// test drives.
+/// Builds a [StreamVideo] on a mocked [client], and holds the [events] and
+/// [appState] the test drives it with.
+///
+/// The default options turn `autoConnect` off; options a test passes keep
+/// their own. With an [initialState], each connect first gets that state, as
+/// the app's lifecycle stream emits the current state on listen.
 class StreamVideoFixture {
   StreamVideoFixture({
     StreamVideoOptions? options,
     this.user = const User(id: 'test-user', name: 'Test User'),
     PNManagerProvider? pushNotificationManagerProvider,
+    LifecycleState? initialState,
   }) {
+    registerFallbackValue(const UserInfo(id: 'fallback'));
     when(() => client.events).thenAnswer((_) => events);
     when(
       () => client.connectUser(
@@ -49,18 +57,24 @@ class StreamVideoFixture {
       options: options ?? StreamVideoOptions(autoConnect: false),
       pushNotificationManagerProvider: pushNotificationManagerProvider,
       coordinatorClient: client,
-      appState: appState.stream,
+      appState: () => initialState == null
+          ? appState.stream
+          : appState.stream.startWith(initialState),
     );
   }
 
   final User user;
   final client = MockCoordinatorClient();
   final events = MutableSharedEmitter<CoordinatorEvent>();
+
+  /// The app states each connect listens to. Broadcast, so a reconnect can
+  /// listen again.
   final appState = StreamController<LifecycleState>.broadcast();
   late final StreamVideo streamVideo;
 
   Future<void> dispose() async {
     await streamVideo.dispose();
     await appState.close();
+    await events.close();
   }
 }
