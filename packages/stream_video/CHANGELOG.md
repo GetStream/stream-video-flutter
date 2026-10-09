@@ -2,7 +2,6 @@
 
 ### ⚠️ Breaking
 
-- The `Call.connectOptions` setter is replaced by `Call.setConnectOptions`, which fails once the join has applied its options instead of dropping the change silently. Use the device methods after that.
 - Joining a `Call` after it was left or ended fails with `CallLeftException`; a `Call` is single use.
 - The lists emitted by `Call.closedCaptions` are unmodifiable; copy one before changing it.
 - `Call`'s action methods (members, permissions, moderation, recording, transcription, captions, broadcasting, mute, pin, go-live, reactions, custom events, feedback) are now extension methods on `CallActions`; they can't be stubbed or overridden, and a `show Call` import must also show `CallActions`.
@@ -48,6 +47,7 @@
 
 ### ⚠️ Deprecated
 
+- The `Call.connectOptions` setter is deprecated in favour of `Call.setConnectOptions`, which reports whether the options were applied; there is no `dart fix` for it, since a setter can't be rewritten into a method call.
 - `StreamVideo.disposeAfterResolvingRinging` is deprecated in favour of `StreamVideoPushHandler.handleBackgroundMessage` from `stream_video_push_notification`. Use it to handle the whole background ringing lifecycle.
 - `VideoError` is renamed to `StreamVideoException`, and `VideoErrorWithCause` to `StreamVideoExceptionWithCause`. The old names remain as deprecated typedefs, so existing code still compiles; `dart fix --apply` migrates it.
 - `ifInvisibleBy` takes a `ParticipantPriority` — a priority for one participant, higher first — instead of a `Comparator`. Pass the priority of the same name: `ifInvisibleBy(dominantSpeakerPriority)` where you passed `ifInvisibleBy(dominantSpeaker)`.
