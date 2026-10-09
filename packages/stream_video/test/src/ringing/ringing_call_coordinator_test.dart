@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/core/client_state.dart';
 import 'package:stream_video/src/lifecycle/lifecycle_state.dart';
+import 'package:stream_video/src/ringing/ringing_call_coordinator_impl.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
@@ -110,17 +111,17 @@ void main() {
   ).thenAnswer((_) async => const Result.success(none));
 
   void nativeCallAccepted() => when(push.activeCalls).thenAnswer(
-    (_) async => [CallData(uuid: uuid, callCid: cid, isAccepted: true)],
+    (_) async => [const CallData(uuid: uuid, callCid: cid, isAccepted: true)],
   );
 
   void incoming() => nativeEvents.add(
-    ActionCallIncoming(
+    const ActionCallIncoming(
       data: CallData(uuid: uuid, callCid: cid),
     ),
   );
 
   void accept() => nativeEvents.add(
-    ActionCallAccept(
+    const ActionCallAccept(
       data: CallData(uuid: uuid, callCid: cid),
     ),
   );
@@ -199,7 +200,7 @@ void main() {
       ringing().observeCallDeclinedRingingEvent();
 
       nativeEvents.add(
-        ActionCallDecline(
+        const ActionCallDecline(
           data: CallData(uuid: uuid, callCid: cid),
         ),
       );
@@ -214,7 +215,7 @@ void main() {
       ringing().observeCallEndedRingingEvent();
 
       nativeEvents.add(
-        ActionCallEnded(
+        const ActionCallEnded(
           data: CallData(uuid: uuid, callCid: cid),
         ),
       );
@@ -229,7 +230,7 @@ void main() {
       ringing().observeCallEndedRingingEvent();
 
       nativeEvents.add(
-        ActionCallEnded(
+        const ActionCallEnded(
           data: CallData(uuid: uuid, callCid: cid),
         ),
       );
@@ -242,7 +243,7 @@ void main() {
       );
 
       nativeEvents.add(
-        ActionCallEnded(
+        const ActionCallEnded(
           data: CallData(uuid: uuid, callCid: cid, endedBySystem: true),
         ),
       );
@@ -283,7 +284,7 @@ void main() {
       incoming();
       await pumpEventQueue();
       nativeEvents.add(
-        ActionCallDecline(
+        const ActionCallDecline(
           data: CallData(uuid: uuid, callCid: cid),
         ),
       );
@@ -299,7 +300,7 @@ void main() {
         incoming();
         async.flushMicrotasks();
 
-        ringing().dispose();
+        (ringing() as RingingCallCoordinatorImpl).dispose();
         async.elapse(timeout * 2);
 
         verifyNeverRejected(CallRejectReason.timeout());
@@ -560,7 +561,9 @@ void main() {
       'consumeAndAcceptActiveCall connects before it consumes the call',
       () async {
         when(push.activeCalls).thenAnswer(
-          (_) async => [CallData(uuid: uuid, callCid: cid, isAccepted: true)],
+          (_) async => [
+            const CallData(uuid: uuid, callCid: cid, isAccepted: true),
+          ],
         );
 
         final accepted = await ringing().consumeAndAcceptActiveCall();
@@ -584,7 +587,7 @@ void main() {
       ringing().observeCallAcceptRingingEvent();
 
       nativeEvents.add(
-        ActionCallAccept(
+        const ActionCallAccept(
           data: CallData(uuid: uuid, callCid: cid),
         ),
       );
@@ -664,21 +667,27 @@ void main() {
     );
 
     test('two accepts at once accept the call once', () async {
-      final accepting = Completer<Result<None>>();
+      // Nothing rang in the app, so the accept fetches the call first.
+      final fetching = Completer<Result<CallReceivedData>>();
       when(
-        () => fixture.client.acceptCall(cid: any(named: 'cid')),
-      ).thenAnswer((_) => accepting.future);
-      ring();
+        () => fixture.client.getCall(callCid: callCid),
+      ).thenAnswer((_) => fetching.future);
+      acceptSucceeds();
       ringing().observeCallAcceptRingingEvent();
 
       accept();
       accept();
       await pumpEventQueue();
-      verify(() => fixture.client.acceptCall(cid: callCid)).called(1);
-
-      accepting.complete(const Result.success(none));
+      fetching.complete(
+        Result.success(
+          CallReceivedData(callCid: callCid, metadata: metadata()),
+        ),
+      );
       await pumpEventQueue();
-      verifyNever(() => fixture.client.acceptCall(cid: callCid));
+
+      verify(() => fixture.client.getCall(callCid: callCid)).called(1);
+      verify(() => fixture.client.acceptCall(cid: callCid)).called(1);
+      verifyNever(() => push.endCallByCid(cid));
     });
 
     test('an accept on Android while the app is detached is ignored', () async {
@@ -700,7 +709,9 @@ void main() {
       final call = ring();
       fixture.streamVideo.state.markCallAcceptedOnThisDevice(callCid, call);
       when(push.activeCalls).thenAnswer(
-        (_) async => [CallData(uuid: uuid, callCid: cid, isAccepted: true)],
+        (_) async => [
+          const CallData(uuid: uuid, callCid: cid, isAccepted: true),
+        ],
       );
 
       Call? handed;

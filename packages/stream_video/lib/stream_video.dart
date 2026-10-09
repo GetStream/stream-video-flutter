@@ -50,8 +50,7 @@ export 'src/network_monitor_settings.dart';
 export 'src/push_notification/push_notification_manager.dart';
 export 'src/retry/retry_policy.dart';
 export 'src/ring_state_polling_settings.dart';
-export 'src/ringing/ringing_call_coordinator.dart'
-    hide EnsureConnected, RingingCallFactory;
+export 'src/ringing/ringing_call_coordinator.dart';
 export 'src/sfu/data/models/sfu_audio_bitrate.dart';
 export 'src/sfu/data/models/sfu_client_capability.dart';
 export 'src/sfu/data/models/sfu_connection_quality.dart';
