@@ -232,7 +232,7 @@ class LocalMediaController {
   /// opening the device again. Inherited tracks that are not published are
   /// stopped.
   Future<void> applyConnectOptions({
-    CallSession? session,
+    required CallSession session,
     List<RtcLocalTrack> inheritedTracks = const [],
   }) async {
     _optionsAppliedBy = session;
@@ -442,7 +442,7 @@ class LocalMediaController {
   /// A screen share is not published through [setScreenShareEnabled], which
   /// always captures a new screen and so asks the user to pick one again.
   Future<Result<None>> _adoptInheritedTrack(
-    CallSession? target,
+    CallSession target,
     RtcLocalTrack track,
   ) async {
     _logger.d(() => '[adoptInheritedTrack] track: $track');
@@ -468,7 +468,7 @@ class LocalMediaController {
     try {
       if (refused != null) {
         result = failureWithError(refused);
-      } else if (target == null || !identical(_session(), target)) {
+      } else if (!identical(_session(), target)) {
         result = failureWithError('the call moved on to another session');
       } else {
         result = await target.setLocalTrack(track);
