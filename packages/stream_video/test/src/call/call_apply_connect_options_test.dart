@@ -378,6 +378,33 @@ void main() {
         );
       },
     );
+
+    group('the deprecated setter', () {
+      test('applies a write before the join', () async {
+        final call = harness.buildCall();
+
+        // ignore: deprecated_member_use_from_same_package
+        call.connectOptions = CallConnectOptions(camera: TrackOption.enabled());
+        await call.join(
+          connectOptions: CallConnectOptions(camera: TrackOption.disabled()),
+        );
+        await pumpEventQueue();
+
+        verifyCameraOpened().called(1);
+      });
+
+      test('changes nothing once the join applied its options', () async {
+        final call = harness.buildCall();
+        await call.join();
+        await pumpEventQueue();
+        final before = call.connectOptions;
+
+        // ignore: deprecated_member_use_from_same_package
+        call.connectOptions = before.copyWith(camera: TrackOption.disabled());
+
+        expect(call.connectOptions, before);
+      });
+    });
   });
 }
 

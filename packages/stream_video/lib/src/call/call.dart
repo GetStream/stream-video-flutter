@@ -625,6 +625,13 @@ class Call {
   Result<None> setConnectOptions(CallConnectOptions connectOptions) =>
       _media.setConnectOptions(connectOptions);
 
+  @Deprecated(
+    'Use setConnectOptions instead, which reports whether the options were '
+    'applied. This setter will be removed in the next major release.',
+  )
+  set connectOptions(CallConnectOptions connectOptions) =>
+      _media.setConnectOptions(connectOptions);
+
   /// The user this call is being watched or joined by.
   UserInfo get currentUser => _streamVideo.currentUser;
 
