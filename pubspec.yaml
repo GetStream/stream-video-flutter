@@ -35,8 +35,8 @@ melos:
     bootstrap:
       # Environment synced into every package during bootstrap.
       environment:
-        sdk: ">=3.10.0 <4.0.0"
-        flutter: ">=3.38.1"
+        sdk: ">=3.12.0 <4.0.0"
+        flutter: ">=3.44.0"
 
       # Dependency constraints synced into every package that declares them.
       dependencies:
@@ -47,12 +47,12 @@ melos:
         share_plus: ^13.0.0
         stream_chat_flutter: ^10.0.0
         stream_webrtc_flutter: ^3.2.0
-        stream_video: ^1.6.0
-        stream_video_filters: ^1.6.0
-        stream_video_flutter: ^1.6.0
-        stream_video_noise_cancellation: ^1.6.0
-        stream_video_push_notification: ^1.6.0
-        stream_video_screen_sharing: ^1.6.0
+        stream_video: ^1.7.0
+        stream_video_filters: ^1.7.0
+        stream_video_flutter: ^1.7.0
+        stream_video_noise_cancellation: ^1.7.0
+        stream_video_push_notification: ^1.7.0
+        stream_video_screen_sharing: ^1.7.0
 
       hooks:
         # Keep streamVideoVersion in globals.dart in sync with the pubspec version.

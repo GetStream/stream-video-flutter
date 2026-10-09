@@ -1,15 +1,9 @@
-## Upcoming
-
-### ⚠️ Breaking
-
-- `CallPreferences` now requires a `participantsThrottleIntervalResolver`; custom implementations must provide it.
-- `CallParticipantState.audioLevels` and `CallState.ringingMembers` are now unmodifiable.
+## 1.7.0
 
 ### ✅ Added
 
 - Added `Call.participantsStream`, which emits the participant list at an interval that grows with the participant count.
-- Added `CallPreferences.participantsThrottleIntervalResolver` to override that interval, or set it to `null` to emit every change.
-- Added `isSameCallStateSelection`, which compares two selected values the way `Call.partialState` does.
+- Added `CallPreferences.participantsThrottleIntervalResolver` to override that interval, or set it to `null` to emit every change. `DefaultCallPreferences` provides a default. If your app implements `CallPreferences` directly, add the getter to your implementation.
 
 ### 🔄 Changed
 
@@ -17,12 +11,13 @@
 - `CallState` keeps its `ownCapabilities`, `blockedUserIds`, `custom`, `capabilitiesByRole` and `callMembers` instances when a call update leaves their contents unchanged.
 - Reduced the cost of call updates in calls with many members.
 - Stopped sending the deprecated raw WebRTC stats and input device lists in SFU stats reports.
-- [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
+- [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed. Apps on AGP 9 failed to build because of it.
 - Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.
 - SFU participant events no longer emit a new call state when they leave every participant unchanged.
 - Reduced the cost of participant state updates in large calls.
 - `CallParticipantState.audioLevel` and `audioLevels` now hold at their last value while a participant is silent.
-- `CallState.localParticipant`, `otherParticipants` and `activeSpeakers` are now computed once per participant list instead of on every read, which keeps them cheap in calls with many participants. `callParticipants`, `otherParticipants` and `activeSpeakers` now return unmodifiable lists shared by every reader, so call `.toList()` before sorting or otherwise mutating them.
+- `CallParticipantState.audioLevels` and `CallState.ringingMembers` now return unmodifiable lists, so call `.toList()` before sorting or otherwise mutating them.
+- `CallState.localParticipant`, `otherParticipants` and `activeSpeakers` are now computed once per participant list instead of on every read, which keeps them cheap in calls with many participants.
 - Simulcast layers are now announced to the SFU and bitrate-capped from the resolution the camera actually captures on iOS and Android, instead of the requested resolution. A camera that captures below the requested size, or at a different aspect ratio, no longer over-reports its layers or over-allocates their bitrate.
 - `RtcMediaDeviceNotifier` now enumerates devices once per burst of device-change events, and calls made while an enumeration is running share its result instead of starting another one. The device list emitted by `RtcMediaDeviceNotifier.onDeviceChange` is now unmodifiable, so copy it with `.toList()` before sorting or otherwise mutating it.
 
@@ -35,8 +30,8 @@
 - Fixed leaving a call trying to stop noise cancellation when no audio processor is configured.
 - Fixed leaving a call calling `removeTrack` on the publisher for received tracks, which failed and logged `sender is null` on every leave.
 - [iOS/Android] Fixed camera video layers being announced in landscape while the phone is held upright.
-- Fixed fast reconnect failing for participants who are not publishing any tracks, such as livestream viewers. Instead of recovering the existing session, they fell back to a full rejoin with a new session after every network drop.
-- Fixed video layers being given a `maxBitrate` of 0 when the SFU's publish option carries no bitrate, and an empty publish option dimension being used as the bitrate target instead of the 1280x720 default. Publishing a video track now logs the publish option, the capture size and the computed encodings at debug level.
+- Fixed fast reconnect failing for participants who are not publishing any tracks, such as livestream viewers.
+- Fixed video layers being given a `maxBitrate` of 0 when the SFU's publish option carries no bitrate, and an empty publish option dimension being used as the bitrate target instead of the 1280x720 default.
 
 ## 1.6.0
 
