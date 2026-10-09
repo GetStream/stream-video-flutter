@@ -617,20 +617,20 @@ class Call {
   /// Changes the options the pending join applies, for example while an
   /// outgoing call rings. Prefer passing them to [join].
   ///
-  /// Fails once the session has started applying them, also while the call
-  /// is connected or reconnecting. Change the devices through
+  /// Fails once the call's session has started applying them, so also while
+  /// the call is connected. Change the devices through
   /// [setCameraEnabled], [setMicrophoneEnabled] and the other device methods
   /// from then on.
   @useResult
   Result<None> setConnectOptions(CallConnectOptions connectOptions) =>
       _media.setConnectOptions(connectOptions);
 
+  /// Ignored, with a warning, once the call's session has started applying
+  /// the options.
   @Deprecated(
     'Use setConnectOptions instead, which reports whether the options were '
     'applied. This setter will be removed in the next major release.',
   )
-  /// Ignored, with a warning, once the session has started applying the
-  /// options.
   set connectOptions(CallConnectOptions connectOptions) =>
       _media.setConnectOptions(connectOptions);
 
