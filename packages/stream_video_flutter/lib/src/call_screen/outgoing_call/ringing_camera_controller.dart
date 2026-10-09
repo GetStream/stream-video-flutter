@@ -15,10 +15,11 @@ typedef RingingCameraTrackOpener = Future<RtcLocalCameraTrack> Function();
 /// The microphone and camera an outgoing call will be placed with, and the
 /// camera track the ringing screen shows behind its blur.
 ///
-/// The track is written into [Call.connectOptions] as [TrackOption.provided]
-/// the moment it opens, so the call carries on with the camera the caller was
+/// The track is handed to the pending join as [TrackOption.provided] the
+/// moment it opens, so the call carries on with the camera the caller was
 /// already previewing rather than opening a second one when the callee picks
-/// up.
+/// up. A change made after the join applied its options goes to the call
+/// itself.
 class StreamRingingCameraController extends ChangeNotifier {
   /// Creates a controller previewing the camera [call] will be placed with.
   StreamRingingCameraController({
@@ -74,10 +75,13 @@ class StreamRingingCameraController extends ChangeNotifier {
     if (!enabled) {
       final track = _cameraTrack;
       _cameraTrack = null;
-      call.connectOptions = call.connectOptions.copyWith(
-        camera: TrackOption.disabled(),
+      final pending = _setPendingOptions(
+        (options) => options.copyWith(camera: TrackOption.disabled()),
       );
       _notify();
+      if (!pending) {
+        await call.setCameraEnabled(enabled: false);
+      }
       await track?.stop();
       return;
     }
@@ -94,10 +98,29 @@ class StreamRingingCameraController extends ChangeNotifier {
   /// Nothing is opened here — there is no preview to feed, and the call opens
   /// the microphone itself when it connects.
   void setMicrophoneEnabled({required bool enabled}) {
-    call.connectOptions = call.connectOptions.copyWith(
-      microphone: TrackOption.fromSetting(enabled: enabled),
+    final pending = _setPendingOptions(
+      (options) => options.copyWith(
+        microphone: TrackOption.fromSetting(enabled: enabled),
+      ),
     );
+    if (!pending) {
+      unawaited(call.setMicrophoneEnabled(enabled: enabled));
+    }
     _notify();
+  }
+
+  /// Hands [update] of the options to the pending join, and answers whether
+  /// it took them. It no longer does once it applied its options, which the
+  /// callee picking up can make happen at any moment while ringing.
+  bool _setPendingOptions(
+    CallConnectOptions Function(CallConnectOptions options) update,
+  ) {
+    final result = call.setConnectOptions(update(call.connectOptions));
+    if (result case Failure(:final error)) {
+      _logger.d(() => 'The join already applied its options: $error');
+      return false;
+    }
+    return true;
   }
 
   Future<void> _openCamera() async {
@@ -115,17 +138,25 @@ class StreamRingingCameraController extends ChangeNotifier {
         return;
       }
 
+      final pending = _setPendingOptions(
+        (options) => options.copyWith(camera: TrackOption.provided(track)),
+      );
+      if (!pending) {
+        // Too late to hand the preview over: the call opens its own camera.
+        _opening = false;
+        await track.stop();
+        await call.setCameraEnabled(enabled: true);
+        _notify();
+        return;
+      }
       _cameraTrack = track;
       _cameraError = null;
-      call.connectOptions = call.connectOptions.copyWith(
-        camera: TrackOption.provided(track),
-      );
     } catch (e, stk) {
       _logger.e(() => 'Error creating camera track: $e\n$stk');
       _cameraError = StreamDeviceError.from(e, stk);
       // The call is still placed, with the camera off rather than pending.
-      call.connectOptions = call.connectOptions.copyWith(
-        camera: TrackOption.disabled(),
+      _setPendingOptions(
+        (options) => options.copyWith(camera: TrackOption.disabled()),
       );
     }
 

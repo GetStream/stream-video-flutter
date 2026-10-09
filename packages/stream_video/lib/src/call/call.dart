@@ -614,14 +614,16 @@ class Call {
 
   CallConnectOptions get connectOptions => _media.connectOptions;
 
-  /// It is better to pass the [connectOptions] to [join] method,
-  /// setting it directly has to be done carefully. Depending on the moment in the call lifecycle,
-  /// it might be overwritten by default configuration or it might be too late to apply the changes.
+  /// Changes the options the pending join applies, for example while an
+  /// outgoing call rings. Prefer passing them to [join].
   ///
-  /// Refused while the call is connected. A value set during a join or a
-  /// reconnect is not merged until the next join.
-  set connectOptions(CallConnectOptions connectOptions) =>
-      _media.connectOptions = connectOptions;
+  /// Fails once the join has applied its options, also while the call is
+  /// connected or reconnecting. Change the devices through
+  /// [setCameraEnabled], [setMicrophoneEnabled] and the other device methods
+  /// from then on.
+  @useResult
+  Result<None> setConnectOptions(CallConnectOptions connectOptions) =>
+      _media.setConnectOptions(connectOptions);
 
   /// The user this call is being watched or joined by.
   UserInfo get currentUser => _streamVideo.currentUser;

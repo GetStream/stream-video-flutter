@@ -18,14 +18,28 @@ void main() {
     state = MockCallState();
     options = const CallConnectOptions();
     stubRingingCall(call, state);
-    // The mock has no storage of its own, so the setter is captured and the
-    // getter reads back what was last written.
+    // The mock has no storage of its own, so a pending join's options are
+    // captured and the getter reads back what was last written.
     when(() => call.connectOptions).thenAnswer((_) => options);
-    when(() => call.connectOptions = any()).thenAnswer((invocation) {
-      return options =
-          invocation.positionalArguments.first as CallConnectOptions;
+    when(() => call.setConnectOptions(any())).thenAnswer((invocation) {
+      options = invocation.positionalArguments.first as CallConnectOptions;
+      return const Result.success(none);
     });
   });
+
+  /// The callee picked up and the join applied its options: from now on the
+  /// controller has to go through the call.
+  void joinAppliedItsOptions() {
+    when(
+      () => call.setConnectOptions(any()),
+    ).thenReturn(failureWithError('applied'));
+    when(
+      () => call.setCameraEnabled(enabled: any(named: 'enabled')),
+    ).thenAnswer((_) async => const Result.success(none));
+    when(
+      () => call.setMicrophoneEnabled(enabled: any(named: 'enabled')),
+    ).thenAnswer((_) async => const Result.success(none));
+  }
 
   StreamRingingCameraController controllerWith({
     MockRtcLocalCameraTrack? track,
@@ -146,5 +160,44 @@ void main() {
     expect(options.microphone, isA<TrackDisabled>());
 
     controller.dispose();
+  });
+
+  group('after the join applied its options', () {
+    test('turning the camera off goes through the call', () async {
+      final track = mockCameraTrack();
+      final controller = controllerWith(track: track);
+      await controller.setCameraEnabled(enabled: true);
+      joinAppliedItsOptions();
+
+      await controller.setCameraEnabled(enabled: false);
+
+      verify(() => call.setCameraEnabled(enabled: false)).called(1);
+      verify(track.stop).called(1);
+      controller.dispose();
+    });
+
+    test('a camera that opens too late is stopped, and the call opens its '
+        'own', () async {
+      joinAppliedItsOptions();
+      final track = mockCameraTrack();
+      final controller = controllerWith(track: track);
+
+      await controller.setCameraEnabled(enabled: true);
+
+      verify(track.stop).called(1);
+      verify(() => call.setCameraEnabled(enabled: true)).called(1);
+      expect(controller.cameraEnabled, isFalse);
+      controller.dispose();
+    });
+
+    test('the microphone goes through the call', () {
+      joinAppliedItsOptions();
+      final controller = controllerWith();
+
+      controller.setMicrophoneEnabled(enabled: true);
+
+      verify(() => call.setMicrophoneEnabled(enabled: true)).called(1);
+      controller.dispose();
+    });
   });
 }

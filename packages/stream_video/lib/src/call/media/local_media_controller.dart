@@ -68,6 +68,10 @@ class LocalMediaController {
   /// over the call settings each time they are applied.
   StreamTargetResolution? _requestedTargetResolution;
 
+  /// Whether the join has applied the call settings, after which the
+  /// options can only change through the device methods.
+  bool _joinSettingsApplied = false;
+
   CallState get _state => _stateManager.callState;
 
   /// The options the next session starts with: an override set before the
@@ -75,22 +79,24 @@ class LocalMediaController {
   CallConnectOptions get connectOptions =>
       _connectOptionsOverride ?? _connectOptions;
 
-  /// Sets the options the next join merges over the call settings. Refused
-  /// while the call is connected. A value set during a join or a reconnect is
-  /// not merged until the next join.
-  set connectOptions(CallConnectOptions connectOptions) {
-    if (_state.status is CallStatusConnected) {
+  /// Changes the options the pending join applies over the call settings.
+  /// Fails once the join has applied them.
+  Result<None> setConnectOptions(CallConnectOptions connectOptions) {
+    if (_joinSettingsApplied) {
       _logger.w(
         () =>
-            '[setConnectOptions] rejected (connectOptions must be'
-            ' set before invoking `connect`)',
+            '[setConnectOptions] rejected (the join already applied its '
+            'connect options)',
       );
-
-      return;
+      return failureWithError(
+        'The join already applied its connect options. Change the devices '
+        'through the call instead.',
+      );
     }
 
-    _logger.d(() => '[setConnectOptions] connectOptions: $connectOptions)');
+    _logger.d(() => '[setConnectOptions] connectOptions: $connectOptions');
     _connectOptionsOverride = connectOptions;
+    return const Result.success(none);
   }
 
   /// Resolves the connect options for a join from [settings], then merges
@@ -109,6 +115,8 @@ class LocalMediaController {
       _connectOptions = _connectOptions.merge(_connectOptionsOverride!);
       _connectOptionsOverride = null;
     }
+
+    _joinSettingsApplied = true;
   }
 
   /// Writes the camera, microphone, devices and resolutions [settings] and
