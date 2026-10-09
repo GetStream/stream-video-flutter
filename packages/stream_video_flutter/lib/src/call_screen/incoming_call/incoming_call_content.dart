@@ -150,7 +150,7 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
       final result = widget.call.setConnectOptions(
         connectOptions.copyWith(microphone: microphone),
       );
-      // Accepted meanwhile: the joined call takes the change itself.
+      // Too late for the join: change the call's device instead.
       if (result.isFailure) {
         await widget.call.setMicrophoneEnabled(enabled: microphone.isEnabled);
       }
@@ -166,7 +166,7 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
       final result = widget.call.setConnectOptions(
         connectOptions.copyWith(camera: camera),
       );
-      // Accepted meanwhile: the joined call takes the change itself.
+      // Too late for the join: change the call's device instead.
       if (result.isFailure) {
         await widget.call.setCameraEnabled(enabled: camera.isEnabled);
       }

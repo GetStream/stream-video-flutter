@@ -379,6 +379,53 @@ void main() {
       },
     );
 
+    test(
+      'applies a change made while the session is still connecting',
+      () async {
+        late final Call call;
+        Result<None>? result;
+        when(
+          () => harness.session.start(
+            reconnectDetails: any(named: 'reconnectDetails'),
+            onRtcManagerCreatedCallback: any(
+              named: 'onRtcManagerCreatedCallback',
+            ),
+            isAnonymousUser: any(named: 'isAnonymousUser'),
+            capabilities: any(named: 'capabilities'),
+            unifiedSessionId: any(named: 'unifiedSessionId'),
+            clientEventRetryCount: any(named: 'clientEventRetryCount'),
+          ),
+        ).thenAnswer((invocation) async {
+          // The join applied the call settings; the session has not applied
+          // the options yet.
+          result = call.setConnectOptions(
+            call.connectOptions.copyWith(camera: TrackOption.disabled()),
+          );
+          final onCreated =
+              invocation.namedArguments[#onRtcManagerCreatedCallback]
+                  as FutureOr<void> Function(RtcManager)?;
+          await onCreated?.call(_MockRtcManager());
+          return Result.success((
+            callState: createTestSfuCallState(),
+            fastReconnectDeadline: Duration.zero,
+          ));
+        });
+        call = harness.buildCall();
+
+        await call.join();
+        await pumpEventQueue();
+
+        expect(result?.isSuccess, isTrue);
+        // The call settings open the camera by default.
+        verifyNever(
+          () => harness.session.setCameraEnabled(
+            true,
+            constraints: any(named: 'constraints'),
+          ),
+        );
+      },
+    );
+
     group('the deprecated setter', () {
       test('applies a write before the join', () async {
         final call = harness.buildCall();

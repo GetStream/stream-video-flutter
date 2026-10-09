@@ -68,9 +68,13 @@ class LocalMediaController {
   /// over the call settings each time they are applied.
   StreamTargetResolution? _requestedTargetResolution;
 
-  /// Whether the join has applied the call settings, after which the
-  /// options can only change through the device methods.
+  /// Whether the join has applied the call settings, after which a change
+  /// is written into the resolved options instead of the override.
   bool _joinSettingsApplied = false;
+
+  /// Whether a session has started applying the options, after which they
+  /// can only change through the device methods.
+  bool _connectOptionsApplied = false;
 
   CallState get _state => _stateManager.callState;
 
@@ -79,23 +83,29 @@ class LocalMediaController {
   CallConnectOptions get connectOptions =>
       _connectOptionsOverride ?? _connectOptions;
 
-  /// Changes the options the pending join applies over the call settings.
-  /// Fails once the join has applied them.
+  /// Changes the options the pending join applies. Fails once a session
+  /// has started applying them.
   Result<None> setConnectOptions(CallConnectOptions connectOptions) {
-    if (_joinSettingsApplied) {
+    if (_connectOptionsApplied) {
       _logger.w(
         () =>
-            '[setConnectOptions] rejected (the join already applied its '
+            '[setConnectOptions] rejected (the session already applied the '
             'connect options)',
       );
       return failureWithError(
-        'The join already applied its connect options. Change the devices '
+        'The session already applied the connect options. Change the devices '
         'through the call instead.',
       );
     }
 
     _logger.d(() => '[setConnectOptions] connectOptions: $connectOptions');
-    _connectOptionsOverride = connectOptions;
+    // Before the join, an override goes over the call settings it applies;
+    // after it, the options are already resolved.
+    if (_joinSettingsApplied) {
+      _connectOptions = _connectOptions.merge(connectOptions);
+    } else {
+      _connectOptionsOverride = connectOptions;
+    }
     return const Result.success(none);
   }
 
@@ -222,6 +232,7 @@ class LocalMediaController {
     CallSession? session,
     List<RtcLocalTrack> inheritedTracks = const [],
   }) async {
+    _connectOptionsApplied = true;
     _logger.d(
       () =>
           '[applyConnectOptions] connectOptions: $_connectOptions, '
