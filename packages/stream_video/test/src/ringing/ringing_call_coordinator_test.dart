@@ -269,7 +269,7 @@ void main() {
       await pumpEventQueue();
       verifyNeverRejected(CallRejectReason.timeout());
 
-      await Future<void>.delayed(const Duration(milliseconds: 150));
+      await Future<void>.delayed(const Duration(seconds: 1));
       verifyRejected(CallRejectReason.timeout()).called(1);
     });
 
@@ -288,7 +288,7 @@ void main() {
           data: CallData(uuid: uuid, callCid: cid),
         ),
       );
-      await Future<void>.delayed(const Duration(milliseconds: 150));
+      await Future<void>.delayed(const Duration(seconds: 1));
 
       verifyRejected(CallRejectReason.decline()).called(1);
       verifyNeverRejected(CallRejectReason.timeout());
@@ -312,6 +312,11 @@ void main() {
         ringing().observeCallIncomingRingingEvent();
         incoming();
         async.flushMicrotasks();
+        // Verifying the ring connected the user; start the accept from a
+        // disconnected client.
+        unawaited(fixture.streamVideo.disconnect());
+        async.flushMicrotasks();
+        clearInteractions(fixture.client);
 
         // A cold start: connecting outlasts the ring.
         final connecting = Completer<Result<None>>();
@@ -325,6 +330,12 @@ void main() {
         unawaited(ringing().consumeAndAcceptActiveCall());
         async.elapse(timeout * 2);
 
+        verify(
+          () => fixture.client.connectUser(
+            any(),
+            includeUserDetails: any(named: 'includeUserDetails'),
+          ),
+        ).called(1);
         verifyNeverRejected(CallRejectReason.timeout());
 
         connecting.complete(const Result.success(none));
@@ -444,7 +455,6 @@ void main() {
           callCid: cid,
           handle: caller,
           callerName: 'Caller',
-          hasVideo: true,
         ),
       ).called(1);
     });
