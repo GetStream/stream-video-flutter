@@ -9,6 +9,7 @@ import 'package:stream_video_push_notification/stream_video_push_notification.da
 
 class MockCall extends Mock implements Call {}
 
+// ignore: subtype_of_sealed_class
 class MockRingingCallCoordinator extends Mock
     implements RingingCallCoordinator {}
 
