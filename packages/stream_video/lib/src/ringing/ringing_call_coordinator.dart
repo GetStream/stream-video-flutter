@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart' show CompositeSubscription;
 
 import '../call/call.dart';
@@ -14,7 +15,8 @@ import '../utils/result.dart';
 /// call screen's accept, decline and end, the ringing pushes, and the
 /// timer that rejects an unanswered incoming call.
 ///
-/// Reached through `StreamVideo.ringing`.
+/// Reached through `StreamVideo.ringing`. Implemented only by the SDK.
+@sealed
 abstract interface class RingingCallCoordinator {
   /// Listens to the ringing events of type [T] the push notification manager
   /// reports, or returns `null` when there is no manager.
