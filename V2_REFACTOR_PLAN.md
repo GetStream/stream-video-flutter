@@ -30,10 +30,9 @@ One PR per ticket, each based on the branch of the ticket before it. The first
 PR targets `v2`. Tick a box in the ticket's own commit.
 
 The stack is split in two after ticket 18. Tickets 1-18 (#1405 to #1429) are the
-connection work and merge into `v2` first, bottom up. Ticket 19 (B1) starts the
-second stack. It branches off `feat/flu-862-call-dispose` and targets it until
-the first stack has merged, then it is retargeted to `v2`. The numbering
-continues across both stacks.
+connection work and have merged into `v2`. Ticket 19 (B1) starts the second
+stack, branched off and targeting `v2`. The numbering continues across both
+stacks.
 
 | # | Ticket | Branch (proposed) | PR |
 |---|---|---|---|
@@ -55,7 +54,7 @@ continues across both stacks.
 | 16 | FLU-938 | `fix/flu-938-reuse-local-tracks` | #1426 |
 | 17 | A6 | `fix/flu-861-session-ownership` | #1427 |
 | 18 | A7 | `feat/flu-862-call-dispose` | #1429 |
-| 19 | B1 | `feat/flu-848-local-media-controller` | |
+| 19 | B1 | `feat/flu-848-local-media-controller` | #1434 |
 | 20 | C2 | `feat/flu-853-stream-video-test-seams` | |
 | 21 | C3 | `fix/flu-857-coordinator-connection` | |
 | 22 | C1 | `feat/flu-856-ringing-call-coordinator` | |
@@ -82,7 +81,7 @@ continues across both stacks.
 - [x] 16. **Fix** [FLU-938](https://linear.app/stream/issue/FLU-938): reuse local tracks across a migration and a rejoin (S–M). The new session takes over the old one's camera, microphone and screen-share tracks instead of opening them again. Right after FLU-932, whose order (the old session stays open until the old SFU confirms) is what the handover has to respect, and before A6 and B1, which then build on its `_startSession` and `_applyConnectOptions` changes.
 - [x] 17. **A6** [FLU-861](https://linear.app/stream/issue/FLU-861): single session ownership and a complete teardown (S). Fixes bugs 3 and 5, and folds in [FLU-925](https://linear.app/stream/issue/FLU-925) (timers re-armed during leave). Also releases the session a migration started from when the migration's join fails: `_reconnectMigrate` returned before closing it, and the rejoin that followed only left the failed new session. The same went for a rejoin whose first attempt failed before the new session took the local tracks: the retry asked only the failed session for them, so it opened the devices again and the original session was never disposed.
 - [x] 18. **A7** [FLU-862](https://linear.app/stream/issue/FLU-862): `Call.dispose` and the single-use-after-leave error (S, v2 breaking).
-- [ ] 19. **B1** [FLU-848](https://linear.app/stream/issue/FLU-848): `LocalMediaController` (M). After the A chain, so `_connectOptions` moves once with A2 and then gets one owner here.
+- [x] 19. **B1** [FLU-848](https://linear.app/stream/issue/FLU-848): `LocalMediaController` (M). After the A chain, so `_connectOptions` moves once with A2 and then gets one owner here.
 - [ ] 20. **C2** [FLU-853](https://linear.app/stream/issue/FLU-853): injection seams in StreamVideo (S). Needed to test C3 and C4.
 - [ ] 21. **C3** [FLU-857](https://linear.app/stream/issue/FLU-857): `CoordinatorConnection` with a real single-flight guard (M). Fixes bug 4.
 - [ ] 22. **C1** [FLU-856](https://linear.app/stream/issue/FLU-856): `RingingCallCoordinator` as `streamVideo.ringing` (L, v2 breaking). Its `ensureConnected` callback comes from C3.
