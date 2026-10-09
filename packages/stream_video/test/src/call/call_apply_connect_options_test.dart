@@ -175,45 +175,7 @@ void main() {
 
     late ConnectionHarness harness;
 
-    setUp(() {
-      harness = ConnectionHarness(sessionCount: 3);
-      for (final permission in CallPermission.values) {
-        when(
-          () => harness.permissionsManager.hasPermission(permission),
-        ).thenReturn(true);
-      }
-      for (final session in harness.sessions) {
-        final published = MockRtcLocalTrack();
-        when(() => published.mediaTrack).thenReturn(_FakeMediaStreamTrack());
-        when(
-          () => session.setCameraEnabled(
-            any(),
-            constraints: any(named: 'constraints'),
-          ),
-        ).thenAnswer((_) async => Result.success(published));
-        when(
-          () => session.start(
-            reconnectDetails: any(named: 'reconnectDetails'),
-            onRtcManagerCreatedCallback: any(
-              named: 'onRtcManagerCreatedCallback',
-            ),
-            isAnonymousUser: any(named: 'isAnonymousUser'),
-            capabilities: any(named: 'capabilities'),
-            unifiedSessionId: any(named: 'unifiedSessionId'),
-            clientEventRetryCount: any(named: 'clientEventRetryCount'),
-          ),
-        ).thenAnswer((invocation) async {
-          final onCreated =
-              invocation.namedArguments[#onRtcManagerCreatedCallback]
-                  as FutureOr<void> Function(RtcManager)?;
-          await onCreated?.call(_MockRtcManager());
-          return Result.success((
-            callState: createTestSfuCallState(),
-            fastReconnectDeadline: Duration.zero,
-          ));
-        });
-      }
-    });
+    setUp(() => harness = _harnessWithCamera(3));
 
     tearDown(() => harness.dispose());
 
@@ -330,4 +292,134 @@ void main() {
       expect(call.connectOptions.targetResolution, resolution);
     });
   });
+
+  group('setConnectOptions', () {
+    late ConnectionHarness harness;
+
+    setUp(() {
+      harness = _harnessWithCamera(1);
+      when(
+        () => harness.coordinatorClient.rejectCall(
+          cid: any(named: 'cid'),
+          reason: any(named: 'reason'),
+        ),
+      ).thenAnswer((_) async => const Result.success(none));
+    });
+
+    tearDown(() => harness.dispose());
+
+    VerificationResult verifyCameraOpened() => verify(
+      () => harness.session.setCameraEnabled(
+        true,
+        constraints: any(named: 'constraints'),
+      ),
+    );
+
+    test('wins over the options passed to join', () async {
+      final call = harness.buildCall();
+
+      final result = call.setConnectOptions(
+        CallConnectOptions(camera: TrackOption.enabled()),
+      );
+      await call.join(
+        connectOptions: CallConnectOptions(camera: TrackOption.disabled()),
+      );
+      await pumpEventQueue();
+
+      expect(result.isSuccess, isTrue);
+      verifyCameraOpened().called(1);
+    });
+
+    test('applies a change made while an outgoing call rings', () async {
+      final call = harness.buildCall(status: CallStatus.outgoing());
+
+      final joining = call.join();
+      await pumpEventQueue();
+      final result = call.setConnectOptions(
+        call.connectOptions.copyWith(camera: TrackOption.disabled()),
+      );
+      harness.stateManager.state = harness.stateManager.callState.copyWith(
+        status: CallStatus.outgoing(acceptedByCallee: true),
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect((await joining).isSuccess, isTrue);
+      await pumpEventQueue();
+      // The call settings open the camera by default; the change made while
+      // ringing turned it off.
+      verifyNever(
+        () => harness.session.setCameraEnabled(
+          true,
+          constraints: any(named: 'constraints'),
+        ),
+      );
+    });
+
+    test(
+      'fails once the join applied its options, and changes nothing',
+      () async {
+        final call = harness.buildCall();
+        await call.join();
+        await pumpEventQueue();
+        final before = call.connectOptions;
+        clearInteractions(harness.session);
+
+        final result = call.setConnectOptions(
+          before.copyWith(camera: TrackOption.enabled()),
+        );
+
+        expect(result.isFailure, isTrue);
+        expect(call.connectOptions, before);
+        verifyNever(
+          () => harness.session.setCameraEnabled(
+            any(),
+            constraints: any(named: 'constraints'),
+          ),
+        );
+      },
+    );
+  });
+}
+
+/// A harness of [sessionCount] sessions that start, apply the connect
+/// options, and open a camera on request.
+ConnectionHarness _harnessWithCamera(int sessionCount) {
+  final harness = ConnectionHarness(sessionCount: sessionCount);
+  for (final permission in CallPermission.values) {
+    when(
+      () => harness.permissionsManager.hasPermission(permission),
+    ).thenReturn(true);
+  }
+  for (final session in harness.sessions) {
+    final published = MockRtcLocalTrack();
+    when(() => published.mediaTrack).thenReturn(_FakeMediaStreamTrack());
+    when(
+      () => session.setCameraEnabled(
+        any(),
+        constraints: any(named: 'constraints'),
+      ),
+    ).thenAnswer((_) async => Result.success(published));
+    when(
+      () => session.start(
+        reconnectDetails: any(named: 'reconnectDetails'),
+        onRtcManagerCreatedCallback: any(
+          named: 'onRtcManagerCreatedCallback',
+        ),
+        isAnonymousUser: any(named: 'isAnonymousUser'),
+        capabilities: any(named: 'capabilities'),
+        unifiedSessionId: any(named: 'unifiedSessionId'),
+        clientEventRetryCount: any(named: 'clientEventRetryCount'),
+      ),
+    ).thenAnswer((invocation) async {
+      final onCreated =
+          invocation.namedArguments[#onRtcManagerCreatedCallback]
+              as FutureOr<void> Function(RtcManager)?;
+      await onCreated?.call(_MockRtcManager());
+      return Result.success((
+        callState: createTestSfuCallState(),
+        fastReconnectDeadline: Duration.zero,
+      ));
+    });
+  }
+  return harness;
 }

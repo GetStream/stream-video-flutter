@@ -146,9 +146,14 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
     if (widget.onMicrophoneTap != null) {
       widget.onMicrophoneTap!();
     } else {
-      widget.call.connectOptions = connectOptions.copyWith(
-        microphone: connectOptions.microphone.toggle(),
+      final microphone = connectOptions.microphone.toggle();
+      final result = widget.call.setConnectOptions(
+        connectOptions.copyWith(microphone: microphone),
       );
+      // Accepted meanwhile: the joined call takes the change itself.
+      if (result.isFailure) {
+        await widget.call.setMicrophoneEnabled(enabled: microphone.isEnabled);
+      }
       return setState(() => {});
     }
   }
@@ -157,9 +162,14 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
     if (widget.onCameraTap != null) {
       widget.onCameraTap!();
     } else {
-      widget.call.connectOptions = connectOptions.copyWith(
-        camera: connectOptions.camera.toggle(),
+      final camera = connectOptions.camera.toggle();
+      final result = widget.call.setConnectOptions(
+        connectOptions.copyWith(camera: camera),
       );
+      // Accepted meanwhile: the joined call takes the change itself.
+      if (result.isFailure) {
+        await widget.call.setCameraEnabled(enabled: camera.isEnabled);
+      }
       return setState(() => {});
     }
   }
