@@ -203,6 +203,8 @@ class VideoTrackRenderer extends StatefulWidget {
 }
 
 class _VideoTrackRendererState extends State<VideoTrackRenderer> {
+  final _logger = taggedLogger(tag: 'SV:VideoTrackRenderer');
+
   /// Renderer to display WebRTC video stream.
   final _videoRenderer = rtc.RTCVideoRenderer();
 
@@ -212,29 +214,53 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
   @override
   void initState() {
     super.initState();
-    (() async {
+    _initializeRenderer();
+  }
+
+  Future<void> _initializeRenderer() async {
+    try {
       await _videoRenderer.initialize();
-      _videoRenderer.srcObject = widget.videoTrack.mediaStream;
-      if (mounted) setState(() => _isInitialized = true);
-    })();
+    } catch (e, stk) {
+      _logger.e(() => 'Could not initialise the video renderer: $e\n$stk');
+      _disposeRenderer();
+      return;
+    }
+    if (!mounted) {
+      // Disposed while initialising; the texture only exists now.
+      _disposeRenderer();
+      return;
+    }
+    // Reads the current widget, so a track swapped in meanwhile is the one set.
+    _videoRenderer.srcObject = widget.videoTrack.mediaStream;
+    setState(() => _isInitialized = true);
   }
 
   @override
   void didUpdateWidget(covariant VideoTrackRenderer oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // Until initialised, [_initializeRenderer] sets the stream itself.
+    if (!_isInitialized) return;
     final streamChanged =
         widget.videoTrack.mediaStream != oldWidget.videoTrack.mediaStream;
     if (widget.videoTrack != oldWidget.videoTrack || streamChanged) {
       _videoRenderer.srcObject = widget.videoTrack.mediaStream;
-      if (mounted) setState(() {});
     }
   }
 
   @override
-  Future<void> dispose() async {
+  void dispose() {
+    // Until initialised, [_initializeRenderer] disposes it once it resolves.
+    if (_isInitialized) {
+      _videoRenderer.srcObject = null;
+      _disposeRenderer();
+    }
     super.dispose();
-    if (_isInitialized) _videoRenderer.srcObject = null;
-    await _videoRenderer.dispose();
+  }
+
+  void _disposeRenderer() {
+    _videoRenderer.dispose().catchError((Object e, StackTrace stk) {
+      _logger.e(() => 'Could not dispose the video renderer: $e\n$stk');
+    });
   }
 
   @override
