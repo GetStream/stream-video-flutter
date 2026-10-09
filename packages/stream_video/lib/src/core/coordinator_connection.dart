@@ -38,8 +38,8 @@ class CoordinatorConnection {
   /// Runs once the socket is up, from the connect that opened it.
   final void Function() _onConnected;
 
-  /// Runs after a disconnect closed the socket, or found it closed already.
-  final Future<void> Function({required bool wasConnected}) _onDisconnected;
+  /// Runs on every disconnect, to drop what the connection held.
+  final Future<void> Function() _onDisconnected;
 
   final _logger = taggedLogger(tag: 'SV:CoordinatorConnection');
   final _lock = Lock();
@@ -60,12 +60,12 @@ class CoordinatorConnection {
 
   /// Connects the user.
   ///
-  /// A connect while the user is connected, or after another connect that is
-  /// still running, opens no second socket and answers with the current
-  /// token. [includeUserDetails] only applies to the connect that opens the
-  /// socket. [registerPushDevice] registers the device once per connection,
-  /// so a later connect asking for it registers a device an earlier one
-  /// skipped.
+  /// A connect while the user is connected opens no second socket and
+  /// answers with the current token. One queued behind a connect that failed
+  /// tries again itself, with its own [includeUserDetails], which otherwise
+  /// only applies to the connect that opens the socket. [registerPushDevice]
+  /// registers the device once per connection, so a later connect asking for
+  /// it registers a device an earlier one skipped.
   Future<Result<UserToken>> connect({
     required bool includeUserDetails,
     required bool registerPushDevice,
@@ -107,59 +107,77 @@ class CoordinatorConnection {
 
     _connection = ConnectionState.connecting(_state.currentUser.id);
 
-    // Establishes a guest's server-assigned identity, unless a request that
-    // needed a token got there first.
-    final tokenResult = await _tokens.getToken();
-    if (tokenResult is! Success<UserToken>) {
-      _logger.e(() => '[connect] token fetching failed: $tokenResult');
-      _connection = ConnectionState.failed(
-        _state.currentUser.id,
-        error: (tokenResult as Failure).videoError,
-      );
-      return tokenResult;
-    }
-
     final user = _state.user.value;
-    _logger.v(() => '[connect] currentUser.id : ${user.id}');
+    final Result<None> result;
+    final UserToken token;
     try {
-      final result = await _client.connectUser(
+      // Establishes a guest's server-assigned identity, unless a request
+      // that needed a token got there first.
+      final tokenResult = await _tokens.getToken();
+      if (tokenResult is! Success<UserToken>) {
+        _logger.e(() => '[connect] token fetching failed: $tokenResult');
+        _connection = ConnectionState.failed(
+          _state.currentUser.id,
+          error: (tokenResult as Failure).videoError,
+        );
+        return tokenResult;
+      }
+      token = tokenResult.data;
+
+      _logger.v(() => '[connect] currentUser.id : ${user.id}');
+      result = await _client.connectUser(
         user.toUserInfo(),
         includeUserDetails: includeUserDetails,
       );
-      _logger.v(() => '[connect] completed: $result');
-      if (result is Failure) {
-        _connection = ConnectionState.failed(
-          _state.currentUser.id,
-          error: result.videoError,
-        );
-        return result;
-      }
-      _connection = ConnectionState.connected(_state.currentUser.id);
-      _onConnected();
-
-      if (registerPushDevice) _registerPushDevice();
-
-      return Result.success(tokenResult.data);
     } catch (e, stk) {
       _logger.e(() => '[connect] failed(${user.id}): $e');
+      final error = StreamVideoExceptions.compose(e, stk);
+      _connection = ConnectionState.failed(_state.currentUser.id, error: error);
+      return Result.failure(error, stk);
+    }
+
+    _logger.v(() => '[connect] completed: $result');
+    if (result is Failure) {
       _connection = ConnectionState.failed(
         _state.currentUser.id,
-        error: StreamVideoExceptions.compose(e, stk),
+        error: result.videoError,
       );
-      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
+      return result;
     }
+
+    // The socket is up, so the connection stays connected whatever the
+    // steps after it do.
+    _connection = ConnectionState.connected(_state.currentUser.id);
+    try {
+      _onConnected();
+    } catch (e, stk) {
+      _logger.e(() => '[connect] setting up the connection failed: $e\n$stk');
+    }
+    if (registerPushDevice) _registerPushDevice();
+
+    return Result.success(token);
   }
 
+  /// Registers the push device, unless a connect of this connection did.
+  /// A failed registration is tried again by the next connect asking for it.
   void _registerPushDevice() {
     if (_pushDeviceRegistered) return;
     final manager = _pushNotificationManager();
     if (manager == null) return;
-    _pushDeviceRegistered = true;
-    manager.registerDevice();
+    try {
+      manager.registerDevice();
+      _pushDeviceRegistered = true;
+    } catch (e, stk) {
+      _logger.e(() => '[connect] registering the push device failed: $e\n$stk');
+    }
   }
 
-  /// Disconnects the user. [unregisterPushDevice] unregisters the push device
-  /// first, so the user gets no more pushes on it.
+  /// Disconnects the user, and with [unregisterPushDevice] unregisters the
+  /// push device first, so the user gets no more pushes on it.
+  ///
+  /// The user ends up disconnected whatever a step fails with. Also when the
+  /// socket dropped earlier and is still reconnecting: that is closed too.
+  /// Returns the failure of closing the socket, if it failed.
   Future<Result<None>> disconnect({bool unregisterPushDevice = true}) {
     return _lock.synchronized(
       () => _disconnect(unregisterPushDevice: unregisterPushDevice),
@@ -168,29 +186,39 @@ class CoordinatorConnection {
 
   Future<Result<None>> _disconnect({required bool unregisterPushDevice}) async {
     _logger.i(() => '[disconnect] currentUser.id: ${_state.currentUser.id}');
-    if (_connection.isDisconnected) {
-      _logger.w(() => '[disconnect] rejected (already disconnected)');
-      // Reachable with state still held: a dropped websocket marks the client
-      // disconnected without coming through here.
-      await _onDisconnected(wasConnected: false);
-      return const Result.success(none);
-    }
-    try {
-      if (unregisterPushDevice) {
+
+    if (unregisterPushDevice) {
+      try {
         await _pushNotificationManager()?.unregisterDevice();
+      } catch (e, stk) {
+        _logger.e(
+          () => '[disconnect] unregistering the push device failed: $e\n$stk',
+        );
       }
-      _pushDeviceRegistered = false;
-
-      await _client.disconnectUser();
-
-      await _onDisconnected(wasConnected: true);
-      _connection = ConnectionState.disconnected(_state.currentUser.id);
-      _logger.v(() => '[disconnect] completed');
-      return const Result.success(none);
-    } catch (e, stk) {
-      _logger.e(() => '[disconnect] failed: $e');
-      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
+    _pushDeviceRegistered = false;
+
+    // Closes a socket that is still reconnecting after a drop as well; with
+    // no user connected it does nothing.
+    Result<None> result;
+    try {
+      result = await _client.disconnectUser();
+    } catch (e, stk) {
+      result = Result.failure(StreamVideoExceptions.compose(e, stk), stk);
+    }
+    if (result case Failure(:final error)) {
+      _logger.e(() => '[disconnect] closing the socket failed: $error');
+    }
+
+    try {
+      await _onDisconnected();
+    } catch (e, stk) {
+      _logger.e(() => '[disconnect] dropping the connection failed: $e\n$stk');
+    }
+
+    _connection = ConnectionState.disconnected(_state.currentUser.id);
+    _logger.v(() => '[disconnect] completed');
+    return result;
   }
 
   /// Disconnects the user without unregistering the push device, and refuses
@@ -198,7 +226,10 @@ class CoordinatorConnection {
   Future<void> dispose() {
     return _lock.synchronized(() async {
       _disposed = true;
-      await _disconnect(unregisterPushDevice: false);
+      final result = await _disconnect(unregisterPushDevice: false);
+      if (result case Failure(:final error)) {
+        _logger.w(() => '[dispose] disconnect failed: $error');
+      }
     });
   }
 
