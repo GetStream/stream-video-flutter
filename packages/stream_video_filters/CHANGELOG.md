@@ -1,4 +1,4 @@
-## Upcoming
+## 1.7.0
 
 ### 🔄 Changed
 
