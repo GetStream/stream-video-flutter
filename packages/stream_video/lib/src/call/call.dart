@@ -617,6 +617,9 @@ class Call {
   /// It is better to pass the [connectOptions] to [join] method,
   /// setting it directly has to be done carefully. Depending on the moment in the call lifecycle,
   /// it might be overwritten by default configuration or it might be too late to apply the changes.
+  ///
+  /// Refused while the call is connected. A value set during a join or a
+  /// reconnect is not merged until the next join.
   set connectOptions(CallConnectOptions connectOptions) =>
       _media.connectOptions = connectOptions;
 
@@ -1573,7 +1576,9 @@ class Call {
     CameraConstraints? constraints,
   }) => _media.setCameraEnabled(enabled: enabled, constraints: constraints);
 
-  /// Changes the camera capture target resolution during an active call.
+  /// Changes the camera capture target resolution. It applies to the live
+  /// camera, and every later session opens the camera at it, over the call
+  /// settings.
   Future<Result<None>> setCameraTargetResolution(
     StreamTargetResolution targetResolution,
   ) => _media.setCameraTargetResolution(targetResolution);

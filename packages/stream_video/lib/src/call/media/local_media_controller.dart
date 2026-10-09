@@ -64,9 +64,9 @@ class LocalMediaController {
   CallConnectOptions _connectOptions = const CallConnectOptions();
   CallConnectOptions? _connectOptionsOverride;
 
-  /// Whether the join has applied the call settings, after which an override
-  /// is no longer merged.
-  bool _joinSettingsApplied = false;
+  /// The camera resolution [setCameraTargetResolution] asked for. It wins
+  /// over the call settings each time they are applied.
+  StreamTargetResolution? _requestedTargetResolution;
 
   CallState get _state => _stateManager.callState;
 
@@ -75,8 +75,9 @@ class LocalMediaController {
   CallConnectOptions get connectOptions =>
       _connectOptionsOverride ?? _connectOptions;
 
-  /// Sets the options the join merges over the call settings. Refused once
-  /// the call is connected.
+  /// Sets the options the next join merges over the call settings. Refused
+  /// while the call is connected. A value set during a join or a reconnect is
+  /// not merged until the next join.
   set connectOptions(CallConnectOptions connectOptions) {
     if (_state.status is CallStatusConnected) {
       _logger.w(
@@ -108,11 +109,11 @@ class LocalMediaController {
       _connectOptions = _connectOptions.merge(_connectOptionsOverride!);
       _connectOptionsOverride = null;
     }
-
-    _joinSettingsApplied = true;
   }
 
-  /// Resolves the connect options from [settings] and the devices present.
+  /// Writes the camera, microphone, devices and resolutions [settings] and
+  /// the devices present ask for over the connect options, starting from an
+  /// override when one is set. A requested camera resolution is kept.
   Future<void> applyCallSettings(CallSettings settings) async {
     final mediaDevicesResult = await _rtcMediaDeviceNotifier
         .enumerateDevicesFor(
@@ -197,7 +198,8 @@ class LocalMediaController {
           : FacingMode.environment,
       speakerDefaultOn:
           !defaultAudioOutputIsExternal && speakerOnWithSettingsPriority,
-      targetResolution: settings.video.targetResolution,
+      targetResolution:
+          _requestedTargetResolution ?? settings.video.targetResolution,
       screenShareTargetResolution: settings.screenShare.targetResolution,
     );
   }
@@ -822,14 +824,13 @@ class LocalMediaController {
   Future<Result<None>> setCameraTargetResolution(
     StreamTargetResolution targetResolution,
   ) async {
-    // Before the join has resolved the options, the override carries the
-    // resolution through it.
-    if (_joinSettingsApplied) {
-      _connectOptions = _connectOptions.copyWith(
-        targetResolution: targetResolution,
-      );
-    } else {
-      _connectOptionsOverride = connectOptions.copyWith(
+    _requestedTargetResolution = targetResolution;
+    _connectOptions = _connectOptions.copyWith(
+      targetResolution: targetResolution,
+    );
+    // An override replaces the options until the join merges it.
+    if (_connectOptionsOverride case final override?) {
+      _connectOptionsOverride = override.copyWith(
         targetResolution: targetResolution,
       );
     }
