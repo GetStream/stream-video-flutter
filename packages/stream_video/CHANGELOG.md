@@ -85,6 +85,7 @@
 
 ### 🐞 Fixed
 
+- A ring that ends before it is answered, such as one the caller cancels, no longer logs a timeout error once the ring's timeout runs out.
 - `StreamVideo.connect()` and `disconnect()` run one at a time in the order they are called, so a disconnect during a connect no longer leaves the user connected.
 - `Call.setCameraTargetResolution` during a call is now kept for later sessions.
 - `CallSettings` equality now compares every section.
