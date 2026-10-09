@@ -10,12 +10,12 @@ import 'package:stream_video_push_notification/stream_video_push_notification.da
 class MockCall extends Mock implements Call {}
 
 // ignore: subtype_of_sealed_class
-class MockRingingCallCoordinator extends Mock
-    implements RingingCallCoordinator {}
+class MockRingingFlowCoordinator extends Mock
+    implements RingingFlowCoordinator {}
 
 class MockStreamVideo extends Mock implements StreamVideo {
   @override
-  final MockRingingCallCoordinator ringing = MockRingingCallCoordinator();
+  final MockRingingFlowCoordinator ringing = MockRingingFlowCoordinator();
 
   // StreamVideo marks dispose as @mustBeOverridden. Routed back through the
   // mock rather than stubbed out here, since teardown is what these tests

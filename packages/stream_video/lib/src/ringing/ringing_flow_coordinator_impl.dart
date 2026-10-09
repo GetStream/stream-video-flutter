@@ -26,7 +26,7 @@ import '../models/disconnect_reason.dart';
 import '../push_notification/push_notification_manager.dart';
 import '../stream_video.dart' show StreamVideoOptions;
 import '../utils/result.dart';
-import 'ringing_call_coordinator.dart';
+import 'ringing_flow_coordinator.dart';
 
 /// Builds the [Call] for a ringing flow.
 @internal
@@ -41,11 +41,11 @@ typedef EnsureConnected =
       required bool registerPushDevice,
     });
 
-/// The [RingingCallCoordinator] behind `StreamVideo.ringing`, with the hooks
+/// The [RingingFlowCoordinator] behind `StreamVideo.ringing`, with the hooks
 /// the client drives it through.
 @internal
-class RingingCallCoordinatorImpl implements RingingCallCoordinator {
-  RingingCallCoordinatorImpl({
+class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
+  RingingFlowCoordinatorImpl({
     required this._state,
     required this._client,
     required this._pushNotificationManager,

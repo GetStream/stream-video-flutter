@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/core/client_state.dart';
 import 'package:stream_video/src/lifecycle/lifecycle_state.dart';
-import 'package:stream_video/src/ringing/ringing_call_coordinator_impl.dart';
+import 'package:stream_video/src/ringing/ringing_flow_coordinator_impl.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
@@ -33,7 +33,7 @@ void main() {
   late StreamController<RingingEvent> nativeEvents;
   late StreamVideoFixture fixture;
 
-  RingingCallCoordinator ringing() => fixture.streamVideo.ringing;
+  RingingFlowCoordinator ringing() => fixture.streamVideo.ringing;
 
   CallMetadata metadata({
     CallSessionData session = const CallSessionData(),
@@ -300,7 +300,7 @@ void main() {
         incoming();
         async.flushMicrotasks();
 
-        (ringing() as RingingCallCoordinatorImpl).dispose();
+        (ringing() as RingingFlowCoordinatorImpl).dispose();
         async.elapse(timeout * 2);
 
         verifyNeverRejected(CallRejectReason.timeout());
