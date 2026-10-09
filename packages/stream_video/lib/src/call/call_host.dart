@@ -27,6 +27,10 @@ abstract interface class CallHost {
 
   PushNotificationManager? get pushNotificationManager;
 
+  /// Whether calls set up media. A client that only handles a push in the
+  /// background does not.
+  bool get setsUpMedia;
+
   @internal
   ClientEventReporter get clientEventReporter;
 

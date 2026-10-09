@@ -159,6 +159,25 @@ void main() {
       },
     );
 
+    test('builds its client without media', () async {
+      bool? withoutMediaAtStart;
+      bool? withoutMediaAfterAwait;
+
+      await handle(
+        createStreamVideo: () async {
+          withoutMediaAtStart = StreamVideo.debugBuildsWithoutMedia;
+          // A factory that reads credentials first still builds inside it.
+          await Future<void>.delayed(Duration.zero);
+          withoutMediaAfterAwait = StreamVideo.debugBuildsWithoutMedia;
+          return client;
+        },
+      );
+
+      expect(withoutMediaAtStart, isTrue);
+      expect(withoutMediaAfterAwait, isTrue);
+      expect(StreamVideo.debugBuildsWithoutMedia, isFalse);
+    });
+
     test('does nothing when nobody is logged in', () async {
       final handled = await handle(createStreamVideo: factoryReturning(null));
 

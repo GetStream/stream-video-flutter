@@ -75,19 +75,26 @@ abstract class ClientState {
 }
 
 class MutableClientState implements ClientState {
-  MutableClientState(User user, this.options)
-    : user = MutableStateEmitter(user),
-      activeCalls = MutableStateEmitter([]),
-      activeCall = MutableStateEmitter(null),
-      watchedCalls = MutableStateEmitter([]),
-      incomingCall = MutableStateEmitter(null),
-      outgoingCall = MutableStateEmitter(null),
-      connection = MutableStateEmitter(
-        ConnectionState.disconnected(user.id),
-      ),
-      appLifecycleState = MutableStateEmitter(null);
+  MutableClientState(
+    User user, {
+    required this.allowMultipleActiveCalls,
+    required this.multiCallAudioPolicy,
+  }) : user = MutableStateEmitter(user),
+       activeCalls = MutableStateEmitter([]),
+       activeCall = MutableStateEmitter(null),
+       watchedCalls = MutableStateEmitter([]),
+       incomingCall = MutableStateEmitter(null),
+       outgoingCall = MutableStateEmitter(null),
+       connection = MutableStateEmitter(
+         ConnectionState.disconnected(user.id),
+       ),
+       appLifecycleState = MutableStateEmitter(null);
 
-  final StreamVideoOptions options;
+  /// Whether several calls may be active at once.
+  final bool allowMultipleActiveCalls;
+
+  /// How the audio of several active calls is shared.
+  final MultiCallAudioPolicy multiCallAudioPolicy;
 
   @override
   final MutableStateEmitter<User> user;
@@ -155,7 +162,7 @@ class MutableClientState implements ClientState {
   }
 
   Call? getActiveCall() {
-    if (options.allowMultipleActiveCalls) {
+    if (allowMultipleActiveCalls) {
       throw Exception(
         'Multiple active calls are enabled, use getActiveCalls instead',
       );
@@ -169,7 +176,7 @@ class MutableClientState implements ClientState {
 
   @override
   Future<void> setActiveCall(Call? call) async {
-    if (!options.allowMultipleActiveCalls) {
+    if (!allowMultipleActiveCalls) {
       final currentlyActiveCall = activeCalls.value.firstOrNull;
       if (currentlyActiveCall != null) {
         await currentlyActiveCall.leave(reason: DisconnectReason.replaced());
@@ -178,7 +185,7 @@ class MutableClientState implements ClientState {
       activeCall.value = call;
       activeCalls.value = call == null ? [] : [call];
     } else if (call != null) {
-      switch (options.multiCallAudioPolicy) {
+      switch (multiCallAudioPolicy) {
         case MultiCallAudioPolicy.suspendExisting:
           // Auto-suspend every other currently-active call's audio before
           // this one claims mic/speaker/audio-session resources.
@@ -217,7 +224,7 @@ class MutableClientState implements ClientState {
 
   @override
   Future<void> removeActiveCall(Call call) async {
-    if (!options.allowMultipleActiveCalls &&
+    if (!allowMultipleActiveCalls &&
         activeCall.value?.callCid == call.callCid) {
       activeCall.value = null;
     }
@@ -232,9 +239,9 @@ class MutableClientState implements ClientState {
     ];
 
     // Resume next most recent call if using suspendExisting audio policy.
-    if (options.allowMultipleActiveCalls &&
+    if (allowMultipleActiveCalls &&
         remaining.isNotEmpty &&
-        options.multiCallAudioPolicy == MultiCallAudioPolicy.suspendExisting) {
+        multiCallAudioPolicy == MultiCallAudioPolicy.suspendExisting) {
       final next = remaining.last;
       try {
         await next.resumeAudio();
