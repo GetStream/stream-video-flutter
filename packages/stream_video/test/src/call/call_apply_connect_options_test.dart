@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
@@ -9,6 +10,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import '../../test_helpers.dart';
 import 'fixtures/call_test_helpers.dart';
 import 'fixtures/connection_harness.dart';
+import 'fixtures/data.dart';
 
 class _MockRtcManager extends Mock implements RtcManager {
   @override
@@ -82,7 +84,7 @@ void main() {
       addTearDown(call.dispose);
 
       await call.join(connectOptions: connectOptions);
-      // `_applyConnectOptions` is started unawaited, so let it settle.
+      // The connect options are applied unawaited, so let them settle.
       await pumpEventQueue();
 
       return call;
@@ -174,7 +176,7 @@ void main() {
     late ConnectionHarness harness;
 
     setUp(() {
-      harness = ConnectionHarness(sessionCount: 2);
+      harness = ConnectionHarness(sessionCount: 3);
       for (final permission in CallPermission.values) {
         when(
           () => harness.permissionsManager.hasPermission(permission),
@@ -218,7 +220,7 @@ void main() {
     test(
       'a resolution set during the call is used by the camera a rejoin opens',
       () async {
-        final [_, second] = harness.sessions;
+        final [_, second, _] = harness.sessions;
         final call = harness.buildCall();
         await call.join();
         await pumpEventQueue();
@@ -235,6 +237,80 @@ void main() {
         final constraints =
             verify(
                   () => second.setCameraEnabled(
+                    true,
+                    constraints: captureAny(named: 'constraints'),
+                  ),
+                ).captured.single
+                as CameraConstraints;
+        expect(constraints.params, resolution.toVideoParams());
+      },
+      timeout: const Timeout(Duration(seconds: 30)),
+    );
+
+    test(
+      'a resolution set between failed join attempts is used by the attempt '
+      'that joins again',
+      () async {
+        final [first, second, third] = harness.sessions;
+        // The call settings name a resolution of their own, which a join
+        // applies again.
+        final joined = SampleCallData.coordinatorJoinedSuccess;
+        harness.stubJoinCall(
+          () async => Result.success(
+            CoordinatorJoined(
+              wasCreated: joined.wasCreated,
+              members: joined.members,
+              users: joined.users,
+              duration: joined.duration,
+              statsOptions: joined.statsOptions,
+              ownCapabilities: joined.ownCapabilities,
+              credentials: joined.credentials,
+              metadata: CallMetadata(
+                cid: joined.metadata.cid,
+                details: joined.metadata.details,
+                session: joined.metadata.session,
+                users: joined.metadata.users,
+                members: joined.metadata.members,
+                settings: const CallSettings(
+                  video: StreamVideoSettings(
+                    targetResolution: StreamTargetResolution(
+                      width: 1280,
+                      height: 720,
+                      bitrate: 1500000,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        late final Call call;
+        // Two failures on one SFU make the next attempt join the coordinator
+        // again, to be sent elsewhere.
+        harness
+          ..stubSessionStart(first, () async {
+            await call.setCameraTargetResolution(resolution);
+            return const Result.failure(
+              StreamVideoException(message: 'sfu unreachable'),
+            );
+          })
+          ..stubSessionStart(
+            second,
+            () async => const Result.failure(
+              StreamVideoException(message: 'sfu unreachable'),
+            ),
+          );
+        call = harness.buildCall();
+
+        final result = await call.join(
+          connectOptions: CallConnectOptions(camera: TrackOption.enabled()),
+        );
+        await pumpEventQueue();
+
+        expect(result.isSuccess, isTrue);
+        final constraints =
+            verify(
+                  () => third.setCameraEnabled(
                     true,
                     constraints: captureAny(named: 'constraints'),
                   ),

@@ -79,7 +79,7 @@
 
 ### 🐞 Fixed
 
-- `Call.setCameraTargetResolution` during a call is now kept for the next session, instead of being dropped.
+- `Call.setCameraTargetResolution` during a call is now kept for later sessions.
 - `CallSettings` equality now compares every section.
 - A failed `Call.join` now returns the error it failed with, retries a retryable coordinator failure, and reports one telemetry abort.
 - A call ended remotely now sends the SFU leave message, like a local leave.
