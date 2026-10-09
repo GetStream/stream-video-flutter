@@ -63,7 +63,7 @@ class RtcManager extends Disposable {
     required this.subscriber,
     required this.publishOptions,
     required this.stateManager,
-    required StreamVideo streamVideo,
+    required CallHost streamVideo,
     required this.pcFactory,
     this.e2eeManager,
     this.sfuId,
@@ -81,7 +81,7 @@ class RtcManager extends Disposable {
   final CallStateNotifier stateManager;
   final TracedStreamPeerConnection? publisher;
   final TracedStreamPeerConnection subscriber;
-  final StreamVideo _streamVideo;
+  final CallHost _streamVideo;
   final String? sfuId;
   final int clientEventRetryCount;
 

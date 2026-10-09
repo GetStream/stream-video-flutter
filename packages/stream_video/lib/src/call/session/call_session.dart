@@ -75,7 +75,7 @@ class CallSession extends Disposable {
     required SdpEditor sdpEditor,
     required this.networkMonitor,
     required this.statsOptions,
-    required StreamVideo streamVideo,
+    required CallHost streamVideo,
     required Tracer tracer,
     required StreamPeerConnectionFactory pcFactory,
     required RetryPolicy retryPolicy,
@@ -134,7 +134,7 @@ class CallSession extends Disposable {
 
   final Tracer _tracer;
   final Tracer _zonedTracer = Tracer(null);
-  final StreamVideo _streamVideo;
+  final CallHost _streamVideo;
 
   final Duration joinResponseTimeout;
 

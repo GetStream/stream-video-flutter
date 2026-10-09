@@ -108,7 +108,7 @@ void main() {
       subscriber: _MockTracedStreamPeerConnection(),
       publishOptions: const [],
       stateManager: stateManager,
-      streamVideo: setupMockStreamVideo(),
+      streamVideo: setupMockCallHost(),
       pcFactory: StreamPeerConnectionFactory(
         callCid: SampleCallData.defaultCid,
       ),
@@ -189,7 +189,7 @@ void main() {
         subscriber: _MockTracedStreamPeerConnection(),
         publishOptions: const [],
         stateManager: stateManager,
-        streamVideo: setupMockStreamVideo(),
+        streamVideo: setupMockCallHost(),
         pcFactory: StreamPeerConnectionFactory(
           callCid: SampleCallData.defaultCid,
         ),

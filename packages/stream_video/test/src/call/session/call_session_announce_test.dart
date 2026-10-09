@@ -52,7 +52,7 @@ CallSession _buildTestSession({
 }) {
   final callCid = SampleCallData.defaultCid;
   final stateManager = createTestCallStateManager();
-  final streamVideo = setupMockStreamVideo();
+  final streamVideo = setupMockCallHost();
   when(() => streamVideo.apiKey).thenReturn('test-api-key');
 
   final session = CallSession(
@@ -166,7 +166,7 @@ _wireStalledPublisher(
     subscriber: _MockTracedStreamPeerConnection(),
     publishOptions: [_publishOption],
     stateManager: createTestCallStateManager(),
-    streamVideo: setupMockStreamVideo(),
+    streamVideo: setupMockCallHost(),
     pcFactory: StreamPeerConnectionFactory(callCid: SampleCallData.defaultCid),
   );
 

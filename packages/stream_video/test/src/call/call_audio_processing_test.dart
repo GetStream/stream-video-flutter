@@ -72,7 +72,7 @@ void main() {
     late BehaviorSubject<InternetStatus> internetStatusController;
     late MockCoordinatorClient coordinatorClient;
     late MockCallSession callSession;
-    late MockStreamVideo mockStreamVideo;
+    late MockCallHost mockStreamVideo;
     late MockPermissionsManager mockPermissionsManager;
 
     setUp(() {
@@ -81,7 +81,7 @@ void main() {
       );
       coordinatorClient = setupMockCoordinatorClient();
       callSession = setupMockCallSession();
-      mockStreamVideo = setupMockStreamVideo();
+      mockStreamVideo = setupMockCallHost();
       mockPermissionsManager = MockPermissionsManager();
     });
 
@@ -778,7 +778,7 @@ void main() {
             () => clientState.activeCalls,
           ).thenAnswer((_) => activeCallsEmitter);
 
-          final streamVideo = setupMockStreamVideo(clientState: clientState);
+          final streamVideo = setupMockCallHost(clientState: clientState);
           when(streamVideo.isAudioProcessorConfigured).thenReturn(true);
           when(
             () => streamVideo.setAudioProcessingEnabled(false),
@@ -786,7 +786,6 @@ void main() {
           when(
             () => streamVideo.setAudioProcessingEnabled(true),
           ).thenAnswer((_) async => const Result.success(none));
-          when(() => streamVideo.activeCalls).thenReturn(const <Call>[]);
 
           when(
             () => mockPermissionsManager.hasPermission(
