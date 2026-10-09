@@ -26,7 +26,7 @@ void main() {
     );
   });
 
-  group('RingingCallCoordinator.isCallAcceptedOnThisDevice', () {
+  group('RingingFlowCoordinator.isCallAcceptedOnThisDevice', () {
     late StreamVideo streamVideo;
     late MockCoordinatorClient mockCoordinatorClient;
 

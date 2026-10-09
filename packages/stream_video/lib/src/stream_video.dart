@@ -51,8 +51,8 @@ import 'network_monitor_settings.dart';
 import 'push_notification/push_notification_manager.dart';
 import 'retry/retry_policy.dart';
 import 'ring_state_polling_settings.dart';
-import 'ringing/ringing_call_coordinator.dart';
-import 'ringing/ringing_call_coordinator_impl.dart';
+import 'ringing/ringing_flow_coordinator.dart';
+import 'ringing/ringing_flow_coordinator_impl.dart';
 import 'telemetry/client_event_reporter.dart';
 import 'telemetry/client_event_transport.dart';
 import 'token/token.dart';
@@ -393,9 +393,9 @@ class StreamVideo extends Disposable {
 
   /// Handles ringing calls: the incoming ring, the native call screen's
   /// actions, the ringing pushes, and the auto-reject of an unanswered call.
-  RingingCallCoordinator get ringing => _ringing;
+  RingingFlowCoordinator get ringing => _ringing;
 
-  late final _ringing = RingingCallCoordinatorImpl(
+  late final _ringing = RingingFlowCoordinatorImpl(
     state: _state,
     client: _client,
     pushNotificationManager: () => pushNotificationManager,
@@ -754,13 +754,13 @@ class StreamVideo extends Disposable {
     return result;
   }
 
-  /// Forwards to [RingingCallCoordinator.onRingingEvent].
+  /// Forwards to [RingingFlowCoordinator.onRingingEvent].
   @Deprecated('Use ringing.onRingingEvent instead.')
   StreamSubscription<T>? onRingingEvent<T extends RingingEvent>(
     void Function(T event)? onEvent,
   ) => ringing.onRingingEvent<T>(onEvent);
 
-  /// Forwards to [RingingCallCoordinator.consumeAndAcceptActiveCall].
+  /// Forwards to [RingingFlowCoordinator.consumeAndAcceptActiveCall].
   @Deprecated('Use ringing.consumeAndAcceptActiveCall instead.')
   Future<bool> consumeAndAcceptActiveCall({
     void Function(Call)? onCallAccepted,
@@ -770,7 +770,7 @@ class StreamVideo extends Disposable {
     callPreferences: callPreferences,
   );
 
-  /// Forwards to [RingingCallCoordinator.observeCoreRingingEvents].
+  /// Forwards to [RingingFlowCoordinator.observeCoreRingingEvents].
   @Deprecated('Use ringing.observeCoreRingingEvents instead.')
   CompositeSubscription observeCoreRingingEvents({
     void Function(Call)? onCallAccepted,
@@ -781,12 +781,12 @@ class StreamVideo extends Disposable {
   );
 
   /// Forwards to
-  /// [RingingCallCoordinator.observeCoreRingingEventsForBackground].
+  /// [RingingFlowCoordinator.observeCoreRingingEventsForBackground].
   @Deprecated('Use ringing.observeCoreRingingEventsForBackground instead.')
   CompositeSubscription observeCoreRingingEventsForBackground() =>
       ringing.observeCoreRingingEventsForBackground();
 
-  /// Forwards to [RingingCallCoordinator.observeCallAcceptRingingEvent].
+  /// Forwards to [RingingFlowCoordinator.observeCallAcceptRingingEvent].
   @Deprecated('Use ringing.observeCallAcceptRingingEvent instead.')
   StreamSubscription<ActionCallAccept>? observeCallAcceptRingingEvent({
     void Function(Call)? onCallAccepted,
@@ -796,22 +796,22 @@ class StreamVideo extends Disposable {
     acceptCallPreferences: acceptCallPreferences,
   );
 
-  /// Forwards to [RingingCallCoordinator.observeCallIncomingRingingEvent].
+  /// Forwards to [RingingFlowCoordinator.observeCallIncomingRingingEvent].
   @Deprecated('Use ringing.observeCallIncomingRingingEvent instead.')
   StreamSubscription<ActionCallIncoming>? observeCallIncomingRingingEvent() =>
       ringing.observeCallIncomingRingingEvent();
 
-  /// Forwards to [RingingCallCoordinator.observeCallDeclinedRingingEvent].
+  /// Forwards to [RingingFlowCoordinator.observeCallDeclinedRingingEvent].
   @Deprecated('Use ringing.observeCallDeclinedRingingEvent instead.')
   StreamSubscription<ActionCallDecline>? observeCallDeclinedRingingEvent() =>
       ringing.observeCallDeclinedRingingEvent();
 
-  /// Forwards to [RingingCallCoordinator.observeCallEndedRingingEvent].
+  /// Forwards to [RingingFlowCoordinator.observeCallEndedRingingEvent].
   @Deprecated('Use ringing.observeCallEndedRingingEvent instead.')
   StreamSubscription<ActionCallEnded>? observeCallEndedRingingEvent() =>
       ringing.observeCallEndedRingingEvent();
 
-  /// Forwards to [RingingCallCoordinator.verifyDisplayedIncomingCalls].
+  /// Forwards to [RingingFlowCoordinator.verifyDisplayedIncomingCalls].
   @Deprecated('Use ringing.verifyDisplayedIncomingCalls instead.')
   Future<void> verifyDisplayedIncomingCalls({
     void Function(Call)? onCallAccepted,
@@ -821,12 +821,12 @@ class StreamVideo extends Disposable {
     acceptCallPreferences: acceptCallPreferences,
   );
 
-  /// Forwards to [RingingCallCoordinator.isCallAcceptedOnThisDevice].
+  /// Forwards to [RingingFlowCoordinator.isCallAcceptedOnThisDevice].
   @Deprecated('Use ringing.isCallAcceptedOnThisDevice instead.')
   bool isCallAcceptedOnThisDevice(String cid) =>
       ringing.isCallAcceptedOnThisDevice(cid);
 
-  /// Forwards to [RingingCallCoordinator.handleRingingFlowNotifications].
+  /// Forwards to [RingingFlowCoordinator.handleRingingFlowNotifications].
   @Deprecated('Use ringing.handleRingingFlowNotifications instead.')
   Future<bool> handleRingingFlowNotifications(
     Map<String, dynamic> payload, {
@@ -836,14 +836,14 @@ class StreamVideo extends Disposable {
     handleMissedCall: handleMissedCall,
   );
 
-  /// Forwards to [RingingCallCoordinator.getCallRingingState].
+  /// Forwards to [RingingFlowCoordinator.getCallRingingState].
   @Deprecated('Use ringing.getCallRingingState instead.')
   Future<CallRingingState> getCallRingingState({
     required StreamCallType callType,
     required String id,
   }) => ringing.getCallRingingState(callType: callType, id: id);
 
-  /// Forwards to [RingingCallCoordinator.consumeIncomingCall].
+  /// Forwards to [RingingFlowCoordinator.consumeIncomingCall].
   @Deprecated('Use ringing.consumeIncomingCall instead.')
   Future<Result<Call>> consumeIncomingCall({
     required String uuid,

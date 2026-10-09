@@ -17,7 +17,7 @@ import '../utils/result.dart';
 ///
 /// Reached through `StreamVideo.ringing`. Implemented only by the SDK.
 @sealed
-abstract interface class RingingCallCoordinator {
+abstract interface class RingingFlowCoordinator {
   /// Listens to the ringing events of type [T] the push notification manager
   /// reports, or returns `null` when there is no manager.
   StreamSubscription<T>? onRingingEvent<T extends RingingEvent>(
