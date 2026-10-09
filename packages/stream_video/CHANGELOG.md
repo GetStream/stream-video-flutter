@@ -68,7 +68,10 @@
 
 ### 🔄 Changed
 
-- `StreamVideo.dispose()` leaves and disposes the calls it tracks.
+- `StreamVideo.dispose()` leaves and disposes the calls it tracks, and disconnects the user like `disconnect()` but keeps the push device registered.
+- A `StreamVideo.connect()` that registers the push device now does so even when the connect that opened the connection skipped it.
+- `StreamVideo.disconnect()` leaves the user disconnected even when unregistering the push device fails, or when the connection had dropped and was reconnecting.
+- `StreamVideo.disconnect()` also unregisters the push device when the user never connected.
 - Leaving or disposing an outgoing call you created while it still rings cancels the ring.
 - With `closedCaptionsVisibilityDurationMs` at 0 or less, closed captions are now shown and stay until newer ones replace them, instead of never being shown.
 - A `call.rejected` event now settles a ring by the same rules as the push and ring-state checks (`RingingSnapshot`), so the paths can no longer disagree. These cases change:
@@ -80,6 +83,7 @@
 
 ### 🐞 Fixed
 
+- `StreamVideo.connect()` and `disconnect()` run one at a time in the order they are called, so a disconnect during a connect no longer leaves the user connected.
 - `Call.setCameraTargetResolution` during a call is now kept for later sessions.
 - `CallSettings` equality now compares every section.
 - A failed `Call.join` now returns the error it failed with, retries a retryable coordinator failure, and reports one telemetry abort.

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:async/async.dart' as async;
 import 'package:collection/collection.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
@@ -22,10 +21,9 @@ import 'coordinator/coordinator_client.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'coordinator/open_api/coordinator_client_open_api.dart';
 import 'core/client_state.dart';
-import 'core/connection_state.dart';
+import 'core/coordinator_connection.dart';
 import 'core/internet_connection_network_state_provider.dart';
 import 'errors/stream_video_exception.dart';
-import 'errors/stream_video_exception_composer.dart';
 import 'internal/_background_mute_policy.dart';
 import 'internal/_instance_holder.dart';
 import 'latency/latency_service.dart';
@@ -63,8 +61,6 @@ import 'telemetry/client_event_transport.dart';
 import 'token/token.dart';
 import 'token/token_provider_factory.dart';
 import 'token/token_source.dart';
-import 'utils/cancelable_operation.dart';
-import 'utils/future.dart';
 import 'utils/none.dart';
 import 'utils/result.dart';
 import 'utils/subscriptions.dart';
@@ -440,117 +436,48 @@ class StreamVideo extends Disposable {
   /// in the reactive [Call.state].
   Stream<CoordinatorEvent> get events => _client.events;
 
-  async.CancelableOperation<Result<UserToken>>? _connectOperation;
-  async.CancelableOperation<Result<None>>? _disconnectOperation;
-
-  set _connectionState(ConnectionState newState) {
-    final curState = _connectionState;
-    if (curState != newState) {
-      _logger.i(() => '[setConnectionState] #client; $newState <= $curState');
-      _state.connection.value = newState;
-    }
-  }
-
-  ConnectionState get _connectionState => _state.connection.value;
-
-  /// Connects the user to the Stream Video service.
-  Future<Result<UserToken>> connect({
-    bool includeUserDetails = true,
-    bool registerPushDevice = true,
-  }) async {
-    if (currentUserType == UserType.anonymous) {
-      _logger.w(() => '[connect] rejected (anonymous user)');
-      return failureWithError(
-        'Cannot connect anonymous user to the WS due to Missing Permissions',
-      );
-    }
-
-    _connectOperation ??= _connect(
-      includeUserDetails: includeUserDetails,
-      registerPushDevice: registerPushDevice,
-    ).asCancelable();
-
-    return _connectOperation!
-        .valueOrDefault(failureWithError('connect was cancelled'))
-        .whenComplete(() {
-          _logger.i(() => '[connect] clear shared operation');
-          _connectOperation = null;
-        });
-  }
-
-  /// Disconnects the user from the Stream Video service.
-  Future<Result<None>> disconnect() async {
-    _disconnectOperation ??= _disconnect().asCancelable();
-    return _disconnectOperation!
-        .valueOrDefault(failureWithError('disconnect was cancelled'))
-        .whenComplete(() {
-          _logger.i(() => '[disconnect] clear shared operation');
-          _disconnectOperation = null;
-        });
-  }
-
-  Future<Result<UserToken>> _connect({
-    bool includeUserDetails = false,
-    bool registerPushDevice = true,
-  }) async {
-    _logger.i(() => '[connect] currentUser.id: ${_state.currentUser.id}');
-
-    if (_connectionState.isConnected) {
-      _logger.w(() => '[connect] rejected (already connected)');
-      // The cache can be briefly empty while a token refresh is in flight;
-      // getToken serves the cached token when present and otherwise waits
-      // for the refresh instead of failing.
-      return _tokens.getToken();
-    }
-
-    _connectionState = ConnectionState.connecting(_state.currentUser.id);
-
-    // Establishes a guest's server-assigned identity, unless a request that
-    // needed a token got there first.
-    final tokenResult = await _tokens.getToken();
-    if (tokenResult is! Success<UserToken>) {
-      _logger.e(() => '[connect] token fetching failed: $tokenResult');
-      _connectionState = ConnectionState.failed(
-        _state.currentUser.id,
-        error: (tokenResult as Failure).videoError,
-      );
-      return tokenResult;
-    }
-
-    final user = _state.user.value;
-    _logger.v(() => '[connect] currentUser.id : ${user.id}');
-    try {
-      await _disconnectOperation?.cancel();
-      final result = await _client.connectUser(
-        user.toUserInfo(),
-        includeUserDetails: includeUserDetails,
-      );
-      _logger.v(() => '[connect] completed: $result');
-      if (result is Failure) {
-        _connectionState = ConnectionState.failed(
-          _state.currentUser.id,
-          error: result.videoError,
-        );
-        return result;
-      }
-      _connectionState = ConnectionState.connected(_state.currentUser.id);
+  /// Connects the user, and disconnects them again.
+  late final _connection = CoordinatorConnection(
+    client: _client,
+    state: _state,
+    tokens: _tokens,
+    pushNotificationManager: () => pushNotificationManager,
+    onConnected: () {
       _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
       _subscriptions.add(
         _idAppState,
         (_appStateOverride?.call() ?? lifecycle.appState).listen(_onAppState),
       );
+    },
+    onDisconnected: () async {
+      _subscriptions.cancelAll();
+      _clearRingingState();
+      await _state.clear();
+    },
+  );
 
-      // Register device with push notification manager.
-      if (registerPushDevice) {
-        pushNotificationManager?.registerDevice();
-      }
-
-      return Result.success(tokenResult.data);
-    } catch (e, stk) {
-      _logger.e(() => '[connect] failed(${user.id}): $e');
-      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
-    }
+  /// Connects the user to the Stream Video service.
+  ///
+  /// Connects and disconnects run one at a time, in the order they are
+  /// called. A connect while the user is connected opens no second connection
+  /// and returns the current token, so [includeUserDetails] only applies to
+  /// the connect that opens it; one queued behind a connect that failed tries
+  /// again itself. [registerPushDevice] registers the push device once per
+  /// connection, also from a later connect when the first one skipped it.
+  Future<Result<UserToken>> connect({
+    bool includeUserDetails = true,
+    bool registerPushDevice = true,
+  }) {
+    return _connection.connect(
+      includeUserDetails: includeUserDetails,
+      registerPushDevice: registerPushDevice,
+    );
   }
+
+  /// Disconnects the user from the Stream Video service, and unregisters the
+  /// push device. The user ends up disconnected even when a step fails; the
+  /// result reports a failure to close the connection.
+  Future<Result<None>> disconnect() => _connection.disconnect();
 
   /// Drops the per-connection ringing bookkeeping.
   void _clearRingingState() {
@@ -560,35 +487,6 @@ class StreamVideo extends Disposable {
     _handledIncomingCallCids.clear();
   }
 
-  Future<Result<None>> _disconnect() async {
-    _logger.i(() => '[disconnect] currentUser.id: ${_state.currentUser.id}');
-    if (_connectionState.isDisconnected) {
-      _logger.w(() => '[disconnect] rejected (already disconnected)');
-      // Reachable with state still held: a dropped websocket marks the client
-      // disconnected without coming through here.
-      _clearRingingState();
-      return const Result.success(none);
-    }
-    try {
-      await _connectOperation?.cancel();
-
-      // Unregister device from push notification manager.
-      await pushNotificationManager?.unregisterDevice();
-
-      await _client.disconnectUser();
-      _subscriptions.cancelAll();
-
-      _clearRingingState();
-      await _state.clear();
-      _connectionState = ConnectionState.disconnected(_state.currentUser.id);
-      _logger.v(() => '[disconnect] completed');
-      return const Result.success(none);
-    } catch (e, stk) {
-      _logger.e(() => '[disconnect] failed: $e');
-      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
-    }
-  }
-
   @override
   Future<void> dispose() async {
     _logger.i(() => '[dispose]');
@@ -596,9 +494,9 @@ class StreamVideo extends Disposable {
     // that leaves.
     await _disposeCalls(_trackedCalls());
 
-    if (!_connectionState.isDisconnected) {
-      await _client.disconnectUser();
-    }
+    // Keeps the push device registered: a client disposed after handling a
+    // push in the background must not stop the next one.
+    await _connection.dispose();
 
     for (final timer in _incomingAutoRejectTimers.values) {
       timer.cancel();
@@ -676,15 +574,9 @@ class StreamVideo extends Disposable {
       _state.incomingCall.value = call;
     } else if (event is CoordinatorCallRejectedEvent) {
       unawaited(_onRingingCancelled(event));
-    } else if (event is CoordinatorConnectedEvent) {
-      _logger.i(() => '[onCoordinatorEvent] connected ${event.userId}');
-      _connectionState = ConnectionState.connected(_state.currentUser.id);
-      _rewatchCalls();
-    } else if (event is CoordinatorDisconnectedEvent) {
-      _logger.i(() => '[onCoordinatorEvent] disconnected ${event.userId}');
-      _connectionState = ConnectionState.disconnected(_state.currentUser.id);
-    } else if (event is CoordinatorReconnectedEvent) {
-      _logger.i(() => '[onCoordinatorEvent] reconnected ${event.userId}');
+    } else {
+      _connection.handleEvent(event);
+      if (event is CoordinatorConnectedEvent) _rewatchCalls();
     }
   }
 
