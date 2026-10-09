@@ -14,6 +14,7 @@ class _MockPushNotificationManager extends Mock
 /// how they interleave.
 void main() {
   setUpAll(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
     registerFallbackValue(const UserInfo(id: 'fallback'));
   });
 
@@ -69,7 +70,10 @@ void main() {
 
     expect((await first).isSuccess, isTrue);
     expect((await second).isSuccess, isTrue);
-    verifyConnectUser().called(1);
+    // The first connect opened it, with its own user details.
+    verify(
+      () => fixture.client.connectUser(any(), includeUserDetails: true),
+    ).called(1);
     verify(push.registerDevice).called(1);
   });
 
@@ -173,6 +177,9 @@ void main() {
     final connecting = fixture.streamVideo.connect();
     await pumpEventQueue();
     final disposing = fixture.streamVideo.dispose();
+    await pumpEventQueue();
+    // The dispose waits for the connect, so the socket is not closed under it.
+    verifyNever(fixture.client.disconnectUser);
     opened.complete(const Result.success(none));
 
     await connecting;
@@ -221,5 +228,171 @@ void main() {
     );
     await pumpEventQueue();
     expect(connection().isConnected, isTrue);
+  });
+
+  test('rejects a connect for an anonymous user', () async {
+    final anonymous = StreamVideoFixture(user: User.anonymous());
+    addTearDown(anonymous.dispose);
+
+    final result = await anonymous.streamVideo.connect();
+
+    expect(result.isFailure, isTrue);
+    verifyNever(
+      () => anonymous.client.connectUser(
+        any(),
+        includeUserDetails: any(named: 'includeUserDetails'),
+      ),
+    );
+  });
+
+  test('a token that cannot be used leaves the connection failed', () async {
+    final client = StreamVideo.forTesting(
+      'test-api-key',
+      user: fixture.user,
+      // Issued for another user, so it is refused before the socket opens.
+      userToken: fakeJwt('someone-else'),
+      options: StreamVideoOptions(autoConnect: false),
+      coordinatorClient: fixture.client,
+    );
+    addTearDown(client.dispose);
+
+    final result = await client.connect();
+
+    expect(result.isFailure, isTrue);
+    expect(client.state.connection.value.isFailed, isTrue);
+    verifyNever(
+      () => fixture.client.connectUser(
+        any(),
+        includeUserDetails: any(named: 'includeUserDetails'),
+      ),
+    );
+  });
+
+  test('stays connected when setting up the connection throws', () async {
+    when(() => fixture.client.events).thenThrow(StateError('events'));
+
+    final result = await fixture.streamVideo.connect();
+
+    expect(result.isSuccess, isTrue);
+    expect(connection().isConnected, isTrue);
+    verify(push.registerDevice).called(1);
+  });
+
+  test('a push registration that throws is tried again', () async {
+    when(push.registerDevice).thenThrow(StateError('push'));
+
+    final result = await fixture.streamVideo.connect();
+    expect(result.isSuccess, isTrue);
+
+    when(push.registerDevice).thenReturn(null);
+    await fixture.streamVideo.connect();
+
+    verify(push.registerDevice).called(2);
+  });
+
+  test('a disconnect after the socket dropped still closes it', () async {
+    await fixture.streamVideo.connect();
+    fixture.events.emit(
+      const CoordinatorDisconnectedEvent(userId: 'test-user'),
+    );
+    await pumpEventQueue();
+    expect(connection().isDisconnected, isTrue);
+
+    await fixture.streamVideo.disconnect();
+
+    verify(push.unregisterDevice).called(1);
+    verify(fixture.client.disconnectUser).called(1);
+    // The socket coming back no longer reaches the client.
+    fixture.events.emit(
+      const CoordinatorConnectedEvent(
+        userId: 'test-user',
+        connectionId: 'connection-id',
+      ),
+    );
+    await pumpEventQueue();
+    expect(connection().isDisconnected, isTrue);
+  });
+
+  test('a disconnect, connect and disconnect run in order', () async {
+    await fixture.streamVideo.connect();
+
+    final results = await Future.wait([
+      fixture.streamVideo.disconnect(),
+      fixture.streamVideo.connect(),
+      fixture.streamVideo.disconnect(),
+    ]);
+
+    expect(results.every((result) => result.isSuccess), isTrue);
+    verifyConnectUser().called(2);
+    verify(fixture.client.disconnectUser).called(2);
+    expect(connection().isDisconnected, isTrue);
+  });
+
+  test('a failed unregister does not stop the disconnect', () async {
+    await fixture.streamVideo.connect();
+    when(push.unregisterDevice).thenThrow(StateError('push'));
+
+    final result = await fixture.streamVideo.disconnect();
+
+    expect(result.isSuccess, isTrue);
+    verify(fixture.client.disconnectUser).called(1);
+    expect(connection().isDisconnected, isTrue);
+  });
+
+  test(
+    'a socket that fails to close still leaves the user disconnected',
+    () async {
+      await fixture.streamVideo.connect();
+      when(fixture.client.disconnectUser).thenAnswer(
+        (_) async => const Result.failure(StreamVideoException(message: 'ws')),
+      );
+
+      final result = await fixture.streamVideo.disconnect();
+
+      expect(result.isFailure, isTrue);
+      expect(connection().isDisconnected, isTrue);
+    },
+  );
+
+  test('a connected event watches the watched calls again', () async {
+    when(
+      () => fixture.client.queryCalls(
+        filterConditions: any(named: 'filterConditions'),
+        next: any(named: 'next'),
+        prev: any(named: 'prev'),
+        sorts: any(named: 'sorts'),
+        limit: any(named: 'limit'),
+        watch: any(named: 'watch'),
+      ),
+    ).thenAnswer((_) async => failureWithError('offline'));
+    await fixture.streamVideo.connect();
+    final call = fixture.streamVideo.makeCall(
+      callType: StreamCallType.defaultType(),
+      id: 'watched',
+    );
+    fixture.streamVideo.state.setWatchedCall(call);
+
+    fixture.events.emit(
+      const CoordinatorConnectedEvent(
+        userId: 'test-user',
+        connectionId: 'connection-id',
+      ),
+    );
+    await pumpEventQueue();
+
+    verify(
+      () => fixture.client.queryCalls(
+        filterConditions: {
+          'cid': {
+            r'$in': [call.callCid.value],
+          },
+        },
+        next: any(named: 'next'),
+        prev: any(named: 'prev'),
+        sorts: any(named: 'sorts'),
+        limit: any(named: 'limit'),
+        watch: true,
+      ),
+    ).called(1);
   });
 }

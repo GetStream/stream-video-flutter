@@ -449,21 +449,21 @@ class StreamVideo extends Disposable {
         (_appStateOverride?.call() ?? lifecycle.appState).listen(_onAppState),
       );
     },
-    onDisconnected: ({required wasConnected}) async {
-      if (wasConnected) _subscriptions.cancelAll();
+    onDisconnected: () async {
+      _subscriptions.cancelAll();
       _clearRingingState();
-      if (wasConnected) await _state.clear();
+      await _state.clear();
     },
   );
 
   /// Connects the user to the Stream Video service.
   ///
   /// Connects and disconnects run one at a time, in the order they are
-  /// called. A connect while the user is connected, or queued behind another
-  /// connect, opens no second connection and returns the current token:
-  /// [includeUserDetails] only applies to the connect that opens it.
-  /// [registerPushDevice] registers the push device once per connection, also
-  /// from a later connect when the first one skipped it.
+  /// called. A connect while the user is connected opens no second connection
+  /// and returns the current token, so [includeUserDetails] only applies to
+  /// the connect that opens it; one queued behind a connect that failed tries
+  /// again itself. [registerPushDevice] registers the push device once per
+  /// connection, also from a later connect when the first one skipped it.
   Future<Result<UserToken>> connect({
     bool includeUserDetails = true,
     bool registerPushDevice = true,
@@ -475,7 +475,8 @@ class StreamVideo extends Disposable {
   }
 
   /// Disconnects the user from the Stream Video service, and unregisters the
-  /// push device.
+  /// push device. The user ends up disconnected even when a step fails; the
+  /// result reports a failure to close the connection.
   Future<Result<None>> disconnect() => _connection.disconnect();
 
   /// Drops the per-connection ringing bookkeeping.

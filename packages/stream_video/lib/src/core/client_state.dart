@@ -100,10 +100,11 @@ class MutableClientState implements ClientState {
   @override
   final MutableStateEmitter<LifecycleState?> appLifecycleState;
 
+  /// Drops the active and outgoing calls. The connection state is left to
+  /// the client's connection.
   Future<void> clear() async {
     activeCalls.value = [];
     outgoingCall.value = null;
-    connection.value = ConnectionState.disconnected(user.value.id);
   }
 
   Call? getActiveCall() {
