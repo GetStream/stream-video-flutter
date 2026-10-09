@@ -102,7 +102,12 @@ class CoordinatorConnection {
       // The cache can be briefly empty while a token refresh is in flight;
       // getToken serves the cached token when present and otherwise waits
       // for the refresh instead of failing.
-      return _tokens.getToken();
+      try {
+        return await _tokens.getToken();
+      } catch (e, stk) {
+        _logger.e(() => '[connect] token fetching failed: $e');
+        return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
+      }
     }
 
     _connection = ConnectionState.connecting(_state.currentUser.id);
