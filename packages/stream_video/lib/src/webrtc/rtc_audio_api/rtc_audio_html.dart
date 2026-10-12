@@ -12,6 +12,7 @@ import 'package:web/web.dart' as web;
 
 import '../../call/stats/trace_tag.dart';
 import '../../logger/stream_log.dart';
+import '../../utils/user_agent.dart';
 
 const audioContainerId = 'stream_audio_container';
 const audioPrefix = 'stream_audio_';
@@ -35,6 +36,21 @@ void setAudioTraceHandler(AudioTraceHandler? handler) {
 void _trace(String tag, Object? data) => _traceHandler?.call(tag, data);
 
 final _watchdogs = <String, _AudioPlaybackWatchdog>{};
+
+/// The JS track each remote audio element currently plays, by track id.
+///
+/// Kept so [reattachRemoteAudio] can rebuild an element's stream without being
+/// handed the track again.
+final _attachedTracks = <String, web.MediaStreamTrack>{};
+
+/// Whether this page runs on WebKit, resolved once from the user agent.
+final bool _isWebKit = isWebKitUserAgent(web.window.navigator.userAgent);
+
+/// How long [reattachRemoteAudio] leaves the elements empty before giving them
+/// a new stream. The media element picks up a new `srcObject` in a queued
+/// task, so a detach and re-attach in the same task is seen as one swap; the
+/// gap makes the detach real.
+const _reattachDelay = Duration(milliseconds: 25);
 
 /// Track ids whose audio element the browser's autoplay policy is blocking.
 final _blockedTrackIds = <String>{};
@@ -81,18 +97,81 @@ void startAudio(String id, rtc.MediaStreamTrack track) {
 
   if (audioElement is! web.HTMLAudioElement) return;
 
+  _attach(id, audioElement, track.jsTrack);
+}
+
+/// Gives [element] a fresh stream carrying [track] and starts watching it.
+void _attach(
+  String id,
+  web.HTMLAudioElement element,
+  web.MediaStreamTrack track,
+) {
   final audioStream = web.MediaStream();
-  audioStream.addTrack(track.jsTrack);
-  audioElement.srcObject = audioStream;
+  audioStream.addTrack(track);
+  element.srcObject = audioStream;
+  _attachedTracks[id] = track;
 
   // `autoplay` alone fails silently when the browser's autoplay policy blocks
   // playback, so drive `play()` explicitly and watch the element from here on.
   _watchdogs.remove(id)?.dispose();
-  _watchdogs[id] = _AudioPlaybackWatchdog(trackId: id, element: audioElement);
+  _watchdogs[id] = _AudioPlaybackWatchdog(trackId: id, element: element);
+}
+
+/// The remote audio element of track [id], if it exists.
+web.HTMLAudioElement? _audioElementOf(String id) {
+  final element = web.document.getElementById(audioPrefix + id);
+  if (element == null || !element.isA<web.HTMLAudioElement>()) return null;
+  return element as web.HTMLAudioElement;
+}
+
+/// Detaches every remote audio element and re-attaches it with a fresh stream
+/// of the same track. WebKit only; a no-op elsewhere.
+///
+/// Called after a subscriber renegotiation that brought in a new audio source.
+/// Playback the autoplay policy blocks stays blocked: the retried `play()`
+/// is rejected again and the element stays in [_blockedTrackIds] for
+/// [resumeAudioPlayback]. [reason] names the trigger in the trace.
+Future<void> reattachRemoteAudio({required String reason}) async {
+  if (!_isWebKit) return;
+
+  final trackIds = _attachedTracks.keys.toList();
+  if (trackIds.isEmpty) return;
+
+  streamLog.i(
+    _tag,
+    () =>
+        'Re-attaching ${trackIds.length} remote audio element(s) '
+        'after $reason',
+  );
+  _trace(TraceTag.audioPlaybackReattach, {
+    'reason': reason,
+    'tracks': trackIds.length,
+    'blockedTracks': _blockedTrackIds.length,
+  });
+
+  for (final trackId in trackIds) {
+    // Dispose first, so the detach is not reported as an outage.
+    _watchdogs.remove(trackId)?.dispose();
+    _audioElementOf(trackId)?.srcObject = null;
+  }
+
+  await Future<void>.delayed(_reattachDelay);
+
+  for (final trackId in trackIds) {
+    final track = _attachedTracks[trackId];
+    final element = _audioElementOf(trackId);
+    // Stopped while we waited.
+    if (track == null || element == null) continue;
+    // Re-attached by a `startAudio` that ran while we waited.
+    if (element.srcObject != null) continue;
+
+    _attach(trackId, element, track);
+  }
 }
 
 void stopAudio(String id) {
   _watchdogs.remove(id)?.dispose();
+  _attachedTracks.remove(id);
   _blockedTrackIds.remove(id);
   _notifyBlocked();
 

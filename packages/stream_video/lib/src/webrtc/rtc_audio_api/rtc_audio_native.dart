@@ -29,6 +29,11 @@ Future<void> resumeAudioPlayback() async {
   // blocking playback on native platforms.
 }
 
+Future<void> reattachRemoteAudio({required String reason}) async {
+  // We don't need to do anything here, because native platforms render remote
+  // audio themselves; there is no audio element to re-attach.
+}
+
 bool checkIfAudioOutputChangeSupported() {
   // On native platforms, we assume audio output change is supported.
   return true;

@@ -79,6 +79,7 @@
 
 ### 🐞 Fixed
 
+- Remote audio on Safari and other WebKit browsers is re-attached whenever a renegotiation brings in a new audio source, working around WebKit silencing the audio already playing when another participant joins.
 - `CallSettings` equality now compares every section.
 - A failed `Call.join` now returns the error it failed with, retries a retryable coordinator failure, and reports one telemetry abort.
 - A call ended remotely now sends the SFU leave message, like a local leave.
