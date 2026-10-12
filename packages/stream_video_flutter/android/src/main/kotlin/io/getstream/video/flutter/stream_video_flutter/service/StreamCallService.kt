@@ -1,15 +1,11 @@
 package io.getstream.video.flutter.stream_video_flutter.service
 
-import android.Manifest
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
-import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import io.getstream.log.taggedLogger
 import io.getstream.video.flutter.stream_video_flutter.service.notification.NotificationPayload
@@ -29,65 +25,18 @@ private data class ActiveCallData(
 )
 
 open class StreamCallService : Service() {
-    private fun getServiceTypeForStartingFGService(trigger: String): Int {
-        return when (trigger) {
-            StreamCallService.TRIGGER_ONGOING_CALL -> {
-                getServiceTypeForOngoingCall(baseContext)
-            }
-
-            else -> noPermissionServiceType()
-        }
-    }
-
-    private fun getServiceTypeForOngoingCall(context: Context): Int {
-        val serviceTypes: MutableSet<Int> = mutableSetOf()
-        val hasCameraPermission = hasPermission(context, Manifest.permission.CAMERA)
-        val hasMicrophonePermission = hasPermission(context, Manifest.permission.RECORD_AUDIO)
-        val hasOwnCallsPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            hasPermission(context, Manifest.permission.MANAGE_OWN_CALLS)
-        else true
-
-        // Since Android R we have to set foreground service types for camera and microphone
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (hasCameraPermission) {
-                serviceTypes.add(ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA)
-            }
-            if (hasMicrophonePermission) {
-                serviceTypes.add(ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE)
-            }
-            serviceTypes.add(ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
-        }
-
-        // Since Android U service type phone call requires own call permission
-        val hasPermissionForForegroundServiceTypeCall =
-            hasOwnCallsPermission || Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && hasPermissionForForegroundServiceTypeCall) {
-            serviceTypes.add(ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL)
-        } else {
-            // Before android Q we don't set any service types
-            serviceTypes.add(0)
-        }
-
-        return serviceTypes.reduce { acc, type -> acc or type }
-    }
-
-    internal fun hasPermission(context: Context, permission: String): Boolean {
-        return ContextCompat.checkSelfPermission(
-            context,
-            permission,
-        ) == PackageManager.PERMISSION_GRANTED
-    }
-
-    internal open fun noPermissionServiceType(): Int {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
-        } else {
-            0
-        }
-    }
+    /**
+     * The foreground service types requested for an ongoing call.
+     *
+     * A subclass hosting another kind of call overrides it. Whatever it returns has to be a
+     * subset of the `foregroundServiceType` declared on that service's manifest entry, or
+     * `startForeground` refuses it.
+     */
+    protected open fun getServiceTypeForOngoingCall(context: Context): Int =
+        ForegroundServiceTypes.forOngoingCall(
+            sdkInt = Build.VERSION.SDK_INT,
+            permissions = CallPermissions.of(context),
+        )
 
     private val logger by taggedLogger("StreamCallService")
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -96,6 +45,10 @@ open class StreamCallService : Service() {
 
     // Map to store active calls: Key = callCid, Value = ActiveCallData
     private val activeCalls = mutableMapOf<String, ActiveCallData>()
+
+    // The call whose notification the service went foreground with, and the types it requested.
+    private var foregroundCallCid: String? = null
+    private var foregroundServiceTypes: Int = 0
 
     private fun generateNotificationId(callCid: String): Int {
         // Generate a unique notification ID. Ensure it's positive.
@@ -154,6 +107,7 @@ open class StreamCallService : Service() {
                             logger.e { "[onStartCommand] ACTION_UPDATE: Cannot proceed with update due to missing callCid/payload." }
                         }
                     }
+                    refreshForegroundServiceTypes()
                 }
 
                 else -> { // New call or service restart
@@ -203,13 +157,16 @@ open class StreamCallService : Service() {
 
         if (activeCalls.size == 1) {
             try {
+                val serviceTypes = getServiceTypeForOngoingCall(baseContext)
                 startForegroundWithServiceType(
                     notificationId,
                     notification,
                     TRIGGER_ONGOING_CALL,
-                    getServiceTypeForStartingFGService(TRIGGER_ONGOING_CALL)
+                    serviceTypes
                 )
-                logger.i { "[startNewCall] Service started in foreground for callCid: $callCid, notificationId: $notificationId" }
+                foregroundCallCid = callCid
+                foregroundServiceTypes = serviceTypes
+                logger.i { "[startNewCall] Service started in foreground for callCid: $callCid, notificationId: $notificationId, types: $serviceTypes" }
             } catch (e: Exception) {
                 logger.e(e) { "[startNewCall] Exception starting foreground for $callCid. Error: ${e.message}" }
                 activeCalls.remove(callCid)
@@ -229,6 +186,41 @@ open class StreamCallService : Service() {
             notificationManager.notify(it.notificationId, notification)
         } ?: run {
             logger.w { "[updateCallNotification] No active call found for cid: $callCid to update." }
+        }
+    }
+
+    /**
+     * Requests the foreground service types again when they changed since the service went
+     * foreground.
+     *
+     * The service starts when the call is marked active, before the microphone and camera are
+     * requested, so a grant that arrives later only takes effect here. Without it a service that
+     * started as a `shortService` would stay one and be stopped by the system mid-call.
+     */
+    private fun refreshForegroundServiceTypes() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return
+        val callData = foregroundCallCid?.let { activeCalls[it] }
+            ?: activeCalls.values.firstOrNull()
+            ?: return
+
+        val serviceTypes = getServiceTypeForOngoingCall(baseContext)
+        if (serviceTypes == foregroundServiceTypes) return
+
+        try {
+            val (_, notification) = notificationBuilder.build(callData.notificationPayload)
+            startForegroundWithServiceType(
+                callData.notificationId,
+                notification,
+                TRIGGER_ONGOING_CALL,
+                serviceTypes
+            )
+            logger.i { "[refreshForegroundServiceTypes] types: $foregroundServiceTypes -> $serviceTypes" }
+            foregroundCallCid = callData.callCid
+            foregroundServiceTypes = serviceTypes
+        } catch (e: Exception) {
+            // Changing type needs the app to be eligible to start a foreground service, and camera
+            // and microphone need it to be in use; a later update retries.
+            logger.w { "[refreshForegroundServiceTypes] Failed to change types to $serviceTypes: $e" }
         }
     }
 

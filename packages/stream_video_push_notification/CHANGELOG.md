@@ -1,3 +1,9 @@
+## Upcoming (minor)
+
+### 🔄 Changed
+
+- [Android] The plugin no longer declares `DISABLE_KEYGUARD` or `ACCESS_NOTIFICATION_POLICY`. Neither was used: the incoming call screen dismisses the keyguard through `KeyguardManager.requestDismissKeyguard` and window flags, which need no permission, and nothing reads or changes the notification policy. An app that relies on either for its own code declares it in its own manifest.
+
 ## 1.7.0
 
 ### 🔄 Changed
