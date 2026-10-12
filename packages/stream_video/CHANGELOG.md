@@ -94,6 +94,8 @@
 - A participant drawn in two places at once is now visible while either shows them, and subscribed at the size of the larger.
 - The camera, microphone and screen share are no longer reopened when the call moves to a new SFU or rejoins.
 - SFU sessions left behind by a failed join or reconnect attempt, or by a migration, are now released.
+- A stopped screen share no longer comes back after the call moves to a new SFU or reconnects. Stopping it now takes the track off its sender, so it is no longer reported as published.
+- On web, a remote participant no longer goes silent after the call moves to a new SFU. Releasing the previous session removed the audio element the new session was already playing through.
 - A participant moving between layouts no longer flashes a placeholder. A track the last viewport lets go of is held for `ViewportVisibilityRegistry.releaseGrace` before it is reported hidden, so the viewport taking over keeps the subscription.
 - Every track on screen is reported again to the new session after a reconnect.
 - Guest creation no longer waits for a coordinator connection id. The call is unauthenticated and watches nothing, so an id could only add latency.

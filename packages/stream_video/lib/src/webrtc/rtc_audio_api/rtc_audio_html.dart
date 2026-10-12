@@ -36,6 +36,11 @@ void _trace(String tag, Object? data) => _traceHandler?.call(tag, data);
 
 final _watchdogs = <String, _AudioPlaybackWatchdog>{};
 
+/// A track id is `trackIdPrefix:trackType`, which a migration keeps, so the
+/// session being replaced and the one replacing it share an element. This is
+/// how [stopAudio] tells which of them owns it now.
+final _attachedTracks = <String, web.MediaStreamTrack>{};
+
 /// Track ids whose audio element the browser's autoplay policy is blocking.
 final _blockedTrackIds = <String>{};
 
@@ -84,6 +89,7 @@ void startAudio(String id, rtc.MediaStreamTrack track) {
   final audioStream = web.MediaStream();
   audioStream.addTrack(track.jsTrack);
   audioElement.srcObject = audioStream;
+  _attachedTracks[id] = track.jsTrack;
 
   // `autoplay` alone fails silently when the browser's autoplay policy blocks
   // playback, so drive `play()` explicitly and watch the element from here on.
@@ -91,7 +97,24 @@ void startAudio(String id, rtc.MediaStreamTrack track) {
   _watchdogs[id] = _AudioPlaybackWatchdog(trackId: id, element: audioElement);
 }
 
-void stopAudio(String id) {
+/// Stops playing [track] and removes the audio element of track [id].
+///
+/// Does nothing when the element has since been given another track. That is
+/// the new session's after a migration: the superseded session is disposed
+/// only once its replacement has bound the same ids.
+void stopAudio(String id, rtc.MediaStreamTrack track) {
+  final attached = _attachedTracks[id];
+  if (attached != null &&
+      track is MediaStreamTrackWeb &&
+      !attached.strictEquals(track.jsTrack).toDart) {
+    streamLog.v(
+      _tag,
+      () => 'Not stopping audio for track $id: its element plays another track',
+    );
+    return;
+  }
+
+  _attachedTracks.remove(id);
   _watchdogs.remove(id)?.dispose();
   _blockedTrackIds.remove(id);
   _notifyBlocked();

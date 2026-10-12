@@ -72,7 +72,7 @@ class RtcRemoteTrack extends RtcTrack {
 
     // Stop the audio player if it's an audio track.
     if (isAudioTrack && disposeWebAudioPlayer) {
-      rtc_audio_api.stopAudio(trackId);
+      rtc_audio_api.stopAudio(trackId, mediaTrack);
     }
   }
 
