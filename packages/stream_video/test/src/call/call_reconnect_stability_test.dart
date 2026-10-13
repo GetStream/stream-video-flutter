@@ -173,7 +173,7 @@ void main() {
           statsOptions: any(named: 'statsOptions'),
           onReconnectionNeeded: any(named: 'onReconnectionNeeded'),
           clientPublishOptions: any(named: 'clientPublishOptions'),
-          streamVideo: any(named: 'streamVideo'),
+          host: any(named: 'host'),
           leftoverTraceRecords: any(named: 'leftoverTraceRecords'),
           pcFactory: any(named: 'pcFactory'),
         ),

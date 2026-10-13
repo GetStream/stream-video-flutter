@@ -212,7 +212,7 @@ CallSession _buildTestSession({
       enableRtcStats: false,
       reportingIntervalMs: 500,
     ),
-    streamVideo: _buildMockStreamVideo(),
+    host: _buildMockStreamVideo(),
     tracer: Tracer(null),
     pcFactory: StreamPeerConnectionFactory(callCid: callCid),
   );

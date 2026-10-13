@@ -424,7 +424,7 @@ MockSessionFactory setupMockSessionFactory({
       statsOptions: any(named: 'statsOptions'),
       onReconnectionNeeded: any(named: 'onReconnectionNeeded'),
       clientPublishOptions: any(named: 'clientPublishOptions'),
-      streamVideo: any(named: 'streamVideo'),
+      host: any(named: 'host'),
       leftoverTraceRecords: any(named: 'leftoverTraceRecords'),
       pcFactory: any(named: 'pcFactory'),
       e2eeManager: any(named: 'e2eeManager'),

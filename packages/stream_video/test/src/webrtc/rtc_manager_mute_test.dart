@@ -74,7 +74,7 @@ void main() {
       subscriber: _MockTracedPeerConnection(),
       publishOptions: [],
       stateManager: MockCallStateNotifier(),
-      streamVideo: streamVideo,
+      host: streamVideo,
       pcFactory: pcFactory,
     );
   });

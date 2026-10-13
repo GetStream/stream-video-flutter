@@ -62,7 +62,7 @@ void main() {
       subscriber: subscriber,
       publishOptions: [],
       stateManager: MockCallStateNotifier(),
-      streamVideo: streamVideo,
+      host: streamVideo,
       pcFactory: _MockStreamPeerConnectionFactory(),
     );
   });

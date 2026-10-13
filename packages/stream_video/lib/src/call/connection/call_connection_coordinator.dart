@@ -746,7 +746,7 @@ class CallConnectionCoordinator {
         stateManager: _call._stateManager,
         dynascaleManager: _call.dynascaleManager,
         networkMonitor: _call.networkMonitor,
-        streamVideo: _call._host,
+        host: _call._host,
         statsOptions: _sfuStatsOptions!,
         pcFactory: _call._ensurePcFactory(),
         e2eeManager: _call._e2ee.manager,

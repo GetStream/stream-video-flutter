@@ -94,7 +94,7 @@ void main() {
       subscriber: subscriber,
       publishOptions: const [],
       stateManager: createTestCallStateManager(),
-      streamVideo: setupMockCallHost(),
+      host: setupMockCallHost(),
       pcFactory: StreamPeerConnectionFactory(
         callCid: SampleCallData.defaultCid,
       ),

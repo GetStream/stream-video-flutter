@@ -77,7 +77,7 @@ CallSession _buildTestSession({
       enableRtcStats: false,
       reportingIntervalMs: 500,
     ),
-    streamVideo: streamVideo,
+    host: streamVideo,
     tracer: Tracer(null),
     pcFactory: StreamPeerConnectionFactory(callCid: callCid),
   );
@@ -166,7 +166,7 @@ _wireStalledPublisher(
     subscriber: _MockTracedStreamPeerConnection(),
     publishOptions: [_publishOption],
     stateManager: createTestCallStateManager(),
-    streamVideo: setupMockCallHost(),
+    host: setupMockCallHost(),
     pcFactory: StreamPeerConnectionFactory(callCid: SampleCallData.defaultCid),
   );
 
