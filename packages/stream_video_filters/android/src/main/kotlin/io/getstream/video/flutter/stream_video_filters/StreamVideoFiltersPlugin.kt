@@ -89,16 +89,34 @@ class StreamVideoFiltersPlugin: FlutterPlugin, MethodCallHandler {
                 result.success(null)
             }
       "unregisterAllFilters" -> {
-                for (name in registeredNames) {
+                val failures = mutableMapOf<String, RuntimeException>()
+                for (name in registeredNames.toList()) {
                     try {
                         ProcessorProvider.removeProcessor(name)
+                        registeredNames.remove(name)
                     } catch (e: RuntimeException) {
-                        // Already removed; nothing to release.
+                        if (isAlreadyRemoved(e)) {
+                            // Removed by someone else; nothing left to release.
+                            registeredNames.remove(name)
+                        } else {
+                            // Keep the name so a later call can retry the removal.
+                            failures[name] = e
+                        }
                     }
                 }
-                registeredNames.clear()
 
-                result.success(null)
+                if (failures.isEmpty()) {
+                    result.success(null)
+                } else {
+                    failures.forEach { (name, e) ->
+                        Log.e(TAG, "Failed to unregister video effect '$name'", e)
+                    }
+                    result.error(
+                        "UNREGISTER_FAILED",
+                        "Failed to unregister video effects: ${failures.keys.joinToString()}",
+                        failures.keys.toList()
+                    )
+                }
             }
       else -> {
         Log.w(TAG, "Method not implemented: ${call.method}")
@@ -110,4 +128,12 @@ class StreamVideoFiltersPlugin: FlutterPlugin, MethodCallHandler {
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     channel.setMethodCallHandler(null)
   }
+
+  /**
+   * Whether [e] is `ProcessorProvider.removeProcessor` reporting that the name is not
+   * registered. That is the only failure it raises itself (a `RuntimeException` whose
+   * message ends in "does not exist"); anything else is a genuine removal failure.
+   */
+  private fun isAlreadyRemoved(e: RuntimeException): Boolean =
+    e.message?.contains("does not exist") == true
 }

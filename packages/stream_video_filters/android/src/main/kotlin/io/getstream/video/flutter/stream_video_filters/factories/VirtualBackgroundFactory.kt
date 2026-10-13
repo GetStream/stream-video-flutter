@@ -12,6 +12,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.annotation.Keep
 import com.google.android.gms.tasks.Tasks
+import com.google.android.renderscript.Toolkit
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.segmentation.Segmentation
 import com.google.mlkit.vision.segmentation.SegmentationMask
@@ -170,7 +171,10 @@ private class VirtualBackgroundVideoFilter(
     private var latestMaskHeight = 0
 
     override fun applyFilter(videoFrameBitmap: Bitmap) {
-        val backgroundImageBitmap = virtualBackgroundBitmap ?: return
+        // Null when the image failed to load. The frame is then still processed, with
+        // a blurred copy of itself as the background, so the real background is never
+        // sent unfiltered.
+        val backgroundImageBitmap = virtualBackgroundBitmap
 
         if (!isProcessing.getAndSet(true)) {
             // Apply segmentation, starts in webrtc CaptureThread
@@ -212,14 +216,20 @@ private class VirtualBackgroundVideoFilter(
             processedSegmentationMask = mask
         }
 
+        // Resolve the background before the frame is modified below: the fallback
+        // blurs the frame itself.
+        val background = scaledVirtualBackgroundBitmap?.takeUnless { it.isRecycled }
+            ?: Toolkit.blur(videoFrameBitmap, FALLBACK_BLUR_RADIUS)
+
         val canvas = Canvas(videoFrameBitmap)
         // 1. Punch a hole in the video frame so that only the person is left
         canvas.drawBitmap(scaledForegroundBitmap!!, 0f, 0f, foregroundPaint)
 
-        System.currentTimeMillis()
-        if (scaledVirtualBackgroundBitmap!!.isRecycled) return
-        // 2. Draw the virtual background behind the person
-        canvas.drawBitmap(scaledVirtualBackgroundBitmap!!, 0f, 0f, backgroundPaint)
+        // 2. Draw the virtual background (or the blurred fallback) behind the person
+        canvas.drawBitmap(background, 0f, 0f, backgroundPaint)
+        if (background !== scaledVirtualBackgroundBitmap) {
+            background.recycle()
+        }
     }
 
     private fun scaleVirtualBackgroundBitmap(bitmap: Bitmap, targetHeight: Int): Bitmap {
@@ -254,16 +264,18 @@ private class VirtualBackgroundVideoFilter(
     }
 
     private fun maybeInit(
-        videoFrameBitmap: Bitmap, backgroundImageBitmap: Bitmap, mask: SegmentationMask
+        videoFrameBitmap: Bitmap, backgroundImageBitmap: Bitmap?, mask: SegmentationMask
     ) {
         var createScale = false
-        if (scaledVirtualBackgroundBitmap == null || scaledForegroundBitmap == null || videoFrameBitmap.width != latestFrameWidth || videoFrameBitmap.height != latestFrameHeight) {
+        if ((scaledVirtualBackgroundBitmap == null && backgroundImageBitmap != null) || scaledForegroundBitmap == null || videoFrameBitmap.width != latestFrameWidth || videoFrameBitmap.height != latestFrameHeight) {
             scaledVirtualBackgroundBitmap?.recycle()
             scaledForegroundBitmap?.recycle()
-            scaledVirtualBackgroundBitmap = scaleVirtualBackgroundBitmap(
-                bitmap = backgroundImageBitmap,
-                targetHeight = videoFrameBitmap.height,
-            )
+            scaledVirtualBackgroundBitmap = backgroundImageBitmap?.let {
+                scaleVirtualBackgroundBitmap(
+                    bitmap = it,
+                    targetHeight = videoFrameBitmap.height,
+                )
+            }
             scaledForegroundBitmap = Bitmap.createBitmap(
                 videoFrameBitmap.width, videoFrameBitmap.height, Bitmap.Config.ARGB_8888
             )
@@ -298,6 +310,9 @@ private class VirtualBackgroundVideoFilter(
 
     companion object {
         private const val TAG = "VirtualBackgroundVideoFilter"
+        // Blur behind the person when the background image is unavailable (matches the
+        // MEDIUM background-blur preset).
+        private const val FALLBACK_BLUR_RADIUS = 10
     }
 }
 

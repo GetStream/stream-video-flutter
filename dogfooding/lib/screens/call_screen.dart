@@ -49,6 +49,8 @@ class CallScreen extends StatefulWidget {
 }
 
 class _CallScreenState extends State<CallScreen> {
+  late final _logger = taggedLogger(tag: 'SV:Dogfooding:CallScreen');
+
   late final _userChatRepo = locator.get<UserChatRepository>();
 
   late String? _encryptionKey = widget.encryptionKey;
@@ -116,11 +118,25 @@ class _CallScreenState extends State<CallScreen> {
     _chatConnectionRecoverySubscription?.cancel();
     widget.call.leave();
     _userChatRepo.disconnectUser();
-    // Release the natively registered filter processors along with the manager;
-    // they are registered again the next time a filter is applied.
-    _videoEffectsManager.unregisterAllFilters();
-    _videoEffectsManager.dispose();
+    unawaited(_releaseVideoEffects());
     super.dispose();
+  }
+
+  /// Releases the video effects manager together with the natively registered
+  /// filter processors; they are registered again the next time a filter is
+  /// applied.
+  ///
+  /// Detached from [dispose], which cannot wait for the platform call, so a
+  /// failure is logged here rather than surfacing as an unhandled asynchronous
+  /// error after the screen is gone. The manager is disposed either way.
+  Future<void> _releaseVideoEffects() async {
+    try {
+      await _videoEffectsManager.unregisterAllFilters();
+    } catch (e) {
+      _logger.e(() => 'Failed to release video effects: $e');
+    } finally {
+      await _videoEffectsManager.dispose();
+    }
   }
 
   Future<void> _connectChatChannel() async {

@@ -30,6 +30,13 @@ final class ImageBackgroundVideoFrameProcessor: VideoFilter {
 
     private static let supportedUrlSchemes: Set<String> = ["http", "https", "file"]
 
+    /// Blur used behind the person while the background image is still loading, or
+    /// when it failed to load, so the real background is never sent unfiltered.
+    /// Computed on a copy scaled by [fallbackDownscaleFactor]; the radius is scaled
+    /// with it, so this matches radius 10 at full resolution.
+    private static let fallbackDownscaleFactor: CGFloat = 0.5
+    private static let fallbackBlurRadius: Float = 10 * Float(fallbackDownscaleFactor)
+
     private var cachedValue: CacheValue?
     private var backgroundImageUrl: String
 
@@ -64,22 +71,40 @@ final class ImageBackgroundVideoFrameProcessor: VideoFilter {
 
         self.filter = { [weak self] input in
             // `[weak self]`: the closure is stored on `self` — a strong capture would leak the processor.
-            guard let self = self, let bgImage = self.backgroundCIImage else {
-                return input.originalImage
-            }
-            let cachedBackgroundImage = self.backgroundImage(
-                image: bgImage, originalImage: input.originalImage,
-                originalImageOrientation: input.originalImageOrientation)
+            guard let self = self else { return input.originalImage }
 
-            let outputImage: CIImage =
-                self.backgroundImageFilterProcessor
+            let backgroundImage: CIImage
+            if let bgImage = self.backgroundCIImage {
+                backgroundImage = self.backgroundImage(
+                    image: bgImage, originalImage: input.originalImage,
+                    originalImageOrientation: input.originalImageOrientation)
+            } else {
+                // Still loading, or the load failed: cover the real background with a
+                // blur instead of passing the camera image through unfiltered.
+                backgroundImage = Self.blurredFallbackBackground(for: input.originalImage)
+            }
+
+            return self.backgroundImageFilterProcessor
                 .applyFilter(
                     input.originalPixelBuffer,
-                    backgroundImage: cachedBackgroundImage
+                    backgroundImage: backgroundImage
                 ) ?? input.originalImage
-
-            return outputImage
         }
+    }
+
+    /// A blurred copy of `image`, at its extent. Same recipe as the background blur
+    /// filter: half resolution, clamped before blurring and cropped after so the
+    /// edges don't darken.
+    private static func blurredFallbackBackground(for image: CIImage) -> CIImage {
+        let scale = fallbackDownscaleFactor
+        let downscaled = image.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
+        return
+            downscaled
+            .clampedToExtent()
+            .applyingFilter("CIGaussianBlur", parameters: [kCIInputRadiusKey: fallbackBlurRadius])
+            .cropped(to: downscaled.extent)
+            .transformed(by: CGAffineTransform(scaleX: 1 / scale, y: 1 / scale))
+            .cropped(to: image.extent)
     }
 
     private func loadBackgroundImage() {
@@ -92,13 +117,18 @@ final class ImageBackgroundVideoFrameProcessor: VideoFilter {
         // real URLs to URLSession: a plain asset path that failed the lookup above
         // would otherwise be treated as a relative URL and fail after a round trip
         // with a misleading network error.
+        let parsedUrl = URL(string: backgroundImageUrl)
         guard
-            let url = URL(string: backgroundImageUrl),
+            let url = parsedUrl,
             let scheme = url.scheme?.lowercased(),
             Self.supportedUrlSchemes.contains(scheme)
         else {
+            // The string may carry a signed-access query token; log scheme and host only.
+            let location = [parsedUrl?.scheme, parsedUrl?.host]
+                .compactMap { $0 }
+                .joined(separator: "://")
             NSLog(
-                "Failed to load virtual-background image: '\(backgroundImageUrl)' is neither a bundled Flutter asset nor an http(s)/file URL"
+                "Failed to load virtual-background image: not a bundled Flutter asset and not an http(s)/file URL (\(location.isEmpty ? "unparseable" : location))"
             )
             return
         }
