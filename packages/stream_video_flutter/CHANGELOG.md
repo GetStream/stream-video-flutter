@@ -2,13 +2,14 @@
 
 ### ✅ Added
 
-- [Android] Added `StreamLivestreamViewerService`, a foreground service for livestream viewers that requests `mediaPlayback` in place of `phoneCall`, plus `microphone` and `camera` when the app holds them, so a viewer brought on stage keeps publishing in the background. A call runs in it when its effective `AudioConfigurationPolicy` resolves to `AndroidCallServiceKind.livestreamViewer`, which the viewer policy does. `StreamVideoFlutterBackground.startService` takes the `kind` to start a call under.
+- [Android] Added `StreamLivestreamViewerService`, the foreground service for calls under `AudioConfigurationPolicy.viewer`.
+- [Android] `StreamVideoFlutterBackground.startService` takes the `AndroidCallServiceKind` to start a call in.
 
 ### 🔄 Changed
 
-- [Android] `StreamCallService` no longer requests the `mediaPlayback` foreground service type, and its manifest entry no longer declares it. It requests `phoneCall`, plus `microphone` and `camera` when those permissions are granted, which is what a voice or video call is.
-- [Android] On Android 14 and newer the call services only request a foreground service type whose `FOREGROUND_SERVICE_*` permission is declared in the merged manifest. Removing a permission with `tools:node="remove"` is now enough to stop the SDK asking for its type.
-- [Android] A call service that is left with no permission-backed type on Android 14 and newer, for example after `MANAGE_OWN_CALLS` was removed and before the microphone or camera permission is granted, runs as a `shortService`, which the system stops after a few minutes and which on Android 17 does not allow audio in the background. It previously relied on `mediaPlayback` there. `StreamLivestreamViewerService` declares `shortService` for the same reason. When the system stops such a service, the SDK no longer reports it as running or sends it updates, which used to recreate a service outside the foreground. Keep `FOREGROUND_SERVICE_PHONE_CALL` and `MANAGE_OWN_CALLS` in any app that makes calls or hosts livestreams so that a participant without the microphone or camera permission never ends up there.
+- [Android] `StreamCallService` no longer requests or declares the `mediaPlayback` foreground service type.
+- [Android] On Android 14 and newer, a foreground service type is only requested while its `FOREGROUND_SERVICE_*` permission is declared, so unused ones can be removed with `tools:node="remove"`.
+- [Android] A call with no permission-backed foreground service type runs as a `shortService` instead of failing to start.
 
 ## 1.7.0
 

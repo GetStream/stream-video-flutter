@@ -2,7 +2,7 @@
 
 ### ✅ Added
 
-- Added `AndroidCallServiceKind` and `AudioConfigurationPolicy.androidCallServiceKind`, which pick the Android foreground service a call runs in. `AudioConfigurationPolicy.viewer` runs in a media playback service. Every other predefined policy runs in the call service, and `AudioConfigurationPolicy.custom` can name one outright. A custom policy that names no kind follows its `basePolicy` unless it sets an `androidConfiguration`, in which case it runs in the call service.
+- Added `AndroidCallServiceKind` and `AudioConfigurationPolicy.androidCallServiceKind`, which pick the Android foreground service a call runs in.
 
 ## 1.7.0
 

@@ -56,9 +56,6 @@ internal data class CallPermissions(
  * manifest with `tools:node="remove"`. The manifest entry of the service may keep listing the
  * type: the OS only requires what is requested to be a subset of what is declared. Below
  * Android 14 those permissions do not exist and no type needs one.
- *
- * The SDK level and the permission state are parameters so the decision is testable without
- * a device.
  */
 internal object ForegroundServiceTypes {
 
