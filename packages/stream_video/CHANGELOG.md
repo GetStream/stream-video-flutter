@@ -4,7 +4,7 @@
 
 - Test mocks that implement `StreamVideo` get a `subtype_of_sealed_class` warning, because `StreamVideo` implements the `@sealed` `CallHost`; add `// ignore: subtype_of_sealed_class` to them.
 - The deprecated `observeCoreCallKitEvents`, `observeCall*CallKitEvent` and `handleVoipPushNotification` methods are removed; use `observeCoreRingingEvents`, `observeCall*RingingEvent` and `handleRingingFlowNotifications` on `StreamVideo.ringing`.
-- `StreamVideo.create` no longer sets up logging from `logPriority` and `logHandlerFunction`; only `StreamVideo(...)` does. Call `StreamVideo.configureLogging` for a client built with `create`.
+- `StreamVideo.create` no longer sets up logging; call `StreamVideo.configureLogging` for such a client.
 - `StreamVideoOptions.androidAudioConfiguration` is removed; pass `AudioConfigurationPolicy.custom` as `audioConfigurationPolicy` instead.
 - The no-op `precacheGenericSdps` parameter of `StreamVideo.create` is removed.
 - `StreamVideo(failIfSingletonExists: false)` no longer disconnects the client it replaces; call `StreamVideo.reset(disconnect: true)` first to disconnect it.

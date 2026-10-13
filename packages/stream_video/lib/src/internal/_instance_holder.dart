@@ -12,13 +12,7 @@ class InstanceHolder {
     bool failIfSingletonExists = true,
   }) {
     if (_instance != null) {
-      if (failIfSingletonExists) {
-        throw Exception('''
-        StreamVideo has already been initialised, use StreamVideo.instance to access the singleton instance.
-        If you want to re-initialise the SDK, call StreamVideo.reset() first.
-        If you want to use multiple instances of the SDK, use StreamVideo.create() instead.
-        ''');
-      }
+      if (failIfSingletonExists) throw alreadyInstalled();
       streamLog.e(
         'InstanceHolder',
         () =>
@@ -29,6 +23,13 @@ class InstanceHolder {
     }
     _instance = instance;
   }
+
+  /// The error for installing a client while one is installed already.
+  Exception alreadyInstalled() => Exception('''
+        StreamVideo has already been initialised, use StreamVideo.instance to access the singleton instance.
+        If you want to re-initialise the SDK, call StreamVideo.reset() first.
+        If you want to use multiple instances of the SDK, use StreamVideo.create() instead.
+        ''');
 
   /// The singleton instance of the Stream Video client.
   StreamVideo get instance {

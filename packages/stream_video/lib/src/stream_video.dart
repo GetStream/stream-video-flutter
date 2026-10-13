@@ -101,6 +101,12 @@ class StreamVideo extends Disposable implements CallHost {
     bool failIfSingletonExists = true,
     PNManagerProvider? pushNotificationManagerProvider,
   }) {
+    // Before anything is built or configured, so a rejected client leaves
+    // nothing running.
+    if (failIfSingletonExists && _instanceHolder.isInitialized()) {
+      throw _instanceHolder.alreadyInstalled();
+    }
+
     final resolvedOptions = options ?? StreamVideoOptions();
     configureLogging(
       priority: resolvedOptions.logPriority,
@@ -170,7 +176,8 @@ class StreamVideo extends Disposable implements CallHost {
 
   static final _withoutMediaKey = Object();
 
-  /// Whether a client built here would set up no media.
+  /// Whether a client built in the current zone would set up no media, as
+  /// inside [runWithoutMedia].
   @visibleForTesting
   static bool get debugBuildsWithoutMedia =>
       Zone.current[_withoutMediaKey] == true;
@@ -287,18 +294,16 @@ class StreamVideo extends Disposable implements CallHost {
   }
 
   /// Completes once the client has started up: the audio configuration is
-  /// applied, the environment is collected and, with
-  /// [StreamVideoOptions.autoConnect], the user is connected or the connect
-  /// has failed. Never completes with an error; failures are logged.
+  /// applied where it applies, the environment is collected and, with
+  /// [StreamVideoOptions.autoConnect], the connect has been attempted.
+  /// [ClientState.connection] tells whether it succeeded. Never completes with
+  /// an error.
   late final Future<void> ready;
 
   Future<void> _startUp() async {
     final audioConfigured = _configureAudio();
 
-    // Pre-warm the token cache, mirroring the eager fetch previously
-    // triggered by setting the token provider. Failures are logged by
-    // getToken and surface later, when the token is actually needed — the
-    // caller that needs one then establishes the session itself.
+    // Pre-warm the token cache. Failures are logged by the token manager.
     unawaited(_tokens.getToken());
 
     try {
@@ -328,8 +333,8 @@ class StreamVideo extends Disposable implements CallHost {
     await audioConfigured;
   }
 
-  /// Applies the audio configuration on Android and iOS, and completes
-  /// [webrtcInitialized] either way.
+  /// Applies the audio configuration on Android and iOS when this client sets
+  /// up media, and completes [webrtcInitialized] either way.
   Future<void> _configureAudio() async {
     try {
       if (setsUpMedia && (CurrentPlatform.isAndroid || CurrentPlatform.isIos)) {
@@ -337,8 +342,8 @@ class StreamVideo extends Disposable implements CallHost {
           _options.audioConfigurationPolicy,
         );
       }
-    } catch (e) {
-      _logger.w(() => '[StreamVideo] failed to configure audio: $e');
+    } catch (e, stk) {
+      _logger.e(() => '[StreamVideo] failed to configure audio: $e\n$stk');
     } finally {
       _webrtcInitialized.complete();
     }
