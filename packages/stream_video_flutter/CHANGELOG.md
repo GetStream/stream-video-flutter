@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🐞 Fixed
+
+- A zoomed-in screen share stays subscribed while it is panned or partly pinched out.
+
 ## 1.7.0
 
 ### ✅ Added
