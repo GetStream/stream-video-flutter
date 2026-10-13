@@ -147,8 +147,12 @@ class ScreenShareContent extends StatefulWidget {
 }
 
 class _ScreenShareContentState extends State<ScreenShareContent> {
+  /// The zoom past which the share stays subscribed even when it is reported
+  /// hidden. Below the zoom at which that starts, about 1.35x.
+  static const _keepTrackZoomThreshold = 1.1;
+
   final _transformationController = TransformationController();
-  bool _isZoomed = false;
+  bool _keepTrackWhileZoomed = false;
 
   @override
   void initState() {
@@ -164,12 +168,12 @@ class _ScreenShareContentState extends State<ScreenShareContent> {
     super.dispose();
   }
 
-  // Zoomed for as long as the viewer's transform is scaled up, whatever
-  // gesture is moving it.
+  // Follows the viewer's transform, whatever gesture is moving it.
   void _onTransformationChanged() {
-    final isZoomed = _transformationController.value.getMaxScaleOnAxis() > 1.0;
-    if (_isZoomed != isZoomed) {
-      setState(() => _isZoomed = isZoomed);
+    final scale = _transformationController.value.getMaxScaleOnAxis();
+    final keepTrack = scale > _keepTrackZoomThreshold;
+    if (_keepTrackWhileZoomed != keepTrack) {
+      setState(() => _keepTrackWhileZoomed = keepTrack);
     }
   }
 
@@ -204,7 +208,7 @@ class _ScreenShareContentState extends State<ScreenShareContent> {
                 participant: widget.participant,
                 videoFit: VideoFit.contain,
                 videoTrackType: SfuTrackType.screenShare,
-                persistTrackIfNotVisible: _isZoomed,
+                persistTrackIfNotVisible: _keepTrackWhileZoomed,
               ),
             );
           },
