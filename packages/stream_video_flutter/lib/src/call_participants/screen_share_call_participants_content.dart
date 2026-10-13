@@ -146,7 +146,31 @@ class ScreenShareContent extends StatefulWidget {
 }
 
 class _ScreenShareContentState extends State<ScreenShareContent> {
+  final _transformationController = TransformationController();
   bool _isZoomed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _transformationController.addListener(_onTransformationChanged);
+  }
+
+  @override
+  void dispose() {
+    _transformationController
+      ..removeListener(_onTransformationChanged)
+      ..dispose();
+    super.dispose();
+  }
+
+  // Zoomed for as long as the viewer's transform is scaled up, whatever
+  // gesture is moving it.
+  void _onTransformationChanged() {
+    final isZoomed = _transformationController.value.getMaxScaleOnAxis() > 1.0;
+    if (_isZoomed != isZoomed) {
+      setState(() => _isZoomed = isZoomed);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -168,15 +192,8 @@ class _ScreenShareContentState extends State<ScreenShareContent> {
             }
 
             return InteractiveViewer(
+              transformationController: _transformationController,
               maxScale: 4,
-              onInteractionUpdate: (details) {
-                final isZoomed = details.scale > 1.0;
-                if (_isZoomed != isZoomed) {
-                  setState(() {
-                    _isZoomed = isZoomed;
-                  });
-                }
-              },
               child: StreamVideoRenderer(
                 key: ValueKey(
                   '${widget.rendererScopePrefix ?? ''}${widget.participant.uniqueParticipantKey}-screen-share',

@@ -208,6 +208,7 @@
 
 ### 🐞 Fixed
 
+- A zoomed-in screen share stays subscribed while it is panned or partly pinched out.
 - The participant tile's overflow menu lines up with the edge of its button.
 - `StreamAdaptiveMenuAnchor` sheet rows are 48px tall.
 - The lobby control buttons are 8px apart.
