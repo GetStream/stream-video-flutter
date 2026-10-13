@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🔄 Changed
+
+- [Android] Removed the unused `DISABLE_KEYGUARD` and `ACCESS_NOTIFICATION_POLICY` permissions.
+
 ## 1.7.0
 
 ### 🔄 Changed
