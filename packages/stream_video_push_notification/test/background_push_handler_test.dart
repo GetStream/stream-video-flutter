@@ -13,6 +13,7 @@ class MockCall extends Mock implements Call {}
 class MockRingingFlowCoordinator extends Mock
     implements RingingFlowCoordinator {}
 
+// ignore: subtype_of_sealed_class
 class MockStreamVideo extends Mock implements StreamVideo {
   @override
   final MockRingingFlowCoordinator ringing = MockRingingFlowCoordinator();

@@ -50,6 +50,7 @@ class MockCallParticipantState extends Mock implements CallParticipantState {
 class MockRtcMediaDeviceNotifier extends Mock
     implements RtcMediaDeviceNotifier {}
 
+// ignore: subtype_of_sealed_class
 class MockStreamVideo extends Mock implements StreamVideo {
   // StreamVideo marks dispose as @mustBeOverridden.
   @override

@@ -12,7 +12,8 @@ import '../utils/result.dart';
 import 'call.dart';
 
 /// What a [Call] needs from the client that made it. [StreamVideo]
-/// implements it.
+/// implements it. Implemented only by the SDK.
+@sealed
 abstract interface class CallHost {
   /// The client's state: its user, and the active, incoming, outgoing and
   /// watched calls.

@@ -17,6 +17,7 @@ class _CapturingPlatform extends StreamVideoPushNotificationPlatform {
 
 class _MockCoordinatorClient extends Mock implements CoordinatorClient {}
 
+// ignore: subtype_of_sealed_class
 class _MockStreamVideo extends Mock implements StreamVideo {
   @override
   Future<void> dispose() {
