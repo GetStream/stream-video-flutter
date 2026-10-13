@@ -1100,14 +1100,16 @@ class LocalMediaController {
     final isVideoEnabled = localParticipant?.isVideoEnabled ?? false;
     final isAudioEnabled = localParticipant?.isAudioEnabled ?? false;
 
-    if (shouldMuteCameraInBackground(
+    final muteCamera = shouldMuteCameraInBackground(
       isVideoEnabled: isVideoEnabled,
       muteVideoWhenInBackground: _muteVideoWhenInBackground(),
       multitaskingCameraAccessSupported: isVideoEnabled
           ? await _multitaskingCameraAccessSupported()
           : null,
       platform: CurrentPlatform.type,
-    )) {
+    );
+
+    if (muteCamera) {
       if (await _backgroundStep(
         'onAppPaused camera',
         () => _setCameraEnabled(enabled: false),
