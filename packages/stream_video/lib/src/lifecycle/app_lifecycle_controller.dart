@@ -53,8 +53,8 @@ class AppLifecycleController {
   }
 
   /// Forgets a connection closed in the background, once the user is
-  /// disconnected.
-  void reset() => _closedInBackground = false;
+  /// disconnected. Runs after any app state still being handled.
+  Future<void> reset() => _lock.synchronized(() => _closedInBackground = false);
 
   Future<void> _onPaused() async {
     if (_state.activeCalls.value.isNotEmpty ||

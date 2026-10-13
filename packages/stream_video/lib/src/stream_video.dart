@@ -475,7 +475,7 @@ class StreamVideo extends Disposable {
     },
     onDisconnected: () async {
       _subscriptions.cancelAll();
-      _lifecycle.reset();
+      unawaited(_lifecycle.reset());
       _ringing.clear();
       await _state.clear();
     },

@@ -313,4 +313,38 @@ void main() {
 
     verifyCamera(true, 1);
   });
+
+  test('a failed restore is cancelled once the camera is set', () async {
+    final call = await activeCall();
+    stubCamera(true, () async => failureWithError('reconnecting'));
+    await goTo(LifecycleState.paused);
+    await goTo(LifecycleState.resumed);
+
+    // The user leaves the camera off.
+    await call.setCameraEnabled(enabled: false);
+    clearInteractions(harness.session);
+    await goTo(LifecycleState.paused);
+    await goTo(LifecycleState.resumed);
+
+    verifyNever(
+      () => harness.session.setCameraEnabled(
+        true,
+        constraints: any(named: 'constraints'),
+      ),
+    );
+  });
+
+  test('a camera step that throws does not skip the microphone', () async {
+    await activeCall();
+    when(
+      () => harness.session.setCameraEnabled(
+        false,
+        constraints: any(named: 'constraints'),
+      ),
+    ).thenThrow(StateError('capture'));
+
+    await goTo(LifecycleState.paused);
+
+    verifyMicrophone(false, 1);
+  });
 }
