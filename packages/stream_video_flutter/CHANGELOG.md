@@ -2,7 +2,7 @@
 
 ### ✅ Added
 
-- [Android] Added `StreamLivestreamViewerService`, a foreground service for livestream viewers that declares `mediaPlayback` alone. A call runs in it when its effective `AudioConfigurationPolicy` resolves to `AndroidCallServiceKind.livestreamViewer`, which the viewer policy does. `StreamVideoFlutterBackground.startService` takes the `kind` to start a call under.
+- [Android] Added `StreamLivestreamViewerService`, a foreground service for livestream viewers that requests `mediaPlayback` in place of `phoneCall`, plus `microphone` and `camera` when the app holds them, so a viewer brought on stage keeps publishing in the background. A call runs in it when its effective `AudioConfigurationPolicy` resolves to `AndroidCallServiceKind.livestreamViewer`, which the viewer policy does. `StreamVideoFlutterBackground.startService` takes the `kind` to start a call under.
 
 ### 🔄 Changed
 

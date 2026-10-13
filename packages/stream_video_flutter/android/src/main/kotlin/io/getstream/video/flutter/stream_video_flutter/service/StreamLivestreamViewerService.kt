@@ -6,16 +6,19 @@ import android.os.Build
 import io.getstream.log.taggedLogger
 
 /**
- * The foreground service for a livestream viewer: a participant who only plays remote media.
+ * The foreground service for a livestream viewer: a participant whose call is media playback
+ * rather than a phone call.
  *
- * It requests `mediaPlayback`, and its manifest entry declares nothing else that Google Play
- * asks about, so a reviewer only meets that type on an app that has a viewer mode. An app
- * without one removes the `FOREGROUND_SERVICE_MEDIA_PLAYBACK` permission from its merged
- * manifest with `tools:node="remove"`, and may remove this service entry the same way, in which
- * case a viewer call runs in [StreamCallService] instead.
+ * It requests `mediaPlayback` in place of `phoneCall`, plus `microphone` and `camera` when the
+ * app holds them, so a viewer brought on stage keeps publishing in the background. An app
+ * without a viewer mode removes the `FOREGROUND_SERVICE_MEDIA_PLAYBACK` permission from its
+ * merged manifest with `tools:node="remove"`, and may remove this service entry the same way, in
+ * which case a viewer call runs in [StreamCallService] instead.
  *
  * A call lands here when its effective `AudioConfigurationPolicy` resolves to
- * `AndroidCallServiceKind.livestreamViewer`, which the viewer policy does.
+ * `AndroidCallServiceKind.livestreamViewer`, which the viewer policy does. The kind is fixed
+ * when the call becomes active: a policy changed through the call preferences afterwards does
+ * not move the call to another service.
  */
 class StreamLivestreamViewerService : StreamCallService() {
 

@@ -48,7 +48,8 @@ internal data class CallPermissions(
  * Every type is backed by a `FOREGROUND_SERVICE_*` permission in the plugin manifest, and
  * Google Play asks the app to justify each of those permissions with what it visibly does. A
  * service therefore requests only the types that match the call it hosts: [forOngoingCall] for
- * a voice or video call, [forLivestreamViewer] for a viewer that only plays remote media.
+ * a voice or video call, [forLivestreamViewer] for a viewer, whose call is media playback
+ * rather than a phone call.
  *
  * On Android 14 and newer a type is only requested when its permission is still declared, so
  * an app strips a type it has no use for by removing that one permission from its merged
@@ -96,15 +97,35 @@ internal object ForegroundServiceTypes {
         return if (types == 0) ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE else types
     }
 
-    /** The types for a livestream viewer, who only plays remote media. */
+    /**
+     * The types for a livestream viewer.
+     *
+     * Media playback is what marks the call as a viewer's rather than a phone call. Microphone
+     * and camera come along under the same rules as [forOngoingCall], so a viewer brought on
+     * stage keeps publishing in the background once the app holds those permissions, and a
+     * viewer-only app that stripped them is not asked to justify them.
+     */
     fun forLivestreamViewer(sdkInt: Int, permissions: CallPermissions): Int {
         if (sdkInt < Build.VERSION_CODES.Q) return 0
 
         val gated = sdkInt >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
-        return if (!gated || permissions.foregroundMediaPlaybackDeclared) {
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
-        } else {
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+        var types = 0
+
+        if (!gated || permissions.foregroundMediaPlaybackDeclared) {
+            types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
         }
+
+        if (sdkInt >= Build.VERSION_CODES.R) {
+            if (permissions.cameraGranted && (!gated || permissions.foregroundCameraDeclared)) {
+                types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA
+            }
+            if (permissions.microphoneGranted &&
+                (!gated || permissions.foregroundMicrophoneDeclared)
+            ) {
+                types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE
+            }
+        }
+
+        return if (types == 0) ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE else types
     }
 }

@@ -76,7 +76,8 @@ import 'android_call_service_kind.dart';
 /// On Android a call runs in a foreground service that declares what kind of
 /// work it does, and the policy decides which one through
 /// [androidCallServiceKind]: the viewer policy runs in the media playback
-/// service, every other predefined policy in the call service. See
+/// service, every other predefined policy in the call service. Both add
+/// microphone and camera when the app holds those permissions. See
 /// [AndroidCallServiceKind].
 ///
 /// ## Custom Configuration
@@ -116,10 +117,15 @@ sealed class AudioConfigurationPolicy {
 
   /// The Android foreground service a call under this policy runs in.
   ///
-  /// [AudioConfigurationPolicy.viewer] only plays remote media, so it runs in
-  /// the livestream viewer service, which declares `mediaPlayback`. Every
-  /// other predefined policy runs in the call service, which declares
-  /// `phoneCall`, `microphone` and `camera`.
+  /// [AudioConfigurationPolicy.viewer] runs in the livestream viewer service,
+  /// which requests `mediaPlayback` in place of `phoneCall`. Every other
+  /// predefined policy runs in the call service, which requests `phoneCall`.
+  /// Both add `microphone` and `camera` when the app holds those permissions,
+  /// so a viewer brought on stage keeps publishing in the background.
+  ///
+  /// The kind is read once, when the call becomes active. A policy changed
+  /// through the call preferences afterwards does not move the call to
+  /// another service.
   AndroidCallServiceKind get androidCallServiceKind;
 }
 
@@ -187,6 +193,13 @@ class BroadcasterAudioPolicy extends AudioConfigurationPolicy {
 ///
 /// This disables voice processing and treats the session as media playback
 /// on both platforms, providing higher audio fidelity.
+///
+/// On Android the call runs in the livestream viewer foreground service,
+/// which requests `mediaPlayback` rather than `phoneCall`. A viewer brought on
+/// stage can still publish in the background: the service adds `microphone`
+/// and `camera` once the app holds those permissions. An app whose viewers
+/// never publish can remove the microphone and camera foreground service
+/// permissions from its manifest; see [AndroidCallServiceKind].
 ///
 /// See [AudioConfigurationPolicy] for detailed platform-specific behavior.
 class ViewerAudioPolicy extends AudioConfigurationPolicy {

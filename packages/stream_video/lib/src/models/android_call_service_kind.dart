@@ -6,9 +6,11 @@
 /// only the types it can need, so an app is only asked to justify the types
 /// it actually uses.
 ///
-/// The kind is read from the call's effective `AudioConfigurationPolicy`:
-/// the viewer policy resolves to [livestreamViewer], every other predefined
-/// policy to [call], and a custom policy can name one explicitly.
+/// The kind is read from the call's effective `AudioConfigurationPolicy` once,
+/// when the call becomes active: the viewer policy resolves to
+/// [livestreamViewer], every other predefined policy to [call], and a custom
+/// policy can name one explicitly. A policy changed through the call
+/// preferences afterwards does not move the call to another service.
 ///
 /// On Android 14 and newer a service only requests a type whose
 /// `FOREGROUND_SERVICE_*` permission is still declared, so an app without a
@@ -24,9 +26,12 @@ enum AndroidCallServiceKind {
   /// `microphone` and `camera` when those permissions are granted.
   call,
 
-  /// A livestream viewer, who only plays remote media.
+  /// A livestream viewer, whose call is media playback rather than a phone
+  /// call.
   ///
   /// Runs in `StreamLivestreamViewerService`, which requests `mediaPlayback`
-  /// alone.
+  /// in place of `phoneCall`, plus `microphone` and `camera` when those
+  /// permissions are granted, so a viewer brought on stage keeps publishing in
+  /// the background.
   livestreamViewer,
 }
