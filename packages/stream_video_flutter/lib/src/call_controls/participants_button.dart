@@ -92,9 +92,8 @@ class StreamParticipantsButton extends StatelessWidget {
     return StreamAdaptiveMenuAnchor(
       title: translations.lobbyParticipants,
       // The design's menu row is sized for a 16px icon; an avatar is 40, and
-      // in a 40px row it touches both edges. These follow the inset the
-      // sheet's list tiles carry, so a name is not crowded against the edge
-      // in either presentation.
+      // in a 40px row it touches both edges. A 56px row gives it 8px above
+      // and below. The sheet keeps the design's 48px mobile list item.
       menuItemStyle: StreamContextMenuActionStyle(
         minimumSize: const WidgetStatePropertyAll(Size(200, 56)),
         padding: WidgetStatePropertyAll(
