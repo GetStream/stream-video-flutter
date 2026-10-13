@@ -33,7 +33,7 @@ abstract interface class CallHost {
 
   /// Completes once the client has configured WebRTC for the app.
   @internal
-  Completer<void> get webrtcInitializationCompleter;
+  Future<void> get webrtcInitialized;
 
   /// Clears the way for [call] to be accepted. `null` when there is nothing
   /// to clear.

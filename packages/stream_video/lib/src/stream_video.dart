@@ -268,13 +268,13 @@ class StreamVideo extends Disposable implements CallHost {
       RtcMediaDeviceNotifier.instance
           .reinitializeAudioConfiguration(options.audioConfigurationPolicy)
           .then((_) {
-            webrtcInitializationCompleter.complete();
+            _webrtcInitialized.complete();
           })
           .onError((_, _) {
-            webrtcInitializationCompleter.complete();
+            _webrtcInitialized.complete();
           });
     } else {
-      webrtcInitializationCompleter.complete();
+      _webrtcInitialized.complete();
     }
 
     // Pre-warm the token cache, mirroring the eager fetch previously
@@ -348,9 +348,11 @@ class StreamVideo extends Disposable implements CallHost {
   @override
   StreamVideoOptions get options => _options;
 
+  final _webrtcInitialized = Completer<void>();
+
   @override
   @internal
-  Completer<void> webrtcInitializationCompleter = Completer();
+  Future<void> get webrtcInitialized => _webrtcInitialized.future;
 
   late final TokenManager _tokenManager;
 
