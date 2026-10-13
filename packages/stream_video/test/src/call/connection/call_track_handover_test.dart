@@ -302,6 +302,51 @@ void main() {
   );
 
   test(
+    'a screen share started from the system picker is not kept for replay',
+    () async {
+      setUpHarness(1);
+      final call = harness.buildCall();
+      await call.join();
+
+      await call.setScreenShareEnabled(
+        enabled: true,
+        constraints: const ScreenShareConstraints(
+          sourceId: ScreenShareConstraints.systemPickerSourceId,
+        ),
+      );
+      expect(call.connectOptions.screenShare, isA<TrackDisabled>());
+
+      await call.setScreenShareEnabled(
+        enabled: true,
+        constraints: const ScreenShareConstraints(sourceId: 'screen:1'),
+      );
+      expect(call.connectOptions.screenShare, isA<TrackEnabled>());
+    },
+  );
+
+  test(
+    'a handed over system picker screen share is not kept for replay',
+    () async {
+      final [_, second] = setUpHarness(2).sessions;
+      final screenShare = liveTrack(
+        SfuTrackType.screenShare,
+        const ScreenShareConstraints(
+          sourceId: ScreenShareConstraints.systemPickerSourceId,
+        ),
+      );
+
+      final call = await migrateWith(
+        [screenShare],
+        CallConnectOptions(screenShare: TrackOption.enabled()),
+      );
+
+      verify(() => second.setLocalTrack(screenShare)).called(1);
+      expect(call.connectOptions.screenShare, isA<TrackDisabled>());
+    },
+    timeout: const Timeout(Duration(seconds: 30)),
+  );
+
+  test(
     'a migration whose first attempt fails still takes the tracks from the '
     'session it started from',
     () async {
