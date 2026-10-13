@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 
 import '../logger/stream_log.dart';
@@ -21,14 +19,13 @@ class InstanceHolder {
         If you want to use multiple instances of the SDK, use StreamVideo.create() instead.
         ''');
       }
-      streamLog.w(
+      streamLog.e(
         'InstanceHolder',
         () =>
-            'StreamVideo has already been initialised, '
-            'disposing the existing instance '
-            'and overriding it with the new instance.',
+            'StreamVideo has already been initialised; replacing the '
+            'singleton. The existing client stays connected: call '
+            'StreamVideo.reset(disconnect: true) first to disconnect it.',
       );
-      unawaited(_instance!.dispose());
     }
     _instance = instance;
   }

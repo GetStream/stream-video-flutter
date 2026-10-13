@@ -88,8 +88,9 @@ class StreamVideo extends Disposable implements CallHost {
   /// [StreamVideoOptions.logPriority] and [StreamVideoOptions.logHandlerFunction].
   ///
   /// When a client is installed already, this throws, unless
-  /// [failIfSingletonExists] is false: then the installed client is disposed
-  /// and replaced.
+  /// [failIfSingletonExists] is false: then the new client replaces it as the
+  /// singleton, and the old one is left as it is, still connected. Call
+  /// [reset] with `disconnect: true` first to disconnect it.
   factory StreamVideo(
     String apiKey, {
     StreamVideoOptions? options,

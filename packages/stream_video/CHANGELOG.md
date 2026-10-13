@@ -7,7 +7,7 @@
 - `StreamVideo.create` no longer sets up logging from `logPriority` and `logHandlerFunction`; only `StreamVideo(...)` does. Call `StreamVideo.configureLogging` for a client built with `create`.
 - `StreamVideoOptions.androidAudioConfiguration` is removed; pass `AudioConfigurationPolicy.custom` as `audioConfigurationPolicy` instead.
 - The no-op `precacheGenericSdps` parameter of `StreamVideo.create` is removed.
-- `StreamVideo(failIfSingletonExists: false)` disposes the client it replaces instead of only disconnecting it.
+- `StreamVideo(failIfSingletonExists: false)` no longer disconnects the client it replaces; call `StreamVideo.reset(disconnect: true)` first to disconnect it.
 - Joining a `Call` after it was left or ended fails with `CallLeftException`; a `Call` is single use.
 - The lists emitted by `Call.closedCaptions` are unmodifiable; copy one before changing it.
 - `Call`'s action methods (members, permissions, moderation, recording, transcription, captions, broadcasting, mute, pin, go-live, reactions, custom events, feedback) are now extension methods on `CallActions`; they can't be stubbed or overridden, and a `show Call` import must also show `CallActions`.

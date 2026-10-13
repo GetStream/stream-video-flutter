@@ -53,7 +53,7 @@ void main() {
     await expectLater(fixture.streamVideo.ready, completes);
   });
 
-  test('replacing the singleton disposes the old client', () async {
+  test('replacing the singleton leaves the old client alone', () async {
     final first = StreamVideo(
       'test-api-key',
       user: user,
@@ -68,11 +68,12 @@ void main() {
       options: StreamVideoOptions(autoConnect: false),
       failIfSingletonExists: false,
     );
+    addTearDown(first.dispose);
+    addTearDown(second.dispose);
     await pumpEventQueue();
 
-    expect(first.isDisposed, isTrue);
     expect(StreamVideo.instance, same(second));
-    await second.dispose();
+    expect(first.isDisposed, isFalse);
   });
 
   test('only the singleton sets up logging from its options', () async {
