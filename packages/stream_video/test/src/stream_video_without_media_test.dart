@@ -126,6 +126,32 @@ void main() {
     verifyZeroInteractions(notifier);
   });
 
+  test('a ring from a client built without media cannot be joined', () async {
+    final fixture = await StreamVideo.runWithoutMedia(buildFixture);
+    addTearDown(fixture.dispose);
+    await fixture.streamVideo.ready;
+
+    final result = await ring(fixture).join();
+
+    expect(result.getErrorOrNull(), isA<CallWithoutMediaException>());
+    verifyNever(
+      () => fixture.client.joinCall(
+        callCid: any(named: 'callCid'),
+        ringing: any(named: 'ringing'),
+        create: any(named: 'create'),
+        migratingFrom: any(named: 'migratingFrom'),
+        migratingFromList: any(named: 'migratingFromList'),
+        video: any(named: 'video'),
+        membersLimit: any(named: 'membersLimit'),
+        hintHighScaleLivestreamPublisher: any(
+          named: 'hintHighScaleLivestreamPublisher',
+        ),
+        e2ee: any(named: 'e2ee'),
+      ),
+    );
+    verifyZeroInteractions(notifier);
+  });
+
   test('a client built outside it applies the audio configuration', () async {
     final fixture = buildFixture();
     await fixture.streamVideo.ready;

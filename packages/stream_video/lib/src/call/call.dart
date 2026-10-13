@@ -890,12 +890,19 @@ class Call {
   /// A call is joined once. After it is left or ended, including after a
   /// failed join or reconnect, [join] fails with [CallLeftException]; use
   /// [StreamVideo.makeCall] to create a new [Call] for the same call.
+  ///
+  /// A call whose client was built inside [StreamVideo.runWithoutMedia]
+  /// cannot be joined: [join] fails with [CallWithoutMediaException].
   Future<Result<None>> join({
     CallConnectOptions? connectOptions,
     int? membersLimit,
     int maxJoinRetries = 3,
     bool? hintHighScaleLivestreamPublisher,
   }) {
+    if (!_host.setsUpMedia) {
+      _logger.e(() => '[join] rejected (the client sets up no media)');
+      return Future.value(const Result.failure(CallWithoutMediaException()));
+    }
     return _connection.join(
       connectOptions: connectOptions,
       membersLimit: membersLimit,

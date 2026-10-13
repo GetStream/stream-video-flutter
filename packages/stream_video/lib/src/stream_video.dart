@@ -158,12 +158,12 @@ class StreamVideo extends Disposable implements CallHost {
   }
 
   /// Runs [body], in which every [StreamVideo] built sets up no media: it
-  /// applies no audio configuration, and neither it nor the calls it rings
-  /// create the media device notifier.
+  /// applies no audio configuration, and the calls it creates do not observe
+  /// the media device notifier.
   ///
   /// For a client that only handles a push in the background, such as the
-  /// one `StreamVideoPushHandler.handleBackgroundMessage` builds. Such a
-  /// client cannot join a call.
+  /// one `StreamVideoPushHandler.handleBackgroundMessage` builds. Its calls
+  /// cannot be joined: [Call.join] fails with [CallWithoutMediaException].
   static Future<T> runWithoutMedia<T>(FutureOr<T> Function() body) async {
     return runZoned(body, zoneValues: {_withoutMediaKey: true});
   }
