@@ -20,7 +20,7 @@ enum class CallServiceKind {
     /** A voice or video call, hosted by [StreamCallService]. */
     call,
 
-    /** A livestream viewer who only plays remote media, hosted by [StreamLivestreamViewerService]. */
+    /** A livestream viewer, hosted by [StreamLivestreamViewerService]. */
     livestreamViewer,
 }
 
@@ -49,6 +49,22 @@ class ServiceManagerImpl(
     // reaches the same one.
     private val activeServices = mutableMapOf<String, ActiveService>()
 
+    /**
+     * Forgets calls whose service ended them on its own, such as a `shortService` the system
+     * timed out.
+     *
+     * Without this the call would read as running forever: updates would keep being sent, and
+     * each would recreate a service that is not in the foreground. A call that was only just
+     * started is not affected, since it is not recorded as ended until its service lets go of it.
+     */
+    private fun pruneEndedCalls() {
+        StreamCallService.drainEndedCallCids().forEach { callCid ->
+            if (activeServices.remove("$callCid-${ServiceType.call}") != null) {
+                logger.w { "[pruneEndedCalls] The service for callCid: $callCid ended without being stopped. It no longer runs in the foreground." }
+            }
+        }
+    }
+
     private fun serviceClass(type: ServiceType, kind: CallServiceKind): Class<out android.app.Service> =
         when (type) {
             ServiceType.call -> when (kind) {
@@ -68,6 +84,7 @@ class ServiceManagerImpl(
         kind: CallServiceKind,
     ): Boolean {
         logger.d { "[start] callCid: $callCid, type: $type, kind: $kind, payload: $payload" }
+        pruneEndedCalls()
         val serviceKey = "$callCid-$type"
 
         if (activeServices.containsKey(serviceKey)) {
@@ -127,6 +144,7 @@ class ServiceManagerImpl(
 
     override fun update(callCid: String, payload: NotificationPayload, type: ServiceType): Boolean {
         logger.d { "[update] callCid: $callCid, type: $type, payload: $payload" }
+        pruneEndedCalls()
 
         val serviceKey = "$callCid-$type"
         val active = activeServices[serviceKey]
@@ -161,6 +179,7 @@ class ServiceManagerImpl(
      */
     override fun stop(callCid: String?, type: ServiceType): Boolean {
         logger.d { "[stop] callCid: $callCid, type: $type" }
+        pruneEndedCalls()
 
         val actualCallCid = if (callCid != null) {
             callCid
@@ -211,6 +230,7 @@ class ServiceManagerImpl(
     }
 
     override fun isRunning(callCid: String?, type: ServiceType): Boolean {
+        pruneEndedCalls()
         val actualCallCid = if (callCid != null) {
             callCid
         } else {

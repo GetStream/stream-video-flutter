@@ -16,9 +16,14 @@
 /// `FOREGROUND_SERVICE_*` permission is still declared, so an app without a
 /// feature removes that one permission from its merged manifest with
 /// `tools:node="remove"`: `FOREGROUND_SERVICE_MEDIA_PLAYBACK` without a
-/// viewer mode, `FOREGROUND_SERVICE_PHONE_CALL` and `MANAGE_OWN_CALLS` for a
-/// livestream host app with no calls, `FOREGROUND_SERVICE_CAMERA` for
-/// audio-only calls.
+/// viewer mode, `FOREGROUND_SERVICE_CAMERA` for audio-only calls.
+///
+/// Keep `FOREGROUND_SERVICE_PHONE_CALL` and `MANAGE_OWN_CALLS` in any app that
+/// makes calls or hosts livestreams. Phone call is the one type the call
+/// service holds without a runtime grant, so it is what keeps a participant
+/// without the microphone or camera permission in the foreground. Without it
+/// such a call falls back to a `shortService`, which the system stops after
+/// about three minutes.
 enum AndroidCallServiceKind {
   /// A voice or video call.
   ///

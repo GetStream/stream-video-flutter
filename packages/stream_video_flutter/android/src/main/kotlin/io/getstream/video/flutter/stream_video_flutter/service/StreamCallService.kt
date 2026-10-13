@@ -170,6 +170,7 @@ open class StreamCallService : Service() {
             } catch (e: Exception) {
                 logger.e(e) { "[startNewCall] Exception starting foreground for $callCid. Error: ${e.message}" }
                 activeCalls.remove(callCid)
+                markCallEnded(callCid)
             }
         } else {
             notificationManager.notify(notificationId, notification)
@@ -246,14 +247,20 @@ open class StreamCallService : Service() {
         super.onDestroy()
         logger.i { "[onDestroy] Service destroying. Clearing ${activeCalls.size} active calls and their notifications." }
 
+        // Calls still here were not stopped through the manager, so it has to learn they ended.
         activeCalls.values.forEach { callData ->
             notificationManager.cancel(callData.notificationId)
-            println("=== StreamCallService.onDestroy === Cancelled notification ID: ${callData.notificationId}")
+            markCallEnded(callData.callCid)
         }
         activeCalls.clear()
         scope.cancel()
     }
 
+    /**
+     * The system ends a `shortService` after about three minutes. The calls it hosted keep
+     * running without a foreground service; [stopService] records them as ended so the
+     * [ServiceManager] stops reporting the service as running and stops sending it updates.
+     */
     override fun onTimeout(startId: Int) {
         super.onTimeout(startId)
         logger.w { "Timeout received from the system, service will stop." }
@@ -275,6 +282,7 @@ open class StreamCallService : Service() {
             val callData = activeCalls.remove(cid)
             if (callData != null) {
                 notificationManager.cancel(callData.notificationId)
+                markCallEnded(cid)
             }
         }
 
@@ -299,6 +307,24 @@ open class StreamCallService : Service() {
         const val TRIGGER_REMOVE_INCOMING_CALL = "REMOVE_CALL"
         const val TRIGGER_OUTGOING_CALL = "OUTGOING_CALL"
         const val TRIGGER_ONGOING_CALL = "ONGOING_CALL"
+
+        // Calls a call service let go of on its own: the system timed it out, the task was
+        // removed, it was destroyed with calls still in it, or it failed to enter the foreground.
+        // Shared by every call service class; the manager drains it before each operation.
+        private val endedCallCids = mutableSetOf<String>()
+
+        @Synchronized
+        private fun markCallEnded(callCid: String) {
+            endedCallCids.add(callCid)
+        }
+
+        /** Returns the calls ended since the last drain, and forgets them. */
+        @Synchronized
+        internal fun drainEndedCallCids(): Set<String> {
+            val ended = endedCallCids.toSet()
+            endedCallCids.clear()
+            return ended
+        }
     }
 }
 
