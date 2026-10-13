@@ -4,6 +4,10 @@
 
 - Fixed `unregisterDevice()` (called from `StreamVideo.disconnect()`) trying to delete the APN device token when `registerApnDeviceToken` is `false`, which failed with a 404 because that token was never registered. An APN token registered while `registerApnDeviceToken` was enabled is still deleted after the flag is turned off.
 
+### 🔄 Changed
+
+- [Android] Removed the unused `DISABLE_KEYGUARD` and `ACCESS_NOTIFICATION_POLICY` permissions.
+
 ## 1.7.0
 
 ### 🔄 Changed
