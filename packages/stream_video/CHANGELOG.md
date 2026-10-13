@@ -68,6 +68,7 @@
 
 ### 🔄 Changed
 
+- Updated `stream_webrtc_flutter` to `^4.0.0`.
 - `StreamVideo.dispose()` leaves and disposes the calls it tracks.
 - Leaving or disposing an outgoing call you created while it still rings cancels the ring.
 - With `closedCaptionsVisibilityDurationMs` at 0 or less, closed captions are now shown and stay until newer ones replace them, instead of never being shown.

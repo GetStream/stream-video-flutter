@@ -53,14 +53,6 @@ dependency_overrides:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core
       ref: f4d49e9db343b48d890247fc9bf142805804daf1
-  # TODO: drop once a release with the multitasking camera access fix and the
-  # macOS system picker is out.
-  # https://github.com/GetStream/webrtc-flutter/pull/88
-  # https://github.com/GetStream/webrtc-flutter/pull/93
-  stream_webrtc_flutter:
-    git:
-      url: https://github.com/GetStream/webrtc-flutter.git
-      ref: 48bde5caa596393d7d789c1bbe28a8ae3460d502
   stream_core_flutter:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
@@ -88,7 +80,7 @@ melos:
         stream_core: ^0.5.0
         stream_core_flutter: ^0.5.1
         stream_chat_flutter: ^10.0.0
-        stream_webrtc_flutter: ^3.2.0
+        stream_webrtc_flutter: ^4.0.0
         stream_video: ^2.0.0-alpha
         stream_video_filters: ^2.0.0-alpha
         stream_video_flutter: ^2.0.0-alpha
