@@ -1,8 +1,8 @@
-## Upcoming
+## 1.7.1
 
 ### 🐞 Fixed
 
-- Fixed `unregisterDevice()` (called from `StreamVideo.disconnect()`) trying to delete the APN device token when `registerApnDeviceToken` is `false`, which failed with a 404 because that token was never registered. An APN token registered while `registerApnDeviceToken` was enabled is still deleted after the flag is turned off.
+- Fixed `unregisterDevice()` incorrectly trying to delete an APN device token when `registerApnDeviceToken` is `false`.
 
 ### 🔄 Changed
 
