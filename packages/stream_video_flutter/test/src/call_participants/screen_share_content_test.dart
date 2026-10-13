@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -14,8 +15,16 @@ void main() {
     registerFallbackValue(ViewportVisibility.visible);
   });
 
+  // Process-wide, so it goes back to what it was for whatever runs next.
+  late Duration updateInterval;
+
   setUp(() {
+    updateInterval = VisibilityDetectorController.instance.updateInterval;
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
+  });
+
+  tearDown(() {
+    VisibilityDetectorController.instance.updateInterval = updateInterval;
   });
 
   final sharer = CallParticipantState(
@@ -84,6 +93,16 @@ void main() {
         ),
       ),
     );
+    await settle(tester);
+  }
+
+  /// Sends [event] at the centre of the share, as a mouse or trackpad would.
+  Future<void> signal(
+    WidgetTester tester,
+    PointerSignalEvent Function(Offset position) event,
+  ) async {
+    final center = tester.getCenter(find.byType(ScreenShareContent));
+    tester.binding.handlePointerEvent(event(center));
     await settle(tester);
   }
 
@@ -156,6 +175,61 @@ void main() {
     expect(keepsTrack(tester), isTrue);
 
     await pinch(tester, from: 90, to: 30);
+
+    expect(keepsTrack(tester), isFalse);
+  });
+
+  testWidgets('a screen share zoomed with a mouse or trackpad is kept while '
+      'it is panned or zoomed partly out', (tester) async {
+    final call = mockCall();
+    await pumpScreenShare(tester, call);
+
+    // A trackpad pinch to 3x.
+    await signal(
+      tester,
+      (position) => PointerScaleEvent(position: position, scale: 3),
+    );
+
+    expect(keepsTrack(tester), isTrue);
+
+    // A two-finger trackpad scroll, which pans.
+    await signal(
+      tester,
+      (position) => PointerScrollEvent(
+        kind: PointerDeviceKind.trackpad,
+        position: position,
+        scrollDelta: const Offset(40, 20),
+      ),
+    );
+
+    expect(keepsTrack(tester), isTrue);
+
+    // A step back out, to 2.4x.
+    await signal(
+      tester,
+      (position) => PointerScaleEvent(position: position, scale: 0.8),
+    );
+
+    expect(keepsTrack(tester), isTrue);
+    verifyNever(
+      () => call.removeSubscription(
+        userId: any(named: 'userId'),
+        sessionId: any(named: 'sessionId'),
+        trackIdPrefix: any(named: 'trackIdPrefix'),
+        trackType: any(named: 'trackType'),
+      ),
+    );
+
+    // Mouse wheel steps back out to 1x or below.
+    for (var i = 0; i < 3; i++) {
+      await signal(
+        tester,
+        (position) => PointerScrollEvent(
+          position: position,
+          scrollDelta: const Offset(0, 200),
+        ),
+      );
+    }
 
     expect(keepsTrack(tester), isFalse);
   });
