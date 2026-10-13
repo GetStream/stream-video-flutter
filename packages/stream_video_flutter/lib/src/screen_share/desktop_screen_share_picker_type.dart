@@ -1,4 +1,4 @@
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
+import 'desktop_capturer_override.dart';
 
 /// How the user chooses what to share on desktop.
 enum DesktopScreenSharePickerType {
@@ -17,4 +17,4 @@ enum DesktopScreenSharePickerType {
 ///
 /// Only true on macOS 14 or newer.
 Future<bool> isDesktopSystemContentPickerSupported() =>
-    desktopCapturer.isSystemContentPickerSupported();
+    resolvedDesktopCapturer.isSystemContentPickerSupported();
