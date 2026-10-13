@@ -13,8 +13,8 @@ import '../globals.dart';
 import '../open_api/video/coordinator/api.dart' hide User;
 import 'audio_processing/audio_processor.dart';
 import 'call/call.dart';
-import 'call/call_ringing_state.dart';
 import 'call/call_host.dart';
+import 'call/call_ringing_state.dart';
 import 'call/call_type.dart';
 import 'coordinator/coordinator_client.dart';
 import 'coordinator/models/coordinator_events.dart';
@@ -340,12 +340,15 @@ class StreamVideo extends Disposable implements CallHost {
   final _logger = taggedLogger(tag: _tag);
 
   final StreamVideoOptions _options;
+  @override
   final String apiKey;
 
   final MutableClientState _state;
 
+  @override
   StreamVideoOptions get options => _options;
 
+  @override
   @internal
   Completer<void> webrtcInitializationCompleter = Completer();
 
@@ -377,10 +380,12 @@ class StreamVideo extends Disposable implements CallHost {
   /// Replaces the app's lifecycle stream in tests.
   final Stream<VideoLifecycleState> Function()? _appStateOverride;
   late final InternetConnection _networkMonitor;
+  @override
   late final PushNotificationManager? pushNotificationManager;
 
   late final ClientEventReporter _clientEventReporter;
 
+  @override
   @internal
   ClientEventReporter get clientEventReporter => _clientEventReporter;
 
@@ -415,6 +420,9 @@ class StreamVideo extends Disposable implements CallHost {
     }),
   );
 
+  /// Clears the way for [call] to be accepted: cancels the current user's
+  /// outgoing ring of another call and, unless several calls may be active,
+  /// leaves the active call.
   @override
   @internal
   Future<void>? prepareToAccept(Call call) => _ringing.prepareToAccept(call);
@@ -433,12 +441,14 @@ class StreamVideo extends Disposable implements CallHost {
   );
 
   /// Returns the current user.
+  @override
   UserInfo get currentUser => _state.currentUser.toUserInfo();
 
   /// Returns the current user type.
   UserType get currentUserType => _state.currentUser.type;
 
   /// Returns the [StreamVideo] state.
+  @override
   ClientState get state => _state;
 
   /// Returns the active call if exists.
@@ -824,6 +834,7 @@ class StreamVideo extends Disposable implements CallHost {
     });
   }
 
+  @override
   @internal
   bool isAudioProcessorConfigured() {
     return _options.audioProcessor != null;
@@ -837,6 +848,7 @@ class StreamVideo extends Disposable implements CallHost {
         );
   }
 
+  @override
   @internal
   Future<Result<None>> setAudioProcessingEnabled(bool enabled) async {
     return await _options.audioProcessor?.setEnabled(enabled) ??
@@ -850,6 +862,7 @@ class StreamVideo extends Disposable implements CallHost {
   /// Devices with this capability are better suited for handling noise cancellation efficiently.
   ///
   /// Returns false on other platforms.
+  @override
   Future<Result<bool>> deviceSupportsAdvancedAudioProcessing() async {
     return await _options.audioProcessor
             ?.deviceSupportsAdvancedAudioProcessing() ??

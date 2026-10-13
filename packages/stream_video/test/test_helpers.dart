@@ -34,10 +34,6 @@ class MockCallHost extends Mock implements CallHost {
   @override
   ClientEventReporter get clientEventReporter =>
       clientEventReporterOverride ?? const ClientEventReporter.noOp();
-
-  /// Accepting clears nothing unless a test stubs it.
-  @override
-  Future<void>? prepareToAccept(Call call) => null;
 }
 
 class MockCallStateNotifier extends Mock implements CallStateNotifier {}
