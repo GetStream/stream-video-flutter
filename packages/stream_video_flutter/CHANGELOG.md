@@ -1,5 +1,9 @@
 ## Upcoming
 
+### 🐞 Fixed
+
+- A zoomed-in screen share stays subscribed while it is panned or partly pinched out.
+
 ### ✅ Added
 
 - [Android] Added `StreamLivestreamViewerService`, the foreground service for calls under `AudioConfigurationPolicy.viewer`.
