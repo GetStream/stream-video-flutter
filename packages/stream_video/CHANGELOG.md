@@ -87,6 +87,8 @@
 
 ### 🐞 Fixed
 
+- Going to the background and straight back no longer leaves the coordinator connection closed, or the camera and microphone off.
+- A camera or microphone that fails to turn back on when the app returns from the background is tried again on the next return instead of staying off.
 - A ring that ends before it is answered, such as one the caller cancels, no longer logs a timeout error once the ring's timeout runs out.
 - `StreamVideo.connect()` and `disconnect()` run one at a time in the order they are called, so a disconnect during a connect no longer leaves the user connected.
 - `Call.setCameraTargetResolution` during a call is now kept for later sessions.

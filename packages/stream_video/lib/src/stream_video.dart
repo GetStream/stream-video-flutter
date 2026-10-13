@@ -393,20 +393,22 @@ class StreamVideo extends Disposable {
     return tokenResult.data;
   }
 
-  /// Records the app's lifecycle, and closes the connection in the
-  /// background while no call is active.
+  /// Follows the app into the background and back; see
+  /// [AppLifecycleController].
   late final _lifecycle = AppLifecycleController(
     state: _state,
     keepConnectionAliveInBackground: () =>
         _options.keepConnectionsAliveWhenInBackground,
     isConnected: () => _client.isConnected,
     closeConnection: () async {
-      _subscriptions.cancel(_idEvents);
-      await _client.closeConnection();
+      final result = await _client.closeConnection();
+      if (result.isSuccess) _subscriptions.cancel(_idEvents);
+      return result;
     },
     openConnection: () async {
-      await _client.openConnection();
+      final result = await _client.openConnection();
       _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
+      return result;
     },
   );
 
@@ -473,6 +475,7 @@ class StreamVideo extends Disposable {
     },
     onDisconnected: () async {
       _subscriptions.cancelAll();
+      _lifecycle.reset();
       _ringing.clear();
       await _state.clear();
     },

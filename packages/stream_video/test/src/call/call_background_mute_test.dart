@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/lifecycle/lifecycle_state.dart';
@@ -32,6 +34,32 @@ void main() {
     await pumpEventQueue();
   }
 
+  void muteInBackground({bool video = true, bool audio = true}) =>
+      when(() => harness.streamVideo.options).thenReturn(
+        StreamVideoOptions(
+          muteVideoWhenInBackground: video,
+          muteAudioWhenInBackground: audio,
+          networkMonitorSettings: const NetworkMonitorSettings(
+            offlineCheckInterval: testReconnectSettleDelay,
+          ),
+        ),
+      );
+
+  void verifyNoCamera() => verifyNever(
+    () => harness.session.setCameraEnabled(
+      any(),
+      constraints: any(named: 'constraints'),
+    ),
+  );
+
+  void verifyNoMicrophone() => verifyNever(
+    () => harness.session.setMicrophoneEnabled(
+      any(),
+      constraints: any(named: 'constraints'),
+      stopTrackOnMute: any(named: 'stopTrackOnMute'),
+    ),
+  );
+
   setUp(() {
     harness = ConnectionHarness();
     for (final permission in CallPermission.values) {
@@ -39,15 +67,7 @@ void main() {
         () => harness.permissionsManager.hasPermission(permission),
       ).thenReturn(true);
     }
-    when(() => harness.streamVideo.options).thenReturn(
-      StreamVideoOptions(
-        muteVideoWhenInBackground: true,
-        muteAudioWhenInBackground: true,
-        networkMonitorSettings: const NetworkMonitorSettings(
-          offlineCheckInterval: testReconnectSettleDelay,
-        ),
-      ),
-    );
+    muteInBackground();
     final published = MockRtcLocalTrack();
     when(() => published.mediaTrack).thenReturn(_FakeMediaStreamTrack());
     when(
@@ -67,8 +87,18 @@ void main() {
 
   tearDown(() => harness.dispose());
 
-  /// Joins a call with the camera and microphone on, and makes it the active
-  /// call.
+  void stubCamera(
+    bool enabled,
+    Future<Result<RtcLocalTrack>> Function() answer,
+  ) => when(
+    () => harness.session.setCameraEnabled(
+      enabled,
+      constraints: any(named: 'constraints'),
+    ),
+  ).thenAnswer((_) => answer());
+
+  /// Joins a call with the camera and microphone on and, unless [active] is
+  /// false, makes it the active call.
   Future<Call> activeCall({bool active = true}) async {
     final call = harness.buildCall();
     await call.join();
@@ -188,5 +218,99 @@ void main() {
         constraints: any(named: 'constraints'),
       ),
     );
+  });
+
+  test('mutes only the camera when only video is muted', () async {
+    muteInBackground(audio: false);
+    await activeCall();
+
+    await goTo(LifecycleState.paused);
+    await goTo(LifecycleState.resumed);
+
+    verifyCamera(false, 1);
+    verifyCamera(true, 1);
+    verifyNoMicrophone();
+  });
+
+  test('mutes only the microphone when only audio is muted', () async {
+    muteInBackground(video: false);
+    await activeCall();
+
+    await goTo(LifecycleState.paused);
+    await goTo(LifecycleState.resumed);
+
+    verifyMicrophone(false, 1);
+    verifyMicrophone(true, 1);
+    verifyNoCamera();
+  });
+
+  test('does nothing while the app is inactive or hidden', () async {
+    await activeCall();
+
+    await goTo(LifecycleState.inactive);
+    await goTo(LifecycleState.hidden);
+
+    verifyNoCamera();
+    verifyNoMicrophone();
+  });
+
+  test('does not turn on a camera it failed to turn off', () async {
+    await activeCall();
+    stubCamera(false, () async => failureWithError('no session'));
+
+    await goTo(LifecycleState.paused);
+    await goTo(LifecycleState.resumed);
+
+    verifyCamera(false, 1);
+    verifyNever(
+      () => harness.session.setCameraEnabled(
+        true,
+        constraints: any(named: 'constraints'),
+      ),
+    );
+  });
+
+  test(
+    'tries a camera that failed to turn on again on the next resume',
+    () async {
+      await activeCall();
+      stubCamera(true, () async => failureWithError('reconnecting'));
+
+      await goTo(LifecycleState.paused);
+      await goTo(LifecycleState.resumed);
+      verifyCamera(true, 1);
+
+      final published = MockRtcLocalTrack();
+      when(() => published.mediaTrack).thenReturn(_FakeMediaStreamTrack());
+      stubCamera(true, () async => Result.success(published));
+      await goTo(LifecycleState.paused);
+      await goTo(LifecycleState.resumed);
+
+      verifyCamera(true, 1);
+    },
+  );
+
+  test('a resume while the pause is still muting turns the camera on '
+      'after it', () async {
+    await activeCall();
+    final muting = Completer<Result<RtcLocalTrack>>();
+    stubCamera(false, () => muting.future);
+
+    appState().value = LifecycleState.paused;
+    await pumpEventQueue();
+    await goTo(LifecycleState.resumed);
+    verifyNever(
+      () => harness.session.setCameraEnabled(
+        true,
+        constraints: any(named: 'constraints'),
+      ),
+    );
+
+    final published = MockRtcLocalTrack();
+    when(() => published.mediaTrack).thenReturn(_FakeMediaStreamTrack());
+    muting.complete(Result.success(published));
+    await pumpEventQueue();
+
+    verifyCamera(true, 1);
   });
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/lifecycle/lifecycle_state.dart';
@@ -8,8 +10,8 @@ import '../fixtures/stream_video_fixture.dart';
 class _MockCall extends Mock implements Call {}
 
 /// Pins how the client follows the app into the background and back: the
-/// connection is closed only with no active call, and reopened only when it
-/// was closed or dropped.
+/// connection is closed only with no active call and when it is not kept
+/// alive, and reopened only when it was closed or dropped.
 void main() {
   setUpAll(() {
     registerFallbackValue(const UserInfo(id: 'fallback'));
@@ -36,7 +38,8 @@ void main() {
     await goTo(LifecycleState.paused);
     verify(fixture.client.closeConnection).called(1);
 
-    when(() => fixture.client.isConnected).thenReturn(false);
+    // The mocked client still reports connected, so only the close made
+    // here triggers the reopen.
     await goTo(LifecycleState.resumed);
     verify(fixture.client.openConnection).called(1);
   });
@@ -95,13 +98,68 @@ void main() {
     );
   });
 
-  test('a close that throws does not stop the reopen', () async {
+  test('a close that fails is not reopened on resume', () async {
     await connect();
-    when(fixture.client.closeConnection).thenThrow(StateError('socket'));
+    when(
+      fixture.client.closeConnection,
+    ).thenAnswer((_) async => failureWithError('not open'));
 
     await goTo(LifecycleState.paused);
     await goTo(LifecycleState.resumed);
 
+    verifyNever(fixture.client.openConnection);
+  });
+
+  test('a reopen that fails is tried again on the next resume', () async {
+    await connect();
+    when(
+      fixture.client.openConnection,
+    ).thenAnswer((_) async => failureWithError('offline'));
+
+    await goTo(LifecycleState.paused);
+    await goTo(LifecycleState.resumed);
     verify(fixture.client.openConnection).called(1);
+
+    when(() => fixture.client.isConnected).thenReturn(false);
+    await goTo(LifecycleState.inactive);
+    await goTo(LifecycleState.resumed);
+    verify(fixture.client.openConnection).called(1);
+  });
+
+  test('does nothing while the app is inactive or hidden', () async {
+    await connect();
+
+    await goTo(LifecycleState.inactive);
+    await goTo(LifecycleState.hidden);
+
+    verifyNever(fixture.client.closeConnection);
+    verifyNever(fixture.client.openConnection);
+  });
+
+  test('a resume while the close is in progress reopens after it', () async {
+    await connect();
+    final closing = Completer<Result<None>>();
+    when(fixture.client.closeConnection).thenAnswer((_) => closing.future);
+
+    await goTo(LifecycleState.paused);
+    await goTo(LifecycleState.resumed);
+    verifyNever(fixture.client.openConnection);
+
+    closing.complete(const Result.success(none));
+    await pumpEventQueue();
+
+    verify(fixture.client.openConnection).called(1);
+  });
+
+  test('forgets a background close once the user disconnects', () async {
+    await connect();
+    await goTo(LifecycleState.paused);
+    await fixture.streamVideo.disconnect();
+    clearInteractions(fixture.client);
+
+    await fixture.streamVideo.connect();
+    await goTo(LifecycleState.resumed);
+
+    verifyNever(fixture.client.openConnection);
   });
 }
