@@ -6,7 +6,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart' show CompositeSubscription;
-import 'package:stream_core/stream_core.dart' hide LifecycleState;
+import 'package:stream_core/stream_core.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../globals.dart';
@@ -26,10 +26,10 @@ import 'internal/_instance_holder.dart';
 import 'latency/latency_service.dart';
 import 'latency/latency_settings.dart';
 import 'lifecycle/app_lifecycle_controller.dart';
-import 'lifecycle/lifecycle_state.dart';
 import 'lifecycle/lifecycle_utils.dart'
     if (dart.library.io) 'lifecycle/lifecycle_utils_io.dart'
     as lifecycle;
+import 'lifecycle/video_lifecycle_state.dart';
 import 'logger/core_log_bridge.dart';
 import 'logger/impl/console_logger.dart';
 import 'logger/impl/external_logger.dart';
@@ -162,7 +162,7 @@ class StreamVideo extends Disposable {
     PNManagerProvider? pushNotificationManagerProvider,
     CoordinatorClient? coordinatorClient,
     InternetConnection? networkMonitor,
-    Stream<LifecycleState> Function()? appState,
+    Stream<VideoLifecycleState> Function()? appState,
   }) {
     return StreamVideo._(
       apiKey,
@@ -188,7 +188,7 @@ class StreamVideo extends Disposable {
     PNManagerProvider? pushNotificationManagerProvider,
     CoordinatorClient? coordinatorClient,
     InternetConnection? networkMonitor,
-    Stream<LifecycleState> Function()? appState,
+    Stream<VideoLifecycleState> Function()? appState,
   }) : _options = options,
        _appStateOverride = appState,
        _state = MutableClientState(user, options) {
@@ -374,7 +374,7 @@ class StreamVideo extends Disposable {
   late final CoordinatorClient _client;
 
   /// Replaces the app's lifecycle stream in tests.
-  final Stream<LifecycleState> Function()? _appStateOverride;
+  final Stream<VideoLifecycleState> Function()? _appStateOverride;
   late final InternetConnection _networkMonitor;
   late final PushNotificationManager? pushNotificationManager;
 

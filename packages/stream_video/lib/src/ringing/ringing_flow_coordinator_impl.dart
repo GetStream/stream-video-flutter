@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_core/stream_core.dart' hide LifecycleState;
+import 'package:stream_core/stream_core.dart';
 import 'package:uuid/uuid.dart';
 
 import '../call/call.dart';
@@ -14,7 +14,7 @@ import '../coordinator/coordinator_client.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../core/client_state.dart';
 import '../errors/stream_video_exception.dart';
-import '../lifecycle/lifecycle_state.dart';
+import '../lifecycle/video_lifecycle_state.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
 import '../models/call_metadata.dart';
@@ -303,7 +303,7 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
       // Ignore call accept event when app is in detached state on Android.
       // The call flow should be handled by consuming the call like in the terminated state.
       if (!CurrentPlatform.isAndroid ||
-          _state.appLifecycleState.value != LifecycleState.detached) {
+          _state.appLifecycleState.value != VideoLifecycleState.detached) {
         _onCallAccept(
           event,
           onCallAccepted: onCallAccepted,

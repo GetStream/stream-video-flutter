@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_video/src/lifecycle/lifecycle_state.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../fixtures/stream_video_fixture.dart';
@@ -19,7 +18,7 @@ void main() {
 
   late StreamVideoFixture fixture;
 
-  Future<void> goTo(LifecycleState state) async {
+  Future<void> goTo(VideoLifecycleState state) async {
     fixture.appState.add(state);
     await pumpEventQueue();
   }
@@ -35,12 +34,12 @@ void main() {
   test('closes the connection in the background and reopens it', () async {
     await connect();
 
-    await goTo(LifecycleState.paused);
+    await goTo(VideoLifecycleState.paused);
     verify(fixture.client.closeConnection).called(1);
 
     // The mocked client still reports connected, so only the close made
     // here triggers the reopen.
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.resumed);
     verify(fixture.client.openConnection).called(1);
   });
 
@@ -50,8 +49,8 @@ void main() {
     when(() => call.callCid).thenReturn(StreamCallCid(cid: 'default:active'));
     await fixture.streamVideo.state.setActiveCall(call);
 
-    await goTo(LifecycleState.paused);
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.paused);
+    await goTo(VideoLifecycleState.resumed);
 
     verifyNever(fixture.client.closeConnection);
     verifyNever(fixture.client.openConnection);
@@ -65,8 +64,8 @@ void main() {
       ),
     );
 
-    await goTo(LifecycleState.paused);
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.paused);
+    await goTo(VideoLifecycleState.resumed);
 
     verifyNever(fixture.client.closeConnection);
     verifyNever(fixture.client.openConnection);
@@ -80,9 +79,9 @@ void main() {
       ),
     );
 
-    await goTo(LifecycleState.paused);
+    await goTo(VideoLifecycleState.paused);
     when(() => fixture.client.isConnected).thenReturn(false);
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.resumed);
 
     verify(fixture.client.openConnection).called(1);
   });
@@ -90,11 +89,11 @@ void main() {
   test('records the app state', () async {
     await connect();
 
-    await goTo(LifecycleState.paused);
+    await goTo(VideoLifecycleState.paused);
 
     expect(
       fixture.streamVideo.state.appLifecycleState.value,
-      LifecycleState.paused,
+      VideoLifecycleState.paused,
     );
   });
 
@@ -104,8 +103,8 @@ void main() {
       fixture.client.closeConnection,
     ).thenAnswer((_) async => failureWithError('not open'));
 
-    await goTo(LifecycleState.paused);
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.paused);
+    await goTo(VideoLifecycleState.resumed);
 
     verifyNever(fixture.client.openConnection);
   });
@@ -116,21 +115,21 @@ void main() {
       fixture.client.openConnection,
     ).thenAnswer((_) async => failureWithError('offline'));
 
-    await goTo(LifecycleState.paused);
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.paused);
+    await goTo(VideoLifecycleState.resumed);
     verify(fixture.client.openConnection).called(1);
 
     when(() => fixture.client.isConnected).thenReturn(false);
-    await goTo(LifecycleState.inactive);
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.inactive);
+    await goTo(VideoLifecycleState.resumed);
     verify(fixture.client.openConnection).called(1);
   });
 
   test('does nothing while the app is inactive or hidden', () async {
     await connect();
 
-    await goTo(LifecycleState.inactive);
-    await goTo(LifecycleState.hidden);
+    await goTo(VideoLifecycleState.inactive);
+    await goTo(VideoLifecycleState.hidden);
 
     verifyNever(fixture.client.closeConnection);
     verifyNever(fixture.client.openConnection);
@@ -141,8 +140,8 @@ void main() {
     final closing = Completer<Result<None>>();
     when(fixture.client.closeConnection).thenAnswer((_) => closing.future);
 
-    await goTo(LifecycleState.paused);
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.paused);
+    await goTo(VideoLifecycleState.resumed);
     verifyNever(fixture.client.openConnection);
 
     closing.complete(const Result.success(none));
@@ -153,12 +152,12 @@ void main() {
 
   test('forgets a background close once the user disconnects', () async {
     await connect();
-    await goTo(LifecycleState.paused);
+    await goTo(VideoLifecycleState.paused);
     await fixture.streamVideo.disconnect();
     clearInteractions(fixture.client);
 
     await fixture.streamVideo.connect();
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.resumed);
 
     verifyNever(fixture.client.openConnection);
   });

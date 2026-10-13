@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_video/src/lifecycle/lifecycle_state.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
@@ -25,11 +24,11 @@ void main() {
 
   late ConnectionHarness harness;
 
-  MutableStateEmitter<LifecycleState?> appState() =>
+  MutableStateEmitter<VideoLifecycleState?> appState() =>
       harness.streamVideo.state.appLifecycleState
-          as MutableStateEmitter<LifecycleState?>;
+          as MutableStateEmitter<VideoLifecycleState?>;
 
-  Future<void> goTo(LifecycleState state) async {
+  Future<void> goTo(VideoLifecycleState state) async {
     appState().value = state;
     await pumpEventQueue();
   }
@@ -147,11 +146,11 @@ void main() {
     final call = await activeCall();
     expect(call.state.value.localParticipant?.isVideoEnabled, isTrue);
 
-    await goTo(LifecycleState.paused);
+    await goTo(VideoLifecycleState.paused);
     verifyCamera(false, 1);
     verifyMicrophone(false, 1);
 
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.resumed);
     verifyCamera(true, 1);
     verifyMicrophone(true, 1);
   });
@@ -161,8 +160,8 @@ void main() {
     await call.setMicrophoneEnabled(enabled: false);
     clearInteractions(harness.session);
 
-    await goTo(LifecycleState.paused);
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.paused);
+    await goTo(VideoLifecycleState.resumed);
 
     verifyCamera(false, 1);
     verifyCamera(true, 1);
@@ -178,7 +177,7 @@ void main() {
   test('leaves a call that is not active alone', () async {
     await activeCall(active: false);
 
-    await goTo(LifecycleState.paused);
+    await goTo(VideoLifecycleState.paused);
 
     verifyNever(
       () => harness.session.setCameraEnabled(
@@ -190,10 +189,10 @@ void main() {
 
   test('a call joined in the background is muted only when the app goes to '
       'the background again', () async {
-    appState().value = LifecycleState.paused;
+    appState().value = VideoLifecycleState.paused;
     await activeCall();
 
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.resumed);
     verifyNever(
       () => harness.session.setCameraEnabled(
         any(),
@@ -201,7 +200,7 @@ void main() {
       ),
     );
 
-    await goTo(LifecycleState.paused);
+    await goTo(VideoLifecycleState.paused);
     verifyCamera(false, 1);
   });
 
@@ -210,7 +209,7 @@ void main() {
     await call.leave();
     clearInteractions(harness.session);
 
-    await goTo(LifecycleState.paused);
+    await goTo(VideoLifecycleState.paused);
 
     verifyNever(
       () => harness.session.setCameraEnabled(
@@ -224,8 +223,8 @@ void main() {
     muteInBackground(audio: false);
     await activeCall();
 
-    await goTo(LifecycleState.paused);
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.paused);
+    await goTo(VideoLifecycleState.resumed);
 
     verifyCamera(false, 1);
     verifyCamera(true, 1);
@@ -236,8 +235,8 @@ void main() {
     muteInBackground(video: false);
     await activeCall();
 
-    await goTo(LifecycleState.paused);
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.paused);
+    await goTo(VideoLifecycleState.resumed);
 
     verifyMicrophone(false, 1);
     verifyMicrophone(true, 1);
@@ -247,8 +246,8 @@ void main() {
   test('does nothing while the app is inactive or hidden', () async {
     await activeCall();
 
-    await goTo(LifecycleState.inactive);
-    await goTo(LifecycleState.hidden);
+    await goTo(VideoLifecycleState.inactive);
+    await goTo(VideoLifecycleState.hidden);
 
     verifyNoCamera();
     verifyNoMicrophone();
@@ -258,8 +257,8 @@ void main() {
     await activeCall();
     stubCamera(false, () async => failureWithError('no session'));
 
-    await goTo(LifecycleState.paused);
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.paused);
+    await goTo(VideoLifecycleState.resumed);
 
     verifyCamera(false, 1);
     verifyNever(
@@ -276,15 +275,15 @@ void main() {
       await activeCall();
       stubCamera(true, () async => failureWithError('reconnecting'));
 
-      await goTo(LifecycleState.paused);
-      await goTo(LifecycleState.resumed);
+      await goTo(VideoLifecycleState.paused);
+      await goTo(VideoLifecycleState.resumed);
       verifyCamera(true, 1);
 
       final published = MockRtcLocalTrack();
       when(() => published.mediaTrack).thenReturn(_FakeMediaStreamTrack());
       stubCamera(true, () async => Result.success(published));
-      await goTo(LifecycleState.paused);
-      await goTo(LifecycleState.resumed);
+      await goTo(VideoLifecycleState.paused);
+      await goTo(VideoLifecycleState.resumed);
 
       verifyCamera(true, 1);
     },
@@ -296,9 +295,9 @@ void main() {
     final muting = Completer<Result<RtcLocalTrack>>();
     stubCamera(false, () => muting.future);
 
-    appState().value = LifecycleState.paused;
+    appState().value = VideoLifecycleState.paused;
     await pumpEventQueue();
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.resumed);
     verifyNever(
       () => harness.session.setCameraEnabled(
         true,
@@ -317,14 +316,14 @@ void main() {
   test('a failed restore is cancelled once the camera is set', () async {
     final call = await activeCall();
     stubCamera(true, () async => failureWithError('reconnecting'));
-    await goTo(LifecycleState.paused);
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.paused);
+    await goTo(VideoLifecycleState.resumed);
 
     // The user leaves the camera off.
     await call.setCameraEnabled(enabled: false);
     clearInteractions(harness.session);
-    await goTo(LifecycleState.paused);
-    await goTo(LifecycleState.resumed);
+    await goTo(VideoLifecycleState.paused);
+    await goTo(VideoLifecycleState.resumed);
 
     verifyNever(
       () => harness.session.setCameraEnabled(
@@ -343,7 +342,7 @@ void main() {
       ),
     ).thenThrow(StateError('capture'));
 
-    await goTo(LifecycleState.paused);
+    await goTo(VideoLifecycleState.paused);
 
     verifyMicrophone(false, 1);
   });

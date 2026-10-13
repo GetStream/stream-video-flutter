@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_video/src/lifecycle/lifecycle_state.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
@@ -31,7 +30,7 @@ class StreamVideoFixture {
     StreamVideoOptions? options,
     this.user = const User(id: 'test-user', name: 'Test User'),
     PNManagerProvider? pushNotificationManagerProvider,
-    LifecycleState? initialState,
+    VideoLifecycleState? initialState,
   }) {
     registerFallbackValue(const UserInfo(id: 'fallback'));
     when(() => client.events).thenAnswer((_) => events);
@@ -77,7 +76,7 @@ class StreamVideoFixture {
 
   /// The app states each connect listens to. Broadcast, so a reconnect can
   /// listen again.
-  final appState = StreamController<LifecycleState>.broadcast();
+  final appState = StreamController<VideoLifecycleState>.broadcast();
   late final StreamVideo streamVideo;
 
   Future<void> dispose() async {

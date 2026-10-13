@@ -5,7 +5,7 @@ import '../core/client_state.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
-import 'lifecycle_state.dart';
+import 'video_lifecycle_state.dart';
 
 /// Follows the app's lifecycle for the client: records the state, closes the
 /// coordinator connection while the app is in the background, and reopens it
@@ -39,7 +39,7 @@ class AppLifecycleController {
   /// Whether this closed the connection when the app went to the background.
   bool _closedInBackground = false;
 
-  Future<void> onAppState(LifecycleState state) {
+  Future<void> onAppState(VideoLifecycleState state) {
     _logger.d(() => '[onAppState] state: $state');
     _state.appLifecycleState.value = state;
 

@@ -6,7 +6,7 @@ import 'dart:math';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_core/stream_core.dart' hide LifecycleState;
+import 'package:stream_core/stream_core.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
@@ -19,7 +19,7 @@ import '../coordinator/coordinator_client.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../coordinator/models/coordinator_models.dart';
 import '../errors/stream_video_exception.dart';
-import '../lifecycle/lifecycle_state.dart';
+import '../lifecycle/video_lifecycle_state.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../logger/stream_log.dart';
 import '../models/models.dart';
@@ -699,7 +699,7 @@ class Call {
     );
   }
 
-  Future<void> _onAppLifecycleState(LifecycleState? state) async {
+  Future<void> _onAppLifecycleState(VideoLifecycleState? state) async {
     if (state == null || !isActiveCall) return;
     try {
       if (state.isPaused) {
