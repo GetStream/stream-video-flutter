@@ -92,7 +92,7 @@ class _AccentColorPicker extends StatelessWidget {
           description: l10n.accentColorDescription,
         ),
         Wrap(
-          spacing: context.streamSpacing.xs,
+          spacing: context.streamSpacing.sm,
           runSpacing: context.streamSpacing.xs,
           children: [
             for (final color in AppAccentColor.values)
@@ -137,7 +137,7 @@ class _AccentColorSwatch extends StatelessWidget {
       label: name,
       excludeSemantics: true,
       child: SizedBox(
-        width: 56,
+        width: ringed,
         child: Column(
           spacing: context.streamSpacing.xxs,
           children: [
@@ -164,14 +164,21 @@ class _AccentColorSwatch extends StatelessWidget {
               ),
             ),
             // Only the chosen one is named, but every swatch keeps the room,
-            // so the row does not shift as the choice moves.
-            Text(
-              selected ? name : '',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: textTheme.metadataDefault.copyWith(
-                color: colorScheme.textSecondary,
+            // so the row does not shift as the choice moves. The name may be
+            // wider than the swatch, and spills over the gaps beside it.
+            SizedBox(
+              height:
+                  textTheme.metadataDefault.fontSize! *
+                  (textTheme.metadataDefault.height ?? 1.2),
+              child: OverflowBox(
+                maxWidth: double.infinity,
+                child: Text(
+                  selected ? name : '',
+                  maxLines: 1,
+                  style: textTheme.metadataDefault.copyWith(
+                    color: colorScheme.textSecondary,
+                  ),
+                ),
               ),
             ),
           ],
