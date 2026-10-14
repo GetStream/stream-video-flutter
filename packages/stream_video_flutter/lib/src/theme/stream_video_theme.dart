@@ -56,6 +56,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamParticipantLabelThemeData? participantLabelTheme,
     StreamPictureInPictureThemeData? pictureInPictureTheme,
     StreamAdaptiveMenuAnchorThemeData? adaptiveMenuAnchorTheme,
+    StreamModalWindowThemeData? modalWindowTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
     StreamDesktopScreenShareSelectorThemeData? desktopScreenShareSelectorTheme,
@@ -106,6 +107,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           participantLabelTheme ?? legacy?.toParticipantLabelThemeData(),
       pictureInPictureTheme: pictureInPictureTheme,
       adaptiveMenuAnchorTheme: adaptiveMenuAnchorTheme,
+      modalWindowTheme: modalWindowTheme,
       connectionQualityIndicatorTheme:
           connectionQualityIndicatorTheme ??
           legacy?.toConnectionQualityIndicatorThemeData(),
@@ -173,6 +175,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     this.participantLabelTheme = const StreamParticipantLabelThemeData(),
     this.pictureInPictureTheme = const StreamPictureInPictureThemeData(),
     this.adaptiveMenuAnchorTheme = const StreamAdaptiveMenuAnchorThemeData(),
+    this.modalWindowTheme = const StreamModalWindowThemeData(),
     this.connectionQualityIndicatorTheme =
         const StreamConnectionQualityIndicatorThemeData(),
     this.callParticipantsGridTheme =
@@ -485,6 +488,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// on mobile.
   final StreamAdaptiveMenuAnchorThemeData adaptiveMenuAnchorTheme;
 
+  /// Theme for the modal windows with a sidebar of tabs.
+  final StreamModalWindowThemeData modalWindowTheme;
+
   /// Theme for the connection quality indicator.
   final StreamConnectionQualityIndicatorThemeData
   connectionQualityIndicatorTheme;
@@ -562,6 +568,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamParticipantLabelThemeData? participantLabelTheme,
     StreamPictureInPictureThemeData? pictureInPictureTheme,
     StreamAdaptiveMenuAnchorThemeData? adaptiveMenuAnchorTheme,
+    StreamModalWindowThemeData? modalWindowTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
     StreamDesktopScreenShareSelectorThemeData? desktopScreenShareSelectorTheme,
@@ -601,6 +608,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     adaptiveMenuAnchorTheme: this.adaptiveMenuAnchorTheme.merge(
       adaptiveMenuAnchorTheme,
     ),
+    modalWindowTheme: this.modalWindowTheme.merge(modalWindowTheme),
     connectionQualityIndicatorTheme: this.connectionQualityIndicatorTheme.merge(
       connectionQualityIndicatorTheme,
     ),
@@ -659,6 +667,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       adaptiveMenuAnchorTheme: adaptiveMenuAnchorTheme.merge(
         other.adaptiveMenuAnchorTheme,
       ),
+      modalWindowTheme: modalWindowTheme.merge(other.modalWindowTheme),
       connectionQualityIndicatorTheme: connectionQualityIndicatorTheme.merge(
         other.connectionQualityIndicatorTheme,
       ),
@@ -768,6 +777,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           adaptiveMenuAnchorTheme,
+      modalWindowTheme:
+          StreamModalWindowThemeData.lerp(
+            modalWindowTheme,
+            other.modalWindowTheme,
+            t,
+          ) ??
+          modalWindowTheme,
       connectionQualityIndicatorTheme:
           StreamConnectionQualityIndicatorThemeData.lerp(
             connectionQualityIndicatorTheme,

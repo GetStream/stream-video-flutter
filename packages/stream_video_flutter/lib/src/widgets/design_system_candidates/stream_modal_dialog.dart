@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:stream_core_flutter/core.dart';
 
+import 'stream_modal_parts.dart';
+
 /// Shows [builder] as a modal dialog over a blurred scrim.
 ///
 /// The dialog itself is typically a [StreamModalDialog], which supplies the
@@ -190,80 +192,21 @@ class StreamModalDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.streamColorScheme;
-    final spacing = context.streamSpacing;
-
-    return Dialog(
-      backgroundColor: colorScheme.backgroundElevation1,
-      surfaceTintColor: Colors.transparent,
-      elevation: context.streamElevation.level4,
-      clipBehavior: Clip.antiAlias,
-      insetPadding: EdgeInsets.all(spacing.xxl),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(context.streamRadius.xl),
-      ),
-      child: ConstrainedBox(
-        constraints: constraints,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _ModalDialogHeader(
-              title: title,
-              actions: [
-                ...headerActions,
-                if (showCloseButton)
-                  StreamButton.icon(
-                    icon: Icon(context.streamIcons.xmark),
-                    style: StreamButtonStyle.secondary,
-                    type: StreamButtonType.ghost,
-                    tooltip: MaterialLocalizations.of(
-                      context,
-                    ).closeButtonTooltip,
-                    onPressed: onClose ?? () => Navigator.of(context).pop(),
-                  ),
-              ],
-            ),
-            Flexible(child: child),
-            if (actions.isNotEmpty) _ModalDialogFooter(actions: actions),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ModalDialogHeader extends StatelessWidget {
-  const _ModalDialogHeader({required this.title, required this.actions});
-
-  final Widget? title;
-  final List<Widget> actions;
-
-  @override
-  Widget build(BuildContext context) {
-    final spacing = context.streamSpacing;
-
-    return Padding(
-      padding: EdgeInsets.all(spacing.xl),
-      child: Row(
-        spacing: spacing.md,
+    return StreamModalSurface(
+      constraints: constraints,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: DefaultTextStyle.merge(
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.streamTextTheme.headingSm.copyWith(
-                color: context.streamColorScheme.textPrimary,
-              ),
-              child: title ?? const SizedBox.shrink(),
-            ),
+          StreamModalHeader(
+            title: title,
+            actions: [
+              ...headerActions,
+              if (showCloseButton) StreamModalCloseButton(onPressed: onClose),
+            ],
           ),
-          if (actions.isNotEmpty)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: spacing.xs,
-              children: actions,
-            ),
+          Flexible(child: child),
+          if (actions.isNotEmpty) _ModalDialogFooter(actions: actions),
         ],
       ),
     );

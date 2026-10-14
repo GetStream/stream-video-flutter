@@ -24,6 +24,8 @@
 - Added `StreamParticipantLabelStyle.showVideoOffIcon`, to leave the camera-off icon out of the name pill.
 - Added `StreamModalDialog` and `showStreamModalDialog`, a centered modal surface with a title, header actions and a footer, over a blurred `StreamBlurScrim`.
 - Added `StreamTabBar`, a row of equal-width tabs whose selected index the caller owns. It, `StreamModalDialog` and `StreamBlurScrim` are design-system candidates, living in `src/widgets/design_system_candidates` until they graduate to core.
+- Added `StreamModalWindow`, a modal window with a sidebar of `StreamModalWindowTab`s that shows one tab at a time. It is a design-system candidate.
+- Added `StreamModalWindowThemeData` on `StreamVideoTheme`, and `StreamModalWindowTheme` to restyle the window over a subtree.
 - Added `StreamDesktopScreenShareDialog`, the desktop screen share picker as a widget, so it can be presented some way other than through `showDefaultScreenSelectionDialog`.
 - Added `StreamDesktopScreenShareSelector`, the redesigned grid of screens and windows behind the desktop screen share picker, and `StreamDesktopScreenShareThumbnail`, one tile of it.
 - Added `DesktopScreenShareSourceController`, which holds the screens and windows on offer and the one that is picked.
