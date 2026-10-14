@@ -179,25 +179,32 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
         ? outgoingCall
         : null;
 
-    final activeCall = _options.allowMultipleActiveCalls
-        ? null
-        : _activeCalls.singleOrNull;
-    final activeToLeave =
-        activeCall != null && activeCall.callCid != call.callCid
-        ? activeCall
-        : null;
+    Call? activeToLeave() {
+      if (_options.allowMultipleActiveCalls) return null;
+      final activeCall = _activeCalls.singleOrNull;
+      return activeCall != null && activeCall.callCid != call.callCid
+          ? activeCall
+          : null;
+    }
 
-    if (outgoingToCancel == null && activeToLeave == null) return null;
+    if (outgoingToCancel == null && activeToLeave() == null) return null;
     return _replaceCalls(outgoingToCancel, activeToLeave);
   }
 
-  Future<void> _replaceCalls(Call? outgoingCall, Call? activeCall) async {
+  /// Cancels [outgoingCall], then leaves the call [activeToLeave] returns.
+  /// That is read after the cancel, which leaves an outgoing call that was
+  /// active already.
+  Future<void> _replaceCalls(
+    Call? outgoingCall,
+    Call? Function() activeToLeave,
+  ) async {
     if (outgoingCall != null) {
       _logger.i(() => '[accept] canceling outgoing call: $outgoingCall');
       await outgoingCall.reject(reason: CallRejectReason.cancel());
       await _state.setOutgoingCall(null);
     }
 
+    final activeCall = activeToLeave();
     if (activeCall != null) {
       _logger.i(() => '[accept] canceling another active call: $activeCall');
       await activeCall.leave(reason: DisconnectReason.replaced());
