@@ -75,5 +75,9 @@
   "incomingVideoQuality720p": "HD 720p",
   "incomingVideoQuality480p": "SD 480p",
   "incomingVideoQuality144p": "Databesparing 144p",
-  "incomingVideoQualityOff": "Video uitschakelen"
+  "incomingVideoQualityOff": "Video uitschakelen",
+  "settingsEffectsTab": "Effecten",
+  "effectsSettingsFilters": "Effecten",
+  "effectsSettingsBackgrounds": "Achtergronden",
+  "effectsSettingsNone": "Geen effect"
 }

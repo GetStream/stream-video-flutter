@@ -83,9 +83,12 @@ large-screen more menu holds has a new home by the time the menu goes.
 
 ### 3. Effects tab
 
-- [ ] Data-driven effects UI in the SDK
-- [ ] Wired to `StreamVideoEffectsManager` in dogfooding; shown only when
-      supported
+- [x] Effects UI in the SDK, from optional lists of `StreamVideoFilter`s and
+      `StreamVideoBackground`s; a list that isn't set drops its section
+- [x] Dogfooding's lists over `StreamVideoEffectsManager`: three blur levels,
+      grayscale and the background images (shown from step 4, only when
+      supported)
+- [x] Goldens of the content, light and dark
 
 ### 4. Settings, feedback and developer buttons in dogfooding
 

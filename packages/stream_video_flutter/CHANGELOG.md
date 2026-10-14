@@ -26,9 +26,11 @@
 - Added `StreamModalWindow`, a modal window with a sidebar of `StreamModalWindowTab`s that shows one tab at a time. It is a design-system candidate.
 - Added `StreamModalWindowThemeData` on `StreamVideoTheme`, and `StreamModalWindowTheme` to restyle the window over a subtree.
 - Added `StreamDeviceSettingsTab`, a ready-made `StreamModalWindowTab` with the call's device settings, and `StreamDeviceSettings`, its content: a local preview, the camera, microphone and speaker, noise cancellation and the incoming video quality.
+- Added `StreamEffectsSettingsTab`, a ready-made `StreamModalWindowTab` with the video effects on offer, and `StreamEffectsSettings`, its content: a local preview over a row of `StreamVideoFilter`s and a grid of `StreamVideoBackground`s. Nothing is offered unless the app passes it.
+- Added `StreamVideoEffect`, sealed over `StreamVideoFilter` and `StreamVideoBackground`, the effects `StreamEffectsSettings` offers.
 - Added `IncomingVideoQuality.label`, the quality's name in the app's language.
 - Added `microphoneSections` and `speakerSections` to `LobbyDeviceMenus`, the two halves of `audioSections`.
-- Added device settings and incoming video quality strings to the localizations, in English and Dutch.
+- Added device settings, effects settings and incoming video quality strings to the localizations, in English and Dutch.
 - Added `StreamDesktopScreenShareDialog`, the desktop screen share picker as a widget, so it can be presented some way other than through `showDefaultScreenSelectionDialog`.
 - Added `StreamDesktopScreenShareSelector`, the redesigned grid of screens and windows behind the desktop screen share picker, and `StreamDesktopScreenShareThumbnail`, one tile of it.
 - Added `DesktopScreenShareSourceController`, which holds the screens and windows on offer and the one that is picked.

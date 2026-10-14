@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../stream_video_flutter.dart';
 import '../call_screen/device_select.dart';
 import '../l10n/localization_extension.dart';
+import 'local_preview.dart';
 import 'settings_switch_row.dart';
 
 /// The device tab of a [StreamModalWindow]: the call's device settings, under
@@ -81,7 +82,7 @@ class StreamDeviceSettings extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: spacing.xxl,
       children: [
-        Center(child: _LocalPreview(call: call)),
+        Center(child: StreamSettingsLocalPreview(call: call, width: 256)),
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -93,39 +94,6 @@ class StreamDeviceSettings extends StatelessWidget {
           ],
         ),
       ],
-    );
-  }
-}
-
-class _LocalPreview extends StatelessWidget {
-  const _LocalPreview({required this.call});
-
-  final Call call;
-
-  static CallParticipantState? _localParticipant(CallState state) =>
-      state.localParticipant;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 256,
-      height: 144,
-      child: PartialCallStateBuilder(
-        call: call,
-        selector: _localParticipant,
-        builder: (context, participant) {
-          if (participant == null) return const SizedBox.shrink();
-
-          return StreamParticipantTile(
-            call: call,
-            participant: participant,
-            // The call screen draws the same participant behind the window.
-            rendererScopePrefix: 'device-settings',
-            // A preview, not a participant to act on.
-            actions: const [],
-          );
-        },
-      ),
     );
   }
 }
