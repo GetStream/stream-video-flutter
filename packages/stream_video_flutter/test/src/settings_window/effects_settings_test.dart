@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' show Tristate;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -109,7 +109,7 @@ void main() {
   /// Whether the button or tile named [label] is marked selected.
   bool isSelected(WidgetTester tester, String label) {
     final node = tester.getSemantics(find.bySemanticsLabel(label));
-    return node.hasFlag(SemanticsFlag.isSelected);
+    return node.flagsCollection.isSelected == Tristate.isTrue;
   }
 
   group('StreamEffectsSettings', () {
