@@ -154,6 +154,7 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
       if (result.isFailure) {
         await widget.call.setMicrophoneEnabled(enabled: microphone.isEnabled);
       }
+      if (!mounted) return;
       return setState(() => {});
     }
   }
@@ -170,6 +171,7 @@ class _StreamIncomingCallContentState extends State<StreamIncomingCallContent> {
       if (result.isFailure) {
         await widget.call.setCameraEnabled(enabled: camera.isEnabled);
       }
+      if (!mounted) return;
       return setState(() => {});
     }
   }
