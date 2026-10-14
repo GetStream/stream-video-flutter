@@ -226,6 +226,7 @@ class _StreamDogFoodingAppContentState
         // Every language the SDK is translated into.
         supportedLocales: appSupportedLocales,
         localizationsDelegates: [
+          CustomVideoLocalizationsEN.delegate,
           CustomVideoLocalizationsNL.delegate,
           AppLocalizations.delegate,
           ...StreamVideoFlutterLocalizations.localizationsDelegates,

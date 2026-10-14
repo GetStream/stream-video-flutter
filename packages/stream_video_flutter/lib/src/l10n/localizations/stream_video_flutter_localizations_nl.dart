@@ -436,4 +436,31 @@ class StreamVideoFlutterLocalizationsNl
 
   @override
   String get transcriptionLanguageSk => 'Slowaaks';
+
+  @override
+  String get settingsRecordingsTab => 'Opnames';
+
+  @override
+  String get recordingsName => 'Naam';
+
+  @override
+  String get recordingsStartTime => 'Begintijd';
+
+  @override
+  String get recordingsEndTime => 'Eindtijd';
+
+  @override
+  String recordingsRecordingName(int number) {
+    return 'Opname #$number';
+  }
+
+  @override
+  String get recordingsDownload => 'Downloaden';
+
+  @override
+  String get recordingsEmptyTitle => 'Geen opnames beschikbaar';
+
+  @override
+  String get recordingsEmptyDescription =>
+      'Opnames van dit gesprek verschijnen hier zodra ze klaar zijn.';
 }
