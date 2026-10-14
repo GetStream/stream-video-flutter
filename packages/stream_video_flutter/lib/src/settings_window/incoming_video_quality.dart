@@ -18,4 +18,13 @@ extension IncomingVideoQualityLabel on IncomingVideoQuality {
       IncomingVideoQuality.off => translations.incomingVideoQualityOff,
     };
   }
+
+  /// A short name for the choice, for example "720p", for a button that shows
+  /// it.
+  String shortLabel(BuildContext context) => switch (this) {
+    IncomingVideoQuality.auto => context.translations.incomingVideoQualityAuto,
+    IncomingVideoQuality.off =>
+      context.translations.incomingVideoQualityShortOff,
+    _ => '${resolution!.height}p',
+  };
 }

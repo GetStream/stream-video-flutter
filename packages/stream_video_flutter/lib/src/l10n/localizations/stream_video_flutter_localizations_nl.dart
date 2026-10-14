@@ -336,4 +336,7 @@ class StreamVideoFlutterLocalizationsNl
 
   @override
   String get effectsSettingsNone => 'Geen effect';
+
+  @override
+  String get incomingVideoQualityShortOff => 'Uit';
 }

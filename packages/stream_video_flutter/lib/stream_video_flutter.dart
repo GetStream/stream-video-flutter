@@ -24,6 +24,7 @@ export 'src/call_controls/controls/stream_add_reaction_button.dart';
 export 'src/call_controls/controls/stream_camera_button.dart';
 export 'src/call_controls/controls/stream_closed_captions_button.dart';
 export 'src/call_controls/controls/stream_flip_camera_button.dart';
+export 'src/call_controls/controls/stream_incoming_video_quality_button.dart';
 export 'src/call_controls/controls/stream_layout_button.dart';
 export 'src/call_controls/controls/stream_leave_call_button.dart';
 export 'src/call_controls/controls/stream_microphone_button.dart';

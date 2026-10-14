@@ -30,7 +30,8 @@
 - Added `StreamDeviceSettingsTab`, a ready-made `StreamModalWindowTab` with the call's device settings, and `StreamDeviceSettings`, its content: a local preview, the camera, microphone and speaker, noise cancellation and the incoming video quality.
 - Added `StreamEffectsSettingsTab`, a ready-made `StreamModalWindowTab` with the video effects on offer, and `StreamEffectsSettings`, its content: a local preview over a row of `StreamVideoFilter`s and a grid of `StreamVideoBackground`s. Nothing is offered unless the app passes it.
 - Added `StreamVideoEffect`, sealed over `StreamVideoFilter` and `StreamVideoBackground`, the effects `StreamEffectsSettings` offers.
-- Added `IncomingVideoQuality.label`, the quality's name in the app's language.
+- Added `StreamIncomingVideoQualityButton`, which shows the incoming video quality and opens a menu to pick another.
+- Added `IncomingVideoQuality.label` and `shortLabel`, the quality's name in the app's language.
 - Added `microphoneSections` and `speakerSections` to `LobbyDeviceMenus`, the two halves of `audioSections`.
 - Added device settings, effects settings and incoming video quality strings to the localizations, in English and Dutch.
 - Added `StreamDesktopScreenShareDialog`, the desktop screen share picker as a widget, so it can be presented some way other than through `showDefaultScreenSelectionDialog`.
