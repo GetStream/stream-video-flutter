@@ -64,6 +64,8 @@ jobs:
           files: packages/*/coverage/lcov.info
       - name: "Test dart fixes"
         run: melos run test:fixes
+      - name: "Browser Test"
+        run: melos run test:web --no-select
 
   build:
     timeout-minutes: 30
