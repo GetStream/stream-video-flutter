@@ -146,12 +146,19 @@ web.HTMLAudioElement? _audioElementOf(String id) {
   return element as web.HTMLAudioElement;
 }
 
+/// Whether remote audio has to be re-attached after a subscriber renegotiation
+/// that adds an audio source. True on WebKit only, where such a renegotiation
+/// silences the audio already playing; elsewhere [reattachRemoteAudio] does
+/// nothing, so the offers need not be compared at all.
+bool needsRemoteAudioReattach() => _isWebKit;
+
 /// The re-attach waiting out [_reattachDelay], if one is.
 ///
 /// A call arriving meanwhile joins it rather than detaching again: its own
 /// renegotiation has been applied by then, and the elements are still empty, so
 /// the pending re-attach already comes after it. Cleared before the elements
-/// are re-attached, so a call from then on starts a re-attach of its own.
+/// are re-attached, so a call from then on starts a re-attach of its own, and
+/// cleared too by a re-attach that fails before its gap ends.
 Future<void>? _pendingReattach;
 
 /// Detaches every remote audio element and re-attaches it with a fresh stream
@@ -178,7 +185,15 @@ Future<void> reattachRemoteAudio({required String reason}) {
   final trackIds = _attachedTracks.keys.toList();
   if (trackIds.isEmpty) return Future.value();
 
-  return _pendingReattach = _reattach(trackIds, reason: reason);
+  final reattach = _reattach(trackIds, reason: reason);
+  _pendingReattach = reattach;
+  // A re-attach that runs to the end has cleared this already, when its gap
+  // ended. One that failed before then has not, and would otherwise be joined
+  // by every later call, leaving re-attach off for the rest of the page.
+  reattach.whenComplete(() {
+    if (identical(_pendingReattach, reattach)) _pendingReattach = null;
+  }).ignore();
+  return reattach;
 }
 
 Future<void> _reattach(List<String> trackIds, {required String reason}) async {
@@ -195,9 +210,15 @@ Future<void> _reattach(List<String> trackIds, {required String reason}) async {
   });
 
   for (final trackId in trackIds) {
-    // Dispose first, so the detach is not reported as an outage.
-    _watchdogs.remove(trackId)?.dispose();
-    _audioElementOf(trackId)?.srcObject = null;
+    // Contained per track: stopping at one would leave the rest without a
+    // re-attach, and the ones already emptied silent.
+    try {
+      // Dispose first, so the detach is not reported as an outage.
+      _watchdogs.remove(trackId)?.dispose();
+      _audioElementOf(trackId)?.srcObject = null;
+    } catch (e, stk) {
+      streamLog.e(_tag, () => 'Failed to detach audio for $trackId: $e\n$stk');
+    }
   }
 
   try {
@@ -214,7 +235,15 @@ Future<void> _reattach(List<String> trackIds, {required String reason}) async {
     // Re-attached by a `startAudio` that ran while we waited.
     if (element.srcObject != null) continue;
 
-    _attach(trackId, element, track);
+    // Contained per track, so one failure leaves no other element empty.
+    try {
+      _attach(trackId, element, track);
+    } catch (e, stk) {
+      streamLog.e(
+        _tag,
+        () => 'Failed to re-attach audio for $trackId: $e\n$stk',
+      );
+    }
   }
 }
 

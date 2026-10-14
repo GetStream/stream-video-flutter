@@ -262,12 +262,18 @@ class RtcManager extends Disposable {
 
   /// The last subscriber offer applied, so the next one can be compared
   /// against it. Null until the first offer: a brand-new subscriber is not a
-  /// renegotiation.
+  /// renegotiation. Only kept where [needsRemoteAudioReattach] holds.
   String? _appliedSubscriberOfferSdp;
 
+  /// Whether subscriber offers have to be compared for new audio sources.
+  /// WebKit only: everywhere else the offers are neither kept nor parsed.
+  /// Swappable so a test on the VM can take the WebKit path.
+  @visibleForTesting
+  bool Function() needsRemoteAudioReattach = rtc_audio.needsRemoteAudioReattach;
+
   /// Re-attaches every remote audio element after a subscriber renegotiation
-  /// brought in a new audio source. Web only; a no-op elsewhere. Swappable so
-  /// a test can observe the trigger.
+  /// brought in a new audio source. Swappable so a test can observe the
+  /// trigger.
   @visibleForTesting
   Future<void> Function({required String reason}) reattachRemoteAudio =
       rtc_audio.reattachRemoteAudio;
@@ -277,15 +283,27 @@ class RtcManager extends Disposable {
 
     final result = await subscriber.setRemoteOffer(offerSdp);
     if (result.isFailure) return null;
-    _appliedSubscriberOfferSdp = offerSdp;
+    if (needsRemoteAudioReattach()) _appliedSubscriberOfferSdp = offerSdp;
 
     final rtcAnswer = await subscriber.createAnswer(offerSdp);
     final answerSdp = rtcAnswer.getDataOrNull()?.sdp;
     if (answerSdp == null) return null;
 
-    if (previousOfferSdp != null &&
-        offerAddsIncomingAudio(previous: previousOfferSdp, next: offerSdp)) {
-      unawaited(_reattachRemoteAudio(reason: 'subscriberOffer'));
+    if (previousOfferSdp != null) {
+      // Best effort, and guarded: losing a re-attach is far cheaper than
+      // losing the answer.
+      try {
+        if (offerAddsIncomingAudio(
+          previous: previousOfferSdp,
+          next: offerSdp,
+        )) {
+          unawaited(_reattachRemoteAudio(reason: 'subscriberOffer'));
+        }
+      } catch (e, stk) {
+        _logger.w(
+          () => '[onSubscriberOffer] audio source check failed: $e\n$stk',
+        );
+      }
     }
 
     return answerSdp;

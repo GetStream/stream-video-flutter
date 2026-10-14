@@ -1,17 +1,24 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/webrtc/sdp/incoming_audio_sources.dart';
 
+typedef _Section = ({
+  String kind,
+  String mid,
+  String? direction,
+  String? msid,
+  List<int> ssrcs,
+});
+
 /// One m-section of an SFU subscriber offer.
-({String kind, String mid, String? direction, String? msid}) _section(
+_Section _section(
   String kind,
   String mid, {
   String? direction = 'sendonly',
   String? msid,
-}) => (kind: kind, mid: mid, direction: direction, msid: msid);
+  List<int> ssrcs = const [],
+}) => (kind: kind, mid: mid, direction: direction, msid: msid, ssrcs: ssrcs);
 
-String _offer(
-  List<({String kind, String mid, String? direction, String? msid})> sections,
-) {
+String _offer(List<_Section> sections) {
   return [
     'v=0\r\n',
     'o=- 1 2 IN IP4 127.0.0.1\r\n',
@@ -26,6 +33,11 @@ String _offer(
       'a=mid:${section.mid}\r\n',
       if (section.direction case final direction?) 'a=$direction\r\n',
       if (section.msid case final msid?) 'a=msid:$msid\r\n',
+      // As the SFU writes them: one line per attribute of each SSRC.
+      for (final ssrc in section.ssrcs) ...[
+        'a=ssrc:$ssrc cname:${section.msid ?? 'cname'}\r\n',
+        if (section.msid case final msid?) 'a=ssrc:$ssrc msid:$msid\r\n',
+      ],
     ],
     'm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\n',
     'c=IN IP4 0.0.0.0\r\n',
@@ -50,8 +62,8 @@ void main() {
         ]);
 
         expect(incomingAudioSources(sdp), {
-          '0|alice:TRACK_TYPE_AUDIO a1',
-          '2|bob:TRACK_TYPE_AUDIO a2',
+          '0|alice:TRACK_TYPE_AUDIO a1|',
+          '2|bob:TRACK_TYPE_AUDIO a2|',
         });
       },
     );
@@ -59,7 +71,22 @@ void main() {
     test('treats a section without a direction as sendrecv', () {
       final sdp = _offer([_section('audio', '0', direction: null)]);
 
-      expect(incomingAudioSources(sdp), {'0|'});
+      expect(incomingAudioSources(sdp), {'0||'});
+    });
+
+    test('keys a section by its SSRCs too, each named once', () {
+      final sdp = _offer([
+        _section(
+          'audio',
+          '0',
+          msid: 'alice:TRACK_TYPE_AUDIO a1',
+          ssrcs: [2000, 1000],
+        ),
+      ]);
+
+      expect(incomingAudioSources(sdp), {
+        '0|alice:TRACK_TYPE_AUDIO a1|1000,2000',
+      });
     });
 
     test('skips inactive and recvonly audio sections', () {
@@ -71,7 +98,7 @@ void main() {
       expect(incomingAudioSources(sdp), isEmpty);
     });
 
-    test('is empty for malformed SDP', () {
+    test('reads text that is not SDP as no sources', () {
       expect(incomingAudioSources('not sdp'), isEmpty);
       expect(incomingAudioSources(''), isEmpty);
     });
@@ -111,6 +138,51 @@ void main() {
         expect(offerAddsIncomingAudio(previous: previous, next: next), isTrue);
       },
     );
+
+    // The SFU moving another participant onto an m-line it is already sending
+    // on, without retiring it first.
+    test('is true when a sending audio section changes track', () {
+      final previous = _offer([
+        _section(
+          'audio',
+          '0',
+          msid: 'alice:TRACK_TYPE_AUDIO a1',
+          ssrcs: [1000],
+        ),
+      ]);
+      final next = _offer([
+        _section('audio', '0', msid: 'bob:TRACK_TYPE_AUDIO a2', ssrcs: [2000]),
+      ]);
+
+      expect(offerAddsIncomingAudio(previous: previous, next: next), isTrue);
+    });
+
+    test('is true when a section without an msid changes SSRC', () {
+      final previous = _offer([
+        _section('audio', '0', ssrcs: [1000]),
+      ]);
+      final next = _offer([
+        _section('audio', '0', ssrcs: [2000]),
+      ]);
+
+      expect(offerAddsIncomingAudio(previous: previous, next: next), isTrue);
+    });
+
+    test('is false when a section keeps its track and SSRCs', () {
+      final section = _section(
+        'audio',
+        '0',
+        msid: 'alice:TRACK_TYPE_AUDIO a1',
+        ssrcs: [1000],
+      );
+      final previous = _offer([section]);
+      final next = _offer([
+        section,
+        _section('video', '1', msid: 'bob:TRACK_TYPE_VIDEO v2', ssrcs: [3000]),
+      ]);
+
+      expect(offerAddsIncomingAudio(previous: previous, next: next), isFalse);
+    });
 
     test('is false when only video was added', () {
       final previous = _offer([alice]);

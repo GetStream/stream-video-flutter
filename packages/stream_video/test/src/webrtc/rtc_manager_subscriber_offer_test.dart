@@ -94,6 +94,8 @@ void main() {
     );
 
     reattachReasons = [];
+    // The WebKit path, which is the one with something to test.
+    manager.needsRemoteAudioReattach = () => true;
     manager.reattachRemoteAudio = ({required reason}) async {
       reattachReasons.add(reason);
     };
@@ -185,6 +187,34 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       expect(answer, 'v=0');
+    });
+
+    group('off WebKit', () {
+      setUp(() => manager.needsRemoteAudioReattach = () => false);
+
+      test('answers without re-attaching', () async {
+        await manager.onSubscriberOffer(_offer(['a:AUDIO 1']));
+        final answer = await manager.onSubscriberOffer(
+          _offer(['a:AUDIO 1', 'b:AUDIO 2']),
+        );
+
+        expect(answer, 'v=0');
+        expect(reattachReasons, isEmpty);
+      });
+
+      // Had the offers been kept, the third would be compared against the
+      // second and count as adding audio.
+      test('keeps no offer to compare against', () async {
+        await manager.onSubscriberOffer(_offer(['a:AUDIO 1']));
+        await manager.onSubscriberOffer(_offer(['a:AUDIO 1', 'b:AUDIO 2']));
+
+        manager.needsRemoteAudioReattach = () => true;
+        await manager.onSubscriberOffer(
+          _offer(['a:AUDIO 1', 'b:AUDIO 2', 'c:AUDIO 3']),
+        );
+
+        expect(reattachReasons, isEmpty);
+      });
     });
   });
 }

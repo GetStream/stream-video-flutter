@@ -116,6 +116,28 @@ void main() {
       expect(reattachTraces, hasLength(2));
     });
 
+    // Joining a failed re-attach would turn re-attach off for the rest of the
+    // page.
+    test('a call after one that failed starts its own', () async {
+      final track = _audioTrack();
+      start(alice, track);
+      setAudioTraceHandler((_, _) => throw StateError('tracer failed'));
+
+      await expectLater(
+        reattachRemoteAudio(reason: 'subscriberOffer'),
+        throwsStateError,
+      );
+
+      setAudioTraceHandler((tag, data) {
+        if (tag != TraceTag.audioPlaybackReattach) return;
+        reattachTraces.add((data! as Map).cast<String, Object?>());
+      });
+      await reattachRemoteAudio(reason: 'subscriberOffer');
+
+      expect(reattachTraces, hasLength(1));
+      expect(_playingTrackId(alice), track.jsTrack.id);
+    });
+
     test('a track stopped while it waits stays stopped', () async {
       start(alice, _audioTrack());
       start(bob, _audioTrack());
@@ -159,6 +181,14 @@ void main() {
     await reattach;
     expect(_stream(alice)!.id, stream);
     expect(reattachTraces, isEmpty);
+  });
+
+  test('needsRemoteAudioReattach holds on WebKit only', () {
+    debugOverrideIsWebKit(true);
+    expect(needsRemoteAudioReattach(), isTrue);
+
+    debugOverrideIsWebKit(false);
+    expect(needsRemoteAudioReattach(), isFalse);
   });
 
   group('checkIfAudioOutputChangeSupported', () {
