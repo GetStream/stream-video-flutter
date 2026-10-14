@@ -130,5 +130,13 @@
   "transcriptionLanguageBg": "Bulgaars",
   "transcriptionLanguageEt": "Estisch",
   "transcriptionLanguageSl": "Sloveens",
-  "transcriptionLanguageSk": "Slowaaks"
+  "transcriptionLanguageSk": "Slowaaks",
+  "settingsRecordingsTab": "Opnames",
+  "recordingsName": "Naam",
+  "recordingsStartTime": "Begintijd",
+  "recordingsEndTime": "Eindtijd",
+  "recordingsRecordingName": "Opname #{number}",
+  "recordingsDownload": "Downloaden",
+  "recordingsEmptyTitle": "Geen opnames beschikbaar",
+  "recordingsEmptyDescription": "Opnames van dit gesprek verschijnen hier zodra ze klaar zijn."
 }

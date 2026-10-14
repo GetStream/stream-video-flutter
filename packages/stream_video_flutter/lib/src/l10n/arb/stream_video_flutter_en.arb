@@ -565,5 +565,42 @@
   "transcriptionLanguageSk": "Slovak",
   "@transcriptionLanguageSk": {
     "description": "The name of a language the call can be transcribed in (sk)"
+  },
+  "settingsRecordingsTab": "Recordings",
+  "@settingsRecordingsTab": {
+    "description": "The label of the recordings tab in the settings window"
+  },
+  "recordingsName": "Name",
+  "@recordingsName": {
+    "description": "Title of the column with each recording's name"
+  },
+  "recordingsStartTime": "Start Time",
+  "@recordingsStartTime": {
+    "description": "Title of the column with the time each recording started"
+  },
+  "recordingsEndTime": "End Time",
+  "@recordingsEndTime": {
+    "description": "Title of the column with the time each recording ended"
+  },
+  "recordingsRecordingName": "Recording #{number}",
+  "@recordingsRecordingName": {
+    "description": "The name of a recording, numbered from the call's first",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "recordingsDownload": "Download",
+  "@recordingsDownload": {
+    "description": "Tooltip of the button that downloads a recording"
+  },
+  "recordingsEmptyTitle": "No Recordings Available",
+  "@recordingsEmptyTitle": {
+    "description": "Title shown when the call has no recordings"
+  },
+  "recordingsEmptyDescription": "Recordings of this call show up here once they're ready.",
+  "@recordingsEmptyDescription": {
+    "description": "Shown under the title when the call has no recordings"
   }
 }

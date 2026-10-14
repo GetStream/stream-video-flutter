@@ -134,8 +134,10 @@ large-screen more menu holds has a new home by the time the menu goes.
 
 ### 9. Recordings tab
 
-- [ ] Recordings list in the SDK, with loading and empty states
-- [ ] Download from dogfooding
+- [x] Recordings list in the SDK, with loading and empty states; the empty
+      state is a new design-system candidate, `StreamEmptyState`
+- [x] Download from dogfooding, through `url_launcher`; dogfooding overrides
+      the empty-state text in its custom localizations
 
 ### Before opening PRs
 

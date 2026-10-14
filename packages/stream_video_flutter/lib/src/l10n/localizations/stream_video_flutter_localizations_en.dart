@@ -462,4 +462,31 @@ class StreamVideoFlutterLocalizationsEn
 
   @override
   String get transcriptionLanguageSk => 'Slovak';
+
+  @override
+  String get settingsRecordingsTab => 'Recordings';
+
+  @override
+  String get recordingsName => 'Name';
+
+  @override
+  String get recordingsStartTime => 'Start Time';
+
+  @override
+  String get recordingsEndTime => 'End Time';
+
+  @override
+  String recordingsRecordingName(int number) {
+    return 'Recording #$number';
+  }
+
+  @override
+  String get recordingsDownload => 'Download';
+
+  @override
+  String get recordingsEmptyTitle => 'No Recordings Available';
+
+  @override
+  String get recordingsEmptyDescription =>
+      'Recordings of this call show up here once they\'re ready.';
 }
