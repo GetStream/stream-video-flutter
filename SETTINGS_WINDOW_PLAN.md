@@ -61,13 +61,14 @@ commit.
 
 ### 1. `StreamModalWindow`
 
-- [ ] `StreamModalWindow` and `StreamModalWindowTab`, sharing the header and
+- [x] `StreamModalWindow` and `StreamModalWindowTab`, sharing the header and
       surface with `StreamModalDialog`
-- [ ] `StreamModalWindowTheme`, registered on `StreamVideoTheme`
-- [ ] The sidebar collapses to icons below 560
-- [ ] Widget tests, including RTL and the collapsed sidebar
-- [ ] Goldens, light and dark, wide and collapsed
-- [ ] Changelog
+- [x] `StreamModalWindowTheme`, registered on `StreamVideoTheme`
+- [x] The sidebar collapses to icons below 560
+- [x] Widget tests, including RTL and the collapsed sidebar
+- [x] Goldens, light and dark, wide and collapsed (local; the CI ones come from
+      the `update_goldens` workflow once the branch is pushed)
+- [x] Changelog
 
 ### 2. Settings button and window in dogfooding
 
