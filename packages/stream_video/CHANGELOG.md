@@ -98,6 +98,7 @@
 - SFU sessions left behind by a failed join or reconnect attempt, or by a migration, are now released.
 - A participant moving between layouts no longer flashes a placeholder. A track the last viewport lets go of is held for `ViewportVisibilityRegistry.releaseGrace` before it is reported hidden, so the viewport taking over keeps the subscription.
 - Every track on screen is reported again to the new session after a reconnect.
+- Participant tiles keep their order after a reconnect. A join response keeps each participant's viewport visibility, pin and reaction.
 - Guest creation no longer waits for a coordinator connection id. The call is unauthenticated and watches nothing, so an id could only add latency.
 - A request that could not be signed now reports a credentials failure rather than a network one.
 - A 4xx the server answered without a Stream error payload — an edge, proxy or WAF answering on its own — is no longer retried as if it were a timeout. The status is read off the failure itself, so a permission denial fails on the first attempt instead of spending the whole retry budget.

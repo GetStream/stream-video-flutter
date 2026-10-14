@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
+import 'package:stream_video/src/models/call_participant_pin.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_audio_level.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_call_state.dart';
@@ -934,6 +935,114 @@ void main() {
       );
       expect(participants[1].isLocal, isFalse);
       expect(participants[1].isOnline, isTrue);
+    });
+
+    test('keeps visibility, reaction and pin for the same session', () {
+      final pin = CallParticipantPin(
+        isLocalPin: true,
+        pinnedAt: DateTime.utc(2026),
+      );
+      const reaction = CallReaction(
+        type: 'raised-hand',
+        user: CallUser(id: 'alice', name: 'alice', roles: [], image: ''),
+      );
+      final notifier = _notifier([
+        _participant(userId: 'alice')
+            .copyWith(
+              viewportVisibility: ViewportVisibility.visible,
+              screenShareViewportVisibility: ViewportVisibility.hidden,
+            )
+            .copyWithPin(participantPin: pin)
+            .copyWithReaction(reaction: reaction),
+      ]);
+
+      notifier.sfuJoinResponse(
+        _joinResponse([_sfuParticipant(userId: 'alice')]),
+      );
+
+      final alice = notifier.callState.callParticipants.single;
+      expect(alice.viewportVisibility, ViewportVisibility.visible);
+      expect(alice.screenShareViewportVisibility, ViewportVisibility.hidden);
+      expect(alice.pin, pin);
+      expect(alice.reaction, reaction);
+    });
+
+    test('does not carry them over to a new session of the same user', () {
+      final notifier = _notifier([
+        _participant(userId: 'alice')
+            .copyWith(viewportVisibility: ViewportVisibility.visible)
+            .copyWithPin(
+              participantPin: CallParticipantPin(
+                isLocalPin: true,
+                pinnedAt: DateTime.utc(2026),
+              ),
+            ),
+      ]);
+
+      notifier.sfuJoinResponse(
+        _joinResponse([
+          _sfuParticipant(userId: 'alice', sessionId: 'alice-rejoined'),
+        ]),
+      );
+
+      final alice = notifier.callState.callParticipants.single;
+      expect(alice.viewportVisibility, ViewportVisibility.unknown);
+      expect(alice.pin, isNull);
+    });
+
+    test('a server pin re-confirmed after the join keeps its pinnedAt', () {
+      final notifier = _notifier([_participant(userId: 'alice')]);
+      const pin = SfuPin(userId: 'alice', sessionId: 'alice-session');
+      notifier.sfuPinsUpdated([pin]);
+      final pinnedAt = notifier.callState.callParticipants.single.pin!.pinnedAt;
+
+      notifier
+        ..sfuJoinResponse(_joinResponse([_sfuParticipant(userId: 'alice')]))
+        ..sfuPinsUpdated([pin]);
+
+      expect(
+        notifier.callState.callParticipants.single.pin!.pinnedAt,
+        pinnedAt,
+      );
+    });
+
+    test('keeps the sorted order of visible participants', () {
+      // Alice is muted, so the regular preset would move her last if she
+      // counted as off screen.
+      final participants =
+          [
+            _participant(userId: 'alice'),
+            _participant(userId: 'bob').copyWith(
+              publishedTracks: {
+                SfuTrackType.audio: TrackState.base(isLocal: false),
+              },
+            ),
+            _participant(userId: 'carol').copyWith(
+              publishedTracks: {
+                SfuTrackType.audio: TrackState.base(isLocal: false),
+              },
+            ),
+          ].map(
+            (it) => it.copyWith(viewportVisibility: ViewportVisibility.visible),
+          );
+      final notifier = _notifier([...participants]);
+
+      notifier.sfuJoinResponse(
+        _joinResponse([
+          _sfuParticipant(userId: 'alice'),
+          _sfuParticipant(userId: 'bob', publishedTracks: [SfuTrackType.audio]),
+          _sfuParticipant(
+            userId: 'carol',
+            publishedTracks: [SfuTrackType.audio],
+          ),
+        ]),
+      );
+
+      final sorted = sortParticipants(
+        notifier.callState.callParticipants,
+        sort: CallParticipantSortingPresets.regular,
+      );
+      expect(sorted.map((it) => it.userId), ['alice', 'bob', 'carol']);
     });
   });
 
