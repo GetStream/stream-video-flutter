@@ -491,6 +491,79 @@ void main() {
       );
     }, timeout: const Timeout(Duration(seconds: 30)));
 
+    group('across join attempts that apply the call settings again', () {
+      late ConnectionHarness h;
+
+      setUp(() {
+        h = _harnessWithCamera(3);
+      });
+
+      tearDown(() => h.dispose());
+
+      /// Fails the first two sessions, so the third attempt joins the
+      /// coordinator again. [beforeFailing] runs as the first one starts.
+      void failTwice({void Function()? beforeFailing}) {
+        final [first, second, _] = h.sessions;
+        h
+          ..stubSessionStart(first, () async {
+            beforeFailing?.call();
+            return const Result.failure(
+              StreamVideoException(message: 'sfu unreachable'),
+            );
+          })
+          ..stubSessionStart(
+            second,
+            () async => const Result.failure(
+              StreamVideoException(message: 'sfu unreachable'),
+            ),
+          );
+      }
+
+      void verifyThirdKeptCameraOff() => verifyNever(
+        () => h.sessions[2].setCameraEnabled(
+          true,
+          constraints: any(named: 'constraints'),
+        ),
+      );
+
+      test('keeps a change made between them', () async {
+        late final Call call;
+        Result<None>? result;
+        failTwice(
+          beforeFailing: () => result = call.setConnectOptions(
+            call.connectOptions.copyWith(
+              camera: TrackOption.disabled(),
+              microphone: TrackOption.disabled(),
+            ),
+          ),
+        );
+        call = h.buildCall();
+
+        expect((await call.join()).isSuccess, isTrue);
+        await pumpEventQueue();
+
+        expect(result?.isSuccess, isTrue);
+        // The call settings turn both on by default.
+        verifyThirdKeptCameraOff();
+        expect(call.connectOptions.camera.isDisabled, isTrue);
+        expect(call.connectOptions.microphone.isDisabled, isTrue);
+      }, timeout: const Timeout(Duration(seconds: 30)));
+
+      test('keeps a change made before the first of them', () async {
+        failTwice();
+        final call = h.buildCall();
+
+        call.setConnectOptions(
+          CallConnectOptions(camera: TrackOption.disabled()),
+        );
+        expect((await call.join()).isSuccess, isTrue);
+        await pumpEventQueue();
+
+        verifyThirdKeptCameraOff();
+        expect(call.connectOptions.camera.isDisabled, isTrue);
+      }, timeout: const Timeout(Duration(seconds: 30)));
+    });
+
     group('the deprecated setter', () {
       test('applies a write before the join', () async {
         final call = harness.buildCall();

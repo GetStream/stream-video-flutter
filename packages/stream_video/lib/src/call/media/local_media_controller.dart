@@ -62,14 +62,17 @@ class LocalMediaController {
   final _sfuStatsTimers = <CancelableOperation<void>>{};
 
   CallConnectOptions _connectOptions = const CallConnectOptions();
+
+  /// The options [setConnectOptions] set last. Each join attempt merges them
+  /// over the call settings, until a session applies the options.
   CallConnectOptions? _connectOptionsOverride;
 
   /// The camera resolution [setCameraTargetResolution] asked for. It wins
   /// over the call settings each time they are applied.
   StreamTargetResolution? _requestedTargetResolution;
 
-  /// Whether the join has applied the call settings, after which a change
-  /// is written into the resolved options instead of the override.
+  /// Whether a join has applied the call settings, after which a change is
+  /// also merged into the resolved options.
   bool _joinSettingsApplied = false;
 
   /// The session that started applying the options. While it is the call's
@@ -80,8 +83,9 @@ class LocalMediaController {
 
   /// The options the next session starts with: an override set before the
   /// join, or the options the call resolved.
-  CallConnectOptions get connectOptions =>
-      _connectOptionsOverride ?? _connectOptions;
+  CallConnectOptions get connectOptions => _joinSettingsApplied
+      ? _connectOptions
+      : _connectOptionsOverride ?? _connectOptions;
 
   /// Changes the options the pending join applies. Fails once the call's
   /// session has started applying them.
@@ -102,12 +106,9 @@ class LocalMediaController {
     }
 
     _logger.d(() => '[setConnectOptions] connectOptions: $connectOptions');
-    // Before the join, an override goes over the call settings it applies;
-    // after it, the options are already resolved.
+    _connectOptionsOverride = connectOptions;
     if (_joinSettingsApplied) {
       _connectOptions = _connectOptions.merge(connectOptions);
-    } else {
-      _connectOptionsOverride = connectOptions;
     }
     return const Result.success(none);
   }
@@ -124,17 +125,16 @@ class LocalMediaController {
       _connectOptions = _connectOptions.merge(joinOptions);
     }
 
-    if (_connectOptionsOverride != null) {
-      _connectOptions = _connectOptions.merge(_connectOptionsOverride!);
-      _connectOptionsOverride = null;
+    if (_connectOptionsOverride case final override?) {
+      _connectOptions = _connectOptions.merge(override);
     }
 
     _joinSettingsApplied = true;
   }
 
   /// Writes the camera, microphone, devices and resolutions [settings] and
-  /// the devices present ask for over the connect options, starting from an
-  /// override when one is set. A requested camera resolution is kept.
+  /// the devices present ask for over the current connect options. A requested
+  /// camera resolution is kept.
   Future<void> applyCallSettings(CallSettings settings) async {
     final mediaDevicesResult = await _rtcMediaDeviceNotifier
         .enumerateDevicesFor(
@@ -236,6 +236,7 @@ class LocalMediaController {
     List<RtcLocalTrack> inheritedTracks = const [],
   }) async {
     _optionsAppliedBy = session;
+    _connectOptionsOverride = null;
     _logger.d(
       () =>
           '[applyConnectOptions] connectOptions: $_connectOptions, '
@@ -850,7 +851,7 @@ class LocalMediaController {
     _connectOptions = _connectOptions.copyWith(
       targetResolution: targetResolution,
     );
-    // An override replaces the options until the join merges it.
+    // A join attempt merges the override over the options again.
     if (_connectOptionsOverride case final override?) {
       _connectOptionsOverride = override.copyWith(
         targetResolution: targetResolution,
