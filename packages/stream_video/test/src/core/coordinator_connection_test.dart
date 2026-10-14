@@ -74,11 +74,13 @@ void main() {
     verify(
       () => fixture.client.connectUser(any(), includeUserDetails: true),
     ).called(1);
-    verify(push.registerDevice).called(1);
+    // Each connect registers the push device.
+    verify(push.registerDevice).called(2);
   });
 
   test(
-    'a later connect registers the push device an earlier one skipped',
+    'every connect that asks registers the push device, also while '
+    'connected',
     () async {
       await fixture.streamVideo.connect(registerPushDevice: false);
       verifyNever(push.registerDevice);
@@ -86,7 +88,7 @@ void main() {
       await fixture.streamVideo.connect();
       await fixture.streamVideo.connect();
 
-      verify(push.registerDevice).called(1);
+      verify(push.registerDevice).called(2);
     },
   );
 
@@ -326,6 +328,61 @@ void main() {
     verifyConnectUser().called(2);
     verify(fixture.client.disconnectUser).called(2);
     expect(connection().isDisconnected, isTrue);
+  });
+
+  test('disconnects that overlap unregister and close once', () async {
+    await fixture.streamVideo.connect();
+
+    final results = await Future.wait([
+      fixture.streamVideo.disconnect(),
+      fixture.streamVideo.disconnect(),
+    ]);
+
+    expect(results.every((result) => result.isSuccess), isTrue);
+    verify(push.unregisterDevice).called(1);
+    verify(fixture.client.disconnectUser).called(1);
+    expect(connection().isDisconnected, isTrue);
+  });
+
+  test(
+    'a disconnect after a dispose unregisters the push device without '
+    'closing the socket again',
+    () async {
+      await fixture.streamVideo.connect();
+      await fixture.streamVideo.dispose();
+      verifyNever(push.unregisterDevice);
+
+      await fixture.streamVideo.disconnect();
+
+      verify(push.unregisterDevice).called(1);
+      verify(fixture.client.disconnectUser).called(1);
+    },
+  );
+
+  test('a disconnect after a failed connect closes the socket again', () async {
+    await fixture.streamVideo.connect();
+    await fixture.streamVideo.disconnect();
+    connectUserAnswers(
+      () async => const Result.failure(StreamVideoException(message: 'ws')),
+    );
+
+    expect((await fixture.streamVideo.connect()).isFailure, isTrue);
+    await fixture.streamVideo.disconnect();
+
+    verify(push.unregisterDevice).called(2);
+    verify(fixture.client.disconnectUser).called(2);
+  });
+
+  test('a failed unregister is tried again by the next disconnect', () async {
+    await fixture.streamVideo.connect();
+    when(push.unregisterDevice).thenThrow(StateError('push'));
+    await fixture.streamVideo.disconnect();
+
+    when(push.unregisterDevice).thenAnswer((_) async {});
+    await fixture.streamVideo.disconnect();
+
+    verify(push.unregisterDevice).called(2);
+    verify(fixture.client.disconnectUser).called(1);
   });
 
   test('a failed unregister does not stop the disconnect', () async {

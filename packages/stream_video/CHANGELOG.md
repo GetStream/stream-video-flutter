@@ -71,7 +71,7 @@
 
 - Updated `stream_webrtc_flutter` to `^4.0.0`.
 - `StreamVideo.dispose()` leaves and disposes the calls it tracks, and disconnects the user like `disconnect()` but keeps the push device registered.
-- A `StreamVideo.connect()` that registers the push device now does so even when the connect that opened the connection skipped it.
+- `StreamVideo.connect()` registers the push device whenever it is asked to, also while the user is connected.
 - `StreamVideo.disconnect()` leaves the user disconnected even when unregistering the push device fails, or when the connection had dropped and was reconnecting.
 - `StreamVideo.disconnect()` also unregisters the push device when the user never connected.
 - Leaving or disposing an outgoing call you created while it still rings cancels the ring.

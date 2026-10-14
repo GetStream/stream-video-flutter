@@ -44,8 +44,12 @@ class CoordinatorConnection {
   final _logger = taggedLogger(tag: 'SV:CoordinatorConnection');
   final _lock = Lock();
 
-  /// Whether a connect of the current connection registered the push device.
-  bool _pushDeviceRegistered = false;
+  /// Whether a disconnect ran, with no connect started since.
+  bool _disconnected = false;
+
+  /// Whether a disconnect unregistered the push device, with no connect
+  /// started since.
+  bool _pushDeviceUnregistered = false;
   bool _disposed = false;
 
   ConnectionState get _connection => _state.connection.value;
@@ -64,8 +68,8 @@ class CoordinatorConnection {
   /// answers with the current token. One queued behind a connect that failed
   /// tries again itself, with its own [includeUserDetails], which otherwise
   /// only applies to the connect that opens the socket. [registerPushDevice]
-  /// registers the device once per connection, so a later connect asking for
-  /// it registers a device an earlier one skipped.
+  /// registers the push device, also while the user is connected; the push
+  /// notification manager skips a token it already registered.
   Future<Result<UserToken>> connect({
     required bool includeUserDetails,
     required bool registerPushDevice,
@@ -111,6 +115,8 @@ class CoordinatorConnection {
     }
 
     _connection = ConnectionState.connecting(_state.currentUser.id);
+    _disconnected = false;
+    _pushDeviceUnregistered = false;
 
     final user = _state.user.value;
     final Result<None> result;
@@ -163,15 +169,9 @@ class CoordinatorConnection {
     return Result.success(token);
   }
 
-  /// Registers the push device, unless a connect of this connection did.
-  /// A failed registration is tried again by the next connect asking for it.
   void _registerPushDevice() {
-    if (_pushDeviceRegistered) return;
-    final manager = _pushNotificationManager();
-    if (manager == null) return;
     try {
-      manager.registerDevice();
-      _pushDeviceRegistered = true;
+      _pushNotificationManager()?.registerDevice();
     } catch (e, stk) {
       _logger.e(() => '[connect] registering the push device failed: $e\n$stk');
     }
@@ -182,7 +182,9 @@ class CoordinatorConnection {
   ///
   /// The user ends up disconnected whatever a step fails with. Also when the
   /// socket dropped earlier and is still reconnecting: that is closed too.
-  /// Returns the failure of closing the socket, if it failed.
+  /// With no connect started since the last disconnect, it only unregisters
+  /// the push device, if asked to and not done yet. Returns the failure of
+  /// closing the socket, if it failed.
   Future<Result<None>> disconnect({bool unregisterPushDevice = true}) {
     return _lock.synchronized(
       () => _disconnect(unregisterPushDevice: unregisterPushDevice),
@@ -192,16 +194,21 @@ class CoordinatorConnection {
   Future<Result<None>> _disconnect({required bool unregisterPushDevice}) async {
     _logger.i(() => '[disconnect] currentUser.id: ${_state.currentUser.id}');
 
-    if (unregisterPushDevice) {
+    if (unregisterPushDevice && !_pushDeviceUnregistered) {
       try {
         await _pushNotificationManager()?.unregisterDevice();
+        _pushDeviceUnregistered = true;
       } catch (e, stk) {
         _logger.e(
           () => '[disconnect] unregistering the push device failed: $e\n$stk',
         );
       }
     }
-    _pushDeviceRegistered = false;
+
+    if (_disconnected) {
+      _logger.v(() => '[disconnect] skipped (no connect since the last one)');
+      return const Result.success(none);
+    }
 
     // Closes a socket that is still reconnecting after a drop as well; with
     // no user connected it does nothing.
@@ -222,6 +229,7 @@ class CoordinatorConnection {
     }
 
     _connection = ConnectionState.disconnected(_state.currentUser.id);
+    _disconnected = true;
     _logger.v(() => '[disconnect] completed');
     return result;
   }
