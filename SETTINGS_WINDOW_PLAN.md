@@ -92,10 +92,12 @@ large-screen more menu holds has a new home by the time the menu goes.
 
 ### 4. Settings, feedback and developer buttons in dogfooding
 
-- [ ] The settings button opens the window on large screens
-- [ ] Feedback and developer options buttons on the leading side of the bar
-- [ ] The tab list, in dogfooding, with the Device and Effects tabs
-- [ ] The large-screen more menu goes
+- [x] The settings button opens the window on large screens
+- [x] Feedback and developer options buttons on the leading side of the bar,
+      in non-production builds only
+- [x] The tab list, in dogfooding, with the Device and Effects tabs
+- [x] The large-screen more menu goes
+- [ ] Checked on a device (part of the final test)
 
 ### 5. Incoming video quality button
 
