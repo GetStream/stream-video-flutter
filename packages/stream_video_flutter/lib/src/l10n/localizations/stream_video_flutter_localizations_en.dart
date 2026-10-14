@@ -306,4 +306,128 @@ class StreamVideoFlutterLocalizationsEn
 
   @override
   String get incomingVideoQualityShortOff => 'Off';
+
+  @override
+  String get settingsCaptionsTab => 'Captions';
+
+  @override
+  String get captionsSettingsTurnOn => 'Turn On Captions';
+
+  @override
+  String get captionsSettingsTurnOnDescription =>
+      'Select the language people will use in the meeting. Captions will be displayed in this language.';
+
+  @override
+  String get captionsSettingsLanguage => 'Language';
+
+  @override
+  String get transcriptionLanguageAuto => 'Automatic';
+
+  @override
+  String get transcriptionLanguageEn => 'English';
+
+  @override
+  String get transcriptionLanguageFr => 'French';
+
+  @override
+  String get transcriptionLanguageEs => 'Spanish';
+
+  @override
+  String get transcriptionLanguageDe => 'German';
+
+  @override
+  String get transcriptionLanguageIt => 'Italian';
+
+  @override
+  String get transcriptionLanguageNl => 'Dutch';
+
+  @override
+  String get transcriptionLanguagePt => 'Portuguese';
+
+  @override
+  String get transcriptionLanguagePl => 'Polish';
+
+  @override
+  String get transcriptionLanguageCa => 'Catalan';
+
+  @override
+  String get transcriptionLanguageCs => 'Czech';
+
+  @override
+  String get transcriptionLanguageDa => 'Danish';
+
+  @override
+  String get transcriptionLanguageEl => 'Greek';
+
+  @override
+  String get transcriptionLanguageFi => 'Finnish';
+
+  @override
+  String get transcriptionLanguageId => 'Indonesian';
+
+  @override
+  String get transcriptionLanguageJa => 'Japanese';
+
+  @override
+  String get transcriptionLanguageRu => 'Russian';
+
+  @override
+  String get transcriptionLanguageSv => 'Swedish';
+
+  @override
+  String get transcriptionLanguageTa => 'Tamil';
+
+  @override
+  String get transcriptionLanguageTh => 'Thai';
+
+  @override
+  String get transcriptionLanguageTr => 'Turkish';
+
+  @override
+  String get transcriptionLanguageHu => 'Hungarian';
+
+  @override
+  String get transcriptionLanguageRo => 'Romanian';
+
+  @override
+  String get transcriptionLanguageZh => 'Chinese';
+
+  @override
+  String get transcriptionLanguageAr => 'Arabic';
+
+  @override
+  String get transcriptionLanguageTl => 'Tagalog';
+
+  @override
+  String get transcriptionLanguageHe => 'Hebrew';
+
+  @override
+  String get transcriptionLanguageHi => 'Hindi';
+
+  @override
+  String get transcriptionLanguageHr => 'Croatian';
+
+  @override
+  String get transcriptionLanguageKo => 'Korean';
+
+  @override
+  String get transcriptionLanguageMs => 'Malay';
+
+  @override
+  String get transcriptionLanguageNo => 'Norwegian';
+
+  @override
+  String get transcriptionLanguageUk => 'Ukrainian';
+
+  @override
+  String get transcriptionLanguageBg => 'Bulgarian';
+
+  @override
+  String get transcriptionLanguageEt => 'Estonian';
+
+  @override
+  String get transcriptionLanguageSl => 'Slovenian';
+
+  @override
+  String get transcriptionLanguageSk => 'Slovak';
 }
