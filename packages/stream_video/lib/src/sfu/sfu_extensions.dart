@@ -169,6 +169,14 @@ extension SfuParticipantX on SfuParticipant {
       connectionQuality: connectionQuality.mergeWithPrevious(
         existing?.connectionQuality,
       ),
+      // The SFU knows nothing of these, so the same session keeps them. A
+      // server pin is kept too, so a re-confirmed one keeps its `pinnedAt`.
+      pin: previous?.pin,
+      reaction: previous?.reaction,
+      viewportVisibility:
+          previous?.viewportVisibility ?? ViewportVisibility.unknown,
+      screenShareViewportVisibility:
+          previous?.screenShareViewportVisibility ?? ViewportVisibility.unknown,
       participantSource: participantSource,
     );
   }

@@ -22,6 +22,7 @@ void main() {
     String id, {
     bool speaking = false,
     bool onScreen = true,
+    bool audio = false,
   }) {
     return CallParticipantState(
       name: id,
@@ -30,8 +31,11 @@ void main() {
       custom: const {},
       roles: const [],
       trackIdPrefix: id,
-      // Nothing published, so the tiles draw their placeholder and no track
+      // No video, so the tiles draw their placeholder and no track
       // subscription is negotiated: this is about the order they come in.
+      publishedTracks: {
+        if (audio) SfuTrackType.audio: TrackState.base(isLocal: false),
+      },
       isDominantSpeaker: speaking,
       isSpeaking: speaking,
       viewportVisibility: onScreen
@@ -127,4 +131,30 @@ void main() {
     // 'd' and 'c' trade places; 'a' and 'b' are untouched.
     expect(order(tester), ['a', 'b', 'd', 'c']);
   });
+
+  testWidgets(
+    'a muted participant on screen keeps its tile after a reconnect',
+    (
+      tester,
+    ) async {
+      final call = mockCall();
+
+      await pumpCall(tester, call, [
+        participant('a'),
+        participant('b', audio: true),
+        participant('c', audio: true),
+      ]);
+      expect(order(tester), ['a', 'b', 'c']);
+
+      // The list as a join response leaves it: new instances of the same
+      // sessions, still on screen.
+      await pumpCall(tester, call, [
+        participant('a'),
+        participant('b', audio: true),
+        participant('c', audio: true),
+      ]);
+
+      expect(order(tester), ['a', 'b', 'c']);
+    },
+  );
 }
