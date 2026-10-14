@@ -246,4 +246,52 @@ class StreamVideoFlutterLocalizationsNl
     );
     return '$first, $second en $_temp0';
   }
+
+  @override
+  String get settingsDeviceTab => 'Apparaat';
+
+  @override
+  String get deviceSettingsSelectCamera => 'Camera kiezen';
+
+  @override
+  String get deviceSettingsSelectMicrophone => 'Microfoon kiezen';
+
+  @override
+  String get deviceSettingsSelectSpeaker => 'Luidspreker kiezen';
+
+  @override
+  String get deviceSettingsNoiseCancellation => 'Ruisonderdrukking';
+
+  @override
+  String get deviceSettingsNoiseCancellationDescription =>
+      'Filtert achtergrondgeluid uit je microfoon.';
+
+  @override
+  String get deviceSettingsIncomingVideoQuality =>
+      'Kwaliteit van inkomende video';
+
+  @override
+  String get deviceSettingsIncomingVideoQualityHelper =>
+      'De kwaliteit van inkomende video hangt af van verschillende factoren, waaronder de kwaliteit van de bronvideo en de netwerkomstandigheden.';
+
+  @override
+  String get incomingVideoQualityAuto => 'Automatisch';
+
+  @override
+  String get incomingVideoQuality2160p => '4K 2160p';
+
+  @override
+  String get incomingVideoQuality1080p => 'Full HD 1080p';
+
+  @override
+  String get incomingVideoQuality720p => 'HD 720p';
+
+  @override
+  String get incomingVideoQuality480p => 'SD 480p';
+
+  @override
+  String get incomingVideoQuality144p => 'Databesparing 144p';
+
+  @override
+  String get incomingVideoQualityOff => 'Video uitschakelen';
 }

@@ -275,5 +275,65 @@
       "second": { "type": "String" },
       "count": { "type": "int" }
     }
+  },
+  "settingsDeviceTab": "Device",
+  "@settingsDeviceTab": {
+    "description": "The label of the device settings tab in the settings window"
+  },
+  "deviceSettingsSelectCamera": "Select Camera",
+  "@deviceSettingsSelectCamera": {
+    "description": "Heading of the camera picker in the device settings"
+  },
+  "deviceSettingsSelectMicrophone": "Select Microphone",
+  "@deviceSettingsSelectMicrophone": {
+    "description": "Heading of the microphone picker in the device settings"
+  },
+  "deviceSettingsSelectSpeaker": "Select Speaker",
+  "@deviceSettingsSelectSpeaker": {
+    "description": "Heading of the speaker picker in the device settings"
+  },
+  "deviceSettingsNoiseCancellation": "Noise Cancellation",
+  "@deviceSettingsNoiseCancellation": {
+    "description": "Title of the noise cancellation switch in the device settings"
+  },
+  "deviceSettingsNoiseCancellationDescription": "Filters out background noise from your microphone.",
+  "@deviceSettingsNoiseCancellationDescription": {
+    "description": "Explains the noise cancellation switch in the device settings"
+  },
+  "deviceSettingsIncomingVideoQuality": "Incoming Video Quality",
+  "@deviceSettingsIncomingVideoQuality": {
+    "description": "Heading of the incoming video quality picker in the device settings"
+  },
+  "deviceSettingsIncomingVideoQualityHelper": "The quality of incoming video is influenced by various factors, including the source video's quality and the network conditions.",
+  "@deviceSettingsIncomingVideoQualityHelper": {
+    "description": "Helper text under the incoming video quality picker"
+  },
+  "incomingVideoQualityAuto": "Auto",
+  "@incomingVideoQualityAuto": {
+    "description": "Incoming video quality choice that leaves the resolution to the SDK"
+  },
+  "incomingVideoQuality2160p": "4K 2160p",
+  "@incomingVideoQuality2160p": {
+    "description": "Incoming video quality choice"
+  },
+  "incomingVideoQuality1080p": "Full HD 1080p",
+  "@incomingVideoQuality1080p": {
+    "description": "Incoming video quality choice"
+  },
+  "incomingVideoQuality720p": "HD 720p",
+  "@incomingVideoQuality720p": {
+    "description": "Incoming video quality choice"
+  },
+  "incomingVideoQuality480p": "SD 480p",
+  "@incomingVideoQuality480p": {
+    "description": "Incoming video quality choice"
+  },
+  "incomingVideoQuality144p": "Data saver 144p",
+  "@incomingVideoQuality144p": {
+    "description": "Incoming video quality choice"
+  },
+  "incomingVideoQualityOff": "Disable video",
+  "@incomingVideoQualityOff": {
+    "description": "Incoming video quality choice that turns other participants' video off"
   }
 }

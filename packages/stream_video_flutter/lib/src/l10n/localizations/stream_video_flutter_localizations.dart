@@ -472,6 +472,96 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'{first}, {second}, and {count, plural, =1{1 other} other{{count} others}}'**
   String ringingManyCallers(String first, String second, int count);
+
+  /// The label of the device settings tab in the settings window
+  ///
+  /// In en, this message translates to:
+  /// **'Device'**
+  String get settingsDeviceTab;
+
+  /// Heading of the camera picker in the device settings
+  ///
+  /// In en, this message translates to:
+  /// **'Select Camera'**
+  String get deviceSettingsSelectCamera;
+
+  /// Heading of the microphone picker in the device settings
+  ///
+  /// In en, this message translates to:
+  /// **'Select Microphone'**
+  String get deviceSettingsSelectMicrophone;
+
+  /// Heading of the speaker picker in the device settings
+  ///
+  /// In en, this message translates to:
+  /// **'Select Speaker'**
+  String get deviceSettingsSelectSpeaker;
+
+  /// Title of the noise cancellation switch in the device settings
+  ///
+  /// In en, this message translates to:
+  /// **'Noise Cancellation'**
+  String get deviceSettingsNoiseCancellation;
+
+  /// Explains the noise cancellation switch in the device settings
+  ///
+  /// In en, this message translates to:
+  /// **'Filters out background noise from your microphone.'**
+  String get deviceSettingsNoiseCancellationDescription;
+
+  /// Heading of the incoming video quality picker in the device settings
+  ///
+  /// In en, this message translates to:
+  /// **'Incoming Video Quality'**
+  String get deviceSettingsIncomingVideoQuality;
+
+  /// Helper text under the incoming video quality picker
+  ///
+  /// In en, this message translates to:
+  /// **'The quality of incoming video is influenced by various factors, including the source video\'s quality and the network conditions.'**
+  String get deviceSettingsIncomingVideoQualityHelper;
+
+  /// Incoming video quality choice that leaves the resolution to the SDK
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get incomingVideoQualityAuto;
+
+  /// Incoming video quality choice
+  ///
+  /// In en, this message translates to:
+  /// **'4K 2160p'**
+  String get incomingVideoQuality2160p;
+
+  /// Incoming video quality choice
+  ///
+  /// In en, this message translates to:
+  /// **'Full HD 1080p'**
+  String get incomingVideoQuality1080p;
+
+  /// Incoming video quality choice
+  ///
+  /// In en, this message translates to:
+  /// **'HD 720p'**
+  String get incomingVideoQuality720p;
+
+  /// Incoming video quality choice
+  ///
+  /// In en, this message translates to:
+  /// **'SD 480p'**
+  String get incomingVideoQuality480p;
+
+  /// Incoming video quality choice
+  ///
+  /// In en, this message translates to:
+  /// **'Data saver 144p'**
+  String get incomingVideoQuality144p;
+
+  /// Incoming video quality choice that turns other participants' video off
+  ///
+  /// In en, this message translates to:
+  /// **'Disable video'**
+  String get incomingVideoQualityOff;
 }
 
 class _StreamVideoFlutterLocalizationsDelegate
