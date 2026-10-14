@@ -15,39 +15,82 @@ fatal() { echo "FATAL: $1" >&2; exit 1; }
 EMUS=$(adb devices | grep -oE "^emulator-[0-9]+" || true)
 EMU_COUNT=$(printf '%s\n' "$EMUS" | grep -c . || true)
 
-# The callee is always the first emulator. The caller is the second one when the
-# ring comes from another Android instance; with RING_CALLER_PLATFORM=ios there
-# is no second emulator and the ring is placed on the simulator instead.
+# The callee is always the first emulator. With RING_MULTI_DEVICE=1 the second
+# one is the callee's other device, logged in as the same user. The caller comes
+# last when the ring comes from another Android instance; with
+# RING_CALLER_PLATFORM=ios it is placed from the simulator instead. `adb devices`
+# lists emulators by port, so the order is stable across phases.
+NEED=1
+ROLES="callee"
+if [ "$RING_MULTI_DEVICE" = "1" ]; then
+  NEED=$((NEED + 1)); ROLES="$ROLES + the callee's second device"
+fi
 if [ "$RING_CALLER_PLATFORM" = "android" ]; then
-  [ "${EMU_COUNT:-0}" -ge 2 ] || fatal "RING_CALLER_PLATFORM=android needs two emulators \
-(callee + caller); $EMU_COUNT booted.
-       Start a second one, or use RING_CALLER_PLATFORM=ios to place the ring from the simulator."
-  [ "$EMU_COUNT" -le 2 ] || fatal "$EMU_COUNT emulators booted; leave exactly two."
-  RING_CALLEE_SERIAL=$(printf '%s\n' "$EMUS" | sed -n 1p)
-  RING_CALLER_SERIAL=$(printf '%s\n' "$EMUS" | sed -n 2p)
+  NEED=$((NEED + 1)); ROLES="$ROLES + caller"
 else
-  [ "${EMU_COUNT:-0}" -ge 1 ] \
-    || fatal "no Android emulator running. Start one: \$ANDROID_HOME/emulator/emulator -avd <name> &"
-  [ "$EMU_COUNT" -le 1 ] \
-    || fatal "$EMU_COUNT emulators booted; leave exactly one for RING_CALLER_PLATFORM=ios."
-  RING_CALLEE_SERIAL="$EMUS"
-  RING_CALLER_SERIAL=""
+  ROLES="$ROLES; the caller runs on the iOS simulator"
+fi
+
+[ "${EMU_COUNT:-0}" -ge 1 ] \
+  || fatal "no Android emulator running. Start one: \$ANDROID_HOME/emulator/emulator -avd <name> &"
+[ "$EMU_COUNT" -eq "$NEED" ] || fatal "this run needs exactly $NEED emulators ($ROLES); \
+$EMU_COUNT booted.
+       RING_CALLER_PLATFORM=ios needs one fewer; RING_MULTI_DEVICE=1 needs one more."
+
+RING_CALLEE_SERIAL=$(printf '%s\n' "$EMUS" | sed -n 1p)
+RING_CALLEE2_SERIAL=""
+RING_CALLER_SERIAL=""
+NEXT=2
+if [ "$RING_MULTI_DEVICE" = "1" ]; then
+  RING_CALLEE2_SERIAL=$(printf '%s\n' "$EMUS" | sed -n "${NEXT}p"); NEXT=$((NEXT + 1))
+fi
+if [ "$RING_CALLER_PLATFORM" = "android" ]; then
+  RING_CALLER_SERIAL=$(printf '%s\n' "$EMUS" | sed -n "${NEXT}p")
 fi
 export ANDROID_SERIAL="$RING_CALLEE_SERIAL"
 
+# prepare_callee — everything a device that RECEIVES the ring needs. Runs against
+# the current ANDROID_SERIAL, so the second callee goes through on_callee2.
+prepare_callee() {
+  local api
+  api=$(adb shell getprop ro.build.version.sdk | tr -d '\r')
+
+  # Telecom needs API 26. Below that every check would report the same skip, which
+  # is a waste of a run rather than a useful result.
+  [ "$api" -ge 26 ] \
+    || fatal "$ANDROID_SERIAL is API $api. Telecom needs API 26+; nothing here would exercise it."
+
+  # The push path is the whole point. Without Play services the ring never
+  # arrives and every check fails for one reason that has nothing to do with the SDK.
+  adb shell pm list packages 2>/dev/null | grep -q "com.google.android.gms" \
+    || fatal "$ANDROID_SERIAL has no Google Play services; FCM cannot deliver. Use a Play-enabled AVD."
+
+  # A permission dialog on top of the ringing UI eats the accept tap, and a
+  # missing POST_NOTIFICATIONS means the incoming notification silently never
+  # appears — which reads exactly like a broken ringing flow.
+  grant_android_permissions
+
+  # USE_FULL_SCREEN_INTENT is an appop, not a runtime permission, so pm grant does
+  # not touch it. On API 34+ it can be off, and then the full-screen incoming call
+  # activity never launches while the app is backgrounded.
+  if [ "$api" -ge 34 ]; then
+    adb shell appops set "$ANDROID_PKG" USE_FULL_SCREEN_INTENT allow >/dev/null 2>&1 \
+      || info "WARN: could not set USE_FULL_SCREEN_INTENT; the full-screen checks may fail"
+  fi
+
+  # Keep the screen on and awake for the whole run.
+  adb shell svc power stayon true >/dev/null 2>&1 || true
+
+  # Take the device out of idle. A dozing emulator defers FCM, and the ring then never
+  # arrives — a failure that has nothing to do with the SDK. Restored by stop.sh.
+  adb shell dumpsys deviceidle disable >/dev/null 2>&1 || true
+}
+
 API=$(adb shell getprop ro.build.version.sdk | tr -d '\r')
 REL=$(adb shell getprop ro.build.version.release | tr -d '\r')
-
-# Telecom needs API 26. Below that every check would report the same skip, which
-# is a waste of a run rather than a useful result.
-[ "$API" -ge 26 ] \
-  || fatal "emulator is API $API. Telecom needs API 26+; nothing here would exercise it."
-
-# --- FCM ---------------------------------------------------------------------
-# The push path is the whole point. Without Play services the ring never
-# arrives and every check fails for one reason that has nothing to do with the SDK.
-adb shell pm list packages 2>/dev/null | grep -q "com.google.android.gms" \
-  || fatal "emulator has no Google Play services; FCM cannot deliver. Use a Play-enabled AVD."
+API2=""
+[ "$RING_MULTI_DEVICE" = "1" ] \
+  && API2=$(adb -s "$RING_CALLEE2_SERIAL" shell getprop ro.build.version.sdk | tr -d '\r')
 
 # --- ios simulator (only when the caller runs there) ------------------------
 if [ "$RING_CALLER_PLATFORM" = "ios" ]; then
@@ -78,45 +121,36 @@ if [ "$RING_BUILD_MODE" = "release" ] && [ ! -f android/key.properties ] \
        reads native logcat or a dumpsys probe, so neither is weakened by debug."
 fi
 
-# --- permissions ------------------------------------------------------------
-# A permission dialog on top of the ringing UI eats the accept tap, and a
-# missing POST_NOTIFICATIONS means the incoming notification silently never
-# appears — which reads exactly like a broken ringing flow.
-grant_android_permissions
-
-# USE_FULL_SCREEN_INTENT is an appop, not a runtime permission, so pm grant does
-# not touch it. On API 34+ it can be off, and then the full-screen incoming call
-# activity never launches while the app is backgrounded.
-if [ "$API" -ge 34 ]; then
-  adb shell appops set "$ANDROID_PKG" USE_FULL_SCREEN_INTENT allow >/dev/null 2>&1 \
-    || info "WARN: could not set USE_FULL_SCREEN_INTENT; the full-screen checks may fail"
+# --- callee devices ---------------------------------------------------------
+prepare_callee
+if [ "$RING_MULTI_DEVICE" = "1" ]; then
+  on_callee2 prepare_callee || exit 1
 fi
-
-# Keep the screen on and awake for the whole run.
-adb shell svc power stayon true >/dev/null 2>&1 || true
-
-# Take the device out of idle. A dozing emulator defers FCM, and the ring then never
-# arrives — a failure that has nothing to do with the SDK. Restored by stop.sh.
-adb shell dumpsys deviceidle disable >/dev/null 2>&1 || true
 
 # --- record the environment for later phases --------------------------------
 mkdir -p "$RING_DIR"
 cat >"$RING_DIR/env.sh" <<EOF
 export ANDROID_SERIAL=$ANDROID_SERIAL
 export RING_CALLEE_SERIAL=$RING_CALLEE_SERIAL
+export RING_CALLEE2_SERIAL=$RING_CALLEE2_SERIAL
 export RING_CALLER_SERIAL=$RING_CALLER_SERIAL
 export RING_CALLER_PLATFORM=$RING_CALLER_PLATFORM
+export RING_MULTI_DEVICE=$RING_MULTI_DEVICE
 export IOS_UDID=${IOS_UDID:-}
 export RING_BUILD_MODE=$RING_BUILD_MODE
 export RING_FLAVOR=$RING_FLAVOR
 export RING_CALLEE=$RING_CALLEE
 export RING_CALLER=$RING_CALLER
 ANDROID_API=$API
+ANDROID_API2=$API2
 EOF
 
 echo "  android:  $REL (API $API)"
 echo "  package:  $ANDROID_PKG  [$RING_BUILD_MODE/$RING_FLAVOR]"
 echo "  callee:   $RING_CALLEE on $RING_CALLEE_SERIAL"
+if [ "$RING_MULTI_DEVICE" = "1" ]; then
+  echo "  callee 2: $RING_CALLEE on $RING_CALLEE2_SERIAL (API $API2) — same user, second device"
+fi
 if [ "$RING_CALLER_PLATFORM" = "android" ]; then
   echo "  caller:   $RING_CALLER on $RING_CALLER_SERIAL (Direct Call, scripted)"
 else
@@ -126,5 +160,9 @@ echo "  branch:   $(git rev-parse --abbrev-ref HEAD) @ $(git rev-parse --short H
 if [ "$API" -lt 37 ]; then
   echo "  note: API $API is below 37, so the Android 17 ringing foreground service"
   echo "        stays gated off. ring-fgs-* will report SKIP, which is correct here."
+fi
+if [ "$RING_MULTI_DEVICE" = "1" ]; then
+  echo "  note: multi-device run — only elsewhere.sh cases apply. checks.sh refuses to"
+  echo "        run while a second device shares the callee (see SKILL.md step 3c)."
 fi
 echo "OK preflight"
