@@ -66,6 +66,7 @@
 - `StreamVideo.configureLogging` sets up the SDK's logging without a singleton client.
 - `StreamVideo.runWithoutMedia` builds a client that sets up no media, for handling a push in the background; its calls cannot be joined.
 - `NetworkMonitorSettings.build()` returns the `InternetConnection` the settings describe.
+- Added `DynascaleManager.incomingVideoSettingsStream`, which emits the incoming video settings as they change.
 - `Call.dispose()` leaves the call if needed and closes its streams.
 - Added `StreamPushPayload`, the wire contract for the push payloads Stream sends: the keys it sets, the `sender` that marks a payload as ours, and predicates for recognising a ringing or missed call push. `handleRingingFlowNotifications` reads payloads through it, so anything that has to recognise a Stream push before handing it over — a background handler deciding whether to build a client, or tracking which call is still ringing — can match on exactly what the SDK matches on instead of restating the format.
 - Added `ScreenShareConstraints.systemPickerSourceId`, the `sourceId` that makes macOS choose what to share with its system picker.
