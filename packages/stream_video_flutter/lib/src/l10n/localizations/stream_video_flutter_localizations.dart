@@ -586,6 +586,12 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'No effect'**
   String get effectsSettingsNone;
+
+  /// Shown on the incoming video quality button while other participants' video is turned off
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get incomingVideoQualityShortOff;
 }
 
 class _StreamVideoFlutterLocalizationsDelegate

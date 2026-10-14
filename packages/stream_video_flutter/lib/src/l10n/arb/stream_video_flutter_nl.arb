@@ -79,5 +79,6 @@
   "settingsEffectsTab": "Effecten",
   "effectsSettingsFilters": "Effecten",
   "effectsSettingsBackgrounds": "Achtergronden",
-  "effectsSettingsNone": "Geen effect"
+  "effectsSettingsNone": "Geen effect",
+  "incomingVideoQualityShortOff": "Uit"
 }

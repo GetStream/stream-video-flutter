@@ -540,6 +540,10 @@ class _CallScreenState extends State<CallScreen>
           StreamClosedCaptionsButton(call: call),
           StreamAddReactionButton(call: call),
           _screenShareOption(call),
+          StreamIncomingVideoQualityButton(
+            call: call,
+            menuDirection: StreamMenuDirection.up,
+          ),
           StreamRecordingButton(call: call),
           StreamLeaveCallButton(call: call),
         ],
