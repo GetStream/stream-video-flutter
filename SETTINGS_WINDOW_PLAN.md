@@ -101,8 +101,9 @@ large-screen more menu holds has a new home by the time the menu goes.
 
 ### 5. Incoming video quality button
 
-- [ ] The button and its menu
-- [ ] In the centre of the large bar in dogfooding
+- [x] The button and its menu
+- [x] In the centre of the large bar in dogfooding
+- [x] Golden of the closed button, light and dark
 
 ### 6a. An unset transcription language means English
 
