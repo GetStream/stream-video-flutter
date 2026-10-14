@@ -32,20 +32,27 @@ class CallConnectionCoordinator {
 
   bool get _isLeftOrLeaving => _phase.value.isLeftOrLeaving;
 
-  /// Waits for [future], or returns null as soon as the call is leaving.
-  Future<T?> _untilLeft<T>(Future<T> future) async {
-    final left = Completer<T?>();
+  /// Runs [body] with a future that completes once the call is leaving.
+  Future<T> _whileJoined<T>(Future<T> Function(Future<void> left) body) async {
+    final left = Completer<void>();
     final subscription = _phase.where((phase) => phase.isLeftOrLeaving).listen((
       _,
     ) {
-      if (!left.isCompleted) left.complete(null);
+      if (!left.isCompleted) left.complete();
     });
 
     try {
-      return await Future.any<T?>([future, left.future]);
+      return await body(left.future);
     } finally {
       await subscription.cancel();
     }
+  }
+
+  /// Waits for [future], or returns null as soon as the call is leaving.
+  Future<T?> _untilLeft<T>(Future<T> future) {
+    return _whileJoined(
+      (left) => Future.any<T?>([future, left.then((_) => null)]),
+    );
   }
 
   /// Waits [duration], or less if the call starts leaving first.
@@ -2029,19 +2036,8 @@ class CallConnectionCoordinator {
 
   /// Waits for a ringing call to be answered; `null` when the call is left
   /// first.
-  Future<Result<None>?> _awaitAnswer() async {
-    final left = Completer<void>();
-    final subscription = _phase.where((phase) => phase.isLeftOrLeaving).listen((
-      _,
-    ) {
-      if (!left.isCompleted) left.complete();
-    });
-
-    try {
-      return await _call._ringing.awaitAnswer(left: left.future);
-    } finally {
-      await subscription.cancel();
-    }
+  Future<Result<None>?> _awaitAnswer() {
+    return _whileJoined((left) => _call._ringing.awaitAnswer(left: left));
   }
 
   Future<Result<None>> leave({DisconnectReason? reason}) {
