@@ -1,17 +1,18 @@
 ## Upcoming
 
-### 🐞 Fixed
-
-- [iOS] Improved performance and stability of background filters (blur and virtual backgrounds): segmentation no longer throttles the camera, filters use less GPU and Neural Engine work, and several rendering, orientation and memory leak issues were fixed.
-
 ### ✅ Added
 
-- `StreamVideoEffectsManager.unregisterAllFilters()` to release native effect processors when filters are no longer needed, e.g. when the call ends.
+- `StreamVideoEffectsManager.unregisterAllFilters()` to release native effect processors when filters are no longer needed, e.g. before leaving the call.
 
 ### 🔄 Changed
 
+- Virtual background filters now blur the background while the background image is still loading, and keep blurring it if the image cannot be loaded, instead of sending the raw camera frame.
 - [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
 - Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.
+
+### 🐞 Fixed
+
+- [iOS] Improved performance and stability of background blur and virtual background filters.
 
 ## 1.6.0
 

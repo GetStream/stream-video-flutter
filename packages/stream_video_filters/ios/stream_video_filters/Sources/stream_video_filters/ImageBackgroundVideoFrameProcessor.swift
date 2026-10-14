@@ -39,6 +39,7 @@ final class ImageBackgroundVideoFrameProcessor: VideoFilter {
 
     private var cachedValue: CacheValue?
     private var backgroundImageUrl: String
+    private var loggedBlendFailure = false
 
     private lazy var backgroundImageFilterProcessor = { return BackgroundImageFilterProcessor() }()
 
@@ -84,11 +85,18 @@ final class ImageBackgroundVideoFrameProcessor: VideoFilter {
                 backgroundImage = Self.blurredFallbackBackground(for: input.originalImage)
             }
 
-            return self.backgroundImageFilterProcessor
-                .applyFilter(
-                    input.originalPixelBuffer,
-                    backgroundImage: backgroundImage
-                ) ?? input.originalImage
+            if let output = self.backgroundImageFilterProcessor.applyFilter(
+                input.originalPixelBuffer,
+                backgroundImage: backgroundImage
+            ) {
+                return output
+            }
+            // Blend failure: send the background rather than the unfiltered frame.
+            if !self.loggedBlendFailure {
+                self.loggedBlendFailure = true
+                NSLog("Virtual background blend failed, sending background only")
+            }
+            return backgroundImage.cropped(to: input.originalImage.extent)
         }
     }
 
@@ -132,18 +140,21 @@ final class ImageBackgroundVideoFrameProcessor: VideoFilter {
             )
             return
         }
-        // Bounded timeout (matches Android's 10s) so a hanging remote URL
-        // doesn't keep this processor alive for the OS-default ~75s.
+        // Bounded so a hanging remote URL doesn't keep the processor alive.
         var request = URLRequest(url: url)
         request.timeoutInterval = 10
-        let task = URLSession.shared.dataTask(with: request) { [weak self] data, _, _ in
+        let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             // `[weak self]`: if the processor is released while the task is in flight
             // (deinit calls cancel()), the closure no-ops and the task is freed.
             guard let self = self else { return }
             guard let data = data, let bgUIImage = UIImage(data: data) else {
                 // URLs may carry signed-access query tokens; log only the host.
                 let host = url.host ?? "local"
-                NSLog("Failed to load virtual-background image (host=\(host))")
+                let status = (response as? HTTPURLResponse).map { " status=\($0.statusCode)" } ?? ""
+                let reason =
+                    error?.localizedDescription
+                    ?? (data == nil ? "no data received" : "data is not a decodable image")
+                NSLog("Failed to load virtual-background image (host=\(host)\(status)): \(reason)")
                 return
             }
             self.setBackgroundImage(bgUIImage)

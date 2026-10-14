@@ -133,6 +133,10 @@ class StreamVideoFiltersPlugin: FlutterPlugin, MethodCallHandler {
    * Whether [e] is `ProcessorProvider.removeProcessor` reporting that the name is not
    * registered. That is the only failure it raises itself (a `RuntimeException` whose
    * message ends in "does not exist"); anything else is a genuine removal failure.
+   *
+   * This matches the message text of `ProcessorProvider.removeProcessor` in
+   * `stream_webrtc_flutter`. If that wording changes, update this check, or every
+   * name that was already removed turns into `UNREGISTER_FAILED` and is retained.
    */
   private fun isAlreadyRemoved(e: RuntimeException): Boolean =
     e.message?.contains("does not exist") == true

@@ -12,8 +12,8 @@ import Vision
 ///
 /// Segmentation runs asynchronously: each `applyFilter` call composites with the last
 /// completed mask and only kicks a new Vision request if one isn't already in flight.
-/// This keeps the capture thread unblocked at the cost of ≤1–2 frames of mask staleness,
-/// which is imperceptible in practice (Android uses the same pattern with ML Kit).
+/// This keeps the capture thread unblocked; the mask can lag a few frames behind the
+/// frame it is composited onto.
 @available(iOS 15.0, *)
 final class BackgroundImageFilterProcessor {
     private static let segmentationTargetHeight: CGFloat = 540
@@ -33,6 +33,13 @@ final class BackgroundImageFilterProcessor {
     private let segQueue = DispatchQueue(
         label: "io.getstream.video.segmentation", qos: .userInitiated)
     private let segLock = NSLock()
+
+    // Failures on this path are otherwise invisible: the frame is sent as background
+    // only until a mask arrives, so a persistently failing segmentation leaves the
+    // person missing from their own video. Logged at most once per interval.
+    private static let failureLogInterval: TimeInterval = 5
+    private let failureLogLock = NSLock()
+    private var lastFailureLog: TimeInterval = 0
     private var lastMask: CIImage?
     private var inFlight = false
 
@@ -90,6 +97,7 @@ final class BackgroundImageFilterProcessor {
                 segLock.lock()
                 inFlight = false
                 segLock.unlock()
+                logSegmentationFailure("could not allocate the segmentation input buffer")
             }
         }
 
@@ -209,11 +217,13 @@ final class BackgroundImageFilterProcessor {
         do {
             try requestHandler.perform([request], on: pixelBuffer, orientation: .up)
             guard let maskPixelBuffer = request.results?.first?.pixelBuffer else {
+                logSegmentationFailure("Vision returned no mask")
                 return
             }
             let rawMask = CIImage(cvPixelBuffer: maskPixelBuffer)
             // Snapshot to a CGImage so `lastMask` survives Vision's potential buffer reuse.
             guard let maskCG = ciContext.createCGImage(rawMask, from: rawMask.extent) else {
+                logSegmentationFailure("could not snapshot the mask")
                 return
             }
             let snapshot = CIImage(cgImage: maskCG)
@@ -221,7 +231,25 @@ final class BackgroundImageFilterProcessor {
             lastMask = snapshot
             segLock.unlock()
         } catch {
+            let nsError = error as NSError
+            logSegmentationFailure(
+                "\(nsError.domain) code \(nsError.code): \(nsError.localizedDescription)")
             return
+        }
+    }
+
+    /// Logs `reason` unless a failure was logged less than `failureLogInterval` ago.
+    /// Called from both the capture thread and `segQueue`.
+    private func logSegmentationFailure(_ reason: String) {
+        let now = Date().timeIntervalSinceReferenceDate
+        failureLogLock.lock()
+        let shouldLog = now - lastFailureLog >= Self.failureLogInterval
+        if shouldLog {
+            lastFailureLog = now
+        }
+        failureLogLock.unlock()
+        if shouldLog {
+            NSLog("Person segmentation failed, sending background only: \(reason)")
         }
     }
 }

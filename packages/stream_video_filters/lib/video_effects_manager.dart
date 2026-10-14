@@ -78,6 +78,11 @@ class StreamVideoEffectsManager {
 
   /// Applies a background image filter to the local participant video stream.
   /// The [imageUrl] parameter specifies the path to the image asset file or an URL to the image.
+  ///
+  /// The image is loaded asynchronously. While it is loading, and if it cannot
+  /// be loaded, the background is blurred instead so the camera image is never
+  /// sent unfiltered. A failed load is logged natively and does not make this
+  /// call fail.
   Future<void> applyBackgroundImageFilter(
     String imageUrl, {
     RtcLocalTrack? track,
@@ -227,12 +232,13 @@ class StreamVideoEffectsManager {
   /// deallocated, and resets the registration bookkeeping so the processors
   /// are registered again on the next apply.
   ///
-  /// Custom effects registered through [applyCustomEffect] are owned by the
-  /// integrator's own native code and are left untouched.
+  /// Custom effects registered through [applyCustomEffect] stay registered,
+  /// but are detached from the track like any other effect.
   ///
-  /// Call this once filters are no longer needed (for example when the call
-  /// ends). Any effect still attached to the local video track is detached
-  /// first so the processors can actually be released.
+  /// Call this once filters are no longer needed, before leaving the call: any
+  /// effect still attached to the local video track is detached first so the
+  /// processors can actually be released, and once the track is torn down that
+  /// native effect chain can no longer be reached.
   Future<void> unregisterAllFilters() async {
     if (!(await isSupported())) {
       return;
@@ -245,20 +251,28 @@ class StreamVideoEffectsManager {
     // Detach before removing from the registry: the native effect chain holds
     // strong references to the processors, so without this they would keep
     // running (and stay alive) while appliedVideoEffects reports nothing.
-    final trackId = await _getTrackId();
-    if (trackId != null) {
-      await rtc.setVideoEffects(trackId, names: []);
+    try {
+      final trackId = await _getTrackId();
+      if (trackId != null) {
+        await rtc.setVideoEffects(trackId, names: []);
+      }
+    } catch (e, stk) {
+      // Best effort: right after leave() the track's factory is already gone
+      // and the detach fails. The registry is still cleaned up below.
+      _logger.w(
+        () => 'Could not detach video effects before unregistering: $e\n$stk',
+      );
+    } finally {
+      // Reset the shared flags before the native call so another manager that
+      // applies a filter meanwhile re-registers instead of trusting a processor
+      // that is about to be removed. Platform-channel calls are processed in
+      // order, so its register lands after this unregister.
+      isBlurRegistered = false;
+      isFullFrameBlurRegistered = false;
+      isImageRegistered.clear();
+
+      await StreamVideoFilters().unregisterAllFilters();
     }
-
-    // Reset the shared flags before the native call so another manager that
-    // applies a filter meanwhile re-registers instead of trusting a processor
-    // that is about to be removed. Platform-channel calls are processed in
-    // order, so its register lands after this unregister.
-    isBlurRegistered = false;
-    isFullFrameBlurRegistered = false;
-    isImageRegistered.clear();
-
-    await StreamVideoFilters().unregisterAllFilters();
   }
 
   Future<void> dispose() async {

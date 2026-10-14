@@ -10,8 +10,7 @@ import stream_webrtc_flutter
 extension RTCVideoRotation {
     /// Maps the capture pipeline's frame rotation to the image orientation used when orienting
     /// the background image. Using the frame's own rotation metadata keeps the background in sync
-    /// with the outgoing video even when the app UI is orientation-locked or mid-rotation, unlike
-    /// reading the UI's interface orientation.
+    /// with the outgoing video even when the app UI is orientation-locked or mid-rotation.
     var cgOrientation: CGImagePropertyOrientation {
         switch self {
         case ._0:

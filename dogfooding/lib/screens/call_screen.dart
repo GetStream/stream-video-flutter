@@ -132,8 +132,8 @@ class _CallScreenState extends State<CallScreen> {
   Future<void> _releaseVideoEffects() async {
     try {
       await _videoEffectsManager.unregisterAllFilters();
-    } catch (e) {
-      _logger.e(() => 'Failed to release video effects: $e');
+    } catch (e, st) {
+      _logger.e(() => 'Failed to release video effects: $e\n$st');
     } finally {
       await _videoEffectsManager.dispose();
     }

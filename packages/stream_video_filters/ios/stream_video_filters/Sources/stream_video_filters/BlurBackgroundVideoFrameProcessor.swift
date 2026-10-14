@@ -12,6 +12,7 @@ final class BlurBackgroundVideoFrameProcessor: VideoFilter {
     private lazy var backgroundImageFilterProcessor = { return BackgroundImageFilterProcessor() }()
 
     private let blurParameters: [String: Float]
+    private var loggedBlendFailure = false
 
     /// The blur runs on a copy scaled by this factor. A Gaussian with radius `r` at
     /// scale `s` matches radius `r / s` at full resolution, so the radius is scaled
@@ -46,11 +47,18 @@ final class BlurBackgroundVideoFrameProcessor: VideoFilter {
                 .transformed(by: CGAffineTransform(scaleX: 1 / scale, y: 1 / scale))
                 .cropped(to: originalExtent)
 
-            return self.backgroundImageFilterProcessor
-                .applyFilter(
-                    input.originalPixelBuffer,
-                    backgroundImage: backgroundImage
-                ) ?? input.originalImage
+            if let output = self.backgroundImageFilterProcessor.applyFilter(
+                input.originalPixelBuffer,
+                backgroundImage: backgroundImage
+            ) {
+                return output
+            }
+            // Blend failure: send the blurred frame rather than the unfiltered one.
+            if !self.loggedBlendFailure {
+                self.loggedBlendFailure = true
+                NSLog("Background blur blend failed, sending blurred frame only")
+            }
+            return backgroundImage
         }
     }
 }
