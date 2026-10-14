@@ -1,3 +1,15 @@
+## Upcoming
+
+### 🐞 Fixed
+
+- `CallState.endedAt` is now set when the call ends while you are joined or watching it.
+
+## 1.7.1
+
+### ✅ Added
+
+- Added `AndroidCallServiceKind` and `AudioConfigurationPolicy.androidCallServiceKind`, which pick the Android foreground service a call runs in.
+
 ## 1.7.0
 
 ### ✅ Added

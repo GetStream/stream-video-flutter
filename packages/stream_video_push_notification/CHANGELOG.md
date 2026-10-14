@@ -1,3 +1,13 @@
+## 1.7.1
+
+### 🐞 Fixed
+
+- Fixed `unregisterDevice()` incorrectly trying to delete an APN device token when `registerApnDeviceToken` is `false`.
+
+### 🔄 Changed
+
+- [Android] Removed the unused `DISABLE_KEYGUARD` and `ACCESS_NOTIFICATION_POLICY` permissions.
+
 ## 1.7.0
 
 ### 🔄 Changed

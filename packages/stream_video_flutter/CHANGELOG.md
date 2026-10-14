@@ -1,3 +1,22 @@
+## 1.7.1
+
+### 🐞 Fixed
+
+- A zoomed-in screen share stays subscribed while it is panned or partly pinched out.
+- Fixed `unregisterDevice()` incorrectly trying to delete an APN device token when `registerApnDeviceToken` is `false`.
+
+### ✅ Added
+
+- [Android] Added `StreamLivestreamViewerService`, the foreground service for calls under `AudioConfigurationPolicy.viewer`.
+- [Android] `StreamVideoFlutterBackground.startService` takes the `AndroidCallServiceKind` to start a call in.
+- Added `AndroidCallServiceKind` and `AudioConfigurationPolicy.androidCallServiceKind`, which pick the Android foreground service a call runs in.
+
+### 🔄 Changed
+
+- [Android] `StreamCallService` no longer requests or declares the `mediaPlayback` foreground service type.
+- [Android] On Android 14 and newer, a foreground service type is only requested while its `FOREGROUND_SERVICE_*` permission is declared, so unused ones can be removed with `tools:node="remove"`.
+- [Android] A call with no permission-backed foreground service type runs as a `shortService` instead of failing to start.
+
 ## 1.7.0
 
 ### ✅ Added
