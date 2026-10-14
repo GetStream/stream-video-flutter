@@ -8,5 +8,15 @@
   "themeTitle": "Weergave",
   "themeDescription": "Kies hoe de app eruitziet.",
   "themeLight": "Licht",
-  "themeDark": "Donker"
+  "themeDark": "Donker",
+  "accentColorTitle": "Accentkleur",
+  "accentColorDescription": "Kies de kleur van knoppen en markeringen.",
+  "accentColorBlue": "Blauw",
+  "accentColorPurple": "Paars",
+  "accentColorViolet": "Violet",
+  "accentColorRed": "Rood",
+  "accentColorYellow": "Geel",
+  "accentColorLime": "Limoen",
+  "accentColorGreen": "Groen",
+  "accentColorCyan": "Cyaan"
 }

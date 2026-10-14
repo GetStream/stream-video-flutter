@@ -45,34 +45,14 @@ class SettingsSelect<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.streamColorScheme;
-    final textTheme = context.streamTextTheme;
-    final spacing = context.streamSpacing;
     final selected = choices.firstWhereOrNull((it) => it.value == value);
     final fieldIcon = selected?.icon ?? icon;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: spacing.xs,
+      spacing: context.streamSpacing.xs,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: spacing.xxs,
-          children: [
-            Text(
-              title,
-              style: textTheme.headingXs.copyWith(
-                color: colorScheme.textPrimary,
-              ),
-            ),
-            Text(
-              description,
-              style: textTheme.metadataDefault.copyWith(
-                color: colorScheme.textTertiary,
-              ),
-            ),
-          ],
-        ),
+        SettingsHeading(title: title, description: description),
         StreamAdaptiveMenuAnchor(
           title: title,
           matchAnchorWidth: true,
@@ -100,6 +80,41 @@ class SettingsSelect<T> extends StatelessWidget {
             value: selected?.label,
             expanded: handle.isOpen,
             onPressed: handle.toggle,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A setting's title over a line describing it.
+class SettingsHeading extends StatelessWidget {
+  const SettingsHeading({
+    required this.title,
+    required this.description,
+    super.key,
+  });
+
+  final String title;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: context.streamSpacing.xxs,
+      children: [
+        Text(
+          title,
+          style: textTheme.headingXs.copyWith(color: colorScheme.textPrimary),
+        ),
+        Text(
+          description,
+          style: textTheme.metadataDefault.copyWith(
+            color: colorScheme.textTertiary,
           ),
         ),
       ],

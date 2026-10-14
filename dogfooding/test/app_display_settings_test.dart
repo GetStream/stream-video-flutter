@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dogfooding/app/app_accent_color.dart';
 import 'package:flutter_dogfooding/app/app_display_settings.dart';
 import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 void main() {
   Future<AppPreferences> preferences([Map<String, Object> values = const {}]) {
@@ -79,6 +81,43 @@ void main() {
         AppDisplaySettings(preferences: prefs).themeMode,
         ThemeMode.dark,
       );
+    });
+
+    test('keeps a picked accent color, and forgets it for blue', () async {
+      final prefs = await preferences();
+      final settings = AppDisplaySettings(preferences: prefs);
+      expect(settings.accentColor, AppAccentColor.blue);
+
+      await settings.setAccentColor(AppAccentColor.violet);
+      expect(
+        AppDisplaySettings(preferences: prefs).accentColor,
+        AppAccentColor.violet,
+      );
+
+      await settings.setAccentColor(AppAccentColor.blue);
+      expect(prefs.accentColor, AppAccentColor.blue);
+    });
+  });
+
+  group('AppAccentColor', () {
+    test('blue leaves the brand color to the design system', () {
+      for (final brightness in Brightness.values) {
+        expect(AppAccentColor.blue.brand(brightness), isNull);
+      }
+    });
+
+    test('a light theme takes the palette as it is', () {
+      expect(AppAccentColor.red.brand(Brightness.light), StreamColors.red);
+    });
+
+    test('a dark theme runs the palette in reverse', () {
+      final brand = AppAccentColor.red.brand(Brightness.dark)!;
+      final red = StreamColors.red;
+
+      expect(brand.shade50, red.shade900);
+      expect(brand.shade400, red.shade400);
+      expect(brand.shade500, red.shade300);
+      expect(brand.shade900, red.shade50);
     });
   });
 }
