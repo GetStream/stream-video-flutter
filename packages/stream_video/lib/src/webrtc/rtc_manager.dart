@@ -140,7 +140,12 @@ class RtcManager extends Disposable {
   }
 
   List<SfuPublishOptions> publishOptions;
-  AudioConstraints _defaultAudioConstraints = const AudioConstraints();
+  // Seeded from the call state, so a bitrate profile chosen before joining,
+  // or before a reconnect built this manager, applies to the microphone.
+  late AudioConstraints _defaultAudioConstraints =
+      AudioConstraints.forBitrateProfile(
+        stateManager.callState.audioBitrateProfile,
+      );
 
   final tracks = </*trackId*/ String, RtcTrack>{};
 

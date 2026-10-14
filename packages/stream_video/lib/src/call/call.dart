@@ -25,6 +25,7 @@ import '../errors/video_error.dart';
 import '../errors/video_error_composer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../logger/stream_log.dart';
+import '../models/audio_configuration_policy.dart';
 import '../models/call_received_data.dart';
 import '../models/models.dart';
 import '../platform_detector/platform_detector.dart';
@@ -313,12 +314,46 @@ class Call {
   /// Audio track states captured at suspension time.
   final _suspendedTrackStates = <String, SuspendedTrackState>{};
 
+  /// Whether noise cancellation was on when the microphone switched to
+  /// [SfuAudioBitrateProfile.musicHighQuality], so leaving music restores
+  /// exactly that. Null while not in music.
+  bool? _audioProcessingBeforeMusic;
+
+  AudioConfigurationPolicy get _effectiveAudioConfigurationPolicy =>
+      _stateManager.callState.preferences.audioConfigurationPolicy ??
+      _streamVideo.options.audioConfigurationPolicy;
+
+  /// Whether this call wants stereo playout: its audio policy bypasses voice
+  /// processing (for example [HiFiAudioPolicy] or [ViewerAudioPolicy]), or the
+  /// microphone uses [SfuAudioBitrateProfile.musicHighQuality].
+  @visibleForTesting
+  bool get prefersStereoPlayout =>
+      _effectiveAudioConfigurationPolicy.bypassVoiceProcessing ||
+      _stateManager.callState.audioBitrateProfile ==
+          SfuAudioBitrateProfile.musicHighQuality;
+
+  /// Applies [prefersStereoPlayout] to the iOS audio device modules.
+  ///
+  /// The native preference is process-wide and outlives the call, and it also
+  /// bypasses voice processing. It is therefore set explicitly, true or false,
+  /// every time a session starts, so a call never inherits it from an earlier
+  /// one.
+  Future<void> _applyStereoPlayoutPreference() async {
+    if (!CurrentPlatform.isIos) return;
+
+    final preferred = prefersStereoPlayout;
+    _logger.d(() => '[applyStereoPlayoutPreference] preferred: $preferred');
+    try {
+      await rtc.Helper.setiOSStereoPlayoutPreferred(preferred);
+    } catch (e) {
+      _logger.w(() => '[applyStereoPlayoutPreference] failed: $e');
+    }
+  }
+
   StreamPeerConnectionFactory _ensurePcFactory() {
     return _pcFactory ??= StreamPeerConnectionFactory(
       callCid: callCid,
-      audioConfigurationPolicy:
-          _stateManager.callState.preferences.audioConfigurationPolicy ??
-          _streamVideo.options.audioConfigurationPolicy,
+      audioConfigurationPolicy: _effectiveAudioConfigurationPolicy,
     );
   }
 
@@ -1001,9 +1036,36 @@ class Call {
     _session?.trace(tag, data);
   }
 
+  /// Replaces this call's preferences.
+  ///
+  /// The audio configuration policy is applied when the per-call peer
+  /// connection factory is built. Changing it before joining discards a
+  /// factory built earlier (for example by a lobby preview), so the next one
+  /// uses the new policy; stop any tracks created from the old factory first.
+  /// After joining, a new policy only takes effect on the next call.
   void updateCallPreferences(CallPreferences preferences) {
     _logger.i(() => '[updateCallPreferences] $preferences');
+    final previousPolicy = _effectiveAudioConfigurationPolicy;
     _stateManager.updateCallPreferences(preferences);
+
+    final pcFactory = _pcFactory;
+    if (pcFactory != null &&
+        _session == null &&
+        _effectiveAudioConfigurationPolicy != previousPolicy) {
+      _logger.i(
+        () =>
+            '[updateCallPreferences] audio policy changed, '
+            'discarding the pre-join factory',
+      );
+      _pcFactory = null;
+      unawaited(
+        pcFactory.dispose().catchError((Object e) {
+          _logger.w(
+            () => '[updateCallPreferences] pcFactory dispose failed: $e',
+          );
+        }),
+      );
+    }
   }
 
   /// Enables the given SFU client capabilities for this call.
@@ -2153,6 +2215,8 @@ class Call {
       _logger.w(() => '[startSession] rejected (call was left)');
       return Result.error('call was left');
     }
+
+    await _applyStereoPlayoutPreference();
 
     final result = await session.start(
       reconnectDetails: reconnectDetails,
@@ -4340,41 +4404,49 @@ class Call {
     return result;
   }
 
+  /// Sets the audio bitrate profile used to publish the microphone.
+  ///
+  /// [SfuAudioBitrateProfile.musicHighQuality] turns voice processing and
+  /// noise cancellation off; leaving it turns noise cancellation back on only
+  /// if it was on before.
+  ///
+  /// The profiles other than [SfuAudioBitrateProfile.voiceStandard] require
+  /// HiFi audio to be enabled for the call. Going back to
+  /// [SfuAudioBitrateProfile.voiceStandard] is always allowed.
   Result<None> setAudioBitrateProfile(SfuAudioBitrateProfile profile) {
-    if (!state.value.settings.audio.hifiAudioEnabled) {
+    if (profile != SfuAudioBitrateProfile.voiceStandard &&
+        !state.value.settings.audio.hifiAudioEnabled) {
       return Result.error('High Fidelity audio is not enabled for this call');
     }
 
-    if (_streamVideo.isAudioProcessorConfigured()) {
-      final disableAudioProcessing =
-          profile == SfuAudioBitrateProfile.musicHighQuality;
-
-      if (disableAudioProcessing) {
-        unawaited(stopAudioProcessing());
-      } else {
-        unawaited(startAudioProcessing());
-      }
-    }
-
+    _applyNoiseCancellationForProfile(profile);
     _stateManager.setAudioBitrateProfile(profile);
-
-    final stereo = profile == SfuAudioBitrateProfile.musicHighQuality;
-
-    // On iOS, toggle stereo playout preference when switching HiFi audio modes.
-    if (CurrentPlatform.isIos) {
-      unawaited(rtc.Helper.setiOSStereoPlayoutPreferred(stereo));
-    }
+    unawaited(_applyStereoPlayoutPreference());
 
     _session?.rtcManager?.changeDefaultAudioConstraints(
-      AudioConstraints(
-        noiseSuppression: !stereo,
-        echoCancellation: !stereo,
-        autoGainControl: !stereo,
-        channelCount: stereo ? 2 : 1,
-      ),
+      AudioConstraints.forBitrateProfile(profile),
     );
 
     return const Result.success(none);
+  }
+
+  /// Turns noise cancellation off when entering music, and back to what it
+  /// was before when leaving it. A call that never entered music keeps
+  /// whatever the app or the user chose.
+  void _applyNoiseCancellationForProfile(SfuAudioBitrateProfile profile) {
+    if (!_streamVideo.isAudioProcessorConfigured()) return;
+
+    if (profile == SfuAudioBitrateProfile.musicHighQuality) {
+      _audioProcessingBeforeMusic ??= state.value.isAudioProcessing;
+      unawaited(stopAudioProcessing());
+      return;
+    }
+
+    final restore = _audioProcessingBeforeMusic;
+    _audioProcessingBeforeMusic = null;
+    if (restore ?? false) {
+      unawaited(startAudioProcessing());
+    }
   }
 
   bool checkIfAudioOutputChangeSupported() {
