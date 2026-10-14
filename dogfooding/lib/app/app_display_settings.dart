@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter_l10n.dart';
 
 import '../core/repos/app_preferences.dart';
+import 'app_accent_color.dart';
 
 /// How the app is shown, as the user picks it in the settings window, kept in
 /// [AppPreferences] so they survive a restart.
@@ -17,7 +18,8 @@ class AppDisplaySettings extends ChangeNotifier {
           Locale(code),
         _ => null,
       },
-      _themeMode = preferences.themeMode;
+      _themeMode = preferences.themeMode,
+      _accentColor = preferences.accentColor;
 
   final AppPreferences _preferences;
 
@@ -42,5 +44,16 @@ class AppDisplaySettings extends ChangeNotifier {
     _themeMode = themeMode;
     notifyListeners();
     await _preferences.setThemeMode(themeMode);
+  }
+
+  /// The palette the app takes its brand color from.
+  AppAccentColor get accentColor => _accentColor;
+  AppAccentColor _accentColor;
+
+  Future<void> setAccentColor(AppAccentColor accentColor) async {
+    if (accentColor == _accentColor) return;
+    _accentColor = accentColor;
+    notifyListeners();
+    await _preferences.setAccentColor(accentColor);
   }
 }

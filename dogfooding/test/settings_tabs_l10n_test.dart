@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dogfooding/app/app_accent_color.dart';
 import 'package:flutter_dogfooding/app/app_display_settings.dart';
 import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
 import 'package:flutter_dogfooding/di/injector.dart';
@@ -28,7 +29,7 @@ void main() {
       MaterialApp(
         locale: locale,
         supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: [
+        localizationsDelegates: const [
           AppLocalizations.delegate,
           ...StreamVideoFlutterLocalizations.localizationsDelegates,
         ],
@@ -60,5 +61,20 @@ void main() {
 
     expect(find.text('System'), findsOneWidget);
     expect(find.byIcon(const StreamIcons().settings), findsOneWidget);
+  });
+
+  testWidgets('picking an accent color names it and keeps it', (tester) async {
+    await pump(tester, const Locale('en'));
+    expect(find.text('Blue'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Violet'));
+    await tester.pumpAndSettle();
+
+    expect(
+      locator.get<AppDisplaySettings>().accentColor,
+      AppAccentColor.violet,
+    );
+    expect(find.text('Violet'), findsOneWidget);
+    expect(find.text('Blue'), findsNothing);
   });
 }

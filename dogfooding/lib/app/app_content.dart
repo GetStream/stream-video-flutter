@@ -245,10 +245,15 @@ class _StreamDogFoodingAppContentState
   ThemeData _buildTheme(Brightness brightness) {
     final baseTheme = ThemeData(brightness: brightness);
     final baseTextTheme = GoogleFonts.interTextTheme(baseTheme.textTheme);
-    final coreTheme = switch (brightness) {
-      .light => StreamTheme.light(),
-      .dark => StreamTheme.dark(),
-    };
+    final brand = _appSettings.accentColor.brand(brightness);
+    final coreTheme = StreamTheme(
+      brightness: brightness,
+      colorScheme: switch (brightness) {
+        _ when brand == null => null,
+        .light => StreamColorScheme.light(brand: brand),
+        .dark => StreamColorScheme.dark(brand: brand),
+      },
+    );
     final videoTheme = switch (brightness) {
       .light => StreamVideoTheme.light(),
       .dark => StreamVideoTheme.dark(),
