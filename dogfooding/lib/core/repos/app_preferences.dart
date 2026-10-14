@@ -12,6 +12,7 @@ class AppPreferences {
   static const String _kUserCredentialsPref = 'user_credentials';
   static const String _kApiKeyPref = 'api_key';
   static const String _kEnvironemntPref = 'environment';
+  static const String _kLanguageCodePref = 'language_code';
 
   UserCredentials? get userCredentials {
     final jsonString = _prefs.getString(_kUserCredentialsPref);
@@ -25,6 +26,14 @@ class AppPreferences {
   Environment get environment => Environment.fromSubdomain(
     _prefs.getString(_kEnvironemntPref) ?? Environment.pronto.name,
   );
+
+  /// The language the app is shown in, or null to follow the device.
+  String? get languageCode => _prefs.getString(_kLanguageCodePref);
+
+  Future<bool> setLanguageCode(String? languageCode) {
+    if (languageCode == null) return _prefs.remove(_kLanguageCodePref);
+    return _prefs.setString(_kLanguageCodePref, languageCode);
+  }
 
   Future<bool> setUserCredentials(UserCredentials? credentials) {
     final jsonString = jsonEncode(credentials?.toJson());

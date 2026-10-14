@@ -120,7 +120,8 @@ large-screen more menu holds has a new home by the time the menu goes.
 
 ### 7. Language tab
 
-- [ ] App locale select, saved in `AppPreferences`
+- [x] App locale select: System, then every language the SDK is translated
+      into; saved in `AppPreferences` through `AppDisplaySettings`
 
 ### 8. Theme tab
 
