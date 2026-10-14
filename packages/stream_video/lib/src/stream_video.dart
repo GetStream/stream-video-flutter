@@ -467,8 +467,8 @@ class StreamVideo extends Disposable {
   /// called. A connect while the user is connected opens no second connection
   /// and returns the current token, so [includeUserDetails] only applies to
   /// the connect that opens it; one queued behind a connect that failed tries
-  /// again itself. [registerPushDevice] registers the push device once per
-  /// connection, also from a later connect when the first one skipped it.
+  /// again itself. [registerPushDevice] registers the push device, also
+  /// while the user is connected.
   Future<Result<UserToken>> connect({
     bool includeUserDetails = true,
     bool registerPushDevice = true,
