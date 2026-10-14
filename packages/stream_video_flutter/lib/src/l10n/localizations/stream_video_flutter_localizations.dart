@@ -640,6 +640,252 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'Off'**
   String get incomingVideoQualityShortOff;
+
+  /// The label of the captions tab in the settings window
+  ///
+  /// In en, this message translates to:
+  /// **'Captions'**
+  String get settingsCaptionsTab;
+
+  /// Title of the switch that turns closed captions on and off
+  ///
+  /// In en, this message translates to:
+  /// **'Turn On Captions'**
+  String get captionsSettingsTurnOn;
+
+  /// Explains the closed captions switch
+  ///
+  /// In en, this message translates to:
+  /// **'Select the language people will use in the meeting. Captions will be displayed in this language.'**
+  String get captionsSettingsTurnOnDescription;
+
+  /// Heading of the picker for the language spoken in the call
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get captionsSettingsLanguage;
+
+  /// The spoken language choice that lets the transcriber detect the language
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get transcriptionLanguageAuto;
+
+  /// The name of a language the call can be transcribed in (en)
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get transcriptionLanguageEn;
+
+  /// The name of a language the call can be transcribed in (fr)
+  ///
+  /// In en, this message translates to:
+  /// **'French'**
+  String get transcriptionLanguageFr;
+
+  /// The name of a language the call can be transcribed in (es)
+  ///
+  /// In en, this message translates to:
+  /// **'Spanish'**
+  String get transcriptionLanguageEs;
+
+  /// The name of a language the call can be transcribed in (de)
+  ///
+  /// In en, this message translates to:
+  /// **'German'**
+  String get transcriptionLanguageDe;
+
+  /// The name of a language the call can be transcribed in (it)
+  ///
+  /// In en, this message translates to:
+  /// **'Italian'**
+  String get transcriptionLanguageIt;
+
+  /// The name of a language the call can be transcribed in (nl)
+  ///
+  /// In en, this message translates to:
+  /// **'Dutch'**
+  String get transcriptionLanguageNl;
+
+  /// The name of a language the call can be transcribed in (pt)
+  ///
+  /// In en, this message translates to:
+  /// **'Portuguese'**
+  String get transcriptionLanguagePt;
+
+  /// The name of a language the call can be transcribed in (pl)
+  ///
+  /// In en, this message translates to:
+  /// **'Polish'**
+  String get transcriptionLanguagePl;
+
+  /// The name of a language the call can be transcribed in (ca)
+  ///
+  /// In en, this message translates to:
+  /// **'Catalan'**
+  String get transcriptionLanguageCa;
+
+  /// The name of a language the call can be transcribed in (cs)
+  ///
+  /// In en, this message translates to:
+  /// **'Czech'**
+  String get transcriptionLanguageCs;
+
+  /// The name of a language the call can be transcribed in (da)
+  ///
+  /// In en, this message translates to:
+  /// **'Danish'**
+  String get transcriptionLanguageDa;
+
+  /// The name of a language the call can be transcribed in (el)
+  ///
+  /// In en, this message translates to:
+  /// **'Greek'**
+  String get transcriptionLanguageEl;
+
+  /// The name of a language the call can be transcribed in (fi)
+  ///
+  /// In en, this message translates to:
+  /// **'Finnish'**
+  String get transcriptionLanguageFi;
+
+  /// The name of a language the call can be transcribed in (id)
+  ///
+  /// In en, this message translates to:
+  /// **'Indonesian'**
+  String get transcriptionLanguageId;
+
+  /// The name of a language the call can be transcribed in (ja)
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese'**
+  String get transcriptionLanguageJa;
+
+  /// The name of a language the call can be transcribed in (ru)
+  ///
+  /// In en, this message translates to:
+  /// **'Russian'**
+  String get transcriptionLanguageRu;
+
+  /// The name of a language the call can be transcribed in (sv)
+  ///
+  /// In en, this message translates to:
+  /// **'Swedish'**
+  String get transcriptionLanguageSv;
+
+  /// The name of a language the call can be transcribed in (ta)
+  ///
+  /// In en, this message translates to:
+  /// **'Tamil'**
+  String get transcriptionLanguageTa;
+
+  /// The name of a language the call can be transcribed in (th)
+  ///
+  /// In en, this message translates to:
+  /// **'Thai'**
+  String get transcriptionLanguageTh;
+
+  /// The name of a language the call can be transcribed in (tr)
+  ///
+  /// In en, this message translates to:
+  /// **'Turkish'**
+  String get transcriptionLanguageTr;
+
+  /// The name of a language the call can be transcribed in (hu)
+  ///
+  /// In en, this message translates to:
+  /// **'Hungarian'**
+  String get transcriptionLanguageHu;
+
+  /// The name of a language the call can be transcribed in (ro)
+  ///
+  /// In en, this message translates to:
+  /// **'Romanian'**
+  String get transcriptionLanguageRo;
+
+  /// The name of a language the call can be transcribed in (zh)
+  ///
+  /// In en, this message translates to:
+  /// **'Chinese'**
+  String get transcriptionLanguageZh;
+
+  /// The name of a language the call can be transcribed in (ar)
+  ///
+  /// In en, this message translates to:
+  /// **'Arabic'**
+  String get transcriptionLanguageAr;
+
+  /// The name of a language the call can be transcribed in (tl)
+  ///
+  /// In en, this message translates to:
+  /// **'Tagalog'**
+  String get transcriptionLanguageTl;
+
+  /// The name of a language the call can be transcribed in (he)
+  ///
+  /// In en, this message translates to:
+  /// **'Hebrew'**
+  String get transcriptionLanguageHe;
+
+  /// The name of a language the call can be transcribed in (hi)
+  ///
+  /// In en, this message translates to:
+  /// **'Hindi'**
+  String get transcriptionLanguageHi;
+
+  /// The name of a language the call can be transcribed in (hr)
+  ///
+  /// In en, this message translates to:
+  /// **'Croatian'**
+  String get transcriptionLanguageHr;
+
+  /// The name of a language the call can be transcribed in (ko)
+  ///
+  /// In en, this message translates to:
+  /// **'Korean'**
+  String get transcriptionLanguageKo;
+
+  /// The name of a language the call can be transcribed in (ms)
+  ///
+  /// In en, this message translates to:
+  /// **'Malay'**
+  String get transcriptionLanguageMs;
+
+  /// The name of a language the call can be transcribed in (no)
+  ///
+  /// In en, this message translates to:
+  /// **'Norwegian'**
+  String get transcriptionLanguageNo;
+
+  /// The name of a language the call can be transcribed in (uk)
+  ///
+  /// In en, this message translates to:
+  /// **'Ukrainian'**
+  String get transcriptionLanguageUk;
+
+  /// The name of a language the call can be transcribed in (bg)
+  ///
+  /// In en, this message translates to:
+  /// **'Bulgarian'**
+  String get transcriptionLanguageBg;
+
+  /// The name of a language the call can be transcribed in (et)
+  ///
+  /// In en, this message translates to:
+  /// **'Estonian'**
+  String get transcriptionLanguageEt;
+
+  /// The name of a language the call can be transcribed in (sl)
+  ///
+  /// In en, this message translates to:
+  /// **'Slovenian'**
+  String get transcriptionLanguageSl;
+
+  /// The name of a language the call can be transcribed in (sk)
+  ///
+  /// In en, this message translates to:
+  /// **'Slovak'**
+  String get transcriptionLanguageSk;
 }
 
 class _StreamVideoFlutterLocalizationsDelegate

@@ -40,7 +40,7 @@ class StreamSettingsSwitchRow extends StatelessWidget {
     return MergeSemantics(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: context.streamSpacing.md,
+        spacing: context.streamSpacing.xxl,
         children: [
           Expanded(
             child: Column(

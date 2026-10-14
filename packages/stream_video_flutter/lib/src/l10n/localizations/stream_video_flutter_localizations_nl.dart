@@ -339,4 +339,128 @@ class StreamVideoFlutterLocalizationsNl
 
   @override
   String get incomingVideoQualityShortOff => 'Uit';
+
+  @override
+  String get settingsCaptionsTab => 'Ondertiteling';
+
+  @override
+  String get captionsSettingsTurnOn => 'Ondertiteling aanzetten';
+
+  @override
+  String get captionsSettingsTurnOnDescription =>
+      'Kies de taal die in de vergadering gesproken wordt. De ondertiteling wordt in deze taal getoond.';
+
+  @override
+  String get captionsSettingsLanguage => 'Taal';
+
+  @override
+  String get transcriptionLanguageAuto => 'Automatisch';
+
+  @override
+  String get transcriptionLanguageEn => 'Engels';
+
+  @override
+  String get transcriptionLanguageFr => 'Frans';
+
+  @override
+  String get transcriptionLanguageEs => 'Spaans';
+
+  @override
+  String get transcriptionLanguageDe => 'Duits';
+
+  @override
+  String get transcriptionLanguageIt => 'Italiaans';
+
+  @override
+  String get transcriptionLanguageNl => 'Nederlands';
+
+  @override
+  String get transcriptionLanguagePt => 'Portugees';
+
+  @override
+  String get transcriptionLanguagePl => 'Pools';
+
+  @override
+  String get transcriptionLanguageCa => 'Catalaans';
+
+  @override
+  String get transcriptionLanguageCs => 'Tsjechisch';
+
+  @override
+  String get transcriptionLanguageDa => 'Deens';
+
+  @override
+  String get transcriptionLanguageEl => 'Grieks';
+
+  @override
+  String get transcriptionLanguageFi => 'Fins';
+
+  @override
+  String get transcriptionLanguageId => 'Indonesisch';
+
+  @override
+  String get transcriptionLanguageJa => 'Japans';
+
+  @override
+  String get transcriptionLanguageRu => 'Russisch';
+
+  @override
+  String get transcriptionLanguageSv => 'Zweeds';
+
+  @override
+  String get transcriptionLanguageTa => 'Tamil';
+
+  @override
+  String get transcriptionLanguageTh => 'Thai';
+
+  @override
+  String get transcriptionLanguageTr => 'Turks';
+
+  @override
+  String get transcriptionLanguageHu => 'Hongaars';
+
+  @override
+  String get transcriptionLanguageRo => 'Roemeens';
+
+  @override
+  String get transcriptionLanguageZh => 'Chinees';
+
+  @override
+  String get transcriptionLanguageAr => 'Arabisch';
+
+  @override
+  String get transcriptionLanguageTl => 'Tagalog';
+
+  @override
+  String get transcriptionLanguageHe => 'Hebreeuws';
+
+  @override
+  String get transcriptionLanguageHi => 'Hindi';
+
+  @override
+  String get transcriptionLanguageHr => 'Kroatisch';
+
+  @override
+  String get transcriptionLanguageKo => 'Koreaans';
+
+  @override
+  String get transcriptionLanguageMs => 'Maleis';
+
+  @override
+  String get transcriptionLanguageNo => 'Noors';
+
+  @override
+  String get transcriptionLanguageUk => 'Oekraïens';
+
+  @override
+  String get transcriptionLanguageBg => 'Bulgaars';
+
+  @override
+  String get transcriptionLanguageEt => 'Estisch';
+
+  @override
+  String get transcriptionLanguageSl => 'Sloveens';
+
+  @override
+  String get transcriptionLanguageSk => 'Slowaaks';
 }

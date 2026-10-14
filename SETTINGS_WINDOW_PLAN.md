@@ -111,9 +111,12 @@ large-screen more menu holds has a new home by the time the menu goes.
 
 ### 6. Captions tab
 
-- [ ] Captions switch
-- [ ] Spoken language select, keeping the current caption and transcription
-      modes on update
+- [x] Captions switch, disabled where the call has captions off or the user
+      may not start or stop them
+- [x] Spoken language select, keeping the current caption and transcription
+      modes on update; language names translated, as in React
+- [x] In dogfooding's tab list
+- [x] Goldens, captions off and on, light and dark
 
 ### 7. Language tab
 
