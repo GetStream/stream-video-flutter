@@ -150,6 +150,44 @@ void main() {
     verify(fixture.client.openConnection).called(1);
   });
 
+  test('a resume queued behind a disconnect does not reopen', () async {
+    await connect();
+    final closing = Completer<Result<None>>();
+    when(fixture.client.closeConnection).thenAnswer((_) => closing.future);
+
+    // The resume waits for the close, and the disconnect is asked for
+    // meanwhile.
+    await goTo(VideoLifecycleState.paused);
+    await goTo(VideoLifecycleState.resumed);
+    final disconnecting = fixture.streamVideo.disconnect();
+    await pumpEventQueue();
+    closing.complete(const Result.success(none));
+    await disconnecting;
+    await pumpEventQueue();
+
+    verifyNever(fixture.client.openConnection);
+    expect(
+      fixture.streamVideo.state.connection.value.isDisconnected,
+      isTrue,
+    );
+  });
+
+  test('a reopen that fails does not follow the socket again', () async {
+    await connect();
+    when(
+      fixture.client.openConnection,
+    ).thenAnswer((_) async => failureWithError('offline'));
+    await goTo(VideoLifecycleState.paused);
+    await goTo(VideoLifecycleState.resumed);
+
+    fixture.events.emit(
+      const CoordinatorDisconnectedEvent(userId: 'test-user'),
+    );
+    await pumpEventQueue();
+
+    expect(fixture.streamVideo.state.connection.value.isConnected, isTrue);
+  });
+
   test('forgets a background close once the user disconnects', () async {
     await connect();
     await goTo(VideoLifecycleState.paused);

@@ -395,21 +395,23 @@ class StreamVideo extends Disposable {
 
   /// Follows the app into the background and back; see
   /// [AppLifecycleController].
-  late final _lifecycle = AppLifecycleController(
+  late final AppLifecycleController _lifecycle = AppLifecycleController(
     state: _state,
     keepConnectionAliveInBackground: () =>
         _options.keepConnectionsAliveWhenInBackground,
     isConnected: () => _client.isConnected,
-    closeConnection: () async {
+    closeConnection: () => _connection.runWhileConnected(() async {
       final result = await _client.closeConnection();
       if (result.isSuccess) _subscriptions.cancel(_idEvents);
       return result;
-    },
-    openConnection: () async {
+    }),
+    openConnection: () => _connection.runWhileConnected(() async {
       final result = await _client.openConnection();
-      _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
+      if (result.isSuccess) {
+        _subscriptions.add(_idEvents, _client.events.listen(_onEvent));
+      }
       return result;
-    },
+    }),
   );
 
   /// Handles ringing calls: the incoming ring, the native call screen's
@@ -459,7 +461,7 @@ class StreamVideo extends Disposable {
   Stream<CoordinatorEvent> get events => _client.events;
 
   /// Connects the user, and disconnects them again.
-  late final _connection = CoordinatorConnection(
+  late final CoordinatorConnection _connection = CoordinatorConnection(
     client: _client,
     state: _state,
     tokens: _tokens,

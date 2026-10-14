@@ -234,6 +234,21 @@ class CoordinatorConnection {
     return result;
   }
 
+  /// Runs [action] on the socket of a connected user, in order with the
+  /// connects and disconnects. Fails without running it when the user is not
+  /// connected by then.
+  Future<Result<None>> runWhileConnected(
+    Future<Result<None>> Function() action,
+  ) {
+    return _lock.synchronized(() {
+      if (!_connection.isConnected) {
+        _logger.w(() => '[runWhileConnected] rejected (not connected)');
+        return failureWithError('The user is not connected');
+      }
+      return action();
+    });
+  }
+
   /// Disconnects the user without unregistering the push device, and refuses
   /// every later connect.
   Future<void> dispose() {
