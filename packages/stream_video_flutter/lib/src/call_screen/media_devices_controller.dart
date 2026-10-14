@@ -43,14 +43,21 @@ class StreamMediaDevicesController extends ChangeNotifier {
   /// selection starts on what is already in use and moves with a switch made
   /// outside the controller. Nothing is applied for what arrives that way: the
   /// owner is the one that changed it.
+  ///
+  /// [supportsAudioOutputSelection] defaults to what the platform reports, see
+  /// [RtcMediaDeviceNotifier.isAudioOutputSelectionSupported].
   StreamMediaDevicesController({
     RtcMediaDeviceNotifier? deviceNotifier,
     this.onAudioInputSelected,
     this.onAudioOutputSelected,
     this.onVideoInputSelected,
     this.supportsSystemDefault = true,
+    bool? supportsAudioOutputSelection,
     Stream<StreamDevicesInUse>? devicesInUse,
-  }) : _deviceNotifier = deviceNotifier ?? RtcMediaDeviceNotifier.instance {
+  }) : _deviceNotifier = deviceNotifier ?? RtcMediaDeviceNotifier.instance,
+       supportsAudioOutputSelection =
+           supportsAudioOutputSelection ??
+           RtcMediaDeviceNotifier.isAudioOutputSelectionSupported {
     _subscription = _deviceNotifier.onDeviceChange.listen(_handleDeviceChange);
     _devicesInUseSubscription = devicesInUse?.listen(_handleDevicesInUse);
     // The notifier replays its last enumeration to a new listener, but only
@@ -165,6 +172,12 @@ class StreamMediaDevicesController extends ChangeNotifier {
   /// that would move the radio button without changing anything.
   final bool supportsSystemDefault;
 
+  /// Whether a speaker can be picked at all.
+  ///
+  /// False on WebKit browsers, which play every call on the system default
+  /// output. [audioOutputs] is then empty, so the speaker section is left out.
+  final bool supportsAudioOutputSelection;
+
   /// The reserved id browsers give the audio device they have picked for
   /// themselves.
   ///
@@ -215,7 +228,8 @@ class StreamMediaDevicesController extends ChangeNotifier {
   /// Android — there is nothing to pick from, and a speaker section built from
   /// this should be omitted rather than shown empty. Note that
   /// [RtcMediaDeviceNotifier] synthesises an earpiece on iOS, so this is not
-  /// reliably empty there. Filtered as [audioInputs] is.
+  /// reliably empty there. Also empty wherever
+  /// [supportsAudioOutputSelection] is false. Filtered as [audioInputs] is.
   List<RtcMediaDevice> get audioOutputs => _audioOutputs;
 
   /// The cameras the platform reports. Filtered as [audioInputs] is.
@@ -363,7 +377,9 @@ class StreamMediaDevicesController extends ChangeNotifier {
         : devices;
 
     _audioInputs = available.ofKind(RtcMediaDeviceKind.audioInput);
-    _audioOutputs = available.ofKind(RtcMediaDeviceKind.audioOutput);
+    _audioOutputs = supportsAudioOutputSelection
+        ? available.ofKind(RtcMediaDeviceKind.audioOutput)
+        : const [];
     _videoInputs = available.ofKind(RtcMediaDeviceKind.videoInput);
 
     // A device the user picked can be unplugged. The system default is both

@@ -64,6 +64,7 @@
 - `byPriority` builds a participant comparator from a `ParticipantPriority`, and every sorting criterion now ships one: `dominantSpeakerPriority`, `speakingPriority`, `screenSharingPriority`, `publishingVideoPriority`, `publishingAudioPriority`, `byReactionTypePriority`, `byParticipantSourcePriority`, `byVideoIngressSourcePriority` and `byRolePriority`. `0` is the priority of a participant already on screen: above it brings an off-screen participant into view, below it leaves them out.
 - The caller of a ringing call now polls the ring state when `call.accepted` or `call.rejected` does not arrive. The WebSocket does not redeliver them, and a caller that missed one kept ringing until its timeout, then rejected a call the callee was already in. After 15 seconds without a ring event, the ring state is read every 5 seconds until the ring settles or times out. Tune it, or turn it off, with `StreamVideoOptions.ringStatePolling`.
 - Added `RingingSnapshot`, which resolves a ringing flow for the caller as well as the callee. `CallMetadata.ringingStateFor` goes through it.
+- Added `RtcMediaDeviceNotifier.isAudioOutputSelectionSupported`, whether `Call.setAudioOutputDevice` can route audio on this platform, so a speaker picker can be hidden where it cannot.
 
 ### 🔄 Changed
 
@@ -79,7 +80,8 @@
 
 ### 🐞 Fixed
 
-- Remote audio on Safari and other WebKit browsers is re-attached whenever a renegotiation brings in a new audio source, working around WebKit silencing the audio already playing when another participant joins.
+- Remote audio on Safari and other WebKit browsers is re-attached whenever a renegotiation brings in a new audio source, working around WebKit silencing the audio already playing when another participant joins. Renegotiations that arrive within the re-attach's 25 ms gap share it rather than each emptying the elements again.
+- Safari and other WebKit browsers no longer route remote audio to a chosen speaker; it always plays on the system default output, and `Call.checkIfAudioOutputChangeSupported` returns false there. WebKit rejects `setSinkId` without a user gesture, so audio from participants who joined later stayed on the default output; where it was applied, a Bluetooth headset switching sample rate made voices sound pitched up or down; and audio went silent when the chosen speaker was disconnected.
 - `CallSettings` equality now compares every section.
 - A failed `Call.join` now returns the error it failed with, retries a retryable coordinator failure, and reports one telemetry abort.
 - A call ended remotely now sends the SFU leave message, like a local leave.

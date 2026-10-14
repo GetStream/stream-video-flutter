@@ -2,6 +2,7 @@
 
 ### ✅ Added
 
+- `StreamMediaDevicesController` takes `supportsAudioOutputSelection`, which defaults to what the platform reports. Where it is false, `audioOutputs` is empty.
 - Added `solveParticipantGrid`, the rule the participants grid arranges a page by, and `StreamCallParticipantsGridThemeData.columnResolver` to override it.
 - Added `StreamCallParticipantsGridThemeData.maxTileAspectRatio`, `compactPageSize` and `pageSize`.
 - Added `StreamCallParticipantsSpotlightThemeData` on `StreamVideoTheme`, and `StreamCallParticipantsSpotlightTheme` to restyle the speaker layouts over a subtree.
@@ -204,6 +205,7 @@
 
 ### 🐞 Fixed
 
+- The lobby no longer offers a speaker choice on Safari and other WebKit browsers, which play every call on the system default output.
 - A participant moving between the spotlight and the bar no longer loses their picture on the way. Their tile carries its element across the move rather than being built again where it lands.
 - The iOS picture-in-picture window keeps its participant's track subscribed while the app is backgrounded.
 - The picture-in-picture views follow the call they are given when it changes, rather than the one they were built with.
