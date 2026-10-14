@@ -77,4 +77,18 @@ void main() {
     expect(find.text('Violet'), findsOneWidget);
     expect(find.text('Blue'), findsNothing);
   });
+
+  testWidgets('the accent colors fit on one line', (tester) async {
+    await pump(tester, const Locale('en'));
+
+    final tops = {
+      for (final color in AppAccentColor.values)
+        tester.getTopLeft(find.bySemanticsLabel(color.name.capitalized)).dy,
+    };
+    expect(tops, hasLength(1));
+  });
+}
+
+extension on String {
+  String get capitalized => this[0].toUpperCase() + substring(1);
 }
