@@ -60,5 +60,20 @@
   "ringingDecline": "Weigeren",
   "ringingNobody": "Geen deelnemers",
   "ringingTwoCallers": "{first} en {second}",
-  "ringingManyCallers": "{first}, {second} en {count, plural, =1{1 ander} other{{count} anderen}}"
+  "ringingManyCallers": "{first}, {second} en {count, plural, =1{1 ander} other{{count} anderen}}",
+  "settingsDeviceTab": "Apparaat",
+  "deviceSettingsSelectCamera": "Camera kiezen",
+  "deviceSettingsSelectMicrophone": "Microfoon kiezen",
+  "deviceSettingsSelectSpeaker": "Luidspreker kiezen",
+  "deviceSettingsNoiseCancellation": "Ruisonderdrukking",
+  "deviceSettingsNoiseCancellationDescription": "Filtert achtergrondgeluid uit je microfoon.",
+  "deviceSettingsIncomingVideoQuality": "Kwaliteit van inkomende video",
+  "deviceSettingsIncomingVideoQualityHelper": "De kwaliteit van inkomende video hangt af van verschillende factoren, waaronder de kwaliteit van de bronvideo en de netwerkomstandigheden.",
+  "incomingVideoQualityAuto": "Automatisch",
+  "incomingVideoQuality2160p": "4K 2160p",
+  "incomingVideoQuality1080p": "Full HD 1080p",
+  "incomingVideoQuality720p": "HD 720p",
+  "incomingVideoQuality480p": "SD 480p",
+  "incomingVideoQuality144p": "Databesparing 144p",
+  "incomingVideoQualityOff": "Video uitschakelen"
 }

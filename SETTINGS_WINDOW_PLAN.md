@@ -47,15 +47,18 @@ commit.
 | # | Step | Branch |
 |---|---|---|
 | 1 | `StreamModalWindow` candidate | `feat/flu-973-modal-window` |
-| 2 | Settings button and window in dogfooding | `feat/flu-973-settings-button` |
-| 3 | Device tab | `feat/flu-973-device-tab` |
-| 3b | Incoming video quality button | `feat/flu-973-incoming-quality-button` |
-| 4 | Effects tab | `feat/flu-973-effects-tab` |
-| 5a | An unset transcription language means English | `fix/flu-973-transcription-language-default` |
-| 5 | Captions tab | `feat/flu-973-captions-tab` |
-| 6 | Language tab (dogfooding) | `feat/flu-973-language-tab` |
-| 7 | Theme tab (dogfooding) | `feat/flu-973-theme-tab` |
-| 8 | Recordings tab | `feat/flu-973-recordings-tab` |
+| 2 | Device tab | `feat/flu-973-device-tab` |
+| 3 | Effects tab | `feat/flu-973-effects-tab` |
+| 4 | Settings, feedback and developer buttons in dogfooding | `feat/flu-973-settings-button` |
+| 5 | Incoming video quality button | `feat/flu-973-incoming-quality-button` |
+| 6a | An unset transcription language means English | `fix/flu-973-transcription-language-default` |
+| 6 | Captions tab | `feat/flu-973-captions-tab` |
+| 7 | Language tab (dogfooding) | `feat/flu-973-language-tab` |
+| 8 | Theme tab (dogfooding) | `feat/flu-973-theme-tab` |
+| 9 | Recordings tab | `feat/flu-973-recordings-tab` |
+
+The two SDK tabs come before the dogfooding buttons, so that everything the
+large-screen more menu holds has a new home by the time the menu goes.
 
 ## Progress
 
@@ -70,48 +73,51 @@ commit.
       workflow
 - [x] Changelog
 
-### 2. Settings button and window in dogfooding
+### 2. Device tab
 
-- [ ] The settings button opens the window on large screens
-- [ ] Feedback and developer options buttons on the leading side of the bar
-- [ ] The tab list, in dogfooding
+- [x] Local preview, and the camera, microphone and speaker selects
+- [x] Noise cancellation toggle
+- [x] Incoming video quality select; `IncomingVideoQuality` moves into the SDK
+- [x] Goldens of the content, light and dark; the `StreamSelectInput` golden
+      changes too, as its label is now `headingXs`
 
-### 3. Device tab
-
-- [ ] Local preview, and the camera, microphone and speaker selects
-- [ ] Noise cancellation toggle
-- [ ] Incoming video quality select; `IncomingVideoQuality` moves into the SDK
-
-### 3b. Incoming video quality button
-
-- [ ] The button and its menu
-- [ ] In the centre of the large bar in dogfooding
-
-### 4. Effects tab
+### 3. Effects tab
 
 - [ ] Data-driven effects UI in the SDK
 - [ ] Wired to `StreamVideoEffectsManager` in dogfooding; shown only when
       supported
 
-### 5a. An unset transcription language means English
+### 4. Settings, feedback and developer buttons in dogfooding
+
+- [ ] The settings button opens the window on large screens
+- [ ] Feedback and developer options buttons on the leading side of the bar
+- [ ] The tab list, in dogfooding, with the Device and Effects tabs
+- [ ] The large-screen more menu goes
+
+### 5. Incoming video quality button
+
+- [ ] The button and its menu
+- [ ] In the centre of the large bar in dogfooding
+
+### 6a. An unset transcription language means English
 
 - [ ] `""` maps to `en`
 
-### 5. Captions tab
+### 6. Captions tab
 
 - [ ] Captions switch
 - [ ] Spoken language select, keeping the current caption and transcription
       modes on update
 
-### 6. Language tab
+### 7. Language tab
 
 - [ ] App locale select, saved in `AppPreferences`
 
-### 7. Theme tab
+### 8. Theme tab
 
 - [ ] System, light and dark, saved in `AppPreferences`
 
-### 8. Recordings tab
+### 9. Recordings tab
 
 - [ ] Recordings list in the SDK, with loading and empty states
 - [ ] Download from dogfooding

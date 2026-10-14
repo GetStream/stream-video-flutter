@@ -62,6 +62,12 @@ class DynascaleManager {
   IncomingVideoSettings? get incomingVideoSettings =>
       _videoTrackSubscriptionsOverrides.value;
 
+  /// [incomingVideoSettings], and every change to it.
+  ///
+  /// Emits the current settings to a new listener first.
+  Stream<IncomingVideoSettings?> get incomingVideoSettingsStream =>
+      _videoTrackSubscriptionsOverrides.stream;
+
   late final _saBuffer = DebounceBuffer<SubscriptionChange, Result<None>>(
     duration: _debounceDuration,
     onBuffered: updateSubscriptions,
