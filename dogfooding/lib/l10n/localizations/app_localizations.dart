@@ -151,6 +151,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dark'**
   String get themeDark;
+
+  /// The heading over the accent color swatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Accent Color'**
+  String get accentColorTitle;
+
+  /// Explains the accent color swatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the color of buttons and highlights.'**
+  String get accentColorDescription;
+
+  /// An accent color.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue'**
+  String get accentColorBlue;
+
+  /// An accent color.
+  ///
+  /// In en, this message translates to:
+  /// **'Purple'**
+  String get accentColorPurple;
+
+  /// An accent color.
+  ///
+  /// In en, this message translates to:
+  /// **'Violet'**
+  String get accentColorViolet;
+
+  /// An accent color.
+  ///
+  /// In en, this message translates to:
+  /// **'Red'**
+  String get accentColorRed;
+
+  /// An accent color.
+  ///
+  /// In en, this message translates to:
+  /// **'Yellow'**
+  String get accentColorYellow;
+
+  /// An accent color.
+  ///
+  /// In en, this message translates to:
+  /// **'Lime'**
+  String get accentColorLime;
+
+  /// An accent color.
+  ///
+  /// In en, this message translates to:
+  /// **'Green'**
+  String get accentColorGreen;
+
+  /// An accent color.
+  ///
+  /// In en, this message translates to:
+  /// **'Cyan'**
+  String get accentColorCyan;
 }
 
 class _AppLocalizationsDelegate
