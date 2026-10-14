@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/environment.dart';
@@ -13,6 +14,7 @@ class AppPreferences {
   static const String _kApiKeyPref = 'api_key';
   static const String _kEnvironemntPref = 'environment';
   static const String _kLanguageCodePref = 'language_code';
+  static const String _kThemeModePref = 'theme_mode';
 
   UserCredentials? get userCredentials {
     final jsonString = _prefs.getString(_kUserCredentialsPref);
@@ -33,6 +35,16 @@ class AppPreferences {
   Future<bool> setLanguageCode(String? languageCode) {
     if (languageCode == null) return _prefs.remove(_kLanguageCodePref);
     return _prefs.setString(_kLanguageCodePref, languageCode);
+  }
+
+  /// Whether the app is light, dark or follows the device.
+  ThemeMode get themeMode => ThemeMode.values.firstWhere(
+    (mode) => mode.name == _prefs.getString(_kThemeModePref),
+    orElse: () => ThemeMode.system,
+  );
+
+  Future<bool> setThemeMode(ThemeMode themeMode) {
+    return _prefs.setString(_kThemeModePref, themeMode.name);
   }
 
   Future<bool> setUserCredentials(UserCredentials? credentials) {
