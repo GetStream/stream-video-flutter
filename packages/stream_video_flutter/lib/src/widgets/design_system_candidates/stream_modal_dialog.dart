@@ -24,8 +24,6 @@ Future<T?> showStreamModalDialog<T>({
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
 }) {
-  final scrimColor = context.streamColorScheme.backgroundScrim;
-
   return showGeneralDialog<T>(
     context: context,
     useRootNavigator: useRootNavigator,
@@ -52,8 +50,10 @@ Future<T?> showStreamModalDialog<T>({
           children: [
             // Behind the dialog and out of the way of the modal barrier that
             // sits below, which is what a tap outside dismisses.
-            Positioned.fill(
-              child: IgnorePointer(child: StreamBlurScrim(color: scrimColor)),
+            const Positioned.fill(
+              // Resolves its color as it builds, so that it follows a theme
+              // change while the dialog is open.
+              child: IgnorePointer(child: StreamBlurScrim()),
             ),
             ScaleTransition(
               scale: Tween<double>(begin: 0.96, end: 1).animate(curve),
