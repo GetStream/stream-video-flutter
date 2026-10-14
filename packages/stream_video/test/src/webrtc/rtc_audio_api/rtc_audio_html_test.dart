@@ -34,6 +34,15 @@ void main() {
 
   late List<Map<String, Object?>> reattachTraces;
 
+  // The track each id was last started with, which is the one [stopAudio]
+  // has to be handed to remove the element.
+  final started = <String, MediaStreamTrackWeb>{};
+
+  void start(String id, MediaStreamTrackWeb track) {
+    started[id] = track;
+    startAudio(id, track);
+  }
+
   setUp(() {
     reattachTraces = [];
     setAudioTraceHandler((tag, data) {
@@ -43,8 +52,10 @@ void main() {
   });
 
   tearDown(() {
-    stopAudio(alice);
-    stopAudio(bob);
+    for (final MapEntry(key: id, value: track) in started.entries) {
+      stopAudio(id, track);
+    }
+    started.clear();
     setAudioTraceHandler(null);
     debugOverrideIsWebKit(null);
   });
@@ -55,8 +66,8 @@ void main() {
     test('gives every element a fresh stream of the track it played', () async {
       final aliceTrack = _audioTrack();
       final bobTrack = _audioTrack();
-      startAudio(alice, aliceTrack);
-      startAudio(bob, bobTrack);
+      start(alice, aliceTrack);
+      start(bob, bobTrack);
       final aliceStream = _stream(alice)!.id;
       final bobStream = _stream(bob)!.id;
 
@@ -74,7 +85,7 @@ void main() {
     // A detach and re-attach in one task is seen by the element as one swap,
     // which is the case this works around.
     test('leaves the elements empty while it waits', () async {
-      startAudio(alice, _audioTrack());
+      start(alice, _audioTrack());
 
       final reattach = reattachRemoteAudio(reason: 'subscriberOffer');
 
@@ -85,7 +96,7 @@ void main() {
 
     test('a call made while one waits joins it', () async {
       final track = _audioTrack();
-      startAudio(alice, track);
+      start(alice, track);
 
       final first = reattachRemoteAudio(reason: 'subscriberOffer');
       final second = reattachRemoteAudio(reason: 'subscriberOffer');
@@ -97,7 +108,7 @@ void main() {
     });
 
     test('a call made once the wait is over starts its own', () async {
-      startAudio(alice, _audioTrack());
+      start(alice, _audioTrack());
 
       await reattachRemoteAudio(reason: 'subscriberOffer');
       await reattachRemoteAudio(reason: 'subscriberOffer');
@@ -106,11 +117,11 @@ void main() {
     });
 
     test('a track stopped while it waits stays stopped', () async {
-      startAudio(alice, _audioTrack());
-      startAudio(bob, _audioTrack());
+      start(alice, _audioTrack());
+      start(bob, _audioTrack());
 
       final reattach = reattachRemoteAudio(reason: 'subscriberOffer');
-      stopAudio(alice);
+      stopAudio(alice, started[alice]!);
       await reattach;
 
       expect(_element(alice), isNull);
@@ -118,11 +129,11 @@ void main() {
     });
 
     test('a track started while it waits keeps its own stream', () async {
-      startAudio(alice, _audioTrack());
+      start(alice, _audioTrack());
       final replacement = _audioTrack();
 
       final reattach = reattachRemoteAudio(reason: 'subscriberOffer');
-      startAudio(alice, replacement);
+      start(alice, replacement);
       final started = _stream(alice)!.id;
       await reattach;
 
@@ -139,7 +150,7 @@ void main() {
 
   test('reattachRemoteAudio leaves other browsers alone', () async {
     debugOverrideIsWebKit(false);
-    startAudio(alice, _audioTrack());
+    start(alice, _audioTrack());
     final stream = _stream(alice)!.id;
 
     final reattach = reattachRemoteAudio(reason: 'subscriberOffer');
@@ -163,5 +174,44 @@ void main() {
 
       expect(checkIfAudioOutputChangeSupported(), isTrue);
     });
+  });
+
+  group('stopAudio', () {
+    const id = 'participant:TrackType.audio';
+
+    tearDown(() {
+      _element(id)?.remove();
+    });
+
+    test('stopping a track removes its audio element', () {
+      final track = _audioTrack();
+      startAudio(id, track);
+
+      stopAudio(id, track);
+
+      expect(_element(id), isNull);
+    });
+
+    test(
+      'a superseded session stopping its track leaves the element the new '
+      'session took over',
+      () {
+        final oldTrack = _audioTrack();
+        final newTrack = _audioTrack();
+
+        // A migration: the new session binds the same id before the old one
+        // is disposed.
+        startAudio(id, oldTrack);
+        startAudio(id, newTrack);
+        stopAudio(id, oldTrack);
+
+        expect(_element(id), isNotNull);
+        expect(_playingTrackId(id), newTrack.jsTrack.id);
+
+        stopAudio(id, newTrack);
+
+        expect(_element(id), isNull);
+      },
+    );
   });
 }

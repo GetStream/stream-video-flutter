@@ -40,8 +40,11 @@ final _watchdogs = <String, _AudioPlaybackWatchdog>{};
 
 /// The JS track each remote audio element currently plays, by track id.
 ///
-/// Kept so [reattachRemoteAudio] can rebuild an element's stream without being
-/// handed the track again.
+/// A track id is `trackIdPrefix:trackType`, which a migration keeps, so the
+/// session being replaced and the one replacing it share an element. This is
+/// how [stopAudio] tells which of them owns it now, and how
+/// [reattachRemoteAudio] rebuilds an element's stream without being handed the
+/// track again.
 final _attachedTracks = <String, web.MediaStreamTrack>{};
 
 /// Whether this page runs on WebKit, resolved once from the user agent.
@@ -215,9 +218,25 @@ Future<void> _reattach(List<String> trackIds, {required String reason}) async {
   }
 }
 
-void stopAudio(String id) {
-  _watchdogs.remove(id)?.dispose();
+/// Stops playing [track] and removes the audio element of track [id].
+///
+/// Does nothing when the element has since been given another track. That is
+/// the new session's after a migration: the superseded session is disposed
+/// only once its replacement has bound the same ids.
+void stopAudio(String id, rtc.MediaStreamTrack track) {
+  final attached = _attachedTracks[id];
+  if (attached != null &&
+      track is MediaStreamTrackWeb &&
+      !attached.strictEquals(track.jsTrack).toDart) {
+    streamLog.v(
+      _tag,
+      () => 'Not stopping audio for track $id: its element plays another track',
+    );
+    return;
+  }
+
   _attachedTracks.remove(id);
+  _watchdogs.remove(id)?.dispose();
   _blockedTrackIds.remove(id);
   _notifyBlocked();
 

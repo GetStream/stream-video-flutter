@@ -13,7 +13,7 @@ void startAudio(String id, rtc.MediaStreamTrack track) {
   throw UnimplementedError();
 }
 
-void stopAudio(String id) {
+void stopAudio(String id, rtc.MediaStreamTrack track) {
   throw UnimplementedError();
 }
 
