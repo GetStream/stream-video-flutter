@@ -21,4 +21,5 @@ List<StreamModalWindowTab> settingsTabs(
   StreamDeviceSettingsTab(call: call, devices: devices),
   if (effectsSupported)
     effectsTab(context, call: call, manager: videoEffectsManager),
+  StreamCaptionsSettingsTab(call: call),
 ];
