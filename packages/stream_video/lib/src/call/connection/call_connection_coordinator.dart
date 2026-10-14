@@ -2127,8 +2127,9 @@ class CallConnectionCoordinator {
   /// from the client's ringing, incoming, outgoing and watched calls.
   ///
   /// A call that is still ringing is reported disconnected, and its native
-  /// call ends unless another instance has joined the same call. An
-  /// unanswered outgoing ring is cancelled first.
+  /// call ends unless another instance has joined the same call or the user
+  /// answered it on the native call screen. An unanswered outgoing ring is
+  /// cancelled first.
   Future<void> _releaseUnjoined() async {
     _cancelables.cancelAll();
     await _call.dynascaleManager.dispose();
@@ -2143,7 +2144,7 @@ class CallConnectionCoordinator {
       final joinedElsewhere = client.state.activeCalls.value.any(
         (call) => call.callCid == _call.callCid,
       );
-      if (!joinedElsewhere) {
+      if (!joinedElsewhere && !await _answeredNatively()) {
         try {
           await client.pushNotificationManager?.endCallByCid(
             _call.callCid.value,
@@ -2166,6 +2167,24 @@ class CallConnectionCoordinator {
     }
     if (identical(client.state.incomingCall.value, _call)) {
       await client.state.setIncomingCall(null);
+    }
+  }
+
+  /// Whether the user answered this call on the native call screen, so a
+  /// client elsewhere, such as the app's in another isolate, takes it over.
+  Future<bool> _answeredNatively() async {
+    try {
+      final calls =
+          await _call._streamVideo.pushNotificationManager?.activeCalls() ??
+          const [];
+      return calls.any(
+        (call) => call.callCid == _call.callCid.value && call.isAccepted,
+      );
+    } catch (e, stk) {
+      _call._logger.e(
+        () => '[dispose] reading the native calls failed: $e\n$stk',
+      );
+      return false;
     }
   }
 
