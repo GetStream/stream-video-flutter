@@ -26,12 +26,12 @@ class _ThemeSettings extends StatelessWidget {
       builder: (context, _) => SettingsSelect<ThemeMode>(
         title: 'Appearance',
         description: 'Choose how the app looks.',
-        icon: switch (Theme.of(context).brightness) {
-          Brightness.light => icons.lightMode,
-          Brightness.dark => icons.darkMode,
-        },
         choices: [
-          const SettingsChoice(value: ThemeMode.system, label: 'System'),
+          SettingsChoice(
+            value: ThemeMode.system,
+            label: 'System',
+            icon: icons.presentDesktopFill,
+          ),
           SettingsChoice(
             value: ThemeMode.light,
             label: 'Light',
