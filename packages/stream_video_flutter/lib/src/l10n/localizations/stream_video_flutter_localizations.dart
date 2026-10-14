@@ -562,6 +562,30 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'Disable video'**
   String get incomingVideoQualityOff;
+
+  /// The label of the video effects tab in the settings window
+  ///
+  /// In en, this message translates to:
+  /// **'Effects'**
+  String get settingsEffectsTab;
+
+  /// Heading of the row of video effects, such as blurs, in the effects settings
+  ///
+  /// In en, this message translates to:
+  /// **'Effects'**
+  String get effectsSettingsFilters;
+
+  /// Heading of the grid of background images in the effects settings
+  ///
+  /// In en, this message translates to:
+  /// **'Backgrounds'**
+  String get effectsSettingsBackgrounds;
+
+  /// Tooltip of the button that turns video effects off
+  ///
+  /// In en, this message translates to:
+  /// **'No effect'**
+  String get effectsSettingsNone;
 }
 
 class _StreamVideoFlutterLocalizationsDelegate
