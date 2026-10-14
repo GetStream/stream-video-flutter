@@ -147,6 +147,9 @@ class StreamContextMenuAnchor extends StatelessWidget {
               ),
               child: StreamContextMenu(
                 elevation: elevation,
+                // The panel sits in an overlay, so the popup route around it,
+                // if any, is not the menu's to close.
+                dismissesRoute: false,
                 children: menuChildren,
               ),
             ),

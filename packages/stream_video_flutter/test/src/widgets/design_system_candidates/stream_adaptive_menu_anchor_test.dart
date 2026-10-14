@@ -424,6 +424,40 @@ void main() {
         expect(find.text('closed'), findsOneWidget);
       });
 
+      testWidgets('leaves the dialog it is shown in open on $name', (
+        tester,
+      ) async {
+        String? picked;
+
+        await tester.pumpWidget(
+          TestWrapper(
+            platform: platform,
+            child: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => showStreamModalDialog<void>(
+                  context: context,
+                  builder: (_) => Center(
+                    child: _Menu(onPicked: (label) => picked = label),
+                  ),
+                ),
+                child: const Text('dialog'),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('dialog'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('open'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Jabra Evolve2 65'));
+        await tester.pumpAndSettle();
+
+        expect(picked, 'Jabra Evolve2 65');
+        expect(find.text('closed'), findsOneWidget);
+      });
+
       testWidgets('shows every section heading on $name', (tester) async {
         await tester.pumpWidget(
           TestWrapper(platform: platform, child: const _Menu()),
