@@ -1350,7 +1350,10 @@ extension PublisherRtcManager on RtcManager {
         // Reusing a transceiver via replaceTrack does not fire
         // onRenegotiationNeeded. If its previous negotiation never reached the
         // SFU, the SFU still doesn't know about it, so force a renegotiation.
-        if (cachedBundle != null && !cachedBundle.negotiated) {
+        // The same holds for a sender that was detached: an announce made
+        // meanwhile left it out, so the SFU may have dropped it.
+        if (cachedBundle != null &&
+            (!cachedBundle.negotiated || previousTrack == null)) {
           needsRenegotiation = true;
         }
 
@@ -1485,7 +1488,10 @@ extension PublisherRtcManager on RtcManager {
         // Reusing a transceiver via replaceTrack does not fire
         // onRenegotiationNeeded. If its previous negotiation never reached the
         // SFU, the SFU still doesn't know about it, so force a renegotiation.
-        if (cachedBundle != null && !cachedBundle.negotiated) {
+        // The same holds for a sender that was detached: an announce made
+        // meanwhile left it out, so the SFU may have dropped it.
+        if (cachedBundle != null &&
+            (!cachedBundle.negotiated || previousTrack == null)) {
           needsRenegotiation = true;
         }
 
@@ -2496,11 +2502,14 @@ extension RtcManagerTrackHelper on RtcManager {
 
       // If the track is a screen share track, mute the audio track as well.
       if (track.trackType == SfuTrackType.screenShare) {
+        await _detachFromSenders(track.trackId);
+
         final screenShareAudioTrack = getPublisherTrackByType(
           SfuTrackType.screenShareAudio,
         );
         if (screenShareAudioTrack != null) {
           await muteTrack(trackId: screenShareAudioTrack.trackId);
+          await _detachFromSenders(screenShareAudioTrack.trackId);
         }
       }
     } else {
@@ -2518,6 +2527,24 @@ extension RtcManagerTrackHelper on RtcManager {
     }
 
     return track;
+  }
+
+  /// Takes the track of [trackId] off every sender carrying it.
+  ///
+  /// For a stopped screen share. Muting leaves the ended track on the sender,
+  /// and every announce reports a sender that has a track, so a reconnect or
+  /// a migration would tell the SFU the share is still published. Sharing
+  /// again always publishes a new track, which puts one back.
+  Future<void> _detachFromSenders(String trackId) async {
+    for (final transceiver in transceiversManager.getTransceiversForTrack(
+      trackId,
+    )) {
+      try {
+        await transceiver.sender.replaceTrack(null);
+      } catch (e, stk) {
+        _logger.w(() => '[detachFromSenders] failed for $trackId: $e\n$stk');
+      }
+    }
   }
 
   /// Acquires media for [trackType] and publishes it.

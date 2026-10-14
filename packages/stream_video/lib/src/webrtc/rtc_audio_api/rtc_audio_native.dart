@@ -14,7 +14,7 @@ void startAudio(String id, rtc.MediaStreamTrack track) {
   // in native platforms.
 }
 
-void stopAudio(String id) {
+void stopAudio(String id, rtc.MediaStreamTrack track) {
   // We don't need to do anything here, because the audio automatically stops
   // in native platforms.
 }
