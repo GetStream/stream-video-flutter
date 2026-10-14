@@ -10,6 +10,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter_l10n.dart';
 
 import '../di/injector.dart';
+import '../l10n/localizations/app_localizations.dart';
 import '../router/router.dart';
 import '../router/routes.dart';
 import '../utils/consts.dart';
@@ -226,6 +227,7 @@ class _StreamDogFoodingAppContentState
         supportedLocales: StreamVideoFlutterLocalizations.supportedLocales,
         localizationsDelegates: [
           CustomVideoLocalizationsNL.delegate,
+          AppLocalizations.delegate,
           ...StreamVideoFlutterLocalizations.localizationsDelegates,
         ],
         builder: (context, child) {

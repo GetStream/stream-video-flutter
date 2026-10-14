@@ -1,0 +1,12 @@
+{
+  "@@locale": "nl",
+  "settingsSystem": "Systeem",
+  "languageTab": "Taal",
+  "languageTitle": "Taal wijzigen",
+  "languageDescription": "Kies de taal van deze demo.",
+  "themeTab": "Thema",
+  "themeTitle": "Weergave",
+  "themeDescription": "Kies hoe de app eruitziet.",
+  "themeLight": "Licht",
+  "themeDark": "Donker"
+}
