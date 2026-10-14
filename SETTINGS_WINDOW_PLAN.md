@@ -125,7 +125,8 @@ large-screen more menu holds has a new home by the time the menu goes.
 
 ### 8. Theme tab
 
-- [ ] System, light and dark, saved in `AppPreferences`
+- [x] System, light and dark, saved in `AppPreferences` through
+      `AppDisplaySettings`
 
 ### 9. Recordings tab
 
