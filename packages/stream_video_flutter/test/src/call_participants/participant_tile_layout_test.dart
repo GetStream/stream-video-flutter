@@ -54,6 +54,7 @@ Widget _tile({
   List<StreamParticipantTileAction>? actions,
   StreamParticipantTileActionsBuilder? actionsBuilder,
   StreamParticipantTileChromePolicy? chromePolicy,
+  TextDirection textDirection = TextDirection.ltr,
 }) {
   final tile = StreamParticipantTile(
     call: MockCall(),
@@ -66,21 +67,29 @@ Widget _tile({
   );
 
   return TestWrapper(
-    child: Center(
-      child: SizedBox(
-        width: width,
-        height: height,
-        child: switch (chromePolicy) {
-          final policy? => StreamParticipantTileTheme(
-            data: StreamParticipantTileThemeData(chromePolicy: policy),
-            child: tile,
-          ),
-          null => tile,
-        },
+    child: Directionality(
+      textDirection: textDirection,
+      child: Center(
+        child: SizedBox(
+          width: width,
+          height: height,
+          child: switch (chromePolicy) {
+            final policy? => StreamParticipantTileTheme(
+              data: StreamParticipantTileThemeData(chromePolicy: policy),
+              child: tile,
+            ),
+            null => tile,
+          },
+        ),
       ),
     ),
   );
 }
+
+// The circle the button paints, rather than the tap target around it.
+final _paintedButton = find
+    .descendant(of: find.byType(StreamButton), matching: find.byType(Material))
+    .first;
 
 StreamParticipantTileChrome _minimalPolicy(
   StreamParticipantTileChromeDetails details,
@@ -482,7 +491,7 @@ void main() {
         _tile(
           participant: _participant(),
           width: 300,
-          height: 96,
+          height: 88,
           actions: [_pin()],
         ),
       );
@@ -490,6 +499,24 @@ void main() {
       expect(find.byType(StreamButton), findsNothing);
       expect(find.byType(DefaultStreamParticipantLabel), findsOneWidget);
     });
+
+    testWidgets(
+      'keeps the button on a tile just tall enough to clear the pill',
+      (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          _tile(
+            participant: _participant(),
+            width: 300,
+            height: 96,
+            actions: [_pin()],
+          ),
+        );
+
+        expect(find.byType(StreamButton), findsOneWidget);
+      },
+    );
 
     testWidgets('keeps the button clear of the pill when both are shown', (
       tester,
@@ -651,6 +678,93 @@ void main() {
 
       expect(find.text('Pin'), findsOneWidget);
       expect(find.text('Block'), findsOneWidget);
+    });
+
+    for (final direction in TextDirection.values) {
+      testWidgets(
+        'lines the menu up with the start of the button in ${direction.name}',
+        (tester) async {
+          await tester.pumpWidget(
+            _tile(
+              participant: _participant(),
+              width: 300,
+              height: 300,
+              actions: [action('Pin')],
+              textDirection: direction,
+            ),
+          );
+
+          await tester.tap(find.byType(StreamButton));
+          await tester.pumpAndSettle();
+
+          final button = tester.getRect(_paintedButton);
+          final menu = tester.getRect(find.byType(StreamContextMenu));
+          switch (direction) {
+            case TextDirection.ltr:
+              expect(menu.left, button.left);
+            case TextDirection.rtl:
+              expect(menu.right, button.right);
+          }
+          // The button keeps its 48px tap target and stays centred in it, so
+          // only the menu moves.
+          final target = tester.getRect(
+            find
+                .ancestor(
+                  of: _paintedButton,
+                  matching: find.byType(StreamTapTargetPadding),
+                )
+                .first,
+          );
+          expect(target.size, const Size.square(kMinInteractiveDimension));
+          expect(button.center, target.center);
+
+          // 8px in from the tile's top-start corner, as the design has it.
+          final tile = tester.getRect(find.byType(StreamParticipantTile));
+          expect(button.top - tile.top, 8);
+          switch (direction) {
+            case TextDirection.ltr:
+              expect(button.left - tile.left, 8);
+            case TextDirection.rtl:
+              expect(tile.right - button.right, 8);
+          }
+          expect(menu.top - button.bottom, 8);
+        },
+      );
+    }
+
+    testWidgets('gives the button a full-size tap target', (tester) async {
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _tile(
+          participant: _participant(),
+          width: 300,
+          height: 300,
+          actions: [action('Pin')],
+        ),
+      );
+
+      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+      handle.dispose();
+    });
+
+    testWidgets('opens the menu from the padding around the button', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _tile(
+          participant: _participant(),
+          width: 300,
+          height: 300,
+          actions: [action('Pin')],
+        ),
+      );
+
+      // Below and past the end of the 32px button, inside its 48px target.
+      final button = tester.getRect(_paintedButton);
+      await tester.tapAt(button.bottomRight + const Offset(6, 6));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pin'), findsOneWidget);
     });
 
     testWidgets('runs the action and closes the menu on tap', (tester) async {

@@ -39,6 +39,9 @@ class FakeDesktopCapturer extends DesktopCapturer {
   /// What [getSources] throws instead of answering, if anything.
   Exception? getSourcesError;
 
+  /// What [isSystemContentPickerSupported] answers.
+  bool systemContentPickerSupported = false;
+
   /// Holds [updateSources] open until it completes, so a test can act while
   /// the capture pass is still running.
   Completer<void>? updateSourcesGate;
@@ -61,6 +64,10 @@ class FakeDesktopCapturer extends DesktopCapturer {
     if (getSourcesError case final error?) throw error;
     return sources;
   }
+
+  @override
+  Future<bool> isSystemContentPickerSupported() async =>
+      systemContentPickerSupported;
 
   @override
   Future<bool> updateSources({required List<SourceType> types}) async {

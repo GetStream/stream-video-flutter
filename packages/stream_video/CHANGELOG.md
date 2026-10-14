@@ -55,6 +55,7 @@
 
 - `Call.dispose()` leaves the call if needed and closes its streams.
 - Added `StreamPushPayload`, the wire contract for the push payloads Stream sends: the keys it sets, the `sender` that marks a payload as ours, and predicates for recognising a ringing or missed call push. `handleRingingFlowNotifications` reads payloads through it, so anything that has to recognise a Stream push before handing it over — a background handler deciding whether to build a client, or tracking which call is still ringing — can match on exactly what the SDK matches on instead of restating the format.
+- Added `ScreenShareConstraints.systemPickerSourceId`, the `sourceId` that makes macOS choose what to share with its system picker.
 - Added `Call.viewportVisibility`, which derives one visibility and one subscription size per track from every viewport reporting through a `ViewportHandle` of its own.
 - `CallReceivedData`, what `Call.get()` returns, is exported. Handling that result meant naming a type the package kept to itself.
 - Anonymous users can now carry a token: pass `userToken` with a `UserType.anonymous` user to send call-restricted tokens (e.g. for closed livestreams). The token's `user_id` claim must be `!anon`; an invalid token fails fast at client construction.
@@ -68,6 +69,7 @@
 
 ### 🔄 Changed
 
+- Updated `stream_webrtc_flutter` to `^4.0.0`.
 - `StreamVideo.dispose()` leaves and disposes the calls it tracks.
 - Leaving or disposing an outgoing call you created while it still rings cancels the ring.
 - With `closedCaptionsVisibilityDurationMs` at 0 or less, closed captions are now shown and stay until newer ones replace them, instead of never being shown.
@@ -99,6 +101,7 @@
 - SFU sessions left behind by a failed join or reconnect attempt, or by a migration, are now released.
 - A participant moving between layouts no longer flashes a placeholder. A track the last viewport lets go of is held for `ViewportVisibilityRegistry.releaseGrace` before it is reported hidden, so the viewport taking over keeps the subscription.
 - Every track on screen is reported again to the new session after a reconnect.
+- Participant tiles keep their order after a reconnect. A join response keeps each participant's viewport visibility, pin and reaction.
 - Guest creation no longer waits for a coordinator connection id. The call is unauthenticated and watches nothing, so an id could only add latency.
 - A request that could not be signed now reports a credentials failure rather than a network one.
 - A 4xx the server answered without a Stream error payload — an edge, proxy or WAF answering on its own — is no longer retried as if it were a timeout. The status is read off the failure itself, so a permission denial fails on the first attempt instead of spending the whole retry budget.

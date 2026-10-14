@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:stream_video_flutter/stream_video_flutter_l10n.dart';
 
 import '../../../test_utils/test_wrapper.dart';
 
@@ -105,6 +106,144 @@ void main() {
         find.byType(StreamContextMenuAction<void>).first,
       );
       expect(row.height, 32);
+    });
+
+    testWidgets('draws the design mobile list item in a sheet', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const TestWrapper(child: _Menu()),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StreamSheetHeader), findsOneWidget);
+      final row = tester.getSize(find.byType(StreamListTile).first);
+      expect(row.height, 48);
+    });
+
+    // The sheet's row is the design's mobile list item, not a list tile in
+    // general, so an app sizing its list tiles does not resize it.
+    testWidgets('keeps the sheet rows at 48 under an app list tile theme', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const _ThemedApp(
+          listTileTheme: StreamListTileThemeData(
+            contentPadding: EdgeInsets.all(24),
+          ),
+          child: _Menu(),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      final row = tester.getSize(find.byType(StreamListTile).first);
+      expect(row.height, 48);
+    });
+
+    testWidgets('sheetTileStyle reaches the sheet rows', (tester) async {
+      await tester.pumpWidget(
+        const _ThemedApp(
+          menuTheme: StreamAdaptiveMenuAnchorThemeData(
+            style: StreamAdaptiveMenuAnchorStyle(
+              sheetTileStyle: StreamListTileThemeData(
+                contentPadding: EdgeInsets.symmetric(vertical: 8),
+              ),
+            ),
+          ),
+          child: _Menu(),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      final row = tester.getSize(find.byType(StreamListTile).first);
+      expect(row.height, 56);
+    });
+
+    // The sheet is a route of its own; a theme wrapped around the anchor
+    // still reaches it.
+    testWidgets('a local theme around the anchor reaches its sheet', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const TestWrapper(
+          child: StreamAdaptiveMenuAnchorTheme(
+            data: StreamAdaptiveMenuAnchorThemeData(
+              style: StreamAdaptiveMenuAnchorStyle(
+                sheetTileStyle: StreamListTileThemeData(
+                  contentPadding: EdgeInsets.symmetric(vertical: 8),
+                ),
+              ),
+            ),
+            child: _Menu(),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      final row = tester.getSize(find.byType(StreamListTile).first);
+      expect(row.height, 56);
+    });
+
+    testWidgets('the theme menuItemStyle reaches the anchored rows', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const _ThemedApp(
+          platform: .macOS,
+          menuTheme: StreamAdaptiveMenuAnchorThemeData(
+            style: StreamAdaptiveMenuAnchorStyle(
+              menuItemStyle: StreamContextMenuActionStyle(
+                minimumSize: WidgetStatePropertyAll(Size(200, 48)),
+              ),
+            ),
+          ),
+          child: _Menu(),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      final row = tester.getSize(
+        find.byType(StreamContextMenuAction<void>).first,
+      );
+      expect(row.height, 48);
+    });
+
+    testWidgets('the menuItemStyle prop wins over the theme', (tester) async {
+      await tester.pumpWidget(
+        const _ThemedApp(
+          platform: .macOS,
+          menuTheme: StreamAdaptiveMenuAnchorThemeData(
+            style: StreamAdaptiveMenuAnchorStyle(
+              menuItemStyle: StreamContextMenuActionStyle(
+                minimumSize: WidgetStatePropertyAll(Size(200, 48)),
+              ),
+            ),
+          ),
+          child: _Menu(
+            menuItemStyle: StreamContextMenuActionStyle(
+              minimumSize: WidgetStatePropertyAll(Size(200, 56)),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      final row = tester.getSize(
+        find.byType(StreamContextMenuAction<void>).first,
+      );
+      expect(row.height, 56);
     });
 
     // MenuAnchor clips its panel to the panel's own bounds by default, which
@@ -711,8 +850,10 @@ class _Menu extends StatelessWidget {
     this.menuElevation,
     this.sections,
     this.onHandle,
+    this.menuItemStyle,
   });
 
+  final StreamContextMenuActionStyle? menuItemStyle;
   final bool? useSheet;
   final ValueChanged<String>? onPicked;
   final bool matchAnchorWidth;
@@ -734,6 +875,7 @@ class _Menu extends StatelessWidget {
       useSheet: useSheet,
       matchAnchorWidth: matchAnchorWidth,
       menuElevation: menuElevation,
+      menuItemStyle: menuItemStyle,
       sections:
           sections ??
           [
@@ -759,6 +901,41 @@ class _Menu extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+/// A [TestWrapper] whose app-wide themes carry [listTileTheme] and [menuTheme],
+/// which a sheet, being a route of its own, reads from the app.
+class _ThemedApp extends StatelessWidget {
+  const _ThemedApp({
+    this.platform = TargetPlatform.android,
+    this.listTileTheme,
+    this.menuTheme,
+    required this.child,
+  });
+
+  final TargetPlatform platform;
+  final StreamListTileThemeData? listTileTheme;
+  final StreamAdaptiveMenuAnchorThemeData? menuTheme;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final base = streamTestTheme(platform: platform);
+    final core = base.extension<StreamTheme>()!;
+    final video = base.extension<StreamVideoTheme>()!;
+
+    return MaterialApp(
+      theme: base.copyWith(
+        extensions: <ThemeExtension<dynamic>>[
+          core.copyWith(listTileTheme: listTileTheme),
+          video.copyWith(adaptiveMenuAnchorTheme: menuTheme),
+        ],
+      ),
+      localizationsDelegates:
+          StreamVideoFlutterLocalizations.localizationsDelegates,
+      home: Material(child: child),
     );
   }
 }

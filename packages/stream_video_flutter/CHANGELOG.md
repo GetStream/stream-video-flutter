@@ -3,6 +3,9 @@
 ### ✅ Added
 
 - `StreamMediaDevicesController` takes `supportsAudioOutputSelection`, which defaults to what the platform reports. Where it is false, `audioOutputs` is empty.
+- Added `StreamAdaptiveMenuAnchorThemeData` on `StreamVideoTheme`, and `StreamAdaptiveMenuAnchorTheme` to restyle the menu's sheet and anchored rows over a subtree.
+- Added `DesktopScreenSharePickerType` and `StreamScreenShareButton.desktopScreenPickerType` to share with the macOS system picker instead of the built-in selector.
+- Added `isDesktopSystemContentPickerSupported`, true on macOS 14 or newer.
 - Added `solveParticipantGrid`, the rule the participants grid arranges a page by, and `StreamCallParticipantsGridThemeData.columnResolver` to override it.
 - Added `StreamCallParticipantsGridThemeData.maxTileAspectRatio`, `compactPageSize` and `pageSize`.
 - Added `StreamCallParticipantsSpotlightThemeData` on `StreamVideoTheme`, and `StreamCallParticipantsSpotlightTheme` to restyle the speaker layouts over a subtree.
@@ -193,6 +196,7 @@
 
 ### 🔄 Changed
 
+- `StreamParticipantTileStyle.topToolbarPadding` defaults to none.
 - The participants bar in `CallParticipantsSpotlightView` carries a button at either end for the tiles it cannot fit.
 - `CallParticipantsGridView` pages with the same button as the participants bar.
 - Above the small breakpoint, the grid's page buttons sit either side of the grid rather than over it.
@@ -206,6 +210,9 @@
 ### 🐞 Fixed
 
 - The lobby no longer offers a speaker choice on Safari and other WebKit browsers, which play every call on the system default output.
+- The participant tile's overflow menu lines up with the edge of its button.
+- `StreamAdaptiveMenuAnchor` sheet rows are 48px tall.
+- The lobby control buttons are 8px apart.
 - A participant moving between the spotlight and the bar no longer loses their picture on the way. Their tile carries its element across the move rather than being built again where it lands.
 - The iOS picture-in-picture window keeps its participant's track subscribed while the app is backgrounded.
 - The picture-in-picture views follow the call they are given when it changes, rather than the one they were built with.

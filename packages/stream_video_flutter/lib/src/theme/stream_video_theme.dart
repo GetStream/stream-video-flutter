@@ -55,6 +55,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamFloatingParticipantTileThemeData? floatingParticipantTileTheme,
     StreamParticipantLabelThemeData? participantLabelTheme,
     StreamPictureInPictureThemeData? pictureInPictureTheme,
+    StreamAdaptiveMenuAnchorThemeData? adaptiveMenuAnchorTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
     StreamDesktopScreenShareSelectorThemeData? desktopScreenShareSelectorTheme,
@@ -104,6 +105,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       participantLabelTheme:
           participantLabelTheme ?? legacy?.toParticipantLabelThemeData(),
       pictureInPictureTheme: pictureInPictureTheme,
+      adaptiveMenuAnchorTheme: adaptiveMenuAnchorTheme,
       connectionQualityIndicatorTheme:
           connectionQualityIndicatorTheme ??
           legacy?.toConnectionQualityIndicatorThemeData(),
@@ -170,6 +172,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
         const StreamFloatingParticipantTileThemeData(),
     this.participantLabelTheme = const StreamParticipantLabelThemeData(),
     this.pictureInPictureTheme = const StreamPictureInPictureThemeData(),
+    this.adaptiveMenuAnchorTheme = const StreamAdaptiveMenuAnchorThemeData(),
     this.connectionQualityIndicatorTheme =
         const StreamConnectionQualityIndicatorThemeData(),
     this.callParticipantsGridTheme =
@@ -478,6 +481,10 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the picture-in-picture window.
   final StreamPictureInPictureThemeData pictureInPictureTheme;
 
+  /// Theme for the menus that open as an anchored menu on desktop and a sheet
+  /// on mobile.
+  final StreamAdaptiveMenuAnchorThemeData adaptiveMenuAnchorTheme;
+
   /// Theme for the connection quality indicator.
   final StreamConnectionQualityIndicatorThemeData
   connectionQualityIndicatorTheme;
@@ -554,6 +561,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamFloatingParticipantTileThemeData? floatingParticipantTileTheme,
     StreamParticipantLabelThemeData? participantLabelTheme,
     StreamPictureInPictureThemeData? pictureInPictureTheme,
+    StreamAdaptiveMenuAnchorThemeData? adaptiveMenuAnchorTheme,
     StreamConnectionQualityIndicatorThemeData? connectionQualityIndicatorTheme,
     StreamCallParticipantsGridThemeData? callParticipantsGridTheme,
     StreamDesktopScreenShareSelectorThemeData? desktopScreenShareSelectorTheme,
@@ -589,6 +597,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     ),
     pictureInPictureTheme: this.pictureInPictureTheme.merge(
       pictureInPictureTheme,
+    ),
+    adaptiveMenuAnchorTheme: this.adaptiveMenuAnchorTheme.merge(
+      adaptiveMenuAnchorTheme,
     ),
     connectionQualityIndicatorTheme: this.connectionQualityIndicatorTheme.merge(
       connectionQualityIndicatorTheme,
@@ -644,6 +655,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       ),
       pictureInPictureTheme: pictureInPictureTheme.merge(
         other.pictureInPictureTheme,
+      ),
+      adaptiveMenuAnchorTheme: adaptiveMenuAnchorTheme.merge(
+        other.adaptiveMenuAnchorTheme,
       ),
       connectionQualityIndicatorTheme: connectionQualityIndicatorTheme.merge(
         other.connectionQualityIndicatorTheme,
@@ -747,6 +761,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           pictureInPictureTheme,
+      adaptiveMenuAnchorTheme:
+          StreamAdaptiveMenuAnchorThemeData.lerp(
+            adaptiveMenuAnchorTheme,
+            other.adaptiveMenuAnchorTheme,
+            t,
+          ) ??
+          adaptiveMenuAnchorTheme,
       connectionQualityIndicatorTheme:
           StreamConnectionQualityIndicatorThemeData.lerp(
             connectionQualityIndicatorTheme,
