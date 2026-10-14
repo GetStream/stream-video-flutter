@@ -324,4 +324,16 @@ class StreamVideoFlutterLocalizationsNl
 
   @override
   String get incomingVideoQualityOff => 'Video uitschakelen';
+
+  @override
+  String get settingsEffectsTab => 'Effecten';
+
+  @override
+  String get effectsSettingsFilters => 'Effecten';
+
+  @override
+  String get effectsSettingsBackgrounds => 'Achtergronden';
+
+  @override
+  String get effectsSettingsNone => 'Geen effect';
 }
