@@ -400,12 +400,12 @@ class StreamVideo extends Disposable {
     keepConnectionAliveInBackground: () =>
         _options.keepConnectionsAliveWhenInBackground,
     isConnected: () => _client.isConnected,
-    closeConnection: () => _connection.runWhileConnected(() async {
+    closeConnection: () => _connection.runWhileUserConnected(() async {
       final result = await _client.closeConnection();
       if (result.isSuccess) _subscriptions.cancel(_idEvents);
       return result;
     }),
-    openConnection: () => _connection.runWhileConnected(() async {
+    openConnection: () => _connection.runWhileUserConnected(() async {
       final result = await _client.openConnection();
       if (result.isSuccess) {
         _subscriptions.add(_idEvents, _client.events.listen(_onEvent));

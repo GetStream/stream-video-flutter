@@ -234,15 +234,16 @@ class CoordinatorConnection {
     return result;
   }
 
-  /// Runs [action] on the socket of a connected user, in order with the
-  /// connects and disconnects. Fails without running it when the user is not
-  /// connected by then.
-  Future<Result<None>> runWhileConnected(
+  /// Runs [action], such as closing or reopening the socket, while the user
+  /// is connected, in order with the connects and disconnects. The socket may
+  /// be closed meanwhile, as in the background. Fails without running it when
+  /// the user is not connected by then.
+  Future<Result<None>> runWhileUserConnected(
     Future<Result<None>> Function() action,
   ) {
     return _lock.synchronized(() {
       if (!_connection.isConnected) {
-        _logger.w(() => '[runWhileConnected] rejected (not connected)');
+        _logger.w(() => '[runWhileUserConnected] rejected (not connected)');
         return failureWithError('The user is not connected');
       }
       return action();
