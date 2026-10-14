@@ -7,6 +7,7 @@ import 'package:stream_video/src/lifecycle/lifecycle_state.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
+import '../call/fixtures/call_test_helpers.dart';
 
 /// A JWT with a fake signature carrying [userId]; [UserToken] parses it
 /// without verifying.
@@ -19,8 +20,8 @@ String fakeJwt(String userId) {
   return '$header.$payload.$signature';
 }
 
-/// Builds a [StreamVideo] on a mocked [client], and holds the [events] and
-/// [appState] the test drives it with.
+/// Builds a [StreamVideo] on a mocked [client] and [networkMonitor], and
+/// holds the [events] and [appState] the test drives it with.
 ///
 /// The default options turn `autoConnect` off; options a test passes keep
 /// their own. With an `initialState`, each connect first gets that state, as
@@ -57,6 +58,7 @@ class StreamVideoFixture {
       options: options ?? StreamVideoOptions(autoConnect: false),
       pushNotificationManagerProvider: pushNotificationManagerProvider,
       coordinatorClient: client,
+      networkMonitor: networkMonitor,
       appState: () => initialState == null
           ? appState.stream
           : appState.stream.startWith(initialState),
@@ -65,6 +67,10 @@ class StreamVideoFixture {
 
   final User user;
   final client = MockCoordinatorClient();
+
+  /// The network monitor the client hands its calls. Connected, unless a
+  /// test stubs it otherwise.
+  final networkMonitor = setupMockInternetConnection();
   final events = MutableSharedEmitter<CoordinatorEvent>();
 
   /// The app states each connect listens to. Broadcast, so a reconnect can

@@ -154,7 +154,8 @@ class StreamVideo extends Disposable {
   /// [StreamVideo.create].
   ///
   /// When given, it talks to [coordinatorClient] instead of building one,
-  /// and follows the stream [appState] returns instead of the app's
+  /// hands [networkMonitor] to its calls instead of the one the options
+  /// build, and follows the stream [appState] returns instead of the app's
   /// lifecycle. [appState] is called on each connect; unlike the app's
   /// lifecycle, its stream need not emit the current state on listen.
   @visibleForTesting
@@ -167,6 +168,7 @@ class StreamVideo extends Disposable {
     OnTokenUpdated? onTokenUpdated,
     PNManagerProvider? pushNotificationManagerProvider,
     CoordinatorClient? coordinatorClient,
+    InternetConnection? networkMonitor,
     Stream<LifecycleState> Function()? appState,
   }) {
     return StreamVideo._(
@@ -178,6 +180,7 @@ class StreamVideo extends Disposable {
       onTokenUpdated: onTokenUpdated,
       pushNotificationManagerProvider: pushNotificationManagerProvider,
       coordinatorClient: coordinatorClient,
+      networkMonitor: networkMonitor,
       appState: appState,
     );
   }
@@ -191,11 +194,13 @@ class StreamVideo extends Disposable {
     OnTokenUpdated? onTokenUpdated,
     PNManagerProvider? pushNotificationManagerProvider,
     CoordinatorClient? coordinatorClient,
+    InternetConnection? networkMonitor,
     Stream<LifecycleState> Function()? appState,
   }) : _options = options,
        _appStateOverride = appState,
        _state = MutableClientState(user, options) {
     _networkMonitor =
+        networkMonitor ??
         _options.networkMonitorSettings.internetConnectionInstance ??
         InternetConnection.createInstance(
           checkInterval: _options.networkMonitorSettings.checkInterval,

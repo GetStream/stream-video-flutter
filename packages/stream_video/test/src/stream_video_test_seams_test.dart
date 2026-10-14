@@ -5,10 +5,11 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/lifecycle/lifecycle_state.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../test_helpers.dart';
 import 'fixtures/stream_video_fixture.dart';
 
-// Pins the seams StreamVideo.forTesting opens: the coordinator client and
-// the app lifecycle stream.
+// Pins the seams StreamVideo.forTesting opens: the coordinator client, the
+// network monitor and the app lifecycle stream.
 void main() {
   late StreamVideoFixture fixture;
 
@@ -26,6 +27,18 @@ void main() {
       ),
     ).called(1);
     expect(fixture.streamVideo.state.connection.value.isConnected, isTrue);
+  });
+
+  test('a call it makes gets the given network monitor', () {
+    RtcMediaDeviceNotifier.instance = MockRtcMediaDeviceNotifier();
+    addTearDown(() => RtcMediaDeviceNotifier.instance = null);
+
+    final call = fixture.streamVideo.makeCall(
+      callType: StreamCallType.defaultType(),
+      id: 'network-monitor',
+    );
+
+    expect(call.networkMonitor, same(fixture.networkMonitor));
   });
 
   test('a coordinator event on the client reaches the client state', () async {
