@@ -220,6 +220,7 @@ class _StreamDogFoodingAppContentState
         routerConfig: _router,
         theme: _buildTheme(Brightness.light),
         darkTheme: _buildTheme(Brightness.dark),
+        themeMode: _appSettings.themeMode,
         locale: _appSettings.locale,
         // Every language the SDK is translated into.
         supportedLocales: StreamVideoFlutterLocalizations.supportedLocales,

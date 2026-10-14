@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/app/app_display_settings.dart';
 import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -56,6 +56,29 @@ void main() {
 
       expect(settings.locale, isNull);
       expect(prefs.languageCode, isNull);
+    });
+
+    test('follows the device until a theme is picked', () async {
+      final settings = AppDisplaySettings(preferences: await preferences());
+
+      expect(settings.themeMode, ThemeMode.system);
+    });
+
+    test('keeps a picked theme and tells its listeners', () async {
+      final prefs = await preferences();
+      final settings = AppDisplaySettings(preferences: prefs);
+      var notified = 0;
+      settings.addListener(() => notified++);
+
+      await settings.setThemeMode(ThemeMode.dark);
+
+      expect(settings.themeMode, ThemeMode.dark);
+      expect(notified, 1);
+      expect(prefs.themeMode, ThemeMode.dark);
+      expect(
+        AppDisplaySettings(preferences: prefs).themeMode,
+        ThemeMode.dark,
+      );
     });
   });
 }
