@@ -107,7 +107,7 @@ large-screen more menu holds has a new home by the time the menu goes.
 
 ### 6a. An unset transcription language means English
 
-- [ ] `""` maps to `en`
+- [x] `""` maps to `en`
 
 ### 6. Captions tab
 
