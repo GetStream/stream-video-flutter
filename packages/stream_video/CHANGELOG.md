@@ -108,6 +108,7 @@
 - `StreamVideo.connect()` and `disconnect()` run one at a time in the order they are called, so a disconnect during a connect no longer leaves the user connected.
 - `Call.setCameraTargetResolution` during a call is now kept for later sessions.
 - Fixed `Call.setPreferredIncomingVideoResolution` and `setIncomingVideoEnabled` throwing before the call is joined; the setting now applies on join.
+- A call with no transcription language set reports `en`, the language the backend uses, instead of `auto`.
 - `CallSettings` equality now compares every section.
 - A failed `Call.join` now returns the error it failed with, retries a retryable coordinator failure, and reports one telemetry abort.
 - A call ended remotely now sends the SFU leave message, like a local leave.
