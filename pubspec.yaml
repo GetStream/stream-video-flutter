@@ -204,6 +204,13 @@ melos:
         flutter: true
         dirExists: test
 
+    test:web:
+      run: |
+        melos exec -c 1 --fail-fast -- "\$MELOS_ROOT_PATH/.github/workflows/scripts/test-web.sh"
+      description: Run the browser-only tests (`@TestOn('browser')`) in Chrome.
+      packageFilters:
+        dirExists: test
+
     test:fixes:
       run: melos exec -c 4 --fail-fast -- "cd test_fixes && dart fix --compare-to-golden"
       description: Verify dart fixes for a specific package in this project.

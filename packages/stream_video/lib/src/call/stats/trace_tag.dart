@@ -132,5 +132,9 @@ abstract class TraceTag {
   static const String mediaPlaybackRecoverStalled =
       'mediaPlayback.recover.stalled';
 
+  /// Reported when every remote audio element is detached and given a fresh
+  /// stream after a subscriber renegotiation brought in a new audio source.
+  static const String audioPlaybackReattach = 'audioPlayback.reattach';
+
   static const String setSinkId = 'setSinkId';
 }
