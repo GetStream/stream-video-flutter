@@ -305,7 +305,7 @@ abstract class CoordinatorClient {
 
   Future<Result<CallMetadata>> updateCall({
     required StreamCallCid callCid,
-    Map<String, Object> custom = const {},
+    Map<String, Object>? custom,
     DateTime? startsAt,
     StreamRingSettings? ring,
     StreamAudioSettings? audio,
