@@ -110,6 +110,12 @@ void main() {
   // the disconnected event it reports moves the client's state on. A failure
   // that threw instead would leave the client connecting with no event to
   // end it.
+  //
+  // The socket's token is valid, so the connect gets past building its
+  // options and opens a real connection to `wss://localhost:0`. Nothing
+  // listens there, so the OS refuses it, and core reports that as a
+  // server-initiated disconnect with a `StreamNetworkException`, the same
+  // path a lost network takes.
   test(
     'a connect that fails reports a disconnect instead of throwing',
     () async {
