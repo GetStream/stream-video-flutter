@@ -61,9 +61,12 @@ jobs:
           path: build/sdk_size/results/analysis/
           retention-days: 90
 
-  # Pull requests skip iOS to save macOS runners; the benchmark still has it.
+  # Pull requests don't measure iOS, except release pull requests. Pushes do,
+  # for the benchmark.
   measure-ios:
-    if: github.event_name != 'pull_request'
+    if: >-
+      github.event_name != 'pull_request'
+      || (startsWith(github.head_ref, 'release/') && github.event.pull_request.draft == false)
     timeout-minutes: 60
     # Pinned, so a runner image update doesn't change the iOS numbers.
     runs-on: macos-26
@@ -95,12 +98,14 @@ jobs:
           path: build/sdk_size/results/analysis/
           retention-days: 90
 
-  # Reports a pull request, from this repository only, without iOS.
+  # Reports a pull request from this repository, without iOS. Release pull
+  # requests go through `report` instead.
   report-android:
     needs: measure-android
     if: >-
       github.event_name == 'pull_request'
       && github.event.pull_request.head.repo.full_name == github.repository
+      && !startsWith(github.head_ref, 'release/')
     timeout-minutes: 15
     runs-on: ubuntu-latest
     permissions:
@@ -123,14 +128,17 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
-  # Stores the benchmark of a push, which needs every platform.
+  # Reports every platform: a push stores it as the benchmark, a release pull
+  # request as the `release` benchmark.
   report:
     needs: [measure-android, measure-ios]
     if: >-
       !cancelled()
-      && github.event_name != 'pull_request'
       && needs.measure-android.result == 'success'
       && needs.measure-ios.result == 'success'
+      && (github.event_name != 'pull_request'
+        || (github.event.pull_request.head.repo.full_name == github.repository
+          && startsWith(github.head_ref, 'release/')))
     timeout-minutes: 15
     runs-on: ubuntu-latest
     permissions:
