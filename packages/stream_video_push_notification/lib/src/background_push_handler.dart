@@ -396,6 +396,10 @@ class _BackgroundSession {
 
   /// The scheduled release, once it falls due.
   ///
+  /// It releases also after an accept: the client sets up no media, so the
+  /// app cannot join a call on it, and takes an accepted call over on its own
+  /// client instead.
+  ///
   /// Nothing awaits this, and `onDispose` is the app's own code: an error
   /// escaping here would land in a background isolate that has no zone
   /// handler to catch it.
@@ -408,23 +412,6 @@ class _BackgroundSession {
             StreamVideoPushHandler._tag,
             () =>
                 '[release] still ringing (${pendingRings.length}); '
-                'standing down',
-          );
-
-          return;
-        }
-
-        // The app answered on this client and is in the call, so the client is
-        // the app's now and its lifecycle goes with it. Android delivers the
-        // accept to whichever isolate is running, which is this one whenever
-        // the app is alive but backgrounded - and there the accept is the
-        // moment the app starts using the client, not the moment this session
-        // is done with it. Disposing here drops a call that just connected.
-        if (streamVideo.activeCalls.isNotEmpty) {
-          streamLog.d(
-            StreamVideoPushHandler._tag,
-            () =>
-                '[release] the app is in a call on this client; '
                 'standing down',
           );
 
