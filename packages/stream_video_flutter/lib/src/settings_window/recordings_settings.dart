@@ -70,6 +70,7 @@ class _StreamRecordingsSettingsState extends State<StreamRecordingsSettings> {
 
   List<CallRecording> _recordings = const [];
   bool _loading = true;
+  bool _failed = false;
   StreamSubscription<StreamCallEvent>? _events;
 
   @override
@@ -86,6 +87,10 @@ class _StreamRecordingsSettingsState extends State<StreamRecordingsSettings> {
   }
 
   Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _failed = false;
+    });
     final result = await widget.call.listRecordings();
     if (!mounted) return;
     switch (result) {
@@ -96,7 +101,10 @@ class _StreamRecordingsSettingsState extends State<StreamRecordingsSettings> {
         });
       case Failure(:final error):
         _logger.e(() => 'Could not list the recordings: $error');
-        setState(() => _loading = false);
+        setState(() {
+          _loading = false;
+          _failed = true;
+        });
     }
   }
 
@@ -105,21 +113,11 @@ class _StreamRecordingsSettingsState extends State<StreamRecordingsSettings> {
       // A stopped recording takes a while to process before it can be listed.
       case StreamCallRecordingStoppedEvent():
         setState(() => _loading = true);
+      // Listed again rather than added, so a recording is never shown twice.
       case StreamCallRecordingReadyEvent():
-        setState(() {
-          _recordings = [
-            ..._recordings,
-            CallRecording(
-              endTime: event.endTime,
-              filename: event.filename,
-              recordingType: '',
-              sessionId: event.sessionId,
-              startTime: event.startTime,
-              url: event.url,
-            ),
-          ];
-          _loading = false;
-        });
+        unawaited(_load());
+      case StreamCallRecordingFailedEvent():
+        setState(() => _loading = false);
       default:
         break;
     }
@@ -131,13 +129,15 @@ class _StreamRecordingsSettingsState extends State<StreamRecordingsSettings> {
       recordings: _recordings,
       loading: _loading,
       onDownload: widget.onDownload,
+      onRetry: _failed ? _load : null,
     );
   }
 }
 
 /// A table of recordings, newest first, each with a download button.
 ///
-/// Shows an empty state when there are none, and a spinner while [loading].
+/// Shows an empty state when there are none, a spinner while [loading], and
+/// an error with a button to try again where [onRetry] is set.
 /// Each recording is named by its place in the call, the first being
 /// "Recording #1".
 class StreamCallRecordingList extends StatelessWidget {
@@ -147,16 +147,21 @@ class StreamCallRecordingList extends StatelessWidget {
     required this.recordings,
     this.loading = false,
     required this.onDownload,
+    this.onRetry,
   });
 
   /// The recordings, in any order.
   final List<CallRecording> recordings;
 
-  /// Whether more recordings are on their way.
+  /// Whether recordings are being listed or processed.
   final bool loading;
 
   /// Called with the recording whose download button is pressed.
   final ValueChanged<CallRecording> onDownload;
+
+  /// Lists the recordings again. Set when listing them failed, which shows
+  /// an error in place of the empty state.
+  final VoidCallback? onRetry;
 
   // The width the design gives each column.
   static const double _columnWidth = 120;
@@ -168,6 +173,19 @@ class StreamCallRecordingList extends StatelessWidget {
 
     if (recordings.isEmpty) {
       if (loading) return const _Loading();
+      if (onRetry case final onRetry?) {
+        return StreamEmptyState(
+          icon: Icon(context.streamIcons.exclamationCircleFill),
+          title: Text(translations.recordingsErrorTitle),
+          description: Text(translations.recordingsErrorDescription),
+          action: StreamButton(
+            style: StreamButtonStyle.secondary,
+            type: StreamButtonType.outline,
+            onPressed: onRetry,
+            child: Text(translations.recordingsRetry),
+          ),
+        );
+      }
       return StreamEmptyState(
         icon: Icon(context.streamIcons.recordLibraryFill),
         title: Text(translations.recordingsEmptyTitle),
@@ -177,7 +195,12 @@ class StreamCallRecordingList extends StatelessWidget {
 
     final oldestFirst = [...recordings]
       ..sort((a, b) => a.startTime.compareTo(b.startTime));
-    final time = DateFormat.Hms(Localizations.localeOf(context).toString());
+    // Falls back to the default locale where the app hasn't loaded date data
+    // for its own.
+    final locale = Localizations.localeOf(context).toLanguageTag();
+    final time = DateFormat.Hms(
+      DateFormat.localeExists(locale) ? locale : null,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

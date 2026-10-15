@@ -892,6 +892,24 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'Recordings of this call show up here once they\'re ready.'**
   String get recordingsEmptyDescription;
+
+  /// Title shown when the call's recordings could not be listed
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t Load Recordings'**
+  String get recordingsErrorTitle;
+
+  /// Shown under the title when the call's recordings could not be listed
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get recordingsErrorDescription;
+
+  /// Button that lists the call's recordings again after a failure
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get recordingsRetry;
 }
 
 class _StreamVideoFlutterLocalizationsDelegate

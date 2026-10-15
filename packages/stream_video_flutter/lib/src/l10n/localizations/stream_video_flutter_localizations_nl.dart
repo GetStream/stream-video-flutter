@@ -463,4 +463,14 @@ class StreamVideoFlutterLocalizationsNl
   @override
   String get recordingsEmptyDescription =>
       'Opnames van dit gesprek verschijnen hier zodra ze klaar zijn.';
+
+  @override
+  String get recordingsErrorTitle => 'Opnames laden mislukt';
+
+  @override
+  String get recordingsErrorDescription =>
+      'Controleer je verbinding en probeer het opnieuw.';
+
+  @override
+  String get recordingsRetry => 'Opnieuw proberen';
 }
