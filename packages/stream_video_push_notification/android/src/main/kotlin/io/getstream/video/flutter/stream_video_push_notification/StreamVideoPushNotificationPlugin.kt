@@ -67,10 +67,10 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
         fun initSharedInstance(context: Context, binaryMessenger: BinaryMessenger) {
             if (!::instance.isInitialized) {
                 instance = StreamVideoPushNotificationPlugin()
-                instance.incomingCallSoundPlayerManager = IncomingCallSoundPlayerManager(context)
-                instance.incomingCallNotificationManager = IncomingCallNotificationManager(context, instance.incomingCallSoundPlayerManager)
                 instance.context = context
             }
+            // Created again after the last engine detached and released them.
+            instance.ensureManagers(context)
 
             val channel = MethodChannel(binaryMessenger, "stream_video_push_notification")
             methodChannels[binaryMessenger] = channel
@@ -92,6 +92,14 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
 
       private var incomingCallNotificationManager: IncomingCallNotificationManager? = null
     private var incomingCallSoundPlayerManager: IncomingCallSoundPlayerManager? = null
+
+    private fun ensureManagers(context: Context) {
+        val soundPlayer = incomingCallSoundPlayerManager
+            ?: IncomingCallSoundPlayerManager(context).also { incomingCallSoundPlayerManager = it }
+        if (incomingCallNotificationManager == null) {
+            incomingCallNotificationManager = IncomingCallNotificationManager(context, soundPlayer)
+        }
+    }
 
     fun getIncomingCallNotificationManager(): IncomingCallNotificationManager? {
         return incomingCallNotificationManager
@@ -413,6 +421,9 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
      methodChannels.remove(binding.binaryMessenger)?.setMethodCallHandler(null)
         eventChannels.remove(binding.binaryMessenger)?.setStreamHandler(null)
         StreamTelecomManager.releaseIfIdle()
+        // Another engine, such as the app's own next to a background one, still shows
+        // the incoming calls and plays their ringtone.
+        if (methodChannels.isNotEmpty()) return
         instance.incomingCallSoundPlayerManager?.destroy()
         instance.incomingCallNotificationManager?.destroy()
         instance.incomingCallSoundPlayerManager = null
