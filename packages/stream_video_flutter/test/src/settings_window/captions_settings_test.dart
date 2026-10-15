@@ -135,6 +135,18 @@ void main() {
       expect(captionsSwitch(tester).props.onChanged, isNull);
     });
 
+    testWidgets('the switch is disabled for a user who may not stop them', (
+      tester,
+    ) async {
+      stubCaptions(
+        on: true,
+        capabilities: const [CallPermission.startClosedCaptionsCall],
+      );
+      await pump(tester);
+
+      expect(captionsSwitch(tester).props.onChanged, isNull);
+    });
+
     testWidgets('picking a language keeps the modes in use', (tester) async {
       stubCaptions(on: true);
       await pump(tester);

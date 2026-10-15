@@ -45,7 +45,7 @@ class _CaptionsTabLabel extends StatelessWidget {
 /// the user may not start or stop them. The language is the call's: changing
 /// it changes it for everyone in the call, which needs the
 /// `update-call-settings` permission.
-class StreamCaptionsSettings extends StatelessWidget {
+class StreamCaptionsSettings extends StatefulWidget {
   /// Creates the captions settings.
   const StreamCaptionsSettings({super.key, required this.call});
 
@@ -71,12 +71,45 @@ class StreamCaptionsSettings extends StatelessWidget {
   }
 
   @override
+  State<StreamCaptionsSettings> createState() => _StreamCaptionsSettingsState();
+}
+
+class _StreamCaptionsSettingsState extends State<StreamCaptionsSettings> {
+  static final _logger = taggedLogger(tag: 'SV:CaptionsSettings');
+
+  // Set while a start or stop is in flight, so a second tap doesn't send
+  // another.
+  bool _switching = false;
+
+  Call get call => widget.call;
+
+  Future<void> _setCaptioning(
+    bool on,
+    TranscriptionSettingsLanguage language,
+  ) async {
+    if (_switching) return;
+    _switching = true;
+    try {
+      final result = on
+          ? await call.startClosedCaptions(language: language)
+          : await call.stopClosedCaptions();
+      if (result case Failure(:final error)) {
+        _logger.e(
+          () => 'Could not turn captions ${on ? 'on' : 'off'}: $error',
+        );
+      }
+    } finally {
+      _switching = false;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final translations = context.translations;
 
     return PartialCallStateBuilder(
       call: call,
-      selector: _captions,
+      selector: StreamCaptionsSettings._captions,
       builder: (context, captions) {
         final canSwitch =
             captions.available &&
@@ -91,9 +124,7 @@ class StreamCaptionsSettings extends StatelessWidget {
               description: translations.captionsSettingsTurnOnDescription,
               value: captions.on,
               onChanged: canSwitch
-                  ? (on) => on
-                        ? call.startClosedCaptions(language: captions.language)
-                        : call.stopClosedCaptions()
+                  ? (on) => _setCaptioning(on, captions.language)
                   : null,
             ),
             if (captions.on)
