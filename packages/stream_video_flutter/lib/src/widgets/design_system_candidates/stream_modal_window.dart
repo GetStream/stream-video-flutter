@@ -39,7 +39,7 @@ import 'stream_modal_parts.dart';
 /// changes its size. The selected tab is drawn in a scroll view.
 ///
 /// When the window is narrower than 560, the sidebar shows only the tabs'
-/// icons, with each label as the icon's tooltip.
+/// icons, each with its tab's [StreamModalWindowTab.tooltip].
 ///
 /// This is a design-system candidate: it lives in this SDK until the
 /// component is finalized and can graduate to stream_core_flutter.
@@ -53,14 +53,18 @@ class StreamModalWindow extends StatefulWidget {
     this.showCloseButton = true,
     this.onClose,
     this.constraints = StreamModalDialog.defaultConstraints,
-  }) : assert(tabs.length > 0, 'A modal window needs at least one tab.');
+  }) : assert(tabs.length > 0, 'A modal window needs at least one tab.'),
+       assert(
+         initialIndex >= 0 && initialIndex < tabs.length,
+         'initialIndex must be the index of one of the tabs.',
+       );
 
   /// The tabs, in the order the sidebar lists them.
   final List<StreamModalWindowTab> tabs;
 
   /// The index of the tab selected when the window opens.
   ///
-  /// Kept within the range of [tabs].
+  /// Must be the index of one of the [tabs].
   final int initialIndex;
 
   /// Called with the tab's index when the user selects a different tab.
@@ -91,6 +95,7 @@ class StreamModalWindowTab {
     required this.icon,
     required this.label,
     required this.builder,
+    this.tooltip,
   });
 
   /// The icon drawn before [label] in the sidebar.
@@ -102,6 +107,12 @@ class StreamModalWindowTab {
   ///
   /// Typically a [Text].
   final Widget label;
+
+  /// The tooltip a collapsed sidebar shows on the tab's icon.
+  ///
+  /// Defaults to the text of [label] when it is a [Text]. Without either, the
+  /// icon has no tooltip.
+  final String? tooltip;
 
   /// Builds the tab's content.
   ///
@@ -321,14 +332,14 @@ class _NavItem extends StatelessWidget {
             ),
     );
 
-    if (collapsed) {
+    final tooltip = switch (tab) {
+      StreamModalWindowTab(:final tooltip?) => tooltip,
+      StreamModalWindowTab(label: Text(:final data?)) => data,
+      _ => null,
+    };
+    if (collapsed && tooltip != null) {
       item = Tooltip(
-        richMessage: WidgetSpan(
-          child: DefaultTextStyle(
-            style: _tooltipTextStyle(context),
-            child: tab.label,
-          ),
-        ),
+        message: tooltip,
         // The hidden label above already names the row.
         excludeFromSemantics: true,
         child: item,
@@ -346,28 +357,6 @@ class _NavItem extends StatelessWidget {
       ),
     );
   }
-}
-
-// The text style a Material tooltip gives its message. A widget in a tooltip's
-// rich message doesn't inherit that style, so the label is given it here.
-TextStyle _tooltipTextStyle(BuildContext context) {
-  final theme = Theme.of(context);
-  final themed = TooltipTheme.of(context).textStyle;
-  if (themed != null) return themed;
-
-  final isDesktop = switch (theme.platform) {
-    TargetPlatform.macOS ||
-    TargetPlatform.linux ||
-    TargetPlatform.windows => true,
-    TargetPlatform.android ||
-    TargetPlatform.fuchsia ||
-    TargetPlatform.iOS => false,
-  };
-
-  return theme.textTheme.bodyMedium!.copyWith(
-    color: theme.brightness == Brightness.dark ? Colors.black : Colors.white,
-    fontSize: isDesktop ? 12 : 14,
-  );
 }
 
 class _StreamModalWindowStyleDefaults extends StreamModalWindowStyle {

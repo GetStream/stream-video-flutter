@@ -59,7 +59,7 @@ class StreamModalHeader extends StatelessWidget {
     required this.actions,
   });
 
-  /// The title, drawn in `headingSm`.
+  /// The title, drawn in `headingSm` and read out as a heading.
   final Widget? title;
 
   /// The buttons at the trailing edge.
@@ -81,7 +81,9 @@ class StreamModalHeader extends StatelessWidget {
               style: context.streamTextTheme.headingSm.copyWith(
                 color: context.streamColorScheme.textPrimary,
               ),
-              child: title ?? const SizedBox.shrink(),
+              child: title == null
+                  ? const SizedBox.shrink()
+                  : Semantics(header: true, child: title),
             ),
           ),
           if (actions.isNotEmpty)
