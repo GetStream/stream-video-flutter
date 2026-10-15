@@ -48,10 +48,16 @@ class StreamAdaptiveMenuAnchorTheme extends InheritedTheme {
 class StreamAdaptiveMenuAnchorThemeData
     with _$StreamAdaptiveMenuAnchorThemeData {
   /// Creates theme data for [StreamAdaptiveMenuAnchor].
-  const StreamAdaptiveMenuAnchorThemeData({this.style});
+  const StreamAdaptiveMenuAnchorThemeData({this.style, this.useSheet});
 
   /// The visual style of the menu's rows.
   final StreamAdaptiveMenuAnchorStyle? style;
+
+  /// Whether the menus present a bottom sheet instead of an anchored menu.
+  ///
+  /// Null follows the platform: a sheet on Android and iOS, the anchored menu
+  /// everywhere else. [StreamAdaptiveMenuAnchor.useSheet] wins over this.
+  final bool? useSheet;
 
   /// Linearly interpolates between two [StreamAdaptiveMenuAnchorThemeData]s.
   static StreamAdaptiveMenuAnchorThemeData? lerp(

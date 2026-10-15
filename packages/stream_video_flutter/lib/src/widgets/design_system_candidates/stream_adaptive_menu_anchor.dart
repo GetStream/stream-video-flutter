@@ -223,8 +223,9 @@ class StreamAdaptiveMenuAnchor extends StatefulWidget {
 
   /// Forces one presentation instead of following the platform.
   ///
-  /// Null — the default — picks the sheet on Android and iOS and the anchored
-  /// menu everywhere else.
+  /// Null — the default — takes [StreamAdaptiveMenuAnchorThemeData.useSheet],
+  /// and without that picks the sheet on Android and iOS and the anchored menu
+  /// everywhere else.
   final bool? useSheet;
 
   /// Whether the anchored menu should be exactly as wide as its anchor.
@@ -377,6 +378,7 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
   /// browser, which reports a mobile target platform.
   bool get _useSheet =>
       widget.useSheet ??
+      StreamAdaptiveMenuAnchorTheme.of(context).useSheet ??
       switch (Theme.of(context).platform) {
         TargetPlatform.android || TargetPlatform.iOS => true,
         _ => false,
