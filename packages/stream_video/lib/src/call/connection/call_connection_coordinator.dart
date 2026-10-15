@@ -2138,8 +2138,7 @@ class CallConnectionCoordinator {
   Future<bool> _answeredNatively() async {
     try {
       final calls =
-          await _call._streamVideo.pushNotificationManager?.activeCalls() ??
-          const [];
+          await _call._host.pushNotificationManager?.activeCalls() ?? const [];
       return calls.any(
         (call) => call.callCid == _call.callCid.value && call.isAccepted,
       );
