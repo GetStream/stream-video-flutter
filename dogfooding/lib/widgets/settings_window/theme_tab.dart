@@ -136,6 +136,9 @@ class _AccentColorSwatch extends StatelessWidget {
       selected: selected,
       label: name,
       excludeSemantics: true,
+      // The ink response's tap is excluded with the rest, so it is given
+      // here again.
+      onTap: onTap,
       child: SizedBox(
         width: ringed,
         child: Column(
