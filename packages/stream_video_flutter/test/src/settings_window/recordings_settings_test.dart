@@ -37,6 +37,7 @@ void main() {
     List<CallRecording> recordings = const [],
     bool loading = false,
     ValueChanged<CallRecording>? onDownload,
+    VoidCallback? onRetry,
     TextDirection textDirection = TextDirection.ltr,
   }) async {
     tester.view.physicalSize = const Size(520, 800);
@@ -52,6 +53,7 @@ void main() {
               recordings: recordings,
               loading: loading,
               onDownload: onDownload ?? (_) {},
+              onRetry: onRetry,
             ),
           ),
         ),
@@ -111,6 +113,19 @@ void main() {
       expect(find.byType(StreamEmptyState), findsOneWidget);
       expect(find.text('No Recordings Available'), findsOneWidget);
       expect(find.text('Name'), findsNothing);
+    });
+
+    testWidgets('after a failure, says so and offers to try again', (
+      tester,
+    ) async {
+      var retried = 0;
+      await pump(tester, onRetry: () => retried++);
+
+      expect(find.text("Couldn't Load Recordings"), findsOneWidget);
+      expect(find.text('No Recordings Available'), findsNothing);
+
+      await tester.tap(find.text('Try Again'));
+      expect(retried, 1);
     });
 
     testWidgets('while the first recordings load, shows only a spinner', (

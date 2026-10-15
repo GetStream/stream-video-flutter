@@ -130,5 +130,8 @@
   "recordingsRecordingName": "Opname #{number}",
   "recordingsDownload": "Downloaden",
   "recordingsEmptyTitle": "Geen opnames beschikbaar",
-  "recordingsEmptyDescription": "Opnames van dit gesprek verschijnen hier zodra ze klaar zijn."
+  "recordingsEmptyDescription": "Opnames van dit gesprek verschijnen hier zodra ze klaar zijn.",
+  "recordingsErrorTitle": "Opnames laden mislukt",
+  "recordingsErrorDescription": "Controleer je verbinding en probeer het opnieuw.",
+  "recordingsRetry": "Opnieuw proberen"
 }

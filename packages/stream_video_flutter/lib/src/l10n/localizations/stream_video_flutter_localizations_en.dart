@@ -460,4 +460,14 @@ class StreamVideoFlutterLocalizationsEn
   @override
   String get recordingsEmptyDescription =>
       'Recordings of this call show up here once they\'re ready.';
+
+  @override
+  String get recordingsErrorTitle => 'Couldn\'t Load Recordings';
+
+  @override
+  String get recordingsErrorDescription =>
+      'Check your connection and try again.';
+
+  @override
+  String get recordingsRetry => 'Try Again';
 }
