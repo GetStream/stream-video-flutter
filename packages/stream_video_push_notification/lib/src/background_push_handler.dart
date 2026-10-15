@@ -250,7 +250,15 @@ class StreamVideoPushHandler {
       // The user has to answer this one, and whatever they do arms the
       // release.
       session.pendingRings.add(ringing);
+      // Rung again, so an end heard for an earlier ring no longer applies.
+      session.endedRings.remove(ringing);
     } else {
+      // A missed call for a ring this session holds says that ring is over,
+      // even when the socket that would have said so was down.
+      if (StreamPushPayload.isMissedCallPush(message.data)) {
+        session.markEnded(StreamPushPayload.callCidOf(message.data));
+      }
+
       session.releaseAfter(resolutionGrace);
     }
 
@@ -328,6 +336,24 @@ class StreamVideoPushHandler {
         }
       });
 
+      // A ring can also end without the user: the caller cancels, the call
+      // ends, or another device answers. The push manager then ends the
+      // native call silently, so none of the events above ever arrives.
+      session.ringEnds = streamVideo.events.listen((event) {
+        final endsRing = switch (event) {
+          CoordinatorCallRejectedEvent() ||
+          CoordinatorCallEndedEvent() ||
+          CoordinatorCallMissedEvent() ||
+          CoordinatorCallAcceptedEvent() => true,
+          _ => false,
+        };
+        if (!endsRing || event is! CoordinatorCallEvent) return;
+
+        if (session.markEnded(event.callCid.value)) {
+          session.releaseAfter(resolutionGrace);
+        }
+      });
+
       _session = session;
       return session;
     } catch (e, stk) {
@@ -363,8 +389,18 @@ class _BackgroundSession {
 
   StreamSubscription<RingingEvent>? resolution;
 
+  /// The coordinator events that can end a ring without the user.
+  StreamSubscription<CoordinatorEvent>? ringEnds;
+
   /// The ringing flows still waiting on the user, by call cid.
   final pendingRings = <String>{};
+
+  /// The pending rings the backend says may have ended, by call cid.
+  ///
+  /// Only a hint: a rejection by one member of a group call leaves the ring
+  /// up for the others. Whether it really ended is read off the native call
+  /// at release time, which the push manager has ended by then if it did.
+  final endedRings = <String>{};
 
   bool _released = false;
 
@@ -394,6 +430,52 @@ class _BackgroundSession {
     return pendingRings.isEmpty;
   }
 
+  /// Notes that the ring for [callCid] may have ended, and reports whether it
+  /// is one this session is waiting on.
+  bool markEnded(String? callCid) {
+    if (callCid == null || !pendingRings.contains(callCid)) return false;
+
+    endedRings.add(callCid);
+    return true;
+  }
+
+  /// Lets go of the rings that ended without the user, so they no longer hold
+  /// the client.
+  ///
+  /// A ring counts as ended once the backend said so and its native call is
+  /// gone. The native call alone is not enough: a ring that just arrived may
+  /// not be posted yet.
+  Future<void> _dropEndedRings() async {
+    final candidates = pendingRings.intersection(endedRings);
+    if (candidates.isEmpty) return;
+
+    final List<CallData> nativeCalls;
+    try {
+      nativeCalls =
+          await streamVideo.pushNotificationManager?.activeCalls() ?? const [];
+    } catch (e) {
+      // Keeping a ring too long costs a client; ending one early drops a
+      // call the user may still answer.
+      streamLog.w(
+        StreamVideoPushHandler._tag,
+        () => '[dropEndedRings] could not read the native calls: $e',
+      );
+      return;
+    }
+
+    final shown = nativeCalls.map((call) => call.callCid).toSet();
+    for (final cid in candidates) {
+      endedRings.remove(cid);
+      if (shown.contains(cid)) continue;
+
+      streamLog.d(
+        StreamVideoPushHandler._tag,
+        () => '[dropEndedRings] ring ended without the user: $cid',
+      );
+      pendingRings.remove(cid);
+    }
+  }
+
   /// The scheduled release, once it falls due.
   ///
   /// It releases also after an accept: the client sets up no media, so the
@@ -406,6 +488,8 @@ class _BackgroundSession {
   Future<void> _release() async {
     try {
       await StreamVideoPushHandler._lock.synchronized(() async {
+        await _dropEndedRings();
+
         // A ringing flow is live. Whatever resolves it arms the next release.
         if (pendingRings.isNotEmpty) {
           streamLog.d(
@@ -446,6 +530,7 @@ class _BackgroundSession {
 
     try {
       await resolution?.cancel();
+      await ringEnds?.cancel();
       await observers.cancel();
       await streamVideo.dispose();
     } catch (e, stk) {

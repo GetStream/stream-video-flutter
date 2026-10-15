@@ -26,7 +26,27 @@ class MockStreamVideo extends Mock implements StreamVideo {
       noSuchMethod(Invocation.method(#dispose, const [])) as Future<void>;
 }
 
+class MockPushNotificationManager extends Mock
+    implements PushNotificationManager {}
+
+// ignore: avoid_implementing_value_types
+class MockRejectedEvent extends Mock implements CoordinatorCallRejectedEvent {}
+
 void _ignore(RingingEvent _) {}
+
+/// The `call.rejected` a caller sends when it cancels the ring for [callCid].
+CoordinatorCallRejectedEvent _rejected(String callCid) {
+  final event = MockRejectedEvent();
+  when(() => event.callCid).thenReturn(StreamCallCid(cid: callCid));
+  return event;
+}
+
+/// A missed call for [callCid], as the backend sends once a ring expires.
+Map<String, dynamic> _missedCallPushFor(String callCid) => {
+  'sender': 'stream.video',
+  'type': 'call.missed',
+  'call_cid': callCid,
+};
 
 /// The payload of a ringing push, the only one whose flow waits for the user.
 ///
@@ -64,6 +84,11 @@ void main() {
 
   late MockStreamVideo client;
   late StreamController<RingingEvent> ringing;
+  late StreamController<CoordinatorEvent> coordinatorEvents;
+  late MockPushNotificationManager pushManager;
+
+  /// The calls the platform shows, as the push manager reads them back.
+  late List<CallData> nativeCalls;
 
   /// The callback the handler registered for ringing resolution.
   void Function(RingingEvent)? onRingingEvent;
@@ -98,6 +123,8 @@ void main() {
 
     when(() => stub.isDisposed).thenReturn(false);
     when(() => stub.activeCalls).thenReturn([]);
+    when(() => stub.events).thenAnswer((_) => coordinatorEvents.stream);
+    when(() => stub.pushNotificationManager).thenReturn(pushManager);
     when(stub.dispose).thenAnswer((_) async {});
     when(
       stub.ringing.observeCoreRingingEventsForBackground,
@@ -131,6 +158,10 @@ void main() {
     StreamVideoPushHandler.ownsClientLifecycle = () => true;
     StreamVideoPushHandler.resolutionGrace = grace;
     ringing = StreamController<RingingEvent>.broadcast();
+    coordinatorEvents = StreamController<CoordinatorEvent>.broadcast();
+    nativeCalls = [];
+    pushManager = MockPushNotificationManager();
+    when(pushManager.activeCalls).thenAnswer((_) async => nativeCalls);
     onRingingEvent = null;
     factoryCalls = 0;
     onDisposeCalled = false;
@@ -140,6 +171,7 @@ void main() {
   tearDown(() async {
     await StreamVideoPushHandler.releaseForTesting();
     await ringing.close();
+    await coordinatorEvents.close();
     StreamVideoPushHandler.resolutionGrace = const Duration(seconds: 1);
     StreamVideoPushHandler.ownsClientLifecycle = () =>
         CurrentPlatform.isAndroid;
@@ -575,6 +607,91 @@ void main() {
 
         verifyNever(() => client.dispose());
         expect(onDisposeCalled, isFalse);
+      });
+    });
+
+    group('when a ring ends without the user', () {
+      // The push manager ends the native call silently on these, so no accept,
+      // decline, timeout or end ever reaches the handler.
+
+      test('releases once the caller cancels the ring', () async {
+        await handle(createStreamVideo: factoryReturning(client));
+
+        coordinatorEvents.add(_rejected('default:call-a'));
+        await pastTheGrace();
+
+        verify(() => client.dispose()).called(1);
+        expect(onDisposeCalled, isTrue);
+      });
+
+      test('releases on a missed call for the ring, with no socket', () async {
+        await handle(createStreamVideo: factoryReturning(client));
+
+        await handle(
+          createStreamVideo: factoryReturning(client),
+          data: _missedCallPushFor('default:call-a'),
+        );
+        await pastTheGrace();
+
+        verify(() => client.dispose()).called(1);
+      });
+
+      test('keeps a ring whose native call is still shown', () async {
+        // One member of a group call declining leaves the ring up for the
+        // rest, and the push manager leaves the native call alone.
+        nativeCalls = [const CallData(uuid: 'u', callCid: 'default:call-a')];
+        await handle(createStreamVideo: factoryReturning(client));
+
+        coordinatorEvents.add(_rejected('default:call-a'));
+        await pastTheGrace();
+
+        verifyNever(() => client.dispose());
+      });
+
+      test('ignores an end for a call it is not ringing', () async {
+        await handle(createStreamVideo: factoryReturning(client));
+
+        coordinatorEvents.add(_rejected('default:call-b'));
+        await pastTheGrace();
+
+        verifyNever(() => client.dispose());
+      });
+
+      test('keeps the ring when the native calls cannot be read', () async {
+        when(pushManager.activeCalls).thenThrow(Exception('no platform'));
+        await handle(createStreamVideo: factoryReturning(client));
+
+        coordinatorEvents.add(_rejected('default:call-a'));
+        await pastTheGrace();
+
+        verifyNever(() => client.dispose());
+      });
+
+      test('keeps a ring that rings again before the release', () async {
+        await handle(createStreamVideo: factoryReturning(client));
+
+        coordinatorEvents.add(_rejected('default:call-a'));
+        // The caller rings straight back, before its native call is posted.
+        await handle(createStreamVideo: factoryReturning(client));
+        await pastTheGrace();
+
+        verifyNever(() => client.dispose());
+      });
+
+      test('releases only once every ring has ended', () async {
+        await handle(createStreamVideo: factoryReturning(client));
+        await handle(
+          createStreamVideo: factoryReturning(client),
+          data: _ringingPushFor('default:call-b'),
+        );
+
+        coordinatorEvents.add(_rejected('default:call-a'));
+        await pastTheGrace();
+        verifyNever(() => client.dispose());
+
+        coordinatorEvents.add(_rejected('default:call-b'));
+        await pastTheGrace();
+        verify(() => client.dispose()).called(1);
       });
     });
 
