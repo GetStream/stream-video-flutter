@@ -61,6 +61,6 @@ StreamEffectsSettingsTab effectsTab(
         ),
     ],
     onClear: manager.disableAllFilters,
-    initialSelected: manager.appliedVideoEffects?.firstOrNull,
+    selected: () => manager.appliedVideoEffects?.firstOrNull,
   );
 }

@@ -7,8 +7,9 @@ import 'local_preview.dart';
 /// The effects tab of a [StreamModalWindow]: a preview of the local
 /// participant and the video effects on offer, under the label "Effects".
 ///
-/// Takes the same arguments as [StreamEffectsSettings]. Add it only where the
-/// device can apply effects.
+/// Takes the same arguments as [StreamEffectsSettings], except that the
+/// effect in use comes from [selected], read each time the tab is shown. Add
+/// it only where the device can apply effects.
 class StreamEffectsSettingsTab extends StreamModalWindowTab {
   /// Creates the effects tab.
   ///
@@ -18,7 +19,7 @@ class StreamEffectsSettingsTab extends StreamModalWindowTab {
     List<StreamVideoFilter>? filters,
     List<StreamVideoBackground>? backgrounds,
     required Future<void> Function() onClear,
-    String? initialSelected,
+    ValueGetter<String?>? selected,
     Widget? icon,
     Widget? label,
   }) : super(
@@ -29,7 +30,7 @@ class StreamEffectsSettingsTab extends StreamModalWindowTab {
            filters: filters,
            backgrounds: backgrounds,
            onClear: onClear,
-           initialSelected: initialSelected,
+           initialSelected: selected?.call(),
          ),
        );
 }
@@ -60,7 +61,9 @@ class _EffectsTabLabel extends StatelessWidget {
 /// it off instead.
 ///
 /// The selected effect starts as [initialSelected] and moves once an effect's
-/// [StreamVideoEffect.onSelected] completes.
+/// [StreamVideoEffect.onSelected] completes. An id that matches none of the
+/// effects on offer leaves every effect unselected, the button to turn effects
+/// off included.
 class StreamEffectsSettings extends StatefulWidget {
   /// Creates the effects settings.
   const StreamEffectsSettings({
@@ -96,8 +99,10 @@ class _StreamEffectsSettingsState extends State<StreamEffectsSettings> {
   late String? _selected = widget.initialSelected;
 
   // Counts selections, so that only the last one to be made moves the
-  // selection when several are in flight.
+  // selection when several are in flight; one that fails leaves the field to
+  // those made before it.
   int _selection = 0;
+  int _shownSelection = 0;
 
   late final _logger = taggedLogger(tag: 'SV:EffectsSettings');
 
@@ -109,7 +114,8 @@ class _StreamEffectsSettingsState extends State<StreamEffectsSettings> {
       _logger.e(() => 'Could not apply the effect $id: $error\n$stackTrace');
       return;
     }
-    if (!mounted || selection != _selection) return;
+    if (!mounted || selection < _shownSelection) return;
+    _shownSelection = selection;
     setState(() => _selected = id);
   }
 
@@ -134,7 +140,7 @@ class _StreamEffectsSettingsState extends State<StreamEffectsSettings> {
       spacing: spacing.xxl,
       children: [
         StreamSettingsLocalPreview(call: widget.call),
-        if (filters != null || backgrounds != null)
+        if (filters != null || (backgrounds?.isNotEmpty ?? false))
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             spacing: spacing.xl,
