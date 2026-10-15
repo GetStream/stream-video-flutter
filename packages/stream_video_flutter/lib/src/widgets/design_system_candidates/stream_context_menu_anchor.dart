@@ -57,6 +57,9 @@ class StreamContextMenuAnchor extends StatelessWidget {
   ///
   /// Typically [StreamContextMenuAction]s, [StreamContextMenuSeparator]s and
   /// [StreamContextMenuHeading]s.
+  ///
+  /// Tapping an item does not close the menu: close it through [controller]
+  /// in the item's `onTap`.
   final List<Widget> menuChildren;
 
   /// Builds the widget the menu is anchored to.

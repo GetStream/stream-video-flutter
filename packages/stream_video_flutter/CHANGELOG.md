@@ -214,7 +214,7 @@
 
 ### 🐞 Fixed
 
-- Fixed picking an option in an anchored `StreamAdaptiveMenuAnchor` closing the dialog it is shown in.
+- Fixed picking an option in a `StreamContextMenuAnchor`, or an anchored `StreamAdaptiveMenuAnchor`, closing the dialog it is shown in.
 - The participant tile's overflow menu lines up with the edge of its button.
 - `StreamAdaptiveMenuAnchor` sheet rows are 48px tall.
 - The lobby control buttons are 8px apart.
