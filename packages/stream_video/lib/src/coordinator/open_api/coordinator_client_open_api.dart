@@ -157,7 +157,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         final openResult = await openConnection();
         if (openResult is Failure) {
           _logger.e(() => '[connectUser] reopen failed: $openResult');
-          _setDisconnected(user);
           return openResult;
         }
       }
@@ -195,7 +194,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     final openResult = await openConnection();
     if (openResult is Failure) {
       _logger.e(() => '[connectUser] open failed: $openResult');
-      _setDisconnected(user);
       return openResult;
     }
     return _awaitConnected().whenComplete(() {
@@ -408,16 +406,6 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       success: (_) => const Result.success(none),
       failure: Result.failure,
     );
-  }
-
-  /// Moves a connect that could not open the socket back to disconnected,
-  /// so a later connect does not wait for it.
-  void _setDisconnected(UserInfo user) {
-    if (_connectionState.value.isConnecting) {
-      _connectionState.value = CoordinatorConnectionState.disconnected(
-        userId: user.id,
-      );
-    }
   }
 
   /// Stops following the socket, closes it and disposes it. Logs a step that

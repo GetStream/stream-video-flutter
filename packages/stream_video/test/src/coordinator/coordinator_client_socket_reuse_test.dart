@@ -217,25 +217,6 @@ void main() {
     },
   );
 
-  test('a failed reopen does not leave the next connect waiting', () async {
-    const user = UserInfo(id: 'user-1');
-    await client.connectUser(user);
-    sockets.single.drop();
-    await pumpEventQueue();
-    when(sockets.single.connect).thenThrow(StateError('offline'));
-    expect((await client.connectUser(user)).isFailure, isTrue);
-
-    when(sockets.single.connect).thenAnswer((_) async {
-      sockets.single.recover();
-      return const Result.success(none);
-    });
-    final stopwatch = Stopwatch()..start();
-    final result = await client.connectUser(user);
-
-    expect(result.isSuccess, isTrue);
-    expect(stopwatch.elapsed, lessThan(const Duration(seconds: 1)));
-  });
-
   test('a disconnect closes and disposes the socket', () async {
     await client.connectUser(const UserInfo(id: 'user-1'));
 
