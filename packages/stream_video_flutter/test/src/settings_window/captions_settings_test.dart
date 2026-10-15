@@ -14,7 +14,7 @@ typedef _Captions = ({
   bool canStart,
   bool canStop,
   bool canChangeLanguage,
-  TranscriptionSettingsLanguage language,
+  TranscriptionSettingsLanguage? language,
   ClosedCaptionSettingsMode closedCaptionMode,
   TranscriptionSettingsMode transcriptionMode,
 });
@@ -37,7 +37,7 @@ void main() {
   /// and [mode], and what the user may do.
   void stubCaptions({
     bool on = false,
-    TranscriptionSettingsLanguage language = TranscriptionSettingsLanguage.en,
+    TranscriptionSettingsLanguage? language = TranscriptionSettingsLanguage.en,
     ClosedCaptionSettingsMode mode = ClosedCaptionSettingsMode.available,
     List<CallPermission> capabilities = _allowed,
   }) {
@@ -168,6 +168,35 @@ void main() {
         transcription.closedCaptionMode,
         ClosedCaptionSettingsMode.available,
       );
+      expect(transcription.transcriptionMode, TranscriptionSettingsMode.autoOn);
+    });
+
+    testWidgets('a call without a language shows the default', (tester) async {
+      stubCaptions(on: true, language: null);
+      await pump(tester);
+
+      expect(find.text('Default'), findsOneWidget);
+    });
+
+    testWidgets('picking the default sets the call back to no language', (
+      tester,
+    ) async {
+      stubCaptions(on: true);
+      await pump(tester);
+
+      await tester.tap(find.text('English'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Default'));
+      await tester.pumpAndSettle();
+
+      final transcription =
+          verify(
+                () => call.update(
+                  transcription: captureAny(named: 'transcription'),
+                ),
+              ).captured.single
+              as StreamTranscriptionSettings;
+      expect(transcription.language, isNull);
       expect(transcription.transcriptionMode, TranscriptionSettingsMode.autoOn);
     });
 
