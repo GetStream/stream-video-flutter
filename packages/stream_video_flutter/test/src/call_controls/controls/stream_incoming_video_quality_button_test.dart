@@ -35,9 +35,10 @@ void main() {
     final dynascale = _MockDynascaleManager();
     when(() => call.dynascaleManager).thenReturn(dynascale);
     when(() => dynascale.incomingVideoSettings).thenReturn(settings);
+    // Like the real stream, it emits the current settings to a new listener.
     when(
       () => dynascale.incomingVideoSettingsStream,
-    ).thenAnswer((_) => const Stream.empty());
+    ).thenAnswer((_) => Stream.value(settings));
     return call;
   }
 
@@ -100,6 +101,41 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Off'), findsOneWidget);
+  });
+
+  testWidgets('follows a new call', (tester) async {
+    Widget button(Call call) => TestWrapper(
+      platform: TargetPlatform.macOS,
+      child: Center(child: StreamIncomingVideoQualityButton(call: call)),
+    );
+    await tester.pumpWidget(button(call));
+    expect(find.text('Auto'), findsOneWidget);
+
+    await tester.pumpWidget(button(callAt(_settings(height: 720))));
+    await tester.pumpAndSettle();
+    expect(find.text('720p'), findsOneWidget);
+
+    await tester.pumpWidget(button(call));
+    incomingVideo.add(_settings(enabled: false));
+    await tester.pumpAndSettle();
+    expect(find.text('Off'), findsOneWidget);
+  });
+
+  testWidgets('a quality the call refuses leaves the button as it was', (
+    tester,
+  ) async {
+    when(
+      () => call.setPreferredIncomingVideoResolution(any()),
+    ).thenAnswer((_) async => failureWithError('not joined'));
+    await pump(tester);
+
+    await tester.tap(find.text('Auto'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('HD 720p'));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Auto'), findsOneWidget);
   });
 
   testWidgets('the menu marks the current choice', (tester) async {

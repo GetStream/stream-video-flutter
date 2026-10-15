@@ -30,6 +30,8 @@ class StreamIncomingVideoQualityButton extends StatefulWidget {
 
 class _StreamIncomingVideoQualityButtonState
     extends State<StreamIncomingVideoQualityButton> {
+  static final _logger = taggedLogger(tag: 'SV:IncomingVideoQualityButton');
+
   late Stream<IncomingVideoQuality> _quality =
       widget.call.incomingVideoQualityStream;
 
@@ -38,6 +40,13 @@ class _StreamIncomingVideoQualityButtonState
     super.didUpdateWidget(oldWidget);
     if (oldWidget.call != widget.call) {
       _quality = widget.call.incomingVideoQualityStream;
+    }
+  }
+
+  Future<void> _setQuality(IncomingVideoQuality quality) async {
+    final result = await widget.call.setIncomingVideoQuality(quality);
+    if (result case Failure(:final error)) {
+      _logger.e(() => 'Setting the incoming video quality failed: $error');
     }
   }
 
@@ -74,7 +83,7 @@ class _StreamIncomingVideoQualityButtonState
                   StreamMenuOption(
                     label: value.label(context),
                     selected: value == quality,
-                    onSelected: () => call.setIncomingVideoQuality(value),
+                    onSelected: () => _setQuality(value),
                   ),
               ],
             ),
