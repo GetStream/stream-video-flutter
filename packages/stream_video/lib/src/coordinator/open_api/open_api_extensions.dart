@@ -387,10 +387,9 @@ extension on open.TranscriptionSettingsResponseMode {
 @internal
 extension TranscriptionSettingsResponseLanguageExt
     on open.TranscriptionSettingsResponseLanguage {
-  TranscriptionSettingsLanguage toSettingsDomain() {
-    // The backend sends a language nobody set as "", and transcribes in
-    // English then.
-    if (this == '') return TranscriptionSettingsLanguage.en;
+  TranscriptionSettingsLanguage? toSettingsDomain() {
+    // The backend sends a language nobody set as "".
+    if (this == '') return null;
 
     return TranscriptionSettingsLanguage.values.firstWhereOrNull(
           (it) => it.value == this,
