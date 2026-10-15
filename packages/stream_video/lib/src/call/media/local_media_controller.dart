@@ -12,6 +12,7 @@ import 'package:synchronized/synchronized.dart';
 import '../../../open_api/video/coordinator/api.dart' hide User;
 import '../../call_state.dart';
 import '../../errors/stream_video_exception.dart';
+import '../../internal/_background_mute_policy.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/audio_configuration_policy.dart';
 import '../../models/models.dart';
@@ -44,6 +45,7 @@ class LocalMediaController {
     required this._rtcMediaDeviceNotifier,
     required this._audioConfigurationPolicy,
     required this._muteVideoWhenInBackground,
+    required this._muteAudioWhenInBackground,
     required this._onMicrophoneMuted,
     required this._logger,
   });
@@ -55,11 +57,21 @@ class LocalMediaController {
   final RtcMediaDeviceNotifier _rtcMediaDeviceNotifier;
   final AudioConfigurationPolicy Function() _audioConfigurationPolicy;
   final bool Function() _muteVideoWhenInBackground;
+  final bool Function() _muteAudioWhenInBackground;
   final Future<void> Function(bool muted) _onMicrophoneMuted;
   final TaggedLogger _logger;
 
   final _multitaskingCameraLock = Lock();
+  final _backgroundLock = Lock();
   final _sfuStatsTimers = <CancelableOperation<void>>{};
+
+  /// Whether going to the background turned the camera off, so coming back
+  /// turns it on again.
+  bool _cameraMutedInBackground = false;
+
+  /// Whether going to the background turned the microphone off, so coming
+  /// back turns it on again.
+  bool _microphoneMutedInBackground = false;
 
   CallConnectOptions _connectOptions = const CallConnectOptions();
 
@@ -796,7 +808,17 @@ class LocalMediaController {
     }
   }
 
+  /// Turns the camera on or off, and cancels turning it back on after the
+  /// background.
   Future<Result<None>> setCameraEnabled({
+    required bool enabled,
+    CameraConstraints? constraints,
+  }) {
+    _cameraMutedInBackground = false;
+    return _setCameraEnabled(enabled: enabled, constraints: constraints);
+  }
+
+  Future<Result<None>> _setCameraEnabled({
     required bool enabled,
     CameraConstraints? constraints,
   }) async {
@@ -871,7 +893,22 @@ class LocalMediaController {
     return result.map((_) => none);
   }
 
+  /// Turns the microphone on or off, and cancels turning it back on after
+  /// the background.
   Future<Result<None>> setMicrophoneEnabled({
+    required bool enabled,
+    AudioConstraints? constraints,
+    bool? stopTrackOnMute,
+  }) {
+    _microphoneMutedInBackground = false;
+    return _setMicrophoneEnabled(
+      enabled: enabled,
+      constraints: constraints,
+      stopTrackOnMute: stopTrackOnMute,
+    );
+  }
+
+  Future<Result<None>> _setMicrophoneEnabled({
     required bool enabled,
     AudioConstraints? constraints,
     bool? stopTrackOnMute,
@@ -1039,5 +1076,94 @@ class LocalMediaController {
     }
 
     return result;
+  }
+
+  /// Whether the capture session in use supports camera access while
+  /// multitasking, or `null` off iOS or when it could not be read.
+  Future<bool?> _multitaskingCameraAccessSupported() async {
+    if (!CurrentPlatform.isIos) return null;
+
+    try {
+      return await rtc.Helper.isIOSMultitaskingCameraAccessSupported();
+    } catch (e, stk) {
+      _logger.w(() => '[multitaskingCameraAccessSupported] failed: $e\n$stk');
+      return null;
+    }
+  }
+
+  /// Turns the camera off as the app goes to the background when
+  /// `muteVideoWhenInBackground` is set or iOS can't keep capturing while
+  /// multitasking, and the microphone when `muteAudioWhenInBackground` is
+  /// set. Runs after any [onAppResumed] still in progress.
+  Future<void> onAppPaused() => _backgroundLock.synchronized(() async {
+    final localParticipant = _state.localParticipant;
+    final isVideoEnabled = localParticipant?.isVideoEnabled ?? false;
+    final isAudioEnabled = localParticipant?.isAudioEnabled ?? false;
+
+    final muteCamera = shouldMuteCameraInBackground(
+      isVideoEnabled: isVideoEnabled,
+      muteVideoWhenInBackground: _muteVideoWhenInBackground(),
+      multitaskingCameraAccessSupported: isVideoEnabled
+          ? await _multitaskingCameraAccessSupported()
+          : null,
+      platform: CurrentPlatform.type,
+    );
+
+    if (muteCamera) {
+      if (await _backgroundStep(
+        'onAppPaused camera',
+        () => _setCameraEnabled(enabled: false),
+      )) {
+        _cameraMutedInBackground = true;
+      }
+    }
+    if (_muteAudioWhenInBackground() && isAudioEnabled) {
+      if (await _backgroundStep(
+        'onAppPaused microphone',
+        () => _setMicrophoneEnabled(enabled: false),
+      )) {
+        _microphoneMutedInBackground = true;
+      }
+    }
+  });
+
+  /// Turns on again what [onAppPaused] turned off. What fails to turn on is
+  /// tried again on the next resume, unless it is set explicitly before
+  /// then. Runs after any [onAppPaused] still in progress.
+  Future<void> onAppResumed() => _backgroundLock.synchronized(() async {
+    if (_cameraMutedInBackground &&
+        await _backgroundStep(
+          'onAppResumed camera',
+          () => _setCameraEnabled(enabled: true),
+        )) {
+      _cameraMutedInBackground = false;
+    }
+    if (_microphoneMutedInBackground &&
+        await _backgroundStep(
+          'onAppResumed microphone',
+          () => _setMicrophoneEnabled(enabled: true),
+        )) {
+      _microphoneMutedInBackground = false;
+    }
+  });
+
+  /// Runs one background mute or restore, and answers whether it succeeded.
+  /// A failure is logged, and the next step still runs.
+  Future<bool> _backgroundStep(
+    String tag,
+    Future<Result<None>> Function() step,
+  ) async {
+    try {
+      final result = await step();
+      if (result case Failure(:final error)) {
+        _logger.w(() => '[$tag] failed: $error');
+        return false;
+      }
+      _logger.v(() => '[$tag] done');
+      return true;
+    } catch (e, stk) {
+      _logger.e(() => '[$tag] failed: $e\n$stk');
+      return false;
+    }
   }
 }

@@ -182,6 +182,13 @@ MockClientState setupMockClientState() {
   when(
     () => clientState.setIncomingCall(any()),
   ).thenAnswer((_) => Future.value());
+  final appLifecycleStateEmitter = MutableStateEmitter<VideoLifecycleState?>(
+    null,
+    sync: true,
+  );
+  when(
+    () => clientState.appLifecycleState,
+  ).thenAnswer((_) => appLifecycleStateEmitter);
 
   return clientState;
 }

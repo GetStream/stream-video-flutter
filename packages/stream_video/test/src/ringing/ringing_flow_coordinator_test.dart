@@ -4,7 +4,6 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/core/client_state.dart';
-import 'package:stream_video/src/lifecycle/lifecycle_state.dart';
 import 'package:stream_video/src/ringing/ringing_flow_coordinator_impl.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -712,7 +711,7 @@ void main() {
       (fixture.streamVideo.state as MutableClientState)
               .appLifecycleState
               .value =
-          LifecycleState.detached;
+          VideoLifecycleState.detached;
       ring();
       ringing().observeCallAcceptRingingEvent();
 

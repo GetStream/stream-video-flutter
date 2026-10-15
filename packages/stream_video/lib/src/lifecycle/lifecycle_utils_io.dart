@@ -1,15 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:stream_core/stream_core.dart' hide LifecycleState;
+import 'package:stream_core/stream_core.dart';
 
 import '../logger/impl/tagged_logger.dart';
-import 'lifecycle_state.dart';
+import 'video_lifecycle_state.dart';
 
 final _logger = taggedLogger(tag: 'SV:LifecycleUtilsM');
 
-Stream<LifecycleState> get appState {
-  final controller = StreamController<LifecycleState>();
+Stream<VideoLifecycleState> get appState {
+  final controller = StreamController<VideoLifecycleState>();
   final callback = LifecycleStateCallback((state) {
     _logger.v(() => '[appState] newState: "$state"');
     controller.add(state);
@@ -30,7 +30,7 @@ Stream<LifecycleState> get appState {
   return controller.stream;
 }
 
-typedef OnLifecycleStateChanged = void Function(LifecycleState state);
+typedef OnLifecycleStateChanged = void Function(VideoLifecycleState state);
 
 class LifecycleStateCallback extends WidgetsBindingObserver {
   LifecycleStateCallback(this.onStateChanged);
@@ -44,14 +44,14 @@ class LifecycleStateCallback extends WidgetsBindingObserver {
 }
 
 extension on AppLifecycleState {
-  LifecycleState toDomain() {
+  VideoLifecycleState toDomain() {
     return switch (this) {
-      AppLifecycleState.resumed => LifecycleState.resumed,
-      AppLifecycleState.inactive => LifecycleState.inactive,
-      AppLifecycleState.paused => LifecycleState.paused,
-      AppLifecycleState.detached => LifecycleState.detached,
+      AppLifecycleState.resumed => VideoLifecycleState.resumed,
+      AppLifecycleState.inactive => VideoLifecycleState.inactive,
+      AppLifecycleState.paused => VideoLifecycleState.paused,
+      AppLifecycleState.detached => VideoLifecycleState.detached,
       // TODO: Switch with `hidden` once we stop supporting Flutter 3.10.
-      _ => LifecycleState.hidden,
+      _ => VideoLifecycleState.hidden,
     };
   }
 }

@@ -56,6 +56,7 @@
 
 ### ✅ Added
 
+- `VideoLifecycleState`, the type of `ClientState.appLifecycleState`, is exported.
 - `Call.dispose()` leaves the call if needed and closes its streams.
 - Added `StreamPushPayload`, the wire contract for the push payloads Stream sends: the keys it sets, the `sender` that marks a payload as ours, and predicates for recognising a ringing or missed call push. `handleRingingFlowNotifications` reads payloads through it, so anything that has to recognise a Stream push before handing it over — a background handler deciding whether to build a client, or tracking which call is still ringing — can match on exactly what the SDK matches on instead of restating the format.
 - Added `ScreenShareConstraints.systemPickerSourceId`, the `sourceId` that makes macOS choose what to share with its system picker.
@@ -87,6 +88,8 @@
 
 ### 🐞 Fixed
 
+- Going to the background and straight back no longer leaves the coordinator connection closed, or the camera and microphone off.
+- A camera or microphone that fails to turn back on when the app returns from the background is tried again on the next return instead of staying off.
 - A ring that ends before it is answered, such as one the caller cancels, no longer logs a timeout error once the ring's timeout runs out.
 - `StreamVideo.connect()` and `disconnect()` run one at a time in the order they are called, so a disconnect during a connect no longer leaves the user connected.
 - `Call.setCameraTargetResolution` during a call is now kept for later sessions.

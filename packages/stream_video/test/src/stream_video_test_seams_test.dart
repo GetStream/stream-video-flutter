@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_video/src/lifecycle/lifecycle_state.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../test_helpers.dart';
@@ -58,15 +57,15 @@ void main() {
   test('follows the given lifecycle stream once connected', () async {
     await fixture.streamVideo.connect();
 
-    fixture.appState.add(LifecycleState.paused);
+    fixture.appState.add(VideoLifecycleState.paused);
     await pumpEventQueue();
     verify(fixture.client.closeConnection).called(1);
     expect(
       fixture.streamVideo.state.appLifecycleState.value,
-      LifecycleState.paused,
+      VideoLifecycleState.paused,
     );
 
-    fixture.appState.add(LifecycleState.resumed);
+    fixture.appState.add(VideoLifecycleState.resumed);
     await pumpEventQueue();
     verify(fixture.client.openConnection).called(1);
   });
@@ -76,7 +75,7 @@ void main() {
     () async {
       var listens = 0;
       // Single subscription, as a real lifecycle stream is per listen.
-      final states = <StreamController<LifecycleState>>[];
+      final states = <StreamController<VideoLifecycleState>>[];
       final streamVideo = StreamVideo.forTesting(
         'test-api-key',
         user: fixture.user,
@@ -85,7 +84,7 @@ void main() {
         coordinatorClient: fixture.client,
         appState: () {
           listens++;
-          final controller = StreamController<LifecycleState>();
+          final controller = StreamController<VideoLifecycleState>();
           states.add(controller);
           return controller.stream;
         },
@@ -100,7 +99,7 @@ void main() {
       expect(listens, 2);
       expect(states.first.hasListener, isFalse);
 
-      states.last.add(LifecycleState.paused);
+      states.last.add(VideoLifecycleState.paused);
       await pumpEventQueue();
       verify(fixture.client.closeConnection).called(1);
     },
@@ -111,19 +110,19 @@ void main() {
     await fixture.streamVideo.disconnect();
     expect(fixture.appState.hasListener, isFalse);
 
-    fixture.appState.add(LifecycleState.paused);
+    fixture.appState.add(VideoLifecycleState.paused);
     await pumpEventQueue();
     verifyNever(fixture.client.closeConnection);
 
     await fixture.streamVideo.connect();
-    fixture.appState.add(LifecycleState.paused);
+    fixture.appState.add(VideoLifecycleState.paused);
     await pumpEventQueue();
     verify(fixture.client.closeConnection).called(1);
   });
 
   test('a connect gets the initial state the lifecycle stream emits', () async {
     final withInitial = StreamVideoFixture(
-      initialState: LifecycleState.resumed,
+      initialState: VideoLifecycleState.resumed,
     );
     addTearDown(withInitial.dispose);
 
@@ -132,7 +131,7 @@ void main() {
 
     expect(
       withInitial.streamVideo.state.appLifecycleState.value,
-      LifecycleState.resumed,
+      VideoLifecycleState.resumed,
     );
   });
 }

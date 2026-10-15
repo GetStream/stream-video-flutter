@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 
 import '../../stream_video.dart';
-import '../lifecycle/lifecycle_state.dart';
 import 'connection_state.dart';
 
 final _logger = taggedLogger(tag: 'SV:ClientState');
@@ -58,7 +57,7 @@ abstract class ClientState {
   Future<void> removeActiveCall(Call call);
 
   // Current app's lifecycle state.
-  StateEmitter<LifecycleState?> get appLifecycleState;
+  StateEmitter<VideoLifecycleState?> get appLifecycleState;
 
   /// Marks [callCid] as accepted on this device, by [call].
   @internal
@@ -114,7 +113,7 @@ class MutableClientState implements ClientState {
   User get currentUser => user.value;
 
   @override
-  final MutableStateEmitter<LifecycleState?> appLifecycleState;
+  final MutableStateEmitter<VideoLifecycleState?> appLifecycleState;
 
   /// Calls built for a ringing flow, by cid, so that every path consuming the
   /// same ringing flow gets the same [Call]. Separate from [incomingCall],
