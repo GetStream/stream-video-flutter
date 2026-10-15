@@ -140,7 +140,7 @@ void main() {
       // The ringing cache is what a later consume reuses. Holding the
       // cancelled call there hands that dead instance back as if it were the
       // new ring, and its join is then rejected with a CallLeftException.
-      final consumed = await streamVideo.consumeIncomingCall(
+      final consumed = await streamVideo.ringing.consumeIncomingCall(
         uuid: 'DF7082E5-D3F5-4244-B96B-F10DF50E8CF6',
         cid: cid,
         metadata: metadataCreatedBy(caller),

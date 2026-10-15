@@ -9,7 +9,14 @@ import 'package:stream_video_push_notification/stream_video_push_notification.da
 
 class MockCall extends Mock implements Call {}
 
+// ignore: subtype_of_sealed_class
+class MockRingingFlowCoordinator extends Mock
+    implements RingingFlowCoordinator {}
+
 class MockStreamVideo extends Mock implements StreamVideo {
+  @override
+  final MockRingingFlowCoordinator ringing = MockRingingFlowCoordinator();
+
   // StreamVideo marks dispose as @mustBeOverridden. Routed back through the
   // mock rather than stubbed out here, since teardown is what these tests
   // verify.
@@ -92,9 +99,11 @@ void main() {
     when(() => stub.activeCalls).thenReturn([]);
     when(stub.dispose).thenAnswer((_) async {});
     when(
-      stub.observeCoreRingingEventsForBackground,
+      stub.ringing.observeCoreRingingEventsForBackground,
     ).thenReturn(CompositeSubscription());
-    when(() => stub.onRingingEvent<RingingEvent>(captureAny())).thenAnswer((
+    when(
+      () => stub.ringing.onRingingEvent<RingingEvent>(captureAny()),
+    ).thenAnswer((
       invocation,
     ) {
       onRingingEvent =
@@ -102,7 +111,7 @@ void main() {
       return ringing.stream.listen(_ignore);
     });
     when(
-      () => stub.handleRingingFlowNotifications(any()),
+      () => stub.ringing.handleRingingFlowNotifications(any()),
     ).thenAnswer((_) async => true);
 
     return stub;
@@ -184,7 +193,7 @@ void main() {
 
     test('releases a message that turns out not to be ours', () async {
       when(
-        () => client.handleRingingFlowNotifications(any()),
+        () => client.ringing.handleRingingFlowNotifications(any()),
       ).thenAnswer((_) async => false);
 
       final handled = await handle(createStreamVideo: factoryReturning(client));
@@ -206,9 +215,11 @@ void main() {
         // Calling the factory twice would install a second singleton over a live
         // one, which throws.
         expect(factoryCalls, 1);
-        verify(() => client.handleRingingFlowNotifications(any())).called(2);
+        verify(
+          () => client.ringing.handleRingingFlowNotifications(any()),
+        ).called(2);
         // And the second message must not wire a second set of observers.
-        verify(client.observeCoreRingingEventsForBackground).called(1);
+        verify(client.ringing.observeCoreRingingEventsForBackground).called(1);
       },
     );
 
@@ -218,7 +229,7 @@ void main() {
         await handle(createStreamVideo: factoryReturning(client));
 
         when(
-          () => client.handleRingingFlowNotifications(any()),
+          () => client.ringing.handleRingingFlowNotifications(any()),
         ).thenAnswer((_) async => false);
         await handle(createStreamVideo: factoryReturning(client));
 
@@ -299,14 +310,16 @@ void main() {
       expect(factoryCalls, 1);
       expect(handled, [true, true]);
       // One session means one set of observers and one teardown.
-      verify(client.observeCoreRingingEventsForBackground).called(1);
-      verify(() => client.handleRingingFlowNotifications(any())).called(2);
+      verify(client.ringing.observeCoreRingingEventsForBackground).called(1);
+      verify(
+        () => client.ringing.handleRingingFlowNotifications(any()),
+      ).called(2);
       expect(onDisposeCalled, isFalse);
     });
 
     test('releases when handling throws', () async {
       when(
-        () => client.handleRingingFlowNotifications(any()),
+        () => client.ringing.handleRingingFlowNotifications(any()),
       ).thenThrow(Exception('boom'));
 
       final handled = await handle(createStreamVideo: factoryReturning(client));
@@ -363,7 +376,9 @@ void main() {
         // takes longer than the grace to handle, so the release comes up while
         // the ring is still in flight.
         await Future<void>.delayed(grace ~/ 2);
-        when(() => client.handleRingingFlowNotifications(any())).thenAnswer((
+        when(
+          () => client.ringing.handleRingingFlowNotifications(any()),
+        ).thenAnswer((
           _,
         ) async {
           await Future<void>.delayed(grace * 2);
@@ -425,7 +440,7 @@ void main() {
 
       test('disposes a client built before the failure', () async {
         when(
-          client.observeCoreRingingEventsForBackground,
+          client.ringing.observeCoreRingingEventsForBackground,
         ).thenThrow(Exception('boom'));
 
         final handled = await handle(
@@ -481,7 +496,9 @@ void main() {
         );
 
         expect(handled, isTrue);
-        verify(() => client.handleRingingFlowNotifications(any())).called(1);
+        verify(
+          () => client.ringing.handleRingingFlowNotifications(any()),
+        ).called(1);
         // Nothing to build: the running app already has a client.
         expect(factoryCalls, 0);
       });
@@ -493,7 +510,7 @@ void main() {
 
           // The running app has its own observers; a second set would show every
           // incoming call twice.
-          verifyNever(client.observeCoreRingingEventsForBackground);
+          verifyNever(client.ringing.observeCoreRingingEventsForBackground);
         },
       );
 
@@ -508,13 +525,15 @@ void main() {
 
         expect(handled, isTrue);
         expect(factoryCalls, 1);
-        verifyNever(() => client.handleRingingFlowNotifications(any()));
-        verify(() => ours.handleRingingFlowNotifications(any())).called(1);
+        verifyNever(() => client.ringing.handleRingingFlowNotifications(any()));
+        verify(
+          () => ours.ringing.handleRingingFlowNotifications(any()),
+        ).called(1);
       });
 
       test('leaves the running client alone for a foreign message', () async {
         when(
-          () => client.handleRingingFlowNotifications(any()),
+          () => client.ringing.handleRingingFlowNotifications(any()),
         ).thenAnswer((_) async => false);
 
         final handled = await handleOnAppIsolate();
@@ -640,7 +659,9 @@ void main() {
 
         expect(handled, isTrue);
         expect(factoryCalls, 2);
-        verify(() => fresh.handleRingingFlowNotifications(any())).called(1);
+        verify(
+          () => fresh.ringing.handleRingingFlowNotifications(any()),
+        ).called(1);
       },
     );
 
@@ -676,7 +697,7 @@ void main() {
         // A token fetch and everything the app's factory sets up around it,
         // spent on a push the SDK could never have acted on.
         expect(factoryCalls, 0);
-        verifyNever(() => client.handleRingingFlowNotifications(any()));
+        verifyNever(() => client.ringing.handleRingingFlowNotifications(any()));
       });
 
       test('does not disturb a call that is ringing', () async {
@@ -700,7 +721,7 @@ void main() {
         );
 
         expect(handled, isFalse);
-        verifyNever(() => client.handleRingingFlowNotifications(any()));
+        verifyNever(() => client.ringing.handleRingingFlowNotifications(any()));
       });
     });
 
@@ -717,7 +738,7 @@ void main() {
         // reports it unhandled; the second is a real ring.
         var calls = 0;
         when(
-          () => client.handleRingingFlowNotifications(any()),
+          () => client.ringing.handleRingingFlowNotifications(any()),
         ).thenAnswer((_) async => calls++ != 0);
 
         await Future.wait([
@@ -735,7 +756,9 @@ void main() {
 
       test('one that throws does not release under a live ring', () async {
         var calls = 0;
-        when(() => client.handleRingingFlowNotifications(any())).thenAnswer((
+        when(
+          () => client.ringing.handleRingingFlowNotifications(any()),
+        ).thenAnswer((
           _,
         ) async {
           if (calls++ == 0) throw Exception('boom');
@@ -769,7 +792,9 @@ void main() {
         // An iOS app that rings over Firebase rather than PushKit gets its
         // incoming calls from here; dropping them would show nothing at all.
         expect(handled, isTrue);
-        verify(() => client.handleRingingFlowNotifications(any())).called(1);
+        verify(
+          () => client.ringing.handleRingingFlowNotifications(any()),
+        ).called(1);
         expect(factoryCalls, 0);
       });
 
@@ -795,7 +820,9 @@ void main() {
 
         // A missed call has no VoIP counterpart, so nothing else would post it.
         expect(handled, isTrue);
-        verify(() => client.handleRingingFlowNotifications(any())).called(1);
+        verify(
+          () => client.ringing.handleRingingFlowNotifications(any()),
+        ).called(1);
         expect(factoryCalls, 0);
       });
 
@@ -818,7 +845,7 @@ void main() {
 
         await pastTheGrace();
 
-        verifyNever(client.observeCoreRingingEventsForBackground);
+        verifyNever(client.ringing.observeCoreRingingEventsForBackground);
         verifyNever(() => client.dispose());
         expect(onDisposeCalled, isFalse);
       });
@@ -828,13 +855,13 @@ void main() {
       'starts a fresh session after the previous one was released',
       () async {
         when(
-          () => client.handleRingingFlowNotifications(any()),
+          () => client.ringing.handleRingingFlowNotifications(any()),
         ).thenAnswer((_) async => false);
         await handle(createStreamVideo: factoryReturning(client));
         await pastTheGrace();
 
         when(
-          () => client.handleRingingFlowNotifications(any()),
+          () => client.ringing.handleRingingFlowNotifications(any()),
         ).thenAnswer((_) async => true);
         await handle(createStreamVideo: factoryReturning(client));
 
