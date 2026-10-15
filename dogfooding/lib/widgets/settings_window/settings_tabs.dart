@@ -3,6 +3,7 @@ import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import 'effects_tab.dart';
+import 'language_tab.dart';
 
 /// The tabs of the settings window, in the order its sidebar lists them.
 ///
@@ -22,4 +23,5 @@ List<StreamModalWindowTab> settingsTabs(
   if (effectsSupported)
     effectsTab(context, call: call, manager: videoEffectsManager),
   StreamCaptionsSettingsTab(call: call),
+  languageTab(context),
 ];
