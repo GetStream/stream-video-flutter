@@ -98,7 +98,7 @@
 
 ### 🐞 Fixed
 
-- Connecting while the coordinator socket is dropped reconnects that socket instead of opening a second one, which delivered every event twice.
+- Connecting while the coordinator socket is dropped reconnects that socket instead of opening a second one.
 - Going to the background and straight back no longer leaves the coordinator connection closed, or the camera and microphone off.
 - A camera or microphone that fails to turn back on when the app returns from the background is tried again on the next return instead of staying off.
 - A ring that ends before it is answered, such as one the caller cancels, no longer logs a timeout error once the ring's timeout runs out.

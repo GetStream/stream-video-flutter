@@ -122,6 +122,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   );
 
   UserInfo? _user;
+  bool _includeUserDetails = false;
   CoordinatorWebSocket? _ws;
   StreamSubscription<CoordinatorEvent>? _wsSubscription;
 
@@ -144,15 +145,19 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       userId: user.id,
     );
 
-    // The socket of a user that is still connected, closed or recovering
-    // from a drop, connects again rather than being replaced.
+    // A socket that is closed, or recovering from a drop, connects again
+    // when it was built for the same user and details; otherwise it is
+    // replaced.
     final existing = _ws;
-    if (existing != null && _user?.id == user.id) {
+    if (existing != null &&
+        _user == user &&
+        _includeUserDetails == includeUserDetails) {
       _logger.i(() => '[connectUser] reusing the socket');
       if (existing.isDisconnected) {
         final openResult = await openConnection();
         if (openResult is Failure) {
           _logger.e(() => '[connectUser] reopen failed: $openResult');
+          _setDisconnected(user);
           return openResult;
         }
       }
@@ -161,6 +166,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     if (existing != null) await _disposeWebSocket();
 
     _user = user;
+    _includeUserDetails = includeUserDetails;
     _ws =
         _createWebSocket(
           user,
@@ -189,6 +195,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     final openResult = await openConnection();
     if (openResult is Failure) {
       _logger.e(() => '[connectUser] open failed: $openResult');
+      _setDisconnected(user);
       return openResult;
     }
     return _awaitConnected().whenComplete(() {
@@ -403,15 +410,36 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     );
   }
 
-  /// Stops following the socket, closes it and disposes it.
+  /// Moves a connect that could not open the socket back to disconnected,
+  /// so a later connect does not wait for it.
+  void _setDisconnected(UserInfo user) {
+    if (_connectionState.value.isConnecting) {
+      _connectionState.value = CoordinatorConnectionState.disconnected(
+        userId: user.id,
+      );
+    }
+  }
+
+  /// Stops following the socket, closes it and disposes it. Logs a step that
+  /// fails instead of throwing, and disposes the socket whatever closing it
+  /// did.
   Future<void> _disposeWebSocket() async {
     final ws = _ws;
     _ws = null;
-    await _wsSubscription?.cancel();
+    final subscription = _wsSubscription;
     _wsSubscription = null;
-    if (ws == null) return;
-    if (!ws.isDisconnected) await ws.disconnect();
-    await ws.dispose();
+    try {
+      await subscription?.cancel();
+      if (ws != null && !ws.isDisconnected) await ws.disconnect();
+    } catch (e, stk) {
+      _logger.e(() => '[disposeWebSocket] closing failed: $e\n$stk');
+    } finally {
+      try {
+        await ws?.dispose();
+      } catch (e, stk) {
+        _logger.e(() => '[disposeWebSocket] disposing failed: $e\n$stk');
+      }
+    }
   }
 
   CoordinatorWebSocket _createWebSocket(

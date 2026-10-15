@@ -13,8 +13,8 @@ import 'package:stream_video/src/utils/none.dart';
 
 /// A socket that connects as soon as it is asked to, and can be dropped.
 class _FakeSocket extends Mock implements CoordinatorWebSocket {
-  _FakeSocket(this.userId) {
-    when(() => isDisconnected).thenAnswer((_) => !_connected);
+  _FakeSocket(this.userId, {required this.includeUserDetails}) {
+    when(() => isDisconnected).thenAnswer((_) => !_connected && !_recovering);
     when(() => isConnected).thenAnswer((_) => _connected);
     when(() => events).thenAnswer((_) => _events);
     when(connect).thenAnswer((_) async {
@@ -33,15 +33,31 @@ class _FakeSocket extends Mock implements CoordinatorWebSocket {
   }
 
   final String userId;
+  final bool includeUserDetails;
   final _events = MutableSharedEmitter<CoordinatorEvent>();
   bool _connected = false;
+  bool _recovering = false;
   int connects = 0;
 
-  /// Drops the connection, as a lost network does.
-  void drop() {
+  /// Drops the connection, as a lost network does. With [recovering], the
+  /// socket reconnects by itself, as core's recovery does, until [recover].
+  void drop({bool recovering = false}) {
     _connected = false;
+    _recovering = recovering;
     _events.emit(CoordinatorDisconnectedEvent(userId: userId));
   }
+
+  /// Ends the recovery of a socket dropped with `recovering`.
+  void recover() {
+    _recovering = false;
+    _connected = true;
+    _events.emit(
+      CoordinatorConnectedEvent(connectionId: 'recovered', userId: userId),
+    );
+  }
+
+  /// Emits [event] as if the server sent it.
+  void emit(CoordinatorEvent event) => _events.emit(event);
 }
 
 /// Pins that connecting a user again reconnects the socket they already have,
@@ -65,7 +81,10 @@ void main() {
       latencyService: LatencyService(settings: const LatencySettings()),
       retryPolicy: const RetryPolicy(),
       webSocketFactory: (user, {required includeUserDetails}) {
-        final socket = _FakeSocket(user.id);
+        final socket = _FakeSocket(
+          user.id,
+          includeUserDetails: includeUserDetails,
+        );
         sockets.add(socket);
         return socket;
       },
@@ -112,8 +131,109 @@ void main() {
     await client.connectUser(const UserInfo(id: 'user-2'));
 
     expect(sockets, hasLength(2));
+    verifyNever(sockets.first.disconnect);
     verify(sockets.first.dispose).called(1);
     expect(client.isConnected, isTrue);
+  });
+
+  test('waits for a socket that is reconnecting by itself', () async {
+    const user = UserInfo(id: 'user-1');
+    await client.connectUser(user);
+    sockets.single.drop(recovering: true);
+    await pumpEventQueue();
+
+    final connecting = client.connectUser(user);
+    await pumpEventQueue();
+    sockets.single.recover();
+
+    expect((await connecting).isSuccess, isTrue);
+    expect(sockets, hasLength(1));
+    expect(sockets.single.connects, 1);
+  });
+
+  test('replaces the socket when the user details are asked for', () async {
+    const user = UserInfo(id: 'user-1');
+    await client.connectUser(user);
+    sockets.single.drop();
+    await pumpEventQueue();
+
+    await client.connectUser(user, includeUserDetails: true);
+
+    expect(sockets, hasLength(2));
+    expect(sockets.last.includeUserDetails, isTrue);
+    verify(sockets.first.dispose).called(1);
+  });
+
+  test('replaces the socket when the user changed', () async {
+    await client.connectUser(const UserInfo(id: 'user-1', name: 'Old'));
+    sockets.single.drop();
+    await pumpEventQueue();
+
+    await client.connectUser(const UserInfo(id: 'user-1', name: 'New'));
+
+    expect(sockets, hasLength(2));
+    verify(sockets.first.dispose).called(1);
+  });
+
+  test('closes a recovering socket of another user', () async {
+    await client.connectUser(const UserInfo(id: 'user-1'));
+    sockets.single.drop(recovering: true);
+    await pumpEventQueue();
+
+    await client.connectUser(const UserInfo(id: 'user-2'));
+
+    verify(sockets.first.disconnect).called(1);
+    verify(sockets.first.dispose).called(1);
+  });
+
+  test('stops forwarding the events of a replaced socket', () async {
+    await client.connectUser(const UserInfo(id: 'user-1'));
+    sockets.single.drop();
+    await pumpEventQueue();
+    await client.connectUser(const UserInfo(id: 'user-2'));
+
+    final received = <CoordinatorEvent>[];
+    final subscription = client.events.listen(received.add);
+    addTearDown(subscription.cancel);
+    sockets.first.emit(const CoordinatorDisconnectedEvent(userId: 'user-1'));
+    await pumpEventQueue();
+
+    expect(received, isEmpty);
+  });
+
+  test(
+    'a failing teardown still disposes, and the next socket connects',
+    () async {
+      await client.connectUser(const UserInfo(id: 'user-1'));
+      sockets.single.drop(recovering: true);
+      await pumpEventQueue();
+      when(sockets.single.disconnect).thenThrow(StateError('boom'));
+
+      final result = await client.connectUser(const UserInfo(id: 'user-2'));
+
+      expect(result.isSuccess, isTrue);
+      verify(sockets.first.dispose).called(1);
+      expect(client.isConnected, isTrue);
+    },
+  );
+
+  test('a failed reopen does not leave the next connect waiting', () async {
+    const user = UserInfo(id: 'user-1');
+    await client.connectUser(user);
+    sockets.single.drop();
+    await pumpEventQueue();
+    when(sockets.single.connect).thenThrow(StateError('offline'));
+    expect((await client.connectUser(user)).isFailure, isTrue);
+
+    when(sockets.single.connect).thenAnswer((_) async {
+      sockets.single.recover();
+      return const Result.success(none);
+    });
+    final stopwatch = Stopwatch()..start();
+    final result = await client.connectUser(user);
+
+    expect(result.isSuccess, isTrue);
+    expect(stopwatch.elapsed, lessThan(const Duration(seconds: 1)));
   });
 
   test('a disconnect closes and disposes the socket', () async {
