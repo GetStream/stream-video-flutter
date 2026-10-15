@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:stream_video_flutter/stream_video_flutter_l10n.dart';
 
 import '../core/repos/app_preferences.dart';
 
@@ -8,8 +9,13 @@ class AppDisplaySettings extends ChangeNotifier {
   AppDisplaySettings({required AppPreferences preferences})
     : _preferences = preferences,
       _locale = switch (preferences.languageCode) {
-        final code? => Locale(code),
-        null => null,
+        // A language no longer offered falls back to the device's.
+        final code?
+            when StreamVideoFlutterLocalizations.supportedLocales.any(
+              (it) => it.languageCode == code,
+            ) =>
+          Locale(code),
+        _ => null,
       };
 
   final AppPreferences _preferences;
@@ -22,6 +28,7 @@ class AppDisplaySettings extends ChangeNotifier {
     if (locale == _locale) return;
     _locale = locale;
     notifyListeners();
-    await _preferences.setLanguageCode(locale?.languageCode);
+    final saved = await _preferences.setLanguageCode(locale?.languageCode);
+    if (!saved) debugPrint('Could not save the language $locale');
   }
 }
