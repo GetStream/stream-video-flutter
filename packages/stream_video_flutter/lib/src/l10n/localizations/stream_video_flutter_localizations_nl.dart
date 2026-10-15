@@ -324,6 +324,9 @@ class StreamVideoFlutterLocalizationsNl
   String get captionsSettingsLanguage => 'Taal';
 
   @override
+  String get captionsSettingsLanguageDefault => 'Standaard';
+
+  @override
   String get transcriptionLanguageAuto => 'Automatisch';
 
   @override

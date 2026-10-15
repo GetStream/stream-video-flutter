@@ -85,6 +85,7 @@
   "captionsSettingsTurnOn": "Ondertiteling aanzetten",
   "captionsSettingsTurnOnDescription": "Kies de taal die in de vergadering gesproken wordt. De ondertiteling wordt in deze taal getoond.",
   "captionsSettingsLanguage": "Taal",
+  "captionsSettingsLanguageDefault": "Standaard",
   "transcriptionLanguageAuto": "Automatisch",
   "transcriptionLanguageEn": "Engels",
   "transcriptionLanguageFr": "Frans",

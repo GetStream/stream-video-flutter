@@ -617,6 +617,12 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'Language'**
   String get captionsSettingsLanguage;
 
+  /// The captions language of a call that never set one, which the backend picks
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get captionsSettingsLanguageDefault;
+
   /// The spoken language choice that lets the transcriber detect the language
   ///
   /// In en, this message translates to:
