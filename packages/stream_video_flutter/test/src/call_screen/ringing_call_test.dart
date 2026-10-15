@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,6 +15,7 @@ void main() {
     // The selector `partialState` is called with, which mocktail's `any()`
     // needs a stand-in for.
     registerFallbackValue((CallState state) => state.ringingMembers);
+    registerFallbackValue(const CallConnectOptions());
   });
 
   ({MockCall call, MockCallState state}) ringing(
@@ -125,6 +128,39 @@ void main() {
 
         expect(find.byIcon(icons.voiceFill), findsOneWidget);
         expect(find.byIcon(icons.videoOffFill), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'a toggle that changes the call device after the screen is gone does '
+      'not throw',
+      (tester) async {
+        final mocks = ringing(
+          ['Tammy'],
+          connectOptions: CallConnectOptions(camera: TrackOption.disabled()),
+        );
+        final toggling = Completer<Result<None>>();
+        when(
+          () => mocks.call.setConnectOptions(any()),
+        ).thenReturn(
+          const Result.failure(
+            StreamVideoException(message: 'too late for the join'),
+          ),
+        );
+        when(
+          () => mocks.call.setCameraEnabled(enabled: any(named: 'enabled')),
+        ).thenAnswer((_) => toggling.future);
+        const icons = StreamIcons();
+
+        await tester.pumpWidget(
+          TestWrapper(child: StreamIncomingCallContent(call: mocks.call)),
+        );
+        await tester.tap(find.byIcon(icons.videoOffFill));
+        await tester.pumpWidget(const SizedBox());
+        toggling.complete(const Result.success(none));
+        await tester.pump();
+
+        expect(tester.takeException(), isNull);
       },
     );
 

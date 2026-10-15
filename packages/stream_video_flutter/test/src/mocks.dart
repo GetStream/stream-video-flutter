@@ -115,6 +115,10 @@ void stubRingingCall(
   when(() => call.currentUser).thenReturn(currentUser);
   when(() => call.callCid).thenReturn(StreamCallCid(cid: 'default:ringing'));
   when(() => call.connectOptions).thenReturn(connectOptions);
+  registerFallbackValue(const CallConnectOptions());
+  when(
+    () => call.setConnectOptions(any()),
+  ).thenReturn(const Result.success(none));
   when(() => call.state).thenAnswer(
     (_) => MutableStateEmitter<CallState>(state, sync: true),
   );
