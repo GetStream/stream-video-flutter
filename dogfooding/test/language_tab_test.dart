@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/app/app_display_settings.dart';
 import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
 import 'package:flutter_dogfooding/di/injector.dart';
+import 'package:flutter_dogfooding/l10n/localizations/app_localizations.dart';
 import 'package:flutter_dogfooding/widgets/settings_window/language_tab.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,8 +31,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.macOS),
-        localizationsDelegates:
-            StreamVideoFlutterLocalizations.localizationsDelegates,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          ...StreamVideoFlutterLocalizations.localizationsDelegates,
+        ],
         home: Builder(
           builder: (context) => StreamModalWindow(tabs: [languageTab(context)]),
         ),
