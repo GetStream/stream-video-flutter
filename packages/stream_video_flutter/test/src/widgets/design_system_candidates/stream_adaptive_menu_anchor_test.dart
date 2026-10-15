@@ -316,6 +316,40 @@ void main() {
       expect(find.byType(StreamListTile), findsNWidgets(3));
     });
 
+    testWidgets('the theme useSheet overrides the platform', (tester) async {
+      await tester.pumpWidget(
+        const TestWrapper(
+          child: StreamAdaptiveMenuAnchorTheme(
+            data: StreamAdaptiveMenuAnchorThemeData(useSheet: false),
+            child: _Menu(),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StreamSheetHeader), findsNothing);
+      expect(find.byType(StreamContextMenu), findsOneWidget);
+    });
+
+    testWidgets('the useSheet prop wins over the theme', (tester) async {
+      await tester.pumpWidget(
+        const TestWrapper(
+          platform: .macOS,
+          child: StreamAdaptiveMenuAnchorTheme(
+            data: StreamAdaptiveMenuAnchorThemeData(useSheet: false),
+            child: _Menu(useSheet: true),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StreamSheetHeader), findsOneWidget);
+    });
+
     // The anchor has to be given loose constraints for a SizedBox inside it to
     // mean anything: TestWrapper's Material is sized to the viewport and hands
     // its child tight constraints.
