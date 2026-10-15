@@ -67,9 +67,9 @@ class _CallScreenState extends State<CallScreen>
   late final _devices = StreamMediaDevicesController.forCall(widget.call);
 
   /// Whether the device can apply video effects, which decides whether the
-  /// settings window has an effects tab. Resolved asynchronously, so false
-  /// until it is known.
-  bool _effectsSupported = false;
+  /// settings window has an effects tab.
+  late final Future<bool> _effectsSupported = _videoEffectsManager
+      .isSupported();
 
   /// Whether the settings window is open, which the settings button shows.
   bool _settingsOpen = false;
@@ -130,9 +130,6 @@ class _CallScreenState extends State<CallScreen>
   void initState() {
     super.initState();
     _connectChatChannel();
-    _videoEffectsManager.isSupported().then((supported) {
-      if (mounted) setState(() => _effectsSupported = supported);
-    });
     _speakingWhileMutedSubscription = _speakingWhileMuted.stream.listen(
       _onSpeakingWhileMutedChanged,
     );
@@ -398,19 +395,25 @@ class _CallScreenState extends State<CallScreen>
 
   Future<void> _openSettings(Call call) async {
     setState(() => _settingsOpen = true);
-    await showStreamModalDialog<void>(
-      context: context,
-      builder: (context) => StreamModalWindow(
-        tabs: settingsTabs(
-          context,
-          call: call,
-          devices: _devices,
-          videoEffectsManager: _videoEffectsManager,
-          effectsSupported: _effectsSupported,
+    try {
+      // Settled before the window opens, so its tabs don't change under it.
+      final effectsSupported = await _effectsSupported;
+      if (!mounted) return;
+      await showStreamModalDialog<void>(
+        context: context,
+        builder: (context) => StreamModalWindow(
+          tabs: settingsTabs(
+            context,
+            call: call,
+            devices: _devices,
+            videoEffectsManager: _videoEffectsManager,
+            effectsSupported: effectsSupported,
+          ),
         ),
-      ),
-    );
-    if (mounted) setState(() => _settingsOpen = false);
+      );
+    } finally {
+      if (mounted) setState(() => _settingsOpen = false);
+    }
   }
 
   Widget _feedbackButton(Call call) => CallFeatureButton(
