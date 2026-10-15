@@ -1,33 +1,24 @@
 import 'package:meta/meta.dart';
 
-import '../logger/stream_log.dart';
 import '../stream_video.dart';
 
 @internal
 class InstanceHolder {
   StreamVideo? _instance;
 
-  void install(
-    StreamVideo instance, {
-    bool failIfSingletonExists = true,
-  }) {
-    if (_instance != null) {
-      if (failIfSingletonExists) throw alreadyInstalled();
-      streamLog.e(
-        'InstanceHolder',
-        () =>
-            'StreamVideo has already been initialised; replacing the '
-            'singleton. The existing client stays connected: call '
-            'StreamVideo.reset(disconnect: true) first to disconnect it.',
-      );
-    }
+  /// Installs [instance] and returns the client it replaced, if any. Throws
+  /// when a client is installed already, unless [replace] is true.
+  StreamVideo? install(StreamVideo instance, {bool replace = false}) {
+    final previous = _instance;
+    if (previous != null && !replace) throw alreadyInstalled();
     _instance = instance;
+    return previous;
   }
 
   /// The error for installing a client while one is installed already.
   Exception alreadyInstalled() => Exception('''
         StreamVideo has already been initialised, use StreamVideo.instance to access the singleton instance.
-        If you want to re-initialise the SDK, call StreamVideo.reset() first.
+        If you want to re-initialise the SDK, call StreamVideo.reset() first, or pass onInstanceReplaced.
         If you want to use multiple instances of the SDK, use StreamVideo.create() instead.
         ''');
 

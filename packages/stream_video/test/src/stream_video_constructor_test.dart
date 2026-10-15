@@ -128,27 +128,93 @@ void main() {
     expect(StreamVideo.instance, same(first));
   });
 
-  test('replacing the singleton leaves the old client alone', () async {
+  test('replacing the singleton hands the old client over', () async {
     final first = StreamVideo(
       'test-api-key',
       user: user,
       userToken: fakeJwt(user.id),
       options: StreamVideoOptions(autoConnect: false),
     );
+    addTearDown(first.dispose);
+
+    final replaced = <StreamVideo>[];
+    final second = StreamVideo(
+      'test-api-key',
+      user: user,
+      userToken: fakeJwt(user.id),
+      options: StreamVideoOptions(autoConnect: false),
+      onInstanceReplaced: replaced.add,
+    );
+    addTearDown(second.dispose);
+    await pumpEventQueue();
+
+    expect(StreamVideo.instance, same(second));
+    expect(replaced, [same(first)]);
+    expect(first.isDisposed, isFalse);
+  });
+
+  test('the old client is handed over after the new one is installed, '
+      'without waiting for it', () async {
+    final first = StreamVideo(
+      'test-api-key',
+      user: user,
+      userToken: fakeJwt(user.id),
+      options: StreamVideoOptions(autoConnect: false),
+    );
+    addTearDown(first.dispose);
+
+    StreamVideo? installedWhenCalled;
+    final handedOver = Completer<void>();
+    final second = StreamVideo(
+      'test-api-key',
+      user: user,
+      userToken: fakeJwt(user.id),
+      options: StreamVideoOptions(autoConnect: false),
+      onInstanceReplaced: (previous) {
+        installedWhenCalled = StreamVideo.instance;
+        return handedOver.future;
+      },
+    );
+    addTearDown(second.dispose);
+
+    expect(installedWhenCalled, same(second));
+    handedOver.complete();
+  });
+
+  test('a failing onInstanceReplaced does not throw', () async {
+    final first = StreamVideo(
+      'test-api-key',
+      user: user,
+      userToken: fakeJwt(user.id),
+      options: StreamVideoOptions(autoConnect: false),
+    );
+    addTearDown(first.dispose);
 
     final second = StreamVideo(
       'test-api-key',
       user: user,
       userToken: fakeJwt(user.id),
       options: StreamVideoOptions(autoConnect: false),
-      failIfSingletonExists: false,
+      onInstanceReplaced: (previous) async => throw StateError('boom'),
     );
-    addTearDown(first.dispose);
     addTearDown(second.dispose);
     await pumpEventQueue();
 
     expect(StreamVideo.instance, same(second));
-    expect(first.isDisposed, isFalse);
+  });
+
+  test('the replaced client is not handed over when none was installed', () {
+    final replaced = <StreamVideo>[];
+    final client = StreamVideo(
+      'test-api-key',
+      user: user,
+      userToken: fakeJwt(user.id),
+      options: StreamVideoOptions(autoConnect: false),
+      onInstanceReplaced: replaced.add,
+    );
+    addTearDown(client.dispose);
+
+    expect(replaced, isEmpty);
   });
 
   test('only the singleton sets up logging from its options', () async {

@@ -88,9 +88,17 @@ class StreamVideo extends Disposable implements CallHost {
   /// [StreamVideoOptions.logPriority] and [StreamVideoOptions.logHandlerFunction].
   ///
   /// When a client is installed already, this throws, unless
-  /// [failIfSingletonExists] is false: then the new client replaces it as the
-  /// singleton, and the old one is left as it is, still connected. Call
-  /// [reset] with `disconnect: true` first to disconnect it.
+  /// [onInstanceReplaced] is given: then the new client replaces it as the
+  /// singleton, and [onInstanceReplaced] is called with the old one, which is
+  /// left as it is otherwise. It is not awaited. To dispose the old client:
+  ///
+  /// ```dart
+  /// StreamVideo(
+  ///   apiKey,
+  ///   user: user,
+  ///   onInstanceReplaced: (previous) => previous.dispose(),
+  /// );
+  /// ```
   factory StreamVideo(
     String apiKey, {
     StreamVideoOptions? options,
@@ -98,12 +106,12 @@ class StreamVideo extends Disposable implements CallHost {
     String? userToken,
     TokenLoader? tokenLoader,
     OnTokenUpdated? onTokenUpdated,
-    bool failIfSingletonExists = true,
+    FutureOr<void> Function(StreamVideo previous)? onInstanceReplaced,
     PNManagerProvider? pushNotificationManagerProvider,
   }) {
     // Before anything is built or configured, so a rejected client leaves
     // nothing running.
-    if (failIfSingletonExists && _instanceHolder.isInitialized()) {
+    if (onInstanceReplaced == null && _instanceHolder.isInitialized()) {
       throw _instanceHolder.alreadyInstalled();
     }
 
@@ -123,10 +131,20 @@ class StreamVideo extends Disposable implements CallHost {
       pushNotificationManagerProvider: pushNotificationManagerProvider,
     );
 
-    _instanceHolder.install(
+    final previous = _instanceHolder.install(
       instance,
-      failIfSingletonExists: failIfSingletonExists,
+      replace: onInstanceReplaced != null,
     );
+    if (previous != null) {
+      unawaited(
+        Future.sync(() => onInstanceReplaced!(previous)).catchError(
+          (Object e, StackTrace stk) => streamLog.e(
+            _tag,
+            () => '[onInstanceReplaced] failed: $e\n$stk',
+          ),
+        ),
+      );
+    }
 
     return instance;
   }
