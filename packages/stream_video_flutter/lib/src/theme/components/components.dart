@@ -9,6 +9,7 @@ export 'connection_quality_indicator_theme.dart';
 export 'desktop_screen_share_selector_theme.dart';
 export 'floating_participant_tile_theme.dart';
 export 'lobby_view_theme.dart';
+export 'modal_window_theme.dart';
 export 'participant_label_theme.dart';
 export 'participant_tile_theme.dart';
 export 'picture_in_picture_theme.dart';
