@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🐞 Fixed
+
+- [Android] Incoming calls keep their notification and ringtone after one of the app's Flutter engines detaches.
+
 ## 1.7.1
 
 ### 🐞 Fixed
