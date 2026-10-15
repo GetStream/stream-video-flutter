@@ -44,9 +44,8 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     this.isAnonymous = false,
     NetworkStateProvider? networkStateProvider,
     ClientEventReporter clientEventReporter = const ClientEventReporter.noOp(),
-    @visibleForTesting CoordinatorWebSocketFactory? webSocketFactory,
-  }) : _webSocketFactory = webSocketFactory,
-       _rpcUrl = rpcUrl,
+    @visibleForTesting this._webSocketFactory,
+  }) : _rpcUrl = rpcUrl,
        _wsUrl = wsUrl,
        _apiKey = apiKey,
        _tokenSource = tokenSource,
@@ -414,10 +413,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   Future<void> _disposeWebSocket() async {
     final ws = _ws;
     _ws = null;
-    final subscription = _wsSubscription;
-    _wsSubscription = null;
     try {
-      await subscription?.cancel();
+      await _wsSubscription?.cancel();
+      _wsSubscription = null;
       if (ws != null && !ws.isDisconnected) await ws.disconnect();
     } catch (e, stk) {
       _logger.e(() => '[disposeWebSocket] closing failed: $e\n$stk');

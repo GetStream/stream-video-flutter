@@ -33,6 +33,7 @@ class _FakeSocket extends Mock implements CoordinatorWebSocket {
   }
 
   final String userId;
+  @override
   final bool includeUserDetails;
   final _events = MutableSharedEmitter<CoordinatorEvent>();
   bool _connected = false;
@@ -78,7 +79,7 @@ void main() {
           tokenProvider: TokenProvider.static(UserToken.anonymous()),
         ),
       ),
-      latencyService: LatencyService(settings: const LatencySettings()),
+      latencyService: const LatencyService(settings: LatencySettings()),
       retryPolicy: const RetryPolicy(),
       webSocketFactory: (user, {required includeUserDetails}) {
         final socket = _FakeSocket(
