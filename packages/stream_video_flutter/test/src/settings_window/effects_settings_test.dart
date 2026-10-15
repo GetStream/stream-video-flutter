@@ -278,6 +278,55 @@ void main() {
       semantics.dispose();
     });
 
+    testWidgets('a later selection that fails leaves an earlier one to stick', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      final slow = Completer<void>();
+      await pump(
+        tester,
+        filters: [
+          StreamVideoFilter(
+            id: 'slow',
+            label: 'Slow',
+            icon: const Icon(Icons.hourglass_empty),
+            onSelected: () => slow.future,
+          ),
+          StreamVideoFilter(
+            id: 'broken',
+            label: 'Broken',
+            icon: const Icon(Icons.error),
+            onSelected: () async => throw StateError('no effect'),
+          ),
+        ],
+      );
+
+      await tester.tap(find.bySemanticsLabel('Slow'));
+      await tester.tap(find.bySemanticsLabel('Broken'));
+      await tester.pumpAndSettle();
+      slow.complete();
+      await tester.pumpAndSettle();
+
+      expect(isSelected(tester, 'Slow'), isTrue);
+      expect(isSelected(tester, 'Broken'), isFalse);
+      semantics.dispose();
+    });
+
+    testWidgets('no backgrounds and no filters offer nothing but the preview', (
+      tester,
+    ) async {
+      await pump(tester, backgrounds: []);
+
+      expect(find.text('Backgrounds'), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(StreamEffectsSettings),
+          matching: find.byType(Column),
+        ),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('right to left, the row starts at the right edge', (
       tester,
     ) async {
@@ -307,6 +356,44 @@ void main() {
       // Once in the sidebar, once as the header's title.
       expect(find.text('Effects'), findsNWidgets(2));
       expect(find.byType(StreamEffectsSettings), findsOneWidget);
+    });
+
+    testWidgets('reads the effect in use each time it is shown', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      String? inUse = 'light';
+      await tester.pumpWidget(
+        TestWrapper(
+          child: StreamModalWindow(
+            tabs: [
+              StreamEffectsSettingsTab(
+                call: call,
+                filters: filters(),
+                onClear: clear,
+                selected: () => inUse,
+              ),
+              StreamModalWindowTab(
+                icon: const Icon(Icons.settings),
+                label: const Text('Other'),
+                builder: (context) => const Text('Other content'),
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(isSelected(tester, 'light blur'), isTrue);
+
+      await tester.tap(find.text('Other'));
+      await tester.pumpAndSettle();
+      inUse = 'heavy';
+      await tester.tap(find.text('Effects').first);
+      await tester.pumpAndSettle();
+
+      expect(isSelected(tester, 'heavy blur'), isTrue);
+      expect(isSelected(tester, 'light blur'), isFalse);
+      semantics.dispose();
     });
   });
 
