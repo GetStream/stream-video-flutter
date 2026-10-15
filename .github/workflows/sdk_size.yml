@@ -61,8 +61,9 @@ jobs:
           path: build/sdk_size/results/analysis/
           retention-days: 90
 
+  # Pull requests skip iOS to save macOS runners; the benchmark still has it.
   measure-ios:
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    if: github.event_name != 'pull_request'
     timeout-minutes: 60
     # Pinned, so a runner image update doesn't change the iOS numbers.
     runs-on: macos-26
@@ -94,8 +95,7 @@ jobs:
           path: build/sdk_size/results/analysis/
           retention-days: 90
 
-  # Reports Android while iOS is still building. Pull requests from this
-  # repository only; a push needs the complete report.
+  # Reports a pull request, from this repository only, without iOS.
   report-android:
     needs: measure-android
     if: >-
@@ -113,6 +113,7 @@ jobs:
       GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
       # On a pull request, github.sha is the merge commit, not the pushed one.
       HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      SKIPPED_PLATFORMS: ios
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
@@ -122,19 +123,14 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
 
-  # Waits for report-android as well, so the complete report always replaces
-  # the partial one rather than racing it. On a pull request, it also reports
-  # a platform that failed to measure; a push only reports a complete run.
+  # Stores the benchmark of a push, which needs every platform.
   report:
-    needs: [measure-android, measure-ios, report-android]
+    needs: [measure-android, measure-ios]
     if: >-
       !cancelled()
-      && ((github.event_name == 'pull_request'
-          && github.event.pull_request.head.repo.full_name == github.repository
-          && (needs.measure-android.result == 'success' || needs.measure-ios.result == 'success'))
-        || (github.event_name != 'pull_request'
-          && needs.measure-android.result == 'success'
-          && needs.measure-ios.result == 'success'))
+      && github.event_name != 'pull_request'
+      && needs.measure-android.result == 'success'
+      && needs.measure-ios.result == 'success'
     timeout-minutes: 15
     runs-on: ubuntu-latest
     permissions:
@@ -147,8 +143,6 @@ jobs:
       GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
       # On a pull request, github.sha is the merge commit, not the pushed one.
       HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      FAILED_PLATFORMS: >-
-        ${{ needs.measure-android.result != 'success' && 'android' || '' }},${{ needs.measure-ios.result != 'success' && 'ios' || '' }}
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7

@@ -27,6 +27,8 @@ lane :sdk_size do
   sha = ENV['HEAD_SHA'] || sh('git rev-parse HEAD', log: false).strip
   # Platforms whose measure job failed, such as `ios`. `android` includes `pub`.
   failed = ENV['FAILED_PLATFORMS'].to_s.split(',').map(&:strip).reject(&:empty?)
+  # Platforms this run doesn't measure, such as `ios` on a pull request.
+  skipped = ENV['SKIPPED_PLATFORMS'].to_s.split(',').map(&:strip).reject(&:empty?)
 
   results = {}
   PLATFORMS.each do |platform|
@@ -49,7 +51,7 @@ lane :sdk_size do
   # Meanwhile iOS shows the numbers of the previous report, marked as outdated.
   outdated = {}
   previous_report_data.each do |platform, data|
-    next if results.key?(platform)
+    next if results.key?(platform) || skipped.include?(platform)
 
     results[platform] = data
     outdated[platform] = data['sha'] unless data['sha'] == sha
@@ -65,7 +67,7 @@ lane :sdk_size do
   show_sdk_size(branch_sizes: sizes, github_repo: GITHUB_REPO, base_branch: base_branch)
   add_commit_note(outdated, failed, sha)
 
-  show_size_breakdown(base_branch, results, outdated, failed, sha)
+  show_size_breakdown(base_branch, results, outdated, failed, skipped, sha)
 end
 
 README_PATH = File.expand_path('../../../README.md', __dir__)
@@ -111,7 +113,7 @@ def badge_size(kb)
   "#{kb.round}%20KB"
 end
 
-def show_size_breakdown(base_branch, results, outdated, failed, sha)
+def show_size_breakdown(base_branch, results, outdated, failed, skipped, sha)
   repo = GITHUB_REPO.split('/').last
   benchmark_file = "flutter-breakdown/#{repo}/#{base_branch}.json"
   benchmark_path = File.join(METRICS_DIR, benchmark_file)
@@ -120,7 +122,7 @@ def show_size_breakdown(base_branch, results, outdated, failed, sha)
   breakdown = results.slice('android', 'ios').transform_values { |data| data['breakdown'] }.compact
   return UI.important('No breakdown found, skipping it.') if breakdown.empty?
 
-  markdown = render_breakdown(breakdown, benchmark, base_branch, outdated, failed, sha)
+  markdown = render_breakdown(breakdown, benchmark, base_branch, outdated, failed, skipped, sha)
   UI.message(markdown)
   summary = ENV['GITHUB_STEP_SUMMARY']
   File.write(summary, "#{markdown}\n", mode: 'a') if summary
@@ -227,7 +229,7 @@ end
 
 # One collapsible table per platform and variant: what the variant adds on top
 # of an empty app, per component, with the change against the base branch.
-def render_breakdown(breakdown, benchmark, base_branch, outdated, failed, sha)
+def render_breakdown(breakdown, benchmark, base_branch, outdated, failed, skipped, sha)
   lines = [BREAKDOWN_HEADER, '']
   artifacts = ENV['GITHUB_RUN_ID'] ? "the `sdk-size-analysis` artifacts of #{run_link}" : 'the analysis files'
   lines << 'What each SDK adds to an empty release app, per Dart package and native library. ' \
@@ -236,8 +238,10 @@ def render_breakdown(breakdown, benchmark, base_branch, outdated, failed, sha)
   lines << ''
   missing = %w[android ios] - breakdown.keys
   failed_missing = missing & failed
-  pending = missing - failed
+  skipped_missing = missing & skipped
+  pending = missing - failed - skipped
   notes = []
+  notes << "Pull requests don't measure #{skipped_missing.join(', ')}." unless skipped_missing.empty?
   notes << "❌ Couldn't measure #{failed_missing.join(', ')}, see #{run_link}." unless failed_missing.empty?
   notes << "⏳ Still measuring #{pending.join(', ')}. Both size comments update when it finishes." unless pending.empty?
   notes << "No `#{base_branch}` benchmark for the breakdown yet." unless benchmark
