@@ -2033,12 +2033,13 @@ packages:
     source: hosted
     version: "2.1.1"
   stream_webrtc_flutter:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: stream_webrtc_flutter
-      sha256: e0dc2bae5d1a19828d9fbd2ef730636e1f10a540c84ed5c75ebf70df73361fab
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "9b6fffaa5fda2652548cafc7d6ec87128409c6bc"
+      resolved-ref: "9b6fffaa5fda2652548cafc7d6ec87128409c6bc"
+      url: "https://github.com/GetStream/webrtc-flutter.git"
+    source: git
     version: "4.0.0"
   string_scanner:
     dependency: transitive
