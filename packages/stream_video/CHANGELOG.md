@@ -110,6 +110,7 @@
 - A ring that ends before it is answered, such as one the caller cancels, no longer logs a timeout error once the ring's timeout runs out.
 - `StreamVideo.connect()` and `disconnect()` run one at a time in the order they are called, so a disconnect during a connect no longer leaves the user connected.
 - `Call.setCameraTargetResolution` during a call is now kept for later sessions.
+- `Call.update` no longer sends empty custom data when none is given, so updating a setting leaves the call's custom data alone.
 - Fixed `Call.setPreferredIncomingVideoResolution` and `setIncomingVideoEnabled` throwing before the call is joined; the setting now applies on join.
 - `CallSettings` equality now compares every section.
 - A failed `Call.join` now returns the error it failed with, retries a retryable coordinator failure, and reports one telemetry abort.
