@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +12,6 @@ import '../../../protobuf/video/sfu/models/models.pb.dart';
 import '../../../stream_video.dart';
 import '../../extensions/thermal_status_ext.dart';
 import '../session/call_session.dart';
-import '../state/call_state_notifier.dart';
 import 'trace_record.dart';
 import 'trace_tag.dart';
 import 'tracer.dart';
@@ -21,7 +19,6 @@ import 'tracer.dart';
 class SfuStatsReporter {
   SfuStatsReporter({
     required this.callSession,
-    required this.stateManager,
     required this.statsOptions,
     this.unifiedSessionId,
   }) {
@@ -36,21 +33,6 @@ class SfuStatsReporter {
         _deviceTracer.trace(TraceTag.deviceThermalState, status.name);
       });
     }
-
-    _mediaDeviceSubscription = RtcMediaDeviceNotifier.instance.onDeviceChange
-        .listen(
-          (devices) {
-            _availableAudioInputs = devices
-                .where((device) => device.kind == RtcMediaDeviceKind.audioInput)
-                .map((device) => device.label)
-                .toList();
-
-            _availableVideoInputs = devices
-                .where((device) => device.kind == RtcMediaDeviceKind.videoInput)
-                .map((device) => device.label)
-                .toList();
-          },
-        );
   }
 
   // In the initial stage send stats more often in case of early-call issues.
@@ -62,7 +44,6 @@ class SfuStatsReporter {
   ];
 
   final CallSession callSession;
-  final CallStateNotifier stateManager;
   final StatsOptions statsOptions;
   final String? unifiedSessionId;
 
@@ -70,11 +51,8 @@ class SfuStatsReporter {
 
   final _logger = taggedLogger(tag: 'SV:SfuStatsReporter');
 
-  StreamSubscription<List<RtcMediaDevice>>? _mediaDeviceSubscription;
   StreamSubscription<ThermalStatus>? _thermalStatusSubscription;
 
-  List<String>? _availableAudioInputs;
-  List<String>? _availableVideoInputs;
   ThermalStatus? _thermalStatus;
   bool? _lastLowPowerMode;
 
@@ -178,26 +156,6 @@ class SfuStatsReporter {
         sfu_models.AndroidState? androidState;
         sfu_models.AppleState? appleState;
 
-        final audioInputDevices = sfu_models.InputDevices(
-          availableDevices: _availableAudioInputs,
-          currentDevice: stateManager.callState.audioInputDevice?.label,
-          isPermitted:
-              stateManager.callState.audioInputDevice != null &&
-              stateManager.callState.ownCapabilities.contains(
-                CallPermission.sendAudio,
-              ),
-        );
-
-        final videoInputDevices = sfu_models.InputDevices(
-          availableDevices: _availableVideoInputs,
-          currentDevice: stateManager.callState.videoInputDevice?.label,
-          isPermitted:
-              stateManager.callState.videoInputDevice != null &&
-              stateManager.callState.ownCapabilities.contains(
-                CallPermission.sendVideo,
-              ),
-        );
-
         if (CurrentPlatform.isAndroid) {
           androidState = sfu_models.AndroidState(
             thermalState: _thermalStatus?.toAndroidThermalState(),
@@ -259,18 +217,10 @@ class SfuStatsReporter {
         try {
           final request = sfu.SendStatsRequest(
             sessionId: callSession.sessionId,
-            publisherStats: publisherStatsBundle == null
-                ? null
-                : jsonEncode(publisherStatsBundle.rawStats),
-            subscriberStats: subscriberStatsBundle == null
-                ? null
-                : jsonEncode(subscriberStatsBundle.rawStats),
             sdkVersion: streamVideoVersion,
             sdk: streamSdkName,
             android: androidState,
             apple: appleState,
-            audioDevices: audioInputDevices,
-            videoDevices: videoInputDevices,
             webrtcVersion: switch (CurrentPlatform.type) {
               PlatformType.android => androidWebRTCVersion,
               PlatformType.ios => iosWebRTCVersion,
@@ -340,7 +290,6 @@ class SfuStatsReporter {
   void stop() {
     _stopped = true;
     _timer?.cancel();
-    _mediaDeviceSubscription?.cancel();
     _thermalStatusSubscription?.cancel();
     _deviceTracer.dispose();
   }

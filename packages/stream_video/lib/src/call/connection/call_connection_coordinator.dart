@@ -1253,7 +1253,6 @@ class CallConnectionCoordinator {
       _sfuStatsReporter =
           SfuStatsReporter(
             callSession: session,
-            stateManager: _call._stateManager,
             statsOptions: _sfuStatsOptions!,
             unifiedSessionId: _unifiedSessionId,
           )..run(

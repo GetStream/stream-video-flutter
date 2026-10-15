@@ -240,19 +240,31 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     StreamCallEndedEvent event,
   ) {
     _logger.i(() => '[coordinatorCallEnded] state: $state');
-    final status = state.status;
-
-    if (status is! CallStatusActive) {
-      _logger.w(() => '[coordinatorCallEnded] rejected (status is not Active)');
-      return;
-    }
 
     if (state.callCid != event.callCid) {
       _logger.w(() => '[coordinatorCallEnded] rejected (invalid cid): $event');
       return;
     }
 
-    state = state.copyWith(
+    // Applied in every status, so a watched call that was not joined also
+    // gets its `endedAt`.
+    final endedState = state
+        .copyFromMetadata(event.metadata, updateMembers: false)
+        .copyWith(
+          endedAt: event.metadata.details.endedAt ?? event.createdAt,
+        );
+
+    if (state.status is! CallStatusActive) {
+      _logger.d(
+        () =>
+            '[coordinatorCallEnded] keeping status (not Active): '
+            '${state.status}',
+      );
+      state = endedState;
+      return;
+    }
+
+    state = endedState.copyWith(
       status: CallStatus.disconnected(
         DisconnectReason.ended(),
       ),

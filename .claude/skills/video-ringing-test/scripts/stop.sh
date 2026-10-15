@@ -14,10 +14,18 @@ if [ -f "$RING_DIR/env.sh" ]; then
   done
 fi
 
-adb shell am force-stop "$ANDROID_PKG" >/dev/null 2>&1 || true
-adb shell cmd statusbar collapse >/dev/null 2>&1 || true
-adb shell svc power stayon false >/dev/null 2>&1 || true
-adb shell dumpsys deviceidle enable >/dev/null 2>&1 || true
-adb shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1 || true
+restore_callee() {
+  adb shell am force-stop "$ANDROID_PKG" >/dev/null 2>&1 || true
+  adb shell cmd statusbar collapse >/dev/null 2>&1 || true
+  adb shell svc power stayon false >/dev/null 2>&1 || true
+  adb shell dumpsys deviceidle enable >/dev/null 2>&1 || true
+  adb shell input keyevent KEYCODE_WAKEUP >/dev/null 2>&1 || true
+}
+restore_callee
+
+if [ "${RING_MULTI_DEVICE:-0}" = "1" ] && [ -n "${RING_CALLEE2_SERIAL:-}" ]; then
+  stop_callee2_logcat
+  on_callee2 restore_callee
+fi
 
 echo "stopped. logs kept in $RING_DIR"

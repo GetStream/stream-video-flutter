@@ -13,7 +13,17 @@
 
 - Added `StreamVideoPushHandler.handleBackgroundMessage`, which simplifies the ringing setup by running a Stream ringing push through its whole background lifecycle from your Firebase background handler: it builds the client through the factory you give it, observes the ringing events a background isolate can act on, and disposes the client — along with whatever that factory set up — once the user has answered, declined, or let the call time out. It replaces the setup and teardown each integration had to write by hand.
 
-## Upcoming (minor)
+## 1.7.1
+
+### 🐞 Fixed
+
+- Fixed `unregisterDevice()` incorrectly trying to delete an APN device token when `registerApnDeviceToken` is `false`.
+
+### 🔄 Changed
+
+- [Android] Removed the unused `DISABLE_KEYGUARD` and `ACCESS_NOTIFICATION_POLICY` permissions.
+
+## 1.7.0
 
 ### 🔄 Changed
 
