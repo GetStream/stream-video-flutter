@@ -98,6 +98,7 @@
 
 ### 🐞 Fixed
 
+- The outgoing call screen shows the camera preview every time the call settings turn the camera on, not only sometimes. `getOrCreate` and `get` now apply the call settings to `connectOptions` before they return.
 - Cancelling an outgoing call while its camera preview is on no longer crashes the app on Android. A track handed over through `TrackOption.provided` that the call never adopted is now stopped before the call's peer connection factory is disposed.
 - Connecting while the coordinator socket is dropped reconnects that socket instead of opening a second one.
 - Going to the background and straight back no longer leaves the coordinator connection closed, or the camera and microphone off.
