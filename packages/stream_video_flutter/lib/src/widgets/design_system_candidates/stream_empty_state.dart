@@ -6,6 +6,8 @@ import 'package:stream_core_flutter/core.dart';
 ///
 /// Mirrors the `Web / Empty State` component from the design.
 ///
+/// It has no theme yet: its sizes and colors come from the design tokens.
+///
 /// This is a design-system candidate: it lives in this SDK until the
 /// component is finalized and can graduate to stream_core_flutter.
 class StreamEmptyState extends StatelessWidget {
@@ -15,6 +17,7 @@ class StreamEmptyState extends StatelessWidget {
     required this.icon,
     required this.title,
     this.description,
+    this.action,
   });
 
   /// The icon at the top, typically an [Icon]. Drawn at 32px.
@@ -25,6 +28,9 @@ class StreamEmptyState extends StatelessWidget {
 
   /// Why, or what would fill it.
   final Widget? description;
+
+  /// A button under the description, such as one to try again.
+  final Widget? action;
 
   // The width the title and description wrap at.
   static const double _maxTextWidth = 320;
@@ -72,6 +78,7 @@ class StreamEmptyState extends StatelessWidget {
               ],
             ),
           ),
+          ?action,
         ],
       ),
     );

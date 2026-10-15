@@ -27,8 +27,8 @@
 - Added `StreamTabBar`, a row of equal-width tabs whose selected index the caller owns. It, `StreamModalDialog` and `StreamBlurScrim` are design-system candidates, living in `src/widgets/design_system_candidates` until they graduate to core.
 - Added `StreamModalWindow`, a modal window with a sidebar of `StreamModalWindowTab`s that shows one tab at a time. It is a design-system candidate.
 - Added `StreamModalWindowThemeData` on `StreamVideoTheme`, and `StreamModalWindowTheme` to restyle the window over a subtree.
-- Added `StreamRecordingsSettingsTab`, a ready-made `StreamModalWindowTab` with the call's recordings, `StreamRecordingsSettings`, its content, which loads them and follows new ones, and `StreamCallRecordingList`, a table of recordings with a download button each.
-- Added `StreamEmptyState`, an icon over a title and description for a place with nothing in it. It is a design-system candidate.
+- Added `StreamRecordingsSettingsTab`, a ready-made `StreamModalWindowTab` with the call's recordings, `StreamRecordingsSettings`, its content, which loads them and follows new ones, and `StreamCallRecordingList`, a table of recordings with a download button each, and an error with a retry button when listing them failed.
+- Added `StreamEmptyState`, an icon over a title, description and optional action for a place with nothing in it. It is a design-system candidate.
 - Added `StreamCaptionsSettingsTab`, a ready-made `StreamModalWindowTab` with a switch for closed captions and the language spoken in the call, and `StreamCaptionsSettings`, its content.
 - Added `TranscriptionSettingsLanguage.label`, the language's name in the app's language.
 - Added `StreamDeviceSettingsTab`, a ready-made `StreamModalWindowTab` with the call's device settings, and `StreamDeviceSettings`, its content: a local preview, the camera, microphone and speaker, noise cancellation and the incoming video quality.
