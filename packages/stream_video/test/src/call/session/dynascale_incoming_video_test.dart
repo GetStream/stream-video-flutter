@@ -48,6 +48,20 @@ void main() {
     },
   );
 
+  test('incomingVideoSettingsStream emits the settings as they change', () {
+    expect(
+      dynascale.incomingVideoSettingsStream,
+      emitsInOrder([
+        null,
+        predicate<IncomingVideoSettings?>((it) => it?.enabled == false),
+      ]),
+    );
+
+    dynascale.setVideoTrackSubscriptionOverrides(
+      override: VideoTrackSubscriptionOverride(enabled: false),
+    );
+  });
+
   test('once joined, the overrides are sent to the SFU', () async {
     final sfuClient = MockSfuClient();
     when(() => sfuClient.updateSubscriptions(any())).thenAnswer(
