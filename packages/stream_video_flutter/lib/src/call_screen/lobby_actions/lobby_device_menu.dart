@@ -11,35 +11,41 @@ import '../../l10n/localization_extension.dart';
 /// in the other.
 extension LobbyDeviceMenus on StreamMediaDevicesController {
   /// The microphone group, plus a speaker group where the platform has one.
-  List<StreamMenuSection> audioSections(BuildContext context) {
-    final translations = context.translations;
+  List<StreamMenuSection> audioSections(BuildContext context) => [
+    ...microphoneSections(context),
+    ...speakerSections(context),
+  ];
 
-    return [
-      if (audioInputs.isNotEmpty)
-        StreamMenuSection(
-          heading: translations.lobbyMicrophoneSection,
-          options: _options(
-            context,
-            devices: audioInputs,
-            selected: selectedAudioInput,
-            onSelected: selectAudioInput,
-          ),
+  /// The microphone group.
+  List<StreamMenuSection> microphoneSections(BuildContext context) => [
+    if (audioInputs.isNotEmpty)
+      StreamMenuSection(
+        heading: context.translations.lobbyMicrophoneSection,
+        options: _options(
+          context,
+          devices: audioInputs,
+          selected: selectedAudioInput,
+          onSelected: selectAudioInput,
         ),
-      // Android routes audio itself and names no outputs; iOS names only the
-      // earpiece RtcMediaDeviceNotifier synthesises. Built only where there is
-      // something to pick from — see StreamMediaDevicesController.audioOutputs.
-      if (audioOutputs.isNotEmpty)
-        StreamMenuSection(
-          heading: translations.lobbySpeakerSection,
-          options: _options(
-            context,
-            devices: audioOutputs,
-            selected: selectedAudioOutput,
-            onSelected: selectAudioOutput,
-          ),
+      ),
+  ];
+
+  /// The speaker group, where the platform has one.
+  List<StreamMenuSection> speakerSections(BuildContext context) => [
+    // Android routes audio itself and names no outputs; iOS names only the
+    // earpiece RtcMediaDeviceNotifier synthesises. Built only where there is
+    // something to pick from — see StreamMediaDevicesController.audioOutputs.
+    if (audioOutputs.isNotEmpty)
+      StreamMenuSection(
+        heading: context.translations.lobbySpeakerSection,
+        options: _options(
+          context,
+          devices: audioOutputs,
+          selected: selectedAudioOutput,
+          onSelected: selectAudioOutput,
         ),
-    ];
-  }
+      ),
+  ];
 
   /// The camera group.
   List<StreamMenuSection> videoSections(BuildContext context) => [

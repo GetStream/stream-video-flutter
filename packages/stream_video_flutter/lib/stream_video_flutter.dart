@@ -88,6 +88,8 @@ export 'src/models/stream_icon_toggle.dart';
 export 'src/renderer/video_renderer.dart';
 export 'src/renderer/viewport_visibility_reporter.dart';
 export 'src/screen_share/screen_share.dart';
+export 'src/settings_window/device_settings.dart';
+export 'src/settings_window/incoming_video_quality.dart';
 export 'src/theme/themes.dart';
 export 'src/utils/device_segmentation.dart';
 export 'src/utils/present_icon.dart';

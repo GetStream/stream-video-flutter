@@ -181,7 +181,7 @@ class _StreamSelectInputState extends State<StreamSelectInput> {
                 labelText,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: textTheme.headingSm.copyWith(
+                style: textTheme.headingXs.copyWith(
                   color: _enabled
                       ? colorScheme.textPrimary
                       : colorScheme.textDisabled,

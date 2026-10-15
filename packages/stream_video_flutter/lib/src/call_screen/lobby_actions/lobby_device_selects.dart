@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 import '../../l10n/localization_extension.dart';
+import '../device_select.dart';
 
 /// Picks which microphone and speaker the call will use.
 ///
@@ -22,7 +23,7 @@ class StreamLobbyMicrophoneSelect extends StatelessWidget {
     final translations = context.translations;
     final opened = controller.hasOpenedMicrophone;
 
-    return _DeviceSelect(
+    return StreamDeviceSelect(
       title: translations.lobbyMicrophoneSection,
       sections: controller.devices.audioSections(context),
       icon: context.streamIcons.voiceFill,
@@ -56,7 +57,7 @@ class StreamLobbyCameraSelect extends StatelessWidget {
     final translations = context.translations;
     final opened = controller.hasOpenedCamera;
 
-    return _DeviceSelect(
+    return StreamDeviceSelect(
       title: translations.lobbyCameraSection,
       sections: controller.devices.videoSections(context),
       icon: context.streamIcons.videoFill,
@@ -114,49 +115,4 @@ String _unavailableReason(
   }
 
   return notOpened;
-}
-
-/// A select field opening a device menu.
-class _DeviceSelect extends StatelessWidget {
-  const _DeviceSelect({
-    required this.title,
-    required this.sections,
-    required this.icon,
-    required this.value,
-    required this.enabled,
-    required this.tooltip,
-  });
-
-  final String title;
-  final List<StreamMenuSection> sections;
-  final IconData icon;
-  final String? value;
-  final bool enabled;
-  final String tooltip;
-
-  @override
-  Widget build(BuildContext context) {
-    // Nothing to pick from, so the field has nothing to open.
-    final noChoice = sections.hasNoOptions;
-
-    return StreamAdaptiveMenuAnchor(
-      title: title,
-      sections: sections,
-      // A field is a wide anchor, and a narrow popup under it reads as
-      // belonging to something else.
-      matchAnchorWidth: true,
-      builder: (context, handle) => Tooltip(
-        message: tooltip,
-        child: StreamSelectInput(
-          leading: Icon(icon),
-          value: value,
-          hintText: context.translations.defaultDevice,
-          // True for a sheet as well as a popup, so the caret points the same
-          // way on every platform.
-          expanded: handle.isOpen,
-          onPressed: enabled && !noChoice ? handle.toggle : null,
-        ),
-      ),
-    );
-  }
 }
