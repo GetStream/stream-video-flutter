@@ -27,6 +27,14 @@ void main() {
       expect(settings.locale, const Locale('nl'));
     });
 
+    test('a language no longer offered falls back to the device', () async {
+      final settings = AppDisplaySettings(
+        preferences: await preferences({'language_code': 'xx'}),
+      );
+
+      expect(settings.locale, isNull);
+    });
+
     test('keeps a picked language and tells its listeners', () async {
       final prefs = await preferences();
       final settings = AppDisplaySettings(preferences: prefs);
