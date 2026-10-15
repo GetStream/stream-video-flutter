@@ -2,12 +2,10 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:collection/collection.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart' show CompositeSubscription;
 import 'package:stream_core/stream_core.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../globals.dart';
 import '../open_api/video/coordinator/api.dart' hide User;
@@ -55,7 +53,6 @@ import 'ring_state_polling_settings.dart';
 import 'ringing/ringing_flow_coordinator.dart';
 import 'ringing/ringing_flow_coordinator_impl.dart';
 import 'telemetry/client_event_reporter.dart';
-import 'telemetry/client_event_transport.dart';
 import 'token/token.dart';
 import 'token/token_provider_factory.dart';
 import 'token/token_source.dart';
@@ -73,6 +70,12 @@ const _idAppState = 2;
 const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com';
 const _defaultCoordinatorWsUrl = 'wss://video.stream-io-api.com/video/connect';
 
+/// The scope of one [StreamVideo.runWithoutMedia], open until a client is
+/// built in it or its body completes.
+class _WithoutMediaScope {
+  bool open = true;
+}
+
 /// Handler function used for logging.
 typedef LogHandlerFunction =
     void Function(
@@ -85,10 +88,23 @@ typedef LogHandlerFunction =
 
 /// The client responsible for handling config and maintaining calls
 class StreamVideo extends Disposable implements CallHost {
-  /// Creates a new Stream Video client associated with the
-  /// Stream Video singleton instance
+  /// Creates the Stream Video client and installs it as [instance].
   ///
-  /// If [failIfSingletonExists] is set to false, the new instance will override and disconnect the existing singleton instance.
+  /// As the app's client, it also sets up the SDK's logging from
+  /// [StreamVideoOptions.logPriority] and [StreamVideoOptions.logHandlerFunction].
+  ///
+  /// When a client is installed already, this throws, unless
+  /// [onInstanceReplaced] is given: then the new client replaces it as the
+  /// singleton, and [onInstanceReplaced] is called with the old one, which is
+  /// left as it is otherwise. It is not awaited. To dispose the old client:
+  ///
+  /// ```dart
+  /// StreamVideo(
+  ///   apiKey,
+  ///   user: user,
+  ///   onInstanceReplaced: (previous) => previous.dispose(),
+  /// );
+  /// ```
   factory StreamVideo(
     String apiKey, {
     StreamVideoOptions? options,
@@ -96,29 +112,52 @@ class StreamVideo extends Disposable implements CallHost {
     String? userToken,
     TokenLoader? tokenLoader,
     OnTokenUpdated? onTokenUpdated,
-    bool failIfSingletonExists = true,
+    FutureOr<void> Function(StreamVideo previous)? onInstanceReplaced,
     PNManagerProvider? pushNotificationManagerProvider,
   }) {
-    final instance = StreamVideo._(
+    // Before anything is built or configured, so a rejected client leaves
+    // nothing running.
+    if (onInstanceReplaced == null && _instanceHolder.isInitialized()) {
+      throw _instanceHolder.alreadyInstalled();
+    }
+
+    final resolvedOptions = options ?? StreamVideoOptions();
+    configureLogging(
+      priority: resolvedOptions.logPriority,
+      handler: resolvedOptions.logHandlerFunction,
+    );
+
+    final instance = StreamVideo.create(
       apiKey,
-      options: options ?? StreamVideoOptions(),
       user: user,
+      options: resolvedOptions,
       userToken: userToken,
       tokenLoader: tokenLoader,
       onTokenUpdated: onTokenUpdated,
       pushNotificationManagerProvider: pushNotificationManagerProvider,
     );
 
-    _instanceHolder.install(
+    final previous = _instanceHolder.install(
       instance,
-      failIfSingletonExists: failIfSingletonExists,
+      replace: onInstanceReplaced != null,
     );
+    if (previous != null) {
+      unawaited(
+        Future.sync(() => onInstanceReplaced!(previous)).catchError(
+          (Object e, StackTrace stk) => streamLog.e(
+            _tag,
+            () => '[onInstanceReplaced] failed: $e\n$stk',
+          ),
+        ),
+      );
+    }
 
     return instance;
   }
 
-  /// Creates a new Stream Video client unassociated with the
-  /// Stream Video singleton instance
+  /// Creates a Stream Video client that is not installed as [instance].
+  ///
+  /// It does not set up logging; call [configureLogging] for that.
   factory StreamVideo.create(
     String apiKey, {
     required User user,
@@ -127,12 +166,8 @@ class StreamVideo extends Disposable implements CallHost {
     TokenLoader? tokenLoader,
     OnTokenUpdated? onTokenUpdated,
     PNManagerProvider? pushNotificationManagerProvider,
-    @Deprecated(
-      'No longer used, SDPs are now generated lazily per call. This parameter is a no-op and will be removed in a future major release.',
-    )
-    bool precacheGenericSdps = true,
   }) {
-    final instance = StreamVideo._(
+    return StreamVideo._(
       apiKey,
       user: user,
       options: options ?? StreamVideoOptions(),
@@ -141,7 +176,53 @@ class StreamVideo extends Disposable implements CallHost {
       onTokenUpdated: onTokenUpdated,
       pushNotificationManagerProvider: pushNotificationManagerProvider,
     );
-    return instance;
+  }
+
+  /// Sets up the SDK's logging, which is shared by every client in the
+  /// process. [Priority.none] leaves it as it is.
+  static void configureLogging({
+    required Priority priority,
+    LogHandlerFunction handler = _defaultLogHandler,
+  }) {
+    _setupLogger(priority, handler);
+  }
+
+  /// Runs [body], in which the first [StreamVideo] built sets up no media:
+  /// it applies no audio configuration, and the calls it creates do not
+  /// observe the media device notifier. Clients built after it, or once
+  /// [body] completed, set up media as usual.
+  ///
+  /// For a client that only handles a push in the background, such as the
+  /// one `StreamVideoPushHandler.handleBackgroundMessage` builds. Its calls
+  /// cannot be joined: [Call.join] fails with [CallWithoutMediaException].
+  static Future<T> runWithoutMedia<T>(FutureOr<T> Function() body) async {
+    final scope = _WithoutMediaScope();
+    try {
+      return await runZoned(body, zoneValues: {_withoutMediaKey: scope});
+    } finally {
+      scope.open = false;
+    }
+  }
+
+  static final _withoutMediaKey = Object();
+
+  static _WithoutMediaScope? get _openWithoutMediaScope {
+    final scope = Zone.current[_withoutMediaKey];
+    return scope is _WithoutMediaScope && scope.open ? scope : null;
+  }
+
+  /// Whether the next client built in the current zone would set up no
+  /// media, as inside [runWithoutMedia].
+  @visibleForTesting
+  static bool get debugBuildsWithoutMedia => _openWithoutMediaScope != null;
+
+  /// Whether a client built now sets up media. Inside [runWithoutMedia],
+  /// the first one does not, and uses the scope up.
+  static bool _claimSetsUpMedia() {
+    final scope = _openWithoutMediaScope;
+    if (scope == null) return true;
+    scope.open = false;
+    return false;
   }
 
   /// Creates a client unassociated with the singleton, like
@@ -192,33 +273,21 @@ class StreamVideo extends Disposable implements CallHost {
     Stream<VideoLifecycleState> Function()? appState,
   }) : _options = options,
        _appStateOverride = appState,
-       _state = MutableClientState(user, options) {
-    _networkMonitor =
-        networkMonitor ??
-        _options.networkMonitorSettings.internetConnectionInstance ??
-        InternetConnection.createInstance(
-          checkInterval: _options.networkMonitorSettings.checkInterval,
-          triggerStream: Connectivity().onConnectivityChanged,
-          useDefaultOptions:
-              _options.networkMonitorSettings.customEndpoints.isEmpty,
-          customCheckOptions:
-              _options.networkMonitorSettings.customEndpoints.isEmpty
-              ? null
-              : _options.networkMonitorSettings.customEndpoints
-                    .map((option) => option.toInternetCheckOption())
-                    .toList(),
-        );
+       setsUpMedia = _claimSetsUpMedia(),
+       _state = MutableClientState(
+         user,
+         allowMultipleActiveCalls: options.allowMultipleActiveCalls,
+         multiCallAudioPolicy: options.multiCallAudioPolicy,
+       ) {
+    _networkMonitor = networkMonitor ?? _options.networkMonitorSettings.build();
 
-    _clientEventReporter = _options.clientEventsReportingEnabled
-        ? ClientEventReporter(
-            transport: ClientEventTransport(
-              baseUrl: _options.coordinatorRpcUrl,
-              apiKey: apiKey,
-              getToken: _clientEventToken,
-            ),
-            resolveUserId: () => _state.currentUser.id,
-          )
-        : const ClientEventReporter.noOp();
+    _clientEventReporter = ClientEventReporter.create(
+      enabled: _options.clientEventsReportingEnabled,
+      baseUrl: _options.coordinatorRpcUrl,
+      apiKey: apiKey,
+      getToken: _clientEventToken,
+      resolveUserId: () => _state.currentUser.id,
+    );
 
     if (user.type == UserType.guest) {
       // A guest's identity is assigned by the server, so the manager starts
@@ -264,56 +333,69 @@ class StreamVideo extends Disposable implements CallHost {
 
     _state.user.value = user;
 
-    if (CurrentPlatform.isAndroid || CurrentPlatform.isIos) {
-      RtcMediaDeviceNotifier.instance
-          .reinitializeAudioConfiguration(options.audioConfigurationPolicy)
-          .then((_) {
-            _webrtcInitialized.complete();
-          })
-          .onError((_, _) {
-            _webrtcInitialized.complete();
-          });
-    } else {
-      _webrtcInitialized.complete();
-    }
+    ready = _startUp();
+  }
 
-    // Pre-warm the token cache, mirroring the eager fetch previously
-    // triggered by setting the token provider. Failures are logged by
-    // getToken and surface later, when the token is actually needed — the
-    // caller that needs one then establishes the session itself.
+  /// Completes once the client has started up: the audio configuration is
+  /// applied where it applies, the environment is collected and, with
+  /// [StreamVideoOptions.autoConnect], the connect has been attempted.
+  /// [ClientState.connection] tells whether it succeeded. Never completes with
+  /// an error.
+  late final Future<void> ready;
+
+  Future<void> _startUp() async {
+    final audioConfigured = _configureAudio();
+
+    // Pre-warm the token cache. Failures are logged by the token manager.
     unawaited(_tokens.getToken());
 
-    _setupLogger(options.logPriority, options.logHandlerFunction);
+    try {
+      await videoEnvironmentManager.collectAndUpdate();
+    } catch (error, stackTrace) {
+      _logger.e(
+        () =>
+            '[StreamVideo] failed to collect environment: $error '
+            'with stackTrace: $stackTrace',
+      );
+    }
 
-    unawaited(
-      videoEnvironmentManager
-          .collectAndUpdate()
-          .catchError((Object error, StackTrace stackTrace) {
-            _logger.e(
-              () =>
-                  '[StreamVideo] failed to collect environment: $error '
-                  'with stackTrace: $stackTrace',
-            );
-          })
-          .whenComplete(() {
-            if (options.autoConnect) {
-              connect(
-                includeUserDetails: options.includeUserDetailsForAutoConnect,
-              ).catchError((dynamic error, StackTrace stackTrace) {
-                _logger.e(
-                  () =>
-                      '[StreamVideo] failed to auto connect: $error '
-                      'with stackTrace: $stackTrace',
-                );
+    if (_options.autoConnect) {
+      try {
+        await connect(
+          includeUserDetails: _options.includeUserDetailsForAutoConnect,
+        );
+      } catch (error, stackTrace) {
+        _logger.e(
+          () =>
+              '[StreamVideo] failed to auto connect: $error '
+              'with stackTrace: $stackTrace',
+        );
+      }
+    }
 
-                return failureWithError<UserToken>(
-                  'Failed to auto connect: $error',
-                );
-              });
-            }
-          }),
-    );
+    await audioConfigured;
   }
+
+  /// Applies the audio configuration on Android and iOS when this client sets
+  /// up media, and completes [webrtcInitialized] either way.
+  Future<void> _configureAudio() async {
+    try {
+      if (setsUpMedia && (CurrentPlatform.isAndroid || CurrentPlatform.isIos)) {
+        await RtcMediaDeviceNotifier.instance.reinitializeAudioConfiguration(
+          _options.audioConfigurationPolicy,
+        );
+      }
+    } catch (e, stk) {
+      _logger.e(() => '[StreamVideo] failed to configure audio: $e\n$stk');
+    } finally {
+      _webrtcInitialized.complete();
+    }
+  }
+
+  /// Whether this client sets up media. False for the first client built
+  /// inside [runWithoutMedia].
+  @override
+  final bool setsUpMedia;
 
   static final InstanceHolder _instanceHolder = InstanceHolder();
 
@@ -950,14 +1032,8 @@ class StreamVideoOptions {
     this.multiCallAudioPolicy = MultiCallAudioPolicy.suspendExisting,
     this.clientEventsReportingEnabled = true,
     this.ringStatePolling = const RingStatePollingSettings(),
-    @Deprecated(
-      'Use audioConfigurationPolicy instead. This parameter will be removed in the next major release.',
-    )
-    this.androidAudioConfiguration,
-    AudioConfigurationPolicy? audioConfigurationPolicy,
-  }) : audioConfigurationPolicy = androidAudioConfiguration == null
-           ? audioConfigurationPolicy ?? const BroadcasterAudioPolicy()
-           : CustomAudioPolicy(androidConfiguration: androidAudioConfiguration);
+    this.audioConfigurationPolicy = const BroadcasterAudioPolicy(),
+  });
 
   final String coordinatorRpcUrl;
   final String coordinatorWsUrl;
@@ -1002,11 +1078,6 @@ class StreamVideoOptions {
 
   /// Returns the current [NetworkMonitorSettings].
   final NetworkMonitorSettings networkMonitorSettings;
-
-  @Deprecated(
-    'Use audioConfigurationPolicy instead. This parameter will be removed in the next major release.',
-  )
-  final rtc.AndroidAudioConfiguration? androidAudioConfiguration;
 
   /// The audio configuration policy for the SDK.
   ///

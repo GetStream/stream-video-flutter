@@ -160,6 +160,25 @@ void main() {
       },
     );
 
+    test('builds its client without media', () async {
+      bool? withoutMediaAtStart;
+      bool? withoutMediaAfterAwait;
+
+      await handle(
+        createStreamVideo: () async {
+          withoutMediaAtStart = StreamVideo.debugBuildsWithoutMedia;
+          // A factory that reads credentials first still builds inside it.
+          await Future<void>.delayed(Duration.zero);
+          withoutMediaAfterAwait = StreamVideo.debugBuildsWithoutMedia;
+          return client;
+        },
+      );
+
+      expect(withoutMediaAtStart, isTrue);
+      expect(withoutMediaAfterAwait, isTrue);
+      expect(StreamVideo.debugBuildsWithoutMedia, isFalse);
+    });
+
     test('does nothing when nobody is logged in', () async {
       final handled = await handle(createStreamVideo: factoryReturning(null));
 
@@ -634,13 +653,26 @@ void main() {
       });
     });
 
+    test('starts over when the app disposed the client', () async {
+      await handle(createStreamVideo: factoryReturning(client));
+      when(() => client.isDisposed).thenReturn(true);
+
+      // The next push must not be forwarded into a dead client.
+      final fresh = stubbedClient();
+      final handled = await handle(createStreamVideo: factoryReturning(fresh));
+
+      expect(handled, isTrue);
+      expect(factoryCalls, 2);
+      verify(
+        () => fresh.ringing.handleRingingFlowNotifications(any()),
+      ).called(1);
+    });
+
     test(
-      'starts over when the app disposed the client it stood down for',
+      'releases the client after an accept, also with a call on it',
       () async {
         await handle(createStreamVideo: factoryReturning(client));
 
-        // The app answered on this client, so the session stood down and kept
-        // it. The app owns it from then on, and eventually lets it go.
         when(() => client.activeCalls).thenReturn([MockCall()]);
         onRingingEvent!(
           const ActionCallAccept(
@@ -648,44 +680,11 @@ void main() {
           ),
         );
         await pastTheGrace();
-        verifyNever(() => client.dispose());
 
-        when(() => client.isDisposed).thenReturn(true);
-
-        // The next push must not be forwarded into a dead client.
-        final fresh = stubbedClient();
-        final handled = await handle(
-          createStreamVideo: factoryReturning(fresh),
-        );
-
-        expect(handled, isTrue);
-        expect(factoryCalls, 2);
-        verify(
-          () => fresh.ringing.handleRingingFlowNotifications(any()),
-        ).called(1);
+        verify(() => client.dispose()).called(1);
+        expect(onDisposeCalled, isTrue);
       },
     );
-
-    test('leaves the client alone when the app is in a call on it', () async {
-      await handle(createStreamVideo: factoryReturning(client));
-
-      // The app answered on this client and joined. On Android the accept
-      // lands on this isolate whenever the app is alive but backgrounded, so
-      // the resolution that normally means "this session is done" is instead
-      // the moment the app starts using the client.
-      when(() => client.activeCalls).thenReturn([MockCall()]);
-      onRingingEvent!(
-        const ActionCallAccept(
-          data: CallData(uuid: 'u', callCid: 'default:call-a'),
-        ),
-      );
-
-      await pastTheGrace();
-
-      // Disposing here drops a call that has just connected.
-      verifyNever(() => client.dispose());
-      expect(onDisposeCalled, isFalse);
-    });
 
     group('when the push is not ours', () {
       test('builds nothing for it', () async {

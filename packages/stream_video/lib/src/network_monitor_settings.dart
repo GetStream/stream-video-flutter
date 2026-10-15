@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 class NetworkMonitorSettings {
@@ -27,6 +28,22 @@ class NetworkMonitorSettings {
   /// class if you already have an existing instance in your app. If not provided,
   /// a default implementation will be used.
   final InternetConnection? internetConnectionInstance;
+
+  /// The [InternetConnection] these settings describe:
+  /// [internetConnectionInstance] when given, a new one otherwise.
+  InternetConnection build() {
+    return internetConnectionInstance ??
+        InternetConnection.createInstance(
+          checkInterval: checkInterval,
+          triggerStream: Connectivity().onConnectivityChanged,
+          useDefaultOptions: customEndpoints.isEmpty,
+          customCheckOptions: customEndpoints.isEmpty
+              ? null
+              : customEndpoints
+                    .map((option) => option.toInternetCheckOption())
+                    .toList(),
+        );
+  }
 }
 
 class NetworkMonitorEndpoint {

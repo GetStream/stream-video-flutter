@@ -47,6 +47,21 @@ class CallLeftException extends StreamVideoException {
       );
 }
 
+/// Returned by `Call.join` on a call whose client was built inside
+/// `StreamVideo.runWithoutMedia`, which sets up no media.
+///
+/// Join from a client built outside it.
+class CallWithoutMediaException extends StreamVideoException {
+  /// Creates a [CallWithoutMediaException].
+  const CallWithoutMediaException()
+    : super(
+        message:
+            'This call belongs to a client built inside '
+            'StreamVideo.runWithoutMedia, which sets up no media, so it cannot '
+            'be joined. Join from a client built outside it.',
+      );
+}
+
 /// A failure that carries what caused it.
 class StreamVideoExceptionWithCause extends StreamVideoException {
   /// Creates a [StreamVideoExceptionWithCause].

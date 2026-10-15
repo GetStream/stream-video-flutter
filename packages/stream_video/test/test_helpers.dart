@@ -34,6 +34,9 @@ class MockCallHost extends Mock implements CallHost {
   @override
   ClientEventReporter get clientEventReporter =>
       clientEventReporterOverride ?? const ClientEventReporter.noOp();
+
+  @override
+  bool get setsUpMedia => true;
 }
 
 class MockCallStateNotifier extends Mock implements CallStateNotifier {}

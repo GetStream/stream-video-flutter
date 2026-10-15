@@ -4,6 +4,10 @@
 
 - Test mocks that implement `StreamVideo` get a `subtype_of_sealed_class` warning, because `StreamVideo` implements the `@sealed` `CallHost`; add `// ignore: subtype_of_sealed_class` to them.
 - The deprecated `observeCoreCallKitEvents`, `observeCall*CallKitEvent` and `handleVoipPushNotification` methods are removed; use `observeCoreRingingEvents`, `observeCall*RingingEvent` and `handleRingingFlowNotifications` on `StreamVideo.ringing`.
+- `StreamVideo.create` no longer sets up logging; call `StreamVideo.configureLogging` for such a client.
+- `StreamVideoOptions.androidAudioConfiguration` is removed; pass `AudioConfigurationPolicy.custom` as `audioConfigurationPolicy` instead.
+- The no-op `precacheGenericSdps` parameter of `StreamVideo.create` is removed.
+- `StreamVideo`'s `failIfSingletonExists` is replaced by `onInstanceReplaced`, which is called with the client it replaces; that client is no longer disconnected.
 - Joining a `Call` after it was left or ended fails with `CallLeftException`; a `Call` is single use.
 - The lists emitted by `Call.closedCaptions` are unmodifiable; copy one before changing it.
 - `Call`'s action methods (members, permissions, moderation, recording, transcription, captions, broadcasting, mute, pin, go-live, reactions, custom events, feedback) are now extension methods on `CallActions`; they can't be stubbed or overridden, and a `show Call` import must also show `CallActions`.
@@ -58,6 +62,10 @@
 ### ✅ Added
 
 - `VideoLifecycleState`, the type of `ClientState.appLifecycleState`, is exported.
+- `StreamVideo.ready` completes once the client has started up: audio configured, environment collected and, with `autoConnect`, the connect attempted.
+- `StreamVideo.configureLogging` sets up the SDK's logging without a singleton client.
+- `StreamVideo.runWithoutMedia` builds a client that sets up no media, for handling a push in the background; its calls cannot be joined.
+- `NetworkMonitorSettings.build()` returns the `InternetConnection` the settings describe.
 - `Call.dispose()` leaves the call if needed and closes its streams.
 - Added `StreamPushPayload`, the wire contract for the push payloads Stream sends: the keys it sets, the `sender` that marks a payload as ours, and predicates for recognising a ringing or missed call push. `handleRingingFlowNotifications` reads payloads through it, so anything that has to recognise a Stream push before handing it over — a background handler deciding whether to build a client, or tracking which call is still ringing — can match on exactly what the SDK matches on instead of restating the format.
 - Added `ScreenShareConstraints.systemPickerSourceId`, the `sourceId` that makes macOS choose what to share with its system picker.
