@@ -24,12 +24,8 @@ class MockRtcMediaDeviceNotifier extends Mock
   Stream<bool> get webAudioPlaybackBlockedChanges => const Stream.empty();
 }
 
-class MockStreamVideo extends Mock implements StreamVideo {
-  @override
-  Future<void> dispose() {
-    return Future.value();
-  }
-
+/// The client a [Call] under test belongs to.
+class MockCallHost extends Mock implements CallHost {
   /// Set by tests that need to observe or fail telemetry calls.
   ClientEventReporter? clientEventReporterOverride;
 

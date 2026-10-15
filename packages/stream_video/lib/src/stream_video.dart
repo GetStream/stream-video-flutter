@@ -13,6 +13,7 @@ import '../globals.dart';
 import '../open_api/video/coordinator/api.dart' hide User;
 import 'audio_processing/audio_processor.dart';
 import 'call/call.dart';
+import 'call/call_host.dart';
 import 'call/call_ringing_state.dart';
 import 'call/call_type.dart';
 import 'coordinator/coordinator_client.dart';
@@ -83,7 +84,7 @@ typedef LogHandlerFunction =
     ]);
 
 /// The client responsible for handling config and maintaining calls
-class StreamVideo extends Disposable {
+class StreamVideo extends Disposable implements CallHost {
   /// Creates a new Stream Video client associated with the
   /// Stream Video singleton instance
   ///
@@ -267,13 +268,13 @@ class StreamVideo extends Disposable {
       RtcMediaDeviceNotifier.instance
           .reinitializeAudioConfiguration(options.audioConfigurationPolicy)
           .then((_) {
-            webrtcInitializationCompleter.complete();
+            _webrtcInitialized.complete();
           })
           .onError((_, _) {
-            webrtcInitializationCompleter.complete();
+            _webrtcInitialized.complete();
           });
     } else {
-      webrtcInitializationCompleter.complete();
+      _webrtcInitialized.complete();
     }
 
     // Pre-warm the token cache, mirroring the eager fetch previously
@@ -339,14 +340,19 @@ class StreamVideo extends Disposable {
   final _logger = taggedLogger(tag: _tag);
 
   final StreamVideoOptions _options;
+  @override
   final String apiKey;
 
   final MutableClientState _state;
 
+  @override
   StreamVideoOptions get options => _options;
 
+  final _webrtcInitialized = Completer<void>();
+
+  @override
   @internal
-  Completer<void> webrtcInitializationCompleter = Completer();
+  Future<void> get webrtcInitialized => _webrtcInitialized.future;
 
   late final TokenManager _tokenManager;
 
@@ -376,10 +382,12 @@ class StreamVideo extends Disposable {
   /// Replaces the app's lifecycle stream in tests.
   final Stream<VideoLifecycleState> Function()? _appStateOverride;
   late final InternetConnection _networkMonitor;
+  @override
   late final PushNotificationManager? pushNotificationManager;
 
   late final ClientEventReporter _clientEventReporter;
 
+  @override
   @internal
   ClientEventReporter get clientEventReporter => _clientEventReporter;
 
@@ -414,6 +422,13 @@ class StreamVideo extends Disposable {
     }),
   );
 
+  /// Clears the way for [call] to be accepted: cancels the current user's
+  /// outgoing ring of another call and, unless several calls may be active,
+  /// leaves the active call.
+  @override
+  @internal
+  Future<void>? prepareToAccept(Call call) => _ringing.prepareToAccept(call);
+
   /// Handles ringing calls: the incoming ring, the native call screen's
   /// actions, the ringing pushes, and the auto-reject of an unanswered call.
   RingingFlowCoordinator get ringing => _ringing;
@@ -427,18 +442,15 @@ class StreamVideo extends Disposable {
     ensureConnected: connect,
   );
 
-  /// Clears the way for [call] to be accepted. See
-  /// [RingingFlowCoordinatorImpl.prepareToAccept].
-  @internal
-  Future<void>? prepareToAccept(Call call) => _ringing.prepareToAccept(call);
-
   /// Returns the current user.
+  @override
   UserInfo get currentUser => _state.currentUser.toUserInfo();
 
   /// Returns the current user type.
   UserType get currentUserType => _state.currentUser.type;
 
   /// Returns the [StreamVideo] state.
+  @override
   ClientState get state => _state;
 
   /// Returns the active call if exists.
@@ -824,6 +836,7 @@ class StreamVideo extends Disposable {
     });
   }
 
+  @override
   @internal
   bool isAudioProcessorConfigured() {
     return _options.audioProcessor != null;
@@ -837,6 +850,7 @@ class StreamVideo extends Disposable {
         );
   }
 
+  @override
   @internal
   Future<Result<None>> setAudioProcessingEnabled(bool enabled) async {
     return await _options.audioProcessor?.setEnabled(enabled) ??
@@ -850,6 +864,7 @@ class StreamVideo extends Disposable {
   /// Devices with this capability are better suited for handling noise cancellation efficiently.
   ///
   /// Returns false on other platforms.
+  @override
   Future<Result<bool>> deviceSupportsAdvancedAudioProcessing() async {
     return await _options.audioProcessor
             ?.deviceSupportsAdvancedAudioProcessing() ??

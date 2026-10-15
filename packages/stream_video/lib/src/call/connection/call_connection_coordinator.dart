@@ -355,7 +355,7 @@ class CallConnectionCoordinator {
       return failureWithError('ongoing connect failed: $status');
     }
 
-    if (_call._streamVideo.state.activeCalls.value.any(
+    if (_call._host.state.activeCalls.value.any(
       (call) => call.callCid == _call.callCid,
     )) {
       _call._logger.w(
@@ -377,17 +377,17 @@ class CallConnectionCoordinator {
 
     if (_isLeftOrLeaving) return _rejectJoinOfLeftCall();
 
-    await _call._streamVideo.state.setActiveCall(_call);
+    await _call._host.state.setActiveCall(_call);
 
     // Marking the call active can wait on another call leaving. A leave of
     // this call in that time has already cleaned up, so undo the marking
     // rather than register a call nothing would unregister.
     if (_isLeftOrLeaving) {
-      await _call._streamVideo.state.removeActiveCall(_call);
+      await _call._host.state.removeActiveCall(_call);
       return _rejectJoinOfLeftCall();
     }
 
-    _call._streamVideo.clientEventReporter
+    _call._host.clientEventReporter
       ..registerCall(_call.callCid)
       ..reportEvent(_call.callCid, ClientEventStage.joinInitiated);
 
@@ -628,7 +628,7 @@ class CallConnectionCoordinator {
     final connectionTimeStopwatch = Stopwatch()..start();
 
     final validation = await _call._stateManager.validateUserId(
-      _call._streamVideo.currentUser.id,
+      _call._host.currentUser.id,
     );
 
     if (validation is Failure) {
@@ -746,7 +746,7 @@ class CallConnectionCoordinator {
         stateManager: _call._stateManager,
         dynascaleManager: _call.dynascaleManager,
         networkMonitor: _call.networkMonitor,
-        streamVideo: _call._streamVideo,
+        host: _call._host,
         statsOptions: _sfuStatsOptions!,
         pcFactory: _call._ensurePcFactory(),
         e2eeManager: _call._e2ee.manager,
@@ -897,10 +897,10 @@ class CallConnectionCoordinator {
 
     // Re-bind audio filter after rejoin/migrate, as iOS may drop it.
     if ((performingRejoin || performingMigration) &&
-        _call._streamVideo.isAudioProcessorConfigured() &&
+        _call._host.isAudioProcessorConfigured() &&
         _call.state.value.isAudioProcessing) {
       unawaited(
-        _call._streamVideo.setAudioProcessingEnabled(true).then((result) {
+        _call._host.setAudioProcessingEnabled(true).then((result) {
           if (result.isFailure) {
             _call._logger.w(
               () =>
@@ -1014,7 +1014,7 @@ class CallConnectionCoordinator {
       return failureWithError('call was left');
     }
 
-    final reporter = _call._streamVideo.clientEventReporter;
+    final reporter = _call._host.clientEventReporter;
     final joinStageId = reporter.beginStage(
       _call.callCid,
       ClientEventStage.coordinatorJoin,
@@ -1084,7 +1084,7 @@ class CallConnectionCoordinator {
       callConnectOptions: connectOptions,
     );
 
-    if (_call._streamVideo.isAudioProcessorConfigured() &&
+    if (_call._host.isAudioProcessorConfigured() &&
         joinResult.data.metadata.settings.audio.noiseCancellation?.mode ==
             NoiseCancellationSettingsMode.autoOn) {
       // AutoOn will enable noise cancellation if the device has sufficient processing power
@@ -1202,8 +1202,7 @@ class CallConnectionCoordinator {
               }),
         );
       },
-      isAnonymousUser:
-          _call._streamVideo.state.currentUser.type == UserType.anonymous,
+      isAnonymousUser: _call._host.state.currentUser.type == UserType.anonymous,
       unifiedSessionId: _unifiedSessionId,
     );
 
@@ -1765,7 +1764,7 @@ class CallConnectionCoordinator {
             ? JoinReason.networkAvailable
             : strategyReason;
         if (joinReason != null) {
-          final reporter = _call._streamVideo.clientEventReporter;
+          final reporter = _call._host.clientEventReporter;
           if (strategyReason != null && !joinReason.mintsNewAttempt) {
             reporter.newJoinAttempt(_call.callCid, reason: joinReason);
           }
@@ -1944,7 +1943,7 @@ class CallConnectionCoordinator {
 
     try {
       _call.networkMonitor.setIntervalAndResetTimer(
-        _call._streamVideo.options.networkMonitorSettings.offlineCheckInterval,
+        _call._host.options.networkMonitorSettings.offlineCheckInterval,
       );
 
       while (true) {
@@ -2004,11 +2003,8 @@ class CallConnectionCoordinator {
           // cannot report anything new before its next probe, so retrying
           // sooner only spins — a flapping monitor otherwise drives this loop
           // thousands of times a minute for as long as the budget lasts.
-          final checkInterval = _call
-              ._streamVideo
-              .options
-              .networkMonitorSettings
-              .offlineCheckInterval;
+          final checkInterval =
+              _call._host.options.networkMonitorSettings.offlineCheckInterval;
           final left = budget - deadline.elapsed;
           final settleDelay = left < checkInterval ? left : checkInterval;
 
@@ -2105,7 +2101,7 @@ class CallConnectionCoordinator {
     _call.viewportVisibility.clear();
     await _call.clearE2EEManager();
 
-    final client = _call._streamVideo;
+    final client = _call._host;
     final status = _call.state.value.status;
     if (status is CallStatusIncoming || status is CallStatusOutgoing) {
       await _cancelUnansweredRing();
@@ -2142,8 +2138,7 @@ class CallConnectionCoordinator {
   Future<bool> _answeredNatively() async {
     try {
       final calls =
-          await _call._streamVideo.pushNotificationManager?.activeCalls() ??
-          const [];
+          await _call._host.pushNotificationManager?.activeCalls() ?? const [];
       return calls.any(
         (call) => call.callCid == _call.callCid.value && call.isAccepted,
       );
@@ -2172,7 +2167,7 @@ class CallConnectionCoordinator {
         ClientEventStandardCode.networkOffline,
       _ => ClientEventStandardCode.clientAborted,
     };
-    _call._streamVideo.clientEventReporter
+    _call._host.clientEventReporter
       ..abort(_call.callCid, abortCode)
       ..unregisterCall(_call.callCid);
 
@@ -2356,21 +2351,16 @@ class CallConnectionCoordinator {
       // Call, so stopping it on this call's teardown would silently drop noise
       // cancellation on any other still-active call that also wants it. Only
       // stop the global processor when no other active call is configured for
-      if (_call._streamVideo.isAudioProcessorConfigured() &&
+      if (_call._host.isAudioProcessorConfigured() &&
           _call.state.value.settings.audio.noiseCancellation?.mode ==
               NoiseCancellationSettingsMode.autoOn) {
-        final anotherCallWantsAutoOn = _call
-            ._streamVideo
-            .state
-            .activeCalls
-            .value
-            .any(
-              (other) =>
-                  other.callCid != _call.callCid &&
-                  other.state.value.status is! CallStatusDisconnected &&
-                  other.state.value.settings.audio.noiseCancellation?.mode ==
-                      NoiseCancellationSettingsMode.autoOn,
-            );
+        final anotherCallWantsAutoOn = _call._host.state.activeCalls.value.any(
+          (other) =>
+              other.callCid != _call.callCid &&
+              other.state.value.status is! CallStatusDisconnected &&
+              other.state.value.settings.audio.noiseCancellation?.mode ==
+                  NoiseCancellationSettingsMode.autoOn,
+        );
         if (!anotherCallWantsAutoOn) {
           unawaited(
             _call.stopAudioProcessing().catchError((Object e) {
@@ -2413,14 +2403,13 @@ class CallConnectionCoordinator {
       await _call.clearE2EEManager();
     } finally {
       _call._ringing.release();
-      await _call._streamVideo.state.removeActiveCall(_call);
-      if (_call._streamVideo.state.outgoingCall.value?.callCid ==
-          _call.callCid) {
-        await _call._streamVideo.state.setOutgoingCall(null);
+      await _call._host.state.removeActiveCall(_call);
+      if (_call._host.state.outgoingCall.value?.callCid == _call.callCid) {
+        await _call._host.state.setOutgoingCall(null);
       }
 
-      if (identical(_call._streamVideo.state.incomingCall.value, _call)) {
-        await _call._streamVideo.state.setIncomingCall(null);
+      if (identical(_call._host.state.incomingCall.value, _call)) {
+        await _call._host.state.setIncomingCall(null);
       }
     }
 

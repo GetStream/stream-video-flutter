@@ -49,14 +49,14 @@ void main() {
   group('Call.suspendAudio()', () {
     late BehaviorSubject<InternetStatus> internetStatusController;
     late MockCallSession callSession;
-    late MockStreamVideo mockStreamVideo;
+    late MockCallHost mockStreamVideo;
 
     setUp(() {
       internetStatusController = BehaviorSubject<InternetStatus>.seeded(
         InternetStatus.connected,
       );
       callSession = _mockSessionForAudioSuspension();
-      mockStreamVideo = setupMockStreamVideo();
+      mockStreamVideo = setupMockCallHost();
     });
 
     tearDown(() async => internetStatusController.close());
@@ -120,14 +120,14 @@ void main() {
   group('Call.resumeAudio()', () {
     late BehaviorSubject<InternetStatus> internetStatusController;
     late MockCallSession callSession;
-    late MockStreamVideo mockStreamVideo;
+    late MockCallHost mockStreamVideo;
 
     setUp(() {
       internetStatusController = BehaviorSubject<InternetStatus>.seeded(
         InternetStatus.connected,
       );
       callSession = _mockSessionForAudioSuspension();
-      mockStreamVideo = setupMockStreamVideo();
+      mockStreamVideo = setupMockCallHost();
     });
 
     tearDown(() async => internetStatusController.close());
@@ -209,14 +209,14 @@ void main() {
   group('Call.end()', () {
     late BehaviorSubject<InternetStatus> internetStatusController;
     late MockCallSession callSession;
-    late MockStreamVideo mockStreamVideo;
+    late MockCallHost mockStreamVideo;
 
     setUp(() {
       internetStatusController = BehaviorSubject<InternetStatus>.seeded(
         InternetStatus.connected,
       );
       callSession = setupMockCallSession();
-      mockStreamVideo = setupMockStreamVideo();
+      mockStreamVideo = setupMockCallHost();
     });
 
     tearDown(() async => internetStatusController.close());
@@ -345,7 +345,7 @@ void main() {
           statusStream: internetStatusController,
         ),
         sessionFactory: setupMockSessionFactory(callSession: callSession),
-        streamVideo: setupMockStreamVideo(),
+        streamVideo: setupMockCallHost(),
       );
 
       await call.join();

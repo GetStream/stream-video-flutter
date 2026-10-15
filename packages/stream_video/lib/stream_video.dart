@@ -29,6 +29,7 @@ export 'src/call/call.dart'
     hide BaseCallFactory, CallConnectionCoordinator, CallDebug;
 export 'src/call/call_connect_options.dart';
 export 'src/call/call_events.dart';
+export 'src/call/call_host.dart';
 export 'src/call/call_reject_reason.dart';
 export 'src/call/call_ringing_state.dart' hide GetCallRingStateResponseX;
 export 'src/call/call_type.dart';

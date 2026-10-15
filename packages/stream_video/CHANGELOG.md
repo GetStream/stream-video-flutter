@@ -2,6 +2,7 @@
 
 ### ⚠️ Breaking
 
+- Test mocks that implement `StreamVideo` get a `subtype_of_sealed_class` warning, because `StreamVideo` implements the `@sealed` `CallHost`; add `// ignore: subtype_of_sealed_class` to them.
 - The deprecated `observeCoreCallKitEvents`, `observeCall*CallKitEvent` and `handleVoipPushNotification` methods are removed; use `observeCoreRingingEvents`, `observeCall*RingingEvent` and `handleRingingFlowNotifications` on `StreamVideo.ringing`.
 - Joining a `Call` after it was left or ended fails with `CallLeftException`; a `Call` is single use.
 - The lists emitted by `Call.closedCaptions` are unmodifiable; copy one before changing it.
@@ -73,6 +74,7 @@
 ### 🔄 Changed
 
 - Updated `stream_webrtc_flutter` to `^4.0.0`.
+- `Call`'s factories take a `CallHost`, the part of the client a call uses; `StreamVideo` implements it, so passing a `StreamVideo` still works.
 - `StreamVideo.dispose()` leaves and disposes the calls it tracks, and disconnects the user like `disconnect()` but keeps the push device registered.
 - `StreamVideo.connect()` registers the push device whenever it is asked to, also while the user is connected.
 - `StreamVideo.disconnect()` leaves the user disconnected even when unregistering the push device fails, or when the connection had dropped and was reconnecting.

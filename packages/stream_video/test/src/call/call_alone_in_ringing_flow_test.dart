@@ -83,7 +83,7 @@ void main() {
     call = createTestCall(
       networkMonitor: setupMockInternetConnection(statusStream: internetStatus),
       sessionFactory: setupMockSessionFactory(callSession: callSession),
-      streamVideo: setupMockStreamVideo(),
+      streamVideo: setupMockCallHost(),
       permissionManager: permissionsManager,
       stateManager: stateManager,
     );

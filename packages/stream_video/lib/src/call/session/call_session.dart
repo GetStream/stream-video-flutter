@@ -75,7 +75,7 @@ class CallSession extends Disposable {
     required SdpEditor sdpEditor,
     required this.networkMonitor,
     required this.statsOptions,
-    required StreamVideo streamVideo,
+    required CallHost host,
     required Tracer tracer,
     required StreamPeerConnectionFactory pcFactory,
     required RetryPolicy retryPolicy,
@@ -84,7 +84,7 @@ class CallSession extends Disposable {
     this.joinResponseTimeout = const Duration(seconds: 5),
     this.fastReconnectJoinResponseTimeout = const Duration(seconds: 15),
   }) : _tracer = tracer,
-       _streamVideo = streamVideo,
+       _host = host,
        sfuClient = SfuClient(
          baseUrl: config.sfuUrl,
          sfuToken: config.sfuToken,
@@ -98,8 +98,8 @@ class CallSession extends Disposable {
          sfuWsEndpoint: config.sfuWsEndpoint,
          sessionId: sessionId,
          cid: callCid.value,
-         userId: streamVideo.currentUser.id,
-         apiKey: streamVideo.apiKey,
+         userId: host.currentUser.id,
+         apiKey: host.apiKey,
        ),
        rtcManagerFactory = RtcManagerFactory(
          sessionId: sessionId,
@@ -134,7 +134,7 @@ class CallSession extends Disposable {
 
   final Tracer _tracer;
   final Tracer _zonedTracer = Tracer(null);
-  final StreamVideo _streamVideo;
+  final CallHost _host;
 
   final Duration joinResponseTimeout;
 
@@ -231,7 +231,7 @@ class CallSession extends Disposable {
     String? unifiedSessionId,
     int clientEventRetryCount = 0,
   }) async {
-    final reporter = _streamVideo.clientEventReporter;
+    final reporter = _host.clientEventReporter;
     final wsJoinDetails = ClientEventDetails(sfuId: config.sfuName);
     var wsJoinStageId = '';
 
@@ -375,13 +375,13 @@ class CallSession extends Disposable {
       _logger.v(() => '[start] sfu joined: $event');
 
       // Ensure WebRTC initialization completes before creating rtcManager
-      await _streamVideo.webrtcInitializationCompleter.future;
+      await _host.webrtcInitialized;
 
       if (isAnonymousUser) {
         rtcManager =
             await rtcManagerFactory.makeRtcManager(
                 sfuClient: sfuClient,
-                streamVideo: _streamVideo,
+                host: _host,
                 stateManager: stateManager,
                 clientDetails: clientDetails,
                 sessionSequence: sessionSeq,
@@ -408,7 +408,7 @@ class CallSession extends Disposable {
         rtcManager =
             await rtcManagerFactory.makeRtcManager(
                 sfuClient: sfuClient,
-                streamVideo: _streamVideo,
+                host: _host,
                 stateManager: stateManager,
                 publisherId: localTrackId,
                 publishOptions: joinResponseEvent.publishOptions,
