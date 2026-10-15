@@ -62,6 +62,7 @@ void main() {
 
     when(() => callState.localParticipant).thenReturn(null);
     when(() => callState.isAudioProcessing).thenReturn(false);
+    when(() => call.isAudioProcessorConfigured).thenReturn(true);
     when(
       () => callState.settings,
     ).thenReturn(_settings(NoiseCancellationSettingsMode.available));
@@ -205,6 +206,15 @@ void main() {
 
         expect(find.text('Noise Cancellation'), findsNothing);
         expect(find.byType(StreamSwitch), findsNothing);
+      });
+
+      testWidgets('is left out where no audio processor is configured', (
+        tester,
+      ) async {
+        when(() => call.isAudioProcessorConfigured).thenReturn(false);
+        await pump(tester);
+
+        expect(find.text('Noise Cancellation'), findsNothing);
       });
 
       testWidgets('turning the switch on starts audio processing', (
