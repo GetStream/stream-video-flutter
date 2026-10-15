@@ -92,7 +92,28 @@ void main() {
       expect(built, ['Device', 'Captions', 'Device']);
     });
 
-    testWidgets('opens on initialIndex, kept within the tabs', (tester) async {
+    testWidgets('opens on initialIndex', (tester) async {
+      await pumpWindow(
+        tester,
+        StreamModalWindow(tabs: tabs(), initialIndex: 2),
+      );
+      expect(find.text('Captions content'), findsOneWidget);
+    });
+
+    test('an initialIndex outside the tabs asserts', () {
+      expect(
+        () => StreamModalWindow(tabs: tabs(), initialIndex: 3),
+        throwsAssertionError,
+      );
+      expect(
+        () => StreamModalWindow(tabs: tabs(), initialIndex: -1),
+        throwsAssertionError,
+      );
+    });
+
+    testWidgets('losing the selected tab selects the last one left', (
+      tester,
+    ) async {
       await pumpWindow(
         tester,
         StreamModalWindow(tabs: tabs(), initialIndex: 2),
@@ -101,9 +122,22 @@ void main() {
 
       await pumpWindow(
         tester,
-        StreamModalWindow(key: UniqueKey(), tabs: tabs(), initialIndex: 7),
+        StreamModalWindow(tabs: tabs().take(2).toList()),
       );
-      expect(find.text('Captions content'), findsOneWidget);
+      expect(find.text('Effects content'), findsOneWidget);
+    });
+
+    testWidgets('the title is read out as a heading', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pumpWindow(tester, StreamModalWindow(tabs: tabs()));
+
+      expect(
+        find.semantics.byPredicate(
+          (node) => node.label == 'Device' && node.flagsCollection.isHeader,
+        ),
+        findsOne,
+      );
+      semantics.dispose();
     });
 
     testWidgets('the selected tab is marked selected for screen readers', (
@@ -250,6 +284,28 @@ void main() {
         expect(tester.getSize(tooltipLabel.last), isNot(Size.zero));
       });
 
+      testWidgets('tooltip replaces the label as the tooltip', (tester) async {
+        await pumpWindow(
+          tester,
+          StreamModalWindow(
+            tabs: [
+              StreamModalWindowTab(
+                icon: Icon(const StreamIcons().settingsFill),
+                label: const Text('Device'),
+                tooltip: 'Camera and microphone',
+                builder: (context) => const Text('Device content'),
+              ),
+            ],
+          ),
+          size: narrow,
+        );
+
+        await tester.longPress(find.byIcon(const StreamIcons().settingsFill));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Camera and microphone'), findsOneWidget);
+      });
+
       testWidgets('tapping an icon selects its tab', (tester) async {
         await pumpWindow(tester, StreamModalWindow(tabs: tabs()), size: narrow);
 
@@ -320,6 +376,36 @@ void main() {
           ),
         );
         expect(sidebarWidth(tester), 200);
+      });
+
+      testWidgets('navItemStyle merges with the default row style', (
+        tester,
+      ) async {
+        await pumpWindow(
+          tester,
+          StreamModalWindowTheme(
+            data: const StreamModalWindowThemeData(
+              style: StreamModalWindowStyle(
+                navItemStyle: StreamListTileThemeData(
+                  shape: StadiumBorder(),
+                ),
+              ),
+            ),
+            child: StreamModalWindow(tabs: tabs()),
+          ),
+        );
+
+        final row = tester.element(find.text('Effects'));
+        final rowTheme = StreamListTileTheme.of(row);
+        expect(rowTheme.shape, const StadiumBorder());
+        // The default padding is kept.
+        expect(
+          rowTheme.contentPadding,
+          EdgeInsets.symmetric(
+            horizontal: row.streamSpacing.sm,
+            vertical: row.streamSpacing.xs,
+          ),
+        );
       });
 
       testWidgets('reads the app-wide theme from StreamVideoTheme', (
