@@ -70,6 +70,12 @@ const _idAppState = 2;
 const _defaultCoordinatorRpcUrl = 'https://video.stream-io-api.com';
 const _defaultCoordinatorWsUrl = 'wss://video.stream-io-api.com/video/connect';
 
+/// The scope of one [StreamVideo.runWithoutMedia], open until a client is
+/// built in it or its body completes.
+class _WithoutMediaScope {
+  bool open = true;
+}
+
 /// Handler function used for logging.
 typedef LogHandlerFunction =
     void Function(
@@ -181,24 +187,43 @@ class StreamVideo extends Disposable implements CallHost {
     _setupLogger(priority, handler);
   }
 
-  /// Runs [body], in which every [StreamVideo] built sets up no media: it
-  /// applies no audio configuration, and the calls it creates do not observe
-  /// the media device notifier.
+  /// Runs [body], in which the first [StreamVideo] built sets up no media:
+  /// it applies no audio configuration, and the calls it creates do not
+  /// observe the media device notifier. Clients built after it, or once
+  /// [body] completed, set up media as usual.
   ///
   /// For a client that only handles a push in the background, such as the
   /// one `StreamVideoPushHandler.handleBackgroundMessage` builds. Its calls
   /// cannot be joined: [Call.join] fails with [CallWithoutMediaException].
   static Future<T> runWithoutMedia<T>(FutureOr<T> Function() body) async {
-    return runZoned(body, zoneValues: {_withoutMediaKey: true});
+    final scope = _WithoutMediaScope();
+    try {
+      return await runZoned(body, zoneValues: {_withoutMediaKey: scope});
+    } finally {
+      scope.open = false;
+    }
   }
 
   static final _withoutMediaKey = Object();
 
-  /// Whether a client built in the current zone would set up no media, as
-  /// inside [runWithoutMedia].
+  static _WithoutMediaScope? get _openWithoutMediaScope {
+    final scope = Zone.current[_withoutMediaKey];
+    return scope is _WithoutMediaScope && scope.open ? scope : null;
+  }
+
+  /// Whether the next client built in the current zone would set up no
+  /// media, as inside [runWithoutMedia].
   @visibleForTesting
-  static bool get debugBuildsWithoutMedia =>
-      Zone.current[_withoutMediaKey] == true;
+  static bool get debugBuildsWithoutMedia => _openWithoutMediaScope != null;
+
+  /// Whether a client built now sets up media. Inside [runWithoutMedia],
+  /// the first one does not, and uses the scope up.
+  static bool _claimSetsUpMedia() {
+    final scope = _openWithoutMediaScope;
+    if (scope == null) return true;
+    scope.open = false;
+    return false;
+  }
 
   /// Creates a client unassociated with the singleton, like
   /// [StreamVideo.create].
@@ -248,7 +273,7 @@ class StreamVideo extends Disposable implements CallHost {
     Stream<VideoLifecycleState> Function()? appState,
   }) : _options = options,
        _appStateOverride = appState,
-       setsUpMedia = Zone.current[_withoutMediaKey] != true,
+       setsUpMedia = _claimSetsUpMedia(),
        _state = MutableClientState(
          user,
          allowMultipleActiveCalls: options.allowMultipleActiveCalls,
@@ -367,8 +392,8 @@ class StreamVideo extends Disposable implements CallHost {
     }
   }
 
-  /// Whether this client sets up media. False for a client built inside
-  /// [runWithoutMedia].
+  /// Whether this client sets up media. False for the first client built
+  /// inside [runWithoutMedia].
   @override
   final bool setsUpMedia;
 

@@ -64,7 +64,7 @@
 - `VideoLifecycleState`, the type of `ClientState.appLifecycleState`, is exported.
 - `StreamVideo.ready` completes once the client has started up: audio configured, environment collected and, with `autoConnect`, the connect attempted.
 - `StreamVideo.configureLogging` sets up the SDK's logging without a singleton client.
-- `StreamVideo.runWithoutMedia` builds clients that set up no media, for handling a push in the background; their calls cannot be joined.
+- `StreamVideo.runWithoutMedia` builds a client that sets up no media, for handling a push in the background; its calls cannot be joined.
 - `NetworkMonitorSettings.build()` returns the `InternetConnection` the settings describe.
 - `Call.dispose()` leaves the call if needed and closes its streams.
 - Added `StreamPushPayload`, the wire contract for the push payloads Stream sends: the keys it sets, the `sender` that marks a payload as ours, and predicates for recognising a ringing or missed call push. `handleRingingFlowNotifications` reads payloads through it, so anything that has to recognise a Stream push before handing it over — a background handler deciding whether to build a client, or tracking which call is still ringing — can match on exactly what the SDK matches on instead of restating the format.

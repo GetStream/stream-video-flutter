@@ -92,6 +92,48 @@ void main() {
     return fixture.streamVideo.state.incomingCall.value!;
   }
 
+  group('runWithoutMedia', () {
+    StreamVideo build() {
+      final fixture = StreamVideoFixture();
+      addTearDown(fixture.dispose);
+      return fixture.streamVideo;
+    }
+
+    test('only the first client built in it sets up no media', () async {
+      final (first, second) = await StreamVideo.runWithoutMedia(
+        () => (build(), build()),
+      );
+
+      expect(first.setsUpMedia, isFalse);
+      expect(second.setsUpMedia, isTrue);
+    });
+
+    test(
+      'a client built after it, from code started in it, sets up media',
+      () async {
+        final later = Completer<void>();
+        late StreamVideo built;
+        await StreamVideo.runWithoutMedia(() {
+          unawaited(later.future.then((_) => built = build()));
+        });
+
+        later.complete();
+        await pumpEventQueue();
+
+        expect(built.setsUpMedia, isTrue);
+      },
+    );
+
+    test('a client built after an await in it sets up no media', () async {
+      final client = await StreamVideo.runWithoutMedia(() async {
+        await Future<void>.delayed(Duration.zero);
+        return build();
+      });
+
+      expect(client.setsUpMedia, isFalse);
+    });
+  });
+
   test('declining a ring touches no media', () async {
     final fixture = await StreamVideo.runWithoutMedia(buildFixture);
     addTearDown(fixture.dispose);
