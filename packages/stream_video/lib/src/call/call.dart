@@ -962,7 +962,7 @@ class Call {
   /// Updates the configuration of the call.
   ///
   /// - [startsAt]: The date and time when the call is scheduled to start.
-  /// - [custom]: Custom metadata to be added to the call.
+  /// - [custom]: Custom metadata for the call. Null leaves it as it is.
   /// - [ring]: Ring settings for the call.
   /// - [audio]: Audio settings for the call.
   /// - [video]: Video settings for the call.
@@ -1000,7 +1000,7 @@ class Call {
   }) {
     return _coordinatorClient.updateCall(
       callCid: callCid,
-      custom: custom ?? {},
+      custom: custom,
       startsAt: startsAt,
       ring: ring,
       audio: audio,

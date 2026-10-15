@@ -201,6 +201,43 @@ void main() {
     });
   });
 
+  group('update', () {
+    void stubUpdate() =>
+        when(
+          () => harness.coordinatorClient.updateCall(
+            callCid: any(named: 'callCid'),
+            custom: any(named: 'custom'),
+            transcription: any(named: 'transcription'),
+          ),
+        ).thenAnswer(
+          (_) async =>
+              const Result.failure(StreamVideoException(message: 'no')),
+        );
+
+    test('leaves the custom data out unless it is given', () async {
+      stubUpdate();
+
+      await harness.buildCall().update();
+
+      verify(
+        () => harness.coordinatorClient.updateCall(callCid: cid, custom: null),
+      ).called(1);
+    });
+
+    test('passes the custom data it is given', () async {
+      stubUpdate();
+
+      await harness.buildCall().update(custom: {'topic': 'standup'});
+
+      verify(
+        () => harness.coordinatorClient.updateCall(
+          callCid: cid,
+          custom: {'topic': 'standup'},
+        ),
+      ).called(1);
+    });
+  });
+
   group('state flags', () {
     void stubRecording(Result<None> result) {
       when(
