@@ -15,6 +15,8 @@ import 'settings_switch_row.dart';
 ///   ],
 /// )
 /// ```
+final _logger = taggedLogger(tag: 'SV:DeviceSettings');
+
 class StreamDeviceSettingsTab extends StreamModalWindowTab {
   /// Creates the device tab.
   ///
@@ -185,6 +187,17 @@ class _NoiseCancellation extends StatelessWidget {
     on: state.isAudioProcessing,
   );
 
+  Future<void> _setNoiseCancellation(bool on) async {
+    final result = on
+        ? await call.startAudioProcessing()
+        : await call.stopAudioProcessing();
+    if (result case Failure(:final error)) {
+      _logger.e(
+        () => 'Turning noise cancellation ${on ? 'on' : 'off'} failed: $error',
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final translations = context.translations;
@@ -193,7 +206,9 @@ class _NoiseCancellation extends StatelessWidget {
       call: call,
       selector: _noiseCancellation,
       builder: (context, noiseCancellation) {
-        if (!noiseCancellation.available) return const SizedBox.shrink();
+        if (!noiseCancellation.available || !call.isAudioProcessorConfigured) {
+          return const SizedBox.shrink();
+        }
 
         return Padding(
           padding: EdgeInsets.only(top: context.streamSpacing.xl),
@@ -202,8 +217,7 @@ class _NoiseCancellation extends StatelessWidget {
             description:
                 translations.deviceSettingsNoiseCancellationDescription,
             value: noiseCancellation.on,
-            onChanged: (on) =>
-                on ? call.startAudioProcessing() : call.stopAudioProcessing(),
+            onChanged: (on) => _setNoiseCancellation(on),
           ),
         );
       },
@@ -224,9 +238,24 @@ class _IncomingVideoQualitySelect extends StatefulWidget {
 class _IncomingVideoQualitySelectState
     extends State<_IncomingVideoQualitySelect> {
   // Held so a rebuild doesn't subscribe again.
-  late final _quality = call.incomingVideoQualityStream;
+  late Stream<IncomingVideoQuality> _quality = call.incomingVideoQualityStream;
 
   Call get call => widget.call;
+
+  @override
+  void didUpdateWidget(_IncomingVideoQualitySelect oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.call != oldWidget.call) {
+      _quality = call.incomingVideoQualityStream;
+    }
+  }
+
+  Future<void> _setQuality(IncomingVideoQuality quality) async {
+    final result = await call.setIncomingVideoQuality(quality);
+    if (result case Failure(:final error)) {
+      _logger.e(() => 'Setting the incoming video quality failed: $error');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -252,7 +281,7 @@ class _IncomingVideoQualitySelectState
                       StreamMenuOption(
                         label: value.label(context),
                         selected: value == quality,
-                        onSelected: () => call.setIncomingVideoQuality(value),
+                        onSelected: () => _setQuality(value),
                       ),
                   ],
                 ),

@@ -33,6 +33,7 @@ export 'src/call/call_host.dart';
 export 'src/call/call_reject_reason.dart';
 export 'src/call/call_ringing_state.dart' hide GetCallRingStateResponseX;
 export 'src/call/call_type.dart';
+export 'src/call/incoming_video_quality.dart';
 export 'src/call/session/dynascale_manager.dart';
 export 'src/call/state/call_state_selection.dart';
 export 'src/call/viewport_visibility_registry.dart';

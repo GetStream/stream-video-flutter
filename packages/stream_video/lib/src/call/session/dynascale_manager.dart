@@ -53,6 +53,10 @@ class DynascaleManager {
   late SfuClient sfuClient;
   late String sessionId;
 
+  // Until a session joins there is no SFU to update; the overrides are
+  // applied with the first subscriptions instead.
+  bool _hasSession = false;
+
   final BehaviorSubject<Map<String, SfuSubscriptionDetails>>
   _currentTrackSubscriptionsSubject = BehaviorSubject.seeded({});
 
@@ -80,6 +84,7 @@ class DynascaleManager {
   }) {
     this.sfuClient = sfuClient;
     this.sessionId = sessionId;
+    _hasSession = true;
   }
 
   Map<String, SfuSubscriptionDetails> getTrackSubscriptions({
@@ -193,6 +198,8 @@ class DynascaleManager {
   }
 
   Future<Result<None>> applyTrackSubscriptions() async {
+    if (!_hasSession) return const Result.success(none);
+
     final result = await sfuClient.update(
       sessionId: sessionId,
       subscriptions: getTrackSubscriptions().values,
@@ -255,6 +262,7 @@ class DynascaleManager {
   Future<void> dispose() async {
     await _saBuffer.cancel();
     await _currentTrackSubscriptionsSubject.close();
+    await _videoTrackSubscriptionsOverrides.close();
   }
 }
 

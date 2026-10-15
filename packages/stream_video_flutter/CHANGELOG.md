@@ -28,7 +28,7 @@
 - Added `StreamModalWindow`, a modal window with a sidebar of `StreamModalWindowTab`s that shows one tab at a time. It is a design-system candidate.
 - Added `StreamModalWindowThemeData` on `StreamVideoTheme`, and `StreamModalWindowTheme` to restyle the window over a subtree.
 - Added `StreamDeviceSettingsTab`, a ready-made `StreamModalWindowTab` with the call's device settings, and `StreamDeviceSettings`, its content: a local preview, the camera, microphone and speaker, noise cancellation and the incoming video quality.
-- Added `IncomingVideoQuality`, and `Call.incomingVideoQuality`, `incomingVideoQualityStream` and `setIncomingVideoQuality` to read and set it.
+- Added `IncomingVideoQuality.label`, the quality's name in the app's language.
 - Added `microphoneSections` and `speakerSections` to `LobbyDeviceMenus`, the two halves of `audioSections`.
 - Added device settings and incoming video quality strings to the localizations, in English and Dutch.
 - Added `StreamDesktopScreenShareDialog`, the desktop screen share picker as a widget, so it can be presented some way other than through `showDefaultScreenSelectionDialog`.
