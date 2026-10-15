@@ -4,7 +4,7 @@ Parent issue: [FLU-859](https://linear.app/stream/issue/FLU-859) · Linear proje
 P-FLU-555 · Analysis and decisions:
 [v2 refactoring: StreamVideo and Call](https://claude.ai/code/artifact/8c46054e-44ad-46ef-bcca-9cc834640ad4)
 
-This file tracks the **order** of the 26 sub-issues in the stack and how each one is
+This file tracks the **order** of the 27 sub-issues in the stack and how each one is
 delivered. What a ticket changes is in the ticket itself and in the analysis
 doc. The decisions in FLU-859 are settled; do not reopen them.
 
@@ -62,6 +62,7 @@ stacks.
 | 24 | C4 | `feat/flu-858-app-lifecycle-controller` | #1439 |
 | 25 | B6 | `feat/flu-852-call-host` | #1440 |
 | 26 | C5 | `feat/flu-854-stream-video-constructor` | #1441 |
+| 27 | Fix | `fix/coordinator-socket-leak` | #1456 |
 
 - [x] 1. **A1** [FLU-847](https://linear.app/stream/issue/FLU-847): characterisation tests for Call join, leave and reconnect (M). Gates A2, so it goes first. Ships with this plan.
 - [x] 2. **B4** [FLU-850](https://linear.app/stream/issue/FLU-850): Call pass-throughs to extension methods (S, low risk). Removes about 380 lines from `call.dart` before the risky moves, with no overlap with the connection code.
@@ -89,6 +90,7 @@ stacks.
 - [x] 24. **C4** [FLU-858](https://linear.app/stream/issue/FLU-858): `AppLifecycleController`; background mute and restore moves into Call (S).
 - [x] 25. **B6** [FLU-852](https://linear.app/stream/issue/FLU-852): `CallHost` interface (M). Late on purpose: after C1, B3 and C4 the interface no longer needs the ringing hooks or the mute maps.
 - [x] 26. **C5** [FLU-854](https://linear.app/stream/issue/FLU-854): StreamVideo constructor and options cleanup (M, v2 breaking). Last, because every earlier C ticket wires into the constructor. Also covers a client built for background push handling, which must do no media setup.
+- [x] 27. **Fix** [FLU-980](https://linear.app/stream/issue/FLU-980): connecting while the coordinator socket is dropped leaves a second socket running (S, bug). Found in the stack's device test; on top so the stack is tested as one.
 
 ### Later, outside the stack
 
