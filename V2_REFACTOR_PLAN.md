@@ -56,7 +56,7 @@ stacks.
 | 18 | A7 | `feat/flu-862-call-dispose` | #1429 |
 | 19 | B1 | `feat/flu-848-local-media-controller` | #1434 |
 | 20 | C2 | `feat/flu-853-stream-video-test-seams` | #1435 |
-| 21 | C3 | `fix/flu-857-coordinator-connection` | |
+| 21 | C3 | `fix/flu-857-coordinator-connection` | #1436 |
 | 22 | C1 | `feat/flu-856-ringing-call-coordinator` | |
 | 23 | B3 | `feat/flu-863-call-ringing-controller` | |
 | 24 | C4 | `feat/flu-858-app-lifecycle-controller` | |
@@ -83,7 +83,7 @@ stacks.
 - [x] 18. **A7** [FLU-862](https://linear.app/stream/issue/FLU-862): `Call.dispose` and the single-use-after-leave error (S, v2 breaking).
 - [x] 19. **B1** [FLU-848](https://linear.app/stream/issue/FLU-848): `LocalMediaController` (M). After the A chain, so `_connectOptions` moves once with A2 and then gets one owner here.
 - [x] 20. **C2** [FLU-853](https://linear.app/stream/issue/FLU-853): injection seams in StreamVideo (S). Needed to test C3 and C4.
-- [ ] 21. **C3** [FLU-857](https://linear.app/stream/issue/FLU-857): `CoordinatorConnection` with a real single-flight guard (M). Fixes bug 4.
+- [x] 21. **C3** [FLU-857](https://linear.app/stream/issue/FLU-857): `CoordinatorConnection` with a real single-flight guard (M). Fixes bug 4.
 - [ ] 22. **C1** [FLU-856](https://linear.app/stream/issue/FLU-856): `RingingCallCoordinator` as `streamVideo.ringing` (L, v2 breaking). Its `ensureConnected` callback comes from C3.
 - [ ] 23. **B3** [FLU-863](https://linear.app/stream/issue/FLU-863): `CallRingingController` (M). After C1, which takes the cross-call orchestration from `Call.accept`. The accept waits stop on leave, so a cancelled ring no longer logs a timeout error 25 s later.
 - [ ] 24. **C4** [FLU-858](https://linear.app/stream/issue/FLU-858): `AppLifecycleController`; background mute and restore moves into Call (S).
