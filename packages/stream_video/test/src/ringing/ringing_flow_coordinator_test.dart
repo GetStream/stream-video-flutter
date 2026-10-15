@@ -126,6 +126,43 @@ void main() {
     ),
   );
 
+  /// Builds the client the tests ring, with the accept and the join
+  /// refused unless a test stubs them otherwise.
+  StreamVideoFixture buildFixture({bool allowMultipleActiveCalls = true}) {
+    final fixture = StreamVideoFixture(
+      options: StreamVideoOptions(
+        autoConnect: false,
+        allowMultipleActiveCalls: allowMultipleActiveCalls,
+      ),
+      pushNotificationManagerProvider: (_, _) => push,
+    );
+    when(
+      () => fixture.client.rejectCall(
+        cid: any(named: 'cid'),
+        reason: any(named: 'reason'),
+      ),
+    ).thenAnswer((_) async => const Result.success(none));
+    when(
+      () => fixture.client.acceptCall(cid: any(named: 'cid')),
+    ).thenAnswer((_) async => failureWithError('accept refused'));
+    when(
+      () => fixture.client.joinCall(
+        callCid: any(named: 'callCid'),
+        ringing: any(named: 'ringing'),
+        create: any(named: 'create'),
+        migratingFrom: any(named: 'migratingFrom'),
+        migratingFromList: any(named: 'migratingFromList'),
+        video: any(named: 'video'),
+        membersLimit: any(named: 'membersLimit'),
+        hintHighScaleLivestreamPublisher: any(
+          named: 'hintHighScaleLivestreamPublisher',
+        ),
+        e2ee: any(named: 'e2ee'),
+      ),
+    ).thenAnswer((_) async => failureWithError('join refused'));
+    return fixture;
+  }
+
   setUp(() {
     push = _MockPushNotificationManager();
     nativeEvents = StreamController<RingingEvent>.broadcast();
@@ -154,37 +191,7 @@ void main() {
       ),
     ).thenAnswer((_) async {});
 
-    fixture = StreamVideoFixture(
-      options: StreamVideoOptions(
-        autoConnect: false,
-        allowMultipleActiveCalls: true,
-      ),
-      pushNotificationManagerProvider: (_, _) => push,
-    );
-    when(
-      () => fixture.client.rejectCall(
-        cid: any(named: 'cid'),
-        reason: any(named: 'reason'),
-      ),
-    ).thenAnswer((_) async => const Result.success(none));
-    when(
-      () => fixture.client.acceptCall(cid: any(named: 'cid')),
-    ).thenAnswer((_) async => failureWithError('accept refused'));
-    when(
-      () => fixture.client.joinCall(
-        callCid: any(named: 'callCid'),
-        ringing: any(named: 'ringing'),
-        create: any(named: 'create'),
-        migratingFrom: any(named: 'migratingFrom'),
-        migratingFromList: any(named: 'migratingFromList'),
-        video: any(named: 'video'),
-        membersLimit: any(named: 'membersLimit'),
-        hintHighScaleLivestreamPublisher: any(
-          named: 'hintHighScaleLivestreamPublisher',
-        ),
-        e2ee: any(named: 'e2ee'),
-      ),
-    ).thenAnswer((_) async => failureWithError('join refused'));
+    fixture = buildFixture();
     getCallReturns(metadata());
   });
 
@@ -732,6 +739,73 @@ void main() {
       expect(accepted, isTrue);
       expect(handed, same(call));
       verifyNever(() => fixture.client.acceptCall(cid: any(named: 'cid')));
+    });
+  });
+
+  group('accepting a ring', () {
+    test('cancels the current user\'s outgoing ring of another call', () async {
+      final outgoing = fixture.streamVideo.makeCall(
+        callType: StreamCallType.defaultType(),
+        id: 'outgoing-call',
+      );
+      await fixture.streamVideo.state.setOutgoingCall(outgoing);
+      final incoming = ring();
+
+      await incoming.accept();
+
+      verify(
+        () => fixture.client.rejectCall(
+          cid: outgoing.callCid,
+          reason: CallRejectReason.cancel().value,
+        ),
+      ).called(1);
+      expect(fixture.streamVideo.state.outgoingCall.value, isNull);
+    });
+
+    test(
+      "cancels the current user's ringing outgoing call without leaving it "
+      'again when it is also the active call',
+      () async {
+        await fixture.dispose();
+        fixture = buildFixture(allowMultipleActiveCalls: false);
+        final outgoing = MockCall();
+        when(() => outgoing.callCid).thenReturn(
+          StreamCallCid(cid: 'default:outgoing-call'),
+        );
+        // Rejecting leaves the call, which takes it out of the active calls.
+        when(() => outgoing.reject(reason: any(named: 'reason'))).thenAnswer((
+          _,
+        ) async {
+          await fixture.streamVideo.state.removeActiveCall(outgoing);
+          return const Result.success(none);
+        });
+        when(
+          () => outgoing.leave(reason: any(named: 'reason')),
+        ).thenAnswer((_) async => const Result.success(none));
+        when(outgoing.dispose).thenAnswer((_) async {});
+        // A ringing outgoing call has joined, so it is active as well.
+        await fixture.streamVideo.state.setOutgoingCall(outgoing);
+        await fixture.streamVideo.state.setActiveCall(outgoing);
+        final incoming = ring();
+
+        await incoming.accept();
+
+        verify(
+          () => outgoing.reject(reason: CallRejectReason.cancel()),
+        ).called(1);
+        verifyNever(() => outgoing.leave(reason: any(named: 'reason')));
+        expect(fixture.streamVideo.state.activeCalls.value, isEmpty);
+      },
+    );
+
+    test('marks the call accepted in the same turn when nothing is '
+        'replaced', () {
+      final incoming = ring();
+
+      unawaited(incoming.accept());
+
+      final status = incoming.state.value.status as CallStatusIncoming;
+      expect(status.acceptedByMe, isTrue);
     });
   });
 }

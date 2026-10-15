@@ -168,6 +168,50 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
     );
   }
 
+  /// Clears the way for [call] to be accepted: cancels the current user's
+  /// outgoing ring of another call and, unless several calls may be active,
+  /// leaves the active call. Returns `null` when there is nothing to clear,
+  /// so the accept goes on without waiting.
+  Future<void>? prepareToAccept(Call call) {
+    final outgoingCall = _state.outgoingCall.value;
+    final outgoingToCancel =
+        outgoingCall != null && outgoingCall.callCid != call.callCid
+        ? outgoingCall
+        : null;
+
+    Call? activeToLeave() {
+      if (_options.allowMultipleActiveCalls) return null;
+      final activeCall = _activeCalls.singleOrNull;
+      return activeCall != null && activeCall.callCid != call.callCid
+          ? activeCall
+          : null;
+    }
+
+    if (outgoingToCancel == null && activeToLeave() == null) return null;
+    return _replaceCalls(outgoingToCancel, activeToLeave);
+  }
+
+  /// Cancels [outgoingCall], then leaves the call [activeToLeave] returns.
+  /// That is read after the cancel, which leaves an outgoing call that was
+  /// active already.
+  Future<void> _replaceCalls(
+    Call? outgoingCall,
+    Call? Function() activeToLeave,
+  ) async {
+    if (outgoingCall != null) {
+      _logger.i(() => '[accept] canceling outgoing call: $outgoingCall');
+      await outgoingCall.reject(reason: CallRejectReason.cancel());
+      await _state.setOutgoingCall(null);
+    }
+
+    final activeCall = activeToLeave();
+    if (activeCall != null) {
+      _logger.i(() => '[accept] canceling another active call: $activeCall');
+      await activeCall.leave(reason: DisconnectReason.replaced());
+      await _state.removeActiveCall(activeCall);
+    }
+  }
+
   @override
   StreamSubscription<T>? onRingingEvent<T extends RingingEvent>(
     void Function(T event)? onEvent,
