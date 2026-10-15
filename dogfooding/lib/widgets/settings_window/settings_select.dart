@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
@@ -35,6 +36,8 @@ class SettingsSelect<T> extends StatelessWidget {
   final IconData icon;
 
   final List<SettingsChoice<T>> choices;
+
+  /// The value picked; the field is empty where no choice has it.
   final T value;
   final ValueChanged<T> onChanged;
 
@@ -43,7 +46,7 @@ class SettingsSelect<T> extends StatelessWidget {
     final colorScheme = context.streamColorScheme;
     final textTheme = context.streamTextTheme;
     final spacing = context.streamSpacing;
-    final selected = choices.firstWhere((it) => it.value == value);
+    final selected = choices.firstWhereOrNull((it) => it.value == value);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -88,7 +91,7 @@ class SettingsSelect<T> extends StatelessWidget {
           ],
           builder: (context, handle) => StreamSelectInput(
             leading: Icon(icon),
-            value: selected.label,
+            value: selected?.label,
             expanded: handle.isOpen,
             onPressed: handle.toggle,
           ),
