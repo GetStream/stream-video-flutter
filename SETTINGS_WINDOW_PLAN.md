@@ -66,8 +66,8 @@ commit.
 - [x] `StreamModalWindowTheme`, registered on `StreamVideoTheme`
 - [x] The sidebar collapses to icons below 560
 - [x] Widget tests, including RTL and the collapsed sidebar
-- [x] Goldens, light and dark, wide and collapsed (local; the CI ones come from
-      the `update_goldens` workflow once the branch is pushed)
+- [x] Goldens, light and dark, wide and collapsed, from the `update_goldens`
+      workflow
 - [x] Changelog
 
 ### 2. Settings button and window in dogfooding
