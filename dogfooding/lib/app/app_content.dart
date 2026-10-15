@@ -10,6 +10,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter_l10n.dart';
 
 import '../di/injector.dart';
+import '../l10n/localizations/app_localizations.dart';
 import '../router/router.dart';
 import '../router/routes.dart';
 import '../utils/consts.dart';
@@ -220,11 +221,13 @@ class _StreamDogFoodingAppContentState
         routerConfig: _router,
         theme: _buildTheme(Brightness.light),
         darkTheme: _buildTheme(Brightness.dark),
+        themeMode: _appSettings.themeMode,
         locale: _appSettings.locale,
         // Every language the SDK is translated into.
-        supportedLocales: StreamVideoFlutterLocalizations.supportedLocales,
+        supportedLocales: appSupportedLocales,
         localizationsDelegates: [
           CustomVideoLocalizationsNL.delegate,
+          AppLocalizations.delegate,
           ...StreamVideoFlutterLocalizations.localizationsDelegates,
         ],
         builder: (context, child) {
@@ -242,10 +245,15 @@ class _StreamDogFoodingAppContentState
   ThemeData _buildTheme(Brightness brightness) {
     final baseTheme = ThemeData(brightness: brightness);
     final baseTextTheme = GoogleFonts.interTextTheme(baseTheme.textTheme);
-    final coreTheme = switch (brightness) {
-      .light => StreamTheme.light(),
-      .dark => StreamTheme.dark(),
-    };
+    final brand = _appSettings.accentColor.brand(brightness);
+    final coreTheme = StreamTheme(
+      brightness: brightness,
+      colorScheme: switch (brightness) {
+        _ when brand == null => null,
+        .light => StreamColorScheme.light(brand: brand),
+        .dark => StreamColorScheme.dark(brand: brand),
+      },
+    );
     final videoTheme = switch (brightness) {
       .light => StreamVideoTheme.light(),
       .dark => StreamVideoTheme.dark(),

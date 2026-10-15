@@ -125,7 +125,12 @@ large-screen more menu holds has a new home by the time the menu goes.
 
 ### 8. Theme tab
 
-- [ ] System, light and dark, saved in `AppPreferences`
+- [x] System, light and dark, saved in `AppPreferences` through
+      `AppDisplaySettings`
+- [x] Accent color picker from the Stream palettes; blue is the design
+      system's default and is stored as none
+- [x] Dogfooding's own translations (gen-l10n, English and Dutch) for the
+      language and theme tabs
 
 ### 9. Recordings tab
 
