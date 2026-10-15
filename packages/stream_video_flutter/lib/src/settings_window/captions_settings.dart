@@ -85,7 +85,7 @@ class _StreamCaptionsSettingsState extends State<StreamCaptionsSettings> {
 
   Future<void> _setCaptioning(
     bool on,
-    TranscriptionSettingsLanguage language,
+    TranscriptionSettingsLanguage? language,
   ) async {
     if (_switching) return;
     _switching = true;
@@ -145,7 +145,7 @@ typedef _Captions = ({
   bool canStart,
   bool canStop,
   bool canChangeLanguage,
-  TranscriptionSettingsLanguage language,
+  TranscriptionSettingsLanguage? language,
   ClosedCaptionSettingsMode closedCaptionMode,
   TranscriptionSettingsMode transcriptionMode,
 });
@@ -159,7 +159,8 @@ class _LanguageCard extends StatelessWidget {
 
   static final _logger = taggedLogger(tag: 'SV:CaptionsSettings');
 
-  Future<void> _setLanguage(TranscriptionSettingsLanguage language) async {
+  /// Null sets the call back to no language of its own.
+  Future<void> _setLanguage(TranscriptionSettingsLanguage? language) async {
     final result = await call.update(
       // Sent whole, so the modes in use go along with the new language rather
       // than being reset to their defaults.
@@ -173,6 +174,13 @@ class _LanguageCard extends StatelessWidget {
       _logger.e(() => 'Could not change the captions language: $error');
     }
   }
+
+  static String _label(
+    BuildContext context,
+    TranscriptionSettingsLanguage? language,
+  ) =>
+      language?.label(context) ??
+      context.translations.captionsSettingsLanguageDefault;
 
   @override
   Widget build(BuildContext context) {
@@ -192,9 +200,12 @@ class _LanguageCard extends StatelessWidget {
           sections: [
             StreamMenuSection(
               options: [
-                for (final language in TranscriptionSettingsLanguage.values)
+                for (final language in [
+                  null,
+                  ...TranscriptionSettingsLanguage.values,
+                ])
                   StreamMenuOption(
-                    label: language.label(context),
+                    label: _label(context, language),
                     selected: language == captions.language,
                     onSelected: () => _setLanguage(language),
                   ),
@@ -204,7 +215,7 @@ class _LanguageCard extends StatelessWidget {
           builder: (context, handle) => StreamSelectInput(
             labelText: translations.captionsSettingsLanguage,
             leading: Icon(context.streamIcons.translate),
-            value: captions.language.label(context),
+            value: _label(context, captions.language),
             expanded: handle.isOpen,
             onPressed: captions.canChangeLanguage ? handle.toggle : null,
           ),
