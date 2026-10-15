@@ -67,7 +67,8 @@ void main() {
     await pump(tester, const Locale('en'));
     expect(find.text('Blue'), findsOneWidget);
 
-    await tester.tap(find.bySemanticsLabel('Violet'));
+    // Through the semantics tree, as a screen reader would.
+    tester.semantics.tap(find.semantics.byLabel('Violet'));
     await tester.pumpAndSettle();
 
     expect(

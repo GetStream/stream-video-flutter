@@ -224,7 +224,7 @@ class _StreamDogFoodingAppContentState
         themeMode: _appSettings.themeMode,
         locale: _appSettings.locale,
         // Every language the SDK is translated into.
-        supportedLocales: StreamVideoFlutterLocalizations.supportedLocales,
+        supportedLocales: appSupportedLocales,
         localizationsDelegates: [
           CustomVideoLocalizationsNL.delegate,
           AppLocalizations.delegate,

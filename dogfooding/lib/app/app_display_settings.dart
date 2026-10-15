@@ -2,7 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter_l10n.dart';
 
 import '../core/repos/app_preferences.dart';
+import '../l10n/localizations/app_localizations.dart';
 import 'app_accent_color.dart';
+
+/// The languages the app can be shown in: those that both the app's own
+/// strings and the SDK's are translated to.
+final List<Locale> appSupportedLocales = [
+  for (final locale in StreamVideoFlutterLocalizations.supportedLocales)
+    if (AppLocalizations.supportedLocales.contains(locale)) locale,
+];
 
 /// How the app is shown, as the user picks it in the settings window, kept in
 /// [AppPreferences] so they survive a restart.
@@ -12,7 +20,7 @@ class AppDisplaySettings extends ChangeNotifier {
       _locale = switch (preferences.languageCode) {
         // A language no longer offered falls back to the device's.
         final code?
-            when StreamVideoFlutterLocalizations.supportedLocales.any(
+            when appSupportedLocales.any(
               (it) => it.languageCode == code,
             ) =>
           Locale(code),
