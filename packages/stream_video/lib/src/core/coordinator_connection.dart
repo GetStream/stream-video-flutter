@@ -52,6 +52,10 @@ class CoordinatorConnection {
   bool _pushDeviceUnregistered = false;
   bool _disposed = false;
 
+  /// Whether a connect succeeded, with no disconnect since. The socket's own
+  /// events leave it alone, so a closed or dropped socket keeps it set.
+  bool _userConnected = false;
+
   ConnectionState get _connection => _state.connection.value;
 
   set _connection(ConnectionState newState) {
@@ -159,6 +163,7 @@ class CoordinatorConnection {
     // The socket is up, so the connection stays connected whatever the
     // steps after it do.
     _connection = ConnectionState.connected(_state.currentUser.id);
+    _userConnected = true;
     try {
       _onConnected();
     } catch (e, stk) {
@@ -193,6 +198,7 @@ class CoordinatorConnection {
 
   Future<Result<None>> _disconnect({required bool unregisterPushDevice}) async {
     _logger.i(() => '[disconnect] currentUser.id: ${_state.currentUser.id}');
+    _userConnected = false;
 
     if (unregisterPushDevice && !_pushDeviceUnregistered) {
       try {
@@ -235,14 +241,15 @@ class CoordinatorConnection {
   }
 
   /// Runs [action], such as closing or reopening the socket, while the user
-  /// is connected, in order with the connects and disconnects. The socket may
-  /// be closed meanwhile, as in the background. Fails without running it when
+  /// is connected, in order with the connects and disconnects. The user stays
+  /// connected from a successful connect until a disconnect, also while the
+  /// socket is closed, as in the background. Fails without running it when
   /// the user is not connected by then.
   Future<Result<None>> runWhileUserConnected(
     Future<Result<None>> Function() action,
   ) {
     return _lock.synchronized(() {
-      if (!_connection.isConnected) {
+      if (!_userConnected) {
         _logger.w(() => '[runWhileUserConnected] rejected (not connected)');
         return failureWithError('The user is not connected');
       }

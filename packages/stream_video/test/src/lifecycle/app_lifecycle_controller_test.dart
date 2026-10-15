@@ -86,6 +86,29 @@ void main() {
     verify(fixture.client.openConnection).called(1);
   });
 
+  test(
+    'reopens after a close that the socket reports as a disconnect',
+    () async {
+      await connect();
+      when(fixture.client.closeConnection).thenAnswer((_) async {
+        fixture.events.emit(
+          const CoordinatorDisconnectedEvent(userId: 'test-user'),
+        );
+        await pumpEventQueue();
+        return const Result.success(none);
+      });
+
+      await goTo(VideoLifecycleState.paused);
+      expect(
+        fixture.streamVideo.state.connection.value.isDisconnected,
+        isTrue,
+      );
+      await goTo(VideoLifecycleState.resumed);
+
+      verify(fixture.client.openConnection).called(1);
+    },
+  );
+
   test('records the app state', () async {
     await connect();
 
