@@ -2,9 +2,12 @@
 
 Measures how much each SDK adds to a release app, and how large each package's
 pub.dev archive is. The `sdk_size` workflow runs this on every pull request and
-reports it in two comments, `## SDK Size` and `## Size Breakdown`. Pushes to
-`main` and `v2` store the numbers as that branch's benchmark in
-`GetStream/stream-internal-metrics`.
+reports it in two comments, `## SDK Size` and `## Size Breakdown`. Pull requests
+measure Android only, except `release/` pull requests, which measure both
+platforms and store them as the `release` benchmark. Pushes to `main` and `v2`
+measure both platforms and store the numbers as that branch's benchmark in
+`GetStream/stream-internal-metrics`. A manual run of the workflow measures iOS
+too, but doesn't comment on a pull request.
 
 ## How it works
 
