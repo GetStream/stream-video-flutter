@@ -198,7 +198,7 @@ def render_breakdown(breakdown, benchmark, base_branch, skipped, sha)
            'in the DevTools App Size tool to drill down further.'
   lines << ''
   notes = []
-  notes << "This run doesn't measure #{skipped.join(', ')}." unless skipped.empty?
+  notes << "This run does not measure #{skipped.join(', ')}." unless skipped.empty?
   notes << "No `#{base_branch}` benchmark for the breakdown yet." unless benchmark
   notes.each { |note| lines << note << '' }
   lines << commit_note(sha)
