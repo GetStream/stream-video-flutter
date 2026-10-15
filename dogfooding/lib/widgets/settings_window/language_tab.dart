@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
-import 'package:stream_video_flutter/stream_video_flutter_l10n.dart';
 
 import '../../app/app_display_settings.dart';
 import '../../di/injector.dart';
@@ -45,7 +44,7 @@ class _LanguageSettings extends StatelessWidget {
         icon: context.streamIcons.translate,
         choices: [
           SettingsChoice(value: null, label: l10n.settingsSystem),
-          for (final locale in StreamVideoFlutterLocalizations.supportedLocales)
+          for (final locale in appSupportedLocales)
             SettingsChoice(
               value: locale,
               label: _languageNames[locale.languageCode] ?? locale.toString(),
