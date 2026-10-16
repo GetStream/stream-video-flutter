@@ -94,7 +94,9 @@ class _LivestreamBackstageContentState
   static ({int participantCount, DateTime? startsAt}) _callData(
     CallState state,
   ) => (
-    participantCount: state.callParticipants.length,
+    // The server's count: in a large call the participant list only holds the
+    // few hundred participants the client gets details for.
+    participantCount: state.participantCount,
     startsAt: state.startsAt,
   );
 

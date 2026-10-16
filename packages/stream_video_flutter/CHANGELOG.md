@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🐞 Fixed
+
+- `LivestreamBackstageContent` and `StreamLobbyView` show the call's participant count from the server. They counted the participant list, which stops at a few hundred in large calls.
+
 ## 1.7.1
 
 ### 🐞 Fixed

@@ -131,4 +131,40 @@ void main() {
       expect(updated.ringingMembers, same(initial.ringingMembers));
     },
   );
+
+  test(
+    'CallState.copyFromMetadata takes the session counts before the call is joined',
+    () {
+      final updated = initial.copyFromMetadata(
+        SampleCallData.createCallMetadata(
+          participantsCountByRole: const {'host': 1, 'user': 12000},
+          anonymousParticipantCount: 300,
+        ),
+      );
+
+      expect(updated.participantCount, 12001);
+      expect(updated.anonymousParticipantCount, 300);
+    },
+  );
+
+  test(
+    'CallState.copyFromMetadata keeps the counts the SFU reports once joined',
+    () {
+      final joined = initial.copyWith(
+        status: CallStatus.connected(),
+        participantCount: 12500,
+        anonymousParticipantCount: 310,
+      );
+
+      final updated = joined.copyFromMetadata(
+        SampleCallData.createCallMetadata(
+          participantsCountByRole: const {'host': 1, 'user': 12000},
+          anonymousParticipantCount: 300,
+        ),
+      );
+
+      expect(updated.participantCount, 12500);
+      expect(updated.anonymousParticipantCount, 310);
+    },
+  );
 }

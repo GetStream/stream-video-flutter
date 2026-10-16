@@ -107,6 +107,11 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
     super.dispose();
   }
 
+  // The server's count: the participant list only holds the few hundred
+  // participants the client gets details for, so it undercounts large calls.
+  static int _peopleInCall(CallState state) =>
+      state.participantCount + state.anonymousParticipantCount;
+
   void _fetchCall() {
     // Obtains SFU credentials and picks the best server, but doesn't
     // connect to the call yet.
@@ -250,9 +255,13 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                               ),
-                              child: Text(
-                                'You are about to join a call. ${participants.length} more people are in the call.',
-                                style: textTheme.title3,
+                              child: PartialCallStateBuilder(
+                                call: widget.call,
+                                selector: _peopleInCall,
+                                builder: (context, count) => Text(
+                                  'You are about to join a call. $count more people are in the call.',
+                                  style: textTheme.title3,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 16),
