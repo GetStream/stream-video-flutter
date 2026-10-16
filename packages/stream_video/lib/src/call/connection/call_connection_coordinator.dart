@@ -2391,6 +2391,7 @@ class CallConnectionCoordinator {
       final pcFactory = _pcFactory;
       _pcFactory = null;
       if (pcFactory != null) {
+        await _stopPendingTracksOf(pcFactory);
         unawaited(
           pcFactory.dispose().catchError((Object e) {
             _call._logger.w(() => '[clear] pcFactory dispose failed: $e');
@@ -2414,5 +2415,34 @@ class CallConnectionCoordinator {
     }
 
     _call._logger.v(() => '[clear] completed');
+  }
+
+  /// Stops the tracks the connect options still hold that were opened on
+  /// [pcFactory], before it is disposed.
+  ///
+  /// A track handed over as [TrackOption.provided] that no session adopted —
+  /// the outgoing screen's camera preview, when the call is cancelled while
+  /// ringing — is not stopped by the session's dispose. Its native track dies
+  /// with the factory, and a renderer still showing it then lets go of freed
+  /// memory and crashes the app. Stopping the track first detaches those
+  /// renderers natively. Stopping one twice is harmless, so a track the
+  /// session already stopped, or that its owner stops later, is fine.
+  Future<void> _stopPendingTracksOf(
+    StreamPeerConnectionFactory pcFactory,
+  ) async {
+    final factoryId = pcFactory.nativeFactory?.factoryId;
+    if (factoryId == null) return;
+
+    final options = _call.connectOptions;
+    final tracks = [
+      options.camera.trackOrNull,
+      options.microphone.trackOrNull,
+      options.screenShare.trackOrNull,
+    ].nonNulls.where((track) => track.nativeFactory?.factoryId == factoryId);
+
+    for (final track in tracks) {
+      _call._logger.d(() => '[clear] stopping pending ${track.trackId}');
+      await track.stop();
+    }
   }
 }

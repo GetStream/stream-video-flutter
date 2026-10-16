@@ -1120,15 +1120,16 @@ class Call {
         _logger.v(() => '[performGetOperation] success: $success');
 
         final callMetadata = onSuccess(success.data);
-        unawaited(
-          _media.applyCallSettings(callMetadata.settings).catchError(
-            (dynamic error, StackTrace stackTrace) {
-              _logger.e(
-                () =>
-                    '[performGetOperation] failed to apply call settings: $error, stackTrace: $stackTrace',
-              );
-            },
-          ),
+        // Awaited so the connect options are settled when the caller gets the
+        // call back: the outgoing screen reads the camera preference as soon
+        // as it opens, and the call's defaults would otherwise leave it dark.
+        await _media.applyCallSettings(callMetadata.settings).catchError(
+          (dynamic error, StackTrace stackTrace) {
+            _logger.e(
+              () =>
+                  '[performGetOperation] failed to apply call settings: $error, stackTrace: $stackTrace',
+            );
+          },
         );
 
         return success;
