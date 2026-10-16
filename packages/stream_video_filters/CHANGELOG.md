@@ -4,11 +4,20 @@
 
 ## 1.7.0
 
+### ✅ Added
+
+- `StreamVideoEffectsManager.unregisterAllFilters()` to release native effect processors when filters are no longer needed, e.g. before leaving the call.
+
 ### 🔄 Changed
 
+- Virtual background filters now blur the background while the background image is still loading, and keep blurring it if the image cannot be loaded, instead of sending the raw camera frame.
 - [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
 - Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.
 - [Android] Added the Stream Maven repository (`https://stream-io-repo.com`) to the Android build repositories.
+
+### 🐞 Fixed
+
+- [iOS] Improved performance and stability of background blur and virtual background filters.
 
 ## 1.6.0
 

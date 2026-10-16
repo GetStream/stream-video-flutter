@@ -12,6 +12,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.annotation.Keep
 import com.google.android.gms.tasks.Tasks
+import com.google.android.renderscript.Toolkit
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.segmentation.Segmentation
 import com.google.mlkit.vision.segmentation.SegmentationMask
@@ -23,7 +24,6 @@ import io.getstream.video.flutter.stream_video_filters.common.Segment
 import io.getstream.video.flutter.stream_video_filters.common.VideoFrameProcessorWithBitmapFilter
 import io.getstream.video.flutter.stream_video_filters.common.colouredSegmentInt
 import io.getstream.video.flutter.stream_video_filters.common.getScalingFactors
-import java.io.IOException
 import java.net.URL
 import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicBoolean
@@ -67,8 +67,8 @@ class VirtualBackgroundFactory(
  */
 @Keep
 private class VirtualBackgroundVideoFilter(
-    appContext: Context,
-    backgroundImageUrlString: String,
+    private val appContext: Context,
+    private val backgroundImageUrlString: String,
     foregroundThreshold: Double = DEFAULT_FOREGROUND_THRESHOLD,
 ) : BitmapVideoFilter() {
     private val options =
@@ -99,21 +99,40 @@ private class VirtualBackgroundVideoFilter(
     }
 
 
-    private val virtualBackgroundBitmap by lazy {
-        try {
+    // Loaded on a background thread so a slow URL doesn't block the capture thread.
+    // Null while loading and when the load failed; frames are then processed with a
+    // blurred copy of themselves as the background (see applyFilter).
+    @Volatile
+    private var virtualBackgroundBitmap: Bitmap? = null
+
+    init {
+        Thread { loadBackgroundImage() }.start()
+    }
+
+    private fun loadBackgroundImage() {
+        // URLs may carry signed-access query tokens; log only the host.
+        val host = Uri.parse(backgroundImageUrlString).host ?: "local"
+        val bitmap: Bitmap? = try {
             val uri = Uri.parse(backgroundImageUrlString)
             if (uri.scheme == null) { // this is a local image
                 loadImageAssetAsBitmap(appContext, backgroundImageUrlString)
             } else {
-                val url = URL(backgroundImageUrlString)
-                url.openConnection().getInputStream().use { input ->
+                val connection = URL(backgroundImageUrlString).openConnection().apply {
+                    connectTimeout = REMOTE_IMAGE_TIMEOUT_MS
+                    readTimeout = REMOTE_IMAGE_TIMEOUT_MS
+                }
+                connection.getInputStream().use { input ->
                     BitmapFactory.decodeStream(input)
                 }
             }
-        } catch (e: IOException) {
-            Log.e(TAG, "cant get bitmap for image url: $backgroundImageUrlString", e)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to load virtual-background image (host=$host)", e)
             null
         }
+        if (bitmap == null) {
+            Log.e(TAG, "Virtual-background image is missing or could not be decoded (host=$host)")
+        }
+        virtualBackgroundBitmap = bitmap
     }
 
     private val foregroundPaint by lazy {
@@ -170,7 +189,10 @@ private class VirtualBackgroundVideoFilter(
     private var latestMaskHeight = 0
 
     override fun applyFilter(videoFrameBitmap: Bitmap) {
-        val backgroundImageBitmap = virtualBackgroundBitmap ?: return
+        // Null while the image is still loading or when it failed to load. The frame
+        // is then still processed, with a blurred copy of itself as the background,
+        // so the real background is never sent unfiltered.
+        val backgroundImageBitmap = virtualBackgroundBitmap
 
         if (!isProcessing.getAndSet(true)) {
             // Apply segmentation, starts in webrtc CaptureThread
@@ -185,7 +207,13 @@ private class VirtualBackgroundVideoFilter(
             }
         }
 
-        val mask = segmentationMask ?: return
+        val mask = segmentationMask
+        if (mask == null) {
+            // The first segmentation is still running: blur the whole frame rather
+            // than sending the raw camera image through until a mask arrives.
+            Canvas(videoFrameBitmap).drawBitmap(blurredCopy(videoFrameBitmap), 0f, 0f, null)
+            return
+        }
 
         maybeInit(videoFrameBitmap, backgroundImageBitmap, mask)
 
@@ -212,14 +240,54 @@ private class VirtualBackgroundVideoFilter(
             processedSegmentationMask = mask
         }
 
+        // Resolve the background before the frame is modified below: the fallback
+        // blurs the frame itself.
+        val background = scaledVirtualBackgroundBitmap?.takeUnless { it.isRecycled }
+            ?: blurredCopy(videoFrameBitmap)
+
         val canvas = Canvas(videoFrameBitmap)
         // 1. Punch a hole in the video frame so that only the person is left
         canvas.drawBitmap(scaledForegroundBitmap!!, 0f, 0f, foregroundPaint)
 
-        System.currentTimeMillis()
-        if (scaledVirtualBackgroundBitmap!!.isRecycled) return
-        // 2. Draw the virtual background behind the person
-        canvas.drawBitmap(scaledVirtualBackgroundBitmap!!, 0f, 0f, backgroundPaint)
+        // 2. Draw the virtual background (or the blurred fallback) behind the person
+        canvas.drawBitmap(background, 0f, 0f, backgroundPaint)
+    }
+
+    // Reused by blurredCopy: a half-resolution scratch bitmap and the full-size result.
+    private var fallbackHalfBitmap: Bitmap? = null
+    private var fallbackBitmap: Bitmap? = null
+    private val fallbackDownScaleMatrix by lazy { Matrix().apply { preScale(0.5f, 0.5f) } }
+    private val fallbackUpScaleMatrix by lazy { Matrix().apply { preScale(2f, 2f) } }
+    private val fallbackPaint by lazy { Paint().apply { isFilterBitmap = true } }
+
+    /**
+     * A blurred copy of [frame] at its size, used as the background while the image is
+     * unavailable and as the whole frame while the first mask is still being computed.
+     * Blurs a 0.5-scale copy at [FALLBACK_BLUR_RADIUS], which matches the MEDIUM
+     * background-blur preset and avoids a full-resolution CPU blur on every frame.
+     * The returned bitmap is owned by this filter and reused across frames.
+     */
+    private fun blurredCopy(frame: Bitmap): Bitmap {
+        val halfWidth = (frame.width / 2).coerceAtLeast(1)
+        val halfHeight = (frame.height / 2).coerceAtLeast(1)
+        var half = fallbackHalfBitmap
+        if (half == null || half.width != halfWidth || half.height != halfHeight) {
+            half?.recycle()
+            half = Bitmap.createBitmap(halfWidth, halfHeight, Bitmap.Config.ARGB_8888)
+            fallbackHalfBitmap = half
+        }
+        var result = fallbackBitmap
+        if (result == null || result.width != frame.width || result.height != frame.height) {
+            result?.recycle()
+            result = Bitmap.createBitmap(frame.width, frame.height, Bitmap.Config.ARGB_8888)
+            fallbackBitmap = result
+        }
+
+        Canvas(half).drawBitmap(frame, fallbackDownScaleMatrix, fallbackPaint)
+        val blurredHalf = Toolkit.blur(half, FALLBACK_BLUR_RADIUS)
+        Canvas(result).drawBitmap(blurredHalf, fallbackUpScaleMatrix, fallbackPaint)
+        blurredHalf.recycle()
+        return result
     }
 
     private fun scaleVirtualBackgroundBitmap(bitmap: Bitmap, targetHeight: Int): Bitmap {
@@ -254,16 +322,18 @@ private class VirtualBackgroundVideoFilter(
     }
 
     private fun maybeInit(
-        videoFrameBitmap: Bitmap, backgroundImageBitmap: Bitmap, mask: SegmentationMask
+        videoFrameBitmap: Bitmap, backgroundImageBitmap: Bitmap?, mask: SegmentationMask
     ) {
         var createScale = false
-        if (scaledVirtualBackgroundBitmap == null || scaledForegroundBitmap == null || videoFrameBitmap.width != latestFrameWidth || videoFrameBitmap.height != latestFrameHeight) {
+        if ((scaledVirtualBackgroundBitmap == null && backgroundImageBitmap != null) || scaledForegroundBitmap == null || videoFrameBitmap.width != latestFrameWidth || videoFrameBitmap.height != latestFrameHeight) {
             scaledVirtualBackgroundBitmap?.recycle()
             scaledForegroundBitmap?.recycle()
-            scaledVirtualBackgroundBitmap = scaleVirtualBackgroundBitmap(
-                bitmap = backgroundImageBitmap,
-                targetHeight = videoFrameBitmap.height,
-            )
+            scaledVirtualBackgroundBitmap = backgroundImageBitmap?.let {
+                scaleVirtualBackgroundBitmap(
+                    bitmap = it,
+                    targetHeight = videoFrameBitmap.height,
+                )
+            }
             scaledForegroundBitmap = Bitmap.createBitmap(
                 videoFrameBitmap.width, videoFrameBitmap.height, Bitmap.Config.ARGB_8888
             )
@@ -298,6 +368,10 @@ private class VirtualBackgroundVideoFilter(
 
     companion object {
         private const val TAG = "VirtualBackgroundVideoFilter"
+        // Radius for the 0.5-scale blurred fallback (see blurredCopy): the same scale and
+        // radius as the MEDIUM background-blur preset.
+        private const val FALLBACK_BLUR_RADIUS = 10
+        private const val REMOTE_IMAGE_TIMEOUT_MS = 10_000
     }
 }
 

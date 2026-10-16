@@ -24,4 +24,10 @@ class StreamVideoFilters {
     return StreamVideoFiltersPlatform.instance
         .registerFullFrameBlurEffectProcessor();
   }
+
+  /// Removes every effect processor this plugin registered natively so they
+  /// can be deallocated. Processors must be registered again before use.
+  Future<void> unregisterAllFilters() {
+    return StreamVideoFiltersPlatform.instance.unregisterAllFilters();
+  }
 }

@@ -12,24 +12,53 @@ final class BlurBackgroundVideoFrameProcessor: VideoFilter {
     private lazy var backgroundImageFilterProcessor = { return BackgroundImageFilterProcessor() }()
 
     private let blurParameters: [String: Float]
+    private var loggedBlendFailure = false
+
+    /// The blur runs on a copy scaled by this factor. A Gaussian with radius `r` at
+    /// scale `s` matches radius `r / s` at full resolution, so the radius is scaled
+    /// along with the image to keep each [BlurIntensity] at its full-resolution strength.
+    private static let downscaleFactor: CGFloat = 0.5
 
     init(blurIntensity: BlurIntensity = BlurIntensity.medium) {
-        blurParameters = ["inputRadius": blurIntensity.rawValue]
+        blurParameters = ["inputRadius": blurIntensity.rawValue * Float(Self.downscaleFactor)]
 
         super.init(
             filter: { input in input.originalImage }
         )
 
-        self.filter = { input in
-            // https://developer.apple.com/library/archive/documentation/GraphicsImaging/Reference/CoreImageFilterReference/index.html#//apple_ref/doc/filter/ci/CIGaussianBlur
-            let backgroundImage = input.originalImage.applyingFilter(
-                "CIGaussianBlur", parameters: self.blurParameters)
+        self.filter = { [weak self] input in
+            // `[weak self]`: the closure is stored on `self` — a strong capture would leak the processor.
+            guard let self = self else { return input.originalImage }
+            // Blur at half resolution for speed. clampedToExtent + cropped(to:)
+            // keep the result at the original extent; without them the background
+            // drifts relative to the foreground and the frame edges darken. Plain
+            // bilinear affine scaling is used in both directions: the intermediate is
+            // blurred anyway, so Lanczos resampling would only cost GPU time.
+            let originalExtent = input.originalImage.extent
+            let scale = Self.downscaleFactor
+            let downscaled = input.originalImage
+                .transformed(by: CGAffineTransform(scaleX: scale, y: scale))
+            let blurred =
+                downscaled
+                .clampedToExtent()
+                .applyingFilter("CIGaussianBlur", parameters: self.blurParameters)
+                .cropped(to: downscaled.extent)
+            let backgroundImage = blurred
+                .transformed(by: CGAffineTransform(scaleX: 1 / scale, y: 1 / scale))
+                .cropped(to: originalExtent)
 
-            return self.backgroundImageFilterProcessor
-                .applyFilter(
-                    input.originalPixelBuffer,
-                    backgroundImage: backgroundImage
-                ) ?? input.originalImage
+            if let output = self.backgroundImageFilterProcessor.applyFilter(
+                input.originalPixelBuffer,
+                backgroundImage: backgroundImage
+            ) {
+                return output
+            }
+            // Blend failure: send the blurred frame rather than the unfiltered one.
+            if !self.loggedBlendFailure {
+                self.loggedBlendFailure = true
+                NSLog("Background blur blend failed, sending blurred frame only")
+            }
+            return backgroundImage
         }
     }
 }

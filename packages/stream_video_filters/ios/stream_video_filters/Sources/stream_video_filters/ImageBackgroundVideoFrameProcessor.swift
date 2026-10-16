@@ -28,30 +28,32 @@ final class ImageBackgroundVideoFrameProcessor: VideoFilter {
         }
     }
 
+    private static let supportedUrlSchemes: Set<String> = ["http", "https", "file"]
+
+    /// Blur used behind the person while the background image is still loading, or
+    /// when it failed to load, so the real background is never sent unfiltered.
+    /// Computed on a copy scaled by [fallbackDownscaleFactor]; the radius is scaled
+    /// with it, so this matches radius 10 at full resolution.
+    private static let fallbackDownscaleFactor: CGFloat = 0.5
+    private static let fallbackBlurRadius: Float = 10 * Float(fallbackDownscaleFactor)
+
     private var cachedValue: CacheValue?
     private var backgroundImageUrl: String
+    private var loggedBlendFailure = false
 
     private lazy var backgroundImageFilterProcessor = { return BackgroundImageFilterProcessor() }()
 
-    private lazy var backgroundCIImage: CIImage? = {
-        var bgUIImage: UIImage?
-        // if let url = URL(string: backgroundImageUrl) {
-        // check if its a local asset
-        bgUIImage = UIImage.flutterImage(named: backgroundImageUrl)  //RCTImageFromLocalAssetURL(url)
-        if bgUIImage == nil {
-            // if its not a local asset, then try to get it as a remote asset
-            if let url = URL(string: backgroundImageUrl), let data = try? Data(contentsOf: url) {
-                bgUIImage = UIImage(data: data)
-            } else {
-                NSLog("Failed to convert uri to image: -\(backgroundImageUrl)")
-            }
-        }
-        // }
-        if bgUIImage != nil {
-            return CIImage.init(image: bgUIImage!)
-        }
-        return nil
-    }()
+    // Loaded on a background queue so a slow URL doesn't block the capture thread.
+    // NSLock because the load thread writes it and the capture thread reads it.
+    private let backgroundImageLock = NSLock()
+    private var _backgroundCIImage: CIImage?
+    private var backgroundImageTask: URLSessionDataTask?
+
+    private var backgroundCIImage: CIImage? {
+        backgroundImageLock.lock()
+        defer { backgroundImageLock.unlock() }
+        return _backgroundCIImage
+    }
 
     @available(*, unavailable)
     override public init(
@@ -64,21 +66,111 @@ final class ImageBackgroundVideoFrameProcessor: VideoFilter {
             filter: { input in input.originalImage }
         )
 
-        self.filter = { input in
-            guard let bgImage = self.backgroundCIImage else { return input.originalImage }
-            let cachedBackgroundImage = self.backgroundImage(
-                image: bgImage, originalImage: input.originalImage,
-                originalImageOrientation: input.originalImageOrientation)
-
-            let outputImage: CIImage =
-                self.backgroundImageFilterProcessor
-                .applyFilter(
-                    input.originalPixelBuffer,
-                    backgroundImage: cachedBackgroundImage
-                ) ?? input.originalImage
-
-            return outputImage
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            self?.loadBackgroundImage()
         }
+
+        self.filter = { [weak self] input in
+            // `[weak self]`: the closure is stored on `self` — a strong capture would leak the processor.
+            guard let self = self else { return input.originalImage }
+
+            let backgroundImage: CIImage
+            if let bgImage = self.backgroundCIImage {
+                backgroundImage = self.backgroundImage(
+                    image: bgImage, originalImage: input.originalImage,
+                    originalImageOrientation: input.originalImageOrientation)
+            } else {
+                // Still loading, or the load failed: cover the real background with a
+                // blur instead of passing the camera image through unfiltered.
+                backgroundImage = Self.blurredFallbackBackground(for: input.originalImage)
+            }
+
+            if let output = self.backgroundImageFilterProcessor.applyFilter(
+                input.originalPixelBuffer,
+                backgroundImage: backgroundImage
+            ) {
+                return output
+            }
+            // Blend failure: send the background rather than the unfiltered frame.
+            if !self.loggedBlendFailure {
+                self.loggedBlendFailure = true
+                NSLog("Virtual background blend failed, sending background only")
+            }
+            return backgroundImage.cropped(to: input.originalImage.extent)
+        }
+    }
+
+    /// A blurred copy of `image`, at its extent. Same recipe as the background blur
+    /// filter: half resolution, clamped before blurring and cropped after so the
+    /// edges don't darken.
+    private static func blurredFallbackBackground(for image: CIImage) -> CIImage {
+        let scale = fallbackDownscaleFactor
+        let downscaled = image.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
+        return
+            downscaled
+            .clampedToExtent()
+            .applyingFilter("CIGaussianBlur", parameters: [kCIInputRadiusKey: fallbackBlurRadius])
+            .cropped(to: downscaled.extent)
+            .transformed(by: CGAffineTransform(scaleX: 1 / scale, y: 1 / scale))
+            .cropped(to: image.extent)
+    }
+
+    private func loadBackgroundImage() {
+        // Check if it's a Flutter asset first.
+        if let bgUIImage = UIImage.flutterImage(named: backgroundImageUrl) {
+            setBackgroundImage(bgUIImage)
+            return
+        }
+        // If it's not a local asset, try to fetch it as a remote asset. Only hand
+        // real URLs to URLSession: a plain asset path that failed the lookup above
+        // would otherwise be treated as a relative URL and fail after a round trip
+        // with a misleading network error.
+        let parsedUrl = URL(string: backgroundImageUrl)
+        guard
+            let url = parsedUrl,
+            let scheme = url.scheme?.lowercased(),
+            Self.supportedUrlSchemes.contains(scheme)
+        else {
+            // The string may carry a signed-access query token; log scheme and host only.
+            let location = [parsedUrl?.scheme, parsedUrl?.host]
+                .compactMap { $0 }
+                .joined(separator: "://")
+            NSLog(
+                "Failed to load virtual-background image: not a bundled Flutter asset and not an http(s)/file URL (\(location.isEmpty ? "unparseable" : location))"
+            )
+            return
+        }
+        // Bounded so a hanging remote URL doesn't keep the processor alive.
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 10
+        let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            // `[weak self]`: if the processor is released while the task is in flight
+            // (deinit calls cancel()), the closure no-ops and the task is freed.
+            guard let self = self else { return }
+            guard let data = data, let bgUIImage = UIImage(data: data) else {
+                // URLs may carry signed-access query tokens; log only the host.
+                let host = url.host ?? "local"
+                let status = (response as? HTTPURLResponse).map { " status=\($0.statusCode)" } ?? ""
+                let reason =
+                    error?.localizedDescription
+                    ?? (data == nil ? "no data received" : "data is not a decodable image")
+                NSLog("Failed to load virtual-background image (host=\(host)\(status)): \(reason)")
+                return
+            }
+            self.setBackgroundImage(bgUIImage)
+        }
+        backgroundImageTask = task
+        task.resume()
+    }
+
+    private func setBackgroundImage(_ image: UIImage) {
+        backgroundImageLock.lock()
+        _backgroundCIImage = CIImage(image: image)
+        backgroundImageLock.unlock()
+    }
+
+    deinit {
+        backgroundImageTask?.cancel()
     }
 
     /// Returns the cached or processed background image for a given original image (frame image).
