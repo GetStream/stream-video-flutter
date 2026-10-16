@@ -205,8 +205,20 @@ case "$ACTION" in
 
   timeout)
     info "letting the ring time out — nothing is tapped"
-    if wait_log "$ANDROID_LOG" "\[reject\] reason: timeout" 90 "$RMARK"; then
-      pass "timeout-$CASE" "an unanswered ring times out and rejects the call"
+    # Both ends count down the same ~25s: the callee rejects, the caller
+    # cancels, and whichever fires first ends the ring. The callee only wins
+    # when its timer started with the ring, which needs the coordinator socket
+    # to deliver `call.ring`. On Android 15+ a cached background app has no
+    # network, so a background or killed callee learns of the ring from the
+    # push, starts its timer seconds late, and the caller's cancel always wins.
+    # Either is the ring expiring; the result says which.
+    CANCEL_PAT="ringing cancelled by the caller, cid: default:${CALL_ID:-[A-Za-z0-9_-]+}"
+    if wait_log "$ANDROID_LOG" "\[reject\] reason: timeout|$CANCEL_PAT" 90 "$RMARK"; then
+      if tail -n "+$RMARK" "$ANDROID_LOG" | grep -qE "\[reject\] reason: timeout"; then
+        pass "timeout-$CASE" "an unanswered ring times out and rejects the call (callee's timer)"
+      else
+        pass "timeout-$CASE" "an unanswered ring times out and the caller cancels it (caller's timer)"
+      fi
     else
       fail "timeout-$CASE" "the ring never timed out"
     fi

@@ -40,16 +40,15 @@ fi
 # then worked. Every one of these events means a frame did not come out the far
 # side intact, and the SDK logs them at error/warn precisely so they are visible
 # here. Scoped to this call so an earlier round cannot colour it.
-E2EE_ERRS=$(tail -n "+$E2EE_MARK" "$ANDROID_LOG" 2>/dev/null \
-  | grep -cE "\[e2ee\].*(missingKey|decryptionFailed|encryptionFailed|unsupportedVersion|decryptionStalled|unencryptedFrame)|\[attach(En|De)cryptor\] failed")
+E2EE_ERRS=$(tail -n "+$E2EE_MARK" "$ANDROID_LOG" 2>/dev/null | grep -cE "$E2EE_BAD_RE")
 if [ "${E2EE_ERRS:-0}" = "0" ]; then
-  pass "e2ee-clean-android" "No decryption failures or cleartext frames on Android"
+  pass "e2ee-clean-android" "No decryption failures or cleartext frames on Android while in the call"
 else
   fail "e2ee-clean-android" "$E2EE_ERRS encryption/decryption error events during the encrypted call"
 fi
-IOS_ERRS=$(grep -cE "\[e2ee\].*(missingKey|decryptionFailed|encryptionFailed|unsupportedVersion|decryptionStalled|unencryptedFrame)|\[attach(En|De)cryptor\] failed" "$IOS_LOG" 2>/dev/null)
+IOS_ERRS=$(tail -n "+$IOS_E2EE_MARK" "$IOS_LOG" 2>/dev/null | grep -cE "$E2EE_BAD_RE")
 if [ "${IOS_ERRS:-0}" = "0" ]; then
-  pass "e2ee-clean-ios" "No decryption failures or cleartext frames on iOS"
+  pass "e2ee-clean-ios" "No decryption failures or cleartext frames on iOS while in the call"
 else
   fail "e2ee-clean-ios" "$IOS_ERRS encryption/decryption error events during the encrypted call"
 fi
@@ -61,6 +60,11 @@ anr_check "e2ee-android"
 # No sheets are open in this round, but tap_until is still the right tool: it
 # confirms from the log that the leave actually happened rather than assuming
 # one tap landed.
+# Mark iOS before Android leaves. Teardown is its own risk: Android disposes its
+# encryptors before it closes its peer connections, and a frame sent in between
+# reaches iOS in cleartext. report.sh judges that window as
+# e2ee-teardown-clean-ios, once iOS has left too.
+echo "IOS_E2EE_TEARDOWN_MARK=$(logline "$IOS_LOG")" >>"$SMOKE_DIR/env.sh"
 M=$(logline "$ANDROID_LOG")
 if tap_until $A_END_X $A_TOP_Y "$ANDROID_LOG" "\[leave\] reason|\[clear\] src: disconnect" 4 12; then
   pass "e2ee-leave-android" "Android left the encrypted call cleanly"

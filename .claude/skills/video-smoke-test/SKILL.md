@@ -63,10 +63,12 @@ is affected either way.
 
 1. **Do not investigate failures during the run.** A check fails, you record it and move on.
    Root-cause only if the user asks afterwards.
-2. **Do not read logs looking for problems.** The scripts assert what matters. Do not grep for
-   extra errors, do not comment on warnings.
+2. **Do not read logs looking for problems yourself — `report.sh`'s log digest does it.** The
+   scripts assert what matters, and the digest lists every SDK warning/error and app crash that
+   `scripts/log_noise.tsv` does not explain. Relay its UNEXPLAINED section; do not grep beyond it
+   during the run. If the user asks afterwards, digging into an entry is fair game.
 3. **Do not interpret screenshots.** They are evidence for the human. The only screenshots you look
-   at are the one in step 4 and the encrypted lobby in step 9, and both are checked against a
+   at are the two in step 4 and the encrypted lobby in step 9, and each is checked against a
    stated expectation rather than read for problems. Reading the Android accessibility tree is not
    screenshot interpretation and is what the scripts already do.
 4. **Do not improvise coordinates.** Every tap is in a table here. If a tap misses, report `FAIL`
@@ -77,7 +79,7 @@ is affected either way.
    closes the sheet; a third leaves the call.
 7. **Out of scope:** ringing, CallKit, push, screen sharing. Do not test them and do not list them
    as gaps.
-8. If a setup phase (preflight, launch, android_join) exits non-zero, **stop** and report the
+8. If a setup phase (preflight, launch, android_join, the iOS join in step 4) fails, **stop** and report the
    `FATAL:` or `FAIL` line it ended on. Do not repair the environment beyond what the scripts
    already do — except for one case the scripts themselves warn about: if `launch.sh` printed
    `WARN: permissions not granted`, grant them and retry the phase once, because a permission
@@ -107,7 +109,7 @@ is affected either way.
 ```
 
 Pins the emulator serial (so a plugged-in phone cannot break the run), forces Flutter's Swift
-Package Manager off (the iOS build cannot link with it on), and pre-grants mic/camera/notification/
+Package Manager on (the dogfooding iOS app is SPM-only; with it off Flutter falls back to CocoaPods), and pre-grants mic/camera/notification/
 phone permissions on both platforms so system dialogs cannot swallow taps. On `FATAL:`, relay that
 line and stop.
 
@@ -123,7 +125,7 @@ permission surfaces three steps later as "Lobby did not open".
 .claude/skills/video-smoke-test/scripts/launch.sh
 ```
 
-Blocks until both report a Dart VM Service. Cold iOS run ~10 min (CocoaPods + compile); warm ~1 min.
+Blocks until both report a Dart VM Service. Cold iOS run ~10 min (SPM resolve + compile); warm ~1 min.
 Wipes Android app state so the login screen is guaranteed. It waits — do not poll it.
 
 ### 3. Android: log in and create the call
@@ -143,6 +145,14 @@ is fixed at creation, so "Start New Call" only opens the lobby and `getOrCreateC
 Take one screenshot. Confirm the tool reports a **402x874** coordinate space — if not, stop and ask
 for an iPhone 17 simulator, because these coordinates will not work.
 
+**Pace every iOS action.** The debug build renders slowly on the simulator: a tap lands, but the
+screen it produces can take a second or two to draw, and a screenshot taken straight after it still
+shows the old screen. Wait **~2 s after every tap** before the next tap, `text` or screenshot, and
+**never repeat a tap because the screen looks unchanged** — the first one almost certainly landed,
+and the repeat toggles it back (it closes the chat panel it opened, or lands on whatever the new
+screen has at that spot). The same goes for `text`: it only types into a field that already has
+focus, so it needs the 2 s after the field tap.
+
 Then pick a branch:
 
 - Shows **"Enter user ID"** → do 4a, then 4b.
@@ -157,25 +167,40 @@ Then pick a branch:
 | 1 | tap user ID field | `201, 532` |
 | 2 | type | `smoke_b1` |
 | 3 | tap "Sign up with username" | `201, 594` |
-| 4 | tap **Allow** on the notifications dialog | `275, 543` |
+| 4 | wait ~3 s, take one screenshot | |
+| 5 | **only if** the notifications dialog is showing: tap **Allow** | `275, 543` |
 
-Row 4 is not optional. iOS asks for notification permission the first time the app reaches the home
-screen, and preflight's pre-grant does not cover it. The dialog sits over the call-id field, so
-without dismissing it every tap in 4b lands on the dialog.
+Rows 4–5: on a simulator that has never granted it, iOS asks for notification permission the first
+time the app reaches the home screen, and preflight's pre-grant does not cover it. The dialog sits
+over the call-id field, so without dismissing it every tap in 4b lands on the dialog. Once granted it
+never comes back — and then a blind tap at `275, 543` lands on the right edge of the call-id field,
+which is why it is conditional. This screenshot is checked against that one expectation only.
 
 **4b. Join by call ID**
 
 | # | Action | Coordinate |
 |---|--------|-----------|
-| 1 | tap "Enter call id" field | `131, 622` |
+| 1 | tap "Enter call id" field | `144, 568` |
 | 2 | type | the `CALL_ID` from step 3 |
-| 3 | tap "Join call" | `325, 621` |
-| 4 | swipe up `201, 700` → `201, 480` | |
-| 5 | tap "Start a test call" | `201, 778` |
+| 3 | wait ~2 s, take one screenshot | check it for an on-screen keyboard — see below |
+| 4 | tap "Join call" | `337, 568` |
+| 5 | wait ~3 s for the lobby | |
+| 6 | tap "Start a test call" | `201, 786` |
 
-Row 4 is not optional either, and it is new. The lobby's end-to-end-encryption card pushed the join
-button past the bottom of the screen, so without the swipe the tap lands on the cut-off edge or
-misses entirely.
+Row 3 is checked against one expectation only: **no on-screen keyboard**. Every iOS coordinate in
+this skill assumes the Simulator shows none. If one is up, it lifts the layout as soon as a field
+has focus — the call-id field, the encrypted lobby's key field, the chat composer — and the taps
+that follow land on the keyboard or in empty space while the log shows a perfectly healthy app.
+Row 3 is the first moment a field has focus, so it is the cheapest place to catch it. If a keyboard
+is showing, **stop**: run `stop.sh`, report `FATAL: iOS on-screen keyboard is showing`, and ask the
+user to turn it off in the Simulator — I/O > Keyboard > **Connect Hardware Keyboard** (⇧⌘K) on, and
+**Toggle Software Keyboard** (⌘K) off. Both have to be right: the software-keyboard toggle shows the
+keyboard even with a hardware keyboard connected. The call-id field now holds text, so the rerun
+starts again from step 1.
+
+No swipe: the plain-call lobby fits on screen, and "Start a test call" is fully visible. `201, 778`
+— the old position — is the bottom edge of **Direct Call** on the home screen, so a row 4 that
+misses turns row 6 into a ringing call.
 
 Confirm with **one** command — do not screenshot to check:
 
@@ -183,7 +208,11 @@ Confirm with **one** command — do not screenshot to check:
 grep -c sfuJoinResponse /tmp/stream-video-smoke/ios.log
 ```
 
-Non-zero means joined. Zero means `FAIL join-ios`; record it and continue anyway.
+Non-zero means joined. Zero means `FAIL join-ios`, and **the run stops there**: every check from
+step 5 on is two-party (peer seen, dominant speaker, chat delivery, E2EE decrypt), so with one side
+missing they would fail or pass for reasons that say nothing about the SDK. Run `stop.sh` (see "If
+the run is abandoned partway") and report the checks that passed so far plus `join-ios` failed. Do
+not run `report.sh` — it asserts an iOS leave that never had a join to follow.
 
 ### 5. Android: all in-call checks
 
@@ -199,28 +228,33 @@ enter+restore, the full network-loss reconnect cycle, and chat send plus its del
 The audio checks talk out loud through the Mac's speakers — that is the script, not a stray
 process. It stops on its own.
 
-**Run it exactly once per call.** The chat step deliberately leaves the chat sheet open, so a second
-run's early taps would land on that sheet instead of the control bar.
+**Run it exactly once per call.** The chat step deliberately leaves the chat panel open, so a second
+run's early taps would land on that panel instead of the call screen.
 
 ### 6. iOS: mute, unmute, chat, leave
 
-Control bar is at **y = 818**. If iOS is not showing the call, tap the app icon at `247, 223`.
+Control bar is at **y = 803**: more `36` · mic `84` · camera `132` · participants `318` · chat
+`366`. If iOS is not showing the call, tap the app icon at `247, 223`.
 
-Row 7 is not optional. The chat sheet opened in row 3 covers the lower screen and dims the rest;
-END CALL is visible above it but sits under the sheet's scrim, so tapping it just dismisses the
-sheet and the call keeps running. Swipe the sheet away first.
+Rows 7 and 8 tap the same spot on purpose. Chat is a full-height panel, not a sheet: it replaces the
+call's top bar, and its close X sits exactly where END CALL is. The first tap closes chat, the
+second ends the call — so wait the full 2 s between them, or the second tap lands mid-transition.
 
 | # | Action | Coordinate | Why |
 |---|--------|-----------|-----|
-| 1 | tap mic (mute) | `158, 818` | must take the Apple ADM mute path, not stop the track |
-| 2 | wait ~2s, tap mic (unmute) | `158, 818` | |
-| 3 | tap chat | `371, 818` | opens the chat sheet |
-| 4 | tap composer | `227, 815` | |
+| 1 | tap mic (mute) | `84, 803` | must take the Apple ADM mute path, not stop the track |
+| 2 | wait ~2s, tap mic (unmute) | `84, 803` | |
+| 3 | tap chat | `366, 803` | opens the chat panel |
+| 4 | tap composer | `227, 728` | |
 | 5 | type | `smoke_ios_1` | exact string — `finish.sh` greps for it |
-| 6 | tap send | `361, 818` | |
-| 7 | swipe down `201, 325` → `201, 790` | grabber → below | closes the chat sheet; END CALL is behind its scrim and a tap there is eaten by the sheet |
-| 8 | tap end call | `371, 90` | |
-| 9 | dismiss the feedback modal | `362, 181` | a "We Value Your Feedback!" sheet appears after every leave and blocks the screen |
+| 6 | tap send | `362, 728` | the send arrow appears inside the composer once it has text |
+| 7 | tap the chat panel's X | `366, 98` | closes chat; END CALL is hidden while it is open |
+| 8 | tap end call | `366, 98` | |
+| 9 | dismiss the feedback modal | `362, 201` | a "We Value Your Feedback!" modal appears after every leave and blocks the screen |
+
+With the call screen showing, `227, 728` is the collapsed "Your Meeting is Live!" banner, and a tap
+there expands it over the call. That only happens if row 3 did not open chat; leave it, it does not
+affect the checks.
 
 Do not verify any of this yourself — `finish.sh` asserts it from the log.
 
@@ -257,15 +291,19 @@ Android browsable intent does.
 | # | Action | Value |
 |---|--------|-------|
 | 1 | `open_url` | `https://pronto.getstream.io/join/<E2EE_CALL_ID>` |
-| 2 | tap the "Shared room key" field | `177, 746` |
-| 3 | type | the `E2EE_KEY` from step 8 |
-| 4 | swipe up `201, 600` → `201, 330` | |
-| 5 | tap "Start a test call" | `201, 778` |
+| 2 | wait ~4 s, take one screenshot | check it against the expectation below |
+| 3 | tap the "Shared room key" field | `184, 687` |
+| 4 | type | the `E2EE_KEY` from step 8 |
+| 5 | tap "Start a test call" | `201, 835` |
 
-The lobby must show a **green** lock, the title "End-to-end encryption" with no switch, and the
-hint "Ask the call creator for the shared key". That is the created-and-encrypted variant. A grey
-lock with "This call was created without encryption" means the link opened the wrong call — check
-the id before typing the key.
+No swipe: the whole encrypted lobby fits on screen. "Start a test call" is greyed out until the key
+field has text.
+
+The lobby must show a **blue, closed** lock, the title "End-to-end encryption" with no switch, an
+empty "Shared room key" field, and the hint "Ask the call creator for the shared key, then enter it
+here to join." That is the created-and-encrypted variant. An **open** lock with a switch and "This
+call was created without encryption" means the link opened the wrong call — check the id before
+typing the key.
 
 Do not screenshot to confirm the join; step 10 asserts it.
 
@@ -284,8 +322,8 @@ present while that script runs:
 
 | # | Action | Coordinate |
 |---|--------|-----------|
-| 1 | tap end call | `371, 90` |
-| 2 | dismiss the feedback modal | `362, 181` |
+| 1 | tap end call | `366, 98` |
+| 2 | dismiss the feedback modal | `362, 201` |
 
 ### 11. Report
 
@@ -321,9 +359,17 @@ Terminal only, in this order, nothing more:
    rows that passed: the point is that the reader sees the whole surface that was covered, not
    only the damage.
 3. One sentence per failure on what it means for the SDK. No speculation about cause.
-4. The screenshot directory path.
+4. **The log digest's UNEXPLAINED section, relayed verbatim**, then one sentence per entry that
+   looks like an SDK defect rather than a known quirk. Skip the EXPECTED section unless asked —
+   it is there so a reader can audit what was excused.
+5. The screenshot directory path.
 
-If everything passed, the table plus one sentence is the whole report. No padding, no
+An UNEXPLAINED entry is not a failure and does not change the exit code. Do **not** add a rule to
+`log_noise.tsv` to make one go away on your own: propose it, with the reason, and add it once the
+user agrees the line is benign.
+
+If everything passed and the digest has nothing unexplained, the table plus one sentence is the
+whole report. No padding, no
 recommendations, no suggested follow-ups unless something failed. Publish an artifact **only if
 asked**.
 
@@ -365,10 +411,15 @@ asked**.
 | `e2ee-manager-*` | both attach an encryption manager before any peer connection exists |
 | `e2ee-encrypt-*` | both attach an encryptor to what they publish — the SDK refuses to publish cleartext, so a miss means no encryptor or a refused publish |
 | `e2ee-decrypt-*` | each side attached a decryptor **for the peer** — only possible once the peer's encrypted media actually arrived, so this is the half a single client cannot prove |
-| `e2ee-clean-*` | no missing-key, decryption-failure or cleartext-frame event fired on either side |
+| `e2ee-clean-*` | no missing-key, decryption-failure or cleartext-frame event fired on either side while both were in the call |
+| `e2ee-teardown-clean-ios` | no cleartext or undecryptable frame reached iOS while the encrypted call was torn down — Android leaves first, so this is media escaping encryption on the way out |
 | `e2ee-leave-*` | the encrypted call tears down on both sides |
 
 ## Traps already handled (do not "fix" these)
+
+- **The log digest dedupes on the SDK's own timestamp, not on the logcat line.** The Android
+  capture repeats a block of lines, so counting raw lines doubles every number. Windows are by
+  time for the same reason — line-number marks land in the wrong copy.
 
 These are encoded in the scripts for reasons found the hard way:
 
@@ -380,8 +431,9 @@ These are encoded in the scripts for reasons found the hard way:
 - **Labelled controls are resolved from the accessibility tree, not from pixels.** The same #1312
   change pushed the lobby's "Start a test call" down 195px and every tap from the old table landed
   in dead space. Do not convert `ui_tap` calls back into coordinates to "make them faster".
-- **Enabling encryption pushes the lobby's join button off-screen** on both platforms. Android
-  scrolls with `ui_scroll_to`; the iOS tables have an explicit swipe row. Neither is a defect.
+- **Enabling encryption grows the Android lobby's card** and moves its join button; Android finds it
+  with `ui_scroll_to` and taps it by label. The iOS lobbies fit on screen in both variants, so the
+  iOS tables have no swipe.
 - **Noise cancellation and closed captions are asserted from the sheet, not the log.** The SFU noise
   cancellation RPC logs at verbose and closed captions only log on failure, and the app runs at
   `Priority.debug` — so in the success case there is nothing in the log at all, and a log-based
@@ -394,9 +446,29 @@ These are encoded in the scripts for reasons found the hard way:
 - **iOS joins the encrypted call by deep link, not by typing the id.** The call-id field still holds
   the plain call's id and cannot be cleared with the available tools. On iOS `open_url` opens the
   app directly, so unlike the Android browsable intent there is no Safari detour.
-- **The iOS notification dialog appears after the first login** and preflight's pre-grant does not
-  cover it. It covers the call-id field, so an undismissed dialog reads as "the join taps did
-  nothing".
+- **The iOS notification dialog appears after the first login** on a simulator that has never
+  granted it, and preflight's pre-grant does not cover it. It covers the call-id field, so an
+  undismissed dialog reads as "the join taps did nothing". Step 4a checks for it before tapping
+  Allow, because once granted it never returns and the blind tap would hit the call-id field.
+- **The iOS screenshot lags the tap.** The debug build draws the next screen a second or two after
+  the tap lands, so a screenshot taken immediately shows the old screen. Re-tapping because of that
+  undoes the first tap. Step 4's pacing rule exists for this.
+- **`text` on iOS only reaches a field that already has focus.** Sent too soon after the field tap,
+  the characters go nowhere and the field stays empty.
+- **An iOS on-screen keyboard silently breaks every tap after a text field.** It lifts the layout,
+  so "Join call", the encrypted lobby's "Start a test call" and the chat send button all move, and
+  the taps land on the keyboard instead. Nothing fails loudly: the log shows the text arriving
+  (chat even logs `typing.start`) and then no join or send at all, which reads like an SDK defect.
+  Two separate Simulator toggles cause it — Connect Hardware Keyboard (⇧⌘K) off, or Toggle Software
+  Keyboard (⌘K) on — and only the first one lands in a `defaults` key a script could read. Step 4b
+  row 3 checks for it with a screenshot instead.
+- **E2EE events are matched by their wire names** (`e2ee.unencrypted_frame`), held once in
+  `E2EE_BAD_RE` in `lib.sh`. The log prints the event's wire name, never the Dart enum name
+  (`unencryptedFrame`); a pattern built on the enum names matched nothing, so `e2ee-clean-*` passed
+  over a cleartext frame.
+- **E2EE teardown is judged separately, in `report.sh`.** `e2ee-clean-*` runs while both sides are
+  still in the call, so it cannot see a frame sent while one of them leaves. `e2ee_verify.sh` marks
+  the iOS log just before Android leaves; `report.sh` checks that window once iOS has left too.
 - **`e2ee-peer-seen` deliberately does not exist.** `assert_two_participants` counts distinct user
   ids across the whole log, and both rounds use the same two users, so in the encrypted round it
   would pass on the plain call's participants without the peer ever arriving. `e2ee-decrypt-android`
@@ -409,12 +481,19 @@ These are encoded in the scripts for reasons found the hard way:
 - Navigation taps use `tap_until` (retry until the log confirms), never a fixed `sleep`.
 - Selecting a **filter leaves the options sheet open**; selecting a **reaction closes it**. The stats
   step relies on the sheet still being open — do not add a `MORE` tap between them.
-- **A modal sheet eats the first tap outside it.** The chat sheet (iOS and Android) and the options
-  sheet (Android) are modal: a tap on the dimmed area only closes that sheet, it does not reach the
-  control underneath. iOS closes the chat sheet with a swipe (step 6, row 7); Android's `finish.sh`
-  uses `tap_until` on END CALL so the first taps peel off the sheets and the last one lands.
-- The stats screen is left via the **top-left** back arrow. The top-right X sits ~16px from END CALL,
-  and if stats ever fails to open that tap silently ends the call.
+- **Chat and stats put their close X exactly where END CALL is.** Chat is a full-height panel on both
+  platforms, and stats a full screen on Android; both replace the call's top bar, and both close
+  with an X at END CALL's position. iOS taps that spot twice in step 6 (close chat, then leave), and
+  Android's `finish.sh` uses `tap_until` on END CALL so the first tap closes chat and a later one
+  lands. Stats has no other way out any more, so `android_checks.sh` taps its X **only after**
+  confirming the stats screen opened ("Call latency" in the tree) — if stats failed to open, that
+  same tap would silently end the call.
+- **The Android options sheet covers the control bar.** It reaches down to y=2361, so a MORE tap to
+  close it lands on its "Incoming video quality" row instead. `close_options_sheet` closes it with
+  the sheet's own labelled "Close" X, and is a no-op when the sheet is already gone.
+- **The options-sheet toggles are labelled "Noise cancellation On/Off" and "Closed captions
+  On/Off"** — no "Toggle" prefix any more. `ui_find` matches case-sensitively, so a stale pattern
+  does not fail: it reports the row as not offered and the check silently skips.
 - PiP is detected from the task's current `mode=pinned`, never from a `PICTURE_IN_PICTURE_ENTER`
   logcat line (stale forever) or from `windowingMode=pinned` (does not match in practice).
 - **Chat receipt is asserted from the receiver's `message.new` event, never from the message text.**
@@ -467,3 +546,8 @@ These are encoded in the scripts for reasons found the hard way:
 accessibility-tree dump), `shots/*.png`. Reset by `launch.sh`, so re-running it after a failed
 attempt starts a clean report.
 `service-leak.txt` is written only when `no-service-leak` fails.
+
+`scripts/log_digest.py` builds the digest; `scripts/log_noise.tsv` is the known-noise list it
+excuses (platform, scope, regex, reason). A `reconnect`-scoped rule only applies between
+`RECONNECT_FROM` and `RECONNECT_TO`, which `android_checks.sh` writes to `env.sh` around the
+network-loss step — so a DNS failure anywhere else in the run is still listed.

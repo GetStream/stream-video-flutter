@@ -397,7 +397,7 @@ asked**.
 | `telecom-timeout-*` | Telecom is released when a ring expires |
 | `telecom-answer-*` | Telecom recorded the answer, tagged app-initiated rather than echoed back |
 | `telecom-reject-*` | a decline disconnects Telecom with `REJECTED` (`cause=6`) |
-| `timeout-*` | an unanswered ring expires and rejects the call |
+| `timeout-*` | an unanswered ring expires — by the callee's timer or the caller's cancel; the result line says which |
 | `missed-notif-*` | a missed call notification is shown after a ring nobody answered |
 | `ring-fgs-stopped-*` | the ringing foreground service does not outlive the call |
 | `no-ring-service-leak` / `no-notif-leak` / `no-telecom-leak` | nothing orphaned once every ring is over |
@@ -480,6 +480,15 @@ asked**.
 - **A ring that times out looks like a decline.** The SDK ends an unaccepted call by rejecting it, so
   `lifecycleCallDisconnected`, `Rejected{byUserId: <self>}` and even Telecom's `cause=6` all appear
   without anyone touching the UI. Only assert a *user* decline inside a short window after the tap.
+- **An unanswered ring is ended by whichever side's timer fires first.** The callee rejects
+  (`[reject] reason: timeout`) and the caller cancels (`ringing cancelled by the caller`) on the same
+  ~25s clock. The callee only starts its timer with the ring when the coordinator socket delivers
+  `call.ring`, and on Android 15+ a cached background app has no network at all
+  (`dumpsys netpolicy`: `blocked=APP_BACKGROUND`), whatever `keepConnectionsAliveWhenInBackground`
+  says. A background or killed callee therefore hears of the ring from the push, starts its timer
+  seconds late, and the caller always wins; in the foreground the two race within ~150ms. So
+  `timeout-*` accepts either end, and its result line names the timer that fired. Requiring the
+  callee's own reject fails `background-timeout` and `terminated-timeout` on every branch.
 - **`lifecycleCallAccepted` is never logged.** An accept goes
   `lifecycleCallConnecting` -> `lifecycleCallJoining` -> `sfuJoinResponse`; waiting on
   "accepted" fails on an accept that plainly worked.

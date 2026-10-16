@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Phase 1 — build and launch both apps, then block until both are actually up.
-# First iOS run pays a CocoaPods + full compile cost (~10 min); later runs are fast.
+# First iOS run pays an SPM resolve + full compile cost (~10 min); later runs are fast.
 cd "$(dirname "$0")" && . ./lib.sh
 . "$SMOKE_DIR/env.sh"
 cd "$(git rev-parse --show-toplevel)/dogfooding" || exit 1
@@ -53,11 +53,7 @@ fi
 if wait_log "$IOS_LOG" "Dart VM Service on" 900; then
   pass "boot-ios" "iOS app launched"
 else
-  if grep -qE "requires minimum platform version" "$IOS_LOG"; then
-    fail "boot-ios" "iOS build failed on SPM platform floor — run: flutter config --no-enable-swift-package-manager"
-  else
-    fail "boot-ios" "iOS app did not launch — see $IOS_LOG"
-  fi
+  fail "boot-ios" "iOS app did not launch — see $IOS_LOG"
 fi
 
 # The decisive grant: flutter's install has just reset runtime permissions, so

@@ -213,8 +213,8 @@ ui_find() { _ui_pick "$1" xy; }
 
 # ui_label <extended-regex> — the full label text of the first matching node.
 # This is how a control's own state is read when the SDK logs nothing: the
-# options sheet renders "Toggle Noise Cancellation Off" and flips the trailing
-# word, so the sheet itself is the assertion.
+# options sheet renders "Noise cancellation Off" and flips the trailing word,
+# so the sheet itself is the assertion.
 ui_label() { _ui_pick "$1" label; }
 
 # ui_wait <regex> [timeout] — poll until a matching label is on screen.
@@ -343,6 +343,19 @@ assert_menu_toggle() {
   done
   fail "$id" "$desc (stayed '"'"'$before'"'"')"
   return 1
+}
+
+# close_options_sheet — close the in-call options sheet if it is open.
+#
+# Not by tapping MORE again: the sheet now reaches down over the control bar,
+# so that tap lands on its "Incoming video quality" row. The sheet has its own
+# labelled "Close" X; the coordinate is the fallback. A no-op when the sheet is
+# already closed, which is what it is after the stats screen returns.
+close_options_sheet() {
+  ui_dump || true
+  [ -n "$(ui_find '^Raise hand$')" ] || return 0
+  ui_tap "^Close$" 5 || tap $A_SHEET_CLOSE_X $A_SHEET_CLOSE_Y
+  sleep 2
 }
 
 # dismiss_feedback — clear the "We Value Your Feedback!" modal that follows
@@ -520,6 +533,17 @@ router_ok() {
     | grep -qE "GoException|no routes for location|popped the last page"
 }
 
+# ---------------------------------------------------------------- e2ee
+# E2EE_BAD_RE — every e2ee event that means a frame did not come out the far
+# side intact, plus a failed cryptor attach.
+#
+# Match the WIRE names (`e2ee.unencrypted_frame`), not the Dart enum names
+# (`unencryptedFrame`): CallE2EE logs the E2eeEvent itself, and its toString
+# prints the wire name. The enum spelling never appears in any log, so a check
+# built on it passes no matter what happened — which is how a cleartext audio
+# frame went unreported.
+E2EE_BAD_RE='\[e2ee\].*e2ee\.(missing_key|decryption_failed|encryption_failed|unsupported_version|decryption_stalled|unencrypted_frame)|\[attach(En|De)cryptor\] failed'
+
 # ---------------------------------------------------------------- chat
 # android_chat_send <message> <mark-line>
 # Types <message> into the already-open Android chat composer and taps SEND
@@ -530,7 +554,7 @@ router_ok() {
 # Two traps this encodes:
 #  * Whether the soft keyboard opens after `input text` is not under our
 #    control (Gboard on this AVD sometimes shows only its floating toolbar),
-#    and that moves the composer between y=2293 (keyboard closed) and y=1434
+#    and that moves the composer between y=2067 (keyboard closed) and y=1436
 #    (keyboard open). One fixed tap missed the button, the text sat in the
 #    composer as a draft, and a stray tap in finish.sh sent it a minute later.
 #  * Never assert the send by grepping logcat for the bare message text:
@@ -545,8 +569,11 @@ android_chat_send() {
   pat="I flutter.*(\"text\":\"$msg\"|, $msg, regular)"
   adb shell input text "$msg"; sleep 2
   for i in 1 2 3 4; do
-    if [ $((i % 2)) = 1 ]; then tap $A_CHAT_SEND_X $A_CHAT_INPUT2_Y
-    else                        tap $A_CHAT_SEND_X $A_CHAT_INPUT_Y; fi
+    # SEND only exists once there is text, and it carries a label, so the tree
+    # finds it wherever the keyboard left it. The rows are the fallback.
+    if ui_tap "^Send message$" 3; then :
+    elif [ $((i % 2)) = 1 ]; then tap $A_CHAT_SEND_X $A_CHAT_INPUT2_Y
+    else                          tap $A_CHAT_SEND_X $A_CHAT_INPUT_Y; fi
     if wait_log "$ANDROID_LOG" "$pat" 8 "$from"; then return 0; fi
     info "retry $i/4: chat send tap produced no outgoing message request"
   done
@@ -688,51 +715,61 @@ stop_bg() {
 stop_all_bg() { stop_bg logcat android_run ios_run; }
 
 # ---------------------------------------------------------------- reference coords
-# In-call bottom control bar (y=2300): more / share / mic / camera / people / chat
-A_MORE=98;   A_SHARE=255; A_MIC=413;  A_CAM=570;  A_PEOPLE=841; A_CHAT=998
-A_BAR_Y=2300
-# Top bar (y=215)
-A_END_X=998; A_TOP_Y=215
+# Measured from the accessibility tree on a 1080x2424 AVD (2026-10-15). When a
+# layout moves, re-measure with `uiautomator dump` — every Flutter control shows
+# up as a clickable node with bounds even when it carries no label.
+#
+# In-call bottom control bar (y=2267): more / mic / camera ... people / chat.
+# There is no screen-share button on the bar any more; it is a row in the
+# options sheet now.
+A_MORE=95;   A_MIC=221;  A_CAM=347;  A_PEOPLE=859; A_CHAT=985
+A_BAR_Y=2267
+# Top bar (y=237). The chat panel and the stats screen put their close X at the
+# same spot as END CALL — see the stats step for why that matters.
+A_END_X=985; A_TOP_Y=237
 # Login screen (reached deterministically via `pm clear`)
-A_USER_X=539;   A_USER_Y=1469
-A_SIGNUP_X=539; A_SIGNUP_Y=1632
+A_USER_X=540;   A_USER_Y=1473
+A_SIGNUP_X=540; A_SIGNUP_Y=1639
 # Home screen. Reference positions only: everything here carries a semantics
 # label, so the scripts resolve it with ui_find/ui_tap and these are the
 # fallback for the very first tap, before a tree is worth dumping.
-A_START_NEW_X=540; A_START_NEW_Y=1876
-A_CALLID_X=359;    A_CALLID_Y=1687
-A_JOIN_X=878;      A_JOIN_Y=1687
-# Lobby. "Start a test call" moved 2084 -> 2279 when #1312 added the E2EE card
-# above it; it is addressed by label now, and this is only a fallback.
-A_TESTCALL_X=540;  A_TESTCALL_Y=2279
+A_START_NEW_X=540; A_START_NEW_Y=1894
+A_CALLID_X=403;    A_CALLID_Y=1545
+A_JOIN_X=922;      A_JOIN_Y=1545
+# Lobby, encryption off. "Start a test call" is addressed by label; this is
+# only a fallback. Turning encryption on re-centres the page and moves it to
+# y=2255, which is why it is never tapped by coordinate.
+A_TESTCALL_X=540;  A_TESTCALL_Y=2100
 # Lobby E2EE card. The switch itself is a bare Switch.adaptive with no label of
 # its own, so it is the one lobby control that has to stay a coordinate. It sits
 # on the row titled "End-to-end encryption", at the right-hand edge of the card.
-A_E2EE_SW_X=890;   A_E2EE_SW_Y=1830
+A_E2EE_SW_X=917;   A_E2EE_SW_Y=1858
 # Options sheet. The reaction row and the filter row are icon-only — no labels
 # in the tree at all — so those two stay coordinates. The rows below them are
 # labelled and are tapped with ui_tap; the y values are kept as documentation of
 # the sheet's running order, which is what makes a mis-tap readable.
-A_REACT_X=224;     A_REACT_Y=413      # first reaction (party popper)
-A_BLUR_X=217;      A_BLUR_Y=688       # blur filter (2nd icon; 1st is "none")
-A_RAISE_Y=544                         # ✋ Raise hand
-A_NC_Y=838                            # Toggle Noise Cancellation
-A_AUDIO_OUT_Y=985                     # Choose audio output
-A_CC_Y=1132                           # Toggle Closed Caption
-A_STATS_X=202;     A_STATS_Y=1279
-A_IVQ_Y=1941                          # Incoming video quality
-# Leave the stats screen with the top-LEFT back arrow, never the top-right X.
-# The X sits ~16px from the call screen's END CALL button, so if the stats screen
-# ever fails to open, that tap silently ends the call. The top-left position is
-# the harmless layout-toggle button on the call screen.
-A_STATS_BACK_X=73
+#
+# The sheet now reaches down to y=2361, over the control bar: with it open, a
+# tap at A_MORE,A_BAR_Y lands on "Incoming video quality", not on MORE. Close it
+# with close_options_sheet, never by tapping MORE again.
+A_REACT_X=267;     A_REACT_Y=870      # first reaction (party popper)
+A_RAISE_Y=1017                        # Raise hand
+A_BLUR_X=191;      A_BLUR_Y=1174      # blur filter (2nd icon; 1st is "none")
+A_NC_Y=1290                           # Noise cancellation On/Off
+A_CC_Y=1416                           # Closed captions On/Off
+A_SCREENSHARE_Y=1542                  # Screen share On/Off
+A_RECORD_Y=1668                       # Record call On/Off
+A_STATS_X=540;     A_STATS_Y=1794
+A_IVQ_Y=2235                          # Incoming video quality
+A_SHEET_CLOSE_X=95; A_SHEET_CLOSE_Y=713   # the sheet's own "Close" X, top-left
 # A "We Value Your Feedback!" modal appears after leaving a call on BOTH
 # platforms. It blocks the home screen until dismissed.
-A_FEEDBACK_X=973; A_FEEDBACK_Y=541
-# Chat sheet
-A_CHAT_INPUT_Y=2293      # composer, keyboard closed (also the SEND row)
-A_CHAT_INPUT2_Y=1434     # composer, keyboard open (also the SEND row)
-# The keyboard does not always open — android_chat_send taps both rows rather
-# than assuming which one is live.
-A_CHAT_INPUT_X=605
-A_CHAT_SEND_X=974
+A_FEEDBACK_X=975; A_FEEDBACK_Y=597
+# Chat panel. It is no longer a modal sheet: it fills the area above the control
+# bar, which stays live, and its header X replaces END CALL at A_END_X,A_TOP_Y.
+A_CHAT_INPUT_Y=2067      # composer, keyboard closed (also the SEND row)
+A_CHAT_INPUT2_Y=1436     # composer, keyboard open (also the SEND row)
+# The keyboard does not always open — android_chat_send taps SEND by its label
+# and only falls back to these two rows.
+A_CHAT_INPUT_X=550
+A_CHAT_SEND_X=975
