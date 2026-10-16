@@ -358,6 +358,9 @@ class CallState extends Equatable {
     bool updateMembers = true,
   }) {
     final capabilities = metadata.details.ownCapabilities.toList();
+    // Once joined, the SFU reports the counts; until then the coordinator's
+    // session counts are the only source.
+    final countsFromSession = !status.isConnected && !status.isJoined;
 
     return copyWith(
       isBackstage: metadata.details.backstage,
@@ -385,6 +388,12 @@ class CallState extends Equatable {
       liveStartedAt: metadata.session.liveStartedAt,
       liveEndedAt: metadata.session.liveEndedAt,
       timerEndsAt: metadata.session.timerEndsAt,
+      participantCount: countsFromSession
+          ? metadata.session.participantsCountByRole.values.sum
+          : null,
+      anonymousParticipantCount: countsFromSession
+          ? metadata.session.anonymousParticipantCount
+          : null,
       capabilitiesByRole: changedCapabilitiesByRoleOrNull(
         this.capabilitiesByRole,
         capabilitiesByRole,
