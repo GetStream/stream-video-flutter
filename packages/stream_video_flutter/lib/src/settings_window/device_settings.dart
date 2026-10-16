@@ -217,7 +217,7 @@ class _NoiseCancellation extends StatelessWidget {
             description:
                 translations.deviceSettingsNoiseCancellationDescription,
             value: noiseCancellation.on,
-            onChanged: (on) => _setNoiseCancellation(on),
+            onChanged: _setNoiseCancellation,
           ),
         );
       },
