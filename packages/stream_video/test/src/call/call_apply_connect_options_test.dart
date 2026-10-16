@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
@@ -354,6 +355,52 @@ void main() {
         ),
       );
     });
+
+    // The outgoing screen previews the camera on the call's own factory and
+    // hands the track over while ringing. Cancelled before pickup, no session
+    // adopts it, and a renderer still bound to it crashed natively once the
+    // factory was freed under it.
+    test(
+      'stops a track handed over while ringing before disposing its factory',
+      () async {
+        CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+        addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+
+        final events = <String>[];
+        const channel = MethodChannel('FlutterWebRTC.Method');
+        final messenger =
+            TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+        messenger.setMockMethodCallHandler(channel, (call) async {
+          switch (call.method) {
+            case 'createPeerConnectionFactory':
+              return {'factoryId': 'factory-1'};
+            case 'disposePeerConnectionFactory':
+              events.add('factory disposed');
+          }
+          return null;
+        });
+        addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+
+        final call = harness.buildCall(status: CallStatus.outgoing());
+        final nativeFactory = await call.ensureNativeFactory();
+
+        final preview = MockRtcLocalTrack();
+        when(() => preview.trackId).thenReturn('local:video');
+        when(() => preview.nativeFactory).thenReturn(nativeFactory);
+        when(preview.stop).thenAnswer((_) async => events.add('track stopped'));
+        call.setConnectOptions(
+          call.connectOptions.copyWith(camera: TrackOption.provided(preview)),
+        );
+
+        final joining = call.join();
+        await pumpEventQueue();
+        await call.leave();
+        await joining;
+        await pumpEventQueue();
+
+        expect(events, ['track stopped', 'factory disposed']);
+      },
+    );
 
     test(
       'fails once the join applied its options, and changes nothing',
