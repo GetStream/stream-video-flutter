@@ -162,10 +162,11 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
     final sharing = state.localParticipant?.isScreenShareEnabled ?? false;
 
     return [
-      // Absent where the call is not configured for it, rather than offered
-      // as a switch that does nothing.
+      // Absent where the call or the client is not configured for it, rather
+      // than offered as a switch that does nothing.
       if (state.settings.audio.noiseCancellation?.mode !=
-          NoiseCancellationSettingsMode.disabled)
+              NoiseCancellationSettingsMode.disabled &&
+          call.isAudioProcessorConfigured)
         StreamMenuOption(
           label: 'Noise cancellation',
           leading: Icon(icons.audio),
