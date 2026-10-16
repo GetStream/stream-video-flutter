@@ -64,15 +64,19 @@ enum EventType {
 
   const EventType(this.alias);
 
+  /// Returns [EventType.unknown] for types the SDK does not handle, such as
+  /// chat events arriving on a socket shared with Stream Chat.
   factory EventType.fromAlias(dynamic alias) {
-    return EventType.values.firstWhere(
-      (e) => e.alias == alias,
-      orElse: () {
-        streamLog.w(_tag, () => '[fromAlias] unexpected alias: $alias');
-        return EventType.unknown;
-      },
-    );
+    final type = _byAlias[alias];
+    if (type != null) return type;
+
+    streamLog.v(_tag, () => '[fromAlias] unhandled alias: $alias');
+    return EventType.unknown;
   }
+
+  static final Map<String, EventType> _byAlias = {
+    for (final type in EventType.values) type.alias: type,
+  };
 
   final String alias;
 }

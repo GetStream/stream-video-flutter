@@ -3,6 +3,7 @@
 ### 🐞 Fixed
 
 - `CallState.endedAt` is now set when the call ends while you are joined or watching it.
+- Events the video SDK does not handle, such as chat events on a shared connection, are now logged at verbose instead of as a warning.
 
 ## 1.7.1
 
