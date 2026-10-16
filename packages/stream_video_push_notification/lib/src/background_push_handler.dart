@@ -340,16 +340,16 @@ class StreamVideoPushHandler {
       // ends, or another device answers. The push manager then ends the
       // native call silently, so none of the events above ever arrives.
       session.ringEnds = streamVideo.events.listen((event) {
-        final endsRing = switch (event) {
-          CoordinatorCallRejectedEvent() ||
-          CoordinatorCallEndedEvent() ||
-          CoordinatorCallMissedEvent() ||
-          CoordinatorCallAcceptedEvent() => true,
-          _ => false,
+        final callCid = switch (event) {
+          CoordinatorCallRejectedEvent(:final callCid) ||
+          CoordinatorCallEndedEvent(:final callCid) ||
+          CoordinatorCallMissedEvent(:final callCid) ||
+          CoordinatorCallAcceptedEvent(:final callCid) => callCid,
+          _ => null,
         };
-        if (!endsRing || event is! CoordinatorCallEvent) return;
+        if (callCid == null) return;
 
-        if (session.markEnded(event.callCid.value)) {
+        if (session.markEnded(callCid.value)) {
           session.releaseAfter(resolutionGrace);
         }
       });
@@ -395,12 +395,23 @@ class _BackgroundSession {
   /// The ringing flows still waiting on the user, by call cid.
   final pendingRings = <String>{};
 
-  /// The pending rings the backend says may have ended, by call cid.
+  /// The pending rings the backend says may have ended, by call cid, with how
+  /// many times their native call has been checked since.
   ///
   /// Only a hint: a rejection by one member of a group call leaves the ring
-  /// up for the others. Whether it really ended is read off the native call
-  /// at release time, which the push manager has ended by then if it did.
-  final endedRings = <String>{};
+  /// up for the others. Whether it really ended is read off the native call,
+  /// and the push manager removes that asynchronously: `endCall` only sends a
+  /// broadcast, which a backgrounded app may handle well after a release falls
+  /// due. So a ring still shown is checked again, up to
+  /// [_maxEndedRingChecks] times.
+  final endedRings = <String, int>{};
+
+  /// How many times a ring with an end hint is checked before the hint is
+  /// dropped and the ring left to its user.
+  ///
+  /// Enough to outlast a slow decline broadcast; a group-call ring that really
+  /// stays up costs this many extra checks rather than a leak.
+  static const _maxEndedRingChecks = 5;
 
   bool _released = false;
 
@@ -435,45 +446,62 @@ class _BackgroundSession {
   bool markEnded(String? callCid) {
     if (callCid == null || !pendingRings.contains(callCid)) return false;
 
-    endedRings.add(callCid);
+    // A fresh signal earns the ring a fresh round of checks.
+    endedRings[callCid] = 0;
     return true;
   }
 
   /// Lets go of the rings that ended without the user, so they no longer hold
-  /// the client.
+  /// the client, and reports whether any is still worth checking again.
   ///
   /// A ring counts as ended once the backend said so and its native call is
   /// gone. The native call alone is not enough: a ring that just arrived may
   /// not be posted yet.
-  Future<void> _dropEndedRings() async {
-    final candidates = pendingRings.intersection(endedRings);
-    if (candidates.isEmpty) return;
+  Future<bool> _dropEndedRings() async {
+    final candidates = pendingRings.intersection(endedRings.keys.toSet());
+    if (candidates.isEmpty) return false;
 
-    final List<CallData> nativeCalls;
+    Set<String?>? shown;
     try {
-      nativeCalls =
+      final nativeCalls =
           await streamVideo.pushNotificationManager?.activeCalls() ?? const [];
+      shown = nativeCalls.map((call) => call.callCid).toSet();
     } catch (e) {
-      // Keeping a ring too long costs a client; ending one early drops a
-      // call the user may still answer.
+      // Not knowing is not a reason to end a call the user may still answer,
+      // nor to keep the client for good: check again, like a ring still shown.
       streamLog.w(
         StreamVideoPushHandler._tag,
         () => '[dropEndedRings] could not read the native calls: $e',
       );
-      return;
     }
 
-    final shown = nativeCalls.map((call) => call.callCid).toSet();
+    var recheck = false;
     for (final cid in candidates) {
-      endedRings.remove(cid);
-      if (shown.contains(cid)) continue;
+      if (shown != null && !shown.contains(cid)) {
+        streamLog.d(
+          StreamVideoPushHandler._tag,
+          () => '[dropEndedRings] ring ended without the user: $cid',
+        );
+        endedRings.remove(cid);
+        pendingRings.remove(cid);
+        continue;
+      }
 
-      streamLog.d(
-        StreamVideoPushHandler._tag,
-        () => '[dropEndedRings] ring ended without the user: $cid',
-      );
-      pendingRings.remove(cid);
+      final checks = (endedRings[cid] ?? 0) + 1;
+      if (checks >= _maxEndedRingChecks) {
+        streamLog.d(
+          StreamVideoPushHandler._tag,
+          () => '[dropEndedRings] ring still up after $checks checks: $cid',
+        );
+        endedRings.remove(cid);
+        continue;
+      }
+
+      endedRings[cid] = checks;
+      recheck = true;
     }
+
+    return recheck;
   }
 
   /// The scheduled release, once it falls due.
@@ -488,17 +516,21 @@ class _BackgroundSession {
   Future<void> _release() async {
     try {
       await StreamVideoPushHandler._lock.synchronized(() async {
-        await _dropEndedRings();
+        final recheck = await _dropEndedRings();
 
-        // A ringing flow is live. Whatever resolves it arms the next release.
+        // A ringing flow is live. Whatever resolves it arms the next release,
+        // and a ring that may have ended is looked at again shortly.
         if (pendingRings.isNotEmpty) {
           streamLog.d(
             StreamVideoPushHandler._tag,
             () =>
                 '[release] still ringing (${pendingRings.length}); '
-                'standing down',
+                '${recheck ? 'checking again' : 'standing down'}',
           );
 
+          if (recheck) {
+            releaseAfter(StreamVideoPushHandler.resolutionGrace);
+          }
           return;
         }
 

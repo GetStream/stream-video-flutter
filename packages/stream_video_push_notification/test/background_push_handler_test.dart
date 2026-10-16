@@ -152,6 +152,9 @@ void main() {
   /// Comfortably past a scheduled release falling due.
   Future<void> pastTheGrace() => Future<void>.delayed(grace * 6);
 
+  /// Past the release and every check a ring that may have ended gets.
+  Future<void> pastEveryCheck() => Future<void>.delayed(grace * 20);
+
   setUp(() {
     // Everything outside the group below is the Android background isolate:
     // the only place this handler owns a client.
@@ -636,16 +639,37 @@ void main() {
         verify(() => client.dispose()).called(1);
       });
 
-      test('keeps a ring whose native call is still shown', () async {
+      test('releases once a slow native end catches up', () async {
+        // `endCall` only sends a broadcast, and a backgrounded app may handle
+        // it after the first check: the call is still listed, then gone.
+        var reads = 0;
+        when(pushManager.activeCalls).thenAnswer(
+          (_) async => reads++ == 0
+              ? [const CallData(uuid: 'u', callCid: 'default:call-a')]
+              : <CallData>[],
+        );
+        await handle(createStreamVideo: factoryReturning(client));
+
+        coordinatorEvents.add(_rejected('default:call-a'));
+        await pastEveryCheck();
+
+        // Kept on the first check, released on the next.
+        expect(reads, 2);
+        verify(() => client.dispose()).called(1);
+      });
+
+      test('keeps a ring whose native call stays shown', () async {
         // One member of a group call declining leaves the ring up for the
         // rest, and the push manager leaves the native call alone.
         nativeCalls = [const CallData(uuid: 'u', callCid: 'default:call-a')];
         await handle(createStreamVideo: factoryReturning(client));
 
         coordinatorEvents.add(_rejected('default:call-a'));
-        await pastTheGrace();
+        await pastEveryCheck();
 
         verifyNever(() => client.dispose());
+        // Checked a bounded number of times, then left to the user.
+        verify(pushManager.activeCalls).called(5);
       });
 
       test('ignores an end for a call it is not ringing', () async {
@@ -657,14 +681,32 @@ void main() {
         verifyNever(() => client.dispose());
       });
 
-      test('keeps the ring when the native calls cannot be read', () async {
+      test('checks again when the native calls cannot be read', () async {
+        var reads = 0;
+        when(pushManager.activeCalls).thenAnswer((_) async {
+          if (reads++ == 0) throw Exception('no platform');
+          return nativeCalls;
+        });
+        await handle(createStreamVideo: factoryReturning(client));
+
+        coordinatorEvents.add(_rejected('default:call-a'));
+        await pastEveryCheck();
+
+        // Not knowing is no reason to end a call the user may still answer,
+        // so the ring survives the failed read and goes on the next one.
+        expect(reads, 2);
+        verify(() => client.dispose()).called(1);
+      });
+
+      test('keeps the ring when the native calls never read', () async {
         when(pushManager.activeCalls).thenThrow(Exception('no platform'));
         await handle(createStreamVideo: factoryReturning(client));
 
         coordinatorEvents.add(_rejected('default:call-a'));
-        await pastTheGrace();
+        await pastEveryCheck();
 
         verifyNever(() => client.dispose());
+        verify(pushManager.activeCalls).called(5);
       });
 
       test('keeps a ring that rings again before the release', () async {
