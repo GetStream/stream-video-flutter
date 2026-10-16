@@ -90,6 +90,28 @@ void main() {
       });
     }
 
+    testWidgets('tapping a row with nothing to press leaves the menu up', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const TestWrapper(
+          platform: .macOS,
+          child: _Menu(
+            sections: [
+              StreamMenuSection(options: [StreamMenuOption(label: 'Rene')]),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Rene'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Rene'), findsOneWidget);
+    });
+
     // A device menu carries 16px icons, so it keeps the design's row and is
     // not dragged along by the roomier one an avatar list asks for.
     testWidgets('keeps the design row when no override is given', (

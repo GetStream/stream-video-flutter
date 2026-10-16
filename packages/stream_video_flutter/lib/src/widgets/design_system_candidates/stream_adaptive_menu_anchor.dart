@@ -552,6 +552,9 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
                     context,
                     selected: option.selected ?? false,
                     child: StreamContextMenuAction<void>(
+                      // A row with nothing to press leaves the menu up.
+                      closeOnActivate:
+                          option.onSelected != null && option.closesMenu,
                       onTap: option.onSelected == null
                           ? null
                           : () => _select(option),

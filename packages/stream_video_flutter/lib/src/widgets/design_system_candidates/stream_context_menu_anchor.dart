@@ -58,8 +58,8 @@ class StreamContextMenuAnchor extends StatelessWidget {
   /// Typically [StreamContextMenuAction]s, [StreamContextMenuSeparator]s and
   /// [StreamContextMenuHeading]s.
   ///
-  /// Tapping an item does not close the menu: close it through [controller]
-  /// in the item's `onTap`.
+  /// Tapping a [StreamContextMenuAction] closes the menu, unless its
+  /// `closeOnActivate` is false.
   final List<Widget> menuChildren;
 
   /// Builds the widget the menu is anchored to.
@@ -150,9 +150,6 @@ class StreamContextMenuAnchor extends StatelessWidget {
               ),
               child: StreamContextMenu(
                 elevation: elevation,
-                // The panel sits in an overlay, so the popup route around it,
-                // if any, is not the menu's to close.
-                dismissesRoute: false,
                 children: menuChildren,
               ),
             ),
