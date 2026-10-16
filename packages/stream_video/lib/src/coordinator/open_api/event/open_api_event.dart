@@ -81,6 +81,10 @@ class OpenApiEvent extends Equatable {
       return null;
     }
     final type = EventType.fromAlias(rawType);
+    if (type == EventType.unknown) {
+      return OpenApiEvent(type: type, unknown: jsonObj);
+    }
+
     streamLog.i(_tag, () => '[fromJson] rawType; $rawType, type: $type');
     final result = OpenApiEvent(type: type);
     switch (type) {
@@ -258,7 +262,6 @@ class OpenApiEvent extends Equatable {
         final event = open.IngressErrorEvent.fromJson(jsonObj);
         return result.copyWith(ingressError: event);
       case EventType.unknown:
-        streamLog.d(_tag, () => '[fromJson] unexpected event: $jsonObj');
         return result.copyWith(unknown: jsonObj);
     }
   }
