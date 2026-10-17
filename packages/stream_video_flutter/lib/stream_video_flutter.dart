@@ -96,6 +96,7 @@ export 'src/widgets/design_system_candidates/stream_adaptive_menu_anchor.dart';
 export 'src/widgets/design_system_candidates/stream_context_menu_anchor.dart';
 export 'src/widgets/design_system_candidates/stream_context_menu_heading.dart';
 export 'src/widgets/design_system_candidates/stream_modal_dialog.dart';
+export 'src/widgets/design_system_candidates/stream_modal_window.dart';
 export 'src/widgets/design_system_candidates/stream_radio_indicator.dart';
 export 'src/widgets/design_system_candidates/stream_select_input.dart';
 export 'src/widgets/design_system_candidates/stream_tab_bar.dart';

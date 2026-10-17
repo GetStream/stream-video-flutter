@@ -94,6 +94,41 @@ void main() {
       expect(find.byType(StreamButton), findsOneWidget); // the close button
     });
 
+    testWidgets('the scrim follows a theme change while it is open', (
+      tester,
+    ) async {
+      Widget app(Brightness brightness) => TestWrapper(
+        brightness: brightness,
+        child: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => showStreamModalDialog<void>(
+              context: context,
+              builder: (context) =>
+                  const StreamModalDialog(child: Text('body')),
+            ),
+            child: const Text('open'),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(app(Brightness.light));
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(app(Brightness.dark));
+      await tester.pumpAndSettle();
+
+      final scrim = tester.widget<ColoredBox>(
+        find.descendant(
+          of: find.byType(StreamBlurScrim),
+          matching: find.byType(ColoredBox),
+        ),
+      );
+      final dark = tester.element(find.text('body')).streamColorScheme;
+      expect(dark.brightness, Brightness.dark);
+      expect(scrim.color, dark.backgroundScrim);
+    });
+
     testWidgets('a tap outside dismisses it through the scrim', (tester) async {
       await openDialog(
         tester,
