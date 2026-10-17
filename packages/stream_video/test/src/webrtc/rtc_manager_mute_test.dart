@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/state_emitter.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
@@ -7,6 +8,7 @@ import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../test_helpers.dart';
+import '../call/fixtures/call_test_helpers.dart';
 import '../call/fixtures/data.dart';
 
 class _MockTracedPeerConnection extends Mock
@@ -71,7 +73,12 @@ void main() {
       publisher: null,
       subscriber: _MockTracedPeerConnection(),
       publishOptions: [],
-      stateManager: MockCallStateNotifier(),
+      stateManager: createTestCallStateManager(
+        callState: MutableStateEmitterImpl<CallState>(
+          createTestCallState(),
+          sync: true,
+        ),
+      ),
       streamVideo: streamVideo,
       pcFactory: pcFactory,
     );
