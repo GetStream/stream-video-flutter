@@ -319,7 +319,12 @@ assert_ui() {
 # depends on which rows are rendered at all.
 assert_menu_toggle() {
   local id="$1" desc="$2" pat="$3" before after deadline
-  ui_dump || true
+  # Confirm the sheet is open from a FRESH dump first. A failed dump (mid-
+  # animation, say) leaves ui.xml holding the previous screen, and reading the
+  # row from that would turn a closed sheet into a silent "not offered" SKIP.
+  if ! ui_wait '^Raise hand$' 10; then
+    fail "$id" "$desc (options sheet is not open)"; return 1
+  fi
   before=$(ui_label "$pat")
   # The row is conditional on call settings: noise cancellation and closed
   # captions are not rendered at all when the call type has them disabled.
@@ -351,9 +356,12 @@ assert_menu_toggle() {
 # so that tap lands on its "Incoming video quality" row. The sheet has its own
 # labelled "Close" X; the coordinate is the fallback. A no-op when the sheet is
 # already closed, which is what it is after the stats screen returns.
+#
+# Open or closed is read with ui_wait, not one `ui_dump || true`: a failed dump
+# leaves ui.xml holding the previous screen's tree, and deciding from that is
+# deciding from a stale screen.
 close_options_sheet() {
-  ui_dump || true
-  [ -n "$(ui_find '^Raise hand$')" ] || return 0
+  ui_wait '^Raise hand$' 3 || return 0
   ui_tap "^Close$" 5 || tap $A_SHEET_CLOSE_X $A_SHEET_CLOSE_Y
   sleep 2
 }
@@ -537,12 +545,14 @@ router_ok() {
 # E2EE_BAD_RE — every e2ee event that means a frame did not come out the far
 # side intact, plus a failed cryptor attach.
 #
-# Match the WIRE names (`e2ee.unencrypted_frame`), not the Dart enum names
-# (`unencryptedFrame`): CallE2EE logs the E2eeEvent itself, and its toString
-# prints the wire name. The enum spelling never appears in any log, so a check
-# built on it passes no matter what happened — which is how a cleartext audio
-# frame went unreported.
-E2EE_BAD_RE='\[e2ee\].*e2ee\.(missing_key|decryption_failed|encryption_failed|unsupported_version|decryption_stalled|unencrypted_frame)|\[attach(En|De)cryptor\] failed'
+# Matched on the LOG LEVEL, not the event name. CallE2EE._onEvent logs exactly
+# the bad events at E (missing key, decryption/encryption failed, unsupported
+# version, decryption stalled) or W (unencrypted frame), and everything benign
+# at D; the event stream's own error is a W too. Names were fragile: the Dart
+# enum spelling (`unencryptedFrame`) never appears in any log, which is how a
+# cleartext audio frame once went unreported, and the wire name that
+# E2eeEvent.toString prints comes from native, which may send it empty.
+E2EE_BAD_RE='\((E|W)/[^)]*\): \[e2ee\]|\[attach(En|De)cryptor\] failed'
 
 # ---------------------------------------------------------------- chat
 # android_chat_send <message> <mark-line>

@@ -111,6 +111,9 @@ if wait_probe incoming_notification_present 45; then
   # stamp _ring_action falls back to a blind three attempts and can grind for
   # minutes on a call that is already dead.
   RING_START=$(date +%s)
+  # Where this ring's log begins, so _ring_action can tell it has ended without
+  # matching a cancel left over from an earlier ring.
+  RING_LOGMARK=$(logline "$ANDROID_LOG")
   pass "ring-delivered-$CASE" "the incoming call was surfaced on the device"
 else
   fail "ring-delivered-$CASE" "no incoming call notification within 45s of the ring"
@@ -211,14 +214,32 @@ case "$ACTION" in
     # to deliver `call.ring`. On Android 15+ a cached background app has no
     # network, so a background or killed callee learns of the ring from the
     # push, starts its timer seconds late, and the caller's cancel always wins.
-    # Either is the ring expiring; the result says which.
-    CANCEL_PAT="ringing cancelled by the caller, cid: default:${CALL_ID:-[A-Za-z0-9_-]+}"
-    if wait_log "$ANDROID_LOG" "\[reject\] reason: timeout|$CANCEL_PAT" 90 "$RMARK"; then
-      if tail -n "+$RMARK" "$ANDROID_LOG" | grep -qE "\[reject\] reason: timeout"; then
-        pass "timeout-$CASE" "an unanswered ring times out and rejects the call (callee's timer)"
+    # Either is the ring expiring in the background and terminated cases; the
+    # result says which.
+    #
+    # The foreground is where the callee's own timer is reachable at all, so
+    # there only its reject counts: accepting the caller's cancel too would pass
+    # a callee timer that never fires, and nothing else in the run would notice.
+    # The cancel is also only accepted for this ring's call id — with none read,
+    # a pattern for "any call" could match a ring other than this one.
+    TIMEOUT_PAT="\[reject\] reason: timeout"
+    if [ "$APP_STATE" != "foreground" ] && [ -n "$CALL_ID" ]; then
+      TIMEOUT_PAT="$TIMEOUT_PAT|ringing cancelled by the caller, cid: default:$CALL_ID"
+    fi
+    if wait_log "$ANDROID_LOG" "$TIMEOUT_PAT" 90 "$RMARK"; then
+      # Both timers count ~25s from the ring; RING_START is stamped once the ring
+      # is on screen, a few seconds in. Anything well short of that is a ring
+      # ended early by something else, not a timeout.
+      ELAPSED=$(( $(date +%s) - ${RING_START:-0} ))
+      if [ -n "${RING_START:-}" ] && [ "$ELAPSED" -lt 15 ]; then
+        fail "timeout-$CASE" "the ring ended after ${ELAPSED}s — too early to be a timeout"
+      elif tail -n "+$RMARK" "$ANDROID_LOG" | grep -qE "\[reject\] reason: timeout"; then
+        pass "timeout-$CASE" "an unanswered ring times out and rejects the call (callee's timer, ${ELAPSED}s)"
       else
-        pass "timeout-$CASE" "an unanswered ring times out and the caller cancels it (caller's timer)"
+        pass "timeout-$CASE" "an unanswered ring times out and the caller cancels it (caller's timer, ${ELAPSED}s)"
       fi
+    elif [ "$APP_STATE" = "foreground" ]; then
+      fail "timeout-$CASE" "the callee's own ring timer never rejected the call"
     else
       fail "timeout-$CASE" "the ring never timed out"
     fi

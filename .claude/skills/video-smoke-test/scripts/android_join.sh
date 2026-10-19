@@ -13,11 +13,24 @@ USER_A=${1:-smoke_a1}
 
 tap $A_USER_X $A_USER_Y; sleep 2
 adb shell input text "$USER_A"; sleep 1
-# The soft keyboard covers the sign-up button, so dismiss it before tapping.
-adb shell input keyevent KEYCODE_BACK; sleep 2
 
-# Coordinator WS health-check traffic only starts once the user is connected.
-if tap_until $A_SIGNUP_X $A_SIGNUP_Y "$ANDROID_LOG" "handleHealthCheckEvent|connectUser" 3 25; then
+# The sign-up button is tapped by label, with the keyboard still up: the
+# Scaffold resizes around it and the button sits just under the field, so the
+# tree reports where it actually is. Do NOT press BACK to close the keyboard
+# first. On the API 37 image an injected BACK skips the IME and goes to the
+# activity, and on the login screen — the only route — that closes the app.
+login_tap() {
+  local i M
+  for i in 1 2 3; do
+    M=$(logline "$ANDROID_LOG")
+    ui_tap "Sign up with username" 10 || tap $A_SIGNUP_X $A_SIGNUP_Y
+    # Coordinator WS health-check traffic only starts once the user is connected.
+    if wait_log "$ANDROID_LOG" "handleHealthCheckEvent|connectUser" 25 "$M"; then return 0; fi
+    info "retry $i/3: sign-up tap produced no login"
+  done
+  return 1
+}
+if login_tap; then
   pass "login-android" "Android logged in as $USER_A"
 else
   fail "login-android" "Android login did not complete"; shot "err-login"; exit 1

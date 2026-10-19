@@ -28,8 +28,13 @@ SDK_TS = re.compile(r'(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)\.\d+ ')
 SDK_LEVEL = re.compile(r'\((E|W)/([^)]+)\): ?(.*)')
 # App-level failures that are not SDK log calls. Kept narrow on purpose: the
 # emulator's own system logs are full of exceptions that say nothing about us.
+# Flutter prints the full EXCEPTION CAUGHT BY block only for the first error
+# after start or hot reload; every later one is a single "Another exception was
+# thrown" line. Logcat's threadtime format writes the engine's errors as
+# "E flutter :", not "E/flutter".
 CRASH = re.compile(
-    r'Unhandled Exception|EXCEPTION CAUGHT BY|\bE/flutter|'
+    r'Unhandled Exception|EXCEPTION CAUGHT BY|Another exception was thrown|'
+    r'\bE/flutter\b|\sE flutter +:|'
     r'FATAL EXCEPTION|ANR in io\.getstream|Lost connection to device')
 LOGCAT_PREFIX = re.compile(r'^\d\d-\d\d \d\d:\d\d:\d\d\.\d+ +\d+ +\d+ ')
 
@@ -96,7 +101,8 @@ def flutter_error(lines, i):
     the banner title, the first line of the error itself, and the first source
     location. The banner alone says nothing — "EXCEPTION CAUGHT BY RENDERING
     LIBRARY" covers every layout overflow there is."""
-    title = re.sub(r'[═╡╞]', '', FLUTTER_LINE.search(lines[i]).group(1)).strip()
+    head = FLUTTER_LINE.search(lines[i])
+    title = re.sub(r'[═╡╞]', '', head.group(1) if head else lines[i]).strip()
     message, where, after_thrown = '', '', False
     for raw in lines[i + 1:i + 60]:
         m = FLUTTER_LINE.search(raw)
@@ -123,7 +129,12 @@ def entries(path, platform):
     seen = set()
     try:
         lines = open(path, encoding='utf-8', errors='replace').read().split('\n')
-    except OSError:
+    except OSError as e:
+        # Loud, not silent: an empty result reads as a clean run.
+        yield None, '?', 'MISSING', platform, f'LOG MISSING: {path} ({e.strerror})'
+        return
+    if not any(lines):
+        yield None, '?', 'MISSING', platform, f'LOG EMPTY: {path}'
         return
     for i, raw in enumerate(lines):
         lvl = SDK_LEVEL.search(raw)
@@ -182,7 +193,7 @@ def main():
     rules = load_rules(NOISE_TSV)
     wins = windows(env)
 
-    unexplained = {}   # key -> [count, platform, first, last, sample]
+    unexplained = {}   # (platform, key) -> [count, first, last, sample]
     expected = {}      # (platform, reason) -> count
     totals = {}
     for platform, path in (('android', ANDROID_LOG), ('ios', IOS_LOG)):

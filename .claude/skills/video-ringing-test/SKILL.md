@@ -397,7 +397,7 @@ asked**.
 | `telecom-timeout-*` | Telecom is released when a ring expires |
 | `telecom-answer-*` | Telecom recorded the answer, tagged app-initiated rather than echoed back |
 | `telecom-reject-*` | a decline disconnects Telecom with `REJECTED` (`cause=6`) |
-| `timeout-*` | an unanswered ring expires — by the callee's timer or the caller's cancel; the result line says which |
+| `timeout-*` | an unanswered ring expires — in the foreground by the callee's own timer; in the background or terminated by either timer, and the result line says which |
 | `missed-notif-*` | a missed call notification is shown after a ring nobody answered |
 | `ring-fgs-stopped-*` | the ringing foreground service does not outlive the call |
 | `no-ring-service-leak` / `no-notif-leak` / `no-telecom-leak` | nothing orphaned once every ring is over |
@@ -467,7 +467,16 @@ asked**.
 - **The full-screen incoming call activity only appears on a LOCKED screen.** Android honours a
   full-screen intent when the device is locked and substitutes a heads-up notification when the app
   is merely backgrounded — which is why every scenario here resolves through the shade, and why
-  `ivAcceptCall`/`ivDeclineCall` are tried first but essentially never match.
+  `ivAcceptCall`/`ivDeclineCall` are looked for only while `isKeyguardShowing=true`. Looking
+  unconditionally cost a 2-13s dump per attempt and lost background and terminated accepts.
+- **`uiautomator dump` does not see a heads-up notification.** With the Decline/Video heads-up on
+  screen, the dump holds only the launcher, so the shade is always expanded first. The expand is
+  not always honoured while a heads-up is up, so `expand_shade` waits for `mCurrentFocus` to be
+  `NotificationShade` and expands once more if it is not, rather than sleeping a fixed 2s.
+- **`_ring_action` stops once the ring has ended.** It checks the log since `RING_LOGMARK` for the
+  caller's cancel, the callee's timeout or a Telecom `cause=2` before each attempt and while
+  waiting on a tap, so a dead call fails as `the ring ended before it was resolved` instead of
+  being tapped at.
 - **A dozing emulator defers FCM.** `preflight.sh` runs `dumpsys deviceidle disable` and `stop.sh`
   restores it; without that a ring can simply never arrive.
 - **Notification action labels are not the strings you expect.** They arrive wrapped in Unicode bidi
@@ -487,8 +496,11 @@ asked**.
   (`dumpsys netpolicy`: `blocked=APP_BACKGROUND`), whatever `keepConnectionsAliveWhenInBackground`
   says. A background or killed callee therefore hears of the ring from the push, starts its timer
   seconds late, and the caller always wins; in the foreground the two race within ~150ms. So
-  `timeout-*` accepts either end, and its result line names the timer that fired. Requiring the
-  callee's own reject fails `background-timeout` and `terminated-timeout` on every branch.
+  `background-timeout` and `terminated-timeout` accept either end (the cancel only for this ring's
+  call id), and the result line names the timer that fired. Requiring the callee's own reject there
+  fails on every branch. `foreground-timeout` does require it: it is the one case where the callee's
+  timer is reachable, and accepting the cancel would let a callee timer that never fires pass.
+  Every case also fails a ring that ends under 15s after it surfaced — that is not a timeout.
 - **`lifecycleCallAccepted` is never logged.** An accept goes
   `lifecycleCallConnecting` -> `lifecycleCallJoining` -> `sfuJoinResponse`; waiting on
   "accepted" fails on an accept that plainly worked.

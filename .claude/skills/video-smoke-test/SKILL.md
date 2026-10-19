@@ -361,7 +361,9 @@ Terminal only, in this order, nothing more:
 3. One sentence per failure on what it means for the SDK. No speculation about cause.
 4. **The log digest's UNEXPLAINED section, relayed verbatim**, then one sentence per entry that
    looks like an SDK defect rather than a known quirk. Skip the EXPECTED section unless asked —
-   it is there so a reader can audit what was excused.
+   it is there so a reader can audit what was excused. A `LOG MISSING` / `LOG EMPTY` entry, or
+   `LOG DIGEST FAILED TO RUN` in place of the digest, means the logs were never read: relay it as
+   such and do not call the run clean.
 5. The screenshot directory path.
 
 An UNEXPLAINED entry is not a failure and does not change the exit code. Do **not** add a rule to
@@ -417,9 +419,12 @@ asked**.
 
 ## Traps already handled (do not "fix" these)
 
-- **The log digest dedupes on the SDK's own timestamp, not on the logcat line.** The Android
-  capture repeats a block of lines, so counting raw lines doubles every number. Windows are by
-  time for the same reason — line-number marks land in the wrong copy.
+- **`android.log` must have exactly one writer.** A second `adb logcat` appending to the same file
+  (one left over from an interrupted run, or another skill's) replays every line, and then the
+  line-number marks `wait_log` / `assert_log_since` / `tap_until` take are unsound: a replayed
+  `[leave] reason` or `sfuJoinResponse` landing after a mark satisfies a later check. `launch.sh`
+  stops any other process writing the file before it starts its own capture. The digest still
+  dedupes on the SDK's own timestamp, and its windows are by time, as a second line of defence.
 
 These are encoded in the scripts for reasons found the hard way:
 
@@ -462,10 +467,11 @@ These are encoded in the scripts for reasons found the hard way:
   Two separate Simulator toggles cause it — Connect Hardware Keyboard (⇧⌘K) off, or Toggle Software
   Keyboard (⌘K) on — and only the first one lands in a `defaults` key a script could read. Step 4b
   row 3 checks for it with a screenshot instead.
-- **E2EE events are matched by their wire names** (`e2ee.unencrypted_frame`), held once in
-  `E2EE_BAD_RE` in `lib.sh`. The log prints the event's wire name, never the Dart enum name
-  (`unencryptedFrame`); a pattern built on the enum names matched nothing, so `e2ee-clean-*` passed
-  over a cleartext frame.
+- **Bad E2EE events are matched by log level, not by name** — any `(E|W)/…): [e2ee]` line, held
+  once in `E2EE_BAD_RE` in `lib.sh`. `CallE2EE` logs exactly the bad events at E/W and the benign
+  ones at D. A pattern built on the Dart enum names (`unencryptedFrame`) matched nothing, so
+  `e2ee-clean-*` passed over a cleartext frame; the wire name the log prints comes from native and
+  can be empty, so names are not relied on at all.
 - **E2EE teardown is judged separately, in `report.sh`.** `e2ee-clean-*` runs while both sides are
   still in the call, so it cannot see a frame sent while one of them leaves. `e2ee_verify.sh` marks
   the iOS log just before Android leaves; `report.sh` checks that window once iOS has left too.

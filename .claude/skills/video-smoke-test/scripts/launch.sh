@@ -14,6 +14,16 @@ echo "== launch =="
 # interleaves two runs' output in one log and makes every assertion suspect.
 stop_all_bg
 
+# A logcat this skill did not record — another session's, or one whose pid
+# file was lost — keeps appending to the same file and replays every line past
+# the marks the checks take. Only `adb` processes holding the file are stopped.
+for pid in $(lsof -t "$ANDROID_LOG" 2>/dev/null); do
+  if ps -o command= -p "$pid" 2>/dev/null | grep -qE '(^|/)adb .*logcat'; then
+    echo "  stopping a stray adb logcat (pid $pid) still writing $ANDROID_LOG"
+    kill "$pid" 2>/dev/null
+  fi
+done
+
 # Fresh logs so no assertion can match a previous run's output.
 adb logcat -c >/dev/null 2>&1
 : >"$ANDROID_LOG"; : >"$IOS_LOG"

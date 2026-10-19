@@ -192,7 +192,16 @@ if ui_wait "Call latency" 10; then
   tap $A_END_X $A_TOP_Y; sleep 3            # the stats screen's close X
   # Honest scope: this proves the stats route opens and closes without hanging
   # or dropping the call. The numbers on it are for a human to read in shot 13.
-  if anr_check "stats-android" && in_call_guard "stats-android"; then
+  # "Closed" is read off the screen: a missed X leaves stats up, and every later
+  # step would then fail for the wrong reason.
+  STATS_CLOSED=0
+  for _ in 1 2 3 4 5; do
+    if ui_dump && [ -z "$(ui_find 'Call latency')" ]; then STATS_CLOSED=1; break; fi
+    sleep 1
+  done
+  if [ "$STATS_CLOSED" != 1 ]; then
+    fail "stats-android" "Stats screen opened but did not close"; shot "err-stats-close"
+  elif anr_check "stats-android" && in_call_guard "stats-android"; then
     pass "stats-android" "Stats screen opened and closed with the call intact (values in shot 13)"
   fi
 else

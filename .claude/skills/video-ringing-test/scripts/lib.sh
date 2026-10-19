@@ -199,6 +199,19 @@ tap_res() {
 # ui_has <resource-id-suffix>  — app-scoped, e.g. ui_has ivAcceptCall
 ui_has() { ui_has_res "$ANDROID_PKG:id/$1"; }
 
+# shade_open — the notification shade holds input focus right now.
+# A dumpsys read, not a uiautomator dump: it costs well under a second where a dump
+# costs 2-13s, and a dump does not even show a heads-up notification's window.
+shade_open() {
+  adb shell dumpsys window 2>/dev/null | tr -d '\r' \
+    | grep -qE "mCurrentFocus=.*NotificationShade"
+}
+
+# device_locked — a keyguard is showing right now.
+device_locked() {
+  adb shell dumpsys window 2>/dev/null | tr -d '\r' | grep -q "isKeyguardShowing=true"
+}
+
 # Dismisses every dismissible notification.
 #
 # Run before a ring whose outcome is judged by a notification appearing: a
@@ -230,7 +243,7 @@ tap_id() { tap_res "$ANDROID_PKG:id/$1"; }
 # nothing and reports the button as absent.
 tap_text() {
   local want="$1" node bounds x1 y1 x2 y2 cx cy
-  # One dump, not four. expand_shade already waits 2s for the shade to settle, and a
+  # One dump, not four. expand_shade already waits for the shade to take focus, and a
   # dump costs 2s on an idle device and ~11s on a loaded one — so re-dumping to "wait
   # out the animation" spent 6-33s waiting for something that finished in ~300ms, out
   # of a ring that only lives ~25s. Transient absence is handled by _ring_action's
@@ -265,9 +278,21 @@ tap_id_until() {
   return 1
 }
 
+# Waits for the shade to actually take focus instead of sleeping a fixed 2s. The
+# command is not always honoured while a heads-up notification is up: a ring was
+# lost when the dump after it came back with the launcher, and only the next
+# attempt — after the caller had cancelled — saw the shade. One more expand is
+# issued if the first is ignored; the caller decides what a closed shade means.
 expand_shade() {
-  adb shell cmd statusbar expand-notifications >/dev/null 2>&1
-  sleep 2
+  local i
+  for i in 1 2; do
+    adb shell cmd statusbar expand-notifications >/dev/null 2>&1
+    if wait_probe shade_open 3; then
+      sleep 0.5   # the expand animation; focus moves before the actions are laid out
+      return 0
+    fi
+  done
+  return 1
 }
 collapse_shade() {
   adb shell cmd statusbar collapse >/dev/null 2>&1
@@ -621,8 +646,8 @@ telecom_enabled_in_app() {
 # posted with contentView=null and two standard action buttons — they carry no app
 # resource id, so they are tapped by label.
 #
-# The resource-id path is kept for the case where the activity IS on top, which costs
-# nothing and is the cheaper lookup when it applies.
+# The resource-id path is kept for the case where the activity IS on top, and only
+# tried when a keyguard is showing: its lookup is a full uiautomator dump.
 #
 # The success signal is a Dart lifecycle transition, not the notification
 # disappearing: that notification is the foreground service's own, flagged
@@ -645,30 +670,65 @@ ring_expired() {
   [ $(( $(date +%s) - RING_START )) -ge "$RING_TTL" ]
 }
 
+# The ring is over without anyone on this device resolving it: the caller's timer
+# cancelled it, or the callee's own timer rejected it. Native cause=2 is the cancel as
+# Telecom saw it, and arrives before the Dart line, which debugPrint can hold back for
+# seconds. A user decline disconnects with cause=6, so it never matches here.
+RING_GONE_PAT='ringing cancelled by the caller|\[reject\] reason: timeout|\[onIsCallDisconnected\].*cause=2'
+
+# ring_ended <from-line> — the ring has ended since <from-line> of the log.
+ring_ended() {
+  tail -n "+${1:-1}" "$ANDROID_LOG" 2>/dev/null | grep -qE "$RING_GONE_PAT"
+}
+
 _ring_action() {
   local activity_id="$1" label="$2" marker="$3" wait_s="${4:-12}" i M
+  # checks.sh and elsewhere.sh stamp RING_LOGMARK with RING_START. Without it, the
+  # loop's own start is the best available bound, and still excludes earlier rings.
+  local from="${RING_LOGMARK:-$(logline "$ANDROID_LOG")}"
   for i in 1 2 3; do
     if ring_expired; then
       info "giving up after attempt $((i - 1)): the ring is past its ~${RING_TTL}s lifetime"
       return 1
     fi
+    # Checked before every attempt, so a call that is already gone is reported as
+    # gone rather than tapped at and reported as "could not accept". A retry once
+    # tapped a stale notification 0.5s after the caller had cancelled.
+    if ring_ended "$from"; then
+      info "giving up after attempt $((i - 1)): the ring ended before it was resolved"
+      return 1
+    fi
     M=$(logline "$ANDROID_LOG")
 
-    if ui_has "$activity_id"; then
+    # The full-screen activity only appears over a keyguard, and none of the covered
+    # states locks the device. Looking for it unconditionally cost one uiautomator
+    # dump (2-13s) per attempt, out of a ring that lives ~24s.
+    if device_locked && ui_has "$activity_id"; then
       tap_id "$activity_id"
-      wait_log "$ANDROID_LOG" "$marker" "$wait_s" "$M" && return 0
     else
       # The shade is opened and left open: the action buttons are present once it is
       # up, and nothing is tapped to "expand" the notification first. An earlier
       # version tapped the first android:id/expand_button in the tree, which can
       # belong to an unrelated notification and reflows the shade mid-sequence.
-      expand_shade
-      if tap_text "$label"; then
-        collapse_shade
-        wait_log "$ANDROID_LOG" "$marker" "$wait_s" "$M" && return 0
-      else
-        collapse_shade
+      if ! expand_shade; then
+        info "retry $i/3: the notification shade did not open"
+        continue
       fi
+      if ! tap_text "$label"; then
+        collapse_shade
+        info "retry $i/3: no '$label' action in the shade"
+        continue
+      fi
+      collapse_shade
+    fi
+
+    # Waits on the ring ending too, so a cancel that lands mid-wait ends the loop now
+    # instead of after the full wait. The marker wins a tie: if the join started, the
+    # tap worked, whatever the caller did a moment later.
+    if wait_log "$ANDROID_LOG" "$marker|$RING_GONE_PAT" "$wait_s" "$M"; then
+      if tail -n "+$M" "$ANDROID_LOG" | grep -qE "$marker"; then return 0; fi
+      info "giving up after attempt $i: the ring ended before the tap took effect"
+      return 1
     fi
     info "retry $i/3: no '$marker' after resolving via '$activity_id'/'$label'"
   done

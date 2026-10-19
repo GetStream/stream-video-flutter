@@ -77,5 +77,5 @@ echo
 # SDK warning/error and app crash, excuses what log_noise.tsv explains, and
 # lists the rest. It is evidence for a human and never changes the exit code.
 python3 "$(pwd)/log_digest.py" "$ANDROID_LOG" "$IOS_LOG" "$(pwd)/log_noise.tsv" "$SMOKE_DIR/env.sh" \
-  || echo "(log digest failed to run)"
+  || echo "LOG DIGEST FAILED TO RUN — no log was read for problems; relay this, it is not a clean run"
 grep -q '^FAIL' "$RESULTS" 2>/dev/null && exit 1 || exit 0
