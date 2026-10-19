@@ -58,6 +58,10 @@ dependency_overrides:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core_flutter
       ref: 2daa0a641519abe9ab637bcb41c69ed3ea4273b7
+  stream_webrtc_flutter:
+    git:
+      url: https://github.com/GetStream/webrtc-flutter.git
+      ref: 9b6fffaa5fda2652548cafc7d6ec87128409c6bc
 
 melos:
   ignore:
@@ -177,6 +181,10 @@ melos:
     generate:flutter:
       run: melos exec -c 1 --depends-on="build_runner" --flutter -- "flutter pub run build_runner build --delete-conflicting-outputs"
       description: Build all generated files for Flutter packages in this project.
+
+    generate:protobuf:
+      run: bash packages/stream_video/generate-protobuf.sh
+      description: Regenerate the SFU protobuf models from GetStream/protocol (requires protoc; set PROTOCOL_REF for a branch other than main).
 
     gen-l10n: >
       melos exec -c 1 --fail-fast --depends-on=flutter_localizations -- \

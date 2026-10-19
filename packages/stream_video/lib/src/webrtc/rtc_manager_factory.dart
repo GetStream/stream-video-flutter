@@ -32,7 +32,7 @@ class RtcManagerFactory {
   Future<RtcManager> makeRtcManager({
     required SfuClient sfuClient,
     required CallStateNotifier stateManager,
-    required StreamVideo streamVideo,
+    required CallHost host,
     ClientDetails? clientDetails,
     String? publisherId,
     int? sessionSequence,
@@ -78,7 +78,7 @@ class RtcManagerFactory {
       subscriber: subscriber,
       publishOptions: publishOptions,
       stateManager: stateManager,
-      streamVideo: streamVideo,
+      host: host,
       pcFactory: pcFactory,
       sfuId: callSessionConfig?.sfuName,
       clientEventRetryCount: clientEventRetryCount,

@@ -550,21 +550,13 @@ enum SendStatsRequest_DeviceState { android, apple, notSet }
 class SendStatsRequest extends $pb.GeneratedMessage {
   factory SendStatsRequest({
     $core.String? sessionId,
-    $core.String? subscriberStats,
-    $core.String? publisherStats,
     $core.String? webrtcVersion,
     $core.String? sdk,
     $core.String? sdkVersion,
-    $0.InputDevices? audioDevices,
-    $0.InputDevices? videoDevices,
     $0.AndroidState? android,
     $0.AppleState? apple,
     Telemetry? telemetry,
     $0.RTMPIngress? rtmp,
-    @$core.Deprecated('This field is deprecated.')
-    $core.String? subscriberRtcStats,
-    @$core.Deprecated('This field is deprecated.')
-    $core.String? publisherRtcStats,
     $core.String? rtcStats,
     $core.Iterable<$0.PerformanceStats>? encodeStats,
     $core.Iterable<$0.PerformanceStats>? decodeStats,
@@ -572,20 +564,13 @@ class SendStatsRequest extends $pb.GeneratedMessage {
   }) {
     final result = create();
     if (sessionId != null) result.sessionId = sessionId;
-    if (subscriberStats != null) result.subscriberStats = subscriberStats;
-    if (publisherStats != null) result.publisherStats = publisherStats;
     if (webrtcVersion != null) result.webrtcVersion = webrtcVersion;
     if (sdk != null) result.sdk = sdk;
     if (sdkVersion != null) result.sdkVersion = sdkVersion;
-    if (audioDevices != null) result.audioDevices = audioDevices;
-    if (videoDevices != null) result.videoDevices = videoDevices;
     if (android != null) result.android = android;
     if (apple != null) result.apple = apple;
     if (telemetry != null) result.telemetry = telemetry;
     if (rtmp != null) result.rtmp = rtmp;
-    if (subscriberRtcStats != null)
-      result.subscriberRtcStats = subscriberRtcStats;
-    if (publisherRtcStats != null) result.publisherRtcStats = publisherRtcStats;
     if (rtcStats != null) result.rtcStats = rtcStats;
     if (encodeStats != null) result.encodeStats.addAll(encodeStats);
     if (decodeStats != null) result.decodeStats.addAll(decodeStats);
@@ -615,15 +600,9 @@ class SendStatsRequest extends $pb.GeneratedMessage {
       createEmptyInstance: create)
     ..oo(0, [9, 10])
     ..aOS(1, _omitFieldNames ? '' : 'sessionId')
-    ..aOS(2, _omitFieldNames ? '' : 'subscriberStats')
-    ..aOS(3, _omitFieldNames ? '' : 'publisherStats')
     ..aOS(4, _omitFieldNames ? '' : 'webrtcVersion')
     ..aOS(5, _omitFieldNames ? '' : 'sdk')
     ..aOS(6, _omitFieldNames ? '' : 'sdkVersion')
-    ..aOM<$0.InputDevices>(7, _omitFieldNames ? '' : 'audioDevices',
-        subBuilder: $0.InputDevices.create)
-    ..aOM<$0.InputDevices>(8, _omitFieldNames ? '' : 'videoDevices',
-        subBuilder: $0.InputDevices.create)
     ..aOM<$0.AndroidState>(9, _omitFieldNames ? '' : 'android',
         subBuilder: $0.AndroidState.create)
     ..aOM<$0.AppleState>(10, _omitFieldNames ? '' : 'apple',
@@ -632,8 +611,6 @@ class SendStatsRequest extends $pb.GeneratedMessage {
         subBuilder: Telemetry.create)
     ..aOM<$0.RTMPIngress>(12, _omitFieldNames ? '' : 'rtmp',
         subBuilder: $0.RTMPIngress.create)
-    ..aOS(13, _omitFieldNames ? '' : 'subscriberRtcStats')
-    ..aOS(14, _omitFieldNames ? '' : 'publisherRtcStats')
     ..aOS(15, _omitFieldNames ? '' : 'rtcStats')
     ..pPM<$0.PerformanceStats>(16, _omitFieldNames ? '' : 'encodeStats',
         subBuilder: $0.PerformanceStats.create)
@@ -678,169 +655,103 @@ class SendStatsRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearSessionId() => $_clearField(1);
 
-  @$pb.TagNumber(2)
-  $core.String get subscriberStats => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set subscriberStats($core.String value) => $_setString(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasSubscriberStats() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearSubscriberStats() => $_clearField(2);
-
-  @$pb.TagNumber(3)
-  $core.String get publisherStats => $_getSZ(2);
-  @$pb.TagNumber(3)
-  set publisherStats($core.String value) => $_setString(2, value);
-  @$pb.TagNumber(3)
-  $core.bool hasPublisherStats() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearPublisherStats() => $_clearField(3);
-
   @$pb.TagNumber(4)
-  $core.String get webrtcVersion => $_getSZ(3);
+  $core.String get webrtcVersion => $_getSZ(1);
   @$pb.TagNumber(4)
-  set webrtcVersion($core.String value) => $_setString(3, value);
+  set webrtcVersion($core.String value) => $_setString(1, value);
   @$pb.TagNumber(4)
-  $core.bool hasWebrtcVersion() => $_has(3);
+  $core.bool hasWebrtcVersion() => $_has(1);
   @$pb.TagNumber(4)
   void clearWebrtcVersion() => $_clearField(4);
 
   @$pb.TagNumber(5)
-  $core.String get sdk => $_getSZ(4);
+  $core.String get sdk => $_getSZ(2);
   @$pb.TagNumber(5)
-  set sdk($core.String value) => $_setString(4, value);
+  set sdk($core.String value) => $_setString(2, value);
   @$pb.TagNumber(5)
-  $core.bool hasSdk() => $_has(4);
+  $core.bool hasSdk() => $_has(2);
   @$pb.TagNumber(5)
   void clearSdk() => $_clearField(5);
 
   @$pb.TagNumber(6)
-  $core.String get sdkVersion => $_getSZ(5);
+  $core.String get sdkVersion => $_getSZ(3);
   @$pb.TagNumber(6)
-  set sdkVersion($core.String value) => $_setString(5, value);
+  set sdkVersion($core.String value) => $_setString(3, value);
   @$pb.TagNumber(6)
-  $core.bool hasSdkVersion() => $_has(5);
+  $core.bool hasSdkVersion() => $_has(3);
   @$pb.TagNumber(6)
   void clearSdkVersion() => $_clearField(6);
 
-  @$pb.TagNumber(7)
-  $0.InputDevices get audioDevices => $_getN(6);
-  @$pb.TagNumber(7)
-  set audioDevices($0.InputDevices value) => $_setField(7, value);
-  @$pb.TagNumber(7)
-  $core.bool hasAudioDevices() => $_has(6);
-  @$pb.TagNumber(7)
-  void clearAudioDevices() => $_clearField(7);
-  @$pb.TagNumber(7)
-  $0.InputDevices ensureAudioDevices() => $_ensure(6);
-
-  @$pb.TagNumber(8)
-  $0.InputDevices get videoDevices => $_getN(7);
-  @$pb.TagNumber(8)
-  set videoDevices($0.InputDevices value) => $_setField(8, value);
-  @$pb.TagNumber(8)
-  $core.bool hasVideoDevices() => $_has(7);
-  @$pb.TagNumber(8)
-  void clearVideoDevices() => $_clearField(8);
-  @$pb.TagNumber(8)
-  $0.InputDevices ensureVideoDevices() => $_ensure(7);
-
   @$pb.TagNumber(9)
-  $0.AndroidState get android => $_getN(8);
+  $0.AndroidState get android => $_getN(4);
   @$pb.TagNumber(9)
   set android($0.AndroidState value) => $_setField(9, value);
   @$pb.TagNumber(9)
-  $core.bool hasAndroid() => $_has(8);
+  $core.bool hasAndroid() => $_has(4);
   @$pb.TagNumber(9)
   void clearAndroid() => $_clearField(9);
   @$pb.TagNumber(9)
-  $0.AndroidState ensureAndroid() => $_ensure(8);
+  $0.AndroidState ensureAndroid() => $_ensure(4);
 
   @$pb.TagNumber(10)
-  $0.AppleState get apple => $_getN(9);
+  $0.AppleState get apple => $_getN(5);
   @$pb.TagNumber(10)
   set apple($0.AppleState value) => $_setField(10, value);
   @$pb.TagNumber(10)
-  $core.bool hasApple() => $_has(9);
+  $core.bool hasApple() => $_has(5);
   @$pb.TagNumber(10)
   void clearApple() => $_clearField(10);
   @$pb.TagNumber(10)
-  $0.AppleState ensureApple() => $_ensure(9);
+  $0.AppleState ensureApple() => $_ensure(5);
 
   @$pb.TagNumber(11)
-  Telemetry get telemetry => $_getN(10);
+  Telemetry get telemetry => $_getN(6);
   @$pb.TagNumber(11)
   set telemetry(Telemetry value) => $_setField(11, value);
   @$pb.TagNumber(11)
-  $core.bool hasTelemetry() => $_has(10);
+  $core.bool hasTelemetry() => $_has(6);
   @$pb.TagNumber(11)
   void clearTelemetry() => $_clearField(11);
   @$pb.TagNumber(11)
-  Telemetry ensureTelemetry() => $_ensure(10);
+  Telemetry ensureTelemetry() => $_ensure(6);
 
   @$pb.TagNumber(12)
-  $0.RTMPIngress get rtmp => $_getN(11);
+  $0.RTMPIngress get rtmp => $_getN(7);
   @$pb.TagNumber(12)
   set rtmp($0.RTMPIngress value) => $_setField(12, value);
   @$pb.TagNumber(12)
-  $core.bool hasRtmp() => $_has(11);
+  $core.bool hasRtmp() => $_has(7);
   @$pb.TagNumber(12)
   void clearRtmp() => $_clearField(12);
   @$pb.TagNumber(12)
-  $0.RTMPIngress ensureRtmp() => $_ensure(11);
-
-  @$core.Deprecated('This field is deprecated.')
-  @$pb.TagNumber(13)
-  $core.String get subscriberRtcStats => $_getSZ(12);
-  @$core.Deprecated('This field is deprecated.')
-  @$pb.TagNumber(13)
-  set subscriberRtcStats($core.String value) => $_setString(12, value);
-  @$core.Deprecated('This field is deprecated.')
-  @$pb.TagNumber(13)
-  $core.bool hasSubscriberRtcStats() => $_has(12);
-  @$core.Deprecated('This field is deprecated.')
-  @$pb.TagNumber(13)
-  void clearSubscriberRtcStats() => $_clearField(13);
-
-  @$core.Deprecated('This field is deprecated.')
-  @$pb.TagNumber(14)
-  $core.String get publisherRtcStats => $_getSZ(13);
-  @$core.Deprecated('This field is deprecated.')
-  @$pb.TagNumber(14)
-  set publisherRtcStats($core.String value) => $_setString(13, value);
-  @$core.Deprecated('This field is deprecated.')
-  @$pb.TagNumber(14)
-  $core.bool hasPublisherRtcStats() => $_has(13);
-  @$core.Deprecated('This field is deprecated.')
-  @$pb.TagNumber(14)
-  void clearPublisherRtcStats() => $_clearField(14);
+  $0.RTMPIngress ensureRtmp() => $_ensure(7);
 
   @$pb.TagNumber(15)
-  $core.String get rtcStats => $_getSZ(14);
+  $core.String get rtcStats => $_getSZ(8);
   @$pb.TagNumber(15)
-  set rtcStats($core.String value) => $_setString(14, value);
+  set rtcStats($core.String value) => $_setString(8, value);
   @$pb.TagNumber(15)
-  $core.bool hasRtcStats() => $_has(14);
+  $core.bool hasRtcStats() => $_has(8);
   @$pb.TagNumber(15)
   void clearRtcStats() => $_clearField(15);
 
   /// Encode stats for the publisher
   @$pb.TagNumber(16)
-  $pb.PbList<$0.PerformanceStats> get encodeStats => $_getList(15);
+  $pb.PbList<$0.PerformanceStats> get encodeStats => $_getList(9);
 
   /// Decode stats for the subscriber
   @$pb.TagNumber(17)
-  $pb.PbList<$0.PerformanceStats> get decodeStats => $_getList(16);
+  $pb.PbList<$0.PerformanceStats> get decodeStats => $_getList(10);
 
   /// user_session id can change during reconnects, this helps us to
   /// identify the user across reconnects and should remain consistent until the user explicitly
   /// disconnects, is kicked or the call is ended.
   @$pb.TagNumber(18)
-  $core.String get unifiedSessionId => $_getSZ(17);
+  $core.String get unifiedSessionId => $_getSZ(11);
   @$pb.TagNumber(18)
-  set unifiedSessionId($core.String value) => $_setString(17, value);
+  set unifiedSessionId($core.String value) => $_setString(11, value);
   @$pb.TagNumber(18)
-  $core.bool hasUnifiedSessionId() => $_has(17);
+  $core.bool hasUnifiedSessionId() => $_has(11);
   @$pb.TagNumber(18)
   void clearUnifiedSessionId() => $_clearField(18);
 }

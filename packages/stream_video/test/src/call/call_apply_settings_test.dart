@@ -66,6 +66,37 @@ void main() {
       await StreamVideo.reset();
     });
 
+    // The outgoing screen reads the camera preference as soon as getOrCreate
+    // returns; a device enumeration still running then left it dark.
+    test(
+      'applies the call settings before getOrCreate returns, '
+      'however long device enumeration takes',
+      () async {
+        when(
+          () => mockDeviceNotifier.enumerateDevicesFor(any()),
+        ).thenAnswer((_) async {
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+          return Result.success(TestDeviceScenarios.builtInDevicesOnly);
+        });
+
+        final call = createCallWithMockedResponse(
+          streamVideo,
+          mockCoordinatorClient,
+          const CallSettings(
+            video: StreamVideoSettings(cameraDefaultOn: true),
+            audio: StreamAudioSettings(micDefaultOn: true),
+          ),
+          rtcMediaDeviceNotifier: mockDeviceNotifier,
+        );
+
+        final result = await call.getOrCreate(watch: false);
+
+        expect(result.isSuccess, isTrue);
+        expect(call.connectOptions.camera.isEnabled, isTrue);
+        expect(call.connectOptions.microphone.isEnabled, isTrue);
+      },
+    );
+
     group('Speaker priority logic', () {
       test('enables speaker when video camera is on by default', () async {
         // Arrange

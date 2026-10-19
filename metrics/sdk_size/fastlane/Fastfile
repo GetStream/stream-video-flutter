@@ -1,4 +1,3 @@
-require 'base64'
 require 'json'
 require 'shellwords'
 
@@ -12,9 +11,6 @@ METRICS_DIR = File.expand_path('../metrics', __dir__)
 PLATFORMS = %w[android ios pub].freeze
 SIZE_HEADER = '## SDK Size'
 BREAKDOWN_HEADER = '## Size Breakdown'
-# The breakdown comment carries the numbers it shows, so a later report that
-# still waits for a platform can show that platform's previous numbers.
-DATA_PATTERN = /<!-- sdk-size-data:(\S+) -->/
 # Rows smaller than this, on the branch and in the diff, are folded into "other".
 BREAKDOWN_MIN_BYTES = 1024
 BREAKDOWN_MAX_ROWS = 15
@@ -25,8 +21,8 @@ BREAKDOWN_MAX_ROWS = 15
 lane :sdk_size do
   base_branch = ENV['BASE_BRANCH'] || git_branch
   sha = ENV['HEAD_SHA'] || sh('git rev-parse HEAD', log: false).strip
-  # Platforms whose measure job failed, such as `ios`. `android` includes `pub`.
-  failed = ENV['FAILED_PLATFORMS'].to_s.split(',').map(&:strip).reject(&:empty?)
+  # Platforms this run doesn't measure, such as `ios` on a pull request.
+  skipped = ENV['SKIPPED_PLATFORMS'].to_s.split(',').map(&:strip).reject(&:empty?)
 
   results = {}
   PLATFORMS.each do |platform|
@@ -34,25 +30,14 @@ lane :sdk_size do
     next unless platform_sizes
 
     results[platform] = {
-      'sha' => sha,
       'sizes' => platform_sizes,
       'breakdown' => read_results("breakdown-#{platform}.json")
     }
   end
   UI.user_error!("No sizes found in #{RESULTS_DIR}") if results.empty?
-  missing = PLATFORMS - results.keys
-  if push_event? && !missing.empty?
-    UI.user_error!("A benchmark needs every platform, missing: #{missing.join(', ')}")
-  end
-
-  # A pull request reports Android before iOS is done, or after iOS failed.
-  # Meanwhile iOS shows the numbers of the previous report, marked as outdated.
-  outdated = {}
-  previous_report_data.each do |platform, data|
-    next if results.key?(platform)
-
-    results[platform] = data
-    outdated[platform] = data['sha'] unless data['sha'] == sha
+  missing = PLATFORMS - skipped - results.keys
+  if is_ci && !missing.empty?
+    UI.user_error!("Every platform that isn't skipped is needed, missing: #{missing.join(', ')}")
   end
 
   sizes = {}
@@ -63,12 +48,55 @@ lane :sdk_size do
   # Clones the metrics repo into METRICS_DIR, and pushes the sizes on a push to
   # the base branch.
   show_sdk_size(branch_sizes: sizes, github_repo: GITHUB_REPO, base_branch: base_branch)
-  add_commit_note(outdated, failed, sha)
+  add_commit_note(sha)
 
-  show_size_breakdown(base_branch, results, outdated, failed, sha)
+  show_size_breakdown(base_branch, results, skipped, sha)
 end
 
-def show_size_breakdown(base_branch, results, outdated, failed, sha)
+README_PATH = File.expand_path('../../../README.md', __dir__)
+
+# Writes the base branch's benchmark into the size badges of the root README.
+# The `stream_video_flutter` badges show what the UI adds on top of
+# `stream_video`. The plugin badges show their pub.dev archive size.
+lane :update_readme_badges do
+  base_branch = ENV['BASE_BRANCH'] || 'main'
+  repo = GITHUB_REPO.split('/').last
+
+  FileUtils.rm_rf(METRICS_DIR)
+  sh("git clone --depth 1 git@github.com:GetStream/stream-internal-metrics.git #{METRICS_DIR.shellescape}")
+  benchmark = JSON.parse(File.read(File.join(METRICS_DIR, "#{repo}-size.json")))[base_branch]
+  UI.user_error!("No benchmark for #{base_branch} in stream-internal-metrics") unless benchmark
+
+  size = lambda do |key|
+    benchmark.fetch(key) { UI.user_error!("The #{base_branch} benchmark has no #{key}") }
+  end
+  badges = {
+    'android:stream_video' => size.call('android_stream_video'),
+    'android:stream_video_flutter' => size.call('android_stream_video_flutter') - size.call('android_stream_video'),
+    'ios:stream_video' => size.call('ios_stream_video'),
+    'ios:stream_video_flutter' => size.call('ios_stream_video_flutter') - size.call('ios_stream_video'),
+    'stream_video_push_notification' => size.call('pub_stream_video_push_notification'),
+    'stream_video_screen_sharing' => size.call('pub_stream_video_screen_sharing')
+  }
+
+  readme = File.read(README_PATH)
+  badges.each do |label, kb|
+    pattern = %r{(https://img\.shields\.io/badge/#{Regexp.escape(label)}-)[^"]*?(-blue")}
+    UI.user_error!("No #{label} badge in README.md") unless readme.match?(pattern)
+
+    readme = readme.sub(pattern) { "#{Regexp.last_match(1)}#{badge_size(kb)}#{Regexp.last_match(2)}" }
+    UI.message("#{label}: #{badge_size(kb).sub('%20', ' ')}")
+  end
+  File.write(README_PATH, readme)
+end
+
+def badge_size(kb)
+  return "#{(kb / 1024.0).round(1)}%20MB" if kb >= 1024
+
+  "#{kb.round}%20KB"
+end
+
+def show_size_breakdown(base_branch, results, skipped, sha)
   repo = GITHUB_REPO.split('/').last
   benchmark_file = "flutter-breakdown/#{repo}/#{base_branch}.json"
   benchmark_path = File.join(METRICS_DIR, benchmark_file)
@@ -77,7 +105,7 @@ def show_size_breakdown(base_branch, results, outdated, failed, sha)
   breakdown = results.slice('android', 'ios').transform_values { |data| data['breakdown'] }.compact
   return UI.important('No breakdown found, skipping it.') if breakdown.empty?
 
-  markdown = render_breakdown(breakdown, benchmark, base_branch, outdated, failed, sha)
+  markdown = render_breakdown(breakdown, benchmark, base_branch, skipped, sha)
   UI.message(markdown)
   summary = ENV['GITHUB_STEP_SUMMARY']
   File.write(summary, "#{markdown}\n", mode: 'a') if summary
@@ -98,8 +126,7 @@ def show_size_breakdown(base_branch, results, outdated, failed, sha)
     end
   end
 
-  data = Base64.strict_encode64(JSON.generate(results.slice('android', 'ios')))
-  pr_comment(text: "#{markdown}\n<!-- sdk-size-data:#{data} -->", edit_last_comment_with_text: BREAKDOWN_HEADER)
+  pr_comment(text: markdown, edit_last_comment_with_text: BREAKDOWN_HEADER)
 end
 
 def push_event?
@@ -122,30 +149,16 @@ def push_metrics(attempts: 3)
   end
 end
 
-# The platforms in the pull request's current breakdown comment, each with the
-# commit it was measured on.
-def previous_report_data
-  pr = ENV['GITHUB_PR_NUM'].to_s
-  return {} if pr.empty? || !is_ci
-
-  body = latest_comment(pr, BREAKDOWN_HEADER)&.fetch('body')
-  match = body && DATA_PATTERN.match(body)
-  match ? JSON.parse(Base64.strict_decode64(match[1])) : {}
-rescue ArgumentError, JSON::ParserError => e
-  UI.important("Ignoring the previous size report: #{e.message}")
-  {}
-end
-
 # Adds the measured commit under the `## SDK Size` table, which show_sdk_size
 # renders.
-def add_commit_note(outdated, failed, sha)
+def add_commit_note(sha)
   pr = ENV['GITHUB_PR_NUM'].to_s
   return if pr.empty? || !is_ci
 
   comment = latest_comment(pr, SIZE_HEADER)
   return UI.important('No SDK size comment found to add the commit to.') unless comment
 
-  body = "#{comment['body'].rstrip}\n\n#{commit_note(outdated, failed, sha, 'rows')}\n"
+  body = "#{comment['body'].rstrip}\n\n#{commit_note(sha)}\n"
   sh("gh api --method PATCH repos/#{GITHUB_REPO}/issues/comments/#{comment['id']} " \
      "-f body=#{Shellwords.escape(body)} --silent", log: false)
 end
@@ -156,15 +169,8 @@ def latest_comment(pr, header)
   json.lines.map(&:strip).reject(&:empty?).map { |line| JSON.parse(line) }.last
 end
 
-def commit_note(outdated, failed, sha, what)
-  measured = "Measured on #{commit_link(sha)}"
-  return "#{measured}." if outdated.empty?
-
-  except = outdated.map do |platform, platform_sha|
-    state = failed.include?(platform) ? "which failed to measure (see #{run_link})" : 'which is still being measured'
-    "#{platform}, #{state}: its #{what} are from #{commit_link(platform_sha)}"
-  end
-  "#{failed.empty? ? '⏳' : '⚠️'} #{measured}, except #{except.join('; and ')}."
+def commit_note(sha)
+  "Measured on #{commit_link(sha)}."
 end
 
 def run_link
@@ -184,31 +190,26 @@ end
 
 # One collapsible table per platform and variant: what the variant adds on top
 # of an empty app, per component, with the change against the base branch.
-def render_breakdown(breakdown, benchmark, base_branch, outdated, failed, sha)
+def render_breakdown(breakdown, benchmark, base_branch, skipped, sha)
   lines = [BREAKDOWN_HEADER, '']
   artifacts = ENV['GITHUB_RUN_ID'] ? "the `sdk-size-analysis` artifacts of #{run_link}" : 'the analysis files'
   lines << 'What each SDK adds to an empty release app, per Dart package and native library. ' \
            "Dart sizes are uncompressed symbol sizes. Open #{artifacts} " \
            'in the DevTools App Size tool to drill down further.'
   lines << ''
-  missing = %w[android ios] - breakdown.keys
-  failed_missing = missing & failed
-  pending = missing - failed
   notes = []
-  notes << "❌ Couldn't measure #{failed_missing.join(', ')}, see #{run_link}." unless failed_missing.empty?
-  notes << "⏳ Still measuring #{pending.join(', ')}. Both size comments update when it finishes." unless pending.empty?
+  notes << "This run does not measure #{skipped.join(', ')}." unless skipped.empty?
   notes << "No `#{base_branch}` benchmark for the breakdown yet." unless benchmark
   notes.each { |note| lines << note << '' }
-  lines << commit_note(outdated, failed, sha, 'tables')
+  lines << commit_note(sha)
   lines << ''
   breakdown.each do |platform, variants|
-    label = outdated.key?(platform) ? ' (outdated)' : ''
     variants.each do |variant, components|
       # Without a benchmark for this variant, there is nothing to compare to.
       base = benchmark&.dig(platform, variant)
       total = components.values.sum
       total_delta = base ? " (#{format_delta(total - base.values.sum)})" : ' (new)'
-      lines << "<details><summary><b>#{platform}</b>#{label} · <code>#{variant}</code>: " \
+      lines << "<details><summary><b>#{platform}</b> · <code>#{variant}</code>: " \
                "#{format_size(total)}#{total_delta}</summary>"
       lines << ''
       lines << "| Component | Size | Δ vs `#{base_branch}` |"

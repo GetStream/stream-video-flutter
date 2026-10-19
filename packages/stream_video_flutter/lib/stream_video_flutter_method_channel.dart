@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:stream_video/stream_video.dart' show AndroidCallServiceKind;
 
 import '../src/call_background/model/notification_payload.dart';
 import 'src/call_background/model/service_type.dart';
@@ -47,6 +48,7 @@ class MethodChannelStreamVideoFlutter extends StreamVideoFlutterPlatform {
   Future<bool> startBackgroundService({
     required NotificationPayload payload,
     required ServiceType type,
+    AndroidCallServiceKind kind = AndroidCallServiceKind.call,
   }) async {
     if (await isBackgroundServiceRunning(type, callCid: payload.callCid) ==
         false) {
@@ -55,6 +57,7 @@ class MethodChannelStreamVideoFlutter extends StreamVideoFlutterPlatform {
         {
           ...payload.toJson(),
           'type': type.name,
+          'serviceKind': kind.name,
         },
       );
     }

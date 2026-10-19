@@ -1,8 +1,10 @@
 import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
 
 import '../../stream_video.dart';
-import '../lifecycle/lifecycle_state.dart';
 import 'connection_state.dart';
+
+final _logger = taggedLogger(tag: 'SV:ClientState');
 
 abstract class ClientState {
   /// Returns the current user.
@@ -55,23 +57,43 @@ abstract class ClientState {
   Future<void> removeActiveCall(Call call);
 
   // Current app's lifecycle state.
-  StateEmitter<LifecycleState?> get appLifecycleState;
+  StateEmitter<VideoLifecycleState?> get appLifecycleState;
+
+  /// Marks [callCid] as accepted on this device, by [call].
+  @internal
+  void markCallAcceptedOnThisDevice(StreamCallCid callCid, Call call);
+
+  /// Clears the acceptance marker for [callCid], if it is still [call]'s.
+  @internal
+  void clearCallAcceptedOnThisDevice(StreamCallCid callCid, Call call);
+
+  /// Drops the [Call] cached for [callCid]'s ringing flow, if it is still
+  /// [call]. A newer instance for the same cid is left alone.
+  @internal
+  void releaseRingingCall(StreamCallCid callCid, Call call);
 }
 
 class MutableClientState implements ClientState {
-  MutableClientState(User user, this.options)
-    : user = MutableStateEmitter(user),
-      activeCalls = MutableStateEmitter([]),
-      activeCall = MutableStateEmitter(null),
-      watchedCalls = MutableStateEmitter([]),
-      incomingCall = MutableStateEmitter(null),
-      outgoingCall = MutableStateEmitter(null),
-      connection = MutableStateEmitter(
-        ConnectionState.disconnected(user.id),
-      ),
-      appLifecycleState = MutableStateEmitter(null);
+  MutableClientState(
+    User user, {
+    required this.allowMultipleActiveCalls,
+    required this.multiCallAudioPolicy,
+  }) : user = MutableStateEmitter(user),
+       activeCalls = MutableStateEmitter([]),
+       activeCall = MutableStateEmitter(null),
+       watchedCalls = MutableStateEmitter([]),
+       incomingCall = MutableStateEmitter(null),
+       outgoingCall = MutableStateEmitter(null),
+       connection = MutableStateEmitter(
+         ConnectionState.disconnected(user.id),
+       ),
+       appLifecycleState = MutableStateEmitter(null);
 
-  final StreamVideoOptions options;
+  /// Whether several calls may be active at once.
+  final bool allowMultipleActiveCalls;
+
+  /// How the audio of several active calls is shared.
+  final MultiCallAudioPolicy multiCallAudioPolicy;
 
   @override
   final MutableStateEmitter<User> user;
@@ -98,16 +120,48 @@ class MutableClientState implements ClientState {
   User get currentUser => user.value;
 
   @override
-  final MutableStateEmitter<LifecycleState?> appLifecycleState;
+  final MutableStateEmitter<VideoLifecycleState?> appLifecycleState;
 
+  /// Calls built for a ringing flow, by cid, so that every path consuming the
+  /// same ringing flow gets the same [Call]. Separate from [incomingCall],
+  /// which is the app-facing incoming call.
+  @internal
+  final Map<String, Call> ringingCalls = {};
+
+  /// Calls this device has accepted, by cid, from the moment the accept is
+  /// sent to the coordinator until the call is cleaned up.
+  @internal
+  final Map<String, Call> locallyAcceptedCalls = {};
+
+  @override
+  void markCallAcceptedOnThisDevice(StreamCallCid callCid, Call call) {
+    _logger.v(() => '[markCallAccepted] cid: $callCid');
+    locallyAcceptedCalls[callCid.value] = call;
+  }
+
+  @override
+  void clearCallAcceptedOnThisDevice(StreamCallCid callCid, Call call) {
+    if (!identical(locallyAcceptedCalls[callCid.value], call)) return;
+    locallyAcceptedCalls.remove(callCid.value);
+    _logger.v(() => '[clearCallAccepted] cid: $callCid');
+  }
+
+  @override
+  void releaseRingingCall(StreamCallCid callCid, Call call) {
+    if (identical(ringingCalls[callCid.value], call)) {
+      ringingCalls.remove(callCid.value);
+    }
+  }
+
+  /// Drops the active and outgoing calls. The connection state is left to
+  /// the client's connection.
   Future<void> clear() async {
     activeCalls.value = [];
     outgoingCall.value = null;
-    connection.value = ConnectionState.disconnected(user.value.id);
   }
 
   Call? getActiveCall() {
-    if (options.allowMultipleActiveCalls) {
+    if (allowMultipleActiveCalls) {
       throw Exception(
         'Multiple active calls are enabled, use getActiveCalls instead',
       );
@@ -121,7 +175,7 @@ class MutableClientState implements ClientState {
 
   @override
   Future<void> setActiveCall(Call? call) async {
-    if (!options.allowMultipleActiveCalls) {
+    if (!allowMultipleActiveCalls) {
       final currentlyActiveCall = activeCalls.value.firstOrNull;
       if (currentlyActiveCall != null) {
         await currentlyActiveCall.leave(reason: DisconnectReason.replaced());
@@ -130,7 +184,7 @@ class MutableClientState implements ClientState {
       activeCall.value = call;
       activeCalls.value = call == null ? [] : [call];
     } else if (call != null) {
-      switch (options.multiCallAudioPolicy) {
+      switch (multiCallAudioPolicy) {
         case MultiCallAudioPolicy.suspendExisting:
           // Auto-suspend every other currently-active call's audio before
           // this one claims mic/speaker/audio-session resources.
@@ -169,7 +223,7 @@ class MutableClientState implements ClientState {
 
   @override
   Future<void> removeActiveCall(Call call) async {
-    if (!options.allowMultipleActiveCalls &&
+    if (!allowMultipleActiveCalls &&
         activeCall.value?.callCid == call.callCid) {
       activeCall.value = null;
     }
@@ -184,9 +238,9 @@ class MutableClientState implements ClientState {
     ];
 
     // Resume next most recent call if using suspendExisting audio policy.
-    if (options.allowMultipleActiveCalls &&
+    if (allowMultipleActiveCalls &&
         remaining.isNotEmpty &&
-        options.multiCallAudioPolicy == MultiCallAudioPolicy.suspendExisting) {
+        multiCallAudioPolicy == MultiCallAudioPolicy.suspendExisting) {
       final next = remaining.last;
       try {
         await next.resumeAudio();

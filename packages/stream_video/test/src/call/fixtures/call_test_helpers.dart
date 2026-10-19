@@ -40,7 +40,7 @@ void registerMockFallbackValues() {
   );
   registerFallbackValue(SfuReconnectionStrategy.fast);
   registerFallbackValue(SampleCallData.defaultMediaDevice);
-  registerFallbackValue(MockStreamVideo());
+  registerFallbackValue(MockCallHost());
   registerFallbackValue(sfu_events.ReconnectDetails());
   registerFallbackValue(sfu_models.SendStatsRequest());
   registerFallbackValue(StreamVideoCloseCode.disposeOldSocket);
@@ -51,7 +51,7 @@ void registerMockFallbackValues() {
 
 Call createStubCall({
   CoordinatorClient? coordinatorClient,
-  StreamVideo? streamVideo,
+  CallHost? streamVideo,
   CallStateNotifier? stateManager,
   PermissionsManager? permissionManager,
   InternetConnection? networkMonitor,
@@ -63,7 +63,7 @@ Call createStubCall({
 }) {
   return BaseCallFactory.makeCall(
     coordinatorClient: coordinatorClient ?? MockCoordinatorClient(),
-    streamVideo: streamVideo ?? MockStreamVideo(),
+    streamVideo: streamVideo ?? MockCallHost(),
     stateManager: stateManager ?? createTestCallStateManager(),
     permissionManager: permissionManager ?? MockPermissionsManager(),
     networkMonitor: networkMonitor ?? MockInternetConnection(),
@@ -86,7 +86,7 @@ const testReconnectSettleDelay = Duration(milliseconds: 20);
 
 Call createTestCall({
   CoordinatorClient? coordinatorClient,
-  StreamVideo? streamVideo,
+  CallHost? streamVideo,
   CallStateNotifier? stateManager,
   PermissionsManager? permissionManager,
   InternetConnection? networkMonitor,
@@ -98,7 +98,7 @@ Call createTestCall({
 }) {
   return BaseCallFactory.makeCall(
     coordinatorClient: coordinatorClient ?? setupMockCoordinatorClient(),
-    streamVideo: streamVideo ?? setupMockStreamVideo(),
+    streamVideo: streamVideo ?? setupMockCallHost(),
     stateManager:
         stateManager ??
         CallStateNotifier(
@@ -182,12 +182,19 @@ MockClientState setupMockClientState() {
   when(
     () => clientState.setIncomingCall(any()),
   ).thenAnswer((_) => Future.value());
+  final appLifecycleStateEmitter = MutableStateEmitter<VideoLifecycleState?>(
+    null,
+    sync: true,
+  );
+  when(
+    () => clientState.appLifecycleState,
+  ).thenAnswer((_) => appLifecycleStateEmitter);
 
   return clientState;
 }
 
-MockStreamVideo setupMockStreamVideo({ClientState? clientState}) {
-  final streamVideo = MockStreamVideo();
+MockCallHost setupMockCallHost({ClientState? clientState}) {
+  final streamVideo = MockCallHost();
   final effectiveClientState = clientState ?? setupMockClientState();
 
   when(() => streamVideo.state).thenReturn(effectiveClientState);
@@ -202,7 +209,6 @@ MockStreamVideo setupMockStreamVideo({ClientState? clientState}) {
     () => streamVideo.currentUser,
   ).thenReturn(SampleCallData.defaultUserInfo);
   when(streamVideo.isAudioProcessorConfigured).thenReturn(false);
-  when(() => streamVideo.activeCalls).thenReturn(const <Call>[]);
 
   return streamVideo;
 }
@@ -418,7 +424,7 @@ MockSessionFactory setupMockSessionFactory({
       statsOptions: any(named: 'statsOptions'),
       onReconnectionNeeded: any(named: 'onReconnectionNeeded'),
       clientPublishOptions: any(named: 'clientPublishOptions'),
-      streamVideo: any(named: 'streamVideo'),
+      host: any(named: 'host'),
       leftoverTraceRecords: any(named: 'leftoverTraceRecords'),
       pcFactory: any(named: 'pcFactory'),
       e2eeManager: any(named: 'e2eeManager'),
@@ -439,7 +445,7 @@ MockSessionFactory setupMockSessionFactory({
 Call createTestCallWithState({
   required CallState initialState,
   CoordinatorClient? coordinatorClient,
-  StreamVideo? streamVideo,
+  CallHost? streamVideo,
 }) {
   final stateManager = CallStateNotifier(initialState);
 

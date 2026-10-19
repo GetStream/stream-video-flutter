@@ -32,20 +32,27 @@ class CallConnectionCoordinator {
 
   bool get _isLeftOrLeaving => _phase.value.isLeftOrLeaving;
 
-  /// Waits for [future], or returns null as soon as the call is leaving.
-  Future<T?> _untilLeft<T>(Future<T> future) async {
-    final left = Completer<T?>();
+  /// Runs [body] with a future that completes once the call is leaving.
+  Future<T> _whileJoined<T>(Future<T> Function(Future<void> left) body) async {
+    final left = Completer<void>();
     final subscription = _phase.where((phase) => phase.isLeftOrLeaving).listen((
       _,
     ) {
-      if (!left.isCompleted) left.complete(null);
+      if (!left.isCompleted) left.complete();
     });
 
     try {
-      return await Future.any<T?>([future, left.future]);
+      return await body(left.future);
     } finally {
       await subscription.cancel();
     }
+  }
+
+  /// Waits for [future], or returns null as soon as the call is leaving.
+  Future<T?> _untilLeft<T>(Future<T> future) {
+    return _whileJoined(
+      (left) => Future.any<T?>([future, left.then((_) => null)]),
+    );
   }
 
   /// Waits [duration], or less if the call starts leaving first.
@@ -216,9 +223,6 @@ class CallConnectionCoordinator {
     SfuClientCapability.subscriberVideoPause, // on by default
   };
 
-  CallConnectOptions _connectOptions = const CallConnectOptions();
-  CallConnectOptions? _connectOptionsOverride;
-
   void _observeState() {
     _call._subscriptions.add(
       _idState,
@@ -351,7 +355,7 @@ class CallConnectionCoordinator {
       return failureWithError('ongoing connect failed: $status');
     }
 
-    if (_call._streamVideo.state.activeCalls.value.any(
+    if (_call._host.state.activeCalls.value.any(
       (call) => call.callCid == _call.callCid,
     )) {
       _call._logger.w(
@@ -373,17 +377,17 @@ class CallConnectionCoordinator {
 
     if (_isLeftOrLeaving) return _rejectJoinOfLeftCall();
 
-    await _call._streamVideo.state.setActiveCall(_call);
+    await _call._host.state.setActiveCall(_call);
 
     // Marking the call active can wait on another call leaving. A leave of
     // this call in that time has already cleaned up, so undo the marking
     // rather than register a call nothing would unregister.
     if (_isLeftOrLeaving) {
-      await _call._streamVideo.state.removeActiveCall(_call);
+      await _call._host.state.removeActiveCall(_call);
       return _rejectJoinOfLeftCall();
     }
 
-    _call._streamVideo.clientEventReporter
+    _call._host.clientEventReporter
       ..registerCall(_call.callCid)
       ..reportEvent(_call.callCid, ClientEventStage.joinInitiated);
 
@@ -620,11 +624,11 @@ class CallConnectionCoordinator {
     int joinAttempt = 0,
     CallSession? migratingFrom,
   }) async {
-    _call._logger.d(() => '[join] options: $_connectOptions');
+    _call._logger.d(() => '[join] options: ${_call.connectOptions}');
     final connectionTimeStopwatch = Stopwatch()..start();
 
     final validation = await _call._stateManager.validateUserId(
-      _call._streamVideo.currentUser.id,
+      _call._host.currentUser.id,
     );
 
     if (validation is Failure) {
@@ -644,8 +648,8 @@ class CallConnectionCoordinator {
     final ringing =
         _call.state.value.status is CallStatusOutgoing ||
         _call.state.value.status is CallStatusIncoming;
-    final result = await _awaitIfNeeded();
-    if (_isLeftOrLeaving) {
+    final result = await _awaitAnswer();
+    if (result == null || _isLeftOrLeaving) {
       _call._logger.w(() => '[join] rejected (call was left)');
       return const JoinCancelled();
     }
@@ -742,7 +746,7 @@ class CallConnectionCoordinator {
         stateManager: _call._stateManager,
         dynascaleManager: _call.dynascaleManager,
         networkMonitor: _call.networkMonitor,
-        streamVideo: _call._streamVideo,
+        host: _call._host,
         statsOptions: _sfuStatsOptions!,
         pcFactory: _call._ensurePcFactory(),
         e2eeManager: _call._e2ee.manager,
@@ -893,10 +897,10 @@ class CallConnectionCoordinator {
 
     // Re-bind audio filter after rejoin/migrate, as iOS may drop it.
     if ((performingRejoin || performingMigration) &&
-        _call._streamVideo.isAudioProcessorConfigured() &&
+        _call._host.isAudioProcessorConfigured() &&
         _call.state.value.isAudioProcessing) {
       unawaited(
-        _call._streamVideo.setAudioProcessingEnabled(true).then((result) {
+        _call._host.setAudioProcessingEnabled(true).then((result) {
           if (result.isFailure) {
             _call._logger.w(
               () =>
@@ -1010,7 +1014,7 @@ class CallConnectionCoordinator {
       return failureWithError('call was left');
     }
 
-    final reporter = _call._streamVideo.clientEventReporter;
+    final reporter = _call._host.clientEventReporter;
     final joinStageId = reporter.beginStage(
       _call.callCid,
       ClientEventStage.coordinatorJoin,
@@ -1057,18 +1061,10 @@ class CallConnectionCoordinator {
 
     // Apply call settings to connect options only when not reconnecting.
     if (_reconnectStrategy == SfuReconnectionStrategy.unspecified) {
-      await _call._applyCallSettingsToConnectOptions(
+      await _call._media.applyJoinSettings(
         receivedOrCreated.data.metadata.settings,
+        joinOptions: connectOptions,
       );
-
-      if (connectOptions != null) {
-        _connectOptions = _connectOptions.merge(connectOptions);
-      }
-
-      if (_connectOptionsOverride != null) {
-        _connectOptions = _connectOptions.merge(_connectOptionsOverride!);
-        _connectOptionsOverride = null;
-      }
     }
 
     _call._logger.v(
@@ -1088,7 +1084,7 @@ class CallConnectionCoordinator {
       callConnectOptions: connectOptions,
     );
 
-    if (_call._streamVideo.isAudioProcessorConfigured() &&
+    if (_call._host.isAudioProcessorConfigured() &&
         joinResult.data.metadata.settings.audio.noiseCancellation?.mode ==
             NoiseCancellationSettingsMode.autoOn) {
       // AutoOn will enable noise cancellation if the device has sufficient processing power
@@ -1190,8 +1186,8 @@ class CallConnectionCoordinator {
         ];
         _call._logger.v(() => '[startSession] applying connect options');
         unawaited(
-          _call
-              ._applyConnectOptions(
+          _call._media
+              .applyConnectOptions(
                 session: session,
                 inheritedTracks: inheritedTracks,
               )
@@ -1206,8 +1202,7 @@ class CallConnectionCoordinator {
               }),
         );
       },
-      isAnonymousUser:
-          _call._streamVideo.state.currentUser.type == UserType.anonymous,
+      isAnonymousUser: _call._host.state.currentUser.type == UserType.anonymous,
       unifiedSessionId: _unifiedSessionId,
     );
 
@@ -1253,7 +1248,6 @@ class CallConnectionCoordinator {
       _sfuStatsReporter =
           SfuStatsReporter(
             callSession: session,
-            stateManager: _call._stateManager,
             statsOptions: _sfuStatsOptions!,
             unifiedSessionId: _unifiedSessionId,
           )..run(
@@ -1770,7 +1764,7 @@ class CallConnectionCoordinator {
             ? JoinReason.networkAvailable
             : strategyReason;
         if (joinReason != null) {
-          final reporter = _call._streamVideo.clientEventReporter;
+          final reporter = _call._host.clientEventReporter;
           if (strategyReason != null && !joinReason.mintsNewAttempt) {
             reporter.newJoinAttempt(_call.callCid, reason: joinReason);
           }
@@ -1949,7 +1943,7 @@ class CallConnectionCoordinator {
 
     try {
       _call.networkMonitor.setIntervalAndResetTimer(
-        _call._streamVideo.options.networkMonitorSettings.offlineCheckInterval,
+        _call._host.options.networkMonitorSettings.offlineCheckInterval,
       );
 
       while (true) {
@@ -2009,11 +2003,8 @@ class CallConnectionCoordinator {
           // cannot report anything new before its next probe, so retrying
           // sooner only spins — a flapping monitor otherwise drives this loop
           // thousands of times a minute for as long as the budget lasts.
-          final checkInterval = _call
-              ._streamVideo
-              .options
-              .networkMonitorSettings
-              .offlineCheckInterval;
+          final checkInterval =
+              _call._host.options.networkMonitorSettings.offlineCheckInterval;
           final left = budget - deadline.elapsed;
           final settleDelay = left < checkInterval ? left : checkInterval;
 
@@ -2039,36 +2030,10 @@ class CallConnectionCoordinator {
     }
   }
 
-  Future<Result<None>> _awaitIfNeeded() async {
-    final state = _call.state.value;
-    final status = state.status;
-    final settings = state.settings;
-
-    Future<Result<None>>? futureResult;
-    if (status is CallStatusOutgoing && !status.acceptedByCallee) {
-      final timeout = settings.ring.autoCancelTimeout;
-      _call._logger.d(() => '[awaitIfNeeded] outgoing timeout: $timeout');
-      futureResult = _call._awaitOutgoingToBeAccepted(timeout);
-    } else if (status is CallStatusIncoming && !status.acceptedByMe) {
-      final timeout = settings.ring.autoRejectTimeout;
-      _call._logger.d(() => '[awaitIfNeeded] incoming timeout: $timeout');
-      futureResult = _call._awaitIncomingToBeAccepted(timeout);
-    } else if (status is CallStatusJoining) {
-      // TODO we don't need this case, since we no longer join from LobbyView
-      _call._logger.d(() => '[awaitIfNeeded] joining to become joined');
-      futureResult = _call._awaitCallToBeJoined();
-    }
-
-    if (futureResult != null) {
-      final result = await _untilLeft(futureResult);
-      if (result == null) {
-        _call._logger.w(() => '[awaitIfNeeded] call was left');
-        return failureWithError('call was left');
-      }
-      return result;
-    }
-
-    return const Result.success(none);
+  /// Waits for a ringing call to be answered; `null` when the call is left
+  /// first.
+  Future<Result<None>?> _awaitAnswer() {
+    return _whileJoined((left) => _call._ringing.awaitAnswer(left: left));
   }
 
   Future<Result<None>> leave({DisconnectReason? reason}) {
@@ -2127,15 +2092,16 @@ class CallConnectionCoordinator {
   /// from the client's ringing, incoming, outgoing and watched calls.
   ///
   /// A call that is still ringing is reported disconnected, and its native
-  /// call ends unless another instance has joined the same call. An
-  /// unanswered outgoing ring is cancelled first.
+  /// call ends unless another instance has joined the same call or the user
+  /// answered it on the native call screen. An unanswered outgoing ring is
+  /// cancelled first.
   Future<void> _releaseUnjoined() async {
     _cancelables.cancelAll();
     await _call.dynascaleManager.dispose();
     _call.viewportVisibility.clear();
     await _call.clearE2EEManager();
 
-    final client = _call._streamVideo;
+    final client = _call._host;
     final status = _call.state.value.status;
     if (status is CallStatusIncoming || status is CallStatusOutgoing) {
       await _cancelUnansweredRing();
@@ -2143,7 +2109,7 @@ class CallConnectionCoordinator {
       final joinedElsewhere = client.state.activeCalls.value.any(
         (call) => call.callCid == _call.callCid,
       );
-      if (!joinedElsewhere) {
+      if (!joinedElsewhere && !await _answeredNatively()) {
         try {
           await client.pushNotificationManager?.endCallByCid(
             _call.callCid.value,
@@ -2157,15 +2123,30 @@ class CallConnectionCoordinator {
       }
     }
 
-    client
-      ..clearCallAcceptedOnThisDevice(_call.callCid, _call)
-      ..releaseRingingCall(_call.callCid, _call);
+    _call._ringing.release();
     client.state.removeWatchedCall(_call);
     if (identical(client.state.outgoingCall.value, _call)) {
       await client.state.setOutgoingCall(null);
     }
     if (identical(client.state.incomingCall.value, _call)) {
       await client.state.setIncomingCall(null);
+    }
+  }
+
+  /// Whether the user answered this call on the native call screen, so a
+  /// client elsewhere, such as the app's in another isolate, takes it over.
+  Future<bool> _answeredNatively() async {
+    try {
+      final calls =
+          await _call._host.pushNotificationManager?.activeCalls() ?? const [];
+      return calls.any(
+        (call) => call.callCid == _call.callCid.value && call.isAccepted,
+      );
+    } catch (e, stk) {
+      _call._logger.e(
+        () => '[dispose] reading the native calls failed: $e\n$stk',
+      );
+      return false;
     }
   }
 
@@ -2186,7 +2167,7 @@ class CallConnectionCoordinator {
         ClientEventStandardCode.networkOffline,
       _ => ClientEventStandardCode.clientAborted,
     };
-    _call._streamVideo.clientEventReporter
+    _call._host.clientEventReporter
       ..abort(_call.callCid, abortCode)
       ..unregisterCall(_call.callCid);
 
@@ -2359,11 +2340,9 @@ class CallConnectionCoordinator {
       _call._closedCaptions.reset();
       _call._moderation.cancelTimer();
 
-      _call._stopRingStatePolling();
+      _call._ringing.stopRingStatePolling();
 
-      for (final operation in _call._sfuStatsTimers) {
-        await operation.cancel();
-      }
+      await _call._media.cancelSfuStatsTimers();
 
       await _flushAndStopSfuStatsReporter();
       _cancelables.cancelAll();
@@ -2372,21 +2351,16 @@ class CallConnectionCoordinator {
       // Call, so stopping it on this call's teardown would silently drop noise
       // cancellation on any other still-active call that also wants it. Only
       // stop the global processor when no other active call is configured for
-      if (_call._streamVideo.isAudioProcessorConfigured() &&
+      if (_call._host.isAudioProcessorConfigured() &&
           _call.state.value.settings.audio.noiseCancellation?.mode ==
               NoiseCancellationSettingsMode.autoOn) {
-        final anotherCallWantsAutoOn = _call
-            ._streamVideo
-            .state
-            .activeCalls
-            .value
-            .any(
-              (other) =>
-                  other.callCid != _call.callCid &&
-                  other.state.value.status is! CallStatusDisconnected &&
-                  other.state.value.settings.audio.noiseCancellation?.mode ==
-                      NoiseCancellationSettingsMode.autoOn,
-            );
+        final anotherCallWantsAutoOn = _call._host.state.activeCalls.value.any(
+          (other) =>
+              other.callCid != _call.callCid &&
+              other.state.value.status is! CallStatusDisconnected &&
+              other.state.value.settings.audio.noiseCancellation?.mode ==
+                  NoiseCancellationSettingsMode.autoOn,
+        );
         if (!anotherCallWantsAutoOn) {
           unawaited(
             _call.stopAudioProcessing().catchError((Object e) {
@@ -2417,6 +2391,7 @@ class CallConnectionCoordinator {
       final pcFactory = _pcFactory;
       _pcFactory = null;
       if (pcFactory != null) {
+        await _stopPendingTracksOf(pcFactory);
         unawaited(
           pcFactory.dispose().catchError((Object e) {
             _call._logger.w(() => '[clear] pcFactory dispose failed: $e');
@@ -2428,19 +2403,46 @@ class CallConnectionCoordinator {
       _call.viewportVisibility.clear();
       await _call.clearE2EEManager();
     } finally {
-      _call._streamVideo.clearCallAcceptedOnThisDevice(_call.callCid, _call);
-      _call._streamVideo.releaseRingingCall(_call.callCid, _call);
-      await _call._streamVideo.state.removeActiveCall(_call);
-      if (_call._streamVideo.state.outgoingCall.value?.callCid ==
-          _call.callCid) {
-        await _call._streamVideo.state.setOutgoingCall(null);
+      _call._ringing.release();
+      await _call._host.state.removeActiveCall(_call);
+      if (_call._host.state.outgoingCall.value?.callCid == _call.callCid) {
+        await _call._host.state.setOutgoingCall(null);
       }
 
-      if (identical(_call._streamVideo.state.incomingCall.value, _call)) {
-        await _call._streamVideo.state.setIncomingCall(null);
+      if (identical(_call._host.state.incomingCall.value, _call)) {
+        await _call._host.state.setIncomingCall(null);
       }
     }
 
     _call._logger.v(() => '[clear] completed');
+  }
+
+  /// Stops the tracks the connect options still hold that were opened on
+  /// [pcFactory], before it is disposed.
+  ///
+  /// A track handed over as [TrackOption.provided] that no session adopted —
+  /// the outgoing screen's camera preview, when the call is cancelled while
+  /// ringing — is not stopped by the session's dispose. Its native track dies
+  /// with the factory, and a renderer still showing it then lets go of freed
+  /// memory and crashes the app. Stopping the track first detaches those
+  /// renderers natively. Stopping one twice is harmless, so a track the
+  /// session already stopped, or that its owner stops later, is fine.
+  Future<void> _stopPendingTracksOf(
+    StreamPeerConnectionFactory pcFactory,
+  ) async {
+    final factoryId = pcFactory.nativeFactory?.factoryId;
+    if (factoryId == null) return;
+
+    final options = _call.connectOptions;
+    final tracks = [
+      options.camera.trackOrNull,
+      options.microphone.trackOrNull,
+      options.screenShare.trackOrNull,
+    ].nonNulls.where((track) => track.nativeFactory?.factoryId == factoryId);
+
+    for (final track in tracks) {
+      _call._logger.d(() => '[clear] stopping pending ${track.trackId}');
+      await track.stop();
+    }
   }
 }

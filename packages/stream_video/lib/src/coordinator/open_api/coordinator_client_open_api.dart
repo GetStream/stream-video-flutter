@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../../stream_video.dart';
 import '../../errors/stream_video_exception_composer.dart';
@@ -22,6 +24,14 @@ const _connectUserTimeout = Duration(seconds: 5);
 /// How long a request waits for a connection id that is on its way.
 const _waitForConnectionId = Duration(seconds: 5);
 
+/// Builds the socket for [user]; a test seam of [CoordinatorClientOpenApi].
+@visibleForTesting
+typedef CoordinatorWebSocketFactory =
+    CoordinatorWebSocket Function(
+      UserInfo user, {
+      required bool includeUserDetails,
+    });
+
 /// An accessor that allows us to communicate with the API around video calls.
 class CoordinatorClientOpenApi extends CoordinatorClient {
   CoordinatorClientOpenApi({
@@ -34,6 +44,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     this.isAnonymous = false,
     NetworkStateProvider? networkStateProvider,
     ClientEventReporter clientEventReporter = const ClientEventReporter.noOp(),
+    @visibleForTesting this._webSocketFactory,
   }) : _rpcUrl = rpcUrl,
        _wsUrl = wsUrl,
        _apiKey = apiKey,
@@ -53,6 +64,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   final RetryPolicy _retryPolicy;
   final NetworkStateProvider? _networkStateProvider;
   final ClientEventReporter _clientEventReporter;
+  final CoordinatorWebSocketFactory? _webSocketFactory;
 
   final bool isAnonymous;
 
@@ -109,6 +121,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   );
 
   UserInfo? _user;
+  bool _includeUserDetails = false;
   CoordinatorWebSocket? _ws;
   StreamSubscription<CoordinatorEvent>? _wsSubscription;
 
@@ -130,7 +143,28 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     _connectionState.value = CoordinatorConnectionState.connecting(
       userId: user.id,
     );
+
+    // A socket that is closed, or recovering from a drop, connects again
+    // when it was built for the same user and details; otherwise it is
+    // replaced.
+    final existing = _ws;
+    if (existing != null &&
+        _user == user &&
+        _includeUserDetails == includeUserDetails) {
+      _logger.i(() => '[connectUser] reusing the socket');
+      if (existing.isDisconnected) {
+        final openResult = await openConnection();
+        if (openResult is Failure) {
+          _logger.e(() => '[connectUser] reopen failed: $openResult');
+          return openResult;
+        }
+      }
+      return _awaitConnected();
+    }
+    if (existing != null) await _disposeWebSocket();
+
     _user = user;
+    _includeUserDetails = includeUserDetails;
     _ws =
         _createWebSocket(
           user,
@@ -365,10 +399,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     final closedResult = await closeConnection();
 
     // Always dispose regardless of closeConnection result
-    await _ws?.dispose();
-    _ws = null;
-    await _wsSubscription?.cancel();
-    _wsSubscription = null;
+    await _disposeWebSocket();
 
     return closedResult.when(
       success: (_) => const Result.success(none),
@@ -376,10 +407,35 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     );
   }
 
+  /// Stops following the socket, closes it and disposes it. Logs a step that
+  /// fails instead of throwing, and disposes the socket whatever closing it
+  /// did.
+  Future<void> _disposeWebSocket() async {
+    final ws = _ws;
+    _ws = null;
+    try {
+      await _wsSubscription?.cancel();
+      _wsSubscription = null;
+      if (ws != null && !ws.isDisconnected) await ws.disconnect();
+    } catch (e, stk) {
+      _logger.e(() => '[disposeWebSocket] closing failed: $e\n$stk');
+    } finally {
+      try {
+        await ws?.dispose();
+      } catch (e, stk) {
+        _logger.e(() => '[disposeWebSocket] disposing failed: $e\n$stk');
+      }
+    }
+  }
+
   CoordinatorWebSocket _createWebSocket(
     UserInfo user, {
     bool includeUserDetails = false,
   }) {
+    final factory = _webSocketFactory;
+    if (factory != null) {
+      return factory(user, includeUserDetails: includeUserDetails);
+    }
     return CoordinatorWebSocket(
       _wsUrl,
       apiKey: _apiKey,

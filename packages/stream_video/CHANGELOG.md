@@ -2,6 +2,12 @@
 
 ### ⚠️ Breaking
 
+- Test mocks that implement `StreamVideo` get a `subtype_of_sealed_class` warning, because `StreamVideo` implements the `@sealed` `CallHost`; add `// ignore: subtype_of_sealed_class` to them.
+- The deprecated `observeCoreCallKitEvents`, `observeCall*CallKitEvent` and `handleVoipPushNotification` methods are removed; use `observeCoreRingingEvents`, `observeCall*RingingEvent` and `handleRingingFlowNotifications` on `StreamVideo.ringing`.
+- `StreamVideo.create` no longer sets up logging; call `StreamVideo.configureLogging` for such a client.
+- `StreamVideoOptions.androidAudioConfiguration` is removed; pass `AudioConfigurationPolicy.custom` as `audioConfigurationPolicy` instead.
+- The no-op `precacheGenericSdps` parameter of `StreamVideo.create` is removed.
+- `StreamVideo`'s `failIfSingletonExists` is replaced by `onInstanceReplaced`, which is called with the client it replaces; that client is no longer disconnected.
 - Joining a `Call` after it was left or ended fails with `CallLeftException`; a `Call` is single use.
 - The lists emitted by `Call.closedCaptions` are unmodifiable; copy one before changing it.
 - `Call`'s action methods (members, permissions, moderation, recording, transcription, captions, broadcasting, mute, pin, go-live, reactions, custom events, feedback) are now extension methods on `CallActions`; they can't be stubbed or overridden, and a `show Call` import must also show `CallActions`.
@@ -47,12 +53,19 @@
 
 ### ⚠️ Deprecated
 
+- The ringing methods on `StreamVideo` are deprecated; call them on `StreamVideo.ringing`, which has the same method names.
+- The `Call.connectOptions` setter is deprecated in favour of `Call.setConnectOptions`, which reports whether the options were applied; there is no `dart fix` for it, since a setter can't be rewritten into a method call.
 - `StreamVideo.disposeAfterResolvingRinging` is deprecated in favour of `StreamVideoPushHandler.handleBackgroundMessage` from `stream_video_push_notification`. Use it to handle the whole background ringing lifecycle.
 - `VideoError` is renamed to `StreamVideoException`, and `VideoErrorWithCause` to `StreamVideoExceptionWithCause`. The old names remain as deprecated typedefs, so existing code still compiles; `dart fix --apply` migrates it.
 - `ifInvisibleBy` takes a `ParticipantPriority` — a priority for one participant, higher first — instead of a `Comparator`. Pass the priority of the same name: `ifInvisibleBy(dominantSpeakerPriority)` where you passed `ifInvisibleBy(dominantSpeaker)`.
 
 ### ✅ Added
 
+- `VideoLifecycleState`, the type of `ClientState.appLifecycleState`, is exported.
+- `StreamVideo.ready` completes once the client has started up: audio configured, environment collected and, with `autoConnect`, the connect attempted.
+- `StreamVideo.configureLogging` sets up the SDK's logging without a singleton client.
+- `StreamVideo.runWithoutMedia` builds a client that sets up no media, for handling a push in the background; its calls cannot be joined.
+- `NetworkMonitorSettings.build()` returns the `InternetConnection` the settings describe.
 - `Call.dispose()` leaves the call if needed and closes its streams.
 - Added `StreamPushPayload`, the wire contract for the push payloads Stream sends: the keys it sets, the `sender` that marks a payload as ours, and predicates for recognising a ringing or missed call push. `handleRingingFlowNotifications` reads payloads through it, so anything that has to recognise a Stream push before handing it over — a background handler deciding whether to build a client, or tracking which call is still ringing — can match on exactly what the SDK matches on instead of restating the format.
 - Added `ScreenShareConstraints.systemPickerSourceId`, the `sourceId` that makes macOS choose what to share with its system picker.
@@ -70,7 +83,11 @@
 ### 🔄 Changed
 
 - Updated `stream_webrtc_flutter` to `^4.0.0`.
-- `StreamVideo.dispose()` leaves and disposes the calls it tracks.
+- `Call`'s factories take a `CallHost`, the part of the client a call uses; `StreamVideo` implements it, so passing a `StreamVideo` still works.
+- `StreamVideo.dispose()` leaves and disposes the calls it tracks, and disconnects the user like `disconnect()` but keeps the push device registered.
+- `StreamVideo.connect()` registers the push device whenever it is asked to, also while the user is connected.
+- `StreamVideo.disconnect()` leaves the user disconnected even when unregistering the push device fails, or when the connection had dropped and was reconnecting.
+- `StreamVideo.disconnect()` also unregisters the push device when the user never connected.
 - Leaving or disposing an outgoing call you created while it still rings cancels the ring.
 - With `closedCaptionsVisibilityDurationMs` at 0 or less, closed captions are now shown and stay until newer ones replace them, instead of never being shown.
 - A `call.rejected` event now settles a ring by the same rules as the push and ring-state checks (`RingingSnapshot`), so the paths can no longer disagree. These cases change:
@@ -78,12 +95,20 @@
   - A callee whose acceptance already reached the server stays in the call when the caller cancels, instead of hanging up.
   - A caller that is the only member keeps ringing until its timeout, instead of hanging up on the first rejection.
   - A caller whose callee accepted keeps the call, even if that callee also shows up as having rejected.
-- An incoming ring is now dismissed when the caller cancels, even if another callee has already accepted. `CallMetadata.ringingStateFor` and `StreamVideo.getCallRingingState` report it as rejected rather than ringing.
+- An incoming ring is now dismissed when the caller cancels, even if another callee has already accepted. `CallMetadata.ringingStateFor` and `StreamVideo.ringing.getCallRingingState` report it as rejected rather than ringing.
 
 ### 🐞 Fixed
 
 - Remote audio on Safari and other WebKit browsers no longer goes silent when another participant joins.
 - Safari and other WebKit browsers always play remote audio on the system default output; `Call.checkIfAudioOutputChangeSupported` returns false there.
+- The outgoing call screen shows the camera preview every time the call settings turn the camera on, not only sometimes. `getOrCreate` and `get` now apply the call settings to `connectOptions` before they return.
+- Cancelling an outgoing call while its camera preview is on no longer crashes the app on Android. A track handed over through `TrackOption.provided` that the call never adopted is now stopped before the call's peer connection factory is disposed.
+- Connecting while the coordinator socket is dropped reconnects that socket instead of opening a second one.
+- Going to the background and straight back no longer leaves the coordinator connection closed, or the camera and microphone off.
+- A camera or microphone that fails to turn back on when the app returns from the background is tried again on the next return instead of staying off.
+- A ring that ends before it is answered, such as one the caller cancels, no longer logs a timeout error once the ring's timeout runs out.
+- `StreamVideo.connect()` and `disconnect()` run one at a time in the order they are called, so a disconnect during a connect no longer leaves the user connected.
+- `Call.setCameraTargetResolution` during a call is now kept for later sessions.
 - `CallSettings` equality now compares every section.
 - A failed `Call.join` now returns the error it failed with, retries a retryable coordinator failure, and reports one telemetry abort.
 - A call ended remotely now sends the SFU leave message, like a local leave.
@@ -123,28 +148,36 @@
 
 ## Upcoming (minor)
 
-### ⚠️ Breaking
+### 🐞 Fixed
 
-- `CallPreferences` now requires a `participantsThrottleIntervalResolver`; custom implementations must provide it.
-- `CallParticipantState.audioLevels` and `CallState.ringingMembers` are now unmodifiable.
+- `CallState.endedAt` is now set when the call ends while you are joined or watching it.
+
+## 1.7.1
+
+### ✅ Added
+
+- Added `AndroidCallServiceKind` and `AudioConfigurationPolicy.androidCallServiceKind`, which pick the Android foreground service a call runs in.
+
+## 1.7.0
 
 ### ✅ Added
 
 - Added `Call.participantsStream`, which emits the participant list at an interval that grows with the participant count.
-- Added `CallPreferences.participantsThrottleIntervalResolver` to override that interval, or set it to `null` to emit every change.
-- Added `isSameCallStateSelection`, which compares two selected values the way `Call.partialState` does.
+- Added `CallPreferences.participantsThrottleIntervalResolver` to override that interval, or set it to `null` to emit every change. `DefaultCallPreferences` provides a default. If your app implements `CallPreferences` directly, add the getter to your implementation.
 
 ### 🔄 Changed
 
 - `Call.partialState` now compares maps, sets and nested collections by their contents.
 - `CallState` keeps its `ownCapabilities`, `blockedUserIds`, `custom`, `capabilitiesByRole` and `callMembers` instances when a call update leaves their contents unchanged.
 - Reduced the cost of call updates in calls with many members.
-- [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
+- Stopped sending the deprecated raw WebRTC stats and input device lists in SFU stats reports.
+- [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed. Apps on AGP 9 failed to build because of it.
 - Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.
 - SFU participant events no longer emit a new call state when they leave every participant unchanged.
 - Reduced the cost of participant state updates in large calls.
 - `CallParticipantState.audioLevel` and `audioLevels` now hold at their last value while a participant is silent.
-- `CallState.localParticipant`, `otherParticipants` and `activeSpeakers` are now computed once per participant list instead of on every read, which keeps them cheap in calls with many participants. `callParticipants`, `otherParticipants` and `activeSpeakers` now return unmodifiable lists shared by every reader, so call `.toList()` before sorting or otherwise mutating them.
+- `CallParticipantState.audioLevels` and `CallState.ringingMembers` now return unmodifiable lists, so call `.toList()` before sorting or otherwise mutating them.
+- `CallState.localParticipant`, `otherParticipants` and `activeSpeakers` are now computed once per participant list instead of on every read, which keeps them cheap in calls with many participants.
 - Simulcast layers are now announced to the SFU and bitrate-capped from the resolution the camera actually captures on iOS and Android, instead of the requested resolution. A camera that captures below the requested size, or at a different aspect ratio, no longer over-reports its layers or over-allocates their bitrate.
 - `RtcMediaDeviceNotifier` now enumerates devices once per burst of device-change events, and calls made while an enumeration is running share its result instead of starting another one. The device list emitted by `RtcMediaDeviceNotifier.onDeviceChange` is now unmodifiable, so copy it with `.toList()` before sorting or otherwise mutating it.
 
@@ -157,8 +190,8 @@
 - Fixed leaving a call trying to stop noise cancellation when no audio processor is configured.
 - Fixed leaving a call calling `removeTrack` on the publisher for received tracks, which failed and logged `sender is null` on every leave.
 - [iOS/Android] Fixed camera video layers being announced in landscape while the phone is held upright.
-- Fixed fast reconnect failing for participants who are not publishing any tracks, such as livestream viewers. Instead of recovering the existing session, they fell back to a full rejoin with a new session after every network drop.
-- Fixed video layers being given a `maxBitrate` of 0 when the SFU's publish option carries no bitrate, and an empty publish option dimension being used as the bitrate target instead of the 1280x720 default. Publishing a video track now logs the publish option, the capture size and the computed encodings at debug level.
+- Fixed fast reconnect failing for participants who are not publishing any tracks, such as livestream viewers.
+- Fixed video layers being given a `maxBitrate` of 0 when the SFU's publish option carries no bitrate, and an empty publish option dimension being used as the bitrate target instead of the 1280x720 default.
 
 ## 1.6.0
 

@@ -177,7 +177,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
           );
 
           final acceptedOnThisDevice = isAcceptedOnThisDevice(
-            acceptedLocally: streamVideo.isCallAcceptedOnThisDevice(
+            acceptedLocally: streamVideo.ringing.isCallAcceptedOnThisDevice(
               event.callCid.toString(),
             ),
             activeCall: activeCall,
@@ -357,8 +357,15 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       _subscriptions.cancel(_idToken);
     }
 
-    final apnToken = await StreamTokenProvider.getAPNToken();
-    if (apnToken != null) {
+    // Delete the APN token stored on a successful registration, which also
+    // covers tokens registered before `registerApnDeviceToken` was disabled,
+    // plus the current one if APN registration is enabled.
+    final apnTokens = {
+      ?_sharedPreferences.getString(userDeviceTokenKey),
+      if (CurrentPlatform.isIos && registerApnDeviceToken)
+        ?await StreamTokenProvider.getAPNToken(),
+    };
+    for (final apnToken in apnTokens) {
       await _client.deleteDevice(id: apnToken);
     }
 

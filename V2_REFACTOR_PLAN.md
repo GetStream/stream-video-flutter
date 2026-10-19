@@ -4,7 +4,7 @@ Parent issue: [FLU-859](https://linear.app/stream/issue/FLU-859) · Linear proje
 P-FLU-555 · Analysis and decisions:
 [v2 refactoring: StreamVideo and Call](https://claude.ai/code/artifact/8c46054e-44ad-46ef-bcca-9cc834640ad4)
 
-This file tracks the **order** of the 26 sub-issues in the stack and how each one is
+This file tracks the **order** of the 27 sub-issues in the stack and how each one is
 delivered. What a ticket changes is in the ticket itself and in the analysis
 doc. The decisions in FLU-859 are settled; do not reopen them.
 
@@ -30,10 +30,9 @@ One PR per ticket, each based on the branch of the ticket before it. The first
 PR targets `v2`. Tick a box in the ticket's own commit.
 
 The stack is split in two after ticket 18. Tickets 1-18 (#1405 to #1429) are the
-connection work and merge into `v2` first, bottom up. Ticket 19 (B1) starts the
-second stack. It branches off `feat/flu-862-call-dispose` and targets it until
-the first stack has merged, then it is retargeted to `v2`. The numbering
-continues across both stacks.
+connection work and have merged into `v2`. Ticket 19 (B1) starts the second
+stack, branched off and targeting `v2`. The numbering continues across both
+stacks.
 
 | # | Ticket | Branch (proposed) | PR |
 |---|---|---|---|
@@ -55,14 +54,15 @@ continues across both stacks.
 | 16 | FLU-938 | `fix/flu-938-reuse-local-tracks` | #1426 |
 | 17 | A6 | `fix/flu-861-session-ownership` | #1427 |
 | 18 | A7 | `feat/flu-862-call-dispose` | #1429 |
-| 19 | B1 | `feat/flu-848-local-media-controller` | |
-| 20 | C2 | `feat/flu-853-stream-video-test-seams` | |
-| 21 | C3 | `fix/flu-857-coordinator-connection` | |
-| 22 | C1 | `feat/flu-856-ringing-call-coordinator` | |
-| 23 | B3 | `feat/flu-863-call-ringing-controller` | |
-| 24 | C4 | `feat/flu-858-app-lifecycle-controller` | |
-| 25 | B6 | `feat/flu-852-call-host` | |
-| 26 | C5 | `feat/flu-854-stream-video-constructor` | |
+| 19 | B1 | `feat/flu-848-local-media-controller` | #1434 |
+| 20 | C2 | `feat/flu-853-stream-video-test-seams` | #1435 |
+| 21 | C3 | `fix/flu-857-coordinator-connection` | #1436 |
+| 22 | C1 | `feat/flu-856-ringing-call-coordinator` | #1437 |
+| 23 | B3 | `feat/flu-863-call-ringing-controller` | #1438 |
+| 24 | C4 | `feat/flu-858-app-lifecycle-controller` | #1439 |
+| 25 | B6 | `feat/flu-852-call-host` | #1440 |
+| 26 | C5 | `feat/flu-854-stream-video-constructor` | #1441 |
+| 27 | Fix | `fix/coordinator-socket-leak` | #1456 |
 
 - [x] 1. **A1** [FLU-847](https://linear.app/stream/issue/FLU-847): characterisation tests for Call join, leave and reconnect (M). Gates A2, so it goes first. Ships with this plan.
 - [x] 2. **B4** [FLU-850](https://linear.app/stream/issue/FLU-850): Call pass-throughs to extension methods (S, low risk). Removes about 380 lines from `call.dart` before the risky moves, with no overlap with the connection code.
@@ -82,14 +82,15 @@ continues across both stacks.
 - [x] 16. **Fix** [FLU-938](https://linear.app/stream/issue/FLU-938): reuse local tracks across a migration and a rejoin (S–M). The new session takes over the old one's camera, microphone and screen-share tracks instead of opening them again. Right after FLU-932, whose order (the old session stays open until the old SFU confirms) is what the handover has to respect, and before A6 and B1, which then build on its `_startSession` and `_applyConnectOptions` changes.
 - [x] 17. **A6** [FLU-861](https://linear.app/stream/issue/FLU-861): single session ownership and a complete teardown (S). Fixes bugs 3 and 5, and folds in [FLU-925](https://linear.app/stream/issue/FLU-925) (timers re-armed during leave). Also releases the session a migration started from when the migration's join fails: `_reconnectMigrate` returned before closing it, and the rejoin that followed only left the failed new session. The same went for a rejoin whose first attempt failed before the new session took the local tracks: the retry asked only the failed session for them, so it opened the devices again and the original session was never disposed.
 - [x] 18. **A7** [FLU-862](https://linear.app/stream/issue/FLU-862): `Call.dispose` and the single-use-after-leave error (S, v2 breaking).
-- [ ] 19. **B1** [FLU-848](https://linear.app/stream/issue/FLU-848): `LocalMediaController` (M). After the A chain, so `_connectOptions` moves once with A2 and then gets one owner here.
-- [ ] 20. **C2** [FLU-853](https://linear.app/stream/issue/FLU-853): injection seams in StreamVideo (S). Needed to test C3 and C4.
-- [ ] 21. **C3** [FLU-857](https://linear.app/stream/issue/FLU-857): `CoordinatorConnection` with a real single-flight guard (M). Fixes bug 4.
-- [ ] 22. **C1** [FLU-856](https://linear.app/stream/issue/FLU-856): `RingingCallCoordinator` as `streamVideo.ringing` (L, v2 breaking). Its `ensureConnected` callback comes from C3.
-- [ ] 23. **B3** [FLU-863](https://linear.app/stream/issue/FLU-863): `CallRingingController` (M). After C1, which takes the cross-call orchestration from `Call.accept`. The accept waits stop on leave, so a cancelled ring no longer logs a timeout error 25 s later.
-- [ ] 24. **C4** [FLU-858](https://linear.app/stream/issue/FLU-858): `AppLifecycleController`; background mute and restore moves into Call (S).
-- [ ] 25. **B6** [FLU-852](https://linear.app/stream/issue/FLU-852): `CallHost` interface (M). Late on purpose: after C1, B3 and C4 the interface no longer needs the ringing hooks or the mute maps.
-- [ ] 26. **C5** [FLU-854](https://linear.app/stream/issue/FLU-854): StreamVideo constructor and options cleanup (M, v2 breaking). Last, because every earlier C ticket wires into the constructor. Also covers a client built for background push handling, which must do no media setup.
+- [x] 19. **B1** [FLU-848](https://linear.app/stream/issue/FLU-848): `LocalMediaController` (M). After the A chain, so `_connectOptions` moves once with A2 and then gets one owner here.
+- [x] 20. **C2** [FLU-853](https://linear.app/stream/issue/FLU-853): injection seams in StreamVideo (S). Needed to test C3 and C4.
+- [x] 21. **C3** [FLU-857](https://linear.app/stream/issue/FLU-857): `CoordinatorConnection` with a real single-flight guard (M). Fixes bug 4.
+- [x] 22. **C1** [FLU-856](https://linear.app/stream/issue/FLU-856): `RingingFlowCoordinator` as `streamVideo.ringing` (L, v2 breaking). Its `ensureConnected` callback comes from C3.
+- [x] 23. **B3** [FLU-863](https://linear.app/stream/issue/FLU-863): `CallRingingController` (M). After C1, which takes the cross-call orchestration from `Call.accept`. The accept waits stop on leave, so a cancelled ring no longer logs a timeout error 25 s later.
+- [x] 24. **C4** [FLU-858](https://linear.app/stream/issue/FLU-858): `AppLifecycleController`; background mute and restore moves into Call (S).
+- [x] 25. **B6** [FLU-852](https://linear.app/stream/issue/FLU-852): `CallHost` interface (M). Late on purpose: after C1, B3 and C4 the interface no longer needs the ringing hooks or the mute maps.
+- [x] 26. **C5** [FLU-854](https://linear.app/stream/issue/FLU-854): StreamVideo constructor and options cleanup (M, v2 breaking). Last, because every earlier C ticket wires into the constructor. Also covers a client built for background push handling, which must do no media setup.
+- [x] 27. **Fix** [FLU-980](https://linear.app/stream/issue/FLU-980): connecting while the coordinator socket is dropped leaves a second socket running (S, bug). Found in the stack's device test; on top so the stack is tested as one.
 
 ### Later, outside the stack
 

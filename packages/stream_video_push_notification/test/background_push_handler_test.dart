@@ -9,7 +9,15 @@ import 'package:stream_video_push_notification/stream_video_push_notification.da
 
 class MockCall extends Mock implements Call {}
 
+// ignore: subtype_of_sealed_class
+class MockRingingFlowCoordinator extends Mock
+    implements RingingFlowCoordinator {}
+
+// ignore: subtype_of_sealed_class
 class MockStreamVideo extends Mock implements StreamVideo {
+  @override
+  final MockRingingFlowCoordinator ringing = MockRingingFlowCoordinator();
+
   // StreamVideo marks dispose as @mustBeOverridden. Routed back through the
   // mock rather than stubbed out here, since teardown is what these tests
   // verify.
@@ -18,7 +26,27 @@ class MockStreamVideo extends Mock implements StreamVideo {
       noSuchMethod(Invocation.method(#dispose, const [])) as Future<void>;
 }
 
+class MockPushNotificationManager extends Mock
+    implements PushNotificationManager {}
+
+// ignore: avoid_implementing_value_types
+class MockRejectedEvent extends Mock implements CoordinatorCallRejectedEvent {}
+
 void _ignore(RingingEvent _) {}
+
+/// The `call.rejected` a caller sends when it cancels the ring for [callCid].
+CoordinatorCallRejectedEvent _rejected(String callCid) {
+  final event = MockRejectedEvent();
+  when(() => event.callCid).thenReturn(StreamCallCid(cid: callCid));
+  return event;
+}
+
+/// A missed call for [callCid], as the backend sends once a ring expires.
+Map<String, dynamic> _missedCallPushFor(String callCid) => {
+  'sender': 'stream.video',
+  'type': 'call.missed',
+  'call_cid': callCid,
+};
 
 /// The payload of a ringing push, the only one whose flow waits for the user.
 ///
@@ -56,6 +84,11 @@ void main() {
 
   late MockStreamVideo client;
   late StreamController<RingingEvent> ringing;
+  late StreamController<CoordinatorEvent> coordinatorEvents;
+  late MockPushNotificationManager pushManager;
+
+  /// The calls the platform shows, as the push manager reads them back.
+  late List<CallData> nativeCalls;
 
   /// The callback the handler registered for ringing resolution.
   void Function(RingingEvent)? onRingingEvent;
@@ -90,11 +123,15 @@ void main() {
 
     when(() => stub.isDisposed).thenReturn(false);
     when(() => stub.activeCalls).thenReturn([]);
+    when(() => stub.events).thenAnswer((_) => coordinatorEvents.stream);
+    when(() => stub.pushNotificationManager).thenReturn(pushManager);
     when(stub.dispose).thenAnswer((_) async {});
     when(
-      stub.observeCoreRingingEventsForBackground,
+      stub.ringing.observeCoreRingingEventsForBackground,
     ).thenReturn(CompositeSubscription());
-    when(() => stub.onRingingEvent<RingingEvent>(captureAny())).thenAnswer((
+    when(
+      () => stub.ringing.onRingingEvent<RingingEvent>(captureAny()),
+    ).thenAnswer((
       invocation,
     ) {
       onRingingEvent =
@@ -102,7 +139,7 @@ void main() {
       return ringing.stream.listen(_ignore);
     });
     when(
-      () => stub.handleRingingFlowNotifications(any()),
+      () => stub.ringing.handleRingingFlowNotifications(any()),
     ).thenAnswer((_) async => true);
 
     return stub;
@@ -115,12 +152,19 @@ void main() {
   /// Comfortably past a scheduled release falling due.
   Future<void> pastTheGrace() => Future<void>.delayed(grace * 6);
 
+  /// Past the release and every check a ring that may have ended gets.
+  Future<void> pastEveryCheck() => Future<void>.delayed(grace * 20);
+
   setUp(() {
     // Everything outside the group below is the Android background isolate:
     // the only place this handler owns a client.
     StreamVideoPushHandler.ownsClientLifecycle = () => true;
     StreamVideoPushHandler.resolutionGrace = grace;
     ringing = StreamController<RingingEvent>.broadcast();
+    coordinatorEvents = StreamController<CoordinatorEvent>.broadcast();
+    nativeCalls = [];
+    pushManager = MockPushNotificationManager();
+    when(pushManager.activeCalls).thenAnswer((_) async => nativeCalls);
     onRingingEvent = null;
     factoryCalls = 0;
     onDisposeCalled = false;
@@ -130,6 +174,7 @@ void main() {
   tearDown(() async {
     await StreamVideoPushHandler.releaseForTesting();
     await ringing.close();
+    await coordinatorEvents.close();
     StreamVideoPushHandler.resolutionGrace = const Duration(seconds: 1);
     StreamVideoPushHandler.ownsClientLifecycle = () =>
         CurrentPlatform.isAndroid;
@@ -149,6 +194,25 @@ void main() {
         expect(onDisposeCalled, isFalse);
       },
     );
+
+    test('builds its client without media', () async {
+      bool? withoutMediaAtStart;
+      bool? withoutMediaAfterAwait;
+
+      await handle(
+        createStreamVideo: () async {
+          withoutMediaAtStart = StreamVideo.debugBuildsWithoutMedia;
+          // A factory that reads credentials first still builds inside it.
+          await Future<void>.delayed(Duration.zero);
+          withoutMediaAfterAwait = StreamVideo.debugBuildsWithoutMedia;
+          return client;
+        },
+      );
+
+      expect(withoutMediaAtStart, isTrue);
+      expect(withoutMediaAfterAwait, isTrue);
+      expect(StreamVideo.debugBuildsWithoutMedia, isFalse);
+    });
 
     test('does nothing when nobody is logged in', () async {
       final handled = await handle(createStreamVideo: factoryReturning(null));
@@ -184,7 +248,7 @@ void main() {
 
     test('releases a message that turns out not to be ours', () async {
       when(
-        () => client.handleRingingFlowNotifications(any()),
+        () => client.ringing.handleRingingFlowNotifications(any()),
       ).thenAnswer((_) async => false);
 
       final handled = await handle(createStreamVideo: factoryReturning(client));
@@ -206,9 +270,11 @@ void main() {
         // Calling the factory twice would install a second singleton over a live
         // one, which throws.
         expect(factoryCalls, 1);
-        verify(() => client.handleRingingFlowNotifications(any())).called(2);
+        verify(
+          () => client.ringing.handleRingingFlowNotifications(any()),
+        ).called(2);
         // And the second message must not wire a second set of observers.
-        verify(client.observeCoreRingingEventsForBackground).called(1);
+        verify(client.ringing.observeCoreRingingEventsForBackground).called(1);
       },
     );
 
@@ -218,7 +284,7 @@ void main() {
         await handle(createStreamVideo: factoryReturning(client));
 
         when(
-          () => client.handleRingingFlowNotifications(any()),
+          () => client.ringing.handleRingingFlowNotifications(any()),
         ).thenAnswer((_) async => false);
         await handle(createStreamVideo: factoryReturning(client));
 
@@ -299,14 +365,16 @@ void main() {
       expect(factoryCalls, 1);
       expect(handled, [true, true]);
       // One session means one set of observers and one teardown.
-      verify(client.observeCoreRingingEventsForBackground).called(1);
-      verify(() => client.handleRingingFlowNotifications(any())).called(2);
+      verify(client.ringing.observeCoreRingingEventsForBackground).called(1);
+      verify(
+        () => client.ringing.handleRingingFlowNotifications(any()),
+      ).called(2);
       expect(onDisposeCalled, isFalse);
     });
 
     test('releases when handling throws', () async {
       when(
-        () => client.handleRingingFlowNotifications(any()),
+        () => client.ringing.handleRingingFlowNotifications(any()),
       ).thenThrow(Exception('boom'));
 
       final handled = await handle(createStreamVideo: factoryReturning(client));
@@ -363,7 +431,9 @@ void main() {
         // takes longer than the grace to handle, so the release comes up while
         // the ring is still in flight.
         await Future<void>.delayed(grace ~/ 2);
-        when(() => client.handleRingingFlowNotifications(any())).thenAnswer((
+        when(
+          () => client.ringing.handleRingingFlowNotifications(any()),
+        ).thenAnswer((
           _,
         ) async {
           await Future<void>.delayed(grace * 2);
@@ -425,7 +495,7 @@ void main() {
 
       test('disposes a client built before the failure', () async {
         when(
-          client.observeCoreRingingEventsForBackground,
+          client.ringing.observeCoreRingingEventsForBackground,
         ).thenThrow(Exception('boom'));
 
         final handled = await handle(
@@ -481,7 +551,9 @@ void main() {
         );
 
         expect(handled, isTrue);
-        verify(() => client.handleRingingFlowNotifications(any())).called(1);
+        verify(
+          () => client.ringing.handleRingingFlowNotifications(any()),
+        ).called(1);
         // Nothing to build: the running app already has a client.
         expect(factoryCalls, 0);
       });
@@ -493,7 +565,7 @@ void main() {
 
           // The running app has its own observers; a second set would show every
           // incoming call twice.
-          verifyNever(client.observeCoreRingingEventsForBackground);
+          verifyNever(client.ringing.observeCoreRingingEventsForBackground);
         },
       );
 
@@ -508,13 +580,15 @@ void main() {
 
         expect(handled, isTrue);
         expect(factoryCalls, 1);
-        verifyNever(() => client.handleRingingFlowNotifications(any()));
-        verify(() => ours.handleRingingFlowNotifications(any())).called(1);
+        verifyNever(() => client.ringing.handleRingingFlowNotifications(any()));
+        verify(
+          () => ours.ringing.handleRingingFlowNotifications(any()),
+        ).called(1);
       });
 
       test('leaves the running client alone for a foreign message', () async {
         when(
-          () => client.handleRingingFlowNotifications(any()),
+          () => client.ringing.handleRingingFlowNotifications(any()),
         ).thenAnswer((_) async => false);
 
         final handled = await handleOnAppIsolate();
@@ -536,6 +610,130 @@ void main() {
 
         verifyNever(() => client.dispose());
         expect(onDisposeCalled, isFalse);
+      });
+    });
+
+    group('when a ring ends without the user', () {
+      // The push manager ends the native call silently on these, so no accept,
+      // decline, timeout or end ever reaches the handler.
+
+      test('releases once the caller cancels the ring', () async {
+        await handle(createStreamVideo: factoryReturning(client));
+
+        coordinatorEvents.add(_rejected('default:call-a'));
+        await pastTheGrace();
+
+        verify(() => client.dispose()).called(1);
+        expect(onDisposeCalled, isTrue);
+      });
+
+      test('releases on a missed call for the ring, with no socket', () async {
+        await handle(createStreamVideo: factoryReturning(client));
+
+        await handle(
+          createStreamVideo: factoryReturning(client),
+          data: _missedCallPushFor('default:call-a'),
+        );
+        await pastTheGrace();
+
+        verify(() => client.dispose()).called(1);
+      });
+
+      test('releases once a slow native end catches up', () async {
+        // `endCall` only sends a broadcast, and a backgrounded app may handle
+        // it after the first check: the call is still listed, then gone.
+        var reads = 0;
+        when(pushManager.activeCalls).thenAnswer(
+          (_) async => reads++ == 0
+              ? [const CallData(uuid: 'u', callCid: 'default:call-a')]
+              : <CallData>[],
+        );
+        await handle(createStreamVideo: factoryReturning(client));
+
+        coordinatorEvents.add(_rejected('default:call-a'));
+        await pastEveryCheck();
+
+        // Kept on the first check, released on the next.
+        expect(reads, 2);
+        verify(() => client.dispose()).called(1);
+      });
+
+      test('keeps a ring whose native call stays shown', () async {
+        // One member of a group call declining leaves the ring up for the
+        // rest, and the push manager leaves the native call alone.
+        nativeCalls = [const CallData(uuid: 'u', callCid: 'default:call-a')];
+        await handle(createStreamVideo: factoryReturning(client));
+
+        coordinatorEvents.add(_rejected('default:call-a'));
+        await pastEveryCheck();
+
+        verifyNever(() => client.dispose());
+        // Checked a bounded number of times, then left to the user.
+        verify(pushManager.activeCalls).called(5);
+      });
+
+      test('ignores an end for a call it is not ringing', () async {
+        await handle(createStreamVideo: factoryReturning(client));
+
+        coordinatorEvents.add(_rejected('default:call-b'));
+        await pastTheGrace();
+
+        verifyNever(() => client.dispose());
+      });
+
+      test('checks again when the native calls cannot be read', () async {
+        var reads = 0;
+        when(pushManager.activeCalls).thenAnswer((_) async {
+          if (reads++ == 0) throw Exception('no platform');
+          return nativeCalls;
+        });
+        await handle(createStreamVideo: factoryReturning(client));
+
+        coordinatorEvents.add(_rejected('default:call-a'));
+        await pastEveryCheck();
+
+        // Not knowing is no reason to end a call the user may still answer,
+        // so the ring survives the failed read and goes on the next one.
+        expect(reads, 2);
+        verify(() => client.dispose()).called(1);
+      });
+
+      test('keeps the ring when the native calls never read', () async {
+        when(pushManager.activeCalls).thenThrow(Exception('no platform'));
+        await handle(createStreamVideo: factoryReturning(client));
+
+        coordinatorEvents.add(_rejected('default:call-a'));
+        await pastEveryCheck();
+
+        verifyNever(() => client.dispose());
+        verify(pushManager.activeCalls).called(5);
+      });
+
+      test('keeps a ring that rings again before the release', () async {
+        await handle(createStreamVideo: factoryReturning(client));
+
+        coordinatorEvents.add(_rejected('default:call-a'));
+        // The caller rings straight back, before its native call is posted.
+        await handle(createStreamVideo: factoryReturning(client));
+        await pastTheGrace();
+
+        verifyNever(() => client.dispose());
+      });
+
+      test('releases only once every ring has ended', () async {
+        await handle(createStreamVideo: factoryReturning(client));
+        await handle(
+          createStreamVideo: factoryReturning(client),
+          data: _ringingPushFor('default:call-b'),
+        );
+
+        coordinatorEvents.add(_rejected('default:call-a'));
+        await pastTheGrace();
+        verifyNever(() => client.dispose());
+
+        coordinatorEvents.add(_rejected('default:call-b'));
+        await pastTheGrace();
+        verify(() => client.dispose()).called(1);
       });
     });
 
@@ -614,13 +812,26 @@ void main() {
       });
     });
 
+    test('starts over when the app disposed the client', () async {
+      await handle(createStreamVideo: factoryReturning(client));
+      when(() => client.isDisposed).thenReturn(true);
+
+      // The next push must not be forwarded into a dead client.
+      final fresh = stubbedClient();
+      final handled = await handle(createStreamVideo: factoryReturning(fresh));
+
+      expect(handled, isTrue);
+      expect(factoryCalls, 2);
+      verify(
+        () => fresh.ringing.handleRingingFlowNotifications(any()),
+      ).called(1);
+    });
+
     test(
-      'starts over when the app disposed the client it stood down for',
+      'releases the client after an accept, also with a call on it',
       () async {
         await handle(createStreamVideo: factoryReturning(client));
 
-        // The app answered on this client, so the session stood down and kept
-        // it. The app owns it from then on, and eventually lets it go.
         when(() => client.activeCalls).thenReturn([MockCall()]);
         onRingingEvent!(
           const ActionCallAccept(
@@ -628,42 +839,11 @@ void main() {
           ),
         );
         await pastTheGrace();
-        verifyNever(() => client.dispose());
 
-        when(() => client.isDisposed).thenReturn(true);
-
-        // The next push must not be forwarded into a dead client.
-        final fresh = stubbedClient();
-        final handled = await handle(
-          createStreamVideo: factoryReturning(fresh),
-        );
-
-        expect(handled, isTrue);
-        expect(factoryCalls, 2);
-        verify(() => fresh.handleRingingFlowNotifications(any())).called(1);
+        verify(() => client.dispose()).called(1);
+        expect(onDisposeCalled, isTrue);
       },
     );
-
-    test('leaves the client alone when the app is in a call on it', () async {
-      await handle(createStreamVideo: factoryReturning(client));
-
-      // The app answered on this client and joined. On Android the accept
-      // lands on this isolate whenever the app is alive but backgrounded, so
-      // the resolution that normally means "this session is done" is instead
-      // the moment the app starts using the client.
-      when(() => client.activeCalls).thenReturn([MockCall()]);
-      onRingingEvent!(
-        const ActionCallAccept(
-          data: CallData(uuid: 'u', callCid: 'default:call-a'),
-        ),
-      );
-
-      await pastTheGrace();
-
-      // Disposing here drops a call that has just connected.
-      verifyNever(() => client.dispose());
-      expect(onDisposeCalled, isFalse);
-    });
 
     group('when the push is not ours', () {
       test('builds nothing for it', () async {
@@ -676,7 +856,7 @@ void main() {
         // A token fetch and everything the app's factory sets up around it,
         // spent on a push the SDK could never have acted on.
         expect(factoryCalls, 0);
-        verifyNever(() => client.handleRingingFlowNotifications(any()));
+        verifyNever(() => client.ringing.handleRingingFlowNotifications(any()));
       });
 
       test('does not disturb a call that is ringing', () async {
@@ -700,7 +880,7 @@ void main() {
         );
 
         expect(handled, isFalse);
-        verifyNever(() => client.handleRingingFlowNotifications(any()));
+        verifyNever(() => client.ringing.handleRingingFlowNotifications(any()));
       });
     });
 
@@ -717,7 +897,7 @@ void main() {
         // reports it unhandled; the second is a real ring.
         var calls = 0;
         when(
-          () => client.handleRingingFlowNotifications(any()),
+          () => client.ringing.handleRingingFlowNotifications(any()),
         ).thenAnswer((_) async => calls++ != 0);
 
         await Future.wait([
@@ -735,7 +915,9 @@ void main() {
 
       test('one that throws does not release under a live ring', () async {
         var calls = 0;
-        when(() => client.handleRingingFlowNotifications(any())).thenAnswer((
+        when(
+          () => client.ringing.handleRingingFlowNotifications(any()),
+        ).thenAnswer((
           _,
         ) async {
           if (calls++ == 0) throw Exception('boom');
@@ -769,7 +951,9 @@ void main() {
         // An iOS app that rings over Firebase rather than PushKit gets its
         // incoming calls from here; dropping them would show nothing at all.
         expect(handled, isTrue);
-        verify(() => client.handleRingingFlowNotifications(any())).called(1);
+        verify(
+          () => client.ringing.handleRingingFlowNotifications(any()),
+        ).called(1);
         expect(factoryCalls, 0);
       });
 
@@ -795,7 +979,9 @@ void main() {
 
         // A missed call has no VoIP counterpart, so nothing else would post it.
         expect(handled, isTrue);
-        verify(() => client.handleRingingFlowNotifications(any())).called(1);
+        verify(
+          () => client.ringing.handleRingingFlowNotifications(any()),
+        ).called(1);
         expect(factoryCalls, 0);
       });
 
@@ -818,7 +1004,7 @@ void main() {
 
         await pastTheGrace();
 
-        verifyNever(client.observeCoreRingingEventsForBackground);
+        verifyNever(client.ringing.observeCoreRingingEventsForBackground);
         verifyNever(() => client.dispose());
         expect(onDisposeCalled, isFalse);
       });
@@ -828,13 +1014,13 @@ void main() {
       'starts a fresh session after the previous one was released',
       () async {
         when(
-          () => client.handleRingingFlowNotifications(any()),
+          () => client.ringing.handleRingingFlowNotifications(any()),
         ).thenAnswer((_) async => false);
         await handle(createStreamVideo: factoryReturning(client));
         await pastTheGrace();
 
         when(
-          () => client.handleRingingFlowNotifications(any()),
+          () => client.ringing.handleRingingFlowNotifications(any()),
         ).thenAnswer((_) async => true);
         await handle(createStreamVideo: factoryReturning(client));
 

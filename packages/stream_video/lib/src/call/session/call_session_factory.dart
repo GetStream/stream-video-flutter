@@ -38,7 +38,7 @@ class CallSessionFactory {
   /// because of PeerConnection issues.
   /// [networkMonitor] monitors the internet connection.
   /// [statsOptions] configures the statistics reporting.
-  /// [streamVideo] is the main StreamVideo instance.
+  /// [host] is the client the session belongs to.
   /// [clientPublishOptions] are optional publish options for the client.
   /// [leftoverTraceRecords] are trace records from previous sessions that were not sent
   /// before the session ended. They will be included in the new session's trace.
@@ -52,7 +52,7 @@ class CallSessionFactory {
     required void Function(String trackId) onSuspendedAudioTrackRecorded,
     required InternetConnection networkMonitor,
     required StatsOptions statsOptions,
-    required StreamVideo streamVideo,
+    required CallHost host,
     required StreamPeerConnectionFactory pcFactory,
     ClientPublishOptions? clientPublishOptions,
     EncryptionManager? e2eeManager,
@@ -104,7 +104,7 @@ class CallSessionFactory {
       e2eeManager: e2eeManager,
       networkMonitor: networkMonitor,
       statsOptions: statsOptions,
-      streamVideo: streamVideo,
+      host: host,
       tracer: tracer,
       pcFactory: pcFactory,
       retryPolicy: retryPolicy,

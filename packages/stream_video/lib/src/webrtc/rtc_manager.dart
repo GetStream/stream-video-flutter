@@ -63,12 +63,12 @@ class RtcManager extends Disposable {
     required this.subscriber,
     required this.publishOptions,
     required this.stateManager,
-    required StreamVideo streamVideo,
+    required CallHost host,
     required this.pcFactory,
     this.e2eeManager,
     this.sfuId,
     this.clientEventRetryCount = 0,
-  }) : _streamVideo = streamVideo {
+  }) : _host = host {
     subscriber.onTrack = _onRemoteTrack;
     _initClientEventReporting();
   }
@@ -81,7 +81,7 @@ class RtcManager extends Disposable {
   final CallStateNotifier stateManager;
   final TracedStreamPeerConnection? publisher;
   final TracedStreamPeerConnection subscriber;
-  final StreamVideo _streamVideo;
+  final CallHost _host;
   final String? sfuId;
   final int clientEventRetryCount;
 
@@ -170,9 +170,9 @@ class RtcManager extends Disposable {
   OnRemoteTrackReceived? onRemoteTrackReceived;
 
   void _initClientEventReporting() {
-    if (!_streamVideo.options.clientEventsReportingEnabled) return;
+    if (!_host.options.clientEventsReportingEnabled) return;
 
-    final reporter = _streamVideo.clientEventReporter;
+    final reporter = _host.clientEventReporter;
 
     _mediaFrameReporter = MediaFrameReporter(
       reporter: reporter,
@@ -2393,11 +2393,11 @@ extension RtcManagerTrackHelper on RtcManager {
           )) {
         await setAppleAudioConfiguration(
           speakerOn: true,
-          policy: _streamVideo.options.audioConfigurationPolicy,
+          policy: _host.options.audioConfigurationPolicy,
         );
       } else {
         await setAppleAudioConfiguration(
-          policy: _streamVideo.options.audioConfigurationPolicy,
+          policy: _host.options.audioConfigurationPolicy,
         );
       }
 

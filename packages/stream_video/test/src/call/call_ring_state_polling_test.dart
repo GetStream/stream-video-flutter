@@ -78,7 +78,7 @@ void main() {
       return Result.success(polledRingState);
     });
 
-    final streamVideo = setupMockStreamVideo();
+    final streamVideo = setupMockCallHost();
     when(() => streamVideo.options).thenReturn(
       StreamVideoOptions(ringStatePolling: pollingSettings),
     );

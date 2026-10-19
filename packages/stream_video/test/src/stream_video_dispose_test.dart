@@ -63,6 +63,7 @@ void main() {
         () => mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
       ).thenAnswer((_) async {});
       when(mockPushManager.dispose).thenAnswer((_) async {});
+      when(mockPushManager.activeCalls).thenAnswer((_) async => []);
 
       // `thenAnswer`, not `thenReturn`: a SharedEmitter is a Stream, which
       // mocktail refuses to hand back from `thenReturn`.
@@ -135,6 +136,53 @@ void main() {
         expect(ringing.state.value.status, isA<CallStatusDisconnected>());
       },
     );
+
+    test(
+      'leaves the native call alone when the user answered it there',
+      () async {
+        ring();
+        // The app's own client, in another isolate, takes an answered call
+        // over.
+        when(mockPushManager.activeCalls).thenAnswer(
+          (_) async => [
+            const CallData(uuid: 'uuid', callCid: cid, isAccepted: true),
+          ],
+        );
+
+        await streamVideo.dispose();
+
+        verifyNever(
+          () =>
+              mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
+        );
+      },
+    );
+
+    test('ends the native call of a ring answered for another call', () async {
+      ring();
+      when(mockPushManager.activeCalls).thenAnswer(
+        (_) async => [
+          const CallData(
+            uuid: 'uuid',
+            callCid: 'default:other-call',
+            isAccepted: true,
+          ),
+        ],
+      );
+
+      await streamVideo.dispose();
+
+      verify(() => mockPushManager.endCallByCid(cid, silent: true)).called(1);
+    });
+
+    test('ends the native call when the native calls cannot be read', () async {
+      ring();
+      when(mockPushManager.activeCalls).thenThrow(StateError('channel'));
+
+      await streamVideo.dispose();
+
+      verify(() => mockPushManager.endCallByCid(cid, silent: true)).called(1);
+    });
 
     test('disposes an outgoing and a watched call', () async {
       final outgoing = streamVideo.makeCall(

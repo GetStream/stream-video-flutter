@@ -3,8 +3,6 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:async/async.dart' show CancelableOperation;
-import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
@@ -21,7 +19,7 @@ import '../coordinator/coordinator_client.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../coordinator/models/coordinator_models.dart';
 import '../errors/stream_video_exception.dart';
-import '../errors/stream_video_exception_composer.dart';
+import '../lifecycle/video_lifecycle_state.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../logger/stream_log.dart';
 import '../models/models.dart';
@@ -38,7 +36,6 @@ import '../telemetry/client_event_types.dart';
 import '../utils/adaptive_throttle.dart';
 import '../utils/cancelable_operation.dart';
 import '../utils/cancelables.dart';
-import '../utils/extensions.dart';
 import '../utils/future.dart';
 import '../utils/none.dart';
 import '../utils/result.dart';
@@ -47,23 +44,20 @@ import '../webrtc/e2ee/call_e2ee.dart';
 import '../webrtc/e2ee/e2ee_claims.dart';
 import '../webrtc/media/media_constraints.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
-import '../webrtc/model/rtc_video_parameters.dart';
 import '../webrtc/peer_connection.dart';
 import '../webrtc/peer_connection_factory.dart';
 import '../webrtc/peer_type.dart';
 import '../webrtc/rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 import '../webrtc/rtc_manager.dart';
-import '../webrtc/rtc_media_device/device_enumeration_trigger.dart';
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
 import '../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../webrtc/rtc_track/rtc_track.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
 import '../webrtc/sdp/policy/sdp_policy.dart';
-import '../ws/ws.dart';
 import 'call_connect_options.dart';
 import 'call_events.dart';
+import 'call_host.dart';
 import 'call_reject_reason.dart';
-import 'call_ringing_state.dart';
 import 'call_type.dart';
 import 'connection/connection_executor.dart';
 import 'connection/connection_phase.dart';
@@ -73,8 +67,9 @@ import 'events/call_closed_captions.dart';
 import 'events/call_coordinator_event_router.dart';
 import 'events/call_reactions.dart';
 import 'events/call_video_moderation.dart';
+import 'media/local_media_controller.dart';
 import 'permissions/permissions_manager.dart';
-import 'ring_state_poller.dart';
+import 'ringing/call_ringing_controller.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
 import 'session/dynascale_manager.dart';
@@ -112,6 +107,7 @@ const _idConnect = 6;
 const _idReconnect = 9;
 const _idNativeWebRtc = 10;
 const _idAudioPlayback = 11;
+const _idAppLifecycle = 12;
 
 const _tag = 'SV:Call';
 int _callSeq = 1;
@@ -127,7 +123,7 @@ class Call {
   factory Call({
     required StreamCallCid callCid,
     required CoordinatorClient coordinatorClient,
-    required StreamVideo streamVideo,
+    required CallHost streamVideo,
     required InternetConnection networkMonitor,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
@@ -153,7 +149,7 @@ class Call {
   factory Call.fromCreated({
     required CallCreatedData data,
     required CoordinatorClient coordinatorClient,
-    required StreamVideo streamVideo,
+    required CallHost streamVideo,
     required InternetConnection networkMonitor,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
@@ -184,7 +180,7 @@ class Call {
   factory Call.fromRinging({
     required CallRingingData data,
     required CoordinatorClient coordinatorClient,
-    required StreamVideo streamVideo,
+    required CallHost streamVideo,
     required InternetConnection networkMonitor,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
@@ -207,7 +203,7 @@ class Call {
   factory Call._internal({
     required StreamCallCid callCid,
     required CoordinatorClient coordinatorClient,
-    required StreamVideo streamVideo,
+    required CallHost streamVideo,
     required InternetConnection networkMonitor,
     RetryPolicy? retryPolicy,
     SdpPolicy? sdpPolicy,
@@ -242,20 +238,19 @@ class Call {
       retryPolicy: finalRetryPolicy,
       sdpPolicy: finalSdpPolicy,
       permissionManager: permissionManager,
-      rtcMediaDeviceNotifier:
-          rtcMediaDeviceNotifier ?? RtcMediaDeviceNotifier.instance,
+      rtcMediaDeviceNotifier: rtcMediaDeviceNotifier,
     );
   }
 
   Call._({
     required CoordinatorClient coordinatorClient,
-    required StreamVideo streamVideo,
+    required CallHost streamVideo,
     required CallStateNotifier stateManager,
     required PermissionsManager permissionManager,
     required this.networkMonitor,
     required RetryPolicy retryPolicy,
     required SdpPolicy sdpPolicy,
-    required RtcMediaDeviceNotifier rtcMediaDeviceNotifier,
+    RtcMediaDeviceNotifier? rtcMediaDeviceNotifier,
     CallCredentials? credentials,
     CallSessionFactory? sessionFactory,
   }) : _sessionFactory =
@@ -270,9 +265,9 @@ class Call {
        _stateManager = stateManager,
        _permissionsManager = permissionManager,
        _coordinatorClient = coordinatorClient,
-       _streamVideo = streamVideo,
+       _host = streamVideo,
        _retryPolicy = retryPolicy,
-       _rtcMediaDeviceNotifier = rtcMediaDeviceNotifier,
+       _injectedRtcMediaDeviceNotifier = rtcMediaDeviceNotifier,
        dynascaleManager = DynascaleManager(stateManager: stateManager) {
     _connection._credentials = credentials;
     streamLog.i(_tag, () => '<init> state: ${stateManager.callState}');
@@ -285,10 +280,9 @@ class Call {
   late final _logger = taggedLogger(tag: '$_tag-${_callSeq++}');
   late final _subscriptions = Subscriptions();
   late final _callInitLock = Lock();
-  late final _multitaskingCameraLock = Lock();
 
   final CoordinatorClient _coordinatorClient;
-  final StreamVideo _streamVideo;
+  final CallHost _host;
   final RetryPolicy _retryPolicy;
   final CallSessionFactory _sessionFactory;
   final CallStateNotifier _stateManager;
@@ -301,10 +295,44 @@ class Call {
     onAggregate: _applyViewportAggregate,
   );
   final InternetConnection networkMonitor;
-  final RtcMediaDeviceNotifier _rtcMediaDeviceNotifier;
+  final RtcMediaDeviceNotifier? _injectedRtcMediaDeviceNotifier;
+
+  /// Created on first use, so a call that sets up no media never creates it.
+  late final _rtcMediaDeviceNotifier =
+      _injectedRtcMediaDeviceNotifier ?? RtcMediaDeviceNotifier.instance;
 
   /// Joins, reconnects and leaves this call, and owns its SFU session.
   late final _connection = CallConnectionCoordinator(this);
+
+  /// Owns the connect options and the local camera, microphone and screen
+  /// share.
+  late final _media = LocalMediaController(
+    stateManager: _stateManager,
+    session: () => _session,
+    sfuStatsReporter: () => _sfuStatsReporter,
+    hasPermission: hasPermission,
+    rtcMediaDeviceNotifier: () => _rtcMediaDeviceNotifier,
+    audioConfigurationPolicy: () =>
+        _stateManager.callState.preferences.audioConfigurationPolicy ??
+        _host.options.audioConfigurationPolicy,
+    muteVideoWhenInBackground: () => _host.options.muteVideoWhenInBackground,
+    muteAudioWhenInBackground: () => _host.options.muteAudioWhenInBackground,
+    onMicrophoneMuted: (muted) async =>
+        _host.pushNotificationManager?.setCallMutedByCid(callCid.value, muted),
+    logger: _logger,
+  );
+
+  /// Accepts and rejects this call's ring, and waits for it to be answered.
+  late final _ringing = CallRingingController(
+    call: this,
+    stateManager: _stateManager,
+    coordinatorClient: _coordinatorClient,
+    clientState: _host.state,
+    prepareToAccept: () => _host.prepareToAccept(this),
+    pollingSettings: () => _host.options.ringStatePolling,
+    trace: (tag, data) => _session?.trace(tag, data),
+    logger: _logger,
+  );
 
   /// Attaches, resolves and releases this call's [EncryptionManager].
   late final _e2ee = CallE2ee(
@@ -329,13 +357,6 @@ class Call {
   StreamPeerConnectionFactory? get _pcFactory => _connection._pcFactory;
   set _pcFactory(StreamPeerConnectionFactory? value) =>
       _connection._pcFactory = value;
-  CallConnectOptions get _connectOptions => _connection._connectOptions;
-  set _connectOptions(CallConnectOptions value) =>
-      _connection._connectOptions = value;
-  CallConnectOptions? get _connectOptionsOverride =>
-      _connection._connectOptionsOverride;
-  set _connectOptionsOverride(CallConnectOptions? value) =>
-      _connection._connectOptionsOverride = value;
 
   /// Audio track states captured at suspension time.
   final _suspendedTrackStates = <String, SuspendedTrackState>{};
@@ -345,7 +366,7 @@ class Call {
       callCid: callCid,
       audioConfigurationPolicy:
           _stateManager.callState.preferences.audioConfigurationPolicy ??
-          _streamVideo.options.audioConfigurationPolicy,
+          _host.options.audioConfigurationPolicy,
     );
   }
 
@@ -425,14 +446,11 @@ class Call {
   }
 
   bool _initialized = false;
-  RingStatePoller? _ringStatePoller;
-  StreamSubscription<CallState>? _ringStatePollerStatusSubscription;
 
-  final List<CancelableOperation<void>> _sfuStatsTimers = [];
   String get id => state.value.callId;
   StreamCallCid get callCid => state.value.callCid;
   StreamCallType get type => state.value.callType;
-  bool get isActiveCall => _streamVideo.state.activeCalls.value.any(
+  bool get isActiveCall => _host.state.activeCalls.value.any(
     (call) => call.callCid == callCid,
   );
 
@@ -583,7 +601,7 @@ class Call {
   /// Applies and clears video moderation.
   late final _moderation = CallVideoModeration(
     stateManager: _stateManager,
-    currentUserId: () => _streamVideo.currentUser.id,
+    currentUserId: () => _host.currentUser.id,
     setMicrophoneEnabled: setMicrophoneEnabled,
     setCameraEnabled: setCameraEnabled,
     logger: _logger,
@@ -596,9 +614,9 @@ class Call {
     closedCaptions: _closedCaptions,
     moderation: _moderation,
     onPermissionRequest: (event) => onPermissionRequest?.call(event),
-    onAccepted: _handleCoordinatorCallAccepted,
-    onRejected: _handleCoordinatorCallRejected,
-    onRingActivity: () => _ringStatePoller?.restartQuietPeriod(),
+    onAccepted: _ringing.onCallAccepted,
+    onRejected: _ringing.onCallRejected,
+    onRingActivity: _ringing.onRingActivity,
   );
 
   OnCallPermissionRequest? onPermissionRequest;
@@ -608,30 +626,30 @@ class Call {
     return 'Call{cid: $callCid}';
   }
 
-  CallConnectOptions get connectOptions {
-    return _connectOptionsOverride ?? _connectOptions;
-  }
+  CallConnectOptions get connectOptions => _media.connectOptions;
 
-  /// It is better to pass the [connectOptions] to [join] method,
-  /// setting it directly has to be done carefully. Depending on the moment in the call lifecycle,
-  /// it might be overwritten by default configuration or it might be too late to apply the changes.
-  set connectOptions(CallConnectOptions connectOptions) {
-    if (state.value.status is CallStatusConnected) {
-      _logger.w(
-        () =>
-            '[setConnectOptions] rejected (connectOptions must be'
-            ' set before invoking `connect`)',
-      );
+  /// Changes the options the pending join applies, for example while an
+  /// outgoing call rings. Prefer passing them to [join].
+  ///
+  /// Fails once the call's session has started applying them, so also while
+  /// the call is connected. Change the devices through
+  /// [setCameraEnabled], [setMicrophoneEnabled] and the other device methods
+  /// from then on.
+  @useResult
+  Result<None> setConnectOptions(CallConnectOptions connectOptions) =>
+      _media.setConnectOptions(connectOptions);
 
-      return;
-    }
-
-    _logger.d(() => '[setConnectOptions] connectOptions: $connectOptions)');
-    _connectOptionsOverride = connectOptions;
-  }
+  /// Ignored, with a warning, once the call's session has started applying
+  /// the options.
+  @Deprecated(
+    'Use setConnectOptions instead, which reports whether the options were '
+    'applied. This setter will be removed in the next major release.',
+  )
+  set connectOptions(CallConnectOptions connectOptions) =>
+      _media.setConnectOptions(connectOptions);
 
   /// The user this call is being watched or joined by.
-  UserInfo get currentUser => _streamVideo.currentUser;
+  UserInfo get currentUser => _host.currentUser;
 
   Future<void> _init() {
     return _callInitLock.synchronized(() async {
@@ -644,8 +662,11 @@ class Call {
       _connection._observeState();
       _connection._observeReconnectEvents();
       _observeUserId();
-      _observeNativeWebRtcEventStream();
-      _observeWebAudioPlaybackBlocked();
+      if (_host.setsUpMedia) {
+        _observeNativeWebRtcEventStream();
+        _observeWebAudioPlaybackBlocked();
+      }
+      _observeAppLifecycle();
 
       _logger.v(() => '[_init] initialized');
       _initialized = true;
@@ -655,7 +676,7 @@ class Call {
   void _observeNativeWebRtcEventStream() {
     _subscriptions.add(
       _idNativeWebRtc,
-      _onNativeWebRtcEvent(),
+      _media.observeNativeWebRtcEvents(),
     );
   }
 
@@ -671,6 +692,30 @@ class Call {
         _stateManager.rtcSetWebAudioPlaybackBlocked(isBlocked: blocked);
       }),
     );
+  }
+
+  /// Mutes and restores this call's media as the app goes to the background
+  /// and comes back, while the call is active.
+  void _observeAppLifecycle() {
+    _subscriptions.add(
+      _idAppLifecycle,
+      _host.state.appLifecycleState.listen(_onAppLifecycleState),
+    );
+  }
+
+  Future<void> _onAppLifecycleState(VideoLifecycleState? state) async {
+    if (state == null || !isActiveCall) return;
+    try {
+      if (state.isPaused) {
+        traceSessionLog('device.stateChange', 'paused');
+        await _media.onAppPaused();
+      } else if (state.isResumed) {
+        traceSessionLog('device.stateChange', 'resumed');
+        await _media.onAppResumed();
+      }
+    } catch (e, stk) {
+      _logger.e(() => '[onAppLifecycleState] $state failed: $e\n$stk');
+    }
   }
 
   void _observeEvents() {
@@ -701,7 +746,7 @@ class Call {
   void _observeUserId() {
     _subscriptions.add(
       _idUserId,
-      _streamVideo.state.user.map((u) => u.id).distinct().listen((
+      _host.state.user.map((u) => u.id).distinct().listen((
         userId,
       ) {
         final stateUserId = _stateManager.callState.currentUserId;
@@ -716,65 +761,6 @@ class Call {
     );
   }
 
-  StreamSubscription<NativeWebRtcEvent> _onNativeWebRtcEvent() {
-    return RtcMediaDeviceNotifier.instance.nativeWebRtcEventsStream().listen((
-      event,
-    ) {
-      _logger.d(
-        () => '[_onNativeWebRtcEvent] screenSharingStopped: $event',
-      );
-
-      switch (event) {
-        case ScreenSharingStoppedEvent _:
-          if (CurrentPlatform.isIos) {
-            // On iOS only one broadcast extension can be active at a time
-            setScreenShareEnabled(enabled: false);
-          } else {
-            final trackId = event.data?['trackId'] as String?;
-            if (trackId != null && state.value.localParticipant != null) {
-              final track = getTrack(
-                state.value.localParticipant!.trackIdPrefix,
-                SfuTrackType.screenShare,
-              );
-
-              if (track?.mediaTrack.id == trackId) {
-                setScreenShareEnabled(enabled: false);
-              }
-            }
-          }
-          break;
-        case ScreenSharingStartedEvent _:
-          _stateManager.participantSetScreenShareEnabled(
-            enabled: true,
-          );
-
-          _connectOptions = _connectOptions.copyWith(
-            screenShare: TrackOption.enabled(
-              constraints: const ScreenShareConstraints(
-                useiOSBroadcastExtension: true,
-              ),
-            ),
-          );
-          break;
-        case AudioRouteChangedEvent _:
-          if (!CurrentPlatform.isIos) break;
-
-          final device = event.device;
-          if (state.value.audioOutputDevice?.id.equalsIgnoreCase(device.id) ??
-              false) {
-            break;
-          }
-
-          _connectOptions = connectOptions.copyWith(audioOutputDevice: device);
-          _stateManager.participantSetAudioOutputDevice(device: device);
-          _stateManager.audioOutputSelectedByUser = false;
-          break;
-        default:
-          return;
-      }
-    });
-  }
-
   Future<void> _onCoordinatorEvent(StreamCallEvent event) async {
     // Return if the event is not for this call.
     if (event.callCid != state.value.callCid) return;
@@ -785,48 +771,6 @@ class Call {
     );
 
     await _eventRouter.route(event);
-  }
-
-  Future<void> _handleCoordinatorCallAccepted(
-    StreamCallAcceptedEvent event,
-  ) async {
-    final currentUserId = _stateManager.callState.currentUserId;
-    final status = state.value.status;
-
-    if (event.acceptedByUserId == currentUserId &&
-        status is CallStatusIncoming &&
-        !status.acceptedByMe) {
-      _logger.i(
-        () =>
-            '[onCoordinatorEvent] call accepted on another device, '
-            'rejecting locally with userRespondedElsewhere',
-      );
-      await reject(reason: CallRejectReason.userRespondedElsewhere());
-      return;
-    }
-
-    _stateManager.coordinatorCallAccepted(event);
-  }
-
-  Future<void> _handleCoordinatorCallRejected(
-    StreamCallRejectedEvent event,
-  ) async {
-    final currentUserId = _stateManager.callState.currentUserId;
-    final status = state.value.status;
-
-    if (event.rejectedByUserId == currentUserId &&
-        status is CallStatusIncoming &&
-        !status.acceptedByMe) {
-      _logger.i(
-        () =>
-            '[onCoordinatorEvent] call rejected on another device, '
-            'rejecting locally with userRespondedElsewhere',
-      );
-      await reject(reason: CallRejectReason.userRespondedElsewhere());
-      return;
-    }
-
-    _stateManager.coordinatorCallRejected(event);
   }
 
   /// Clears the moderation action, restoring normal operation.
@@ -879,71 +823,14 @@ class Call {
   }
 
   /// Accepts the incoming call.
-  Future<Result<None>> accept() async {
-    final state = this.state.value;
-    _logger.i(() => '[accept] state: $state');
+  ///
+  /// Cancels the current user's outgoing ring of another call and, unless
+  /// several calls may be active, leaves the active call first.
+  Future<Result<None>> accept() => _ringing.accept();
 
-    final status = state.status;
-    if (status is! CallStatusIncoming || status.acceptedByMe) {
-      _logger.w(() => '[accept] rejected (invalid status): $status');
-      return failureWithError('invalid status: $status');
-    }
-
-    final outgoingCall = _streamVideo.state.outgoingCall.value;
-    if (outgoingCall != null && outgoingCall.callCid != callCid) {
-      _logger.i(() => '[accept] canceling outgoing call: $outgoingCall');
-      await outgoingCall.reject(reason: CallRejectReason.cancel());
-      await _streamVideo.state.setOutgoingCall(null);
-    }
-
-    if (!_streamVideo.options.allowMultipleActiveCalls) {
-      final activeCall = _streamVideo.activeCall;
-      if (activeCall != null && activeCall.callCid != callCid) {
-        _logger.i(() => '[accept] canceling another active call: $activeCall');
-        await activeCall.leave(reason: DisconnectReason.replaced());
-        await _streamVideo.state.removeActiveCall(activeCall);
-      }
-    }
-
-    _session?.trace(TraceTag.callAccept, null);
-
-    // Optimistically mark the call as accepted
-    _stateManager.lifecycleCallAccepted();
-    _streamVideo.markCallAcceptedOnThisDevice(callCid, this);
-
-    final result = await _coordinatorClient.acceptCall(cid: state.callCid);
-    if (result is Failure) {
-      // Revert the optimistic acceptance so the user can retry or reject.
-      _stateManager.lifecycleCallAccepted(accepted: false);
-      _streamVideo.clearCallAcceptedOnThisDevice(callCid, this);
-    }
-
-    return result;
-  }
-
-  /// Rejects the incoming call.
-  Future<Result<None>> reject({CallRejectReason? reason}) async {
-    final state = this.state.value;
-    _logger.i(() => '[reject] reason: $reason');
-
-    _session?.trace(TraceTag.callReject, reason?.value);
-    final result = await _coordinatorClient.rejectCall(
-      cid: state.callCid,
-      reason: reason?.value,
-    );
-
-    // Always leave the call after rejecting it.
-    await leave(
-      reason: result is Success<None>
-          ? DisconnectReason.rejected(
-              byUserId: state.currentUserId,
-              reason: reason,
-            )
-          : null,
-    );
-
-    return result;
-  }
+  /// Rejects the incoming call, then leaves it.
+  Future<Result<None>> reject({CallRejectReason? reason}) =>
+      _ringing.reject(reason: reason);
 
   /// Ends the call for all participants.
   Future<Result<None>> end({String? reason}) {
@@ -1003,12 +890,19 @@ class Call {
   /// A call is joined once. After it is left or ended, including after a
   /// failed join or reconnect, [join] fails with [CallLeftException]; use
   /// [StreamVideo.makeCall] to create a new [Call] for the same call.
+  ///
+  /// A call whose client was built inside [StreamVideo.runWithoutMedia]
+  /// cannot be joined: [join] fails with [CallWithoutMediaException].
   Future<Result<None>> join({
     CallConnectOptions? connectOptions,
     int? membersLimit,
     int maxJoinRetries = 3,
     bool? hintHighScaleLivestreamPublisher,
   }) {
+    if (!_host.setsUpMedia) {
+      _logger.e(() => '[join] rejected (the client sets up no media)');
+      return Future.value(const Result.failure(CallWithoutMediaException()));
+    }
     return _connection.join(
       connectOptions: connectOptions,
       membersLimit: membersLimit,
@@ -1054,10 +948,8 @@ class Call {
     _subscriptions.cancelAll();
     _reactions.cancelTimers();
     _moderation.cancelTimer();
-    _stopRingStatePolling();
-    for (final operation in _sfuStatsTimers) {
-      await operation.cancel();
-    }
+    _ringing.stopRingStatePolling();
+    await _media.cancelSfuStatsTimers();
 
     // First, so the participants subject gets the last list before it closes.
     _stateManager.dispose();
@@ -1132,7 +1024,7 @@ class Call {
   /// Whether exactly one participant, a session of the current user, remains
   /// once [leaving] is removed.
   bool _isAloneAfterLeave(SfuParticipant leaving) {
-    final currentUserId = _streamVideo.currentUser.id;
+    final currentUserId = _host.currentUser.id;
     var remaining = 0;
 
     for (final participant in state.value.callParticipants) {
@@ -1184,9 +1076,8 @@ class Call {
     await _connection._onSfuConnectionEvent(sfuEvent, session: session);
   }
 
-  Future<Result<None>> setLocalTrack(RtcLocalTrack track) async {
-    return _setLocalTrack(track);
-  }
+  Future<Result<None>> setLocalTrack(RtcLocalTrack track) =>
+      _media.setLocalTrack(track);
 
   RtcTrack? getTrack(String trackIdPrefix, SfuTrackType trackType) {
     return _session?.getTrack(trackIdPrefix, trackType);
@@ -1212,466 +1103,6 @@ class Call {
     return track?.captureScreenshot();
   }
 
-  Future<void> _applyCallSettingsToConnectOptions(CallSettings settings) async {
-    final mediaDevicesResult = await _rtcMediaDeviceNotifier
-        .enumerateDevicesFor(
-          DeviceEnumerationTrigger.callSettings,
-        );
-
-    final mediaDevices = mediaDevicesResult.foldResult(
-      success: (success) => success.data,
-      failure: (failure) => <RtcMediaDevice>[],
-    );
-
-    final audioOutputs = mediaDevices
-        .where((d) => d.kind == RtcMediaDeviceKind.audioOutput)
-        .toList();
-    final audioInputs = mediaDevices
-        .where((d) => d.kind == RtcMediaDeviceKind.audioInput)
-        .toList();
-
-    /// Determines if the speaker should be enabled based on a priority hierarchy of
-    /// settings.
-    ///
-    /// The priority order is as follows:
-    /// 1. If video camera is set to be on by default, speaker is enabled
-    /// 2. If audio speaker is set to be on by default, speaker is enabled
-    /// 3. If the default audio device is set to speaker, speaker is enabled
-    final speakerOnWithSettingsPriority =
-        settings.video.cameraDefaultOn ||
-        settings.audio.speakerDefaultOn ||
-        settings.audio.defaultDevice ==
-            AudioSettingsRequestDefaultDevice.speaker;
-
-    // Determine default audio output with priority:
-    // 1. External device (if available)
-    var defaultAudioOutput = audioOutputs.firstWhereOrNull(
-      (device) => device.isExternal,
-    );
-
-    if (defaultAudioOutput == null) {
-      // 2. Speaker (if settings indicate it should be used)
-      if (speakerOnWithSettingsPriority) {
-        defaultAudioOutput = audioOutputs.firstWhereOrNull(
-          (device) => device.id.equalsIgnoreCase(
-            AudioSettingsRequestDefaultDevice.speaker,
-          ),
-        );
-      } else {
-        // 3. First non-speaker device
-        defaultAudioOutput = audioOutputs.firstWhereOrNull(
-          (device) => !device.id.equalsIgnoreCase(
-            AudioSettingsRequestDefaultDevice.speaker,
-          ),
-        );
-      }
-    }
-
-    final defaultAudioOutputIsExternal =
-        defaultAudioOutput?.isExternal ?? false;
-
-    // iOS doesn't allow implicitly setting the default audio output,
-    // if external device is connected we trust the OS to set it as default.
-    if (defaultAudioOutputIsExternal && CurrentPlatform.isIos) {
-      defaultAudioOutput = null;
-    }
-
-    // Match the default audio input with the default audio output if possible
-    final defaultAudioInput = audioInputs.firstWhereOrNull(
-      (d) => d.label == defaultAudioOutput?.label,
-    );
-
-    _connectOptions = connectOptions.copyWith(
-      camera: TrackOption.fromSetting(
-        enabled: settings.video.cameraDefaultOn,
-      ),
-      microphone: TrackOption.fromSetting(
-        enabled: settings.audio.micDefaultOn,
-      ),
-      audioInputDevice: defaultAudioInput,
-      audioOutputDevice: defaultAudioOutput,
-      cameraFacingMode:
-          settings.video.cameraFacing == VideoSettingsRequestCameraFacing.front
-          ? FacingMode.user
-          : FacingMode.environment,
-      speakerDefaultOn:
-          !defaultAudioOutputIsExternal && speakerOnWithSettingsPriority,
-      targetResolution: settings.video.targetResolution,
-      screenShareTargetResolution: settings.screenShare.targetResolution,
-    );
-  }
-
-  /// Applies [_connectOptions] to [session], a newly started session.
-  ///
-  /// [inheritedTracks] are the live local tracks of the session it replaces.
-  /// An enabled or provided option publishes its inherited track instead of
-  /// opening the device again. Inherited tracks that are not published are
-  /// stopped.
-  Future<void> _applyConnectOptions({
-    CallSession? session,
-    List<RtcLocalTrack> inheritedTracks = const [],
-  }) async {
-    _logger.d(
-      () =>
-          '[applyConnectOptions] connectOptions: $_connectOptions, '
-          'inheritedTracks: $inheritedTracks',
-    );
-
-    final inherited = <SfuTrackType, RtcLocalTrack>{};
-    final duplicates = <RtcLocalTrack>[];
-    for (final track in inheritedTracks) {
-      final replaced = inherited[track.trackType];
-      if (replaced != null) duplicates.add(replaced);
-      inherited[track.trackType] = track;
-    }
-
-    RtcLocalTrack? take(SfuTrackType trackType, TrackOption option) {
-      if (option is! TrackEnabled && option is! TrackProvided) return null;
-      return inherited.remove(trackType);
-    }
-
-    final camera = take(SfuTrackType.video, _connectOptions.camera);
-    final microphone = take(SfuTrackType.audio, _connectOptions.microphone);
-    final screenShare = take(
-      SfuTrackType.screenShare,
-      _connectOptions.screenShare,
-    );
-
-    // Stopped up front: a screen share picker can keep the apply waiting.
-    for (final track in [...duplicates, ...inherited.values]) {
-      _logger.v(() => '[applyConnectOptions] stopping unused $track');
-      await track.stop();
-    }
-
-    // Taken tracks are stopped if the apply fails before they are published.
-    final unpublished = {?camera, ?microphone, ?screenShare};
-    Future<Result<None>> adopt(RtcLocalTrack track) {
-      unpublished.remove(track);
-      return _adoptInheritedTrack(session, track);
-    }
-
-    // A refused option leaves the device off, so the intent comes down with
-    // it: the setters only downgrade `_connectOptions` on success, and a
-    // control that reads the intent while no track has been reported would
-    // otherwise draw the device as live for the rest of the call — and refuse
-    // to toggle, having no track to mute.
-    bool failed(String option, Result<None> result) {
-      if (result is! Failure) return false;
-
-      _logger.e(
-        () =>
-            '[applyConnectOptions] $option not applied: '
-            '${result.videoError.message}',
-      );
-
-      return true;
-    }
-
-    try {
-      final cameraFailed = failed(
-        'camera',
-        camera != null
-            ? await adopt(camera)
-            : await _applyCameraOption(
-                _connectOptions.camera,
-                _connectOptions.cameraFacingMode,
-                _connectOptions.targetResolution,
-                _connectOptions.videoInputDevice?.id,
-              ),
-      );
-      if (cameraFailed) {
-        _connectOptions = _connectOptions.copyWith(
-          camera: TrackOption.disabled(),
-        );
-      }
-
-      final microphoneFailed = failed(
-        'microphone',
-        microphone != null
-            ? await adopt(microphone)
-            : await _applyMicrophoneOption(_connectOptions.microphone),
-      );
-      if (microphoneFailed) {
-        _connectOptions = _connectOptions.copyWith(
-          microphone: TrackOption.disabled(),
-        );
-      }
-
-      final screenShareFailed = failed(
-        'screenShare',
-        screenShare != null
-            ? await adopt(screenShare)
-            : await _applyScreenShareOption(
-                _connectOptions.screenShare,
-                _connectOptions.screenShareTargetResolution,
-              ),
-      );
-      if (screenShareFailed) {
-        _connectOptions = _connectOptions.copyWith(
-          screenShare: TrackOption.disabled(),
-        );
-      }
-    } finally {
-      for (final track in unpublished) {
-        _logger.w(() => '[applyConnectOptions] stopping unpublished $track');
-        await track.stop();
-      }
-    }
-
-    if (_connectOptions.audioInputDevice != null) {
-      await setAudioInputDevice(_connectOptions.audioInputDevice!);
-    }
-
-    if (_connectOptions.audioOutputDevice != null) {
-      await setAudioOutputDevice(_connectOptions.audioOutputDevice!);
-    } else {
-      if (CurrentPlatform.isIos) {
-        await _session?.rtcManager?.setAppleAudioConfiguration(
-          speakerOn: _connectOptions.speakerDefaultOn,
-          policy:
-              _stateManager.callState.preferences.audioConfigurationPolicy ??
-              _streamVideo.options.audioConfigurationPolicy,
-        );
-      }
-    }
-
-    _logger.v(() => '[applyConnectOptions] finished');
-  }
-
-  Future<Result<None>> _applyCameraOption(
-    TrackOption cameraOption,
-    FacingMode facingMode,
-    StreamTargetResolution? targetResolution,
-    String? deviceId,
-  ) async {
-    if (cameraOption is TrackProvided) {
-      return _setLocalTrack(cameraOption.track);
-    } else if (cameraOption is TrackEnabled) {
-      final constraints = cameraOption.constraints is CameraConstraints
-          ? cameraOption.constraints as CameraConstraints?
-          : null;
-
-      return setCameraEnabled(
-        enabled: true,
-        constraints:
-            constraints ??
-            CameraConstraints(
-              facingMode: facingMode,
-              deviceId: deviceId,
-              params:
-                  targetResolution?.toVideoParams() ??
-                  RtcVideoParametersPresets.h720_16x9,
-            ),
-      );
-    }
-
-    return const Result.success(none);
-  }
-
-  Future<Result<None>> _applyMicrophoneOption(
-    TrackOption microphoneOption,
-  ) async {
-    if (microphoneOption is TrackProvided) {
-      return _setLocalTrack(microphoneOption.track);
-    } else if (microphoneOption is TrackEnabled) {
-      final constraints = microphoneOption.constraints is AudioConstraints
-          ? microphoneOption.constraints as AudioConstraints?
-          : null;
-      return setMicrophoneEnabled(enabled: true, constraints: constraints);
-    }
-
-    return const Result.success(none);
-  }
-
-  Future<Result<None>> _applyScreenShareOption(
-    TrackOption screenShareOption,
-    StreamTargetResolution? targetResolution,
-  ) async {
-    if (screenShareOption is TrackProvided) {
-      return _setLocalTrack(screenShareOption.track);
-    } else if (screenShareOption is TrackEnabled) {
-      final constraints =
-          screenShareOption.constraints is ScreenShareConstraints
-          ? screenShareOption.constraints as ScreenShareConstraints?
-          : null;
-
-      return setScreenShareEnabled(
-        enabled: true,
-        constraints:
-            constraints ??
-            ScreenShareConstraints(
-              params:
-                  targetResolution?.toVideoParams(
-                    defaultBitrate: RtcVideoParametersPresets.k1080pBitrate,
-                  ) ??
-                  RtcVideoParametersPresets.h1080_16x9,
-            ),
-      );
-    }
-
-    return const Result.success(none);
-  }
-
-  /// Publishes [track], taken over from the session [target] replaced, on
-  /// [target], while that is still the call's session. A track that is not
-  /// published is stopped.
-  ///
-  /// A screen share is not published through [setScreenShareEnabled], which
-  /// always captures a new screen and so asks the user to pick one again.
-  Future<Result<None>> _adoptInheritedTrack(
-    CallSession? target,
-    RtcLocalTrack track,
-  ) async {
-    _logger.d(() => '[adoptInheritedTrack] track: $track');
-
-    final constraints = track.mediaConstraints;
-    final String? refused;
-    if (track.trackType == SfuTrackType.video) {
-      refused = _sendVideoBlockedReason();
-    } else if (track.trackType == SfuTrackType.audio) {
-      refused = _sendAudioBlockedReason();
-    } else if (track.trackType != SfuTrackType.screenShare) {
-      refused = 'Unsupported track type: ${track.trackType}';
-    } else if (constraints is! ScreenShareConstraints) {
-      refused =
-          'Unexpected screen share constraints: ${constraints.runtimeType}';
-    } else if (!hasPermission(CallPermission.screenshare)) {
-      refused = 'Missing permission to share screen for the user';
-    } else {
-      refused = null;
-    }
-
-    final Result<None> result;
-    try {
-      if (refused != null) {
-        result = failureWithError(refused);
-      } else if (target == null || !identical(_session, target)) {
-        result = failureWithError('the call moved on to another session');
-      } else {
-        result = await target.setLocalTrack(track);
-      }
-    } catch (_) {
-      await track.stop();
-      rethrow;
-    }
-
-    _logger.v(() => '[adoptInheritedTrack] completed: $result');
-    if (result.isFailure) {
-      await track.stop();
-      return result;
-    }
-
-    if (constraints is ScreenShareConstraints) {
-      _onScreenShareEnabled(
-        enabled: true,
-        constraints: constraints,
-        track: track,
-      );
-    } else {
-      await _onLocalTrackSet(track);
-    }
-
-    return result;
-  }
-
-  Future<Result<None>> _setLocalTrack(RtcLocalTrack track) async {
-    _logger.d(() => '[setLocalTrack] localTrack: $track');
-    final session = _session;
-    if (session == null) {
-      _logger.w(() => '[setLocalTrack] rejected (session is null);');
-      return failureWithError('no call session');
-    }
-    final result = await session.setLocalTrack(track);
-    _logger.v(() => '[setLocalTrack] completed: $result');
-    if (result.isSuccess) await _onLocalTrackSet(track);
-    return result;
-  }
-
-  /// Brings the device state in line with [track], just published.
-  Future<void> _onLocalTrackSet(RtcLocalTrack track) async {
-    final mediaConstraints = track.mediaConstraints;
-    if (mediaConstraints is AudioConstraints) {
-      _logger.v(() => '[setLocalTrack]: setMicrophoneEnabled true');
-      await setMicrophoneEnabled(
-        enabled: track.mediaTrack.enabled,
-        constraints: mediaConstraints,
-      );
-    } else if (mediaConstraints is CameraConstraints) {
-      _logger.v(() => '[setLocalTrack]: setCameraEnabled true');
-      await setCameraEnabled(
-        enabled: track.mediaTrack.enabled,
-        constraints: mediaConstraints,
-      );
-    } else if (mediaConstraints is ScreenShareConstraints) {
-      _logger.v(() => '[setLocalTrack] setScreenShareEnabled true');
-      await setScreenShareEnabled(
-        enabled: track.mediaTrack.enabled,
-        constraints: mediaConstraints,
-      );
-    } else {
-      streamLog.e(
-        _tag,
-        () => '[_setLocalTrack] failed: $mediaConstraints',
-      );
-    }
-  }
-
-  Future<Result<None>> _awaitIncomingToBeAccepted(Duration timeLimit) async {
-    return state
-        .firstWhere(
-          (state) {
-            final status = state.status;
-            return status is CallStatusIncoming && status.acceptedByMe;
-          },
-        )
-        .timeout(timeLimit)
-        .then((value) {
-          _logger.i(() => '[awaitIncomingToBeAccepted] completed');
-          return const Result.success(none);
-        })
-        .onError((e, stk) {
-          _logger.e(() => '[awaitIncomingToBeAccepted] failed: $e');
-          return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
-        });
-  }
-
-  Future<Result<None>> _awaitOutgoingToBeAccepted(Duration timeLimit) async {
-    return state
-        .firstWhere(
-          (state) {
-            final status = state.status;
-            return status is CallStatusOutgoing && status.acceptedByCallee;
-          },
-        )
-        .timeout(timeLimit)
-        .then((value) {
-          _logger.i(() => '[awaitOutgoingToBeAccepted] completed');
-          return const Result.success(none);
-        })
-        .onError((e, stk) {
-          _logger.e(() => '[awaitOutgoingToBeAccepted] failed: $e');
-          return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
-        });
-  }
-
-  Future<Result<None>> _awaitCallToBeJoined() async {
-    return state
-        .firstWhere(
-          (state) {
-            return state.status is CallStatusJoined;
-          },
-        )
-        .timeout(const Duration(seconds: 60))
-        .then((value) {
-          _logger.d(() => '[awaitCallToBeJoined] completed');
-          return const Result.success(none);
-        })
-        .onError((e, stk) {
-          _logger.e(() => '[awaitCallToBeJoined] failed: $e');
-          return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
-        });
-  }
-
   Future<Result<T>> _performGetOperation<T>({
     required bool watch,
     required Future<Result<T>> Function() coordinatorCall,
@@ -1679,7 +1110,7 @@ class Call {
   }) async {
     if (watch && !_isDisposed) {
       _observeEvents();
-      _streamVideo.state.setWatchedCall(this);
+      _host.state.setWatchedCall(this);
     }
 
     final response = await coordinatorCall();
@@ -1689,17 +1120,16 @@ class Call {
         _logger.v(() => '[performGetOperation] success: $success');
 
         final callMetadata = onSuccess(success.data);
-        unawaited(
-          _applyCallSettingsToConnectOptions(
-            callMetadata.settings,
-          ).catchError(
-            (dynamic error, StackTrace stackTrace) {
-              _logger.e(
-                () =>
-                    '[performGetOperation] failed to apply call settings: $error, stackTrace: $stackTrace',
-              );
-            },
-          ),
+        // Awaited so the connect options are settled when the caller gets the
+        // call back: the outgoing screen reads the camera preference as soon
+        // as it opens, and the call's defaults would otherwise leave it dark.
+        await _media.applyCallSettings(callMetadata.settings).catchError(
+          (dynamic error, StackTrace stackTrace) {
+            _logger.e(
+              () =>
+                  '[performGetOperation] failed to apply call settings: $error, stackTrace: $stackTrace',
+            );
+          },
         );
 
         return success;
@@ -1746,7 +1176,7 @@ class Call {
           ringing: ringing,
           notify: notify,
         );
-        _startRingStatePollingIfNeeded(data.metadata);
+        _ringing.startRingStatePollingIfNeeded(data.metadata);
 
         return data.metadata;
       },
@@ -1833,7 +1263,7 @@ class Call {
     ];
 
     if (ringing) {
-      await _streamVideo.state.setOutgoingCall(this);
+      await _host.state.setOutgoingCall(this);
     }
 
     return _performGetOperation<CallReceivedOrCreatedData>(
@@ -1857,93 +1287,10 @@ class Call {
           callConnectOptions: connectOptions,
         );
 
-        _startRingStatePollingIfNeeded(data.data.metadata);
+        _ringing.startRingStatePollingIfNeeded(data.data.metadata);
         return data.data.metadata;
       },
     );
-  }
-
-  /// Starts polling for the outcome of a ring the current user just started,
-  /// in case the `call.accepted` or `call.rejected` event never arrives.
-  void _startRingStatePollingIfNeeded(CallMetadata metadata) {
-    final settings = _streamVideo.options.ringStatePolling;
-    if (!settings.enabled) return;
-    if (_ringStatePoller?.isStopped == false) return;
-
-    // A zero interval would fire the poll timer on every event-loop turn.
-    if (settings.interval <= Duration.zero) {
-      _logger.w(
-        () =>
-            '[startRingStatePolling] rejected (interval is not positive): '
-            '${settings.interval}',
-      );
-      return;
-    }
-
-    final status = _stateManager.callState.status;
-    if (status is! CallStatusOutgoing || status.acceptedByCallee) return;
-
-    // Captured once: the ring state is read for the session that rang.
-    final sessionId = metadata.session.id;
-    if (sessionId.isEmpty) {
-      _logger.w(() => '[startRingStatePolling] rejected (no session)');
-      return;
-    }
-
-    final ringTimeout = metadata.settings.ring.autoCancelTimeout;
-    if (ringTimeout <= Duration.zero) return;
-
-    final poller = RingStatePoller(
-      settings: settings,
-      ringTimeout: ringTimeout,
-      fetchRingState: () => _coordinatorClient.getCallRingState(
-        callCid: callCid,
-        sessionId: sessionId,
-      ),
-      onRingState: _onPolledRingState,
-    );
-    _ringStatePoller = poller;
-
-    unawaited(_ringStatePollerStatusSubscription?.cancel());
-    _ringStatePollerStatusSubscription = _stateManager.callStateStream.listen((
-      state,
-    ) {
-      final status = state.status;
-      if (status is! CallStatusOutgoing || status.acceptedByCallee) {
-        _stopRingStatePolling();
-      }
-    });
-
-    poller.start();
-  }
-
-  /// Applies a polled ring state, returning whether the ring is settled.
-  bool _onPolledRingState(GetCallRingStateResponse ringState) {
-    final callState = _stateManager.callState;
-    final status = callState.status;
-    if (status is! CallStatusOutgoing || status.acceptedByCallee) return true;
-
-    final snapshot = ringState.toRingingSnapshot(
-      memberIds: callState.callMembers.map((member) => member.userId),
-    );
-
-    final ringingState = snapshot.resolveFor(callState.currentUserId);
-    if (!ringingState.isRinging) {
-      // A settled ring here means the event that carried it was dropped.
-      _logger.i(
-        () => '[onPolledRingState] resolved by polling: $ringingState',
-      );
-    }
-
-    _stateManager.coordinatorOutgoingRingResolved(ringingState, snapshot);
-    return !ringingState.isRinging;
-  }
-
-  void _stopRingStatePolling() {
-    _ringStatePoller?.stop();
-    _ringStatePoller = null;
-    unawaited(_ringStatePollerStatusSubscription?.cancel());
-    _ringStatePollerStatusSubscription = null;
   }
 
   /// Sends a ring notification to the provided users who are not already in the call.
@@ -1967,7 +1314,7 @@ class Call {
   Future<Result<None>> startAudioProcessing({
     bool requireAdvancedAudioProcessingSupport = false,
   }) async {
-    if (!_streamVideo.isAudioProcessorConfigured()) {
+    if (!_host.isAudioProcessorConfigured()) {
       _logger.w(() => '[startAudioProcessing] rejected (not configured)');
       return failureWithError(
         'Cannot start audio processing (not configured)',
@@ -1984,8 +1331,7 @@ class Call {
     }
 
     if (requireAdvancedAudioProcessingSupport) {
-      final supportResult = await _streamVideo
-          .deviceSupportsAdvancedAudioProcessing();
+      final supportResult = await _host.deviceSupportsAdvancedAudioProcessing();
 
       if (supportResult.isFailure) {
         return failureWithError(
@@ -2000,7 +1346,7 @@ class Call {
       }
     }
 
-    final result = await _streamVideo.setAudioProcessingEnabled(true);
+    final result = await _host.setAudioProcessingEnabled(true);
 
     if (result.isSuccess) {
       await _session?.notifyNoiseCancellationStarted();
@@ -2012,14 +1358,14 @@ class Call {
 
   /// Stops audio processing for the call.
   Future<Result<None>> stopAudioProcessing() async {
-    if (!_streamVideo.isAudioProcessorConfigured()) {
+    if (!_host.isAudioProcessorConfigured()) {
       _logger.w(() => '[stopAudioProcessing] rejected (not configured)');
       return failureWithError(
         'Cannot stop audio processing (not configured)',
       );
     }
 
-    final result = await _streamVideo.setAudioProcessingEnabled(false);
+    final result = await _host.setAudioProcessingEnabled(false);
 
     if (result.isSuccess) {
       await _session?.notifyNoiseCancellationStopped();
@@ -2029,258 +1375,34 @@ class Call {
     return result;
   }
 
-  Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) async {
-    final result =
-        await _session?.setCameraPosition(cameraPosition) ??
-        failureWithError('Session is null');
+  Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) =>
+      _media.setCameraPosition(cameraPosition);
 
-    if (result.isSuccess) {
-      _stateManager.participantUpdateCameraPosition(
-        cameraPosition: cameraPosition,
-      );
-    }
+  Future<Result<None>> flipCamera() => _media.flipCamera();
 
-    return result;
-  }
+  Future<Result<bool>> setMultitaskingCameraAccessEnabled(bool enabled) =>
+      _media.setMultitaskingCameraAccessEnabled(enabled);
 
-  Future<Result<None>> flipCamera() async {
-    final result =
-        await _session?.flipCamera() ?? failureWithError('Session is null');
+  Future<Result<None>> setZoom({required double zoomLevel}) =>
+      _media.setZoom(zoomLevel: zoomLevel);
 
-    await result.foldResult(
-      success: (success) async {
-        final mediaDevicesResult = await _rtcMediaDeviceNotifier
-            .enumerateDevicesFor(DeviceEnumerationTrigger.flipCamera);
+  Future<Result<None>> focus({Point<double>? focusPoint}) =>
+      _media.focus(focusPoint: focusPoint);
 
-        final mediaDevices = mediaDevicesResult.foldResult(
-          success: (success) => success.data,
-          failure: (failure) => <RtcMediaDevice>[],
-        );
-
-        final currentInput = mediaDevices
-            .where((d) => d.id == success.data.mediaConstraints.deviceId)
-            .firstOrNull;
-
-        _connectOptions = connectOptions.copyWith(
-          cameraFacingMode: success.data.mediaConstraints.facingMode,
-          videoInputDevice: currentInput,
-        );
-
-        _stateManager.participantFlipCamera(
-          currentInput,
-          track: success.data,
-        );
-      },
-      failure: (failure) {},
-    );
-
-    return result.map((_) => none);
-  }
-
-  Future<Result<bool>> setMultitaskingCameraAccessEnabled(bool enabled) async {
-    return _multitaskingCameraLock.synchronized(() async {
-      if (CurrentPlatform.isIos) {
-        try {
-          final result = await rtc.Helper.enableIOSMultitaskingCameraAccess(
-            enabled,
-          );
-          return Result.success(result);
-        } catch (error, stackTrace) {
-          _logger.e(() => 'Failed to set multitasking camera access: $error');
-          return failureWithError(
-            'Failed to set multitasking camera access',
-            stackTrace: stackTrace,
-          );
-        }
-      }
-
-      return const Result.success(false);
-    });
-  }
-
-  Future<Result<None>> setZoom({
-    required double zoomLevel,
-  }) async {
-    _logger.d(() => '[setZoom] zoomLevel: $zoomLevel');
-
-    final localTrackIdPrefix = state.value.localParticipant?.trackIdPrefix;
-
-    if (localTrackIdPrefix == null) {
-      _logger.w(() => '[setZoom] local participant not found');
-      return failureWithError('Local participant not found');
-    }
-    final localTrack = _session?.getTrack(
-      localTrackIdPrefix,
-      SfuTrackType.video,
-    );
-
-    if (localTrack == null) {
-      _logger.w(() => '[setZoom] local track not found');
-      return failureWithError('Local track not found');
-    }
-
-    try {
-      await rtc.Helper.setZoom(localTrack.mediaTrack, zoomLevel);
-      return const Result.success(none);
-    } catch (error, stackTrace) {
-      _logger.e(() => '[setZoom] Failed to set zoom: $error');
-      return failureWithError('Failed to set zoom', stackTrace: stackTrace);
-    }
-  }
-
-  Future<Result<None>> focus({Point<double>? focusPoint}) async {
-    _logger.d(() => '[focus] focusPoint: $focusPoint');
-
-    final localTrackIdPrefix = state.value.localParticipant?.trackIdPrefix;
-
-    if (localTrackIdPrefix == null) {
-      _logger.w(() => '[focus] local participant not found');
-      return failureWithError('Local participant not found');
-    }
-
-    final localTrack = _session?.getTrack(
-      localTrackIdPrefix,
-      SfuTrackType.video,
-    );
-    if (localTrack == null) {
-      _logger.w(() => '[focus] local track not found');
-      return failureWithError('Local track not found');
-    }
-
-    try {
-      await Helper.setFocusPoint(localTrack.mediaTrack, focusPoint);
-      await Helper.setExposurePoint(localTrack.mediaTrack, focusPoint);
-    } catch (error, stackTrace) {
-      _logger.e(() => '[focus] Failed to set focus: $error');
-      return failureWithError('Failed to set focus', stackTrace: stackTrace);
-    }
-
-    return const Result.success(none);
-  }
-
-  Future<Result<None>> setVideoInputDevice(RtcMediaDevice device) async {
-    final result =
-        await _session?.setVideoInputDevice(device) ??
-        failureWithError('Session is null');
-
-    if (result.isSuccess) {
-      final track = result.getDataOrNull()!;
-
-      _connectOptions = connectOptions.copyWith(
-        videoInputDevice: device,
-        cameraFacingMode: track.mediaConstraints.facingMode,
-      );
-
-      _stateManager.participantSetVideoInputDevice(
-        device: device,
-        track: track,
-      );
-    }
-
-    return result.map((_) => none);
-  }
-
-  /// Why the camera may not be turned on, or null when it may.
-  String? _sendVideoBlockedReason() {
-    if (state.value.isVideoModerated &&
-        state.value.preferences.videoModerationConfig.muteVideo) {
-      return 'Blocked by video moderation';
-    }
-    if (!hasPermission(CallPermission.sendVideo)) {
-      return 'Missing permission to send video';
-    }
-    return null;
-  }
-
-  /// Why the microphone may not be turned on, or null when it may.
-  String? _sendAudioBlockedReason() {
-    if (state.value.isVideoModerated &&
-        state.value.preferences.videoModerationConfig.muteAudio) {
-      return 'Blocked by video moderation';
-    }
-    if (!hasPermission(CallPermission.sendAudio)) {
-      return 'Missing permission to send audio';
-    }
-    return null;
-  }
+  Future<Result<None>> setVideoInputDevice(RtcMediaDevice device) =>
+      _media.setVideoInputDevice(device);
 
   Future<Result<None>> setCameraEnabled({
     required bool enabled,
     CameraConstraints? constraints,
-  }) async {
-    final blocked = enabled ? _sendVideoBlockedReason() : null;
-    if (blocked != null) {
-      _logger.w(() => '[setCameraEnabled] rejected: $blocked');
-      return failureWithError(blocked);
-    }
-    final result =
-        await _session?.setCameraEnabled(enabled, constraints: constraints) ??
-        failureWithError('Session is null');
+  }) => _media.setCameraEnabled(enabled: enabled, constraints: constraints);
 
-    if (result.isSuccess) {
-      _sfuStatsTimers.add(
-        Future<void>.delayed(const Duration(seconds: 3)).then((_) {
-          if (result.getDataOrNull()!.mediaTrack.enabled) {
-            _sfuStatsReporter?.sendSfuStats();
-          }
-        }).asCancelable(),
-      );
-
-      var multitaskingEnabled = state.value.iOSMultitaskingCameraAccessEnabled;
-      if (enabled && !multitaskingEnabled) {
-        // Set multitasking camera access for iOS
-        final multitaskingResult = await setMultitaskingCameraAccessEnabled(
-          enabled && !_streamVideo.options.muteVideoWhenInBackground,
-        );
-
-        multitaskingEnabled = multitaskingResult.getDataOrNull() ?? false;
-      }
-
-      _stateManager.participantSetCameraEnabled(
-        enabled: enabled,
-        iOSMultitaskingCameraAccessEnabled: multitaskingEnabled,
-      );
-
-      var facingMode = constraints?.facingMode;
-      if (facingMode == null && result.getDataOrNull() is RtcLocalCameraTrack) {
-        final track = result.getDataOrNull()! as RtcLocalCameraTrack;
-        facingMode = track.mediaConstraints.facingMode;
-      }
-
-      _connectOptions = _connectOptions.copyWith(
-        camera: enabled
-            ? TrackOption.enabled(constraints: constraints)
-            : TrackOption.disabled(),
-        cameraFacingMode: facingMode ?? _connectOptions.cameraFacingMode,
-      );
-    }
-
-    return result.map((_) => none);
-  }
-
-  /// Changes the camera capture target resolution during an active call.
+  /// Changes the camera capture target resolution. It applies to the live
+  /// camera, and every later session opens the camera at it, over the call
+  /// settings.
   Future<Result<None>> setCameraTargetResolution(
     StreamTargetResolution targetResolution,
-  ) async {
-    connectOptions = _connectOptions.copyWith(
-      targetResolution: targetResolution,
-    );
-
-    if (_session?.rtcManager == null) {
-      return const Result.success(none);
-    }
-
-    final params = targetResolution.toVideoParams();
-    final result = await _session!.rtcManager!.setCameraVideoParameters(
-      params: params,
-    );
-
-    if (result.isSuccess) {
-      return const Result.success(none);
-    } else {
-      return result.map((_) => none);
-    }
-  }
+  ) => _media.setCameraTargetResolution(targetResolution);
 
   /// Enables or disables the microphone for this call.
   ///
@@ -2291,165 +1413,25 @@ class Call {
     required bool enabled,
     AudioConstraints? constraints,
     bool? stopTrackOnMute,
-  }) async {
-    final blocked = enabled ? _sendAudioBlockedReason() : null;
-    if (blocked != null) {
-      _logger.w(() => '[setMicrophoneEnabled] rejected: $blocked');
-      return failureWithError(blocked);
-    }
+  }) => _media.setMicrophoneEnabled(
+    enabled: enabled,
+    constraints: constraints,
+    stopTrackOnMute: stopTrackOnMute,
+  );
 
-    final result =
-        await _session?.setMicrophoneEnabled(
-          enabled,
-          constraints: constraints,
-          stopTrackOnMute: stopTrackOnMute,
-        ) ??
-        failureWithError('Session is null');
-
-    if (result.isSuccess) {
-      // Make sure the audio input device is set
-      if (enabled && _connectOptions.audioInputDevice != null) {
-        await setAudioInputDevice(_connectOptions.audioInputDevice!);
-      }
-
-      _sfuStatsTimers.add(
-        Future<void>.delayed(const Duration(seconds: 3)).then((_) {
-          if (result.getDataOrNull()!.mediaTrack.enabled) {
-            _sfuStatsReporter?.sendSfuStats();
-          }
-        }).asCancelable(),
-      );
-
-      await _streamVideo.pushNotificationManager?.setCallMutedByCid(
-        callCid.value,
-        !enabled,
-      );
-
-      _stateManager.participantSetMicrophoneEnabled(
-        enabled: enabled,
-      );
-
-      _connectOptions = _connectOptions.copyWith(
-        microphone: enabled
-            ? TrackOption.enabled(constraints: constraints)
-            : TrackOption.disabled(),
-      );
-    }
-
-    return result.map((_) => none);
-  }
-
-  Future<bool> requestScreenSharePermission() async {
-    // Request screen share permission from the native factory if available
-    final nativeFactory = await _session?.rtcManager?.pcFactory
-        .ensureNativeFactory();
-
-    if (nativeFactory != null) {
-      return nativeFactory.requestCapturePermission();
-    }
-
-    return Helper.requestCapturePermission();
-  }
+  Future<bool> requestScreenSharePermission() =>
+      _media.requestScreenSharePermission();
 
   Future<Result<None>> setScreenShareEnabled({
     required bool enabled,
     ScreenShareConstraints? constraints,
-  }) async {
-    // Checks to ensure the user can share their screen.
-    final canShare = hasPermission(CallPermission.screenshare);
-    if (enabled && !canShare) {
-      return failureWithError(
-        'Missing permission to share screen for the user',
-      );
-    }
+  }) => _media.setScreenShareEnabled(
+    enabled: enabled,
+    constraints: constraints,
+  );
 
-    final updatedConstraints = (constraints ?? const ScreenShareConstraints())
-        .copyWith(
-          params:
-              constraints?.params ??
-              _connectOptions.screenShareTargetResolution?.toVideoParams(
-                defaultBitrate: RtcVideoParametersPresets.k1080pBitrate,
-              ),
-        );
-
-    final result =
-        await _session?.setScreenShareEnabled(
-          enabled,
-          constraints: updatedConstraints,
-        ) ??
-        failureWithError('Call session is null, cannot start screen share');
-
-    // In case of iOS Broadcast Extension, we don't update the state here
-    // We listen to the ScreenShareStarted event instead
-    if (CurrentPlatform.isIos &&
-        constraints is ScreenShareConstraints &&
-        constraints.useiOSBroadcastExtension) {
-      return result.map((_) => none);
-    }
-
-    if (result.isSuccess) {
-      _onScreenShareEnabled(
-        enabled: enabled,
-        constraints: updatedConstraints,
-        track: result.getDataOrNull(),
-      );
-    }
-
-    return result.map((_) => none);
-  }
-
-  void _onScreenShareEnabled({
-    required bool enabled,
-    required ScreenShareConstraints constraints,
-    RtcLocalTrack? track,
-  }) {
-    _stateManager.participantSetScreenShareEnabled(
-      enabled: enabled,
-    );
-
-    // The system picker's choice cannot be replayed; keeping it would show
-    // the picker again whenever the connect options are re-applied.
-    final replayable =
-        enabled &&
-        constraints.deviceId != ScreenShareConstraints.systemPickerSourceId;
-
-    _connectOptions = _connectOptions.copyWith(
-      screenShare: replayable
-          ? TrackOption.enabled(constraints: constraints)
-          : TrackOption.disabled(),
-    );
-
-    if (enabled) {
-      // [web only] Automatically stop screen share when the track ends
-      track?.mediaTrack.onEnded = () {
-        setScreenShareEnabled(enabled: false);
-      };
-    }
-  }
-
-  Future<Result<None>> setAudioInputDevice(RtcMediaDevice device) async {
-    final result =
-        await _session?.setAudioInputDevice(device) ??
-        failureWithError('Session is null');
-
-    _connectOptions = _connectOptions.copyWith(audioInputDevice: device);
-
-    if (result.isSuccess) {
-      _stateManager.participantSetAudioInputDevice(device: device);
-      return const Result.success(none);
-    } else {
-      final error = result.getErrorOrNull();
-      if (error is StreamVideoException &&
-          error.rawCause is TrackMissingException) {
-        // If the track is null, it most probably means that the user
-        // joined the call muted and the audio track was not created.
-        // We will set the audio input device when the user unmutes.
-        return const Result.success(none);
-      } else {
-        return result;
-      }
-    }
-  }
+  Future<Result<None>> setAudioInputDevice(RtcMediaDevice device) =>
+      _media.setAudioInputDevice(device);
 
   /// Sets the audio output device for the call.
   /// - [device]: The audio output device to set.
@@ -2457,20 +1439,8 @@ class Call {
   ///
   /// On web platforms, this method may return an error if the browser does not support
   /// setting audio output devices programmatically.
-  Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) async {
-    final result =
-        await _session?.setAudioOutputDevice(device) ??
-        failureWithError('Session is null');
-
-    if (result.isSuccess) {
-      _connectOptions = connectOptions.copyWith(audioOutputDevice: device);
-
-      _stateManager.participantSetAudioOutputDevice(device: device);
-      _stateManager.audioOutputSelectedByUser = true;
-    }
-
-    return result;
-  }
+  Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) =>
+      _media.setAudioOutputDevice(device);
 
   Result<None> setAudioBitrateProfile(SfuAudioBitrateProfile profile) {
     if (!state.value.settings.audio.hifiAudioEnabled) {
@@ -2479,7 +1449,7 @@ class Call {
       );
     }
 
-    if (_streamVideo.isAudioProcessorConfigured()) {
+    if (_host.isAudioProcessorConfigured()) {
       final disableAudioProcessing =
           profile == SfuAudioBitrateProfile.musicHighQuality;
 
@@ -2890,13 +1860,13 @@ extension FutureStartWithEx<T> on Stream<T> {
 class BaseCallFactory {
   static Call makeCall({
     required CoordinatorClient coordinatorClient,
-    required StreamVideo streamVideo,
+    required CallHost streamVideo,
     required CallStateNotifier stateManager,
     required PermissionsManager permissionManager,
     required InternetConnection networkMonitor,
     required RetryPolicy retryPolicy,
     required SdpPolicy sdpPolicy,
-    required RtcMediaDeviceNotifier rtcMediaDeviceNotifier,
+    required RtcMediaDeviceNotifier? rtcMediaDeviceNotifier,
     required CallCredentials? credentials,
     required CallSessionFactory? sessionFactory,
   }) => Call._(

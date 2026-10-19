@@ -2,9 +2,12 @@
 
 Measures how much each SDK adds to a release app, and how large each package's
 pub.dev archive is. The `sdk_size` workflow runs this on every pull request and
-reports it in two comments, `## SDK Size` and `## Size Breakdown`. Pushes to
-`main` and `v2` store the numbers as that branch's benchmark in
-`GetStream/stream-internal-metrics`.
+reports it in two comments, `## SDK Size` and `## Size Breakdown`. Pull requests
+measure Android only, except `release/` pull requests, which measure both
+platforms and store them as the `release` benchmark. Pushes to `main` and `v2`
+measure both platforms and store the numbers as that branch's benchmark in
+`GetStream/stream-internal-metrics`. A manual run of the workflow measures iOS
+too, but doesn't comment on a pull request.
 
 ## How it works
 
@@ -57,6 +60,23 @@ needs read access to `GetStream/stream-internal-metrics`:
 
 ```bash
 cd metrics/sdk_size && bundle install && BASE_BRANCH=main bundle exec fastlane sdk_size
+```
+
+## README badges
+
+The size badges in the root `README.md` show a benchmark from
+`GetStream/stream-internal-metrics`:
+
+- `stream_video`: what the LLC adds to an empty app.
+- `stream_video_flutter`: what the UI adds on top of `stream_video`.
+- `stream_video_push_notification` and `stream_video_screen_sharing`: their
+  pub.dev archive size.
+
+They are updated for each release, on the release branch, by the
+`update_size_badges` workflow:
+
+```bash
+gh workflow run update_size_badges.yml --ref release/v<version> -f base_branch=main
 ```
 
 ## Adding a variant

@@ -161,7 +161,7 @@ void main() {
       subscriber: _MockTracedStreamPeerConnection(),
       publishOptions: [_micOption, _screenShareOption, _screenShareAudioOption],
       stateManager: createTestCallStateManager(),
-      streamVideo: setupMockStreamVideo(),
+      host: setupMockCallHost(),
       pcFactory: StreamPeerConnectionFactory(
         callCid: SampleCallData.defaultCid,
       ),

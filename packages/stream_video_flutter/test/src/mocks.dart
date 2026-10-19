@@ -50,6 +50,7 @@ class MockCallParticipantState extends Mock implements CallParticipantState {
 class MockRtcMediaDeviceNotifier extends Mock
     implements RtcMediaDeviceNotifier {}
 
+// ignore: subtype_of_sealed_class
 class MockStreamVideo extends Mock implements StreamVideo {
   // StreamVideo marks dispose as @mustBeOverridden.
   @override
@@ -115,6 +116,10 @@ void stubRingingCall(
   when(() => call.currentUser).thenReturn(currentUser);
   when(() => call.callCid).thenReturn(StreamCallCid(cid: 'default:ringing'));
   when(() => call.connectOptions).thenReturn(connectOptions);
+  registerFallbackValue(const CallConnectOptions());
+  when(
+    () => call.setConnectOptions(any()),
+  ).thenReturn(const Result.success(none));
   when(() => call.state).thenAnswer(
     (_) => MutableStateEmitter<CallState>(state, sync: true),
   );

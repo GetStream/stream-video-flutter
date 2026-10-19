@@ -46,7 +46,7 @@ void main() {
   late RtcManager rtcManager;
 
   setUp(() {
-    final streamVideo = MockStreamVideo();
+    final streamVideo = MockCallHost();
     when(() => streamVideo.options).thenReturn(
       StreamVideoOptions(clientEventsReportingEnabled: false),
     );
@@ -62,7 +62,7 @@ void main() {
       subscriber: subscriber,
       publishOptions: [],
       stateManager: MockCallStateNotifier(),
-      streamVideo: streamVideo,
+      host: streamVideo,
       pcFactory: _MockStreamPeerConnectionFactory(),
     );
   });

@@ -105,4 +105,38 @@ void main() {
       expect(disconnected.apiError, isNull);
     });
   });
+
+  // `connectUser` relies on this: a connect that fails does not throw, and
+  // the disconnected event it reports moves the client's state on. A failure
+  // that threw instead would leave the client connecting with no event to
+  // end it.
+  //
+  // The socket's token is valid, so the connect gets past building its
+  // options and opens a real connection to `wss://localhost:0`. Nothing
+  // listens there, so the OS refuses it, and core reports that as a
+  // server-initiated disconnect with a `StreamNetworkException`, the same
+  // path a lost network takes.
+  test(
+    'a connect that fails reports a disconnect instead of throwing',
+    () async {
+      final socket = _socket();
+      addTearDown(socket.dispose);
+      final states = <WebSocketConnectionState>[];
+      final subscription = socket.client.connectionState.listen(states.add);
+      addTearDown(subscription.cancel);
+      final disconnected = socket.events.firstWhere(
+        (it) => it is CoordinatorDisconnectedEvent,
+      );
+
+      await expectLater(socket.connect(), completes);
+
+      await expectLater(
+        disconnected.timeout(const Duration(seconds: 5)),
+        completes,
+      );
+      // The socket did try to connect.
+      expect(states, contains(isA<Connecting>()));
+      expect(socket.isDisconnected, isTrue);
+    },
+  );
 }

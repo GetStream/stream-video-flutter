@@ -212,4 +212,54 @@ void main() {
       expect(stateNotifier.state, same(connectedState));
     });
   });
+
+  group('Call.accept with calls to replace', () {
+    setUpAll(() => registerFallbackValue(MockCall()));
+
+    test('waits for the replaced calls before it accepts', () async {
+      final coordinatorClient = setupMockCoordinatorClient();
+      when(
+        () => coordinatorClient.acceptCall(cid: any(named: 'cid')),
+      ).thenAnswer((_) async => const Result.success(none));
+      final host = setupMockCallHost();
+      final replacing = Completer<void>();
+      when(
+        () => host.prepareToAccept(any()),
+      ).thenAnswer((_) => replacing.future);
+
+      final callCid = StreamCallCid.from(
+        id: 'ringing-call',
+        type: StreamCallType.defaultType(),
+      );
+      final call = Call.fromRinging(
+        data: CallRingingData(
+          callCid: callCid,
+          ringing: true,
+          metadata: CallMetadata(
+            cid: callCid,
+            details: createTestCallDetails(createdByUserId: 'other-user'),
+            settings: const CallSettings(),
+            session: const CallSessionData(),
+            users: const {},
+            members: const {},
+          ),
+        ),
+        coordinatorClient: coordinatorClient,
+        streamVideo: host,
+        networkMonitor: InternetConnection.createInstance(),
+      );
+
+      final accepting = call.accept();
+      await pumpEventQueue();
+      verifyNever(() => coordinatorClient.acceptCall(cid: any(named: 'cid')));
+      expect(
+        (call.state.value.status as CallStatusIncoming).acceptedByMe,
+        isFalse,
+      );
+
+      replacing.complete();
+      expect((await accepting).isSuccess, isTrue);
+      verify(() => coordinatorClient.acceptCall(cid: callCid)).called(1);
+    });
+  });
 }

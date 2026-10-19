@@ -177,8 +177,8 @@ MockCallStateNotifier _stateManagerWithLocalAudio({required bool enabled}) {
   );
 }
 
-MockStreamVideo _buildMockStreamVideo() {
-  final mock = setupMockStreamVideo();
+MockCallHost _buildMockStreamVideo() {
+  final mock = setupMockCallHost();
   when(() => mock.apiKey).thenReturn('test-api-key');
   return mock;
 }
@@ -212,7 +212,7 @@ CallSession _buildTestSession({
       enableRtcStats: false,
       reportingIntervalMs: 500,
     ),
-    streamVideo: _buildMockStreamVideo(),
+    host: _buildMockStreamVideo(),
     tracer: Tracer(null),
     pcFactory: StreamPeerConnectionFactory(callCid: callCid),
   );
