@@ -2,7 +2,7 @@
 
 ### ✅ Added
 
-- `StreamMediaDevicesController` takes `supportsAudioOutputSelection`, which defaults to what the platform reports. Where it is false, `audioOutputs` is empty.
+- Added `StreamMediaDevicesController.supportsAudioOutputSelection`; `audioOutputs` is empty where it is false.
 - Added `StreamAdaptiveMenuAnchorThemeData` on `StreamVideoTheme`, and `StreamAdaptiveMenuAnchorTheme` to restyle the menu's sheet and anchored rows over a subtree.
 - Added `DesktopScreenSharePickerType` and `StreamScreenShareButton.desktopScreenPickerType` to share with the macOS system picker instead of the built-in selector.
 - Added `isDesktopSystemContentPickerSupported`, true on macOS 14 or newer.
