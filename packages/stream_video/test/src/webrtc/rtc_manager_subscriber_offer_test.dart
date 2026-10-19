@@ -174,6 +174,31 @@ void main() {
       expect(reattachReasons, isEmpty);
     });
 
+    test(
+      're-attaches when an offer that failed to answer comes again',
+      () async {
+        await manager.onSubscriberOffer(_offer(['a:AUDIO 1']));
+
+        when(
+          () => subscriber.createAnswer(any()),
+        ).thenAnswer((_) async => failureWithError('no answer'));
+        expect(
+          await manager.onSubscriberOffer(_offer(['a:AUDIO 1', 'b:AUDIO 2'])),
+          isNull,
+        );
+
+        // The unanswered offer must not count as applied: the same sources are
+        // still new relative to the first offer.
+        when(() => subscriber.createAnswer(any())).thenAnswer(
+          (_) async =>
+              Result.success(rtc.RTCSessionDescription('v=0', 'answer')),
+        );
+        await manager.onSubscriberOffer(_offer(['a:AUDIO 1', 'b:AUDIO 2']));
+
+        expect(reattachReasons, ['subscriberOffer']);
+      },
+    );
+
     test('a failing re-attach does not fail the offer', () async {
       manager.reattachRemoteAudio = ({required reason}) async {
         throw StateError('boom');

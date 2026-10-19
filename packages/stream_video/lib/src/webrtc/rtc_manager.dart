@@ -260,7 +260,7 @@ class RtcManager extends Disposable {
     return sdp;
   }
 
-  /// The last subscriber offer applied, so the next one can be compared
+  /// The last subscriber offer applied and answered, so the next one can be compared
   /// against it. Null until the first offer: a brand-new subscriber is not a
   /// renegotiation. Only kept where [needsRemoteAudioReattach] holds.
   String? _appliedSubscriberOfferSdp;
@@ -283,11 +283,14 @@ class RtcManager extends Disposable {
 
     final result = await subscriber.setRemoteOffer(offerSdp);
     if (result.isFailure) return null;
-    if (needsRemoteAudioReattach()) _appliedSubscriberOfferSdp = offerSdp;
 
     final rtcAnswer = await subscriber.createAnswer(offerSdp);
     final answerSdp = rtcAnswer.getDataOrNull()?.sdp;
     if (answerSdp == null) return null;
+
+    // Recorded only once the answer exists: an offer that failed to answer
+    // was never applied, so a retry of it must still count as new.
+    if (needsRemoteAudioReattach()) _appliedSubscriberOfferSdp = offerSdp;
 
     if (previousOfferSdp != null) {
       // Best effort, and guarded: losing a re-attach is far cheaper than

@@ -1,3 +1,4 @@
+import 'package:meta/meta.dart';
 import 'package:sdp_transform/sdp_transform.dart';
 
 import '../../logger/impl/tagged_logger.dart';
@@ -13,6 +14,7 @@ final _logger = taggedLogger(tag: 'SV:IncomingAudioSources');
 /// gone. The SSRCs catch that swap even where an offer leaves `a=msid` out,
 /// since a new track always arrives under new ones. Text that is not SDP
 /// yields an empty set, which is how the parser reads it.
+@internal
 Set<String>? incomingAudioSources(String sdp) {
   // The whole read is guarded, not only the parse: the casts below run lazily,
   // inside the set comprehension.
@@ -57,6 +59,7 @@ bool _sendsToUs(Map<String, dynamic> section) {
 ///
 /// True when either offer could not be read. A needless re-attach costs the
 /// remote audio a short gap; a missed one leaves it silent until a rejoin.
+@internal
 bool offerAddsIncomingAudio({required String previous, required String next}) {
   final nextSources = incomingAudioSources(next);
   if (nextSources == null) return true;
