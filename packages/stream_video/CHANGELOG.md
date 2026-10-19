@@ -82,7 +82,7 @@
 
 ### 🐞 Fixed
 
-- Remote audio on Safari and other WebKit browsers is re-attached whenever a renegotiation brings in a new audio source, working around WebKit silencing the audio already playing when another participant joins. Renegotiations that arrive within the re-attach's 25 ms gap share it rather than each emptying the elements again.
+- Remote audio on Safari and other WebKit browsers no longer goes silent when another participant joins.
 - Safari and other WebKit browsers no longer route remote audio to a chosen speaker; it always plays on the system default output, and `Call.checkIfAudioOutputChangeSupported` returns false there. WebKit rejects `setSinkId` without a user gesture, so audio from participants who joined later stayed on the default output; where it was applied, a Bluetooth headset switching sample rate made voices sound pitched up or down; and audio went silent when the chosen speaker was disconnected.
 - `CallSettings` equality now compares every section.
 - A failed `Call.join` now returns the error it failed with, retries a retryable coordinator failure, and reports one telemetry abort.
