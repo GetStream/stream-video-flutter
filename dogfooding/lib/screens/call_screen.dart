@@ -18,6 +18,7 @@ import '../app/user_auth_controller.dart';
 import '../core/repos/app_preferences.dart';
 import '../core/repos/user_chat_repository.dart';
 import '../di/injector.dart';
+import '../utils/consts.dart';
 import '../utils/feedback_dialog.dart';
 import '../widgets/call_connection_banner.dart';
 import '../widgets/closed_captions_widget.dart';
@@ -569,9 +570,10 @@ class _CallScreenState extends State<CallScreen>
               );
             }
 
-            if (reason is DisconnectReasonCancelled ||
-                reason is DisconnectReasonEnded ||
-                reason is DisconnectReasonLastParticipantLeft) {
+            if (kIsProd &&
+                (reason is DisconnectReasonCancelled ||
+                    reason is DisconnectReasonEnded ||
+                    reason is DisconnectReasonLastParticipantLeft)) {
               showFeedbackDialog(context, call: widget.call);
             }
           },
