@@ -83,7 +83,7 @@
 ### 🐞 Fixed
 
 - Remote audio on Safari and other WebKit browsers no longer goes silent when another participant joins.
-- Safari and other WebKit browsers no longer route remote audio to a chosen speaker; it always plays on the system default output, and `Call.checkIfAudioOutputChangeSupported` returns false there. WebKit rejects `setSinkId` without a user gesture, so audio from participants who joined later stayed on the default output; where it was applied, a Bluetooth headset switching sample rate made voices sound pitched up or down; and audio went silent when the chosen speaker was disconnected.
+- Safari and other WebKit browsers always play remote audio on the system default output; `Call.checkIfAudioOutputChangeSupported` returns false there.
 - `CallSettings` equality now compares every section.
 - A failed `Call.join` now returns the error it failed with, retries a retryable coordinator failure, and reports one telemetry abort.
 - A call ended remotely now sends the SFU leave message, like a local leave.
