@@ -275,5 +275,47 @@
       "second": { "type": "String" },
       "count": { "type": "int" }
     }
+  },
+  "callConnectionConnecting": "Connecting…",
+  "@callConnectionConnecting": {
+    "description": "Banner shown while a call joins for the first time"
+  },
+  "callConnectionReconnecting": "Reconnecting…",
+  "@callConnectionReconnecting": {
+    "description": "Banner shown while a call gets its connection back"
+  },
+  "callConnectionReconnectingAttempt": "Reconnecting… (attempt {attempt})",
+  "@callConnectionReconnectingAttempt": {
+    "description": "Banner shown while a call gets its connection back, from its second attempt on",
+    "placeholders": {
+      "attempt": {
+        "type": "int"
+      }
+    }
+  },
+  "callConnectionJoining": "Joining…",
+  "@callConnectionJoining": {
+    "description": "Banner shown while a reconnecting call joins again"
+  },
+  "callConnectionJoiningAttempt": "Joining… (attempt {attempt})",
+  "@callConnectionJoiningAttempt": {
+    "description": "Banner shown while a reconnecting call joins again, from its second attempt on",
+    "placeholders": {
+      "attempt": {
+        "type": "int"
+      }
+    }
+  },
+  "callConnectionOffline": "You're offline. Waiting for the network…",
+  "@callConnectionOffline": {
+    "description": "Banner shown while a reconnecting call waits for the network to come back"
+  },
+  "callConnectionMigrating": "Moving to another server…",
+  "@callConnectionMigrating": {
+    "description": "Banner shown while a call moves to another server"
+  },
+  "callConnectionReconnectFailed": "Couldn't reconnect to the call",
+  "@callConnectionReconnectFailed": {
+    "description": "Banner shown when a call gave up reconnecting, until it has left"
   }
 }

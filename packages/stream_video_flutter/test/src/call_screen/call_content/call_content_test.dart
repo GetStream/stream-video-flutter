@@ -1,4 +1,6 @@
 // ignore_for_file: avoid_redundant_argument_values, deprecated_member_use_from_same_package
+import 'dart:async';
+
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -33,6 +35,9 @@ void main() {
         final filtered = selector(mockCallState);
         return Stream.value(filtered);
       });
+      when(
+        () => mockCall.partialState<CallStatus>(any()),
+      ).thenAnswer((_) => Stream.value(CallStatus.connected()));
       when(
         () => mockCall
             .partialState<({bool isScreenShareEnabled, CallStatus status})>(
@@ -92,6 +97,135 @@ void main() {
       await tester.pump();
 
       expect(taps, 1);
+    });
+
+    /// Builds the content on [status], with participants that say so. A
+    /// status added to the returned controller reaches it after that.
+    Future<StreamController<CallStatus>> pumpContent(
+      WidgetTester tester,
+      CallStatus status, {
+      CallConnectionBannerBuilder? callConnectionBannerBuilder,
+    }) async {
+      final statuses = StreamController<CallStatus>.broadcast();
+      addTearDown(statuses.close);
+
+      when(() => mockCallState.status).thenReturn(status);
+      when(() => mockCall.partialState<CallStatus>(any())).thenAnswer(
+        (_) async* {
+          yield status;
+          yield* statuses.stream;
+        },
+      );
+      when(
+        () => mockCall
+            .partialState<({bool isScreenShareEnabled, CallStatus status})>(
+              any(),
+            ),
+      ).thenAnswer((_) async* {
+        yield (isScreenShareEnabled: false, status: status);
+        yield* statuses.stream.map(
+          (status) => (isScreenShareEnabled: false, status: status),
+        );
+      });
+
+      await tester.pumpWidget(
+        TestWrapper(
+          child: StreamCallContent(
+            call: mockCall,
+            callAppBarWidgetBuilder: (context, call) => AppBar(),
+            callControlsWidgetBuilder: (context, call) => const SizedBox(),
+            callParticipantsWidgetBuilder: (context, call) =>
+                const Text('Participants'),
+            callConnectionBannerBuilder: callConnectionBannerBuilder,
+          ),
+        ),
+      );
+      // Not settled: the banner's spinner keeps turning.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      return statuses;
+    }
+
+    // The previous session keeps playing the participants' media until the
+    // call is connected again or has left, so the grid stays rather than
+    // going blank.
+    final keptStatuses = <String, (CallStatus, String)>{
+      'offline': (
+        CallStatusReconnecting(
+          attempt: 1,
+          isFastReconnectAttempt: true,
+          phase: CallReconnectPhase.offline,
+        ),
+        "You're offline. Waiting for the network…",
+      ),
+      'a fast reconnect': (
+        CallStatusReconnecting(
+          attempt: 1,
+          isFastReconnectAttempt: true,
+          phase: CallReconnectPhase.waiting,
+        ),
+        'Reconnecting…',
+      ),
+      'a rejoin': (
+        CallStatusReconnecting(
+          attempt: 5,
+          isFastReconnectAttempt: false,
+          phase: CallReconnectPhase.joining,
+        ),
+        'Joining… (attempt 5)',
+      ),
+      'a migration': (CallStatus.migrating(), 'Moving to another server…'),
+      'a failed reconnect': (
+        CallStatusReconnectionFailed(),
+        "Couldn't reconnect to the call",
+      ),
+    };
+
+    for (final MapEntry(key: name, value: (status, notice))
+        in keptStatuses.entries) {
+      testWidgets('$name keeps the participants and says so', (tester) async {
+        await pumpContent(tester, status);
+
+        expect(find.text('Participants'), findsOne);
+        expect(find.text(notice), findsOne);
+      });
+    }
+
+    testWidgets('before the first join the banner says it is connecting', (
+      tester,
+    ) async {
+      await pumpContent(tester, CallStatus.connecting());
+
+      expect(find.text('Participants'), findsNothing);
+      expect(find.text('Connecting…'), findsOne);
+    });
+
+    testWidgets('a custom banner is built with each call status', (
+      tester,
+    ) async {
+      final built = <CallStatus>[];
+      final reconnecting = CallStatusReconnecting(
+        attempt: 1,
+        isFastReconnectAttempt: true,
+      );
+
+      final statuses = await pumpContent(
+        tester,
+        CallStatus.connected(),
+        callConnectionBannerBuilder: (context, properties) {
+          built.add(properties.status);
+          return const SizedBox();
+        },
+      );
+      statuses.add(reconnecting);
+      // One frame to deliver the status, one to build for it.
+      await tester.pump();
+      await tester.pump();
+
+      expect(built.first, CallStatus.connected());
+      expect(built.last, reconnecting);
+      expect(find.byType(StreamCallConnectionBanner), findsNothing);
     });
 
     // The default bar goes into a `Scaffold.appBar` slot, which reserves

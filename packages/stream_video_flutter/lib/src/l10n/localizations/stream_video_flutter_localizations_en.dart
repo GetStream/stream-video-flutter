@@ -244,4 +244,33 @@ class StreamVideoFlutterLocalizationsEn
     );
     return '$first, $second, and $_temp0';
   }
+
+  @override
+  String get callConnectionConnecting => 'Connecting…';
+
+  @override
+  String get callConnectionReconnecting => 'Reconnecting…';
+
+  @override
+  String callConnectionReconnectingAttempt(int attempt) {
+    return 'Reconnecting… (attempt $attempt)';
+  }
+
+  @override
+  String get callConnectionJoining => 'Joining…';
+
+  @override
+  String callConnectionJoiningAttempt(int attempt) {
+    return 'Joining… (attempt $attempt)';
+  }
+
+  @override
+  String get callConnectionOffline =>
+      'You\'re offline. Waiting for the network…';
+
+  @override
+  String get callConnectionMigrating => 'Moving to another server…';
+
+  @override
+  String get callConnectionReconnectFailed => 'Couldn\'t reconnect to the call';
 }

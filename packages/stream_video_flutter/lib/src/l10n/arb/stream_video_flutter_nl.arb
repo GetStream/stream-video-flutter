@@ -60,5 +60,13 @@
   "ringingDecline": "Weigeren",
   "ringingNobody": "Geen deelnemers",
   "ringingTwoCallers": "{first} en {second}",
-  "ringingManyCallers": "{first}, {second} en {count, plural, =1{1 ander} other{{count} anderen}}"
+  "ringingManyCallers": "{first}, {second} en {count, plural, =1{1 ander} other{{count} anderen}}",
+  "callConnectionConnecting": "Verbinden…",
+  "callConnectionReconnecting": "Opnieuw verbinden…",
+  "callConnectionReconnectingAttempt": "Opnieuw verbinden… (poging {attempt})",
+  "callConnectionJoining": "Deelnemen…",
+  "callConnectionJoiningAttempt": "Deelnemen… (poging {attempt})",
+  "callConnectionOffline": "Je bent offline. Wachten op het netwerk…",
+  "callConnectionMigrating": "Overstappen naar een andere server…",
+  "callConnectionReconnectFailed": "Opnieuw verbinden met het gesprek is mislukt"
 }
