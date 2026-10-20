@@ -73,4 +73,31 @@ void main() {
 
     verify(() => sfuClient.updateSubscriptions(any())).called(1);
   });
+
+  group('after dispose', () {
+    test('setting the overrides is ignored', () async {
+      await dynascale.dispose();
+
+      dynascale.setVideoTrackSubscriptionOverrides(
+        override: VideoTrackSubscriptionOverride(enabled: false),
+      );
+      dynascale.setVideoTrackSubscriptionOverrides(
+        override: VideoTrackSubscriptionOverride(enabled: false),
+        sessionIds: ['remote'],
+      );
+
+      expect(dynascale.incomingVideoSettings, isNull);
+    });
+
+    test('applying the subscriptions sends nothing to the SFU', () async {
+      final sfuClient = MockSfuClient();
+      dynascale.init(sfuClient: sfuClient, sessionId: 'session-1');
+      await dynascale.dispose();
+
+      final result = await dynascale.applyTrackSubscriptions();
+
+      expect(result, isA<Success<None>>());
+      verifyNever(() => sfuClient.updateSubscriptions(any()));
+    });
+  });
 }

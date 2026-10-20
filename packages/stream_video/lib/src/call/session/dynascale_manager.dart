@@ -53,8 +53,8 @@ class DynascaleManager {
   late SfuClient sfuClient;
   late String sessionId;
 
-  // Until a session joins there is no SFU to update; the overrides are
-  // applied with the first subscriptions instead.
+  // Until a session joins, and once disposed, there is no SFU to update; the
+  // overrides are applied with the first subscriptions instead.
   bool _hasSession = false;
 
   final BehaviorSubject<Map<String, SfuSubscriptionDetails>>
@@ -218,6 +218,9 @@ class DynascaleManager {
           'override: $override',
     );
 
+    // Disposed with the call; nothing left to override.
+    if (_videoTrackSubscriptionsOverrides.isClosed) return;
+
     if (sessionIds == null) {
       if (override == null) {
         return _videoTrackSubscriptionsOverrides.add(
@@ -260,6 +263,7 @@ class DynascaleManager {
   }
 
   Future<void> dispose() async {
+    _hasSession = false;
     await _saBuffer.cancel();
     await _currentTrackSubscriptionsSubject.close();
     await _videoTrackSubscriptionsOverrides.close();
