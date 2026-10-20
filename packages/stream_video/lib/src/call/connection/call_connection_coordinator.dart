@@ -22,6 +22,13 @@ class CallConnectionCoordinator {
 
   Duration _fastReconnectDeadline = Duration.zero;
 
+  /// Rejoins and migrations, across reconnects. Fast reconnects are not
+  /// counted.
+  final _rejoinRateLimiter = RejoinRateLimiter();
+
+  /// The attempts one reconnect makes, any strategy, before it fails.
+  static const _maxReconnectAttempts = 10;
+
   /// Where the connection is. [_publishStatus] writes the connection status
   /// it projects to; a disconnect written into the state elsewhere moves it to
   /// [ConnectionDisconnected] through [_onStateChanged].
@@ -1610,6 +1617,17 @@ class CallConnectionCoordinator {
       _updateReconnect((phase) => phase.copyWith(strategy: next));
     }
 
+    // Fails the reconnect, which leaves the call.
+    void giveUp(String reason) {
+      _call._logger.w(() => '[reconnect] giving up: $reason');
+      _session?.trace(TraceTag.callReconnectFailed, {
+        'strategy': _reconnectStrategy.name,
+        'error': reason,
+      });
+      _setPhase(const ConnectionReconnectFailed());
+      _publishStatus();
+    }
+
     do {
       // Wait for a stable network before reconnecting with rejoin/migrate
       // to prevent starting an SDP exchange on a transient connection that drops before the answer arrives.
@@ -1631,6 +1649,11 @@ class CallConnectionCoordinator {
 
       if (_isLeftOrLeaving) {
         _call._logger.w(() => '[reconnect] rejected (call was left)');
+        return;
+      }
+
+      if (_reconnectStatusAttempt >= _maxReconnectAttempts) {
+        giveUp('reconnect_attempt_limit_exceeded');
         return;
       }
 
@@ -1751,6 +1774,13 @@ class CallConnectionCoordinator {
             onStatus: onNetworkStatus,
           );
           if (stopsAfterNetworkWait(status)) return;
+        }
+
+        // Rejoins and migrations count towards the rate limit; fast
+        // reconnects do not.
+        if (needsStableNetwork && !_rejoinRateLimiter.tryRegister()) {
+          giveUp('rejoin_attempt_limit_exceeded');
+          return;
         }
 
         unawaited(_sfuStatsReporter?.sendSfuStats());

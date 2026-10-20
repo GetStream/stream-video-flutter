@@ -63,6 +63,7 @@ import 'connection/connection_executor.dart';
 import 'connection/connection_phase.dart';
 import 'connection/join_outcome.dart';
 import 'connection/reconnect_trigger.dart';
+import 'connection/rejoin_rate_limiter.dart';
 import 'events/call_closed_captions.dart';
 import 'events/call_coordinator_event_router.dart';
 import 'events/call_reactions.dart';
