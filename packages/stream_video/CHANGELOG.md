@@ -98,6 +98,8 @@
 
 ### 🐞 Fixed
 
+- A dropped SFU connection starts reconnecting within two seconds, even when the call stats sent first do not go out.
+- Call stats keep being reported when a peer connection stops answering for its stats.
 - The outgoing call screen shows the camera preview every time the call settings turn the camera on, not only sometimes. `getOrCreate` and `get` now apply the call settings to `connectOptions` before they return.
 - Cancelling an outgoing call while its camera preview is on no longer crashes the app on Android. A track handed over through `TrackOption.provided` that the call never adopted is now stopped before the call's peer connection factory is disposed.
 - Connecting while the coordinator socket is dropped reconnects that socket instead of opening a second one.

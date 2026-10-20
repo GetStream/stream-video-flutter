@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
+import 'package:stream_video/src/webrtc/rtc_manager.dart';
+import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
@@ -32,6 +36,20 @@ SfuSocketFailed _failed({required bool isReconnectable}) {
     isReconnectable: isReconnectable,
     error: const StreamVideoException(message: 'permission denied'),
   );
+}
+
+class _MockRtcManager extends Mock implements RtcManager {
+  @override
+  Future<void> dispose() {
+    return Future.value();
+  }
+}
+
+class _MockSubscriber extends Mock implements TracedStreamPeerConnection {
+  @override
+  Future<void> dispose() {
+    return Future.value();
+  }
 }
 
 void main() {
@@ -161,6 +179,29 @@ void main() {
       await pumpEventQueue();
 
       expect(call.state.value.status, isNot(isA<CallStatusDisconnected>()));
+    });
+
+    test('stats that do not go out do not hold up the reconnect', () async {
+      // The stats that go out before the reconnect never finish collecting.
+      final subscriber = _MockSubscriber();
+      when(subscriber.getStats).thenAnswer((_) => Completer<Never>().future);
+      final rtcManager = _MockRtcManager();
+      when(() => rtcManager.subscriber).thenReturn(subscriber);
+      when(() => callSession.rtcManager).thenReturn(rtcManager);
+
+      final call = buildCall();
+      await call.join();
+
+      _emit(callSession, _disconnected(isReconnectable: true));
+      await Future<void>.delayed(const Duration(milliseconds: 2500));
+
+      verify(
+        () => callSession.fastReconnect(
+          reconnectDetails: any(named: 'reconnectDetails'),
+          capabilities: any(named: 'capabilities'),
+          unifiedSessionId: any(named: 'unifiedSessionId'),
+        ),
+      ).called(1);
     });
   });
 }

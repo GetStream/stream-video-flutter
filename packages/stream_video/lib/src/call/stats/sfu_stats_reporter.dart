@@ -64,6 +64,7 @@ class SfuStatsReporter {
   bool _flushing = false;
 
   static const _flushTimeout = Duration(seconds: 2);
+  static const _getStatsTimeout = Duration(seconds: 5);
 
   bool get _shouldSkipSfuStats => _stopped && !_flushing;
 
@@ -122,12 +123,16 @@ class SfuStatsReporter {
     try {
       await _sfuStatsLock.synchronized(() async {
         if (_shouldSkipSfuStats) return;
-        final publisherStatsBundle = await callSession.rtcManager?.publisher
-            ?.getStats();
+        final publisherStatsBundle = await _withinStatsTimeout(
+          callSession.rtcManager?.publisher?.getStats(),
+          'publisher',
+        );
 
         if (_shouldSkipSfuStats) return;
-        final subscriberStatsBundle = await callSession.rtcManager?.subscriber
-            .getStats();
+        final subscriberStatsBundle = await _withinStatsTimeout(
+          callSession.rtcManager?.subscriber.getStats(),
+          'subscriber',
+        );
 
         if (_shouldSkipSfuStats ||
             (publisherStatsBundle == null && subscriberStatsBundle == null)) {
@@ -263,6 +268,22 @@ class SfuStatsReporter {
         () => 'Failed to send SFU stats: $e',
       );
     }
+  }
+
+  /// The result of [getStats], or null when it takes longer than
+  /// [_getStatsTimeout], so a peer connection that does not answer cannot
+  /// hold up later reports.
+  Future<T?> _withinStatsTimeout<T>(Future<T>? getStats, String label) async {
+    if (getStats == null) return null;
+    return getStats
+        .then<T?>((stats) => stats)
+        .timeout(
+          _getStatsTimeout,
+          onTimeout: () {
+            _logger.w(() => '[sendSfuStats] $label getStats timed out');
+            return null;
+          },
+        );
   }
 
   sfu.Telemetry? _calculateTelemetry(

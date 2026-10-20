@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -43,6 +46,33 @@ class FakeSubscriber extends Fake implements TracedStreamPeerConnection {
         {'type': 'test'},
       ],
     );
+  }
+}
+
+/// A subscriber whose `getStats` never completes.
+class UnresponsiveSubscriber extends FakeSubscriber {
+  @override
+  Future<void> dispose() {
+    return Future.value();
+  }
+
+  @override
+  Future<
+    ({
+      List<RtcStats> rtcStats,
+      RtcPrintableStats printable,
+      List<Map<String, dynamic>> rawStats,
+    })
+  >
+  getStats() {
+    return Completer<
+          ({
+            List<RtcStats> rtcStats,
+            RtcPrintableStats printable,
+            List<Map<String, dynamic>> rawStats,
+          })
+        >()
+        .future;
   }
 }
 
@@ -134,6 +164,28 @@ void main() {
       await reporter.flush();
 
       verifyNever(() => sfuClient.sendStats(any()));
+    });
+
+    test('a getStats that never completes does not hold up reports', () {
+      fakeAsync((async) {
+        final reporter = _createReporter(
+          callSession: callSession,
+          sfuClient: sfuClient,
+          subscriber: UnresponsiveSubscriber(),
+        );
+
+        var firstDone = false;
+        var secondDone = false;
+        reporter.sendSfuStats().then((_) => firstDone = true);
+        reporter.sendSfuStats().then((_) => secondDone = true);
+
+        async.elapse(const Duration(seconds: 6));
+        expect(firstDone, isTrue);
+        expect(secondDone, isFalse, reason: 'it waits for the lock');
+
+        async.elapse(const Duration(seconds: 5));
+        expect(secondDone, isTrue);
+      });
     });
   });
 }
