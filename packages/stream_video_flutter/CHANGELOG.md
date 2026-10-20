@@ -1,3 +1,14 @@
+## Upcoming
+
+### 🔄 Changed
+
+- The speaker button of `LivestreamPlayer` (`LivestreamSpeakerphoneOption`) now mutes and unmutes the stream's audio, like a video player, instead of switching the audio output between speaker and earpiece. Output follows the system route (speaker, headphones or Bluetooth). It mutes through `RtcMediaDeviceNotifier.pauseAudioPlayout()`, unmutes on removal if it was the one that muted, and is hidden on Windows and Linux, where playout cannot be paused.
+
+### ✅ Added
+
+- Added `RtcMediaDeviceNotifier.isAudioPlayoutPaused` and `RtcMediaDeviceNotifier.audioPlayoutPausedChanges`, which report whether remote audio playout is paused via `pauseAudioPlayout()`, and `RtcMediaDeviceNotifier.isAudioPlayoutPauseSupported` (Android, iOS, macOS and web). On Windows and Linux, where pausing playout is not implemented, `pauseAudioPlayout()` / `resumeAudioPlayout()` do nothing.
+- [Web] `RtcMediaDeviceNotifier.pauseAudioPlayout()` / `resumeAudioPlayout()` now mute and unmute remote audio on web too; they were a no-op there.
+
 ## 1.7.1
 
 ### 🐞 Fixed

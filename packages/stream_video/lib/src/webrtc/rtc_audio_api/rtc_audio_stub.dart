@@ -28,3 +28,7 @@ Future<void> resumeAudioPlayback() {
 bool checkIfAudioOutputChangeSupported() {
   throw UnimplementedError();
 }
+
+void setAudioPlayoutPaused({required bool paused}) {
+  throw UnimplementedError();
+}
