@@ -1,3 +1,4 @@
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/stream_video.dart';
@@ -47,20 +48,27 @@ void main() {
     ('an incoming', CallStatus.incoming()),
     ('an outgoing', CallStatus.outgoing()),
   ]) {
-    test('the wait for $name ring stops when the call is left', () async {
-      final logger = installRecordingLogger();
-      final call = ringingCall(status);
+    test('the wait for $name ring stops when the call is left', () {
+      fakeAsync((async) {
+        final logger = installRecordingLogger();
+        final call = ringingCall(status);
 
-      final joining = call.join();
-      await pumpEventQueue();
-      await call.leave();
+        Result<None>? joined;
+        call.join().then((result) => joined = result);
+        async.flushMicrotasks();
+        async.elapse(timeout ~/ 2);
+        expect(joined, isNull, reason: 'the join waits for the ring');
 
-      expect((await joining).isFailure, isTrue);
-      await Future<void>.delayed(timeout * 3);
-      expect(
-        logger.errors.where((message) => message.contains('ToBeAccepted')),
-        isEmpty,
-      );
+        call.leave();
+        async.flushMicrotasks();
+        expect(joined?.isFailure, isTrue);
+
+        async.elapse(timeout * 3);
+        expect(
+          logger.errors.where((message) => message.contains('ToBeAccepted')),
+          isEmpty,
+        );
+      });
     });
 
     test('the wait for $name ring fails the join when unanswered', () async {
