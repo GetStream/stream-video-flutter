@@ -82,7 +82,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   /// The client every coordinator call goes through.
   StreamCoreHttpClient _buildHttpClient() {
     final client = StreamCoreHttpClient(
-      options: BaseOptions(baseUrl: _rpcUrl, extra: coordinatorRequestExtra()),
+      options: coordinatorHttpOptions(_rpcUrl, _retryPolicy.config),
     );
 
     client.interceptors.addAll(
@@ -1801,10 +1801,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     try {
       _logger.d(() => '[loadGuest] id: $id');
       final dio = StreamCoreHttpClient(
-        options: BaseOptions(
-          baseUrl: _rpcUrl,
-          extra: coordinatorRequestExtra(),
-        ),
+        options: coordinatorHttpOptions(_rpcUrl, _retryPolicy.config),
       );
       dio.interceptors.addAll(
         _buildInterceptors(
@@ -1907,4 +1904,16 @@ extension on PushProvider {
         return open.CreateDeviceRequestPushProvider.apn;
     }
   }
+}
+
+/// The options of the coordinator HTTP clients: requests to [rpcUrl], marked
+/// as coordinator requests, each attempt bounded by [RetryConfig.rpcTimeout].
+@internal
+BaseOptions coordinatorHttpOptions(String rpcUrl, RetryConfig config) {
+  return BaseOptions(
+    baseUrl: rpcUrl,
+    extra: coordinatorRequestExtra(),
+    connectTimeout: config.rpcTimeout,
+    receiveTimeout: config.rpcTimeout,
+  );
 }

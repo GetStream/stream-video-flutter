@@ -7,6 +7,7 @@ const _minDelay = Duration(milliseconds: 200);
 const _defaultRpcMaxRetries = 5;
 const _defaultMaxBackoff = Duration(seconds: 3);
 const _defaultMaxTotalRetryDelay = Duration(seconds: 30);
+const _defaultRpcTimeout = Duration(seconds: 10);
 const _defaultSfuRpcMaxRetries = 3;
 const _defaultSfuRpcTimeout = Duration(seconds: 10);
 
@@ -46,6 +47,7 @@ class RetryConfig extends Equatable {
     this.rpcMaxRetries = _defaultRpcMaxRetries,
     this.maxBackoff = _defaultMaxBackoff,
     this.maxTotalRetryDelay = _defaultMaxTotalRetryDelay,
+    this.rpcTimeout = _defaultRpcTimeout,
     this.sfuRpcMaxRetries = _defaultSfuRpcMaxRetries,
     this.sfuRpcTimeout = _defaultSfuRpcTimeout,
   });
@@ -59,6 +61,11 @@ class RetryConfig extends Equatable {
 
   /// The total time retrying may add to a single coordinator HTTP request. Not applied to SFU signalling retries.
   final Duration maxTotalRetryDelay;
+
+  /// How long one coordinator HTTP attempt may wait to connect, and then for
+  /// its response. An attempt that times out is retried like any other
+  /// network failure.
+  final Duration rpcTimeout;
 
   /// How many attempts an SFU signalling RPC gets in total, the first one
   /// included.
@@ -75,6 +82,7 @@ class RetryConfig extends Equatable {
     rpcMaxRetries,
     maxBackoff,
     maxTotalRetryDelay,
+    rpcTimeout,
     sfuRpcMaxRetries,
     sfuRpcTimeout,
   ];
