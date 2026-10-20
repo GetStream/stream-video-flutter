@@ -1545,7 +1545,7 @@ class CallConnectionCoordinator {
   ) async {
     _setPhase(ConnectionReconnecting(strategy: strategy));
 
-    final reconnectStartTime = DateTime.now();
+    final reconnectStartTime = clock.now();
     var fastReconnectAttemptsCount = 0;
 
     // Counts consecutive unexpected throws. The per-strategy counters only
@@ -1572,8 +1572,7 @@ class CallConnectionCoordinator {
       );
 
       final mustPerformRejoin =
-          DateTime.now().difference(reconnectStartTime) >
-          _fastReconnectDeadline;
+          clock.now().difference(reconnectStartTime) > _fastReconnectDeadline;
 
       // A rejoin or migrate asked for during the attempt or its backoff makes
       // the next attempt the same, unless something below asks for a rejoin.
@@ -1708,7 +1707,7 @@ class CallConnectionCoordinator {
 
         // Offline past the fast-reconnect deadline: the attempt rejoins
         // instead. The deadline runs from when the reconnect started.
-        final elapsed = DateTime.now().difference(reconnectStartTime);
+        final elapsed = clock.now().difference(reconnectStartTime);
         final offlinePastDeadline =
             wasOffline &&
             _fastReconnectDeadline > Duration.zero &&
@@ -1853,11 +1852,9 @@ class CallConnectionCoordinator {
   /// attempts. Returns whether it did.
   bool _giveUpOnTimeoutOrMaxAttempts(DateTime reconnectStartTime) {
     final timeout = _call.state.value.preferences.reconnectTimeout;
-    final elapsed = DateTime.now().difference(reconnectStartTime);
+    final elapsed = clock.now().difference(reconnectStartTime);
     if (timeout > Duration.zero && elapsed > timeout) {
-      _call._logger.w(() => '[reconnect] reconnection timeout');
-      _setPhase(const ConnectionReconnectFailed());
-      _publishStatus();
+      _giveUpReconnect('reconnection timeout');
       return true;
     }
 

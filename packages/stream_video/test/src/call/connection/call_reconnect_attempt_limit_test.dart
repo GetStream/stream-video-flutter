@@ -165,11 +165,12 @@ void main() {
     });
     final reconnectStart = fake.elapsed;
     Duration? failedAfter;
-    call.state.listen((state) {
+    final subscription = call.state.listen((state) {
       if (state.status is CallStatusReconnectionFailed) {
         failedAfter ??= fake.elapsed - reconnectStart;
       }
     });
+    addTearDown(subscription.cancel);
 
     fake.run((_) => unawaited(harness.emitSfu(harness.session, forcedRejoin)));
     await elapse(const Duration(minutes: 10));
