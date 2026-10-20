@@ -18,11 +18,14 @@ class StreamCallConnectionBanner extends StatelessWidget {
   /// The call whose connection the banner reports.
   final Call call;
 
+  // A tear-off rather than a closure, so a rebuild keeps the subscription.
+  static CallStatus _status(CallState state) => state.status;
+
   @override
   Widget build(BuildContext context) {
     return PartialCallStateBuilder(
       call: call,
-      selector: (state) => state.status,
+      selector: _status,
       builder: (context, status) {
         final notice = _CallConnectionNotice.of(status);
 
