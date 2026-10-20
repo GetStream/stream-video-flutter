@@ -7,9 +7,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
     show PerformanceStats;
+import 'package:stream_video/src/call/call.dart';
 import 'package:stream_video/src/call/stats/tracer.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
-import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
 import 'package:stream_video/stream_video.dart';
@@ -228,6 +228,15 @@ void main() {
               const MethodChannel('dev.fluttercommunity.plus/battery'),
               null,
             ),
+      );
+
+      // Short, so the test does not sit out the real 2s.
+      CallConnectionCoordinator.statsBeforeReconnectTimeout = const Duration(
+        milliseconds: 50,
+      );
+      addTearDown(
+        () => CallConnectionCoordinator.statsBeforeReconnectTimeout =
+            const Duration(seconds: 2),
       );
 
       final call = buildCall();

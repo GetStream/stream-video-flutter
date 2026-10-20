@@ -22,7 +22,8 @@ class CallConnectionCoordinator {
 
   /// How long a lost SFU socket waits for its stats to go out before the
   /// reconnect starts. The stats keep going out after that.
-  static const _statsBeforeReconnectTimeout = Duration(seconds: 2);
+  @visibleForTesting
+  static Duration statsBeforeReconnectTimeout = const Duration(seconds: 2);
 
   Duration _fastReconnectDeadline = Duration.zero;
 
@@ -1296,7 +1297,7 @@ class CallConnectionCoordinator {
   }) async {
     if (sfuEvent is SfuSocketDisconnected) {
       await _sfuStatsReporter?.sendSfuStats().timeout(
-        _statsBeforeReconnectTimeout,
+        statsBeforeReconnectTimeout,
         onTimeout: () => _call._logger.w(
           () => '[onSfuEvent] stats not sent in time, reconnecting anyway',
         ),
