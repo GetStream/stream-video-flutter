@@ -1,3 +1,4 @@
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/stream_video.dart';
@@ -49,14 +50,31 @@ void main() {
   ]) {
     test('the wait for $name ring stops when the call is left', () async {
       final logger = installRecordingLogger();
-      final call = ringingCall(status);
+      final async = FakeAsync();
+      Result<None>? joined;
+      Result<None>? left;
 
-      final joining = call.join();
-      await pumpEventQueue();
-      await call.leave();
+      async.run((_) {
+        final call = ringingCall(status);
+        call.join().then((result) => joined = result);
+        async.flushMicrotasks();
+        async.elapse(timeout ~/ 2);
+        expect(joined, isNull, reason: 'the join waits for the ring');
 
-      expect((await joining).isFailure, isTrue);
-      await Future<void>.delayed(timeout * 3);
+        call.leave().then((result) => left = result);
+        async.flushMicrotasks();
+        expect(joined?.isFailure, isTrue);
+      });
+
+      // Part of the leave completes on the real event loop: rxdart cancels
+      // its subscriptions through a root-zone future.
+      for (var turn = 0; left == null && turn < 100; turn++) {
+        await Future<void>.delayed(Duration.zero);
+        async.flushMicrotasks();
+      }
+      expect(left?.isSuccess, isTrue);
+
+      async.elapse(timeout * 3);
       expect(
         logger.errors.where((message) => message.contains('ToBeAccepted')),
         isEmpty,
