@@ -250,15 +250,7 @@ class SfuStatsReporter {
             unifiedSessionId: unifiedSessionId,
           );
 
-          final result = await callSession.sfuClient.sendStats(
-            request,
-          );
-
-          if (result.isFailure) {
-            for (final trace in traces) {
-              trace.rollback();
-            }
-          }
+          await _sendRequest(send, request, traces);
         } catch (e) {
           for (final trace in traces) {
             trace.rollback();
@@ -271,6 +263,24 @@ class SfuStatsReporter {
       _logger.v(
         () => 'Failed to send SFU stats: $e',
       );
+    }
+  }
+
+  /// Sends [request], unless [send] is skipped by now: the battery and trace
+  /// reads before it can outlast [stop]. [traces] are rolled back when the
+  /// request is skipped or fails.
+  Future<void> _sendRequest(
+    int send,
+    sfu.SendStatsRequest request,
+    List<TraceSlice> traces,
+  ) async {
+    final skipped = _skips(send);
+    final failed =
+        !skipped && (await callSession.sfuClient.sendStats(request)).isFailure;
+    if (skipped || failed) {
+      for (final trace in traces) {
+        trace.rollback();
+      }
     }
   }
 

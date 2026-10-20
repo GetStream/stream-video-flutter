@@ -247,5 +247,44 @@ void main() {
         verify(() => sfuClient.sendStats(any())).called(1);
       });
     });
+
+    test(
+      'does not send once stopped while the battery read is pending',
+      () async {
+        final batteryRead = Completer<bool>();
+        var batteryAsked = false;
+        final messenger =
+            TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+        messenger.setMockMethodCallHandler(
+          const MethodChannel('dev.fluttercommunity.plus/battery'),
+          (call) {
+            batteryAsked = true;
+            return batteryRead.future;
+          },
+        );
+        addTearDown(
+          () => messenger.setMockMethodCallHandler(
+            const MethodChannel('dev.fluttercommunity.plus/battery'),
+            (call) async => false,
+          ),
+        );
+
+        final reporter = _createReporter(
+          callSession: callSession,
+          sfuClient: sfuClient,
+          subscriber: subscriber,
+        );
+
+        final send = reporter.sendSfuStats();
+        await pumpEventQueue();
+        expect(batteryAsked, isTrue);
+
+        reporter.stop();
+        batteryRead.complete(false);
+        await send;
+
+        verifyNever(() => sfuClient.sendStats(any()));
+      },
+    );
   });
 }
