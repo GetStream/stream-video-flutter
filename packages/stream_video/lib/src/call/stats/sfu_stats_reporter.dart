@@ -62,12 +62,16 @@ class SfuStatsReporter {
   int _reportCount = 0;
   bool _stopped = false;
 
+  /// How many sends have started, and which of them is the flush.
+  int _sends = 0;
+  int? _flushSend;
+
   static const _flushTimeout = Duration(seconds: 2);
   static const _getStatsTimeout = Duration(seconds: 5);
 
-  /// Whether a send is skipped: once stopped, only the flush still goes out,
+  /// Whether [send] is skipped: once stopped, only the flush still goes out,
   /// not the sends queued behind it.
-  bool _skips({required bool isFlush}) => _stopped && !isFlush;
+  bool _skips(int send) => _stopped && send != _flushSend;
 
   void run({Duration interval = const Duration(seconds: 8)}) {
     _timer?.cancel();
@@ -99,7 +103,8 @@ class SfuStatsReporter {
   Future<void> flush() async {
     if (_stopped) return;
 
-    final sendStatsFuture = _sendSfuStats(isFlush: true);
+    _flushSend = _sends + 1;
+    final sendStatsFuture = sendSfuStats();
 
     try {
       await sendStatsFuture.timeout(
@@ -116,35 +121,24 @@ class SfuStatsReporter {
   Future<void> sendSfuStats({
     int? connectionTimeMs,
     SfuReconnectionStrategy? reconnectionStrategy,
-  }) {
-    return _sendSfuStats(
-      isFlush: false,
-      connectionTimeMs: connectionTimeMs,
-      reconnectionStrategy: reconnectionStrategy,
-    );
-  }
-
-  Future<void> _sendSfuStats({
-    required bool isFlush,
-    int? connectionTimeMs,
-    SfuReconnectionStrategy? reconnectionStrategy,
   }) async {
-    if (_skips(isFlush: isFlush)) return;
+    final send = ++_sends;
+    if (_skips(send)) return;
     try {
       await _sfuStatsLock.synchronized(() async {
-        if (_skips(isFlush: isFlush)) return;
+        if (_skips(send)) return;
         final publisherStatsBundle = await _withinStatsTimeout(
           callSession.rtcManager?.publisher?.getStats(),
           'publisher',
         );
 
-        if (_skips(isFlush: isFlush)) return;
+        if (_skips(send)) return;
         final subscriberStatsBundle = await _withinStatsTimeout(
           callSession.rtcManager?.subscriber.getStats(),
           'subscriber',
         );
 
-        if (_skips(isFlush: isFlush) ||
+        if (_skips(send) ||
             (publisherStatsBundle == null && subscriberStatsBundle == null)) {
           return;
         }
