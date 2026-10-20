@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -41,7 +43,11 @@ void main() {
     // Steps time until the harness is disposed, rather than awaiting a
     // future that completes in fake time.
     var disposed = false;
-    fake.run((_) => harness.dispose().whenComplete(() => disposed = true));
+    fake.run(
+      (_) => unawaited(
+        harness.dispose().whenComplete(() => disposed = true),
+      ),
+    );
     for (var i = 0; i < 100 && !disposed; i++) {
       await elapse(const Duration(seconds: 1));
     }
@@ -69,13 +75,15 @@ void main() {
 
   /// Has the SFU force a rejoin, and lets it complete.
   Future<void> forceRejoin() async {
-    fake.run((_) => harness.emitSfu(harness.session, forcedRejoin));
+    fake.run((_) => unawaited(harness.emitSfu(harness.session, forcedRejoin)));
     await elapse(const Duration(seconds: 10));
   }
 
   /// Drops the SFU socket, which reconnects fast, and lets it complete.
   Future<void> dropSocket() async {
-    fake.run((_) => harness.emitSfu(harness.session, sfuSocketDropped));
+    fake.run(
+      (_) => unawaited(harness.emitSfu(harness.session, sfuSocketDropped)),
+    );
     await elapse(const Duration(seconds: 1));
   }
 
@@ -163,7 +171,7 @@ void main() {
       }
     });
 
-    fake.run((_) => harness.emitSfu(harness.session, forcedRejoin));
+    fake.run((_) => unawaited(harness.emitSfu(harness.session, forcedRejoin)));
     await elapse(const Duration(minutes: 10));
 
     final attempts = statuses
