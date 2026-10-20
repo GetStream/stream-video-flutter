@@ -41,7 +41,7 @@ class StreamRetryInterceptor extends Interceptor {
     }
 
     final exception = err.toStreamException();
-    if (!_isRetryable(exception, options)) return handler.next(err);
+    if (!_isRetryable(exception, err)) return handler.next(err);
 
     final delay = _delay(exception, spent);
 
@@ -112,11 +112,24 @@ class StreamRetryInterceptor extends Interceptor {
   /// Methods that leave the server in the same state when sent twice.
   static const _idempotentMethods = {'GET', 'HEAD', 'OPTIONS', 'PUT', 'DELETE'};
 
-  /// Whether [exception], raised by the request [options] describes, is worth
-  /// another attempt.
+  /// Whether the request [err] timed out on can be sent again.
+  ///
+  /// A native connect timeout fires before the request is written, so the
+  /// server never saw it. On web it fires whenever no response headers came
+  /// in time, which includes a request the server received.
+  bool _isSafeToResend(DioException err) {
+    if (err.type == DioExceptionType.connectionTimeout &&
+        !CurrentPlatform.isWeb) {
+      return true;
+    }
+    return _idempotentMethods.contains(err.requestOptions.method.toUpperCase());
+  }
+
+  /// Whether [exception], raised by the failed request [err], is worth another
+  /// attempt.
   bool _isRetryable(
     StreamException exception,
-    RequestOptions options,
+    DioException err,
   ) => switch (exception) {
     // The server declared that retrying will not help, which settles it.
     StreamApiException(unrecoverable: true) => false,
@@ -150,9 +163,7 @@ class StreamRetryInterceptor extends Interceptor {
 
     // A request that timed out may have reached the server, so only one that
     // is safe to send twice is sent again.
-    StreamNetworkException(isTimeout: true) => _idempotentMethods.contains(
-      options.method.toUpperCase(),
-    ),
+    StreamNetworkException(isTimeout: true) => _isSafeToResend(err),
 
     // Never reached a verdict — a dropped connection. Worth another
     // attempt, and the outcome of the last one is unknown either way.

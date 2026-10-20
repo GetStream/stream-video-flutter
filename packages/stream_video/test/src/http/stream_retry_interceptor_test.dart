@@ -279,22 +279,47 @@ void main() {
   // failure is retried when it is about *the moment*, never when it is about
   // the request or the setup.
   group('separates a transport failure from an SDK one', () {
-    DioException timedOut() => DioException(
-      requestOptions: RequestOptions(path: '/x'),
-      error: const StreamNetworkException(
-        message: 'the request timed out before the server answered',
-        isTimeout: true,
-      ),
+    final options = RequestOptions(path: '/x');
+    DioException connectTimedOut() => DioException.connectionTimeout(
+      requestOptions: options,
+      timeout: const Duration(seconds: 10),
+    );
+    DioException receiveTimedOut() => DioException.receiveTimeout(
+      requestOptions: options,
+      timeout: const Duration(seconds: 10),
     );
 
     test('retries a request that never reached a verdict', () async {
-      expect(await attemptsFor(() => throw timedOut()), 3);
+      expect(await attemptsFor(() => throw receiveTimedOut()), 3);
     });
 
     // The server may have acted on a request that timed out, and a POST such
     // as a ring or a reaction must not happen twice.
-    test('does not resend a POST that timed out', () async {
-      expect(await attemptsFor(() => throw timedOut(), method: 'POST'), 1);
+    test('does not resend a POST whose response timed out', () async {
+      expect(
+        await attemptsFor(() => throw receiveTimedOut(), method: 'POST'),
+        1,
+      );
+    });
+
+    // A native connect timeout fires before the request is written.
+    test('resends a POST whose connect timed out', () async {
+      expect(
+        await attemptsFor(() => throw connectTimedOut(), method: 'POST'),
+        3,
+      );
+    });
+
+    // On web a connect timeout only means no headers came in time, which
+    // includes a request the server received.
+    test('does not resend a POST whose connect timed out on web', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.web;
+      addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+
+      expect(
+        await attemptsFor(() => throw connectTimedOut(), method: 'POST'),
+        1,
+      );
     });
 
     test('resends a POST whose connection dropped', () async {
