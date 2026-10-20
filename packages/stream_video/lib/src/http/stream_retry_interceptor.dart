@@ -109,8 +109,9 @@ class StreamRetryInterceptor extends Interceptor {
     return retryAfter;
   }
 
-  /// Methods that leave the server in the same state when sent twice.
-  static const _idempotentMethods = {'GET', 'HEAD', 'OPTIONS', 'PUT', 'DELETE'};
+  /// Methods that change nothing on the server, so sending one twice has no
+  /// effect beyond the first.
+  static const _safeMethods = {'GET', 'HEAD', 'OPTIONS'};
 
   /// Whether the request [err] timed out on can be sent again.
   ///
@@ -122,7 +123,7 @@ class StreamRetryInterceptor extends Interceptor {
         !CurrentPlatform.isWeb) {
       return true;
     }
-    return _idempotentMethods.contains(err.requestOptions.method.toUpperCase());
+    return _safeMethods.contains(err.requestOptions.method.toUpperCase());
   }
 
   /// Whether [exception], raised by the failed request [err], is worth another

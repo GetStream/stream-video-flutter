@@ -302,6 +302,17 @@ void main() {
       );
     });
 
+    // A resent PUT can undo a newer update, and a resent DELETE can report a
+    // delete that worked as not found.
+    for (final method in ['PUT', 'DELETE']) {
+      test('does not resend a $method whose response timed out', () async {
+        expect(
+          await attemptsFor(() => throw receiveTimedOut(), method: method),
+          1,
+        );
+      });
+    }
+
     // A native connect timeout fires before the request is written.
     test('resends a POST whose connect timed out', () async {
       expect(
