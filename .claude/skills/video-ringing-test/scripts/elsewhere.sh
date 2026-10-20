@@ -113,6 +113,7 @@ fi
 # --- the ring reached BOTH devices -------------------------------------------
 if wait_probe incoming_notification_present 45; then
   RING_START=$(date +%s)
+  RING_LOGMARK=$(logline "$ANDROID_LOG")   # see checks.sh
   pass "ring-delivered-$CASE" "the incoming call was surfaced on the primary device"
 else
   fail "ring-delivered-$CASE" "no incoming call notification within 45s of the ring"

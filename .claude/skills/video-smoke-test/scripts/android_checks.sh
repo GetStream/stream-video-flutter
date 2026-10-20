@@ -31,8 +31,8 @@ trap 'restore_network; exit 130' INT TERM
 
 # This script assumes a freshly joined call with the plain call screen showing —
 # which android_join.sh guarantees. Do not run it twice against the same call:
-# the chat step deliberately leaves the chat sheet open, and a second run's
-# early taps would land on that sheet instead of the control bar.
+# the chat step deliberately leaves the chat panel open, and a second run's
+# early taps would land on that panel instead of the call screen.
 shot "09-android-precheck-state"
 
 # --- peer visible ----------------------------------------------------------
@@ -141,6 +141,7 @@ fi
 # reaction above has already landed by then, so an event after it can only be
 # this one — but it does prove "a reaction was sent", not "that exact emoji".
 M=$(logline "$ANDROID_LOG")
+close_options_sheet   # in case the previous row left it open
 tap $A_MORE $A_BAR_Y; sleep 2
 if ui_tap "Raise hand" 10; then
   sleep 4
@@ -154,17 +155,18 @@ fi
 # Both live on the options sheet, neither pops it, and both are asserted from
 # the row's own state word (see assert_menu_toggle in lib.sh for why not logs).
 # One MORE tap covers both.
+close_options_sheet   # in case the previous row left it open
 tap $A_MORE $A_BAR_Y; sleep 2
 assert_menu_toggle "noise-cancellation-android" \
   "Noise cancellation toggles the call's audio processing" \
-  "Toggle Noise Cancellation"
+  "^Noise cancellation (On|Off)$"
 assert_menu_toggle "closed-captions-android" \
   "Closed captions start and stop" \
-  "Toggle Closed Caption"
+  "^Closed captions (On|Off)$"
 shot "11b-android-menu-toggles"
 # Close the sheet again so the filter step below starts from the plain call
 # screen, exactly as it did before these two checks existed.
-tap $A_MORE $A_BAR_Y; sleep 2
+close_options_sheet
 
 # --- video filter ----------------------------------------------------------
 # Selecting a filter does NOT close the options sheet (selecting a reaction
@@ -179,18 +181,36 @@ shot "12-android-filter"
 
 # --- stats screen ----------------------------------------------------------
 # Sheet is already open from the filter step; tap Stats directly.
-tap $A_STATS_X $A_STATS_Y; sleep 4
-shot "13-android-stats"
-tap $A_STATS_BACK_X $A_TOP_Y; sleep 3        # top-LEFT back arrow (see lib.sh)
-# Honest scope: this proves the stats route opens and closes without hanging or
-# dropping the call. The numbers on it are for a human to read in shot 13.
-if anr_check "stats-android" && in_call_guard "stats-android"; then
-  pass "stats-android" "Stats screen opened and closed with the call intact (values in shot 13)"
+#
+# The stats screen's only way out is a close X in the top-right corner, at the
+# exact spot END CALL occupies on the call screen. So the X is tapped only once
+# the stats screen is confirmed open: if it failed to open, that same tap would
+# silently end the call and every later check would fail for the wrong reason.
+ui_tap "^Stats$" 5 || tap $A_STATS_X $A_STATS_Y
+if ui_wait "Call latency" 10; then
+  shot "13-android-stats"
+  tap $A_END_X $A_TOP_Y; sleep 3            # the stats screen's close X
+  # Honest scope: this proves the stats route opens and closes without hanging
+  # or dropping the call. The numbers on it are for a human to read in shot 13.
+  # "Closed" is read off the screen: a missed X leaves stats up, and every later
+  # step would then fail for the wrong reason.
+  STATS_CLOSED=0
+  for _ in 1 2 3 4 5; do
+    if ui_dump && [ -z "$(ui_find 'Call latency')" ]; then STATS_CLOSED=1; break; fi
+    sleep 1
+  done
+  if [ "$STATS_CLOSED" != 1 ]; then
+    fail "stats-android" "Stats screen opened but did not close"; shot "err-stats-close"
+  elif anr_check "stats-android" && in_call_guard "stats-android"; then
+    pass "stats-android" "Stats screen opened and closed with the call intact (values in shot 13)"
+  fi
+else
+  fail "stats-android" "Stats screen did not open"; shot "err-stats"
 fi
 
-# The sheet is still open after returning from stats. Close it so the bottom
-# control bar is reachable for the steps below.
-tap $A_MORE $A_BAR_Y; sleep 2
+# Closing stats returns to the bare call screen, but if stats never opened the
+# sheet is still up. Either way the control bar must be reachable below.
+close_options_sheet
 shot "13b-android-sheet-closed"
 
 # --- picture in picture ----------------------------------------------------
@@ -219,6 +239,9 @@ if in_call_guard "reconnect-detect-android"; then
   # Flag first: if the disable lands and the script dies before the restore, the
   # trap must know the network is down. Setting it after would lose that race.
   NET_CUT=1
+  # The log digest in report.sh excuses DNS/socket/ICE failures only inside this
+  # window, so the same failure anywhere else in the run still gets read.
+  echo "RECONNECT_FROM='$(date '+%Y-%m-%d %H:%M:%S')'" >>"$SMOKE_DIR/env.sh"
   adb shell svc wifi disable; adb shell svc data disable
   if wait_log "$ANDROID_LOG" "scheduling restartICE|\[reconnect\] isConnecting" 45 "$M"; then
     pass "reconnect-detect-android" "Network loss detected; ICE restart / reconnect scheduled"
@@ -241,6 +264,7 @@ if in_call_guard "reconnect-detect-android"; then
     fail "reconnect-recover-android" "did not rejoin the SFU after network restore"
   fi
   sleep 3; shot "17-android-reconnected"
+  echo "RECONNECT_TO='$(date '+%Y-%m-%d %H:%M:%S')'" >>"$SMOKE_DIR/env.sh"
   anr_check "reconnect-android"
 fi
 

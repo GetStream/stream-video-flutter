@@ -1,0 +1,29 @@
+# Known noise for log_digest.py — four TAB-separated columns:
+#   platform  android | ios | any
+#   scope     any | reconnect   (reconnect = only inside the network-loss step,
+#                                recorded by android_checks.sh as RECONNECT_FROM/TO)
+#   regex     Python regex, searched in "(LEVEL/TAG): message", e.g.
+#             "(W/SV:Call-1): [reconnect] held …"; crashes are "(CRASH/<platform>): …"
+#   reason    why this line is expected; printed in the digest
+#
+# Add a rule only once a line is UNDERSTOOD to be benign, and say why. Keep rules
+# narrow: anything a rule matches is no longer read by anyone. Lines that look
+# like an SDK race or a bug stay out of here even when the run recovered — that
+# is exactly what the digest is for.
+any	any	^\(W/SV:CoordinatorConnection\)\: \[connect\] rejected \(already connected\)	connect() called while already connected; idempotent guard
+any	any	^\(W/SV:Call-\d+\)\: \[joinIfNeeded\] rejected \(already joined\)	join requested while already joined; idempotent guard
+any	any	^\(E/SV:LobbyController\)\: \[fetchCall\] failed: .*Can\'t find call with id	the lobby probes a call before "Start a test call" creates it
+any	any	^\(E/SV:Call-\d+\)\: \[performGetOperation\] failed: .*Can\'t find call with id	the lobby probes a call before "Start a test call" creates it
+any	any	^\(W/SV:CallSession-\d+\)\: \[onSfuEvent\] event: SfuSocketDisconnected\(	the raw SFU socket event, logged on every close including a leave; Call-N's own line says whether it mattered
+ios	any	^\((E|W)/[^)]*\)\: .*No camera track found	iOS simulator has no camera
+android	any	Failed to set wt file	Krisp on the emulator
+android	reconnect	^\((E|W)/[^)]*\)\: .*Failed host lookup	network-loss step: DNS is down
+android	reconnect	^\(W/SV:ClientEventTransport\)\: \[send\] attempt \d+ failed \(connectionError\)	network-loss step: telemetry send retried while offline
+android	reconnect	^\(E/SV:ClientEventTransport\)\: \[send\] giving up after \d+ attempts	network-loss step: telemetry send abandoned while offline
+android	reconnect	^\(W/\d+-SV:SfuClient\)\: \[sendStats\] attempt \d+ failed	network-loss step: stats upload retried while offline
+android	reconnect	^\((E|W)/[^)]*\)\: .*RTCPeerConnectionStateFailed	network-loss step: peer connections fail when the network drops
+android	reconnect	^\(W/\d+-SV:SfuClient\)\: \[iceRestart\]	network-loss step: ICE restart cannot reach the SFU while offline
+android	reconnect	^\(W/SV:Call-\d+\)\: \[onSfuEvent\] socket disconnected$	network-loss step: the SFU socket drops and a fast reconnect starts (anchored, so "… not reconnectable … - leaving" stays unexplained)
+android	reconnect	^\(W/SV:Call-\d+\)\: \[reconnect\] held 	network-loss step: overlapping reconnect triggers held while one runs
+android	reconnect	^\(W/SV:CallSession-\d+\)\: \[negotiate\] (skipped — SFU WS not connected|call is disconnected|renegotiation failed: StreamVideoException\{message: (SFU WS is not connected|Call is disconnected))	network-loss step: renegotiation skipped while the SFU socket is down
+any	any	^\(W/SV:(Call-\d+\)\: \[applyViewportAggregate\] no participant for|ViewportVisibility\)\: \[emit\] not applied, forgetting)	viewport update for a participant that just left the call

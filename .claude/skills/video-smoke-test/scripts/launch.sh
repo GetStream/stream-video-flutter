@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Phase 1 — build and launch both apps, then block until both are actually up.
-# First iOS run pays a CocoaPods + full compile cost (~10 min); later runs are fast.
+# First iOS run pays an SPM resolve + full compile cost (~10 min); later runs are fast.
 cd "$(dirname "$0")" && . ./lib.sh
 . "$SMOKE_DIR/env.sh"
 cd "$(git rev-parse --show-toplevel)/dogfooding" || exit 1
@@ -13,6 +13,16 @@ echo "== launch =="
 # is still appending to the very file this run is about to truncate, which
 # interleaves two runs' output in one log and makes every assertion suspect.
 stop_all_bg
+
+# A logcat this skill did not record — another session's, or one whose pid
+# file was lost — keeps appending to the same file and replays every line past
+# the marks the checks take. Only `adb` processes holding the file are stopped.
+for pid in $(lsof -t "$ANDROID_LOG" 2>/dev/null); do
+  if ps -o command= -p "$pid" 2>/dev/null | grep -qE '(^|/)adb .*logcat'; then
+    echo "  stopping a stray adb logcat (pid $pid) still writing $ANDROID_LOG"
+    kill "$pid" 2>/dev/null
+  fi
+done
 
 # Fresh logs so no assertion can match a previous run's output.
 adb logcat -c >/dev/null 2>&1
@@ -53,11 +63,7 @@ fi
 if wait_log "$IOS_LOG" "Dart VM Service on" 900; then
   pass "boot-ios" "iOS app launched"
 else
-  if grep -qE "requires minimum platform version" "$IOS_LOG"; then
-    fail "boot-ios" "iOS build failed on SPM platform floor — run: flutter config --no-enable-swift-package-manager"
-  else
-    fail "boot-ios" "iOS app did not launch — see $IOS_LOG"
-  fi
+  fail "boot-ios" "iOS app did not launch — see $IOS_LOG"
 fi
 
 # The decisive grant: flutter's install has just reset runtime permissions, so
