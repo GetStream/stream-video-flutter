@@ -139,6 +139,42 @@ void main() {
       expect(find.text('Joining… (attempt 5)'), findsOne);
     });
 
+    testWidgets('before the first join the banner says it is connecting', (
+      tester,
+    ) async {
+      final connecting = CallStatus.connecting();
+      when(() => mockCallState.status).thenReturn(connecting);
+      when(
+        () => mockCall.partialState<CallStatus>(any()),
+      ).thenAnswer((_) => Stream.value(connecting));
+      when(
+        () => mockCall
+            .partialState<({bool isScreenShareEnabled, CallStatus status})>(
+              any(),
+            ),
+      ).thenAnswer(
+        (_) => Stream.value((isScreenShareEnabled: false, status: connecting)),
+      );
+
+      await tester.pumpWidget(
+        TestWrapper(
+          child: StreamCallContent(
+            call: mockCall,
+            callAppBarWidgetBuilder: (context, call) => AppBar(),
+            callControlsWidgetBuilder: (context, call) => const SizedBox(),
+            callParticipantsWidgetBuilder: (context, call) =>
+                const Text('Participants'),
+          ),
+        ),
+      );
+      // Not settled: the banner's spinner keeps turning.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.text('Participants'), findsNothing);
+      expect(find.text('Connecting…'), findsOne);
+    });
+
     testWidgets('a custom banner is built with the call status', (
       tester,
     ) async {
