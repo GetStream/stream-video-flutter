@@ -116,7 +116,7 @@
 - Call stats keep being reported when a peer connection stops answering for its stats.
 - A coordinator request that gets no response, such as a join during a reconnect, now times out after `RetryConfig.rpcTimeout` (10 seconds by default) instead of holding the reconnect on one attempt.
 - Coordinator requests that get no response now time out after `RetryConfig.rpcTimeout` (10 seconds by default), so a reconnect attempt whose join hangs ends and the next one starts.
-- A coordinator POST that times out after it may have reached the server, such as a ring or a reaction, is not sent again.
+- A coordinator request that changes something, such as a ring or a reaction, is not sent again when it times out after it may have reached the server.
 - The outgoing call screen shows the camera preview every time the call settings turn the camera on, not only sometimes. `getOrCreate` and `get` now apply the call settings to `connectOptions` before they return.
 - Cancelling an outgoing call while its camera preview is on no longer crashes the app on Android. A track handed over through `TrackOption.provided` that the call never adopted is now stopped before the call's peer connection factory is disposed.
 - Connecting while the coordinator socket is dropped reconnects that socket instead of opening a second one.
