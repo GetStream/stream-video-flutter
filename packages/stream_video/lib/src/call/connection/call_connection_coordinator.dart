@@ -1617,17 +1617,6 @@ class CallConnectionCoordinator {
       _updateReconnect((phase) => phase.copyWith(strategy: next));
     }
 
-    // Fails the reconnect, which leaves the call.
-    void giveUp(String reason) {
-      _call._logger.w(() => '[reconnect] giving up: $reason');
-      _session?.trace(TraceTag.callReconnectFailed, {
-        'strategy': _reconnectStrategy.name,
-        'error': reason,
-      });
-      _setPhase(const ConnectionReconnectFailed());
-      _publishStatus();
-    }
-
     do {
       // Wait for a stable network before reconnecting with rejoin/migrate
       // to prevent starting an SDP exchange on a transient connection that drops before the answer arrives.
@@ -1637,25 +1626,12 @@ class CallConnectionCoordinator {
           ? const Duration(seconds: 3)
           : Duration.zero;
 
-      if (_call.state.value.preferences.reconnectTimeout > Duration.zero) {
-        final elapsed = DateTime.now().difference(reconnectStartTime);
-        if (elapsed > _call.state.value.preferences.reconnectTimeout) {
-          _call._logger.w(() => '[reconnect] reconnection timeout');
-          _setPhase(const ConnectionReconnectFailed());
-          _publishStatus();
-          return;
-        }
-      }
-
       if (_isLeftOrLeaving) {
         _call._logger.w(() => '[reconnect] rejected (call was left)');
         return;
       }
 
-      if (_reconnectStatusAttempt >= _maxReconnectAttempts) {
-        giveUp('reconnect_attempt_limit_exceeded');
-        return;
-      }
+      if (_failsBeforeAttempt(reconnectStartTime)) return;
 
       _session?.trace(TraceTag.callReconnect, {
         'strategy': _reconnectStrategy.name,
@@ -1779,7 +1755,7 @@ class CallConnectionCoordinator {
         // Rejoins and migrations count towards the rate limit; fast
         // reconnects do not.
         if (needsStableNetwork && !_rejoinRateLimiter.tryRegister()) {
-          giveUp('rejoin_attempt_limit_exceeded');
+          _giveUpReconnect('rejoin_attempt_limit_exceeded');
           return;
         }
 
@@ -1870,6 +1846,38 @@ class CallConnectionCoordinator {
         }
       }
     } while (_phase.value is ConnectionReconnecting);
+  }
+
+  /// Fails the running reconnect, before its next attempt, when it has run
+  /// past [CallPreferences.reconnectTimeout] or made [_maxReconnectAttempts]
+  /// attempts. Returns whether it did.
+  bool _failsBeforeAttempt(DateTime reconnectStartTime) {
+    final timeout = _call.state.value.preferences.reconnectTimeout;
+    final elapsed = DateTime.now().difference(reconnectStartTime);
+    if (timeout > Duration.zero && elapsed > timeout) {
+      _call._logger.w(() => '[reconnect] reconnection timeout');
+      _setPhase(const ConnectionReconnectFailed());
+      _publishStatus();
+      return true;
+    }
+
+    if (_reconnectStatusAttempt >= _maxReconnectAttempts) {
+      _giveUpReconnect('reconnect_attempt_limit_exceeded');
+      return true;
+    }
+
+    return false;
+  }
+
+  /// Fails the running reconnect for [reason], which leaves the call.
+  void _giveUpReconnect(String reason) {
+    _call._logger.w(() => '[reconnect] giving up: $reason');
+    _session?.trace(TraceTag.callReconnectFailed, {
+      'strategy': _reconnectStrategy.name,
+      'error': reason,
+    });
+    _setPhase(const ConnectionReconnectFailed());
+    _publishStatus();
   }
 
   Future<JoinOutcome> _reconnectFast({String? reason}) async {
