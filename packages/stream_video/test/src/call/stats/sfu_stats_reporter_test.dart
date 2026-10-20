@@ -251,6 +251,11 @@ void main() {
     test(
       'does not send once stopped while the battery read is pending',
       () async {
+        // A platform the battery saver mode is read on, and the thermal
+        // status is not, whatever runs the test.
+        CurrentPlatform.debugCurrentPlatformOverride = PlatformType.macOS;
+        addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+
         final batteryRead = Completer<bool>();
         var batteryAsked = false;
         final messenger =
