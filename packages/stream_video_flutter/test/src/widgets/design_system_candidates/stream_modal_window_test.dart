@@ -378,6 +378,37 @@ void main() {
         expect(sidebarWidth(tester), 200);
       });
 
+      testWidgets('a local theme reaches a window opened as a dialog', (
+        tester,
+      ) async {
+        tester.view.physicalSize = const Size(1024, 768);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+
+        await tester.pumpWidget(
+          TestWrapper(
+            child: StreamModalWindowTheme(
+              data: const StreamModalWindowThemeData(
+                style: StreamModalWindowStyle(sidebarWidth: 240),
+              ),
+              child: Builder(
+                builder: (context) => TextButton(
+                  onPressed: () => showStreamModalDialog<void>(
+                    context: context,
+                    builder: (context) => StreamModalWindow(tabs: tabs()),
+                  ),
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.tap(find.text('open'));
+        await tester.pumpAndSettle();
+
+        expect(sidebarWidth(tester), 240);
+      });
+
       testWidgets('navItemStyle merges with the default row style', (
         tester,
       ) async {

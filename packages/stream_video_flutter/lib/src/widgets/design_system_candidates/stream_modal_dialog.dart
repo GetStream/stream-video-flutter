@@ -14,6 +14,11 @@ import 'stream_modal_parts.dart';
 /// the scrim color over a backdrop blur, rather than the flat translucent
 /// black Material's [showDialog] paints.
 ///
+/// The themes between [context] and the navigator, such as a
+/// `StreamModalWindowTheme` around the caller, are applied to the dialog as
+/// they are when it opens. Themes above the navigator, such as the app's, are
+/// read as they change.
+///
 /// Returns the value the dialog was popped with, or null when it was
 /// dismissed.
 Future<T?> showStreamModalDialog<T>({
@@ -24,6 +29,9 @@ Future<T?> showStreamModalDialog<T>({
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
 }) {
+  final navigator = Navigator.of(context, rootNavigator: useRootNavigator);
+  final themes = InheritedTheme.capture(from: context, to: navigator.context);
+
   return showGeneralDialog<T>(
     context: context,
     useRootNavigator: useRootNavigator,
@@ -37,7 +45,10 @@ Future<T?> showStreamModalDialog<T>({
     // underneath it.
     barrierColor: Colors.transparent,
     transitionDuration: const Duration(milliseconds: 150),
-    pageBuilder: (context, animation, secondaryAnimation) => builder(context),
+    // A Builder, so the dialog is built under the themes the transition
+    // applies.
+    pageBuilder: (context, animation, secondaryAnimation) =>
+        Builder(builder: builder),
     transitionBuilder: (context, animation, secondaryAnimation, child) {
       final curve = CurvedAnimation(
         parent: animation,
@@ -46,20 +57,22 @@ Future<T?> showStreamModalDialog<T>({
 
       return FadeTransition(
         opacity: curve,
-        child: Stack(
-          children: [
-            // Behind the dialog and out of the way of the modal barrier that
-            // sits below, which is what a tap outside dismisses.
-            const Positioned.fill(
-              // Resolves its color as it builds, so that it follows a theme
-              // change while the dialog is open.
-              child: IgnorePointer(child: StreamBlurScrim()),
-            ),
-            ScaleTransition(
-              scale: Tween<double>(begin: 0.96, end: 1).animate(curve),
-              child: child,
-            ),
-          ],
+        child: themes.wrap(
+          Stack(
+            children: [
+              // Behind the dialog and out of the way of the modal barrier that
+              // sits below, which is what a tap outside dismisses.
+              const Positioned.fill(
+                // Resolves its color as it builds, so that it follows a change
+                // to the app's theme while the dialog is open.
+                child: IgnorePointer(child: StreamBlurScrim()),
+              ),
+              ScaleTransition(
+                scale: Tween<double>(begin: 0.96, end: 1).animate(curve),
+                child: child,
+              ),
+            ],
+          ),
         ),
       );
     },
