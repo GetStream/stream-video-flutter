@@ -3,7 +3,7 @@
 ### ✅ Added
 
 - Added `StreamCallConnectionBanner`, which says what the call's connection is doing while it reconnects.
-- Added the `callConnection…` strings `StreamCallConnectionBanner` shows to the localizations, in English and Dutch.
+- Added `callConnectionConnecting`, `callConnectionReconnecting`, `callConnectionReconnectingAttempt`, `callConnectionJoining`, `callConnectionJoiningAttempt`, `callConnectionOffline`, `callConnectionMigrating` and `callConnectionReconnectFailed` to the localizations, in English and Dutch.
 - Added `StreamAdaptiveMenuAnchorThemeData` on `StreamVideoTheme`, and `StreamAdaptiveMenuAnchorTheme` to restyle the menu's sheet and anchored rows over a subtree.
 - Added `DesktopScreenSharePickerType` and `StreamScreenShareButton.desktopScreenPickerType` to share with the macOS system picker instead of the built-in selector.
 - Added `isDesktopSystemContentPickerSupported`, true on macOS 14 or newer.
