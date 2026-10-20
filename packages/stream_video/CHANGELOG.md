@@ -114,6 +114,7 @@
 - Safari and other WebKit browsers always play remote audio on the system default output; `Call.checkIfAudioOutputChangeSupported` returns false there.
 - A dropped SFU connection starts reconnecting within two seconds.
 - Call stats keep being reported when a peer connection stops answering for its stats.
+- A coordinator request that gets no response, such as a join during a reconnect, now times out after `RetryConfig.rpcTimeout` (10 seconds by default) instead of holding the reconnect on one attempt.
 - The outgoing call screen shows the camera preview every time the call settings turn the camera on, not only sometimes. `getOrCreate` and `get` now apply the call settings to `connectOptions` before they return.
 - Cancelling an outgoing call while its camera preview is on no longer crashes the app on Android. A track handed over through `TrackOption.provided` that the call never adopted is now stopped before the call's peer connection factory is disposed.
 - Connecting while the coordinator socket is dropped reconnects that socket instead of opening a second one.
