@@ -57,7 +57,7 @@ dependency_overrides:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core_flutter
-      ref: b0272fbf98c93f486edb4057472278e915080455
+      ref: 003840918ef0537a2c0dd0b0115a92caae79630e
   stream_webrtc_flutter:
     git:
       url: https://github.com/GetStream/webrtc-flutter.git
