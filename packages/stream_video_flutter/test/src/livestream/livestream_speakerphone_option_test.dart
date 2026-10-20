@@ -173,15 +173,16 @@ void main() {
   );
 
   testWidgets('ignores taps while a pause is in flight', (tester) async {
-    pauseGate = Completer<void>();
     await pumpOption(tester);
 
-    await tester.tap(find.byType(IconButton));
-    await tester.pump();
-    await tester.tap(find.byType(IconButton));
-    await tester.pump();
+    // Press twice in the same turn, so the second press lands while the first
+    // pause is still in flight on any host, not only where the gate holds it.
+    final onPressed = tester
+        .widget<IconButton>(find.byType(IconButton))
+        .onPressed!;
+    onPressed();
+    onPressed();
 
-    pauseGate!.complete();
     await settle(tester);
 
     expect(notifier.isAudioPlayoutPaused, isTrue);
