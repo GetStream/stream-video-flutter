@@ -34,6 +34,9 @@ void main() {
         return Stream.value(filtered);
       });
       when(
+        () => mockCall.partialState<CallStatus>(any()),
+      ).thenAnswer((_) => Stream.value(CallStatus.connected()));
+      when(
         () => mockCall
             .partialState<({bool isScreenShareEnabled, CallStatus status})>(
               any(),
@@ -92,6 +95,48 @@ void main() {
       await tester.pump();
 
       expect(taps, 1);
+    });
+
+    // The previous session keeps playing the participants' media until a
+    // rejoin lands, so the grid stays rather than going blank.
+    testWidgets('a rejoin keeps the participants and says it is joining', (
+      tester,
+    ) async {
+      final rejoining = CallStatusReconnecting(
+        attempt: 5,
+        isFastReconnectAttempt: false,
+        phase: CallReconnectPhase.joining,
+      );
+      when(() => mockCallState.status).thenReturn(rejoining);
+      when(
+        () => mockCall.partialState<CallStatus>(any()),
+      ).thenAnswer((_) => Stream.value(rejoining));
+      when(
+        () => mockCall
+            .partialState<({bool isScreenShareEnabled, CallStatus status})>(
+              any(),
+            ),
+      ).thenAnswer(
+        (_) => Stream.value((isScreenShareEnabled: false, status: rejoining)),
+      );
+
+      await tester.pumpWidget(
+        TestWrapper(
+          child: StreamCallContent(
+            call: mockCall,
+            callAppBarWidgetBuilder: (context, call) => AppBar(),
+            callControlsWidgetBuilder: (context, call) => const SizedBox(),
+            callParticipantsWidgetBuilder: (context, call) =>
+                const Text('Participants'),
+          ),
+        ),
+      );
+      // Not settled: the banner's spinner keeps turning.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.text('Participants'), findsOne);
+      expect(find.text('Joining… (attempt 5)'), findsOne);
     });
 
     // The default bar goes into a `Scaffold.appBar` slot, which reserves

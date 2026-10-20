@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../../../stream_video_flutter.dart';
 
 /// Says what the call's connection is doing while it is not simply connected.
 ///
@@ -9,11 +10,12 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 /// each phase, so a fast reconnect that escalates to a rejoin reads as one
 /// banner changing its text, not as one going away and another arriving.
 ///
-/// Drawn as the app's own snackbar, the one "You are muted" uses, so the call
-/// has one way of telling the user something rather than two.
-class CallConnectionBanner extends StatelessWidget {
-  const CallConnectionBanner({super.key, required this.call});
+/// Says nothing while the call is connected, so it can stay in the tree.
+class StreamCallConnectionBanner extends StatelessWidget {
+  /// Creates a banner for [call].
+  const StreamCallConnectionBanner({super.key, required this.call});
 
+  /// The call whose connection the banner reports.
   final Call call;
 
   @override
@@ -78,8 +80,7 @@ class _CallConnectionNotice {
         'Moving to another server…',
         StreamSnackbarVariant.loading,
       ),
-      // Reached only before the first join lands, which the SDK shows in
-      // place of the participants.
+      // Reached only before the first join lands.
       CallStatusConnecting() => const _CallConnectionNotice(
         'Connecting…',
         StreamSnackbarVariant.loading,

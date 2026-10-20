@@ -20,7 +20,6 @@ import '../core/repos/user_chat_repository.dart';
 import '../di/injector.dart';
 import '../utils/consts.dart';
 import '../utils/feedback_dialog.dart';
-import '../widgets/call_connection_banner.dart';
 import '../widgets/closed_captions_widget.dart';
 import '../widgets/e2ee_key_notification.dart';
 import '../widgets/settings_menu/more_menu.dart';
@@ -612,7 +611,7 @@ class _CallScreenState extends State<CallScreen>
                       ),
                       Align(
                         alignment: Alignment.topCenter,
-                        child: CallConnectionBanner(call: call),
+                        child: StreamCallConnectionBanner(call: call),
                       ),
                       Align(
                         alignment: Alignment.bottomCenter,
@@ -690,11 +689,11 @@ class _CallScreenState extends State<CallScreen>
               callControlsWidgetBuilder: _callControls,
               callNotConnectedBuilder: (context, properties) => Align(
                 alignment: Alignment.topCenter,
-                child: CallConnectionBanner(call: properties.call),
+                child: StreamCallConnectionBanner(call: properties.call),
               ),
-              // The banner already says a fast reconnect is under way.
-              callFastReconnectingOverlayBuilder: (_, _) =>
-                  const SizedBox.shrink(),
+              // Drawn over the grid instead, so it stays clear of the side
+              // panel.
+              callConnectionBannerBuilder: (_, _) => const SizedBox.shrink(),
             );
           },
         ),

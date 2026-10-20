@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dogfooding/widgets/call_connection_banner.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
@@ -49,7 +48,7 @@ void main() {
     call.status = status;
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(body: CallConnectionBanner(call: call)),
+        home: Scaffold(body: StreamCallConnectionBanner(call: call)),
       ),
     );
     await pumpSwitch(tester);

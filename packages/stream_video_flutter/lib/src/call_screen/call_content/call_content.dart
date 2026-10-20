@@ -12,26 +12,8 @@ typedef CallNotConnectedBuilder =
       CallNotConnectedProperties properties,
     );
 
-typedef CallFastReconnectingOverlayBuilder =
-    Widget Function(
-      BuildContext context,
-      CallFastReconnectingProperties properties,
-    );
-
 class CallNotConnectedProperties {
-  CallNotConnectedProperties(
-    this.call, {
-    required this.isMigrating,
-    required this.isReconnecting,
-  });
-
-  final Call call;
-  final bool isMigrating;
-  final bool isReconnecting;
-}
-
-class CallFastReconnectingProperties {
-  CallFastReconnectingProperties(this.call);
+  CallNotConnectedProperties(this.call);
 
   final Call call;
 }
@@ -50,7 +32,7 @@ class StreamCallContent extends StatefulWidget {
     this.callParticipantsWidgetBuilder,
     this.callControlsWidgetBuilder,
     this.callNotConnectedBuilder,
-    this.callFastReconnectingOverlayBuilder,
+    this.callConnectionBannerBuilder,
     this.layoutMode = ParticipantLayoutMode.auto,
     this.extendBody = false,
     this.pictureInPictureConfiguration = const PictureInPictureConfiguration(),
@@ -74,11 +56,14 @@ class StreamCallContent extends StatefulWidget {
   /// Builder used to create a custom call controls panel.
   final CallWidgetBuilder? callControlsWidgetBuilder;
 
-  /// Builder used to create a custom widget when the call is not connected.
+  /// Builder used to create a custom widget in place of the participants
+  /// before the call first connects.
   final CallNotConnectedBuilder? callNotConnectedBuilder;
 
-  /// Builder used to create a custom widget when the call is fast reconnecting.
-  final CallFastReconnectingOverlayBuilder? callFastReconnectingOverlayBuilder;
+  /// Builder used to create a custom banner, drawn at the top of the body,
+  /// that says what the connection is doing. Defaults to
+  /// [StreamCallConnectionBanner].
+  final CallWidgetBuilder? callConnectionBannerBuilder;
 
   /// The layout mode used to display the participants.
   final ParticipantLayoutMode layoutMode;
@@ -185,9 +170,9 @@ class _StreamCallContentState extends State<StreamCallContent> {
             !_isScreenShareEnabled);
 
     final Widget bodyWidget;
-    if (_status.isConnected ||
-        _status.isFastReconnecting ||
-        _status.isMigrating) {
+    // A reconnect keeps the participants: their media keeps playing until the
+    // call is connected again.
+    if (_status.isConnected || _status.isReconnecting || _status.isMigrating) {
       bodyWidget = Stack(
         children: [
           if (CurrentPlatform.isIos && pipEnabled)
@@ -214,22 +199,12 @@ class _StreamCallContentState extends State<StreamCallContent> {
         ],
       );
     } else {
-      final isReconnecting = _status.isReconnecting;
       bodyWidget =
           widget.callNotConnectedBuilder?.call(
             context,
-            CallNotConnectedProperties(
-              call,
-              isMigrating: _status.isMigrating,
-              isReconnecting: isReconnecting,
-            ),
+            CallNotConnectedProperties(call),
           ) ??
-          Center(
-            child: Text(
-              isReconnecting ? 'Reconnecting' : 'Connecting',
-              style: theme.textTheme.title3,
-            ),
-          );
+          const SizedBox.shrink();
     }
 
     return Scaffold(
@@ -254,23 +229,12 @@ class _StreamCallContentState extends State<StreamCallContent> {
       body: Stack(
         children: [
           bodyWidget,
-          if (_status.isFastReconnecting)
-            widget.callFastReconnectingOverlayBuilder?.call(
-                  context,
-                  CallFastReconnectingProperties(call),
-                ) ??
-                const Positioned(
-                  top: 25,
-                  left: 25,
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  ),
-                ),
+          Align(
+            alignment: Alignment.topCenter,
+            child:
+                widget.callConnectionBannerBuilder?.call(context, call) ??
+                StreamCallConnectionBanner(call: call),
+          ),
         ],
       ),
       extendBody: widget.extendBody,
