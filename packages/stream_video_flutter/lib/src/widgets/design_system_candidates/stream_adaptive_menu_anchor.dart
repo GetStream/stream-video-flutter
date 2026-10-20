@@ -548,35 +548,34 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
                 if (section.content case final content?) content(context, this),
               if (!_isCollapsed(section))
                 for (final option in section.options)
-                  _selectedBackground(
-                    context,
-                    selected: option.selected ?? false,
-                    child: StreamContextMenuAction<void>(
-                      // A row with nothing to press leaves the menu up.
-                      closeOnActivate:
-                          option.onSelected != null && option.closesMenu,
-                      onTap: option.onSelected == null
-                          ? null
-                          : () => _select(option),
-                      // Deliberately left enabled for a row with nothing to
-                      // press. `enabled: false` is the design system's
-                      // *unavailable* look — it paints the label in
-                      // `textDisabled` — and a list that only shows something,
-                      // like the people already in a call, would render every
-                      // name as though that person were unavailable.
-                      leading: _leadingOf(option),
-                      trailing: option.trailing,
-                      label: Text(
-                        option.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
+                  _anchoredOption(context, option),
             ],
         ],
       ),
       builder: (context, _, _) => widget.builder(context, this),
+    );
+  }
+
+  /// One row of the anchored menu.
+  Widget _anchoredOption(BuildContext context, StreamMenuOption option) {
+    final onSelected = option.onSelected;
+
+    return _selectedBackground(
+      context,
+      selected: option.selected ?? false,
+      child: StreamContextMenuAction<void>(
+        // A row with nothing to press leaves the menu up.
+        closeOnActivate: onSelected != null && option.closesMenu,
+        onTap: onSelected == null ? null : () => _select(option),
+        // Deliberately left enabled for a row with nothing to press.
+        // `enabled: false` is the design system's *unavailable* look — it
+        // paints the label in `textDisabled` — and a list that only shows
+        // something, like the people already in a call, would render every
+        // name as though that person were unavailable.
+        leading: _leadingOf(option),
+        trailing: option.trailing,
+        label: Text(option.label, maxLines: 1, overflow: TextOverflow.ellipsis),
+      ),
     );
   }
 }
