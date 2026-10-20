@@ -61,12 +61,13 @@ class SfuStatsReporter {
   Timer? _timer;
   int _reportCount = 0;
   bool _stopped = false;
-  bool _flushing = false;
 
   static const _flushTimeout = Duration(seconds: 2);
   static const _getStatsTimeout = Duration(seconds: 5);
 
-  bool get _shouldSkipSfuStats => _stopped && !_flushing;
+  /// Whether a send is skipped: once stopped, only the flush still goes out,
+  /// not the sends queued behind it.
+  bool _skips({required bool isFlush}) => _stopped && !isFlush;
 
   void run({Duration interval = const Duration(seconds: 8)}) {
     _timer?.cancel();
@@ -97,11 +98,8 @@ class SfuStatsReporter {
 
   Future<void> flush() async {
     if (_stopped) return;
-    _flushing = true;
 
-    final sendStatsFuture = sendSfuStats().whenComplete(() {
-      _flushing = false;
-    });
+    final sendStatsFuture = _sendSfuStats(isFlush: true);
 
     try {
       await sendStatsFuture.timeout(
@@ -118,23 +116,35 @@ class SfuStatsReporter {
   Future<void> sendSfuStats({
     int? connectionTimeMs,
     SfuReconnectionStrategy? reconnectionStrategy,
+  }) {
+    return _sendSfuStats(
+      isFlush: false,
+      connectionTimeMs: connectionTimeMs,
+      reconnectionStrategy: reconnectionStrategy,
+    );
+  }
+
+  Future<void> _sendSfuStats({
+    required bool isFlush,
+    int? connectionTimeMs,
+    SfuReconnectionStrategy? reconnectionStrategy,
   }) async {
-    if (_shouldSkipSfuStats) return;
+    if (_skips(isFlush: isFlush)) return;
     try {
       await _sfuStatsLock.synchronized(() async {
-        if (_shouldSkipSfuStats) return;
+        if (_skips(isFlush: isFlush)) return;
         final publisherStatsBundle = await _withinStatsTimeout(
           callSession.rtcManager?.publisher?.getStats(),
           'publisher',
         );
 
-        if (_shouldSkipSfuStats) return;
+        if (_skips(isFlush: isFlush)) return;
         final subscriberStatsBundle = await _withinStatsTimeout(
           callSession.rtcManager?.subscriber.getStats(),
           'subscriber',
         );
 
-        if (_shouldSkipSfuStats ||
+        if (_skips(isFlush: isFlush) ||
             (publisherStatsBundle == null && subscriberStatsBundle == null)) {
           return;
         }

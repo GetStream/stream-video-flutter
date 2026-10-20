@@ -76,6 +76,38 @@ class UnresponsiveSubscriber extends FakeSubscriber {
   }
 }
 
+/// A subscriber whose first `getStats` never completes; later ones do.
+class FirstUnresponsiveSubscriber extends FakeSubscriber {
+  var _calls = 0;
+
+  @override
+  Future<void> dispose() {
+    return Future.value();
+  }
+
+  @override
+  Future<
+    ({
+      List<RtcStats> rtcStats,
+      RtcPrintableStats printable,
+      List<Map<String, dynamic>> rawStats,
+    })
+  >
+  getStats() {
+    if (_calls++ == 0) {
+      return Completer<
+            ({
+              List<RtcStats> rtcStats,
+              RtcPrintableStats printable,
+              List<Map<String, dynamic>> rawStats,
+            })
+          >()
+          .future;
+    }
+    return super.getStats();
+  }
+}
+
 SfuStatsReporter _createReporter({
   required MockCallSession callSession,
   required MockSfuClient sfuClient,
@@ -185,6 +217,34 @@ void main() {
 
         async.elapse(const Duration(seconds: 5));
         expect(secondDone, isTrue);
+      });
+    });
+
+    test('sends only the flush once stopped, not a send queued before it', () {
+      fakeAsync((async) {
+        final reporter = _createReporter(
+          callSession: callSession,
+          sfuClient: sfuClient,
+          subscriber: FirstUnresponsiveSubscriber(),
+        );
+        // A publisher that answers, so a send whose subscriber stats time
+        // out still has something to send.
+        final rtcManager = callSession.rtcManager!;
+        when(() => rtcManager.publisher).thenReturn(FakeSubscriber());
+
+        // Waits for the subscriber's stats until they time out.
+        unawaited(reporter.sendSfuStats());
+        async.flushMicrotasks();
+
+        var flushed = false;
+        reporter.flush().then((_) => flushed = true);
+        async.elapse(const Duration(seconds: 2));
+        expect(flushed, isTrue, reason: 'the flush gives up waiting');
+        reporter.stop();
+
+        async.elapse(const Duration(seconds: 10));
+
+        verify(() => sfuClient.sendStats(any())).called(1);
       });
     });
   });
