@@ -3,6 +3,7 @@
 ### ✅ Added
 
 - Added `StreamCallConnectionBanner`, which says what the call's connection is doing while it reconnects.
+- Added the `callConnection…` strings `StreamCallConnectionBanner` shows to the localizations, in English and Dutch.
 - Added `StreamAdaptiveMenuAnchorThemeData` on `StreamVideoTheme`, and `StreamAdaptiveMenuAnchorTheme` to restyle the menu's sheet and anchored rows over a subtree.
 - Added `DesktopScreenSharePickerType` and `StreamScreenShareButton.desktopScreenPickerType` to share with the macOS system picker instead of the built-in selector.
 - Added `isDesktopSystemContentPickerSupported`, true on macOS 14 or newer.
@@ -196,7 +197,7 @@
 
 ### 🔄 Changed
 
-- `StreamCallContent` keeps showing the participants during a rejoin, with a `StreamCallConnectionBanner` above them instead of the centred "Reconnecting" text.
+- `StreamCallContent` keeps showing the participants during a reconnect, and after one fails until the call has left, with a `StreamCallConnectionBanner` above them instead of the centred "Reconnecting" text.
 - `StreamParticipantTileStyle.topToolbarPadding` defaults to none.
 - A microphone or camera change on the ringing screens made just as the call is picked up now reaches the call, instead of being dropped.
 - The participants bar in `CallParticipantsSpotlightView` carries a button at either end for the tiles it cannot fit.

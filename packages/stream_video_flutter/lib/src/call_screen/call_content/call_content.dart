@@ -188,8 +188,11 @@ class _StreamCallContentState extends State<StreamCallContent> {
 
     final Widget bodyWidget;
     // A reconnect keeps the participants: their media keeps playing until the
-    // call is connected again.
-    if (_status.isConnected || _status.isReconnecting || _status.isMigrating) {
+    // call is connected again, or until it has left after giving up.
+    if (_status.isConnected ||
+        _status.isReconnecting ||
+        _status.isMigrating ||
+        _status is CallStatusReconnectionFailed) {
       bodyWidget = Stack(
         children: [
           if (CurrentPlatform.isIos && pipEnabled)
@@ -246,15 +249,17 @@ class _StreamCallContentState extends State<StreamCallContent> {
       body: Stack(
         children: [
           bodyWidget,
-          Align(
-            alignment: Alignment.topCenter,
-            child:
-                widget.callConnectionBannerBuilder?.call(
-                  context,
-                  CallConnectionBannerProperties(call, status: _status),
-                ) ??
-                StreamCallConnectionBanner(call: call),
-          ),
+          // The picture-in-picture window is too small to show it over.
+          if (!_isInPictureInPictureMode)
+            Align(
+              alignment: Alignment.topCenter,
+              child:
+                  widget.callConnectionBannerBuilder?.call(
+                    context,
+                    CallConnectionBannerProperties(call, status: _status),
+                  ) ??
+                  StreamCallConnectionBanner(call: call),
+            ),
         ],
       ),
       extendBody: widget.extendBody,
