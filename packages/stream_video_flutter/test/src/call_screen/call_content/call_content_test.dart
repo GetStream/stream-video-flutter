@@ -139,6 +139,31 @@ void main() {
       expect(find.text('Joining… (attempt 5)'), findsOne);
     });
 
+    testWidgets('a custom banner is built with the call status', (
+      tester,
+    ) async {
+      final statuses = <CallStatus>[];
+
+      await tester.pumpWidget(
+        TestWrapper(
+          child: StreamCallContent(
+            call: mockCall,
+            callAppBarWidgetBuilder: (context, call) => AppBar(),
+            callControlsWidgetBuilder: (context, call) => const SizedBox(),
+            callParticipantsWidgetBuilder: (context, call) => const SizedBox(),
+            callConnectionBannerBuilder: (context, properties) {
+              statuses.add(properties.status);
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(statuses.last, CallStatus.connected());
+      expect(find.byType(StreamCallConnectionBanner), findsNothing);
+    });
+
     // The default bar goes into a `Scaffold.appBar` slot, which reserves
     // `preferredSize.height` — a constant the bar cannot theme. The height a
     // `CallAppBarTheme` sets is measured out for the slot instead.

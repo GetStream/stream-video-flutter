@@ -18,6 +18,23 @@ class CallNotConnectedProperties {
   final Call call;
 }
 
+typedef CallConnectionBannerBuilder =
+    Widget Function(
+      BuildContext context,
+      CallConnectionBannerProperties properties,
+    );
+
+/// What [StreamCallContent.callConnectionBannerBuilder] builds a banner
+/// from.
+class CallConnectionBannerProperties {
+  CallConnectionBannerProperties(this.call, {required this.status});
+
+  final Call call;
+
+  /// The call's status, which the banner is rebuilt for when it changes.
+  final CallStatus status;
+}
+
 /// Represents the UI in an active call that shows participants and their video,
 /// as well as some extra UI features to control the call settings, browse
 /// participants and more.
@@ -61,9 +78,9 @@ class StreamCallContent extends StatefulWidget {
   final CallNotConnectedBuilder? callNotConnectedBuilder;
 
   /// Builder used to create a custom banner, drawn at the top of the body,
-  /// that says what the connection is doing. Defaults to
-  /// [StreamCallConnectionBanner].
-  final CallWidgetBuilder? callConnectionBannerBuilder;
+  /// that says what the connection is doing. Built for every status,
+  /// connected included. Defaults to [StreamCallConnectionBanner].
+  final CallConnectionBannerBuilder? callConnectionBannerBuilder;
 
   /// The layout mode used to display the participants.
   final ParticipantLayoutMode layoutMode;
@@ -232,7 +249,10 @@ class _StreamCallContentState extends State<StreamCallContent> {
           Align(
             alignment: Alignment.topCenter,
             child:
-                widget.callConnectionBannerBuilder?.call(context, call) ??
+                widget.callConnectionBannerBuilder?.call(
+                  context,
+                  CallConnectionBannerProperties(call, status: _status),
+                ) ??
                 StreamCallConnectionBanner(call: call),
           ),
         ],
