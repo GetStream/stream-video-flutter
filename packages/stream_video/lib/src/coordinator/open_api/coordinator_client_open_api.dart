@@ -45,7 +45,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     NetworkStateProvider? networkStateProvider,
     ClientEventReporter clientEventReporter = const ClientEventReporter.noOp(),
     @visibleForTesting this._webSocketFactory,
+    @visibleForTesting LocationService? locationService,
   }) : _rpcUrl = rpcUrl,
+       _locationService = locationService ?? LocationService(),
        _wsUrl = wsUrl,
        _apiKey = apiKey,
        _tokenSource = tokenSource,
@@ -106,7 +108,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   late final _defaultApi = open.DefaultApi(_httpClient);
-  late final _locationService = LocationService();
+  final LocationService _locationService;
 
   @override
   SharedEmitter<StreamVideoEvent> get events => _events;
