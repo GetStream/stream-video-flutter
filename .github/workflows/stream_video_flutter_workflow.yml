@@ -65,6 +65,47 @@ jobs:
       - name: "Test dart fixes"
         run: melos run test:fixes
 
+  # Gates cognitive complexity on the declarations a PR touches.
+  #
+  # PR-only: on a push there is no base ref, and the scanner would then check
+  # whole files and fail on existing hotspots this gate is not meant to block.
+  complexity:
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    # Posting the sticky audit comment needs write access; without it the
+    # action still annotates the diff but skips the comment.
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Install Flutter
+        uses: ./.github/actions/setup-flutter
+
+      # `targets` leaves out `stream_video/lib/open_api` and `lib/protobuf`,
+      # which hold generated code the scanner does not recognise as generated.
+      - name: Cognitive Complexity
+        uses: kevmoo/analytica.dart/packages/cognitive_complexity@447ff3ee2f0c12b735cc4fea80532549f7df5132 # main
+        with:
+          targets: >-
+            packages/stream_video/lib/src
+            packages/stream_video/lib/debug.dart
+            packages/stream_video/lib/globals.dart
+            packages/stream_video/lib/stream_video.dart
+            packages/stream_video_filters/lib
+            packages/stream_video_flutter/lib
+            packages/stream_video_noise_cancellation/lib
+            packages/stream_video_push_notification/lib
+            packages/stream_video_screen_sharing/lib
+          diff-base: origin/${{ github.base_ref }}
+          fail-threshold: 15
+          fail-on-increase: true
+
   build:
     timeout-minutes: 30
     runs-on: ubuntu-latest
