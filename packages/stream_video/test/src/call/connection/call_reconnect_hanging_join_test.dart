@@ -24,10 +24,7 @@ void main() {
   });
 
   const policy = RetryPolicy(
-    config: RetryConfig(
-      rpcMaxRetries: 2,
-      rpcTimeout: Duration(milliseconds: 100),
-    ),
+    config: RetryConfig(rpcTimeout: Duration(milliseconds: 100)),
     backoff: _noBackoff,
   );
 
@@ -70,18 +67,6 @@ void main() {
   }
 
   test(
-    'a coordinator request the server never answers times out each attempt',
-    () async {
-      final stopwatch = Stopwatch()..start();
-      final result = await hangingJoin();
-
-      expect(result, isA<Failure>());
-      expect(unanswered, hasLength(policy.config.rpcMaxRetries));
-      expect(stopwatch.elapsed, lessThan(const Duration(seconds: 2)));
-    },
-  );
-
-  test(
     'a reconnect attempt whose coordinator join hangs ends, and the next '
     'attempt reconnects',
     () async {
@@ -109,7 +94,7 @@ void main() {
       );
 
       expect(joins, hangingJoins + 1);
-      expect(unanswered, hasLength(hangingJoins * policy.config.rpcMaxRetries));
+      expect(unanswered, hasLength(hangingJoins));
       final attempts = statuses
           .whereType<CallStatusReconnecting>()
           .map((status) => status.attempt)

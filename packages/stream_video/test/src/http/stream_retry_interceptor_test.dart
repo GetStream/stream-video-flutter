@@ -74,6 +74,7 @@ void main() {
     ResponseBody Function() response, {
     RetryPolicy? policy,
     int rpcMaxRetries = 3,
+    String method = 'GET',
   }) async {
     final dio = Dio(BaseOptions(baseUrl: 'https://example.invalid'));
     final adapter = _CountingAdapter(response);
@@ -92,7 +93,7 @@ void main() {
     ]);
 
     try {
-      await dio.get<dynamic>('/x');
+      await dio.request<dynamic>('/x', options: Options(method: method));
     } on DioException catch (_) {
       // The failure is the point; the attempt count is what is asserted.
     }
@@ -278,16 +279,32 @@ void main() {
   // failure is retried when it is about *the moment*, never when it is about
   // the request or the setup.
   group('separates a transport failure from an SDK one', () {
+    DioException timedOut() => DioException(
+      requestOptions: RequestOptions(path: '/x'),
+      error: const StreamNetworkException(
+        message: 'the request timed out before the server answered',
+        isTimeout: true,
+      ),
+    );
+
     test('retries a request that never reached a verdict', () async {
+      expect(await attemptsFor(() => throw timedOut()), 3);
+    });
+
+    // The server may have acted on a request that timed out, and a POST such
+    // as a ring or a reaction must not happen twice.
+    test('does not resend a POST that timed out', () async {
+      expect(await attemptsFor(() => throw timedOut(), method: 'POST'), 1);
+    });
+
+    test('resends a POST whose connection dropped', () async {
       expect(
         await attemptsFor(
           () => throw DioException(
             requestOptions: RequestOptions(path: '/x'),
-            error: const StreamNetworkException(
-              message: 'the request timed out before the server answered',
-              isTimeout: true,
-            ),
+            error: const StreamNetworkException(message: 'connection reset'),
           ),
+          method: 'POST',
         ),
         3,
       );
