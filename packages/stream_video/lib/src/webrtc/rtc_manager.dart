@@ -18,7 +18,7 @@ import '../sfu/data/models/sfu_video_sender.dart';
 import '../telemetry/client_event_types.dart';
 import '../telemetry/media_frame_reporter.dart';
 import '../telemetry/peer_connection_connect_reporter.dart';
-import '../utils/extensions.dart';
+import 'apple_audio_route.dart';
 import 'codecs_helper.dart' as codecs;
 import 'codecs_helper.dart';
 import 'e2ee/e2ee_mapping.dart';
@@ -801,6 +801,24 @@ class RtcManager extends Disposable {
         return track.trackIdPrefix == trackIdPrefix;
       }),
     ];
+  }
+
+  /// Applies [policy]'s Apple audio session configuration, asking for the
+  /// loudspeaker as the built-in output when [speakerOn].
+  ///
+  /// A member of the class rather than of an extension, so tests can stub it.
+  Future<Result<None>> setAppleAudioConfiguration({
+    required AudioConfigurationPolicy policy,
+    bool speakerOn = false,
+  }) async {
+    try {
+      await rtc.Helper.setAppleAudioConfiguration(
+        policy.getAppleConfiguration(defaultToSpeaker: speakerOn),
+      );
+      return const Result.success(none);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
   }
 }
 
@@ -2283,19 +2301,17 @@ extension RtcManagerTrackHelper on RtcManager {
     }
 
     try {
-      if (CurrentPlatform.isIos &&
-          device.id.equalsIgnoreCase(
-            AudioSettingsRequestDefaultDeviceEnum.speaker.value,
-          )) {
-        await setAppleAudioConfiguration(
-          speakerOn: true,
-          policy: _streamVideo.options.audioConfigurationPolicy,
-        );
-      } else {
-        await setAppleAudioConfiguration(
-          policy: _streamVideo.options.audioConfigurationPolicy,
-        );
-      }
+      // The policy the call's factory was built with, so the session and the
+      // factory never disagree.
+      final policy = pcFactory.resolvedAudioConfigurationPolicy;
+      await setAppleAudioConfiguration(
+        speakerOn: resolveAppleSpeakerOn(
+          policy: policy,
+          speakerRequested: device.isBuiltInSpeaker,
+          earpieceRequested: device.isBuiltInEarpiece,
+        ),
+        policy: policy,
+      );
 
       // Change the audio output device for all remote audio tracks.
       await rtc.Helper.selectAudioOutput(device.id);
@@ -2576,20 +2592,6 @@ extension RtcManagerTrackHelper on RtcManager {
 
           await publishVideoTrack(track: track);
         });
-  }
-
-  Future<Result<None>> setAppleAudioConfiguration({
-    required AudioConfigurationPolicy policy,
-    bool speakerOn = false,
-  }) async {
-    try {
-      await rtc.Helper.setAppleAudioConfiguration(
-        policy.getAppleConfiguration(defaultToSpeaker: speakerOn),
-      );
-      return const Result.success(none);
-    } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
-    }
   }
 }
 

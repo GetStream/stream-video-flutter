@@ -191,6 +191,143 @@ void main() {
       );
     });
 
+    group('Audio policy speaker default', () {
+      // A call type whose settings would send the audio to the earpiece.
+      const earpieceSettings = CallSettings(
+        video: StreamVideoSettings(cameraDefaultOn: false),
+        audio: StreamAudioSettings(
+          speakerDefaultOn: false,
+          defaultDevice: AudioSettingsRequestDefaultDeviceEnum.earpiece,
+        ),
+      );
+
+      Future<void> useClientPolicy(AudioConfigurationPolicy policy) async {
+        await StreamVideo.reset();
+        streamVideo = StreamVideo.create(
+          'test-api-key',
+          user: user,
+          userToken: userToken,
+          options: StreamVideoOptions(
+            autoConnect: false,
+            audioConfigurationPolicy: policy,
+          ),
+        );
+      }
+
+      test(
+        'the viewer policy turns the speaker on over earpiece settings',
+        () async {
+          await useClientPolicy(const AudioConfigurationPolicy.viewer());
+
+          final call = createCallWithMockedResponse(
+            streamVideo,
+            mockCoordinatorClient,
+            earpieceSettings,
+            rtcMediaDeviceNotifier: mockDeviceNotifier,
+          );
+
+          final result = await call.getOrCreate(watch: false);
+
+          expect(result.isSuccess, true);
+          expect(call.connectOptions.speakerDefaultOn, true);
+          expect(call.connectOptions.audioOutputDevice?.id, 'speaker');
+        },
+      );
+
+      test('a viewer policy set in the call preferences wins over the '
+          'client default', () async {
+        final call =
+            createCallWithMockedResponse(
+              streamVideo,
+              mockCoordinatorClient,
+              earpieceSettings,
+              rtcMediaDeviceNotifier: mockDeviceNotifier,
+            )..updateCallPreferences(
+              DefaultCallPreferences(
+                audioConfigurationPolicy:
+                    const AudioConfigurationPolicy.viewer(),
+              ),
+            );
+
+        final result = await call.getOrCreate(watch: false);
+
+        expect(result.isSuccess, true);
+        expect(call.connectOptions.speakerDefaultOn, true);
+        expect(call.connectOptions.audioOutputDevice?.id, 'speaker');
+      });
+
+      test(
+        'a custom policy based on the viewer policy turns the speaker on',
+        () async {
+          await useClientPolicy(
+            const AudioConfigurationPolicy.custom(
+              basePolicy: AudioConfigurationPolicy.viewer(),
+            ),
+          );
+
+          final call = createCallWithMockedResponse(
+            streamVideo,
+            mockCoordinatorClient,
+            earpieceSettings,
+            rtcMediaDeviceNotifier: mockDeviceNotifier,
+          );
+
+          final result = await call.getOrCreate(watch: false);
+
+          expect(result.isSuccess, true);
+          expect(call.connectOptions.speakerDefaultOn, true);
+        },
+      );
+
+      test(
+        'the viewer policy keeps headphones as the output',
+        () async {
+          await useClientPolicy(const AudioConfigurationPolicy.viewer());
+          when(
+            () => mockDeviceNotifier.enumerateDevicesFor(any()),
+          ).thenAnswer(
+            (_) async =>
+                Result.success(TestDeviceScenarios.withBluetoothHeadphones),
+          );
+
+          final call = createCallWithMockedResponse(
+            streamVideo,
+            mockCoordinatorClient,
+            earpieceSettings,
+            rtcMediaDeviceNotifier: mockDeviceNotifier,
+          );
+
+          final result = await call.getOrCreate(watch: false);
+
+          expect(result.isSuccess, true);
+          expect(
+            call.connectOptions.audioOutputDevice?.label,
+            'Bluetooth Headphones',
+          );
+        },
+      );
+
+      test(
+        'the broadcaster policy keeps following the call settings',
+        () async {
+          await useClientPolicy(const AudioConfigurationPolicy.broadcaster());
+
+          final call = createCallWithMockedResponse(
+            streamVideo,
+            mockCoordinatorClient,
+            earpieceSettings,
+            rtcMediaDeviceNotifier: mockDeviceNotifier,
+          );
+
+          final result = await call.getOrCreate(watch: false);
+
+          expect(result.isSuccess, true);
+          expect(call.connectOptions.speakerDefaultOn, false);
+          expect(call.connectOptions.audioOutputDevice?.id, 'earpiece');
+        },
+      );
+    });
+
     group('External device priority logic', () {
       test('prioritizes external device over built-in speaker', () async {
         // Arrange

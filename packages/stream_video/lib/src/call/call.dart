@@ -25,6 +25,7 @@ import '../errors/video_error.dart';
 import '../errors/video_error_composer.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../logger/stream_log.dart';
+import '../models/audio_configuration_policy.dart';
 import '../models/call_received_data.dart';
 import '../models/models.dart';
 import '../platform_detector/platform_detector.dart';
@@ -48,6 +49,7 @@ import '../utils/none.dart';
 import '../utils/result.dart';
 import '../utils/standard.dart';
 import '../utils/subscriptions.dart';
+import '../webrtc/apple_audio_route.dart';
 import '../webrtc/e2ee/call_encryption_key.dart';
 import '../webrtc/media/media_constraints.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
@@ -313,12 +315,20 @@ class Call {
   /// Audio track states captured at suspension time.
   final _suspendedTrackStates = <String, SuspendedTrackState>{};
 
+  /// The audio policy in effect for this call.
+  ///
+  /// Once the call's peer connection factory exists, the policy it was built
+  /// with, which stays fixed for its lifetime. Before that, the one set in
+  /// the call preferences, else the client default.
+  AudioConfigurationPolicy get _audioConfigurationPolicy =>
+      _pcFactory?.resolvedAudioConfigurationPolicy ??
+      _stateManager.callState.preferences.audioConfigurationPolicy ??
+      _streamVideo.options.audioConfigurationPolicy;
+
   StreamPeerConnectionFactory _ensurePcFactory() {
     return _pcFactory ??= StreamPeerConnectionFactory(
       callCid: callCid,
-      audioConfigurationPolicy:
-          _stateManager.callState.preferences.audioConfigurationPolicy ??
-          _streamVideo.options.audioConfigurationPolicy,
+      audioConfigurationPolicy: _audioConfigurationPolicy,
     );
   }
 
@@ -383,6 +393,13 @@ class Call {
       return;
     }
     await factory.resumeAudio();
+
+    // On iOS the factory restores the audio session configuration it was
+    // built with, which drops an output the user picked since, such as the
+    // earpiece.
+    if (CurrentPlatform.isIos) {
+      await _session?.applyCurrentAudioOutputDevice();
+    }
 
     await _session?.resumeSuspendedAudioTracks(_suspendedTrackStates);
     _suspendedTrackStates.clear();
@@ -3039,7 +3056,11 @@ class Call {
     /// 1. If video camera is set to be on by default, speaker is enabled
     /// 2. If audio speaker is set to be on by default, speaker is enabled
     /// 3. If the default audio device is set to speaker, speaker is enabled
+    ///
+    /// An audio policy that defaults to the speaker, such as the viewer
+    /// policy, turns the speaker on whatever the settings say.
     final speakerOnWithSettingsPriority =
+        _audioConfigurationPolicy.defaultsToSpeaker ||
         settings.video.cameraDefaultOn ||
         settings.audio.speakerDefaultOn ||
         settings.audio.defaultDevice ==
@@ -3147,11 +3168,17 @@ class Call {
       await setAudioOutputDevice(_connectOptions.audioOutputDevice!);
     } else {
       if (CurrentPlatform.isIos) {
+        // Resolved here rather than in `speakerDefaultOn`, which options
+        // passed to `join` overwrite. Under a policy that defaults to the
+        // speaker this keeps the loudspeaker as the built-in output while headphones are connected,
+        // so that disconnecting them does not fall back to the earpiece.
+        final policy = _audioConfigurationPolicy;
         await _session?.rtcManager?.setAppleAudioConfiguration(
-          speakerOn: _connectOptions.speakerDefaultOn,
-          policy:
-              _stateManager.callState.preferences.audioConfigurationPolicy ??
-              _streamVideo.options.audioConfigurationPolicy,
+          speakerOn: resolveAppleSpeakerOn(
+            policy: policy,
+            speakerRequested: _connectOptions.speakerDefaultOn,
+          ),
+          policy: policy,
         );
       }
     }

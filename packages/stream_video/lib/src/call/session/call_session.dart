@@ -895,7 +895,7 @@ class CallSession extends Disposable {
       await track.start();
 
       if (track.isAudioTrack) {
-        await _applyCurrentAudioOutputDevice();
+        await applyCurrentAudioOutputDevice();
       }
     }
   }
@@ -1063,7 +1063,7 @@ class CallSession extends Disposable {
       await track.start();
 
       if (track.isAudioTrack) {
-        await _applyCurrentAudioOutputDevice();
+        await applyCurrentAudioOutputDevice();
       }
     }
 
@@ -1251,7 +1251,7 @@ class CallSession extends Disposable {
       await remoteTrack.start();
 
       if (remoteTrack.isAudioTrack) {
-        await _applyCurrentAudioOutputDevice();
+        await applyCurrentAudioOutputDevice();
       }
     }
 
@@ -1261,7 +1261,8 @@ class CallSession extends Disposable {
     );
   }
 
-  Future<void> _applyCurrentAudioOutputDevice() async {
+  /// Re-applies the audio output the user selected, if any.
+  Future<void> applyCurrentAudioOutputDevice() async {
     // Only re-apply an output the user explicitly selected.
     if (!stateManager.audioOutputSelectedByUser) return;
 
@@ -1343,7 +1344,7 @@ class CallSession extends Disposable {
           }
 
           await track.start();
-          await _applyCurrentAudioOutputDevice();
+          await applyCurrentAudioOutputDevice();
           _logger.d(
             () => '[resumeSuspendedAudioTracks] started track ${entry.key}',
           );
