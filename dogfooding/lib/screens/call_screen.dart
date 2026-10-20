@@ -610,10 +610,6 @@ class _CallScreenState extends State<CallScreen>
                         ],
                       ),
                       Align(
-                        alignment: Alignment.topCenter,
-                        child: StreamCallConnectionBanner(call: call),
-                      ),
-                      Align(
                         alignment: Alignment.bottomCenter,
                         child: E2eeKeyNotification(
                           call: call,
@@ -687,13 +683,6 @@ class _CallScreenState extends State<CallScreen>
                 );
               },
               callControlsWidgetBuilder: _callControls,
-              callNotConnectedBuilder: (context, properties) => Align(
-                alignment: Alignment.topCenter,
-                child: StreamCallConnectionBanner(call: properties.call),
-              ),
-              // Drawn over the grid instead, so it stays clear of the side
-              // panel.
-              callConnectionBannerBuilder: (_, _) => const SizedBox.shrink(),
             );
           },
         ),
