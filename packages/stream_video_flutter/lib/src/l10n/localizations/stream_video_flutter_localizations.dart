@@ -472,6 +472,54 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'{first}, {second}, and {count, plural, =1{1 other} other{{count} others}}'**
   String ringingManyCallers(String first, String second, int count);
+
+  /// Banner shown while a call joins for the first time
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get callConnectionConnecting;
+
+  /// Banner shown while a call gets its connection back
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnecting…'**
+  String get callConnectionReconnecting;
+
+  /// Banner shown while a call gets its connection back, from its second attempt on
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnecting… (attempt {attempt})'**
+  String callConnectionReconnectingAttempt(int attempt);
+
+  /// Banner shown while a reconnecting call joins again
+  ///
+  /// In en, this message translates to:
+  /// **'Joining…'**
+  String get callConnectionJoining;
+
+  /// Banner shown while a reconnecting call joins again, from its second attempt on
+  ///
+  /// In en, this message translates to:
+  /// **'Joining… (attempt {attempt})'**
+  String callConnectionJoiningAttempt(int attempt);
+
+  /// Banner shown while a reconnecting call waits for the network to come back
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re offline. Waiting for the network…'**
+  String get callConnectionOffline;
+
+  /// Banner shown while a call moves to another server
+  ///
+  /// In en, this message translates to:
+  /// **'Moving to another server…'**
+  String get callConnectionMigrating;
+
+  /// Banner shown when a call gave up reconnecting, until it has left
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t reconnect to the call'**
+  String get callConnectionReconnectFailed;
 }
 
 class _StreamVideoFlutterLocalizationsDelegate

@@ -99,6 +99,14 @@ void main() {
     expect(find.text('Joining… (attempt 2)'), findsOne);
   });
 
+  testWidgets('says the call could not reconnect once it gives up', (
+    tester,
+  ) async {
+    await pumpBanner(tester, CallStatusReconnectionFailed());
+
+    expect(find.text("Couldn't reconnect to the call"), findsOne);
+  });
+
   testWidgets('says the call is moving on a migration', (tester) async {
     await pumpBanner(tester, CallStatus.migrating());
 

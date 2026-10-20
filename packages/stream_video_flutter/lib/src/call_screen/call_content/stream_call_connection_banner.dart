@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../../l10n/localization_extension.dart';
+import '../../l10n/localizations/stream_video_flutter_localizations.dart';
 
 /// Says what the call's connection is doing while it is not simply connected.
 ///
@@ -27,7 +29,7 @@ class StreamCallConnectionBanner extends StatelessWidget {
       call: call,
       selector: _status,
       builder: (context, status) {
-        final notice = _CallConnectionNotice.of(status);
+        final notice = _CallConnectionNotice.of(status, context.translations);
 
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
@@ -64,38 +66,50 @@ class _CallConnectionNotice {
   const _CallConnectionNotice(this.message, this.variant);
 
   /// The notice for [status], or null when there is nothing to say.
-  static _CallConnectionNotice? of(CallStatus status) {
+  static _CallConnectionNotice? of(
+    CallStatus status,
+    StreamVideoFlutterLocalizations translations,
+  ) {
     return switch (status) {
       CallStatusReconnecting(phase: CallReconnectPhase.offline) =>
-        const _CallConnectionNotice(
-          "You're offline. Waiting for the network…",
+        _CallConnectionNotice(
+          translations.callConnectionOffline,
           StreamSnackbarVariant.error,
         ),
-      CallStatusReconnecting(:final phase, :final attempt) =>
+      // The attempt is named once there has been more than one, which is when
+      // it starts to mean something.
+      CallStatusReconnecting(
+        phase: CallReconnectPhase.joining,
+        :final attempt,
+      ) =>
         _CallConnectionNotice(
-          _withAttempt(
-            phase == CallReconnectPhase.joining ? 'Joining' : 'Reconnecting',
-            attempt,
-          ),
+          attempt > 1
+              ? translations.callConnectionJoiningAttempt(attempt)
+              : translations.callConnectionJoining,
           StreamSnackbarVariant.loading,
         ),
-      CallStatusMigrating() => const _CallConnectionNotice(
-        'Moving to another server…',
+      CallStatusReconnecting(:final attempt) => _CallConnectionNotice(
+        attempt > 1
+            ? translations.callConnectionReconnectingAttempt(attempt)
+            : translations.callConnectionReconnecting,
+        StreamSnackbarVariant.loading,
+      ),
+      // Shown until the call has left, which it does next.
+      CallStatusReconnectionFailed() => _CallConnectionNotice(
+        translations.callConnectionReconnectFailed,
+        StreamSnackbarVariant.error,
+      ),
+      CallStatusMigrating() => _CallConnectionNotice(
+        translations.callConnectionMigrating,
         StreamSnackbarVariant.loading,
       ),
       // Reached only before the first join lands.
-      CallStatusConnecting() => const _CallConnectionNotice(
-        'Connecting…',
+      CallStatusConnecting() => _CallConnectionNotice(
+        translations.callConnectionConnecting,
         StreamSnackbarVariant.loading,
       ),
       _ => null,
     };
-  }
-
-  /// Names the attempt once there has been more than one, which is when it
-  /// starts to mean something.
-  static String _withAttempt(String label, int attempt) {
-    return attempt > 1 ? '$label… (attempt $attempt)' : '$label…';
   }
 
   final String message;

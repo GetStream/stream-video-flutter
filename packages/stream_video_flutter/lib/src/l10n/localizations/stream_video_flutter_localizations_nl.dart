@@ -246,4 +246,34 @@ class StreamVideoFlutterLocalizationsNl
     );
     return '$first, $second en $_temp0';
   }
+
+  @override
+  String get callConnectionConnecting => 'Verbinden…';
+
+  @override
+  String get callConnectionReconnecting => 'Opnieuw verbinden…';
+
+  @override
+  String callConnectionReconnectingAttempt(int attempt) {
+    return 'Opnieuw verbinden… (poging $attempt)';
+  }
+
+  @override
+  String get callConnectionJoining => 'Deelnemen…';
+
+  @override
+  String callConnectionJoiningAttempt(int attempt) {
+    return 'Deelnemen… (poging $attempt)';
+  }
+
+  @override
+  String get callConnectionOffline =>
+      'Je bent offline. Wachten op het netwerk…';
+
+  @override
+  String get callConnectionMigrating => 'Overstappen naar een andere server…';
+
+  @override
+  String get callConnectionReconnectFailed =>
+      'Opnieuw verbinden met het gesprek is mislukt';
 }
