@@ -139,6 +139,30 @@ void main() {
       expect(controller.videoInputs, [_frontCamera]);
     });
 
+    // The owner can still report the output it plays on, but with no list to
+    // mark it in, a selection would point at a device the menu does not show.
+    test('ignores the output in use where selection is unsupported', () async {
+      final devicesInUse = StreamController<StreamDevicesInUse>();
+      addTearDown(devicesInUse.close);
+      final controller = StreamMediaDevicesController(
+        deviceNotifier: notifier,
+        supportsAudioOutputSelection: false,
+        devicesInUse: devicesInUse.stream,
+      );
+      addTearDown(controller.dispose);
+
+      deviceChanges.add([_builtInMic, _speakers, _frontCamera]);
+      devicesInUse.add((
+        audioInput: _builtInMic,
+        audioOutput: _speakers,
+        videoInput: null,
+      ));
+      await pumpEventQueue();
+
+      expect(controller.selectedAudioInput, _builtInMic);
+      expect(controller.selectedAudioOutput, isNull);
+    });
+
     // Both mean "let the platform pick", and a menu over this controller
     // already draws a row for null, so listing the browser's own entry offered
     // the same choice twice.

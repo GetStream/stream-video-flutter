@@ -416,12 +416,16 @@ class StreamMediaDevicesController extends ChangeNotifier {
   /// Assigned rather than selected: the owner has already switched to it, so
   /// there is nothing to apply and no rejection to put back. A kind it names
   /// no device for is left as it is, so an owner that has resolved only some
-  /// of them does not clear the rest.
+  /// of them does not clear the rest. The output is ignored where
+  /// [supportsAudioOutputSelection] is false, as [audioOutputs] has no row
+  /// for it to mark.
   void _handleDevicesInUse(StreamDevicesInUse devices) {
     if (_disposed) return;
 
     _selectedAudioInput = devices.audioInput ?? _selectedAudioInput;
-    _selectedAudioOutput = devices.audioOutput ?? _selectedAudioOutput;
+    if (supportsAudioOutputSelection) {
+      _selectedAudioOutput = devices.audioOutput ?? _selectedAudioOutput;
+    }
     _selectedVideoInput = devices.videoInput ?? _selectedVideoInput;
 
     notifyListeners();
