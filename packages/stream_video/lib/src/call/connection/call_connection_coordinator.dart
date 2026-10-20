@@ -1631,7 +1631,7 @@ class CallConnectionCoordinator {
         return;
       }
 
-      if (_failsBeforeAttempt(reconnectStartTime)) return;
+      if (_giveUpOnTimeoutOrMaxAttempts(reconnectStartTime)) return;
 
       _session?.trace(TraceTag.callReconnect, {
         'strategy': _reconnectStrategy.name,
@@ -1851,7 +1851,7 @@ class CallConnectionCoordinator {
   /// Fails the running reconnect, before its next attempt, when it has run
   /// past [CallPreferences.reconnectTimeout] or made [_maxReconnectAttempts]
   /// attempts. Returns whether it did.
-  bool _failsBeforeAttempt(DateTime reconnectStartTime) {
+  bool _giveUpOnTimeoutOrMaxAttempts(DateTime reconnectStartTime) {
     final timeout = _call.state.value.preferences.reconnectTimeout;
     final elapsed = DateTime.now().difference(reconnectStartTime);
     if (timeout > Duration.zero && elapsed > timeout) {
