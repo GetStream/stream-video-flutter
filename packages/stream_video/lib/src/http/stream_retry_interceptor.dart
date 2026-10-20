@@ -41,7 +41,7 @@ class StreamRetryInterceptor extends Interceptor {
     }
 
     final exception = err.toStreamException();
-    if (!_isRetryable(exception)) return handler.next(err);
+    if (!_isRetryable(exception, options)) return handler.next(err);
 
     final delay = _delay(exception, spent);
 
@@ -109,8 +109,15 @@ class StreamRetryInterceptor extends Interceptor {
     return retryAfter;
   }
 
-  /// Whether [exception] is worth another attempt.
-  bool _isRetryable(StreamException exception) => switch (exception) {
+  /// Methods that leave the server in the same state when sent twice.
+  static const _idempotentMethods = {'GET', 'HEAD', 'OPTIONS', 'PUT', 'DELETE'};
+
+  /// Whether [exception], raised by the request [options] describes, is worth
+  /// another attempt.
+  bool _isRetryable(
+    StreamException exception,
+    RequestOptions options,
+  ) => switch (exception) {
     // The server declared that retrying will not help, which settles it.
     StreamApiException(unrecoverable: true) => false,
 
@@ -141,7 +148,13 @@ class StreamRetryInterceptor extends Interceptor {
     // the cancellation.
     StreamNetworkException(isCancelled: true) => false,
 
-    // Never reached a verdict — a timeout, a dropped connection. Worth another
+    // A request that timed out may have reached the server, so only one that
+    // is safe to send twice is sent again.
+    StreamNetworkException(isTimeout: true) => _idempotentMethods.contains(
+      options.method.toUpperCase(),
+    ),
+
+    // Never reached a verdict — a dropped connection. Worth another
     // attempt, and the outcome of the last one is unknown either way.
     StreamNetworkException() => true,
 
