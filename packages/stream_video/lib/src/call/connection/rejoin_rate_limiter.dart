@@ -6,10 +6,7 @@ import 'package:meta/meta.dart';
 /// Allows at most [maxAttempts] attempts within any rolling [window].
 @internal
 class RejoinRateLimiter {
-  RejoinRateLimiter({
-    this.maxAttempts = 10,
-    this.window = const Duration(seconds: 120),
-  });
+  RejoinRateLimiter({required this.maxAttempts, required this.window});
 
   final int maxAttempts;
   final Duration window;

@@ -22,12 +22,25 @@ class CallConnectionCoordinator {
 
   Duration _fastReconnectDeadline = Duration.zero;
 
-  /// Rejoins and migrations, across reconnects. Fast reconnects are not
-  /// counted.
-  final _rejoinRateLimiter = RejoinRateLimiter();
+  // Two separate limits. The rejoin window counts rejoins and migrations
+  // across reconnects; the attempt cap counts every attempt within one
+  // reconnect, whatever its strategy.
+
+  /// The rejoins and migrations allowed within [_rejoinWindow].
+  static const _maxRejoinsPerWindow = 10;
+
+  /// The rolling window [_maxRejoinsPerWindow] applies to.
+  static const _rejoinWindow = Duration(seconds: 120);
 
   /// The attempts one reconnect makes, any strategy, before it fails.
   static const _maxReconnectAttempts = 10;
+
+  /// Rejoins and migrations, across reconnects. Fast reconnects are not
+  /// counted.
+  final _rejoinRateLimiter = RejoinRateLimiter(
+    maxAttempts: _maxRejoinsPerWindow,
+    window: _rejoinWindow,
+  );
 
   /// Where the connection is. [_publishStatus] writes the connection status
   /// it projects to; a disconnect written into the state elsewhere moves it to

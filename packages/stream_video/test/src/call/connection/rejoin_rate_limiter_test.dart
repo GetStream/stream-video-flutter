@@ -59,11 +59,4 @@ void main() {
       expect(limiter.tryRegister(), isFalse);
     });
   });
-
-  test('defaults to 10 attempts per 120 seconds', () {
-    final limiter = RejoinRateLimiter();
-
-    expect(limiter.maxAttempts, 10);
-    expect(limiter.window, const Duration(seconds: 120));
-  });
 }
