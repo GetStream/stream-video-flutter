@@ -48,27 +48,37 @@ void main() {
     ('an incoming', CallStatus.incoming()),
     ('an outgoing', CallStatus.outgoing()),
   ]) {
-    test('the wait for $name ring stops when the call is left', () {
-      fakeAsync((async) {
-        final logger = installRecordingLogger();
-        final call = ringingCall(status);
+    test('the wait for $name ring stops when the call is left', () async {
+      final logger = installRecordingLogger();
+      final async = FakeAsync();
+      Result<None>? joined;
+      Result<None>? left;
 
-        Result<None>? joined;
+      async.run((_) {
+        final call = ringingCall(status);
         call.join().then((result) => joined = result);
         async.flushMicrotasks();
         async.elapse(timeout ~/ 2);
         expect(joined, isNull, reason: 'the join waits for the ring');
 
-        call.leave();
+        call.leave().then((result) => left = result);
         async.flushMicrotasks();
         expect(joined?.isFailure, isTrue);
-
-        async.elapse(timeout * 3);
-        expect(
-          logger.errors.where((message) => message.contains('ToBeAccepted')),
-          isEmpty,
-        );
       });
+
+      // Part of the leave completes on the real event loop: rxdart cancels
+      // its subscriptions through a root-zone future.
+      for (var turn = 0; left == null && turn < 100; turn++) {
+        await Future<void>.delayed(Duration.zero);
+        async.flushMicrotasks();
+      }
+      expect(left?.isSuccess, isTrue);
+
+      async.elapse(timeout * 3);
+      expect(
+        logger.errors.where((message) => message.contains('ToBeAccepted')),
+        isEmpty,
+      );
     });
 
     test('the wait for $name ring fails the join when unanswered', () async {
