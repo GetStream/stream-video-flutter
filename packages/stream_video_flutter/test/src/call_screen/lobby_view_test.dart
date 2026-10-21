@@ -246,6 +246,7 @@ void main() {
     const poses = <String, (Size, EdgeInsets)>{
       'outer landscape': (Size(678, 466), EdgeInsets.only(right: 84)),
       'inner portrait': (Size(669, 951), EdgeInsets.only(top: 54)),
+      'inner landscape': (Size(951, 669), EdgeInsets.only(right: 84)),
     };
 
     for (final MapEntry(key: pose, value: (size, padding)) in poses.entries) {

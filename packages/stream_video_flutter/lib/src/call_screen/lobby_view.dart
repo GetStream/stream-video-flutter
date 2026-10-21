@@ -38,9 +38,9 @@ typedef StreamLobbyJoinCallback =
 ///
 /// The layout follows the window's [StreamScreenSize]: at
 /// [StreamScreenSize.small] the controls sit below the preview, above it they
-/// are overlaid on the preview itself. A window shorter than
-/// [StreamScreenSize.smallMaxHeight] in landscape puts the preview beside the
-/// rest instead of above it. The lobby keeps clear of the ambient safe-area
+/// are overlaid on the preview itself. A landscape window shorter than
+/// [sideBySideMaxHeight] puts the preview beside the rest instead of above
+/// it. The lobby keeps clear of the ambient safe-area
 /// insets. Which actions are shown does *not* follow the screen — [actions]
 /// defaults to `StreamLobbyActions.simple()` at every width, and choosing a richer
 /// preset for a roomier window is the host's call.
@@ -88,6 +88,10 @@ class StreamLobbyView extends StatefulWidget {
   }) : _call = null;
 
   final Call? _call;
+
+  /// Landscape windows shorter than this put the preview beside the rest of
+  /// the lobby: stacked, the join button would fall below the window.
+  static const sideBySideMaxHeight = 800.0;
 
   /// The call this lobby is a waiting room for.
   Call get call => controller?.call ?? _call!;
@@ -263,7 +267,7 @@ class _LobbyBody extends StatelessWidget {
     // A short window in landscape has no height for the preview and the rest
     // stacked under it, so the two go side by side.
     final sideBySide =
-        windowSize.height < StreamScreenSize.smallMaxHeight &&
+        windowSize.height < StreamLobbyView.sideBySideMaxHeight &&
         windowSize.width > windowSize.height;
 
     // The overlaid row is centred on a preview whose bottom-start corner is
