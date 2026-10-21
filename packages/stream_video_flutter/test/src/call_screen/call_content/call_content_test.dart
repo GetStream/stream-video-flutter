@@ -99,6 +99,31 @@ void main() {
       expect(taps, 1);
     });
 
+    testWidgets('the body clears the side insets', (tester) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+            size: Size(800, 600),
+            padding: EdgeInsets.only(left: 12, right: 84),
+          ),
+          child: TestWrapper(
+            child: StreamCallContent(
+              call: mockCall,
+              callAppBarWidgetBuilder: (context, call) => AppBar(),
+              callControlsWidgetBuilder: (context, call) => const SizedBox(),
+              callParticipantsWidgetBuilder: (context, call) =>
+                  const SizedBox.expand(key: Key('participants')),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final rect = tester.getRect(find.byKey(const Key('participants')));
+      expect(rect.left, 12);
+      expect(rect.right, 800 - 84);
+    });
+
     /// Builds the content on [status], with participants that say so. A
     /// status added to the returned controller reaches it after that.
     Future<StreamController<CallStatus>> pumpContent(

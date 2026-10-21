@@ -246,21 +246,27 @@ class _StreamCallContentState extends State<StreamCallContent> {
               onLeaveCallTap: widget.onLeaveCallTap,
             ),
           ),
-      body: Stack(
-        children: [
-          bodyWidget,
-          // The picture-in-picture window is too small to show it over.
-          if (!_isInPictureInPictureMode)
-            Align(
-              alignment: Alignment.topCenter,
-              child:
-                  widget.callConnectionBannerBuilder?.call(
-                    context,
-                    CallConnectionBannerProperties(call, status: _status),
-                  ) ??
-                  StreamCallConnectionBanner(call: call),
-            ),
-        ],
+      // The app bar and the controls clear the top and bottom insets; this
+      // clears the sides, where a rail or a cutout can sit in landscape.
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: Stack(
+          children: [
+            bodyWidget,
+            // The picture-in-picture window is too small to show it over.
+            if (!_isInPictureInPictureMode)
+              Align(
+                alignment: Alignment.topCenter,
+                child:
+                    widget.callConnectionBannerBuilder?.call(
+                      context,
+                      CallConnectionBannerProperties(call, status: _status),
+                    ) ??
+                    StreamCallConnectionBanner(call: call),
+              ),
+          ],
+        ),
       ),
       extendBody: widget.extendBody,
       bottomNavigationBar: PartialCallStateBuilder<bool>(
