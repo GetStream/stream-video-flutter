@@ -298,7 +298,7 @@
 
 ### ⚠️ Breaking
 
-- `StreamScreenSize` is `small` for any window shorter than 600, and `StreamScreenSize.fromSize` buckets a size by both axes.
+- `StreamScreenSize` is `small` for any window shorter than 480, and `StreamScreenSize.fromSize` buckets a size by both axes.
 - `StreamCallContent.callFastReconnectingOverlayBuilder`, `CallFastReconnectingOverlayBuilder` and `CallFastReconnectingProperties` are removed; use `callConnectionBannerBuilder`, which is drawn for every reconnect and gets the call status through `CallConnectionBannerProperties`. `CallNotConnectedProperties.isMigrating` and `isReconnecting` are removed, since `callNotConnectedBuilder` is only used before the call first connects.
 - `CallParticipantSort` is a class rather than an alias for `Comparator`. It pairs the comparator with an `identity`, which is what `StreamCallParticipants` compares to notice the sorting has changed — a bare closure is a new function on every build, so comparing those reordered the list every time. Wrap an existing comparator as `CallParticipantSort(compare, identity: 'my-sort')`; without an identity a sort is only equal to itself. The SDK's own sorts are on `CallParticipantSorts`. `PictureInPictureConfiguration.sort` and `StreamPictureInPictureUiKitView.participantSort` take one too.
 - The desktop screen share picker is rebuilt on the design system. `TabbedScreenSelectWidget`, `ThumbnailGrid`, `ScreenSelectorStateNotifier` and `ScreenSelectorState` are gone; `StreamDesktopScreenShareSelector` and `DesktopScreenShareSourceController` replace them. `showDefaultScreenSelectionDialog` keeps its signature.

@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 /// The width breakpoints match the ones the design system uses across SDKs, so
 /// a component laid out against [StreamScreenSize] lines up with the Figma
 /// variant of the same name. A window shorter than [smallMaxHeight] is [small]
-/// whatever its width, the way iOS gives a phone in landscape a compact height.
+/// whatever its width, so a phone in landscape is [small].
 ///
 /// This is about how much room there is, not what the app is running on — see
 /// `isMobileDevice` and friends in `device_segmentation.dart` for the platform
@@ -16,17 +16,18 @@ enum StreamScreenSize {
   /// the outer display of a foldable, and desktop windows dragged small.
   small,
 
-  /// Between [smallMaxWidth] and [mediumMaxWidth]. Tablets, split-screen.
+  /// Between [smallMaxWidth] and [mediumMaxWidth], and at least
+  /// [smallMaxHeight] tall. Tablets, split-screen.
   medium,
 
-  /// [mediumMaxWidth] and wider.
+  /// [mediumMaxWidth] and wider, and at least [smallMaxHeight] tall.
   large;
 
   /// Widths below this are [small].
   static const smallMaxWidth = 768.0;
 
   /// Heights below this are [small].
-  static const smallMaxHeight = 600.0;
+  static const smallMaxHeight = 480.0;
 
   /// Widths below this — and at or above [smallMaxWidth] — are [medium].
   static const mediumMaxWidth = 1280.0;

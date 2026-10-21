@@ -650,7 +650,7 @@ class _CallScreenState extends State<CallScreen>
                     enablePictureInPicture: true,
                   ),
               callParticipantsWidgetBuilder: (context, call) {
-                // A narrow window has no room beside the grid, so the panel
+                // A small window has no room beside the grid, so the panel
                 // covers it instead of docking next to it.
                 final fullScreen = context.streamScreenSize.isSmall;
 
@@ -702,7 +702,7 @@ class _CallScreenState extends State<CallScreen>
                 );
               },
               callAppBarWidgetBuilder: (context, call) {
-                // A narrow window gives the whole body to the panel, the app
+                // A small window gives the whole body to the panel, the app
                 // bar's row included. A zero-height bar rather than null,
                 // because null falls back to the SDK's own.
                 if (context.streamScreenSize.isSmall && _panelOnScreen(call)) {

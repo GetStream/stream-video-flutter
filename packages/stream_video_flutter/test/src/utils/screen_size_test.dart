@@ -22,11 +22,11 @@ void main() {
   group('StreamScreenSize.fromSize', () {
     test('is small below the height breakpoint, whatever the width', () {
       expect(
-        StreamScreenSize.fromSize(const Size(1440, 599.9)),
+        StreamScreenSize.fromSize(const Size(1440, 479.9)),
         StreamScreenSize.small,
       );
       expect(
-        StreamScreenSize.fromSize(const Size(1440, 600)),
+        StreamScreenSize.fromSize(const Size(1440, 480)),
         StreamScreenSize.large,
       );
     });
@@ -78,6 +78,26 @@ void main() {
         StreamScreenSize.small,
       );
     });
+  });
+
+  testWidgets('context.streamScreenSize reads the window height too', (
+    tester,
+  ) async {
+    late StreamScreenSize size;
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(size: Size(1440, 400)),
+        child: Builder(
+          builder: (context) {
+            size = context.streamScreenSize;
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(size, StreamScreenSize.small);
   });
 
   testWidgets('context.streamScreenSize reads the window, not the widget', (
