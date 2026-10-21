@@ -10,7 +10,6 @@ CallMetadata _metadata({
   StreamCallCid? cid,
   DateTime? endedAt,
   Map<String, CallMember> members = const {},
-  CallSessionData session = const CallSessionData(),
 }) {
   return CallMetadata(
     cid: cid ?? SampleCallData.defaultCid,
@@ -35,7 +34,7 @@ CallMetadata _metadata({
       endedAt: endedAt,
     ),
     settings: const CallSettings(),
-    session: session,
+    session: const CallSessionData(),
     users: const {},
     members: members,
   );
@@ -53,35 +52,6 @@ StreamCallEndedEvent _callEnded({
     createdAt: createdAt ?? DateTime.utc(2026, 10, 14, 12),
     metadata: _metadata(cid: callCid, endedAt: endedAt),
     type: 'call.ended',
-  );
-}
-
-CallParticipant _sessionParticipant(String userId) {
-  return CallParticipant(
-    userSessionId: '$userId-session',
-    userId: userId,
-    role: 'user',
-  );
-}
-
-StreamCallSessionParticipantJoinedEvent _participantJoined(String userId) {
-  return StreamCallSessionParticipantJoinedEvent(
-    SampleCallData.defaultCid,
-    createdAt: DateTime.utc(2026, 10, 21, 12),
-    sessionId: 'session',
-    user: CallUser(id: userId, name: userId, roles: const ['user'], image: ''),
-    participant: _sessionParticipant(userId),
-  );
-}
-
-StreamCallSessionParticipantLeftEvent _participantLeft(String userId) {
-  return StreamCallSessionParticipantLeftEvent(
-    SampleCallData.defaultCid,
-    createdAt: DateTime.utc(2026, 10, 21, 12),
-    sessionId: 'session',
-    user: CallUser(id: userId, name: userId, roles: const ['user'], image: ''),
-    participant: _sessionParticipant(userId),
-    duration: const Duration(minutes: 1),
   );
 }
 
@@ -167,68 +137,6 @@ void main() {
       );
 
       expect(notifier.state, same(before));
-    });
-  });
-
-  group('coordinatorCallSessionParticipantJoined and Left', () {
-    CallStateNotifier lobby() {
-      return CallStateNotifier(
-        CallState(
-          currentUserId: 'viewer',
-          callCid: SampleCallData.defaultCid,
-          preferences: DefaultCallPreferences(),
-        ),
-      )..callMetadataChanged(
-        _metadata(
-          session: CallSessionData(
-            participants: {
-              'a-session': _sessionParticipant('a'),
-              'b-session': _sessionParticipant('b'),
-            },
-            participantsCountByRole: const {'user': 2},
-          ),
-        ),
-      );
-    }
-
-    test('a participant joining is counted', () {
-      final notifier = lobby()
-        ..coordinatorCallSessionParticipantJoined(_participantJoined('c'));
-
-      expect(notifier.state.participantCount, 3);
-    });
-
-    test('a participant already in the session is not counted again', () {
-      final notifier = lobby()
-        ..coordinatorCallSessionParticipantJoined(_participantJoined('a'))
-        ..coordinatorCallSessionParticipantJoined(_participantJoined('c'))
-        ..coordinatorCallSessionParticipantJoined(_participantJoined('c'));
-
-      expect(notifier.state.participantCount, 3);
-    });
-
-    test('a participant leaving is uncounted', () {
-      final notifier = lobby()
-        ..coordinatorCallSessionParticipantLeft(_participantLeft('a'));
-
-      expect(notifier.state.participantCount, 1);
-    });
-
-    test('a participant who left and rejoins is counted again', () {
-      final notifier = lobby()
-        ..coordinatorCallSessionParticipantLeft(_participantLeft('a'))
-        ..coordinatorCallSessionParticipantJoined(_participantJoined('a'));
-
-      expect(notifier.state.participantCount, 2);
-    });
-
-    test('the count does not go below zero', () {
-      final notifier = lobby()
-        ..coordinatorCallSessionParticipantLeft(_participantLeft('a'))
-        ..coordinatorCallSessionParticipantLeft(_participantLeft('b'))
-        ..coordinatorCallSessionParticipantLeft(_participantLeft('c'));
-
-      expect(notifier.state.participantCount, 0);
     });
   });
 }

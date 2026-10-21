@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:collection/collection.dart';
 import 'package:state_notifier/state_notifier.dart';
 
@@ -553,33 +551,6 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
 
     state = state.copyWith(
       callParticipants: newParticipants,
-    );
-  }
-
-  /// Counts a participant who joins before the call is joined. A participant
-  /// already in the session is not counted again.
-  void coordinatorCallSessionParticipantJoined(
-    StreamCallSessionParticipantJoinedEvent event,
-  ) {
-    final userSessionId = event.participant.userSessionId;
-    if (state.sessionParticipantIds.contains(userSessionId)) return;
-
-    state = state.copyWith(
-      sessionParticipantIds: {...state.sessionParticipantIds, userSessionId},
-      participantCount: state.participantCount + 1,
-    );
-  }
-
-  /// Uncounts a participant who leaves before the call is joined.
-  void coordinatorCallSessionParticipantLeft(
-    StreamCallSessionParticipantLeftEvent event,
-  ) {
-    final userSessionId = event.participant.userSessionId;
-
-    state = state.copyWith(
-      sessionParticipantIds: {...state.sessionParticipantIds}
-        ..remove(userSessionId),
-      participantCount: math.max(0, state.participantCount - 1),
     );
   }
 

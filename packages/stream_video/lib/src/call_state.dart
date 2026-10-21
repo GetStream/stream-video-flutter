@@ -90,7 +90,6 @@ class CallState extends Equatable {
       blockedUserIds: const [],
       participantCount: 0,
       anonymousParticipantCount: 0,
-      sessionParticipantIds: const {},
       iOSMultitaskingCameraAccessEnabled: false,
       custom: const {},
       isVideoModerated: false,
@@ -136,7 +135,6 @@ class CallState extends Equatable {
     required this.blockedUserIds,
     required this.participantCount,
     required this.anonymousParticipantCount,
-    required this.sessionParticipantIds,
     required this.iOSMultitaskingCameraAccessEnabled,
     required this.custom,
     required this.isVideoModerated,
@@ -180,12 +178,6 @@ class CallState extends Equatable {
   final List<String> blockedUserIds;
   final int participantCount;
   final int anonymousParticipantCount;
-
-  /// The user session ids the coordinator has reported in the call session
-  /// while the call is not joined. Used to count each joined participant once.
-  @internal
-  final Set<UserSessionId> sessionParticipantIds;
-
   final bool iOSMultitaskingCameraAccessEnabled;
   final Map<String, Object> custom;
 
@@ -304,7 +296,6 @@ class CallState extends Equatable {
     List<String>? blockedUserIds,
     int? participantCount,
     int? anonymousParticipantCount,
-    Set<UserSessionId>? sessionParticipantIds,
     bool? iOSMultitaskingCameraAccessEnabled,
     Map<String, Object>? custom,
     bool? isVideoModerated,
@@ -351,8 +342,6 @@ class CallState extends Equatable {
       participantCount: participantCount ?? this.participantCount,
       anonymousParticipantCount:
           anonymousParticipantCount ?? this.anonymousParticipantCount,
-      sessionParticipantIds:
-          sessionParticipantIds ?? this.sessionParticipantIds,
       iOSMultitaskingCameraAccessEnabled:
           iOSMultitaskingCameraAccessEnabled ??
           this.iOSMultitaskingCameraAccessEnabled,
@@ -373,7 +362,7 @@ class CallState extends Equatable {
     final capabilities = metadata.details.ownCapabilities.toList();
     // Once joined, the SFU reports the counts; until then the coordinator's
     // session counts are the only source.
-    final countsFromSession = !status.isConnected && !status.isJoined;
+    final countsFromSession = !status.isAlreadyJoined;
 
     return copyWith(
       isBackstage: metadata.details.backstage,
@@ -409,9 +398,6 @@ class CallState extends Equatable {
           : null,
       anonymousParticipantCount: countsFromSession
           ? metadata.session.anonymousParticipantCount
-          : null,
-      sessionParticipantIds: countsFromSession
-          ? metadata.session.participants.keys.toSet()
           : null,
       capabilitiesByRole: changedCapabilitiesByRoleOrNull(
         this.capabilitiesByRole,
@@ -458,7 +444,6 @@ class CallState extends Equatable {
     blockedUserIds,
     participantCount,
     anonymousParticipantCount,
-    sessionParticipantIds,
     iOSMultitaskingCameraAccessEnabled,
     custom,
     isVideoModerated,

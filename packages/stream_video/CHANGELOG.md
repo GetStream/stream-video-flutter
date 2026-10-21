@@ -3,7 +3,7 @@
 ### 🐞 Fixed
 
 - `CallState.endedAt` is now set when the call ends while you are joined or watching it.
-- `CallState.participantCount` and `anonymousParticipantCount` are set from the call's session as soon as it is fetched, instead of staying 0 until the first count update. Before you join, `participantCount` also follows participants joining and leaving. Once you join, the SFU's counts still take over.
+- `CallState.participantCount` and `anonymousParticipantCount` are set from the call's session as soon as it is fetched, instead of staying 0 until the first count update. Once you join, the SFU's counts still take over.
 
 ### ✅ Added
 

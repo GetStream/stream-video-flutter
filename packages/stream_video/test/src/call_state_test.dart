@@ -192,4 +192,25 @@ void main() {
       expect(updated.participantCount, 2);
     },
   );
+
+  test(
+    'CallState.copyFromMetadata keeps the counts the SFU reports while reconnecting',
+    () {
+      final reconnecting = initial.copyWith(
+        status: CallStatus.reconnecting(1),
+        participantCount: 12500,
+        anonymousParticipantCount: 310,
+      );
+
+      final updated = reconnecting.copyFromMetadata(
+        SampleCallData.createCallMetadata(
+          participantsCountByRole: const {'host': 1, 'user': 12000},
+          anonymousParticipantCount: 300,
+        ),
+      );
+
+      expect(updated.participantCount, 12500);
+      expect(updated.anonymousParticipantCount, 310);
+    },
+  );
 }
