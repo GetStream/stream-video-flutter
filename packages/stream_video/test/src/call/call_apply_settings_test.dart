@@ -43,7 +43,7 @@ void main() {
       // Mock coordinator client methods that might be called
       when(
         () => mockCoordinatorClient.events,
-      ).thenAnswer((_) => MutableSharedEmitter<CoordinatorEvent>());
+      ).thenAnswer((_) => MutableSharedEmitter<StreamVideoEvent>());
 
       // Default device enumeration mocking - returns built-in devices only
       when(

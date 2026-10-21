@@ -35,7 +35,7 @@ class ConnectionHarness {
   final internetStatus = BehaviorSubject<InternetStatus>.seeded(
     InternetStatus.connected,
   );
-  final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+  final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
   final reporter = RecordingClientEventReporter();
 
   /// The SFU sessions, handed out by [sessionFactory] in order.

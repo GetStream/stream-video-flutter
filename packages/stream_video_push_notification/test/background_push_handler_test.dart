@@ -30,12 +30,12 @@ class MockPushNotificationManager extends Mock
     implements PushNotificationManager {}
 
 // ignore: avoid_implementing_value_types
-class MockRejectedEvent extends Mock implements CoordinatorCallRejectedEvent {}
+class MockRejectedEvent extends Mock implements StreamCallRejectedEvent {}
 
 void _ignore(RingingEvent _) {}
 
 /// The `call.rejected` a caller sends when it cancels the ring for [callCid].
-CoordinatorCallRejectedEvent _rejected(String callCid) {
+StreamCallRejectedEvent _rejected(String callCid) {
   final event = MockRejectedEvent();
   when(() => event.callCid).thenReturn(StreamCallCid(cid: callCid));
   return event;
@@ -84,7 +84,7 @@ void main() {
 
   late MockStreamVideo client;
   late StreamController<RingingEvent> ringing;
-  late StreamController<CoordinatorEvent> coordinatorEvents;
+  late StreamController<StreamVideoEvent> coordinatorEvents;
   late MockPushNotificationManager pushManager;
 
   /// The calls the platform shows, as the push manager reads them back.
@@ -161,7 +161,7 @@ void main() {
     StreamVideoPushHandler.ownsClientLifecycle = () => true;
     StreamVideoPushHandler.resolutionGrace = grace;
     ringing = StreamController<RingingEvent>.broadcast();
-    coordinatorEvents = StreamController<CoordinatorEvent>.broadcast();
+    coordinatorEvents = StreamController<StreamVideoEvent>.broadcast();
     nativeCalls = [];
     pushManager = MockPushNotificationManager();
     when(pushManager.activeCalls).thenAnswer((_) async => nativeCalls);

@@ -1,7 +1,3 @@
-import '../../../logger/stream_log.dart';
-
-const _tag = 'SV:EventType';
-
 enum EventType {
   healthCheck('health.check'),
   connectionOk('connection.ok'),
@@ -64,15 +60,11 @@ enum EventType {
 
   const EventType(this.alias);
 
-  factory EventType.fromAlias(dynamic alias) {
-    return EventType.values.firstWhere(
-      (e) => e.alias == alias,
-      orElse: () {
-        streamLog.w(_tag, () => '[fromAlias] unexpected alias: $alias');
-        return EventType.unknown;
-      },
-    );
-  }
+  /// The type named [alias], or [unknown] for one this SDK version has no
+  /// model for. Not logged here: the codec drops an unknown type and names it.
+  factory EventType.fromAlias(dynamic alias) => _byAlias[alias] ?? unknown;
+
+  static final _byAlias = {for (final type in values) type.alias: type};
 
   final String alias;
 }

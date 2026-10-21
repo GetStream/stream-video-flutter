@@ -341,10 +341,10 @@ class StreamVideoPushHandler {
       // native call silently, so none of the events above ever arrives.
       session.ringEnds = streamVideo.events.listen((event) {
         final callCid = switch (event) {
-          CoordinatorCallRejectedEvent(:final callCid) ||
-          CoordinatorCallEndedEvent(:final callCid) ||
-          CoordinatorCallMissedEvent(:final callCid) ||
-          CoordinatorCallAcceptedEvent(:final callCid) => callCid,
+          StreamCallRejectedEvent(:final callCid) ||
+          StreamCallEndedEvent(:final callCid) ||
+          StreamCallMissedEvent(:final callCid) ||
+          StreamCallAcceptedEvent(:final callCid) => callCid,
           _ => null,
         };
         if (callCid == null) return;
@@ -390,7 +390,7 @@ class _BackgroundSession {
   StreamSubscription<RingingEvent>? resolution;
 
   /// The coordinator events that can end a ring without the user.
-  StreamSubscription<CoordinatorEvent>? ringEnds;
+  StreamSubscription<StreamVideoEvent>? ringEnds;
 
   /// The ringing flows still waiting on the user, by call cid.
   final pendingRings = <String>{};

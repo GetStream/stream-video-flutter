@@ -94,8 +94,8 @@ class CoordinatorWebSocket {
   late final RetryStrategy _retryStrategy;
   late final String _wsUrl;
 
-  SharedEmitter<CoordinatorEvent> get events => _events;
-  final _events = MutableSharedEmitter<CoordinatorEvent>();
+  SharedEmitter<StreamVideoEvent> get events => _events;
+  final _events = MutableSharedEmitter<StreamVideoEvent>();
 
   String? _userId;
   String? _connectionId;

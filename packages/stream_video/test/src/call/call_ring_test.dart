@@ -24,14 +24,14 @@ void main() {
   Future<
     ({
       Call call,
-      MutableSharedEmitter<CoordinatorEvent> events,
+      MutableSharedEmitter<StreamVideoEvent> events,
       MockCoordinatorClient coordinatorClient,
     })
   >
   setupOngoingCall({
     Map<String, CallMember>? members,
   }) async {
-    final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+    final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
     final currentUser = SampleCallData.defaultCallUser;
     final effectiveMembers =
@@ -229,8 +229,8 @@ void main() {
         // The coordinator emits a member added event which should update state.
         final newMember = SampleCallData.createCallMember(userId: newUser.id);
         setup.events.emit(
-          CoordinatorCallMemberAddedEvent(
-            callCid: setup.call.callCid,
+          StreamCallMemberAddedEvent(
+            setup.call.callCid,
             members: [newMember],
             metadata: SampleCallData.createCallMetadata(
               members: {newMember.userId: newMember},

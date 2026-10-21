@@ -6,7 +6,7 @@ import 'models/coordinator_models.dart' as models;
 
 abstract class CoordinatorClient {
   bool get isConnected;
-  SharedEmitter<CoordinatorEvent> get events;
+  SharedEmitter<StreamVideoEvent> get events;
 
   Future<Result<None>> connectUser(
     UserInfo user, {
@@ -262,7 +262,7 @@ abstract class CoordinatorClient {
 
   /// Signals other users that I have cancelled my call to them before
   /// they accepted it.
-  /// Causes the [CoordinatorCallEndedEvent] event to be emitted
+  /// Causes the [StreamCallEndedEvent] event to be emitted
   /// to all the call members.
   ///
   /// Cancelling a call is only possible before the local participant

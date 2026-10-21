@@ -46,15 +46,13 @@ void main() {
     /// Rings [streamVideo] for a call created by [caller].
     void ring() {
       streamVideo.debugHandleCoordinatorEvent(
-        CoordinatorCallRingingEvent(
-          data: CallRingingData(
-            callCid: StreamCallCid(cid: cid),
-            ringing: true,
-            metadata: metadataCreatedBy(caller),
-          ),
+        StreamCallRingingEvent(
+          StreamCallCid(cid: cid),
           video: false,
           sessionId: 'session-id',
           createdAt: DateTime.now(),
+          ringing: true,
+          metadata: metadataCreatedBy(caller),
         ),
       );
     }
@@ -62,8 +60,8 @@ void main() {
     /// Delivers a `call.rejected` for [cid], rejected by [rejectedBy].
     void reject(String rejectedBy) {
       streamVideo.debugHandleCoordinatorEvent(
-        CoordinatorCallRejectedEvent(
-          callCid: StreamCallCid(cid: cid),
+        StreamCallRejectedEvent(
+          StreamCallCid(cid: cid),
           rejectedBy: CallUser(
             id: rejectedBy,
             name: rejectedBy,
@@ -72,12 +70,6 @@ void main() {
           ),
           createdAt: DateTime.now(),
           metadata: metadataCreatedBy(caller),
-          user: CallUser(
-            id: rejectedBy,
-            name: rejectedBy,
-            roles: const [],
-            image: '',
-          ),
         ),
       );
     }
@@ -93,7 +85,7 @@ void main() {
 
       // `thenAnswer`, not `thenReturn`: a SharedEmitter is a Stream, which
       // mocktail refuses to hand back from `thenReturn`.
-      final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+      final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
       when(() => mockCoordinatorClient.events).thenAnswer(
         (_) => coordinatorEvents,
       );

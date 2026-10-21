@@ -29,6 +29,7 @@ export 'push_device.dart';
 export 'push_provider.dart';
 export 'queried_calls.dart';
 export 'queried_members.dart';
+export 'stream_video_event.dart';
 export 'subscription_change.dart';
 export 'user.dart';
 export 'user_info.dart';

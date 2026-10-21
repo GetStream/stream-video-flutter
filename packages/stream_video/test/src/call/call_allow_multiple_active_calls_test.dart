@@ -41,7 +41,7 @@ void main() {
       // Mock coordinator client methods and events that might be called
       when(
         () => mockCoordinatorClient.events,
-      ).thenAnswer((_) => MutableSharedEmitter<CoordinatorEvent>());
+      ).thenAnswer((_) => MutableSharedEmitter<StreamVideoEvent>());
       when(
         () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),
       ).thenAnswer((_) async => const Result.success(none));

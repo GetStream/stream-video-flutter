@@ -7,11 +7,11 @@ import 'package:stream_core/stream_core.dart';
 import 'package:uuid/uuid.dart';
 
 import '../call/call.dart';
+import '../call/call_events.dart';
 import '../call/call_reject_reason.dart';
 import '../call/call_ringing_state.dart';
 import '../call/call_type.dart';
 import '../coordinator/coordinator_client.dart';
-import '../coordinator/models/coordinator_events.dart';
 import '../core/client_state.dart';
 import '../errors/stream_video_exception.dart';
 import '../lifecycle/video_lifecycle_state.dart';
@@ -23,6 +23,7 @@ import '../models/call_received_data.dart';
 import '../models/call_ringing_data.dart';
 import '../models/call_status.dart';
 import '../models/disconnect_reason.dart';
+import '../models/stream_video_event.dart';
 import '../push_notification/push_notification_manager.dart';
 import '../stream_video.dart' show StreamVideoOptions;
 import '../utils/result.dart';
@@ -92,26 +93,26 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
 
   /// Handles a ring and a reject from the coordinator. Answers whether
   /// [event] was one of them.
-  bool handleCoordinatorEvent(CoordinatorEvent event) {
-    if (event is CoordinatorCallRingingEvent) {
+  bool handleCoordinatorEvent(StreamVideoEvent event) {
+    if (event is StreamCallRingingEvent) {
       _onCallRinging(event);
       return true;
     }
-    if (event is CoordinatorCallRejectedEvent) {
+    if (event is StreamCallRejectedEvent) {
       unawaited(_onRingingCancelled(event));
       return true;
     }
     return false;
   }
 
-  void _onCallRinging(CoordinatorCallRingingEvent event) {
+  void _onCallRinging(StreamCallRingingEvent event) {
     if (event.metadata.details.createdBy.id == _state.currentUser.id ||
-        !event.data.ringing) {
+        !event.ringing) {
       return;
     }
 
-    _logger.v(() => '[onCoordinatorEvent] onCallRinging: ${event.data}');
-    final cid = event.data.callCid.value;
+    _logger.v(() => '[onCoordinatorEvent] onCallRinging: $event');
+    final cid = event.callCid.value;
 
     // In a edge case where call with the same CID as the incoming call is also an outgoing call
     // we want to use the same Call instance.
@@ -122,7 +123,7 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
 
     if (isCallAcceptedOnThisDevice(cid)) {
       _logger.v(
-        () => '[onCoordinatorEvent] already accepted here: ${event.data}',
+        () => '[onCoordinatorEvent] already accepted here: $event',
       );
       return;
     }
@@ -130,13 +131,19 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
     final consumedCall = _state.ringingCalls[cid];
     if (consumedCall != null) {
       _logger.v(
-        () => '[onCoordinatorEvent] reusing consumed call: ${event.data}',
+        () => '[onCoordinatorEvent] reusing consumed call: $event',
       );
       _state.incomingCall.value = consumedCall;
       return;
     }
 
-    final call = _makeRingingCall(event.data);
+    final call = _makeRingingCall(
+      CallRingingData(
+        callCid: event.callCid,
+        ringing: event.ringing,
+        metadata: event.metadata,
+      ),
+    );
     _state.ringingCalls[cid] = call;
     _state.incomingCall.value = call;
   }
@@ -144,7 +151,7 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
   /// Ends a ringing call cancelled by the caller.
   ///
   /// Applies only when the caller rejects; other rejections are handled elsewhere.
-  Future<void> _onRingingCancelled(CoordinatorCallRejectedEvent event) async {
+  Future<void> _onRingingCancelled(StreamCallRejectedEvent event) async {
     final cid = event.callCid.value;
     if (event.rejectedBy.id != event.metadata.details.createdBy.id) return;
 

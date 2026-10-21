@@ -44,8 +44,8 @@ void main() {
   }
 
   /// A coordinator event for the call, which it forwards to its events.
-  CoordinatorCallEvent caption() => CoordinatorCallClosedCaptionEvent(
-    callCid: SampleCallData.defaultCid,
+  StreamCallEvent caption() => StreamCallClosedCaptionsEvent(
+    SampleCallData.defaultCid,
     createdAt: DateTime.now(),
     startTime: DateTime.now(),
     endTime: DateTime.now().add(const Duration(seconds: 3)),

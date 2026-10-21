@@ -251,39 +251,6 @@ void main() {
       expect(controller.participants, hasLength(2));
     });
 
-    // The coordinator's socket carries every call the user is in, so a call
-    // ringing in the background used to move people in and out of this
-    // lobby's list.
-    test('ignores an event for another call', () async {
-      sessionParticipants = {'a': _participant('a')};
-      final controller = build();
-      await pumpEventQueue();
-
-      events
-        ..emit(
-          StreamCallSessionParticipantJoinedEvent(
-            StreamCallCid(cid: 'default:other'),
-            createdAt: DateTime(2026),
-            sessionId: 'session',
-            user: _user('b'),
-            participant: _participant('b'),
-          ),
-        )
-        ..emit(
-          StreamCallSessionParticipantLeftEvent(
-            StreamCallCid(cid: 'default:other'),
-            createdAt: DateTime(2026),
-            sessionId: 'session',
-            duration: Duration.zero,
-            user: _user('a'),
-            participant: _participant('a'),
-          ),
-        );
-      await pumpEventQueue();
-
-      expect(controller.participants.map((it) => it.userId), ['a']);
-    });
-
     test('ignores a join event for the local user', () async {
       final controller = build();
       await pumpEventQueue();

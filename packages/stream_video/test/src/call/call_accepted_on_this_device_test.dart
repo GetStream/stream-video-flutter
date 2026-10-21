@@ -35,7 +35,7 @@ void main() {
 
       // `thenAnswer`, not `thenReturn`: a SharedEmitter is a Stream, which
       // mocktail refuses to hand back from `thenReturn`.
-      final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+      final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
       when(() => mockCoordinatorClient.events).thenAnswer(
         (_) => coordinatorEvents,
       );

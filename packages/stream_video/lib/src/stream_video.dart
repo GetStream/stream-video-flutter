@@ -44,6 +44,7 @@ import 'models/multi_call_audio_policy.dart';
 import 'models/push_device.dart';
 import 'models/push_provider.dart';
 import 'models/queried_calls.dart';
+import 'models/stream_video_event.dart';
 import 'models/user.dart';
 import 'models/user_info.dart';
 import 'network_monitor_settings.dart';
@@ -552,7 +553,7 @@ class StreamVideo extends Disposable implements CallHost {
   /// Please note that subscribing to WebSocket events is an advanced use-case,
   /// for most use-cases it should be enough to watch for changes
   /// in the reactive [Call.state].
-  Stream<CoordinatorEvent> get events => _client.events;
+  Stream<StreamVideoEvent> get events => _client.events;
 
   /// Connects the user, and disconnects them again.
   late final CoordinatorConnection _connection = CoordinatorConnection(
@@ -645,9 +646,9 @@ class StreamVideo extends Disposable implements CallHost {
 
   /// Routes [event] through the coordinator event handling. Tests only.
   @visibleForTesting
-  void debugHandleCoordinatorEvent(CoordinatorEvent event) => _onEvent(event);
+  void debugHandleCoordinatorEvent(StreamVideoEvent event) => _onEvent(event);
 
-  void _onEvent(CoordinatorEvent event) {
+  void _onEvent(StreamVideoEvent event) {
     _logger.v(() => '[onCoordinatorEvent] eventType: ${event.runtimeType}');
     if (_ringing.handleCoordinatorEvent(event)) {
       return;

@@ -67,15 +67,13 @@ void main() {
   /// The ring the coordinator sends, which leaves an incoming call behind.
   Call ring() {
     fixture.streamVideo.debugHandleCoordinatorEvent(
-      CoordinatorCallRingingEvent(
-        data: CallRingingData(
-          callCid: callCid,
-          ringing: true,
-          metadata: metadata(),
-        ),
+      StreamCallRingingEvent(
+        callCid,
         video: false,
         sessionId: 'session-id',
         createdAt: DateTime.now(),
+        ringing: true,
+        metadata: metadata(),
       ),
     );
     return fixture.streamVideo.state.incomingCall.value!;
