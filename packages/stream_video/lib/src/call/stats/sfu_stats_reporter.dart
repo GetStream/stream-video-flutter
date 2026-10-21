@@ -62,16 +62,12 @@ class SfuStatsReporter {
   int _reportCount = 0;
   bool _stopped = false;
 
-  /// How many sends have started, and which of them is the flush.
-  int _sends = 0;
-  int? _flushSend;
-
   static const _flushTimeout = Duration(seconds: 2);
   static const _getStatsTimeout = Duration(seconds: 5);
 
-  /// Whether [send] is skipped: once stopped, only the flush still goes out,
-  /// not the sends queued behind it.
-  bool _skips(int send) => _stopped && send != _flushSend;
+  /// Whether a send is skipped: once stopped, only a send that is
+  /// [keptAfterStop] still goes out.
+  bool _skips({required bool keptAfterStop}) => _stopped && !keptAfterStop;
 
   void run({Duration interval = const Duration(seconds: 8)}) {
     _timer?.cancel();
@@ -103,8 +99,7 @@ class SfuStatsReporter {
   Future<void> flush() async {
     if (_stopped) return;
 
-    _flushSend = _sends + 1;
-    final sendStatsFuture = sendSfuStats();
+    final sendStatsFuture = sendSfuStats(keepAfterStop: true);
 
     try {
       await sendStatsFuture.timeout(
@@ -118,27 +113,30 @@ class SfuStatsReporter {
     }
   }
 
+  /// Sends the current stats. With [keepAfterStop], it still goes out when
+  /// [stop] is called before it has: the flush, and the stats sent as the
+  /// connection drops, which describe the drop.
   Future<void> sendSfuStats({
     int? connectionTimeMs,
     SfuReconnectionStrategy? reconnectionStrategy,
+    bool keepAfterStop = false,
   }) async {
-    final send = ++_sends;
-    if (_skips(send)) return;
+    if (_skips(keptAfterStop: keepAfterStop)) return;
     try {
       await _sfuStatsLock.synchronized(() async {
-        if (_skips(send)) return;
+        if (_skips(keptAfterStop: keepAfterStop)) return;
         final publisherStatsBundle = await _withinStatsTimeout(
           callSession.rtcManager?.publisher?.getStats(),
           'publisher',
         );
 
-        if (_skips(send)) return;
+        if (_skips(keptAfterStop: keepAfterStop)) return;
         final subscriberStatsBundle = await _withinStatsTimeout(
           callSession.rtcManager?.subscriber.getStats(),
           'subscriber',
         );
 
-        if (_skips(send) ||
+        if (_skips(keptAfterStop: keepAfterStop) ||
             (publisherStatsBundle == null && subscriberStatsBundle == null)) {
           return;
         }
@@ -250,7 +248,7 @@ class SfuStatsReporter {
             unifiedSessionId: unifiedSessionId,
           );
 
-          await _sendRequest(send, request, traces);
+          await _sendRequest(request, traces, keepAfterStop: keepAfterStop);
         } catch (e) {
           for (final trace in traces) {
             trace.rollback();
@@ -266,15 +264,15 @@ class SfuStatsReporter {
     }
   }
 
-  /// Sends [request], unless [send] is skipped by now: the battery and trace
-  /// reads before it can outlast [stop]. [traces] are rolled back when the
-  /// request is skipped or fails.
+  /// Sends [request], unless it is skipped by now: the battery and trace reads
+  /// before it can outlast [stop]. [traces] are rolled back when the request
+  /// is skipped or fails.
   Future<void> _sendRequest(
-    int send,
     sfu.SendStatsRequest request,
-    List<TraceSlice> traces,
-  ) async {
-    final skipped = _skips(send);
+    List<TraceSlice> traces, {
+    required bool keepAfterStop,
+  }) async {
+    final skipped = _skips(keptAfterStop: keepAfterStop);
     final failed =
         !skipped && (await callSession.sfuClient.sendStats(request)).isFailure;
     if (skipped || failed) {

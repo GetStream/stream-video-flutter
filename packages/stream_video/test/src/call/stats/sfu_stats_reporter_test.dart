@@ -291,5 +291,49 @@ void main() {
         verifyNever(() => sfuClient.sendStats(any()));
       },
     );
+
+    test(
+      'still sends a send kept after stop once the battery read is done',
+      () async {
+        // A platform the battery saver mode is read on, and the thermal
+        // status is not, whatever runs the test.
+        CurrentPlatform.debugCurrentPlatformOverride = PlatformType.macOS;
+        addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+
+        final batteryRead = Completer<bool>();
+        var batteryAsked = false;
+        final messenger =
+            TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+        messenger.setMockMethodCallHandler(
+          const MethodChannel('dev.fluttercommunity.plus/battery'),
+          (call) {
+            batteryAsked = true;
+            return batteryRead.future;
+          },
+        );
+        addTearDown(
+          () => messenger.setMockMethodCallHandler(
+            const MethodChannel('dev.fluttercommunity.plus/battery'),
+            (call) async => false,
+          ),
+        );
+
+        final reporter = _createReporter(
+          callSession: callSession,
+          sfuClient: sfuClient,
+          subscriber: subscriber,
+        );
+
+        final send = reporter.sendSfuStats(keepAfterStop: true);
+        await pumpEventQueue();
+        expect(batteryAsked, isTrue);
+
+        reporter.stop();
+        batteryRead.complete(false);
+        await send;
+
+        verify(() => sfuClient.sendStats(any())).called(1);
+      },
+    );
   });
 }

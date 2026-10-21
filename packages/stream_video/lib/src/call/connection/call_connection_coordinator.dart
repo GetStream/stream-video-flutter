@@ -1296,12 +1296,16 @@ class CallConnectionCoordinator {
     required CallSession session,
   }) async {
     if (sfuEvent is SfuSocketDisconnected) {
-      await _sfuStatsReporter?.sendSfuStats().timeout(
-        statsBeforeReconnectTimeout,
-        onTimeout: () => _call._logger.w(
-          () => '[onSfuEvent] stats not sent in time, reconnecting anyway',
-        ),
-      );
+      // Kept after stop, so a rejoin that stops the reporter still lets these
+      // go out: they describe the drop.
+      await _sfuStatsReporter
+          ?.sendSfuStats(keepAfterStop: true)
+          .timeout(
+            statsBeforeReconnectTimeout,
+            onTimeout: () => _call._logger.w(
+              () => '[onSfuEvent] stats not sent in time, reconnecting anyway',
+            ),
+          );
       // Don't attempt reconnection if leaving the call was triggered, or if the
       // closure itself says another attempt is pointless. That verdict comes
       // from the disconnection source rather than the close code, which a
