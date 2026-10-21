@@ -71,22 +71,20 @@ void main() {
 
   Call ring(StreamVideoFixture fixture) {
     fixture.streamVideo.debugHandleCoordinatorEvent(
-      CoordinatorCallRingingEvent(
-        data: CallRingingData(
-          callCid: callCid,
-          ringing: true,
-          metadata: CallMetadata(
-            cid: callCid,
-            details: createTestCallDetails(createdByUserId: 'caller'),
-            settings: const CallSettings(),
-            session: const CallSessionData(),
-            users: const {},
-            members: const {},
-          ),
-        ),
+      StreamCallRingingEvent(
+        callCid,
         video: false,
         sessionId: 'session-id',
         createdAt: DateTime.now(),
+        ringing: true,
+        metadata: CallMetadata(
+          cid: callCid,
+          details: createTestCallDetails(createdByUserId: 'caller'),
+          settings: const CallSettings(),
+          session: const CallSessionData(),
+          users: const {},
+          members: const {},
+        ),
       ),
     );
     return fixture.streamVideo.state.incomingCall.value!;

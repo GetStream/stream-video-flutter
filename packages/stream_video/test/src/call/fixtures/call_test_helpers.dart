@@ -214,12 +214,12 @@ MockCallHost setupMockCallHost({ClientState? clientState}) {
 }
 
 MockCoordinatorClient setupMockCoordinatorClient({
-  SharedEmitter<CoordinatorEvent>? events,
+  SharedEmitter<StreamVideoEvent>? events,
   CallReceivedOrCreatedData? getOrCreateCallResult,
 }) {
   final coordinatorClient = MockCoordinatorClient();
   final coordinatorEventStream =
-      events ?? MutableSharedEmitter<CoordinatorEvent>();
+      events ?? MutableSharedEmitter<StreamVideoEvent>();
   when(() => coordinatorClient.events).thenAnswer(
     (_) => coordinatorEventStream,
   );

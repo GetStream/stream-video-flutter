@@ -44,7 +44,7 @@ void main() {
 
       // `thenAnswer`, not `thenReturn`: a SharedEmitter is a Stream, which
       // mocktail refuses to hand back from `thenReturn`.
-      final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+      final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
       when(() => mockCoordinatorClient.events).thenAnswer(
         (_) => coordinatorEvents,
       );
@@ -237,7 +237,7 @@ void main() {
 
       // `thenAnswer`, not `thenReturn`: a SharedEmitter is a Stream, which
       // mocktail refuses to hand back from `thenReturn`.
-      final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+      final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
       when(() => mockCoordinatorClient.events).thenAnswer(
         (_) => coordinatorEvents,
       );
@@ -351,15 +351,13 @@ void main() {
       );
 
       streamVideo.debugHandleCoordinatorEvent(
-        CoordinatorCallRingingEvent(
-          data: CallRingingData(
-            callCid: callCid,
-            ringing: true,
-            metadata: metadata,
-          ),
+        StreamCallRingingEvent(
+          callCid,
           video: false,
           sessionId: 'session-id',
           createdAt: DateTime.now(),
+          ringing: true,
+          metadata: metadata,
         ),
       );
 
@@ -402,15 +400,13 @@ void main() {
       expect(streamVideo.ringing.isCallAcceptedOnThisDevice(cid), isTrue);
 
       streamVideo.debugHandleCoordinatorEvent(
-        CoordinatorCallRingingEvent(
-          data: CallRingingData(
-            callCid: callCid,
-            ringing: true,
-            metadata: metadata,
-          ),
+        StreamCallRingingEvent(
+          callCid,
           video: false,
           sessionId: 'session-id',
           createdAt: DateTime.now(),
+          ringing: true,
+          metadata: metadata,
         ),
       );
 
@@ -442,15 +438,13 @@ void main() {
 
       // The ringing event is what publishes it.
       streamVideo.debugHandleCoordinatorEvent(
-        CoordinatorCallRingingEvent(
-          data: CallRingingData(
-            callCid: callCid,
-            ringing: true,
-            metadata: metadata,
-          ),
+        StreamCallRingingEvent(
+          callCid,
           video: false,
           sessionId: 'session-id',
           createdAt: DateTime.now(),
+          ringing: true,
+          metadata: metadata,
         ),
       );
       expect(streamVideo.state.incomingCall.value, isNotNull);
@@ -529,15 +523,13 @@ void main() {
       await first.getDataOrNull()!.leave();
 
       streamVideo.debugHandleCoordinatorEvent(
-        CoordinatorCallRingingEvent(
-          data: CallRingingData(
-            callCid: callCid,
-            ringing: true,
-            metadata: metadata,
-          ),
+        StreamCallRingingEvent(
+          callCid,
           video: false,
           sessionId: 'session-id',
           createdAt: DateTime.now(),
+          ringing: true,
+          metadata: metadata,
         ),
       );
 
@@ -558,7 +550,7 @@ void main() {
 
       // `thenAnswer`, not `thenReturn`: a SharedEmitter is a Stream, which
       // mocktail refuses to hand back from `thenReturn`.
-      final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+      final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
       when(() => mockCoordinatorClient.events).thenAnswer(
         (_) => coordinatorEvents,
       );

@@ -107,7 +107,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     void subscribeToEvents() {
       _subscriptions.add(
         _idCallEnded,
-        client.events.on<CoordinatorCallEndedEvent>((event) {
+        client.events.on<StreamCallEndedEvent>((event) {
           _logger.d(
             () => '[subscribeToEvents] Call ended event: ${event.callCid}',
           );
@@ -118,7 +118,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
       _subscriptions.add(
         _idCallParticipantCount,
-        client.events.on<CoordinatorCallSessionParticipantCountUpdatedEvent>((
+        client.events.on<StreamCallSessionParticipantCountUpdatedEvent>((
           event,
         ) async {
           final roleCounts = event.participantsCountByRole.values.map((v) => v);
@@ -145,7 +145,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
       _subscriptions.add(
         _idCallRejected,
-        client.events.on<CoordinatorCallRejectedEvent>((event) async {
+        client.events.on<StreamCallRejectedEvent>((event) async {
           _logger.d(
             () =>
                 '[subscribeToEvents] Call rejected event: ${event.callCid}, rejected by: ${event.rejectedByUserId}',
@@ -165,7 +165,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
       _subscriptions.add(
         _idCallAccepted,
-        client.events.on<CoordinatorCallAcceptedEvent>((event) async {
+        client.events.on<StreamCallAcceptedEvent>((event) async {
           _logger.d(
             () =>
                 '[subscribeToEvents] Call accepted event: ${event.callCid}, accepted by: ${event.acceptedByUserId}',

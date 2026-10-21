@@ -2,20 +2,20 @@ import 'dart:convert';
 
 import '../../../stream_video.dart';
 import 'error/open_api_error.dart';
-import 'event/open_api_event.dart';
+import 'event/event_type.dart';
 import 'open_api_mapper_extensions.dart';
 
 final _logger = taggedLogger(tag: 'SV:CoordinatorCodec');
 
 /// A thin [WsEvent] wrapper produced by [CoordinatorMessageCodec].
-/// Carries the decoded [CoordinatorEvent]
+/// Carries the decoded [StreamVideoEvent]
 /// [healthCheckInfo] is non-null only for events that act as pong signals
 /// [error] is non-null only for API errors that refused the connection
 final class CoordinatorWsEvent extends WsEvent {
   const CoordinatorWsEvent(this.event, {this.healthCheckInfo, this.error});
 
   /// `null` indicates the message was suppressed (not a domain event).
-  final CoordinatorEvent? event;
+  final StreamVideoEvent? event;
 
   @override
   final HealthCheckInfo? healthCheckInfo;
@@ -49,14 +49,11 @@ enum _DropReason {
   /// have the socket client close a connection the error was never about.
   serverError,
 
-  /// JSON the coordinator event envelope did not recognise.
+  /// A JSON object that names no event type, so is no event envelope.
   unrecognisedEnvelope,
 
   /// An envelope naming an event type this SDK version has no model for.
   unknownEventType,
-
-  /// A recognised envelope this SDK version has no domain event for.
-  unmappedEvent,
 }
 
 /// Encodes/decodes messages between the coordinator WebSocket wire format
@@ -114,50 +111,35 @@ class CoordinatorMessageCodec
       return _drop(_DropReason.serverError, apiError);
     }
 
-    final dtoEvent = OpenApiEvent.fromJson(jsonMap);
-    if (dtoEvent == null) {
-      return _drop(_DropReason.unrecognisedEnvelope, jsonMap['type']);
+    final rawType = jsonMap['type'];
+    if (rawType == null) {
+      return _drop(_DropReason.unrecognisedEnvelope);
     }
-
-    // Connected — signals initial pong and carries the connection ID used
-    // for subsequent health check pings.
-    if (dtoEvent.connected case final connected?) {
-      final event = CoordinatorConnectedEvent(
-        connectionId: connected.connectionId,
-        userId: connected.me.id,
-      );
-      return CoordinatorWsEvent(
-        event,
-        healthCheckInfo: HealthCheckInfo(connectionId: connected.connectionId),
-      );
-    }
-
-    // Health check response — signals a pong.
-    if (dtoEvent.healthCheck case final healthCheck?) {
-      final event = CoordinatorHealthCheckEvent(
-        clientId: healthCheck.connectionId,
-      );
-      return CoordinatorWsEvent(
-        event,
-        healthCheckInfo: HealthCheckInfo(
-          connectionId: healthCheck.connectionId,
-        ),
-      );
-    }
-
-    final domainEvent = dtoEvent.toCoordinatorEvent();
-    if (domainEvent == null) {
-      return _drop(_DropReason.unmappedEvent, jsonMap['type']);
-    }
+    _logger.v(() => '[decode] type: $rawType');
 
     // An event type this SDK version has no model for. Dropped here, where the
     // type is still known, rather than delivered as an opaque event for the
     // socket to discard without being able to name it.
-    if (domainEvent is CoordinatorUnknownEvent) {
-      return _drop(_DropReason.unknownEventType, jsonMap['type']);
+    final event = coordinatorEventFromJson(
+      EventType.fromAlias(rawType),
+      jsonMap,
+    );
+    if (event == null) {
+      return _drop(_DropReason.unknownEventType, rawType);
     }
 
-    return CoordinatorWsEvent(domainEvent);
+    return CoordinatorWsEvent(
+      event,
+      // Connected signals the initial pong and carries the connection ID used
+      // for subsequent health check pings; a health check response is a pong.
+      healthCheckInfo: switch (event) {
+        CoordinatorConnectedEvent(:final connectionId) ||
+        CoordinatorHealthCheckEvent(
+          clientId: final connectionId,
+        ) => HealthCheckInfo(connectionId: connectionId),
+        _ => null,
+      },
+    );
   }
 }
 

@@ -541,17 +541,10 @@ class StreamLobbyController extends ChangeNotifier {
   /// They flow because [_fetchCall] watches the call, which is what `Call.get`
   /// does unless asked not to: a watched call follows the coordinator without
   /// having been joined.
-  ///
-  /// Filtered by cid: the coordinator's socket carries every call the user is
-  /// in, so without this a second call — one ringing in the background, or the
-  /// one this user just stepped out of — moves people in and out of this
-  /// lobby's list.
   void _listenEvents() {
     _eventSubscription?.cancel();
     _eventSubscription = call.callEvents.listen(
       (event) {
-        if (event.callCid != call.callCid) return;
-
         if (event is StreamCallSessionParticipantLeftEvent) {
           _logger.d(
             () =>

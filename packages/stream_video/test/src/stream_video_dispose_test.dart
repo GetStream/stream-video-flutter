@@ -42,15 +42,13 @@ void main() {
     /// Rings [streamVideo] for a call created by [caller].
     void ring() {
       streamVideo.debugHandleCoordinatorEvent(
-        CoordinatorCallRingingEvent(
-          data: CallRingingData(
-            callCid: StreamCallCid(cid: cid),
-            ringing: true,
-            metadata: metadataCreatedBy(caller),
-          ),
+        StreamCallRingingEvent(
+          StreamCallCid(cid: cid),
           video: false,
           sessionId: 'session-id',
           createdAt: DateTime.now(),
+          ringing: true,
+          metadata: metadataCreatedBy(caller),
         ),
       );
     }
@@ -67,7 +65,7 @@ void main() {
 
       // `thenAnswer`, not `thenReturn`: a SharedEmitter is a Stream, which
       // mocktail refuses to hand back from `thenReturn`.
-      final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+      final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
       when(() => mockCoordinatorClient.events).thenAnswer(
         (_) => coordinatorEvents,
       );

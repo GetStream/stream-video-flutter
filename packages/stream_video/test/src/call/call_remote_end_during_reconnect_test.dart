@@ -12,9 +12,9 @@ import 'fixtures/call_test_helpers.dart';
 import 'fixtures/data.dart';
 
 /// The event a call ended from another device arrives as.
-CoordinatorCallEndedEvent _endedEvent() {
-  return CoordinatorCallEndedEvent(
-    callCid: SampleCallData.defaultCid,
+StreamCallEndedEvent _endedEvent() {
+  return StreamCallEndedEvent(
+    SampleCallData.defaultCid,
     endedBy: SampleCallData.defaultCallUser,
     createdAt: DateTime.now(),
     metadata: SampleCallData.defaultCallMetadata,
@@ -37,7 +37,7 @@ void main() {
   // "Connecting…" for good.
   group('a call ended remotely while a reconnect is in flight', () {
     late BehaviorSubject<InternetStatus> internetStatus;
-    late MutableSharedEmitter<CoordinatorEvent> coordinatorEvents;
+    late MutableSharedEmitter<StreamVideoEvent> coordinatorEvents;
     late MockCoordinatorClient coordinatorClient;
     late MockCallSession callSession;
     late MockSessionFactory sessionFactory;
@@ -46,7 +46,7 @@ void main() {
       internetStatus = BehaviorSubject<InternetStatus>.seeded(
         InternetStatus.connected,
       );
-      coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+      coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
       coordinatorClient = setupMockCoordinatorClient(
         events: coordinatorEvents,
       );

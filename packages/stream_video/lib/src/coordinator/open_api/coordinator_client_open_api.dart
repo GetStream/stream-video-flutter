@@ -109,12 +109,12 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   late final _locationService = LocationService();
 
   @override
-  SharedEmitter<CoordinatorEvent> get events => _events;
+  SharedEmitter<StreamVideoEvent> get events => _events;
 
   @override
   bool get isConnected => _ws?.isConnected ?? false;
 
-  final _events = MutableSharedEmitter<CoordinatorEvent>();
+  final _events = MutableSharedEmitter<StreamVideoEvent>();
 
   final _connectionState = MutableStateEmitter<CoordinatorConnectionState>(
     const CoordinatorDisconnected(),
@@ -123,7 +123,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   UserInfo? _user;
   bool _includeUserDetails = false;
   CoordinatorWebSocket? _ws;
-  StreamSubscription<CoordinatorEvent>? _wsSubscription;
+  StreamSubscription<StreamVideoEvent>? _wsSubscription;
 
   @override
   Future<Result<None>> connectUser(
@@ -1737,7 +1737,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   /// Signals other users that I have accepted the incoming call.
-  /// Causes the [CoordinatorCallAcceptedEvent] event to be emitted
+  /// Causes the [StreamCallAcceptedEvent] event to be emitted
   /// to all the call members.
   @override
   Future<Result<None>> acceptCall({
@@ -1762,7 +1762,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   /// Signals other users that I have rejected the incoming call.
-  /// Causes the [CoordinatorCallRejectedEvent] event to be emitted
+  /// Causes the [StreamCallRejectedEvent] event to be emitted
   /// to all the call members.
   @override
   Future<Result<None>> rejectCall({

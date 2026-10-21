@@ -72,7 +72,7 @@ class StreamVideoFixture {
   /// The network monitor the client hands its calls. Connected, unless a
   /// test stubs it otherwise.
   final networkMonitor = setupMockInternetConnection();
-  final events = MutableSharedEmitter<CoordinatorEvent>();
+  final events = MutableSharedEmitter<StreamVideoEvent>();
 
   /// The app states each connect listens to. Broadcast, so a reconnect can
   /// listen again.

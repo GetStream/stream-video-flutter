@@ -74,8 +74,8 @@ void main() {
       final left = call.leave();
       await subscriber.statsRequested.future;
       harness.coordinatorEvents.emit(
-        CoordinatorCallClosedCaptionEvent(
-          callCid: call.callCid,
+        StreamCallClosedCaptionsEvent(
+          call.callCid,
           createdAt: DateTime.now(),
           startTime: DateTime.now(),
           endTime: DateTime.now().add(const Duration(seconds: 3)),

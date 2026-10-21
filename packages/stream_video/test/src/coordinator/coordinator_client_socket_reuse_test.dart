@@ -6,6 +6,7 @@ import 'package:stream_video/src/coordinator/open_api/coordinator_client_open_ap
 import 'package:stream_video/src/coordinator/open_api/coordinator_ws.dart';
 import 'package:stream_video/src/latency/latency_service.dart';
 import 'package:stream_video/src/latency/latency_settings.dart';
+import 'package:stream_video/src/models/stream_video_event.dart';
 import 'package:stream_video/src/models/user_info.dart';
 import 'package:stream_video/src/retry/retry_policy.dart';
 import 'package:stream_video/src/token/token_source.dart';
@@ -35,7 +36,7 @@ class _FakeSocket extends Mock implements CoordinatorWebSocket {
   final String userId;
   @override
   final bool includeUserDetails;
-  final _events = MutableSharedEmitter<CoordinatorEvent>();
+  final _events = MutableSharedEmitter<StreamVideoEvent>();
   bool _connected = false;
   bool _recovering = false;
   int connects = 0;
@@ -58,7 +59,7 @@ class _FakeSocket extends Mock implements CoordinatorWebSocket {
   }
 
   /// Emits [event] as if the server sent it.
-  void emit(CoordinatorEvent event) => _events.emit(event);
+  void emit(StreamVideoEvent event) => _events.emit(event);
 }
 
 /// Pins that connecting a user again reconnects the socket they already have,
@@ -114,7 +115,7 @@ void main() {
       await pumpEventQueue();
       await client.connectUser(user);
 
-      final received = <CoordinatorEvent>[];
+      final received = <StreamVideoEvent>[];
       final subscription = client.events.listen(received.add);
       addTearDown(subscription.cancel);
       sockets.single.drop();
@@ -193,7 +194,7 @@ void main() {
     await pumpEventQueue();
     await client.connectUser(const UserInfo(id: 'user-2'));
 
-    final received = <CoordinatorEvent>[];
+    final received = <StreamVideoEvent>[];
     final subscription = client.events.listen(received.add);
     addTearDown(subscription.cancel);
     sockets.first.emit(const CoordinatorDisconnectedEvent(userId: 'user-1'));
