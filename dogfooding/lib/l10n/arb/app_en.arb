@@ -1,0 +1,79 @@
+{
+  "@@locale": "en",
+  "settingsSystem": "System",
+  "@settingsSystem": {
+    "description": "A choice that follows the device's own setting, as for the app language or theme."
+  },
+  "languageTab": "Language",
+  "@languageTab": {
+    "description": "The settings window tab that picks the app language."
+  },
+  "languageTitle": "Change Language",
+  "@languageTitle": {
+    "description": "The heading over the app language select."
+  },
+  "languageDescription": "Select the language used across this demo.",
+  "@languageDescription": {
+    "description": "Explains the app language select."
+  },
+  "themeTab": "Theme",
+  "@themeTab": {
+    "description": "The settings window tab that picks light or dark mode."
+  },
+  "themeTitle": "Appearance",
+  "@themeTitle": {
+    "description": "The heading over the theme select."
+  },
+  "themeDescription": "Choose how the app looks.",
+  "@themeDescription": {
+    "description": "Explains the theme select."
+  },
+  "themeLight": "Light",
+  "@themeLight": {
+    "description": "The light theme choice."
+  },
+  "themeDark": "Dark",
+  "@themeDark": {
+    "description": "The dark theme choice."
+  },
+  "accentColorTitle": "Accent Color",
+  "@accentColorTitle": {
+    "description": "The heading over the accent color swatches."
+  },
+  "accentColorDescription": "Choose the color of buttons and highlights.",
+  "@accentColorDescription": {
+    "description": "Explains the accent color swatches."
+  },
+  "accentColorBlue": "Blue",
+  "@accentColorBlue": {
+    "description": "An accent color."
+  },
+  "accentColorPurple": "Purple",
+  "@accentColorPurple": {
+    "description": "An accent color."
+  },
+  "accentColorViolet": "Violet",
+  "@accentColorViolet": {
+    "description": "An accent color."
+  },
+  "accentColorRed": "Red",
+  "@accentColorRed": {
+    "description": "An accent color."
+  },
+  "accentColorYellow": "Yellow",
+  "@accentColorYellow": {
+    "description": "An accent color."
+  },
+  "accentColorLime": "Lime",
+  "@accentColorLime": {
+    "description": "An accent color."
+  },
+  "accentColorGreen": "Green",
+  "@accentColorGreen": {
+    "description": "An accent color."
+  },
+  "accentColorCyan": "Cyan",
+  "@accentColorCyan": {
+    "description": "An accent color."
+  }
+}

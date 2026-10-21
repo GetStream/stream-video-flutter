@@ -4,6 +4,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import 'effects_tab.dart';
 import 'language_tab.dart';
+import 'theme_tab.dart';
 
 /// The tabs of the settings window, in the order its sidebar lists them.
 ///
@@ -24,4 +25,5 @@ List<StreamModalWindowTab> settingsTabs(
     effectsTab(context, call: call, manager: videoEffectsManager),
   StreamCaptionsSettingsTab(call: call),
   languageTab(context),
+  themeTab(context),
 ];

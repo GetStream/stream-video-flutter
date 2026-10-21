@@ -9,7 +9,8 @@ class SettingsChoice<T> {
   final T value;
   final String label;
 
-  /// Drawn before the label in the menu.
+  /// Drawn before the label in the menu, and before the value in the field
+  /// while this choice is selected.
   final IconData? icon;
 }
 
@@ -22,18 +23,19 @@ class SettingsSelect<T> extends StatelessWidget {
   const SettingsSelect({
     required this.title,
     required this.description,
-    required this.icon,
     required this.choices,
     required this.value,
     required this.onChanged,
+    this.icon,
     super.key,
   });
 
   final String title;
   final String description;
 
-  /// Drawn before the value in the field.
-  final IconData icon;
+  /// Drawn before the value in the field when the selected choice has no
+  /// icon of its own.
+  final IconData? icon;
 
   final List<SettingsChoice<T>> choices;
 
@@ -43,33 +45,14 @@ class SettingsSelect<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.streamColorScheme;
-    final textTheme = context.streamTextTheme;
-    final spacing = context.streamSpacing;
     final selected = choices.firstWhereOrNull((it) => it.value == value);
+    final fieldIcon = selected?.icon ?? icon;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: spacing.xs,
+      spacing: context.streamSpacing.xs,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: spacing.xxs,
-          children: [
-            Text(
-              title,
-              style: textTheme.headingXs.copyWith(
-                color: colorScheme.textPrimary,
-              ),
-            ),
-            Text(
-              description,
-              style: textTheme.metadataDefault.copyWith(
-                color: colorScheme.textTertiary,
-              ),
-            ),
-          ],
-        ),
+        SettingsHeading(title: title, description: description),
         StreamAdaptiveMenuAnchor(
           title: title,
           matchAnchorWidth: true,
@@ -90,10 +73,48 @@ class SettingsSelect<T> extends StatelessWidget {
             ),
           ],
           builder: (context, handle) => StreamSelectInput(
-            leading: Icon(icon),
+            leading: switch (fieldIcon) {
+              final icon? => Icon(icon),
+              null => null,
+            },
             value: selected?.label,
             expanded: handle.isOpen,
             onPressed: handle.toggle,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A setting's title over a line describing it.
+class SettingsHeading extends StatelessWidget {
+  const SettingsHeading({
+    required this.title,
+    required this.description,
+    super.key,
+  });
+
+  final String title;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: context.streamSpacing.xxs,
+      children: [
+        Text(
+          title,
+          style: textTheme.headingXs.copyWith(color: colorScheme.textPrimary),
+        ),
+        Text(
+          description,
+          style: textTheme.metadataDefault.copyWith(
+            color: colorScheme.textTertiary,
           ),
         ),
       ],
