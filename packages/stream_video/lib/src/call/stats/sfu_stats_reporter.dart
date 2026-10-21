@@ -61,11 +61,13 @@ class SfuStatsReporter {
   Timer? _timer;
   int _reportCount = 0;
   bool _stopped = false;
-  bool _flushing = false;
 
   static const _flushTimeout = Duration(seconds: 2);
+  static const _getStatsTimeout = Duration(seconds: 5);
 
-  bool get _shouldSkipSfuStats => _stopped && !_flushing;
+  /// Whether a send is skipped: once stopped, only a send that is
+  /// [keptAfterStop] still goes out.
+  bool _skips({required bool keptAfterStop}) => _stopped && !keptAfterStop;
 
   void run({Duration interval = const Duration(seconds: 8)}) {
     _timer?.cancel();
@@ -96,11 +98,8 @@ class SfuStatsReporter {
 
   Future<void> flush() async {
     if (_stopped) return;
-    _flushing = true;
 
-    final sendStatsFuture = sendSfuStats().whenComplete(() {
-      _flushing = false;
-    });
+    final sendStatsFuture = sendSfuStats(keepAfterStop: true);
 
     try {
       await sendStatsFuture.timeout(
@@ -114,22 +113,30 @@ class SfuStatsReporter {
     }
   }
 
+  /// Sends the current stats. With [keepAfterStop], it still goes out when
+  /// [stop] is called before it has: the flush, and the stats sent as the
+  /// connection drops, which describe the drop.
   Future<void> sendSfuStats({
     int? connectionTimeMs,
     SfuReconnectionStrategy? reconnectionStrategy,
+    bool keepAfterStop = false,
   }) async {
-    if (_shouldSkipSfuStats) return;
+    if (_skips(keptAfterStop: keepAfterStop)) return;
     try {
       await _sfuStatsLock.synchronized(() async {
-        if (_shouldSkipSfuStats) return;
-        final publisherStatsBundle = await callSession.rtcManager?.publisher
-            ?.getStats();
+        if (_skips(keptAfterStop: keepAfterStop)) return;
+        final publisherStatsBundle = await _withinStatsTimeout(
+          callSession.rtcManager?.publisher?.getStats(),
+          'publisher',
+        );
 
-        if (_shouldSkipSfuStats) return;
-        final subscriberStatsBundle = await callSession.rtcManager?.subscriber
-            .getStats();
+        if (_skips(keptAfterStop: keepAfterStop)) return;
+        final subscriberStatsBundle = await _withinStatsTimeout(
+          callSession.rtcManager?.subscriber.getStats(),
+          'subscriber',
+        );
 
-        if (_shouldSkipSfuStats ||
+        if (_skips(keptAfterStop: keepAfterStop) ||
             (publisherStatsBundle == null && subscriberStatsBundle == null)) {
           return;
         }
@@ -241,15 +248,7 @@ class SfuStatsReporter {
             unifiedSessionId: unifiedSessionId,
           );
 
-          final result = await callSession.sfuClient.sendStats(
-            request,
-          );
-
-          if (result.isFailure) {
-            for (final trace in traces) {
-              trace.rollback();
-            }
-          }
+          await _sendRequest(request, traces, keepAfterStop: keepAfterStop);
         } catch (e) {
           for (final trace in traces) {
             trace.rollback();
@@ -263,6 +262,40 @@ class SfuStatsReporter {
         () => 'Failed to send SFU stats: $e',
       );
     }
+  }
+
+  /// Sends [request], unless it is skipped by now: the battery and trace reads
+  /// before it can outlast [stop]. [traces] are rolled back when the request
+  /// is skipped or fails.
+  Future<void> _sendRequest(
+    sfu.SendStatsRequest request,
+    List<TraceSlice> traces, {
+    required bool keepAfterStop,
+  }) async {
+    final skipped = _skips(keptAfterStop: keepAfterStop);
+    final failed =
+        !skipped && (await callSession.sfuClient.sendStats(request)).isFailure;
+    if (skipped || failed) {
+      for (final trace in traces) {
+        trace.rollback();
+      }
+    }
+  }
+
+  /// The result of [getStats], or null when it takes longer than
+  /// [_getStatsTimeout], so a peer connection that does not answer cannot
+  /// hold up later reports.
+  Future<T?> _withinStatsTimeout<T>(Future<T>? getStats, String label) async {
+    if (getStats == null) return null;
+    return getStats
+        .then<T?>((stats) => stats)
+        .timeout(
+          _getStatsTimeout,
+          onTimeout: () {
+            _logger.w(() => '[sendSfuStats] $label getStats timed out');
+            return null;
+          },
+        );
   }
 
   sfu.Telemetry? _calculateTelemetry(

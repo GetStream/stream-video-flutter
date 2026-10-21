@@ -20,6 +20,11 @@ class CallConnectionCoordinator {
   SfuStatsReporter? _sfuStatsReporter;
   String? _unifiedSessionId;
 
+  /// How long a lost SFU socket waits for its stats to go out before the
+  /// reconnect starts. The stats keep going out after that.
+  @visibleForTesting
+  static Duration statsBeforeReconnectTimeout = const Duration(seconds: 2);
+
   Duration _fastReconnectDeadline = Duration.zero;
 
   /// Where the connection is. [_publishStatus] writes the connection status
@@ -99,7 +104,7 @@ class CallConnectionCoordinator {
 
     final phase = _phase.value;
     if (phase is! ConnectionConnected) {
-      _call._logger.v(() => '[reconnect] dropped held $held (phase: $phase)');
+      _call._logger.w(() => '[reconnect] dropped held $held (phase: $phase)');
       return;
     }
 
@@ -126,11 +131,11 @@ class CallConnectionCoordinator {
     final applicable = <ReconnectRequest>[];
     for (final held in _executor.takeHeld()) {
       if (!identical(held.session, _session)) {
-        _call._logger.v(
+        _call._logger.d(
           () => '[reconnect] dropped held $held (session replaced)',
         );
       } else if (!held.trigger.isStillNeeded) {
-        _call._logger.v(() => '[reconnect] dropped held $held (cleared)');
+        _call._logger.d(() => '[reconnect] dropped held $held (cleared)');
       } else {
         applicable.add(held);
       }
@@ -1291,7 +1296,16 @@ class CallConnectionCoordinator {
     required CallSession session,
   }) async {
     if (sfuEvent is SfuSocketDisconnected) {
-      await _sfuStatsReporter?.sendSfuStats();
+      // Kept after stop, so a rejoin that stops the reporter still lets these
+      // go out: they describe the drop.
+      await _sfuStatsReporter
+          ?.sendSfuStats(keepAfterStop: true)
+          .timeout(
+            statsBeforeReconnectTimeout,
+            onTimeout: () => _call._logger.w(
+              () => '[onSfuEvent] stats not sent in time, reconnecting anyway',
+            ),
+          );
       // Don't attempt reconnection if leaving the call was triggered, or if the
       // closure itself says another attempt is pointless. That verdict comes
       // from the disconnection source rather than the close code, which a
