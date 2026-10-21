@@ -212,6 +212,7 @@
 
 ### 🔄 Changed
 
+- `StreamLobbyView` puts the preview beside the rest of the lobby in a short landscape window.
 - `StreamCallContent` keeps showing the participants during a reconnect, and after one fails until the call has left, with a `StreamCallConnectionBanner` above them instead of the centred "Reconnecting" text.
 - `StreamSelectInput` draws its `labelText` in `headingXs`, the size the design gives it.
 - `StreamParticipantTileStyle.topToolbarPadding` defaults to none.
@@ -229,6 +230,7 @@
 ### 🐞 Fixed
 
 - The lobby no longer offers a speaker choice on Safari and other WebKit browsers, which play every call on the system default output.
+- `StreamLobbyView` keeps clear of the safe-area insets and caps the preview's height on small windows, so the join button stays on screen.
 - `StreamCallContent` keeps the call body clear of side safe-area insets, such as a status rail in landscape.
 - The floating local video keeps clear of the safe-area insets on every edge.
 - `OverlayAppBar` now clears the right safe-area inset.

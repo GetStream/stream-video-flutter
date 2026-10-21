@@ -241,18 +241,91 @@ class _HomeScreenState extends State<HomeScreen> {
     final colors = context.streamColorScheme;
     final spacing = context.streamSpacing;
     final size = MediaQuery.sizeOf(context);
-    final width = math.min(size.width, kMaxWidthRegularScreen);
     final name = currentUser!.name;
 
-    final logo = ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 220),
-      child: Hero(
-        tag: 'stream_logo',
-        child: Image.asset(streamVideoIconAsset, width: width * 0.6),
-      ),
+    // A short window in landscape has no height for the logo and the form
+    // stacked, so the two go side by side and the logo shrinks.
+    final compactHeight =
+        size.height < StreamScreenSize.smallMaxHeight &&
+        size.width > size.height;
+    final logoWidth = compactHeight
+        ? 120.0
+        : math.min<double>(
+            math.min(size.width, kMaxWidthRegularScreen) * 0.6,
+            220,
+          );
+
+    final logo = Hero(
+      tag: 'stream_logo',
+      child: Image.asset(streamVideoIconAsset, width: logoWidth),
     );
 
     final appTitle = Text('Stream Video Calling', style: textTheme.headingLg);
+
+    final intro = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        logo,
+        const SizedBox(height: 24),
+        appTitle,
+        const SizedBox(height: 24),
+        Text(
+          'Start a new call, join a meeting by\n'
+          'entering the call ID or by scanning\n'
+          'a QR code.',
+          textAlign: TextAlign.center,
+          style: textTheme.bodyDefault.apply(color: colors.textSecondary),
+        ),
+      ],
+    );
+
+    final actions = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _JoinForm(
+          callIdController: _callIdController,
+          onJoinPressed: _getOrCreateCall,
+          onEncryptionKeyScanned: (invited) => _invitedEncryptionKey = invited,
+          onLogoutPressed: _userAuthController.logout,
+          currentEnvironment: _appPreferences.environment,
+        ),
+        SizedBox(height: spacing.xxl),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            children: [
+              Expanded(child: Container(height: 1, color: colors.borderSubtle)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  'OR',
+                  style: TextStyle(color: colors.textDisabled),
+                ),
+              ),
+              Expanded(child: Container(height: 1, color: colors.borderSubtle)),
+            ],
+          ),
+        ),
+        SizedBox(height: spacing.xxl),
+        SizedBox(
+          width: double.infinity,
+          child: StreamButton(
+            onPressed: _getOrCreateCall,
+            child: const Text('Start New Call'),
+          ),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity,
+          child: StreamButton(
+            style: StreamButtonStyle.secondary,
+            type: StreamButtonType.outline,
+            onPressed: () => _directCall(context),
+            child: const Text('Direct Call'),
+          ),
+        ),
+      ],
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -281,84 +354,42 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: kMaxWidthRegularScreen),
+      // The app bar clears the top inset. The sides are cleared here, and the
+      // bottom inside the scroll view so the content can scroll past it.
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                logo,
-                const SizedBox(height: 24),
-                appTitle,
-                const SizedBox(height: 24),
-                Text(
-                  'Start a new call, join a meeting by\n'
-                  'entering the call ID or by scanning\n'
-                  'a QR code.',
-                  textAlign: TextAlign.center,
-                  style: textTheme.bodyDefault.apply(
-                    color: colors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 36),
-                const SizedBox(height: 8),
-                _JoinForm(
-                  callIdController: _callIdController,
-                  onJoinPressed: _getOrCreateCall,
-                  onEncryptionKeyScanned: (invited) =>
-                      _invitedEncryptionKey = invited,
-                  onLogoutPressed: _userAuthController.logout,
-                  currentEnvironment: _appPreferences.environment,
-                ),
-                SizedBox(height: spacing.xxl),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 1,
-                          color: colors.borderSubtle,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Text(
-                          'OR',
-                          style: TextStyle(color: colors.textDisabled),
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 1,
-                          color: colors.borderSubtle,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: spacing.xxl),
-                SizedBox(
-                  width: double.infinity,
-                  child: StreamButton(
-                    onPressed: _getOrCreateCall,
-                    child: const Text('Start New Call'),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: StreamButton(
-                    style: StreamButtonStyle.secondary,
-                    type: StreamButtonType.outline,
-                    onPressed: () => _directCall(context),
-                    child: const Text('Direct Call'),
-                  ),
-                ),
-              ],
+            padding: const EdgeInsets.all(14).add(
+              EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
             ),
+            child: compactHeight
+                ? ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: kMaxWidthRegularScreen * 2,
+                    ),
+                    child: Row(
+                      spacing: spacing.xl,
+                      children: [
+                        Expanded(child: intro),
+                        Expanded(child: actions),
+                      ],
+                    ),
+                  )
+                : ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: kMaxWidthRegularScreen,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        intro,
+                        const SizedBox(height: 44),
+                        actions,
+                      ],
+                    ),
+                  ),
           ),
         ),
       ),

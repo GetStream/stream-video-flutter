@@ -240,6 +240,66 @@ void main() {
     ),
   );
 
+  group('on a foldable', () {
+    // The poses the lobby has to fit without scrolling, each with the status
+    // rail it puts along the side or the top.
+    const poses = <String, (Size, EdgeInsets)>{
+      'outer landscape': (Size(678, 466), EdgeInsets.only(right: 84)),
+      'inner portrait': (Size(669, 951), EdgeInsets.only(top: 54)),
+    };
+
+    for (final MapEntry(key: pose, value: (size, padding)) in poses.entries) {
+      testWidgets('$pose shows the join button without scrolling', (
+        tester,
+      ) async {
+        tester.view
+          ..physicalSize = size
+          ..devicePixelRatio = 1
+          ..padding = FakeViewPadding(
+            left: padding.left,
+            top: padding.top,
+            right: padding.right,
+            bottom: padding.bottom,
+          );
+        addTearDown(tester.view.reset);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              appBar: AppBar(),
+              body: Center(
+                child: SingleChildScrollView(
+                  // The padding the sample's lobby screen gives it.
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 32,
+                  ),
+                  child: StreamLobbyView.withController(
+                    controller: controller,
+                    actions: StreamLobbyActions.regular(),
+                    // About what the sample's encryption card takes.
+                    footer: const SizedBox(height: 140),
+                    onJoinCallPressed: (_) => true,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final join = tester.getRect(find.byType(StreamButton).last);
+        expect(join.bottom, lessThanOrEqualTo(size.height - padding.bottom));
+        expect(join.left, greaterThanOrEqualTo(padding.left));
+        expect(join.right, lessThanOrEqualTo(size.width - padding.right));
+
+        final preview = tester.getRect(find.byType(StreamParticipantTile));
+        expect(preview.left, greaterThanOrEqualTo(padding.left));
+        expect(preview.right, lessThanOrEqualTo(size.width - padding.right));
+      });
+    }
+  });
+
   testWidgets('the settings lane is not drawn when it is empty', (
     tester,
   ) async {
