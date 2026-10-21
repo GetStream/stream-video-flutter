@@ -92,6 +92,7 @@
 
 ### 🔄 Changed
 
+- A failed coordinator request now says which request it was. `StreamVideoException.message` is prefixed with the method, host, path and the diagnostic query parameters (`call_session_id`, `connection_id`, `session_id`, `sfu_id`), as in `HTTP 404 POST video.stream-io-api.com/api/v2/video/call/default/123/join?connection_id=abc failed: Not Found`; the server's own message, when it sent one, follows the prefix. A request the server never answered reads `request timed out`, `request cancelled`, `DNS lookup failed`, `connection failed` or `TLS connection failed`, followed by the platform's detail where there is one. The API key, headers and every other query parameter are left out, requests other than the coordinator's (such as a token provider's) are not named, and the status, error code, retry hint and `isUnrecoverable` are unchanged.
 - Updated `stream_webrtc_flutter` to `^4.0.0`.
 - `Call`'s factories take a `CallHost`, the part of the client a call uses; `StreamVideo` implements it, so passing a `StreamVideo` still works.
 - `StreamVideo.dispose()` leaves and disposes the calls it tracks, and disconnects the user like `disconnect()` but keeps the push device registered.

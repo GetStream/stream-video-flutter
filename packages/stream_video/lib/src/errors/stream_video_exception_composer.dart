@@ -10,6 +10,7 @@ import '../../open_api/video/coordinator/api.dart';
 import '../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../sfu/data/events/sfu_event_mapper_extensions.dart';
 import '../sfu/data/models/sfu_error.dart';
+import 'request_failure_description.dart';
 import 'stream_video_exception.dart';
 
 mixin StreamVideoExceptions {
@@ -62,7 +63,8 @@ mixin StreamVideoExceptions {
       };
 
       return StreamVideoExceptionWithCause(
-        message: cause.message,
+        // Names the request, which the cause's own message does not.
+        message: describeRequestFailure(exception, cause.message),
         cause: cause,
         stackTrace: stackTrace ?? exception.stackTrace,
       );
