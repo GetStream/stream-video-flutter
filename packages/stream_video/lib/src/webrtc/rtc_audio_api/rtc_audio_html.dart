@@ -153,7 +153,7 @@ Future<void> setSinkId(String id, String deviceId) async {
   if (audioElement is! web.HTMLAudioElement) {
     // Not a failure: the element is created when the track starts, and every
     // site that starts a track re-applies the selected output immediately
-    // after, via `_applyCurrentAudioOutputDevice` in `call_session.dart`, which
+    // after, via `applyCurrentAudioOutputDevice` in `call_session.dart`, which
     // re-derives the device from call state.
     streamLog.w(
       _tag,

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/transformers.dart';
 import 'package:sdp_transform/sdp_transform.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
@@ -18,7 +19,7 @@ import '../sfu/data/models/sfu_video_sender.dart';
 import '../telemetry/client_event_types.dart';
 import '../telemetry/media_frame_reporter.dart';
 import '../telemetry/peer_connection_connect_reporter.dart';
-import '../utils/extensions.dart';
+import 'apple_audio_route.dart';
 import 'codecs_helper.dart' as codecs;
 import 'codecs_helper.dart';
 import 'e2ee/e2ee_mapping.dart';
@@ -801,6 +802,49 @@ class RtcManager extends Disposable {
         return track.trackIdPrefix == trackIdPrefix;
       }),
     ];
+  }
+
+  /// The Apple audio session configuration last applied with
+  /// [setAppleAudioConfiguration].
+  rtc.AppleAudioConfiguration? _appleAudioConfiguration;
+
+  /// Applies [policy]'s Apple audio session configuration, asking for the
+  /// loudspeaker as the built-in output when [speakerOn].
+  @internal
+  Future<Result<None>> setAppleAudioConfiguration({
+    required AudioConfigurationPolicy policy,
+    bool speakerOn = false,
+  }) async {
+    final configuration = policy.getAppleConfiguration(
+      defaultToSpeaker: speakerOn,
+    );
+    try {
+      await rtc.Helper.setAppleAudioConfiguration(configuration);
+      _appleAudioConfiguration = configuration;
+      return const Result.success(none);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  /// Re-applies the configuration last applied with
+  /// [setAppleAudioConfiguration], if any.
+  ///
+  /// Resuming suspended audio restores the configuration the call's factory
+  /// was built with, which asks for the loudspeaker only under a policy that
+  /// defaults to it. This brings back the loudspeaker the call settings or
+  /// an output change asked for since.
+  @internal
+  Future<Result<None>> restoreAppleAudioConfiguration() async {
+    final configuration = _appleAudioConfiguration;
+    if (configuration == null) return const Result.success(none);
+
+    try {
+      await rtc.Helper.setAppleAudioConfiguration(configuration);
+      return const Result.success(none);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
   }
 }
 
@@ -2283,17 +2327,22 @@ extension RtcManagerTrackHelper on RtcManager {
     }
 
     try {
-      if (CurrentPlatform.isIos &&
-          device.id.equalsIgnoreCase(
-            AudioSettingsRequestDefaultDeviceEnum.speaker.value,
-          )) {
-        await setAppleAudioConfiguration(
-          speakerOn: true,
-          policy: _streamVideo.options.audioConfigurationPolicy,
-        );
-      } else {
-        await setAppleAudioConfiguration(
-          policy: _streamVideo.options.audioConfigurationPolicy,
+      // The policy the call's factory was built with, so the session and the
+      // factory never disagree.
+      final policy = pcFactory.resolvedAudioConfigurationPolicy;
+      final configured = await setAppleAudioConfiguration(
+        speakerOn: resolveAppleSpeakerOn(
+          policy: policy,
+          speakerRequested: device.isBuiltInSpeaker,
+          earpieceRequested: device.isBuiltInEarpiece,
+        ),
+        policy: policy,
+      );
+      if (configured is Failure) {
+        _logger.w(
+          () =>
+              '[setAudioOutputDevice] audio session not configured for '
+              '${device.id}: ${configured.error.message}',
         );
       }
 
@@ -2576,20 +2625,6 @@ extension RtcManagerTrackHelper on RtcManager {
 
           await publishVideoTrack(track: track);
         });
-  }
-
-  Future<Result<None>> setAppleAudioConfiguration({
-    required AudioConfigurationPolicy policy,
-    bool speakerOn = false,
-  }) async {
-    try {
-      await rtc.Helper.setAppleAudioConfiguration(
-        policy.getAppleConfiguration(defaultToSpeaker: speakerOn),
-      );
-      return const Result.success(none);
-    } catch (e, stk) {
-      return Result.failure(VideoErrors.compose(e, stk));
-    }
   }
 }
 
