@@ -50,8 +50,7 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
   Widget build(BuildContext context) {
     const aspectRatio = 16 / 9;
 
-    // Measured on the space this is given rather than the window, part of
-    // which a docked side panel can take.
+    // The strip's side follows the shape of the space this is given.
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWideBox =

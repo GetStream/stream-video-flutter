@@ -89,7 +89,7 @@ open class VideoFilter: NSObject, VideoFrameProcessorDelegate {
     @objc private func updateRotation() {
         DispatchQueue.main.async {
             let scene = Self.activeWindowScene()
-            self.sceneOrientation = scene?.interfaceOrientation ?? .unknown
+            self.sceneOrientation = scene.map(Self.orientation(of:)) ?? .unknown
             self.observeGeometry(of: scene)
         }
     }
@@ -99,9 +99,16 @@ open class VideoFilter: NSObject, VideoFrameProcessorDelegate {
         observedScene = scene
         geometryObservation = scene.observe(\.effectiveGeometry) { [weak self] scene, _ in
             DispatchQueue.main.async {
-                self?.sceneOrientation = scene.interfaceOrientation
+                self?.sceneOrientation = scene.effectiveGeometry.interfaceOrientation
             }
         }
+    }
+
+    private static func orientation(of scene: UIWindowScene) -> UIInterfaceOrientation {
+        if #available(iOS 16.0, *) {
+            return scene.effectiveGeometry.interfaceOrientation
+        }
+        return scene.interfaceOrientation
     }
 
     /// The scene in the foreground, or any connected one when none is.

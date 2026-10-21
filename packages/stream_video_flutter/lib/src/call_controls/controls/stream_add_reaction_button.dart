@@ -29,8 +29,8 @@ class _StreamAddReactionButtonState extends State<StreamAddReactionButton> {
   OverlayEntry? overlayEntry;
   GlobalKey key = GlobalKey();
 
-  // Ties the overlay to the button, so it follows it through a rotation, a
-  // resize or a change of display instead of staying where it opened.
+  // Links the overlay to the button, which it follows wherever the button is
+  // laid out.
   final _link = LayerLink();
 
   @override
@@ -119,9 +119,10 @@ class _StreamAddReactionButtonState extends State<StreamAddReactionButton> {
 
   @override
   void dispose() {
-    super.dispose();
     overlayEntry?.remove();
+    overlayEntry?.dispose();
     overlayEntry = null;
+    super.dispose();
   }
 }
 

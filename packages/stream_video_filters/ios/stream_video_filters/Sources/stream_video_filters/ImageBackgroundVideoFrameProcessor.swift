@@ -114,8 +114,8 @@ extension UIImage {
         let filename = (name as NSString).lastPathComponent
         let path = (name as NSString).deletingLastPathComponent
 
-        // The sharpest variant Flutter bundles, whatever the screen: the image
-        // is drawn behind camera frames, not on the display.
+        // Starts at the sharpest variant Flutter bundles, whatever the screen
+        // scale.
         let maxScale = 3
         for scale in stride(from: maxScale, to: 1, by: -1) {
             let assetPath = "\(path)/\(scale).0x/\(filename)"
