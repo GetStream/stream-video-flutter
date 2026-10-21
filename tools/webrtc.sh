@@ -15,7 +15,6 @@
 #   test            flutter test, in packages that have a test/ folder.
 #
 # Without a package, the command runs in every package under webrtc/.
-# format-verify and imports-verify skip the packages listed below.
 
 set -euo pipefail
 
@@ -28,16 +27,6 @@ if [[ -n "$package" ]]; then
 else
   packages=("$root"/webrtc/*/)
 fi
-
-# Imported sources that do not pass a check yet (FLU-1039).
-unsorted_imports=(dart_webrtc)
-unformatted=(webrtc_interface)
-
-contains() {
-  local needle="$1"
-  shift
-  [[ " $* " == *" $needle "* ]]
-}
 
 format_dirs() {
   local dirs=(lib)
@@ -71,16 +60,14 @@ for dir in "${packages[@]}"; do
       dart format $(format_dirs)
       ;;
     format-verify)
-      if contains "$name" "${unformatted[@]}"; then
-        echo "Not formatted yet, skipping."
-      else
-        # shellcheck disable=SC2046
-        dart format --output=none --set-exit-if-changed $(format_dirs)
-      fi
+      # shellcheck disable=SC2046
+      dart format --output=none --set-exit-if-changed $(format_dirs)
       ;;
     imports-verify)
-      if contains "$name" "${unsorted_imports[@]}"; then
-        echo "Imports not sorted yet, skipping."
+      # dart_webrtc orders its imports with the directives_ordering lint,
+      # which disagrees with import_sorter.
+      if [[ "$name" == dart_webrtc ]]; then
+        echo "Imports are checked by the analyzer, skipping."
       else
         dart run import_sorter:main --no-comments --exit-if-changed
       fi

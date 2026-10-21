@@ -74,7 +74,8 @@ class RTCRtpEncoding {
         scaleResolutionDownBy: map['scaleResolutionDownBy'],
         ssrc: map['ssrc'],
         scalabilityMode: map['scalabilityMode'],
-        priority: rtcPriorityTypeForString(map['priority']) ?? RTCPriorityType.low,
+        priority:
+            rtcPriorityTypeForString(map['priority']) ?? RTCPriorityType.low,
         networkPriority: rtcPriorityTypeForString(map['networkPriority']),
       );
 
