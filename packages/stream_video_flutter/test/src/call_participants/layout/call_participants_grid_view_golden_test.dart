@@ -153,7 +153,7 @@ void main() {
           ),
           GoldenTestScenario(
             name: '13 on a wider one',
-            child: _grid(const Size(768, 560), count: 13),
+            child: _grid(const Size(768, 600), count: 13),
           ),
         ],
       ),
