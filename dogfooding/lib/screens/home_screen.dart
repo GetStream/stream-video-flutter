@@ -332,6 +332,7 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         backgroundColor: colors.backgroundApp,
         leading: UserActionsAvatar(currentUser: currentUser),
+        leadingWidth: kAppBarAvatarLeadingWidth,
         titleSpacing: 4,
         centerTitle: false,
         title: Text(name, style: textTheme.bodyDefault),

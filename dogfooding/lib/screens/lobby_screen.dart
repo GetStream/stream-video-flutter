@@ -13,6 +13,7 @@ import '../utils/call_encryption.dart';
 import '../utils/e2ee.dart';
 import '../utils/random_words.dart';
 import '../widgets/lobby_encryption.dart';
+import '../widgets/user_actions_avatar.dart';
 
 /// Hands the call over to the call screen once the lobby is done with it.
 ///
@@ -276,9 +277,10 @@ class _LobbyScreenState extends State<LobbyScreen> {
         elevation: 0,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         leading: Padding(
-          padding: const EdgeInsets.all(8),
+          padding: kAppBarAvatarPadding,
           child: StreamUserAvatar(user: currentUser),
         ),
+        leadingWidth: kAppBarAvatarLeadingWidth,
         titleSpacing: 4,
         centerTitle: false,
         title: Text(currentUser.name, style: textTheme.headingXs),
