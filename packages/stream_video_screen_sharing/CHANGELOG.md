@@ -1,3 +1,7 @@
+## 1.4.4
+
+- Sync version with `stream_video_flutter` 1.4.4
+
 ## 1.4.3
 
 - Minor bug fixes and improvements

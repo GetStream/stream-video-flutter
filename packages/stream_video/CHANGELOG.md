@@ -1,3 +1,9 @@
+## 1.4.4
+
+### ✅ Added
+
+- Added `AndroidCallServiceKind` and `AudioConfigurationPolicy.androidCallServiceKind`, which pick the Android foreground service a call runs in.
+
 ## 1.4.3
 
 ### 🐞 Fixed

@@ -167,6 +167,7 @@ class StreamBackgroundService {
           // New call, start managing it
           await _instance._startManagingCall(
             call,
+            streamVideo,
             callNotificationOptionsBuilder,
           );
         }
@@ -222,6 +223,7 @@ class StreamBackgroundService {
 
   Future<void> _startManagingCall(
     Call call,
+    StreamVideo streamVideo,
     NotificationOptionsBuilder optionsBuilder,
   ) async {
     final callCid = call.callCid.value;
@@ -234,17 +236,28 @@ class StreamBackgroundService {
         options: options,
       );
 
+      // The call's own policy wins over the client-wide one, the same way the
+      // audio configuration is resolved when the call is joined.
+      final audioPolicy =
+          call.state.value.preferences.audioConfigurationPolicy ??
+          streamVideo.options.audioConfigurationPolicy;
+      final serviceKind = audioPolicy.androidCallServiceKind;
+
       final result = await StreamVideoFlutterBackground.startService(
         payload,
         ServiceType.call,
+        kind: serviceKind,
       );
 
       _logger.d(
         () =>
-            '<$callCid> [_startManagingCall] call service start result: $result',
+            '<$callCid> [_startManagingCall] call service start result: $result, kind: $serviceKind',
       );
 
       if (result) {
+        var lastOptions = options;
+        var lastLocalMedia = _localMedia(call.state.value);
+
         // ignore: cancel_subscriptions
         final stateSubscription = call.state.listen((CallState value) async {
           _logger.v(
@@ -258,8 +271,17 @@ class StreamBackgroundService {
 
           try {
             final updateOptions = optionsBuilder.call(call);
+            final localMedia = _localMedia(value);
 
-            // TODO: That is a lot of service updates. We should only update the service if the options have changed.
+            // Skips the service update when the notification options and the
+            // local microphone and camera are unchanged. A change to the
+            // latter is sent anyway, because the service re-evaluates its
+            // foreground service types on every update, so a permission
+            // granted after the service started takes effect.
+            if (updateOptions == lastOptions && localMedia == lastLocalMedia) {
+              return;
+            }
+
             final updateResult =
                 await StreamVideoFlutterBackground.updateService(
                   NotificationPayload(
@@ -272,6 +294,13 @@ class StreamBackgroundService {
               () =>
                   '<$callCid> [_startManagingCall] call service update result: $updateResult',
             );
+
+            // Only a delivered update is remembered, so a failed one is
+            // retried on the next emission rather than skipped as unchanged.
+            if (updateResult) {
+              lastOptions = updateOptions;
+              lastLocalMedia = localMedia;
+            }
           } catch (e, stk) {
             _logger.e(
               () =>
@@ -426,6 +455,12 @@ class StreamBackgroundService {
       callCid: callCid,
     );
   }
+}
+
+/// Whether the local participant has its microphone and camera on.
+(bool, bool) _localMedia(CallState state) {
+  final local = state.localParticipant;
+  return (local?.isAudioEnabled ?? false, local?.isVideoEnabled ?? false);
 }
 
 NotificationOptions _callDefaultOptions(Call call) {

@@ -1,3 +1,7 @@
+## 1.4.4
+
+- Sync version with `stream_video_flutter` 1.4.4
+
 ## 1.4.3
 
 - Updated `stream_video` dependency to [`1.4.3`](https://pub.dev/packages/stream_video/changelog).

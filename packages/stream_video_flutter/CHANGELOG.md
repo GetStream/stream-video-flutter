@@ -1,3 +1,16 @@
+## 1.4.4
+
+### ✅ Added
+
+- [Android] Added `StreamLivestreamViewerService`, the foreground service for calls under `AudioConfigurationPolicy.viewer`.
+- [Android] `StreamVideoFlutterBackground.startService` takes the `AndroidCallServiceKind` to start a call in.
+
+### 🔄 Changed
+
+- [Android] `StreamCallService` no longer requests or declares the `mediaPlayback` foreground service type.
+- [Android] On Android 14 and newer, a foreground service type is only requested while its `FOREGROUND_SERVICE_*` permission is declared, so unused ones can be removed with `tools:node="remove"`.
+- [Android] A call with no permission-backed foreground service type runs as a `shortService` instead of failing to start.
+
 ## 1.4.3
 
 ### 🐞 Fixed

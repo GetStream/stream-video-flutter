@@ -7,3 +7,4 @@ formatter:
 analyzer:
   exclude:
     - build/**
+    - ios/**
