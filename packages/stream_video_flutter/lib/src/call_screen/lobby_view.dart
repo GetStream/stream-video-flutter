@@ -91,7 +91,7 @@ class StreamLobbyView extends StatefulWidget {
 
   /// Landscape windows shorter than this put the preview beside the rest of
   /// the lobby: stacked, the join button would fall below the window.
-  static const sideBySideMaxHeight = 800.0;
+  static const sideBySideMaxHeight = 900.0;
 
   /// The call this lobby is a waiting room for.
   Call get call => controller?.call ?? _call!;

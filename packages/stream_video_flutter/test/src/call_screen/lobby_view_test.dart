@@ -247,6 +247,8 @@ void main() {
       'outer landscape': (Size(678, 466), EdgeInsets.only(right: 84)),
       'inner portrait': (Size(669, 951), EdgeInsets.only(top: 54)),
       'inner landscape': (Size(951, 669), EdgeInsets.only(right: 84)),
+      // Not a foldable, but the same problem: a tablet in landscape.
+      'tablet landscape': (Size(1280, 800), EdgeInsets.only(top: 24)),
     };
 
     for (final MapEntry(key: pose, value: (size, padding)) in poses.entries) {
