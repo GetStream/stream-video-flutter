@@ -416,6 +416,40 @@ void main() {
     expect(footer, lessThan(tester.getCenter(find.text('Join')).dy));
   });
 
+  testWidgets('a short desktop window keeps each side at its stacked width', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(1440, 850)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      TestWrapper(
+        child: SingleChildScrollView(
+          child: StreamLobbyView.withController(
+            controller: controller,
+            actions: StreamLobbyActions.simple(),
+            footer: const SizedBox(key: Key('footer'), height: 40),
+            joinButtonLabel: const Text('Join'),
+            onJoinCallPressed: (_) => true,
+          ),
+        ),
+      ),
+    );
+
+    final join = tester.getRect(
+      find.ancestor(of: find.text('Join'), matching: find.byType(StreamButton)),
+    );
+    final preview = tester.getRect(find.byType(StreamParticipantTile));
+
+    // Side by side, not stacked.
+    expect(join.left, greaterThan(preview.right));
+    expect(join.width, 400);
+    expect(tester.getRect(find.byKey(const Key('footer'))).width, 400);
+    expect(preview.width, lessThanOrEqualTo(640));
+  });
+
   for (final width in [375.0, 900.0]) {
     testWidgets('the footer takes the join button width at $width', (
       tester,

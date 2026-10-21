@@ -90,7 +90,7 @@ class StreamLobbyView extends StatefulWidget {
   final Call? _call;
 
   /// Landscape windows shorter than this put the preview beside the rest of
-  /// the lobby: stacked, the join button would fall below the window.
+  /// the lobby.
   static const sideBySideMaxHeight = 900.0;
 
   /// The call this lobby is a waiting room for.
@@ -298,7 +298,12 @@ class _LobbyBody extends StatelessWidget {
 
     return SafeArea(
       child: sideBySide
-          ? _sideBySide(context, parts)
+          ? _sideBySide(
+              context,
+              parts,
+              previewMaxWidth: style.expandedPreviewSize.width,
+              endMaxWidth: style.joinButtonWidth,
+            )
           : _stacked(
               context,
               parts,
@@ -375,33 +380,50 @@ class _LobbyBody extends StatelessWidget {
   );
 
   /// The preview and its controls on one side, the rest on the other.
-  Widget _sideBySide(BuildContext context, _LobbyParts parts) {
+  ///
+  /// Each side is at most as wide as it is when stacked: [previewMaxWidth] for
+  /// the preview, [endMaxWidth] for the rest. The pair is centred.
+  Widget _sideBySide(
+    BuildContext context,
+    _LobbyParts parts, {
+    required double previewMaxWidth,
+    required double endMaxWidth,
+  }) {
     final spacing = context.streamSpacing;
 
-    return Row(
-      spacing: spacing.xl,
-      children: [
-        Expanded(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            spacing: spacing.sm,
-            children: [parts.preview, ?parts.controlsBelow],
+    return Center(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: spacing.xl,
+        children: [
+          Flexible(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: previewMaxWidth),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                spacing: spacing.sm,
+                children: [parts.preview, ?parts.controlsBelow],
+              ),
+            ),
           ),
-        ),
-        Expanded(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: spacing.lg,
-            children: [
-              StreamLobbyHeader(title: title, subtitle: subtitle),
-              ?parts.settingsRow,
-              ?parts.footer,
-              parts.joinButton,
-            ],
+          Flexible(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: endMaxWidth),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: spacing.lg,
+                children: [
+                  StreamLobbyHeader(title: title, subtitle: subtitle),
+                  ?parts.settingsRow,
+                  ?parts.footer,
+                  parts.joinButton,
+                ],
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

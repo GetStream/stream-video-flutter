@@ -1,8 +1,9 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-/// Raises the top safe-area inset under [child] to at least [minimum].
+/// On iOS, raises the top safe-area inset under [child] to at least [minimum].
 ///
 /// iOS reports no inset for a rounded display corner, so on a display whose
 /// status bar sits along the side the top inset is zero and an app bar runs
@@ -19,6 +20,8 @@ class MinimumTopInset extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (defaultTargetPlatform != TargetPlatform.iOS) return child;
+
     final data = MediaQuery.of(context);
     final top = math.max(data.padding.top, minimum);
     if (top == data.padding.top) return child;
