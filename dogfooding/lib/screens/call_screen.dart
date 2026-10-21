@@ -22,7 +22,9 @@ import '../utils/consts.dart';
 import '../utils/feedback_dialog.dart';
 import '../widgets/closed_captions_widget.dart';
 import '../widgets/e2ee_key_notification.dart';
+import '../widgets/settings_menu/developer_options_menu.dart';
 import '../widgets/settings_menu/more_menu.dart';
+import '../widgets/settings_window/settings_tabs.dart';
 import '../widgets/share_call_card.dart';
 import '../widgets/side_panel/call_side_panel.dart';
 import '../widgets/side_panel/call_side_panel_layout.dart';
@@ -63,6 +65,14 @@ class _CallScreenState extends State<CallScreen>
   /// Backs the mic and camera split buttons' carets. One controller, so the
   /// two agree about which device is in use.
   late final _devices = StreamMediaDevicesController.forCall(widget.call);
+
+  /// Whether the device can apply video effects, which decides whether the
+  /// settings window has an effects tab.
+  late final Future<bool> _effectsSupported = _videoEffectsManager
+      .isSupported();
+
+  /// Whether the settings window is open, which the settings button shows.
+  bool _settingsOpen = false;
 
   late final _speakingWhileMuted = SpeakingWhileMutedRecognition(
     call: widget.call,
@@ -374,6 +384,44 @@ class _CallScreenState extends State<CallScreen>
     snackbarMessenger: _controlsMessenger,
   );
 
+  /// Opens the settings window. Only the wide bar has this button: on a
+  /// smaller screen the same settings live in the more menu.
+  Widget _settingsButton(Call call) => CallFeatureButton(
+    icon: Icon(context.streamIcons.settingsFill),
+    tooltip: 'Settings',
+    selected: _settingsOpen,
+    onPressed: () => _openSettings(call),
+  );
+
+  Future<void> _openSettings(Call call) async {
+    setState(() => _settingsOpen = true);
+    try {
+      // Settled before the window opens, so its tabs don't change under it.
+      final effectsSupported = await _effectsSupported;
+      if (!mounted) return;
+      await showStreamModalDialog<void>(
+        context: context,
+        builder: (context) => StreamModalWindow(
+          tabs: settingsTabs(
+            context,
+            call: call,
+            devices: _devices,
+            videoEffectsManager: _videoEffectsManager,
+            effectsSupported: effectsSupported,
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _settingsOpen = false);
+    }
+  }
+
+  Widget _feedbackButton(Call call) => CallFeatureButton(
+    icon: Icon(context.streamIcons.megaphone),
+    tooltip: 'Provide feedback',
+    onPressed: () => showFeedbackDialog(context, call: call),
+  );
+
   // The phone bar's microphone and camera: plain round buttons, no caret. A
   // phone has one microphone and two cameras, and the design gives the narrow
   // bar five controls in total — the device picker lives in the more menu
@@ -473,9 +521,17 @@ class _CallScreenState extends State<CallScreen>
         trailing: panels,
       ),
       large: CallControlBarLayout(
+        // The settings window takes over from the more menu here, and the
+        // developer tools get buttons of their own, as in the web app.
         leading: [
-          _moreMenu(call, context.streamIcons.settingsFill),
+          _settingsButton(call),
+          if (!kIsProd) _feedbackButton(call),
           _layoutToggle(),
+          if (!kIsProd)
+            DeveloperOptionsMenu(
+              call: call,
+              snackbarMessenger: _controlsMessenger,
+            ),
         ],
         center: [
           _microphoneButton(call),
