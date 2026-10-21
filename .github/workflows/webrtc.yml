@@ -7,18 +7,10 @@ on:
       - reopened
       - synchronize
       - ready_for_review
-    paths:
-      - "webrtc/**"
-      - "tools/webrtc.sh"
-      - ".github/workflows/webrtc.yml"
   push:
     branches:
       - main
       - v2
-    paths:
-      - "webrtc/**"
-      - "tools/webrtc.sh"
-      - ".github/workflows/webrtc.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -32,7 +24,31 @@ env:
   example: webrtc/stream_webrtc_flutter/example
 
 jobs:
+  # Decides whether the webrtc checks below need to run.
+  changes:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    outputs:
+      webrtc: ${{ steps.filter.outputs.webrtc }}
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+
+      - name: Filter changed paths
+        id: filter
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: |
+            webrtc:
+              - "webrtc/**"
+              - "tools/webrtc.sh"
+              - ".github/actions/setup-flutter/**"
+              - ".github/actions/select-xcode/**"
+              - ".github/workflows/webrtc.yml"
+
   analyze:
+    needs: changes
+    if: needs.changes.outputs.webrtc == 'true'
     name: Analyze (${{ matrix.package }})
     timeout-minutes: 15
     runs-on: ubuntu-latest
@@ -64,6 +80,8 @@ jobs:
         run: tools/webrtc.sh test ${{ matrix.package }}
 
   build-android:
+    needs: changes
+    if: needs.changes.outputs.webrtc == 'true'
     name: Build example (Android)
     timeout-minutes: 30
     runs-on: ubuntu-latest
@@ -81,6 +99,8 @@ jobs:
         run: flutter build apk
 
   build-ios:
+    needs: changes
+    if: needs.changes.outputs.webrtc == 'true'
     name: Build example (iOS, CocoaPods + SPM)
     timeout-minutes: 45
     runs-on: macos-latest
@@ -115,6 +135,8 @@ jobs:
           flutter build ios --no-codesign
 
   build-macos:
+    needs: changes
+    if: needs.changes.outputs.webrtc == 'true'
     name: Build example (macOS)
     timeout-minutes: 45
     runs-on: macos-latest
@@ -133,6 +155,8 @@ jobs:
         run: flutter build macos --release
 
   build-windows:
+    needs: changes
+    if: needs.changes.outputs.webrtc == 'true'
     name: Build example (Windows)
     timeout-minutes: 45
     runs-on: windows-latest
@@ -148,6 +172,8 @@ jobs:
         run: flutter build windows --release
 
   build-linux:
+    needs: changes
+    if: needs.changes.outputs.webrtc == 'true'
     name: Build example (Linux)
     timeout-minutes: 30
     runs-on: ubuntu-latest
@@ -168,6 +194,8 @@ jobs:
         run: flutter build linux
 
   build-elinux:
+    needs: changes
+    if: needs.changes.outputs.webrtc == 'true'
     name: Build example (Embedded Linux)
     timeout-minutes: 30
     runs-on: ubuntu-latest
@@ -190,6 +218,8 @@ jobs:
           ~/flutter-elinux/bin/flutter-elinux build elinux
 
   build-web:
+    needs: changes
+    if: needs.changes.outputs.webrtc == 'true'
     name: Build example (Web)
     timeout-minutes: 30
     runs-on: ubuntu-latest
@@ -203,3 +233,31 @@ jobs:
       - name: Build
         working-directory: ${{ env.example }}
         run: flutter build web
+
+  # The one check to mark as required: it passes when every check above
+  # passed or was skipped because nothing in webrtc/ changed.
+  verified:
+    name: WebRTC verified
+    if: always()
+    needs:
+      - changes
+      - analyze
+      - build-android
+      - build-ios
+      - build-macos
+      - build-windows
+      - build-linux
+      - build-elinux
+      - build-web
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        env:
+          FAILED: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          if [[ "$FAILED" == "true" ]]; then
+            echo "A required check failed or was cancelled."
+            exit 1
+          fi
+          echo "All checks passed or were skipped."
