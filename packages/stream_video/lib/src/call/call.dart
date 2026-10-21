@@ -833,6 +833,18 @@ class Call {
           },
         );
         return _stateManager.coordinatorCallReaction(event);
+      case StreamCallSessionParticipantJoinedEvent _:
+        if (state.value.status.isConnected || state.value.status.isJoined) {
+          return;
+        }
+
+        return _stateManager.coordinatorCallSessionParticipantJoined(event);
+      case StreamCallSessionParticipantLeftEvent _:
+        if (state.value.status.isConnected || state.value.status.isJoined) {
+          return;
+        }
+
+        return _stateManager.coordinatorCallSessionParticipantLeft(event);
       case StreamCallSessionParticipantCountUpdatedEvent _:
         if (state.value.status.isConnected || state.value.status.isJoined) {
           return;

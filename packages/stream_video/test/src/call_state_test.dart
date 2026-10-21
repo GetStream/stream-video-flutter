@@ -167,4 +167,29 @@ void main() {
       expect(updated.anonymousParticipantCount, 310);
     },
   );
+
+  test(
+    'CallState.copyFromMetadata counts the session participants when the role counts are lower',
+    () {
+      final updated = initial.copyFromMetadata(
+        SampleCallData.createCallMetadata(
+          participants: const {
+            'a-session': CallParticipant(
+              userSessionId: 'a-session',
+              userId: 'a',
+              role: 'user',
+            ),
+            'b-session': CallParticipant(
+              userSessionId: 'b-session',
+              userId: 'b',
+              role: 'user',
+            ),
+          },
+          participantsCountByRole: const {'user': 1},
+        ),
+      );
+
+      expect(updated.participantCount, 2);
+    },
+  );
 }
