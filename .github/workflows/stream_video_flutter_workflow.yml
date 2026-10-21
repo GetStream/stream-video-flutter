@@ -21,38 +21,43 @@ permissions:
   pull-requests: read
 
 jobs:
-  # Decides whether the SDK checks below need to run. A push always runs them.
-  changes:
-    timeout-minutes: 5
+  # Centralizes every gating decision for this workflow — path filter,
+  # draft state, and push-vs-PR semantics. Downstream jobs only need a
+  # single `if: needs.gate.outputs.should_run == 'true'`. A job skipped
+  # this way reports `success` to branch protection (vs. `on.paths`
+  # filtering, which hangs forever) — see
+  # https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks
+  #
+  # `push` events to main and v2 always run the full suite.
+  gate:
     runs-on: ubuntu-latest
     outputs:
-      sdk: ${{ github.event_name == 'push' || steps.filter.outputs.sdk == 'true' }}
+      should_run: ${{ github.event_name == 'push' || (steps.filter.outputs.relevant == 'true' && github.event.pull_request.draft != true) }}
     steps:
-      - name: Git Checkout
+      - name: "Git Checkout"
         uses: actions/checkout@v7
 
-      - name: Filter changed paths
+      - name: "Detect Path Changes"
+        uses: dorny/paths-filter@v4
         id: filter
-        if: github.event_name == 'pull_request'
-        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         with:
           filters: |
-            sdk:
-              - "packages/**"
-              - "dogfooding/**"
-              - "pubspec.yaml"
-              - "pubspec.lock"
-              - "analysis_options.yaml"
-              - "all_lint_rules.yaml"
-              - "tools/*.dart"
-              - ".github/actions/setup-flutter/**"
-              - ".github/actions/setup-melos/**"
-              - ".github/workflows/scripts/**"
-              - ".github/workflows/stream_video_flutter_workflow.yml"
+            relevant:
+              - 'packages/**'
+              - 'dogfooding/**'
+              - 'pubspec.yaml'
+              - 'pubspec.lock'
+              - 'analysis_options.yaml'
+              - 'all_lint_rules.yaml'
+              - 'tools/*.dart'
+              - '.github/actions/setup-flutter/**'
+              - '.github/actions/setup-melos/**'
+              - '.github/workflows/scripts/**'
+              - '.github/workflows/stream_video_flutter_workflow.yml'
 
   analyze:
-    needs: changes
-    if: needs.changes.outputs.sdk == 'true'
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
@@ -101,8 +106,8 @@ jobs:
   # PR-only: on a push there is no base ref, and the scanner would then check
   # whole files and fail on existing hotspots this gate is not meant to block.
   complexity:
-    needs: changes
-    if: github.event_name == 'pull_request' && needs.changes.outputs.sdk == 'true'
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true' && github.event_name == 'pull_request'
     timeout-minutes: 10
     runs-on: ubuntu-latest
     # Posting the sticky audit comment needs write access; without it the
@@ -139,8 +144,8 @@ jobs:
           fail-on-increase: true
 
   build:
-    needs: changes
-    if: needs.changes.outputs.sdk == 'true'
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
@@ -166,11 +171,11 @@ jobs:
           melos run build:example:android
 
   # The one check to mark as required: it passes when every check above
-  # passed or was skipped because nothing relevant changed.
+  # passed or was skipped by the gate.
   verified:
     name: SDK verified
     if: always()
-    needs: [changes, analyze, complexity, build]
+    needs: [gate, analyze, complexity, build]
     timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
