@@ -1310,6 +1310,10 @@ class Call {
     );
   }
 
+  /// Whether the client was given an audio processor, without which
+  /// [startAudioProcessing] fails.
+  bool get isAudioProcessorConfigured => _host.isAudioProcessorConfigured();
+
   /// Starts audio processing for the call.
   Future<Result<None>> startAudioProcessing({
     bool requireAdvancedAudioProcessingSupport = false,

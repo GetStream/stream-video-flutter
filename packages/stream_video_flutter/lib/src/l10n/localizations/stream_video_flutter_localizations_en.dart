@@ -273,4 +273,51 @@ class StreamVideoFlutterLocalizationsEn
 
   @override
   String get callConnectionReconnectFailed => 'Couldn\'t reconnect to the call';
+
+  @override
+  String get settingsDeviceTab => 'Device';
+
+  @override
+  String get deviceSettingsSelectCamera => 'Select Camera';
+
+  @override
+  String get deviceSettingsSelectMicrophone => 'Select Microphone';
+
+  @override
+  String get deviceSettingsSelectSpeaker => 'Select Speaker';
+
+  @override
+  String get deviceSettingsNoiseCancellation => 'Noise Cancellation';
+
+  @override
+  String get deviceSettingsNoiseCancellationDescription =>
+      'Filters out background noise from your microphone.';
+
+  @override
+  String get deviceSettingsIncomingVideoQuality => 'Incoming Video Quality';
+
+  @override
+  String get deviceSettingsIncomingVideoQualityHelper =>
+      'The quality of incoming video is influenced by various factors, including the source video\'s quality and the network conditions.';
+
+  @override
+  String get incomingVideoQualityAuto => 'Auto';
+
+  @override
+  String get incomingVideoQuality2160p => '4K 2160p';
+
+  @override
+  String get incomingVideoQuality1080p => 'Full HD 1080p';
+
+  @override
+  String get incomingVideoQuality720p => 'HD 720p';
+
+  @override
+  String get incomingVideoQuality480p => 'SD 480p';
+
+  @override
+  String get incomingVideoQuality144p => 'Data saver 144p';
+
+  @override
+  String get incomingVideoQualityOff => 'Disable video';
 }

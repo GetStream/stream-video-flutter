@@ -6,7 +6,6 @@ import '../../utils/consts.dart';
 import '../../utils/feedback_dialog.dart';
 import 'background_filters_menu_item.dart';
 import 'connection_failure_section.dart';
-import 'incoming_video_quality.dart';
 import 'reactions_menu_content.dart';
 
 /// What the control bar already carries at a given width.
@@ -163,10 +162,11 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
     final sharing = state.localParticipant?.isScreenShareEnabled ?? false;
 
     return [
-      // Absent where the call is not configured for it, rather than offered
-      // as a switch that does nothing.
+      // Absent where the call or the client is not configured for it, rather
+      // than offered as a switch that does nothing.
       if (state.settings.audio.noiseCancellation?.mode !=
-          NoiseCancellationSettingsMode.disabled)
+              NoiseCancellationSettingsMode.disabled &&
+          call.isAudioProcessorConfigured)
         StreamMenuOption(
           label: 'Noise cancellation',
           leading: Icon(icons.audio),
@@ -231,9 +231,7 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
     CallState state,
   ) {
     final icons = context.streamIcons;
-    final quality = incomingVideoQualityOf(
-      widget.call.dynascaleManager.incomingVideoSettings,
-    );
+    final quality = widget.call.incomingVideoQuality;
 
     return [
       StreamMenuSection(
@@ -253,9 +251,9 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
         options: [
           for (final value in IncomingVideoQuality.values)
             StreamMenuOption(
-              label: value.name,
+              label: value.label(context),
               selected: value == quality,
-              onSelected: () => _setIncomingVideoQuality(value),
+              onSelected: () => widget.call.setIncomingVideoQuality(value),
             ),
         ],
       ),
@@ -264,15 +262,6 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
         messenger: widget.snackbarMessenger,
       ),
     ];
-  }
-
-  void _setIncomingVideoQuality(IncomingVideoQuality quality) {
-    if (quality == IncomingVideoQuality.off) {
-      widget.call.setIncomingVideoEnabled(false);
-      return;
-    }
-
-    widget.call.setPreferredIncomingVideoResolution(quality.resolution);
   }
 }
 
