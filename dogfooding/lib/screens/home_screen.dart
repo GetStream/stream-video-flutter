@@ -20,6 +20,7 @@ import '../utils/call_lookup.dart';
 import '../utils/consts.dart';
 import '../utils/loading_dialog.dart';
 import '../widgets/environment_switcher.dart';
+import '../widgets/minimum_top_inset.dart';
 import '../widgets/user_actions_avatar.dart';
 import 'qr_code_scanner.dart';
 
@@ -327,70 +328,72 @@ class _HomeScreenState extends State<HomeScreen> {
       ],
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: colors.backgroundApp,
-        leading: UserActionsAvatar(currentUser: currentUser),
-        leadingWidth: kAppBarAvatarLeadingWidth,
-        titleSpacing: 4,
-        centerTitle: false,
-        title: Text(name, style: textTheme.bodyDefault),
-        actions: [
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: EnvironmentBanner(
-                  currentEnvironment: _appPreferences.environment,
-                ),
-              ),
-              StreamButton.icon(
-                type: .ghost,
-                style: .secondary,
-                icon: const Icon(Icons.logout),
-                onPressed: _userAuthController.logout,
-              ),
-            ],
-          ),
-        ],
-      ),
-      // The app bar clears the top inset. The sides are cleared here, and the
-      // bottom inside the scroll view so the content can scroll past it.
-      body: SafeArea(
-        top: false,
-        bottom: false,
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(14).add(
-              EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
-            ),
-            child: compactHeight
-                ? ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: kMaxWidthRegularScreen * 2,
-                    ),
-                    child: Row(
-                      spacing: spacing.xl,
-                      children: [
-                        Expanded(child: intro),
-                        Expanded(child: actions),
-                      ],
-                    ),
-                  )
-                : ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: kMaxWidthRegularScreen,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        intro,
-                        const SizedBox(height: 44),
-                        actions,
-                      ],
-                    ),
+    return MinimumTopInset(
+      child: Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: colors.backgroundApp,
+          leading: UserActionsAvatar(currentUser: currentUser),
+          leadingWidth: kAppBarAvatarLeadingWidth,
+          titleSpacing: 4,
+          centerTitle: false,
+          title: Text(name, style: textTheme.bodyDefault),
+          actions: [
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: EnvironmentBanner(
+                    currentEnvironment: _appPreferences.environment,
                   ),
+                ),
+                StreamButton.icon(
+                  type: .ghost,
+                  style: .secondary,
+                  icon: const Icon(Icons.logout),
+                  onPressed: _userAuthController.logout,
+                ),
+              ],
+            ),
+          ],
+        ),
+        // The app bar clears the top inset. The sides are cleared here, and the
+        // bottom inside the scroll view so the content can scroll past it.
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(14).add(
+                EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
+              ),
+              child: compactHeight
+                  ? ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: kMaxWidthRegularScreen * 2,
+                      ),
+                      child: Row(
+                        spacing: spacing.xl,
+                        children: [
+                          Expanded(child: intro),
+                          Expanded(child: actions),
+                        ],
+                      ),
+                    )
+                  : ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: kMaxWidthRegularScreen,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          intro,
+                          const SizedBox(height: 44),
+                          actions,
+                        ],
+                      ),
+                    ),
+            ),
           ),
         ),
       ),
