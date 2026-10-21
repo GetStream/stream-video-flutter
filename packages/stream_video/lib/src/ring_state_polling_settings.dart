@@ -9,7 +9,7 @@
 class RingStatePollingSettings {
   const RingStatePollingSettings({
     this.enabled = true,
-    this.startAfter = const Duration(seconds: 15),
+    this.startAfter = const Duration(seconds: 9),
     this.interval = const Duration(seconds: 5),
   });
 
@@ -20,6 +20,10 @@ class RingStatePollingSettings {
   final bool enabled;
 
   /// How long the ring has to go without a ring event before the first poll.
+  ///
+  /// Defaults to 9 seconds, so that a 30 second ring is read at 9, 14, 19, 24
+  /// and 29 seconds. A callee who takes longer than that to answer costs one
+  /// read even when the WebSocket is healthy; raise it to poll less.
   ///
   /// Every `call.accepted`, `call.rejected` or `call.missed` event restarts it,
   /// as an event proves the WebSocket is alive.
