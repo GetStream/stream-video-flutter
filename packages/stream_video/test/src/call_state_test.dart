@@ -131,4 +131,86 @@ void main() {
       expect(updated.ringingMembers, same(initial.ringingMembers));
     },
   );
+
+  test(
+    'CallState.copyFromMetadata takes the session counts before the call is joined',
+    () {
+      final updated = initial.copyFromMetadata(
+        SampleCallData.createCallMetadata(
+          participantsCountByRole: const {'host': 1, 'user': 12000},
+          anonymousParticipantCount: 300,
+        ),
+      );
+
+      expect(updated.participantCount, 12001);
+      expect(updated.anonymousParticipantCount, 300);
+    },
+  );
+
+  test(
+    'CallState.copyFromMetadata keeps the counts the SFU reports once joined',
+    () {
+      final joined = initial.copyWith(
+        status: CallStatus.connected(),
+        participantCount: 12500,
+        anonymousParticipantCount: 310,
+      );
+
+      final updated = joined.copyFromMetadata(
+        SampleCallData.createCallMetadata(
+          participantsCountByRole: const {'host': 1, 'user': 12000},
+          anonymousParticipantCount: 300,
+        ),
+      );
+
+      expect(updated.participantCount, 12500);
+      expect(updated.anonymousParticipantCount, 310);
+    },
+  );
+
+  test(
+    'CallState.copyFromMetadata counts the session participants when the role counts are lower',
+    () {
+      final updated = initial.copyFromMetadata(
+        SampleCallData.createCallMetadata(
+          participants: const {
+            'a-session': CallParticipant(
+              userSessionId: 'a-session',
+              userId: 'a',
+              role: 'user',
+            ),
+            'b-session': CallParticipant(
+              userSessionId: 'b-session',
+              userId: 'b',
+              role: 'user',
+            ),
+          },
+          participantsCountByRole: const {'user': 1},
+        ),
+      );
+
+      expect(updated.participantCount, 2);
+    },
+  );
+
+  test(
+    'CallState.copyFromMetadata keeps the counts the SFU reports while reconnecting',
+    () {
+      final reconnecting = initial.copyWith(
+        status: CallStatus.reconnecting(1),
+        participantCount: 12500,
+        anonymousParticipantCount: 310,
+      );
+
+      final updated = reconnecting.copyFromMetadata(
+        SampleCallData.createCallMetadata(
+          participantsCountByRole: const {'host': 1, 'user': 12000},
+          anonymousParticipantCount: 300,
+        ),
+      );
+
+      expect(updated.participantCount, 12500);
+      expect(updated.anonymousParticipantCount, 310);
+    },
+  );
 }
