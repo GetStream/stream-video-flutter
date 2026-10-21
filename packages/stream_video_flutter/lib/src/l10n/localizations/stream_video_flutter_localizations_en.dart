@@ -320,4 +320,16 @@ class StreamVideoFlutterLocalizationsEn
 
   @override
   String get incomingVideoQualityOff => 'Disable video';
+
+  @override
+  String get settingsEffectsTab => 'Effects';
+
+  @override
+  String get effectsSettingsFilters => 'Effects';
+
+  @override
+  String get effectsSettingsBackgrounds => 'Backgrounds';
+
+  @override
+  String get effectsSettingsNone => 'No effect';
 }

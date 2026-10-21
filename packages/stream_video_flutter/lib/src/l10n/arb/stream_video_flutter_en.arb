@@ -377,5 +377,21 @@
   "incomingVideoQualityOff": "Disable video",
   "@incomingVideoQualityOff": {
     "description": "Incoming video quality choice that turns other participants' video off"
+  },
+  "settingsEffectsTab": "Effects",
+  "@settingsEffectsTab": {
+    "description": "The label of the video effects tab in the settings window"
+  },
+  "effectsSettingsFilters": "Effects",
+  "@effectsSettingsFilters": {
+    "description": "Heading of the row of video effects, such as blurs, in the effects settings"
+  },
+  "effectsSettingsBackgrounds": "Backgrounds",
+  "@effectsSettingsBackgrounds": {
+    "description": "Heading of the grid of background images in the effects settings"
+  },
+  "effectsSettingsNone": "No effect",
+  "@effectsSettingsNone": {
+    "description": "Tooltip of the button that turns video effects off"
   }
 }
