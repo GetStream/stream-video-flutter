@@ -21,7 +21,38 @@ permissions:
   pull-requests: read
 
 jobs:
+  # Decides whether the SDK checks below need to run. A push always runs them.
+  changes:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    outputs:
+      sdk: ${{ github.event_name == 'push' || steps.filter.outputs.sdk == 'true' }}
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+
+      - name: Filter changed paths
+        id: filter
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: |
+            sdk:
+              - "packages/**"
+              - "dogfooding/**"
+              - "pubspec.yaml"
+              - "pubspec.lock"
+              - "analysis_options.yaml"
+              - "all_lint_rules.yaml"
+              - "tools/*.dart"
+              - ".github/actions/setup-flutter/**"
+              - ".github/actions/setup-melos/**"
+              - ".github/workflows/scripts/**"
+              - ".github/workflows/stream_video_flutter_workflow.yml"
+
   analyze:
+    needs: changes
+    if: needs.changes.outputs.sdk == 'true'
     timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
@@ -70,7 +101,8 @@ jobs:
   # PR-only: on a push there is no base ref, and the scanner would then check
   # whole files and fail on existing hotspots this gate is not meant to block.
   complexity:
-    if: github.event_name == 'pull_request'
+    needs: changes
+    if: github.event_name == 'pull_request' && needs.changes.outputs.sdk == 'true'
     timeout-minutes: 10
     runs-on: ubuntu-latest
     # Posting the sticky audit comment needs write access; without it the
@@ -107,6 +139,8 @@ jobs:
           fail-on-increase: true
 
   build:
+    needs: changes
+    if: needs.changes.outputs.sdk == 'true'
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
@@ -130,3 +164,22 @@ jobs:
       - name: Build Example
         run: |
           melos run build:example:android
+
+  # The one check to mark as required: it passes when every check above
+  # passed or was skipped because nothing relevant changed.
+  verified:
+    name: SDK verified
+    if: always()
+    needs: [changes, analyze, complexity, build]
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        env:
+          FAILED: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          if [[ "$FAILED" == "true" ]]; then
+            echo "A required check failed or was cancelled."
+            exit 1
+          fi
+          echo "All checks passed or were skipped."
