@@ -31,15 +31,20 @@ mixin _$StreamAdaptiveMenuAnchorThemeData {
 
     return StreamAdaptiveMenuAnchorThemeData(
       style: StreamAdaptiveMenuAnchorStyle.lerp(a.style, b.style, t),
+      useSheet: t < 0.5 ? a.useSheet : b.useSheet,
     );
   }
 
   StreamAdaptiveMenuAnchorThemeData copyWith({
     StreamAdaptiveMenuAnchorStyle? style,
+    bool? useSheet,
   }) {
     final _this = (this as StreamAdaptiveMenuAnchorThemeData);
 
-    return StreamAdaptiveMenuAnchorThemeData(style: style ?? _this.style);
+    return StreamAdaptiveMenuAnchorThemeData(
+      style: style ?? _this.style,
+      useSheet: useSheet ?? _this.useSheet,
+    );
   }
 
   StreamAdaptiveMenuAnchorThemeData merge(
@@ -55,7 +60,10 @@ mixin _$StreamAdaptiveMenuAnchorThemeData {
       return other;
     }
 
-    return copyWith(style: _this.style?.merge(other.style) ?? other.style);
+    return copyWith(
+      style: _this.style?.merge(other.style) ?? other.style,
+      useSheet: other.useSheet,
+    );
   }
 
   @override
@@ -71,14 +79,14 @@ mixin _$StreamAdaptiveMenuAnchorThemeData {
     final _this = (this as StreamAdaptiveMenuAnchorThemeData);
     final _other = (other as StreamAdaptiveMenuAnchorThemeData);
 
-    return _other.style == _this.style;
+    return _other.style == _this.style && _other.useSheet == _this.useSheet;
   }
 
   @override
   int get hashCode {
     final _this = (this as StreamAdaptiveMenuAnchorThemeData);
 
-    return Object.hash(runtimeType, _this.style);
+    return Object.hash(runtimeType, _this.style, _this.useSheet);
   }
 }
 

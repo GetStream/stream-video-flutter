@@ -43,7 +43,64 @@ void main() {
     );
   }
 
+  /// A window on iOS whose one tab is a menu anchor, wrapped by [wrap].
+  Widget windowWithMenu({Widget Function(Widget child)? wrap}) {
+    final Widget menu = StreamAdaptiveMenuAnchor(
+      title: 'Microphone',
+      sections: [
+        StreamMenuSection(
+          options: [StreamMenuOption(label: 'Jabra', onSelected: () {})],
+        ),
+      ],
+      builder: (context, handle) => TextButton(
+        onPressed: handle.toggle,
+        child: const Text('open'),
+      ),
+    );
+
+    return TestWrapper(
+      platform: TargetPlatform.iOS,
+      child: StreamModalWindow(
+        tabs: [
+          StreamModalWindowTab(
+            icon: Icon(const StreamIcons().settingsFill),
+            label: const Text('Device'),
+            builder: (context) => wrap?.call(menu) ?? menu,
+          ),
+        ],
+      ),
+    );
+  }
+
   group('StreamModalWindow', () {
+    testWidgets('a menu in a tab opens anchored on a phone platform', (
+      tester,
+    ) async {
+      await tester.pumpWidget(windowWithMenu());
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StreamSheetHeader), findsNothing);
+      expect(find.text('Jabra'), findsOneWidget);
+    });
+
+    testWidgets('a tab can ask its menus for a sheet', (tester) async {
+      await tester.pumpWidget(
+        windowWithMenu(
+          wrap: (child) => StreamAdaptiveMenuAnchorTheme(
+            data: const StreamAdaptiveMenuAnchorThemeData(useSheet: true),
+            child: child,
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StreamSheetHeader), findsOneWidget);
+    });
+
     testWidgets('shows the first tab with its label as the title', (
       tester,
     ) async {

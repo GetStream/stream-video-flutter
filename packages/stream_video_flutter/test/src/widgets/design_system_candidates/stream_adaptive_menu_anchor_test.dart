@@ -90,6 +90,28 @@ void main() {
       });
     }
 
+    testWidgets('tapping a row with nothing to press leaves the menu up', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const TestWrapper(
+          platform: .macOS,
+          child: _Menu(
+            sections: [
+              StreamMenuSection(options: [StreamMenuOption(label: 'Rene')]),
+            ],
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Rene'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Rene'), findsOneWidget);
+    });
+
     // A device menu carries 16px icons, so it keeps the design's row and is
     // not dragged along by the roomier one an avatar list asks for.
     testWidgets('keeps the design row when no override is given', (
@@ -316,6 +338,40 @@ void main() {
       expect(find.byType(StreamListTile), findsNWidgets(3));
     });
 
+    testWidgets('the theme useSheet overrides the platform', (tester) async {
+      await tester.pumpWidget(
+        const TestWrapper(
+          child: StreamAdaptiveMenuAnchorTheme(
+            data: StreamAdaptiveMenuAnchorThemeData(useSheet: false),
+            child: _Menu(),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StreamSheetHeader), findsNothing);
+      expect(find.byType(StreamContextMenu), findsOneWidget);
+    });
+
+    testWidgets('the useSheet prop wins over the theme', (tester) async {
+      await tester.pumpWidget(
+        const TestWrapper(
+          platform: .macOS,
+          child: StreamAdaptiveMenuAnchorTheme(
+            data: StreamAdaptiveMenuAnchorThemeData(useSheet: false),
+            child: _Menu(useSheet: true),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StreamSheetHeader), findsOneWidget);
+    });
+
     // The anchor has to be given loose constraints for a SizedBox inside it to
     // mean anything: TestWrapper's Material is sized to the viewport and hands
     // its child tight constraints.
@@ -414,6 +470,40 @@ void main() {
           ),
         );
 
+        await tester.tap(find.text('open'));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Jabra Evolve2 65'));
+        await tester.pumpAndSettle();
+
+        expect(picked, 'Jabra Evolve2 65');
+        expect(find.text('closed'), findsOneWidget);
+      });
+
+      testWidgets('leaves the dialog it is shown in open on $name', (
+        tester,
+      ) async {
+        String? picked;
+
+        await tester.pumpWidget(
+          TestWrapper(
+            platform: platform,
+            child: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => showStreamModalDialog<void>(
+                  context: context,
+                  builder: (_) => Center(
+                    child: _Menu(onPicked: (label) => picked = label),
+                  ),
+                ),
+                child: const Text('dialog'),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('dialog'));
+        await tester.pumpAndSettle();
         await tester.tap(find.text('open'));
         await tester.pumpAndSettle();
 

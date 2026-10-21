@@ -12,6 +12,7 @@
 - Added `StreamCallParticipantsSpotlightThemeData` on `StreamVideoTheme`, and `StreamCallParticipantsSpotlightTheme` to restyle the speaker layouts over a subtree.
 - Added `StreamMenuOption.trailing`, the value a menu row reports at its far end.
 - Added `StreamMenuSection.content`, which draws arbitrary content in place of a section's rows.
+- Added `StreamAdaptiveMenuAnchorThemeData.useSheet`, which picks a menu's presentation for a subtree; `StreamModalWindow` sets it to false for its tabs.
 - Added `StreamMenuSection.collapsible`, whose heading folds the section away, and `initiallyCollapsed` for how it starts.
 - Added `StreamMenuOption.closesMenu`, so a row reporting state the menu shows can leave it up.
 - `StreamContextMenuHeading` takes a `trailing` and an `onTap`.
@@ -214,6 +215,7 @@
 
 ### 🐞 Fixed
 
+- Fixed picking an option in a `StreamContextMenuAnchor`, or an anchored `StreamAdaptiveMenuAnchor`, closing the dialog it is shown in.
 - The participant tile's overflow menu lines up with the edge of its button.
 - `StreamAdaptiveMenuAnchor` sheet rows are 48px tall.
 - The lobby control buttons are 8px apart.

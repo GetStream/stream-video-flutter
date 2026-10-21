@@ -38,6 +38,11 @@ import 'stream_modal_parts.dart';
 /// The window takes the whole of [constraints], so switching tabs never
 /// changes its size. The selected tab is drawn in a scroll view.
 ///
+/// A [StreamAdaptiveMenuAnchor] in a tab opens its anchored menu on every
+/// platform rather than a bottom sheet. Wrap the tab's content in a
+/// [StreamAdaptiveMenuAnchorTheme] that sets
+/// [StreamAdaptiveMenuAnchorThemeData.useSheet] to change that.
+///
 /// When the window is narrower than 560, the sidebar shows only the tabs'
 /// icons, each with its tab's [StreamModalWindowTab.tooltip].
 ///
@@ -184,7 +189,15 @@ class _StreamModalWindowState extends State<StreamModalWindow> {
                           key: ValueKey(_selectedIndex),
                           padding:
                               style?.contentPadding ?? defaults.contentPadding,
-                          child: Builder(builder: tab.builder),
+                          child: StreamAdaptiveMenuAnchorTheme(
+                            data: StreamAdaptiveMenuAnchorTheme.of(context)
+                                .merge(
+                                  const StreamAdaptiveMenuAnchorThemeData(
+                                    useSheet: false,
+                                  ),
+                                ),
+                            child: Builder(builder: tab.builder),
+                          ),
                         ),
                       ),
                     ],
