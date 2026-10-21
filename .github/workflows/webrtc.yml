@@ -24,31 +24,37 @@ env:
   example: webrtc/stream_webrtc_flutter/example
 
 jobs:
-  # Decides whether the webrtc checks below need to run.
-  changes:
-    timeout-minutes: 5
+  # Centralizes every gating decision for this workflow — path filter,
+  # draft state, and push-vs-PR semantics. Downstream jobs only need a
+  # single `if: needs.gate.outputs.should_run == 'true'`. A job skipped
+  # this way reports `success` to branch protection (vs. `on.paths`
+  # filtering, which hangs forever) — see
+  # https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks
+  #
+  # `push` events to main and v2 run when webrtc/ changed.
+  gate:
     runs-on: ubuntu-latest
     outputs:
-      webrtc: ${{ steps.filter.outputs.webrtc }}
+      should_run: ${{ steps.filter.outputs.relevant == 'true' && github.event.pull_request.draft != true }}
     steps:
-      - name: Git Checkout
+      - name: "Git Checkout"
         uses: actions/checkout@v7
 
-      - name: Filter changed paths
+      - name: "Detect Path Changes"
+        uses: dorny/paths-filter@v4
         id: filter
-        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         with:
           filters: |
-            webrtc:
-              - "webrtc/**"
-              - "tools/webrtc.sh"
-              - ".github/actions/setup-flutter/**"
-              - ".github/actions/select-xcode/**"
-              - ".github/workflows/webrtc.yml"
+            relevant:
+              - 'webrtc/**'
+              - 'tools/webrtc.sh'
+              - '.github/actions/setup-flutter/**'
+              - '.github/actions/select-xcode/**'
+              - '.github/workflows/webrtc.yml'
 
   analyze:
-    needs: changes
-    if: needs.changes.outputs.webrtc == 'true'
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
     name: Analyze (${{ matrix.package }})
     timeout-minutes: 15
     runs-on: ubuntu-latest
@@ -81,8 +87,8 @@ jobs:
         run: tools/webrtc.sh test ${{ matrix.package }}
 
   build-android:
-    needs: changes
-    if: needs.changes.outputs.webrtc == 'true'
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
     name: Build example (Android)
     timeout-minutes: 30
     runs-on: ubuntu-latest
@@ -100,8 +106,8 @@ jobs:
         run: flutter build apk
 
   build-ios:
-    needs: changes
-    if: needs.changes.outputs.webrtc == 'true'
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
     name: Build example (iOS, CocoaPods + SPM)
     timeout-minutes: 45
     runs-on: macos-latest
@@ -136,8 +142,8 @@ jobs:
           flutter build ios --no-codesign
 
   build-macos:
-    needs: changes
-    if: needs.changes.outputs.webrtc == 'true'
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
     name: Build example (macOS)
     timeout-minutes: 45
     runs-on: macos-latest
@@ -156,8 +162,8 @@ jobs:
         run: flutter build macos --release
 
   build-windows:
-    needs: changes
-    if: needs.changes.outputs.webrtc == 'true'
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
     name: Build example (Windows)
     timeout-minutes: 45
     runs-on: windows-latest
@@ -173,8 +179,8 @@ jobs:
         run: flutter build windows --release
 
   build-linux:
-    needs: changes
-    if: needs.changes.outputs.webrtc == 'true'
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
     name: Build example (Linux)
     timeout-minutes: 30
     runs-on: ubuntu-latest
@@ -195,8 +201,8 @@ jobs:
         run: flutter build linux
 
   build-elinux:
-    needs: changes
-    if: needs.changes.outputs.webrtc == 'true'
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
     name: Build example (Embedded Linux)
     timeout-minutes: 30
     runs-on: ubuntu-latest
@@ -219,8 +225,8 @@ jobs:
           ~/flutter-elinux/bin/flutter-elinux build elinux
 
   build-web:
-    needs: changes
-    if: needs.changes.outputs.webrtc == 'true'
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
     name: Build example (Web)
     timeout-minutes: 30
     runs-on: ubuntu-latest
@@ -236,12 +242,12 @@ jobs:
         run: flutter build web
 
   # The one check to mark as required: it passes when every check above
-  # passed or was skipped because nothing in webrtc/ changed.
+  # passed or was skipped by the gate.
   verified:
     name: WebRTC verified
     if: always()
     needs:
-      - changes
+      - gate
       - analyze
       - build-android
       - build-ios
