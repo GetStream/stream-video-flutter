@@ -130,4 +130,68 @@ void main() {
       });
     }
   });
+
+  testWidgets('SplitAtFold keeps its children through the measurement', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SplitAtFold(
+            fold: Rect.fromLTWH(475, 0, 0, 669),
+            gap: 16,
+            start: _Counter(key: Key('start')),
+            end: SizedBox(height: 50),
+          ),
+        ),
+      ),
+    );
+    final state = tester.state(find.byKey(const Key('start')));
+
+    // The second frame lays out around the measured fold.
+    await tester.pump();
+
+    expect(tester.state(find.byKey(const Key('start'))), same(state));
+    expect(tester.getRect(find.byKey(const Key('start'))).right, 475 - 16);
+  });
+
+  testWidgets('SplitAtFold splits evenly when the fold is outside it', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 400,
+            child: SplitAtFold(
+              fold: Rect.fromLTWH(600, 0, 0, 669),
+              gap: 16,
+              start: SizedBox(key: Key('start'), height: 50),
+              end: SizedBox(key: Key('end'), height: 50),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(tester.getRect(find.byKey(const Key('start'))).width, 184);
+    expect(tester.getRect(find.byKey(const Key('end'))).width, 184);
+  });
+}
+
+class _Counter extends StatefulWidget {
+  const _Counter({super.key});
+
+  @override
+  State<_Counter> createState() => _CounterState();
+}
+
+class _CounterState extends State<_Counter> {
+  @override
+  Widget build(BuildContext context) => const SizedBox(height: 50);
 }

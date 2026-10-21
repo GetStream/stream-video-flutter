@@ -43,10 +43,10 @@ Offset trailingTopAnchorOf(BuildContext context) =>
 /// Lays [start] and [end] out side by side, each kept clear of [fold] by at
 /// least [gap].
 ///
-/// The fold is in window coordinates, so this measures where it sits in the
-/// window after each layout and moves the split if the fold has moved
-/// relative to it. Until the first measurement the two share the width
-/// evenly.
+/// The fold is in window coordinates, so after each build this measures where
+/// the box sits in the window and moves the split if the fold has moved
+/// relative to it. Until the first measurement, and when the fold is not
+/// inside the box, the two share the width evenly.
 @internal
 class SplitAtFold extends StatefulWidget {
   /// Creates a row split at [fold].
@@ -97,22 +97,20 @@ class _SplitAtFoldState extends State<SplitAtFold> {
     final right = rtl ? widget.start : widget.end;
 
     final fold = _fold;
-    if (fold == null) {
-      return Row(
-        textDirection: TextDirection.ltr,
-        spacing: widget.gap * 2,
-        children: [
-          Expanded(child: left),
-          Expanded(child: right),
-        ],
-      );
-    }
+    final gap = widget.gap;
 
+    // One tree whether or not the fold has been measured, so the children
+    // keep their state when it is.
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final leftWidth = (fold.$1 - widget.gap).clamp(0.0, width);
-        final rightStart = (fold.$2 + widget.gap).clamp(leftWidth, width);
+        final even = ((width - gap * 2) / 2).clamp(0.0, double.infinity);
+        final (leftWidth, rightStart) = switch (fold) {
+          (final foldLeft, final foldRight)
+              when foldLeft - gap > 0 && foldRight + gap < width =>
+            (foldLeft - gap, foldRight + gap),
+          _ => (even, even + gap * 2),
+        };
 
         return Row(
           textDirection: TextDirection.ltr,

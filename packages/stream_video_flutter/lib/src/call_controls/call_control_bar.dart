@@ -7,8 +7,7 @@ import '../utils/display_fold.dart';
 ///
 /// [leading] sits against the bar's start edge and [trailing] against its end;
 /// [center] is centred in the bar's full width, however lopsided the two sides
-/// are. When a fold runs down the middle of the window, [center]'s controls
-/// are split between the two sides instead, so none of them sits on it. A slot whose list is empty is not drawn and reserves no room, so a bar
+/// are. A slot whose list is empty is not drawn and reserves no room, so a bar
 /// with only a [center] has that centre across the whole width.
 ///
 /// The bar draws no controls of its own — every one of them is a widget given
@@ -60,6 +59,10 @@ class CallControlBarLayout {
 
 /// The row of controls along the bottom of a call, laid out for the width it
 /// is given.
+///
+/// When a fold runs down the middle of the window, the centre slot's controls
+/// move to the two sides, the first half to the leading side and the rest to
+/// the trailing side.
 ///
 /// Takes one [CallControlBarLayout] per [StreamScreenSize] and draws the one
 /// the window calls for, falling back to the next smaller layout that was
