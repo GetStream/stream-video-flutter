@@ -47,6 +47,7 @@ commit.
 | # | Step | Branch |
 |---|---|---|
 | 1 | `StreamModalWindow` candidate | `feat/flu-973-modal-window` |
+| 1b | Picking from a menu keeps the dialog around it open | `fix/flu-973-menu-in-dialog` |
 | 2 | Device tab | `feat/flu-973-device-tab` |
 | 3 | Effects tab | `feat/flu-973-effects-tab` |
 | 4 | Settings, feedback and developer buttons in dogfooding | `feat/flu-973-settings-button` |
@@ -72,6 +73,14 @@ large-screen more menu holds has a new home by the time the menu goes.
 - [x] Goldens, light and dark, wide and collapsed, from the `update_goldens`
       workflow
 - [x] Changelog
+
+### 1b. Picking from a menu keeps the dialog around it open
+
+- [x] `StreamContextMenu.dismissesRoute` in core
+      (`fix/context-menu-overlay-dismiss`), pinned by SHA
+- [x] The anchored menu leaves the popup route around it alone
+- [x] Regression test: picking an option inside a dialog leaves it open
+- [ ] Core PR merged, and the pin moved to the merge commit
 
 ### 2. Device tab
 
@@ -134,8 +143,10 @@ large-screen more menu holds has a new home by the time the menu goes.
 
 ### 9. Recordings tab
 
-- [ ] Recordings list in the SDK, with loading and empty states
-- [ ] Download from dogfooding
+- [x] Recordings list in the SDK, with loading and empty states; the empty
+      state is a new design-system candidate, `StreamEmptyState`
+- [x] Download from dogfooding, through `url_launcher`; dogfooding overrides
+      the empty-state text in its custom localizations
 
 ### Before opening PRs
 

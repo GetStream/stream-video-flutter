@@ -892,6 +892,72 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'Slovak'**
   String get transcriptionLanguageSk;
+
+  /// The label of the recordings tab in the settings window
+  ///
+  /// In en, this message translates to:
+  /// **'Recordings'**
+  String get settingsRecordingsTab;
+
+  /// Title of the column with each recording's name
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get recordingsName;
+
+  /// Title of the column with the time each recording started
+  ///
+  /// In en, this message translates to:
+  /// **'Start Time'**
+  String get recordingsStartTime;
+
+  /// Title of the column with the time each recording ended
+  ///
+  /// In en, this message translates to:
+  /// **'End Time'**
+  String get recordingsEndTime;
+
+  /// The name of a recording, numbered from the call's first
+  ///
+  /// In en, this message translates to:
+  /// **'Recording #{number}'**
+  String recordingsRecordingName(int number);
+
+  /// Tooltip of the button that downloads a recording
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get recordingsDownload;
+
+  /// Title shown when the call has no recordings
+  ///
+  /// In en, this message translates to:
+  /// **'No Recordings Available'**
+  String get recordingsEmptyTitle;
+
+  /// Shown under the title when the call has no recordings
+  ///
+  /// In en, this message translates to:
+  /// **'Recordings of this call show up here once they\'re ready.'**
+  String get recordingsEmptyDescription;
+
+  /// Title shown when the call's recordings could not be listed
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t Load Recordings'**
+  String get recordingsErrorTitle;
+
+  /// Shown under the title when the call's recordings could not be listed
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get recordingsErrorDescription;
+
+  /// Button that lists the call's recordings again after a failure
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get recordingsRetry;
 }
 
 class _StreamVideoFlutterLocalizationsDelegate
