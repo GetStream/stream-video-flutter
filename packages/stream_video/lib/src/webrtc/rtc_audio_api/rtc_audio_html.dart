@@ -81,6 +81,8 @@ void startAudio(String id, rtc.MediaStreamTrack track) {
 
   if (audioElement is! web.HTMLAudioElement) return;
 
+  audioElement.muted = _playoutPaused;
+
   final audioStream = web.MediaStream();
   audioStream.addTrack(track.jsTrack);
   audioElement.srcObject = audioStream;
@@ -89,6 +91,27 @@ void startAudio(String id, rtc.MediaStreamTrack track) {
   // playback, so drive `play()` explicitly and watch the element from here on.
   _watchdogs.remove(id)?.dispose();
   _watchdogs[id] = _AudioPlaybackWatchdog(trackId: id, element: audioElement);
+}
+
+/// Whether remote audio playout is paused, see [setAudioPlayoutPaused].
+bool _playoutPaused = false;
+
+/// Mutes or unmutes every remote audio element, including the ones created
+/// later while [paused] is set.
+///
+/// Uses the element's `muted` flag rather than pausing it, so playback keeps
+/// running (and the watchdog does not try to recover it) and resumes in sync.
+void setAudioPlayoutPaused({required bool paused}) {
+  _playoutPaused = paused;
+
+  final container = web.document.getElementById(audioContainerId);
+  if (container == null) return;
+
+  final elements = container.querySelectorAll('audio');
+  for (var i = 0; i < elements.length; i++) {
+    final element = elements.item(i);
+    if (element is web.HTMLAudioElement) element.muted = paused;
+  }
 }
 
 void stopAudio(String id) {

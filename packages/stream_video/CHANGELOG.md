@@ -1,5 +1,10 @@
 ## Upcoming
 
+### ✅ Added
+
+- Added `RtcMediaDeviceNotifier.isAudioPlayoutPaused`, `audioPlayoutPausedChanges` and `isAudioPlayoutPauseSupported`.
+- [Web] `RtcMediaDeviceNotifier.pauseAudioPlayout()` and `resumeAudioPlayout()` now work on web.
+
 ### 🐞 Fixed
 
 - `CallState.endedAt` is now set when the call ends while you are joined or watching it.
