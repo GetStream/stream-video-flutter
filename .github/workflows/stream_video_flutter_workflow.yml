@@ -172,8 +172,7 @@ jobs:
 
   # The one check to mark as required: it passes when every check above
   # passed or was skipped by the gate.
-  verified:
-    name: SDK verified
+  sdk-verified:
     if: always()
     needs: [gate, analyze, complexity, build]
     timeout-minutes: 5
