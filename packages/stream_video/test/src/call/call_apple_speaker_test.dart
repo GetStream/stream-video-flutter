@@ -12,6 +12,21 @@ import 'fixtures/call_test_helpers.dart';
 
 class _MockRtcManager extends Mock implements RtcManager {}
 
+class _CapturingLogger extends StreamLogger {
+  final errors = <String>[];
+
+  @override
+  void log(
+    Priority priority,
+    String tag,
+    MessageBuilder message, [
+    Object? error,
+    StackTrace? stk,
+  ]) {
+    if (priority == Priority.error) errors.add(message());
+  }
+}
+
 void main() {
   setUpAll(() {
     registerMockFallbackValues();
@@ -19,7 +34,7 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
   });
 
-  group('Call.join on iOS', () {
+  group('Call on iOS', () {
     late MockCallSession callSession;
     late _MockRtcManager rtcManager;
     late MockRtcMediaDeviceNotifier deviceNotifier;
@@ -163,5 +178,112 @@ void main() {
         ).called(1);
       },
     );
+
+    test('a failure to configure the audio session is logged', () async {
+      final logger = _CapturingLogger();
+      StreamLog()
+        ..logger = logger
+        ..priority = Priority.error;
+      addTearDown(() {
+        StreamLog()
+          ..logger = const SilentStreamLogger()
+          ..priority = Priority.none;
+      });
+
+      when(
+        () => rtcManager.setAppleAudioConfiguration(
+          policy: any(named: 'policy'),
+          speakerOn: any(named: 'speakerOn'),
+        ),
+      ).thenAnswer((_) async {
+        if (!appleConfigurationApplied.isCompleted) {
+          appleConfigurationApplied.complete();
+        }
+        return Result.error('session busy');
+      });
+
+      final call = makeCall(const AudioConfigurationPolicy.viewer());
+
+      final result = await call.join(connectOptions: viewerConnectOptions);
+      expect(result.isSuccess, isTrue);
+      await appleConfigurationApplied.future.timeout(
+        const Duration(seconds: 5),
+      );
+      // The result reaches the log after the stub returns.
+      await pumpEventQueue();
+
+      expect(
+        logger.errors,
+        contains(
+          allOf(contains('appleAudioConfiguration'), contains('session busy')),
+        ),
+      );
+    });
+
+    group('resumeAudio', () {
+      setUp(() {
+        when(
+          () => callSession.restoreAppleAudioConfiguration(),
+        ).thenAnswer((_) async => const Result.success(none));
+        when(
+          () => callSession.applyCurrentAudioOutputDevice(),
+        ).thenAnswer((_) async {});
+        when(
+          () => callSession.resumeSuspendedAudioTracks(any()),
+        ).thenAnswer((_) async {});
+      });
+
+      test('restores the audio session configuration applied since the call '
+          'started, then the output the user picked', () async {
+        // The broadcaster's factory configuration has no loudspeaker, so
+        // without the restore a speaker from the call settings is lost.
+        final call = makeCall(const AudioConfigurationPolicy.broadcaster());
+        await call.join(connectOptions: viewerConnectOptions);
+        // The session's RTC manager can't run the ADM mute reconciliation
+        // as a mock; its restore goes through the session.
+        when(() => callSession.rtcManager).thenReturn(null);
+
+        await call.suspendAudio();
+        await call.resumeAudio();
+
+        verifyInOrder([
+          () => callSession.restoreAppleAudioConfiguration(),
+          () => callSession.applyCurrentAudioOutputDevice(),
+        ]);
+      });
+
+      test('a failure to restore the configuration is logged', () async {
+        final logger = _CapturingLogger();
+        StreamLog()
+          ..logger = logger
+          ..priority = Priority.error;
+        addTearDown(() {
+          StreamLog()
+            ..logger = const SilentStreamLogger()
+            ..priority = Priority.none;
+        });
+        when(
+          () => callSession.restoreAppleAudioConfiguration(),
+        ).thenAnswer((_) async => Result.error('session busy'));
+
+        final call = makeCall(const AudioConfigurationPolicy.broadcaster());
+        await call.join(connectOptions: viewerConnectOptions);
+        // The session's RTC manager can't run the ADM mute reconciliation
+        // as a mock; its restore goes through the session.
+        when(() => callSession.rtcManager).thenReturn(null);
+
+        await call.suspendAudio();
+        await call.resumeAudio();
+
+        expect(
+          logger.errors,
+          contains(
+            allOf(contains('[resumeAudio]'), contains('session busy')),
+          ),
+        );
+        // The user's output is still re-applied.
+        verify(() => callSession.applyCurrentAudioOutputDevice()).called(1);
+      });
+    });
   });
 }

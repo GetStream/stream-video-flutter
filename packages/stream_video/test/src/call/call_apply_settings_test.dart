@@ -308,6 +308,43 @@ void main() {
       );
 
       test(
+        'the viewer policy falls back to the first output when there is no '
+        'speaker',
+        () async {
+          // Web and desktop list no output with the `speaker` id.
+          await useClientPolicy(const AudioConfigurationPolicy.viewer());
+          when(
+            () => mockDeviceNotifier.enumerateDevicesFor(any()),
+          ).thenAnswer(
+            (_) async => const Result.success([
+              RtcMediaDevice(
+                id: 'default',
+                label: 'Default - MacBook Pro Speakers',
+                kind: RtcMediaDeviceKind.audioOutput,
+              ),
+              RtcMediaDevice(
+                id: 'display-audio',
+                label: 'Display Audio',
+                kind: RtcMediaDeviceKind.audioOutput,
+              ),
+            ]),
+          );
+
+          final call = createCallWithMockedResponse(
+            streamVideo,
+            mockCoordinatorClient,
+            earpieceSettings,
+            rtcMediaDeviceNotifier: mockDeviceNotifier,
+          );
+
+          final result = await call.getOrCreate(watch: false);
+
+          expect(result.isSuccess, true);
+          expect(call.connectOptions.audioOutputDevice?.id, 'default');
+        },
+      );
+
+      test(
         'the broadcaster policy keeps following the call settings',
         () async {
           await useClientPolicy(const AudioConfigurationPolicy.broadcaster());

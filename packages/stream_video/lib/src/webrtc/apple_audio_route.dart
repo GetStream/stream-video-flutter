@@ -1,3 +1,5 @@
+import 'package:meta/meta.dart';
+
 import '../../open_api/video/coordinator/api.dart';
 import '../models/audio_configuration_policy.dart';
 import '../utils/extensions.dart';
@@ -15,6 +17,7 @@ const _iosBuiltInReceiverPortType = 'Receiver';
 /// explicitly requested. Under such a policy the loudspeaker therefore stays
 /// the built-in fallback while headphones or a Bluetooth device are in use,
 /// so disconnecting them does not move the audio to the earpiece.
+@internal
 bool resolveAppleSpeakerOn({
   required AudioConfigurationPolicy policy,
   required bool speakerRequested,
@@ -23,6 +26,7 @@ bool resolveAppleSpeakerOn({
   return speakerRequested || (policy.defaultsToSpeaker && !earpieceRequested);
 }
 
+@internal
 extension AppleAudioRouteDevice on RtcMediaDevice {
   /// Whether this is the built-in loudspeaker.
   bool get isBuiltInSpeaker =>

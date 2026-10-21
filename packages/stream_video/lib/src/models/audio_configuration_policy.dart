@@ -107,6 +107,7 @@ sealed class AudioConfigurationPolicy {
     rtc.AndroidAudioConfiguration? androidConfiguration,
     bool bypassVoiceProcessing,
     AndroidCallServiceKind? androidCallServiceKind,
+    bool? defaultsToSpeaker,
   }) = CustomAudioPolicy;
 
   rtc.AppleAudioConfiguration getAppleConfiguration({
@@ -120,15 +121,14 @@ sealed class AudioConfigurationPolicy {
   /// Whether audio plays through the loudspeaker by default under this
   /// policy, whatever the call settings say.
   ///
-  /// True for [AudioConfigurationPolicy.viewer], which treats the call as
-  /// media playback. Without it, iOS routes a `playAndRecord` session to the
-  /// receiver (earpiece) unless the call settings turn the speaker on.
   /// Headphones and Bluetooth devices still take the audio when connected,
   /// and an output picked with `Call.setAudioOutputDevice` still applies.
   ///
-  /// False for [AudioConfigurationPolicy.broadcaster] and
+  /// True for [AudioConfigurationPolicy.viewer]. False for
+  /// [AudioConfigurationPolicy.broadcaster] and
   /// [AudioConfigurationPolicy.hiFi], whose default output follows the call
-  /// settings.
+  /// settings. A custom policy follows its base policy unless it sets its
+  /// own.
   bool get defaultsToSpeaker;
 
   /// The Android foreground service a call under this policy runs in.
@@ -341,6 +341,7 @@ class CustomAudioPolicy extends AudioConfigurationPolicy {
     this.androidConfiguration,
     this.bypassVoiceProcessing = false,
     this._androidCallServiceKind,
+    this._defaultsToSpeaker,
   });
 
   /// The base policy used for platforms where a custom configuration
@@ -370,9 +371,13 @@ class CustomAudioPolicy extends AudioConfigurationPolicy {
           ? AndroidCallServiceKind.call
           : basePolicy.androidCallServiceKind);
 
-  /// Follows [basePolicy].
+  final bool? _defaultsToSpeaker;
+
+  /// Whether audio plays through the loudspeaker by default, when it was
+  /// given. Otherwise follows [basePolicy].
   @override
-  bool get defaultsToSpeaker => basePolicy.defaultsToSpeaker;
+  bool get defaultsToSpeaker =>
+      _defaultsToSpeaker ?? basePolicy.defaultsToSpeaker;
 
   @override
   rtc.AppleAudioConfiguration getAppleConfiguration({

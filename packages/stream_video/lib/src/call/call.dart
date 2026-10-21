@@ -395,9 +395,20 @@ class Call {
     await factory.resumeAudio();
 
     // On iOS the factory restores the audio session configuration it was
-    // built with, which drops an output the user picked since, such as the
-    // earpiece.
+    // built with. Bring back the one applied since, such as the loudspeaker
+    // the call settings asked for, and then an output the user picked, such
+    // as the earpiece.
     if (CurrentPlatform.isIos) {
+      final result =
+          await _session?.restoreAppleAudioConfiguration() ??
+          Result.error('no session');
+      if (result is Failure) {
+        _logger.e(
+          () =>
+              '[resumeAudio] audio session configuration not restored: '
+              '${result.error.message}',
+        );
+      }
       await _session?.applyCurrentAudioOutputDevice();
     }
 
@@ -3053,12 +3064,11 @@ class Call {
     /// settings.
     ///
     /// The priority order is as follows:
-    /// 1. If video camera is set to be on by default, speaker is enabled
-    /// 2. If audio speaker is set to be on by default, speaker is enabled
-    /// 3. If the default audio device is set to speaker, speaker is enabled
-    ///
-    /// An audio policy that defaults to the speaker, such as the viewer
-    /// policy, turns the speaker on whatever the settings say.
+    /// 1. If the audio policy defaults to the speaker, such as the viewer
+    ///    policy, speaker is enabled whatever the settings below say
+    /// 2. If video camera is set to be on by default, speaker is enabled
+    /// 3. If audio speaker is set to be on by default, speaker is enabled
+    /// 4. If the default audio device is set to speaker, speaker is enabled
     final speakerOnWithSettingsPriority =
         _audioConfigurationPolicy.defaultsToSpeaker ||
         settings.video.cameraDefaultOn ||
@@ -3073,21 +3083,21 @@ class Call {
     );
 
     if (defaultAudioOutput == null) {
+      bool isSpeaker(RtcMediaDevice device) => device.id.equalsIgnoreCase(
+        AudioSettingsRequestDefaultDeviceEnum.speaker.value,
+      );
+
       // 2. Speaker (if settings indicate it should be used)
       if (speakerOnWithSettingsPriority) {
-        defaultAudioOutput = audioOutputs.firstWhereOrNull(
-          (device) => device.id.equalsIgnoreCase(
-            AudioSettingsRequestDefaultDeviceEnum.speaker.value,
-          ),
-        );
-      } else {
-        // 3. First non-speaker device
-        defaultAudioOutput = audioOutputs.firstWhereOrNull(
-          (device) => !device.id.equalsIgnoreCase(
-            AudioSettingsRequestDefaultDeviceEnum.speaker.value,
-          ),
-        );
+        defaultAudioOutput = audioOutputs.firstWhereOrNull(isSpeaker);
       }
+
+      // 3. First non-speaker device. Also when the speaker should be used
+      // but there is none: only iOS and Android list one, so web and desktop
+      // fall back to their first output.
+      defaultAudioOutput ??= audioOutputs.firstWhereOrNull(
+        (device) => !isSpeaker(device),
+      );
     }
 
     final defaultAudioOutputIsExternal =
@@ -3166,21 +3176,24 @@ class Call {
 
     if (_connectOptions.audioOutputDevice != null) {
       await setAudioOutputDevice(_connectOptions.audioOutputDevice!);
-    } else {
-      if (CurrentPlatform.isIos) {
-        // Resolved here rather than in `speakerDefaultOn`, which options
-        // passed to `join` overwrite. Under a policy that defaults to the
-        // speaker this keeps the loudspeaker as the built-in output while headphones are connected,
-        // so that disconnecting them does not fall back to the earpiece.
-        final policy = _audioConfigurationPolicy;
-        await _session?.rtcManager?.setAppleAudioConfiguration(
-          speakerOn: resolveAppleSpeakerOn(
-            policy: policy,
-            speakerRequested: _connectOptions.speakerDefaultOn,
-          ),
-          policy: policy,
-        );
-      }
+    } else if (CurrentPlatform.isIos) {
+      // Under a policy that defaults to the speaker, keeps the loudspeaker
+      // as the built-in output while headphones are connected, so
+      // disconnecting them does not fall back to the earpiece.
+      final policy = _audioConfigurationPolicy;
+      final rtcManager = _session?.rtcManager;
+      report(
+        'appleAudioConfiguration',
+        rtcManager == null
+            ? Result.error('no RTC manager')
+            : await rtcManager.setAppleAudioConfiguration(
+                speakerOn: resolveAppleSpeakerOn(
+                  policy: policy,
+                  speakerRequested: _connectOptions.speakerDefaultOn,
+                ),
+                policy: policy,
+              ),
+      );
     }
 
     _logger.v(() => '[applyConnectOptions] finished');

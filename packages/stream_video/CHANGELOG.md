@@ -3,13 +3,13 @@
 ### 🐞 Fixed
 
 - `CallState.endedAt` is now set when the call ends while you are joined or watching it.
-- Livestream viewers on `AudioConfigurationPolicy.viewer()` no longer hear the stream quietly through the earpiece on iOS. The viewer policy now picks the loudspeaker as the default output on every platform, whatever the call type's audio settings say, unless headphones or a Bluetooth device are connected. On Android this policy already played media through the loudspeaker; the selected output now says so. On iOS the loudspeaker also stays the built-in output while headphones are in use, so disconnecting them no longer falls back to the earpiece. Picking the earpiece with `Call.setAudioOutputDevice` still works.
-- The audio session now uses the policy the call was joined with, including one set through `CallPreferences.audioConfigurationPolicy`, when the audio output device changes. It previously used the client-wide `StreamVideoOptions.audioConfigurationPolicy`.
-- [iOS] An audio output picked with `Call.setAudioOutputDevice` is now re-applied after `Call.resumeAudio`.
+- [iOS] Livestream viewers on `AudioConfigurationPolicy.viewer()` now hear the stream through the loudspeaker instead of the earpiece, whatever the call type's audio settings say. Headphones and Bluetooth devices still take priority, and an output picked with `Call.setAudioOutputDevice` still applies.
+- [iOS] `Call.resumeAudio` now restores the audio output the call was using, such as the loudspeaker, instead of falling back to the earpiece.
+- Changing the audio output device now uses the call's audio policy instead of the client-wide one.
 
 ### ✅ Added
 
-- Added `AudioConfigurationPolicy.defaultsToSpeaker`, which says whether a policy plays through the loudspeaker by default. It is `true` for the viewer policy, and a custom policy follows its base policy. The broadcaster and HiFi policies follow the call settings.
+- Added `AudioConfigurationPolicy.defaultsToSpeaker`, which is `true` for the viewer policy. `AudioConfigurationPolicy.custom` takes an optional `defaultsToSpeaker`, which otherwise follows the base policy.
 
 ## 1.7.1
 

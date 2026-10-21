@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/transformers.dart';
 import 'package:sdp_transform/sdp_transform.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
@@ -803,18 +804,43 @@ class RtcManager extends Disposable {
     ];
   }
 
+  /// The Apple audio session configuration last applied with
+  /// [setAppleAudioConfiguration].
+  rtc.AppleAudioConfiguration? _appleAudioConfiguration;
+
   /// Applies [policy]'s Apple audio session configuration, asking for the
   /// loudspeaker as the built-in output when [speakerOn].
-  ///
-  /// A member of the class rather than of an extension, so tests can stub it.
+  @internal
   Future<Result<None>> setAppleAudioConfiguration({
     required AudioConfigurationPolicy policy,
     bool speakerOn = false,
   }) async {
+    final configuration = policy.getAppleConfiguration(
+      defaultToSpeaker: speakerOn,
+    );
     try {
-      await rtc.Helper.setAppleAudioConfiguration(
-        policy.getAppleConfiguration(defaultToSpeaker: speakerOn),
-      );
+      await rtc.Helper.setAppleAudioConfiguration(configuration);
+      _appleAudioConfiguration = configuration;
+      return const Result.success(none);
+    } catch (e, stk) {
+      return Result.failure(VideoErrors.compose(e, stk));
+    }
+  }
+
+  /// Re-applies the configuration last applied with
+  /// [setAppleAudioConfiguration], if any.
+  ///
+  /// Resuming suspended audio restores the configuration the call's factory
+  /// was built with, which asks for the loudspeaker only under a policy that
+  /// defaults to it. This brings back the loudspeaker the call settings or
+  /// an output change asked for since.
+  @internal
+  Future<Result<None>> restoreAppleAudioConfiguration() async {
+    final configuration = _appleAudioConfiguration;
+    if (configuration == null) return const Result.success(none);
+
+    try {
+      await rtc.Helper.setAppleAudioConfiguration(configuration);
       return const Result.success(none);
     } catch (e, stk) {
       return Result.failure(VideoErrors.compose(e, stk));
@@ -2304,7 +2330,7 @@ extension RtcManagerTrackHelper on RtcManager {
       // The policy the call's factory was built with, so the session and the
       // factory never disagree.
       final policy = pcFactory.resolvedAudioConfigurationPolicy;
-      await setAppleAudioConfiguration(
+      final configured = await setAppleAudioConfiguration(
         speakerOn: resolveAppleSpeakerOn(
           policy: policy,
           speakerRequested: device.isBuiltInSpeaker,
@@ -2312,6 +2338,13 @@ extension RtcManagerTrackHelper on RtcManager {
         ),
         policy: policy,
       );
+      if (configured is Failure) {
+        _logger.w(
+          () =>
+              '[setAudioOutputDevice] audio session not configured for '
+              '${device.id}: ${configured.error.message}',
+        );
+      }
 
       // Change the audio output device for all remote audio tracks.
       await rtc.Helper.selectAudioOutput(device.id);

@@ -36,9 +36,8 @@ class StreamPeerConnectionFactory {
 
   /// The audio policy this factory is built with, fixed for its lifetime.
   ///
-  /// Everything that configures the audio session for this call reads the
-  /// policy from here, so a call preference changed mid-call does not leave
-  /// the session configured under one policy and the factory under another.
+  /// Falls back to [BroadcasterAudioPolicy] when [audioConfigurationPolicy]
+  /// is null.
   AudioConfigurationPolicy get resolvedAudioConfigurationPolicy =>
       audioConfigurationPolicy ?? const BroadcasterAudioPolicy();
 
@@ -80,11 +79,10 @@ class StreamPeerConnectionFactory {
       }
 
       if (CurrentPlatform.isIos || CurrentPlatform.isMacOS) {
-        // The factory applies this configuration when it is built, and again
-        // when its audio resumes after a suspension. A policy that defaults
-        // to the speaker has to ask for it here too, or iOS starts the call
-        // on the receiver. `Call.resumeAudio` re-applies an output the user picked,
-        // such as the earpiece, after the factory restores this one.
+        // Applied when the factory is built and again when its audio resumes.
+        // A policy that defaults to the speaker starts on the loudspeaker. On
+        // iOS, `Call.resumeAudio` then re-applies the configuration and output
+        // applied since.
         options['appleAudioConfiguration'] = policy
             .getAppleConfiguration(defaultToSpeaker: policy.defaultsToSpeaker)
             .toMap();

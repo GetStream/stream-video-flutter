@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart'
-    show AppleAudioCategoryOption, AppleAudioMode;
+    show AppleAudioMode;
 
 void main() {
   group('AudioConfigurationPolicy.androidCallServiceKind', () {
@@ -88,28 +88,25 @@ void main() {
         isTrue,
       );
     });
+
+    test('a custom policy can set its own', () {
+      expect(
+        const AudioConfigurationPolicy.custom(
+          basePolicy: AudioConfigurationPolicy.viewer(),
+          defaultsToSpeaker: false,
+        ).defaultsToSpeaker,
+        isFalse,
+      );
+      expect(
+        const AudioConfigurationPolicy.custom(
+          defaultsToSpeaker: true,
+        ).defaultsToSpeaker,
+        isTrue,
+      );
+    });
   });
 
   group('AudioConfigurationPolicy.getAppleConfiguration', () {
-    test('the configuration a call starts with asks iOS for the loudspeaker '
-        'only under the viewer policy', () {
-      for (final policy in const [
-        AudioConfigurationPolicy.broadcaster(),
-        AudioConfigurationPolicy.viewer(),
-        AudioConfigurationPolicy.hiFi(),
-      ]) {
-        expect(
-          policy
-              .getAppleConfiguration(defaultToSpeaker: policy.defaultsToSpeaker)
-              .appleAudioCategoryOptions,
-          policy.defaultsToSpeaker
-              ? contains(AppleAudioCategoryOption.defaultToSpeaker)
-              : isNot(contains(AppleAudioCategoryOption.defaultToSpeaker)),
-          reason: '${policy.runtimeType}',
-        );
-      }
-    });
-
     test('the viewer policy does not use the voice chat mode', () {
       expect(
         const AudioConfigurationPolicy.viewer()
