@@ -276,4 +276,231 @@ class StreamVideoFlutterLocalizationsNl
   @override
   String get callConnectionReconnectFailed =>
       'Opnieuw verbinden met het gesprek is mislukt';
+
+  @override
+  String get settingsDeviceTab => 'Apparaat';
+
+  @override
+  String get deviceSettingsSelectCamera => 'Camera kiezen';
+
+  @override
+  String get deviceSettingsSelectMicrophone => 'Microfoon kiezen';
+
+  @override
+  String get deviceSettingsSelectSpeaker => 'Luidspreker kiezen';
+
+  @override
+  String get deviceSettingsNoiseCancellation => 'Ruisonderdrukking';
+
+  @override
+  String get deviceSettingsNoiseCancellationDescription =>
+      'Filtert achtergrondgeluid uit je microfoon.';
+
+  @override
+  String get deviceSettingsIncomingVideoQuality =>
+      'Kwaliteit van inkomende video';
+
+  @override
+  String get deviceSettingsIncomingVideoQualityHelper =>
+      'De kwaliteit van inkomende video hangt af van verschillende factoren, waaronder de kwaliteit van de bronvideo en de netwerkomstandigheden.';
+
+  @override
+  String get incomingVideoQualityAuto => 'Automatisch';
+
+  @override
+  String get incomingVideoQuality2160p => '4K 2160p';
+
+  @override
+  String get incomingVideoQuality1080p => 'Full HD 1080p';
+
+  @override
+  String get incomingVideoQuality720p => 'HD 720p';
+
+  @override
+  String get incomingVideoQuality480p => 'SD 480p';
+
+  @override
+  String get incomingVideoQuality144p => 'Databesparing 144p';
+
+  @override
+  String get incomingVideoQualityOff => 'Video uitschakelen';
+
+  @override
+  String get settingsEffectsTab => 'Effecten';
+
+  @override
+  String get effectsSettingsFilters => 'Effecten';
+
+  @override
+  String get effectsSettingsBackgrounds => 'Achtergronden';
+
+  @override
+  String get effectsSettingsNone => 'Geen effect';
+
+  @override
+  String get incomingVideoQualityShortOff => 'Uit';
+
+  @override
+  String get settingsCaptionsTab => 'Ondertiteling';
+
+  @override
+  String get captionsSettingsTurnOn => 'Ondertiteling aanzetten';
+
+  @override
+  String get captionsSettingsTurnOnDescription =>
+      'Kies de taal die in de vergadering gesproken wordt. De ondertiteling wordt in deze taal getoond.';
+
+  @override
+  String get captionsSettingsLanguage => 'Taal';
+
+  @override
+  String get captionsSettingsLanguageDefault => 'Standaard';
+
+  @override
+  String get transcriptionLanguageAuto => 'Automatisch';
+
+  @override
+  String get transcriptionLanguageEn => 'Engels';
+
+  @override
+  String get transcriptionLanguageFr => 'Frans';
+
+  @override
+  String get transcriptionLanguageEs => 'Spaans';
+
+  @override
+  String get transcriptionLanguageDe => 'Duits';
+
+  @override
+  String get transcriptionLanguageIt => 'Italiaans';
+
+  @override
+  String get transcriptionLanguageNl => 'Nederlands';
+
+  @override
+  String get transcriptionLanguagePt => 'Portugees';
+
+  @override
+  String get transcriptionLanguagePl => 'Pools';
+
+  @override
+  String get transcriptionLanguageCa => 'Catalaans';
+
+  @override
+  String get transcriptionLanguageCs => 'Tsjechisch';
+
+  @override
+  String get transcriptionLanguageDa => 'Deens';
+
+  @override
+  String get transcriptionLanguageEl => 'Grieks';
+
+  @override
+  String get transcriptionLanguageFi => 'Fins';
+
+  @override
+  String get transcriptionLanguageId => 'Indonesisch';
+
+  @override
+  String get transcriptionLanguageJa => 'Japans';
+
+  @override
+  String get transcriptionLanguageRu => 'Russisch';
+
+  @override
+  String get transcriptionLanguageSv => 'Zweeds';
+
+  @override
+  String get transcriptionLanguageTa => 'Tamil';
+
+  @override
+  String get transcriptionLanguageTh => 'Thai';
+
+  @override
+  String get transcriptionLanguageTr => 'Turks';
+
+  @override
+  String get transcriptionLanguageHu => 'Hongaars';
+
+  @override
+  String get transcriptionLanguageRo => 'Roemeens';
+
+  @override
+  String get transcriptionLanguageZh => 'Chinees';
+
+  @override
+  String get transcriptionLanguageAr => 'Arabisch';
+
+  @override
+  String get transcriptionLanguageTl => 'Tagalog';
+
+  @override
+  String get transcriptionLanguageHe => 'Hebreeuws';
+
+  @override
+  String get transcriptionLanguageHi => 'Hindi';
+
+  @override
+  String get transcriptionLanguageHr => 'Kroatisch';
+
+  @override
+  String get transcriptionLanguageKo => 'Koreaans';
+
+  @override
+  String get transcriptionLanguageMs => 'Maleis';
+
+  @override
+  String get transcriptionLanguageNo => 'Noors';
+
+  @override
+  String get transcriptionLanguageUk => 'Oekraïens';
+
+  @override
+  String get transcriptionLanguageBg => 'Bulgaars';
+
+  @override
+  String get transcriptionLanguageEt => 'Estisch';
+
+  @override
+  String get transcriptionLanguageSl => 'Sloveens';
+
+  @override
+  String get transcriptionLanguageSk => 'Slowaaks';
+
+  @override
+  String get settingsRecordingsTab => 'Opnames';
+
+  @override
+  String get recordingsName => 'Naam';
+
+  @override
+  String get recordingsStartTime => 'Begintijd';
+
+  @override
+  String get recordingsEndTime => 'Eindtijd';
+
+  @override
+  String recordingsRecordingName(int number) {
+    return 'Opname #$number';
+  }
+
+  @override
+  String get recordingsDownload => 'Downloaden';
+
+  @override
+  String get recordingsEmptyTitle => 'Geen opnames beschikbaar';
+
+  @override
+  String get recordingsEmptyDescription =>
+      'Opnames van dit gesprek verschijnen hier zodra ze klaar zijn.';
+
+  @override
+  String get recordingsErrorTitle => 'Opnames laden mislukt';
+
+  @override
+  String get recordingsErrorDescription =>
+      'Controleer je verbinding en probeer het opnieuw.';
+
+  @override
+  String get recordingsRetry => 'Opnieuw proberen';
 }

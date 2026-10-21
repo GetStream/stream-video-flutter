@@ -520,6 +520,444 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t reconnect to the call'**
   String get callConnectionReconnectFailed;
+
+  /// The label of the device settings tab in the settings window
+  ///
+  /// In en, this message translates to:
+  /// **'Device'**
+  String get settingsDeviceTab;
+
+  /// Heading of the camera picker in the device settings
+  ///
+  /// In en, this message translates to:
+  /// **'Select Camera'**
+  String get deviceSettingsSelectCamera;
+
+  /// Heading of the microphone picker in the device settings
+  ///
+  /// In en, this message translates to:
+  /// **'Select Microphone'**
+  String get deviceSettingsSelectMicrophone;
+
+  /// Heading of the speaker picker in the device settings
+  ///
+  /// In en, this message translates to:
+  /// **'Select Speaker'**
+  String get deviceSettingsSelectSpeaker;
+
+  /// Title of the noise cancellation switch in the device settings
+  ///
+  /// In en, this message translates to:
+  /// **'Noise Cancellation'**
+  String get deviceSettingsNoiseCancellation;
+
+  /// Explains the noise cancellation switch in the device settings
+  ///
+  /// In en, this message translates to:
+  /// **'Filters out background noise from your microphone.'**
+  String get deviceSettingsNoiseCancellationDescription;
+
+  /// Heading of the incoming video quality picker in the device settings
+  ///
+  /// In en, this message translates to:
+  /// **'Incoming Video Quality'**
+  String get deviceSettingsIncomingVideoQuality;
+
+  /// Helper text under the incoming video quality picker
+  ///
+  /// In en, this message translates to:
+  /// **'The quality of incoming video is influenced by various factors, including the source video\'s quality and the network conditions.'**
+  String get deviceSettingsIncomingVideoQualityHelper;
+
+  /// Incoming video quality choice that leaves the resolution to the SDK
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get incomingVideoQualityAuto;
+
+  /// Incoming video quality choice
+  ///
+  /// In en, this message translates to:
+  /// **'4K 2160p'**
+  String get incomingVideoQuality2160p;
+
+  /// Incoming video quality choice
+  ///
+  /// In en, this message translates to:
+  /// **'Full HD 1080p'**
+  String get incomingVideoQuality1080p;
+
+  /// Incoming video quality choice
+  ///
+  /// In en, this message translates to:
+  /// **'HD 720p'**
+  String get incomingVideoQuality720p;
+
+  /// Incoming video quality choice
+  ///
+  /// In en, this message translates to:
+  /// **'SD 480p'**
+  String get incomingVideoQuality480p;
+
+  /// Incoming video quality choice
+  ///
+  /// In en, this message translates to:
+  /// **'Data saver 144p'**
+  String get incomingVideoQuality144p;
+
+  /// Incoming video quality choice that turns other participants' video off
+  ///
+  /// In en, this message translates to:
+  /// **'Disable video'**
+  String get incomingVideoQualityOff;
+
+  /// The label of the video effects tab in the settings window
+  ///
+  /// In en, this message translates to:
+  /// **'Effects'**
+  String get settingsEffectsTab;
+
+  /// Heading of the row of video effects, such as blurs, in the effects settings
+  ///
+  /// In en, this message translates to:
+  /// **'Effects'**
+  String get effectsSettingsFilters;
+
+  /// Heading of the grid of background images in the effects settings
+  ///
+  /// In en, this message translates to:
+  /// **'Backgrounds'**
+  String get effectsSettingsBackgrounds;
+
+  /// Tooltip of the button that turns video effects off
+  ///
+  /// In en, this message translates to:
+  /// **'No effect'**
+  String get effectsSettingsNone;
+
+  /// Shown on the incoming video quality button while other participants' video is turned off
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get incomingVideoQualityShortOff;
+
+  /// The label of the captions tab in the settings window
+  ///
+  /// In en, this message translates to:
+  /// **'Captions'**
+  String get settingsCaptionsTab;
+
+  /// Title of the switch that turns closed captions on and off
+  ///
+  /// In en, this message translates to:
+  /// **'Turn On Captions'**
+  String get captionsSettingsTurnOn;
+
+  /// Explains the closed captions switch
+  ///
+  /// In en, this message translates to:
+  /// **'Select the language people will use in the meeting. Captions will be displayed in this language.'**
+  String get captionsSettingsTurnOnDescription;
+
+  /// Heading of the picker for the language spoken in the call
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get captionsSettingsLanguage;
+
+  /// The captions language of a call that never set one, which the backend picks
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get captionsSettingsLanguageDefault;
+
+  /// The spoken language choice that lets the transcriber detect the language
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get transcriptionLanguageAuto;
+
+  /// The name of a language the call can be transcribed in (en)
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get transcriptionLanguageEn;
+
+  /// The name of a language the call can be transcribed in (fr)
+  ///
+  /// In en, this message translates to:
+  /// **'French'**
+  String get transcriptionLanguageFr;
+
+  /// The name of a language the call can be transcribed in (es)
+  ///
+  /// In en, this message translates to:
+  /// **'Spanish'**
+  String get transcriptionLanguageEs;
+
+  /// The name of a language the call can be transcribed in (de)
+  ///
+  /// In en, this message translates to:
+  /// **'German'**
+  String get transcriptionLanguageDe;
+
+  /// The name of a language the call can be transcribed in (it)
+  ///
+  /// In en, this message translates to:
+  /// **'Italian'**
+  String get transcriptionLanguageIt;
+
+  /// The name of a language the call can be transcribed in (nl)
+  ///
+  /// In en, this message translates to:
+  /// **'Dutch'**
+  String get transcriptionLanguageNl;
+
+  /// The name of a language the call can be transcribed in (pt)
+  ///
+  /// In en, this message translates to:
+  /// **'Portuguese'**
+  String get transcriptionLanguagePt;
+
+  /// The name of a language the call can be transcribed in (pl)
+  ///
+  /// In en, this message translates to:
+  /// **'Polish'**
+  String get transcriptionLanguagePl;
+
+  /// The name of a language the call can be transcribed in (ca)
+  ///
+  /// In en, this message translates to:
+  /// **'Catalan'**
+  String get transcriptionLanguageCa;
+
+  /// The name of a language the call can be transcribed in (cs)
+  ///
+  /// In en, this message translates to:
+  /// **'Czech'**
+  String get transcriptionLanguageCs;
+
+  /// The name of a language the call can be transcribed in (da)
+  ///
+  /// In en, this message translates to:
+  /// **'Danish'**
+  String get transcriptionLanguageDa;
+
+  /// The name of a language the call can be transcribed in (el)
+  ///
+  /// In en, this message translates to:
+  /// **'Greek'**
+  String get transcriptionLanguageEl;
+
+  /// The name of a language the call can be transcribed in (fi)
+  ///
+  /// In en, this message translates to:
+  /// **'Finnish'**
+  String get transcriptionLanguageFi;
+
+  /// The name of a language the call can be transcribed in (id)
+  ///
+  /// In en, this message translates to:
+  /// **'Indonesian'**
+  String get transcriptionLanguageId;
+
+  /// The name of a language the call can be transcribed in (ja)
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese'**
+  String get transcriptionLanguageJa;
+
+  /// The name of a language the call can be transcribed in (ru)
+  ///
+  /// In en, this message translates to:
+  /// **'Russian'**
+  String get transcriptionLanguageRu;
+
+  /// The name of a language the call can be transcribed in (sv)
+  ///
+  /// In en, this message translates to:
+  /// **'Swedish'**
+  String get transcriptionLanguageSv;
+
+  /// The name of a language the call can be transcribed in (ta)
+  ///
+  /// In en, this message translates to:
+  /// **'Tamil'**
+  String get transcriptionLanguageTa;
+
+  /// The name of a language the call can be transcribed in (th)
+  ///
+  /// In en, this message translates to:
+  /// **'Thai'**
+  String get transcriptionLanguageTh;
+
+  /// The name of a language the call can be transcribed in (tr)
+  ///
+  /// In en, this message translates to:
+  /// **'Turkish'**
+  String get transcriptionLanguageTr;
+
+  /// The name of a language the call can be transcribed in (hu)
+  ///
+  /// In en, this message translates to:
+  /// **'Hungarian'**
+  String get transcriptionLanguageHu;
+
+  /// The name of a language the call can be transcribed in (ro)
+  ///
+  /// In en, this message translates to:
+  /// **'Romanian'**
+  String get transcriptionLanguageRo;
+
+  /// The name of a language the call can be transcribed in (zh)
+  ///
+  /// In en, this message translates to:
+  /// **'Chinese'**
+  String get transcriptionLanguageZh;
+
+  /// The name of a language the call can be transcribed in (ar)
+  ///
+  /// In en, this message translates to:
+  /// **'Arabic'**
+  String get transcriptionLanguageAr;
+
+  /// The name of a language the call can be transcribed in (tl)
+  ///
+  /// In en, this message translates to:
+  /// **'Tagalog'**
+  String get transcriptionLanguageTl;
+
+  /// The name of a language the call can be transcribed in (he)
+  ///
+  /// In en, this message translates to:
+  /// **'Hebrew'**
+  String get transcriptionLanguageHe;
+
+  /// The name of a language the call can be transcribed in (hi)
+  ///
+  /// In en, this message translates to:
+  /// **'Hindi'**
+  String get transcriptionLanguageHi;
+
+  /// The name of a language the call can be transcribed in (hr)
+  ///
+  /// In en, this message translates to:
+  /// **'Croatian'**
+  String get transcriptionLanguageHr;
+
+  /// The name of a language the call can be transcribed in (ko)
+  ///
+  /// In en, this message translates to:
+  /// **'Korean'**
+  String get transcriptionLanguageKo;
+
+  /// The name of a language the call can be transcribed in (ms)
+  ///
+  /// In en, this message translates to:
+  /// **'Malay'**
+  String get transcriptionLanguageMs;
+
+  /// The name of a language the call can be transcribed in (no)
+  ///
+  /// In en, this message translates to:
+  /// **'Norwegian'**
+  String get transcriptionLanguageNo;
+
+  /// The name of a language the call can be transcribed in (uk)
+  ///
+  /// In en, this message translates to:
+  /// **'Ukrainian'**
+  String get transcriptionLanguageUk;
+
+  /// The name of a language the call can be transcribed in (bg)
+  ///
+  /// In en, this message translates to:
+  /// **'Bulgarian'**
+  String get transcriptionLanguageBg;
+
+  /// The name of a language the call can be transcribed in (et)
+  ///
+  /// In en, this message translates to:
+  /// **'Estonian'**
+  String get transcriptionLanguageEt;
+
+  /// The name of a language the call can be transcribed in (sl)
+  ///
+  /// In en, this message translates to:
+  /// **'Slovenian'**
+  String get transcriptionLanguageSl;
+
+  /// The name of a language the call can be transcribed in (sk)
+  ///
+  /// In en, this message translates to:
+  /// **'Slovak'**
+  String get transcriptionLanguageSk;
+
+  /// The label of the recordings tab in the settings window
+  ///
+  /// In en, this message translates to:
+  /// **'Recordings'**
+  String get settingsRecordingsTab;
+
+  /// Title of the column with each recording's name
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get recordingsName;
+
+  /// Title of the column with the time each recording started
+  ///
+  /// In en, this message translates to:
+  /// **'Start Time'**
+  String get recordingsStartTime;
+
+  /// Title of the column with the time each recording ended
+  ///
+  /// In en, this message translates to:
+  /// **'End Time'**
+  String get recordingsEndTime;
+
+  /// The name of a recording, numbered from the call's first
+  ///
+  /// In en, this message translates to:
+  /// **'Recording #{number}'**
+  String recordingsRecordingName(int number);
+
+  /// Tooltip of the button that downloads a recording
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get recordingsDownload;
+
+  /// Title shown when the call has no recordings
+  ///
+  /// In en, this message translates to:
+  /// **'No Recordings Available'**
+  String get recordingsEmptyTitle;
+
+  /// Shown under the title when the call has no recordings
+  ///
+  /// In en, this message translates to:
+  /// **'Recordings of this call show up here once they\'re ready.'**
+  String get recordingsEmptyDescription;
+
+  /// Title shown when the call's recordings could not be listed
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t Load Recordings'**
+  String get recordingsErrorTitle;
+
+  /// Shown under the title when the call's recordings could not be listed
+  ///
+  /// In en, this message translates to:
+  /// **'Check your connection and try again.'**
+  String get recordingsErrorDescription;
+
+  /// Button that lists the call's recordings again after a failure
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get recordingsRetry;
 }
 
 class _StreamVideoFlutterLocalizationsDelegate

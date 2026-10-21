@@ -46,10 +46,17 @@ case "$IOS_MODEL" in
     ;;
 esac
 
-# --- swift package manager must be off (otherwise the iOS build cannot link) -
-if grep -q '"enable-swift-package-manager": *true' ~/.config/flutter/settings 2>/dev/null; then
-  echo "  fixing: flutter SPM support is on; the dogfooding iOS build fails with it"
-  flutter config --no-enable-swift-package-manager >/dev/null 2>&1
+# --- swift package manager must be on (the dogfooding iOS app is SPM-only) ---
+# With it off, flutter falls back to CocoaPods: it generates a Podfile and adds
+# Pods includes to the xcconfigs, and the build does not match what ships.
+# v2 only: main's dogfooding app still builds with CocoaPods. The setting is
+# re-read afterwards, because a failed `flutter config` would otherwise leave
+# the build to fall back to CocoaPods without a word.
+spm_on() { grep -q '"enable-swift-package-manager": *true' ~/.config/flutter/settings 2>/dev/null; }
+if ! spm_on; then
+  echo "  fixing: flutter SPM support is off; the dogfooding iOS app only builds with SPM"
+  flutter config --enable-swift-package-manager >/dev/null 2>&1
+  spm_on || fatal "could not enable flutter SPM support; run: flutter config --enable-swift-package-manager"
 fi
 
 # --- pre-grant iOS permissions so no system dialog can eat a tap ------------

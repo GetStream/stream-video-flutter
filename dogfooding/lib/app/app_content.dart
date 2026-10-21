@@ -10,10 +10,12 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter_l10n.dart';
 
 import '../di/injector.dart';
+import '../l10n/localizations/app_localizations.dart';
 import '../router/router.dart';
 import '../router/routes.dart';
 import '../utils/consts.dart';
 import '../widgets/dogfooding_participant_tile.dart';
+import 'app_display_settings.dart';
 import 'custom_video_localizations.dart';
 import 'firebase_messaging_handler.dart';
 import 'user_auth_controller.dart';
@@ -29,6 +31,7 @@ class StreamDogFoodingAppContent extends StatefulWidget {
 class _StreamDogFoodingAppContentState
     extends State<StreamDogFoodingAppContent> {
   late final _userAuthController = locator.get<UserAuthController>();
+  late final _appSettings = locator.get<AppDisplaySettings>();
 
   late final _router = initRouter(_userAuthController);
 
@@ -211,34 +214,47 @@ class _StreamDogFoodingAppContentState
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: kAppName,
-      routerConfig: _router,
-      theme: _buildTheme(Brightness.light),
-      darkTheme: _buildTheme(Brightness.dark),
-      supportedLocales: const [Locale('en'), Locale('nl')],
-      localizationsDelegates: [
-        CustomVideoLocalizationsNL.delegate,
-        ...StreamVideoFlutterLocalizations.localizationsDelegates,
-      ],
-      builder: (context, child) {
-        return StreamComponentFactory(
-          builders: _componentBuilders,
-          // Above the router, so a snackbar shown from any route has a
-          // messenger to reach and outlives the screen that showed it.
-          child: StreamSnackbarScope(child: child!),
-        );
-      },
+    return ListenableBuilder(
+      listenable: _appSettings,
+      builder: (context, _) => MaterialApp.router(
+        title: kAppName,
+        routerConfig: _router,
+        theme: _buildTheme(Brightness.light),
+        darkTheme: _buildTheme(Brightness.dark),
+        themeMode: _appSettings.themeMode,
+        locale: _appSettings.locale,
+        // Every language the SDK is translated into.
+        supportedLocales: appSupportedLocales,
+        localizationsDelegates: [
+          CustomVideoLocalizationsEN.delegate,
+          CustomVideoLocalizationsNL.delegate,
+          AppLocalizations.delegate,
+          ...StreamVideoFlutterLocalizations.localizationsDelegates,
+        ],
+        builder: (context, child) {
+          return StreamComponentFactory(
+            builders: _componentBuilders,
+            // Above the router, so a snackbar shown from any route has a
+            // messenger to reach and outlives the screen that showed it.
+            child: StreamSnackbarScope(child: child!),
+          );
+        },
+      ),
     );
   }
 
   ThemeData _buildTheme(Brightness brightness) {
     final baseTheme = ThemeData(brightness: brightness);
     final baseTextTheme = GoogleFonts.interTextTheme(baseTheme.textTheme);
-    final coreTheme = switch (brightness) {
-      .light => StreamTheme.light(),
-      .dark => StreamTheme.dark(),
-    };
+    final brand = _appSettings.accentColor.brand(brightness);
+    final coreTheme = StreamTheme(
+      brightness: brightness,
+      colorScheme: switch (brightness) {
+        _ when brand == null => null,
+        .light => StreamColorScheme.light(brand: brand),
+        .dark => StreamColorScheme.dark(brand: brand),
+      },
+    );
     final videoTheme = switch (brightness) {
       .light => StreamVideoTheme.light(),
       .dark => StreamVideoTheme.dark(),

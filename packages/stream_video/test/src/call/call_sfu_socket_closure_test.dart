@@ -1,8 +1,17 @@
+import 'dart:async';
+
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
+    show PerformanceStats;
+import 'package:stream_video/src/call/call.dart';
+import 'package:stream_video/src/call/stats/tracer.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
+import 'package:stream_video/src/webrtc/rtc_manager.dart';
+import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
@@ -32,6 +41,32 @@ SfuSocketFailed _failed({required bool isReconnectable}) {
     isReconnectable: isReconnectable,
     error: const StreamVideoException(message: 'permission denied'),
   );
+}
+
+class _MockRtcManager extends Mock implements RtcManager {
+  @override
+  Future<void> dispose() {
+    return Future.value();
+  }
+}
+
+class _MockSubscriber extends Mock implements TracedStreamPeerConnection {
+  @override
+  final Tracer tracer = Tracer('subscriber');
+
+  @override
+  Future<void> dispose() {
+    return Future.value();
+  }
+
+  @override
+  Future<void> traceStats(List<Map<String, dynamic>> newRtcStats) async {}
+
+  @override
+  List<PerformanceStats> getPerformanceStats(
+    List<RtcStats> rtcStats,
+    SfuTrackType? Function(String) trackIdToTrackType,
+  ) => const [];
 }
 
 void main() {
@@ -161,6 +196,62 @@ void main() {
       await pumpEventQueue();
 
       expect(call.state.value.status, isNot(isA<CallStatusDisconnected>()));
+    });
+
+    test('stats that do not go out do not hold up the reconnect', () async {
+      // The stats collect, but sending them never finishes.
+      final subscriber = _MockSubscriber();
+      when(subscriber.getStats).thenAnswer(
+        (_) async => (
+          rtcStats: <RtcStats>[],
+          printable: const RtcPrintableStats(local: '', remote: ''),
+          rawStats: <Map<String, dynamic>>[],
+        ),
+      );
+      final rtcManager = _MockRtcManager();
+      when(() => rtcManager.subscriber).thenReturn(subscriber);
+      when(() => callSession.rtcManager).thenReturn(rtcManager);
+      final sfuClient = callSession.sfuClient;
+      when(
+        () => sfuClient.sendStats(any()),
+      ).thenAnswer((_) => Completer<Never>().future);
+
+      // The stats read the battery saver mode on the way.
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+            const MethodChannel('dev.fluttercommunity.plus/battery'),
+            (call) async => false,
+          );
+      addTearDown(
+        () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(
+              const MethodChannel('dev.fluttercommunity.plus/battery'),
+              null,
+            ),
+      );
+
+      // Short, so the test does not sit out the real 2s.
+      CallConnectionCoordinator.statsBeforeReconnectTimeout = const Duration(
+        milliseconds: 50,
+      );
+      addTearDown(
+        () => CallConnectionCoordinator.statsBeforeReconnectTimeout =
+            const Duration(seconds: 2),
+      );
+
+      final call = buildCall();
+      await call.join();
+
+      _emit(callSession, _disconnected(isReconnectable: true));
+
+      // Without a bound on the wait for the stats, it never starts.
+      await untilCalled(
+        () => callSession.fastReconnect(
+          reconnectDetails: any(named: 'reconnectDetails'),
+          capabilities: any(named: 'capabilities'),
+          unifiedSessionId: any(named: 'unifiedSessionId'),
+        ),
+      ).timeout(const Duration(seconds: 10));
     });
   });
 }

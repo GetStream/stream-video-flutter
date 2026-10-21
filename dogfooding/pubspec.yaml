@@ -24,6 +24,8 @@ dependencies:
   fl_chart: ^1.1.0
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   flutter_rating_stars: ^1.1.0
   flutter_svg: ^2.0.7
   get_it: ^8.2.0
@@ -31,6 +33,7 @@ dependencies:
   google_fonts: ^8.0.2
   google_sign_in: ^7.2.0
   http: ^1.5.0
+  intl: ">=0.18.1 <=0.21.0"
   internet_connection_checker_plus: ^3.0.0
   marionette_flutter: ^0.6.0
   mobile_scanner: ^7.1.0
@@ -48,6 +51,7 @@ dependencies:
   stream_video_noise_cancellation: ^2.0.0-alpha
   stream_video_push_notification: ^2.0.0-alpha
   stream_video_screen_sharing: ^2.0.0-alpha
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   build_runner: ^2.4.6
@@ -64,6 +68,7 @@ import_sorter:
   emojis: true
 
 flutter:
+  generate: true
   assets:
     - assets/
   uses-material-design: true

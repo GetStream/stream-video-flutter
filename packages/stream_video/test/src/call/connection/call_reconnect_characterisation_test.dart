@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/call/stats/trace_tag.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_call_ended_reason.dart';
 import 'package:stream_video/src/telemetry/client_event_types.dart';
@@ -85,6 +86,12 @@ void main() {
         expect(harness.reporter.aborts, [
           ClientEventStandardCode.networkOffline,
         ]);
+        verify(
+          () => harness.session.trace(
+            TraceTag.callReconnectFailed,
+            any<dynamic>(that: containsPair('error', 'reconnection timeout')),
+          ),
+        ).called(1);
       },
     );
 

@@ -13,6 +13,7 @@
 - Added `StreamCallParticipantsSpotlightThemeData` on `StreamVideoTheme`, and `StreamCallParticipantsSpotlightTheme` to restyle the speaker layouts over a subtree.
 - Added `StreamMenuOption.trailing`, the value a menu row reports at its far end.
 - Added `StreamMenuSection.content`, which draws arbitrary content in place of a section's rows.
+- Added `StreamAdaptiveMenuAnchorThemeData.useSheet`, which picks a menu's presentation for a subtree; `StreamModalWindow` sets it to false for its tabs.
 - Added `StreamMenuSection.collapsible`, whose heading folds the section away, and `initiallyCollapsed` for how it starts.
 - Added `StreamMenuOption.closesMenu`, so a row reporting state the menu shows can leave it up.
 - `StreamContextMenuHeading` takes a `trailing` and an `onTap`.
@@ -25,6 +26,19 @@
 - Added `StreamParticipantLabelStyle.showVideoOffIcon`, to leave the camera-off icon out of the name pill.
 - Added `StreamModalDialog` and `showStreamModalDialog`, a centered modal surface with a title, header actions and a footer, over a blurred `StreamBlurScrim`.
 - Added `StreamTabBar`, a row of equal-width tabs whose selected index the caller owns. It, `StreamModalDialog` and `StreamBlurScrim` are design-system candidates, living in `src/widgets/design_system_candidates` until they graduate to core.
+- Added `StreamModalWindow`, a modal window with a sidebar of `StreamModalWindowTab`s that shows one tab at a time. It is a design-system candidate.
+- Added `StreamModalWindowThemeData` on `StreamVideoTheme`, and `StreamModalWindowTheme` to restyle the window over a subtree.
+- Added `StreamRecordingsSettingsTab`, a ready-made `StreamModalWindowTab` with the call's recordings, `StreamRecordingsSettings`, its content, which loads them and follows new ones, and `StreamCallRecordingList`, a table of recordings with a download button each, and an error with a retry button when listing them failed.
+- Added `StreamEmptyState`, an icon over a title, description and optional action for a place with nothing in it. It is a design-system candidate.
+- Added `StreamCaptionsSettingsTab`, a ready-made `StreamModalWindowTab` with a switch for closed captions and the language spoken in the call, and `StreamCaptionsSettings`, its content.
+- Added `TranscriptionSettingsLanguage.label`, the language's name in the app's language.
+- Added `StreamDeviceSettingsTab`, a ready-made `StreamModalWindowTab` with the call's device settings, and `StreamDeviceSettings`, its content: a local preview, the camera, microphone and speaker, noise cancellation and the incoming video quality.
+- Added `StreamEffectsSettingsTab`, a ready-made `StreamModalWindowTab` with the video effects on offer, and `StreamEffectsSettings`, its content: a local preview over a row of `StreamVideoFilter`s and a grid of `StreamVideoBackground`s. Nothing is offered unless the app passes it.
+- Added `StreamVideoEffect`, sealed over `StreamVideoFilter` and `StreamVideoBackground`, the effects `StreamEffectsSettings` offers.
+- Added `StreamIncomingVideoQualityButton`, which shows the incoming video quality and opens a menu to pick another.
+- Added `IncomingVideoQuality.label` and `shortLabel`, the quality's name in the app's language.
+- Added `microphoneSections` and `speakerSections` to `LobbyDeviceMenus`, the two halves of `audioSections`.
+- Added device, effects, captions and recordings settings, incoming video quality and transcription language strings to the localizations, in English and Dutch.
 - Added `StreamDesktopScreenShareDialog`, the desktop screen share picker as a widget, so it can be presented some way other than through `showDefaultScreenSelectionDialog`.
 - Added `StreamDesktopScreenShareSelector`, the redesigned grid of screens and windows behind the desktop screen share picker, and `StreamDesktopScreenShareThumbnail`, one tile of it.
 - Added `DesktopScreenShareSourceController`, which holds the screens and windows on offer and the one that is picked.
@@ -199,6 +213,7 @@
 ### 🔄 Changed
 
 - `StreamCallContent` keeps showing the participants during a reconnect, and after one fails until the call has left, with a `StreamCallConnectionBanner` above them instead of the centred "Reconnecting" text.
+- `StreamSelectInput` draws its `labelText` in `headingXs`, the size the design gives it.
 - `StreamParticipantTileStyle.topToolbarPadding` defaults to none.
 - A microphone or camera change on the ringing screens made just as the call is picked up now reaches the call, instead of being dropped.
 - The participants bar in `CallParticipantsSpotlightView` carries a button at either end for the tiles it cannot fit.
@@ -214,6 +229,7 @@
 ### 🐞 Fixed
 
 - The lobby no longer offers a speaker choice on Safari and other WebKit browsers, which play every call on the system default output.
+- Fixed picking an option in a `StreamContextMenuAnchor`, or an anchored `StreamAdaptiveMenuAnchor`, closing the dialog it is shown in.
 - The participant tile's overflow menu lines up with the edge of its button.
 - `StreamAdaptiveMenuAnchor` sheet rows are 48px tall.
 - The lobby control buttons are 8px apart.

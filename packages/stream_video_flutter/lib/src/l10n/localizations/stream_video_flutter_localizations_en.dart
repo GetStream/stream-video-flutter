@@ -273,4 +273,230 @@ class StreamVideoFlutterLocalizationsEn
 
   @override
   String get callConnectionReconnectFailed => 'Couldn\'t reconnect to the call';
+
+  @override
+  String get settingsDeviceTab => 'Device';
+
+  @override
+  String get deviceSettingsSelectCamera => 'Select Camera';
+
+  @override
+  String get deviceSettingsSelectMicrophone => 'Select Microphone';
+
+  @override
+  String get deviceSettingsSelectSpeaker => 'Select Speaker';
+
+  @override
+  String get deviceSettingsNoiseCancellation => 'Noise Cancellation';
+
+  @override
+  String get deviceSettingsNoiseCancellationDescription =>
+      'Filters out background noise from your microphone.';
+
+  @override
+  String get deviceSettingsIncomingVideoQuality => 'Incoming Video Quality';
+
+  @override
+  String get deviceSettingsIncomingVideoQualityHelper =>
+      'The quality of incoming video is influenced by various factors, including the source video\'s quality and the network conditions.';
+
+  @override
+  String get incomingVideoQualityAuto => 'Auto';
+
+  @override
+  String get incomingVideoQuality2160p => '4K 2160p';
+
+  @override
+  String get incomingVideoQuality1080p => 'Full HD 1080p';
+
+  @override
+  String get incomingVideoQuality720p => 'HD 720p';
+
+  @override
+  String get incomingVideoQuality480p => 'SD 480p';
+
+  @override
+  String get incomingVideoQuality144p => 'Data saver 144p';
+
+  @override
+  String get incomingVideoQualityOff => 'Disable video';
+
+  @override
+  String get settingsEffectsTab => 'Effects';
+
+  @override
+  String get effectsSettingsFilters => 'Effects';
+
+  @override
+  String get effectsSettingsBackgrounds => 'Backgrounds';
+
+  @override
+  String get effectsSettingsNone => 'No effect';
+
+  @override
+  String get incomingVideoQualityShortOff => 'Off';
+
+  @override
+  String get settingsCaptionsTab => 'Captions';
+
+  @override
+  String get captionsSettingsTurnOn => 'Turn On Captions';
+
+  @override
+  String get captionsSettingsTurnOnDescription =>
+      'Select the language people will use in the meeting. Captions will be displayed in this language.';
+
+  @override
+  String get captionsSettingsLanguage => 'Language';
+
+  @override
+  String get captionsSettingsLanguageDefault => 'Default';
+
+  @override
+  String get transcriptionLanguageAuto => 'Automatic';
+
+  @override
+  String get transcriptionLanguageEn => 'English';
+
+  @override
+  String get transcriptionLanguageFr => 'French';
+
+  @override
+  String get transcriptionLanguageEs => 'Spanish';
+
+  @override
+  String get transcriptionLanguageDe => 'German';
+
+  @override
+  String get transcriptionLanguageIt => 'Italian';
+
+  @override
+  String get transcriptionLanguageNl => 'Dutch';
+
+  @override
+  String get transcriptionLanguagePt => 'Portuguese';
+
+  @override
+  String get transcriptionLanguagePl => 'Polish';
+
+  @override
+  String get transcriptionLanguageCa => 'Catalan';
+
+  @override
+  String get transcriptionLanguageCs => 'Czech';
+
+  @override
+  String get transcriptionLanguageDa => 'Danish';
+
+  @override
+  String get transcriptionLanguageEl => 'Greek';
+
+  @override
+  String get transcriptionLanguageFi => 'Finnish';
+
+  @override
+  String get transcriptionLanguageId => 'Indonesian';
+
+  @override
+  String get transcriptionLanguageJa => 'Japanese';
+
+  @override
+  String get transcriptionLanguageRu => 'Russian';
+
+  @override
+  String get transcriptionLanguageSv => 'Swedish';
+
+  @override
+  String get transcriptionLanguageTa => 'Tamil';
+
+  @override
+  String get transcriptionLanguageTh => 'Thai';
+
+  @override
+  String get transcriptionLanguageTr => 'Turkish';
+
+  @override
+  String get transcriptionLanguageHu => 'Hungarian';
+
+  @override
+  String get transcriptionLanguageRo => 'Romanian';
+
+  @override
+  String get transcriptionLanguageZh => 'Chinese';
+
+  @override
+  String get transcriptionLanguageAr => 'Arabic';
+
+  @override
+  String get transcriptionLanguageTl => 'Tagalog';
+
+  @override
+  String get transcriptionLanguageHe => 'Hebrew';
+
+  @override
+  String get transcriptionLanguageHi => 'Hindi';
+
+  @override
+  String get transcriptionLanguageHr => 'Croatian';
+
+  @override
+  String get transcriptionLanguageKo => 'Korean';
+
+  @override
+  String get transcriptionLanguageMs => 'Malay';
+
+  @override
+  String get transcriptionLanguageNo => 'Norwegian';
+
+  @override
+  String get transcriptionLanguageUk => 'Ukrainian';
+
+  @override
+  String get transcriptionLanguageBg => 'Bulgarian';
+
+  @override
+  String get transcriptionLanguageEt => 'Estonian';
+
+  @override
+  String get transcriptionLanguageSl => 'Slovenian';
+
+  @override
+  String get transcriptionLanguageSk => 'Slovak';
+
+  @override
+  String get settingsRecordingsTab => 'Recordings';
+
+  @override
+  String get recordingsName => 'Name';
+
+  @override
+  String get recordingsStartTime => 'Start Time';
+
+  @override
+  String get recordingsEndTime => 'End Time';
+
+  @override
+  String recordingsRecordingName(int number) {
+    return 'Recording #$number';
+  }
+
+  @override
+  String get recordingsDownload => 'Download';
+
+  @override
+  String get recordingsEmptyTitle => 'No Recordings Available';
+
+  @override
+  String get recordingsEmptyDescription =>
+      'Recordings of this call show up here once they\'re ready.';
+
+  @override
+  String get recordingsErrorTitle => 'Couldn\'t Load Recordings';
+
+  @override
+  String get recordingsErrorDescription =>
+      'Check your connection and try again.';
+
+  @override
+  String get recordingsRetry => 'Try Again';
 }

@@ -43,13 +43,12 @@ fi
 
 # --- leave + teardown ------------------------------------------------------
 echo "== teardown =="
-# android_checks.sh ends with the chat sheet open, stacked on top of the
-# options sheet. Both are modal: a tap outside a sheet is eaten by its scrim
-# and only dismisses that sheet, so a single END CALL tap never reaches the
-# button — it just closes the chat sheet and the call keeps running (which is
-# what made leave/service/notification all fail together). tap_until re-taps
-# until the log confirms the leave: the first taps peel off the sheets, the
-# last one lands on END CALL. Do not replace this with a bare tap.
+# android_checks.sh ends with the chat panel open. The panel replaces the call's
+# top bar and puts its own close X exactly where END CALL is, so a single tap
+# there only closes chat and the call keeps running (which is what made
+# leave/service/notification all fail together). tap_until re-taps until the
+# log confirms the leave: the first tap closes chat, a later one lands on END
+# CALL. Do not replace this with a bare tap.
 if tap_until $A_END_X $A_TOP_Y "$ANDROID_LOG" "\[leave\] reason|\[clear\] src: disconnect" 4 12; then
   pass "leave-android" "Android left the call cleanly"
 else

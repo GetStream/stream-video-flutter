@@ -927,12 +927,7 @@ class _MoreMenuButtonState extends State<_MoreMenuButton> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                onTap: () {
-                  // A MenuAnchor panel is an overlay rather than a route, so
-                  // selecting an item does not dismiss it on its own.
-                  _controller.close();
-                  action.onPressed();
-                },
+                onTap: action.onPressed,
               ),
           ],
           builder: (context, controller, child) => StreamButton.icon(

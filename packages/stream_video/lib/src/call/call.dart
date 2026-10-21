@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:clock/clock.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
@@ -63,6 +64,7 @@ import 'connection/connection_executor.dart';
 import 'connection/connection_phase.dart';
 import 'connection/join_outcome.dart';
 import 'connection/reconnect_trigger.dart';
+import 'connection/rejoin_rate_limiter.dart';
 import 'events/call_closed_captions.dart';
 import 'events/call_coordinator_event_router.dart';
 import 'events/call_reactions.dart';
@@ -962,7 +964,7 @@ class Call {
   /// Updates the configuration of the call.
   ///
   /// - [startsAt]: The date and time when the call is scheduled to start.
-  /// - [custom]: Custom metadata to be added to the call.
+  /// - [custom]: Custom metadata for the call. Null leaves it as it is.
   /// - [ring]: Ring settings for the call.
   /// - [audio]: Audio settings for the call.
   /// - [video]: Video settings for the call.
@@ -1000,7 +1002,7 @@ class Call {
   }) {
     return _coordinatorClient.updateCall(
       callCid: callCid,
-      custom: custom ?? {},
+      custom: custom,
       startsAt: startsAt,
       ring: ring,
       audio: audio,
@@ -1309,6 +1311,10 @@ class Call {
       video: video,
     );
   }
+
+  /// Whether the client was given an audio processor, without which
+  /// [startAudioProcessing] fails.
+  bool get isAudioProcessorConfigured => _host.isAudioProcessorConfigured();
 
   /// Starts audio processing for the call.
   Future<Result<None>> startAudioProcessing({

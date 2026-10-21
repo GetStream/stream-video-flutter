@@ -53,6 +53,10 @@ class DynascaleManager {
   late SfuClient sfuClient;
   late String sessionId;
 
+  // Until a session joins, and once disposed, there is no SFU to update; the
+  // overrides are applied with the first subscriptions instead.
+  bool _hasSession = false;
+
   final BehaviorSubject<Map<String, SfuSubscriptionDetails>>
   _currentTrackSubscriptionsSubject = BehaviorSubject.seeded({});
 
@@ -61,6 +65,12 @@ class DynascaleManager {
 
   IncomingVideoSettings? get incomingVideoSettings =>
       _videoTrackSubscriptionsOverrides.value;
+
+  /// [incomingVideoSettings], and every change to it.
+  ///
+  /// Emits the current settings to a new listener first.
+  Stream<IncomingVideoSettings?> get incomingVideoSettingsStream =>
+      _videoTrackSubscriptionsOverrides.stream;
 
   late final _saBuffer = DebounceBuffer<SubscriptionChange, Result<None>>(
     duration: _debounceDuration,
@@ -74,6 +84,7 @@ class DynascaleManager {
   }) {
     this.sfuClient = sfuClient;
     this.sessionId = sessionId;
+    _hasSession = true;
   }
 
   Map<String, SfuSubscriptionDetails> getTrackSubscriptions({
@@ -187,6 +198,8 @@ class DynascaleManager {
   }
 
   Future<Result<None>> applyTrackSubscriptions() async {
+    if (!_hasSession) return const Result.success(none);
+
     final result = await sfuClient.update(
       sessionId: sessionId,
       subscriptions: getTrackSubscriptions().values,
@@ -204,6 +217,9 @@ class DynascaleManager {
           '[setVideoTrackSubscriptionOverrides] sessionIds: $sessionIds, '
           'override: $override',
     );
+
+    // Disposed with the call; nothing left to override.
+    if (_videoTrackSubscriptionsOverrides.isClosed) return;
 
     if (sessionIds == null) {
       if (override == null) {
@@ -247,8 +263,10 @@ class DynascaleManager {
   }
 
   Future<void> dispose() async {
+    _hasSession = false;
     await _saBuffer.cancel();
     await _currentTrackSubscriptionsSubject.close();
+    await _videoTrackSubscriptionsOverrides.close();
   }
 }
 

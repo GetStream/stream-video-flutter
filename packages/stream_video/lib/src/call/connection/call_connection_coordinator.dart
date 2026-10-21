@@ -20,7 +20,47 @@ class CallConnectionCoordinator {
   SfuStatsReporter? _sfuStatsReporter;
   String? _unifiedSessionId;
 
+  /// How long a lost SFU socket waits for its stats to go out before the
+  /// reconnect starts. The stats keep going out after that.
+  @visibleForTesting
+  static Duration statsBeforeReconnectTimeout = const Duration(seconds: 2);
+
   Duration _fastReconnectDeadline = Duration.zero;
+
+  // Separate limits. The rejoin windows count across reconnects. The short
+  // window counts rejoins and migrations. The long window counts only
+  // rejoins. The attempt cap counts every attempt within one reconnect,
+  // whatever its strategy.
+
+  /// The rejoins and migrations allowed within [_rejoinWindow].
+  static const _maxRejoinsPerWindow = 10;
+
+  /// The rolling window [_maxRejoinsPerWindow] applies to.
+  static const _rejoinWindow = Duration(seconds: 120);
+
+  /// The rejoins allowed within [_longRejoinWindow].
+  static const _maxRejoinsPerLongWindow = 20;
+
+  /// The rolling window [_maxRejoinsPerLongWindow] applies to. It catches
+  /// rejoins that each succeed but come too far apart for [_rejoinWindow].
+  static const _longRejoinWindow = Duration(minutes: 30);
+
+  /// The attempts one reconnect makes, any strategy, before it fails.
+  static const _maxReconnectAttempts = 10;
+
+  /// Rejoins and migrations, across reconnects. Fast reconnects are not
+  /// counted.
+  final _rejoinRateLimiter = RejoinRateLimiter(
+    maxAttempts: _maxRejoinsPerWindow,
+    window: _rejoinWindow,
+  );
+
+  /// Rejoins, across reconnects. Migrations and fast reconnects are not
+  /// counted.
+  final _longRejoinRateLimiter = RejoinRateLimiter(
+    maxAttempts: _maxRejoinsPerLongWindow,
+    window: _longRejoinWindow,
+  );
 
   /// Where the connection is. [_publishStatus] writes the connection status
   /// it projects to; a disconnect written into the state elsewhere moves it to
@@ -99,7 +139,7 @@ class CallConnectionCoordinator {
 
     final phase = _phase.value;
     if (phase is! ConnectionConnected) {
-      _call._logger.v(() => '[reconnect] dropped held $held (phase: $phase)');
+      _call._logger.w(() => '[reconnect] dropped held $held (phase: $phase)');
       return;
     }
 
@@ -126,11 +166,11 @@ class CallConnectionCoordinator {
     final applicable = <ReconnectRequest>[];
     for (final held in _executor.takeHeld()) {
       if (!identical(held.session, _session)) {
-        _call._logger.v(
+        _call._logger.d(
           () => '[reconnect] dropped held $held (session replaced)',
         );
       } else if (!held.trigger.isStillNeeded) {
-        _call._logger.v(() => '[reconnect] dropped held $held (cleared)');
+        _call._logger.d(() => '[reconnect] dropped held $held (cleared)');
       } else {
         applicable.add(held);
       }
@@ -1291,7 +1331,16 @@ class CallConnectionCoordinator {
     required CallSession session,
   }) async {
     if (sfuEvent is SfuSocketDisconnected) {
-      await _sfuStatsReporter?.sendSfuStats();
+      // Kept after stop, so a rejoin that stops the reporter still lets these
+      // go out: they describe the drop.
+      await _sfuStatsReporter
+          ?.sendSfuStats(keepAfterStop: true)
+          .timeout(
+            statsBeforeReconnectTimeout,
+            onTimeout: () => _call._logger.w(
+              () => '[onSfuEvent] stats not sent in time, reconnecting anyway',
+            ),
+          );
       // Don't attempt reconnection if leaving the call was triggered, or if the
       // closure itself says another attempt is pointless. That verdict comes
       // from the disconnection source rather than the close code, which a
@@ -1538,7 +1587,7 @@ class CallConnectionCoordinator {
   ) async {
     _setPhase(ConnectionReconnecting(strategy: strategy));
 
-    final reconnectStartTime = DateTime.now();
+    final reconnectStartTime = clock.now();
     var fastReconnectAttemptsCount = 0;
 
     // Counts consecutive unexpected throws. The per-strategy counters only
@@ -1565,8 +1614,7 @@ class CallConnectionCoordinator {
       );
 
       final mustPerformRejoin =
-          DateTime.now().difference(reconnectStartTime) >
-          _fastReconnectDeadline;
+          clock.now().difference(reconnectStartTime) > _fastReconnectDeadline;
 
       // A rejoin or migrate asked for during the attempt or its backoff makes
       // the next attempt the same, unless something below asks for a rejoin.
@@ -1619,20 +1667,12 @@ class CallConnectionCoordinator {
           ? const Duration(seconds: 3)
           : Duration.zero;
 
-      if (_call.state.value.preferences.reconnectTimeout > Duration.zero) {
-        final elapsed = DateTime.now().difference(reconnectStartTime);
-        if (elapsed > _call.state.value.preferences.reconnectTimeout) {
-          _call._logger.w(() => '[reconnect] reconnection timeout');
-          _setPhase(const ConnectionReconnectFailed());
-          _publishStatus();
-          return;
-        }
-      }
-
       if (_isLeftOrLeaving) {
         _call._logger.w(() => '[reconnect] rejected (call was left)');
         return;
       }
+
+      if (_giveUpOnTimeoutOrMaxAttempts(reconnectStartTime)) return;
 
       _session?.trace(TraceTag.callReconnect, {
         'strategy': _reconnectStrategy.name,
@@ -1709,7 +1749,7 @@ class CallConnectionCoordinator {
 
         // Offline past the fast-reconnect deadline: the attempt rejoins
         // instead. The deadline runs from when the reconnect started.
-        final elapsed = DateTime.now().difference(reconnectStartTime);
+        final elapsed = clock.now().difference(reconnectStartTime);
         final offlinePastDeadline =
             wasOffline &&
             _fastReconnectDeadline > Duration.zero &&
@@ -1751,6 +1791,11 @@ class CallConnectionCoordinator {
             onStatus: onNetworkStatus,
           );
           if (stopsAfterNetworkWait(status)) return;
+        }
+
+        if (needsStableNetwork && !_tryRegisterRejoin()) {
+          _giveUpReconnect('rejoin_attempt_limit_exceeded');
+          return;
         }
 
         unawaited(_sfuStatsReporter?.sendSfuStats());
@@ -1840,6 +1885,45 @@ class CallConnectionCoordinator {
         }
       }
     } while (_phase.value is ConnectionReconnecting);
+  }
+
+  /// Records a rejoin or migration in the rejoin windows. Returns false when
+  /// either window has no room left. Migrations only count towards the short
+  /// window.
+  bool _tryRegisterRejoin() {
+    if (!_rejoinRateLimiter.tryRegister()) return false;
+    if (_reconnectStrategy != SfuReconnectionStrategy.rejoin) return true;
+    return _longRejoinRateLimiter.tryRegister();
+  }
+
+  /// Fails the running reconnect, before its next attempt, when it has run
+  /// past [CallPreferences.reconnectTimeout] or made [_maxReconnectAttempts]
+  /// attempts. Returns whether it did.
+  bool _giveUpOnTimeoutOrMaxAttempts(DateTime reconnectStartTime) {
+    final timeout = _call.state.value.preferences.reconnectTimeout;
+    final elapsed = clock.now().difference(reconnectStartTime);
+    if (timeout > Duration.zero && elapsed > timeout) {
+      _giveUpReconnect('reconnection timeout');
+      return true;
+    }
+
+    if (_reconnectStatusAttempt >= _maxReconnectAttempts) {
+      _giveUpReconnect('reconnect_attempt_limit_exceeded');
+      return true;
+    }
+
+    return false;
+  }
+
+  /// Fails the running reconnect for [reason], which leaves the call.
+  void _giveUpReconnect(String reason) {
+    _call._logger.w(() => '[reconnect] giving up: $reason');
+    _session?.trace(TraceTag.callReconnectFailed, {
+      'strategy': _reconnectStrategy.name,
+      'error': reason,
+    });
+    _setPhase(const ConnectionReconnectFailed());
+    _publishStatus();
   }
 
   Future<JoinOutcome> _reconnectFast({String? reason}) async {

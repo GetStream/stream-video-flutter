@@ -3,11 +3,13 @@ import 'package:get_it/get_it.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide User;
+import 'package:stream_chat_flutter/stream_chat_flutter.dart'
+    hide CurrentPlatform, User;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_noise_cancellation/noise_cancellation_audio_processor.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 
+import '../app/app_display_settings.dart';
 import '../app/user_auth_controller.dart';
 import '../core/model/environment.dart';
 import '../core/repos/app_preferences.dart';
@@ -48,6 +50,7 @@ class AppInjector {
     }
 
     locator.registerSingleton<AppPreferences>(appPrefs);
+    locator.registerSingleton(AppDisplaySettings(preferences: appPrefs));
 
     // Repositories
     locator.registerSingleton(
@@ -185,7 +188,10 @@ StreamVideo _initStreamVideo(
             ? null
             : locator<SimulatedInternetConnection>(),
       ),
-      audioProcessor: NoiseCancellationAudioProcessor(),
+      // The noise cancellation plugin only runs on Android and iOS.
+      audioProcessor: CurrentPlatform.isAndroid || CurrentPlatform.isIos
+          ? NoiseCancellationAudioProcessor()
+          : null,
       defaultCallPreferences: DefaultCallPreferences(
         encryptionKeyResolver: resolveRingingEncryptionKey,
       ),

@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:stream_core_flutter/core.dart';
 
+import 'stream_modal_parts.dart';
+
 /// Shows [builder] as a modal dialog over a blurred scrim.
 ///
 /// The dialog itself is typically a [StreamModalDialog], which supplies the
@@ -11,6 +13,11 @@ import 'package:stream_core_flutter/core.dart';
 /// Mirrors the `Web / Blur Scrim` component from the design: the barrier is
 /// the scrim color over a backdrop blur, rather than the flat translucent
 /// black Material's [showDialog] paints.
+///
+/// The themes between [context] and the navigator, such as a
+/// `StreamModalWindowTheme` around the caller, are applied to the dialog as
+/// they are when it opens. Themes above the navigator, such as the app's, are
+/// read as they change.
 ///
 /// Returns the value the dialog was popped with, or null when it was
 /// dismissed.
@@ -22,7 +29,8 @@ Future<T?> showStreamModalDialog<T>({
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
 }) {
-  final scrimColor = context.streamColorScheme.backgroundScrim;
+  final navigator = Navigator.of(context, rootNavigator: useRootNavigator);
+  final themes = InheritedTheme.capture(from: context, to: navigator.context);
 
   return showGeneralDialog<T>(
     context: context,
@@ -37,7 +45,10 @@ Future<T?> showStreamModalDialog<T>({
     // underneath it.
     barrierColor: Colors.transparent,
     transitionDuration: const Duration(milliseconds: 150),
-    pageBuilder: (context, animation, secondaryAnimation) => builder(context),
+    // A Builder, so the dialog is built under the themes the transition
+    // applies.
+    pageBuilder: (context, animation, secondaryAnimation) =>
+        Builder(builder: builder),
     transitionBuilder: (context, animation, secondaryAnimation, child) {
       final curve = CurvedAnimation(
         parent: animation,
@@ -46,18 +57,22 @@ Future<T?> showStreamModalDialog<T>({
 
       return FadeTransition(
         opacity: curve,
-        child: Stack(
-          children: [
-            // Behind the dialog and out of the way of the modal barrier that
-            // sits below, which is what a tap outside dismisses.
-            Positioned.fill(
-              child: IgnorePointer(child: StreamBlurScrim(color: scrimColor)),
-            ),
-            ScaleTransition(
-              scale: Tween<double>(begin: 0.96, end: 1).animate(curve),
-              child: child,
-            ),
-          ],
+        child: themes.wrap(
+          Stack(
+            children: [
+              // Behind the dialog and out of the way of the modal barrier that
+              // sits below, which is what a tap outside dismisses.
+              const Positioned.fill(
+                // Resolves its color as it builds, so that it follows a change
+                // to the app's theme while the dialog is open.
+                child: IgnorePointer(child: StreamBlurScrim()),
+              ),
+              ScaleTransition(
+                scale: Tween<double>(begin: 0.96, end: 1).animate(curve),
+                child: child,
+              ),
+            ],
+          ),
         ),
       );
     },
@@ -190,80 +205,21 @@ class StreamModalDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.streamColorScheme;
-    final spacing = context.streamSpacing;
-
-    return Dialog(
-      backgroundColor: colorScheme.backgroundElevation1,
-      surfaceTintColor: Colors.transparent,
-      elevation: context.streamElevation.level4,
-      clipBehavior: Clip.antiAlias,
-      insetPadding: EdgeInsets.all(spacing.xxl),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(context.streamRadius.xl),
-      ),
-      child: ConstrainedBox(
-        constraints: constraints,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _ModalDialogHeader(
-              title: title,
-              actions: [
-                ...headerActions,
-                if (showCloseButton)
-                  StreamButton.icon(
-                    icon: Icon(context.streamIcons.xmark),
-                    style: StreamButtonStyle.secondary,
-                    type: StreamButtonType.ghost,
-                    tooltip: MaterialLocalizations.of(
-                      context,
-                    ).closeButtonTooltip,
-                    onPressed: onClose ?? () => Navigator.of(context).pop(),
-                  ),
-              ],
-            ),
-            Flexible(child: child),
-            if (actions.isNotEmpty) _ModalDialogFooter(actions: actions),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ModalDialogHeader extends StatelessWidget {
-  const _ModalDialogHeader({required this.title, required this.actions});
-
-  final Widget? title;
-  final List<Widget> actions;
-
-  @override
-  Widget build(BuildContext context) {
-    final spacing = context.streamSpacing;
-
-    return Padding(
-      padding: EdgeInsets.all(spacing.xl),
-      child: Row(
-        spacing: spacing.md,
+    return StreamModalSurface(
+      constraints: constraints,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: DefaultTextStyle.merge(
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.streamTextTheme.headingSm.copyWith(
-                color: context.streamColorScheme.textPrimary,
-              ),
-              child: title ?? const SizedBox.shrink(),
-            ),
+          StreamModalHeader(
+            title: title,
+            actions: [
+              ...headerActions,
+              if (showCloseButton) StreamModalCloseButton(onPressed: onClose),
+            ],
           ),
-          if (actions.isNotEmpty)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: spacing.xs,
-              children: actions,
-            ),
+          Flexible(child: child),
+          if (actions.isNotEmpty) _ModalDialogFooter(actions: actions),
         ],
       ),
     );
