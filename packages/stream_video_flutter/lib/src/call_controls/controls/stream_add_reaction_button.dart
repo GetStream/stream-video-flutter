@@ -29,14 +29,21 @@ class _StreamAddReactionButtonState extends State<StreamAddReactionButton> {
   OverlayEntry? overlayEntry;
   GlobalKey key = GlobalKey();
 
+  // Ties the overlay to the button, so it follows it through a rotation, a
+  // resize or a change of display instead of staying where it opened.
+  final _link = LayerLink();
+
   @override
   Widget build(BuildContext context) {
     return VisibilityDetector(
       key: const Key('reactionControlKey'),
-      child: CallControlButton(
-        key: key,
-        icon: Icon(widget.reactionIcon ?? context.streamIcons.emojiAddFill),
-        onPressed: _toggleOverlay,
+      child: CompositedTransformTarget(
+        link: _link,
+        child: CallControlButton(
+          key: key,
+          icon: Icon(widget.reactionIcon ?? context.streamIcons.emojiAddFill),
+          onPressed: _toggleOverlay,
+        ),
       ),
       onVisibilityChanged: (info) {
         if (info.visibleFraction == 0.0) {
@@ -55,45 +62,51 @@ class _StreamAddReactionButtonState extends State<StreamAddReactionButton> {
       overlayEntry?.remove();
       overlayEntry = null;
     } else {
-      final renderBox = key.currentContext!.findRenderObject() as RenderBox?;
-      final offset = renderBox!.localToGlobal(Offset.zero);
+      final renderBox = key.currentContext!.findRenderObject()! as RenderBox;
 
       overlayEntry = OverlayEntry(
         builder: (context) {
           return Positioned(
-            left: offset.dx - 16,
-            bottom: renderBox.size.height + 16,
-            child: Material(
-              color: Colors.transparent,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(renderBox.size.width),
-                  color: Colors.black,
-                ),
-                child: Column(
-                  children: theme.callControlsTheme.callReactions.map((e) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: InkWell(
-                        onTap: () {
-                          widget.call.sendReaction(
-                            reactionType: e.type,
-                            emojiCode: e.emojiCode,
-                          );
-                          _toggleOverlay();
-                        },
-                        child: CircleAvatar(
-                          radius: renderBox.size.width / 2,
-                          child: Text(
-                            e.icon,
-                            style: TextStyle(
-                              fontSize: renderBox.size.width / 2,
+            left: 0,
+            top: 0,
+            child: CompositedTransformFollower(
+              link: _link,
+              showWhenUnlinked: false,
+              targetAnchor: Alignment.topCenter,
+              followerAnchor: Alignment.bottomCenter,
+              offset: const Offset(0, -16),
+              child: Material(
+                color: Colors.transparent,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(renderBox.size.width),
+                    color: Colors.black,
+                  ),
+                  child: Column(
+                    children: theme.callControlsTheme.callReactions.map((e) {
+                      return Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: InkWell(
+                          onTap: () {
+                            widget.call.sendReaction(
+                              reactionType: e.type,
+                              emojiCode: e.emojiCode,
+                            );
+                            _toggleOverlay();
+                          },
+                          child: CircleAvatar(
+                            radius: renderBox.size.width / 2,
+                            child: Text(
+                              e.icon,
+                              style: TextStyle(
+                                fontSize: renderBox.size.width / 2,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  }).toList(),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
             ),

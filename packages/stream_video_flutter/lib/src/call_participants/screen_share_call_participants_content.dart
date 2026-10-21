@@ -50,64 +50,70 @@ class ScreenShareCallParticipantsContent extends StatelessWidget {
   Widget build(BuildContext context) {
     const aspectRatio = 16 / 9;
 
-    final windowSize = MediaQuery.sizeOf(context);
-    final isWideWindow = windowSize.width / windowSize.height > aspectRatio;
+    // Measured on the space this is given rather than the window, part of
+    // which a docked side panel can take.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWideBox =
+            constraints.maxWidth / constraints.maxHeight > aspectRatio;
 
-    return CallParticipantsSpotlightView(
-      call: call,
-      spotlight: screenSharingParticipant,
-      participants: participants,
-      participantBuilder: screenShareParticipantBuilder,
-      barAlignment: isWideWindow
-          ? ParticipantsBarAlignment.right
-          : ParticipantsBarAlignment.bottom,
-      spotlightBuilder: (context, call, participant) {
-        final screenShareContentBuilder = this.screenShareContentBuilder;
-        if (screenShareContentBuilder != null) {
-          return screenShareContentBuilder.call(context, call, participant);
-        }
+        return CallParticipantsSpotlightView(
+          call: call,
+          spotlight: screenSharingParticipant,
+          participants: participants,
+          participantBuilder: screenShareParticipantBuilder,
+          barAlignment: isWideBox
+              ? ParticipantsBarAlignment.right
+              : ParticipantsBarAlignment.bottom,
+          spotlightBuilder: (context, call, participant) {
+            final screenShareContentBuilder = this.screenShareContentBuilder;
+            if (screenShareContentBuilder != null) {
+              return screenShareContentBuilder.call(context, call, participant);
+            }
 
-        final videoTheme = StreamVideoTheme.of(context);
-        final colorTheme = videoTheme.colorTheme;
+            final videoTheme = StreamVideoTheme.of(context);
+            final colorTheme = videoTheme.colorTheme;
 
-        final participantName = participant.name;
+            final participantName = participant.name;
 
-        return Stack(
-          children: [
-            ScreenShareContent(
-              key: ValueKey(
-                '${participant.uniqueParticipantKey}-screenShareContent',
-              ),
-              rendererScopePrefix: 'screenshareContent',
-              call: call,
-              participant: participant,
-            ),
-            FittedBox(
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  // ignore: deprecated_member_use
-                  color: colorTheme.barsBg.withOpacity(0.85),
-                  borderRadius: BorderRadius.circular(8),
+            return Stack(
+              children: [
+                ScreenShareContent(
+                  key: ValueKey(
+                    '${participant.uniqueParticipantKey}-screenShareContent',
+                  ),
+                  rendererScopePrefix: 'screenshareContent',
+                  call: call,
+                  participant: participant,
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      context.streamPresentIcon,
-                      color: colorTheme.textHighEmphasis,
+                FittedBox(
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      // ignore: deprecated_member_use
+                      color: colorTheme.barsBg.withOpacity(0.85),
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    const SizedBox(width: 8),
-                    // TODO localize hardcoded text
-                    Text(
-                      '$participantName is sharing their screen',
-                      style: videoTheme.textTheme.footnote,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          context.streamPresentIcon,
+                          color: colorTheme.textHighEmphasis,
+                        ),
+                        const SizedBox(width: 8),
+                        // TODO localize hardcoded text
+                        Text(
+                          '$participantName is sharing their screen',
+                          style: videoTheme.textTheme.footnote,
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         );
       },
     );

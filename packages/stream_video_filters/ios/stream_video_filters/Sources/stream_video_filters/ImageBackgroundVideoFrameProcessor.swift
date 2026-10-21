@@ -114,8 +114,10 @@ extension UIImage {
         let filename = (name as NSString).lastPathComponent
         let path = (name as NSString).deletingLastPathComponent
 
-        let screenScale = Int(UIScreen.main.scale)
-        for scale in stride(from: screenScale, to: 1, by: -1) {
+        // The sharpest variant Flutter bundles, whatever the screen: the image
+        // is drawn behind camera frames, not on the display.
+        let maxScale = 3
+        for scale in stride(from: maxScale, to: 1, by: -1) {
             let assetPath = "\(path)/\(scale).0x/\(filename)"
             let key = FlutterDartProject.lookupKey(forAsset: assetPath)
             if let image = UIImage(named: key, in: Bundle.main, compatibleWith: nil) {

@@ -232,6 +232,8 @@
 ### 🐞 Fixed
 
 - The lobby no longer offers a speaker choice on Safari and other WebKit browsers, which play every call on the system default output.
+- The screen share layout puts the participant strip beside or under the share by the space it is given, not by the window.
+- The reaction picker stays above `StreamAddReactionButton` when the window changes while it is open.
 - `StreamCallContent` keeps the call body clear of side safe-area insets, such as a status rail in landscape.
 - The floating local video keeps clear of the safe-area insets on every edge.
 - `OverlayAppBar` now clears the right safe-area inset.
@@ -304,6 +306,7 @@
 
 ### ⚠️ Breaking
 
+- `isMobileLandscape` and `isMobilePortrait` are removed.
 - `StreamScreenSize` is `small` for any window shorter than 480, and `StreamScreenSize.fromSize` buckets a size by both axes.
 - `StreamCallContent.callFastReconnectingOverlayBuilder`, `CallFastReconnectingOverlayBuilder` and `CallFastReconnectingProperties` are removed; use `callConnectionBannerBuilder`, which is drawn for every reconnect and gets the call status through `CallConnectionBannerProperties`. `CallNotConnectedProperties.isMigrating` and `isReconnecting` are removed, since `callNotConnectedBuilder` is only used before the call first connects.
 - `CallParticipantSort` is a class rather than an alias for `Comparator`. It pairs the comparator with an `identity`, which is what `StreamCallParticipants` compares to notice the sorting has changed — a bare closure is a new function on every build, so comparing those reordered the list every time. Wrap an existing comparator as `CallParticipantSort(compare, identity: 'my-sort')`; without an identity a sort is only equal to itself. The SDK's own sorts are on `CallParticipantSorts`. `PictureInPictureConfiguration.sort` and `StreamPictureInPictureUiKitView.participantSort` take one too.
