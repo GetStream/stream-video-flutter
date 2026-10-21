@@ -862,9 +862,7 @@ class Call {
         );
         return _stateManager.coordinatorCallReaction(event);
       case StreamCallSessionParticipantCountUpdatedEvent _:
-        if (state.value.status.isConnected || state.value.status.isJoined) {
-          return;
-        }
+        if (state.value.status.isAlreadyJoined) return;
 
         return _stateManager.setParticipantsCount(
           totalCount: event.participantsCountByRole.values.fold(

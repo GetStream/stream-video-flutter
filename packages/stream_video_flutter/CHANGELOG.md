@@ -1,3 +1,19 @@
+## Upcoming
+
+### 🐞 Fixed
+
+- `LivestreamBackstageContent` and `StreamLobbyView` show the call's participant count from the server. They counted the participant list, which stops at a few hundred in large calls.
+- `LivestreamPlayer` fullscreen mode no longer crops a feed whose orientation differs from the player's, such as a landscape stream on a portrait phone. The feed is letterboxed instead, and still fills the player when both share an orientation.
+
+### ✅ Added
+
+- Added `LivestreamPlayer.fullscreenVideoFit`, the fit used in fullscreen mode. It defaults to `VideoFit.adaptive`; pass `VideoFit.cover` to restore the previous always-fill behaviour.
+
+### 🔄 Changed
+
+- `StreamLobbyView` now says "N people are in the call" instead of "N more people are in the call".
+- `VideoFit.adaptive` now compares the video's orientation with the widget's instead of looking at the video alone. The video fills the widget when both are landscape or both are portrait, and is letterboxed when they differ. Landscape tiles, the common case on web and desktop, behave as before; in a portrait tile a landscape feed is now letterboxed instead of cropped, and a portrait feed now fills the tile instead of being letterboxed.
+
 ## 1.7.1
 
 ### 🐞 Fixed
