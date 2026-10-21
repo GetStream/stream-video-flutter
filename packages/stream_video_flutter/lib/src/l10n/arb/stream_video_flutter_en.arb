@@ -397,5 +397,173 @@
   "incomingVideoQualityShortOff": "Off",
   "@incomingVideoQualityShortOff": {
     "description": "Shown on the incoming video quality button while other participants' video is turned off"
+  },
+  "settingsCaptionsTab": "Captions",
+  "@settingsCaptionsTab": {
+    "description": "The label of the captions tab in the settings window"
+  },
+  "captionsSettingsTurnOn": "Turn On Captions",
+  "@captionsSettingsTurnOn": {
+    "description": "Title of the switch that turns closed captions on and off"
+  },
+  "captionsSettingsTurnOnDescription": "Select the language people will use in the meeting. Captions will be displayed in this language.",
+  "@captionsSettingsTurnOnDescription": {
+    "description": "Explains the closed captions switch"
+  },
+  "captionsSettingsLanguage": "Language",
+  "@captionsSettingsLanguage": {
+    "description": "Heading of the picker for the language spoken in the call"
+  },
+  "captionsSettingsLanguageDefault": "Default",
+  "@captionsSettingsLanguageDefault": {
+    "description": "The captions language of a call that never set one, which the backend picks"
+  },
+  "transcriptionLanguageAuto": "Automatic",
+  "@transcriptionLanguageAuto": {
+    "description": "The spoken language choice that lets the transcriber detect the language"
+  },
+  "transcriptionLanguageEn": "English",
+  "@transcriptionLanguageEn": {
+    "description": "The name of a language the call can be transcribed in (en)"
+  },
+  "transcriptionLanguageFr": "French",
+  "@transcriptionLanguageFr": {
+    "description": "The name of a language the call can be transcribed in (fr)"
+  },
+  "transcriptionLanguageEs": "Spanish",
+  "@transcriptionLanguageEs": {
+    "description": "The name of a language the call can be transcribed in (es)"
+  },
+  "transcriptionLanguageDe": "German",
+  "@transcriptionLanguageDe": {
+    "description": "The name of a language the call can be transcribed in (de)"
+  },
+  "transcriptionLanguageIt": "Italian",
+  "@transcriptionLanguageIt": {
+    "description": "The name of a language the call can be transcribed in (it)"
+  },
+  "transcriptionLanguageNl": "Dutch",
+  "@transcriptionLanguageNl": {
+    "description": "The name of a language the call can be transcribed in (nl)"
+  },
+  "transcriptionLanguagePt": "Portuguese",
+  "@transcriptionLanguagePt": {
+    "description": "The name of a language the call can be transcribed in (pt)"
+  },
+  "transcriptionLanguagePl": "Polish",
+  "@transcriptionLanguagePl": {
+    "description": "The name of a language the call can be transcribed in (pl)"
+  },
+  "transcriptionLanguageCa": "Catalan",
+  "@transcriptionLanguageCa": {
+    "description": "The name of a language the call can be transcribed in (ca)"
+  },
+  "transcriptionLanguageCs": "Czech",
+  "@transcriptionLanguageCs": {
+    "description": "The name of a language the call can be transcribed in (cs)"
+  },
+  "transcriptionLanguageDa": "Danish",
+  "@transcriptionLanguageDa": {
+    "description": "The name of a language the call can be transcribed in (da)"
+  },
+  "transcriptionLanguageEl": "Greek",
+  "@transcriptionLanguageEl": {
+    "description": "The name of a language the call can be transcribed in (el)"
+  },
+  "transcriptionLanguageFi": "Finnish",
+  "@transcriptionLanguageFi": {
+    "description": "The name of a language the call can be transcribed in (fi)"
+  },
+  "transcriptionLanguageId": "Indonesian",
+  "@transcriptionLanguageId": {
+    "description": "The name of a language the call can be transcribed in (id)"
+  },
+  "transcriptionLanguageJa": "Japanese",
+  "@transcriptionLanguageJa": {
+    "description": "The name of a language the call can be transcribed in (ja)"
+  },
+  "transcriptionLanguageRu": "Russian",
+  "@transcriptionLanguageRu": {
+    "description": "The name of a language the call can be transcribed in (ru)"
+  },
+  "transcriptionLanguageSv": "Swedish",
+  "@transcriptionLanguageSv": {
+    "description": "The name of a language the call can be transcribed in (sv)"
+  },
+  "transcriptionLanguageTa": "Tamil",
+  "@transcriptionLanguageTa": {
+    "description": "The name of a language the call can be transcribed in (ta)"
+  },
+  "transcriptionLanguageTh": "Thai",
+  "@transcriptionLanguageTh": {
+    "description": "The name of a language the call can be transcribed in (th)"
+  },
+  "transcriptionLanguageTr": "Turkish",
+  "@transcriptionLanguageTr": {
+    "description": "The name of a language the call can be transcribed in (tr)"
+  },
+  "transcriptionLanguageHu": "Hungarian",
+  "@transcriptionLanguageHu": {
+    "description": "The name of a language the call can be transcribed in (hu)"
+  },
+  "transcriptionLanguageRo": "Romanian",
+  "@transcriptionLanguageRo": {
+    "description": "The name of a language the call can be transcribed in (ro)"
+  },
+  "transcriptionLanguageZh": "Chinese",
+  "@transcriptionLanguageZh": {
+    "description": "The name of a language the call can be transcribed in (zh)"
+  },
+  "transcriptionLanguageAr": "Arabic",
+  "@transcriptionLanguageAr": {
+    "description": "The name of a language the call can be transcribed in (ar)"
+  },
+  "transcriptionLanguageTl": "Tagalog",
+  "@transcriptionLanguageTl": {
+    "description": "The name of a language the call can be transcribed in (tl)"
+  },
+  "transcriptionLanguageHe": "Hebrew",
+  "@transcriptionLanguageHe": {
+    "description": "The name of a language the call can be transcribed in (he)"
+  },
+  "transcriptionLanguageHi": "Hindi",
+  "@transcriptionLanguageHi": {
+    "description": "The name of a language the call can be transcribed in (hi)"
+  },
+  "transcriptionLanguageHr": "Croatian",
+  "@transcriptionLanguageHr": {
+    "description": "The name of a language the call can be transcribed in (hr)"
+  },
+  "transcriptionLanguageKo": "Korean",
+  "@transcriptionLanguageKo": {
+    "description": "The name of a language the call can be transcribed in (ko)"
+  },
+  "transcriptionLanguageMs": "Malay",
+  "@transcriptionLanguageMs": {
+    "description": "The name of a language the call can be transcribed in (ms)"
+  },
+  "transcriptionLanguageNo": "Norwegian",
+  "@transcriptionLanguageNo": {
+    "description": "The name of a language the call can be transcribed in (no)"
+  },
+  "transcriptionLanguageUk": "Ukrainian",
+  "@transcriptionLanguageUk": {
+    "description": "The name of a language the call can be transcribed in (uk)"
+  },
+  "transcriptionLanguageBg": "Bulgarian",
+  "@transcriptionLanguageBg": {
+    "description": "The name of a language the call can be transcribed in (bg)"
+  },
+  "transcriptionLanguageEt": "Estonian",
+  "@transcriptionLanguageEt": {
+    "description": "The name of a language the call can be transcribed in (et)"
+  },
+  "transcriptionLanguageSl": "Slovenian",
+  "@transcriptionLanguageSl": {
+    "description": "The name of a language the call can be transcribed in (sl)"
+  },
+  "transcriptionLanguageSk": "Slovak",
+  "@transcriptionLanguageSk": {
+    "description": "The name of a language the call can be transcribed in (sk)"
   }
 }

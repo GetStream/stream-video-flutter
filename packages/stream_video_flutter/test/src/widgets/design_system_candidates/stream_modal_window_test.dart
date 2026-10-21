@@ -1,5 +1,6 @@
+import 'dart:ui' show Tristate;
+
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
@@ -207,8 +208,8 @@ void main() {
         find.semantics.byPredicate(
           (node) =>
               node.label == 'Device' &&
-              node.hasFlag(SemanticsFlag.isButton) &&
-              node.hasFlag(SemanticsFlag.isSelected),
+              node.flagsCollection.isButton &&
+              node.flagsCollection.isSelected == Tristate.isTrue,
         ),
         findsOne,
       );
@@ -216,8 +217,8 @@ void main() {
         find.semantics.byPredicate(
           (node) =>
               node.label == 'Effects' &&
-              node.hasFlag(SemanticsFlag.isButton) &&
-              !node.hasFlag(SemanticsFlag.isSelected),
+              node.flagsCollection.isButton &&
+              node.flagsCollection.isSelected != Tristate.isTrue,
         ),
         findsOne,
       );
@@ -318,8 +319,7 @@ void main() {
 
         expect(
           find.semantics.byPredicate(
-            (node) =>
-                node.label == 'Effects' && node.hasFlag(SemanticsFlag.isButton),
+            (node) => node.label == 'Effects' && node.flagsCollection.isButton,
           ),
           findsOne,
         );
