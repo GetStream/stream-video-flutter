@@ -87,7 +87,7 @@ void main() {
         ),
       ],
       stateManager: createTestCallStateManager(),
-      streamVideo: setupMockStreamVideo(),
+      host: setupMockCallHost(),
       pcFactory: StreamPeerConnectionFactory(
         callCid: SampleCallData.defaultCid,
       ),

@@ -8,6 +8,7 @@ import '../../stream_video_flutter.dart';
 import '../widgets/avatar_size_from_constraints.dart';
 import 'indicators/connection_quality_indicator_defaults.dart';
 import 'participant_label_defaults.dart';
+import 'participant_tile_chrome.dart' show resolveParticipantTileChrome;
 
 /// Builder function used to build a video placeholder.
 typedef VideoPlaceholderBuilder =
