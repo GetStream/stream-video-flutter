@@ -6,6 +6,7 @@ import '../coordinator/coordinator_client.dart';
 import '../coordinator/models/coordinator_events.dart';
 import '../errors/stream_video_exception_composer.dart';
 import '../logger/impl/tagged_logger.dart';
+import '../models/stream_video_event.dart';
 import '../models/user.dart';
 import '../push_notification/push_notification_manager.dart';
 import '../token/token_source.dart';
@@ -270,7 +271,7 @@ class CoordinatorConnection {
   }
 
   /// Follows the socket's own connected and disconnected events.
-  void handleEvent(CoordinatorEvent event) {
+  void handleEvent(StreamVideoEvent event) {
     if (event is CoordinatorConnectedEvent) {
       _logger.i(() => '[onCoordinatorEvent] connected ${event.userId}');
       _connection = ConnectionState.connected(_state.currentUser.id);

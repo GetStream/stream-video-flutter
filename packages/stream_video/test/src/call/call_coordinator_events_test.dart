@@ -15,11 +15,11 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
   });
 
-  Future<({Call call, MutableSharedEmitter<CoordinatorEvent> events})>
+  Future<({Call call, MutableSharedEmitter<StreamVideoEvent> events})>
   setupCallForEventTesting({
     CallStatus? status,
   }) async {
-    final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+    final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
     final coordinatorClient = setupMockCoordinatorClient(
       events: coordinatorEvents,
@@ -44,7 +44,7 @@ void main() {
     // anyone has joined, and a call nobody joined has no other subscription to
     // the coordinator. Watching the call is what puts one in place.
     test('a watched call emits its events before it is joined', () async {
-      final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+      final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
       final coordinatorClient = setupMockCoordinatorClient(
         events: coordinatorEvents,
       );
@@ -56,8 +56,8 @@ void main() {
       call.callEvents.listen(received.add);
 
       coordinatorEvents.emit(
-        CoordinatorCallSessionParticipantJoinedEvent(
-          callCid: call.callCid,
+        StreamCallSessionParticipantJoinedEvent(
+          call.callCid,
           createdAt: DateTime.now(),
           sessionId: 'session',
           user: SampleCallData.defaultCallUser,
@@ -74,10 +74,38 @@ void main() {
       expect(received, [isA<StreamCallSessionParticipantJoinedEvent>()]);
     });
 
+    // The coordinator delivers the events of every call the user is involved
+    // in, to every call. A call's stream is for that call alone, so an app
+    // listening to one call is not handed another call's events.
+    test('a call does not emit or apply events of another call', () async {
+      final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
+      final coordinatorClient = setupMockCoordinatorClient(
+        events: coordinatorEvents,
+      );
+
+      final call = createTestCall(coordinatorClient: coordinatorClient);
+      await call.getOrCreate();
+
+      final received = <StreamCallEvent>[];
+      call.callEvents.listen(received.add);
+
+      coordinatorEvents.emit(
+        StreamCallRecordingStartedEvent(
+          StreamCallCid(cid: 'default:another-call'),
+          createdAt: DateTime.now(),
+          recordingType: RecordingType.composite,
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(received, isEmpty);
+      expect(call.state.value.isRecording, isFalse);
+    });
+
     test(
       'permission request event - onPermissionRequest is called when permission request event is emitted',
       () async {
-        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
         final coordinatorClient = setupMockCoordinatorClient(
           events: coordinatorEvents,
@@ -92,8 +120,8 @@ void main() {
         };
 
         coordinatorEvents.emit(
-          CoordinatorCallPermissionRequestEvent(
-            callCid: call.callCid,
+          StreamCallPermissionRequestEvent(
+            call.callCid,
             createdAt: DateTime.now(),
             permissions: const [CallPermission.sendAudio],
             user: const CallUser(
@@ -120,8 +148,8 @@ void main() {
           setup.call.onPermissionRequest = (_) => throw StateError('boom');
 
           setup.events.emit(
-            CoordinatorCallPermissionRequestEvent(
-              callCid: setup.call.callCid,
+            StreamCallPermissionRequestEvent(
+              setup.call.callCid,
               createdAt: DateTime.now(),
               permissions: const [CallPermission.sendAudio],
               user: SampleCallData.defaultCallUser,
@@ -152,8 +180,8 @@ void main() {
         expect(setup.call.state.value.status, isA<CallStatusActive>());
 
         setup.events.emit(
-          CoordinatorCallEndedEvent(
-            callCid: setup.call.callCid,
+          StreamCallEndedEvent(
+            setup.call.callCid,
             endedBy: SampleCallData.defaultCallUser,
             type: 'call.ended',
             metadata: SampleCallData.createCallMetadata(),
@@ -182,8 +210,8 @@ void main() {
         ];
 
         setup.events.emit(
-          CoordinatorCallPermissionsUpdatedEvent(
-            callCid: setup.call.callCid,
+          StreamCallPermissionsUpdatedEvent(
+            setup.call.callCid,
             user: SampleCallData.defaultCallUser,
             ownCapabilities: newCapabilities,
             createdAt: DateTime.now(),
@@ -213,8 +241,8 @@ void main() {
 
         // Emit participant count updated event
         setup.events.emit(
-          CoordinatorCallSessionParticipantCountUpdatedEvent(
-            callCid: setup.call.callCid,
+          StreamCallSessionParticipantCountUpdatedEvent(
+            setup.call.callCid,
             sessionId: 'test-session-id',
             participantsCountByRole: const {
               'user': 3,
@@ -248,8 +276,8 @@ void main() {
 
         // Emit participant count updated event
         setup.events.emit(
-          CoordinatorCallSessionParticipantCountUpdatedEvent(
-            callCid: setup.call.callCid,
+          StreamCallSessionParticipantCountUpdatedEvent(
+            setup.call.callCid,
             sessionId: 'test-session-id',
             participantsCountByRole: const {
               'user': 10,
@@ -285,8 +313,8 @@ void main() {
 
         // Emit user blocked event
         setup.events.emit(
-          CoordinatorCallUserBlockedEvent(
-            callCid: setup.call.callCid,
+          StreamCallUserBlockedEvent(
+            setup.call.callCid,
             user: userToBlock,
             createdAt: DateTime.now(),
           ),
@@ -310,8 +338,8 @@ void main() {
 
         // Emit user blocked event for current user
         setup.events.emit(
-          CoordinatorCallUserBlockedEvent(
-            callCid: setup.call.callCid,
+          StreamCallUserBlockedEvent(
+            setup.call.callCid,
             user: currentUser,
             createdAt: DateTime.now(),
           ),
@@ -336,8 +364,8 @@ void main() {
 
         // First block the user
         setup.events.emit(
-          CoordinatorCallUserBlockedEvent(
-            callCid: setup.call.callCid,
+          StreamCallUserBlockedEvent(
+            setup.call.callCid,
             user: userToUnblock,
             createdAt: DateTime.now(),
           ),
@@ -350,8 +378,8 @@ void main() {
 
         // Now unblock the user
         setup.events.emit(
-          CoordinatorCallUserUnblockedEvent(
-            callCid: setup.call.callCid,
+          StreamCallUserUnblockedEvent(
+            setup.call.callCid,
             user: userToUnblock,
             createdAt: DateTime.now(),
           ),
@@ -382,8 +410,8 @@ void main() {
 
         // Emit member added event
         setup.events.emit(
-          CoordinatorCallMemberAddedEvent(
-            callCid: setup.call.callCid,
+          StreamCallMemberAddedEvent(
+            setup.call.callCid,
             members: [newMember],
             metadata: SampleCallData.createCallMetadata(
               members: {newMember.userId: newMember},
@@ -411,7 +439,7 @@ void main() {
     test(
       'member removed event - should remove members from call',
       () async {
-        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
         final user1 = SampleCallData.testCallUser1;
         final user2 = SampleCallData.testCallUser2;
@@ -446,8 +474,8 @@ void main() {
 
         // Emit member removed event
         coordinatorEvents.emit(
-          CoordinatorCallMemberRemovedEvent(
-            callCid: call.callCid,
+          StreamCallMemberRemovedEvent(
+            call.callCid,
             removedMemberIds: [user1.id],
             metadata: SampleCallData.createCallMetadata(),
             createdAt: DateTime.now(),
@@ -472,7 +500,7 @@ void main() {
     test(
       'member updated event - should update member roles and custom data',
       () async {
-        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
         final user1 = SampleCallData.testCallUser1;
 
@@ -515,8 +543,8 @@ void main() {
         );
 
         coordinatorEvents.emit(
-          CoordinatorCallMemberUpdatedEvent(
-            callCid: call.callCid,
+          StreamCallMemberUpdatedEvent(
+            call.callCid,
             members: [updatedMember],
             metadata: SampleCallData.createCallMetadata(),
             createdAt: DateTime.now(),
@@ -537,7 +565,7 @@ void main() {
     test(
       'member updated permission event - should update capabilities by role',
       () async {
-        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
         final user1 = SampleCallData.testCallUser1;
 
@@ -574,8 +602,8 @@ void main() {
         };
 
         coordinatorEvents.emit(
-          CoordinatorCallMemberUpdatedPermissionEvent(
-            callCid: call.callCid,
+          StreamCallMemberUpdatedPermissionEvent(
+            call.callCid,
             capabilitiesByRole: capabilitiesByRole,
             updatedMembers: members,
             metadata: SampleCallData.createCallMetadata(),
@@ -595,7 +623,7 @@ void main() {
     test(
       'call reaction event - should set reaction on participant',
       () async {
-        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
         final currentUser = SampleCallData.defaultCallUser;
         final reactingUser = SampleCallData.testCallUser1;
@@ -641,8 +669,8 @@ void main() {
 
         // Emit reaction event
         coordinatorEvents.emit(
-          CoordinatorCallReactionEvent(
-            callCid: call.callCid,
+          StreamCallReactionEvent(
+            call.callCid,
             user: reactingUser,
             reactionType: 'like',
             emojiCode: '👍',
@@ -666,7 +694,7 @@ void main() {
     test(
       'call reaction event - should dismiss reaction after timeout',
       () async {
-        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
         final currentUser = SampleCallData.defaultCallUser;
         final reactingUser = SampleCallData.testCallUser1;
@@ -710,8 +738,8 @@ void main() {
 
         // Emit reaction event
         coordinatorEvents.emit(
-          CoordinatorCallReactionEvent(
-            callCid: call.callCid,
+          StreamCallReactionEvent(
+            call.callCid,
             user: reactingUser,
             reactionType: 'like',
             emojiCode: '👍',
@@ -749,8 +777,8 @@ void main() {
         expect(setup.call.state.value.isRecording, isFalse);
 
         setup.events.emit(
-          CoordinatorCallRecordingStartedEvent(
-            callCid: setup.call.callCid,
+          StreamCallRecordingStartedEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
             recordingType: RecordingType.composite,
           ),
@@ -769,8 +797,8 @@ void main() {
 
         // First start recording
         setup.events.emit(
-          CoordinatorCallRecordingStartedEvent(
-            callCid: setup.call.callCid,
+          StreamCallRecordingStartedEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
             recordingType: RecordingType.composite,
           ),
@@ -780,8 +808,8 @@ void main() {
 
         // Then stop recording
         setup.events.emit(
-          CoordinatorCallRecordingStoppedEvent(
-            callCid: setup.call.callCid,
+          StreamCallRecordingStoppedEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
             recordingType: RecordingType.composite,
           ),
@@ -800,8 +828,8 @@ void main() {
 
         // First start recording
         setup.events.emit(
-          CoordinatorCallRecordingStartedEvent(
-            callCid: setup.call.callCid,
+          StreamCallRecordingStartedEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
             recordingType: RecordingType.composite,
           ),
@@ -811,8 +839,8 @@ void main() {
 
         // Then recording fails
         setup.events.emit(
-          CoordinatorCallRecordingFailedEvent(
-            callCid: setup.call.callCid,
+          StreamCallRecordingFailedEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
             recordingType: RecordingType.composite,
           ),
@@ -832,8 +860,8 @@ void main() {
         expect(setup.call.state.value.isTranscribing, isFalse);
 
         setup.events.emit(
-          CoordinatorCallTranscriptionStartedEvent(
-            callCid: setup.call.callCid,
+          StreamCallTranscriptionStartedEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
           ),
         );
@@ -851,8 +879,8 @@ void main() {
 
         // First start transcription
         setup.events.emit(
-          CoordinatorCallTranscriptionStartedEvent(
-            callCid: setup.call.callCid,
+          StreamCallTranscriptionStartedEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
           ),
         );
@@ -861,8 +889,8 @@ void main() {
 
         // Then stop transcription
         setup.events.emit(
-          CoordinatorCallTranscriptionStoppedEvent(
-            callCid: setup.call.callCid,
+          StreamCallTranscriptionStoppedEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
           ),
         );
@@ -880,8 +908,8 @@ void main() {
 
         // First start transcription
         setup.events.emit(
-          CoordinatorCallTranscriptionStartedEvent(
-            callCid: setup.call.callCid,
+          StreamCallTranscriptionStartedEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
           ),
         );
@@ -890,8 +918,8 @@ void main() {
 
         // Then transcription fails
         setup.events.emit(
-          CoordinatorCallTranscriptionFailedEvent(
-            callCid: setup.call.callCid,
+          StreamCallTranscriptionFailedEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
           ),
         );
@@ -910,8 +938,8 @@ void main() {
         expect(setup.call.state.value.isCaptioning, isFalse);
 
         setup.events.emit(
-          CoordinatorCallClosedCaptionStartedEvent(
-            callCid: setup.call.callCid,
+          StreamCallClosedCaptionsStartedEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
           ),
         );
@@ -929,8 +957,8 @@ void main() {
 
         // First start closed captions
         setup.events.emit(
-          CoordinatorCallClosedCaptionStartedEvent(
-            callCid: setup.call.callCid,
+          StreamCallClosedCaptionsStartedEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
           ),
         );
@@ -939,8 +967,8 @@ void main() {
 
         // Then stop closed captions
         setup.events.emit(
-          CoordinatorCallClosedCaptionStoppedEvent(
-            callCid: setup.call.callCid,
+          StreamCallClosedCaptionsStoppedEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
           ),
         );
@@ -958,8 +986,8 @@ void main() {
 
         // First start closed captions
         setup.events.emit(
-          CoordinatorCallClosedCaptionStartedEvent(
-            callCid: setup.call.callCid,
+          StreamCallClosedCaptionsStartedEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
           ),
         );
@@ -968,8 +996,8 @@ void main() {
 
         // Then closed captions fail
         setup.events.emit(
-          CoordinatorCallClosedCaptionFailedEvent(
-            callCid: setup.call.callCid,
+          StreamCallClosedCaptionsFailedEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
           ),
         );
@@ -988,8 +1016,8 @@ void main() {
         expect(setup.call.state.value.isBroadcasting, isFalse);
 
         setup.events.emit(
-          CoordinatorCallBroadcastingStartedEvent(
-            callCid: setup.call.callCid,
+          StreamCallBroadcastingStartedEvent(
+            setup.call.callCid,
             hlsPlaylistUrl: 'https://example.com/hls/playlist.m3u8',
             metadata: SampleCallData.createCallMetadata(),
             createdAt: DateTime.now(),
@@ -1009,8 +1037,8 @@ void main() {
 
         // First start broadcasting
         setup.events.emit(
-          CoordinatorCallBroadcastingStartedEvent(
-            callCid: setup.call.callCid,
+          StreamCallBroadcastingStartedEvent(
+            setup.call.callCid,
             hlsPlaylistUrl: 'https://example.com/hls/playlist.m3u8',
             metadata: SampleCallData.createCallMetadata(),
             createdAt: DateTime.now(),
@@ -1021,8 +1049,8 @@ void main() {
 
         // Then stop broadcasting
         setup.events.emit(
-          CoordinatorCallBroadcastingStoppedEvent(
-            callCid: setup.call.callCid,
+          StreamCallBroadcastingStoppedEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
           ),
         );
@@ -1040,8 +1068,8 @@ void main() {
 
         // First start broadcasting
         setup.events.emit(
-          CoordinatorCallBroadcastingStartedEvent(
-            callCid: setup.call.callCid,
+          StreamCallBroadcastingStartedEvent(
+            setup.call.callCid,
             hlsPlaylistUrl: 'https://example.com/hls/playlist.m3u8',
             metadata: SampleCallData.createCallMetadata(),
             createdAt: DateTime.now(),
@@ -1052,8 +1080,8 @@ void main() {
 
         // Then broadcasting fails
         setup.events.emit(
-          CoordinatorCallBroadcastingFailedEvent(
-            callCid: setup.call.callCid,
+          StreamCallBroadcastingFailedEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
           ),
         );
@@ -1068,7 +1096,7 @@ void main() {
   group('Call Metadata Events', () {
     Future<void> testMetadataEvent({
       required String eventName,
-      required CoordinatorCallEvent Function(
+      required StreamCallEvent Function(
         StreamCallCid callCid,
         CallMetadata metadata,
         DateTime createdAt,
@@ -1113,13 +1141,12 @@ void main() {
 
         await testMetadataEvent(
           eventName: 'call updated',
-          createEvent: (callCid, metadata, createdAt) =>
-              CoordinatorCallUpdatedEvent(
-                callCid: callCid,
-                metadata: metadata,
-                capabilitiesByRole: capabilitiesByRole,
-                createdAt: createdAt,
-              ),
+          createEvent: (callCid, metadata, createdAt) => StreamCallUpdatedEvent(
+            callCid,
+            metadata: metadata,
+            capabilitiesByRole: capabilitiesByRole,
+            createdAt: createdAt,
+          ),
           capabilitiesByRole: capabilitiesByRole,
         );
       },
@@ -1131,8 +1158,8 @@ void main() {
         await testMetadataEvent(
           eventName: 'call live started',
           createEvent: (callCid, metadata, createdAt) =>
-              CoordinatorCallLiveStartedEvent(
-                callCid: callCid,
+              StreamCallLiveStartedEvent(
+                callCid,
                 metadata: metadata,
                 createdAt: createdAt,
               ),
@@ -1145,17 +1172,14 @@ void main() {
       () async {
         await testMetadataEvent(
           eventName: 'call ringing',
-          createEvent: (callCid, metadata, createdAt) =>
-              CoordinatorCallRingingEvent(
-                data: CallRingingData(
-                  callCid: callCid,
-                  ringing: true,
-                  metadata: metadata,
-                ),
-                video: true,
-                sessionId: 'test-session-id',
-                createdAt: createdAt,
-              ),
+          createEvent: (callCid, metadata, createdAt) => StreamCallRingingEvent(
+            callCid,
+            video: true,
+            sessionId: 'test-session-id',
+            createdAt: createdAt,
+            ringing: true,
+            metadata: metadata,
+          ),
         );
       },
     );
@@ -1165,15 +1189,14 @@ void main() {
       () async {
         await testMetadataEvent(
           eventName: 'call missed',
-          createEvent: (callCid, metadata, createdAt) =>
-              CoordinatorCallMissedEvent(
-                callCid: callCid,
-                sessionId: 'test-session-id',
-                metadata: metadata,
-                callUser: SampleCallData.testCallUser1,
-                members: const [],
-                createdAt: createdAt,
-              ),
+          createEvent: (callCid, metadata, createdAt) => StreamCallMissedEvent(
+            callCid,
+            sessionId: 'test-session-id',
+            metadata: metadata,
+            callUser: SampleCallData.testCallUser1,
+            members: const [],
+            createdAt: createdAt,
+          ),
         );
       },
     );
@@ -1181,7 +1204,7 @@ void main() {
     test(
       'call session ended event - should update metadata but not members',
       () async {
-        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
         final user1 = SampleCallData.testCallUser1;
         final user2 = SampleCallData.testCallUser2;
@@ -1225,8 +1248,8 @@ void main() {
 
         // Emit session ended event
         coordinatorEvents.emit(
-          CoordinatorCallSessionEndedEvent(
-            callCid: call.callCid,
+          StreamCallSessionEndedEvent(
+            call.callCid,
             sessionId: 'test-session-id',
             metadata: metadata,
             createdAt: DateTime.now(),
@@ -1250,7 +1273,7 @@ void main() {
     test(
       'call session started event - should update metadata but not members',
       () async {
-        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
         final user1 = SampleCallData.testCallUser1;
         final user2 = SampleCallData.testCallUser2;
@@ -1294,8 +1317,8 @@ void main() {
 
         // Emit session started event
         coordinatorEvents.emit(
-          CoordinatorCallSessionStartedEvent(
-            callCid: call.callCid,
+          StreamCallSessionStartedEvent(
+            call.callCid,
             sessionId: 'test-session-id',
             metadata: metadata,
             createdAt: DateTime.now(),
@@ -1322,8 +1345,8 @@ void main() {
       final setup = await setupCallForEventTesting();
 
       setup.events.emit(
-        CoordinatorCallClosedCaptionEvent(
-          callCid: setup.call.callCid,
+        StreamCallClosedCaptionsEvent(
+          setup.call.callCid,
           createdAt: DateTime.now(),
           startTime: DateTime.now(),
           endTime: DateTime.now().add(const Duration(seconds: 3)),
@@ -1352,8 +1375,8 @@ void main() {
 
         // Emit a closed caption event
         setup.events.emit(
-          CoordinatorCallClosedCaptionEvent(
-            callCid: setup.call.callCid,
+          StreamCallClosedCaptionsEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
             startTime: DateTime.now(),
             endTime: DateTime.now().add(const Duration(seconds: 3)),
@@ -1381,8 +1404,8 @@ void main() {
         final setup = await setupCallForEventTesting();
 
         final startTime = DateTime.now();
-        final event = CoordinatorCallClosedCaptionEvent(
-          callCid: setup.call.callCid,
+        final event = StreamCallClosedCaptionsEvent(
+          setup.call.callCid,
           createdAt: DateTime.now(),
           startTime: startTime,
           endTime: startTime.add(const Duration(seconds: 3)),
@@ -1418,8 +1441,8 @@ void main() {
         // Default visibleCaptions is 2, so add 3 captions
         for (var i = 0; i < 3; i++) {
           setup.events.emit(
-            CoordinatorCallClosedCaptionEvent(
-              callCid: setup.call.callCid,
+            StreamCallClosedCaptionsEvent(
+              setup.call.callCid,
               createdAt: DateTime.now(),
               startTime: DateTime.now().add(Duration(milliseconds: i)),
               endTime: DateTime.now().add(
@@ -1450,8 +1473,8 @@ void main() {
 
         // Emit a caption
         setup.events.emit(
-          CoordinatorCallClosedCaptionEvent(
-            callCid: setup.call.callCid,
+          StreamCallClosedCaptionsEvent(
+            setup.call.callCid,
             createdAt: DateTime.now(),
             startTime: DateTime.now(),
             endTime: DateTime.now().add(const Duration(seconds: 3)),
@@ -1483,7 +1506,7 @@ void main() {
     test(
       'call rejected event - should update rejected member with callRejectedAt timestamp',
       () async {
-        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
         final members = [
           SampleCallData.createCallMember(
@@ -1528,9 +1551,8 @@ void main() {
 
         final rejectedTime = DateTime.now();
         coordinatorEvents.emit(
-          CoordinatorCallRejectedEvent(
-            callCid: call.callCid,
-            user: SampleCallData.defaultCallUser,
+          StreamCallRejectedEvent(
+            call.callCid,
             rejectedBy: SampleCallData.testCallUser1,
             createdAt: rejectedTime,
             metadata: SampleCallData.createCallMetadata(),
@@ -1553,7 +1575,7 @@ void main() {
     test(
       'call rejected event - should disconnect when user is creator and all other members rejected',
       () async {
-        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
         final currentUser = SampleCallData.defaultCallUser;
         final user1 = SampleCallData.testCallUser1;
@@ -1594,9 +1616,8 @@ void main() {
         // All other members rejected
         final rejectedTime = DateTime.now();
         coordinatorEvents.emit(
-          CoordinatorCallRejectedEvent(
-            callCid: call.callCid,
-            user: currentUser,
+          StreamCallRejectedEvent(
+            call.callCid,
             rejectedBy: user1,
             createdAt: rejectedTime,
             metadata: SampleCallData.createCallMetadata(
@@ -1622,7 +1643,7 @@ void main() {
     test(
       'call rejected event - should not disconnect when user is creator and some members have not rejected',
       () async {
-        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
         final currentUser = SampleCallData.defaultCallUser;
         final user1 = SampleCallData.testCallUser1;
@@ -1663,9 +1684,8 @@ void main() {
         // Only one member rejected, another hasn't
         final rejectedTime = DateTime.now();
         coordinatorEvents.emit(
-          CoordinatorCallRejectedEvent(
-            callCid: call.callCid,
-            user: currentUser,
+          StreamCallRejectedEvent(
+            call.callCid,
             rejectedBy: user1,
             createdAt: rejectedTime,
             metadata: SampleCallData.createCallMetadata(
@@ -1686,7 +1706,7 @@ void main() {
     test(
       'call rejected event - should disconnect when user is not creator and creator rejected',
       () async {
-        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
         final currentUser = SampleCallData.defaultCallUser;
         const creator = CallUser(
@@ -1729,9 +1749,8 @@ void main() {
         // Current user is not the creator, and creator rejected
         final rejectedTime = DateTime.now();
         coordinatorEvents.emit(
-          CoordinatorCallRejectedEvent(
-            callCid: call.callCid,
-            user: currentUser,
+          StreamCallRejectedEvent(
+            call.callCid,
             rejectedBy: creator,
             createdAt: rejectedTime,
             metadata: SampleCallData.createCallMetadata(
@@ -1756,7 +1775,7 @@ void main() {
     test(
       'call rejected event - should preserve other members state when updating rejected member',
       () async {
-        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
         final currentUser = SampleCallData.defaultCallUser;
         final user1 = SampleCallData.testCallUser1;
@@ -1797,9 +1816,8 @@ void main() {
 
         final rejectedTime = DateTime.now();
         coordinatorEvents.emit(
-          CoordinatorCallRejectedEvent(
-            callCid: call.callCid,
-            user: currentUser,
+          StreamCallRejectedEvent(
+            call.callCid,
             rejectedBy: user1,
             createdAt: rejectedTime,
             metadata: SampleCallData.createCallMetadata(
@@ -1830,7 +1848,7 @@ void main() {
       'call rejected event - should not disconnect when not in ringing flow '
       '(member rung mid-call)',
       () async {
-        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
         final currentUser = SampleCallData.defaultCallUser;
         final user1 = SampleCallData.testCallUser1;
@@ -1874,9 +1892,8 @@ void main() {
         // rejects, the call should stay active outside the ringing flow.
         final rejectedTime = DateTime.now();
         coordinatorEvents.emit(
-          CoordinatorCallRejectedEvent(
-            callCid: call.callCid,
-            user: currentUser,
+          StreamCallRejectedEvent(
+            call.callCid,
             rejectedBy: user1,
             createdAt: rejectedTime,
             metadata: SampleCallData.createCallMetadata(
@@ -1902,7 +1919,7 @@ void main() {
     test(
       'call accepted event - should update accepted member with callAcceptedAt timestamp and status',
       () async {
-        final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+        final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
         final currentUser = SampleCallData.defaultCallUser;
         final acceptingUser = SampleCallData.testCallUser1;
@@ -1948,9 +1965,8 @@ void main() {
 
         final acceptedTime = DateTime.now();
         coordinatorEvents.emit(
-          CoordinatorCallAcceptedEvent(
-            callCid: call.callCid,
-            user: currentUser,
+          StreamCallAcceptedEvent(
+            call.callCid,
             acceptedBy: acceptingUser,
             createdAt: acceptedTime,
             metadata: SampleCallData.createCallMetadata(),
@@ -1980,9 +1996,9 @@ void main() {
   group('Video moderation events', () {
     final currentUserId = SampleCallData.defaultUserInfo.id;
 
-    Future<({Call call, MutableSharedEmitter<CoordinatorEvent> events})>
+    Future<({Call call, MutableSharedEmitter<StreamVideoEvent> events})>
     setupModeratedCall(VideoModerationConfig config) async {
-      final coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+      final coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
 
       final initialState = createActiveCallState().copyWith(
         preferences: DefaultCallPreferences(videoModerationConfig: config),
@@ -1999,9 +2015,9 @@ void main() {
       return (call: call, events: coordinatorEvents);
     }
 
-    CoordinatorCallModerationBlurEvent blurEvent(Call call, String userId) {
-      return CoordinatorCallModerationBlurEvent(
-        callCid: call.callCid,
+    StreamCallModerationBlurEvent blurEvent(Call call, String userId) {
+      return StreamCallModerationBlurEvent(
+        call.callCid,
         createdAt: DateTime.now(),
         userId: userId,
       );
@@ -2015,16 +2031,16 @@ void main() {
 
       events
         ..emit(
-          CoordinatorCallModerationWarningEvent(
-            callCid: call.callCid,
+          StreamCallModerationWarningEvent(
+            call.callCid,
             createdAt: DateTime.now(),
             userId: 'someone-else',
             message: 'not for me',
           ),
         )
         ..emit(
-          CoordinatorCallModerationWarningEvent(
-            callCid: call.callCid,
+          StreamCallModerationWarningEvent(
+            call.callCid,
             createdAt: DateTime.now(),
             userId: currentUserId,
             message: 'for me',

@@ -40,3 +40,772 @@ transforms:
     changes:
       - kind: "rename"
         newName: "StreamVideoExceptionWithCause"
+
+  - title: "replace CoordinatorEvent with StreamVideoEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamVideoEvent"
+
+  - title: "replace CoordinatorCallEvent with StreamCallEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallEvent"
+
+  - title: "replace CoordinatorCallCreatedEvent with StreamCallCreatedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallCreatedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallCreatedEvent"
+
+  - title: "replace CoordinatorCallRingingEvent with StreamCallRingingEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallRingingEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallRingingEvent"
+
+  - title: "replace CoordinatorCallMissedEvent with StreamCallMissedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallMissedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallMissedEvent"
+
+  - title: "replace CoordinatorCallUpdatedEvent with StreamCallUpdatedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallUpdatedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallUpdatedEvent"
+
+  - title: "replace CoordinatorCallEndedEvent with StreamCallEndedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallEndedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallEndedEvent"
+
+  - title: "replace CoordinatorCallAcceptedEvent with StreamCallAcceptedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallAcceptedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallAcceptedEvent"
+
+  - title: "replace CoordinatorCallRejectedEvent with StreamCallRejectedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallRejectedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallRejectedEvent"
+
+  - title: "replace CoordinatorCallPermissionRequestEvent with StreamCallPermissionRequestEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallPermissionRequestEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallPermissionRequestEvent"
+
+  - title: "replace CoordinatorCallPermissionsUpdatedEvent with StreamCallPermissionsUpdatedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallPermissionsUpdatedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallPermissionsUpdatedEvent"
+
+  - title: "replace CoordinatorCallRecordingStartedEvent with StreamCallRecordingStartedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallRecordingStartedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallRecordingStartedEvent"
+
+  - title: "replace CoordinatorCallRecordingStoppedEvent with StreamCallRecordingStoppedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallRecordingStoppedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallRecordingStoppedEvent"
+
+  - title: "replace CoordinatorCallRecordingFailedEvent with StreamCallRecordingFailedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallRecordingFailedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallRecordingFailedEvent"
+
+  - title: "replace CoordinatorCallTranscriptionStartedEvent with StreamCallTranscriptionStartedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallTranscriptionStartedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallTranscriptionStartedEvent"
+
+  - title: "replace CoordinatorCallTranscriptionStoppedEvent with StreamCallTranscriptionStoppedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallTranscriptionStoppedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallTranscriptionStoppedEvent"
+
+  - title: "replace CoordinatorCallTranscriptionFailedEvent with StreamCallTranscriptionFailedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallTranscriptionFailedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallTranscriptionFailedEvent"
+
+  - title: "replace CoordinatorCallClosedCaptionStartedEvent with StreamCallClosedCaptionsStartedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallClosedCaptionStartedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallClosedCaptionsStartedEvent"
+
+  - title: "replace CoordinatorCallClosedCaptionStoppedEvent with StreamCallClosedCaptionsStoppedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallClosedCaptionStoppedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallClosedCaptionsStoppedEvent"
+
+  - title: "replace CoordinatorCallClosedCaptionFailedEvent with StreamCallClosedCaptionsFailedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallClosedCaptionFailedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallClosedCaptionsFailedEvent"
+
+  - title: "replace CoordinatorCallBroadcastingStartedEvent with StreamCallBroadcastingStartedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallBroadcastingStartedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallBroadcastingStartedEvent"
+
+  - title: "replace CoordinatorCallBroadcastingStoppedEvent with StreamCallBroadcastingStoppedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallBroadcastingStoppedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallBroadcastingStoppedEvent"
+
+  - title: "replace CoordinatorCallBroadcastingFailedEvent with StreamCallBroadcastingFailedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallBroadcastingFailedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallBroadcastingFailedEvent"
+
+  - title: "replace CoordinatorCallRtmpBroadcastStartedEvent with StreamCallRtmpBroadcastStartedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallRtmpBroadcastStartedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallRtmpBroadcastStartedEvent"
+
+  - title: "replace CoordinatorCallRtmpBroadcastStoppedEvent with StreamCallRtmpBroadcastStoppedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallRtmpBroadcastStoppedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallRtmpBroadcastStoppedEvent"
+
+  - title: "replace CoordinatorCallRtmpBroadcastFailedEvent with StreamCallRtmpBroadcastFailedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallRtmpBroadcastFailedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallRtmpBroadcastFailedEvent"
+
+  - title: "replace CoordinatorCallUserBlockedEvent with StreamCallUserBlockedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallUserBlockedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallUserBlockedEvent"
+
+  - title: "replace CoordinatorCallUserUnblockedEvent with StreamCallUserUnblockedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallUserUnblockedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallUserUnblockedEvent"
+
+  - title: "replace CoordinatorCallUserKickedEvent with StreamCallUserKickedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallUserKickedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallUserKickedEvent"
+
+  - title: "replace CoordinatorCallReactionEvent with StreamCallReactionEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallReactionEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallReactionEvent"
+
+  - title: "replace CoordinatorCallCustomEvent with StreamCallCustomEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallCustomEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallCustomEvent"
+
+  - title: "replace CoordinatorCallSessionStartedEvent with StreamCallSessionStartedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallSessionStartedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallSessionStartedEvent"
+
+  - title: "replace CoordinatorCallSessionEndedEvent with StreamCallSessionEndedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallSessionEndedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallSessionEndedEvent"
+
+  - title: "replace CoordinatorCallSessionParticipantJoinedEvent with StreamCallSessionParticipantJoinedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallSessionParticipantJoinedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallSessionParticipantJoinedEvent"
+
+  - title: "replace CoordinatorCallSessionParticipantLeftEvent with StreamCallSessionParticipantLeftEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallSessionParticipantLeftEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallSessionParticipantLeftEvent"
+
+  - title: "replace CoordinatorCallSessionParticipantCountUpdatedEvent with StreamCallSessionParticipantCountUpdatedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallSessionParticipantCountUpdatedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallSessionParticipantCountUpdatedEvent"
+
+  - title: "replace CoordinatorCallClosedCaptionEvent with StreamCallClosedCaptionsEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallClosedCaptionEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallClosedCaptionsEvent"
+
+  - title: "replace CoordinatorCallLiveStartedEvent with StreamCallLiveStartedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallLiveStartedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallLiveStartedEvent"
+
+  - title: "replace CoordinatorCallMemberAddedEvent with StreamCallMemberAddedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallMemberAddedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallMemberAddedEvent"
+
+  - title: "replace CoordinatorCallMemberRemovedEvent with StreamCallMemberRemovedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallMemberRemovedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallMemberRemovedEvent"
+
+  - title: "replace CoordinatorCallMemberUpdatedEvent with StreamCallMemberUpdatedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallMemberUpdatedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallMemberUpdatedEvent"
+
+  - title: "replace CoordinatorCallMemberUpdatedPermissionEvent with StreamCallMemberUpdatedPermissionEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallMemberUpdatedPermissionEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallMemberUpdatedPermissionEvent"
+
+  - title: "replace CoordinatorCallFrameRecordingStartedEvent with StreamCallFrameRecordingStartedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallFrameRecordingStartedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallFrameRecordingStartedEvent"
+
+  - title: "replace CoordinatorCallFrameRecordingStoppedEvent with StreamCallFrameRecordingStoppedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallFrameRecordingStoppedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallFrameRecordingStoppedEvent"
+
+  - title: "replace CoordinatorCallFrameRecordingFailedEvent with StreamCallFrameRecordingFailedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallFrameRecordingFailedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallFrameRecordingFailedEvent"
+
+  - title: "replace CoordinatorCallFrameRecordingReadyEvent with StreamCallFrameRecordingReadyEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallFrameRecordingReadyEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallFrameRecordingReadyEvent"
+
+  - title: "replace CoordinatorCallNotificationEvent with StreamCallNotificationEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallNotificationEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallNotificationEvent"
+
+  - title: "replace CoordinatorCallUserMutedEvent with StreamCallUserMutedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallUserMutedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallUserMutedEvent"
+
+  - title: "replace CoordinatorCallRecordingReadyEvent with StreamCallRecordingReadyEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallRecordingReadyEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallRecordingReadyEvent"
+
+  - title: "replace CoordinatorCallModerationBlurEvent with StreamCallModerationBlurEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallModerationBlurEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallModerationBlurEvent"
+
+  - title: "replace CoordinatorCallModerationWarningEvent with StreamCallModerationWarningEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallModerationWarningEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallModerationWarningEvent"
+
+  - title: "replace CoordinatorCallDeletedEvent with StreamCallDeletedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallDeletedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallDeletedEvent"
+
+  - title: "replace CoordinatorCallUserFeedbackSubmittedEvent with StreamCallUserFeedbackSubmittedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallUserFeedbackSubmittedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallUserFeedbackSubmittedEvent"
+
+  - title: "replace CoordinatorCallTranscriptionReadyEvent with StreamCallTranscriptionReadyEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorCallTranscriptionReadyEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallTranscriptionReadyEvent"
+
+  - title: "replace CoordinatorIngressStartedEvent with StreamCallIngressStartedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorIngressStartedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallIngressStartedEvent"
+
+  - title: "replace CoordinatorIngressStoppedEvent with StreamCallIngressStoppedEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorIngressStoppedEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallIngressStoppedEvent"
+
+  - title: "replace CoordinatorIngressErrorEvent with StreamCallIngressErrorEvent"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/coordinator/models/coordinator_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "CoordinatorIngressErrorEvent"
+    changes:
+      - kind: "rename"
+        newName: "StreamCallIngressErrorEvent"
+
+  - title: "replace StreamCallAcceptedEvent.user with acceptedBy"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/call/call_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      inClass: "StreamCallAcceptedEvent"
+      getter: "user"
+    changes:
+      - kind: "rename"
+        newName: "acceptedBy"
+
+  - title: "replace StreamCallRejectedEvent.user with rejectedBy"
+    date: "2026-10-05"
+    element:
+      uris:
+        [
+          "package:stream_video/src/call/call_events.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      inClass: "StreamCallRejectedEvent"
+      getter: "user"
+    changes:
+      - kind: "rename"
+        newName: "rejectedBy"

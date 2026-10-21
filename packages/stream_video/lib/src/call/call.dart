@@ -17,7 +17,6 @@ import '../../open_api/video/coordinator/api.dart' hide User;
 import '../../protobuf/video/sfu/event/events.pb.dart' show ReconnectDetails;
 import '../call_state.dart';
 import '../coordinator/coordinator_client.dart';
-import '../coordinator/models/coordinator_events.dart';
 import '../coordinator/models/coordinator_models.dart';
 import '../errors/stream_video_exception.dart';
 import '../lifecycle/video_lifecycle_state.dart';
@@ -724,23 +723,23 @@ class Call {
     _subscriptions.cancel(_idCoordEvents);
     _subscriptions.add(
       _idCoordEvents,
-      _coordinatorClient.events.on<CoordinatorCallEvent>((event) {
-        event
-            .mapToCallEvent(state.value)
-            .emitIfNotNull(_callEvents)
-            ?.also(
-              (event) => unawaited(
-                _onCoordinatorEvent(event).catchError(
-                  (Object error, StackTrace stackTrace) {
-                    _logger.e(
-                      () =>
-                          '[onCoordinatorEvent] failed to handle ${event.runtimeType}: '
-                          '$error, stackTrace: $stackTrace',
-                    );
-                  },
-                ),
-              ),
-            );
+      _coordinatorClient.events.on<StreamCallEvent>((event) {
+        // The coordinator delivers the events of every call the user is
+        // involved in. This call's stream carries only its own.
+        if (event.callCid != state.value.callCid) return;
+
+        _callEvents.emit(event);
+        unawaited(
+          _onCoordinatorEvent(event).catchError(
+            (Object error, StackTrace stackTrace) {
+              _logger.e(
+                () =>
+                    '[onCoordinatorEvent] failed to handle ${event.runtimeType}: '
+                    '$error, stackTrace: $stackTrace',
+              );
+            },
+          ),
+        );
       }),
     );
   }
@@ -764,9 +763,6 @@ class Call {
   }
 
   Future<void> _onCoordinatorEvent(StreamCallEvent event) async {
-    // Return if the event is not for this call.
-    if (event.callCid != state.value.callCid) return;
-
     _logger.v(
       () =>
           '[onCoordinatorEvent] event.type: ${event.runtimeType}, calStatus: ${state.value.status}',

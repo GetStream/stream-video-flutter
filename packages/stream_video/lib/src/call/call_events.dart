@@ -1,8 +1,6 @@
-import 'package:equatable/equatable.dart';
 import 'package:stream_core/stream_core.dart';
 
 import '../call_state.dart';
-import '../coordinator/models/coordinator_events.dart';
 import '../models/call_participant_pin.dart';
 import '../models/models.dart';
 import '../sfu/data/events/sfu_events.dart';
@@ -13,13 +11,11 @@ import '../sfu/data/models/sfu_pin.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../sfu/sfu_extensions.dart';
 
-abstract class StreamCallEvent extends Equatable {
+/// An event about one call, from the coordinator or from the SFU.
+abstract class StreamCallEvent extends StreamVideoEvent {
   const StreamCallEvent(this.callCid);
 
   final StreamCallCid callCid;
-
-  @override
-  bool? get stringify => true;
 
   @override
   List<Object?> get props => [callCid];
@@ -222,7 +218,12 @@ class StreamCallGrantsUpdated extends StreamSfuCallEvent {
 }
 
 /// Event that is triggered when the call is connected
+@Deprecated(
+  'Never delivered. Listen for CoordinatorConnectedEvent on '
+  'StreamVideo.events instead.',
+)
 class StreamCallConnectedEvent extends StreamCallEvent {
+  @Deprecated('Never delivered.')
   const StreamCallConnectedEvent(
     super.callCid, {
     required this.connectionId,
@@ -241,7 +242,12 @@ class StreamCallConnectedEvent extends StreamCallEvent {
 }
 
 /// Event that is triggered when the call is disconnected
+@Deprecated(
+  'Never delivered. Listen for CoordinatorDisconnectedEvent on '
+  'StreamVideo.events instead.',
+)
 class StreamCallDisconnectedEvent extends StreamCallEvent {
+  @Deprecated('Never delivered.')
   const StreamCallDisconnectedEvent(
     super.callCid, {
     this.connectionId,
@@ -283,6 +289,12 @@ class StreamCallCreatedEvent extends StreamCallEvent {
 
   final CallMetadata metadata;
   final DateTime createdAt;
+
+  @Deprecated('Use callCid and metadata instead.')
+  CallCreatedData get data => CallCreatedData(
+    callCid: callCid,
+    metadata: metadata,
+  );
 
   @override
   List<Object?> get props => [
@@ -330,12 +342,23 @@ class StreamCallRingingEvent extends StreamCallEvent {
     required this.metadata,
     required this.sessionId,
     required this.createdAt,
+    required this.video,
   });
 
   final bool ringing;
   final CallMetadata metadata;
   final String sessionId;
   final DateTime createdAt;
+
+  /// Whether the call is ringing as a video call.
+  final bool video;
+
+  @Deprecated('Use callCid, ringing and metadata instead.')
+  CallRingingData get data => CallRingingData(
+    callCid: callCid,
+    ringing: ringing,
+    metadata: metadata,
+  );
 
   @override
   List<Object?> get props => [
@@ -344,6 +367,7 @@ class StreamCallRingingEvent extends StreamCallEvent {
     sessionId,
     createdAt,
     metadata,
+    video,
   ];
 }
 
@@ -667,6 +691,7 @@ class StreamCallRecordingReadyEvent extends StreamCallEvent {
     required this.egressId,
     required this.endTime,
     required this.filename,
+    required this.recordingType,
     required this.sessionId,
     required this.startTime,
     required this.url,
@@ -676,6 +701,7 @@ class StreamCallRecordingReadyEvent extends StreamCallEvent {
   final String egressId;
   final DateTime endTime;
   final String filename;
+  final RecordingType recordingType;
   final String sessionId;
   final DateTime startTime;
   final String url;
@@ -687,6 +713,7 @@ class StreamCallRecordingReadyEvent extends StreamCallEvent {
     egressId,
     endTime,
     filename,
+    recordingType,
     sessionId,
     startTime,
     url,
@@ -707,6 +734,9 @@ class StreamCallAcceptedEvent extends StreamCallEvent {
   final CallMetadata metadata;
 
   String get acceptedByUserId => acceptedBy.id;
+
+  @Deprecated('Use acceptedBy instead.')
+  CallUser get user => acceptedBy;
 
   @override
   List<Object?> get props => [
@@ -731,6 +761,9 @@ class StreamCallRejectedEvent extends StreamCallEvent {
   final CallMetadata metadata;
 
   String get rejectedByUserId => rejectedBy.id;
+
+  @Deprecated('Use rejectedBy instead.')
+  CallUser get user => rejectedBy;
 
   @override
   List<Object?> get props => [
@@ -790,14 +823,17 @@ class StreamCallRecordingStartedEvent extends StreamCallEvent {
   const StreamCallRecordingStartedEvent(
     super.callCid, {
     required this.createdAt,
+    required this.recordingType,
   });
 
   final DateTime createdAt;
+  final RecordingType recordingType;
 
   @override
   List<Object?> get props => [
     ...super.props,
     createdAt,
+    recordingType,
   ];
 }
 
@@ -806,14 +842,17 @@ class StreamCallRecordingStoppedEvent extends StreamCallEvent {
   const StreamCallRecordingStoppedEvent(
     super.callCid, {
     required this.createdAt,
+    required this.recordingType,
   });
 
   final DateTime createdAt;
+  final RecordingType recordingType;
 
   @override
   List<Object?> get props => [
     ...super.props,
     createdAt,
+    recordingType,
   ];
 }
 
@@ -822,14 +861,17 @@ class StreamCallRecordingFailedEvent extends StreamCallEvent {
   const StreamCallRecordingFailedEvent(
     super.callCid, {
     required this.createdAt,
+    required this.recordingType,
   });
 
   final DateTime createdAt;
+  final RecordingType recordingType;
 
   @override
   List<Object?> get props => [
     ...super.props,
     createdAt,
+    recordingType,
   ];
 }
 
@@ -1035,16 +1077,19 @@ class StreamCallBroadcastingStartedEvent extends StreamCallEvent {
     super.callCid, {
     required this.hlsPlaylistUrl,
     required this.createdAt,
+    required this.metadata,
   });
 
   final String hlsPlaylistUrl;
   final DateTime createdAt;
+  final CallMetadata metadata;
 
   @override
   List<Object?> get props => [
     ...super.props,
     hlsPlaylistUrl,
     createdAt,
+    metadata,
   ];
 }
 
@@ -1639,415 +1684,6 @@ extension SfuEventX on SfuEvent {
         message: event.message,
       ),
       // Ignore other events as they are internal to SFU logic
-      _ => null,
-    };
-  }
-}
-
-extension CoordinatorCallEventX on CoordinatorCallEvent {
-  StreamCallEvent? mapToCallEvent(CallState state) {
-    return switch (this) {
-      final CoordinatorConnectedEvent event => StreamCallConnectedEvent(
-        state.callCid,
-        connectionId: event.connectionId,
-        userId: event.userId,
-      ),
-      final CoordinatorDisconnectedEvent event => StreamCallDisconnectedEvent(
-        state.callCid,
-        connectionId: event.connectionId,
-        userId: event.userId,
-        closeCode: event.closeCode,
-        closeReason: event.closeReason,
-        apiError: event.apiError,
-      ),
-      final CoordinatorCallCreatedEvent event => StreamCallCreatedEvent(
-        event.callCid,
-        metadata: event.metadata,
-        createdAt: event.createdAt,
-      ),
-      final CoordinatorCallMissedEvent event => StreamCallMissedEvent(
-        event.callCid,
-        metadata: event.metadata,
-        createdAt: event.createdAt,
-        sessionId: event.sessionId,
-        callUser: event.callUser,
-        members: event.members,
-      ),
-      final CoordinatorCallRingingEvent event => StreamCallRingingEvent(
-        event.callCid,
-        ringing: event.ringing,
-        metadata: event.metadata,
-        sessionId: event.sessionId,
-        createdAt: event.createdAt,
-      ),
-      final CoordinatorCallUpdatedEvent event => StreamCallUpdatedEvent(
-        event.callCid,
-        metadata: event.metadata,
-        capabilitiesByRole: event.capabilitiesByRole,
-        createdAt: event.createdAt,
-      ),
-      final CoordinatorCallEndedEvent event => StreamCallEndedEvent(
-        event.callCid,
-        endedBy: event.endedBy,
-        createdAt: event.createdAt,
-        metadata: event.metadata,
-        type: event.type,
-        reason: event.reason,
-        members: event.members,
-      ),
-      final CoordinatorCallAcceptedEvent event => StreamCallAcceptedEvent(
-        event.callCid,
-        acceptedBy: event.acceptedBy,
-        createdAt: event.createdAt,
-        metadata: event.metadata,
-      ),
-      final CoordinatorCallRejectedEvent event => StreamCallRejectedEvent(
-        event.callCid,
-        rejectedBy: event.rejectedBy,
-        createdAt: event.createdAt,
-        metadata: event.metadata,
-      ),
-      final CoordinatorCallPermissionRequestEvent event =>
-        StreamCallPermissionRequestEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          permissions: event.permissions,
-          user: event.user,
-        ),
-      final CoordinatorCallPermissionsUpdatedEvent event =>
-        StreamCallPermissionsUpdatedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          ownCapabilities: event.ownCapabilities,
-          user: event.user,
-        ),
-      final CoordinatorCallSessionParticipantCountUpdatedEvent event =>
-        StreamCallSessionParticipantCountUpdatedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          sessionId: event.sessionId,
-          participantsCountByRole: event.participantsCountByRole,
-          anonymousParticipantCount: event.anonymousParticipantCount,
-        ),
-      final CoordinatorCallRecordingStartedEvent event =>
-        StreamCallRecordingStartedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-        ),
-      final CoordinatorCallRecordingStoppedEvent event =>
-        StreamCallRecordingStoppedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-        ),
-      final CoordinatorCallRecordingFailedEvent event =>
-        StreamCallRecordingFailedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-        ),
-      final CoordinatorCallTranscriptionStartedEvent event =>
-        StreamCallTranscriptionStartedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-        ),
-      final CoordinatorCallTranscriptionStoppedEvent event =>
-        StreamCallTranscriptionStoppedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-        ),
-      final CoordinatorCallTranscriptionFailedEvent event =>
-        StreamCallTranscriptionFailedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          error: event.error,
-        ),
-      final CoordinatorCallClosedCaptionStartedEvent event =>
-        StreamCallClosedCaptionsStartedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-        ),
-      final CoordinatorCallClosedCaptionStoppedEvent event =>
-        StreamCallClosedCaptionsStoppedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-        ),
-      final CoordinatorCallClosedCaptionFailedEvent event =>
-        StreamCallClosedCaptionsFailedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-        ),
-      final CoordinatorCallClosedCaptionEvent event =>
-        StreamCallClosedCaptionsEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          startTime: event.startTime,
-          endTime: event.endTime,
-          speakerId: event.speakerId,
-          text: event.text,
-          user: event.user,
-          language: event.language,
-          translated: event.translated,
-          service: event.service,
-        ),
-      final CoordinatorCallBroadcastingStartedEvent event =>
-        StreamCallBroadcastingStartedEvent(
-          event.callCid,
-          hlsPlaylistUrl: event.hlsPlaylistUrl,
-          createdAt: event.createdAt,
-        ),
-      final CoordinatorCallBroadcastingStoppedEvent event =>
-        StreamCallBroadcastingStoppedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-        ),
-      final CoordinatorCallBroadcastingFailedEvent event =>
-        StreamCallBroadcastingFailedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-        ),
-      final CoordinatorCallRtmpBroadcastStartedEvent event =>
-        StreamCallRtmpBroadcastStartedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          name: event.name,
-        ),
-      final CoordinatorCallRtmpBroadcastStoppedEvent event =>
-        StreamCallRtmpBroadcastStoppedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          name: event.name,
-        ),
-      final CoordinatorCallRtmpBroadcastFailedEvent event =>
-        StreamCallRtmpBroadcastFailedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          name: event.name,
-        ),
-      final CoordinatorCallDeletedEvent event => StreamCallDeletedEvent(
-        event.callCid,
-        createdAt: event.createdAt,
-        metadata: event.metadata,
-      ),
-      final CoordinatorCallUserFeedbackSubmittedEvent event =>
-        StreamCallUserFeedbackSubmittedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          sessionId: event.sessionId,
-          rating: event.rating,
-          reason: event.reason,
-          sdk: event.sdk,
-          sdkVersion: event.sdkVersion,
-          user: event.user,
-          custom: event.custom ?? const <String, Object?>{},
-        ),
-      final CoordinatorCallTranscriptionReadyEvent event =>
-        StreamCallTranscriptionReadyEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          egressId: event.egressId,
-          url: event.url,
-          filename: event.filename,
-          startTime: event.startTime,
-          endTime: event.endTime,
-          sessionId: event.sessionId,
-        ),
-      final CoordinatorIngressStartedEvent event =>
-        StreamCallIngressStartedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          ingressStreamId: event.ingressStreamId,
-          publisherType: event.publisherType,
-          userId: event.userId,
-          clientIp: event.clientIp,
-          clientName: event.clientName,
-          version: event.version,
-        ),
-      final CoordinatorIngressStoppedEvent event =>
-        StreamCallIngressStoppedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          ingressStreamId: event.ingressStreamId,
-          userId: event.userId,
-        ),
-      final CoordinatorIngressErrorEvent event => StreamCallIngressErrorEvent(
-        event.callCid,
-        createdAt: event.createdAt,
-        ingressStreamId: event.ingressStreamId,
-        userId: event.userId,
-        error: event.error,
-        code: event.code,
-      ),
-      final CoordinatorCallUserBlockedEvent event => StreamCallUserBlockedEvent(
-        event.callCid,
-        createdAt: event.createdAt,
-        user: event.user,
-      ),
-      final CoordinatorCallUserKickedEvent event => StreamCallUserKickedEvent(
-        event.callCid,
-        createdAt: event.createdAt,
-        user: event.user,
-        kickedByUser: event.kickedByUser,
-      ),
-      final CoordinatorCallUserUnblockedEvent event =>
-        StreamCallUserUnblockedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          user: event.user,
-        ),
-      final CoordinatorCallReactionEvent event => StreamCallReactionEvent(
-        event.callCid,
-        createdAt: event.createdAt,
-        reactionType: event.reactionType,
-        user: event.user,
-        emojiCode: event.emojiCode,
-        custom: event.custom,
-      ),
-      final CoordinatorCallCustomEvent event => StreamCallCustomEvent(
-        event.callCid,
-        senderUserId: event.senderUserId,
-        createdAt: event.createdAt,
-        eventType: event.eventType,
-        users: event.users,
-        custom: event.custom,
-      ),
-      final CoordinatorCallSessionStartedEvent event =>
-        StreamCallSessionStartedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          sessionId: event.sessionId,
-          metadata: event.metadata,
-        ),
-      final CoordinatorCallSessionEndedEvent event =>
-        StreamCallSessionEndedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          sessionId: event.sessionId,
-          metadata: event.metadata,
-        ),
-      final CoordinatorCallSessionParticipantJoinedEvent event =>
-        StreamCallSessionParticipantJoinedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          sessionId: event.sessionId,
-          user: event.user,
-          participant: event.participant,
-        ),
-      final CoordinatorCallSessionParticipantLeftEvent event =>
-        StreamCallSessionParticipantLeftEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          sessionId: event.sessionId,
-          user: event.user,
-          participant: event.participant,
-          duration: event.duration,
-          reason: event.reason,
-        ),
-      final CoordinatorCallLiveStartedEvent event => StreamCallLiveStartedEvent(
-        event.callCid,
-        createdAt: event.createdAt,
-        metadata: event.metadata,
-      ),
-      final CoordinatorCallMemberAddedEvent event => StreamCallMemberAddedEvent(
-        event.callCid,
-        createdAt: event.createdAt,
-        members: event.members,
-        metadata: event.metadata,
-      ),
-      final CoordinatorCallMemberRemovedEvent event =>
-        StreamCallMemberRemovedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          metadata: event.metadata,
-          removedMemberIds: event.removedMemberIds,
-        ),
-      final CoordinatorCallMemberUpdatedEvent event =>
-        StreamCallMemberUpdatedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          members: event.members,
-          metadata: event.metadata,
-        ),
-      final CoordinatorCallMemberUpdatedPermissionEvent event =>
-        StreamCallMemberUpdatedPermissionEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          updatedMembers: event.updatedMembers,
-          capabilitiesByRole: event.capabilitiesByRole,
-          metadata: event.metadata,
-        ),
-      final CoordinatorCallFrameRecordingStartedEvent event =>
-        StreamCallFrameRecordingStartedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          metadata: event.metadata,
-          egressId: event.egressId,
-        ),
-      final CoordinatorCallFrameRecordingStoppedEvent event =>
-        StreamCallFrameRecordingStoppedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          metadata: event.metadata,
-          egressId: event.egressId,
-        ),
-      final CoordinatorCallFrameRecordingFailedEvent event =>
-        StreamCallFrameRecordingFailedEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          metadata: event.metadata,
-          egressId: event.egressId,
-        ),
-      final CoordinatorCallFrameRecordingReadyEvent event =>
-        StreamCallFrameRecordingReadyEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          url: event.url,
-          capturedAt: event.capturedAt,
-          egressId: event.egressId,
-          sessionId: event.sessionId,
-          trackType: event.trackType,
-          usersInFrame: event.usersInFrame,
-        ),
-      final CoordinatorCallNotificationEvent event =>
-        StreamCallNotificationEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          user: event.user,
-          members: event.members,
-          metadata: event.metadata,
-        ),
-      final CoordinatorCallUserMutedEvent event => StreamCallUserMutedEvent(
-        event.callCid,
-        createdAt: event.createdAt,
-        fromUserId: event.fromUserId,
-        mutedUserIds: event.mutedUserIds,
-        reason: event.reason,
-      ),
-      final CoordinatorCallRecordingReadyEvent event =>
-        StreamCallRecordingReadyEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          egressId: event.egressId,
-          endTime: event.endTime,
-          filename: event.filename,
-          sessionId: event.sessionId,
-          startTime: event.startTime,
-          url: event.url,
-        ),
-      final CoordinatorCallModerationBlurEvent event =>
-        StreamCallModerationBlurEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          userId: event.userId,
-          custom: event.custom,
-        ),
-      final CoordinatorCallModerationWarningEvent event =>
-        StreamCallModerationWarningEvent(
-          event.callCid,
-          createdAt: event.createdAt,
-          userId: event.userId,
-          message: event.message,
-          custom: event.custom,
-        ),
-      // Ignore other events as they are internal to Coordinator logic
       _ => null,
     };
   }

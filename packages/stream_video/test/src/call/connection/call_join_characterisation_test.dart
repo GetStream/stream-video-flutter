@@ -259,8 +259,8 @@ void main() {
         final join = call.join();
         await pumpEventQueue();
         harness.coordinatorEvents.emit(
-          CoordinatorCallRecordingStartedEvent(
-            callCid: SampleCallData.defaultCid,
+          StreamCallRecordingStartedEvent(
+            SampleCallData.defaultCid,
             createdAt: DateTime.now(),
             recordingType: RecordingType.composite,
           ),

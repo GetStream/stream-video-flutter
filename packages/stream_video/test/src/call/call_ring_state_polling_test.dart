@@ -40,7 +40,7 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
   });
 
-  late MutableSharedEmitter<CoordinatorEvent> coordinatorEvents;
+  late MutableSharedEmitter<StreamVideoEvent> coordinatorEvents;
   late MockCoordinatorClient coordinatorClient;
   late CallStateNotifier stateManager;
   late open.GetCallRingStateResponse polledRingState;
@@ -52,7 +52,7 @@ void main() {
     String sessionId = _sessionId,
     Map<String, CallParticipant> participants = const {},
   }) {
-    coordinatorEvents = MutableSharedEmitter<CoordinatorEvent>();
+    coordinatorEvents = MutableSharedEmitter<StreamVideoEvent>();
     coordinatorClient = setupMockCoordinatorClient(
       events: coordinatorEvents,
       getOrCreateCallResult: SampleCallData.createCallReceivedOrCreatedData(
@@ -233,9 +233,8 @@ void main() {
       async.elapse(const Duration(seconds: 10));
       final rejectedAt = DateTime.now();
       coordinatorEvents.emit(
-        CoordinatorCallRejectedEvent(
-          callCid: call.callCid,
-          user: _currentUser,
+        StreamCallRejectedEvent(
+          call.callCid,
           rejectedBy: _callee1,
           createdAt: rejectedAt,
           metadata: SampleCallData.createCallMetadata(
@@ -261,9 +260,8 @@ void main() {
 
       async.elapse(const Duration(seconds: 5));
       coordinatorEvents.emit(
-        CoordinatorCallAcceptedEvent(
-          callCid: call.callCid,
-          user: _callee1,
+        StreamCallAcceptedEvent(
+          call.callCid,
           acceptedBy: _callee1,
           createdAt: DateTime.now(),
           metadata: SampleCallData.createCallMetadata(
