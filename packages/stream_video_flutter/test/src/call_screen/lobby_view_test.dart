@@ -416,6 +416,42 @@ void main() {
     expect(footer, lessThan(tester.getCenter(find.text('Join')).dy));
   });
 
+  for (final width in [375.0, 900.0]) {
+    testWidgets('the footer takes the join button width at $width', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          child: SingleChildScrollView(
+            child: MediaQuery(
+              data: MediaQueryData(size: Size(width, 900)),
+              child: SizedBox(
+                width: width,
+                child: StreamLobbyView.withController(
+                  controller: controller,
+                  actions: StreamLobbyActions.simple(),
+                  footer: const SizedBox(key: Key('footer'), height: 40),
+                  joinButtonLabel: const Text('Join'),
+                  onJoinCallPressed: (_) => true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final join = tester.getRect(
+        find.ancestor(
+          of: find.text('Join'),
+          matching: find.byType(StreamButton),
+        ),
+      );
+      final footer = tester.getRect(find.byKey(const Key('footer')));
+      expect(footer.left, join.left);
+      expect(footer.width, join.width);
+    });
+  }
+
   // Without a footer and without a builder the slot is not built at all: the
   // body's Column spaces its children out, so an empty one would leave a gap.
   testWidgets('no footer is drawn when none is asked for', (tester) async {

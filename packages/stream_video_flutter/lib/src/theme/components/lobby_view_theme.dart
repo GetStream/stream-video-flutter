@@ -140,10 +140,10 @@ class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
   /// to below partway through rather than sliding it.
   final int? maxOverlaidControls;
 
-  /// The width of the join button above [StreamScreenSize.small].
+  /// The width of the join button, and of the footer above it, above
+  /// [StreamScreenSize.small].
   ///
-  /// At [StreamScreenSize.small] the button is always full width. Defaults to
-  /// 400.
+  /// At [StreamScreenSize.small] both are always full width. Defaults to 400.
   final double? joinButtonWidth;
 
   /// Linearly interpolate between two styles.

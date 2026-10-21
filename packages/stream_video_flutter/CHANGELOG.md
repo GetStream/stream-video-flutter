@@ -212,6 +212,7 @@
 
 ### 🔄 Changed
 
+- `StreamLobbyView` lays its footer out at the join button's width.
 - `StreamLobbyView` puts the preview beside the rest of the lobby in a landscape window shorter than `StreamLobbyView.sideBySideMaxHeight` (900).
 - `StreamCallContent` keeps showing the participants during a reconnect, and after one fails until the call has left, with a `StreamCallConnectionBanner` above them instead of the centred "Reconnecting" text.
 - `StreamSelectInput` draws its `labelText` in `headingXs`, the size the design gives it.

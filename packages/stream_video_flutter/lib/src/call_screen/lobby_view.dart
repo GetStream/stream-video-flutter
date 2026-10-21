@@ -138,6 +138,8 @@ class StreamLobbyView extends StatefulWidget {
   /// Nothing is drawn when null and no `lobbyFooter` builder is registered.
   /// Use it for whatever a call has to be set up with that the lobby knows
   /// nothing about.
+  ///
+  /// Laid out at the join button's width, so the two line up.
   final Widget? footer;
 
   /// The controller driving this lobby, or null when it owns one.
@@ -433,8 +435,10 @@ class _LobbyBody extends StatelessWidget {
             ],
           ),
         ),
-        ?parts.footer,
-        // Full width on a phone, a fixed width where there is room for it.
+        // Full width on a phone, a fixed width where there is room for it. The
+        // footer takes the same width, so the two line up.
+        if (parts.footer case final footer?)
+          SizedBox(width: joinButtonWidth, child: footer),
         SizedBox(width: joinButtonWidth, child: parts.joinButton),
       ],
     );
