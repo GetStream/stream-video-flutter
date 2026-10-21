@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import '../utils/dialog_anchor.dart';
 import 'device_list.dart';
 
 /// The padding around the avatar at the start of an app bar.
@@ -56,6 +57,8 @@ class UserActionsAvatar extends StatelessWidget {
               await showDialog<void>(
                 // ignore: use_build_context_synchronously
                 context: context,
+                // ignore: use_build_context_synchronously
+                anchorPoint: trailingTopAnchor(context),
                 builder: (context) {
                   return AlertDialog(
                     title: Row(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 import '../l10n/localization_extension.dart';
+import '../utils/display_fold.dart';
 
 /// Joins the call the lobby is a waiting room for, with the options it
 /// prepared.
@@ -40,10 +41,12 @@ typedef StreamLobbyJoinCallback =
 /// [StreamScreenSize.small] the controls sit below the preview, above it they
 /// are overlaid on the preview itself. A landscape window shorter than
 /// [sideBySideMaxHeight] puts the preview beside the rest instead of above
-/// it. The lobby keeps clear of the ambient safe-area
-/// insets. Which actions are shown does *not* follow the screen — [actions]
-/// defaults to `StreamLobbyActions.simple()` at every width, and choosing a richer
-/// preset for a roomier window is the host's call.
+/// it, and so does a window folded down the middle, with the preview on one
+/// side of the fold and the rest on the other. The lobby keeps clear of the
+/// ambient safe-area insets. Which actions are shown does *not* follow the
+/// screen — [actions] defaults to `StreamLobbyActions.simple()` at every
+/// width, and choosing a richer preset for a roomier window is the host's
+/// call.
 ///
 /// A row of more than [StreamLobbyViewStyle.maxOverlaidControls] sits below
 /// the preview at any width: the overlaid row is centred on a preview whose
@@ -267,10 +270,13 @@ class _LobbyBody extends StatelessWidget {
     );
 
     // A short window in landscape has no height for the preview and the rest
-    // stacked under it, so the two go side by side.
+    // stacked under it, so the two go side by side. So does a window folded
+    // down the middle, one on either side, so nothing sits on the fold.
+    final fold = verticalFoldOf(context);
     final sideBySide =
-        windowSize.height < StreamLobbyView.sideBySideMaxHeight &&
-        windowSize.width > windowSize.height;
+        fold != null ||
+        (windowSize.height < StreamLobbyView.sideBySideMaxHeight &&
+            windowSize.width > windowSize.height);
 
     // The overlaid row is centred on a preview whose bottom-start corner is
     // taken by the participant label, so a long row runs into it. Past that
@@ -301,6 +307,7 @@ class _LobbyBody extends StatelessWidget {
           ? _sideBySide(
               context,
               parts,
+              fold: fold,
               previewMaxWidth: style.expandedPreviewSize.width,
               endMaxWidth: style.joinButtonWidth,
             )
@@ -381,15 +388,38 @@ class _LobbyBody extends StatelessWidget {
 
   /// The preview and its controls on one side, the rest on the other.
   ///
-  /// Each side is at most as wide as it is when stacked: [previewMaxWidth] for
-  /// the preview, [endMaxWidth] for the rest. The pair is centred.
+  /// Split at [fold] when there is one. Otherwise each side is at most as wide
+  /// as it is when stacked, [previewMaxWidth] for the preview and
+  /// [endMaxWidth] for the rest, and the pair is centred.
   Widget _sideBySide(
     BuildContext context,
     _LobbyParts parts, {
+    required Rect? fold,
     required double previewMaxWidth,
     required double endMaxWidth,
   }) {
     final spacing = context.streamSpacing;
+
+    final start = Column(
+      mainAxisSize: MainAxisSize.min,
+      spacing: spacing.sm,
+      children: [parts.preview, ?parts.controlsBelow],
+    );
+    final end = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: spacing.lg,
+      children: [
+        StreamLobbyHeader(title: title, subtitle: subtitle),
+        ?parts.settingsRow,
+        ?parts.footer,
+        parts.joinButton,
+      ],
+    );
+
+    if (fold != null) {
+      return SplitAtFold(fold: fold, gap: spacing.md, start: start, end: end);
+    }
 
     return Center(
       child: Row(
@@ -399,27 +429,13 @@ class _LobbyBody extends StatelessWidget {
           Flexible(
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: previewMaxWidth),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                spacing: spacing.sm,
-                children: [parts.preview, ?parts.controlsBelow],
-              ),
+              child: start,
             ),
           ),
           Flexible(
             child: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: endMaxWidth),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: spacing.lg,
-                children: [
-                  StreamLobbyHeader(title: title, subtitle: subtitle),
-                  ?parts.settingsRow,
-                  ?parts.footer,
-                  parts.joinButton,
-                ],
-              ),
+              child: end,
             ),
           ),
         ],
