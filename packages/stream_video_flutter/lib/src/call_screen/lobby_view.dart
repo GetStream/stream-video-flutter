@@ -252,12 +252,8 @@ class _LobbyBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final translations = context.translations;
-    final spacing = context.streamSpacing;
     final windowSize = MediaQuery.sizeOf(context);
     final isSmall = StreamScreenSize.fromSize(windowSize).isSmall;
-    final footerBuilder = context
-        .videoComponentBuilder<StreamLobbyFooterProps>();
     // Typed as the defaults class, not as the style: declaring it as the base
     // type would throw away the non-null overrides.
     final style = _StreamLobbyViewStyleDefaults(
@@ -276,123 +272,179 @@ class _LobbyBody extends StatelessWidget {
     final overlayControls =
         !isSmall && actions.controls.length <= style.maxOverlaidControls;
 
-    final controlRow = actions.controls.isEmpty
-        ? null
-        // No spacing: each control's tap target already pads it on either
-        // side, which together make the gap the design draws.
-        : Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: actions.controls,
-          );
-
-    final settingsRow = actions.settings.isEmpty
-        ? null
-        : Row(
-            spacing: spacing.xs,
-            children: [
-              for (final setting in actions.settings) Expanded(child: setting),
-            ],
-          );
-
     // A small window gives the preview at most this much of its height, so
     // a tall preview cannot push the join button off the screen.
     final compactPreviewMaxHeight =
         windowSize.height * (sideBySide ? 0.6 : 0.4);
 
-    final preview = Stack(
+    final controlRow = _controlRow();
+    final parts = (
+      preview: _preview(
+        context,
+        overlaidControls: overlayControls ? controlRow : null,
+        compactMaxHeight: compactPreviewMaxHeight,
+      ),
+      controlsBelow: overlayControls ? null : controlRow,
+      settingsRow: _settingsRow(context),
+      footer: _footer(context),
+      joinButton: _joinButton(context),
+    );
+
+    return SafeArea(
+      child: sideBySide
+          ? _sideBySide(context, parts)
+          : _stacked(
+              context,
+              parts,
+              isSmall: isSmall,
+              previewMaxWidth: isSmall
+                  ? compactPreviewMaxHeight * style.compactPreviewAspectRatio
+                  : style.expandedPreviewSize.width,
+              joinButtonWidth: isSmall
+                  ? double.infinity
+                  : style.joinButtonWidth,
+            ),
+    );
+  }
+
+  /// The controls in a row, or null when there are none.
+  Widget? _controlRow() {
+    if (actions.controls.isEmpty) return null;
+
+    // No spacing: each control's tap target already pads it on either side,
+    // which together make the gap the design draws.
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: actions.controls,
+    );
+  }
+
+  /// The settings side by side, or null when there are none.
+  Widget? _settingsRow(BuildContext context) {
+    if (actions.settings.isEmpty) return null;
+
+    return Row(
+      spacing: context.streamSpacing.xs,
+      children: [
+        for (final setting in actions.settings) Expanded(child: setting),
+      ],
+    );
+  }
+
+  /// The preview, with [overlaidControls] floating over its bottom edge.
+  Widget _preview(
+    BuildContext context, {
+    required Widget? overlaidControls,
+    required double compactMaxHeight,
+  }) {
+    return Stack(
       alignment: AlignmentDirectional.bottomCenter,
       children: [
-        _LobbyPreview(compactMaxHeight: compactPreviewMaxHeight),
+        _LobbyPreview(compactMaxHeight: compactMaxHeight),
         // Past small, a short row floats over the preview, clear of the
         // participant label's toolbar band along the bottom.
-        if (overlayControls && controlRow != null)
+        if (overlaidControls != null)
           Padding(
-            padding: EdgeInsets.only(bottom: spacing.md),
-            child: controlRow,
+            padding: EdgeInsets.only(bottom: context.streamSpacing.md),
+            child: overlaidControls,
           ),
       ],
     );
+  }
 
-    // Drawn when there is something to draw: a footer from the call site, or
-    // an app-wide builder that supplies its own. Otherwise the Column's
-    // spacing would leave a gap for an empty slot.
-    final hasFooter = footer != null || footerBuilder != null;
+  /// The footer, or null when there is nothing to draw: no footer from the
+  /// call site, and no app-wide builder that supplies its own. Otherwise the
+  /// Column's spacing would leave a gap for an empty slot.
+  Widget? _footer(BuildContext context) {
+    final footerBuilder = context
+        .videoComponentBuilder<StreamLobbyFooterProps>();
+    if (footer == null && footerBuilder == null) return null;
+    return StreamLobbyFooter(child: footer);
+  }
 
-    final joinButton = StreamButton(
-      onPressed: joinEnabled ? onJoinCallPressed : null,
-      child: joinButtonLabel ?? Text(translations.lobbyJoinCall),
-    );
+  Widget _joinButton(BuildContext context) => StreamButton(
+    onPressed: joinEnabled ? onJoinCallPressed : null,
+    child: joinButtonLabel ?? Text(context.translations.lobbyJoinCall),
+  );
 
-    if (sideBySide) {
-      return SafeArea(
-        child: Row(
-          spacing: spacing.xl,
-          children: [
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                spacing: spacing.sm,
-                children: [
-                  preview,
-                  if (!overlayControls && controlRow != null) controlRow,
-                ],
-              ),
-            ),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: spacing.lg,
-                children: [
-                  StreamLobbyHeader(title: title, subtitle: subtitle),
-                  ?settingsRow,
-                  if (hasFooter) StreamLobbyFooter(child: footer),
-                  joinButton,
-                ],
-              ),
-            ),
-          ],
+  /// The preview and its controls on one side, the rest on the other.
+  Widget _sideBySide(BuildContext context, _LobbyParts parts) {
+    final spacing = context.streamSpacing;
+
+    return Row(
+      spacing: spacing.xl,
+      children: [
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: spacing.sm,
+            children: [parts.preview, ?parts.controlsBelow],
+          ),
         ),
-      );
-    }
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: spacing.lg,
+            children: [
+              StreamLobbyHeader(title: title, subtitle: subtitle),
+              ?parts.settingsRow,
+              ?parts.footer,
+              parts.joinButton,
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 
-    return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        spacing: spacing.xxl,
-        children: [
-          StreamLobbyHeader(title: title, subtitle: subtitle),
-          // The whole preview block is capped at the preview's width, so the
-          // settings fields line up under it rather than running the width of
-          // the window.
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: isSmall
-                  ? compactPreviewMaxHeight * style.compactPreviewAspectRatio
-                  : style.expandedPreviewSize.width,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              spacing: isSmall ? spacing.sm : spacing.md,
-              children: [
-                preview,
-                if (!overlayControls && controlRow != null) controlRow,
-                ?settingsRow,
-              ],
-            ),
+  /// Everything in one column, the preview block capped at [previewMaxWidth].
+  Widget _stacked(
+    BuildContext context,
+    _LobbyParts parts, {
+    required bool isSmall,
+    required double previewMaxWidth,
+    required double joinButtonWidth,
+  }) {
+    final spacing = context.streamSpacing;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      spacing: spacing.xxl,
+      children: [
+        StreamLobbyHeader(title: title, subtitle: subtitle),
+        // The whole preview block is capped at the preview's width, so the
+        // settings fields line up under it rather than running the width of
+        // the window.
+        ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: previewMaxWidth),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: isSmall ? spacing.sm : spacing.md,
+            children: [
+              parts.preview,
+              ?parts.controlsBelow,
+              ?parts.settingsRow,
+            ],
           ),
-          if (hasFooter) StreamLobbyFooter(child: footer),
-          SizedBox(
-            // Full width on a phone, a fixed 400 where there is room for it.
-            width: isSmall ? double.infinity : style.joinButtonWidth,
-            child: joinButton,
-          ),
-        ],
-      ),
+        ),
+        ?parts.footer,
+        // Full width on a phone, a fixed width where there is room for it.
+        SizedBox(width: joinButtonWidth, child: parts.joinButton),
+      ],
     );
   }
 }
+
+/// The pieces of the lobby, before they are arranged.
+typedef _LobbyParts = ({
+  Widget preview,
+  Widget? controlsBelow,
+  Widget? settingsRow,
+  Widget? footer,
+  Widget joinButton,
+});
 
 /// The camera preview: the participant tile the user is about to become.
 ///
