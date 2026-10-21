@@ -393,5 +393,9 @@
   "effectsSettingsNone": "No effect",
   "@effectsSettingsNone": {
     "description": "Tooltip of the button that turns video effects off"
+  },
+  "incomingVideoQualityShortOff": "Off",
+  "@incomingVideoQualityShortOff": {
+    "description": "Shown on the incoming video quality button while other participants' video is turned off"
   }
 }

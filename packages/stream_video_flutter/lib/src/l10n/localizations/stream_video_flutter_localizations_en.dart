@@ -332,4 +332,7 @@ class StreamVideoFlutterLocalizationsEn
 
   @override
   String get effectsSettingsNone => 'No effect';
+
+  @override
+  String get incomingVideoQualityShortOff => 'Off';
 }
