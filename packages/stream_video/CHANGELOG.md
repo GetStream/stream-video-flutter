@@ -142,7 +142,7 @@
 - Fixed the participant sort reordering tiles that are visible on screen. One participant whose tile was not visible was enough to move the dominant speaker to the first tile.
 - A viewport visibility is now recorded whether or not the session accepts it. A dropped report left a participant recorded as something they were not for the rest of the call, since a viewport only ever reports what changed.
 - On iOS devices without multitasking camera access, the camera track is now muted while the app is in the background, so other participants see camera-off instead of a frozen frame.
-- A call that keeps rejoining or keeps failing to reconnect now leaves after 10 rejoins within 120 seconds, or after 10 failed reconnect attempts, instead of retrying forever.
+- A call that keeps rejoining or keeps failing to reconnect now leaves after 10 rejoins within 120 seconds, 20 rejoins within 30 minutes, or 10 failed reconnect attempts, instead of retrying forever.
 
 ## Upcoming (minor)
 

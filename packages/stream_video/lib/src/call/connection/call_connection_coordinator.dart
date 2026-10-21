@@ -22,15 +22,23 @@ class CallConnectionCoordinator {
 
   Duration _fastReconnectDeadline = Duration.zero;
 
-  // Two separate limits. The rejoin window counts rejoins and migrations
-  // across reconnects; the attempt cap counts every attempt within one
-  // reconnect, whatever its strategy.
+  // Separate limits. The rejoin windows count across reconnects. The short
+  // window counts rejoins and migrations. The long window counts only
+  // rejoins. The attempt cap counts every attempt within one reconnect,
+  // whatever its strategy.
 
   /// The rejoins and migrations allowed within [_rejoinWindow].
   static const _maxRejoinsPerWindow = 10;
 
   /// The rolling window [_maxRejoinsPerWindow] applies to.
   static const _rejoinWindow = Duration(seconds: 120);
+
+  /// The rejoins allowed within [_longRejoinWindow].
+  static const _maxRejoinsPerLongWindow = 20;
+
+  /// The rolling window [_maxRejoinsPerLongWindow] applies to. It catches
+  /// rejoins that each succeed but come too far apart for [_rejoinWindow].
+  static const _longRejoinWindow = Duration(minutes: 30);
 
   /// The attempts one reconnect makes, any strategy, before it fails.
   static const _maxReconnectAttempts = 10;
@@ -40,6 +48,13 @@ class CallConnectionCoordinator {
   final _rejoinRateLimiter = RejoinRateLimiter(
     maxAttempts: _maxRejoinsPerWindow,
     window: _rejoinWindow,
+  );
+
+  /// Rejoins, across reconnects. Migrations and fast reconnects are not
+  /// counted.
+  final _longRejoinRateLimiter = RejoinRateLimiter(
+    maxAttempts: _maxRejoinsPerLongWindow,
+    window: _longRejoinWindow,
   );
 
   /// Where the connection is. [_publishStatus] writes the connection status
@@ -1764,9 +1779,7 @@ class CallConnectionCoordinator {
           if (stopsAfterNetworkWait(status)) return;
         }
 
-        // Rejoins and migrations count towards the rate limit; fast
-        // reconnects do not.
-        if (needsStableNetwork && !_rejoinRateLimiter.tryRegister()) {
+        if (needsStableNetwork && !_tryRegisterRejoin()) {
           _giveUpReconnect('rejoin_attempt_limit_exceeded');
           return;
         }
@@ -1858,6 +1871,15 @@ class CallConnectionCoordinator {
         }
       }
     } while (_phase.value is ConnectionReconnecting);
+  }
+
+  /// Records a rejoin or migration in the rejoin windows. Returns false when
+  /// either window has no room left. Migrations only count towards the short
+  /// window.
+  bool _tryRegisterRejoin() {
+    if (!_rejoinRateLimiter.tryRegister()) return false;
+    if (_reconnectStrategy != SfuReconnectionStrategy.rejoin) return true;
+    return _longRejoinRateLimiter.tryRegister();
   }
 
   /// Fails the running reconnect, before its next attempt, when it has run

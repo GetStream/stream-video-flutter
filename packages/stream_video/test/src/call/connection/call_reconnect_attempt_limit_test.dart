@@ -73,10 +73,33 @@ void main() {
     return call;
   }
 
+  const forcedMigrate = SfuErrorEvent(
+    error: SfuError(
+      message: 'participant migration',
+      code: SfuErrorCode.participantMigrating,
+      shouldRetry: true,
+      reconnectStrategy: SfuReconnectionStrategy.migrate,
+    ),
+  );
+
   /// Has the SFU force a rejoin, and lets it complete.
   Future<void> forceRejoin() async {
     fake.run((_) => unawaited(harness.emitSfu(harness.session, forcedRejoin)));
     await elapse(const Duration(seconds: 10));
+  }
+
+  /// Has the SFU force a migration, and lets it complete.
+  Future<void> forceMigrate() async {
+    fake.run((_) => unawaited(harness.emitSfu(harness.session, forcedMigrate)));
+    await elapse(const Duration(seconds: 10));
+  }
+
+  /// Forces a rejoin every 40 seconds, too slowly for the 120 second window.
+  Future<void> forceSpacedRejoins(int count) async {
+    for (var i = 0; i < count; i++) {
+      await forceRejoin();
+      await elapse(const Duration(seconds: 30));
+    }
   }
 
   /// Drops the SFU socket, which reconnects fast, and lets it complete.
@@ -189,5 +212,43 @@ void main() {
         'error': 'rejoin_attempt_limit_exceeded',
       }),
     );
+  });
+
+  test('a call forced to rejoin every 40 seconds leaves after the 20th rejoin '
+      'within 30 minutes', () async {
+    final call = await joinedCall();
+
+    await forceSpacedRejoins(20);
+    expect(call.state.value.status, isA<CallStatusConnected>());
+
+    await forceRejoin();
+
+    final status = call.state.value.status as CallStatusDisconnected;
+    expect(status.reason, isA<DisconnectReasonReconnectionFailed>());
+    verifyGaveUp('rejoin_attempt_limit_exceeded');
+  });
+
+  test('rejoins older than 30 minutes no longer count', () async {
+    final call = await joinedCall();
+
+    await forceSpacedRejoins(20);
+    await elapse(const Duration(minutes: 30));
+    await forceRejoin();
+
+    expect(call.state.value.status, isA<CallStatusConnected>());
+  });
+
+  test('migrations do not count towards the 30 minute limit', () async {
+    final call = await joinedCall();
+
+    await forceSpacedRejoins(19);
+    for (var i = 0; i < 10; i++) {
+      await forceMigrate();
+      await elapse(const Duration(seconds: 30));
+      expect(call.state.value.status, isA<CallStatusConnected>());
+    }
+    await forceRejoin();
+
+    expect(call.state.value.status, isA<CallStatusConnected>());
   });
 }
