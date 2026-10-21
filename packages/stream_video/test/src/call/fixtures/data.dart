@@ -140,6 +140,8 @@ class SampleCallData {
     Map<String, DateTime>? rejectedBy,
     Map<String, CallMember> members = const {},
     Map<String, CallParticipant> participants = const {},
+    Map<String, int> participantsCountByRole = const {},
+    int anonymousParticipantCount = 0,
     CallUser? createdByUser,
     bool recording = false,
     bool broadcasting = false,
@@ -151,6 +153,8 @@ class SampleCallData {
       session: CallSessionData(
         rejectedBy: rejectedBy ?? const {},
         participants: participants,
+        participantsCountByRole: participantsCountByRole,
+        anonymousParticipantCount: anonymousParticipantCount,
       ),
       users: const {},
       members: members,
