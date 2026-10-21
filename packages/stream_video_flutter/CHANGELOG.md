@@ -11,6 +11,7 @@
 
 ### 🔄 Changed
 
+- `StreamLobbyView` now says "N people are in the call" instead of "N more people are in the call".
 - `VideoFit.adaptive` now compares the video's orientation with the widget's instead of looking at the video alone. The video fills the widget when both are landscape or both are portrait, and is letterboxed when they differ. Landscape tiles, the common case on web and desktop, behave as before; in a portrait tile a landscape feed is now letterboxed instead of cropped, and a portrait feed now fills the tile instead of being letterboxed.
 
 ## 1.7.1

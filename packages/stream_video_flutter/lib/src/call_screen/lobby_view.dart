@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -107,10 +108,17 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
     super.dispose();
   }
 
-  // The server's count: the participant list only holds the few hundred
-  // participants the client gets details for, so it undercounts large calls.
+  // The server's count, which the participant list undercounts in large calls.
   static int _peopleInCall(CallState state) =>
       state.participantCount + state.anonymousParticipantCount;
+
+  // The participant list follows joins and leaves as they happen, so it can be
+  // ahead of the server's count in small calls.
+  static String _peopleInCallText(int serverCount, int listedCount) {
+    final count = math.max(serverCount, listedCount);
+    final people = count == 1 ? '1 person is' : '$count people are';
+    return 'You are about to join a call. $people in the call.';
+  }
 
   void _fetchCall() {
     // Obtains SFU credentials and picks the best server, but doesn't
@@ -259,7 +267,10 @@ class _StreamLobbyViewState extends State<StreamLobbyView> {
                                 call: widget.call,
                                 selector: _peopleInCall,
                                 builder: (context, count) => Text(
-                                  'You are about to join a call. $count more people are in the call.',
+                                  _peopleInCallText(
+                                    count,
+                                    participants.length,
+                                  ),
                                   style: textTheme.title3,
                                 ),
                               ),
