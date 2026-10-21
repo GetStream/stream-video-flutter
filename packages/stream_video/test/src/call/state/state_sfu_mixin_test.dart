@@ -17,6 +17,7 @@ CallParticipantState _participant({
   bool isSpeaking = false,
   bool isDominantSpeaker = false,
   SfuConnectionQuality connectionQuality = SfuConnectionQuality.unspecified,
+  SfuParticipantSource? participantSource = SfuParticipantSource.webrtc,
 }) {
   return CallParticipantState(
     userId: userId,
@@ -28,6 +29,7 @@ CallParticipantState _participant({
     isSpeaking: isSpeaking,
     isDominantSpeaker: isDominantSpeaker,
     connectionQuality: connectionQuality,
+    participantSource: participantSource,
   );
 }
 
@@ -39,6 +41,7 @@ SfuParticipant _sfuParticipant({
   String? sessionId,
   List<SfuTrackType> publishedTracks = const [],
   SfuConnectionQuality connectionQuality = SfuConnectionQuality.unspecified,
+  SfuParticipantSource participantSource = SfuParticipantSource.webrtc,
 }) {
   return SfuParticipant(
     userId: userId,
@@ -55,7 +58,7 @@ SfuParticipant _sfuParticipant({
     isDominantSpeaker: false,
     audioLevel: audioLevel,
     roles: const <String>[],
-    participantSource: SfuParticipantSource.webrtc,
+    participantSource: participantSource,
   );
 }
 
@@ -713,6 +716,27 @@ void main() {
         isTrue,
       );
     });
+
+    test('takes the source the SFU sends', () {
+      final notifier = _notifier([
+        _participant(userId: 'obs', participantSource: null),
+      ]);
+
+      notifier.sfuParticipantUpdated(
+        SfuParticipantUpdatedEvent(
+          callCid: notifier.callState.callCid.value,
+          participant: _sfuParticipant(
+            userId: 'obs',
+            participantSource: SfuParticipantSource.rtmp,
+          ),
+        ),
+      );
+
+      expect(
+        notifier.callState.callParticipants.single.participantSource,
+        SfuParticipantSource.rtmp,
+      );
+    });
   });
 
   group('CallParticipantState audio level sealing', () {
@@ -1104,6 +1128,80 @@ void main() {
         notifier.callState.callParticipants.map((it) => it.sessionId),
         ['alice-session', 'alice-tablet'],
       );
+    });
+
+    test('keeps the source of a participant who joins mid-call', () {
+      final notifier = _notifier([_participant(userId: 'host')]);
+
+      notifier.sfuParticipantJoined(
+        SfuParticipantJoinedEvent(
+          callCid: 'default:id',
+          participant: _sfuParticipant(
+            userId: 'obs',
+            participantSource: SfuParticipantSource.rtmp,
+          ),
+        ),
+      );
+
+      expect(
+        notifier.callState.callParticipants.last.participantSource,
+        SfuParticipantSource.rtmp,
+      );
+    });
+
+    test('keeps the source when an ingest comes back as a new session', () {
+      final notifier = _notifier([
+        _participant(userId: 'host'),
+        _participant(
+          userId: 'obs',
+          participantSource: SfuParticipantSource.rtmp,
+        ),
+      ]);
+
+      notifier
+        ..sfuParticipantLeft(
+          SfuParticipantLeftEvent(
+            callCid: 'default:id',
+            participant: _sfuParticipant(
+              userId: 'obs',
+              participantSource: SfuParticipantSource.rtmp,
+            ),
+          ),
+        )
+        ..sfuParticipantJoined(
+          SfuParticipantJoinedEvent(
+            callCid: 'default:id',
+            participant: _sfuParticipant(
+              userId: 'obs',
+              sessionId: 'obs-session-2',
+              participantSource: SfuParticipantSource.rtmp,
+            ),
+          ),
+        );
+
+      final obs = notifier.callState.callParticipants.last;
+      expect(obs.sessionId, 'obs-session-2');
+      expect(obs.participantSource, SfuParticipantSource.rtmp);
+    });
+
+    test('an ingest that joins mid-call sorts ahead of the host', () {
+      final notifier = _notifier([_participant(userId: 'host')]);
+
+      notifier.sfuParticipantJoined(
+        SfuParticipantJoinedEvent(
+          callCid: 'default:id',
+          participant: _sfuParticipant(
+            userId: 'obs',
+            participantSource: SfuParticipantSource.rtmp,
+          ),
+        ),
+      );
+
+      // Picture in picture boosts an ingress regardless of visibility, so
+      // the order depends on the source alone.
+      final sorted = [...notifier.callState.callParticipants]
+        ..sort(CallParticipantSortingPresets.pictureInPicture);
+      expect(sorted.map((it) => it.userId), ['obs', 'host']);
     });
   });
 
