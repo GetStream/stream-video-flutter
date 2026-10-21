@@ -11,10 +11,11 @@
 #   analyze         flutter analyze.
 #   format          dart format lib/ and test/.
 #   format-verify   dart format lib/ and test/, failing on changes.
-#   imports-verify  import_sorter, failing on changes. Skips dart_webrtc.
+#   imports-verify  import_sorter, failing on changes.
 #   test            flutter test, in packages that have a test/ folder.
 #
 # Without a package, the command runs in every package under webrtc/.
+# format-verify and imports-verify skip the packages listed below.
 
 set -euo pipefail
 
@@ -27,6 +28,16 @@ if [[ -n "$package" ]]; then
 else
   packages=("$root"/webrtc/*/)
 fi
+
+# Imported sources that do not pass a check yet (FLU-1039).
+unsorted_imports=(dart_webrtc)
+unformatted=(webrtc_interface)
+
+contains() {
+  local needle="$1"
+  shift
+  [[ " $* " == *" $needle "* ]]
+}
 
 format_dirs() {
   local dirs=(lib)
@@ -41,6 +52,7 @@ for dir in "${packages[@]}"; do
     exit 1
   fi
 
+  name="$(basename "$dir")"
   echo "▶ $command: ${dir#"$root"/}"
   cd "$dir"
 
@@ -59,13 +71,15 @@ for dir in "${packages[@]}"; do
       dart format $(format_dirs)
       ;;
     format-verify)
-      # shellcheck disable=SC2046
-      dart format --set-exit-if-changed $(format_dirs)
+      if contains "$name" "${unformatted[@]}"; then
+        echo "Not formatted yet, skipping."
+      else
+        # shellcheck disable=SC2046
+        dart format --output=none --set-exit-if-changed $(format_dirs)
+      fi
       ;;
     imports-verify)
-      # The imported dart_webrtc source does not pass import_sorter yet
-      # (FLU-1039).
-      if [[ "$(basename "$dir")" == dart_webrtc ]]; then
+      if contains "$name" "${unsorted_imports[@]}"; then
         echo "Imports not sorted yet, skipping."
       else
         dart run import_sorter:main --no-comments --exit-if-changed

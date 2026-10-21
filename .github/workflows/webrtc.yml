@@ -42,6 +42,7 @@ jobs:
         package:
           - stream_webrtc_flutter
           - dart_webrtc
+          - webrtc_interface
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
