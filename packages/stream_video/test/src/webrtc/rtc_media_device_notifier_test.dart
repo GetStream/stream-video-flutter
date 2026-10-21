@@ -262,4 +262,77 @@ void main() {
       expect(results, hasLength(1));
     });
   });
+
+  group('audio playout pause', () {
+    late Future<void> Function() originalPause;
+    late Future<void> Function() originalResume;
+    final nativeCalls = <String>[];
+    Exception? pauseError;
+
+    setUp(() {
+      CurrentPlatform.debugPlatformOverride = PlatformType.android;
+      nativeCalls.clear();
+      pauseError = null;
+      originalPause = notifier.nativePauseAudioPlayout;
+      originalResume = notifier.nativeResumeAudioPlayout;
+      notifier
+        ..nativePauseAudioPlayout = () async {
+          nativeCalls.add('pause');
+          if (pauseError case final error?) throw error;
+        }
+        ..nativeResumeAudioPlayout = () async => nativeCalls.add('resume');
+    });
+
+    tearDown(() async {
+      CurrentPlatform.debugPlatformOverride = PlatformType.android;
+      pauseError = null;
+      if (notifier.isAudioPlayoutPaused) await notifier.resumeAudioPlayout();
+      notifier
+        ..nativePauseAudioPlayout = originalPause
+        ..nativeResumeAudioPlayout = originalResume;
+      CurrentPlatform.debugPlatformOverride = null;
+    });
+
+    test('starts unpaused and emits only when the state changes', () async {
+      expect(notifier.isAudioPlayoutPaused, isFalse);
+
+      final emitted = <bool>[];
+      final subscription = notifier.audioPlayoutPausedChanges.listen(
+        emitted.add,
+      );
+
+      await notifier.pauseAudioPlayout();
+      await notifier.pauseAudioPlayout();
+      expect(notifier.isAudioPlayoutPaused, isTrue);
+
+      await notifier.resumeAudioPlayout();
+      await notifier.resumeAudioPlayout();
+      expect(notifier.isAudioPlayoutPaused, isFalse);
+
+      await subscription.cancel();
+      expect(emitted, [false, true, false]);
+      expect(nativeCalls, ['pause', 'pause', 'resume', 'resume']);
+    });
+
+    for (final platform in [PlatformType.windows, PlatformType.linux]) {
+      test('does nothing on ${platform.name}', () async {
+        CurrentPlatform.debugPlatformOverride = platform;
+
+        expect(notifier.isAudioPlayoutPauseSupported, isFalse);
+        await notifier.pauseAudioPlayout();
+
+        expect(notifier.isAudioPlayoutPaused, isFalse);
+        expect(nativeCalls, isEmpty);
+      });
+    }
+
+    test('a pause that throws leaves the state unchanged', () async {
+      final error = Exception('pause failed');
+      pauseError = error;
+
+      await expectLater(notifier.pauseAudioPlayout(), throwsA(same(error)));
+
+      expect(notifier.isAudioPlayoutPaused, isFalse);
+    });
+  });
 }

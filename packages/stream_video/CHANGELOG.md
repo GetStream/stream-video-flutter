@@ -2,8 +2,8 @@
 
 ### ✅ Added
 
-- Added `RtcMediaDeviceNotifier.isAudioPlayoutPaused` and `RtcMediaDeviceNotifier.audioPlayoutPausedChanges`, which report whether remote audio playout is paused via `pauseAudioPlayout()`, and `RtcMediaDeviceNotifier.isAudioPlayoutPauseSupported` (Android, iOS, macOS and web). On Windows and Linux, where pausing playout is not implemented, `pauseAudioPlayout()` / `resumeAudioPlayout()` do nothing.
-- [Web] `RtcMediaDeviceNotifier.pauseAudioPlayout()` / `resumeAudioPlayout()` now mute and unmute remote audio on web too; they were a no-op there.
+- Added `RtcMediaDeviceNotifier.isAudioPlayoutPaused`, `audioPlayoutPausedChanges` and `isAudioPlayoutPauseSupported`.
+- [Web] `RtcMediaDeviceNotifier.pauseAudioPlayout()` and `resumeAudioPlayout()` now work on web.
 
 ### 🐞 Fixed
 

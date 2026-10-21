@@ -14,15 +14,18 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   final notifier = RtcMediaDeviceNotifier.instance;
+  final originalNativePause = notifier.nativePauseAudioPlayout;
+  final originalNativeResume = notifier.nativeResumeAudioPlayout;
   final webrtcCalls = <String>[];
 
-  /// When set, `pauseAudioPlayout` does not answer until it completes.
-  ///
-  /// The WebRTC plugin only reaches the platform channel on Android, iOS and
-  /// macOS hosts, so the gate holds the pause in flight only when the tests
-  /// run on macOS; elsewhere the pause completes at once and these tests check
-  /// the end state only.
+  /// Every native pause and resume, in order.
+  final nativeCalls = <String>[];
+
+  /// When set, the native pause does not complete until this does.
   Completer<void>? pauseGate;
+
+  /// When set, the native pause throws it.
+  Exception? pauseError;
 
   setUpAll(() {
     registerFallbackValue(
@@ -37,11 +40,19 @@ void main() {
   setUp(() {
     CurrentPlatform.debugPlatformOverride = PlatformType.android;
     webrtcCalls.clear();
+    nativeCalls.clear();
     pauseGate = null;
+    pauseError = null;
+    notifier
+      ..nativePauseAudioPlayout = () async {
+        nativeCalls.add('pause');
+        await pauseGate?.future;
+        if (pauseError case final error?) throw error;
+      }
+      ..nativeResumeAudioPlayout = () async => nativeCalls.add('resume');
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_webrtcChannel, (call) async {
           webrtcCalls.add(call.method);
-          if (call.method == 'pauseAudioPlayout') await pauseGate?.future;
           return null;
         });
   });
@@ -49,7 +60,11 @@ void main() {
   tearDown(() async {
     CurrentPlatform.debugPlatformOverride = PlatformType.android;
     pauseGate = null;
+    pauseError = null;
     if (notifier.isAudioPlayoutPaused) await notifier.resumeAudioPlayout();
+    notifier
+      ..nativePauseAudioPlayout = originalNativePause
+      ..nativeResumeAudioPlayout = originalNativeResume;
     CurrentPlatform.debugPlatformOverride = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_webrtcChannel, null);
@@ -131,10 +146,12 @@ void main() {
 
     await tester.tap(find.byType(IconButton));
     await tester.pumpWidget(const SizedBox());
+    expect(nativeCalls, ['pause']);
 
     pauseGate!.complete();
     await settle(tester);
 
+    expect(nativeCalls, ['pause', 'resume']);
     expect(notifier.isAudioPlayoutPaused, isFalse);
   });
 
@@ -173,25 +190,53 @@ void main() {
   );
 
   testWidgets('ignores taps while a pause is in flight', (tester) async {
+    pauseGate = Completer<void>();
     await pumpOption(tester);
 
-    // Press twice in the same turn, so the second press lands while the first
-    // pause is still in flight on any host, not only where the gate holds it.
-    final onPressed = tester
-        .widget<IconButton>(find.byType(IconButton))
-        .onPressed!;
-    onPressed();
-    onPressed();
+    await tester.tap(find.byType(IconButton));
+    await tester.pump();
+    await tester.tap(find.byType(IconButton));
+    await tester.pump();
 
+    pauseGate!.complete();
     await settle(tester);
 
+    expect(nativeCalls, ['pause']);
     expect(notifier.isAudioPlayoutPaused, isTrue);
     expect(find.byIcon(Icons.volume_off_rounded), findsOneWidget);
-    expect(
-      webrtcCalls.where((it) => it == 'pauseAudioPlayout'),
-      hasLength(lessThanOrEqualTo(1)),
-    );
-    expect(webrtcCalls, isNot(contains('resumeAudioPlayout')));
+  });
+
+  testWidgets('a failed pause can be retried', (tester) async {
+    pauseError = Exception('pause failed');
+    await pumpOption(tester);
+
+    await tester.tap(find.byType(IconButton));
+    await settle(tester);
+
+    expect(notifier.isAudioPlayoutPaused, isFalse);
+    expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);
+
+    pauseError = null;
+    await tester.tap(find.byType(IconButton));
+    await settle(tester);
+
+    expect(nativeCalls, ['pause', 'pause']);
+    expect(notifier.isAudioPlayoutPaused, isTrue);
+    expect(find.byIcon(Icons.volume_off_rounded), findsOneWidget);
+  });
+
+  testWidgets('does not resume on dispose after its pause failed', (
+    tester,
+  ) async {
+    pauseError = Exception('pause failed');
+    await pumpOption(tester);
+
+    await tester.tap(find.byType(IconButton));
+    await settle(tester);
+    await tester.pumpWidget(const SizedBox());
+    await settle(tester);
+
+    expect(nativeCalls, ['pause']);
   });
 
   group('where pausing playout is not supported', () {

@@ -377,6 +377,17 @@ class RtcMediaDeviceNotifier {
       _audioPlayoutPausedController.stream;
   final _audioPlayoutPausedController = BehaviorSubject<bool>.seeded(false);
 
+  /// Pauses playout in the WebRTC plugin. Replaceable in tests, because the
+  /// plugin only reaches the platform channel on Android, iOS and macOS hosts.
+  @visibleForTesting
+  Future<void> Function() nativePauseAudioPlayout =
+      rtc.Helper.pauseAudioPlayout;
+
+  /// Resumes playout in the WebRTC plugin, see [nativePauseAudioPlayout].
+  @visibleForTesting
+  Future<void> Function() nativeResumeAudioPlayout =
+      rtc.Helper.resumeAudioPlayout;
+
   /// Temporarily mutes all audio output (playout) from the app.
   /// This does not affect the microphone, the audio output route or remote
   /// track subscriptions; remote tracks that arrive while paused start muted.
@@ -389,7 +400,7 @@ class RtcMediaDeviceNotifier {
     if (!isAudioPlayoutPauseSupported) return;
 
     _tracer.trace(TraceTag.pauseAudioPlayout, null);
-    await rtc.Helper.pauseAudioPlayout();
+    await nativePauseAudioPlayout();
     rtc_audio.setAudioPlayoutPaused(paused: true);
     _setAudioPlayoutPaused(true);
   }
@@ -401,7 +412,7 @@ class RtcMediaDeviceNotifier {
     if (!isAudioPlayoutPauseSupported) return;
 
     _tracer.trace(TraceTag.resumeAudioPlayout, null);
-    await rtc.Helper.resumeAudioPlayout();
+    await nativeResumeAudioPlayout();
     rtc_audio.setAudioPlayoutPaused(paused: false);
     _setAudioPlayoutPaused(false);
   }

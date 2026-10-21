@@ -16,7 +16,8 @@ import '../../../stream_video_flutter.dart';
 ///
 /// Playout is app-wide. If this widget muted it, it unmutes it again when it
 /// is removed from the tree, so leaving the livestream does not leave the next
-/// call silent.
+/// call silent. This includes the livestream going backstage, which removes
+/// the controls: a viewer who muted hears the stream again when it goes live.
 ///
 /// Pausing playout is supported on Android, iOS, macOS and web
 /// ([RtcMediaDeviceNotifier.isAudioPlayoutPauseSupported]); elsewhere the
@@ -48,6 +49,7 @@ class LivestreamSpeakerphoneOption extends StatefulWidget {
 }
 
 class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
+  final _logger = taggedLogger(tag: 'SV:LivestreamSpeakerphoneOption');
   final _deviceNotifier = RtcMediaDeviceNotifier.instance;
   StreamSubscription<bool>? _pausedSubscription;
 
@@ -88,7 +90,10 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
 
     try {
       await operation;
-    } catch (_) {
+    } catch (e, stk) {
+      _logger.e(
+        () => '[toggle] failed to ${mute ? 'mute' : 'unmute'}: $e\n$stk',
+      );
       _pausedByThisWidget = previouslyPausedByThisWidget;
     } finally {
       _inFlight = null;
@@ -104,7 +109,11 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
         inFlight
             .catchError((_) {})
             .then((_) => _deviceNotifier.resumeAudioPlayout())
-            .catchError((_) {}),
+            .catchError((Object e, StackTrace stk) {
+              // Playout stays paused for the whole app, so the next call
+              // starts silent.
+              _logger.w(() => '[dispose] failed to unmute: $e\n$stk');
+            }),
       );
     }
     super.dispose();
