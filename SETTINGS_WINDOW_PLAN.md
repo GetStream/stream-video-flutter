@@ -105,9 +105,9 @@ large-screen more menu holds has a new home by the time the menu goes.
 - [x] In the centre of the large bar in dogfooding
 - [x] Golden of the closed button, light and dark
 
-### 6a. An unset transcription language means English
+### 6a. An unset transcription language is null
 
-- [ ] `""` maps to `en`
+- [x] `""` reads as a null language, and null is sent back as no language
 
 ### 6. Captions tab
 

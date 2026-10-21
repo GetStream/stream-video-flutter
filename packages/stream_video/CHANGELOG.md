@@ -8,6 +8,7 @@
 - `StreamVideoOptions.androidAudioConfiguration` is removed; pass `AudioConfigurationPolicy.custom` as `audioConfigurationPolicy` instead.
 - The no-op `precacheGenericSdps` parameter of `StreamVideo.create` is removed.
 - `StreamVideo`'s `failIfSingletonExists` is replaced by `onInstanceReplaced`, which is called with the client it replaces; that client is no longer disconnected.
+- `StreamTranscriptionSettings.language` is nullable and defaults to null, for a call that never set a language, which the backend transcribes as English. It used to read as `auto`. Sending null sets the call back to no language.
 - Joining a `Call` after it was left or ended fails with `CallLeftException`; a `Call` is single use.
 - The lists emitted by `Call.closedCaptions` are unmodifiable; copy one before changing it.
 - `Call`'s action methods (members, permissions, moderation, recording, transcription, captions, broadcasting, mute, pin, go-live, reactions, custom events, feedback) are now extension methods on `CallActions`; they can't be stubbed or overridden, and a `show Call` import must also show `CallActions`.

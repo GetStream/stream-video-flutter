@@ -496,10 +496,16 @@ class StreamTranscriptionSettings extends AbstractSettings {
   const StreamTranscriptionSettings({
     this.closedCaptionMode = ClosedCaptionSettingsMode.disabled,
     this.transcriptionMode = TranscriptionSettingsMode.disabled,
-    this.language = TranscriptionSettingsLanguage.auto,
+    this.language,
   });
 
-  final TranscriptionSettingsLanguage language;
+  /// The language spoken in the call, or null where none was set, which the
+  /// backend transcribes as English.
+  ///
+  /// Sent as it is with the rest of these settings: null sets the call back
+  /// to no language, so an update that only changes a mode passes the current
+  /// language along.
+  final TranscriptionSettingsLanguage? language;
   final ClosedCaptionSettingsMode closedCaptionMode;
   final TranscriptionSettingsMode transcriptionMode;
 
@@ -510,7 +516,7 @@ class StreamTranscriptionSettings extends AbstractSettings {
     return TranscriptionSettingsRequest(
       closedCaptionMode: closedCaptionMode.toOpenDto(),
       mode: transcriptionMode.toOpenDto(),
-      language: language.toOpenDto(),
+      language: language?.toOpenDto(),
     );
   }
 }

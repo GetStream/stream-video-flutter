@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
@@ -383,8 +384,13 @@ extension on open.TranscriptionSettingsResponseMode {
   }
 }
 
-extension on open.TranscriptionSettingsResponseLanguage {
-  TranscriptionSettingsLanguage toSettingsDomain() {
+@internal
+extension TranscriptionSettingsResponseLanguageExt
+    on open.TranscriptionSettingsResponseLanguage {
+  TranscriptionSettingsLanguage? toSettingsDomain() {
+    // The backend sends a language nobody set as "".
+    if (this == '') return null;
+
     return TranscriptionSettingsLanguage.values.firstWhereOrNull(
           (it) => it.value == this,
         ) ??
