@@ -19,6 +19,67 @@ void main() {
     });
   });
 
+  group('StreamScreenSize.fromSize', () {
+    test('is small below the height breakpoint, whatever the width', () {
+      expect(
+        StreamScreenSize.fromSize(const Size(1440, 599.9)),
+        StreamScreenSize.small,
+      );
+      expect(
+        StreamScreenSize.fromSize(const Size(1440, 600)),
+        StreamScreenSize.large,
+      );
+    });
+
+    test('buckets a tall enough window by its width', () {
+      expect(
+        StreamScreenSize.fromSize(const Size(767.9, 900)),
+        StreamScreenSize.small,
+      );
+      expect(
+        StreamScreenSize.fromSize(const Size(768, 900)),
+        StreamScreenSize.medium,
+      );
+      expect(
+        StreamScreenSize.fromSize(const Size(1280, 900)),
+        StreamScreenSize.large,
+      );
+    });
+
+    test('buckets the poses of a foldable phone', () {
+      // Outer display, portrait and landscape.
+      expect(
+        StreamScreenSize.fromSize(const Size(466, 678)),
+        StreamScreenSize.small,
+      );
+      expect(
+        StreamScreenSize.fromSize(const Size(678, 466)),
+        StreamScreenSize.small,
+      );
+      // Inner display, portrait and landscape.
+      expect(
+        StreamScreenSize.fromSize(const Size(669, 951)),
+        StreamScreenSize.small,
+      );
+      expect(
+        StreamScreenSize.fromSize(const Size(951, 669)),
+        StreamScreenSize.medium,
+      );
+      // Half of the inner display in Split View.
+      expect(
+        StreamScreenSize.fromSize(const Size(475, 669)),
+        StreamScreenSize.small,
+      );
+    });
+
+    test('puts a phone in landscape in small', () {
+      expect(
+        StreamScreenSize.fromSize(const Size(932, 430)),
+        StreamScreenSize.small,
+      );
+    });
+  });
+
   testWidgets('context.streamScreenSize reads the window, not the widget', (
     tester,
   ) async {

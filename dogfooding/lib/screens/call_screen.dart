@@ -339,7 +339,12 @@ class _CallScreenState extends State<CallScreen>
   StreamLayoutButton _layoutToggle({
     StreamMenuDirection menuDirection = StreamMenuDirection.up,
   }) {
-    final blocked = context.streamScreenSize.isSmall
+    // By width alone: a phone in landscape is small, but it is the speaker
+    // strip at the side that suits its shape.
+    final narrow = StreamScreenSize.fromWidth(
+      MediaQuery.sizeOf(context).width,
+    ).isSmall;
+    final blocked = narrow
         ? const [
             ParticipantLayoutMode.speakerLeft,
             ParticipantLayoutMode.speakerRight,
