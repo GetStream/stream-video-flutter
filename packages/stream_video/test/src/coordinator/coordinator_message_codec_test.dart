@@ -279,8 +279,11 @@ void main() {
       EventType.callMemberUpdatedPermission:
           isA<StreamCallMemberUpdatedPermissionEvent>(),
       EventType.callNotification: isA<StreamCallNotificationEvent>(),
-      EventType.callReaction: isA<StreamCallReactionEvent>()
-          .having((it) => it.reactionType, 'reactionType', 'like'),
+      EventType.callReaction: isA<StreamCallReactionEvent>().having(
+        (it) => it.reactionType,
+        'reactionType',
+        'like',
+      ),
       EventType.callUserMuted: isA<StreamCallUserMutedEvent>(),
       EventType.callRecordingReady: isA<StreamCallRecordingReadyEvent>()
           .having((it) => it.recordingType, 'recordingType', _recordingType)
@@ -299,8 +302,11 @@ void main() {
           isA<StreamCallClosedCaptionsStoppedEvent>(),
       EventType.callClosedCaptionFailed:
           isA<StreamCallClosedCaptionsFailedEvent>(),
-      EventType.callClosedCaption: isA<StreamCallClosedCaptionsEvent>()
-          .having((it) => it.text, 'text', 'hello'),
+      EventType.callClosedCaption: isA<StreamCallClosedCaptionsEvent>().having(
+        (it) => it.text,
+        'text',
+        'hello',
+      ),
       EventType.callFrameRecordingStarted:
           isA<StreamCallFrameRecordingStartedEvent>(),
       EventType.callFrameRecordingStopped:
@@ -314,8 +320,11 @@ void main() {
           .having((it) => it.message, 'message', 'a warning'),
       EventType.callDeleted: isA<StreamCallDeletedEvent>(),
       EventType.callUserFeedbackSubmitted:
-          isA<StreamCallUserFeedbackSubmittedEvent>()
-              .having((it) => it.rating, 'rating', 4),
+          isA<StreamCallUserFeedbackSubmittedEvent>().having(
+            (it) => it.rating,
+            'rating',
+            4,
+          ),
       EventType.callTranscriptionReady:
           isA<StreamCallTranscriptionReadyEvent>(),
       EventType.ingressStarted: isA<StreamCallIngressStartedEvent>(),
