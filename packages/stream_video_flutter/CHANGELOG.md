@@ -2,6 +2,7 @@
 
 ### ✅ Added
 
+- Added `StreamMediaDevicesController.supportsAudioOutputSelection`; `audioOutputs` is empty where it is false.
 - Added `StreamCallConnectionBanner`, which says what the call's connection is doing while it reconnects.
 - Added `callConnectionConnecting`, `callConnectionReconnecting`, `callConnectionReconnectingAttempt`, `callConnectionJoining`, `callConnectionJoiningAttempt`, `callConnectionOffline`, `callConnectionMigrating` and `callConnectionReconnectFailed` to the localizations, in English and Dutch.
 - Added `StreamAdaptiveMenuAnchorThemeData` on `StreamVideoTheme`, and `StreamAdaptiveMenuAnchorTheme` to restyle the menu's sheet and anchored rows over a subtree.
@@ -227,6 +228,7 @@
 
 ### 🐞 Fixed
 
+- The lobby no longer offers a speaker choice on Safari and other WebKit browsers, which play every call on the system default output.
 - Fixed picking an option in a `StreamContextMenuAnchor`, or an anchored `StreamAdaptiveMenuAnchor`, closing the dialog it is shown in.
 - The participant tile's overflow menu lines up with the edge of its button.
 - `StreamAdaptiveMenuAnchor` sheet rows are 48px tall.

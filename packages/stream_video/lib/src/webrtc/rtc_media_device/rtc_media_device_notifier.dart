@@ -84,6 +84,16 @@ class RtcMediaDeviceNotifier {
   @visibleForTesting
   static set instance(RtcMediaDeviceNotifier? notifier) => _instance = notifier;
 
+  /// Whether remote audio can be routed to an output picked from the
+  /// [RtcMediaDeviceKind.audioOutput] devices, through
+  /// `Call.setAudioOutputDevice`.
+  ///
+  /// False on WebKit browsers (Safari, every iOS browser and web view) and on
+  /// browsers without `setSinkId`: audio plays on the system default output,
+  /// and an output picker should be hidden. True on native platforms.
+  static bool get isAudioOutputSelectionSupported =>
+      rtc_audio.checkIfAudioOutputChangeSupported();
+
   Stream<List<RtcMediaDevice>> get onDeviceChange => _devicesController.stream;
   final _devicesController = BehaviorSubject<List<RtcMediaDevice>>();
 

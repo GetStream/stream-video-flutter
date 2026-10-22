@@ -25,10 +25,10 @@ import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_encoding.dart';
 import 'peer_connection.dart';
 import 'peer_connection_factory.dart';
-import 'rtc_audio_api/rtc_audio_api.dart'
-    show checkIfAudioOutputChangeSupported;
+import 'rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 import 'rtc_parser.dart';
 import 'rtc_track/rtc_track_publish_options.dart';
+import 'sdp/incoming_audio_sources.dart';
 import 'traced_peer_connection.dart';
 import 'transceiver_cache.dart';
 
@@ -260,12 +260,64 @@ class RtcManager extends Disposable {
     return sdp;
   }
 
+  /// The last subscriber offer applied and answered, so the next one can be compared
+  /// against it. Null until the first offer: a brand-new subscriber is not a
+  /// renegotiation. Only kept where [needsRemoteAudioReattach] holds.
+  String? _appliedSubscriberOfferSdp;
+
+  /// Whether subscriber offers have to be compared for new audio sources.
+  /// WebKit only: everywhere else the offers are neither kept nor parsed.
+  /// Swappable so a test on the VM can take the WebKit path.
+  @visibleForTesting
+  bool Function() needsRemoteAudioReattach = rtc_audio.needsRemoteAudioReattach;
+
+  /// Re-attaches every remote audio element after a subscriber renegotiation
+  /// brought in a new audio source. Swappable so a test can observe the
+  /// trigger.
+  @visibleForTesting
+  Future<void> Function({required String reason}) reattachRemoteAudio =
+      rtc_audio.reattachRemoteAudio;
+
   Future<String?> onSubscriberOffer(String offerSdp) async {
+    final previousOfferSdp = _appliedSubscriberOfferSdp;
+
     final result = await subscriber.setRemoteOffer(offerSdp);
     if (result.isFailure) return null;
 
     final rtcAnswer = await subscriber.createAnswer(offerSdp);
-    return rtcAnswer.getDataOrNull()?.sdp;
+    final answerSdp = rtcAnswer.getDataOrNull()?.sdp;
+    if (answerSdp == null) return null;
+
+    // Recorded only once the answer exists: an offer that failed to answer
+    // was never applied, so a retry of it must still count as new.
+    if (needsRemoteAudioReattach()) _appliedSubscriberOfferSdp = offerSdp;
+
+    if (previousOfferSdp != null) {
+      // Best effort, and guarded: losing a re-attach is far cheaper than
+      // losing the answer.
+      try {
+        if (offerAddsIncomingAudio(
+          previous: previousOfferSdp,
+          next: offerSdp,
+        )) {
+          unawaited(_reattachRemoteAudio(reason: 'subscriberOffer'));
+        }
+      } catch (e, stk) {
+        _logger.w(
+          () => '[onSubscriberOffer] audio source check failed: $e\n$stk',
+        );
+      }
+    }
+
+    return answerSdp;
+  }
+
+  Future<void> _reattachRemoteAudio({required String reason}) async {
+    try {
+      await reattachRemoteAudio(reason: reason);
+    } catch (e, stk) {
+      _logger.w(() => '[reattachRemoteAudio] failed: $e\n$stk');
+    }
   }
 
   Future<Result<None>> onRemoteIceCandidate({
@@ -2284,7 +2336,7 @@ extension RtcManagerTrackHelper on RtcManager {
     // If the platform is web, set the sink id for all remote audio tracks
     // to the selected device.
     if (CurrentPlatform.isWeb) {
-      if (!checkIfAudioOutputChangeSupported()) {
+      if (!rtc_audio.checkIfAudioOutputChangeSupported()) {
         _logger.w(
           () =>
               '[setAudioOutputDevice] rejected: Audio Output device change is not supported on this browser.',

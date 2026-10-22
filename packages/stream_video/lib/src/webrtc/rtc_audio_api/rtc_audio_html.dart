@@ -6,12 +6,14 @@ import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 
 import 'package:dart_webrtc/src/media_stream_track_impl.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:web/web.dart' as web;
 
 import '../../call/stats/trace_tag.dart';
 import '../../logger/stream_log.dart';
+import '../../utils/user_agent.dart';
 
 const audioContainerId = 'stream_audio_container';
 const audioPrefix = 'stream_audio_';
@@ -36,10 +38,41 @@ void _trace(String tag, Object? data) => _traceHandler?.call(tag, data);
 
 final _watchdogs = <String, _AudioPlaybackWatchdog>{};
 
+/// The JS track each remote audio element currently plays, by track id.
+///
 /// A track id is `trackIdPrefix:trackType`, which a migration keeps, so the
 /// session being replaced and the one replacing it share an element. This is
-/// how [stopAudio] tells which of them owns it now.
+/// how [stopAudio] tells which of them owns it now, and how
+/// [reattachRemoteAudio] rebuilds an element's stream without being handed the
+/// track again.
 final _attachedTracks = <String, web.MediaStreamTrack>{};
+
+/// Whether this page runs on WebKit, resolved once from the user agent.
+final bool _isWebKitUserAgent = isWebKitUserAgent(
+  web.window.navigator.userAgent,
+);
+
+bool? _isWebKitOverride;
+
+bool get _isWebKit => _isWebKitOverride ?? _isWebKitUserAgent;
+
+/// Makes this page count as WebKit, or not, whatever its user agent says.
+/// Null goes back to the user agent.
+///
+/// The WebKit-only paths are otherwise unreachable from a test, which runs in
+/// Chrome.
+@visibleForTesting
+void debugOverrideIsWebKit(bool? isWebKit) {
+  _isWebKitOverride = isWebKit;
+  // Cached from whichever engine was in effect when it was first asked.
+  _audioOutputChangeSupported = null;
+}
+
+/// How long [reattachRemoteAudio] leaves the elements empty before giving them
+/// a new stream. The media element picks up a new `srcObject` in a queued
+/// task, so a detach and re-attach in the same task is seen as one swap; the
+/// gap makes the detach real.
+const _reattachDelay = Duration(milliseconds: 25);
 
 /// Track ids whose audio element the browser's autoplay policy is blocking.
 final _blockedTrackIds = <String>{};
@@ -86,15 +119,132 @@ void startAudio(String id, rtc.MediaStreamTrack track) {
 
   if (audioElement is! web.HTMLAudioElement) return;
 
+  _attach(id, audioElement, track.jsTrack);
+}
+
+/// Gives [element] a fresh stream carrying [track] and starts watching it.
+void _attach(
+  String id,
+  web.HTMLAudioElement element,
+  web.MediaStreamTrack track,
+) {
   final audioStream = web.MediaStream();
-  audioStream.addTrack(track.jsTrack);
-  audioElement.srcObject = audioStream;
-  _attachedTracks[id] = track.jsTrack;
+  audioStream.addTrack(track);
+  element.srcObject = audioStream;
+  _attachedTracks[id] = track;
 
   // `autoplay` alone fails silently when the browser's autoplay policy blocks
   // playback, so drive `play()` explicitly and watch the element from here on.
   _watchdogs.remove(id)?.dispose();
-  _watchdogs[id] = _AudioPlaybackWatchdog(trackId: id, element: audioElement);
+  _watchdogs[id] = _AudioPlaybackWatchdog(trackId: id, element: element);
+}
+
+/// The remote audio element of track [id], if it exists.
+web.HTMLAudioElement? _audioElementOf(String id) {
+  final element = web.document.getElementById(audioPrefix + id);
+  if (element == null || !element.isA<web.HTMLAudioElement>()) return null;
+  return element as web.HTMLAudioElement;
+}
+
+/// Whether remote audio has to be re-attached after a subscriber renegotiation
+/// that adds an audio source. True on WebKit only, where such a renegotiation
+/// silences the audio already playing; elsewhere [reattachRemoteAudio] does
+/// nothing, so the offers need not be compared at all.
+bool needsRemoteAudioReattach() => _isWebKit;
+
+/// The re-attach waiting out [_reattachDelay], if one is.
+///
+/// A call arriving meanwhile joins it rather than detaching again: its own
+/// renegotiation has been applied by then, and the elements are still empty, so
+/// the pending re-attach already comes after it. Cleared before the elements
+/// are re-attached, so a call from then on starts a re-attach of its own, and
+/// cleared too by a re-attach that fails before its gap ends.
+Future<void>? _pendingReattach;
+
+/// Detaches every remote audio element and re-attaches it with a fresh stream
+/// of the same track. WebKit only; a no-op elsewhere.
+///
+/// Called after a subscriber renegotiation that brought in a new audio source.
+/// Calls that arrive while one is waiting share it, so several participants
+/// joining together cost the elements one gap rather than one each.
+/// Playback the autoplay policy blocks stays blocked: the retried `play()`
+/// is rejected again and the element stays in [_blockedTrackIds] for
+/// [resumeAudioPlayback]. [reason] names the trigger in the trace.
+Future<void> reattachRemoteAudio({required String reason}) {
+  if (!_isWebKit) return Future.value();
+
+  final pending = _pendingReattach;
+  if (pending != null) {
+    streamLog.v(
+      _tag,
+      () => 'Re-attach after $reason joins the one already waiting',
+    );
+    return pending;
+  }
+
+  final trackIds = _attachedTracks.keys.toList();
+  if (trackIds.isEmpty) return Future.value();
+
+  final reattach = _reattach(trackIds, reason: reason);
+  _pendingReattach = reattach;
+  // A re-attach that runs to the end has cleared this already, when its gap
+  // ended. One that failed before then has not, and would otherwise be joined
+  // by every later call, leaving re-attach off for the rest of the page.
+  reattach.whenComplete(() {
+    if (identical(_pendingReattach, reattach)) _pendingReattach = null;
+  }).ignore();
+  return reattach;
+}
+
+Future<void> _reattach(List<String> trackIds, {required String reason}) async {
+  streamLog.i(
+    _tag,
+    () =>
+        'Re-attaching ${trackIds.length} remote audio element(s) '
+        'after $reason',
+  );
+  _trace(TraceTag.audioPlaybackReattach, {
+    'reason': reason,
+    'tracks': trackIds.length,
+    'blockedTracks': _blockedTrackIds.length,
+  });
+
+  for (final trackId in trackIds) {
+    // Contained per track: stopping at one would leave the rest without a
+    // re-attach, and the ones already emptied silent.
+    try {
+      // Dispose first, so the detach is not reported as an outage.
+      _watchdogs.remove(trackId)?.dispose();
+      _audioElementOf(trackId)?.srcObject = null;
+    } catch (e, stk) {
+      streamLog.e(_tag, () => 'Failed to detach audio for $trackId: $e\n$stk');
+    }
+  }
+
+  try {
+    await Future<void>.delayed(_reattachDelay);
+  } finally {
+    _pendingReattach = null;
+  }
+
+  for (final trackId in trackIds) {
+    final track = _attachedTracks[trackId];
+    final element = _audioElementOf(trackId);
+    // Stopped while we waited.
+    if (track == null || element == null) continue;
+    // Re-attached by a `startAudio` that ran while we waited.
+    if (element.srcObject != null) continue;
+
+    // Contained per track, so one failure leaves no other element empty.
+    try {
+      _attach(trackId, element, track);
+    } catch (e, stk) {
+      streamLog.e(
+        _tag,
+        () => 'Failed to re-attach audio for $trackId: $e\n$stk',
+      );
+    }
+  }
 }
 
 /// Stops playing [track] and removes the audio element of track [id].
@@ -241,9 +391,20 @@ bool _tracedOutputChangeUnsupported = false;
 /// instead of once per track.
 bool? _audioOutputChangeSupported;
 
+/// Whether remote audio can be routed to a chosen output with `setSinkId`.
+///
+/// False on WebKit even where the method exists. Safari rejects `setSinkId`
+/// without a user gesture, so applying it to each new track fails. Where it
+/// succeeds, the output it creates keeps the sample rate the device had at
+/// that moment, and a Bluetooth headset changes rate as its mic turns on and
+/// off, so voices come out pitched up or down. And when the chosen device
+/// disconnects, that output is rebuilt on the missing device and goes silent.
+/// The system default output has none of these problems.
 bool checkIfAudioOutputChangeSupported() {
   final cached = _audioOutputChangeSupported;
   if (cached != null) return cached;
+
+  if (_isWebKit) return _audioOutputChangeSupported = false;
 
   // Detect the capability by looking the method up rather than calling it:
   // `setSinkId` returns a promise, so invoking it would route audio and leave

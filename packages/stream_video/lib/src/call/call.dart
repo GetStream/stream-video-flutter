@@ -1483,6 +1483,8 @@ class Call {
     return const Result.success(none);
   }
 
+  /// Whether [setAudioOutputDevice] can route audio on this platform. See
+  /// [RtcMediaDeviceNotifier.isAudioOutputSelectionSupported].
   bool checkIfAudioOutputChangeSupported() {
     return rtc_audio.checkIfAudioOutputChangeSupported();
   }
