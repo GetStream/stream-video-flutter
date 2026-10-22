@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
@@ -713,5 +714,7 @@ void main() async {
     }
   }
 
-  self.onmessage = handleMessage.toJS;
+  self.onmessage = (web.MessageEvent e) {
+    unawaited(handleMessage(e));
+  }.toJS;
 }

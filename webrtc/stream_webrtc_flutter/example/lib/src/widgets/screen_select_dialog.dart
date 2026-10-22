@@ -52,12 +52,14 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     return Column(
       children: [
         Expanded(
-          child: DecoratedBox(
+          // Container insets the child by the border width.
+          // ignore: use_decorated_box
+          child: Container(
             decoration: widget.selected
                 ? BoxDecoration(
                     border: Border.all(width: 2, color: Colors.blueAccent),
                   )
-                : const BoxDecoration(),
+                : null,
             child: InkWell(
               onTap: () {
                 print('Selected source id => ${widget.source.id}');

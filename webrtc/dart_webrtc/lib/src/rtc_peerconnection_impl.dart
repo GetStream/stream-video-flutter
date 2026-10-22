@@ -322,7 +322,9 @@ class RTCPeerConnectionWeb extends RTCPeerConnection {
         .addIceCandidate(
           web.RTCIceCandidateInit(
             candidate: candidate.candidate!,
-            sdpMid: candidate.sdpMid,
+            // Throws for a candidate without an sdpMid.
+            // ignore: unnecessary_null_checks
+            sdpMid: candidate.sdpMid!,
             sdpMLineIndex: candidate.sdpMLineIndex,
           ),
         )

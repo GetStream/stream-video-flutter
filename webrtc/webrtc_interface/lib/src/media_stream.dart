@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import '../webrtc_interface.dart' show MediaStreamTrack;
 import 'media_stream_track.dart';
 
 ///https://w3c.github.io/mediacapture-main/#mediastream

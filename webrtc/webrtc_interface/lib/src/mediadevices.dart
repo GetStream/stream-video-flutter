@@ -1,6 +1,4 @@
-import '../webrtc_interface.dart' show MediaStreamTrack;
 import 'media_stream.dart';
-import 'media_stream_track.dart' show MediaStreamTrack;
 
 class MediaStreamConstraints {
   MediaStreamConstraints({this.audio, this.video});
