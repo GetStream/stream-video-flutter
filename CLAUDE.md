@@ -22,6 +22,15 @@ melos run webrtc:analyze     # and webrtc:test, webrtc:format:verify: webrtc/ on
 The `webrtc/` packages include the root `analysis_options.yaml` like the rest,
 but turn off the rules their upstream code doesn't follow yet.
 
+## Releases
+
+The `packages/` packages share one version and release together under one tag,
+`stream-video-vX.Y.Z`. Each `webrtc/` package has its own version and tag, named
+after the package in kebab case: `stream-webrtc-flutter-vX.Y.Z`. A webrtc package
+can take a major bump without the others. Open a release PR with `/release-pr`;
+`release_tag.yml` tags whatever is unpublished once it merges, and
+`release_publish.yml` publishes each tag. Never push a release tag by hand.
+
 ## The design system lives in another repository
 
 `stream_core_flutter` is the design system and is **not** in this repo. It is a
