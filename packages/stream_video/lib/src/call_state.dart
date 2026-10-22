@@ -411,6 +411,7 @@ class CallState extends Equatable {
 
   @override
   List<Object?> get props => [
+    preferences,
     currentUserId,
     callCid,
     createdByUser,
