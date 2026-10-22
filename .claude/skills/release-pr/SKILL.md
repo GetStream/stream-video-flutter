@@ -2,7 +2,7 @@
 name: release-pr
 description: >
   Open a release PR, for the stream_video packages (one shared version, tag stream-video-vX.Y.Z) or for one webrtc
-  package (its own version, e.g. stream-webrtc-flutter-vX.Y.Z): bumps the versions, finalises CHANGELOGs, updates the
+  package (its own version, e.g. webrtc-flutter-vX.Y.Z): bumps the versions, finalises CHANGELOGs, updates the
   SDK size badges for stream-video, opens a PR against main.
 disable-model-invocation: true
 argument-hint: "[product] [version]"
@@ -28,13 +28,17 @@ The repo releases two kinds of product, each under its own tag:
 | Product | Packages | Version | Tag |
 |---|---|---|---|
 | `stream-video` | the six `packages/stream_video*` packages | one shared `X.Y.Z` | `stream-video-vX.Y.Z` |
-| `stream-webrtc-flutter` | `webrtc/stream_webrtc_flutter` | its own | `stream-webrtc-flutter-vX.Y.Z` |
-| `dart-webrtc` | `webrtc/dart_webrtc` | its own | `dart-webrtc-vX.Y.Z` |
-| `webrtc-interface` | `webrtc/webrtc_interface` | its own | `webrtc-interface-vX.Y.Z` |
+| `webrtc-flutter` | `webrtc/stream_webrtc_flutter` | its own | `webrtc-flutter-vX.Y.Z` |
+| `dart-webrtc` | `webrtc/dart_webrtc` (to become `stream_dart_webrtc`) | its own | `dart-webrtc-vX.Y.Z` |
+| `webrtc-interface` | `webrtc/webrtc_interface` (to become `stream_webrtc_interface`) | its own | `webrtc-interface-vX.Y.Z` |
+
+Only `stream-video` keeps `stream` in its tag. A webrtc tag is the package name without its `stream_` prefix, in
+kebab case; `release_publish.yml` adds the prefix back to find the package.
 
 A webrtc package's version is not aligned with the others or with stream-video, and it can take a major bump on its
 own. `dart_webrtc` and `webrtc_interface` are not published by us yet (`lint:pub`, `release:pub` and
-`release_tag.yml` skip them): refuse a release of either and tell the user.
+`release_tag.yml` skip them): they are renamed to `stream_dart_webrtc` and `stream_webrtc_interface` before their
+first release. Until then, refuse a release of either and tell the user.
 
 `<tag>` below is `<product>-v<version>`, e.g. `stream-video-v2.0.0`.
 
@@ -42,8 +46,8 @@ own. `dart_webrtc` and `webrtc_interface` are not published by us yet (`lint:pub
 `release_publish.yml` — automatic for both stable and pre-release.
 
 If `$product` and `$version` are provided (e.g. `/release-pr stream-video 2.1.0` or
-`/release-pr stream-webrtc-flutter 4.0.1`), use them. A bare version (`/release-pr 2.1.0`) means `stream-video`.
-Accept the package name too (`stream_webrtc_flutter` → `stream-webrtc-flutter`). Strip any leading `v`. Otherwise ask
+`/release-pr webrtc-flutter 4.0.1`), use them. A bare version (`/release-pr 2.1.0`) means `stream-video`.
+Accept the package name too (`stream_webrtc_flutter` → `webrtc-flutter`). Strip any leading `v`. Otherwise ask
 the user.
 
 ## Release types

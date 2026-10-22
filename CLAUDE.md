@@ -26,7 +26,8 @@ but turn off the rules their upstream code doesn't follow yet.
 
 The `packages/` packages share one version and release together under one tag,
 `stream-video-vX.Y.Z`. Each `webrtc/` package has its own version and tag, named
-after the package in kebab case: `stream-webrtc-flutter-vX.Y.Z`. A webrtc package
+after the package without its `stream_` prefix, in kebab case: `webrtc-flutter-vX.Y.Z`
+for `stream_webrtc_flutter`. A webrtc package
 can take a major bump without the others. Open a release PR with `/release-pr`;
 `release_tag.yml` tags whatever is unpublished once it merges, and
 `release_publish.yml` publishes each tag. Never push a release tag by hand.

@@ -4,7 +4,7 @@ on:
   push:
     tags:
       # <product>-vX.Y.Z plus any pre-release (-…) or build (+…) suffix, e.g.
-      # stream-video-v2.0.0 or stream-webrtc-flutter-v4.0.1. The parse step
+      # stream-video-v2.0.0 or webrtc-flutter-v4.0.1. The parse step
       # validates the rest.
       - '*-v[0-9]+.[0-9]+.[0-9]+*'
   workflow_dispatch: # manual re-runs against a tag ref
@@ -47,12 +47,13 @@ jobs:
           version="${BASH_REMATCH[2]}"
 
           # stream-video releases every publishable package under packages/.
-          # Any other tag names one package under webrtc/, in kebab case.
+          # Any other tag names one package under webrtc/: its name without the
+          # stream_ prefix, in kebab case (webrtc-flutter → stream_webrtc_flutter).
           if [[ "$product" == "stream-video" ]]; then
             pubspecs="$(grep -LE '^publish_to:[[:space:]]*none' packages/*/pubspec.yaml || true)"
             changelog="packages/stream_video_flutter/CHANGELOG.md"
           else
-            pkg="${product//-/_}"
+            pkg="stream_${product//-/_}"
             pubspecs="$(grep -rlE "^name:[[:space:]]+$pkg\$" --include=pubspec.yaml webrtc/ 2>/dev/null | head -n1 || true)"
             if [[ -z "$pubspecs" ]]; then
               echo "::error ::No package named '$pkg' found under webrtc/."
