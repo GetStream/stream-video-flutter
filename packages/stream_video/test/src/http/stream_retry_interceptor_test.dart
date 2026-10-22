@@ -333,6 +333,24 @@ void main() {
       );
     });
 
+    // A timeout that is not dio's own, such as loading the token, happened
+    // before the request was sent.
+    test('resends a POST that timed out before it was sent', () async {
+      expect(
+        await attemptsFor(
+          () => throw DioException(
+            requestOptions: RequestOptions(path: '/x'),
+            error: const StreamNetworkException(
+              message: 'the token provider timed out',
+              isTimeout: true,
+            ),
+          ),
+          method: 'POST',
+        ),
+        3,
+      );
+    });
+
     test('resends a POST whose connection dropped', () async {
       expect(
         await attemptsFor(
