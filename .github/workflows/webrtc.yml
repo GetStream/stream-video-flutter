@@ -31,7 +31,7 @@ jobs:
   # filtering, which hangs forever) — see
   # https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks
   #
-  # `push` events to main and v2 run when webrtc/ changed.
+  # `push` events to main and v2 run when the push changed webrtc/.
   gate:
     runs-on: ubuntu-latest
     outputs:
@@ -44,6 +44,9 @@ jobs:
         uses: dorny/paths-filter@v4
         id: filter
         with:
+          # On push, compare against the commit before the push instead of
+          # the default branch. Ignored on pull_request.
+          base: ${{ github.ref }}
           filters: |
             relevant:
               - 'webrtc/**'
