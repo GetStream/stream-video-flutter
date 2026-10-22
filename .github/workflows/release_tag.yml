@@ -35,8 +35,9 @@ jobs:
 
       - name: 🏷️ Tag unpublished packages
         # The packages under packages/ share one version and one tag,
-        # stream-video-vX.Y.Z. Every other package gets its own tag, named after
-        # the package in kebab case, e.g. stream-webrtc-flutter-vX.Y.Z.
+        # stream-video-vX.Y.Z. Every other package gets its own tag: its name
+        # without the stream_ prefix, in kebab case, e.g. webrtc-flutter-vX.Y.Z
+        # for stream_webrtc_flutter.
         #
         # Tags are pushed one per push, in dependency order, so each starts its
         # own publish run. An existing tag (e.g. a stale one on an old commit)
@@ -71,7 +72,8 @@ jobs:
                 tags+=("stream-video-v$version")
                 ;;
               *)
-                tags+=("${name//_/-}-v$version")
+                short="${name#stream_}"
+                tags+=("${short//_/-}-v$version")
                 ;;
             esac
           done < "$list"

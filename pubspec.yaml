@@ -77,7 +77,7 @@ melos:
       # Dependency constraints synced into every package that declares them.
       # The stream_video* packages share one version (released as
       # stream-video-vX.Y.Z); dart_webrtc, stream_webrtc_flutter and
-      # webrtc_interface each have their own (e.g. stream-webrtc-flutter-vX.Y.Z).
+      # webrtc_interface each have their own (e.g. webrtc-flutter-vX.Y.Z).
       dependencies:
         dart_webrtc: ^1.8.2
         device_info_plus: ">=12.1.0 <14.0.0"
