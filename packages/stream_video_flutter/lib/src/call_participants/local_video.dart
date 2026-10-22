@@ -76,6 +76,10 @@ class StreamLocalVideo extends StatelessWidget {
       return StreamCallParticipant(
         call: call,
         participant: participant,
+        // The view has a fixed size, so the adaptive default would letterbox
+        // a camera whose orientation differs from it, such as a landscape
+        // webcam in the portrait default view.
+        videoFit: VideoFit.cover,
         borderRadius: borderRadius,
         userAvatarTheme: userAvatarTheme,
         showParticipantLabel: false,
