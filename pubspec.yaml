@@ -173,6 +173,8 @@ melos:
          - Note: you can also rely on your IDEs Dart Analysis / Issues window.
 
     lint:pub:
+      # dart_webrtc and webrtc_interface are skipped until our first version
+      # of them is published; include them again after that.
       run: |
         melos exec -c 1 --no-published --no-private --order-dependents \
           --ignore=dart_webrtc --ignore=webrtc_interface -- \
@@ -180,6 +182,8 @@ melos:
       description: Dry-run `pub publish` for every publishable package (pre-publish gate).
 
     release:pub:
+      # dart_webrtc and webrtc_interface are skipped until our first version
+      # of them is published; include them again after that.
       run: |
         melos exec -c 1 --no-published --no-private --order-dependents \
           --ignore=dart_webrtc --ignore=webrtc_interface -- \
