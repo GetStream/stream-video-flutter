@@ -36,11 +36,12 @@ typedef StreamLobbyJoinCallback =
 /// ```
 /// {@end-tool}
 ///
-/// The layout follows the window's [StreamScreenSize]: under 768px the
-/// controls sit below the preview, above it they are overlaid on the preview
-/// itself. Which actions are shown does *not* follow the screen — [actions]
-/// defaults to `StreamLobbyActions.simple()` at every width, and choosing a richer
-/// preset for a roomier window is the host's call.
+/// The layout follows the window's [StreamScreenSize]: at
+/// [StreamScreenSize.small] the controls sit below the preview, above it they
+/// are overlaid on the preview itself. Which actions are shown does *not*
+/// follow the screen — [actions] defaults to `StreamLobbyActions.simple()` at
+/// every width, and choosing a richer preset for a roomier window is the host's
+/// call.
 ///
 /// A row of more than [StreamLobbyViewStyle.maxOverlaidControls] sits below
 /// the preview at any width: the overlaid row is centred on a preview whose
@@ -298,7 +299,7 @@ class _LobbyBody extends StatelessWidget {
                 alignment: AlignmentDirectional.bottomCenter,
                 children: [
                   const _LobbyPreview(),
-                  // Above 768px a short row floats over the preview, clear
+                  // Past small, a short row floats over the preview, clear
                   // of the participant label's toolbar band along the bottom.
                   if (overlayControls && controlRow != null)
                     Padding(
