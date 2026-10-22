@@ -95,7 +95,8 @@ melos:
         webrtc_interface: ^1.5.1
 
       hooks:
-        # Keep streamVideoVersion in globals.dart in sync with the pubspec version.
+        # Keep streamVideoVersion in globals.dart and the podspec versions in
+        # sync with the pubspec versions.
         post: melos run version:update
 
   scripts:
@@ -192,7 +193,7 @@ melos:
 
     version:update:
       run: dart run tools/generate_version.dart
-      description: Sync streamVideoVersion in globals.dart and the dogfooding app version with the pubspec version.
+      description: Sync streamVideoVersion in globals.dart, the dogfooding app version and the podspec versions with the pubspec versions.
 
     generate:all:
       run: melos run generate:dart && melos run generate:flutter
