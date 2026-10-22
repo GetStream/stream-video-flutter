@@ -22,6 +22,7 @@ class SfuWebSocket {
     required String sfuUrl,
     required String sfuWsEndpoint,
     Iterable<String>? protocols,
+    @visibleForTesting WebSocketProvider? wsProvider,
   }) {
     final tag = '$_tag-$sessionSeq';
     streamLog.i(tag, () => '<factory> sessionId: $sessionId');
@@ -55,6 +56,7 @@ class SfuWebSocket {
       sessionId: sessionId,
       url: finalWsEndpoint,
       protocols: protocols,
+      wsProvider: wsProvider,
     );
   }
 
@@ -63,11 +65,13 @@ class SfuWebSocket {
     required this.sessionId,
     required this.url,
     Iterable<String>? protocols,
+    WebSocketProvider? wsProvider,
   }) {
     _logger.i(() => '<init> sessionId: $sessionId');
     _client = _SfuWebSocketClient(
       tag: '$_tag-$sessionSeq',
-      optionsBuilder: () => WebSocketOptions(url: url, protocols: protocols),
+      wsProvider: wsProvider,
+      optionsProvider: (_) => WebSocketOptions(url: url, protocols: protocols),
       messageCodec: const SfuMessageCodec(),
       pingRequestBuilder: ([_]) => SfuWsRequest(
         sfu_events.SfuRequest(
@@ -103,7 +107,7 @@ class SfuWebSocket {
     _logger.i(
       () => '[connect] connectionState: ${_client.connectionState.value}',
     );
-    await _client.connect();
+    await _open();
     return _openResult('connect');
   }
 
@@ -138,20 +142,42 @@ class SfuWebSocket {
 
   Future<Result<None>> recreate() async {
     _logger.i(() => '[recreate] no args');
-    await _client.disconnect(
-      closeCode: StreamVideoCloseCode.disposeOldSocket,
-      source: const DisconnectionSource.systemInitiated(),
+    // Not awaited: closing a socket that is still shaking hands waits on the
+    // handshake. The wait below is bounded, and a socket still closing after
+    // it makes the open below fail rather than hang.
+    unawaited(
+      _client.disconnect(
+        closeCode: StreamVideoCloseCode.disposeOldSocket,
+        source: const DisconnectionSource.systemInitiated(),
+      ),
     );
 
-    // disconnect() uses unawaited engine.close() internally
-    // wait for Disconnected with timeout
     await _client.connectionState
         .firstWhere((s) => s is Disconnected)
         .timeout(const Duration(seconds: 10))
         .catchError((_) => _client.connectionState.value);
 
-    await _client.connect();
+    await _open();
     return _openResult('recreate');
+  }
+
+  /// Starts a connection attempt and returns once it has settled.
+  ///
+  /// Settled is the state leaving [Connecting], not `connect()` returning.
+  /// That future follows the handshake, and a handshake to a host the network
+  /// cannot reach answers only when the OS gives up on it — long after core's
+  /// connect timeout has closed the attempt and moved the state on. Waiting on
+  /// it held a reconnect that had nothing left to wait for.
+  Future<void> _open() {
+    final attempt = _client.connect();
+    // A state closed under it, by a dispose, settles it too.
+    final settled = _client.connectionState
+        .firstWhere((s) => s is! Connecting)
+        .then<void>((_) {}, onError: (_) {});
+
+    // A connect that throws still throws; a handshake that never answers no
+    // longer holds the caller once the state has moved on.
+    return Future.any([attempt, settled]);
   }
 
   /// What the `connect()` that just returned amounted to.
@@ -351,10 +377,11 @@ class SfuWebSocket {
 
 class _SfuWebSocketClient extends StreamWebSocketClient {
   _SfuWebSocketClient({
-    required super.optionsBuilder,
+    required super.optionsProvider,
     required super.messageCodec,
     required super.pingRequestBuilder,
     required super.tag,
+    super.wsProvider,
   });
 
   @override
