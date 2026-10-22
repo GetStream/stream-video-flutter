@@ -22,6 +22,18 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 command="${1:-}"
 package="${2:-}"
 
+usage() {
+  sed -n '/^# Usage:/,/^# Without a package/s/^# \{0,1\}//p' "${BASH_SOURCE[0]}" >&2
+}
+
+case "$command" in
+  bootstrap | analyze | format | format-verify | imports-verify | test) ;;
+  *)
+    usage
+    exit 64
+    ;;
+esac
+
 if [[ -n "$package" ]]; then
   packages=("$root/webrtc/$package")
 else
@@ -78,10 +90,6 @@ for dir in "${packages[@]}"; do
       else
         echo "No test/ folder, skipping."
       fi
-      ;;
-    *)
-      echo "Unknown command: $command" >&2
-      exit 64
       ;;
   esac
 done
