@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - v2
+  # Only stream-video releases build the prod app; the jobs skip the
+  # webrtc package releases.
   release:
     types: [published]
 
@@ -56,7 +58,7 @@ jobs:
     name: Build and Distribute Dogfooding Ios
     runs-on: xcode-27
     timeout-minutes: 60
-    if: ${{ github.event_name == 'push' || github.event_name == 'release'  || inputs.build_ios == true }}
+    if: ${{ github.event_name == 'push' || (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'stream-video-v')) || inputs.build_ios == true }}
     steps:
       - name: Install Bot SSH Key
         uses: webfactory/ssh-agent@v0.10.0
@@ -108,7 +110,7 @@ jobs:
     name: Build and Distribute Dogfooding macOS
     runs-on: xcode-27
     timeout-minutes: 60
-    if: ${{ github.event_name == 'push' || github.event_name == 'release'  || inputs.build_macos == true }}
+    if: ${{ github.event_name == 'push' || (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'stream-video-v')) || inputs.build_macos == true }}
     steps:
       - name: Install Bot SSH Key
         uses: webfactory/ssh-agent@v0.10.0
@@ -156,7 +158,7 @@ jobs:
     name: Build and Distribute Dogfooding Android
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: ${{ github.event_name == 'push' || github.event_name == 'release'  || inputs.build_android == true }}
+    if: ${{ github.event_name == 'push' || (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'stream-video-v')) || inputs.build_android == true }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -214,7 +216,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: write
-    if: ${{ github.event_name == 'push' || github.event_name == 'release'  || inputs.build_web == true }}
+    if: ${{ github.event_name == 'push' || (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'stream-video-v')) || inputs.build_web == true }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7

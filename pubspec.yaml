@@ -75,6 +75,9 @@ melos:
         flutter: ">=3.44.0"
 
       # Dependency constraints synced into every package that declares them.
+      # The stream_video* packages share one version (released as
+      # stream-video-vX.Y.Z); dart_webrtc, stream_webrtc_flutter and
+      # webrtc_interface each have their own (e.g. webrtc-flutter-vX.Y.Z).
       dependencies:
         dart_webrtc: ^1.8.2
         device_info_plus: ">=12.1.0 <14.0.0"
@@ -95,7 +98,8 @@ melos:
         webrtc_interface: ^1.5.1
 
       hooks:
-        # Keep streamVideoVersion in globals.dart in sync with the pubspec version.
+        # Keep streamVideoVersion in globals.dart and the podspec versions in
+        # sync with the pubspec versions.
         post: melos run version:update
 
   scripts:
@@ -173,26 +177,30 @@ melos:
          - Note: you can also rely on your IDEs Dart Analysis / Issues window.
 
     lint:pub:
-      # dart_webrtc and webrtc_interface are skipped until our first version
-      # of them is published; include them again after that.
+      # release_publish.yml scopes this to the packages of one tag with
+      # MELOS_PACKAGES. dart_webrtc and webrtc_interface are skipped until our
+      # first version of them is published; include them again after that, here,
+      # in release:pub and in release_tag.yml.
       run: |
         melos exec -c 1 --no-published --no-private --order-dependents \
           --ignore=dart_webrtc --ignore=webrtc_interface -- \
               "flutter pub publish -n"
-      description: Dry-run `pub publish` for every publishable package (pre-publish gate).
+      description: Dry-run `pub publish` for every unpublished package (pre-publish gate).
 
     release:pub:
-      # dart_webrtc and webrtc_interface are skipped until our first version
-      # of them is published; include them again after that.
+      # release_publish.yml scopes this to the packages of one tag with
+      # MELOS_PACKAGES. dart_webrtc and webrtc_interface are skipped until our
+      # first version of them is published; include them again after that, here,
+      # in lint:pub and in release_tag.yml.
       run: |
         melos exec -c 1 --no-published --no-private --order-dependents \
           --ignore=dart_webrtc --ignore=webrtc_interface -- \
               "flutter pub publish -f"
-      description: Publish every publishable package to pub.dev, in dependency order.
+      description: Publish every unpublished package to pub.dev, in dependency order.
 
     version:update:
       run: dart run tools/generate_version.dart
-      description: Sync streamVideoVersion in globals.dart and the dogfooding app version with the pubspec version.
+      description: Sync streamVideoVersion in globals.dart, the dogfooding app version and the podspec versions with the pubspec versions.
 
     generate:all:
       run: melos run generate:dart && melos run generate:flutter
