@@ -19,6 +19,7 @@ final class StreamPictureInPictureTrackStateAdapter {
             /// it calls the 'enableObserver' function.
             guard isEnabled != oldValue else { return }
             enableObserver(isEnabled)
+            if !isEnabled { restoreDisabledTracks() }
         }
     }
 
@@ -27,9 +28,13 @@ final class StreamPictureInPictureTrackStateAdapter {
         didSet {
             /// When the 'activeTrack' property changes, this didSet observer is called.
             /// If the adapter is enabled and the new 'activeTrack' is different from the old one,
-            /// it disables the old track (if it exists).
-            if isEnabled, oldValue?.trackId != activeTrack?.trackId {
-                oldValue?.isEnabled = false
+            /// it disables the old track (if it exists), and remembers it so it is enabled again
+            /// once picture-in-picture ends.
+            if isEnabled, let oldValue, oldValue.trackId != activeTrack?.trackId,
+                oldValue.isEnabled
+            {
+                oldValue.isEnabled = false
+                disabledTracks.append(oldValue)
             }
         }
     }
@@ -38,6 +43,18 @@ final class StreamPictureInPictureTrackStateAdapter {
 
     /// This property holds a reference to the observer cancellable.
     private var observerCancellable: AnyCancellable?
+
+    /// The tracks this adapter disabled when picture-in-picture moved away from them. The app
+    /// shows them again once picture-in-picture ends, and only this adapter knows to enable them.
+    private var disabledTracks: [RTCVideoTrack] = []
+
+    /// Enables the tracks this adapter disabled.
+    private func restoreDisabledTracks() {
+        for track in disabledTracks where !track.isEnabled {
+            track.isEnabled = true
+        }
+        disabledTracks.removeAll()
+    }
 
     /// This private function enables or disables an observer based on the 'isActive' parameter.
     ///
