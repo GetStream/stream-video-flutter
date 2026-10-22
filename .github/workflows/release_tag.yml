@@ -3,57 +3,89 @@ name: release_tag
 on:
   push:
     branches: [main]
+  workflow_dispatch: # manual recovery, e.g. if a release commit's title was edited past the gate
 
 concurrency:
+  # false: never cancel a run mid tag-push (would drop a release).
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   release:
-    # Only run this job for commits that indicate a release
-    if: "${{ startsWith(github.event.head_commit.message, 'chore(repo): release') }}"
+    # Manual dispatch, or a commit whose message starts `chore(repo): release`.
+    # The tags come from the unpublished package versions, not from the message.
+    if: "${{ github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'chore(repo): release') }}"
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Required to create and push tags
+      contents: write # push tags
 
     steps:
       - name: 📚 Checkout branch
+        # Bot PAT: GITHUB_TOKEN tag pushes don't trigger the publish workflow.
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
           token: ${{ secrets.BOT_GITHUB_API_TOKEN }}
 
-      - name: 🏷️ Extract Version Tag
-        id: extract_tag
+      - name: 🐦 Install Flutter
+        uses: ./.github/actions/setup-flutter
+
+      - name: 📦 Install Melos
+        uses: ./.github/actions/setup-melos
+
+      - name: 🏷️ Tag unpublished packages
+        # The packages under packages/ share one version and one tag,
+        # stream-video-vX.Y.Z. Every other package gets its own tag, named after
+        # the package in kebab case, e.g. stream-webrtc-flutter-vX.Y.Z.
+        #
+        # Tags are pushed one per push, in dependency order, so each starts its
+        # own publish run. An existing tag (e.g. a stale one on an old commit)
+        # is skipped with a warning.
+        #
+        # dart_webrtc and webrtc_interface are skipped, as in lint:pub and
+        # release:pub in the root pubspec.yaml.
         shell: bash
-        # Pass via env, not inline interpolation, to avoid shell injection.
-        env:
-          COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
           set -euo pipefail
 
-          commit_msg="$COMMIT_MSG"
-          echo "📦 Commit message: $commit_msg"
+          list="$RUNNER_TEMP/unpublished.txt"
+          : > "$list"
+          # shellcheck disable=SC2016 # melos expands the variables per package
+          LIST="$list" melos exec -c 1 --no-published --no-private --order-dependents \
+            --ignore=dart_webrtc --ignore=webrtc_interface -- \
+            'echo "$MELOS_PACKAGE_NAME $MELOS_PACKAGE_VERSION $MELOS_PACKAGE_PATH" >> "$LIST"'
 
-          # Match vX.Y.Z or vX.Y.Z-suffix (case-insensitive)
-          version_regex='[vV][0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.\-]+)?'
+          tags=()
+          stream_video_version=""
+          while read -r name version path; do
+            case "${path#"$GITHUB_WORKSPACE"/}" in
+              packages/*)
+                if [[ -n "$stream_video_version" ]]; then
+                  if [[ "$stream_video_version" != "$version" ]]; then
+                    echo "::error ::$name is at $version, but other unpublished stream-video packages are at $stream_video_version. They release together and need the same version."
+                    exit 1
+                  fi
+                  continue
+                fi
+                stream_video_version="$version"
+                tags+=("stream-video-v$version")
+                ;;
+              *)
+                tags+=("${name//_/-}-v$version")
+                ;;
+            esac
+          done < "$list"
 
-          if [[ "$commit_msg" =~ $version_regex ]]; then
-            version="${BASH_REMATCH[0]}"
-            echo "✅ Found version tag: $version"
-            echo "tag=$version" >> "$GITHUB_OUTPUT"
-          else
-            echo "::error ::❌ No SemVer tag found in commit message."
-            echo "::error ::Expected something like: 'chore(repo): release v1.2.3[-beta]'"
-            exit 1
+          if [[ ${#tags[@]} -eq 0 ]]; then
+            echo "✅ Every publishable package is already on pub.dev; nothing to tag."
+            exit 0
           fi
 
-      - name: 🚀 Create and Push Tag
-        shell: bash
-        run: |
-          git config user.name "Stream SDK Bot"
-          git config user.email "60655709+Stream-SDK-Bot@users.noreply.github.com"
-
-          echo "Creating and pushing tag: ${{ steps.extract_tag.outputs.tag }}"
-          git tag ${{ steps.extract_tag.outputs.tag }}
-          git push origin ${{ steps.extract_tag.outputs.tag }}
+          for tag in "${tags[@]}"; do
+            if git tag "$tag" 2>/dev/null; then
+              echo "🏷️ Pushing $tag"
+              git push origin "$tag"
+            else
+              echo "::warning ::Skipped $tag: tag already exists (stale tag on an old commit?), not pushed."
+            fi
+          done
