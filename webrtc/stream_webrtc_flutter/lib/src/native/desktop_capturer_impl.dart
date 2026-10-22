@@ -13,10 +13,10 @@ class DesktopCapturerSourceNative extends DesktopCapturerSource {
     this._type,
   );
   factory DesktopCapturerSourceNative.fromMap(Map<dynamic, dynamic> map) {
-    var sourceType = (map['type'] as String) == 'window'
+    final sourceType = (map['type'] as String) == 'window'
         ? SourceType.Window
         : SourceType.Screen;
-    var source = DesktopCapturerSourceNative(
+    final source = DesktopCapturerSourceNative(
       map['id'],
       map['name'],
       ThumbnailSize.fromMap(map['thumbnailSize']),
@@ -75,8 +75,8 @@ class DesktopCapturerSourceNative extends DesktopCapturerSource {
 class DesktopCapturerNative extends DesktopCapturer {
   DesktopCapturerNative._internal() {
     FlutterWebRTCEventChannel.instance.handleEvents.stream.listen((data) {
-      var event = data.keys.first;
-      Map<dynamic, dynamic> map = data[event];
+      final event = data.keys.first;
+      final Map<dynamic, dynamic> map = data[event];
       handleEvent(event, map);
     });
   }
@@ -166,8 +166,8 @@ class DesktopCapturerNative extends DesktopCapturer {
     if (response == null) {
       throw Exception('getDesktopSources return null, something wrong');
     }
-    for (var source in response['sources']) {
-      var desktopSource = DesktopCapturerSourceNative.fromMap(source);
+    for (final source in response['sources']) {
+      final desktopSource = DesktopCapturerSourceNative.fromMap(source);
       _sources[desktopSource.id] = desktopSource;
     }
     return _sources.values.toList();

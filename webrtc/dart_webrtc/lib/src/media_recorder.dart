@@ -1,10 +1,10 @@
-import 'package:webrtc_interface/src/media_recorder.dart' as _interface;
+import 'package:webrtc_interface/src/media_recorder.dart' as rtc;
 
 import '../dart_webrtc.dart';
 
-class MediaRecorder extends _interface.MediaRecorder {
+class MediaRecorder extends rtc.MediaRecorder {
   MediaRecorder() : _delegate = mediaRecorder();
-  final _interface.MediaRecorder _delegate;
+  final rtc.MediaRecorder _delegate;
 
   @override
   Future<void> start(
@@ -23,11 +23,10 @@ class MediaRecorder extends _interface.MediaRecorder {
     Function(dynamic blob, bool isLastOne)? onDataChunk,
     String? mimeType,
     int timeSlice = 1000,
-  }) =>
-      _delegate.startWeb(
-        stream,
-        onDataChunk: onDataChunk,
-        mimeType: mimeType ?? 'video/webm',
-        timeSlice: timeSlice,
-      );
+  }) => _delegate.startWeb(
+    stream,
+    onDataChunk: onDataChunk,
+    mimeType: mimeType ?? 'video/webm',
+    timeSlice: timeSlice,
+  );
 }

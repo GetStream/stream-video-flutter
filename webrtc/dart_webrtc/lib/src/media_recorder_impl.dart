@@ -27,35 +27,42 @@ class MediaRecorderWeb extends MediaRecorder {
     String mimeType = 'video/webm',
     int timeSlice = 1000,
   }) {
-    var _native = stream as MediaStreamWeb;
+    final native = stream as MediaStreamWeb;
     _recorder = web.MediaRecorder(
-        _native.jsStream, web.MediaRecorderOptions(mimeType: mimeType));
+      native.jsStream,
+      web.MediaRecorderOptions(mimeType: mimeType),
+    );
     if (onDataChunk == null) {
-      var _chunks = <web.Blob>[];
+      final chunks = <web.Blob>[];
       _completer = Completer<String>();
-      final callback = (web.Event event) {
-        final blob = event.getProperty('data'.toJS) as web.Blob;
+      void callback(web.Event event) {
+        final blob = event.getProperty('data'.toJS)! as web.Blob;
         if (blob.size > 0) {
-          _chunks.add(blob);
+          chunks.add(blob);
         }
         if (_recorder.state == 'inactive') {
-          final blob =
-              web.Blob(_chunks.toJS, web.BlobPropertyBag(type: mimeType));
+          final blob = web.Blob(
+            chunks.toJS,
+            web.BlobPropertyBag(type: mimeType),
+          );
           _completer.complete(web.URL.createObjectURL(blob));
         }
-      };
-      final onError = (JSAny error) {
+      }
+
+      void onError(JSAny error) {
         _completer.completeError(error);
-      };
+      }
+
       _recorder.addEventListener('dataavailable', callback.toJS);
       _recorder.addEventListener('error', onError.toJS);
     } else {
-      final callback = (web.Event event) {
+      void callback(web.Event event) {
         onDataChunk(
           event.getProperty('data'.toJS),
           _recorder.state == 'inactive',
         );
-      };
+      }
+
       _recorder.addEventListener('dataavailable', callback.toJS);
     }
     _recorder.start(timeSlice);

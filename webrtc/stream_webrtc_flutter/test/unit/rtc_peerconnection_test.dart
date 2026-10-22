@@ -7,7 +7,7 @@ import 'package:stream_webrtc_flutter/src/native/rtc_peerconnection_impl.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final channel = MethodChannel('FlutterWebRTC.Method');
+  const channel = MethodChannel('FlutterWebRTC.Method');
   setUp(() {
     channel.setMockMethodCallHandler((MethodCall methodCall) async {
       await ServicesBinding.instance.defaultBinaryMessenger
@@ -56,7 +56,7 @@ void main() {
         });
       };
 
-      for (var event in events) {
+      for (final event in events) {
         pc.eventListener(<String, dynamic>{
           'event': event,
 

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 
 class DataChannelLoopBackSample extends StatefulWidget {
+  const DataChannelLoopBackSample({super.key});
+
   static String tag = 'data_channel_sample';
 
   @override
@@ -22,7 +24,7 @@ class _DataChannelLoopBackSampleState extends State<DataChannelLoopBackSample> {
 
   bool _inCalling = false;
 
-  void _makeCall() async {
+  Future<void> _makeCall() async {
     if (_peerConnection1 != null || _peerConnection2 != null) return;
 
     try {
@@ -40,49 +42,57 @@ class _DataChannelLoopBackSampleState extends State<DataChannelLoopBackSample> {
       };
 
       _dataChannel1 = await _peerConnection1!.createDataChannel(
-          'peerConnection1-dc', RTCDataChannelInit()..id = 1);
+        'peerConnection1-dc',
+        RTCDataChannelInit()..id = 1,
+      );
 
       _peerConnection2!.onDataChannel = (channel) {
         _dataChannel2 = channel;
         _dataChannel2!.onDataChannelState = (state) {
           setState(() {
-            _dataChannel2Status += '\ndataChannel2: state: ${state.toString()}';
+            _dataChannel2Status += '\ndataChannel2: state: $state';
           });
         };
         _dataChannel2!.onMessage = (data) async {
-          var bufferedAmount = await _dataChannel2!.getBufferedAmount();
+          final bufferedAmount = await _dataChannel2!.getBufferedAmount();
           setState(() {
             _dataChannel2Status +=
                 '\ndataChannel2: Received message: ${data.text}, bufferedAmount: $bufferedAmount';
           });
 
-          await _dataChannel2!.send(RTCDataChannelMessage(
-              '(dataChannel2 ==> dataChannel1) Hello from dataChannel2 echo !!!'));
+          await _dataChannel2!.send(
+            RTCDataChannelMessage(
+              '(dataChannel2 ==> dataChannel1) Hello from dataChannel2 echo !!!',
+            ),
+          );
         };
       };
 
       _dataChannel1!.onDataChannelState = (state) {
         setState(() {
-          _dataChannel1Status += '\ndataChannel1: state: ${state.toString()}';
+          _dataChannel1Status += '\ndataChannel1: state: $state';
         });
         if (state == RTCDataChannelState.RTCDataChannelOpen) {
-          _dataChannel1!.send(RTCDataChannelMessage(
-              '(dataChannel1 ==> dataChannel2) Hello from dataChannel1 !!!'));
+          _dataChannel1!.send(
+            RTCDataChannelMessage(
+              '(dataChannel1 ==> dataChannel2) Hello from dataChannel1 !!!',
+            ),
+          );
         }
       };
 
       _dataChannel1!.onMessage = (data) async {
-        var bufferedAmount = await _dataChannel2!.getBufferedAmount();
+        final bufferedAmount = await _dataChannel2!.getBufferedAmount();
         _dataChannel1Status +=
             '\ndataChannel1: Received message: ${data.text}, bufferedAmount: $bufferedAmount';
         setState(() {});
       };
 
-      var offer = await _peerConnection1!.createOffer({});
+      final offer = await _peerConnection1!.createOffer({});
       print('peerConnection1 offer: ${offer.sdp}');
 
       await _peerConnection2!.setRemoteDescription(offer);
-      var answer = await _peerConnection2!.createAnswer();
+      final answer = await _peerConnection2!.createAnswer();
       print('peerConnection2 answer: ${answer.sdp}');
 
       await _peerConnection1!.setLocalDescription(offer);
@@ -90,7 +100,7 @@ class _DataChannelLoopBackSampleState extends State<DataChannelLoopBackSample> {
 
       await _peerConnection1!.setRemoteDescription(answer);
     } catch (e) {
-      print(e.toString());
+      print(e);
     }
     if (!mounted) return;
 
@@ -99,7 +109,7 @@ class _DataChannelLoopBackSampleState extends State<DataChannelLoopBackSample> {
     });
   }
 
-  void _hangUp() async {
+  Future<void> _hangUp() async {
     try {
       await _dataChannel1?.close();
       setState(() {
@@ -111,7 +121,7 @@ class _DataChannelLoopBackSampleState extends State<DataChannelLoopBackSample> {
       _peerConnection1 = null;
       _peerConnection2 = null;
     } catch (e) {
-      print(e.toString());
+      print(e);
     }
     setState(() {
       _inCalling = false;
@@ -131,17 +141,17 @@ class _DataChannelLoopBackSampleState extends State<DataChannelLoopBackSample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Data Channel Test'),
+        title: const Text('Data Channel Test'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('(caller)data channel 1:\n'),
+            const Text('(caller)data channel 1:\n'),
             Container(
               child: Text(_dataChannel1Status),
             ),
-            Text('\n\n(callee)data channel 2:\n'),
+            const Text('\n\n(callee)data channel 2:\n'),
             Container(
               child: Text(_dataChannel2Status),
             ),

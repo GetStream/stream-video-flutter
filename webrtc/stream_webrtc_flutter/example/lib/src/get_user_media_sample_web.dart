@@ -11,6 +11,8 @@ import 'package:web/web.dart' as web;
  * getUserMedia sample
  */
 class GetUserMediaSample extends StatefulWidget {
+  const GetUserMediaSample({super.key});
+
   static String tag = 'get_usermedia_sample';
 
   @override
@@ -49,12 +51,12 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
     _localRenderer.dispose();
   }
 
-  void initRenderers() async {
+  Future<void> initRenderers() async {
     await _localRenderer.initialize();
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
-  void _makeCall() async {
+  Future<void> _makeCall() async {
     final mediaConstraints = <String, dynamic>{
       'audio': true,
       'video': {
@@ -64,16 +66,18 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
           'minHeight': '720',
           'minFrameRate': '30',
         },
-      }
+      },
     };
 
     try {
-      var stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      final stream = await navigator.mediaDevices.getUserMedia(
+        mediaConstraints,
+      );
       _cameras = await Helper.cameras;
       _localStream = stream;
       _localRenderer.srcObject = _localStream;
     } catch (e) {
-      print(e.toString());
+      print(e);
     }
     if (!mounted) return;
 
@@ -91,25 +95,25 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
       _localStream = null;
       _localRenderer.srcObject = null;
     } catch (e) {
-      print(e.toString());
+      print(e);
     }
   }
 
-  void _hangUp() async {
+  Future<void> _hangUp() async {
     await _stop();
     setState(() {
       _inCalling = false;
     });
   }
 
-  void _startRecording() async {
-    if (_localStream == null) throw Exception('Can\'t record without a stream');
+  Future<void> _startRecording() async {
+    if (_localStream == null) throw Exception("Can't record without a stream");
     _mediaRecorder = MediaRecorder();
     setState(() {});
     _mediaRecorder?.startWeb(_localStream!);
   }
 
-  void _stopRecording() async {
+  Future<void> _stopRecording() async {
     final objectUrl = await _mediaRecorder?.stop();
     setState(() {
       _mediaRecorder = null;
@@ -119,35 +123,35 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
     web.window.open(objectUrl, '_blank');
   }
 
-  void _captureFrame() async {
-    if (_localStream == null) throw Exception('Can\'t record without a stream');
-    final videoTrack = _localStream!
-        .getVideoTracks()
-        .firstWhere((track) => track.kind == 'video');
+  Future<void> _captureFrame() async {
+    if (_localStream == null) throw Exception("Can't record without a stream");
+    final videoTrack = _localStream!.getVideoTracks().firstWhere(
+      (track) => track.kind == 'video',
+    );
     final frame = await videoTrack.captureFrame();
     await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              content:
-                  Image.memory(frame.asUint8List(), height: 720, width: 1280),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: Navigator.of(context, rootNavigator: true).pop,
-                  child: Text('OK'),
-                )
-              ],
-            ));
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Image.memory(frame.asUint8List(), height: 720, width: 1280),
+        actions: <Widget>[
+          TextButton(
+            onPressed: Navigator.of(context, rootNavigator: true).pop,
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('GetUserMedia API Test Web'),
+        title: const Text('GetUserMedia API Test Web'),
         actions: _inCalling
             ? <Widget>[
                 IconButton(
-                  icon: Icon(Icons.camera),
+                  icon: const Icon(Icons.camera),
                   onPressed: _captureFrame,
                 ),
                 IconButton(
@@ -180,10 +184,10 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
         builder: (context, orientation) {
           return Center(
             child: Container(
-              margin: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
+              margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
-              decoration: BoxDecoration(color: Colors.black54),
+              decoration: const BoxDecoration(color: Colors.black54),
               child: RTCVideoView(_localRenderer, mirror: true),
             ),
           );
@@ -197,11 +201,14 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
     );
   }
 
-  void _switchCamera(String deviceId) async {
+  Future<void> _switchCamera(String deviceId) async {
     if (_localStream == null) return;
 
     await Helper.switchCamera(
-        _localStream!.getVideoTracks()[0], deviceId, _localStream);
+      _localStream!.getVideoTracks()[0],
+      deviceId,
+      _localStream,
+    );
     setState(() {});
   }
 }

@@ -8,6 +8,7 @@ Melos monorepo for the Stream Video Flutter SDK.
 | `packages/stream_video_flutter` | UI toolkit — widgets, themes, call screens. |
 | `packages/stream_video_*` | Filters, noise cancellation, push notifications, screen sharing. |
 | `dogfooding/` | The internal sample app. The first place a UI change gets tried. |
+| `webrtc/` | Our fork of the WebRTC plugin: `stream_webrtc_flutter`, `dart_webrtc` (web) and `webrtc_interface`. The SDK builds against these, not pub.dev. |
 
 ```bash
 melos bootstrap          # after any pubspec change
@@ -15,7 +16,11 @@ melos run analyze        # dart analyze --fatal-infos, every package
 melos run format
 melos run generate:flutter   # build_runner, for *.g.theme.dart and friends
 melos run test:all
+melos run webrtc:analyze     # and webrtc:test, webrtc:format:verify: webrtc/ only
 ```
+
+The `webrtc/` packages include the root `analysis_options.yaml` like the rest,
+but turn off the rules their upstream code doesn't follow yet.
 
 ## The design system lives in another repository
 
