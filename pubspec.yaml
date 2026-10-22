@@ -199,7 +199,8 @@ melos:
       description: Build all generated files for Dart & Flutter packages in this project.
 
     generate:dart:
-      run: melos exec -c 1 --depends-on="build_runner" --no-flutter -- "dart run build_runner build --delete-conflicting-outputs"
+      # dart_webrtc uses build_runner only to serve its web/ demo pages.
+      run: melos exec -c 1 --depends-on="build_runner" --no-flutter --ignore="dart_webrtc" -- "dart run build_runner build --delete-conflicting-outputs"
       description: Build all generated files for Dart packages in this project.
 
     generate:flutter:
