@@ -63,8 +63,8 @@ class RetryConfig extends Equatable {
   final Duration maxTotalRetryDelay;
 
   /// How long one coordinator HTTP attempt may wait to connect, and then for
-  /// its response. An attempt that times out is retried like any other
-  /// network failure.
+  /// its response. An attempt that times out is retried only for GET, HEAD and
+  /// OPTIONS, or after a connect timeout on a native platform.
   final Duration rpcTimeout;
 
   /// How many attempts an SFU signalling RPC gets in total, the first one

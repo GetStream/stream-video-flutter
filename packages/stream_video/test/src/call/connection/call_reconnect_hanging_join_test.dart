@@ -1,9 +1,6 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:stream_core/stream_core.dart';
 import 'package:stream_video/src/call/call.dart' show CallConnectionCoordinator;
 import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
 import 'package:stream_video/src/coordinator/open_api/coordinator_client_open_api.dart';
@@ -72,13 +69,12 @@ void main() {
     'attempt reconnects',
     () async {
       // The rejoin's stability window is not what this test is about.
+      final stabilityWindow = CallConnectionCoordinator.rejoinStabilityWindow;
       CallConnectionCoordinator.rejoinStabilityWindow = const Duration(
         milliseconds: 10,
       );
       addTearDown(
-        () => CallConnectionCoordinator.rejoinStabilityWindow = const Duration(
-          seconds: 3,
-        ),
+        () => CallConnectionCoordinator.rejoinStabilityWindow = stabilityWindow,
       );
 
       final harness = ConnectionHarness(sessionCount: 2);

@@ -117,14 +117,18 @@ class StreamRetryInterceptor extends Interceptor {
   ///
   /// A native connect timeout fires before the request is written, so the
   /// server never saw it. On web it fires whenever no response headers came
-  /// in time, which includes a request the server received.
-  bool _isSafeToResend(DioException err) {
-    if (err.type == DioExceptionType.connectionTimeout &&
-        !CurrentPlatform.isWeb) {
-      return true;
-    }
-    return _safeMethods.contains(err.requestOptions.method.toUpperCase());
-  }
+  /// in time, which includes a request the server received. A timeout that is
+  /// not dio's own, such as loading the token, happened before the request
+  /// was sent.
+  bool _isSafeToResend(DioException err) => switch (err.type) {
+    DioExceptionType.connectionTimeout when !CurrentPlatform.isWeb => true,
+    DioExceptionType.connectionTimeout ||
+    DioExceptionType.sendTimeout ||
+    DioExceptionType.receiveTimeout => _safeMethods.contains(
+      err.requestOptions.method.toUpperCase(),
+    ),
+    _ => true,
+  };
 
   /// Whether [exception], raised by the failed request [err], is worth another
   /// attempt.
