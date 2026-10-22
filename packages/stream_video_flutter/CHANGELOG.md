@@ -229,6 +229,9 @@
 ### 🐞 Fixed
 
 - The lobby no longer offers a speaker choice on Safari and other WebKit browsers, which play every call on the system default output.
+- `StreamCallContent` keeps the call body clear of side safe-area insets, such as a status rail in landscape.
+- The floating local video keeps clear of the safe-area insets on every edge.
+- `OverlayAppBar` now clears the right safe-area inset.
 - Fixed picking an option in a `StreamContextMenuAnchor`, or an anchored `StreamAdaptiveMenuAnchor`, closing the dialog it is shown in.
 - The participant tile's overflow menu lines up with the edge of its button.
 - `StreamAdaptiveMenuAnchor` sheet rows are 48px tall.
