@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:stream_core_flutter/core.dart';
 
+import '../../utils/display_fold.dart';
 import 'stream_modal_parts.dart';
 
 /// Shows [builder] as a modal dialog over a blurred scrim.
@@ -19,6 +20,10 @@ import 'stream_modal_parts.dart';
 /// they are when it opens. Themes above the navigator, such as the app's, are
 /// read as they change.
 ///
+/// On a window split by a fold, the dialog is drawn in the half closest to
+/// [anchorPoint], in window coordinates. Pass the position of the control that
+/// opened it. Defaults to the trailing top corner.
+///
 /// Returns the value the dialog was popped with, or null when it was
 /// dismissed.
 Future<T?> showStreamModalDialog<T>({
@@ -28,6 +33,7 @@ Future<T?> showStreamModalDialog<T>({
   String? barrierLabel,
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
+  Offset? anchorPoint,
 }) {
   final navigator = Navigator.of(context, rootNavigator: useRootNavigator);
   final themes = InheritedTheme.capture(from: context, to: navigator.context);
@@ -36,6 +42,7 @@ Future<T?> showStreamModalDialog<T>({
     context: context,
     useRootNavigator: useRootNavigator,
     routeSettings: routeSettings,
+    anchorPoint: anchorPoint ?? trailingTopAnchorOf(context),
     barrierDismissible: barrierDismissible,
     barrierLabel:
         barrierLabel ??

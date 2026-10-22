@@ -3,6 +3,7 @@
 ### ✅ Added
 
 - Added `StreamMediaDevicesController.supportsAudioOutputSelection`; `audioOutputs` is empty where it is false.
+- Added `anchorPoint` to `showStreamModalDialog`, which picks the half of a folded window the dialog goes to.
 - Added `StreamCallConnectionBanner`, which says what the call's connection is doing while it reconnects.
 - Added `callConnectionConnecting`, `callConnectionReconnecting`, `callConnectionReconnectingAttempt`, `callConnectionJoining`, `callConnectionJoiningAttempt`, `callConnectionOffline`, `callConnectionMigrating` and `callConnectionReconnectFailed` to the localizations, in English and Dutch.
 - Added `StreamAdaptiveMenuAnchorThemeData` on `StreamVideoTheme`, and `StreamAdaptiveMenuAnchorTheme` to restyle the menu's sheet and anchored rows over a subtree.
@@ -212,6 +213,8 @@
 
 ### 🔄 Changed
 
+- On a folded window, `showStreamModalDialog` goes to the trailing half by default, and `StreamAdaptiveMenuAnchor`'s sheet to the half its button is in.
+- On a window folded down the middle, `StreamLobbyView` puts the preview and the rest of the lobby on either side of the fold, and `CallControlBar` splits its centre controls between its two sides.
 - `StreamCallContent` keeps showing the participants during a reconnect, and after one fails until the call has left, with a `StreamCallConnectionBanner` above them instead of the centred "Reconnecting" text.
 - `StreamSelectInput` draws its `labelText` in `headingXs`, the size the design gives it.
 - `StreamParticipantTileStyle.topToolbarPadding` defaults to none.

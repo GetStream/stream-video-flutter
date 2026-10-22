@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
@@ -300,6 +301,58 @@ void main() {
         expect(preview.left, greaterThanOrEqualTo(padding.left));
         expect(preview.right, lessThanOrEqualTo(size.width - padding.right));
       });
+    }
+  });
+
+  testWidgets('a half-open fold keeps every control off it', (tester) async {
+    const fold = Rect.fromLTWH(475, 0, 0, 669);
+    tester.view
+      ..physicalSize = const Size(951, 669)
+      ..devicePixelRatio = 1
+      ..padding = const FakeViewPadding(right: 84)
+      ..displayFeatures = const [
+        DisplayFeature(
+          bounds: fold,
+          type: DisplayFeatureType.fold,
+          state: DisplayFeatureState.postureHalfOpened,
+        ),
+      ];
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          body: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: StreamLobbyView.withController(
+                controller: controller,
+                actions: StreamLobbyActions.regular(),
+                onJoinCallPressed: (_) => true,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    // The first frame measures where the fold falls; the next lays out
+    // around it.
+    await tester.pump();
+    await tester.pump();
+
+    for (final finder in [
+      find.byType(StreamParticipantTile),
+      find.byType(StreamLobbyMicrophoneSplitButton),
+      find.byType(StreamLobbyCameraSplitButton),
+      find.byType(StreamButton).last,
+    ]) {
+      final rect = tester.getRect(finder);
+      expect(
+        rect.right <= fold.left || rect.left >= fold.right,
+        isTrue,
+        reason: '$finder at $rect',
+      );
     }
   });
 

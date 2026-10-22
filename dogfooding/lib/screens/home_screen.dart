@@ -18,6 +18,7 @@ import '../router/routes.dart';
 import '../utils/assets.dart';
 import '../utils/call_lookup.dart';
 import '../utils/consts.dart';
+import '../utils/dialog_anchor.dart';
 import '../utils/loading_dialog.dart';
 import '../widgets/environment_switcher.dart';
 import '../widgets/minimum_top_inset.dart';
@@ -183,6 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return showDialog(
       context: context,
+      anchorPoint: trailingTopAnchor(context),
       builder: (context) {
         return AlertDialog(
           backgroundColor: theme.scaffoldBackgroundColor,
@@ -517,6 +519,7 @@ class _JoinForm extends StatelessWidget {
       if (!kIsProd) {
         await showDialog<void>(
           context: context,
+          anchorPoint: trailingTopAnchor(context),
           builder: (context) {
             return AlertDialog(
               title: const Text('Invalid environment'),
