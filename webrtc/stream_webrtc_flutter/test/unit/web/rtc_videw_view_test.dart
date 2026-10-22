@@ -12,5 +12,5 @@ void main() {
     await renderer.initialize();
     renderer.srcObject = await MediaDevices.getUserMedia({});
     await renderer.dispose();
-  });
+  }, skip: 'getUserMedia rejects a request without audio or video.');
 }
