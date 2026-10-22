@@ -95,10 +95,7 @@ class CallCoordinatorEventRouter {
       case StreamCallReactionEvent _:
         return _reactions.onReaction(event);
       case StreamCallSessionParticipantCountUpdatedEvent _:
-        final status = _stateManager.callState.status;
-        if (status.isConnected || status.isJoined) {
-          return;
-        }
+        if (_stateManager.callState.status.isAlreadyJoined) return;
 
         return _stateManager.setParticipantsCount(
           totalCount: event.participantsCountByRole.values.fold(

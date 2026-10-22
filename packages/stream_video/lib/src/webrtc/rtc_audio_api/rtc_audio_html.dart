@@ -119,6 +119,8 @@ void startAudio(String id, rtc.MediaStreamTrack track) {
 
   if (audioElement is! web.HTMLAudioElement) return;
 
+  audioElement.muted = _playoutPaused;
+
   _attach(id, audioElement, track.jsTrack);
 }
 
@@ -247,6 +249,27 @@ Future<void> _reattach(List<String> trackIds, {required String reason}) async {
   }
 }
 
+/// Whether remote audio playout is paused, see [setAudioPlayoutPaused].
+bool _playoutPaused = false;
+
+/// Mutes or unmutes every remote audio element, including the ones created
+/// later while [paused] is set.
+///
+/// Uses the element's `muted` flag rather than pausing it, so playback keeps
+/// running (and the watchdog does not try to recover it) and resumes in sync.
+void setAudioPlayoutPaused({required bool paused}) {
+  _playoutPaused = paused;
+
+  final container = web.document.getElementById(audioContainerId);
+  if (container == null) return;
+
+  final elements = container.querySelectorAll('audio');
+  for (var i = 0; i < elements.length; i++) {
+    final element = elements.item(i);
+    if (element is web.HTMLAudioElement) element.muted = paused;
+  }
+}
+
 /// Stops playing [track] and removes the audio element of track [id].
 ///
 /// Does nothing when the element has since been given another track. That is
@@ -303,7 +326,7 @@ Future<void> setSinkId(String id, String deviceId) async {
   if (audioElement is! web.HTMLAudioElement) {
     // Not a failure: the element is created when the track starts, and every
     // site that starts a track re-applies the selected output immediately
-    // after, via `_applyCurrentAudioOutputDevice` in `call_session.dart`, which
+    // after, via `applyCurrentAudioOutputDevice` in `call_session.dart`, which
     // re-derives the device from call state.
     streamLog.w(
       _tag,

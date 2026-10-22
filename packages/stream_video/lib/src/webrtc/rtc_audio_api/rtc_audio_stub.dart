@@ -36,3 +36,7 @@ Future<void> reattachRemoteAudio({required String reason}) {
 bool checkIfAudioOutputChangeSupported() {
   throw UnimplementedError();
 }
+
+void setAudioPlayoutPaused({required bool paused}) {
+  throw UnimplementedError();
+}

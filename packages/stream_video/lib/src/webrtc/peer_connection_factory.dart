@@ -28,6 +28,13 @@ class StreamPeerConnectionFactory {
   /// [BroadcasterAudioPolicy] when null.
   final AudioConfigurationPolicy? audioConfigurationPolicy;
 
+  /// The audio policy this factory is built with, fixed for its lifetime.
+  ///
+  /// Falls back to [BroadcasterAudioPolicy] when [audioConfigurationPolicy]
+  /// is null.
+  AudioConfigurationPolicy get resolvedAudioConfigurationPolicy =>
+      audioConfigurationPolicy ?? const BroadcasterAudioPolicy();
+
   rtc.NativePeerConnectionFactory? _nativeFactory;
   Future<rtc.NativePeerConnectionFactory?>? _nativeFactoryFuture;
 
@@ -54,7 +61,7 @@ class StreamPeerConnectionFactory {
 
   Future<rtc.NativePeerConnectionFactory?> _buildNativeFactory() async {
     try {
-      final policy = audioConfigurationPolicy ?? const BroadcasterAudioPolicy();
+      final policy = resolvedAudioConfigurationPolicy;
       final options = <String, dynamic>{
         'bypassVoiceProcessing': policy.bypassVoiceProcessing,
       };
@@ -66,8 +73,12 @@ class StreamPeerConnectionFactory {
       }
 
       if (CurrentPlatform.isIos || CurrentPlatform.isMacOS) {
+        // Applied when the factory is built and again when its audio resumes.
+        // A policy that defaults to the speaker starts on the loudspeaker. On
+        // iOS, `Call.resumeAudio` then re-applies the configuration and output
+        // applied since.
         options['appleAudioConfiguration'] = policy
-            .getAppleConfiguration()
+            .getAppleConfiguration(defaultToSpeaker: policy.defaultsToSpeaker)
             .toMap();
       }
 

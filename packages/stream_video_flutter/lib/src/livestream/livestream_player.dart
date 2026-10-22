@@ -117,6 +117,7 @@ class LivestreamPlayer extends StatefulWidget {
     this.layoutMode = ParticipantLayoutMode.grid,
     this.screenShareMode = LivestreamScreenShareMode.spotlight,
     this.videoFit = VideoFit.contain,
+    this.fullscreenVideoFit = VideoFit.adaptive,
     this.pictureInPictureConfiguration = const PictureInPictureConfiguration(),
   });
 
@@ -141,8 +142,8 @@ class LivestreamPlayer extends StatefulWidget {
   final bool showRecordingsWhenEnded;
 
   /// Determines whether the livestream should start in fullscreen mode.
-  /// When true, the video will expand to cover the entire available space.
-  /// When false, the video will be contained within its boundaries.
+  /// When true, the video is shown with [fullscreenVideoFit].
+  /// When false, it is shown with [videoFit].
   /// Defaults to false.
   final bool startInFullscreenMode;
 
@@ -212,7 +213,7 @@ class LivestreamPlayer extends StatefulWidget {
   /// The action to perform when the recording shown when livestream is ended is tapped.
   final FutureOr<void> Function(String)? onRecordingTapped;
 
-  /// The action to perform when dfullscreen button is tapped.
+  /// The action to perform when the fullscreen button is tapped.
   final VoidCallback? onFullscreenTapped;
 
   /// Denotes if the livestream allows multiple hosts.
@@ -231,8 +232,19 @@ class LivestreamPlayer extends StatefulWidget {
   final LivestreamScreenShareMode screenShareMode;
 
   /// Denotes if the video fits the width (contain) or expands to
-  /// the whole size (cover).
+  /// the whole size (cover) while the player is not in fullscreen mode.
+  ///
+  /// Defaults to [VideoFit.contain].
   final VideoFit videoFit;
+
+  /// How the video is fitted while the player is in fullscreen mode.
+  ///
+  /// Defaults to [VideoFit.adaptive]: the video fills the player when it
+  /// shares the player's orientation, and is letterboxed when it does not, so
+  /// a landscape feed on a portrait phone is shown whole.
+  /// Pass [VideoFit.cover] to always fill the player, cropping a feed whose
+  /// orientation differs.
+  final VideoFit fullscreenVideoFit;
 
   /// Boolean to allow a user to double-tap a call to see diagnostic data.
   ///
@@ -268,7 +280,8 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   /// Controls the visibility of diagnostic data.
   bool _isStatsVisible = false;
 
-  /// Stores if the livestream is in cover or contain mode.
+  /// Stores if the livestream is in fullscreen mode, which shows the video
+  /// with [LivestreamPlayer.fullscreenVideoFit].
   bool _fullscreen = false;
 
   /// Whether the livestream is over and this player still owes its route a
@@ -495,7 +508,9 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
                   livestreamHostsParticipantsFilter:
                       widget.livestreamHostsParticipantsFilter,
                   displayDiagnostics: _isStatsVisible,
-                  videoFit: _fullscreen ? VideoFit.cover : widget.videoFit,
+                  videoFit: _fullscreen
+                      ? widget.fullscreenVideoFit
+                      : widget.videoFit,
                   showMultipleHosts: widget.showMultipleHosts,
                   layoutMode: widget.layoutMode,
                   screenShareMode: widget.screenShareMode,

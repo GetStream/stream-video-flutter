@@ -22,6 +22,7 @@ import '../errors/stream_video_exception.dart';
 import '../lifecycle/video_lifecycle_state.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../logger/stream_log.dart';
+import '../models/audio_configuration_policy.dart';
 import '../models/models.dart';
 import '../retry/retry_policy.dart';
 import '../sfu/data/events/sfu_events.dart';
@@ -313,9 +314,7 @@ class Call {
     sfuStatsReporter: () => _sfuStatsReporter,
     hasPermission: hasPermission,
     rtcMediaDeviceNotifier: () => _rtcMediaDeviceNotifier,
-    audioConfigurationPolicy: () =>
-        _stateManager.callState.preferences.audioConfigurationPolicy ??
-        _host.options.audioConfigurationPolicy,
+    audioConfigurationPolicy: () => _audioConfigurationPolicy,
     muteVideoWhenInBackground: () => _host.options.muteVideoWhenInBackground,
     muteAudioWhenInBackground: () => _host.options.muteAudioWhenInBackground,
     onMicrophoneMuted: (muted) async =>
@@ -362,12 +361,20 @@ class Call {
   /// Audio track states captured at suspension time.
   final _suspendedTrackStates = <String, SuspendedTrackState>{};
 
+  /// The audio policy in effect for this call.
+  ///
+  /// Once the call's peer connection factory exists, the policy it was built
+  /// with, which stays fixed for its lifetime. Before that, the one set in
+  /// the call preferences, else the client default.
+  AudioConfigurationPolicy get _audioConfigurationPolicy =>
+      _pcFactory?.resolvedAudioConfigurationPolicy ??
+      _stateManager.callState.preferences.audioConfigurationPolicy ??
+      _host.options.audioConfigurationPolicy;
+
   StreamPeerConnectionFactory _ensurePcFactory() {
     return _pcFactory ??= StreamPeerConnectionFactory(
       callCid: callCid,
-      audioConfigurationPolicy:
-          _stateManager.callState.preferences.audioConfigurationPolicy ??
-          _host.options.audioConfigurationPolicy,
+      audioConfigurationPolicy: _audioConfigurationPolicy,
     );
   }
 
@@ -432,6 +439,24 @@ class Call {
       return;
     }
     await factory.resumeAudio();
+
+    // On iOS the factory restores the audio session configuration it was
+    // built with. Bring back the one applied since, such as the loudspeaker
+    // the call settings asked for, and then an output the user picked, such
+    // as the earpiece.
+    if (CurrentPlatform.isIos) {
+      final result =
+          await _session?.restoreAppleAudioConfiguration() ??
+          failureWithError('no session');
+      if (result is Failure) {
+        _logger.e(
+          () =>
+              '[resumeAudio] audio session configuration not restored: '
+              '${result.videoError.message}',
+        );
+      }
+      await _session?.applyCurrentAudioOutputDevice();
+    }
 
     await _session?.resumeSuspendedAudioTracks(_suspendedTrackStates);
     _suspendedTrackStates.clear();

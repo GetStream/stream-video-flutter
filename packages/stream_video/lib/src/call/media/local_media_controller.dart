@@ -21,6 +21,7 @@ import '../../utils/extensions.dart';
 import '../../utils/future.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
+import '../../webrtc/apple_audio_route.dart';
 import '../../webrtc/media/media_constraints.dart';
 import '../../webrtc/model/rtc_video_parameters.dart';
 import '../../webrtc/rtc_manager.dart';
@@ -169,10 +170,13 @@ class LocalMediaController {
     /// settings.
     ///
     /// The priority order is as follows:
-    /// 1. If video camera is set to be on by default, speaker is enabled
-    /// 2. If audio speaker is set to be on by default, speaker is enabled
-    /// 3. If the default audio device is set to speaker, speaker is enabled
+    /// 1. If the audio policy defaults to the speaker, such as the viewer
+    ///    policy, speaker is enabled whatever the settings below say
+    /// 2. If video camera is set to be on by default, speaker is enabled
+    /// 3. If audio speaker is set to be on by default, speaker is enabled
+    /// 4. If the default audio device is set to speaker, speaker is enabled
     final speakerOnWithSettingsPriority =
+        _audioConfigurationPolicy().defaultsToSpeaker ||
         settings.video.cameraDefaultOn ||
         settings.audio.speakerDefaultOn ||
         settings.audio.defaultDevice ==
@@ -185,21 +189,21 @@ class LocalMediaController {
     );
 
     if (defaultAudioOutput == null) {
+      bool isSpeaker(RtcMediaDevice device) => device.id.equalsIgnoreCase(
+        AudioSettingsRequestDefaultDevice.speaker,
+      );
+
       // 2. Speaker (if settings indicate it should be used)
       if (speakerOnWithSettingsPriority) {
-        defaultAudioOutput = audioOutputs.firstWhereOrNull(
-          (device) => device.id.equalsIgnoreCase(
-            AudioSettingsRequestDefaultDevice.speaker,
-          ),
-        );
-      } else {
-        // 3. First non-speaker device
-        defaultAudioOutput = audioOutputs.firstWhereOrNull(
-          (device) => !device.id.equalsIgnoreCase(
-            AudioSettingsRequestDefaultDevice.speaker,
-          ),
-        );
+        defaultAudioOutput = audioOutputs.firstWhereOrNull(isSpeaker);
       }
+
+      // 3. First non-speaker device. Also when the speaker should be used
+      // but there is none: only iOS and Android list one, so web and desktop
+      // fall back to their first output.
+      defaultAudioOutput ??= audioOutputs.firstWhereOrNull(
+        (device) => !isSpeaker(device),
+      );
     }
 
     final defaultAudioOutputIsExternal =
@@ -362,11 +366,26 @@ class LocalMediaController {
 
     if (_connectOptions.audioOutputDevice != null) {
       await setAudioOutputDevice(_connectOptions.audioOutputDevice!);
-    } else {
-      if (CurrentPlatform.isIos) {
-        await _session()?.rtcManager?.setAppleAudioConfiguration(
-          speakerOn: _connectOptions.speakerDefaultOn,
-          policy: _audioConfigurationPolicy(),
+    } else if (CurrentPlatform.isIos) {
+      // Under a policy that defaults to the speaker, keeps the loudspeaker
+      // as the built-in output while headphones are connected, so
+      // disconnecting them does not fall back to the earpiece.
+      final policy = _audioConfigurationPolicy();
+      final rtcManager = _session()?.rtcManager;
+      final result = rtcManager == null
+          ? failureWithError<None>('no RTC manager')
+          : await rtcManager.setAppleAudioConfiguration(
+              speakerOn: resolveAppleSpeakerOn(
+                policy: policy,
+                speakerRequested: _connectOptions.speakerDefaultOn,
+              ),
+              policy: policy,
+            );
+      if (result is Failure) {
+        _logger.e(
+          () =>
+              '[applyConnectOptions] appleAudioConfiguration not applied: '
+              '${result.videoError.message}',
         );
       }
     }
