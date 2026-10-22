@@ -41,7 +41,7 @@ class StreamRetryInterceptor extends Interceptor {
     }
 
     final exception = err.toStreamException();
-    if (!_isRetryable(exception)) return handler.next(err);
+    if (!_isRetryable(exception, err)) return handler.next(err);
 
     final delay = _delay(exception, spent);
 
@@ -109,8 +109,33 @@ class StreamRetryInterceptor extends Interceptor {
     return retryAfter;
   }
 
-  /// Whether [exception] is worth another attempt.
-  bool _isRetryable(StreamException exception) => switch (exception) {
+  /// Methods that change nothing on the server, so sending one twice has no
+  /// effect beyond the first.
+  static const _safeMethods = {'GET', 'HEAD', 'OPTIONS'};
+
+  /// Whether the request [err] timed out on can be sent again.
+  ///
+  /// A native connect timeout fires before the request is written, so the
+  /// server never saw it. On web it fires whenever no response headers came
+  /// in time, which includes a request the server received. A timeout that is
+  /// not dio's own, such as loading the token, happened before the request
+  /// was sent.
+  bool _isSafeToResend(DioException err) => switch (err.type) {
+    DioExceptionType.connectionTimeout when !CurrentPlatform.isWeb => true,
+    DioExceptionType.connectionTimeout ||
+    DioExceptionType.sendTimeout ||
+    DioExceptionType.receiveTimeout => _safeMethods.contains(
+      err.requestOptions.method.toUpperCase(),
+    ),
+    _ => true,
+  };
+
+  /// Whether [exception], raised by the failed request [err], is worth another
+  /// attempt.
+  bool _isRetryable(
+    StreamException exception,
+    DioException err,
+  ) => switch (exception) {
     // The server declared that retrying will not help, which settles it.
     StreamApiException(unrecoverable: true) => false,
 
@@ -141,7 +166,11 @@ class StreamRetryInterceptor extends Interceptor {
     // the cancellation.
     StreamNetworkException(isCancelled: true) => false,
 
-    // Never reached a verdict — a timeout, a dropped connection. Worth another
+    // A request that timed out may have reached the server, so only one that
+    // is safe to send twice is sent again.
+    StreamNetworkException(isTimeout: true) => _isSafeToResend(err),
+
+    // Never reached a verdict — a dropped connection. Worth another
     // attempt, and the outcome of the last one is unknown either way.
     StreamNetworkException() => true,
 
