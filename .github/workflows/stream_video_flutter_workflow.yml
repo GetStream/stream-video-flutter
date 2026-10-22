@@ -170,11 +170,31 @@ jobs:
         run: |
           melos run build:example:android
 
+  # codecov/patch is a required check, but Codecov only reports it for a
+  # commit with an upload. When the gate skips the tests, an empty upload
+  # makes Codecov report it as passed.
+  coverage-skipped:
+    needs: gate
+    if: needs.gate.outputs.should_run != 'true' && github.event_name == 'pull_request' && github.event.pull_request.draft != true
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+
+      - name: Report Skipped Coverage
+        uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          run_command: empty-upload
+          force: true
+          fail_ci_if_error: true
+
   # The one check to mark as required: it passes when every check above
   # passed or was skipped by the gate.
   sdk-verified:
     if: always()
-    needs: [gate, analyze, complexity, build]
+    needs: [gate, analyze, complexity, build, coverage-skipped]
     timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
