@@ -16,6 +16,10 @@ workspace:
   - packages/stream_video_push_notification
   - packages/stream_video_push_notification/example
   - packages/stream_video_screen_sharing
+  - webrtc/dart_webrtc
+  - webrtc/stream_webrtc_flutter
+  - webrtc/stream_webrtc_flutter/example
+  - webrtc/webrtc_interface
 
 dev_dependencies:
   lints: ^6.0.0
@@ -58,10 +62,6 @@ dependency_overrides:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core_flutter
       ref: 003840918ef0537a2c0dd0b0115a92caae79630e
-  stream_webrtc_flutter:
-    git:
-      url: https://github.com/GetStream/webrtc-flutter.git
-      ref: 9b6fffaa5fda2652548cafc7d6ec87128409c6bc
 
 melos:
   ignore:
@@ -92,6 +92,7 @@ melos:
         stream_video_push_notification: ^2.0.0-alpha
         stream_video_screen_sharing: ^2.0.0-alpha
         theme_extensions_builder_annotation: ^7.1.0
+        webrtc_interface: ^1.5.1
 
       hooks:
         # Keep streamVideoVersion in globals.dart in sync with the pubspec version.
