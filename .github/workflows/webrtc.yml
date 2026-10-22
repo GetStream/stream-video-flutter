@@ -218,15 +218,16 @@ jobs:
       - name: Build
         working-directory: ${{ env.example }}
         run: |
-          # flutter-elinux reads the package config from the app's own
-          # .dart_tool, but in the pub workspace only the root has one. Resolve
-          # from the root, copy the config over with its relative paths rebased
-          # onto the example, and build without resolving again.
+          # flutter-elinux reads the package config and graph from the app's
+          # own .dart_tool, but in the pub workspace only the root has them.
+          # Resolve from the root, copy both over with the config's relative
+          # paths rebased onto the example, and build without resolving again.
           (cd "$GITHUB_WORKSPACE" && ~/flutter-elinux/bin/flutter-elinux pub get)
           mkdir -p .dart_tool
           sed 's#"rootUri": "\.\./#"rootUri": "../../../../#' \
             "$GITHUB_WORKSPACE/.dart_tool/package_config.json" \
             > .dart_tool/package_config.json
+          cp "$GITHUB_WORKSPACE/.dart_tool/package_graph.json" .dart_tool/
           ~/flutter-elinux/bin/flutter-elinux build elinux --no-pub
 
   build-web:
