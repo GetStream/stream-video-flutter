@@ -11,7 +11,7 @@
 #   analyze         flutter analyze.
 #   format          dart format lib/ and test/.
 #   format-verify   dart format lib/ and test/, failing on changes.
-#   imports-verify  import_sorter, failing on changes.
+#   imports-verify  import_sorter, failing on changes. Skips dart_webrtc.
 #   test            flutter test, in packages that have a test/ folder.
 #
 # Without a package, the command runs in every package under webrtc/.
@@ -75,7 +75,13 @@ for dir in "${packages[@]}"; do
       dart format --set-exit-if-changed $(format_dirs)
       ;;
     imports-verify)
-      dart run import_sorter:main --no-comments --exit-if-changed
+      # The imported dart_webrtc source does not pass import_sorter yet
+      # (FLU-1039).
+      if [[ "$(basename "$dir")" == dart_webrtc ]]; then
+        echo "Imports not sorted yet, skipping."
+      else
+        dart run import_sorter:main --no-comments --exit-if-changed
+      fi
       ;;
     test)
       if [[ -d test ]]; then

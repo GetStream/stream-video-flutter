@@ -66,6 +66,7 @@ jobs:
       matrix:
         package:
           - stream_webrtc_flutter
+          - dart_webrtc
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
