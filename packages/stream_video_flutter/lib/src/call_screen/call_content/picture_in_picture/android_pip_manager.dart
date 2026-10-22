@@ -50,6 +50,58 @@ class AndroidPipManager {
     }
   }
 
+  /// The object that last set the aspect ratio, so that another one doesn't
+  /// clear it by accident.
+  Object? _aspectRatioOwner;
+
+  /// Sets the shape of the picture-in-picture window to the aspect ratio of
+  /// [videoSize] on behalf of [owner], updating the window if it is already
+  /// showing.
+  ///
+  /// Pass null when the video's size is unknown, so the window falls back to
+  /// the device's orientation. Android limits the ratio to between 1:2.39 and
+  /// 2.39:1.
+  Future<void> setPictureInPictureAspectRatio(
+    Size? videoSize, {
+    required Object owner,
+  }) {
+    _aspectRatioOwner = owner;
+    return _sendAspectRatio(videoSize);
+  }
+
+  /// Falls back to the device's orientation for the window's shape, unless
+  /// an object other than [owner] has set the aspect ratio since.
+  Future<void> clearPictureInPictureAspectRatio({required Object owner}) async {
+    if (!identical(_aspectRatioOwner, owner)) return;
+
+    _aspectRatioOwner = null;
+    return _sendAspectRatio(null);
+  }
+
+  Future<void> _sendAspectRatio(Size? videoSize) async {
+    if (!CurrentPlatform.isAndroid) return;
+
+    final hasSize =
+        videoSize != null && videoSize.width > 0 && videoSize.height > 0;
+
+    try {
+      await _methodChannel.invokeMethod(
+        'setPictureInPictureAspectRatio',
+        hasSize
+            ? {
+                'width': videoSize.width.round(),
+                'height': videoSize.height.round(),
+              }
+            : null,
+      );
+    } catch (e) {
+      _logger.e(
+        () =>
+            '[setPictureInPictureAspectRatio] Failed to set picture in picture aspect ratio: $e',
+      );
+    }
+  }
+
   Future<void> _handleMethodCall(MethodCall call) async {
     switch (call.method) {
       case 'onPictureInPictureModeChanged':

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../stream_video_flutter.dart';
+import 'rendered_video_sizes.dart';
 
 /// A builder for the widget that is displayed when there's no video stream.
 Widget _defaultPlaceholderBuilder(BuildContext context) => Container();
@@ -242,9 +243,17 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
   /// If [rtc.RTCVideoRenderer] is initialized.
   bool _isInitialized = false;
 
+  /// The id of the track whose frame size this renderer last reported, so it
+  /// can be taken back.
+  String? _reportedTrackId;
+
   @override
   void initState() {
     super.initState();
+    // Only native size and rotation events, unlike the renderer's listeners,
+    // which also fire when the stream is set and still hold the size of the
+    // previous one.
+    _videoRenderer.onResize = _reportVideoSize;
     _initializeRenderer();
   }
 
@@ -274,12 +283,41 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
     final streamChanged =
         widget.videoTrack.mediaStream != oldWidget.videoTrack.mediaStream;
     if (widget.videoTrack != oldWidget.videoTrack || streamChanged) {
+      // A new track with the same id, such as after a reconnect, keeps its
+      // size until its own frames report one.
+      final reportedTrackId = _reportedTrackId;
+      if (reportedTrackId != null &&
+          reportedTrackId != widget.videoTrack.trackId) {
+        RenderedVideoSizes.instance.remove(reportedTrackId, this);
+        _reportedTrackId = null;
+      }
       _videoRenderer.srcObject = widget.videoTrack.mediaStream;
     }
   }
 
+  /// Shares the size of the frames shown here, so that the Android
+  /// picture-in-picture window can take the video's shape.
+  void _reportVideoSize() {
+    final value = _videoRenderer.value;
+    if (value.width <= 0 || value.height <= 0) return;
+
+    final isRotated = value.rotation == 90 || value.rotation == 270;
+    final trackId = _reportedTrackId = widget.videoTrack.trackId;
+    RenderedVideoSizes.instance.report(
+      trackId,
+      this,
+      isRotated
+          ? Size(value.height, value.width)
+          : Size(value.width, value.height),
+    );
+  }
+
   @override
   void dispose() {
+    _videoRenderer.onResize = null;
+    if (_reportedTrackId case final trackId?) {
+      RenderedVideoSizes.instance.remove(trackId, this);
+    }
     // Until initialised, [_initializeRenderer] disposes it once it resolves.
     if (_isInitialized) {
       _videoRenderer.srcObject = null;

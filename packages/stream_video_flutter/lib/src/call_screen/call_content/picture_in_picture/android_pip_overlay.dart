@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../../../stream_video_flutter.dart';
 import '../../../call_participants/screen_share_call_participants_content.dart';
+import 'android_pip_track.dart';
 import 'picture_in_picture_defaults.dart';
 
 final _logger = taggedLogger(tag: 'SV:AndroidPipOverlay');
@@ -104,23 +105,17 @@ class _AndroidPipOverlayState extends State<AndroidPipOverlay>
             .callPictureInPictureWidgetBuilder ??
         widget.customBuilder;
 
-    if (customBuilder == null && sortedParticipants.isNotEmpty) {
-      final pipParticipant = sortedParticipants.first;
+    final pipTrack = customBuilder == null
+        ? resolveAndroidPipTrack(
+            sortedParticipants,
+            widget.pictureInPictureConfiguration?.pipTrackPriority,
+          )
+        : null;
 
-      final hasScreenShare =
-          pipParticipant.isScreenShareEnabled &&
-          pipParticipant.screenShareTrack != null;
+    if (pipTrack != null) {
+      final pipParticipant = pipTrack.participant;
 
-      // Show screen share if:
-      // 1. prioritise is true and screen share is available, OR
-      // 2. video is disabled but screen share is available (fallback)
-      final shouldShowScreenShare =
-          hasScreenShare &&
-          (widget.pictureInPictureConfiguration?.pipTrackPriority !=
-                  PipTrackPriority.camera ||
-              !pipParticipant.isVideoEnabled);
-
-      if (shouldShowScreenShare) {
+      if (pipTrack.trackType == SfuTrackType.screenShare) {
         pipBody = ScreenShareContent(
           key: ValueKey(
             '${pipParticipant.uniqueParticipantKey} - pipScreenShare',
