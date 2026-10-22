@@ -22,10 +22,8 @@ class RTCTrackEventNative extends RTCTrackEvent {
     Map<String, dynamic> map,
     String peerConnectionId,
   ) {
-    var streamsParams = map['streams'] as List<Map<String, dynamic>>;
-    var streams = streamsParams
-        .map((e) => MediaStreamNative.fromMap(e))
-        .toList();
+    final streamsParams = map['streams'] as List<Map<String, dynamic>>;
+    final streams = streamsParams.map(MediaStreamNative.fromMap).toList();
     return RTCTrackEventNative(
       RTCRtpReceiverNative.fromMap(
         map['receiver'],

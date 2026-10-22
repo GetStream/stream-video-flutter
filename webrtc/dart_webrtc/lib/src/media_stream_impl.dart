@@ -18,34 +18,38 @@ class MediaStreamWeb extends MediaStream {
   @override
   Future<void> addTrack(MediaStreamTrack track, {bool addToNative = true}) {
     if (addToNative) {
-      var _native = track as MediaStreamTrackWeb;
-      jsStream.addTrack(_native.jsTrack);
+      final native = track as MediaStreamTrackWeb;
+      jsStream.addTrack(native.jsTrack);
     }
     return Future.value();
   }
 
   @override
-  Future<void> removeTrack(MediaStreamTrack track,
-      {bool removeFromNative = true}) async {
+  Future<void> removeTrack(
+    MediaStreamTrack track, {
+    bool removeFromNative = true,
+  }) async {
     if (removeFromNative) {
-      var _native = track as MediaStreamTrackWeb;
-      jsStream.removeTrack(_native.jsTrack);
+      final native = track as MediaStreamTrackWeb;
+      jsStream.removeTrack(native.jsTrack);
     }
   }
 
   @override
   List<MediaStreamTrack> getAudioTracks() {
-    var audioTracks = <MediaStreamTrack>[];
+    final audioTracks = <MediaStreamTrack>[];
     jsStream.getAudioTracks().toDart.forEach(
-        (dynamic jsTrack) => audioTracks.add(MediaStreamTrackWeb(jsTrack)));
+      (dynamic jsTrack) => audioTracks.add(MediaStreamTrackWeb(jsTrack)),
+    );
     return audioTracks;
   }
 
   @override
   List<MediaStreamTrack> getVideoTracks() {
-    var audioTracks = <MediaStreamTrack>[];
+    final audioTracks = <MediaStreamTrack>[];
     jsStream.getVideoTracks().toDart.forEach(
-        (dynamic jsTrack) => audioTracks.add(MediaStreamTrackWeb(jsTrack)));
+      (dynamic jsTrack) => audioTracks.add(MediaStreamTrackWeb(jsTrack)),
+    );
     return audioTracks;
   }
 

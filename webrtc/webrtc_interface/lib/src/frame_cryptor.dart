@@ -108,7 +108,7 @@ abstract class FrameCryptor {
   FrameCryptor();
 
   Function(String participantId, FrameCryptorState state)?
-      onFrameCryptorStateChanged;
+  onFrameCryptorStateChanged;
 
   /// The unique identifier of the frame cryptor.
   String get participantId;

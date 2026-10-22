@@ -43,15 +43,15 @@ class MediaRecorderNative extends MediaRecorder {
     String? mimeType,
     int timeSlice = 1000,
   }) {
-    throw 'It\'s for Flutter Web only';
+    throw "It's for Flutter Web only";
   }
 
   @override
   Future<dynamic> stop() async {
     if (!_isStarted) {
-      throw "Media recorder not started!";
+      throw 'Media recorder not started!';
     }
-    return await WebRTC.invokeMethod('stopRecordToFile', {
+    return WebRTC.invokeMethod('stopRecordToFile', {
       'recorderId': _recorderId,
       'albumName': _albumName,
     });

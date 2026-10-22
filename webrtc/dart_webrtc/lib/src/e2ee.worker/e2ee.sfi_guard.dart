@@ -23,11 +23,11 @@ class SifGuard {
       userFramesSinceSif += 1;
     }
     if (
-        // reset if we received more user frames than SIFs
-        userFramesSinceSif > consecutiveSifCount ||
-            // also reset if we got a new user frame and the latest SIF frame hasn't been updated in a while
-            DateTime.now().millisecondsSinceEpoch - lastSifReceivedAt >
-                MAX_SIF_DURATION) {
+    // reset if we received more user frames than SIFs
+    userFramesSinceSif > consecutiveSifCount ||
+        // also reset if we got a new user frame and the latest SIF frame hasn't been updated in a while
+        DateTime.now().millisecondsSinceEpoch - lastSifReceivedAt >
+            MAX_SIF_DURATION) {
       reset();
     }
   }

@@ -25,28 +25,30 @@ class RTCRtpSenderWeb extends RTCRtpSender {
   Future<void> replaceTrack(MediaStreamTrack? track) async {
     try {
       if (track != null) {
-        var nativeTrack = track as MediaStreamTrackWeb;
+        final nativeTrack = track as MediaStreamTrackWeb;
         _jsRtpSender.replaceTrack(nativeTrack.jsTrack);
       } else {
         _jsRtpSender.replaceTrack(null);
       }
     } on Exception catch (e) {
-      throw 'Unable to RTCRtpSender::replaceTrack: ${e.toString()}';
+      throw 'Unable to RTCRtpSender::replaceTrack: $e';
     }
   }
 
   @override
-  Future<void> setTrack(MediaStreamTrack? track,
-      {bool takeOwnership = true}) async {
+  Future<void> setTrack(
+    MediaStreamTrack? track, {
+    bool takeOwnership = true,
+  }) async {
     try {
       if (track != null) {
-        var nativeTrack = track as MediaStreamTrackWeb;
+        final nativeTrack = track as MediaStreamTrackWeb;
         _jsRtpSender.callMethod('setTrack'.toJS, nativeTrack.jsTrack);
       } else {
-        _jsRtpSender.callMethod('setTrack'.toJS, null);
+        _jsRtpSender.callMethod('setTrack'.toJS);
       }
     } on Exception catch (e) {
-      throw 'Unable to RTCRtpSender::setTrack: ${e.toString()}';
+      throw 'Unable to RTCRtpSender::setTrack: $e';
     }
   }
 
@@ -55,49 +57,55 @@ class RTCRtpSenderWeb extends RTCRtpSender {
     try {
       final nativeStreams = streams.cast<MediaStreamWeb>();
       _jsRtpSender.callMethodVarArgs(
-          'setStreams'.toJS, nativeStreams.map((e) => e.jsStream).toList());
+        'setStreams'.toJS,
+        nativeStreams.map((e) => e.jsStream).toList(),
+      );
     } on Exception catch (e) {
-      throw 'Unable to RTCRtpSender::setStreams: ${e.toString()}';
+      throw 'Unable to RTCRtpSender::setStreams: $e';
     }
   }
 
   @override
   RTCRtpParameters get parameters {
-    var parameters = _jsRtpSender.getParameters();
+    final parameters = _jsRtpSender.getParameters();
     return RTCRtpParametersWeb.fromJsObject(parameters);
   }
 
   @override
   Future<bool> setParameters(RTCRtpParameters parameters) async {
     try {
-      var oldParameters = _jsRtpSender.getParameters();
+      final oldParameters = _jsRtpSender.getParameters();
 
       oldParameters.encodings =
           (parameters.encodings?.map((e) => e.toMap()).toList().jsify() ??
-              [].jsify()) as JSArray<web.RTCRtpEncodingParameters>;
+                  [].jsify())!
+              as JSArray<web.RTCRtpEncodingParameters>;
       await _jsRtpSender.setParameters(oldParameters).toDart;
       return await Future<bool>.value(true);
     } on Exception catch (e) {
-      throw 'Unable to RTCRtpSender::setParameters: ${e.toString()}';
+      throw 'Unable to RTCRtpSender::setParameters: $e';
     }
   }
 
   @override
   Future<List<StatsReport>> getStats() async {
-    var stats = await _jsRtpSender.getStats().toDart;
-    var report = <StatsReport>[];
+    final stats = await _jsRtpSender.getStats().toDart;
+    final report = <StatsReport>[];
     stats.callMethodVarArgs('forEach'.toJS, [
       (JSObject value, JSAny key) {
-        var map = value.dartify() as LinkedHashMap<Object?, Object?>;
-        var stats = <String, dynamic>{};
-        for (var entry in map.entries) {
+        final map = value.dartify()! as LinkedHashMap<Object?, Object?>;
+        final stats = <String, dynamic>{};
+        for (final entry in map.entries) {
           stats[entry.key.toString()] = entry.value;
         }
-        report.add(StatsReport(
+        report.add(
+          StatsReport(
             value.getProperty<JSString>('id'.toJS).toDart,
             value.getProperty<JSString>('type'.toJS).toDart,
             value.getProperty<JSNumber>('timestamp'.toJS).toDartDouble,
-            stats));
+            stats,
+          ),
+        );
       }.toJS,
     ]);
     return report;

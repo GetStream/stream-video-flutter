@@ -16,13 +16,13 @@ enum RTCSignalingState {
   RTCSignalingStateHaveRemoteOffer,
   RTCSignalingStateHaveLocalPrAnswer,
   RTCSignalingStateHaveRemotePrAnswer,
-  RTCSignalingStateClosed
+  RTCSignalingStateClosed,
 }
 
 enum RTCIceGatheringState {
   RTCIceGatheringStateNew,
   RTCIceGatheringStateGathering,
-  RTCIceGatheringStateComplete
+  RTCIceGatheringStateComplete,
 }
 
 enum RTCPeerConnectionState {
@@ -31,7 +31,7 @@ enum RTCPeerConnectionState {
   RTCPeerConnectionStateDisconnected,
   RTCPeerConnectionStateNew,
   RTCPeerConnectionStateConnecting,
-  RTCPeerConnectionStateConnected
+  RTCPeerConnectionStateConnected,
 }
 
 enum RTCIceConnectionState {
@@ -89,7 +89,7 @@ final typeRtpTransceiverDirectionToString = <TransceiverDirection, String>{
   TransceiverDirection.SendOnly: 'sendonly',
   TransceiverDirection.RecvOnly: 'recvonly',
   TransceiverDirection.Inactive: 'inactive',
-  TransceiverDirection.Stopped: 'stopped,'
+  TransceiverDirection.Stopped: 'stopped,',
 };
 
 RTCIceConnectionState iceConnectionStateForString(String? state) {

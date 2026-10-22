@@ -1,4 +1,6 @@
+import '../webrtc_interface.dart' show MediaStreamTrack;
 import 'media_stream.dart';
+import 'media_stream_track.dart' show MediaStreamTrack;
 
 class MediaStreamConstraints {
   MediaStreamConstraints({this.audio, this.video});
@@ -56,38 +58,38 @@ class MediaTrackSupportedConstraints {
     this.zoom = false,
   });
 
-  final bool aspectRatio,
-      autoGainControl,
-      brightness,
-      channelCount,
-      colorTemperature,
-      contrast,
-      deviceId,
-      echoCancellation,
-      exposureCompensation,
-      exposureMode,
-      exposureTime,
-      facingMode,
-      focusDistance,
-      focusMode,
-      frameRate,
-      groupId,
-      height,
-      iso,
-      latency,
-      noiseSuppression,
-      pan,
-      pointsOfInterest,
-      resizeMode,
-      sampleRate,
-      sampleSize,
-      saturation,
-      sharpness,
-      tilt,
-      torch,
-      whiteBalanceMode,
-      width,
-      zoom;
+  final bool aspectRatio;
+  final bool autoGainControl;
+  final bool brightness;
+  final bool channelCount;
+  final bool colorTemperature;
+  final bool contrast;
+  final bool deviceId;
+  final bool echoCancellation;
+  final bool exposureCompensation;
+  final bool exposureMode;
+  final bool exposureTime;
+  final bool facingMode;
+  final bool focusDistance;
+  final bool focusMode;
+  final bool frameRate;
+  final bool groupId;
+  final bool height;
+  final bool iso;
+  final bool latency;
+  final bool noiseSuppression;
+  final bool pan;
+  final bool pointsOfInterest;
+  final bool resizeMode;
+  final bool sampleRate;
+  final bool sampleSize;
+  final bool saturation;
+  final bool sharpness;
+  final bool tilt;
+  final bool torch;
+  final bool whiteBalanceMode;
+  final bool width;
+  final bool zoom;
 }
 
 abstract class MediaDevices {

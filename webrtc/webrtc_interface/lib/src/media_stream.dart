@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../webrtc_interface.dart' show MediaStreamTrack;
 import 'media_stream_track.dart';
 
 ///https://w3c.github.io/mediacapture-main/#mediastream
@@ -30,8 +31,10 @@ abstract class MediaStream {
   Future<void> addTrack(MediaStreamTrack track, {bool addToNative = true});
 
   /// Removes the given [MediaStreamTrack] object from this [MediaStream].
-  Future<void> removeTrack(MediaStreamTrack track,
-      {bool removeFromNative = true});
+  Future<void> removeTrack(
+    MediaStreamTrack track, {
+    bool removeFromNative = true,
+  });
 
   /// Returns a List [MediaStreamTrack] objects representing all the tracks in this stream.
   List<MediaStreamTrack> getTracks();
@@ -46,7 +49,7 @@ abstract class MediaStream {
 
   /// Returns either a [MediaStreamTrack] object from this stream's track set whose id is equal to trackId, or [StateError], if no such track exists.
   MediaStreamTrack? getTrackById(String trackId) {
-    for (var item in getTracks()) {
+    for (final item in getTracks()) {
       if (item.id == trackId) {
         return item;
       }

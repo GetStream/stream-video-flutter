@@ -64,8 +64,9 @@ class RTCDataChannelWeb extends RTCDataChannel {
 
   final _stateChangeController =
       StreamController<RTCDataChannelState>.broadcast(sync: true);
-  final _messageController =
-      StreamController<RTCDataChannelMessage>.broadcast(sync: true);
+  final _messageController = StreamController<RTCDataChannelMessage>.broadcast(
+    sync: true,
+  );
 
   Future<RTCDataChannelMessage> _parse(dynamic data) async {
     if (data is String) {

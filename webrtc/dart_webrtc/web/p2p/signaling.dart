@@ -23,8 +23,8 @@ enum SignalingState {
 typedef SignalingStateCallback = void Function(SignalingState state);
 typedef StreamStateCallback = void Function(MediaStream stream);
 typedef OtherEventCallback = void Function(dynamic event);
-typedef DataChannelMessageCallback = void Function(
-    RTCDataChannel dc, RTCDataChannelMessage data);
+typedef DataChannelMessageCallback =
+    void Function(RTCDataChannel dc, RTCDataChannelMessage data);
 typedef DataChannelCallback = void Function(RTCDataChannel dc);
 
 class Signaling {
@@ -117,7 +117,8 @@ class Signaling {
         var pc = await _createPeerConnection(id, media, false);
         _peerConnections[id] = pc;
         await pc.setRemoteDescription(
-            RTCSessionDescription(description['sdp'], description['type']));
+          RTCSessionDescription(description['sdp'], description['type']),
+        );
         await _createAnswer(id, pc, media);
         if (_remoteCandidates.isNotEmpty) {
           _remoteCandidates.forEach((candidate) async {
@@ -134,7 +135,8 @@ class Signaling {
         var pc = _peerConnections[id];
         if (pc != null) {
           await pc.setRemoteDescription(
-              RTCSessionDescription(description['sdp'], description['type']));
+            RTCSessionDescription(description['sdp'], description['type']),
+          );
         }
 
         break;
@@ -142,8 +144,11 @@ class Signaling {
         var id = data['from'];
         var candidateMap = data['candidate'];
         var pc = _peerConnections[id];
-        var candidate = RTCIceCandidate(candidateMap['candidate'],
-            candidateMap['sdpMid'], candidateMap['sdpMLineIndex']);
+        var candidate = RTCIceCandidate(
+          candidateMap['candidate'],
+          candidateMap['sdpMid'],
+          candidateMap['sdpMLineIndex'],
+        );
         if (pc != null) {
           await pc.addCandidate(candidate);
         } else {
@@ -220,8 +225,8 @@ class Signaling {
           <String, dynamic>{
             'urls': _turnCredential['uris'][0],
             'username': _turnCredential['username'],
-            'credential': _turnCredential['password']
-          }
+            'credential': _turnCredential['password'],
+          },
         ];
       } catch (e) {
         print('error: ${e.toString()}');
@@ -231,8 +236,11 @@ class Signaling {
     _socket?.onOpen = () {
       print('onOpen');
       onStateChange?.call(SignalingState.ConnectionOpen);
-      _send('new',
-          {'name': 'dart_webrtc', 'id': _selfId, 'user_agent': 'broswer'});
+      _send('new', {
+        'name': 'dart_webrtc',
+        'id': _selfId,
+        'user_agent': 'broswer',
+      });
     };
 
     _socket?.onMessage = (message) {
@@ -263,7 +271,7 @@ class Signaling {
               },
               'facingMode': 'user',
               'optional': [],
-            }
+            },
           });
 
     onLocalStream?.call(stream);
@@ -272,14 +280,17 @@ class Signaling {
   }
 
   Future<RTCPeerConnection> _createPeerConnection(
-      id, media, user_screen) async {
+    id,
+    media,
+    user_screen,
+  ) async {
     if (media != 'data') _localStream = await createStream(media, user_screen);
     var pc = await createPeerConnection(<String, dynamic>{
       'iceServers': _iceServers.isNotEmpty
           ? _iceServers
           : [
-              {'urls': 'stun:stun.l.google.com:19302'}
-            ]
+              {'urls': 'stun:stun.l.google.com:19302'},
+            ],
     });
     if (media != 'data') await pc.addStream(_localStream!);
 
@@ -331,8 +342,11 @@ class Signaling {
     onDataChannel?.call(channel);
   }
 
-  void _createDataChannel(id, RTCPeerConnection pc,
-      {String label = 'fileTransfer'}) async {
+  void _createDataChannel(
+    id,
+    RTCPeerConnection pc, {
+    String label = 'fileTransfer',
+  }) async {
     var dataChannelDict = RTCDataChannelInit();
     var channel = await pc.createDataChannel(label, dataChannelDict);
     _addDataChannel(id, channel);

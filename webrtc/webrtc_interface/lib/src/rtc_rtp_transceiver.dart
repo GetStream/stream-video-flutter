@@ -8,7 +8,7 @@ import 'rtc_rtp_receiver.dart';
 import 'rtc_rtp_sender.dart';
 
 List<RTCRtpEncoding> listToRtpEncodings(List<Map<String, dynamic>> list) {
-  return list.map((e) => RTCRtpEncoding.fromMap(e)).toList();
+  return list.map(RTCRtpEncoding.fromMap).toList();
 }
 
 class RTCRtpTransceiverInit {
@@ -48,5 +48,6 @@ abstract class RTCRtpTransceiver {
   /// Deprecated methods.
   @Deprecated('Use the `await getCurrentDirection` instead')
   TransceiverDirection get currentDirection => throw UnimplementedError(
-      'Need to be call asynchronously from native sdk, so the method is deprecated');
+    'Need to be call asynchronously from native sdk, so the method is deprecated',
+  );
 }

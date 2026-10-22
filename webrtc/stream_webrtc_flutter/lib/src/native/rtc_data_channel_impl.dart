@@ -78,8 +78,8 @@ class RTCDataChannelNative extends RTCDataChannel {
       case 'dataChannelReceiveMessage':
         _dataChannelId = map['id'];
 
-        var type = _typeStringToMessageType[map['type']];
-        dynamic data = map['data'];
+        final type = _typeStringToMessageType[map['type']];
+        final dynamic data = map['data'];
         RTCDataChannelMessage message;
         if (type == MessageType.binary) {
           message = RTCDataChannelMessage.fromBinary(data);
