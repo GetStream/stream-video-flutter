@@ -50,24 +50,20 @@ jobs:
           filters: |
             relevant:
               - 'webrtc/**'
-              - 'tools/webrtc.sh'
+              - 'pubspec.yaml'
+              - 'pubspec.lock'
+              - 'analysis_options.yaml'
+              - 'all_lint_rules.yaml'
               - '.github/actions/setup-flutter/**'
+              - '.github/actions/setup-melos/**'
               - '.github/actions/select-xcode/**'
               - '.github/workflows/webrtc.yml'
 
   analyze:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
-    name: Analyze (${{ matrix.package }})
     timeout-minutes: 15
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        package:
-          - stream_webrtc_flutter
-          - dart_webrtc
-          - webrtc_interface
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
@@ -75,20 +71,17 @@ jobs:
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter
 
-      - name: Install dependencies
-        run: tools/webrtc.sh bootstrap ${{ matrix.package }}
+      - name: Install Melos
+        uses: ./.github/actions/setup-melos
 
       - name: Check formatting
-        run: tools/webrtc.sh format-verify ${{ matrix.package }}
-
-      - name: Check import order
-        run: tools/webrtc.sh imports-verify ${{ matrix.package }}
+        run: melos run webrtc:format:verify
 
       - name: Analyze
-        run: tools/webrtc.sh analyze ${{ matrix.package }}
+        run: melos run webrtc:analyze --no-select
 
       - name: Test
-        run: tools/webrtc.sh test ${{ matrix.package }}
+        run: melos run webrtc:test --no-select
 
   build-android:
     needs: gate

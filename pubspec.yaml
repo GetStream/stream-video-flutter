@@ -137,40 +137,32 @@ melos:
 
     format:
       # Only format git-tracked Dart files so `dart format` never descends into
-      # build artifacts (e.g. /build/ios/SourcePackages). The webrtc/ packages
-      # are formatted by `webrtc:format`.
-      run: git ls-files '*.dart' ':(exclude)webrtc' | xargs dart format
+      # build artifacts (e.g. /build/ios/SourcePackages).
+      run: git ls-files '*.dart' | xargs dart format
       description: |
-        Run `dart format` on all git-tracked Dart files outside webrtc/.
+        Run `dart format` on all git-tracked Dart files.
 
     format:verify:
-      run: git ls-files '*.dart' ':(exclude)webrtc' | xargs dart format --set-exit-if-changed
+      run: git ls-files '*.dart' | xargs dart format --set-exit-if-changed
       description: |
-        Run `dart format --set-exit-if-changed` on all git-tracked Dart files outside webrtc/.
-
-    webrtc:bootstrap:
-      run: tools/webrtc.sh bootstrap
-      description: Run `flutter pub get` in the webrtc/ packages and their examples.
+        Run `dart format --set-exit-if-changed` on all git-tracked Dart files.
 
     webrtc:analyze:
-      run: tools/webrtc.sh analyze
-      description: Run `flutter analyze` in the webrtc/ packages.
-
-    webrtc:format:
-      run: tools/webrtc.sh format
-      description: Run `dart format` on lib/ and test/ of the webrtc/ packages.
+      run: melos exec -c 4 -- dart analyze --fatal-infos .
+      description: Run `dart analyze` in the webrtc/ packages and their example.
+      packageFilters:
+        scope: "*webrtc*"
 
     webrtc:format:verify:
-      run: tools/webrtc.sh format-verify
-      description: Run `dart format --set-exit-if-changed` on lib/ and test/ of the webrtc/ packages.
-
-    webrtc:imports:verify:
-      run: tools/webrtc.sh imports-verify
-      description: Check the import order of the webrtc/ packages with import_sorter.
+      run: git ls-files 'webrtc/*.dart' | xargs dart format --set-exit-if-changed
+      description: Run `dart format --set-exit-if-changed` on the git-tracked Dart files in webrtc/.
 
     webrtc:test:
-      run: tools/webrtc.sh test
+      run: melos exec -c 1 --fail-fast -- flutter test
       description: Run `flutter test` in the webrtc/ packages.
+      packageFilters:
+        scope: "*webrtc*"
+        dirExists: test
 
     metrics:
       run: |
