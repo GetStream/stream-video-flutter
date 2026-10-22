@@ -151,6 +151,15 @@ class _StreamPictureInPictureUiKitViewState
         return;
       }
 
+      // The native side turns off the track it moves away from, so every
+      // remote one it is given is turned back on with the app.
+      if (videoTrack != null && !pipParticipant.isLocal) {
+        _tracksShownInPictureInPicture.add((
+          trackIdPrefix: pipParticipant.trackIdPrefix,
+          trackType: priorityTrack,
+        ));
+      }
+
       await _channel.invokeMethod(
         'updateParticipant',
         {
@@ -234,6 +243,9 @@ class _StreamPictureInPictureUiKitViewState
     super.didUpdateWidget(oldWidget);
     if (widget.call == oldWidget.call) return;
 
+    // The tracks turned off in the background belong to the previous call.
+    _restoreTracksFromBackground(oldWidget.call);
+
     // Everything here was taken from the call it was given: the handle belongs
     // to that call's registry, and the listeners to its state.
     _viewport.dispose();
@@ -267,10 +279,10 @@ class _StreamPictureInPictureUiKitViewState
     switch (state) {
       case AppLifecycleState.resumed:
         _subscriptions.cancel(_idCallState);
-        _toggleSubscribedTracks(true);
+        _restoreTracksFromBackground(widget.call);
         break;
       case AppLifecycleState.paused:
-        _toggleSubscribedTracks(false);
+        _disableTracksInBackground();
         _subscribeToCallEvents();
 
         // Check status with a small delay to catch the race condition where
@@ -291,60 +303,74 @@ class _StreamPictureInPictureUiKitViewState
     }
   }
 
-  // When app goes to background disable video tracks of all participants except
-  // the one shown in PiP to save bandwidth and resources.
-  // Re-enable them when app comes back to foreground.
-  void _toggleSubscribedTracks(bool enable) {
+  /// The tracks [_disableTracksInBackground] turned off, so the same ones are
+  /// turned back on. The participants can look different by the time the app
+  /// is back: one whose subscription lapsed in the background, or who turned
+  /// their camera off and on again, would otherwise be left with a disabled
+  /// track and a black tile.
+  final _tracksDisabledInBackground =
+      <({String trackIdPrefix, SfuTrackTypeVideo trackType})>{};
+
+  /// The remote tracks the window was given to draw while in the background.
+  /// The native side turns off the one it moves away from and turns it back
+  /// on once picture-in-picture ends; they are turned on with the app as well,
+  /// so a participant shown earlier is never left black should that be missed.
+  final _tracksShownInPictureInPicture =
+      <({String trackIdPrefix, SfuTrackTypeVideo trackType})>{};
+
+  // When app goes to background disable video tracks of all participants
+  // except speaking ones to save bandwidth and resources. The one shown in
+  // PiP is kept enabled by the native side.
+  void _disableTracksInBackground() {
     final participants = widget.call.state.value.callParticipants;
 
-    for (final participant in participants.where(
-      (p) => p.isVideoEnabled,
-    )) {
-      if (!enable && participant.isSpeaking) {
-        // Do not disable video track of speaking participant
-        continue;
-      }
+    for (final participant in participants) {
+      // Do not disable video track of speaking participant
+      if (participant.isSpeaking) continue;
 
-      final videoTrackState = participant.publishedTracks[SfuTrackType.video];
-      if ((videoTrackState is RemoteTrackState && videoTrackState.subscribed) ||
-          participant.isLocal) {
+      for (final (trackType, isEnabled) in [
+        (SfuTrackType.video, participant.isVideoEnabled),
+        (SfuTrackType.screenShare, participant.isScreenShareEnabled),
+      ]) {
+        if (!isEnabled) continue;
+
+        final trackState = participant.publishedTracks[trackType];
+        final isSubscribed =
+            trackState is RemoteTrackState && trackState.subscribed;
+        if (!isSubscribed && !participant.isLocal) continue;
+
         final track = widget.call.getTrack(
           participant.trackIdPrefix,
-          SfuTrackType.video,
+          trackType,
         );
-        if (track != null) {
-          track.mediaTrack.enabled = enable;
-        }
+        if (track == null || !track.mediaTrack.enabled) continue;
+
+        track.mediaTrack.enabled = false;
+        _tracksDisabledInBackground.add((
+          trackIdPrefix: participant.trackIdPrefix,
+          trackType: trackType,
+        ));
       }
     }
+  }
 
-    for (final participant in participants.where(
-      (p) => p.isScreenShareEnabled,
-    )) {
-      if (!enable && participant.isSpeaking) {
-        // Do not disable video track of speaking participant
-        continue;
-      }
-
-      final screenShareTrackState =
-          participant.publishedTracks[SfuTrackType.screenShare];
-      if ((screenShareTrackState is RemoteTrackState &&
-              screenShareTrackState.subscribed) ||
-          participant.isLocal) {
-        final track = widget.call.getTrack(
-          participant.trackIdPrefix,
-          SfuTrackType.screenShare,
-        );
-        if (track != null) {
-          track.mediaTrack.enabled = enable;
-        }
-      }
+  // Re-enable the tracks disabled in background when app comes back to
+  // foreground, looked up again in case a track was replaced meanwhile.
+  void _restoreTracksFromBackground(Call call) {
+    for (final (:trackIdPrefix, :trackType) in {
+      ..._tracksDisabledInBackground,
+      ..._tracksShownInPictureInPicture,
+    }) {
+      call.getTrack(trackIdPrefix, trackType)?.mediaTrack.enabled = true;
     }
+    _tracksDisabledInBackground.clear();
+    _tracksShownInPictureInPicture.clear();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _restoreTracksFromBackground(widget.call);
     _subscriptions.cancelAll();
     _viewport.dispose();
     unawaited(

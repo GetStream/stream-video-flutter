@@ -85,6 +85,12 @@ final class StreamAVPictureInPictureVideoCallViewController:
         contentView.pictureInPictureWindowSizePolicy.controller = self
     }
 
+    deinit {
+        // The track holds on to the views rendering it, so the content view
+        // would outlive this controller and keep receiving frames otherwise.
+        contentView.track = nil
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setUp()
