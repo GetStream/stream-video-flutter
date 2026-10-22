@@ -64,6 +64,11 @@ open class VideoFilter: NSObject, VideoFrameProcessorDelegate {
 
     var sceneOrientation: UIInterfaceOrientation = .unknown
 
+    /// Follows the scene's geometry, which changes without the device turning
+    /// when the app moves to another display.
+    private var geometryObservation: NSKeyValueObservation?
+    private weak var observedScene: UIWindowScene?
+
     /// Initializes a new VideoFilter instance with the provided parameters.
     public init(
         filter: @escaping (Input) -> CIImage
@@ -83,9 +88,33 @@ open class VideoFilter: NSObject, VideoFrameProcessorDelegate {
 
     @objc private func updateRotation() {
         DispatchQueue.main.async {
-            self.sceneOrientation =
-                UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
+            let scene = Self.activeWindowScene()
+            self.sceneOrientation = scene.map(Self.orientation(of:)) ?? .unknown
+            self.observeGeometry(of: scene)
         }
+    }
+
+    private func observeGeometry(of scene: UIWindowScene?) {
+        guard #available(iOS 16.0, *), let scene, scene !== observedScene else { return }
+        observedScene = scene
+        geometryObservation = scene.observe(\.effectiveGeometry) { [weak self] scene, _ in
+            DispatchQueue.main.async {
+                self?.sceneOrientation = scene.effectiveGeometry.interfaceOrientation
+            }
+        }
+    }
+
+    private static func orientation(of scene: UIWindowScene) -> UIInterfaceOrientation {
+        if #available(iOS 16.0, *) {
+            return scene.effectiveGeometry.interfaceOrientation
+        }
+        return scene.interfaceOrientation
+    }
+
+    /// The scene in the foreground, or any connected one when none is.
+    private static func activeWindowScene() -> UIWindowScene? {
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        return scenes.first { $0.activationState == .foregroundActive } ?? scenes.first
     }
 
     public func capturer(_ capturer: RTCVideoCapturer!, didCapture frame: RTCVideoFrame!)
