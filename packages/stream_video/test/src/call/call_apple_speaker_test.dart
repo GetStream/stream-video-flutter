@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/call/permissions/permissions_manager.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
@@ -113,7 +114,10 @@ void main() {
       }
     });
 
-    Call makeCall(AudioConfigurationPolicy policy) {
+    Call makeCall(
+      AudioConfigurationPolicy policy, {
+      PermissionsManager? permissionManager,
+    }) {
       return createTestCall(
         stateManager: CallStateNotifier(
           createTestCallState(
@@ -124,6 +128,7 @@ void main() {
         ),
         sessionFactory: setupMockSessionFactory(callSession: callSession),
         rtcMediaDeviceNotifier: deviceNotifier,
+        permissionManager: permissionManager,
       );
     }
 
@@ -177,6 +182,54 @@ void main() {
             speakerOn: false,
           ),
         ).called(1);
+      },
+    );
+
+    test(
+      'configures the audio session before the microphone captures',
+      () async {
+        // Changing the category or mode while the AVAudioEngine records
+        // makes WebRTC rebuild the engine.
+        final permissionManager = MockPermissionsManager();
+        for (final permission in CallPermission.values) {
+          when(
+            () => permissionManager.hasPermission(permission),
+          ).thenReturn(true);
+        }
+        when(
+          () => callSession.setMicrophoneEnabled(
+            any(),
+            constraints: any(named: 'constraints'),
+            stopTrackOnMute: any(named: 'stopTrackOnMute'),
+          ),
+        ).thenAnswer((_) async => Result.success(MockRtcLocalTrack()));
+
+        const policy = AudioConfigurationPolicy.broadcaster();
+        final call = makeCall(policy, permissionManager: permissionManager);
+        // Cancels the stats send the published microphone schedules.
+        addTearDown(call.dispose);
+
+        final result = await call.join(
+          connectOptions: CallConnectOptions(
+            camera: TrackOption.disabled(),
+            microphone: TrackOption.enabled(),
+          ),
+        );
+        expect(result.isSuccess, isTrue);
+        // The connect options are applied unawaited, so let them settle.
+        await pumpEventQueue();
+
+        verifyInOrder([
+          () => rtcManager.setAppleAudioConfiguration(
+            policy: policy,
+            speakerOn: any(named: 'speakerOn'),
+          ),
+          () => callSession.setMicrophoneEnabled(
+            true,
+            constraints: any(named: 'constraints'),
+            stopTrackOnMute: any(named: 'stopTrackOnMute'),
+          ),
+        ]);
       },
     );
 
