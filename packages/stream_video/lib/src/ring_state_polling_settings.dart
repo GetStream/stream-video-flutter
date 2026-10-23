@@ -20,9 +20,10 @@ class RingStatePollingSettings {
   final bool enabled;
 
   /// How long the ring has to go without a ring event before the first poll.
-  ///
-  /// Defaults to 9 seconds, so that a 30 second ring is read at 9, 14, 19, 24
-  /// and 29 seconds. A callee who takes longer than that to answer costs one
+  /// Defaults to 9 seconds, so that a 30 second ring without a ring event is
+  /// read at 9, 14, 19, 24 and 29 seconds. A callee who takes longer than that
+  /// to answer is read every [interval] until the answer arrives, even when the
+  /// WebSocket is healthy; raise it to poll less.
   /// read even when the WebSocket is healthy; raise it to poll less.
   ///
   /// Every `call.accepted`, `call.rejected` or `call.missed` event restarts it,
