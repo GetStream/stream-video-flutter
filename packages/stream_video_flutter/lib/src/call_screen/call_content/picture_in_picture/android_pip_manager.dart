@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../stream_video_flutter.dart';
@@ -50,55 +51,92 @@ class AndroidPipManager {
     }
   }
 
-  /// The object that last set the aspect ratio, so that another one doesn't
-  /// clear it by accident.
-  Object? _aspectRatioOwner;
+  /// The params each view last set, in the order they set them. The last
+  /// one is the one Android has, so when it goes, the one before it takes
+  /// over.
+  final _paramsByOwner = <Object, _PictureInPictureParams>{};
 
-  /// Sets the shape of the picture-in-picture window to the aspect ratio of
-  /// [videoSize] on behalf of [owner], updating the window if it is already
-  /// showing.
+  /// What was last sent, so the same isn't sent twice.
+  _PictureInPictureParams? _sentParams;
+
+  /// Set once the channel turns out to have no handler, as without the
+  /// SDK's Android activities, so a value sent every frame doesn't log every
+  /// frame. Cleared when an activity attaches one.
+  bool _isChannelMissing = false;
+
+  /// Sets the shape of the picture-in-picture window, and the area it
+  /// animates in from, on behalf of [owner], updating the window if it is
+  /// already showing. The last owner to set them is the one Android gets.
   ///
-  /// Pass null when the video's size is unknown, so the window falls back to
-  /// the device's orientation. Android limits the ratio to between 1:2.39 and
-  /// 2.39:1.
-  Future<void> setPictureInPictureAspectRatio(
-    Size? videoSize, {
+  /// The window takes the aspect ratio of [videoSize], within Android's limit
+  /// of 1:2.39 to 2.39:1, or the device's orientation's when it is null. It
+  /// animates in from [sourceRectHint], where that video is drawn, in
+  /// physical pixels relative to the Flutter view, rather than showing the
+  /// app's icon until the app draws again.
+  Future<void> setPictureInPictureParams({
     required Object owner,
+    Size? videoSize,
+    Rect? sourceRectHint,
   }) {
-    _aspectRatioOwner = owner;
-    return _sendAspectRatio(videoSize);
+    _paramsByOwner
+      ..remove(owner)
+      ..[owner] = (videoSize: videoSize, sourceRectHint: sourceRectHint);
+    return _sendParams();
   }
 
-  /// Falls back to the device's orientation for the window's shape, unless
-  /// an object other than [owner] has set the aspect ratio since.
-  Future<void> clearPictureInPictureAspectRatio({required Object owner}) async {
-    if (!identical(_aspectRatioOwner, owner)) return;
-
-    _aspectRatioOwner = null;
-    return _sendAspectRatio(null);
+  /// Forgets the params [owner] set, so the owner before it, if any, has
+  /// them sent instead, or the window falls back to the device's
+  /// orientation and no area to animate from.
+  Future<void> clearPictureInPictureParams({required Object owner}) {
+    if (_paramsByOwner.remove(owner) == null) return Future.value();
+    return _sendParams();
   }
 
-  Future<void> _sendAspectRatio(Size? videoSize) async {
-    if (!CurrentPlatform.isAndroid) return;
+  /// Forgets every view's params and what was sent, as a fresh app would
+  /// start.
+  @visibleForTesting
+  void resetPictureInPictureParams() {
+    _paramsByOwner.clear();
+    _sentParams = null;
+    _isChannelMissing = false;
+  }
 
-    final hasSize =
-        videoSize != null && videoSize.width > 0 && videoSize.height > 0;
+  Future<void> _sendParams() async {
+    final params =
+        _paramsByOwner.values.lastOrNull ??
+        (videoSize: null, sourceRectHint: null);
+    if (params == _sentParams) return;
+    _sentParams = params;
+
+    final (:videoSize, sourceRectHint: hint) = params;
+    await _invokeParamsMethod('setPictureInPictureParams', {
+      if (videoSize != null) ...{
+        'width': videoSize.width.round(),
+        'height': videoSize.height.round(),
+      },
+      if (hint != null) ...{
+        'left': hint.left.round(),
+        'top': hint.top.round(),
+        'right': hint.right.round(),
+        'bottom': hint.bottom.round(),
+      },
+    });
+  }
+
+  Future<void> _invokeParamsMethod(String method, Object? arguments) async {
+    if (!CurrentPlatform.isAndroid || _isChannelMissing) return;
 
     try {
-      await _methodChannel.invokeMethod(
-        'setPictureInPictureAspectRatio',
-        hasSize
-            ? {
-                'width': videoSize.width.round(),
-                'height': videoSize.height.round(),
-              }
-            : null,
+      await _methodChannel.invokeMethod(method, arguments);
+    } on MissingPluginException catch (e) {
+      _isChannelMissing = true;
+      _logger.w(
+        () =>
+            '[$method] No picture-in-picture handler, as the activity does '
+            'not extend StreamFlutterActivity; not sending again: $e',
       );
     } catch (e) {
-      _logger.e(
-        () =>
-            '[setPictureInPictureAspectRatio] Failed to set picture in picture aspect ratio: $e',
-      );
+      _logger.e(() => '[$method] Failed: $e');
     }
   }
 
@@ -113,6 +151,16 @@ class AndroidPipManager {
         }
 
         break;
+      case 'onPictureInPictureHandlerAttached':
+        // An activity attached to this engine, without the params the one
+        // before it had, and the channel works now if it didn't.
+        _sentParams = null;
+        _isChannelMissing = false;
+        await _sendParams();
+
+        break;
     }
   }
 }
+
+typedef _PictureInPictureParams = ({Size? videoSize, Rect? sourceRectHint});

@@ -178,6 +178,27 @@ void main() {
       expect(RenderedVideoSizes.instance.sizeOf('bob:video'), isNull);
     });
 
+    testWidgets('with where it is drawn', (tester) async {
+      await pumpRenderer(
+        tester,
+        viewSize: portraitView,
+        videoSize: landscapeVideo,
+      );
+
+      // Centred in the test view, at the size it was given.
+      final rect = RenderedVideoSizes.instance.screenRectOf('alice:video');
+      expect(rect?.size, portraitView);
+      expect(
+        rect?.center,
+        Offset(
+              tester.view.physicalSize.width,
+              tester.view.physicalSize.height,
+            ) /
+            tester.view.devicePixelRatio /
+            2,
+      );
+    });
+
     testWidgets('until it is removed', (tester) async {
       await pumpRenderer(
         tester,

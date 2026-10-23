@@ -309,6 +309,7 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
       isRotated
           ? Size(value.height, value.width)
           : Size(value.width, value.height),
+      context: context,
     );
   }
 
