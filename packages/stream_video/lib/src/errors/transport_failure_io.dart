@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:meta/meta.dart';
+
 /// Why [error] kept a request from reaching the server, or `null` when it is
 /// not a transport failure.
 ///
 /// Reads `normalized reason — platform detail`, as in
-/// `DNS lookup failed — Failed host lookup: 'video.stream-io-api.com'`. The
-/// detail comes from the platform, never from the server.
+/// `DNS lookup failed — Failed host lookup: 'video.stream-io-api.com' (nodename nor servname provided)`.
+/// The detail comes from the platform, never from the server.
+@internal
 String? platformTransportFailureOf(Object? error) {
   return switch (error) {
     SocketException(:final message, :final osError)

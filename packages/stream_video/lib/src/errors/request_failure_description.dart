@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart' show StreamException;
 
 import 'transport_failure.dart'
@@ -9,9 +10,9 @@ const _coordinatorRequestKey = 'stream_video.coordinator_request';
 /// The `extra` that marks every request a client sends as a coordinator
 /// request, whose failures [describeRequestFailure] names.
 ///
-/// Set on the client's `BaseOptions`. A request anything else sent — an app's
-/// token provider among them — is left unnamed, since its URL is the app's
-/// and may carry what the app would not want in an error message.
+/// Set on the client's `BaseOptions`. A request sent without it, such as the
+/// token provider's, is left unnamed.
+@internal
 Map<String, Object?> coordinatorRequestExtra() => {
   _coordinatorRequestKey: true,
 };
@@ -23,8 +24,7 @@ extension on RequestOptions {
 /// The query parameters that identify a request without carrying a
 /// credential.
 ///
-/// Everything else is left out — `api_key` among it — so a parameter added
-/// later stays out of error messages until it is listed here.
+/// Everything else is left out, `api_key` among it.
 const _diagnosticQueryParameters = {
   'call_session_id',
   'connection_id',
@@ -38,38 +38,43 @@ const _diagnosticQueryParameters = {
 /// An answer from the server reads
 /// `HTTP 404 POST video.stream-io-api.com/api/v2/video/call/default/123/join?connection_id=abc failed: Not Found`,
 /// and a failure that never got one
-/// `POST video.stream-io-api.com/api/v2/video/call/default/123/join failed: DNS lookup failed — Failed host lookup: 'video.stream-io-api.com'`.
+/// `POST video.stream-io-api.com/api/v2/video/call/default/123/join failed: DNS lookup failed — Failed host lookup: 'video.stream-io-api.com' (nodename nor servname provided)`.
 ///
 /// Only the message gains the context. Whatever the failure is classified as —
 /// its status, its code, whether it may be retried — is read elsewhere and
 /// left alone.
+@internal
 String describeRequestFailure(DioException exception, String message) {
   final options = exception.requestOptions;
   if (!options.isCoordinatorRequest) return message;
 
-  final request = describeRequest(options);
+  final request = _describeRequest(options);
 
-  // A timeout or a cancellation is that, whatever else came with it — the
-  // order stream_core classifies them in.
-  final transportFailure = _transportFailureOf(exception);
-  if (transportFailure == null) {
-    if (exception.response case final response?) {
-      final status = switch (response.statusCode) {
-        final statusCode? => 'HTTP $statusCode ',
-        null => '',
-      };
-      return '$status$request failed: $message';
-    }
+  // Only a timeout or a cancellation outranks a response that came with it,
+  // the order stream_core classifies them in.
+  final isTimeoutOrCancel = switch (exception.type) {
+    DioExceptionType.connectionTimeout ||
+    DioExceptionType.sendTimeout ||
+    DioExceptionType.receiveTimeout ||
+    DioExceptionType.cancel => true,
+    _ => false,
+  };
+  if (exception.response case final response? when !isTimeoutOrCancel) {
+    final status = switch (response.statusCode) {
+      final statusCode? => 'HTTP $statusCode ',
+      null => '',
+    };
+    return '$status$request failed: $message';
   }
 
-  return '$request failed: ${transportFailure ?? message}';
+  return '$request failed: ${_transportFailureOf(exception) ?? message}';
 }
 
 /// `METHOD host/path?query` for [options], keeping only the query parameters
 /// in [_diagnosticQueryParameters].
 ///
 /// Headers are never read, so neither is the token they carry.
-String describeRequest(RequestOptions options) {
+String _describeRequest(RequestOptions options) {
   final uri = options.uri;
   final diagnostic = {
     for (final MapEntry(:key, :value) in uri.queryParametersAll.entries)
@@ -82,10 +87,8 @@ String describeRequest(RequestOptions options) {
   return '${options.method} ${uri.host}${uri.path}$query';
 }
 
-/// Why a request that the server never answered failed, or `null` when Dio
-/// has no transport reason to give — a body it could not decode, or an
-/// exception an interceptor threw, whose own message already says what
-/// happened.
+/// Why a request that the server never answered failed, or `null` when the
+/// server answered, or when Dio's error is not a transport failure.
 String? _transportFailureOf(DioException exception) {
   return switch (exception.type) {
     DioExceptionType.connectionTimeout ||

@@ -396,6 +396,39 @@ void main() {
       expect(error.message, '$_endpoint failed: connection failed');
     });
 
+    test('in a socket error only the OS explains', () {
+      final error = compose(
+        DioException.connectionError(
+          requestOptions: _requestOptions,
+          reason: 'dio boilerplate',
+          error: const SocketException(
+            '',
+            osError: OSError('Network is unreachable', 51),
+          ),
+        ),
+      );
+
+      expect(
+        error.message,
+        '$_endpoint failed: connection failed — Network is unreachable',
+      );
+    });
+
+    test('in an answer that carried no status code', () {
+      final error = compose(
+        DioException(
+          requestOptions: _requestOptions,
+          type: DioExceptionType.badResponse,
+          response: Response(
+            requestOptions: _requestOptions,
+            statusMessage: 'Proxy error',
+          ),
+        ),
+      );
+
+      expect(error.message, '$_endpoint failed: Proxy error');
+    });
+
     test('keeps the message of an exception an interceptor threw', () {
       final error = compose(
         DioException(
@@ -481,6 +514,32 @@ void main() {
       );
 
       const query = '?call_session_id=session-1&sfu_id=sfu-1';
+      expect(
+        error.message,
+        'GET video.stream-io-api.com/api/v2/video/call/default/x$query '
+        'failed: request timed out',
+      );
+    });
+
+    test('keeps every value of a diagnostic parameter sent twice', () {
+      final options = RequestOptions(
+        method: 'GET',
+        baseUrl: 'https://video.stream-io-api.com',
+        path: '/api/v2/video/call/default/x',
+        queryParameters: {
+          'sfu_id': ['sfu-1', 'sfu-2'],
+        },
+        extra: coordinatorRequestExtra(),
+      );
+
+      final error = compose(
+        DioException(
+          requestOptions: options,
+          type: DioExceptionType.connectionTimeout,
+        ),
+      );
+
+      const query = '?sfu_id=sfu-1&sfu_id=sfu-2';
       expect(
         error.message,
         'GET video.stream-io-api.com/api/v2/video/call/default/x$query '

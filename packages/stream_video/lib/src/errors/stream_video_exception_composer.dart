@@ -63,7 +63,7 @@ mixin StreamVideoExceptions {
       };
 
       return StreamVideoExceptionWithCause(
-        // Names the request, which the cause's own message does not.
+        // Prefixed with the request that failed.
         message: describeRequestFailure(exception, cause.message),
         cause: cause,
         stackTrace: stackTrace ?? exception.stackTrace,
