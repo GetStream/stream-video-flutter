@@ -289,6 +289,10 @@
 
 - The lobby no longer lists someone twice. `getOrCreate` returns a snapshot of the session while the event subscription is already live, so a join already reflected in that snapshot still arrives as a `ParticipantJoined` event — and the lobby appended it blindly. Participants are now upserted by session id, which leaves a genuine second session of the same user (a phone and a laptop) listed separately, as it should be. A join event for the local user is ignored, matching the snapshot, which always filtered them out.
 - The lobby no longer adds and drops people on another call's events.
+- [Android] The picture-in-picture window now takes the aspect ratio of the video it shows, within Android's 2.39:1 limit, and reshapes when that video's size or orientation changes. It used to be 9:16 or 16:9 depending on how the phone was held. It still falls back to that when the video's size isn't known yet or a custom `callPictureInPictureWidgetBuilder` is set.
+- [Android] On Android 12 and above the system enters picture-in-picture by itself when the user leaves the app during a call, with the smoother animation that brings, instead of the app entering it from `onUserLeaveHint` and `onPause`. The app no longer enters it from `onPause` there, which also came for dialogs and permission prompts.
+- [Android] The picture-in-picture window animates in from the tile of the participant it shows, instead of showing the app's icon until the app draws in the small window.
+- [Android] `StreamCallContent` no longer builds its app bar and controls, or the custom `callAppBarWidgetBuilder` and `callControlsWidgetBuilder`, while in picture-in-picture, where the overlay covers them and the window is too small to lay them out.
 
 ### ⚠️ Deprecated
 

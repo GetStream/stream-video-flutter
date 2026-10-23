@@ -231,21 +231,25 @@ class _StreamCallContentState extends State<StreamCallContent> {
       backgroundColor:
           theme.callContentTheme.callContentBackgroundColor ??
           context.streamColorScheme.backgroundApp,
-      appBar:
-          widget.callAppBarWidgetBuilder?.call(context, call) ??
-          // `Scaffold` reserves `preferredSize.height` and adds the top inset
-          // itself, and the bar cannot read a themed height without a context —
-          // so the height a `CallAppBarTheme` sets is measured out here.
-          PreferredSize(
-            preferredSize: Size.fromHeight(
-              CallAppBar.heightOf(context, primary: false),
-            ),
-            child: CallAppBar(
-              call: call,
-              onBackPressed: widget.onBackPressed,
-              onLeaveCallTap: widget.onLeaveCallTap,
-            ),
-          ),
+      // The picture-in-picture overlay covers the call, and the window is too
+      // small to lay the bar or the controls out in.
+      appBar: _isInPictureInPictureMode
+          ? null
+          : widget.callAppBarWidgetBuilder?.call(context, call) ??
+                // `Scaffold` reserves `preferredSize.height` and adds the
+                // top inset itself, and the bar cannot read a themed height
+                // without a context — so the height a `CallAppBarTheme` sets
+                // is measured out here.
+                PreferredSize(
+                  preferredSize: Size.fromHeight(
+                    CallAppBar.heightOf(context, primary: false),
+                  ),
+                  child: CallAppBar(
+                    call: call,
+                    onBackPressed: widget.onBackPressed,
+                    onLeaveCallTap: widget.onLeaveCallTap,
+                  ),
+                ),
       // The app bar and the controls clear the top and bottom insets; this
       // clears the sides, where a rail or a cutout can sit in landscape.
       body: SafeArea(
@@ -269,16 +273,18 @@ class _StreamCallContentState extends State<StreamCallContent> {
         ),
       ),
       extendBody: widget.extendBody,
-      bottomNavigationBar: PartialCallStateBuilder<bool>(
-        call: call,
-        selector: _hasLocalParticipant,
-        builder: (_, hasLocalParticipant) => hasLocalParticipant
-            ? widget.callControlsWidgetBuilder?.call(context, call) ??
-                  StreamCallControls.withDefaultOptions(
-                    call: call,
-                  )
-            : const SizedBox.shrink(),
-      ),
+      bottomNavigationBar: _isInPictureInPictureMode
+          ? null
+          : PartialCallStateBuilder<bool>(
+              call: call,
+              selector: _hasLocalParticipant,
+              builder: (_, hasLocalParticipant) => hasLocalParticipant
+                  ? widget.callControlsWidgetBuilder?.call(context, call) ??
+                        StreamCallControls.withDefaultOptions(
+                          call: call,
+                        )
+                  : const SizedBox.shrink(),
+            ),
     );
   }
 }
