@@ -110,6 +110,7 @@
 
 ### 🐞 Fixed
 
+- On iOS, joining a call sets up the audio session (category, mode and loudspeaker) before the camera and microphone start, so WebRTC no longer rebuilds its audio engine when a call that defaults to the loudspeaker starts recording.
 - Remote audio on Safari and other WebKit browsers no longer goes silent when another participant joins.
 - Safari and other WebKit browsers always play remote audio on the system default output; `Call.checkIfAudioOutputChangeSupported` returns false there.
 - A dropped SFU connection starts reconnecting within two seconds.

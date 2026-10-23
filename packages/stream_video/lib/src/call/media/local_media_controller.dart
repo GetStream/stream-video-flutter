@@ -310,6 +310,12 @@ class LocalMediaController {
     }
 
     try {
+      // On iOS the audio session takes its final category and mode before any
+      // track captures: changing them while the AVAudioEngine records makes
+      // WebRTC rebuild the engine. Elsewhere the output is picked last, as
+      // it applies to the tracks.
+      if (CurrentPlatform.isIos) await _applyAudioOutputOption();
+
       final cameraFailed = failed(
         'camera',
         camera != null
@@ -364,6 +370,14 @@ class LocalMediaController {
       await setAudioInputDevice(_connectOptions.audioInputDevice!);
     }
 
+    if (!CurrentPlatform.isIos) await _applyAudioOutputOption();
+
+    _logger.v(() => '[applyConnectOptions] finished');
+  }
+
+  /// Applies the audio output from the connect options, or on iOS without
+  /// one, the audio session configuration the call settings ask for.
+  Future<void> _applyAudioOutputOption() async {
     if (_connectOptions.audioOutputDevice != null) {
       await setAudioOutputDevice(_connectOptions.audioOutputDevice!);
     } else if (CurrentPlatform.isIos) {
@@ -389,8 +403,6 @@ class LocalMediaController {
         );
       }
     }
-
-    _logger.v(() => '[applyConnectOptions] finished');
   }
 
   Future<Result<None>> _applyCameraOption(
