@@ -109,7 +109,7 @@
 
 ### 🐞 Fixed
 
-- A participant who joins mid-call keeps their participant source, so a livestream sorts an RTMP, WHIP, SRT or RTSP ingest that starts or reconnects during the call ahead of the host again.
+- A participant who joins mid-call keeps their participant source, so the speaker, livestream and picture-in-picture layouts put an RTMP or SRT ingest that starts or reconnects during the call ahead of the host.
 - A dropped SFU connection starts reconnecting within two seconds.
 - Call stats keep being reported when a peer connection stops answering for its stats.
 - The outgoing call screen shows the camera preview every time the call settings turn the camera on, not only sometimes. `getOrCreate` and `get` now apply the call settings to `connectOptions` before they return.
