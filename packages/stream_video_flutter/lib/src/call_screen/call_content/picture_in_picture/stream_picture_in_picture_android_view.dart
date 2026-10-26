@@ -37,24 +37,24 @@ class _StreamPictureInPictureAndroidViewState
   StreamSubscription<(CallStatus, bool?)>? _callStateSubscription;
   StreamSubscription<List<CallParticipantState>?>? _participantsSubscription;
 
-  /// The params last offered to Android, and whether any have been. The
-  /// first go out at once, so the window has a shape before anything has
-  /// settled; later ones once they have held for [_paramsDebounceDuration].
-  /// A renderer that has just mounted reports its size and its rotation as
-  /// two events, and a moving tile moves every frame, so sending each change
-  /// would reshape the window twice, or call Android every frame.
+  // The params last offered to Android, and whether any have been. The
+  // first go out at once, so the window has a shape before anything has
+  // settled; later ones once they have held for [_paramsDebounceDuration].
+  // A renderer that has just mounted reports its size and its rotation as
+  // two events, and a moving tile moves every frame, so sending each change
+  // would reshape the window twice, or call Android every frame.
   ({Size? videoSize, Rect? sourceRectHint})? _offeredParams;
   bool _hasOfferedParams = false;
   Timer? _paramsDebounce;
   static const _paramsDebounceDuration = Duration(milliseconds: 100);
 
-  /// The last size seen for the track the overlay shows, kept while no
-  /// renderer of it reports one.
+  // The last size seen for the track the overlay shows, kept while no
+  // renderer of it reports one.
   String? _lastKnownTrackId;
   Size? _lastKnownSize;
 
-  /// Bumped whenever tracking stops, so a check scheduled before then does
-  /// not schedule another.
+  // Bumped whenever tracking stops, so a check scheduled before then does
+  // not schedule another.
   int _trackingGeneration = 0;
 
   Call get call => widget.call;
@@ -186,8 +186,8 @@ class _StreamPictureInPictureAndroidViewState
     );
   }
 
-  /// Starts sending Android the shape of the video the picture-in-picture
-  /// window will show, and where it is drawn.
+  // Starts sending Android the shape of the video the picture-in-picture
+  // window will show, and where it is drawn.
   void _startTrackingPictureInPictureParams() {
     // A custom `participantsThrottleIntervalResolver` that throws surfaces as
     // an error here; without `onError` it would reach the zone uncaught.
@@ -231,8 +231,8 @@ class _StreamPictureInPictureAndroidViewState
     );
   }
 
-  /// The id of the track the overlay shows, or null when there is none or a
-  /// custom builder decides what is shown.
+  // The id of the track the overlay shows, or null when there is none or a
+  // custom builder decides what is shown.
   String? _pipTrackId() {
     final hasCustomBuilder =
         widget
@@ -253,9 +253,9 @@ class _StreamPictureInPictureAndroidViewState
         ?.trackId;
   }
 
-  /// Checks the params after each frame that is drawn anyway, never asking
-  /// for one: what they are read from, the participants, the videos' sizes
-  /// and where their tiles are laid out, all change with a frame.
+  // Checks the params after each frame that is drawn anyway, never asking
+  // for one: what they are read from, the participants, the videos' sizes
+  // and where their tiles are laid out, all change with a frame.
   void _scheduleParamsCheck(int generation) {
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (!mounted || generation != _trackingGeneration) return;
@@ -290,9 +290,9 @@ class _StreamPictureInPictureAndroidViewState
     return (videoSize: videoSize, sourceRectHint: sourceRectHint);
   }
 
-  /// Where the track with [trackId] is drawn, in physical pixels, clipped to
-  /// the view, so the window animates in from it instead of showing the
-  /// app's icon until the overlay is drawn.
+  // Where the track with [trackId] is drawn, in physical pixels, clipped to
+  // the view, so the window animates in from it instead of showing the
+  // app's icon until the overlay is drawn.
   Rect? _sourceRectHintOf(String? trackId) {
     final logicalRect = trackId == null
         ? null
@@ -336,11 +336,16 @@ class _StreamPictureInPictureAndroidViewState
     // The root one, so nothing drawn over the call, such as a route on an
     // outer navigator, is drawn over the window.
     final overlay = Overlay.of(context, rootOverlay: true);
+    // Built under the root overlay, it would otherwise lose the themes set
+    // between the root navigator and the call, as in a nested navigator.
+    final themes = InheritedTheme.capture(from: context, to: overlay.context);
 
     _overlayEntry = OverlayEntry(
-      builder: (context) => AndroidPipOverlay(
-        call: call,
-        pictureInPictureConfiguration: widget.configuration,
+      builder: (context) => themes.wrap(
+        AndroidPipOverlay(
+          call: call,
+          pictureInPictureConfiguration: widget.configuration,
+        ),
       ),
     );
 

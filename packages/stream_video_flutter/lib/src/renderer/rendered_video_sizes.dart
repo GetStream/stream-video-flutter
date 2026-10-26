@@ -12,8 +12,8 @@ import 'package:flutter/widgets.dart';
 /// the unrotated size before its rotation arrives.
 ///
 /// It also tells where on screen a track is drawn, from the renderers that
-/// reported with their [BuildContext]. A change of size asks for a frame, as
-/// what reads them does so after each frame.
+/// reported with their [BuildContext]. Changing a size schedules a frame,
+/// since the sizes are read after each frame.
 class RenderedVideoSizes {
   RenderedVideoSizes._();
 
@@ -86,9 +86,8 @@ class RenderedVideoSizes {
     if (sizeOf(trackId) != previous) _scheduleFrame();
   }
 
-  /// Clears every recorded size.
-  @visibleForTesting
-  void reset() => _sizes.clear();
+  /// Clears every recorded size. For tests.
+  void debugReset() => _sizes.clear();
 
   void _scheduleFrame() => SchedulerBinding.instance.ensureVisualUpdate();
 }

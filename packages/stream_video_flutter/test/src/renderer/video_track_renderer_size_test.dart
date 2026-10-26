@@ -52,7 +52,7 @@ void main() {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
     messenger.setMockMethodCallHandler(_methodChannel, null);
     messenger.setMockStreamHandler(_textureChannel, null);
-    RenderedVideoSizes.instance.reset();
+    RenderedVideoSizes.instance.debugReset();
   });
 
   Future<void> pumpRenderer(

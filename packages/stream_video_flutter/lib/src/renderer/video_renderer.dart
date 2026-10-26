@@ -243,8 +243,8 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
   /// If [rtc.RTCVideoRenderer] is initialized.
   bool _isInitialized = false;
 
-  /// The id of the track whose frame size this renderer last reported, so it
-  /// can be taken back.
+  // The id of the track whose frame size this renderer last reported, so it
+  // can be taken back.
   String? _reportedTrackId;
 
   @override
@@ -295,8 +295,8 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
     }
   }
 
-  /// Shares the size of the frames shown here, so that the Android
-  /// picture-in-picture window can take the video's shape.
+  // Shares the size of the frames shown here, so that the Android
+  // picture-in-picture window can take the video's shape.
   void _reportVideoSize() {
     final value = _videoRenderer.value;
     if (value.width <= 0 || value.height <= 0) return;

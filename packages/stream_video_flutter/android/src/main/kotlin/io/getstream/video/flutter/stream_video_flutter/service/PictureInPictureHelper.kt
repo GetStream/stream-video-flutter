@@ -34,6 +34,16 @@ class PictureInPictureHelper {
         // doesn't declare picture-in-picture does, so it isn't asked again.
         private var isPictureInPictureUnsupported: Boolean = false
 
+        // Whether the activity last accepted params with auto-enter on. Only
+        // then does the system enter picture-in-picture by itself, so only
+        // then is entering it here left out.
+        private var isAutoEnterArmed: Boolean = false
+
+        // The system's message when the activity's manifest doesn't declare
+        // picture-in-picture. Android throws IllegalStateException for passing
+        // reasons too, such as an activity that isn't resumed yet.
+        private const val UNSUPPORTED_MESSAGE = "does not support picture-in-picture"
+
         // The aspect ratio of the video shown in picture-in-picture, or null
         // when it is unknown and the device's orientation is used instead.
         private var videoAspectRatio: Rational? = null
@@ -58,6 +68,8 @@ class PictureInPictureHelper {
             getActivity = activityGetter
             currentEngine = WeakReference(engine)
             isPictureInPictureUnsupported = false
+            // A new activity starts without the params of the one before.
+            isAutoEnterArmed = false
             methodChannel?.setMethodCallHandler { call, result ->
                 handleMethodCall(call, result)
             }
@@ -161,28 +173,41 @@ class PictureInPictureHelper {
             if (isPictureInPictureUnsupported || !canEnterPictureInPicture(activity)) return
 
             val autoEnter = usesAutoEnter && allowAutoEnter
-            withUnsupportedHandled {
+            val applied = withUnsupportedHandled {
                 withAspectRatioFallback(activity, autoEnter) {
                     activity.setPictureInPictureParams(it)
                 }
             }
+            // Rejected params leave the activity with whatever it had, so it
+            // is taken as unarmed, and entering is left to handlePipTrigger.
+            isAutoEnterArmed = applied && autoEnter
         }
 
         /**
          * Runs [block], which is called from lifecycle callbacks as well as
-         * from Flutter, so nothing it throws may reach the activity.
+         * from Flutter, so nothing it throws may reach the activity. Returns
+         * whether it ran to the end.
          */
-        private fun withUnsupportedHandled(block: () -> Unit) {
-            try {
+        private fun withUnsupportedHandled(block: () -> Unit): Boolean {
+            return try {
                 block()
+                true
             } catch (e: IllegalStateException) {
-                // The activity doesn't support picture-in-picture, as its
-                // manifest doesn't declare it.
-                Log.w(TAG, "Picture-in-picture is not supported by the activity", e)
-                isPictureInPictureUnsupported = true
+                if (e.message?.contains(UNSUPPORTED_MESSAGE) == true) {
+                    // The activity's manifest doesn't declare
+                    // picture-in-picture, so it isn't asked again.
+                    Log.w(TAG, "Picture-in-picture is not supported by the activity", e)
+                    isPictureInPictureUnsupported = true
+                } else {
+                    // Passing, such as an activity that isn't resumed, so the
+                    // next attempt may well work.
+                    Log.w(TAG, "Picture-in-picture refused for now", e)
+                }
+                false
             } catch (e: IllegalArgumentException) {
                 // Even the orientation's aspect ratio was rejected.
                 Log.w(TAG, "Picture-in-picture params rejected", e)
+                false
             }
         }
 
@@ -225,7 +250,9 @@ class PictureInPictureHelper {
             // The system enters by itself there, when the user leaves the
             // activity. Entering here too would race it, and onPause also comes
             // for dialogs and permission prompts, which shouldn't enter at all.
-            if (usesAutoEnter) return
+            // Only while the activity took the params that arm it, though:
+            // otherwise nothing would enter at all.
+            if (isAutoEnterArmed) return
 
             enterPictureInPictureMode(activity)
         }
@@ -243,12 +270,12 @@ class PictureInPictureHelper {
 
             withUnsupportedHandled {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    withAspectRatioFallback(
-                        activity,
-                        autoEnter = usesAutoEnter && isPictureInPictureAllowed,
-                    ) {
+                    val autoEnter = usesAutoEnter && isPictureInPictureAllowed
+                    withAspectRatioFallback(activity, autoEnter) {
                         activity.enterPictureInPictureMode(it)
                     }
+                    // Entering hands the activity these params too.
+                    isAutoEnterArmed = autoEnter
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     activity.enterPictureInPictureMode()
                 }
@@ -320,6 +347,7 @@ class PictureInPictureHelper {
             if (usesAutoEnter) {
                 getActivity?.invoke()?.let { applyParams(it, allowAutoEnter = false) }
             }
+            isAutoEnterArmed = false
             methodChannel?.setMethodCallHandler(null)
             methodChannel = null
             getActivity = null

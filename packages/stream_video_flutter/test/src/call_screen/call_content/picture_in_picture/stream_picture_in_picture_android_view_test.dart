@@ -101,8 +101,8 @@ void main() {
     CurrentPlatform.debugCurrentPlatformOverride = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_pipChannel, null);
-    RenderedVideoSizes.instance.reset();
-    AndroidPipManager.instance().resetPictureInPictureParams();
+    RenderedVideoSizes.instance.debugReset();
+    AndroidPipManager.instance().debugResetPictureInPictureParams();
   });
 
   CallParticipantState participant(

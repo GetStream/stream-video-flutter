@@ -51,17 +51,17 @@ class AndroidPipManager {
     }
   }
 
-  /// The params each view last set, in the order they set them. The last
-  /// one is the one Android has, so when it goes, the one before it takes
-  /// over.
+  // The params each view last set, in the order they set them. The last
+  // one is the one Android has, so when it goes, the one before it takes
+  // over.
   final _paramsByOwner = <Object, _PictureInPictureParams>{};
 
-  /// What was last sent, so the same isn't sent twice.
+  // What was last sent, so the same isn't sent twice.
   _PictureInPictureParams? _sentParams;
 
-  /// Set once the channel turns out to have no handler, as without the
-  /// SDK's Android activities, so a value sent every frame doesn't log every
-  /// frame. Cleared when an activity attaches one.
+  // Set once the channel turns out to have no handler, as without the
+  // SDK's Android activities, so a value sent every frame doesn't log every
+  // frame. Cleared when an activity attaches one.
   bool _isChannelMissing = false;
 
   /// Sets the shape of the picture-in-picture window, and the area it
@@ -73,6 +73,10 @@ class AndroidPipManager {
   /// animates in from [sourceRectHint], where that video is drawn, in
   /// physical pixels relative to the Flutter view, rather than showing the
   /// app's icon until the app draws again.
+  ///
+  /// Only the SDK's picture-in-picture view calls this. It re-offers its own
+  /// params after every change, so a value set from elsewhere would not last.
+  @internal
   Future<void> setPictureInPictureParams({
     required Object owner,
     Size? videoSize,
@@ -87,15 +91,16 @@ class AndroidPipManager {
   /// Forgets the params [owner] set, so the owner before it, if any, has
   /// them sent instead, or the window falls back to the device's
   /// orientation and no area to animate from.
+  @internal
   Future<void> clearPictureInPictureParams({required Object owner}) {
     if (_paramsByOwner.remove(owner) == null) return Future.value();
     return _sendParams();
   }
 
   /// Forgets every view's params and what was sent, as a fresh app would
-  /// start.
-  @visibleForTesting
-  void resetPictureInPictureParams() {
+  /// start. For tests.
+  @internal
+  void debugResetPictureInPictureParams() {
     _paramsByOwner.clear();
     _sentParams = null;
     _isChannelMissing = false;

@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -123,6 +124,74 @@ void main() {
       expect(rect.left, 12);
       expect(rect.right, 800 - 84);
     });
+
+    // The overlay covers them, and the window is too small to lay them out.
+    testWidgets(
+      'the app bar and controls are left out in Android picture-in-picture, '
+      'and built afresh on leaving it',
+      (tester) async {
+        Future<void> setPictureInPicture(bool isInPip) async {
+          const channel = MethodChannel('stream_video_flutter_android_pip');
+          await TestDefaultBinaryMessengerBinding
+              .instance
+              .defaultBinaryMessenger
+              .handlePlatformMessage(
+                channel.name,
+                channel.codec.encodeMethodCall(
+                  MethodCall('onPictureInPictureModeChanged', isInPip),
+                ),
+                (_) {},
+              );
+          await tester.pump();
+        }
+
+        // The manager is shared, so the next test starts outside it.
+        addTearDown(() => setPictureInPicture(false));
+
+        await tester.pumpWidget(
+          TestWrapper(
+            child: StreamCallContent(
+              call: mockCall,
+              callAppBarWidgetBuilder: (context, call) => const PreferredSize(
+                preferredSize: Size.fromHeight(56),
+                child: _Counter(key: Key('app bar')),
+              ),
+              callControlsWidgetBuilder: (context, call) =>
+                  const _Counter(key: Key('controls')),
+              callParticipantsWidgetBuilder: (context, call) =>
+                  const Text('Participants'),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final appBar = find.byKey(const Key('app bar'));
+        final controls = find.byKey(const Key('controls'));
+        await tester.tap(appBar);
+        await tester.tap(controls);
+        await tester.pump();
+        expect(find.descendant(of: appBar, matching: find.text('1')), findsOne);
+        expect(
+          find.descendant(of: controls, matching: find.text('1')),
+          findsOne,
+        );
+
+        await setPictureInPicture(true);
+        expect(appBar, findsNothing);
+        expect(controls, findsNothing);
+        // The overlay shows the participant instead.
+        expect(find.text('Participants'), findsNothing);
+
+        await setPictureInPicture(false);
+        expect(find.text('Participants'), findsOne);
+        // Disposed in between, so the counts start over.
+        expect(find.descendant(of: appBar, matching: find.text('0')), findsOne);
+        expect(
+          find.descendant(of: controls, matching: find.text('0')),
+          findsOne,
+        );
+      },
+    );
 
     /// Builds the content on [status], with participants that say so. A
     /// status added to the returned controller reaches it after that.
@@ -356,6 +425,27 @@ class _CallContentExample extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+// Counts its taps, so a test can tell whether its state survived.
+class _Counter extends StatefulWidget {
+  const _Counter({super.key});
+
+  @override
+  State<_Counter> createState() => _CounterState();
+}
+
+class _CounterState extends State<_Counter> {
+  var _taps = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => setState(() => _taps++),
+      child: SizedBox(height: 56, child: Text('$_taps')),
     );
   }
 }

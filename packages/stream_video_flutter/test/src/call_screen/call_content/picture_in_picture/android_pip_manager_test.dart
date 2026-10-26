@@ -16,7 +16,7 @@ void main() {
 
   setUp(() {
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
-    manager.resetPictureInPictureParams();
+    manager.debugResetPictureInPictureParams();
     sent = [];
     hasHandler = true;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -33,7 +33,7 @@ void main() {
     CurrentPlatform.debugCurrentPlatformOverride = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_channel, null);
-    manager.resetPictureInPictureParams();
+    manager.debugResetPictureInPictureParams();
   });
 
   Future<void> handlerAttached() async {

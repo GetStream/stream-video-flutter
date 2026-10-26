@@ -8,8 +8,8 @@ void main() {
 
   final sizes = RenderedVideoSizes.instance;
 
-  setUp(sizes.reset);
-  tearDown(sizes.reset);
+  setUp(sizes.debugReset);
+  tearDown(sizes.debugReset);
 
   const landscape = Size(1920, 1080);
   const portrait = Size(1080, 1920);
