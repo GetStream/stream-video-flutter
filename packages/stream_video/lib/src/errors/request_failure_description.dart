@@ -87,8 +87,8 @@ String _describeRequest(RequestOptions options) {
   return '${options.method} ${uri.host}${uri.path}$query';
 }
 
-/// Why a request that the server never answered failed, or `null` when the
-/// server answered, or when Dio's error is not a transport failure.
+/// The transport reason for [exception]'s type, or `null` when the type
+/// carries none: the answer was read, or the platform error can't be.
 String? _transportFailureOf(DioException exception) {
   return switch (exception.type) {
     DioExceptionType.connectionTimeout ||
