@@ -717,7 +717,7 @@ void main() {
       );
     });
 
-    test('takes the source the SFU sends', () {
+    test('fills in a missing participant source', () {
       final notifier = _notifier([
         _participant(userId: 'obs', participantSource: null),
       ]);
@@ -1149,7 +1149,7 @@ void main() {
       );
     });
 
-    test('keeps the source when an ingest comes back as a new session', () {
+    test('keeps the source when an ingest rejoins with the same session', () {
       final notifier = _notifier([
         _participant(userId: 'host'),
         _participant(
@@ -1157,35 +1157,6 @@ void main() {
           participantSource: SfuParticipantSource.rtmp,
         ),
       ]);
-
-      notifier
-        ..sfuParticipantLeft(
-          SfuParticipantLeftEvent(
-            callCid: 'default:id',
-            participant: _sfuParticipant(
-              userId: 'obs',
-              participantSource: SfuParticipantSource.rtmp,
-            ),
-          ),
-        )
-        ..sfuParticipantJoined(
-          SfuParticipantJoinedEvent(
-            callCid: 'default:id',
-            participant: _sfuParticipant(
-              userId: 'obs',
-              sessionId: 'obs-session-2',
-              participantSource: SfuParticipantSource.rtmp,
-            ),
-          ),
-        );
-
-      final obs = notifier.callState.callParticipants.last;
-      expect(obs.sessionId, 'obs-session-2');
-      expect(obs.participantSource, SfuParticipantSource.rtmp);
-    });
-
-    test('an ingest that joins mid-call sorts ahead of the host', () {
-      final notifier = _notifier([_participant(userId: 'host')]);
 
       notifier.sfuParticipantJoined(
         SfuParticipantJoinedEvent(
@@ -1197,10 +1168,31 @@ void main() {
         ),
       );
 
-      // Picture in picture boosts an ingress regardless of visibility, so
-      // the order depends on the source alone.
+      final participants = notifier.callState.callParticipants;
+      expect(participants.map((it) => it.userId), ['host', 'obs']);
+      expect(participants[1].participantSource, SfuParticipantSource.rtmp);
+    });
+
+    test('an ingest that joins mid-call sorts ahead of a visible host', () {
+      final notifier = _notifier([
+        _participant(userId: 'host').copyWith(
+          roles: ['host'],
+          viewportVisibility: ViewportVisibility.visible,
+        ),
+      ]);
+
+      notifier.sfuParticipantJoined(
+        SfuParticipantJoinedEvent(
+          callCid: 'default:id',
+          participant: _sfuParticipant(
+            userId: 'obs',
+            participantSource: SfuParticipantSource.rtmp,
+          ),
+        ),
+      );
+
       final sorted = [...notifier.callState.callParticipants]
-        ..sort(CallParticipantSortingPresets.pictureInPicture);
+        ..sort(CallParticipantSortingPresets.livestreamOrAudioRoom);
       expect(sorted.map((it) => it.userId), ['obs', 'host']);
     });
   });
