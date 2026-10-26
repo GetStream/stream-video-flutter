@@ -149,8 +149,8 @@ class _CallParticipantsGridViewState extends State<CallParticipantsGridView> {
         // Insets are to the button's visual, less the tap inset.
         final tapInset = participantsNavigationButtonTapInset;
 
-        // A narrow window has no width to spare, so its buttons sit over the
-        // grid, a gap inside its padding. Wider ones set the grid in between
+        // A small window has no room to spare, so its buttons sit over the
+        // grid, a gap inside its padding. Larger ones set the grid in between
         // them instead, each button a gap out from the grid and the padding
         // in from the edge.
         if (screenSize == StreamScreenSize.small) {

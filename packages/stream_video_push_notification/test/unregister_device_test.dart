@@ -43,6 +43,7 @@ class _FakeFirebaseMessaging extends FirebaseMessagingPlatform {
 
 class _MockCoordinatorClient extends Mock implements CoordinatorClient {}
 
+// ignore: subtype_of_sealed_class
 class _MockStreamVideo extends Mock implements StreamVideo {
   // StreamVideo marks dispose as @mustBeOverridden.
   @override

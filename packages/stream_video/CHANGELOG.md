@@ -89,6 +89,7 @@
 - `byPriority` builds a participant comparator from a `ParticipantPriority`, and every sorting criterion now ships one: `dominantSpeakerPriority`, `speakingPriority`, `screenSharingPriority`, `publishingVideoPriority`, `publishingAudioPriority`, `byReactionTypePriority`, `byParticipantSourcePriority`, `byVideoIngressSourcePriority` and `byRolePriority`. `0` is the priority of a participant already on screen: above it brings an off-screen participant into view, below it leaves them out.
 - The caller of a ringing call now polls the ring state when `call.accepted` or `call.rejected` does not arrive. The WebSocket does not redeliver them, and a caller that missed one kept ringing until its timeout, then rejected a call the callee was already in. After 15 seconds without a ring event, the ring state is read every 5 seconds until the ring settles or times out. Tune it, or turn it off, with `StreamVideoOptions.ringStatePolling`.
 - Added `RingingSnapshot`, which resolves a ringing flow for the caller as well as the callee. `CallMetadata.ringingStateFor` goes through it.
+- Added `RtcMediaDeviceNotifier.isAudioOutputSelectionSupported`, whether `Call.setAudioOutputDevice` can route audio on this platform, so a speaker picker can be hidden where it cannot.
 
 ### 🔄 Changed
 
@@ -110,6 +111,8 @@
 ### 🐞 Fixed
 
 - A participant who joins mid-call keeps their participant source, so the speaker, livestream and picture-in-picture layouts put an RTMP or SRT ingest that starts or reconnects during the call ahead of the host.
+- Remote audio on Safari and other WebKit browsers no longer goes silent when another participant joins.
+- Safari and other WebKit browsers always play remote audio on the system default output; `Call.checkIfAudioOutputChangeSupported` returns false there.
 - A dropped SFU connection starts reconnecting within two seconds.
 - Call stats keep being reported when a peer connection stops answering for its stats.
 - The outgoing call screen shows the camera preview every time the call settings turn the camera on, not only sometimes. `getOrCreate` and `get` now apply the call settings to `connectOptions` before they return.
@@ -160,11 +163,25 @@
 - On iOS devices without multitasking camera access, the camera track is now muted while the app is in the background, so other participants see camera-off instead of a frozen frame.
 - A call that keeps rejoining or keeps failing to reconnect now leaves after 10 rejoins within 120 seconds, 20 rejoins within 30 minutes, or 10 failed reconnect attempts, instead of retrying forever.
 
-## Upcoming (minor)
+## 1.7.2
+
+### ✅ Added
+
+- Added `RtcMediaDeviceNotifier.isAudioPlayoutPaused`, `audioPlayoutPausedChanges` and `isAudioPlayoutPauseSupported`.
+- [Web] `RtcMediaDeviceNotifier.pauseAudioPlayout()` and `resumeAudioPlayout()` now work on web.
+- Added `AudioConfigurationPolicy.defaultsToSpeaker`, which is `true` for the viewer policy. `AudioConfigurationPolicy.custom` takes an optional `defaultsToSpeaker`, which otherwise follows the base policy.
+- `CallState.participantCount` and `anonymousParticipantCount` are set from the call's session as soon as it is fetched, instead of staying 0 until the first count update. Once you join, the SFU's counts still take over.
+
+### 🔄 Changed
+
+- `stream_video` now requires `jose` 0.3.5+2 or newer.
 
 ### 🐞 Fixed
 
 - `CallState.endedAt` is now set when the call ends while you are joined or watching it.
+- [iOS] Livestream viewers on `AudioConfigurationPolicy.viewer()` now hear the stream through the loudspeaker instead of the earpiece, whatever the call type's audio settings say. Headphones and Bluetooth devices still take priority, and an output picked with `Call.setAudioOutputDevice` still applies.
+- [iOS] `Call.resumeAudio` now restores the audio output the call was using, such as the loudspeaker, instead of falling back to the earpiece.
+- Changing the audio output device now uses the call's audio policy instead of the client-wide one.
 
 ## 1.7.1
 

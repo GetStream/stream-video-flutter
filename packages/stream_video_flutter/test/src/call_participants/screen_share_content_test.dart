@@ -211,4 +211,60 @@ void main() {
 
     expect(keepsTrack(tester), isFalse);
   });
+
+  group('ScreenShareCallParticipantsContent', () {
+    Future<ParticipantsBarAlignment> barAlignmentIn(
+      WidgetTester tester,
+      Size box,
+    ) async {
+      // A window the other way round from the box, so only the box can be
+      // what decides.
+      tester.view
+        ..devicePixelRatio = 1
+        ..physicalSize = Size(box.height * 2, box.width * 2);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        TestWrapper(
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox.fromSize(
+              size: box,
+              child: ScreenShareCallParticipantsContent(
+                call: mockCall(),
+                screenSharingParticipant: sharer,
+                participants: const [],
+                screenShareContentBuilder: (_, _, _) => const SizedBox(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await settle(tester);
+
+      return tester
+          .widget<CallParticipantsSpotlightView>(
+            find.byType(CallParticipantsSpotlightView),
+          )
+          .barAlignment;
+    }
+
+    testWidgets('a box wider than the share puts the strip beside it', (
+      tester,
+    ) async {
+      expect(
+        await barAlignmentIn(tester, const Size(1000, 300)),
+        ParticipantsBarAlignment.right,
+      );
+    });
+
+    testWidgets('a box taller than the share puts the strip under it', (
+      tester,
+    ) async {
+      expect(
+        await barAlignmentIn(tester, const Size(300, 600)),
+        ParticipantsBarAlignment.bottom,
+      );
+    });
+  });
 }

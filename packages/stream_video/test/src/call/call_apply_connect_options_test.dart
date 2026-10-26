@@ -388,8 +388,15 @@ void main() {
         when(() => preview.trackId).thenReturn('local:video');
         when(() => preview.nativeFactory).thenReturn(nativeFactory);
         when(preview.stop).thenAnswer((_) async => events.add('track stopped'));
-        call.setConnectOptions(
-          call.connectOptions.copyWith(camera: TrackOption.provided(preview)),
+        expect(
+          call
+              .setConnectOptions(
+                call.connectOptions.copyWith(
+                  camera: TrackOption.provided(preview),
+                ),
+              )
+              .isSuccess,
+          isTrue,
         );
 
         final joining = call.join();
@@ -600,8 +607,13 @@ void main() {
         failTwice();
         final call = h.buildCall();
 
-        call.setConnectOptions(
-          CallConnectOptions(camera: TrackOption.disabled()),
+        expect(
+          call
+              .setConnectOptions(
+                CallConnectOptions(camera: TrackOption.disabled()),
+              )
+              .isSuccess,
+          isTrue,
         );
         expect((await call.join()).isSuccess, isTrue);
         await pumpEventQueue();

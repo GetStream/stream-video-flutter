@@ -606,6 +606,7 @@ extension CallSessionResponseExt on open.CallSessionResponse {
       id: id,
       participants: participants.toCallParticipants(),
       participantsCountByRole: participantsCountByRole,
+      anonymousParticipantCount: anonymousParticipantCount,
       rejectedBy: rejectedBy,
       acceptedBy: acceptedBy,
       missedBy: missedBy,

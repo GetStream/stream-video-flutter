@@ -2,6 +2,8 @@
 
 ### ✅ Added
 
+- Added `StreamMediaDevicesController.supportsAudioOutputSelection`; `audioOutputs` is empty where it is false.
+- Added `anchorPoint` to `showStreamModalDialog`, which picks the half of a folded window the dialog goes to.
 - Added `StreamCallConnectionBanner`, which says what the call's connection is doing while it reconnects.
 - Added `callConnectionConnecting`, `callConnectionReconnecting`, `callConnectionReconnectingAttempt`, `callConnectionJoining`, `callConnectionJoiningAttempt`, `callConnectionOffline`, `callConnectionMigrating` and `callConnectionReconnectFailed` to the localizations, in English and Dutch.
 - Added `StreamAdaptiveMenuAnchorThemeData` on `StreamVideoTheme`, and `StreamAdaptiveMenuAnchorTheme` to restyle the menu's sheet and anchored rows over a subtree.
@@ -102,8 +104,8 @@
 - The lobby theme follows the `@themeGen` pattern the other component themes use: `StreamLobbyViewThemeData` carries one nullable `StreamLobbyViewStyle`, every property of which means "no override", and `StreamLobbyViewTheme` is an `InheritedTheme` that merges with the ambient theme instead of replacing it. The style is deliberately small — the preview's appearance belongs to `StreamParticipantTileTheme`, the gaps between rows to `StreamSpacing` and the headings to `StreamTextTheme`, so an app restyles them by restyling those. What is left is the lobby's own geometry: `previewTileStyle`, `compactPreviewAspectRatio`, `expandedPreviewSize`, `maxOverlaidControls` and `joinButtonWidth`.
 
 - The lobby's preview is a `StreamParticipantTile` — the same component the call draws — so its surface, corner radius, name pill and placeholder avatar cannot drift from the tiles it leads to, and an app that themes its participant tiles themes the lobby too. The tile is handed its renderer directly, because the lobby's camera track is warmed up locally and never registered with the call, so the tile's usual lookup by session id would find nothing. The overflow menu, sound indicator, connection quality and reactions are switched off — nobody has joined, so there is nothing to pin or mute, no connection to rate, no reactions to receive, and no local audio level for an indicator to animate. The overflow button is suppressed through the tile's style rather than its props, so it stays suppressed even under an app-wide `participantTile` builder that adds actions to every tile. The speaking outline is left on but never triggers yet: the in-call speaking state comes from the SFU, and a local microphone level pre-join is still to come. `StreamLobbyController.localParticipant` exposes the `CallParticipantState` this is built from.
-- `StreamLobbyView` is rebuilt around `StreamLobbyActions` and the lobby controller. It lays itself out per the window's `StreamScreenSize` — under 768px the controls sit below the preview, above it a short row is overlaid on the preview itself. A row of more than `StreamLobbyViewStyle.maxOverlaidControls` (3 by default) always sits below it instead: the overlaid row is centred on a preview whose bottom-start corner is already taken by the participant label, so a longer row runs into it, and the preview goes from a 370×264 aspect to 640×360 at most — while *which* actions are shown does not follow the screen: `actions` defaults to `StreamLobbyActions.simple()` at every width, and choosing a richer preset for a roomier window is the host's call.
-- `StreamLobbyView` takes a `footer`, drawn between the controls and the join button, and a `joinEnabled` flag that says whether the join button can be pressed. Together they let a lobby ask for something the SDK knows nothing about — a shared encryption key, a display name — and refuse to join until it is there.
+- `StreamLobbyView` is rebuilt around `StreamLobbyActions` and the lobby controller. It lays itself out per the window's `StreamScreenSize` — at `StreamScreenSize.small` the controls sit below the preview, above it a short row is overlaid on the preview itself. A row of more than `StreamLobbyViewStyle.maxOverlaidControls` (3 by default) always sits below it instead: the overlaid row is centred on a preview whose bottom-start corner is already taken by the participant label, so a longer row runs into it, and the preview goes from a 370×264 aspect to 640×360 at most — while *which* actions are shown does not follow the screen: `actions` defaults to `StreamLobbyActions.simple()` at every width, and choosing a richer preset for a roomier window is the host's call. A landscape window shorter than `StreamLobbyView.sideBySideMaxHeight` (900) puts the preview beside the rest. On a small window the preview takes at most 40% of the window height. The lobby keeps clear of the safe-area insets.
+- `StreamLobbyView` takes a `footer`, drawn between the controls and the join button, and a `joinEnabled` flag that says whether the join button can be pressed. Together they let a lobby ask for something the SDK knows nothing about — a shared encryption key, a display name — and refuse to join until it is there. The footer is laid out at the join button's width.
 
 - Added `StreamLobbyHeader`, the heading above the lobby's preview: the design's icon, a title and a line below it. It is registered as `lobbyHeader` on `streamVideoComponentBuilders`, so an app can replace the whole heading — a logo, a call name, a countdown — without touching the rest of the lobby. `StreamLobbyView`'s `title` and `subtitle` are passed through to it. The title falls back to a localized default; the subtitle has none, because the design puts a single line under the icon — pass one to get a second.
 
@@ -211,6 +213,8 @@
 
 ### 🔄 Changed
 
+- On a folded window, `showStreamModalDialog` goes to the trailing half by default, and `StreamAdaptiveMenuAnchor`'s sheet to the half its button is in.
+- On a window folded down the middle, `StreamLobbyView` puts the preview and the rest of the lobby on either side of the fold, and `CallControlBar` splits its centre controls between its two sides.
 - `StreamCallContent` keeps showing the participants during a reconnect, and after one fails until the call has left, with a `StreamCallConnectionBanner` above them instead of the centred "Reconnecting" text.
 - `StreamSelectInput` draws its `labelText` in `headingXs`, the size the design gives it.
 - `StreamParticipantTileStyle.topToolbarPadding` defaults to none.
@@ -227,6 +231,12 @@
 
 ### 🐞 Fixed
 
+- The lobby no longer offers a speaker choice on Safari and other WebKit browsers, which play every call on the system default output.
+- The screen share layout puts the participant strip beside or under the share by the space it is given, not by the window.
+- The reaction picker stays above `StreamAddReactionButton` when the window changes while it is open.
+- `StreamCallContent` keeps the call body clear of side safe-area insets, such as a status rail in landscape.
+- The floating local video keeps clear of the safe-area insets on every edge.
+- `OverlayAppBar` now clears the right safe-area inset.
 - Fixed picking an option in a `StreamContextMenuAnchor`, or an anchored `StreamAdaptiveMenuAnchor`, closing the dialog it is shown in.
 - The participant tile's overflow menu lines up with the edge of its button.
 - `StreamAdaptiveMenuAnchor` sheet rows are 48px tall.
@@ -296,6 +306,8 @@
 
 ### ⚠️ Breaking
 
+- `isMobileLandscape` and `isMobilePortrait` are removed.
+- `StreamScreenSize` is `small` for any window shorter than 480, and `StreamScreenSize.fromSize` buckets a size by both axes.
 - `StreamCallContent.callFastReconnectingOverlayBuilder`, `CallFastReconnectingOverlayBuilder` and `CallFastReconnectingProperties` are removed; use `callConnectionBannerBuilder`, which is drawn for every reconnect and gets the call status through `CallConnectionBannerProperties`. `CallNotConnectedProperties.isMigrating` and `isReconnecting` are removed, since `callNotConnectedBuilder` is only used before the call first connects.
 - `CallParticipantSort` is a class rather than an alias for `Comparator`. It pairs the comparator with an `identity`, which is what `StreamCallParticipants` compares to notice the sorting has changed — a bare closure is a new function on every build, so comparing those reordered the list every time. Wrap an existing comparator as `CallParticipantSort(compare, identity: 'my-sort')`; without an identity a sort is only equal to itself. The SDK's own sorts are on `CallParticipantSorts`. `PictureInPictureConfiguration.sort` and `StreamPictureInPictureUiKitView.participantSort` take one too.
 - The desktop screen share picker is rebuilt on the design system. `TabbedScreenSelectWidget`, `ThumbnailGrid`, `ScreenSelectorStateNotifier` and `ScreenSelectorState` are gone; `StreamDesktopScreenShareSelector` and `DesktopScreenShareSourceController` replace them. `showDefaultScreenSelectionDialog` keeps its signature.
@@ -381,6 +393,32 @@
 - The participants bar draws 222x125 tiles, centred until they overflow and scaled down only where they would take more than a third of the view.
 - `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
 - Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.
+
+## 1.7.2
+
+### 🔄 Changed
+
+- The `LivestreamPlayer` speaker button now mutes and unmutes the stream instead of switching between speaker and earpiece.
+- `StreamLobbyView` now says "N people are in the call" instead of "N more people are in the call".
+- `VideoFit.adaptive` now compares the video's orientation with the widget's instead of looking at the video alone. The video fills the widget when both are landscape or both are portrait, and is letterboxed when they differ.
+- `stream_video` now requires `jose` 0.3.5+2 or newer.
+
+### ✅ Added
+
+- Added `RtcMediaDeviceNotifier.isAudioPlayoutPaused`, `audioPlayoutPausedChanges` and `isAudioPlayoutPauseSupported`.
+- [Web] `RtcMediaDeviceNotifier.pauseAudioPlayout()` and `resumeAudioPlayout()` now work on web.
+- Added `LivestreamPlayer.fullscreenVideoFit`, the fit used in fullscreen mode. It defaults to `VideoFit.adaptive`. Pass `VideoFit.cover` to restore the previous always-fill behaviour.
+- Added `AudioConfigurationPolicy.defaultsToSpeaker`, which is `true` for the viewer policy. `AudioConfigurationPolicy.custom` takes an optional `defaultsToSpeaker`, which otherwise follows the base policy.
+- `CallState.participantCount` and `anonymousParticipantCount` are set from the call's session as soon as it is fetched, instead of staying 0 until the first count update. Once you join, the SFU's counts still take over.
+
+### 🐞 Fixed
+
+- `LivestreamBackstageContent` and `StreamLobbyView` show the correct call's participant count for large calls.
+- `LivestreamPlayer` fullscreen mode no longer crops a feed whose orientation differs from the player's, such as a landscape stream on a portrait phone. The feed is letterboxed instead, and still fills the player when both share an orientation.
+- `CallState.endedAt` is now set when the call ends while you are joined or watching it.
+- [iOS] Livestream viewers on `AudioConfigurationPolicy.viewer()` now hear the stream through the loudspeaker instead of the earpiece, whatever the call type's audio settings say. Headphones and Bluetooth devices still take priority, and an output picked with `Call.setAudioOutputDevice` still applies.
+- [iOS] `Call.resumeAudio` now restores the audio output the call was using, such as the loudspeaker, instead of falling back to the earpiece.
+- Changing the audio output device now uses the call's audio policy instead of the client-wide one.
 
 ## 1.7.1
 
