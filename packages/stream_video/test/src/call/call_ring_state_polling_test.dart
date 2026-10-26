@@ -104,6 +104,13 @@ void main() {
     return call;
   }
 
+  test('polls from 9 s into the ring, every 5 s, by default', () {
+    // The tests below advance time by the defaults, so they would not notice
+    // a change to them.
+    expect(_startAfter, const Duration(seconds: 9));
+    expect(_interval, const Duration(seconds: 5));
+  });
+
   test('joins the ring a callee accepted without the event', () {
     fakeAsync((async) {
       startRing();
