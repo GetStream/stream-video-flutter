@@ -5,6 +5,10 @@ part of '../call.dart';
 class CallConnectionCoordinator {
   CallConnectionCoordinator(this._call);
 
+  /// How long the network has to stay up before a rejoin or migrate starts.
+  @visibleForTesting
+  static Duration rejoinStabilityWindow = const Duration(seconds: 3);
+
   final Call _call;
 
   late final _cancelables = Cancelables();
@@ -1664,7 +1668,7 @@ class CallConnectionCoordinator {
       final stabilityWindow =
           (_reconnectStrategy == SfuReconnectionStrategy.rejoin ||
               _reconnectStrategy == SfuReconnectionStrategy.migrate)
-          ? const Duration(seconds: 3)
+          ? rejoinStabilityWindow
           : Duration.zero;
 
       if (_isLeftOrLeaving) {
@@ -1787,7 +1791,7 @@ class CallConnectionCoordinator {
             _reconnectStrategy == SfuReconnectionStrategy.migrate;
         if (needsStableNetwork && stabilityWindow == Duration.zero) {
           final status = await _awaitNetworkAvailable(
-            stabilityWindow: const Duration(seconds: 3),
+            stabilityWindow: rejoinStabilityWindow,
             onStatus: onNetworkStatus,
           );
           if (stopsAfterNetworkWait(status)) return;

@@ -90,6 +90,7 @@
 - The caller of a ringing call now polls the ring state when `call.accepted` or `call.rejected` does not arrive. The WebSocket does not redeliver them, and a caller that missed one kept ringing until its timeout, then rejected a call the callee was already in. After 15 seconds without a ring event, the ring state is read every 5 seconds until the ring settles or times out. Tune it, or turn it off, with `StreamVideoOptions.ringStatePolling`.
 - Added `RingingSnapshot`, which resolves a ringing flow for the caller as well as the callee. `CallMetadata.ringingStateFor` goes through it.
 - Added `RtcMediaDeviceNotifier.isAudioOutputSelectionSupported`, whether `Call.setAudioOutputDevice` can route audio on this platform, so a speaker picker can be hidden where it cannot.
+- Added `RetryConfig.rpcTimeout`, how long a coordinator request may wait to connect and then for its response (10 seconds by default).
 
 ### 🔄 Changed
 
@@ -114,6 +115,7 @@
 - Safari and other WebKit browsers always play remote audio on the system default output; `Call.checkIfAudioOutputChangeSupported` returns false there.
 - A dropped SFU connection starts reconnecting within two seconds.
 - Call stats keep being reported when a peer connection stops answering for its stats.
+- Coordinator requests that get no response now time out, so a reconnect attempt whose join hangs ends and the next one starts. A timed-out request that changes something, such as a ring or a reaction, is not sent again.
 - The outgoing call screen shows the camera preview every time the call settings turn the camera on, not only sometimes. `getOrCreate` and `get` now apply the call settings to `connectOptions` before they return.
 - Cancelling an outgoing call while its camera preview is on no longer crashes the app on Android. A track handed over through `TrackOption.provided` that the call never adopted is now stopped before the call's peer connection factory is disposed.
 - Connecting while the coordinator socket is dropped reconnects that socket instead of opening a second one.
