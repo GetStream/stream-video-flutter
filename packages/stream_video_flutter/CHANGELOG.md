@@ -396,24 +396,31 @@
 - `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
 - Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.
 
-## Upcoming (minor)
+## 1.7.2
 
 ### 🔄 Changed
 
-- The `LivestreamPlayer` speaker button now mutes and unmutes the stream instead of switching between speaker and earpiece. It is hidden on Windows and Linux.
+- The `LivestreamPlayer` speaker button now mutes and unmutes the stream instead of switching between speaker and earpiece.
 - `StreamLobbyView` now says "N people are in the call" instead of "N more people are in the call".
-- `VideoFit.adaptive` now compares the video's orientation with the widget's instead of looking at the video alone. The video fills the widget when both are landscape or both are portrait, and is letterboxed when they differ. Landscape tiles, the common case on web and desktop, behave as before; in a portrait tile a landscape feed is now letterboxed instead of cropped, and a portrait feed now fills the tile instead of being letterboxed.
+- `VideoFit.adaptive` now compares the video's orientation with the widget's instead of looking at the video alone. The video fills the widget when both are landscape or both are portrait, and is letterboxed when they differ.
+- `stream_video` now requires `jose` 0.3.5+2 or newer.
 
 ### ✅ Added
 
 - Added `RtcMediaDeviceNotifier.isAudioPlayoutPaused`, `audioPlayoutPausedChanges` and `isAudioPlayoutPauseSupported`.
 - [Web] `RtcMediaDeviceNotifier.pauseAudioPlayout()` and `resumeAudioPlayout()` now work on web.
-- Added `LivestreamPlayer.fullscreenVideoFit`, the fit used in fullscreen mode. It defaults to `VideoFit.adaptive`; pass `VideoFit.cover` to restore the previous always-fill behaviour.
- 
+- Added `LivestreamPlayer.fullscreenVideoFit`, the fit used in fullscreen mode. It defaults to `VideoFit.adaptive`. Pass `VideoFit.cover` to restore the previous always-fill behaviour.
+- Added `AudioConfigurationPolicy.defaultsToSpeaker`, which is `true` for the viewer policy. `AudioConfigurationPolicy.custom` takes an optional `defaultsToSpeaker`, which otherwise follows the base policy.
+- `CallState.participantCount` and `anonymousParticipantCount` are set from the call's session as soon as it is fetched, instead of staying 0 until the first count update. Once you join, the SFU's counts still take over.
+
 ### 🐞 Fixed
 
-- `LivestreamBackstageContent` and `StreamLobbyView` show the call's participant count from the server. They counted the participant list, which stops at a few hundred in large calls.
+- `LivestreamBackstageContent` and `StreamLobbyView` show the correct call's participant count for large calls.
 - `LivestreamPlayer` fullscreen mode no longer crops a feed whose orientation differs from the player's, such as a landscape stream on a portrait phone. The feed is letterboxed instead, and still fills the player when both share an orientation.
+- `CallState.endedAt` is now set when the call ends while you are joined or watching it.
+- [iOS] Livestream viewers on `AudioConfigurationPolicy.viewer()` now hear the stream through the loudspeaker instead of the earpiece, whatever the call type's audio settings say. Headphones and Bluetooth devices still take priority, and an output picked with `Call.setAudioOutputDevice` still applies.
+- [iOS] `Call.resumeAudio` now restores the audio output the call was using, such as the loudspeaker, instead of falling back to the earpiece.
+- Changing the audio output device now uses the call's audio policy instead of the client-wide one.
 
 ## 1.7.1
 
