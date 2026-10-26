@@ -289,8 +289,8 @@
 
 - The lobby no longer lists someone twice. `getOrCreate` returns a snapshot of the session while the event subscription is already live, so a join already reflected in that snapshot still arrives as a `ParticipantJoined` event — and the lobby appended it blindly. Participants are now upserted by session id, which leaves a genuine second session of the same user (a phone and a laptop) listed separately, as it should be. A join event for the local user is ignored, matching the snapshot, which always filtered them out.
 - The lobby no longer adds and drops people on another call's events.
-- [iOS] Picture-in-picture video is drawn by WebRTC's own picture-in-picture renderer, which converts frames off the main thread and flushes its display layer when it needs flushing to resume decoding. The window learns the video's size before picture-in-picture starts, so it opens in the video's shape, and video sent with a rotation, such as the local camera's, is shown upright instead of on its side.
-- [iOS] A participant's tile no longer stays black after the app returns from picture-in-picture. The tracks turned off in the background are the ones turned back on, even when the participant's subscription lapsed or they turned their camera off and on meanwhile, and the tracks picture-in-picture turned off when it moved to someone else are turned back on when it ends.
+- [iOS] Picture-in-picture now opens in the video's aspect ratio and shows rotated video, such as the local camera, upright.
+- [iOS] A participant's video no longer stays black after returning from picture-in-picture.
 
 ### ⚠️ Deprecated
 

@@ -31,6 +31,7 @@ void main() {
   late MockCallParticipantState participant;
   late MutableStateEmitter<CallState> emitter;
   late _FakeMediaStreamTrack mediaTrack;
+  late List<MethodCall> nativeCalls;
 
   setUpAll(() {
     registerFallbackValue(SfuTrackType.video);
@@ -52,6 +53,7 @@ void main() {
     callState = MockCallState();
     participant = MockCallParticipantState();
     mediaTrack = _FakeMediaStreamTrack();
+    nativeCalls = [];
 
     when(() => participant.userId).thenReturn('alice');
     when(() => participant.sessionId).thenReturn('alice-session');
@@ -71,6 +73,7 @@ void main() {
 
     when(() => callState.status).thenReturn(CallStatus.connected());
     when(() => callState.callParticipants).thenReturn([participant]);
+    when(() => callState.localParticipant).thenReturn(null);
     when(() => callState.iOSMultitaskingCameraAccessEnabled).thenReturn(true);
 
     emitter = MutableStateEmitter<CallState>(callState, sync: true);
@@ -87,7 +90,10 @@ void main() {
     });
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, (_) async => null);
+        .setMockMethodCallHandler(channel, (methodCall) async {
+          nativeCalls.add(methodCall);
+          return null;
+        });
   });
 
   tearDown(() {
@@ -189,18 +195,65 @@ void main() {
   ) async {
     // Speaking, so the app leaves the track alone in the background.
     when(() => participant.isSpeaking).thenReturn(true);
+    // Backgrounding replays the participants, which gives the window the
+    // participant to draw.
     await pumpPip(tester);
     await background(tester);
 
-    // The window is given the participant to draw.
-    emitter.value = callState;
-    await tester.pump();
-    // Then moves on to someone else, and the native side turns this one off.
+    // Then it moves on to someone else, and the native side turns this one
+    // off.
     mediaTrack.enabled = false;
 
     await foreground(tester);
 
     expect(mediaTrack.enabled, isTrue);
+  });
+
+  testWidgets('leaves the local camera to the LLC when it stopped it', (
+    tester,
+  ) async {
+    when(() => participant.isLocal).thenReturn(true);
+    when(() => callState.localParticipant).thenReturn(participant);
+    await pumpPip(tester);
+    await background(tester);
+    expect(mediaTrack.enabled, isFalse);
+
+    // Without multitasking camera access the LLC stops the camera in the
+    // background. It recreates it on resume only if it finds it disabled.
+    when(() => participant.isVideoEnabled).thenReturn(false);
+    await foreground(tester);
+
+    expect(mediaTrack.enabled, isFalse);
+  });
+
+  testWidgets('turns the local camera on again when it stayed on', (
+    tester,
+  ) async {
+    when(() => participant.isLocal).thenReturn(true);
+    when(() => callState.localParticipant).thenReturn(participant);
+    await pumpPip(tester);
+
+    await background(tester);
+    expect(mediaTrack.enabled, isFalse);
+
+    await foreground(tester);
+    expect(mediaTrack.enabled, isTrue);
+  });
+
+  testWidgets('gives the window its participant before the app is paused', (
+    tester,
+  ) async {
+    // Picture-in-picture can start from inline before the app is paused, and
+    // opens in the shape of the track it already has.
+    await pumpPip(tester);
+
+    final update = nativeCalls.lastWhere(
+      (call) => call.method == 'updateParticipant',
+    );
+    expect(
+      (update.arguments as Map<Object?, Object?>)['trackId'],
+      'alice-video',
+    );
   });
 
   testWidgets('turns the track on again when removed in the background', (

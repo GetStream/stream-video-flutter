@@ -86,6 +86,8 @@ class _StreamPictureInPictureUiKitViewState
   /// is the one still drawing once the app is backgrounded.
   late ViewportHandle _viewport = widget.call.viewportVisibility.attach();
 
+  bool _isInBackground = false;
+
   Future<void> _handleParticipantsChange(
     List<CallParticipantState> callParticipants,
     bool includeLocalParticipantVideo,
@@ -128,26 +130,30 @@ class _StreamPictureInPictureUiKitViewState
 
       // What this window draws, reported like any other viewport. Kept while
       // hidden: the Flutter tiles go off screen when the app is backgrounded,
-      // which is exactly when this window is the one being watched.
-      _viewport.report(
-        ViewportTrack(
-          userId: pipParticipant.userId,
-          sessionId: pipParticipant.sessionId,
-          trackIdPrefix: pipParticipant.trackIdPrefix,
-          trackType: priorityTrack,
-        ),
-        const ViewportMeasurement(
-          visibility: ViewportVisibility.visible,
-          dimension: RtcVideoDimensionPresets.h360_169,
-          persistWhenHidden: true,
-        ),
-      );
+      // which is exactly when this window is the one being watched. In the
+      // foreground the tiles ask for what is on screen.
+      if (_isInBackground) {
+        _viewport.report(
+          ViewportTrack(
+            userId: pipParticipant.userId,
+            sessionId: pipParticipant.sessionId,
+            trackIdPrefix: pipParticipant.trackIdPrefix,
+            trackType: priorityTrack,
+          ),
+          const ViewportMeasurement(
+            visibility: ViewportVisibility.visible,
+            dimension: RtcVideoDimensionPresets.h360_169,
+            persistWhenHidden: true,
+          ),
+        );
+      }
 
       if (videoTrack == null &&
           (pipParticipant.isVideoEnabled ||
               pipParticipant.isScreenShareEnabled)) {
-        // The track has not arrived yet. The report above is what asks for
-        // it; the state change it causes comes back through here.
+        // The track has not arrived yet. In the background the report above
+        // is what asks for it; the state change it causes comes back through
+        // here.
         return;
       }
 
@@ -234,6 +240,10 @@ class _StreamPictureInPictureUiKitViewState
     WidgetsBinding.instance.addObserver(this);
 
     _listenForCallEnded();
+    // Picture-in-picture can start from inline before the app is paused, so
+    // the window is given its participant in the foreground too. It then
+    // opens in the shape of that participant's video.
+    _subscribeToCallEvents();
 
     super.initState();
   }
@@ -251,10 +261,9 @@ class _StreamPictureInPictureUiKitViewState
     _viewport.dispose();
     _viewport = widget.call.viewportVisibility.attach();
 
-    final wasFollowingParticipants = _subscriptions.contains(_idCallState);
     _subscriptions.cancelAll();
     _listenForCallEnded();
-    if (wasFollowingParticipants) _subscribeToCallEvents();
+    _subscribeToCallEvents();
   }
 
   void _listenForCallEnded() {
@@ -278,11 +287,14 @@ class _StreamPictureInPictureUiKitViewState
 
     switch (state) {
       case AppLifecycleState.resumed:
-        _subscriptions.cancel(_idCallState);
+        _isInBackground = false;
         _restoreTracksFromBackground(widget.call);
         break;
       case AppLifecycleState.paused:
+        _isInBackground = true;
         _disableTracksInBackground();
+        // Subscribed again so the participants are replayed, and the window
+        // reports its participant as a viewport now that the tiles are hidden.
         _subscribeToCallEvents();
 
         // Check status with a small delay to catch the race condition where
@@ -357,15 +369,33 @@ class _StreamPictureInPictureUiKitViewState
   // Re-enable the tracks disabled in background when app comes back to
   // foreground, looked up again in case a track was replaced meanwhile.
   void _restoreTracksFromBackground(Call call) {
+    final localParticipant = call.state.value.localParticipant;
+
     for (final (:trackIdPrefix, :trackType) in {
       ..._tracksDisabledInBackground,
       ..._tracksShownInPictureInPicture,
     }) {
+      // A local track turned off meanwhile, such as the camera the LLC stops
+      // in the background, is left to the LLC: it only recreates a stopped
+      // track it finds disabled.
+      if (localParticipant case final local?
+          when local.trackIdPrefix == trackIdPrefix &&
+              !_isPublishing(local, trackType)) {
+        continue;
+      }
+
       call.getTrack(trackIdPrefix, trackType)?.mediaTrack.enabled = true;
     }
     _tracksDisabledInBackground.clear();
     _tracksShownInPictureInPicture.clear();
   }
+
+  static bool _isPublishing(
+    CallParticipantState participant,
+    SfuTrackTypeVideo trackType,
+  ) => trackType.isScreenShare
+      ? participant.isScreenShareEnabled
+      : participant.isVideoEnabled;
 
   @override
   void dispose() {

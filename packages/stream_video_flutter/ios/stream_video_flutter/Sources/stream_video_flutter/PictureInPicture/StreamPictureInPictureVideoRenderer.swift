@@ -28,12 +28,15 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         didSet {
             guard oldValue != track else { return }
             oldValue?.remove(self)
+            // Disabling flushes the previous track's last frame, which would
+            // otherwise stay up, in its own shape, until the new one draws.
+            if window != nil {
+                videoRenderer.isEnabled = false
+                videoRenderer.isEnabled = true
+            }
             track?.add(self)
         }
     }
-
-    /// The layer that renders the track's frames.
-    var displayLayer: CALayer { videoRenderer.layer }
 
     /// A policy defining how the Picture in Picture window should be resized in order to better fit
     /// the rendering frame size.
