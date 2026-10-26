@@ -24,7 +24,6 @@ class RingStatePollingSettings {
   /// read at 9, 14, 19, 24 and 29 seconds. A callee who takes longer than that
   /// to answer is read every [interval] until the answer arrives, even when the
   /// WebSocket is healthy; raise it to poll less.
-  /// read even when the WebSocket is healthy; raise it to poll less.
   ///
   /// Every `call.accepted`, `call.rejected` or `call.missed` event restarts it,
   /// as an event proves the WebSocket is alive.
