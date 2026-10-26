@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 
-/// Why [error] kept a request from reaching the server, or `null` when it is
-/// not a transport failure.
+/// Why [error] ended a request before the server's answer was read, or
+/// `null` when it is not a transport failure.
 ///
 /// Reads `normalized reason — platform detail`, as in
 /// `DNS lookup failed — Failed host lookup: 'video.stream-io-api.com' (nodename nor servname provided)`.
