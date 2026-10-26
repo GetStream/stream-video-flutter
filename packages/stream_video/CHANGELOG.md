@@ -110,6 +110,7 @@
 
 ### 🐞 Fixed
 
+- A participant who joins mid-call keeps their participant source, so the speaker, livestream and picture-in-picture layouts put an RTMP or SRT ingest that starts or reconnects during the call ahead of the host.
 - Remote audio on Safari and other WebKit browsers no longer goes silent when another participant joins.
 - Safari and other WebKit browsers always play remote audio on the system default output; `Call.checkIfAudioOutputChangeSupported` returns false there.
 - A dropped SFU connection starts reconnecting within two seconds.

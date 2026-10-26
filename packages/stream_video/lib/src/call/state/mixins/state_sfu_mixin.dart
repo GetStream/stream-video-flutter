@@ -309,6 +309,7 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
       image: event.participant.userImage,
       sessionId: event.participant.sessionId,
       trackIdPrefix: event.participant.trackLookupPrefix,
+      participantSource: event.participant.participantSource,
       publishedTracks:
           consumePendingTracks(event.participant.trackLookupPrefix) ?? {},
       isLocal: isLocal,
@@ -366,6 +367,7 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
         customData: participant.customData,
         image: participant.userImage,
         trackIdPrefix: participant.trackLookupPrefix,
+        participantSource: participant.participantSource,
         isSpeaking: participant.isSpeaking,
         isDominantSpeaker: participant.isDominantSpeaker,
         connectionQuality: participant.connectionQuality.mergeWithPrevious(
