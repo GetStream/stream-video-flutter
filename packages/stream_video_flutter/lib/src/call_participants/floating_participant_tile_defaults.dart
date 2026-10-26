@@ -53,5 +53,9 @@ class StreamFloatingParticipantTileStyleDefaults
     // The tile draws no border of its own — the floating surface owns it, and
     // two hairlines on the same corner read as one thick one.
     border: Border(),
+    // The view has a fixed size, so the adaptive default would letterbox a
+    // camera whose orientation differs from it, such as a landscape webcam in
+    // the portrait default view.
+    videoFit: VideoFit.cover,
   );
 }
