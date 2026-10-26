@@ -157,9 +157,9 @@ class _StreamPictureInPictureUiKitViewState
         return;
       }
 
-      // The native side turns off the track it moves away from, so every
-      // remote one it is given is turned back on with the app.
-      if (videoTrack != null && !pipParticipant.isLocal) {
+      // The native side turns off the track it moves away from, so every one
+      // it is given is turned back on with the app.
+      if (videoTrack != null) {
         _tracksShownInPictureInPicture.add((
           trackIdPrefix: pipParticipant.trackIdPrefix,
           trackType: priorityTrack,
@@ -323,10 +323,10 @@ class _StreamPictureInPictureUiKitViewState
   final _tracksDisabledInBackground =
       <({String trackIdPrefix, SfuTrackTypeVideo trackType})>{};
 
-  /// The remote tracks the window was given to draw while in the background.
-  /// The native side turns off the one it moves away from and turns it back
-  /// on once picture-in-picture ends; they are turned on with the app as well,
-  /// so a participant shown earlier is never left black should that be missed.
+  /// The tracks the window was given to draw. The native side turns off the
+  /// one it moves away from and leaves turning it back on to this widget,
+  /// which does it with the app rather than when the window closes: closed in
+  /// the background, it would decode with nobody watching.
   final _tracksShownInPictureInPicture =
       <({String trackIdPrefix, SfuTrackTypeVideo trackType})>{};
 

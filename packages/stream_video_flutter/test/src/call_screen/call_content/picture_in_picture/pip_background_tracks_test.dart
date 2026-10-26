@@ -240,6 +240,25 @@ void main() {
     expect(mediaTrack.enabled, isTrue);
   });
 
+  testWidgets('turns on the local camera picture-in-picture moved away from', (
+    tester,
+  ) async {
+    // Speaking, so the app leaves the camera alone in the background.
+    when(() => participant.isLocal).thenReturn(true);
+    when(() => participant.isSpeaking).thenReturn(true);
+    when(() => callState.localParticipant).thenReturn(participant);
+    await pumpPip(tester);
+    await background(tester);
+
+    // The window moves on to someone else, and the native side turns the
+    // camera off.
+    mediaTrack.enabled = false;
+
+    await foreground(tester);
+
+    expect(mediaTrack.enabled, isTrue);
+  });
+
   testWidgets('gives the window its participant before the app is paused', (
     tester,
   ) async {
