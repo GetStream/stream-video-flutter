@@ -95,10 +95,6 @@ linter:
     # Too many false positive (builders)
     diagnostic_describe_all_properties: false
 
-    # Not a common style and would add a lot of verbosity to function signature.
-    # 'parameter_assignments' already enforces this to an extent.
-    prefer_final_parameters: false
-
     # There are situations where we use default in enums on purpose
     no_default_cases: false
 

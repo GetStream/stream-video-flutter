@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
@@ -240,6 +241,121 @@ void main() {
     ),
   );
 
+  group('on a foldable', () {
+    // The poses the lobby has to fit without scrolling, each with the status
+    // rail it puts along the side or the top.
+    const poses = <String, (Size, EdgeInsets)>{
+      'outer landscape': (Size(678, 466), EdgeInsets.only(right: 84)),
+      'inner portrait': (Size(669, 951), EdgeInsets.only(top: 54)),
+      'inner landscape': (Size(951, 669), EdgeInsets.only(right: 84)),
+      // Not a foldable, but the same problem: a tablet in landscape.
+      'tablet landscape': (Size(1280, 800), EdgeInsets.only(top: 24)),
+    };
+
+    for (final MapEntry(key: pose, value: (size, padding)) in poses.entries) {
+      testWidgets('$pose shows the join button without scrolling', (
+        tester,
+      ) async {
+        tester.view
+          ..physicalSize = size
+          ..devicePixelRatio = 1
+          ..padding = FakeViewPadding(
+            left: padding.left,
+            top: padding.top,
+            right: padding.right,
+            bottom: padding.bottom,
+          );
+        addTearDown(tester.view.reset);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              appBar: AppBar(),
+              body: Center(
+                child: SingleChildScrollView(
+                  // The padding the sample's lobby screen gives it.
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 32,
+                  ),
+                  child: StreamLobbyView.withController(
+                    controller: controller,
+                    actions: StreamLobbyActions.regular(),
+                    // About what the sample's encryption card takes.
+                    footer: const SizedBox(height: 140),
+                    onJoinCallPressed: (_) => true,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final join = tester.getRect(find.byType(StreamButton).last);
+        expect(join.bottom, lessThanOrEqualTo(size.height - padding.bottom));
+        expect(join.left, greaterThanOrEqualTo(padding.left));
+        expect(join.right, lessThanOrEqualTo(size.width - padding.right));
+
+        final preview = tester.getRect(find.byType(StreamParticipantTile));
+        expect(preview.left, greaterThanOrEqualTo(padding.left));
+        expect(preview.right, lessThanOrEqualTo(size.width - padding.right));
+      });
+    }
+  });
+
+  testWidgets('a half-open fold keeps every control off it', (tester) async {
+    const fold = Rect.fromLTWH(475, 0, 0, 669);
+    tester.view
+      ..physicalSize = const Size(951, 669)
+      ..devicePixelRatio = 1
+      ..padding = const FakeViewPadding(right: 84)
+      ..displayFeatures = const [
+        DisplayFeature(
+          bounds: fold,
+          type: DisplayFeatureType.fold,
+          state: DisplayFeatureState.postureHalfOpened,
+        ),
+      ];
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          body: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: StreamLobbyView.withController(
+                controller: controller,
+                actions: StreamLobbyActions.regular(),
+                onJoinCallPressed: (_) => true,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    // The first frame measures where the fold falls; the next lays out
+    // around it.
+    await tester.pump();
+    await tester.pump();
+
+    for (final finder in [
+      find.byType(StreamParticipantTile),
+      find.byType(StreamLobbyMicrophoneSplitButton),
+      find.byType(StreamLobbyCameraSplitButton),
+      find.byType(StreamButton).last,
+    ]) {
+      final rect = tester.getRect(finder);
+      expect(
+        rect.right <= fold.left || rect.left >= fold.right,
+        isTrue,
+        reason: '$finder at $rect',
+      );
+    }
+  });
+
   testWidgets('the settings lane is not drawn when it is empty', (
     tester,
   ) async {
@@ -352,6 +468,76 @@ void main() {
     );
     expect(footer, lessThan(tester.getCenter(find.text('Join')).dy));
   });
+
+  testWidgets('a short desktop window keeps each side at its stacked width', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(1440, 850)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      TestWrapper(
+        child: SingleChildScrollView(
+          child: StreamLobbyView.withController(
+            controller: controller,
+            actions: StreamLobbyActions.simple(),
+            footer: const SizedBox(key: Key('footer'), height: 40),
+            joinButtonLabel: const Text('Join'),
+            onJoinCallPressed: (_) => true,
+          ),
+        ),
+      ),
+    );
+
+    final join = tester.getRect(
+      find.ancestor(of: find.text('Join'), matching: find.byType(StreamButton)),
+    );
+    final preview = tester.getRect(find.byType(StreamParticipantTile));
+
+    // Side by side, not stacked.
+    expect(join.left, greaterThan(preview.right));
+    expect(join.width, 400);
+    expect(tester.getRect(find.byKey(const Key('footer'))).width, 400);
+    expect(preview.width, lessThanOrEqualTo(640));
+  });
+
+  for (final width in [375.0, 900.0]) {
+    testWidgets('the footer takes the join button width at $width', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          child: SingleChildScrollView(
+            child: MediaQuery(
+              data: MediaQueryData(size: Size(width, 900)),
+              child: SizedBox(
+                width: width,
+                child: StreamLobbyView.withController(
+                  controller: controller,
+                  actions: StreamLobbyActions.simple(),
+                  footer: const SizedBox(key: Key('footer'), height: 40),
+                  joinButtonLabel: const Text('Join'),
+                  onJoinCallPressed: (_) => true,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final join = tester.getRect(
+        find.ancestor(
+          of: find.text('Join'),
+          matching: find.byType(StreamButton),
+        ),
+      );
+      final footer = tester.getRect(find.byKey(const Key('footer')));
+      expect(footer.left, join.left);
+      expect(footer.width, join.width);
+    });
+  }
 
   // Without a footer and without a builder the slot is not built at all: the
   // body's Column spaces its children out, so an empty one would leave a gap.

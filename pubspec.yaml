@@ -84,7 +84,7 @@ melos:
         stream_core: ^0.5.0
         stream_core_flutter: ^0.5.1
         stream_chat_flutter: ^10.0.0
-        stream_webrtc_flutter: ^4.0.0
+        stream_webrtc_flutter: ^4.0.1
         stream_video: ^2.0.0-alpha
         stream_video_filters: ^2.0.0-alpha
         stream_video_flutter: ^2.0.0-alpha
@@ -136,15 +136,40 @@ melos:
 
     format:
       # Only format git-tracked Dart files so `dart format` never descends into
-      # build artifacts (e.g. /build/ios/SourcePackages).
-      run: git ls-files '*.dart' | xargs dart format
+      # build artifacts (e.g. /build/ios/SourcePackages). The webrtc/ packages
+      # are formatted by `webrtc:format`.
+      run: git ls-files '*.dart' ':(exclude)webrtc' | xargs dart format
       description: |
-        Run `dart format` on all git-tracked Dart files.
+        Run `dart format` on all git-tracked Dart files outside webrtc/.
 
     format:verify:
-      run: git ls-files '*.dart' | xargs dart format --set-exit-if-changed
+      run: git ls-files '*.dart' ':(exclude)webrtc' | xargs dart format --set-exit-if-changed
       description: |
-        Run `dart format --set-exit-if-changed` on all git-tracked Dart files.
+        Run `dart format --set-exit-if-changed` on all git-tracked Dart files outside webrtc/.
+
+    webrtc:bootstrap:
+      run: tools/webrtc.sh bootstrap
+      description: Run `flutter pub get` in the webrtc/ packages and their examples.
+
+    webrtc:analyze:
+      run: tools/webrtc.sh analyze
+      description: Run `flutter analyze` in the webrtc/ packages.
+
+    webrtc:format:
+      run: tools/webrtc.sh format
+      description: Run `dart format` on lib/ and test/ of the webrtc/ packages.
+
+    webrtc:format:verify:
+      run: tools/webrtc.sh format-verify
+      description: Run `dart format --set-exit-if-changed` on lib/ and test/ of the webrtc/ packages.
+
+    webrtc:imports:verify:
+      run: tools/webrtc.sh imports-verify
+      description: Check the import order of the webrtc/ packages with import_sorter.
+
+    webrtc:test:
+      run: tools/webrtc.sh test
+      description: Run `flutter test` in the webrtc/ packages.
 
     metrics:
       run: |
@@ -210,6 +235,13 @@ melos:
       description: Run Flutter tests for a specific package in this project.
       packageFilters:
         flutter: true
+        dirExists: test
+
+    test:web:
+      run: |
+        melos exec -c 1 --fail-fast -- "\$MELOS_ROOT_PATH/.github/workflows/scripts/test-web.sh"
+      description: Run the browser-only tests (`@TestOn('browser')`) in Chrome.
+      packageFilters:
         dirExists: test
 
     test:fixes:

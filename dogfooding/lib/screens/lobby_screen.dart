@@ -13,6 +13,8 @@ import '../utils/call_encryption.dart';
 import '../utils/e2ee.dart';
 import '../utils/random_words.dart';
 import '../widgets/lobby_encryption.dart';
+import '../widgets/minimum_top_inset.dart';
+import '../widgets/user_actions_avatar.dart';
 
 /// Hands the call over to the call screen once the lobby is done with it.
 ///
@@ -271,75 +273,78 @@ class _LobbyScreenState extends State<LobbyScreen> {
         ? StreamLobbyActions.regular(extraControls: extras)
         : StreamLobbyActions.full(extraControls: extras);
 
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        leading: Padding(
-          padding: const EdgeInsets.all(8),
-          child: StreamUserAvatar(user: currentUser),
+    return MinimumTopInset(
+      child: Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          leading: Padding(
+            padding: kAppBarAvatarPadding,
+            child: StreamUserAvatar(user: currentUser),
+          ),
+          leadingWidth: kAppBarAvatarLeadingWidth,
+          titleSpacing: 4,
+          centerTitle: false,
+          title: Text(currentUser.name, style: textTheme.headingXs),
+          actions: [
+            StreamButton.icon(
+              style: .secondary,
+              type: .ghost,
+              icon: Icon(context.streamIcons.leave),
+              onPressed: () => Navigator.maybePop(context),
+            ),
+          ],
         ),
-        titleSpacing: 4,
-        centerTitle: false,
-        title: Text(currentUser.name, style: textTheme.headingXs),
-        actions: [
-          StreamButton.icon(
-            style: .secondary,
-            type: .ghost,
-            icon: Icon(context.streamIcons.leave),
-            onPressed: () => Navigator.maybePop(context),
-          ),
-        ],
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(
-            horizontal: spacing.md,
-            vertical: spacing.xxl,
-          ),
-          // An `auto-on` call requires every participant to encrypt, so the
-          // server rejects a join without a key.
-          child: PartialCallStateBuilder(
-            call: widget.call,
-            selector: (state) => isCallEncrypted(state.settings),
-            builder: (context, isEncrypted) {
-              final willBeEncrypted = _callExists
-                  ? isEncrypted
-                  : _encryptionEnabled;
-              final needsKey = willBeEncrypted && _encryptionKey.isEmpty;
-              // An encrypted call is unreachable from a platform without the
-              // encryption manager: every frame would arrive undecryptable.
-              final blocked = willBeEncrypted && !_encryptionSupported;
+        body: Center(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: spacing.md,
+              vertical: spacing.xxl,
+            ),
+            // An `auto-on` call requires every participant to encrypt, so the
+            // server rejects a join without a key.
+            child: PartialCallStateBuilder(
+              call: widget.call,
+              selector: (state) => isCallEncrypted(state.settings),
+              builder: (context, isEncrypted) {
+                final willBeEncrypted = _callExists
+                    ? isEncrypted
+                    : _encryptionEnabled;
+                final needsKey = willBeEncrypted && _encryptionKey.isEmpty;
+                // An encrypted call is unreachable from a platform without the
+                // encryption manager: every frame would arrive undecryptable.
+                final blocked = willBeEncrypted && !_encryptionSupported;
 
-              return StreamLobbyView(
-                call: widget.call,
-                actions: actions,
-                title: Text('Set up your call', style: textTheme.headingLg),
-                joinButtonLabel: const Text('Start a test call'),
-                joinEnabled: !needsKey && !blocked && !_creatingCall,
-                footer: LobbyEncryption(
+                return StreamLobbyView(
                   call: widget.call,
-                  callExists: _callExists,
-                  supported: _encryptionSupported,
-                  encryptionEnabled: _encryptionEnabled,
-                  encryptionKey: _encryptionKey,
-                  busy: _creatingCall,
-                  keyController: _encryptionKeyController,
-                  onEncryptionToggled: _toggleEncryption,
-                  onEncryptionKeyChanged: (value) {
-                    final next = value.trim();
-                    final wasEmpty = _encryptionKey.isEmpty;
-                    _encryptionKey = next;
-                    // Only the join button and the hint depend on the key, and
-                    // only on whether there is one at all.
-                    if (wasEmpty != next.isEmpty) setState(() {});
-                  },
-                  onGenerateKey: () =>
-                      setState(() => _setEncryptionKey(getRandomWords())),
-                ),
-                onJoinCallPressed: _joinCallPressed,
-              );
-            },
+                  actions: actions,
+                  title: Text('Set up your call', style: textTheme.headingLg),
+                  joinButtonLabel: const Text('Start a test call'),
+                  joinEnabled: !needsKey && !blocked && !_creatingCall,
+                  footer: LobbyEncryption(
+                    call: widget.call,
+                    callExists: _callExists,
+                    supported: _encryptionSupported,
+                    encryptionEnabled: _encryptionEnabled,
+                    encryptionKey: _encryptionKey,
+                    busy: _creatingCall,
+                    keyController: _encryptionKeyController,
+                    onEncryptionToggled: _toggleEncryption,
+                    onEncryptionKeyChanged: (value) {
+                      final next = value.trim();
+                      final wasEmpty = _encryptionKey.isEmpty;
+                      _encryptionKey = next;
+                      // Only the join button and the hint depend on the key, and
+                      // only on whether there is one at all.
+                      if (wasEmpty != next.isEmpty) setState(() {});
+                    },
+                    onGenerateKey: () =>
+                        setState(() => _setEncryptionKey(getRandomWords())),
+                  ),
+                  onJoinCallPressed: _joinCallPressed,
+                );
+              },
+            ),
           ),
         ),
       ),

@@ -65,7 +65,6 @@ class LobbyEncryption extends StatelessWidget {
     final textTheme = context.streamTextTheme;
     final spacing = context.streamSpacing;
     final radius = context.streamRadius;
-    final isSmall = context.streamScreenSize.isSmall;
 
     return PartialCallStateBuilder(
       call: call,
@@ -89,140 +88,137 @@ class LobbyEncryption extends StatelessWidget {
         final needsKey =
             supported && callExists && isOn && encryptionKey.isEmpty;
 
-        return SizedBox(
-          // The same width as the join button below it, so the two line up.
-          width: isSmall ? double.infinity : 400,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(radius.lg),
-              color: colorScheme.backgroundSurfaceCard,
-              border: Border.all(
-                color: switch ((isOn, supported)) {
-                  (true, false) => colorScheme.borderWarning,
-                  (_, _) => colorScheme.borderSubtle,
-                },
-              ),
+        // The lobby lays its footer out at the join button's width.
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(radius.lg),
+            color: colorScheme.backgroundSurfaceCard,
+            border: Border.all(
+              color: switch ((isOn, supported)) {
+                (true, false) => colorScheme.borderWarning,
+                (_, _) => colorScheme.borderSubtle,
+              },
             ),
-            child: Padding(
-              padding: EdgeInsets.all(spacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (!supported)
-                    _Header(
-                      title: 'End-to-end encryption',
-                      subtitle: blocked
-                          ? 'This call is encrypted and cannot be joined on '
-                                'this platform'
-                          : 'Not supported on this platform',
-                      isOn: isOn,
-                      warning: blocked,
-                      // Nothing to switch: the platform decides, not the user.
-                      trailing: blocked
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(spacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (!supported)
+                  _Header(
+                    title: 'End-to-end encryption',
+                    subtitle: blocked
+                        ? 'This call is encrypted and cannot be joined on '
+                              'this platform'
+                        : 'Not supported on this platform',
+                    isOn: isOn,
+                    warning: blocked,
+                    // Nothing to switch: the platform decides, not the user.
+                    trailing: blocked
+                        ? null
+                        : StreamSwitch(value: false, onChanged: null),
+                  )
+                else if (callExists && isOn)
+                  const _Header(
+                    title: 'End-to-end encryption',
+                    isOn: true,
+                  )
+                else
+                  _Header(
+                    title: 'End-to-end encryption',
+                    subtitle: switch ((callExists, isOn)) {
+                      (true, _) => 'This call was created without encryption',
+                      (false, true) => 'Only people with the key can join',
+                      (false, false) => 'Encrypt this call with a shared key',
+                    },
+                    isOn: isOn,
+                    trailing: StreamSwitch(
+                      value: isOn,
+                      onChanged: callExists || busy
                           ? null
-                          : StreamSwitch(value: false, onChanged: null),
-                    )
-                  else if (callExists && isOn)
-                    const _Header(
-                      title: 'End-to-end encryption',
-                      isOn: true,
-                    )
-                  else
-                    _Header(
-                      title: 'End-to-end encryption',
-                      subtitle: switch ((callExists, isOn)) {
-                        (true, _) => 'This call was created without encryption',
-                        (false, true) => 'Only people with the key can join',
-                        (false, false) => 'Encrypt this call with a shared key',
-                      },
-                      isOn: isOn,
-                      trailing: StreamSwitch(
-                        value: isOn,
-                        onChanged: callExists || busy
-                            ? null
-                            : onEncryptionToggled,
-                      ),
+                          : onEncryptionToggled,
                     ),
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 180),
-                    curve: Curves.easeOut,
-                    alignment: Alignment.topCenter,
-                    child: !isOn || !supported
-                        ? const SizedBox(width: double.infinity)
-                        : Padding(
-                            // Inside the animated slot, so a closed card has no
-                            // gap below its header.
-                            padding: EdgeInsets.only(top: spacing.md),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              spacing: spacing.sm,
-                              children: [
-                                StreamTextInput(
-                                  controller: keyController,
-                                  onChanged: onEncryptionKeyChanged,
-                                  hintText: 'Shared room key',
-                                  // Small buttons keep the field at its 40px
-                                  // height instead of growing around 40px ones.
-                                  style: StreamTextInputStyle(
-                                    contentPadding:
-                                        EdgeInsetsDirectional.symmetric(
-                                          vertical: spacing.xs,
-                                          horizontal: spacing.md,
-                                        ),
-                                  ),
-                                  // A key is matched verbatim, so iOS
-                                  // auto-capitalizing the first letter turns a
-                                  // valid key into one that will not decrypt.
-                                  textCapitalization: .none,
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (!callExists)
-                                        Tooltip(
-                                          message: 'Generate a new key',
-                                          child: StreamButton.icon(
-                                            style: .secondary,
-                                            type: .ghost,
-                                            size: .small,
-                                            themeStyle: _compactButton,
-                                            icon: Icon(
-                                              context.streamIcons.refresh,
-                                            ),
-                                            onPressed: busy
-                                                ? null
-                                                : onGenerateKey,
-                                          ),
-                                        ),
+                  ),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOut,
+                  alignment: Alignment.topCenter,
+                  child: !isOn || !supported
+                      ? const SizedBox(width: double.infinity)
+                      : Padding(
+                          // Inside the animated slot, so a closed card has no
+                          // gap below its header.
+                          padding: EdgeInsets.only(top: spacing.md),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: spacing.sm,
+                            children: [
+                              StreamTextInput(
+                                controller: keyController,
+                                onChanged: onEncryptionKeyChanged,
+                                hintText: 'Shared room key',
+                                // Small buttons keep the field at its 40px
+                                // height instead of growing around 40px ones.
+                                style: StreamTextInputStyle(
+                                  contentPadding:
+                                      EdgeInsetsDirectional.symmetric(
+                                        vertical: spacing.xs,
+                                        horizontal: spacing.md,
+                                      ),
+                                ),
+                                // A key is matched verbatim, so iOS
+                                // auto-capitalizing the first letter turns a
+                                // valid key into one that will not decrypt.
+                                textCapitalization: .none,
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (!callExists)
                                       Tooltip(
-                                        message: 'Copy key',
+                                        message: 'Generate a new key',
                                         child: StreamButton.icon(
                                           style: .secondary,
                                           type: .ghost,
                                           size: .small,
                                           themeStyle: _compactButton,
-                                          icon: Icon(context.streamIcons.copy),
-                                          onPressed: encryptionKey.isEmpty
+                                          icon: Icon(
+                                            context.streamIcons.refresh,
+                                          ),
+                                          onPressed: busy
                                               ? null
-                                              : () => _copyKey(context),
+                                              : onGenerateKey,
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                    Tooltip(
+                                      message: 'Copy key',
+                                      child: StreamButton.icon(
+                                        style: .secondary,
+                                        type: .ghost,
+                                        size: .small,
+                                        themeStyle: _compactButton,
+                                        icon: Icon(context.streamIcons.copy),
+                                        onPressed: encryptionKey.isEmpty
+                                            ? null
+                                            : () => _copyKey(context),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  needsKey
-                                      ? 'Ask the call creator for the shared key, then enter it here to join.'
-                                      : 'Anyone with this key can join and decrypt the call. Share it only with people you trust.',
-                                  style: textTheme.captionDefault.copyWith(
-                                    color: colorScheme.textSecondary,
-                                  ),
+                              ),
+                              Text(
+                                needsKey
+                                    ? 'Ask the call creator for the shared key, then enter it here to join.'
+                                    : 'Anyone with this key can join and decrypt the call. Share it only with people you trust.',
+                                style: textTheme.captionDefault.copyWith(
+                                  color: colorScheme.textSecondary,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                  ),
-                ],
-              ),
+                        ),
+                ),
+              ],
             ),
           ),
         );

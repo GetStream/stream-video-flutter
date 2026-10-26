@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
@@ -358,6 +360,9 @@ class CallState extends Equatable {
     bool updateMembers = true,
   }) {
     final capabilities = metadata.details.ownCapabilities.toList();
+    // Once joined, the SFU reports the counts; until then the coordinator's
+    // session counts are the only source.
+    final countsFromSession = !status.isAlreadyJoined;
 
     return copyWith(
       isBackstage: metadata.details.backstage,
@@ -385,6 +390,15 @@ class CallState extends Equatable {
       liveStartedAt: metadata.session.liveStartedAt,
       liveEndedAt: metadata.session.liveEndedAt,
       timerEndsAt: metadata.session.timerEndsAt,
+      participantCount: countsFromSession
+          ? math.max(
+              metadata.session.participantsCountByRole.values.sum,
+              metadata.session.participants.length,
+            )
+          : null,
+      anonymousParticipantCount: countsFromSession
+          ? metadata.session.anonymousParticipantCount
+          : null,
       capabilitiesByRole: changedCapabilitiesByRoleOrNull(
         this.capabilitiesByRole,
         capabilitiesByRole,
@@ -397,6 +411,7 @@ class CallState extends Equatable {
 
   @override
   List<Object?> get props => [
+    preferences,
     currentUserId,
     callCid,
     createdByUser,
