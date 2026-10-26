@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_core/stream_core.dart';
+import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/ws/sfu_ws.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -51,7 +53,40 @@ class _UnansweredSink implements WebSocketSink {
   Future<void> addStream(Stream<dynamic> stream) async {}
 }
 
-SfuWebSocket _socket() {
+/// A socket that opens, then fails the way a dropped network fails one: its
+/// stream reports an error and closes.
+class _FailingChannel implements WebSocketChannel {
+  final _controller = StreamController<dynamic>();
+
+  void fail(Object error) {
+    _controller.addError(error);
+    unawaited(_controller.close());
+  }
+
+  @override
+  final Future<void> ready = Future<void>.value();
+
+  @override
+  Stream<dynamic> get stream => _controller.stream;
+
+  @override
+  // ignore: close_sinks
+  final WebSocketSink sink = _UnansweredSink();
+
+  @override
+  String? get protocol => null;
+
+  @override
+  int? get closeCode => null;
+
+  @override
+  String? get closeReason => null;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+SfuWebSocket _socket({WebSocketProvider? wsProvider}) {
   return SfuWebSocket(
     sessionSeq: 0,
     sessionId: 'session-1',
@@ -60,7 +95,7 @@ SfuWebSocket _socket() {
     apiKey: 'test-key',
     sfuUrl: 'https://sfu.invalid/twirp',
     sfuWsEndpoint: 'wss://sfu.invalid/ws',
-    wsProvider: (_) => _UnansweredChannel(),
+    wsProvider: wsProvider ?? (_) => _UnansweredChannel(),
   );
 }
 
@@ -75,6 +110,24 @@ void main() {
       ),
     );
   }
+
+  // Core's 30 s default outlasts the SFU's fast-reconnect window, so a
+  // fast reconnect on an unanswered upgrade could only end in a rejoin.
+  test('bounds an attempt by the SFU connect timeout', () async {
+    WebSocketOptions? opened;
+    final socket = _socket(
+      wsProvider: (options) {
+        opened = options;
+        return _UnansweredChannel();
+      },
+    );
+
+    unawaited(socket.connect());
+    await pumpEventQueue();
+
+    expect(opened?.connectTimeout, sfuConnectTimeout);
+    expect(sfuConnectTimeout, lessThan(WebSocketOptions.defaultConnectTimeout));
+  });
 
   // A fast reconnect recreates the socket and waits on it. When the handshake
   // went unanswered, it waited past the connect timeout for as long as the OS
@@ -110,5 +163,20 @@ void main() {
         isTrue,
       );
     });
+  });
+
+  // Core reports a socket error as a `SystemInitiated` closure; the call reads
+  // nothing from it unless this layer turns it into an event.
+  test('a socket error mid-call is reported as a failure', () async {
+    final channel = _FailingChannel();
+    final socket = _socket(wsProvider: (_) => channel);
+    final emitted = socket.events.firstWhere((it) => it is SfuSocketFailed);
+
+    unawaited(socket.connect());
+    await pumpEventQueue();
+    channel.fail(const SocketException('Connection reset by peer'));
+
+    final event = await emitted.timeout(const Duration(seconds: 1));
+    expect((event as SfuSocketFailed).isReconnectable, isTrue);
   });
 }
