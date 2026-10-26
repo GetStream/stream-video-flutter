@@ -122,9 +122,8 @@ class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
   /// The preview's maximum width, and its aspect, at
   /// [StreamScreenSize.medium] and above.
   ///
-  /// A cap rather than a fixed size: a window past
-  /// [StreamScreenSize.smallMaxWidth] but narrower than this gets a smaller
-  /// preview of the same shape. Its width also caps the settings row, so the
+  /// A cap rather than a fixed size: a window above [StreamScreenSize.small]
+  /// but narrower than this gets a smaller preview of the same shape. Its width also caps the settings row, so the
   /// fields line up under the preview.
   ///
   /// Defaults to `Size(640, 360)`.
@@ -141,10 +140,10 @@ class StreamLobbyViewStyle with _$StreamLobbyViewStyle {
   /// to below partway through rather than sliding it.
   final int? maxOverlaidControls;
 
-  /// The width of the join button at [StreamScreenSize.smallMaxWidth] and
-  /// above.
+  /// The width of the join button, and of the footer above it, above
+  /// [StreamScreenSize.small].
   ///
-  /// Below it the button is always full width. Defaults to 400.
+  /// At [StreamScreenSize.small] both are always full width. Defaults to 400.
   final double? joinButtonWidth;
 
   /// Linearly interpolate between two styles.

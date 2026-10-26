@@ -1,15 +1,27 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
-import '../utils/extensions.dart';
 
-/// A widget that represents a call control option to toggle if the
-/// speakerphone is on or off.
+/// A livestream control that mutes and unmutes playback of the stream's
+/// audio, like the speaker button of a video player.
 ///
-/// This widget is only available on Android and iOS.
+/// Muting pauses remote audio playout through
+/// [RtcMediaDeviceNotifier.pauseAudioPlayout]; it does not change the audio
+/// output device, so audio keeps following the system route (speaker,
+/// headphones or Bluetooth). The icon follows
+/// [RtcMediaDeviceNotifier.isAudioPlayoutPaused], so it also reflects playout
+/// paused or resumed elsewhere in the app.
+///
+/// Playout is app-wide. If this widget muted it, it unmutes it again when it
+/// is removed from the tree, so leaving the livestream does not leave the next
+/// call silent. This includes the livestream going backstage, which removes
+/// the controls: a viewer who muted hears the stream again when it goes live.
+///
+/// Pausing playout is supported on Android, iOS, macOS and web
+/// ([RtcMediaDeviceNotifier.isAudioPlayoutPauseSupported]); elsewhere the
+/// button is not shown.
 class LivestreamSpeakerphoneOption extends StatefulWidget {
   /// Creates a new instance of [LivestreamSpeakerphoneOption].
   const LivestreamSpeakerphoneOption({
@@ -26,10 +38,10 @@ class LivestreamSpeakerphoneOption extends StatefulWidget {
   /// Represents a call.
   final Call call;
 
-  /// The theme that is applied when the speakerphone is enabled.
+  /// The theme that is applied while the stream's audio is playing.
   final IconThemeData enabledSpeakerphoneIconTheme;
 
-  /// The theme that is applied when the speakerphone is disabled.
+  /// The theme that is applied while the stream's audio is muted.
   final IconThemeData disabledSpeakerphoneIconTheme;
 
   @override
@@ -40,99 +52,92 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
   late final _logger = taggedLogger(tag: 'SV:LivestreamSpeakerphoneOption');
 
   final _deviceNotifier = RtcMediaDeviceNotifier.instance;
-  StreamSubscription<List<RtcMediaDevice>>? _deviceChangeSubscription;
+  StreamSubscription<bool>? _pausedSubscription;
 
-  var _audioOutputs = <RtcMediaDevice>[];
+  late var _muted = _deviceNotifier.isAudioPlayoutPaused;
 
-  Future<void> _setSpeakerphoneEnabled({bool enabled = false}) async {
-    final audioOutputs = _audioOutputs;
-    if (audioOutputs.isEmpty) return;
+  /// Whether this widget is the one that paused playout, so it only undoes
+  /// its own mute on dispose. Set before the pause is sent, so leaving while
+  /// it is in flight still unmutes, and cleared whenever playout is resumed,
+  /// by anyone, so a later pause from elsewhere is left alone.
+  var _pausedByThisWidget = false;
 
-    var device = audioOutputs.firstWhereOrNull(
-      (it) => it.id.equalsIgnoreCase(
-        enabled ? deviceIdSpeaker : deviceIdEarpiece,
-      ),
-    );
-
-    if (!enabled && device == null) {
-      // In IOS, we don't have earpiece as a listed device. So we will try to
-      // create a new device with the earpiece ID.
-      if (CurrentPlatform.isIos) {
-        device = const RtcMediaDevice(
-          id: deviceIdEarpiece,
-          kind: RtcMediaDeviceKind.audioOutput,
-          label: 'Earpiece',
-        );
-      }
-    }
-
-    // If we don't have a device, we can't set it as the audio output.
-    // Android names no audio outputs at all, so this is the ordinary path
-    // there rather than a fault: there is nothing to route to.
-    if (device == null) {
-      _logger.w(() => 'No audio output to route to; leaving it as it is');
-      return;
-    }
-
-    // Set the device as the current audio output.
-    await widget.call.setAudioOutputDevice(device);
-  }
+  /// The pause or resume currently in flight. Taps are ignored while it runs,
+  /// and dispose waits for it before unmuting.
+  Future<void>? _inFlight;
 
   @override
   void initState() {
     super.initState();
-    _deviceChangeSubscription = _deviceNotifier.onDeviceChange.listen((
-      devices,
+    _pausedSubscription = _deviceNotifier.audioPlayoutPausedChanges.listen((
+      paused,
     ) {
-      final audioOutputs = devices.where(
-        (it) => it.kind == RtcMediaDeviceKind.audioOutput,
-      );
-      _audioOutputs = audioOutputs.toList();
+      if (!paused) _pausedByThisWidget = false;
+      if (paused != _muted) setState(() => _muted = paused);
     });
+  }
+
+  Future<void> _toggle() async {
+    if (_inFlight != null) return;
+
+    final mute = !_muted;
+    final previouslyPausedByThisWidget = _pausedByThisWidget;
+    _pausedByThisWidget = mute;
+
+    final operation = mute
+        ? _deviceNotifier.pauseAudioPlayout()
+        : _deviceNotifier.resumeAudioPlayout();
+    _inFlight = operation;
+
+    try {
+      await operation;
+    } catch (e, stk) {
+      _logger.e(
+        () => '[toggle] failed to ${mute ? 'mute' : 'unmute'}: $e\n$stk',
+      );
+      _pausedByThisWidget = previouslyPausedByThisWidget;
+    } finally {
+      _inFlight = null;
+    }
   }
 
   @override
   void dispose() {
-    _deviceChangeSubscription?.cancel();
-    super.dispose();
-  }
-
-  static bool _isSpeakerphoneEnabled(CallState state) {
-    final audioOutputDevice = state.audioOutputDevice;
-    if (audioOutputDevice != null) {
-      return audioOutputDevice.id.equalsIgnoreCase(deviceIdSpeaker);
+    _pausedSubscription?.cancel();
+    if (_pausedByThisWidget) {
+      final inFlight = _inFlight ?? Future<void>.value();
+      unawaited(
+        inFlight
+            .catchError((_) {})
+            .then((_) => _deviceNotifier.resumeAudioPlayout())
+            .catchError((Object e, StackTrace stk) {
+              // Playout stays paused for the whole app, so the next call
+              // starts silent.
+              _logger.w(() => '[dispose] failed to unmute: $e\n$stk');
+            }),
+      );
     }
-    return false;
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return PartialCallStateBuilder<bool>(
-      call: widget.call,
-      selector: _isSpeakerphoneEnabled,
-      builder: (_, enabled) {
-        final iconTheme = enabled
-            ? widget.enabledSpeakerphoneIconTheme
-            : widget.disabledSpeakerphoneIconTheme;
-        return StreamButton.icon(
-          icon: Icon(
-            enabled ? context.streamIcons.audio : context.streamIcons.mute,
-          ),
-          style: StreamButtonStyle.secondary,
-          type: StreamButtonType.ghost,
-          size: StreamButtonSize.large,
-          themeStyle: StreamButtonThemeStyle.from(
-            foregroundColor: iconTheme.color,
-          ),
-          onPressed: () async {
-            try {
-              await _setSpeakerphoneEnabled(enabled: !enabled);
-            } catch (e, stk) {
-              _logger.e(() => 'Error routing the audio output: $e\n$stk');
-            }
-          },
-        );
-      },
+    if (!_deviceNotifier.isAudioPlayoutPauseSupported) {
+      return const SizedBox.shrink();
+    }
+
+    final iconTheme = _muted
+        ? widget.disabledSpeakerphoneIconTheme
+        : widget.enabledSpeakerphoneIconTheme;
+    return StreamButton.icon(
+      icon: Icon(_muted ? context.streamIcons.mute : context.streamIcons.audio),
+      style: StreamButtonStyle.secondary,
+      type: StreamButtonType.ghost,
+      size: StreamButtonSize.large,
+      themeStyle: StreamButtonThemeStyle.from(
+        foregroundColor: iconTheme.color,
+      ),
+      onPressed: _toggle,
     );
   }
 }

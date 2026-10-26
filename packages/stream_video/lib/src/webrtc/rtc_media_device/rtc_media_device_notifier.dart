@@ -84,6 +84,16 @@ class RtcMediaDeviceNotifier {
   @visibleForTesting
   static set instance(RtcMediaDeviceNotifier? notifier) => _instance = notifier;
 
+  /// Whether remote audio can be routed to an output picked from the
+  /// [RtcMediaDeviceKind.audioOutput] devices, through
+  /// `Call.setAudioOutputDevice`.
+  ///
+  /// False on WebKit browsers (Safari, every iOS browser and web view) and on
+  /// browsers without `setSinkId`: audio plays on the system default output,
+  /// and an output picker should be hidden. True on native platforms.
+  static bool get isAudioOutputSelectionSupported =>
+      rtc_audio.checkIfAudioOutputChangeSupported();
+
   Stream<List<RtcMediaDevice>> get onDeviceChange => _devicesController.stream;
   final _devicesController = BehaviorSubject<List<RtcMediaDevice>>();
 
@@ -369,19 +379,73 @@ class RtcMediaDeviceNotifier {
     return rtc.Helper.triggeriOSAudioRouteSelectionUI();
   }
 
+  /// Whether [pauseAudioPlayout] can mute remote audio on this platform.
+  ///
+  /// Supported on Android, iOS, macOS and web. On Windows and Linux pausing
+  /// playout is not implemented, so [pauseAudioPlayout] and
+  /// [resumeAudioPlayout] do nothing and [isAudioPlayoutPaused] stays `false`.
+  bool get isAudioPlayoutPauseSupported =>
+      CurrentPlatform.isAndroid ||
+      CurrentPlatform.isIos ||
+      CurrentPlatform.isMacOS ||
+      CurrentPlatform.isWeb;
+
+  /// Whether remote audio playout is currently paused via
+  /// [pauseAudioPlayout].
+  ///
+  /// Playout is app-wide, so this reflects every call, not just one. Always
+  /// `false` where [isAudioPlayoutPauseSupported] is `false`.
+  bool get isAudioPlayoutPaused => _audioPlayoutPausedController.value;
+
+  /// Emits whenever [isAudioPlayoutPaused] changes. A new listener receives
+  /// the current value first.
+  Stream<bool> get audioPlayoutPausedChanges =>
+      _audioPlayoutPausedController.stream;
+  final _audioPlayoutPausedController = BehaviorSubject<bool>.seeded(false);
+
+  /// Pauses playout in the WebRTC plugin. Replaceable in tests, because the
+  /// plugin only reaches the platform channel on Android, iOS and macOS hosts.
+  @visibleForTesting
+  Future<void> Function() nativePauseAudioPlayout =
+      rtc.Helper.pauseAudioPlayout;
+
+  /// Resumes playout in the WebRTC plugin, see [nativePauseAudioPlayout].
+  @visibleForTesting
+  Future<void> Function() nativeResumeAudioPlayout =
+      rtc.Helper.resumeAudioPlayout;
+
   /// Temporarily mutes all audio output (playout) from the app.
-  /// This does not affect the microphone or remote track subscriptions.
+  /// This does not affect the microphone, the audio output route or remote
+  /// track subscriptions; remote tracks that arrive while paused start muted.
   /// Use as a global "mute all sounds" toggle or when the app goes to background.
-  Future<void> pauseAudioPlayout() {
+  ///
+  /// Observe [isAudioPlayoutPaused] / [audioPlayoutPausedChanges] to reflect
+  /// the state in UI. Does nothing where [isAudioPlayoutPauseSupported] is
+  /// `false` (Windows, Linux).
+  Future<void> pauseAudioPlayout() async {
+    if (!isAudioPlayoutPauseSupported) return;
+
     _tracer.trace(TraceTag.pauseAudioPlayout, null);
-    return rtc.Helper.pauseAudioPlayout();
+    await nativePauseAudioPlayout();
+    rtc_audio.setAudioPlayoutPaused(paused: true);
+    _setAudioPlayoutPaused(true);
   }
 
   /// Resumes audio output (playout) muted via [pauseAudioPlayout].
   /// Does not change microphone state or remote track subscriptions.
-  Future<void> resumeAudioPlayout() {
+  /// Does nothing where [isAudioPlayoutPauseSupported] is `false`.
+  Future<void> resumeAudioPlayout() async {
+    if (!isAudioPlayoutPauseSupported) return;
+
     _tracer.trace(TraceTag.resumeAudioPlayout, null);
-    return rtc.Helper.resumeAudioPlayout();
+    await nativeResumeAudioPlayout();
+    rtc_audio.setAudioPlayoutPaused(paused: false);
+    _setAudioPlayoutPaused(false);
+  }
+
+  void _setAudioPlayoutPaused(bool paused) {
+    if (_audioPlayoutPausedController.value == paused) return;
+    _audioPlayoutPausedController.add(paused);
   }
 
   /// Emits whenever the browser's autoplay policy starts or stops blocking

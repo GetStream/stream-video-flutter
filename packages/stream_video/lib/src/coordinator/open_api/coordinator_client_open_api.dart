@@ -480,7 +480,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       _logger.v(() => '[collectUserFeedback] completed: $result');
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -515,7 +515,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       );
 
       _logger.v(() => '[createDevice] completed: $result');
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -536,7 +536,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       final result = await _defaultApi.listDevices();
       _logger.v(() => '[listDevices] completed: $result');
-      return result.fold(
+      return result.fold<Result<List<PushDevice>>>(
         onSuccess: (data) => Result.success(data.devices.toPushDevices()),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -563,7 +563,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       );
 
       _logger.v(() => '[deleteDevice] completed: $result');
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -604,7 +604,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       _logger.v(() => '[getCall] completed: $result');
 
-      return result.fold(
+      return result.fold<Result<CallReceivedData>>(
         onSuccess: (data) => Result.success(
           CallReceivedData(
             callCid: callCid,
@@ -642,7 +642,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         callSessionId: sessionId,
       );
 
-      return result.fold(
+      return result.fold<Result<open.GetCallRingStateResponse>>(
         onSuccess: Result.success,
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -699,7 +699,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       _logger.v(() => '[getOrCreateCall] completed: $result');
 
-      return result.fold(
+      return result.fold<Result<CallReceivedOrCreatedData>>(
         onSuccess: (data) => Result.success(
           CallReceivedOrCreatedData(
             wasCreated: data.created,
@@ -766,7 +766,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       _logger.v(() => '[joinCall] completed: $result');
 
-      return result.fold(
+      return result.fold<Result<CoordinatorJoined>>(
         onSuccess: (data) => Result.success(
           CoordinatorJoined(
             wasCreated: data.created,
@@ -819,7 +819,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
 
       _logger.v(() => '[ringCall] completed: $result');
 
-      return result.fold(
+      return result.fold<Result<List<String>>>(
         onSuccess: (data) => Result.success(data.membersIds),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -854,7 +854,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       );
 
       _logger.v(() => '[sendCustomEvent] completed: $result');
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -914,7 +914,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       );
 
       _logger.v(() => '[updateCallMembers] completed: $result');
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -943,7 +943,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -971,7 +971,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -999,7 +999,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1035,7 +1035,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1063,7 +1063,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1085,7 +1085,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         id: callCid.id,
       );
 
-      return result.fold(
+      return result.fold<Result<List<open.CallRecording>>>(
         onSuccess: (data) => Result.success(data.recordings),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1109,7 +1109,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         recordingType: recordingType.toOpenDto(),
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1139,7 +1139,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1161,7 +1161,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         id: callCid.id,
       );
 
-      return result.fold(
+      return result.fold<Result<List<open.CallTranscription>>>(
         onSuccess: (data) => Result.success(data.transcriptions),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1187,7 +1187,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1217,7 +1217,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1243,7 +1243,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1263,7 +1263,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         id: callCid.id,
       );
 
-      return result.fold(
+      return result.fold<Result<String?>>(
         onSuccess: (data) => Result.success(data.playlistUrl),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1283,7 +1283,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         id: callCid.id,
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1309,7 +1309,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1333,7 +1333,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         name: name,
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1353,7 +1353,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         id: callCid.id,
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1383,7 +1383,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<CallReaction>>(
         onSuccess: (data) => Result.success(data.reaction.toCallReaction()),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1418,7 +1418,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<QueriedMembers>>(
         onSuccess: (data) => Result.success(data.toQueriedMembers(callCid)),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1452,7 +1452,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<QueriedCalls>>(
         onSuccess: (data) => Result.success(data.toQueriedCalls()),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1476,7 +1476,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         blockUserRequest: open.BlockUserRequest(userId: userId),
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1500,7 +1500,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         unblockUserRequest: open.UnblockUserRequest(userId: userId),
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1525,7 +1525,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         kickUserRequest: open.KickUserRequest(userId: userId, block: block),
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1545,7 +1545,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         id: callCid.id,
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1587,7 +1587,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<CallMetadata>>(
         onSuccess: (data) => Result.success(data.call.toCallMetadata()),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1627,7 +1627,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<CallMetadata>>(
         onSuccess: (data) => Result.success(data.call.toCallMetadata()),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1661,7 +1661,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1725,7 +1725,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<CallMetadata>>(
         onSuccess: (data) => Result.success(data.call.toCallMetadata()),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1750,7 +1750,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         id: cid.id,
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1779,7 +1779,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<None>>(
         onSuccess: (_) => const Result.success(none),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),
@@ -1837,7 +1837,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         ),
       );
 
-      return result.fold(
+      return result.fold<Result<GuestCreatedData>>(
         onSuccess: (data) => Result.success(data.toGuestCreatedData()),
         onFailure: (error, stackTrace) => Result.failure(
           StreamVideoExceptions.compose(error, stackTrace),

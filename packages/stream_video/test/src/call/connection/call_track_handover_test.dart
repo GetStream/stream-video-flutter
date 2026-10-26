@@ -28,7 +28,7 @@ class _FakeMediaStreamTrack extends Fake implements rtc.MediaStreamTrack {
   bool enabled = true;
 
   @override
-  set onEnded(Function()? callback) {}
+  set onEnded(void Function()? callback) {}
 
   @override
   Future<void> stop() async {

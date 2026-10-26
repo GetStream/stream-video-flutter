@@ -1,0 +1,273 @@
+name: webrtc
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+  push:
+    branches:
+      - main
+      - v2
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  example: webrtc/stream_webrtc_flutter/example
+
+jobs:
+  # Centralizes every gating decision for this workflow — path filter,
+  # draft state, and push-vs-PR semantics. Downstream jobs only need a
+  # single `if: needs.gate.outputs.should_run == 'true'`. A job skipped
+  # this way reports `success` to branch protection (vs. `on.paths`
+  # filtering, which hangs forever) — see
+  # https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks
+  #
+  # `push` events to main and v2 run when the push changed webrtc/.
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.filter.outputs.relevant == 'true' && github.event.pull_request.draft != true }}
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v7
+
+      - name: "Detect Path Changes"
+        uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          # On push, compare against the commit before the push instead of
+          # the default branch. Ignored on pull_request.
+          base: ${{ github.ref }}
+          filters: |
+            relevant:
+              - 'webrtc/**'
+              - 'tools/webrtc.sh'
+              - '.github/actions/setup-flutter/**'
+              - '.github/actions/select-xcode/**'
+              - '.github/workflows/webrtc.yml'
+
+  analyze:
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
+    name: Analyze (${{ matrix.package }})
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - stream_webrtc_flutter
+          - dart_webrtc
+          - webrtc_interface
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Flutter
+        uses: ./.github/actions/setup-flutter
+
+      - name: Install dependencies
+        run: tools/webrtc.sh bootstrap ${{ matrix.package }}
+
+      - name: Check formatting
+        run: tools/webrtc.sh format-verify ${{ matrix.package }}
+
+      - name: Check import order
+        run: tools/webrtc.sh imports-verify ${{ matrix.package }}
+
+      - name: Analyze
+        run: tools/webrtc.sh analyze ${{ matrix.package }}
+
+      - name: Test
+        run: tools/webrtc.sh test ${{ matrix.package }}
+
+  build-android:
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
+    name: Build example (Android)
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Flutter
+        uses: ./.github/actions/setup-flutter
+        with:
+          java-version: "17"
+
+      - name: Build
+        working-directory: ${{ env.example }}
+        run: flutter build apk
+
+  build-ios:
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
+    name: Build example (iOS, CocoaPods + SPM)
+    timeout-minutes: 45
+    runs-on: macos-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+
+      - name: Select Xcode
+        uses: ./.github/actions/select-xcode
+
+      - name: Install Flutter
+        uses: ./.github/actions/setup-flutter
+
+      - name: Build with CocoaPods
+        working-directory: ${{ env.example }}
+        run: |
+          flutter config --no-enable-swift-package-manager
+          flutter pub get
+          (cd ios && pod repo update && pod install)
+          flutter build ios --no-codesign
+
+      - name: Clean CocoaPods
+        working-directory: ${{ env.example }}
+        run: |
+          rm -rf ios/Pods ios/Podfile.lock
+          flutter clean
+
+      - name: Build with Swift Package Manager
+        working-directory: ${{ env.example }}
+        run: |
+          flutter config --enable-swift-package-manager
+          flutter build ios --no-codesign
+
+  build-macos:
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
+    name: Build example (macOS)
+    timeout-minutes: 45
+    runs-on: macos-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+
+      - name: Select Xcode
+        uses: ./.github/actions/select-xcode
+
+      - name: Install Flutter
+        uses: ./.github/actions/setup-flutter
+
+      - name: Build
+        working-directory: ${{ env.example }}
+        run: flutter build macos --release
+
+  build-windows:
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
+    name: Build example (Windows)
+    timeout-minutes: 45
+    runs-on: windows-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Flutter
+        uses: ./.github/actions/setup-flutter
+
+      - name: Build
+        working-directory: ${{ env.example }}
+        run: flutter build windows --release
+
+  build-linux:
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
+    name: Build example (Linux)
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libgtk-3-dev
+
+      - name: Install Flutter
+        uses: ./.github/actions/setup-flutter
+
+      - name: Build
+        working-directory: ${{ env.example }}
+        run: flutter build linux
+
+  build-elinux:
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
+    name: Build example (Embedded Linux)
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libgtk-3-dev
+
+      - name: Install flutter-elinux
+        run: git clone --depth 1 https://github.com/flutter-elinux/flutter-elinux.git -b 3.47.1 ~/flutter-elinux
+
+      - name: Build
+        working-directory: ${{ env.example }}
+        run: |
+          ~/flutter-elinux/bin/flutter-elinux pub get
+          ~/flutter-elinux/bin/flutter-elinux build elinux
+
+  build-web:
+    needs: gate
+    if: needs.gate.outputs.should_run == 'true'
+    name: Build example (Web)
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+
+      - name: Install Flutter
+        uses: ./.github/actions/setup-flutter
+
+      - name: Build
+        working-directory: ${{ env.example }}
+        run: flutter build web
+
+  # The one check to mark as required: it passes when every check above
+  # passed or was skipped by the gate.
+  webrtc-verified:
+    if: always()
+    needs:
+      - gate
+      - analyze
+      - build-android
+      - build-ios
+      - build-macos
+      - build-windows
+      - build-linux
+      - build-elinux
+      - build-web
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        env:
+          FAILED: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          if [[ "$FAILED" == "true" ]]; then
+            echo "A required check failed or was cancelled."
+            exit 1
+          fi
+          echo "All checks passed or were skipped."
