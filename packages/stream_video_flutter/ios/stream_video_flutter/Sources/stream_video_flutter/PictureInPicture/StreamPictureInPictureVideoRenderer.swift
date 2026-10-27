@@ -59,7 +59,10 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
 
     /// The rotation the frames need to be shown upright. The renderer draws
     /// them as their buffers hold them, so it is turned by this instead.
-    /// Only read and written on WebRTC's thread, from ``renderFrame(_:)``.
+    /// Only read and written from ``renderFrame(_:)``, on the thread that
+    /// delivers the current track's frames: the decode thread for a remote
+    /// track, the capture thread for a local one. Changing tracks keeps them
+    /// apart, as `remove` returns only once the old track stops delivering.
     private var frameRotation: RTCVideoRotation = ._0
 
     /// The rotation the renderer is turned by. Main thread only.

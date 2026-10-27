@@ -88,13 +88,91 @@ class _StreamPictureInPictureUiKitViewState
 
   bool _isInBackground = false;
 
+  // What the last `updateParticipant` sent, so an unchanged participant is not
+  // sent again on every emission.
+  Map<String, Object?>? _lastParticipantArguments;
+
+  // The tracks [_disableTracksInBackground] turned off, so the same ones are
+  // turned back on. The participants can look different by the time the app
+  // is back: one whose subscription lapsed in the background, or who turned
+  // their camera off and on again, would otherwise be left with a disabled
+  // track and a black tile.
+  final _tracksDisabledInBackground =
+      <({String trackIdPrefix, SfuTrackTypeVideo trackType})>{};
+
+  // The tracks the window was given while the app was not active. The native
+  // side turns off the one picture-in-picture moves away from and leaves
+  // turning it back on to this widget, which does it with the app rather than
+  // when the window closes: closed in the background, it would decode with
+  // nobody watching.
+  final _tracksShownInPictureInPicture =
+      <({String trackIdPrefix, SfuTrackTypeVideo trackType})>{};
+
   Future<void> _handleParticipantsChange(
     List<CallParticipantState> callParticipants,
     bool includeLocalParticipantVideo,
   ) async {
+    final pipParticipant = _selectPipParticipant(
+      callParticipants,
+      includeLocalParticipantVideo,
+    );
+    if (pipParticipant == null) {
+      // Nobody to draw, so nothing to hold a track for.
+      _viewport.release();
+      return;
+    }
+
+    final trackType = _pipTrackType(pipParticipant);
+    final videoTrack = widget.call.getTrack(
+      pipParticipant.trackIdPrefix,
+      trackType,
+    );
+
+    // Reported while hidden only: the Flutter tiles go off screen when the app
+    // is backgrounded, which is exactly when this window is the one watched.
+    if (_isInBackground) _reportViewport(pipParticipant, trackType);
+
+    if (videoTrack == null &&
+        (pipParticipant.isVideoEnabled ||
+            pipParticipant.isScreenShareEnabled)) {
+      // The track has not arrived yet. In the background the report above is
+      // what asks for it; the state change it causes comes back through here.
+      return;
+    }
+
+    // Picture-in-picture can be open from as soon as the app is not active.
+    if (videoTrack != null &&
+        WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
+      _tracksShownInPictureInPicture.add((
+        trackIdPrefix: pipParticipant.trackIdPrefix,
+        trackType: trackType,
+      ));
+    }
+
+    final arguments = _participantArguments(
+      pipParticipant,
+      videoTrack,
+      trackType,
+    );
+    if (const MapEquality<String, Object?>().equals(
+      arguments,
+      _lastParticipantArguments,
+    )) {
+      return;
+    }
+    _lastParticipantArguments = arguments;
+
+    await _channel.invokeMethod('updateParticipant', arguments);
+  }
+
+  CallParticipantState? _selectPipParticipant(
+    List<CallParticipantState> callParticipants,
+    bool includeLocalParticipantVideo,
+  ) {
     final participants = includeLocalParticipantVideo
         ? callParticipants
         : callParticipants.where((element) => !element.isLocal).toList();
+    if (participants.isEmpty) return null;
 
     final sorted = List<CallParticipantState>.from(participants);
     final sort =
@@ -102,107 +180,74 @@ class _StreamPictureInPictureUiKitViewState
         widget.participantSort ??
         CallParticipantSorts.pictureInPicture;
     mergeSort(sorted, compare: sort.compare);
+    return sorted.first;
+  }
 
-    if (sorted.isNotEmpty) {
-      final pipParticipant = sorted.first;
+  SfuTrackTypeVideo _pipTrackType(CallParticipantState participant) {
+    final hasScreenShare =
+        participant.isScreenShareEnabled &&
+        participant.screenShareTrack != null;
 
-      final hasScreenShare =
-          pipParticipant.isScreenShareEnabled &&
-          pipParticipant.screenShareTrack != null;
+    // Show screen share if:
+    // 1. prioritise is true and screen share is available, OR
+    // 2. video is disabled but screen share is available (fallback)
+    final shouldShowScreenShare =
+        hasScreenShare &&
+        (widget.pictureInPictureConfiguration?.pipTrackPriority !=
+                PipTrackPriority.camera ||
+            !participant.isVideoEnabled);
 
-      // Show screen share if:
-      // 1. prioritise is true and screen share is available, OR
-      // 2. video is disabled but screen share is available (fallback)
-      final shouldShowScreenShare =
-          hasScreenShare &&
-          (widget.pictureInPictureConfiguration?.pipTrackPriority !=
-                  PipTrackPriority.camera ||
-              !pipParticipant.isVideoEnabled);
+    return shouldShowScreenShare
+        ? SfuTrackType.screenShare
+        : SfuTrackType.video;
+  }
 
-      final priorityTrack = shouldShowScreenShare
-          ? SfuTrackType.screenShare
-          : SfuTrackType.video;
+  void _reportViewport(
+    CallParticipantState participant,
+    SfuTrackTypeVideo trackType,
+  ) {
+    _viewport.report(
+      ViewportTrack(
+        userId: participant.userId,
+        sessionId: participant.sessionId,
+        trackIdPrefix: participant.trackIdPrefix,
+        trackType: trackType,
+      ),
+      const ViewportMeasurement(
+        visibility: ViewportVisibility.visible,
+        dimension: RtcVideoDimensionPresets.h360_169,
+        persistWhenHidden: true,
+      ),
+    );
+  }
 
-      final videoTrack = widget.call.getTrack(
-        pipParticipant.trackIdPrefix,
-        priorityTrack,
-      );
+  Map<String, Object?> _participantArguments(
+    CallParticipantState participant,
+    RtcTrack? videoTrack,
+    SfuTrackTypeVideo trackType,
+  ) {
+    final iOSConfiguration =
+        widget.pictureInPictureConfiguration?.iOSPiPConfiguration;
+    final legacyConfiguration = widget.configuration;
 
-      // What this window draws, reported like any other viewport. Kept while
-      // hidden: the Flutter tiles go off screen when the app is backgrounded,
-      // which is exactly when this window is the one being watched. In the
-      // foreground the tiles ask for what is on screen.
-      if (_isInBackground) {
-        _viewport.report(
-          ViewportTrack(
-            userId: pipParticipant.userId,
-            sessionId: pipParticipant.sessionId,
-            trackIdPrefix: pipParticipant.trackIdPrefix,
-            trackType: priorityTrack,
-          ),
-          const ViewportMeasurement(
-            visibility: ViewportVisibility.visible,
-            dimension: RtcVideoDimensionPresets.h360_169,
-            persistWhenHidden: true,
-          ),
-        );
-      }
-
-      if (videoTrack == null &&
-          (pipParticipant.isVideoEnabled ||
-              pipParticipant.isScreenShareEnabled)) {
-        // The track has not arrived yet. In the background the report above
-        // is what asks for it; the state change it causes comes back through
-        // here.
-        return;
-      }
-
-      // The native side turns off the track it moves away from, so every one
-      // it is given is turned back on with the app.
-      if (videoTrack != null) {
-        _tracksShownInPictureInPicture.add((
-          trackIdPrefix: pipParticipant.trackIdPrefix,
-          trackType: priorityTrack,
-        ));
-      }
-
-      await _channel.invokeMethod(
-        'updateParticipant',
-        {
-          'trackId': videoTrack?.mediaTrack.id,
-          'name': pipParticipant.name.isEmpty
-              ? pipParticipant.userId
-              : pipParticipant.name,
-          'imageUrl': pipParticipant.image,
-          'isAudioEnabled': pipParticipant.isAudioEnabled,
-          'isVideoEnabled':
-              videoTrack != null &&
-              (pipParticipant.isVideoEnabled || shouldShowScreenShare),
-          'connectionQuality': pipParticipant.connectionQuality.name,
-          'showParticipantName':
-              widget
-                  .pictureInPictureConfiguration
-                  ?.iOSPiPConfiguration
-                  .showParticipantName ??
-              widget.configuration?.showParticipantName,
-          'showMicrophoneIndicator':
-              widget
-                  .pictureInPictureConfiguration
-                  ?.iOSPiPConfiguration
-                  .showMicrophoneIndicator ??
-              widget.configuration?.showMicrophoneIndicator,
-          'showConnectionQualityIndicator':
-              widget
-                  .pictureInPictureConfiguration
-                  ?.iOSPiPConfiguration
-                  .showConnectionQualityIndicator ??
-              widget.configuration?.showConnectionQualityIndicator,
-        },
-      );
-    } else {
-      // Nobody to draw, so nothing to hold a track for.
-      _viewport.release();
-    }
+    return {
+      'trackId': videoTrack?.mediaTrack.id,
+      'name': participant.name.isEmpty ? participant.userId : participant.name,
+      'imageUrl': participant.image,
+      'isAudioEnabled': participant.isAudioEnabled,
+      'isVideoEnabled':
+          videoTrack != null && _isPublishing(participant, trackType),
+      'connectionQuality': participant.connectionQuality.name,
+      'showParticipantName':
+          iOSConfiguration?.showParticipantName ??
+          legacyConfiguration?.showParticipantName,
+      'showMicrophoneIndicator':
+          iOSConfiguration?.showMicrophoneIndicator ??
+          legacyConfiguration?.showMicrophoneIndicator,
+      'showConnectionQualityIndicator':
+          iOSConfiguration?.showConnectionQualityIndicator ??
+          legacyConfiguration?.showConnectionQualityIndicator,
+    };
   }
 
   void _subscribeToCallEvents() {
@@ -261,6 +306,7 @@ class _StreamPictureInPictureUiKitViewState
     _viewport.dispose();
     _viewport = widget.call.viewportVisibility.attach();
 
+    _lastParticipantArguments = null;
     _subscriptions.cancelAll();
     _listenForCallEnded();
     _subscribeToCallEvents();
@@ -272,6 +318,7 @@ class _StreamPictureInPictureUiKitViewState
       widget.call.state.listen(
         (state) async {
           if (state.status is CallStatusDisconnected) {
+            _lastParticipantArguments = null;
             await _channel.invokeMethod(
               'callEnded',
             );
@@ -288,6 +335,8 @@ class _StreamPictureInPictureUiKitViewState
     switch (state) {
       case AppLifecycleState.resumed:
         _isInBackground = false;
+        // The tiles are back on screen and ask for what they draw.
+        _viewport.release();
         _restoreTracksFromBackground(widget.call);
         break;
       case AppLifecycleState.paused:
@@ -315,55 +364,38 @@ class _StreamPictureInPictureUiKitViewState
     }
   }
 
-  /// The tracks [_disableTracksInBackground] turned off, so the same ones are
-  /// turned back on. The participants can look different by the time the app
-  /// is back: one whose subscription lapsed in the background, or who turned
-  /// their camera off and on again, would otherwise be left with a disabled
-  /// track and a black tile.
-  final _tracksDisabledInBackground =
-      <({String trackIdPrefix, SfuTrackTypeVideo trackType})>{};
-
-  /// The tracks the window was given to draw. The native side turns off the
-  /// one it moves away from and leaves turning it back on to this widget,
-  /// which does it with the app rather than when the window closes: closed in
-  /// the background, it would decode with nobody watching.
-  final _tracksShownInPictureInPicture =
-      <({String trackIdPrefix, SfuTrackTypeVideo trackType})>{};
-
   // When app goes to background disable video tracks of all participants
   // except speaking ones to save bandwidth and resources. The one shown in
   // PiP is kept enabled by the native side.
   void _disableTracksInBackground() {
-    final participants = widget.call.state.value.callParticipants;
-
-    for (final participant in participants) {
+    for (final participant in widget.call.state.value.callParticipants) {
       // Do not disable video track of speaking participant
       if (participant.isSpeaking) continue;
 
-      for (final (trackType, isEnabled) in [
-        (SfuTrackType.video, participant.isVideoEnabled),
-        (SfuTrackType.screenShare, participant.isScreenShareEnabled),
-      ]) {
-        if (!isEnabled) continue;
-
-        final trackState = participant.publishedTracks[trackType];
-        final isSubscribed =
-            trackState is RemoteTrackState && trackState.subscribed;
-        if (!isSubscribed && !participant.isLocal) continue;
-
-        final track = widget.call.getTrack(
-          participant.trackIdPrefix,
-          trackType,
-        );
-        if (track == null || !track.mediaTrack.enabled) continue;
-
-        track.mediaTrack.enabled = false;
-        _tracksDisabledInBackground.add((
-          trackIdPrefix: participant.trackIdPrefix,
-          trackType: trackType,
-        ));
-      }
+      _disableTrackInBackground(participant, SfuTrackType.video);
+      _disableTrackInBackground(participant, SfuTrackType.screenShare);
     }
+  }
+
+  void _disableTrackInBackground(
+    CallParticipantState participant,
+    SfuTrackTypeVideo trackType,
+  ) {
+    if (!_isPublishing(participant, trackType)) return;
+
+    final trackState = participant.publishedTracks[trackType];
+    final isSubscribed =
+        trackState is RemoteTrackState && trackState.subscribed;
+    if (!isSubscribed && !participant.isLocal) return;
+
+    final track = widget.call.getTrack(participant.trackIdPrefix, trackType);
+    if (track == null || !track.mediaTrack.enabled) return;
+
+    track.mediaTrack.enabled = false;
+    _tracksDisabledInBackground.add((
+      trackIdPrefix: participant.trackIdPrefix,
+      trackType: trackType,
+    ));
   }
 
   // Re-enable the tracks disabled in background when app comes back to

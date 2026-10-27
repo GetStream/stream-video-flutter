@@ -275,6 +275,33 @@ void main() {
     );
   });
 
+  testWidgets('does not send an unchanged participant again', (tester) async {
+    await pumpPip(tester);
+    await background(tester);
+    await foreground(tester);
+
+    expect(
+      nativeCalls.where((call) => call.method == 'updateParticipant'),
+      hasLength(1),
+    );
+  });
+
+  testWidgets('leaves alone a track the window was given in the foreground', (
+    tester,
+  ) async {
+    // Speaking, so the app leaves the track alone in the background.
+    when(() => participant.isSpeaking).thenReturn(true);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await pumpPip(tester);
+
+    // Turned off by something else, and only through Control Center away.
+    mediaTrack.enabled = false;
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    await foreground(tester);
+
+    expect(mediaTrack.enabled, isFalse);
+  });
+
   testWidgets('turns the track on again when removed in the background', (
     tester,
   ) async {
