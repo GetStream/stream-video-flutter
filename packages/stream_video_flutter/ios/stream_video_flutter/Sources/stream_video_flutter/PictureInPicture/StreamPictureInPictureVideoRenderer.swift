@@ -2,90 +2,71 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Combine
+import AVFoundation
 import Foundation
 import stream_webrtc_flutter
 
-/// A view that can be used to render an instance of `RTCVideoTrack`
+/// A view that renders an instance of `RTCVideoTrack` in the picture-in-picture
+/// window.
+///
+/// The frames are drawn by WebRTC's `RTCPictureInPictureVideoRenderer`, which
+/// converts them into sample buffers off the main thread, scales them to its
+/// bounds, and flushes its display layer when it needs flushing to resume, such
+/// as after the app was in the background. This view adds what it lacks: it
+/// turns the renderer by the frames' rotation, and gives the window the shape of
+/// the video.
 final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
 
     /// The rendering track.
+    ///
+    /// This view renders it as soon as it is set, so the window learns the
+    /// video's size before picture-in-picture starts. The frames are only
+    /// converted while the view is in a window.
+    ///
+    /// - Important: The track holds on to this view until it is set to nil.
     var track: RTCVideoTrack? {
         didSet {
-            // Whenever the track changes we perform the following operations if possible:
-            // - stopFrameStreaming for the old track
-            // - startFrameStreaming for the new track and only if we are already
-            // in picture-in-picture.
             guard oldValue != track else { return }
-            prepareForTrackRendering(oldValue)
+            oldValue?.remove(self)
+            // Disabling flushes the previous track's last frame, which would
+            // otherwise stay up, in its own shape, until the new one draws.
+            if window != nil {
+                videoRenderer.isEnabled = false
+                videoRenderer.isEnabled = true
+            }
+            track?.add(self)
         }
     }
-
-    /// The layer that renders the track's frames.
-    var displayLayer: CALayer { contentView.layer }
 
     /// A policy defining how the Picture in Picture window should be resized in order to better fit
     /// the rendering frame size.
     var pictureInPictureWindowSizePolicy: PictureInPictureWindowSizePolicy
 
-    /// The publisher which is used to streamline the frames received from the track.
-    private let bufferPublisher: PassthroughSubject<CMSampleBuffer, Never> = .init()
-
-    /// The view that contains the rendering layer.
-    private lazy var contentView: SampleBufferVideoCallView = {
-        let contentView = SampleBufferVideoCallView()
-        contentView.translatesAutoresizingMaskIntoConstraints = false
-        contentView.contentMode = .scaleAspectFill
-        contentView.videoGravity = .resizeAspectFill
-        contentView.preventsDisplaySleepDuringVideoPlayback = true
-        return contentView
+    /// The view that draws the frames.
+    private lazy var videoRenderer: RTCPictureInPictureVideoRenderer = {
+        let videoRenderer = RTCPictureInPictureVideoRenderer(frame: .zero)
+        // Laid out by hand, as it is rotated by the frames' rotation.
+        videoRenderer.translatesAutoresizingMaskIntoConstraints = true
+        videoRenderer.videoGravity = .resizeAspectFill
+        // Picture-in-picture doesn't like rendering frames bigger than its
+        // window, so they are scaled to the renderer's bounds.
+        videoRenderer.resizesFramesToRendererSize = true
+        videoRenderer.isEnabled = false
+        (videoRenderer.layer as? AVSampleBufferDisplayLayer)?
+            .preventsDisplaySleepDuringVideoPlayback = true
+        return videoRenderer
     }()
 
-    /// The transformer used to transform and downsample a RTCVideoFrame's buffer.
-    private var bufferTransformer = StreamBufferTransformer()
+    /// The rotation the frames need to be shown upright. The renderer draws
+    /// them as their buffers hold them, so it is turned by this instead.
+    /// Only read and written from ``renderFrame(_:)``, on the thread that
+    /// delivers the current track's frames: the decode thread for a remote
+    /// track, the capture thread for a local one. Changing tracks keeps them
+    /// apart, as `remove` returns only once the old track stops delivering.
+    private var frameRotation: RTCVideoRotation = ._0
 
-    /// The cancellable used to control the bufferPublisher stream.
-    private var bufferUpdatesCancellable: AnyCancellable?
-
-    /// The view's size.
-    /// - Note: We are using this property instead for `frame.size` or `bounds.size` so we can
-    /// access it from any thread.
-    private var contentSize: CGSize = .zero
-
-    /// The track's size.
-    private var trackSize: CGSize = .zero {
-        didSet {
-            guard trackSize != oldValue else { return }
-            didUpdateTrackSize()
-        }
-    }
-
-    /// A property that defines if the RTCVideoFrame instances that will be rendered need to be resized
-    /// to fid the view's contentSize.
-    private var requiresResize = false {
-        didSet { bufferTransformer.requiresResize = requiresResize }
-    }
-
-    /// As we are operate in smaller rendering bounds we skip frames depending on this property's value
-    /// to improve performance.
-    /// - Note: The number of frames to skip is being calculated based on the ``trackSize`` and
-    /// ``contentSize``. It takes into account also the ``sizeRatioThreshold``
-    private var noOfFramesToSkipAfterRendering = 1
-
-    /// The number of frames that we have skipped so far. This is used as a step counter in the
-    /// ``renderFrame(_:)``.
-    private var skippedFrames = 0
-
-    /// We render frames every time the stepper/counter value is 0 and have a valid trackSize.
-    private var shouldRenderFrame: Bool { skippedFrames == 0 && trackSize != .zero }
-
-    /// A size ratio threshold used to determine if resizing is required.
-    /// - Note: It seems that Picture-in-Picture doesn't like rendering frames that are bigger than its
-    /// window size. For this reason, we are setting the resizeThreshold to `1`.
-    private let resizeRequiredSizeRatioThreshold: CGFloat = 1
-
-    /// A size ratio threshold used to determine if skipping frames is required.
-    private let sizeRatioThreshold: CGFloat = 15
+    /// The rotation the renderer is turned by. Main thread only.
+    private var displayRotation: RTCVideoRotation = ._0
 
     // MARK: - Lifecycle
 
@@ -95,163 +76,79 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     init(windowSizePolicy: PictureInPictureWindowSizePolicy) {
         pictureInPictureWindowSizePolicy = windowSizePolicy
         super.init(frame: .zero)
-        setUp()
+        addSubview(videoRenderer)
     }
 
-    override func willMove(toWindow newWindow: UIWindow?) {
-        super.willMove(toWindow: newWindow)
-        // Depending on the window we are moving we either start or stop
-        // streaming frames from the track.
-        if newWindow != nil {
-            startFrameStreaming(for: track, on: newWindow)
-        } else {
-            stopFrameStreaming(for: track)
-        }
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        // Converting frames is only worth it while the picture-in-picture
+        // window shows them. Disabling flushes the frames already queued.
+        videoRenderer.isEnabled = window != nil
     }
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        contentSize = frame.size
+        layoutVideoRenderer()
     }
 
-    // MARK: - Rendering lifecycle
+    // MARK: - RTCVideoRenderer
 
-    /// This method is being called from WebRTC and asks the container to set its size to the track's size.
+    /// Called by WebRTC before a frame of a new size, with that size as the
+    /// frame is shown: its rotation applied.
     func setSize(_ size: CGSize) {
-        trackSize = size
+        videoRenderer.setSize(size)
+
+        guard size != .zero else { return }
+        // The policy sets the controller's preferredContentSize, which is only
+        // safe on the main thread, while WebRTC calls this on its own.
+        DispatchQueue.main.async { [weak self] in
+            self?.pictureInPictureWindowSizePolicy.trackSize = size
+        }
     }
 
     func renderFrame(_ frame: RTCVideoFrame?) {
-        guard let frame = frame else {
-            return
+        if let rotation = frame?.rotation, rotation != frameRotation {
+            frameRotation = rotation
+            DispatchQueue.main.async { [weak self] in
+                self?.applyDisplayRotation(rotation)
+            }
         }
-
-        // Update the trackSize and re-calculate rendering properties if the size
-        // has changed.
-        trackSize = .init(width: Int(frame.width), height: Int(frame.height))
-
-        defer {
-            handleFrameSkippingIfRequired()
-        }
-
-        guard shouldRenderFrame else {
-            return
-        }
-
-        if let yuvBuffer = bufferTransformer.transformAndResizeIfRequired(
-            frame, targetSize: contentSize)?
-            .buffer as? StreamRTCYUVBuffer,
-            let sampleBuffer = yuvBuffer.sampleBuffer
-        {
-            bufferPublisher.send(sampleBuffer)
-        }
+        videoRenderer.renderFrame(frame)
     }
 
     // MARK: - Private helpers
 
-    /// Set up the view's hierarchy.
-    private func setUp() {
-        addSubview(contentView)
-        NSLayoutConstraint.activate([
-            contentView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            contentView.topAnchor.constraint(equalTo: topAnchor),
-            contentView.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
+    /// Turns the renderer to show the frames upright.
+    private func applyDisplayRotation(_ rotation: RTCVideoRotation) {
+        guard rotation != displayRotation else { return }
+        displayRotation = rotation
+        setNeedsLayout()
     }
 
-    /// A method used to process the frame's buffer and enqueue on the rendering view.
-    private func process(_ buffer: CMSampleBuffer) {
-        guard
-            bufferUpdatesCancellable != nil,
-            let trackId = track?.trackId,
-            buffer.isValid
-        else {
-            contentView.renderingComponent.flush()
-            return
+    /// Fills the view with the renderer, turned by ``displayRotation``. A
+    /// quarter-turned one is laid out with its sides swapped, so it covers the
+    /// view once turned, and the renderer scales the frames to its bounds in the
+    /// frames' own orientation.
+    private func layoutVideoRenderer() {
+        let angle: CGFloat
+        switch displayRotation {
+        case ._90: angle = .pi / 2
+        case ._180: angle = .pi
+        case ._270: angle = -.pi / 2
+        default: angle = 0
         }
+        let isQuarterTurned = displayRotation == ._90 || displayRotation == ._270
 
-        if #available(iOS 14.0, *) {
-            if contentView.renderingComponent.requiresFlushToResumeDecoding == true {
-                contentView.renderingComponent.flush()
-            }
-        }
-
-        if contentView.renderingComponent.isReadyForMoreMediaData {
-            contentView.renderingComponent.enqueue(buffer)
-        }
-    }
-
-    /// A method used to start consuming frames from the track.
-    /// - Note: In order to avoid unnecessary processing, we only start consuming track's frames when
-    /// the view has been added on a window (which means that picture-in-picture view is visible).
-    private func startFrameStreaming(
-        for track: RTCVideoTrack?,
-        on window: UIWindow?
-    ) {
-        guard window != nil, let track else { return }
-
-        bufferUpdatesCancellable =
-            bufferPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] in self?.process($0) }
-
-        track.add(self)
-    }
-
-    /// A method that stops the frame consumption from the track. Used automatically when the rendering
-    /// view move's away from the window or when the track changes.
-    private func stopFrameStreaming(for track: RTCVideoTrack?) {
-        guard bufferUpdatesCancellable != nil else { return }
-        bufferUpdatesCancellable?.cancel()
-        bufferUpdatesCancellable = nil
-        track?.remove(self)
-        contentView.renderingComponent.flush()
-    }
-
-    /// A method used to calculate rendering required properties, every time the trackSize changes.
-    private func didUpdateTrackSize() {
-        guard contentSize != .zero, trackSize != .zero else { return }
-
-        let widthDiffRatio = trackSize.width / contentSize.width
-        let heightDiffRatio = trackSize.height / contentSize.height
-        requiresResize =
-            widthDiffRatio >= resizeRequiredSizeRatioThreshold
-            || heightDiffRatio >= resizeRequiredSizeRatioThreshold
-        let requiresFramesSkipping =
-            widthDiffRatio >= sizeRatioThreshold || heightDiffRatio >= sizeRatioThreshold
-
-        /// Skipping frames is decided based on how much bigger is the incoming frame's size compared
-        /// to PiP window's size.
-        noOfFramesToSkipAfterRendering =
-            requiresFramesSkipping
-            ? max(Int(max(Int(widthDiffRatio), Int(heightDiffRatio)) / 2), 1) : 0
-        skippedFrames = 0
-
-        /// We update the provided windowSizePolicy with the size of the track we received, transformed
-        /// to the value that fits.
-        pictureInPictureWindowSizePolicy.trackSize = trackSize
-    }
-
-    /// A method used to handle the frameSkipping(step) during frame consumption.
-    private func handleFrameSkippingIfRequired() {
-        if noOfFramesToSkipAfterRendering > 0 {
-            if skippedFrames == noOfFramesToSkipAfterRendering {
-                skippedFrames = 0
-            } else {
-                skippedFrames += 1
-            }
-        } else if skippedFrames > 0 {
-            skippedFrames = 0
-        }
-    }
-
-    /// A method used to prepare the view for a new track rendering.
-    private func prepareForTrackRendering(_ oldValue: RTCVideoTrack?) {
-        stopFrameStreaming(for: oldValue)
-        noOfFramesToSkipAfterRendering = 0
-        skippedFrames = 0
-        requiresResize = false
-        startFrameStreaming(for: track, on: window)
+        // The bounds and centre are set untransformed; the frame is undefined
+        // while a transform is applied.
+        videoRenderer.transform = .identity
+        videoRenderer.bounds = CGRect(
+            origin: .zero,
+            size: isQuarterTurned
+                ? CGSize(width: bounds.height, height: bounds.width)
+                : bounds.size
+        )
+        videoRenderer.center = CGPoint(x: bounds.midX, y: bounds.midY)
+        videoRenderer.transform = CGAffineTransform(rotationAngle: angle)
     }
 }

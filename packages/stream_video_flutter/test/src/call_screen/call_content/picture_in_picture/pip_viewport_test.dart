@@ -174,6 +174,27 @@ void main() {
     );
   });
 
+  testWidgets('the window lets go of the track once the app is back', (
+    tester,
+  ) async {
+    await pumpPip(tester);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    // Past the delay backgrounding schedules to re-check the call status.
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(aggregates, isNotEmpty, reason: 'precondition: the window reported');
+    aggregates.clear();
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+
+    expect(
+      aggregates.single.visibility,
+      ViewportVisibility.hidden,
+      reason: 'the tiles ask for what they draw in the foreground',
+    );
+  });
+
   testWidgets(
     'the window moved to another call stops speaking to the old one',
     (
@@ -192,9 +213,9 @@ void main() {
       );
       aggregates.clear();
 
-      // Back to the foreground: a backgrounded binding produces no frames, so
-      // nothing would be rebuilt to notice the new call.
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      // Frames run again from inactive, without the app coming back, which
+      // would release the report on its own.
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
       await tester.pump();
 
       final joined = <ViewportAggregate>[];

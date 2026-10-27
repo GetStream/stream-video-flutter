@@ -21,9 +21,6 @@ protocol StreamAVPictureInPictureViewControlling: AnyObject {
     /// a cryptic error with content `PGPegasus code:-1003`
     var preferredContentSize: CGSize { get set }
 
-    /// The layer that renders the incoming frames from WebRTC.
-    var displayLayer: CALayer { get }
-
     /// Removes the current overlay from the picture-in-picture view
     func removeOverlay()
 
@@ -71,8 +68,6 @@ final class StreamAVPictureInPictureVideoCallViewController:
         }
     }
 
-    var displayLayer: CALayer { contentView.displayLayer }
-
     // MARK: - Lifecycle
 
     @available(*, unavailable)
@@ -83,6 +78,12 @@ final class StreamAVPictureInPictureVideoCallViewController:
     required init() {
         super.init(nibName: nil, bundle: nil)
         contentView.pictureInPictureWindowSizePolicy.controller = self
+    }
+
+    deinit {
+        // The track holds on to the views rendering it, so the content view
+        // would outlive this controller and keep receiving frames otherwise.
+        contentView.track = nil
     }
 
     override func viewDidLoad() {
