@@ -93,6 +93,7 @@
 
 ### 🔄 Changed
 
+- A failed coordinator request's `StreamVideoException.message` now names the method, host and path, and a request the server never answered ends in a short reason such as `request timed out` or `connection failed` instead of the previous text.
 - Updated `stream_webrtc_flutter` to `^4.0.0`.
 - `Call`'s factories take a `CallHost`, the part of the client a call uses; `StreamVideo` implements it, so passing a `StreamVideo` still works.
 - `StreamVideo.dispose()` leaves and disposes the calls it tracks, and disconnects the user like `disconnect()` but keeps the push device registered.
