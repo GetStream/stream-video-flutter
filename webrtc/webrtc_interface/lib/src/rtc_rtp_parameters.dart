@@ -2,22 +2,24 @@ import 'enums.dart';
 import 'rtc_rtcp_parameters.dart';
 
 class RTCRTPCodec {
-  RTCRTPCodec(
-      {this.payloadType,
-      this.name,
-      this.kind,
-      this.clockRate,
-      this.numChannels,
-      this.parameters});
+  RTCRTPCodec({
+    this.payloadType,
+    this.name,
+    this.kind,
+    this.clockRate,
+    this.numChannels,
+    this.parameters,
+  });
 
   factory RTCRTPCodec.fromMap(Map<dynamic, dynamic> map) {
     return RTCRTPCodec(
-        payloadType: map['payloadType'],
-        name: map['name'],
-        kind: map['kind'],
-        clockRate: map['clockRate'],
-        numChannels: map['numChannels'] ?? 1,
-        parameters: map['parameters']);
+      payloadType: map['payloadType'],
+      name: map['name'],
+      kind: map['kind'],
+      clockRate: map['clockRate'],
+      numChannels: map['numChannels'] ?? 1,
+      parameters: map['parameters'],
+    );
   }
   // Payload type used to identify this codec in RTP packets.
   int? payloadType;
@@ -65,19 +67,18 @@ class RTCRtpEncoding {
   });
 
   factory RTCRtpEncoding.fromMap(Map<dynamic, dynamic> map) => RTCRtpEncoding(
-        rid: map['rid'],
-        active: map['active'],
-        maxBitrate: map['maxBitrate'],
-        maxFramerate: map['maxFramerate'],
-        minBitrate: map['minBitrate'],
-        numTemporalLayers: map['numTemporalLayers'],
-        scaleResolutionDownBy: map['scaleResolutionDownBy'],
-        ssrc: map['ssrc'],
-        scalabilityMode: map['scalabilityMode'],
-        priority:
-            rtcPriorityTypeForString(map['priority']) ?? RTCPriorityType.low,
-        networkPriority: rtcPriorityTypeForString(map['networkPriority']),
-      );
+    rid: map['rid'],
+    active: map['active'],
+    maxBitrate: map['maxBitrate'],
+    maxFramerate: map['maxFramerate'],
+    minBitrate: map['minBitrate'],
+    numTemporalLayers: map['numTemporalLayers'],
+    scaleResolutionDownBy: map['scaleResolutionDownBy'],
+    ssrc: map['ssrc'],
+    scalabilityMode: map['scalabilityMode'],
+    priority: rtcPriorityTypeForString(map['priority']) ?? RTCPriorityType.low,
+    networkPriority: rtcPriorityTypeForString(map['networkPriority']),
+  );
 
   /// If non-null, this represents the RID that identifies this encoding layer.
   /// RIDs are used to identify layers in simulcast.
@@ -121,27 +122,30 @@ class RTCRtpEncoding {
   RTCPriorityType? networkPriority;
 
   Map<String, dynamic> toMap() => {
-        'active': active,
-        if (rid != null) 'rid': rid,
-        if (maxBitrate != null) 'maxBitrate': maxBitrate,
-        if (maxFramerate != null) 'maxFramerate': maxFramerate,
-        if (minBitrate != null) 'minBitrate': minBitrate,
-        if (numTemporalLayers != null) 'numTemporalLayers': numTemporalLayers,
-        if (scaleResolutionDownBy != null)
-          'scaleResolutionDownBy': scaleResolutionDownBy,
-        if (scalabilityMode != null) 'scalabilityMode': scalabilityMode,
-        if (ssrc != null) 'ssrc': ssrc,
-        'priority': typeRTCPriorityTypeString[priority],
-        if (networkPriority != null)
-          'networkPriority': typeRTCPriorityTypeString[networkPriority],
-      };
+    'active': active,
+    if (rid != null) 'rid': rid,
+    if (maxBitrate != null) 'maxBitrate': maxBitrate,
+    if (maxFramerate != null) 'maxFramerate': maxFramerate,
+    if (minBitrate != null) 'minBitrate': minBitrate,
+    if (numTemporalLayers != null) 'numTemporalLayers': numTemporalLayers,
+    if (scaleResolutionDownBy != null)
+      'scaleResolutionDownBy': scaleResolutionDownBy,
+    if (scalabilityMode != null) 'scalabilityMode': scalabilityMode,
+    if (ssrc != null) 'ssrc': ssrc,
+    'priority': typeRTCPriorityTypeString[priority],
+    if (networkPriority != null)
+      'networkPriority': typeRTCPriorityTypeString[networkPriority],
+  };
 }
 
 class RTCHeaderExtension {
   RTCHeaderExtension({this.uri, this.id, this.encrypted});
   factory RTCHeaderExtension.fromMap(Map<dynamic, dynamic> map) {
     return RTCHeaderExtension(
-        uri: map['uri'], id: map['id'], encrypted: map['encrypted']);
+      uri: map['uri'],
+      id: map['id'],
+      encrypted: map['encrypted'],
+    );
   }
 
   /// The URI of the RTP header extension, as defined in RFC5285.
@@ -173,32 +177,34 @@ class RTCRtpParameters {
   });
 
   factory RTCRtpParameters.fromMap(Map<dynamic, dynamic> map) {
-    var encodings = <RTCRtpEncoding>[];
-    dynamic encodingsMap = map['encodings'];
+    final encodings = <RTCRtpEncoding>[];
+    final dynamic encodingsMap = map['encodings'];
     encodingsMap.forEach((params) {
       encodings.add(RTCRtpEncoding.fromMap(params));
     });
-    var headerExtensions = <RTCHeaderExtension>[];
-    dynamic headerExtensionsMap = map['headerExtensions'];
+    final headerExtensions = <RTCHeaderExtension>[];
+    final dynamic headerExtensionsMap = map['headerExtensions'];
     headerExtensionsMap.forEach((params) {
       headerExtensions.add(RTCHeaderExtension.fromMap(params));
     });
-    var codecs = <RTCRTPCodec>[];
-    dynamic codecsMap = map['codecs'];
+    final codecs = <RTCRTPCodec>[];
+    final dynamic codecsMap = map['codecs'];
     codecsMap.forEach((params) {
       codecs.add(RTCRTPCodec.fromMap(params));
     });
 
-    var degradationPreference = map['degradationPreference'];
-    var rtcp = RTCRTCPParameters.fromMap(map['rtcp']);
+    final degradationPreference = map['degradationPreference'];
+    final rtcp = RTCRTCPParameters.fromMap(map['rtcp']);
     return RTCRtpParameters(
-        transactionId: map['transactionId'],
-        rtcp: rtcp,
-        headerExtensions: headerExtensions,
-        encodings: encodings,
-        degradationPreference:
-            degradationPreferenceforString(degradationPreference),
-        codecs: codecs);
+      transactionId: map['transactionId'],
+      rtcp: rtcp,
+      headerExtensions: headerExtensions,
+      encodings: encodings,
+      degradationPreference: degradationPreferenceforString(
+        degradationPreference,
+      ),
+      codecs: codecs,
+    );
   }
 
   String? transactionId;
@@ -217,15 +223,15 @@ class RTCRtpParameters {
   List<RTCRTPCodec>? codecs;
 
   Map<String, dynamic> toMap() {
-    var headerExtensionsList = <dynamic>[];
+    final headerExtensionsList = <dynamic>[];
     headerExtensions?.forEach((params) {
       headerExtensionsList.add(params.toMap());
     });
-    var encodingList = <dynamic>[];
+    final encodingList = <dynamic>[];
     encodings?.forEach((params) {
       encodingList.add(params.toMap());
     });
-    var codecsList = <dynamic>[];
+    final codecsList = <dynamic>[];
     codecs?.forEach((params) {
       codecsList.add(params.toMap());
     });

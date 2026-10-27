@@ -20,7 +20,7 @@ class MediaStreamNative extends MediaStream {
   void setMediaTracks(List<dynamic> audioTracks, List<dynamic> videoTracks) {
     _audioTracks.clear();
 
-    for (var track in audioTracks) {
+    for (final track in audioTracks) {
       _audioTracks.add(
         MediaStreamTrackNative(
           track['id'],
@@ -34,7 +34,7 @@ class MediaStreamNative extends MediaStream {
     }
 
     _videoTracks.clear();
-    for (var track in videoTracks) {
+    for (final track in videoTracks) {
       _videoTracks.add(
         MediaStreamTrackNative(
           track['id'],
@@ -125,7 +125,7 @@ class MediaStreamNative extends MediaStream {
   @override
   Future<MediaStream> clone() async {
     final cloneStream = await createLocalMediaStream(id);
-    for (var track in [..._audioTracks, ..._videoTracks]) {
+    for (final track in [..._audioTracks, ..._videoTracks]) {
       await cloneStream.addTrack(track);
     }
     return cloneStream;

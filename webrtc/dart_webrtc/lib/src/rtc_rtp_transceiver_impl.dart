@@ -10,17 +10,20 @@ import 'rtc_rtp_receiver_impl.dart';
 import 'rtc_rtp_sender_impl.dart';
 
 List<RTCRtpEncoding> listToRtpEncodings(List<Map<String, dynamic>> list) {
-  return list.map((e) => RTCRtpEncoding.fromMap(e)).toList();
+  return list.map(RTCRtpEncoding.fromMap).toList();
 }
 
-@Deprecated('RTCRtpTransceiverInitWeb isn\'t referenced from anywhere.')
+@Deprecated("RTCRtpTransceiverInitWeb isn't referenced from anywhere.")
 class RTCRtpTransceiverInitWeb extends RTCRtpTransceiverInit {
-  RTCRtpTransceiverInitWeb(TransceiverDirection direction,
-      List<MediaStream> streams, List<RTCRtpEncoding> sendEncodings)
-      : super(
-            direction: direction,
-            streams: streams,
-            sendEncodings: sendEncodings);
+  RTCRtpTransceiverInitWeb(
+    TransceiverDirection direction,
+    List<MediaStream> streams,
+    List<RTCRtpEncoding> sendEncodings,
+  ) : super(
+        direction: direction,
+        streams: streams,
+        sendEncodings: sendEncodings,
+      );
 
   factory RTCRtpTransceiverInitWeb.fromMap(Map<dynamic, dynamic> map) {
     if (map['direction'] == null) {
@@ -31,36 +34,42 @@ class RTCRtpTransceiverInitWeb extends RTCRtpTransceiverInit {
     }
 
     return RTCRtpTransceiverInitWeb(
-        typeStringToRtpTransceiverDirection[map['direction']]!,
-        (map['streams'] as List<MediaStream>).map((e) => e).toList(),
-        listToRtpEncodings(map['sendEncodings']));
+      typeStringToRtpTransceiverDirection[map['direction']]!,
+      (map['streams'] as List<MediaStream>).map((e) => e).toList(),
+      listToRtpEncodings(map['sendEncodings']),
+    );
   }
 
   Map<String, dynamic> toMap() => {
-        'direction': typeRtpTransceiverDirectionToString[direction],
-        if (streams != null) 'streamIds': streams!.map((e) => e.id).toList(),
-        if (sendEncodings != null)
-          'sendEncodings': sendEncodings!.map((e) => e.toMap()).toList(),
-      };
+    'direction': typeRtpTransceiverDirectionToString[direction],
+    if (streams != null) 'streamIds': streams!.map((e) => e.id).toList(),
+    if (sendEncodings != null)
+      'sendEncodings': sendEncodings!.map((e) => e.toMap()).toList(),
+  };
 }
 
 extension RTCRtpTransceiverInitWebExt on RTCRtpTransceiverInit {
-  JSObject toJsObject() => {
-        'direction': typeRtpTransceiverDirectionToString[direction],
-        if (streams != null)
-          'streams':
-              streams!.map((e) => (e as MediaStreamWeb).jsStream).toList(),
-        if (sendEncodings != null)
-          'sendEncodings': sendEncodings!.map((e) => e.toMap()).toList(),
-      }.jsify() as JSObject;
+  JSObject toJsObject() =>
+      {
+            'direction': typeRtpTransceiverDirectionToString[direction],
+            if (streams != null)
+              'streams': streams!
+                  .map((e) => (e as MediaStreamWeb).jsStream)
+                  .toList(),
+            if (sendEncodings != null)
+              'sendEncodings': sendEncodings!.map((e) => e.toMap()).toList(),
+          }.jsify()!
+          as JSObject;
 }
 
 class RTCRtpTransceiverWeb extends RTCRtpTransceiver {
   RTCRtpTransceiverWeb(this._jsTransceiver, _peerConnectionId);
 
-  factory RTCRtpTransceiverWeb.fromJsObject(web.RTCRtpTransceiver jsTransceiver,
-      {String? peerConnectionId}) {
-    var transceiver = RTCRtpTransceiverWeb(jsTransceiver, peerConnectionId);
+  factory RTCRtpTransceiverWeb.fromJsObject(
+    web.RTCRtpTransceiver jsTransceiver, {
+    String? peerConnectionId,
+  }) {
+    final transceiver = RTCRtpTransceiverWeb(jsTransceiver, peerConnectionId);
     return transceiver;
   }
 
@@ -97,7 +106,7 @@ class RTCRtpTransceiverWeb extends RTCRtpTransceiver {
       _jsTransceiver.direction =
           typeRtpTransceiverDirectionToString[direction]!;
     } on Exception catch (e) {
-      throw 'Unable to RTCRtpTransceiver::setDirection: ${e.toString()}';
+      throw 'Unable to RTCRtpTransceiver::setDirection: $e';
     }
   }
 
@@ -113,10 +122,9 @@ class RTCRtpTransceiverWeb extends RTCRtpTransceiver {
   @override
   Future<void> setCodecPreferences(List<RTCRtpCodecCapability> codecs) async {
     try {
-      _jsTransceiver.setCodecPreferences(codecs
-          .map((e) => e.toMap().jsify() as web.RTCRtpCodec)
-          .toList()
-          .toJS);
+      _jsTransceiver.setCodecPreferences(
+        codecs.map((e) => e.toMap().jsify()! as web.RTCRtpCodec).toList().toJS,
+      );
     } on Exception catch (e) {
       throw 'Unable to RTCRtpTransceiver::setCodecPreferences: ${e..toString()}';
     }

@@ -55,12 +55,14 @@ class NativePeerConnectionFactory {
         {'DtlsSrtpKeyAgreement': true},
       ],
     };
-    final response =
-        await WebRTC.invokeMethod('createPeerConnection', <String, dynamic>{
-          'configuration': configuration,
-          'constraints': constraints.isEmpty ? defaultConstraints : constraints,
-          'factoryId': factoryId,
-        });
+    final response = await WebRTC.invokeMethod(
+      'createPeerConnection',
+      <String, dynamic>{
+        'configuration': configuration,
+        'constraints': constraints.isEmpty ? defaultConstraints : constraints,
+        'factoryId': factoryId,
+      },
+    );
 
     final peerConnectionId = response['peerConnectionId'] as String;
     return RTCPeerConnectionNative(peerConnectionId, configuration);

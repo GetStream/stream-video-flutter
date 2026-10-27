@@ -30,8 +30,9 @@ class RTCFactoryWeb extends RTCFactory {
 
   @override
   Future<RTCPeerConnection> createPeerConnection(
-      Map<String, dynamic> configuration,
-      [Map<String, dynamic>? constraints]) async {
+    Map<String, dynamic> configuration, [
+    Map<String, dynamic>? constraints,
+  ]) async {
     final constr = (constraints != null && constraints.isNotEmpty)
         ? constraints
         : {
@@ -41,9 +42,10 @@ class RTCFactoryWeb extends RTCFactory {
             ],
           };
     final jsRtcPc = web.RTCPeerConnection(
-        {...constr, ...configuration}.jsify() as web.RTCConfiguration);
-    final _peerConnectionId = base64Encode(jsRtcPc.toString().codeUnits);
-    return RTCPeerConnectionWeb(_peerConnectionId, jsRtcPc);
+      {...constr, ...configuration}.jsify()! as web.RTCConfiguration,
+    );
+    final peerConnectionId = base64Encode(jsRtcPc.toString().codeUnits);
+    return RTCPeerConnectionWeb(peerConnectionId, jsRtcPc);
   }
 
   @override
@@ -71,22 +73,25 @@ class RTCFactoryWeb extends RTCFactory {
 
   @override
   Future<RTCRtpCapabilities> getRtpReceiverCapabilities(String kind) async {
-    var caps = RTCRtpReceiverJs.getCapabilities(kind);
+    final caps = RTCRtpReceiverJs.getCapabilities(kind);
     return RTCRtpCapabilitiesWeb.fromJsObject(caps);
   }
 
   @override
   Future<RTCRtpCapabilities> getRtpSenderCapabilities(String kind) async {
-    var caps = RTCRtpSenderJs.getCapabilities(kind);
+    final caps = RTCRtpSenderJs.getCapabilities(kind);
     return RTCRtpCapabilitiesWeb.fromJsObject(caps);
   }
 }
 
 Future<RTCPeerConnection> createPeerConnection(
-    Map<String, dynamic> configuration,
-    [Map<String, dynamic>? constraints]) {
-  return RTCFactoryWeb.instance
-      .createPeerConnection(configuration, constraints);
+  Map<String, dynamic> configuration, [
+  Map<String, dynamic>? constraints,
+]) {
+  return RTCFactoryWeb.instance.createPeerConnection(
+    configuration,
+    constraints,
+  );
 }
 
 Future<MediaStream> createLocalMediaStream(String label) {

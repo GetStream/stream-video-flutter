@@ -54,7 +54,7 @@ class RTCVideoRenderer extends ValueNotifier<RTCVideoValue>
   @override
   set srcObject(MediaStream? stream) {
     if (_disposed) {
-      throw 'Can\'t set srcObject: The RTCVideoRenderer is disposed';
+      throw "Can't set srcObject: The RTCVideoRenderer is disposed";
     }
     if (textureId == null) throw 'Call initialize before setting the stream';
     _srcObject = stream;
@@ -77,11 +77,11 @@ class RTCVideoRenderer extends ValueNotifier<RTCVideoValue>
 
   Future<void> setSrcObject({MediaStream? stream, String? trackId}) async {
     if (_disposed) {
-      throw 'Can\'t set srcObject: The RTCVideoRenderer is disposed';
+      throw "Can't set srcObject: The RTCVideoRenderer is disposed";
     }
     if (_textureId == null) throw 'Call initialize before setting the stream';
     _srcObject = stream;
-    var oldTextureId = _textureId;
+    final oldTextureId = _textureId;
     try {
       await WebRTC.invokeMethod('videoRendererSetSrcObject', <String, dynamic>{
         'textureId': _textureId,
@@ -158,18 +158,18 @@ class RTCVideoRenderer extends ValueNotifier<RTCVideoValue>
   @override
   set muted(bool mute) {
     if (_disposed) {
-      throw Exception('Can\'t be muted: The RTCVideoRenderer is disposed');
+      throw Exception("Can't be muted: The RTCVideoRenderer is disposed");
     }
     if (_srcObject == null) {
-      throw Exception('Can\'t be muted: The MediaStream is null');
+      throw Exception("Can't be muted: The MediaStream is null");
     }
     if (_srcObject!.ownerTag != 'local') {
       throw Exception(
-        'You\'re trying to mute a remote track, this is not supported',
+        "You're trying to mute a remote track, this is not supported",
       );
     }
     if (_srcObject!.getAudioTracks().isEmpty) {
-      throw Exception('Can\'t be muted: The MediaStreamTrack(audio) is empty');
+      throw Exception("Can't be muted: The MediaStreamTrack(audio) is empty");
     }
 
     Helper.setMicrophoneMute(mute, _srcObject!.getAudioTracks()[0]);
@@ -180,7 +180,7 @@ class RTCVideoRenderer extends ValueNotifier<RTCVideoValue>
     try {
       await Helper.selectAudioOutput(deviceId);
     } catch (e) {
-      print('Helper.selectAudioOutput ${e.toString()}');
+      print('Helper.selectAudioOutput $e');
       return false;
     }
     return true;
@@ -190,13 +190,13 @@ class RTCVideoRenderer extends ValueNotifier<RTCVideoValue>
   Future<void> setVolume(double value) async {
     try {
       if (_srcObject == null) {
-        throw Exception('Can\'t set volume: The MediaStream is null');
+        throw Exception("Can't set volume: The MediaStream is null");
       }
-      for (MediaStreamTrack track in _srcObject!.getAudioTracks()) {
+      for (final track in _srcObject!.getAudioTracks()) {
         await Helper.setVolume(value, track);
       }
     } catch (e) {
-      print('Helper.setVolume ${e.toString()}');
+      print('Helper.setVolume $e');
     }
   }
 }

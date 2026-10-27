@@ -2,10 +2,9 @@ import 'dart:typed_data';
 
 import 'package:webrtc_interface/webrtc_interface.dart';
 
-import 'encryption_types.dart';
-
 import '../native/encryption_manager_impl.dart'
     if (dart.library.js_interop) '../web/encryption_manager_impl.dart';
+import 'encryption_types.dart';
 
 /// Attaches AES-GCM end-to-end encryption to RTP senders and receivers.
 ///

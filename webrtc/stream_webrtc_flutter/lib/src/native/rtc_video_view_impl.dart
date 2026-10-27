@@ -7,7 +7,7 @@ import 'package:webrtc_interface/webrtc_interface.dart';
 import 'rtc_video_renderer_impl.dart';
 
 class RTCVideoView extends StatelessWidget {
-  RTCVideoView(
+  const RTCVideoView(
     this._renderer, {
     super.key,
     this.objectFit = RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
@@ -27,14 +27,13 @@ class RTCVideoView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) =>
-          _buildVideoView(context, constraints),
+      builder: _buildVideoView,
     );
   }
 
   Widget _buildVideoView(BuildContext context, BoxConstraints constraints) {
     return Center(
-      child: Container(
+      child: SizedBox(
         width: constraints.maxWidth,
         height: constraints.maxHeight,
         child: FittedBox(

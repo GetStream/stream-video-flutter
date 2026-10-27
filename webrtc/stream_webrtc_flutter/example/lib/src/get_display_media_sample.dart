@@ -3,13 +3,16 @@ import 'dart:core';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background/flutter_background.dart';
-import 'package:flutter_webrtc_example/src/widgets/screen_select_dialog.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
+
+import 'widgets/screen_select_dialog.dart';
 
 /*
  * getDisplayMedia sample
  */
 class GetDisplayMediaSample extends StatefulWidget {
+  const GetDisplayMediaSample({super.key});
+
   static String tag = 'get_display_media_sample';
 
   @override
@@ -61,12 +64,14 @@ class _GetDisplayMediaSampleState extends State<GetDisplayMediaSample> {
               const androidConfig = FlutterBackgroundAndroidConfig(
                 notificationTitle: 'Screen Sharing',
                 notificationText: 'LiveKit Example is sharing the screen.',
-                notificationImportance: AndroidNotificationImportance.normal,
                 notificationIcon: AndroidResource(
-                    name: 'livekit_ic_launcher', defType: 'mipmap'),
+                  name: 'livekit_ic_launcher',
+                  defType: 'mipmap',
+                ),
               );
               hasPermissions = await FlutterBackground.initialize(
-                  androidConfig: androidConfig);
+                androidConfig: androidConfig,
+              );
             }
             if (hasPermissions &&
                 !FlutterBackground.isBackgroundExecutionEnabled) {
@@ -74,8 +79,10 @@ class _GetDisplayMediaSampleState extends State<GetDisplayMediaSample> {
             }
           } catch (e) {
             if (!isRetry) {
-              return await Future<void>.delayed(const Duration(seconds: 1),
-                  () => requestBackgroundPermission(true));
+              return Future<void>.delayed(
+                const Duration(seconds: 1),
+                () => requestBackgroundPermission(true),
+              );
             }
             print('could not publish video: $e');
           }
@@ -94,24 +101,26 @@ class _GetDisplayMediaSampleState extends State<GetDisplayMediaSample> {
     });
 
     try {
-      var stream =
-          await navigator.mediaDevices.getDisplayMedia(<String, dynamic>{
-        'video': selected_source_ == null
-            ? true
-            : {
-                'deviceId': {'exact': selected_source_!.id},
-                'mandatory': {'frameRate': 30.0}
-              }
-      });
+      final stream = await navigator.mediaDevices.getDisplayMedia(
+        <String, dynamic>{
+          'video': selected_source_ == null
+              ? true
+              : {
+                  'deviceId': {'exact': selected_source_!.id},
+                  'mandatory': {'frameRate': 30.0},
+                },
+        },
+      );
       stream.getVideoTracks()[0].onEnded = () {
         print(
-            'By adding a listener on onEnded you can: 1) catch stop video sharing on Web');
+          'By adding a listener on onEnded you can: 1) catch stop video sharing on Web',
+        );
       };
 
       _localStream = stream;
       _localRenderer.srcObject = _localStream;
     } catch (e) {
-      print(e.toString());
+      print(e);
     }
     if (!mounted) return;
 
@@ -129,7 +138,7 @@ class _GetDisplayMediaSampleState extends State<GetDisplayMediaSample> {
       _localStream = null;
       _localRenderer.srcObject = null;
     } catch (e) {
-      print(e.toString());
+      print(e);
     }
   }
 
@@ -144,27 +153,31 @@ class _GetDisplayMediaSampleState extends State<GetDisplayMediaSample> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('GetDisplayMedia source: ' +
-            (selected_source_ != null ? selected_source_!.name : '')),
-        actions: [],
+        title: Text(
+          'GetDisplayMedia source: ${selected_source_ != null ? selected_source_!.name : ''}',
+        ),
+        actions: const [],
       ),
       body: OrientationBuilder(
         builder: (context, orientation) {
           return Center(
-              child: Container(
-            width: MediaQuery.of(context).size.width,
-            color: Colors.white10,
-            child: Stack(children: <Widget>[
-              if (_inCalling)
-                Container(
-                  margin: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.height,
-                  decoration: BoxDecoration(color: Colors.black54),
-                  child: RTCVideoView(_localRenderer),
-                )
-            ]),
-          ));
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              color: Colors.white10,
+              child: Stack(
+                children: <Widget>[
+                  if (_inCalling)
+                    Container(
+                      margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height,
+                      decoration: const BoxDecoration(color: Colors.black54),
+                      child: RTCVideoView(_localRenderer),
+                    ),
+                ],
+              ),
+            ),
+          );
         },
       ),
       floatingActionButton: FloatingActionButton(

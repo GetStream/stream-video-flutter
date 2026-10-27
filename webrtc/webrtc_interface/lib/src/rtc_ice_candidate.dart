@@ -7,7 +7,7 @@ class RTCIceCandidate {
     return {
       'candidate': candidate,
       'sdpMid': sdpMid,
-      'sdpMLineIndex': sdpMLineIndex
+      'sdpMLineIndex': sdpMLineIndex,
     };
   }
 }

@@ -16,6 +16,10 @@ workspace:
   - packages/stream_video_push_notification
   - packages/stream_video_push_notification/example
   - packages/stream_video_screen_sharing
+  - webrtc/dart_webrtc
+  - webrtc/stream_webrtc_flutter
+  - webrtc/stream_webrtc_flutter/example
+  - webrtc/webrtc_interface
 
 dev_dependencies:
   lints: ^6.0.0
@@ -59,10 +63,6 @@ dependency_overrides:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core_flutter
       ref: 003840918ef0537a2c0dd0b0115a92caae79630e
-  stream_webrtc_flutter:
-    git:
-      url: https://github.com/GetStream/webrtc-flutter.git
-      ref: 9b6fffaa5fda2652548cafc7d6ec87128409c6bc
 
 melos:
   ignore:
@@ -93,6 +93,7 @@ melos:
         stream_video_push_notification: ^2.0.0-alpha
         stream_video_screen_sharing: ^2.0.0-alpha
         theme_extensions_builder_annotation: ^7.1.0
+        webrtc_interface: ^1.5.1
 
       hooks:
         # Keep streamVideoVersion in globals.dart in sync with the pubspec version.
@@ -137,40 +138,32 @@ melos:
 
     format:
       # Only format git-tracked Dart files so `dart format` never descends into
-      # build artifacts (e.g. /build/ios/SourcePackages). The webrtc/ packages
-      # are formatted by `webrtc:format`.
-      run: git ls-files '*.dart' ':(exclude)webrtc' | xargs dart format
+      # build artifacts (e.g. /build/ios/SourcePackages).
+      run: git ls-files '*.dart' | xargs dart format
       description: |
-        Run `dart format` on all git-tracked Dart files outside webrtc/.
+        Run `dart format` on all git-tracked Dart files.
 
     format:verify:
-      run: git ls-files '*.dart' ':(exclude)webrtc' | xargs dart format --set-exit-if-changed
+      run: git ls-files '*.dart' | xargs dart format --set-exit-if-changed
       description: |
-        Run `dart format --set-exit-if-changed` on all git-tracked Dart files outside webrtc/.
-
-    webrtc:bootstrap:
-      run: tools/webrtc.sh bootstrap
-      description: Run `flutter pub get` in the webrtc/ packages and their examples.
+        Run `dart format --set-exit-if-changed` on all git-tracked Dart files.
 
     webrtc:analyze:
-      run: tools/webrtc.sh analyze
-      description: Run `flutter analyze` in the webrtc/ packages.
-
-    webrtc:format:
-      run: tools/webrtc.sh format
-      description: Run `dart format` on lib/ and test/ of the webrtc/ packages.
+      run: melos exec -c 4 -- dart analyze --fatal-infos .
+      description: Run `dart analyze` in the webrtc/ packages and their example.
+      packageFilters:
+        scope: "*webrtc*"
 
     webrtc:format:verify:
-      run: tools/webrtc.sh format-verify
-      description: Run `dart format --set-exit-if-changed` on lib/ and test/ of the webrtc/ packages.
-
-    webrtc:imports:verify:
-      run: tools/webrtc.sh imports-verify
-      description: Check the import order of the webrtc/ packages with import_sorter.
+      run: git ls-files 'webrtc/*.dart' | xargs dart format --set-exit-if-changed
+      description: Run `dart format --set-exit-if-changed` on the git-tracked Dart files in webrtc/.
 
     webrtc:test:
-      run: tools/webrtc.sh test
+      run: melos exec -c 1 --fail-fast -- flutter test
       description: Run `flutter test` in the webrtc/ packages.
+      packageFilters:
+        scope: "*webrtc*"
+        dirExists: test
 
     metrics:
       run: |
@@ -181,14 +174,20 @@ melos:
          - Note: you can also rely on your IDEs Dart Analysis / Issues window.
 
     lint:pub:
+      # dart_webrtc and webrtc_interface are skipped until our first version
+      # of them is published; include them again after that.
       run: |
-        melos exec -c 1 --no-published --no-private --order-dependents -- \
+        melos exec -c 1 --no-published --no-private --order-dependents \
+          --ignore=dart_webrtc --ignore=webrtc_interface -- \
               "flutter pub publish -n"
       description: Dry-run `pub publish` for every publishable package (pre-publish gate).
 
     release:pub:
+      # dart_webrtc and webrtc_interface are skipped until our first version
+      # of them is published; include them again after that.
       run: |
-        melos exec -c 1 --no-published --no-private --order-dependents -- \
+        melos exec -c 1 --no-published --no-private --order-dependents \
+          --ignore=dart_webrtc --ignore=webrtc_interface -- \
               "flutter pub publish -f"
       description: Publish every publishable package to pub.dev, in dependency order.
 
@@ -201,7 +200,8 @@ melos:
       description: Build all generated files for Dart & Flutter packages in this project.
 
     generate:dart:
-      run: melos exec -c 1 --depends-on="build_runner" --no-flutter -- "dart run build_runner build --delete-conflicting-outputs"
+      # dart_webrtc uses build_runner only to serve its web/ demo pages.
+      run: melos exec -c 1 --depends-on="build_runner" --no-flutter --ignore="dart_webrtc" -- "dart run build_runner build --delete-conflicting-outputs"
       description: Build all generated files for Dart packages in this project.
 
     generate:flutter:

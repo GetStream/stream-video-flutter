@@ -139,7 +139,7 @@ class NativeAudioManagement {
     try {
       await WebRTC.invokeMethod(
         'setIsVoiceProcessingBypassed',
-        <String, dynamic>{"value": value},
+        <String, dynamic>{'value': value},
       );
     } on PlatformException catch (e) {
       throw 'Unable to set isVoiceProcessingBypassed: ${e.message}';
