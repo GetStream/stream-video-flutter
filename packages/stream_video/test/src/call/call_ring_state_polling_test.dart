@@ -11,6 +11,11 @@ import 'fixtures/data.dart';
 
 const _sessionId = 'ring-session';
 
+// The ring polls on the default settings, so the time advances follow them.
+final _startAfter = const RingStatePollingSettings().startAfter;
+final _interval = const RingStatePollingSettings().interval;
+const _second = Duration(seconds: 1);
+
 final _currentUser = SampleCallData.defaultCallUser;
 final _callee1 = SampleCallData.testCallUser1;
 final _callee2 = SampleCallData.testCallUser2;
@@ -99,6 +104,13 @@ void main() {
     return call;
   }
 
+  test('polls from 9 s into the ring, every 5 s, by default', () {
+    // The tests below advance time by the defaults, so they would not notice
+    // a change to them.
+    expect(_startAfter, const Duration(seconds: 9));
+    expect(_interval, const Duration(seconds: 5));
+  });
+
   test('joins the ring a callee accepted without the event', () {
     fakeAsync((async) {
       startRing();
@@ -110,7 +122,7 @@ void main() {
 
       final acceptedAt = DateTime.utc(2026);
       polledRingState = _ringState(acceptedBy: {_callee1.id: acceptedAt});
-      async.elapse(const Duration(seconds: 15));
+      async.elapse(_startAfter);
 
       expect(polls, 1);
       expect(
@@ -130,7 +142,7 @@ void main() {
       ).called(1);
 
       // The ring settled, so nothing is polled any more.
-      async.elapse(const Duration(seconds: 10));
+      async.elapse(_interval * 2);
       expect(polls, 1);
     });
   });
@@ -146,7 +158,7 @@ void main() {
           _callee2.id: DateTime.utc(2026, 1, 2),
         },
       );
-      async.elapse(const Duration(seconds: 15));
+      async.elapse(_startAfter);
 
       final status = stateManager.callState.status;
       expect(status, isA<CallStatusDisconnected>());
@@ -181,7 +193,7 @@ void main() {
           _callee2.id: DateTime.utc(2026),
         },
       );
-      async.elapse(const Duration(seconds: 15));
+      async.elapse(_startAfter);
 
       // The same outcome as a `call.rejected` event carrying this state.
       expect(stateManager.callState.status, CallStatus.outgoing());
@@ -201,7 +213,7 @@ void main() {
         callEndedAt: DateTime.utc(2026),
         acceptedBy: {_callee1.id: DateTime.utc(2026)},
       );
-      async.elapse(const Duration(seconds: 15));
+      async.elapse(_startAfter);
 
       expect(
         stateManager.callState.status,
@@ -218,7 +230,7 @@ void main() {
       polledRingState = _ringState(
         rejectedBy: {_callee1.id: DateTime.utc(2026)},
       );
-      async.elapse(const Duration(seconds: 20));
+      async.elapse(_startAfter + _interval);
 
       expect(polls, 2);
       expect(stateManager.callState.status, CallStatus.outgoing());
@@ -230,7 +242,7 @@ void main() {
       final call = startRing();
       async.flushMicrotasks();
 
-      async.elapse(const Duration(seconds: 10));
+      async.elapse(_startAfter - _second);
       final rejectedAt = DateTime.now();
       coordinatorEvents.emit(
         StreamCallRejectedEvent(
@@ -245,10 +257,10 @@ void main() {
       );
       async.flushMicrotasks();
 
-      async.elapse(const Duration(seconds: 14));
+      async.elapse(_startAfter - _second);
       expect(polls, 0);
 
-      async.elapse(const Duration(seconds: 1));
+      async.elapse(_second);
       expect(polls, 1);
     });
   });
@@ -258,7 +270,7 @@ void main() {
       final call = startRing();
       async.flushMicrotasks();
 
-      async.elapse(const Duration(seconds: 5));
+      async.elapse(_startAfter - _second);
       coordinatorEvents.emit(
         StreamCallAcceptedEvent(
           call.callCid,
