@@ -112,6 +112,7 @@
 
 ### 🐞 Fixed
 
+- Leaving a call while it is still joining no longer lets the coordinator's late answer reach the left call. It used to restore the call's capabilities and participants and could start auto-on noise cancellation, which then kept running after the call ended. Leaving while the SFU connection is being set up no longer leaves a peer connection manager behind.
 - On iOS, a call that defaults to the loudspeaker now starts on it, instead of switching to it after the microphone is already recording.
 - A fast reconnect no longer hangs when the network drops while it is reopening the SFU connection. The attempt fails after five seconds and the call rejoins, where before it stayed reconnecting until the operating system gave up on the connection.
 - The client reconnects after a network loss again, instead of the coordinator connection staying stuck closing and refusing every reconnect.
