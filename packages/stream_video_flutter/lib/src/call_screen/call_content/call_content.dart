@@ -231,21 +231,7 @@ class _StreamCallContentState extends State<StreamCallContent> {
       backgroundColor:
           theme.callContentTheme.callContentBackgroundColor ??
           context.streamColorScheme.backgroundApp,
-      appBar:
-          widget.callAppBarWidgetBuilder?.call(context, call) ??
-          // `Scaffold` reserves `preferredSize.height` and adds the top inset
-          // itself, and the bar cannot read a themed height without a context —
-          // so the height a `CallAppBarTheme` sets is measured out here.
-          PreferredSize(
-            preferredSize: Size.fromHeight(
-              CallAppBar.heightOf(context, primary: false),
-            ),
-            child: CallAppBar(
-              call: call,
-              onBackPressed: widget.onBackPressed,
-              onLeaveCallTap: widget.onLeaveCallTap,
-            ),
-          ),
+      appBar: _buildAppBar(context),
       // The app bar and the controls clear the top and bottom insets; this
       // clears the sides, where a rail or a cutout can sit in landscape.
       body: SafeArea(
@@ -269,16 +255,43 @@ class _StreamCallContentState extends State<StreamCallContent> {
         ),
       ),
       extendBody: widget.extendBody,
-      bottomNavigationBar: PartialCallStateBuilder<bool>(
-        call: call,
-        selector: _hasLocalParticipant,
-        builder: (_, hasLocalParticipant) => hasLocalParticipant
-            ? widget.callControlsWidgetBuilder?.call(context, call) ??
-                  StreamCallControls.withDefaultOptions(
-                    call: call,
-                  )
-            : const SizedBox.shrink(),
-      ),
+      bottomNavigationBar: _buildControls(context),
+    );
+  }
+
+  // Null in picture-in-picture, as are the controls: the overlay covers the
+  // call, and the window is too small to lay them out in.
+  PreferredSizeWidget? _buildAppBar(BuildContext context) {
+    if (_isInPictureInPictureMode) return null;
+
+    return widget.callAppBarWidgetBuilder?.call(context, call) ??
+        // `Scaffold` reserves `preferredSize.height` and adds the top inset
+        // itself, and the bar cannot read a themed height without a context —
+        // so the height a `CallAppBarTheme` sets is measured out here.
+        PreferredSize(
+          preferredSize: Size.fromHeight(
+            CallAppBar.heightOf(context, primary: false),
+          ),
+          child: CallAppBar(
+            call: call,
+            onBackPressed: widget.onBackPressed,
+            onLeaveCallTap: widget.onLeaveCallTap,
+          ),
+        );
+  }
+
+  Widget? _buildControls(BuildContext context) {
+    if (_isInPictureInPictureMode) return null;
+
+    return PartialCallStateBuilder<bool>(
+      call: call,
+      selector: _hasLocalParticipant,
+      builder: (_, hasLocalParticipant) {
+        if (!hasLocalParticipant) return const SizedBox.shrink();
+
+        return widget.callControlsWidgetBuilder?.call(context, call) ??
+            StreamCallControls.withDefaultOptions(call: call);
+      },
     );
   }
 }
