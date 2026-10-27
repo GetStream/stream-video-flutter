@@ -83,15 +83,19 @@ class CallSession extends Disposable {
     this.e2eeManager,
     this.joinResponseTimeout = const Duration(seconds: 5),
     this.fastReconnectJoinResponseTimeout = const Duration(seconds: 15),
+    // Only tests pass one; the session otherwise builds its own.
+    SfuClient? sfuClient,
   }) : _tracer = tracer,
        _host = host,
-       sfuClient = SfuClient(
-         baseUrl: config.sfuUrl,
-         sfuToken: config.sfuToken,
-         sessionSeq: sessionSeq,
-         tracer: tracer,
-         retryPolicy: retryPolicy,
-       ),
+       sfuClient =
+           sfuClient ??
+           SfuClient(
+             baseUrl: config.sfuUrl,
+             sfuToken: config.sfuToken,
+             sessionSeq: sessionSeq,
+             tracer: tracer,
+             retryPolicy: retryPolicy,
+           ),
        sfuWS = SfuWebSocket(
          sessionSeq: sessionSeq,
          sfuUrl: config.sfuUrl,
@@ -827,7 +831,7 @@ class CallSession extends Disposable {
 
     await _sfuEventsLock.synchronized(() async {
       if (event is SfuSubscriberOfferEvent) {
-        await _onSubscriberOffer(event);
+        await onSubscriberOffer(event);
       } else if (event is SfuIceTrickleEvent) {
         await _onRemoteIceCandidate(event);
       } else if (event is SfuParticipantLeftEvent) {
@@ -1018,7 +1022,8 @@ class CallSession extends Disposable {
     return await rtcManager?.onPublishOptionsChanged(event.publishOptions);
   }
 
-  Future<void> _onSubscriberOffer(SfuSubscriberOfferEvent event) async {
+  @visibleForTesting
+  Future<void> onSubscriberOffer(SfuSubscriberOfferEvent event) async {
     if (_isLeavingOrClosed || stateManager.callState.status.isDisconnected) {
       _logger.w(
         () => '[onSubscriberOffer] rejected (session is disconnecting)',
@@ -1035,11 +1040,20 @@ class CallSession extends Disposable {
       return;
     }
 
+    // The session can leave or close while the answer is created; the SFU no
+    // longer expects one then.
+    if (_isLeavingOrClosed) {
+      _logger.w(() => '[onSubscriberOffer] dropped (session left mid-offer)');
+      return;
+    }
+
     final result = await sfuClient.sendAnswer(
       sfu.SendAnswerRequest(
         sdp: answerSdp,
         sessionId: sessionId,
         peerType: sfu_models.PeerType.PEER_TYPE_SUBSCRIBER,
+        // Lets the SFU tell this answer from a stale or duplicate one.
+        negotiationId: event.negotiationId,
       ),
     );
     _logger.v(() => '[onSubscriberOffer] result: $result');
