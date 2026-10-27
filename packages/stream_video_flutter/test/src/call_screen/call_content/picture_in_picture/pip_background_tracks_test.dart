@@ -286,6 +286,31 @@ void main() {
     );
   });
 
+  testWidgets('sends a track rebuilt under the same id again', (tester) async {
+    await pumpPip(tester);
+
+    // A rejoin or a migration rebuilds the subscriber, and the remote track
+    // comes back with the publisher's id.
+    final rebuilt = _MockRtcTrack();
+    when(() => rebuilt.mediaTrack).thenReturn(_FakeMediaStreamTrack());
+    when(() => call.getTrack(any(), any())).thenReturn(rebuilt);
+    final rejoined = MockCallState();
+    when(() => rejoined.status).thenReturn(CallStatus.connected());
+    when(() => rejoined.callParticipants).thenReturn([participant]);
+    when(() => rejoined.iOSMultitaskingCameraAccessEnabled).thenReturn(true);
+    emitter.value = rejoined;
+    await tester.pump();
+
+    final updates = nativeCalls.where(
+      (call) => call.method == 'updateParticipant',
+    );
+    expect(updates, hasLength(2));
+    expect(
+      (updates.last.arguments as Map<Object?, Object?>)['trackId'],
+      'alice-video',
+    );
+  });
+
   testWidgets('leaves alone a track the window was given in the foreground', (
     tester,
   ) async {

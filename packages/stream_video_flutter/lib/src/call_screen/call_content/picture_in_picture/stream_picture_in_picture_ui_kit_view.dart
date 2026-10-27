@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../../call_participants/call_participants.dart';
 import 'picture_in_picture_configuration.dart';
@@ -89,8 +90,11 @@ class _StreamPictureInPictureUiKitViewState
   bool _isInBackground = false;
 
   // What the last `updateParticipant` sent, so an unchanged participant is not
-  // sent again on every emission.
-  Map<String, Object?>? _lastParticipantArguments;
+  // sent again on every emission. The track is compared by identity: one
+  // rebuilt by a rejoin or a migration keeps its id, and the native side only
+  // swaps to it when sent again.
+  ({Map<String, Object?> arguments, rtc.MediaStreamTrack? mediaTrack})?
+  _lastSentParticipant;
 
   // The tracks [_disableTracksInBackground] turned off, so the same ones are
   // turned back on. The participants can look different by the time the app
@@ -154,13 +158,16 @@ class _StreamPictureInPictureUiKitViewState
       videoTrack,
       trackType,
     );
-    if (const MapEquality<String, Object?>().equals(
-      arguments,
-      _lastParticipantArguments,
-    )) {
+    final mediaTrack = videoTrack?.mediaTrack;
+    if (_lastSentParticipant case final last?
+        when identical(last.mediaTrack, mediaTrack) &&
+            const MapEquality<String, Object?>().equals(
+              last.arguments,
+              arguments,
+            )) {
       return;
     }
-    _lastParticipantArguments = arguments;
+    _lastSentParticipant = (arguments: arguments, mediaTrack: mediaTrack);
 
     await _channel.invokeMethod('updateParticipant', arguments);
   }
@@ -306,7 +313,7 @@ class _StreamPictureInPictureUiKitViewState
     _viewport.dispose();
     _viewport = widget.call.viewportVisibility.attach();
 
-    _lastParticipantArguments = null;
+    _lastSentParticipant = null;
     _subscriptions.cancelAll();
     _listenForCallEnded();
     _subscribeToCallEvents();
@@ -318,7 +325,7 @@ class _StreamPictureInPictureUiKitViewState
       widget.call.state.listen(
         (state) async {
           if (state.status is CallStatusDisconnected) {
-            _lastParticipantArguments = null;
+            _lastSentParticipant = null;
             await _channel.invokeMethod(
               'callEnded',
             );
