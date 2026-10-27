@@ -77,16 +77,16 @@ class StreamCallKitCallController: NSObject {
     /// the app's own state is not known at this layer, and ending the call to clear the stale ring
     /// would dismiss a ring the user may still be able to answer.
     ///
-    /// An outgoing call has nothing to answer: marking it connected already reports it to CallKit
-    /// through `hasConnectDidChange`. Answering it would run the incoming-call path, which
-    /// reconfigures the audio session and emits an accept event for the app's own call. A call
-    /// CallKit does not track yet has nothing to answer either.
+    /// Only an incoming call this plugin is tracking is answered; marking an outgoing call
+    /// connected already reports it to CallKit.
     func connectedCall(call: Call, completion: ((Bool) -> Void)? = nil) {
         guard let callItem = self.callWithUUID(uuid: call.uuid) else {
             completion?(false)
             return
         }
-        callItem.connectedCall(completion: nil)
+        if !callItem.hasConnected {
+            callItem.connectedCall(completion: nil)
+        }
 
         if callItem.isOutGoing {
             completion?(true)
