@@ -76,9 +76,22 @@ class StreamCallKitCallController: NSObject {
     /// Deliberately not recovered automatically, unlike a refused end. There is no safe move here:
     /// the app's own state is not known at this layer, and ending the call to clear the stale ring
     /// would dismiss a ring the user may still be able to answer.
+    ///
+    /// Only an incoming call this plugin is tracking is answered; marking an outgoing call
+    /// connected already reports it to CallKit.
     func connectedCall(call: Call, completion: ((Bool) -> Void)? = nil) {
-        let callItem = self.callWithUUID(uuid: call.uuid)
-        callItem?.connectedCall(completion: nil)
+        guard let callItem = self.callWithUUID(uuid: call.uuid) else {
+            completion?(false)
+            return
+        }
+        if !callItem.hasConnected {
+            callItem.connectedCall(completion: nil)
+        }
+
+        if callItem.isOutGoing {
+            completion?(true)
+            return
+        }
 
         let answerAction = CXAnswerCallAction(call: call.uuid)
         let transaction = CXTransaction(action: answerAction)

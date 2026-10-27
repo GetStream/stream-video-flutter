@@ -98,7 +98,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                 self.endCall(self.data!)
             } else {
                 if let getArgs = args as? [String: Any] {
-                    self.data = CallData(args: getArgs)
+                    self.data = self.storedCallData(for: getArgs)
                     self.endCall(self.data!)
                 }
             }
@@ -151,7 +151,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                 self.connectedCall(self.data!)
             } else {
                 if let getArgs = args as? [String: Any] {
-                    self.data = CallData(args: getArgs)
+                    self.data = self.storedCallData(for: getArgs)
                     self.connectedCall(self.data!)
                 }
             }
@@ -332,6 +332,23 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         } else {
             self.callController.holdCall(call: call, onHold: onHold)
         }
+    }
+
+    /// Returns the options already stored for the call that `args` names.
+    ///
+    /// `callConnected` and `endCall` send only the id, so rebuilding `CallData` from their args
+    /// would reset the call's options to defaults.
+    private func storedCallData(for args: [String: Any]) -> CallData {
+        guard let id = args["id"] as? String else {
+            return CallData(args: args)
+        }
+        if let data = self.data, data.uuid.lowercased() == id.lowercased() {
+            return data
+        }
+        if let uuid = UUID(uuidString: id), let call = self.callController.callWithUUID(uuid: uuid) {
+            return call.data
+        }
+        return CallData(args: args)
     }
 
     @objc public func endCall(_ data: CallData) {
