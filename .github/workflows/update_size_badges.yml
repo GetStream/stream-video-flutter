@@ -4,7 +4,7 @@ name: update_size_badges
 # to the branch the workflow runs on. The release-pr skill runs it on the
 # release branch, so the badges ship with the release:
 #
-#   gh workflow run update_size_badges.yml --ref release/v<version> -f base_branch=main
+#   gh workflow run update_size_badges.yml --ref release/stream-video-v<version> -f base_branch=main
 on:
   workflow_dispatch:
     inputs:

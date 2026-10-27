@@ -72,11 +72,11 @@ The size badges in the root `README.md` show a benchmark from
 - `stream_video_push_notification` and `stream_video_screen_sharing`: their
   pub.dev archive size.
 
-They are updated for each release, on the release branch, by the
+They are updated for each stream-video release, on the release branch, by the
 `update_size_badges` workflow:
 
 ```bash
-gh workflow run update_size_badges.yml --ref release/v<version> -f base_branch=main
+gh workflow run update_size_badges.yml --ref release/stream-video-v<version> -f base_branch=main
 ```
 
 ## Adding a variant
