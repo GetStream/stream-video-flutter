@@ -101,9 +101,10 @@ class CallRingingController {
     }
 
     if (result is Failure && _acceptReachedServer) {
-      // The response failed, a timeout say, but the server applied the
-      // accept and said so. Reverting would take its echo, or a later ring
-      // check, for an accept from elsewhere and end the call here.
+      // The response failed, a timeout say, but the server's echo of the
+      // accept arrived first, so it took effect. Reverting would take that
+      // echo for an accept from elsewhere and end the call here. An echo
+      // that arrives only after the failure still does.
       _logger.w(() => '[accept] response failed, but accepted: $result');
       return const Result.success(none);
     }
@@ -151,7 +152,8 @@ class CallRingingController {
     }
 
     if (_isOwnPendingAnswer(event.acceptedByUserId)) {
-      await _leaveAnsweredElsewhere('accepted');
+      _logger.i(() => '[onCallAccepted] accepted elsewhere');
+      await _leaveAnsweredElsewhere();
       return;
     }
 
@@ -162,7 +164,8 @@ class CallRingingController {
   /// somewhere else ends the ring here.
   Future<void> onCallRejected(StreamCallRejectedEvent event) async {
     if (_isOwnPendingAnswer(event.rejectedByUserId)) {
-      await _leaveAnsweredElsewhere('rejected');
+      _logger.i(() => '[onCallRejected] rejected elsewhere');
+      await _leaveAnsweredElsewhere();
       return;
     }
 
@@ -179,20 +182,19 @@ class CallRingingController {
         !status.acceptedByMe;
   }
 
-  /// Ends the ring here without rejecting it, for an answer [how] given on
-  /// another device or through another [Call] for the same cid. The server
-  /// already holds the answer, and a reject from here would contradict an
-  /// accept, or end the call on a device that is joining it.
+  /// Ends the ring here, for an answer given on another device or through
+  /// another [Call] for the same cid. It sends no reject: the answer is
+  /// already on the server, and the other SDKs also just leave
+  /// (`answeredElsewhere` / `declinedElsewhere`).
   ///
   /// The echo of a reject this instance sent is left to [reject], which
   /// leaves with the reason it was given.
-  Future<void> _leaveAnsweredElsewhere(String how) async {
+  Future<void> _leaveAnsweredElsewhere() async {
     if (_rejecting) {
       _logger.v(() => '[leaveAnsweredElsewhere] echo of own reject, ignoring');
       return;
     }
 
-    _logger.i(() => '[leaveAnsweredElsewhere] $how elsewhere, leaving');
     await _call.leave(
       reason: DisconnectReason.rejected(
         byUserId: _stateManager.callState.currentUserId,

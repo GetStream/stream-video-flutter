@@ -109,30 +109,30 @@ void main() {
     expect((await joining).isSuccess, isTrue);
   });
 
+  final currentUser = SampleCallData.defaultCallUser;
+
+  void verifyNoReject() => verifyNever(
+    () => harness.coordinatorClient.rejectCall(
+      cid: any(named: 'cid'),
+      reason: any(named: 'reason'),
+    ),
+  );
+
+  StreamCallAcceptedEvent accepted(Call call) => StreamCallAcceptedEvent(
+    call.callCid,
+    acceptedBy: currentUser,
+    createdAt: DateTime.now(),
+    metadata: SampleCallData.createCallMetadata(),
+  );
+
+  StreamCallRejectedEvent rejected(Call call) => StreamCallRejectedEvent(
+    call.callCid,
+    rejectedBy: currentUser,
+    createdAt: DateTime.now(),
+    metadata: SampleCallData.createCallMetadata(),
+  );
+
   group('a ring answered elsewhere by the current user', () {
-    final currentUser = SampleCallData.defaultCallUser;
-
-    void verifyNoReject() => verifyNever(
-      () => harness.coordinatorClient.rejectCall(
-        cid: any(named: 'cid'),
-        reason: any(named: 'reason'),
-      ),
-    );
-
-    StreamCallAcceptedEvent accepted(Call call) => StreamCallAcceptedEvent(
-      call.callCid,
-      acceptedBy: currentUser,
-      createdAt: DateTime.now(),
-      metadata: SampleCallData.createCallMetadata(),
-    );
-
-    StreamCallRejectedEvent rejected(Call call) => StreamCallRejectedEvent(
-      call.callCid,
-      rejectedBy: currentUser,
-      createdAt: DateTime.now(),
-      metadata: SampleCallData.createCallMetadata(),
-    );
-
     for (final (name, event) in [
       ('accepted', accepted),
       ('rejected', rejected),
@@ -155,17 +155,73 @@ void main() {
       });
     }
 
+    group('through a second instance for the same cid', () {
+      late MutableClientState clientState;
+      late Call joining;
+
+      /// Rings a stale instance and a joining one for the same cid, then
+      /// answers the ring, so the stale one leaves.
+      Future<void> answerWithTwoInstances() async {
+        clientState = MutableClientState(
+          User(id: currentUser.id),
+          allowMultipleActiveCalls: false,
+          multiCallAudioPolicy: MultiCallAudioPolicy.manual,
+        );
+        when(() => harness.streamVideo.state).thenReturn(clientState);
+
+        final stale = ringingCall(CallStatus.incoming());
+        joining = ringingCall(CallStatus.incoming(acceptedByMe: true));
+        // The stale instance was watched first, as a ring is before an
+        // accept.
+        clientState.setWatchedCall(stale);
+        await clientState.setActiveCall(joining);
+        await clientState.setOutgoingCall(joining);
+
+        harness.coordinatorEvents.emit(accepted(joining));
+        await pumpEventQueue();
+        expect(stale.state.value.status, isA<CallStatusDisconnected>());
+      }
+
+      test('the joining one stays ringing, without a reject', () async {
+        await answerWithTwoInstances();
+
+        expect(joining.state.value.status, isA<CallStatusIncoming>());
+        verifyNoReject();
+      });
+
+      test('the joining one stays active and watched', () async {
+        await answerWithTwoInstances();
+
+        expect(clientState.activeCalls.value, [joining]);
+        expect(clientState.activeCall.value, joining);
+        expect(clientState.watchedCalls.value, [joining]);
+      });
+
+      test('the joining one stays the outgoing call', () async {
+        await answerWithTwoInstances();
+
+        expect(clientState.outgoingCall.value, joining);
+      });
+    });
+  });
+
+  group('a ring answered by this instance', () {
     test('the echo of its own reject keeps the reason it was given', () async {
       final call = ringingCall(CallStatus.incoming());
-      // The server's event for the reject arrives before its response.
+      // The server's event for the reject arrives before its response. Only
+      // once, so code that rejects again on the echo fails rather than loops.
+      var emitted = false;
       when(
         () => harness.coordinatorClient.rejectCall(
           cid: any(named: 'cid'),
           reason: any(named: 'reason'),
         ),
       ).thenAnswer((_) async {
-        harness.coordinatorEvents.emit(rejected(call));
-        await pumpEventQueue();
+        if (!emitted) {
+          emitted = true;
+          harness.coordinatorEvents.emit(rejected(call));
+          await pumpEventQueue();
+        }
         return const Result.success(none);
       });
 
@@ -183,6 +239,19 @@ void main() {
           reason: any(named: 'reason'),
         ),
       ).called(1);
+    });
+
+    test('the echo of its own accept is not a leave', () async {
+      final call = ringingCall(CallStatus.incoming(acceptedByMe: true));
+
+      harness.coordinatorEvents.emit(accepted(call));
+      await pumpEventQueue();
+
+      expect(
+        harness.stateManager.callState.status,
+        isNot(isA<CallStatusDisconnected>()),
+      );
+      verifyNoReject();
     });
 
     test('an accept the server applied stays, though its response '
@@ -224,67 +293,25 @@ void main() {
         CallStatus.incoming(),
       );
     });
+  });
 
-    test('another user accepting does not end the ring', () async {
-      final call = ringingCall(CallStatus.incoming());
+  test('another user accepting does not end the ring', () async {
+    final call = ringingCall(CallStatus.incoming());
 
-      harness.coordinatorEvents.emit(
-        StreamCallAcceptedEvent(
-          call.callCid,
-          acceptedBy: SampleCallData.testCallUser1,
-          createdAt: DateTime.now(),
-          metadata: SampleCallData.createCallMetadata(),
-        ),
-      );
-      await pumpEventQueue();
+    harness.coordinatorEvents.emit(
+      StreamCallAcceptedEvent(
+        call.callCid,
+        acceptedBy: SampleCallData.testCallUser1,
+        createdAt: DateTime.now(),
+        metadata: SampleCallData.createCallMetadata(),
+      ),
+    );
+    await pumpEventQueue();
 
-      expect(
-        harness.stateManager.callState.status,
-        isA<CallStatusIncoming>(),
-      );
-      verifyNoReject();
-    });
-
-    test('a second instance leaving keeps the joining one', () async {
-      final clientState = MutableClientState(
-        User(id: currentUser.id),
-        allowMultipleActiveCalls: false,
-        multiCallAudioPolicy: MultiCallAudioPolicy.manual,
-      );
-      when(() => harness.streamVideo.state).thenReturn(clientState);
-
-      final stale = ringingCall(CallStatus.incoming());
-      final staleState = harness.stateManager;
-      final joining = ringingCall(CallStatus.incoming(acceptedByMe: true));
-      final joiningState = harness.stateManager;
-      // The stale instance was watched first, as a ring is before an accept.
-      clientState.setWatchedCall(stale);
-      await clientState.setActiveCall(joining);
-      await clientState.setOutgoingCall(joining);
-
-      harness.coordinatorEvents.emit(accepted(joining));
-      await pumpEventQueue();
-
-      expect(staleState.callState.status, isA<CallStatusDisconnected>());
-      expect(joiningState.callState.status, isA<CallStatusIncoming>());
-      expect(clientState.activeCalls.value, [joining]);
-      expect(clientState.activeCall.value, joining);
-      expect(clientState.watchedCalls.value, [joining]);
-      expect(clientState.outgoingCall.value, joining);
-      verifyNoReject();
-    });
-
-    test('accepted here: the echo of its own accept is not a leave', () async {
-      final call = ringingCall(CallStatus.incoming(acceptedByMe: true));
-
-      harness.coordinatorEvents.emit(accepted(call));
-      await pumpEventQueue();
-
-      expect(
-        harness.stateManager.callState.status,
-        isNot(isA<CallStatusDisconnected>()),
-      );
-      verifyNoReject();
-    });
+    expect(
+      harness.stateManager.callState.status,
+      isA<CallStatusIncoming>(),
+    );
+    verifyNoReject();
   });
 }

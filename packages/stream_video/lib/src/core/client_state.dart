@@ -54,6 +54,7 @@ abstract class ClientState {
   void removeWatchedCall(Call call);
 
   /// Removes the call from the list of active calls.
+  ///
   /// It won't `leave` the call, just removes it from the list. Another
   /// instance with the same cid stays active.
   Future<void> removeActiveCall(Call call);
@@ -225,8 +226,6 @@ class MutableClientState implements ClientState {
 
   @override
   Future<void> removeActiveCall(Call call) async {
-    // By instance, not by cid: a second [Call] for the same cid leaving must
-    // not drop the one that is joining.
     if (!allowMultipleActiveCalls && identical(activeCall.value, call)) {
       activeCall.value = null;
     }
@@ -242,8 +241,6 @@ class MutableClientState implements ClientState {
     ];
 
     // Resume next most recent call if using suspendExisting audio policy.
-    // Only when a call actually left: a call that was never active took no
-    // audio from the others.
     if (removed &&
         allowMultipleActiveCalls &&
         remaining.isNotEmpty &&
@@ -259,8 +256,6 @@ class MutableClientState implements ClientState {
 
   @override
   void setWatchedCall(Call call) {
-    // By instance, like the removals: each [Call] watched is tracked until it
-    // is itself removed, even when another one shares its cid.
     if (watchedCalls.value.any((it) => identical(it, call))) return;
 
     watchedCalls.value = [...watchedCalls.value, call];
