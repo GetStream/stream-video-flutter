@@ -98,7 +98,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                 self.endCall(self.data!)
             } else {
                 if let getArgs = args as? [String: Any] {
-                    self.data = CallData(args: getArgs)
+                    self.data = self.storedCallData(for: getArgs)
                     self.endCall(self.data!)
                 }
             }
@@ -151,7 +151,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                 self.connectedCall(self.data!)
             } else {
                 if let getArgs = args as? [String: Any] {
-                    self.data = CallData(args: getArgs)
+                    self.data = self.storedCallData(for: getArgs)
                     self.connectedCall(self.data!)
                 }
             }
@@ -332,6 +332,24 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         } else {
             self.callController.holdCall(call: call, onHold: onHold)
         }
+    }
+
+    /// Returns the options already stored for the call that `args` names.
+    ///
+    /// `callConnected` and `endCall` send only the call id. Building `CallData` from that resets
+    /// every option to its default, so `configureAudioSession: false` was lost and the plugin went
+    /// on to reconfigure the audio session WebRTC had set up. Full arguments are still used as given.
+    private func storedCallData(for args: [String: Any]) -> CallData {
+        guard args.keys.allSatisfy({ $0 == "id" }), let id = args["id"] as? String else {
+            return CallData(args: args)
+        }
+        if let data = self.data, data.uuid.lowercased() == id.lowercased() {
+            return data
+        }
+        if let uuid = UUID(uuidString: id), let call = self.callController.callWithUUID(uuid: uuid) {
+            return call.data
+        }
+        return CallData(args: args)
     }
 
     @objc public func endCall(_ data: CallData) {
