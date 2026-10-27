@@ -310,6 +310,10 @@ class LocalMediaController {
     }
 
     try {
+      // iOS: set the session before capture so WebRTC doesn't rebuild the
+      // audio engine.
+      if (CurrentPlatform.isIos) await _applyAudioOutputOption();
+
       final cameraFailed = failed(
         'camera',
         camera != null
@@ -364,6 +368,22 @@ class LocalMediaController {
       await setAudioInputDevice(_connectOptions.audioInputDevice!);
     }
 
+    if (!CurrentPlatform.isIos) {
+      await _applyAudioOutputOption();
+    } else if (_connectOptions.audioInputDevice != null &&
+        _connectOptions.audioOutputDevice != null) {
+      // Picking the input can change the route, which drops the speaker
+      // override. The session configuration is unchanged by now, so this only
+      // overrides the port again.
+      await setAudioOutputDevice(_connectOptions.audioOutputDevice!);
+    }
+
+    _logger.v(() => '[applyConnectOptions] finished');
+  }
+
+  /// Applies the connect options' audio output, or on iOS when none is set,
+  /// the audio session the call settings ask for.
+  Future<void> _applyAudioOutputOption() async {
     if (_connectOptions.audioOutputDevice != null) {
       await setAudioOutputDevice(_connectOptions.audioOutputDevice!);
     } else if (CurrentPlatform.isIos) {
@@ -389,8 +409,6 @@ class LocalMediaController {
         );
       }
     }
-
-    _logger.v(() => '[applyConnectOptions] finished');
   }
 
   Future<Result<None>> _applyCameraOption(

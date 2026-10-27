@@ -111,6 +111,7 @@
 
 ### 🐞 Fixed
 
+- On iOS, a call that defaults to the loudspeaker now starts on it, instead of switching to it after the microphone is already recording.
 - A fast reconnect no longer hangs when the network drops while it is reopening the SFU connection. The attempt fails after five seconds and the call rejoins, where before it stayed reconnecting until the operating system gave up on the connection.
 - The client reconnects after a network loss again, instead of the coordinator connection staying stuck closing and refusing every reconnect.
 - A participant who joins mid-call keeps their participant source, so the speaker, livestream and picture-in-picture layouts put an RTMP or SRT ingest that starts or reconnects during the call ahead of the host.

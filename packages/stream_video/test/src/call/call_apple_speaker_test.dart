@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/call/permissions/permissions_manager.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
@@ -113,7 +114,10 @@ void main() {
       }
     });
 
-    Call makeCall(AudioConfigurationPolicy policy) {
+    Call makeCall(
+      AudioConfigurationPolicy policy, {
+      PermissionsManager? permissionManager,
+    }) {
       return createTestCall(
         stateManager: CallStateNotifier(
           createTestCallState(
@@ -124,6 +128,7 @@ void main() {
         ),
         sessionFactory: setupMockSessionFactory(callSession: callSession),
         rtcMediaDeviceNotifier: deviceNotifier,
+        permissionManager: permissionManager,
       );
     }
 
@@ -179,6 +184,138 @@ void main() {
         ).called(1);
       },
     );
+
+    // Grants every permission and lets the microphone publish.
+    PermissionsManager publishingMicrophone() {
+      final permissionManager = MockPermissionsManager();
+      for (final permission in CallPermission.values) {
+        when(
+          () => permissionManager.hasPermission(permission),
+        ).thenReturn(true);
+      }
+      when(
+        () => callSession.setMicrophoneEnabled(
+          any(),
+          constraints: any(named: 'constraints'),
+          stopTrackOnMute: any(named: 'stopTrackOnMute'),
+        ),
+      ).thenAnswer((_) async => Result.success(MockRtcLocalTrack()));
+      return permissionManager;
+    }
+
+    void microphoneEnabled() => callSession.setMicrophoneEnabled(
+      true,
+      constraints: any(named: 'constraints'),
+      stopTrackOnMute: any(named: 'stopTrackOnMute'),
+    );
+
+    test(
+      'configures the audio session before the microphone captures',
+      () async {
+        const policy = AudioConfigurationPolicy.broadcaster();
+        final call = makeCall(
+          policy,
+          permissionManager: publishingMicrophone(),
+        );
+        // Cancels the stats send the published microphone schedules.
+        addTearDown(call.dispose);
+
+        final result = await call.join(
+          connectOptions: CallConnectOptions(
+            camera: TrackOption.disabled(),
+            microphone: TrackOption.enabled(),
+          ),
+        );
+        expect(result.isSuccess, isTrue);
+        // The connect options are applied unawaited, so let them settle.
+        await pumpEventQueue();
+
+        verifyInOrder([
+          () => rtcManager.setAppleAudioConfiguration(
+            policy: policy,
+            // Explicit, since headphones keep the speaker off.
+            // ignore: avoid_redundant_argument_values
+            speakerOn: false,
+          ),
+          microphoneEnabled,
+        ]);
+      },
+    );
+
+    group('with built-in devices only', () {
+      final speaker = TestDeviceScenarios.builtInDevicesOnly.firstWhere(
+        (d) => d.id == 'speaker',
+      );
+      final builtInMic = TestDeviceScenarios.builtInDevicesOnly.firstWhere(
+        (d) => d.kind == RtcMediaDeviceKind.audioInput,
+      );
+
+      setUp(() {
+        when(() => deviceNotifier.enumerateDevicesFor(any())).thenAnswer(
+          (_) async => Result.success(TestDeviceScenarios.builtInDevicesOnly),
+        );
+        when(
+          () => callSession.setAudioOutputDevice(any()),
+        ).thenAnswer((_) async => const Result.success(none));
+        when(
+          () => callSession.setAudioInputDevice(any()),
+        ).thenAnswer((_) async => const Result.success(none));
+      });
+
+      test('picks the loudspeaker before the microphone captures', () async {
+        final call = makeCall(
+          const AudioConfigurationPolicy.broadcaster(),
+          permissionManager: publishingMicrophone(),
+        );
+        addTearDown(call.dispose);
+
+        final result = await call.join(
+          connectOptions: CallConnectOptions(
+            camera: TrackOption.disabled(),
+            microphone: TrackOption.enabled(),
+            audioOutputDevice: speaker,
+          ),
+        );
+        expect(result.isSuccess, isTrue);
+        await pumpEventQueue();
+
+        verifyInOrder([
+          () => callSession.setAudioOutputDevice(speaker),
+          microphoneEnabled,
+        ]);
+        verifyNever(() => callSession.setAudioInputDevice(any()));
+      });
+
+      test(
+        'picks the loudspeaker again after an explicit microphone, which can '
+        'change the route',
+        () async {
+          final call = makeCall(
+            const AudioConfigurationPolicy.broadcaster(),
+            permissionManager: publishingMicrophone(),
+          );
+          addTearDown(call.dispose);
+
+          final result = await call.join(
+            connectOptions: CallConnectOptions(
+              camera: TrackOption.disabled(),
+              microphone: TrackOption.enabled(),
+              audioOutputDevice: speaker,
+              audioInputDevice: builtInMic,
+            ),
+          );
+          expect(result.isSuccess, isTrue);
+          await pumpEventQueue();
+
+          verifyInOrder([
+            () => callSession.setAudioOutputDevice(speaker),
+            microphoneEnabled,
+            () => callSession.setAudioInputDevice(builtInMic),
+            () => callSession.setAudioOutputDevice(speaker),
+          ]);
+        },
+      );
+    });
 
     test('a failure to configure the audio session is logged', () async {
       final logger = _CapturingLogger();
