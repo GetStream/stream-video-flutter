@@ -228,6 +228,9 @@
 - `CallAppBar` is laid out by `StreamToolbar` at the design system's 72 with `spacing.sm` edge padding, matching `CallControlBar`'s horizontal inset.
 - `CallAppBar.backgroundColor` colours a floating bar as well as a docked one.
 - `StreamCallDurationBadgeStyle.textStyle` merges onto the default rather than replacing it.
+- [Android] On Android 12 and above the system now enters picture-in-picture by itself when the user leaves the app during a call, with a smoother transition, and dialogs or permission prompts no longer trigger it.
+- [Android] `StreamCallContent` no longer builds its app bar and controls while in picture-in-picture, where the overlay covers them and the window is too small to lay them out. A custom `callAppBarWidgetBuilder` or `callControlsWidgetBuilder` is disposed on entering picture-in-picture and built again on leaving it, so any state it holds is lost.
+- [Android] The picture-in-picture overlay, and a custom `callPictureInPictureWidgetBuilder`, are built in the root overlay, so a route on an outer navigator is no longer drawn over them. They keep the call screen's themes, but no longer see other inherited widgets placed between the root navigator and the call screen, such as a `Provider`.
 
 ### 🐞 Fixed
 
@@ -289,6 +292,10 @@
 
 - The lobby no longer lists someone twice. `getOrCreate` returns a snapshot of the session while the event subscription is already live, so a join already reflected in that snapshot still arrives as a `ParticipantJoined` event — and the lobby appended it blindly. Participants are now upserted by session id, which leaves a genuine second session of the same user (a phone and a laptop) listed separately, as it should be. A join event for the local user is ignored, matching the snapshot, which always filtered them out.
 - The lobby no longer adds and drops people on another call's events.
+- [iOS] Picture-in-picture now opens in the video's aspect ratio and shows rotated video, such as the local camera, upright.
+- [iOS] A participant's video no longer stays black after returning from picture-in-picture.
+- [Android] The picture-in-picture window now takes the aspect ratio of the video it shows, within Android's 2.39:1 limit, and reshapes when that video's size or orientation changes. It used to be 9:16 or 16:9 depending on how the phone was held. It still falls back to that when the video's size isn't known yet or a custom `callPictureInPictureWidgetBuilder` is set.
+- [Android] The picture-in-picture window animates in from the tile of the participant it shows, instead of showing the app's icon until the app draws in the small window.
 
 ### ⚠️ Deprecated
 

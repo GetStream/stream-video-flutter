@@ -47,17 +47,18 @@ dependency_overrides:
       path: packages/stream_chat_flutter_core
       ref: 686a9980966872eee4b64abad2d5e8ffcdb8c29c
   # A git commit rather than a release: the published 0.5.0 predates
-  # CurrentPlatform.debugCurrentPlatformOverride, which the tests need.
+  # CurrentPlatform.debugCurrentPlatformOverride, which the tests need, and
+  # the socket close that no longer waits on a handshake still in flight.
   stream_core:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core
-      ref: f4d49e9db343b48d890247fc9bf142805804daf1
+      ref: 003840918ef0537a2c0dd0b0115a92caae79630e
   stream_core_flutter:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core_flutter
-      ref: 003840918ef0537a2c0dd0b0115a92caae79630e
+      ref: 958a8d30411ae49339a842c0672c03a7d064403c
   stream_webrtc_flutter:
     git:
       url: https://github.com/GetStream/webrtc-flutter.git
