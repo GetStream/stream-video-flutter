@@ -87,12 +87,13 @@
 - `Call.currentUser` is the user the call is being watched or joined by.
 - `sortParticipants` sorts a participant list the way the SDK's own layouts do: the criteria that hold whether or not a tile is being watched order everybody, while what a participant is owed for being off screen costs the screen a single tile — they trade places with the tile that has the least claim to one, and nothing else moves.
 - `byPriority` builds a participant comparator from a `ParticipantPriority`, and every sorting criterion now ships one: `dominantSpeakerPriority`, `speakingPriority`, `screenSharingPriority`, `publishingVideoPriority`, `publishingAudioPriority`, `byReactionTypePriority`, `byParticipantSourcePriority`, `byVideoIngressSourcePriority` and `byRolePriority`. `0` is the priority of a participant already on screen: above it brings an off-screen participant into view, below it leaves them out.
-- The caller of a ringing call now polls the ring state when `call.accepted` or `call.rejected` does not arrive. The WebSocket does not redeliver them, and a caller that missed one kept ringing until its timeout, then rejected a call the callee was already in. After 15 seconds without a ring event, the ring state is read every 5 seconds until the ring settles or times out. Tune it, or turn it off, with `StreamVideoOptions.ringStatePolling`.
+- The caller of a ringing call now polls the ring state when `call.accepted` or `call.rejected` does not arrive. The WebSocket does not redeliver them, and a caller that missed one kept ringing until its timeout, then rejected a call the callee was already in. After 9 seconds without a ring event, the ring state is read every 5 seconds until the ring settles or times out. Tune it, or turn it off, with `StreamVideoOptions.ringStatePolling`.
 - Added `RingingSnapshot`, which resolves a ringing flow for the caller as well as the callee. `CallMetadata.ringingStateFor` goes through it.
 - Added `RtcMediaDeviceNotifier.isAudioOutputSelectionSupported`, whether `Call.setAudioOutputDevice` can route audio on this platform, so a speaker picker can be hidden where it cannot.
 
 ### 🔄 Changed
 
+- A failed coordinator request's `StreamVideoException.message` now names the method, host and path, and a request the server never answered ends in a short reason such as `request timed out` or `connection failed` instead of the previous text.
 - Updated `stream_webrtc_flutter` to `^4.0.0`.
 - `Call`'s factories take a `CallHost`, the part of the client a call uses; `StreamVideo` implements it, so passing a `StreamVideo` still works.
 - `StreamVideo.dispose()` leaves and disposes the calls it tracks, and disconnects the user like `disconnect()` but keeps the push device registered.
@@ -110,6 +111,8 @@
 
 ### 🐞 Fixed
 
+- A fast reconnect no longer hangs when the network drops while it is reopening the SFU connection. The attempt fails after five seconds and the call rejoins, where before it stayed reconnecting until the operating system gave up on the connection.
+- The client reconnects after a network loss again, instead of the coordinator connection staying stuck closing and refusing every reconnect.
 - A participant who joins mid-call keeps their participant source, so the speaker, livestream and picture-in-picture layouts put an RTMP or SRT ingest that starts or reconnects during the call ahead of the host.
 - Remote audio on Safari and other WebKit browsers no longer goes silent when another participant joins.
 - Safari and other WebKit browsers always play remote audio on the system default output; `Call.checkIfAudioOutputChangeSupported` returns false there.
