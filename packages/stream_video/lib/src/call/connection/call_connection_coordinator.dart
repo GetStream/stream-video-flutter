@@ -1404,7 +1404,16 @@ class CallConnectionCoordinator {
           'isReconnectable': false,
         });
 
-        await leave(reason: DisconnectReason.ended());
+        await leave(
+          reason: DisconnectReason.failure(
+            StreamVideoException(
+              message:
+                  'SFU socket closed and cannot reconnect '
+                  '(closeCode: ${sfuEvent.reason.closeCode}, '
+                  'closeReason: ${sfuEvent.reason.closeReason})',
+            ),
+          ),
+        );
       }
     } else if (sfuEvent is SfuSocketFailed) {
       _call._logger.w(() => '[onSfuEvent] socket failed');
@@ -2271,7 +2280,7 @@ class CallConnectionCoordinator {
 
     final abortCode = switch (reason) {
       DisconnectReasonEnded() ||
-      DisconnectReasonCallEnded() => ClientEventStandardCode.backendLeave,
+      DisconnectReasonNativeCallEnded() => ClientEventStandardCode.backendLeave,
       // Reconnection gave up — treat as a device-offline
       DisconnectReasonReconnectionFailed() =>
         ClientEventStandardCode.networkOffline,
@@ -2429,12 +2438,9 @@ class CallConnectionCoordinator {
       DisconnectReasonReplaced _ => 'replaced by another call',
       DisconnectReasonReconnectionFailed _ => 'reconnection failed',
       DisconnectReasonLastParticipantLeft _ => 'last participant left',
-      DisconnectReasonCallEnded _ => 'call ended externally',
+      DisconnectReasonNativeCallEnded _ => 'call ended externally',
       DisconnectReasonEnded _ => 'call ended',
-      DisconnectReasonTimeout _ => 'timeout',
-      DisconnectReasonManuallyClosed _ => 'manually closed',
       DisconnectReasonBlocked _ => 'blocked',
-      _ => 'user is leaving the call',
     };
   }
 

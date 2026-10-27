@@ -106,26 +106,35 @@ void main() {
       );
     }
 
-    test('a non-reconnectable disconnect ends the call', () async {
-      final call = buildCall();
-      await call.join();
+    test(
+      'a non-reconnectable disconnect leaves the call as a failure',
+      () async {
+        final call = buildCall();
+        await call.join();
 
-      _emit(callSession, _disconnected(isReconnectable: false));
-      await pumpEventQueue();
+        _emit(callSession, _disconnected(isReconnectable: false));
+        await pumpEventQueue();
 
-      expect(
-        call.state.value.status,
-        isA<CallStatusDisconnected>(),
-        reason: 'it must not sit on a socket that will not come back',
-      );
-      verifyNever(
-        () => callSession.fastReconnect(
-          reconnectDetails: any(named: 'reconnectDetails'),
-          capabilities: any(named: 'capabilities'),
-          unifiedSessionId: any(named: 'unifiedSessionId'),
-        ),
-      );
-    });
+        expect(
+          call.state.value.status,
+          isA<CallStatusDisconnected>().having(
+            (status) => status.reason,
+            'reason',
+            isA<DisconnectReasonFailure>(),
+          ),
+          reason:
+              'it must not sit on a socket that will not come back, and the '
+              'call did not end',
+        );
+        verifyNever(
+          () => callSession.fastReconnect(
+            reconnectDetails: any(named: 'reconnectDetails'),
+            capabilities: any(named: 'capabilities'),
+            unifiedSessionId: any(named: 'unifiedSessionId'),
+          ),
+        );
+      },
+    );
 
     test(
       'a non-reconnectable failure reports the error it failed on',

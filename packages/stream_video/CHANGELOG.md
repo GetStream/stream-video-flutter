@@ -54,6 +54,8 @@
 - `StreamVideoExceptionWithCause.cause` is deprecated. Its runtime type is not part of this API - it is chosen by whatever mapped the failure — so matching on it compiles but can stop matching without warning, which is what happened to the change above. Read the failure through the accessors on `StreamVideoException` instead.
 - `StreamVideoException` (formerly `VideoError`) now implements `Exception` rather than `Error`. An `on Error catch` clause no longer matches it — these are runtime conditions to handle, not programming bugs. Catch `Exception`, or `StreamVideoException` directly.
 - `CallStatusReconnecting.attempt` now counts every attempt of a reconnect, fast and rejoin alike, starting at 1. It used to start at 0, stay there across fast attempts, and count only rejoins — reaching a different value twice within one rejoin.
+- `DisconnectReason` is `sealed`, so a `switch` over it must cover every subclass and an app cannot add its own. `DisconnectReason.timeout()` / `DisconnectReasonTimeout` and `DisconnectReasonManuallyClosed` are removed; the SDK never reported either.
+- An SFU socket that the server closes for good, with no call-ended event before it, now disconnects the call with `DisconnectReasonFailure` rather than `DisconnectReasonEnded`: the connection failed, the call did not end. UI that reacts to `DisconnectReasonEnded` no longer runs for it, and its join telemetry reports `CLIENT_ABORTED` rather than `BACKEND_LEAVE`. A call the backend ends still reports `DisconnectReasonEnded`, from the SFU's call-ended event that comes before the close.
 
 ### ⚠️ Deprecated
 
@@ -65,6 +67,7 @@
 - `StreamVideo.disposeAfterResolvingRinging` is deprecated in favour of `StreamVideoPushHandler.handleBackgroundMessage` from `stream_video_push_notification`. Use it to handle the whole background ringing lifecycle.
 - `VideoError` is renamed to `StreamVideoException`, and `VideoErrorWithCause` to `StreamVideoExceptionWithCause`. The old names remain as deprecated typedefs, so existing code still compiles; `dart fix --apply` migrates it.
 - `ifInvisibleBy` takes a `ParticipantPriority` — a priority for one participant, higher first — instead of a `Comparator`. Pass the priority of the same name: `ifInvisibleBy(dominantSpeakerPriority)` where you passed `ifInvisibleBy(dominantSpeaker)`.
+- `DisconnectReason.callEnded()` is renamed to `DisconnectReason.nativeCallEnded()`, and `DisconnectReasonCallEnded` to `DisconnectReasonNativeCallEnded`. Only the system call UI (CallKit, Android Telecom) ending the call reports it; a backend end reports `DisconnectReasonEnded`. The old names remain deprecated, and `dart fix --apply` migrates them.
 
 ### ✅ Added
 

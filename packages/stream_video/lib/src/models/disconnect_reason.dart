@@ -5,11 +5,10 @@ import '../call/call_reject_reason.dart';
 import '../errors/stream_video_exception.dart';
 import '../sfu/data/models/sfu_error.dart';
 
+/// Why a call disconnected, carried by `CallStatusDisconnected`.
 @immutable
-abstract class DisconnectReason extends Equatable {
+sealed class DisconnectReason extends Equatable {
   const DisconnectReason();
-
-  const factory DisconnectReason.timeout() = DisconnectReasonTimeout;
 
   const factory DisconnectReason.failure(
     StreamVideoException error,
@@ -34,11 +33,13 @@ abstract class DisconnectReason extends Equatable {
     return DisconnectReasonEnded();
   }
 
-  /// The call was ended externally (e.g. a backend `call.ended` event or
-  /// CallKit reporting the call ended) while the user was still connected.
-  factory DisconnectReason.callEnded() {
-    return DisconnectReasonCallEnded();
+  /// The system call UI ended the call: CallKit on iOS, Telecom on Android.
+  factory DisconnectReason.nativeCallEnded() {
+    return DisconnectReasonNativeCallEnded();
   }
+
+  @Deprecated('Use DisconnectReason.nativeCallEnded instead.')
+  factory DisconnectReason.callEnded() = DisconnectReason.nativeCallEnded;
 
   factory DisconnectReason.replaced() {
     return DisconnectReasonReplaced();
@@ -54,15 +55,6 @@ abstract class DisconnectReason extends Equatable {
 
   @override
   List<Object?> get props => [];
-}
-
-class DisconnectReasonTimeout extends DisconnectReason {
-  const DisconnectReasonTimeout();
-
-  @override
-  String toString() {
-    return 'Timeout';
-  }
 }
 
 class DisconnectReasonFailure extends DisconnectReason {
@@ -200,34 +192,22 @@ class DisconnectReasonReconnectionFailed extends DisconnectReason {
   }
 }
 
-class DisconnectReasonCallEnded extends DisconnectReason {
-  factory DisconnectReasonCallEnded() {
+/// The system call UI ended the call: CallKit on iOS, Telecom on Android.
+class DisconnectReasonNativeCallEnded extends DisconnectReason {
+  factory DisconnectReasonNativeCallEnded() {
     return _instance;
   }
 
-  const DisconnectReasonCallEnded._internal();
+  const DisconnectReasonNativeCallEnded._internal();
 
-  static const DisconnectReasonCallEnded _instance =
-      DisconnectReasonCallEnded._internal();
-
-  @override
-  String toString() {
-    return 'CallEnded';
-  }
-}
-
-class DisconnectReasonManuallyClosed extends DisconnectReason {
-  factory DisconnectReasonManuallyClosed() {
-    return _instance;
-  }
-
-  const DisconnectReasonManuallyClosed._internal();
-
-  static const DisconnectReasonManuallyClosed _instance =
-      DisconnectReasonManuallyClosed._internal();
+  static const DisconnectReasonNativeCallEnded _instance =
+      DisconnectReasonNativeCallEnded._internal();
 
   @override
   String toString() {
-    return 'ManuallyClosed';
+    return 'NativeCallEnded';
   }
 }
+
+@Deprecated('Use DisconnectReasonNativeCallEnded instead.')
+typedef DisconnectReasonCallEnded = DisconnectReasonNativeCallEnded;
