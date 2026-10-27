@@ -58,12 +58,13 @@ class ConnectionHarness {
     CallPreferences? preferences,
     CallStatus? status,
     RetryPolicy? retryPolicy,
+    bool isRingingFlow = false,
   }) {
     var callState = CallState(
       preferences: preferences ?? DefaultCallPreferences(),
       currentUserId: SampleCallData.defaultUserInfo.id,
       callCid: SampleCallData.defaultCid,
-    );
+    ).copyWith(isRingingFlow: isRingingFlow);
     if (status != null) callState = callState.copyWith(status: status);
     stateManager = CallStateNotifier(callState);
 

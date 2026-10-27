@@ -2489,7 +2489,7 @@ class CallConnectionCoordinator {
     } finally {
       _call._ringing.release();
       await _call._host.state.removeActiveCall(_call);
-      if (_call._host.state.outgoingCall.value?.callCid == _call.callCid) {
+      if (identical(_call._host.state.outgoingCall.value, _call)) {
         await _call._host.state.setOutgoingCall(null);
       }
 
