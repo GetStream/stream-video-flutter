@@ -140,7 +140,7 @@ void main() {
 
       final status = call.state.value.status as CallStatusDisconnected;
       expect(status.reason, isA<DisconnectReasonSfuError>());
-      expect(harness.reporter.aborts, [ClientEventStandardCode.clientAborted]);
+      expect(harness.reporter.aborts, [ClientEventStandardCode.sfuError]);
       verify(
         () => harness.session.leave(
           reason: any(named: 'reason', that: startsWith('sfu error: ')),

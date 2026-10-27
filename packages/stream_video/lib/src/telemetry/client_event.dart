@@ -135,8 +135,21 @@ class ClientEvent {
       if (failure != null) ...{
         'retry_failure_code': failure.code.wireValue,
         'retry_failure_reason': failure.reason,
+        if (failure.leaveInitiator != null)
+          'leave_initiator': failure.leaveInitiator!.wireValue,
+        if (failure.leaveReason != null)
+          'leave_reason': _truncate(failure.leaveReason!, _maxLeaveReasonRunes),
       },
       ...details.toJson(),
     };
+  }
+
+  /// The backend accepts at most this many characters of `leave_reason`.
+  static const _maxLeaveReasonRunes = 200;
+
+  static String _truncate(String value, int maxRunes) {
+    final runes = value.runes;
+    if (runes.length <= maxRunes) return value;
+    return String.fromCharCodes(runes.take(maxRunes));
   }
 }

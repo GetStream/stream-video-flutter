@@ -16,8 +16,13 @@ class RecordingClientEventReporter implements ClientEventReporter {
   /// Runs on every [reportJoinAttempt], after it is recorded.
   void Function()? onReportJoinAttempt;
 
-  /// Every abort code reported, in order.
-  final aborts = <ClientEventStandardCode>[];
+  /// The code of every abort reported, in order.
+  List<ClientEventStandardCode> get aborts => [
+    for (final failure in abortFailures) failure.code,
+  ];
+
+  /// Every abort reported, in order.
+  final abortFailures = <ClientEventFailure>[];
 
   /// The calls registered and not unregistered since.
   final registered = <String>{};
@@ -33,8 +38,8 @@ class RecordingClientEventReporter implements ClientEventReporter {
   final stageFailures = <ClientEventStandardCode>[];
 
   @override
-  void abort(StreamCallCid cid, ClientEventStandardCode code) {
-    aborts.add(code);
+  void abort(StreamCallCid cid, ClientEventFailure failure) {
+    abortFailures.add(failure);
   }
 
   @override
