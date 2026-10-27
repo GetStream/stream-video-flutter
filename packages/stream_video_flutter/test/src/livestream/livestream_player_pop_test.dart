@@ -70,7 +70,7 @@ void main() {
 
     when(() => call.state).thenAnswer((_) => state);
     when(
-      () => call.leave(),
+      () => call.leave(reason: any(named: 'reason')),
     ).thenAnswer((_) async => const Result.success(none));
 
     // The status stream is the one these tests drive; every other selector the
@@ -121,7 +121,11 @@ void main() {
 
     expect(find.text('above'), findsOneWidget);
     // Leaving the call itself is not deferred, only the route.
-    verify(() => call.leave()).called(1);
+    verify(
+      () => call.leave(
+        reason: const DisconnectReason.left(initiator: LeaveInitiator.app),
+      ),
+    ).called(1);
   });
 
   testWidgets('closes itself once it is the top route again', (tester) async {

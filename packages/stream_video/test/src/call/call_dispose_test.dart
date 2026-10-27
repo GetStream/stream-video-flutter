@@ -328,6 +328,17 @@ void main() {
       await call.dispose();
 
       verifyRejectCall('cancel');
+      expect(
+        call.state.value.status,
+        isA<CallStatusDisconnected>().having(
+          (status) => status.reason,
+          'reason',
+          const DisconnectReason.left(
+            initiator: LeaveInitiator.app,
+            message: 'call disposed',
+          ),
+        ),
+      );
     });
 
     test('that is outgoing and unanswered is cancelled by leave', () async {

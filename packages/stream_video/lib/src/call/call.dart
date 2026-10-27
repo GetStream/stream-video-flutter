@@ -853,8 +853,16 @@ class Call {
   Future<Result<None>> accept() => _ringing.accept();
 
   /// Rejects the incoming call, then leaves it.
-  Future<Result<None>> reject({CallRejectReason? reason}) =>
-      _ringing.reject(reason: reason);
+  ///
+  /// - [reason]: optional reason for rejecting the call
+  /// - [initiator]: what made this user reject, reported with the join
+  ///   stages the leave aborts. Defaults to what [reason] implies, for
+  ///   example [LeaveInitiator.sdkError] for a ring timeout and
+  ///   [LeaveInitiator.user] for a decline.
+  Future<Result<None>> reject({
+    CallRejectReason? reason,
+    LeaveInitiator? initiator,
+  }) => _ringing.reject(reason: reason, initiator: initiator);
 
   /// Ends the call for all participants.
   Future<Result<None>> end({String? reason}) {
@@ -943,7 +951,10 @@ class Call {
   /// Leaving an outgoing call this user created while it still rings, with
   /// nobody accepted or joined, cancels the ring for the callees.
   ///
-  /// - [reason]: optional reason for leaving the call
+  /// - [reason]: why the call leaves. Defaults to
+  ///   [DisconnectReason.left] with [LeaveInitiator.unknown]; pass
+  ///   `DisconnectReason.left(initiator: LeaveInitiator.user)` for a leave
+  ///   the user asked for, and a `message` to report why.
   Future<Result<None>> leave({DisconnectReason? reason}) {
     return _connection.leave(reason: reason);
   }

@@ -207,6 +207,37 @@ void main() {
             code: 'call.rejected:ring: everyone rejected',
           ),
           (
+            name: 'a leave the user asked for',
+            reason: const DisconnectReason.left(initiator: LeaveInitiator.user),
+            message: 'user is leaving the call',
+            abortCode: ClientEventStandardCode.clientAborted,
+            initiator: LeaveInitiator.user,
+            code: 'left',
+          ),
+          (
+            name: 'a leave the app gave a reason for',
+            reason: const DisconnectReason.left(
+              initiator: LeaveInitiator.app,
+              message: 'logged out',
+            ),
+            message: 'logged out',
+            abortCode: ClientEventStandardCode.clientAborted,
+            initiator: LeaveInitiator.app,
+            code: 'logged out',
+          ),
+          (
+            name: 'a native decline',
+            reason: DisconnectReason.rejected(
+              byUserId: currentUserId,
+              reason: CallRejectReason.decline(),
+              initiator: LeaveInitiator.callkit,
+            ),
+            message: 'rejected: decline',
+            abortCode: ClientEventStandardCode.clientAborted,
+            initiator: LeaveInitiator.callkit,
+            code: 'call.rejected:decline',
+          ),
+          (
             name: 'cancelled',
             reason: const DisconnectReason.cancelled(byUserId: 'caller'),
             message: 'cancelled: caller',
@@ -300,6 +331,29 @@ void main() {
       ).called(1);
     });
 
+    test('dispose reports the app', () async {
+      final call = harness.buildCall();
+      await call.join();
+
+      await call.dispose();
+
+      verify(() => harness.session.leave(reason: 'call disposed')).called(1);
+      final failure = harness.reporter.abortFailures.single;
+      expect(failure.leaveInitiator, LeaveInitiator.app);
+      expect(failure.leaveReason, 'call disposed');
+      expect(
+        call.state.value.status,
+        isA<CallStatusDisconnected>().having(
+          (status) => status.reason,
+          'reason',
+          const DisconnectReason.left(
+            initiator: LeaveInitiator.app,
+            message: 'call disposed',
+          ),
+        ),
+      );
+    });
+
     test('a leave without a reason reports unknown', () async {
       final call = harness.buildCall();
       await call.join();
@@ -311,6 +365,14 @@ void main() {
       expect(failure.reason, 'user is leaving the call');
       expect(failure.leaveInitiator, LeaveInitiator.unknown);
       expect(failure.leaveReason, 'left');
+      expect(
+        call.state.value.status,
+        isA<CallStatusDisconnected>().having(
+          (status) => status.reason,
+          'reason',
+          const DisconnectReason.left(),
+        ),
+      );
     });
 
     test('a failed SFU join tells the SFU about the failure', () async {

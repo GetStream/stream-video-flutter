@@ -18,10 +18,8 @@ class LeaveAttribution {
   });
 
   /// The attribution of a leave for [reason], by the user [currentUserId].
-  ///
-  /// A `null` [reason] is a leave nobody gave a reason for.
   factory LeaveAttribution.of(
-    DisconnectReason? reason, {
+    DisconnectReason reason, {
     required String currentUserId,
   }) {
     final initiator = _initiator(reason, currentUserId);
@@ -43,7 +41,7 @@ class LeaveAttribution {
   final LeaveInitiator initiator;
 
   /// A short, stable identifier of why the call left, sent as
-  /// `leave_reason`.
+  /// `leave_reason`, or the app's own words for a leave it gave them for.
   final String code;
 
   /// Why the call left, in words: the reason the SFU is told and the
@@ -62,19 +60,20 @@ class LeaveAttribution {
   );
 
   static LeaveInitiator _initiator(
-    DisconnectReason? reason,
+    DisconnectReason reason,
     String currentUserId,
   ) {
     return switch (reason) {
-      null => LeaveInitiator.unknown,
+      DisconnectReasonLeft(:final initiator) => initiator,
       DisconnectReasonEnded() ||
       DisconnectReasonCancelled() ||
       DisconnectReasonBlocked() => LeaveInitiator.remoteEvent,
       DisconnectReasonNativeCallEnded() => LeaveInitiator.callkit,
-      final DisconnectReasonRejected rejected => _rejectInitiator(
-        rejected,
-        currentUserId,
-      ),
+      final DisconnectReasonRejected rejected =>
+        rejected.initiator ??
+            (rejected.byUserId == currentUserId
+                ? rejectInitiator(rejected.reason)
+                : LeaveInitiator.remoteEvent),
       DisconnectReasonReplaced() ||
       DisconnectReasonLastParticipantLeft() => LeaveInitiator.app,
       DisconnectReasonReconnectionFailed() ||
@@ -83,16 +82,12 @@ class LeaveAttribution {
     };
   }
 
-  // A reject by someone else, or one that mirrors a ring resolved elsewhere,
-  // came from the backend. One this user sent is theirs, unless the SDK sent
-  // it for them.
-  static LeaveInitiator _rejectInitiator(
-    DisconnectReasonRejected rejected,
-    String currentUserId,
-  ) {
-    if (rejected.byUserId != currentUserId) return LeaveInitiator.remoteEvent;
-
-    final reason = rejected.reason;
+  /// What made the current user reject for [reason], when the reject does
+  /// not say.
+  ///
+  /// One that mirrors a ring resolved elsewhere came from the backend. Any
+  /// other is the user's, unless the SDK sent it for them.
+  static LeaveInitiator rejectInitiator(CallRejectReason? reason) {
     if (reason == CallRejectReason.timeout()) return LeaveInitiator.sdkError;
     if (reason == CallRejectReason.callEndedLocally()) {
       return LeaveInitiator.app;
@@ -106,9 +101,9 @@ class LeaveAttribution {
     return LeaveInitiator.user;
   }
 
-  static String _code(DisconnectReason? reason) {
+  static String _code(DisconnectReason reason) {
     return switch (reason) {
-      null => 'left',
+      DisconnectReasonLeft(:final message) => message ?? 'left',
       DisconnectReasonEnded() => 'call.ended',
       DisconnectReasonNativeCallEnded() => 'native.call_ended',
       DisconnectReasonRejected(reason: final rejectReason?) =>
@@ -124,9 +119,10 @@ class LeaveAttribution {
     };
   }
 
-  static String _message(DisconnectReason? reason) {
+  static String _message(DisconnectReason reason) {
     return switch (reason) {
-      null => 'user is leaving the call',
+      DisconnectReasonLeft(:final message) =>
+        message ?? 'user is leaving the call',
       DisconnectReasonEnded() => 'call ended',
       DisconnectReasonNativeCallEnded() => 'call ended externally',
       DisconnectReasonRejected(:final reason) =>

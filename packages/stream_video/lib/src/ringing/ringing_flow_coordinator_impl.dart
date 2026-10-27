@@ -23,6 +23,7 @@ import '../models/call_received_data.dart';
 import '../models/call_ringing_data.dart';
 import '../models/call_status.dart';
 import '../models/disconnect_reason.dart';
+import '../models/leave_initiator.dart';
 import '../models/stream_video_event.dart';
 import '../push_notification/push_notification_manager.dart';
 import '../stream_video.dart' show StreamVideoOptions;
@@ -207,7 +208,10 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
   ) async {
     if (outgoingCall != null) {
       _logger.i(() => '[accept] canceling outgoing call: $outgoingCall');
-      await outgoingCall.reject(reason: CallRejectReason.cancel());
+      await outgoingCall.reject(
+        reason: CallRejectReason.cancel(),
+        initiator: LeaveInitiator.app,
+      );
       await _state.setOutgoingCall(null);
     }
 
@@ -715,6 +719,7 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
 
     final result = await callToReject.reject(
       reason: CallRejectReason.decline(),
+      initiator: LeaveInitiator.callkit,
     );
 
     if (result is Failure) {
@@ -758,6 +763,7 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
       if (status is CallStatusIncoming && !status.acceptedByMe) {
         final result = await incomingCall?.reject(
           reason: CallRejectReason.callEnded(),
+          initiator: LeaveInitiator.callkit,
         );
         if (result is Failure) {
           _logger.d(

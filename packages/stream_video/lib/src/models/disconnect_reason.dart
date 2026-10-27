@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import '../call/call_reject_reason.dart';
 import '../errors/stream_video_exception.dart';
 import '../sfu/data/models/sfu_error.dart';
+import 'leave_initiator.dart';
 
 /// Why a call disconnected, carried by `CallStatusDisconnected`.
 @immutable
@@ -18,9 +19,17 @@ sealed class DisconnectReason extends Equatable {
     SfuError error,
   ) = DisconnectReasonSfuError;
 
+  /// This side left the call, as [initiator] says, for the reason in
+  /// [message], if one was given.
+  const factory DisconnectReason.left({
+    LeaveInitiator initiator,
+    String? message,
+  }) = DisconnectReasonLeft;
+
   const factory DisconnectReason.rejected({
     required String byUserId,
     CallRejectReason? reason,
+    LeaveInitiator? initiator,
   }) = DisconnectReasonRejected;
 
   const factory DisconnectReason.blocked() = DisconnectReasonBlocked;
@@ -85,21 +94,52 @@ final class DisconnectReasonSfuError extends DisconnectReason {
   }
 }
 
+/// This side left the call: through `Call.leave`, or for the SDK or the app
+/// on their own.
+final class DisconnectReasonLeft extends DisconnectReason {
+  const DisconnectReasonLeft({
+    this.initiator = LeaveInitiator.unknown,
+    this.message,
+  });
+
+  /// What made the call leave.
+  final LeaveInitiator initiator;
+
+  /// Why the call left, in words, if a reason was given.
+  ///
+  /// Sent to the SFU and reported with the join stages the leave aborts.
+  final String? message;
+
+  @override
+  List<Object?> get props => [initiator, message];
+
+  @override
+  String toString() {
+    return 'Left{initiator: ${initiator.name}, message: $message}';
+  }
+}
+
 final class DisconnectReasonRejected extends DisconnectReason {
   const DisconnectReasonRejected({
     required this.byUserId,
     this.reason,
+    this.initiator,
   });
 
   final String byUserId;
   final CallRejectReason? reason;
 
+  /// What made this user reject, when the reject's [reason] does not say.
+  ///
+  /// `null` works it out from [byUserId] and [reason].
+  final LeaveInitiator? initiator;
+
   @override
-  List<Object?> get props => [byUserId, reason];
+  List<Object?> get props => [byUserId, reason, initiator];
 
   @override
   String toString() {
-    return 'Rejected{byUserId: $byUserId}';
+    return 'Rejected{byUserId: $byUserId, reason: $reason}';
   }
 }
 

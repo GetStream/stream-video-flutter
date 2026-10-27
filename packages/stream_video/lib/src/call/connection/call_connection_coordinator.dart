@@ -2156,8 +2156,14 @@ class CallConnectionCoordinator {
   }
 
   Future<Result<None>> leave({DisconnectReason? reason}) {
-    return _leave(reason: reason);
+    return _leave(reason: reason ?? const DisconnectReason.left());
   }
+
+  /// The reason a call leaves with when the app disposes it.
+  static const _disposed = DisconnectReason.left(
+    initiator: LeaveInitiator.app,
+    message: 'call disposed',
+  );
 
   /// Leaves the call unless it is left already, waits for a leave in progress
   /// to finish, then closes [_phase].
@@ -2166,11 +2172,13 @@ class CallConnectionCoordinator {
   /// instance holds, so a live call with the same cid is not touched.
   Future<void> dispose() async {
     if (_phase.value is ConnectionIdle) {
-      _setPhase(const ConnectionDisconnected(null));
+      _setPhase(const ConnectionDisconnected(_disposed));
       await _releaseUnjoined();
     } else {
       try {
-        if (!_isLeftOrLeaving) await leave();
+        if (!_isLeftOrLeaving) {
+          await leave(reason: _disposed);
+        }
       } catch (e, stk) {
         _call._logger.e(() => '[dispose] leave failed: $e\n$stk');
       }
@@ -2224,7 +2232,7 @@ class CallConnectionCoordinator {
     final status = _call.state.value.status;
     if (status is CallStatusIncoming || status is CallStatusOutgoing) {
       await _cancelUnansweredRing();
-      _call._stateManager.lifecycleCallDisconnected();
+      _call._stateManager.lifecycleCallDisconnected(reason: _disposed);
       final joinedElsewhere = client.state.activeCalls.value.any(
         (call) => call.callCid == _call.callCid,
       );
@@ -2273,7 +2281,7 @@ class CallConnectionCoordinator {
   /// written into the state from elsewhere, so the status is already
   /// disconnected.
   Future<Result<None>> _leave({
-    DisconnectReason? reason,
+    required DisconnectReason reason,
     bool remote = false,
   }) async {
     final attribution = _leaveAttribution(reason);
@@ -2420,7 +2428,7 @@ class CallConnectionCoordinator {
     _sfuStatsReporter = null;
   }
 
-  LeaveAttribution _leaveAttribution(DisconnectReason? reason) {
+  LeaveAttribution _leaveAttribution(DisconnectReason reason) {
     return LeaveAttribution.of(
       reason,
       currentUserId: _call.state.value.currentUserId,
