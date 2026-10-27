@@ -84,7 +84,7 @@ melos:
         stream_core: ^0.5.0
         stream_core_flutter: ^0.5.1
         stream_chat_flutter: ^10.0.0
-        stream_webrtc_flutter: ^4.0.0
+        stream_webrtc_flutter: ^4.0.1
         stream_video: ^2.0.0-alpha
         stream_video_filters: ^2.0.0-alpha
         stream_video_flutter: ^2.0.0-alpha
