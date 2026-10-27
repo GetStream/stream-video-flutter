@@ -96,9 +96,11 @@
 - Added `RtcMediaDeviceNotifier.isAudioOutputSelectionSupported`, whether `Call.setAudioOutputDevice` can route audio on this platform, so a speaker picker can be hidden where it cannot.
 - Added `LeaveInitiator`, who or what made a call leave.
 - `DisconnectReason.left({initiator, message})` says who made a call leave and why; pass it to `Call.leave`. `Call.reject` takes an `initiator` too. A `leave()` without a reason reports `LeaveInitiator.unknown`; `StreamLeaveCallButton` reports `user`.
+- `Call.end` takes an `initiator`, and the call disconnects with a `DisconnectReasonEnded` that carries it and the `reason` given, so an end this side made can be told apart from one on the backend, whose `initiator` is `null`. `DisconnectReason.ended` takes both as optional arguments.
 
 ### 🔄 Changed
 
+- `DisconnectReasonEnded` now carries values, so detect an ended call with `is DisconnectReasonEnded` rather than `== DisconnectReason.ended()`: after `Call.end` the reason carries its initiator and is not equal to a bare `DisconnectReason.ended()`.
 - A leave for a failure or an SFU error tells the SFU the error's message, such as `failure: <message>` or `sfu error: <code>: <message>`, rather than the whole error with its stack trace.
 - A failed coordinator request's `StreamVideoException.message` now names the method, host and path, and a request the server never answered ends in a short reason such as `request timed out` or `connection failed` instead of the previous text.
 - Updated `stream_webrtc_flutter` to `^4.0.0`.

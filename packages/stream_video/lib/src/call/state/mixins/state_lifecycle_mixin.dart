@@ -47,12 +47,10 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     );
   }
 
-  void lifecycleCallEnded() {
-    _logWithState('lifecycleCallEnded');
+  void lifecycleCallEnded({required DisconnectReasonEnded reason}) {
+    _logWithState('lifecycleCallEnded', 'reason: $reason');
     state = state.copyWith(
-      status: CallStatus.disconnected(
-        DisconnectReason.ended(),
-      ),
+      status: CallStatus.disconnected(reason),
       sessionId: '',
     );
   }

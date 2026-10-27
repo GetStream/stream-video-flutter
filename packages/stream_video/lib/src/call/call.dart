@@ -864,8 +864,19 @@ class Call {
   }) => _ringing.reject(reason: reason, initiator: initiator);
 
   /// Ends the call for all participants.
-  Future<Result<None>> end({String? reason}) {
-    return _connection.end(reason: reason);
+  ///
+  /// The call disconnects with a [DisconnectReasonEnded] that carries
+  /// [initiator] and [reason], which tells it apart from a call ended
+  /// elsewhere.
+  ///
+  /// - [reason]: why the call ends, told to the SFU
+  /// - [initiator]: what made the call end. Pass [LeaveInitiator.user] for
+  ///   an end the user asked for.
+  Future<Result<None>> end({
+    String? reason,
+    LeaveInitiator initiator = LeaveInitiator.unknown,
+  }) {
+    return _connection.end(reason: reason, initiator: initiator);
   }
 
   /// The end-to-end encryption manager attached via [setE2EEManager].

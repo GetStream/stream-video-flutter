@@ -65,7 +65,8 @@ class LeaveAttribution {
   ) {
     return switch (reason) {
       DisconnectReasonLeft(:final initiator) => initiator,
-      DisconnectReasonEnded() ||
+      DisconnectReasonEnded(:final initiator) =>
+        initiator ?? LeaveInitiator.remoteEvent,
       DisconnectReasonCancelled() ||
       DisconnectReasonBlocked() => LeaveInitiator.remoteEvent,
       DisconnectReasonNativeCallEnded() => LeaveInitiator.callkit,
@@ -123,7 +124,10 @@ class LeaveAttribution {
     return switch (reason) {
       DisconnectReasonLeft(:final message) =>
         message ?? 'user is leaving the call',
-      DisconnectReasonEnded() => 'call ended',
+      DisconnectReasonEnded(initiator: null, :final message) =>
+        message ?? 'call ended',
+      DisconnectReasonEnded(:final message) =>
+        message ?? 'user is ending the call',
       DisconnectReasonNativeCallEnded() => 'call ended externally',
       DisconnectReasonRejected(:final reason) =>
         'rejected: ${reason?.value ?? 'unspecified'}',

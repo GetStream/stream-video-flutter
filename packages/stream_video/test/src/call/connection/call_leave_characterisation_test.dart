@@ -238,6 +238,25 @@ void main() {
             code: 'call.rejected:decline',
           ),
           (
+            name: 'an end this side made',
+            reason: DisconnectReason.ended(initiator: LeaveInitiator.user),
+            message: 'user is ending the call',
+            abortCode: ClientEventStandardCode.clientAborted,
+            initiator: LeaveInitiator.user,
+            code: 'call.ended',
+          ),
+          (
+            name: 'an end this side gave a reason for',
+            reason: DisconnectReason.ended(
+              initiator: LeaveInitiator.app,
+              message: 'meeting over',
+            ),
+            message: 'meeting over',
+            abortCode: ClientEventStandardCode.clientAborted,
+            initiator: LeaveInitiator.app,
+            code: 'call.ended',
+          ),
+          (
             name: 'cancelled',
             reason: const DisconnectReason.cancelled(byUserId: 'caller'),
             message: 'cancelled: caller',
@@ -523,6 +542,34 @@ void main() {
       verify(
         () => harness.session.leave(reason: 'user is ending the call'),
       ).called(1);
+    });
+
+    test('carries who ended the call and why', () async {
+      final call = harness.buildCall();
+      await call.join();
+
+      await call.end(reason: 'meeting over', initiator: LeaveInitiator.user);
+
+      expect(
+        (call.state.value.status as CallStatusDisconnected).reason,
+        DisconnectReason.ended(
+          initiator: LeaveInitiator.user,
+          message: 'meeting over',
+        ),
+      );
+      verify(() => harness.session.leave(reason: 'meeting over')).called(1);
+    });
+
+    test('without an initiator reports unknown, not a backend end', () async {
+      final call = harness.buildCall();
+      await call.join();
+
+      await call.end();
+
+      expect(
+        (call.state.value.status as CallStatusDisconnected).reason,
+        DisconnectReason.ended(initiator: LeaveInitiator.unknown),
+      );
     });
 
     test(

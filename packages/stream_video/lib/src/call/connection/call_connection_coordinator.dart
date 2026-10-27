@@ -2316,7 +2316,10 @@ class CallConnectionCoordinator {
     return const Result.success(none);
   }
 
-  Future<Result<None>> end({String? reason}) async {
+  Future<Result<None>> end({
+    String? reason,
+    LeaveInitiator initiator = LeaveInitiator.unknown,
+  }) async {
     _call._logger.d(() => '[end] status: ${_call.state.value.status}');
 
     if (_call.state.value.status is! CallStatusActive) {
@@ -2326,17 +2329,21 @@ class CallConnectionCoordinator {
       return failureWithError('invalid status: ${_call.state.value.status}');
     }
 
+    final endReason = DisconnectReasonEnded(
+      initiator: initiator,
+      message: reason,
+    );
     final bool didDisconnect;
     try {
       didDisconnect = await _disconnect(
-        sfuLeaveReason: reason ?? 'user is ending the call',
+        sfuLeaveReason: _leaveAttribution(endReason).message,
       );
     } catch (_) {
       // The teardown failed here, but the call still ends for everyone.
       try {
         await _call._permissionsManager.endCall();
       } finally {
-        _settleDisconnected(DisconnectReason.ended());
+        _settleDisconnected(endReason);
       }
       rethrow;
     }
@@ -2353,8 +2360,8 @@ class CallConnectionCoordinator {
     try {
       result = await _call._permissionsManager.endCall();
     } finally {
-      _setPhase(ConnectionDisconnected(DisconnectReason.ended()));
-      _call._stateManager.lifecycleCallEnded();
+      _setPhase(ConnectionDisconnected(endReason));
+      _call._stateManager.lifecycleCallEnded(reason: endReason);
     }
 
     _call._logger.v(() => '[end] completed: $result');
