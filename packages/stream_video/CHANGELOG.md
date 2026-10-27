@@ -108,9 +108,12 @@
   - A caller that is the only member keeps ringing until its timeout, instead of hanging up on the first rejection.
   - A caller whose callee accepted keeps the call, even if that callee also shows up as having rejected.
 - An incoming ring is now dismissed when the caller cancels, even if another callee has already accepted. `CallMetadata.ringingStateFor` and `StreamVideo.ringing.getCallRingingState` report it as rejected rather than ringing.
+- `ClientState.removeActiveCall` removes only the `Call` it is given. Another `Call` instance for the same call stays active and watched. `ClientState.watchedCalls` likewise tracks each instance, so two `Call`s for the same call can both be in it.
 
 ### 🐞 Fixed
 
+- A ring the current user accepted or rejected on another device, or through another `Call` for the same call, now ends here without sending a reject. That reject could end the call on the device that was joining it.
+- `Call.accept()` succeeds when the server applied the accept even though its response failed, such as on a timeout, instead of reverting it and then ending the call when the accept came back from the server.
 - A participant who joins mid-call keeps their participant source, so the speaker, livestream and picture-in-picture layouts put an RTMP or SRT ingest that starts or reconnects during the call ahead of the host.
 - Remote audio on Safari and other WebKit browsers no longer goes silent when another participant joins.
 - Safari and other WebKit browsers always play remote audio on the system default output; `Call.checkIfAudioOutputChangeSupported` returns false there.
