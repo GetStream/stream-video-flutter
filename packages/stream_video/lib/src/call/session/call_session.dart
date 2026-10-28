@@ -83,15 +83,18 @@ class CallSession extends Disposable {
     this.e2eeManager,
     this.joinResponseTimeout = const Duration(seconds: 5),
     this.fastReconnectJoinResponseTimeout = const Duration(seconds: 15),
+    SfuClient? sfuClient,
   }) : _tracer = tracer,
        _host = host,
-       sfuClient = SfuClient(
-         baseUrl: config.sfuUrl,
-         sfuToken: config.sfuToken,
-         sessionSeq: sessionSeq,
-         tracer: tracer,
-         retryPolicy: retryPolicy,
-       ),
+       sfuClient =
+           sfuClient ??
+           SfuClient(
+             baseUrl: config.sfuUrl,
+             sfuToken: config.sfuToken,
+             sessionSeq: sessionSeq,
+             tracer: tracer,
+             retryPolicy: retryPolicy,
+           ),
        sfuWS = SfuWebSocket(
          sessionSeq: sessionSeq,
          sfuUrl: config.sfuUrl,
@@ -822,6 +825,10 @@ class CallSession extends Disposable {
     return rtcManager?.getTrack(trackId)?.trackType;
   }
 
+  /// Routes [event] through the SFU event handling. Tests only.
+  @visibleForTesting
+  Future<void> debugHandleSfuEvent(SfuEvent event) => _onSfuEvent(event);
+
   Future<void> _onSfuEvent(SfuEvent event) async {
     _logger.log(event.logPriority, () => '[onSfuEvent] event: $event');
 
@@ -1035,11 +1042,19 @@ class CallSession extends Disposable {
       return;
     }
 
+    // The session can leave or close while the answer is created; the SFU no
+    // longer expects one then.
+    if (_isLeavingOrClosed) {
+      _logger.w(() => '[onSubscriberOffer] dropped (session left mid-offer)');
+      return;
+    }
+
     final result = await sfuClient.sendAnswer(
       sfu.SendAnswerRequest(
         sdp: answerSdp,
         sessionId: sessionId,
         peerType: sfu_models.PeerType.PEER_TYPE_SUBSCRIBER,
+        negotiationId: event.negotiationId,
       ),
     );
     _logger.v(() => '[onSubscriberOffer] result: $result');

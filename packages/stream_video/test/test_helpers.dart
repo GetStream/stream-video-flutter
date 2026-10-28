@@ -8,6 +8,7 @@ import 'package:stream_video/src/call/stats/tracer.dart';
 import 'package:stream_video/src/core/client_state.dart';
 import 'package:stream_video/src/sfu/sfu_client.dart';
 import 'package:stream_video/src/telemetry/client_event_reporter.dart';
+import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/sdp/editor/sdp_editor.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -59,6 +60,9 @@ class MockTracer extends Mock implements Tracer {}
 class MockCallSession extends Mock implements CallSession {}
 
 class MockSfuClient extends Mock implements SfuClient {}
+
+// ignore: missing_override_of_must_be_overridden
+class MockRtcManager extends Mock implements RtcManager {}
 
 class MockClientState extends Mock implements ClientState {}
 

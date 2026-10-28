@@ -59,13 +59,20 @@ class SfuJoinResponseEvent extends SfuEvent {
 
 @internal
 class SfuSubscriberOfferEvent extends SfuEvent {
-  const SfuSubscriberOfferEvent({required this.sdp, required this.iceRestart});
+  const SfuSubscriberOfferEvent({
+    required this.sdp,
+    required this.iceRestart,
+    required this.negotiationId,
+  });
 
   final String sdp;
   final bool iceRestart;
 
+  /// The id of this offer's negotiation, echoed back in the answer.
+  final int negotiationId;
+
   @override
-  List<Object> get props => [iceRestart, sdp];
+  List<Object> get props => [iceRestart, sdp, negotiationId];
 }
 
 @internal
