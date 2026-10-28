@@ -195,11 +195,7 @@ class StreamCallKitCallController: NSObject {
     static let callsChangedNotification = Notification.Name("CallsChangedNotification")
     var callsChangedHandler: (() -> Void)?
 
-    /// The id to report to Dart for `uuid`: the string the call was started or shown with.
-    ///
-    /// `UUID.uuidString` is uppercase, while Dart passes lowercase uuids, so events built from it
-    /// would not match the call's other events. The tracked id is only used when it names the same
-    /// call, since a start action can pick up another call's data.
+    /// The id the call was started or shown with, or the lowercased uuid if this plugin does not track that call.
     func reportedId(for uuid: UUID) -> String {
         let fallback = uuid.uuidString.lowercased()
         guard let id = self.callWithUUID(uuid: uuid)?.data.uuid, id.lowercased() == fallback else {
