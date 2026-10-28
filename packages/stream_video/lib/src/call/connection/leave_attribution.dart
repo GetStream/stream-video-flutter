@@ -32,7 +32,6 @@ class LeaveAttribution {
       abortCode: switch (reason) {
         DisconnectReasonReconnectionFailed() =>
           ClientEventStandardCode.networkOffline,
-        DisconnectReasonSfuError() => ClientEventStandardCode.sfuError,
         _ when initiator == LeaveInitiator.remoteEvent =>
           ClientEventStandardCode.backendLeave,
         _ => ClientEventStandardCode.clientAborted,
@@ -44,8 +43,7 @@ class LeaveAttribution {
   final LeaveInitiator initiator;
 
   /// A short, stable identifier of why the call left, sent as
-  /// `leave_reason`. The same as the iOS SDK's where the two have the same
-  /// leave.
+  /// `leave_reason`.
   final String code;
 
   /// Why the call left, in words: the reason the SFU is told and the
@@ -85,9 +83,9 @@ class LeaveAttribution {
     };
   }
 
-  /// A reject by someone else, or one that mirrors a ring resolved
-  /// elsewhere, came from the backend. One this user sent is theirs, unless
-  /// the SDK sent it for them.
+  // A reject by someone else, or one that mirrors a ring resolved elsewhere,
+  // came from the backend. One this user sent is theirs, unless the SDK sent
+  // it for them.
   static LeaveInitiator _rejectInitiator(
     DisconnectReasonRejected rejected,
     String currentUserId,
@@ -117,9 +115,9 @@ class LeaveAttribution {
         'call.rejected:${rejectReason.value}',
       DisconnectReasonRejected() => 'call.rejected',
       DisconnectReasonCancelled() => 'ring.cancelled',
-      DisconnectReasonBlocked() => 'call.blocked_user',
-      DisconnectReasonReplaced() => 'active_call_replaced',
-      DisconnectReasonLastParticipantLeft() => 'auto-leave',
+      DisconnectReasonBlocked() => 'call.blocked',
+      DisconnectReasonReplaced() => 'call.replaced',
+      DisconnectReasonLastParticipantLeft() => 'call.last_participant_left',
       DisconnectReasonReconnectionFailed() => 'reconnection_failed',
       DisconnectReasonFailure() => 'error',
       DisconnectReasonSfuError(:final error) => 'sfu_error:${error.code.name}',

@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_call_ended_reason.dart';
 import 'package:stream_video/src/telemetry/client_event_types.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -218,7 +220,7 @@ void main() {
             message: 'blocked',
             abortCode: ClientEventStandardCode.backendLeave,
             initiator: LeaveInitiator.remoteEvent,
-            code: 'call.blocked_user',
+            code: 'call.blocked',
           ),
           (
             name: 'replaced',
@@ -226,7 +228,7 @@ void main() {
             message: 'replaced by another call',
             abortCode: ClientEventStandardCode.clientAborted,
             initiator: LeaveInitiator.app,
-            code: 'active_call_replaced',
+            code: 'call.replaced',
           ),
           (
             name: 'last participant left',
@@ -234,7 +236,7 @@ void main() {
             message: 'last participant left',
             abortCode: ClientEventStandardCode.clientAborted,
             initiator: LeaveInitiator.app,
-            code: 'auto-leave',
+            code: 'call.last_participant_left',
           ),
           (
             name: 'reconnection failed',
@@ -258,7 +260,7 @@ void main() {
             name: 'SFU error',
             reason: const DisconnectReason.sfuError(_sfuError),
             message: 'sfu error: unspecified: kicked',
-            abortCode: ClientEventStandardCode.sfuError,
+            abortCode: ClientEventStandardCode.clientAborted,
             initiator: LeaveInitiator.sdkError,
             code: 'sfu_error:unspecified',
           ),
@@ -283,6 +285,20 @@ void main() {
         },
       );
     }
+
+    test('the leave reason traced at teardown is the attribution', () async {
+      final call = harness.buildCall();
+      await call.join();
+
+      await harness.emitSfu(
+        harness.session,
+        const SfuCallEndedEvent(callEndedReason: SfuCallEndedReason.ended),
+      );
+
+      verify(
+        () => harness.session.trace('call.leaveReason', 'call ended'),
+      ).called(1);
+    });
 
     test('a leave without a reason reports unknown', () async {
       final call = harness.buildCall();

@@ -1,5 +1,7 @@
 library;
 
+import 'package:meta/meta.dart';
+
 import '../models/leave_initiator.dart';
 import '../sfu/data/models/sfu_error.dart';
 
@@ -99,6 +101,19 @@ class ClientEventFailure {
 
   /// Why the call left, as a short identifier such as `call.ended`.
   final String? leaveReason;
+}
+
+/// The value [LeaveInitiator] is sent as, in `leave_initiator`.
+@internal
+extension LeaveInitiatorWireValue on LeaveInitiator {
+  String get wireValue => switch (this) {
+    LeaveInitiator.user => 'user',
+    LeaveInitiator.app => 'app',
+    LeaveInitiator.callkit => 'callkit',
+    LeaveInitiator.remoteEvent => 'remote_event',
+    LeaveInitiator.sdkError => 'sdk_error',
+    LeaveInitiator.unknown => 'unknown',
+  };
 }
 
 enum ClientEventStandardCode {

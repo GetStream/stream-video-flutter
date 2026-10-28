@@ -185,7 +185,27 @@ void main() {
       (e) => e['event_type'] == 'completed',
     );
     expect(completed['retry_failure_code'], 'CLIENT_ABORTED');
+    expect(completed['retry_failure_reason'], 'Aborted: call unregistered');
     expect(completed['leave_initiator'], 'unknown');
+    expect(completed['leave_reason'], 'call.unregistered');
+  });
+
+  test('the retry failure reason is cut to 2000 characters', () async {
+    reporter.registerCall(cid);
+    final stageId = reporter.beginStage(cid, ClientEventStage.wsJoin);
+    reporter.failStage(
+      stageId,
+      failure: ClientEventFailure(
+        ClientEventStandardCode.clientAborted,
+        'x' * 2500,
+      ),
+    );
+    await flush();
+
+    final completed = captured.firstWhere(
+      (e) => e['event_type'] == 'completed',
+    );
+    expect(completed['retry_failure_reason'], 'x' * 2000);
   });
 
   test('newJoinAttempt mints a fresh id and updates join_reason', () async {

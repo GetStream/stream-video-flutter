@@ -251,6 +251,7 @@ class _ClientEventReporterImpl implements ClientEventReporter {
         ClientEventStandardCode.clientAborted,
         'Aborted: call unregistered',
         leaveInitiator: LeaveInitiator.unknown,
+        leaveReason: 'call.unregistered',
       ),
     );
     _calls.remove(cid.value);

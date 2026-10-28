@@ -134,7 +134,10 @@ class ClientEvent {
       if (elapsedTime != null) 'elapsed_time': elapsedTime,
       if (failure != null) ...{
         'retry_failure_code': failure.code.wireValue,
-        'retry_failure_reason': failure.reason,
+        'retry_failure_reason': _truncate(
+          failure.reason,
+          _maxRetryFailureReasonRunes,
+        ),
         if (failure.leaveInitiator != null)
           'leave_initiator': failure.leaveInitiator!.wireValue,
         if (failure.leaveReason != null)
@@ -144,7 +147,9 @@ class ClientEvent {
     };
   }
 
-  /// The backend accepts at most this many characters of `leave_reason`.
+  // The backend accepts at most this many characters of each field, and drops
+  // the whole event over a longer one.
+  static const _maxRetryFailureReasonRunes = 2000;
   static const _maxLeaveReasonRunes = 200;
 
   static String _truncate(String value, int maxRunes) {
