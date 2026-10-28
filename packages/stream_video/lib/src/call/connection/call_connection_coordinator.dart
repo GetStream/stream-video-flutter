@@ -716,8 +716,6 @@ class CallConnectionCoordinator {
       clientEventRetryCount: clientEventRetryCount,
     );
 
-    // Checked first: a join the call was left during fails, and retrying it
-    // would only be rejected.
     if (_isLeftOrLeaving) {
       _call._logger.w(() => '[join] rejected (call was left during joining)');
       return const JoinCancelled();
@@ -1008,8 +1006,6 @@ class CallConnectionCoordinator {
         clientEventRetryCount: clientEventRetryCount,
       );
 
-      // The leave already cleared the stats options and settled the state,
-      // and neither may be put back.
       if (_isLeftOrLeaving) {
         _call._logger.w(() => '[joinIfNeeded] rejected (call was left)');
         return failureWithError('call was left');

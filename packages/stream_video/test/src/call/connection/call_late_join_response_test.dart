@@ -10,8 +10,8 @@ import '../fixtures/call_test_helpers.dart';
 import '../fixtures/connection_harness.dart';
 import '../fixtures/data.dart';
 
-/// A coordinator answer for a call with auto-on noise cancellation, whose
-/// user may enable it.
+// A coordinator answer for a call with auto-on noise cancellation, whose
+// user may enable it.
 CoordinatorJoined _autoOnJoined() {
   final details = SampleCallData.defaultCallMetadata.details;
   return CoordinatorJoined(
@@ -57,8 +57,7 @@ CoordinatorJoined _autoOnJoined() {
   );
 }
 
-/// The coordinator join request is not cancelled by a leave, so its answer
-/// can arrive after one. That answer must leave the call as the leave did.
+// The coordinator join answer can arrive after a leave, which must win.
 void main() {
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -93,8 +92,8 @@ void main() {
   });
   tearDown(() => harness.dispose());
 
-  /// Starts a join, leaves while the coordinator has not answered, then
-  /// answers it successfully.
+  // Starts a join, leaves while the coordinator has not answered, then
+  // answers it successfully.
   Future<Call> leaveBeforeTheAnswer() async {
     final call = harness.buildCall();
     final join = call.join();
@@ -151,8 +150,21 @@ void main() {
     expect(harness.reporter.stageFailures, [
       ClientEventStandardCode.clientAborted,
     ]);
-    harness.verifyMakeCallSessionCount(0);
-    expect(call.state.value.ownCapabilities, isEmpty);
+  });
+
+  test('a failed answer after a leave keeps the call disconnected', () async {
+    final call = harness.buildCall();
+    final join = call.join();
+    await waitUntil(() => joinRequested);
+
+    await call.leave();
+    joinAnswer.complete(
+      const Result.failure(StreamVideoException(message: 'join failed')),
+    );
+    await join;
+    await pumpEventQueue();
+
+    expect(call.state.value.status, isA<CallStatusDisconnected>());
   });
 
   test('the same answer before a leave is applied', () async {

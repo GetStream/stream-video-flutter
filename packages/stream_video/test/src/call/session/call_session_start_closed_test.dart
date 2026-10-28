@@ -35,10 +35,8 @@ class _MockRTCPeerConnection extends Mock implements rtc.RTCPeerConnection {}
 
 class _MockRTCRtpTransceiver extends Mock implements rtc.RTCRtpTransceiver {}
 
-class _MockRtcManager extends Mock implements RtcManager {}
-
-/// A [CallSession] whose SFU socket answers the join at once, and whose
-/// [RtcManager] is created when [rtcManager] completes.
+// A CallSession whose SFU socket answers the join at once, and whose
+// RtcManager is created when rtcManager completes.
 CallSession _buildSession({
   required Completer<RtcManager> rtcManager,
 }) {
@@ -150,7 +148,7 @@ void main() {
     () async {
       final made = Completer<RtcManager>();
       final session = _buildSession(rtcManager: made);
-      final rtcManager = _MockRtcManager();
+      final rtcManager = MockRtcManager();
       when(rtcManager.dispose).thenAnswer((_) async {});
 
       var callbackRan = false;
@@ -172,10 +170,41 @@ void main() {
     },
   );
 
+  test(
+    'a close while the created callback runs ends the start',
+    () async {
+      final made = Completer<RtcManager>();
+      final session = _buildSession(rtcManager: made);
+      final rtcManager = MockRtcManager();
+      when(rtcManager.dispose).thenAnswer((_) async {});
+      when(rtcManager.flushPendingDecryptors).thenAnswer((_) async {});
+      made.complete(rtcManager);
+
+      final callbackEntered = Completer<void>();
+      final callbackDone = Completer<void>();
+      final start = session.start(
+        isAnonymousUser: true,
+        onRtcManagerCreatedCallback: (_) {
+          callbackEntered.complete();
+          return callbackDone.future;
+        },
+      );
+      await callbackEntered.future;
+
+      await session.close(CloseCode.normalClosure);
+      callbackDone.complete();
+      final result = await start;
+
+      expect(result.isFailure, isTrue);
+      expect(session.statsReporter, isNull);
+      verify(rtcManager.dispose).called(1);
+    },
+  );
+
   test('a start nothing closes keeps the rtcManager', () async {
     final made = Completer<RtcManager>();
     final session = _buildSession(rtcManager: made);
-    final rtcManager = _MockRtcManager();
+    final rtcManager = MockRtcManager();
     when(rtcManager.dispose).thenAnswer((_) async {});
 
     when(rtcManager.flushPendingDecryptors).thenAnswer((_) async {});

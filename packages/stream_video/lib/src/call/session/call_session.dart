@@ -453,7 +453,6 @@ class CallSession extends Disposable {
 
       await onRtcManagerCreatedCallback?.call(createdRtcManager);
 
-      // The close disposed the rtcManager made above.
       if (_isLeavingOrClosed) return _rejectClosedStart('after rtcManager');
 
       _rtcManagerSubject!.add(createdRtcManager);
