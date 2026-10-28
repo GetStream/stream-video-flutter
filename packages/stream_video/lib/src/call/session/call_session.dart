@@ -83,7 +83,6 @@ class CallSession extends Disposable {
     this.e2eeManager,
     this.joinResponseTimeout = const Duration(seconds: 5),
     this.fastReconnectJoinResponseTimeout = const Duration(seconds: 15),
-    // Only tests pass one; the session otherwise builds its own.
     SfuClient? sfuClient,
   }) : _tracer = tracer,
        _host = host,
@@ -826,12 +825,16 @@ class CallSession extends Disposable {
     return rtcManager?.getTrack(trackId)?.trackType;
   }
 
+  /// Routes [event] through the SFU event handling. Tests only.
+  @visibleForTesting
+  Future<void> debugHandleSfuEvent(SfuEvent event) => _onSfuEvent(event);
+
   Future<void> _onSfuEvent(SfuEvent event) async {
     _logger.log(event.logPriority, () => '[onSfuEvent] event: $event');
 
     await _sfuEventsLock.synchronized(() async {
       if (event is SfuSubscriberOfferEvent) {
-        await onSubscriberOffer(event);
+        await _onSubscriberOffer(event);
       } else if (event is SfuIceTrickleEvent) {
         await _onRemoteIceCandidate(event);
       } else if (event is SfuParticipantLeftEvent) {
@@ -1022,8 +1025,7 @@ class CallSession extends Disposable {
     return await rtcManager?.onPublishOptionsChanged(event.publishOptions);
   }
 
-  @visibleForTesting
-  Future<void> onSubscriberOffer(SfuSubscriberOfferEvent event) async {
+  Future<void> _onSubscriberOffer(SfuSubscriberOfferEvent event) async {
     if (_isLeavingOrClosed || stateManager.callState.status.isDisconnected) {
       _logger.w(
         () => '[onSubscriberOffer] rejected (session is disconnecting)',
@@ -1052,7 +1054,6 @@ class CallSession extends Disposable {
         sdp: answerSdp,
         sessionId: sessionId,
         peerType: sfu_models.PeerType.PEER_TYPE_SUBSCRIBER,
-        // Lets the SFU tell this answer from a stale or duplicate one.
         negotiationId: event.negotiationId,
       ),
     );

@@ -1,5 +1,3 @@
-// ignore_for_file: missing_override_of_must_be_overridden
-
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -15,14 +13,101 @@ import 'package:stream_video/src/sfu/data/events/sfu_event_mapper_extensions.dar
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/sfu_client.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
-import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../../test_helpers.dart';
 import '../fixtures/call_test_helpers.dart';
 import '../fixtures/data.dart';
 
-class MockRtcManager extends Mock implements RtcManager {}
+void main() {
+  setUpAll(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    registerMockFallbackValues();
+    registerFallbackValue(sfu.SendAnswerRequest());
+  });
+
+  late MockSfuClient sfuClient;
+  late MockRtcManager rtcManager;
+  late CallSession session;
+
+  setUp(() {
+    sfuClient = MockSfuClient();
+    when(() => sfuClient.sendAnswer(any())).thenAnswer(
+      (_) async => Result.success(sfu.SendAnswerResponse()),
+    );
+    rtcManager = MockRtcManager();
+    when(rtcManager.dispose).thenAnswer((_) async {});
+    session = _buildTestSession(sfuClient: sfuClient)..rtcManager = rtcManager;
+  });
+
+  test('the answer echoes the offer negotiation id', () async {
+    when(
+      () => rtcManager.onSubscriberOffer(any()),
+    ).thenAnswer((_) async => 'answer-sdp');
+
+    await session.debugHandleSfuEvent(_offer);
+
+    final request =
+        verify(() => sfuClient.sendAnswer(captureAny())).captured.single
+            as sfu.SendAnswerRequest;
+    expect(request.sdp, 'answer-sdp');
+    expect(request.sessionId, 'test-session');
+    expect(request.negotiationId, 42);
+  });
+
+  test('no answer is sent when the session closes mid-offer', () async {
+    final answer = Completer<String?>();
+    when(
+      () => rtcManager.onSubscriberOffer(any()),
+    ).thenAnswer((_) => answer.future);
+
+    final handled = session.debugHandleSfuEvent(_offer);
+    await session.close(CloseCode.normalClosure);
+    answer.complete('answer-sdp');
+    await handled;
+
+    verifyNever(() => sfuClient.sendAnswer(any()));
+  });
+
+  test('no answer is sent when the session leaves mid-offer', () async {
+    final answer = Completer<String?>();
+    when(
+      () => rtcManager.onSubscriberOffer(any()),
+    ).thenAnswer((_) => answer.future);
+
+    final handled = session.debugHandleSfuEvent(_offer);
+    session.leave(reason: 'test');
+    answer.complete('answer-sdp');
+    await handled;
+
+    verifyNever(() => sfuClient.sendAnswer(any()));
+  });
+
+  test('the SFU subscriber offer maps its negotiation id', () {
+    final event = sfu_events.SfuEvent(
+      subscriberOffer: sfu_events.SubscriberOffer(
+        sdp: 'offer-sdp',
+        iceRestart: true,
+        negotiationId: 7,
+      ),
+    ).toDomain();
+
+    expect(
+      event,
+      const SfuSubscriberOfferEvent(
+        sdp: 'offer-sdp',
+        iceRestart: true,
+        negotiationId: 7,
+      ),
+    );
+  });
+}
+
+const _offer = SfuSubscriberOfferEvent(
+  sdp: 'offer-sdp',
+  iceRestart: false,
+  negotiationId: 42,
+);
 
 CallSession _buildTestSession({required SfuClient sfuClient}) {
   final callCid = SampleCallData.defaultCid;
@@ -57,94 +142,4 @@ CallSession _buildTestSession({required SfuClient sfuClient}) {
     pcFactory: StreamPeerConnectionFactory(callCid: callCid),
     sfuClient: sfuClient,
   );
-}
-
-const _offer = SfuSubscriberOfferEvent(
-  sdp: 'offer-sdp',
-  iceRestart: false,
-  negotiationId: 42,
-);
-
-void main() {
-  setUpAll(() {
-    TestWidgetsFlutterBinding.ensureInitialized();
-    registerMockFallbackValues();
-    registerFallbackValue(sfu.SendAnswerRequest());
-  });
-
-  late MockSfuClient sfuClient;
-  late MockRtcManager rtcManager;
-  late CallSession session;
-
-  setUp(() {
-    sfuClient = MockSfuClient();
-    when(() => sfuClient.sendAnswer(any())).thenAnswer(
-      (_) async => Result.success(sfu.SendAnswerResponse()),
-    );
-    rtcManager = MockRtcManager();
-    when(rtcManager.dispose).thenAnswer((_) async {});
-    session = _buildTestSession(sfuClient: sfuClient)..rtcManager = rtcManager;
-  });
-
-  test('the answer echoes the offer negotiation id', () async {
-    when(
-      () => rtcManager.onSubscriberOffer(any()),
-    ).thenAnswer((_) async => 'answer-sdp');
-
-    await session.onSubscriberOffer(_offer);
-
-    final request =
-        verify(() => sfuClient.sendAnswer(captureAny())).captured.single
-            as sfu.SendAnswerRequest;
-    expect(request.sdp, 'answer-sdp');
-    expect(request.sessionId, 'test-session');
-    expect(request.negotiationId, 42);
-  });
-
-  test('no answer is sent when the session closes mid-offer', () async {
-    final answer = Completer<String?>();
-    when(
-      () => rtcManager.onSubscriberOffer(any()),
-    ).thenAnswer((_) => answer.future);
-
-    final handled = session.onSubscriberOffer(_offer);
-    await session.close(CloseCode.normalClosure);
-    answer.complete('answer-sdp');
-    await handled;
-
-    verifyNever(() => sfuClient.sendAnswer(any()));
-  });
-
-  test('no answer is sent when the session leaves mid-offer', () async {
-    final answer = Completer<String?>();
-    when(
-      () => rtcManager.onSubscriberOffer(any()),
-    ).thenAnswer((_) => answer.future);
-
-    final handled = session.onSubscriberOffer(_offer);
-    session.leave(reason: 'test');
-    answer.complete('answer-sdp');
-    await handled;
-
-    verifyNever(() => sfuClient.sendAnswer(any()));
-  });
-
-  test('the SFU subscriber offer maps its negotiation id', () {
-    final event = sfu_events.SfuEvent(
-      subscriberOffer: sfu_events.SubscriberOffer(
-        sdp: 'offer-sdp',
-        iceRestart: true,
-        negotiationId: 7,
-      ),
-    ).toDomain();
-
-    expect(
-      event,
-      const SfuSubscriberOfferEvent(
-        sdp: 'offer-sdp',
-        iceRestart: true,
-        negotiationId: 7,
-      ),
-    );
-  });
 }
