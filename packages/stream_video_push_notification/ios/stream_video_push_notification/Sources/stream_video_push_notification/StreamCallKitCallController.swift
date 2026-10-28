@@ -9,9 +9,6 @@ class StreamCallKitCallController: NSObject {
     private(set) var calls = [Call]()
 
     /// Data of outgoing calls whose start action CallKit has not performed yet, by call uuid.
-    ///
-    /// The start action must use its own call's data, not whatever was stored last: another call
-    /// can be started or shown before CallKit performs it.
     private var pendingOutgoingCalls = [UUID: CallData]()
 
     func setSharedProvider(_ sharedProvider: CXProvider) {
