@@ -4,6 +4,7 @@
 
 - [iOS] `setCallConnected` and `endCall` keep the call's options, so `configureAudioSession: false` is respected after the call connects and the plugin no longer reconfigures the audio session set up by WebRTC.
 - [iOS] `setCallConnected` no longer answers an outgoing call, which reconfigured the audio session and emitted an accept event for the app's own call.
+- [iOS] CallKit mute, hold, group and DTMF events report the call's uuid as it was started or shown with, instead of uppercased, so it matches the uuid in the call's other events.
 
 ## 1.7.2
 

@@ -121,7 +121,7 @@ class StreamCallKitCallController: NSObject {
                 item["accepted"] = callItem?.hasConnected
                 json.append(item)
             } else {
-                let item: [String: String] = ["id": call.uuid.uuidString]
+                let item: [String: String] = ["id": self.reportedId(for: call.uuid)]
                 json.append(item)
             }
         }
@@ -194,6 +194,14 @@ class StreamCallKitCallController: NSObject {
 
     static let callsChangedNotification = Notification.Name("CallsChangedNotification")
     var callsChangedHandler: (() -> Void)?
+
+    /// The id to report to Dart for `uuid`: the string the call was started or shown with.
+    ///
+    /// `UUID.uuidString` is uppercase, while Dart passes lowercase uuids, so events built from it
+    /// would not match the call's other events.
+    func reportedId(for uuid: UUID) -> String {
+        return self.callWithUUID(uuid: uuid)?.data.uuid ?? uuid.uuidString.lowercased()
+    }
 
     func callWithUUID(uuid: UUID) -> Call? {
         guard let idx = calls.firstIndex(where: { $0.uuid == uuid }) else { return nil }
