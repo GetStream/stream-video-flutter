@@ -139,7 +139,8 @@ final class DisconnectReasonRejected extends DisconnectReason {
 
   @override
   String toString() {
-    return 'Rejected{byUserId: $byUserId, reason: $reason}';
+    return 'Rejected{byUserId: $byUserId, reason: $reason, '
+        'initiator: ${initiator?.name}}';
   }
 }
 
