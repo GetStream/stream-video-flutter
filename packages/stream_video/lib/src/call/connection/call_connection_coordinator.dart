@@ -716,16 +716,16 @@ class CallConnectionCoordinator {
       clientEventRetryCount: clientEventRetryCount,
     );
 
+    if (_isLeftOrLeaving) {
+      _call._logger.w(() => '[join] rejected (call was left during joining)');
+      return const JoinCancelled();
+    }
+
     if (joinedResult is! Success<CallCredentials>) {
       _call._logger.e(() => '[join] coordinator joining failed: $joinedResult');
 
       final failure = joinedResult as Failure;
       return JoinRetry(failure.videoError, failure.stackTrace);
-    }
-
-    if (_isLeftOrLeaving) {
-      _call._logger.w(() => '[join] rejected (call was left during joining)');
-      return const JoinCancelled();
     }
 
     _credentials = joinedResult.data;
@@ -1006,6 +1006,11 @@ class CallConnectionCoordinator {
         clientEventRetryCount: clientEventRetryCount,
       );
 
+      if (_isLeftOrLeaving) {
+        _call._logger.w(() => '[joinIfNeeded] rejected (call was left)');
+        return failureWithError('call was left');
+      }
+
       return joinedResult.foldResult(
         success: (success) {
           _sfuStatsOptions = success.data.statsOptions;
@@ -1082,6 +1087,20 @@ class CallConnectionCoordinator {
       return failure;
     }
 
+    // The request is not cancelled by a leave, so its answer can arrive after
+    // one. A leave aborted the stage already, but an end does not abort.
+    if (_isLeftOrLeaving) {
+      _call._logger.w(() => '[joinCall] rejected (call was left during join)');
+      reporter.failStage(
+        joinStageId,
+        failure: const ClientEventFailure.clientAborted(
+          'Aborted: call was left during join',
+        ),
+        retryCount: clientEventRetryCount,
+      );
+      return failureWithError('call was left');
+    }
+
     // Server call_session_id is now known; stamp it on subsequent stages.
     reporter
       ..setCallSessionId(_call.callCid, joinResult.data.metadata.session.id)
@@ -1105,6 +1124,13 @@ class CallConnectionCoordinator {
         receivedOrCreated.data.metadata.settings,
         joinOptions: connectOptions,
       );
+
+      if (_isLeftOrLeaving) {
+        _call._logger.w(
+          () => '[joinCall] rejected (call was left during join settings)',
+        );
+        return failureWithError('call was left');
+      }
     }
 
     _call._logger.v(
