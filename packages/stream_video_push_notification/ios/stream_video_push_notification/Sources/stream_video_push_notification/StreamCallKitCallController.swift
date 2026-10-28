@@ -198,9 +198,14 @@ class StreamCallKitCallController: NSObject {
     /// The id to report to Dart for `uuid`: the string the call was started or shown with.
     ///
     /// `UUID.uuidString` is uppercase, while Dart passes lowercase uuids, so events built from it
-    /// would not match the call's other events.
+    /// would not match the call's other events. The tracked id is only used when it names the same
+    /// call, since a start action can pick up another call's data.
     func reportedId(for uuid: UUID) -> String {
-        return self.callWithUUID(uuid: uuid)?.data.uuid ?? uuid.uuidString.lowercased()
+        let fallback = uuid.uuidString.lowercased()
+        guard let id = self.callWithUUID(uuid: uuid)?.data.uuid, id.lowercased() == fallback else {
+            return fallback
+        }
+        return id
     }
 
     func callWithUUID(uuid: UUID) -> Call? {
