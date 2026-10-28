@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/call/call.dart' show CallConnectionCoordinator;
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_call_ended_reason.dart';
 import 'package:stream_video/src/telemetry/client_event_types.dart';
@@ -728,6 +729,82 @@ void main() {
         ).called(1);
       },
     );
+
+    // The server answered, but did not decide on the end: it failed or turned
+    // the request away for its rate. Only a refusal keeps the call.
+    for (final (statusCode, leaves) in [
+      (503, true),
+      (429, true),
+      (403, false),
+    ]) {
+      test(
+        'an HTTP $statusCode answer ${leaves ? 'leaves' : 'keeps the call'}',
+        () async {
+          when(() => harness.permissionsManager.endCall()).thenAnswer(
+            (_) async => Result.failure(
+              StreamVideoExceptionWithCause(
+                message: 'end failed',
+                cause: StreamApiException(
+                  message: 'HTTP $statusCode',
+                  statusCode: statusCode,
+                ),
+              ),
+            ),
+          );
+          final call = harness.buildCall();
+          await call.join();
+
+          final result = await call.end(initiator: LeaveInitiator.user);
+          await pumpEventQueue();
+
+          expect(result.isFailure, isTrue);
+          if (leaves) {
+            expect(
+              (call.state.value.status as CallStatusDisconnected).reason,
+              const DisconnectReason.left(
+                initiator: LeaveInitiator.user,
+                message: 'end not delivered',
+              ),
+            );
+          } else {
+            expect(
+              call.state.value.status,
+              isNot(isA<CallStatusDisconnected>()),
+            );
+            verifyNever(
+              () => harness.session.leave(reason: any(named: 'reason')),
+            );
+          }
+        },
+      );
+    }
+
+    test('a request that hangs past the timeout still leaves', () async {
+      final previous = CallConnectionCoordinator.endRequestTimeout;
+      CallConnectionCoordinator.endRequestTimeout = const Duration(
+        milliseconds: 50,
+      );
+      addTearDown(
+        () => CallConnectionCoordinator.endRequestTimeout = previous,
+      );
+      when(
+        () => harness.permissionsManager.endCall(),
+      ).thenAnswer((_) => Completer<Result<None>>().future);
+      final call = harness.buildCall();
+      await call.join();
+
+      final result = await call.end(initiator: LeaveInitiator.user);
+      await pumpEventQueue();
+
+      expect(result.getErrorOrNull()?.message, 'end request timed out');
+      expect(
+        (call.state.value.status as CallStatusDisconnected).reason,
+        const DisconnectReason.left(
+          initiator: LeaveInitiator.user,
+          message: 'end not delivered',
+        ),
+      );
+    });
 
     test('two ends at once ask the server once', () async {
       final call = harness.buildCall();

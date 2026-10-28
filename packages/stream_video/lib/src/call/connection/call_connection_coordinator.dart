@@ -25,6 +25,12 @@ class CallConnectionCoordinator {
   @visibleForTesting
   static Duration statsBeforeReconnectTimeout = const Duration(seconds: 2);
 
+  /// How long `end()` waits for the server before leaving anyway. The client
+  /// sets no timeout of its own, so a stalled connection would otherwise keep
+  /// the call up until the socket gives up.
+  @visibleForTesting
+  static Duration endRequestTimeout = const Duration(seconds: 10);
+
   Duration _fastReconnectDeadline = Duration.zero;
 
   // Separate limits. The rejoin windows count across reconnects. The short
@@ -1091,8 +1097,9 @@ class CallConnectionCoordinator {
       return failure;
     }
 
-    // The request is not cancelled by a leave, so its answer can arrive after
-    // one. A leave aborted the stage already, but an end does not abort.
+    // The request is not cancelled by a leave or an end, so its answer can
+    // arrive after one. Both aborted the stage already, so failing it again
+    // only closes it should a path ever skip the abort.
     if (_isLeftOrLeaving) {
       _call._logger.w(() => '[joinCall] rejected (call was left during join)');
       reporter.failStage(
@@ -2322,9 +2329,11 @@ class CallConnectionCoordinator {
 
   /// Ends the call on the server, then leaves it.
   ///
-  /// A server that refuses the end leaves the call untouched. A request that
-  /// never reaches a verdict, because the device is offline or it timed out,
-  /// still leaves this side, as the user asked to be out of the call.
+  /// A server that refuses the end leaves the call untouched. An end the
+  /// server never decided on, because the device is offline, the request
+  /// timed out after [endRequestTimeout], or the server failed or rate
+  /// limited it, still leaves this side, as the user asked to be out of the
+  /// call.
   Future<Result<None>> end({
     String? reason,
     LeaveInitiator initiator = LeaveInitiator.unknown,
@@ -2366,7 +2375,13 @@ class CallConnectionCoordinator {
     final stateManager = _call._stateManager..pendingEnd = endReason;
     final Result<None> result;
     try {
-      result = await _call._permissionsManager.endCall();
+      result = await _call._permissionsManager.endCall().timeout(
+        endRequestTimeout,
+        onTimeout: () => failureWithError(
+          'end request timed out',
+          cause: TimeoutException('end request', endRequestTimeout),
+        ),
+      );
     } finally {
       stateManager.pendingEnd = null;
     }
@@ -2375,7 +2390,7 @@ class CallConnectionCoordinator {
       case Success<None>():
         // The backend ended it for everyone, so there is no ring to cancel.
         await _leave(reason: endReason, remote: true);
-      case Failure(:final error) when _isTransportFailure(error):
+      case Failure(:final error) when _isNotDelivered(error):
         _call._logger.w(() => '[end] not delivered, leaving anyway: $error');
         await _leave(
           reason: DisconnectReason.left(
@@ -2397,9 +2412,13 @@ class CallConnectionCoordinator {
     return result;
   }
 
-  // Whether [error] means the request never got the server's verdict: the
-  // device was offline or the request timed out.
-  static bool _isTransportFailure(Object error) {
+  // Whether [error] means the server never decided on the end: the device was
+  // offline, the request timed out, the server failed (5xx) or turned the
+  // request away for its rate (429). Anything else is the server refusing it.
+  static bool _isNotDelivered(Object error) {
+    if (error case StreamVideoException(:final apiStatusCode?)) {
+      if (apiStatusCode >= 500 || apiStatusCode == 429) return true;
+    }
     final code = const ClientEventErrorMapper().map(error).code;
     return code == ClientEventStandardCode.networkOffline ||
         code == ClientEventStandardCode.requestTimeout;

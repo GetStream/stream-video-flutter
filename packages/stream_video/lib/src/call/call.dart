@@ -866,11 +866,15 @@ class Call {
 
   /// Ends the call for all participants.
   ///
-  /// The server ends the call first. If it refuses, for example for a user
-  /// without the end-call permission, the failure is returned and the call
-  /// carries on. Otherwise the call leaves and disconnects with a
-  /// [DisconnectReasonEnded] that carries [initiator] and [reason], which
-  /// tells it apart from a call ended elsewhere.
+  /// The server ends the call first, and the call then leaves and
+  /// disconnects with a [DisconnectReasonEnded] that carries [initiator] and
+  /// [reason], which tells it apart from a call ended elsewhere.
+  ///
+  /// If the server refuses, for example for a user without the end-call
+  /// permission, the failure is returned and the call carries on. If it never
+  /// decides, because the device is offline, the request times out or the
+  /// server fails, the failure is returned and this side leaves anyway, with a
+  /// [DisconnectReasonLeft].
   ///
   /// - [reason]: why the call ends, told to the SFU. Only this side's
   ///   disconnect carries it; other participants are not told it.
