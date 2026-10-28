@@ -8,6 +8,12 @@ class StreamCallKitCallController: NSObject {
     private var sharedProvider: CXProvider? = nil
     private(set) var calls = [Call]()
 
+    /// Data of outgoing calls whose start action CallKit has not performed yet, by call uuid.
+    ///
+    /// The start action must use its own call's data, not whatever was stored last: another call
+    /// can be started or shown before CallKit performs it.
+    private var pendingOutgoingCalls = [UUID: CallData]()
+
     func setSharedProvider(_ sharedProvider: CXProvider) {
         self.sharedProvider = sharedProvider
     }
@@ -27,10 +33,20 @@ class StreamCallKitCallController: NSObject {
         let callTransaction = CXTransaction()
         callTransaction.addAction(startCallAction)
 
+        if self.pendingOutgoingCalls[uuid] == nil {
+            self.pendingOutgoingCalls[uuid] = data
+        }
+
         self.requestCall(
             callTransaction, action: "startCall",
             completion: { started in
-                guard started else { return }
+                guard started else {
+                    // A refused duplicate start must not drop the entry of the one still pending.
+                    if self.pendingOutgoingCalls[uuid] === data {
+                        self.pendingOutgoingCalls[uuid] = nil
+                    }
+                    return
+                }
 
                 let callUpdate = CXCallUpdate()
                 callUpdate.remoteHandle = handle
@@ -195,6 +211,11 @@ class StreamCallKitCallController: NSObject {
     static let callsChangedNotification = Notification.Name("CallsChangedNotification")
     var callsChangedHandler: (() -> Void)?
 
+    /// Returns and forgets the data `startCall` was called with for `uuid`.
+    func takePendingOutgoingCall(uuid: UUID) -> CallData? {
+        return self.pendingOutgoingCalls.removeValue(forKey: uuid)
+    }
+
     func callWithUUID(uuid: UUID) -> Call? {
         guard let idx = calls.firstIndex(where: { $0.uuid == uuid }) else { return nil }
         return calls[idx]
@@ -220,6 +241,7 @@ class StreamCallKitCallController: NSObject {
 
     func removeAllCalls() {
         calls.removeAll()
+        pendingOutgoingCalls.removeAll()
         callsChangedHandler?()
         postCallNotification()
     }

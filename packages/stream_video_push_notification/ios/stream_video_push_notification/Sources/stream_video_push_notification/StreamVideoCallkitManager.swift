@@ -541,7 +541,9 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             name: AVAudioSession.interruptionNotification, object: self, userInfo: userInfo)
     }
 
-    func configureAudioSession() {
+    /// Applies `data`'s audio session options, or the stored call's when `data` is nil.
+    func configureAudioSession(_ data: CallData? = nil) {
+        let data = data ?? self.data
         if data?.configureAudioSession != false {
             let session = AVAudioSession.sharedInstance()
             do {
@@ -610,9 +612,16 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     }
 
     public func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
-        let call = Call(uuid: action.callUUID, data: self.data!, isOutGoing: true)
+        guard
+            let data = self.callController.takePendingOutgoingCall(uuid: action.callUUID)
+                ?? self.data
+        else {
+            action.fail()
+            return
+        }
+        let call = Call(uuid: action.callUUID, data: data, isOutGoing: true)
         call.handle = action.handle.value
-        configureAudioSession()
+        configureAudioSession(data)
         call.hasStartedConnectDidChange = { [weak self] in
             self?.sharedProvider?.reportOutgoingCall(
                 with: call.uuid, startedConnectingAt: call.connectData)
@@ -623,7 +632,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
         self.outgoingCall = call
         self.callController.addCall(call)
-        self.sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_START, self.data?.toJSON())
+        self.sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_START, data.toJSON())
         action.fulfill()
     }
 
