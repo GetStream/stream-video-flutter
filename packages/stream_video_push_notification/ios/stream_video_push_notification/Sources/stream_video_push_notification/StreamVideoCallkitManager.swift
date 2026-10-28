@@ -616,6 +616,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             let data = self.callController.takePendingOutgoingCall(uuid: action.callUUID)
                 ?? self.data
         else {
+            NSLog("startCall: no call data for \(action.callUUID), failing the start action")
             action.fail()
             return
         }
