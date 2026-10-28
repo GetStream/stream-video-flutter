@@ -10,12 +10,15 @@ import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
 import 'package:stream_video/src/call/call.dart';
 import 'package:stream_video/src/call/stats/tracer.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_call_ended_reason.dart';
+import 'package:stream_video/src/telemetry/client_event_types.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
 import 'fixtures/call_test_helpers.dart';
+import 'fixtures/connection_harness.dart';
 
 /// Emits [event] the way `CallSession` would.
 void _emit(MockCallSession session, SfuEvent event) {
@@ -263,4 +266,35 @@ void main() {
       ).timeout(const Duration(seconds: 10));
     });
   });
+
+  // A call the backend ends gets the SFU's call-ended event and then a
+  // non-reconnectable close. The close must not turn the end into a failure,
+  // neither in the status nor in what the SFU and the join telemetry hear.
+  test(
+    'a call-ended event followed by the close it brings still ends the call',
+    () async {
+      final harness = ConnectionHarness();
+      addTearDown(harness.dispose);
+      final call = harness.buildCall();
+      await call.join();
+
+      // Back to back, with no pump in between, as the socket delivers them.
+      (harness.session.events as MutableSharedEmitter<SfuEvent>)
+        ..emit(
+          const SfuCallEndedEvent(callEndedReason: SfuCallEndedReason.ended),
+        )
+        ..emit(_disconnected(isReconnectable: false));
+      await pumpEventQueue();
+
+      final status = call.state.value.status as CallStatusDisconnected;
+      expect(status.reason, isA<DisconnectReasonEnded>());
+      verify(() => harness.session.leave(reason: 'call ended')).called(1);
+      verifyNever(
+        () => harness.session.leave(
+          reason: any(named: 'reason', that: startsWith('failure: ')),
+        ),
+      );
+      expect(harness.reporter.aborts, [ClientEventStandardCode.backendLeave]);
+    },
+  );
 }

@@ -57,7 +57,7 @@ sealed class DisconnectReason extends Equatable {
   List<Object?> get props => [];
 }
 
-class DisconnectReasonFailure extends DisconnectReason {
+final class DisconnectReasonFailure extends DisconnectReason {
   const DisconnectReasonFailure(this.error);
 
   final StreamVideoException error;
@@ -71,7 +71,7 @@ class DisconnectReasonFailure extends DisconnectReason {
   }
 }
 
-class DisconnectReasonSfuError extends DisconnectReason {
+final class DisconnectReasonSfuError extends DisconnectReason {
   const DisconnectReasonSfuError(this.error);
 
   final SfuError error;
@@ -85,7 +85,7 @@ class DisconnectReasonSfuError extends DisconnectReason {
   }
 }
 
-class DisconnectReasonRejected extends DisconnectReason {
+final class DisconnectReasonRejected extends DisconnectReason {
   const DisconnectReasonRejected({
     required this.byUserId,
     this.reason,
@@ -103,7 +103,7 @@ class DisconnectReasonRejected extends DisconnectReason {
   }
 }
 
-class DisconnectReasonBlocked extends DisconnectReason {
+final class DisconnectReasonBlocked extends DisconnectReason {
   const DisconnectReasonBlocked();
 
   @override
@@ -112,7 +112,7 @@ class DisconnectReasonBlocked extends DisconnectReason {
   }
 }
 
-class DisconnectReasonCancelled extends DisconnectReason {
+final class DisconnectReasonCancelled extends DisconnectReason {
   const DisconnectReasonCancelled({
     required this.byUserId,
   });
@@ -128,7 +128,7 @@ class DisconnectReasonCancelled extends DisconnectReason {
   }
 }
 
-class DisconnectReasonEnded extends DisconnectReason {
+final class DisconnectReasonEnded extends DisconnectReason {
   factory DisconnectReasonEnded() {
     return _instance;
   }
@@ -144,7 +144,7 @@ class DisconnectReasonEnded extends DisconnectReason {
   }
 }
 
-class DisconnectReasonReplaced extends DisconnectReason {
+final class DisconnectReasonReplaced extends DisconnectReason {
   factory DisconnectReasonReplaced() {
     return _instance;
   }
@@ -160,7 +160,7 @@ class DisconnectReasonReplaced extends DisconnectReason {
   }
 }
 
-class DisconnectReasonLastParticipantLeft extends DisconnectReason {
+final class DisconnectReasonLastParticipantLeft extends DisconnectReason {
   factory DisconnectReasonLastParticipantLeft() {
     return _instance;
   }
@@ -176,7 +176,7 @@ class DisconnectReasonLastParticipantLeft extends DisconnectReason {
   }
 }
 
-class DisconnectReasonReconnectionFailed extends DisconnectReason {
+final class DisconnectReasonReconnectionFailed extends DisconnectReason {
   factory DisconnectReasonReconnectionFailed() {
     return _instance;
   }
@@ -193,7 +193,7 @@ class DisconnectReasonReconnectionFailed extends DisconnectReason {
 }
 
 /// The system call UI ended the call: CallKit on iOS, Telecom on Android.
-class DisconnectReasonNativeCallEnded extends DisconnectReason {
+final class DisconnectReasonNativeCallEnded extends DisconnectReason {
   factory DisconnectReasonNativeCallEnded() {
     return _instance;
   }

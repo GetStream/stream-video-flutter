@@ -71,9 +71,6 @@ void main() {
       ).called(1);
     });
 
-    // Pins the wording each reason sends to the SFU and the code it aborts
-    // in-flight join stages with today, so moving both into one mapping
-    // cannot change either unnoticed.
     final pinned =
         <(String, DisconnectReason, String, ClientEventStandardCode)>[
           (
