@@ -72,6 +72,9 @@ class CallConnectionCoordinator {
 
   bool get _isLeftOrLeaving => _phase.value.isLeftOrLeaving;
 
+  // The end this side is asking the server for, while the request runs.
+  DisconnectReasonEnded? _pendingEnd;
+
   /// Runs [body] with a future that completes once the call is leaving.
   Future<T> _whileJoined<T>(Future<T> Function(Future<void> left) body) async {
     final left = Completer<void>();
@@ -303,8 +306,15 @@ class CallConnectionCoordinator {
     // was deleted, or the user was blocked. It leaves like a local leave. A
     // leave already running settles the phase itself.
     if (status is CallStatusDisconnected && !_isLeftOrLeaving) {
+      // An end this side asked for is reported as its own, not as one from
+      // elsewhere, when its event beats the response.
+      final reason = switch ((status.reason, _pendingEnd)) {
+        (DisconnectReasonEnded(), final DisconnectReasonEnded pending) =>
+          pending,
+        (final reason, _) => reason,
+      };
       try {
-        await _leave(reason: status.reason, remote: true);
+        await _leave(reason: reason, remote: true);
       } catch (error, stackTrace) {
         _call._logger.e(
           () => '[leave] remote leave failed: $error, stackTrace: $stackTrace',
@@ -2316,6 +2326,8 @@ class CallConnectionCoordinator {
     return const Result.success(none);
   }
 
+  /// Ends the call on the server, then leaves it. A server that refuses the
+  /// end leaves the call untouched.
   Future<Result<None>> end({
     String? reason,
     LeaveInitiator initiator = LeaveInitiator.unknown,
@@ -2329,42 +2341,40 @@ class CallConnectionCoordinator {
       return failureWithError('invalid status: ${_call.state.value.status}');
     }
 
+    // A leave that is already disconnecting wins: the call is on its way out,
+    // and this instance no longer holds a session to end it from.
+    if (_isLeftOrLeaving) {
+      _call._logger.v(() => '[end] rejected (already leaving)');
+      return const Result.success(none);
+    }
+
     final endReason = DisconnectReasonEnded(
       initiator: initiator,
       message: reason,
     );
-    final bool didDisconnect;
-    try {
-      didDisconnect = await _disconnect(
-        sfuLeaveReason: _leaveAttribution(endReason).message,
-      );
-    } catch (_) {
-      // The teardown failed here, but the call still ends for everyone.
-      try {
-        await _call._permissionsManager.endCall();
-      } finally {
-        _settleDisconnected(endReason);
-      }
-      rethrow;
-    }
 
-    // If another disconnect already ran (or is running), don't fire the
-    // server-side endCall a second time and don't re-emit the lifecycle
-    // event.
-    if (!didDisconnect) {
-      _call._logger.v(() => '[end] disconnect short-circuited');
-      return const Result.success(none);
-    }
-
+    // The call's own `call.ended` can arrive before the response and start a
+    // remote leave; while the request runs, that leave reports this end.
+    _pendingEnd = endReason;
     final Result<None> result;
     try {
       result = await _call._permissionsManager.endCall();
     } finally {
-      _setPhase(ConnectionDisconnected(endReason));
-      _call._stateManager.lifecycleCallEnded(reason: endReason);
+      _pendingEnd = null;
     }
 
-    _call._logger.v(() => '[end] completed: $result');
+    if (result is! Success<None>) {
+      _call._logger.w(() => '[end] rejected by the server: $result');
+      return result;
+    }
+
+    // The backend ended it for everyone, so there is no ring left to cancel.
+    await _leave(reason: endReason, remote: true);
+    // Settles this side's end also when its own `call.ended` got here first
+    // and settled the status as an end from elsewhere.
+    _call._stateManager.lifecycleCallEnded(reason: endReason);
+
+    _call._logger.v(() => '[end] completed');
     return result;
   }
 

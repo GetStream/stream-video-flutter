@@ -38,14 +38,14 @@ sealed class DisconnectReason extends Equatable {
     required String byUserId,
   }) = DisconnectReasonCancelled;
 
-  /// The call ended for everyone. [initiator] is set when this side ended
-  /// it, through `Call.end`, with [message] as the reason it gave.
-  factory DisconnectReason.ended({
-    LeaveInitiator? initiator,
+  /// The call ended for everyone. [initiator] says what ended it: an end
+  /// from elsewhere, such as the backend, is [LeaveInitiator.remoteEvent];
+  /// one this side made through `Call.end` carries that call's initiator and
+  /// [message].
+  const factory DisconnectReason.ended({
+    LeaveInitiator initiator,
     String? message,
-  }) {
-    return DisconnectReasonEnded(initiator: initiator, message: message);
-  }
+  }) = DisconnectReasonEnded;
 
   /// The system call UI ended the call: CallKit on iOS, Telecom on Android.
   factory DisconnectReason.nativeCallEnded() {
@@ -174,11 +174,14 @@ final class DisconnectReasonCancelled extends DisconnectReason {
 
 /// The call ended for everyone: on the backend, or through `Call.end`.
 final class DisconnectReasonEnded extends DisconnectReason {
-  const DisconnectReasonEnded({this.initiator, this.message});
+  const DisconnectReasonEnded({
+    this.initiator = LeaveInitiator.remoteEvent,
+    this.message,
+  });
 
-  /// What made this side end the call through `Call.end`, or `null` for a
-  /// call ended elsewhere, such as on the backend.
-  final LeaveInitiator? initiator;
+  /// What ended the call: [LeaveInitiator.remoteEvent] for an end from
+  /// elsewhere, or what made this side end it through `Call.end`.
+  final LeaveInitiator initiator;
 
   /// The reason given to `Call.end`, if any.
   final String? message;
@@ -188,7 +191,7 @@ final class DisconnectReasonEnded extends DisconnectReason {
 
   @override
   String toString() {
-    return 'Ended{initiator: ${initiator?.name}, message: $message}';
+    return 'Ended{initiator: ${initiator.name}, message: $message}';
   }
 }
 

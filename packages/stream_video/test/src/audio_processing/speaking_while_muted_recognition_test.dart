@@ -265,7 +265,7 @@ void main() {
       callStateStreamController.add(
         createCallState(
           isAudioEnabled: false,
-          status: CallStatus.disconnected(DisconnectReason.ended()),
+          status: CallStatus.disconnected(const DisconnectReason.ended()),
         ),
       );
 

@@ -319,7 +319,7 @@ void main() {
       final join = call.join();
       await pumpEventQueue();
       harness.stateManager.state = harness.stateManager.callState.copyWith(
-        status: CallStatus.disconnected(DisconnectReason.ended()),
+        status: CallStatus.disconnected(const DisconnectReason.ended()),
       );
       gate.complete();
 

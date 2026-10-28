@@ -56,7 +56,7 @@ void main() {
       final call = harness.buildCall();
       await call.join();
 
-      await call.leave(reason: DisconnectReason.ended());
+      await call.leave(reason: const DisconnectReason.ended());
 
       expect(harness.reporter.aborts, [ClientEventStandardCode.backendLeave]);
     });
@@ -88,7 +88,7 @@ void main() {
         >[
           (
             name: 'ended',
-            reason: DisconnectReason.ended(),
+            reason: const DisconnectReason.ended(),
             message: 'call ended',
             abortCode: ClientEventStandardCode.backendLeave,
             initiator: LeaveInitiator.remoteEvent,
@@ -236,25 +236,6 @@ void main() {
             abortCode: ClientEventStandardCode.clientAborted,
             initiator: LeaveInitiator.callkit,
             code: 'call.rejected:decline',
-          ),
-          (
-            name: 'an end this side made',
-            reason: DisconnectReason.ended(initiator: LeaveInitiator.user),
-            message: 'user is ending the call',
-            abortCode: ClientEventStandardCode.clientAborted,
-            initiator: LeaveInitiator.user,
-            code: 'call.ended',
-          ),
-          (
-            name: 'an end this side gave a reason for',
-            reason: DisconnectReason.ended(
-              initiator: LeaveInitiator.app,
-              message: 'meeting over',
-            ),
-            message: 'meeting over',
-            abortCode: ClientEventStandardCode.clientAborted,
-            initiator: LeaveInitiator.app,
-            code: 'call.ended',
           ),
           (
             name: 'cancelled',
@@ -552,7 +533,7 @@ void main() {
 
       expect(
         (call.state.value.status as CallStatusDisconnected).reason,
-        DisconnectReason.ended(
+        const DisconnectReason.ended(
           initiator: LeaveInitiator.user,
           message: 'meeting over',
         ),
@@ -568,13 +549,13 @@ void main() {
 
       expect(
         (call.state.value.status as CallStatusDisconnected).reason,
-        DisconnectReason.ended(initiator: LeaveInitiator.unknown),
+        const DisconnectReason.ended(initiator: LeaveInitiator.unknown),
       );
     });
 
     test(
-      'when the server refuses to end, returns the failure but stays '
-      'disconnected as ended',
+      'when the server refuses to end, returns the failure and the call '
+      'carries on',
       () async {
         when(() => harness.permissionsManager.endCall()).thenAnswer(
           (_) async => const Result.failure(
@@ -583,12 +564,17 @@ void main() {
         );
         final call = harness.buildCall();
         await call.join();
+        final before = call.state.value.status;
 
         final result = await call.end();
+        await pumpEventQueue();
 
         expect(result.getErrorOrNull()?.message, 'end refused');
-        final status = call.state.value.status as CallStatusDisconnected;
-        expect(status.reason, isA<DisconnectReasonEnded>());
+        expect(call.state.value.status, before);
+        verifyNever(
+          () => harness.session.leave(reason: any(named: 'reason')),
+        );
+        expect(harness.reporter.aborts, isEmpty);
       },
     );
 
@@ -611,15 +597,78 @@ void main() {
       verify(harness.session.dispose).called(1);
     });
 
-    test('reports no telemetry abort', () async {
+    test('aborts and unregisters telemetry with the end', () async {
       final call = harness.buildCall();
       await call.join();
 
-      await call.end();
+      await call.end(initiator: LeaveInitiator.user);
       await pumpEventQueue();
 
-      expect(harness.reporter.aborts, isEmpty);
+      final failure = harness.reporter.abortFailures.single;
+      expect(failure.code, ClientEventStandardCode.clientAborted);
+      expect(failure.reason, 'user is ending the call');
+      expect(failure.leaveInitiator, LeaveInitiator.user);
+      expect(failure.leaveReason, 'call.ended');
+      expect(harness.reporter.registered, isEmpty);
     });
+
+    test('during a join, ends it and attributes the end', () async {
+      final startGate = Completer<Result<SessionStartResult>>();
+      harness.stubSessionStart(harness.session, () => startGate.future);
+      final call = harness.buildCall();
+      final join = call.join();
+      await pumpEventQueue();
+      expect(call.state.value.status, isA<CallStatusActive>());
+
+      final result = await call.end(initiator: LeaveInitiator.user);
+      startGate.complete(sessionStartSuccess());
+      await join;
+      await pumpEventQueue();
+
+      expect(result.isSuccess, isTrue);
+      expect(
+        (call.state.value.status as CallStatusDisconnected).reason,
+        const DisconnectReason.ended(initiator: LeaveInitiator.user),
+      );
+      expect(
+        harness.reporter.abortFailures.map((f) => f.leaveInitiator),
+        everyElement(LeaveInitiator.user),
+      );
+      expect(harness.reporter.abortFailures, isNotEmpty);
+      expect(harness.reporter.registered, isEmpty);
+    });
+
+    test(
+      'whose own call-ended arrives before the response, is still '
+      "reported as this side's end",
+      () async {
+        final call = harness.buildCall();
+        await call.join();
+        when(() => harness.permissionsManager.endCall()).thenAnswer((_) async {
+          await harness.emitSfu(
+            harness.session,
+            const SfuCallEndedEvent(callEndedReason: SfuCallEndedReason.ended),
+          );
+          return const Result.success(none);
+        });
+
+        await call.end(reason: 'meeting over', initiator: LeaveInitiator.user);
+        await pumpEventQueue();
+
+        expect(
+          (call.state.value.status as CallStatusDisconnected).reason,
+          const DisconnectReason.ended(
+            initiator: LeaveInitiator.user,
+            message: 'meeting over',
+          ),
+        );
+        verify(() => harness.session.leave(reason: 'meeting over')).called(1);
+        expect(
+          harness.reporter.abortFailures.map((f) => f.leaveInitiator),
+          everyElement(LeaveInitiator.user),
+        );
+      },
+    );
 
     test(
       'while a leave is disconnecting, does not end on the server',

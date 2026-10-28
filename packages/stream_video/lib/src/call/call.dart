@@ -865,11 +865,14 @@ class Call {
 
   /// Ends the call for all participants.
   ///
-  /// The call disconnects with a [DisconnectReasonEnded] that carries
-  /// [initiator] and [reason], which tells it apart from a call ended
-  /// elsewhere.
+  /// The server ends the call first. If it refuses, for example for a user
+  /// without the end-call permission, the failure is returned and the call
+  /// carries on. Otherwise the call leaves and disconnects with a
+  /// [DisconnectReasonEnded] that carries [initiator] and [reason], which
+  /// tells it apart from a call ended elsewhere.
   ///
-  /// - [reason]: why the call ends, told to the SFU
+  /// - [reason]: why the call ends, told to the SFU. Only this side's
+  ///   disconnect carries it; other participants are not told it.
   /// - [initiator]: what made the call end. Pass [LeaveInitiator.user] for
   ///   an end the user asked for.
   Future<Result<None>> end({

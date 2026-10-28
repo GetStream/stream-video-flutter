@@ -116,7 +116,7 @@ void main() {
     await pumpPlayerRoute(tester);
     await pushOverIt(tester);
 
-    status.add(CallStatus.disconnected(DisconnectReason.ended()));
+    status.add(CallStatus.disconnected(const DisconnectReason.ended()));
     await tester.pumpAndSettle();
 
     expect(find.text('above'), findsOneWidget);
@@ -132,7 +132,7 @@ void main() {
     await pumpPlayerRoute(tester);
     await pushOverIt(tester);
 
-    status.add(CallStatus.disconnected(DisconnectReason.ended()));
+    status.add(CallStatus.disconnected(const DisconnectReason.ended()));
     await tester.pumpAndSettle();
 
     navigatorKey.currentState!.pop();
@@ -146,7 +146,7 @@ void main() {
   testWidgets('pops straight away when it is the top route', (tester) async {
     await pumpPlayerRoute(tester);
 
-    status.add(CallStatus.disconnected(DisconnectReason.ended()));
+    status.add(CallStatus.disconnected(const DisconnectReason.ended()));
     await tester.pumpAndSettle();
 
     expect(find.text('home'), findsOneWidget);

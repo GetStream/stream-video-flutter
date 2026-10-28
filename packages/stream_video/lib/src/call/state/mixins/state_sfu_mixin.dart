@@ -93,7 +93,7 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
 
     state = state.copyWith(
       status: CallStatus.disconnected(
-        DisconnectReason.ended(),
+        const DisconnectReason.ended(),
       ),
       callParticipants: const [],
     );

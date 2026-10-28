@@ -57,6 +57,7 @@
 - `DisconnectReason` is `sealed` and its subclasses are `final`, so a `switch` over it must cover every subclass and an app cannot add, extend or implement one. `DisconnectReason.timeout()` / `DisconnectReasonTimeout` and `DisconnectReasonManuallyClosed` are removed; the SDK never reported either.
 - An SFU socket that the server closes for good, with no call-ended event before it, now disconnects the call with `DisconnectReasonFailure` rather than `DisconnectReasonEnded`: the connection failed, the call did not end. UI that reacts to `DisconnectReasonEnded` no longer runs for it. A call the backend ends still reports `DisconnectReasonEnded`, from the SFU's call-ended event that comes before the close.
 - A call this side leaves now disconnects with the new `DisconnectReasonLeft` rather than `DisconnectReasonCancelled` carrying the current user's id. `DisconnectReasonCancelled` now means only that the caller cancelled the ring. A `leave()` without a reason, and a reject whose request failed, both disconnect with `DisconnectReasonLeft`.
+- `DisconnectReasonEnded` now carries an `initiator` and a `message`, so detect an ended call with `is DisconnectReasonEnded` rather than `== DisconnectReason.ended()`. An end from elsewhere has `initiator` `LeaveInitiator.remoteEvent`; one this side made through `Call.end` carries that call's initiator and reason and is not equal to a bare `DisconnectReason.ended()`.
 
 ### ⚠️ Deprecated
 
@@ -96,11 +97,10 @@
 - Added `RtcMediaDeviceNotifier.isAudioOutputSelectionSupported`, whether `Call.setAudioOutputDevice` can route audio on this platform, so a speaker picker can be hidden where it cannot.
 - Added `LeaveInitiator`, who or what made a call leave.
 - `DisconnectReason.left({initiator, message})` says who made a call leave and why; pass it to `Call.leave`. `Call.reject` takes an `initiator` too. A `leave()` without a reason reports `LeaveInitiator.unknown`; `StreamLeaveCallButton` reports `user`.
-- `Call.end` takes an `initiator`, and the call disconnects with a `DisconnectReasonEnded` that carries it and the `reason` given, so an end this side made can be told apart from one on the backend, whose `initiator` is `null`. `DisconnectReason.ended` takes both as optional arguments.
+- `Call.end` takes an `initiator`, and the call disconnects with a `DisconnectReasonEnded` that carries it and the `reason` given, so an end this side made can be told apart from one from elsewhere.
 
 ### 🔄 Changed
 
-- `DisconnectReasonEnded` now carries values, so detect an ended call with `is DisconnectReasonEnded` rather than `== DisconnectReason.ended()`: after `Call.end` the reason carries its initiator and is not equal to a bare `DisconnectReason.ended()`.
 - A leave for a failure or an SFU error tells the SFU the error's message, such as `failure: <message>` or `sfu error: <code>: <message>`, rather than the whole error with its stack trace.
 - A failed coordinator request's `StreamVideoException.message` now names the method, host and path, and a request the server never answered ends in a short reason such as `request timed out` or `connection failed` instead of the previous text.
 - Updated `stream_webrtc_flutter` to `^4.0.0`.
@@ -121,6 +121,7 @@
 
 ### 🐞 Fixed
 
+- `Call.end` ends the call on the server before leaving it. A server that refuses the end, for example for a user without the end-call permission, no longer leaves the call disconnected on this side while it carries on for everyone else: the failure is returned and the call is untouched. An end that succeeds now also fails the join stages still in flight, as a leave does.
 - Leaving a call while it is still joining no longer restores its capabilities and participants, or starts auto-on noise cancellation that kept running after the call ended. Leaving while the call is still connecting no longer leaves WebRTC connections running.
 - On iOS, a call that defaults to the loudspeaker now starts on it, instead of switching to it after the microphone is already recording.
 - A fast reconnect no longer hangs when the network drops while it is reopening the SFU connection. The attempt fails after five seconds and the call rejoins, where before it stayed reconnecting until the operating system gave up on the connection.

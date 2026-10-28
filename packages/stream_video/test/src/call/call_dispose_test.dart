@@ -204,7 +204,7 @@ void main() {
       final call = harness.buildCall();
       await call.get();
       harness.stateManager.state = harness.stateManager.callState.copyWith(
-        status: CallStatus.disconnected(DisconnectReason.ended()),
+        status: CallStatus.disconnected(const DisconnectReason.ended()),
       );
 
       await call.dispose();

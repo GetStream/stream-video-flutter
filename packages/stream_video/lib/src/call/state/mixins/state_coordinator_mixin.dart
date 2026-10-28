@@ -229,7 +229,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
         if (!disconnected) state = state.copyWith(callMembers: members);
       case CallRingingState.ended:
         state = state.copyWith(
-          status: CallStatus.disconnected(DisconnectReason.ended()),
+          status: CallStatus.disconnected(const DisconnectReason.ended()),
           callParticipants: const [],
           callMembers: members,
         );
@@ -266,7 +266,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
 
     state = endedState.copyWith(
       status: CallStatus.disconnected(
-        DisconnectReason.ended(),
+        const DisconnectReason.ended(),
       ),
       callParticipants: const [],
     );
@@ -582,7 +582,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
 
     state = state.copyWith(
       status: CallStatus.disconnected(
-        DisconnectReason.ended(),
+        const DisconnectReason.ended(),
       ),
       callParticipants: const [],
     );
