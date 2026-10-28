@@ -4,7 +4,7 @@
 
 - [iOS] `setCallConnected` and `endCall` keep the call's options, so `configureAudioSession: false` is respected after the call connects and the plugin no longer reconfigures the audio session set up by WebRTC.
 - [iOS] `setCallConnected` no longer answers an outgoing call, which reconfigured the audio session and emitted an accept event for the app's own call.
-- [iOS] An outgoing call keeps its own options and `ActionCallStart` data when another call is started, shown, connected or ended before CallKit starts it.
+- [iOS] An outgoing call keeps its own options and `ActionCallStart` data when another call is started, shown, connected or ended while it is starting.
 
 ## 1.7.2
 
