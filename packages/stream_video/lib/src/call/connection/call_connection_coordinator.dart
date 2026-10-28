@@ -72,8 +72,9 @@ class CallConnectionCoordinator {
 
   bool get _isLeftOrLeaving => _phase.value.isLeftOrLeaving;
 
-  // The end this side is asking the server for, while the request runs.
-  DisconnectReasonEnded? _pendingEnd;
+  // The end this side is asking the server for, so a second end() joins it
+  // rather than asking again.
+  Future<Result<None>>? _endInFlight;
 
   /// Runs [body] with a future that completes once the call is leaving.
   Future<T> _whileJoined<T>(Future<T> Function(Future<void> left) body) async {
@@ -306,15 +307,8 @@ class CallConnectionCoordinator {
     // was deleted, or the user was blocked. It leaves like a local leave. A
     // leave already running settles the phase itself.
     if (status is CallStatusDisconnected && !_isLeftOrLeaving) {
-      // An end this side asked for is reported as its own, not as one from
-      // elsewhere, when its event beats the response.
-      final reason = switch ((status.reason, _pendingEnd)) {
-        (DisconnectReasonEnded(), final DisconnectReasonEnded pending) =>
-          pending,
-        (final reason, _) => reason,
-      };
       try {
-        await _leave(reason: reason, remote: true);
+        await _leave(reason: status.reason, remote: true);
       } catch (error, stackTrace) {
         _call._logger.e(
           () => '[leave] remote leave failed: $error, stackTrace: $stackTrace',
@@ -2326,11 +2320,24 @@ class CallConnectionCoordinator {
     return const Result.success(none);
   }
 
-  /// Ends the call on the server, then leaves it. A server that refuses the
-  /// end leaves the call untouched.
+  /// Ends the call on the server, then leaves it.
+  ///
+  /// A server that refuses the end leaves the call untouched. A request that
+  /// never reaches a verdict, because the device is offline or it timed out,
+  /// still leaves this side, as the user asked to be out of the call.
   Future<Result<None>> end({
     String? reason,
     LeaveInitiator initiator = LeaveInitiator.unknown,
+  }) {
+    return _endInFlight ??= _end(
+      reason: reason,
+      initiator: initiator,
+    ).whenComplete(() => _endInFlight = null);
+  }
+
+  Future<Result<None>> _end({
+    String? reason,
+    required LeaveInitiator initiator,
   }) async {
     _call._logger.d(() => '[end] status: ${_call.state.value.status}');
 
@@ -2353,29 +2360,49 @@ class CallConnectionCoordinator {
       message: reason,
     );
 
-    // The call's own `call.ended` can arrive before the response and start a
-    // remote leave; while the request runs, that leave reports this end.
-    _pendingEnd = endReason;
+    // The call's own `call.ended` can arrive before the response. While the
+    // request runs, the state writes it as this end, not as one from
+    // elsewhere, so the call disconnects once and with this reason.
+    final stateManager = _call._stateManager..pendingEnd = endReason;
     final Result<None> result;
     try {
       result = await _call._permissionsManager.endCall();
     } finally {
-      _pendingEnd = null;
+      stateManager.pendingEnd = null;
     }
 
-    if (result is! Success<None>) {
-      _call._logger.w(() => '[end] rejected by the server: $result');
-      return result;
+    switch (result) {
+      case Success<None>():
+        // The backend ended it for everyone, so there is no ring to cancel.
+        await _leave(reason: endReason, remote: true);
+      case Failure(:final error) when _isTransportFailure(error):
+        _call._logger.w(() => '[end] not delivered, leaving anyway: $error');
+        await _leave(
+          reason: DisconnectReason.left(
+            initiator: initiator,
+            message: 'end not delivered',
+          ),
+        );
+      case Failure():
+        _call._logger.w(() => '[end] rejected by the server: $result');
+        return result;
     }
 
-    // The backend ended it for everyone, so there is no ring left to cancel.
-    await _leave(reason: endReason, remote: true);
-    // Settles this side's end also when its own `call.ended` got here first
-    // and settled the status as an end from elsewhere.
-    _call._stateManager.lifecycleCallEnded(reason: endReason);
+    // A remote leave its own `call.ended` started may still be tearing down.
+    if (_phase.value is ConnectionLeaving) {
+      await _phase.firstWhere((phase) => phase is ConnectionDisconnected);
+    }
 
-    _call._logger.v(() => '[end] completed');
+    _call._logger.v(() => '[end] completed: $result');
     return result;
+  }
+
+  // Whether [error] means the request never got the server's verdict: the
+  // device was offline or the request timed out.
+  static bool _isTransportFailure(Object error) {
+    final code = const ClientEventErrorMapper().map(error).code;
+    return code == ClientEventStandardCode.networkOffline ||
+        code == ClientEventStandardCode.requestTimeout;
   }
 
   /// Moves to [ConnectionDisconnected] and reports the call disconnected for

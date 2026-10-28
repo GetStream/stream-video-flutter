@@ -35,6 +35,16 @@ class CallStateNotifier extends StateNotifier<CallState>
 
   final _logger = taggedLogger(tag: 'CallStateNotifier');
 
+  /// The end this side has asked the server for, while that request runs.
+  ///
+  /// A call that ends meanwhile, by its own `call.ended` arriving before the
+  /// response, is that end rather than one from elsewhere.
+  DisconnectReasonEnded? pendingEnd;
+
+  @override
+  DisconnectReasonEnded get endedReason =>
+      pendingEnd ?? const DisconnectReasonEnded();
+
   late final MutableStateEmitter<CallState> callStateStream;
   CallState get callState => callStateStream.value;
 

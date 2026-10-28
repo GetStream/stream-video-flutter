@@ -234,6 +234,7 @@
 
 ### 🐞 Fixed
 
+- `StreamCallContainer` reports a call's disconnect once. A status the call settled on after it, such as a second disconnect from a race, no longer calls `onCallDisconnected`, or leaves, a second time.
 - The lobby no longer offers a speaker choice on Safari and other WebKit browsers, which play every call on the system default output.
 - The screen share layout puts the participant strip beside or under the share by the space it is given, not by the window.
 - The reaction picker stays above `StreamAddReactionButton` when the window changes while it is open.

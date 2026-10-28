@@ -17,6 +17,9 @@ import '../../call_ringing_state.dart';
 final _logger = taggedLogger(tag: 'SV:CallState:Coordinator');
 
 mixin StateCoordinatorMixin on StateNotifier<CallState> {
+  /// The reason a call that ends now disconnects with.
+  DisconnectReasonEnded get endedReason;
+
   void callMetadataChanged(
     CallMetadata callMetadata, {
     Map<String, List<String>>? capabilitiesByRole,
@@ -229,7 +232,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
         if (!disconnected) state = state.copyWith(callMembers: members);
       case CallRingingState.ended:
         state = state.copyWith(
-          status: CallStatus.disconnected(const DisconnectReason.ended()),
+          status: CallStatus.disconnected(endedReason),
           callParticipants: const [],
           callMembers: members,
         );
@@ -265,9 +268,7 @@ mixin StateCoordinatorMixin on StateNotifier<CallState> {
     }
 
     state = endedState.copyWith(
-      status: CallStatus.disconnected(
-        const DisconnectReason.ended(),
-      ),
+      status: CallStatus.disconnected(endedReason),
       callParticipants: const [],
     );
   }

@@ -153,4 +153,35 @@ void main() {
 
     expect(find.text('home'), findsOneWidget);
   });
+
+  testWidgets('reports a disconnect once, whatever follows it', (
+    tester,
+  ) async {
+    final reasons = <DisconnectReason>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StreamCallContainer(
+            call: call,
+            onCallDisconnected: (properties) => reasons.add(properties.reason),
+            callContentWidgetBuilder: (_, _) => const Text('call'),
+            incomingCallWidgetBuilder: (_, _) => const Text('call'),
+            outgoingCallWidgetBuilder: (_, _) => const Text('call'),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    status
+      ..add(CallStatus.disconnected(const DisconnectReason.ended()))
+      ..add(
+        CallStatus.disconnected(
+          const DisconnectReason.left(initiator: LeaveInitiator.user),
+        ),
+      );
+    await tester.pumpAndSettle();
+
+    expect(reasons, [const DisconnectReason.ended()]);
+  });
 }

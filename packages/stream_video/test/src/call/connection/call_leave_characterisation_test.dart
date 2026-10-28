@@ -639,11 +639,12 @@ void main() {
     });
 
     test(
-      'whose own call-ended arrives before the response, is still '
-      "reported as this side's end",
+      'whose own call-ended arrives before the response, disconnects once '
+      "and as this side's end",
       () async {
         final call = harness.buildCall();
         await call.join();
+        final statuses = recordStatuses(call);
         when(() => harness.permissionsManager.endCall()).thenAnswer((_) async {
           await harness.emitSfu(
             harness.session,
@@ -655,13 +656,14 @@ void main() {
         await call.end(reason: 'meeting over', initiator: LeaveInitiator.user);
         await pumpEventQueue();
 
-        expect(
-          (call.state.value.status as CallStatusDisconnected).reason,
-          const DisconnectReason.ended(
-            initiator: LeaveInitiator.user,
-            message: 'meeting over',
+        expect(statuses.whereType<CallStatusDisconnected>(), [
+          CallStatus.disconnected(
+            const DisconnectReason.ended(
+              initiator: LeaveInitiator.user,
+              message: 'meeting over',
+            ),
           ),
-        );
+        ]);
         verify(() => harness.session.leave(reason: 'meeting over')).called(1);
         expect(
           harness.reporter.abortFailures.map((f) => f.leaveInitiator),
@@ -669,6 +671,80 @@ void main() {
         );
       },
     );
+
+    test('a leave during the request wins, and disconnects once', () async {
+      final call = harness.buildCall();
+      await call.join();
+      final statuses = recordStatuses(call);
+      final response = Completer<Result<None>>();
+      when(
+        () => harness.permissionsManager.endCall(),
+      ).thenAnswer((_) => response.future);
+
+      final end = call.end(initiator: LeaveInitiator.user);
+      await pumpEventQueue();
+      await call.leave(
+        reason: const DisconnectReason.left(initiator: LeaveInitiator.user),
+      );
+      response.complete(const Result.success(none));
+      final result = await end;
+      await pumpEventQueue();
+
+      expect(result.isSuccess, isTrue);
+      expect(statuses.whereType<CallStatusDisconnected>(), [
+        CallStatus.disconnected(
+          const DisconnectReason.left(initiator: LeaveInitiator.user),
+        ),
+      ]);
+    });
+
+    test(
+      'when the request never reaches the server, still leaves this side',
+      () async {
+        when(() => harness.permissionsManager.endCall()).thenAnswer(
+          (_) async => Result.failure(
+            StreamVideoExceptionWithCause(
+              message: 'timed out',
+              cause: TimeoutException('slow network'),
+            ),
+          ),
+        );
+        final call = harness.buildCall();
+        await call.join();
+
+        final result = await call.end(initiator: LeaveInitiator.user);
+        await pumpEventQueue();
+
+        expect(result.isFailure, isTrue);
+        expect(
+          (call.state.value.status as CallStatusDisconnected).reason,
+          const DisconnectReason.left(
+            initiator: LeaveInitiator.user,
+            message: 'end not delivered',
+          ),
+        );
+        verify(
+          () => harness.session.leave(reason: 'end not delivered'),
+        ).called(1);
+      },
+    );
+
+    test('two ends at once ask the server once', () async {
+      final call = harness.buildCall();
+      await call.join();
+      final response = Completer<Result<None>>();
+      when(
+        () => harness.permissionsManager.endCall(),
+      ).thenAnswer((_) => response.future);
+
+      final first = call.end(initiator: LeaveInitiator.user);
+      final second = call.end(initiator: LeaveInitiator.user);
+      response.complete(const Result.success(none));
+
+      expect((await first).isSuccess, isTrue);
+      expect((await second).isSuccess, isTrue);
+      verify(() => harness.permissionsManager.endCall()).called(1);
+    });
 
     test(
       'while a leave is disconnecting, does not end on the server',

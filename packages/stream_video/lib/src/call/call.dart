@@ -33,6 +33,7 @@ import '../sfu/data/models/sfu_goaway_reason.dart';
 import '../sfu/data/models/sfu_participant.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../stream_video.dart';
+import '../telemetry/client_event_error_mapper.dart';
 import '../telemetry/client_event_types.dart';
 import '../utils/adaptive_throttle.dart';
 import '../utils/cancelable_operation.dart';
