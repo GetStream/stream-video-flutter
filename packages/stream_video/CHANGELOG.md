@@ -169,7 +169,7 @@
 - A viewport visibility is now recorded whether or not the session accepts it. A dropped report left a participant recorded as something they were not for the rest of the call, since a viewport only ever reports what changed.
 - On iOS devices without multitasking camera access, the camera track is now muted while the app is in the background, so other participants see camera-off instead of a frozen frame.
 - A call that keeps rejoining or keeps failing to reconnect now leaves after 10 rejoins within 120 seconds, 20 rejoins within 30 minutes, or 10 failed reconnect attempts, instead of retrying forever.
-- The subscriber answer now echoes the offer's negotiation id, so the SFU can tell it from a stale or duplicate answer, and no answer is sent for an offer that was still being answered when the session closed.
+- Remote audio and video recover more reliably after a reconnect: an answer to a re-sent subscriber offer can no longer be applied to a newer one.
 
 ## 1.7.2
 
