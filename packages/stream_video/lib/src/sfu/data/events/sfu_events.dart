@@ -68,7 +68,7 @@ class SfuSubscriberOfferEvent extends SfuEvent {
   final String sdp;
   final bool iceRestart;
 
-  /// Echoed in the answer so the SFU can match it to this offer.
+  /// The id of this offer's negotiation, echoed back in the answer.
   final int negotiationId;
 
   @override
