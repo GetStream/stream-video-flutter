@@ -315,7 +315,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
         if call.isMuted == isMuted {
-            self.sendMuteEvent(callId.uuidString, isMuted)
+            self.sendMuteEvent(self.callController.reportedId(for: callId), isMuted)
         } else {
             self.callController.muteCall(call: call, isMuted: isMuted)
         }
@@ -328,7 +328,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
         if call.isOnHold == onHold {
-            self.sendHoldEvent(callId.uuidString, onHold)
+            self.sendHoldEvent(self.callController.reportedId(for: callId), onHold)
         } else {
             self.callController.holdCall(call: call, onHold: onHold)
         }
@@ -688,7 +688,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         call.isOnHold = action.isOnHold
         call.isMuted = action.isOnHold
         self.callController.setHold(call: call, onHold: action.isOnHold)
-        sendHoldEvent(action.callUUID.uuidString, action.isOnHold)
+        sendHoldEvent(self.callController.reportedId(for: action.callUUID), action.isOnHold)
         action.fulfill()
     }
 
@@ -698,7 +698,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
         call.isMuted = action.isMuted
-        sendMuteEvent(action.callUUID.uuidString, action.isMuted)
+        sendMuteEvent(self.callController.reportedId(for: action.callUUID), action.isMuted)
         action.fulfill()
     }
 
@@ -710,8 +710,10 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         self.sendEvent(
             StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_GROUP,
             [
-                "id": action.callUUID.uuidString,
-                "callUUIDToGroupWith": action.callUUIDToGroupWith?.uuidString,
+                "id": self.callController.reportedId(for: action.callUUID),
+                "callUUIDToGroupWith": action.callUUIDToGroupWith.map {
+                    self.callController.reportedId(for: $0)
+                },
             ])
         action.fulfill()
     }
@@ -724,7 +726,8 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         self.sendEvent(
             StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_DTMF,
             [
-                "id": action.callUUID.uuidString, "digits": action.digits,
+                "id": self.callController.reportedId(for: action.callUUID),
+                "digits": action.digits,
                 "type": action.type.rawValue,
             ])
         action.fulfill()
