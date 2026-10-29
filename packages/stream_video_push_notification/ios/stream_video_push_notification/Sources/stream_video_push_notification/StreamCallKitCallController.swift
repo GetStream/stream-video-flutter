@@ -121,7 +121,7 @@ class StreamCallKitCallController: NSObject {
                 item["accepted"] = callItem?.hasConnected
                 json.append(item)
             } else {
-                let item: [String: String] = ["id": call.uuid.uuidString]
+                let item: [String: String] = ["id": self.reportedId(for: call.uuid)]
                 json.append(item)
             }
         }
@@ -194,6 +194,15 @@ class StreamCallKitCallController: NSObject {
 
     static let callsChangedNotification = Notification.Name("CallsChangedNotification")
     var callsChangedHandler: (() -> Void)?
+
+    /// The id the call was started or shown with, or the lowercased uuid if this plugin does not track that call.
+    func reportedId(for uuid: UUID) -> String {
+        let fallback = uuid.uuidString.lowercased()
+        guard let id = self.callWithUUID(uuid: uuid)?.data.uuid, id.lowercased() == fallback else {
+            return fallback
+        }
+        return id
+    }
 
     func callWithUUID(uuid: UUID) -> Call? {
         guard let idx = calls.firstIndex(where: { $0.uuid == uuid }) else { return nil }
