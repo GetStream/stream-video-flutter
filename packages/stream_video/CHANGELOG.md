@@ -100,6 +100,8 @@
 - Added `LeaveInitiator`, who or what made a call leave.
 - `DisconnectReason.left({initiator, message})` says who made a call leave and why; pass it to `Call.leave`. `Call.reject` takes an `initiator` too. A `leave()` without a reason reports `LeaveInitiator.unknown`; `StreamLeaveCallButton` reports `user`.
 - `Call.end` takes an `initiator`, and the call disconnects with a `DisconnectReasonEnded` that carries it and the `reason` given, so an end this side made can be told apart from one from elsewhere.
+- Added `DisconnectReasonUnsupportedNetwork`, the reason a call disconnects with when the network cannot carry WebRTC, so an app can tell the user their network blocks calls rather than that the connection dropped.
+- Added `CallPreferences.maxIceFailuresWithoutConnect`, how many reconnects for sessions in which ICE never connected end the call with `DisconnectReasonUnsupportedNetwork`. `DefaultCallPreferences` defaults it to 2. If your app implements `CallPreferences` directly, add the getter to your implementation.
 
 ### 🔄 Changed
 
@@ -180,6 +182,7 @@
 - A viewport visibility is now recorded whether or not the session accepts it. A dropped report left a participant recorded as something they were not for the rest of the call, since a viewport only ever reports what changed.
 - On iOS devices without multitasking camera access, the camera track is now muted while the app is in the background, so other participants see camera-off instead of a frozen frame.
 - A call that keeps rejoining or keeps failing to reconnect now leaves after 10 rejoins within 120 seconds, 20 rejoins within 30 minutes, or 10 failed reconnect attempts, instead of retrying forever.
+- A call on a network where ICE never connects, such as one that blocks UDP and TURN, now leaves with `DisconnectReasonUnsupportedNetwork` after one rejoin, instead of rejoining for up to 30 minutes. It leaves on the second reconnect, by default, for a session in which neither peer connection connected ICE: a peer connection failed, ICE stayed disconnected, ICE gathering found no local candidates, or the SFU reported a media transport failure. ICE connecting on any peer connection starts the count again, and a reconnect that finds the device offline is not counted. A peer connection whose ICE fails before it ever connected now rejoins straight away, rather than first restarting ICE.
 - Remote audio and video recover more reliably after a reconnect: an answer to a re-sent subscriber offer can no longer be applied to a newer one.
 
 ## 1.7.2

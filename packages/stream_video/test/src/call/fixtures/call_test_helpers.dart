@@ -423,6 +423,7 @@ MockSessionFactory setupMockSessionFactory({
       networkMonitor: any(named: 'networkMonitor'),
       statsOptions: any(named: 'statsOptions'),
       onReconnectionNeeded: any(named: 'onReconnectionNeeded'),
+      onIceConnected: any(named: 'onIceConnected'),
       clientPublishOptions: any(named: 'clientPublishOptions'),
       host: any(named: 'host'),
       leftoverTraceRecords: any(named: 'leftoverTraceRecords'),

@@ -43,6 +43,14 @@ enum ReconnectionNeededReason {
   /// connected, such as a negotiation that failed or a publisher that never
   /// connected.
   stuck,
+
+  /// ICE never connected: the connection or ICE failed, or ICE stayed
+  /// disconnected, before ICE had connected even once.
+  iceNeverConnected,
+
+  /// ICE gathering completed without a single local candidate before ICE had
+  /// connected even once, so nothing can connect.
+  noLocalCandidates,
 }
 
 /// {@template onReconnectionNeeded}
@@ -56,6 +64,11 @@ typedef OnReconnectionNeeded =
       SfuReconnectionStrategy,
       ReconnectionNeededReason,
     );
+
+/// {@template onIceConnected}
+/// Handler for the first time ICE of a peer connection connects.
+/// {@endtemplate}
+typedef OnIceConnected = void Function(StreamPeerConnection);
 
 /// {@template onIceCandidate}
 /// Handler whenever we receive [rtc.RTCIceCandidate]s.
@@ -118,6 +131,21 @@ class StreamPeerConnection extends Disposable {
   /// Whether a reconnect is currently in progress for this peer connection.
   bool get isReconnecting => _isReconnecting;
 
+  bool _iceHasEverConnected = false;
+
+  /// Whether ICE has been connected or completed at least once.
+  bool get hasIceEverConnected => _iceHasEverConnected;
+
+  /// The local candidates of the current ICE gathering round.
+  int _localCandidatesGathered = 0;
+
+  bool _iceGatheringComplete = false;
+
+  /// Whether the latest ICE gathering round completed without a single local
+  /// candidate.
+  bool get hasNoLocalCandidates =>
+      _iceGatheringComplete && _localCandidatesGathered == 0;
+
   void setReconnecting(bool value) {
     _logger.v(() => '[setReconnecting] #$type; value: $value');
     _isReconnecting = value;
@@ -136,6 +164,9 @@ class StreamPeerConnection extends Disposable {
 
   /// {@macro onReconnectionNeeded}
   OnReconnectionNeeded? onReconnectionNeeded;
+
+  /// {@macro onIceConnected}
+  OnIceConnected? onIceConnected;
 
   /// {@macro onIceCandidate}
   OnIceCandidate? onIceCandidate;
@@ -513,6 +544,7 @@ class StreamPeerConnection extends Disposable {
       ..onRemoveTrack = _onRemoveTrack
       ..onIceCandidate = _onIceCandidate
       ..onIceConnectionState = _onIceConnectionState
+      ..onIceGatheringState = _onIceGatheringState
       ..onConnectionState = _onConnectionState
       ..onRenegotiationNeeded = _onRenegotiationNeeded;
   }
@@ -566,13 +598,50 @@ class StreamPeerConnection extends Disposable {
   }
 
   void _onIceCandidate(rtc.RTCIceCandidate iceCandidate) {
+    if (iceCandidate.candidate?.isNotEmpty ?? false) {
+      _localCandidatesGathered++;
+    }
     onIceCandidate?.call(this, iceCandidate);
+  }
+
+  void _onIceGatheringState(rtc.RTCIceGatheringState state) {
+    _logger.v(() => '[onIceGatheringState] #$type; state: $state');
+
+    switch (state) {
+      case rtc.RTCIceGatheringState.RTCIceGatheringStateGathering:
+        _localCandidatesGathered = 0;
+        _iceGatheringComplete = false;
+      case rtc.RTCIceGatheringState.RTCIceGatheringStateComplete:
+        _iceGatheringComplete = true;
+        if (_localCandidatesGathered > 0 || _iceHasEverConnected) return;
+
+        _logger.w(
+          () => '[onIceGatheringState] #$type; no local candidates gathered',
+        );
+        onReconnectionNeeded?.call(
+          this,
+          SfuReconnectionStrategy.rejoin,
+          ReconnectionNeededReason.noLocalCandidates,
+        );
+      case rtc.RTCIceGatheringState.RTCIceGatheringStateNew:
+        break;
+    }
   }
 
   void _onIceConnectionState(rtc.RTCIceConnectionState state) {
     _logger.v(() => '[onIceConnectionState] state: $state');
 
     onIceConnectionStateUpdated?.call(state);
+
+    final isConnected =
+        state == rtc.RTCIceConnectionState.RTCIceConnectionStateConnected ||
+        state == rtc.RTCIceConnectionState.RTCIceConnectionStateCompleted;
+    if (isConnected && !_iceHasEverConnected) {
+      _iceHasEverConnected = true;
+      onIceConnected?.call(this);
+    }
+
+    if (!_iceHasEverConnected && _onIceStateBeforeConnected(state)) return;
 
     switch (state) {
       case rtc.RTCIceConnectionState.RTCIceConnectionStateFailed:
@@ -596,6 +665,7 @@ class StreamPeerConnection extends Disposable {
         });
         break;
       case rtc.RTCIceConnectionState.RTCIceConnectionStateConnected:
+      case rtc.RTCIceConnectionState.RTCIceConnectionStateCompleted:
         // in the `connected` state, we clear the ice restart timeout if it exists
         _logger.i(() => 'connected connection, canceling restartICE');
         iceRestartTimeout?.cancel();
@@ -605,16 +675,66 @@ class StreamPeerConnection extends Disposable {
     }
   }
 
+  /// Handles [state] while ICE has never connected, and returns whether it
+  /// did. An ICE restart cannot help a connection that was never made, so a
+  /// failure asks for a rejoin instead. A disconnect may still recover, so it
+  /// asks for one only if ICE is still disconnected after twice
+  /// [iceRestartDelay].
+  bool _onIceStateBeforeConnected(rtc.RTCIceConnectionState state) {
+    switch (state) {
+      case rtc.RTCIceConnectionState.RTCIceConnectionStateFailed:
+        _logger.i(
+          () => '[onIceConnectionState] #$type; failed before connected',
+        );
+        iceRestartTimeout?.cancel();
+        iceRestartTimeout = null;
+        onReconnectionNeeded?.call(
+          this,
+          SfuReconnectionStrategy.rejoin,
+          ReconnectionNeededReason.iceNeverConnected,
+        );
+        return true;
+      case rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected:
+        _logger.i(
+          () => '[onIceConnectionState] #$type; disconnected before connected',
+        );
+        iceRestartTimeout?.cancel();
+        iceRestartTimeout = Timer(iceRestartDelay * 2, () {
+          if (_iceHasEverConnected ||
+              pc.iceConnectionState !=
+                  rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected) {
+            return;
+          }
+          onReconnectionNeeded?.call(
+            this,
+            SfuReconnectionStrategy.rejoin,
+            ReconnectionNeededReason.iceNeverConnected,
+          );
+        });
+        return true;
+      default:
+        return false;
+    }
+  }
+
   void _onConnectionState(rtc.RTCPeerConnectionState state) {
     onConnectionStateUpdated?.call(state);
 
     if (state == rtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
       _logger.w(() => '[onConnectionState] state: $state');
+      if (!_iceHasEverConnected) {
+        // The failure is reported here; the disconnected watchdog would
+        // report it again.
+        iceRestartTimeout?.cancel();
+        iceRestartTimeout = null;
+      }
       // A failed connection asks for new peer connections.
       onReconnectionNeeded?.call(
         this,
         SfuReconnectionStrategy.rejoin,
-        ReconnectionNeededReason.connectionFailed,
+        _iceHasEverConnected
+            ? ReconnectionNeededReason.connectionFailed
+            : ReconnectionNeededReason.iceNeverConnected,
       );
     } else {
       _logger.v(() => '[onConnectionState] state: $state');
@@ -669,6 +789,7 @@ class StreamPeerConnection extends Disposable {
     onStreamAdded = null;
     onRenegotiationNeeded = null;
     onReconnectionNeeded = null;
+    onIceConnected = null;
     onIceCandidate = null;
     onTrack = null;
     onIceConnectionStateUpdated = null;

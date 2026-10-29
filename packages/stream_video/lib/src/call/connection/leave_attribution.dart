@@ -30,6 +30,8 @@ class LeaveAttribution {
       abortCode: switch (reason) {
         DisconnectReasonReconnectionFailed() =>
           ClientEventStandardCode.networkOffline,
+        DisconnectReasonUnsupportedNetwork() =>
+          ClientEventStandardCode.iceConnectivityFailed,
         _ when initiator == LeaveInitiator.remoteEvent =>
           ClientEventStandardCode.backendLeave,
         _ => ClientEventStandardCode.clientAborted,
@@ -77,6 +79,7 @@ class LeaveAttribution {
       DisconnectReasonReplaced() ||
       DisconnectReasonLastParticipantLeft() => LeaveInitiator.app,
       DisconnectReasonReconnectionFailed() ||
+      DisconnectReasonUnsupportedNetwork() ||
       DisconnectReasonFailure() ||
       DisconnectReasonSfuError() => LeaveInitiator.sdkError,
     };
@@ -114,6 +117,7 @@ class LeaveAttribution {
       DisconnectReasonReplaced() => 'call.replaced',
       DisconnectReasonLastParticipantLeft() => 'call.last_participant_left',
       DisconnectReasonReconnectionFailed() => 'reconnection_failed',
+      DisconnectReasonUnsupportedNetwork() => 'webrtc_unsupported_network',
       DisconnectReasonFailure() => 'error',
       DisconnectReasonSfuError(:final error) => 'sfu_error:${error.code.name}',
     };
@@ -138,6 +142,7 @@ class LeaveAttribution {
       DisconnectReasonReplaced() => 'replaced by another call',
       DisconnectReasonLastParticipantLeft() => 'last participant left',
       DisconnectReasonReconnectionFailed() => 'reconnection failed',
+      DisconnectReasonUnsupportedNetwork() => 'network does not support WebRTC',
       // The error's message, not its `toString`, which carries the stack
       // trace.
       DisconnectReasonFailure(:final error) => 'failure: ${error.message}',

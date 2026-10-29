@@ -71,6 +71,7 @@ class CallSession extends Disposable {
     required this.stateManager,
     required this.dynascaleManager,
     required this.onReconnectionNeeded,
+    required this.onIceConnected,
     required this.onSuspendedAudioTrackRecorded,
     required SdpEditor sdpEditor,
     required this.networkMonitor,
@@ -133,6 +134,9 @@ class CallSession extends Disposable {
   final SfuWebSocket sfuWS;
   final RtcManagerFactory rtcManagerFactory;
   final OnReconnectionNeeded onReconnectionNeeded;
+
+  /// {@macro onIceConnected}
+  final OnIceConnected onIceConnected;
   final ClientPublishOptions? clientPublishOptions;
   final InternetConnection networkMonitor;
   final StatsOptions statsOptions;
@@ -406,6 +410,7 @@ class CallSession extends Disposable {
               ..onSubscriberIceCandidate = _onLocalIceCandidate
               ..onRenegotiationNeeded = negotiateOrRecover
               ..onReconnectionNeeded = onReconnectionNeeded
+              ..onIceConnected = onIceConnected
               ..onRemoteTrackReceived = _onRemoteTrackReceived;
       } else {
         final currentUserId = stateManager.callState.currentUserId;
@@ -436,6 +441,7 @@ class CallSession extends Disposable {
               ..onLocalTrackMuted = _onLocalTrackMuted
               ..onLocalTrackPublished = _onLocalTrackPublished
               ..onReconnectionNeeded = onReconnectionNeeded
+              ..onIceConnected = onIceConnected
               ..onRenegotiationNeeded = negotiateOrRecover
               ..onRemoteTrackReceived = _onRemoteTrackReceived;
       }
