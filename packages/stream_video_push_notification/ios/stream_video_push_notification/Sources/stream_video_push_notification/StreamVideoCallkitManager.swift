@@ -677,7 +677,6 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
         call.isOnHold = action.isOnHold
         call.isMuted = action.isOnHold
-        self.callController.setHold(call: call, onHold: action.isOnHold)
         sendHoldEvent(self.callController.reportedId(for: action.callUUID), action.isOnHold)
         action.fulfill()
     }

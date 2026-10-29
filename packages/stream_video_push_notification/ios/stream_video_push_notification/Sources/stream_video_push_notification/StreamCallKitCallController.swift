@@ -128,14 +128,6 @@ class StreamCallKitCallController: NSObject {
         return json
     }
 
-    func setHold(call: Call, onHold: Bool) {
-        let handleCall = CXSetHeldCallAction(call: call.uuid, onHold: onHold)
-
-        let callTransaction = CXTransaction()
-        callTransaction.addAction(handleCall)
-        self.requestCall(callTransaction, action: "holdCall")
-    }
-
     private func requestCall(
         _ transaction: CXTransaction, action: String, completion: ((Bool) -> Void)? = nil
     ) {
