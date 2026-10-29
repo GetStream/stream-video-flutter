@@ -4,7 +4,7 @@ import Foundation
 @available(iOS 10.0, *)
 class StreamCallKitCallController: NSObject {
 
-    private let callController = CXCallController()
+    private let callController = CXCallController(queue: .main)
     private var sharedProvider: CXProvider? = nil
     private(set) var calls = [Call]()
 
@@ -38,7 +38,6 @@ class StreamCallKitCallController: NSObject {
             callTransaction, action: "startCall",
             completion: { started in
                 guard started else {
-                    // A refused duplicate start must not drop the entry of the one still pending.
                     if self.pendingOutgoingCalls[uuid] === data {
                         self.pendingOutgoingCalls[uuid] = nil
                     }
