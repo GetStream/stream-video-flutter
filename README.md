@@ -31,7 +31,6 @@ We use [Melos](https://melos.invertase.dev) to manage this repository.
 
 * The `packages` folder contains the packages and plugins that the SDK consists of.
 * The `examples` folder holds the samples created using the Flutter Video SDK.
-* The `docusaurus` folder contains the documentation and guides.
 * The `dogfooding` folder contains a complete example app that implements all of the features of the SDK.
 
 ## Process to get started with this repository

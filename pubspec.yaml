@@ -203,9 +203,3 @@ melos:
         flutter build apk --release --verbose
       description: |
         Run `flutter build apk` in the example app.
-
-    docs:
-      run: |
-        npm install -g https://github.com/GetStream/stream-chat-docusaurus-cli &&
-        npx stream-chat-docusaurus -i -s
-      description: Runs the docusaurus documentation locally.
