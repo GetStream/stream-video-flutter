@@ -747,7 +747,7 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
 
     if (activeCall?.callCid.value == cid) {
       final result = await activeCall?.leave(
-        reason: DisconnectReason.callEnded(),
+        reason: DisconnectReason.nativeCallEnded(),
       );
 
       if (result is Failure) {

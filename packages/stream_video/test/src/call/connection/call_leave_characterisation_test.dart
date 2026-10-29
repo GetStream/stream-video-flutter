@@ -71,6 +71,97 @@ void main() {
       ).called(1);
     });
 
+    final pinned =
+        <(String, DisconnectReason, String, ClientEventStandardCode)>[
+          (
+            'ended',
+            DisconnectReason.ended(),
+            'call ended',
+            ClientEventStandardCode.backendLeave,
+          ),
+          (
+            'native call ended',
+            DisconnectReason.nativeCallEnded(),
+            'call ended externally',
+            ClientEventStandardCode.backendLeave,
+          ),
+          (
+            'rejected with a reason',
+            DisconnectReason.rejected(
+              byUserId: 'someone',
+              reason: CallRejectReason.decline(),
+            ),
+            'rejected: decline',
+            ClientEventStandardCode.clientAborted,
+          ),
+          (
+            'rejected without a reason',
+            const DisconnectReason.rejected(byUserId: 'someone'),
+            'rejected: unspecified',
+            ClientEventStandardCode.clientAborted,
+          ),
+          (
+            'cancelled',
+            const DisconnectReason.cancelled(byUserId: 'caller'),
+            'cancelled: caller',
+            ClientEventStandardCode.clientAborted,
+          ),
+          (
+            'blocked',
+            const DisconnectReason.blocked(),
+            'blocked',
+            ClientEventStandardCode.clientAborted,
+          ),
+          (
+            'replaced',
+            DisconnectReason.replaced(),
+            'replaced by another call',
+            ClientEventStandardCode.clientAborted,
+          ),
+          (
+            'last participant left',
+            DisconnectReason.lastParticipantLeft(),
+            'last participant left',
+            ClientEventStandardCode.clientAborted,
+          ),
+          (
+            'reconnection failed',
+            DisconnectReason.reconnectionFailed(),
+            'reconnection failed',
+            ClientEventStandardCode.networkOffline,
+          ),
+          (
+            'failure',
+            const DisconnectReason.failure(
+              StreamVideoException(message: 'boom'),
+            ),
+            'failure: ${const StreamVideoException(message: 'boom')}',
+            ClientEventStandardCode.clientAborted,
+          ),
+          (
+            'SFU error',
+            const DisconnectReason.sfuError(_sfuError),
+            'sfu error: $_sfuError',
+            ClientEventStandardCode.clientAborted,
+          ),
+        ];
+
+    for (final (name, reason, wording, abortCode) in pinned) {
+      test(
+        'a leave for $name tells the SFU "$wording" and aborts with '
+        '${abortCode.wireValue}',
+        () async {
+          final call = harness.buildCall();
+          await call.join();
+
+          await call.leave(reason: reason);
+
+          verify(() => harness.session.leave(reason: wording)).called(1);
+          expect(harness.reporter.aborts, [abortCode]);
+        },
+      );
+    }
+
     test('a failed SFU join tells the SFU about the failure', () async {
       harness.stubSessionStart(
         harness.session,
@@ -324,3 +415,10 @@ void main() {
     });
   });
 }
+
+const _sfuError = SfuError(
+  message: 'kicked',
+  code: SfuErrorCode.unspecified,
+  shouldRetry: false,
+  reconnectStrategy: SfuReconnectionStrategy.disconnect,
+);
