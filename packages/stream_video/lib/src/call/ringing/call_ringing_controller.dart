@@ -13,6 +13,7 @@ import '../../models/call_cid.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_status.dart';
 import '../../models/disconnect_reason.dart';
+import '../../models/leave_initiator.dart';
 import '../../ring_state_polling_settings.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
@@ -20,6 +21,7 @@ import '../call.dart';
 import '../call_events.dart';
 import '../call_reject_reason.dart';
 import '../call_ringing_state.dart';
+import '../connection/leave_attribution.dart';
 import '../ring_state_poller.dart';
 import '../state/call_state_notifier.dart';
 import '../stats/trace_tag.dart';
@@ -119,7 +121,10 @@ class CallRingingController {
   }
 
   /// Rejects the incoming call, then leaves it.
-  Future<Result<None>> reject({CallRejectReason? reason}) async {
+  Future<Result<None>> reject({
+    CallRejectReason? reason,
+    LeaveInitiator? initiator,
+  }) async {
     final state = _stateManager.callState;
     _logger.i(() => '[reject] reason: $reason');
 
@@ -136,8 +141,12 @@ class CallRingingController {
           ? DisconnectReason.rejected(
               byUserId: state.currentUserId,
               reason: reason,
+              initiator: initiator,
             )
-          : null,
+          : DisconnectReason.left(
+              initiator: initiator ?? LeaveAttribution.rejectInitiator(reason),
+              message: 'reject failed: ${reason?.value ?? 'unspecified'}',
+            ),
     );
 
     return result;

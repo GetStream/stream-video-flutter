@@ -56,6 +56,7 @@
 - `CallStatusReconnecting.attempt` now counts every attempt of a reconnect, fast and rejoin alike, starting at 1. It used to start at 0, stay there across fast attempts, and count only rejoins — reaching a different value twice within one rejoin.
 - `DisconnectReason` is `sealed` and its subclasses are `final`, so a `switch` over it must cover every subclass and an app cannot add, extend or implement one. `DisconnectReason.timeout()` / `DisconnectReasonTimeout` and `DisconnectReasonManuallyClosed` are removed; the SDK never reported either.
 - An SFU socket that the server closes for good, with no call-ended event before it, now disconnects the call with `DisconnectReasonFailure` rather than `DisconnectReasonEnded`: the connection failed, the call did not end. UI that reacts to `DisconnectReasonEnded` no longer runs for it. A call the backend ends still reports `DisconnectReasonEnded`, from the SFU's call-ended event that comes before the close.
+- A call this side leaves now disconnects with the new `DisconnectReasonLeft` rather than `DisconnectReasonCancelled` carrying the current user's id. `DisconnectReasonCancelled` now means only that the caller cancelled the ring. A `leave()` without a reason, and a reject whose request failed, both disconnect with `DisconnectReasonLeft`.
 
 ### ⚠️ Deprecated
 
@@ -94,6 +95,7 @@
 - Added `RingingSnapshot`, which resolves a ringing flow for the caller as well as the callee. `CallMetadata.ringingStateFor` goes through it.
 - Added `RtcMediaDeviceNotifier.isAudioOutputSelectionSupported`, whether `Call.setAudioOutputDevice` can route audio on this platform, so a speaker picker can be hidden where it cannot.
 - Added `LeaveInitiator`, who or what made a call leave.
+- `DisconnectReason.left({initiator, message})` says who made a call leave and why; pass it to `Call.leave`. `Call.reject` takes an `initiator` too. A `leave()` without a reason reports `LeaveInitiator.unknown`; `StreamLeaveCallButton` reports `user`.
 
 ### 🔄 Changed
 

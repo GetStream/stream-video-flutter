@@ -200,7 +200,7 @@ void main() {
 
   group('the native call screen', () {
     test('a decline rejects the ringing call', () async {
-      ring();
+      final call = ring();
       ringing().observeCallDeclinedRingingEvent();
 
       nativeEvents.add(
@@ -211,11 +211,12 @@ void main() {
       await pumpEventQueue();
 
       verifyRejected(CallRejectReason.decline()).called(1);
+      expect(call.state.value.status, _rejectedBy(LeaveInitiator.callkit));
     });
 
     test('an end on iOS rejects the incoming call', () async {
       CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
-      ring();
+      final call = ring();
       ringing().observeCallEndedRingingEvent();
 
       nativeEvents.add(
@@ -226,6 +227,7 @@ void main() {
       await pumpEventQueue();
 
       verifyRejected(CallRejectReason.callEnded()).called(1);
+      expect(call.state.value.status, _rejectedBy(LeaveInitiator.callkit));
     });
 
     test('an end on Android is ignored unless the system ended it', () async {
@@ -770,9 +772,12 @@ void main() {
           StreamCallCid(cid: 'default:outgoing-call'),
         );
         // Rejecting leaves the call, which takes it out of the active calls.
-        when(() => outgoing.reject(reason: any(named: 'reason'))).thenAnswer((
-          _,
-        ) async {
+        when(
+          () => outgoing.reject(
+            reason: any(named: 'reason'),
+            initiator: any(named: 'initiator'),
+          ),
+        ).thenAnswer((_) async {
           await fixture.streamVideo.state.removeActiveCall(outgoing);
           return const Result.success(none);
         });
@@ -788,7 +793,10 @@ void main() {
         await incoming.accept();
 
         verify(
-          () => outgoing.reject(reason: CallRejectReason.cancel()),
+          () => outgoing.reject(
+            reason: CallRejectReason.cancel(),
+            initiator: LeaveInitiator.app,
+          ),
         ).called(1);
         verifyNever(() => outgoing.leave(reason: any(named: 'reason')));
         expect(fixture.streamVideo.state.activeCalls.value, isEmpty);
@@ -805,4 +813,17 @@ void main() {
       expect(status.acceptedByMe, isTrue);
     });
   });
+}
+
+/// A status disconnected by a reject that [initiator] made.
+Matcher _rejectedBy(LeaveInitiator initiator) {
+  return isA<CallStatusDisconnected>().having(
+    (status) => status.reason,
+    'reason',
+    isA<DisconnectReasonRejected>().having(
+      (rejected) => rejected.initiator,
+      'initiator',
+      initiator,
+    ),
+  );
 }

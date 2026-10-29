@@ -74,9 +74,13 @@ class _LivestreamDemoScreenState extends State<LivestreamDemoScreen> {
 
   @override
   void dispose() {
-    _call?.leave().then((value) {
-      _streamVideo?.dispose();
-    });
+    _call
+        ?.leave(
+          reason: const DisconnectReason.left(initiator: LeaveInitiator.app),
+        )
+        .then((value) {
+          _streamVideo?.dispose();
+        });
     super.dispose();
   }
 

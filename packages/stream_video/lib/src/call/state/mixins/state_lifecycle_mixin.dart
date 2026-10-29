@@ -198,10 +198,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
 
     state = state.copyWith(
       status: CallStatus.disconnected(
-        reason ??
-            DisconnectReason.cancelled(
-              byUserId: state.currentUserId,
-            ),
+        reason ?? const DisconnectReason.left(),
       ),
       sessionId: '',
       callParticipants: const [],

@@ -132,7 +132,12 @@ class StreamBackgroundService {
           try {
             await onPlatformUiLayerDestroyed?.call(callContext.call);
             if (onPlatformUiLayerDestroyed == null) {
-              await callContext.call.leave();
+              await callContext.call.leave(
+                reason: const DisconnectReason.left(
+                  initiator: LeaveInitiator.app,
+                  message: 'app UI destroyed',
+                ),
+              );
             }
           } catch (e) {
             _instance._logger.e(

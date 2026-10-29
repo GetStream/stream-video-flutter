@@ -11,13 +11,13 @@ import '../fixtures/data.dart';
 /// Pins how `Call.join` behaves today, including where it races `leave`, so
 /// moving the connection code out of `Call` cannot change it unnoticed.
 /// Idle, then connecting, then disconnected by the user's own leave.
-final cancelledFromConnecting = [
+final leftFromConnecting = [
   isA<CallStatusIdle>(),
   isA<CallStatusConnecting>(),
   isA<CallStatusDisconnected>().having(
     (s) => s.reason,
     'reason',
-    isA<DisconnectReasonCancelled>(),
+    isA<DisconnectReasonLeft>(),
   ),
 ];
 
@@ -182,7 +182,7 @@ void main() {
       await pumpEventQueue();
 
       harness.verifyMakeCallSessionCount(0);
-      expect(statuses, cancelledFromConnecting);
+      expect(statuses, leftFromConnecting);
     });
 
     test('while the SFU session is being created', () async {
@@ -216,7 +216,7 @@ void main() {
           clientEventRetryCount: any(named: 'clientEventRetryCount'),
         ),
       );
-      expect(statuses, cancelledFromConnecting);
+      expect(statuses, leftFromConnecting);
     });
 
     test('while the SFU session is starting', () async {
@@ -238,7 +238,7 @@ void main() {
       gate.complete();
       await pumpEventQueue();
 
-      expect(statuses, cancelledFromConnecting);
+      expect(statuses, leftFromConnecting);
     });
   });
 

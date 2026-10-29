@@ -190,7 +190,9 @@ class _CallScreenState extends State<CallScreen>
     _devices.dispose();
     _panelAnimation.dispose();
     _panelController.dispose();
-    widget.call.leave();
+    widget.call.leave(
+      reason: const DisconnectReason.left(initiator: LeaveInitiator.app),
+    );
     _userChatRepo.disconnectUser();
     _videoEffectsManager.dispose();
     super.dispose();
@@ -635,7 +637,7 @@ class _CallScreenState extends State<CallScreen>
             }
 
             if (kIsProd &&
-                (reason is DisconnectReasonCancelled ||
+                (reason is DisconnectReasonLeft ||
                     reason is DisconnectReasonEnded ||
                     reason is DisconnectReasonLastParticipantLeft)) {
               showFeedbackDialog(context, call: widget.call);

@@ -206,6 +206,80 @@ void main() {
   });
 
   group('a ring answered by this instance', () {
+    test('a reject leaves with the initiator it was given', () async {
+      final call = ringingCall(CallStatus.incoming());
+      when(
+        () => harness.coordinatorClient.rejectCall(
+          cid: any(named: 'cid'),
+          reason: any(named: 'reason'),
+        ),
+      ).thenAnswer((_) async => const Result.success(none));
+
+      await call.reject(
+        reason: CallRejectReason.decline(),
+        initiator: LeaveInitiator.callkit,
+      );
+
+      final status = harness.stateManager.callState.status;
+      final reason = (status as CallStatusDisconnected).reason;
+      expect(
+        reason,
+        isA<DisconnectReasonRejected>().having(
+          (rejected) => rejected.initiator,
+          'initiator',
+          LeaveInitiator.callkit,
+        ),
+      );
+    });
+
+    test(
+      'a reject that fails without an initiator still derives one',
+      () async {
+        final call = ringingCall(CallStatus.incoming());
+        when(
+          () => harness.coordinatorClient.rejectCall(
+            cid: any(named: 'cid'),
+            reason: any(named: 'reason'),
+          ),
+        ).thenAnswer((_) async => failureWithError('offline'));
+
+        await call.reject(reason: CallRejectReason.timeout());
+
+        final status = harness.stateManager.callState.status;
+        expect(
+          (status as CallStatusDisconnected).reason,
+          const DisconnectReason.left(
+            initiator: LeaveInitiator.sdkError,
+            message: 'reject failed: timeout',
+          ),
+        );
+      },
+    );
+
+    test('a reject that fails still leaves, with its initiator', () async {
+      final call = ringingCall(CallStatus.incoming());
+      when(
+        () => harness.coordinatorClient.rejectCall(
+          cid: any(named: 'cid'),
+          reason: any(named: 'reason'),
+        ),
+      ).thenAnswer((_) async => failureWithError('offline'));
+
+      await call.reject(
+        reason: CallRejectReason.decline(),
+        initiator: LeaveInitiator.user,
+      );
+
+      final status = harness.stateManager.callState.status;
+      expect(
+        (status as CallStatusDisconnected).reason,
+        const DisconnectReason.left(
+          initiator: LeaveInitiator.user,
+          message: 'reject failed: decline',
+        ),
+      );
+    });
+
     test('the echo of its own reject keeps the reason it was given', () async {
       final call = ringingCall(CallStatus.incoming());
       // The server's event for the reject arrives before its response. Only
