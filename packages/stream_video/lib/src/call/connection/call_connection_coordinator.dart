@@ -25,6 +25,12 @@ class CallConnectionCoordinator {
   @visibleForTesting
   static Duration statsBeforeReconnectTimeout = const Duration(seconds: 2);
 
+  /// How long `end()` waits for the server before leaving anyway. The client
+  /// sets no timeout of its own, so a stalled connection would otherwise keep
+  /// the call up until the socket gives up.
+  @visibleForTesting
+  static Duration endRequestTimeout = const Duration(seconds: 10);
+
   Duration _fastReconnectDeadline = Duration.zero;
 
   // Separate limits. The rejoin windows count across reconnects. The short
@@ -71,6 +77,10 @@ class CallConnectionCoordinator {
   );
 
   bool get _isLeftOrLeaving => _phase.value.isLeftOrLeaving;
+
+  // The end this side is asking the server for, so a second end() joins it
+  // rather than asking again.
+  Future<Result<None>>? _endInFlight;
 
   /// Runs [body] with a future that completes once the call is leaving.
   Future<T> _whileJoined<T>(Future<T> Function(Future<void> left) body) async {
@@ -1087,8 +1097,9 @@ class CallConnectionCoordinator {
       return failure;
     }
 
-    // The request is not cancelled by a leave, so its answer can arrive after
-    // one. A leave aborted the stage already, but an end does not abort.
+    // The request is not cancelled by a leave or an end, so its answer can
+    // arrive after one. Both aborted the stage already, so failing it again
+    // only closes it should a path ever skip the abort.
     if (_isLeftOrLeaving) {
       _call._logger.w(() => '[joinCall] rejected (call was left during join)');
       reporter.failStage(
@@ -2316,7 +2327,27 @@ class CallConnectionCoordinator {
     return const Result.success(none);
   }
 
-  Future<Result<None>> end({String? reason}) async {
+  /// Ends the call on the server, then leaves it.
+  ///
+  /// A server that refuses the end leaves the call untouched. An end the
+  /// server never decided on, because the device is offline, the request
+  /// timed out after [endRequestTimeout], or the server failed or rate
+  /// limited it, still leaves this side, as the user asked to be out of the
+  /// call.
+  Future<Result<None>> end({
+    String? reason,
+    LeaveInitiator initiator = LeaveInitiator.unknown,
+  }) {
+    return _endInFlight ??= _end(
+      reason: reason,
+      initiator: initiator,
+    ).whenComplete(() => _endInFlight = null);
+  }
+
+  Future<Result<None>> _end({
+    String? reason,
+    required LeaveInitiator initiator,
+  }) async {
     _call._logger.d(() => '[end] status: ${_call.state.value.status}');
 
     if (_call.state.value.status is! CallStatusActive) {
@@ -2326,39 +2357,71 @@ class CallConnectionCoordinator {
       return failureWithError('invalid status: ${_call.state.value.status}');
     }
 
-    final bool didDisconnect;
-    try {
-      didDisconnect = await _disconnect(
-        sfuLeaveReason: reason ?? 'user is ending the call',
-      );
-    } catch (_) {
-      // The teardown failed here, but the call still ends for everyone.
-      try {
-        await _call._permissionsManager.endCall();
-      } finally {
-        _settleDisconnected(DisconnectReason.ended());
-      }
-      rethrow;
-    }
-
-    // If another disconnect already ran (or is running), don't fire the
-    // server-side endCall a second time and don't re-emit the lifecycle
-    // event.
-    if (!didDisconnect) {
-      _call._logger.v(() => '[end] disconnect short-circuited');
+    // A leave that is already disconnecting wins: the call is on its way out,
+    // and this instance no longer holds a session to end it from.
+    if (_isLeftOrLeaving) {
+      _call._logger.v(() => '[end] rejected (already leaving)');
       return const Result.success(none);
     }
 
+    final endReason = DisconnectReasonEnded(
+      initiator: initiator,
+      message: reason,
+    );
+
+    // The call's own `call.ended` can arrive before the response. While the
+    // request runs, the state writes it as this end, not as one from
+    // elsewhere, so the call disconnects once and with this reason.
+    final stateManager = _call._stateManager..pendingEnd = endReason;
     final Result<None> result;
     try {
-      result = await _call._permissionsManager.endCall();
+      result = await _call._permissionsManager.endCall().timeout(
+        endRequestTimeout,
+        onTimeout: () => failureWithError(
+          'end request timed out',
+          cause: TimeoutException('end request', endRequestTimeout),
+        ),
+      );
     } finally {
-      _setPhase(ConnectionDisconnected(DisconnectReason.ended()));
-      _call._stateManager.lifecycleCallEnded();
+      stateManager.pendingEnd = null;
+    }
+
+    switch (result) {
+      case Success<None>():
+        // The backend ended it for everyone, so there is no ring to cancel.
+        await _leave(reason: endReason, remote: true);
+      case Failure(:final error) when _isNotDelivered(error):
+        _call._logger.w(() => '[end] not delivered, leaving anyway: $error');
+        await _leave(
+          reason: DisconnectReason.left(
+            initiator: initiator,
+            message: 'end not delivered',
+          ),
+        );
+      case Failure():
+        _call._logger.w(() => '[end] rejected by the server: $result');
+        return result;
+    }
+
+    // A remote leave its own `call.ended` started may still be tearing down.
+    if (_phase.value is ConnectionLeaving) {
+      await _phase.firstWhere((phase) => phase is ConnectionDisconnected);
     }
 
     _call._logger.v(() => '[end] completed: $result');
     return result;
+  }
+
+  // Whether [error] means the server never decided on the end: the device was
+  // offline, the request timed out, the server failed (5xx) or turned the
+  // request away for its rate (429). Anything else is the server refusing it.
+  static bool _isNotDelivered(Object error) {
+    if (error case StreamVideoException(:final apiStatusCode?)) {
+      if (apiStatusCode >= 500 || apiStatusCode == 429) return true;
+    }
+    final code = const ClientEventErrorMapper().map(error).code;
+    return code == ClientEventStandardCode.networkOffline ||
+        code == ClientEventStandardCode.requestTimeout;
   }
 
   /// Moves to [ConnectionDisconnected] and reports the call disconnected for

@@ -57,6 +57,9 @@
 - `DisconnectReason` is `sealed` and its subclasses are `final`, so a `switch` over it must cover every subclass and an app cannot add, extend or implement one. `DisconnectReason.timeout()` / `DisconnectReasonTimeout` and `DisconnectReasonManuallyClosed` are removed; the SDK never reported either.
 - An SFU socket that the server closes for good, with no call-ended event before it, now disconnects the call with `DisconnectReasonFailure` rather than `DisconnectReasonEnded`: the connection failed, the call did not end. UI that reacts to `DisconnectReasonEnded` no longer runs for it. A call the backend ends still reports `DisconnectReasonEnded`, from the SFU's call-ended event that comes before the close.
 - A call this side leaves now disconnects with the new `DisconnectReasonLeft` rather than `DisconnectReasonCancelled` carrying the current user's id. `DisconnectReasonCancelled` now means only that the caller cancelled the ring. A `leave()` without a reason, and a reject whose request failed, both disconnect with `DisconnectReasonLeft`.
+- `DisconnectReasonEnded` now carries an `initiator` and a `message`, so detect an ended call with `is DisconnectReasonEnded` rather than `== DisconnectReason.ended()`. An end from elsewhere has `initiator` `LeaveInitiator.remoteEvent`; one this side made through `Call.end` carries that call's initiator and reason and is not equal to a bare `DisconnectReason.ended()`.
+- `Call.end` ends the call on the server before leaving it, and a server that refuses the end now leaves the call running. It used to leave this side whatever the server said. A user without the end-call permission, or any other refusal, gets the failure back and stays in the call, so an app that showed "End call" to such users and relied on it acting as a leave has to call `Call.leave` instead. An end the server never decides on, because the device is offline, the request times out after 10 seconds, or the server fails (5xx) or rate limits it (429), still leaves this side, now as `DisconnectReasonLeft`, and returns the failure. An end that succeeds also fails the join stages still in flight, as a leave does, and a second `end()` while one is in flight waits for it rather than asking the server again.
+- `Call.leave` callers in the SDK now pass a reason, and `Call.reject` and `Call.end` take a new optional `initiator`. A class that implements `Call` has to add the parameter, and a test that verifies `call.leave()` with no arguments against the SDK's widgets has to match `reason` too.
 
 ### ⚠️ Deprecated
 
@@ -96,6 +99,7 @@
 - Added `RtcMediaDeviceNotifier.isAudioOutputSelectionSupported`, whether `Call.setAudioOutputDevice` can route audio on this platform, so a speaker picker can be hidden where it cannot.
 - Added `LeaveInitiator`, who or what made a call leave.
 - `DisconnectReason.left({initiator, message})` says who made a call leave and why; pass it to `Call.leave`. `Call.reject` takes an `initiator` too. A `leave()` without a reason reports `LeaveInitiator.unknown`; `StreamLeaveCallButton` reports `user`.
+- `Call.end` takes an `initiator`, and the call disconnects with a `DisconnectReasonEnded` that carries it and the `reason` given, so an end this side made can be told apart from one from elsewhere.
 
 ### 🔄 Changed
 
@@ -119,7 +123,6 @@
 
 ### 🐞 Fixed
 
-- Leaving a call while it is still joining no longer restores its capabilities and participants, or starts auto-on noise cancellation that kept running after the call ended. Leaving while the call is still connecting no longer leaves WebRTC connections running.
 - On iOS, a call that defaults to the loudspeaker now starts on it, instead of switching to it after the microphone is already recording.
 - A fast reconnect no longer hangs when the network drops while it is reopening the SFU connection. The attempt fails after five seconds and the call rejoins, where before it stayed reconnecting until the operating system gave up on the connection.
 - The client reconnects after a network loss again, instead of the coordinator connection staying stuck closing and refusing every reconnect.

@@ -217,7 +217,7 @@ void main() {
 
       expect(
         stateManager.callState.status,
-        CallStatus.disconnected(DisconnectReason.ended()),
+        CallStatus.disconnected(const DisconnectReason.ended()),
       );
     });
   });

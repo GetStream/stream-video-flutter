@@ -132,7 +132,7 @@ void main() {
     verifyNever(() => harness.streamVideo.setAudioProcessingEnabled(true));
   });
 
-  test('an end during the join closes the coordinator join stage', () async {
+  test('an end during the join aborts the coordinator join stage', () async {
     when(
       () => harness.permissionsManager.endCall(),
     ).thenAnswer((_) async => const Result.success(none));
@@ -140,16 +140,18 @@ void main() {
     final join = call.join();
     await waitUntil(() => joinRequested);
 
-    // Unlike a leave, an end aborts no telemetry stage.
-    await call.end();
+    // Like a leave, an end aborts the stages in flight, attributed to the end.
+    await call.end(initiator: LeaveInitiator.user);
     joinAnswer.complete(Result.success(_autoOnJoined()));
     await join;
     await pumpEventQueue();
 
-    expect(harness.reporter.aborts, isEmpty);
-    expect(harness.reporter.stageFailures, [
-      ClientEventStandardCode.clientAborted,
-    ]);
+    final abort = harness.reporter.abortFailures.single;
+    expect(abort.code, ClientEventStandardCode.clientAborted);
+    expect(abort.leaveInitiator, LeaveInitiator.user);
+    expect(abort.leaveReason, 'call.ended');
+    harness.verifyMakeCallSessionCount(0);
+    expect(call.state.value.status, isA<CallStatusDisconnected>());
   });
 
   test('a failed answer after a leave keeps the call disconnected', () async {

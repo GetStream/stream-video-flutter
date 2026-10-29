@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/call/call.dart' show CallConnectionCoordinator;
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_call_ended_reason.dart';
 import 'package:stream_video/src/telemetry/client_event_types.dart';
@@ -56,7 +57,7 @@ void main() {
       final call = harness.buildCall();
       await call.join();
 
-      await call.leave(reason: DisconnectReason.ended());
+      await call.leave(reason: const DisconnectReason.ended());
 
       expect(harness.reporter.aborts, [ClientEventStandardCode.backendLeave]);
     });
@@ -88,7 +89,7 @@ void main() {
         >[
           (
             name: 'ended',
-            reason: DisconnectReason.ended(),
+            reason: const DisconnectReason.ended(),
             message: 'call ended',
             abortCode: ClientEventStandardCode.backendLeave,
             initiator: LeaveInitiator.remoteEvent,
@@ -525,9 +526,37 @@ void main() {
       ).called(1);
     });
 
+    test('carries who ended the call and why', () async {
+      final call = harness.buildCall();
+      await call.join();
+
+      await call.end(reason: 'meeting over', initiator: LeaveInitiator.user);
+
+      expect(
+        (call.state.value.status as CallStatusDisconnected).reason,
+        const DisconnectReason.ended(
+          initiator: LeaveInitiator.user,
+          message: 'meeting over',
+        ),
+      );
+      verify(() => harness.session.leave(reason: 'meeting over')).called(1);
+    });
+
+    test('without an initiator reports unknown, not a backend end', () async {
+      final call = harness.buildCall();
+      await call.join();
+
+      await call.end();
+
+      expect(
+        (call.state.value.status as CallStatusDisconnected).reason,
+        const DisconnectReason.ended(initiator: LeaveInitiator.unknown),
+      );
+    });
+
     test(
-      'when the server refuses to end, returns the failure but stays '
-      'disconnected as ended',
+      'when the server refuses to end, returns the failure and the call '
+      'carries on',
       () async {
         when(() => harness.permissionsManager.endCall()).thenAnswer(
           (_) async => const Result.failure(
@@ -536,12 +565,17 @@ void main() {
         );
         final call = harness.buildCall();
         await call.join();
+        final before = call.state.value.status;
 
         final result = await call.end();
+        await pumpEventQueue();
 
         expect(result.getErrorOrNull()?.message, 'end refused');
-        final status = call.state.value.status as CallStatusDisconnected;
-        expect(status.reason, isA<DisconnectReasonEnded>());
+        expect(call.state.value.status, before);
+        verifyNever(
+          () => harness.session.leave(reason: any(named: 'reason')),
+        );
+        expect(harness.reporter.aborts, isEmpty);
       },
     );
 
@@ -564,14 +598,229 @@ void main() {
       verify(harness.session.dispose).called(1);
     });
 
-    test('reports no telemetry abort', () async {
+    test('aborts and unregisters telemetry with the end', () async {
       final call = harness.buildCall();
       await call.join();
 
-      await call.end();
+      await call.end(initiator: LeaveInitiator.user);
       await pumpEventQueue();
 
-      expect(harness.reporter.aborts, isEmpty);
+      final failure = harness.reporter.abortFailures.single;
+      expect(failure.code, ClientEventStandardCode.clientAborted);
+      expect(failure.reason, 'user is ending the call');
+      expect(failure.leaveInitiator, LeaveInitiator.user);
+      expect(failure.leaveReason, 'call.ended');
+      expect(harness.reporter.registered, isEmpty);
+    });
+
+    test('during a join, ends it and attributes the end', () async {
+      final startGate = Completer<Result<SessionStartResult>>();
+      harness.stubSessionStart(harness.session, () => startGate.future);
+      final call = harness.buildCall();
+      final join = call.join();
+      await pumpEventQueue();
+      expect(call.state.value.status, isA<CallStatusActive>());
+
+      final result = await call.end(initiator: LeaveInitiator.user);
+      startGate.complete(sessionStartSuccess());
+      await join;
+      await pumpEventQueue();
+
+      expect(result.isSuccess, isTrue);
+      expect(
+        (call.state.value.status as CallStatusDisconnected).reason,
+        const DisconnectReason.ended(initiator: LeaveInitiator.user),
+      );
+      expect(
+        harness.reporter.abortFailures.map((f) => f.leaveInitiator),
+        everyElement(LeaveInitiator.user),
+      );
+      expect(harness.reporter.abortFailures, isNotEmpty);
+      expect(harness.reporter.registered, isEmpty);
+    });
+
+    test(
+      'whose own call-ended arrives before the response, disconnects once '
+      "and as this side's end",
+      () async {
+        final call = harness.buildCall();
+        await call.join();
+        final statuses = recordStatuses(call);
+        when(() => harness.permissionsManager.endCall()).thenAnswer((_) async {
+          await harness.emitSfu(
+            harness.session,
+            const SfuCallEndedEvent(callEndedReason: SfuCallEndedReason.ended),
+          );
+          return const Result.success(none);
+        });
+
+        await call.end(reason: 'meeting over', initiator: LeaveInitiator.user);
+        await pumpEventQueue();
+
+        expect(statuses.whereType<CallStatusDisconnected>(), [
+          CallStatus.disconnected(
+            const DisconnectReason.ended(
+              initiator: LeaveInitiator.user,
+              message: 'meeting over',
+            ),
+          ),
+        ]);
+        verify(() => harness.session.leave(reason: 'meeting over')).called(1);
+        expect(
+          harness.reporter.abortFailures.map((f) => f.leaveInitiator),
+          everyElement(LeaveInitiator.user),
+        );
+      },
+    );
+
+    test('a leave during the request wins, and disconnects once', () async {
+      final call = harness.buildCall();
+      await call.join();
+      final statuses = recordStatuses(call);
+      final response = Completer<Result<None>>();
+      when(
+        () => harness.permissionsManager.endCall(),
+      ).thenAnswer((_) => response.future);
+
+      final end = call.end(initiator: LeaveInitiator.user);
+      await pumpEventQueue();
+      await call.leave(
+        reason: const DisconnectReason.left(initiator: LeaveInitiator.user),
+      );
+      response.complete(const Result.success(none));
+      final result = await end;
+      await pumpEventQueue();
+
+      expect(result.isSuccess, isTrue);
+      expect(statuses.whereType<CallStatusDisconnected>(), [
+        CallStatus.disconnected(
+          const DisconnectReason.left(initiator: LeaveInitiator.user),
+        ),
+      ]);
+    });
+
+    test(
+      'when the request never reaches the server, still leaves this side',
+      () async {
+        when(() => harness.permissionsManager.endCall()).thenAnswer(
+          (_) async => Result.failure(
+            StreamVideoExceptionWithCause(
+              message: 'timed out',
+              cause: TimeoutException('slow network'),
+            ),
+          ),
+        );
+        final call = harness.buildCall();
+        await call.join();
+
+        final result = await call.end(initiator: LeaveInitiator.user);
+        await pumpEventQueue();
+
+        expect(result.isFailure, isTrue);
+        expect(
+          (call.state.value.status as CallStatusDisconnected).reason,
+          const DisconnectReason.left(
+            initiator: LeaveInitiator.user,
+            message: 'end not delivered',
+          ),
+        );
+        verify(
+          () => harness.session.leave(reason: 'end not delivered'),
+        ).called(1);
+      },
+    );
+
+    // The server answered, but did not decide on the end: it failed or turned
+    // the request away for its rate. Only a refusal keeps the call.
+    for (final (statusCode, leaves) in [
+      (503, true),
+      (429, true),
+      (403, false),
+    ]) {
+      test(
+        'an HTTP $statusCode answer ${leaves ? 'leaves' : 'keeps the call'}',
+        () async {
+          when(() => harness.permissionsManager.endCall()).thenAnswer(
+            (_) async => Result.failure(
+              StreamVideoExceptionWithCause(
+                message: 'end failed',
+                cause: StreamApiException(
+                  message: 'HTTP $statusCode',
+                  statusCode: statusCode,
+                ),
+              ),
+            ),
+          );
+          final call = harness.buildCall();
+          await call.join();
+
+          final result = await call.end(initiator: LeaveInitiator.user);
+          await pumpEventQueue();
+
+          expect(result.isFailure, isTrue);
+          if (leaves) {
+            expect(
+              (call.state.value.status as CallStatusDisconnected).reason,
+              const DisconnectReason.left(
+                initiator: LeaveInitiator.user,
+                message: 'end not delivered',
+              ),
+            );
+          } else {
+            expect(
+              call.state.value.status,
+              isNot(isA<CallStatusDisconnected>()),
+            );
+            verifyNever(
+              () => harness.session.leave(reason: any(named: 'reason')),
+            );
+          }
+        },
+      );
+    }
+
+    test('a request that hangs past the timeout still leaves', () async {
+      final previous = CallConnectionCoordinator.endRequestTimeout;
+      CallConnectionCoordinator.endRequestTimeout = const Duration(
+        milliseconds: 50,
+      );
+      addTearDown(
+        () => CallConnectionCoordinator.endRequestTimeout = previous,
+      );
+      when(
+        () => harness.permissionsManager.endCall(),
+      ).thenAnswer((_) => Completer<Result<None>>().future);
+      final call = harness.buildCall();
+      await call.join();
+
+      final result = await call.end(initiator: LeaveInitiator.user);
+      await pumpEventQueue();
+
+      expect(result.getErrorOrNull()?.message, 'end request timed out');
+      expect(
+        (call.state.value.status as CallStatusDisconnected).reason,
+        const DisconnectReason.left(
+          initiator: LeaveInitiator.user,
+          message: 'end not delivered',
+        ),
+      );
+    });
+
+    test('two ends at once ask the server once', () async {
+      final call = harness.buildCall();
+      await call.join();
+      final response = Completer<Result<None>>();
+      when(
+        () => harness.permissionsManager.endCall(),
+      ).thenAnswer((_) => response.future);
+
+      final first = call.end(initiator: LeaveInitiator.user);
+      final second = call.end(initiator: LeaveInitiator.user);
+      response.complete(const Result.success(none));
+
+      expect((await first).isSuccess, isTrue);
+      expect((await second).isSuccess, isTrue);
+      verify(() => harness.permissionsManager.endCall()).called(1);
     });
 
     test(

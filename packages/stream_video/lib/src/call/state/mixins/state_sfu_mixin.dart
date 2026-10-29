@@ -12,6 +12,9 @@ import 'state_pending_tracks_mixin.dart';
 final _logger = taggedLogger(tag: 'SV:CallState:Sfu');
 
 mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
+  /// The reason a call that ends now disconnects with.
+  DisconnectReasonEnded get endedReason;
+
   /// Rewrites the participant list through [update], writing the state only if
   /// some participant came back a different instance.
   ///
@@ -92,9 +95,7 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
     _logger.d(() => '[sfuCallEnded] ${state.sessionId}; event: $event');
 
     state = state.copyWith(
-      status: CallStatus.disconnected(
-        DisconnectReason.ended(),
-      ),
+      status: CallStatus.disconnected(endedReason),
       callParticipants: const [],
     );
   }

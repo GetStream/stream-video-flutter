@@ -67,7 +67,6 @@ class StreamCallContainer extends StatefulWidget {
 
 class _StreamCallContainerState extends State<StreamCallContainer> {
   final _logger = taggedLogger(tag: 'SV:CallContainer');
-  StreamSubscription<CallState>? _callStateSubscription;
   StreamSubscription<CallStatus>? _callStatusSubscription;
 
   /// Represents a call.
@@ -90,8 +89,6 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
   void didUpdateWidget(StreamCallContainer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.call != widget.call) {
-      _callStateSubscription?.cancel();
-      _callStateSubscription = null;
       _callStatusSubscription?.cancel();
       _callStatusSubscription = null;
 
@@ -105,8 +102,6 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
 
   @override
   void dispose() {
-    _callStateSubscription?.cancel();
-    _callStateSubscription = null;
     _callStatusSubscription?.cancel();
     _callStatusSubscription = null;
     super.dispose();
@@ -126,7 +121,10 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
     });
 
     if (callStatus.isDisconnected) {
-      _callStateSubscription?.cancel();
+      // A call disconnects once: anything after it must not call
+      // onCallDisconnected, or leave, a second time.
+      _callStatusSubscription?.cancel();
+      _callStatusSubscription = null;
       if (widget.onCallDisconnected != null) {
         final disconnectedStatus = callStatus as CallStatusDisconnected;
         final disconnectedProperties = CallDisconnectedProperties(
