@@ -1416,6 +1416,21 @@ class CallConnectionCoordinator {
   bool get _isOffline =>
       _call.networkMonitor.lastTryResults == InternetStatus.disconnected;
 
+  /// The trigger for a reconnect that SFU [error] asks [session] for. A media
+  /// transport failure on a session that never connected ICE counts towards
+  /// the never-connected budget.
+  ReconnectTrigger _sfuErrorTrigger(
+    SfuError error, {
+    required CallSession session,
+  }) {
+    final neverConnected =
+        error.code == SfuErrorCode.participantMediaTransportFailure &&
+        session.isIceNeverConnected;
+    return neverConnected
+        ? IceNeverConnected(session, otherwise: const SfuRequested())
+        : const SfuRequested();
+  }
+
   /// Handles the connection events of [session], the session that sent
   /// [sfuEvent]; a reconnect it asks for is for that session.
   Future<void> _onSfuConnectionEvent(
@@ -1547,18 +1562,10 @@ class CallConnectionCoordinator {
                 '[onSfuEvent] SFU error: ${sfuEvent.error}, reconnect strategy: ${sfuEvent.error.reconnectStrategy}',
           );
 
-          // A media transport failure on a session that never connected ICE
-          // counts towards the never-connected budget.
-          final neverConnected =
-              sfuEvent.error.code ==
-                  SfuErrorCode.participantMediaTransportFailure &&
-              session.isIceNeverConnected;
           await _reconnect(
             sfuEvent.error.reconnectStrategy,
             reconnectReason: 'sfu error: ${sfuEvent.error.message}',
-            trigger: neverConnected
-                ? IceNeverConnected(session, otherwise: const SfuRequested())
-                : const SfuRequested(),
+            trigger: _sfuErrorTrigger(sfuEvent.error, session: session),
             source: session,
           );
           break;
@@ -1853,7 +1860,9 @@ class CallConnectionCoordinator {
 
       // Started only once the status says waiting, so an offline report
       // from the wait cannot be overwritten by it.
-      final networkAvailable = _awaitNetworkAvailable(
+      final networkAvailable = _awaitNetworkCountingIceFailure(
+        trigger,
+        isFirstWait: isFirstAttempt,
         stabilityWindow: stabilityWindow,
         onStatus: onNetworkStatus,
       );
@@ -1869,26 +1878,8 @@ class CallConnectionCoordinator {
           _reconnectStrategy == SfuReconnectionStrategy.migrate;
 
       try {
+        // A spent never-connected budget leaves the call during the wait.
         if (stopsAfterNetworkWait(await networkAvailable)) return;
-
-        // Counted once the network is known to be there, since ICE cannot
-        // connect without one.
-        if (isFirstAttempt &&
-            trigger is IceNeverConnected &&
-            !wasOffline &&
-            _spendIceFailureWithoutConnect(trigger)) {
-          _call._logger.w(
-            () =>
-                '[reconnect] giving up: ICE never connected in '
-                '$_iceFailuresWithoutConnect reconnects',
-          );
-          _session?.trace(TraceTag.callReconnectFailed, {
-            'strategy': _reconnectStrategy.name,
-            'error': 'webrtc_unsupported_network',
-          });
-          await leave(reason: DisconnectReason.unsupportedNetwork());
-          return;
-        }
         isFirstAttempt = false;
 
         // Offline past the fast-reconnect deadline: the attempt rejoins
@@ -2029,6 +2020,49 @@ class CallConnectionCoordinator {
         }
       }
     } while (_phase.value is ConnectionReconnecting);
+  }
+
+  /// Waits for the network as [_awaitNetworkAvailable] does. After a
+  /// reconnect's first wait, a [trigger] for a session that never connected
+  /// ICE counts towards [CallPreferences.maxIceFailuresWithoutConnect], since
+  /// ICE cannot connect without a network; a wait that found the device
+  /// offline does not count. The reconnect that reaches the limit leaves the
+  /// call before this returns.
+  Future<InternetStatus> _awaitNetworkCountingIceFailure(
+    ReconnectTrigger trigger, {
+    required bool isFirstWait,
+    required Duration stabilityWindow,
+    required void Function(InternetStatus status) onStatus,
+  }) async {
+    var wasOffline = false;
+    final status = await _awaitNetworkAvailable(
+      stabilityWindow: stabilityWindow,
+      onStatus: (status) {
+        if (status != InternetStatus.connected) wasOffline = true;
+        onStatus(status);
+      },
+    );
+
+    final counts =
+        isFirstWait &&
+        !wasOffline &&
+        status == InternetStatus.connected &&
+        !_isLeftOrLeaving;
+    if (counts &&
+        trigger is IceNeverConnected &&
+        _spendIceFailureWithoutConnect(trigger)) {
+      _call._logger.w(
+        () =>
+            '[reconnect] giving up: ICE never connected in '
+            '$_iceFailuresWithoutConnect reconnects',
+      );
+      _session?.trace(TraceTag.callReconnectFailed, {
+        'strategy': _reconnectStrategy.name,
+        'error': 'webrtc_unsupported_network',
+      });
+      await leave(reason: DisconnectReason.unsupportedNetwork());
+    }
+    return status;
   }
 
   /// Records a reconnect for [trigger], unless its session has connected
