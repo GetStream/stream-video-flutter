@@ -855,9 +855,8 @@ class Call {
   /// Rejects the incoming call, then leaves it.
   ///
   /// - [reason]: optional reason for rejecting the call
-  /// - [initiator]: what made this user reject, reported with the join
-  ///   stages the leave aborts. Defaults to what [reason] implies, for
-  ///   example [LeaveInitiator.sdkError] for a ring timeout and
+  /// - [initiator]: what made this user reject. Defaults to what [reason]
+  ///   implies, for example [LeaveInitiator.sdkError] for a ring timeout and
   ///   [LeaveInitiator.user] for a decline.
   Future<Result<None>> reject({
     CallRejectReason? reason,

@@ -105,9 +105,7 @@ final class DisconnectReasonLeft extends DisconnectReason {
   /// What made the call leave.
   final LeaveInitiator initiator;
 
-  /// Why the call left, in words, if a reason was given.
-  ///
-  /// Sent to the SFU and reported with the join stages the leave aborts.
+  /// Why the call left, as reported to Stream.
   final String? message;
 
   @override
@@ -131,7 +129,7 @@ final class DisconnectReasonRejected extends DisconnectReason {
 
   /// What made this user reject, when the reject's [reason] does not say.
   ///
-  /// `null` works it out from [byUserId] and [reason].
+  /// If null, the initiator is derived from [byUserId] and [reason].
   final LeaveInitiator? initiator;
 
   @override

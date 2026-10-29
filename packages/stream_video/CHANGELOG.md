@@ -95,7 +95,7 @@
 - Added `RingingSnapshot`, which resolves a ringing flow for the caller as well as the callee. `CallMetadata.ringingStateFor` goes through it.
 - Added `RtcMediaDeviceNotifier.isAudioOutputSelectionSupported`, whether `Call.setAudioOutputDevice` can route audio on this platform, so a speaker picker can be hidden where it cannot.
 - Added `LeaveInitiator`, who or what made a call leave.
-- `DisconnectReason.left({initiator, message})` says who made a call leave and why. Pass it to `Call.leave`, as in `call.leave(reason: DisconnectReason.left(initiator: LeaveInitiator.user))`; its `message` is what the SFU is told. A `leave()` without a reason reports `unknown`. `Call.reject` takes an `initiator` too, for a reject the reason alone does not explain, such as a decline from the system call UI. The SDK's own leaves report theirs: the leave button `user`, the livestream player, the background service and `Call.dispose` `app`, and a hang-up or decline from CallKit or Telecom `callkit`.
+- `DisconnectReason.left({initiator, message})` says who made a call leave and why; pass it to `Call.leave`. `Call.reject` takes an `initiator` too. A `leave()` without a reason reports `LeaveInitiator.unknown`; `StreamLeaveCallButton` reports `user`.
 
 ### 🔄 Changed
 
