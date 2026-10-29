@@ -1106,6 +1106,7 @@ class Call {
           _isAloneAfterLeave(sfuEvent.participant)) {
         final endResult = await end(
           reason: 'last participant left the call (ringing flow)',
+          initiator: LeaveInitiator.app,
         );
 
         if (endResult.isFailure) {
