@@ -23,6 +23,16 @@ abstract class CallPreferences {
   /// considered disconnected
   Duration get networkAvailabilityTimeout;
 
+  /// The number of reconnects for sessions in which ICE never connected at
+  /// which the call concludes that the network cannot carry WebRTC. The
+  /// reconnect that reaches it leaves the call with
+  /// `DisconnectReasonUnsupportedNetwork` instead of reconnecting, so 2
+  /// rejoins once and leaves on the next failure.
+  ///
+  /// ICE connecting on any peer connection starts the count again. Values
+  /// below 1 count as 1.
+  int get maxIceFailuresWithoutConnect;
+
   /// The duration after which call reactions (like emoji reactions)
   /// automatically disappear from the UI.
   Duration get reactionAutoDismissTime;
@@ -107,6 +117,7 @@ class DefaultCallPreferences implements CallPreferences {
     this.connectTimeout = const Duration(seconds: 60),
     this.reconnectTimeout = Duration.zero,
     this.networkAvailabilityTimeout = const Duration(minutes: 5),
+    this.maxIceFailuresWithoutConnect = 2,
     this.reactionAutoDismissTime = const Duration(seconds: 5),
     this.callStatsReportingInterval = const Duration(seconds: 2),
     this.dropIfAloneInRingingFlow = true,
@@ -146,6 +157,14 @@ class DefaultCallPreferences implements CallPreferences {
   /// Defaults to 5 minutes.
   @override
   final Duration networkAvailabilityTimeout;
+
+  /// The number of reconnects for sessions in which ICE never connected at
+  /// which the call leaves with `DisconnectReasonUnsupportedNetwork`. See
+  /// [CallPreferences.maxIceFailuresWithoutConnect].
+  ///
+  /// Defaults to 2.
+  @override
+  final int maxIceFailuresWithoutConnect;
 
   /// The duration after which call reactions (like emoji reactions)
   /// automatically disappear from the UI.

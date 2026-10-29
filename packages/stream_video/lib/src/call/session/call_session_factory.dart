@@ -36,6 +36,8 @@ class CallSessionFactory {
   /// [dynascaleManager] manages dynascale operations.
   /// [onReconnectionNeeded] is a callback invoked when reconnection is needed
   /// because of PeerConnection issues.
+  /// [onIceConnected] is invoked the first time ICE of a PeerConnection
+  /// connects.
   /// [networkMonitor] monitors the internet connection.
   /// [statsOptions] configures the statistics reporting.
   /// [host] is the client the session belongs to.
@@ -49,6 +51,7 @@ class CallSessionFactory {
     required CallStateNotifier stateManager,
     required DynascaleManager dynascaleManager,
     required OnReconnectionNeeded onReconnectionNeeded,
+    required OnIceConnected onIceConnected,
     required void Function(String trackId) onSuspendedAudioTrackRecorded,
     required InternetConnection networkMonitor,
     required StatsOptions statsOptions,
@@ -99,6 +102,7 @@ class CallSessionFactory {
       dynascaleManager: dynascaleManager,
       sdpEditor: sdpEditor,
       onReconnectionNeeded: onReconnectionNeeded,
+      onIceConnected: onIceConnected,
       onSuspendedAudioTrackRecorded: onSuspendedAudioTrackRecorded,
       clientPublishOptions: clientPublishOptions,
       e2eeManager: e2eeManager,

@@ -166,6 +166,22 @@ class RtcManager extends Disposable {
     publisher?.onReconnectionNeeded = cb;
   }
 
+  set onIceConnected(OnIceConnected? cb) {
+    subscriber.onIceConnected = cb;
+    publisher?.onIceConnected = cb;
+  }
+
+  /// Whether ICE of either peer connection has ever connected.
+  bool get hasIceEverConnected =>
+      subscriber.hasIceEverConnected ||
+      (publisher?.hasIceEverConnected ?? false);
+
+  /// Whether either peer connection's latest ICE gathering round completed
+  /// without a single local candidate.
+  bool get hasNoLocalCandidates =>
+      subscriber.hasNoLocalCandidates ||
+      (publisher?.hasNoLocalCandidates ?? false);
+
   OnLocalTrackMuted? onLocalTrackMuted;
   OnLocalTrackPublished? onLocalTrackPublished;
   OnRemoteTrackReceived? onRemoteTrackReceived;

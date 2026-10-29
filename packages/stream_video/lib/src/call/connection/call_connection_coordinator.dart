@@ -54,6 +54,12 @@ class CallConnectionCoordinator {
   /// The attempts one reconnect makes, any strategy, before it fails.
   static const _maxReconnectAttempts = 10;
 
+  /// Reconnects whose session never connected ICE, since ICE of any peer
+  /// connection last connected. Once it reaches
+  /// [CallPreferences.maxIceFailuresWithoutConnect], the call leaves with
+  /// [DisconnectReasonUnsupportedNetwork] instead of reconnecting.
+  var _iceFailuresWithoutConnect = 0;
+
   /// Rejoins and migrations, across reconnects. Fast reconnects are not
   /// counted.
   final _rejoinRateLimiter = RejoinRateLimiter(
@@ -812,6 +818,7 @@ class CallConnectionCoordinator {
         },
         onReconnectionNeeded: (pc, strategy, reason) =>
             _onReconnectionNeeded(pc, strategy, reason, session: session),
+        onIceConnected: _onIceConnected,
         clientPublishOptions:
             _call._stateManager.callState.preferences.clientPublishOptions,
       );
@@ -1345,20 +1352,83 @@ class CallConnectionCoordinator {
     ReconnectionNeededReason reason, {
     required CallSession session,
   }) {
-    _session?.trace(TraceTag.pcReconnectionNeeded, {
+    final (ReconnectTrigger trigger, String reconnectReason) = switch (reason) {
+      ReconnectionNeededReason.connectionFailed => (
+        PeerConnectionFailed(pc),
+        '${pc.type.name} pc disconnected',
+      ),
+      ReconnectionNeededReason.stuck => (
+        PeerConnectionStuck(pc),
+        '${pc.type.name} pc disconnected',
+      ),
+      // The other peer connection may have connected; then this is an
+      // ordinary failure.
+      ReconnectionNeededReason.iceNeverConnected => (
+        session.isIceNeverConnected
+            ? IceNeverConnected(session, otherwise: PeerConnectionFailed(pc))
+            : PeerConnectionFailed(pc),
+        '${pc.type.name} pc never connected',
+      ),
+      ReconnectionNeededReason.noLocalCandidates => (
+        IceNeverConnected(session, otherwise: null, noLocalCandidates: true),
+        '${pc.type.name} pc gathered no local candidates',
+      ),
+    };
+
+    // Without a network, gathering finds no candidates either way; the
+    // network monitor starts the reconnect for that.
+    if (reason == ReconnectionNeededReason.noLocalCandidates &&
+        (!session.isIceNeverConnected || _isOffline)) {
+      _call._logger.d(
+        () =>
+            '[onReconnectionNeeded] ignoring no local candidates on '
+            '${pc.type.name} (offline: $_isOffline)',
+      );
+      return;
+    }
+
+    session.trace(TraceTag.pcReconnectionNeeded, {
       'peerConnectionId': pc.type.name,
       'reconnectionStrategy': strategy.name,
     });
 
     _reconnect(
       strategy,
-      reconnectReason: '${pc.type.name} pc disconnected',
-      trigger: switch (reason) {
-        ReconnectionNeededReason.connectionFailed => PeerConnectionFailed(pc),
-        ReconnectionNeededReason.stuck => PeerConnectionStuck(pc),
-      },
+      reconnectReason: reconnectReason,
+      trigger: trigger,
       source: session,
     );
+  }
+
+  /// Resets the never-connected budget: WebRTC works on this network.
+  void _onIceConnected(StreamPeerConnection pc) {
+    if (_iceFailuresWithoutConnect > 0) {
+      _call._logger.d(
+        () =>
+            '[onIceConnected] ${pc.type.name} connected, resetting '
+            '$_iceFailuresWithoutConnect never-connected reconnects',
+      );
+    }
+    _iceFailuresWithoutConnect = 0;
+  }
+
+  /// Whether the network monitor last found the device offline.
+  bool get _isOffline =>
+      _call.networkMonitor.lastTryResults == InternetStatus.disconnected;
+
+  /// The trigger for a reconnect that SFU [error] asks [session] for. A media
+  /// transport failure on a session that never connected ICE counts towards
+  /// the never-connected budget.
+  ReconnectTrigger _sfuErrorTrigger(
+    SfuError error, {
+    required CallSession session,
+  }) {
+    final neverConnected =
+        error.code == SfuErrorCode.participantMediaTransportFailure &&
+        session.isIceNeverConnected;
+    return neverConnected
+        ? IceNeverConnected(session, otherwise: const SfuRequested())
+        : const SfuRequested();
   }
 
   /// Handles the connection events of [session], the session that sent
@@ -1495,7 +1565,7 @@ class CallConnectionCoordinator {
           await _reconnect(
             sfuEvent.error.reconnectStrategy,
             reconnectReason: 'sfu error: ${sfuEvent.error.message}',
-            trigger: const SfuRequested(),
+            trigger: _sfuErrorTrigger(sfuEvent.error, session: session),
             source: session,
           );
           break;
@@ -1534,6 +1604,18 @@ class CallConnectionCoordinator {
   /// | A track mid that does not resolve                   | fast          |
   /// | The SFU sends a GoAway                              | migrate       |
   /// | An SFU error naming fast, rejoin or migrate         | that strategy |
+  /// | A peer connection fails before ICE ever connected   | rejoin        |
+  /// | ICE stays disconnected before it ever connected     | rejoin        |
+  /// | Gathering finds no local candidates, never connected | rejoin       |
+  ///
+  /// A reconnect for a session whose peer connections never connected ICE,
+  /// including an SFU media transport failure on one, counts towards
+  /// [CallPreferences.maxIceFailuresWithoutConnect], once its first network
+  /// wait is over. The reconnect that reaches it leaves the call with
+  /// [DisconnectReasonUnsupportedNetwork] instead. ICE connecting on any peer
+  /// connection starts the count again. Gathering no candidates while offline
+  /// is ignored, a reconnect that found the device offline is not counted,
+  /// and neither is one whose session connected while it was held.
   ///
   /// A socket closure or failure that is not reconnectable, and an SFU error
   /// naming disconnect, leave the call instead. An SFU error naming no strategy
@@ -1642,6 +1724,9 @@ class CallConnectionCoordinator {
     // backoff pinned at zero. Reset as soon as an attempt completes without
     // throwing.
     var unexpectedErrorCount = 0;
+
+    // Whether no attempt has got past its network wait yet.
+    var isFirstAttempt = true;
 
     // Shared post-failure handling: back off, then decide whether to
     // escalate to `rejoin` or retry with `fast`.
@@ -1775,7 +1860,9 @@ class CallConnectionCoordinator {
 
       // Started only once the status says waiting, so an offline report
       // from the wait cannot be overwritten by it.
-      final networkAvailable = _awaitNetworkAvailable(
+      final networkAvailable = _awaitNetworkCountingIceFailure(
+        trigger,
+        isFirstWait: isFirstAttempt,
         stabilityWindow: stabilityWindow,
         onStatus: onNetworkStatus,
       );
@@ -1791,7 +1878,9 @@ class CallConnectionCoordinator {
           _reconnectStrategy == SfuReconnectionStrategy.migrate;
 
       try {
+        // A spent never-connected budget leaves the call during the wait.
         if (stopsAfterNetworkWait(await networkAvailable)) return;
+        isFirstAttempt = false;
 
         // Offline past the fast-reconnect deadline: the attempt rejoins
         // instead. The deadline runs from when the reconnect started.
@@ -1931,6 +2020,62 @@ class CallConnectionCoordinator {
         }
       }
     } while (_phase.value is ConnectionReconnecting);
+  }
+
+  /// Waits for the network as [_awaitNetworkAvailable] does. After a
+  /// reconnect's first wait, a [trigger] for a session that never connected
+  /// ICE counts towards [CallPreferences.maxIceFailuresWithoutConnect], since
+  /// ICE cannot connect without a network; a wait that found the device
+  /// offline does not count. The reconnect that reaches the limit leaves the
+  /// call before this returns.
+  Future<InternetStatus> _awaitNetworkCountingIceFailure(
+    ReconnectTrigger trigger, {
+    required bool isFirstWait,
+    required Duration stabilityWindow,
+    required void Function(InternetStatus status) onStatus,
+  }) async {
+    var wasOffline = false;
+    final status = await _awaitNetworkAvailable(
+      stabilityWindow: stabilityWindow,
+      onStatus: (status) {
+        if (status != InternetStatus.connected) wasOffline = true;
+        onStatus(status);
+      },
+    );
+
+    final counts =
+        isFirstWait &&
+        !wasOffline &&
+        status == InternetStatus.connected &&
+        !_isLeftOrLeaving;
+    if (counts &&
+        trigger is IceNeverConnected &&
+        _spendIceFailureWithoutConnect(trigger)) {
+      _call._logger.w(
+        () =>
+            '[reconnect] giving up: ICE never connected in '
+            '$_iceFailuresWithoutConnect reconnects',
+      );
+      _session?.trace(TraceTag.callReconnectFailed, {
+        'strategy': _reconnectStrategy.name,
+        'error': 'webrtc_unsupported_network',
+      });
+      await leave(reason: DisconnectReason.unsupportedNetwork());
+    }
+    return status;
+  }
+
+  /// Records a reconnect for [trigger], unless its session has connected
+  /// since it was asked for. Returns whether that reached
+  /// [CallPreferences.maxIceFailuresWithoutConnect].
+  bool _spendIceFailureWithoutConnect(IceNeverConnected trigger) {
+    if (!trigger.session.isIceNeverConnected) return false;
+    _iceFailuresWithoutConnect++;
+    final limit = max(
+      1,
+      _call.state.value.preferences.maxIceFailuresWithoutConnect,
+    );
+    return _iceFailuresWithoutConnect >= limit;
   }
 
   /// Records a rejoin or migration in the rejoin windows. Returns false when
