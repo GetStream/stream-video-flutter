@@ -2,11 +2,14 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_call_ended_reason.dart';
 import 'package:stream_video/src/telemetry/client_event_types.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../fixtures/call_test_helpers.dart';
 import '../fixtures/connection_harness.dart';
+import '../fixtures/data.dart';
 
 /// Pins what `Call.leave` and `Call.end` report and tear down today, so moving
 /// the connection code out of `Call` cannot change it unnoticed.
@@ -71,96 +74,244 @@ void main() {
       ).called(1);
     });
 
+    final currentUserId = SampleCallData.defaultUserInfo.id;
     final pinned =
-        <(String, DisconnectReason, String, ClientEventStandardCode)>[
+        <
+          ({
+            String name,
+            DisconnectReason reason,
+            String message,
+            ClientEventStandardCode abortCode,
+            LeaveInitiator initiator,
+            String code,
+          })
+        >[
           (
-            'ended',
-            DisconnectReason.ended(),
-            'call ended',
-            ClientEventStandardCode.backendLeave,
+            name: 'ended',
+            reason: DisconnectReason.ended(),
+            message: 'call ended',
+            abortCode: ClientEventStandardCode.backendLeave,
+            initiator: LeaveInitiator.remoteEvent,
+            code: 'call.ended',
           ),
           (
-            'native call ended',
-            DisconnectReason.nativeCallEnded(),
-            'call ended externally',
-            ClientEventStandardCode.backendLeave,
+            name: 'native call ended',
+            reason: DisconnectReason.nativeCallEnded(),
+            message: 'call ended externally',
+            abortCode: ClientEventStandardCode.clientAborted,
+            initiator: LeaveInitiator.callkit,
+            code: 'native.call_ended',
           ),
           (
-            'rejected with a reason',
-            DisconnectReason.rejected(
+            name: 'a reject by another user',
+            reason: DisconnectReason.rejected(
               byUserId: 'someone',
               reason: CallRejectReason.decline(),
             ),
-            'rejected: decline',
-            ClientEventStandardCode.clientAborted,
+            message: 'rejected: decline',
+            abortCode: ClientEventStandardCode.backendLeave,
+            initiator: LeaveInitiator.remoteEvent,
+            code: 'call.rejected:decline',
           ),
           (
-            'rejected without a reason',
-            const DisconnectReason.rejected(byUserId: 'someone'),
-            'rejected: unspecified',
-            ClientEventStandardCode.clientAborted,
+            name: 'a reject by another user without a reason',
+            reason: const DisconnectReason.rejected(byUserId: 'someone'),
+            message: 'rejected: unspecified',
+            abortCode: ClientEventStandardCode.backendLeave,
+            initiator: LeaveInitiator.remoteEvent,
+            code: 'call.rejected',
           ),
           (
-            'cancelled',
-            const DisconnectReason.cancelled(byUserId: 'caller'),
-            'cancelled: caller',
-            ClientEventStandardCode.clientAborted,
+            name: 'a decline by this user',
+            reason: DisconnectReason.rejected(
+              byUserId: currentUserId,
+              reason: CallRejectReason.decline(),
+            ),
+            message: 'rejected: decline',
+            abortCode: ClientEventStandardCode.clientAborted,
+            initiator: LeaveInitiator.user,
+            code: 'call.rejected:decline',
           ),
           (
-            'blocked',
-            const DisconnectReason.blocked(),
-            'blocked',
-            ClientEventStandardCode.clientAborted,
+            name: 'a ring timeout',
+            reason: DisconnectReason.rejected(
+              byUserId: currentUserId,
+              reason: CallRejectReason.timeout(),
+            ),
+            message: 'rejected: timeout',
+            abortCode: ClientEventStandardCode.clientAborted,
+            initiator: LeaveInitiator.sdkError,
+            code: 'call.rejected:timeout',
           ),
           (
-            'replaced',
-            DisconnectReason.replaced(),
-            'replaced by another call',
-            ClientEventStandardCode.clientAborted,
+            name: 'an answer on another device',
+            reason: DisconnectReason.rejected(
+              byUserId: currentUserId,
+              reason: CallRejectReason.userRespondedElsewhere(),
+            ),
+            message: 'rejected: user-responded-elsewhere',
+            abortCode: ClientEventStandardCode.backendLeave,
+            initiator: LeaveInitiator.remoteEvent,
+            code: 'call.rejected:user-responded-elsewhere',
           ),
           (
-            'last participant left',
-            DisconnectReason.lastParticipantLeft(),
-            'last participant left',
-            ClientEventStandardCode.clientAborted,
+            name: 'a local end brought back in sync',
+            reason: DisconnectReason.rejected(
+              byUserId: currentUserId,
+              reason: CallRejectReason.callEndedLocally(),
+            ),
+            message: 'rejected: call-ended-locally',
+            abortCode: ClientEventStandardCode.clientAborted,
+            initiator: LeaveInitiator.app,
+            code: 'call.rejected:call-ended-locally',
           ),
           (
-            'reconnection failed',
-            DisconnectReason.reconnectionFailed(),
-            'reconnection failed',
-            ClientEventStandardCode.networkOffline,
+            name: 'a reject by this user without a reason',
+            reason: DisconnectReason.rejected(byUserId: currentUserId),
+            message: 'rejected: unspecified',
+            abortCode: ClientEventStandardCode.clientAborted,
+            initiator: LeaveInitiator.user,
+            code: 'call.rejected',
           ),
           (
-            'failure',
-            const DisconnectReason.failure(
+            name: 'a stale ring the backend ended',
+            reason: DisconnectReason.rejected(
+              byUserId: currentUserId,
+              reason: CallRejectReason.callEnded(),
+            ),
+            message: 'rejected: call-ended',
+            abortCode: ClientEventStandardCode.backendLeave,
+            initiator: LeaveInitiator.remoteEvent,
+            code: 'call.rejected:call-ended',
+          ),
+          (
+            name: 'a ring the creator cancelled',
+            reason: DisconnectReason.rejected(
+              byUserId: currentUserId,
+              reason: CallRejectReason.creatorRejected(),
+            ),
+            message: 'rejected: ring: creator rejected',
+            abortCode: ClientEventStandardCode.backendLeave,
+            initiator: LeaveInitiator.remoteEvent,
+            code: 'call.rejected:ring: creator rejected',
+          ),
+          (
+            name: 'a ring everyone else rejected',
+            reason: DisconnectReason.rejected(
+              byUserId: currentUserId,
+              reason: CallRejectReason.allOtherParticipantsRejected(),
+            ),
+            message: 'rejected: ring: everyone rejected',
+            abortCode: ClientEventStandardCode.backendLeave,
+            initiator: LeaveInitiator.remoteEvent,
+            code: 'call.rejected:ring: everyone rejected',
+          ),
+          (
+            name: 'cancelled',
+            reason: const DisconnectReason.cancelled(byUserId: 'caller'),
+            message: 'cancelled: caller',
+            abortCode: ClientEventStandardCode.backendLeave,
+            initiator: LeaveInitiator.remoteEvent,
+            code: 'ring.cancelled',
+          ),
+          (
+            name: 'blocked',
+            reason: const DisconnectReason.blocked(),
+            message: 'blocked',
+            abortCode: ClientEventStandardCode.backendLeave,
+            initiator: LeaveInitiator.remoteEvent,
+            code: 'call.blocked',
+          ),
+          (
+            name: 'replaced',
+            reason: DisconnectReason.replaced(),
+            message: 'replaced by another call',
+            abortCode: ClientEventStandardCode.clientAborted,
+            initiator: LeaveInitiator.app,
+            code: 'call.replaced',
+          ),
+          (
+            name: 'last participant left',
+            reason: DisconnectReason.lastParticipantLeft(),
+            message: 'last participant left',
+            abortCode: ClientEventStandardCode.clientAborted,
+            initiator: LeaveInitiator.app,
+            code: 'call.last_participant_left',
+          ),
+          (
+            name: 'reconnection failed',
+            reason: DisconnectReason.reconnectionFailed(),
+            message: 'reconnection failed',
+            abortCode: ClientEventStandardCode.networkOffline,
+            initiator: LeaveInitiator.sdkError,
+            code: 'reconnection_failed',
+          ),
+          (
+            name: 'failure',
+            reason: const DisconnectReason.failure(
               StreamVideoException(message: 'boom'),
             ),
-            'failure: ${const StreamVideoException(message: 'boom')}',
-            ClientEventStandardCode.clientAborted,
+            message: 'failure: boom',
+            abortCode: ClientEventStandardCode.clientAborted,
+            initiator: LeaveInitiator.sdkError,
+            code: 'error',
           ),
           (
-            'SFU error',
-            const DisconnectReason.sfuError(_sfuError),
-            'sfu error: $_sfuError',
-            ClientEventStandardCode.clientAborted,
+            name: 'SFU error',
+            reason: const DisconnectReason.sfuError(_sfuError),
+            message: 'sfu error: unspecified: kicked',
+            abortCode: ClientEventStandardCode.clientAborted,
+            initiator: LeaveInitiator.sdkError,
+            code: 'sfu_error:unspecified',
           ),
         ];
 
-    for (final (name, reason, wording, abortCode) in pinned) {
+    for (final row in pinned) {
       test(
-        'a leave for $name tells the SFU "$wording" and aborts with '
-        '${abortCode.wireValue}',
+        'a leave for ${row.name} tells the SFU "${row.message}" and reports '
+        '${row.initiator.wireValue} / ${row.code}',
         () async {
           final call = harness.buildCall();
           await call.join();
 
-          await call.leave(reason: reason);
+          await call.leave(reason: row.reason);
 
-          verify(() => harness.session.leave(reason: wording)).called(1);
-          expect(harness.reporter.aborts, [abortCode]);
+          verify(() => harness.session.leave(reason: row.message)).called(1);
+          final failure = harness.reporter.abortFailures.single;
+          expect(failure.code, row.abortCode);
+          expect(failure.reason, row.message);
+          expect(failure.leaveInitiator, row.initiator);
+          expect(failure.leaveReason, row.code);
         },
       );
     }
+
+    test('the leave reason traced at teardown is the attribution', () async {
+      final call = harness.buildCall();
+      await call.join();
+
+      await harness.emitSfu(
+        harness.session,
+        const SfuCallEndedEvent(callEndedReason: SfuCallEndedReason.ended),
+      );
+
+      verify(
+        () => harness.session.trace('call.leaveReason', 'call ended'),
+      ).called(1);
+    });
+
+    test('a leave without a reason reports unknown', () async {
+      final call = harness.buildCall();
+      await call.join();
+
+      await call.leave();
+
+      final failure = harness.reporter.abortFailures.single;
+      expect(failure.code, ClientEventStandardCode.clientAborted);
+      expect(failure.reason, 'user is leaving the call');
+      expect(failure.leaveInitiator, LeaveInitiator.unknown);
+      expect(failure.leaveReason, 'left');
+    });
 
     test('a failed SFU join tells the SFU about the failure', () async {
       harness.stubSessionStart(

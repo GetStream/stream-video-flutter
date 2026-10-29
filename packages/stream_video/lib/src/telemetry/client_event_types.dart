@@ -1,5 +1,8 @@
 library;
 
+import 'package:meta/meta.dart';
+
+import '../models/leave_initiator.dart';
 import '../sfu/data/models/sfu_error.dart';
 
 enum ClientEventStage {
@@ -59,8 +62,16 @@ enum ClientEventIceState {
 
 /// A resolved failure: the standard [code] plus human-readable [reason] text
 /// sent as `retry_failure_code` / `retry_failure_reason`.
+///
+/// A failure caused by a leave also carries [leaveInitiator] and
+/// [leaveReason], sent as `leave_initiator` / `leave_reason`.
 class ClientEventFailure {
-  const ClientEventFailure(this.code, this.reason);
+  const ClientEventFailure(
+    this.code,
+    this.reason, {
+    this.leaveInitiator,
+    this.leaveReason,
+  });
 
   const ClientEventFailure.ice([
     String reason = 'ICE connectivity checks failed',
@@ -84,6 +95,25 @@ class ClientEventFailure {
 
   final ClientEventStandardCode code;
   final String reason;
+
+  /// What made the call leave, when a leave caused this failure.
+  final LeaveInitiator? leaveInitiator;
+
+  /// Why the call left, as a short identifier such as `call.ended`.
+  final String? leaveReason;
+}
+
+/// The value [LeaveInitiator] is sent as, in `leave_initiator`.
+@internal
+extension LeaveInitiatorWireValue on LeaveInitiator {
+  String get wireValue => switch (this) {
+    LeaveInitiator.user => 'user',
+    LeaveInitiator.app => 'app',
+    LeaveInitiator.callkit => 'callkit',
+    LeaveInitiator.remoteEvent => 'remote_event',
+    LeaveInitiator.sdkError => 'sdk_error',
+    LeaveInitiator.unknown => 'unknown',
+  };
 }
 
 enum ClientEventStandardCode {

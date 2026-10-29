@@ -2276,18 +2276,13 @@ class CallConnectionCoordinator {
     DisconnectReason? reason,
     bool remote = false,
   }) async {
-    _call._logger.i(() => '[leave] reason: $reason, remote: $remote');
+    final attribution = _leaveAttribution(reason);
+    _call._logger.i(
+      () => '[leave] reason: $reason, remote: $remote, $attribution',
+    );
 
-    final abortCode = switch (reason) {
-      DisconnectReasonEnded() ||
-      DisconnectReasonNativeCallEnded() => ClientEventStandardCode.backendLeave,
-      // Reconnection gave up — treat as a device-offline
-      DisconnectReasonReconnectionFailed() =>
-        ClientEventStandardCode.networkOffline,
-      _ => ClientEventStandardCode.clientAborted,
-    };
     _call._host.clientEventReporter
-      ..abort(_call.callCid, abortCode)
+      ..abort(_call.callCid, attribution.abortFailure)
       ..unregisterCall(_call.callCid);
 
     // A reject already told the server, and a remote end needs no answer.
@@ -2298,7 +2293,7 @@ class CallConnectionCoordinator {
     final bool didDisconnect;
     try {
       didDisconnect = await _disconnect(
-        sfuLeaveReason: _sfuLeaveReason(reason),
+        sfuLeaveReason: attribution.message,
         remote: remote,
       );
     } catch (_) {
@@ -2416,7 +2411,7 @@ class CallConnectionCoordinator {
     if (status is CallStatusDisconnected) {
       _session?.trace(
         'call.leaveReason',
-        _sfuLeaveReason(status.reason),
+        _leaveAttribution(status.reason).message,
       );
     }
 
@@ -2425,23 +2420,11 @@ class CallConnectionCoordinator {
     _sfuStatsReporter = null;
   }
 
-  String _sfuLeaveReason(DisconnectReason? reason) {
-    if (reason == null) return 'user is leaving the call';
-
-    return switch (reason) {
-      final DisconnectReasonRejected rejected =>
-        'rejected: ${rejected.reason?.value ?? 'unspecified'}',
-      final DisconnectReasonFailure failure => 'failure: ${failure.error}',
-      final DisconnectReasonSfuError sfuError => 'sfu error: ${sfuError.error}',
-      final DisconnectReasonCancelled cancelled =>
-        'cancelled: ${cancelled.byUserId}',
-      DisconnectReasonReplaced _ => 'replaced by another call',
-      DisconnectReasonReconnectionFailed _ => 'reconnection failed',
-      DisconnectReasonLastParticipantLeft _ => 'last participant left',
-      DisconnectReasonNativeCallEnded _ => 'call ended externally',
-      DisconnectReasonEnded _ => 'call ended',
-      DisconnectReasonBlocked _ => 'blocked',
-    };
+  LeaveAttribution _leaveAttribution(DisconnectReason? reason) {
+    return LeaveAttribution.of(
+      reason,
+      currentUserId: _call.state.value.currentUserId,
+    );
   }
 
   Future<void> _clear(String src) async {
