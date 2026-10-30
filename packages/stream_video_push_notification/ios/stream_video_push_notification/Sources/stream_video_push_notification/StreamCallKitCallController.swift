@@ -4,9 +4,12 @@ import Foundation
 @available(iOS 10.0, *)
 class StreamCallKitCallController: NSObject {
 
-    private let callController = CXCallController()
+    private let callController = CXCallController(queue: .main)
     private var sharedProvider: CXProvider? = nil
     private(set) var calls = [Call]()
+
+    /// Data of outgoing calls whose start action CallKit has not performed yet, by call uuid.
+    private var pendingOutgoingCalls = [UUID: CallData]()
 
     func setSharedProvider(_ sharedProvider: CXProvider) {
         self.sharedProvider = sharedProvider
@@ -27,10 +30,19 @@ class StreamCallKitCallController: NSObject {
         let callTransaction = CXTransaction()
         callTransaction.addAction(startCallAction)
 
+        if self.pendingOutgoingCalls[uuid] == nil {
+            self.pendingOutgoingCalls[uuid] = data
+        }
+
         self.requestCall(
             callTransaction, action: "startCall",
             completion: { started in
-                guard started else { return }
+                guard started else {
+                    if self.pendingOutgoingCalls[uuid] === data {
+                        self.pendingOutgoingCalls[uuid] = nil
+                    }
+                    return
+                }
 
                 let callUpdate = CXCallUpdate()
                 callUpdate.remoteHandle = handle
@@ -187,6 +199,11 @@ class StreamCallKitCallController: NSObject {
     static let callsChangedNotification = Notification.Name("CallsChangedNotification")
     var callsChangedHandler: (() -> Void)?
 
+    /// Returns and forgets the data `startCall` was called with for `uuid`.
+    func takePendingOutgoingCall(uuid: UUID) -> CallData? {
+        return self.pendingOutgoingCalls.removeValue(forKey: uuid)
+    }
+  
     /// The id the call was started or shown with, or the lowercased uuid if this plugin does not track that call.
     func reportedId(for uuid: UUID) -> String {
         let fallback = uuid.uuidString.lowercased()
@@ -221,6 +238,7 @@ class StreamCallKitCallController: NSObject {
 
     func removeAllCalls() {
         calls.removeAll()
+        pendingOutgoingCalls.removeAll()
         callsChangedHandler?()
         postCallNotification()
     }
