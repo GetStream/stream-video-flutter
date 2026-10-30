@@ -269,8 +269,9 @@ extension CallSettingsExt on open.CallSettingsResponse {
         rtmp: broadcasting.rtmp.toSettingsDomain(),
       ),
       transcription: StreamTranscriptionSettings(
-        closedCaptionMode: transcription.closedCaptionMode.toSettingsDomain(),
-        transcriptionMode: transcription.mode.toSettingsDomain(),
+        closedCaptionMode: transcription.closedCaptionMode
+            .toClosedCaptionModeDomain(),
+        transcriptionMode: transcription.mode.toTranscriptionModeDomain(),
         language: transcription.language.toSettingsDomain(),
       ),
       backstage: StreamBackstageSettings(
@@ -350,43 +351,62 @@ extension CallPermissionRequestPermissionsExt on CallPermission {
   }
 }
 
-extension on open.AudioSettingsResponseDefaultDevice {
-  AudioSettingsRequestDefaultDevice toRequestDomain() {
-    if (this == open.AudioSettingsResponseDefaultDevice.speaker) {
-      return AudioSettingsRequestDefaultDevice.speaker;
+extension on open.AudioDefaultDevice {
+  AudioDefaultDevice toRequestDomain() {
+    if (this == open.AudioDefaultDevice.speaker) {
+      return AudioDefaultDevice.speaker;
     } else {
-      return AudioSettingsRequestDefaultDevice.earpiece;
+      return AudioDefaultDevice.earpiece;
     }
   }
 }
 
-extension on open.VideoSettingsResponseCameraFacing {
-  VideoSettingsRequestCameraFacing toRequestDomain() {
-    if (this == open.VideoSettingsResponseCameraFacing.front) {
-      return VideoSettingsRequestCameraFacing.front;
-    } else if (this == open.VideoSettingsResponseCameraFacing.back) {
-      return VideoSettingsRequestCameraFacing.back;
+extension on open.CameraFacing {
+  CameraFacing toRequestDomain() {
+    if (this == open.CameraFacing.front) {
+      return CameraFacing.front;
+    } else if (this == open.CameraFacing.back) {
+      return CameraFacing.back;
     } else {
-      return VideoSettingsRequestCameraFacing.external;
+      return CameraFacing.external;
     }
   }
 }
 
-extension on open.TranscriptionSettingsResponseMode {
-  TranscriptionSettingsMode toSettingsDomain() {
-    if (this == open.TranscriptionSettingsResponseMode.autoOn) {
+extension on open.FeatureActivationMode {
+  FeatureActivationMode toSettingsDomain() {
+    if (this == open.FeatureActivationMode.autoOn) {
+      return FeatureActivationMode.autoOn;
+    } else if (this == open.FeatureActivationMode.available) {
+      return FeatureActivationMode.available;
+    } else {
+      return FeatureActivationMode.disabled;
+    }
+  }
+
+  TranscriptionSettingsMode toTranscriptionModeDomain() {
+    if (this == open.FeatureActivationMode.autoOn) {
       return TranscriptionSettingsMode.autoOn;
-    } else if (this == open.TranscriptionSettingsResponseMode.available) {
+    } else if (this == open.FeatureActivationMode.available) {
       return TranscriptionSettingsMode.available;
     } else {
       return TranscriptionSettingsMode.disabled;
     }
   }
+
+  ClosedCaptionSettingsMode toClosedCaptionModeDomain() {
+    if (this == open.FeatureActivationMode.autoOn) {
+      return ClosedCaptionSettingsMode.autoOn;
+    } else if (this == open.FeatureActivationMode.available) {
+      return ClosedCaptionSettingsMode.available;
+    } else {
+      return ClosedCaptionSettingsMode.disabled;
+    }
+  }
 }
 
 @internal
-extension TranscriptionSettingsResponseLanguageExt
-    on open.TranscriptionSettingsResponseLanguage {
+extension TranscriptionLanguageExt on open.TranscriptionLanguage {
   TranscriptionSettingsLanguage? toSettingsDomain() {
     // The backend sends a language nobody set as "".
     if (this == '') return null;
@@ -398,36 +418,11 @@ extension TranscriptionSettingsResponseLanguageExt
   }
 }
 
-extension on open.TranscriptionSettingsResponseClosedCaptionMode {
-  ClosedCaptionSettingsMode toSettingsDomain() {
-    if (this == open.TranscriptionSettingsResponseClosedCaptionMode.autoOn) {
-      return ClosedCaptionSettingsMode.autoOn;
-    } else if (this ==
-        open.TranscriptionSettingsResponseClosedCaptionMode.available) {
-      return ClosedCaptionSettingsMode.available;
-    } else {
-      return ClosedCaptionSettingsMode.disabled;
-    }
-  }
-}
-
 extension on open.NoiseCancellationSettings {
   StreamNoiceCancellingSettings toSettingsDomain() {
     return StreamNoiceCancellingSettings(
       mode: mode.toSettingsDomain(),
     );
-  }
-}
-
-extension on open.NoiseCancellationSettingsMode {
-  NoiseCancellationSettingsMode toSettingsDomain() {
-    if (this == open.NoiseCancellationSettingsMode.autoOn) {
-      return NoiseCancellationSettingsMode.autoOn;
-    } else if (this == open.NoiseCancellationSettingsMode.available) {
-      return NoiseCancellationSettingsMode.available;
-    } else {
-      return NoiseCancellationSettingsMode.disabled;
-    }
   }
 }
 
@@ -510,12 +505,12 @@ extension on open.IngressSourceResponse {
   }
 }
 
-extension IngressVideoLayerRequestCodecExt on IngressVideoLayerRequestCodec {
-  static IngressVideoLayerRequestCodec fromString(String value) {
+extension VideoCodecExt on VideoCodec {
+  static VideoCodec fromString(String value) {
     return switch (value) {
-      'h264' => IngressVideoLayerRequestCodec.h264,
-      'vp8' => IngressVideoLayerRequestCodec.vp8,
-      _ => IngressVideoLayerRequestCodec.h264,
+      'h264' => VideoCodec.h264,
+      'vp8' => VideoCodec.vp8,
+      _ => VideoCodec.h264,
     };
   }
 }
@@ -524,7 +519,7 @@ extension on open.IngressVideoLayerResponse {
   StreamIngressVideoLayer toSettingsDomain() {
     return StreamIngressVideoLayer(
       bitrate: bitrate,
-      codec: IngressVideoLayerRequestCodecExt.fromString(codec),
+      codec: VideoCodecExt.fromString(codec),
       frameRateLimit: frameRateLimit,
       maxDimension: maxDimension,
       minDimension: minDimension,
@@ -650,16 +645,15 @@ extension ParticipantListExt on List<open.CallParticipantResponse> {
   }
 }
 
-extension CreateDeviceRequestPushProviderX
-    on open.CreateDeviceRequestPushProvider {
+extension PushProviderNameX on open.PushProviderName {
   PushProvider toPushProvider() {
-    if (this == open.CreateDeviceRequestPushProvider.firebase) {
+    if (this == open.PushProviderName.firebase) {
       return PushProvider.firebase;
-    } else if (this == open.CreateDeviceRequestPushProvider.xiaomi) {
+    } else if (this == open.PushProviderName.xiaomi) {
       return PushProvider.xiaomi;
-    } else if (this == open.CreateDeviceRequestPushProvider.huawei) {
+    } else if (this == open.PushProviderName.huawei) {
       return PushProvider.huawei;
-    } else if (this == open.CreateDeviceRequestPushProvider.apn) {
+    } else if (this == open.PushProviderName.apn) {
       return PushProvider.apn;
     }
     throw StreamVideoException(message: 'Unknown push provider: $this');

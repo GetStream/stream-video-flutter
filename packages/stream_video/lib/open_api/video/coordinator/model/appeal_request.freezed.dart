@@ -15,6 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$AppealRequest {
   String get appealReason;
   List<String>? get attachments;
+  String? get channelCid;
   String get entityId;
   String get entityType;
   String? get reviewQueueItemId;
@@ -40,6 +41,8 @@ mixin _$AppealRequest {
               other.attachments,
               attachments,
             ) &&
+            (identical(other.channelCid, channelCid) ||
+                other.channelCid == channelCid) &&
             (identical(other.entityId, entityId) ||
                 other.entityId == entityId) &&
             (identical(other.entityType, entityType) ||
@@ -53,6 +56,7 @@ mixin _$AppealRequest {
     runtimeType,
     appealReason,
     const DeepCollectionEquality().hash(attachments),
+    channelCid,
     entityId,
     entityType,
     reviewQueueItemId,
@@ -60,7 +64,7 @@ mixin _$AppealRequest {
 
   @override
   String toString() {
-    return 'AppealRequest(appealReason: $appealReason, attachments: $attachments, entityId: $entityId, entityType: $entityType, reviewQueueItemId: $reviewQueueItemId)';
+    return 'AppealRequest(appealReason: $appealReason, attachments: $attachments, channelCid: $channelCid, entityId: $entityId, entityType: $entityType, reviewQueueItemId: $reviewQueueItemId)';
   }
 }
 
@@ -74,6 +78,7 @@ abstract mixin class $AppealRequestCopyWith<$Res> {
   $Res call({
     String appealReason,
     List<String>? attachments,
+    String? channelCid,
     String entityId,
     String entityType,
     String? reviewQueueItemId,
@@ -95,6 +100,7 @@ class _$AppealRequestCopyWithImpl<$Res>
   $Res call({
     Object? appealReason = null,
     Object? attachments = freezed,
+    Object? channelCid = freezed,
     Object? entityId = null,
     Object? entityType = null,
     Object? reviewQueueItemId = freezed,
@@ -109,6 +115,10 @@ class _$AppealRequestCopyWithImpl<$Res>
             ? _self.attachments
             : attachments // ignore: cast_nullable_to_non_nullable
                   as List<String>?,
+        channelCid: freezed == channelCid
+            ? _self.channelCid
+            : channelCid // ignore: cast_nullable_to_non_nullable
+                  as String?,
         entityId: null == entityId
             ? _self.entityId
             : entityId // ignore: cast_nullable_to_non_nullable

@@ -3,6 +3,8 @@
 // coverage:ignore-file
 // ignore_for_file: unused_import, unnecessary_import, prefer_single_quotes, require_trailing_commas, unnecessary_raw_strings, public_member_api_docs
 
+import 'dart:convert' show jsonEncode;
+
 import 'package:retrofit/retrofit.dart';
 import 'package:stream_core/stream_core.dart';
 
@@ -10,35 +12,49 @@ import '../models.dart';
 
 part 'default_api.g.dart';
 
-@RestApi(callAdapter: _ResultCallAdapter)
+// Call adapters are set per operation: retrofit_generator applies a
+// class-level adapter to every method, concrete ones included, so its overrides
+// would replace the typed methods declared here.
+@RestApi()
 abstract interface class DefaultApi {
   factory DefaultApi(
     Dio dio, {
     String? baseUrl,
-  }) = _DefaultApi;
+  }) = _DefaultApi._;
 
+  // A named non-factory constructor makes retrofit_generator extend this class
+  // instead of implementing it, so concrete methods declared here are
+  // inherited. The generated class mirrors it as `_DefaultApi._`, which is why
+  // the factory redirects there.
+  const DefaultApi._();
+
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/accept')
   Future<Result<AcceptCallResponse>> acceptCall({
     @Path('type') required String type,
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/usergroups/{id}/members')
   Future<Result<AddUserGroupMembersResponse>> addUserGroupMembers({
     @Path('id') required String id,
     @Body() required AddUserGroupMembersRequest addUserGroupMembersRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/appeal')
   Future<Result<AppealResponse>> appeal({
     @Body() required AppealRequest appealRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/ban')
   Future<Result<ModerationBanResponse>> ban({
     @Body() required BanRequest banRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/block')
   Future<Result<BlockUserResponse>> blockUser({
     @Path('type') required String type,
@@ -46,28 +62,33 @@ abstract interface class DefaultApi {
     @Body() required BlockUserRequest blockUserRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/users/block')
   Future<Result<BlockUsersResponse>> blockUsers({
     @Body() required BlockUsersRequest blockUsersRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/appeals/bulk_action')
   Future<Result<BulkActionAppealsResponse>> bulkActionAppeals({
     @Body() required BulkActionAppealsRequest bulkActionAppealsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/action_config/bulk_delete')
   Future<Result<BulkDeleteActionConfigResponse>> bulkDeleteActionConfig({
     @Body()
     required BulkDeleteActionConfigRequest bulkDeleteActionConfigRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/action_config/bulk')
   Future<Result<BulkUpsertActionConfigResponse>> bulkUpsertActionConfig({
     @Body()
     required BulkUpsertActionConfigRequest bulkUpsertActionConfigRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/feedback')
   Future<Result<CollectUserFeedbackResponse>> collectUserFeedback({
     @Path('type') required String type,
@@ -75,53 +96,63 @@ abstract interface class DefaultApi {
     @Body() required CollectUserFeedbackRequest collectUserFeedbackRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/blocklists')
   Future<Result<CreateBlockListResponse>> createBlockList({
     @Body() required CreateBlockListRequest createBlockListRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/devices')
   Future<Result<DurationResponse>> createDevice({
     @Body() required CreateDeviceRequest createDeviceRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/guest')
   Future<Result<CreateGuestResponse>> createGuest({
     @Body() required CreateGuestRequest createGuestRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/polls')
   Future<Result<PollResponse>> createPoll({
     @Body() required CreatePollRequest createPollRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/polls/{poll_id}/options')
   Future<Result<PollOptionResponse>> createPollOption({
     @Path('poll_id') required String pollId,
     @Body() required CreatePollOptionRequest createPollOptionRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/queues')
   Future<Result<QueueResponse>> createQueue({
     @Body() required CreateQueueRequest createQueueRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/usergroups')
   Future<Result<CreateUserGroupResponse>> createUserGroup({
     @Body() required CreateUserGroupRequest createUserGroupRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/moderation/action_config/{id}')
   Future<Result<DeleteActionConfigResponse>> deleteActionConfig({
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/blocklists/{name}')
   Future<Result<DurationResponse>> deleteBlockList({
     @Path('name') required String name,
     @Query('team') String? team,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/delete')
   Future<Result<DeleteCallResponse>> deleteCall({
     @Path('type') required String type,
@@ -129,43 +160,51 @@ abstract interface class DefaultApi {
     @Body() DeleteCallRequest? deleteCallRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/moderation/config/{key}')
   Future<Result<DeleteModerationConfigResponse>> deleteConfig({
     @Path('key') required String key,
     @Query('team') String? team,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/devices')
   Future<Result<DurationResponse>> deleteDevice({
     @Query('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/uploads/file')
   Future<Result<DurationResponse>> deleteFile({
     @Query('url') String? url,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/uploads/image')
   Future<Result<DurationResponse>> deleteImage({
     @Query('url') String? url,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/polls/{poll_id}')
   Future<Result<DurationResponse>> deletePoll({
     @Path('poll_id') required String pollId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/polls/{poll_id}/options/{option_id}')
   Future<Result<DurationResponse>> deletePollOption({
     @Path('poll_id') required String pollId,
     @Path('option_id') required String optionId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/queues/{id}/delete')
   Future<Result<QueueResponse>> deleteQueue({
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/video/call/{type}/{id}/{session}/recordings/{filename}')
   Future<Result<DeleteRecordingResponse>> deleteRecording({
     @Path('type') required String type,
@@ -174,6 +213,7 @@ abstract interface class DefaultApi {
     @Path('filename') required String filename,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/video/call/{type}/{id}/{session}/transcriptions/{filename}')
   Future<Result<DeleteTranscriptionResponse>> deleteTranscription({
     @Path('type') required String type,
@@ -182,23 +222,27 @@ abstract interface class DefaultApi {
     @Path('filename') required String filename,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/usergroups/{id}')
   Future<Result<DurationResponse>> deleteUserGroup({
     @Path('id') required String id,
     @Query('team_id') String? teamId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/mark_ended')
   Future<Result<EndCallResponse>> endCall({
     @Path('type') required String type,
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/flag')
   Future<Result<FlagItemResponse>> flag({
     @Body() required FlagRequest flagRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/moderation/action_config')
   Future<Result<GetActionConfigResponse>> getActionConfig({
     @Query('queue_type') String? queueType,
@@ -207,17 +251,21 @@ abstract interface class DefaultApi {
     @Query('only_defaults') bool? onlyDefaults,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/app')
   Future<Result<GetApplicationResponse>> getApp();
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/moderation/appeal/{id}')
   Future<Result<GetAppealResponse>> getAppeal({
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/users/block')
   Future<Result<GetBlockedUsersResponse>> getBlockedUsers();
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/video/call/{type}/{id}')
   Future<Result<GetCallResponse>> getCall({
     @Path('type') required String type,
@@ -228,6 +276,7 @@ abstract interface class DefaultApi {
     @Query('video') bool? video,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET(
     '/api/v2/video/call/{type}/{id}/session/{session}/participant/{user}/{user_session}/details/track',
   )
@@ -242,6 +291,7 @@ abstract interface class DefaultApi {
     @Query('until') DateTime? until,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/video/call/{type}/{id}/report')
   Future<Result<GetCallReportResponse>> getCallReport({
     @Path('type') required String type,
@@ -249,6 +299,7 @@ abstract interface class DefaultApi {
     @Query('session_id') String? sessionId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/video/call/{type}/{id}/ring_state')
   Future<Result<GetCallRingStateResponse>> getCallRingState({
     @Path('type') required String type,
@@ -256,6 +307,7 @@ abstract interface class DefaultApi {
     @Query('call_session_id') required String callSessionId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET(
     '/api/v2/video/call_stats/{call_type}/{call_id}/{session}/participant/{user}/{user_session}/details',
   )
@@ -271,6 +323,7 @@ abstract interface class DefaultApi {
     @Query('max_points') int? maxPoints,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET(
     '/api/v2/video/call_stats/{call_type}/{call_id}/{session}/participants/{user}/{user_session}/timeline',
   )
@@ -286,6 +339,7 @@ abstract interface class DefaultApi {
     @Query('severity') List<String>? severity,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/video/call_stats/{call_type}/{call_id}/{session}/map')
   Future<Result<QueryCallStatsMapResponse>> getCallStatsMap({
     @Path('call_type') required String callType,
@@ -298,20 +352,24 @@ abstract interface class DefaultApi {
     @Query('exclude_sfus') bool? excludeSfus,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/moderation/config/{key}')
   Future<Result<GetConfigResponse>> getConfig({
     @Path('key') required String key,
     @Query('team') String? team,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/video/edges')
   Future<Result<GetEdgesResponse>> getEdges();
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/og')
   Future<Result<GetOGResponse>> getOG({
     @Query('url') required String url,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}')
   Future<Result<GetOrCreateCallResponse>> getOrCreateCall({
     @Path('type') required String type,
@@ -319,31 +377,37 @@ abstract interface class DefaultApi {
     @Body() GetOrCreateCallRequest? getOrCreateCallRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/polls/{poll_id}')
   Future<Result<PollResponse>> getPoll({
     @Path('poll_id') required String pollId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/polls/{poll_id}/options/{option_id}')
   Future<Result<PollOptionResponse>> getPollOption({
     @Path('poll_id') required String pollId,
     @Path('option_id') required String optionId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/moderation/queues/{id}')
   Future<Result<QueueResponse>> getQueue({
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/usergroups/{id}')
   Future<Result<GetUserGroupResponse>> getUserGroup({
     @Path('id') required String id,
     @Query('team_id') String? teamId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/users/live_locations')
   Future<Result<SharedLocationsResponse>> getUserLiveLocations();
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/go_live')
   Future<Result<GoLiveResponse>> goLive({
     @Path('type') required String type,
@@ -351,12 +415,7 @@ abstract interface class DefaultApi {
     @Body() GoLiveRequest? goLiveRequest,
   });
 
-  @POST('/api/v2/blocklists/{id}/import')
-  Future<Result<ImportBlockListResponse>> importBlockList({
-    @Path('id') required String id,
-    @Body() required ImportBlockListRequest importBlockListRequest,
-  });
-
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/join')
   Future<Result<JoinCallResponse>> joinCall({
     @Path('type') required String type,
@@ -364,6 +423,7 @@ abstract interface class DefaultApi {
     @Body() required JoinCallRequest joinCallRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/kick')
   Future<Result<KickUserResponse>> kickUser({
     @Path('type') required String type,
@@ -371,6 +431,7 @@ abstract interface class DefaultApi {
     @Body() required KickUserRequest kickUserRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/blocklists')
   Future<Result<ListBlockListResponse>> listBlockLists({
     @Query('team') String? team,
@@ -378,24 +439,29 @@ abstract interface class DefaultApi {
     @Query('limit') int? limit,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/devices')
   Future<Result<ListDevicesResponse>> listDevices();
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/moderation/queues')
   Future<Result<ListQueuesResponse>> listQueues();
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/video/call/{type}/{id}/recordings')
   Future<Result<ListRecordingsResponse>> listRecordings({
     @Path('type') required String type,
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/video/call/{type}/{id}/transcriptions')
   Future<Result<ListTranscriptionsResponse>> listTranscriptions({
     @Path('type') required String type,
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/usergroups')
   Future<Result<ListUserGroupsResponse>> listUserGroups({
     @Query('limit') int? limit,
@@ -404,16 +470,28 @@ abstract interface class DefaultApi {
     @Query('team_id') String? teamId,
   });
 
-  @GET('/api/v2/longpoll')
   Future<Result<void>> longPoll({
-    @Query('json') WSAuthMessage? json,
+    bool? close,
+    WSAuthMessage? json,
+  }) => _longPoll(
+    close: close,
+    json: _JsonQuery.of(json),
+  );
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @GET('/api/v2/longpoll')
+  Future<Result<void>> _longPoll({
+    @Query('close') bool? close,
+    @Query('json') _JsonQuery? json,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/mute')
   Future<Result<MuteResponse>> mute({
     @Body() required MuteRequest muteRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/mute_users')
   Future<Result<MuteUsersResponse>> muteUsers({
     @Path('type') required String type,
@@ -421,33 +499,57 @@ abstract interface class DefaultApi {
     @Body() MuteUsersRequest? muteUsersRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/stats')
   Future<Result<QueryAggregateCallStatsResponse>> queryAggregateCallStats({
     @Body() QueryAggregateCallStatsRequest? queryAggregateCallStatsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/appeals')
   Future<Result<QueryAppealsResponse>> queryAppeals({
     @Body() QueryAppealsRequest? queryAppealsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/members')
   Future<Result<QueryCallMembersResponse>> queryCallMembers({
     @Body() required QueryCallMembersRequest queryCallMembersRequest,
   });
 
-  @GET('/api/v2/video/call/{type}/{id}/session/{session}/participant_sessions')
   Future<Result<QueryCallParticipantSessionsResponse>>
   queryCallParticipantSessions({
+    required String type,
+    required String id,
+    required String session,
+    int? limit,
+    String? prev,
+    String? next,
+    Map<String, Object?>? filterConditions,
+  }) => _queryCallParticipantSessions(
+    type: type,
+    id: id,
+    session: session,
+    limit: limit,
+    prev: prev,
+    next: next,
+    filterConditions: _JsonQuery.of(filterConditions),
+  );
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @GET('/api/v2/video/call/{type}/{id}/session/{session}/participant_sessions')
+  Future<Result<QueryCallParticipantSessionsResponse>>
+  _queryCallParticipantSessions({
     @Path('type') required String type,
     @Path('id') required String id,
     @Path('session') required String session,
     @Query('limit') int? limit,
     @Query('prev') String? prev,
     @Query('next') String? next,
-    @Query('filter_conditions') Map<String, Object?>? filterConditions,
+    @Query('filter_conditions') _JsonQuery? filterConditions,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/participants')
   Future<Result<QueryCallParticipantsResponse>> queryCallParticipants({
     @Path('id') required String id,
@@ -456,60 +558,97 @@ abstract interface class DefaultApi {
     @Body() QueryCallParticipantsRequest? queryCallParticipantsRequest,
   });
 
-  @GET('/api/v2/video/call_stats/{call_type}/{call_id}/{session}/participants')
   Future<Result<QueryCallSessionParticipantStatsResponse>>
   queryCallSessionParticipantStats({
+    required String callType,
+    required String callId,
+    required String session,
+    int? limit,
+    String? prev,
+    String? next,
+    List<SortParamRequest>? sort,
+    Map<String, Object?>? filterConditions,
+  }) => _queryCallSessionParticipantStats(
+    callType: callType,
+    callId: callId,
+    session: session,
+    limit: limit,
+    prev: prev,
+    next: next,
+    sort: _JsonQuery.of(sort),
+    filterConditions: _JsonQuery.of(filterConditions),
+  );
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @GET('/api/v2/video/call_stats/{call_type}/{call_id}/{session}/participants')
+  Future<Result<QueryCallSessionParticipantStatsResponse>>
+  _queryCallSessionParticipantStats({
     @Path('call_type') required String callType,
     @Path('call_id') required String callId,
     @Path('session') required String session,
     @Query('limit') int? limit,
     @Query('prev') String? prev,
     @Query('next') String? next,
-    @Query('sort') List<SortParamRequest>? sort,
-    @Query('filter_conditions') Map<String, Object?>? filterConditions,
+    @Query('sort') _JsonQuery? sort,
+    @Query('filter_conditions') _JsonQuery? filterConditions,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call_stats')
   Future<Result<QueryCallSessionStatsResponse>> queryCallSessionStats({
     @Body() QueryCallSessionStatsRequest? queryCallSessionStatsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/stats')
   Future<Result<QueryCallStatsResponse>> queryCallStats({
     @Body() QueryCallStatsRequest? queryCallStatsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/calls')
   Future<Result<QueryCallsResponse>> queryCalls({
     @Body() QueryCallsRequest? queryCallsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/configs')
   Future<Result<QueryModerationConfigsResponse>> queryModerationConfigs({
     @Body() QueryModerationConfigsRequest? queryModerationConfigsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/polls/{poll_id}/votes')
   Future<Result<PollVotesResponse>> queryPollVotes({
     @Path('poll_id') required String pollId,
     @Body() QueryPollVotesRequest? queryPollVotesRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/polls/query')
   Future<Result<QueryPollsResponse>> queryPolls({
     @Body() QueryPollsRequest? queryPollsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/review_queue')
   Future<Result<QueryReviewQueueResponse>> queryReviewQueue({
     @Body() QueryReviewQueueRequest? queryReviewQueueRequest,
   });
 
-  @GET('/api/v2/users')
   Future<Result<QueryUsersResponse>> queryUsers({
-    @Query('payload') QueryUsersPayload? payload,
+    QueryUsersPayload? payload,
+  }) => _queryUsers(
+    payload: _JsonQuery.of(payload),
+  );
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @GET('/api/v2/users')
+  Future<Result<QueryUsersResponse>> _queryUsers({
+    @Query('payload') _JsonQuery? payload,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/reject')
   Future<Result<RejectCallResponse>> rejectCall({
     @Path('type') required String type,
@@ -517,6 +656,7 @@ abstract interface class DefaultApi {
     @Body() RejectCallRequest? rejectCallRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/usergroups/{id}/members/delete')
   Future<Result<RemoveUserGroupMembersResponse>> removeUserGroupMembers({
     @Path('id') required String id,
@@ -524,11 +664,13 @@ abstract interface class DefaultApi {
     required RemoveUserGroupMembersRequest removeUserGroupMembersRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call_client_event')
   Future<Result<ReportClientEventResponse>> reportClientCallEvent({
     @Body() required ReportClientEventRequest reportClientEventRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/request_permission')
   Future<Result<RequestPermissionResponse>> requestPermission({
     @Path('type') required String type,
@@ -536,16 +678,25 @@ abstract interface class DefaultApi {
     @Body() required RequestPermissionRequest requestPermissionRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/sip/auth')
   Future<Result<ResolveSipAuthResponse>> resolveSipAuth({
     @Body() required ResolveSipAuthRequest resolveSipAuthRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/sip/resolve')
   Future<Result<ResolveSipInboundResponse>> resolveSipInbound({
     @Body() required ResolveSipInboundRequest resolveSipInboundRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
+  @POST('/api/v2/moderation/reveal_media')
+  Future<Result<RevealMediaResponse>> revealMedia({
+    @Body() required RevealMediaRequest revealMediaRequest,
+  });
+
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/ring')
   Future<Result<RingCallResponse>> ringCall({
     @Path('type') required String type,
@@ -553,6 +704,7 @@ abstract interface class DefaultApi {
     @Body() RingCallRequest? ringCallRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/roles/search')
   Future<Result<SearchRolesResponse>> searchRoles({
     @Query('query') required String query,
@@ -562,6 +714,7 @@ abstract interface class DefaultApi {
     @Query('include_global_roles') bool? includeGlobalRoles,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/usergroups/search')
   Future<Result<SearchUserGroupsResponse>> searchUserGroups({
     @Query('query') required String query,
@@ -571,6 +724,7 @@ abstract interface class DefaultApi {
     @Query('team_id') String? teamId,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/event')
   Future<Result<SendCallEventResponse>> sendCallEvent({
     @Path('type') required String type,
@@ -578,6 +732,7 @@ abstract interface class DefaultApi {
     @Body() SendCallEventRequest? sendCallEventRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/reaction')
   Future<Result<SendVideoReactionResponse>> sendVideoReaction({
     @Path('type') required String type,
@@ -585,6 +740,7 @@ abstract interface class DefaultApi {
     @Body() required SendVideoReactionRequest sendVideoReactionRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/start_closed_captions')
   Future<Result<StartClosedCaptionsResponse>> startClosedCaptions({
     @Path('type') required String type,
@@ -592,6 +748,7 @@ abstract interface class DefaultApi {
     @Body() StartClosedCaptionsRequest? startClosedCaptionsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/start_frame_recording')
   Future<Result<StartFrameRecordingResponse>> startFrameRecording({
     @Path('type') required String type,
@@ -599,12 +756,14 @@ abstract interface class DefaultApi {
     @Body() StartFrameRecordingRequest? startFrameRecordingRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/start_broadcasting')
   Future<Result<StartHLSBroadcastingResponse>> startHLSBroadcasting({
     @Path('type') required String type,
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/rtmp_broadcasts')
   Future<Result<StartRTMPBroadcastsResponse>> startRTMPBroadcasts({
     @Path('type') required String type,
@@ -612,14 +771,16 @@ abstract interface class DefaultApi {
     @Body() required StartRTMPBroadcastsRequest startRTMPBroadcastsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/recordings/{recording_type}/start')
   Future<Result<StartRecordingResponse>> startRecording({
     @Path('type') required String type,
     @Path('id') required String id,
-    @Path('recording_type') required String recordingType,
+    @Path('recording_type') required RecordingType recordingType,
     @Body() StartRecordingRequest? startRecordingRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/start_transcription')
   Future<Result<StartTranscriptionResponse>> startTranscription({
     @Path('type') required String type,
@@ -627,12 +788,14 @@ abstract interface class DefaultApi {
     @Body() StartTranscriptionRequest? startTranscriptionRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/rtmp_broadcasts/stop')
   Future<Result<StopAllRTMPBroadcastsResponse>> stopAllRTMPBroadcasts({
     @Path('type') required String type,
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/stop_closed_captions')
   Future<Result<StopClosedCaptionsResponse>> stopClosedCaptions({
     @Path('type') required String type,
@@ -640,18 +803,21 @@ abstract interface class DefaultApi {
     @Body() StopClosedCaptionsRequest? stopClosedCaptionsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/stop_frame_recording')
   Future<Result<StopFrameRecordingResponse>> stopFrameRecording({
     @Path('type') required String type,
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/stop_broadcasting')
   Future<Result<StopHLSBroadcastingResponse>> stopHLSBroadcasting({
     @Path('type') required String type,
     @Path('id') required String id,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/stop_live')
   Future<Result<StopLiveResponse>> stopLive({
     @Path('type') required String type,
@@ -659,6 +825,7 @@ abstract interface class DefaultApi {
     @Body() StopLiveRequest? stopLiveRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/rtmp_broadcasts/{name}/stop')
   Future<Result<StopRTMPBroadcastsResponse>> stopRTMPBroadcast({
     @Path('type') required String type,
@@ -666,13 +833,15 @@ abstract interface class DefaultApi {
     @Path('name') required String name,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/recordings/{recording_type}/stop')
   Future<Result<StopRecordingResponse>> stopRecording({
     @Path('type') required String type,
     @Path('id') required String id,
-    @Path('recording_type') required String recordingType,
+    @Path('recording_type') required RecordingType recordingType,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/stop_transcription')
   Future<Result<StopTranscriptionResponse>> stopTranscription({
     @Path('type') required String type,
@@ -680,17 +849,20 @@ abstract interface class DefaultApi {
     @Body() StopTranscriptionRequest? stopTranscriptionRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/submit_action')
   Future<Result<SubmitActionResponse>> submitAction({
     @Body() required SubmitActionRequest submitActionRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/unban')
   Future<Result<UnbanResponse>> unban({
     @Query('target_user_id') required String targetUserId,
     @Query('channel_cid') String? channelCid,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/unblock')
   Future<Result<UnblockUserResponse>> unblockUser({
     @Path('type') required String type,
@@ -698,22 +870,26 @@ abstract interface class DefaultApi {
     @Body() required UnblockUserRequest unblockUserRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/users/unblock')
   Future<Result<UnblockUsersResponse>> unblockUsers({
     @Body() required UnblockUsersRequest unblockUsersRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/unmute')
   Future<Result<UnmuteResponse>> unmute({
     @Body() required UnmuteRequest unmuteRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PUT('/api/v2/blocklists/{name}')
   Future<Result<UpdateBlockListResponse>> updateBlockList({
     @Path('name') required String name,
     @Body() UpdateBlockListRequest? updateBlockListRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PATCH('/api/v2/video/call/{type}/{id}')
   Future<Result<UpdateCallResponse>> updateCall({
     @Path('type') required String type,
@@ -721,6 +897,7 @@ abstract interface class DefaultApi {
     @Body() UpdateCallRequest? updateCallRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/members')
   Future<Result<UpdateCallMembersResponse>> updateCallMembers({
     @Path('type') required String type,
@@ -728,46 +905,54 @@ abstract interface class DefaultApi {
     @Body() UpdateCallMembersRequest? updateCallMembersRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PUT('/api/v2/users/live_locations')
   Future<Result<SharedLocationResponse>> updateLiveLocation({
     @Body() required UpdateLiveLocationRequest updateLiveLocationRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PUT('/api/v2/polls')
   Future<Result<PollResponse>> updatePoll({
     @Body() required UpdatePollRequest updatePollRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PUT('/api/v2/polls/{poll_id}/options')
   Future<Result<PollOptionResponse>> updatePollOption({
     @Path('poll_id') required String pollId,
     @Body() required UpdatePollOptionRequest updatePollOptionRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PATCH('/api/v2/polls/{poll_id}')
   Future<Result<PollResponse>> updatePollPartial({
     @Path('poll_id') required String pollId,
     @Body() UpdatePollPartialRequest? updatePollPartialRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/push_preferences')
   Future<Result<UpsertPushPreferencesResponse>>
   updatePushNotificationPreferences({
     @Body() required UpsertPushPreferencesRequest upsertPushPreferencesRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PATCH('/api/v2/moderation/queues/{id}')
   Future<Result<QueueResponse>> updateQueue({
     @Path('id') required String id,
     @Body() UpdateQueueRequest? updateQueueRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PUT('/api/v2/usergroups/{id}')
   Future<Result<UpdateUserGroupResponse>> updateUserGroup({
     @Path('id') required String id,
     @Body() UpdateUserGroupRequest? updateUserGroupRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/user_permissions')
   Future<Result<UpdateUserPermissionsResponse>> updateUserPermissions({
     @Path('type') required String type,
@@ -775,36 +960,43 @@ abstract interface class DefaultApi {
     @Body() required UpdateUserPermissionsRequest updateUserPermissionsRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/users')
   Future<Result<UpdateUsersResponse>> updateUsers({
     @Body() required UpdateUsersRequest updateUsersRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @PATCH('/api/v2/users')
   Future<Result<UpdateUsersResponse>> updateUsersPartial({
     @Body() required UpdateUsersPartialRequest updateUsersPartialRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/uploads/file')
   Future<Result<FileUploadResponse>> uploadFile({
     @Body() FileUploadRequest? fileUploadRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/uploads/image')
   Future<Result<ImageUploadResponse>> uploadImage({
     @Body() ImageUploadRequest? imageUploadRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/action_config')
   Future<Result<UpsertActionConfigResponse>> upsertActionConfig({
     @Body() required UpsertActionConfigRequest upsertActionConfigRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/moderation/config')
   Future<Result<UpsertConfigResponse>> upsertConfig({
     @Body() required UpsertConfigRequest upsertConfigRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/pin')
   Future<Result<PinResponse>> videoPin({
     @Path('type') required String type,
@@ -812,6 +1004,7 @@ abstract interface class DefaultApi {
     @Body() required PinRequest pinRequest,
   });
 
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/video/call/{type}/{id}/unpin')
   Future<Result<UnpinResponse>> videoUnpin({
     @Path('type') required String type,
@@ -822,5 +1015,28 @@ abstract interface class DefaultApi {
 
 class _ResultCallAdapter<T> extends CallAdapter<Future<T>, Future<Result<T>>> {
   @override
-  Future<Result<T>> adapt(Future<T> Function() call) => runSafely(call);
+  Future<Result<T>> adapt(Future<T> Function() call) => runApiSafely(call);
+}
+
+// A query parameter sent as one JSON string, such as a query payload or a sort
+// list. The generated retrofit code calls toJson() inside the call adapter, so a
+// value that cannot be encoded fails the call instead of throwing. Dates are
+// encoded as RFC3339 in UTC, like the models' date fields, and any other
+// iterable, such as a Set, as a list.
+final class _JsonQuery {
+  const _JsonQuery(this.value);
+
+  static _JsonQuery? of(Object? value) =>
+      value == null ? null : _JsonQuery(value);
+
+  final Object value;
+
+  String toJson() => jsonEncode(value, toEncodable: _toEncodable);
+
+  static Object? _toEncodable(Object? object) => switch (object) {
+    final DateTime date => date.toUtc().toIso8601String(),
+    final Iterable<Object?> iterable => iterable.toList(),
+    // ignore: avoid_dynamic_calls
+    _ => (object as dynamic).toJson(),
+  };
 }

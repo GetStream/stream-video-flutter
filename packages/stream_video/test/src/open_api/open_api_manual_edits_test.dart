@@ -222,7 +222,7 @@ void main() {
     test('a known language reads as its constant', () {
       final result = parseLanguage('en');
 
-      expect(result.language, TranscriptionSettingsResponseLanguage.en);
+      expect(result.language, TranscriptionLanguage.en);
     });
 
     // The server can start transcribing in a language released after this SDK
@@ -234,7 +234,7 @@ void main() {
       expect(result.language, 'unknown_language_xyz');
       expect(
         result.language,
-        isNot(TranscriptionSettingsResponseLanguage.auto),
+        isNot(TranscriptionLanguage.auto),
       );
       expect(result.toJson()['language'], 'unknown_language_xyz');
     });
@@ -245,7 +245,7 @@ void main() {
       expect(result.language, isEmpty);
       expect(
         result.language,
-        isNot(TranscriptionSettingsResponseLanguage.auto),
+        isNot(TranscriptionLanguage.auto),
       );
     });
   });

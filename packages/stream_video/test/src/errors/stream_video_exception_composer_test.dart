@@ -471,6 +471,42 @@ void main() {
       );
     });
 
+    test('in a failure that arrives already mapped', () {
+      final error = StreamVideoExceptions.compose(
+        DioException(
+          requestOptions: _requestOptions,
+          response: Response(
+            requestOptions: _requestOptions,
+            statusCode: 503,
+            statusMessage: 'Service Unavailable',
+          ),
+          type: DioExceptionType.badResponse,
+        ).toStreamException(),
+      );
+
+      expect(error.message, startsWith('HTTP 503 $_endpoint'));
+    });
+
+    test('keeps the message of a token fetch failure that arrives mapped', () {
+      final error = StreamVideoExceptions.compose(
+        StreamNetworkException(
+          message: 'The token could not be fetched',
+          cause: DioException.connectionError(
+            requestOptions: RequestOptions(
+              baseUrl: 'https://my-backend.example',
+              path: '/token',
+            ),
+            reason: 'dio boilerplate',
+            error: const SocketException(
+              "Failed host lookup: 'my-backend.example'",
+            ),
+          ),
+        ),
+      );
+
+      expect(error.message, 'The token could not be fetched');
+    });
+
     test('leaves a request that is not the coordinator unnamed', () {
       final appRequest = RequestOptions(
         baseUrl: 'https://my-backend.example',

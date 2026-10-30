@@ -27,6 +27,7 @@ mixin _$ConfigResponse {
   BlockListConfig? get blockListConfig;
   DateTime get createdAt;
   FloodConfig? get floodConfig;
+  IntentConfigResponse? get intentConfig;
   String get key;
   LLMConfig? get llmConfig;
   List<String> get supportedVideoCallHarmTypes;
@@ -91,6 +92,8 @@ mixin _$ConfigResponse {
                 other.createdAt == createdAt) &&
             (identical(other.floodConfig, floodConfig) ||
                 other.floodConfig == floodConfig) &&
+            (identical(other.intentConfig, intentConfig) ||
+                other.intentConfig == intentConfig) &&
             (identical(other.key, key) || other.key == key) &&
             (identical(other.llmConfig, llmConfig) ||
                 other.llmConfig == llmConfig) &&
@@ -124,6 +127,7 @@ mixin _$ConfigResponse {
     blockListConfig,
     createdAt,
     floodConfig,
+    intentConfig,
     key,
     llmConfig,
     const DeepCollectionEquality().hash(supportedVideoCallHarmTypes),
@@ -135,7 +139,7 @@ mixin _$ConfigResponse {
 
   @override
   String toString() {
-    return 'ConfigResponse(aiAudioConfig: $aiAudioConfig, aiImageConfig: $aiImageConfig, aiImageLabelDefinitions: $aiImageLabelDefinitions, aiImageSubclassifications: $aiImageSubclassifications, aiTextConfig: $aiTextConfig, aiVideoConfig: $aiVideoConfig, async: $async, automodPlatformCircumventionConfig: $automodPlatformCircumventionConfig, automodSemanticFiltersConfig: $automodSemanticFiltersConfig, automodToxicityConfig: $automodToxicityConfig, availableBodyguardProfiles: $availableBodyguardProfiles, blockListConfig: $blockListConfig, createdAt: $createdAt, floodConfig: $floodConfig, key: $key, llmConfig: $llmConfig, supportedVideoCallHarmTypes: $supportedVideoCallHarmTypes, team: $team, updatedAt: $updatedAt, velocityFilterConfig: $velocityFilterConfig, videoCallRuleConfig: $videoCallRuleConfig)';
+    return 'ConfigResponse(aiAudioConfig: $aiAudioConfig, aiImageConfig: $aiImageConfig, aiImageLabelDefinitions: $aiImageLabelDefinitions, aiImageSubclassifications: $aiImageSubclassifications, aiTextConfig: $aiTextConfig, aiVideoConfig: $aiVideoConfig, async: $async, automodPlatformCircumventionConfig: $automodPlatformCircumventionConfig, automodSemanticFiltersConfig: $automodSemanticFiltersConfig, automodToxicityConfig: $automodToxicityConfig, availableBodyguardProfiles: $availableBodyguardProfiles, blockListConfig: $blockListConfig, createdAt: $createdAt, floodConfig: $floodConfig, intentConfig: $intentConfig, key: $key, llmConfig: $llmConfig, supportedVideoCallHarmTypes: $supportedVideoCallHarmTypes, team: $team, updatedAt: $updatedAt, velocityFilterConfig: $velocityFilterConfig, videoCallRuleConfig: $videoCallRuleConfig)';
   }
 }
 
@@ -161,6 +165,7 @@ abstract mixin class $ConfigResponseCopyWith<$Res> {
     BlockListConfig? blockListConfig,
     DateTime createdAt,
     FloodConfig? floodConfig,
+    IntentConfigResponse? intentConfig,
     String key,
     LLMConfig? llmConfig,
     List<String> supportedVideoCallHarmTypes,
@@ -198,6 +203,7 @@ class _$ConfigResponseCopyWithImpl<$Res>
     Object? blockListConfig = freezed,
     Object? createdAt = null,
     Object? floodConfig = freezed,
+    Object? intentConfig = freezed,
     Object? key = null,
     Object? llmConfig = freezed,
     Object? supportedVideoCallHarmTypes = null,
@@ -265,6 +271,10 @@ class _$ConfigResponseCopyWithImpl<$Res>
             ? _self.floodConfig
             : floodConfig // ignore: cast_nullable_to_non_nullable
                   as FloodConfig?,
+        intentConfig: freezed == intentConfig
+            ? _self.intentConfig
+            : intentConfig // ignore: cast_nullable_to_non_nullable
+                  as IntentConfigResponse?,
         key: null == key
             ? _self.key
             : key // ignore: cast_nullable_to_non_nullable

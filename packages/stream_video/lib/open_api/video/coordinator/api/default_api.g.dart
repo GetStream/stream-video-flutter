@@ -10,8 +10,8 @@ part of 'default_api.dart';
 
 // ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations,unused_element_parameter,avoid_unused_constructor_parameters,unreachable_from_main,avoid_redundant_argument_values
 
-class _DefaultApi implements DefaultApi {
-  _DefaultApi(this._dio, {this.baseUrl, this.errorLogger});
+class _DefaultApi extends DefaultApi {
+  _DefaultApi._(this._dio, {this.baseUrl, this.errorLogger}) : super._();
 
   final Dio _dio;
 
@@ -2211,49 +2211,6 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<ImportBlockListResponse> _importBlockList({
-    required String id,
-    required ImportBlockListRequest importBlockListRequest,
-  }) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(importBlockListRequest.toJson());
-    final _options = _setStreamType<Result<ImportBlockListResponse>>(
-      Options(method: 'POST', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            '/api/v2/blocklists/${id}/import',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late ImportBlockListResponse _value;
-    try {
-      _value = ImportBlockListResponse.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<Result<ImportBlockListResponse>> importBlockList({
-    required String id,
-    required ImportBlockListRequest importBlockListRequest,
-  }) {
-    return _ResultCallAdapter<ImportBlockListResponse>().adapt(
-      () => _importBlockList(
-        id: id,
-        importBlockListRequest: importBlockListRequest,
-      ),
-    );
-  }
-
   Future<JoinCallResponse> _joinCall({
     required String type,
     required String id,
@@ -2580,9 +2537,12 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<void> _longPoll({WSAuthMessage? json}) async {
+  Future<void> __longPoll({bool? close, _JsonQuery? json}) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'json': json?.toJson()};
+    final queryParameters = <String, dynamic>{
+      r'close': close,
+      r'json': json?.toJson(),
+    };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
@@ -2600,8 +2560,10 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<void>> longPoll({WSAuthMessage? json}) {
-    return _ResultCallAdapter<void>().adapt(() => _longPoll(json: json));
+  Future<Result<void>> _longPoll({bool? close, _JsonQuery? json}) {
+    return _ResultCallAdapter<void>().adapt(
+      () => __longPoll(close: close, json: json),
+    );
   }
 
   Future<MuteResponse> _mute({required MuteRequest muteRequest}) async {
@@ -2801,21 +2763,21 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<QueryCallParticipantSessionsResponse> _queryCallParticipantSessions({
+  Future<QueryCallParticipantSessionsResponse> __queryCallParticipantSessions({
     required String type,
     required String id,
     required String session,
     int? limit,
     String? prev,
     String? next,
-    Map<String, Object?>? filterConditions,
+    _JsonQuery? filterConditions,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'limit': limit,
       r'prev': prev,
       r'next': next,
-      r'filter_conditions': filterConditions,
+      r'filter_conditions': filterConditions?.toJson(),
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
@@ -2843,17 +2805,17 @@ class _DefaultApi implements DefaultApi {
 
   @override
   Future<Result<QueryCallParticipantSessionsResponse>>
-  queryCallParticipantSessions({
+  _queryCallParticipantSessions({
     required String type,
     required String id,
     required String session,
     int? limit,
     String? prev,
     String? next,
-    Map<String, Object?>? filterConditions,
+    _JsonQuery? filterConditions,
   }) {
     return _ResultCallAdapter<QueryCallParticipantSessionsResponse>().adapt(
-      () => _queryCallParticipantSessions(
+      () => __queryCallParticipantSessions(
         type: type,
         id: id,
         session: session,
@@ -2916,23 +2878,23 @@ class _DefaultApi implements DefaultApi {
   }
 
   Future<QueryCallSessionParticipantStatsResponse>
-  _queryCallSessionParticipantStats({
+  __queryCallSessionParticipantStats({
     required String callType,
     required String callId,
     required String session,
     int? limit,
     String? prev,
     String? next,
-    List<SortParamRequest>? sort,
-    Map<String, Object?>? filterConditions,
+    _JsonQuery? sort,
+    _JsonQuery? filterConditions,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
       r'limit': limit,
       r'prev': prev,
       r'next': next,
-      r'sort': sort,
-      r'filter_conditions': filterConditions,
+      r'sort': sort?.toJson(),
+      r'filter_conditions': filterConditions?.toJson(),
     };
     queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
@@ -2963,18 +2925,18 @@ class _DefaultApi implements DefaultApi {
 
   @override
   Future<Result<QueryCallSessionParticipantStatsResponse>>
-  queryCallSessionParticipantStats({
+  _queryCallSessionParticipantStats({
     required String callType,
     required String callId,
     required String session,
     int? limit,
     String? prev,
     String? next,
-    List<SortParamRequest>? sort,
-    Map<String, Object?>? filterConditions,
+    _JsonQuery? sort,
+    _JsonQuery? filterConditions,
   }) {
     return _ResultCallAdapter<QueryCallSessionParticipantStatsResponse>().adapt(
-      () => _queryCallSessionParticipantStats(
+      () => __queryCallSessionParticipantStats(
         callType: callType,
         callId: callId,
         session: session,
@@ -3271,7 +3233,7 @@ class _DefaultApi implements DefaultApi {
     );
   }
 
-  Future<QueryUsersResponse> _queryUsers({QueryUsersPayload? payload}) async {
+  Future<QueryUsersResponse> __queryUsers({_JsonQuery? payload}) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'payload': payload?.toJson()};
     queryParameters.removeWhere((k, v) => v == null);
@@ -3299,9 +3261,9 @@ class _DefaultApi implements DefaultApi {
   }
 
   @override
-  Future<Result<QueryUsersResponse>> queryUsers({QueryUsersPayload? payload}) {
+  Future<Result<QueryUsersResponse>> _queryUsers({_JsonQuery? payload}) {
     return _ResultCallAdapter<QueryUsersResponse>().adapt(
-      () => _queryUsers(payload: payload),
+      () => __queryUsers(payload: payload),
     );
   }
 
@@ -3553,6 +3515,44 @@ class _DefaultApi implements DefaultApi {
       () => _resolveSipInbound(
         resolveSipInboundRequest: resolveSipInboundRequest,
       ),
+    );
+  }
+
+  Future<RevealMediaResponse> _revealMedia({
+    required RevealMediaRequest revealMediaRequest,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(revealMediaRequest.toJson());
+    final _options = _setStreamType<Result<RevealMediaResponse>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/moderation/reveal_media',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late RevealMediaResponse _value;
+    try {
+      _value = RevealMediaResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<RevealMediaResponse>> revealMedia({
+    required RevealMediaRequest revealMediaRequest,
+  }) {
+    return _ResultCallAdapter<RevealMediaResponse>().adapt(
+      () => _revealMedia(revealMediaRequest: revealMediaRequest),
     );
   }
 
@@ -3990,7 +3990,7 @@ class _DefaultApi implements DefaultApi {
   Future<StartRecordingResponse> _startRecording({
     required String type,
     required String id,
-    required String recordingType,
+    required RecordingType recordingType,
     StartRecordingRequest? startRecordingRequest,
   }) async {
     final _extra = <String, dynamic>{};
@@ -4024,7 +4024,7 @@ class _DefaultApi implements DefaultApi {
   Future<Result<StartRecordingResponse>> startRecording({
     required String type,
     required String id,
-    required String recordingType,
+    required RecordingType recordingType,
     StartRecordingRequest? startRecordingRequest,
   }) {
     return _ResultCallAdapter<StartRecordingResponse>().adapt(
@@ -4335,7 +4335,7 @@ class _DefaultApi implements DefaultApi {
   Future<StopRecordingResponse> _stopRecording({
     required String type,
     required String id,
-    required String recordingType,
+    required RecordingType recordingType,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
@@ -4366,7 +4366,7 @@ class _DefaultApi implements DefaultApi {
   Future<Result<StopRecordingResponse>> stopRecording({
     required String type,
     required String id,
-    required String recordingType,
+    required RecordingType recordingType,
   }) {
     return _ResultCallAdapter<StopRecordingResponse>().adapt(
       () => _stopRecording(type: type, id: id, recordingType: recordingType),

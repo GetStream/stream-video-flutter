@@ -15,6 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$EnrichedReaction {
   String get activityId;
   Map<String, int>? get childrenCounts;
+  String? get createdAt;
   Map<String, Object?>? get data;
   String? get id;
   String get kind;
@@ -22,6 +23,7 @@ mixin _$EnrichedReaction {
   Map<String, List<EnrichedReaction>>? get ownChildren;
   String? get parent;
   List<String>? get targetFeeds;
+  String? get updatedAt;
   Data? get user;
   String get userId;
 
@@ -46,6 +48,8 @@ mixin _$EnrichedReaction {
               other.childrenCounts,
               childrenCounts,
             ) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
             const DeepCollectionEquality().equals(other.data, data) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.kind, kind) || other.kind == kind) &&
@@ -62,6 +66,8 @@ mixin _$EnrichedReaction {
               other.targetFeeds,
               targetFeeds,
             ) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt) &&
             (identical(other.user, user) || other.user == user) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
@@ -71,6 +77,7 @@ mixin _$EnrichedReaction {
     runtimeType,
     activityId,
     const DeepCollectionEquality().hash(childrenCounts),
+    createdAt,
     const DeepCollectionEquality().hash(data),
     id,
     kind,
@@ -78,13 +85,14 @@ mixin _$EnrichedReaction {
     const DeepCollectionEquality().hash(ownChildren),
     parent,
     const DeepCollectionEquality().hash(targetFeeds),
+    updatedAt,
     user,
     userId,
   );
 
   @override
   String toString() {
-    return 'EnrichedReaction(activityId: $activityId, childrenCounts: $childrenCounts, data: $data, id: $id, kind: $kind, latestChildren: $latestChildren, ownChildren: $ownChildren, parent: $parent, targetFeeds: $targetFeeds, user: $user, userId: $userId)';
+    return 'EnrichedReaction(activityId: $activityId, childrenCounts: $childrenCounts, createdAt: $createdAt, data: $data, id: $id, kind: $kind, latestChildren: $latestChildren, ownChildren: $ownChildren, parent: $parent, targetFeeds: $targetFeeds, updatedAt: $updatedAt, user: $user, userId: $userId)';
   }
 }
 
@@ -98,6 +106,7 @@ abstract mixin class $EnrichedReactionCopyWith<$Res> {
   $Res call({
     String activityId,
     Map<String, int>? childrenCounts,
+    String? createdAt,
     Map<String, Object?>? data,
     String? id,
     String kind,
@@ -105,6 +114,7 @@ abstract mixin class $EnrichedReactionCopyWith<$Res> {
     Map<String, List<EnrichedReaction>>? ownChildren,
     String? parent,
     List<String>? targetFeeds,
+    String? updatedAt,
     Data? user,
     String userId,
   });
@@ -125,6 +135,7 @@ class _$EnrichedReactionCopyWithImpl<$Res>
   $Res call({
     Object? activityId = null,
     Object? childrenCounts = freezed,
+    Object? createdAt = freezed,
     Object? data = freezed,
     Object? id = freezed,
     Object? kind = null,
@@ -132,6 +143,7 @@ class _$EnrichedReactionCopyWithImpl<$Res>
     Object? ownChildren = freezed,
     Object? parent = freezed,
     Object? targetFeeds = freezed,
+    Object? updatedAt = freezed,
     Object? user = freezed,
     Object? userId = null,
   }) {
@@ -145,6 +157,10 @@ class _$EnrichedReactionCopyWithImpl<$Res>
             ? _self.childrenCounts
             : childrenCounts // ignore: cast_nullable_to_non_nullable
                   as Map<String, int>?,
+        createdAt: freezed == createdAt
+            ? _self.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as String?,
         data: freezed == data
             ? _self.data
             : data // ignore: cast_nullable_to_non_nullable
@@ -173,6 +189,10 @@ class _$EnrichedReactionCopyWithImpl<$Res>
             ? _self.targetFeeds
             : targetFeeds // ignore: cast_nullable_to_non_nullable
                   as List<String>?,
+        updatedAt: freezed == updatedAt
+            ? _self.updatedAt
+            : updatedAt // ignore: cast_nullable_to_non_nullable
+                  as String?,
         user: freezed == user
             ? _self.user
             : user // ignore: cast_nullable_to_non_nullable

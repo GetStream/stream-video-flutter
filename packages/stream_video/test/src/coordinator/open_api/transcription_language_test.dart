@@ -4,9 +4,9 @@ import 'package:stream_video/stream_video.dart';
 
 void main() {
   TranscriptionSettingsLanguage? read(String json) =>
-      TranscriptionSettingsResponseLanguage.fromJson(json).toSettingsDomain();
+      TranscriptionLanguage(json).toSettingsDomain();
 
-  group('TranscriptionSettingsResponseLanguage.toSettingsDomain', () {
+  group('TranscriptionLanguage.toSettingsDomain', () {
     test('a language nobody set is null', () {
       expect(read(''), isNull);
     });
@@ -31,7 +31,7 @@ void main() {
         const StreamTranscriptionSettings(
           language: TranscriptionSettingsLanguage.nl,
         ).toOpenDto().language,
-        TranscriptionSettingsRequestLanguage.nl,
+        TranscriptionLanguage.nl,
       );
     });
   });

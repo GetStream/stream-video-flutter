@@ -20,11 +20,7 @@ UpdatePollRequest _$UpdatePollRequestFromJson(Map<String, dynamic> json) =>
       options: (json['options'] as List<dynamic>?)
           ?.map((e) => PollOptionRequest.fromJson(e as Map<String, dynamic>))
           .toList(),
-      votingVisibility: json['voting_visibility'] == null
-          ? null
-          : UpdatePollRequestVotingVisibility.fromJson(
-              json['voting_visibility'] as String,
-            ),
+      votingVisibility: json['voting_visibility'] as VotingVisibility?,
     );
 
 Map<String, dynamic> _$UpdatePollRequestToJson(UpdatePollRequest instance) =>
@@ -39,5 +35,5 @@ Map<String, dynamic> _$UpdatePollRequestToJson(UpdatePollRequest instance) =>
       'max_votes_allowed': instance.maxVotesAllowed,
       'name': instance.name,
       'options': instance.options?.map((e) => e.toJson()).toList(),
-      'voting_visibility': instance.votingVisibility?.toJson(),
+      'voting_visibility': instance.votingVisibility,
     };

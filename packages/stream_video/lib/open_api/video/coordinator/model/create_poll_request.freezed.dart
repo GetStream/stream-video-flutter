@@ -23,7 +23,8 @@ mixin _$CreatePollRequest {
   int? get maxVotesAllowed;
   String get name;
   List<PollOptionInput>? get options;
-  CreatePollRequestVotingVisibility? get votingVisibility;
+  String? get team;
+  VotingVisibility? get votingVisibility;
 
   /// Create a copy of CreatePollRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -59,6 +60,7 @@ mixin _$CreatePollRequest {
                 other.maxVotesAllowed == maxVotesAllowed) &&
             (identical(other.name, name) || other.name == name) &&
             const DeepCollectionEquality().equals(other.options, options) &&
+            (identical(other.team, team) || other.team == team) &&
             (identical(other.votingVisibility, votingVisibility) ||
                 other.votingVisibility == votingVisibility));
   }
@@ -76,12 +78,13 @@ mixin _$CreatePollRequest {
     maxVotesAllowed,
     name,
     const DeepCollectionEquality().hash(options),
+    team,
     votingVisibility,
   );
 
   @override
   String toString() {
-    return 'CreatePollRequest(allowAnswers: $allowAnswers, allowUserSuggestedOptions: $allowUserSuggestedOptions, custom: $custom, description: $description, enforceUniqueVote: $enforceUniqueVote, id: $id, isClosed: $isClosed, maxVotesAllowed: $maxVotesAllowed, name: $name, options: $options, votingVisibility: $votingVisibility)';
+    return 'CreatePollRequest(allowAnswers: $allowAnswers, allowUserSuggestedOptions: $allowUserSuggestedOptions, custom: $custom, description: $description, enforceUniqueVote: $enforceUniqueVote, id: $id, isClosed: $isClosed, maxVotesAllowed: $maxVotesAllowed, name: $name, options: $options, team: $team, votingVisibility: $votingVisibility)';
   }
 }
 
@@ -103,7 +106,8 @@ abstract mixin class $CreatePollRequestCopyWith<$Res> {
     int? maxVotesAllowed,
     String name,
     List<PollOptionInput>? options,
-    CreatePollRequestVotingVisibility? votingVisibility,
+    String? team,
+    VotingVisibility? votingVisibility,
   });
 }
 
@@ -130,6 +134,7 @@ class _$CreatePollRequestCopyWithImpl<$Res>
     Object? maxVotesAllowed = freezed,
     Object? name = null,
     Object? options = freezed,
+    Object? team = freezed,
     Object? votingVisibility = freezed,
   }) {
     return _then(
@@ -174,10 +179,14 @@ class _$CreatePollRequestCopyWithImpl<$Res>
             ? _self.options
             : options // ignore: cast_nullable_to_non_nullable
                   as List<PollOptionInput>?,
+        team: freezed == team
+            ? _self.team
+            : team // ignore: cast_nullable_to_non_nullable
+                  as String?,
         votingVisibility: freezed == votingVisibility
             ? _self.votingVisibility
             : votingVisibility // ignore: cast_nullable_to_non_nullable
-                  as CreatePollRequestVotingVisibility?,
+                  as VotingVisibility?,
       ),
     );
   }

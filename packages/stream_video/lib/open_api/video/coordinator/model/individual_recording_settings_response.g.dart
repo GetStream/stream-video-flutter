@@ -9,9 +9,7 @@ part of 'individual_recording_settings_response.dart';
 IndividualRecordingSettingsResponse
 _$IndividualRecordingSettingsResponseFromJson(Map<String, dynamic> json) =>
     IndividualRecordingSettingsResponse(
-      mode: IndividualRecordingSettingsResponseMode.fromJson(
-        json['mode'] as String,
-      ),
+      mode: json['mode'] as FeatureActivationMode,
       outputTypes: (json['output_types'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
@@ -20,6 +18,6 @@ _$IndividualRecordingSettingsResponseFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$IndividualRecordingSettingsResponseToJson(
   IndividualRecordingSettingsResponse instance,
 ) => <String, dynamic>{
-  'mode': instance.mode.toJson(),
+  'mode': instance.mode,
   'output_types': instance.outputTypes,
 };

@@ -51,7 +51,7 @@ mixin _$FeedsV3ActivityResponse {
   bool get preview;
   int get reactionCount;
   Map<String, FeedsReactionGroupResponse> get reactionGroups;
-  String get restrictReplies;
+  RestrictReplies get restrictReplies;
   double get score;
   Map<String, Object?>? get scoreVars;
   Map<String, Object?> get searchData;
@@ -61,7 +61,7 @@ mixin _$FeedsV3ActivityResponse {
   String get type;
   DateTime get updatedAt;
   UserResponse get user;
-  String get visibility;
+  ActivityVisibility get visibility;
   String? get visibilityTag;
 
   /// Create a copy of FeedsV3ActivityResponse
@@ -295,7 +295,7 @@ abstract mixin class $FeedsV3ActivityResponseCopyWith<$Res> {
     bool preview,
     int reactionCount,
     Map<String, FeedsReactionGroupResponse> reactionGroups,
-    String restrictReplies,
+    RestrictReplies restrictReplies,
     double score,
     Map<String, Object?>? scoreVars,
     Map<String, Object?> searchData,
@@ -305,7 +305,7 @@ abstract mixin class $FeedsV3ActivityResponseCopyWith<$Res> {
     String type,
     DateTime updatedAt,
     UserResponse user,
-    String visibility,
+    ActivityVisibility visibility,
     String? visibilityTag,
   });
 }
@@ -531,7 +531,7 @@ class _$FeedsV3ActivityResponseCopyWithImpl<$Res>
         restrictReplies: null == restrictReplies
             ? _self.restrictReplies
             : restrictReplies // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as RestrictReplies,
         score: null == score
             ? _self.score
             : score // ignore: cast_nullable_to_non_nullable
@@ -571,7 +571,7 @@ class _$FeedsV3ActivityResponseCopyWithImpl<$Res>
         visibility: null == visibility
             ? _self.visibility
             : visibility // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as ActivityVisibility,
         visibilityTag: freezed == visibilityTag
             ? _self.visibilityTag
             : visibilityTag // ignore: cast_nullable_to_non_nullable

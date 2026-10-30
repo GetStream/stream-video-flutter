@@ -17,7 +17,10 @@ Map<String, Object?> coordinatorRequestExtra() => {
   _coordinatorRequestKey: true,
 };
 
-extension on RequestOptions {
+/// Whether a request is one [coordinatorRequestExtra] marked.
+@internal
+extension CoordinatorRequestOptions on RequestOptions {
+  /// Whether this request was sent by a coordinator client.
   bool get isCoordinatorRequest => extra[_coordinatorRequestKey] == true;
 }
 

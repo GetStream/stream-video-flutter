@@ -13,6 +13,8 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$RuleBuilderCondition {
+  AppChannelCountParameters? get appChannelCountParams;
+  AppMessageCountParameters? get appMessageCountParams;
   CallCustomPropertyParameters? get callCustomPropertyParams;
   CallTypeRuleParameters? get callTypeRuleParams;
   CallViolationCountParameters? get callViolationCountParams;
@@ -20,6 +22,7 @@ mixin _$RuleBuilderCondition {
   ClosedCaptionRuleParameters? get closedCaptionRuleParams;
   double? get confidence;
   ContentCountRuleParameters? get contentCountRuleParams;
+  ContentCountryCodeParameters? get contentCountryCodeParams;
   ContentCustomPropertyCountParameters? get contentCustomPropertyCountParams;
   ContentCustomPropertyParameters? get contentCustomPropertyParams;
   FlagCountRuleParameters? get contentFlagCountRuleParams;
@@ -27,6 +30,7 @@ mixin _$RuleBuilderCondition {
   FloodSimilarRuleParameters? get floodSimilarParams;
   ImageContentParameters? get imageContentParams;
   ImageRuleParameters? get imageRuleParams;
+  IntentRuleParameters? get intentRuleParams;
   IPContentCountRuleParameters? get ipContentCountRuleParams;
   IPFlagCountRuleParameters? get ipFlagCountRuleParams;
   KeyframeOCRRuleParameters? get keyframeOcrRuleParams;
@@ -35,10 +39,14 @@ mixin _$RuleBuilderCondition {
   TextContentParameters? get textContentParams;
   TextRuleParameters? get textRuleParams;
   String? get type;
+  UserChannelBanCountRuleParameters? get userChannelBanCountParams;
+  UserChannelCountRuleParameters? get userChannelCountParams;
   UserCreatedWithinParameters? get userCreatedWithinParams;
   UserCustomPropertyParameters? get userCustomPropertyParams;
   FlagCountRuleParameters? get userFlagCountRuleParams;
   UserIdenticalContentCountParameters? get userIdenticalContentCountParams;
+  UserIdenticalImageCountParameters? get userIdenticalImageCountParams;
+  UserReactionCountRuleParameters? get userReactionCountParams;
   UserRoleParameters? get userRoleParams;
   UserRuleParameters? get userRuleParams;
   VideoContentParameters? get videoContentParams;
@@ -59,6 +67,10 @@ mixin _$RuleBuilderCondition {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is RuleBuilderCondition &&
+            (identical(other.appChannelCountParams, appChannelCountParams) ||
+                other.appChannelCountParams == appChannelCountParams) &&
+            (identical(other.appMessageCountParams, appMessageCountParams) ||
+                other.appMessageCountParams == appMessageCountParams) &&
             (identical(
                   other.callCustomPropertyParams,
                   callCustomPropertyParams,
@@ -87,6 +99,11 @@ mixin _$RuleBuilderCondition {
             (identical(other.contentCountRuleParams, contentCountRuleParams) ||
                 other.contentCountRuleParams == contentCountRuleParams) &&
             (identical(
+                  other.contentCountryCodeParams,
+                  contentCountryCodeParams,
+                ) ||
+                other.contentCountryCodeParams == contentCountryCodeParams) &&
+            (identical(
                   other.contentCustomPropertyCountParams,
                   contentCustomPropertyCountParams,
                 ) ||
@@ -112,6 +129,8 @@ mixin _$RuleBuilderCondition {
                 other.imageContentParams == imageContentParams) &&
             (identical(other.imageRuleParams, imageRuleParams) ||
                 other.imageRuleParams == imageRuleParams) &&
+            (identical(other.intentRuleParams, intentRuleParams) ||
+                other.intentRuleParams == intentRuleParams) &&
             (identical(
                   other.ipContentCountRuleParams,
                   ipContentCountRuleParams,
@@ -130,6 +149,13 @@ mixin _$RuleBuilderCondition {
             (identical(other.textRuleParams, textRuleParams) ||
                 other.textRuleParams == textRuleParams) &&
             (identical(other.type, type) || other.type == type) &&
+            (identical(
+                  other.userChannelBanCountParams,
+                  userChannelBanCountParams,
+                ) ||
+                other.userChannelBanCountParams == userChannelBanCountParams) &&
+            (identical(other.userChannelCountParams, userChannelCountParams) ||
+                other.userChannelCountParams == userChannelCountParams) &&
             (identical(
                   other.userCreatedWithinParams,
                   userCreatedWithinParams,
@@ -151,6 +177,17 @@ mixin _$RuleBuilderCondition {
                 ) ||
                 other.userIdenticalContentCountParams ==
                     userIdenticalContentCountParams) &&
+            (identical(
+                  other.userIdenticalImageCountParams,
+                  userIdenticalImageCountParams,
+                ) ||
+                other.userIdenticalImageCountParams ==
+                    userIdenticalImageCountParams) &&
+            (identical(
+                  other.userReactionCountParams,
+                  userReactionCountParams,
+                ) ||
+                other.userReactionCountParams == userReactionCountParams) &&
             (identical(other.userRoleParams, userRoleParams) ||
                 other.userRoleParams == userRoleParams) &&
             (identical(other.userRuleParams, userRuleParams) ||
@@ -164,6 +201,8 @@ mixin _$RuleBuilderCondition {
   @override
   int get hashCode => Object.hashAll([
     runtimeType,
+    appChannelCountParams,
+    appMessageCountParams,
     callCustomPropertyParams,
     callTypeRuleParams,
     callViolationCountParams,
@@ -171,6 +210,7 @@ mixin _$RuleBuilderCondition {
     closedCaptionRuleParams,
     confidence,
     contentCountRuleParams,
+    contentCountryCodeParams,
     contentCustomPropertyCountParams,
     contentCustomPropertyParams,
     contentFlagCountRuleParams,
@@ -178,6 +218,7 @@ mixin _$RuleBuilderCondition {
     floodSimilarParams,
     imageContentParams,
     imageRuleParams,
+    intentRuleParams,
     ipContentCountRuleParams,
     ipFlagCountRuleParams,
     keyframeOcrRuleParams,
@@ -186,10 +227,14 @@ mixin _$RuleBuilderCondition {
     textContentParams,
     textRuleParams,
     type,
+    userChannelBanCountParams,
+    userChannelCountParams,
     userCreatedWithinParams,
     userCustomPropertyParams,
     userFlagCountRuleParams,
     userIdenticalContentCountParams,
+    userIdenticalImageCountParams,
+    userReactionCountParams,
     userRoleParams,
     userRuleParams,
     videoContentParams,
@@ -198,7 +243,7 @@ mixin _$RuleBuilderCondition {
 
   @override
   String toString() {
-    return 'RuleBuilderCondition(callCustomPropertyParams: $callCustomPropertyParams, callTypeRuleParams: $callTypeRuleParams, callViolationCountParams: $callViolationCountParams, channelMessageCountRuleParams: $channelMessageCountRuleParams, closedCaptionRuleParams: $closedCaptionRuleParams, confidence: $confidence, contentCountRuleParams: $contentCountRuleParams, contentCustomPropertyCountParams: $contentCustomPropertyCountParams, contentCustomPropertyParams: $contentCustomPropertyParams, contentFlagCountRuleParams: $contentFlagCountRuleParams, floodIdenticalParams: $floodIdenticalParams, floodSimilarParams: $floodSimilarParams, imageContentParams: $imageContentParams, imageRuleParams: $imageRuleParams, ipContentCountRuleParams: $ipContentCountRuleParams, ipFlagCountRuleParams: $ipFlagCountRuleParams, keyframeOcrRuleParams: $keyframeOcrRuleParams, keyframeRuleParams: $keyframeRuleParams, ocrContentParams: $ocrContentParams, textContentParams: $textContentParams, textRuleParams: $textRuleParams, type: $type, userCreatedWithinParams: $userCreatedWithinParams, userCustomPropertyParams: $userCustomPropertyParams, userFlagCountRuleParams: $userFlagCountRuleParams, userIdenticalContentCountParams: $userIdenticalContentCountParams, userRoleParams: $userRoleParams, userRuleParams: $userRuleParams, videoContentParams: $videoContentParams, videoRuleParams: $videoRuleParams)';
+    return 'RuleBuilderCondition(appChannelCountParams: $appChannelCountParams, appMessageCountParams: $appMessageCountParams, callCustomPropertyParams: $callCustomPropertyParams, callTypeRuleParams: $callTypeRuleParams, callViolationCountParams: $callViolationCountParams, channelMessageCountRuleParams: $channelMessageCountRuleParams, closedCaptionRuleParams: $closedCaptionRuleParams, confidence: $confidence, contentCountRuleParams: $contentCountRuleParams, contentCountryCodeParams: $contentCountryCodeParams, contentCustomPropertyCountParams: $contentCustomPropertyCountParams, contentCustomPropertyParams: $contentCustomPropertyParams, contentFlagCountRuleParams: $contentFlagCountRuleParams, floodIdenticalParams: $floodIdenticalParams, floodSimilarParams: $floodSimilarParams, imageContentParams: $imageContentParams, imageRuleParams: $imageRuleParams, intentRuleParams: $intentRuleParams, ipContentCountRuleParams: $ipContentCountRuleParams, ipFlagCountRuleParams: $ipFlagCountRuleParams, keyframeOcrRuleParams: $keyframeOcrRuleParams, keyframeRuleParams: $keyframeRuleParams, ocrContentParams: $ocrContentParams, textContentParams: $textContentParams, textRuleParams: $textRuleParams, type: $type, userChannelBanCountParams: $userChannelBanCountParams, userChannelCountParams: $userChannelCountParams, userCreatedWithinParams: $userCreatedWithinParams, userCustomPropertyParams: $userCustomPropertyParams, userFlagCountRuleParams: $userFlagCountRuleParams, userIdenticalContentCountParams: $userIdenticalContentCountParams, userIdenticalImageCountParams: $userIdenticalImageCountParams, userReactionCountParams: $userReactionCountParams, userRoleParams: $userRoleParams, userRuleParams: $userRuleParams, videoContentParams: $videoContentParams, videoRuleParams: $videoRuleParams)';
   }
 }
 
@@ -210,6 +255,8 @@ abstract mixin class $RuleBuilderConditionCopyWith<$Res> {
   ) = _$RuleBuilderConditionCopyWithImpl;
   @useResult
   $Res call({
+    AppChannelCountParameters? appChannelCountParams,
+    AppMessageCountParameters? appMessageCountParams,
     CallCustomPropertyParameters? callCustomPropertyParams,
     CallTypeRuleParameters? callTypeRuleParams,
     CallViolationCountParameters? callViolationCountParams,
@@ -217,6 +264,7 @@ abstract mixin class $RuleBuilderConditionCopyWith<$Res> {
     ClosedCaptionRuleParameters? closedCaptionRuleParams,
     double? confidence,
     ContentCountRuleParameters? contentCountRuleParams,
+    ContentCountryCodeParameters? contentCountryCodeParams,
     ContentCustomPropertyCountParameters? contentCustomPropertyCountParams,
     ContentCustomPropertyParameters? contentCustomPropertyParams,
     FlagCountRuleParameters? contentFlagCountRuleParams,
@@ -224,6 +272,7 @@ abstract mixin class $RuleBuilderConditionCopyWith<$Res> {
     FloodSimilarRuleParameters? floodSimilarParams,
     ImageContentParameters? imageContentParams,
     ImageRuleParameters? imageRuleParams,
+    IntentRuleParameters? intentRuleParams,
     IPContentCountRuleParameters? ipContentCountRuleParams,
     IPFlagCountRuleParameters? ipFlagCountRuleParams,
     KeyframeOCRRuleParameters? keyframeOcrRuleParams,
@@ -232,10 +281,14 @@ abstract mixin class $RuleBuilderConditionCopyWith<$Res> {
     TextContentParameters? textContentParams,
     TextRuleParameters? textRuleParams,
     String? type,
+    UserChannelBanCountRuleParameters? userChannelBanCountParams,
+    UserChannelCountRuleParameters? userChannelCountParams,
     UserCreatedWithinParameters? userCreatedWithinParams,
     UserCustomPropertyParameters? userCustomPropertyParams,
     FlagCountRuleParameters? userFlagCountRuleParams,
     UserIdenticalContentCountParameters? userIdenticalContentCountParams,
+    UserIdenticalImageCountParameters? userIdenticalImageCountParams,
+    UserReactionCountRuleParameters? userReactionCountParams,
     UserRoleParameters? userRoleParams,
     UserRuleParameters? userRuleParams,
     VideoContentParameters? videoContentParams,
@@ -256,6 +309,8 @@ class _$RuleBuilderConditionCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? appChannelCountParams = freezed,
+    Object? appMessageCountParams = freezed,
     Object? callCustomPropertyParams = freezed,
     Object? callTypeRuleParams = freezed,
     Object? callViolationCountParams = freezed,
@@ -263,6 +318,7 @@ class _$RuleBuilderConditionCopyWithImpl<$Res>
     Object? closedCaptionRuleParams = freezed,
     Object? confidence = freezed,
     Object? contentCountRuleParams = freezed,
+    Object? contentCountryCodeParams = freezed,
     Object? contentCustomPropertyCountParams = freezed,
     Object? contentCustomPropertyParams = freezed,
     Object? contentFlagCountRuleParams = freezed,
@@ -270,6 +326,7 @@ class _$RuleBuilderConditionCopyWithImpl<$Res>
     Object? floodSimilarParams = freezed,
     Object? imageContentParams = freezed,
     Object? imageRuleParams = freezed,
+    Object? intentRuleParams = freezed,
     Object? ipContentCountRuleParams = freezed,
     Object? ipFlagCountRuleParams = freezed,
     Object? keyframeOcrRuleParams = freezed,
@@ -278,10 +335,14 @@ class _$RuleBuilderConditionCopyWithImpl<$Res>
     Object? textContentParams = freezed,
     Object? textRuleParams = freezed,
     Object? type = freezed,
+    Object? userChannelBanCountParams = freezed,
+    Object? userChannelCountParams = freezed,
     Object? userCreatedWithinParams = freezed,
     Object? userCustomPropertyParams = freezed,
     Object? userFlagCountRuleParams = freezed,
     Object? userIdenticalContentCountParams = freezed,
+    Object? userIdenticalImageCountParams = freezed,
+    Object? userReactionCountParams = freezed,
     Object? userRoleParams = freezed,
     Object? userRuleParams = freezed,
     Object? videoContentParams = freezed,
@@ -289,6 +350,14 @@ class _$RuleBuilderConditionCopyWithImpl<$Res>
   }) {
     return _then(
       RuleBuilderCondition(
+        appChannelCountParams: freezed == appChannelCountParams
+            ? _self.appChannelCountParams
+            : appChannelCountParams // ignore: cast_nullable_to_non_nullable
+                  as AppChannelCountParameters?,
+        appMessageCountParams: freezed == appMessageCountParams
+            ? _self.appMessageCountParams
+            : appMessageCountParams // ignore: cast_nullable_to_non_nullable
+                  as AppMessageCountParameters?,
         callCustomPropertyParams: freezed == callCustomPropertyParams
             ? _self.callCustomPropertyParams
             : callCustomPropertyParams // ignore: cast_nullable_to_non_nullable
@@ -317,6 +386,10 @@ class _$RuleBuilderConditionCopyWithImpl<$Res>
             ? _self.contentCountRuleParams
             : contentCountRuleParams // ignore: cast_nullable_to_non_nullable
                   as ContentCountRuleParameters?,
+        contentCountryCodeParams: freezed == contentCountryCodeParams
+            ? _self.contentCountryCodeParams
+            : contentCountryCodeParams // ignore: cast_nullable_to_non_nullable
+                  as ContentCountryCodeParameters?,
         contentCustomPropertyCountParams:
             freezed == contentCustomPropertyCountParams
             ? _self.contentCustomPropertyCountParams
@@ -346,6 +419,10 @@ class _$RuleBuilderConditionCopyWithImpl<$Res>
             ? _self.imageRuleParams
             : imageRuleParams // ignore: cast_nullable_to_non_nullable
                   as ImageRuleParameters?,
+        intentRuleParams: freezed == intentRuleParams
+            ? _self.intentRuleParams
+            : intentRuleParams // ignore: cast_nullable_to_non_nullable
+                  as IntentRuleParameters?,
         ipContentCountRuleParams: freezed == ipContentCountRuleParams
             ? _self.ipContentCountRuleParams
             : ipContentCountRuleParams // ignore: cast_nullable_to_non_nullable
@@ -378,6 +455,14 @@ class _$RuleBuilderConditionCopyWithImpl<$Res>
             ? _self.type
             : type // ignore: cast_nullable_to_non_nullable
                   as String?,
+        userChannelBanCountParams: freezed == userChannelBanCountParams
+            ? _self.userChannelBanCountParams
+            : userChannelBanCountParams // ignore: cast_nullable_to_non_nullable
+                  as UserChannelBanCountRuleParameters?,
+        userChannelCountParams: freezed == userChannelCountParams
+            ? _self.userChannelCountParams
+            : userChannelCountParams // ignore: cast_nullable_to_non_nullable
+                  as UserChannelCountRuleParameters?,
         userCreatedWithinParams: freezed == userCreatedWithinParams
             ? _self.userCreatedWithinParams
             : userCreatedWithinParams // ignore: cast_nullable_to_non_nullable
@@ -395,6 +480,14 @@ class _$RuleBuilderConditionCopyWithImpl<$Res>
             ? _self.userIdenticalContentCountParams
             : userIdenticalContentCountParams // ignore: cast_nullable_to_non_nullable
                   as UserIdenticalContentCountParameters?,
+        userIdenticalImageCountParams: freezed == userIdenticalImageCountParams
+            ? _self.userIdenticalImageCountParams
+            : userIdenticalImageCountParams // ignore: cast_nullable_to_non_nullable
+                  as UserIdenticalImageCountParameters?,
+        userReactionCountParams: freezed == userReactionCountParams
+            ? _self.userReactionCountParams
+            : userReactionCountParams // ignore: cast_nullable_to_non_nullable
+                  as UserReactionCountRuleParameters?,
         userRoleParams: freezed == userRoleParams
             ? _self.userRoleParams
             : userRoleParams // ignore: cast_nullable_to_non_nullable

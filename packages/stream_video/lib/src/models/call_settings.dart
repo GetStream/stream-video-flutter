@@ -129,7 +129,7 @@ class StreamAudioSettings extends MediaSettings {
     super.accessRequestEnabled = false,
     this.opusDtxEnabled = false,
     this.redundantCodingEnabled = false,
-    this.defaultDevice = AudioSettingsRequestDefaultDevice.speaker,
+    this.defaultDevice = AudioDefaultDevice.speaker,
     this.micDefaultOn = true,
     this.speakerDefaultOn = true,
     this.noiseCancellation,
@@ -142,7 +142,7 @@ class StreamAudioSettings extends MediaSettings {
   /// When true, the call will send additional audio streams to ensure calls are more resistant to poor network conditions.
   final bool redundantCodingEnabled;
 
-  final AudioSettingsRequestDefaultDevice defaultDevice;
+  final AudioDefaultDevice defaultDevice;
   final bool micDefaultOn;
   final bool speakerDefaultOn;
   final StreamNoiceCancellingSettings? noiseCancellation;
@@ -181,7 +181,7 @@ class StreamVideoSettings extends MediaSettings {
     super.accessRequestEnabled = false,
     this.enabled = false,
     this.cameraDefaultOn = true,
-    this.cameraFacing = VideoSettingsRequestCameraFacing.front,
+    this.cameraFacing = CameraFacing.front,
     this.targetResolution = const StreamTargetResolution(
       height: 720,
       width: 1280,
@@ -190,7 +190,7 @@ class StreamVideoSettings extends MediaSettings {
 
   final bool enabled;
   final bool cameraDefaultOn;
-  final VideoSettingsRequestCameraFacing cameraFacing;
+  final CameraFacing cameraFacing;
   final StreamTargetResolution targetResolution;
 
   @override
@@ -523,10 +523,10 @@ class StreamTranscriptionSettings extends AbstractSettings {
 
 class StreamNoiceCancellingSettings extends AbstractSettings {
   const StreamNoiceCancellingSettings({
-    this.mode = NoiseCancellationSettingsMode.disabled,
+    this.mode = FeatureActivationMode.disabled,
   });
 
-  final NoiseCancellationSettingsMode mode;
+  final FeatureActivationMode mode;
 
   @override
   List<Object?> get props => [mode];
@@ -762,14 +762,7 @@ enum StreamIngressSourceFps {
     }
   }
 
-  IngressSourceRequestFps toOpenDto() {
-    switch (this) {
-      case StreamIngressSourceFps.fps30:
-        return IngressSourceRequestFps.n30;
-      case StreamIngressSourceFps.fps60:
-        return IngressSourceRequestFps.n60;
-    }
-  }
+  int toOpenDto() => value;
 }
 
 class StreamIngressVideoLayer extends AbstractSettings {
@@ -782,7 +775,7 @@ class StreamIngressVideoLayer extends AbstractSettings {
   });
 
   final int bitrate;
-  final IngressVideoLayerRequestCodec codec;
+  final VideoCodec codec;
   final int frameRateLimit;
   final int maxDimension;
   final int minDimension;
@@ -814,14 +807,7 @@ enum IngressAudioChannels {
   const IngressAudioChannels(this.value);
   final int value;
 
-  IngressAudioEncodingOptionsRequestChannels toOpenDto() {
-    switch (this) {
-      case IngressAudioChannels.mono:
-        return IngressAudioEncodingOptionsRequestChannels.n1;
-      case IngressAudioChannels.stereo:
-        return IngressAudioEncodingOptionsRequestChannels.n2;
-    }
-  }
+  int toOpenDto() => value;
 
   static IngressAudioChannels fromValue(int value) {
     switch (value) {
@@ -843,14 +829,14 @@ enum StreamTranscriptionMode {
   @override
   String toString() => name;
 
-  TranscriptionSettingsResponseMode toOpenDto() {
+  FeatureActivationMode toOpenDto() {
     switch (this) {
       case StreamTranscriptionMode.available:
-        return TranscriptionSettingsResponseMode.available;
+        return FeatureActivationMode.available;
       case StreamTranscriptionMode.disabled:
-        return TranscriptionSettingsResponseMode.disabled;
+        return FeatureActivationMode.disabled;
       case StreamTranscriptionMode.autoOn:
-        return TranscriptionSettingsResponseMode.autoOn;
+        return FeatureActivationMode.autoOn;
     }
   }
 
@@ -876,14 +862,14 @@ enum RecordSettingsMode {
   @override
   String toString() => name;
 
-  RecordSettingsRequestMode toOpenDto() {
+  FeatureActivationMode toOpenDto() {
     switch (this) {
       case RecordSettingsMode.available:
-        return RecordSettingsRequestMode.available;
+        return FeatureActivationMode.available;
       case RecordSettingsMode.disabled:
-        return RecordSettingsRequestMode.disabled;
+        return FeatureActivationMode.disabled;
       case RecordSettingsMode.autoOn:
-        return RecordSettingsRequestMode.autoOn;
+        return FeatureActivationMode.autoOn;
     }
   }
 
@@ -909,14 +895,14 @@ enum IndividualRecordingSettingsMode {
   @override
   String toString() => name;
 
-  IndividualRecordingSettingsRequestMode toOpenDto() {
+  FeatureActivationMode toOpenDto() {
     switch (this) {
       case IndividualRecordingSettingsMode.available:
-        return IndividualRecordingSettingsRequestMode.available;
+        return FeatureActivationMode.available;
       case IndividualRecordingSettingsMode.disabled:
-        return IndividualRecordingSettingsRequestMode.disabled;
+        return FeatureActivationMode.disabled;
       case IndividualRecordingSettingsMode.autoOn:
-        return IndividualRecordingSettingsRequestMode.autoOn;
+        return FeatureActivationMode.autoOn;
     }
   }
 
@@ -993,14 +979,14 @@ enum RawRecordingSettingsMode {
   @override
   String toString() => name;
 
-  RawRecordingSettingsRequestMode toOpenDto() {
+  FeatureActivationMode toOpenDto() {
     switch (this) {
       case RawRecordingSettingsMode.available:
-        return RawRecordingSettingsRequestMode.available;
+        return FeatureActivationMode.available;
       case RawRecordingSettingsMode.disabled:
-        return RawRecordingSettingsRequestMode.disabled;
+        return FeatureActivationMode.disabled;
       case RawRecordingSettingsMode.autoOn:
-        return RawRecordingSettingsRequestMode.autoOn;
+        return FeatureActivationMode.autoOn;
     }
   }
 
@@ -1026,14 +1012,14 @@ enum FrameRecordingSettingsMode {
   @override
   String toString() => name;
 
-  FrameRecordingSettingsRequestMode toOpenDto() {
+  FeatureActivationMode toOpenDto() {
     switch (this) {
       case FrameRecordingSettingsMode.available:
-        return FrameRecordingSettingsRequestMode.available;
+        return FeatureActivationMode.available;
       case FrameRecordingSettingsMode.disabled:
-        return FrameRecordingSettingsRequestMode.disabled;
+        return FeatureActivationMode.disabled;
       case FrameRecordingSettingsMode.autoOn:
-        return FrameRecordingSettingsRequestMode.autoOn;
+        return FeatureActivationMode.autoOn;
     }
   }
 
@@ -1109,14 +1095,14 @@ enum StreamEncryptionMode {
   @override
   String toString() => name;
 
-  EncryptionSettingsRequestMode toOpenDto() {
+  FeatureActivationMode toOpenDto() {
     switch (this) {
       case StreamEncryptionMode.available:
-        return EncryptionSettingsRequestMode.available;
+        return FeatureActivationMode.available;
       case StreamEncryptionMode.disabled:
-        return EncryptionSettingsRequestMode.disabled;
+        return FeatureActivationMode.disabled;
       case StreamEncryptionMode.autoOn:
-        return EncryptionSettingsRequestMode.autoOn;
+        return FeatureActivationMode.autoOn;
     }
   }
 
@@ -1258,14 +1244,14 @@ enum ClosedCaptionSettingsMode {
   @override
   String toString() => name;
 
-  TranscriptionSettingsRequestClosedCaptionMode toOpenDto() {
+  FeatureActivationMode toOpenDto() {
     switch (this) {
       case ClosedCaptionSettingsMode.available:
-        return TranscriptionSettingsRequestClosedCaptionMode.available;
+        return FeatureActivationMode.available;
       case ClosedCaptionSettingsMode.disabled:
-        return TranscriptionSettingsRequestClosedCaptionMode.disabled;
+        return FeatureActivationMode.disabled;
       case ClosedCaptionSettingsMode.autoOn:
-        return TranscriptionSettingsRequestClosedCaptionMode.autoOn;
+        return FeatureActivationMode.autoOn;
     }
   }
 }
@@ -1278,14 +1264,14 @@ enum TranscriptionSettingsMode {
   @override
   String toString() => name;
 
-  TranscriptionSettingsRequestMode toOpenDto() {
+  FeatureActivationMode toOpenDto() {
     switch (this) {
       case TranscriptionSettingsMode.available:
-        return TranscriptionSettingsRequestMode.available;
+        return FeatureActivationMode.available;
       case TranscriptionSettingsMode.disabled:
-        return TranscriptionSettingsRequestMode.disabled;
+        return FeatureActivationMode.disabled;
       case TranscriptionSettingsMode.autoOn:
-        return TranscriptionSettingsRequestMode.autoOn;
+        return FeatureActivationMode.autoOn;
     }
   }
 }
@@ -1335,16 +1321,16 @@ enum TranscriptionSettingsLanguage {
   @override
   String toString() => value;
 
-  TranscriptionSettingsRequestLanguage toOpenDto() {
-    return TranscriptionSettingsRequestLanguage.fromJson(value);
+  TranscriptionLanguage toOpenDto() {
+    return TranscriptionLanguage(value);
   }
 
-  StartTranscriptionRequestLanguage toStartTranscriptionDto() {
-    return StartTranscriptionRequestLanguage.fromJson(value);
+  TranscriptionLanguage toStartTranscriptionDto() {
+    return TranscriptionLanguage(value);
   }
 
-  StartClosedCaptionsRequestLanguage toStartClosedCaptionsDto() {
-    return StartClosedCaptionsRequestLanguage.fromJson(value);
+  TranscriptionLanguage toStartClosedCaptionsDto() {
+    return TranscriptionLanguage(value);
   }
 }
 

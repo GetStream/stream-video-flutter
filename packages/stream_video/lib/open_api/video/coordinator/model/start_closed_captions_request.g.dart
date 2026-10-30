@@ -11,9 +11,7 @@ StartClosedCaptionsRequest _$StartClosedCaptionsRequestFromJson(
 ) => StartClosedCaptionsRequest(
   enableTranscription: json['enable_transcription'] as bool?,
   externalStorage: json['external_storage'] as String?,
-  language: json['language'] == null
-      ? null
-      : StartClosedCaptionsRequestLanguage.fromJson(json['language'] as String),
+  language: json['language'] as TranscriptionLanguage?,
   speechSegmentConfig: json['speech_segment_config'] == null
       ? null
       : SpeechSegmentConfig.fromJson(
@@ -26,6 +24,6 @@ Map<String, dynamic> _$StartClosedCaptionsRequestToJson(
 ) => <String, dynamic>{
   'enable_transcription': instance.enableTranscription,
   'external_storage': instance.externalStorage,
-  'language': instance.language?.toJson(),
+  'language': instance.language,
   'speech_segment_config': instance.speechSegmentConfig?.toJson(),
 };

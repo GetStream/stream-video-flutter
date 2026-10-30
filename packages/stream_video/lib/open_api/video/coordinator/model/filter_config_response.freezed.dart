@@ -14,11 +14,13 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FilterConfigResponse {
   List<String>? get aiImageLabels;
+  List<String>? get aiImageOcrLabels;
   Map<String, List<String>>? get aiImageTaxonomy;
   List<String>? get aiTextLabels;
   List<String>? get configKeys;
   List<String>? get filterableCustomKeys;
   List<String> get llmLabels;
+  List<String>? get ruleNames;
 
   /// Create a copy of FilterConfigResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -40,6 +42,10 @@ mixin _$FilterConfigResponse {
               aiImageLabels,
             ) &&
             const DeepCollectionEquality().equals(
+              other.aiImageOcrLabels,
+              aiImageOcrLabels,
+            ) &&
+            const DeepCollectionEquality().equals(
               other.aiImageTaxonomy,
               aiImageTaxonomy,
             ) &&
@@ -55,23 +61,26 @@ mixin _$FilterConfigResponse {
               other.filterableCustomKeys,
               filterableCustomKeys,
             ) &&
-            const DeepCollectionEquality().equals(other.llmLabels, llmLabels));
+            const DeepCollectionEquality().equals(other.llmLabels, llmLabels) &&
+            const DeepCollectionEquality().equals(other.ruleNames, ruleNames));
   }
 
   @override
   int get hashCode => Object.hash(
     runtimeType,
     const DeepCollectionEquality().hash(aiImageLabels),
+    const DeepCollectionEquality().hash(aiImageOcrLabels),
     const DeepCollectionEquality().hash(aiImageTaxonomy),
     const DeepCollectionEquality().hash(aiTextLabels),
     const DeepCollectionEquality().hash(configKeys),
     const DeepCollectionEquality().hash(filterableCustomKeys),
     const DeepCollectionEquality().hash(llmLabels),
+    const DeepCollectionEquality().hash(ruleNames),
   );
 
   @override
   String toString() {
-    return 'FilterConfigResponse(aiImageLabels: $aiImageLabels, aiImageTaxonomy: $aiImageTaxonomy, aiTextLabels: $aiTextLabels, configKeys: $configKeys, filterableCustomKeys: $filterableCustomKeys, llmLabels: $llmLabels)';
+    return 'FilterConfigResponse(aiImageLabels: $aiImageLabels, aiImageOcrLabels: $aiImageOcrLabels, aiImageTaxonomy: $aiImageTaxonomy, aiTextLabels: $aiTextLabels, configKeys: $configKeys, filterableCustomKeys: $filterableCustomKeys, llmLabels: $llmLabels, ruleNames: $ruleNames)';
   }
 }
 
@@ -84,11 +93,13 @@ abstract mixin class $FilterConfigResponseCopyWith<$Res> {
   @useResult
   $Res call({
     List<String>? aiImageLabels,
+    List<String>? aiImageOcrLabels,
     Map<String, List<String>>? aiImageTaxonomy,
     List<String>? aiTextLabels,
     List<String>? configKeys,
     List<String>? filterableCustomKeys,
     List<String> llmLabels,
+    List<String>? ruleNames,
   });
 }
 
@@ -106,17 +117,23 @@ class _$FilterConfigResponseCopyWithImpl<$Res>
   @override
   $Res call({
     Object? aiImageLabels = freezed,
+    Object? aiImageOcrLabels = freezed,
     Object? aiImageTaxonomy = freezed,
     Object? aiTextLabels = freezed,
     Object? configKeys = freezed,
     Object? filterableCustomKeys = freezed,
     Object? llmLabels = null,
+    Object? ruleNames = freezed,
   }) {
     return _then(
       FilterConfigResponse(
         aiImageLabels: freezed == aiImageLabels
             ? _self.aiImageLabels
             : aiImageLabels // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+        aiImageOcrLabels: freezed == aiImageOcrLabels
+            ? _self.aiImageOcrLabels
+            : aiImageOcrLabels // ignore: cast_nullable_to_non_nullable
                   as List<String>?,
         aiImageTaxonomy: freezed == aiImageTaxonomy
             ? _self.aiImageTaxonomy
@@ -138,6 +155,10 @@ class _$FilterConfigResponseCopyWithImpl<$Res>
             ? _self.llmLabels
             : llmLabels // ignore: cast_nullable_to_non_nullable
                   as List<String>,
+        ruleNames: freezed == ruleNames
+            ? _self.ruleNames
+            : ruleNames // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
       ),
     );
   }

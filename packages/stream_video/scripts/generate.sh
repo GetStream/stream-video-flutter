@@ -62,17 +62,19 @@ mkdir -p "$OUTPUT_DIR_VIDEO"
 
 (
   set -o pipefail
-  cd "$CHAT_DIR/projects/chat-manager"
+  cd "$CHAT_DIR"
+  make -C tools/openapi build
+  OPENAPI="$CHAT_DIR/build/openapi"
 
-  go run . openapi generate-spec \
+  "$OPENAPI" generate-spec \
     -products "$PRODUCTS" \
     -version "$API_VERSION" \
     --clientside \
     -output "$CHAT_DIR/$SPEC_DIR_REL/$SPEC_BASENAME" \
-    "${RENAMED_MODELS_FLAG[@]}"
+    ${RENAMED_MODELS_FLAG[@]+"${RENAMED_MODELS_FLAG[@]}"}
 
   # Generate Dart client into stream_video coordinator generated folder
-  go run . openapi generate-client \
+  "$OPENAPI" generate-client \
     --language dart \
     --spec "$CHAT_DIR/$SPEC_PATH" \
     --output "$OUTPUT_DIR_VIDEO"
@@ -110,24 +112,30 @@ require_match() {
 
 # capabilitiesByRole: Map<String, List<String>> — the generated cast crashes for
 # non-List values. Insert a tolerant helper and wire it via @JsonKey(fromJson:).
+# Both event models are parts of model/events.dart, one library, so the helper
+# is declared once and both use it.
+helper_file="$OUTPUT_DIR_VIDEO/model/call_updated_event.dart"
+require_file "$helper_file"
+
+# Insert the helper function before the first @freezed annotation.
+awk '/^@freezed$/ && !inserted {
+  print "Map<String, List<String>> _capabilitiesByRoleFromJson(Map<String, dynamic> json) {"
+  print "  return {"
+  print "    for (final entry in json.entries)"
+  print "      if (entry.value is List)"
+  print "        entry.key: (entry.value as List).map((i) => i as String).toList(),"
+  print "  };"
+  print "}"
+  print ""
+  inserted=1
+}
+{ print }' "$helper_file" > "${helper_file}.tmp" && mv "${helper_file}.tmp" "$helper_file"
+require_match "$helper_file" 'Map<String, List<String>> _capabilitiesByRoleFromJson'
+
 for file in \
   "$OUTPUT_DIR_VIDEO/model/call_updated_event.dart" \
   "$OUTPUT_DIR_VIDEO/model/call_member_updated_permission_event.dart"; do
   require_file "$file"
-
-  # Insert the helper function before the first @freezed annotation.
-  awk '/^@freezed$/ && !inserted {
-    print "Map<String, List<String>> _capabilitiesByRoleFromJson(Map<String, dynamic> json) {"
-    print "  return {"
-    print "    for (final entry in json.entries)"
-    print "      if (entry.value is List)"
-    print "        entry.key: (entry.value as List).map((i) => i as String).toList(),"
-    print "  };"
-    print "}"
-    print ""
-    inserted=1
-  }
-  { print }' "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
 
   # Wire the helper onto the field, keeping the generated `name:` argument.
   # capabilitiesByRole is the only Map<String, List<String>> field in these two
@@ -136,7 +144,6 @@ for file in \
     "s/@JsonKey(name: 'capabilities_by_role')/@JsonKey(name: 'capabilities_by_role', fromJson: _capabilitiesByRoleFromJson)/" \
     "$file"
 
-  require_match "$file" 'Map<String, List<String>> _capabilitiesByRoleFromJson'
   require_match "$file" 'fromJson: _capabilitiesByRoleFromJson'
   echo "• Fixed capabilitiesByRole in $(basename "$file")"
 done

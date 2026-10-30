@@ -9,19 +9,9 @@ part of 'transcription_settings_request.dart';
 TranscriptionSettingsRequest _$TranscriptionSettingsRequestFromJson(
   Map<String, dynamic> json,
 ) => TranscriptionSettingsRequest(
-  closedCaptionMode: json['closed_caption_mode'] == null
-      ? null
-      : TranscriptionSettingsRequestClosedCaptionMode.fromJson(
-          json['closed_caption_mode'] as String,
-        ),
-  language: json['language'] == null
-      ? null
-      : TranscriptionSettingsRequestLanguage.fromJson(
-          json['language'] as String,
-        ),
-  mode: json['mode'] == null
-      ? null
-      : TranscriptionSettingsRequestMode.fromJson(json['mode'] as String),
+  closedCaptionMode: json['closed_caption_mode'] as FeatureActivationMode?,
+  language: json['language'] as TranscriptionLanguage?,
+  mode: json['mode'] as FeatureActivationMode?,
   speechSegmentConfig: json['speech_segment_config'] == null
       ? null
       : SpeechSegmentConfig.fromJson(
@@ -37,9 +27,9 @@ TranscriptionSettingsRequest _$TranscriptionSettingsRequestFromJson(
 Map<String, dynamic> _$TranscriptionSettingsRequestToJson(
   TranscriptionSettingsRequest instance,
 ) => <String, dynamic>{
-  'closed_caption_mode': instance.closedCaptionMode?.toJson(),
-  'language': instance.language?.toJson(),
-  'mode': instance.mode?.toJson(),
+  'closed_caption_mode': instance.closedCaptionMode,
+  'language': instance.language,
+  'mode': instance.mode,
   'speech_segment_config': instance.speechSegmentConfig?.toJson(),
   'translation': instance.translation?.toJson(),
 };

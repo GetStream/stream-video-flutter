@@ -34,7 +34,7 @@ mixin _$ChannelMemberResponse {
   String? get status;
   DateTime get updatedAt;
   UserResponse? get user;
-  String? get userId;
+  String get userId;
 
   /// Create a copy of ChannelMemberResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -157,7 +157,7 @@ abstract mixin class $ChannelMemberResponseCopyWith<$Res> {
     String? status,
     DateTime updatedAt,
     UserResponse? user,
-    String? userId,
+    String userId,
   });
 }
 
@@ -195,7 +195,7 @@ class _$ChannelMemberResponseCopyWithImpl<$Res>
     Object? status = freezed,
     Object? updatedAt = null,
     Object? user = freezed,
-    Object? userId = freezed,
+    Object? userId = null,
   }) {
     return _then(
       ChannelMemberResponse(
@@ -283,10 +283,10 @@ class _$ChannelMemberResponseCopyWithImpl<$Res>
             ? _self.user
             : user // ignore: cast_nullable_to_non_nullable
                   as UserResponse?,
-        userId: freezed == userId
+        userId: null == userId
             ? _self.userId
             : userId // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as String,
       ),
     );
   }

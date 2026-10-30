@@ -20,12 +20,9 @@ PushPreferencesResponse _$PushPreferencesResponseFromJson(
     json['disabled_until'],
     const StreamDateTimeConverter().fromJson,
   ),
-  feedsLevel: json['feeds_level'] as String?,
-  feedsPreferences: json['feeds_preferences'] == null
+  schedule: json['schedule'] == null
       ? null
-      : FeedsPreferencesResponse.fromJson(
-          json['feeds_preferences'] as Map<String, dynamic>,
-        ),
+      : PushScheduleResponse.fromJson(json['schedule'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$PushPreferencesResponseToJson(
@@ -38,8 +35,7 @@ Map<String, dynamic> _$PushPreferencesResponseToJson(
     instance.disabledUntil,
     const StreamDateTimeConverter().toJson,
   ),
-  'feeds_level': instance.feedsLevel,
-  'feeds_preferences': instance.feedsPreferences?.toJson(),
+  'schedule': instance.schedule?.toJson(),
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

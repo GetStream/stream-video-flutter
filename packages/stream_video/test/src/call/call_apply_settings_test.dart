@@ -104,7 +104,7 @@ void main() {
           video: StreamVideoSettings(cameraDefaultOn: true),
           audio: StreamAudioSettings(
             speakerDefaultOn: false,
-            defaultDevice: AudioSettingsRequestDefaultDevice.earpiece,
+            defaultDevice: AudioDefaultDevice.earpiece,
           ),
         );
 
@@ -134,7 +134,7 @@ void main() {
           video: StreamVideoSettings(cameraDefaultOn: false),
           audio: StreamAudioSettings(
             speakerDefaultOn: true,
-            defaultDevice: AudioSettingsRequestDefaultDevice.earpiece,
+            defaultDevice: AudioDefaultDevice.earpiece,
           ),
         );
 
@@ -162,7 +162,7 @@ void main() {
           video: StreamVideoSettings(cameraDefaultOn: false),
           audio: StreamAudioSettings(
             speakerDefaultOn: false,
-            defaultDevice: AudioSettingsRequestDefaultDevice.speaker,
+            defaultDevice: AudioDefaultDevice.speaker,
           ),
         );
 
@@ -192,7 +192,7 @@ void main() {
             video: StreamVideoSettings(cameraDefaultOn: false),
             audio: StreamAudioSettings(
               speakerDefaultOn: false,
-              defaultDevice: AudioSettingsRequestDefaultDevice.earpiece,
+              defaultDevice: AudioDefaultDevice.earpiece,
             ),
           );
 
@@ -227,7 +227,7 @@ void main() {
         video: StreamVideoSettings(cameraDefaultOn: false),
         audio: StreamAudioSettings(
           speakerDefaultOn: false,
-          defaultDevice: AudioSettingsRequestDefaultDeviceEnum.earpiece,
+          defaultDevice: AudioDefaultDevice.earpiece,
         ),
       );
 
@@ -402,7 +402,7 @@ void main() {
           video: StreamVideoSettings(cameraDefaultOn: false),
           audio: StreamAudioSettings(
             speakerDefaultOn: true,
-            defaultDevice: AudioSettingsRequestDefaultDevice.speaker,
+            defaultDevice: AudioDefaultDevice.speaker,
           ),
         );
 
@@ -442,7 +442,7 @@ void main() {
             video: StreamVideoSettings(cameraDefaultOn: false),
             audio: StreamAudioSettings(
               speakerDefaultOn: false,
-              defaultDevice: AudioSettingsRequestDefaultDevice.earpiece,
+              defaultDevice: AudioDefaultDevice.earpiece,
             ),
           );
 
@@ -480,7 +480,7 @@ void main() {
             ), // This normally enables speaker
             audio: StreamAudioSettings(
               speakerDefaultOn: false,
-              defaultDevice: AudioSettingsRequestDefaultDevice.earpiece,
+              defaultDevice: AudioDefaultDevice.earpiece,
             ),
           );
 
@@ -520,7 +520,7 @@ void main() {
         // Arrange
         const callSettings = CallSettings(
           video: StreamVideoSettings(
-            cameraFacing: VideoSettingsRequestCameraFacing.front,
+            cameraFacing: CameraFacing.front,
           ),
         );
 
@@ -543,7 +543,7 @@ void main() {
         // Arrange
         const callSettings = CallSettings(
           video: StreamVideoSettings(
-            cameraFacing: VideoSettingsRequestCameraFacing.back,
+            cameraFacing: CameraFacing.back,
           ),
         );
 

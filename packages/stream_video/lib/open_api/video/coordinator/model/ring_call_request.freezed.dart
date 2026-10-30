@@ -13,6 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$RingCallRequest {
+  Map<String, Object?>? get custom;
   List<String>? get membersIds;
   bool? get video;
 
@@ -31,6 +32,7 @@ mixin _$RingCallRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is RingCallRequest &&
+            const DeepCollectionEquality().equals(other.custom, custom) &&
             const DeepCollectionEquality().equals(
               other.membersIds,
               membersIds,
@@ -41,13 +43,14 @@ mixin _$RingCallRequest {
   @override
   int get hashCode => Object.hash(
     runtimeType,
+    const DeepCollectionEquality().hash(custom),
     const DeepCollectionEquality().hash(membersIds),
     video,
   );
 
   @override
   String toString() {
-    return 'RingCallRequest(membersIds: $membersIds, video: $video)';
+    return 'RingCallRequest(custom: $custom, membersIds: $membersIds, video: $video)';
   }
 }
 
@@ -58,7 +61,11 @@ abstract mixin class $RingCallRequestCopyWith<$Res> {
     $Res Function(RingCallRequest) _then,
   ) = _$RingCallRequestCopyWithImpl;
   @useResult
-  $Res call({List<String>? membersIds, bool? video});
+  $Res call({
+    Map<String, Object?>? custom,
+    List<String>? membersIds,
+    bool? video,
+  });
 }
 
 /// @nodoc
@@ -73,9 +80,17 @@ class _$RingCallRequestCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? membersIds = freezed, Object? video = freezed}) {
+  $Res call({
+    Object? custom = freezed,
+    Object? membersIds = freezed,
+    Object? video = freezed,
+  }) {
     return _then(
       RingCallRequest(
+        custom: freezed == custom
+            ? _self.custom
+            : custom // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>?,
         membersIds: freezed == membersIds
             ? _self.membersIds
             : membersIds // ignore: cast_nullable_to_non_nullable

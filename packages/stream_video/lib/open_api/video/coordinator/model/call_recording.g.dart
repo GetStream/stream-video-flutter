@@ -12,7 +12,7 @@ CallRecording _$CallRecordingFromJson(Map<String, dynamic> json) =>
         json['end_time'] as Object,
       ),
       filename: json['filename'] as String,
-      recordingType: json['recording_type'] as String,
+      recordingType: json['recording_type'] as RecordingType,
       sessionId: json['session_id'] as String,
       startTime: const StreamDateTimeConverter().fromJson(
         json['start_time'] as Object,

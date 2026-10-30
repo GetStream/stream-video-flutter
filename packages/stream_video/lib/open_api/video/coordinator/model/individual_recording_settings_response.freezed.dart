@@ -13,7 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$IndividualRecordingSettingsResponse {
-  IndividualRecordingSettingsResponseMode get mode;
+  FeatureActivationMode get mode;
   List<String>? get outputTypes;
 
   /// Create a copy of IndividualRecordingSettingsResponse
@@ -60,10 +60,7 @@ abstract mixin class $IndividualRecordingSettingsResponseCopyWith<$Res> {
     $Res Function(IndividualRecordingSettingsResponse) _then,
   ) = _$IndividualRecordingSettingsResponseCopyWithImpl;
   @useResult
-  $Res call({
-    IndividualRecordingSettingsResponseMode mode,
-    List<String>? outputTypes,
-  });
+  $Res call({FeatureActivationMode mode, List<String>? outputTypes});
 }
 
 /// @nodoc
@@ -84,7 +81,7 @@ class _$IndividualRecordingSettingsResponseCopyWithImpl<$Res>
         mode: null == mode
             ? _self.mode
             : mode // ignore: cast_nullable_to_non_nullable
-                  as IndividualRecordingSettingsResponseMode,
+                  as FeatureActivationMode,
         outputTypes: freezed == outputTypes
             ? _self.outputTypes
             : outputTypes // ignore: cast_nullable_to_non_nullable

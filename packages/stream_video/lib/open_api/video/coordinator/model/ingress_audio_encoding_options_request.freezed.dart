@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$IngressAudioEncodingOptionsRequest {
   int get bitrate;
-  IngressAudioEncodingOptionsRequestChannels get channels;
+  int get channels;
   bool? get enableDtx;
 
   /// Create a copy of IngressAudioEncodingOptionsRequest
@@ -57,11 +57,7 @@ abstract mixin class $IngressAudioEncodingOptionsRequestCopyWith<$Res> {
     $Res Function(IngressAudioEncodingOptionsRequest) _then,
   ) = _$IngressAudioEncodingOptionsRequestCopyWithImpl;
   @useResult
-  $Res call({
-    int bitrate,
-    IngressAudioEncodingOptionsRequestChannels channels,
-    bool? enableDtx,
-  });
+  $Res call({int bitrate, int channels, bool? enableDtx});
 }
 
 /// @nodoc
@@ -90,7 +86,7 @@ class _$IngressAudioEncodingOptionsRequestCopyWithImpl<$Res>
         channels: null == channels
             ? _self.channels
             : channels // ignore: cast_nullable_to_non_nullable
-                  as IngressAudioEncodingOptionsRequestChannels,
+                  as int,
         enableDtx: freezed == enableDtx
             ? _self.enableDtx
             : enableDtx // ignore: cast_nullable_to_non_nullable

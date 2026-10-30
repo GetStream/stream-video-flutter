@@ -21,22 +21,21 @@ JoinCallResponse _$JoinCallResponseFromJson(Map<String, dynamic> json) =>
           ? null
           : MemberResponse.fromJson(json['membership'] as Map<String, dynamic>),
       ownCapabilities: (json['own_capabilities'] as List<dynamic>)
-          .map((e) => OwnCapability.fromJson(e as String))
+          .map((e) => e as OwnCapability)
           .toList(),
       statsOptions: StatsOptions.fromJson(
         json['stats_options'] as Map<String, dynamic>,
       ),
     );
 
-Map<String, dynamic> _$JoinCallResponseToJson(
-  JoinCallResponse instance,
-) => <String, dynamic>{
-  'call': instance.call.toJson(),
-  'created': instance.created,
-  'credentials': instance.credentials.toJson(),
-  'duration': instance.duration,
-  'members': instance.members.map((e) => e.toJson()).toList(),
-  'membership': instance.membership?.toJson(),
-  'own_capabilities': instance.ownCapabilities.map((e) => e.toJson()).toList(),
-  'stats_options': instance.statsOptions.toJson(),
-};
+Map<String, dynamic> _$JoinCallResponseToJson(JoinCallResponse instance) =>
+    <String, dynamic>{
+      'call': instance.call.toJson(),
+      'created': instance.created,
+      'credentials': instance.credentials.toJson(),
+      'duration': instance.duration,
+      'members': instance.members.map((e) => e.toJson()).toList(),
+      'membership': instance.membership?.toJson(),
+      'own_capabilities': instance.ownCapabilities,
+      'stats_options': instance.statsOptions.toJson(),
+    };

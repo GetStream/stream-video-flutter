@@ -13,9 +13,9 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$TranscriptionSettingsRequest {
-  TranscriptionSettingsRequestClosedCaptionMode? get closedCaptionMode;
-  TranscriptionSettingsRequestLanguage? get language;
-  TranscriptionSettingsRequestMode? get mode;
+  FeatureActivationMode? get closedCaptionMode;
+  TranscriptionLanguage? get language;
+  FeatureActivationMode? get mode;
   SpeechSegmentConfig? get speechSegmentConfig;
   TranslationSettings? get translation;
 
@@ -70,9 +70,9 @@ abstract mixin class $TranscriptionSettingsRequestCopyWith<$Res> {
   ) = _$TranscriptionSettingsRequestCopyWithImpl;
   @useResult
   $Res call({
-    TranscriptionSettingsRequestClosedCaptionMode? closedCaptionMode,
-    TranscriptionSettingsRequestLanguage? language,
-    TranscriptionSettingsRequestMode? mode,
+    FeatureActivationMode? closedCaptionMode,
+    TranscriptionLanguage? language,
+    FeatureActivationMode? mode,
     SpeechSegmentConfig? speechSegmentConfig,
     TranslationSettings? translation,
   });
@@ -102,15 +102,15 @@ class _$TranscriptionSettingsRequestCopyWithImpl<$Res>
         closedCaptionMode: freezed == closedCaptionMode
             ? _self.closedCaptionMode
             : closedCaptionMode // ignore: cast_nullable_to_non_nullable
-                  as TranscriptionSettingsRequestClosedCaptionMode?,
+                  as FeatureActivationMode?,
         language: freezed == language
             ? _self.language
             : language // ignore: cast_nullable_to_non_nullable
-                  as TranscriptionSettingsRequestLanguage?,
+                  as TranscriptionLanguage?,
         mode: freezed == mode
             ? _self.mode
             : mode // ignore: cast_nullable_to_non_nullable
-                  as TranscriptionSettingsRequestMode?,
+                  as FeatureActivationMode?,
         speechSegmentConfig: freezed == speechSegmentConfig
             ? _self.speechSegmentConfig
             : speechSegmentConfig // ignore: cast_nullable_to_non_nullable

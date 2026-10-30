@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RecordSettingsRequest {
   bool? get audioOnly;
-  RecordSettingsRequestMode get mode;
+  FeatureActivationMode get mode;
   RecordSettingsRequestQuality? get quality;
 
   /// Create a copy of RecordSettingsRequest
@@ -56,7 +56,7 @@ abstract mixin class $RecordSettingsRequestCopyWith<$Res> {
   @useResult
   $Res call({
     bool? audioOnly,
-    RecordSettingsRequestMode mode,
+    FeatureActivationMode mode,
     RecordSettingsRequestQuality? quality,
   });
 }
@@ -87,7 +87,7 @@ class _$RecordSettingsRequestCopyWithImpl<$Res>
         mode: null == mode
             ? _self.mode
             : mode // ignore: cast_nullable_to_non_nullable
-                  as RecordSettingsRequestMode,
+                  as FeatureActivationMode,
         quality: freezed == quality
             ? _self.quality
             : quality // ignore: cast_nullable_to_non_nullable

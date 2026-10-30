@@ -11,18 +11,14 @@ FrameRecordingSettingsRequest _$FrameRecordingSettingsRequestFromJson(
 ) => FrameRecordingSettingsRequest(
   captureIntervalInSeconds: (json['capture_interval_in_seconds'] as num)
       .toInt(),
-  mode: FrameRecordingSettingsRequestMode.fromJson(json['mode'] as String),
-  quality: json['quality'] == null
-      ? null
-      : FrameRecordingSettingsRequestQuality.fromJson(
-          json['quality'] as String,
-        ),
+  mode: json['mode'] as FeatureActivationMode,
+  quality: json['quality'] as FrameRecordingSettingsRequestQuality?,
 );
 
 Map<String, dynamic> _$FrameRecordingSettingsRequestToJson(
   FrameRecordingSettingsRequest instance,
 ) => <String, dynamic>{
   'capture_interval_in_seconds': instance.captureIntervalInSeconds,
-  'mode': instance.mode.toJson(),
-  'quality': instance.quality?.toJson(),
+  'mode': instance.mode,
+  'quality': instance.quality,
 };
