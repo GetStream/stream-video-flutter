@@ -12,6 +12,7 @@ EnrichedReaction _$EnrichedReactionFromJson(Map<String, dynamic> json) =>
       childrenCounts: (json['children_counts'] as Map<String, dynamic>?)?.map(
         (k, e) => MapEntry(k, (e as num).toInt()),
       ),
+      createdAt: json['created_at'] as String?,
       data: json['data'] as Map<String, dynamic>?,
       id: json['id'] as String?,
       kind: json['kind'] as String,
@@ -35,6 +36,7 @@ EnrichedReaction _$EnrichedReactionFromJson(Map<String, dynamic> json) =>
       targetFeeds: (json['target_feeds'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
+      updatedAt: json['updated_at'] as String?,
       user: json['user'] == null
           ? null
           : Data.fromJson(json['user'] as Map<String, dynamic>),
@@ -45,6 +47,7 @@ Map<String, dynamic> _$EnrichedReactionToJson(EnrichedReaction instance) =>
     <String, dynamic>{
       'activity_id': instance.activityId,
       'children_counts': instance.childrenCounts,
+      'created_at': instance.createdAt,
       'data': instance.data,
       'id': instance.id,
       'kind': instance.kind,
@@ -56,6 +59,7 @@ Map<String, dynamic> _$EnrichedReactionToJson(EnrichedReaction instance) =>
       ),
       'parent': instance.parent,
       'target_feeds': instance.targetFeeds,
+      'updated_at': instance.updatedAt,
       'user': instance.user?.toJson(),
       'user_id': instance.userId,
     };

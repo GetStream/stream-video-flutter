@@ -13,7 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$AutomodSemanticFiltersRule {
-  AutomodSemanticFiltersRuleAction get action;
+  ModerationAction get action;
   String get name;
   double get threshold;
 
@@ -55,11 +55,7 @@ abstract mixin class $AutomodSemanticFiltersRuleCopyWith<$Res> {
     $Res Function(AutomodSemanticFiltersRule) _then,
   ) = _$AutomodSemanticFiltersRuleCopyWithImpl;
   @useResult
-  $Res call({
-    AutomodSemanticFiltersRuleAction action,
-    String name,
-    double threshold,
-  });
+  $Res call({ModerationAction action, String name, double threshold});
 }
 
 /// @nodoc
@@ -84,7 +80,7 @@ class _$AutomodSemanticFiltersRuleCopyWithImpl<$Res>
         action: null == action
             ? _self.action
             : action // ignore: cast_nullable_to_non_nullable
-                  as AutomodSemanticFiltersRuleAction,
+                  as ModerationAction,
         name: null == name
             ? _self.name
             : name // ignore: cast_nullable_to_non_nullable

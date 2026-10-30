@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$CallRecording {
   DateTime get endTime;
   String get filename;
-  String get recordingType;
+  RecordingType get recordingType;
   String get sessionId;
   DateTime get startTime;
   String get url;
@@ -74,7 +74,7 @@ abstract mixin class $CallRecordingCopyWith<$Res> {
   $Res call({
     DateTime endTime,
     String filename,
-    String recordingType,
+    RecordingType recordingType,
     String sessionId,
     DateTime startTime,
     String url,
@@ -114,7 +114,7 @@ class _$CallRecordingCopyWithImpl<$Res>
         recordingType: null == recordingType
             ? _self.recordingType
             : recordingType // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as RecordingType,
         sessionId: null == sessionId
             ? _self.sessionId
             : sessionId // ignore: cast_nullable_to_non_nullable

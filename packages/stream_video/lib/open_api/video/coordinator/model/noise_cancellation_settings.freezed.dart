@@ -13,7 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$NoiseCancellationSettings {
-  NoiseCancellationSettingsMode get mode;
+  FeatureActivationMode get mode;
 
   /// Create a copy of NoiseCancellationSettings
   /// with the given fields replaced by the non-null parameter values.
@@ -49,7 +49,7 @@ abstract mixin class $NoiseCancellationSettingsCopyWith<$Res> {
     $Res Function(NoiseCancellationSettings) _then,
   ) = _$NoiseCancellationSettingsCopyWithImpl;
   @useResult
-  $Res call({NoiseCancellationSettingsMode mode});
+  $Res call({FeatureActivationMode mode});
 }
 
 /// @nodoc
@@ -70,7 +70,7 @@ class _$NoiseCancellationSettingsCopyWithImpl<$Res>
         mode: null == mode
             ? _self.mode
             : mode // ignore: cast_nullable_to_non_nullable
-                  as NoiseCancellationSettingsMode,
+                  as FeatureActivationMode,
       ),
     );
   }

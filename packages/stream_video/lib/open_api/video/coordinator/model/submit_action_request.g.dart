@@ -9,9 +9,7 @@ part of 'submit_action_request.dart';
 SubmitActionRequest _$SubmitActionRequestFromJson(
   Map<String, dynamic> json,
 ) => SubmitActionRequest(
-  actionType: SubmitActionRequestActionType.fromJson(
-    json['action_type'] as String,
-  ),
+  actionType: json['action_type'] as SubmitActionRequestActionType,
   appealId: json['appeal_id'] as String?,
   ban: json['ban'] == null
       ? null
@@ -43,6 +41,21 @@ SubmitActionRequest _$SubmitActionRequestFromJson(
       ? null
       : DeleteMessageRequestPayload.fromJson(
           json['delete_message'] as Map<String, dynamic>,
+        ),
+  deletePoll: json['delete_poll'] == null
+      ? null
+      : DeletePollRequestPayload.fromJson(
+          json['delete_poll'] as Map<String, dynamic>,
+        ),
+  deletePollAnswer: json['delete_poll_answer'] == null
+      ? null
+      : DeletePollAnswerRequestPayload.fromJson(
+          json['delete_poll_answer'] as Map<String, dynamic>,
+        ),
+  deletePollOption: json['delete_poll_option'] == null
+      ? null
+      : DeletePollOptionRequestPayload.fromJson(
+          json['delete_poll_option'] as Map<String, dynamic>,
         ),
   deleteReaction: json['delete_reaction'] == null
       ? null
@@ -101,7 +114,7 @@ SubmitActionRequest _$SubmitActionRequestFromJson(
 Map<String, dynamic> _$SubmitActionRequestToJson(
   SubmitActionRequest instance,
 ) => <String, dynamic>{
-  'action_type': instance.actionType.toJson(),
+  'action_type': instance.actionType,
   'appeal_id': instance.appealId,
   'ban': instance.ban?.toJson(),
   'block': instance.block?.toJson(),
@@ -110,6 +123,9 @@ Map<String, dynamic> _$SubmitActionRequestToJson(
   'delete_activity': instance.deleteActivity?.toJson(),
   'delete_comment': instance.deleteComment?.toJson(),
   'delete_message': instance.deleteMessage?.toJson(),
+  'delete_poll': instance.deletePoll?.toJson(),
+  'delete_poll_answer': instance.deletePollAnswer?.toJson(),
+  'delete_poll_option': instance.deletePollOption?.toJson(),
   'delete_reaction': instance.deleteReaction?.toJson(),
   'delete_user': instance.deleteUser?.toJson(),
   'delete_user_messages': instance.deleteUserMessages?.toJson(),

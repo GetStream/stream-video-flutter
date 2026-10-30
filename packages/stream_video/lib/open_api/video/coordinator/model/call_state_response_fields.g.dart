@@ -17,7 +17,7 @@ CallStateResponseFields _$CallStateResponseFieldsFromJson(
       ? null
       : MemberResponse.fromJson(json['membership'] as Map<String, dynamic>),
   ownCapabilities: (json['own_capabilities'] as List<dynamic>)
-      .map((e) => OwnCapability.fromJson(e as String))
+      .map((e) => e as OwnCapability)
       .toList(),
 );
 
@@ -27,5 +27,5 @@ Map<String, dynamic> _$CallStateResponseFieldsToJson(
   'call': instance.call.toJson(),
   'members': instance.members.map((e) => e.toJson()).toList(),
   'membership': instance.membership?.toJson(),
-  'own_capabilities': instance.ownCapabilities.map((e) => e.toJson()).toList(),
+  'own_capabilities': instance.ownCapabilities,
 };

@@ -18,9 +18,9 @@ mixin _$PushPreferenceInput {
   PushPreferenceInputChatLevel? get chatLevel;
   ChatPreferencesInput? get chatPreferences;
   DateTime? get disabledUntil;
-  PushPreferenceInputFeedsLevel? get feedsLevel;
-  FeedsPreferences? get feedsPreferences;
   bool? get removeDisable;
+  bool? get removeSchedule;
+  PushScheduleInput? get schedule;
   String? get userId;
 
   /// Create a copy of PushPreferenceInput
@@ -48,12 +48,12 @@ mixin _$PushPreferenceInput {
                 other.chatPreferences == chatPreferences) &&
             (identical(other.disabledUntil, disabledUntil) ||
                 other.disabledUntil == disabledUntil) &&
-            (identical(other.feedsLevel, feedsLevel) ||
-                other.feedsLevel == feedsLevel) &&
-            (identical(other.feedsPreferences, feedsPreferences) ||
-                other.feedsPreferences == feedsPreferences) &&
             (identical(other.removeDisable, removeDisable) ||
                 other.removeDisable == removeDisable) &&
+            (identical(other.removeSchedule, removeSchedule) ||
+                other.removeSchedule == removeSchedule) &&
+            (identical(other.schedule, schedule) ||
+                other.schedule == schedule) &&
             (identical(other.userId, userId) || other.userId == userId));
   }
 
@@ -65,15 +65,15 @@ mixin _$PushPreferenceInput {
     chatLevel,
     chatPreferences,
     disabledUntil,
-    feedsLevel,
-    feedsPreferences,
     removeDisable,
+    removeSchedule,
+    schedule,
     userId,
   );
 
   @override
   String toString() {
-    return 'PushPreferenceInput(callLevel: $callLevel, channelCid: $channelCid, chatLevel: $chatLevel, chatPreferences: $chatPreferences, disabledUntil: $disabledUntil, feedsLevel: $feedsLevel, feedsPreferences: $feedsPreferences, removeDisable: $removeDisable, userId: $userId)';
+    return 'PushPreferenceInput(callLevel: $callLevel, channelCid: $channelCid, chatLevel: $chatLevel, chatPreferences: $chatPreferences, disabledUntil: $disabledUntil, removeDisable: $removeDisable, removeSchedule: $removeSchedule, schedule: $schedule, userId: $userId)';
   }
 }
 
@@ -90,9 +90,9 @@ abstract mixin class $PushPreferenceInputCopyWith<$Res> {
     PushPreferenceInputChatLevel? chatLevel,
     ChatPreferencesInput? chatPreferences,
     DateTime? disabledUntil,
-    PushPreferenceInputFeedsLevel? feedsLevel,
-    FeedsPreferences? feedsPreferences,
     bool? removeDisable,
+    bool? removeSchedule,
+    PushScheduleInput? schedule,
     String? userId,
   });
 }
@@ -115,9 +115,9 @@ class _$PushPreferenceInputCopyWithImpl<$Res>
     Object? chatLevel = freezed,
     Object? chatPreferences = freezed,
     Object? disabledUntil = freezed,
-    Object? feedsLevel = freezed,
-    Object? feedsPreferences = freezed,
     Object? removeDisable = freezed,
+    Object? removeSchedule = freezed,
+    Object? schedule = freezed,
     Object? userId = freezed,
   }) {
     return _then(
@@ -142,18 +142,18 @@ class _$PushPreferenceInputCopyWithImpl<$Res>
             ? _self.disabledUntil
             : disabledUntil // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
-        feedsLevel: freezed == feedsLevel
-            ? _self.feedsLevel
-            : feedsLevel // ignore: cast_nullable_to_non_nullable
-                  as PushPreferenceInputFeedsLevel?,
-        feedsPreferences: freezed == feedsPreferences
-            ? _self.feedsPreferences
-            : feedsPreferences // ignore: cast_nullable_to_non_nullable
-                  as FeedsPreferences?,
         removeDisable: freezed == removeDisable
             ? _self.removeDisable
             : removeDisable // ignore: cast_nullable_to_non_nullable
                   as bool?,
+        removeSchedule: freezed == removeSchedule
+            ? _self.removeSchedule
+            : removeSchedule // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        schedule: freezed == schedule
+            ? _self.schedule
+            : schedule // ignore: cast_nullable_to_non_nullable
+                  as PushScheduleInput?,
         userId: freezed == userId
             ? _self.userId
             : userId // ignore: cast_nullable_to_non_nullable

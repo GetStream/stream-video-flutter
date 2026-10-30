@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../../../open_api/video/coordinator/api.dart';
+import '../../../open_api/video/coordinator/api.dart' hide RecordingType;
 import '../../call_state.dart';
 import '../../coordinator/coordinator_client.dart';
 import '../../logger/impl/tagged_logger.dart';

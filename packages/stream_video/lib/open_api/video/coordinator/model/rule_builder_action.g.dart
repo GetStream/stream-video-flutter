@@ -23,9 +23,7 @@ RuleBuilderAction _$RuleBuilderActionFromJson(Map<String, dynamic> json) =>
             ),
       reason: json['reason'] as String?,
       skipInbox: json['skip_inbox'] as bool?,
-      type: json['type'] == null
-          ? null
-          : RuleBuilderActionType.fromJson(json['type'] as String),
+      type: json['type'] as RuleBuilderActionType?,
     );
 
 Map<String, dynamic> _$RuleBuilderActionToJson(RuleBuilderAction instance) =>
@@ -35,5 +33,5 @@ Map<String, dynamic> _$RuleBuilderActionToJson(RuleBuilderAction instance) =>
       'flag_user_options': instance.flagUserOptions?.toJson(),
       'reason': instance.reason,
       'skip_inbox': instance.skipInbox,
-      'type': instance.type?.toJson(),
+      'type': instance.type,
     };

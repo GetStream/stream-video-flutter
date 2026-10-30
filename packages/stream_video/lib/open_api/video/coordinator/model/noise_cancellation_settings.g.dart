@@ -8,10 +8,8 @@ part of 'noise_cancellation_settings.dart';
 
 NoiseCancellationSettings _$NoiseCancellationSettingsFromJson(
   Map<String, dynamic> json,
-) => NoiseCancellationSettings(
-  mode: NoiseCancellationSettingsMode.fromJson(json['mode'] as String),
-);
+) => NoiseCancellationSettings(mode: json['mode'] as FeatureActivationMode);
 
 Map<String, dynamic> _$NoiseCancellationSettingsToJson(
   NoiseCancellationSettings instance,
-) => <String, dynamic>{'mode': instance.mode.toJson()};
+) => <String, dynamic>{'mode': instance.mode};

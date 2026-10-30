@@ -9,18 +9,15 @@ part of 'individual_recording_settings_request.dart';
 IndividualRecordingSettingsRequest _$IndividualRecordingSettingsRequestFromJson(
   Map<String, dynamic> json,
 ) => IndividualRecordingSettingsRequest(
-  mode: IndividualRecordingSettingsRequestMode.fromJson(json['mode'] as String),
+  mode: json['mode'] as FeatureActivationMode,
   outputTypes: (json['output_types'] as List<dynamic>?)
-      ?.map(
-        (e) =>
-            IndividualRecordingSettingsRequestOutputTypes.fromJson(e as String),
-      )
+      ?.map((e) => e as IndividualRecordingSettingsRequestOutputTypes)
       .toList(),
 );
 
 Map<String, dynamic> _$IndividualRecordingSettingsRequestToJson(
   IndividualRecordingSettingsRequest instance,
 ) => <String, dynamic>{
-  'mode': instance.mode.toJson(),
-  'output_types': instance.outputTypes?.map((e) => e.toJson()).toList(),
+  'mode': instance.mode,
+  'output_types': instance.outputTypes,
 };
