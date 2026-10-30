@@ -58,7 +58,7 @@ jobs:
   analyze:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
-    timeout-minutes: 15
+    timeout-minutes: 25
     runs-on: ubuntu-latest
     steps:
       - name: Git Checkout
