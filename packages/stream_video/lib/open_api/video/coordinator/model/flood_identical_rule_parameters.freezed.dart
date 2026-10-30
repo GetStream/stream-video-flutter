@@ -14,8 +14,10 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FloodIdenticalRuleParameters {
   List<String>? get allowlist;
+  int? get minTextLength;
   int? get threshold;
   String? get timeWindow;
+  bool? get trackAcrossUsers;
 
   /// Create a copy of FloodIdenticalRuleParameters
   /// with the given fields replaced by the non-null parameter values.
@@ -34,23 +36,29 @@ mixin _$FloodIdenticalRuleParameters {
         (other.runtimeType == runtimeType &&
             other is FloodIdenticalRuleParameters &&
             const DeepCollectionEquality().equals(other.allowlist, allowlist) &&
+            (identical(other.minTextLength, minTextLength) ||
+                other.minTextLength == minTextLength) &&
             (identical(other.threshold, threshold) ||
                 other.threshold == threshold) &&
             (identical(other.timeWindow, timeWindow) ||
-                other.timeWindow == timeWindow));
+                other.timeWindow == timeWindow) &&
+            (identical(other.trackAcrossUsers, trackAcrossUsers) ||
+                other.trackAcrossUsers == trackAcrossUsers));
   }
 
   @override
   int get hashCode => Object.hash(
     runtimeType,
     const DeepCollectionEquality().hash(allowlist),
+    minTextLength,
     threshold,
     timeWindow,
+    trackAcrossUsers,
   );
 
   @override
   String toString() {
-    return 'FloodIdenticalRuleParameters(allowlist: $allowlist, threshold: $threshold, timeWindow: $timeWindow)';
+    return 'FloodIdenticalRuleParameters(allowlist: $allowlist, minTextLength: $minTextLength, threshold: $threshold, timeWindow: $timeWindow, trackAcrossUsers: $trackAcrossUsers)';
   }
 }
 
@@ -61,7 +69,13 @@ abstract mixin class $FloodIdenticalRuleParametersCopyWith<$Res> {
     $Res Function(FloodIdenticalRuleParameters) _then,
   ) = _$FloodIdenticalRuleParametersCopyWithImpl;
   @useResult
-  $Res call({List<String>? allowlist, int? threshold, String? timeWindow});
+  $Res call({
+    List<String>? allowlist,
+    int? minTextLength,
+    int? threshold,
+    String? timeWindow,
+    bool? trackAcrossUsers,
+  });
 }
 
 /// @nodoc
@@ -78,8 +92,10 @@ class _$FloodIdenticalRuleParametersCopyWithImpl<$Res>
   @override
   $Res call({
     Object? allowlist = freezed,
+    Object? minTextLength = freezed,
     Object? threshold = freezed,
     Object? timeWindow = freezed,
+    Object? trackAcrossUsers = freezed,
   }) {
     return _then(
       FloodIdenticalRuleParameters(
@@ -87,6 +103,10 @@ class _$FloodIdenticalRuleParametersCopyWithImpl<$Res>
             ? _self.allowlist
             : allowlist // ignore: cast_nullable_to_non_nullable
                   as List<String>?,
+        minTextLength: freezed == minTextLength
+            ? _self.minTextLength
+            : minTextLength // ignore: cast_nullable_to_non_nullable
+                  as int?,
         threshold: freezed == threshold
             ? _self.threshold
             : threshold // ignore: cast_nullable_to_non_nullable
@@ -95,6 +115,10 @@ class _$FloodIdenticalRuleParametersCopyWithImpl<$Res>
             ? _self.timeWindow
             : timeWindow // ignore: cast_nullable_to_non_nullable
                   as String?,
+        trackAcrossUsers: freezed == trackAcrossUsers
+            ? _self.trackAcrossUsers
+            : trackAcrossUsers // ignore: cast_nullable_to_non_nullable
+                  as bool?,
       ),
     );
   }

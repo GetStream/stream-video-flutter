@@ -68,6 +68,14 @@ mixin StreamVideoExceptions {
         stackTrace: stackTrace ?? exception.stackTrace,
       );
     } else if (exception is StreamException) {
+      // A failed coordinator request arrives already mapped, with its
+      // DioException as the cause: compose from that, so the error still
+      // names the request. Any other cause, such as the app's token endpoint,
+      // keeps this exception's own message.
+      if (exception.cause case final DioException cause
+          when cause.requestOptions.isCoordinatorRequest) {
+        return compose(cause, stackTrace);
+      }
       return StreamVideoExceptionWithCause(
         message: exception.message,
         cause: exception,

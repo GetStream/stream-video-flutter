@@ -13,7 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$IngressSourceRequest {
-  IngressSourceRequestFps get fps;
+  int get fps;
   int get height;
   int get width;
 
@@ -53,7 +53,7 @@ abstract mixin class $IngressSourceRequestCopyWith<$Res> {
     $Res Function(IngressSourceRequest) _then,
   ) = _$IngressSourceRequestCopyWithImpl;
   @useResult
-  $Res call({IngressSourceRequestFps fps, int height, int width});
+  $Res call({int fps, int height, int width});
 }
 
 /// @nodoc
@@ -74,7 +74,7 @@ class _$IngressSourceRequestCopyWithImpl<$Res>
         fps: null == fps
             ? _self.fps
             : fps // ignore: cast_nullable_to_non_nullable
-                  as IngressSourceRequestFps,
+                  as int,
         height: null == height
             ? _self.height
             : height // ignore: cast_nullable_to_non_nullable

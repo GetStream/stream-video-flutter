@@ -9,7 +9,7 @@ part of 'ingress_source_request.dart';
 IngressSourceRequest _$IngressSourceRequestFromJson(
   Map<String, dynamic> json,
 ) => IngressSourceRequest(
-  fps: IngressSourceRequestFps.fromJson(json['fps'] as String),
+  fps: (json['fps'] as num).toInt(),
   height: (json['height'] as num).toInt(),
   width: (json['width'] as num).toInt(),
 );
@@ -17,7 +17,7 @@ IngressSourceRequest _$IngressSourceRequestFromJson(
 Map<String, dynamic> _$IngressSourceRequestToJson(
   IngressSourceRequest instance,
 ) => <String, dynamic>{
-  'fps': instance.fps.toJson(),
+  'fps': instance.fps,
   'height': instance.height,
   'width': instance.width,
 };

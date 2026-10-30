@@ -8,6 +8,7 @@ part of 'ring_call_request.dart';
 
 RingCallRequest _$RingCallRequestFromJson(Map<String, dynamic> json) =>
     RingCallRequest(
+      custom: json['custom'] as Map<String, dynamic>?,
       membersIds: (json['members_ids'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
@@ -16,6 +17,7 @@ RingCallRequest _$RingCallRequestFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$RingCallRequestToJson(RingCallRequest instance) =>
     <String, dynamic>{
+      'custom': instance.custom,
       'members_ids': instance.membersIds,
       'video': instance.video,
     };

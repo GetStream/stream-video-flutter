@@ -13,7 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$EncryptionSettingsRequest {
-  EncryptionSettingsRequestMode? get mode;
+  FeatureActivationMode? get mode;
 
   /// Create a copy of EncryptionSettingsRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -49,7 +49,7 @@ abstract mixin class $EncryptionSettingsRequestCopyWith<$Res> {
     $Res Function(EncryptionSettingsRequest) _then,
   ) = _$EncryptionSettingsRequestCopyWithImpl;
   @useResult
-  $Res call({EncryptionSettingsRequestMode? mode});
+  $Res call({FeatureActivationMode? mode});
 }
 
 /// @nodoc
@@ -70,7 +70,7 @@ class _$EncryptionSettingsRequestCopyWithImpl<$Res>
         mode: freezed == mode
             ? _self.mode
             : mode // ignore: cast_nullable_to_non_nullable
-                  as EncryptionSettingsRequestMode?,
+                  as FeatureActivationMode?,
       ),
     );
   }

@@ -8,12 +8,8 @@ part of 'encryption_settings_request.dart';
 
 EncryptionSettingsRequest _$EncryptionSettingsRequestFromJson(
   Map<String, dynamic> json,
-) => EncryptionSettingsRequest(
-  mode: json['mode'] == null
-      ? null
-      : EncryptionSettingsRequestMode.fromJson(json['mode'] as String),
-);
+) => EncryptionSettingsRequest(mode: json['mode'] as FeatureActivationMode?);
 
 Map<String, dynamic> _$EncryptionSettingsRequestToJson(
   EncryptionSettingsRequest instance,
-) => <String, dynamic>{'mode': instance.mode?.toJson()};
+) => <String, dynamic>{'mode': instance.mode};

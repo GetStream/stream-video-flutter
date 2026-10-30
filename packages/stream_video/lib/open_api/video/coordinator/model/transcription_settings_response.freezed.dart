@@ -13,9 +13,9 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$TranscriptionSettingsResponse {
-  TranscriptionSettingsResponseClosedCaptionMode get closedCaptionMode;
-  TranscriptionSettingsResponseLanguage get language;
-  TranscriptionSettingsResponseMode get mode;
+  FeatureActivationMode get closedCaptionMode;
+  TranscriptionLanguage get language;
+  FeatureActivationMode get mode;
   SpeechSegmentConfig? get speechSegmentConfig;
   TranslationSettings? get translation;
 
@@ -69,9 +69,9 @@ abstract mixin class $TranscriptionSettingsResponseCopyWith<$Res> {
   ) = _$TranscriptionSettingsResponseCopyWithImpl;
   @useResult
   $Res call({
-    TranscriptionSettingsResponseClosedCaptionMode closedCaptionMode,
-    TranscriptionSettingsResponseLanguage language,
-    TranscriptionSettingsResponseMode mode,
+    FeatureActivationMode closedCaptionMode,
+    TranscriptionLanguage language,
+    FeatureActivationMode mode,
     SpeechSegmentConfig? speechSegmentConfig,
     TranslationSettings? translation,
   });
@@ -101,15 +101,15 @@ class _$TranscriptionSettingsResponseCopyWithImpl<$Res>
         closedCaptionMode: null == closedCaptionMode
             ? _self.closedCaptionMode
             : closedCaptionMode // ignore: cast_nullable_to_non_nullable
-                  as TranscriptionSettingsResponseClosedCaptionMode,
+                  as FeatureActivationMode,
         language: null == language
             ? _self.language
             : language // ignore: cast_nullable_to_non_nullable
-                  as TranscriptionSettingsResponseLanguage,
+                  as TranscriptionLanguage,
         mode: null == mode
             ? _self.mode
             : mode // ignore: cast_nullable_to_non_nullable
-                  as TranscriptionSettingsResponseMode,
+                  as FeatureActivationMode,
         speechSegmentConfig: freezed == speechSegmentConfig
             ? _self.speechSegmentConfig
             : speechSegmentConfig // ignore: cast_nullable_to_non_nullable

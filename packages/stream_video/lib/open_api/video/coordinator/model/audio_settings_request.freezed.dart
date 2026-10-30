@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AudioSettingsRequest {
   bool? get accessRequestEnabled;
-  AudioSettingsRequestDefaultDevice get defaultDevice;
+  AudioDefaultDevice get defaultDevice;
   bool? get hifiAudioEnabled;
   bool? get micDefaultOn;
   NoiseCancellationSettings? get noiseCancellation;
@@ -83,7 +83,7 @@ abstract mixin class $AudioSettingsRequestCopyWith<$Res> {
   @useResult
   $Res call({
     bool? accessRequestEnabled,
-    AudioSettingsRequestDefaultDevice defaultDevice,
+    AudioDefaultDevice defaultDevice,
     bool? hifiAudioEnabled,
     bool? micDefaultOn,
     NoiseCancellationSettings? noiseCancellation,
@@ -124,7 +124,7 @@ class _$AudioSettingsRequestCopyWithImpl<$Res>
         defaultDevice: null == defaultDevice
             ? _self.defaultDevice
             : defaultDevice // ignore: cast_nullable_to_non_nullable
-                  as AudioSettingsRequestDefaultDevice,
+                  as AudioDefaultDevice,
         hifiAudioEnabled: freezed == hifiAudioEnabled
             ? _self.hifiAudioEnabled
             : hifiAudioEnabled // ignore: cast_nullable_to_non_nullable

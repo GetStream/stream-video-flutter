@@ -11,7 +11,7 @@ FrameRecordingSettingsResponse _$FrameRecordingSettingsResponseFromJson(
 ) => FrameRecordingSettingsResponse(
   captureIntervalInSeconds: (json['capture_interval_in_seconds'] as num)
       .toInt(),
-  mode: FrameRecordingSettingsResponseMode.fromJson(json['mode'] as String),
+  mode: json['mode'] as FeatureActivationMode,
   quality: json['quality'] as String?,
 );
 
@@ -19,6 +19,6 @@ Map<String, dynamic> _$FrameRecordingSettingsResponseToJson(
   FrameRecordingSettingsResponse instance,
 ) => <String, dynamic>{
   'capture_interval_in_seconds': instance.captureIntervalInSeconds,
-  'mode': instance.mode.toJson(),
+  'mode': instance.mode,
   'quality': instance.quality,
 };

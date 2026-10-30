@@ -9,6 +9,7 @@ part of 'channel_response.dart';
 ChannelResponse _$ChannelResponseFromJson(
   Map<String, dynamic> json,
 ) => ChannelResponse(
+  activeMemberCount: (json['active_member_count'] as num?)?.toInt(),
   autoTranslationEnabled: json['auto_translation_enabled'] as bool?,
   autoTranslationLanguage: json['auto_translation_language'] as String?,
   blocked: json['blocked'] as bool?,
@@ -32,6 +33,9 @@ ChannelResponse _$ChannelResponseFromJson(
   filterTags: (json['filter_tags'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
+  fork: json['fork'] == null
+      ? null
+      : ChannelForkSummary.fromJson(json['fork'] as Map<String, dynamic>),
   frozen: json['frozen'] as bool,
   hidden: json['hidden'] as bool?,
   hideMessagesBefore: _$JsonConverterFromJson<Object, DateTime>(
@@ -54,7 +58,7 @@ ChannelResponse _$ChannelResponseFromJson(
   ),
   muted: json['muted'] as bool?,
   ownCapabilities: (json['own_capabilities'] as List<dynamic>?)
-      ?.map((e) => ChannelOwnCapability.fromJson(e as String))
+      ?.map((e) => e as ChannelOwnCapability)
       .toList(),
   team: json['team'] as String?,
   truncatedAt: _$JsonConverterFromJson<Object, DateTime>(
@@ -70,53 +74,54 @@ ChannelResponse _$ChannelResponseFromJson(
   ),
 );
 
-Map<String, dynamic> _$ChannelResponseToJson(
-  ChannelResponse instance,
-) => <String, dynamic>{
-  'auto_translation_enabled': instance.autoTranslationEnabled,
-  'auto_translation_language': instance.autoTranslationLanguage,
-  'blocked': instance.blocked,
-  'cid': instance.cid,
-  'config': instance.config?.toJson(),
-  'cooldown': instance.cooldown,
-  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
-  'created_by': instance.createdBy?.toJson(),
-  'custom': instance.custom,
-  'deleted_at': _$JsonConverterToJson<Object, DateTime>(
-    instance.deletedAt,
-    const StreamDateTimeConverter().toJson,
-  ),
-  'disabled': instance.disabled,
-  'filter_tags': instance.filterTags,
-  'frozen': instance.frozen,
-  'hidden': instance.hidden,
-  'hide_messages_before': _$JsonConverterToJson<Object, DateTime>(
-    instance.hideMessagesBefore,
-    const StreamDateTimeConverter().toJson,
-  ),
-  'id': instance.id,
-  'last_message_at': _$JsonConverterToJson<Object, DateTime>(
-    instance.lastMessageAt,
-    const StreamDateTimeConverter().toJson,
-  ),
-  'member_count': instance.memberCount,
-  'members': instance.members?.map((e) => e.toJson()).toList(),
-  'message_count': instance.messageCount,
-  'mute_expires_at': _$JsonConverterToJson<Object, DateTime>(
-    instance.muteExpiresAt,
-    const StreamDateTimeConverter().toJson,
-  ),
-  'muted': instance.muted,
-  'own_capabilities': instance.ownCapabilities?.map((e) => e.toJson()).toList(),
-  'team': instance.team,
-  'truncated_at': _$JsonConverterToJson<Object, DateTime>(
-    instance.truncatedAt,
-    const StreamDateTimeConverter().toJson,
-  ),
-  'truncated_by': instance.truncatedBy?.toJson(),
-  'type': instance.type,
-  'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
-};
+Map<String, dynamic> _$ChannelResponseToJson(ChannelResponse instance) =>
+    <String, dynamic>{
+      'active_member_count': instance.activeMemberCount,
+      'auto_translation_enabled': instance.autoTranslationEnabled,
+      'auto_translation_language': instance.autoTranslationLanguage,
+      'blocked': instance.blocked,
+      'cid': instance.cid,
+      'config': instance.config?.toJson(),
+      'cooldown': instance.cooldown,
+      'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
+      'created_by': instance.createdBy?.toJson(),
+      'custom': instance.custom,
+      'deleted_at': _$JsonConverterToJson<Object, DateTime>(
+        instance.deletedAt,
+        const StreamDateTimeConverter().toJson,
+      ),
+      'disabled': instance.disabled,
+      'filter_tags': instance.filterTags,
+      'fork': instance.fork?.toJson(),
+      'frozen': instance.frozen,
+      'hidden': instance.hidden,
+      'hide_messages_before': _$JsonConverterToJson<Object, DateTime>(
+        instance.hideMessagesBefore,
+        const StreamDateTimeConverter().toJson,
+      ),
+      'id': instance.id,
+      'last_message_at': _$JsonConverterToJson<Object, DateTime>(
+        instance.lastMessageAt,
+        const StreamDateTimeConverter().toJson,
+      ),
+      'member_count': instance.memberCount,
+      'members': instance.members?.map((e) => e.toJson()).toList(),
+      'message_count': instance.messageCount,
+      'mute_expires_at': _$JsonConverterToJson<Object, DateTime>(
+        instance.muteExpiresAt,
+        const StreamDateTimeConverter().toJson,
+      ),
+      'muted': instance.muted,
+      'own_capabilities': instance.ownCapabilities,
+      'team': instance.team,
+      'truncated_at': _$JsonConverterToJson<Object, DateTime>(
+        instance.truncatedAt,
+        const StreamDateTimeConverter().toJson,
+      ),
+      'truncated_by': instance.truncatedBy?.toJson(),
+      'type': instance.type,
+      'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
+    };
 
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,

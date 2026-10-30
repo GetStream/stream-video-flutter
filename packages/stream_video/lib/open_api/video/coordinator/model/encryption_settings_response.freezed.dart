@@ -13,7 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$EncryptionSettingsResponse {
-  EncryptionSettingsResponseMode get mode;
+  FeatureActivationMode get mode;
 
   /// Create a copy of EncryptionSettingsResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -50,7 +50,7 @@ abstract mixin class $EncryptionSettingsResponseCopyWith<$Res> {
     $Res Function(EncryptionSettingsResponse) _then,
   ) = _$EncryptionSettingsResponseCopyWithImpl;
   @useResult
-  $Res call({EncryptionSettingsResponseMode mode});
+  $Res call({FeatureActivationMode mode});
 }
 
 /// @nodoc
@@ -71,7 +71,7 @@ class _$EncryptionSettingsResponseCopyWithImpl<$Res>
         mode: null == mode
             ? _self.mode
             : mode // ignore: cast_nullable_to_non_nullable
-                  as EncryptionSettingsResponseMode,
+                  as FeatureActivationMode,
       ),
     );
   }

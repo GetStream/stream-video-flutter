@@ -29,13 +29,12 @@ bool resolveAppleSpeakerOn({
 @internal
 extension AppleAudioRouteDevice on RtcMediaDevice {
   /// Whether this is the built-in loudspeaker.
-  bool get isBuiltInSpeaker =>
-      id.equalsIgnoreCase(AudioSettingsRequestDefaultDevice.speaker);
+  bool get isBuiltInSpeaker => id.equalsIgnoreCase(AudioDefaultDevice.speaker);
 
   /// Whether this is the built-in earpiece (receiver).
   bool get isBuiltInEarpiece =>
       id.equalsIgnoreCase(
-        AudioSettingsRequestDefaultDevice.earpiece,
+        AudioDefaultDevice.earpiece,
       ) ||
       groupId == _iosBuiltInReceiverPortType;
 }

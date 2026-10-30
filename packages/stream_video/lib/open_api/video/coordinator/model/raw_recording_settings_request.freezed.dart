@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RawRecordingSettingsRequest {
   bool? get audioOnly;
-  RawRecordingSettingsRequestMode get mode;
+  FeatureActivationMode get mode;
 
   /// Create a copy of RawRecordingSettingsRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -53,7 +53,7 @@ abstract mixin class $RawRecordingSettingsRequestCopyWith<$Res> {
     $Res Function(RawRecordingSettingsRequest) _then,
   ) = _$RawRecordingSettingsRequestCopyWithImpl;
   @useResult
-  $Res call({bool? audioOnly, RawRecordingSettingsRequestMode mode});
+  $Res call({bool? audioOnly, FeatureActivationMode mode});
 }
 
 /// @nodoc
@@ -78,7 +78,7 @@ class _$RawRecordingSettingsRequestCopyWithImpl<$Res>
         mode: null == mode
             ? _self.mode
             : mode // ignore: cast_nullable_to_non_nullable
-                  as RawRecordingSettingsRequestMode,
+                  as FeatureActivationMode,
       ),
     );
   }

@@ -22,6 +22,8 @@ mixin _$ClientEvent {
   String? get id;
   String? get joinAttemptId;
   String? get joinReason;
+  String? get leaveInitiator;
+  String? get leaveReason;
   String? get microphonePermissionStatus;
   String? get outcome;
   String? get peerConnection;
@@ -32,6 +34,7 @@ mixin _$ClientEvent {
   String? get screenShareStatus;
   String? get sdkVersion;
   String? get sfuId;
+  String? get source;
   String? get stage;
   String? get stageId;
   DateTime? get timestamp;
@@ -70,6 +73,10 @@ mixin _$ClientEvent {
                 other.joinAttemptId == joinAttemptId) &&
             (identical(other.joinReason, joinReason) ||
                 other.joinReason == joinReason) &&
+            (identical(other.leaveInitiator, leaveInitiator) ||
+                other.leaveInitiator == leaveInitiator) &&
+            (identical(other.leaveReason, leaveReason) ||
+                other.leaveReason == leaveReason) &&
             (identical(
                   other.microphonePermissionStatus,
                   microphonePermissionStatus,
@@ -96,6 +103,7 @@ mixin _$ClientEvent {
             (identical(other.sdkVersion, sdkVersion) ||
                 other.sdkVersion == sdkVersion) &&
             (identical(other.sfuId, sfuId) || other.sfuId == sfuId) &&
+            (identical(other.source, source) || other.source == source) &&
             (identical(other.stage, stage) || other.stage == stage) &&
             (identical(other.stageId, stageId) || other.stageId == stageId) &&
             (identical(other.timestamp, timestamp) ||
@@ -121,6 +129,8 @@ mixin _$ClientEvent {
     id,
     joinAttemptId,
     joinReason,
+    leaveInitiator,
+    leaveReason,
     microphonePermissionStatus,
     outcome,
     peerConnection,
@@ -131,6 +141,7 @@ mixin _$ClientEvent {
     screenShareStatus,
     sdkVersion,
     sfuId,
+    source,
     stage,
     stageId,
     timestamp,
@@ -143,7 +154,7 @@ mixin _$ClientEvent {
 
   @override
   String toString() {
-    return 'ClientEvent(callSessionId: $callSessionId, cameraPermissionStatus: $cameraPermissionStatus, coordinatorConnectId: $coordinatorConnectId, elapsedTime: $elapsedTime, eventType: $eventType, iceState: $iceState, id: $id, joinAttemptId: $joinAttemptId, joinReason: $joinReason, microphonePermissionStatus: $microphonePermissionStatus, outcome: $outcome, peerConnection: $peerConnection, previouslyConnectedTimestamp: $previouslyConnectedTimestamp, retryCountAttempt: $retryCountAttempt, retryFailureCode: $retryFailureCode, retryFailureReason: $retryFailureReason, screenShareStatus: $screenShareStatus, sdkVersion: $sdkVersion, sfuId: $sfuId, stage: $stage, stageId: $stageId, timestamp: $timestamp, trackId: $trackId, type: $type, userAgent: $userAgent, userId: $userId, wasPreviouslyConnected: $wasPreviouslyConnected)';
+    return 'ClientEvent(callSessionId: $callSessionId, cameraPermissionStatus: $cameraPermissionStatus, coordinatorConnectId: $coordinatorConnectId, elapsedTime: $elapsedTime, eventType: $eventType, iceState: $iceState, id: $id, joinAttemptId: $joinAttemptId, joinReason: $joinReason, leaveInitiator: $leaveInitiator, leaveReason: $leaveReason, microphonePermissionStatus: $microphonePermissionStatus, outcome: $outcome, peerConnection: $peerConnection, previouslyConnectedTimestamp: $previouslyConnectedTimestamp, retryCountAttempt: $retryCountAttempt, retryFailureCode: $retryFailureCode, retryFailureReason: $retryFailureReason, screenShareStatus: $screenShareStatus, sdkVersion: $sdkVersion, sfuId: $sfuId, source: $source, stage: $stage, stageId: $stageId, timestamp: $timestamp, trackId: $trackId, type: $type, userAgent: $userAgent, userId: $userId, wasPreviouslyConnected: $wasPreviouslyConnected)';
   }
 }
 
@@ -164,6 +175,8 @@ abstract mixin class $ClientEventCopyWith<$Res> {
     String? id,
     String? joinAttemptId,
     String? joinReason,
+    String? leaveInitiator,
+    String? leaveReason,
     String? microphonePermissionStatus,
     String? outcome,
     String? peerConnection,
@@ -174,6 +187,7 @@ abstract mixin class $ClientEventCopyWith<$Res> {
     String? screenShareStatus,
     String? sdkVersion,
     String? sfuId,
+    String? source,
     String? stage,
     String? stageId,
     DateTime? timestamp,
@@ -206,6 +220,8 @@ class _$ClientEventCopyWithImpl<$Res> implements $ClientEventCopyWith<$Res> {
     Object? id = freezed,
     Object? joinAttemptId = freezed,
     Object? joinReason = freezed,
+    Object? leaveInitiator = freezed,
+    Object? leaveReason = freezed,
     Object? microphonePermissionStatus = freezed,
     Object? outcome = freezed,
     Object? peerConnection = freezed,
@@ -216,6 +232,7 @@ class _$ClientEventCopyWithImpl<$Res> implements $ClientEventCopyWith<$Res> {
     Object? screenShareStatus = freezed,
     Object? sdkVersion = freezed,
     Object? sfuId = freezed,
+    Object? source = freezed,
     Object? stage = freezed,
     Object? stageId = freezed,
     Object? timestamp = freezed,
@@ -263,6 +280,14 @@ class _$ClientEventCopyWithImpl<$Res> implements $ClientEventCopyWith<$Res> {
             ? _self.joinReason
             : joinReason // ignore: cast_nullable_to_non_nullable
                   as String?,
+        leaveInitiator: freezed == leaveInitiator
+            ? _self.leaveInitiator
+            : leaveInitiator // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        leaveReason: freezed == leaveReason
+            ? _self.leaveReason
+            : leaveReason // ignore: cast_nullable_to_non_nullable
+                  as String?,
         microphonePermissionStatus: freezed == microphonePermissionStatus
             ? _self.microphonePermissionStatus
             : microphonePermissionStatus // ignore: cast_nullable_to_non_nullable
@@ -302,6 +327,10 @@ class _$ClientEventCopyWithImpl<$Res> implements $ClientEventCopyWith<$Res> {
         sfuId: freezed == sfuId
             ? _self.sfuId
             : sfuId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        source: freezed == source
+            ? _self.source
+            : source // ignore: cast_nullable_to_non_nullable
                   as String?,
         stage: freezed == stage
             ? _self.stage

@@ -20,7 +20,8 @@ export 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart'
         EncryptionAlgorithm,
         EncryptionManager;
 
-export 'open_api/video/coordinator/api.dart' hide Role, User;
+export 'open_api/video/coordinator/api.dart' hide RecordingType, Role, User;
+export 'open_api/video/coordinator_aliases.dart';
 export 'open_api/video/coordinator_legacy_enums.dart';
 export 'src/audio_processing/audio_processor.dart';
 export 'src/audio_processing/audio_recognition.dart';

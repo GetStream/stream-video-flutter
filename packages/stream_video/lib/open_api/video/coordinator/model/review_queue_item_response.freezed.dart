@@ -21,7 +21,10 @@ mixin _$ReviewQueueItemResponse {
   List<BanInfoResponse> get bans;
   ModerationCallResponse? get call;
   DateTime? get completedAt;
+  double? get confidenceScore;
   String? get configKey;
+  String? get countryCode;
+  List<String>? get countryCodes;
   DateTime get createdAt;
   EntityCreatorResponse? get entityCreator;
   String? get entityCreatorId;
@@ -31,6 +34,7 @@ mixin _$ReviewQueueItemResponse {
   DateTime? get escalatedAt;
   String? get escalatedBy;
   EscalationMetadata? get escalationMetadata;
+  List<String>? get falsePositiveFlags;
   EnrichedActivity? get feedsV2Activity;
   Reaction? get feedsV2Reaction;
   FeedsV3ActivityResponse? get feedsV3Activity;
@@ -40,8 +44,10 @@ mixin _$ReviewQueueItemResponse {
   String get id;
   List<String> get languages;
   String get latestModeratorAction;
+  MediaDisplayResponse get mediaDisplay;
   ChatMessageResponse? get message;
   ModerationPayloadResponse? get moderationPayload;
+  PollResponseData? get poll;
   Reaction? get reaction;
   String get recommendedAction;
   DateTime? get reviewedAt;
@@ -78,8 +84,16 @@ mixin _$ReviewQueueItemResponse {
             (identical(other.call, call) || other.call == call) &&
             (identical(other.completedAt, completedAt) ||
                 other.completedAt == completedAt) &&
+            (identical(other.confidenceScore, confidenceScore) ||
+                other.confidenceScore == confidenceScore) &&
             (identical(other.configKey, configKey) ||
                 other.configKey == configKey) &&
+            (identical(other.countryCode, countryCode) ||
+                other.countryCode == countryCode) &&
+            const DeepCollectionEquality().equals(
+              other.countryCodes,
+              countryCodes,
+            ) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.entityCreator, entityCreator) ||
@@ -98,6 +112,10 @@ mixin _$ReviewQueueItemResponse {
                 other.escalatedBy == escalatedBy) &&
             (identical(other.escalationMetadata, escalationMetadata) ||
                 other.escalationMetadata == escalationMetadata) &&
+            const DeepCollectionEquality().equals(
+              other.falsePositiveFlags,
+              falsePositiveFlags,
+            ) &&
             (identical(other.feedsV2Activity, feedsV2Activity) ||
                 other.feedsV2Activity == feedsV2Activity) &&
             (identical(other.feedsV2Reaction, feedsV2Reaction) ||
@@ -113,9 +131,12 @@ mixin _$ReviewQueueItemResponse {
             const DeepCollectionEquality().equals(other.languages, languages) &&
             (identical(other.latestModeratorAction, latestModeratorAction) ||
                 other.latestModeratorAction == latestModeratorAction) &&
+            (identical(other.mediaDisplay, mediaDisplay) ||
+                other.mediaDisplay == mediaDisplay) &&
             (identical(other.message, message) || other.message == message) &&
             (identical(other.moderationPayload, moderationPayload) ||
                 other.moderationPayload == moderationPayload) &&
+            (identical(other.poll, poll) || other.poll == poll) &&
             (identical(other.reaction, reaction) ||
                 other.reaction == reaction) &&
             (identical(other.recommendedAction, recommendedAction) ||
@@ -143,7 +164,10 @@ mixin _$ReviewQueueItemResponse {
     const DeepCollectionEquality().hash(bans),
     call,
     completedAt,
+    confidenceScore,
     configKey,
+    countryCode,
+    const DeepCollectionEquality().hash(countryCodes),
     createdAt,
     entityCreator,
     entityCreatorId,
@@ -153,6 +177,7 @@ mixin _$ReviewQueueItemResponse {
     escalatedAt,
     escalatedBy,
     escalationMetadata,
+    const DeepCollectionEquality().hash(falsePositiveFlags),
     feedsV2Activity,
     feedsV2Reaction,
     feedsV3Activity,
@@ -162,8 +187,10 @@ mixin _$ReviewQueueItemResponse {
     id,
     const DeepCollectionEquality().hash(languages),
     latestModeratorAction,
+    mediaDisplay,
     message,
     moderationPayload,
+    poll,
     reaction,
     recommendedAction,
     reviewedAt,
@@ -176,7 +203,7 @@ mixin _$ReviewQueueItemResponse {
 
   @override
   String toString() {
-    return 'ReviewQueueItemResponse(actions: $actions, activity: $activity, aiTextSeverity: $aiTextSeverity, appeal: $appeal, assignedTo: $assignedTo, bans: $bans, call: $call, completedAt: $completedAt, configKey: $configKey, createdAt: $createdAt, entityCreator: $entityCreator, entityCreatorId: $entityCreatorId, entityId: $entityId, entityType: $entityType, escalated: $escalated, escalatedAt: $escalatedAt, escalatedBy: $escalatedBy, escalationMetadata: $escalationMetadata, feedsV2Activity: $feedsV2Activity, feedsV2Reaction: $feedsV2Reaction, feedsV3Activity: $feedsV3Activity, feedsV3Comment: $feedsV3Comment, flags: $flags, flagsCount: $flagsCount, id: $id, languages: $languages, latestModeratorAction: $latestModeratorAction, message: $message, moderationPayload: $moderationPayload, reaction: $reaction, recommendedAction: $recommendedAction, reviewedAt: $reviewedAt, reviewedBy: $reviewedBy, severity: $severity, status: $status, teams: $teams, updatedAt: $updatedAt)';
+    return 'ReviewQueueItemResponse(actions: $actions, activity: $activity, aiTextSeverity: $aiTextSeverity, appeal: $appeal, assignedTo: $assignedTo, bans: $bans, call: $call, completedAt: $completedAt, confidenceScore: $confidenceScore, configKey: $configKey, countryCode: $countryCode, countryCodes: $countryCodes, createdAt: $createdAt, entityCreator: $entityCreator, entityCreatorId: $entityCreatorId, entityId: $entityId, entityType: $entityType, escalated: $escalated, escalatedAt: $escalatedAt, escalatedBy: $escalatedBy, escalationMetadata: $escalationMetadata, falsePositiveFlags: $falsePositiveFlags, feedsV2Activity: $feedsV2Activity, feedsV2Reaction: $feedsV2Reaction, feedsV3Activity: $feedsV3Activity, feedsV3Comment: $feedsV3Comment, flags: $flags, flagsCount: $flagsCount, id: $id, languages: $languages, latestModeratorAction: $latestModeratorAction, mediaDisplay: $mediaDisplay, message: $message, moderationPayload: $moderationPayload, poll: $poll, reaction: $reaction, recommendedAction: $recommendedAction, reviewedAt: $reviewedAt, reviewedBy: $reviewedBy, severity: $severity, status: $status, teams: $teams, updatedAt: $updatedAt)';
   }
 }
 
@@ -196,7 +223,10 @@ abstract mixin class $ReviewQueueItemResponseCopyWith<$Res> {
     List<BanInfoResponse> bans,
     ModerationCallResponse? call,
     DateTime? completedAt,
+    double? confidenceScore,
     String? configKey,
+    String? countryCode,
+    List<String>? countryCodes,
     DateTime createdAt,
     EntityCreatorResponse? entityCreator,
     String? entityCreatorId,
@@ -206,6 +236,7 @@ abstract mixin class $ReviewQueueItemResponseCopyWith<$Res> {
     DateTime? escalatedAt,
     String? escalatedBy,
     EscalationMetadata? escalationMetadata,
+    List<String>? falsePositiveFlags,
     EnrichedActivity? feedsV2Activity,
     Reaction? feedsV2Reaction,
     FeedsV3ActivityResponse? feedsV3Activity,
@@ -215,8 +246,10 @@ abstract mixin class $ReviewQueueItemResponseCopyWith<$Res> {
     String id,
     List<String> languages,
     String latestModeratorAction,
+    MediaDisplayResponse mediaDisplay,
     ChatMessageResponse? message,
     ModerationPayloadResponse? moderationPayload,
+    PollResponseData? poll,
     Reaction? reaction,
     String recommendedAction,
     DateTime? reviewedAt,
@@ -249,7 +282,10 @@ class _$ReviewQueueItemResponseCopyWithImpl<$Res>
     Object? bans = null,
     Object? call = freezed,
     Object? completedAt = freezed,
+    Object? confidenceScore = freezed,
     Object? configKey = freezed,
+    Object? countryCode = freezed,
+    Object? countryCodes = freezed,
     Object? createdAt = null,
     Object? entityCreator = freezed,
     Object? entityCreatorId = freezed,
@@ -259,6 +295,7 @@ class _$ReviewQueueItemResponseCopyWithImpl<$Res>
     Object? escalatedAt = freezed,
     Object? escalatedBy = freezed,
     Object? escalationMetadata = freezed,
+    Object? falsePositiveFlags = freezed,
     Object? feedsV2Activity = freezed,
     Object? feedsV2Reaction = freezed,
     Object? feedsV3Activity = freezed,
@@ -268,8 +305,10 @@ class _$ReviewQueueItemResponseCopyWithImpl<$Res>
     Object? id = null,
     Object? languages = null,
     Object? latestModeratorAction = null,
+    Object? mediaDisplay = null,
     Object? message = freezed,
     Object? moderationPayload = freezed,
+    Object? poll = freezed,
     Object? reaction = freezed,
     Object? recommendedAction = null,
     Object? reviewedAt = freezed,
@@ -313,10 +352,22 @@ class _$ReviewQueueItemResponseCopyWithImpl<$Res>
             ? _self.completedAt
             : completedAt // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
+        confidenceScore: freezed == confidenceScore
+            ? _self.confidenceScore
+            : confidenceScore // ignore: cast_nullable_to_non_nullable
+                  as double?,
         configKey: freezed == configKey
             ? _self.configKey
             : configKey // ignore: cast_nullable_to_non_nullable
                   as String?,
+        countryCode: freezed == countryCode
+            ? _self.countryCode
+            : countryCode // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        countryCodes: freezed == countryCodes
+            ? _self.countryCodes
+            : countryCodes // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
         createdAt: null == createdAt
             ? _self.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -353,6 +404,10 @@ class _$ReviewQueueItemResponseCopyWithImpl<$Res>
             ? _self.escalationMetadata
             : escalationMetadata // ignore: cast_nullable_to_non_nullable
                   as EscalationMetadata?,
+        falsePositiveFlags: freezed == falsePositiveFlags
+            ? _self.falsePositiveFlags
+            : falsePositiveFlags // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
         feedsV2Activity: freezed == feedsV2Activity
             ? _self.feedsV2Activity
             : feedsV2Activity // ignore: cast_nullable_to_non_nullable
@@ -389,6 +444,10 @@ class _$ReviewQueueItemResponseCopyWithImpl<$Res>
             ? _self.latestModeratorAction
             : latestModeratorAction // ignore: cast_nullable_to_non_nullable
                   as String,
+        mediaDisplay: null == mediaDisplay
+            ? _self.mediaDisplay
+            : mediaDisplay // ignore: cast_nullable_to_non_nullable
+                  as MediaDisplayResponse,
         message: freezed == message
             ? _self.message
             : message // ignore: cast_nullable_to_non_nullable
@@ -397,6 +456,10 @@ class _$ReviewQueueItemResponseCopyWithImpl<$Res>
             ? _self.moderationPayload
             : moderationPayload // ignore: cast_nullable_to_non_nullable
                   as ModerationPayloadResponse?,
+        poll: freezed == poll
+            ? _self.poll
+            : poll // ignore: cast_nullable_to_non_nullable
+                  as PollResponseData?,
         reaction: freezed == reaction
             ? _self.reaction
             : reaction // ignore: cast_nullable_to_non_nullable

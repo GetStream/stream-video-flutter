@@ -1057,7 +1057,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       final result = await _defaultApi.startRecording(
         type: callCid.type.value,
         id: callCid.id,
-        recordingType: recordingType.toOpenDto(),
+        recordingType: open.RecordingType(recordingType.toOpenDto()),
         startRecordingRequest: open.StartRecordingRequest(
           recordingExternalStorage: recordingExternalStorage,
         ),
@@ -1106,7 +1106,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       final result = await _defaultApi.stopRecording(
         type: callCid.type.value,
         id: callCid.id,
-        recordingType: recordingType.toOpenDto(),
+        recordingType: open.RecordingType(recordingType.toOpenDto()),
       );
 
       return result.fold<Result<None>>(
@@ -1895,16 +1895,16 @@ class _ApiKeyInterceptor extends Interceptor {
 }
 
 extension on PushProvider {
-  open.CreateDeviceRequestPushProvider toOpenDTO() {
+  open.PushProviderName toOpenDTO() {
     switch (this) {
       case PushProvider.firebase:
-        return open.CreateDeviceRequestPushProvider.firebase;
+        return open.PushProviderName.firebase;
       case PushProvider.xiaomi:
-        return open.CreateDeviceRequestPushProvider.xiaomi;
+        return open.PushProviderName.xiaomi;
       case PushProvider.huawei:
-        return open.CreateDeviceRequestPushProvider.huawei;
+        return open.PushProviderName.huawei;
       case PushProvider.apn:
-        return open.CreateDeviceRequestPushProvider.apn;
+        return open.PushProviderName.apn;
     }
   }
 }

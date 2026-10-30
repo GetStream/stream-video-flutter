@@ -14,6 +14,7 @@ MarkReviewedRequestPayload _$MarkReviewedRequestPayloadFromJson(
   decisionReason: json['decision_reason'] as String?,
   disableMarkingContentAsReviewed:
       json['disable_marking_content_as_reviewed'] as bool?,
+  reason: json['reason'] as String?,
 );
 
 Map<String, dynamic> _$MarkReviewedRequestPayloadToJson(
@@ -23,4 +24,5 @@ Map<String, dynamic> _$MarkReviewedRequestPayloadToJson(
   'decision_reason': instance.decisionReason,
   'disable_marking_content_as_reviewed':
       instance.disableMarkingContentAsReviewed,
+  'reason': instance.reason,
 };

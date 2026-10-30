@@ -10,16 +10,10 @@ UpdateUserPermissionsRequest _$UpdateUserPermissionsRequestFromJson(
   Map<String, dynamic> json,
 ) => UpdateUserPermissionsRequest(
   grantPermissions: (json['grant_permissions'] as List<dynamic>?)
-      ?.map(
-        (e) =>
-            UpdateUserPermissionsRequestGrantPermissions.fromJson(e as String),
-      )
+      ?.map((e) => e as UpdateUserPermissionsRequestGrantPermissions)
       .toList(),
   revokePermissions: (json['revoke_permissions'] as List<dynamic>?)
-      ?.map(
-        (e) =>
-            UpdateUserPermissionsRequestRevokePermissions.fromJson(e as String),
-      )
+      ?.map((e) => e as UpdateUserPermissionsRequestRevokePermissions)
       .toList(),
   userId: json['user_id'] as String,
 );
@@ -27,11 +21,7 @@ UpdateUserPermissionsRequest _$UpdateUserPermissionsRequestFromJson(
 Map<String, dynamic> _$UpdateUserPermissionsRequestToJson(
   UpdateUserPermissionsRequest instance,
 ) => <String, dynamic>{
-  'grant_permissions': instance.grantPermissions
-      ?.map((e) => e.toJson())
-      .toList(),
-  'revoke_permissions': instance.revokePermissions
-      ?.map((e) => e.toJson())
-      .toList(),
+  'grant_permissions': instance.grantPermissions,
+  'revoke_permissions': instance.revokePermissions,
   'user_id': instance.userId,
 };

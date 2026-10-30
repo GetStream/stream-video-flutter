@@ -21,6 +21,7 @@ mixin _$CallSettingsResponse {
   GeofenceSettingsResponse get geofencing;
   IndividualRecordingSettingsResponse get individualRecording;
   IngressSettingsResponse? get ingress;
+  LifecycleSettingsResponse get lifecycle;
   LimitsSettingsResponse get limits;
   RawRecordingSettingsResponse get rawRecording;
   RecordSettingsResponse get recording;
@@ -60,6 +61,8 @@ mixin _$CallSettingsResponse {
             (identical(other.individualRecording, individualRecording) ||
                 other.individualRecording == individualRecording) &&
             (identical(other.ingress, ingress) || other.ingress == ingress) &&
+            (identical(other.lifecycle, lifecycle) ||
+                other.lifecycle == lifecycle) &&
             (identical(other.limits, limits) || other.limits == limits) &&
             (identical(other.rawRecording, rawRecording) ||
                 other.rawRecording == rawRecording) &&
@@ -87,6 +90,7 @@ mixin _$CallSettingsResponse {
     geofencing,
     individualRecording,
     ingress,
+    lifecycle,
     limits,
     rawRecording,
     recording,
@@ -100,7 +104,7 @@ mixin _$CallSettingsResponse {
 
   @override
   String toString() {
-    return 'CallSettingsResponse(audio: $audio, backstage: $backstage, broadcasting: $broadcasting, encryption: $encryption, frameRecording: $frameRecording, geofencing: $geofencing, individualRecording: $individualRecording, ingress: $ingress, limits: $limits, rawRecording: $rawRecording, recording: $recording, ring: $ring, screensharing: $screensharing, session: $session, thumbnails: $thumbnails, transcription: $transcription, video: $video)';
+    return 'CallSettingsResponse(audio: $audio, backstage: $backstage, broadcasting: $broadcasting, encryption: $encryption, frameRecording: $frameRecording, geofencing: $geofencing, individualRecording: $individualRecording, ingress: $ingress, lifecycle: $lifecycle, limits: $limits, rawRecording: $rawRecording, recording: $recording, ring: $ring, screensharing: $screensharing, session: $session, thumbnails: $thumbnails, transcription: $transcription, video: $video)';
   }
 }
 
@@ -120,6 +124,7 @@ abstract mixin class $CallSettingsResponseCopyWith<$Res> {
     GeofenceSettingsResponse geofencing,
     IndividualRecordingSettingsResponse individualRecording,
     IngressSettingsResponse? ingress,
+    LifecycleSettingsResponse lifecycle,
     LimitsSettingsResponse limits,
     RawRecordingSettingsResponse rawRecording,
     RecordSettingsResponse recording,
@@ -153,6 +158,7 @@ class _$CallSettingsResponseCopyWithImpl<$Res>
     Object? geofencing = null,
     Object? individualRecording = null,
     Object? ingress = freezed,
+    Object? lifecycle = null,
     Object? limits = null,
     Object? rawRecording = null,
     Object? recording = null,
@@ -197,6 +203,10 @@ class _$CallSettingsResponseCopyWithImpl<$Res>
             ? _self.ingress
             : ingress // ignore: cast_nullable_to_non_nullable
                   as IngressSettingsResponse?,
+        lifecycle: null == lifecycle
+            ? _self.lifecycle
+            : lifecycle // ignore: cast_nullable_to_non_nullable
+                  as LifecycleSettingsResponse,
         limits: null == limits
             ? _self.limits
             : limits // ignore: cast_nullable_to_non_nullable

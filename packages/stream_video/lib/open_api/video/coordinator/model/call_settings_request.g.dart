@@ -47,6 +47,11 @@ CallSettingsRequest _$CallSettingsRequestFromJson(
       : IngressSettingsRequest.fromJson(
           json['ingress'] as Map<String, dynamic>,
         ),
+  lifecycle: json['lifecycle'] == null
+      ? null
+      : LifecycleSettingsRequest.fromJson(
+          json['lifecycle'] as Map<String, dynamic>,
+        ),
   limits: json['limits'] == null
       ? null
       : LimitsSettingsRequest.fromJson(json['limits'] as Map<String, dynamic>),
@@ -99,6 +104,7 @@ Map<String, dynamic> _$CallSettingsRequestToJson(
   'geofencing': instance.geofencing?.toJson(),
   'individual_recording': instance.individualRecording?.toJson(),
   'ingress': instance.ingress?.toJson(),
+  'lifecycle': instance.lifecycle?.toJson(),
   'limits': instance.limits?.toJson(),
   'raw_recording': instance.rawRecording?.toJson(),
   'recording': instance.recording?.toJson(),
