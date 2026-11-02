@@ -413,10 +413,8 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
      methodChannels.remove(binding.binaryMessenger)?.setMethodCallHandler(null)
         eventChannels.remove(binding.binaryMessenger)?.setStreamHandler(null)
         StreamTelecomManager.releaseIfIdle()
-        instance.incomingCallSoundPlayerManager?.destroy()
-        instance.incomingCallNotificationManager?.destroy()
-        instance.incomingCallSoundPlayerManager = null
-        instance.incomingCallNotificationManager = null
+        // The notification and ringtone managers are shared by every engine and by the
+        // manifest-declared receiver and service, so they live as long as the process.
   }
 
   override fun onAttachedToActivity(binding: ActivityPluginBinding) {

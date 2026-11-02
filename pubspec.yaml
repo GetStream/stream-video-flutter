@@ -26,6 +26,10 @@ dev_dependencies:
 dependency_overrides:
   cli_util: ^0.5.1
   file_picker: ^12.0.0-beta.5
+  stream_webrtc_flutter:
+    git:
+      url: https://github.com/GetStream/webrtc-flutter.git
+      ref: 9b6fffaa5fda2652548cafc7d6ec87128409c6bc
 
 melos:
   ignore:
@@ -35,8 +39,8 @@ melos:
     bootstrap:
       # Environment synced into every package during bootstrap.
       environment:
-        sdk: ">=3.10.0 <4.0.0"
-        flutter: ">=3.38.1"
+        sdk: ">=3.12.0 <4.0.0"
+        flutter: ">=3.44.0"
 
       # Dependency constraints synced into every package that declares them.
       dependencies:
@@ -46,13 +50,13 @@ melos:
         package_info_plus: ">=9.0.0 <11.0.0"
         share_plus: ^13.0.0
         stream_chat_flutter: ^10.0.0
-        stream_webrtc_flutter: ^3.2.0
-        stream_video: ^1.6.0
-        stream_video_filters: ^1.6.0
-        stream_video_flutter: ^1.6.0
-        stream_video_noise_cancellation: ^1.6.0
-        stream_video_push_notification: ^1.6.0
-        stream_video_screen_sharing: ^1.6.0
+        stream_webrtc_flutter: ^4.0.1
+        stream_video: ^1.7.2
+        stream_video_filters: ^1.7.2
+        stream_video_flutter: ^1.7.2
+        stream_video_noise_cancellation: ^1.7.2
+        stream_video_push_notification: ^1.7.2
+        stream_video_screen_sharing: ^1.7.2
 
       hooks:
         # Keep streamVideoVersion in globals.dart in sync with the pubspec version.
@@ -143,6 +147,10 @@ melos:
       run: melos exec -c 1 --depends-on="build_runner" --flutter -- "flutter pub run build_runner build --delete-conflicting-outputs"
       description: Build all generated files for Flutter packages in this project.
 
+    generate:protobuf:
+      run: bash packages/stream_video/generate-protobuf.sh
+      description: Regenerate the SFU protobuf models from GetStream/protocol (requires protoc; set PROTOCOL_REF for a branch other than main).
+
     gen-l10n: >
       melos exec -c 1 --fail-fast --depends-on=flutter_localizations -- \
        "flutter gen-l10n && dart format ."
@@ -195,9 +203,3 @@ melos:
         flutter build apk --release --verbose
       description: |
         Run `flutter build apk` in the example app.
-
-    docs:
-      run: |
-        npm install -g https://github.com/GetStream/stream-chat-docusaurus-cli &&
-        npx stream-chat-docusaurus -i -s
-      description: Runs the docusaurus documentation locally.

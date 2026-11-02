@@ -1,8 +1,80 @@
-## Upcoming
+## 1.7.2
+
+### 🔄 Changed
+
+- The `LivestreamPlayer` speaker button now mutes and unmutes the stream instead of switching between speaker and earpiece.
+- `StreamLobbyView` now says "N people are in the call" instead of "N more people are in the call".
+- `VideoFit.adaptive` now compares the video's orientation with the widget's instead of looking at the video alone. The video fills the widget when both are landscape or both are portrait, and is letterboxed when they differ.
+- `stream_video` now requires `jose` 0.3.5+2 or newer.
+
+### ✅ Added
+
+- Added `RtcMediaDeviceNotifier.isAudioPlayoutPaused`, `audioPlayoutPausedChanges` and `isAudioPlayoutPauseSupported`.
+- [Web] `RtcMediaDeviceNotifier.pauseAudioPlayout()` and `resumeAudioPlayout()` now work on web.
+- Added `LivestreamPlayer.fullscreenVideoFit`, the fit used in fullscreen mode. It defaults to `VideoFit.adaptive`. Pass `VideoFit.cover` to restore the previous always-fill behaviour.
+- Added `AudioConfigurationPolicy.defaultsToSpeaker`, which is `true` for the viewer policy. `AudioConfigurationPolicy.custom` takes an optional `defaultsToSpeaker`, which otherwise follows the base policy.
+- `CallState.participantCount` and `anonymousParticipantCount` are set from the call's session as soon as it is fetched, instead of staying 0 until the first count update. Once you join, the SFU's counts still take over.
+
+### 🐞 Fixed
+
+- `LivestreamBackstageContent` and `StreamLobbyView` show the correct call's participant count for large calls.
+- `LivestreamPlayer` fullscreen mode no longer crops a feed whose orientation differs from the player's, such as a landscape stream on a portrait phone. The feed is letterboxed instead, and still fills the player when both share an orientation.
+- `CallState.endedAt` is now set when the call ends while you are joined or watching it.
+- [iOS] Livestream viewers on `AudioConfigurationPolicy.viewer()` now hear the stream through the loudspeaker instead of the earpiece, whatever the call type's audio settings say. Headphones and Bluetooth devices still take priority, and an output picked with `Call.setAudioOutputDevice` still applies.
+- [iOS] `Call.resumeAudio` now restores the audio output the call was using, such as the loudspeaker, instead of falling back to the earpiece.
+- Changing the audio output device now uses the call's audio policy instead of the client-wide one.
+
+## 1.7.1
+
+### 🐞 Fixed
+
+- A zoomed-in screen share stays subscribed while it is panned or partly pinched out.
+- Fixed `unregisterDevice()` incorrectly trying to delete an APN device token when `registerApnDeviceToken` is `false`.
+
+### ✅ Added
+
+- [Android] Added `StreamLivestreamViewerService`, the foreground service for calls under `AudioConfigurationPolicy.viewer`.
+- [Android] `StreamVideoFlutterBackground.startService` takes the `AndroidCallServiceKind` to start a call in.
+- Added `AndroidCallServiceKind` and `AudioConfigurationPolicy.androidCallServiceKind`, which pick the Android foreground service a call runs in.
+
+### 🔄 Changed
+
+- [Android] `StreamCallService` no longer requests or declares the `mediaPlayback` foreground service type.
+- [Android] On Android 14 and newer, a foreground service type is only requested while its `FOREGROUND_SERVICE_*` permission is declared, so unused ones can be removed with `tools:node="remove"`.
+- [Android] A call with no permission-backed foreground service type runs as a `shortService` instead of failing to start.
+
+## 1.7.0
 
 ### ✅ Added
 
 - Added `CallParticipantsBuilder`, which builds from `Call.participantsStream`.
+- Added `Call.participantsStream`, which emits the participant list at an interval that grows with the participant count.
+- Added `CallPreferences.participantsThrottleIntervalResolver` to override that interval, or set it to `null` to emit every change. `DefaultCallPreferences` provides a default. If your app implements `CallPreferences` directly, add the getter to your implementation.
+
+### 🔄 Changed
+
+- `PartialCallStateBuilder` now reports partial state errors to `FlutterError.onError`.
+- The iOS picture-in-picture view and the Android background service now update only when the participant list or notification options change, instead of on every call state emission.
+- Participant list widgets now subscribe to `Call.participantsStream`, which is throttled by participant count.
+- `StreamCallParticipants` and `StreamLivestreamHosts` no longer rebuild when an update leaves the rendered participants unchanged.
+- `LivestreamContent` renders participants from `Call.participantsStream` instead of the raw call state.
+- `LivestreamBackstageContent` only rebuilds when the participant count changes.
+- `ToggleScreenShareOption` and the call controls of `StreamCallContent` no longer rebuild on local participant changes they don't use.
+- [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed. Apps on AGP 9 failed to build because of it.
+- [Android] Replaced `kotlin-parcelize` with hand-written `Parcelable` implementations for the notification payloads. `kotlin-parcelize` is a Kotlin compiler plugin and does not run under built-in Kotlin: it applies without error but generates no `writeToParcel`, so `@Parcelize` classes fail to compile. Behaviour is unchanged.
+- Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.
+- [Android] Added the Stream Maven repository (`https://stream-io-repo.com`) to the Android build repositories.
+- `Call.partialState` now compares maps, sets and nested collections by their contents.
+- `CallState` keeps its `ownCapabilities`, `blockedUserIds`, `custom`, `capabilitiesByRole` and `callMembers` instances when a call update leaves their contents unchanged.
+- Reduced the cost of call updates in calls with many members.
+- Stopped sending the deprecated raw WebRTC stats and input device lists in SFU stats reports.
+- SFU participant events no longer emit a new call state when they leave every participant unchanged.
+- Reduced the cost of participant state updates in large calls.
+- `CallParticipantState.audioLevel` and `audioLevels` now hold at their last value while a participant is silent.
+- `CallParticipantState.audioLevels` and `CallState.ringingMembers` now return unmodifiable lists, so call `.toList()` before sorting or otherwise mutating them.
+- `CallState.localParticipant`, `otherParticipants` and `activeSpeakers` are now computed once per participant list instead of on every read, which keeps them cheap in calls with many participants.
+- Simulcast layers are now announced to the SFU and bitrate-capped from the resolution the camera actually captures on iOS and Android, instead of the requested resolution. A camera that captures below the requested size, or at a different aspect ratio, no longer over-reports its layers or over-allocates their bitrate.
+- `RtcMediaDeviceNotifier` now enumerates devices once per burst of device-change events, and calls made while an enumeration is running share its result instead of starting another one. The device list emitted by `RtcMediaDeviceNotifier.onDeviceChange` is now unmodifiable, so copy it with `.toList()` before sorting or otherwise mutating it.
 
 ### 🐞 Fixed
 
@@ -13,19 +85,15 @@
 - Fixed `LivestreamPlayer` calling `Call.join` again on each call status change while its automatic join was still in progress.
 - Fixed `LivestreamPlayer` repainting the whole screen it is embedded in every second as the call duration updates.
 - Fixed the call controls, livestream widgets and call screens re-subscribing to the call state each time their parent rebuilt.
-
-### 🔄 Changed
-
-- `PartialCallStateBuilder` now reports partial state errors to `FlutterError.onError`.
-- The iOS picture-in-picture view and the Android background service now update only when the participant list or notification options change, instead of on every call state emission.
-- [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
-- [Android] Replaced `kotlin-parcelize` with hand-written `Parcelable` implementations for the notification payloads. `kotlin-parcelize` is a Kotlin compiler plugin and does not run under built-in Kotlin: it applies without error but generates no `writeToParcel`, so `@Parcelize` classes fail to compile. Behaviour is unchanged.
-- Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.
-- Participant list widgets now subscribe to `Call.participantsStream`, which is throttled by participant count.
-- `StreamCallParticipants` and `StreamLivestreamHosts` no longer rebuild when an update leaves the rendered participants unchanged.
-- `LivestreamContent` renders participants from `Call.participantsStream` instead of the raw call state.
-- `LivestreamBackstageContent` only rebuilds when the participant count changes.
-- `ToggleScreenShareOption` and the call controls of `StreamCallContent` no longer rebuild on local participant changes they don't use.
+- Fixed `Call.partialState` streams staying subscribed to the call state after their last listener cancelled.
+- Fixed server-pinned participants being reordered on every pins event.
+- Fixed `CallParticipantState.copyWithUpdatedAudioLevels` mutating the audio level history of the previous state.
+- Fixed `Call.join` being rejected with "a call with the same cid is in progress" when called again while a join was in progress. A repeated call now returns the result of the join already in flight.
+- Fixed leaving a call trying to stop noise cancellation when no audio processor is configured.
+- Fixed leaving a call calling `removeTrack` on the publisher for received tracks, which failed and logged `sender is null` on every leave.
+- [iOS/Android] Fixed camera video layers being announced in landscape while the phone is held upright.
+- Fixed fast reconnect failing for participants who are not publishing any tracks, such as livestream viewers.
+- Fixed video layers being given a `maxBitrate` of 0 when the SFU's publish option carries no bitrate, and an empty publish option dimension being used as the bitrate target instead of the 1280x720 default.
 
 ## 1.6.0
 

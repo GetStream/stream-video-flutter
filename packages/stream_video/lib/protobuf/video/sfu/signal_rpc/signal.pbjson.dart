@@ -214,27 +214,9 @@ const SendStatsRequest$json = {
   '1': 'SendStatsRequest',
   '2': [
     {'1': 'session_id', '3': 1, '4': 1, '5': 9, '10': 'sessionId'},
-    {'1': 'subscriber_stats', '3': 2, '4': 1, '5': 9, '10': 'subscriberStats'},
-    {'1': 'publisher_stats', '3': 3, '4': 1, '5': 9, '10': 'publisherStats'},
     {'1': 'webrtc_version', '3': 4, '4': 1, '5': 9, '10': 'webrtcVersion'},
     {'1': 'sdk', '3': 5, '4': 1, '5': 9, '10': 'sdk'},
     {'1': 'sdk_version', '3': 6, '4': 1, '5': 9, '10': 'sdkVersion'},
-    {
-      '1': 'audio_devices',
-      '3': 7,
-      '4': 1,
-      '5': 11,
-      '6': '.stream.video.sfu.models.InputDevices',
-      '10': 'audioDevices'
-    },
-    {
-      '1': 'video_devices',
-      '3': 8,
-      '4': 1,
-      '5': 11,
-      '6': '.stream.video.sfu.models.InputDevices',
-      '10': 'videoDevices'
-    },
     {
       '1': 'android',
       '3': 9,
@@ -269,22 +251,6 @@ const SendStatsRequest$json = {
       '6': '.stream.video.sfu.models.RTMPIngress',
       '10': 'rtmp'
     },
-    {
-      '1': 'subscriber_rtc_stats',
-      '3': 13,
-      '4': 1,
-      '5': 9,
-      '8': {'3': true},
-      '10': 'subscriberRtcStats',
-    },
-    {
-      '1': 'publisher_rtc_stats',
-      '3': 14,
-      '4': 1,
-      '5': 9,
-      '8': {'3': true},
-      '10': 'publisherRtcStats',
-    },
     {'1': 'rtc_stats', '3': 15, '4': 1, '5': 9, '10': 'rtcStats'},
     {
       '1': 'encode_stats',
@@ -313,28 +279,31 @@ const SendStatsRequest$json = {
   '8': [
     {'1': 'device_state'},
   ],
+  '9': [
+    {'1': 2, '2': 3},
+    {'1': 3, '2': 4},
+    {'1': 7, '2': 8},
+    {'1': 8, '2': 9},
+    {'1': 13, '2': 14},
+    {'1': 14, '2': 15},
+  ],
 };
 
 /// Descriptor for `SendStatsRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List sendStatsRequestDescriptor = $convert.base64Decode(
-    'ChBTZW5kU3RhdHNSZXF1ZXN0Eh0KCnNlc3Npb25faWQYASABKAlSCXNlc3Npb25JZBIpChBzdW'
-    'JzY3JpYmVyX3N0YXRzGAIgASgJUg9zdWJzY3JpYmVyU3RhdHMSJwoPcHVibGlzaGVyX3N0YXRz'
-    'GAMgASgJUg5wdWJsaXNoZXJTdGF0cxIlCg53ZWJydGNfdmVyc2lvbhgEIAEoCVINd2VicnRjVm'
-    'Vyc2lvbhIQCgNzZGsYBSABKAlSA3NkaxIfCgtzZGtfdmVyc2lvbhgGIAEoCVIKc2RrVmVyc2lv'
-    'bhJKCg1hdWRpb19kZXZpY2VzGAcgASgLMiUuc3RyZWFtLnZpZGVvLnNmdS5tb2RlbHMuSW5wdX'
-    'REZXZpY2VzUgxhdWRpb0RldmljZXMSSgoNdmlkZW9fZGV2aWNlcxgIIAEoCzIlLnN0cmVhbS52'
-    'aWRlby5zZnUubW9kZWxzLklucHV0RGV2aWNlc1IMdmlkZW9EZXZpY2VzEkEKB2FuZHJvaWQYCS'
-    'ABKAsyJS5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5BbmRyb2lkU3RhdGVIAFIHYW5kcm9pZBI7'
-    'CgVhcHBsZRgKIAEoCzIjLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLkFwcGxlU3RhdGVIAFIFYX'
-    'BwbGUSQAoJdGVsZW1ldHJ5GAsgASgLMiIuc3RyZWFtLnZpZGVvLnNmdS5zaWduYWwuVGVsZW1l'
-    'dHJ5Ugl0ZWxlbWV0cnkSOAoEcnRtcBgMIAEoCzIkLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLl'
-    'JUTVBJbmdyZXNzUgRydG1wEjQKFHN1YnNjcmliZXJfcnRjX3N0YXRzGA0gASgJQgIYAVISc3Vi'
-    'c2NyaWJlclJ0Y1N0YXRzEjIKE3B1Ymxpc2hlcl9ydGNfc3RhdHMYDiABKAlCAhgBUhFwdWJsaX'
-    'NoZXJSdGNTdGF0cxIbCglydGNfc3RhdHMYDyABKAlSCHJ0Y1N0YXRzEkwKDGVuY29kZV9zdGF0'
-    'cxgQIAMoCzIpLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlBlcmZvcm1hbmNlU3RhdHNSC2VuY2'
-    '9kZVN0YXRzEkwKDGRlY29kZV9zdGF0cxgRIAMoCzIpLnN0cmVhbS52aWRlby5zZnUubW9kZWxz'
-    'LlBlcmZvcm1hbmNlU3RhdHNSC2RlY29kZVN0YXRzEiwKEnVuaWZpZWRfc2Vzc2lvbl9pZBgSIA'
-    'EoCVIQdW5pZmllZFNlc3Npb25JZEIOCgxkZXZpY2Vfc3RhdGU=');
+    'ChBTZW5kU3RhdHNSZXF1ZXN0Eh0KCnNlc3Npb25faWQYASABKAlSCXNlc3Npb25JZBIlCg53ZW'
+    'JydGNfdmVyc2lvbhgEIAEoCVINd2VicnRjVmVyc2lvbhIQCgNzZGsYBSABKAlSA3NkaxIfCgtz'
+    'ZGtfdmVyc2lvbhgGIAEoCVIKc2RrVmVyc2lvbhJBCgdhbmRyb2lkGAkgASgLMiUuc3RyZWFtLn'
+    'ZpZGVvLnNmdS5tb2RlbHMuQW5kcm9pZFN0YXRlSABSB2FuZHJvaWQSOwoFYXBwbGUYCiABKAsy'
+    'Iy5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5BcHBsZVN0YXRlSABSBWFwcGxlEkAKCXRlbGVtZX'
+    'RyeRgLIAEoCzIiLnN0cmVhbS52aWRlby5zZnUuc2lnbmFsLlRlbGVtZXRyeVIJdGVsZW1ldHJ5'
+    'EjgKBHJ0bXAYDCABKAsyJC5zdHJlYW0udmlkZW8uc2Z1Lm1vZGVscy5SVE1QSW5ncmVzc1IEcn'
+    'RtcBIbCglydGNfc3RhdHMYDyABKAlSCHJ0Y1N0YXRzEkwKDGVuY29kZV9zdGF0cxgQIAMoCzIp'
+    'LnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlBlcmZvcm1hbmNlU3RhdHNSC2VuY29kZVN0YXRzEk'
+    'wKDGRlY29kZV9zdGF0cxgRIAMoCzIpLnN0cmVhbS52aWRlby5zZnUubW9kZWxzLlBlcmZvcm1h'
+    'bmNlU3RhdHNSC2RlY29kZVN0YXRzEiwKEnVuaWZpZWRfc2Vzc2lvbl9pZBgSIAEoCVIQdW5pZm'
+    'llZFNlc3Npb25JZEIOCgxkZXZpY2Vfc3RhdGVKBAgCEANKBAgDEARKBAgHEAhKBAgIEAlKBAgN'
+    'EA5KBAgOEA8=');
 
 @$core.Deprecated('Use sendStatsResponseDescriptor instead')
 const SendStatsResponse$json = {
@@ -758,7 +727,6 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.stream.video.sfu.signal.ICERestartRequest': ICERestartRequest$json,
   '.stream.video.sfu.signal.ICERestartResponse': ICERestartResponse$json,
   '.stream.video.sfu.signal.SendStatsRequest': SendStatsRequest$json,
-  '.stream.video.sfu.models.InputDevices': $0.InputDevices$json,
   '.stream.video.sfu.models.AndroidState': $0.AndroidState$json,
   '.stream.video.sfu.models.AppleState': $0.AppleState$json,
   '.stream.video.sfu.signal.Telemetry': Telemetry$json,

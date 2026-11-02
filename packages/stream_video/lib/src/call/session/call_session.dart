@@ -895,7 +895,7 @@ class CallSession extends Disposable {
       await track.start();
 
       if (track.isAudioTrack) {
-        await _applyCurrentAudioOutputDevice();
+        await applyCurrentAudioOutputDevice();
       }
     }
   }
@@ -1063,7 +1063,7 @@ class CallSession extends Disposable {
       await track.start();
 
       if (track.isAudioTrack) {
-        await _applyCurrentAudioOutputDevice();
+        await applyCurrentAudioOutputDevice();
       }
     }
 
@@ -1251,7 +1251,7 @@ class CallSession extends Disposable {
       await remoteTrack.start();
 
       if (remoteTrack.isAudioTrack) {
-        await _applyCurrentAudioOutputDevice();
+        await applyCurrentAudioOutputDevice();
       }
     }
 
@@ -1261,14 +1261,34 @@ class CallSession extends Disposable {
     );
   }
 
-  Future<void> _applyCurrentAudioOutputDevice() async {
+  /// Re-applies the Apple audio session configuration last applied, if any.
+  @internal
+  Future<Result<None>> restoreAppleAudioConfiguration() async {
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) {
+      return Result.error('Call not connected');
+    }
+
+    return rtcManager.restoreAppleAudioConfiguration();
+  }
+
+  /// Re-applies the audio output the user selected, if any.
+  @internal
+  Future<void> applyCurrentAudioOutputDevice() async {
     // Only re-apply an output the user explicitly selected.
     if (!stateManager.audioOutputSelectedByUser) return;
 
     final state = stateManager.callStateStream.valueOrNull;
     final audioOutputDevice = state?.audioOutputDevice;
-    if (audioOutputDevice != null) {
-      await setAudioOutputDevice(audioOutputDevice);
+    if (audioOutputDevice == null) return;
+
+    final result = await setAudioOutputDevice(audioOutputDevice);
+    if (result is Failure) {
+      _logger.w(
+        () =>
+            '[applyCurrentAudioOutputDevice] ${audioOutputDevice.id} not '
+            'applied: ${result.error.message}',
+      );
     }
   }
 
@@ -1343,7 +1363,7 @@ class CallSession extends Disposable {
           }
 
           await track.start();
-          await _applyCurrentAudioOutputDevice();
+          await applyCurrentAudioOutputDevice();
           _logger.d(
             () => '[resumeSuspendedAudioTracks] started track ${entry.key}',
           );

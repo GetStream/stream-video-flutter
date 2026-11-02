@@ -129,8 +129,6 @@ env.g.dart
 **/fastlane/screenshots
 **/fastlane/test_output
 /video-buddy-session.json
-/docusaurus/shared
-/docusaurus/docusaurus
 /.fvm/flutter_sdk
 /.fvm/fvm_config.json
 /.fvm/release

@@ -147,7 +147,35 @@ class ScreenShareContent extends StatefulWidget {
 }
 
 class _ScreenShareContentState extends State<ScreenShareContent> {
-  bool _isZoomed = false;
+  /// The zoom past which the share stays subscribed even when it is reported
+  /// hidden. Below the zoom at which that starts, about 1.35x.
+  static const _keepTrackZoomThreshold = 1.1;
+
+  final _transformationController = TransformationController();
+  bool _keepTrackWhileZoomed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _transformationController.addListener(_onTransformationChanged);
+  }
+
+  @override
+  void dispose() {
+    _transformationController
+      ..removeListener(_onTransformationChanged)
+      ..dispose();
+    super.dispose();
+  }
+
+  // Follows the viewer's transform, whatever gesture is moving it.
+  void _onTransformationChanged() {
+    final scale = _transformationController.value.getMaxScaleOnAxis();
+    final keepTrack = scale > _keepTrackZoomThreshold;
+    if (_keepTrackWhileZoomed != keepTrack) {
+      setState(() => _keepTrackWhileZoomed = keepTrack);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -169,15 +197,8 @@ class _ScreenShareContentState extends State<ScreenShareContent> {
             }
 
             return InteractiveViewer(
+              transformationController: _transformationController,
               maxScale: 4,
-              onInteractionUpdate: (details) {
-                final isZoomed = details.scale > 1.0;
-                if (_isZoomed != isZoomed) {
-                  setState(() {
-                    _isZoomed = isZoomed;
-                  });
-                }
-              },
               child: StreamVideoRenderer(
                 key: ValueKey(
                   '${widget.rendererScopePrefix ?? ''}${widget.participant.uniqueParticipantKey}-screen-share',
@@ -187,7 +208,7 @@ class _ScreenShareContentState extends State<ScreenShareContent> {
                 participant: widget.participant,
                 videoFit: VideoFit.contain,
                 videoTrackType: SfuTrackType.screenShare,
-                persistTrackIfNotVisible: _isZoomed,
+                persistTrackIfNotVisible: _keepTrackWhileZoomed,
               ),
             );
           },

@@ -26,6 +26,16 @@ if [ -z "$APP_STATE" ] || [ -z "$ACTION" ]; then
   exit 2
 fi
 
+# A second device logged in as the callee rings too, and it resolves its own copy
+# of the ring: when it times out it rejects the call as the same user, and the
+# primary then ends with user-responded-elsewhere instead of its own timeout. Every
+# timeout-* case would fail for the harness's reason, not the SDK's.
+if [ "${RING_MULTI_DEVICE:-0}" = "1" ]; then
+  echo "checks.sh does not run in a RING_MULTI_DEVICE=1 run — the second callee device" >&2
+  echo "interferes with every case here. Use elsewhere.sh, or re-run preflight.sh without it." >&2
+  exit 2
+fi
+
 API="${ANDROID_API:-$(adb shell getprop ro.build.version.sdk | tr -d '\r')}"
 # From env.sh, written by install.sh. Falls back to the log only when a run skipped
 # install.sh entirely.

@@ -1,5 +1,30 @@
 ## Upcoming
 
+### 🐞 Fixed
+
+- [iOS] `setCallConnected` and `endCall` keep the call's options, so `configureAudioSession: false` is respected after the call connects and the plugin no longer reconfigures the audio session set up by WebRTC.
+- [iOS] `setCallConnected` no longer answers an outgoing call, which reconfigured the audio session and emitted an accept event for the app's own call.
+- [iOS] An outgoing call keeps its own options and `ActionCallStart` data when another call is started, shown, connected or ended while it is starting.
+- [iOS] CallKit mute, hold, group and DTMF events report the call's uuid as it was started or shown with, instead of uppercased, so it matches the uuid in the call's other events.
+
+## 1.7.2
+
+### 🐞 Fixed
+
+- [Android] Incoming calls keep their notification and ringtone after one of the app's Flutter engines detaches.
+
+## 1.7.1
+
+### 🐞 Fixed
+
+- Fixed `unregisterDevice()` incorrectly trying to delete an APN device token when `registerApnDeviceToken` is `false`.
+
+### 🔄 Changed
+
+- [Android] Removed the unused `DISABLE_KEYGUARD` and `ACCESS_NOTIFICATION_POLICY` permissions.
+
+## 1.7.0
+
 ### 🔄 Changed
 
 - [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.

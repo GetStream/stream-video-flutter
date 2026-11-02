@@ -5,10 +5,14 @@ description: >
   ringing calls through the coordinator and asserting what the SDK does with them. Covers push
   delivery, the incoming call notification, Telecom registration, accept, decline and ring-out with a
   missed call notification, the Android 17 ringing foreground service,
-  and leak-free teardown — with the app foregrounded, backgrounded and terminated. Rings come from a
+  and leak-free teardown — with the app foregrounded, backgrounded and terminated. A separate
+  multi-device run signs the callee in on two emulators and asserts that answering or declining on
+  one ends the ring on the other. Rings come from a
   real second instance of the app through its Direct Call button, on a second emulator or the iOS
   simulator. The device under test is always Android: iOS CallKit cannot be tested on a simulator.
 disable-model-invocation: true
+argument-hint: "[core|elsewhere] [android|ios]"
+arguments: [mode, caller]
 allowed-tools:
   - Bash
   - Read
@@ -54,6 +58,11 @@ app state.
 - **No host microphone or speakers.** None of the traps that make the other skill's audio checks
   intermittent apply here.
 
+For the **multi-device run** (step 3c) add one more emulator for the callee's second device: three
+Play-enabled emulators (callee, callee's second device, caller), or two plus the iOS simulator with
+`RING_CALLER_PLATFORM=ios`. Both callee emulators must have the reference aspect ratio — the second
+one is logged in by the same coordinates as the first.
+
 Optional: an **API 37 emulator** to cover the Android 17 ringing foreground service. On anything
 lower those checks report `SKIP`, which is correct rather than a gap.
 
@@ -88,6 +97,33 @@ lower those checks report `SKIP`, which is correct rather than a gap.
 - **The ringtone's audibility is not asserted.** Audio cannot be heard over adb. `ring-fgs-type-*`
   asserts the mechanism the Android 17 fix actually changes — a `phoneCall` foreground service
   rather than `shortService` — which is the assertable half.
+
+## Choosing the run
+
+Invoked as `/video-ringing-test [mode] [caller]`. Both arguments are optional and positional.
+
+| `$mode` | runs | emulators (android caller) | emulators (ios caller) |
+|---------|------|----------------------------|------------------------|
+| `core` (default) | the six-case matrix, step 3 | 2 | 1 + iPhone simulator |
+| `elsewhere` | the answered-on-another-device cases, step 3c | 3 | 2 + iPhone simulator |
+
+| `$caller` | the ring is placed from |
+|-----------|-------------------------|
+| `android` (default) | the last emulator, fully scripted |
+| `ios` | the iOS simulator, driven by you (steps 2b and 3b) |
+
+Examples: `/video-ringing-test`, `/video-ringing-test elsewhere`, `/video-ringing-test elsewhere ios`.
+
+Map them onto environment variables and pass those to **`preflight.sh` only** — it records them in
+`env.sh` and every later phase reads them from there:
+
+- `$mode` = `elsewhere` → prefix preflight with `RING_MULTI_DEVICE=1`. Then run step 3c instead of
+  step 3. Anything else, including empty → no prefix, run step 3.
+- `$caller` = `ios` → prefix preflight with `RING_CALLER_PLATFORM=ios`. Empty or `android` → no prefix.
+
+Any other value for either argument: stop and print the usage line above. Do not guess. The two modes
+cannot share a run (see step 3c), so there is no `all`; run the skill twice, once per mode, with the
+emulator count changed between them.
 
 ## Steps
 
@@ -199,13 +235,71 @@ for a reason that has nothing to do with the SDK. Screenshot before ringing if u
 The script asserts delivery on the Android side, so a missed tap fails the state rather than passing
 quietly.
 
+### 3c. Answered on another device (multi-device run)
+
+The same user is signed in on two Android devices, so one ring rings both. The ring is accepted or
+declined on the primary callee through its ringing UI, exactly as in step 3, and the assertions that
+matter are about the **other** device: its ring has to end because the user answered elsewhere —
+not because it timed out on its own.
+
+This is **its own run**, from preflight onwards — `/video-ringing-test elsewhere`. It cannot share a run with step 3: with a second
+device registered, every ring also rings there, and when that copy times out it rejects the call as
+the same user — the primary then ends with `user-responded-elsewhere` instead of its own timeout, and
+every `timeout-*` case fails for the harness's reason. `checks.sh` refuses to run in a multi-device
+run, and `elsewhere.sh` refuses to run outside one.
+
+```bash
+RING_MULTI_DEVICE=1 .claude/skills/video-ringing-test/scripts/preflight.sh
+.claude/skills/video-ringing-test/scripts/install.sh
+for state in foreground background terminated; do
+  for action in accept decline; do
+    .claude/skills/video-ringing-test/scripts/elsewhere.sh "$state-$action"
+  done
+done
+.claude/skills/video-ringing-test/scripts/finish.sh
+```
+
+Emulators are assigned by port, as `adb devices` lists them: the first is the primary callee, the
+second the callee's second device (`dev2`), the third the caller. Preflight prints the assignment.
+`install.sh` logs `RING_CALLEE` in on both callee devices and waits for **both** `createDevice`
+calls, then logs the caller in.
+
+Both callee devices are put into the same app state before each ring. There is no `timeout` action:
+with nobody answering, both devices simply time out, which step 3 already covers.
+
+| check | what it asserts on the second device |
+|-------|--------------------------------------|
+| `dev2-ring-delivered-*` | the same ring reached it — without that the case stops, nothing to observe |
+| `dev2-ring-ended-*` | its incoming call notification is gone within `ELSEWHERE_WINDOW` (15s) of the answer |
+| `dev2-end-reason-*` | it heard about the answer (`on another device`, `user-responded-elsewhere`, or a `call.accepted`/`call.rejected` by the same user) and never logged `[reject] reason: timeout` |
+| `dev2-not-joined-*` | it did not join the call itself |
+
+`dev2-end-reason-*` is the one that separates a real pass from a coincidence: the other device's
+ring expiring also clears its notification. It is judged only once the ring is past its ~24s
+lifetime plus a margin for Dart log lag, so each case costs ~35s more than a step-3 case.
+
+`terminated-*` is again the one that matters most: the revived process must not only show the ring
+but connect, so that it can hear the answer at all.
+
+With an iOS caller, each `elsewhere.sh` waits on `>>> RING NOW` exactly like step 3b.
+
+The finish matrix for this run has two columns:
+
+```
+               accept         decline
+-------------- -------------- --------------
+foreground     PASS 12/12     PASS 12/12
+background     PASS 12/12     PASS 12/12
+terminated     PASS 16/16     PASS 16/16
+```
+
 ### 4. Finish
 
 ```bash
 .claude/skills/video-ringing-test/scripts/finish.sh
 ```
 
-Asserts nothing leaked once every ring is over — no ringing foreground service, no posted
+Asserts nothing leaked once every ring is over (on both callee devices in a multi-device run) — no ringing foreground service, no posted
 notification, no call left in Telecom — checks for platform-channel type errors and native crashes,
 then prints two tables and stops the background logcat. Exits non-zero if anything failed.
 
@@ -309,6 +403,15 @@ asked**.
 | `no-ring-service-leak` / `no-notif-leak` / `no-telecom-leak` | nothing orphaned once every ring is over |
 | `no-channel-type-error` | no platform channel type cast failed — invisible unless something looks for it |
 | `no-native-crash` | no native crash during the run |
+| `dev2-login` / `dev2-push-register` | the callee's second device is signed in as the same user and has its own push token |
+| `*-elsewhere` | a multi-device case — see step 3c; checks without the `dev2-` prefix ran on the primary |
+| `dev2-ring-delivered-*` / `dev2-cold-start-*` | the ring reached the second device too, from dead when terminated |
+| `dev2-telecom-live-*` / `dev2-ring-fgs-*` | baselines: the second device really held a Telecom call / foreground service before the answer |
+| `dev2-ring-ended-*` | the second device stopped ringing once the primary answered |
+| `dev2-end-reason-*` | it stopped because it learned of the answer, not because it timed out |
+| `dev2-telecom-ended-*` / `dev2-fgs-stopped-*` | the second device released Telecom and the ringing service |
+| `dev2-not-joined-*` | the second device did not join the call as well |
+| `dev2-no-*-leak` / `dev2-no-native-crash` | nothing orphaned or crashed on the second device |
 
 ## Traps already handled (do not "fix" these)
 
@@ -399,10 +502,19 @@ asked**.
   from a one-shot shell kills the `adb logcat` child when that shell exits, and because the pid file
   survives, the next case does not restart logging and asserts against a frozen log.
 
+- **The second callee device runs every helper through `on_callee2`.** All helpers use bare `adb`,
+  so it re-points `ANDROID_SERIAL` (and `ANDROID_LOG`) in a subshell. Do not add `-s` to the
+  helpers instead — one wrapper keeps the two devices from ever being mixed up.
+- **The second device's logcat is started with `adb -s`, never through `ANDROID_SERIAL`.**
+  `stop_logcat`'s fallback `pkill` matches `adb logcat -v time StreamTelecomManager`; an identical
+  command line for the second device would be killed every time the primary restarts its capture.
+- **A missed call notification on the second device is not asserted** after the call was answered
+  elsewhere. Whether one should appear is a product decision, not a regression check.
+
 ## Files
 
 `/tmp/stream-video-ringing/`: `results.tsv`, `android.log` (device under test), `caller.log`,
-`build.log`, `env.sh`, `ui.xml` (the last hierarchy dump), `shots/*.png`.
+`callee2.log` (the callee's second device, multi-device run only), `build.log`, `env.sh`, `ui.xml` (the last hierarchy dump), `shots/*.png`.
 
 `results.tsv` is truncated by `preflight.sh` and `android.log` by each `start_logcat`, so re-running
 from preflight gives a clean report. Screenshots accumulate across runs on purpose — a failed

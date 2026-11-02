@@ -2,7 +2,7 @@
 name: release-pr
 description: >
   Open a release PR: bumps the lockstep version in the root pubspec.yaml and package pubspecs, finalises CHANGELOGs,
-  opens a PR with auto-generated release notes against main.
+  updates the SDK size badges, opens a PR with auto-generated release notes against main.
 disable-model-invocation: true
 argument-hint: "[version]"
 arguments: [version]
@@ -57,6 +57,8 @@ Run these checks. **If any fail, stop the skill, surface the failing check to th
 - `gh auth status` succeeds.
 - `gh pr list --head release/v<version> --state all --json number` returns `[]`.
 - Latest CI on `main` is green: `gh run list --branch main --limit 5` — no failures on the most recent runs.
+- The latest `sdk_size` run on `main` finished successfully, so the size benchmark matches what is released:
+  `gh run list --workflow sdk_size.yml --branch main --limit 1`.
 
 ## Steps
 
@@ -186,7 +188,28 @@ git commit -m "chore(repo): release v<version>"
 git push -u origin release/v<version>
 ```
 
-Single commit. The message format is load-bearing: `release_tag.yml` parses `vX.Y.Z` from it after merge.
+One release commit. The message format is load-bearing: `release_tag.yml` parses `vX.Y.Z` from it after merge.
+
+### 5b. Update the SDK size badges
+
+The size badges in the root `README.md` show the latest `main` benchmark from the `sdk_size` workflow. The
+`update_size_badges` workflow writes them and commits `chore(repo): update the SDK size badges` to the release branch.
+Anyone releasing by hand runs the same workflow, from the Actions tab or with:
+
+```bash
+gh workflow run update_size_badges.yml --ref release/v<version> -f base_branch=main
+```
+
+See the run through before opening the PR:
+
+```bash
+gh run list --workflow update_size_badges.yml --branch release/v<version> --limit 1 --json databaseId,status
+gh run watch <run-id> --exit-status
+git pull --ff-only
+```
+
+If the badges already matched, the workflow commits nothing and the pull is a no-op. If the run fails, surface it to
+the user and stop.
 
 ### 6. Generate the PR body
 

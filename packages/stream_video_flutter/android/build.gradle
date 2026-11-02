@@ -6,6 +6,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://stream-io-repo.com") }
     }
 }
 

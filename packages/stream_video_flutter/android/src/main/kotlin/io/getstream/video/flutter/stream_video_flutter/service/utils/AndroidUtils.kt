@@ -95,20 +95,17 @@ internal fun Service.startForegroundWithServiceType(
         )
     } else {
         val serviceType = foregroundServiceType ?: ServiceInfo.FOREGROUND_SERVICE_TYPE_PHONE_CALL
-        ServiceCompat.startForeground(
-            this,
-            notificationId,
-            notification,
-            when (trigger) {
-                TRIGGER_ONGOING_CALL -> serviceType
-                TRIGGER_OUTGOING_CALL, TRIGGER_INCOMING_CALL -> serviceType
-                TRIGGER_SHARE_SCREEN -> ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
-                else -> serviceType
-            },
-        )
+        val requestedType = when (trigger) {
+            TRIGGER_ONGOING_CALL -> serviceType
+            TRIGGER_OUTGOING_CALL, TRIGGER_INCOMING_CALL -> serviceType
+            TRIGGER_SHARE_SCREEN -> ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+            else -> serviceType
+        }
+        ServiceCompat.startForeground(this, notificationId, notification, requestedType)
         Log.d(
             "AndroidUtils",
-            "[startForegroundWithServiceType] 2 startForeground notificationId: $notificationId",
+            "[startForegroundWithServiceType] 2 startForeground notificationId: $notificationId, " +
+                "service: ${javaClass.simpleName}, types: 0x${Integer.toHexString(requestedType)}",
         )
     }
 }

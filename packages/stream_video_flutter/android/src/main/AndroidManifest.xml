@@ -1,20 +1,45 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
-    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Each FOREGROUND_SERVICE_* permission below backs one foreground service type. On
+         Android 14 and newer the call services only request a type whose permission is still
+         declared, so an app without the matching feature removes the permission from its merged
+         manifest with tools:node="remove" and the SDK stops asking for that type. This covers
+         the call and livestream viewer permissions only: StreamScreenShareService always
+         requests mediaProjection, so FOREGROUND_SERVICE_MEDIA_PROJECTION has to stay while the
+         app offers screen sharing. -->
+
+    <!-- Used by StreamCallService for voice and video calls, and for livestream hosts. Phone
+         call is the one type the call service holds without a runtime grant, so it keeps a
+         participant without the microphone or camera permission in the foreground. Keep both in
+         any app that makes calls; only a viewer-only app should remove them. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
+    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
+
+    <!-- Used by StreamLivestreamViewerService for livestream viewers, whose call is media
+         playback rather than a phone call. The viewer service also uses the microphone and
+         camera permissions above when the app keeps them, for viewers brought on stage. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+
+    <!-- Used by StreamScreenShareService. Always requested when screen sharing starts, so only
+         remove it from an app that does not offer screen sharing. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
 
     <application>
 
         <service
             android:name=".service.StreamCallService"
-            android:foregroundServiceType="microphone|phoneCall|camera|shortService|mediaPlayback"
+            android:foregroundServiceType="microphone|phoneCall|camera|shortService"
+            android:exported="false" />
+
+        <service
+            android:name=".service.StreamLivestreamViewerService"
+            android:foregroundServiceType="mediaPlayback|microphone|camera|shortService"
             android:exported="false" />
 
         <service

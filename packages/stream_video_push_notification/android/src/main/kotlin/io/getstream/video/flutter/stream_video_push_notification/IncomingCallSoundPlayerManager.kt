@@ -57,18 +57,6 @@ class IncomingCallSoundPlayerManager(private val context: Context) {
         }catch (_: Exception){}
     }
 
-    fun destroy() {
-        this.isPlaying = false
-
-        ringtone?.stop()
-        vibrator?.cancel()
-        ringtone = null
-        vibrator = null
-        try {
-            context.unregisterReceiver(screenOffIncomingCallBroadcastReceiver)
-        }catch (_: Exception){}
-    }
-
     private fun prepare() {
         ringtone?.stop()
         vibrator?.cancel()

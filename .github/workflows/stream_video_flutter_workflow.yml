@@ -88,3 +88,21 @@ jobs:
       - name: Build Example
         run: |
           melos run build:example:android
+
+  # The one check to mark as required: it passes when every check above
+  # passed.
+  sdk-verified:
+    if: always()
+    needs: [analyze, build]
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        env:
+          FAILED: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          if [[ "$FAILED" == "true" ]]; then
+            echo "A required check failed or was cancelled."
+            exit 1
+          fi
+          echo "All checks passed."

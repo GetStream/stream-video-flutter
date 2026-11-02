@@ -17,6 +17,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
 import io.getstream.log.taggedLogger
+import io.getstream.video.flutter.stream_video_flutter.service.CallServiceKind
 import io.getstream.video.flutter.stream_video_flutter.service.ServiceManager
 import io.getstream.video.flutter.stream_video_flutter.service.ServiceManagerImpl
 import io.getstream.video.flutter.stream_video_flutter.service.ServiceType
@@ -86,7 +87,10 @@ class MethodCallHandlerImpl(
             "startBackgroundService" -> {
                 val typeString = call.argument<String>("type")
                 val serviceType = ServiceType.valueOf(typeString ?: "call")
-                
+                val serviceKind = call.argument<String>("serviceKind")
+                    ?.let { name -> CallServiceKind.values().firstOrNull { it.name == name } }
+                    ?: CallServiceKind.call
+
                 val activity = getActivity()
                 if (activity == null) {
                     logger.e { "[onMethodCall] #startService(type: $serviceType); failed (No activity found)" }
@@ -117,11 +121,11 @@ class MethodCallHandlerImpl(
                             return@requestPermission
                         }
                         
-                        logger.d { "[onMethodCall] #startService(cid: $callCid, type: $serviceType); notificationPayload: $notificationPayload" }
+                        logger.d { "[onMethodCall] #startService(cid: $callCid, type: $serviceType, kind: $serviceKind); notificationPayload: $notificationPayload" }
                         FlutterEngineCache.getInstance().put(STREAM_FLUTTER_BACKGROUND_ENGINE_ID, engine)
                         activity.intent?.putExtra(FlutterFlags.EXTRA_DESTROY_ENGINE_WITH_ACTIVITY, false)
 
-                        val startResult = serviceManager.start(callCid, notificationPayload, serviceType)
+                        val startResult = serviceManager.start(callCid, notificationPayload, serviceType, serviceKind)
 
                         println("=== MethodCallHandlerImpl.onMethodCall === startBackgroundService: serviceManager.start result: $startResult")
                         result.success(startResult)

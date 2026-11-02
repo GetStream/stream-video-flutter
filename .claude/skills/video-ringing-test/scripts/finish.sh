@@ -39,6 +39,34 @@ else
   pass "no-native-crash" "no native crashes"
 fi
 
+# --- the callee's second device (multi-device run) --------------------------
+# Same leak and crash checks, against the device that only ever watched its ring
+# being answered elsewhere. A ring it never released is exactly what this run is
+# looking for, so it is judged here as well as per case.
+if [ "${RING_MULTI_DEVICE:-0}" = "1" ] && [ -n "${RING_CALLEE2_SERIAL:-}" ]; then
+  on_callee2 assert_probe_clears "dev2-no-ring-service-leak" \
+    "no ringing foreground service left running on the second device" ringing_service_foreground 25
+  on_callee2 assert_probe_clears "dev2-no-notif-leak" \
+    "no incoming call notification left posted on the second device" incoming_notification_present 25
+  if [ "${TELECOM_ENABLED:-0}" = "1" ]; then
+    on_callee2 assert_probe_clears "dev2-no-telecom-leak" \
+      "no call left registered in the second device's Telecom stack" telecom_call_present 25
+  else
+    skip "dev2-no-telecom-leak" "Telecom not enabled in the app config"
+  fi
+  if grep -qE "is not a subtype of type" "$CALLEE2_LOG"; then
+    fail "dev2-no-channel-type-error" "a platform channel type cast failed (see callee2.log)"
+  else
+    pass "dev2-no-channel-type-error" "no platform channel type errors on the second device"
+  fi
+  if grep -qE "FATAL EXCEPTION|E AndroidRuntime" "$CALLEE2_LOG"; then
+    fail "dev2-no-native-crash" "a native crash was logged (see callee2.log)"
+  else
+    pass "dev2-no-native-crash" "no native crashes on the second device"
+  fi
+  stop_callee2_logcat
+fi
+
 stop_logcat
 
 # --- summary ----------------------------------------------------------------
@@ -53,12 +81,15 @@ awk -F'\t' '{ last[$2] = $0; order[$2] = (order[$2] ? order[$2] : ++n) }
   END { for (id in last) printf "%d\t%s\n", order[id], last[id] }' "$RESULTS" \
   | sort -n | cut -f2- >"$DEDUPED"
 
-printf '%-34s %-11s %s\n' "CHECK" "RESULT" "WHAT IT PROVES"
-printf '%-34s %-11s %s\n' "$(printf '%.34s' "$DASH")" "$(printf '%.11s' "$DASH")" \
+# Elsewhere ids carry a longer suffix and a dev2- prefix, so the column grows.
+W=34
+[ "${RING_MULTI_DEVICE:-0}" = "1" ] && W=50
+printf "%-${W}s %-11s %s\n" "CHECK" "RESULT" "WHAT IT PROVES"
+printf "%-${W}s %-11s %s\n" "$(printf "%.${W}s" "$DASH")" "$(printf '%.11s' "$DASH")" \
   "$(printf '%.44s' "$DASH")"
 while IFS=$'\t' read -r result id desc; do
   [ -n "${id:-}" ] || continue
-  printf '%-34s %-11s %s\n' "$id" "$result" "$desc"
+  printf "%-${W}s %-11s %s\n" "$id" "$result" "$desc"
 done <"$DEDUPED"
 
 P=$(grep -c '^PASS' "$DEDUPED" || true)
@@ -69,11 +100,6 @@ K=$(grep -c '^KNOWN-FAIL' "$DEDUPED" || true)
 # The per-check table above is the evidence; this is the answer. A scenario counts
 # as PASS only when every check carrying its suffix passed — one FAIL anywhere in
 # it makes the scenario FAIL, which is the only reading that is safe to act on.
-echo
-printf '%-14s %-14s %-14s %-14s\n' "" "accept" "decline" "timeout"
-printf '%-14s %-14s %-14s %-14s\n' "$(printf '%.14s' "$DASH")" \
-  "$(printf '%.14s' "$DASH")" "$(printf '%.14s' "$DASH")" "$(printf '%.14s' "$DASH")"
-
 scenario_cell() {
   local suffix="$1" total fails
   total=$(awk -F'\t' -v s="-$suffix" '$2 ~ (s "$")' "$DEDUPED" | wc -l | tr -d ' ')
@@ -86,17 +112,38 @@ scenario_cell() {
   fi
 }
 
-for state in foreground background terminated; do
-  printf '%-14s ' "$state"
-  for action in accept decline timeout; do
-    scenario_cell "$state-$action"
+# matrix <case-suffix> <action...> — one row per app state, one column per action.
+matrix() {
+  local tail="$1" state action; shift
+  echo
+  printf '%-14s' ""
+  for action in "$@"; do printf ' %-14s' "$action"; done; printf '\n'
+  printf '%.14s' "$DASH"
+  for action in "$@"; do printf ' %.14s' "$DASH"; done; printf '\n'
+  for state in foreground background terminated; do
+    printf '%-14s ' "$state"
+    for action in "$@"; do
+      scenario_cell "$state-$action$tail"; printf ' '
+    done
+    printf '\n'
   done
-  printf '\n'
-done
+}
+
+# A multi-device run only has elsewhere cases, and a regular run has none, so one
+# matrix per run. The core suffix `-<state>-<action>` never matches an elsewhere
+# id, which always ends in `-elsewhere`.
+if [ "${RING_MULTI_DEVICE:-0}" = "1" ]; then
+  echo
+  echo "answered on the primary — did the second device stop ringing?"
+  matrix "-elsewhere" accept decline
+else
+  matrix "" accept decline timeout
+fi
 
 echo
 echo "$P passed, $F failed, $S skipped, $K known-fail"
 echo "logs: $ANDROID_LOG   shots: $SHOTS"
+[ "${RING_MULTI_DEVICE:-0}" = "1" ] && echo "second device log: $CALLEE2_LOG"
 
 if [ "$API" -lt 37 ]; then
   echo

@@ -1,4 +1,5 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:stream_video/stream_video.dart' show AndroidCallServiceKind;
 
 import '../src/call_background/model/notification_payload.dart';
 import '../src/call_background/model/service_type.dart';
@@ -33,9 +34,14 @@ abstract class StreamVideoFlutterPlatform extends PlatformInterface {
 
   void Function(String callCid)? onBackgroundNotificationUiLayerDestroyed;
 
+  /// Starts the foreground service of [type] for the call in [payload].
+  ///
+  /// For [ServiceType.call], [kind] picks which Android service hosts the
+  /// call, and so which foreground service types it requests.
   Future<bool> startBackgroundService({
     required NotificationPayload payload,
     required ServiceType type,
+    AndroidCallServiceKind kind = AndroidCallServiceKind.call,
   }) {
     throw UnimplementedError('startService() has not been implemented.');
   }
