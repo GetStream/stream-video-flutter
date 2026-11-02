@@ -10,8 +10,8 @@ import 'package:stream_core/stream_core.dart' as core;
 
 import '../models.dart';
 
-part 'call_stats_map_sf_us.g.dart';
-part 'call_stats_map_sf_us.freezed.dart';
+part 'call_stats_map_sfus.g.dart';
+part 'call_stats_map_sfus.freezed.dart';
 
 @freezed
 @immutable

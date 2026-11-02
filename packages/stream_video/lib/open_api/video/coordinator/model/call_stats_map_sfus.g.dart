@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'call_stats_map_sf_us.dart';
+part of 'call_stats_map_sfus.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

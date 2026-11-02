@@ -96,7 +96,7 @@ export 'model/call_stats_location.dart';
 export 'model/call_stats_map_location.dart';
 export 'model/call_stats_map_publisher.dart';
 export 'model/call_stats_map_publishers.dart';
-export 'model/call_stats_map_sf_us.dart';
+export 'model/call_stats_map_sfus.dart';
 export 'model/call_stats_map_subscriber.dart';
 export 'model/call_stats_map_subscribers.dart';
 export 'model/call_stats_participant.dart';

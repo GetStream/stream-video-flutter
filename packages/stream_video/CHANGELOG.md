@@ -19,6 +19,7 @@
 - `RetryConfig.callRejoinTimeout` is removed. It was deprecated and had no readers. Use `CallPreferences.networkAvailabilityTimeout`, which is what actually bounds waiting for the network.
 - Generated enum types are named for their values rather than the field they come from, and lose the `Enum` suffix: e.g. `AudioSettingsRequestDefaultDeviceEnum` is now `AudioDefaultDevice`, and the camera-facing, mode, language and codec enums are now `CameraFacing`, `FeatureActivationMode`, `TranscriptionLanguage` and `VideoCodec`. The `…Enum` names remain as deprecated aliases. `StreamAudioSettings.defaultDevice`, `StreamVideoSettings.cameraFacing`, `StreamNoiceCancellingSettings.mode` and `StreamIngressVideoLayer.codec` take the new types.
 - Generated enum types have no `fromJson`/`toJson`; build one with its constructor, e.g. `TranscriptionLanguage('en')`.
+- The generated `AutomodMode.aI` is renamed `AutomodMode.ai`.
 - The generated `ConnectedEvent` and `ConnectionErrorEvent` are removed.
 - The ingress source `fps` and audio `channels` are `int`s, so `StreamIngressSourceFps.toOpenDto()` and `IngressAudioChannels.toOpenDto()` return `int`; `IngressSourceRequestFpsEnum` and `IngressAudioEncodingOptionsRequestChannelsEnum` are deprecated aliases of `int`.
 - Constructing a `CallSettingsResponse` needs `lifecycle`, and an `OwnUserResponse` needs `blockedUserIds`.
