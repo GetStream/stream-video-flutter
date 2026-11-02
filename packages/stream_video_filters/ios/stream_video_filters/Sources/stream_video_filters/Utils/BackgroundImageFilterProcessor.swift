@@ -26,8 +26,8 @@ final class BackgroundImageFilterProcessor {
     // buffer pool nor forces a GPU->CPU readback on the capture thread. The resulting
     // mask is snapshotted so it survives Vision reusing its own pooled result buffers.
     // `segQueue` serialises Vision calls — `VNSequenceRequestHandler` isn't thread-safe
-    // under concurrent use. `segLock` guards `lastMask` and `inFlight`, both shared
-    // between the capture thread and `segQueue`.
+    // under concurrent use. `segLock` guards `lastMask`, `lastMaskFrameSize` and
+    // `inFlight`, all shared between the capture thread and `segQueue`.
     private let ciContext = CIContext(options: [.useSoftwareRenderer: false])
     private let segColorSpace = CGColorSpaceCreateDeviceRGB()
     private let segQueue = DispatchQueue(
@@ -41,6 +41,9 @@ final class BackgroundImageFilterProcessor {
     private let failureLogLock = NSLock()
     private var lastFailureLog: TimeInterval = 0
     private var lastMask: CIImage?
+    // Size of the frame `lastMask` was computed from. A mask from a frame of another
+    // size (camera flip, quality change) would be stretched onto the new geometry.
+    private var lastMaskFrameSize: CGSize = .zero
     private var inFlight = false
 
     // Only touched from the capture thread (`applyFilter` is called serially there).
@@ -77,8 +80,12 @@ final class BackgroundImageFilterProcessor {
         backgroundImage: CIImage
     ) -> CIImage? {
         let originalImage = CIImage(cvPixelBuffer: buffer)
+        let frameSize = originalImage.extent.size
 
         segLock.lock()
+        if lastMaskFrameSize != frameSize {
+            lastMask = nil
+        }
         let mask = lastMask
         let shouldDispatch = !inFlight
         if shouldDispatch {
@@ -91,7 +98,7 @@ final class BackgroundImageFilterProcessor {
             // capture pool while the composite is being rendered.
             if let segInput = makeSegmentationInput(from: originalImage) {
                 segQueue.async { [weak self] in
-                    self?.runSegmentation(on: segInput)
+                    self?.runSegmentation(on: segInput, frameSize: frameSize)
                 }
             } else {
                 segLock.lock()
@@ -208,7 +215,7 @@ final class BackgroundImageFilterProcessor {
     /// Runs on `segQueue`. Performs Vision on the pooled input buffer and stores the
     /// result mask under `segLock`. `inFlight` is always cleared via `defer`, so a thrown
     /// `perform`, missing results, or failed snapshot won't deadlock future frames.
-    private func runSegmentation(on pixelBuffer: CVPixelBuffer) {
+    private func runSegmentation(on pixelBuffer: CVPixelBuffer, frameSize: CGSize) {
         defer {
             segLock.lock()
             inFlight = false
@@ -229,6 +236,7 @@ final class BackgroundImageFilterProcessor {
             let snapshot = CIImage(cgImage: maskCG)
             segLock.lock()
             lastMask = snapshot
+            lastMaskFrameSize = frameSize
             segLock.unlock()
         } catch {
             let nsError = error as NSError

@@ -118,25 +118,24 @@ class _CallScreenState extends State<CallScreen> {
     _chatConnectionRecoverySubscription?.cancel();
     widget.call.leave();
     _userChatRepo.disconnectUser();
-    unawaited(_releaseVideoEffects());
+    _videoEffectsManager.dispose();
     super.dispose();
   }
 
-  /// Releases the video effects manager together with the natively registered
-  /// filter processors; they are registered again the next time a filter is
-  /// applied.
+  /// Releases the natively registered filter processors before leaving the
+  /// call; they are registered again the next time a filter is applied.
   ///
-  /// Detached from [dispose], which cannot wait for the platform call, so a
-  /// failure is logged here rather than surfacing as an unhandled asynchronous
-  /// error after the screen is gone. The manager is disposed either way.
-  Future<void> _releaseVideoEffects() async {
+  /// This has to happen before [Call.leave]: once the local video track is
+  /// torn down, the effects attached to it can no longer be detached, and the
+  /// processors stay alive. A failed release is logged and does not block
+  /// leaving.
+  Future<void> _leaveCall(Call call) async {
     try {
       await _videoEffectsManager.unregisterAllFilters();
     } catch (e, st) {
       _logger.e(() => 'Failed to release video effects: $e\n$st');
-    } finally {
-      await _videoEffectsManager.dispose();
     }
+    await call.leave();
   }
 
   Future<void> _connectChatChannel() async {
@@ -314,6 +313,7 @@ class _CallScreenState extends State<CallScreen> {
               callAppBarWidgetBuilder: (context, call) {
                 return CallAppBar(
                   call: call,
+                  onLeaveCallTap: () => unawaited(_leaveCall(call)),
                   leadingWidth: 120,
                   leading: Row(
                     children: [

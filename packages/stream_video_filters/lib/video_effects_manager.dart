@@ -32,6 +32,18 @@ class StreamVideoEffectsManager {
   static Map<String, bool> isImageRegistered = <String, bool>{};
   static Map<String, bool> isCustomEffectRegistered = <String, bool>{};
 
+  // Built-in register and unregister calls, together with the flags above that
+  // mirror them, run one at a time across all managers. Otherwise an unregister
+  // could remove a processor whose register is still in flight, leaving its
+  // flag set for a processor that no longer exists.
+  static Future<void> _registryQueue = Future.value();
+
+  static Future<void> _runSerially(Future<void> Function() action) {
+    final result = _registryQueue.then((_) => action());
+    _registryQueue = result.catchError((Object _) {});
+    return result;
+  }
+
   final Call call;
 
   /// List of previously applied video effects using this manager.
@@ -156,29 +168,35 @@ class StreamVideoEffectsManager {
   }
 
   /// Ensures that the blur effect processor is registered.
-  Future<void> ensureBlurEffectRegistered() async {
-    if (!isBlurRegistered) {
-      await StreamVideoFilters().registerBlurEffectProcessors();
-      isBlurRegistered = true;
-    }
+  Future<void> ensureBlurEffectRegistered() {
+    return _runSerially(() async {
+      if (!isBlurRegistered) {
+        await StreamVideoFilters().registerBlurEffectProcessors();
+        isBlurRegistered = true;
+      }
+    });
   }
 
   /// Ensures that the full-frame blur effect processor is registered.
-  Future<void> ensureFullFrameBlurEffectRegistered() async {
-    if (!isFullFrameBlurRegistered) {
-      await StreamVideoFilters().registerFullFrameBlurEffectProcessor();
-      isFullFrameBlurRegistered = true;
-    }
+  Future<void> ensureFullFrameBlurEffectRegistered() {
+    return _runSerially(() async {
+      if (!isFullFrameBlurRegistered) {
+        await StreamVideoFilters().registerFullFrameBlurEffectProcessor();
+        isFullFrameBlurRegistered = true;
+      }
+    });
   }
 
   /// Ensures that the image effect processor is registered.
-  Future<void> ensureImageEffectRegistered(String imageUrl) async {
-    if (!isImageRegistered.containsKey(imageUrl)) {
-      await StreamVideoFilters().registerImageEffectProcessors(
-        backgroundImageUrl: imageUrl,
-      );
-      isImageRegistered[imageUrl] = true;
-    }
+  Future<void> ensureImageEffectRegistered(String imageUrl) {
+    return _runSerially(() async {
+      if (!isImageRegistered.containsKey(imageUrl)) {
+        await StreamVideoFilters().registerImageEffectProcessors(
+          backgroundImageUrl: imageUrl,
+        );
+        isImageRegistered[imageUrl] = true;
+      }
+    });
   }
 
   /// Disables all video filters applied to the local participant video stream.
@@ -263,15 +281,15 @@ class StreamVideoEffectsManager {
         () => 'Could not detach video effects before unregistering: $e\n$stk',
       );
     } finally {
-      // Reset the shared flags before the native call so another manager that
-      // applies a filter meanwhile re-registers instead of trusting a processor
-      // that is about to be removed. Platform-channel calls are processed in
-      // order, so its register lands after this unregister.
-      isBlurRegistered = false;
-      isFullFrameBlurRegistered = false;
-      isImageRegistered.clear();
+      // Queued behind any register already in flight, so its flag is reset
+      // here too, and a register started meanwhile runs after the removal.
+      await _runSerially(() async {
+        isBlurRegistered = false;
+        isFullFrameBlurRegistered = false;
+        isImageRegistered.clear();
 
-      await StreamVideoFilters().unregisterAllFilters();
+        await StreamVideoFilters().unregisterAllFilters();
+      });
     }
   }
 
