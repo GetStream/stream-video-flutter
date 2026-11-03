@@ -31,10 +31,9 @@ final _logger = taggedLogger(tag: 'SV:RtcSubscriber');
 class RtcSubscriber {
   RtcSubscriber({
     required this.pc,
-    required Future<void> Function(RtcRemoteTrack track) attachDecryptor,
-    void Function(RtcRemoteTrack track)? onTrackAdded,
-  }) : _attachDecryptor = attachDecryptor,
-       _onTrackAdded = onTrackAdded {
+    required Future<void> Function(RtcRemoteTrack track) this._attachDecryptor,
+    void Function(RtcRemoteTrack track)? this._onTrackAdded,
+  }) {
     pc.onTrack = _onRemoteTrack;
   }
 
