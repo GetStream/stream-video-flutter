@@ -1069,7 +1069,7 @@ extension PublisherRtcManager on RtcManager {
       liveTransceivers: liveTransceivers,
       sdp: sdp,
       audioSettings: stateManager.callState.settings.audio,
-      dimensionOf: _getTrackDimension,
+      dimensionOf: captureDimensionResolver.resolve,
       onMidUnresolved: (data) {
         publisher?.tracer.trace(TraceTag.trackMidUnresolved, data);
       },
@@ -1266,7 +1266,7 @@ extension PublisherRtcManager on RtcManager {
     _logger.i(() => '[publishVideoTrack] track: $videoTrack');
     tracks[videoTrack.trackId] = videoTrack;
     var updatedTrack = videoTrack.copyWith(
-      videoDimension: _getTrackDimension(videoTrack),
+      videoDimension: captureDimensionResolver.resolve(videoTrack),
       stopTrackOnMute: stopTrackOnMute,
     );
 
@@ -1382,10 +1382,6 @@ extension PublisherRtcManager on RtcManager {
     tracks[updatedTrack.trackId] = updatedTrack;
 
     return Result.success(updatedTrack);
-  }
-
-  RtcVideoDimension _getTrackDimension(RtcLocalVideoTrack track) {
-    return captureDimensionResolver.resolve(track);
   }
 
   /// Explicitly triggers a publisher renegotiation.
@@ -1538,7 +1534,7 @@ extension PublisherRtcManager on RtcManager {
         encodings: audioEncodings,
       );
     } else if (track is RtcLocalVideoTrack) {
-      final captureDimension = _getTrackDimension(track);
+      final captureDimension = captureDimensionResolver.resolve(track);
       final videoEncodings = codecs.findOptimalVideoLayers(
         dimensions: captureDimension,
         publishOptions: publishOptions,

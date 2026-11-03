@@ -69,6 +69,37 @@ void main() {
       },
     );
 
+    test(
+      'a portrait capture on a landscape screen is announced landscape',
+      () {
+        CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
+
+        expect(
+          _resolver(
+            const RtcVideoDimension(width: 2340, height: 1080),
+          ).resolve(_camera(settings: const {'width': 720, 'height': 1280})),
+          const RtcVideoDimension(width: 1280, height: 720),
+        );
+      },
+    );
+
+    test(
+      'a mobile camera whose settings fail is announced at the requested '
+      'size in the orientation of the screen',
+      () {
+        CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
+        final camera = _camera();
+        fakeMediaOf(camera).settingsError = Exception('getSettings');
+        final requested = const CameraConstraints().params.dimension;
+
+        expect(
+          _resolver(_portraitScreen).resolve(camera),
+          requested.orientedLike(_portraitScreen),
+        );
+        expect(requested.width, greaterThan(requested.height));
+      },
+    );
+
     test('a mobile camera keeps its capture size without a screen size', () {
       CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
 

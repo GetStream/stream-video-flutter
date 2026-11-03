@@ -28,8 +28,7 @@ RtcVideoDimension? platformScreenDimension() {
 /// the sensor's capture size, which is landscape, so it is announced in the
 /// orientation of the screen. That is a plugin workaround: Android marks a
 /// size already rotated to the delivered frames with `sensorOrientation`, iOS
-/// does not. Once every platform reports a frame-oriented size, the screen
-/// size is needed for screen share only.
+/// does not.
 @internal
 class CaptureDimensionResolver {
   const CaptureDimensionResolver({
@@ -47,7 +46,7 @@ class CaptureDimensionResolver {
       final screenDimension = _screenDimension();
       streamLog.v(
         _tag,
-        () => '[publishVideoTrack] screenDimension: $screenDimension',
+        () => '[resolve] screenDimension: $screenDimension',
       );
 
       if (screenDimension != null) dimension = screenDimension;
@@ -80,7 +79,7 @@ extension on RtcLocalTrack<VideoConstraints> {
     try {
       // Implemented on web and, via the webrtc fork, on iOS and Android.
       final settings = mediaTrack.getSettings();
-      streamLog.v(_tag, () => '[publishVideoTrack] settings: $settings');
+      streamLog.v(_tag, () => '[resolve] settings: $settings');
       final width = settings['width'];
       final height = settings['height'];
       if (width is num && width > 0) {
@@ -92,7 +91,7 @@ extension on RtcLocalTrack<VideoConstraints> {
     } catch (_) {
       streamLog.w(
         _tag,
-        () => '[publishVideoTrack] `mediaStreamTrack.getSettings()` failed',
+        () => '[resolve] `mediaStreamTrack.getSettings()` failed',
       );
     }
     return dimension;
