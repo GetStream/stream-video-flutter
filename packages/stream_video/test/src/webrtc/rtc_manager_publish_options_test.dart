@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_codec.dart';
@@ -13,6 +15,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../call/fixtures/call_test_helpers.dart';
 import '../call/fixtures/data.dart';
+import 'fixtures/rtc_manager_fakes.dart';
 
 // ignore: missing_override_of_must_be_overridden
 class _MockTracedStreamPeerConnection extends Mock
@@ -96,6 +99,7 @@ void main() {
     registerMockFallbackValues();
     registerFallbackValue(_MockMediaStreamTrack());
     registerFallbackValue(<rtc.RTCRtpEncoding>[]);
+    registerRtcManagerFallbacks();
   });
 
   ({RtcManager manager, int Function() addCalls}) buildManager() {
@@ -207,6 +211,87 @@ void main() {
 
         expect(wires.manager.transceiversManager.get(_vp8), isNull);
         expect(wires.manager.transceiversManager.get(_vp9), isNotNull);
+      },
+    );
+  });
+
+  group('onPublishOptionsChanged adding a codec', () {
+    test(
+      'a new option for a publishing track type clones the sending track '
+      'onto a transceiver of its own',
+      () async {
+        final fixture = RtcManagerFixture(publishOptions: [_vp8]);
+        final camera = (await fixture.manager.publishVideoTrack(
+          track: fakeCameraTrack('cam'),
+        )).getDataOrNull()!;
+
+        await fixture.manager.onPublishOptionsChanged([_vp8, _vp9]);
+
+        expect(fixture.transceivers, hasLength(2));
+        final vp8Sent = fixture.transceivers.first.sender.track!;
+        final vp9Sent = fixture.transceivers.last.sender.track!;
+        expect(vp9Sent.id, isNot(vp8Sent.id));
+        // The new sender gets a clone of the clone the first one sends.
+        expect((vp8Sent as FakeMediaStreamTrack).clones, [vp9Sent]);
+
+        final stored = fixture.manager.tracks[camera.trackId]! as RtcLocalTrack;
+        expect(stored.clonedTracks, [vp8Sent, vp9Sent]);
+      },
+    );
+
+    test(
+      'the clone is stopped when the option was published while it was '
+      'being made',
+      () async {
+        final fixture = RtcManagerFixture(publishOptions: [_vp8]);
+        await fixture.manager.publishVideoTrack(track: fakeCameraTrack('cam'));
+        final vp8Sent =
+            fixture.transceivers.single.sender.track! as FakeMediaStreamTrack;
+
+        final gate = Completer<void>();
+        vp8Sent.cloneGate = gate;
+        final changing = fixture.manager.onPublishOptionsChanged([_vp8, _vp9]);
+        await Future<void>.delayed(Duration.zero);
+
+        // A publish lands while the codec switch is still cloning.
+        await fixture.manager.publishVideoTrack(track: fakeCameraTrack('cam2'));
+        expect(fixture.transceivers, hasLength(2));
+
+        gate.complete();
+        await changing;
+
+        expect(fixture.transceivers, hasLength(2));
+        expect(vp8Sent.clones.single.stopped, isTrue);
+      },
+    );
+
+    test('the clone is stopped when adding its transceiver fails', () async {
+      final fixture = RtcManagerFixture(publishOptions: [_vp8]);
+      final camera = (await fixture.manager.publishVideoTrack(
+        track: fakeCameraTrack('cam'),
+      )).getDataOrNull()!;
+      final vp8Sent =
+          fixture.transceivers.single.sender.track! as FakeMediaStreamTrack;
+      fixture.onAddVideoTransceiver = (_, _) async =>
+          failureWithError('platform refused the transceiver');
+
+      await fixture.manager.onPublishOptionsChanged([_vp8, _vp9]);
+
+      expect(vp8Sent.clones.single.stopped, isTrue);
+      expect(fixture.manager.transceiversManager.get(_vp9), isNull);
+      final stored = fixture.manager.tracks[camera.trackId]! as RtcLocalTrack;
+      expect(stored.clonedTracks, [vp8Sent]);
+    });
+
+    test(
+      'an option for a track type that is not publishing is ignored',
+      () async {
+        final fixture = RtcManagerFixture(publishOptions: [_vp8]);
+
+        await fixture.manager.onPublishOptionsChanged([_vp8, _vp9]);
+
+        expect(fixture.transceivers, isEmpty);
+        expect(fixture.manager.publishOptions, [_vp8, _vp9]);
       },
     );
   });
