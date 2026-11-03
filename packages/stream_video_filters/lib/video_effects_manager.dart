@@ -281,9 +281,7 @@ class StreamVideoEffectsManager {
       // An apply queued before this one has set its effects meanwhile.
       await _clearAppliedEffects();
 
-      final trackId = track != null
-          ? track.mediaTrack.id
-          : await _getTrackId();
+      final trackId = track != null ? track.mediaTrack.id : await _getTrackId();
       if (trackId == null) {
         return;
       }
