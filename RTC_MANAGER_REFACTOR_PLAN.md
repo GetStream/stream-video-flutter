@@ -47,7 +47,7 @@ branches off `v2` instead of in the stack, as long as T11 waits for all of them.
 - [x] 5. **T5** [FLU-1051](https://linear.app/stream/issue/FLU-1051): announced tracks builder (S–M). Audio settings as a value; the `mid` workarounds named as a plugin seam.
 - [x] 6. **T6** [FLU-1052](https://linear.app/stream/issue/FLU-1052): capture dimension resolver with an injected screen size (S). `package:flutter/widgets.dart` leaves the manager.
 - [x] 7. **T7** [FLU-1053](https://linear.app/stream/issue/FLU-1053): Apple ADM mute and audio session out (S). The facade keeps `@internal` delegates.
-- [ ] 8. **T8** [FLU-1054](https://linear.app/stream/issue/FLU-1054): remote track decryption out (S). Participant lookup as a callback.
+- [x] 8. **T8** [FLU-1054](https://linear.app/stream/issue/FLU-1054): remote track decryption out (S). Participant lookup as a callback.
 - [ ] 9. **T9** [FLU-1055](https://linear.app/stream/issue/FLU-1055): telemetry wiring out (S).
 - [ ] 10. **T10** [FLU-1056](https://linear.app/stream/issue/FLU-1056): local track acquisition and the single flight out (S). The publisher never opens a device after this.
 - [ ] 11. **T11** [FLU-1057](https://linear.app/stream/issue/FLU-1057): `RtcSubscriber` (M). Splits the track map; `rtc_audio_api/` stays behind its two seams. Update the `RtcManager` class doc (added in T3) for what moved out.

@@ -23,6 +23,7 @@ import 'audio/audio_session.dart';
 import 'codecs_helper.dart' as codecs;
 import 'codecs_helper.dart';
 import 'e2ee/e2ee_mapping.dart';
+import 'e2ee/remote_track_decryptor.dart';
 import 'media/capture_dimension.dart';
 import 'model/rtc_tracks_info.dart';
 import 'peer_connection.dart';
@@ -135,8 +136,11 @@ class RtcManager extends Disposable {
   /// tracks arrive.
   final rtc.EncryptionManager? e2eeManager;
 
-  /// Remote tracks that arrived before their participant was known.
-  final _pendingDecryptors = <String, RtcRemoteTrack>{};
+  late final _remoteTrackDecryptor = RemoteTrackDecryptor(
+    manager: e2eeManager,
+    userIdForTrackPrefix: _userIdForTrackPrefix,
+    receiverFor: _receiverForTrack,
+  );
 
   final transceiversManager = TransceiverManager();
 
@@ -712,68 +716,16 @@ class RtcManager extends Disposable {
 
   /// Decrypts everything [track]'s receiver delivers, or queues the track
   /// until its participant is known.
-  Future<void> attachDecryptor(RtcRemoteTrack track) async {
-    final manager = e2eeManager;
-    if (manager == null) return;
-
-    final userId = _userIdForTrackPrefix(track.trackIdPrefix);
-    if (userId == null) {
-      _logger.d(
-        () =>
-            '[attachDecryptor] no participant yet for '
-            '${track.trackIdPrefix}; queueing ${track.trackId}',
-      );
-      _pendingDecryptors[track.trackId] = track;
-      return;
-    }
-
-    final receiver = await _receiverForTrack(track);
-    if (receiver == null) {
-      _logger.w(
-        () =>
-            '[attachDecryptor] no RTP receiver for ${track.trackId}; '
-            'frames from $userId stay encrypted',
-      );
-      return;
-    }
-
-    try {
-      await manager.decrypt(
-        receiver,
-        userId: userId,
-        trackType: track.trackType.e2eeTrackType,
-      );
-
-      _logger.d(
-        () =>
-            '[attachDecryptor] attached for userId: $userId, '
-            'trackType: ${track.trackType}',
-      );
-    } catch (e, stk) {
-      _logger.e(
-        () => '[attachDecryptor] failed for userId: $userId: $e',
-      );
-      _logger.v(() => '[attachDecryptor] $stk');
-    }
+  Future<void> attachDecryptor(RtcRemoteTrack track) {
+    return _remoteTrackDecryptor.attach(track);
   }
 
   /// Retries decryptors that were waiting on a participant.
-  Future<void> flushPendingDecryptors() async {
-    if (e2eeManager == null || _pendingDecryptors.isEmpty) return;
-
-    for (final trackId in [..._pendingDecryptors.keys]) {
-      final track = _pendingDecryptors.remove(trackId);
-      if (track == null) continue;
-
-      await attachDecryptor(track);
-    }
-  }
+  Future<void> flushPendingDecryptors() => _remoteTrackDecryptor.flush();
 
   /// Drops decryptors still waiting on a participant who has left.
   void discardPendingDecryptors(String trackIdPrefix) {
-    _pendingDecryptors.removeWhere(
-      (_, track) => track.trackIdPrefix == trackIdPrefix,
-    );
+    _remoteTrackDecryptor.discard(trackIdPrefix);
   }
 
   /// The subscriber receiver carrying [track].
@@ -815,7 +767,7 @@ class RtcManager extends Disposable {
     );
 
     tracks.clear();
-    _pendingDecryptors.clear();
+    _remoteTrackDecryptor.clear();
 
     onLocalTrackMuted = null;
     onLocalTrackPublished = null;
