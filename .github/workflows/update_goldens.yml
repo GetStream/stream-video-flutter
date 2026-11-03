@@ -7,7 +7,9 @@ permissions:
 
 jobs:
   update_goldens:
-    runs-on: ubuntu-latest
+    # Keep in sync with the analyze job in stream_video_flutter_workflow.yml,
+    # which compares against the goldens rendered here.
+    runs-on: ubuntu-26.04
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
