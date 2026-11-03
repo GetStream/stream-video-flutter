@@ -185,9 +185,12 @@ class RtcPublisher {
       );
 
       // The old capture is stopped, so the microphone is reported muted.
-      // Unmuting captures it again, with the new constraints.
+      // Unmuting captures it again, with the new constraints. A microphone
+      // published again meanwhile is live, and is left alone.
       final held = tracks[trackId];
-      if (recaptured.isFailure && held != null) {
+      if (recaptured.isFailure &&
+          held != null &&
+          identical(held.mediaTrack, track.mediaTrack)) {
         onLocalTrackMuted?.call(held, true);
       }
     }
@@ -1460,25 +1463,30 @@ class RtcPublisher {
 
       RtcLocalTrack? captured;
       try {
-        captured = await current.recapture(
+        var sending = captured = await current.recapture(
           mediaConstraints: constraintsFor?.call(current),
         );
-        if (!_isHeld(current)) {
-          return await _keepIfStillHeld(current, captured, tag);
+
+        // Sender by sender, each only while the track is still held, so a
+        // track published again meanwhile keeps its senders.
+        final clones = <rtc.MediaStreamTrack>[];
+        for (final transceiver in transceiversManager.getTransceiversForTrack(
+          trackId,
+        )) {
+          if (!_isHeld(current)) break;
+          final sent = await sending.sendOn([transceiver]);
+          clones.addAll(sent.clonedTracks);
+          captured = sending = sending.copyWith(clonedTracks: [...clones]);
         }
 
-        captured = await captured.sendOn(
-          transceiversManager.getTransceiversForTrack(trackId).toList(),
-        );
-
-        if (captured is RtcLocalAudioTrack) {
+        if (_isHeld(current) && sending is RtcLocalAudioTrack) {
           await _updateAudioPublishOptions(
-            captured.trackType,
+            sending.trackType,
             RtcTrackPublishOptions(audioBitrateProfile: _audioBitrateProfile()),
           );
         }
 
-        return await _keepIfStillHeld(current, captured, tag);
+        return await _keepIfStillHeld(current, sending, tag);
       } catch (e, stk) {
         _logger.e(() => '$tag failed for $trackId: $e');
         await captured?.stop();

@@ -367,6 +367,20 @@ void main() {
       },
     );
 
+    test('a soft mute during a flip keeps the camera off', () async {
+      final camera = await publishCamera();
+
+      final flipping = fixture.manager.flipCamera();
+      final muting = fixture.manager.muteTrack(
+        trackId: camera.trackId,
+        stopTrackOnMute: false,
+      );
+      await Future.wait([flipping, muting]);
+
+      expect(camera.mediaTrack.enabled, isFalse);
+      expect(stored(camera.trackId).mediaTrack.enabled, isFalse);
+    });
+
     test('fails without a camera track', () async {
       final missing = await fixture.manager.flipCamera();
       expect(missing.isFailure, isTrue);

@@ -18,20 +18,26 @@ extension RtcManagerTrackHelper on RtcManager {
       return failureWithError('Track is not camera');
     }
 
-    track.disable();
+    // The camera is off for the flip and back on after it, all while no
+    // mute can run, so a mute that lands meanwhile applies after the flip.
+    final flipped = await _publisher.updateHeldTrack(
+      track.trackId,
+      (current) async {
+        final camera = current as RtcLocalCameraTrack;
+        final wasEnabled = camera.mediaTrack.enabled;
+        camera.disable();
 
-    try {
-      final flipped = await _publisher.updateHeldTrack(
-        track.trackId,
-        (current) => (current as RtcLocalCameraTrack).flipCamera(),
-        tag: '[flipCamera]',
-      );
-      return flipped.map((it) => it as RtcLocalCameraTrack);
-    } finally {
-      // small delay avoids camera being mirrored wrongly for a brief moment
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      track.enable();
-    }
+        try {
+          return await camera.flipCamera();
+        } finally {
+          // small delay avoids camera being mirrored wrongly for a brief moment
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+          if (wasEnabled) camera.enable();
+        }
+      },
+      tag: '[flipCamera]',
+    );
+    return flipped.map((it) => it as RtcLocalCameraTrack);
   }
 
   Future<Result<RtcLocalCameraTrack>> setVideoInputDevice({

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/stream_video.dart';
@@ -114,6 +116,28 @@ void main() {
         await fixture.manager.unmuteTrack(trackId: mic.trackId);
 
         expect(stored(mic.trackId).mediaConstraints, _newConstraints);
+        expect(stored(mic.trackId).mediaTrack.enabled, isTrue);
+      },
+    );
+
+    test(
+      'a microphone published again during the recapture is not reported '
+      'muted',
+      () async {
+        final mic = await publishMic(stopTrackOnMute: true);
+        platform.getUserMediaGate = Completer<void>();
+
+        final changing = fixture.manager.changeDefaultAudioConstraints(
+          _newConstraints,
+        );
+        await pumpEventQueue();
+        await fixture.manager.unpublishTrack(trackId: mic.trackId);
+        final again = await publishMic(stopTrackOnMute: true);
+        platform.getUserMediaGate!.complete();
+        await changing;
+
+        expect(muteEvents, isEmpty);
+        expect(stored(mic.trackId).mediaTrack, same(again.mediaTrack));
         expect(stored(mic.trackId).mediaTrack.enabled, isTrue);
       },
     );
