@@ -13,10 +13,9 @@ final _logger = taggedLogger(tag: 'SV:LocalTrackAcquirer');
 @internal
 class LocalTrackAcquirer {
   LocalTrackAcquirer({
-    required StreamPeerConnectionFactory pcFactory,
-    required String? publisherId,
-  }) : _pcFactory = pcFactory,
-       _publisherId = publisherId;
+    required this._pcFactory,
+    required this._publisherId,
+  });
 
   final StreamPeerConnectionFactory _pcFactory;
 
