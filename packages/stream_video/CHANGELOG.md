@@ -267,7 +267,6 @@
 
 ### 🐞 Fixed
 
-- [Android] Fixed a call hung up outside the app, from a paired watch, a Bluetooth headset or a car head unit, not leaving the Stream call. Ended events carrying `CallData.endedBySystem` are now applied on Android too, while the ambiguous ones, which on Android also mean the incoming call notification was merely dismissed, keep being ignored. Requires the Android Telecom integration in `stream_video_push_notification`.
 - Fixed an issue where `consumeIncomingCall` could create multiple `Call` instances for the same ringing flow, causing state conflicts and UI issues.
 - [iOS] Fixed calls answered on the CallKit screen during a cold start or terminated state not being properly joined, or being incorrectly ended on the device. The SDK now reliably detects and joins answered calls in these scenarios.
 - Fixed the call reconnect loop retrying without a delay or an escalation when an unexpected error was thrown before the reconnect strategy ran.
@@ -327,10 +326,6 @@
   - A transient ICE `disconnected` state is no longer treated as unhealthy, only a permanently `closed` peer connection forces an immediate rejoin.
 - Fixed connection quality indicator blanking after reconnect.
 - Fixed SFU stats not being flushed on call end.
-
-### ✅ Added
-
-- Added client-side call join telemetry (`ClientEventReporter`): the SDK reports each stage of the join funnel — `JoinInitiated`, `CoordinatorWS`, `CoordinatorJoin`, `WSJoin`, `PeerConnectionConnect` (publish/subscribe), `FirstVideoFrame`, and `FirstAudioFrame` — to the backend so join success/failure can be reconciled. Enabled by default; disable via `StreamVideoOptions.clientEventsReportingEnabled`.
 
 ## 1.4.1
 
