@@ -414,7 +414,9 @@ extension RtcManagerTrackHelper on RtcManager {
     if (track is RtcLocalAudioTrack) return publishAudioTrack(track: track);
     if (track is RtcLocalVideoTrack) return publishVideoTrack(track: track);
 
-    return failureWithError('Unsupported track type: ${track.runtimeType}');
+    final message = 'Unsupported track type: ${track.runtimeType}';
+    _logger.e(() => message);
+    return failureWithError(message);
   }
 
   void _startListeningToScreenShareStarted(
