@@ -21,11 +21,12 @@ extension RtcManagerTrackHelper on RtcManager {
     track.disable();
 
     try {
-      final updatedTrack = await track.flipCamera();
-      if (!_publisher.keepIfHeld(track, updatedTrack)) {
-        return failureWithError('Track was unpublished while flipping');
-      }
-      return Result.success(updatedTrack);
+      final flipped = await _publisher.updateHeldTrack(
+        track.trackId,
+        (current) => (current as RtcLocalCameraTrack).flipCamera(),
+        tag: '[flipCamera]',
+      );
+      return flipped.map((it) => it as RtcLocalCameraTrack);
     } finally {
       // small delay avoids camera being mirrored wrongly for a brief moment
       await Future<void>.delayed(const Duration(milliseconds: 50));
@@ -56,28 +57,38 @@ extension RtcManagerTrackHelper on RtcManager {
       return failureWithError('Track is not audio');
     }
 
-    final transceivers = transceiversManager
-        .getTransceiversForTrack(track.trackId)
-        .toList();
+    if (track.mediaConstraints.deviceId == device.id) {
+      _logger.i(() => '[setAudioInputDevice] already selected: $device');
+      return Result.success(track);
+    }
 
-    final RtcLocalAudioTrack updatedTrack;
+    final Result<RtcLocalTrack> switched;
     try {
-      updatedTrack = await track.selectAudioInput(transceivers, device);
+      // On web the input is a property of the capture, so it is captured
+      // again; elsewhere the platform switches the input of the capture.
+      switched = CurrentPlatform.isWeb
+          ? await _publisher.recapture(
+              track.trackId,
+              tag: '[setAudioInputDevice]',
+              constraintsFor: (current) => (current as RtcLocalAudioTrack)
+                  .mediaConstraints
+                  .copyWith(deviceId: device.id),
+            )
+          : await _publisher.updateHeldTrack(
+              track.trackId,
+              (current) => (current as RtcLocalAudioTrack).selectAudioInput(
+                const [],
+                device,
+              ),
+              tag: '[setAudioInputDevice]',
+            );
     } finally {
       // Switching the input restarts capture, which drops the ADM mute.
       // Reconciled on failure too.
       await reconcileAppleAdmMicrophoneMute();
     }
 
-    if (!_publisher.keepIfHeld(track, updatedTrack)) {
-      // On web the switch opened a new capture of its own.
-      if (!identical(updatedTrack.mediaTrack, track.mediaTrack)) {
-        await updatedTrack.stop();
-      }
-      return failureWithError('Track was unpublished while switching input');
-    }
-
-    return Result.success(updatedTrack);
+    return switched.map((it) => it as RtcLocalAudioTrack);
   }
 
   Future<Result<None>> setAudioOutputDevice({
@@ -229,6 +240,7 @@ extension RtcManagerTrackHelper on RtcManager {
                   '[awaitBroadcastStart] publish failed: '
                   '${published.getErrorOrNull()}',
             );
+            await track.stop();
           }
         });
   }

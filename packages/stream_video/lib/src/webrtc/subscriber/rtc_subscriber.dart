@@ -248,7 +248,10 @@ class RtcSubscriber {
   /// Keeps [track] in place of the remote track with its id, unless that one
   /// was removed, or replaced by another, while [track] was being made.
   void _keepIfHeld(RtcRemoteTrack track) {
-    if (!identical(tracks[track.trackId]?.mediaTrack, track.mediaTrack)) return;
+    if (!identical(tracks[track.trackId]?.mediaTrack, track.mediaTrack)) {
+      _logger.d(() => '[keepIfHeld] ${track.trackId} is no longer held');
+      return;
+    }
     tracks[track.trackId] = track;
   }
 

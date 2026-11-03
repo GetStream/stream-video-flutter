@@ -231,9 +231,10 @@ class RtcManager extends Disposable {
     _telemetry?.onSubscriberStats(stats);
   }
 
-  /// The iOS broadcast share created but not started yet, and the
-  /// subscription waiting for it to start.
+  /// The iOS broadcast share created but not started yet.
   RtcLocalScreenShareTrack? _pendingBroadcastTrack;
+
+  /// Waits for [_pendingBroadcastTrack]'s broadcast to start or stop.
   StreamSubscription<NativeWebRtcEvent>? _pendingBroadcastSubscription;
 
   /// Bumped by every cancel, so a broadcast still being created can tell it
@@ -247,8 +248,8 @@ class RtcManager extends Disposable {
     final track = _pendingBroadcastTrack;
     _pendingBroadcastTrack = null;
 
-    // No broadcast arms meanwhile: one still being created sees the new
-    // generation and stops its track instead.
+    // A broadcast still being created sees the new generation and stops its
+    // track, so none starts waiting meanwhile.
     await _pendingBroadcastSubscription?.cancel();
     _pendingBroadcastSubscription = null;
     await track?.stop();

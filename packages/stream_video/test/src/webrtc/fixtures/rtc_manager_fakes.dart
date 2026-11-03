@@ -95,11 +95,16 @@ class FakeMediaStreamTrack extends Fake implements rtc.MediaStreamTrack {
   /// When set, [clone] waits for it before returning.
   Completer<void>? cloneGate;
 
+  /// When set, [clone] throws it.
+  Exception? cloneError;
+
   @override
   Future<void> stop() async => stopCount++;
 
   @override
   Future<rtc.MediaStreamTrack> clone() async {
+    final error = cloneError;
+    if (error != null) throw error;
     final clone = FakeMediaStreamTrack(
       '$id-clone-${clones.length}',
       kind: kind,

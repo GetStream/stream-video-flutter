@@ -313,7 +313,7 @@ void main() {
     });
   });
 
-  group('audio and video share one publish path', () {
+  group('a failed audio or video publish', () {
     setUp(() {
       when(
         () => pc.addVideoTransceiver(
@@ -359,6 +359,18 @@ void main() {
         expect(tracks, isEmpty);
       });
     }
+
+    test('a clone that throws fails the publish and keeps nothing', () async {
+      final rtcPublisher = publisher();
+      final mic = localMic();
+      fakeMediaOf(mic).cloneError = Exception('clone');
+
+      final result = await rtcPublisher.publishTrack(mic);
+
+      expect(result.isFailure, isTrue);
+      expect(rtcPublisher.tracks, isEmpty);
+      expect(fakeMediaOf(mic).stopped, isTrue);
+    });
 
     test('both stop the source and the clone of a failed publish', () async {
       final rtcPublisher = publisher(publishOptions: [_mic, _camera]);
@@ -408,15 +420,26 @@ void main() {
       expect(platform.disposedTrackIds, isNotEmpty);
     });
 
-    test('keepIfHeld does not bring it back either', () async {
+    test('updateHeldTrack does not bring it back either', () async {
       final rtcPublisher = publisher();
       final track = (await rtcPublisher.publishAudioTrack(
         track: localMic(),
       )).getDataOrNull()!;
-      await rtcPublisher.unpublishTrack(trackId: track.trackId);
+      final gate = Completer<RtcLocalTrack>();
 
-      expect(rtcPublisher.keepIfHeld(track, track), isFalse);
+      final updating = rtcPublisher.updateHeldTrack(
+        track.trackId,
+        (_) => gate.future,
+        tag: 'test',
+      );
+      await rtcPublisher.unpublishTrack(trackId: track.trackId);
+      final other = localMic();
+      gate.complete(other);
+
+      expect((await updating).isFailure, isTrue);
       expect(rtcPublisher.tracks, isEmpty);
+      // A capture of its own that the change made is stopped.
+      expect(fakeMediaOf(other).stopped, isTrue);
     });
   });
 

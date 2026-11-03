@@ -247,47 +247,67 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     );
   }
 
-  /// Recreates the track with new [mediaConstraints].
+  /// Recreates the track with new [mediaConstraints] and sends the new
+  /// capture on [transceivers].
   Future<RtcLocalTrack<T>> recreate(
     List<rtc.RTCRtpTransceiver> transceivers, {
     T? mediaConstraints,
   }) async {
-    streamLog.i(_tag, () => 'Recreating track: $trackId');
+    final captured = await recapture(mediaConstraints: mediaConstraints);
+    try {
+      return await captured.sendOn(transceivers);
+    } catch (_) {
+      await captured.stop();
+      rethrow;
+    }
+  }
 
-    // Stop the current track.
+  /// Stops this track and captures it again with [mediaConstraints], or its
+  /// own when null, on the same per-call factory. The new capture has no
+  /// clones and is on no sender yet.
+  Future<RtcLocalTrack<T>> recapture({T? mediaConstraints}) async {
+    streamLog.i(_tag, () => 'Recapturing track: $trackId');
+
     await stop();
 
-    // Use the current constraints if none are provided.
     final constraints = mediaConstraints ?? this.mediaConstraints;
-
-    // Create a new track with the new constraints, pinned to the same
-    // per-call factory the original was attached to.
     final newStream = await rtc.navigator.mediaDevices.getMedia(
       constraints,
       nativeFactory: nativeFactory,
     );
-    final newTrack = newStream.getTracks().first;
-    final clonedTracks = <rtc.MediaStreamTrack>[];
-
-    // Replace the track on the transceiver if it exists.
-    for (final transceiver in transceivers) {
-      if (transceiver.sender.track == null) {
-        continue;
-      }
-
-      final clonedTrack = await newTrack.clone();
-      clonedTracks.add(clonedTrack);
-
-      streamLog.i(_tag, () => 'Replacing track on sender');
-      await transceiver.sender.replaceTrack(clonedTrack);
-    }
 
     return copyWith(
-      mediaTrack: newTrack,
+      mediaTrack: newStream.getTracks().first,
       mediaStream: newStream,
       mediaConstraints: constraints,
-      clonedTracks: clonedTracks,
+      clonedTracks: const [],
     );
+  }
+
+  /// Sends a clone of this track on every one of [transceivers] that is
+  /// sending a track, and returns this track carrying those clones. When one
+  /// fails, the clones made so far are stopped.
+  Future<RtcLocalTrack<T>> sendOn(
+    List<rtc.RTCRtpTransceiver> transceivers,
+  ) async {
+    final clonedTracks = <rtc.MediaStreamTrack>[];
+
+    try {
+      for (final transceiver in transceivers) {
+        if (transceiver.sender.track == null) continue;
+
+        final clonedTrack = await mediaTrack.clone();
+        clonedTracks.add(clonedTrack);
+
+        streamLog.i(_tag, () => 'Replacing track on sender');
+        await transceiver.sender.replaceTrack(clonedTrack);
+      }
+    } catch (_) {
+      await copyWith(clonedTracks: clonedTracks).stopClones();
+      rethrow;
+    }
+
+    return copyWith(clonedTracks: clonedTracks);
   }
 
   @override
