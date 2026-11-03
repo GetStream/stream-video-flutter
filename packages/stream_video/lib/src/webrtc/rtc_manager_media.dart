@@ -106,8 +106,8 @@ extension RtcManagerTrackHelper on RtcManager {
       // The policy the call's factory was built with, so the session and the
       // factory never disagree.
       final policy = pcFactory.resolvedAudioConfigurationPolicy;
-      final configured = await setAppleAudioConfiguration(
-        speakerOn: AppleAudioSession.speakerOnFor(device, policy),
+      final configured = await configureAudioSession(
+        speakerOn: IosAudioSession.speakerOnFor(device, policy),
         policy: policy,
       );
       if (configured is Failure) {

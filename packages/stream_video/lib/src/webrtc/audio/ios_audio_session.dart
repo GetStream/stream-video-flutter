@@ -6,14 +6,14 @@ import '../../errors/stream_video_exception_composer.dart';
 import '../apple_audio_route.dart';
 import 'audio_session.dart';
 
-/// The Apple audio session of a call and its audio output.
+/// The iOS audio session of a call and its audio output.
 ///
 /// A thin wrapper over `Helper.setAppleAudioConfiguration` and
 /// `Helper.selectAudioOutput`, which remembers the configuration it applied
 /// last so it can be restored.
 @internal
-class AppleAudioSession implements AudioSession {
-  AppleAudioSession({
+class IosAudioSession implements AudioSession {
+  IosAudioSession({
     Future<void> Function(rtc.AppleAudioConfiguration) apply =
         rtc.Helper.setAppleAudioConfiguration,
     Future<void> Function(String deviceId) selectAudioOutput =

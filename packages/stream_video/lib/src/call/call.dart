@@ -451,7 +451,7 @@ class Call {
     // as the earpiece.
     if (CurrentPlatform.isIos) {
       final result =
-          await _session?.restoreAppleAudioConfiguration() ??
+          await _session?.restoreAudioSession() ??
           failureWithError('no session');
       if (result is Failure) {
         _logger.e(

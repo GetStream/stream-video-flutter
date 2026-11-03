@@ -18,7 +18,7 @@ import '../telemetry/client_event_types.dart';
 import '../telemetry/media_frame_reporter.dart';
 import '../telemetry/peer_connection_connect_reporter.dart';
 import 'audio/adm_microphone_mute.dart';
-import 'audio/apple_audio_session.dart';
+import 'audio/ios_audio_session.dart';
 import 'audio/audio_session.dart';
 import 'codecs_helper.dart' as codecs;
 import 'codecs_helper.dart';
@@ -864,10 +864,11 @@ class RtcManager extends Disposable {
     pcFactory,
   );
 
-  /// Applies [policy]'s Apple audio session configuration, asking for the
-  /// loudspeaker as the built-in output when [speakerOn].
+  /// Applies [policy]'s audio session configuration, asking for the
+  /// loudspeaker as the built-in output when [speakerOn]. Does nothing on a
+  /// platform without an audio session to configure.
   @internal
-  Future<Result<None>> setAppleAudioConfiguration({
+  Future<Result<None>> configureAudioSession({
     required AudioConfigurationPolicy policy,
     bool speakerOn = false,
   }) {
@@ -875,9 +876,9 @@ class RtcManager extends Disposable {
   }
 
   /// Re-applies the configuration last applied with
-  /// [setAppleAudioConfiguration], if any.
+  /// [configureAudioSession], if any.
   @internal
-  Future<Result<None>> restoreAppleAudioConfiguration() {
+  Future<Result<None>> restoreAudioSession() {
     return _audioSession.restore();
   }
 

@@ -1366,15 +1366,15 @@ class CallSession extends Disposable {
     );
   }
 
-  /// Re-applies the Apple audio session configuration last applied, if any.
+  /// Re-applies the audio session configuration last applied, if any.
   @internal
-  Future<Result<None>> restoreAppleAudioConfiguration() async {
+  Future<Result<None>> restoreAudioSession() async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return failureWithError('Call not connected');
     }
 
-    return rtcManager.restoreAppleAudioConfiguration();
+    return rtcManager.restoreAudioSession();
   }
 
   /// Re-applies the audio output the user selected, if any.

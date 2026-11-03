@@ -58,7 +58,7 @@ void main() {
       rtcManager = _MockRtcManager();
       appleConfigurationApplied = Completer<void>();
       when(
-        () => rtcManager.setAppleAudioConfiguration(
+        () => rtcManager.configureAudioSession(
           policy: any(named: 'policy'),
           speakerOn: any(named: 'speakerOn'),
         ),
@@ -154,7 +154,7 @@ void main() {
 
         expect(call.connectOptions.speakerDefaultOn, isFalse);
         verify(
-          () => rtcManager.setAppleAudioConfiguration(
+          () => rtcManager.configureAudioSession(
             policy: policy,
             speakerOn: true,
           ),
@@ -175,7 +175,7 @@ void main() {
         );
 
         verify(
-          () => rtcManager.setAppleAudioConfiguration(
+          () => rtcManager.configureAudioSession(
             policy: policy,
             // Explicit, since the point is that the speaker stays off.
             // ignore: avoid_redundant_argument_values
@@ -231,7 +231,7 @@ void main() {
         await pumpEventQueue();
 
         verifyInOrder([
-          () => rtcManager.setAppleAudioConfiguration(
+          () => rtcManager.configureAudioSession(
             policy: policy,
             // Explicit, since headphones keep the speaker off.
             // ignore: avoid_redundant_argument_values
@@ -329,7 +329,7 @@ void main() {
       });
 
       when(
-        () => rtcManager.setAppleAudioConfiguration(
+        () => rtcManager.configureAudioSession(
           policy: any(named: 'policy'),
           speakerOn: any(named: 'speakerOn'),
         ),
@@ -361,7 +361,7 @@ void main() {
     group('resumeAudio', () {
       setUp(() {
         when(
-          () => callSession.restoreAppleAudioConfiguration(),
+          () => callSession.restoreAudioSession(),
         ).thenAnswer((_) async => const Result.success(none));
         when(
           () => callSession.applyCurrentAudioOutputDevice(),
@@ -385,7 +385,7 @@ void main() {
         await call.resumeAudio();
 
         verifyInOrder([
-          () => callSession.restoreAppleAudioConfiguration(),
+          () => callSession.restoreAudioSession(),
           () => callSession.applyCurrentAudioOutputDevice(),
         ]);
       });
@@ -401,7 +401,7 @@ void main() {
             ..priority = Priority.none;
         });
         when(
-          () => callSession.restoreAppleAudioConfiguration(),
+          () => callSession.restoreAudioSession(),
         ).thenAnswer((_) async => failureWithError<None>('session busy'));
 
         final call = makeCall(const AudioConfigurationPolicy.broadcaster());

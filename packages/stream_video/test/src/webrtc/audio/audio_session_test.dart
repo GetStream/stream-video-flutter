@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_video/src/webrtc/audio/apple_audio_session.dart';
+import 'package:stream_video/src/webrtc/audio/ios_audio_session.dart';
 import 'package:stream_video/src/webrtc/audio/audio_session.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -22,8 +22,8 @@ void main() {
     late List<Map<String, dynamic>> applied;
     Object? applyError;
 
-    AppleAudioSession session() {
-      return AppleAudioSession(
+    IosAudioSession session() {
+      return IosAudioSession(
         apply: (configuration) async {
           final error = applyError;
           if (error != null) throw error;
@@ -110,25 +110,25 @@ void main() {
   group('speakerOnFor', () {
     test('the loudspeaker is asked for when it is selected', () {
       expect(
-        AppleAudioSession.speakerOnFor(_output('speaker'), viewer),
+        IosAudioSession.speakerOnFor(_output('speaker'), viewer),
         isTrue,
       );
     });
 
     test('the earpiece never asks for the loudspeaker', () {
       expect(
-        AppleAudioSession.speakerOnFor(_output('earpiece'), broadcaster),
+        IosAudioSession.speakerOnFor(_output('earpiece'), broadcaster),
         isFalse,
       );
     });
 
     test('another output follows the policy', () {
       expect(
-        AppleAudioSession.speakerOnFor(_output('bluetooth'), broadcaster),
+        IosAudioSession.speakerOnFor(_output('bluetooth'), broadcaster),
         broadcaster.defaultsToSpeaker,
       );
       expect(
-        AppleAudioSession.speakerOnFor(_output('bluetooth'), viewer),
+        IosAudioSession.speakerOnFor(_output('bluetooth'), viewer),
         viewer.defaultsToSpeaker,
       );
     });
@@ -137,7 +137,7 @@ void main() {
   group('selectOutput', () {
     test('routes the audio to the device', () async {
       final selected = <String>[];
-      final audioSession = AppleAudioSession(
+      final audioSession = IosAudioSession(
         selectAudioOutput: (deviceId) async => selected.add(deviceId),
       );
 
@@ -153,7 +153,7 @@ void main() {
     test('is the Apple session on iOS', () {
       CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
 
-      expect(AudioSession.forPlatform(), isA<AppleAudioSession>());
+      expect(AudioSession.forPlatform(), isA<IosAudioSession>());
     });
 
     test('is the default session elsewhere', () {

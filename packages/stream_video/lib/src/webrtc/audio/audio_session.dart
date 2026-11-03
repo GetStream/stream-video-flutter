@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../../stream_video.dart';
-import 'apple_audio_session.dart';
+import 'ios_audio_session.dart';
 
 /// The audio session of a call and its audio output.
 ///
@@ -11,10 +11,10 @@ import 'apple_audio_session.dart';
 /// themselves.
 @internal
 abstract interface class AudioSession {
-  /// The audio session of the current platform: the Apple one on iOS, the
+  /// The audio session of the current platform: the iOS one on iOS, the
   /// default one elsewhere.
   factory AudioSession.forPlatform() {
-    if (CurrentPlatform.isIos) return AppleAudioSession();
+    if (CurrentPlatform.isIos) return IosAudioSession();
     return const DefaultAudioSession();
   }
 
