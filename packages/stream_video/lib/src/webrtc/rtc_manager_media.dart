@@ -144,7 +144,8 @@ extension RtcManagerTrackHelper on RtcManager {
   ) async {
     if (!rtc_audio.checkIfAudioOutputChangeSupported()) {
       _logger.w(
-        () => '[setAudioOutputDevice] rejected: Audio Output device change is not supported on this browser.',
+        () =>
+            '[setAudioOutputDevice] rejected: Audio Output device change is not supported on this browser.',
       );
       return failureWithError(
         'Audio Output device change is not supported on this browser.',
