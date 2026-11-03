@@ -93,13 +93,13 @@ class RtcManager extends Disposable {
     required this.subscriber,
     required this.publishOptions,
     required this.stateManager,
-    required CallHost host,
+    required this._host,
     required this.pcFactory,
     this.e2eeManager,
     this.sfuId,
     this.clientEventRetryCount = 0,
     this.captureDimensionResolver = const CaptureDimensionResolver(),
-  }) : _host = host {
+  }) {
     subscriber.onTrack = _onRemoteTrack;
     _initClientEventReporting();
   }

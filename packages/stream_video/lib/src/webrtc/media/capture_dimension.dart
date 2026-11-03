@@ -32,8 +32,9 @@ RtcVideoDimension? platformScreenDimension() {
 @internal
 class CaptureDimensionResolver {
   const CaptureDimensionResolver({
-    RtcVideoDimension? Function() screenDimension = platformScreenDimension,
-  }) : _screenDimension = screenDimension;
+    RtcVideoDimension? Function() this._screenDimension =
+        platformScreenDimension,
+  });
 
   /// The size of the screen, or null when it is unknown.
   final RtcVideoDimension? Function() _screenDimension;
