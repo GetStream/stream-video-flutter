@@ -330,14 +330,7 @@ class RtcManager extends Disposable {
   }) async {
     final publishedTrack = tracks.remove(trackId);
 
-    if (publishedTrack == null) {
-      // A remote track is only stopped: its receiver belongs to the
-      // receive-only subscriber, so there is no sender to remove.
-      if (await _subscriber.removeTrack(trackId)) return;
-
-      _logger.w(() => '[unpublishTrack] rejected (track not found): $trackId');
-      return;
-    }
+    if (publishedTrack == null) return _removeRemoteTrack(trackId);
 
     final handedOver = _handedOverMediaTracks.remove(trackId);
     if (publishedTrack is RtcLocalTrack &&
@@ -362,6 +355,14 @@ class RtcManager extends Disposable {
         }
       }
     }
+  }
+
+  /// Stops the remote track of [trackId]. Its receiver belongs to the
+  /// receive-only subscriber, so there is no sender to remove.
+  Future<void> _removeRemoteTrack(String trackId) async {
+    if (await _subscriber.removeTrack(trackId)) return;
+
+    _logger.w(() => '[unpublishTrack] rejected (track not found): $trackId');
   }
 
   /// Gives the live local tracks to the manager of the session that replaces
