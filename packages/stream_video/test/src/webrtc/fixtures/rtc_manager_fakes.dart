@@ -362,6 +362,15 @@ class FakeWebRtcPlatform {
   /// When set, `getUserMedia` fails with it.
   PlatformException? getUserMediaError;
 
+  /// When set, `createOffer` fails with it.
+  PlatformException? createOfferError;
+
+  /// When true, `createOffer` answers with an empty SDP.
+  bool createOfferWithEmptySdp = false;
+
+  /// When set, `peerConnectionDispose` fails with it.
+  PlatformException? peerConnectionDisposeError;
+
   /// What `mediaStreamTrackSwitchCamera` reports: true for the front camera.
   bool switchesToFrontCamera = false;
 
@@ -443,8 +452,17 @@ class FakeWebRtcPlatform {
       case 'addTransceiver':
         return _transceiver(call);
       case 'createOffer':
+        final error = createOfferError;
+        if (error != null) throw error;
         final peerConnectionId = (call.arguments as Map)['peerConnectionId'];
-        return {'sdp': 'v=0 $peerConnectionId', 'type': 'offer'};
+        return {
+          'sdp': createOfferWithEmptySdp ? '' : 'v=0 $peerConnectionId',
+          'type': 'offer',
+        };
+      case 'peerConnectionDispose':
+        final error = peerConnectionDisposeError;
+        if (error != null) throw error;
+        return null;
       default:
         return null;
     }

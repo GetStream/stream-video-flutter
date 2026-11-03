@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/stream_video.dart';
@@ -36,7 +37,11 @@ void main() {
         );
 
         expect(sdp, 'v=0 pc-0');
-        expect(platform.callsOf('addTransceiver'), hasLength(2));
+        final directions = platform
+            .callsOf('addTransceiver')
+            .map((call) => (call.arguments as Map)['transceiverInit'] as Map)
+            .map((init) => init['direction']);
+        expect(directions, ['sendonly', 'sendonly']);
         expect(platform.callsOf('peerConnectionDispose'), hasLength(1));
       },
     );
@@ -73,6 +78,70 @@ void main() {
       await factory().getGenericSdp(rtc.TransceiverDirection.SendOnly);
 
       expect(platform.callsOf('createPeerConnection'), hasLength(2));
+    });
+
+    test(
+      'a failed offer is not cached and its peer connection is disposed',
+      () async {
+        final pcFactory = factory();
+        platform.createOfferError = PlatformException(code: 'failed');
+
+        await expectLater(
+          pcFactory.getGenericSdp(rtc.TransceiverDirection.SendOnly),
+          throwsA(anything),
+        );
+        expect(platform.callsOf('peerConnectionDispose'), hasLength(1));
+
+        platform.createOfferError = null;
+        final sdp = await pcFactory.getGenericSdp(
+          rtc.TransceiverDirection.SendOnly,
+        );
+
+        expect(sdp, isNotEmpty);
+        expect(platform.callsOf('createPeerConnection'), hasLength(2));
+      },
+    );
+
+    test('an empty offer is not cached', () async {
+      final pcFactory = factory();
+      platform.createOfferWithEmptySdp = true;
+
+      final empty = await pcFactory.getGenericSdp(
+        rtc.TransceiverDirection.SendOnly,
+      );
+      expect(empty, isEmpty);
+
+      platform.createOfferWithEmptySdp = false;
+      final sdp = await pcFactory.getGenericSdp(
+        rtc.TransceiverDirection.SendOnly,
+      );
+
+      expect(sdp, isNotEmpty);
+      expect(platform.callsOf('createPeerConnection'), hasLength(2));
+    });
+
+    test('a failed dispose keeps the offer', () async {
+      platform.peerConnectionDisposeError = PlatformException(code: 'failed');
+
+      final sdp = await factory().getGenericSdp(
+        rtc.TransceiverDirection.SendOnly,
+      );
+
+      expect(sdp, 'v=0 pc-0');
+    });
+
+    test('a failed dispose does not hide why the offer failed', () async {
+      platform
+        ..createOfferError = PlatformException(
+          code: 'failed',
+          message: 'offer-failed',
+        )
+        ..peerConnectionDisposeError = PlatformException(code: 'dispose');
+
+      await expectLater(
+        factory().getGenericSdp(rtc.TransceiverDirection.SendOnly),
+        throwsA(contains('offer-failed')),
+      );
     });
   });
 }

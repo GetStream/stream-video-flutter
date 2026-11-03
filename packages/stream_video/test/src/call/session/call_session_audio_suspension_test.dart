@@ -62,8 +62,14 @@ class _FakeAudioTrack extends Fake implements RtcRemoteTrack {
   @override
   void disable() => enabled = false;
 
+  /// Runs when [start] is called.
+  void Function()? onStart;
+
   @override
-  Future<void> start() async => startCalled = true;
+  Future<void> start() async {
+    startCalled = true;
+    onStart?.call();
+  }
 
   @override
   Future<void> stop({bool disposeWebAudioPlayer = true}) async =>
@@ -220,6 +226,9 @@ void _stubTracks(
 }) {
   when(() => rtcManager.localTracks).thenReturn(local);
   when(() => rtcManager.remoteTracks).thenReturn(remote);
+  when(
+    () => rtcManager.getTrack(any()),
+  ).thenAnswer((i) => {...local, ...remote}[i.positionalArguments.first]);
 }
 
 void main() {
@@ -437,6 +446,31 @@ void main() {
 
       expect(local.mediaTrack.enabled, isTrue);
       expect(remote.enabled, isTrue);
+    });
+
+    test('skips a track removed while an earlier one resumed', () async {
+      final session = _buildTestSession();
+      final mockRtcManager = MockRtcManager();
+      final first = _FakeAudioTrack();
+      final removed = _FakeAudioTrack()..enabled = false;
+
+      _stubTracks(
+        mockRtcManager,
+        remote: {'first:audio': first, 'removed:audio': removed},
+      );
+      // The first track's start lets the second one go away.
+      first.onStart = () => when(
+        () => mockRtcManager.getTrack('removed:audio'),
+      ).thenReturn(null);
+      session.rtcManager = mockRtcManager;
+
+      await session.resumeSuspendedAudioTracks({
+        'first:audio': SuspendedTrackState.neverStarted,
+        'removed:audio': SuspendedTrackState.wasEnabled,
+      });
+
+      expect(first.startCalled, isTrue);
+      expect(removed.enabled, isFalse);
     });
 
     test('does nothing when rtcManager is null', () async {

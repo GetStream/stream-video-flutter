@@ -1439,6 +1439,8 @@ class CallSession extends Disposable {
     for (final entry in tracks.entries) {
       final track = entry.value;
       if (!track.isAudioTrack) continue;
+      // Gone since the snapshot was taken, while an earlier track resumed.
+      if (rtcManager.getTrack(entry.key) == null) continue;
 
       final prior = priorStates[entry.key];
       if (prior == null) continue;

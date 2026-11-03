@@ -323,7 +323,15 @@ class StreamPeerConnectionFactory {
       final offer = await tempPC.createOffer();
       sdp = offer.sdp;
     } finally {
-      await tempPC.dispose();
+      // Logged, not thrown: a failed dispose must neither hide why the offer
+      // failed nor throw away an offer that was made.
+      try {
+        await tempPC.dispose();
+      } catch (e, stk) {
+        _logger.w(
+          () => '[getGenericSdp] peer connection dispose failed: $e\n$stk',
+        );
+      }
     }
 
     if (sdp == null) {
