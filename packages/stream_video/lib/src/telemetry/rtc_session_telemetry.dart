@@ -16,18 +16,14 @@ import 'peer_connection_connect_reporter.dart';
 @internal
 class RtcSessionTelemetry {
   RtcSessionTelemetry({
-    required ClientEventReporter reporter,
-    required StreamCallCid callCid,
-    String? sfuId,
-    int retryCount = 0,
-  }) : _reporter = reporter,
-       _callCid = callCid,
-       _sfuId = sfuId,
-       _retryCount = retryCount,
-       _mediaFrameReporter = MediaFrameReporter(
-         reporter: reporter,
-         callCid: callCid,
-         sfuId: sfuId,
+    required this._reporter,
+    required this._callCid,
+    this._sfuId,
+    this._retryCount = 0,
+  }) : _mediaFrameReporter = MediaFrameReporter(
+         reporter: _reporter,
+         callCid: _callCid,
+         sfuId: _sfuId,
        );
 
   final ClientEventReporter _reporter;
