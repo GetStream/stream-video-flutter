@@ -32,10 +32,13 @@ class StreamVideoEffectsManager {
   static Map<String, bool> isImageRegistered = <String, bool>{};
   static Map<String, bool> isCustomEffectRegistered = <String, bool>{};
 
-  // Built-in register and unregister calls, together with the flags above that
-  // mirror them, run one at a time across all managers. Otherwise an unregister
-  // could remove a processor whose register is still in flight, leaving its
-  // flag set for a processor that no longer exists.
+  // Registering, attaching, detaching and unregistering built-in effects, and
+  // the flags above that mirror the registry, run one at a time across all
+  // managers. Otherwise an unregister could run between the register and the
+  // attach of an apply that is in flight: the attach would then install a name
+  // that no longer exists (sending the camera image unfiltered while
+  // appliedVideoEffects reports the effect), or, in the other order, attach a
+  // processor right after it was detached for release.
   static Future<void> _registryQueue = Future.value();
 
   static Future<void> _runSerially(Future<void> Function() action) {
@@ -52,6 +55,7 @@ class StreamVideoEffectsManager {
   final _logger = taggedLogger(tag: _tag);
   List<String>? _appliedVideoEffects;
   StreamSubscription<bool?>? _localVideoTrackSubscription;
+  bool _disposed = false;
 
   /// Checks if the background effect is supported on the current device.
   Future<bool> isSupported() async {
@@ -67,25 +71,23 @@ class StreamVideoEffectsManager {
   Future<void> applyBackgroundBlurFilter(
     BlurIntensity blurIntensity, {
     RtcLocalTrack? track,
-  }) async {
-    if (!(await isSupported())) {
-      return;
-    }
-
-    await ensureBlurEffectRegistered();
-    await applyVideoEffects([blurIntensity.name], track: track);
+  }) {
+    return _applyBuiltInEffects(
+      [blurIntensity.name],
+      register: _registerBlurEffectIfNeeded,
+      track: track,
+    );
   }
 
   /// Applies a full-frame blur filter to the local participant video stream.
   Future<void> applyFullFrameBlurFilter({
     RtcLocalTrack? track,
-  }) async {
-    if (!(await isSupported())) {
-      return;
-    }
-
-    await ensureFullFrameBlurEffectRegistered();
-    await applyVideoEffects(['FullFrameBlur'], track: track);
+  }) {
+    return _applyBuiltInEffects(
+      ['FullFrameBlur'],
+      register: _registerFullFrameBlurEffectIfNeeded,
+      track: track,
+    );
   }
 
   /// Applies a background image filter to the local participant video stream.
@@ -98,33 +100,39 @@ class StreamVideoEffectsManager {
   Future<void> applyBackgroundImageFilter(
     String imageUrl, {
     RtcLocalTrack? track,
-  }) async {
-    if (!(await isSupported())) {
-      return;
-    }
-
-    await ensureImageEffectRegistered(imageUrl);
-    await applyVideoEffects(['VirtualBackground-$imageUrl'], track: track);
+  }) {
+    return _applyBuiltInEffects(
+      ['VirtualBackground-$imageUrl'],
+      register: () => _registerImageEffectIfNeeded(imageUrl),
+      track: track,
+    );
   }
 
   /// Applies a custom effect to the local participant video stream.
   /// The [effectName] parameter specifies the name of the custom effect.
   /// The [registerEffectProcessorCallback] parameter is is a required callback to register the custom effect processor.
   /// For details on how to implement the custom effect check the documentation.
+  ///
+  /// The callback runs inside this manager's effect queue, so it must not call
+  /// back into any apply, disable or unregister method of a
+  /// [StreamVideoEffectsManager]: that call would wait for the queue, which is
+  /// waiting for the callback.
   Future<void> applyCustomEffect(
     String effectName, {
     required Future<void> Function() registerEffectProcessorCallback,
-  }) async {
-    if (!(await isSupported())) {
-      return;
-    }
+  }) {
+    return _runSerially(() async {
+      if (!(await isSupported())) {
+        return;
+      }
 
-    if (!isCustomEffectRegistered.containsKey(effectName)) {
-      await registerEffectProcessorCallback();
-      isCustomEffectRegistered[effectName] = true;
-    }
+      if (!isCustomEffectRegistered.containsKey(effectName)) {
+        await registerEffectProcessorCallback();
+        isCustomEffectRegistered[effectName] = true;
+      }
 
-    await applyVideoEffects([effectName]);
+      await _applyVideoEffects([effectName]);
+    });
   }
 
   /// Applies a list of video effects to the local participant video stream.
@@ -133,24 +141,76 @@ class StreamVideoEffectsManager {
   Future<void> applyVideoEffects(
     List<String> names, {
     RtcLocalTrack? track,
+  }) {
+    return _runSerially(() async {
+      if (!(await isSupported())) {
+        return;
+      }
+      await _applyVideoEffects(names, track: track);
+    });
+  }
+
+  /// Registers a built-in effect and attaches it as one unit of the registry
+  /// queue, so no unregister can slip in between the two.
+  ///
+  /// Every public apply, disable and unregister method takes its place in the
+  /// queue synchronously, before any await, so calls run in the order they
+  /// were made even when they are not awaited.
+  Future<void> _applyBuiltInEffects(
+    List<String> names, {
+    required Future<void> Function() register,
+    RtcLocalTrack? track,
+  }) {
+    return _runSerially(() async {
+      if (!(await isSupported())) {
+        return;
+      }
+      await register();
+      await _applyVideoEffects(names, track: track, register: register);
+    });
+  }
+
+  /// Attaches [names] to the local video track and re-attaches them whenever
+  /// the camera is turned back on (the track is re-created then). Runs inside
+  /// the registry queue. [register] re-registers a built-in effect before a
+  /// re-attach, in case the registry was cleared meanwhile.
+  Future<void> _applyVideoEffects(
+    List<String> names, {
+    RtcLocalTrack? track,
+    Future<void> Function()? register,
   }) async {
+    if (_disposed) {
+      return;
+    }
     _appliedVideoEffects = names;
 
     await _localVideoTrackSubscription?.cancel();
     _localVideoTrackSubscription = call
         .partialState((s) => s.localParticipant?.isVideoEnabled)
+        // The stream replays the current value on subscribe. That is the
+        // track being attached to right below, not a camera-on: re-applying
+        // on it would build a second processor chain on Android.
+        .skip(1)
         .where((enabled) => enabled ?? false)
-        .listen(
-          (_) async {
-            final trackId = await _getTrackId();
-            if (trackId != null) {
-              await rtc.setVideoEffects(
-                trackId,
-                names: names,
+        .listen((_) {
+          unawaited(
+            _runSerially(() async {
+              // Replaced or removed while this was queued: nothing to re-apply.
+              if (_disposed || !identical(_appliedVideoEffects, names)) {
+                return;
+              }
+              await register?.call();
+              final trackId = await _getTrackId();
+              if (trackId != null) {
+                await rtc.setVideoEffects(trackId, names: names);
+              }
+            }).catchError((Object e, StackTrace stk) {
+              _logger.w(
+                () => 'Could not re-apply video effects $names: $e\n$stk',
               );
-            }
-          },
-        );
+            }),
+          );
+        });
 
     final trackId = track != null ? track.mediaTrack.id : await _getTrackId();
     if (trackId == null) {
@@ -169,56 +229,84 @@ class StreamVideoEffectsManager {
 
   /// Ensures that the blur effect processor is registered.
   Future<void> ensureBlurEffectRegistered() {
-    return _runSerially(() async {
-      if (!isBlurRegistered) {
-        await StreamVideoFilters().registerBlurEffectProcessors();
-        isBlurRegistered = true;
-      }
-    });
+    return _runSerially(_registerBlurEffectIfNeeded);
   }
 
   /// Ensures that the full-frame blur effect processor is registered.
   Future<void> ensureFullFrameBlurEffectRegistered() {
-    return _runSerially(() async {
-      if (!isFullFrameBlurRegistered) {
-        await StreamVideoFilters().registerFullFrameBlurEffectProcessor();
-        isFullFrameBlurRegistered = true;
-      }
-    });
+    return _runSerially(_registerFullFrameBlurEffectIfNeeded);
   }
 
   /// Ensures that the image effect processor is registered.
   Future<void> ensureImageEffectRegistered(String imageUrl) {
-    return _runSerially(() async {
-      if (!isImageRegistered.containsKey(imageUrl)) {
-        await StreamVideoFilters().registerImageEffectProcessors(
-          backgroundImageUrl: imageUrl,
-        );
-        isImageRegistered[imageUrl] = true;
-      }
-    });
+    return _runSerially(() => _registerImageEffectIfNeeded(imageUrl));
+  }
+
+  // The three below must run inside the registry queue.
+
+  Future<void> _registerBlurEffectIfNeeded() async {
+    if (!isBlurRegistered) {
+      await StreamVideoFilters().registerBlurEffectProcessors();
+      isBlurRegistered = true;
+    }
+  }
+
+  Future<void> _registerFullFrameBlurEffectIfNeeded() async {
+    if (!isFullFrameBlurRegistered) {
+      await StreamVideoFilters().registerFullFrameBlurEffectProcessor();
+      isFullFrameBlurRegistered = true;
+    }
+  }
+
+  Future<void> _registerImageEffectIfNeeded(String imageUrl) async {
+    if (!isImageRegistered.containsKey(imageUrl)) {
+      await StreamVideoFilters().registerImageEffectProcessors(
+        backgroundImageUrl: imageUrl,
+      );
+      isImageRegistered[imageUrl] = true;
+    }
   }
 
   /// Disables all video filters applied to the local participant video stream.
   Future<void> disableAllFilters({
     RtcLocalTrack? track,
-  }) async {
-    if (!(await isSupported())) {
-      return;
-    }
+  }) {
+    // Queued so it cannot run between the register and the attach of an apply
+    // in flight, which would leave that effect attached.
+    final queued = _runSerially(() async {
+      if (!(await isSupported())) {
+        return;
+      }
 
+      // An apply queued before this one has set its effects meanwhile.
+      await _clearAppliedEffects();
+
+      final trackId = track != null
+          ? track.mediaTrack.id
+          : await _getTrackId();
+      if (trackId == null) {
+        return;
+      }
+
+      await rtc.setVideoEffects(
+        trackId,
+        names: [],
+      );
+    });
+
+    // Also right away, so appliedVideoEffects reports the change at once.
+    unawaited(_clearAppliedEffects());
+    return queued;
+  }
+
+  /// Forgets the applied effects and stops re-applying them on camera-on.
+  /// Called right away so [appliedVideoEffects] reports the change at once,
+  /// and again inside the registry queue to undo an apply that was queued
+  /// before the disable or unregister and has completed meanwhile.
+  Future<void> _clearAppliedEffects() async {
     _appliedVideoEffects = [];
     await _localVideoTrackSubscription?.cancel();
-
-    final trackId = track != null ? track.mediaTrack.id : await _getTrackId();
-    if (trackId == null) {
-      return;
-    }
-
-    await rtc.setVideoEffects(
-      trackId,
-      names: [],
-    );
+    _localVideoTrackSubscription = null;
   }
 
   Future<String?> _getTrackId() async {
@@ -257,44 +345,58 @@ class StreamVideoEffectsManager {
   /// effect still attached to the local video track is detached first so the
   /// processors can actually be released, and once the track is torn down that
   /// native effect chain can no longer be reached.
-  Future<void> unregisterAllFilters() async {
-    if (!(await isSupported())) {
-      return;
-    }
-
-    _appliedVideoEffects = [];
-    await _localVideoTrackSubscription?.cancel();
-    _localVideoTrackSubscription = null;
-
-    // Detach before removing from the registry: the native effect chain holds
-    // strong references to the processors, so without this they would keep
-    // running (and stay alive) while appliedVideoEffects reports nothing.
-    try {
-      final trackId = await _getTrackId();
-      if (trackId != null) {
-        await rtc.setVideoEffects(trackId, names: []);
+  ///
+  /// The registry is shared by every [StreamVideoEffectsManager] in the
+  /// process, so this detaches the effects of all of them. Another manager
+  /// keeps reporting its [appliedVideoEffects] and re-registers and re-attaches
+  /// them the next time the camera is turned on.
+  Future<void> unregisterAllFilters() {
+    // Queued behind any apply already in flight, so this never runs between
+    // its register and its attach; its flag is reset here too, and an apply
+    // started meanwhile registers again after the removal.
+    final queued = _runSerially(() async {
+      if (!(await isSupported())) {
+        return;
       }
-    } catch (e, stk) {
-      // Best effort: right after leave() the track's factory is already gone
-      // and the detach fails. The registry is still cleaned up below.
-      _logger.w(
-        () => 'Could not detach video effects before unregistering: $e\n$stk',
-      );
-    } finally {
-      // Queued behind any register already in flight, so its flag is reset
-      // here too, and a register started meanwhile runs after the removal.
-      await _runSerially(() async {
-        isBlurRegistered = false;
-        isFullFrameBlurRegistered = false;
-        isImageRegistered.clear();
 
-        await StreamVideoFilters().unregisterAllFilters();
-      });
-    }
+      // An apply queued before this one has set its effects meanwhile.
+      await _clearAppliedEffects();
+
+      // Detach before removing from the registry: the native effect chain
+      // holds strong references to the processors, so without this they would
+      // keep running (and stay alive) while appliedVideoEffects reports
+      // nothing.
+      try {
+        final trackId = await _getTrackId();
+        if (trackId != null) {
+          await rtc.setVideoEffects(trackId, names: []);
+        }
+      } catch (e, stk) {
+        // Best effort: right after leave() the track's factory is already
+        // gone and the detach fails. The registry is still cleaned up below.
+        _logger.w(
+          () => 'Could not detach video effects before unregistering: $e\n$stk',
+        );
+      }
+
+      isBlurRegistered = false;
+      isFullFrameBlurRegistered = false;
+      isImageRegistered.clear();
+
+      await StreamVideoFilters().unregisterAllFilters();
+    });
+
+    // Also right away, so appliedVideoEffects reports the change at once.
+    unawaited(_clearAppliedEffects());
+    return queued;
   }
 
+  /// Stops re-applying effects on camera-on. An apply still queued or in
+  /// flight no longer attaches anything either. The effects currently attached
+  /// to the track stay attached; use [disableAllFilters] or
+  /// [unregisterAllFilters] first to remove them.
   Future<void> dispose() async {
-    await _localVideoTrackSubscription?.cancel();
-    _localVideoTrackSubscription = null;
+    _disposed = true;
+    await _clearAppliedEffects();
   }
 }

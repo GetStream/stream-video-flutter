@@ -49,7 +49,8 @@ final class BlurBackgroundVideoFrameProcessor: VideoFilter {
 
             if let output = self.backgroundImageFilterProcessor.applyFilter(
                 input.originalPixelBuffer,
-                backgroundImage: backgroundImage
+                backgroundImage: backgroundImage,
+                orientation: input.originalImageOrientation
             ) {
                 return output
             }

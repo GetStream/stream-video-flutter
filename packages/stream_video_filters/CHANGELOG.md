@@ -6,11 +6,11 @@
 
 ### 🔄 Changed
 
-- Virtual background filters now blur the background while the background image is still loading, and keep blurring it if the image cannot be loaded, instead of sending the raw camera frame.
+- Improvements to background filters: smoother and more stable edges around the person on Android and iOS, better performance, and the real background is never sent unfiltered while a filter is being set up.
 
 ### 🐞 Fixed
 
-- [iOS] Improved performance and stability of background blur and virtual background filters.
+- Fixed stability issues in background blur and virtual background filters on Android and iOS.
 
 ## 1.7.2
 

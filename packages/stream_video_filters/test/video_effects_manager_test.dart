@@ -114,9 +114,11 @@ void main() {
     call = MockCall();
     when(() => call.state).thenReturn(stateEmitter);
     when(() => call.getTrack(any(), any())).thenReturn(track);
-    when(
-      () => call.partialState<bool?>(any()),
-    ).thenAnswer((_) => videoEnabled.stream);
+    // Like the real stream, replays the current value (camera on) on subscribe.
+    when(() => call.partialState<bool?>(any())).thenAnswer((_) async* {
+      yield true;
+      yield* videoEnabled.stream;
+    });
   });
 
   tearDown(() async {
@@ -204,14 +206,159 @@ void main() {
       final unregister = manager.unregisterAllFilters();
       await pumpEventQueue();
 
-      expect(log, ['registerBlur', 'setVideoEffects:[]']);
+      expect(log, ['registerBlur']);
 
       platform.blurRegistration!.complete();
       await register;
       await unregister;
 
-      expect(log.last, 'unregisterAll');
+      expect(log, ['registerBlur', 'setVideoEffects:[]', 'unregisterAll']);
       expect(StreamVideoEffectsManager.isBlurRegistered, isFalse);
+    });
+
+    test('waits for an apply that is already in flight', () async {
+      final manager = StreamVideoEffectsManager(call);
+      platform.blurRegistration = Completer<void>();
+
+      final apply = manager.applyBackgroundBlurFilter(BlurIntensity.medium);
+      await pumpEventQueue();
+      final unregister = manager.unregisterAllFilters();
+      await pumpEventQueue();
+
+      // The detach must not run between the register and the attach.
+      expect(log, ['registerBlur']);
+
+      platform.blurRegistration!.complete();
+      await apply;
+      await unregister;
+
+      expect(log, [
+        'registerBlur',
+        'setVideoEffects:[BackgroundBlurMedium]',
+        'setVideoEffects:[]',
+        'unregisterAll',
+      ]);
+      expect(manager.appliedVideoEffects, isEmpty);
+      expect(StreamVideoEffectsManager.isBlurRegistered, isFalse);
+
+      // The apply's camera-on subscription is gone with it.
+      log.clear();
+      videoEnabled.add(true);
+      await pumpEventQueue();
+      expect(log, isEmpty);
+    });
+
+    test(
+      "another manager's effect registers again when the camera turns on",
+      () async {
+        final manager = StreamVideoEffectsManager(call);
+        final otherManager = StreamVideoEffectsManager(call);
+        await manager.applyBackgroundBlurFilter(BlurIntensity.medium);
+        await otherManager.unregisterAllFilters();
+        log.clear();
+
+        videoEnabled.add(true);
+        await pumpEventQueue();
+
+        expect(log, ['registerBlur', 'setVideoEffects:[BackgroundBlurMedium]']);
+        expect(StreamVideoEffectsManager.isBlurRegistered, isTrue);
+      },
+    );
+  });
+
+  group('apply', () {
+    test('does not re-apply on the replayed camera state', () async {
+      final manager = StreamVideoEffectsManager(call);
+
+      await manager.applyBackgroundBlurFilter(BlurIntensity.medium);
+      await pumpEventQueue();
+
+      expect(log, ['registerBlur', 'setVideoEffects:[BackgroundBlurMedium]']);
+    });
+
+    test('re-applies when the camera is turned back on', () async {
+      final manager = StreamVideoEffectsManager(call);
+      await manager.applyBackgroundBlurFilter(BlurIntensity.medium);
+      await pumpEventQueue();
+      log.clear();
+
+      videoEnabled.add(false);
+      videoEnabled.add(true);
+      await pumpEventQueue();
+
+      expect(log, ['setVideoEffects:[BackgroundBlurMedium]']);
+    });
+
+    test('calls run in the order they were made when not awaited', () async {
+      final manager = StreamVideoEffectsManager(call);
+
+      final disable = manager.disableAllFilters();
+      final apply = manager.applyVideoEffects(['Custom']);
+      await Future.wait([disable, apply]);
+
+      expect(log, ['setVideoEffects:[]', 'setVideoEffects:[Custom]']);
+      expect(manager.appliedVideoEffects, ['Custom']);
+    });
+
+    test('a custom effect queued before a disable ends up detached', () async {
+      final manager = StreamVideoEffectsManager(call);
+
+      final apply = manager.applyCustomEffect(
+        'Custom',
+        registerEffectProcessorCallback: () async => log.add('registerCustom'),
+      );
+      final disable = manager.disableAllFilters();
+      await Future.wait([apply, disable]);
+
+      expect(log, [
+        'registerCustom',
+        'setVideoEffects:[Custom]',
+        'setVideoEffects:[]',
+      ]);
+      expect(manager.appliedVideoEffects, isEmpty);
+    });
+
+    test('an apply in flight when disposing attaches nothing', () async {
+      final manager = StreamVideoEffectsManager(call);
+      platform.blurRegistration = Completer<void>();
+
+      final apply = manager.applyBackgroundBlurFilter(BlurIntensity.medium);
+      await pumpEventQueue();
+      await manager.dispose();
+      platform.blurRegistration!.complete();
+      await apply;
+
+      expect(log, ['registerBlur']);
+
+      videoEnabled.add(false);
+      videoEnabled.add(true);
+      await pumpEventQueue();
+      expect(log, ['registerBlur']);
+    });
+  });
+
+  group('disableAllFilters', () {
+    test('waits for an apply that is already in flight', () async {
+      final manager = StreamVideoEffectsManager(call);
+      platform.blurRegistration = Completer<void>();
+
+      final apply = manager.applyBackgroundBlurFilter(BlurIntensity.medium);
+      await pumpEventQueue();
+      final disable = manager.disableAllFilters();
+      await pumpEventQueue();
+
+      expect(log, ['registerBlur']);
+
+      platform.blurRegistration!.complete();
+      await apply;
+      await disable;
+
+      expect(log, [
+        'registerBlur',
+        'setVideoEffects:[BackgroundBlurMedium]',
+        'setVideoEffects:[]',
+      ]);
+      expect(manager.appliedVideoEffects, isEmpty);
     });
   });
 }

@@ -27,6 +27,21 @@ extension RTCVideoRotation {
     }
 }
 
+extension CGImagePropertyOrientation {
+    /// The orientation that undoes this one: `image.oriented(o).oriented(o.inverted)`
+    /// is `image` again. Quarter turns swap, everything else is its own inverse.
+    var inverted: CGImagePropertyOrientation {
+        switch self {
+        case .left:
+            return .right
+        case .right:
+            return .left
+        default:
+            return self
+        }
+    }
+}
+
 open class VideoFilter: NSObject, VideoFrameProcessorDelegate {
 
     /// An object which encapsulates the required input for a Video filter.

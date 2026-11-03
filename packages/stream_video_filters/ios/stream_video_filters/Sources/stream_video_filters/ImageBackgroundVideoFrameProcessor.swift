@@ -39,6 +39,10 @@ final class ImageBackgroundVideoFrameProcessor: VideoFilter {
 
     private var cachedValue: CacheValue?
     private var backgroundImageUrl: String
+    // Renders the oriented, resized background once per frame geometry. Without the
+    // snapshot the cached value is a lazy Lanczos graph over the full-size source
+    // that Core Image may re-evaluate on every frame.
+    private let snapshotContext = CIContext(options: [.useSoftwareRenderer: false])
     private var loggedBlendFailure = false
 
     private lazy var backgroundImageFilterProcessor = { return BackgroundImageFilterProcessor() }()
@@ -87,7 +91,8 @@ final class ImageBackgroundVideoFrameProcessor: VideoFilter {
 
             if let output = self.backgroundImageFilterProcessor.applyFilter(
                 input.originalPixelBuffer,
-                backgroundImage: backgroundImage
+                backgroundImage: backgroundImage,
+                orientation: input.originalImageOrientation
             ) {
                 return output
             }
@@ -189,6 +194,19 @@ final class ImageBackgroundVideoFrameProcessor: VideoFilter {
                 cachedBackgroundImage =
                     cachedBackgroundImage
                     .resize(originalImage.extent.size) ?? cachedBackgroundImage
+            }
+
+            // Snapshot at exactly the frame's extent so the per-frame blend reads a
+            // plain bitmap, not the scaling graph.
+            let frameRect = CGRect(origin: .zero, size: originalImage.extent.size)
+            let normalized = cachedBackgroundImage.transformed(
+                by: CGAffineTransform(
+                    translationX: -cachedBackgroundImage.extent.origin.x,
+                    y: -cachedBackgroundImage.extent.origin.y
+                )
+            )
+            if let snapshot = snapshotContext.createCGImage(normalized, from: frameRect) {
+                cachedBackgroundImage = CIImage(cgImage: snapshot)
             }
 
             cachedValue = .init(
