@@ -203,5 +203,15 @@ void main() {
         expect(subscriber.tracks[video.trackId]!.audioSinkId, isNull);
       },
     );
+
+    test('useAudioOutput does not bring back a removed track', () async {
+      final audio = deliver('alice:TRACK_TYPE_AUDIO');
+      final audioTracks = subscriber.audioTracks;
+      await subscriber.removeTrack(audio.trackId);
+
+      subscriber.useAudioOutput(_speaker, audioTracks);
+
+      expect(subscriber.tracks, isEmpty);
+    });
   });
 }
