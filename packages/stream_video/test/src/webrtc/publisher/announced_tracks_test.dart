@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_publish_options.dart';
+import 'package:stream_video/src/webrtc/codecs_helper.dart';
 import 'package:stream_video/src/webrtc/model/rtc_tracks_info.dart';
 import 'package:stream_video/src/webrtc/model/rtc_video_encoding.dart';
 import 'package:stream_video/src/webrtc/publisher/announced_tracks.dart';
@@ -17,6 +18,7 @@ final _cameraOption = SfuPublishOptions(
   codec: vp8Codec,
   trackType: SfuTrackType.video,
   bitrate: 1000000,
+  fps: 24,
   videoDimension: const RtcVideoDimension(width: 1280, height: 720),
 );
 
@@ -43,7 +45,6 @@ String _offer({
 TransceiverCache _cache(
   RtcLocalTrack track,
   SfuPublishOptions option, {
-  bool sending = true,
   bool negotiated = false,
   String? negotiatedMid,
 }) {
@@ -51,7 +52,7 @@ TransceiverCache _cache(
     track: track,
     publishOption: option,
     transceiver: FakeTransceiver(
-      FakeSender(sending ? track.mediaTrack : null),
+      FakeSender(track.mediaTrack),
     ),
     trackPublishOptions: const RtcTrackPublishOptions(),
     negotiated: negotiated,
@@ -102,10 +103,10 @@ void main() {
       expect(isMidFlightPublish(cache, _offer(trackId: 'mic')), isFalse);
     });
 
-    test('is false when the offer names an earlier sent track id', () {
+    test('is false when the offer names an earlier sent track id', () async {
       final cache = _cache(fakeAudioTrack('mic'), _micOption);
       // A replaceTrack after createOffer: the offer still names 'mic'.
-      cache.transceiver.sender.replaceTrack(
+      await cache.transceiver.sender.replaceTrack(
         FakeMediaStreamTrack('mic-2', kind: 'audio'),
       );
 
@@ -143,6 +144,7 @@ void main() {
       expect(info.trackType, SfuTrackType.audio);
       expect(info.publishOptionId, _micOption.id);
       expect(info.layers, isEmpty);
+      expect(info.codec, opusCodec);
       expect(info.muted, isFalse);
     });
 
@@ -150,22 +152,38 @@ void main() {
       final cache = _cache(fakeAudioTrack('mic'), _micOption);
       final sdp = _offer(trackId: 'mic', mid: '0');
 
-      final plain = _info(cache, sdp: sdp)!;
-      expect((plain.stereo, plain.dtx, plain.red), (false, false, false));
+      (bool, bool, bool) flags(StreamAudioSettings settings) {
+        final info = _info(cache, sdp: sdp, audioSettings: settings)!;
+        return (info.stereo, info.dtx, info.red);
+      }
 
-      final configured = _info(
-        cache,
-        sdp: sdp,
-        audioSettings: const StreamAudioSettings(
-          hifiAudioEnabled: true,
-          opusDtxEnabled: true,
-          redundantCodingEnabled: true,
-        ),
-      )!;
+      expect(flags(const StreamAudioSettings()), (false, false, false));
       expect(
-        (configured.stereo, configured.dtx, configured.red),
-        (true, true, true),
+        flags(const StreamAudioSettings(hifiAudioEnabled: true)),
+        (true, false, false),
       );
+      expect(
+        flags(const StreamAudioSettings(opusDtxEnabled: true)),
+        (false, true, false),
+      );
+      expect(
+        flags(const StreamAudioSettings(redundantCodingEnabled: true)),
+        (false, false, true),
+      );
+    });
+
+    test('announces the track the sender holds now', () async {
+      final cache = _cache(fakeAudioTrack('mic'), _micOption);
+      await cache.transceiver.sender.replaceTrack(
+        FakeMediaStreamTrack('mic-2', kind: 'audio'),
+      );
+
+      final info = _info(
+        cache,
+        sdp: _offer(trackId: 'mic-2', mid: '0'),
+      );
+
+      expect(info!.trackId, 'mic-2');
     });
 
     test('announces screen share audio in stereo', () {
@@ -200,20 +218,55 @@ void main() {
 
     test('announces video layers worked out from the given dimension', () {
       final cache = _cache(fakeCameraTrack('cam'), _cameraOption);
-
       // A capture size other than the publish option's 1280x720.
+      const capture = RtcVideoDimension(width: 640, height: 360);
+
       final info = _info(
         cache,
         sdp: _offer(trackId: 'cam', kind: 'video', mid: '0'),
-        dimension: const RtcVideoDimension(width: 640, height: 360),
-      );
+        dimension: capture,
+      )!;
 
-      final layers = info!.layers!;
+      expect(info.trackId, 'cam');
+      expect(info.trackType, SfuTrackType.video);
+      expect(info.publishOptionId, _cameraOption.id);
+      expect(info.codec, vp8Codec);
+      expect(info.muted, isFalse);
+      expect((info.stereo, info.dtx, info.red), (false, false, false));
+
+      final expected = findOptimalVideoLayers(
+        dimensions: capture,
+        publishOptions: _cameraOption,
+      );
+      final layers = info.layers!;
       // Two layers fit a 640x360 capture; the publish option alone gives three.
       expect(layers.map((it) => it.rid), ['q', 'h']);
+      expect(layers.map((it) => it.rid), expected.map((it) => it.rid));
       expect(
-        layers.last.parameters.dimension,
-        const RtcVideoDimension(width: 640, height: 360),
+        layers.map((it) => it.parameters.encoding.maxBitrate),
+        expected.map((it) => it.maxBitrate),
+      );
+      expect(
+        layers.map((it) => it.parameters.encoding.maxFramerate),
+        expected.map((it) => it.maxFramerate),
+      );
+      expect(
+        layers.map((it) => it.parameters.dimension),
+        expected.map(
+          (it) => RtcVideoDimension(
+            width: it.width.floor(),
+            height: it.height.floor(),
+          ),
+        ),
+      );
+      expect(layers.last.parameters.dimension, capture);
+      expect(
+        layers.map((it) => it.parameters.encoding.maxFramerate),
+        everyElement(24),
+      );
+      expect(
+        layers.map((it) => it.parameters.encoding.maxBitrate),
+        everyElement(greaterThan(0)),
       );
       expect(
         layers.map((it) => it.parameters.encoding.quality),
@@ -255,8 +308,35 @@ void main() {
         );
 
         expect(info, isNull);
-        expect(reports.single, containsPair('trackId', 'mic'));
-        expect(reports.single, containsPair('hasSdp', true));
+        expect(reports.single, {
+          'trackId': 'mic',
+          'cachedTrackId': 'mic',
+          'trackType': SfuTrackType.audio.toString(),
+          'publishOptionId': _micOption.id,
+          'liveTransceiverCount': 0,
+          'hasSdp': true,
+          'negotiated': false,
+        });
+      },
+    );
+
+    test(
+      'reports the sent and the cached track id of a replaced track',
+      () async {
+        final cache = _cache(fakeAudioTrack('mic'), _micOption);
+        await cache.transceiver.sender.replaceTrack(
+          FakeMediaStreamTrack('mic-2', kind: 'audio'),
+        );
+        final reports = <Map<String, Object?>>[];
+
+        _info(
+          cache,
+          sdp: _offer(trackId: 'mic-2'),
+          onMidUnresolved: reports.add,
+        );
+
+        expect(reports.single, containsPair('trackId', 'mic-2'));
+        expect(reports.single, containsPair('cachedTrackId', 'mic'));
       },
     );
 
