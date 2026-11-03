@@ -68,7 +68,7 @@ class LocalTrackAcquirer {
       if (constraints != null && constraints is! CameraConstraints) {
         return _invalidConstraints(constraints, CameraConstraints);
       }
-      return createCameraTrack(
+      return _createCameraTrack(
         constraints:
             (constraints ?? const CameraConstraints()) as CameraConstraints,
       );
@@ -76,7 +76,7 @@ class LocalTrackAcquirer {
       if (constraints != null && constraints is! AudioConstraints) {
         return _invalidConstraints(constraints, AudioConstraints);
       }
-      return createAudioTrack(
+      return _createAudioTrack(
         constraints:
             (constraints ?? defaultAudioConstraints) as AudioConstraints,
       );
@@ -105,7 +105,7 @@ class LocalTrackAcquirer {
     return failureWithError(errorMessage);
   }
 
-  Future<Result<RtcLocalAudioTrack>> createAudioTrack({
+  Future<Result<RtcLocalAudioTrack>> _createAudioTrack({
     AudioConstraints? constraints,
   }) async {
     _logger.d(() => '[createAudioTrack] constraints: ${constraints?.toMap()}');
@@ -132,7 +132,7 @@ class LocalTrackAcquirer {
     }
   }
 
-  Future<Result<RtcLocalCameraTrack>> createCameraTrack({
+  Future<Result<RtcLocalCameraTrack>> _createCameraTrack({
     CameraConstraints constraints = const CameraConstraints(),
   }) async {
     _logger.d(() => '[createCameraTrack] constraints: ${constraints.toMap()}');
@@ -159,6 +159,7 @@ class LocalTrackAcquirer {
     }
   }
 
+  /// Acquires a screen share track with [constraints].
   Future<Result<RtcLocalScreenShareTrack>> createScreenShareTrack({
     ScreenShareConstraints constraints = const ScreenShareConstraints(),
   }) async {

@@ -278,4 +278,44 @@ void main() {
       );
     });
   });
+
+  group('enabling a track', () {
+    test('opens no device for a session without a publisher', () async {
+      final fixture = RtcManagerFixture(
+        publishOptions: [_vp8Option],
+        withPublisher: false,
+      );
+
+      final result = await fixture.manager.setCameraEnabled();
+
+      expect(result.isFailure, isTrue);
+      expect(platform.callsOf('getUserMedia'), isEmpty);
+    });
+
+    test('publishes the microphone on an audio transceiver', () async {
+      final fixture = RtcManagerFixture(publishOptions: [_micOption]);
+      var audioTransceivers = 0;
+      fixture.onAddAudioTransceiver = (track, encodings) async {
+        audioTransceivers++;
+        return Result.success(fixture.newTransceiver(track, encodings));
+      };
+
+      final result = await fixture.manager.setMicrophoneEnabled();
+
+      expect(result.getDataOrNull(), isA<RtcLocalAudioTrack>());
+      expect(audioTransceivers, 1);
+    });
+
+    test('publishes the screen share on a video transceiver', () async {
+      final fixture = RtcManagerFixture(
+        publishOptions: [publishOption(4, SfuTrackType.screenShare)],
+      );
+
+      final result = await fixture.manager.setScreenShareEnabled();
+
+      expect(result.getDataOrNull(), isA<RtcLocalScreenShareTrack>());
+      expect(platform.callsOf('getDisplayMedia'), hasLength(1));
+      expect(fixture.transceivers, hasLength(1));
+    });
+  });
 }

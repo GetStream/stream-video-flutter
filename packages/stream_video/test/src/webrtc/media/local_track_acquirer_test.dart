@@ -63,18 +63,40 @@ void main() {
 
     test('keeps track types apart', () async {
       final tracks = acquirer();
-      final gate = Completer<Result<RtcLocalTrack>>();
+      final cameraGate = Completer<Result<RtcLocalTrack>>();
+      final micGate = Completer<Result<RtcLocalTrack>>();
+
+      final camera = tracks.singleFlight(
+        SfuTrackType.video,
+        () => cameraGate.future,
+      );
+      final mic = tracks.singleFlight(SfuTrackType.audio, () => micGate.future);
+
+      expect(tracks.inFlight(SfuTrackType.video), isNotNull);
+      expect(tracks.inFlight(SfuTrackType.audio), isNotNull);
+
+      cameraGate.complete(Result.success(fakeCameraTrack('cam')));
+      micGate.complete(Result.success(fakeAudioTrack('mic')));
+      expect((await camera).getDataOrNull(), isA<RtcLocalCameraTrack>());
+      expect((await mic).getDataOrNull(), isA<RtcLocalAudioTrack>());
+    });
+
+    test('a failed acquisition leaves the single flight', () async {
+      final tracks = acquirer();
       var creates = 0;
-      Future<Result<RtcLocalTrack>> create() {
+      Future<Result<RtcLocalTrack>> create() async {
         creates++;
-        return gate.future;
+        return failureWithError('camera busy');
       }
 
-      unawaited(tracks.singleFlight(SfuTrackType.video, create));
-      unawaited(tracks.singleFlight(SfuTrackType.audio, create));
+      expect(
+        (await tracks.singleFlight(SfuTrackType.video, create)).isFailure,
+        isTrue,
+      );
+      expect(tracks.inFlight(SfuTrackType.video), isNull);
 
+      await tracks.singleFlight(SfuTrackType.video, create);
       expect(creates, 2);
-      gate.complete(Result.success(fakeCameraTrack('cam')));
     });
   });
 
