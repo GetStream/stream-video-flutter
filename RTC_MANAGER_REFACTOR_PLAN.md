@@ -27,7 +27,7 @@ branches off `v2` instead of in the stack, as long as T11 waits for all of them.
 | # | Ticket | Branch (proposed) | PR |
 |---|---|---|---|
 | 1 | T1 | `test/flu-1047-rtc-manager-characterisation-tests` | [#1543](https://github.com/GetStream/stream-video-flutter/pull/1543) |
-| 2 | T2 | `refactor/flu-1048-rtc-manager-media-part` | |
+| 2 | T2 | `refactor/flu-1048-rtc-manager-media-part` | [#1544](https://github.com/GetStream/stream-video-flutter/pull/1544) |
 | 3 | T3 | `refactor/flu-1049-rtc-manager-facade` | |
 | 4 | T4 | `refactor/flu-1050-publish-quality` | |
 | 5 | T5 | `refactor/flu-1051-announced-tracks` | |
