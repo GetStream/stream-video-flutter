@@ -106,13 +106,9 @@ void main() {
       final rtcManager = MockRtcManager();
       when(() => rtcManager.localTracks).thenReturn({local.trackId: local});
       when(() => rtcManager.remoteTracks).thenReturn({remote.trackId: remote});
-      // Read by the Apple microphone mute reconcile on resume.
-      when(() => rtcManager.tracks).thenReturn({
-        local.trackId: local,
-        remote.trackId: remote,
-      });
-      final pcFactory = fakePcFactory();
-      when(() => rtcManager.pcFactory).thenReturn(pcFactory);
+      when(
+        rtcManager.reconcileAppleAdmMicrophoneMute,
+      ).thenAnswer((_) async {});
       when(() => callSession.rtcManager).thenReturn(rtcManager);
 
       final call = createTestCall(
@@ -146,6 +142,11 @@ void main() {
         local.trackId: SuspendedTrackState.wasEnabled,
         remote.trackId: SuspendedTrackState.wasEnabled,
       });
+      // The microphone mute is reconciled once the tracks are back.
+      verifyInOrder([
+        () => callSession.resumeSuspendedAudioTracks(any()),
+        rtcManager.reconcileAppleAdmMicrophoneMute,
+      ]);
     });
 
     test('is idempotent — second call does not change state again', () async {

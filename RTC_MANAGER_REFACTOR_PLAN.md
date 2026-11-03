@@ -46,7 +46,7 @@ branches off `v2` instead of in the stack, as long as T11 waits for all of them.
 - [x] 4. **T4** [FLU-1050](https://linear.app/stream/issue/FLU-1050): publish quality and audio bitrate as pure functions (S). The two highest complexity scores, with no tests until T1.
 - [x] 5. **T5** [FLU-1051](https://linear.app/stream/issue/FLU-1051): announced tracks builder (S–M). Audio settings as a value; the `mid` workarounds named as a plugin seam.
 - [x] 6. **T6** [FLU-1052](https://linear.app/stream/issue/FLU-1052): capture dimension resolver with an injected screen size (S). `package:flutter/widgets.dart` leaves the manager.
-- [ ] 7. **T7** [FLU-1053](https://linear.app/stream/issue/FLU-1053): Apple ADM mute and audio session out (S). The facade keeps `@internal` delegates.
+- [x] 7. **T7** [FLU-1053](https://linear.app/stream/issue/FLU-1053): Apple ADM mute and audio session out (S). The facade keeps `@internal` delegates.
 - [ ] 8. **T8** [FLU-1054](https://linear.app/stream/issue/FLU-1054): remote track decryption out (S). Participant lookup as a callback.
 - [ ] 9. **T9** [FLU-1055](https://linear.app/stream/issue/FLU-1055): telemetry wiring out (S).
 - [ ] 10. **T10** [FLU-1056](https://linear.app/stream/issue/FLU-1056): local track acquisition and the single flight out (S). The publisher never opens a device after this.

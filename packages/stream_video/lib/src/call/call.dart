@@ -50,7 +50,6 @@ import '../webrtc/peer_connection.dart';
 import '../webrtc/peer_connection_factory.dart';
 import '../webrtc/peer_type.dart';
 import '../webrtc/rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
-import '../webrtc/rtc_manager.dart';
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
 import '../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../webrtc/rtc_track/rtc_track.dart';
