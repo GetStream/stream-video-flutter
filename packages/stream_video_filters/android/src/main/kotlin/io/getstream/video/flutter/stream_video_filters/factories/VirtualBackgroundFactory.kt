@@ -9,30 +9,30 @@ import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import androidx.annotation.Keep
-import com.google.android.gms.tasks.Tasks
-import com.google.android.renderscript.Toolkit
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.segmentation.Segmentation
 import com.google.mlkit.vision.segmentation.SegmentationMask
 import com.google.mlkit.vision.segmentation.selfie.SelfieSegmenterOptions
+import io.flutter.FlutterInjector
+import io.getstream.video.flutter.stream_video_filters.common.BitmapVideoFilter
+import io.getstream.video.flutter.stream_video_filters.common.DEFAULT_MASK_EDGE_SOFTNESS
+import io.getstream.video.flutter.stream_video_filters.common.DEFAULT_MASK_TEMPORAL_WEIGHT
+import io.getstream.video.flutter.stream_video_filters.common.DownscaledBlur
+import io.getstream.video.flutter.stream_video_filters.common.SegmentationResult
+import io.getstream.video.flutter.stream_video_filters.common.Segment
+import io.getstream.video.flutter.stream_video_filters.common.SegmentMaskBuffers
+import io.getstream.video.flutter.stream_video_filters.common.SegmentationInput
+import io.getstream.video.flutter.stream_video_filters.common.VideoFrameProcessorWithBitmapFilter
+import io.getstream.video.flutter.stream_video_filters.common.getScalingFactors
+import io.getstream.video.flutter.stream_video_filters.common.writeSoftSegmentMask
 import io.getstream.webrtc.flutter.videoEffects.VideoFrameProcessor
 import io.getstream.webrtc.flutter.videoEffects.VideoFrameProcessorFactoryInterface
-import io.getstream.video.flutter.stream_video_filters.common.BitmapVideoFilter
-import io.getstream.video.flutter.stream_video_filters.common.Segment
-import io.getstream.video.flutter.stream_video_filters.common.VideoFrameProcessorWithBitmapFilter
-import io.getstream.video.flutter.stream_video_filters.common.colouredSegmentInt
-import io.getstream.video.flutter.stream_video_filters.common.getScalingFactors
-import java.net.URL
-import java.nio.ByteBuffer
-import java.util.concurrent.atomic.AtomicBoolean
-import io.flutter.embedding.engine.loader.FlutterLoader
 import java.io.InputStream
-import android.os.Handler
-import android.os.Looper
-import android.os.Build;
-import io.flutter.FlutterInjector;
+import java.net.URL
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * original source: https://github.com/GetStream/stream-video-android/blob/develop/stream-video-android-filters-video/src/main/kotlin/io/getstream/video/android/filters/video/VirtualBackgroundVideoFilter.kt
@@ -40,7 +40,10 @@ import io.flutter.FlutterInjector;
  * Applies a virtual background (custom image) to a video call.
  *
  * @param backgroundImageUrlString The image url of the custom background image.
- * @param foregroundThreshold The confidence threshold for the foreground. Pixels with a confidence value greater than or equal to this threshold are considered to be in the foreground. Value is coerced between 0 and 1, inclusive.
+ * @param foregroundThreshold The confidence at which a pixel counts as foreground. The mask
+ * ramps smoothly from background to foreground around this value, so pixels with a confidence
+ * well above it are fully in the foreground and well below it fully in the background.
+ * Value is coerced between 0 and 1, inclusive.
  */
 class VirtualBackgroundFactory(
     private val appContext: Context,
@@ -63,7 +66,8 @@ class VirtualBackgroundFactory(
  * Applies a virtual background (custom image) to a video call.
  *
  * @param backgroundImageUrlString The image url of the custom background image.
- * @param foregroundThreshold The confidence threshold for the foreground. Pixels with a confidence value greater than or equal to this threshold are considered to be in the foreground. Value is coerced between 0 and 1, inclusive.
+ * @param foregroundThreshold The confidence at which a pixel counts as foreground; see
+ * [VirtualBackgroundFactory]. Value is coerced between 0 and 1, inclusive.
  */
 @Keep
 private class VirtualBackgroundVideoFilter(
@@ -77,7 +81,7 @@ private class VirtualBackgroundVideoFilter(
     private val segmenter = Segmentation.getClient(options)
 
     @Volatile // volatile as its get and set happen in different threads
-    private var segmentationMask: SegmentationMask? = null
+    private var segmentationResult: SegmentationResult? = null
     private var processedSegmentationMask: SegmentationMask? = null
     private var scaleBetweenSourceAndMaskMatrix: Matrix? = null
 
@@ -86,13 +90,21 @@ private class VirtualBackgroundVideoFilter(
     private val isProcessing = AtomicBoolean(false)
     private var foregroundThreshold: Double = foregroundThreshold.coerceIn(0.0, 1.0)
 
-    // bitmap to hold the foreground values, 1 for background 0 for foreground, raw mask sized
+    // The copy of the frame that ML Kit segments; see SegmentationInput.
+    private val segmentationInput = SegmentationInput()
+    private val fallbackBlur = DownscaledBlur()
+
+    // Alpha mask of the person at the raw mask size, and the buffers that build it
     private var foregroundMaskBitmap: Bitmap? = null
+    private var maskBuffers: SegmentMaskBuffers? = null
 
     // bitmap to upscale the mask bitmap to video frame size
     private var scaledForegroundBitmap: Bitmap? = null
     private val upscalePaint: Paint by lazy {
         Paint().apply {
+            // Sample the ~256x256 mask bilinearly when scaling it up to the frame.
+            // Without this every mask texel becomes a visible block at the edge.
+            isFilterBitmap = true
             // smooths out the edges of shapes
             isAntiAlias = true
         }
@@ -114,17 +126,16 @@ private class VirtualBackgroundVideoFilter(
         val host = Uri.parse(backgroundImageUrlString).host ?: "local"
         val bitmap: Bitmap? = try {
             val uri = Uri.parse(backgroundImageUrlString)
-            if (uri.scheme == null) { // this is a local image
-                loadImageAssetAsBitmap(appContext, backgroundImageUrlString)
+            val bytes = if (uri.scheme == null) { // this is a local image
+                readImageAssetBytes(appContext, backgroundImageUrlString)
             } else {
                 val connection = URL(backgroundImageUrlString).openConnection().apply {
                     connectTimeout = REMOTE_IMAGE_TIMEOUT_MS
                     readTimeout = REMOTE_IMAGE_TIMEOUT_MS
                 }
-                connection.getInputStream().use { input ->
-                    BitmapFactory.decodeStream(input)
-                }
+                connection.getInputStream().use { input -> input.readBytes() }
             }
+            bytes?.let { decodeDownsampled(it) }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to load virtual-background image (host=$host)", e)
             null
@@ -137,8 +148,9 @@ private class VirtualBackgroundVideoFilter(
 
     private val foregroundPaint by lazy {
         // destination - video frame
-        // source - black mask bitmap of person cutout
-        // DST_IN - Keeps the destination pixels that are covered by source pixels.
+        // source - alpha mask of the person cutout
+        // DST_IN - Keeps the destination pixels that are covered by source pixels,
+        // weighted by the source alpha, so the soft mask edge blends into the background.
         Paint().apply {
             xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
         }
@@ -151,8 +163,7 @@ private class VirtualBackgroundVideoFilter(
         Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OVER) }
     }
 
-    fun loadImageAssetAsBitmap(context: Context, assetPath: String): Bitmap? {
-        var bitmap: Bitmap? = null
+    private fun readImageAssetBytes(context: Context, assetPath: String): ByteArray? {
         var inputStream: InputStream? = null
 
         try {
@@ -167,8 +178,7 @@ private class VirtualBackgroundVideoFilter(
                 assetFileDescriptor.createInputStream()
             }
 
-            bitmap = BitmapFactory.decodeStream(inputStream)
-            return bitmap
+            return inputStream.readBytes()
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
@@ -177,10 +187,26 @@ private class VirtualBackgroundVideoFilter(
         return null
     }
 
+    /**
+     * Decodes [bytes] with the largest power-of-two `inSampleSize` that keeps the
+     * longest side at or above [MAX_DECODED_IMAGE_SIDE], so a large photo does not
+     * cost tens of megabytes (and a possible OOM) only to be scaled to the frame.
+     */
+    private fun decodeDownsampled(bytes: ByteArray): Bitmap? {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
+        var sampleSize = 1
+        var longSide = maxOf(bounds.outWidth, bounds.outHeight)
+        while (longSide / 2 >= MAX_DECODED_IMAGE_SIDE) {
+            sampleSize *= 2
+            longSide /= 2
+        }
+        val options = BitmapFactory.Options().apply { inSampleSize = sampleSize }
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
+    }
+
     private var scaledVirtualBackgroundBitmap: Bitmap? = null
     private var scaleBetweenSourceAndMask: Pair<Float, Float>? = null
-    private var maskArray: IntArray? = null
-    private var lineBuffer: FloatArray? = null
 
     private var latestFrameWidth: Int? = null
     private var latestFrameHeight: Int? = null
@@ -195,11 +221,15 @@ private class VirtualBackgroundVideoFilter(
         val backgroundImageBitmap = virtualBackgroundBitmap
 
         if (!isProcessing.getAndSet(true)) {
-            // Apply segmentation, starts in webrtc CaptureThread
-            val mlImage = InputImage.fromBitmap(videoFrameBitmap, 0)
+            // Apply segmentation, starts in webrtc CaptureThread. ML Kit reads its
+            // input after this method has already drawn into videoFrameBitmap, so it
+            // gets a copy taken before that.
+            val frameWidth = videoFrameBitmap.width
+            val frameHeight = videoFrameBitmap.height
+            val mlImage = InputImage.fromBitmap(segmentationInput.snapshot(videoFrameBitmap), 0)
             segmenter.process(mlImage).addOnSuccessListener { mask ->
                 // callbacks happen in main thread
-                segmentationMask = mask
+                segmentationResult = SegmentationResult(mask, frameWidth, frameHeight)
             }.addOnFailureListener { e ->
                 Log.e(TAG, "Failed to segment image", e)
             }.addOnCompleteListener {
@@ -207,26 +237,34 @@ private class VirtualBackgroundVideoFilter(
             }
         }
 
-        val mask = segmentationMask
-        if (mask == null) {
+        val result = segmentationResult
+        if (result == null) {
             // The first segmentation is still running: blur the whole frame rather
             // than sending the raw camera image through until a mask arrives.
-            Canvas(videoFrameBitmap).drawBitmap(blurredCopy(videoFrameBitmap), 0f, 0f, null)
+            fallbackBlur.blurInPlace(videoFrameBitmap)
             return
         }
+        val mask = result.mask
 
         maybeInit(videoFrameBitmap, backgroundImageBitmap, mask)
 
         if (mask !== processedSegmentationMask) {
-            // Color the foreground segment (the person) to a bitmap - foregroundBitmap
-            colouredSegmentInt(
+            // A mask from a frame of another size (rotation) still covers the frames
+            // until the next one, but is not blended into the smoothing history.
+            val stale = !result.isFromFrameOfSize(videoFrameBitmap.width, videoFrameBitmap.height)
+            // Write the person as a soft alpha mask - foregroundMaskBitmap
+            writeSoftSegmentMask(
                 segment = Segment.FOREGROUND,
                 destination = foregroundMaskBitmap!!,
                 segmentationMask = mask,
                 confidenceThreshold = foregroundThreshold,
-                maskArray = maskArray!!,
-                lineBuffer = lineBuffer!!
+                edgeSoftness = DEFAULT_MASK_EDGE_SOFTNESS,
+                temporalWeight = if (stale) 1.0 else DEFAULT_MASK_TEMPORAL_WEIGHT,
+                buffers = maskBuffers!!,
             )
+            if (stale) {
+                maskBuffers!!.hasSmoothedConfidence = false
+            }
             val canvas = Canvas(scaledForegroundBitmap!!)
             // Clear the bitmap before drawing (important to avoid artifacts!)
             canvas.drawColor(0, PorterDuff.Mode.CLEAR)
@@ -243,7 +281,7 @@ private class VirtualBackgroundVideoFilter(
         // Resolve the background before the frame is modified below: the fallback
         // blurs the frame itself.
         val background = scaledVirtualBackgroundBitmap?.takeUnless { it.isRecycled }
-            ?: blurredCopy(videoFrameBitmap)
+            ?: fallbackBlur.blurred(videoFrameBitmap)
 
         val canvas = Canvas(videoFrameBitmap)
         // 1. Punch a hole in the video frame so that only the person is left
@@ -253,72 +291,21 @@ private class VirtualBackgroundVideoFilter(
         canvas.drawBitmap(background, 0f, 0f, backgroundPaint)
     }
 
-    // Reused by blurredCopy: a half-resolution scratch bitmap and the full-size result.
-    private var fallbackHalfBitmap: Bitmap? = null
-    private var fallbackBitmap: Bitmap? = null
-    private val fallbackDownScaleMatrix by lazy { Matrix().apply { preScale(0.5f, 0.5f) } }
-    private val fallbackUpScaleMatrix by lazy { Matrix().apply { preScale(2f, 2f) } }
-    private val fallbackPaint by lazy { Paint().apply { isFilterBitmap = true } }
+    private val scalePaint by lazy { Paint(Paint.FILTER_BITMAP_FLAG) }
 
     /**
-     * A blurred copy of [frame] at its size, used as the background while the image is
-     * unavailable and as the whole frame while the first mask is still being computed.
-     * Blurs a 0.5-scale copy at [FALLBACK_BLUR_RADIUS], which matches the MEDIUM
-     * background-blur preset and avoids a full-resolution CPU blur on every frame.
-     * The returned bitmap is owned by this filter and reused across frames.
+     * A new ARGB_8888 bitmap (required by the DST_OVER draw) with [bitmap] scaled to
+     * [targetHeight]. Always a new bitmap: `Bitmap.createScaledBitmap` returns the
+     * source itself when the size already matches, and that source is the decoded
+     * image, which must survive the recycle on the next frame-size change.
      */
-    private fun blurredCopy(frame: Bitmap): Bitmap {
-        val halfWidth = (frame.width / 2).coerceAtLeast(1)
-        val halfHeight = (frame.height / 2).coerceAtLeast(1)
-        var half = fallbackHalfBitmap
-        if (half == null || half.width != halfWidth || half.height != halfHeight) {
-            half?.recycle()
-            half = Bitmap.createBitmap(halfWidth, halfHeight, Bitmap.Config.ARGB_8888)
-            fallbackHalfBitmap = half
-        }
-        var result = fallbackBitmap
-        if (result == null || result.width != frame.width || result.height != frame.height) {
-            result?.recycle()
-            result = Bitmap.createBitmap(frame.width, frame.height, Bitmap.Config.ARGB_8888)
-            fallbackBitmap = result
-        }
-
-        Canvas(half).drawBitmap(frame, fallbackDownScaleMatrix, fallbackPaint)
-        val blurredHalf = Toolkit.blur(half, FALLBACK_BLUR_RADIUS)
-        Canvas(result).drawBitmap(blurredHalf, fallbackUpScaleMatrix, fallbackPaint)
-        blurredHalf.recycle()
-        return result
-    }
-
     private fun scaleVirtualBackgroundBitmap(bitmap: Bitmap, targetHeight: Int): Bitmap {
         val scale = targetHeight.toFloat() / bitmap.height
-        return ensureAlpha(
-            Bitmap.createScaledBitmap(
-                /* src = */
-                bitmap,
-                /* dstWidth = */
-                (bitmap.width * scale).toInt(),
-                /* dstHeight = */
-                targetHeight,
-                /* filter = */
-                true,
-            ),
-        )
-    }
-
-    private fun ensureAlpha(original: Bitmap): Bitmap {
-        return if (original.hasAlpha()) {
-            original
-        } else {
-            val bitmapWithAlpha = Bitmap.createBitmap(
-                original.width,
-                original.height,
-                Bitmap.Config.ARGB_8888,
-            )
-            val canvas = Canvas(bitmapWithAlpha)
-            canvas.drawBitmap(original, 0f, 0f, null)
-            bitmapWithAlpha
-        }
+        val targetWidth = (bitmap.width * scale).toInt().coerceAtLeast(1)
+        val scaled = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888)
+        val matrix = Matrix().apply { setScale(scale, scale) }
+        Canvas(scaled).drawBitmap(bitmap, matrix, scalePaint)
+        return scaled
     }
 
     private fun maybeInit(
@@ -337,6 +324,15 @@ private class VirtualBackgroundVideoFilter(
             scaledForegroundBitmap = Bitmap.createBitmap(
                 videoFrameBitmap.width, videoFrameBitmap.height, Bitmap.Config.ARGB_8888
             )
+            // The new foreground bitmap is blank: redraw the current mask into it
+            // below even if it is the one already processed, or DST_IN with an
+            // empty mask erases the person until the next mask arrives.
+            processedSegmentationMask = null
+            if (videoFrameBitmap.width != latestFrameWidth || videoFrameBitmap.height != latestFrameHeight) {
+                // The scene geometry changed (rotation): the previous masks must
+                // not be blended into the new ones.
+                maskBuffers?.hasSmoothedConfidence = false
+            }
             latestFrameWidth = videoFrameBitmap.width
             latestFrameHeight = videoFrameBitmap.height
             createScale = true
@@ -347,8 +343,9 @@ private class VirtualBackgroundVideoFilter(
             foregroundMaskBitmap?.recycle()
             foregroundMaskBitmap =
                 Bitmap.createBitmap(latestMaskWidth, latestMaskHeight, Bitmap.Config.ARGB_8888)
-            maskArray = IntArray(latestMaskWidth * latestMaskHeight)
-            lineBuffer = FloatArray(latestMaskWidth)
+            // New buffers also restart the temporal smoothing: a mask of another size
+            // cannot be blended with the previous one.
+            maskBuffers = SegmentMaskBuffers(latestMaskWidth, latestMaskHeight)
             createScale = true
         }
 
@@ -368,12 +365,15 @@ private class VirtualBackgroundVideoFilter(
 
     companion object {
         private const val TAG = "VirtualBackgroundVideoFilter"
-        // Radius for the 0.5-scale blurred fallback (see blurredCopy): the same scale and
-        // radius as the MEDIUM background-blur preset.
-        private const val FALLBACK_BLUR_RADIUS = 10
         private const val REMOTE_IMAGE_TIMEOUT_MS = 10_000
+        // Longest side the background image is decoded at. The frame is at most a
+        // few thousand pixels wide, and a full-resolution decode of a camera photo
+        // (12 MP, ~48 MB) is what the capture thread would otherwise scale down.
+        private const val MAX_DECODED_IMAGE_SIDE = 2048
     }
 }
 
-private const val DEFAULT_FOREGROUND_THRESHOLD: Double =
-    0.9 // 1 is max confidence that pixel is in the foreground
+// Midpoint of the soft edge (see DEFAULT_MASK_EDGE_SOFTNESS): with the default softness
+// a pixel is fully foreground from 0.8 up and fully background from 0.4 down. The old
+// hard cut-off at 0.9 eroded hair and accessories, which the model is least sure about.
+private const val DEFAULT_FOREGROUND_THRESHOLD: Double = 0.6

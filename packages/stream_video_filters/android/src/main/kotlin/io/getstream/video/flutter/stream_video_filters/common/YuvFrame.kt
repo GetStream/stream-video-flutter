@@ -9,17 +9,22 @@ import io.github.crow_misia.libyuv.RotateMode
 import io.github.crow_misia.libyuv.RowStride
 import org.webrtc.VideoFrame
 
-object YuvFrame {
-  private const val TAG = "YuvFrame"
-
+/**
+ * Converts WebRTC frames to bitmaps. Owns its scratch buffers and the output bitmap, so
+ * every processor needs its own instance: two capture threads sharing one would recycle
+ * or overwrite each other's bitmap mid-frame.
+ */
+class YuvFrame {
   private lateinit var webRtcI420Buffer: VideoFrame.I420Buffer
   private lateinit var libYuvI420Buffer: I420Buffer
   private var libYuvRotatedI420Buffer: I420Buffer? = null
   private var libYuvAbgrBuffer: AbgrBuffer? = null
+  private var bitmap: Bitmap? = null
 
   /**
    * Converts VideoFrame.Buffer YUV frame to an ARGB_8888 Bitmap. Applies stored rotation.
-   * @return A new Bitmap containing the converted frame.
+   * @return The converted frame, in a Bitmap that is owned by this object and reused for
+   * the next frame. The caller must be done with it before converting another frame.
    */
   fun bitmapFromVideoFrame(videoFrame: VideoFrame?): Bitmap? {
     if (videoFrame == null) {
@@ -32,7 +37,7 @@ object YuvFrame {
       rotateLibYuvI420Buffer(videoFrame.rotation)
       createLibYuvAbgrBuffer()
       cleanUp()
-      libYuvAbgrBuffer!!.asBitmap()
+      copyAbgrBufferToBitmap()
     } catch (t: Throwable) {
       Log.e(TAG, "Failed to convert a VideoFrame", t)
       null
@@ -65,8 +70,11 @@ object YuvFrame {
   }
 
   private fun changeOrientation(width: Int, height: Int, rotateMode: RotateMode) {
-    libYuvRotatedI420Buffer?.close()
-    libYuvRotatedI420Buffer = I420Buffer.allocate(height, width) // swapped width and height
+    // swapped width and height
+    if (height != libYuvRotatedI420Buffer?.width || width != libYuvRotatedI420Buffer?.height) {
+      libYuvRotatedI420Buffer?.close()
+      libYuvRotatedI420Buffer = I420Buffer.allocate(height, width)
+    }
     libYuvI420Buffer.rotate(libYuvRotatedI420Buffer!!, rotateMode)
   }
 
@@ -89,9 +97,31 @@ object YuvFrame {
     libYuvRotatedI420Buffer!!.convertTo(libYuvAbgrBuffer!!)
   }
 
+  /**
+   * Copies the ABGR buffer into the reused bitmap. `AbgrBuffer.asBitmap()` would allocate a
+   * new full-frame bitmap on every frame, which shows up as GC pauses at 30 fps.
+   */
+  private fun copyAbgrBufferToBitmap(): Bitmap {
+    val abgr = libYuvAbgrBuffer!!
+    var target = bitmap
+    if (target == null || target.width != abgr.width || target.height != abgr.height) {
+      target?.recycle()
+      target = Bitmap.createBitmap(abgr.width, abgr.height, Bitmap.Config.ARGB_8888)
+      bitmap = target
+    }
+    val buffer = abgr.asBuffer()
+    buffer.position(0)
+    target.copyPixelsFromBuffer(buffer)
+    return target
+  }
+
   private fun cleanUp() {
     libYuvI420Buffer.close()
     webRtcI420Buffer.release()
     // Rest of buffers are closed in the methods above
+  }
+
+  companion object {
+    private const val TAG = "YuvFrame"
   }
 }

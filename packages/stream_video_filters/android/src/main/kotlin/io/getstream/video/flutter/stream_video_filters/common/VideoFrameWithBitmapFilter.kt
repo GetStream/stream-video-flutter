@@ -1,6 +1,5 @@
 package io.getstream.video.flutter.stream_video_filters.common
 
-import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.opengl.GLES20
 import android.opengl.GLUtils
@@ -18,12 +17,12 @@ import org.webrtc.YuvConverter
 class VideoFrameProcessorWithBitmapFilter(bitmapVideoFilterFunc: () -> BitmapVideoFilter) :
   VideoFrameProcessor {
   private val yuvConverter = YuvConverter()
+  private val yuvFrame = YuvFrame()
   private var inputWidth = 0
   private var inputHeight = 0
   private var inputBuffer: VideoFrame.TextureBuffer? = null
   private var yuvBuffer: VideoFrame.I420Buffer? = null
   private val textures = IntArray(1)
-  private var inputFrameBitmap: Bitmap? = null
 
   private val bitmapVideoFilter by lazy {
     bitmapVideoFilterFunc.invoke()
@@ -35,7 +34,13 @@ class VideoFrameProcessorWithBitmapFilter(bitmapVideoFilterFunc: () -> BitmapVid
 
   override fun process(frame: VideoFrame, surfaceTextureHelper: SurfaceTextureHelper): VideoFrame {
     // Step 1: Video Frame to Bitmap
-    val inputFrameBitmap = YuvFrame.bitmapFromVideoFrame(frame) ?: return frame
+    val inputFrameBitmap = yuvFrame.bitmapFromVideoFrame(frame)
+    if (inputFrameBitmap == null) {
+      // Pass the frame through. The caller releases both the input and the
+      // returned frame, so the returned one needs its own reference.
+      frame.retain()
+      return frame
+    }
 
     // Prepare helpers (runs only once or if the dimensions change)
     initialize(
@@ -73,7 +78,6 @@ class VideoFrameProcessorWithBitmapFilter(bitmapVideoFilterFunc: () -> BitmapVid
       Log.d(TAG, "initialize - width: $width height: $height")
       this.inputWidth = width
       this.inputHeight = height
-      inputFrameBitmap?.recycle()
       inputBuffer?.release()
 
       val type = VideoFrame.TextureBuffer.Type.RGB
@@ -87,8 +91,6 @@ class VideoFrameProcessorWithBitmapFilter(bitmapVideoFilterFunc: () -> BitmapVid
         inputWidth, inputHeight, type, textures[0], matrix, surfaceTextureHelper.handler,
         yuvConverter, null as Runnable?,
       )
-      this.inputFrameBitmap =
-        Bitmap.createBitmap(this.inputWidth, this.inputHeight, Bitmap.Config.ARGB_8888)
     }
   }
 

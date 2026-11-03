@@ -15,10 +15,16 @@ import com.google.mlkit.vision.segmentation.selfie.SelfieSegmenterOptions
 import io.getstream.webrtc.flutter.videoEffects.VideoFrameProcessor
 import io.getstream.webrtc.flutter.videoEffects.VideoFrameProcessorFactoryInterface
 import io.getstream.video.flutter.stream_video_filters.common.BitmapVideoFilter
+import io.getstream.video.flutter.stream_video_filters.common.DEFAULT_MASK_EDGE_SOFTNESS
+import io.getstream.video.flutter.stream_video_filters.common.DEFAULT_MASK_TEMPORAL_WEIGHT
+import io.getstream.video.flutter.stream_video_filters.common.DownscaledBlur
+import io.getstream.video.flutter.stream_video_filters.common.SegmentationResult
 import io.getstream.video.flutter.stream_video_filters.common.Segment
+import io.getstream.video.flutter.stream_video_filters.common.SegmentMaskBuffers
+import io.getstream.video.flutter.stream_video_filters.common.SegmentationInput
 import io.getstream.video.flutter.stream_video_filters.common.VideoFrameProcessorWithBitmapFilter
-import io.getstream.video.flutter.stream_video_filters.common.colouredSegmentInt
 import io.getstream.video.flutter.stream_video_filters.common.getScalingFactors
+import io.getstream.video.flutter.stream_video_filters.common.writeSoftSegmentMask
 import java.util.concurrent.atomic.AtomicBoolean
 
 // Original Sources
@@ -27,7 +33,10 @@ import java.util.concurrent.atomic.AtomicBoolean
  * Applies a blur effect to the background of a video call.
  *
  * @param blurIntensity The intensity of the blur effect. See [BlurIntensity] for options. Defaults to [BlurIntensity.MEDIUM].
- * @param foregroundThreshold The confidence threshold for the foreground. Pixels with a confidence value greater than or equal to this threshold are considered to be in the foreground. Value is coerced between 0 and 1, inclusive.
+ * @param foregroundThreshold The confidence at which a pixel counts as foreground. The mask
+ * ramps smoothly from background to foreground around this value, so pixels with a confidence
+ * well above it are fully in the foreground and well below it fully in the background.
+ * Value is coerced between 0 and 1, inclusive.
  */
 class BackgroundBlurFactory(
     private val blurIntensity: BlurIntensity = BlurIntensity.MEDIUM,
@@ -50,7 +59,7 @@ private class BlurredBackgroundVideoFilter(
     private val segmenter = Segmentation.getClient(options)
 
     @Volatile // volatile as its get and set happen in different threads
-    private var segmentationMask: SegmentationMask? = null
+    private var segmentationResult: SegmentationResult? = null
     private var processedSegmentationMask: SegmentationMask? = null
 
     // used for throttling, we dont want to send to ML model when there is an ongoing processing
@@ -60,8 +69,13 @@ private class BlurredBackgroundVideoFilter(
     private var scaleBetweenSourceAndMask: Pair<Float, Float>? = null
     private var scaleBetweenSourceAndMaskMatrix: Matrix? = null
 
-    // bitmap to hold the background values, 1 for background 0 for foreground, raw mask sized
+    // The copy of the frame that ML Kit segments; see SegmentationInput.
+    private val segmentationInput = SegmentationInput()
+    private val fallbackBlur = DownscaledBlur()
+
+    // Alpha mask of the background at the raw mask size, and the buffers that build it
     private var backgroundMaskBitmap: Bitmap? = null
+    private var maskBuffers: SegmentMaskBuffers? = null
 
     // bitmap to hold a downscaled version (0.5) of the actual background, to optimise blur step
     private var downScaledBackgroundBitmap: Bitmap? = null
@@ -76,10 +90,14 @@ private class BlurredBackgroundVideoFilter(
     private var maskToDownScaledBackgroundScale: Matrix? = null
     private val maskToDownScalePaint by lazy {
         // destination - downscaled background
-        // source - black mask bitmap of person cutout
-        // DST_IN - Keeps the destination pixels that are covered by source pixels.
+        // source - alpha mask of the background
+        // DST_IN - Keeps the destination pixels that are covered by source pixels,
+        // weighted by the source alpha, so the soft mask edge blends into the person.
         Paint().apply {
             xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
+            // Sample the ~256x256 mask bilinearly when scaling it up. Without this
+            // every mask texel becomes a visible block at the edge.
+            isFilterBitmap = true
             // smooth the edges
             isAntiAlias = true
         }
@@ -92,17 +110,17 @@ private class BlurredBackgroundVideoFilter(
     private var currentFrameHeight = 0
     private var currentMaskWidth = 0
     private var currentMaskHeight = 0
-    private var lineBuffer: FloatArray? = null
-    private var sourcePixels: IntArray? = null
-    private var destinationPixels: IntArray? = null
 
 
     override fun applyFilter(videoFrameBitmap: Bitmap) {
         if (!isProcessing.getAndSet(true)) {
-            // Apply segmentation
-            val mlImage = InputImage.fromBitmap(videoFrameBitmap, 0)
+            // Apply segmentation. ML Kit reads its input after this method has already
+            // drawn into videoFrameBitmap, so it gets a copy taken before that.
+            val frameWidth = videoFrameBitmap.width
+            val frameHeight = videoFrameBitmap.height
+            val mlImage = InputImage.fromBitmap(segmentationInput.snapshot(videoFrameBitmap), 0)
             segmenter.process(mlImage).addOnSuccessListener { mask ->
-                segmentationMask = mask
+                segmentationResult = SegmentationResult(mask, frameWidth, frameHeight)
             }.addOnFailureListener { e ->
                 Log.e("VideoFilters", "Failed to segment image", e)
             }.addOnCompleteListener {
@@ -110,19 +128,34 @@ private class BlurredBackgroundVideoFilter(
             }
         }
 
-        val mask = segmentationMask ?: return
+        val result = segmentationResult
+        if (result == null) {
+            // The first segmentation is still running (this includes loading the
+            // model): blur the whole frame rather than sending the raw camera image
+            // through until a mask arrives.
+            fallbackBlur.blurInPlace(videoFrameBitmap)
+            return
+        }
+        val mask = result.mask
 
         maybeInit(videoFrameBitmap, mask)
 
         if (mask !== processedSegmentationMask) {
-            colouredSegmentInt(
+            // A mask from a frame of another size (rotation) still covers the frames
+            // until the next one, but is not blended into the smoothing history.
+            val stale = !result.isFromFrameOfSize(videoFrameBitmap.width, videoFrameBitmap.height)
+            writeSoftSegmentMask(
                 segment = Segment.BACKGROUND,
                 destination = backgroundMaskBitmap!!,
                 segmentationMask = mask,
                 confidenceThreshold = foregroundThreshold,
-                maskArray = destinationPixels!!,
-                lineBuffer = lineBuffer!!
+                edgeSoftness = DEFAULT_MASK_EDGE_SOFTNESS,
+                temporalWeight = if (stale) 1.0 else DEFAULT_MASK_TEMPORAL_WEIGHT,
+                buffers = maskBuffers!!,
             )
+            if (stale) {
+                maskBuffers!!.hasSmoothedConfidence = false
+            }
             processedSegmentationMask = mask
         }
 
@@ -143,7 +176,7 @@ private class BlurredBackgroundVideoFilter(
 
         // Draw the blurred background bitmap on the original bitmap
         val canvas = Canvas(videoFrameBitmap)
-        canvas.drawBitmap(blurredBackgroundBitmap, upScaleMatrix, null)
+        canvas.drawBitmap(blurredBackgroundBitmap, upScaleMatrix, downScalePaint)
 
         blurredBackgroundBitmap.recycle()
     }
@@ -153,7 +186,10 @@ private class BlurredBackgroundVideoFilter(
         if (currentFrameWidth != videoFrameBitmap.width || currentFrameHeight != videoFrameBitmap.height) {
             currentFrameWidth = videoFrameBitmap.width
             currentFrameHeight = videoFrameBitmap.height
-            sourcePixels = IntArray(currentFrameWidth * currentFrameHeight)
+            // The scene geometry changed (rotation): the previous masks must not be
+            // blended into the new ones.
+            maskBuffers?.hasSmoothedConfidence = false
+            downScaledBackgroundBitmap?.recycle()
             downScaledBackgroundBitmap = Bitmap.createBitmap(
                 currentFrameWidth / 2, currentFrameHeight / 2, Bitmap.Config.ARGB_8888
             )
@@ -165,8 +201,9 @@ private class BlurredBackgroundVideoFilter(
             backgroundMaskBitmap?.recycle()
             backgroundMaskBitmap =
                 Bitmap.createBitmap(currentMaskWidth, currentMaskHeight, Bitmap.Config.ARGB_8888)
-            destinationPixels = IntArray(currentMaskWidth * currentMaskHeight)
-            lineBuffer = FloatArray(currentMaskWidth)
+            // New buffers also restart the temporal smoothing: a mask of another size
+            // cannot be blended with the previous one.
+            maskBuffers = SegmentMaskBuffers(currentMaskWidth, currentMaskHeight)
             createScale = true
         }
 
@@ -199,5 +236,7 @@ enum class BlurIntensity(val radius: Int) {
     HEAVY(15),
 }
 
-private const val DEFAULT_FOREGROUND_THRESHOLD: Double =
-    0.9 // 1 is max confidence that pixel is in the foreground
+// Midpoint of the soft edge (see DEFAULT_MASK_EDGE_SOFTNESS): with the default softness
+// a pixel is fully foreground from 0.8 up and fully background from 0.4 down. The old
+// hard cut-off at 0.9 eroded hair and accessories, which the model is least sure about.
+private const val DEFAULT_FOREGROUND_THRESHOLD: Double = 0.6
