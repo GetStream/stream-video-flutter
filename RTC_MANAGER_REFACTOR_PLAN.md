@@ -51,7 +51,7 @@ branches off `v2` instead of in the stack, as long as T11 waits for all of them.
 - [x] 9. **T9** [FLU-1055](https://linear.app/stream/issue/FLU-1055): telemetry wiring out (S).
 - [x] 10. **T10** [FLU-1056](https://linear.app/stream/issue/FLU-1056): local track acquisition and the single flight out (S). The publisher never opens a device after this.
 - [x] 11. **T11** [FLU-1057](https://linear.app/stream/issue/FLU-1057): `RtcSubscriber` (M). Splits the track map; `rtc_audio_api/` stays behind its two seams. Update the `RtcManager` class doc (added in T3) for what moved out.
-- [ ] 12. **T12** [FLU-1058](https://linear.app/stream/issue/FLU-1058): `RtcPublisher` (L, high risk). Verbatim; the facade ends at about 300 lines. Rewrite the `RtcManager` class doc as the facade over `RtcPublisher` and `RtcSubscriber`. Audio bitrate profile as a getter.
+- [x] 12. **T12** [FLU-1058](https://linear.app/stream/issue/FLU-1058): `RtcPublisher` (L, high risk). Verbatim; the facade ends at about 300 lines. Rewrite the `RtcManager` class doc as the facade over `RtcPublisher` and `RtcSubscriber`. Audio bitrate profile as a getter.
 - [ ] 13. **T13** [FLU-1059](https://linear.app/stream/issue/FLU-1059): one publish path and one recreate path (M, behaviour change). Fixes bugs 1 to 3 (and 6 if T12 left it); the T1 tests that pinned them are updated here. Also makes `StreamPeerConnectionFactory.getGenericSdp` throw a `StateError` naming the direction instead of returning `''`, so join and fast reconnect fail with the cause (from the review of #1546). And `RtcSubscriber.useAudioOutput` / `setAudioSink` skip a track removed while the output switch was awaited, instead of writing it back into `tracks` (from the review of #1557).
 
 ### After the stack

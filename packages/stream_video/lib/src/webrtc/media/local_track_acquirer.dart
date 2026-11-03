@@ -8,8 +8,7 @@ final _logger = taggedLogger(tag: 'SV:LocalTrackAcquirer');
 
 /// Opens the camera, the microphone and the screen share as local tracks.
 ///
-/// Acquiring only: publishing the track is left to the caller. A track type
-/// has at most one acquisition in flight through [singleFlight].
+/// Acquiring only: publishing the track is left to the caller.
 @internal
 class LocalTrackAcquirer {
   LocalTrackAcquirer({
@@ -25,31 +24,6 @@ class LocalTrackAcquirer {
 
   /// The constraints a microphone track is acquired with when none are given.
   AudioConstraints defaultAudioConstraints = const AudioConstraints();
-
-  /// Acquisitions (and whatever the caller does with the track) in flight per
-  /// track type.
-  final _inFlight = InFlightCache<SfuTrackType, Result<RtcLocalTrack>>();
-
-  /// Runs [create] as the single in-flight acquisition for [trackType],
-  /// returning the already-running one when there is one.
-  Future<Result<RtcLocalTrack>> singleFlight(
-    SfuTrackType trackType,
-    Future<Result<RtcLocalTrack>> Function() create,
-  ) {
-    if (_inFlight.inFlight(trackType) != null) {
-      _logger.i(
-        () =>
-            '[createTrack] $trackType is already being created; '
-            'joining the in-flight request instead of acquiring media again',
-      );
-    }
-    return _inFlight.run(trackType, create);
-  }
-
-  /// The acquisition in flight for [trackType], if any.
-  Future<Result<RtcLocalTrack>>? inFlight(SfuTrackType trackType) {
-    return _inFlight.inFlight(trackType);
-  }
 
   /// Acquires a track of [trackType] with [constraints], falling back to the
   /// defaults of that type. Fails when [constraints] are of another type.
