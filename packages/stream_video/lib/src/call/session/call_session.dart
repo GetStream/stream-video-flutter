@@ -1444,47 +1444,56 @@ class CallSession extends Disposable {
 
       final prior = priorStates[entry.key];
       if (prior == null) continue;
-      switch (prior) {
-        case SuspendedTrackState.wasEnabled:
-          // [priorStates] is a snapshot, user may have muted since.
-          // Re-enabling could make the mic live while UI/SDK show muted, especially on iOS/macOS.
-          if (_isMutedLocalMicrophoneTrack(track)) {
-            _logger.d(
-              () =>
-                  '[resumeSuspendedAudioTracks] track ${entry.key} was muted '
-                  'during the suspension, leaving disabled',
-            );
-            continue;
-          }
 
-          track.enable();
-          _logger.d(
-            () => '[resumeSuspendedAudioTracks] re-enabled track ${entry.key}',
-          );
-        case SuspendedTrackState.neverStarted:
-          // For local mic tracks published during suspension, starting here
-          // could make the mic live even if muted in the SDK/UI.
-          if (_isMutedLocalMicrophoneTrack(track)) {
-            _logger.d(
-              () =>
-                  '[resumeSuspendedAudioTracks] track ${entry.key} was muted '
-                  'during the suspension, leaving unstarted',
-            );
-            continue;
-          }
+      await _resumeSuspendedAudioTrack(entry.key, track, prior);
+    }
+  }
 
-          await track.start();
-          await applyCurrentAudioOutputDevice();
+  Future<void> _resumeSuspendedAudioTrack(
+    String trackId,
+    RtcTrack track,
+    SuspendedTrackState prior,
+  ) async {
+    switch (prior) {
+      case SuspendedTrackState.wasEnabled:
+        // [priorStates] is a snapshot, user may have muted since.
+        // Re-enabling could make the mic live while UI/SDK show muted, especially on iOS/macOS.
+        if (_isMutedLocalMicrophoneTrack(track)) {
           _logger.d(
-            () => '[resumeSuspendedAudioTracks] started track ${entry.key}',
-          );
-        case SuspendedTrackState.wasDisabled:
-          _logger.v(
             () =>
-                '[resumeSuspendedAudioTracks] track ${entry.key} was '
-                'disabled before suspension, leaving disabled',
+                '[resumeSuspendedAudioTracks] track ${trackId} was muted '
+                'during the suspension, leaving disabled',
           );
-      }
+          return;
+        }
+
+        track.enable();
+        _logger.d(
+          () => '[resumeSuspendedAudioTracks] re-enabled track ${trackId}',
+        );
+      case SuspendedTrackState.neverStarted:
+        // For local mic tracks published during suspension, starting here
+        // could make the mic live even if muted in the SDK/UI.
+        if (_isMutedLocalMicrophoneTrack(track)) {
+          _logger.d(
+            () =>
+                '[resumeSuspendedAudioTracks] track ${trackId} was muted '
+                'during the suspension, leaving unstarted',
+          );
+          return;
+        }
+
+        await track.start();
+        await applyCurrentAudioOutputDevice();
+        _logger.d(
+          () => '[resumeSuspendedAudioTracks] started track ${trackId}',
+        );
+      case SuspendedTrackState.wasDisabled:
+        _logger.v(
+          () =>
+              '[resumeSuspendedAudioTracks] track ${trackId} was '
+              'disabled before suspension, leaving disabled',
+        );
     }
   }
 
