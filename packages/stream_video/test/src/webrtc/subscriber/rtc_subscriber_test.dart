@@ -82,8 +82,13 @@ void main() {
                 calls.add('decrypt ${track.trackId}'),
             onTrackAdded: (track) => calls.add('added ${track.trackId}'),
           )
-          ..onRemoteTrackReceived = (_, track) =>
-              calls.add('received ${track.trackId}');
+          ..onRemoteTrackReceived = (_, track) {
+            // Announced before the track is kept.
+            calls.add(
+              'received ${track.trackId} '
+              'kept: ${subscriber.tracks.containsKey(track.trackId)}',
+            );
+          };
     onTrack =
         verify(() => pc.onTrack = captureAny()).captured.single as OnTrack;
   });
@@ -131,7 +136,7 @@ void main() {
       expect(subscriber.tracks, {track.trackId: track});
       expect(calls, [
         'decrypt ${track.trackId}',
-        'received ${track.trackId}',
+        'received ${track.trackId} kept: false',
         'added ${track.trackId}',
       ]);
     });
@@ -189,7 +194,7 @@ void main() {
       final audio = deliver('alice:TRACK_TYPE_AUDIO');
       final video = deliver('alice:TRACK_TYPE_VIDEO', kind: 'video');
 
-      subscriber.useAudioOutput(_speaker);
+      subscriber.useAudioOutput(_speaker, subscriber.audioTracks);
 
       expect(subscriber.tracks[audio.trackId]!.audioSinkId, 'speaker-2');
       expect(subscriber.tracks[video.trackId]!.audioSinkId, isNull);

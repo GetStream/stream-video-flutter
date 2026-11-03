@@ -172,25 +172,26 @@ class RtcSubscriber {
       );
       if (match != null) return match.receiver;
     } catch (e) {
-      _logger.w(() => '[receiverForTrack] getTransceivers failed: $e');
+      _logger.w(() => '[receiverFor] getTransceivers failed: $e');
     }
 
     return track.transceiver?.receiver;
   }
 
-  List<RtcRemoteTrack> get _audioTracks =>
+  /// The remote audio tracks.
+  List<RtcRemoteTrack> get audioTracks =>
       tracks.values.where((it) => it.trackType == SfuTrackType.audio).toList();
 
   /// Sets the sink id of every remote audio track to [device], as the web
   /// selects the audio output per element. A track that rejects it keeps its
   /// sink; the call fails only when every track rejected it.
   Future<Result<None>> setAudioSink(RtcMediaDevice device) async {
-    final audioTracks = _audioTracks;
+    final audioTracks = this.audioTracks;
 
     if (!rtc_audio.checkIfAudioOutputChangeSupported()) {
       _logger.w(
         () =>
-            '[setAudioOutputDevice] rejected: Audio Output device change is not supported on this browser.',
+            '[setAudioSink] rejected: Audio Output device change is not supported on this browser.',
       );
       return failureWithError(
         'Audio Output device change is not supported on this browser.',
@@ -224,23 +225,23 @@ class RtcSubscriber {
 
     for (final (trackId, error, _) in failures) {
       _logger.w(
-        () => '[setAudioOutputDevice] track $trackId rejected: $error',
+        () => '[setAudioSink] track $trackId rejected: $error',
       );
     }
 
     if (applied.isEmpty && failures.isNotEmpty) {
       final (_, error, stk) = failures.first;
-      _logger.e(() => '[setAudioOutputDevice] rejected: $error');
+      _logger.e(() => '[setAudioSink] rejected: $error');
       return Result.failure(StreamVideoExceptions.compose(error, stk), stk);
     }
 
     return const Result.success(none);
   }
 
-  /// Records [device] as the audio sink of every remote audio track, after
-  /// the platform switched the audio output to it.
-  void useAudioOutput(RtcMediaDevice device) {
-    for (final audioTrack in _audioTracks) {
+  /// Records [device] as the audio sink of [audioTracks], after the platform
+  /// switched the audio output to it.
+  void useAudioOutput(RtcMediaDevice device, List<RtcRemoteTrack> audioTracks) {
+    for (final audioTrack in audioTracks) {
       final updatedTrack = audioTrack.copyWith(audioSinkId: device.id);
       tracks[updatedTrack.trackId] = updatedTrack;
     }

@@ -69,7 +69,7 @@ const _pendingTransceiverSettleTimeout = Duration(seconds: 5);
 ///   unmutes and switches devices on them;
 /// - follows the SFU: publish options (codecs), publish quality (layers), and
 ///   the tracks announced in `SetPublisher` and `ReconnectDetails`;
-/// - receives remote tracks through its [RtcSubscriber], which owns the
+/// - receives remote tracks through its subscriber side, which owns the
 ///   subscriber peer connection and answers its offers;
 /// - attaches end-to-end encryption to senders and receivers when the call is
 ///   encrypted;
@@ -125,12 +125,12 @@ class RtcManager extends Disposable {
   final TracedStreamPeerConnection? publisher;
   final TracedStreamPeerConnection subscriber;
 
-  /// The receiving side of this session.
   late final RtcSubscriber _subscriber;
 
   /// The receiving side of this session.
   @visibleForTesting
   RtcSubscriber get rtcSubscriber => _subscriber;
+
   final CallHost _host;
   final String? sfuId;
   final int clientEventRetryCount;
@@ -347,9 +347,6 @@ class RtcManager extends Disposable {
       await publishedTrack.stop();
     }
 
-    // A remote track's transceiver belongs to the receive-only subscriber
-    // PC, so there is no sender to remove. Passing it to the publisher PC
-    // only failed with "sender is null". Stopping the track is enough.
     if (publishedTrack is RtcLocalTrack) {
       for (final publishOption in publishOptions) {
         if (publishOption.trackType != publishedTrack.trackType) continue;

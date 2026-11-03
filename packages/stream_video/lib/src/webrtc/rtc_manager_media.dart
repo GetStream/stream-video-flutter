@@ -97,6 +97,8 @@ extension RtcManagerTrackHelper on RtcManager {
       return _subscriber.setAudioSink(device);
     }
 
+    final audioTracks = _subscriber.audioTracks;
+
     try {
       // The policy the call's factory was built with, so the session and the
       // factory never disagree.
@@ -115,7 +117,7 @@ extension RtcManagerTrackHelper on RtcManager {
 
       // Change the audio output device for all remote audio tracks.
       await _audioSession.selectOutput(device);
-      _subscriber.useAudioOutput(device);
+      _subscriber.useAudioOutput(device, audioTracks);
 
       return const Result.success(none);
     } catch (e, stk) {
