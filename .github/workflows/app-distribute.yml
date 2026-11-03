@@ -68,6 +68,9 @@ jobs:
 
       - name: Select Xcode
         uses: ./.github/actions/select-xcode
+        with:
+          # Xcode 27.2 RC fails to upload to TestFlight.
+          xcode-version: "27.1"
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
@@ -120,6 +123,9 @@ jobs:
 
       - name: Select Xcode
         uses: ./.github/actions/select-xcode
+        with:
+          # Xcode 27.2 RC fails to upload to TestFlight.
+          xcode-version: "27.1"
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
