@@ -5,6 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_publish_options.dart';
 import 'package:stream_video/src/webrtc/audio/adm_microphone_mute.dart';
 import 'package:stream_video/src/webrtc/media/capture_dimension.dart';
+import 'package:stream_video/src/webrtc/peer_connection.dart';
 import 'package:stream_video/src/webrtc/publisher/rtc_publisher.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
@@ -151,6 +152,53 @@ void main() {
     });
   });
 
+  group('republishing on a reused sender', () {
+    late List<StreamPeerConnection> renegotiations;
+    late RtcPublisher rtcPublisher;
+
+    setUp(() {
+      renegotiations = [];
+      when(() => pc.onRenegotiationNeeded).thenReturn(renegotiations.add);
+      when(nativePc.getTransceivers).thenAnswer((_) async => []);
+      rtcPublisher = publisher();
+    });
+
+    Future<RtcLocalTrack> publishMic() async {
+      final result = await rtcPublisher.publishAudioTrack(track: localMic());
+      return result.getDataOrNull()!;
+    }
+
+    test('forces a renegotiation the SFU never acknowledged', () async {
+      await publishMic();
+      expect(renegotiations, isEmpty);
+
+      await publishMic();
+
+      expect(renegotiations, [pc]);
+    });
+
+    test('does not renegotiate once the SFU acknowledged the sender', () async {
+      final track = await publishMic();
+      final announced = await rtcPublisher.getAnnouncedTracks(
+        sdp: _offer(trackId: track.clonedTracks.single.id!, mid: '0'),
+      );
+      rtcPublisher.markNegotiated(announced!);
+
+      await publishMic();
+
+      expect(renegotiations, isEmpty);
+    });
+
+    test('does not renegotiate while the peer connection reconnects', () async {
+      await publishMic();
+      when(() => pc.isReconnecting).thenReturn(true);
+
+      await publishMic();
+
+      expect(renegotiations, isEmpty);
+    });
+  });
+
   group('unpublishTrack', () {
     test('stops the track and removes its senders', () async {
       final rtcPublisher = publisher();
@@ -204,8 +252,8 @@ void main() {
   });
 
   test('announces audio with the audio settings of the call', () async {
-    audioSettings = const StreamAudioSettings(hifiAudioEnabled: true);
     final rtcPublisher = publisher();
+    audioSettings = const StreamAudioSettings(hifiAudioEnabled: true);
     when(nativePc.getTransceivers).thenAnswer((_) async => []);
     final track = (await rtcPublisher.publishAudioTrack(
       track: localMic(),

@@ -38,19 +38,22 @@ part 'rtc_manager_media.dart';
 const _tag = 'SV:RtcManager';
 
 /// The WebRTC side of one call session: a facade over its [RtcPublisher] and
-/// [RtcSubscriber], and the media helpers they share.
+/// [RtcSubscriber], plus the device and audio work around them.
 ///
 /// One is made per `CallSession` by `RtcManagerFactory`, which hands it the
-/// two peer connections. A rejoin or an SFU migration makes a new one;
+/// subscriber peer connection and, when the session publishes, the publisher
+/// one. A rejoin or an SFU migration makes a new one;
 /// [handOverLocalTracks] passes the live local tracks to it, so the devices
 /// are not opened again.
 ///
 /// - The publisher sends the local tracks, one transceiver per publish
-///   option, mutes and unmutes them, follows the SFU's publish options and
-///   publish quality, and builds the tracks announced to the SFU.
+///   option, encrypts its senders when the call is end-to-end encrypted,
+///   mutes and unmutes the tracks, changes the camera's facing mode and
+///   parameters, follows the SFU's publish options and publish quality, and
+///   builds the tracks announced to the SFU.
 /// - The subscriber answers the SFU's offers and keeps the remote tracks.
 /// - This class acquires the camera, microphone and screen share and hands
-///   them to the publisher, switches devices, attaches end-to-end decryption
+///   them to the publisher, switches the camera and microphone, attaches end-to-end decryption
 ///   to remote tracks, selects the audio output, and applies the audio
 ///   session.
 ///
@@ -153,7 +156,6 @@ class RtcManager extends Disposable {
   );
 
   /// The transceiver of every publish option that has one.
-  @visibleForTesting
   TransceiverManager get transceiversManager => _publisher.transceiversManager;
 
   /// Acquires local tracks. A session without a publisher acquires none.
@@ -272,7 +274,7 @@ class RtcManager extends Disposable {
     final candidate = RtcIceCandidateParser.fromJsonString(iceCandidate);
     final Result<AddIceCandidateResult>? result;
     if (peerType == StreamPeerType.publisher) {
-      result = await publisher?.addIceCandidate(candidate);
+      result = await _publisher.addIceCandidate(candidate);
       if (result == null) return failureWithError('no publisher created');
     } else if (peerType == StreamPeerType.subscriber) {
       result = await _subscriber.addIceCandidate(candidate);
@@ -375,7 +377,7 @@ class RtcManager extends Disposable {
       ),
     );
 
-    tracks.clear();
+    _publisher.clearTracks();
     _subscriber.clearTracks();
     _remoteTrackDecryptor.clear();
 

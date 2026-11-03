@@ -15,6 +15,7 @@ import '../codecs_helper.dart';
 import '../e2ee/e2ee_mapping.dart';
 import '../media/capture_dimension.dart';
 import '../model/rtc_tracks_info.dart';
+import '../peer_connection.dart';
 import '../rtc_track/rtc_track_publish_options.dart';
 import '../traced_peer_connection.dart';
 import '../transceiver_cache.dart';
@@ -22,7 +23,7 @@ import 'announced_tracks.dart';
 import 'publish_quality.dart';
 
 /// {@template OnLocalTrackMuted}
-/// Callback for when a local track is muted.
+/// Called when a local track is muted or unmuted; [muted] says which.
 /// {@endtemplate}
 typedef OnLocalTrackMuted = void Function(RtcLocalTrack track, bool muted);
 
@@ -40,14 +41,19 @@ const _pendingTransceiverSettleTimeout = Duration(seconds: 5);
 /// The sending side of a call session: the publisher peer connection and the
 /// local tracks it sends.
 ///
-/// It sends each local track on one transceiver per publish option, mutes and
-/// unmutes those tracks, follows the SFU's publish options and publish
+/// It sends each local track on one transceiver per publish option, encrypts
+/// those senders when the call is end-to-end encrypted, mutes and unmutes the
+/// tracks (keeping the microphone mute of the audio device module in step
+/// where there is one), follows the SFU's publish options and publish
 /// quality, and builds the tracks announced in `SetPublisher` and
-/// `ReconnectDetails`. It never opens a device: tracks come in already
-/// acquired.
+/// `ReconnectDetails`.
+///
+/// It does not acquire new tracks: they come in already acquired. Unmuting,
+/// a facing-mode change and new camera parameters recreate the capture of a
+/// track it holds.
 ///
 /// A session that does not publish has no peer connection: [pc] is null and
-/// every publish fails, but the tracks given to it are still kept.
+/// every publish fails without keeping its track.
 @internal
 class RtcPublisher {
   RtcPublisher({
@@ -74,7 +80,7 @@ class RtcPublisher {
 
   final AdmMicrophoneMute Function() _createAdmMute;
 
-  /// The ADM mute, made on the first mute or audio publish.
+  /// The ADM mute, made on first use.
   late final AdmMicrophoneMute _admMute = _createAdmMute();
   final CaptureDimensionResolver _captureDimensionResolver;
 
@@ -191,7 +197,8 @@ class RtcPublisher {
   }
 
   /// Stops the local track of [trackId], its clones and media stream, and
-  /// calls `pc.removeTrack` on every sender that referenced it. Returns false
+  /// calls `pc.removeTrack` on every sender that referenced it. A track handed
+  /// over by [handOverLocalTracks] has only its clones stopped. Returns false
   /// when there is no local track of [trackId].
   Future<bool> unpublishTrack({
     required String trackId,
@@ -519,7 +526,7 @@ class RtcPublisher {
   /// different answer — nothing is sending, which is a legitimate no-op.
   ///
   /// A transceiver whose track is absent from the offer entirely (a publish
-  /// that landed while this negotiation was preparing) is skipped, not failed
+  /// that landed while this negotiation was preparing) is skipped, not failed:
   /// its own queued negotiation announces it right after.
   Future<List<RtcTrackInfo>?> getAnnouncedTracks({String? sdp}) async {
     // Wait for all pending transceivers to settle before announcing tracks.
@@ -643,7 +650,7 @@ class RtcPublisher {
   /// failed.
   ///
   /// [publishAudioTrack] and [publishVideoTrack] register [registered] before
-  /// any sender exists so `onPublisherNegotiationNeeded` can see it, and there
+  /// any sender exists so the `onRenegotiationNeeded` handler can see it, and there
   /// is no matching `unpublishTrack` when the publish never completes. Left
   /// behind, the entry makes [getPublisherTrackByType] report a track that
   /// never reached the SFU: the next enable takes the unmute path instead of
@@ -675,8 +682,8 @@ class RtcPublisher {
       audioTrack = audioTrack.copyWith(trackIdPrefix: publisherId);
     }
 
-    // Adding early as we need to access it in the onPublisherNegotiationNeeded
-    // callback.
+    // Added early so the `onRenegotiationNeeded` handler of the peer
+    // connection can see it.
     _logger.i(() => '[publishAudioTrack] track: $audioTrack');
     tracks[audioTrack.trackId] = audioTrack;
     var updatedTrack = audioTrack.copyWith(stopTrackOnMute: stopTrackOnMute);
@@ -692,7 +699,7 @@ class RtcPublisher {
       if (option.trackType != audioTrack.trackType) continue;
 
       // Create a clone of the track so each transceiver has a unique trackId
-      // in the SDP, matching the JS SDK pattern.
+      // in the SDP.
       final mediaTrackClone = await audioTrack.mediaTrack.clone();
       final trackToPublish = audioTrack.copyWith(mediaTrack: mediaTrackClone);
 
@@ -700,7 +707,7 @@ class RtcPublisher {
         option,
         trackToPublish,
         tag: '[publishAudioTrack]',
-        trackPublishOptions: RtcTrackPublishOptions(
+        trackPublishOptions: () => RtcTrackPublishOptions(
           audioBitrateProfile: _audioBitrateProfile(),
         ),
       );
@@ -760,8 +767,8 @@ class RtcPublisher {
       videoTrack = videoTrack.copyWith(trackIdPrefix: publisherId);
     }
 
-    // Adding early as we need to access it in the onPublisherNegotiationNeeded
-    // callback.
+    // Added early so the `onRenegotiationNeeded` handler of the peer
+    // connection can see it.
     _logger.i(() => '[publishVideoTrack] track: $videoTrack');
     tracks[videoTrack.trackId] = videoTrack;
     var updatedTrack = videoTrack.copyWith(
@@ -789,7 +796,7 @@ class RtcPublisher {
       if (option.trackType != videoTrack.trackType) continue;
 
       // Create a clone of the track so each transceiver has a unique trackId
-      // in the SDP, matching the JS SDK pattern.
+      // in the SDP.
       final mediaTrackClone = await videoTrack.mediaTrack.clone();
       // Carry the resolved size over: on Android the clone has no settings,
       // so it could not work out the capture size itself.
@@ -848,33 +855,38 @@ class RtcPublisher {
   /// none, otherwise the cached one in place of its previous track.
   ///
   /// Returns whether a renegotiation has to be forced for a reused sender,
-  /// or the failure to create a new one. [trackPublishOptions] defaults to
-  /// none for a new transceiver and leaves a reused one's as they are.
+  /// or the failure to create a new one.
+  ///
+  /// [trackPublishOptions] is read once no other publish holds the key. Without
+  /// it a new transceiver gets the defaults, and a reused video sender keeps
+  /// the options it has.
   Future<Result<bool>> _sendOnOption(
     SfuPublishOptions option,
     RtcLocalTrack track, {
     required String tag,
-    RtcTrackPublishOptions? trackPublishOptions,
+    RtcTrackPublishOptions Function()? trackPublishOptions,
   }) async {
     // Another publish may have claimed this key and still be waiting on the
     // platform. Let it settle, then re-read: whoever claimed first creates
     // the sender, everyone else reuses it through `replaceTrack` below.
     //
-    // Inline on purpose: the re-read and the claim in [_addTransceiver] must
-    // run in the same synchronous step as the end of this wait.
+    // This loop stays in this function: awaiting a helper would add a
+    // microtask between its last check and the re-read below, in which
+    // another publish could claim the key.
     var pending = _pendingTransceivers[option.transceiverKey];
     while (pending != null) {
       await pending;
       pending = _pendingTransceivers[option.transceiverKey];
     }
 
+    final options = trackPublishOptions?.call();
     final cachedBundle = transceiversManager.get(option);
     if (cachedBundle != null) {
       final unannounced = await _reuseTransceiver(
         cachedBundle,
         track,
         tag: tag,
-        trackPublishOptions: trackPublishOptions,
+        trackPublishOptions: options,
       );
       return Result.success(unannounced);
     }
@@ -882,7 +894,7 @@ class RtcPublisher {
     final transceiverResult = await _addTransceiver(
       track,
       option,
-      trackPublishOptions ?? const RtcTrackPublishOptions(),
+      options ?? const RtcTrackPublishOptions(),
     );
     if (transceiverResult is Failure) return transceiverResult;
 
@@ -890,13 +902,13 @@ class RtcPublisher {
     return const Result.success(false);
   }
 
-  /// Sends [track] on the cached transceiver of [cached] in place of its
-  /// previous track, which is stopped, and returns whether the SFU may not
-  /// know about that sender, so a renegotiation has to be forced.
+  /// Sends [track] on [cached]'s transceiver in place of its previous track,
+  /// which is stopped, and returns whether the SFU may not know about that
+  /// sender, so a renegotiation has to be forced.
   ///
   /// Reusing a transceiver via replaceTrack does not fire
-  /// onRenegotiationNeeded. If its previous negotiation never reached the
-  /// SFU, the SFU still doesn't know about it. The same holds for a sender
+  /// onRenegotiationNeeded. If the sender's last negotiation never reached
+  /// the SFU, the SFU does not know about it yet. The same holds for a sender
   /// that was detached: an announce made meanwhile left it out, so the SFU
   /// may have dropped it.
   Future<bool> _reuseTransceiver(
@@ -1402,6 +1414,17 @@ class RtcPublisher {
       }
     }
   }
+
+  /// Applies a remote ICE [candidate] to the publisher peer connection, or
+  /// returns null when this session does not publish.
+  Future<Result<AddIceCandidateResult>>? addIceCandidate(
+    rtc.RTCIceCandidate candidate,
+  ) {
+    return pc?.addIceCandidate(candidate);
+  }
+
+  /// Forgets every local track without stopping it.
+  void clearTracks() => tracks.clear();
 
   /// Makes a publish still in flight discard its track rather than keep it.
   void beginDispose() {
