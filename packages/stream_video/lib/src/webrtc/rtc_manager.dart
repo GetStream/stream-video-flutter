@@ -371,46 +371,41 @@ class RtcManager extends Disposable {
 
     await _cancelPendingBroadcast();
 
-    final trackIds = [...tracks.keys, ..._subscriber.tracks.keys];
-    await Future.wait(
-      trackIds.map(
-        (trackId) => unpublishTrack(trackId: trackId).catchError(
-          (Object e, StackTrace stk) {
-            _logger.e(
-              () => '[dispose] unpublishTrack failed for $trackId: $e\n$stk',
-            );
-          },
-        ),
-      ),
-    );
-
-    _publisher.clearTracks();
-    _subscriber.clearTracks();
-    _remoteTrackDecryptor.clear();
-
-    onLocalTrackMuted = null;
-    onLocalTrackPublished = null;
     onRemoteTrackReceived = null;
-
     _telemetry?.dispose();
 
     await Future.wait([
-      if (publisher != null)
-        _publisher.dispose().catchError((
-          Object e,
-          StackTrace stk,
-        ) {
-          _logger.e(() => '[dispose] publisher.dispose failed: $e\n$stk');
-        }),
-      _subscriber.dispose().catchError((
-        Object e,
-        StackTrace stk,
-      ) {
+      _publisher.dispose().catchError((Object e, StackTrace stk) {
+        _logger.e(() => '[dispose] publisher.dispose failed: $e\n$stk');
+      }),
+      _disposeSubscriber().catchError((Object e, StackTrace stk) {
         _logger.e(() => '[dispose] subscriber.dispose failed: $e\n$stk');
       }),
     ]);
 
     return super.dispose();
+  }
+
+  /// Stops the remote tracks, drops the decryptors still waiting on a
+  /// participant, and closes the subscriber peer connection.
+  Future<void> _disposeSubscriber() async {
+    final trackIds = [..._subscriber.tracks.keys];
+    await Future.wait(
+      trackIds.map(
+        (trackId) => _subscriber.removeTrack(trackId).catchError((
+          Object e,
+          StackTrace stk,
+        ) {
+          _logger.e(() => '[dispose] stop failed for $trackId: $e\n$stk');
+          return false;
+        }),
+      ),
+    );
+
+    _subscriber.clearTracks();
+    _remoteTrackDecryptor.clear();
+
+    await _subscriber.dispose();
   }
 
   RtcTrack? getTrack(String trackId) {

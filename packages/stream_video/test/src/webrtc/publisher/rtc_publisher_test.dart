@@ -420,6 +420,42 @@ void main() {
     });
   });
 
+  group('dispose', () {
+    test(
+      'stops the local tracks and closes the peer connection without taking '
+      'them off their senders',
+      () async {
+        final rtcPublisher = publisher();
+        final track = (await rtcPublisher.publishAudioTrack(
+          track: localMic(),
+        )).getDataOrNull()!;
+        final published = <RtcLocalTrack>[];
+        rtcPublisher.onLocalTrackPublished = published.add;
+
+        await rtcPublisher.dispose();
+
+        expect(rtcPublisher.tracks, isEmpty);
+        expect(fakeMediaOf(track).stopped, isTrue);
+        expect(rtcPublisher.onLocalTrackPublished, isNull);
+        verifyNever(() => nativePc.removeTrack(any()));
+        verify(pc.dispose).called(1);
+      },
+    );
+
+    test('stops only the clones of a handed-over track', () async {
+      final rtcPublisher = publisher();
+      final track = (await rtcPublisher.publishAudioTrack(
+        track: localMic(),
+      )).getDataOrNull()!;
+      rtcPublisher.handOverLocalTracks();
+
+      await rtcPublisher.dispose();
+
+      expect(fakeMediaOf(track).stopped, isFalse);
+      expect(fakeMediaOf(track).clones.single.stopped, isTrue);
+    });
+  });
+
   group('unpublishTrack', () {
     test('stops the track and removes its senders', () async {
       final rtcPublisher = publisher();

@@ -189,12 +189,7 @@ class RtcPublisher {
     final publishedTrack = tracks.remove(trackId);
     if (publishedTrack == null) return false;
 
-    final handedOver = _handedOverMediaTracks.remove(trackId);
-    if (identical(handedOver, publishedTrack.mediaTrack)) {
-      await publishedTrack.stopClones();
-    } else {
-      await publishedTrack.stop();
-    }
+    await _stopLocalTrack(publishedTrack);
 
     for (final publishOption in publishOptions) {
       if (publishOption.trackType != publishedTrack.trackType) continue;
@@ -211,6 +206,17 @@ class RtcPublisher {
     }
 
     return true;
+  }
+
+  /// Stops [track], or only its clones when its media track was handed over
+  /// to the next session.
+  Future<void> _stopLocalTrack(RtcLocalTrack track) async {
+    final handedOver = _handedOverMediaTracks.remove(track.trackId);
+    if (identical(handedOver, track.mediaTrack)) {
+      await track.stopClones();
+    } else {
+      await track.stop();
+    }
   }
 
   /// Gives the live local tracks to the session that replaces this one, so
@@ -1445,16 +1451,39 @@ class RtcPublisher {
     return pc?.addIceCandidate(candidate);
   }
 
-  /// Forgets every local track without stopping it.
-  void clearTracks() => tracks.clear();
-
   /// Makes a publish still in flight discard its track rather than keep it.
+  ///
+  /// [dispose] does this too; calling it earlier covers the part of a
+  /// session's teardown that runs before the publisher's.
   void beginDispose() {
     _isDisposing = true;
   }
 
-  /// Disposes the publisher peer connection, if any.
+  /// Stops every local track and closes the publisher peer connection, if
+  /// any. A publish still in flight discards its track.
+  ///
+  /// The tracks are not taken off their senders first: closing the peer
+  /// connection ends them all, and a sender removed from a connection that
+  /// is about to close would only ask for a renegotiation.
   Future<void> dispose() async {
+    beginDispose();
+
+    final localTracks = [...tracks.values];
+    tracks.clear();
+    await Future.wait(
+      localTracks.map(
+        (track) =>
+            _stopLocalTrack(track).catchError((Object e, StackTrace stk) {
+              _logger.e(
+                () => '[dispose] stop failed for ${track.trackId}: $e\n$stk',
+              );
+            }),
+      ),
+    );
+
+    onLocalTrackMuted = null;
+    onLocalTrackPublished = null;
+
     await pc?.dispose();
   }
 }
