@@ -93,13 +93,8 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<None>> setAudioOutputDevice({
     required RtcMediaDevice device,
   }) async {
-    final audioTracks = tracks.values
-        .whereType<RtcRemoteTrack>()
-        .where((it) => it.trackType == SfuTrackType.audio)
-        .toList();
-
     if (CurrentPlatform.isWeb) {
-      return _setWebAudioOutputDevice(device, audioTracks);
+      return _subscriber.setAudioSink(device);
     }
 
     try {
@@ -120,72 +115,13 @@ extension RtcManagerTrackHelper on RtcManager {
 
       // Change the audio output device for all remote audio tracks.
       await _audioSession.selectOutput(device);
-      for (final audioTrack in audioTracks) {
-        final updatedTrack = audioTrack.copyWith(audioSinkId: device.id);
-        tracks[updatedTrack.trackId] = updatedTrack;
-      }
+      _subscriber.useAudioOutput(device);
 
       return const Result.success(none);
     } catch (e, stk) {
       _logger.e(() => '[setAudioOutputDevice] rejected: $e');
       return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
-  }
-
-  /// Sets the sink id of every remote audio track in [audioTracks] to
-  /// [device], as the web selects the audio output per element.
-  Future<Result<None>> _setWebAudioOutputDevice(
-    RtcMediaDevice device,
-    List<RtcRemoteTrack> audioTracks,
-  ) async {
-    if (!rtc_audio.checkIfAudioOutputChangeSupported()) {
-      _logger.w(
-        () =>
-            '[setAudioOutputDevice] rejected: Audio Output device change is not supported on this browser.',
-      );
-      return failureWithError(
-        'Audio Output device change is not supported on this browser.',
-      );
-    }
-
-    // Try every track instead of aborting on the first rejection: stopping
-    // half way leaves the switched tracks on the new device and the rest on
-    // the old one, with no way to record both.
-    final applied = <RtcRemoteTrack>[];
-    final failures = <(String, Object, StackTrace)>[];
-
-    await Future.wait(
-      audioTracks.map((audioTrack) async {
-        if (audioTrack.audioSinkId == device.id) {
-          applied.add(audioTrack);
-          return;
-        }
-
-        try {
-          applied.add(await audioTrack.setSinkId(device.id));
-        } catch (e, stk) {
-          failures.add((audioTrack.trackId, e, stk));
-        }
-      }),
-    );
-
-    for (final updatedTrack in applied) {
-      tracks[updatedTrack.trackId] = updatedTrack;
-    }
-
-    for (final (trackId, error, _) in failures) {
-      _logger.w(
-        () => '[setAudioOutputDevice] track $trackId rejected: $error',
-      );
-    }
-
-    if (applied.isEmpty && failures.isNotEmpty) {
-      final (_, error, stk) = failures.first;
-      _logger.e(() => '[setAudioOutputDevice] rejected: $error');
-      return Result.failure(StreamVideoExceptions.compose(error, stk), stk);
-    }
-
-    return const Result.success(none);
   }
 
   Future<Result<RtcLocalCameraTrack>> setCameraPosition({

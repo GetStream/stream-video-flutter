@@ -23,9 +23,8 @@ void main() {
         mediaStream: FakeMediaStream(),
         mediaTrack: FakeMediaStreamTrack('remote', kind: 'video'),
       );
-      fixture.manager.tracks
-        ..[local.trackId] = local
-        ..[remote.trackId] = remote;
+      fixture.manager.tracks[local.trackId] = local;
+      fixture.manager.rtcSubscriber.tracks[remote.trackId] = remote;
     });
 
     test('split the tracks into local and remote by track id', () {

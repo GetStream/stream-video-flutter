@@ -75,14 +75,14 @@ void main() {
         mediaStream: FakeMediaStream(),
         mediaTrack: remoteMedia,
       );
-      fixture.manager.tracks[remote.trackId] = remote;
+      fixture.manager.rtcSubscriber.tracks[remote.trackId] = remote;
 
       await fixture.manager.unpublishTrack(trackId: remote.trackId);
 
       // A remote track's stop only disables it.
       expect(remoteMedia.enabled, isFalse);
       expect(remoteMedia.stopped, isFalse);
-      expect(fixture.manager.tracks, isEmpty);
+      expect(fixture.manager.rtcSubscriber.tracks, isEmpty);
       verifyNever(() => fixture.pc.removeTrack(any()));
     });
 
