@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_video/src/webrtc/media/capture_dimension.dart';
 import 'package:stream_video/src/webrtc/model/rtc_audio_bitrate_preset.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
@@ -207,5 +208,23 @@ void main() {
         expect(sender.setParametersCalls, isEmpty);
       },
     );
+  });
+
+  group('publishVideoTrack capture size', () {
+    test('comes from the capture dimension resolver', () async {
+      const screen = RtcVideoDimension(width: 1000, height: 500);
+      final fixture = RtcManagerFixture(
+        publishOptions: [publishOption(3, SfuTrackType.screenShare)],
+        captureDimensionResolver: CaptureDimensionResolver(
+          screenDimension: () => screen,
+        ),
+      );
+
+      final result = await fixture.manager.publishVideoTrack(
+        track: fakeScreenShareTrack('share'),
+      );
+
+      expect(result.getDataOrNull()!.videoDimension, screen);
+    });
   });
 }
