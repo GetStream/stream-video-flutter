@@ -247,6 +247,18 @@ class Helper {
   static Future<bool?> isIOSMultitaskingCameraAccessSupported() =>
       IosAudioManagement.isMultitaskingCameraAccessSupported();
 
+  /// Shows the system picker of the broadcast upload extension (iOS only).
+  ///
+  /// Starts no capture: once the broadcast has started, `getDisplayMedia`
+  /// with `broadcast-manual` as the `deviceId` captures it without showing the
+  /// picker again.
+  static Future<void> presentiOSBroadcastPicker() async {
+    if (!WebRTC.platformIsIOS) {
+      throw Exception('presentiOSBroadcastPicker is only supported on iOS');
+    }
+    await WebRTC.invokeMethod<void, void>('presentBroadcastPicker');
+  }
+
   /// Trigger the iOS audio route selection UI (iOS only).
   static Future<void> triggeriOSAudioRouteSelectionUI() =>
       IosAudioManagement.triggerAudioRouteSelectionUI();

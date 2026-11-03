@@ -640,6 +640,8 @@ static FlutterWebRTCPlugin* sharedSingleton;
     NSDictionary* constraints = argsMap[@"constraints"];
     NSString* factoryId = argsMap[@"factoryId"];
     [self getDisplayMedia:constraints factoryId:factoryId result:result];
+  } else if ([@"presentBroadcastPicker" isEqualToString:call.method]) {
+    [self presentBroadcastPicker:result];
   } else if ([@"createLocalMediaStream" isEqualToString:call.method]) {
     NSString* factoryId = call.arguments[@"factoryId"];
     [self createLocalMediaStream:factoryId result:result];

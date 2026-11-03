@@ -167,93 +167,12 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<RtcLocalTrack>> setScreenShareEnabled({
     bool enabled = true,
     ScreenShareConstraints? constraints,
-  }) async {
-    if (CurrentPlatform.isIos &&
-        enabled &&
-        constraints is ScreenShareConstraints &&
-        constraints.useiOSBroadcastExtension) {
-      return _startBroadcastShare(constraints);
-    }
-
-    await _cancelPendingBroadcast();
+  }) {
     return _setTrackEnabled(
       trackType: SfuTrackType.screenShare,
       enabled: enabled,
       constraints: constraints,
     );
-  }
-
-  /// Creates the screen share track of an iOS broadcast at once, and
-  /// publishes it when the broadcast extension starts.
-  ///
-  /// Runs as the screen share's single flight. A broadcast that was created
-  /// but never started is cancelled first.
-  Future<Result<RtcLocalTrack>> _startBroadcastShare(
-    ScreenShareConstraints constraints,
-  ) {
-    return _publisher.singleFlight(SfuTrackType.screenShare, () async {
-      await _cancelPendingBroadcast();
-      final generation = _broadcastGeneration;
-
-      final created = await _trackAcquirer.createScreenShareTrack(
-        constraints: constraints,
-      );
-      if (created is! Success<RtcLocalScreenShareTrack>) {
-        _logger.e(
-          () =>
-              '[startBroadcastShare] failed to create screen share track: '
-              '${created.getErrorOrNull()}',
-        );
-        return created;
-      }
-
-      // Disabled or disposed while the track was being created.
-      if (generation != _broadcastGeneration) {
-        _logger.i(() => '[startBroadcastShare] cancelled while creating');
-        await created.data.stop();
-        return failureWithError('Screen share was cancelled while starting');
-      }
-
-      _awaitBroadcastStart(created.data);
-      return created;
-    });
-  }
-
-  /// Publishes [track] on the first start of the broadcast, or stops it when
-  /// the broadcast stops before it ever started. Only the first of the two
-  /// counts. A publish that fails stops the track and marks the local
-  /// participant as not sharing.
-  void _awaitBroadcastStart(RtcLocalScreenShareTrack track) {
-    _pendingBroadcastTrack = track;
-    _pendingBroadcastSubscription = RtcMediaDeviceNotifier.instance
-        .nativeWebRtcEventsStream()
-        .where(
-          (it) =>
-              it is ScreenSharingStartedEvent ||
-              it is ScreenSharingStoppedEvent,
-        )
-        .take(1)
-        .listen((event) async {
-          _logger.i(() => '[awaitBroadcastStart] received: $event');
-          _pendingBroadcastSubscription = null;
-          _pendingBroadcastTrack = null;
-
-          if (event is! ScreenSharingStartedEvent) return track.stop();
-
-          final published = await publishVideoTrack(track: track);
-          if (published.isFailure) {
-            _logger.e(
-              () =>
-                  '[awaitBroadcastStart] publish failed: '
-                  '${published.getErrorOrNull()}',
-            );
-            await track.stop();
-
-            // The start event already marked the local participant as
-            // sharing; nothing reaches the SFU, so that is taken back.
-            stateManager.participantSetScreenShareEnabled(enabled: false);
-          }
-        });
   }
 
   Future<Result<RtcLocalTrack>> _setTrackEnabled({

@@ -1,3 +1,7 @@
+[Upcoming]
+
+* [iOS] Added `Helper.presentiOSBroadcastPicker`, which shows the broadcast extension's picker without starting a capture.
+
 [4.0.1] - 2026.10.22
 
 * [iOS/macOS] fix: peer connection operations (SDP, candidates, tracks, transceivers, senders, stats) now run on a serial queue per peer connection instead of the main thread, so joining a call or changing publish quality no longer freezes the app.

@@ -38,7 +38,8 @@ class ScreenShareConstraints extends VideoConstraints {
   Map<String, dynamic> toMap() {
     final constraints = <String, dynamic>{...super.toMap()};
     if (useiOSBroadcastExtension && CurrentPlatform.isIos) {
-      constraints['deviceId'] = 'broadcast';
+      // The picker is shown on its own, before the broadcast starts.
+      constraints['deviceId'] = 'broadcast-manual';
     }
     if (CurrentPlatform.isDesktop) {
       if (deviceId != null) {

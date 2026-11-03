@@ -378,6 +378,12 @@ class RtcMediaDeviceNotifier {
     return rtc.Helper.triggeriOSAudioRouteSelectionUI();
   }
 
+  /// Shows the picker of the iOS broadcast extension, without starting a
+  /// capture.
+  Future<void> presentiOSBroadcastPicker() {
+    return rtc.Helper.presentiOSBroadcastPicker();
+  }
+
   /// Whether [pauseAudioPlayout] can mute remote audio on this platform.
   ///
   /// Supported on Android, iOS, macOS and web. On Windows and Linux pausing

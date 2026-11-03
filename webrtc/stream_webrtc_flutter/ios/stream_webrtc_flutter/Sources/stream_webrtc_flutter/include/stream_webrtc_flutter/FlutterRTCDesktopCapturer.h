@@ -14,6 +14,9 @@
               factoryId:(nullable NSString*)factoryId
                  result:(nonnull FlutterResult)result;
 
+/// Shows the system picker of the broadcast upload extension, without starting a capture.
+- (void)presentBroadcastPicker:(nonnull FlutterResult)result;
+
 - (void)getDesktopSources:(nonnull NSDictionary*)argsMap result:(nonnull FlutterResult)result;
 
 - (void)updateDesktopSources:(nonnull NSDictionary*)argsMap result:(nonnull FlutterResult)result;
