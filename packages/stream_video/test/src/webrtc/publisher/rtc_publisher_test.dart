@@ -39,7 +39,15 @@ void main() {
   late SfuAudioBitrateProfile bitrateProfile;
   late StreamAudioSettings audioSettings;
 
+  /// Answers each `addAudioTransceiver` call, in order. The calls after the
+  /// last answer succeed at once.
+  late List<Future<Result<rtc.RTCRtpTransceiver>> Function(FakeTransceiver)>
+  addAudioAnswers;
+  late int addAudioCalls;
+
   setUp(() {
+    addAudioAnswers = [];
+    addAudioCalls = 0;
     pc = MockTracedPeerConnection();
     nativePc = MockPeerConnection();
     transceivers = [];
@@ -59,8 +67,12 @@ void main() {
     ).thenAnswer((invocation) async {
       final track = invocation.namedArguments[#track] as rtc.MediaStreamTrack;
       final transceiver = FakeTransceiver(FakeSender(track));
-      transceivers.add(transceiver);
-      return Result.success(transceiver);
+      final call = addAudioCalls++;
+      final result = call < addAudioAnswers.length
+          ? await addAudioAnswers[call](transceiver)
+          : Result.success(transceiver);
+      if (result.isSuccess) transceivers.add(transceiver);
+      return result;
     });
   });
 
@@ -114,8 +126,8 @@ void main() {
     );
 
     test('records the audio bitrate profile of the call', () async {
-      bitrateProfile = SfuAudioBitrateProfile.musicHighQuality;
       final rtcPublisher = publisher();
+      bitrateProfile = SfuAudioBitrateProfile.musicHighQuality;
 
       await rtcPublisher.publishAudioTrack(track: localMic());
 
@@ -127,6 +139,67 @@ void main() {
         SfuAudioBitrateProfile.musicHighQuality,
       );
     });
+
+    test(
+      'a publish waiting on a claim reads the bitrate profile once it holds '
+      'the key',
+      () async {
+        final gate = Completer<void>();
+        addAudioAnswers = [
+          (transceiver) async {
+            await gate.future;
+            return Result.success(transceiver);
+          },
+        ];
+        final rtcPublisher = publisher();
+
+        final first = rtcPublisher.publishAudioTrack(track: localMic());
+        await pumpEventQueue();
+        final second = rtcPublisher.publishAudioTrack(track: localMic());
+        await pumpEventQueue();
+        bitrateProfile = SfuAudioBitrateProfile.musicHighQuality;
+        gate.complete();
+        await Future.wait([first, second]);
+
+        expect(addAudioCalls, 1);
+        expect(
+          rtcPublisher.transceiversManager
+              .get(_mic)!
+              .trackPublishOptions
+              .audioBitrateProfile,
+          SfuAudioBitrateProfile.musicHighQuality,
+        );
+      },
+    );
+
+    test(
+      'when the claim holder fails, one waiter creates the sender and the '
+      'other reuses it',
+      () async {
+        final gate = Completer<void>();
+        addAudioAnswers = [
+          (_) async {
+            await gate.future;
+            return failureWithError('platform refused');
+          },
+        ];
+        final rtcPublisher = publisher();
+
+        final a = rtcPublisher.publishAudioTrack(track: localMic());
+        await pumpEventQueue();
+        final b = rtcPublisher.publishAudioTrack(track: localMic());
+        final c = rtcPublisher.publishAudioTrack(track: localMic());
+        await pumpEventQueue();
+        gate.complete();
+
+        expect((await a).isFailure, isTrue);
+        expect((await b).isSuccess, isTrue);
+        expect((await c).isSuccess, isTrue);
+        expect(addAudioCalls, 2);
+        expect(rtcPublisher.transceiversManager.items(), hasLength(1));
+        expect(transceivers.single.sender.replacedTracks, hasLength(1));
+      },
+    );
 
     test('fails and keeps nothing without a peer connection', () async {
       final rtcPublisher = publisher(withPc: false);
@@ -196,6 +269,38 @@ void main() {
       await publishMic();
 
       expect(renegotiations, isEmpty);
+    });
+  });
+
+  group('isPublisherEmpty', () {
+    test('is true until a publish claims a sender, and false after', () async {
+      when(nativePc.getTransceivers).thenAnswer((_) async => []);
+      final gate = Completer<void>();
+      addAudioAnswers = [
+        (transceiver) async {
+          await gate.future;
+          return Result.success(transceiver);
+        },
+      ];
+      final rtcPublisher = publisher();
+
+      expect(await rtcPublisher.isPublisherEmpty(), isTrue);
+
+      final publishing = rtcPublisher.publishAudioTrack(track: localMic());
+      await pumpEventQueue();
+      expect(await rtcPublisher.isPublisherEmpty(), isFalse);
+
+      gate.complete();
+      await publishing;
+      expect(await rtcPublisher.isPublisherEmpty(), isFalse);
+    });
+
+    test('is false while the peer connection reports a transceiver', () async {
+      when(
+        nativePc.getTransceivers,
+      ).thenAnswer((_) async => [FakeTransceiver(FakeSender(null))]);
+
+      expect(await publisher().isPublisherEmpty(), isFalse);
     });
   });
 

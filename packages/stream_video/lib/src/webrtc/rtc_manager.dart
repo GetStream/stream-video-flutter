@@ -53,9 +53,9 @@ const _tag = 'SV:RtcManager';
 ///   builds the tracks announced to the SFU.
 /// - The subscriber answers the SFU's offers and keeps the remote tracks.
 /// - This class acquires the camera, microphone and screen share and hands
-///   them to the publisher, switches the camera and microphone, attaches end-to-end decryption
-///   to remote tracks, selects the audio output, and applies the audio
-///   session.
+///   them to the publisher, switches the camera and microphone, attaches
+///   end-to-end decryption to remote tracks, selects the audio output, and
+///   applies the audio session.
 ///
 /// It does not talk to the SFU: `CallSession` negotiates and calls into it.
 /// The call layer reads tracks through [localTracks], [remoteTracks],
@@ -317,10 +317,6 @@ class RtcManager extends Disposable {
   /// stay here and are stopped on dispose. A second call returns nothing.
   List<RtcLocalTrack> handOverLocalTracks() => _publisher.handOverLocalTracks();
 
-  /// Whether a sender of [trackType] has an enabled track.
-  bool isPublishing(SfuTrackType trackType) =>
-      _publisher.isPublishing(trackType);
-
   /// Applies the SFU's new [publishOptions]: adds a transceiver for each new
   /// one of a track type being published, and removes the ones dropped.
   Future<void> onPublishOptionsChanged(
@@ -447,8 +443,6 @@ class RtcManager extends Disposable {
   Future<void> reconcileAppleAdmMicrophoneMute() {
     return _publisher.reconcileAdmMute();
   }
-
-  List<RtcLocalTrack> getPublisherTracks() => _publisher.getPublisherTracks();
 
   RtcLocalTrack? getPublisherTrackByType(SfuTrackType trackType) {
     return _publisher.getPublisherTrackByType(trackType);

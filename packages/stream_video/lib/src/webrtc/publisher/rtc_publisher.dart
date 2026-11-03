@@ -50,10 +50,11 @@ const _pendingTransceiverSettleTimeout = Duration(seconds: 5);
 ///
 /// It does not acquire new tracks: they come in already acquired. Unmuting,
 /// a facing-mode change and new camera parameters recreate the capture of a
-/// track it holds.
+/// track it holds. It also keeps the one acquire-and-publish in flight per
+/// track type, which the caller starts through [singleFlight].
 ///
 /// A session that does not publish has no peer connection: [pc] is null and
-/// every publish fails without keeping its track.
+/// a publish fails, without keeping its track, at its first transceiver.
 @internal
 class RtcPublisher {
   RtcPublisher({
@@ -104,9 +105,6 @@ class RtcPublisher {
 
   /// Publishes that have claimed a `(trackType, publishOptionId)` and are
   /// still creating their transceiver.
-  ///
-  /// The claim stands in for an operation queue on the peer connection: with
-  /// one, a publish would only have to check [transceiversManager].
   final _pendingTransceivers = <TransceiverKey, Future<void>>{};
 
   /// The local tracks by track id.
@@ -117,7 +115,7 @@ class RtcPublisher {
   /// only this session's clones.
   final _handedOverMediaTracks = <String, rtc.MediaStreamTrack>{};
 
-  /// Acquisitions and publishes in flight per track type.
+  /// The acquire-and-publish running for each track type.
   final _inFlight = InFlightCache<SfuTrackType, Result<RtcLocalTrack>>();
 
   OnLocalTrackMuted? onLocalTrackMuted;
@@ -256,6 +254,7 @@ class RtcPublisher {
     return handedOver;
   }
 
+  /// Whether a sender of [trackType] has an enabled track.
   bool isPublishing(SfuTrackType trackType) {
     for (final item in transceiversManager.items()) {
       if (item.publishOption.trackType != trackType) continue;
@@ -520,8 +519,8 @@ class RtcPublisher {
   /// one sending transceiver that is part of the offer could not be resolved.
   ///
   /// All-or-nothing on purpose: announcing a subset commits an offer whose
-  /// omitted m-lines keep sending media the SFU cannot map, and the SFU may read
-  /// a missing entry as an unpublish of a track that was working. A null tells
+  /// omitted m-lines keep sending media the SFU cannot map, and the SFU may
+  /// read a missing entry as an unpublish of a track that was working. A null tells
   /// the caller to roll the offer back and retry instead. An empty list is a
   /// different answer — nothing is sending, which is a legitimate no-op.
   ///
@@ -586,9 +585,10 @@ class RtcPublisher {
   /// Best-effort, unlike [getAnnouncedTracks]: this runs against the previous
   /// session, whose peer connection is often already closed, and there is no
   /// offer to roll back. Aborting a reconnect over an unresolved mid is worse
-  /// than reporting what we do know, so unresolved tracks are dropped. With the
-  /// publisher gone the mid usually comes from [TransceiverCache.negotiatedMid],
-  /// i.e. the last announce the SFU acknowledged.
+  /// than reporting what we do know, so unresolved tracks are dropped. With
+  /// the publisher gone the mid usually comes from
+  /// [TransceiverCache.negotiatedMid], i.e. the last announce the SFU
+  /// acknowledged.
   Future<List<RtcTrackInfo>> getAnnouncedTracksForReconnect({
     String? sdp,
   }) async {
@@ -650,8 +650,8 @@ class RtcPublisher {
   /// failed.
   ///
   /// [publishAudioTrack] and [publishVideoTrack] register [registered] before
-  /// any sender exists so the `onRenegotiationNeeded` handler can see it, and there
-  /// is no matching `unpublishTrack` when the publish never completes. Left
+  /// any sender exists so the `onRenegotiationNeeded` handler can see it, and
+  /// there is no matching `unpublishTrack` when the publish never completes. Left
   /// behind, the entry makes [getPublisherTrackByType] report a track that
   /// never reached the SFU: the next enable takes the unmute path instead of
   /// retrying the publish, and the camera or microphone keeps capturing for a
@@ -689,8 +689,8 @@ class RtcPublisher {
     var updatedTrack = audioTrack.copyWith(stopTrackOnMute: stopTrackOnMute);
     var needsRenegotiation = false;
 
-    // Ensure a new live audio track isn't still muted by an existing ADM-level mute.
-    // ADM mute persists beyond sessions (per-call factory).
+    // Ensure a new live audio track isn't still muted by an existing ADM-level
+    // mute. ADM mute persists beyond sessions (per-call factory).
     if (_admMute.isSupported(audioTrack) && audioTrack.mediaTrack.enabled) {
       await _admMute.setMuted(false);
     }
@@ -870,9 +870,8 @@ class RtcPublisher {
     // platform. Let it settle, then re-read: whoever claimed first creates
     // the sender, everyone else reuses it through `replaceTrack` below.
     //
-    // This loop stays in this function: awaiting a helper would add a
-    // microtask between its last check and the re-read below, in which
-    // another publish could claim the key.
+    // The re-read below must follow the last check with no await between
+    // them, so this loop stays in this function.
     var pending = _pendingTransceivers[option.transceiverKey];
     while (pending != null) {
       await pending;
@@ -1235,8 +1234,9 @@ class RtcPublisher {
       return failureWithError('Track not found');
     }
 
-    // If [stopTrackOnMute] is true or unset, the track is stopped and released (default).
-    // If false, the track stays alive and is muted at the device level (iOS/macOS only).
+    // If [stopTrackOnMute] is true or unset, the track is stopped and released
+    // (default). If false, the track stays alive and is muted at the device
+    // level (iOS/macOS only).
     final track = originalTrack.copyWith(stopTrackOnMute: stopTrackOnMute);
     tracks[trackId] = track;
 
