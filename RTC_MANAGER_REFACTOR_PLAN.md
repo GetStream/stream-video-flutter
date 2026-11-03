@@ -41,7 +41,7 @@ branches off `v2` instead of in the stack, as long as T11 waits for all of them.
 | 13 | T13 | `fix/flu-1059-one-publish-path` | |
 
 - [x] 1. **T1** [FLU-1047](https://linear.app/stream/issue/FLU-1047): characterisation tests for the untested paths (M). Gates every move; pins bugs 1 to 3 of FLU-1046 as they behave today.
-- [ ] 2. **T2** [FLU-1048](https://linear.app/stream/issue/FLU-1048): device facade to a part file, dead code out (S). Pure file split.
+- [x] 2. **T2** [FLU-1048](https://linear.app/stream/issue/FLU-1048): device facade to a part file, dead code out (S). Pure file split.
 - [ ] 3. **T3** [FLU-1049](https://linear.app/stream/issue/FLU-1049): close the facade: `localTracks`, `remoteTracks`, `markNegotiated`, `getGenericSdp` to the factory (S). Before any class move, so `CallSession` does not change again later.
 - [ ] 4. **T4** [FLU-1050](https://linear.app/stream/issue/FLU-1050): publish quality and audio bitrate as pure functions (S). The two highest complexity scores, with no tests until T1.
 - [ ] 5. **T5** [FLU-1051](https://linear.app/stream/issue/FLU-1051): announced tracks builder (S–M). Audio settings as a value; the `mid` workarounds named as a plugin seam.
