@@ -18,7 +18,7 @@ QueryCallParticipantsResponse _$QueryCallParticipantsResponseFromJson(
       ? null
       : MemberResponse.fromJson(json['membership'] as Map<String, dynamic>),
   ownCapabilities: (json['own_capabilities'] as List<dynamic>)
-      .map((e) => OwnCapability.fromJson(e as String))
+      .map((e) => e as OwnCapability)
       .toList(),
   participants: (json['participants'] as List<dynamic>)
       .map((e) => CallParticipantResponse.fromJson(e as Map<String, dynamic>))
@@ -33,7 +33,7 @@ Map<String, dynamic> _$QueryCallParticipantsResponseToJson(
   'duration': instance.duration,
   'members': instance.members.map((e) => e.toJson()).toList(),
   'membership': instance.membership?.toJson(),
-  'own_capabilities': instance.ownCapabilities.map((e) => e.toJson()).toList(),
+  'own_capabilities': instance.ownCapabilities,
   'participants': instance.participants.map((e) => e.toJson()).toList(),
   'total_participants': instance.totalParticipants,
 };

@@ -1137,7 +1137,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         startTranscriptionRequest: open.StartTranscriptionRequest(
           transcriptionExternalStorage: transcriptionExternalStorage,
           enableClosedCaptions: enableClosedCaptions,
-          language: language?.toStartTranscriptionDto(),
+          language: language?.toOpenDto(),
         ),
       );
 
@@ -1215,7 +1215,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         startClosedCaptionsRequest: open.StartClosedCaptionsRequest(
           enableTranscription: enableTranscription,
           externalStorage: transcriptionExternalStorage,
-          language: language?.toStartClosedCaptionsDto(),
+          language: language?.toOpenDto(),
         ),
       );
 
@@ -1894,16 +1894,16 @@ class _ApiKeyInterceptor extends Interceptor {
 }
 
 extension on PushProvider {
-  open.CreateDeviceRequestPushProvider toOpenDTO() {
+  open.PushProviderName toOpenDTO() {
     switch (this) {
       case PushProvider.firebase:
-        return open.CreateDeviceRequestPushProvider.firebase;
+        return open.PushProviderName.firebase;
       case PushProvider.xiaomi:
-        return open.CreateDeviceRequestPushProvider.xiaomi;
+        return open.PushProviderName.xiaomi;
       case PushProvider.huawei:
-        return open.CreateDeviceRequestPushProvider.huawei;
+        return open.PushProviderName.huawei;
       case PushProvider.apn:
-        return open.CreateDeviceRequestPushProvider.apn;
+        return open.PushProviderName.apn;
     }
   }
 }

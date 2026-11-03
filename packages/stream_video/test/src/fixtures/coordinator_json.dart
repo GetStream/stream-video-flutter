@@ -69,6 +69,7 @@ Map<String, dynamic> minimalCallSettingsJson() => {
   },
   'geofencing': {'names': <dynamic>[]},
   'individual_recording': {'mode': 'disabled'},
+  'lifecycle': {'mode': 'reusable'},
   'limits': {'max_participants_exclude_roles': <dynamic>[]},
   'raw_recording': {'mode': 'disabled'},
   'recording': {

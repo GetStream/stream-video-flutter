@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$StartClosedCaptionsRequest {
   bool? get enableTranscription;
   String? get externalStorage;
-  StartClosedCaptionsRequestLanguage? get language;
+  TranscriptionLanguage? get language;
   SpeechSegmentConfig? get speechSegmentConfig;
 
   /// Create a copy of StartClosedCaptionsRequest
@@ -69,7 +69,7 @@ abstract mixin class $StartClosedCaptionsRequestCopyWith<$Res> {
   $Res call({
     bool? enableTranscription,
     String? externalStorage,
-    StartClosedCaptionsRequestLanguage? language,
+    TranscriptionLanguage? language,
     SpeechSegmentConfig? speechSegmentConfig,
   });
 }
@@ -105,7 +105,7 @@ class _$StartClosedCaptionsRequestCopyWithImpl<$Res>
         language: freezed == language
             ? _self.language
             : language // ignore: cast_nullable_to_non_nullable
-                  as StartClosedCaptionsRequestLanguage?,
+                  as TranscriptionLanguage?,
         speechSegmentConfig: freezed == speechSegmentConfig
             ? _self.speechSegmentConfig
             : speechSegmentConfig // ignore: cast_nullable_to_non_nullable

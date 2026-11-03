@@ -16,7 +16,7 @@ mixin _$LayoutSettingsRequest {
   bool? get detectOrientation;
   String? get externalAppUrl;
   String? get externalCssUrl;
-  LayoutSettingsRequestName get name;
+  LayoutName get name;
   Map<String, Object?>? get options;
 
   /// Create a copy of LayoutSettingsRequest
@@ -71,7 +71,7 @@ abstract mixin class $LayoutSettingsRequestCopyWith<$Res> {
     bool? detectOrientation,
     String? externalAppUrl,
     String? externalCssUrl,
-    LayoutSettingsRequestName name,
+    LayoutName name,
     Map<String, Object?>? options,
   });
 }
@@ -112,7 +112,7 @@ class _$LayoutSettingsRequestCopyWithImpl<$Res>
         name: null == name
             ? _self.name
             : name // ignore: cast_nullable_to_non_nullable
-                  as LayoutSettingsRequestName,
+                  as LayoutName,
         options: freezed == options
             ? _self.options
             : options // ignore: cast_nullable_to_non_nullable

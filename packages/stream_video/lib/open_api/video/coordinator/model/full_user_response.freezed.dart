@@ -33,7 +33,6 @@ mixin _$FullUserResponse {
   String? get name;
   bool get online;
   PrivacySettingsResponse? get privacySettings;
-  DateTime? get revokeTokensIssuedBefore;
   String get role;
   bool get shadowBanned;
   List<String> get teams;
@@ -97,11 +96,6 @@ mixin _$FullUserResponse {
             (identical(other.online, online) || other.online == online) &&
             (identical(other.privacySettings, privacySettings) ||
                 other.privacySettings == privacySettings) &&
-            (identical(
-                  other.revokeTokensIssuedBefore,
-                  revokeTokensIssuedBefore,
-                ) ||
-                other.revokeTokensIssuedBefore == revokeTokensIssuedBefore) &&
             (identical(other.role, role) || other.role == role) &&
             (identical(other.shadowBanned, shadowBanned) ||
                 other.shadowBanned == shadowBanned) &&
@@ -142,7 +136,6 @@ mixin _$FullUserResponse {
     name,
     online,
     privacySettings,
-    revokeTokensIssuedBefore,
     role,
     shadowBanned,
     const DeepCollectionEquality().hash(teams),
@@ -156,7 +149,7 @@ mixin _$FullUserResponse {
 
   @override
   String toString() {
-    return 'FullUserResponse(avgResponseTime: $avgResponseTime, banExpires: $banExpires, banned: $banned, blockedUserIds: $blockedUserIds, channelMutes: $channelMutes, createdAt: $createdAt, custom: $custom, deactivatedAt: $deactivatedAt, deletedAt: $deletedAt, devices: $devices, id: $id, image: $image, invisible: $invisible, language: $language, lastActive: $lastActive, latestHiddenChannels: $latestHiddenChannels, mutes: $mutes, name: $name, online: $online, privacySettings: $privacySettings, revokeTokensIssuedBefore: $revokeTokensIssuedBefore, role: $role, shadowBanned: $shadowBanned, teams: $teams, teamsRole: $teamsRole, totalUnreadCount: $totalUnreadCount, unreadChannels: $unreadChannels, unreadCount: $unreadCount, unreadThreads: $unreadThreads, updatedAt: $updatedAt)';
+    return 'FullUserResponse(avgResponseTime: $avgResponseTime, banExpires: $banExpires, banned: $banned, blockedUserIds: $blockedUserIds, channelMutes: $channelMutes, createdAt: $createdAt, custom: $custom, deactivatedAt: $deactivatedAt, deletedAt: $deletedAt, devices: $devices, id: $id, image: $image, invisible: $invisible, language: $language, lastActive: $lastActive, latestHiddenChannels: $latestHiddenChannels, mutes: $mutes, name: $name, online: $online, privacySettings: $privacySettings, role: $role, shadowBanned: $shadowBanned, teams: $teams, teamsRole: $teamsRole, totalUnreadCount: $totalUnreadCount, unreadChannels: $unreadChannels, unreadCount: $unreadCount, unreadThreads: $unreadThreads, updatedAt: $updatedAt)';
   }
 }
 
@@ -188,7 +181,6 @@ abstract mixin class $FullUserResponseCopyWith<$Res> {
     String? name,
     bool online,
     PrivacySettingsResponse? privacySettings,
-    DateTime? revokeTokensIssuedBefore,
     String role,
     bool shadowBanned,
     List<String> teams,
@@ -234,7 +226,6 @@ class _$FullUserResponseCopyWithImpl<$Res>
     Object? name = freezed,
     Object? online = null,
     Object? privacySettings = freezed,
-    Object? revokeTokensIssuedBefore = freezed,
     Object? role = null,
     Object? shadowBanned = null,
     Object? teams = null,
@@ -327,10 +318,6 @@ class _$FullUserResponseCopyWithImpl<$Res>
             ? _self.privacySettings
             : privacySettings // ignore: cast_nullable_to_non_nullable
                   as PrivacySettingsResponse?,
-        revokeTokensIssuedBefore: freezed == revokeTokensIssuedBefore
-            ? _self.revokeTokensIssuedBefore
-            : revokeTokensIssuedBefore // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
         role: null == role
             ? _self.role
             : role // ignore: cast_nullable_to_non_nullable

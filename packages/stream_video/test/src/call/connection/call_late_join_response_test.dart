@@ -45,7 +45,7 @@ CoordinatorJoined _autoOnJoined() {
       settings: const CallSettings(
         audio: StreamAudioSettings(
           noiseCancellation: StreamNoiceCancellingSettings(
-            mode: NoiseCancellationSettingsMode.autoOn,
+            mode: FeatureActivationMode.autoOn,
           ),
         ),
       ),

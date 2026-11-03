@@ -165,7 +165,7 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
       // Absent where the call or the client is not configured for it, rather
       // than offered as a switch that does nothing.
       if (state.settings.audio.noiseCancellation?.mode !=
-              NoiseCancellationSettingsMode.disabled &&
+              FeatureActivationMode.disabled &&
           call.isAudioProcessorConfigured)
         StreamMenuOption(
           label: 'Noise cancellation',

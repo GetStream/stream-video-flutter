@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$StartTranscriptionRequest {
   bool? get enableClosedCaptions;
-  StartTranscriptionRequestLanguage? get language;
+  TranscriptionLanguage? get language;
   String? get transcriptionExternalStorage;
 
   /// Create a copy of StartTranscriptionRequest
@@ -67,7 +67,7 @@ abstract mixin class $StartTranscriptionRequestCopyWith<$Res> {
   @useResult
   $Res call({
     bool? enableClosedCaptions,
-    StartTranscriptionRequestLanguage? language,
+    TranscriptionLanguage? language,
     String? transcriptionExternalStorage,
   });
 }
@@ -98,7 +98,7 @@ class _$StartTranscriptionRequestCopyWithImpl<$Res>
         language: freezed == language
             ? _self.language
             : language // ignore: cast_nullable_to_non_nullable
-                  as StartTranscriptionRequestLanguage?,
+                  as TranscriptionLanguage?,
         transcriptionExternalStorage: freezed == transcriptionExternalStorage
             ? _self.transcriptionExternalStorage
             : transcriptionExternalStorage // ignore: cast_nullable_to_non_nullable

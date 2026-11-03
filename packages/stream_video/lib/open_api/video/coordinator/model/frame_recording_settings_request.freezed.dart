@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FrameRecordingSettingsRequest {
   int get captureIntervalInSeconds;
-  FrameRecordingSettingsRequestMode get mode;
+  FeatureActivationMode get mode;
   FrameRecordingSettingsRequestQuality? get quality;
 
   /// Create a copy of FrameRecordingSettingsRequest
@@ -60,7 +60,7 @@ abstract mixin class $FrameRecordingSettingsRequestCopyWith<$Res> {
   @useResult
   $Res call({
     int captureIntervalInSeconds,
-    FrameRecordingSettingsRequestMode mode,
+    FeatureActivationMode mode,
     FrameRecordingSettingsRequestQuality? quality,
   });
 }
@@ -91,7 +91,7 @@ class _$FrameRecordingSettingsRequestCopyWithImpl<$Res>
         mode: null == mode
             ? _self.mode
             : mode // ignore: cast_nullable_to_non_nullable
-                  as FrameRecordingSettingsRequestMode,
+                  as FeatureActivationMode,
         quality: freezed == quality
             ? _self.quality
             : quality // ignore: cast_nullable_to_non_nullable

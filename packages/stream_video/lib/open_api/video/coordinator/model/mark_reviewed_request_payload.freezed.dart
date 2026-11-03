@@ -16,6 +16,7 @@ mixin _$MarkReviewedRequestPayload {
   int? get contentToMarkAsReviewedLimit;
   String? get decisionReason;
   bool? get disableMarkingContentAsReviewed;
+  String? get reason;
 
   /// Create a copy of MarkReviewedRequestPayload
   /// with the given fields replaced by the non-null parameter values.
@@ -46,7 +47,8 @@ mixin _$MarkReviewedRequestPayload {
                   disableMarkingContentAsReviewed,
                 ) ||
                 other.disableMarkingContentAsReviewed ==
-                    disableMarkingContentAsReviewed));
+                    disableMarkingContentAsReviewed) &&
+            (identical(other.reason, reason) || other.reason == reason));
   }
 
   @override
@@ -55,11 +57,12 @@ mixin _$MarkReviewedRequestPayload {
     contentToMarkAsReviewedLimit,
     decisionReason,
     disableMarkingContentAsReviewed,
+    reason,
   );
 
   @override
   String toString() {
-    return 'MarkReviewedRequestPayload(contentToMarkAsReviewedLimit: $contentToMarkAsReviewedLimit, decisionReason: $decisionReason, disableMarkingContentAsReviewed: $disableMarkingContentAsReviewed)';
+    return 'MarkReviewedRequestPayload(contentToMarkAsReviewedLimit: $contentToMarkAsReviewedLimit, decisionReason: $decisionReason, disableMarkingContentAsReviewed: $disableMarkingContentAsReviewed, reason: $reason)';
   }
 }
 
@@ -74,6 +77,7 @@ abstract mixin class $MarkReviewedRequestPayloadCopyWith<$Res> {
     int? contentToMarkAsReviewedLimit,
     String? decisionReason,
     bool? disableMarkingContentAsReviewed,
+    String? reason,
   });
 }
 
@@ -93,6 +97,7 @@ class _$MarkReviewedRequestPayloadCopyWithImpl<$Res>
     Object? contentToMarkAsReviewedLimit = freezed,
     Object? decisionReason = freezed,
     Object? disableMarkingContentAsReviewed = freezed,
+    Object? reason = freezed,
   }) {
     return _then(
       MarkReviewedRequestPayload(
@@ -109,6 +114,10 @@ class _$MarkReviewedRequestPayloadCopyWithImpl<$Res>
             ? _self.disableMarkingContentAsReviewed
             : disableMarkingContentAsReviewed // ignore: cast_nullable_to_non_nullable
                   as bool?,
+        reason: freezed == reason
+            ? _self.reason
+            : reason // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }

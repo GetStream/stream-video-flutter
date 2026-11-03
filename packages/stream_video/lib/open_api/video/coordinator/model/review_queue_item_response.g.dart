@@ -32,7 +32,12 @@ ReviewQueueItemResponse _$ReviewQueueItemResponseFromJson(
     json['completed_at'],
     const StreamDateTimeConverter().fromJson,
   ),
+  confidenceScore: (json['confidence_score'] as num?)?.toDouble(),
   configKey: json['config_key'] as String?,
+  countryCode: json['country_code'] as String?,
+  countryCodes: (json['country_codes'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
@@ -55,6 +60,9 @@ ReviewQueueItemResponse _$ReviewQueueItemResponseFromJson(
       : EscalationMetadata.fromJson(
           json['escalation_metadata'] as Map<String, dynamic>,
         ),
+  falsePositiveFlags: (json['false_positive_flags'] as List<dynamic>?)
+      ?.map((e) => e as String)
+      .toList(),
   feedsV2Activity: json['feeds_v2_activity'] == null
       ? null
       : EnrichedActivity.fromJson(
@@ -82,6 +90,9 @@ ReviewQueueItemResponse _$ReviewQueueItemResponseFromJson(
       .map((e) => e as String)
       .toList(),
   latestModeratorAction: json['latest_moderator_action'] as String,
+  mediaDisplay: MediaDisplayResponse.fromJson(
+    json['media_display'] as Map<String, dynamic>,
+  ),
   message: json['message'] == null
       ? null
       : ChatMessageResponse.fromJson(json['message'] as Map<String, dynamic>),
@@ -90,6 +101,9 @@ ReviewQueueItemResponse _$ReviewQueueItemResponseFromJson(
       : ModerationPayloadResponse.fromJson(
           json['moderation_payload'] as Map<String, dynamic>,
         ),
+  poll: json['poll'] == null
+      ? null
+      : PollResponseData.fromJson(json['poll'] as Map<String, dynamic>),
   reaction: json['reaction'] == null
       ? null
       : Reaction.fromJson(json['reaction'] as Map<String, dynamic>),
@@ -121,7 +135,10 @@ Map<String, dynamic> _$ReviewQueueItemResponseToJson(
     instance.completedAt,
     const StreamDateTimeConverter().toJson,
   ),
+  'confidence_score': instance.confidenceScore,
   'config_key': instance.configKey,
+  'country_code': instance.countryCode,
+  'country_codes': instance.countryCodes,
   'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'entity_creator': instance.entityCreator?.toJson(),
   'entity_creator_id': instance.entityCreatorId,
@@ -134,6 +151,7 @@ Map<String, dynamic> _$ReviewQueueItemResponseToJson(
   ),
   'escalated_by': instance.escalatedBy,
   'escalation_metadata': instance.escalationMetadata?.toJson(),
+  'false_positive_flags': instance.falsePositiveFlags,
   'feeds_v2_activity': instance.feedsV2Activity?.toJson(),
   'feeds_v2_reaction': instance.feedsV2Reaction?.toJson(),
   'feeds_v3_activity': instance.feedsV3Activity?.toJson(),
@@ -143,8 +161,10 @@ Map<String, dynamic> _$ReviewQueueItemResponseToJson(
   'id': instance.id,
   'languages': instance.languages,
   'latest_moderator_action': instance.latestModeratorAction,
+  'media_display': instance.mediaDisplay.toJson(),
   'message': instance.message?.toJson(),
   'moderation_payload': instance.moderationPayload?.toJson(),
+  'poll': instance.poll?.toJson(),
   'reaction': instance.reaction?.toJson(),
   'recommended_action': instance.recommendedAction,
   'reviewed_at': _$JsonConverterToJson<Object, DateTime>(

@@ -14,6 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RestoreActionRequestPayload {
   String? get decisionReason;
+  String? get reason;
 
   /// Create a copy of RestoreActionRequestPayload
   /// with the given fields replaced by the non-null parameter values.
@@ -32,15 +33,16 @@ mixin _$RestoreActionRequestPayload {
         (other.runtimeType == runtimeType &&
             other is RestoreActionRequestPayload &&
             (identical(other.decisionReason, decisionReason) ||
-                other.decisionReason == decisionReason));
+                other.decisionReason == decisionReason) &&
+            (identical(other.reason, reason) || other.reason == reason));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, decisionReason);
+  int get hashCode => Object.hash(runtimeType, decisionReason, reason);
 
   @override
   String toString() {
-    return 'RestoreActionRequestPayload(decisionReason: $decisionReason)';
+    return 'RestoreActionRequestPayload(decisionReason: $decisionReason, reason: $reason)';
   }
 }
 
@@ -51,7 +53,7 @@ abstract mixin class $RestoreActionRequestPayloadCopyWith<$Res> {
     $Res Function(RestoreActionRequestPayload) _then,
   ) = _$RestoreActionRequestPayloadCopyWithImpl;
   @useResult
-  $Res call({String? decisionReason});
+  $Res call({String? decisionReason, String? reason});
 }
 
 /// @nodoc
@@ -66,12 +68,16 @@ class _$RestoreActionRequestPayloadCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? decisionReason = freezed}) {
+  $Res call({Object? decisionReason = freezed, Object? reason = freezed}) {
     return _then(
       RestoreActionRequestPayload(
         decisionReason: freezed == decisionReason
             ? _self.decisionReason
             : decisionReason // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        reason: freezed == reason
+            ? _self.reason
+            : reason // ignore: cast_nullable_to_non_nullable
                   as String?,
       ),
     );

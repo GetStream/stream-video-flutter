@@ -11,11 +11,7 @@ VideoSettingsRequest _$VideoSettingsRequestFromJson(
 ) => VideoSettingsRequest(
   accessRequestEnabled: json['access_request_enabled'] as bool?,
   cameraDefaultOn: json['camera_default_on'] as bool?,
-  cameraFacing: json['camera_facing'] == null
-      ? null
-      : VideoSettingsRequestCameraFacing.fromJson(
-          json['camera_facing'] as String,
-        ),
+  cameraFacing: json['camera_facing'] as CameraFacing?,
   enabled: json['enabled'] as bool?,
   targetResolution: json['target_resolution'] == null
       ? null
@@ -29,7 +25,7 @@ Map<String, dynamic> _$VideoSettingsRequestToJson(
 ) => <String, dynamic>{
   'access_request_enabled': instance.accessRequestEnabled,
   'camera_default_on': instance.cameraDefaultOn,
-  'camera_facing': instance.cameraFacing?.toJson(),
+  'camera_facing': instance.cameraFacing,
   'enabled': instance.enabled,
   'target_resolution': instance.targetResolution?.toJson(),
 };

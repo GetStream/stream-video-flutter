@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$SortParamRequest {
   int? get direction;
   String? get field;
-  String? get type;
+  SortParamType? get type;
 
   /// Create a copy of SortParamRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -54,7 +54,7 @@ abstract mixin class $SortParamRequestCopyWith<$Res> {
     $Res Function(SortParamRequest) _then,
   ) = _$SortParamRequestCopyWithImpl;
   @useResult
-  $Res call({int? direction, String? field, String? type});
+  $Res call({int? direction, String? field, SortParamType? type});
 }
 
 /// @nodoc
@@ -87,7 +87,7 @@ class _$SortParamRequestCopyWithImpl<$Res>
         type: freezed == type
             ? _self.type
             : type // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as SortParamType?,
       ),
     );
   }

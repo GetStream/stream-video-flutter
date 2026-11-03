@@ -10,12 +10,9 @@ RawRecordingSettingsRequest _$RawRecordingSettingsRequestFromJson(
   Map<String, dynamic> json,
 ) => RawRecordingSettingsRequest(
   audioOnly: json['audio_only'] as bool?,
-  mode: RawRecordingSettingsRequestMode.fromJson(json['mode'] as String),
+  mode: json['mode'] as FeatureActivationMode,
 );
 
 Map<String, dynamic> _$RawRecordingSettingsRequestToJson(
   RawRecordingSettingsRequest instance,
-) => <String, dynamic>{
-  'audio_only': instance.audioOnly,
-  'mode': instance.mode.toJson(),
-};
+) => <String, dynamic>{'audio_only': instance.audioOnly, 'mode': instance.mode};

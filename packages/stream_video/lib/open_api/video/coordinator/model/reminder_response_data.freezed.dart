@@ -16,6 +16,7 @@ mixin _$ReminderResponseData {
   ChannelResponse? get channel;
   String get channelCid;
   DateTime get createdAt;
+  DateTime? get expiresAt;
   MessageResponse? get message;
   String get messageId;
   DateTime? get remindAt;
@@ -43,6 +44,8 @@ mixin _$ReminderResponseData {
                 other.channelCid == channelCid) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
+            (identical(other.expiresAt, expiresAt) ||
+                other.expiresAt == expiresAt) &&
             (identical(other.message, message) || other.message == message) &&
             (identical(other.messageId, messageId) ||
                 other.messageId == messageId) &&
@@ -60,6 +63,7 @@ mixin _$ReminderResponseData {
     channel,
     channelCid,
     createdAt,
+    expiresAt,
     message,
     messageId,
     remindAt,
@@ -70,7 +74,7 @@ mixin _$ReminderResponseData {
 
   @override
   String toString() {
-    return 'ReminderResponseData(channel: $channel, channelCid: $channelCid, createdAt: $createdAt, message: $message, messageId: $messageId, remindAt: $remindAt, updatedAt: $updatedAt, user: $user, userId: $userId)';
+    return 'ReminderResponseData(channel: $channel, channelCid: $channelCid, createdAt: $createdAt, expiresAt: $expiresAt, message: $message, messageId: $messageId, remindAt: $remindAt, updatedAt: $updatedAt, user: $user, userId: $userId)';
   }
 }
 
@@ -85,6 +89,7 @@ abstract mixin class $ReminderResponseDataCopyWith<$Res> {
     ChannelResponse? channel,
     String channelCid,
     DateTime createdAt,
+    DateTime? expiresAt,
     MessageResponse? message,
     String messageId,
     DateTime? remindAt,
@@ -110,6 +115,7 @@ class _$ReminderResponseDataCopyWithImpl<$Res>
     Object? channel = freezed,
     Object? channelCid = null,
     Object? createdAt = null,
+    Object? expiresAt = freezed,
     Object? message = freezed,
     Object? messageId = null,
     Object? remindAt = freezed,
@@ -131,6 +137,10 @@ class _$ReminderResponseDataCopyWithImpl<$Res>
             ? _self.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
                   as DateTime,
+        expiresAt: freezed == expiresAt
+            ? _self.expiresAt
+            : expiresAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         message: freezed == message
             ? _self.message
             : message // ignore: cast_nullable_to_non_nullable
