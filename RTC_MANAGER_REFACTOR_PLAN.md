@@ -38,7 +38,7 @@ branches off `v2` instead of in the stack, as long as T11 waits for all of them.
 | 10 | T10 | `refactor/flu-1056-local-track-acquirer` | [#1556](https://github.com/GetStream/stream-video-flutter/pull/1556) |
 | 11 | T11 | `refactor/flu-1057-rtc-subscriber` | [#1557](https://github.com/GetStream/stream-video-flutter/pull/1557) |
 | 12 | T12 | `refactor/flu-1058-rtc-publisher` | [#1558](https://github.com/GetStream/stream-video-flutter/pull/1558) |
-| 13 | T13 | `fix/flu-1059-one-publish-path` | |
+| 13 | T13 | `fix/flu-1059-one-publish-path` | [#1559](https://github.com/GetStream/stream-video-flutter/pull/1559) |
 
 - [x] 1. **T1** [FLU-1047](https://linear.app/stream/issue/FLU-1047): characterisation tests for the untested paths (M). Gates every move; pins bugs 1 to 3 of FLU-1046 as they behave today.
 - [x] 2. **T2** [FLU-1048](https://linear.app/stream/issue/FLU-1048): device facade to a part file, dead code out (S). Pure file split.
