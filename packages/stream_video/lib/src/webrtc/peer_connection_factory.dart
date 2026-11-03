@@ -289,13 +289,12 @@ class StreamPeerConnectionFactory {
 
   /// A generic offer SDP for [direction], made on a throwaway peer connection
   /// of this factory. Cached per direction, since the factory's capabilities
-  /// don't change; a failed or empty result is not cached.
+  /// don't change; a failure is not cached.
+  ///
+  /// Throws a [StateError] naming [direction] when the peer connection makes
+  /// no offer, or an empty one.
   Future<String> getGenericSdp(rtc.TransceiverDirection direction) {
     return _genericSdpByDirection[direction] ??= _createGenericSdp(direction)
-        .then((sdp) {
-          if (sdp.isEmpty) _genericSdpByDirection.remove(direction);
-          return sdp;
-        })
         .catchError((Object e, StackTrace stk) {
           _genericSdpByDirection.remove(direction);
           return Future<String>.error(e, stk);
@@ -334,9 +333,9 @@ class StreamPeerConnectionFactory {
       }
     }
 
-    if (sdp == null) {
-      _logger.e(() => '[getGenericSdp] sdp is null');
-      return '';
+    if (sdp == null || sdp.isEmpty) {
+      _logger.e(() => '[getGenericSdp] no $direction offer');
+      throw StateError('No generic $direction offer: the offer was empty');
     }
 
     return sdp;

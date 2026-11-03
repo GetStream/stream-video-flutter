@@ -102,23 +102,32 @@ void main() {
       },
     );
 
-    test('an empty offer is not cached', () async {
-      final pcFactory = factory();
-      platform.createOfferWithEmptySdp = true;
+    test(
+      'an empty offer fails, naming the direction, and is not cached',
+      () async {
+        final pcFactory = factory();
+        platform.createOfferWithEmptySdp = true;
 
-      final empty = await pcFactory.getGenericSdp(
-        rtc.TransceiverDirection.SendOnly,
-      );
-      expect(empty, isEmpty);
+        await expectLater(
+          pcFactory.getGenericSdp(rtc.TransceiverDirection.SendOnly),
+          throwsA(
+            isA<StateError>().having(
+              (it) => it.message,
+              'message',
+              contains('SendOnly'),
+            ),
+          ),
+        );
 
-      platform.createOfferWithEmptySdp = false;
-      final sdp = await pcFactory.getGenericSdp(
-        rtc.TransceiverDirection.SendOnly,
-      );
+        platform.createOfferWithEmptySdp = false;
+        final sdp = await pcFactory.getGenericSdp(
+          rtc.TransceiverDirection.SendOnly,
+        );
 
-      expect(sdp, isNotEmpty);
-      expect(platform.callsOf('createPeerConnection'), hasLength(2));
-    });
+        expect(sdp, isNotEmpty);
+        expect(platform.callsOf('createPeerConnection'), hasLength(2));
+      },
+    );
 
     test('a failed dispose keeps the offer', () async {
       platform.peerConnectionDisposeError = PlatformException(code: 'failed');
