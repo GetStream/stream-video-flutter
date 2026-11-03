@@ -22,7 +22,9 @@ extension RtcManagerTrackHelper on RtcManager {
 
     try {
       final updatedTrack = await track.flipCamera();
-      _publisher.keepIfHeld(updatedTrack);
+      if (!_publisher.keepIfHeld(track, updatedTrack)) {
+        return failureWithError('Track was unpublished while flipping');
+      }
       return Result.success(updatedTrack);
     } finally {
       // small delay avoids camera being mirrored wrongly for a brief moment
@@ -67,7 +69,13 @@ extension RtcManagerTrackHelper on RtcManager {
       await reconcileAppleAdmMicrophoneMute();
     }
 
-    _publisher.keepIfHeld(updatedTrack);
+    if (!_publisher.keepIfHeld(track, updatedTrack)) {
+      // On web the switch opened a new capture of its own.
+      if (!identical(updatedTrack.mediaTrack, track.mediaTrack)) {
+        await updatedTrack.stop();
+      }
+      return failureWithError('Track was unpublished while switching input');
+    }
 
     return Result.success(updatedTrack);
   }
@@ -168,6 +176,7 @@ extension RtcManagerTrackHelper on RtcManager {
   ) {
     return _publisher.singleFlight(SfuTrackType.screenShare, () async {
       await _cancelPendingBroadcast();
+      final generation = _broadcastGeneration;
 
       final created = await _trackAcquirer.createScreenShareTrack(
         constraints: constraints,
@@ -179,6 +188,13 @@ extension RtcManagerTrackHelper on RtcManager {
               '${created.getErrorOrNull()}',
         );
         return created;
+      }
+
+      // Disabled or disposed while the track was being created.
+      if (generation != _broadcastGeneration) {
+        _logger.i(() => '[startBroadcastShare] cancelled while creating');
+        await created.data.stop();
+        return failureWithError('Screen share was cancelled while starting');
       }
 
       _awaitBroadcastStart(created.data);
@@ -204,10 +220,15 @@ extension RtcManagerTrackHelper on RtcManager {
           _pendingBroadcastSubscription = null;
           _pendingBroadcastTrack = null;
 
-          if (event is ScreenSharingStartedEvent) {
-            await publishVideoTrack(track: track);
-          } else {
-            await track.stop();
+          if (event is! ScreenSharingStartedEvent) return track.stop();
+
+          final published = await publishVideoTrack(track: track);
+          if (published.isFailure) {
+            _logger.e(
+              () =>
+                  '[awaitBroadcastStart] publish failed: '
+                  '${published.getErrorOrNull()}',
+            );
           }
         });
   }

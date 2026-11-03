@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
@@ -162,6 +164,81 @@ void main() {
       expectRecreated(camera);
       expect(stored(camera.trackId).mediaConstraints.deviceId, 'usb-camera');
     });
+
+    test('takes the facing mode from the device label', () async {
+      await publishCamera();
+      final back = RtcMediaDevice(
+        id: _backCamera['deviceId']!,
+        label: _backCamera['label']!,
+        kind: RtcMediaDeviceKind.videoInput,
+      );
+
+      final result = await fixture.manager.setVideoInputDevice(device: back);
+
+      expect(
+        result.getDataOrNull()!.mediaConstraints.facingMode,
+        FacingMode.environment,
+      );
+    });
+
+    test('prefers the facing mode the capture reports', () async {
+      final camera = await publishCamera();
+      platform.trackSettings = const {'facingMode': 'user'};
+      final back = RtcMediaDevice(
+        id: _backCamera['deviceId']!,
+        label: _backCamera['label']!,
+        kind: RtcMediaDeviceKind.videoInput,
+      );
+
+      await fixture.manager.setVideoInputDevice(device: back);
+
+      expect(
+        stored(camera.trackId).mediaConstraints.facingMode,
+        FacingMode.user,
+      );
+    });
+
+    test(
+      'a camera unpublished during the switch is not brought back and its '
+      'new capture is stopped',
+      () async {
+        final camera = await publishCamera();
+        platform.getUserMediaGate = Completer<void>();
+
+        final switching = fixture.manager.setVideoInputDevice(
+          device: _otherCamera,
+        );
+        await pumpEventQueue();
+        await fixture.manager.unpublishTrack(trackId: camera.trackId);
+        platform.getUserMediaGate!.complete();
+
+        expect((await switching).isFailure, isTrue);
+        expect(fixture.manager.tracks, isEmpty);
+        expect(platform.disposedTrackIds, isNotEmpty);
+      },
+    );
+
+    test(
+      'a camera published again during the switch keeps the new one',
+      () async {
+        final camera = await publishCamera();
+        platform.getUserMediaGate = Completer<void>();
+
+        final switching = fixture.manager.setVideoInputDevice(
+          device: _otherCamera,
+        );
+        await pumpEventQueue();
+        await fixture.manager.unpublishTrack(trackId: camera.trackId);
+        final republished = await publishCamera();
+        platform.getUserMediaGate!.complete();
+
+        expect((await switching).isFailure, isTrue);
+        expect(
+          stored(camera.trackId).mediaTrack,
+          same(republished.mediaTrack),
+        );
+      },
+    );
 
     test('keeps the camera when the device is already selected', () async {
       await publishCamera();

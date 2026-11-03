@@ -236,12 +236,19 @@ class RtcManager extends Disposable {
   RtcLocalScreenShareTrack? _pendingBroadcastTrack;
   StreamSubscription<NativeWebRtcEvent>? _pendingBroadcastSubscription;
 
+  /// Bumped by every cancel, so a broadcast still being created can tell it
+  /// was cancelled meanwhile.
+  int _broadcastGeneration = 0;
+
   /// Cancels a broadcast that was created but has not started, stopping its
-  /// track.
+  /// track, and one that is still being created.
   Future<void> _cancelPendingBroadcast() async {
+    _broadcastGeneration++;
     final track = _pendingBroadcastTrack;
     _pendingBroadcastTrack = null;
 
+    // No broadcast arms meanwhile: one still being created sees the new
+    // generation and stops its track instead.
     await _pendingBroadcastSubscription?.cancel();
     _pendingBroadcastSubscription = null;
     await track?.stop();

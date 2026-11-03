@@ -444,37 +444,6 @@ void main() {
       });
 
       test(
-        'changing audio constraints preserves the soft-mute opt-in',
-        () async {
-          final mediaTrack = _FakeMediaStreamTrack(kind: 'audio');
-          final track = addAudioTrack(
-            mediaTrack: mediaTrack,
-            mediaStream: _FakeMediaStream(),
-          );
-          rtcManager.tracks[track.trackId] = track.copyWith(
-            stopTrackOnMute: false,
-          );
-
-          // The cycle has to stop and recreate the track, so it forces
-          // stopTrackOnMute — but only for the cycle.
-          try {
-            await rtcManager.changeDefaultAudioConstraints(
-              const AudioConstraints(),
-            );
-          } catch (_) {
-            // Track recreation needs the platform plugin.
-          }
-
-          expect(
-            (rtcManager.tracks[track.trackId]! as RtcLocalAudioTrack)
-                .stopTrackOnMute,
-            isFalse,
-            reason: 'a forced hard mute must not become the new preference',
-          );
-        },
-      );
-
-      test(
         'changing audio constraints leaves an already-muted track muted',
         () async {
           final mediaTrack = _FakeMediaStreamTrack(kind: 'audio');

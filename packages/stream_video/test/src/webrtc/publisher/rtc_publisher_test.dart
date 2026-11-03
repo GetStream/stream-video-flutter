@@ -415,9 +415,32 @@ void main() {
       )).getDataOrNull()!;
       await rtcPublisher.unpublishTrack(trackId: track.trackId);
 
-      expect(rtcPublisher.keepIfHeld(track), isFalse);
+      expect(rtcPublisher.keepIfHeld(track, track), isFalse);
       expect(rtcPublisher.tracks, isEmpty);
     });
+  });
+
+  test('republishing a video track keeps its stopTrackOnMute', () async {
+    when(
+      () => pc.addVideoTransceiver(
+        track: any(named: 'track'),
+        encodings: any(named: 'encodings'),
+        degradationPreference: any(named: 'degradationPreference'),
+      ),
+    ).thenAnswer(
+      (invocation) async => Result.success(
+        FakeTransceiver(
+          FakeSender(invocation.namedArguments[#track] as rtc.MediaStreamTrack),
+        ),
+      ),
+    );
+    final rtcPublisher = publisher(publishOptions: [_camera]);
+
+    final result = await rtcPublisher.publishTrack(
+      localCamera().copyWith(stopTrackOnMute: false),
+    );
+
+    expect(result.getDataOrNull()!.stopTrackOnMute, isFalse);
   });
 
   group('dispose', () {

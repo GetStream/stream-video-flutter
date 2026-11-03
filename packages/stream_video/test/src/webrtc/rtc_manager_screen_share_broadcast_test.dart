@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
@@ -135,6 +137,51 @@ void main() {
         expect(platform.disposedTrackIds, contains(created.mediaTrack.id));
       },
     );
+
+    for (final (name, cancel) in [
+      (
+        'disabling',
+        (RtcManager m) => m.setScreenShareEnabled(enabled: false),
+      ),
+      ('disposing', (RtcManager m) => m.dispose()),
+    ]) {
+      test(
+        '$name while the track is still being created stops it and never '
+        'publishes it',
+        () async {
+          platform.getDisplayMediaGate = Completer<void>();
+
+          final starting = fixture.manager.setScreenShareEnabled(
+            constraints: _broadcast,
+          );
+          await pumpEventQueue();
+          final cancelling = cancel(fixture.manager);
+          platform.getDisplayMediaGate!.complete();
+          await cancelling;
+
+          expect((await starting).isFailure, isTrue);
+          await broadcastStarted();
+
+          expect(fixture.transceivers, isEmpty);
+          expect(fixture.manager.tracks, isEmpty);
+          expect(platform.disposedTrackIds, isNotEmpty);
+        },
+      );
+    }
+
+    test('two enables at once create one track', () async {
+      final first = fixture.manager.setScreenShareEnabled(
+        constraints: _broadcast,
+      );
+      final second = fixture.manager.setScreenShareEnabled(
+        constraints: _broadcast,
+      );
+
+      final (a, b) = (await first, await second);
+
+      expect(platform.callsOf('getDisplayMedia'), hasLength(1));
+      expect(a.getDataOrNull(), same(b.getDataOrNull()));
+    });
 
     test('stopping the created track disposes it on the platform', () async {
       // The control for the tests above: a stop is visible to the fake.

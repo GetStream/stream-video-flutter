@@ -159,7 +159,8 @@ class RtcPublisher {
   /// constraints, on the senders that carry them.
   ///
   /// A muted track is left muted: it picks the constraints up when it is
-  /// unmuted. Nothing is muted or unmuted along the way.
+  /// unmuted. Nothing is muted or unmuted along the way, except a track that
+  /// cannot be captured again, which is reported muted.
   Future<void> restartLiveAudioTracks() async {
     final liveTracks = tracks.values
         .whereType<RtcLocalAudioTrack>()
@@ -168,11 +169,18 @@ class RtcPublisher {
         .toList();
 
     for (final track in liveTracks) {
-      await _recreateOnSenders(
-        track,
-        constraints: _defaultAudioConstraints(),
-        tag: '[restartLiveAudioTracks]',
-      );
+      try {
+        await _recreateOnSenders(
+          track,
+          constraints: _defaultAudioConstraints(),
+          tag: '[restartLiveAudioTracks]',
+        );
+      } catch (e, stk) {
+        // The old capture is already stopped, so the microphone is reported
+        // muted. Unmuting captures it again, with the new constraints.
+        _logger.e(() => '[restartLiveAudioTracks] failed: $e\n$stk');
+        onLocalTrackMuted?.call(track, true);
+      }
     }
 
     // Recapturing drops the ADM mute; no-op when it already matches.
@@ -1373,26 +1381,33 @@ class RtcPublisher {
     return Result.success(updated);
   }
 
-  /// Keeps [track] in place of the local track with its id, as long as that
-  /// one is still held. Returns whether it was kept.
+  /// Keeps [updated] in place of [original], as long as [original] is still
+  /// the track held under its id. Returns whether it was kept.
   ///
-  /// For a change made to a track outside this class: a track unpublished
-  /// in the meantime is not brought back.
-  bool keepIfHeld(RtcLocalTrack track) {
-    if (!tracks.containsKey(track.trackId)) {
-      _logger.w(() => '[keepIfHeld] ${track.trackId} was unpublished');
+  /// For a change made to a track outside this class: a track unpublished,
+  /// or unpublished and published again, in the meantime is not overwritten.
+  bool keepIfHeld(RtcLocalTrack original, RtcLocalTrack updated) {
+    if (!_isHeld(original)) {
+      _logger.w(() => '[keepIfHeld] ${original.trackId} is no longer held');
       return false;
     }
 
-    tracks[track.trackId] = track;
+    tracks[updated.trackId] = updated;
     return true;
+  }
+
+  /// Whether [track]'s capture is still the one held under its id. A copy
+  /// made by a mute counts; a track published again under the same id does
+  /// not.
+  bool _isHeld(RtcLocalTrack track) {
+    return identical(tracks[track.trackId]?.mediaTrack, track.mediaTrack);
   }
 
   /// Captures [track] again with [constraints], or its own when null, sends
   /// the new capture on every sender that carried it, and keeps it.
   ///
-  /// When the track was unpublished while it was being recaptured, the new
-  /// capture is stopped and not kept, and this fails.
+  /// When the track was unpublished, or replaced, while it was being
+  /// recaptured, the new capture is stopped and not kept, and this fails.
   Future<Result<RtcLocalTrack<T>>>
   _recreateOnSenders<T extends MediaConstraints>(
     RtcLocalTrack<T> track, {
@@ -1415,8 +1430,8 @@ class RtcPublisher {
       );
     }
 
-    if (!tracks.containsKey(track.trackId)) {
-      _logger.w(() => '$tag ${track.trackId} was unpublished; stopping it');
+    if (!_isHeld(track)) {
+      _logger.w(() => '$tag ${track.trackId} is no longer held; stopping it');
       await updated.stop();
       return failureWithError('Track was unpublished while it was recreated');
     }

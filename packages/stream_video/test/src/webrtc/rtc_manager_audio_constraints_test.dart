@@ -99,18 +99,45 @@ void main() {
     });
 
     test(
-      'a failed recapture throws and leaves stopTrackOnMute as it was',
+      'a failed recapture reports the microphone muted, and unmuting '
+      'captures it with the new constraints',
       () async {
         final mic = await publishMic(stopTrackOnMute: false);
         platform.getUserMediaError = PlatformException(code: 'denied');
 
-        await expectLater(
-          fixture.manager.changeDefaultAudioConstraints(_newConstraints),
-          throwsA(startsWith('Unable to getUserMedia')),
-        );
+        await fixture.manager.changeDefaultAudioConstraints(_newConstraints);
 
+        expect(muteEvents, [(mic.trackId, true)]);
         expect(stored(mic.trackId).stopTrackOnMute, isFalse);
+
+        platform.getUserMediaError = null;
+        await fixture.manager.unmuteTrack(trackId: mic.trackId);
+
+        expect(stored(mic.trackId).mediaConstraints, _newConstraints);
+        expect(stored(mic.trackId).mediaTrack.enabled, isTrue);
       },
     );
+
+    test('screen share audio is left alone', () async {
+      final fixture = RtcManagerFixture(
+        publishOptions: [
+          _micOption,
+          publishOption(2, SfuTrackType.screenShareAudio),
+        ],
+      );
+      final shareAudio = fakeLocalTrack(
+        'share-audio',
+        trackType: SfuTrackType.screenShareAudio,
+        constraints: const AudioConstraints(),
+        kind: 'audio',
+      );
+      await fixture.manager.publishAudioTrack(track: shareAudio);
+      await fixture.manager.publishAudioTrack(track: fakeAudioTrack('mic'));
+
+      await fixture.manager.changeDefaultAudioConstraints(_newConstraints);
+
+      expect(platform.callsOf('getUserMedia'), hasLength(1));
+      expect(fakeMediaOf(shareAudio).stopped, isFalse);
+    });
   });
 }

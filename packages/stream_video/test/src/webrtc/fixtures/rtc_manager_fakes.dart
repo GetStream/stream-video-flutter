@@ -382,6 +382,9 @@ class FakeWebRtcPlatform {
   /// When set, `getUserMedia` waits for it before answering.
   Completer<void>? getUserMediaGate;
 
+  /// When set, `getDisplayMedia` waits for it before answering.
+  Completer<void>? getDisplayMediaGate;
+
   /// When set, `createOffer` fails with it.
   PlatformException? createOfferError;
 
@@ -457,6 +460,7 @@ class FakeWebRtcPlatform {
         if (error != null) throw error;
         return _stream(call);
       case 'getDisplayMedia':
+        await getDisplayMediaGate?.future;
         return _stream(call);
       case 'trackClone':
         final trackId = (call.arguments as Map)['trackId'] as String;

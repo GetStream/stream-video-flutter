@@ -335,7 +335,7 @@ class StreamPeerConnectionFactory {
 
     if (sdp == null || sdp.isEmpty) {
       _logger.e(() => '[getGenericSdp] no $direction offer');
-      throw StateError('No generic $direction offer: the offer was empty');
+      throw StateError('No generic $direction offer was made');
     }
 
     return sdp;
