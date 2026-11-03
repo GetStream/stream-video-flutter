@@ -18,7 +18,7 @@ class Helper {
   }
 
   static Future<List<MediaDeviceInfo>> enumerateDevices(String type) async {
-    var devices = await navigator.mediaDevices.enumerateDevices();
+    final devices = await navigator.mediaDevices.enumerateDevices();
     return devices.where((d) => d.kind == type).toList();
   }
 
@@ -58,7 +58,7 @@ class Helper {
     if (deviceId == null) throw 'You need to specify the deviceId';
     if (stream == null) throw 'You need to specify the stream';
 
-    var cams = await cameras;
+    final cams = await cameras;
     if (!cams.any((e) => e.deviceId == deviceId)) {
       throw 'The provided deviceId is not available, make sure to retreive the deviceId from Helper.cammeras()';
     }
@@ -70,15 +70,15 @@ class Helper {
       stream.removeTrack(track);
     });
 
-    var mediaConstraints = {
+    final mediaConstraints = {
       'audio': false, // NO need to capture audio again
       'video': {'deviceId': deviceId},
     };
 
-    var newStream = await openCamera(mediaConstraints);
-    var newCamTrack = newStream.getVideoTracks()[0];
+    final newStream = await openCamera(mediaConstraints);
+    final newCamTrack = newStream.getVideoTracks()[0];
 
-    await stream.addTrack(newCamTrack, addToNative: true);
+    await stream.addTrack(newCamTrack);
 
     return Future.value(true);
   }
@@ -190,7 +190,7 @@ class Helper {
   /// Force Android to re-request audio focus after a loss.
   static Future<void> regainAndroidAudioFocus() async {
     if (WebRTC.platformIsAndroid) {
-      return await WebRTC.invokeMethod('regainAndroidAudioFocus');
+      return WebRTC.invokeMethod('regainAndroidAudioFocus');
     } else {
       throw Exception('regainAndroidAudioFocus is only supported on Android');
     }

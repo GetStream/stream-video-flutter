@@ -20,7 +20,7 @@ class RTCDataChannelInit {
       if (maxRetransmits > 0) 'maxRetransmits': maxRetransmits,
       'protocol': protocol,
       'negotiated': negotiated,
-      'id': id
+      'id': id,
     };
   }
 }

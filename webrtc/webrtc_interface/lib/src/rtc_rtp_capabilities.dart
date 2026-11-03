@@ -1,9 +1,10 @@
 class RTCRtpCodecCapability {
-  RTCRtpCodecCapability(
-      {this.channels,
-      required this.clockRate,
-      required this.mimeType,
-      this.sdpFmtpLine});
+  RTCRtpCodecCapability({
+    this.channels,
+    required this.clockRate,
+    required this.mimeType,
+    this.sdpFmtpLine,
+  });
   factory RTCRtpCodecCapability.fromMap(Map<dynamic, dynamic> map) {
     return RTCRtpCodecCapability(
       channels: map['channels'],
@@ -42,25 +43,24 @@ class RTCRtpHeaderExtensionCapability {
 class RTCRtpCapabilities {
   RTCRtpCapabilities({this.codecs, this.headerExtensions, this.fecMechanisms});
   factory RTCRtpCapabilities.fromMap(Map<dynamic, dynamic> map) {
-    var codecs = <RTCRtpCodecCapability>[];
-    dynamic codecsMap = map['codecs'];
+    final codecs = <RTCRtpCodecCapability>[];
+    final dynamic codecsMap = map['codecs'];
     codecsMap.forEach((params) {
       codecs.add(RTCRtpCodecCapability.fromMap(params));
     });
-    var headerExtensions = <RTCRtpHeaderExtensionCapability>[];
-    dynamic headerExtensionsMap = map['headerExtensions'];
+    final headerExtensions = <RTCRtpHeaderExtensionCapability>[];
+    final dynamic headerExtensionsMap = map['headerExtensions'];
     headerExtensionsMap.forEach((params) {
       headerExtensions.add(RTCRtpHeaderExtensionCapability.fromMap(params));
     });
-    var fecMechanisms = <String>[];
-    dynamic fecMechanismsMap = map['fecMechanisms'];
-    fecMechanismsMap.forEach((params) {
-      fecMechanisms.add(params);
-    });
+    final fecMechanisms = <String>[];
+    final dynamic fecMechanismsMap = map['fecMechanisms'];
+    fecMechanismsMap.forEach(fecMechanisms.add);
     return RTCRtpCapabilities(
-        codecs: codecs,
-        headerExtensions: headerExtensions,
-        fecMechanisms: fecMechanisms);
+      codecs: codecs,
+      headerExtensions: headerExtensions,
+      fecMechanisms: fecMechanisms,
+    );
   }
   List<RTCRtpCodecCapability>? codecs;
   List<RTCRtpHeaderExtensionCapability>? headerExtensions;

@@ -30,7 +30,7 @@ class EventsEmitter<T> extends EventsListenable<T> {
     bool listenSynchronized = false,
   }) : super(synchronized: listenSynchronized);
   // suppport for multiple event listeners
-  final streamCtrl = StreamController<T>.broadcast(sync: false);
+  final streamCtrl = StreamController<T>.broadcast();
 
   @override
   EventsEmitter<T> get emitter => this;
@@ -46,10 +46,8 @@ class EventsEmitter<T> extends EventsListenable<T> {
 class EventsListener<T> extends EventsListenable<T> {
   EventsListener(
     this.emitter, {
-    bool synchronized = false,
-  }) : super(
-          synchronized: synchronized,
-        );
+    super.synchronized = false,
+  });
   @override
   final EventsEmitter<T> emitter;
 }
@@ -108,15 +106,14 @@ abstract class EventsListenable<T> {
   CancelListenFunc on<E>(
     FutureOr<void> Function(E) then, {
     bool Function(E)? filter,
-  }) =>
-      listen((event) async {
-        // event must be E
-        if (event is! E) return;
-        // filter must be true (if filter is used)
-        if (filter != null && !filter(event)) return;
-        // cast to E
-        await then(event);
-      });
+  }) => listen((event) async {
+    // event must be E
+    if (event is! E) return;
+    // filter must be true (if filter is used)
+    if (filter != null && !filter(event)) return;
+    // cast to E
+    await then(event);
+  });
 
   /// convenience method to listen & filter a specific event type, just once.
   void once<E>(

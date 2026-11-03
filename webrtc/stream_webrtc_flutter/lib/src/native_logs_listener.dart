@@ -6,8 +6,8 @@ import 'native/event_channel.dart';
 class NativeLogsListener {
   NativeLogsListener._internal() {
     FlutterWebRTCEventChannel.instance.handleEvents.stream.listen((data) {
-      var event = data.keys.first;
-      Map<dynamic, dynamic> map = data[event];
+      final event = data.keys.first;
+      final Map<dynamic, dynamic> map = data[event];
       handleEvent(event, map);
     });
   }
@@ -30,7 +30,7 @@ class NativeLogsListener {
     WebRTC.invokeMethod('setLogSeverity', {'severity': severity});
   }
 
-  void handleEvent(String event, final Map<dynamic, dynamic> map) async {
+  void handleEvent(String event, Map<dynamic, dynamic> map) async {
     switch (map['event']) {
       case 'onLogData':
         if (_logger != null) {

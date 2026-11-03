@@ -119,7 +119,7 @@ List<String> checkDarwinParity({Directory? repoRoot}) {
       findings.add(
         '$path differs between the two trees.\n'
         '    A change landed in one copy only. Fold the platform difference into a\n'
-        "    `#if TARGET_OS_IPHONE` / `#if TARGET_OS_OSX` guard, then run\n"
+        '    `#if TARGET_OS_IPHONE` / `#if TARGET_OS_OSX` guard, then run\n'
         '    `dart tool/darwin_parity.dart fix --to=macos` (or --to=ios) to copy the\n'
         '    reconciled file across.',
       );
@@ -150,7 +150,7 @@ List<String> checkDarwinParity({Directory? repoRoot}) {
   for (final path in (iosOnly.toList()..sort())) {
     if (!ios.contains(path)) {
       findings.add(
-        "$path is declared iOS-only but no longer exists in the iOS tree.\n"
+        '$path is declared iOS-only but no longer exists in the iOS tree.\n'
         '    Remove it from `iosOnly` in tool/darwin_parity.dart.',
       );
     } else if (macos.contains(path)) {

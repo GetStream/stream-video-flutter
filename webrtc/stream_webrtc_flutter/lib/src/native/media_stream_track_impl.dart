@@ -98,7 +98,7 @@ class MediaStreamTrackNative extends MediaStreamTrack {
 
   @override
   Future<ByteBuffer> captureFrame() async {
-    var filePath = await getTemporaryDirectory();
+    final filePath = await getTemporaryDirectory();
     await WebRTC.invokeMethod('captureFrame', <String, dynamic>{
       'trackId': _trackId,
       'peerConnectionId': _peerConnectionId,
@@ -113,7 +113,7 @@ class MediaStreamTrackNative extends MediaStreamTrack {
   Future<void> applyConstraints([Map<String, dynamic>? constraints]) {
     if (constraints == null) return Future.value();
 
-    var current = getConstraints();
+    final current = getConstraints();
     if (constraints.containsKey('volume') &&
         current['volume'] != constraints['volume']) {
       Helper.setVolume(constraints['volume'], this);

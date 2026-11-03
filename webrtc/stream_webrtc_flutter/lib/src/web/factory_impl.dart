@@ -1,7 +1,7 @@
 import '../desktop_capturer.dart';
 
 export 'package:dart_webrtc/dart_webrtc.dart'
-    hide videoRenderer, MediaDevices, MediaRecorder;
+    hide MediaDevices, MediaRecorder, videoRenderer;
 
 DesktopCapturer get desktopCapturer => throw UnimplementedError();
 
@@ -24,4 +24,4 @@ Future<void> handleCallInterruptionCallbacks(
   );
 }
 
-Stream<Map<String, dynamic>> get eventStream => Stream.empty();
+Stream<Map<String, dynamic>> get eventStream => const Stream.empty();

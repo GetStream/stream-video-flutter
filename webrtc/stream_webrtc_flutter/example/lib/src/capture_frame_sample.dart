@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 
 class CaptureFrameSample extends StatefulWidget {
+  const CaptureFrameSample({super.key});
+
   @override
   State<StatefulWidget> createState() => _CaptureFrameSample();
 }
@@ -11,7 +13,7 @@ class CaptureFrameSample extends StatefulWidget {
 class _CaptureFrameSample extends State<CaptureFrameSample> {
   Uint8List? _data;
 
-  void _captureFrame() async {
+  Future<void> _captureFrame() async {
     final stream = await navigator.mediaDevices.getUserMedia({
       'audio': false,
       'video': true,
@@ -35,23 +37,25 @@ class _CaptureFrameSample extends State<CaptureFrameSample> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _captureFrame,
-        child: Icon(Icons.camera_alt_outlined),
+        child: const Icon(Icons.camera_alt_outlined),
       ),
-      body: Builder(builder: (context) {
-        final data = _data;
+      body: Builder(
+        builder: (context) {
+          final data = _data;
 
-        if (data == null) {
-          return Container();
-        }
-        return Center(
-          child: Image.memory(
-            data,
-            fit: BoxFit.contain,
-            width: double.infinity,
-            height: double.infinity,
-          ),
-        );
-      }),
+          if (data == null) {
+            return Container();
+          }
+          return Center(
+            child: Image.memory(
+              data,
+              fit: BoxFit.contain,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+          );
+        },
+      ),
     );
   }
 }

@@ -30,6 +30,7 @@ We use [Melos](https://melos.invertase.dev) to manage this repository.
 ## Understanding the structure of the repository
 
 * The `packages` folder contains the packages and plugins that the SDK consists of.
+* The `webrtc` folder contains Stream's fork of the Flutter WebRTC plugin (`stream_webrtc_flutter`, `dart_webrtc` and `webrtc_interface`), which the SDK builds against.
 * The `examples` folder holds the samples created using the Flutter Video SDK.
 * The `docusaurus` folder contains the documentation and guides.
 * The `dogfooding` folder contains a complete example app that implements all of the features of the SDK.

@@ -23,7 +23,7 @@ class RTCRtpSenderNative extends RTCRtpSender {
     Map<dynamic, dynamic> map, {
     required String peerConnectionId,
   }) {
-    Map<dynamic, dynamic> trackMap = map['track'];
+    final Map<dynamic, dynamic> trackMap = map['track'];
     return RTCRtpSenderNative(
       map['senderId'],
       (trackMap.isNotEmpty)
@@ -63,10 +63,10 @@ class RTCRtpSenderNative extends RTCRtpSender {
         'peerConnectionId': _peerConnectionId,
         if (track != null) 'trackId': track!.id,
       });
-      var stats = <StatsReport>[];
+      final stats = <StatsReport>[];
       if (response != null) {
-        List<dynamic> reports = response['stats'];
-        for (var report in reports) {
+        final List<dynamic> reports = response['stats'];
+        for (final report in reports) {
           stats.add(
             StatsReport(
               report['id'],
@@ -87,12 +87,14 @@ class RTCRtpSenderNative extends RTCRtpSender {
   Future<bool> setParameters(RTCRtpParameters parameters) async {
     _parameters = parameters;
     try {
-      final response =
-          await WebRTC.invokeMethod('rtpSenderSetParameters', <String, dynamic>{
-            'peerConnectionId': _peerConnectionId,
-            'rtpSenderId': _id,
-            'parameters': parameters.toMap(),
-          });
+      final response = await WebRTC.invokeMethod(
+        'rtpSenderSetParameters',
+        <String, dynamic>{
+          'peerConnectionId': _peerConnectionId,
+          'rtpSenderId': _id,
+          'parameters': parameters.toMap(),
+        },
+      );
       return response['result'];
     } on PlatformException catch (e) {
       throw 'Unable to RTCRtpSenderNative::setParameters: ${e.message}';

@@ -4,16 +4,15 @@ import 'dart:js_interop_unsafe';
 import 'dart:ui' as ui;
 import 'dart:ui_web' as ui_web;
 
-import 'package:flutter/material.dart';
-
 import 'package:dart_webrtc/dart_webrtc.dart';
+import 'package:flutter/material.dart';
 import 'package:web/web.dart' as web;
 import 'package:webrtc_interface/webrtc_interface.dart';
 
 import 'rtc_video_renderer_impl.dart';
 
 class RTCVideoView extends StatefulWidget {
-  RTCVideoView(
+  const RTCVideoView(
     this._renderer, {
     super.key,
     this.objectFit = RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
@@ -48,7 +47,7 @@ class RTCVideoViewState extends State<RTCVideoView> {
         : 'cover';
 
     videoElement =
-        web.document.getElementById("video_${videoRenderer.viewType}")
+        web.document.getElementById('video_${videoRenderer.viewType}')
             as web.HTMLVideoElement?;
     frameCallback(0.toJS, 0.toJS);
   }
@@ -72,7 +71,7 @@ class RTCVideoViewState extends State<RTCVideoView> {
   }
 
   void frameCallback(JSAny now, JSAny metadata) {
-    final web.HTMLVideoElement? element = videoElement;
+    final element = videoElement;
     if (element != null) {
       // only capture frames if video is playing (optimization for RAF)
       if (element.readyState > 2) {
@@ -84,7 +83,7 @@ class RTCVideoViewState extends State<RTCVideoView> {
       }
     } else {
       if (mounted) {
-        Future.delayed(Duration(milliseconds: 100)).then((_) {
+        Future.delayed(const Duration(milliseconds: 100)).then((_) {
           frameCallback(0.toJS, 0.toJS);
         });
       }
@@ -98,7 +97,7 @@ class RTCVideoViewState extends State<RTCVideoView> {
     if (lastFrameTime != element.currentTime) {
       lastFrameTime = element.currentTime;
       try {
-        final ui.Image img = await ui_web.createImageFromTextureSource(
+        final img = await ui_web.createImageFromTextureSource(
           element,
           width: element.videoWidth,
           height: element.videoHeight,
@@ -146,7 +145,7 @@ class RTCVideoViewState extends State<RTCVideoView> {
   void didUpdateWidget(RTCVideoView oldWidget) {
     super.didUpdateWidget(oldWidget);
     Timer(
-      Duration(milliseconds: 10),
+      const Duration(milliseconds: 10),
       () => videoRenderer.mirror = widget.mirror,
     );
     videoRenderer.objectFit =
@@ -205,7 +204,7 @@ class RTCVideoViewState extends State<RTCVideoView> {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return Center(
-          child: Container(
+          child: SizedBox(
             width: constraints.maxWidth,
             height: constraints.maxHeight,
             child: widget._renderer.renderVideo
@@ -265,7 +264,7 @@ class _ImageFlipPainter extends CustomPainter {
     } else {
       canvas.drawImage(
         image,
-        Offset(0, 0),
+        const Offset(0, 0),
         Paint()..filterQuality = ui.FilterQuality.high,
       );
     }

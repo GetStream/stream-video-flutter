@@ -113,7 +113,7 @@ class AndroidAudioConfiguration {
   final bool? forceHandleAudioRouting;
 
   Map<String, dynamic> toMap() => <String, dynamic>{
-    if (manageAudioFocus != null) 'manageAudioFocus': manageAudioFocus!,
+    if (manageAudioFocus != null) 'manageAudioFocus': manageAudioFocus,
     if (androidAudioMode != null) 'androidAudioMode': androidAudioMode!.name,
     if (androidAudioFocusMode != null)
       'androidAudioFocusMode': androidAudioFocusMode!.name,
@@ -125,7 +125,7 @@ class AndroidAudioConfiguration {
       'androidAudioAttributesContentType':
           androidAudioAttributesContentType!.name,
     if (forceHandleAudioRouting != null)
-      'forceHandleAudioRouting': forceHandleAudioRouting!,
+      'forceHandleAudioRouting': forceHandleAudioRouting,
   };
 
   /// A pre-configured AndroidAudioConfiguration for media playback.

@@ -74,20 +74,22 @@ class RTCFactoryNative extends RTCFactory {
     Map<String, dynamic> configuration, [
     Map<String, dynamic> constraints = const {},
   ]) async {
-    var defaultConstraints = <String, dynamic>{
+    final defaultConstraints = <String, dynamic>{
       'mandatory': {},
       'optional': [
         {'DtlsSrtpKeyAgreement': true},
       ],
     };
 
-    final response =
-        await WebRTC.invokeMethod('createPeerConnection', <String, dynamic>{
-          'configuration': configuration,
-          'constraints': constraints.isEmpty ? defaultConstraints : constraints,
-        });
+    final response = await WebRTC.invokeMethod(
+      'createPeerConnection',
+      <String, dynamic>{
+        'configuration': configuration,
+        'constraints': constraints.isEmpty ? defaultConstraints : constraints,
+      },
+    );
 
-    String peerConnectionId = response['peerConnectionId'];
+    final String peerConnectionId = response['peerConnectionId'];
     return RTCPeerConnectionNative(peerConnectionId, configuration);
   }
 

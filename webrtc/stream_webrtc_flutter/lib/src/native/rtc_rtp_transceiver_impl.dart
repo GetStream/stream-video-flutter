@@ -10,7 +10,7 @@ import 'rtc_rtp_sender_impl.dart';
 import 'utils.dart';
 
 List<RTCRtpEncoding> listToRtpEncodings(List<Map<String, dynamic>> list) {
-  return list.map((e) => RTCRtpEncoding.fromMap(e)).toList();
+  return list.map(RTCRtpEncoding.fromMap).toList();
 }
 
 class RTCRtpTransceiverInitNative extends RTCRtpTransceiverInit {
@@ -68,7 +68,7 @@ class RTCRtpTransceiverNative extends RTCRtpTransceiver {
     Map<dynamic, dynamic> map, {
     required String peerConnectionId,
   }) {
-    var transceiver = RTCRtpTransceiverNative(
+    final transceiver = RTCRtpTransceiverNative(
       map['transceiverId'] ?? '',
       typeStringToRtpTransceiverDirection[map['direction']]!,
       map['mid'] ?? '',
