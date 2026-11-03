@@ -398,17 +398,27 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
       ),
     );
 
-    // Detect the actual facing mode from the track.
+    return updatedTrack.withFacingModeOf(
+      device,
+      fallback: mediaConstraints.facingMode,
+    );
+  }
+
+  /// This track with the facing mode its capture reports. When it reports
+  /// none, the facing mode is inferred from [device]'s label, and is
+  /// [fallback] when the label does not tell either.
+  RtcLocalCameraTrack withFacingModeOf(
+    RtcMediaDevice device, {
+    required FacingMode fallback,
+  }) {
     final facingMode = _detectFacingModeFromTrack(
-      updatedTrack.mediaTrack,
-      fallbackFacingMode: mediaConstraints.facingMode,
+      mediaTrack,
+      fallbackFacingMode: fallback,
       deviceLabel: device.label,
     );
 
-    return updatedTrack.copyWith(
-      mediaConstraints: updatedTrack.mediaConstraints.copyWith(
-        facingMode: facingMode,
-      ),
+    return copyWith(
+      mediaConstraints: mediaConstraints.copyWith(facingMode: facingMode),
     );
   }
 }

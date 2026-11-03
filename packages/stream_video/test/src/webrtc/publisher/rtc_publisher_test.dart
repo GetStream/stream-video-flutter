@@ -380,6 +380,46 @@ void main() {
     });
   });
 
+  group('a track unpublished while it is recaptured', () {
+    late FakeWebRtcPlatform platform;
+
+    setUp(() {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      platform = FakeWebRtcPlatform()..install();
+    });
+
+    tearDown(() => platform.uninstall());
+
+    test('is not brought back, and its new capture is stopped', () async {
+      final rtcPublisher = publisher();
+      final track = (await rtcPublisher.publishAudioTrack(
+        track: localMic(),
+      )).getDataOrNull()!;
+      await rtcPublisher.muteTrack(trackId: track.trackId);
+      platform.getUserMediaGate = Completer<void>();
+
+      final unmuting = rtcPublisher.unmuteTrack(trackId: track.trackId);
+      await pumpEventQueue();
+      await rtcPublisher.unpublishTrack(trackId: track.trackId);
+      platform.getUserMediaGate!.complete();
+
+      expect((await unmuting).isFailure, isTrue);
+      expect(rtcPublisher.tracks, isEmpty);
+      expect(platform.disposedTrackIds, isNotEmpty);
+    });
+
+    test('keepIfHeld does not bring it back either', () async {
+      final rtcPublisher = publisher();
+      final track = (await rtcPublisher.publishAudioTrack(
+        track: localMic(),
+      )).getDataOrNull()!;
+      await rtcPublisher.unpublishTrack(trackId: track.trackId);
+
+      expect(rtcPublisher.keepIfHeld(track), isFalse);
+      expect(rtcPublisher.tracks, isEmpty);
+    });
+  });
+
   group('unpublishTrack', () {
     test('stops the track and removes its senders', () async {
       final rtcPublisher = publisher();

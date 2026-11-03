@@ -155,43 +155,28 @@ class RtcPublisher {
     return _admMute.reconcile(getPublisherTrackByType(SfuTrackType.audio));
   }
 
-  /// Restarts the live microphone tracks so they capture with the default
-  /// audio constraints.
+  /// Recaptures the live microphone tracks with the default audio
+  /// constraints, on the senders that carry them.
+  ///
+  /// A muted track is left muted: it picks the constraints up when it is
+  /// unmuted. Nothing is muted or unmuted along the way.
   Future<void> restartLiveAudioTracks() async {
-    // Only live tracks are cycled. An already-muted track must stay muted —
-    // unmuting it here would put the user back on air behind their back, and
-    // on iOS/macOS also clear the ADM mute. It picks the new constraints up
-    // from the default audio constraints when it is recreated on unmute.
     final liveTracks = tracks.values
         .whereType<RtcLocalAudioTrack>()
+        .where((it) => it.trackType == SfuTrackType.audio)
         .where((it) => it.mediaTrack.enabled)
         .toList();
 
-    // The cycle has to stop and recreate the track for the new constraints to
-    // take effect, so it forces [stopTrackOnMute] regardless of the track's
-    // own setting.
-    final stopTrackOnMuteByTrackId = {
-      for (final track in liveTracks) track.trackId: track.stopTrackOnMute,
-    };
-
-    try {
-      for (final track in liveTracks) {
-        await muteTrack(trackId: track.trackId, stopTrackOnMute: true);
-      }
-
-      for (final track in liveTracks) {
-        await unmuteTrack(trackId: track.trackId);
-      }
-    } finally {
-      // Restored even if the cycle failed part-way: leaving the forced flag
-      // behind would silently downgrade the mute strategy for the rest of the
-      // call.
-      for (final entry in stopTrackOnMuteByTrackId.entries) {
-        final track = tracks[entry.key];
-        if (track is! RtcLocalAudioTrack) continue;
-        tracks[entry.key] = track.copyWith(stopTrackOnMute: entry.value);
-      }
+    for (final track in liveTracks) {
+      await _recreateOnSenders(
+        track,
+        constraints: _defaultAudioConstraints(),
+        tag: '[restartLiveAudioTracks]',
+      );
     }
+
+    // Recapturing drops the ADM mute; no-op when it already matches.
+    if (liveTracks.isNotEmpty) await reconcileAdmMute();
   }
 
   /// Stops the local track of [trackId], its clones and media stream, and
@@ -1256,31 +1241,19 @@ class RtcPublisher {
     // stale constraints justify it.
     final wasReleased = track.stopTrackOnMute && !track.mediaTrack.enabled;
     if (wasReleased || _hasStaleAudioConstraints(track)) {
-      final transceivers = transceiversManager
-          .getTransceiversForTrack(track.trackId)
-          .toList();
-
-      final updatedTrack = await track.recreate(
-        transceivers,
-        mediaConstraints: track.trackType == SfuTrackType.audio
+      final recreated = await _recreateOnSenders(
+        track,
+        constraints: track.trackType == SfuTrackType.audio
             ? _defaultAudioConstraints()
             : null,
+        tag: '[unmuteTrack]',
       );
+      if (recreated is! Success<RtcLocalTrack>) return recreated;
 
-      if (track is RtcLocalAudioTrack) {
-        await _updateAudioPublishOptions(
-          track.trackType,
-          RtcTrackPublishOptions(
-            audioBitrateProfile: _audioBitrateProfile(),
-          ),
-        );
-      }
-
-      tracks[trackId] = updatedTrack;
-      onLocalTrackMuted?.call(updatedTrack, false);
+      onLocalTrackMuted?.call(recreated.data, false);
 
       _renegotiateIfUnacknowledged(trackId, '[unmuteTrack]');
-      return Result.success(updatedTrack);
+      return recreated;
     }
 
     // Otherwise simply enable it again
@@ -1320,17 +1293,11 @@ class RtcPublisher {
       return failureWithError('Track is not camera');
     }
 
-    final transceivers = transceiversManager
-        .getTransceiversForTrack(track.trackId)
-        .toList();
-
-    final updatedTrack = await track.recreate(
-      transceivers,
-      mediaConstraints: track.mediaConstraints.copyWith(facingMode: facingMode),
+    return _recreateOnSenders(
+      track,
+      constraints: track.mediaConstraints.copyWith(facingMode: facingMode),
+      tag: '[setTrackFacingMode]',
     );
-
-    tracks[updatedTrack.trackId] = updatedTrack;
-    return Result.success(updatedTrack);
   }
 
   Future<Result<RtcLocalCameraTrack>> setCameraVideoParameters({
@@ -1352,21 +1319,104 @@ class RtcPublisher {
       return failureWithError('Track is not camera');
     }
 
-    final transceivers = transceiversManager
-        .getTransceiversForTrack(track.trackId)
-        .toList();
-
-    final updatedTrack = await track.recreate(
-      transceivers,
-      mediaConstraints: track.mediaConstraints.copyWith(
+    return _recreateOnSenders(
+      track,
+      constraints: track.mediaConstraints.copyWith(
         params: track.mediaConstraints.params.copyWith(
           dimension: params.dimension,
         ),
       ),
+      tag: '[setCameraVideoParameters]',
+    );
+  }
+
+  /// Captures the camera from [device] instead, on the senders that carry
+  /// it. Does nothing when [device] is already the one in use.
+  Future<Result<RtcLocalCameraTrack>> setVideoInputDevice(
+    RtcMediaDevice device,
+  ) async {
+    final track = getPublisherTrackByType(SfuTrackType.video);
+    if (track == null) {
+      _logger.w(() => '[setVideoInputDevice] rejected (track is null)');
+      return failureWithError('Track is null');
+    }
+
+    if (track is! RtcLocalCameraTrack) {
+      _logger.w(() => '[setVideoInputDevice] rejected (track is not camera)');
+      return failureWithError('Track is not camera');
+    }
+
+    if (track.mediaConstraints.deviceId == device.id) {
+      _logger.i(() => '[setVideoInputDevice] already selected: $device');
+      return Result.success(track);
+    }
+
+    final recreated = await _recreateOnSenders(
+      track,
+      constraints: track.mediaConstraints.copyWith(deviceId: device.id),
+      tag: '[setVideoInputDevice]',
+    );
+    if (recreated is! Success<RtcLocalCameraTrack>) return recreated;
+
+    // No await since the recreate kept it, so the track is still held.
+    final updated = recreated.data.withFacingModeOf(
+      device,
+      fallback: track.mediaConstraints.facingMode,
+    );
+    tracks[updated.trackId] = updated;
+    return Result.success(updated);
+  }
+
+  /// Keeps [track] in place of the local track with its id, as long as that
+  /// one is still held. Returns whether it was kept.
+  ///
+  /// For a change made to a track outside this class: a track unpublished
+  /// in the meantime is not brought back.
+  bool keepIfHeld(RtcLocalTrack track) {
+    if (!tracks.containsKey(track.trackId)) {
+      _logger.w(() => '[keepIfHeld] ${track.trackId} was unpublished');
+      return false;
+    }
+
+    tracks[track.trackId] = track;
+    return true;
+  }
+
+  /// Captures [track] again with [constraints], or its own when null, sends
+  /// the new capture on every sender that carried it, and keeps it.
+  ///
+  /// When the track was unpublished while it was being recaptured, the new
+  /// capture is stopped and not kept, and this fails.
+  Future<Result<RtcLocalTrack<T>>>
+  _recreateOnSenders<T extends MediaConstraints>(
+    RtcLocalTrack<T> track, {
+    required String tag,
+    T? constraints,
+  }) async {
+    final transceivers = transceiversManager
+        .getTransceiversForTrack(track.trackId)
+        .toList();
+
+    final updated = await track.recreate(
+      transceivers,
+      mediaConstraints: constraints,
     );
 
-    tracks[updatedTrack.trackId] = updatedTrack;
-    return Result.success(updatedTrack);
+    if (updated is RtcLocalAudioTrack) {
+      await _updateAudioPublishOptions(
+        updated.trackType,
+        RtcTrackPublishOptions(audioBitrateProfile: _audioBitrateProfile()),
+      );
+    }
+
+    if (!tracks.containsKey(track.trackId)) {
+      _logger.w(() => '$tag ${track.trackId} was unpublished; stopping it');
+      await updated.stop();
+      return failureWithError('Track was unpublished while it was recreated');
+    }
+
+    tracks[updated.trackId] = updated;
+    return Result.success(updated);
   }
 
   /// Takes the track of [trackId] off every sender carrying it.

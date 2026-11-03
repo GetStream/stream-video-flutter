@@ -379,6 +379,9 @@ class FakeWebRtcPlatform {
   /// When set, `getUserMedia` fails with it.
   PlatformException? getUserMediaError;
 
+  /// When set, `getUserMedia` waits for it before answering.
+  Completer<void>? getUserMediaGate;
+
   /// When set, `createOffer` fails with it.
   PlatformException? createOfferError;
 
@@ -449,6 +452,7 @@ class FakeWebRtcPlatform {
     calls.add(call);
     switch (call.method) {
       case 'getUserMedia':
+        await getUserMediaGate?.future;
         final error = getUserMediaError;
         if (error != null) throw error;
         return _stream(call);

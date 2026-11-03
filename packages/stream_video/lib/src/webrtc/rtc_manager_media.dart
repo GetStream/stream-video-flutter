@@ -22,7 +22,7 @@ extension RtcManagerTrackHelper on RtcManager {
 
     try {
       final updatedTrack = await track.flipCamera();
-      tracks[updatedTrack.trackId] = updatedTrack;
+      _publisher.keepIfHeld(updatedTrack);
       return Result.success(updatedTrack);
     } finally {
       // small delay avoids camera being mirrored wrongly for a brief moment
@@ -33,26 +33,8 @@ extension RtcManagerTrackHelper on RtcManager {
 
   Future<Result<RtcLocalCameraTrack>> setVideoInputDevice({
     required RtcMediaDevice device,
-  }) async {
-    final track = getPublisherTrackByType(SfuTrackType.video);
-    if (track == null) {
-      _logger.w(() => '[setCameraDeviceId] rejected (track is null)');
-      return failureWithError('Track is null');
-    }
-
-    if (track is! RtcLocalCameraTrack) {
-      _logger.w(() => '[setCameraDeviceId] rejected (track is not camera)');
-      return failureWithError('Track is not camera');
-    }
-
-    final transceivers = transceiversManager
-        .getTransceiversForTrack(track.trackId)
-        .toList();
-
-    final updatedTrack = await track.selectVideoInput(device, transceivers);
-    tracks[updatedTrack.trackId] = updatedTrack;
-
-    return Result.success(updatedTrack);
+  }) {
+    return _publisher.setVideoInputDevice(device);
   }
 
   Future<Result<RtcLocalAudioTrack>> setAudioInputDevice({
@@ -85,7 +67,7 @@ extension RtcManagerTrackHelper on RtcManager {
       await reconcileAppleAdmMicrophoneMute();
     }
 
-    tracks[updatedTrack.trackId] = updatedTrack;
+    _publisher.keepIfHeld(updatedTrack);
 
     return Result.success(updatedTrack);
   }
