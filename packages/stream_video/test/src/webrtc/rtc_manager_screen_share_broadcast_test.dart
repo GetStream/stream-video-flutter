@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../call/fixtures/call_test_helpers.dart';
 import 'fixtures/rtc_manager_fakes.dart';
 
 final _screenShareOption = publishOption(1, SfuTrackType.screenShare);
@@ -168,6 +170,26 @@ void main() {
         },
       );
     }
+
+    test(
+      'a publish that fails stops the track and marks the share off',
+      () async {
+        final state = createTestCallStateManager();
+        final failing = RtcManagerFixture(stateManager: state);
+        final created = (await failing.manager.setScreenShareEnabled(
+          constraints: _broadcast,
+        )).getDataOrNull()!;
+
+        await broadcastStarted();
+
+        expect(failing.transceivers, isEmpty);
+        expect(platform.disposedTrackIds, contains(created.mediaTrack.id));
+        verify(
+          () => state.participantSetScreenShareEnabled(enabled: false),
+        ).called(1);
+        await failing.manager.dispose();
+      },
+    );
 
     test('two enables at once create one track', () async {
       final first = fixture.manager.setScreenShareEnabled(

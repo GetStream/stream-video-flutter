@@ -215,7 +215,8 @@ extension RtcManagerTrackHelper on RtcManager {
 
   /// Publishes [track] on the first start of the broadcast, or stops it when
   /// the broadcast stops before it ever started. Only the first of the two
-  /// counts.
+  /// counts. A publish that fails stops the track and marks the local
+  /// participant as not sharing.
   void _awaitBroadcastStart(RtcLocalScreenShareTrack track) {
     _pendingBroadcastTrack = track;
     _pendingBroadcastSubscription = RtcMediaDeviceNotifier.instance
@@ -241,6 +242,10 @@ extension RtcManagerTrackHelper on RtcManager {
                   '${published.getErrorOrNull()}',
             );
             await track.stop();
+
+            // The start event already marked the local participant as
+            // sharing; nothing reaches the SFU, so that is taken back.
+            stateManager.participantSetScreenShareEnabled(enabled: false);
           }
         });
   }
