@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import 'assets.dart';
+import 'dialog_anchor.dart';
 
 Future<void> showFeedbackDialog(
   BuildContext context, {
@@ -13,6 +14,7 @@ Future<void> showFeedbackDialog(
 }) async {
   return showDialog<void>(
     context: context,
+    anchorPoint: trailingTopAnchor(context),
     builder: (BuildContext context) {
       final colorScheme = StreamTheme.of(context).colorScheme;
       final spacing = context.streamSpacing;

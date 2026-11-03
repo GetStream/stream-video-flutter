@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 
 // 📦 Package imports:
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'dialog_anchor.dart';
 
 Future<void> showLoadingIndicator(BuildContext context) async {
   return showDialog<void>(
     context: context,
+    anchorPoint: trailingTopAnchor(context),
     barrierDismissible: false,
     builder: (BuildContext context) {
       return SimpleDialog(

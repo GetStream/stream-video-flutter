@@ -16,8 +16,13 @@ class RecordingClientEventReporter implements ClientEventReporter {
   /// Runs on every [reportJoinAttempt], after it is recorded.
   void Function()? onReportJoinAttempt;
 
-  /// Every abort code reported, in order.
-  final aborts = <ClientEventStandardCode>[];
+  /// The code of every abort reported, in order.
+  List<ClientEventStandardCode> get aborts => [
+    for (final failure in abortFailures) failure.code,
+  ];
+
+  /// Every abort reported, in order.
+  final abortFailures = <ClientEventFailure>[];
 
   /// The calls registered and not unregistered since.
   final registered = <String>{};
@@ -28,9 +33,13 @@ class RecordingClientEventReporter implements ClientEventReporter {
   /// The reason of every new join attempt asked for directly, in order.
   final newJoinAttempts = <JoinReason>[];
 
+  /// The code of every stage failed directly, in order. Aborts are in
+  /// [aborts] instead.
+  final stageFailures = <ClientEventStandardCode>[];
+
   @override
-  void abort(StreamCallCid cid, ClientEventStandardCode code) {
-    aborts.add(code);
+  void abort(StreamCallCid cid, ClientEventFailure failure) {
+    abortFailures.add(failure);
   }
 
   @override
@@ -104,12 +113,15 @@ class RecordingClientEventReporter implements ClientEventReporter {
     required ClientEventFailure failure,
     int retryCount = 0,
     ClientEventDetails details = const ClientEventDetails(),
-  }) => _delegate.failStage(
-    stageId,
-    failure: failure,
-    retryCount: retryCount,
-    details: details,
-  );
+  }) {
+    stageFailures.add(failure.code);
+    _delegate.failStage(
+      stageId,
+      failure: failure,
+      retryCount: retryCount,
+      details: details,
+    );
+  }
 
   @override
   void failStageWithError(

@@ -667,7 +667,9 @@ class StreamVideo extends Disposable implements CallHost {
       queryCalls(
         watch: true,
         filterConditions: {
-          'cid': {r'$in': watched.map((call) => call.callCid.value).toList()},
+          'cid': {
+            r'$in': watched.map((call) => call.callCid.value).toSet().toList(),
+          },
         },
       ).then((result) {
         if (result case Failure(:final error)) {

@@ -89,7 +89,10 @@ void main() {
       notifier.coordinatorCallEnded(_callEnded(endedAt: endedAt));
 
       final state = notifier.state;
-      expect(state.status, CallStatus.disconnected(DisconnectReason.ended()));
+      expect(
+        state.status,
+        CallStatus.disconnected(const DisconnectReason.ended()),
+      );
       expect(state.callParticipants, isEmpty);
       expect(state.endedAt, endedAt);
     });

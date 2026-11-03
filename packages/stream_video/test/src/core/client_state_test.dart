@@ -143,6 +143,36 @@ void main() {
         },
       );
 
+      test(
+        'removeActiveCall with another instance of the same cid keeps the call',
+        () async {
+          final sameCid = MockCall();
+          when(() => sameCid.callCid).thenReturn(mockCall1.callCid);
+          await streamVideo.state.setActiveCall(mockCall1);
+
+          await streamVideo.state.removeActiveCall(sameCid);
+
+          expect(streamVideo.activeCall, mockCall1);
+          expect(streamVideo.activeCalls, [mockCall1]);
+          expect(streamVideo.state.watchedCalls.value, [mockCall1]);
+        },
+      );
+
+      test(
+        'setActiveCall keeps another instance for the same cid watched',
+        () async {
+          final sameCid = MockCall();
+          when(() => sameCid.callCid).thenReturn(mockCall1.callCid);
+          streamVideo.state.setWatchedCall(sameCid);
+
+          await streamVideo.state.setActiveCall(mockCall1);
+          expect(streamVideo.state.watchedCalls.value, [sameCid, mockCall1]);
+
+          await streamVideo.state.removeActiveCall(sameCid);
+          expect(streamVideo.state.watchedCalls.value, [mockCall1]);
+        },
+      );
+
       test('StreamVideo.activeCall getter works in single call mode', () async {
         await streamVideo.state.setActiveCall(mockCall1);
         expect(streamVideo.activeCall, mockCall1);
@@ -224,6 +254,20 @@ void main() {
           // Assert - only the specific call is removed
           expect(streamVideo.activeCalls, [mockCall1, mockCall3]);
           verifyNever(() => mockCall2.leave(reason: any(named: 'reason')));
+        },
+      );
+
+      test(
+        'removeActiveCall with another instance of the same cid keeps the call',
+        () async {
+          final sameCid = MockCall();
+          when(() => sameCid.callCid).thenReturn(mockCall1.callCid);
+          await streamVideo.state.setActiveCall(mockCall1);
+          await streamVideo.state.setActiveCall(mockCall2);
+
+          await streamVideo.state.removeActiveCall(sameCid);
+
+          expect(streamVideo.activeCalls, [mockCall1, mockCall2]);
         },
       );
 

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -384,6 +386,51 @@ void main() {
     );
 
     expect(tester.getSize(find.byType(CallControlBar)).height, 96);
+  });
+
+  testWidgets('a fold down the middle splits the centre between the sides', (
+    tester,
+  ) async {
+    const fold = Rect.fromLTWH(475, 0, 0, 669);
+    tester.view
+      ..devicePixelRatio = 1.0
+      ..physicalSize = const Size(951, 669)
+      ..displayFeatures = const [
+        DisplayFeature(
+          bounds: fold,
+          type: DisplayFeatureType.fold,
+          state: DisplayFeatureState.postureHalfOpened,
+        ),
+      ];
+    addTearDown(tester.view.reset);
+
+    const bar = CallControlBar(
+      small: CallControlBarLayout(
+        leading: [Text('leading')],
+        center: [Text('one'), Text('two'), Text('three')],
+        trailing: [Text('trailing')],
+      ),
+    );
+    await tester.pumpWidget(
+      const TestWrapper(
+        child: Align(alignment: Alignment.bottomCenter, child: bar),
+      ),
+    );
+
+    for (final label in ['leading', 'one', 'two']) {
+      expect(
+        tester.getRect(find.text(label)).right,
+        lessThanOrEqualTo(fold.left),
+        reason: label,
+      );
+    }
+    for (final label in ['three', 'trailing']) {
+      expect(
+        tester.getRect(find.text(label)).left,
+        greaterThanOrEqualTo(fold.right),
+        reason: label,
+      );
+    }
   });
 }
 

@@ -35,7 +35,6 @@ class OverlayAppBar extends StatelessWidget {
     return ColoredBox(
       color: backgroundColor ?? theme.colorTheme.overlay,
       child: SafeArea(
-        right: false,
         bottom: false,
         child: SizedBox(
           height: 48,

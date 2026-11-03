@@ -35,6 +35,7 @@ extension SfuEventMapper on sfu_events.SfuEvent {
         return SfuSubscriberOfferEvent(
           sdp: payload.sdp,
           iceRestart: payload.iceRestart,
+          negotiationId: payload.negotiationId,
         );
 
       case sfu_events.SfuEvent_EventPayload.publisherAnswer:

@@ -125,8 +125,8 @@ class _ThrowingJoinAttemptReporter implements ClientEventReporter {
   }) => _delegate.reportEvent(cid, stage, type: type, details: details);
 
   @override
-  void abort(StreamCallCid cid, ClientEventStandardCode code) =>
-      _delegate.abort(cid, code);
+  void abort(StreamCallCid cid, ClientEventFailure failure) =>
+      _delegate.abort(cid, failure);
 
   @override
   void dispose() => _delegate.dispose();

@@ -9,7 +9,7 @@ import 'package:stream_video/src/call/ring_state_poller.dart';
 import 'package:stream_video/stream_video.dart';
 
 const _settings = RingStatePollingSettings(
-  startAfter: Duration(seconds: 15),
+  startAfter: Duration(seconds: 9),
   interval: Duration(seconds: 5),
 );
 
@@ -64,7 +64,7 @@ void main() {
     fakeAsync((async) {
       createPoller().start();
 
-      async.elapse(const Duration(seconds: 14));
+      async.elapse(const Duration(seconds: 8));
       expect(polls, 0);
 
       async.elapse(const Duration(seconds: 1));
@@ -80,7 +80,7 @@ void main() {
       final poller = createPoller()..start();
       settled = true;
 
-      async.elapse(const Duration(seconds: 15));
+      async.elapse(const Duration(seconds: 9));
       expect(polls, 1);
       expect(poller.isStopped, isTrue);
 
@@ -95,11 +95,12 @@ void main() {
         ringTimeout: const Duration(seconds: 60),
       )..start();
 
-      async.elapse(const Duration(seconds: 16));
+      async.elapse(const Duration(seconds: 10));
       expect(polls, 1);
 
+      // Without the restart, the next poll would be at 14s.
       poller.restartQuietPeriod();
-      async.elapse(const Duration(seconds: 14));
+      async.elapse(const Duration(seconds: 8));
       expect(polls, 1);
 
       async.elapse(const Duration(seconds: 1));
@@ -112,14 +113,14 @@ void main() {
       final poller = createPoller()..start();
 
       async.elapse(const Duration(seconds: 29));
-      // At 15s, 20s and 25s.
-      expect(polls, 3);
+      // At 9s, 14s, 19s, 24s and 29s.
+      expect(polls, 5);
 
       async.elapse(const Duration(seconds: 1));
       expect(poller.isStopped, isTrue);
 
       async.elapse(const Duration(seconds: 10));
-      expect(polls, 3);
+      expect(polls, 5);
     });
   });
 
@@ -129,8 +130,8 @@ void main() {
       nextResult = _failure(503);
 
       async.elapse(const Duration(seconds: 25));
-      // At 15s, 20s and 25s.
-      expect(polls, 3);
+      // At 9s, 14s, 19s and 24s.
+      expect(polls, 4);
       expect(poller.isStopped, isFalse);
     });
   });
@@ -148,7 +149,7 @@ void main() {
       )..start();
 
       // fakeAsync would surface the throw if it escaped the poll.
-      async.elapse(const Duration(seconds: 15));
+      async.elapse(const Duration(seconds: 9));
       expect(polls, 1);
       expect(poller.isStopped, isTrue);
 

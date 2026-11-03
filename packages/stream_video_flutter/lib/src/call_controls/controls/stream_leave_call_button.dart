@@ -32,7 +32,11 @@ class StreamLeaveCallButton extends StatelessWidget {
         if (onLeaveCallTap != null) {
           onLeaveCallTap!();
         } else {
-          call.leave();
+          call.leave(
+            reason: const DisconnectReason.left(
+              initiator: LeaveInitiator.user,
+            ),
+          );
         }
       },
     );

@@ -13,6 +13,7 @@ import '../../models/call_cid.dart';
 import '../../models/call_metadata.dart';
 import '../../models/call_status.dart';
 import '../../models/disconnect_reason.dart';
+import '../../models/leave_initiator.dart';
 import '../../ring_state_polling_settings.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
@@ -20,6 +21,7 @@ import '../call.dart';
 import '../call_events.dart';
 import '../call_reject_reason.dart';
 import '../call_ringing_state.dart';
+import '../connection/leave_attribution.dart';
 import '../ring_state_poller.dart';
 import '../state/call_state_notifier.dart';
 import '../stats/trace_tag.dart';
@@ -53,6 +55,17 @@ class CallRingingController {
   final void Function(String tag, Object? data) _trace;
   final TaggedLogger _logger;
 
+  /// Whether an accept from this instance is waiting for its response.
+  bool _accepting = false;
+
+  /// Whether the server's echo of the pending accept arrived, so the accept
+  /// took effect whatever its response says.
+  bool _acceptReachedServer = false;
+
+  /// Whether this instance has sent a reject, so the server's echo of it is
+  /// not taken for an answer from elsewhere.
+  bool _rejecting = false;
+
   RingStatePoller? _ringStatePoller;
   StreamSubscription<CallState>? _ringStatePollerStatusSubscription;
 
@@ -80,7 +93,24 @@ class CallRingingController {
     _stateManager.lifecycleCallAccepted();
     _clientState.markCallAcceptedOnThisDevice(_callCid, _call);
 
-    final result = await _coordinatorClient.acceptCall(cid: state.callCid);
+    _accepting = true;
+    _acceptReachedServer = false;
+    final Result<None> result;
+    try {
+      result = await _coordinatorClient.acceptCall(cid: state.callCid);
+    } finally {
+      _accepting = false;
+    }
+
+    if (result is Failure && _acceptReachedServer) {
+      // The response failed, a timeout say, but the server's echo of the
+      // accept arrived first, so it took effect. Reverting would take that
+      // echo for an accept from elsewhere and end the call here. An echo
+      // that arrives only after the failure still does.
+      _logger.w(() => '[accept] response failed, but accepted: $result');
+      return const Result.success(none);
+    }
+
     if (result is Failure) {
       // Revert the optimistic acceptance so the user can retry or reject.
       _stateManager.lifecycleCallAccepted(accepted: false);
@@ -91,11 +121,15 @@ class CallRingingController {
   }
 
   /// Rejects the incoming call, then leaves it.
-  Future<Result<None>> reject({CallRejectReason? reason}) async {
+  Future<Result<None>> reject({
+    CallRejectReason? reason,
+    LeaveInitiator? initiator,
+  }) async {
     final state = _stateManager.callState;
     _logger.i(() => '[reject] reason: $reason');
 
     _trace(TraceTag.callReject, reason?.value);
+    _rejecting = true;
     final result = await _coordinatorClient.rejectCall(
       cid: state.callCid,
       reason: reason?.value,
@@ -107,53 +141,75 @@ class CallRingingController {
           ? DisconnectReason.rejected(
               byUserId: state.currentUserId,
               reason: reason,
+              initiator: initiator,
             )
-          : null,
+          : DisconnectReason.left(
+              initiator: initiator ?? LeaveAttribution.rejectInitiator(reason),
+              message: 'reject failed: ${reason?.value ?? 'unspecified'}',
+            ),
     );
 
     return result;
   }
 
-  /// Follows a `call.accepted` event. An accept by the current user on
-  /// another device ends the ring here.
+  /// Follows a `call.accepted` event. An accept by the current user
+  /// somewhere else ends the ring here.
   Future<void> onCallAccepted(StreamCallAcceptedEvent event) async {
     final currentUserId = _stateManager.callState.currentUserId;
-    final status = _stateManager.callState.status;
+    if (_accepting && event.acceptedByUserId == currentUserId) {
+      _acceptReachedServer = true;
+    }
 
-    if (event.acceptedByUserId == currentUserId &&
-        status is CallStatusIncoming &&
-        !status.acceptedByMe) {
-      _logger.i(
-        () =>
-            '[onCoordinatorEvent] call accepted on another device, '
-            'rejecting locally with userRespondedElsewhere',
-      );
-      await reject(reason: CallRejectReason.userRespondedElsewhere());
+    if (_isOwnPendingAnswer(event.acceptedByUserId)) {
+      _logger.i(() => '[onCallAccepted] accepted elsewhere');
+      await _leaveAnsweredElsewhere();
       return;
     }
 
     _stateManager.coordinatorCallAccepted(event);
   }
 
-  /// Follows a `call.rejected` event. A reject by the current user on
-  /// another device ends the ring here.
+  /// Follows a `call.rejected` event. A reject by the current user
+  /// somewhere else ends the ring here.
   Future<void> onCallRejected(StreamCallRejectedEvent event) async {
-    final currentUserId = _stateManager.callState.currentUserId;
-    final status = _stateManager.callState.status;
-
-    if (event.rejectedByUserId == currentUserId &&
-        status is CallStatusIncoming &&
-        !status.acceptedByMe) {
-      _logger.i(
-        () =>
-            '[onCoordinatorEvent] call rejected on another device, '
-            'rejecting locally with userRespondedElsewhere',
-      );
-      await reject(reason: CallRejectReason.userRespondedElsewhere());
+    if (_isOwnPendingAnswer(event.rejectedByUserId)) {
+      _logger.i(() => '[onCallRejected] rejected elsewhere');
+      await _leaveAnsweredElsewhere();
       return;
     }
 
     _stateManager.coordinatorCallRejected(event);
+  }
+
+  /// Whether [userId] answering is the current user answering this ring
+  /// while it still rings here.
+  bool _isOwnPendingAnswer(String userId) {
+    final state = _stateManager.callState;
+    final status = state.status;
+    return userId == state.currentUserId &&
+        status is CallStatusIncoming &&
+        !status.acceptedByMe;
+  }
+
+  /// Ends the ring here, for an answer given on another device or through
+  /// another [Call] for the same cid. It sends no reject: the answer is
+  /// already on the server, and the other SDKs also just leave
+  /// (`answeredElsewhere` / `declinedElsewhere`).
+  ///
+  /// The echo of a reject this instance sent is left to [reject], which
+  /// leaves with the reason it was given.
+  Future<void> _leaveAnsweredElsewhere() async {
+    if (_rejecting) {
+      _logger.v(() => '[leaveAnsweredElsewhere] echo of own reject, ignoring');
+      return;
+    }
+
+    await _call.leave(
+      reason: DisconnectReason.rejected(
+        byUserId: _stateManager.callState.currentUserId,
+        reason: CallRejectReason.userRespondedElsewhere(),
+      ),
+    );
   }
 
   /// Waits until a ringing call is answered: an outgoing ring by a callee, an

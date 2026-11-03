@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:stream_video/src/errors/stream_video_exception.dart';
@@ -145,6 +147,23 @@ void main() {
         await _close(_socket(), const DisconnectionSource.userInitiated()),
         isNull,
       );
+    });
+
+    // Core closes this way after the socket reports an error: a transport
+    // error mid-call, or a handshake that failed.
+    test('a closure after a socket error is a failure', () async {
+      final event = await _close(
+        _socket(),
+        const DisconnectionSource.systemInitiated(
+          error: StreamNetworkException(
+            message: 'The connection reported an error',
+            cause: SocketException('Connection reset by peer'),
+          ),
+        ),
+      );
+
+      expect(event, isA<SfuSocketFailed>());
+      expect((event! as SfuSocketFailed).isReconnectable, isTrue);
     });
 
     test('a recreate emits nothing', () async {

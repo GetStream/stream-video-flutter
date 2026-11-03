@@ -46,14 +46,17 @@ abstract class ClientState {
   /// Otherwise the call is added to the list of active calls.
   Future<void> setActiveCall(Call? call);
 
-  /// Adds the call to the list of watched calls.
+  /// Adds the call to the list of watched calls. Another instance with the
+  /// same cid is watched separately.
   void setWatchedCall(Call call);
 
   /// Stops watching [call]. Another instance with the same cid stays watched.
   void removeWatchedCall(Call call);
 
   /// Removes the call from the list of active calls.
-  /// It won't `leave` the call, just removes it from the list.
+  ///
+  /// It won't `leave` the call, just removes it from the list. Another
+  /// instance with the same cid stays active.
   Future<void> removeActiveCall(Call call);
 
   // Current app's lifecycle state.
@@ -223,22 +226,23 @@ class MutableClientState implements ClientState {
 
   @override
   Future<void> removeActiveCall(Call call) async {
-    if (!allowMultipleActiveCalls &&
-        activeCall.value?.callCid == call.callCid) {
+    if (!allowMultipleActiveCalls && identical(activeCall.value, call)) {
       activeCall.value = null;
     }
 
     final remaining = activeCalls.value
-        .where((it) => it.callCid != call.callCid)
+        .where((it) => !identical(it, call))
         .toList(growable: false);
+    final removed = remaining.length != activeCalls.value.length;
     activeCalls.value = remaining;
 
     watchedCalls.value = [
-      ...watchedCalls.value.where((it) => it.callCid != call.callCid),
+      ...watchedCalls.value.where((it) => !identical(it, call)),
     ];
 
     // Resume next most recent call if using suspendExisting audio policy.
-    if (allowMultipleActiveCalls &&
+    if (removed &&
+        allowMultipleActiveCalls &&
         remaining.isNotEmpty &&
         multiCallAudioPolicy == MultiCallAudioPolicy.suspendExisting) {
       final next = remaining.last;
@@ -252,9 +256,7 @@ class MutableClientState implements ClientState {
 
   @override
   void setWatchedCall(Call call) {
-    if (watchedCalls.value.any((it) => it.callCid == call.callCid)) {
-      return;
-    }
+    if (watchedCalls.value.any((it) => identical(it, call))) return;
 
     watchedCalls.value = [...watchedCalls.value, call];
   }

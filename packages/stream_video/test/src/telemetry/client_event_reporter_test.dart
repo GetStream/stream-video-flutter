@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:stream_video/src/models/call_cid.dart';
+import 'package:stream_video/src/models/leave_initiator.dart';
 import 'package:stream_video/src/telemetry/client_event_reporter.dart';
 import 'package:stream_video/src/telemetry/client_event_transport.dart';
 import 'package:stream_video/src/telemetry/client_event_types.dart';
@@ -112,10 +113,18 @@ void main() {
     expect(completed['retry_failure_reason'], 'Timed out');
   });
 
-  test('abort fails every in-flight stage with the given code', () async {
+  test('abort fails every in-flight stage with the given failure', () async {
     reporter.registerCall(cid);
     final stageId = reporter.beginStage(cid, ClientEventStage.wsJoin);
-    reporter.abort(cid, ClientEventStandardCode.backendLeave);
+    reporter.abort(
+      cid,
+      const ClientEventFailure(
+        ClientEventStandardCode.backendLeave,
+        'call ended',
+        leaveInitiator: LeaveInitiator.remoteEvent,
+        leaveReason: 'call.ended',
+      ),
+    );
     await flush();
 
     final completed = captured.firstWhere(
@@ -124,6 +133,79 @@ void main() {
     expect(completed['stage_id'], stageId);
     expect(completed['outcome'], 'failure');
     expect(completed['retry_failure_code'], 'BACKEND_LEAVE');
+    expect(completed['retry_failure_reason'], 'call ended');
+    expect(completed['leave_initiator'], 'remote_event');
+    expect(completed['leave_reason'], 'call.ended');
+  });
+
+  test('a failure without a leave sends no leave fields', () async {
+    reporter.registerCall(cid);
+    final stageId = reporter.beginStage(cid, ClientEventStage.wsJoin);
+    reporter.failStage(
+      stageId,
+      failure: const ClientEventFailure.requestTimeout(),
+    );
+    await flush();
+
+    final completed = captured.firstWhere(
+      (e) => e['event_type'] == 'completed',
+    );
+    expect(completed.containsKey('leave_initiator'), isFalse);
+    expect(completed.containsKey('leave_reason'), isFalse);
+  });
+
+  test('the leave reason is cut to 200 characters', () async {
+    reporter.registerCall(cid);
+    reporter.beginStage(cid, ClientEventStage.wsJoin);
+    // An emoji is two UTF-16 code units, so a cut by code unit would differ.
+    reporter.abort(
+      cid,
+      ClientEventFailure(
+        ClientEventStandardCode.clientAborted,
+        'left',
+        leaveInitiator: LeaveInitiator.user,
+        leaveReason: '😀' * 250,
+      ),
+    );
+    await flush();
+
+    final completed = captured.firstWhere(
+      (e) => e['event_type'] == 'completed',
+    );
+    expect(completed['leave_reason'], '😀' * 200);
+  });
+
+  test('unregistering a call aborts what is in flight as unknown', () async {
+    reporter.registerCall(cid);
+    reporter.beginStage(cid, ClientEventStage.wsJoin);
+    reporter.unregisterCall(cid);
+    await flush();
+
+    final completed = captured.firstWhere(
+      (e) => e['event_type'] == 'completed',
+    );
+    expect(completed['retry_failure_code'], 'CLIENT_ABORTED');
+    expect(completed['retry_failure_reason'], 'Aborted: call unregistered');
+    expect(completed['leave_initiator'], 'unknown');
+    expect(completed['leave_reason'], 'call.unregistered');
+  });
+
+  test('the retry failure reason is cut to 2000 characters', () async {
+    reporter.registerCall(cid);
+    final stageId = reporter.beginStage(cid, ClientEventStage.wsJoin);
+    reporter.failStage(
+      stageId,
+      failure: ClientEventFailure(
+        ClientEventStandardCode.clientAborted,
+        'x' * 2500,
+      ),
+    );
+    await flush();
+
+    final completed = captured.firstWhere(
+      (e) => e['event_type'] == 'completed',
+    );
+    expect(completed['retry_failure_reason'], 'x' * 2000);
   });
 
   test('newJoinAttempt mints a fresh id and updates join_reason', () async {
@@ -319,7 +401,13 @@ void main() {
     noop
       ..registerCall(cid)
       ..reportEvent(cid, ClientEventStage.joinInitiated)
-      ..abort(cid, ClientEventStandardCode.clientAborted);
+      ..abort(
+        cid,
+        const ClientEventFailure(
+          ClientEventStandardCode.clientAborted,
+          'Aborted',
+        ),
+      );
     await flush();
 
     expect(captured, isEmpty);

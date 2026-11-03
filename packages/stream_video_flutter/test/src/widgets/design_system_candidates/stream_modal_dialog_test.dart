@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -178,6 +180,58 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('body'), findsNothing);
+    });
+  });
+
+  group('on a folded window', () {
+    const fold = Rect.fromLTWH(475, 0, 0, 669);
+
+    Future<Rect> dialogRect(WidgetTester tester, {Offset? anchorPoint}) async {
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(951, 669)
+        ..displayFeatures = const [
+          DisplayFeature(
+            bounds: fold,
+            type: DisplayFeatureType.fold,
+            state: DisplayFeatureState.postureHalfOpened,
+          ),
+        ];
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        TestWrapper(
+          child: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showStreamModalDialog<void>(
+                context: context,
+                anchorPoint: anchorPoint,
+                builder: (context) => const StreamModalDialog(
+                  title: Text('title'),
+                  child: Text('body'),
+                ),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      return tester.getRect(find.byType(StreamModalDialog));
+    }
+
+    testWidgets('goes to the trailing half by default', (tester) async {
+      final rect = await dialogRect(tester);
+
+      expect(rect.left, greaterThanOrEqualTo(fold.right));
+    });
+
+    testWidgets('goes to the half the anchor point is in', (tester) async {
+      final rect = await dialogRect(tester, anchorPoint: const Offset(100, 0));
+
+      expect(rect.right, lessThanOrEqualTo(fold.left));
     });
   });
 }

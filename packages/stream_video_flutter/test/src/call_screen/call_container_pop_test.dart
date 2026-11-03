@@ -101,7 +101,7 @@ void main() {
     await pumpContainerRoute(tester);
     await pushOverIt(tester);
 
-    status.add(CallStatus.disconnected(DisconnectReason.ended()));
+    status.add(CallStatus.disconnected(const DisconnectReason.ended()));
     await tester.pumpAndSettle();
 
     // Popping here would close the screen the user is actually looking at.
@@ -112,7 +112,7 @@ void main() {
     await pumpContainerRoute(tester);
     await pushOverIt(tester);
 
-    status.add(CallStatus.disconnected(DisconnectReason.ended()));
+    status.add(CallStatus.disconnected(const DisconnectReason.ended()));
     await tester.pumpAndSettle();
 
     // The pop it held back is still owed, and falls due the moment the
@@ -131,7 +131,7 @@ void main() {
     await pumpContainerRoute(tester);
     await pushOverIt(tester);
 
-    status.add(CallStatus.disconnected(DisconnectReason.ended()));
+    status.add(CallStatus.disconnected(const DisconnectReason.ended()));
     await tester.pumpAndSettle();
 
     // A second call arrives before the owed pop falls due: the container has
@@ -148,9 +148,40 @@ void main() {
   testWidgets('pops straight away when it is the top route', (tester) async {
     await pumpContainerRoute(tester);
 
-    status.add(CallStatus.disconnected(DisconnectReason.ended()));
+    status.add(CallStatus.disconnected(const DisconnectReason.ended()));
     await tester.pumpAndSettle();
 
     expect(find.text('home'), findsOneWidget);
+  });
+
+  testWidgets('reports a disconnect once, whatever follows it', (
+    tester,
+  ) async {
+    final reasons = <DisconnectReason>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StreamCallContainer(
+            call: call,
+            onCallDisconnected: (properties) => reasons.add(properties.reason),
+            callContentWidgetBuilder: (_, _) => const Text('call'),
+            incomingCallWidgetBuilder: (_, _) => const Text('call'),
+            outgoingCallWidgetBuilder: (_, _) => const Text('call'),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    status
+      ..add(CallStatus.disconnected(const DisconnectReason.ended()))
+      ..add(
+        CallStatus.disconnected(
+          const DisconnectReason.left(initiator: LeaveInitiator.user),
+        ),
+      );
+    await tester.pumpAndSettle();
+
+    expect(reasons, [const DisconnectReason.ended()]);
   });
 }

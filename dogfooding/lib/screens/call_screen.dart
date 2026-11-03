@@ -190,7 +190,9 @@ class _CallScreenState extends State<CallScreen>
     _devices.dispose();
     _panelAnimation.dispose();
     _panelController.dispose();
-    widget.call.leave();
+    widget.call.leave(
+      reason: const DisconnectReason.left(initiator: LeaveInitiator.app),
+    );
     _userChatRepo.disconnectUser();
     _videoEffectsManager.dispose();
     super.dispose();
@@ -339,7 +341,12 @@ class _CallScreenState extends State<CallScreen>
   StreamLayoutButton _layoutToggle({
     StreamMenuDirection menuDirection = StreamMenuDirection.up,
   }) {
-    final blocked = context.streamScreenSize.isSmall
+    // By width alone: a phone in landscape is small, but it is the speaker
+    // strip at the side that suits its shape.
+    final narrow = StreamScreenSize.fromWidth(
+      MediaQuery.sizeOf(context).width,
+    ).isSmall;
+    final blocked = narrow
         ? const [
             ParticipantLayoutMode.speakerLeft,
             ParticipantLayoutMode.speakerRight,
@@ -630,7 +637,7 @@ class _CallScreenState extends State<CallScreen>
             }
 
             if (kIsProd &&
-                (reason is DisconnectReasonCancelled ||
+                (reason is DisconnectReasonLeft ||
                     reason is DisconnectReasonEnded ||
                     reason is DisconnectReasonLastParticipantLeft)) {
               showFeedbackDialog(context, call: widget.call);
@@ -645,7 +652,7 @@ class _CallScreenState extends State<CallScreen>
                     enablePictureInPicture: true,
                   ),
               callParticipantsWidgetBuilder: (context, call) {
-                // A narrow window has no room beside the grid, so the panel
+                // A small window has no room beside the grid, so the panel
                 // covers it instead of docking next to it.
                 final fullScreen = context.streamScreenSize.isSmall;
 
@@ -697,7 +704,7 @@ class _CallScreenState extends State<CallScreen>
                 );
               },
               callAppBarWidgetBuilder: (context, call) {
-                // A narrow window gives the whole body to the panel, the app
+                // A small window gives the whole body to the panel, the app
                 // bar's row included. A zero-height bar rather than null,
                 // because null falls back to the SDK's own.
                 if (context.streamScreenSize.isSmall && _panelOnScreen(call)) {

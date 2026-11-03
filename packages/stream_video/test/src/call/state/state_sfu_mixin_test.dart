@@ -17,6 +17,7 @@ CallParticipantState _participant({
   bool isSpeaking = false,
   bool isDominantSpeaker = false,
   SfuConnectionQuality connectionQuality = SfuConnectionQuality.unspecified,
+  SfuParticipantSource? participantSource = SfuParticipantSource.webrtc,
 }) {
   return CallParticipantState(
     userId: userId,
@@ -28,6 +29,7 @@ CallParticipantState _participant({
     isSpeaking: isSpeaking,
     isDominantSpeaker: isDominantSpeaker,
     connectionQuality: connectionQuality,
+    participantSource: participantSource,
   );
 }
 
@@ -39,6 +41,7 @@ SfuParticipant _sfuParticipant({
   String? sessionId,
   List<SfuTrackType> publishedTracks = const [],
   SfuConnectionQuality connectionQuality = SfuConnectionQuality.unspecified,
+  SfuParticipantSource participantSource = SfuParticipantSource.webrtc,
 }) {
   return SfuParticipant(
     userId: userId,
@@ -55,7 +58,7 @@ SfuParticipant _sfuParticipant({
     isDominantSpeaker: false,
     audioLevel: audioLevel,
     roles: const <String>[],
-    participantSource: SfuParticipantSource.webrtc,
+    participantSource: participantSource,
   );
 }
 
@@ -713,6 +716,27 @@ void main() {
         isTrue,
       );
     });
+
+    test('fills in a missing participant source', () {
+      final notifier = _notifier([
+        _participant(userId: 'obs', participantSource: null),
+      ]);
+
+      notifier.sfuParticipantUpdated(
+        SfuParticipantUpdatedEvent(
+          callCid: notifier.callState.callCid.value,
+          participant: _sfuParticipant(
+            userId: 'obs',
+            participantSource: SfuParticipantSource.rtmp,
+          ),
+        ),
+      );
+
+      expect(
+        notifier.callState.callParticipants.single.participantSource,
+        SfuParticipantSource.rtmp,
+      );
+    });
   });
 
   group('CallParticipantState audio level sealing', () {
@@ -1104,6 +1128,72 @@ void main() {
         notifier.callState.callParticipants.map((it) => it.sessionId),
         ['alice-session', 'alice-tablet'],
       );
+    });
+
+    test('keeps the source of a participant who joins mid-call', () {
+      final notifier = _notifier([_participant(userId: 'host')]);
+
+      notifier.sfuParticipantJoined(
+        SfuParticipantJoinedEvent(
+          callCid: 'default:id',
+          participant: _sfuParticipant(
+            userId: 'obs',
+            participantSource: SfuParticipantSource.rtmp,
+          ),
+        ),
+      );
+
+      expect(
+        notifier.callState.callParticipants.last.participantSource,
+        SfuParticipantSource.rtmp,
+      );
+    });
+
+    test('keeps the source when an ingest rejoins with the same session', () {
+      final notifier = _notifier([
+        _participant(userId: 'host'),
+        _participant(
+          userId: 'obs',
+          participantSource: SfuParticipantSource.rtmp,
+        ),
+      ]);
+
+      notifier.sfuParticipantJoined(
+        SfuParticipantJoinedEvent(
+          callCid: 'default:id',
+          participant: _sfuParticipant(
+            userId: 'obs',
+            participantSource: SfuParticipantSource.rtmp,
+          ),
+        ),
+      );
+
+      final participants = notifier.callState.callParticipants;
+      expect(participants.map((it) => it.userId), ['host', 'obs']);
+      expect(participants[1].participantSource, SfuParticipantSource.rtmp);
+    });
+
+    test('an ingest that joins mid-call sorts ahead of a visible host', () {
+      final notifier = _notifier([
+        _participant(userId: 'host').copyWith(
+          roles: ['host'],
+          viewportVisibility: ViewportVisibility.visible,
+        ),
+      ]);
+
+      notifier.sfuParticipantJoined(
+        SfuParticipantJoinedEvent(
+          callCid: 'default:id',
+          participant: _sfuParticipant(
+            userId: 'obs',
+            participantSource: SfuParticipantSource.rtmp,
+          ),
+        ),
+      );
+
+      final sorted = [...notifier.callState.callParticipants]
+        ..sort(CallParticipantSortingPresets.livestreamOrAudioRoom);
+      expect(sorted.map((it) => it.userId), ['obs', 'host']);
     });
   });
 

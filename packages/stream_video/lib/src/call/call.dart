@@ -33,6 +33,7 @@ import '../sfu/data/models/sfu_goaway_reason.dart';
 import '../sfu/data/models/sfu_participant.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../stream_video.dart';
+import '../telemetry/client_event_error_mapper.dart';
 import '../telemetry/client_event_types.dart';
 import '../utils/adaptive_throttle.dart';
 import '../utils/cancelable_operation.dart';
@@ -63,6 +64,7 @@ import 'call_type.dart';
 import 'connection/connection_executor.dart';
 import 'connection/connection_phase.dart';
 import 'connection/join_outcome.dart';
+import 'connection/leave_attribution.dart';
 import 'connection/reconnect_trigger.dart';
 import 'connection/rejoin_rate_limiter.dart';
 import 'events/call_closed_captions.dart';
@@ -852,12 +854,37 @@ class Call {
   Future<Result<None>> accept() => _ringing.accept();
 
   /// Rejects the incoming call, then leaves it.
-  Future<Result<None>> reject({CallRejectReason? reason}) =>
-      _ringing.reject(reason: reason);
+  ///
+  /// - [reason]: optional reason for rejecting the call
+  /// - [initiator]: what made this user reject. Defaults to what [reason]
+  ///   implies, for example [LeaveInitiator.sdkError] for a ring timeout and
+  ///   [LeaveInitiator.user] for a decline.
+  Future<Result<None>> reject({
+    CallRejectReason? reason,
+    LeaveInitiator? initiator,
+  }) => _ringing.reject(reason: reason, initiator: initiator);
 
   /// Ends the call for all participants.
-  Future<Result<None>> end({String? reason}) {
-    return _connection.end(reason: reason);
+  ///
+  /// The server ends the call first, and the call then leaves and
+  /// disconnects with a [DisconnectReasonEnded] that carries [initiator] and
+  /// [reason], which tells it apart from a call ended elsewhere.
+  ///
+  /// If the server refuses, for example for a user without the end-call
+  /// permission, the failure is returned and the call carries on. If it never
+  /// decides, because the device is offline, the request times out or the
+  /// server fails, the failure is returned and this side leaves anyway, with a
+  /// [DisconnectReasonLeft].
+  ///
+  /// - [reason]: why the call ends, told to the SFU. Only this side's
+  ///   disconnect carries it; other participants are not told it.
+  /// - [initiator]: what made the call end. Pass [LeaveInitiator.user] for
+  ///   an end the user asked for.
+  Future<Result<None>> end({
+    String? reason,
+    LeaveInitiator initiator = LeaveInitiator.unknown,
+  }) {
+    return _connection.end(reason: reason, initiator: initiator);
   }
 
   /// The end-to-end encryption manager attached via [setE2EEManager].
@@ -942,7 +969,10 @@ class Call {
   /// Leaving an outgoing call this user created while it still rings, with
   /// nobody accepted or joined, cancels the ring for the callees.
   ///
-  /// - [reason]: optional reason for leaving the call
+  /// - [reason]: why the call leaves. Defaults to
+  ///   [DisconnectReason.left] with [LeaveInitiator.unknown]; pass
+  ///   `DisconnectReason.left(initiator: LeaveInitiator.user)` for a leave
+  ///   the user asked for, and a `message` to report why.
   Future<Result<None>> leave({DisconnectReason? reason}) {
     return _connection.leave(reason: reason);
   }
@@ -1076,6 +1106,7 @@ class Call {
           _isAloneAfterLeave(sfuEvent.participant)) {
         final endResult = await end(
           reason: 'last participant left the call (ringing flow)',
+          initiator: LeaveInitiator.app,
         );
 
         if (endResult.isFailure) {

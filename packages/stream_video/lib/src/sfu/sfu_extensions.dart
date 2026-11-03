@@ -280,6 +280,7 @@ extension SendAnswerRequestX on sfu.SendAnswerRequest {
       'peerType': peerType.value,
       'sdp': sdp,
       'sessionId': sessionId,
+      'negotiationId': negotiationId,
     };
   }
 }

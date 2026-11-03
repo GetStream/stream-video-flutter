@@ -1,7 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import '../utils/dialog_anchor.dart';
 import 'device_list.dart';
+
+/// The padding around the avatar at the start of an app bar.
+///
+/// 16 at the start, the margin UIKit keeps inside the safe area. iOS reports
+/// no inset for a rounded display corner, so this is what keeps the avatar
+/// clear of it.
+const kAppBarAvatarPadding = EdgeInsetsDirectional.fromSTEB(16, 8, 8, 8);
+
+/// The width of an app bar's leading slot holding a padded avatar.
+const kAppBarAvatarLeadingWidth = 64.0;
 
 class UserActionsAvatar extends StatelessWidget {
   const UserActionsAvatar({required this.currentUser, super.key});
@@ -13,7 +24,7 @@ class UserActionsAvatar extends StatelessWidget {
     final colorScheme = StreamTheme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.all(8),
+      padding: kAppBarAvatarPadding,
       child: MenuAnchor(
         style: MenuStyle(
           alignment: Alignment.bottomRight,
@@ -46,6 +57,8 @@ class UserActionsAvatar extends StatelessWidget {
               await showDialog<void>(
                 // ignore: use_build_context_synchronously
                 context: context,
+                // ignore: use_build_context_synchronously
+                anchorPoint: trailingTopAnchor(context),
                 builder: (context) {
                   return AlertDialog(
                     title: Row(

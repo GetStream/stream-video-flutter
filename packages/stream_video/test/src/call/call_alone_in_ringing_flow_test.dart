@@ -136,6 +136,45 @@ void main() {
       expect(call.state.value.status.isDisconnected, isTrue);
     });
 
+    test('reports the end as made by the app', () async {
+      await joinWith(participants: [_participant(_me), _participant('bob')]);
+
+      await emitLeft(_sfuParticipant('bob'));
+
+      expect(
+        (call.state.value.status as CallStatusDisconnected).reason,
+        const DisconnectReason.ended(
+          initiator: LeaveInitiator.app,
+          message: 'last participant left the call (ringing flow)',
+        ),
+      );
+    });
+
+    test(
+      'reports a leave made by the app when the end is not delivered',
+      () async {
+        when(permissionsManager.endCall).thenAnswer(
+          (_) async => const Result.failure(
+            StreamVideoExceptionWithCause(
+              message: 'end failed',
+              cause: StreamApiException(message: 'HTTP 503', statusCode: 503),
+            ),
+          ),
+        );
+        await joinWith(participants: [_participant(_me), _participant('bob')]);
+
+        await emitLeft(_sfuParticipant('bob'));
+
+        expect(
+          (call.state.value.status as CallStatusDisconnected).reason,
+          const DisconnectReason.left(
+            initiator: LeaveInitiator.app,
+            message: 'end not delivered',
+          ),
+        );
+      },
+    );
+
     test('keeps the call when someone else is still there', () async {
       await joinWith(
         participants: [

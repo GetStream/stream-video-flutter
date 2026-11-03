@@ -125,6 +125,24 @@ void main() {
     );
 
     test(
+      'removeActiveCall of a call that was never active does not resume',
+      () async {
+        final sameCid = MockCall();
+        when(() => sameCid.callCid).thenReturn(mockCall1.callCid);
+        await client.state.setActiveCall(mockCall1);
+        await client.state.setActiveCall(mockCall2);
+        clearInteractions(mockCall1);
+        clearInteractions(mockCall2);
+
+        await client.state.removeActiveCall(sameCid);
+
+        expect(client.activeCalls, [mockCall1, mockCall2]);
+        verifyNever(mockCall1.resumeAudio);
+        verifyNever(mockCall2.resumeAudio);
+      },
+    );
+
+    test(
       'removeActiveCall on the last remaining call does not call resumeAudio',
       () async {
         await client.state.setActiveCall(mockCall1);

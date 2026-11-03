@@ -32,6 +32,8 @@ class SnappingFloatingView extends StatefulWidget {
   final double floatingViewHeight;
 
   /// The padding between floating view and the container.
+  ///
+  /// Added to the ambient safe-area inset of each edge.
   final double floatingViewPadding;
 
   /// The initial position of the floating view.
@@ -88,6 +90,7 @@ class _SnappingFloatingViewState extends State<SnappingFloatingView>
         _snapOffsets = _calculateSnapOffsets(
           constraints.maxWidth,
           constraints.maxHeight,
+          MediaQuery.paddingOf(context),
         );
 
         return Stack(
@@ -204,14 +207,26 @@ class _SnappingFloatingViewState extends State<SnappingFloatingView>
   }
 
   /// Calculates offset for each snap position.
+  ///
+  /// Each corner sits [floatingViewPadding] in from the edges, plus the
+  /// [safeArea] inset of those edges.
   Map<FloatingViewAlignment, Offset> _calculateSnapOffsets(
     double containerWidth,
     double containerHeight,
+    EdgeInsets safeArea,
   ) {
-    final left = floatingViewPadding;
-    final top = floatingViewPadding;
-    final right = containerWidth - floatingViewWidth - floatingViewPadding;
-    final bottom = containerHeight - floatingViewHeight - floatingViewPadding;
+    final left = safeArea.left + floatingViewPadding;
+    final top = safeArea.top + floatingViewPadding;
+    final right =
+        containerWidth -
+        floatingViewWidth -
+        floatingViewPadding -
+        safeArea.right;
+    final bottom =
+        containerHeight -
+        floatingViewHeight -
+        floatingViewPadding -
+        safeArea.bottom;
 
     return <FloatingViewAlignment, Offset>{
       FloatingViewAlignment.topLeft: Offset(left, top),

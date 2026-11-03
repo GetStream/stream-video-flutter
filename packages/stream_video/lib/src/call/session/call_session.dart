@@ -83,31 +83,40 @@ class CallSession extends Disposable {
     this.e2eeManager,
     this.joinResponseTimeout = const Duration(seconds: 5),
     this.fastReconnectJoinResponseTimeout = const Duration(seconds: 15),
+    @visibleForTesting SfuClient? sfuClient,
+    @visibleForTesting SfuWebSocket? sfuWS,
+    @visibleForTesting RtcManagerFactory? rtcManagerFactory,
   }) : _tracer = tracer,
        _host = host,
-       sfuClient = SfuClient(
-         baseUrl: config.sfuUrl,
-         sfuToken: config.sfuToken,
-         sessionSeq: sessionSeq,
-         tracer: tracer,
-         retryPolicy: retryPolicy,
-       ),
-       sfuWS = SfuWebSocket(
-         sessionSeq: sessionSeq,
-         sfuUrl: config.sfuUrl,
-         sfuWsEndpoint: config.sfuWsEndpoint,
-         sessionId: sessionId,
-         cid: callCid.value,
-         userId: host.currentUser.id,
-         apiKey: host.apiKey,
-       ),
-       rtcManagerFactory = RtcManagerFactory(
-         sessionId: sessionId,
-         callCid: callCid,
-         configuration: config.rtcConfig,
-         sdpEditor: sdpEditor,
-         pcFactory: pcFactory,
-       ) {
+       sfuClient =
+           sfuClient ??
+           SfuClient(
+             baseUrl: config.sfuUrl,
+             sfuToken: config.sfuToken,
+             sessionSeq: sessionSeq,
+             tracer: tracer,
+             retryPolicy: retryPolicy,
+           ),
+       sfuWS =
+           sfuWS ??
+           SfuWebSocket(
+             sessionSeq: sessionSeq,
+             sfuUrl: config.sfuUrl,
+             sfuWsEndpoint: config.sfuWsEndpoint,
+             sessionId: sessionId,
+             cid: callCid.value,
+             userId: host.currentUser.id,
+             apiKey: host.apiKey,
+           ),
+       rtcManagerFactory =
+           rtcManagerFactory ??
+           RtcManagerFactory(
+             sessionId: sessionId,
+             callCid: callCid,
+             configuration: config.rtcConfig,
+             sdpEditor: sdpEditor,
+             pcFactory: pcFactory,
+           ) {
     _logger.i(() => '<init> callCid: $callCid, sessionId: $sessionId');
     _observeNetworkStatus();
   }
@@ -377,8 +386,11 @@ class CallSession extends Disposable {
       // Ensure WebRTC initialization completes before creating rtcManager
       await _host.webrtcInitialized;
 
+      if (_isLeavingOrClosed) return _rejectClosedStart('before rtcManager');
+
+      final RtcManager createdRtcManager;
       if (isAnonymousUser) {
-        rtcManager =
+        createdRtcManager =
             await rtcManagerFactory.makeRtcManager(
                 sfuClient: sfuClient,
                 host: _host,
@@ -405,7 +417,7 @@ class CallSession extends Disposable {
 
         _logger.v(() => '[start] localTrackId: $localTrackId');
 
-        rtcManager =
+        createdRtcManager =
             await rtcManagerFactory.makeRtcManager(
                 sfuClient: sfuClient,
                 host: _host,
@@ -428,8 +440,22 @@ class CallSession extends Disposable {
               ..onRemoteTrackReceived = _onRemoteTrackReceived;
       }
 
-      await onRtcManagerCreatedCallback?.call(rtcManager!);
-      _rtcManagerSubject!.add(rtcManager!);
+      // A close during its creation found no rtcManager to dispose, so this
+      // one would be left running.
+      if (_isLeavingOrClosed) {
+        await createdRtcManager.dispose().catchError((Object e) {
+          _logger.w(() => '[start] rtcManager.dispose failed: $e');
+        });
+        return _rejectClosedStart('during rtcManager creation');
+      }
+
+      rtcManager = createdRtcManager;
+
+      await onRtcManagerCreatedCallback?.call(createdRtcManager);
+
+      if (_isLeavingOrClosed) return _rejectClosedStart('after rtcManager');
+
+      _rtcManagerSubject!.add(createdRtcManager);
 
       stateManager.sfuPinsUpdated(event.callState.pins);
       stateManager.sfuE2eeEnabledUpdated(event.callState.e2eeEnabled);
@@ -448,7 +474,7 @@ class CallSession extends Disposable {
       );
 
       statsReporter = StatsReporter(
-        rtcManager: rtcManager!,
+        rtcManager: createdRtcManager,
         clientEnvironment: environment,
       );
 
@@ -481,6 +507,11 @@ class CallSession extends Disposable {
       _logger.e(() => '[start] failed: $e');
       return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
+  }
+
+  Result<T> _rejectClosedStart<T>(String step) {
+    _logger.w(() => '[start] rejected (session closed $step)');
+    return failureWithError<T>('session closed $step');
   }
 
   Future<Result<None>> waitForMigrationComplete() async {
@@ -822,6 +853,10 @@ class CallSession extends Disposable {
     return rtcManager?.getTrack(trackId)?.trackType;
   }
 
+  /// Routes [event] through the SFU event handling. Tests only.
+  @visibleForTesting
+  Future<void> debugHandleSfuEvent(SfuEvent event) => _onSfuEvent(event);
+
   Future<void> _onSfuEvent(SfuEvent event) async {
     _logger.log(event.logPriority, () => '[onSfuEvent] event: $event');
 
@@ -1035,11 +1070,19 @@ class CallSession extends Disposable {
       return;
     }
 
+    // The session can leave or close while the answer is created; the SFU no
+    // longer expects one then.
+    if (_isLeavingOrClosed) {
+      _logger.w(() => '[onSubscriberOffer] dropped (session left mid-offer)');
+      return;
+    }
+
     final result = await sfuClient.sendAnswer(
       sfu.SendAnswerRequest(
         sdp: answerSdp,
         sessionId: sessionId,
         peerType: sfu_models.PeerType.PEER_TYPE_SUBSCRIBER,
+        negotiationId: event.negotiationId,
       ),
     );
     _logger.v(() => '[onSubscriberOffer] result: $result');

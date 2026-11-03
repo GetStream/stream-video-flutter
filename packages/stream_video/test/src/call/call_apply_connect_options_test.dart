@@ -165,6 +165,58 @@ void main() {
 
       expect(call.connectOptions.microphone.isDisabled, isFalse);
     });
+
+    test('off iOS, picks the audio output after publishing', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+      // The stats reporter reads the thermal state on Android.
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      for (final channel in ['thermal', 'thermal/events']) {
+        messenger.setMockMethodCallHandler(
+          MethodChannel(channel),
+          (_) async => null,
+        );
+        addTearDown(
+          () => messenger.setMockMethodCallHandler(
+            MethodChannel(channel),
+            null,
+          ),
+        );
+      }
+
+      when(
+        () => callSession.setMicrophoneEnabled(
+          any(),
+          constraints: any(named: 'constraints'),
+          stopTrackOnMute: any(named: 'stopTrackOnMute'),
+        ),
+      ).thenAnswer((_) async => Result.success(MockRtcLocalTrack()));
+      when(
+        () => callSession.setAudioOutputDevice(any()),
+      ).thenAnswer((_) async => const Result.success(none));
+
+      const speaker = RtcMediaDevice(
+        id: 'speaker',
+        label: 'Speaker',
+        kind: RtcMediaDeviceKind.audioOutput,
+      );
+      await joinWith(
+        CallConnectOptions(
+          microphone: TrackOption.enabled(),
+          audioOutputDevice: speaker,
+        ),
+      );
+
+      verifyInOrder([
+        () => callSession.setMicrophoneEnabled(
+          true,
+          constraints: any(named: 'constraints'),
+          stopTrackOnMute: any(named: 'stopTrackOnMute'),
+        ),
+        () => callSession.setAudioOutputDevice(speaker),
+      ]);
+    });
   });
 
   group('setCameraTargetResolution', () {

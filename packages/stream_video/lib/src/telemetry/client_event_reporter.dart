@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../../globals.dart';
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
+import '../models/leave_initiator.dart';
 import 'client_event.dart';
 import 'client_event_error_mapper.dart';
 import 'client_event_transport.dart';
@@ -172,8 +173,8 @@ abstract interface class ClientEventReporter {
     ClientEventDetails details = const ClientEventDetails(),
   });
 
-  /// Fails every in-flight stage of [cid] with [code]
-  void abort(StreamCallCid cid, ClientEventStandardCode code);
+  /// Fails every in-flight stage of [cid] with [failure].
+  void abort(StreamCallCid cid, ClientEventFailure failure);
 
   void dispose();
 }
@@ -244,7 +245,15 @@ class _ClientEventReporterImpl implements ClientEventReporter {
 
   @override
   void unregisterCall(StreamCallCid cid) {
-    abort(cid, ClientEventStandardCode.clientAborted);
+    abort(
+      cid,
+      const ClientEventFailure(
+        ClientEventStandardCode.clientAborted,
+        'Aborted: call unregistered',
+        leaveInitiator: LeaveInitiator.unknown,
+        leaveReason: 'call.unregistered',
+      ),
+    );
     _calls.remove(cid.value);
     _logger.d(() => '[unregisterCall] cid: ${cid.value}');
   }
@@ -423,7 +432,7 @@ class _ClientEventReporterImpl implements ClientEventReporter {
   }
 
   @override
-  void abort(StreamCallCid cid, ClientEventStandardCode code) {
+  void abort(StreamCallCid cid, ClientEventFailure failure) {
     final stageIds = _pending.entries
         .where((entry) => entry.value.cidValue == cid.value)
         .map((entry) => entry.key)
@@ -433,15 +442,13 @@ class _ClientEventReporterImpl implements ClientEventReporter {
 
     _logger.d(
       () =>
-          '[abort] cid: ${cid.value}, code: ${code.wireValue}, '
-          'inFlight: ${stageIds.length}',
+          '[abort] cid: ${cid.value}, code: ${failure.code.wireValue}, '
+          'initiator: ${failure.leaveInitiator?.wireValue}, '
+          'reason: ${failure.leaveReason}, inFlight: ${stageIds.length}',
     );
 
     for (final stageId in stageIds) {
-      failStage(
-        stageId,
-        failure: ClientEventFailure(code, 'Aborted: ${code.wireValue}'),
-      );
+      failStage(stageId, failure: failure);
     }
   }
 
@@ -562,7 +569,7 @@ class _NoOpClientEventReporter implements ClientEventReporter {
   }) {}
 
   @override
-  void abort(StreamCallCid cid, ClientEventStandardCode code) {}
+  void abort(StreamCallCid cid, ClientEventFailure failure) {}
 
   @override
   void dispose() {}

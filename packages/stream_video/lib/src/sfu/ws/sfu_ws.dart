@@ -12,6 +12,13 @@ import 'sfu_message_codec.dart';
 
 const _tag = 'SV:Sfu-WS';
 
+/// How long an SFU connection attempt may take before it is given up.
+///
+/// Well inside the SFU's fast-reconnect window, so an unanswered upgrade
+/// still leaves time to rejoin; JS and Android use the same.
+@visibleForTesting
+const sfuConnectTimeout = Duration(seconds: 5);
+
 class SfuWebSocket {
   factory SfuWebSocket({
     required int sessionSeq,
@@ -22,6 +29,7 @@ class SfuWebSocket {
     required String sfuUrl,
     required String sfuWsEndpoint,
     Iterable<String>? protocols,
+    @visibleForTesting WebSocketProvider? wsProvider,
   }) {
     final tag = '$_tag-$sessionSeq';
     streamLog.i(tag, () => '<factory> sessionId: $sessionId');
@@ -55,6 +63,7 @@ class SfuWebSocket {
       sessionId: sessionId,
       url: finalWsEndpoint,
       protocols: protocols,
+      wsProvider: wsProvider,
     );
   }
 
@@ -63,11 +72,17 @@ class SfuWebSocket {
     required this.sessionId,
     required this.url,
     Iterable<String>? protocols,
+    WebSocketProvider? wsProvider,
   }) {
     _logger.i(() => '<init> sessionId: $sessionId');
     _client = _SfuWebSocketClient(
       tag: '$_tag-$sessionSeq',
-      optionsBuilder: () => WebSocketOptions(url: url, protocols: protocols),
+      wsProvider: wsProvider,
+      optionsProvider: (_) => WebSocketOptions(
+        url: url,
+        protocols: protocols,
+        connectTimeout: sfuConnectTimeout,
+      ),
       messageCodec: const SfuMessageCodec(),
       pingRequestBuilder: ([_]) => SfuWsRequest(
         sfu_events.SfuRequest(
@@ -103,7 +118,7 @@ class SfuWebSocket {
     _logger.i(
       () => '[connect] connectionState: ${_client.connectionState.value}',
     );
-    await _client.connect();
+    await _open();
     return _openResult('connect');
   }
 
@@ -143,15 +158,34 @@ class SfuWebSocket {
       source: const DisconnectionSource.systemInitiated(),
     );
 
-    // disconnect() uses unawaited engine.close() internally
-    // wait for Disconnected with timeout
+    // A socket that was already closing keeps its own closure, which
+    // disconnect() does not wait for.
     await _client.connectionState
         .firstWhere((s) => s is Disconnected)
         .timeout(const Duration(seconds: 10))
         .catchError((_) => _client.connectionState.value);
 
-    await _client.connect();
+    await _open();
     return _openResult('recreate');
+  }
+
+  /// Starts a connection attempt and returns once it has settled.
+  ///
+  /// Settled is the state leaving [Connecting], not `connect()` returning.
+  /// That future follows the handshake, and a handshake to a host the network
+  /// cannot reach answers only when the OS gives up on it — long after core's
+  /// connect timeout has closed the attempt and moved the state on. Waiting on
+  /// it held a reconnect that had nothing left to wait for.
+  Future<void> _open() {
+    final attempt = _client.connect();
+    // A state closed under it, by a dispose, settles it too.
+    final settled = _client.connectionState
+        .firstWhere((s) => s is! Connecting)
+        .then<void>((_) {}, onError: (_) {});
+
+    // A connect that throws still throws; a handshake that never answers no
+    // longer holds the caller once the state has moved on.
+    return Future.any([attempt, settled]);
   }
 
   /// What the `connect()` that just returned amounted to.
@@ -335,11 +369,23 @@ class SfuWebSocket {
             ),
           ),
         );
+      // Core closes a socket that reported an error this way. A recreate
+      // closes as `SystemInitiated` too, but without an error, so it falls
+      // through to the arm below.
+      case SystemInitiated(:final error?):
+        _events.emit(
+          SfuSocketFailed(
+            sessionId: sessionId,
+            url: url,
+            isReconnectable: source.isReconnectable,
+            error: StreamVideoExceptions.compose(error),
+          ),
+        );
       // A close this SDK asked for is not news for the call to act on:
-      // `UserInitiated` is a leave, `SystemInitiated` a recreate.
+      // `UserInitiated` is a leave, an error-free `SystemInitiated` a recreate.
       //
       // `ServerInitiated` is listed only to keep the switch exhaustive — the
-      // arm above matches it whenever it carries an error, and core builds it
+      // first arm matches it whenever it carries an error, and core builds it
       // no other way. Should that change, a reasonless server closure would
       // land here and be suppressed, which `isReconnectable` calls worth
       // recovering — so it would need an arm of its own rather than this one.
@@ -351,10 +397,11 @@ class SfuWebSocket {
 
 class _SfuWebSocketClient extends StreamWebSocketClient {
   _SfuWebSocketClient({
-    required super.optionsBuilder,
+    required super.optionsProvider,
     required super.messageCodec,
     required super.pingRequestBuilder,
     required super.tag,
+    super.wsProvider,
   });
 
   @override

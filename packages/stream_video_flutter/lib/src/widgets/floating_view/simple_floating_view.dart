@@ -29,6 +29,8 @@ class SimpleFloatingView extends StatefulWidget {
   final double floatingViewHeight;
 
   /// The padding between floating view and the container.
+  ///
+  /// Added to the ambient safe-area inset of each edge.
   final double floatingViewPadding;
 
   /// The initial position of the floating view.
@@ -40,7 +42,9 @@ class SimpleFloatingView extends StatefulWidget {
 
 class _SimpleFloatingViewState extends State<SimpleFloatingView> {
   final bottomRightOffset = ValueNotifier<Offset>(Offset.zero);
+  double minRightOffset = 0;
   double maxRightOffset = 0;
+  double minBottomOffset = 0;
   double maxBottomOffset = 0;
 
   double get floatingViewWidth => widget.floatingViewWidth;
@@ -61,20 +65,19 @@ class _SimpleFloatingViewState extends State<SimpleFloatingView> {
       builder: (context, constraints) {
         final width = constraints.maxWidth;
         final height = constraints.maxHeight;
+        final safeArea = MediaQuery.paddingOf(context);
 
-        maxRightOffset = width - floatingViewWidth - floatingViewPadding;
-        maxBottomOffset = height - floatingViewHeight - floatingViewPadding;
+        minRightOffset = safeArea.right + floatingViewPadding;
+        maxRightOffset =
+            width - floatingViewWidth - floatingViewPadding - safeArea.left;
+        minBottomOffset = safeArea.bottom + floatingViewPadding;
+        maxBottomOffset =
+            height - floatingViewHeight - floatingViewPadding - safeArea.top;
 
         // If window is resized, this resets the floating window.
         bottomRightOffset.value = Offset(
-          bottomRightOffset.value.dx.coerceIn(
-            floatingViewPadding,
-            maxRightOffset,
-          ),
-          bottomRightOffset.value.dy.coerceIn(
-            floatingViewPadding,
-            maxBottomOffset,
-          ),
+          bottomRightOffset.value.dx.coerceIn(minRightOffset, maxRightOffset),
+          bottomRightOffset.value.dy.coerceIn(minBottomOffset, maxBottomOffset),
         );
 
         return Stack(
@@ -106,8 +109,8 @@ class _SimpleFloatingViewState extends State<SimpleFloatingView> {
     final dy = details.delta.dy;
 
     bottomRightOffset.value = Offset(
-      (bottomOffset - dx).coerceIn(floatingViewPadding, maxRightOffset),
-      (rightOffset - dy).coerceIn(floatingViewPadding, maxBottomOffset),
+      (bottomOffset - dx).coerceIn(minRightOffset, maxRightOffset),
+      (rightOffset - dy).coerceIn(minBottomOffset, maxBottomOffset),
     );
   }
 

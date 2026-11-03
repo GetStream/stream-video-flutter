@@ -51,7 +51,7 @@ class CoordinatorWebSocket {
 
     _client = StreamWebSocketClient(
       tag: _tag,
-      optionsBuilder: () => WebSocketOptions(url: _wsUrl),
+      optionsProvider: (_) => WebSocketOptions(url: _wsUrl),
       messageCodec: CoordinatorMessageCodec(),
       onAuthenticate: _authenticateUser,
       pingRequestBuilder: ([info]) =>

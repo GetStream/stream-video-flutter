@@ -54,6 +54,12 @@
 - `StreamVideoExceptionWithCause.cause` is deprecated. Its runtime type is not part of this API - it is chosen by whatever mapped the failure — so matching on it compiles but can stop matching without warning, which is what happened to the change above. Read the failure through the accessors on `StreamVideoException` instead.
 - `StreamVideoException` (formerly `VideoError`) now implements `Exception` rather than `Error`. An `on Error catch` clause no longer matches it — these are runtime conditions to handle, not programming bugs. Catch `Exception`, or `StreamVideoException` directly.
 - `CallStatusReconnecting.attempt` now counts every attempt of a reconnect, fast and rejoin alike, starting at 1. It used to start at 0, stay there across fast attempts, and count only rejoins — reaching a different value twice within one rejoin.
+- `DisconnectReason` is `sealed` and its subclasses are `final`, so a `switch` over it must cover every subclass and an app cannot add, extend or implement one. `DisconnectReason.timeout()` / `DisconnectReasonTimeout` and `DisconnectReasonManuallyClosed` are removed; the SDK never reported either.
+- An SFU socket that the server closes for good, with no call-ended event before it, now disconnects the call with `DisconnectReasonFailure` rather than `DisconnectReasonEnded`: the connection failed, the call did not end. UI that reacts to `DisconnectReasonEnded` no longer runs for it. A call the backend ends still reports `DisconnectReasonEnded`, from the SFU's call-ended event that comes before the close.
+- A call this side leaves now disconnects with the new `DisconnectReasonLeft` rather than `DisconnectReasonCancelled` carrying the current user's id. `DisconnectReasonCancelled` now means only that the caller cancelled the ring. A `leave()` without a reason, and a reject whose request failed, both disconnect with `DisconnectReasonLeft`.
+- `DisconnectReasonEnded` now carries an `initiator` and a `message`, so detect an ended call with `is DisconnectReasonEnded` rather than `== DisconnectReason.ended()`. An end from elsewhere has `initiator` `LeaveInitiator.remoteEvent`; one this side made through `Call.end` carries that call's initiator and reason and is not equal to a bare `DisconnectReason.ended()`.
+- `Call.end` ends the call on the server before leaving it, and a server that refuses the end now leaves the call running. It used to leave this side whatever the server said. A user without the end-call permission, or any other refusal, gets the failure back and stays in the call, so an app that showed "End call" to such users and relied on it acting as a leave has to call `Call.leave` instead. An end the server never decides on, because the device is offline, the request times out after 10 seconds, or the server fails (5xx) or rate limits it (429), still leaves this side, now as `DisconnectReasonLeft`, and returns the failure. An end that succeeds also fails the join stages still in flight, as a leave does, and a second `end()` while one is in flight waits for it rather than asking the server again.
+- `Call.leave` callers in the SDK now pass a reason, and `Call.reject` and `Call.end` take a new optional `initiator`. A class that implements `Call` has to add the parameter, and a test that verifies `call.leave()` with no arguments against the SDK's widgets has to match `reason` too.
 
 ### ⚠️ Deprecated
 
@@ -65,6 +71,7 @@
 - `StreamVideo.disposeAfterResolvingRinging` is deprecated in favour of `StreamVideoPushHandler.handleBackgroundMessage` from `stream_video_push_notification`. Use it to handle the whole background ringing lifecycle.
 - `VideoError` is renamed to `StreamVideoException`, and `VideoErrorWithCause` to `StreamVideoExceptionWithCause`. The old names remain as deprecated typedefs, so existing code still compiles; `dart fix --apply` migrates it.
 - `ifInvisibleBy` takes a `ParticipantPriority` — a priority for one participant, higher first — instead of a `Comparator`. Pass the priority of the same name: `ifInvisibleBy(dominantSpeakerPriority)` where you passed `ifInvisibleBy(dominantSpeaker)`.
+- `DisconnectReason.callEnded()` is renamed to `DisconnectReason.nativeCallEnded()`, and `DisconnectReasonCallEnded` to `DisconnectReasonNativeCallEnded`. Only the system call UI (CallKit, Android Telecom) ending the call reports it; a backend end reports `DisconnectReasonEnded`. Its `toString()` changes from `CallEnded` to `NativeCallEnded`. The old names remain deprecated, and `dart fix --apply` migrates them.
 
 ### ✅ Added
 
@@ -87,12 +94,17 @@
 - `Call.currentUser` is the user the call is being watched or joined by.
 - `sortParticipants` sorts a participant list the way the SDK's own layouts do: the criteria that hold whether or not a tile is being watched order everybody, while what a participant is owed for being off screen costs the screen a single tile — they trade places with the tile that has the least claim to one, and nothing else moves.
 - `byPriority` builds a participant comparator from a `ParticipantPriority`, and every sorting criterion now ships one: `dominantSpeakerPriority`, `speakingPriority`, `screenSharingPriority`, `publishingVideoPriority`, `publishingAudioPriority`, `byReactionTypePriority`, `byParticipantSourcePriority`, `byVideoIngressSourcePriority` and `byRolePriority`. `0` is the priority of a participant already on screen: above it brings an off-screen participant into view, below it leaves them out.
-- The caller of a ringing call now polls the ring state when `call.accepted` or `call.rejected` does not arrive. The WebSocket does not redeliver them, and a caller that missed one kept ringing until its timeout, then rejected a call the callee was already in. After 15 seconds without a ring event, the ring state is read every 5 seconds until the ring settles or times out. Tune it, or turn it off, with `StreamVideoOptions.ringStatePolling`.
+- The caller of a ringing call now polls the ring state when `call.accepted` or `call.rejected` does not arrive. The WebSocket does not redeliver them, and a caller that missed one kept ringing until its timeout, then rejected a call the callee was already in. After 9 seconds without a ring event, the ring state is read every 5 seconds until the ring settles or times out. Tune it, or turn it off, with `StreamVideoOptions.ringStatePolling`.
 - Added `RingingSnapshot`, which resolves a ringing flow for the caller as well as the callee. `CallMetadata.ringingStateFor` goes through it.
 - Added `RtcMediaDeviceNotifier.isAudioOutputSelectionSupported`, whether `Call.setAudioOutputDevice` can route audio on this platform, so a speaker picker can be hidden where it cannot.
+- Added `LeaveInitiator`, who or what made a call leave.
+- `DisconnectReason.left({initiator, message})` says who made a call leave and why; pass it to `Call.leave`. `Call.reject` takes an `initiator` too. A `leave()` without a reason reports `LeaveInitiator.unknown`; `StreamLeaveCallButton` reports `user`.
+- `Call.end` takes an `initiator`, and the call disconnects with a `DisconnectReasonEnded` that carries it and the `reason` given, so an end this side made can be told apart from one from elsewhere.
 
 ### 🔄 Changed
 
+- A leave for a failure or an SFU error tells the SFU the error's message, such as `failure: <message>` or `sfu error: <code>: <message>`, rather than the whole error with its stack trace.
+- A failed coordinator request's `StreamVideoException.message` now names the method, host and path, and a request the server never answered ends in a short reason such as `request timed out` or `connection failed` instead of the previous text.
 - Updated `stream_webrtc_flutter` to `^4.0.0`.
 - `Call`'s factories take a `CallHost`, the part of the client a call uses; `StreamVideo` implements it, so passing a `StreamVideo` still works.
 - `StreamVideo.dispose()` leaves and disposes the calls it tracks, and disconnects the user like `disconnect()` but keeps the push device registered.
@@ -107,9 +119,16 @@
   - A caller that is the only member keeps ringing until its timeout, instead of hanging up on the first rejection.
   - A caller whose callee accepted keeps the call, even if that callee also shows up as having rejected.
 - An incoming ring is now dismissed when the caller cancels, even if another callee has already accepted. `CallMetadata.ringingStateFor` and `StreamVideo.ringing.getCallRingingState` report it as rejected rather than ringing.
+- `ClientState.removeActiveCall` removes only the `Call` it is given. Another `Call` instance for the same call stays active and watched. `ClientState.watchedCalls` likewise tracks each instance, so two `Call`s for the same call can both be in it. A `Call` watched through `get` or `getOrCreate` and then dropped without `leave()` or `dispose()` stays in it until the client is disposed; before, a screen that got the same call again each time it opened kept a single entry.
 
 ### 🐞 Fixed
 
+- On iOS, a call that defaults to the loudspeaker now starts on it, instead of switching to it after the microphone is already recording.
+- A fast reconnect no longer hangs when the network drops while it is reopening the SFU connection. The attempt fails after five seconds and the call rejoins, where before it stayed reconnecting until the operating system gave up on the connection.
+- The client reconnects after a network loss again, instead of the coordinator connection staying stuck closing and refusing every reconnect.
+- A ring the current user accepted or rejected on another device, or through another `Call` for the same call, now ends here without sending a reject, and a second `Call` for the same call that stops ringing no longer ends the one being joined.
+- `Call.accept()` succeeds when the server applied the accept even though its response failed, such as on a timeout, instead of reverting it and then ending the call when the accept came back from the server.
+- A participant who joins mid-call keeps their participant source, so the speaker, livestream and picture-in-picture layouts put an RTMP or SRT ingest that starts or reconnects during the call ahead of the host.
 - Remote audio on Safari and other WebKit browsers no longer goes silent when another participant joins.
 - Safari and other WebKit browsers always play remote audio on the system default output; `Call.checkIfAudioOutputChangeSupported` returns false there.
 - A dropped SFU connection starts reconnecting within two seconds.
@@ -161,13 +180,20 @@
 - A viewport visibility is now recorded whether or not the session accepts it. A dropped report left a participant recorded as something they were not for the rest of the call, since a viewport only ever reports what changed.
 - On iOS devices without multitasking camera access, the camera track is now muted while the app is in the background, so other participants see camera-off instead of a frozen frame.
 - A call that keeps rejoining or keeps failing to reconnect now leaves after 10 rejoins within 120 seconds, 20 rejoins within 30 minutes, or 10 failed reconnect attempts, instead of retrying forever.
+- Remote audio and video recover more reliably after a reconnect: an answer to a re-sent subscriber offer can no longer be applied to a newer one.
 
-## Upcoming (minor)
+## 1.7.2
 
 ### ✅ Added
 
 - Added `RtcMediaDeviceNotifier.isAudioPlayoutPaused`, `audioPlayoutPausedChanges` and `isAudioPlayoutPauseSupported`.
 - [Web] `RtcMediaDeviceNotifier.pauseAudioPlayout()` and `resumeAudioPlayout()` now work on web.
+- Added `AudioConfigurationPolicy.defaultsToSpeaker`, which is `true` for the viewer policy. `AudioConfigurationPolicy.custom` takes an optional `defaultsToSpeaker`, which otherwise follows the base policy.
+- `CallState.participantCount` and `anonymousParticipantCount` are set from the call's session as soon as it is fetched, instead of staying 0 until the first count update. Once you join, the SFU's counts still take over.
+
+### 🔄 Changed
+
+- `stream_video` now requires `jose` 0.3.5+2 or newer.
 
 ### 🐞 Fixed
 
@@ -175,12 +201,6 @@
 - [iOS] Livestream viewers on `AudioConfigurationPolicy.viewer()` now hear the stream through the loudspeaker instead of the earpiece, whatever the call type's audio settings say. Headphones and Bluetooth devices still take priority, and an output picked with `Call.setAudioOutputDevice` still applies.
 - [iOS] `Call.resumeAudio` now restores the audio output the call was using, such as the loudspeaker, instead of falling back to the earpiece.
 - Changing the audio output device now uses the call's audio policy instead of the client-wide one.
-
-### ✅ Added
-
-- Added `AudioConfigurationPolicy.defaultsToSpeaker`, which is `true` for the viewer policy. `AudioConfigurationPolicy.custom` takes an optional `defaultsToSpeaker`, which otherwise follows the base policy.
-- `CallState.participantCount` and `anonymousParticipantCount` are set from the call's session as soon as it is fetched, instead of staying 0 until the first count update. Once you join, the SFU's counts still take over.
-- Added `CallSessionData.anonymousParticipantCount`.
 
 ## 1.7.1
 

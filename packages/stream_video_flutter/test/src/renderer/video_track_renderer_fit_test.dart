@@ -23,6 +23,7 @@ void main() {
     when(() => stream.ownerTag).thenReturn('remote');
     track = _MockRtcTrack();
     when(() => track.mediaStream).thenReturn(stream);
+    when(() => track.trackId).thenReturn('alice:video');
 
     final messenger =
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;

@@ -4,12 +4,12 @@ import 'package:flutter/cupertino.dart';
 import '../call/call_reject_reason.dart';
 import '../errors/stream_video_exception.dart';
 import '../sfu/data/models/sfu_error.dart';
+import 'leave_initiator.dart';
 
+/// Why a call disconnected, carried by `CallStatusDisconnected`.
 @immutable
-abstract class DisconnectReason extends Equatable {
+sealed class DisconnectReason extends Equatable {
   const DisconnectReason();
-
-  const factory DisconnectReason.timeout() = DisconnectReasonTimeout;
 
   const factory DisconnectReason.failure(
     StreamVideoException error,
@@ -19,9 +19,17 @@ abstract class DisconnectReason extends Equatable {
     SfuError error,
   ) = DisconnectReasonSfuError;
 
+  /// This side left the call, as [initiator] says, for the reason in
+  /// [message], if one was given.
+  const factory DisconnectReason.left({
+    LeaveInitiator initiator,
+    String? message,
+  }) = DisconnectReasonLeft;
+
   const factory DisconnectReason.rejected({
     required String byUserId,
     CallRejectReason? reason,
+    LeaveInitiator? initiator,
   }) = DisconnectReasonRejected;
 
   const factory DisconnectReason.blocked() = DisconnectReasonBlocked;
@@ -30,15 +38,22 @@ abstract class DisconnectReason extends Equatable {
     required String byUserId,
   }) = DisconnectReasonCancelled;
 
-  factory DisconnectReason.ended() {
-    return DisconnectReasonEnded();
+  /// The call ended for everyone. [initiator] says what ended it: an end
+  /// from elsewhere, such as the backend, is [LeaveInitiator.remoteEvent];
+  /// one this side made through `Call.end` carries that call's initiator and
+  /// [message].
+  const factory DisconnectReason.ended({
+    LeaveInitiator initiator,
+    String? message,
+  }) = DisconnectReasonEnded;
+
+  /// The system call UI ended the call: CallKit on iOS, Telecom on Android.
+  factory DisconnectReason.nativeCallEnded() {
+    return DisconnectReasonNativeCallEnded();
   }
 
-  /// The call was ended externally (e.g. a backend `call.ended` event or
-  /// CallKit reporting the call ended) while the user was still connected.
-  factory DisconnectReason.callEnded() {
-    return DisconnectReasonCallEnded();
-  }
+  @Deprecated('Use DisconnectReason.nativeCallEnded instead.')
+  factory DisconnectReason.callEnded() = DisconnectReason.nativeCallEnded;
 
   factory DisconnectReason.replaced() {
     return DisconnectReasonReplaced();
@@ -56,16 +71,7 @@ abstract class DisconnectReason extends Equatable {
   List<Object?> get props => [];
 }
 
-class DisconnectReasonTimeout extends DisconnectReason {
-  const DisconnectReasonTimeout();
-
-  @override
-  String toString() {
-    return 'Timeout';
-  }
-}
-
-class DisconnectReasonFailure extends DisconnectReason {
+final class DisconnectReasonFailure extends DisconnectReason {
   const DisconnectReasonFailure(this.error);
 
   final StreamVideoException error;
@@ -79,7 +85,7 @@ class DisconnectReasonFailure extends DisconnectReason {
   }
 }
 
-class DisconnectReasonSfuError extends DisconnectReason {
+final class DisconnectReasonSfuError extends DisconnectReason {
   const DisconnectReasonSfuError(this.error);
 
   final SfuError error;
@@ -93,25 +99,55 @@ class DisconnectReasonSfuError extends DisconnectReason {
   }
 }
 
-class DisconnectReasonRejected extends DisconnectReason {
+/// This side left the call: through `Call.leave`, or for the SDK or the app
+/// on their own.
+final class DisconnectReasonLeft extends DisconnectReason {
+  const DisconnectReasonLeft({
+    this.initiator = LeaveInitiator.unknown,
+    this.message,
+  });
+
+  /// What made the call leave.
+  final LeaveInitiator initiator;
+
+  /// Why the call left, as reported to Stream.
+  final String? message;
+
+  @override
+  List<Object?> get props => [initiator, message];
+
+  @override
+  String toString() {
+    return 'Left{initiator: ${initiator.name}, message: $message}';
+  }
+}
+
+final class DisconnectReasonRejected extends DisconnectReason {
   const DisconnectReasonRejected({
     required this.byUserId,
     this.reason,
+    this.initiator,
   });
 
   final String byUserId;
   final CallRejectReason? reason;
 
+  /// What made this user reject, when the reject's [reason] does not say.
+  ///
+  /// If null, the initiator is derived from [byUserId] and [reason].
+  final LeaveInitiator? initiator;
+
   @override
-  List<Object?> get props => [byUserId, reason];
+  List<Object?> get props => [byUserId, reason, initiator];
 
   @override
   String toString() {
-    return 'Rejected{byUserId: $byUserId}';
+    return 'Rejected{byUserId: $byUserId, reason: $reason, '
+        'initiator: ${initiator?.name}}';
   }
 }
 
-class DisconnectReasonBlocked extends DisconnectReason {
+final class DisconnectReasonBlocked extends DisconnectReason {
   const DisconnectReasonBlocked();
 
   @override
@@ -120,7 +156,7 @@ class DisconnectReasonBlocked extends DisconnectReason {
   }
 }
 
-class DisconnectReasonCancelled extends DisconnectReason {
+final class DisconnectReasonCancelled extends DisconnectReason {
   const DisconnectReasonCancelled({
     required this.byUserId,
   });
@@ -136,23 +172,30 @@ class DisconnectReasonCancelled extends DisconnectReason {
   }
 }
 
-class DisconnectReasonEnded extends DisconnectReason {
-  factory DisconnectReasonEnded() {
-    return _instance;
-  }
+/// The call ended for everyone: on the backend, or through `Call.end`.
+final class DisconnectReasonEnded extends DisconnectReason {
+  const DisconnectReasonEnded({
+    this.initiator = LeaveInitiator.remoteEvent,
+    this.message,
+  });
 
-  const DisconnectReasonEnded._internal();
+  /// What ended the call: [LeaveInitiator.remoteEvent] for an end from
+  /// elsewhere, or what made this side end it through `Call.end`.
+  final LeaveInitiator initiator;
 
-  static const DisconnectReasonEnded _instance =
-      DisconnectReasonEnded._internal();
+  /// The reason given to `Call.end`, if any.
+  final String? message;
+
+  @override
+  List<Object?> get props => [initiator, message];
 
   @override
   String toString() {
-    return 'Ended';
+    return 'Ended{initiator: ${initiator.name}, message: $message}';
   }
 }
 
-class DisconnectReasonReplaced extends DisconnectReason {
+final class DisconnectReasonReplaced extends DisconnectReason {
   factory DisconnectReasonReplaced() {
     return _instance;
   }
@@ -168,7 +211,7 @@ class DisconnectReasonReplaced extends DisconnectReason {
   }
 }
 
-class DisconnectReasonLastParticipantLeft extends DisconnectReason {
+final class DisconnectReasonLastParticipantLeft extends DisconnectReason {
   factory DisconnectReasonLastParticipantLeft() {
     return _instance;
   }
@@ -184,7 +227,7 @@ class DisconnectReasonLastParticipantLeft extends DisconnectReason {
   }
 }
 
-class DisconnectReasonReconnectionFailed extends DisconnectReason {
+final class DisconnectReasonReconnectionFailed extends DisconnectReason {
   factory DisconnectReasonReconnectionFailed() {
     return _instance;
   }
@@ -200,34 +243,22 @@ class DisconnectReasonReconnectionFailed extends DisconnectReason {
   }
 }
 
-class DisconnectReasonCallEnded extends DisconnectReason {
-  factory DisconnectReasonCallEnded() {
+/// The system call UI ended the call: CallKit on iOS, Telecom on Android.
+final class DisconnectReasonNativeCallEnded extends DisconnectReason {
+  factory DisconnectReasonNativeCallEnded() {
     return _instance;
   }
 
-  const DisconnectReasonCallEnded._internal();
+  const DisconnectReasonNativeCallEnded._internal();
 
-  static const DisconnectReasonCallEnded _instance =
-      DisconnectReasonCallEnded._internal();
-
-  @override
-  String toString() {
-    return 'CallEnded';
-  }
-}
-
-class DisconnectReasonManuallyClosed extends DisconnectReason {
-  factory DisconnectReasonManuallyClosed() {
-    return _instance;
-  }
-
-  const DisconnectReasonManuallyClosed._internal();
-
-  static const DisconnectReasonManuallyClosed _instance =
-      DisconnectReasonManuallyClosed._internal();
+  static const DisconnectReasonNativeCallEnded _instance =
+      DisconnectReasonNativeCallEnded._internal();
 
   @override
   String toString() {
-    return 'ManuallyClosed';
+    return 'NativeCallEnded';
   }
 }
+
+@Deprecated('Use DisconnectReasonNativeCallEnded instead.')
+typedef DisconnectReasonCallEnded = DisconnectReasonNativeCallEnded;

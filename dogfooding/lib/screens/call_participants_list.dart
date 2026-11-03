@@ -4,6 +4,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
+import '../utils/dialog_anchor.dart';
 
 /// The call's participants and invited members, as the body of a side panel.
 class CallParticipantsPanelBody extends StatelessWidget {
@@ -152,6 +153,7 @@ class CallParticipantsPanelBody extends StatelessWidget {
 
     final userId = await showDialog<String>(
       context: context,
+      anchorPoint: trailingTopAnchor(context),
       builder: (context) {
         return AlertDialog(
           backgroundColor: theme.scaffoldBackgroundColor,

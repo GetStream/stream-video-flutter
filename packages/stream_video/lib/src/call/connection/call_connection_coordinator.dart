@@ -25,6 +25,12 @@ class CallConnectionCoordinator {
   @visibleForTesting
   static Duration statsBeforeReconnectTimeout = const Duration(seconds: 2);
 
+  /// How long `end()` waits for the server before leaving anyway. The client
+  /// sets no timeout of its own, so a stalled connection would otherwise keep
+  /// the call up until the socket gives up.
+  @visibleForTesting
+  static Duration endRequestTimeout = const Duration(seconds: 10);
+
   Duration _fastReconnectDeadline = Duration.zero;
 
   // Separate limits. The rejoin windows count across reconnects. The short
@@ -71,6 +77,10 @@ class CallConnectionCoordinator {
   );
 
   bool get _isLeftOrLeaving => _phase.value.isLeftOrLeaving;
+
+  // The end this side is asking the server for, so a second end() joins it
+  // rather than asking again.
+  Future<Result<None>>? _endInFlight;
 
   /// Runs [body] with a future that completes once the call is leaving.
   Future<T> _whileJoined<T>(Future<T> Function(Future<void> left) body) async {
@@ -716,16 +726,16 @@ class CallConnectionCoordinator {
       clientEventRetryCount: clientEventRetryCount,
     );
 
+    if (_isLeftOrLeaving) {
+      _call._logger.w(() => '[join] rejected (call was left during joining)');
+      return const JoinCancelled();
+    }
+
     if (joinedResult is! Success<CallCredentials>) {
       _call._logger.e(() => '[join] coordinator joining failed: $joinedResult');
 
       final failure = joinedResult as Failure;
       return JoinRetry(failure.videoError, failure.stackTrace);
-    }
-
-    if (_isLeftOrLeaving) {
-      _call._logger.w(() => '[join] rejected (call was left during joining)');
-      return const JoinCancelled();
     }
 
     _credentials = joinedResult.data;
@@ -1006,6 +1016,11 @@ class CallConnectionCoordinator {
         clientEventRetryCount: clientEventRetryCount,
       );
 
+      if (_isLeftOrLeaving) {
+        _call._logger.w(() => '[joinIfNeeded] rejected (call was left)');
+        return failureWithError('call was left');
+      }
+
       return joinedResult.foldResult(
         success: (success) {
           _sfuStatsOptions = success.data.statsOptions;
@@ -1082,6 +1097,21 @@ class CallConnectionCoordinator {
       return failure;
     }
 
+    // The request is not cancelled by a leave or an end, so its answer can
+    // arrive after one. Both aborted the stage already, so failing it again
+    // only closes it should a path ever skip the abort.
+    if (_isLeftOrLeaving) {
+      _call._logger.w(() => '[joinCall] rejected (call was left during join)');
+      reporter.failStage(
+        joinStageId,
+        failure: const ClientEventFailure.clientAborted(
+          'Aborted: call was left during join',
+        ),
+        retryCount: clientEventRetryCount,
+      );
+      return failureWithError('call was left');
+    }
+
     // Server call_session_id is now known; stamp it on subsequent stages.
     reporter
       ..setCallSessionId(_call.callCid, joinResult.data.metadata.session.id)
@@ -1105,6 +1135,13 @@ class CallConnectionCoordinator {
         receivedOrCreated.data.metadata.settings,
         joinOptions: connectOptions,
       );
+
+      if (_isLeftOrLeaving) {
+        _call._logger.w(
+          () => '[joinCall] rejected (call was left during join settings)',
+        );
+        return failureWithError('call was left');
+      }
     }
 
     _call._logger.v(
@@ -1378,7 +1415,16 @@ class CallConnectionCoordinator {
           'isReconnectable': false,
         });
 
-        await leave(reason: DisconnectReason.ended());
+        await leave(
+          reason: DisconnectReason.failure(
+            StreamVideoException(
+              message:
+                  'SFU socket closed and cannot reconnect '
+                  '(closeCode: ${sfuEvent.reason.closeCode}, '
+                  'closeReason: ${sfuEvent.reason.closeReason})',
+            ),
+          ),
+        );
       }
     } else if (sfuEvent is SfuSocketFailed) {
       _call._logger.w(() => '[onSfuEvent] socket failed');
@@ -2121,8 +2167,14 @@ class CallConnectionCoordinator {
   }
 
   Future<Result<None>> leave({DisconnectReason? reason}) {
-    return _leave(reason: reason);
+    return _leave(reason: reason ?? const DisconnectReason.left());
   }
+
+  /// The reason a call leaves with when the app disposes it.
+  static const _disposed = DisconnectReason.left(
+    initiator: LeaveInitiator.app,
+    message: 'call disposed',
+  );
 
   /// Leaves the call unless it is left already, waits for a leave in progress
   /// to finish, then closes [_phase].
@@ -2131,11 +2183,13 @@ class CallConnectionCoordinator {
   /// instance holds, so a live call with the same cid is not touched.
   Future<void> dispose() async {
     if (_phase.value is ConnectionIdle) {
-      _setPhase(const ConnectionDisconnected(null));
+      _setPhase(const ConnectionDisconnected(_disposed));
       await _releaseUnjoined();
     } else {
       try {
-        if (!_isLeftOrLeaving) await leave();
+        if (!_isLeftOrLeaving) {
+          await leave(reason: _disposed);
+        }
       } catch (e, stk) {
         _call._logger.e(() => '[dispose] leave failed: $e\n$stk');
       }
@@ -2189,7 +2243,7 @@ class CallConnectionCoordinator {
     final status = _call.state.value.status;
     if (status is CallStatusIncoming || status is CallStatusOutgoing) {
       await _cancelUnansweredRing();
-      _call._stateManager.lifecycleCallDisconnected();
+      _call._stateManager.lifecycleCallDisconnected(reason: _disposed);
       final joinedElsewhere = client.state.activeCalls.value.any(
         (call) => call.callCid == _call.callCid,
       );
@@ -2238,21 +2292,16 @@ class CallConnectionCoordinator {
   /// written into the state from elsewhere, so the status is already
   /// disconnected.
   Future<Result<None>> _leave({
-    DisconnectReason? reason,
+    required DisconnectReason reason,
     bool remote = false,
   }) async {
-    _call._logger.i(() => '[leave] reason: $reason, remote: $remote');
+    final attribution = _leaveAttribution(reason);
+    _call._logger.i(
+      () => '[leave] reason: $reason, remote: $remote, $attribution',
+    );
 
-    final abortCode = switch (reason) {
-      DisconnectReasonEnded() ||
-      DisconnectReasonCallEnded() => ClientEventStandardCode.backendLeave,
-      // Reconnection gave up — treat as a device-offline
-      DisconnectReasonReconnectionFailed() =>
-        ClientEventStandardCode.networkOffline,
-      _ => ClientEventStandardCode.clientAborted,
-    };
     _call._host.clientEventReporter
-      ..abort(_call.callCid, abortCode)
+      ..abort(_call.callCid, attribution.abortFailure)
       ..unregisterCall(_call.callCid);
 
     // A reject already told the server, and a remote end needs no answer.
@@ -2263,7 +2312,7 @@ class CallConnectionCoordinator {
     final bool didDisconnect;
     try {
       didDisconnect = await _disconnect(
-        sfuLeaveReason: _sfuLeaveReason(reason),
+        sfuLeaveReason: attribution.message,
         remote: remote,
       );
     } catch (_) {
@@ -2278,7 +2327,27 @@ class CallConnectionCoordinator {
     return const Result.success(none);
   }
 
-  Future<Result<None>> end({String? reason}) async {
+  /// Ends the call on the server, then leaves it.
+  ///
+  /// A server that refuses the end leaves the call untouched. An end the
+  /// server never decided on, because the device is offline, the request
+  /// timed out after [endRequestTimeout], or the server failed or rate
+  /// limited it, still leaves this side, as the user asked to be out of the
+  /// call.
+  Future<Result<None>> end({
+    String? reason,
+    LeaveInitiator initiator = LeaveInitiator.unknown,
+  }) {
+    return _endInFlight ??= _end(
+      reason: reason,
+      initiator: initiator,
+    ).whenComplete(() => _endInFlight = null);
+  }
+
+  Future<Result<None>> _end({
+    String? reason,
+    required LeaveInitiator initiator,
+  }) async {
     _call._logger.d(() => '[end] status: ${_call.state.value.status}');
 
     if (_call.state.value.status is! CallStatusActive) {
@@ -2288,39 +2357,71 @@ class CallConnectionCoordinator {
       return failureWithError('invalid status: ${_call.state.value.status}');
     }
 
-    final bool didDisconnect;
-    try {
-      didDisconnect = await _disconnect(
-        sfuLeaveReason: reason ?? 'user is ending the call',
-      );
-    } catch (_) {
-      // The teardown failed here, but the call still ends for everyone.
-      try {
-        await _call._permissionsManager.endCall();
-      } finally {
-        _settleDisconnected(DisconnectReason.ended());
-      }
-      rethrow;
-    }
-
-    // If another disconnect already ran (or is running), don't fire the
-    // server-side endCall a second time and don't re-emit the lifecycle
-    // event.
-    if (!didDisconnect) {
-      _call._logger.v(() => '[end] disconnect short-circuited');
+    // A leave that is already disconnecting wins: the call is on its way out,
+    // and this instance no longer holds a session to end it from.
+    if (_isLeftOrLeaving) {
+      _call._logger.v(() => '[end] rejected (already leaving)');
       return const Result.success(none);
     }
 
+    final endReason = DisconnectReasonEnded(
+      initiator: initiator,
+      message: reason,
+    );
+
+    // The call's own `call.ended` can arrive before the response. While the
+    // request runs, the state writes it as this end, not as one from
+    // elsewhere, so the call disconnects once and with this reason.
+    final stateManager = _call._stateManager..pendingEnd = endReason;
     final Result<None> result;
     try {
-      result = await _call._permissionsManager.endCall();
+      result = await _call._permissionsManager.endCall().timeout(
+        endRequestTimeout,
+        onTimeout: () => failureWithError(
+          'end request timed out',
+          cause: TimeoutException('end request', endRequestTimeout),
+        ),
+      );
     } finally {
-      _setPhase(ConnectionDisconnected(DisconnectReason.ended()));
-      _call._stateManager.lifecycleCallEnded();
+      stateManager.pendingEnd = null;
+    }
+
+    switch (result) {
+      case Success<None>():
+        // The backend ended it for everyone, so there is no ring to cancel.
+        await _leave(reason: endReason, remote: true);
+      case Failure(:final error) when _isNotDelivered(error):
+        _call._logger.w(() => '[end] not delivered, leaving anyway: $error');
+        await _leave(
+          reason: DisconnectReason.left(
+            initiator: initiator,
+            message: 'end not delivered',
+          ),
+        );
+      case Failure():
+        _call._logger.w(() => '[end] rejected by the server: $result');
+        return result;
+    }
+
+    // A remote leave its own `call.ended` started may still be tearing down.
+    if (_phase.value is ConnectionLeaving) {
+      await _phase.firstWhere((phase) => phase is ConnectionDisconnected);
     }
 
     _call._logger.v(() => '[end] completed: $result');
     return result;
+  }
+
+  // Whether [error] means the server never decided on the end: the device was
+  // offline, the request timed out, the server failed (5xx) or turned the
+  // request away for its rate (429). Anything else is the server refusing it.
+  static bool _isNotDelivered(Object error) {
+    if (error case StreamVideoException(:final apiStatusCode?)) {
+      if (apiStatusCode >= 500 || apiStatusCode == 429) return true;
+    }
+    final code = const ClientEventErrorMapper().map(error).code;
+    return code == ClientEventStandardCode.networkOffline ||
+        code == ClientEventStandardCode.requestTimeout;
   }
 
   /// Moves to [ConnectionDisconnected] and reports the call disconnected for
@@ -2381,7 +2482,7 @@ class CallConnectionCoordinator {
     if (status is CallStatusDisconnected) {
       _session?.trace(
         'call.leaveReason',
-        _sfuLeaveReason(status.reason),
+        _leaveAttribution(status.reason).message,
       );
     }
 
@@ -2390,26 +2491,11 @@ class CallConnectionCoordinator {
     _sfuStatsReporter = null;
   }
 
-  String _sfuLeaveReason(DisconnectReason? reason) {
-    if (reason == null) return 'user is leaving the call';
-
-    return switch (reason) {
-      final DisconnectReasonRejected rejected =>
-        'rejected: ${rejected.reason?.value ?? 'unspecified'}',
-      final DisconnectReasonFailure failure => 'failure: ${failure.error}',
-      final DisconnectReasonSfuError sfuError => 'sfu error: ${sfuError.error}',
-      final DisconnectReasonCancelled cancelled =>
-        'cancelled: ${cancelled.byUserId}',
-      DisconnectReasonReplaced _ => 'replaced by another call',
-      DisconnectReasonReconnectionFailed _ => 'reconnection failed',
-      DisconnectReasonLastParticipantLeft _ => 'last participant left',
-      DisconnectReasonCallEnded _ => 'call ended externally',
-      DisconnectReasonEnded _ => 'call ended',
-      DisconnectReasonTimeout _ => 'timeout',
-      DisconnectReasonManuallyClosed _ => 'manually closed',
-      DisconnectReasonBlocked _ => 'blocked',
-      _ => 'user is leaving the call',
-    };
+  LeaveAttribution _leaveAttribution(DisconnectReason reason) {
+    return LeaveAttribution.of(
+      reason,
+      currentUserId: _call.state.value.currentUserId,
+    );
   }
 
   Future<void> _clear(String src) async {
@@ -2489,7 +2575,7 @@ class CallConnectionCoordinator {
     } finally {
       _call._ringing.release();
       await _call._host.state.removeActiveCall(_call);
-      if (_call._host.state.outgoingCall.value?.callCid == _call.callCid) {
+      if (identical(_call._host.state.outgoingCall.value, _call)) {
         await _call._host.state.setOutgoingCall(null);
       }
 

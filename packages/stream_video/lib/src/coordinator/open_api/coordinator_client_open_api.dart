@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 
 import '../../../../open_api/video/coordinator/api.dart' as open;
 import '../../../stream_video.dart';
+import '../../errors/request_failure_description.dart';
 import '../../errors/stream_video_exception_composer.dart';
 import '../../http/stream_auth_interceptor.dart';
 import '../../http/stream_client_info_interceptor.dart';
@@ -81,7 +82,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   /// The client every coordinator call goes through.
   StreamCoreHttpClient _buildHttpClient() {
     final client = StreamCoreHttpClient(
-      options: BaseOptions(baseUrl: _rpcUrl),
+      options: BaseOptions(baseUrl: _rpcUrl, extra: coordinatorRequestExtra()),
     );
 
     client.interceptors.addAll(
@@ -1800,7 +1801,10 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     try {
       _logger.d(() => '[loadGuest] id: $id');
       final dio = StreamCoreHttpClient(
-        options: BaseOptions(baseUrl: _rpcUrl),
+        options: BaseOptions(
+          baseUrl: _rpcUrl,
+          extra: coordinatorRequestExtra(),
+        ),
       );
       dio.interceptors.addAll(
         _buildInterceptors(

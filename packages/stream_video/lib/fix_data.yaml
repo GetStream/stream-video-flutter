@@ -809,3 +809,30 @@ transforms:
     changes:
       - kind: "rename"
         newName: "rejectedBy"
+
+  - title: "rename DisconnectReason.callEnded to nativeCallEnded"
+    date: "2026-10-27"
+    element:
+      uris:
+        [
+          "package:stream_video/src/models/disconnect_reason.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      inClass: "DisconnectReason"
+      constructor: "callEnded"
+    changes:
+      - kind: "rename"
+        newName: "nativeCallEnded"
+
+  - title: "rename DisconnectReasonCallEnded to DisconnectReasonNativeCallEnded"
+    date: "2026-10-27"
+    element:
+      uris:
+        [
+          "package:stream_video/src/models/disconnect_reason.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      typedef: "DisconnectReasonCallEnded"
+    changes:
+      - kind: "rename"
+        newName: "DisconnectReasonNativeCallEnded"

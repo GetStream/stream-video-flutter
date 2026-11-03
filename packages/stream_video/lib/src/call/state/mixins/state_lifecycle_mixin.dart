@@ -47,16 +47,6 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     );
   }
 
-  void lifecycleCallEnded() {
-    _logWithState('lifecycleCallEnded');
-    state = state.copyWith(
-      status: CallStatus.disconnected(
-        DisconnectReason.ended(),
-      ),
-      sessionId: '',
-    );
-  }
-
   void updateFromCallReceivedData(
     CallReceivedData data, {
     bool ringing = false,
@@ -198,10 +188,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
 
     state = state.copyWith(
       status: CallStatus.disconnected(
-        reason ??
-            DisconnectReason.cancelled(
-              byUserId: state.currentUserId,
-            ),
+        reason ?? const DisconnectReason.left(),
       ),
       sessionId: '',
       callParticipants: const [],

@@ -601,7 +601,9 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   Future<void> _leave() async {
     try {
       _logger.d(() => '[leave] no args');
-      await call.leave();
+      await call.leave(
+        reason: const DisconnectReason.left(initiator: LeaveInitiator.app),
+      );
       // play tone
       await _popSelf();
     } finally {

@@ -410,9 +410,12 @@ class _StreamAdaptiveMenuAnchorState extends State<StreamAdaptiveMenuAnchor>
 
   Future<void> _openSheet() async {
     setState(() => _isOpen = true);
+    // On a folded window, the sheet goes to the half the button is in.
+    final box = context.findRenderObject() as RenderBox?;
     await showStreamSheet<void>(
       context: context,
       isDismissible: true,
+      anchorPoint: box?.localToGlobal(box.size.center(Offset.zero)),
       builder: (context, scrollController) => ListenableBuilder(
         listenable: _revision,
         builder: (context, _) => _MenuSheet(
