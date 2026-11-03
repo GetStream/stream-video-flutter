@@ -1057,7 +1057,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       final result = await _defaultApi.startRecording(
         type: callCid.type.value,
         id: callCid.id,
-        recordingType: open.RecordingType(recordingType.toOpenDto()),
+        recordingType: recordingType.toOpenDto(),
         startRecordingRequest: open.StartRecordingRequest(
           recordingExternalStorage: recordingExternalStorage,
         ),
@@ -1106,7 +1106,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
       final result = await _defaultApi.stopRecording(
         type: callCid.type.value,
         id: callCid.id,
-        recordingType: open.RecordingType(recordingType.toOpenDto()),
+        recordingType: recordingType.toOpenDto(),
       );
 
       return result.fold<Result<None>>(

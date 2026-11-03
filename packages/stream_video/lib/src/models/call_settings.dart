@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import '../../open_api/video/coordinator/api.dart';
+import '../../open_api/video/coordinator_aliases.dart';
 import '../coordinator/open_api/open_api_extensions.dart';
 import '../webrtc/model/rtc_video_dimension.dart';
 import '../webrtc/model/rtc_video_encoding.dart';
@@ -1340,14 +1341,14 @@ enum RecordingType {
   @override
   String toString() => name;
 
-  String toOpenDto() {
+  CallRecordingType toOpenDto() {
     switch (this) {
       case RecordingType.composite:
-        return 'composite';
+        return CallRecordingType.composite;
       case RecordingType.individual:
-        return 'individual';
+        return CallRecordingType.individual;
       case RecordingType.raw:
-        return 'raw';
+        return CallRecordingType.raw;
     }
   }
 
