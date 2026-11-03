@@ -716,17 +716,15 @@ class RtcManager extends Disposable {
 
   /// Decrypts everything [track]'s receiver delivers, or queues the track
   /// until its participant is known.
-  Future<void> attachDecryptor(RtcRemoteTrack track) {
-    return _remoteTrackDecryptor.attach(track);
-  }
+  Future<void> attachDecryptor(RtcRemoteTrack track) =>
+      _remoteTrackDecryptor.attach(track);
 
   /// Retries decryptors that were waiting on a participant.
   Future<void> flushPendingDecryptors() => _remoteTrackDecryptor.flush();
 
   /// Drops decryptors still waiting on a participant who has left.
-  void discardPendingDecryptors(String trackIdPrefix) {
-    _remoteTrackDecryptor.discard(trackIdPrefix);
-  }
+  void discardPendingDecryptors(String trackIdPrefix) =>
+      _remoteTrackDecryptor.discard(trackIdPrefix);
 
   /// The subscriber receiver carrying [track].
   Future<rtc.RTCRtpReceiver?> _receiverForTrack(RtcRemoteTrack track) async {

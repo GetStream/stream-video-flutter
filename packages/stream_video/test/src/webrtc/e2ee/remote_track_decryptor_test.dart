@@ -125,12 +125,17 @@ void main() {
     expect(decryptedFor, isEmpty);
   });
 
-  test('a track without a receiver is skipped', () async {
+  test('a track without a receiver is skipped, not queued', () async {
     userIdByPrefix['alice-prefix'] = 'alice';
     receiver = null;
+    final remote = decryptor();
 
-    await decryptor().attach(_remoteTrack('alice-prefix'));
+    await remote.attach(_remoteTrack('alice-prefix'));
+    expect(decryptedFor, isEmpty);
 
+    // A receiver showing up later does not bring the track back.
+    receiver = _FakeReceiver();
+    await remote.flush();
     expect(decryptedFor, isEmpty);
   });
 
@@ -142,7 +147,7 @@ void main() {
         userId: any(named: 'userId'),
         trackType: any(named: 'trackType'),
       ),
-    ).thenThrow(StateError('key missing'));
+    ).thenAnswer((_) async => throw StateError('key missing'));
 
     await expectLater(
       decryptor().attach(_remoteTrack('alice-prefix')),
