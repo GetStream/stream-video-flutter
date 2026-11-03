@@ -60,6 +60,29 @@ const _tag = 'SV:RtcManager';
 /// transceiver creations before giving up on the current negotiation.
 const _pendingTransceiverSettleTimeout = Duration(seconds: 5);
 
+/// The WebRTC side of one call session: its publisher and subscriber peer
+/// connections and the tracks they carry.
+///
+/// One is made per `CallSession` by `RtcManagerFactory`. A rejoin or an SFU
+/// migration makes a new one; [handOverLocalTracks] passes the live local
+/// tracks to it, so the devices are not opened again.
+///
+/// It:
+/// - publishes local tracks: it acquires the camera, microphone and screen
+///   share, sends each track on a transceiver per publish option, and mutes,
+///   unmutes and switches devices on them;
+/// - follows the SFU: publish options (codecs), publish quality (layers), and
+///   the tracks announced in `SetPublisher` and `ReconnectDetails`;
+/// - receives remote tracks on the subscriber and answers its offers;
+/// - attaches end-to-end encryption to senders and receivers when the call is
+///   encrypted;
+/// - selects the audio output and, on Apple platforms, applies the audio
+///   session and the microphone mute of the audio device module.
+///
+/// It does not talk to the SFU: `CallSession` negotiates and calls into it.
+/// The call layer reads tracks through [localTracks], [remoteTracks],
+/// [getTrack] and [getTracks], and hears about changes through
+/// [onLocalTrackPublished], [onLocalTrackMuted] and [onRemoteTrackReceived].
 class RtcManager extends Disposable {
   RtcManager({
     required this.sessionId,
