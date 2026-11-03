@@ -14,12 +14,11 @@ import 'audio_session.dart';
 @internal
 class IosAudioSession implements AudioSession {
   IosAudioSession({
-    Future<void> Function(rtc.AppleAudioConfiguration) apply =
+    Future<void> Function(rtc.AppleAudioConfiguration) this._apply =
         rtc.Helper.setAppleAudioConfiguration,
-    Future<void> Function(String deviceId) selectAudioOutput =
+    Future<void> Function(String deviceId) this._selectAudioOutput =
         rtc.Helper.selectAudioOutput,
-  }) : _apply = apply,
-       _selectAudioOutput = selectAudioOutput;
+  });
 
   /// Sends a configuration to the platform.
   final Future<void> Function(rtc.AppleAudioConfiguration) _apply;
