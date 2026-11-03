@@ -14,12 +14,11 @@ final _logger = taggedLogger(tag: 'SV:RemoteTrackDecryptor');
 @internal
 class RemoteTrackDecryptor {
   RemoteTrackDecryptor({
-    required rtc.EncryptionManager? manager,
-    required String? Function(String trackIdPrefix) userIdForTrackPrefix,
-    required Future<rtc.RTCRtpReceiver?> Function(RtcRemoteTrack) receiverFor,
-  }) : _manager = manager,
-       _userIdForTrackPrefix = userIdForTrackPrefix,
-       _receiverFor = receiverFor;
+    required rtc.EncryptionManager? this._manager,
+    required String? Function(String trackIdPrefix) this._userIdForTrackPrefix,
+    required Future<rtc.RTCRtpReceiver?> Function(RtcRemoteTrack)
+    this._receiverFor,
+  });
 
   final rtc.EncryptionManager? _manager;
   final String? Function(String trackIdPrefix) _userIdForTrackPrefix;
