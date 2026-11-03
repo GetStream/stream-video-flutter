@@ -12,7 +12,7 @@ import '../rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 import '../sdp/incoming_audio_sources.dart';
 import '../traced_peer_connection.dart';
 
-/// {@template OnRemoteTrackPublished}
+/// {@template OnRemoteTrackReceived}
 /// Called when a subscriber track is received.
 /// {@endtemplate}
 typedef OnRemoteTrackReceived =
@@ -31,8 +31,8 @@ final _logger = taggedLogger(tag: 'SV:RtcSubscriber');
 class RtcSubscriber {
   RtcSubscriber({
     required this.pc,
-    required Future<void> Function(RtcRemoteTrack track) this._attachDecryptor,
-    void Function(RtcRemoteTrack track)? this._onTrackAdded,
+    required this._attachDecryptor,
+    this._onTrackAdded,
   }) {
     pc.onTrack = _onRemoteTrack;
   }

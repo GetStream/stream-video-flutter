@@ -190,14 +190,18 @@ void main() {
       expect(subscriber.tracks[audio.trackId]!.audioSinkId, 'speaker-2');
     });
 
-    test('useAudioOutput records the device on audio tracks only', () {
-      final audio = deliver('alice:TRACK_TYPE_AUDIO');
-      final video = deliver('alice:TRACK_TYPE_VIDEO', kind: 'video');
+    test(
+      'audioTracks holds only audio, and useAudioOutput records the device on '
+      'them',
+      () {
+        final audio = deliver('alice:TRACK_TYPE_AUDIO');
+        final video = deliver('alice:TRACK_TYPE_VIDEO', kind: 'video');
 
-      subscriber.useAudioOutput(_speaker, subscriber.audioTracks);
+        subscriber.useAudioOutput(_speaker, subscriber.audioTracks);
 
-      expect(subscriber.tracks[audio.trackId]!.audioSinkId, 'speaker-2');
-      expect(subscriber.tracks[video.trackId]!.audioSinkId, isNull);
-    });
+        expect(subscriber.tracks[audio.trackId]!.audioSinkId, 'speaker-2');
+        expect(subscriber.tracks[video.trackId]!.audioSinkId, isNull);
+      },
+    );
   });
 }
