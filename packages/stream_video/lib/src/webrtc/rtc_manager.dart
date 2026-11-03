@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
-import 'package:rxdart/transformers.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../stream_video.dart';
@@ -232,8 +231,21 @@ class RtcManager extends Disposable {
     _telemetry?.onSubscriberStats(stats);
   }
 
-  StreamSubscription<ScreenSharingStartedEvent>?
-  _screenSharingStartedSubscription;
+  /// The iOS broadcast share created but not started yet, and the
+  /// subscription waiting for it to start.
+  RtcLocalScreenShareTrack? _pendingBroadcastTrack;
+  StreamSubscription<NativeWebRtcEvent>? _pendingBroadcastSubscription;
+
+  /// Cancels a broadcast that was created but has not started, stopping its
+  /// track.
+  Future<void> _cancelPendingBroadcast() async {
+    final track = _pendingBroadcastTrack;
+    _pendingBroadcastTrack = null;
+
+    await _pendingBroadcastSubscription?.cancel();
+    _pendingBroadcastSubscription = null;
+    await track?.stop();
+  }
 
   /// Whether subscriber offers have to be compared for new audio sources.
   /// WebKit only: everywhere else the offers are neither kept nor parsed.
@@ -357,8 +369,7 @@ class RtcManager extends Disposable {
     _logger.d(() => '[dispose] no args');
     _publisher.beginDispose();
 
-    await _screenSharingStartedSubscription?.cancel();
-    _screenSharingStartedSubscription = null;
+    await _cancelPendingBroadcast();
 
     final trackIds = [...tracks.keys, ..._subscriber.tracks.keys];
     await Future.wait(

@@ -147,34 +147,69 @@ extension RtcManagerTrackHelper on RtcManager {
         enabled &&
         constraints is ScreenShareConstraints &&
         constraints.useiOSBroadcastExtension) {
-      final screenShareTrackResult = await _trackAcquirer
-          .createScreenShareTrack(
-            constraints: constraints,
-          );
+      return _startBroadcastShare(constraints);
+    }
 
-      if (screenShareTrackResult.isFailure) {
-        _logger.e(
-          () =>
-              '[ScreenSharingStartedEvent] failed to create screen share track: ${screenShareTrackResult.getErrorOrNull()}',
-        );
-        return screenShareTrackResult;
-      }
+    await _cancelPendingBroadcast();
+    return _setTrackEnabled(
+      trackType: SfuTrackType.screenShare,
+      enabled: enabled,
+      constraints: constraints,
+    );
+  }
 
-      _startListeningToScreenShareStarted(
-        screenShareTrackResult.getDataOrNull()!,
-      );
+  /// Creates the screen share track of an iOS broadcast at once, and
+  /// publishes it when the broadcast extension starts.
+  ///
+  /// Runs as the screen share's single flight. A broadcast that was created
+  /// but never started is cancelled first.
+  Future<Result<RtcLocalTrack>> _startBroadcastShare(
+    ScreenShareConstraints constraints,
+  ) {
+    return _publisher.singleFlight(SfuTrackType.screenShare, () async {
+      await _cancelPendingBroadcast();
 
-      return Future.value(
-        Result.success(screenShareTrackResult.getDataOrNull()!),
-      );
-    } else {
-      await _screenSharingStartedSubscription?.cancel();
-      return _setTrackEnabled(
-        trackType: SfuTrackType.screenShare,
-        enabled: enabled,
+      final created = await _trackAcquirer.createScreenShareTrack(
         constraints: constraints,
       );
-    }
+      if (created is! Success<RtcLocalScreenShareTrack>) {
+        _logger.e(
+          () =>
+              '[startBroadcastShare] failed to create screen share track: '
+              '${created.getErrorOrNull()}',
+        );
+        return created;
+      }
+
+      _awaitBroadcastStart(created.data);
+      return created;
+    });
+  }
+
+  /// Publishes [track] on the first start of the broadcast, or stops it when
+  /// the broadcast stops before it ever started. Only the first of the two
+  /// counts.
+  void _awaitBroadcastStart(RtcLocalScreenShareTrack track) {
+    _pendingBroadcastTrack = track;
+    _pendingBroadcastSubscription = RtcMediaDeviceNotifier.instance
+        .nativeWebRtcEventsStream()
+        .where(
+          (it) =>
+              it is ScreenSharingStartedEvent ||
+              it is ScreenSharingStoppedEvent,
+        )
+        .take(1)
+        .listen((event) async {
+          _logger.i(() => '[awaitBroadcastStart] received: $event');
+          _pendingBroadcastSubscription = null;
+          _pendingBroadcastTrack = null;
+
+          if (event is ScreenSharingStartedEvent) {
+            await publishVideoTrack(track: track);
+          } else {
+            await track.stop();
+          }
+        });
   }
 
   Future<Result<RtcLocalTrack>> _setTrackEnabled({
@@ -319,19 +354,5 @@ extension RtcManagerTrackHelper on RtcManager {
     final message = 'Unsupported track type: ${track.runtimeType}';
     _logger.e(() => message);
     return failureWithError(message);
-  }
-
-  void _startListeningToScreenShareStarted(
-    RtcLocalTrack<ScreenShareConstraints> track,
-  ) {
-    _screenSharingStartedSubscription?.cancel();
-    _screenSharingStartedSubscription = RtcMediaDeviceNotifier.instance
-        .nativeWebRtcEventsStream()
-        .whereType<ScreenSharingStartedEvent>()
-        .listen((event) async {
-          _logger.i(() => '[ScreenSharingStartedEvent] received: $event');
-
-          await publishVideoTrack(track: track);
-        });
   }
 }
