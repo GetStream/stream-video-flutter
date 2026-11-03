@@ -23,6 +23,7 @@ import 'codecs_helper.dart';
 import 'e2ee/e2ee_mapping.dart';
 import 'e2ee/remote_track_decryptor.dart';
 import 'media/capture_dimension.dart';
+import 'media/local_track_acquirer.dart';
 import 'model/rtc_tracks_info.dart';
 import 'peer_connection.dart';
 import 'peer_connection_factory.dart';
@@ -159,36 +160,13 @@ class RtcManager extends Disposable {
   /// still creating their transceiver.
   final _pendingTransceivers = <TransceiverKey, Future<void>>{};
 
-  /// Track creations (`getUserMedia` and the publish that follows) in flight
-  /// per track type, so a double "enable" opens the camera once instead of
-  /// twice.
-  final _pendingTrackCreations =
-      <SfuTrackType, Future<Result<RtcLocalTrack>>>{};
-
-  /// Runs [create] as the single in-flight creation for [trackType], returning
-  /// the already-running one when there is one.
-  Future<Result<RtcLocalTrack>> _singleFlightCreate(
-    SfuTrackType trackType,
-    Future<Result<RtcLocalTrack>> Function() create,
-  ) {
-    final inFlight = _pendingTrackCreations[trackType];
-    if (inFlight != null) {
-      _logger.i(
-        () =>
-            '[createTrack] $trackType is already being created; '
-            'joining the in-flight request instead of acquiring media again',
-      );
-      return inFlight;
-    }
-
-    final pending = create();
-    _pendingTrackCreations[trackType] = pending;
-
-    return pending.whenComplete(() => _pendingTrackCreations.remove(trackType));
-  }
+  /// Acquires local tracks. A session without a publisher acquires none.
+  late final _trackAcquirer = LocalTrackAcquirer(
+    pcFactory: pcFactory,
+    publisherId: publisher == null ? null : publisherId,
+  );
 
   List<SfuPublishOptions> publishOptions;
-  AudioConstraints _defaultAudioConstraints = const AudioConstraints();
 
   final tracks = </*trackId*/ String, RtcTrack>{};
 
@@ -367,12 +345,12 @@ class RtcManager extends Disposable {
   Future<void> changeDefaultAudioConstraints(
     AudioConstraints constraints,
   ) async {
-    _defaultAudioConstraints = constraints;
+    _trackAcquirer.defaultAudioConstraints = constraints;
 
     // Only live tracks are cycled. An already-muted track must stay muted —
     // unmuting it here would put the user back on air behind their back, and
     // on iOS/macOS also clear the ADM mute. It picks the new constraints up
-    // from [_defaultAudioConstraints] when it is recreated on unmute.
+    // from the default audio constraints when it is recreated on unmute.
     final liveTracks = tracks.values
         .whereType<RtcLocalAudioTrack>()
         .where((it) => it.mediaTrack.enabled)
@@ -1628,7 +1606,7 @@ extension PublisherRtcManager on RtcManager {
     // A soft-muted track was never released, but it is still capturing with
     // the constraints it was created with — enabling it again would leave it
     // on the stale ones and skip the publish-options update below. So it is
-    // recreated too whenever [_defaultAudioConstraints] moved on since.
+    // recreated too whenever the default audio constraints moved on since.
     //
     // A track that is still enabled was never muted — joining with a track
     // from the lobby unmutes it straight after publishing. Recreating it would
@@ -1643,7 +1621,7 @@ extension PublisherRtcManager on RtcManager {
       final updatedTrack = await track.recreate(
         transceivers,
         mediaConstraints: track.trackType == SfuTrackType.audio
-            ? _defaultAudioConstraints
+            ? _trackAcquirer.defaultAudioConstraints
             : null,
       );
 
@@ -1672,12 +1650,12 @@ extension PublisherRtcManager on RtcManager {
   }
 
   /// Whether [track] captures with audio constraints that no longer match
-  /// [_defaultAudioConstraints].
+  /// the default audio constraints.
   bool _hasStaleAudioConstraints(RtcLocalTrack track) {
     if (track is! RtcLocalAudioTrack) return false;
 
     final current = track.mediaConstraints;
-    final next = _defaultAudioConstraints;
+    final next = _trackAcquirer.defaultAudioConstraints;
 
     return current.noiseSuppression != next.noiseSuppression ||
         current.echoCancellation != next.echoCancellation ||
@@ -1685,86 +1663,6 @@ extension PublisherRtcManager on RtcManager {
         current.highPassFilter != next.highPassFilter ||
         current.typingNoiseDetection != next.typingNoiseDetection ||
         current.channelCount != next.channelCount;
-  }
-
-  Future<Result<RtcLocalAudioTrack>> createAudioTrack({
-    AudioConstraints? constraints,
-  }) async {
-    _logger.d(() => '[createAudioTrack] constraints: ${constraints?.toMap()}');
-
-    if (publisher == null || publisherId == null) {
-      return failureWithError(
-        'Publisher is not created, cannot create audio track',
-      );
-    }
-
-    try {
-      final nativeFactory = await pcFactory.ensureNativeFactory();
-      final audioTrack = await RtcLocalTrack.audio(
-        trackIdPrefix: publisherId!,
-        constraints: constraints ?? _defaultAudioConstraints,
-        nativeFactory: nativeFactory,
-      );
-
-      return Result.success(audioTrack);
-    } catch (e, stk) {
-      _logger.e(() => '[createAudioTrack] rejected: $e');
-      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
-    }
-  }
-
-  Future<Result<RtcLocalCameraTrack>> createCameraTrack({
-    CameraConstraints constraints = const CameraConstraints(),
-  }) async {
-    _logger.d(() => '[createCameraTrack] constraints: ${constraints.toMap()}');
-
-    if (publisher == null || publisherId == null) {
-      return failureWithError(
-        'Publisher is not created, cannot create camera track',
-      );
-    }
-
-    try {
-      final nativeFactory = await pcFactory.ensureNativeFactory();
-      final videoTrack = await RtcLocalTrack.camera(
-        trackIdPrefix: publisherId!,
-        constraints: constraints,
-        nativeFactory: nativeFactory,
-      );
-
-      return Result.success(videoTrack);
-    } catch (e, stk) {
-      _logger.e(() => '[createCameraTrack] rejected: $e');
-      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
-    }
-  }
-
-  Future<Result<RtcLocalScreenShareTrack>> createScreenShareTrack({
-    ScreenShareConstraints constraints = const ScreenShareConstraints(),
-  }) async {
-    _logger.d(
-      () => '[createScreenShareTrack] constraints: ${constraints.toMap()}',
-    );
-
-    if (publisher == null || publisherId == null) {
-      return failureWithError(
-        'Publisher is not created, cannot create screen share track',
-      );
-    }
-
-    try {
-      final nativeFactory = await pcFactory.ensureNativeFactory();
-      final screenShareTrack = await RtcLocalTrack.screenShare(
-        trackIdPrefix: publisherId!,
-        constraints: constraints,
-        nativeFactory: nativeFactory,
-      );
-
-      return Result.success(screenShareTrack);
-    } catch (e, stk) {
-      _logger.e(() => '[createScreenShareTrack] rejected: $e');
-      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
-    }
   }
 
   Future<Result<RtcLocalCameraTrack>> setTrackFacingMode({
