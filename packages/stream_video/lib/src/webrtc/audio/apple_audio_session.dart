@@ -4,6 +4,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import '../../../stream_video.dart';
 import '../../errors/stream_video_exception_composer.dart';
 import '../apple_audio_route.dart';
+import 'audio_session.dart';
 
 /// The Apple audio session of a call and its audio output.
 ///
@@ -11,14 +12,20 @@ import '../apple_audio_route.dart';
 /// `Helper.selectAudioOutput`, which remembers the configuration it applied
 /// last so it can be restored.
 @internal
-class AppleAudioSession {
+class AppleAudioSession implements AudioSession {
   AppleAudioSession({
     Future<void> Function(rtc.AppleAudioConfiguration) apply =
         rtc.Helper.setAppleAudioConfiguration,
-  }) : _apply = apply;
+    Future<void> Function(String deviceId) selectAudioOutput =
+        rtc.Helper.selectAudioOutput,
+  }) : _apply = apply,
+       _selectAudioOutput = selectAudioOutput;
 
   /// Sends a configuration to the platform.
   final Future<void> Function(rtc.AppleAudioConfiguration) _apply;
+
+  /// Routes the audio to a device on the platform.
+  final Future<void> Function(String deviceId) _selectAudioOutput;
 
   rtc.AppleAudioConfiguration? _configuration;
 
@@ -26,8 +33,7 @@ class AppleAudioSession {
   @visibleForTesting
   rtc.AppleAudioConfiguration? get configuration => _configuration;
 
-  /// Applies [policy]'s Apple audio session configuration, asking for the
-  /// loudspeaker as the built-in output when [speakerOn].
+  @override
   Future<Result<None>> set({
     required AudioConfigurationPolicy policy,
     bool speakerOn = false,
@@ -50,6 +56,7 @@ class AppleAudioSession {
   /// was built with, which asks for the loudspeaker only under a policy that
   /// defaults to it. This brings back the loudspeaker the call settings or
   /// an output change asked for since.
+  @override
   Future<Result<None>> restore() async {
     final configuration = _configuration;
     if (configuration == null) return const Result.success(none);
@@ -75,8 +82,8 @@ class AppleAudioSession {
     );
   }
 
-  /// Routes the call's audio to [device].
+  @override
   Future<void> selectOutput(RtcMediaDevice device) {
-    return rtc.Helper.selectAudioOutput(device.id);
+    return _selectAudioOutput(device.id);
   }
 }

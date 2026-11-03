@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/webrtc/audio/apple_audio_session.dart';
+import 'package:stream_video/src/webrtc/audio/audio_session.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../fixtures/rtc_manager_fakes.dart';
@@ -59,6 +60,34 @@ void main() {
       },
     );
 
+    test('restore applies the configuration set last', () async {
+      final audioSession = session();
+
+      await audioSession.set(policy: viewer, speakerOn: true);
+      await audioSession.set(policy: viewer);
+      applied.clear();
+      await audioSession.restore();
+
+      expect(applied, [
+        viewer.getAppleConfiguration(defaultToSpeaker: false).toMap(),
+      ]);
+    });
+
+    test('a failed set keeps the configuration set before it', () async {
+      final audioSession = session();
+      await audioSession.set(policy: viewer, speakerOn: true);
+      applyError = StateError('audio session busy');
+
+      expect((await audioSession.set(policy: viewer)).isFailure, isTrue);
+
+      final earlier = viewer.getAppleConfiguration(defaultToSpeaker: true);
+      expect(audioSession.configuration?.toMap(), earlier.toMap());
+      applyError = null;
+      applied.clear();
+      await audioSession.restore();
+      expect(applied, [earlier.toMap()]);
+    });
+
     test('a failed set is reported and not remembered', () async {
       final audioSession = session();
       applyError = StateError('audio session busy');
@@ -106,18 +135,49 @@ void main() {
   });
 
   group('selectOutput', () {
+    test('routes the audio to the device', () async {
+      final selected = <String>[];
+      final audioSession = AppleAudioSession(
+        selectAudioOutput: (deviceId) async => selected.add(deviceId),
+      );
+
+      await audioSession.selectOutput(_output('bluetooth'));
+
+      expect(selected, ['bluetooth']);
+    });
+  });
+
+  group('AudioSession.forPlatform', () {
+    tearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+
+    test('is the Apple session on iOS', () {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
+
+      expect(AudioSession.forPlatform(), isA<AppleAudioSession>());
+    });
+
+    test('is the default session elsewhere', () {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+
+      expect(AudioSession.forPlatform(), isA<DefaultAudioSession>());
+    });
+  });
+
+  group('DefaultAudioSession', () {
     late FakeWebRtcPlatform platform;
 
     setUp(() => platform = FakeWebRtcPlatform()..install());
     tearDown(() => platform.uninstall());
 
-    test('routes the audio to the device', () async {
-      await AppleAudioSession().selectOutput(_output('bluetooth'));
+    test('configures nothing and still switches the output', () async {
+      const audioSession = DefaultAudioSession();
 
-      expect(
-        platform.callsOf('selectAudioOutput').single.arguments,
-        containsPair('deviceId', 'bluetooth'),
-      );
+      expect((await audioSession.set(policy: viewer)).isSuccess, isTrue);
+      expect((await audioSession.restore()).isSuccess, isTrue);
+      await audioSession.selectOutput(_output('headset'));
+
+      expect(platform.callsOf('selectAudioOutput'), hasLength(1));
+      expect(platform.callsOf('setAppleAudioConfiguration'), isEmpty);
     });
   });
 }

@@ -19,6 +19,7 @@ import '../telemetry/media_frame_reporter.dart';
 import '../telemetry/peer_connection_connect_reporter.dart';
 import 'audio/adm_microphone_mute.dart';
 import 'audio/apple_audio_session.dart';
+import 'audio/audio_session.dart';
 import 'codecs_helper.dart' as codecs;
 import 'codecs_helper.dart';
 import 'e2ee/e2ee_mapping.dart';
@@ -857,7 +858,7 @@ class RtcManager extends Disposable {
     ];
   }
 
-  final _appleAudioSession = AppleAudioSession();
+  late final AudioSession _audioSession = AudioSession.forPlatform();
 
   late final AdmMicrophoneMute _admMute = AdmMicrophoneMute.forFactory(
     pcFactory,
@@ -870,14 +871,14 @@ class RtcManager extends Disposable {
     required AudioConfigurationPolicy policy,
     bool speakerOn = false,
   }) {
-    return _appleAudioSession.set(policy: policy, speakerOn: speakerOn);
+    return _audioSession.set(policy: policy, speakerOn: speakerOn);
   }
 
   /// Re-applies the configuration last applied with
   /// [setAppleAudioConfiguration], if any.
   @internal
   Future<Result<None>> restoreAppleAudioConfiguration() {
-    return _appleAudioSession.restore();
+    return _audioSession.restore();
   }
 
   /// Syncs the ADM mute state with the local audio track, to avoid mismatches

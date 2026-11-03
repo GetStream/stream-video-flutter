@@ -119,7 +119,7 @@ extension RtcManagerTrackHelper on RtcManager {
       }
 
       // Change the audio output device for all remote audio tracks.
-      await _appleAudioSession.selectOutput(device);
+      await _audioSession.selectOutput(device);
       for (final audioTrack in audioTracks) {
         final updatedTrack = audioTrack.copyWith(audioSinkId: device.id);
         tracks[updatedTrack.trackId] = updatedTrack;

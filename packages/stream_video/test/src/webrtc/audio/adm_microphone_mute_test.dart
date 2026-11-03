@@ -68,6 +68,13 @@ void main() {
     test('holds for the microphone track only', () {
       expect(admMute.isSupported(mic()), isTrue);
       expect(admMute.isSupported(fakeCameraTrack('cam')), isFalse);
+      final screenShareAudio = fakeLocalTrack(
+        'screen-audio',
+        trackType: SfuTrackType.screenShareAudio,
+        constraints: const AudioConstraints(),
+        kind: 'audio',
+      );
+      expect(admMute.isSupported(screenShareAudio), isFalse);
     });
   });
 
@@ -108,8 +115,12 @@ void main() {
       when(pcFactory.isAppleAdmMicrophoneMuted).thenAnswer((_) async => null);
 
       await admMute.reconcile(mic());
+      await admMute.reconcile(mic(enabled: false, stopTrackOnMute: false));
 
-      verify(() => pcFactory.setAppleAdmMicrophoneMuted(false)).called(1);
+      verifyInOrder([
+        () => pcFactory.setAppleAdmMicrophoneMuted(false),
+        () => pcFactory.setAppleAdmMicrophoneMuted(true),
+      ]);
     });
 
     test('leaves the ADM alone for a track stopped on mute', () async {
@@ -117,6 +128,7 @@ void main() {
 
       await admMute.reconcile(mic(enabled: false));
 
+      verifyNever(pcFactory.isAppleAdmMicrophoneMuted);
       verifyNever(() => pcFactory.setAppleAdmMicrophoneMuted(any()));
       expect(admMuted, isTrue);
     });
