@@ -10,6 +10,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../test_helpers.dart';
 import '../call/fixtures/data.dart';
+import 'fixtures/rtc_manager_fakes.dart';
 
 class _MockTracedPeerConnection extends Mock
     implements TracedStreamPeerConnection {}
@@ -44,6 +45,8 @@ class _FakeMediaStream extends Fake implements rtc.MediaStream {
 }
 
 void main() {
+  setUpAll(registerRtcManagerFallbacks);
+
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late _MockStreamPeerConnectionFactory pcFactory;
@@ -78,6 +81,14 @@ void main() {
       pcFactory: pcFactory,
     );
   });
+
+  /// A manager that publishes on a microphone option, over the same factory.
+  RtcManager publishingManager() {
+    return RtcManagerFixture(
+      publishOptions: [publishOption(1, SfuTrackType.audio)],
+      pcFactory: pcFactory,
+    ).manager;
+  }
 
   RtcLocalAudioTrack addAudioTrack({
     required _FakeMediaStreamTrack mediaTrack,
@@ -282,32 +293,22 @@ void main() {
         // After mute → rejoin → unmute, the new session publishes a fresh
         // track instead of running unmuteTrack — the leftover ADM mute must
         // be lifted or the microphone stays silent.
-        final track = RtcLocalAudioTrack(
-          trackIdPrefix: 'test-publisher',
-          trackType: SfuTrackType.audio,
-          mediaStream: _FakeMediaStream(),
-          mediaTrack: _FakeMediaStreamTrack(kind: 'audio'),
-          mediaConstraints: const AudioConstraints(),
-        );
+        final manager = publishingManager();
 
-        final result = await rtcManager.publishAudioTrack(track: track);
+        final result = await manager.publishAudioTrack(
+          track: fakeAudioTrack('mic'),
+        );
 
         expect(result.isSuccess, isTrue);
         verify(() => pcFactory.setAppleAdmMicrophoneMuted(false)).called(1);
       });
 
       test('publishing a disabled audio track keeps the ADM mute', () async {
-        final mediaTrack = _FakeMediaStreamTrack(kind: 'audio')
-          ..enabled = false;
-        final track = RtcLocalAudioTrack(
-          trackIdPrefix: 'test-publisher',
-          trackType: SfuTrackType.audio,
-          mediaStream: _FakeMediaStream(),
-          mediaTrack: mediaTrack,
-          mediaConstraints: const AudioConstraints(),
-        );
+        final manager = publishingManager();
+        final track = fakeAudioTrack('mic');
+        fakeMediaOf(track).enabled = false;
 
-        final result = await rtcManager.publishAudioTrack(track: track);
+        final result = await manager.publishAudioTrack(track: track);
 
         expect(result.isSuccess, isTrue);
         verifyNever(() => pcFactory.setAppleAdmMicrophoneMuted(any()));
@@ -403,16 +404,9 @@ void main() {
         // publishAudioTrack defaults stopTrackOnMute to true; republishing an
         // existing track must not silently downgrade its mute strategy, or the
         // next mute would stop the track and kill speech detection.
-        final track = RtcLocalAudioTrack(
-          trackIdPrefix: 'test-publisher',
-          trackType: SfuTrackType.audio,
-          mediaStream: _FakeMediaStream(),
-          mediaTrack: _FakeMediaStreamTrack(kind: 'audio'),
-          mediaConstraints: const AudioConstraints(),
-          stopTrackOnMute: false,
-        );
+        final track = fakeAudioTrack('mic').copyWith(stopTrackOnMute: false);
 
-        final result = await rtcManager.publishTrack(track);
+        final result = await publishingManager().publishTrack(track);
 
         expect(result.isSuccess, isTrue);
         expect(result.getDataOrNull()!.stopTrackOnMute, isFalse);

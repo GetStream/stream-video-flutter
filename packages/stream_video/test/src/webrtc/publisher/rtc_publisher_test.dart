@@ -13,6 +13,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import '../fixtures/rtc_manager_fakes.dart';
 
 final _mic = publishOption(1, SfuTrackType.audio);
+final _camera = publishOption(2, SfuTrackType.video);
 
 /// An offer naming [trackId] in an audio m-section with [mid].
 String _offer({required String trackId, required String mid}) {
@@ -75,6 +76,14 @@ void main() {
       return result;
     });
   });
+
+  RtcLocalVideoTrack localCamera() => fakeLocalTrack(
+    'cam',
+    trackType: SfuTrackType.video,
+    constraints: const CameraConstraints(),
+    kind: 'video',
+    trackIdPrefix: kLocalTrackIdPrefix,
+  );
 
   RtcPublisher publisher({
     bool withPc = true,
@@ -301,6 +310,73 @@ void main() {
       ).thenAnswer((_) async => [FakeTransceiver(FakeSender(null))]);
 
       expect(await publisher().isPublisherEmpty(), isFalse);
+    });
+  });
+
+  group('audio and video share one publish path', () {
+    setUp(() {
+      when(
+        () => pc.addVideoTransceiver(
+          track: any(named: 'track'),
+          encodings: any(named: 'encodings'),
+          degradationPreference: any(named: 'degradationPreference'),
+        ),
+      ).thenAnswer((_) async => failureWithError('platform refused'));
+      addAudioAnswers = [(_) async => failureWithError('platform refused')];
+    });
+
+    for (final (kind, publish) in [
+      (
+        'audio',
+        (RtcPublisher p) =>
+            p.publishTrack(localMic()).then((r) => (r, p.tracks)),
+      ),
+      (
+        'video',
+        (RtcPublisher p) =>
+            p.publishTrack(localCamera()).then((r) => (r, p.tracks)),
+      ),
+    ]) {
+      test('a failed $kind transceiver keeps nothing', () async {
+        final rtcPublisher = publisher(publishOptions: [_mic, _camera]);
+        final published = <RtcLocalTrack>[];
+        rtcPublisher.onLocalTrackPublished = published.add;
+
+        final (result, tracks) = await publish(rtcPublisher);
+
+        expect(result.isFailure, isTrue);
+        expect(tracks, isEmpty);
+        expect(published, isEmpty);
+        expect(rtcPublisher.transceiversManager.items(), isEmpty);
+      });
+
+      test('a $kind track without a publish option fails', () async {
+        final rtcPublisher = publisher(publishOptions: []);
+
+        final (result, tracks) = await publish(rtcPublisher);
+
+        expect(result.isFailure, isTrue);
+        expect(tracks, isEmpty);
+      });
+    }
+
+    test('both stop the source and the clone of a failed publish', () async {
+      final rtcPublisher = publisher(publishOptions: [_mic, _camera]);
+      final mic = localMic();
+      final camera = localCamera();
+
+      await rtcPublisher.publishTrack(mic);
+      await rtcPublisher.publishTrack(camera);
+
+      for (final track in [mic, camera]) {
+        final media = fakeMediaOf(track);
+        expect(media.stopped, isTrue, reason: '${track.trackType}');
+        expect(
+          media.clones.single.stopped,
+          isTrue,
+          reason: '${track.trackType}',
+        );
+      }
     });
   });
 

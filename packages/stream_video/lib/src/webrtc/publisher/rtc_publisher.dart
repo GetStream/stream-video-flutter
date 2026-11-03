@@ -634,6 +634,7 @@ class RtcPublisher {
     );
   }
 
+  /// Publishes [track], keeping the `stopTrackOnMute` it carries.
   Future<Result<RtcLocalTrack>> publishTrack(RtcLocalTrack track) async {
     if (track is RtcLocalAudioTrack) {
       return publishAudioTrack(
@@ -641,7 +642,12 @@ class RtcPublisher {
         stopTrackOnMute: track.stopTrackOnMute,
       );
     }
-    if (track is RtcLocalVideoTrack) return publishVideoTrack(track: track);
+    if (track is RtcLocalVideoTrack) {
+      return publishVideoTrack(
+        track: track,
+        stopTrackOnMute: track.stopTrackOnMute,
+      );
+    }
 
     return Result.failure('Unsupported track type: ${track.runtimeType}');
   }
@@ -649,13 +655,13 @@ class RtcPublisher {
   /// Undoes the bookkeeping of a publish that registered its track and then
   /// failed.
   ///
-  /// [publishAudioTrack] and [publishVideoTrack] register [registered] before
-  /// any sender exists so the `onRenegotiationNeeded` handler can see it, and
-  /// there is no matching `unpublishTrack` when the publish never completes. Left
-  /// behind, the entry makes [getPublisherTrackByType] report a track that
-  /// never reached the SFU: the next enable takes the unmute path instead of
-  /// retrying the publish, and the camera or microphone keeps capturing for a
-  /// sender that does not exist.
+  /// [_publish] registers [registered] before any sender exists so the
+  /// `onRenegotiationNeeded` handler can see it, and there is no matching
+  /// `unpublishTrack` when the publish never completes. Left behind, the entry
+  /// makes [getPublisherTrackByType] report a track that never reached the
+  /// SFU: the next enable takes the unmute path instead of retrying the
+  /// publish, and the camera or microphone keeps capturing for a sender that
+  /// does not exist.
   ///
   /// [acquired] is the same track carrying whatever clones the publish managed
   /// to make; stopping it releases the device.
@@ -671,184 +677,150 @@ class RtcPublisher {
     await acquired.stop();
   }
 
+  /// Publishes a microphone or screen share audio track.
   Future<Result<RtcLocalAudioTrack>> publishAudioTrack({
     required RtcLocalAudioTrack track,
     bool stopTrackOnMute = true,
   }) async {
-    var audioTrack = track;
-
-    // Add publisherId to the trackIdPrefix if it's a local track.
-    if (audioTrack.trackIdPrefix == kLocalTrackIdPrefix) {
-      audioTrack = audioTrack.copyWith(trackIdPrefix: publisherId);
-    }
-
-    // Added early so the `onRenegotiationNeeded` handler of the peer
-    // connection can see it.
-    _logger.i(() => '[publishAudioTrack] track: $audioTrack');
-    tracks[audioTrack.trackId] = audioTrack;
-    var updatedTrack = audioTrack.copyWith(stopTrackOnMute: stopTrackOnMute);
-    var needsRenegotiation = false;
-
-    // Ensure a new live audio track isn't still muted by an existing ADM-level
-    // mute. ADM mute persists beyond sessions (per-call factory).
-    if (_admMute.isSupported(audioTrack) && audioTrack.mediaTrack.enabled) {
-      await _admMute.setMuted(false);
-    }
-
-    for (final option in publishOptions) {
-      if (option.trackType != audioTrack.trackType) continue;
-
-      // Create a clone of the track so each transceiver has a unique trackId
-      // in the SDP.
-      final mediaTrackClone = await audioTrack.mediaTrack.clone();
-      final trackToPublish = audioTrack.copyWith(mediaTrack: mediaTrackClone);
-
-      final sent = await _sendOnOption(
-        option,
-        trackToPublish,
-        tag: '[publishAudioTrack]',
-        trackPublishOptions: () => RtcTrackPublishOptions(
-          audioBitrateProfile: _audioBitrateProfile(),
-        ),
-      );
-
-      if (sent is! Success<bool>) {
-        await mediaTrackClone.stop();
-        await _discardFailedPublish(
-          registered: audioTrack,
-          acquired: updatedTrack,
-        );
-        return sent as Failure;
-      }
-
-      needsRenegotiation |= sent.data;
-
-      updatedTrack = updatedTrack.copyWith(
-        clonedTracks: [...updatedTrack.clonedTracks, mediaTrackClone],
-      );
-    }
-
-    if (needsRenegotiation) {
-      _forceRenegotiation('[publishAudioTrack]');
-    }
-
-    if (_isDisposing) {
-      _logger.w(
-        () =>
-            '[publishAudioTrack] disposed mid-publish; discarding '
-            '${updatedTrack.trackId}',
-      );
-      await _discardFailedPublish(
-        registered: audioTrack,
-        acquired: updatedTrack,
-      );
-      return failureWithError('RtcManager was disposed while publishing');
-    }
-
-    // Notify listeners.
-    onLocalTrackPublished?.call(updatedTrack);
-    tracks[updatedTrack.trackId] = updatedTrack;
-
+    final result = await _publish(
+      track.copyWith(stopTrackOnMute: stopTrackOnMute),
+      tag: '[publishAudioTrack]',
+      trackPublishOptions: () => RtcTrackPublishOptions(
+        audioBitrateProfile: _audioBitrateProfile(),
+      ),
+      beforeSend: _liftAdmMute,
+    );
     // Republishing restarts capture, which drops the ADM mute. No-op when the
     // ADM already matches the track being published.
-    await reconcileAdmMute();
+    if (result.isSuccess) await reconcileAdmMute();
 
-    return Result.success(updatedTrack);
+    return result.map((it) => it as RtcLocalAudioTrack);
   }
 
+  /// Publishes a camera or screen share track, announced at the size it is
+  /// captured at.
   Future<Result<RtcLocalVideoTrack>> publishVideoTrack({
     required RtcLocalVideoTrack track,
     bool stopTrackOnMute = true,
   }) async {
-    var videoTrack = track;
+    // Every clone carries the resolved size: on Android a clone has no
+    // settings, so it could not work out the capture size itself.
+    final result = await _publish(
+      track.copyWith(
+        videoDimension: _captureDimensionResolver.resolve(track),
+        stopTrackOnMute: stopTrackOnMute,
+      ),
+      tag: '[publishVideoTrack]',
+    );
 
-    // Add publisherId to the trackIdPrefix if it's a local track.
-    if (videoTrack.trackIdPrefix == kLocalTrackIdPrefix) {
-      videoTrack = videoTrack.copyWith(trackIdPrefix: publisherId);
+    return result.map((it) => it as RtcLocalVideoTrack);
+  }
+
+  /// Lifts an ADM mute left over from an earlier track, so a new live audio
+  /// track is not muted at the device. The ADM mute outlives sessions: it
+  /// belongs to the call's factory.
+  Future<void> _liftAdmMute(RtcLocalTrack track) async {
+    if (_admMute.isSupported(track) && track.mediaTrack.enabled) {
+      await _admMute.setMuted(false);
     }
+  }
+
+  /// Publishes [track] on every publish option of its type and keeps it.
+  ///
+  /// A track with the local prefix gets the publisher id. A track type
+  /// without a publish option fails, and so does a publish that cannot send
+  /// on one of them or that is still running when disposing starts: each
+  /// stops the track and keeps nothing.
+  Future<Result<RtcLocalTrack>> _publish(
+    RtcLocalTrack track, {
+    required String tag,
+    RtcTrackPublishOptions Function()? trackPublishOptions,
+    Future<void> Function(RtcLocalTrack track)? beforeSend,
+  }) async {
+    final registered = track.trackIdPrefix == kLocalTrackIdPrefix
+        ? track.copyWith(trackIdPrefix: publisherId)
+        : track;
 
     // Added early so the `onRenegotiationNeeded` handler of the peer
     // connection can see it.
-    _logger.i(() => '[publishVideoTrack] track: $videoTrack');
-    tracks[videoTrack.trackId] = videoTrack;
-    var updatedTrack = videoTrack.copyWith(
-      videoDimension: _captureDimensionResolver.resolve(videoTrack),
-      stopTrackOnMute: stopTrackOnMute,
-    );
+    _logger.i(() => '$tag track: $registered');
+    tracks[registered.trackId] = registered;
 
-    if (!publishOptions.any((o) => o.trackType == videoTrack.trackType)) {
-      _logger.w(
-        () =>
-            '[publishVideoTrack] No publish options found for track type: ${videoTrack.trackType}',
-      );
-      await _discardFailedPublish(
-        registered: videoTrack,
-        acquired: updatedTrack,
-      );
-      return failureWithError(
-        'No publish options found for track type: ${videoTrack.trackType}',
-      );
+    if (!publishOptions.any((o) => o.trackType == registered.trackType)) {
+      final message =
+          'No publish options found for track type: ${registered.trackType}';
+      _logger.w(() => '$tag $message');
+      await _discardFailedPublish(registered: registered, acquired: registered);
+      return failureWithError(message);
     }
 
+    await beforeSend?.call(registered);
+
+    final sent = await _sendClones(
+      registered,
+      tag: tag,
+      trackPublishOptions: trackPublishOptions,
+    );
+    if (sent is! Success<RtcLocalTrack>) return sent;
+    final published = sent.data;
+
+    if (_isDisposing) {
+      _logger.w(
+        () => '$tag disposed mid-publish; discarding ${published.trackId}',
+      );
+      await _discardFailedPublish(registered: registered, acquired: published);
+      return failureWithError('RtcPublisher was disposed while publishing');
+    }
+
+    onLocalTrackPublished?.call(published);
+    tracks[published.trackId] = published;
+
+    return Result.success(published);
+  }
+
+  /// Sends a clone of [registered] on the transceiver of every publish option
+  /// of its type, and returns it carrying those clones.
+  ///
+  /// Each transceiver gets a clone of its own, so each has a unique track id
+  /// in the SDP. On a failure the clones made so far and the track are
+  /// stopped and the registration is dropped.
+  Future<Result<RtcLocalTrack>> _sendClones(
+    RtcLocalTrack registered, {
+    required String tag,
+    RtcTrackPublishOptions Function()? trackPublishOptions,
+  }) async {
+    var published = registered;
     var needsRenegotiation = false;
 
     for (final option in publishOptions) {
-      if (option.trackType != videoTrack.trackType) continue;
+      if (option.trackType != registered.trackType) continue;
 
-      // Create a clone of the track so each transceiver has a unique trackId
-      // in the SDP.
-      final mediaTrackClone = await videoTrack.mediaTrack.clone();
-      // Carry the resolved size over: on Android the clone has no settings,
-      // so it could not work out the capture size itself.
-      final trackToPublish = videoTrack.copyWith(
-        mediaTrack: mediaTrackClone,
-        videoDimension: updatedTrack.videoDimension,
-      );
-
+      final clone = await registered.mediaTrack.clone();
       final sent = await _sendOnOption(
         option,
-        trackToPublish,
-        tag: '[publishVideoTrack]',
+        registered.copyWith(mediaTrack: clone),
+        tag: tag,
+        trackPublishOptions: trackPublishOptions,
       );
 
       if (sent is! Success<bool>) {
-        await mediaTrackClone.stop();
+        await clone.stop();
         await _discardFailedPublish(
-          registered: videoTrack,
-          acquired: updatedTrack,
+          registered: registered,
+          acquired: published,
         );
         return sent as Failure;
       }
 
       needsRenegotiation |= sent.data;
-
-      updatedTrack = updatedTrack.copyWith(
-        clonedTracks: [...updatedTrack.clonedTracks, mediaTrackClone],
+      published = published.copyWith(
+        clonedTracks: [...published.clonedTracks, clone],
       );
     }
 
-    if (needsRenegotiation) {
-      _forceRenegotiation('[publishVideoTrack]');
-    }
+    if (needsRenegotiation) _forceRenegotiation(tag);
 
-    if (_isDisposing) {
-      _logger.w(
-        () =>
-            '[publishVideoTrack] disposed mid-publish; discarding '
-            '${updatedTrack.trackId}',
-      );
-      await _discardFailedPublish(
-        registered: videoTrack,
-        acquired: updatedTrack,
-      );
-      return failureWithError('RtcManager was disposed while publishing');
-    }
-
-    // Notify listeners.
-    onLocalTrackPublished?.call(updatedTrack);
-    tracks[updatedTrack.trackId] = updatedTrack;
-
-    return Result.success(updatedTrack);
+    return Result.success(published);
   }
 
   /// Sends [track] on the transceiver of [option]: a new one when it has
