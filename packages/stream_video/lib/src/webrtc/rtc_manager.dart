@@ -149,6 +149,23 @@ class RtcManager extends Disposable {
 
   final tracks = </*trackId*/ String, RtcTrack>{};
 
+  /// The local tracks by track id, as an unmodifiable snapshot.
+  Map<String, RtcLocalTrack> get localTracks => Map.unmodifiable({
+    for (final MapEntry(:key, :value) in tracks.entries)
+      if (value is RtcLocalTrack) key: value,
+  });
+
+  /// The remote tracks by track id, as an unmodifiable snapshot.
+  Map<String, RtcRemoteTrack> get remoteTracks => Map.unmodifiable({
+    for (final MapEntry(:key, :value) in tracks.entries)
+      if (value is RtcRemoteTrack) key: value,
+  });
+
+  /// Marks the transceivers sending [announced] as acknowledged by the SFU.
+  void markNegotiated(Iterable<RtcTrackInfo> announced) {
+    transceiversManager.markNegotiated(announced);
+  }
+
   /// The media tracks given to the next session's manager by
   /// [handOverLocalTracks], by track id. Unpublishing a track that still holds
   /// that media track stops only this manager's clones.
@@ -224,47 +241,6 @@ class RtcManager extends Disposable {
 
   StreamSubscription<ScreenSharingStartedEvent>?
   _screenSharingStartedSubscription;
-
-  static final Map<rtc.TransceiverDirection, String> _cachedGenericSdp = {};
-
-  /// Returns a generic sdp. Results are cached since device capabilities
-  /// don't change between calls.
-  static Future<String> getGenericSdp(
-    rtc.TransceiverDirection direction, {
-    required rtc.NativePeerConnectionFactory? pcFactory,
-  }) async {
-    // Check cache first
-    if (_cachedGenericSdp.containsKey(direction)) {
-      return _cachedGenericSdp[direction]!;
-    }
-
-    final tempPC = pcFactory != null
-        ? await pcFactory.createPeerConnection({}, {})
-        : await rtc.createPeerConnection({});
-
-    await tempPC.addTransceiver(
-      kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio,
-      init: rtc.RTCRtpTransceiverInit(direction: direction),
-    );
-
-    await tempPC.addTransceiver(
-      kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeVideo,
-      init: rtc.RTCRtpTransceiverInit(direction: direction),
-    );
-
-    final offer = await tempPC.createOffer();
-    final sdp = offer.sdp;
-
-    await tempPC.dispose();
-
-    if (sdp == null) {
-      taggedLogger(tag: _tag).e(() => '[getGenericSdp] sdp is null');
-      return '';
-    }
-
-    _cachedGenericSdp[direction] = sdp;
-    return sdp;
-  }
 
   /// The last subscriber offer applied and answered, so the next one can be compared
   /// against it. Null until the first offer: a brand-new subscriber is not a

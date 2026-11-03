@@ -285,6 +285,55 @@ class StreamPeerConnectionFactory {
     );
   }
 
+  final _genericSdpByDirection = <rtc.TransceiverDirection, Future<String>>{};
+
+  /// A generic offer SDP for [direction], made on a throwaway peer connection
+  /// of this factory. Cached per direction, since the factory's capabilities
+  /// don't change; a failed or empty result is not cached.
+  Future<String> getGenericSdp(rtc.TransceiverDirection direction) {
+    return _genericSdpByDirection[direction] ??= _createGenericSdp(direction)
+        .then((sdp) {
+          if (sdp.isEmpty) _genericSdpByDirection.remove(direction);
+          return sdp;
+        })
+        .catchError((Object e, StackTrace stk) {
+          _genericSdpByDirection.remove(direction);
+          return Future<String>.error(e, stk);
+        });
+  }
+
+  Future<String> _createGenericSdp(rtc.TransceiverDirection direction) async {
+    final nativeFactory = await ensureNativeFactory();
+    final tempPC = nativeFactory != null
+        ? await nativeFactory.createPeerConnection({}, {})
+        : await rtc.createPeerConnection({});
+
+    final String? sdp;
+    try {
+      await tempPC.addTransceiver(
+        kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio,
+        init: rtc.RTCRtpTransceiverInit(direction: direction),
+      );
+
+      await tempPC.addTransceiver(
+        kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeVideo,
+        init: rtc.RTCRtpTransceiverInit(direction: direction),
+      );
+
+      final offer = await tempPC.createOffer();
+      sdp = offer.sdp;
+    } finally {
+      await tempPC.dispose();
+    }
+
+    if (sdp == null) {
+      _logger.e(() => '[getGenericSdp] sdp is null');
+      return '';
+    }
+
+    return sdp;
+  }
+
   /// Tears down the per-call factory. Must be called only after every PC the
   /// factory created has been disposed.
   Future<void> dispose() async {

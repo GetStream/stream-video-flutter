@@ -412,8 +412,12 @@ class Call {
       return;
     }
 
-    final tracks = _session?.rtcManager?.tracks;
-    if (tracks != null) {
+    final rtcManager = _session?.rtcManager;
+    if (rtcManager != null) {
+      final tracks = <String, RtcTrack>{
+        ...rtcManager.localTracks,
+        ...rtcManager.remoteTracks,
+      };
       for (final entry in tracks.entries) {
         final track = entry.value;
         if (track.isAudioTrack) {

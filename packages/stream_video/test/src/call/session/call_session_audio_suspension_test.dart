@@ -24,7 +24,7 @@ class MockRtcManager extends Mock implements RtcManager {
 
 /// Minimal [RtcTrack] implementation that records which lifecycle methods were
 /// called without requiring a real native media stack.
-class _FakeAudioTrack implements RtcTrack {
+class _FakeAudioTrack extends Fake implements RtcRemoteTrack {
   bool enabled = true;
   bool startCalled = false;
   bool stopCalled = false;
@@ -66,16 +66,14 @@ class _FakeAudioTrack implements RtcTrack {
   Future<void> start() async => startCalled = true;
 
   @override
-  Future<void> stop() async => stopCalled = true;
-
-  @override
-  RtcTrack copyWith() => this;
+  Future<void> stop({bool disposeWebAudioPlayer = true}) async =>
+      stopCalled = true;
 
   @override
   Future<ByteBuffer?> captureScreenshot() async => null;
 }
 
-class _FakeVideoTrack implements RtcTrack {
+class _FakeVideoTrack extends Fake implements RtcRemoteTrack {
   bool startCalled = false;
 
   @override
@@ -115,10 +113,7 @@ class _FakeVideoTrack implements RtcTrack {
   Future<void> start() async => startCalled = true;
 
   @override
-  Future<void> stop() async {}
-
-  @override
-  RtcTrack copyWith() => this;
+  Future<void> stop({bool disposeWebAudioPlayer = true}) async {}
 
   @override
   Future<ByteBuffer?> captureScreenshot() async => null;
@@ -218,6 +213,15 @@ CallSession _buildTestSession({
   );
 }
 
+void _stubTracks(
+  MockRtcManager rtcManager, {
+  Map<String, RtcLocalTrack> local = const {},
+  Map<String, RtcRemoteTrack> remote = const {},
+}) {
+  when(() => rtcManager.localTracks).thenReturn(local);
+  when(() => rtcManager.remoteTracks).thenReturn(remote);
+}
+
 void main() {
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -231,7 +235,7 @@ void main() {
       final track = _FakeAudioTrack()..enabled = false;
       const trackKey = 'prefix:audio';
 
-      when(() => mockRtcManager.tracks).thenReturn({trackKey: track});
+      _stubTracks(mockRtcManager, remote: {trackKey: track});
       session.rtcManager = mockRtcManager;
 
       await session.resumeSuspendedAudioTracks({
@@ -254,9 +258,7 @@ void main() {
         final mockRtcManager = MockRtcManager();
         final track = _buildLocalAudioTrack(enabled: false);
 
-        when(
-          () => mockRtcManager.tracks,
-        ).thenReturn({track.trackId: track});
+        _stubTracks(mockRtcManager, local: {track.trackId: track});
         session.rtcManager = mockRtcManager;
 
         await session.resumeSuspendedAudioTracks({
@@ -281,9 +283,7 @@ void main() {
         final mockRtcManager = MockRtcManager();
         final track = _buildLocalAudioTrack(enabled: false);
 
-        when(
-          () => mockRtcManager.tracks,
-        ).thenReturn({track.trackId: track});
+        _stubTracks(mockRtcManager, local: {track.trackId: track});
         session.rtcManager = mockRtcManager;
 
         await session.resumeSuspendedAudioTracks({
@@ -300,7 +300,7 @@ void main() {
       final track = _FakeAudioTrack();
       const trackKey = 'prefix:audio';
 
-      when(() => mockRtcManager.tracks).thenReturn({trackKey: track});
+      _stubTracks(mockRtcManager, remote: {trackKey: track});
       session.rtcManager = mockRtcManager;
 
       await session.resumeSuspendedAudioTracks({
@@ -324,9 +324,7 @@ void main() {
         final mockRtcManager = MockRtcManager();
         final track = _buildLocalAudioTrack(enabled: false);
 
-        when(
-          () => mockRtcManager.tracks,
-        ).thenReturn({track.trackId: track});
+        _stubTracks(mockRtcManager, local: {track.trackId: track});
         session.rtcManager = mockRtcManager;
 
         await session.resumeSuspendedAudioTracks({
@@ -350,9 +348,7 @@ void main() {
         final mockRtcManager = MockRtcManager();
         final track = _buildLocalAudioTrack(enabled: false);
 
-        when(
-          () => mockRtcManager.tracks,
-        ).thenReturn({track.trackId: track});
+        _stubTracks(mockRtcManager, local: {track.trackId: track});
         session.rtcManager = mockRtcManager;
 
         await session.resumeSuspendedAudioTracks({
@@ -369,7 +365,7 @@ void main() {
       final track = _FakeAudioTrack()..enabled = false;
       const trackKey = 'prefix:audio';
 
-      when(() => mockRtcManager.tracks).thenReturn({trackKey: track});
+      _stubTracks(mockRtcManager, remote: {trackKey: track});
       session.rtcManager = mockRtcManager;
 
       await session.resumeSuspendedAudioTracks({
@@ -386,7 +382,7 @@ void main() {
       final track = _FakeAudioTrack()..enabled = false;
 
       // Track is in the rtcManager but NOT in priorStates.
-      when(() => mockRtcManager.tracks).thenReturn({'prefix:audio': track});
+      _stubTracks(mockRtcManager, remote: {'prefix:audio': track});
       session.rtcManager = mockRtcManager;
 
       await session.resumeSuspendedAudioTracks({}); // empty prior states
@@ -403,7 +399,7 @@ void main() {
         final videoTrack = _FakeVideoTrack();
         const trackKey = 'fake-video:video';
 
-        when(() => mockRtcManager.tracks).thenReturn({trackKey: videoTrack});
+        _stubTracks(mockRtcManager, remote: {trackKey: videoTrack});
         session.rtcManager = mockRtcManager;
 
         await session.resumeSuspendedAudioTracks({
@@ -417,6 +413,31 @@ void main() {
         );
       },
     );
+
+    test('resumes local and remote audio tracks alike', () async {
+      final session = _buildTestSession(
+        callStateManager: _stateManagerWithLocalAudio(enabled: true),
+      );
+      final mockRtcManager = MockRtcManager();
+      final local = _buildLocalAudioTrack(enabled: false);
+      final remote = _FakeAudioTrack()..enabled = false;
+      const remoteKey = 'prefix:audio';
+
+      _stubTracks(
+        mockRtcManager,
+        local: {local.trackId: local},
+        remote: {remoteKey: remote},
+      );
+      session.rtcManager = mockRtcManager;
+
+      await session.resumeSuspendedAudioTracks({
+        local.trackId: SuspendedTrackState.wasEnabled,
+        remoteKey: SuspendedTrackState.wasEnabled,
+      });
+
+      expect(local.mediaTrack.enabled, isTrue);
+      expect(remote.enabled, isTrue);
+    });
 
     test('does nothing when rtcManager is null', () async {
       final session = _buildTestSession();
@@ -440,12 +461,15 @@ void main() {
       final ignoredTrack = _FakeAudioTrack()
         ..enabled = false; // not in priorStates
 
-      when(() => mockRtcManager.tracks).thenReturn({
-        'track1:audio': wasEnabledTrack,
-        'track2:audio': neverStartedTrack,
-        'track3:audio': wasDisabledTrack,
-        'track4:audio': ignoredTrack,
-      });
+      _stubTracks(
+        mockRtcManager,
+        remote: {
+          'track1:audio': wasEnabledTrack,
+          'track2:audio': neverStartedTrack,
+          'track3:audio': wasDisabledTrack,
+          'track4:audio': ignoredTrack,
+        },
+      );
       session.rtcManager = mockRtcManager;
 
       await session.resumeSuspendedAudioTracks({

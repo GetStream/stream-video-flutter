@@ -345,8 +345,10 @@ void registerRtcManagerFallbacks() {
 
 /// Stands in for the native side of `stream_webrtc_flutter`, answering the
 /// method calls the media paths make on the VM: `getUserMedia`,
-/// `getDisplayMedia`, `trackClone`, `mediaStreamTrackSwitchCamera` and
-/// `getSources`. Everything else answers null.
+/// `getDisplayMedia`, `trackClone`, `mediaStreamTrackSwitchCamera`,
+/// `getSources`, and `createPeerConnection`, `addTransceiver` and
+/// `createOffer` for a throwaway peer connection. Everything else answers
+/// null.
 class FakeWebRtcPlatform {
   static const _methods = MethodChannel('FlutterWebRTC.Method');
   static const _events = EventChannel('FlutterWebRTC.Event');
@@ -436,6 +438,13 @@ class FakeWebRtcPlatform {
         return switchesToFrontCamera;
       case 'getSources':
         return {'sources': sources};
+      case 'createPeerConnection':
+        return {'peerConnectionId': 'pc-${_nextId++}'};
+      case 'addTransceiver':
+        return _transceiver(call);
+      case 'createOffer':
+        final peerConnectionId = (call.arguments as Map)['peerConnectionId'];
+        return {'sdp': 'v=0 $peerConnectionId', 'type': 'offer'};
       default:
         return null;
     }
@@ -456,6 +465,36 @@ class FakeWebRtcPlatform {
       'videoTracks': [
         if (video != null && video != false) _track('video-$id', kind: 'video'),
       ],
+    };
+  }
+
+  Map<String, Object?> _transceiver(MethodCall call) {
+    final arguments = call.arguments as Map;
+    final init = arguments['transceiverInit'] as Map?;
+    final kind = arguments['mediaType'] == 'audio' ? 'audio' : 'video';
+    const rtpParameters = {
+      'encodings': <Object?>[],
+      'headerExtensions': <Object?>[],
+      'codecs': <Object?>[],
+      'rtcp': {'cname': '', 'reducedSize': false},
+    };
+    final id = _nextId++;
+
+    return {
+      'transceiverId': 'transceiver-$id',
+      'direction': init?['direction'] ?? 'sendrecv',
+      'mid': '',
+      'sender': {
+        'senderId': 'sender-$id',
+        'track': <String, Object?>{},
+        'rtpParameters': rtpParameters,
+        'ownsTrack': false,
+      },
+      'receiver': {
+        'receiverId': 'receiver-$id',
+        'track': _track('receiver-track-$id', kind: kind),
+        'rtpParameters': rtpParameters,
+      },
     };
   }
 

@@ -296,15 +296,12 @@ class CallSession extends Disposable {
 
       _logger.v(() => '[start] sfu connected');
 
-      final genericSdpFactory = await rtcManagerFactory.pcFactory
-          .ensureNativeFactory();
-      final subscriberSdp = await RtcManager.getGenericSdp(
+      final pcFactory = rtcManagerFactory.pcFactory;
+      final subscriberSdp = await pcFactory.getGenericSdp(
         rtc.TransceiverDirection.RecvOnly,
-        pcFactory: genericSdpFactory,
       );
-      final publisherSdp = await RtcManager.getGenericSdp(
+      final publisherSdp = await pcFactory.getGenericSdp(
         rtc.TransceiverDirection.SendOnly,
-        pcFactory: genericSdpFactory,
       );
 
       _logger.v(
@@ -544,15 +541,12 @@ class CallSession extends Disposable {
 
       _tracer.trace(TraceTag.fastReconnect, reconnectDetails.toJson());
 
-      final genericSdpFactory = await rtcManagerFactory.pcFactory
-          .ensureNativeFactory();
-      final subscriberSdp = await RtcManager.getGenericSdp(
+      final pcFactory = rtcManagerFactory.pcFactory;
+      final subscriberSdp = await pcFactory.getGenericSdp(
         rtc.TransceiverDirection.RecvOnly,
-        pcFactory: genericSdpFactory,
       );
-      final publisherSdp = await RtcManager.getGenericSdp(
+      final publisherSdp = await pcFactory.getGenericSdp(
         rtc.TransceiverDirection.SendOnly,
-        pcFactory: genericSdpFactory,
       );
 
       Result<({SfuCallState callState, Duration fastReconnectDeadline})?>?
@@ -650,9 +644,7 @@ class CallSession extends Disposable {
         }
       }
 
-      final remoteTracks = rtcManager!.tracks.values
-          .whereType<RtcRemoteTrack>()
-          .toList();
+      final remoteTracks = rtcManager!.remoteTracks.values;
 
       for (final track in remoteTracks) {
         await _onRemoteTrackReceived(rtcManager!.subscriber, track);
@@ -1312,7 +1304,7 @@ class CallSession extends Disposable {
           }
         }
 
-        rtcManager?.transceiversManager.markNegotiated(tracksInfo);
+        rtcManager?.markNegotiated(tracksInfo);
 
         return const Result.success(null);
       } catch (e, stk) {
@@ -1437,9 +1429,13 @@ class CallSession extends Disposable {
   Future<void> resumeSuspendedAudioTracks(
     Map<String, SuspendedTrackState> priorStates,
   ) async {
-    final tracks = rtcManager?.tracks;
-    if (tracks == null) return;
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) return;
 
+    final tracks = <String, RtcTrack>{
+      ...rtcManager.localTracks,
+      ...rtcManager.remoteTracks,
+    };
     for (final entry in tracks.entries) {
       final track = entry.value;
       if (!track.isAudioTrack) continue;
