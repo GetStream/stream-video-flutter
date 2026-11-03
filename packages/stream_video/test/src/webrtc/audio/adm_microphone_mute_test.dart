@@ -1,13 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_video/src/webrtc/audio/apple_adm_mute.dart';
+import 'package:stream_video/src/webrtc/audio/adm_microphone_mute.dart';
+import 'package:stream_video/src/webrtc/audio/apple_adm_microphone_mute.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../fixtures/rtc_manager_fakes.dart';
 
 void main() {
   late MockPcFactory pcFactory;
-  late AppleAdmMute admMute;
+  late AppleAdmMicrophoneMute admMute;
   bool? admMuted;
 
   setUp(() {
@@ -20,7 +21,7 @@ void main() {
       admMuted = invocation.positionalArguments.first as bool;
     });
     when(pcFactory.isAppleAdmMicrophoneMuted).thenAnswer((_) async => admMuted);
-    admMute = AppleAdmMute(pcFactory);
+    admMute = AppleAdmMicrophoneMute(pcFactory);
   });
 
   /// A microphone track, live when [enabled], muted by stopping it when
@@ -33,16 +34,40 @@ void main() {
     return track;
   }
 
-  group('isSupported', () {
-    test('holds for a microphone track when the factory supports it', () {
-      expect(admMute.isSupported(mic()), isTrue);
-      expect(admMute.isSupported(fakeCameraTrack('cam')), isFalse);
+  group('forFactory', () {
+    test('picks the Apple ADM mute when the factory supports it', () {
+      expect(
+        AdmMicrophoneMute.forFactory(pcFactory),
+        isA<AppleAdmMicrophoneMute>(),
+      );
     });
 
-    test('never holds when the factory does not support it', () {
+    test('picks no ADM mute when the factory does not support it', () {
       when(() => pcFactory.isAppleAdmMicrophoneMuteSupported).thenReturn(false);
 
-      expect(admMute.isSupported(mic()), isFalse);
+      expect(
+        AdmMicrophoneMute.forFactory(pcFactory),
+        isA<NoAdmMicrophoneMute>(),
+      );
+    });
+  });
+
+  group('NoAdmMicrophoneMute', () {
+    test('supports no track and does nothing', () async {
+      const none = NoAdmMicrophoneMute();
+
+      expect(none.isSupported(mic()), isFalse);
+      await none.setMuted(true);
+      await none.reconcile(mic());
+      expect(await none.isMuted(), isNull);
+      verifyNever(() => pcFactory.setAppleAdmMicrophoneMuted(any()));
+    });
+  });
+
+  group('AppleAdmMicrophoneMute.isSupported', () {
+    test('holds for the microphone track only', () {
+      expect(admMute.isSupported(mic()), isTrue);
+      expect(admMute.isSupported(fakeCameraTrack('cam')), isFalse);
     });
   });
 
@@ -96,12 +121,10 @@ void main() {
       expect(admMuted, isTrue);
     });
 
-    test('does nothing without a track or ADM support', () async {
+    test('does nothing without a track or for a camera track', () async {
       admMuted = true;
       await admMute.reconcile(null);
-
-      when(() => pcFactory.isAppleAdmMicrophoneMuteSupported).thenReturn(false);
-      await admMute.reconcile(mic());
+      await admMute.reconcile(fakeCameraTrack('cam'));
 
       verifyNever(() => pcFactory.setAppleAdmMicrophoneMuted(any()));
     });

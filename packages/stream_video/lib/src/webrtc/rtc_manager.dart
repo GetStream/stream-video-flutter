@@ -17,7 +17,7 @@ import '../sfu/data/models/sfu_video_sender.dart';
 import '../telemetry/client_event_types.dart';
 import '../telemetry/media_frame_reporter.dart';
 import '../telemetry/peer_connection_connect_reporter.dart';
-import 'audio/apple_adm_mute.dart';
+import 'audio/adm_microphone_mute.dart';
 import 'audio/apple_audio_session.dart';
 import 'codecs_helper.dart' as codecs;
 import 'codecs_helper.dart';
@@ -859,7 +859,9 @@ class RtcManager extends Disposable {
 
   final _appleAudioSession = AppleAudioSession();
 
-  late final _appleAdmMute = AppleAdmMute(pcFactory);
+  late final AdmMicrophoneMute _admMute = AdmMicrophoneMute.forFactory(
+    pcFactory,
+  );
 
   /// Applies [policy]'s Apple audio session configuration, asking for the
   /// loudspeaker as the built-in output when [speakerOn].
@@ -884,7 +886,7 @@ class RtcManager extends Disposable {
   /// No-op on platforms without ADM-level mute.
   @internal
   Future<void> reconcileAppleAdmMicrophoneMute() {
-    return _appleAdmMute.reconcile(
+    return _admMute.reconcile(
       getPublisherTrackByType(SfuTrackType.audio),
     );
   }
@@ -1131,9 +1133,8 @@ extension PublisherRtcManager on RtcManager {
 
     // Ensure a new live audio track isn't still muted by an existing ADM-level mute.
     // ADM mute persists beyond sessions (per-call factory).
-    if (_appleAdmMute.isSupported(audioTrack) &&
-        audioTrack.mediaTrack.enabled) {
-      await _appleAdmMute.setMuted(false);
+    if (_admMute.isSupported(audioTrack) && audioTrack.mediaTrack.enabled) {
+      await _admMute.setMuted(false);
     }
 
     for (final option in publishOptions) {
@@ -1683,11 +1684,11 @@ extension PublisherRtcManager on RtcManager {
     tracks[trackId] = track;
 
     final useAdmLevelMute =
-        !track.stopTrackOnMute && _appleAdmMute.isSupported(track);
+        !track.stopTrackOnMute && _admMute.isSupported(track);
 
     track.disable();
     if (useAdmLevelMute) {
-      await _appleAdmMute.setMuted(true);
+      await _admMute.setMuted(true);
     } else if (track.stopTrackOnMute) {
       // Releases the track and stops the permission indicator.
       await track.stop();
@@ -1716,8 +1717,8 @@ extension PublisherRtcManager on RtcManager {
     // leaves the ADM muted, and the recreate path below neither clears it nor
     // goes through publishAudioTrack's reconcile — which would leave a live,
     // published track with capture silenced inside the ADM.
-    if (_appleAdmMute.isSupported(track)) {
-      await _appleAdmMute.setMuted(false);
+    if (_admMute.isSupported(track)) {
+      await _admMute.setMuted(false);
     }
 
     // A soft-muted track was never released, but it is still capturing with

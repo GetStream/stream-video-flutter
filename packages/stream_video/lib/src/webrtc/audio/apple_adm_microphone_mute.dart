@@ -2,27 +2,26 @@ import 'package:meta/meta.dart';
 
 import '../../../stream_video.dart';
 import '../peer_connection_factory.dart';
+import 'adm_microphone_mute.dart';
 
-final _logger = taggedLogger(tag: 'SV:AppleAdmMute');
+final _logger = taggedLogger(tag: 'SV:AppleAdmMicrophoneMute');
 
 /// The microphone mute of the audio device module (ADM) on iOS and macOS.
 ///
-/// Muting there keeps the audio track alive while no audio is captured, the
-/// alternative to stopping the track on mute. A thin wrapper over the
-/// factory's ADM calls, which never throws: failures are logged.
+/// A thin wrapper over the factory's ADM calls, which never throws: failures
+/// are logged.
 @internal
-class AppleAdmMute {
-  AppleAdmMute(this._pcFactory);
+class AppleAdmMicrophoneMute implements AdmMicrophoneMute {
+  AppleAdmMicrophoneMute(this._pcFactory);
 
   final StreamPeerConnectionFactory _pcFactory;
 
-  /// Whether [track] can be muted in the ADM: microphone tracks on iOS and
-  /// macOS only.
+  /// Whether [track] can be muted in the ADM: the microphone track only.
+  @override
   bool isSupported(RtcLocalTrack track) =>
-      _pcFactory.isAppleAdmMicrophoneMuteSupported &&
       track.trackType == SfuTrackType.audio;
 
-  /// Mutes or unmutes the microphone in the ADM.
+  @override
   Future<void> setMuted(bool muted) async {
     try {
       await _pcFactory.setAppleAdmMicrophoneMuted(muted);
@@ -31,7 +30,7 @@ class AppleAdmMute {
     }
   }
 
-  /// Reads the ADM's own mute state, or `null` when it cannot be determined.
+  @override
   Future<bool?> isMuted() async {
     try {
       return await _pcFactory.isAppleAdmMicrophoneMuted();
@@ -46,7 +45,8 @@ class AppleAdmMute {
   ///
   /// A live track is never left muted; a disabled track that is not stopped
   /// on mute is kept muted; a track stopped on mute leaves the ADM alone.
-  /// No-op without a track or on platforms without ADM-level mute.
+  /// No-op without a track or for a track the ADM cannot mute.
+  @override
   Future<void> reconcile(RtcLocalTrack? track) async {
     if (track == null) return;
     if (!isSupported(track)) return;
