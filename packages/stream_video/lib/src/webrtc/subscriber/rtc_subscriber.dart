@@ -218,9 +218,7 @@ class RtcSubscriber {
       }),
     );
 
-    for (final updatedTrack in applied) {
-      tracks[updatedTrack.trackId] = updatedTrack;
-    }
+    applied.forEach(_keepIfHeld);
 
     for (final (trackId, error, _) in failures) {
       _logger.w(
@@ -239,11 +237,19 @@ class RtcSubscriber {
 
   /// Records [device] as the audio sink of [audioTracks], after the platform
   /// switched the audio output to it.
+  ///
+  /// A track removed in the meantime is not brought back.
   void useAudioOutput(RtcMediaDevice device, List<RtcRemoteTrack> audioTracks) {
     for (final audioTrack in audioTracks) {
-      final updatedTrack = audioTrack.copyWith(audioSinkId: device.id);
-      tracks[updatedTrack.trackId] = updatedTrack;
+      _keepIfHeld(audioTrack.copyWith(audioSinkId: device.id));
     }
+  }
+
+  /// Keeps [track] in place of the remote track with its id, unless that one
+  /// was removed while [track] was being made.
+  void _keepIfHeld(RtcRemoteTrack track) {
+    if (!tracks.containsKey(track.trackId)) return;
+    tracks[track.trackId] = track;
   }
 
   /// Stops and drops the remote track [trackId], and reports whether there
