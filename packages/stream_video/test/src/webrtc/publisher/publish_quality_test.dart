@@ -81,7 +81,7 @@ void main() {
       expect(params.encodings!.map((e) => e.maxBitrate), [null, 500, 1500]);
     });
 
-    test('a flip of active alone counts as a change', () {
+    test('an encoding whose layer is paused is deactivated', () {
       final params = _params([rtc.RTCRtpEncoding(rid: 'f')]);
 
       final changed = applyPublishQuality(
@@ -92,6 +92,19 @@ void main() {
 
       expect(changed, isTrue);
       expect(params.encodings!.single.active, isFalse);
+    });
+
+    test('activating an encoding alone counts as a change', () {
+      final params = _params([rtc.RTCRtpEncoding(rid: 'f', active: false)]);
+
+      final changed = applyPublishQuality(
+        params,
+        _sender([_layer('f')]),
+        usesSvcCodec: false,
+      );
+
+      expect(changed, isTrue);
+      expect(params.encodings!.single.active, isTrue);
     });
 
     test('simulcast deactivates an encoding whose rid matches nothing', () {
@@ -143,6 +156,19 @@ void main() {
       final encoding = params.encodings!.single;
       expect(encoding.maxBitrate, 1500);
       expect(encoding.scalabilityMode, 'L3T3_KEY');
+    });
+
+    test('SVC deactivates its encoding when every layer is paused', () {
+      final params = _params([rtc.RTCRtpEncoding(rid: 'q')]);
+
+      final changed = applyPublishQuality(
+        params,
+        _sender([_layer('q', active: false), _layer('f', active: false)]),
+        usesSvcCodec: true,
+      );
+
+      expect(changed, isTrue);
+      expect(params.encodings!.single.active, isFalse);
     });
 
     test('SVC applies the same layer to every encoding', () {

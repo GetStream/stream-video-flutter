@@ -69,7 +69,7 @@ SfuVideoLayerSetting? _layerFor(
 bool _applyLayer(rtc.RTCRtpEncoding encoding, SfuVideoLayerSetting? layer) {
   var changed = false;
 
-  final shouldActivate = layer?.active ?? false;
+  final shouldActivate = layer != null;
   if (shouldActivate != encoding.active) {
     encoding.active = shouldActivate;
     changed = true;
