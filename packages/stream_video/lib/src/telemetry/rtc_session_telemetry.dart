@@ -1,9 +1,10 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
-import '../../stream_video.dart';
+import '../models/call_cid.dart';
+import '../webrtc/model/stats/rtc_stats.dart';
+import '../webrtc/rtc_track/rtc_remote_track.dart';
 import '../webrtc/traced_peer_connection.dart';
 import 'client_event_reporter.dart';
 import 'client_event_types.dart';
@@ -72,15 +73,15 @@ class RtcSessionTelemetry {
     );
   }
 
-  /// Watches [track], which arrived in [stream], for its first frame.
-  void onRemoteTrack(RtcRemoteTrack track, rtc.MediaStream stream) {
+  /// Watches [track] for its first frame.
+  void onRemoteTrack(RtcRemoteTrack track) {
     final kind = track.mediaTrack.kind;
     if (kind == 'audio') {
       _mediaFrameReporter.onRemoteAudioTrack(trackId: track.trackId);
     } else if (kind == 'video') {
       unawaited(
         _mediaFrameReporter.onRemoteVideoTrack(
-          stream: stream,
+          stream: track.mediaStream,
           trackId: track.trackId,
         ),
       );

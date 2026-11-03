@@ -102,14 +102,19 @@ class RtcManager extends Disposable {
     this.captureDimensionResolver = const CaptureDimensionResolver(),
   }) {
     subscriber.onTrack = _onRemoteTrack;
-    _telemetry = _host.options.clientEventsReportingEnabled
-        ? (RtcSessionTelemetry(
-            reporter: _host.clientEventReporter,
-            callCid: callCid,
-            sfuId: sfuId,
-            retryCount: clientEventRetryCount,
-          )..attach(publisher: publisher, subscriber: subscriber))
-        : null;
+    _telemetry = _initTelemetry();
+  }
+
+  /// The client event reporting of this session, or `null` when it is off.
+  RtcSessionTelemetry? _initTelemetry() {
+    if (!_host.options.clientEventsReportingEnabled) return null;
+
+    return RtcSessionTelemetry(
+      reporter: _host.clientEventReporter,
+      callCid: callCid,
+      sfuId: sfuId,
+      retryCount: clientEventRetryCount,
+    )..attach(publisher: publisher, subscriber: subscriber);
   }
 
   final _logger = taggedLogger(tag: _tag);
@@ -356,7 +361,7 @@ class RtcManager extends Disposable {
     _logger.v(() => '[onRemoteTrack] published: ${remoteTrack.trackId}');
 
     // Telemetry: first-frame detection for remote media.
-    _telemetry?.onRemoteTrack(remoteTrack, stream);
+    _telemetry?.onRemoteTrack(remoteTrack);
   }
 
   Future<void> changeDefaultAudioConstraints(

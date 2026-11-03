@@ -1,5 +1,3 @@
-// ignore_for_file: missing_override_of_must_be_overridden
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/telemetry/client_event.dart';
@@ -151,7 +149,7 @@ void main() {
 
     test('a remote audio track reports its first frame once audio flows', () {
       final track = remoteAudio();
-      telemetry.onRemoteTrack(track, track.mediaStream);
+      telemetry.onRemoteTrack(track);
 
       telemetry.onSubscriberStats(const [
         RtcInboundRtpAudioStream(packetsReceived: 0),
@@ -174,7 +172,7 @@ void main() {
         mediaTrack: FakeMediaStreamTrack('remote-video', kind: 'video'),
       );
       telemetry
-        ..onRemoteTrack(video, video.mediaStream)
+        ..onRemoteTrack(video)
         ..onSubscriberStats(const [
           RtcInboundRtpAudioStream(packetsReceived: 5),
         ]);
@@ -193,7 +191,7 @@ void main() {
     test('nothing is reported after dispose', () {
       final track = remoteAudio();
       telemetry
-        ..onRemoteTrack(track, track.mediaStream)
+        ..onRemoteTrack(track)
         ..dispose()
         ..onSubscriberStats(const [
           RtcInboundRtpAudioStream(packetsReceived: 5),
