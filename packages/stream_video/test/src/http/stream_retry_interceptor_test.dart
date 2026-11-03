@@ -74,6 +74,7 @@ void main() {
     ResponseBody Function() response, {
     RetryPolicy? policy,
     int rpcMaxRetries = 3,
+    String method = 'GET',
   }) async {
     final dio = Dio(BaseOptions(baseUrl: 'https://example.invalid'));
     final adapter = _CountingAdapter(response);
@@ -92,7 +93,7 @@ void main() {
     ]);
 
     try {
-      await dio.get<dynamic>('/x');
+      await dio.request<dynamic>('/x', options: Options(method: method));
     } on DioException catch (_) {
       // The failure is the point; the attempt count is what is asserted.
     }
@@ -278,16 +279,86 @@ void main() {
   // failure is retried when it is about *the moment*, never when it is about
   // the request or the setup.
   group('separates a transport failure from an SDK one', () {
+    final options = RequestOptions(path: '/x');
+    DioException connectTimedOut() => DioException.connectionTimeout(
+      requestOptions: options,
+      timeout: const Duration(seconds: 10),
+    );
+    DioException receiveTimedOut() => DioException.receiveTimeout(
+      requestOptions: options,
+      timeout: const Duration(seconds: 10),
+    );
+
     test('retries a request that never reached a verdict', () async {
+      expect(await attemptsFor(() => throw receiveTimedOut()), 3);
+    });
+
+    // The server may have acted on a request that timed out, and a POST such
+    // as a ring or a reaction must not happen twice.
+    test('does not resend a POST whose response timed out', () async {
+      expect(
+        await attemptsFor(() => throw receiveTimedOut(), method: 'POST'),
+        1,
+      );
+    });
+
+    // A resent PUT can undo a newer update, and a resent DELETE can report a
+    // delete that worked as not found.
+    for (final method in ['PUT', 'DELETE']) {
+      test('does not resend a $method whose response timed out', () async {
+        expect(
+          await attemptsFor(() => throw receiveTimedOut(), method: method),
+          1,
+        );
+      });
+    }
+
+    // A native connect timeout fires before the request is written.
+    test('resends a POST whose connect timed out', () async {
+      expect(
+        await attemptsFor(() => throw connectTimedOut(), method: 'POST'),
+        3,
+      );
+    });
+
+    // On web a connect timeout only means no headers came in time, which
+    // includes a request the server received.
+    test('does not resend a POST whose connect timed out on web', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.web;
+      addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+
+      expect(
+        await attemptsFor(() => throw connectTimedOut(), method: 'POST'),
+        1,
+      );
+    });
+
+    // A timeout that is not dio's own, such as loading the token, happened
+    // before the request was sent.
+    test('resends a POST that timed out before it was sent', () async {
       expect(
         await attemptsFor(
           () => throw DioException(
             requestOptions: RequestOptions(path: '/x'),
             error: const StreamNetworkException(
-              message: 'the request timed out before the server answered',
+              message: 'the token provider timed out',
               isTimeout: true,
             ),
           ),
+          method: 'POST',
+        ),
+        3,
+      );
+    });
+
+    test('resends a POST whose connection dropped', () async {
+      expect(
+        await attemptsFor(
+          () => throw DioException(
+            requestOptions: RequestOptions(path: '/x'),
+            error: const StreamNetworkException(message: 'connection reset'),
+          ),
+          method: 'POST',
         ),
         3,
       );

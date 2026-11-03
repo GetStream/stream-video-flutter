@@ -100,6 +100,7 @@
 - Added `LeaveInitiator`, who or what made a call leave.
 - `DisconnectReason.left({initiator, message})` says who made a call leave and why; pass it to `Call.leave`. `Call.reject` takes an `initiator` too. A `leave()` without a reason reports `LeaveInitiator.unknown`; `StreamLeaveCallButton` reports `user`.
 - `Call.end` takes an `initiator`, and the call disconnects with a `DisconnectReasonEnded` that carries it and the `reason` given, so an end this side made can be told apart from one from elsewhere.
+- Added `RetryConfig.rpcTimeout`, how long a coordinator request may wait to connect and then for its response (10 seconds by default).
 
 ### 🔄 Changed
 
@@ -133,6 +134,7 @@
 - Safari and other WebKit browsers always play remote audio on the system default output; `Call.checkIfAudioOutputChangeSupported` returns false there.
 - A dropped SFU connection starts reconnecting within two seconds.
 - Call stats keep being reported when a peer connection stops answering for its stats.
+- Coordinator requests that get no response now time out, so a reconnect attempt whose join hangs ends and the next one starts. A timed-out request that changes something, such as a ring or a reaction, is not sent again.
 - The outgoing call screen shows the camera preview every time the call settings turn the camera on, not only sometimes. `getOrCreate` and `get` now apply the call settings to `connectOptions` before they return.
 - Cancelling an outgoing call while its camera preview is on no longer crashes the app on Android. A track handed over through `TrackOption.provided` that the call never adopted is now stopped before the call's peer connection factory is disposed.
 - Connecting while the coordinator socket is dropped reconnects that socket instead of opening a second one.
