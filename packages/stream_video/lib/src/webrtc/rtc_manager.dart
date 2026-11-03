@@ -11,12 +11,10 @@ import '../call/state/call_state_notifier.dart';
 import '../call/stats/trace_tag.dart';
 import '../errors/stream_video_exception_composer.dart';
 import '../errors/track_missing_exception.dart';
+import '../telemetry/rtc_session_telemetry.dart';
 import '../sfu/data/models/sfu_model_parser.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
 import '../sfu/data/models/sfu_video_sender.dart';
-import '../telemetry/client_event_types.dart';
-import '../telemetry/media_frame_reporter.dart';
-import '../telemetry/peer_connection_connect_reporter.dart';
 import 'audio/adm_microphone_mute.dart';
 import 'audio/ios_audio_session.dart';
 import 'audio/audio_session.dart';
@@ -104,7 +102,14 @@ class RtcManager extends Disposable {
     this.captureDimensionResolver = const CaptureDimensionResolver(),
   }) {
     subscriber.onTrack = _onRemoteTrack;
-    _initClientEventReporting();
+    _telemetry = _host.options.clientEventsReportingEnabled
+        ? (RtcSessionTelemetry(
+            reporter: _host.clientEventReporter,
+            callCid: callCid,
+            sfuId: sfuId,
+            retryCount: clientEventRetryCount,
+          )..attach(publisher: publisher, subscriber: subscriber))
+        : null;
   }
 
   final _logger = taggedLogger(tag: _tag);
@@ -122,9 +127,8 @@ class RtcManager extends Disposable {
   /// Works out the size a local video track is encoded at.
   final CaptureDimensionResolver captureDimensionResolver;
 
-  PeerConnectionConnectReporter? _publisherConnectReporter;
-  PeerConnectionConnectReporter? _subscriberConnectReporter;
-  MediaFrameReporter? _mediaFrameReporter;
+  /// Client event reporting for this session, or `null` when it is off.
+  late final RtcSessionTelemetry? _telemetry;
 
   final StreamPeerConnectionFactory pcFactory;
 
@@ -226,51 +230,9 @@ class RtcManager extends Disposable {
   OnLocalTrackPublished? onLocalTrackPublished;
   OnRemoteTrackReceived? onRemoteTrackReceived;
 
-  void _initClientEventReporting() {
-    if (!_host.options.clientEventsReportingEnabled) return;
-
-    final reporter = _host.clientEventReporter;
-
-    _mediaFrameReporter = MediaFrameReporter(
-      reporter: reporter,
-      callCid: callCid,
-      sfuId: sfuId,
-    );
-
-    _subscriberConnectReporter = PeerConnectionConnectReporter(
-      reporter: reporter,
-      callCid: callCid,
-      role: ClientEventPeerConnectionRole.subscribe,
-      sfuId: sfuId,
-      retryCount: clientEventRetryCount,
-    );
-
-    subscriber
-      ..onIceConnectionStateUpdated =
-          _subscriberConnectReporter!.onIceConnectionState
-      ..onConnectionStateUpdated =
-          _subscriberConnectReporter!.onConnectionState;
-
-    final pub = publisher;
-    if (pub != null) {
-      _publisherConnectReporter = PeerConnectionConnectReporter(
-        reporter: reporter,
-        callCid: callCid,
-        role: ClientEventPeerConnectionRole.publish,
-        sfuId: sfuId,
-        retryCount: clientEventRetryCount,
-      );
-      pub
-        ..onIceConnectionStateUpdated =
-            _publisherConnectReporter!.onIceConnectionState
-        ..onConnectionStateUpdated =
-            _publisherConnectReporter!.onConnectionState;
-    }
-  }
-
   /// Feeds the subscriber's periodic WebRTC [stats] to first-frame telemetry
   void onSubscriberStats(List<RtcStats> stats) {
-    _mediaFrameReporter?.onSubscriberStats(stats);
+    _telemetry?.onSubscriberStats(stats);
   }
 
   StreamSubscription<ScreenSharingStartedEvent>?
@@ -394,19 +356,7 @@ class RtcManager extends Disposable {
     _logger.v(() => '[onRemoteTrack] published: ${remoteTrack.trackId}');
 
     // Telemetry: first-frame detection for remote media.
-    final frameReporter = _mediaFrameReporter;
-    if (frameReporter != null) {
-      if (track.kind == 'audio') {
-        frameReporter.onRemoteAudioTrack(trackId: remoteTrack.trackId);
-      } else if (track.kind == 'video') {
-        unawaited(
-          frameReporter.onRemoteVideoTrack(
-            stream: stream,
-            trackId: remoteTrack.trackId,
-          ),
-        );
-      }
-    }
+    _telemetry?.onRemoteTrack(remoteTrack, stream);
   }
 
   Future<void> changeDefaultAudioConstraints(
@@ -771,10 +721,7 @@ class RtcManager extends Disposable {
     onLocalTrackPublished = null;
     onRemoteTrackReceived = null;
 
-    // Fail any peer-connection attempt that never finished connecting.
-    _publisherConnectReporter?.abortInFlight();
-    _subscriberConnectReporter?.abortInFlight();
-    _mediaFrameReporter?.dispose();
+    _telemetry?.dispose();
 
     await Future.wait([
       if (publisher != null)
