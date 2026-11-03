@@ -61,7 +61,7 @@ class _RecordingReporter extends Fake implements ClientEventReporter {
   }
 }
 
-/// The connection state callbacks [attach] set on [pc].
+/// The connection state callbacks `attach` set on [pc].
 ({
   void Function(rtc.RTCIceConnectionState) ice,
   void Function(rtc.RTCPeerConnectionState) connection,
@@ -77,6 +77,8 @@ _callbacksOf(MockTracedPeerConnection pc) {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late _RecordingReporter reporter;
   late RtcSessionTelemetry telemetry;
   late MockTracedPeerConnection publisher;
@@ -160,6 +162,24 @@ void main() {
         RtcInboundRtpAudioStream(packetsReceived: 5),
       ]);
       expect(reporter.events, [ClientEventStage.firstAudioFrame]);
+    });
+
+    test('a remote video track is not taken for audio', () {
+      final platform = FakeWebRtcPlatform()..install();
+      addTearDown(platform.uninstall);
+      final video = RtcRemoteTrack(
+        trackIdPrefix: 'other-participant',
+        trackType: SfuTrackType.video,
+        mediaStream: FakeMediaStream(),
+        mediaTrack: FakeMediaStreamTrack('remote-video', kind: 'video'),
+      );
+      telemetry
+        ..onRemoteTrack(video, video.mediaStream)
+        ..onSubscriberStats(const [
+          RtcInboundRtpAudioStream(packetsReceived: 5),
+        ]);
+
+      expect(reporter.events, isEmpty);
     });
 
     test('stats report nothing without a remote audio track', () {
