@@ -34,7 +34,7 @@ branches off `v2` instead of in the stack, as long as T11 waits for all of them.
 | 6 | T6 | `refactor/flu-1052-capture-dimension` | [#1549](https://github.com/GetStream/stream-video-flutter/pull/1549) |
 | 7 | T7 | `refactor/flu-1053-apple-audio` | [#1551](https://github.com/GetStream/stream-video-flutter/pull/1551) |
 | 8 | T8 | `refactor/flu-1054-remote-track-decryptor` | [#1554](https://github.com/GetStream/stream-video-flutter/pull/1554) |
-| 9 | T9 | `refactor/flu-1055-rtc-session-telemetry` | |
+| 9 | T9 | `refactor/flu-1055-rtc-session-telemetry` | [#1555](https://github.com/GetStream/stream-video-flutter/pull/1555) |
 | 10 | T10 | `refactor/flu-1056-local-track-acquirer` | |
 | 11 | T11 | `refactor/flu-1057-rtc-subscriber` | |
 | 12 | T12 | `refactor/flu-1058-rtc-publisher` | |
