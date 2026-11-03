@@ -97,6 +97,12 @@ typedef VideoSettingsResponseCameraFacingEnum = CameraFacing;
 @Deprecated('Use WSAuthMessageProducts instead.')
 typedef WSAuthMessageProductsEnum = WSAuthMessageProducts;
 
+@Deprecated('Use FeatureActivationMode instead.')
+typedef EncryptionSettingsRequestModeEnum = FeatureActivationMode;
+@Deprecated('Use FeatureActivationMode instead.')
+typedef EncryptionSettingsResponseModeEnum = FeatureActivationMode;
+@Deprecated('Use CallRecordingType instead.')
+typedef VideoEventRecordingTypeEnum = CallRecordingType;
 @Deprecated('Use int instead.')
 typedef IngressAudioEncodingOptionsRequestChannelsEnum = int;
 @Deprecated('Use int instead.')

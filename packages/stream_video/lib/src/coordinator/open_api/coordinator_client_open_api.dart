@@ -1135,7 +1135,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         startTranscriptionRequest: open.StartTranscriptionRequest(
           transcriptionExternalStorage: transcriptionExternalStorage,
           enableClosedCaptions: enableClosedCaptions,
-          language: language?.toStartTranscriptionDto(),
+          language: language?.toOpenDto(),
         ),
       );
 
@@ -1213,7 +1213,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         startClosedCaptionsRequest: open.StartClosedCaptionsRequest(
           enableTranscription: enableTranscription,
           externalStorage: transcriptionExternalStorage,
-          language: language?.toStartClosedCaptionsDto(),
+          language: language?.toOpenDto(),
         ),
       );
 

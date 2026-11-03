@@ -21,7 +21,7 @@
 - Generated enum types have no `fromJson`/`toJson`; build one with its constructor, e.g. `TranscriptionLanguage('en')`.
 - The generated `AutomodMode.aI` is renamed `AutomodMode.ai`.
 - The generated `ConnectedEvent` and `ConnectionErrorEvent` are removed.
-- The ingress source `fps` and audio `channels` are `int`s, so `StreamIngressSourceFps.toOpenDto()` and `IngressAudioChannels.toOpenDto()` return `int`; `IngressSourceRequestFpsEnum` and `IngressAudioEncodingOptionsRequestChannelsEnum` are deprecated aliases of `int`.
+- The ingress source `fps` and audio `channels` are `int`s, so `StreamIngressSourceFps.toOpenDto()` and `IngressAudioChannels.toOpenDto()` return `int`; `IngressSourceRequestFpsEnum` and `IngressAudioEncodingOptionsRequestChannelsEnum` are deprecated aliases of `int`, so their constants are gone: pass the number, e.g. `30` rather than `IngressSourceRequestFpsEnum.n30`.
 - Constructing a `CallSettingsResponse` needs `lifecycle`, and an `OwnUserResponse` needs `blockedUserIds`.
 - `CallRecording.recordingType` and the recording events' `recordingType` are a `CallRecordingType` rather than a `String`; the `CallRecording*EventRecordingTypeEnum` aliases now point at it.
 - `custom` map fields now allow null values (`Map<String, Object?>`). Code that assumed non-null values may need null handling.
@@ -78,6 +78,7 @@
 - `VideoError` is renamed to `StreamVideoException`, and `VideoErrorWithCause` to `StreamVideoExceptionWithCause`. The old names remain as deprecated typedefs, so existing code still compiles; `dart fix --apply` migrates it.
 - `ifInvisibleBy` takes a `ParticipantPriority` — a priority for one participant, higher first — instead of a `Comparator`. Pass the priority of the same name: `ifInvisibleBy(dominantSpeakerPriority)` where you passed `ifInvisibleBy(dominantSpeaker)`.
 - `DisconnectReason.callEnded()` is renamed to `DisconnectReason.nativeCallEnded()`, and `DisconnectReasonCallEnded` to `DisconnectReasonNativeCallEnded`. Only the system call UI (CallKit, Android Telecom) ending the call reports it; a backend end reports `DisconnectReasonEnded`. Its `toString()` changes from `CallEnded` to `NativeCallEnded`. The old names remain deprecated, and `dart fix --apply` migrates them.
+- `TranscriptionSettingsLanguage.toStartTranscriptionDto()` and `toStartClosedCaptionsDto()` are deprecated; they return the same value as `toOpenDto()`.
 
 ### ✅ Added
 

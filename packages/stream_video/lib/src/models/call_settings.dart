@@ -1325,13 +1325,11 @@ enum TranscriptionSettingsLanguage {
     return TranscriptionLanguage(value);
   }
 
-  TranscriptionLanguage toStartTranscriptionDto() {
-    return TranscriptionLanguage(value);
-  }
+  @Deprecated('Use toOpenDto instead.')
+  TranscriptionLanguage toStartTranscriptionDto() => toOpenDto();
 
-  TranscriptionLanguage toStartClosedCaptionsDto() {
-    return TranscriptionLanguage(value);
-  }
+  @Deprecated('Use toOpenDto instead.')
+  TranscriptionLanguage toStartClosedCaptionsDto() => toOpenDto();
 }
 
 enum RecordingType {

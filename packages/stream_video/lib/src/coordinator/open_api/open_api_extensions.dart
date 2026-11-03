@@ -237,7 +237,7 @@ extension CallSettingsExt on open.CallSettingsResponse {
         accessRequestEnabled: audio.accessRequestEnabled,
         opusDtxEnabled: audio.opusDtxEnabled,
         redundantCodingEnabled: audio.redundantCodingEnabled,
-        defaultDevice: audio.defaultDevice.toRequestDomain(),
+        defaultDevice: audio.defaultDevice.orEarpiece(),
         micDefaultOn: audio.micDefaultOn,
         speakerDefaultOn: audio.speakerDefaultOn,
         noiseCancellation: audio.noiseCancellation?.toSettingsDomain(),
@@ -247,7 +247,7 @@ extension CallSettingsExt on open.CallSettingsResponse {
         accessRequestEnabled: video.accessRequestEnabled,
         enabled: video.enabled,
         cameraDefaultOn: video.cameraDefaultOn,
-        cameraFacing: video.cameraFacing.toRequestDomain(),
+        cameraFacing: video.cameraFacing.orExternal(),
         targetResolution: video.targetResolution.toSettingsDomain(),
       ),
       encryption: StreamEncryptionSettings(
@@ -352,7 +352,7 @@ extension CallPermissionRequestPermissionsExt on CallPermission {
 }
 
 extension on open.AudioDefaultDevice {
-  AudioDefaultDevice toRequestDomain() {
+  AudioDefaultDevice orEarpiece() {
     if (this == open.AudioDefaultDevice.speaker) {
       return AudioDefaultDevice.speaker;
     } else {
@@ -362,7 +362,7 @@ extension on open.AudioDefaultDevice {
 }
 
 extension on open.CameraFacing {
-  CameraFacing toRequestDomain() {
+  CameraFacing orExternal() {
     if (this == open.CameraFacing.front) {
       return CameraFacing.front;
     } else if (this == open.CameraFacing.back) {
@@ -374,7 +374,7 @@ extension on open.CameraFacing {
 }
 
 extension on open.FeatureActivationMode {
-  FeatureActivationMode toSettingsDomain() {
+  FeatureActivationMode orDisabled() {
     if (this == open.FeatureActivationMode.autoOn) {
       return FeatureActivationMode.autoOn;
     } else if (this == open.FeatureActivationMode.available) {
@@ -421,7 +421,7 @@ extension TranscriptionLanguageExt on open.TranscriptionLanguage {
 extension on open.NoiseCancellationSettings {
   StreamNoiceCancellingSettings toSettingsDomain() {
     return StreamNoiceCancellingSettings(
-      mode: mode.toSettingsDomain(),
+      mode: mode.orDisabled(),
     );
   }
 }
