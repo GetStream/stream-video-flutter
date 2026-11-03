@@ -30,7 +30,7 @@ branches off `v2` instead of in the stack, as long as T11 waits for all of them.
 | 2 | T2 | `refactor/flu-1048-rtc-manager-media-part` | [#1544](https://github.com/GetStream/stream-video-flutter/pull/1544) |
 | 3 | T3 | `refactor/flu-1049-rtc-manager-facade` | [#1546](https://github.com/GetStream/stream-video-flutter/pull/1546) |
 | 4 | T4 | `refactor/flu-1050-publish-quality` | [#1547](https://github.com/GetStream/stream-video-flutter/pull/1547) |
-| 5 | T5 | `refactor/flu-1051-announced-tracks` | |
+| 5 | T5 | `refactor/flu-1051-announced-tracks` | [#1548](https://github.com/GetStream/stream-video-flutter/pull/1548) |
 | 6 | T6 | `refactor/flu-1052-capture-dimension` | |
 | 7 | T7 | `refactor/flu-1053-apple-audio` | |
 | 8 | T8 | `refactor/flu-1054-remote-track-decryptor` | |
