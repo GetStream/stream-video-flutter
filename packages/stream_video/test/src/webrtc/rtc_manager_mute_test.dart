@@ -138,7 +138,7 @@ void main() {
 
         // The stored track must not be flagged for recreation on unmute.
         final storedTrack = rtcManager.tracks[track.trackId];
-        expect((storedTrack! as RtcLocalTrack).stopTrackOnMute, isFalse);
+        expect(storedTrack!.stopTrackOnMute, isFalse);
       });
 
       test('unmute lifts the ADM mute and re-enables the track', () async {

@@ -234,7 +234,7 @@ void main() {
         // The new sender gets a clone of the clone the first one sends.
         expect((vp8Sent as FakeMediaStreamTrack).clones, [vp9Sent]);
 
-        final stored = fixture.manager.tracks[camera.trackId]! as RtcLocalTrack;
+        final stored = fixture.manager.tracks[camera.trackId]!;
         expect(stored.clonedTracks, [vp8Sent, vp9Sent]);
       },
     );
@@ -279,7 +279,7 @@ void main() {
 
       expect(vp8Sent.clones.single.stopped, isTrue);
       expect(fixture.manager.transceiversManager.get(_vp9), isNull);
-      final stored = fixture.manager.tracks[camera.trackId]! as RtcLocalTrack;
+      final stored = fixture.manager.tracks[camera.trackId]!;
       expect(stored.clonedTracks, [vp8Sent]);
     });
 

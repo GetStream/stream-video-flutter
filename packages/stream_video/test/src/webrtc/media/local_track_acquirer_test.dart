@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/webrtc/media/local_track_acquirer.dart';
@@ -21,84 +19,6 @@ void main() {
       publisherId: publisherId,
     );
   }
-
-  group('singleFlight', () {
-    test(
-      'joins the acquisition already in flight for the track type',
-      () async {
-        final tracks = acquirer();
-        final gate = Completer<Result<RtcLocalTrack>>();
-        var creates = 0;
-        Future<Result<RtcLocalTrack>> create() {
-          creates++;
-          return gate.future;
-        }
-
-        final first = tracks.singleFlight(SfuTrackType.video, create);
-        final second = tracks.singleFlight(SfuTrackType.video, create);
-
-        expect(creates, 1);
-        expect(tracks.inFlight(SfuTrackType.video), isNotNull);
-        expect(tracks.inFlight(SfuTrackType.audio), isNull);
-
-        gate.complete(Result.success(fakeCameraTrack('cam')));
-        expect(await first, same(await second));
-        expect(tracks.inFlight(SfuTrackType.video), isNull);
-      },
-    );
-
-    test('runs a new acquisition once the last one finished', () async {
-      final tracks = acquirer();
-      var creates = 0;
-      Future<Result<RtcLocalTrack>> create() async {
-        creates++;
-        return Result.success(fakeCameraTrack('cam-$creates'));
-      }
-
-      await tracks.singleFlight(SfuTrackType.video, create);
-      await tracks.singleFlight(SfuTrackType.video, create);
-
-      expect(creates, 2);
-    });
-
-    test('keeps track types apart', () async {
-      final tracks = acquirer();
-      final cameraGate = Completer<Result<RtcLocalTrack>>();
-      final micGate = Completer<Result<RtcLocalTrack>>();
-
-      final camera = tracks.singleFlight(
-        SfuTrackType.video,
-        () => cameraGate.future,
-      );
-      final mic = tracks.singleFlight(SfuTrackType.audio, () => micGate.future);
-
-      expect(tracks.inFlight(SfuTrackType.video), isNotNull);
-      expect(tracks.inFlight(SfuTrackType.audio), isNotNull);
-
-      cameraGate.complete(Result.success(fakeCameraTrack('cam')));
-      micGate.complete(Result.success(fakeAudioTrack('mic')));
-      expect((await camera).getDataOrNull(), isA<RtcLocalCameraTrack>());
-      expect((await mic).getDataOrNull(), isA<RtcLocalAudioTrack>());
-    });
-
-    test('a failed acquisition leaves the single flight', () async {
-      final tracks = acquirer();
-      var creates = 0;
-      Future<Result<RtcLocalTrack>> create() async {
-        creates++;
-        return failureWithError('camera busy');
-      }
-
-      expect(
-        (await tracks.singleFlight(SfuTrackType.video, create)).isFailure,
-        isTrue,
-      );
-      expect(tracks.inFlight(SfuTrackType.video), isNull);
-
-      await tracks.singleFlight(SfuTrackType.video, create);
-      expect(creates, 2);
-    });
-  });
 
   group('acquire', () {
     test('opens a track of each type with its defaults', () async {

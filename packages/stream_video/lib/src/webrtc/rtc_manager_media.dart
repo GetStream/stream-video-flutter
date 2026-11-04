@@ -212,7 +212,7 @@ extension RtcManagerTrackHelper on RtcManager {
         track == null && (!enabled || trackType != SfuTrackType.screenShare);
 
     if (awaitsCreation) {
-      final inFlight = _trackAcquirer.inFlight(trackType);
+      final inFlight = _publisher.inFlight(trackType);
       if (inFlight != null) {
         _logger.i(
           () =>
@@ -266,14 +266,14 @@ extension RtcManagerTrackHelper on RtcManager {
 
       // If the track is a screen share track, mute the audio track as well.
       if (track.trackType == SfuTrackType.screenShare) {
-        await _detachFromSenders(track.trackId);
+        await _publisher.detachFromSenders(track.trackId);
 
         final screenShareAudioTrack = getPublisherTrackByType(
           SfuTrackType.screenShareAudio,
         );
         if (screenShareAudioTrack != null) {
           await muteTrack(trackId: screenShareAudioTrack.trackId);
-          await _detachFromSenders(screenShareAudioTrack.trackId);
+          await _publisher.detachFromSenders(screenShareAudioTrack.trackId);
         }
       }
     } else {
@@ -293,24 +293,6 @@ extension RtcManagerTrackHelper on RtcManager {
     return track;
   }
 
-  /// Takes the track of [trackId] off every sender carrying it.
-  ///
-  /// For a stopped screen share. Muting leaves the ended track on the sender,
-  /// and every announce reports a sender that has a track, so a reconnect or
-  /// a migration would tell the SFU the share is still published. Sharing
-  /// again always publishes a new track, which puts one back.
-  Future<void> _detachFromSenders(String trackId) async {
-    for (final transceiver in transceiversManager.getTransceiversForTrack(
-      trackId,
-    )) {
-      try {
-        await transceiver.sender.replaceTrack(null);
-      } catch (e, stk) {
-        _logger.w(() => '[detachFromSenders] failed for $trackId: $e\n$stk');
-      }
-    }
-  }
-
   /// Acquires media for [trackType] and publishes it.
   ///
   /// Collapsed per track type: a second "enable" arriving while the first is
@@ -324,7 +306,7 @@ extension RtcManagerTrackHelper on RtcManager {
     required SfuTrackType trackType,
     MediaConstraints? constraints,
   }) {
-    return _trackAcquirer.singleFlight(
+    return _publisher.singleFlight(
       trackType,
       () => _acquireAndPublishTrack(
         trackType: trackType,

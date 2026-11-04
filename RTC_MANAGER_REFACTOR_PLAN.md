@@ -37,7 +37,7 @@ branches off `v2` instead of in the stack, as long as T11 waits for all of them.
 | 9 | T9 | `refactor/flu-1055-rtc-session-telemetry` | [#1555](https://github.com/GetStream/stream-video-flutter/pull/1555) |
 | 10 | T10 | `refactor/flu-1056-local-track-acquirer` | [#1556](https://github.com/GetStream/stream-video-flutter/pull/1556) |
 | 11 | T11 | `refactor/flu-1057-rtc-subscriber` | [#1557](https://github.com/GetStream/stream-video-flutter/pull/1557) |
-| 12 | T12 | `refactor/flu-1058-rtc-publisher` | |
+| 12 | T12 | `refactor/flu-1058-rtc-publisher` | [#1558](https://github.com/GetStream/stream-video-flutter/pull/1558) |
 | 13 | T13 | `fix/flu-1059-one-publish-path` | |
 
 - [x] 1. **T1** [FLU-1047](https://linear.app/stream/issue/FLU-1047): characterisation tests for the untested paths (M). Gates every move; pins bugs 1 to 3 of FLU-1046 as they behave today.
@@ -51,8 +51,8 @@ branches off `v2` instead of in the stack, as long as T11 waits for all of them.
 - [x] 9. **T9** [FLU-1055](https://linear.app/stream/issue/FLU-1055): telemetry wiring out (S).
 - [x] 10. **T10** [FLU-1056](https://linear.app/stream/issue/FLU-1056): local track acquisition and the single flight out (S). The publisher never opens a device after this.
 - [x] 11. **T11** [FLU-1057](https://linear.app/stream/issue/FLU-1057): `RtcSubscriber` (M). Splits the track map; `rtc_audio_api/` stays behind its two seams. Update the `RtcManager` class doc (added in T3) for what moved out.
-- [ ] 12. **T12** [FLU-1058](https://linear.app/stream/issue/FLU-1058): `RtcPublisher` (L, high risk). Verbatim; the facade ends at about 300 lines. Rewrite the `RtcManager` class doc as the facade over `RtcPublisher` and `RtcSubscriber`. Audio bitrate profile as a getter.
-- [ ] 13. **T13** [FLU-1059](https://linear.app/stream/issue/FLU-1059): one publish path and one recreate path (M, behaviour change). Fixes bugs 1 to 3 (and 6 if T12 left it); the T1 tests that pinned them are updated here. Also makes `StreamPeerConnectionFactory.getGenericSdp` throw a `StateError` naming the direction instead of returning `''`, so join and fast reconnect fail with the cause (from the review of #1546). And `RtcSubscriber.useAudioOutput` / `setAudioSink` skip a track removed while the output switch was awaited, instead of writing it back into `tracks` (from the review of #1557).
+- [x] 12. **T12** [FLU-1058](https://linear.app/stream/issue/FLU-1058): `RtcPublisher` (L, high risk). Zero behaviour change; the publish loop is split into helpers to pass the complexity gate, and the facade ends at about 520 lines, most of them forwarders. Rewrite the `RtcManager` class doc as the facade over `RtcPublisher` and `RtcSubscriber`. Audio bitrate profile as a getter.
+- [ ] 13. **T13** [FLU-1059](https://linear.app/stream/issue/FLU-1059): one publish path and one recreate path (M, behaviour change). Fixes bugs 1 to 3 (and 6 if T12 left it); the T1 tests that pinned them are updated here. Also makes `StreamPeerConnectionFactory.getGenericSdp` throw a `StateError` naming the direction instead of returning `''`, so join and fast reconnect fail with the cause (from the review of #1546). And `RtcSubscriber.useAudioOutput` / `setAudioSink` skip a track removed while the output switch was awaited, instead of writing it back into `tracks` (from the review of #1557). From the review of T12: the device switches (`flipCamera`, `setVideoInputDevice`, `setAudioInputDevice`) and the unmute recreate write their track back after an await the same way; `RtcPublisher.dispose` takes over the whole publisher share of the teardown (the disposing flag, its tracks, its callbacks), and a recreate or `_addClone` after it no longer reaches `tracks`; the disposed-while-publishing failure names `RtcPublisher`.
 
 ### After the stack
 
