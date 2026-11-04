@@ -473,6 +473,36 @@ void main() {
       expect(removed.enabled, isFalse);
     });
 
+    test(
+      'resumes the current track when one is replaced under the same id '
+      'while an earlier one resumed',
+      () async {
+        final session = _buildTestSession();
+        final mockRtcManager = MockRtcManager();
+        final first = _FakeAudioTrack();
+        final outdated = _FakeAudioTrack()..enabled = false;
+        final replacement = _FakeAudioTrack()..enabled = false;
+
+        _stubTracks(
+          mockRtcManager,
+          remote: {'first:audio': first, 'second:audio': outdated},
+        );
+        // The first track's start replaces the second one under its id.
+        first.onStart = () => when(
+          () => mockRtcManager.getTrack('second:audio'),
+        ).thenReturn(replacement);
+        session.rtcManager = mockRtcManager;
+
+        await session.resumeSuspendedAudioTracks({
+          'first:audio': SuspendedTrackState.neverStarted,
+          'second:audio': SuspendedTrackState.wasEnabled,
+        });
+
+        expect(replacement.enabled, isTrue);
+        expect(outdated.enabled, isFalse);
+      },
+    );
+
     test('does nothing when rtcManager is null', () async {
       final session = _buildTestSession();
       // rtcManager is null by default (start() was never called).

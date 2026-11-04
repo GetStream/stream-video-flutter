@@ -1436,16 +1436,16 @@ class CallSession extends Disposable {
       ...rtcManager.localTracks,
       ...rtcManager.remoteTracks,
     };
-    for (final entry in tracks.entries) {
-      final track = entry.value;
-      if (!track.isAudioTrack) continue;
-      // Gone since the snapshot was taken, while an earlier track resumed.
-      if (rtcManager.getTrack(entry.key) == null) continue;
+    for (final trackId in tracks.keys) {
+      // Read again: an earlier track's resume awaits, and meanwhile this one
+      // may have been removed or replaced under the same id.
+      final track = rtcManager.getTrack(trackId);
+      if (track == null || !track.isAudioTrack) continue;
 
-      final prior = priorStates[entry.key];
+      final prior = priorStates[trackId];
       if (prior == null) continue;
 
-      await _resumeSuspendedAudioTrack(entry.key, track, prior);
+      await _resumeSuspendedAudioTrack(trackId, track, prior);
     }
   }
 
@@ -1461,7 +1461,7 @@ class CallSession extends Disposable {
         if (_isMutedLocalMicrophoneTrack(track)) {
           _logger.d(
             () =>
-                '[resumeSuspendedAudioTracks] track ${trackId} was muted '
+                '[resumeSuspendedAudioTracks] track $trackId was muted '
                 'during the suspension, leaving disabled',
           );
           return;
@@ -1469,7 +1469,7 @@ class CallSession extends Disposable {
 
         track.enable();
         _logger.d(
-          () => '[resumeSuspendedAudioTracks] re-enabled track ${trackId}',
+          () => '[resumeSuspendedAudioTracks] re-enabled track $trackId',
         );
       case SuspendedTrackState.neverStarted:
         // For local mic tracks published during suspension, starting here
@@ -1477,7 +1477,7 @@ class CallSession extends Disposable {
         if (_isMutedLocalMicrophoneTrack(track)) {
           _logger.d(
             () =>
-                '[resumeSuspendedAudioTracks] track ${trackId} was muted '
+                '[resumeSuspendedAudioTracks] track $trackId was muted '
                 'during the suspension, leaving unstarted',
           );
           return;
@@ -1486,12 +1486,12 @@ class CallSession extends Disposable {
         await track.start();
         await applyCurrentAudioOutputDevice();
         _logger.d(
-          () => '[resumeSuspendedAudioTracks] started track ${trackId}',
+          () => '[resumeSuspendedAudioTracks] started track $trackId',
         );
       case SuspendedTrackState.wasDisabled:
         _logger.v(
           () =>
-              '[resumeSuspendedAudioTracks] track ${trackId} was '
+              '[resumeSuspendedAudioTracks] track $trackId was '
               'disabled before suspension, leaving disabled',
         );
     }
