@@ -3,7 +3,6 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../../protobuf/video/sfu/models/models.pbenum.dart' as sfu_enums;
 import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
-import '../../../models/call_client_publish_options.dart';
 import '../../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../../webrtc/model/rtc_tracks_info.dart';
 import '../../../webrtc/model/rtc_video_encoding.dart';
@@ -209,39 +208,5 @@ extension SfuSubscriptionDetailsListMapper on List<SfuSubscriptionDetails> {
         dimension: sub.dimension?.toDTO(),
       );
     }).toList();
-  }
-}
-
-extension ClientPublishOptionsMapper on ClientPublishOptions {
-  List<sfu_models.PublishOption>? getPreferredPublishOptions() {
-    if (preferredCodec == null) return null;
-
-    return [
-      sfu_models.PublishOption(
-        codec: sfu_models.Codec(
-          name: preferredCodec?.name,
-          fmtp: fmtpLine,
-        ),
-        bitrate: preferredBitrate,
-        maxSpatialLayers: maxSimulcastLayers,
-        trackType: sfu_models.TrackType.TRACK_TYPE_VIDEO,
-      ),
-    ];
-  }
-
-  List<sfu_models.SubscribeOption>? getPreferredSubscriberOptions() {
-    if (subscriberCodec == null) return null;
-
-    return [
-      sfu_models.SubscribeOption(
-        codecs: [
-          sfu_models.Codec(
-            name: subscriberCodec?.name,
-            fmtp: subscriberFmtpLine,
-          ),
-        ],
-        trackType: sfu_models.TrackType.TRACK_TYPE_VIDEO,
-      ),
-    ];
   }
 }
