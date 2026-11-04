@@ -18,14 +18,11 @@ import '../../errors/stream_video_exception_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_call_state.dart';
 import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
-import '../../sfu/data/models/sfu_subscription_details.dart';
 import '../../sfu/sfu_client.dart';
 import '../../sfu/sfu_extensions.dart';
 import '../../sfu/ws/sfu_ws.dart';
 import '../../telemetry/client_event.dart';
 import '../../telemetry/client_event_types.dart';
-import '../../utils/debounce_buffer.dart';
-import '../../webrtc/model/rtc_model_mapper_extensions.dart';
 import '../../webrtc/model/rtc_tracks_info.dart';
 import '../../webrtc/peer_connection.dart';
 import '../../webrtc/peer_connection_factory.dart';
@@ -38,9 +35,10 @@ import '../stats/trace_tag.dart';
 import '../stats/tracer.dart';
 import 'call_session_config.dart';
 
+part 'call_session_media.dart';
+
 const _tag = 'SV:CallSession';
 
-const _debounceDuration = Duration(milliseconds: 200);
 const _migrationCompleteEventTimeout = Duration(seconds: 7);
 const _publisherConnectionCheckDelay = Duration(seconds: 15);
 
@@ -62,7 +60,7 @@ class SfuSessionNotResumedException extends StreamVideoException {
       );
 }
 
-class CallSession extends Disposable {
+class CallSession extends Disposable with _CallSessionMedia {
   CallSession({
     required this.callCid,
     required this.sessionSeq,
@@ -122,6 +120,7 @@ class CallSession extends Disposable {
     _observeNetworkStatus();
   }
 
+  @override
   late final _logger = taggedLogger(tag: '$_tag-$sessionSeq');
 
   final StreamCallCid callCid;
@@ -146,6 +145,7 @@ class CallSession extends Disposable {
   final EncryptionManager? e2eeManager;
 
   final Tracer _tracer;
+  @override
   final Tracer _zonedTracer = Tracer(null);
   final CallHost _host;
 
@@ -157,8 +157,10 @@ class CallSession extends Disposable {
   final Lock _sfuEventsLock = Lock();
   final Lock _negotiationLock = Lock();
 
+  @override
   int zonedTracerSeq = 0;
 
+  @override
   RtcManager? rtcManager;
   BehaviorSubject<RtcManager>? _rtcManagerSubject;
   StreamSubscription<SfuEvent>? _eventsSubscription;
@@ -182,12 +184,6 @@ class CallSession extends Disposable {
 
   /// Whether the SFU signalling socket is connected.
   bool get isSfuConnected => sfuWS.isConnected;
-
-  late final _vvBuffer = DebounceBuffer<VisibilityChange, Result<None>>(
-    duration: _debounceDuration,
-    onBuffered: updateViewportVisibilities,
-    onCancel: () => failureWithError('UpdateViewportVisibility cancelled'),
-  );
 
   List<TraceSlice> getTrace() {
     return [_tracer.take(), _zonedTracer.take()];
@@ -816,39 +812,6 @@ class CallSession extends Disposable {
 
     await close(CloseCode.normalClosure);
     return await super.dispose();
-  }
-
-  Future<Result<None>> setLocalTrack(RtcLocalTrack track) async {
-    _logger.d(() => '[setLocalTrack] track: $track');
-
-    final rtcManager = this.rtcManager;
-    if (rtcManager == null) {
-      return failureWithError(
-        'Unable to set local track, Call not connected',
-      );
-    }
-
-    final result = await rtcManager.publishTrack(track);
-    return result.map((_) => none);
-  }
-
-  /// Gives this session's live local tracks to the session that replaces it.
-  /// See [RtcManager.handOverLocalTracks].
-  List<RtcLocalTrack> handOverLocalTracks() {
-    return rtcManager?.handOverLocalTracks() ?? const [];
-  }
-
-  RtcTrack? getTrack(String trackIdPrefix, SfuTrackType trackType) {
-    final trackId = '$trackIdPrefix:$trackType';
-    return rtcManager?.getTrack(trackId);
-  }
-
-  List<RtcTrack> getTracks(String trackIdPrefix) {
-    return [...?rtcManager?.getTracks(trackIdPrefix)];
-  }
-
-  SfuTrackType? getTrackType(String trackId) {
-    return rtcManager?.getTrack(trackId)?.trackType;
   }
 
   /// Whether the subject that holds SFU events back until `start` sets the
@@ -1509,155 +1472,6 @@ class CallSession extends Disposable {
     }
   }
 
-  Future<Result<None>> updateViewportVisibility(
-    VisibilityChange visibilityChange,
-  ) async {
-    _logger.d(
-      () => '[updateViewportVisibility] visibilityChange: $visibilityChange',
-    );
-
-    if (!_vvBuffer.isClosed) {
-      return _vvBuffer.post(visibilityChange);
-    }
-
-    //Ignore the visibility change if the buffer is closed
-    return const Result.success(none);
-  }
-
-  Future<Result<None>> updateViewportVisibilities(
-    List<VisibilityChange> visibilityChanges,
-  ) async {
-    _logger.d(
-      () => '[updateViewportVisibilities] changes: $visibilityChanges',
-    );
-    // Nothing to do here, this is handled by the UI
-    return const Result.success(none);
-  }
-
-  Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) async {
-    final rtcManager = this.rtcManager;
-    if (rtcManager == null) {
-      return const Result.failure(
-        'Unable to set speaker device, Call not connected',
-      );
-    }
-
-    final result = await rtcManager.setAudioOutputDevice(device: device);
-    return result;
-  }
-
-  Future<Result<RtcLocalTrack>> setCameraEnabled(
-    bool enabled, {
-    CameraConstraints? constraints,
-  }) async {
-    final rtcManager = this.rtcManager;
-    if (rtcManager == null) {
-      return failureWithError('Unable to set camera, Call not connected');
-    }
-
-    final result = TracerZone.run(
-      _zonedTracer,
-      ++zonedTracerSeq,
-      () async {
-        return rtcManager.setCameraEnabled(
-          enabled: enabled,
-          constraints: constraints,
-        );
-      },
-    );
-
-    return result;
-  }
-
-  Future<Result<RtcLocalTrack>> setMicrophoneEnabled(
-    bool enabled, {
-    AudioConstraints? constraints,
-    bool? stopTrackOnMute,
-  }) async {
-    final rtcManager = this.rtcManager;
-    if (rtcManager == null) {
-      return failureWithError(
-        'Unable to set microphone, Call not connected',
-      );
-    }
-
-    final result = TracerZone.run(_zonedTracer, ++zonedTracerSeq, () async {
-      return rtcManager.setMicrophoneEnabled(
-        enabled: enabled,
-        constraints: constraints,
-        stopTrackOnMute: stopTrackOnMute,
-      );
-    });
-
-    return result;
-  }
-
-  Future<Result<None>> setAudioInputDevice(RtcMediaDevice device) async {
-    final rtcManager = this.rtcManager;
-    if (rtcManager == null) {
-      return failureWithError(
-        'Unable to set audioInput, Call not connected',
-      );
-    }
-
-    final result = await rtcManager.setAudioInputDevice(device: device);
-    return result.map((_) => none);
-  }
-
-  Future<Result<RtcLocalTrack>> setScreenShareEnabled(
-    bool enabled, {
-    ScreenShareConstraints? constraints,
-  }) async {
-    final rtcManager = this.rtcManager;
-    if (rtcManager == null) {
-      return failureWithError(
-        'Unable to set ScreenShare, Call not connected',
-      );
-    }
-
-    final result = await rtcManager.setScreenShareEnabled(
-      enabled: enabled,
-      constraints: constraints,
-    );
-
-    return result;
-  }
-
-  Future<Result<RtcLocalTrack<CameraConstraints>>> flipCamera() async {
-    final rtcManager = this.rtcManager;
-    if (rtcManager == null) {
-      return failureWithError('Unable to flip camera, Call not connected');
-    }
-
-    final result = await rtcManager.flipCamera();
-    return result;
-  }
-
-  Future<Result<RtcLocalTrack<CameraConstraints>>> setVideoInputDevice(
-    RtcMediaDevice device,
-  ) async {
-    final rtcManager = this.rtcManager;
-    if (rtcManager == null) {
-      return failureWithError(
-        'Unable to set video input, Call not connected',
-      );
-    }
-
-    return rtcManager.setVideoInputDevice(device: device);
-  }
-
-  Future<Result<None>> setCameraPosition(CameraPosition position) async {
-    final rtcManager = this.rtcManager;
-    if (rtcManager == null) {
-      return failureWithError(
-        'Unable to set camera position, Call not connected',
-      );
-    }
-
-    final result = await rtcManager.setCameraPosition(cameraPosition: position);
-    return result.map((_) => none);
-  }
-
   Future<Result<None>> notifyNoiseCancellationStarted() async {
     final result = await sfuClient.startNoiseCancellation(
       sfu.StartNoiseCancellationRequest(
@@ -1680,81 +1494,4 @@ class CallSession extends Disposable {
 
   @override
   String toString() => 'CallSession{seq: $sessionSeq, id: $sessionId}';
-}
-
-extension RtcTracksInfoMapper on List<RtcTrackInfo> {
-  List<sfu_models.TrackInfo> toDTO() {
-    return map((info) {
-      return sfu_models.TrackInfo(
-        trackId: info.trackId,
-        trackType: info.trackType?.toDTO(),
-        mid: info.mid,
-        publishOptionId: info.publishOptionId,
-        codec: info.codec?.toDTO(),
-        dtx: info.dtx,
-        stereo: info.stereo,
-        red: info.red,
-        muted: info.muted,
-        layers: info.layers?.map((layer) {
-          return sfu_models.VideoLayer(
-            rid: layer.rid,
-            videoDimension: sfu_models.VideoDimension(
-              width: layer.parameters.dimension.width,
-              height: layer.parameters.dimension.height,
-            ),
-            bitrate: layer.parameters.encoding.maxBitrate,
-            fps: layer.parameters.encoding.maxFramerate,
-            quality: layer.parameters.encoding.quality.toDTO(),
-          );
-        }),
-      );
-    }).toList();
-  }
-}
-
-extension SfuSubscriptionDetailsEx on List<SfuSubscriptionDetails> {
-  List<sfu.TrackSubscriptionDetails> toDTO() {
-    return map((sub) {
-      return sfu.TrackSubscriptionDetails(
-        userId: sub.userId,
-        sessionId: sub.sessionId,
-        trackType: sub.trackType.toDTO(),
-        dimension: sub.dimension?.toDTO(),
-      );
-    }).toList();
-  }
-}
-
-extension on ClientPublishOptions {
-  List<sfu_models.PublishOption>? getPreferredPublishOptions() {
-    if (preferredCodec == null) return null;
-
-    return [
-      sfu_models.PublishOption(
-        codec: sfu_models.Codec(
-          name: preferredCodec?.name,
-          fmtp: fmtpLine,
-        ),
-        bitrate: preferredBitrate,
-        maxSpatialLayers: maxSimulcastLayers,
-        trackType: sfu_models.TrackType.TRACK_TYPE_VIDEO,
-      ),
-    ];
-  }
-
-  List<sfu_models.SubscribeOption>? getPreferredSubscriberOptions() {
-    if (subscriberCodec == null) return null;
-
-    return [
-      sfu_models.SubscribeOption(
-        codecs: [
-          sfu_models.Codec(
-            name: subscriberCodec?.name,
-            fmtp: subscriberFmtpLine,
-          ),
-        ],
-        trackType: sfu_models.TrackType.TRACK_TYPE_VIDEO,
-      ),
-    ];
-  }
 }
