@@ -51,7 +51,7 @@ people work on this; CS6 needs CS5, CS9 needs CS6 and CS8, CS10 needs all.
 - [x] 6. **CS6** [FLU-1066](https://linear.app/stream/issue/FLU-1066): `SessionSignaling` (S). Subscriber offer, ICE both ways, ICE restart, mute state. After CS5.
 - [x] 7. **CS7** [FLU-1067](https://linear.app/stream/issue/FLU-1067): `PublisherConnectionWatchdog` (S).
 - [x] 8. **CS8** [FLU-1068](https://linear.app/stream/issue/FLU-1068): `SessionTrackController` (M). The suspend-or-start rule written once.
-- [ ] 9. **CS9** [FLU-1069](https://linear.app/stream/issue/FLU-1069): `SfuEventRouter` (M). The events lock, the dispatch, the state forwards and the manager gate; after CS6 and CS8. Fixes bug 3, which flips its CS1 pin.
+- [x] 9. **CS9** [FLU-1069](https://linear.app/stream/issue/FLU-1069): `SfuEventRouter` (M). The events lock, the dispatch, the state forwards and the manager gate; after CS6 and CS8. Fixes bug 3, which flips its CS1 pin.
 - [ ] 10. **CS10** [FLU-1070](https://linear.app/stream/issue/FLU-1070): `start` and `fastReconnect` on the new parts (M). One manager branch; device test with the FLU-936 simulator before it is marked ready.
 
 ### After the stack

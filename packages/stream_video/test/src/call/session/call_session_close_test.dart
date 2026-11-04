@@ -141,13 +141,11 @@ void main() {
     });
   });
 
-  // Bug 3 of FLU-1060, pinned as it behaves today: only the next `start`
-  // closes the subject. CS9 closes it in `close`.
-  test('leaves the rtcManager subject open', () async {
+  test('closes the rtcManager subject', () async {
     expect(harness.session.debugIsRtcManagerSubjectClosed, isFalse);
 
     await harness.session.close(CloseCode.normalClosure);
 
-    expect(harness.session.debugIsRtcManagerSubjectClosed, isFalse);
+    expect(harness.session.debugIsRtcManagerSubjectClosed, isTrue);
   });
 }
