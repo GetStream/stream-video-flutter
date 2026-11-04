@@ -66,6 +66,7 @@
 - `DisconnectReasonEnded` now carries an `initiator` and a `message`, so detect an ended call with `is DisconnectReasonEnded` rather than `== DisconnectReason.ended()`. An end from elsewhere has `initiator` `LeaveInitiator.remoteEvent`; one this side made through `Call.end` carries that call's initiator and reason and is not equal to a bare `DisconnectReason.ended()`.
 - `Call.end` ends the call on the server before leaving it, and a server that refuses the end now leaves the call running. It used to leave this side whatever the server said. A user without the end-call permission, or any other refusal, gets the failure back and stays in the call, so an app that showed "End call" to such users and relied on it acting as a leave has to call `Call.leave` instead. An end the server never decides on, because the device is offline, the request times out after 10 seconds, or the server fails (5xx) or rate limits it (429), still leaves this side, now as `DisconnectReasonLeft`, and returns the failure. An end that succeeds also fails the join stages still in flight, as a leave does, and a second `end()` while one is in flight waits for it rather than asking the server again.
 - `Call.leave` callers in the SDK now pass a reason, and `Call.reject` and `Call.end` take a new optional `initiator`. A class that implements `Call` has to add the parameter, and a test that verifies `call.leave()` with no arguments against the SDK's widgets has to match `reason` too.
+- Enabling the microphone fails, and releases it, when the call has no audio publish option.
 
 ### ⚠️ Deprecated
 
@@ -190,6 +191,10 @@
 - On iOS devices without multitasking camera access, the camera track is now muted while the app is in the background, so other participants see camera-off instead of a frozen frame.
 - A call that keeps rejoining or keeps failing to reconnect now leaves after 10 rejoins within 120 seconds, 20 rejoins within 30 minutes, or 10 failed reconnect attempts, instead of retrying forever.
 - Remote audio and video recover more reliably after a reconnect: an answer to a re-sent subscriber offer can no longer be applied to a newer one.
+- Changing the default audio constraints no longer mutes and unmutes the microphone.
+- On iOS, a broadcast screen share cancelled before it starts no longer keeps its track running.
+- On iOS, a later start of a broadcast screen share no longer publishes its track again.
+- A join or fast reconnect fails when the device makes no generic SDP offer, instead of joining with an empty one.
 
 ## 1.7.2
 

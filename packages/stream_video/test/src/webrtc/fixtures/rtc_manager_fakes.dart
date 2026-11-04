@@ -95,11 +95,16 @@ class FakeMediaStreamTrack extends Fake implements rtc.MediaStreamTrack {
   /// When set, [clone] waits for it before returning.
   Completer<void>? cloneGate;
 
+  /// When set, [clone] throws it.
+  Exception? cloneError;
+
   @override
   Future<void> stop() async => stopCount++;
 
   @override
   Future<rtc.MediaStreamTrack> clone() async {
+    final error = cloneError;
+    if (error != null) throw error;
     final clone = FakeMediaStreamTrack(
       '$id-clone-${clones.length}',
       kind: kind,
@@ -379,6 +384,12 @@ class FakeWebRtcPlatform {
   /// When set, `getUserMedia` fails with it.
   PlatformException? getUserMediaError;
 
+  /// When set, `getUserMedia` waits for it before answering.
+  Completer<void>? getUserMediaGate;
+
+  /// When set, `getDisplayMedia` waits for it before answering.
+  Completer<void>? getDisplayMediaGate;
+
   /// When set, `createOffer` fails with it.
   PlatformException? createOfferError;
 
@@ -449,10 +460,12 @@ class FakeWebRtcPlatform {
     calls.add(call);
     switch (call.method) {
       case 'getUserMedia':
+        await getUserMediaGate?.future;
         final error = getUserMediaError;
         if (error != null) throw error;
         return _stream(call);
       case 'getDisplayMedia':
+        await getDisplayMediaGate?.future;
         return _stream(call);
       case 'trackClone':
         final trackId = (call.arguments as Map)['trackId'] as String;

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/stream_video.dart';
@@ -43,14 +45,14 @@ void main() {
 
   group('changeDefaultAudioConstraints', () {
     test(
-      'a live track is muted with stopTrackOnMute forced on, recreated with '
-      'the new constraints, and keeps its own stopTrackOnMute',
+      'a live track is recaptured with the new constraints and keeps its own '
+      'stopTrackOnMute',
       () async {
         final mic = await publishMic(stopTrackOnMute: false);
 
         await fixture.manager.changeDefaultAudioConstraints(_newConstraints);
 
-        // Forced: the source was stopped and acquired again.
+        // The source was stopped and acquired again.
         expect(fakeMediaOf(mic).stopped, isTrue);
         expect(platform.callsOf('getUserMedia'), hasLength(1));
 
@@ -61,17 +63,24 @@ void main() {
       },
     );
 
-    test(
-      'onLocalTrackMuted fires twice per live track (bug 2 of FLU-1046, '
-      'pinned as it behaves today; fixed in T13)',
-      () async {
-        final mic = await publishMic(stopTrackOnMute: true);
+    test('a live track is not muted and unmuted along the way', () async {
+      final mic = await publishMic(stopTrackOnMute: true);
 
-        await fixture.manager.changeDefaultAudioConstraints(_newConstraints);
+      await fixture.manager.changeDefaultAudioConstraints(_newConstraints);
 
-        expect(muteEvents, [(mic.trackId, true), (mic.trackId, false)]);
-      },
-    );
+      expect(muteEvents, isEmpty);
+      expect(stored(mic.trackId).mediaTrack.enabled, isTrue);
+    });
+
+    test("the new capture is sent on the track's sender", () async {
+      final mic = await publishMic(stopTrackOnMute: true);
+      final sender = fixture.transceivers.single.sender;
+
+      await fixture.manager.changeDefaultAudioConstraints(_newConstraints);
+
+      expect(sender.replacedTracks, hasLength(1));
+      expect(stored(mic.trackId).clonedTracks, [sender.track]);
+    });
 
     test('a muted track is left muted', () async {
       final mic = await publishMic(stopTrackOnMute: false);
@@ -92,18 +101,111 @@ void main() {
     });
 
     test(
-      'the original stopTrackOnMute is restored when the cycle throws',
+      'a failed recapture reports the microphone muted, and unmuting '
+      'captures it with the new constraints',
       () async {
         final mic = await publishMic(stopTrackOnMute: false);
         platform.getUserMediaError = PlatformException(code: 'denied');
 
-        await expectLater(
-          fixture.manager.changeDefaultAudioConstraints(_newConstraints),
-          throwsA(startsWith('Unable to getUserMedia')),
-        );
+        await fixture.manager.changeDefaultAudioConstraints(_newConstraints);
 
+        expect(muteEvents, [(mic.trackId, true)]);
         expect(stored(mic.trackId).stopTrackOnMute, isFalse);
+
+        platform.getUserMediaError = null;
+        await fixture.manager.unmuteTrack(trackId: mic.trackId);
+
+        expect(stored(mic.trackId).mediaConstraints, _newConstraints);
+        expect(stored(mic.trackId).mediaTrack.enabled, isTrue);
       },
     );
+
+    test(
+      'a microphone published again during the recapture is not reported '
+      'muted',
+      () async {
+        final mic = await publishMic(stopTrackOnMute: true);
+        platform.getUserMediaGate = Completer<void>();
+
+        final changing = fixture.manager.changeDefaultAudioConstraints(
+          _newConstraints,
+        );
+        await pumpEventQueue();
+        await fixture.manager.unpublishTrack(trackId: mic.trackId);
+        final again = await publishMic(stopTrackOnMute: true);
+        platform.getUserMediaGate!.complete();
+        await changing;
+
+        expect(muteEvents, isEmpty);
+        expect(stored(mic.trackId).mediaTrack, same(again.mediaTrack));
+        expect(stored(mic.trackId).mediaTrack.enabled, isTrue);
+      },
+    );
+
+    test(
+      'a change made while a recapture is running is applied after it',
+      () async {
+        final mic = await publishMic(stopTrackOnMute: true);
+        platform.getUserMediaGate = Completer<void>();
+
+        final first = fixture.manager.changeDefaultAudioConstraints(
+          _newConstraints,
+        );
+        await pumpEventQueue();
+        final second = fixture.manager.changeDefaultAudioConstraints(
+          const AudioConstraints(),
+        );
+        await pumpEventQueue();
+        platform.getUserMediaGate!.complete();
+        await Future.wait([first, second]);
+
+        expect(platform.callsOf('getUserMedia'), hasLength(2));
+        expect(stored(mic.trackId).mediaConstraints, const AudioConstraints());
+        expect(stored(mic.trackId).mediaTrack.enabled, isTrue);
+        expect(muteEvents, isEmpty);
+      },
+    );
+
+    test('a mute while a recapture is running skips the next one', () async {
+      final mic = await publishMic(stopTrackOnMute: false);
+      platform.getUserMediaGate = Completer<void>();
+
+      final first = fixture.manager.changeDefaultAudioConstraints(
+        _newConstraints,
+      );
+      await pumpEventQueue();
+      final muting = fixture.manager.muteTrack(trackId: mic.trackId);
+      final second = fixture.manager.changeDefaultAudioConstraints(
+        const AudioConstraints(),
+      );
+      await pumpEventQueue();
+      platform.getUserMediaGate!.complete();
+      await Future.wait([first, muting, second]);
+
+      expect(platform.callsOf('getUserMedia'), hasLength(1));
+      expect(stored(mic.trackId).mediaTrack.enabled, isFalse);
+    });
+
+    test('screen share audio is left alone', () async {
+      final fixture = RtcManagerFixture(
+        publishOptions: [
+          _micOption,
+          publishOption(2, SfuTrackType.screenShareAudio),
+        ],
+      );
+      final shareAudio = fakeLocalTrack(
+        'share-audio',
+        trackType: SfuTrackType.screenShareAudio,
+        constraints: const AudioConstraints(),
+        kind: 'audio',
+      );
+      await fixture.manager.publishAudioTrack(track: shareAudio);
+      await fixture.manager.publishAudioTrack(track: fakeAudioTrack('mic'));
+
+      await fixture.manager.changeDefaultAudioConstraints(_newConstraints);
+
+      expect(platform.callsOf('getUserMedia'), hasLength(1));
+      expect(fakeMediaOf(shareAudio).stopped, isFalse);
+    });
   });
 }

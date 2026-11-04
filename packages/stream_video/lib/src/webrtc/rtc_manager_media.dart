@@ -18,41 +18,32 @@ extension RtcManagerTrackHelper on RtcManager {
       return failureWithError('Track is not camera');
     }
 
-    track.disable();
+    // The camera is off for the flip and back on after it, all while no
+    // mute can run, so a mute that lands meanwhile applies after the flip.
+    final flipped = await _publisher.updateHeldTrack(
+      track.trackId,
+      (current) async {
+        final camera = current as RtcLocalCameraTrack;
+        final wasEnabled = camera.mediaTrack.enabled;
+        camera.disable();
 
-    try {
-      final updatedTrack = await track.flipCamera();
-      tracks[updatedTrack.trackId] = updatedTrack;
-      return Result.success(updatedTrack);
-    } finally {
-      // small delay avoids camera being mirrored wrongly for a brief moment
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-      track.enable();
-    }
+        try {
+          return await camera.flipCamera();
+        } finally {
+          // small delay avoids camera being mirrored wrongly for a brief moment
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+          if (wasEnabled) camera.enable();
+        }
+      },
+      tag: '[flipCamera]',
+    );
+    return flipped.map((it) => it as RtcLocalCameraTrack);
   }
 
   Future<Result<RtcLocalCameraTrack>> setVideoInputDevice({
     required RtcMediaDevice device,
-  }) async {
-    final track = getPublisherTrackByType(SfuTrackType.video);
-    if (track == null) {
-      _logger.w(() => '[setCameraDeviceId] rejected (track is null)');
-      return failureWithError('Track is null');
-    }
-
-    if (track is! RtcLocalCameraTrack) {
-      _logger.w(() => '[setCameraDeviceId] rejected (track is not camera)');
-      return failureWithError('Track is not camera');
-    }
-
-    final transceivers = transceiversManager
-        .getTransceiversForTrack(track.trackId)
-        .toList();
-
-    final updatedTrack = await track.selectVideoInput(device, transceivers);
-    tracks[updatedTrack.trackId] = updatedTrack;
-
-    return Result.success(updatedTrack);
+  }) {
+    return _publisher.setVideoInputDevice(device);
   }
 
   Future<Result<RtcLocalAudioTrack>> setAudioInputDevice({
@@ -72,22 +63,38 @@ extension RtcManagerTrackHelper on RtcManager {
       return failureWithError('Track is not audio');
     }
 
-    final transceivers = transceiversManager
-        .getTransceiversForTrack(track.trackId)
-        .toList();
+    if (track.mediaConstraints.deviceId == device.id) {
+      _logger.i(() => '[setAudioInputDevice] already selected: $device');
+      return Result.success(track);
+    }
 
-    final RtcLocalAudioTrack updatedTrack;
+    final Result<RtcLocalTrack> switched;
     try {
-      updatedTrack = await track.selectAudioInput(transceivers, device);
+      // On web the input is a property of the capture, so it is captured
+      // again; elsewhere the platform switches the input of the capture.
+      switched = CurrentPlatform.isWeb
+          ? await _publisher.recapture(
+              track.trackId,
+              tag: '[setAudioInputDevice]',
+              constraintsFor: (current) => (current as RtcLocalAudioTrack)
+                  .mediaConstraints
+                  .copyWith(deviceId: device.id),
+            )
+          : await _publisher.updateHeldTrack(
+              track.trackId,
+              (current) => (current as RtcLocalAudioTrack).selectAudioInput(
+                const [],
+                device,
+              ),
+              tag: '[setAudioInputDevice]',
+            );
     } finally {
       // Switching the input restarts capture, which drops the ADM mute.
       // Reconciled on failure too.
       await reconcileAppleAdmMicrophoneMute();
     }
 
-    tracks[updatedTrack.trackId] = updatedTrack;
-
-    return Result.success(updatedTrack);
+    return switched.map((it) => it as RtcLocalAudioTrack);
   }
 
   Future<Result<None>> setAudioOutputDevice({
@@ -165,34 +172,88 @@ extension RtcManagerTrackHelper on RtcManager {
         enabled &&
         constraints is ScreenShareConstraints &&
         constraints.useiOSBroadcastExtension) {
-      final screenShareTrackResult = await _trackAcquirer
-          .createScreenShareTrack(
-            constraints: constraints,
-          );
+      return _startBroadcastShare(constraints);
+    }
 
-      if (screenShareTrackResult.isFailure) {
-        _logger.e(
-          () =>
-              '[ScreenSharingStartedEvent] failed to create screen share track: ${screenShareTrackResult.getErrorOrNull()}',
-        );
-        return screenShareTrackResult;
-      }
+    await _cancelPendingBroadcast();
+    return _setTrackEnabled(
+      trackType: SfuTrackType.screenShare,
+      enabled: enabled,
+      constraints: constraints,
+    );
+  }
 
-      _startListeningToScreenShareStarted(
-        screenShareTrackResult.getDataOrNull()!,
-      );
+  /// Creates the screen share track of an iOS broadcast at once, and
+  /// publishes it when the broadcast extension starts.
+  ///
+  /// Runs as the screen share's single flight. A broadcast that was created
+  /// but never started is cancelled first.
+  Future<Result<RtcLocalTrack>> _startBroadcastShare(
+    ScreenShareConstraints constraints,
+  ) {
+    return _publisher.singleFlight(SfuTrackType.screenShare, () async {
+      await _cancelPendingBroadcast();
+      final generation = _broadcastGeneration;
 
-      return Future.value(
-        Result.success(screenShareTrackResult.getDataOrNull()!),
-      );
-    } else {
-      await _screenSharingStartedSubscription?.cancel();
-      return _setTrackEnabled(
-        trackType: SfuTrackType.screenShare,
-        enabled: enabled,
+      final created = await _trackAcquirer.createScreenShareTrack(
         constraints: constraints,
       );
-    }
+      if (created is! Success<RtcLocalScreenShareTrack>) {
+        _logger.e(
+          () =>
+              '[startBroadcastShare] failed to create screen share track: '
+              '${created.getErrorOrNull()}',
+        );
+        return created;
+      }
+
+      // Disabled or disposed while the track was being created.
+      if (generation != _broadcastGeneration) {
+        _logger.i(() => '[startBroadcastShare] cancelled while creating');
+        await created.data.stop();
+        return failureWithError('Screen share was cancelled while starting');
+      }
+
+      _awaitBroadcastStart(created.data);
+      return created;
+    });
+  }
+
+  /// Publishes [track] on the first start of the broadcast, or stops it when
+  /// the broadcast stops before it ever started. Only the first of the two
+  /// counts. A publish that fails stops the track and marks the local
+  /// participant as not sharing.
+  void _awaitBroadcastStart(RtcLocalScreenShareTrack track) {
+    _pendingBroadcastTrack = track;
+    _pendingBroadcastSubscription = RtcMediaDeviceNotifier.instance
+        .nativeWebRtcEventsStream()
+        .where(
+          (it) =>
+              it is ScreenSharingStartedEvent ||
+              it is ScreenSharingStoppedEvent,
+        )
+        .take(1)
+        .listen((event) async {
+          _logger.i(() => '[awaitBroadcastStart] received: $event');
+          _pendingBroadcastSubscription = null;
+          _pendingBroadcastTrack = null;
+
+          if (event is! ScreenSharingStartedEvent) return track.stop();
+
+          final published = await publishVideoTrack(track: track);
+          if (published.isFailure) {
+            _logger.e(
+              () =>
+                  '[awaitBroadcastStart] publish failed: '
+                  '${published.getErrorOrNull()}',
+            );
+            await track.stop();
+
+            // The start event already marked the local participant as
+            // sharing; nothing reaches the SFU, so that is taken back.
+            stateManager.participantSetScreenShareEnabled(enabled: false);
+          }
+        });
   }
 
   Future<Result<RtcLocalTrack>> _setTrackEnabled({
@@ -337,19 +398,5 @@ extension RtcManagerTrackHelper on RtcManager {
     final message = 'Unsupported track type: ${track.runtimeType}';
     _logger.e(() => message);
     return failureWithError(message);
-  }
-
-  void _startListeningToScreenShareStarted(
-    RtcLocalTrack<ScreenShareConstraints> track,
-  ) {
-    _screenSharingStartedSubscription?.cancel();
-    _screenSharingStartedSubscription = RtcMediaDeviceNotifier.instance
-        .nativeWebRtcEventsStream()
-        .whereType<ScreenSharingStartedEvent>()
-        .listen((event) async {
-          _logger.i(() => '[ScreenSharingStartedEvent] received: $event');
-
-          await publishVideoTrack(track: track);
-        });
   }
 }

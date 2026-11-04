@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../call/fixtures/call_test_helpers.dart';
 import 'fixtures/rtc_manager_fakes.dart';
 
 final _screenShareOption = publishOption(1, SfuTrackType.screenShare);
@@ -62,26 +66,19 @@ void main() {
       },
     );
 
-    test(
-      'a second start event publishes the same track again (bug 3 of '
-      'FLU-1046, pinned as it behaves today; fixed in T13)',
-      () async {
-        await fixture.manager.setScreenShareEnabled(constraints: _broadcast);
-        await broadcastStarted();
-        final sender = fixture.transceivers.single.sender;
-        expect(sender.replacedTracks, isEmpty);
+    test('a second start event does not publish the track again', () async {
+      await fixture.manager.setScreenShareEnabled(constraints: _broadcast);
+      await broadcastStarted();
+      final sender = fixture.transceivers.single.sender;
 
-        await broadcastStarted();
+      await broadcastStarted();
 
-        // Republished onto the cached transceiver.
-        expect(fixture.transceivers, hasLength(1));
-        expect(sender.replacedTracks, hasLength(1));
-      },
-    );
+      expect(fixture.transceivers, hasLength(1));
+      expect(sender.replacedTracks, isEmpty);
+    });
 
     test(
-      'disabling before the broadcast starts cancels the publish but leaves '
-      'the created track running (bug 3, pinned as it behaves today)',
+      'disabling before the broadcast starts stops the created track',
       () async {
         final created = (await fixture.manager.setScreenShareEnabled(
           constraints: _broadcast,
@@ -92,15 +89,124 @@ void main() {
 
         expect(fixture.transceivers, isEmpty);
         expect(fixture.manager.tracks, isEmpty);
-        expect(
-          platform.disposedTrackIds,
-          isNot(contains(created.mediaTrack.id)),
-        );
+        expect(platform.disposedTrackIds, contains(created.mediaTrack.id));
       },
     );
 
+    test(
+      'a broadcast that stops before it starts stops the created track',
+      () async {
+        final created = (await fixture.manager.setScreenShareEnabled(
+          constraints: _broadcast,
+        )).getDataOrNull()!;
+
+        await platform.emitEvent('screenSharingStopped');
+        await Future<void>.delayed(Duration.zero);
+        await broadcastStarted();
+
+        expect(fixture.transceivers, isEmpty);
+        expect(platform.disposedTrackIds, contains(created.mediaTrack.id));
+      },
+    );
+
+    test(
+      'enabling again before the broadcast starts replaces the created track',
+      () async {
+        final first = (await fixture.manager.setScreenShareEnabled(
+          constraints: _broadcast,
+        )).getDataOrNull()!;
+        final second = (await fixture.manager.setScreenShareEnabled(
+          constraints: _broadcast,
+        )).getDataOrNull()!;
+
+        await broadcastStarted();
+
+        expect(platform.disposedTrackIds, contains(first.mediaTrack.id));
+        expect(fixture.manager.tracks.keys, [second.trackId]);
+        expect(fixture.transceivers, hasLength(1));
+      },
+    );
+
+    test(
+      'disposing before the broadcast starts stops the created track',
+      () async {
+        final created = (await fixture.manager.setScreenShareEnabled(
+          constraints: _broadcast,
+        )).getDataOrNull()!;
+
+        await fixture.manager.dispose();
+
+        expect(platform.disposedTrackIds, contains(created.mediaTrack.id));
+      },
+    );
+
+    for (final (name, cancel) in [
+      (
+        'disabling',
+        (RtcManager m) => m.setScreenShareEnabled(enabled: false),
+      ),
+      ('disposing', (RtcManager m) => m.dispose()),
+    ]) {
+      test(
+        '$name while the track is still being created stops it and never '
+        'publishes it',
+        () async {
+          platform.getDisplayMediaGate = Completer<void>();
+
+          final starting = fixture.manager.setScreenShareEnabled(
+            constraints: _broadcast,
+          );
+          await pumpEventQueue();
+          final cancelling = cancel(fixture.manager);
+          platform.getDisplayMediaGate!.complete();
+          await cancelling;
+
+          expect((await starting).isFailure, isTrue);
+          await broadcastStarted();
+
+          expect(fixture.transceivers, isEmpty);
+          expect(fixture.manager.tracks, isEmpty);
+          expect(platform.disposedTrackIds, isNotEmpty);
+        },
+      );
+    }
+
+    test(
+      'a publish that fails stops the track and marks the share off',
+      () async {
+        final state = createTestCallStateManager();
+        final failing = RtcManagerFixture(stateManager: state);
+        final created = (await failing.manager.setScreenShareEnabled(
+          constraints: _broadcast,
+        )).getDataOrNull()!;
+
+        await broadcastStarted();
+
+        expect(failing.transceivers, isEmpty);
+        expect(platform.disposedTrackIds, contains(created.mediaTrack.id));
+        verify(
+          () => state.participantSetScreenShareEnabled(enabled: false),
+        ).called(1);
+        await failing.manager.dispose();
+      },
+    );
+
+    test('two enables at once create one track', () async {
+      final first = fixture.manager.setScreenShareEnabled(
+        constraints: _broadcast,
+      );
+      final second = fixture.manager.setScreenShareEnabled(
+        constraints: _broadcast,
+      );
+
+      final (a, b) = (await first, await second);
+
+      expect(platform.callsOf('getDisplayMedia'), hasLength(1));
+      expect(a.getDataOrNull(), same(b.getDataOrNull()));
+    });
+
     test('stopping the created track disposes it on the platform', () async {
-      // The control for the test above: a stop is visible to the fake.
+      // The control for the tests above: a stop is visible to the fake.
       final created = (await fixture.manager.setScreenShareEnabled(
         constraints: _broadcast,
       )).getDataOrNull()!;

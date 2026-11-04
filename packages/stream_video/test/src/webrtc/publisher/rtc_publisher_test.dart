@@ -13,6 +13,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import '../fixtures/rtc_manager_fakes.dart';
 
 final _mic = publishOption(1, SfuTrackType.audio);
+final _camera = publishOption(2, SfuTrackType.video);
 
 /// An offer naming [trackId] in an audio m-section with [mid].
 String _offer({required String trackId, required String mid}) {
@@ -75,6 +76,14 @@ void main() {
       return result;
     });
   });
+
+  RtcLocalVideoTrack localCamera() => fakeLocalTrack(
+    'cam',
+    trackType: SfuTrackType.video,
+    constraints: const CameraConstraints(),
+    kind: 'video',
+    trackIdPrefix: kLocalTrackIdPrefix,
+  );
 
   RtcPublisher publisher({
     bool withPc = true,
@@ -301,6 +310,195 @@ void main() {
       ).thenAnswer((_) async => [FakeTransceiver(FakeSender(null))]);
 
       expect(await publisher().isPublisherEmpty(), isFalse);
+    });
+  });
+
+  group('a failed audio or video publish', () {
+    setUp(() {
+      when(
+        () => pc.addVideoTransceiver(
+          track: any(named: 'track'),
+          encodings: any(named: 'encodings'),
+          degradationPreference: any(named: 'degradationPreference'),
+        ),
+      ).thenAnswer((_) async => failureWithError('platform refused'));
+      addAudioAnswers = [(_) async => failureWithError('platform refused')];
+    });
+
+    for (final (kind, publish) in [
+      (
+        'audio',
+        (RtcPublisher p) =>
+            p.publishTrack(localMic()).then((r) => (r, p.tracks)),
+      ),
+      (
+        'video',
+        (RtcPublisher p) =>
+            p.publishTrack(localCamera()).then((r) => (r, p.tracks)),
+      ),
+    ]) {
+      test('a failed $kind transceiver keeps nothing', () async {
+        final rtcPublisher = publisher(publishOptions: [_mic, _camera]);
+        final published = <RtcLocalTrack>[];
+        rtcPublisher.onLocalTrackPublished = published.add;
+
+        final (result, tracks) = await publish(rtcPublisher);
+
+        expect(result.isFailure, isTrue);
+        expect(tracks, isEmpty);
+        expect(published, isEmpty);
+        expect(rtcPublisher.transceiversManager.items(), isEmpty);
+      });
+
+      test('a $kind track without a publish option fails', () async {
+        final rtcPublisher = publisher(publishOptions: []);
+
+        final (result, tracks) = await publish(rtcPublisher);
+
+        expect(result.isFailure, isTrue);
+        expect(tracks, isEmpty);
+      });
+    }
+
+    test('a clone that throws fails the publish and keeps nothing', () async {
+      final rtcPublisher = publisher();
+      final mic = localMic();
+      fakeMediaOf(mic).cloneError = Exception('clone');
+
+      final result = await rtcPublisher.publishTrack(mic);
+
+      expect(result.isFailure, isTrue);
+      expect(rtcPublisher.tracks, isEmpty);
+      expect(fakeMediaOf(mic).stopped, isTrue);
+    });
+
+    test('both stop the source and the clone of a failed publish', () async {
+      final rtcPublisher = publisher(publishOptions: [_mic, _camera]);
+      final mic = localMic();
+      final camera = localCamera();
+
+      await rtcPublisher.publishTrack(mic);
+      await rtcPublisher.publishTrack(camera);
+
+      for (final track in [mic, camera]) {
+        final media = fakeMediaOf(track);
+        expect(media.stopped, isTrue, reason: '${track.trackType}');
+        expect(
+          media.clones.single.stopped,
+          isTrue,
+          reason: '${track.trackType}',
+        );
+      }
+    });
+  });
+
+  group('a track unpublished while it is recaptured', () {
+    late FakeWebRtcPlatform platform;
+
+    setUp(() {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      platform = FakeWebRtcPlatform()..install();
+    });
+
+    tearDown(() => platform.uninstall());
+
+    test('is not brought back, and its new capture is stopped', () async {
+      final rtcPublisher = publisher();
+      final track = (await rtcPublisher.publishAudioTrack(
+        track: localMic(),
+      )).getDataOrNull()!;
+      await rtcPublisher.muteTrack(trackId: track.trackId);
+      platform.getUserMediaGate = Completer<void>();
+
+      final unmuting = rtcPublisher.unmuteTrack(trackId: track.trackId);
+      await pumpEventQueue();
+      await rtcPublisher.unpublishTrack(trackId: track.trackId);
+      platform.getUserMediaGate!.complete();
+
+      expect((await unmuting).isFailure, isTrue);
+      expect(rtcPublisher.tracks, isEmpty);
+      expect(platform.disposedTrackIds, isNotEmpty);
+    });
+
+    test('updateHeldTrack does not bring it back either', () async {
+      final rtcPublisher = publisher();
+      final track = (await rtcPublisher.publishAudioTrack(
+        track: localMic(),
+      )).getDataOrNull()!;
+      final gate = Completer<RtcLocalTrack>();
+
+      final updating = rtcPublisher.updateHeldTrack(
+        track.trackId,
+        (_) => gate.future,
+        tag: 'test',
+      );
+      await rtcPublisher.unpublishTrack(trackId: track.trackId);
+      final other = localMic();
+      gate.complete(other);
+
+      expect((await updating).isFailure, isTrue);
+      expect(rtcPublisher.tracks, isEmpty);
+      // A capture of its own that the change made is stopped.
+      expect(fakeMediaOf(other).stopped, isTrue);
+    });
+  });
+
+  test('republishing a video track keeps its stopTrackOnMute', () async {
+    when(
+      () => pc.addVideoTransceiver(
+        track: any(named: 'track'),
+        encodings: any(named: 'encodings'),
+        degradationPreference: any(named: 'degradationPreference'),
+      ),
+    ).thenAnswer(
+      (invocation) async => Result.success(
+        FakeTransceiver(
+          FakeSender(invocation.namedArguments[#track] as rtc.MediaStreamTrack),
+        ),
+      ),
+    );
+    final rtcPublisher = publisher(publishOptions: [_camera]);
+
+    final result = await rtcPublisher.publishTrack(
+      localCamera().copyWith(stopTrackOnMute: false),
+    );
+
+    expect(result.getDataOrNull()!.stopTrackOnMute, isFalse);
+  });
+
+  group('dispose', () {
+    test(
+      'stops the local tracks and closes the peer connection without taking '
+      'them off their senders',
+      () async {
+        final rtcPublisher = publisher();
+        final track = (await rtcPublisher.publishAudioTrack(
+          track: localMic(),
+        )).getDataOrNull()!;
+        final published = <RtcLocalTrack>[];
+        rtcPublisher.onLocalTrackPublished = published.add;
+
+        await rtcPublisher.dispose();
+
+        expect(rtcPublisher.tracks, isEmpty);
+        expect(fakeMediaOf(track).stopped, isTrue);
+        expect(rtcPublisher.onLocalTrackPublished, isNull);
+        verifyNever(() => nativePc.removeTrack(any()));
+        verify(pc.dispose).called(1);
+      },
+    );
+
+    test('stops only the clones of a handed-over track', () async {
+      final rtcPublisher = publisher();
+      final track = (await rtcPublisher.publishAudioTrack(
+        track: localMic(),
+      )).getDataOrNull()!;
+      rtcPublisher.handOverLocalTracks();
+
+      await rtcPublisher.dispose();
+
+      expect(fakeMediaOf(track).stopped, isFalse);
+      expect(fakeMediaOf(track).clones.single.stopped, isTrue);
     });
   });
 

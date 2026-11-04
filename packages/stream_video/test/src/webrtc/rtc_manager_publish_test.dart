@@ -92,19 +92,17 @@ void main() {
     );
 
     test(
-      'an audio track succeeds and stays registered with no sender '
-      '(bug 1 of FLU-1046, pinned as it behaves today; fixed in T13)',
+      'an audio track fails, is not registered and has its source stopped',
       () async {
         final fixture = RtcManagerFixture(publishOptions: [_vp8Option]);
         final mic = fakeAudioTrack('mic');
 
         final result = await fixture.manager.publishAudioTrack(track: mic);
 
-        expect(result.isSuccess, isTrue);
-        expect(fixture.manager.tracks.keys, [mic.trackId]);
+        expect(result.isFailure, isTrue);
+        expect(fixture.manager.tracks, isEmpty);
+        expect(fakeMediaOf(mic).stopped, isTrue);
         expect(fixture.transceivers, isEmpty);
-        // The microphone keeps capturing for a sender that does not exist.
-        expect(fakeMediaOf(mic).stopped, isFalse);
       },
     );
   });

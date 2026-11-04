@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
@@ -163,6 +165,158 @@ void main() {
       expect(stored(camera.trackId).mediaConstraints.deviceId, 'usb-camera');
     });
 
+    test('takes the facing mode from the device label', () async {
+      await publishCamera();
+      final back = RtcMediaDevice(
+        id: _backCamera['deviceId']!,
+        label: _backCamera['label']!,
+        kind: RtcMediaDeviceKind.videoInput,
+      );
+
+      final result = await fixture.manager.setVideoInputDevice(device: back);
+
+      expect(
+        result.getDataOrNull()!.mediaConstraints.facingMode,
+        FacingMode.environment,
+      );
+    });
+
+    test('prefers the facing mode the capture reports', () async {
+      final camera = await publishCamera();
+      platform.trackSettings = const {'facingMode': 'user'};
+      final back = RtcMediaDevice(
+        id: _backCamera['deviceId']!,
+        label: _backCamera['label']!,
+        kind: RtcMediaDeviceKind.videoInput,
+      );
+
+      await fixture.manager.setVideoInputDevice(device: back);
+
+      expect(
+        stored(camera.trackId).mediaConstraints.facingMode,
+        FacingMode.user,
+      );
+    });
+
+    test(
+      'a camera unpublished during the switch is not brought back and its '
+      'new capture is stopped',
+      () async {
+        final camera = await publishCamera();
+        platform.getUserMediaGate = Completer<void>();
+
+        final switching = fixture.manager.setVideoInputDevice(
+          device: _otherCamera,
+        );
+        await pumpEventQueue();
+        await fixture.manager.unpublishTrack(trackId: camera.trackId);
+        platform.getUserMediaGate!.complete();
+
+        expect((await switching).isFailure, isTrue);
+        expect(fixture.manager.tracks, isEmpty);
+        expect(platform.disposedTrackIds, isNotEmpty);
+      },
+    );
+
+    test(
+      'a camera published again during the switch keeps the new one',
+      () async {
+        final camera = await publishCamera();
+        platform.getUserMediaGate = Completer<void>();
+
+        final switching = fixture.manager.setVideoInputDevice(
+          device: _otherCamera,
+        );
+        await pumpEventQueue();
+        await fixture.manager.unpublishTrack(trackId: camera.trackId);
+        final republished = await publishCamera();
+        platform.getUserMediaGate!.complete();
+
+        expect((await switching).isFailure, isTrue);
+        expect(
+          stored(camera.trackId).mediaTrack,
+          same(republished.mediaTrack),
+        );
+        // The senders still carry the republished camera, not a stopped
+        // capture of the switch.
+        for (final transceiver in fixture.transceivers) {
+          expect(
+            transceiver.sender.track!.id,
+            startsWith('${republished.mediaTrack.id}-clone-'),
+          );
+        }
+        expect(platform.disposedTrackIds, isNotEmpty);
+      },
+    );
+
+    test(
+      'two recaptures at once run in turn, and the senders end on the last',
+      () async {
+        final camera = await publishCamera();
+
+        await Future.wait([
+          fixture.manager.setTrackFacingMode(
+            facingMode: FacingMode.environment,
+          ),
+          fixture.manager.setCameraVideoParameters(
+            params: RtcVideoParametersPresets.h360_16x9,
+          ),
+        ]);
+
+        final after = stored(camera.trackId);
+        expect(platform.callsOf('getUserMedia'), hasLength(2));
+        // The second started from the first's result.
+        expect(after.mediaConstraints.facingMode, FacingMode.environment);
+        expect(
+          after.mediaConstraints.params.dimension,
+          RtcVideoParametersPresets.h360_16x9.dimension,
+        );
+        for (final transceiver in fixture.transceivers) {
+          final sent = transceiver.sender.track!.id;
+          expect(sent, startsWith('${after.mediaTrack.id}-clone-'));
+          expect(platform.disposedTrackIds, isNot(contains(sent)));
+        }
+      },
+    );
+
+    test('a mute during a recapture applies to the new capture', () async {
+      final camera = await publishCamera();
+      platform.getUserMediaGate = Completer<void>();
+
+      final switching = fixture.manager.setVideoInputDevice(
+        device: _otherCamera,
+      );
+      await pumpEventQueue();
+      final muting = fixture.manager.muteTrack(
+        trackId: camera.trackId,
+        stopTrackOnMute: false,
+      );
+      platform.getUserMediaGate!.complete();
+      await switching;
+      await muting;
+
+      final after = stored(camera.trackId);
+      expect(after.mediaTrack.id, isNot(camera.mediaTrack.id));
+      expect(after.mediaTrack.enabled, isFalse);
+      expect(after.stopTrackOnMute, isFalse);
+    });
+
+    test('a dispose during a recapture stops the new capture', () async {
+      await publishCamera();
+      platform.getUserMediaGate = Completer<void>();
+
+      final switching = fixture.manager.setVideoInputDevice(
+        device: _otherCamera,
+      );
+      await pumpEventQueue();
+      await fixture.manager.dispose();
+      platform.getUserMediaGate!.complete();
+
+      expect((await switching).isFailure, isTrue);
+      expect(fixture.manager.tracks, isEmpty);
+      expect(platform.disposedTrackIds, isNotEmpty);
+    });
+
     test('keeps the camera when the device is already selected', () async {
       await publishCamera();
       await fixture.manager.setVideoInputDevice(device: _otherCamera);
@@ -212,6 +366,20 @@ void main() {
         expect(after.mediaConstraints.deviceId, 'back-camera');
       },
     );
+
+    test('a soft mute during a flip keeps the camera off', () async {
+      final camera = await publishCamera();
+
+      final flipping = fixture.manager.flipCamera();
+      final muting = fixture.manager.muteTrack(
+        trackId: camera.trackId,
+        stopTrackOnMute: false,
+      );
+      await Future.wait([flipping, muting]);
+
+      expect(camera.mediaTrack.enabled, isFalse);
+      expect(stored(camera.trackId).mediaTrack.enabled, isFalse);
+    });
 
     test('fails without a camera track', () async {
       final missing = await fixture.manager.flipCamera();
