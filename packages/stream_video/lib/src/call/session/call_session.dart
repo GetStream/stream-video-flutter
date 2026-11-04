@@ -304,10 +304,10 @@ class CallSession extends Disposable with _CallSessionMedia {
       );
 
       final wsResult = await sfuWS.connect();
-      if (wsResult.isFailure) {
+      if (wsResult is Failure) {
         reporter.failStageWithError(
           wsJoinStageId,
-          (wsResult as Failure).error,
+          wsResult.error,
           details: wsJoinDetails,
           retryCount: clientEventRetryCount,
         );
@@ -365,58 +365,11 @@ class CallSession extends Disposable with _CallSessionMedia {
 
       if (_isLeavingOrClosed) return _rejectClosedStart('before rtcManager');
 
-      final RtcManager createdRtcManager;
-      if (isAnonymousUser) {
-        createdRtcManager =
-            await rtcManagerFactory.makeRtcManager(
-                sfuClient: sfuClient,
-                host: _host,
-                stateManager: stateManager,
-                clientDetails: clientDetails,
-                sessionSequence: sessionSeq,
-                statsOptions: statsOptions,
-                callSessionConfig: config,
-                publishOptions: event.publishOptions,
-                clientEventRetryCount: clientEventRetryCount,
-                e2eeManager: e2eeManager,
-              )
-              ..onSubscriberIceCandidate = _signaling.onLocalIceCandidate
-              ..onRenegotiationNeeded = _negotiator.negotiateOrRecover
-              ..onReconnectionNeeded = onReconnectionNeeded
-              ..onIceConnected = onIceConnected
-              ..onRemoteTrackReceived = _tracks.onRemoteTrackReceived;
-      } else {
-        final currentUserId = stateManager.callState.currentUserId;
-        final localParticipant = event.callState.participants.firstWhere(
-          (it) => it.userId == currentUserId && it.sessionId == sessionId,
-        );
-        final localTrackId = localParticipant.trackLookupPrefix;
-
-        _logger.v(() => '[start] localTrackId: $localTrackId');
-
-        createdRtcManager =
-            await rtcManagerFactory.makeRtcManager(
-                sfuClient: sfuClient,
-                host: _host,
-                stateManager: stateManager,
-                publisherId: localTrackId,
-                publishOptions: event.publishOptions,
-                clientDetails: clientDetails,
-                sessionSequence: sessionSeq,
-                statsOptions: statsOptions,
-                callSessionConfig: config,
-                clientEventRetryCount: clientEventRetryCount,
-                e2eeManager: e2eeManager,
-              )
-              ..onPublisherIceCandidate = _signaling.onLocalIceCandidate
-              ..onSubscriberIceCandidate = _signaling.onLocalIceCandidate
-              ..onLocalTrackMuted = _signaling.sendMuteState
-              ..onLocalTrackPublished = _tracks.onLocalTrackPublished
-              ..onReconnectionNeeded = onReconnectionNeeded
-              ..onIceConnected = onIceConnected
-              ..onRenegotiationNeeded = _negotiator.negotiateOrRecover
-              ..onRemoteTrackReceived = _tracks.onRemoteTrackReceived;
-      }
+      final createdRtcManager = await _makeRtcManager(
+        event,
+        isAnonymousUser: isAnonymousUser,
+        clientEventRetryCount: clientEventRetryCount,
+      );
 
       // A close during its creation found no rtcManager to dispose, so this
       // one would be left running.
@@ -434,26 +387,8 @@ class CallSession extends Disposable with _CallSessionMedia {
       if (_isLeavingOrClosed) return _rejectClosedStart('after rtcManager');
 
       _events.attachManager(createdRtcManager);
-
       _events.applyJoinedCallState(event.callState);
-
-      final environment = ClientEnvironment(
-        sfu: config.sfuUrl,
-        sdkVersion: streamVideoVersion,
-        webRtcVersion: switch (CurrentPlatform.type) {
-          PlatformType.android => androidWebRTCVersion,
-          PlatformType.ios => iosWebRTCVersion,
-          PlatformType.macOS => macOsWebRTCVersion,
-          PlatformType.windows => windowsWebRTCVersion,
-          PlatformType.linux => linuxWebRTCVersion,
-          _ => '',
-        },
-      );
-
-      statsReporter = StatsReporter(
-        rtcManager: createdRtcManager,
-        clientEnvironment: environment,
-      );
+      statsReporter = _makeStatsReporter(createdRtcManager);
 
       _logger.d(() => '[start] completed');
       return Result.success(
@@ -472,6 +407,74 @@ class CallSession extends Disposable with _CallSessionMedia {
       _logger.e(() => '[start] failed: $e');
       return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
+  }
+
+  /// Makes the manager for the joined session and wires it to this session.
+  ///
+  /// An anonymous user gets a manager without a publisher connection, so
+  /// nothing it publishes is sent.
+  Future<RtcManager> _makeRtcManager(
+    SfuJoinResponseEvent event, {
+    required bool isAnonymousUser,
+    required int clientEventRetryCount,
+  }) async {
+    final publisherId = isAnonymousUser ? null : _localTrackLookupPrefix(event);
+
+    final created = await rtcManagerFactory.makeRtcManager(
+      sfuClient: sfuClient,
+      host: _host,
+      stateManager: stateManager,
+      publisherId: publisherId,
+      publishOptions: event.publishOptions,
+      clientDetails: clientDetails,
+      sessionSequence: sessionSeq,
+      statsOptions: statsOptions,
+      callSessionConfig: config,
+      clientEventRetryCount: clientEventRetryCount,
+      e2eeManager: e2eeManager,
+    );
+
+    return created
+      ..onPublisherIceCandidate = _signaling.onLocalIceCandidate
+      ..onSubscriberIceCandidate = _signaling.onLocalIceCandidate
+      ..onLocalTrackMuted = _signaling.sendMuteState
+      ..onLocalTrackPublished = _tracks.onLocalTrackPublished
+      ..onReconnectionNeeded = onReconnectionNeeded
+      ..onIceConnected = onIceConnected
+      ..onRenegotiationNeeded = _negotiator.negotiateOrRecover
+      ..onRemoteTrackReceived = _tracks.onRemoteTrackReceived;
+  }
+
+  /// The track lookup prefix the SFU gave this session's participant.
+  String _localTrackLookupPrefix(SfuJoinResponseEvent event) {
+    final currentUserId = stateManager.callState.currentUserId;
+    final localParticipant = event.callState.participants.firstWhere(
+      (it) => it.userId == currentUserId && it.sessionId == sessionId,
+    );
+    final localTrackId = localParticipant.trackLookupPrefix;
+
+    _logger.v(() => '[start] localTrackId: $localTrackId');
+    return localTrackId;
+  }
+
+  StatsReporter _makeStatsReporter(RtcManager rtcManager) {
+    final environment = ClientEnvironment(
+      sfu: config.sfuUrl,
+      sdkVersion: streamVideoVersion,
+      webRtcVersion: switch (CurrentPlatform.type) {
+        PlatformType.android => androidWebRTCVersion,
+        PlatformType.ios => iosWebRTCVersion,
+        PlatformType.macOS => macOsWebRTCVersion,
+        PlatformType.windows => windowsWebRTCVersion,
+        PlatformType.linux => linuxWebRTCVersion,
+        _ => '',
+      },
+    );
+
+    return StatsReporter(
+      rtcManager: rtcManager,
+      clientEnvironment: environment,
+    );
   }
 
   Result<T> _rejectClosedStart<T>(String step) {
@@ -547,6 +550,12 @@ class CallSession extends Disposable with _CallSessionMedia {
     }
   }
 
+  /// Resumes this session on a new socket.
+  ///
+  /// Fails when the socket cannot be recreated, the join is not answered, or
+  /// the SFU did not resume the session. A resumed join restarts the
+  /// publisher's ICE, renegotiates it and replays the remote tracks; the
+  /// result is the renegotiation's failure if it failed, else the join.
   Future<Result<({SfuCallState callState, Duration fastReconnectDeadline})?>>
   fastReconnect({
     required sfu_events.ReconnectDetails reconnectDetails,
@@ -561,86 +570,33 @@ class CallSession extends Disposable with _CallSessionMedia {
 
       _tracer.trace(TraceTag.fastReconnect, reconnectDetails.toJson());
 
-      Result<({SfuCallState callState, Duration fastReconnectDeadline})?>?
-      result;
-
-      // Every way out of here before the join settles is a failure worth
-      // seeing in the trace: these are the ones that left no mark before.
-      Result<Never> failed(StreamVideoException error) {
+      final joined = await _rejoinSfu(
+        reconnectDetails: reconnectDetails,
+        capabilities: capabilities,
+        unifiedSessionId: unifiedSessionId,
+      );
+      if (joined is Failure) {
+        final error = joined.videoError;
         _logger.w(() => '[fastReconnect] failed: $error');
         _tracer.trace(TraceTag.fastReconnectFailure, error.toString());
         return Result.failure(error);
       }
 
-      // Fails before the socket is touched when the SDPs cannot be made.
-      await _joinRequestBuilder.prepareSdps();
-
-      _logger.d(() => '[fastReconnect] sfu not connected, recreating');
-      final wsResult = await sfuWS.recreate();
-      if (wsResult is Failure) {
-        return failed(
-          StreamVideoException(
-            message: 'SFU WS reconnect failed: ${wsResult.videoError.message}',
-          ),
-        );
-      }
-
-      _logger.d(() => '[fastReconnect] sfu connected, sending join request');
-      // Reads the publish options as they are once the socket is back.
-      final joinRequest = await _joinRequestBuilder.build(
-        reconnectDetails: reconnectDetails,
-        capabilities: capabilities,
-        unifiedSessionId: unifiedSessionId,
-        currentPublishOptions: rtcManager?.publishOptions,
-      );
-
-      _logger.v(() => '[fastReconnect] wait for SfuJoinResponseEvent');
-      final joinResponse = await _joinSfu(
-        joinRequest,
-        timeLimit: fastReconnectJoinResponseTimeout,
-      );
-      if (joinResponse is Failure) {
-        return failed(joinResponse.videoError);
-      }
-
-      final event = joinResponse.getDataOrNull()!;
-      if (!event.isReconnected) {
-        return failed(const SfuSessionNotResumedException());
-      }
-
+      final event = joined.getDataOrNull()!;
       _logger.v(() => '[fastReconnect] fast-reconnect done');
-
       _events.applyJoinedCallState(event.callState);
 
-      result = Result.success(
-        (
-          callState: event.callState,
-          fastReconnectDeadline: event.fastReconnectDeadline,
-        ),
-      );
+      final renegotiation = await _restartPublisher();
+      await _tracks.replayRemoteTracks();
 
-      _logger.v(() => '[fastReconnect] restarting ICE');
-      await rtcManager?.publisher?.pc.restartIce();
-
-      final publisher = rtcManager?.publisher;
-      if (publisher != null) {
-        _logger.v(() => '[fastReconnect] triggering publisher renegotiation');
-        final renegotiation = await _negotiator.negotiate(publisher);
-        if (renegotiation is Failure) {
-          _logger.w(
-            () =>
-                '[fastReconnect] publisher renegotiation failed: '
-                '${renegotiation.error}',
-          );
-          result = renegotiation;
-        }
-      }
-
-      final remoteTracks = rtcManager!.remoteTracks.values;
-
-      for (final track in remoteTracks) {
-        await _tracks.onRemoteTrackReceived(rtcManager!.subscriber, track);
-      }
+      final result = renegotiation is Failure
+          ? renegotiation
+          : Result.success(
+              (
+                callState: event.callState,
+                fastReconnectDeadline: event.fastReconnectDeadline,
+              ),
+            );
 
       if (result.isSuccess) {
         _tracer.trace(TraceTag.fastReconnectSuccess, null);
@@ -660,6 +616,69 @@ class CallSession extends Disposable with _CallSessionMedia {
       rtcManager?.subscriber.setReconnecting(false);
       rtcManager?.publisher?.setReconnecting(false);
     }
+  }
+
+  /// Recreates the socket and joins on it, failing unless the SFU resumed
+  /// this session.
+  Future<Result<SfuJoinResponseEvent>> _rejoinSfu({
+    required sfu_events.ReconnectDetails reconnectDetails,
+    required Set<SfuClientCapability> capabilities,
+    required String? unifiedSessionId,
+  }) async {
+    // Fails before the socket is touched when the SDPs cannot be made.
+    await _joinRequestBuilder.prepareSdps();
+
+    _logger.d(() => '[fastReconnect] sfu not connected, recreating');
+    final wsResult = await sfuWS.recreate();
+    if (wsResult is Failure) {
+      return failureWithError(
+        'SFU WS reconnect failed: ${wsResult.videoError.message}',
+      );
+    }
+
+    _logger.d(() => '[fastReconnect] sfu connected, sending join request');
+    // Reads the publish options as they are once the socket is back.
+    final joinRequest = await _joinRequestBuilder.build(
+      reconnectDetails: reconnectDetails,
+      capabilities: capabilities,
+      unifiedSessionId: unifiedSessionId,
+      currentPublishOptions: rtcManager?.publishOptions,
+    );
+
+    _logger.v(() => '[fastReconnect] wait for SfuJoinResponseEvent');
+    final joinResponse = await _joinSfu(
+      joinRequest,
+      timeLimit: fastReconnectJoinResponseTimeout,
+    );
+    if (joinResponse is Failure) return joinResponse;
+
+    final event = joinResponse.getDataOrNull()!;
+    if (!event.isReconnected) {
+      return const Result.failure(SfuSessionNotResumedException());
+    }
+
+    return joinResponse;
+  }
+
+  /// Restarts the publisher's ICE and renegotiates it, if there is one.
+  Future<Result<void>> _restartPublisher() async {
+    _logger.v(() => '[fastReconnect] restarting ICE');
+    await rtcManager?.publisher?.pc.restartIce();
+
+    final publisher = rtcManager?.publisher;
+    if (publisher == null) return const Result.success(null);
+
+    _logger.v(() => '[fastReconnect] triggering publisher renegotiation');
+    final renegotiation = await _negotiator.negotiate(publisher);
+    if (renegotiation is Failure) {
+      _logger.w(
+        () =>
+            '[fastReconnect] publisher renegotiation failed: '
+            '${renegotiation.error}',
+      );
+    }
+
+    return renegotiation;
   }
 
   /// Arms the [PublisherConnectionWatchdog] check that the publisher

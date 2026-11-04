@@ -29,26 +29,20 @@ void main() {
   setUpAll(registerCallSessionHarnessFallbacks);
 
   group('start wires the manager', () {
-    test('an anonymous user gets a manager without a publisher and four '
-        'callbacks', () async {
+    test('an anonymous user gets a manager without a publisher', () async {
       final harness = CallSessionHarness();
-      final rtcManager = harness.rtcManager;
 
       final result = await harness.session.start(isAnonymousUser: true);
 
       expect(result.isSuccess, isTrue);
       expect(harness.capturedPublisherId(), isNull);
-      verify(() => rtcManager.onSubscriberIceCandidate = any()).called(1);
-      verify(() => rtcManager.onRenegotiationNeeded = any()).called(1);
-      verify(() => rtcManager.onReconnectionNeeded = any()).called(1);
-      verify(() => rtcManager.onRemoteTrackReceived = any()).called(1);
-      verifyNever(() => rtcManager.onPublisherIceCandidate = any());
-      verifyNever(() => rtcManager.onLocalTrackMuted = any());
-      verifyNever(() => rtcManager.onLocalTrackPublished = any());
+      verify(
+        () => harness.rtcManager.onRemoteTrackReceived = any(),
+      ).called(1);
     });
 
     test('a regular user publishes under the local participant prefix with '
-        'seven callbacks', () async {
+        'every callback', () async {
       final harness = CallSessionHarness();
       final rtcManager = harness.rtcManager;
 

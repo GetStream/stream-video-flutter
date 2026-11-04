@@ -143,6 +143,16 @@ class SessionTrackController {
     );
   }
 
+  /// Hands every remote track of the manager to [onRemoteTrackReceived]
+  /// again, after a fast reconnect.
+  Future<void> replayRemoteTracks() async {
+    final rtcManager = _rtcManager()!;
+
+    for (final track in rtcManager.remoteTracks.values) {
+      await onRemoteTrackReceived(rtcManager.subscriber, track);
+    }
+  }
+
   /// Re-applies the audio output the user selected, if any.
   Future<void> applyCurrentAudioOutputDevice() async {
     // Only re-apply an output the user explicitly selected.
