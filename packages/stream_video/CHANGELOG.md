@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🔄 Changed
+
+- `ActionCallToggleGroup.callUUIDToGroupWith` is now nullable. It is null when CallKit ungroups the call.
+
 ## 1.7.2
 
 ### ✅ Added
