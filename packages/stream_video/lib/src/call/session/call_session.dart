@@ -31,6 +31,7 @@ import 'call_session_config.dart';
 import 'publisher_connection_watchdog.dart';
 import 'publisher_negotiator.dart';
 import 'session_signaling.dart';
+import 'session_track_controller.dart';
 import 'sfu_join_request_builder.dart';
 
 part 'call_session_media.dart';
@@ -145,6 +146,25 @@ class CallSession extends Disposable with _CallSessionMedia {
     logTag: '$_tag-$sessionSeq',
   );
 
+  late final _tracks = SessionTrackController(
+    rtcManager: () => rtcManager,
+    getTrack: getTrack,
+    isAudioSuspended: () => stateManager.callState.isAudioSuspended,
+    localParticipant: () => stateManager.callState.localParticipant,
+    participants: () => stateManager.callState.callParticipants,
+    audioOutputSelectedByUser: () => stateManager.audioOutputSelectedByUser,
+    audioOutputDevice: () =>
+        stateManager.callStateStream.value.audioOutputDevice,
+    videoInputDevice: () => stateManager.callStateStream.value.videoInputDevice,
+    onSuspendedAudioTrackRecorded: onSuspendedAudioTrackRecorded,
+    setAudioOutputDevice: setAudioOutputDevice,
+    setVideoInputDevice: setVideoInputDevice,
+    setScreenShareEnabled: setScreenShareEnabled,
+    sendMuteState: _signaling.sendMuteState,
+    updateSubscriberTrack: stateManager.rtcUpdateSubscriberTrack,
+    logTag: '$_tag-$sessionSeq',
+  );
+
   late final _joinRequestBuilder = SfuJoinRequestBuilder(
     sessionId: sessionId,
     sfuToken: config.sfuToken,
@@ -196,9 +216,9 @@ class CallSession extends Disposable with _CallSessionMedia {
 
   StatsReporter? statsReporter;
 
-  /// Called by [_onLocalTrackPublished] and [_onRemoteTrackReceived] when an
-  /// audio track arrives while audio is suspended. The owning [Call] uses this
-  /// to record the track in its tracking map.
+  /// Called by [SessionTrackController] when an audio track arrives while
+  /// audio is suspended. The owning [Call] uses this to record the track in
+  /// its tracking map.
   final void Function(String trackId) onSuspendedAudioTrackRecorded;
 
   bool _isLeavingOrClosed = false;
@@ -379,7 +399,7 @@ class CallSession extends Disposable with _CallSessionMedia {
               ..onRenegotiationNeeded = _negotiator.negotiateOrRecover
               ..onReconnectionNeeded = onReconnectionNeeded
               ..onIceConnected = onIceConnected
-              ..onRemoteTrackReceived = _onRemoteTrackReceived;
+              ..onRemoteTrackReceived = _tracks.onRemoteTrackReceived;
       } else {
         final currentUserId = stateManager.callState.currentUserId;
         final localParticipant = event.callState.participants.firstWhere(
@@ -406,11 +426,11 @@ class CallSession extends Disposable with _CallSessionMedia {
               ..onPublisherIceCandidate = _signaling.onLocalIceCandidate
               ..onSubscriberIceCandidate = _signaling.onLocalIceCandidate
               ..onLocalTrackMuted = _signaling.sendMuteState
-              ..onLocalTrackPublished = _onLocalTrackPublished
+              ..onLocalTrackPublished = _tracks.onLocalTrackPublished
               ..onReconnectionNeeded = onReconnectionNeeded
               ..onIceConnected = onIceConnected
               ..onRenegotiationNeeded = _negotiator.negotiateOrRecover
-              ..onRemoteTrackReceived = _onRemoteTrackReceived;
+              ..onRemoteTrackReceived = _tracks.onRemoteTrackReceived;
       }
 
       // A close during its creation found no rtcManager to dispose, so this
@@ -639,7 +659,7 @@ class CallSession extends Disposable with _CallSessionMedia {
       final remoteTracks = rtcManager!.remoteTracks.values;
 
       for (final track in remoteTracks) {
-        await _onRemoteTrackReceived(rtcManager!.subscriber, track);
+        await _tracks.onRemoteTrackReceived(rtcManager!.subscriber, track);
       }
 
       if (result.isSuccess) {
@@ -749,10 +769,10 @@ class CallSession extends Disposable with _CallSessionMedia {
         await _onParticipantLeft(event);
       } else if (event is SfuTrackPublishedEvent) {
         _tracer.trace(TraceTag.trackPublished, event.toJson());
-        await _onTrackPublished(event);
+        await _tracks.onTrackPublished(event);
       } else if (event is SfuTrackUnpublishedEvent) {
         _tracer.trace(TraceTag.trackUnpublished, event.toJson());
-        await _onTrackUnpublished(event);
+        await _tracks.onTrackUnpublished(event);
       } else if (event is SfuChangePublishQualityEvent) {
         _tracer.trace(TraceTag.changePublishQuality, event.toJson());
         await _onPublishQualityChanged(event);
@@ -820,98 +840,6 @@ class CallSession extends Disposable with _CallSessionMedia {
     await rtcManager?.removeSubscriber(trackIdPrefix);
   }
 
-  Future<Result<RtcTrack>> _getTrackForParticipant(
-    String userId,
-    String sessionId,
-    SfuTrackType trackType,
-  ) async {
-    bool matchParticipant(CallParticipantState participant) {
-      return participant.userId == userId && participant.sessionId == sessionId;
-    }
-
-    final callParticipants = stateManager.callState.callParticipants;
-    final participant = callParticipants.firstWhereOrNull(matchParticipant);
-
-    if (participant == null) {
-      return failureWithError('Participant not found: $userId:$sessionId');
-    }
-
-    final trackIdPrefix = participant.trackIdPrefix;
-    final track = getTrack(trackIdPrefix, trackType);
-
-    // If the track is not found, return an error.
-    if (track == null) {
-      return failureWithError('Track not found: $trackIdPrefix:$trackType');
-    }
-
-    // If the track is found, return it.
-    return Result.success(track);
-  }
-
-  Future<void> _onTrackPublished(
-    SfuTrackPublishedEvent event,
-  ) async {
-    _logger.v(() => '[onTrackPublished] event: $event');
-
-    final trackResult = await _getTrackForParticipant(
-      event.userId,
-      event.sessionId,
-      event.trackType,
-    );
-
-    final track = trackResult.getDataOrNull();
-    if (track == null) return;
-
-    // Only start remote tracks. Local tracks are started by the user.
-    if (track is! RtcRemoteTrack) return;
-
-    if (track.isAudioTrack && stateManager.callState.isAudioSuspended) {
-      _logger.d(
-        () =>
-            '[onTrackPublished] audio suspended, '
-            'disabling and skipping start for audio track ${track.trackId}',
-      );
-      _suspendAudioTrack(track);
-    } else {
-      await track.start();
-
-      if (track.isAudioTrack) {
-        await applyCurrentAudioOutputDevice();
-      }
-    }
-  }
-
-  Future<void> _onTrackUnpublished(
-    SfuTrackUnpublishedEvent event,
-  ) async {
-    _logger.v(() => '[onTrackUnpublished] event: $event');
-
-    final trackResult = await _getTrackForParticipant(
-      event.userId,
-      event.sessionId,
-      event.trackType,
-    );
-
-    final track = trackResult.getDataOrNull();
-    if (track == null) return;
-
-    // Only stop remote tracks. Local tracks are stopped by the user.
-    if (track is! RtcRemoteTrack) {
-      final localTrack = rtcManager?.getTrack(track.trackId);
-      if (localTrack != null &&
-          localTrack.isScreenShareTrack &&
-          localTrack.mediaTrack.enabled) {
-        // If the unpublished track is a local screen share track and it's still enabled,
-        // disable screen sharing. It means the screen sharing was muted by the server.
-        await setScreenShareEnabled(false);
-      }
-
-      return;
-    }
-
-    await track.stop(disposeWebAudioPlayer: false);
-  }
-
   Future<void> _onPublishQualityChanged(
     SfuChangePublishQualityEvent event,
   ) async {
@@ -933,71 +861,10 @@ class CallSession extends Disposable with _CallSessionMedia {
     return await rtcManager?.onPublishOptionsChanged(event.publishOptions);
   }
 
-  Future<void> _applyCurrentVideoInputDevice() async {
-    final state = stateManager.callStateStream.value;
-    final videoInputDevice = state.videoInputDevice;
-    if (videoInputDevice != null) {
-      await setVideoInputDevice(videoInputDevice);
-    }
-  }
-
-  Future<void> _onLocalTrackPublished(RtcLocalTrack track) async {
-    _logger.d(() => '[onPublisherTrackPublished] track: $track');
-
-    if (track.isAudioTrack && stateManager.callState.isAudioSuspended) {
-      _logger.d(
-        () =>
-            '[onPublisherTrackPublished] audio suspended, '
-            'disabling and skipping start for audio track ${track.trackId}',
-      );
-      _suspendAudioTrack(track);
-    } else {
-      await track.start();
-
-      if (track.isAudioTrack) {
-        await applyCurrentAudioOutputDevice();
-      }
-    }
-
-    if (track.isVideoTrack) {
-      await _applyCurrentVideoInputDevice();
-    }
-
-    // Send a mute state update to the server.
-    _signaling.sendMuteState(track, false);
-  }
-
   /// Negotiates [pc], escalating an unresolved track mid.
   @visibleForTesting
   Future<void> negotiateOrRecover(StreamPeerConnection pc) =>
       _negotiator.negotiateOrRecover(pc);
-
-  Future<void> _onRemoteTrackReceived(
-    StreamPeerConnection pc,
-    RtcRemoteTrack remoteTrack,
-  ) async {
-    _logger.d(() => '[onRemoteTrackReceived] remoteTrack: $remoteTrack');
-
-    if (remoteTrack.isAudioTrack && stateManager.callState.isAudioSuspended) {
-      _logger.d(
-        () =>
-            '[onRemoteTrackReceived] audio suspended, '
-            'disabling and skipping start for audio track ${remoteTrack.trackId}',
-      );
-      _suspendAudioTrack(remoteTrack);
-    } else {
-      await remoteTrack.start();
-
-      if (remoteTrack.isAudioTrack) {
-        await applyCurrentAudioOutputDevice();
-      }
-    }
-
-    return stateManager.rtcUpdateSubscriberTrack(
-      trackIdPrefix: remoteTrack.trackIdPrefix,
-      trackType: remoteTrack.trackType,
-    );
-  }
 
   /// Re-applies the audio session configuration last applied, if any.
   @internal
@@ -1012,123 +879,13 @@ class CallSession extends Disposable with _CallSessionMedia {
 
   /// Re-applies the audio output the user selected, if any.
   @internal
-  Future<void> applyCurrentAudioOutputDevice() async {
-    // Only re-apply an output the user explicitly selected.
-    if (!stateManager.audioOutputSelectedByUser) return;
-
-    final state = stateManager.callStateStream.value;
-    final audioOutputDevice = state.audioOutputDevice;
-    if (audioOutputDevice == null) return;
-
-    final result = await setAudioOutputDevice(audioOutputDevice);
-    if (result is Failure) {
-      _logger.w(
-        () =>
-            '[applyCurrentAudioOutputDevice] ${audioOutputDevice.id} not '
-            'applied: ${result.videoError.message}',
-      );
-    }
-  }
-
-  /// Disables a freshly-received audio track and records it so
-  /// [resumeSuspendedAudioTracks] can re-enable it on resume.
-  void _suspendAudioTrack(RtcTrack track) {
-    track.disable();
-    onSuspendedAudioTrackRecorded(track.trackId);
-  }
-
-  /// Whether [track] is the local microphone track and the SDK currently
-  /// considers it muted.
-  bool _isMutedLocalMicrophoneTrack(RtcTrack track) {
-    if (track is! RtcLocalTrack) return false;
-    if (track.trackType != SfuTrackType.audio) return false;
-
-    final localParticipant = stateManager.callState.localParticipant;
-    if (localParticipant == null) {
-      // Warned about because the resume that follows is indistinguishable
-      // from a legitimate mute in a customer log.
-      _logger.w(
-        () =>
-            '[isMutedLocalMicrophoneTrack] no local participant in state, '
-            'treating ${track.trackId} as muted',
-      );
-      return true;
-    }
-
-    return !localParticipant.isAudioEnabled;
-  }
+  Future<void> applyCurrentAudioOutputDevice() =>
+      _tracks.applyCurrentAudioOutputDevice();
 
   /// Resumes audio tracks that were suspended or arrived during suspension.
   Future<void> resumeSuspendedAudioTracks(
     Map<String, SuspendedTrackState> priorStates,
-  ) async {
-    final rtcManager = this.rtcManager;
-    if (rtcManager == null) return;
-
-    final tracks = <String, RtcTrack>{
-      ...rtcManager.localTracks,
-      ...rtcManager.remoteTracks,
-    };
-    for (final trackId in tracks.keys) {
-      // Read again: an earlier track's resume awaits, and meanwhile this one
-      // may have been removed or replaced under the same id.
-      final track = rtcManager.getTrack(trackId);
-      if (track == null || !track.isAudioTrack) continue;
-
-      final prior = priorStates[trackId];
-      if (prior == null) continue;
-
-      await _resumeSuspendedAudioTrack(trackId, track, prior);
-    }
-  }
-
-  Future<void> _resumeSuspendedAudioTrack(
-    String trackId,
-    RtcTrack track,
-    SuspendedTrackState prior,
-  ) async {
-    switch (prior) {
-      case SuspendedTrackState.wasEnabled:
-        // [priorStates] is a snapshot, user may have muted since.
-        // Re-enabling could make the mic live while UI/SDK show muted, especially on iOS/macOS.
-        if (_isMutedLocalMicrophoneTrack(track)) {
-          _logger.d(
-            () =>
-                '[resumeSuspendedAudioTracks] track $trackId was muted '
-                'during the suspension, leaving disabled',
-          );
-          return;
-        }
-
-        track.enable();
-        _logger.d(
-          () => '[resumeSuspendedAudioTracks] re-enabled track $trackId',
-        );
-      case SuspendedTrackState.neverStarted:
-        // For local mic tracks published during suspension, starting here
-        // could make the mic live even if muted in the SDK/UI.
-        if (_isMutedLocalMicrophoneTrack(track)) {
-          _logger.d(
-            () =>
-                '[resumeSuspendedAudioTracks] track $trackId was muted '
-                'during the suspension, leaving unstarted',
-          );
-          return;
-        }
-
-        await track.start();
-        await applyCurrentAudioOutputDevice();
-        _logger.d(
-          () => '[resumeSuspendedAudioTracks] started track $trackId',
-        );
-      case SuspendedTrackState.wasDisabled:
-        _logger.v(
-          () =>
-              '[resumeSuspendedAudioTracks] track $trackId was '
-              'disabled before suspension, leaving disabled',
-        );
-    }
-  }
+  ) => _tracks.resumeSuspendedAudioTracks(priorStates);
 
   Future<Result<None>> notifyNoiseCancellationStarted() async {
     final result = await sfuClient.startNoiseCancellation(
