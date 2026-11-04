@@ -37,7 +37,7 @@ people work on this; CS6 needs CS5, CS9 needs CS6 and CS8, CS10 needs all.
 | 3 | CS3 | `refactor/flu-1063-sfu-join-request-builder` | #1565 |
 | 4 | CS4 | `fix/flu-1064-one-join-handshake` | #1566 |
 | 5 | CS5 | `refactor/flu-1065-publisher-negotiator` | #1567 |
-| 6 | CS6 | `refactor/flu-1066-session-signaling` | |
+| 6 | CS6 | `refactor/flu-1066-session-signaling` | #1568 |
 | 7 | CS7 | `refactor/flu-1067-publisher-connection-watchdog` | |
 | 8 | CS8 | `refactor/flu-1068-session-track-controller` | |
 | 9 | CS9 | `refactor/flu-1069-sfu-event-router` | |
