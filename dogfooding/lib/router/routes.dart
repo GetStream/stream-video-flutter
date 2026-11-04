@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../screens/call_screen.dart';
+import '../screens/call_route_page.dart';
 import '../screens/home_screen.dart';
-import '../screens/join_call_screen.dart';
 import '../screens/livestream_demo_screen.dart';
-import '../screens/lobby_screen.dart';
 import '../screens/login_screen.dart';
+import '../utils/consts.dart';
 
 part 'routes.g.dart';
 
@@ -34,91 +32,94 @@ class LoginRoute extends GoRouteData with $LoginRoute {
   }
 }
 
+/// The page for one call, `/join/<callId>`.
+///
+/// It takes the query parameters pronto's links use: `type` for the call type,
+/// `encryption_key` for the shared passphrase of an encrypted call, and the
+/// codec overrides `video_encoder` (or `video_codec`), `fmtp`, `bitrate`,
+/// `max_simulcast_layers`, `video_decoder` and `video_decoder_fmtp`.
 @immutable
 class JoinRoute extends GoRouteData with $JoinRoute {
   const JoinRoute({required this.callId});
 
   final String callId;
 
+  /// [location] with the call's type, left out for [kCallType], and the
+  /// shared passphrase of an encrypted call.
+  String locationFor({StreamCallType? callType, String? encryptionKey}) {
+    final type = callType?.value;
+    final query = {
+      if (type != null && type != kCallType.value) 'type': type,
+      if (encryptionKey != null && encryptionKey.isNotEmpty)
+        'encryption_key': encryptionKey,
+    };
+    if (query.isEmpty) return location;
+
+    return Uri(path: location, queryParameters: query).toString();
+  }
+
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return JoinCallScreen(
+    final query = state.uri.queryParameters;
+    final type = query['type'];
+
+    return CallRoutePage(
       callId: callId,
+      callType: type == null || type.isEmpty
+          ? kCallType
+          : StreamCallType.fromString(type),
       linkHost: state.uri.host,
-      encryptionKey: state.uri.queryParameters['encryption_key'],
+      encryptionKey: query['encryption_key'],
+      publishOptions: _publishOptions(query),
     );
   }
 }
 
-@immutable
-@TypedGoRoute<LobbyRoute>(path: '/lobby', name: 'lobby')
-class LobbyRoute extends GoRouteData with $LobbyRoute {
-  const LobbyRoute({required this.$extra});
+/// The codec overrides in [query], null when it has none.
+ClientPublishOptions? _publishOptions(Map<String, String> query) {
+  PreferredCodec? codec(String? name) =>
+      name == null ? null : PreferredCodec.values.asNameMap()[name];
+  int? number(String? value) => value == null ? null : int.tryParse(value);
 
-  final ({Call call, bool callExists, String? encryptionKey}) $extra;
+  final preferredCodec = codec(query['video_encoder'] ?? query['video_codec']);
+  final fmtpLine = query['fmtp'];
+  final preferredBitrate = number(query['bitrate']);
+  final maxSimulcastLayers = number(query['max_simulcast_layers']);
+  final subscriberCodec = codec(query['video_decoder']);
+  final subscriberFmtpLine = query['video_decoder_fmtp'];
 
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return LobbyScreen(
-      call: $extra.call,
-      callExists: $extra.callExists,
-      initialEncryptionKey: $extra.encryptionKey,
-      onJoinCallPressed:
-          ({
-            required call,
-            required connectOptions,
-            required effectsManager,
-            encryptionKey,
-          }) {
-            // Navigate to the call screen.
-            CallRoute(
-              $extra: (
-                call: call,
-                connectOptions: connectOptions,
-                effectsManager: effectsManager,
-                // The passphrase the lobby settled on, so the call screen can
-                // put it in the invite it offers.
-                encryptionKey: encryptionKey,
-              ),
-            ).replace(context);
-          },
-    );
-  }
+  final overrides = [
+    preferredCodec,
+    fmtpLine,
+    preferredBitrate,
+    maxSimulcastLayers,
+    subscriberCodec,
+    subscriberFmtpLine,
+  ];
+  if (overrides.every((it) => it == null)) return null;
+
+  return ClientPublishOptions(
+    preferredCodec: preferredCodec,
+    fmtpLine: fmtpLine,
+    preferredBitrate: preferredBitrate,
+    maxSimulcastLayers: maxSimulcastLayers,
+    subscriberCodec: subscriberCodec,
+    subscriberFmtpLine: subscriberFmtpLine,
+  );
 }
 
 @immutable
-@TypedGoRoute<LivestreamRoute>(path: '/livestream', name: 'livestream')
+@TypedGoRoute<LivestreamRoute>(
+  path: '/livestream/:callId',
+  name: 'livestream',
+)
 class LivestreamRoute extends GoRouteData with $LivestreamRoute {
-  const LivestreamRoute({required this.$extra});
+  const LivestreamRoute({required this.callId});
 
-  final String $extra;
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return LivestreamDemoScreen(callId: $extra);
-  }
-}
-
-@immutable
-@TypedGoRoute<CallRoute>(path: '/call', name: 'call')
-class CallRoute extends GoRouteData with $CallRoute {
-  const CallRoute({required this.$extra});
-
-  final ({
-    Call call,
-    CallConnectOptions? connectOptions,
-    StreamVideoEffectsManager? effectsManager,
-    String? encryptionKey,
-  })
-  $extra;
+  final String callId;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return CallScreen(
-      call: $extra.call,
-      connectOptions: $extra.connectOptions,
-      videoEffectsManager: $extra.effectsManager,
-      encryptionKey: $extra.encryptionKey,
-    );
+    return LivestreamDemoScreen(callId: callId);
   }
 }
