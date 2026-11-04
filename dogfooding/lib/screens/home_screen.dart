@@ -121,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e, stk) {
       debugPrint('Error creating ringing call: $e');
       debugPrint(stk.toString());
+      if (mounted) _showError(e.toString());
     } finally {
       if (mounted) {
         hideLoadingIndicator(context);

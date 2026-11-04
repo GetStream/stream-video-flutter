@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
@@ -16,10 +17,8 @@ import 'lobby_screen.dart';
 /// itself.
 ///
 /// The route carries only the call id, so the address always names the call.
-/// The page finds the [Call] for that id and picks what to show from its
-/// state: a call that is idle opens in the lobby, one that is already ringing
-/// or joined opens on the call screen. Leaving the lobby for the call stays on
-/// this page.
+/// A call the app is already ringing or in opens on the call screen; any other
+/// opens in the lobby. Leaving the lobby for the call stays on this page.
 class CallRoutePage extends StatefulWidget {
   const CallRoutePage({
     super.key,
@@ -36,13 +35,14 @@ class CallRoutePage extends StatefulWidget {
   /// the call lives in.
   final String? linkHost;
 
-  /// The shared passphrase the link carried, null for a link to a call that is
-  /// not encrypted.
+  /// The shared passphrase that came with the navigation, null when none did.
   final String? encryptionKey;
 
   /// Hands [call] to the next page that opens for its id, so a call the app
-  /// already set up — one it is ringing, or one accepted from a notification —
-  /// is shown instead of a fresh call with the same id.
+  /// already set up — one it is ringing, one ringing in, or one accepted from
+  /// a notification — is shown instead of a fresh call with the same id.
+  ///
+  /// A call that has ended by the time the page opens closes the page.
   static void handOff(Call call) => _handedOff[call.id] = call;
 
   static final _handedOff = <String, Call>{};
@@ -60,7 +60,9 @@ typedef _JoinOptions = ({
 class _CallRoutePageState extends State<CallRoutePage> {
   Call? _call;
   bool _callExists = false;
-  bool _failed = false;
+
+  /// Why the call could not be opened, null while it can.
+  String? _error;
 
   /// Whether the call screen is showing rather than the lobby.
   bool _inCall = false;
@@ -76,7 +78,13 @@ class _CallRoutePageState extends State<CallRoutePage> {
 
   Future<void> _openCall() async {
     try {
-      final existing = _existingCall();
+      final handedOff = CallRoutePage._handedOff.remove(widget.callId);
+      if (handedOff != null && handedOff.state.value.status.isDisconnected) {
+        _close();
+        return;
+      }
+
+      final existing = handedOff ?? _activeCall();
       if (existing != null && !existing.state.value.status.isIdle) {
         setState(() {
           _call = existing;
@@ -89,13 +97,13 @@ class _CallRoutePageState extends State<CallRoutePage> {
 
       final call = existing ?? makeAppCall(widget.callId);
 
-      // A link can point at a call that was never created. Creation is left to
-      // the lobby, because that is where the encryption mode is chosen and the
-      // mode is fixed at creation.
+      // The call may not exist yet. Creation is left to the lobby, because
+      // that is where the encryption mode is chosen and the mode is fixed at
+      // creation.
       final lookup = await lookupCallExists(call);
       if (lookup is Failure) {
         debugPrint('Could not look up call ${widget.callId}: ${lookup.error}');
-        if (mounted) setState(() => _failed = true);
+        if (mounted) setState(() => _error = lookup.videoError.message);
         return;
       }
 
@@ -107,18 +115,24 @@ class _CallRoutePageState extends State<CallRoutePage> {
     } catch (e, stk) {
       debugPrint('Could not open call ${widget.callId}: $e');
       debugPrintStack(stackTrace: stk);
-      if (mounted) setState(() => _failed = true);
+      if (mounted) setState(() => _error = e.toString());
     }
   }
 
-  /// The call the app already holds for this id: one handed off to this page,
-  /// or one the client is in.
-  Call? _existingCall() {
-    final handedOff = CallRoutePage._handedOff.remove(widget.callId);
-    if (handedOff != null && !handedOff.state.value.status.isDisconnected) {
-      return handedOff;
-    }
+  /// Leaves this page once it is on screen, for a call that is already over.
+  void _close() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        HomeRoute().go(context);
+      }
+    });
+  }
 
+  /// The call the client is in with this id.
+  Call? _activeCall() {
     return locator
         .get<StreamVideo>()
         .activeCalls
@@ -150,12 +164,13 @@ class _CallRoutePageState extends State<CallRoutePage> {
   @override
   Widget build(BuildContext context) {
     final call = _call;
-    if (_failed || call == null) {
+    final error = _error;
+    if (error != null || call == null) {
       return Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: Center(
-          child: _failed
-              ? _JoinFailed(callId: widget.callId)
+          child: error != null
+              ? _JoinFailed(callId: widget.callId, error: error)
               : const CircularProgressIndicator.adaptive(),
         ),
       );
@@ -198,9 +213,10 @@ class _CallRoutePageState extends State<CallRoutePage> {
 }
 
 class _JoinFailed extends StatelessWidget {
-  const _JoinFailed({required this.callId});
+  const _JoinFailed({required this.callId, required this.error});
 
   final String callId;
+  final String error;
 
   @override
   Widget build(BuildContext context) {
@@ -216,7 +232,13 @@ class _JoinFailed extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Check that the link is still valid, then try again.',
+            error,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Check the call id or your connection, then try again.',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
