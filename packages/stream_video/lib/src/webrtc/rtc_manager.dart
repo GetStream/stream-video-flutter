@@ -17,7 +17,9 @@ import '../sfu/data/models/sfu_video_sender.dart';
 import '../telemetry/client_event_types.dart';
 import '../telemetry/media_frame_reporter.dart';
 import '../telemetry/peer_connection_connect_reporter.dart';
-import 'apple_audio_route.dart';
+import 'audio/adm_microphone_mute.dart';
+import 'audio/ios_audio_session.dart';
+import 'audio/audio_session.dart';
 import 'codecs_helper.dart' as codecs;
 import 'codecs_helper.dart';
 import 'e2ee/e2ee_mapping.dart';
@@ -856,47 +858,39 @@ class RtcManager extends Disposable {
     ];
   }
 
-  /// The Apple audio session configuration last applied with
-  /// [setAppleAudioConfiguration].
-  rtc.AppleAudioConfiguration? _appleAudioConfiguration;
+  late final AudioSession _audioSession = AudioSession.forPlatform();
 
-  /// Applies [policy]'s Apple audio session configuration, asking for the
-  /// loudspeaker as the built-in output when [speakerOn].
+  late final AdmMicrophoneMute _admMute = AdmMicrophoneMute.forFactory(
+    pcFactory,
+  );
+
+  /// Applies [policy]'s audio session configuration, asking for the
+  /// loudspeaker as the built-in output when [speakerOn]. Does nothing on a
+  /// platform without an audio session to configure.
   @internal
-  Future<Result<None>> setAppleAudioConfiguration({
+  Future<Result<None>> configureAudioSession({
     required AudioConfigurationPolicy policy,
     bool speakerOn = false,
-  }) async {
-    final configuration = policy.getAppleConfiguration(
-      defaultToSpeaker: speakerOn,
-    );
-    try {
-      await rtc.Helper.setAppleAudioConfiguration(configuration);
-      _appleAudioConfiguration = configuration;
-      return const Result.success(none);
-    } catch (e, stk) {
-      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
-    }
+  }) {
+    return _audioSession.set(policy: policy, speakerOn: speakerOn);
   }
 
   /// Re-applies the configuration last applied with
-  /// [setAppleAudioConfiguration], if any.
-  ///
-  /// Resuming suspended audio restores the configuration the call's factory
-  /// was built with, which asks for the loudspeaker only under a policy that
-  /// defaults to it. This brings back the loudspeaker the call settings or
-  /// an output change asked for since.
+  /// [configureAudioSession], if any.
   @internal
-  Future<Result<None>> restoreAppleAudioConfiguration() async {
-    final configuration = _appleAudioConfiguration;
-    if (configuration == null) return const Result.success(none);
+  Future<Result<None>> restoreAudioSession() {
+    return _audioSession.restore();
+  }
 
-    try {
-      await rtc.Helper.setAppleAudioConfiguration(configuration);
-      return const Result.success(none);
-    } catch (e, stk) {
-      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
-    }
+  /// Syncs the ADM mute state with the local audio track, to avoid mismatches
+  /// after audio restarts or suspends. Idempotent: only updates when needed.
+  ///
+  /// No-op on platforms without ADM-level mute.
+  @internal
+  Future<void> reconcileAppleAdmMicrophoneMute() {
+    return _admMute.reconcile(
+      getPublisherTrackByType(SfuTrackType.audio),
+    );
   }
 }
 
@@ -1141,8 +1135,8 @@ extension PublisherRtcManager on RtcManager {
 
     // Ensure a new live audio track isn't still muted by an existing ADM-level mute.
     // ADM mute persists beyond sessions (per-call factory).
-    if (_isAppleAdmMuteSupported(audioTrack) && audioTrack.mediaTrack.enabled) {
-      await _setAppleAdmMicrophoneMuted(false);
+    if (_admMute.isSupported(audioTrack) && audioTrack.mediaTrack.enabled) {
+      await _admMute.setMuted(false);
     }
 
     for (final option in publishOptions) {
@@ -1692,11 +1686,11 @@ extension PublisherRtcManager on RtcManager {
     tracks[trackId] = track;
 
     final useAdmLevelMute =
-        !track.stopTrackOnMute && _isAppleAdmMuteSupported(track);
+        !track.stopTrackOnMute && _admMute.isSupported(track);
 
     track.disable();
     if (useAdmLevelMute) {
-      await _setAppleAdmMicrophoneMuted(true);
+      await _admMute.setMuted(true);
     } else if (track.stopTrackOnMute) {
       // Releases the track and stops the permission indicator.
       await track.stop();
@@ -1725,8 +1719,8 @@ extension PublisherRtcManager on RtcManager {
     // leaves the ADM muted, and the recreate path below neither clears it nor
     // goes through publishAudioTrack's reconcile — which would leave a live,
     // published track with capture silenced inside the ADM.
-    if (_isAppleAdmMuteSupported(track)) {
-      await _setAppleAdmMicrophoneMuted(false);
+    if (_admMute.isSupported(track)) {
+      await _admMute.setMuted(false);
     }
 
     // A soft-muted track was never released, but it is still capturing with
@@ -1789,63 +1783,6 @@ extension PublisherRtcManager on RtcManager {
         current.highPassFilter != next.highPassFilter ||
         current.typingNoiseDetection != next.typingNoiseDetection ||
         current.channelCount != next.channelCount;
-  }
-
-  /// Returns true if [track] should use ADM-level mute.
-  /// Audio tracks on iOS / macOS only.
-  bool _isAppleAdmMuteSupported(RtcLocalTrack track) =>
-      pcFactory.isAppleAdmMicrophoneMuteSupported &&
-      track.trackType == SfuTrackType.audio;
-
-  Future<void> _setAppleAdmMicrophoneMuted(bool muted) async {
-    try {
-      await pcFactory.setAppleAdmMicrophoneMuted(muted);
-    } catch (e, stk) {
-      _logger.w(() => '[setAppleAdmMicrophoneMuted] failed: $e\n$stk');
-    }
-  }
-
-  /// Reads the ADM's own mute state, or `null` when it cannot be determined.
-  Future<bool?> _getAppleAdmMicrophoneMuted() async {
-    try {
-      return await pcFactory.isAppleAdmMicrophoneMuted();
-    } catch (e, stk) {
-      _logger.w(() => '[getAppleAdmMicrophoneMuted] failed: $e\n$stk');
-      return null;
-    }
-  }
-
-  /// Syncs the ADM mute state with the local audio track, to avoid mismatches
-  /// after audio restarts or suspends. Idempotent: only updates when needed.
-  ///
-  /// No-op on platforms without ADM-level mute.
-  Future<void> reconcileAppleAdmMicrophoneMute() async {
-    final track = getPublisherTrackByType(SfuTrackType.audio);
-    if (track == null) return;
-    if (!_isAppleAdmMuteSupported(track)) return;
-
-    final bool desiredMuted;
-    if (track.mediaTrack.enabled) {
-      // A live track must never stay silenced by a leftover ADM mute.
-      desiredMuted = false;
-    } else if (!track.stopTrackOnMute) {
-      // A disabled track is the SDK's muted state when using ADM-level mute.
-      desiredMuted = true;
-    } else {
-      // When the track is muted by stopping it, ADM mute is not used.
-      return;
-    }
-
-    final actual = await _getAppleAdmMicrophoneMuted();
-    if (actual == desiredMuted) return;
-
-    _logger.w(
-      () =>
-          '[reconcileAppleAdmMicrophoneMute] ADM mute out of sync '
-          '(adm reported: $actual, expected: $desiredMuted), re-applying for '
-          'track ${track.trackId}',
-    );
-    await _setAppleAdmMicrophoneMuted(desiredMuted);
   }
 
   Future<Result<RtcLocalAudioTrack>> createAudioTrack({

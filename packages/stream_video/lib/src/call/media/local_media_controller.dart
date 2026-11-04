@@ -392,7 +392,7 @@ class LocalMediaController {
       final rtcManager = _session()?.rtcManager;
       final result = rtcManager == null
           ? failureWithError<None>('no RTC manager')
-          : await rtcManager.setAppleAudioConfiguration(
+          : await rtcManager.configureAudioSession(
               speakerOn: resolveAppleSpeakerOn(
                 policy: policy,
                 speakerRequested: _connectOptions.speakerDefaultOn,

@@ -106,12 +106,8 @@ extension RtcManagerTrackHelper on RtcManager {
       // The policy the call's factory was built with, so the session and the
       // factory never disagree.
       final policy = pcFactory.resolvedAudioConfigurationPolicy;
-      final configured = await setAppleAudioConfiguration(
-        speakerOn: resolveAppleSpeakerOn(
-          policy: policy,
-          speakerRequested: device.isBuiltInSpeaker,
-          earpieceRequested: device.isBuiltInEarpiece,
-        ),
+      final configured = await configureAudioSession(
+        speakerOn: IosAudioSession.speakerOnFor(device, policy),
         policy: policy,
       );
       if (configured is Failure) {
@@ -123,7 +119,7 @@ extension RtcManagerTrackHelper on RtcManager {
       }
 
       // Change the audio output device for all remote audio tracks.
-      await rtc.Helper.selectAudioOutput(device.id);
+      await _audioSession.selectOutput(device);
       for (final audioTrack in audioTracks) {
         final updatedTrack = audioTrack.copyWith(audioSinkId: device.id);
         tracks[updatedTrack.trackId] = updatedTrack;
