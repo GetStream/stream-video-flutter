@@ -40,7 +40,7 @@ people work on this; CS6 needs CS5, CS9 needs CS6 and CS8, CS10 needs all.
 | 6 | CS6 | `refactor/flu-1066-session-signaling` | #1568 |
 | 7 | CS7 | `refactor/flu-1067-publisher-connection-watchdog` | #1569 |
 | 8 | CS8 | `refactor/flu-1068-session-track-controller` | #1571 |
-| 9 | CS9 | `refactor/flu-1069-sfu-event-router` | |
+| 9 | CS9 | `refactor/flu-1069-sfu-event-router` | #1572 |
 | 10 | CS10 | `refactor/flu-1070-call-session-start-fast-reconnect` | |
 
 - [x] 1. **CS1** [FLU-1061](https://linear.app/stream/issue/FLU-1061): characterisation tests for the untested paths (M). Gates every move; pins bugs 1 to 3 and 5 of FLU-1060 as they behave today.
