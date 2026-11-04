@@ -1,13 +1,17 @@
 // ignore_for_file: avoid_print
 
-import 'dart:io' show Directory, File;
+import 'dart:io' show Directory, File, FileSystemEntity;
 
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
 /// Updates the version constant in stream_video/lib/globals.dart and the
-/// dogfooding app version based on the version in stream_video's pubspec.yaml.
+/// dogfooding app version based on the version in stream_video's pubspec.yaml,
+/// and the podspec version of every package under packages/ and webrtc/ based
+/// on that package's own pubspec.yaml.
 Future<void> main() async {
+  _updatePodspecVersions();
+
   // Target the stream_video package
   const packageName = 'stream_video';
   final rootDir = Directory.current.path;
@@ -63,4 +67,44 @@ Future<void> main() async {
   print(
     '✓ Successfully updated version to $cleanedVersion in $dogfoodingPubspecPath',
   );
+}
+
+/// Sets `s.version` in each package's ios/ and macos/ podspecs to the version
+/// in its pubspec.yaml.
+void _updatePodspecVersions() {
+  final rootDir = Directory.current.path;
+  final packageDirs = [
+    for (final parent in ['packages', 'webrtc'])
+      ...Directory(p.join(rootDir, parent)).listSync().whereType<Directory>(),
+  ];
+
+  for (final packageDir in packageDirs) {
+    final pubspecFile = File(p.join(packageDir.path, 'pubspec.yaml'));
+    if (!pubspecFile.existsSync()) continue;
+
+    final pubspec = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
+    final version = pubspec['version'] as String?;
+    if (version == null) continue;
+
+    final podspecs = [
+      for (final platform in ['ios', 'macos'])
+        if (FileSystemEntity.isDirectorySync(p.join(packageDir.path, platform)))
+          ...Directory(p.join(packageDir.path, platform))
+              .listSync()
+              .whereType<File>()
+              .where((file) => file.path.endsWith('.podspec')),
+    ];
+
+    for (final podspec in podspecs) {
+      final content = podspec.readAsStringSync();
+      final updated = content.replaceFirstMapped(
+        RegExp(r"^(\s*s\.version\s*=\s*)'[^']*'", multiLine: true),
+        (match) => "${match[1]}'$version'",
+      );
+      if (updated == content) continue;
+
+      podspec.writeAsStringSync(updated);
+      print('✓ Updated version to $version in ${podspec.path}');
+    }
+  }
 }
