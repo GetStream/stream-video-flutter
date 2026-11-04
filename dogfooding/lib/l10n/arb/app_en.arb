@@ -60,6 +60,10 @@
   "@designFluent": {
     "description": "The design choice for Microsoft's Fluent design system. A product name, not translated."
   },
+  "designLiquidGlass": "Liquid Glass",
+  "@designLiquidGlass": {
+    "description": "The design choice for Apple's Liquid Glass design. A product name, not translated."
+  },
   "accentColorTitle": "Accent Color",
   "@accentColorTitle": {
     "description": "The heading over the accent color swatches."

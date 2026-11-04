@@ -147,12 +147,12 @@ checked class by class. Use it as a reference, not a port.
 - [x] Accent: the picked palette color via `Color.toAccentColor()`. fluent_ui is built on the decoupled `material_ui`, so Material types it takes (e.g. `VisualDensity`) come from `fluent_ui`.
 
 ### Phase 6: Liquid Glass
-- [ ] Port the theme and the icons (`CupertinoIcons`) from chat. Rewrite the builders on `liquid_glass_widgets`' own widgets (glass buttons, switch, text field), which replaces chat's custom glass switch.
-- [ ] `splitButton`: two glass halves in one glass pill. Check whether the package has a grouped or segmented button to build it from before composing it by hand.
-- [ ] Setup: call `LiquidGlassWidgets.initialize()` in `main` (it preloads the shaders) and `LiquidGlassWidgets.wrap()` around the app, with a `brightnessResolver` so the glass follows `ThemeMode`. No Flutter GPU flags.
-- [ ] Wrap the call controls in a `GlassBackdropGroup`, so the controls bar shares one backdrop read.
-- [ ] Use the default (Standard) quality. Premium is only recommended for static surfaces, and the call controls sit over moving video.
-- [ ] Default to `StreamSurfaceStyle.floating` while this design is active, as chat does.
+- [x] Port the theme and the icons (`CupertinoIcons`) from chat. Rewrite the builders on `liquid_glass_widgets`' own widgets (glass buttons, switch, text field, progress), which replaces chat's custom glass switch. Every control uses `useOwnLayer: true`, as the SDK places them one by one.
+- [x] `splitButton`: a `GlassButtonGroup` of two transparent `GlassButton`s with a divider, tinted with the error color when destructive.
+- [x] Setup: call `LiquidGlassWidgets.initialize()` in `main` (it preloads the shaders) and `LiquidGlassWidgets.wrap()` around the app, with a `brightnessResolver` so the glass follows `ThemeMode`. No Flutter GPU flags.
+- [ ] Wrap the call controls in a `GlassBackdropGroup`, so the controls bar shares one backdrop read. Not done: the bar is built inside the SDK, so dogfooding has nothing to wrap it with.
+- [x] Use the default (Standard) quality. Premium is only recommended for static surfaces, and the call controls sit over moving video.
+- [x] Default to `StreamSurfaceStyle.floating` while this design is active, as chat does.
 - [ ] Glass over **video tiles** is the interesting case. Check frame times on a 6+ participant call (profile build).
 
 ### Phase 7: Material 3 Expressive

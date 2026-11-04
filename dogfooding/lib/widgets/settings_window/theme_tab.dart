@@ -218,6 +218,7 @@ extension on AppDesign {
     AppDesign.shad => l10n.designShad,
     AppDesign.yaru => l10n.designYaru,
     AppDesign.fluent => l10n.designFluent,
+    AppDesign.liquidGlass => l10n.designLiquidGlass,
   };
 }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'design/app_design_spec.dart';
 import 'design/fluent/fluent_design.dart';
+import 'design/liquid_glass/liquid_glass_design.dart';
 import 'design/shad/shad_design.dart';
 import 'design/stream_design.dart';
 import 'design/yaru/yaru_design.dart';
@@ -18,7 +19,10 @@ enum AppDesign {
   yaru(YaruDesign()),
 
   /// Windows 11's Fluent.
-  fluent(FluentDesign());
+  fluent(FluentDesign()),
+
+  /// Apple's Liquid Glass.
+  liquidGlass(LiquidGlassDesign());
 
   const AppDesign(this.spec);
 

@@ -188,6 +188,12 @@ abstract class AppLocalizations {
   /// **'Fluent'**
   String get designFluent;
 
+  /// The design choice for Apple's Liquid Glass design. A product name, not translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Liquid Glass'**
+  String get designLiquidGlass;
+
   /// The heading over the accent color swatches.
   ///
   /// In en, this message translates to:
