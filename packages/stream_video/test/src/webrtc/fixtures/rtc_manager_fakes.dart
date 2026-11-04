@@ -8,6 +8,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_codec.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_publish_options.dart';
+import 'package:stream_video/src/webrtc/media/capture_dimension.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
@@ -108,8 +109,18 @@ class FakeMediaStreamTrack extends Fake implements rtc.MediaStreamTrack {
     return clone;
   }
 
+  /// What [getSettings] reports.
+  Map<String, dynamic> settings = const {};
+
+  /// When set, [getSettings] throws it.
+  Exception? settingsError;
+
   @override
-  Map<String, dynamic> getSettings() => const {};
+  Map<String, dynamic> getSettings() {
+    final error = settingsError;
+    if (error != null) throw error;
+    return settings;
+  }
 
   @override
   String toString() => 'FakeMediaStreamTrack($id)';
@@ -231,6 +242,8 @@ class RtcManagerFixture {
     CallStateNotifier? stateManager,
     CallHost? host,
     bool withPublisher = true,
+    CaptureDimensionResolver captureDimensionResolver =
+        const CaptureDimensionResolver(),
   }) {
     when(() => publisherMock.pc).thenReturn(pc);
     when(() => publisherMock.isReconnecting).thenReturn(false);
@@ -271,6 +284,7 @@ class RtcManagerFixture {
       stateManager: stateManager ?? createTestCallStateManager(),
       host: host ?? setupMockCallHost(),
       pcFactory: pcFactory ?? fakePcFactory(),
+      captureDimensionResolver: captureDimensionResolver,
     );
   }
 

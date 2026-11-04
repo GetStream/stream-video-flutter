@@ -31,7 +31,7 @@ branches off `v2` instead of in the stack, as long as T11 waits for all of them.
 | 3 | T3 | `refactor/flu-1049-rtc-manager-facade` | [#1546](https://github.com/GetStream/stream-video-flutter/pull/1546) |
 | 4 | T4 | `refactor/flu-1050-publish-quality` | [#1547](https://github.com/GetStream/stream-video-flutter/pull/1547) |
 | 5 | T5 | `refactor/flu-1051-announced-tracks` | [#1548](https://github.com/GetStream/stream-video-flutter/pull/1548) |
-| 6 | T6 | `refactor/flu-1052-capture-dimension` | |
+| 6 | T6 | `refactor/flu-1052-capture-dimension` | [#1549](https://github.com/GetStream/stream-video-flutter/pull/1549) |
 | 7 | T7 | `refactor/flu-1053-apple-audio` | |
 | 8 | T8 | `refactor/flu-1054-remote-track-decryptor` | |
 | 9 | T9 | `refactor/flu-1055-rtc-session-telemetry` | |
@@ -45,7 +45,7 @@ branches off `v2` instead of in the stack, as long as T11 waits for all of them.
 - [x] 3. **T3** [FLU-1049](https://linear.app/stream/issue/FLU-1049): close the facade: `localTracks`, `remoteTracks`, `markNegotiated`, `getGenericSdp` to the factory (S). Before any class move, so `CallSession` does not change again later.
 - [x] 4. **T4** [FLU-1050](https://linear.app/stream/issue/FLU-1050): publish quality and audio bitrate as pure functions (S). The two highest complexity scores, with no tests until T1.
 - [x] 5. **T5** [FLU-1051](https://linear.app/stream/issue/FLU-1051): announced tracks builder (S–M). Audio settings as a value; the `mid` workarounds named as a plugin seam.
-- [ ] 6. **T6** [FLU-1052](https://linear.app/stream/issue/FLU-1052): capture dimension resolver with an injected screen size (S). `package:flutter/widgets.dart` leaves the manager.
+- [x] 6. **T6** [FLU-1052](https://linear.app/stream/issue/FLU-1052): capture dimension resolver with an injected screen size (S). `package:flutter/widgets.dart` leaves the manager.
 - [ ] 7. **T7** [FLU-1053](https://linear.app/stream/issue/FLU-1053): Apple ADM mute and audio session out (S). The facade keeps `@internal` delegates.
 - [ ] 8. **T8** [FLU-1054](https://linear.app/stream/issue/FLU-1054): remote track decryption out (S). Participant lookup as a callback.
 - [ ] 9. **T9** [FLU-1055](https://linear.app/stream/issue/FLU-1055): telemetry wiring out (S).

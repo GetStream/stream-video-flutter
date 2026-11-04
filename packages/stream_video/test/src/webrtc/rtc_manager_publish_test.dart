@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_video/src/webrtc/codecs_helper.dart';
+import 'package:stream_video/src/webrtc/media/capture_dimension.dart';
 import 'package:stream_video/src/webrtc/model/rtc_audio_bitrate_preset.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
@@ -207,5 +209,73 @@ void main() {
         expect(sender.setParametersCalls, isEmpty);
       },
     );
+  });
+
+  group('capture size', () {
+    const screen = RtcVideoDimension(width: 1000, height: 500);
+    final shareOption = publishOption(3, SfuTrackType.screenShare);
+
+    RtcManagerFixture build() {
+      return RtcManagerFixture(
+        publishOptions: [shareOption],
+        captureDimensionResolver: CaptureDimensionResolver(
+          screenDimension: () => screen,
+        ),
+      );
+    }
+
+    test('the published track carries the resolved size', () async {
+      final fixture = build();
+
+      final result = await fixture.manager.publishVideoTrack(
+        track: fakeScreenShareTrack('share'),
+      );
+
+      expect(result.getDataOrNull()!.videoDimension, screen);
+    });
+
+    test('the sender encodes at the resolved size', () async {
+      final fixture = build();
+      final sent = <RTCRtpEncodingWithDimensions>[];
+      fixture.onAddVideoTransceiver = (track, encodings) async {
+        sent.addAll(encodings.cast<RTCRtpEncodingWithDimensions>());
+        return Result.success(fixture.newTransceiver(track, encodings));
+      };
+
+      await fixture.manager.publishVideoTrack(
+        track: fakeScreenShareTrack('share'),
+      );
+
+      final top = sent.last;
+      expect((top.width, top.height), (1000, 500));
+    });
+
+    test('the announce uses the resolved size', () async {
+      final fixture = build();
+      await fixture.manager.publishVideoTrack(
+        track: fakeScreenShareTrack('share'),
+      );
+      final sentId = fixture.transceivers.single.sender.track!.id;
+
+      final announced = await fixture.manager.getAnnouncedTracks(
+        sdp: [
+          'v=0',
+          'o=- 1 2 IN IP4 127.0.0.1',
+          's=-',
+          't=0 0',
+          'm=video 9 UDP/TLS/RTP/SAVPF 96',
+          'c=IN IP4 0.0.0.0',
+          'a=sendonly',
+          'a=msid:stream-id $sentId',
+          'a=mid:0',
+          '',
+        ].join('\r\n'),
+      );
+
+      expect(
+        announced!.single.layers!.last.parameters.dimension,
+        screen,
+      );
+    });
   });
 }
