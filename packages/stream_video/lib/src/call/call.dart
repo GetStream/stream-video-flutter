@@ -283,6 +283,7 @@ class Call {
   late final _logger = taggedLogger(tag: '$_tag-${_callSeq++}');
   late final _subscriptions = Subscriptions();
   late final _callInitLock = Lock();
+  late final _audioBitrateProfileLock = Lock();
 
   final CoordinatorClient _coordinatorClient;
   final CallHost _host;
@@ -1515,6 +1516,9 @@ class Call {
   /// microphone could not be captured again. The call keeps the new profile
   /// then: the microphone is reported muted, and captures with the new
   /// constraints when it is unmuted.
+  ///
+  /// Switches run one at a time, in the order they were made. The microphone
+  /// is captured again after audio processing is toggled.
   Future<Result<None>> setAudioBitrateProfile(
     SfuAudioBitrateProfile profile,
   ) async {
@@ -1524,6 +1528,14 @@ class Call {
       );
     }
 
+    return _audioBitrateProfileLock.synchronized(
+      () => _switchAudioBitrateProfile(profile),
+    );
+  }
+
+  Future<Result<None>> _switchAudioBitrateProfile(
+    SfuAudioBitrateProfile profile,
+  ) async {
     _stateManager.setAudioBitrateProfile(profile);
 
     final stereo = profile == SfuAudioBitrateProfile.musicHighQuality;

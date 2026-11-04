@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_redundant_argument_values
 
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
@@ -1074,6 +1076,7 @@ void main() {
             coordinatorClient: coordinatorClient,
             sessionFactory: setupMockSessionFactory(callSession: callSession),
             streamVideo: mockStreamVideo,
+            permissionManager: mockPermissionsManager,
           );
           await call.join();
           return call;
@@ -1104,6 +1107,101 @@ void main() {
             expect(constraints.noiseSuppression, isFalse);
             expect(constraints.echoCancellation, isFalse);
             expect(constraints.autoGainControl, isFalse);
+          },
+        );
+
+        test(
+          'captures the microphone in mono with voice processing for '
+          'voiceStandard',
+          () async {
+            when(
+              () => rtcManager.changeDefaultAudioConstraints(any()),
+            ).thenAnswer((_) async => const Result.success(none));
+            final call = await joinedCall();
+
+            await call.setAudioBitrateProfile(
+              SfuAudioBitrateProfile.voiceStandard,
+            );
+
+            final constraints =
+                verify(
+                      () => rtcManager.changeDefaultAudioConstraints(
+                        captureAny(),
+                      ),
+                    ).captured.single
+                    as AudioConstraints;
+            expect(constraints.channelCount, 1);
+            expect(constraints.noiseSuppression, isTrue);
+            expect(constraints.echoCancellation, isTrue);
+            expect(constraints.autoGainControl, isTrue);
+          },
+        );
+
+        test(
+          'still captures the microphone again when audio processing could '
+          'not be toggled',
+          () async {
+            when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(true);
+            when(
+              () => mockStreamVideo.setAudioProcessingEnabled(false),
+            ).thenAnswer((_) async => failureWithError('toggle failed'));
+            when(
+              () => rtcManager.changeDefaultAudioConstraints(any()),
+            ).thenAnswer((_) async => const Result.success(none));
+            final call = await joinedCall();
+
+            final result = await call.setAudioBitrateProfile(
+              SfuAudioBitrateProfile.musicHighQuality,
+            );
+
+            expect(result.isSuccess, isTrue);
+            verify(
+              () => rtcManager.changeDefaultAudioConstraints(any()),
+            ).called(1);
+          },
+        );
+
+        test(
+          'a switch made while one is running is applied after it',
+          () async {
+            final processingStopped = Completer<Result<None>>();
+            when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(true);
+            when(
+              () => mockStreamVideo.setAudioProcessingEnabled(false),
+            ).thenAnswer((_) => processingStopped.future);
+            when(
+              () => mockPermissionsManager.hasPermission(
+                CallPermission.enableNoiseCancellation,
+              ),
+            ).thenReturn(false);
+            when(
+              callSession.notifyNoiseCancellationStopped,
+            ).thenAnswer((_) async => const Result.success(none));
+            when(
+              () => rtcManager.changeDefaultAudioConstraints(any()),
+            ).thenAnswer((_) async => const Result.success(none));
+            final call = await joinedCall();
+
+            // Stopping audio processing is slow; starting it fails at once
+            // (no permission).
+            final music = call.setAudioBitrateProfile(
+              SfuAudioBitrateProfile.musicHighQuality,
+            );
+            final voice = call.setAudioBitrateProfile(
+              SfuAudioBitrateProfile.voiceStandard,
+            );
+            await pumpEventQueue();
+            processingStopped.complete(const Result.success(none));
+            await Future.wait([music, voice]);
+
+            final applied = verify(
+              () => rtcManager.changeDefaultAudioConstraints(captureAny()),
+            ).captured.cast<AudioConstraints>();
+            expect(applied.map((c) => c.channelCount), [2, 1]);
+            expect(
+              call.state.value.audioBitrateProfile,
+              SfuAudioBitrateProfile.voiceStandard,
+            );
           },
         );
 
