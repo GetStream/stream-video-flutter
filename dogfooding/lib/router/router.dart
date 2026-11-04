@@ -17,7 +17,7 @@ GoRouter initRouter(UserAuthController authNotifier) {
   // shared and reloaded.
   GoRouter.optionURLReflectsImperativeAPIs = true;
 
-  return GoRouter(
+  final router = GoRouter(
     routes: [
       ShellRoute(
         routes: [
@@ -68,6 +68,17 @@ GoRouter initRouter(UserAuthController authNotifier) {
       router.go(state.uri.replace(path: '$_joinPrefix/$callId').toString());
     },
   );
+
+  // Leaving a `/join` page the app was opened on lands on home with the join's
+  // query still in the address. Home reads no query, so it is dropped.
+  router.routerDelegate.addListener(() {
+    final uri = router.routerDelegate.currentConfiguration.uri;
+    if (uri.path != HomeRoute().location || !uri.hasQuery) return;
+
+    Future.microtask(() => router.go(HomeRoute().location));
+  });
+
+  return router;
 }
 
 const _joinPrefix = '/join';
