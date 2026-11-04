@@ -219,6 +219,7 @@ extension on AppDesign {
     AppDesign.yaru => l10n.designYaru,
     AppDesign.fluent => l10n.designFluent,
     AppDesign.liquidGlass => l10n.designLiquidGlass,
+    AppDesign.material3Expressive => l10n.designMaterial3Expressive,
   };
 }
 

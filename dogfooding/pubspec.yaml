@@ -16,6 +16,7 @@ dependencies:
   cryptography: ^2.7.0
   cupertino_icons: ^1.0.8
   device_info_plus: ">=12.1.0 <14.0.0"
+  dynamic_color: ^1.8.1
   envied: ^1.2.1
   firebase_auth: ^6.0.2
   firebase_core: ^4.1.0

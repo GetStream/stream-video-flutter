@@ -152,18 +152,19 @@ checked class by class. Use it as a reference, not a port.
 - [x] Setup: call `LiquidGlassWidgets.initialize()` in `main` (it preloads the shaders) and `LiquidGlassWidgets.wrap()` around the app, with a `brightnessResolver` so the glass follows `ThemeMode`. No Flutter GPU flags.
 - [ ] Wrap the call controls in a `GlassBackdropGroup`, so the controls bar shares one backdrop read. Not done: the bar is built inside the SDK, so dogfooding has nothing to wrap it with.
 - [x] Use the default (Standard) quality. Premium is only recommended for static surfaces, and the call controls sit over moving video.
-- [x] Default to `StreamSurfaceStyle.floating` while this design is active, as chat does.
+- [ ] Default to `StreamSurfaceStyle.floating` while this design is active, as chat does. Not done: the call screen's side panel doesn't support floating surfaces yet.
 - [ ] Glass over **video tiles** is the interesting case. Check frame times on a 6+ participant call (profile build).
 
 ### Phase 7: Material 3 Expressive
-- [ ] Theme: `ColorScheme.fromSeed` from the accent color plus `m3e_design` tokens. `StreamTheme` takes the colors and the expressive radius.
-- [ ] Icons: Material Symbols (rounded).
-- [ ] Builders: M3E buttons (shape morphing on press), switch, progress (the wavy indicator for `progressBar` and `loadingSpinner`), and the split button.
+- [x] Theme: `ColorScheme.fromSeed` from the accent color plus `m3e_design` tokens. `StreamTheme` takes the colors and the expressive radius.
+- [x] Icons: Material's rounded icons for the ~70 StreamIcons that video and dogfooding use. The rest keep the Stream default.
+- [x] Builders: `ButtonM3E`/`IconButtonM3E`, Material `Switch` with a check thumb, wavy `LinearProgressIndicatorM3E`, `LoadingIndicatorM3E` (or `CircularProgressIndicatorM3E` with a value). The split button is a connected `ButtonGroupM3E`, because `SplitButtonM3E` opens its own menu from the caret.
 
 ### Phase 8: verification
+- [x] Rendered the component harness in every design, light and dark (golden snapshots, not committed). Fixed two problems it showed: the shad destructive split button's icons and the faint glass progress.
 - [ ] Run dogfooding (debug) on iOS, Android, macOS and web. For each design, check the lobby, the call screen (call controls and the **device split buttons** in both variants), the settings window, in-call chat and a snackbar. Light and dark, with Default and one named accent.
 - [ ] Switching designs mid-call keeps the call and doesn't remount the call screen.
-- [ ] `melos run analyze:error`, `format:verify` and the dogfooding tests.
+- [x] `dart analyze` (dogfooding) and the dogfooding tests (65 pass). `design_components_test.dart` draws every component in every design.
 - [ ] Screenshots of every design for the PR.
 
 ## Decisions

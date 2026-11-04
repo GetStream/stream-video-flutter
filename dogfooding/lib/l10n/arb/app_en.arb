@@ -64,6 +64,10 @@
   "@designLiquidGlass": {
     "description": "The design choice for Apple's Liquid Glass design. A product name, not translated."
   },
+  "designMaterial3Expressive": "Material 3 Expressive",
+  "@designMaterial3Expressive": {
+    "description": "The design choice for Google's Material 3 Expressive design. A product name, not translated."
+  },
   "accentColorTitle": "Accent Color",
   "@accentColorTitle": {
     "description": "The heading over the accent color swatches."

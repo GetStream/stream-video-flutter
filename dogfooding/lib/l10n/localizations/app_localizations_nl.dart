@@ -58,6 +58,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get designLiquidGlass => 'Liquid Glass';
 
   @override
+  String get designMaterial3Expressive => 'Material 3 Expressive';
+
+  @override
   String get accentColorTitle => 'Accentkleur';
 
   @override

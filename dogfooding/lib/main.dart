@@ -8,6 +8,7 @@ import 'package:marionette_flutter/marionette_flutter.dart';
 
 // 🌎 Project imports:
 import 'app/app.dart';
+import 'app/design/m3e/m3e_design.dart';
 
 Future<void> main() async {
   // Needed to initialize the plugin bindings.
@@ -24,6 +25,10 @@ Future<void> main() async {
   // Loads the Liquid Glass design's shaders, so its first frames draw glass
   // rather than a placeholder.
   await LiquidGlassWidgets.initialize();
+
+  // Reads the device's accent color, which Material 3 Expressive takes by
+  // default.
+  await M3EDesign.loadDeviceAccent();
 
   runApp(const StreamDogFoodingApp());
 }

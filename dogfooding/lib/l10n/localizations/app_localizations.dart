@@ -194,6 +194,12 @@ abstract class AppLocalizations {
   /// **'Liquid Glass'**
   String get designLiquidGlass;
 
+  /// The design choice for Google's Material 3 Expressive design. A product name, not translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Material 3 Expressive'**
+  String get designMaterial3Expressive;
+
   /// The heading over the accent color swatches.
   ///
   /// In en, this message translates to:

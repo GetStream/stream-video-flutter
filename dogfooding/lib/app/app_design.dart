@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'design/app_design_spec.dart';
 import 'design/fluent/fluent_design.dart';
 import 'design/liquid_glass/liquid_glass_design.dart';
+import 'design/m3e/m3e_design.dart';
 import 'design/shad/shad_design.dart';
 import 'design/stream_design.dart';
 import 'design/yaru/yaru_design.dart';
@@ -22,7 +23,10 @@ enum AppDesign {
   fluent(FluentDesign()),
 
   /// Apple's Liquid Glass.
-  liquidGlass(LiquidGlassDesign());
+  liquidGlass(LiquidGlassDesign()),
+
+  /// Material 3 Expressive.
+  material3Expressive(M3EDesign());
 
   const AppDesign(this.spec);
 

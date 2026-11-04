@@ -39,6 +39,9 @@ abstract class AppDesignSpec {
     Iterable<StreamComponentBuilderExtension<Object>> extensions,
   ) => StreamComponentBuilders(extensions: extensions);
 
+  /// The participant tile theme, or null for the SDK's own.
+  StreamParticipantTileThemeData? get participantTileTheme => null;
+
   /// Wraps [child], below the [MaterialApp], in any scope the design's widgets
   /// read.
   Widget wrap(BuildContext context, AppAccentColor accent, Widget child) =>

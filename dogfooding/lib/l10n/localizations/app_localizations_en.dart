@@ -59,6 +59,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get designLiquidGlass => 'Liquid Glass';
 
   @override
+  String get designMaterial3Expressive => 'Material 3 Expressive';
+
+  @override
   String get accentColorTitle => 'Accent Color';
 
   @override

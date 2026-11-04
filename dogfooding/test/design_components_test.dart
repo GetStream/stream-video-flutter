@@ -6,6 +6,7 @@ import 'package:flutter_dogfooding/app/app_accent_color.dart';
 import 'package:flutter_dogfooding/app/app_design.dart';
 import 'package:flutter_dogfooding/app/app_theme.dart';
 import 'package:flutter_dogfooding/app/design/app_design_spec.dart';
+import 'package:flutter_dogfooding/app/design/m3e/m3e_design.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_core_flutter/video.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -43,6 +44,28 @@ void main() {
     );
     await tester.pump(const Duration(seconds: 1));
   }
+
+  testWidgets('material3Expressive defaults to the device accent color', (
+    tester,
+  ) async {
+    const device = Color(0xFF2E7D32);
+    M3EDesign.deviceAccent = device;
+    addTearDown(() => M3EDesign.deviceAccent = null);
+
+    await pump(
+      tester,
+      AppDesign.material3Expressive,
+      Brightness.light,
+      AppAccentColor.designDefault,
+    );
+
+    final context = tester.element(find.byType(_Components));
+    final shown = HSLColor.fromColor(context.streamColorScheme.accentPrimary);
+    expect(
+      (shown.hue - HSLColor.fromColor(device).hue).abs(),
+      lessThan(30),
+    );
+  });
 
   for (final design in AppDesign.values) {
     for (final brightness in Brightness.values) {
@@ -129,6 +152,28 @@ void main() {
         context.streamColorScheme.accentPrimary,
         isNot(design.defaultAccent(Brightness.light)),
       );
+    });
+
+    testWidgets('${design.name} keeps the hue of a picked accent color', (
+      tester,
+    ) async {
+      for (final accent in [AppAccentColor.blue, AppAccentColor.green]) {
+        await pump(tester, design, Brightness.dark, accent);
+
+        final context = tester.element(find.byType(_Components));
+        final picked = HSLColor.fromColor(
+          accent.paletteColor(Brightness.dark)!,
+        ).hue;
+        final shown = HSLColor.fromColor(
+          context.streamColorScheme.accentPrimary,
+        ).hue;
+        final distance = (picked - shown).abs() % 360;
+        expect(
+          distance > 180 ? 360 - distance : distance,
+          lessThan(30),
+          reason: '${accent.name}: picked hue $picked, shown hue $shown',
+        );
+      }
     });
   }
 }

@@ -88,10 +88,11 @@ ThemeData buildAppTheme({
             microphoneOffColor: _onOverlay,
           ),
         ),
-        // The participant tile is styled by the design system now. Nothing
-        // is overridden here, which is what an app wanting the stock look
-        // should do: setting `callParticipantTheme` opts back into the
-        // deprecated shape.
+        // The participant tile is styled by the design system now. Only a
+        // design's own tile theme is applied here, which is what an app
+        // wanting the stock look should do: setting `callParticipantTheme`
+        // opts back into the deprecated shape.
+        participantTileTheme: spec.participantTileTheme,
         callParticipantsGridTheme: const StreamCallParticipantsGridThemeData(
           padding: EdgeInsets.all(4),
           mainAxisSpacing: 4,
