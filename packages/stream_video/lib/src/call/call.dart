@@ -1504,21 +1504,12 @@ class Call {
   Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) =>
       _media.setAudioOutputDevice(device);
 
-  /// Switches the audio bitrate profile of the call, and captures the live
-  /// microphone again with the matching audio constraints.
+  /// Switches the audio bitrate profile, and captures the live microphone
+  /// again to match it.
   ///
-  /// [SfuAudioBitrateProfile.musicHighQuality] captures in stereo, without
-  /// noise suppression, echo cancellation or auto gain control, and stops
-  /// audio processing when an audio processor is configured. The other
-  /// profiles capture in mono with those enabled, and start audio processing.
-  ///
-  /// Fails when High Fidelity audio is not enabled for the call, or when the
-  /// microphone could not be captured again. The call keeps the new profile
-  /// then: the microphone is reported muted, and captures with the new
-  /// constraints when it is unmuted.
-  ///
-  /// Switches run one at a time, in the order they were made. The microphone
-  /// is captured again after audio processing is toggled.
+  /// Fails when High Fidelity audio is not enabled, or when the microphone
+  /// could not be captured again; it is then reported muted, and the new
+  /// profile applies when it is unmuted.
   Future<Result<None>> setAudioBitrateProfile(
     SfuAudioBitrateProfile profile,
   ) async {
