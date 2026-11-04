@@ -227,9 +227,10 @@ extension RtcManagerTrackHelper on RtcManager {
         enabled &&
         constraints is ScreenShareConstraints &&
         constraints.useiOSBroadcastExtension) {
-      final screenShareTrackResult = await createScreenShareTrack(
-        constraints: constraints,
-      );
+      final screenShareTrackResult = await _trackAcquirer
+          .createScreenShareTrack(
+            constraints: constraints,
+          );
 
       if (screenShareTrackResult.isFailure) {
         _logger.e(
@@ -273,7 +274,7 @@ extension RtcManagerTrackHelper on RtcManager {
         track == null && (!enabled || trackType != SfuTrackType.screenShare);
 
     if (awaitsCreation) {
-      final inFlight = _pendingTrackCreations[trackType];
+      final inFlight = _trackAcquirer.inFlight(trackType);
       if (inFlight != null) {
         _logger.i(
           () =>
@@ -385,7 +386,7 @@ extension RtcManagerTrackHelper on RtcManager {
     required SfuTrackType trackType,
     MediaConstraints? constraints,
   }) {
-    return _singleFlightCreate(
+    return _trackAcquirer.singleFlight(
       trackType,
       () => _acquireAndPublishTrack(
         trackType: trackType,
@@ -398,60 +399,24 @@ extension RtcManagerTrackHelper on RtcManager {
     required SfuTrackType trackType,
     MediaConstraints? constraints,
   }) async {
-    if (trackType == SfuTrackType.video) {
-      if (constraints != null && constraints is! CameraConstraints) {
-        final errorMessage =
-            'Invalid media constraints type ${constraints.runtimeType}, $CameraConstraints expected';
-        _logger.e(() => errorMessage);
-        return failureWithError(errorMessage);
-      }
+    final acquired = await _trackAcquirer.acquire(
+      trackType: trackType,
+      constraints: constraints,
+    );
 
-      final cameraTrackResult = await createCameraTrack(
-        constraints:
-            (constraints ?? const CameraConstraints()) as CameraConstraints,
-      );
-      return cameraTrackResult.foldResult(
-        success: (it) => publishVideoTrack(track: it.data),
-        failure: (it) => it,
-      );
-    } else if (trackType == SfuTrackType.audio) {
-      if (constraints != null && constraints is! AudioConstraints) {
-        final errorMessage =
-            'Invalid media constraints type ${constraints.runtimeType}, $AudioConstraints expected';
-        _logger.e(() => errorMessage);
-        return failureWithError(errorMessage);
-      }
+    return acquired.foldResult(
+      success: (it) => _publishAcquired(it.data),
+      failure: (it) => it,
+    );
+  }
 
-      final audioTrackResult = await createAudioTrack(
-        constraints:
-            (constraints ?? _defaultAudioConstraints) as AudioConstraints,
-      );
-      return audioTrackResult.foldResult(
-        success: (it) => publishAudioTrack(track: it.data),
-        failure: (it) => it,
-      );
-    } else if (trackType == SfuTrackType.screenShare) {
-      if (constraints != null && constraints is! ScreenShareConstraints) {
-        final errorMessage =
-            'Invalid media constraints type ${constraints.runtimeType}, $ScreenShareConstraints expected';
-        _logger.e(() => errorMessage);
-        return failureWithError(errorMessage);
-      }
+  Future<Result<RtcLocalTrack>> _publishAcquired(RtcLocalTrack track) async {
+    if (track is RtcLocalAudioTrack) return publishAudioTrack(track: track);
+    if (track is RtcLocalVideoTrack) return publishVideoTrack(track: track);
 
-      final screenShareTrackResult = await createScreenShareTrack(
-        constraints:
-            (constraints ?? const ScreenShareConstraints())
-                as ScreenShareConstraints,
-      );
-
-      return screenShareTrackResult.foldResult(
-        success: (it) => publishVideoTrack(track: it.data),
-        failure: (it) => it,
-      );
-    }
-
-    _logger.e(() => 'Unsupported trackType $trackType');
-    return failureWithError('Unsupported trackType $trackType');
+    final message = 'Unsupported track type: ${track.runtimeType}';
+    _logger.e(() => message);
+    return failureWithError(message);
   }
 
   void _startListeningToScreenShareStarted(
