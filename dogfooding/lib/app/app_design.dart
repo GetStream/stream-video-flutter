@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 
 import 'design/app_design_spec.dart';
+import 'design/shad/shad_design.dart';
 import 'design/stream_design.dart';
 
 /// The design system the app's components are drawn with.
 enum AppDesign {
   /// The SDK's own design system.
-  stream(StreamDesign());
+  stream(StreamDesign()),
+
+  /// shadcn/ui, through the shad package.
+  shad(ShadDesign());
 
   const AppDesign(this.spec);
 

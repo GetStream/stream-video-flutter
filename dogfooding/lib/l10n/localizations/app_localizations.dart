@@ -170,6 +170,12 @@ abstract class AppLocalizations {
   /// **'Stream'**
   String get designStream;
 
+  /// The design choice for the shadcn/ui design system. A product name, not translated.
+  ///
+  /// In en, this message translates to:
+  /// **'shadcn/ui'**
+  String get designShad;
+
   /// The heading over the accent color swatches.
   ///
   /// In en, this message translates to:

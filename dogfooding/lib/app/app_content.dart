@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:shad/shad.dart' show GlobalShadLocalizations;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart'
     hide CurrentPlatform;
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -241,6 +242,7 @@ class _StreamDogFoodingAppContentState
           CustomVideoLocalizationsEN.delegate,
           CustomVideoLocalizationsNL.delegate,
           AppLocalizations.delegate,
+          GlobalShadLocalizations.delegate,
           ...StreamVideoFlutterLocalizations.localizationsDelegates,
         ],
         builder: (context, child) {

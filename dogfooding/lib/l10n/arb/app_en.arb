@@ -48,6 +48,10 @@
   "@designStream": {
     "description": "The design choice for Stream's own design system. A product name, not translated."
   },
+  "designShad": "shadcn/ui",
+  "@designShad": {
+    "description": "The design choice for the shadcn/ui design system. A product name, not translated."
+  },
   "accentColorTitle": "Accent Color",
   "@accentColorTitle": {
     "description": "The heading over the accent color swatches."

@@ -46,6 +46,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get designStream => 'Stream';
 
   @override
+  String get designShad => 'shadcn/ui';
+
+  @override
   String get accentColorTitle => 'Accentkleur';
 
   @override

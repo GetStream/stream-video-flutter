@@ -215,6 +215,7 @@ class _AccentColorSwatch extends StatelessWidget {
 extension on AppDesign {
   String label(AppLocalizations l10n) => switch (this) {
     AppDesign.stream => l10n.designStream,
+    AppDesign.shad => l10n.designShad,
   };
 }
 

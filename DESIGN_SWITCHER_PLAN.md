@@ -128,13 +128,13 @@ Commit after each phase (no push).
 Chat's `shadcn/` design is on a different package (`shadcn_ui`). shad started
 from the same project, so the structure carries over but the API has to be
 checked class by class. Use it as a reference, not a port.
-- [ ] Theme scope: inside the existing `MaterialApp`, go through shad's Material interop (`ShadApp.custom` with `shadMaterialThemeFrom(ShadTheme.of(context))`, from `package:shad/material.dart`), or a bare `ShadTheme` in `MaterialApp.builder`. Pick whichever keeps `MaterialApp.router` and our localization delegates as they are. Add `GlobalShadLocalizations` to the delegates if shad's widgets need it.
-- [ ] `ShadThemeData`: a color scheme per accent (`ShadZincColorScheme` for Default, see the table) and one style preset (shad ships eight, e.g. `nova`; pick one with screenshots).
-- [ ] Font: shad bundles none, so use Geist through `google_fonts` (`ShadTextTheme.fromGoogleFont`, and the same family in `StreamTheme.textTheme`). `google_fonts` is already a dogfooding dependency.
-- [ ] Icons: `LucideIcons` from `lucide_icons_flutter`. Chat's icon map came from `shadcn_ui`'s Lucide set, so check the names.
-- [ ] Builders: `ShadButton` / `ShadIconButton`, `ShadCheckbox`, `ShadSwitch`, `ShadInput`, `ShadProgress` (determinate and indeterminate) and `ShadSpinner` for `loadingSpinner`.
-- [ ] Composed `splitButton`, as shad has no button group yet.
-- [ ] Optional: a `snackbar` builder on `ShadToast`, if the props fit.
+- [x] Theme scope: a bare `ShadTheme` in `MaterialApp.builder`, plus `GlobalShadLocalizations.delegate`. Considered: inside the existing `MaterialApp`, go through shad's Material interop (`ShadApp.custom` with `shadMaterialThemeFrom(ShadTheme.of(context))`, from `package:shad/material.dart`), or a bare `ShadTheme` in `MaterialApp.builder`. Pick whichever keeps `MaterialApp.router` and our localization delegates as they are. Add `GlobalShadLocalizations` to the delegates if shad's widgets need it.
+- [x] `ShadThemeData`: `ShadZincColorScheme`, with a picked accent as `primary`/`ring` instead of a named scheme per accent. Uses the default style preset.
+- [x] Font: shad bundles none, so use Geist through `google_fonts` (`ShadTextTheme.fromGoogleFont`, and the same family in `StreamTheme.textTheme`). `google_fonts` is already a dogfooding dependency.
+- [x] Icons: `LucideIcons` from `lucide_icons_flutter`. Chat's icon map came from `shadcn_ui`'s Lucide set, so check the names.
+- [x] Builders: `ShadButton` / `ShadIconButton`, `ShadCheckbox`, `ShadSwitch`, `ShadInput`, `ShadProgress` (determinate and indeterminate) and `ShadSpinner` for `loadingSpinner`.
+- [x] Composed `splitButton`, as shad has no button group yet.
+- [ ] Optional: a `snackbar` builder on `ShadToast`, if the props fit (not done).
 
 ### Phase 4: Yaru
 - [ ] Port the theme, the icons (`YaruIcons`) and the builders. The Ubuntu font comes from `packages/yaru/Ubuntu`.
