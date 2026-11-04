@@ -35,7 +35,7 @@ people work on this; CS6 needs CS5, CS9 needs CS6 and CS8, CS10 needs all.
 
 | # | Ticket | Branch (proposed) | PR |
 |---|---|---|---|
-| 1 | CS1 | `test/flu-1061-call-session-characterisation-tests` | |
+| 1 | CS1 | `test/flu-1061-call-session-characterisation-tests` | #1563 |
 | 2 | CS2 | `refactor/flu-1062-call-session-media-part` | |
 | 3 | CS3 | `refactor/flu-1063-sfu-join-request-builder` | |
 | 4 | CS4 | `fix/flu-1064-one-join-handshake` | |
