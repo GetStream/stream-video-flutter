@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart'
     hide CurrentPlatform;
@@ -16,7 +15,9 @@ import '../router/routes.dart';
 import '../screens/call_route_page.dart';
 import '../utils/consts.dart';
 import '../widgets/dogfooding_participant_tile.dart';
+import 'app_design.dart';
 import 'app_display_settings.dart';
+import 'app_theme.dart';
 import 'custom_video_localizations.dart';
 import 'firebase_messaging_handler.dart';
 import 'user_auth_controller.dart';
@@ -36,22 +37,29 @@ class _StreamDogFoodingAppContentState
 
   late final _router = initRouter(_userAuthController);
 
-  /// The component builders that customise the Stream Video UI components.
+  /// The component builders that customise the Stream Video UI components,
+  /// for the design they were built for.
   ///
-  /// Built once so its identity stays stable across rebuilds: a newly created
-  /// [StreamComponentBuilders] is never equal to the previous one, so building
-  /// it inline would rebuild every widget depending on the
+  /// Built once per design so their identity stays stable across rebuilds: a
+  /// newly created [StreamComponentBuilders] is never equal to the previous
+  /// one, so building them inline would rebuild every widget depending on the
   /// [StreamComponentFactory] every time the surrounding widget rebuilds.
-  late final _componentBuilders = StreamComponentBuilders(
-    extensions: [
+  ({AppDesign design, StreamComponentBuilders builders})? _componentBuilders;
+
+  StreamComponentBuilders _componentBuildersFor(AppDesign design) {
+    final cached = _componentBuilders;
+    if (cached != null && cached.design == design) return cached.builders;
+    final builders = design.spec.builders([
       ...streamVideoComponentBuilders(
         participantTile: (context, props) =>
             DogfoodingParticipantTile(props: props),
       ),
       // You can combine both chat and video component builders.
       ...streamChatComponentBuilders(),
-    ],
-  );
+    ]);
+    _componentBuilders = (design: design, builders: builders);
+    return builders;
+  }
 
   final _compositeSubscription = CompositeSubscription();
   bool? _microphoneEnabledBeforeInterruption;
@@ -215,8 +223,16 @@ class _StreamDogFoodingAppContentState
       builder: (context, _) => MaterialApp.router(
         title: kAppName,
         routerConfig: _router,
-        theme: _buildTheme(Brightness.light),
-        darkTheme: _buildTheme(Brightness.dark),
+        theme: buildAppTheme(
+          design: _appSettings.design,
+          brightness: Brightness.light,
+          accent: _appSettings.accentColor,
+        ),
+        darkTheme: buildAppTheme(
+          design: _appSettings.design,
+          brightness: Brightness.dark,
+          accent: _appSettings.accentColor,
+        ),
         themeMode: _appSettings.themeMode,
         locale: _appSettings.locale,
         // Every language the SDK is translated into.
@@ -228,119 +244,18 @@ class _StreamDogFoodingAppContentState
           ...StreamVideoFlutterLocalizations.localizationsDelegates,
         ],
         builder: (context, child) {
-          return StreamComponentFactory(
-            builders: _componentBuilders,
-            // Above the router, so a snackbar shown from any route has a
-            // messenger to reach and outlives the screen that showed it.
-            child: StreamSnackbarScope(child: child!),
+          final design = _appSettings.design;
+          return design.spec.wrap(
+            context,
+            _appSettings.accentColor,
+            StreamComponentFactory(
+              builders: _componentBuildersFor(design),
+              // Above the router, so a snackbar shown from any route has a
+              // messenger to reach and outlives the screen that showed it.
+              child: StreamSnackbarScope(child: child!),
+            ),
           );
         },
-      ),
-    );
-  }
-
-  ThemeData _buildTheme(Brightness brightness) {
-    final baseTheme = ThemeData(brightness: brightness);
-    final baseTextTheme = GoogleFonts.interTextTheme(baseTheme.textTheme);
-    final brand = _appSettings.accentColor.brand(brightness);
-    final coreTheme = StreamTheme(
-      brightness: brightness,
-      colorScheme: switch (brightness) {
-        _ when brand == null => null,
-        .light => StreamColorScheme.light(brand: brand),
-        .dark => StreamColorScheme.dark(brand: brand),
-      },
-    );
-    final videoTheme = switch (brightness) {
-      .light => StreamVideoTheme.light(),
-      .dark => StreamVideoTheme.dark(),
-    };
-
-    final colorScheme = coreTheme.colorScheme;
-
-    return baseTheme.copyWith(
-      scaffoldBackgroundColor: colorScheme.backgroundApp,
-      colorScheme: ColorScheme.fromSwatch().copyWith(
-        primary: colorScheme.brand,
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        labelStyle: TextStyle(color: colorScheme.textPrimary),
-      ),
-      bottomSheetTheme: baseTheme.bottomSheetTheme.copyWith(
-        backgroundColor: colorScheme.backgroundElevation0,
-        dragHandleColor: colorScheme.textPrimary,
-      ),
-      extensions: <ThemeExtension<dynamic>>[
-        coreTheme,
-        videoTheme.copyWith(
-          callControlsTheme: StreamCallControlsThemeData(
-            callReactions: const [
-              CallReactionData(
-                type: 'Fireworks',
-                emojiCode: ':fireworks:',
-                icon: '🎉',
-              ),
-              CallReactionData(
-                type: 'Liked',
-                emojiCode: ':like:',
-                icon: '👍',
-              ),
-              CallReactionData(
-                type: 'Dislike',
-                emojiCode: ':dislike:',
-                icon: '👎',
-              ),
-              CallReactionData(
-                type: 'Smile',
-                emojiCode: ':smile:',
-                icon: '😊',
-              ),
-              CallReactionData(
-                type: 'Heart',
-                emojiCode: ':heart:',
-                icon: '♥️',
-              ),
-              CallReactionData(
-                emojiCode: ':raise-hand:',
-                type: 'Raise hand',
-                icon: '✋',
-              ),
-            ],
-            backgroundColor: colorScheme.backgroundElevation0,
-            spacing: 4,
-            optionIconColor: colorScheme.textPrimary,
-            optionBackgroundColor: colorScheme.backgroundSurface,
-            inactiveOptionBackgroundColor: colorScheme.backgroundOverlayDark,
-            optionPadding: const EdgeInsets.all(14),
-          ),
-          userAvatarTheme: StreamUserAvatarThemeData(
-            borderRadius: BorderRadius.circular(20),
-            initialsTextStyle: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: colorScheme.brand,
-            ),
-            initialsBackground: colorScheme.brand.shade100,
-          ),
-          // The participant tile is styled by the design system now. Nothing
-          // is overridden here, which is what an app wanting the stock look
-          // should do: setting `callParticipantTheme` opts back into the
-          // deprecated shape.
-          callParticipantsGridTheme: const StreamCallParticipantsGridThemeData(
-            padding: EdgeInsets.all(4),
-            mainAxisSpacing: 4,
-            crossAxisSpacing: 4,
-          ),
-        ),
-      ],
-      textTheme: baseTextTheme.copyWith(
-        bodyLarge: baseTextTheme.bodyLarge?.copyWith(
-          color: colorScheme.textPrimary,
-          fontWeight: FontWeight.bold,
-        ),
-        bodyMedium: baseTextTheme.bodyMedium?.copyWith(
-          color: colorScheme.textPrimary,
-        ),
       ),
     );
   }

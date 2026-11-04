@@ -29,16 +29,20 @@ enum AppAccentColor {
     cyan => StreamColors.cyan,
   };
 
+  /// The accent this palette gives a theme of [brightness], or null for
+  /// [designDefault].
+  Color? paletteColor(Brightness brightness) => switch (palette) {
+    null => null,
+    final palette => switch (brightness) {
+      Brightness.light => palette.shade500,
+      Brightness.dark => palette.shade400,
+    },
+  };
+
   /// The color a swatch for this palette shows: the accent it gives a theme of
   /// [brightness] in [design].
   Color swatchColor(Brightness brightness, AppDesign design) =>
-      switch (palette) {
-        null => design.defaultAccent(brightness),
-        final palette => switch (brightness) {
-          Brightness.light => palette.shade500,
-          Brightness.dark => palette.shade400,
-        },
-      };
+      paletteColor(brightness) ?? design.defaultAccent(brightness);
 
   /// The brand color for a theme of [brightness], or null for
   /// [designDefault], which leaves it to the design system.

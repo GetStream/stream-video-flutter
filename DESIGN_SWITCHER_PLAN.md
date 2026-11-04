@@ -118,11 +118,11 @@ Commit after each phase (no push).
 - [x] Tests: extend `app_display_settings_test.dart` for the persist and restore of `design`, and for the accent color (an empty preference gives Default, and `blue` survives a restart).
 
 ### Phase 2: design plumbing
-- [ ] A small `AppDesignSpec` interface in place of chat's three parallel `switch`es:
+- [x] A small `AppDesignSpec` interface in place of chat's three parallel `switch`es:
   `ThemeData theme(Brightness, AppAccentColor)`, `StreamComponentBuilders builders(extensions)`, `Widget wrap(BuildContext, Widget)`, `Color defaultAccent(Brightness)` (for the Default swatch).
-- [ ] `app_content.dart`: `_componentBuilders` stops being `late final` and is rebuilt when the design changes. `_buildTheme` delegates to the spec. The video theme overrides now in `_buildTheme` (call reactions, avatar, grid padding) are shared by every design.
-- [ ] `utils/tap_target.dart`: port `padToTapTarget`.
-- [ ] Widget test harness: for each design, pump a `StreamButton` (each type and style, icon-only and labelled), a `StreamSplitButton` (both variants, enabled and disabled), a `StreamTextInput`, a `StreamToggleSwitch`, a snackbar and a modal window. Assert no exceptions (a missing `ShadTheme`/`FluentTheme` ancestor would throw) and that the design's own split button widget is the one rendered.
+- [x] `app_content.dart`: `_componentBuilders` stops being `late final` and is rebuilt when the design changes. `_buildTheme` delegates to the spec. The video theme overrides now in `_buildTheme` (call reactions, avatar, grid padding) are shared by every design.
+- [x] `padToTapTarget`, `designColorScheme`, `designMaterialTheme` and `DesignLabeledField` live in `app/design/app_design_spec.dart`. Dogfooding depends on `stream_core_flutter` directly, because the split button is only exported from its experimental `video.dart`.
+- [x] Widget test harness: for each design, pump a `StreamButton` (each type and style, icon-only and labelled), a `StreamSplitButton` (both variants, enabled and disabled), a `StreamTextInput`, a `StreamToggleSwitch`, a snackbar and a modal window. Assert no exceptions (a missing `ShadTheme`/`FluentTheme` ancestor would throw) and that the design's own split button widget is the one rendered.
 
 ### Phase 3: shad
 Chat's `shadcn/` design is on a different package (`shadcn_ui`). shad started

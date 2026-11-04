@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import 'design/app_design_spec.dart';
+import 'design/stream_design.dart';
 
 /// The design system the app's components are drawn with.
 enum AppDesign {
   /// The SDK's own design system.
-  stream;
+  stream(StreamDesign());
+
+  const AppDesign(this.spec);
+
+  /// The theme, component builders and scope this design restyles the app
+  /// with.
+  final AppDesignSpec spec;
 
   /// The accent color this design uses when no accent color is picked.
-  Color defaultAccent(Brightness brightness) => switch (this) {
-    stream => switch (brightness) {
-      Brightness.light => StreamColorScheme.light().accentPrimary,
-      Brightness.dark => StreamColorScheme.dark().accentPrimary,
-    },
-  };
+  Color defaultAccent(Brightness brightness) => spec.defaultAccent(brightness);
 }
