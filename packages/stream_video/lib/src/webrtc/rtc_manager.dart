@@ -11,7 +11,6 @@ import '../call/state/call_state_notifier.dart';
 import '../call/stats/trace_tag.dart';
 import '../errors/stream_video_exception_composer.dart';
 import '../errors/track_missing_exception.dart';
-import '../sfu/data/models/sfu_model_parser.dart';
 import '../sfu/data/models/sfu_publish_options.dart';
 import '../sfu/data/models/sfu_video_sender.dart';
 import '../telemetry/rtc_session_telemetry.dart';
@@ -29,15 +28,15 @@ import 'peer_connection.dart';
 import 'peer_connection_factory.dart';
 import 'publisher/announced_tracks.dart';
 import 'publisher/publish_quality.dart';
-import 'rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 import 'rtc_parser.dart';
 import 'rtc_track/rtc_track_publish_options.dart';
-import 'sdp/incoming_audio_sources.dart';
+import 'subscriber/rtc_subscriber.dart';
 import 'traced_peer_connection.dart';
 import 'transceiver_cache.dart';
 
 export '../errors/track_missing_exception.dart';
 export 'publisher/announced_tracks.dart' show resolveTrackMid;
+export 'subscriber/rtc_subscriber.dart' show OnRemoteTrackReceived;
 
 part 'rtc_manager_media.dart';
 
@@ -50,12 +49,6 @@ typedef OnLocalTrackMuted = void Function(RtcLocalTrack track, bool muted);
 /// Called when a local track is published.
 /// {@endtemplate}
 typedef OnLocalTrackPublished = void Function(RtcLocalTrack track);
-
-/// {@template OnRemoteTrackPublished}
-/// Called when a subscriber track is received.
-/// {@endtemplate}
-typedef OnRemoteTrackReceived =
-    void Function(StreamPeerConnection pc, RtcRemoteTrack track);
 
 const _tag = 'SV:RtcManager';
 
@@ -76,7 +69,8 @@ const _pendingTransceiverSettleTimeout = Duration(seconds: 5);
 ///   unmutes and switches devices on them;
 /// - follows the SFU: publish options (codecs), publish quality (layers), and
 ///   the tracks announced in `SetPublisher` and `ReconnectDetails`;
-/// - receives remote tracks on the subscriber and answers its offers;
+/// - receives remote tracks through its subscriber side, which owns the
+///   subscriber peer connection and answers its offers;
 /// - attaches end-to-end encryption to senders and receivers when the call is
 ///   encrypted;
 /// - selects the audio output and, on Apple platforms, applies the audio
@@ -102,7 +96,11 @@ class RtcManager extends Disposable {
     this.clientEventRetryCount = 0,
     this.captureDimensionResolver = const CaptureDimensionResolver(),
   }) {
-    subscriber.onTrack = _onRemoteTrack;
+    _subscriber = RtcSubscriber(
+      pc: subscriber,
+      attachDecryptor: attachDecryptor,
+      onTrackAdded: (track) => _telemetry?.onRemoteTrack(track),
+    );
     _telemetry = _initTelemetry();
   }
 
@@ -126,6 +124,13 @@ class RtcManager extends Disposable {
   final CallStateNotifier stateManager;
   final TracedStreamPeerConnection? publisher;
   final TracedStreamPeerConnection subscriber;
+
+  late final RtcSubscriber _subscriber;
+
+  /// The receiving side of this session.
+  @visibleForTesting
+  RtcSubscriber get rtcSubscriber => _subscriber;
+
   final CallHost _host;
   final String? sfuId;
   final int clientEventRetryCount;
@@ -149,7 +154,7 @@ class RtcManager extends Disposable {
   late final _remoteTrackDecryptor = RemoteTrackDecryptor(
     manager: e2eeManager,
     userIdForTrackPrefix: _userIdForTrackPrefix,
-    receiverFor: _receiverForTrack,
+    receiverFor: (track) => _subscriber.receiverFor(track),
   );
 
   final transceiversManager = TransceiverManager();
@@ -168,6 +173,8 @@ class RtcManager extends Disposable {
 
   List<SfuPublishOptions> publishOptions;
 
+  /// The local tracks by track id. The remote ones are kept by the
+  /// subscriber.
   final tracks = </*trackId*/ String, RtcTrack>{};
 
   /// The local tracks by track id, as an unmodifiable snapshot.
@@ -177,10 +184,8 @@ class RtcManager extends Disposable {
   });
 
   /// The remote tracks by track id, as an unmodifiable snapshot.
-  Map<String, RtcRemoteTrack> get remoteTracks => Map.unmodifiable({
-    for (final MapEntry(:key, :value) in tracks.entries)
-      if (value is RtcRemoteTrack) key: value,
-  });
+  Map<String, RtcRemoteTrack> get remoteTracks =>
+      Map.unmodifiable(_subscriber.tracks);
 
   /// Marks the transceivers sending [announced] as acknowledged by the SFU.
   void markNegotiated(Iterable<RtcTrackInfo> announced) {
@@ -211,7 +216,14 @@ class RtcManager extends Disposable {
 
   OnLocalTrackMuted? onLocalTrackMuted;
   OnLocalTrackPublished? onLocalTrackPublished;
-  OnRemoteTrackReceived? onRemoteTrackReceived;
+
+  /// Called for every remote track the subscriber receives.
+  OnRemoteTrackReceived? get onRemoteTrackReceived =>
+      _subscriber.onRemoteTrackReceived;
+
+  set onRemoteTrackReceived(OnRemoteTrackReceived? callback) {
+    _subscriber.onRemoteTrackReceived = callback;
+  }
 
   /// Feeds the subscriber's periodic WebRTC [stats] to first-frame telemetry
   void onSubscriberStats(List<RtcStats> stats) {
@@ -221,64 +233,36 @@ class RtcManager extends Disposable {
   StreamSubscription<ScreenSharingStartedEvent>?
   _screenSharingStartedSubscription;
 
-  /// The last subscriber offer applied and answered, so the next one can be compared
-  /// against it. Null until the first offer: a brand-new subscriber is not a
-  /// renegotiation. Only kept where [needsRemoteAudioReattach] holds.
-  String? _appliedSubscriberOfferSdp;
-
   /// Whether subscriber offers have to be compared for new audio sources.
   /// WebKit only: everywhere else the offers are neither kept nor parsed.
   /// Swappable so a test on the VM can take the WebKit path.
   @visibleForTesting
-  bool Function() needsRemoteAudioReattach = rtc_audio.needsRemoteAudioReattach;
+  bool Function() get needsRemoteAudioReattach =>
+      _subscriber.needsRemoteAudioReattach;
+
+  @visibleForTesting
+  set needsRemoteAudioReattach(bool Function() value) {
+    _subscriber.needsRemoteAudioReattach = value;
+  }
 
   /// Re-attaches every remote audio element after a subscriber renegotiation
   /// brought in a new audio source. Swappable so a test can observe the
   /// trigger.
   @visibleForTesting
-  Future<void> Function({required String reason}) reattachRemoteAudio =
-      rtc_audio.reattachRemoteAudio;
+  Future<void> Function({required String reason}) get reattachRemoteAudio =>
+      _subscriber.reattachRemoteAudio;
 
-  Future<String?> onSubscriberOffer(String offerSdp) async {
-    final previousOfferSdp = _appliedSubscriberOfferSdp;
-
-    final result = await subscriber.setRemoteOffer(offerSdp);
-    if (result.isFailure) return null;
-
-    final rtcAnswer = await subscriber.createAnswer(offerSdp);
-    final answerSdp = rtcAnswer.getDataOrNull()?.sdp;
-    if (answerSdp == null) return null;
-
-    // Recorded only once the answer exists: an offer that failed to answer
-    // was never applied, so a retry of it must still count as new.
-    if (needsRemoteAudioReattach()) _appliedSubscriberOfferSdp = offerSdp;
-
-    if (previousOfferSdp != null) {
-      // Best effort, and guarded: losing a re-attach is far cheaper than
-      // losing the answer.
-      try {
-        if (offerAddsIncomingAudio(
-          previous: previousOfferSdp,
-          next: offerSdp,
-        )) {
-          unawaited(_reattachRemoteAudio(reason: 'subscriberOffer'));
-        }
-      } catch (e, stk) {
-        _logger.w(
-          () => '[onSubscriberOffer] audio source check failed: $e\n$stk',
-        );
-      }
-    }
-
-    return answerSdp;
+  @visibleForTesting
+  set reattachRemoteAudio(
+    Future<void> Function({required String reason}) value,
+  ) {
+    _subscriber.reattachRemoteAudio = value;
   }
 
-  Future<void> _reattachRemoteAudio({required String reason}) async {
-    try {
-      await reattachRemoteAudio(reason: reason);
-    } catch (e, stk) {
-      _logger.w(() => '[reattachRemoteAudio] failed: $e\n$stk');
-    }
+  /// Applies the SFU's subscriber [offerSdp] and returns the answer, or null
+  /// when either step failed.
+  Future<String?> onSubscriberOffer(String offerSdp) {
+    return _subscriber.onOffer(offerSdp);
   }
 
   Future<Result<None>> onRemoteIceCandidate({
@@ -291,55 +275,11 @@ class RtcManager extends Disposable {
       result = await publisher?.addIceCandidate(candidate);
       if (result == null) return failureWithError('no publisher created');
     } else if (peerType == StreamPeerType.subscriber) {
-      result = await subscriber.addIceCandidate(candidate);
+      result = await _subscriber.addIceCandidate(candidate);
     } else {
       return failureWithError('unexpected peerType: $peerType');
     }
     return result.map((_) => none);
-  }
-
-  void _onRemoteTrack(StreamPeerConnection pc, rtc.RTCTrackEvent event) {
-    _logger.d(
-      () => '[onRemoteTrack] event.streams.length: ${event.streams.length}',
-    );
-
-    final stream = event.streams.firstOrNull;
-    if (stream == null) {
-      _logger.w(() => '[onRemoteTrack] stream is null');
-      return;
-    }
-    _logger.v(() => '[onRemoteTrack] stream.id: ${stream.id}');
-
-    event.track.onEnded = () {
-      _logger.w(() => '[onRemoteTrack] #onTrackEnded; no args');
-    };
-    stream.onRemoveTrack = (_) {
-      _logger.w(() => '[onRemoteTrack] #onRemoveTrack; no args');
-    };
-
-    final track = event.track;
-    final transceiver = event.transceiver;
-
-    final idParts = stream.id.split(':');
-    final trackId = idParts[0];
-    final trackType = idParts[1];
-
-    final remoteTrack = RtcRemoteTrack(
-      trackIdPrefix: trackId,
-      trackType: SfuTrackTypeParser.parseSfuName(trackType),
-      mediaTrack: track,
-      mediaStream: stream,
-      transceiver: transceiver,
-    );
-
-    unawaited(attachDecryptor(remoteTrack));
-
-    onRemoteTrackReceived?.call(pc, remoteTrack);
-    tracks[remoteTrack.trackId] = remoteTrack;
-    _logger.v(() => '[onRemoteTrack] published: ${remoteTrack.trackId}');
-
-    // Telemetry: first-frame detection for remote media.
-    _telemetry?.onRemoteTrack(remoteTrack);
   }
 
   Future<void> changeDefaultAudioConstraints(
@@ -390,10 +330,7 @@ class RtcManager extends Disposable {
   }) async {
     final publishedTrack = tracks.remove(trackId);
 
-    if (publishedTrack == null) {
-      _logger.w(() => '[unpublishTrack] rejected (track not found): $trackId');
-      return;
-    }
+    if (publishedTrack == null) return _removeRemoteTrack(trackId);
 
     final handedOver = _handedOverMediaTracks.remove(trackId);
     if (publishedTrack is RtcLocalTrack &&
@@ -403,9 +340,6 @@ class RtcManager extends Disposable {
       await publishedTrack.stop();
     }
 
-    // A remote track's transceiver belongs to the receive-only subscriber
-    // PC, so there is no sender to remove. Passing it to the publisher PC
-    // only failed with "sender is null". Stopping the track is enough.
     if (publishedTrack is RtcLocalTrack) {
       for (final publishOption in publishOptions) {
         if (publishOption.trackType != publishedTrack.trackType) continue;
@@ -421,6 +355,14 @@ class RtcManager extends Disposable {
         }
       }
     }
+  }
+
+  /// Stops the remote track of [trackId]. Its receiver belongs to the
+  /// receive-only subscriber, so there is no sender to remove.
+  Future<void> _removeRemoteTrack(String trackId) async {
+    if (await _subscriber.removeTrack(trackId)) return;
+
+    _logger.w(() => '[unpublishTrack] rejected (track not found): $trackId');
   }
 
   /// Gives the live local tracks to the manager of the session that replaces
@@ -659,23 +601,6 @@ class RtcManager extends Disposable {
   void discardPendingDecryptors(String trackIdPrefix) =>
       _remoteTrackDecryptor.discard(trackIdPrefix);
 
-  /// The subscriber receiver carrying [track].
-  Future<rtc.RTCRtpReceiver?> _receiverForTrack(RtcRemoteTrack track) async {
-    final trackId = track.mediaTrack.id;
-
-    try {
-      final transceivers = await subscriber.pc.getTransceivers();
-      final match = transceivers.firstWhereOrNull(
-        (it) => it.receiver.track?.id == trackId,
-      );
-      if (match != null) return match.receiver;
-    } catch (e) {
-      _logger.w(() => '[receiverForTrack] getTransceivers failed: $e');
-    }
-
-    return track.transceiver?.receiver;
-  }
-
   @override
   Future<void> dispose() async {
     _logger.d(() => '[dispose] no args');
@@ -684,7 +609,7 @@ class RtcManager extends Disposable {
     await _screenSharingStartedSubscription?.cancel();
     _screenSharingStartedSubscription = null;
 
-    final trackIds = [...tracks.keys];
+    final trackIds = [...tracks.keys, ..._subscriber.tracks.keys];
     await Future.wait(
       trackIds.map(
         (trackId) => unpublishTrack(trackId: trackId).catchError(
@@ -698,6 +623,7 @@ class RtcManager extends Disposable {
     );
 
     tracks.clear();
+    _subscriber.clearTracks();
     _remoteTrackDecryptor.clear();
 
     onLocalTrackMuted = null;
@@ -714,7 +640,7 @@ class RtcManager extends Disposable {
         ) {
           _logger.e(() => '[dispose] publisher.dispose failed: $e\n$stk');
         }),
-      subscriber.dispose().catchError((
+      _subscriber.dispose().catchError((
         Object e,
         StackTrace stk,
       ) {
@@ -727,12 +653,12 @@ class RtcManager extends Disposable {
 
   RtcTrack? getTrack(String trackId) {
     _logger.v(() => '[getTrack] trackId: $trackId');
-    return tracks[trackId];
+    return tracks[trackId] ?? _subscriber.tracks[trackId];
   }
 
   List<RtcTrack> getTracks(String trackIdPrefix) {
     return [
-      ...tracks.values.where((track) {
+      ...[...tracks.values, ..._subscriber.tracks.values].where((track) {
         return track.trackIdPrefix == trackIdPrefix;
       }),
     ];

@@ -337,6 +337,9 @@ MockPcFactory fakePcFactory() {
   final factory = MockPcFactory();
   when(() => factory.isAppleAdmMicrophoneMuteSupported).thenReturn(false);
   when(factory.ensureNativeFactory).thenAnswer((_) async => null);
+  when(
+    () => factory.resolvedAudioConfigurationPolicy,
+  ).thenReturn(const AudioConfigurationPolicy.broadcaster());
   return factory;
 }
 
