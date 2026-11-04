@@ -52,12 +52,13 @@ dependency_overrides:
       ref: 686a9980966872eee4b64abad2d5e8ffcdb8c29c
   # A git commit rather than a release: the published 0.5.0 predates
   # CurrentPlatform.debugCurrentPlatformOverride, which the tests need, and
-  # the socket close that no longer waits on a handshake still in flight.
+  # the socket close that no longer waits on a handshake still in flight,
+  # and InFlightCache.inFlight.
   stream_core:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core
-      ref: 003840918ef0537a2c0dd0b0115a92caae79630e
+      ref: b11ffa97e6285fe7c15c77ad322142fabe0cdee5
   stream_core_flutter:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git

@@ -28,7 +28,7 @@ class LocalTrackAcquirer {
 
   /// Acquisitions (and whatever the caller does with the track) in flight per
   /// track type.
-  final _inFlight = <SfuTrackType, Future<Result<RtcLocalTrack>>>{};
+  final _inFlight = InFlightCache<SfuTrackType, Result<RtcLocalTrack>>();
 
   /// Runs [create] as the single in-flight acquisition for [trackType],
   /// returning the already-running one when there is one.
@@ -36,25 +36,19 @@ class LocalTrackAcquirer {
     SfuTrackType trackType,
     Future<Result<RtcLocalTrack>> Function() create,
   ) {
-    final inFlight = _inFlight[trackType];
-    if (inFlight != null) {
+    if (_inFlight.inFlight(trackType) != null) {
       _logger.i(
         () =>
             '[createTrack] $trackType is already being created; '
             'joining the in-flight request instead of acquiring media again',
       );
-      return inFlight;
     }
-
-    final pending = create();
-    _inFlight[trackType] = pending;
-
-    return pending.whenComplete(() => _inFlight.remove(trackType));
+    return _inFlight.run(trackType, create);
   }
 
   /// The acquisition in flight for [trackType], if any.
   Future<Result<RtcLocalTrack>>? inFlight(SfuTrackType trackType) {
-    return _inFlight[trackType];
+    return _inFlight.inFlight(trackType);
   }
 
   /// Acquires a track of [trackType] with [constraints], falling back to the
