@@ -142,6 +142,50 @@ void main() {
       },
     );
 
+    test(
+      'a change made while a recapture is running is applied after it',
+      () async {
+        final mic = await publishMic(stopTrackOnMute: true);
+        platform.getUserMediaGate = Completer<void>();
+
+        final first = fixture.manager.changeDefaultAudioConstraints(
+          _newConstraints,
+        );
+        await pumpEventQueue();
+        final second = fixture.manager.changeDefaultAudioConstraints(
+          const AudioConstraints(),
+        );
+        await pumpEventQueue();
+        platform.getUserMediaGate!.complete();
+        await Future.wait([first, second]);
+
+        expect(platform.callsOf('getUserMedia'), hasLength(2));
+        expect(stored(mic.trackId).mediaConstraints, const AudioConstraints());
+        expect(stored(mic.trackId).mediaTrack.enabled, isTrue);
+        expect(muteEvents, isEmpty);
+      },
+    );
+
+    test('a mute while a recapture is running skips the next one', () async {
+      final mic = await publishMic(stopTrackOnMute: false);
+      platform.getUserMediaGate = Completer<void>();
+
+      final first = fixture.manager.changeDefaultAudioConstraints(
+        _newConstraints,
+      );
+      await pumpEventQueue();
+      final muting = fixture.manager.muteTrack(trackId: mic.trackId);
+      final second = fixture.manager.changeDefaultAudioConstraints(
+        const AudioConstraints(),
+      );
+      await pumpEventQueue();
+      platform.getUserMediaGate!.complete();
+      await Future.wait([first, muting, second]);
+
+      expect(platform.callsOf('getUserMedia'), hasLength(1));
+      expect(stored(mic.trackId).mediaTrack.enabled, isFalse);
+    });
+
     test('screen share audio is left alone', () async {
       final fixture = RtcManagerFixture(
         publishOptions: [

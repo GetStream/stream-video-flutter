@@ -173,15 +173,17 @@ class RtcPublisher {
     ];
 
     for (final trackId in trackIds) {
-      // Checked right before its recapture, which starts without an await:
-      // a track muted while an earlier one was recaptured stays muted.
       final track = tracks[trackId];
-      if (track == null || !track.mediaTrack.enabled) continue;
+      if (track == null) continue;
 
+      // Checked once this recapture's turn starts: a recapture still running
+      // has disabled the capture it replaces, and a track muted meanwhile
+      // stays muted.
       final recaptured = await recapture(
         trackId,
         tag: '[restartLiveAudioTracks]',
         constraintsFor: (_) => _defaultAudioConstraints(),
+        skipIf: (current) => !current.mediaTrack.enabled,
       );
 
       // The old capture is stopped, so the microphone is reported muted.
@@ -1448,18 +1450,21 @@ class RtcPublisher {
   /// track, and keeps it.
   ///
   /// Recaptures of a track run one at a time, each from the previous one's
-  /// result. The new capture goes on the senders only while the track is
-  /// still held. A track unpublished, or published again, meanwhile is not
+  /// result. When [skipIf] holds for the track held once this recapture's
+  /// turn starts, it is kept as it is. The new capture goes on the senders
+  /// only while the track is still held. A track unpublished, or published again, meanwhile is not
   /// overwritten: the new capture is stopped, and this fails. So does a
   /// capture that fails; the old capture is stopped either way.
   Future<Result<RtcLocalTrack>> recapture(
     String trackId, {
     required String tag,
     MediaConstraints? Function(RtcLocalTrack current)? constraintsFor,
+    bool Function(RtcLocalTrack current)? skipIf,
   }) {
     return _oneRecaptureAtATime(trackId, () async {
       final current = tracks[trackId];
       if (current == null) return failureWithError('Track not found');
+      if (skipIf?.call(current) ?? false) return Result.success(current);
 
       RtcLocalTrack? captured;
       try {
