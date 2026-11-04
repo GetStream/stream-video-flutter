@@ -1,3 +1,8 @@
-# The forked WebRTC packages under webrtc/ are not part of the SDK coverage.
+# Paths that are not part of the SDK coverage:
+# - the forked WebRTC packages under webrtc/
+# - the dogfooding sample app
+# - the generated protobuf code
 ignore:
   - "webrtc/**"
+  - "dogfooding/**"
+  - "packages/stream_video/lib/protobuf/**"
