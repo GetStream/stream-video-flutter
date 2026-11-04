@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:fluent_ui/fluent_ui.dart' as fluent show FluentLocalizations;
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shad/shad.dart' show GlobalShadLocalizations;
@@ -243,6 +244,7 @@ class _StreamDogFoodingAppContentState
           CustomVideoLocalizationsNL.delegate,
           AppLocalizations.delegate,
           GlobalShadLocalizations.delegate,
+          fluent.FluentLocalizations.delegate,
           ...StreamVideoFlutterLocalizations.localizationsDelegates,
         ],
         builder: (context, child) {

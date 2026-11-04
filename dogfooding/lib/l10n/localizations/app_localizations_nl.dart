@@ -52,6 +52,9 @@ class AppLocalizationsNl extends AppLocalizations {
   String get designYaru => 'Yaru';
 
   @override
+  String get designFluent => 'Fluent';
+
+  @override
   String get accentColorTitle => 'Accentkleur';
 
   @override

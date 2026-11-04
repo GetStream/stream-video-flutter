@@ -14,6 +14,7 @@
   "designStream": "Stream",
   "designShad": "shadcn/ui",
   "designYaru": "Yaru",
+  "designFluent": "Fluent",
   "accentColorTitle": "Accentkleur",
   "accentColorDescription": "Kies de kleur van knoppen en markeringen.",
   "accentColorDefault": "Standaard",

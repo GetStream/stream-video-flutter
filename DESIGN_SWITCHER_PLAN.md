@@ -142,9 +142,9 @@ checked class by class. Use it as a reference, not a port.
 - [x] Accent: the picked palette color is Yaru's `primaryColor` (orange for Default), rather than the nearest `YaruVariant`.
 
 ### Phase 5: Fluent
-- [ ] Port the theme, the icons (`fluentui_system_icons`) and the builders. Add `FluentLocalizations.delegate` and the `FluentTheme` wrapper.
-- [ ] `splitButton` with `SplitButton`.
-- [ ] Map `AppAccentColor` to Fluent's `AccentColor`s.
+- [x] Port the theme, the icons (`fluentui_system_icons`) and the builders. Add `FluentLocalizations.delegate` and the `FluentTheme` wrapper.
+- [x] `splitButton` with `SplitButton`.
+- [x] Accent: the picked palette color via `Color.toAccentColor()`. fluent_ui is built on the decoupled `material_ui`, so Material types it takes (e.g. `VisualDensity`) come from `fluent_ui`.
 
 ### Phase 6: Liquid Glass
 - [ ] Port the theme and the icons (`CupertinoIcons`) from chat. Rewrite the builders on `liquid_glass_widgets`' own widgets (glass buttons, switch, text field), which replaces chat's custom glass switch.

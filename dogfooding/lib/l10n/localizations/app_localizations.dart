@@ -182,6 +182,12 @@ abstract class AppLocalizations {
   /// **'Yaru'**
   String get designYaru;
 
+  /// The design choice for Microsoft's Fluent design system. A product name, not translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Fluent'**
+  String get designFluent;
+
   /// The heading over the accent color swatches.
   ///
   /// In en, this message translates to:

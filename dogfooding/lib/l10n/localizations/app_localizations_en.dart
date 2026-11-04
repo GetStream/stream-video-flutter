@@ -53,6 +53,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get designYaru => 'Yaru';
 
   @override
+  String get designFluent => 'Fluent';
+
+  @override
   String get accentColorTitle => 'Accent Color';
 
   @override

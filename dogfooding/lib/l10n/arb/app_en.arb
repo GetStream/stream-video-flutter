@@ -56,6 +56,10 @@
   "@designYaru": {
     "description": "The design choice for Ubuntu's Yaru design system. A product name, not translated."
   },
+  "designFluent": "Fluent",
+  "@designFluent": {
+    "description": "The design choice for Microsoft's Fluent design system. A product name, not translated."
+  },
   "accentColorTitle": "Accent Color",
   "@accentColorTitle": {
     "description": "The heading over the accent color swatches."
