@@ -36,6 +36,18 @@
   "@themeDark": {
     "description": "The dark theme choice."
   },
+  "designTitle": "Design",
+  "@designTitle": {
+    "description": "The heading over the design select, which picks the design system the app's components are drawn with."
+  },
+  "designDescription": "Choose the style of buttons, switches and fields.",
+  "@designDescription": {
+    "description": "Explains the design select."
+  },
+  "designStream": "Stream",
+  "@designStream": {
+    "description": "The design choice for Stream's own design system. A product name, not translated."
+  },
   "accentColorTitle": "Accent Color",
   "@accentColorTitle": {
     "description": "The heading over the accent color swatches."
@@ -43,6 +55,10 @@
   "accentColorDescription": "Choose the color of buttons and highlights.",
   "@accentColorDescription": {
     "description": "Explains the accent color swatches."
+  },
+  "accentColorDefault": "Default",
+  "@accentColorDefault": {
+    "description": "The accent color choice that keeps the design's own default color."
   },
   "accentColorBlue": "Blue",
   "@accentColorBlue": {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../app/app_accent_color.dart';
+import '../../app/app_design.dart';
 import '../model/environment.dart';
 import '../model/user_credentials.dart';
 
@@ -17,6 +18,7 @@ class AppPreferences {
   static const String _kLanguageCodePref = 'language_code';
   static const String _kThemeModePref = 'theme_mode';
   static const String _kAccentColorPref = 'accent_color';
+  static const String _kDesignPref = 'design';
 
   UserCredentials? get userCredentials {
     final jsonString = _prefs.getString(_kUserCredentialsPref);
@@ -52,14 +54,25 @@ class AppPreferences {
   /// The palette the app takes its brand color from.
   AppAccentColor get accentColor => AppAccentColor.values.firstWhere(
     (color) => color.name == _prefs.getString(_kAccentColorPref),
-    orElse: () => AppAccentColor.blue,
+    orElse: () => AppAccentColor.designDefault,
   );
 
   Future<bool> setAccentColor(AppAccentColor accentColor) {
-    if (accentColor == AppAccentColor.blue) {
+    if (accentColor == AppAccentColor.designDefault) {
       return _prefs.remove(_kAccentColorPref);
     }
     return _prefs.setString(_kAccentColorPref, accentColor.name);
+  }
+
+  /// The design system the app's components are drawn with.
+  AppDesign get design => AppDesign.values.firstWhere(
+    (design) => design.name == _prefs.getString(_kDesignPref),
+    orElse: () => AppDesign.stream,
+  );
+
+  Future<bool> setDesign(AppDesign design) {
+    if (design == AppDesign.stream) return _prefs.remove(_kDesignPref);
+    return _prefs.setString(_kDesignPref, design.name);
   }
 
   Future<bool> setUserCredentials(UserCredentials? credentials) {

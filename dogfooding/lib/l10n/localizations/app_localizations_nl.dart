@@ -36,11 +36,24 @@ class AppLocalizationsNl extends AppLocalizations {
   String get themeDark => 'Donker';
 
   @override
+  String get designTitle => 'Ontwerp';
+
+  @override
+  String get designDescription =>
+      'Kies de stijl van knoppen, schakelaars en velden.';
+
+  @override
+  String get designStream => 'Stream';
+
+  @override
   String get accentColorTitle => 'Accentkleur';
 
   @override
   String get accentColorDescription =>
       'Kies de kleur van knoppen en markeringen.';
+
+  @override
+  String get accentColorDefault => 'Standaard';
 
   @override
   String get accentColorBlue => 'Blauw';

@@ -65,7 +65,7 @@ void main() {
 
   testWidgets('picking an accent color names it and keeps it', (tester) async {
     await pump(tester, const Locale('en'));
-    expect(find.text('Blue'), findsOneWidget);
+    expect(find.text('Default'), findsOneWidget);
 
     // Through the semantics tree, as a screen reader would.
     tester.semantics.tap(find.semantics.byLabel('Violet'));
@@ -76,7 +76,7 @@ void main() {
       AppAccentColor.violet,
     );
     expect(find.text('Violet'), findsOneWidget);
-    expect(find.text('Blue'), findsNothing);
+    expect(find.text('Default'), findsNothing);
   });
 
   testWidgets('the accent colors fit on one line', (tester) async {
@@ -84,12 +84,15 @@ void main() {
 
     final tops = {
       for (final color in AppAccentColor.values)
-        tester.getTopLeft(find.bySemanticsLabel(color.name.capitalized)).dy,
+        tester.getTopLeft(find.bySemanticsLabel(color.label)).dy,
     };
     expect(tops, hasLength(1));
   });
 }
 
-extension on String {
-  String get capitalized => this[0].toUpperCase() + substring(1);
+extension on AppAccentColor {
+  String get label => switch (this) {
+    AppAccentColor.designDefault => 'Default',
+    _ => name[0].toUpperCase() + name.substring(1),
+  };
 }

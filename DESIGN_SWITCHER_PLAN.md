@@ -109,13 +109,13 @@ Commit after each phase (no push).
 - [x] Not an issue: `m3e_collection` 0.3.7 doesn't pull in `m3e_core`, and only `fluent_ui` uses `material_ui`. It includes `split_button_m3e` and `button_group_m3e`. **Check the M3E risk:** `m3e_core` ≥ 1.1 is built on the standalone `material_ui` package. If its widgets read `material_ui`'s `Theme` rather than `flutter/material`'s, they won't see the app's `ThemeData`. If so, pin `m3e_core <1.1` or switch to `material_3_expressive`.
 
 ### Phase 1: the design setting, the Default accent and the Stream design
-- [ ] `AppDesign` enum (`stream`, `shad`, `yaru`, `fluent`, `liquidGlass`, `material3Expressive`) in `dogfooding/lib/app/`.
-- [ ] `AppPreferences`: `design` getter/setter (`_kDesignPref`); an unknown or missing value falls back to `stream`.
-- [ ] `AppDisplaySettings`: `design` + `setDesign`, like `themeMode`.
-- [ ] `AppAccentColor.designDefault` as described in [Accent color](#accent-color). The preference default changes from `blue` to `designDefault`, and `blue` is stored explicitly.
-- [ ] `theme_tab.dart`: a `SettingsSelect<AppDesign>` above the theme-mode select, each choice with a label, a short description and an icon. The Default swatch first in the accent picker, filled with the active design's default color.
-- [ ] l10n: `designTitle`, `designDescription`, one label per design, and `accentColorDefault`, in `app_en.arb` and `app_nl.arb`, then regenerate.
-- [ ] Tests: extend `app_display_settings_test.dart` for the persist and restore of `design`, and for the accent color (an empty preference gives Default, and `blue` survives a restart).
+- [x] `AppDesign` enum in `dogfooding/lib/app/`. It starts with `stream` only; each design phase adds its own value, label and `defaultAccent`.
+- [x] `AppPreferences`: `design` getter/setter (`_kDesignPref`); an unknown or missing value falls back to `stream`.
+- [x] `AppDisplaySettings`: `design` + `setDesign`, like `themeMode`.
+- [x] `AppAccentColor.designDefault` as described in [Accent color](#accent-color). The preference default changes from `blue` to `designDefault`, and `blue` is stored explicitly.
+- [x] `theme_tab.dart`: a `SettingsSelect<AppDesign>` above the theme-mode select, each choice with a label, a short description and an icon. The Default swatch first in the accent picker, filled with the active design's default color.
+- [x] l10n: `designTitle`, `designDescription`, one label per design, and `accentColorDefault`, in `app_en.arb` and `app_nl.arb`, then regenerate.
+- [x] Tests: extend `app_display_settings_test.dart` for the persist and restore of `design`, and for the accent color (an empty preference gives Default, and `blue` survives a restart).
 
 ### Phase 2: design plumbing
 - [ ] A small `AppDesignSpec` interface in place of chat's three parallel `switch`es:

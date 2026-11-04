@@ -152,6 +152,24 @@ abstract class AppLocalizations {
   /// **'Dark'**
   String get themeDark;
 
+  /// The heading over the design select, which picks the design system the app's components are drawn with.
+  ///
+  /// In en, this message translates to:
+  /// **'Design'**
+  String get designTitle;
+
+  /// Explains the design select.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the style of buttons, switches and fields.'**
+  String get designDescription;
+
+  /// The design choice for Stream's own design system. A product name, not translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Stream'**
+  String get designStream;
+
   /// The heading over the accent color swatches.
   ///
   /// In en, this message translates to:
@@ -163,6 +181,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose the color of buttons and highlights.'**
   String get accentColorDescription;
+
+  /// The accent color choice that keeps the design's own default color.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get accentColorDefault;
 
   /// An accent color.
   ///
