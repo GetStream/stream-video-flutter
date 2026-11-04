@@ -27,6 +27,7 @@ import 'model/rtc_tracks_info.dart';
 import 'model/rtc_video_encoding.dart';
 import 'peer_connection.dart';
 import 'peer_connection_factory.dart';
+import 'publisher/publish_quality.dart';
 import 'rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 import 'rtc_parser.dart';
 import 'rtc_track/rtc_track_publish_options.dart';
@@ -671,58 +672,11 @@ class RtcManager extends Disposable {
           '[onPublishQualityChanged] Codec in use: $codecInUse, uses SVC: $usesSvcCodec',
     );
 
-    var changed = false;
-    for (final encoder in params.encodings!) {
-      final layer = usesSvcCodec
-          ? // for SVC, we only have one layer (q) and often rid is omitted
-            enabledLayers.firstOrNull
-          : // for non-SVC, we need to find the layer by rid (simulcast)
-            enabledLayers.firstWhereOrNull((l) => l.name == encoder.rid) ??
-                (params.encodings!.length == 1
-                    ? enabledLayers.firstOrNull
-                    : null);
-
-      // flip 'active' flag only when necessary
-      final shouldActivate = layer?.active ?? false;
-      if (shouldActivate != encoder.active) {
-        encoder.active = shouldActivate;
-        changed = true;
-      }
-
-      // skip the rest of the settings if the layer is disabled or not found
-      if (layer == null) continue;
-
-      final scaleResolutionDownBy = layer.scaleResolutionDownBy;
-      final maxBitrate = layer.maxBitrate;
-      final maxFramerate = layer.maxFramerate;
-      final scalabilityMode = layer.scalabilityMode;
-
-      if (scaleResolutionDownBy >= 1 &&
-          scaleResolutionDownBy != encoder.scaleResolutionDownBy) {
-        encoder.scaleResolutionDownBy = scaleResolutionDownBy;
-        changed = true;
-      }
-      if (maxBitrate > 0 && maxBitrate != encoder.maxBitrate) {
-        encoder.maxBitrate = maxBitrate;
-        changed = true;
-      }
-      if (maxFramerate > 0 && maxFramerate != encoder.maxFramerate) {
-        encoder.maxFramerate = maxFramerate;
-        changed = true;
-      }
-      if (scalabilityMode.isNotEmpty &&
-          scalabilityMode != encoder.scalabilityMode) {
-        encoder.scalabilityMode = scalabilityMode;
-        changed = true;
-      }
-    }
-
-    final degradationPreference = videoSender.degradationPreference;
-    if (degradationPreference != null &&
-        params.degradationPreference != degradationPreference) {
-      params.degradationPreference = degradationPreference;
-      changed = true;
-    }
+    final changed = applyPublishQuality(
+      params,
+      videoSender,
+      usesSvcCodec: usesSvcCodec,
+    );
 
     final activeLayers = params.encodings!.where((e) => e.active).toList();
 
@@ -1304,17 +1258,6 @@ extension PublisherRtcManager on RtcManager {
     }
 
     throw UnimplementedError('Unsupported track type: ${track.runtimeType}');
-  }
-
-  RtcVideoQuality ridToVideoQuality(String rid) {
-    switch (rid) {
-      case 'q':
-        return RtcVideoQuality.lowUnspecified;
-      case 'h':
-        return RtcVideoQuality.mid;
-      default:
-        return RtcVideoQuality.high; // default to HIGH
-    }
   }
 
   /// Removes all tracks from the publisher with the given [trackIdPrefix].
@@ -1940,17 +1883,9 @@ extension PublisherRtcManager on RtcManager {
           trackPublishOptions: options,
         );
 
-        if (encodings.isNotEmpty) {
-          final params = transceiver.sender.parameters;
-          if (params.encodings != null && params.encodings!.isNotEmpty) {
-            final currentEncoding = params.encodings!.first;
-            final targetEncoding = encodings.first;
-            if (currentEncoding.maxBitrate != targetEncoding.maxBitrate) {
-              currentEncoding.maxBitrate = targetEncoding.maxBitrate;
-            }
-
-            await transceiver.sender.setParameters(params);
-          }
+        final params = transceiver.sender.parameters;
+        if (applyAudioBitrate(params, encodings)) {
+          await transceiver.sender.setParameters(params);
         }
       }
 
