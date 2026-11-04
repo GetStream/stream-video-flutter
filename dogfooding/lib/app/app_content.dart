@@ -13,6 +13,7 @@ import '../di/injector.dart';
 import '../l10n/localizations/app_localizations.dart';
 import '../router/router.dart';
 import '../router/routes.dart';
+import '../screens/call_route_page.dart';
 import '../utils/consts.dart';
 import '../widgets/dogfooding_participant_tile.dart';
 import 'app_display_settings.dart';
@@ -127,18 +128,10 @@ class _StreamDogFoodingAppContentState
 
     _routedCallCid = call.callCid.value;
 
-    final extra = (
-      call: call,
-      connectOptions: null,
-      effectsManager: null,
-      encryptionKey: null,
-    );
-
-    _router.push(CallRoute($extra: extra).location, extra: extra).whenComplete(
-      () {
-        if (_routedCallCid == call.callCid.value) _routedCallCid = null;
-      },
-    );
+    CallRoutePage.handOff(call);
+    _router.push<void>(JoinRoute(callId: call.id).location).whenComplete(() {
+      if (_routedCallCid == call.callCid.value) _routedCallCid = null;
+    });
   }
 
   void _tryConsumingIncomingCallFromTerminatedState() {

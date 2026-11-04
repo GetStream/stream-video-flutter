@@ -1,0 +1,232 @@
+import 'package:flutter/material.dart';
+import 'package:stream_video_filters/video_effects_manager.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
+
+import '../app/user_auth_controller.dart';
+import '../core/model/environment.dart';
+import '../core/repos/app_preferences.dart';
+import '../di/injector.dart';
+import '../router/routes.dart';
+import '../utils/app_call.dart';
+import '../utils/call_lookup.dart';
+import 'call_screen.dart';
+import 'lobby_screen.dart';
+
+/// The page behind `/join/<callId>`: the lobby for the call, then the call
+/// itself.
+///
+/// The route carries only the call id, so the address always names the call.
+/// The page finds the [Call] for that id and picks what to show from its
+/// state: a call that is idle opens in the lobby, one that is already ringing
+/// or joined opens on the call screen. Leaving the lobby for the call stays on
+/// this page.
+class CallRoutePage extends StatefulWidget {
+  const CallRoutePage({
+    super.key,
+    required this.callId,
+    this.linkHost,
+    this.encryptionKey,
+  });
+
+  /// Id of the call to open.
+  final String callId;
+
+  /// Host of the link that opened the app, empty when the navigation did not
+  /// come from a link. It is the only place the app learns which environment
+  /// the call lives in.
+  final String? linkHost;
+
+  /// The shared passphrase the link carried, null for a link to a call that is
+  /// not encrypted.
+  final String? encryptionKey;
+
+  /// Hands [call] to the next page that opens for its id, so a call the app
+  /// already set up — one it is ringing, or one accepted from a notification —
+  /// is shown instead of a fresh call with the same id.
+  static void handOff(Call call) => _handedOff[call.id] = call;
+
+  static final _handedOff = <String, Call>{};
+
+  @override
+  State<CallRoutePage> createState() => _CallRoutePageState();
+}
+
+typedef _JoinOptions = ({
+  CallConnectOptions connectOptions,
+  StreamVideoEffectsManager effectsManager,
+  String? encryptionKey,
+});
+
+class _CallRoutePageState extends State<CallRoutePage> {
+  Call? _call;
+  bool _callExists = false;
+  bool _failed = false;
+
+  /// Whether the call screen is showing rather than the lobby.
+  bool _inCall = false;
+
+  /// What the lobby settled on, null when the call skipped the lobby.
+  _JoinOptions? _joinOptions;
+
+  @override
+  void initState() {
+    super.initState();
+    _openCall();
+  }
+
+  Future<void> _openCall() async {
+    try {
+      final existing = _existingCall();
+      if (existing != null && !existing.state.value.status.isIdle) {
+        setState(() {
+          _call = existing;
+          _inCall = true;
+        });
+        return;
+      }
+
+      await _switchEnvironmentIfNeeded();
+
+      final call = existing ?? makeAppCall(widget.callId);
+
+      // A link can point at a call that was never created. Creation is left to
+      // the lobby, because that is where the encryption mode is chosen and the
+      // mode is fixed at creation.
+      final lookup = await lookupCallExists(call);
+      if (lookup is Failure) {
+        debugPrint('Could not look up call ${widget.callId}: ${lookup.error}');
+        if (mounted) setState(() => _failed = true);
+        return;
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _call = call;
+        _callExists = (lookup as Success<bool>).data;
+      });
+    } catch (e, stk) {
+      debugPrint('Could not open call ${widget.callId}: $e');
+      debugPrintStack(stackTrace: stk);
+      if (mounted) setState(() => _failed = true);
+    }
+  }
+
+  /// The call the app already holds for this id: one handed off to this page,
+  /// or one the client is in.
+  Call? _existingCall() {
+    final handedOff = CallRoutePage._handedOff.remove(widget.callId);
+    if (handedOff != null && !handedOff.state.value.status.isDisconnected) {
+      return handedOff;
+    }
+
+    return locator
+        .get<StreamVideo>()
+        .activeCalls
+        .where((call) => call.id == widget.callId)
+        .firstOrNull;
+  }
+
+  /// A link carries its environment in its host, so a link to staging must not
+  /// be joined against pronto.
+  ///
+  /// Re-initialising the injector tears down the video and chat clients and
+  /// reconnects them, so it only happens when the link actually points
+  /// somewhere other than where the app is already pointing.
+  Future<void> _switchEnvironmentIfNeeded() async {
+    final host = widget.linkHost;
+    if (host == null || host.isEmpty) return;
+
+    final target = Environment.fromHost(host);
+    if (locator.get<AppPreferences>().environment == target) return;
+
+    final user = locator.get<UserAuthController>().currentUser;
+    if (user == null) return;
+
+    await AppInjector.reset();
+    await AppInjector.init(forceEnvironment: target);
+    await locator.get<UserAuthController>().login(user.toUser(), target);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final call = _call;
+    if (_failed || call == null) {
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: Center(
+          child: _failed
+              ? _JoinFailed(callId: widget.callId)
+              : const CircularProgressIndicator.adaptive(),
+        ),
+      );
+    }
+
+    if (_inCall) {
+      final options = _joinOptions;
+      return CallScreen(
+        call: call,
+        connectOptions: options?.connectOptions,
+        videoEffectsManager: options?.effectsManager,
+        encryptionKey: options?.encryptionKey,
+      );
+    }
+
+    return LobbyScreen(
+      call: call,
+      callExists: _callExists,
+      initialEncryptionKey: widget.encryptionKey,
+      onJoinCallPressed:
+          ({
+            required call,
+            required connectOptions,
+            required effectsManager,
+            encryptionKey,
+          }) {
+            setState(() {
+              _inCall = true;
+              _joinOptions = (
+                connectOptions: connectOptions,
+                effectsManager: effectsManager,
+                // The passphrase the lobby settled on, so the call screen can
+                // put it in the invite it offers.
+                encryptionKey: encryptionKey,
+              );
+            });
+          },
+    );
+  }
+}
+
+class _JoinFailed extends StatelessWidget {
+  const _JoinFailed({required this.callId});
+
+  final String callId;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Could not open call $callId',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Check that the link is still valid, then try again.',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () => HomeRoute().go(context),
+            child: const Text('Go to home'),
+          ),
+        ],
+      ),
+    );
+  }
+}

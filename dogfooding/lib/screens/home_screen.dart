@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 // 📦 Package imports:
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 import 'package:stream_video_flutter/stream_video_flutter_background.dart';
@@ -15,14 +16,15 @@ import '../core/model/environment.dart';
 import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
 import '../router/routes.dart';
+import '../utils/app_call.dart';
 import '../utils/assets.dart';
-import '../utils/call_lookup.dart';
 import '../utils/consts.dart';
 import '../utils/dialog_anchor.dart';
 import '../utils/loading_dialog.dart';
 import '../widgets/environment_switcher.dart';
 import '../widgets/minimum_top_inset.dart';
 import '../widgets/user_actions_avatar.dart';
+import 'call_route_page.dart';
 import 'qr_code_scanner.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -33,12 +35,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final _streamVideo = locator.get<StreamVideo>();
   late final _appPreferences = locator.get<AppPreferences>();
   late final _userAuthController = locator.get<UserAuthController>();
   late final _callIdController = TextEditingController();
-
-  late Call _call;
 
   /// A shared passphrase that came in with a scanned or followed invite, and
   /// the call id it was for.
@@ -83,84 +82,44 @@ class _HomeScreenState extends State<HomeScreen> {
     var callId = _callIdController.text;
 
     // Always generate a new call id for ringing
-    final generatedCallId = callId.isEmpty || memberIds.isNotEmpty;
-    if (generatedCallId) {
+    if (callId.isEmpty || memberIds.isNotEmpty) {
       callId = generateAlphanumericString(12);
+    }
+
+    if (memberIds.isEmpty) {
+      final invited = _invitedEncryptionKey;
+      final encryptionKey = invited?.callId == callId ? invited?.key : null;
+      unawaited(
+        context.push<void>(
+          JoinRoute(callId: callId).locationWithKey(encryptionKey),
+        ),
+      );
+      return;
     }
 
     unawaited(showLoadingIndicator(context));
 
-    _call = _streamVideo.makeCall(
-      callType: kCallType,
-      id: callId,
-      preferences: DefaultCallPreferences(
-        closedCaptionsVisibleCaptions: 3,
-        closedCaptionsVisibilityDurationMs: 5000,
-        // clientPublishOptions: ClientPublishOptions(
-        // preferredCodec: PreferredCodec.h264,
-        // fmtpLine: 'a=fmtp:96max-fr=60;max-fs=12288', <-- VP8
-        // fmtpLine: 'level-idx=5;profile=0;tier=0', <-- AV1
-        // ),
-      ),
-    );
-
-    final isRinging = memberIds.isNotEmpty;
+    final call = makeAppCall(callId);
 
     try {
-      if (isRinging) {
-        final result = await _call.getOrCreate(
-          memberIds: memberIds,
-          ringing: true,
-          video: true,
-        );
-
-        if (!mounted) return;
-
-        result.foldResult(
-          success: (_) => unawaited(
-            CallRoute(
-              $extra: (
-                call: _call,
-                connectOptions: null,
-                effectsManager: null,
-                // Ringing has no lobby to pick a key up in.
-                encryptionKey: null,
-              ),
-            ).push<void>(context),
-          ),
-          failure: (failure) => _showError(failure.videoError.message),
-        );
-
-        return;
-      }
-
-      // Creation is left to the lobby, because that is where the encryption
-      // mode is chosen and the mode is fixed at creation.
-      var callExists = false;
-      if (!generatedCallId) {
-        final lookup = await lookupCallExists(_call);
-        if (lookup is Failure) {
-          if (mounted) _showError(lookup.videoError.message);
-          return;
-        }
-
-        callExists = (lookup as Success<bool>).data;
-      }
+      final result = await call.getOrCreate(
+        memberIds: memberIds,
+        ringing: true,
+        video: true,
+      );
 
       if (!mounted) return;
 
-      final invited = _invitedEncryptionKey;
-      unawaited(
-        LobbyRoute(
-          $extra: (
-            call: _call,
-            callExists: callExists,
-            encryptionKey: invited?.callId == callId ? invited?.key : null,
-          ),
-        ).push<void>(context),
+      result.foldResult(
+        success: (_) {
+          // The page opens on the call screen, since the call is ringing.
+          CallRoutePage.handOff(call);
+          unawaited(JoinRoute(callId: callId).push<void>(context));
+        },
+        failure: (failure) => _showError(failure.videoError.message),
       );
     } catch (e, stk) {
-      debugPrint('Error joining or creating call: $e');
+      debugPrint('Error creating ringing call: $e');
       debugPrint(stk.toString());
     } finally {
       if (mounted) {
@@ -510,7 +469,7 @@ class _JoinForm extends StatelessWidget {
       // Example: https://livestream-react-demo.vercel.app/?id=6G9bxsMaFbMiGvLWWP85d&type=livestream
       final callId = uri.queryParameters['id'];
       if (callId != null) {
-        await LivestreamRoute($extra: callId).push<void>(context);
+        await LivestreamRoute(callId: callId).push<void>(context);
       }
       return;
     }

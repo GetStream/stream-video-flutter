@@ -13,13 +13,15 @@ import 'routes.dart';
 Uri? _pendingLink;
 
 GoRouter initRouter(UserAuthController authNotifier) {
+  // Pushed routes show in the address bar on web, so a call's page can be
+  // shared and reloaded.
+  GoRouter.optionURLReflectsImperativeAPIs = true;
+
   return GoRouter(
     routes: [
       ShellRoute(
         routes: [
           $homeRoute,
-          $lobbyRoute,
-          $callRoute,
           $livestreamRoute,
         ],
         builder: (context, state, child) {
