@@ -108,7 +108,7 @@ void _setSfuConnected(CallSession session, {required bool connected}) {
 
 /// Wires a publisher wedged in `have-local-offer`, so the publisher watchdog
 /// runs a recovery renegotiation — the only entry point that both drives
-/// `_onRenegotiationNeeded` and reports what it returned.
+/// `PublisherNegotiator.negotiate` and reports what it returned.
 ///
 /// The manager is real, so the announce is computed the way it is in
 /// production. With [sendingTrack] there is one cached transceiver whose mid
