@@ -60,6 +60,29 @@ const _tag = 'SV:RtcManager';
 /// transceiver creations before giving up on the current negotiation.
 const _pendingTransceiverSettleTimeout = Duration(seconds: 5);
 
+/// The WebRTC side of one call session: its publisher and subscriber peer
+/// connections and the tracks they carry.
+///
+/// One is made per `CallSession` by `RtcManagerFactory`. A rejoin or an SFU
+/// migration makes a new one; [handOverLocalTracks] passes the live local
+/// tracks to it, so the devices are not opened again.
+///
+/// It:
+/// - publishes local tracks: it acquires the camera, microphone and screen
+///   share, sends each track on a transceiver per publish option, and mutes,
+///   unmutes and switches devices on them;
+/// - follows the SFU: publish options (codecs), publish quality (layers), and
+///   the tracks announced in `SetPublisher` and `ReconnectDetails`;
+/// - receives remote tracks on the subscriber and answers its offers;
+/// - attaches end-to-end encryption to senders and receivers when the call is
+///   encrypted;
+/// - selects the audio output and, on Apple platforms, applies the audio
+///   session and the microphone mute of the audio device module.
+///
+/// It does not talk to the SFU: `CallSession` negotiates and calls into it.
+/// The call layer reads tracks through [localTracks], [remoteTracks],
+/// [getTrack] and [getTracks], and hears about changes through
+/// [onLocalTrackPublished], [onLocalTrackMuted] and [onRemoteTrackReceived].
 class RtcManager extends Disposable {
   RtcManager({
     required this.sessionId,
@@ -149,6 +172,23 @@ class RtcManager extends Disposable {
 
   final tracks = </*trackId*/ String, RtcTrack>{};
 
+  /// The local tracks by track id, as an unmodifiable snapshot.
+  Map<String, RtcLocalTrack> get localTracks => Map.unmodifiable({
+    for (final MapEntry(:key, :value) in tracks.entries)
+      if (value is RtcLocalTrack) key: value,
+  });
+
+  /// The remote tracks by track id, as an unmodifiable snapshot.
+  Map<String, RtcRemoteTrack> get remoteTracks => Map.unmodifiable({
+    for (final MapEntry(:key, :value) in tracks.entries)
+      if (value is RtcRemoteTrack) key: value,
+  });
+
+  /// Marks the transceivers sending [announced] as acknowledged by the SFU.
+  void markNegotiated(Iterable<RtcTrackInfo> announced) {
+    transceiversManager.markNegotiated(announced);
+  }
+
   /// The media tracks given to the next session's manager by
   /// [handOverLocalTracks], by track id. Unpublishing a track that still holds
   /// that media track stops only this manager's clones.
@@ -224,47 +264,6 @@ class RtcManager extends Disposable {
 
   StreamSubscription<ScreenSharingStartedEvent>?
   _screenSharingStartedSubscription;
-
-  static final Map<rtc.TransceiverDirection, String> _cachedGenericSdp = {};
-
-  /// Returns a generic sdp. Results are cached since device capabilities
-  /// don't change between calls.
-  static Future<String> getGenericSdp(
-    rtc.TransceiverDirection direction, {
-    required rtc.NativePeerConnectionFactory? pcFactory,
-  }) async {
-    // Check cache first
-    if (_cachedGenericSdp.containsKey(direction)) {
-      return _cachedGenericSdp[direction]!;
-    }
-
-    final tempPC = pcFactory != null
-        ? await pcFactory.createPeerConnection({}, {})
-        : await rtc.createPeerConnection({});
-
-    await tempPC.addTransceiver(
-      kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio,
-      init: rtc.RTCRtpTransceiverInit(direction: direction),
-    );
-
-    await tempPC.addTransceiver(
-      kind: rtc.RTCRtpMediaType.RTCRtpMediaTypeVideo,
-      init: rtc.RTCRtpTransceiverInit(direction: direction),
-    );
-
-    final offer = await tempPC.createOffer();
-    final sdp = offer.sdp;
-
-    await tempPC.dispose();
-
-    if (sdp == null) {
-      taggedLogger(tag: _tag).e(() => '[getGenericSdp] sdp is null');
-      return '';
-    }
-
-    _cachedGenericSdp[direction] = sdp;
-    return sdp;
-  }
 
   /// The last subscriber offer applied and answered, so the next one can be compared
   /// against it. Null until the first offer: a brand-new subscriber is not a

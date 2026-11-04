@@ -5,6 +5,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
+import '../webrtc/fixtures/rtc_manager_fakes.dart';
 import 'fixtures/call_test_helpers.dart';
 
 // ---------------------------------------------------------------------------
@@ -92,6 +93,59 @@ void main() {
       await call.suspendAudio();
 
       expect(call.state.value.isAudioSuspended, isTrue);
+    });
+
+    test('disables and records local and remote audio tracks alike', () async {
+      final local = fakeAudioTrack('mic');
+      final remote = RtcRemoteTrack(
+        trackIdPrefix: 'other-participant',
+        trackType: SfuTrackType.audio,
+        mediaStream: FakeMediaStream(),
+        mediaTrack: FakeMediaStreamTrack('remote-audio', kind: 'audio'),
+      );
+      final rtcManager = MockRtcManager();
+      when(() => rtcManager.localTracks).thenReturn({local.trackId: local});
+      when(() => rtcManager.remoteTracks).thenReturn({remote.trackId: remote});
+      // Read by the Apple microphone mute reconcile on resume.
+      when(() => rtcManager.tracks).thenReturn({
+        local.trackId: local,
+        remote.trackId: remote,
+      });
+      final pcFactory = fakePcFactory();
+      when(() => rtcManager.pcFactory).thenReturn(pcFactory);
+      when(() => callSession.rtcManager).thenReturn(rtcManager);
+
+      final call = createTestCall(
+        networkMonitor: setupMockInternetConnection(
+          statusStream: internetStatusController,
+        ),
+        sessionFactory: setupMockSessionFactory(callSession: callSession),
+        streamVideo: mockStreamVideo,
+      );
+
+      await call.join();
+      await call.suspendAudio();
+
+      expect(local.mediaTrack.enabled, isFalse);
+      expect(remote.mediaTrack.enabled, isFalse);
+
+      // Copied on arrival: the call clears its map once resumed.
+      Map<String, SuspendedTrackState>? recorded;
+      when(() => callSession.resumeSuspendedAudioTracks(any())).thenAnswer((
+        invocation,
+      ) async {
+        recorded = {
+          ...invocation.positionalArguments.first
+              as Map<String, SuspendedTrackState>,
+        };
+      });
+
+      await call.resumeAudio();
+
+      expect(recorded, {
+        local.trackId: SuspendedTrackState.wasEnabled,
+        remote.trackId: SuspendedTrackState.wasEnabled,
+      });
     });
 
     test('is idempotent — second call does not change state again', () async {
