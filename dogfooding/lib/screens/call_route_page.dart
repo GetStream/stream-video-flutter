@@ -23,12 +23,17 @@ class CallRoutePage extends StatefulWidget {
   const CallRoutePage({
     super.key,
     required this.callId,
+    required this.callType,
     this.linkHost,
     this.encryptionKey,
+    this.publishOptions,
   });
 
   /// Id of the call to open.
   final String callId;
+
+  /// Type of the call to open.
+  final StreamCallType callType;
 
   /// Host of the link that opened the app, empty when the navigation did not
   /// come from a link. It is the only place the app learns which environment
@@ -38,13 +43,17 @@ class CallRoutePage extends StatefulWidget {
   /// The shared passphrase that came with the navigation, null when none did.
   final String? encryptionKey;
 
+  /// Codec overrides for a call this page makes, null for none.
+  final ClientPublishOptions? publishOptions;
+
   /// Hands [call] to the next page that opens for its id, so a call the app
   /// already set up — one it is ringing, one ringing in, or one accepted from
   /// a notification — is shown instead of a fresh call with the same id.
   ///
   /// A call that has ended by the time the page opens closes the page.
-  static void handOff(Call call) => _handedOff[call.id] = call;
+  static void handOff(Call call) => _handedOff[call.callCid.value] = call;
 
+  /// Handed-off calls by their call cid.
   static final _handedOff = <String, Call>{};
 
   @override
@@ -58,6 +67,11 @@ typedef _JoinOptions = ({
 });
 
 class _CallRoutePageState extends State<CallRoutePage> {
+  late final _callCid = StreamCallCid.from(
+    type: widget.callType,
+    id: widget.callId,
+  );
+
   Call? _call;
   bool _callExists = false;
 
@@ -78,7 +92,7 @@ class _CallRoutePageState extends State<CallRoutePage> {
 
   Future<void> _openCall() async {
     try {
-      final handedOff = CallRoutePage._handedOff.remove(widget.callId);
+      final handedOff = CallRoutePage._handedOff.remove(_callCid.value);
       if (handedOff != null && handedOff.state.value.status.isDisconnected) {
         _close();
         return;
@@ -95,7 +109,13 @@ class _CallRoutePageState extends State<CallRoutePage> {
 
       await _switchEnvironmentIfNeeded();
 
-      final call = existing ?? makeAppCall(widget.callId);
+      final call =
+          existing ??
+          makeAppCall(
+            widget.callId,
+            callType: widget.callType,
+            publishOptions: widget.publishOptions,
+          );
 
       // The call may not exist yet. Creation is left to the lobby, because
       // that is where the encryption mode is chosen and the mode is fixed at
@@ -131,12 +151,12 @@ class _CallRoutePageState extends State<CallRoutePage> {
     });
   }
 
-  /// The call the client is in with this id.
+  /// The call the client is in with this call cid.
   Call? _activeCall() {
     return locator
         .get<StreamVideo>()
         .activeCalls
-        .where((call) => call.id == widget.callId)
+        .where((call) => call.callCid == _callCid)
         .firstOrNull;
   }
 

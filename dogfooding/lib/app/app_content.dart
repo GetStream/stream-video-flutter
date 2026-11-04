@@ -129,7 +129,10 @@ class _StreamDogFoodingAppContentState
     _routedCallCid = call.callCid.value;
 
     CallRoutePage.handOff(call);
-    _router.push<void>(JoinRoute(callId: call.id).location).whenComplete(() {
+    final location = JoinRoute(callId: call.id).locationFor(
+      callType: call.type,
+    );
+    _router.push<void>(location).whenComplete(() {
       if (_routedCallCid == call.callCid.value) _routedCallCid = null;
     });
   }

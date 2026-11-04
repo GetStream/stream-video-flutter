@@ -7,18 +7,21 @@ import 'consts.dart';
 
 /// Makes the [Call] for [callId] with the preferences every call in this app
 /// uses.
-Call makeAppCall(String callId) {
+///
+/// [callType] defaults to [kCallType]. [publishOptions] overrides the codecs
+/// and bitrate the call publishes and subscribes with.
+Call makeAppCall(
+  String callId, {
+  StreamCallType? callType,
+  ClientPublishOptions? publishOptions,
+}) {
   return locator.get<StreamVideo>().makeCall(
-    callType: kCallType,
+    callType: callType ?? kCallType,
     id: callId,
     preferences: DefaultCallPreferences(
       closedCaptionsVisibleCaptions: 3,
       closedCaptionsVisibilityDurationMs: 5000,
-      // clientPublishOptions: ClientPublishOptions(
-      // preferredCodec: PreferredCodec.h264,
-      // fmtpLine: 'a=fmtp:96max-fr=60;max-fs=12288', <-- VP8
-      // fmtpLine: 'level-idx=5;profile=0;tier=0', <-- AV1
-      // ),
+      clientPublishOptions: publishOptions,
     ),
   );
 }

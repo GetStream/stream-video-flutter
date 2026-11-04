@@ -91,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final encryptionKey = invited?.callId == callId ? invited?.key : null;
       unawaited(
         context.push<void>(
-          JoinRoute(callId: callId).locationWithKey(encryptionKey),
+          JoinRoute(callId: callId).locationFor(encryptionKey: encryptionKey),
         ),
       );
       return;
@@ -114,7 +114,11 @@ class _HomeScreenState extends State<HomeScreen> {
         success: (_) {
           // The page opens on the call screen, since the call is ringing.
           CallRoutePage.handOff(call);
-          unawaited(JoinRoute(callId: callId).push<void>(context));
+          unawaited(
+            context.push<void>(
+              JoinRoute(callId: callId).locationFor(callType: call.type),
+            ),
+          );
         },
         failure: (failure) => _showError(failure.videoError.message),
       );
