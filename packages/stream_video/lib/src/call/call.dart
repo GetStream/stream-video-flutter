@@ -1503,34 +1503,57 @@ class Call {
   Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) =>
       _media.setAudioOutputDevice(device);
 
-  Result<None> setAudioBitrateProfile(SfuAudioBitrateProfile profile) {
+  /// Switches the audio bitrate profile of the call, and captures the live
+  /// microphone again with the matching audio constraints.
+  ///
+  /// [SfuAudioBitrateProfile.musicHighQuality] captures in stereo, without
+  /// noise suppression, echo cancellation or auto gain control, and stops
+  /// audio processing when an audio processor is configured. The other
+  /// profiles capture in mono with those enabled, and start audio processing.
+  ///
+  /// Fails when High Fidelity audio is not enabled for the call, or when the
+  /// microphone could not be captured again. The call keeps the new profile
+  /// then: the microphone is reported muted, and captures with the new
+  /// constraints when it is unmuted.
+  Future<Result<None>> setAudioBitrateProfile(
+    SfuAudioBitrateProfile profile,
+  ) async {
     if (!state.value.settings.audio.hifiAudioEnabled) {
       return failureWithError(
         'High Fidelity audio is not enabled for this call',
       );
     }
 
-    if (_host.isAudioProcessorConfigured()) {
-      final disableAudioProcessing =
-          profile == SfuAudioBitrateProfile.musicHighQuality;
-
-      if (disableAudioProcessing) {
-        unawaited(stopAudioProcessing());
-      } else {
-        unawaited(startAudioProcessing());
-      }
-    }
-
     _stateManager.setAudioBitrateProfile(profile);
 
     final stereo = profile == SfuAudioBitrateProfile.musicHighQuality;
 
-    // On iOS, toggle stereo playout preference when switching HiFi audio modes.
-    if (CurrentPlatform.isIos) {
-      unawaited(rtc.Helper.setiOSStereoPlayoutPreferred(stereo));
+    if (_host.isAudioProcessorConfigured()) {
+      final processing = stereo
+          ? await stopAudioProcessing()
+          : await startAudioProcessing();
+      if (processing case Failure(:final error)) {
+        _logger.w(
+          () => '[setAudioBitrateProfile] audio processing not toggled: $error',
+        );
+      }
     }
 
-    _session?.rtcManager?.changeDefaultAudioConstraints(
+    // On iOS, toggle stereo playout preference when switching HiFi audio modes.
+    if (CurrentPlatform.isIos) {
+      try {
+        await rtc.Helper.setiOSStereoPlayoutPreferred(stereo);
+      } catch (e) {
+        _logger.w(
+          () => '[setAudioBitrateProfile] stereo playout not set: $e',
+        );
+      }
+    }
+
+    final rtcManager = _session?.rtcManager;
+    if (rtcManager == null) return const Result.success(none);
+
+    return rtcManager.changeDefaultAudioConstraints(
       AudioConstraints(
         noiseSuppression: !stereo,
         echoCancellation: !stereo,
@@ -1538,8 +1561,6 @@ class Call {
         channelCount: stereo ? 2 : 1,
       ),
     );
-
-    return const Result.success(none);
   }
 
   /// Whether [setAudioOutputDevice] can route audio on this platform. See

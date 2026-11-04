@@ -863,7 +863,7 @@ void main() {
 
           await call.join();
 
-          final result = call.setAudioBitrateProfile(
+          final result = await call.setAudioBitrateProfile(
             SfuAudioBitrateProfile.musicHighQuality,
           );
 
@@ -916,12 +916,11 @@ void main() {
 
           await call.join();
 
-          final result = call.setAudioBitrateProfile(
+          final result = await call.setAudioBitrateProfile(
             SfuAudioBitrateProfile.musicHighQuality,
           );
 
           expect(result.isSuccess, isTrue);
-          await Future<void>.delayed(Duration.zero);
 
           verify(
             () => mockStreamVideo.setAudioProcessingEnabled(false),
@@ -980,12 +979,11 @@ void main() {
 
           await call.join();
 
-          final result = call.setAudioBitrateProfile(
+          final result = await call.setAudioBitrateProfile(
             SfuAudioBitrateProfile.voiceStandard,
           );
 
           expect(result.isSuccess, isTrue);
-          await Future<void>.delayed(Duration.zero);
 
           verify(
             () => mockStreamVideo.setAudioProcessingEnabled(true),
@@ -1029,14 +1027,107 @@ void main() {
 
           await call.join();
 
-          call.setAudioBitrateProfile(
+          await call.setAudioBitrateProfile(
             SfuAudioBitrateProfile.musicHighQuality,
           );
-          await Future<void>.delayed(Duration.zero);
 
           verifyNever(() => mockStreamVideo.setAudioProcessingEnabled(any()));
         },
       );
+
+      group('microphone recapture', () {
+        late MockRtcManager rtcManager;
+
+        setUpAll(() {
+          registerFallbackValue(const AudioConstraints());
+        });
+
+        setUp(() {
+          const hifiSettings = CallSettings(
+            audio: StreamAudioSettings(hifiAudioEnabled: true),
+          );
+
+          when(
+            () => coordinatorClient.joinCall(
+              callCid: any(named: 'callCid'),
+              create: any(named: 'create'),
+              migratingFrom: any(named: 'migratingFrom'),
+              migratingFromList: any(named: 'migratingFromList'),
+              video: any(named: 'video'),
+              membersLimit: any(named: 'membersLimit'),
+              e2ee: any(named: 'e2ee'),
+            ),
+          ).thenAnswer(
+            (_) async => Result.success(_joinedWithSettings(hifiSettings)),
+          );
+          when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(false);
+
+          rtcManager = MockRtcManager();
+          when(() => callSession.rtcManager).thenReturn(rtcManager);
+        });
+
+        Future<Call> joinedCall() async {
+          final call = createTestCall(
+            networkMonitor: setupMockInternetConnection(
+              statusStream: internetStatusController,
+            ),
+            coordinatorClient: coordinatorClient,
+            sessionFactory: setupMockSessionFactory(callSession: callSession),
+            streamVideo: mockStreamVideo,
+          );
+          await call.join();
+          return call;
+        }
+
+        test(
+          'captures the microphone in stereo without voice processing for '
+          'musicHighQuality',
+          () async {
+            when(
+              () => rtcManager.changeDefaultAudioConstraints(any()),
+            ).thenAnswer((_) async => const Result.success(none));
+            final call = await joinedCall();
+
+            final result = await call.setAudioBitrateProfile(
+              SfuAudioBitrateProfile.musicHighQuality,
+            );
+
+            expect(result.isSuccess, isTrue);
+            final constraints =
+                verify(
+                      () => rtcManager.changeDefaultAudioConstraints(
+                        captureAny(),
+                      ),
+                    ).captured.single
+                    as AudioConstraints;
+            expect(constraints.channelCount, 2);
+            expect(constraints.noiseSuppression, isFalse);
+            expect(constraints.echoCancellation, isFalse);
+            expect(constraints.autoGainControl, isFalse);
+          },
+        );
+
+        test(
+          'fails and keeps the new profile when the microphone could not be '
+          'captured again',
+          () async {
+            when(
+              () => rtcManager.changeDefaultAudioConstraints(any()),
+            ).thenAnswer((_) async => failureWithError('capture failed'));
+            final call = await joinedCall();
+
+            final result = await call.setAudioBitrateProfile(
+              SfuAudioBitrateProfile.musicHighQuality,
+            );
+
+            expect(result.isFailure, isTrue);
+            expect(
+              call.state.value.audioBitrateProfile,
+              SfuAudioBitrateProfile.musicHighQuality,
+            );
+          },
+        );
+      });
     });
   });
 }

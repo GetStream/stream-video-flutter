@@ -306,7 +306,10 @@ class RtcManager extends Disposable {
 
   /// Makes [constraints] the default for microphone tracks, and restarts the
   /// live ones so they capture with it.
-  Future<void> changeDefaultAudioConstraints(
+  ///
+  /// Fails when a live microphone could not be captured again; it is then
+  /// reported muted, and captures with [constraints] when it is unmuted.
+  Future<Result<None>> changeDefaultAudioConstraints(
     AudioConstraints constraints,
   ) {
     _trackAcquirer.defaultAudioConstraints = constraints;
