@@ -6,16 +6,19 @@ list(APPEND FLUTTER_PLUGIN_LIST
   battery_plus
   connectivity_plus
   desktop_drop
+  dynamic_color
   file_selector_windows
   firebase_auth
   firebase_core
   gal
   permission_handler_windows
   record_windows
+  screen_retriever_windows
   share_plus
   stream_thumbnail
   stream_webrtc_flutter
   url_launcher_windows
+  window_manager
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
