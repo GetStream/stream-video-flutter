@@ -48,7 +48,7 @@ people work on this; CS6 needs CS5, CS9 needs CS6 and CS8, CS10 needs all.
 - [x] 3. **CS3** [FLU-1063](https://linear.app/stream/issue/FLU-1063): `SfuJoinRequestBuilder` (S). One `JoinRequest` and one `ReconnectDetails` builder for both join paths.
 - [x] 4. **CS4** [FLU-1064](https://linear.app/stream/issue/FLU-1064): one join handshake (S, behaviour change). `start` gains the closed-socket fail-fast; changelog line.
 - [x] 5. **CS5** [FLU-1065](https://linear.app/stream/issue/FLU-1065): `PublisherNegotiator` (M). The negotiation lock and the three rollback rules move verbatim.
-- [ ] 6. **CS6** [FLU-1066](https://linear.app/stream/issue/FLU-1066): `SessionSignaling` (S). Subscriber offer, ICE both ways, ICE restart, mute state. After CS5.
+- [x] 6. **CS6** [FLU-1066](https://linear.app/stream/issue/FLU-1066): `SessionSignaling` (S). Subscriber offer, ICE both ways, ICE restart, mute state. After CS5.
 - [ ] 7. **CS7** [FLU-1067](https://linear.app/stream/issue/FLU-1067): `PublisherConnectionWatchdog` (S).
 - [ ] 8. **CS8** [FLU-1068](https://linear.app/stream/issue/FLU-1068): `SessionTrackController` (M). The suspend-or-start rule written once.
 - [ ] 9. **CS9** [FLU-1069](https://linear.app/stream/issue/FLU-1069): `SfuEventRouter` (M). The events lock, the dispatch, the state forwards and the manager gate; after CS6 and CS8. Fixes bug 3, which flips its CS1 pin.

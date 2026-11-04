@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
@@ -10,13 +9,11 @@ import 'package:synchronized/synchronized.dart';
 
 import '../../../globals.dart';
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
-import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
 import '../../errors/stream_video_exception_composer.dart';
 import '../../sfu/data/events/sfu_events.dart';
 import '../../sfu/data/models/sfu_call_state.dart';
-import '../../sfu/data/models/sfu_model_mapper_extensions.dart';
 import '../../sfu/sfu_client.dart';
 import '../../sfu/sfu_extensions.dart';
 import '../../sfu/ws/sfu_ws.dart';
@@ -33,6 +30,7 @@ import '../stats/trace_tag.dart';
 import '../stats/tracer.dart';
 import 'call_session_config.dart';
 import 'publisher_negotiator.dart';
+import 'session_signaling.dart';
 import 'sfu_join_request_builder.dart';
 
 part 'call_session_media.dart';
@@ -126,6 +124,16 @@ class CallSession extends Disposable with _CallSessionMedia {
     isCallDisconnected: () => stateManager.callState.status.isDisconnected,
     isSfuConnected: () => sfuWS.isConnected,
     onReconnectionNeeded: onReconnectionNeeded,
+    logTag: '$_tag-$sessionSeq',
+  );
+
+  late final _signaling = SessionSignaling(
+    sfuClient: sfuClient,
+    sessionId: sessionId,
+    rtcManager: () => rtcManager,
+    negotiator: _negotiator,
+    isLeavingOrClosed: () => _isLeavingOrClosed,
+    isCallDisconnected: () => stateManager.callState.status.isDisconnected,
     logTag: '$_tag-$sessionSeq',
   );
 
@@ -361,7 +369,7 @@ class CallSession extends Disposable with _CallSessionMedia {
                 clientEventRetryCount: clientEventRetryCount,
                 e2eeManager: e2eeManager,
               )
-              ..onSubscriberIceCandidate = _onLocalIceCandidate
+              ..onSubscriberIceCandidate = _signaling.onLocalIceCandidate
               ..onRenegotiationNeeded = _negotiator.negotiateOrRecover
               ..onReconnectionNeeded = onReconnectionNeeded
               ..onIceConnected = onIceConnected
@@ -389,9 +397,9 @@ class CallSession extends Disposable with _CallSessionMedia {
                 clientEventRetryCount: clientEventRetryCount,
                 e2eeManager: e2eeManager,
               )
-              ..onPublisherIceCandidate = _onLocalIceCandidate
-              ..onSubscriberIceCandidate = _onLocalIceCandidate
-              ..onLocalTrackMuted = _onLocalTrackMuted
+              ..onPublisherIceCandidate = _signaling.onLocalIceCandidate
+              ..onSubscriberIceCandidate = _signaling.onLocalIceCandidate
+              ..onLocalTrackMuted = _signaling.sendMuteState
               ..onLocalTrackPublished = _onLocalTrackPublished
               ..onReconnectionNeeded = onReconnectionNeeded
               ..onIceConnected = onIceConnected
@@ -805,9 +813,9 @@ class CallSession extends Disposable with _CallSessionMedia {
 
     await _sfuEventsLock.synchronized(() async {
       if (event is SfuSubscriberOfferEvent) {
-        await _onSubscriberOffer(event);
+        await _signaling.onSubscriberOffer(event);
       } else if (event is SfuIceTrickleEvent) {
-        await _onRemoteIceCandidate(event);
+        await _signaling.onRemoteIceCandidate(event);
       } else if (event is SfuParticipantLeftEvent) {
         await _onParticipantLeft(event);
       } else if (event is SfuTrackPublishedEvent) {
@@ -823,7 +831,7 @@ class CallSession extends Disposable with _CallSessionMedia {
         _tracer.trace(TraceTag.changePublishOptions, event.toJson());
         await _onPublishOptionsChanged(event);
       } else if (event is SfuIceRestartEvent) {
-        await _onIceRestart(event);
+        await _signaling.onIceRestart(event);
       } else if (event is SfuGoAwayEvent) {
         _tracer.trace(TraceTag.goAway, event.toJson());
       } else if (event is SfuErrorEvent) {
@@ -996,106 +1004,6 @@ class CallSession extends Disposable with _CallSessionMedia {
     return await rtcManager?.onPublishOptionsChanged(event.publishOptions);
   }
 
-  Future<void> _onSubscriberOffer(SfuSubscriberOfferEvent event) async {
-    if (_isLeavingOrClosed || stateManager.callState.status.isDisconnected) {
-      _logger.w(
-        () => '[onSubscriberOffer] rejected (session is disconnecting)',
-      );
-      return;
-    }
-
-    final offerSdp = event.sdp;
-    _logger.v(() => '[onSubscriberOffer] event: $event');
-
-    final answerSdp = await rtcManager?.onSubscriberOffer(offerSdp);
-    if (answerSdp == null) {
-      _logger.w(() => '[onSubscriberOffer] rejected (answerSdp is null)');
-      return;
-    }
-
-    // The session can leave or close while the answer is created; the SFU no
-    // longer expects one then.
-    if (_isLeavingOrClosed) {
-      _logger.w(() => '[onSubscriberOffer] dropped (session left mid-offer)');
-      return;
-    }
-
-    final result = await sfuClient.sendAnswer(
-      sfu.SendAnswerRequest(
-        sdp: answerSdp,
-        sessionId: sessionId,
-        peerType: sfu_models.PeerType.PEER_TYPE_SUBSCRIBER,
-        negotiationId: event.negotiationId,
-      ),
-    );
-    _logger.v(() => '[onSubscriberOffer] result: $result');
-  }
-
-  Future<void> _onIceRestart(SfuIceRestartEvent event) async {
-    _logger.d(() => '[onIceRestart] event: $event');
-
-    final peerType = event.peerType;
-
-    if (peerType == StreamPeerType.publisher) {
-      final publisher = rtcManager?.publisher;
-      if (publisher == null) {
-        _logger.w(() => '[onIceRestart] publisher peer connection is null');
-        return;
-      }
-
-      _logger.i(() => '[onIceRestart] restarting ICE for publisher');
-      final result = await publisher.restartIce();
-      _logger.d(() => '[onIceRestart] publisher ICE restart result: $result');
-
-      // After marking ICE restart, explicitly trigger renegotiation to create
-      // a new offer with fresh ICE credentials and send it to the SFU.
-      // pc.restartIce() only sets a flag; we must create and send the offer.
-      //
-      // Use unawaited so we don't hold _sfuEventsLock during the SetPublisher
-      // HTTP call.
-      _logger.i(() => '[onIceRestart] triggering publisher renegotiation');
-      unawaited(
-        _negotiator.negotiateOrRecover(publisher).catchError((
-          Object e,
-          StackTrace stk,
-        ) {
-          _logger.e(
-            () => '[onIceRestart] publisher renegotiation error: $e\n$stk',
-          );
-        }),
-      );
-    } else if (peerType == StreamPeerType.subscriber) {
-      final subscriber = rtcManager?.subscriber;
-      if (subscriber == null) {
-        _logger.w(() => '[onIceRestart] subscriber peer connection is null');
-        return;
-      }
-
-      _logger.i(() => '[onIceRestart] restarting ICE for subscriber');
-      final result = await subscriber.restartIce();
-      _logger.d(() => '[onIceRestart] subscriber ICE restart result: $result');
-    } else {
-      _logger.w(() => '[onIceRestart] unknown peer type: $peerType');
-    }
-  }
-
-  void _onLocalTrackMuted(RtcLocalTrack track, bool muted) {
-    _logger.d(() => '[onPublisherTrackMuted] track: $track');
-
-    // Send a mute state update to the server.
-    sfuClient.updateMuteState(
-      sfu.UpdateMuteStatesRequest(
-        sessionId: sessionId,
-        muteStates: [
-          sfu.TrackMuteState(
-            trackType: track.trackType.toDTO(),
-            muted: muted,
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _applyCurrentVideoInputDevice() async {
     final state = stateManager.callStateStream.value;
     final videoInputDevice = state.videoInputDevice;
@@ -1127,40 +1035,7 @@ class CallSession extends Disposable with _CallSessionMedia {
     }
 
     // Send a mute state update to the server.
-    _onLocalTrackMuted(track, false);
-  }
-
-  Future<void> _onRemoteIceCandidate(SfuIceTrickleEvent event) async {
-    _logger.d(() => '[onRemoteIceCandidate] event: $event');
-    final result = await rtcManager?.onRemoteIceCandidate(
-      peerType: event.peerType,
-      iceCandidate: event.iceCandidate,
-    );
-    _logger.v(() => '[onRemoteIceCandidate] result: $result');
-  }
-
-  void _onLocalIceCandidate(
-    StreamPeerConnection pc,
-    rtc.RTCIceCandidate candidate,
-  ) {
-    _logger.d(
-      () => '[onLocalIceCandidate] type: ${pc.type}, candidate: $candidate',
-    );
-
-    final encodedIceCandidate = json.encode(candidate.toMap());
-    final peerType = pc.type == StreamPeerType.publisher
-        ? sfu_models.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED
-        : sfu_models.PeerType.PEER_TYPE_SUBSCRIBER;
-
-    final result = sfuClient.iceTrickle(
-      sfu_models.ICETrickle(
-        peerType: peerType,
-        sessionId: sessionId,
-        iceCandidate: encodedIceCandidate,
-      ),
-    );
-
-    _logger.v(() => '[onLocalIceCandidate] result: $result');
+    _signaling.sendMuteState(track, false);
   }
 
   /// Negotiates [pc], escalating an unresolved track mid.
