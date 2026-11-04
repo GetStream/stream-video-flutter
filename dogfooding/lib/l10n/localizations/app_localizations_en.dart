@@ -50,6 +50,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get designShad => 'shadcn/ui';
 
   @override
+  String get designYaru => 'Yaru';
+
+  @override
   String get accentColorTitle => 'Accent Color';
 
   @override

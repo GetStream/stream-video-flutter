@@ -137,9 +137,9 @@ checked class by class. Use it as a reference, not a port.
 - [ ] Optional: a `snackbar` builder on `ShadToast`, if the props fit (not done).
 
 ### Phase 4: Yaru
-- [ ] Port the theme, the icons (`YaruIcons`) and the builders. The Ubuntu font comes from `packages/yaru/Ubuntu`.
-- [ ] `splitButton` with `YaruSplitButton`.
-- [ ] Map `AppAccentColor` to `YaruVariant`s (orange is the default).
+- [x] Port the theme, the icons (`YaruIcons`) and the builders. The Ubuntu font comes from `packages/yaru/Ubuntu`.
+- [x] `splitButton` with `YaruSplitButton`.
+- [x] Accent: the picked palette color is Yaru's `primaryColor` (orange for Default), rather than the nearest `YaruVariant`.
 
 ### Phase 5: Fluent
 - [ ] Port the theme, the icons (`fluentui_system_icons`) and the builders. Add `FluentLocalizations.delegate` and the `FluentTheme` wrapper.

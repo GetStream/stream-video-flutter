@@ -52,6 +52,10 @@
   "@designShad": {
     "description": "The design choice for the shadcn/ui design system. A product name, not translated."
   },
+  "designYaru": "Yaru",
+  "@designYaru": {
+    "description": "The design choice for Ubuntu's Yaru design system. A product name, not translated."
+  },
   "accentColorTitle": "Accent Color",
   "@accentColorTitle": {
     "description": "The heading over the accent color swatches."

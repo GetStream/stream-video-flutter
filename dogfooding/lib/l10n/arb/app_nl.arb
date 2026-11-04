@@ -13,6 +13,7 @@
   "designDescription": "Kies de stijl van knoppen, schakelaars en velden.",
   "designStream": "Stream",
   "designShad": "shadcn/ui",
+  "designYaru": "Yaru",
   "accentColorTitle": "Accentkleur",
   "accentColorDescription": "Kies de kleur van knoppen en markeringen.",
   "accentColorDefault": "Standaard",

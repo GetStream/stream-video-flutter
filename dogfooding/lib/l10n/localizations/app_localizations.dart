@@ -176,6 +176,12 @@ abstract class AppLocalizations {
   /// **'shadcn/ui'**
   String get designShad;
 
+  /// The design choice for Ubuntu's Yaru design system. A product name, not translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Yaru'**
+  String get designYaru;
+
   /// The heading over the accent color swatches.
   ///
   /// In en, this message translates to:

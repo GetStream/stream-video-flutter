@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'design/app_design_spec.dart';
 import 'design/shad/shad_design.dart';
 import 'design/stream_design.dart';
+import 'design/yaru/yaru_design.dart';
 
 /// The design system the app's components are drawn with.
 enum AppDesign {
@@ -10,7 +11,10 @@ enum AppDesign {
   stream(StreamDesign()),
 
   /// shadcn/ui, through the shad package.
-  shad(ShadDesign());
+  shad(ShadDesign()),
+
+  /// Ubuntu's Yaru.
+  yaru(YaruDesign());
 
   const AppDesign(this.spec);
 

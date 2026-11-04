@@ -216,6 +216,7 @@ extension on AppDesign {
   String label(AppLocalizations l10n) => switch (this) {
     AppDesign.stream => l10n.designStream,
     AppDesign.shad => l10n.designShad,
+    AppDesign.yaru => l10n.designYaru,
   };
 }
 
