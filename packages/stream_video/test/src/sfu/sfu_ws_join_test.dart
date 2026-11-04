@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart'
     as sfu_events;
 import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
     as sfu_models;
+import 'package:stream_video/src/errors/stream_video_exception.dart';
 import 'package:stream_video/src/sfu/ws/sfu_message_codec.dart';
 import 'package:stream_video/src/sfu/ws/sfu_ws.dart';
+import 'package:stream_video/src/utils/result.dart';
 
 SfuWebSocket _socket() {
   return SfuWebSocket(
@@ -140,12 +144,20 @@ void main() {
       expect(result.isFailure, isTrue);
     });
 
-    test('fails once the time limit passes', () async {
+    test('fails once the time limit passes, with a timeout cause', () async {
       final result = await _socket().waitForJoinResponse(
         timeLimit: const Duration(milliseconds: 50),
       );
 
-      expect(result.isFailure, isTrue);
+      final error = (result as Failure).videoError;
+      expect(
+        error,
+        isA<StreamVideoExceptionWithCause>().having(
+          (e) => e.cause,
+          'cause',
+          isA<TimeoutException>(),
+        ),
+      );
     });
 
     test('ignores events that are neither answer nor error', () async {

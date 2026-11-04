@@ -246,6 +246,7 @@ class SfuWebSocket {
       settle(
         failureWithError(
           'No join response within ${timeLimit.inMilliseconds}ms',
+          cause: TimeoutException('No join response', timeLimit),
         ),
       );
     });

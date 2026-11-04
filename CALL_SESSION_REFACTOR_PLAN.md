@@ -46,7 +46,7 @@ people work on this; CS6 needs CS5, CS9 needs CS6 and CS8, CS10 needs all.
 - [x] 1. **CS1** [FLU-1061](https://linear.app/stream/issue/FLU-1061): characterisation tests for the untested paths (M). Gates every move; pins bugs 1 to 3 and 5 of FLU-1060 as they behave today.
 - [x] 2. **CS2** [FLU-1062](https://linear.app/stream/issue/FLU-1062): media pass-throughs to a part file, the dead viewport path out, DTO mappers moved (S).
 - [x] 3. **CS3** [FLU-1063](https://linear.app/stream/issue/FLU-1063): `SfuJoinRequestBuilder` (S). One `JoinRequest` and one `ReconnectDetails` builder for both join paths.
-- [ ] 4. **CS4** [FLU-1064](https://linear.app/stream/issue/FLU-1064): one join handshake (S, behaviour change). `start` gains the closed-socket fail-fast; changelog line.
+- [x] 4. **CS4** [FLU-1064](https://linear.app/stream/issue/FLU-1064): one join handshake (S, behaviour change). `start` gains the closed-socket fail-fast; changelog line.
 - [ ] 5. **CS5** [FLU-1065](https://linear.app/stream/issue/FLU-1065): `PublisherNegotiator` (M). The negotiation lock and the three rollback rules move verbatim.
 - [ ] 6. **CS6** [FLU-1066](https://linear.app/stream/issue/FLU-1066): `SessionSignaling` (S). Subscriber offer, ICE both ways, ICE restart, mute state. After CS5.
 - [ ] 7. **CS7** [FLU-1067](https://linear.app/stream/issue/FLU-1067): `PublisherConnectionWatchdog` (S).
