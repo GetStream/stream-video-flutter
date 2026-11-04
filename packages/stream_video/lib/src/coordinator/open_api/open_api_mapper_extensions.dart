@@ -19,10 +19,10 @@ StreamVideoEvent? coordinatorEventFromJson(
 ) {
   switch (type) {
     case EventType.connectionOk:
-      final event = open.ConnectedEvent.fromJson(json);
+      final me = json['me'] as Map<String, dynamic>;
       return CoordinatorConnectedEvent(
-        connectionId: event.connectionId,
-        userId: event.me.id,
+        connectionId: json['connection_id'] as String,
+        userId: me['id'] as String,
       );
     case EventType.healthCheck:
       return CoordinatorHealthCheckEvent(

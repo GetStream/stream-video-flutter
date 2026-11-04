@@ -50,29 +50,34 @@ void loopBackTest() async {
   print('receiver video capabilities: ${vcapabilities.toMap()}');
 
   var keyProviderOptions = KeyProviderOptions(
-      sharedKey: false,
-      ratchetWindowSize: 16,
-      failureTolerance: -1,
-      ratchetSalt: Uint8List.fromList('testSalt'.codeUnits),
-      discardFrameWhenCryptorNotReady: true);
-  var keyProviderForSender =
-      await frameCryptorFactory.createDefaultKeyProvider(keyProviderOptions);
+    sharedKey: false,
+    ratchetWindowSize: 16,
+    failureTolerance: -1,
+    ratchetSalt: Uint8List.fromList('testSalt'.codeUnits),
+    discardFrameWhenCryptorNotReady: true,
+  );
+  var keyProviderForSender = await frameCryptorFactory.createDefaultKeyProvider(
+    keyProviderOptions,
+  );
 
-  var keyProviderForReceiver =
-      await frameCryptorFactory.createDefaultKeyProvider(keyProviderOptions);
+  var keyProviderForReceiver = await frameCryptorFactory
+      .createDefaultKeyProvider(keyProviderOptions);
 
   await keyProviderForSender.setKey(
-      participantId: 'sender',
-      index: 0,
-      key: Uint8List.fromList('testkey'.codeUnits));
+    participantId: 'sender',
+    index: 0,
+    key: Uint8List.fromList('testkey'.codeUnits),
+  );
 
   await keyProviderForReceiver.setKey(
-      participantId: 'receiver',
-      index: 0,
-      key: Uint8List.fromList('testkey'.codeUnits));
+    participantId: 'receiver',
+    index: 0,
+    key: Uint8List.fromList('testkey'.codeUnits),
+  );
 
-  var pc2 =
-      await createPeerConnection({'encodedInsertableStreams': enableE2EE});
+  var pc2 = await createPeerConnection({
+    'encodedInsertableStreams': enableE2EE,
+  });
 
   pc2.onTrack = (event) async {
     if (event.track.kind == 'video') {
@@ -80,10 +85,11 @@ void loopBackTest() async {
     }
     if (enableE2EE) {
       var fc = await frameCryptorFactory.createFrameCryptorForRtpReceiver(
-          participantId: 'receiver',
-          receiver: event.receiver!,
-          algorithm: Algorithm.kAesGcm,
-          keyProvider: keyProviderForReceiver);
+        participantId: 'receiver',
+        receiver: event.receiver!,
+        algorithm: Algorithm.kAesGcm,
+        keyProvider: keyProviderForReceiver,
+      );
       if (keyProviderOptions.discardFrameWhenCryptorNotReady) {
         Timer(Duration(seconds: 1), () {
           fc.setEnabled(true);
@@ -111,14 +117,17 @@ void loopBackTest() async {
     print('iceConnectionState $state');
   };
 
-  var pc1 =
-      await createPeerConnection({'encodedInsertableStreams': enableE2EE});
+  var pc1 = await createPeerConnection({
+    'encodedInsertableStreams': enableE2EE,
+  });
 
   pc1.onIceCandidate = (candidate) => pc2.addCandidate(candidate);
   pc2.onIceCandidate = (candidate) => pc1.addCandidate(candidate);
 
-  var stream =
-      await navigator.mediaDevices.getUserMedia({'audio': true, 'video': true});
+  var stream = await navigator.mediaDevices.getUserMedia({
+    'audio': true,
+    'video': true,
+  });
   /*.getUserMedia(MediaStreamConstraints(audio: true, video: true))*/
   print('getDisplayMedia: stream.id => ${stream.id}');
 
@@ -150,10 +159,11 @@ void loopBackTest() async {
     var sender = await pc1.addTrack(track, stream);
     if (enableE2EE) {
       var fc = await frameCryptorFactory.createFrameCryptorForRtpSender(
-          participantId: 'sender',
-          sender: sender,
-          algorithm: Algorithm.kAesGcm,
-          keyProvider: keyProviderForSender);
+        participantId: 'sender',
+        sender: sender,
+        algorithm: Algorithm.kAesGcm,
+        keyProvider: keyProviderForSender,
+      );
       await fc.setEnabled(true);
       await fc.setKeyIndex(0);
       if (track.kind == 'video') {
@@ -165,7 +175,7 @@ void loopBackTest() async {
       pc1FrameCryptors.add(fc);
     }
   });
-/*
+  /*
   var transceivers = await pc1.getTransceivers();
   transceivers.forEach((transceiver) {
     print('transceiver: ${transceiver.sender.track!.kind!}');
@@ -183,15 +193,19 @@ void loopBackTest() async {
   });
 */
   await pc1.createDataChannel(
-      'label', RTCDataChannelInit()..binaryType = 'binary');
+    'label',
+    RTCDataChannelInit()..binaryType = 'binary',
+  );
   var offer = await pc1.createOffer();
 
   await pc2.addTransceiver(
-      kind: RTCRtpMediaType.RTCRtpMediaTypeAudio,
-      init: RTCRtpTransceiverInit(direction: TransceiverDirection.RecvOnly));
+    kind: RTCRtpMediaType.RTCRtpMediaTypeAudio,
+    init: RTCRtpTransceiverInit(direction: TransceiverDirection.RecvOnly),
+  );
   await pc2.addTransceiver(
-      kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
-      init: RTCRtpTransceiverInit(direction: TransceiverDirection.RecvOnly));
+    kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
+    init: RTCRtpTransceiverInit(direction: TransceiverDirection.RecvOnly),
+  );
 
   await pc1.setLocalDescription(offer);
   await pc2.setRemoteDescription(offer);
@@ -202,60 +216,79 @@ void loopBackTest() async {
   localVideo.muted = true;
   localVideo.srcObject = stream;
 
-  var key2 =
-      await keyProviderForSender.ratchetKey(index: 0, participantId: 'sender');
+  var key2 = await keyProviderForSender.ratchetKey(
+    index: 0,
+    participantId: 'sender',
+  );
   print('ratchetKey key2: ${key2.toList()}');
 
   await keyProviderForSender.setKey(
-      index: 1,
-      participantId: 'sender',
-      key: Uint8List.fromList('testkey3'.codeUnits));
+    index: 1,
+    participantId: 'sender',
+    key: Uint8List.fromList('testkey3'.codeUnits),
+  );
 
   await keyProviderForReceiver.setKey(
-      index: 1,
-      participantId: 'receiver',
-      key: Uint8List.fromList('testkey3'.codeUnits));
+    index: 1,
+    participantId: 'receiver',
+    key: Uint8List.fromList('testkey3'.codeUnits),
+  );
 
   [...pc1FrameCryptors, ...pc2FrameCryptors].forEach((element) async {
     await element.setKeyIndex(1);
   });
 
   await keyProviderForSender.setKey(
-      index: 2,
-      participantId: 'sender',
-      key: Uint8List.fromList('testkey4'.codeUnits));
+    index: 2,
+    participantId: 'sender',
+    key: Uint8List.fromList('testkey4'.codeUnits),
+  );
 
   await keyProviderForReceiver.setKey(
-      index: 2,
-      participantId: 'receiver',
-      key: Uint8List.fromList('testkey4'.codeUnits));
+    index: 2,
+    participantId: 'receiver',
+    key: Uint8List.fromList('testkey4'.codeUnits),
+  );
 
   [...pc1FrameCryptors, ...pc2FrameCryptors].forEach((element) async {
     await element.setKeyIndex(2);
   });
 
-  var key =
-      await keyProviderForSender.ratchetKey(index: 2, participantId: 'sender');
+  var key = await keyProviderForSender.ratchetKey(
+    index: 2,
+    participantId: 'sender',
+  );
   print('ratchetKey key: ${key.toList()}');
 
   var participantId = 'participantId_1';
 
   await keyProviderForSender.setKey(
-      participantId: participantId, index: 0, key: key);
+    participantId: participantId,
+    index: 0,
+    key: key,
+  );
 
-  final dataPacketCryptor =
-      await dataPacketCryptorFactory.createDataPacketCryptor(
-          algorithm: Algorithm.kAesGcm, keyProvider: keyProviderForSender);
+  final dataPacketCryptor = await dataPacketCryptorFactory
+      .createDataPacketCryptor(
+        algorithm: Algorithm.kAesGcm,
+        keyProvider: keyProviderForSender,
+      );
 
   var data = Uint8List.fromList('Hello world!'.codeUnits);
   print('plain string: ${String.fromCharCodes(data)}');
   print('plain data: $data');
   var encryptedPacket = await dataPacketCryptor.encrypt(
-      participantId: participantId, keyIndex: 0, data: data);
+    participantId: participantId,
+    keyIndex: 0,
+    data: data,
+  );
   print(
-      'encrypted data: ${encryptedPacket.data}, keyIndex: ${encryptedPacket.keyIndex}, iv: ${encryptedPacket.iv}');
+    'encrypted data: ${encryptedPacket.data}, keyIndex: ${encryptedPacket.keyIndex}, iv: ${encryptedPacket.iv}',
+  );
   var decryptedData = await dataPacketCryptor.decrypt(
-      participantId: participantId, encryptedPacket: encryptedPacket);
+    participantId: participantId,
+    encryptedPacket: encryptedPacket,
+  );
   print('decrypted data: $decryptedData');
   print('decrypted string: ${String.fromCharCodes(decryptedData)}');
 

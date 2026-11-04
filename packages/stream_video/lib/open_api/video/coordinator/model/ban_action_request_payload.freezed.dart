@@ -16,7 +16,7 @@ mixin _$BanActionRequestPayload {
   bool? get banFromFutureChannels;
   bool? get channelBanOnly;
   String? get channelCid;
-  BanActionRequestPayloadDeleteMessages? get deleteMessages;
+  DeleteMessages? get deleteMessages;
   bool? get ipBan;
   String? get reason;
   bool? get shadow;
@@ -85,7 +85,7 @@ abstract mixin class $BanActionRequestPayloadCopyWith<$Res> {
     bool? banFromFutureChannels,
     bool? channelBanOnly,
     String? channelCid,
-    BanActionRequestPayloadDeleteMessages? deleteMessages,
+    DeleteMessages? deleteMessages,
     bool? ipBan,
     String? reason,
     bool? shadow,
@@ -134,7 +134,7 @@ class _$BanActionRequestPayloadCopyWithImpl<$Res>
         deleteMessages: freezed == deleteMessages
             ? _self.deleteMessages
             : deleteMessages // ignore: cast_nullable_to_non_nullable
-                  as BanActionRequestPayloadDeleteMessages?,
+                  as DeleteMessages?,
         ipBan: freezed == ipBan
             ? _self.ipBan
             : ipBan // ignore: cast_nullable_to_non_nullable

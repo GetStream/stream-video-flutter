@@ -16,6 +16,8 @@ ClientEvent _$ClientEventFromJson(Map<String, dynamic> json) => ClientEvent(
   id: json['id'] as String?,
   joinAttemptId: json['join_attempt_id'] as String?,
   joinReason: json['join_reason'] as String?,
+  leaveInitiator: json['leave_initiator'] as String?,
+  leaveReason: json['leave_reason'] as String?,
   microphonePermissionStatus: json['microphone_permission_status'] as String?,
   outcome: json['outcome'] as String?,
   peerConnection: json['peer_connection'] as String?,
@@ -29,6 +31,7 @@ ClientEvent _$ClientEventFromJson(Map<String, dynamic> json) => ClientEvent(
   screenShareStatus: json['screen_share_status'] as String?,
   sdkVersion: json['sdk_version'] as String?,
   sfuId: json['sfu_id'] as String?,
+  source: json['source'] as String?,
   stage: json['stage'] as String?,
   stageId: json['stage_id'] as String?,
   timestamp: _$JsonConverterFromJson<Object, DateTime>(
@@ -53,6 +56,8 @@ Map<String, dynamic> _$ClientEventToJson(ClientEvent instance) =>
       'id': instance.id,
       'join_attempt_id': instance.joinAttemptId,
       'join_reason': instance.joinReason,
+      'leave_initiator': instance.leaveInitiator,
+      'leave_reason': instance.leaveReason,
       'microphone_permission_status': instance.microphonePermissionStatus,
       'outcome': instance.outcome,
       'peer_connection': instance.peerConnection,
@@ -66,6 +71,7 @@ Map<String, dynamic> _$ClientEventToJson(ClientEvent instance) =>
       'screen_share_status': instance.screenShareStatus,
       'sdk_version': instance.sdkVersion,
       'sfu_id': instance.sfuId,
+      'source': instance.source,
       'stage': instance.stage,
       'stage_id': instance.stageId,
       'timestamp': _$JsonConverterToJson<Object, DateTime>(

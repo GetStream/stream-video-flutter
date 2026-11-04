@@ -9,14 +9,19 @@ abstract class RTCDTMFSender {
   ///          The browser will enforce a minimum value of 30 ms (that is,
   ///          if you specify a lower value, 30 ms will be used instead);
   ///          the default is 70 ms.
-  Future<void> insertDTMF(String tones,
-      {int duration = 100, int interToneGap = 70});
+  Future<void> insertDTMF(
+    String tones, {
+    int duration = 100,
+    int interToneGap = 70,
+  });
 
   /// Compatible with old methods
   @Deprecated('Use method insertDTMF instead')
-  Future<void> sendDtmf(String tones,
-          {int duration = 100, int interToneGap = 70}) =>
-      insertDTMF(tones, duration: duration, interToneGap: interToneGap);
+  Future<void> sendDtmf(
+    String tones, {
+    int duration = 100,
+    int interToneGap = 70,
+  }) => insertDTMF(tones, duration: duration, interToneGap: interToneGap);
 
   Future<bool> canInsertDtmf();
 }

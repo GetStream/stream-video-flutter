@@ -98,7 +98,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                 self.endCall(self.data!)
             } else {
                 if let getArgs = args as? [String: Any] {
-                    self.data = CallData(args: getArgs)
+                    self.data = self.storedCallData(for: getArgs)
                     self.endCall(self.data!)
                 }
             }
@@ -151,7 +151,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                 self.connectedCall(self.data!)
             } else {
                 if let getArgs = args as? [String: Any] {
-                    self.data = CallData(args: getArgs)
+                    self.data = self.storedCallData(for: getArgs)
                     self.connectedCall(self.data!)
                 }
             }
@@ -315,7 +315,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
         if call.isMuted == isMuted {
-            self.sendMuteEvent(callId.uuidString, isMuted)
+            self.sendMuteEvent(self.callController.reportedId(for: callId), isMuted)
         } else {
             self.callController.muteCall(call: call, isMuted: isMuted)
         }
@@ -328,10 +328,27 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
         if call.isOnHold == onHold {
-            self.sendHoldEvent(callId.uuidString, onHold)
+            self.sendHoldEvent(self.callController.reportedId(for: callId), onHold)
         } else {
             self.callController.holdCall(call: call, onHold: onHold)
         }
+    }
+
+    /// Returns the options already stored for the call that `args` names.
+    ///
+    /// `callConnected` and `endCall` send only the id, so rebuilding `CallData` from their args
+    /// would reset the call's options to defaults.
+    private func storedCallData(for args: [String: Any]) -> CallData {
+        guard let id = args["id"] as? String else {
+            return CallData(args: args)
+        }
+        if let data = self.data, data.uuid.lowercased() == id.lowercased() {
+            return data
+        }
+        if let uuid = UUID(uuidString: id), let call = self.callController.callWithUUID(uuid: uuid) {
+            return call.data
+        }
+        return CallData(args: args)
     }
 
     @objc public func endCall(_ data: CallData) {
@@ -524,7 +541,9 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             name: AVAudioSession.interruptionNotification, object: self, userInfo: userInfo)
     }
 
-    func configureAudioSession() {
+    /// Applies `data`'s audio session options, or the stored call's when `data` is nil.
+    func configureAudioSession(_ data: CallData? = nil) {
+        let data = data ?? self.data
         if data?.configureAudioSession != false {
             let session = AVAudioSession.sharedInstance()
             do {
@@ -593,9 +612,17 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     }
 
     public func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
-        let call = Call(uuid: action.callUUID, data: self.data!, isOutGoing: true)
+        guard
+            let data = self.callController.takePendingOutgoingCall(uuid: action.callUUID)
+                ?? self.data
+        else {
+            NSLog("startCall: no call data for \(action.callUUID), failing the start action")
+            action.fail()
+            return
+        }
+        let call = Call(uuid: action.callUUID, data: data, isOutGoing: true)
         call.handle = action.handle.value
-        configureAudioSession()
+        configureAudioSession(data)
         call.hasStartedConnectDidChange = { [weak self] in
             self?.sharedProvider?.reportOutgoingCall(
                 with: call.uuid, startedConnectingAt: call.connectData)
@@ -606,7 +633,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
         self.outgoingCall = call
         self.callController.addCall(call)
-        self.sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_START, self.data?.toJSON())
+        self.sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_START, data.toJSON())
         action.fulfill()
     }
 
@@ -661,7 +688,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         call.isOnHold = action.isOnHold
         call.isMuted = action.isOnHold
         self.callController.setHold(call: call, onHold: action.isOnHold)
-        sendHoldEvent(action.callUUID.uuidString, action.isOnHold)
+        sendHoldEvent(self.callController.reportedId(for: action.callUUID), action.isOnHold)
         action.fulfill()
     }
 
@@ -671,7 +698,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
         call.isMuted = action.isMuted
-        sendMuteEvent(action.callUUID.uuidString, action.isMuted)
+        sendMuteEvent(self.callController.reportedId(for: action.callUUID), action.isMuted)
         action.fulfill()
     }
 
@@ -683,8 +710,10 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         self.sendEvent(
             StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_GROUP,
             [
-                "id": action.callUUID.uuidString,
-                "callUUIDToGroupWith": action.callUUIDToGroupWith?.uuidString,
+                "id": self.callController.reportedId(for: action.callUUID),
+                "callUUIDToGroupWith": action.callUUIDToGroupWith.map {
+                    self.callController.reportedId(for: $0)
+                },
             ])
         action.fulfill()
     }
@@ -697,7 +726,8 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         self.sendEvent(
             StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_DTMF,
             [
-                "id": action.callUUID.uuidString, "digits": action.digits,
+                "id": self.callController.reportedId(for: action.callUUID),
+                "digits": action.digits,
                 "type": action.type.rawValue,
             ])
         action.fulfill()

@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RecordSettingsResponse {
   bool get audioOnly;
-  String get mode;
+  FeatureActivationMode get mode;
   String get quality;
 
   /// Create a copy of RecordSettingsResponse
@@ -54,7 +54,7 @@ abstract mixin class $RecordSettingsResponseCopyWith<$Res> {
     $Res Function(RecordSettingsResponse) _then,
   ) = _$RecordSettingsResponseCopyWithImpl;
   @useResult
-  $Res call({bool audioOnly, String mode, String quality});
+  $Res call({bool audioOnly, FeatureActivationMode mode, String quality});
 }
 
 /// @nodoc
@@ -83,7 +83,7 @@ class _$RecordSettingsResponseCopyWithImpl<$Res>
         mode: null == mode
             ? _self.mode
             : mode // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as FeatureActivationMode,
         quality: null == quality
             ? _self.quality
             : quality // ignore: cast_nullable_to_non_nullable

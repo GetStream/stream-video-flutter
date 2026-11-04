@@ -17,8 +17,11 @@ class RTCRtpReceiverNative extends RTCRtpReceiver {
     Map<dynamic, dynamic> map, {
     required String peerConnectionId,
   }) {
-    var track = MediaStreamTrackNative.fromMap(map['track'], peerConnectionId);
-    var parameters = RTCRtpParameters.fromMap(map['rtpParameters']);
+    final track = MediaStreamTrackNative.fromMap(
+      map['track'],
+      peerConnectionId,
+    );
+    final parameters = RTCRtpParameters.fromMap(map['rtpParameters']);
     return RTCRtpReceiverNative(
       map['receiverId'],
       track,
@@ -48,10 +51,10 @@ class RTCRtpReceiverNative extends RTCRtpReceiver {
         'peerConnectionId': _peerConnectionId,
         'trackId': track.id,
       });
-      var stats = <StatsReport>[];
+      final stats = <StatsReport>[];
       if (response != null) {
-        List<dynamic> reports = response['stats'];
-        for (var report in reports) {
+        final List<dynamic> reports = response['stats'];
+        for (final report in reports) {
           stats.add(
             StatsReport(
               report['id'],

@@ -5,6 +5,10 @@ part of '../call.dart';
 class CallConnectionCoordinator {
   CallConnectionCoordinator(this._call);
 
+  /// How long the network has to stay up before a rejoin or migrate starts.
+  @visibleForTesting
+  static Duration rejoinStabilityWindow = const Duration(seconds: 3);
+
   final Call _call;
 
   late final _cancelables = Cancelables();
@@ -1170,7 +1174,7 @@ class CallConnectionCoordinator {
 
     if (_call._host.isAudioProcessorConfigured() &&
         joinResult.data.metadata.settings.audio.noiseCancellation?.mode ==
-            NoiseCancellationSettingsMode.autoOn) {
+            FeatureActivationMode.autoOn) {
       // AutoOn will enable noise cancellation if the device has sufficient processing power
       unawaited(
         _call.startAudioProcessing(
@@ -1795,7 +1799,7 @@ class CallConnectionCoordinator {
       final stabilityWindow =
           (_reconnectStrategy == SfuReconnectionStrategy.rejoin ||
               _reconnectStrategy == SfuReconnectionStrategy.migrate)
-          ? const Duration(seconds: 3)
+          ? rejoinStabilityWindow
           : Duration.zero;
 
       if (_isLeftOrLeaving) {
@@ -1922,7 +1926,7 @@ class CallConnectionCoordinator {
             _reconnectStrategy == SfuReconnectionStrategy.migrate;
         if (needsStableNetwork && stabilityWindow == Duration.zero) {
           final status = await _awaitNetworkAvailable(
-            stabilityWindow: const Duration(seconds: 3),
+            stabilityWindow: rejoinStabilityWindow,
             onStatus: onNetworkStatus,
           );
           if (stopsAfterNetworkWait(status)) return;
@@ -2668,13 +2672,13 @@ class CallConnectionCoordinator {
       // stop the global processor when no other active call is configured for
       if (_call._host.isAudioProcessorConfigured() &&
           _call.state.value.settings.audio.noiseCancellation?.mode ==
-              NoiseCancellationSettingsMode.autoOn) {
+              FeatureActivationMode.autoOn) {
         final anotherCallWantsAutoOn = _call._host.state.activeCalls.value.any(
           (other) =>
               other.callCid != _call.callCid &&
               other.state.value.status is! CallStatusDisconnected &&
               other.state.value.settings.audio.noiseCancellation?.mode ==
-                  NoiseCancellationSettingsMode.autoOn,
+                  FeatureActivationMode.autoOn,
         );
         if (!anotherCallWantsAutoOn) {
           unawaited(

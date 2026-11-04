@@ -1,10 +1,13 @@
 import 'package:sdp_transform/sdp_transform.dart' as sdp_transform;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 
-void setPreferredCodec(RTCSessionDescription description,
-    {String audio = 'opus', String video = 'vp8'}) {
-  var capSel = CodecCapabilitySelector(description.sdp!);
-  var acaps = capSel.getCapabilities('audio');
+void setPreferredCodec(
+  RTCSessionDescription description, {
+  String audio = 'opus',
+  String video = 'vp8',
+}) {
+  final capSel = CodecCapabilitySelector(description.sdp!);
+  final acaps = capSel.getCapabilities('audio');
   if (acaps != null) {
     acaps.codecs = acaps.codecs
         .where((e) => (e['codec'] as String).toLowerCase() == audio)
@@ -13,7 +16,7 @@ void setPreferredCodec(RTCSessionDescription description,
     capSel.setCapabilities(acaps);
   }
 
-  var vcaps = capSel.getCapabilities('video');
+  final vcaps = capSel.getCapabilities('video');
   if (vcaps != null) {
     vcaps.codecs = vcaps.codecs
         .where((e) => (e['codec'] as String).toLowerCase() == video)
@@ -26,10 +29,15 @@ void setPreferredCodec(RTCSessionDescription description,
 
 class CodecCapability {
   CodecCapability(
-      this.kind, this.payloads, this.codecs, this.fmtp, this.rtcpFb) {
-    codecs.forEach((element) {
+    this.kind,
+    this.payloads,
+    this.codecs,
+    this.fmtp,
+    this.rtcpFb,
+  ) {
+    for (final element in codecs) {
       element['orign_payload'] = element['payload'];
-    });
+    }
   }
   String kind;
   List<dynamic> rtcpFb;
@@ -40,29 +48,33 @@ class CodecCapability {
     if (newCodecs == null) {
       return false;
     }
-    var newRtcpFb = <dynamic>[];
-    var newFmtp = <dynamic>[];
-    var newPayloads = <String>[];
-    newCodecs.forEach((element) {
-      var orign_payload = element['orign_payload'] as int;
-      var payload = element['payload'] as int;
+    final newRtcpFb = <dynamic>[];
+    final newFmtp = <dynamic>[];
+    final newPayloads = <String>[];
+    for (final element in newCodecs) {
+      final orignPayload = element['orign_payload'] as int;
+      final payload = element['payload'] as int;
       // change payload type
-      if (payload != orign_payload) {
-        newRtcpFb.addAll(rtcpFb.where((e) {
-          if (e['payload'] == orign_payload) {
-            e['payload'] = payload;
-            return true;
-          }
-          return false;
-        }).toList());
-        newFmtp.addAll(fmtp.where((e) {
-          if (e['payload'] == orign_payload) {
-            e['payload'] = payload;
-            return true;
-          }
-          return false;
-        }).toList());
-        if (payloads.contains('$orign_payload')) {
+      if (payload != orignPayload) {
+        newRtcpFb.addAll(
+          rtcpFb.where((e) {
+            if (e['payload'] == orignPayload) {
+              e['payload'] = payload;
+              return true;
+            }
+            return false;
+          }).toList(),
+        );
+        newFmtp.addAll(
+          fmtp.where((e) {
+            if (e['payload'] == orignPayload) {
+              e['payload'] = payload;
+              return true;
+            }
+            return false;
+          }).toList(),
+        );
+        if (payloads.contains('$orignPayload')) {
           newPayloads.add('$payload');
         }
       } else {
@@ -70,7 +82,7 @@ class CodecCapability {
         newFmtp.addAll(fmtp.where((e) => e['payload'] == payload).toList());
         newPayloads.addAll(payloads.where((e) => e == '$payload').toList());
       }
-    });
+    }
     rtcpFb = newRtcpFb;
     fmtp = newFmtp;
     payloads = newPayloads;
@@ -90,14 +102,14 @@ class CodecCapabilitySelector {
   String sdp() => sdp_transform.write(_session, null);
 
   CodecCapability? getCapabilities(String kind) {
-    var mline = _mline(kind);
+    final mline = _mline(kind);
     if (mline == null) {
       return null;
     }
-    var rtcpFb = mline['rtcpFb'] ?? <dynamic>[];
-    var fmtp = mline['fmtp'] ?? <dynamic>[];
-    var payloads = (mline['payloads'] as String).split(' ');
-    var codecs = mline['rtp'] ?? <dynamic>[];
+    final rtcpFb = mline['rtcpFb'] ?? <dynamic>[];
+    final fmtp = mline['fmtp'] ?? <dynamic>[];
+    final payloads = (mline['payloads'] as String).split(' ');
+    final codecs = mline['rtp'] ?? <dynamic>[];
     return CodecCapability(kind, payloads, codecs, fmtp, rtcpFb);
   }
 
@@ -105,7 +117,7 @@ class CodecCapabilitySelector {
     if (caps == null) {
       return false;
     }
-    var mline = _mline(caps.kind);
+    final mline = _mline(caps.kind);
     if (mline == null) {
       return false;
     }
@@ -117,8 +129,10 @@ class CodecCapabilitySelector {
   }
 
   Map<String, dynamic>? _mline(String kind) {
-    var mlist = _session['media'] as List<dynamic>;
-    return mlist.firstWhere((element) => element['type'] == kind,
-        orElse: () => null);
+    final mlist = _session['media'] as List<dynamic>;
+    return mlist.firstWhere(
+      (element) => element['type'] == kind,
+      orElse: () => null,
+    );
   }
 }

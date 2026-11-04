@@ -9,14 +9,12 @@ part of 'rtmp_settings_request.dart';
 RTMPSettingsRequest _$RTMPSettingsRequestFromJson(Map<String, dynamic> json) =>
     RTMPSettingsRequest(
       enabled: json['enabled'] as bool?,
-      quality: json['quality'] == null
-          ? null
-          : RTMPSettingsRequestQuality.fromJson(json['quality'] as String),
+      quality: json['quality'] as RTMPSettingsRequestQuality?,
     );
 
 Map<String, dynamic> _$RTMPSettingsRequestToJson(
   RTMPSettingsRequest instance,
 ) => <String, dynamic>{
   'enabled': instance.enabled,
-  'quality': instance.quality?.toJson(),
+  'quality': instance.quality,
 };

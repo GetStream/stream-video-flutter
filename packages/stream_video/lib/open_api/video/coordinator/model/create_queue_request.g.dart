@@ -14,7 +14,7 @@ CreateQueueRequest _$CreateQueueRequestFromJson(Map<String, dynamic> json) =>
       sort: (json['sort'] as List<dynamic>?)
           ?.map((e) => e as Map<String, dynamic>)
           .toList(),
-      type: CreateQueueRequestType.fromJson(json['type'] as String),
+      type: json['type'] as CreateQueueRequestType,
     );
 
 Map<String, dynamic> _$CreateQueueRequestToJson(CreateQueueRequest instance) =>
@@ -23,5 +23,5 @@ Map<String, dynamic> _$CreateQueueRequestToJson(CreateQueueRequest instance) =>
       'filters': instance.filters,
       'name': instance.name,
       'sort': instance.sort,
-      'type': instance.type.toJson(),
+      'type': instance.type,
     };

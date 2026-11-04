@@ -10,9 +10,7 @@ AudioSettingsResponse _$AudioSettingsResponseFromJson(
   Map<String, dynamic> json,
 ) => AudioSettingsResponse(
   accessRequestEnabled: json['access_request_enabled'] as bool,
-  defaultDevice: AudioSettingsResponseDefaultDevice.fromJson(
-    json['default_device'] as String,
-  ),
+  defaultDevice: json['default_device'] as AudioDefaultDevice,
   hifiAudioEnabled: json['hifi_audio_enabled'] as bool,
   micDefaultOn: json['mic_default_on'] as bool,
   noiseCancellation: json['noise_cancellation'] == null
@@ -29,7 +27,7 @@ Map<String, dynamic> _$AudioSettingsResponseToJson(
   AudioSettingsResponse instance,
 ) => <String, dynamic>{
   'access_request_enabled': instance.accessRequestEnabled,
-  'default_device': instance.defaultDevice.toJson(),
+  'default_device': instance.defaultDevice,
   'hifi_audio_enabled': instance.hifiAudioEnabled,
   'mic_default_on': instance.micDefaultOn,
   'noise_cancellation': instance.noiseCancellation?.toJson(),

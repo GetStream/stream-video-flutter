@@ -17,7 +17,13 @@
 - `CoordinatorCallUserFeedbackSubmittedEvent.custom` (now `StreamCallUserFeedbackSubmittedEvent.custom`) is non-nullable. A feedback event without custom data carries an empty map rather than `null`.
 - `Call.updateViewportVisibility`, `Call.updateSubscription` and `Call.removeSubscription` are internal; report to `Call.viewportVisibility` instead.
 - `RetryConfig.callRejoinTimeout` is removed. It was deprecated and had no readers. Use `CallPreferences.networkAvailabilityTimeout`, which is what actually bounds waiting for the network.
-- Generated enum types no longer use the `Enum` suffix (e.g. `AudioSettingsRequestDefaultDeviceEnum` → `AudioSettingsRequestDefaultDevice`). The old names remain available as deprecated aliases and will be removed in a future release — please migrate to the new names.
+- Generated enum types are named for their values rather than the field they come from, and lose the `Enum` suffix: e.g. `AudioSettingsRequestDefaultDeviceEnum` is now `AudioDefaultDevice`, and the camera-facing, mode, language and codec enums are now `CameraFacing`, `FeatureActivationMode`, `TranscriptionLanguage` and `VideoCodec`. The `…Enum` names remain as deprecated aliases. `StreamAudioSettings.defaultDevice`, `StreamVideoSettings.cameraFacing`, `StreamNoiceCancellingSettings.mode` and `StreamIngressVideoLayer.codec` take the new types.
+- Generated enum types have no `fromJson`/`toJson`; build one with its constructor, e.g. `TranscriptionLanguage('en')`.
+- The generated `AutomodMode.aI` is renamed `AutomodMode.ai`.
+- The generated `ConnectedEvent` and `ConnectionErrorEvent` are removed.
+- The ingress source `fps` and audio `channels` are `int`s, so `StreamIngressSourceFps.toOpenDto()` and `IngressAudioChannels.toOpenDto()` return `int`; `IngressSourceRequestFpsEnum` and `IngressAudioEncodingOptionsRequestChannelsEnum` are deprecated aliases of `int`, so their constants are gone: pass the number, e.g. `30` rather than `IngressSourceRequestFpsEnum.n30`.
+- Constructing a `CallSettingsResponse` needs `lifecycle`, and an `OwnUserResponse` needs `blockedUserIds`.
+- `CallRecording.recordingType` and the recording events' `recordingType` are a `CallRecordingType` rather than a `String`; the `CallRecording*EventRecordingTypeEnum` aliases now point at it.
 - `custom` map fields now allow null values (`Map<String, Object?>`). Code that assumed non-null values may need null handling.
 - `Result`, `Success`, and `Failure` are now provided by `stream_core`. Several API changes follow:
   - `Result.fold()` now takes `{onSuccess:, onFailure:}` parameters instead of `{success:, failure:}`. Use the new `foldResult()` extension method to keep the previous `{success: (Success<T>), failure: (Failure)}` style.
@@ -72,6 +78,7 @@
 - `VideoError` is renamed to `StreamVideoException`, and `VideoErrorWithCause` to `StreamVideoExceptionWithCause`. The old names remain as deprecated typedefs, so existing code still compiles; `dart fix --apply` migrates it.
 - `ifInvisibleBy` takes a `ParticipantPriority` — a priority for one participant, higher first — instead of a `Comparator`. Pass the priority of the same name: `ifInvisibleBy(dominantSpeakerPriority)` where you passed `ifInvisibleBy(dominantSpeaker)`.
 - `DisconnectReason.callEnded()` is renamed to `DisconnectReason.nativeCallEnded()`, and `DisconnectReasonCallEnded` to `DisconnectReasonNativeCallEnded`. Only the system call UI (CallKit, Android Telecom) ending the call reports it; a backend end reports `DisconnectReasonEnded`. Its `toString()` changes from `CallEnded` to `NativeCallEnded`. The old names remain deprecated, and `dart fix --apply` migrates them.
+- `TranscriptionSettingsLanguage.toStartTranscriptionDto()` and `toStartClosedCaptionsDto()` are deprecated; they return the same value as `toOpenDto()`.
 
 ### ✅ Added
 
@@ -102,6 +109,7 @@
 - `Call.end` takes an `initiator`, and the call disconnects with a `DisconnectReasonEnded` that carries it and the `reason` given, so an end this side made can be told apart from one from elsewhere.
 - Added `DisconnectReasonUnsupportedNetwork`, the reason a call disconnects with when the network cannot carry WebRTC, so an app can tell the user their network blocks calls rather than that the connection dropped.
 - Added `CallPreferences.maxIceFailuresWithoutConnect`, how many reconnects for sessions in which ICE never connected end the call with `DisconnectReasonUnsupportedNetwork`. `DefaultCallPreferences` defaults it to 2. If your app implements `CallPreferences` directly, add the getter to your implementation.
+- Added `RetryConfig.rpcTimeout`, how long a coordinator request may wait to connect and then for its response (10 seconds by default).
 
 ### 🔄 Changed
 
@@ -135,6 +143,7 @@
 - Safari and other WebKit browsers always play remote audio on the system default output; `Call.checkIfAudioOutputChangeSupported` returns false there.
 - A dropped SFU connection starts reconnecting within two seconds.
 - Call stats keep being reported when a peer connection stops answering for its stats.
+- Coordinator requests that get no response now time out, so a reconnect attempt whose join hangs ends and the next one starts. A timed-out request that changes something, such as a ring or a reaction, is not sent again.
 - The outgoing call screen shows the camera preview every time the call settings turn the camera on, not only sometimes. `getOrCreate` and `get` now apply the call settings to `connectOptions` before they return.
 - Cancelling an outgoing call while its camera preview is on no longer crashes the app on Android. A track handed over through `TrackOption.provided` that the call never adopted is now stopped before the call's peer connection factory is disposed.
 - Connecting while the coordinator socket is dropped reconnects that socket instead of opening a second one.
@@ -261,7 +270,6 @@
 
 ### 🐞 Fixed
 
-- [Android] Fixed a call hung up outside the app, from a paired watch, a Bluetooth headset or a car head unit, not leaving the Stream call. Ended events carrying `CallData.endedBySystem` are now applied on Android too, while the ambiguous ones, which on Android also mean the incoming call notification was merely dismissed, keep being ignored. Requires the Android Telecom integration in `stream_video_push_notification`.
 - Fixed an issue where `consumeIncomingCall` could create multiple `Call` instances for the same ringing flow, causing state conflicts and UI issues.
 - [iOS] Fixed calls answered on the CallKit screen during a cold start or terminated state not being properly joined, or being incorrectly ended on the device. The SDK now reliably detects and joins answered calls in these scenarios.
 - Fixed the call reconnect loop retrying without a delay or an escalation when an unexpected error was thrown before the reconnect strategy ran.
@@ -321,10 +329,6 @@
   - A transient ICE `disconnected` state is no longer treated as unhealthy, only a permanently `closed` peer connection forces an immediate rejoin.
 - Fixed connection quality indicator blanking after reconnect.
 - Fixed SFU stats not being flushed on call end.
-
-### ✅ Added
-
-- Added client-side call join telemetry (`ClientEventReporter`): the SDK reports each stage of the join funnel — `JoinInitiated`, `CoordinatorWS`, `CoordinatorJoin`, `WSJoin`, `PeerConnectionConnect` (publish/subscribe), `FirstVideoFrame`, and `FirstAudioFrame` — to the backend so join success/failure can be reconciled. Enabled by default; disable via `StreamVideoOptions.clientEventsReportingEnabled`.
 
 ## 1.4.1
 

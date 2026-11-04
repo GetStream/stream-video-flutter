@@ -10,16 +10,14 @@ RecordSettingsRequest _$RecordSettingsRequestFromJson(
   Map<String, dynamic> json,
 ) => RecordSettingsRequest(
   audioOnly: json['audio_only'] as bool?,
-  mode: RecordSettingsRequestMode.fromJson(json['mode'] as String),
-  quality: json['quality'] == null
-      ? null
-      : RecordSettingsRequestQuality.fromJson(json['quality'] as String),
+  mode: json['mode'] as FeatureActivationMode,
+  quality: json['quality'] as RecordSettingsRequestQuality?,
 );
 
 Map<String, dynamic> _$RecordSettingsRequestToJson(
   RecordSettingsRequest instance,
 ) => <String, dynamic>{
   'audio_only': instance.audioOnly,
-  'mode': instance.mode.toJson(),
-  'quality': instance.quality?.toJson(),
+  'mode': instance.mode,
+  'quality': instance.quality,
 };

@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 
 class FlutterWebRTCEventChannel {
   FlutterWebRTCEventChannel._internal() {
-    EventChannel(
+    const EventChannel(
       'FlutterWebRTC.Event',
     ).receiveBroadcastStream().listen(eventListener, onError: errorListener);
   }

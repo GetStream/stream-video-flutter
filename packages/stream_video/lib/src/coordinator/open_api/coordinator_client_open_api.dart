@@ -46,7 +46,9 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     NetworkStateProvider? networkStateProvider,
     ClientEventReporter clientEventReporter = const ClientEventReporter.noOp(),
     @visibleForTesting this._webSocketFactory,
+    @visibleForTesting LocationService? locationService,
   }) : _rpcUrl = rpcUrl,
+       _locationService = locationService ?? LocationService(),
        _wsUrl = wsUrl,
        _apiKey = apiKey,
        _tokenSource = tokenSource,
@@ -82,7 +84,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   /// The client every coordinator call goes through.
   StreamCoreHttpClient _buildHttpClient() {
     final client = StreamCoreHttpClient(
-      options: BaseOptions(baseUrl: _rpcUrl, extra: coordinatorRequestExtra()),
+      options: coordinatorHttpOptions(_rpcUrl, _retryPolicy.config),
     );
 
     client.interceptors.addAll(
@@ -107,7 +109,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
   }
 
   late final _defaultApi = open.DefaultApi(_httpClient);
-  late final _locationService = LocationService();
+  final LocationService _locationService;
 
   @override
   SharedEmitter<StreamVideoEvent> get events => _events;
@@ -1135,7 +1137,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         startTranscriptionRequest: open.StartTranscriptionRequest(
           transcriptionExternalStorage: transcriptionExternalStorage,
           enableClosedCaptions: enableClosedCaptions,
-          language: language?.toStartTranscriptionDto(),
+          language: language?.toOpenDto(),
         ),
       );
 
@@ -1213,7 +1215,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         startClosedCaptionsRequest: open.StartClosedCaptionsRequest(
           enableTranscription: enableTranscription,
           externalStorage: transcriptionExternalStorage,
-          language: language?.toStartClosedCaptionsDto(),
+          language: language?.toOpenDto(),
         ),
       );
 
@@ -1801,10 +1803,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     try {
       _logger.d(() => '[loadGuest] id: $id');
       final dio = StreamCoreHttpClient(
-        options: BaseOptions(
-          baseUrl: _rpcUrl,
-          extra: coordinatorRequestExtra(),
-        ),
+        options: coordinatorHttpOptions(_rpcUrl, _retryPolicy.config),
       );
       dio.interceptors.addAll(
         _buildInterceptors(
@@ -1895,16 +1894,28 @@ class _ApiKeyInterceptor extends Interceptor {
 }
 
 extension on PushProvider {
-  open.CreateDeviceRequestPushProvider toOpenDTO() {
+  open.PushProviderName toOpenDTO() {
     switch (this) {
       case PushProvider.firebase:
-        return open.CreateDeviceRequestPushProvider.firebase;
+        return open.PushProviderName.firebase;
       case PushProvider.xiaomi:
-        return open.CreateDeviceRequestPushProvider.xiaomi;
+        return open.PushProviderName.xiaomi;
       case PushProvider.huawei:
-        return open.CreateDeviceRequestPushProvider.huawei;
+        return open.PushProviderName.huawei;
       case PushProvider.apn:
-        return open.CreateDeviceRequestPushProvider.apn;
+        return open.PushProviderName.apn;
     }
   }
+}
+
+/// The options of the coordinator HTTP clients: requests to [rpcUrl], marked
+/// as coordinator requests, each attempt bounded by [RetryConfig.rpcTimeout].
+@internal
+BaseOptions coordinatorHttpOptions(String rpcUrl, RetryConfig config) {
+  return BaseOptions(
+    baseUrl: rpcUrl,
+    extra: coordinatorRequestExtra(),
+    connectTimeout: config.rpcTimeout,
+    receiveTimeout: config.rpcTimeout,
+  );
 }

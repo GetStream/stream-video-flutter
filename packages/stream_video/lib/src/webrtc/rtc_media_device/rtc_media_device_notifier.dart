@@ -339,13 +339,12 @@ class RtcMediaDeviceNotifier {
         if (CurrentPlatform.isIos &&
             devices.none(
               (d) => d.deviceId.equalsIgnoreCase(
-                AudioSettingsRequestDefaultDevice.earpiece,
+                AudioDefaultDevice.earpiece,
               ),
             ))
           RtcMediaDevice(
-            id: AudioSettingsRequestDefaultDevice.earpiece,
-            label: AudioSettingsRequestDefaultDevice.earpiece
-                .capitalizeFirstLetter(),
+            id: AudioDefaultDevice.earpiece,
+            label: AudioDefaultDevice.earpiece.capitalizeFirstLetter(),
             kind: RtcMediaDeviceKind.audioOutput,
           ),
       ]);

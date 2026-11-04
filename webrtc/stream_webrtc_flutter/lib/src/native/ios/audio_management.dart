@@ -63,7 +63,7 @@ class IosAudioManagement {
   /// Trigger the iOS audio route selection UI (iOS only).
   static Future<void> triggerAudioRouteSelectionUI() async {
     if (WebRTC.platformIsIOS) {
-      return await WebRTC.invokeMethod('triggeriOSAudioRouteSelectionUI');
+      return WebRTC.invokeMethod('triggeriOSAudioRouteSelectionUI');
     } else {
       throw Exception('triggerAudioRouteSelectionUI is only supported for iOS');
     }
@@ -90,7 +90,7 @@ class IosAudioManagement {
   /// until the camera is started.
   static Future<bool?> isMultitaskingCameraAccessSupported() async {
     if (WebRTC.platformIsIOS) {
-      return await WebRTC.invokeMethod(
+      return WebRTC.invokeMethod(
         'isIOSMultitaskingCameraAccessSupported',
       );
     } else {

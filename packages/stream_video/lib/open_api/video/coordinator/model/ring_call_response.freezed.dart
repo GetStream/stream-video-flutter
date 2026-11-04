@@ -15,6 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$RingCallResponse {
   String get duration;
   List<String> get membersIds;
+  String? get ringId;
 
   /// Create a copy of RingCallResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -36,7 +37,8 @@ mixin _$RingCallResponse {
             const DeepCollectionEquality().equals(
               other.membersIds,
               membersIds,
-            ));
+            ) &&
+            (identical(other.ringId, ringId) || other.ringId == ringId));
   }
 
   @override
@@ -44,11 +46,12 @@ mixin _$RingCallResponse {
     runtimeType,
     duration,
     const DeepCollectionEquality().hash(membersIds),
+    ringId,
   );
 
   @override
   String toString() {
-    return 'RingCallResponse(duration: $duration, membersIds: $membersIds)';
+    return 'RingCallResponse(duration: $duration, membersIds: $membersIds, ringId: $ringId)';
   }
 }
 
@@ -59,7 +62,7 @@ abstract mixin class $RingCallResponseCopyWith<$Res> {
     $Res Function(RingCallResponse) _then,
   ) = _$RingCallResponseCopyWithImpl;
   @useResult
-  $Res call({String duration, List<String> membersIds});
+  $Res call({String duration, List<String> membersIds, String? ringId});
 }
 
 /// @nodoc
@@ -74,7 +77,11 @@ class _$RingCallResponseCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? duration = null, Object? membersIds = null}) {
+  $Res call({
+    Object? duration = null,
+    Object? membersIds = null,
+    Object? ringId = freezed,
+  }) {
     return _then(
       RingCallResponse(
         duration: null == duration
@@ -85,6 +92,10 @@ class _$RingCallResponseCopyWithImpl<$Res>
             ? _self.membersIds
             : membersIds // ignore: cast_nullable_to_non_nullable
                   as List<String>,
+        ringId: freezed == ringId
+            ? _self.ringId
+            : ringId // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }

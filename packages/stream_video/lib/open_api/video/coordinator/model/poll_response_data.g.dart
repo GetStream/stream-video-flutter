@@ -21,6 +21,9 @@ PollResponseData _$PollResponseDataFromJson(
   createdById: json['created_by_id'] as String,
   custom: json['custom'] as Map<String, dynamic>,
   description: json['description'] as String,
+  descriptionI18n: (json['description_i18n'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as String),
+  ),
   enforceUniqueVote: json['enforce_unique_vote'] as bool,
   id: json['id'] as String,
   isClosed: json['is_closed'] as bool?,
@@ -40,6 +43,9 @@ PollResponseData _$PollResponseDataFromJson(
       ),
   maxVotesAllowed: (json['max_votes_allowed'] as num?)?.toInt(),
   name: json['name'] as String,
+  nameI18n: (json['name_i18n'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as String),
+  ),
   options: (json['options'] as List<dynamic>)
       .map((e) => PollOptionResponseData.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -53,9 +59,7 @@ PollResponseData _$PollResponseDataFromJson(
   voteCountsByOption: Map<String, int>.from(
     json['vote_counts_by_option'] as Map,
   ),
-  votingVisibility: PollResponseDataVotingVisibility.fromJson(
-    json['voting_visibility'] as String,
-  ),
+  votingVisibility: json['voting_visibility'] as VotingVisibility,
 );
 
 Map<String, dynamic> _$PollResponseDataToJson(PollResponseData instance) =>
@@ -68,6 +72,7 @@ Map<String, dynamic> _$PollResponseDataToJson(PollResponseData instance) =>
       'created_by_id': instance.createdById,
       'custom': instance.custom,
       'description': instance.description,
+      'description_i18n': instance.descriptionI18n,
       'enforce_unique_vote': instance.enforceUniqueVote,
       'id': instance.id,
       'is_closed': instance.isClosed,
@@ -77,10 +82,11 @@ Map<String, dynamic> _$PollResponseDataToJson(PollResponseData instance) =>
       ),
       'max_votes_allowed': instance.maxVotesAllowed,
       'name': instance.name,
+      'name_i18n': instance.nameI18n,
       'options': instance.options.map((e) => e.toJson()).toList(),
       'own_votes': instance.ownVotes.map((e) => e.toJson()).toList(),
       'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
       'vote_count': instance.voteCount,
       'vote_counts_by_option': instance.voteCountsByOption,
-      'voting_visibility': instance.votingVisibility.toJson(),
+      'voting_visibility': instance.votingVisibility,
     };

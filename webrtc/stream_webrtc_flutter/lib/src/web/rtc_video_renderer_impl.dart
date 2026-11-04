@@ -3,17 +3,15 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:ui_web' as web_ui;
 
+import 'package:dart_webrtc/dart_webrtc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-
-import 'package:dart_webrtc/dart_webrtc.dart';
 import 'package:web/web.dart' as web;
 
 import '../video_renderer_extension.dart' show AudioControl;
 
 const bool useHtmlElementView = bool.fromEnvironment(
-  "WEBRTC_USE_HTML_ELEMENT_VIEW",
-  defaultValue: false,
+  'WEBRTC_USE_HTML_ELEMENT_VIEW',
 );
 
 // An error code value to error name Map.
@@ -152,7 +150,7 @@ class RTCVideoRenderer extends ValueNotifier<RTCVideoValue>
       _audioElement?.srcObject = _audioStream;
     }
 
-    var videoElement = findHtmlView();
+    final videoElement = findHtmlView();
     if (null != videoElement) {
       videoElement.srcObject = _videoStream;
       _applyDefaultVideoStyles(findHtmlView()!);
@@ -202,7 +200,7 @@ class RTCVideoRenderer extends ValueNotifier<RTCVideoValue>
       _audioElement?.srcObject = _audioStream;
     }
 
-    var videoElement = findHtmlView();
+    final videoElement = findHtmlView();
     if (null != videoElement) {
       videoElement.srcObject = _videoStream;
       _applyDefaultVideoStyles(findHtmlView()!);
@@ -231,7 +229,7 @@ class RTCVideoRenderer extends ValueNotifier<RTCVideoValue>
   @override
   Future<void> dispose() async {
     _srcObject = null;
-    for (var s in _subscriptions) {
+    for (final s in _subscriptions) {
       s.cancel();
     }
     final element = findHtmlView();
@@ -256,19 +254,20 @@ class RTCVideoRenderer extends ValueNotifier<RTCVideoValue>
       final element = _audioElement;
       if (null != element &&
           element.getProperty('setSinkId'.toJS).isDefinedAndNotNull) {
-        await (element.callMethod('setSinkId'.toJS, deviceId.toJS) as JSPromise)
+        await (element.callMethod('setSinkId'.toJS, deviceId.toJS)!
+                as JSPromise)
             .toDart;
 
         return true;
       }
     } catch (e) {
-      print('Unable to setSinkId: ${e.toString()}');
+      print('Unable to setSinkId: $e');
     }
     return false;
   }
 
   web.HTMLVideoElement createElement() {
-    for (var s in _subscriptions) {
+    for (final s in _subscriptions) {
       s.cancel();
     }
     _subscriptions.clear();
@@ -303,7 +302,7 @@ class RTCVideoRenderer extends ValueNotifier<RTCVideoValue>
         // We need to look at the HTMLMediaElement.error.
         // See: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/error
         final error = element.error;
-        print('RTCVideoRenderer: videoElement.onError, ${error.toString()}');
+        print('RTCVideoRenderer: videoElement.onError, $error');
         throw PlatformException(
           code: _kErrorValueToErrorName[error!.code]!,
           message: error.message != '' ? error.message : _kDefaultErrorMessage,
@@ -323,7 +322,7 @@ class RTCVideoRenderer extends ValueNotifier<RTCVideoValue>
 
   @override
   Future<void> initialize() async {
-    bool isVisible = useHtmlElementView;
+    const isVisible = useHtmlElementView;
     if (isVisible) {
       web_ui.platformViewRegistry.registerViewFactory(viewType, (int viewId) {
         return createElement();
@@ -347,11 +346,11 @@ class RTCVideoRenderer extends ValueNotifier<RTCVideoValue>
         ..style.width = '100%'
         ..style.height = '100%';
     } else {
-      element.style.pointerEvents = "none";
-      element.style.opacity = "0";
-      element.style.position = "absolute";
-      element.style.left = "0px";
-      element.style.top = "0px";
+      element.style.pointerEvents = 'none';
+      element.style.opacity = '0';
+      element.style.position = 'absolute';
+      element.style.left = '0px';
+      element.style.top = '0px';
     }
   }
 

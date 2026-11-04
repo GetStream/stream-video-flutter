@@ -63,6 +63,11 @@ UpsertConfigRequest _$UpsertConfigRequestFromJson(
       : GoogleVisionConfig.fromJson(
           json['google_vision_config'] as Map<String, dynamic>,
         ),
+  intentConfig: json['intent_config'] == null
+      ? null
+      : IntentConfigRequest.fromJson(
+          json['intent_config'] as Map<String, dynamic>,
+        ),
   key: json['key'] as String,
   llmConfig: json['llm_config'] == null
       ? null
@@ -104,6 +109,7 @@ Map<String, dynamic> _$UpsertConfigRequestToJson(
   'bodyguard_config': instance.bodyguardConfig?.toJson(),
   'flood_config': instance.floodConfig?.toJson(),
   'google_vision_config': instance.googleVisionConfig?.toJson(),
+  'intent_config': instance.intentConfig?.toJson(),
   'key': instance.key,
   'llm_config': instance.llmConfig?.toJson(),
   'rule_builder_config': instance.ruleBuilderConfig?.toJson(),

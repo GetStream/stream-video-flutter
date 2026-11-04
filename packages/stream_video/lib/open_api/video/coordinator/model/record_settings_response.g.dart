@@ -10,7 +10,7 @@ RecordSettingsResponse _$RecordSettingsResponseFromJson(
   Map<String, dynamic> json,
 ) => RecordSettingsResponse(
   audioOnly: json['audio_only'] as bool,
-  mode: json['mode'] as String,
+  mode: json['mode'] as FeatureActivationMode,
   quality: json['quality'] as String,
 );
 

@@ -58,8 +58,10 @@ jobs:
   analyze:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
-    timeout-minutes: 15
-    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    # Goldens compare pixels, so this matches the image update_goldens.yml
+    # renders them on.
+    runs-on: ubuntu-26.04
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7

@@ -14,6 +14,15 @@
 
 - Added `StreamVideoPushHandler.handleBackgroundMessage`, which simplifies the ringing setup by running a Stream ringing push through its whole background lifecycle from your Firebase background handler: it builds the client through the factory you give it, observes the ringing events a background isolate can act on, and disposes the client — along with whatever that factory set up — once the user has answered, declined, or let the call time out, or the ring has ended without them, such as when the caller cancels it. It replaces the setup and teardown each integration had to write by hand.
 
+## Upcoming (minor)
+
+### 🐞 Fixed
+
+- [iOS] `setCallConnected` and `endCall` keep the call's options, so `configureAudioSession: false` is respected after the call connects and the plugin no longer reconfigures the audio session set up by WebRTC.
+- [iOS] `setCallConnected` no longer answers an outgoing call, which reconfigured the audio session and emitted an accept event for the app's own call.
+- [iOS] An outgoing call keeps its own options and `ActionCallStart` data when another call is started, shown, connected or ended while it is starting.
+- [iOS] CallKit mute, hold, group and DTMF events report the call's uuid as it was started or shown with, instead of uppercased, so it matches the uuid in the call's other events.
+
 ## 1.7.2
 
 ### 🐞 Fixed
@@ -41,7 +50,6 @@
 
 ### ✅ Added
 
-- [iOS] Added `reportCallEnded`, which reports how a call ended to CallKit so it is listed correctly in the system Recents.
 - [iOS] Added `ActionCallIncomingFailed` and `IncomingCallFailureReason` to notify when the system blocks showing an incoming call (e.g. due to Do Not Disturb or block list). Listen via `onRingingEvent<ActionCallIncomingFailed>`.
 - [Android] Added a Telecom integration for the ringing flow, which registers ringing calls with the platform's [Telecom stack](https://developer.android.com/develop/connectivity/telecom). This gives the call proper audio focus and a place in the system call state, and lets it be answered or hung up from a paired watch, a car head unit or a Bluetooth headset. The incoming call notification and full-screen ringing UI are unchanged. It is on by default on Android 17 and above, where ringing from a push no longer works reliably without it, and off below that, so existing integrations are unaffected. Configure it with `AndroidPushConfiguration(telecom: TelecomPushConfiguration(...))`.
 

@@ -1,0 +1,3 @@
+# The forked WebRTC packages under webrtc/ are not part of the SDK coverage.
+ignore:
+  - "webrtc/**"

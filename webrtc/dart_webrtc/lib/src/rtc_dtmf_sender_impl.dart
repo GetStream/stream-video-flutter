@@ -6,8 +6,11 @@ class RTCDTMFSenderWeb extends RTCDTMFSender {
   final web.RTCDTMFSender _jsDtmfSender;
 
   @override
-  Future<void> insertDTMF(String tones,
-      {int duration = 100, int interToneGap = 70}) async {
+  Future<void> insertDTMF(
+    String tones, {
+    int duration = 100,
+    int interToneGap = 70,
+  }) async {
     return _jsDtmfSender.insertDTMF(tones, duration, interToneGap);
   }
 

@@ -17,7 +17,7 @@ ChannelMetadata _$ChannelMetadataFromJson(Map<String, dynamic> json) =>
       ),
       memberCount: (json['member_count'] as num?)?.toInt(),
       messageCount: (json['message_count'] as num?)?.toInt(),
-      pushLevel: json['push_level'] as String?,
+      pushLevel: json['push_level'] as PushLevel?,
       team: json['team'] as String?,
       type: json['type'] as String,
     );
