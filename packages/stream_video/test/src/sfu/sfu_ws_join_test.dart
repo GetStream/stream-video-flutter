@@ -7,6 +7,7 @@ import 'package:stream_video/protobuf/video/sfu/event/events.pb.dart'
 import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
     as sfu_models;
 import 'package:stream_video/src/errors/stream_video_exception.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_error.dart';
 import 'package:stream_video/src/sfu/ws/sfu_message_codec.dart';
 import 'package:stream_video/src/sfu/ws/sfu_ws.dart';
 import 'package:stream_video/src/utils/result.dart';
@@ -121,6 +122,35 @@ void main() {
       final result = await wait.timeout(settlesWithin);
 
       expect(result.isFailure, isTrue);
+    });
+
+    test('an SFU error that arrives with the close wins over the '
+        'close', () async {
+      final socket = _socket();
+
+      final wait = socket.waitForJoinResponse(timeLimit: timeLimit);
+      _receive(
+        socket,
+        sfu_events.SfuEvent(
+          error: sfu_events.Error(
+            error: sfu_models.Error(
+              message: 'call is full',
+              code: sfu_models.ErrorCode.ERROR_CODE_SFU_FULL,
+            ),
+          ),
+        ),
+      );
+      _setState(socket, _dropped);
+      final result = await wait.timeout(settlesWithin);
+
+      expect(
+        (result as Failure).videoError,
+        isA<StreamVideoExceptionWithCause>().having(
+          (e) => e.cause,
+          'cause',
+          isA<SfuError>().having((e) => e.code, 'code', SfuErrorCode.sfuFull),
+        ),
+      );
     });
 
     test('fails as soon as the socket drops', () async {

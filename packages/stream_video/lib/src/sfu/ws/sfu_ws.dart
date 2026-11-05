@@ -235,10 +235,15 @@ class SfuWebSocket {
     });
 
     // The state replays its current value, so a socket already down settles
-    // this at once.
+    // this at once. The close settles a turn later, so an error the SFU sent
+    // just before closing is the failure reported.
     final stateSubscription = _client.connectionState.listen((state) {
       if (state is Disconnecting || state is Disconnected) {
-        settle(failureWithError('SFU WS closed before the join response'));
+        Timer.run(
+          () => settle(
+            failureWithError('SFU WS closed before the join response'),
+          ),
+        );
       }
     });
 
