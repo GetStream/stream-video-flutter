@@ -32,4 +32,60 @@ void main() {
       });
     }
   }
+
+  testWidgets(
+    'keeps the state above the navigator through every design wrapper',
+    (
+      tester,
+    ) async {
+      final contentKey = GlobalKey();
+      var mounts = 0;
+
+      Widget wrapped(AppDesign design) => MaterialApp(
+        theme: buildAppTheme(
+          design: design,
+          brightness: Brightness.dark,
+          accent: AppAccentColor.designDefault,
+        ),
+        builder: (context, child) => design.spec.wrap(
+          context,
+          AppAccentColor.designDefault,
+          KeyedSubtree(
+            key: contentKey,
+            // Above the navigator, as the app's snackbar scope is.
+            child: _MountCounter(onMount: () => mounts++, child: child!),
+          ),
+        ),
+        home: const SizedBox.shrink(),
+      );
+
+      for (final design in [...AppDesign.values, AppDesign.stream]) {
+        await tester.pumpWidget(wrapped(design));
+        await tester.pump(const Duration(milliseconds: 500));
+      }
+
+      expect(mounts, 1);
+    },
+  );
+}
+
+class _MountCounter extends StatefulWidget {
+  const _MountCounter({required this.onMount, required this.child});
+
+  final VoidCallback onMount;
+  final Widget child;
+
+  @override
+  State<_MountCounter> createState() => _MountCounterState();
+}
+
+class _MountCounterState extends State<_MountCounter> {
+  @override
+  void initState() {
+    super.initState();
+    widget.onMount();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

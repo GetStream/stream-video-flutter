@@ -23,8 +23,12 @@ Future<void> main() async {
   }
 
   // Loads the Liquid Glass design's shaders, so its first frames draw glass
-  // rather than a placeholder.
-  await LiquidGlassWidgets.initialize();
+  // rather than a placeholder. The app starts without them if they fail.
+  try {
+    await LiquidGlassWidgets.initialize();
+  } catch (e) {
+    debugPrint('Liquid Glass shaders failed to load: $e');
+  }
 
   // Reads the device's accent color, which Material 3 Expressive takes by
   // default.

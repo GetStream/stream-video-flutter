@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-/// A [StreamTextInput] drawn as a Material [TextField], for designs whose
+/// A [StreamTextInput] drawn as a Material [TextFormField], for designs whose
 /// Material theme styles the field.
 class MaterialStreamTextInput extends StatelessWidget {
   const MaterialStreamTextInput({required this.props, this.filled, super.key});
@@ -15,8 +15,9 @@ class MaterialStreamTextInput extends StatelessWidget {
   Widget build(BuildContext context) {
     final error = props.helperState == StreamHelperState.error;
 
-    return TextField(
+    return TextFormField(
       controller: props.controller,
+      initialValue: props.controller == null ? props.initialValue : null,
       focusNode: props.focusNode,
       enabled: props.enabled,
       readOnly: props.readOnly,
@@ -35,7 +36,7 @@ class MaterialStreamTextInput extends StatelessWidget {
       maxLength: props.maxLength,
       onChanged: props.onChanged,
       onEditingComplete: props.onEditingComplete,
-      onSubmitted: props.onSubmitted,
+      onFieldSubmitted: props.onSubmitted,
       onTap: props.onTap,
       decoration: InputDecoration(
         filled: filled,

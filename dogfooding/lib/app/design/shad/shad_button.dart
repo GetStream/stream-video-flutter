@@ -25,10 +25,14 @@ class ShadStreamButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selected = props.isSelected ?? false;
-    // A selected button takes the primary fill, as a toggle that is on.
-    final variant = selected
-        ? ShadButtonVariant.primary
-        : _variant(props.type, props.style);
+    // A selected button takes the primary fill, as a toggle that is on, or
+    // the destructive one when it is destructive, as a running recording.
+    final variant = switch (props.style) {
+      StreamButtonStyle.destructive when selected =>
+        ShadButtonVariant.destructive,
+      _ when selected => ShadButtonVariant.primary,
+      _ => _variant(props.type, props.style),
+    };
     // An outline or ghost destructive button keeps its variant but reads red.
     final foreground =
         props.style == StreamButtonStyle.destructive &&

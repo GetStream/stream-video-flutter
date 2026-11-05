@@ -1,6 +1,5 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:m3e_collection/m3e_collection.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -42,9 +41,9 @@ class M3EDesign extends AppDesignSpec {
         return;
       }
       deviceAccent = await DynamicColorPlugin.getAccentColor();
-    } on PlatformException {
-      deviceAccent = null;
-    } on MissingPluginException {
+    } catch (e) {
+      // No device accent on this platform, so the baseline seed is used.
+      debugPrint('No device accent color: $e');
       deviceAccent = null;
     }
   }

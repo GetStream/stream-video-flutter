@@ -13,10 +13,16 @@ class LiquidGlassStreamTextInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // A GlassTextField takes its text from a controller only.
-    if (props.controller == null && props.initialValue != null) {
-      return DefaultStreamTextInput(props: props);
-    }
+    // A GlassTextField takes its text from a controller only, always has a
+    // line limit, and has no tap or editing-complete callback or text
+    // alignment, so a field that needs one is the SDK's own.
+    final unsupported =
+        (props.controller == null && props.initialValue != null) ||
+        props.maxLines == null ||
+        props.onTap != null ||
+        props.onEditingComplete != null ||
+        props.textAlign != TextAlign.start;
+    if (unsupported) return DefaultStreamTextInput(props: props);
 
     return DesignLabeledField(
       label: props.labelText,
@@ -34,7 +40,7 @@ class LiquidGlassStreamTextInput extends StatelessWidget {
         keyboardType: props.keyboardType,
         textInputAction: props.textInputAction,
         inputFormatters: props.inputFormatters,
-        maxLines: props.maxLines ?? 1,
+        maxLines: props.maxLines!,
         minLines: props.minLines,
         maxLength: props.maxLength,
         onChanged: props.onChanged,

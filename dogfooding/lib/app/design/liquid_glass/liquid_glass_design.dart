@@ -51,13 +51,27 @@ class LiquidGlassDesign extends AppDesignSpec {
   ) => StreamComponentBuilders(
     button: (context, props) => LiquidGlassStreamButton(props: props),
     splitButton: (context, props) => LiquidGlassStreamSplitButton(props: props),
-    toggleSwitch: (context, props) => GlassSwitch(
-      value: props.value,
-      onChanged: props.onChanged ?? (_) {},
-      activeColor: context.streamColorScheme.accentPrimary,
-      semanticLabel: props.semanticLabel,
-      useOwnLayer: true,
-    ),
+    toggleSwitch: (context, props) {
+      final onChanged = props.onChanged;
+      final glassSwitch = GlassSwitch(
+        value: props.value,
+        onChanged: onChanged ?? (_) {},
+        activeColor: context.streamColorScheme.accentPrimary,
+        semanticLabel: props.semanticLabel,
+        useOwnLayer: true,
+      );
+      if (onChanged != null) return glassSwitch;
+      // The glass switch has no disabled state, so a disabled one is dimmed
+      // and takes no input.
+      return Semantics(
+        enabled: false,
+        child: IgnorePointer(
+          child: ExcludeFocus(
+            child: Opacity(opacity: 0.5, child: glassSwitch),
+          ),
+        ),
+      );
+    },
     textInput: (context, props) => LiquidGlassStreamTextInput(props: props),
     progressBar: (context, props) => GlassProgressIndicator.linear(
       value: props.value,

@@ -39,6 +39,10 @@ class _StreamDogFoodingAppContentState
 
   late final _router = initRouter(_userAuthController);
 
+  // Keeps the screens' state when a design adds or removes a wrapper above
+  // them, as switching to or from a design library with its own scope does.
+  final _contentKey = GlobalKey(debugLabel: 'app content');
+
   /// The component builders that customise the Stream Video UI components,
   /// for the design they were built for.
   ///
@@ -253,6 +257,7 @@ class _StreamDogFoodingAppContentState
             context,
             _appSettings.accentColor,
             StreamComponentFactory(
+              key: _contentKey,
               builders: _componentBuildersFor(design),
               // Above the router, so a snackbar shown from any route has a
               // messenger to reach and outlives the screen that showed it.

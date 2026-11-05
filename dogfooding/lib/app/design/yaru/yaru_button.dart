@@ -83,7 +83,14 @@ class YaruStreamButton extends StatelessWidget {
         ],
       );
       final minimumSize = Size(0, height);
-      button = switch ((props.type, props.style)) {
+      // A selected button is drawn solid in the accent, or in the error color
+      // when destructive, as the icon buttons are.
+      final selected = props.isSelected ?? false;
+      final type = selected ? StreamButtonType.solid : props.type;
+      final style = selected && !destructive
+          ? StreamButtonStyle.primary
+          : props.style;
+      button = switch ((type, style)) {
         (StreamButtonType.solid, StreamButtonStyle.primary) => ElevatedButton(
           onPressed: props.onPressed,
           autofocus: props.autofocus,

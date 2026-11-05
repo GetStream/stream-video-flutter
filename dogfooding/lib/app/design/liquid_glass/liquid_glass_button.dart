@@ -9,9 +9,9 @@ import '../app_design_spec.dart';
 LiquidGlassSettings tintedGlass(Color color) =>
     LiquidGlassSettings(glassColor: color.withValues(alpha: 0.6));
 
-/// A [StreamButton] drawn as a [GlassButton]: tinted with the accent when
-/// solid primary or selected, with the error color when solid destructive,
-/// and clear otherwise.
+/// A [StreamButton] drawn as a [GlassButton]: tinted with the error color
+/// when destructive and solid or selected, with the accent when solid primary
+/// or selected, and clear otherwise.
 class LiquidGlassStreamButton extends StatelessWidget {
   const LiquidGlassStreamButton({required this.props, super.key});
 
@@ -26,9 +26,10 @@ class LiquidGlassStreamButton extends StatelessWidget {
     final height = props.size.value;
 
     final tint = switch (props.style) {
+      StreamButtonStyle.destructive when solid || selected =>
+        colorScheme.accentError,
       _ when selected => colorScheme.accentPrimary,
       StreamButtonStyle.primary when solid => colorScheme.accentPrimary,
-      StreamButtonStyle.destructive when solid => colorScheme.accentError,
       _ => null,
     };
     final foreground = switch (tint) {
@@ -68,7 +69,9 @@ class LiquidGlassStreamButton extends StatelessWidget {
     } else {
       button = GlassButton.custom(
         onTap: onTap,
+        enabled: enabled,
         autofocus: props.autofocus,
+        style: style,
         height: height,
         shape: LiquidRoundedSuperellipse(borderRadius: height / 2),
         settings: switch (tint) {
@@ -95,7 +98,6 @@ class LiquidGlassStreamButton extends StatelessWidget {
           ),
         ),
       );
-      if (!enabled) button = Opacity(opacity: 0.5, child: button);
     }
 
     if (props.tooltip case final tooltip?) {
