@@ -7,6 +7,7 @@ import 'package:synchronized/synchronized.dart';
 
 import '../../logger/impl/tagged_logger.dart';
 import '../../sfu/data/events/sfu_events.dart';
+import '../../sfu/data/models/sfu_call_state.dart';
 import '../../sfu/sfu_extensions.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../state/call_state_notifier.dart';
@@ -88,6 +89,14 @@ class SfuEventRouter {
 
   /// Forgets the manager the last join response was applied against.
   void forgetJoinedManager() => _joinedRtcManager = null;
+
+  /// Applies the pins and the E2EE flag of the call state a join answered
+  /// with.
+  void applyJoinedCallState(SfuCallState callState) {
+    _stateManager
+      ..sfuPinsUpdated(callState.pins)
+      ..sfuE2eeEnabledUpdated(callState.e2eeEnabled);
+  }
 
   /// Stops routing events and closes the manager subject.
   Future<void> dispose() async {

@@ -10,6 +10,7 @@ import 'package:stream_video/src/call/stats/tracer.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_call_ended_reason.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_codec.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_pin.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_video_sender.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
@@ -476,5 +477,16 @@ void main() {
     await Future.wait([offer, joined]);
 
     verify(() => stateManager.sfuParticipantJoined(any())).called(1);
+  });
+
+  test('a joined call state applies its pins and E2EE flag', () {
+    const pin = SfuPin(userId: 'alice', sessionId: 'alice-session');
+
+    router.applyJoinedCallState(
+      harnessSfuCallState(pins: const [pin], e2eeEnabled: true),
+    );
+
+    verify(() => stateManager.sfuPinsUpdated(const [pin])).called(1);
+    verify(() => stateManager.sfuE2eeEnabledUpdated(true)).called(1);
   });
 }

@@ -435,7 +435,7 @@ class CallSession extends Disposable with _CallSessionMedia {
 
       _events.attachManager(createdRtcManager);
 
-      _applyJoinResponse(event);
+      _events.applyJoinedCallState(event.callState);
 
       final environment = ClientEnvironment(
         sfu: config.sfuUrl,
@@ -498,11 +498,6 @@ class CallSession extends Disposable with _CallSessionMedia {
     // Nothing is awaited between sending and subscribing, so the answer
     // cannot slip past.
     return sfuWS.waitForJoinResponse(timeLimit: timeLimit);
-  }
-
-  void _applyJoinResponse(SfuJoinResponseEvent event) {
-    stateManager.sfuPinsUpdated(event.callState.pins);
-    stateManager.sfuE2eeEnabledUpdated(event.callState.e2eeEnabled);
   }
 
   /// Fails the `wsJoin` stage with [error], as a request timeout when the SFU
@@ -615,7 +610,7 @@ class CallSession extends Disposable with _CallSessionMedia {
 
       _logger.v(() => '[fastReconnect] fast-reconnect done');
 
-      _applyJoinResponse(event);
+      _events.applyJoinedCallState(event.callState);
 
       result = Result.success(
         (

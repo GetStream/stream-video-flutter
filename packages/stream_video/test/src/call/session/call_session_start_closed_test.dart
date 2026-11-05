@@ -180,6 +180,24 @@ void main() {
     },
   );
 
+  for (final (name, end) in <(String, Future<void> Function(CallSession))>[
+    ('close', (session) => session.close(CloseCode.normalClosure)),
+    ('leave', (session) async => session.leave(reason: 'test')),
+  ]) {
+    test('a $name while the events are being listened to ends the start '
+        'before the join', () async {
+      final session = _buildSession(rtcManager: Completer<RtcManager>());
+
+      final start = session.start(isAnonymousUser: true);
+      await end(session);
+      final result = await start;
+
+      expect(result.isFailure, isTrue);
+      expect(session.debugIsRtcManagerSubjectClosed, isTrue);
+      verifyNever(() => session.sfuWS.send(any()));
+    });
+  }
+
   test('a start nothing closes keeps the rtcManager', () async {
     final made = Completer<RtcManager>();
     final session = _buildSession(rtcManager: made);
