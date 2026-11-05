@@ -1202,6 +1202,26 @@ extension PublisherRtcManager on RtcManager {
     return !candidateIds.any(sdp.contains);
   }
 
+  /// Whether the track behind [transceiverCache] should be announced to the
+  /// SFU as muted.
+  ///
+  /// Reads the SDK's own track from [tracks], the one [muteTrack] and
+  /// [unmuteTrack] act on and report through `UpdateMuteStates`, so the
+  /// announce agrees with the last mute state sent. Neither track reachable
+  /// from the transceiver is reliable on native:
+  /// - `sender.track` is a snapshot built by `addTransceiver`, so its `enabled`
+  ///   keeps the value from publish time until a `replaceTrack` swaps it.
+  /// - [TransceiverCache.track] is not updated when [unmuteTrack] recreates a
+  ///   released track, so after a mute and unmute it still holds the stopped,
+  ///   disabled original.
+  bool _isAnnouncedMuted(TransceiverCache transceiverCache) {
+    if (transceiverCache.transceiver.sender.track == null) return true;
+
+    final cachedTrack = transceiverCache.track;
+    final currentTrack = tracks[cachedTrack.trackId] ?? cachedTrack;
+    return !currentTrack.mediaTrack.enabled;
+  }
+
   RtcTrackInfo? _transceiverToTrackInfo(
     TransceiverCache transceiverCache, {
     required List<rtc.RTCRtpTransceiver> liveTransceivers,
@@ -1263,7 +1283,7 @@ extension PublisherRtcManager on RtcManager {
         mid: mid,
         layers: [],
         codec: transceiverCache.publishOption.codec,
-        muted: !(transceiverCache.transceiver.sender.track?.enabled ?? false),
+        muted: _isAnnouncedMuted(transceiverCache),
         stereo: stereo,
         dtx: audioSettings.opusDtxEnabled,
         red: audioSettings.redundantCodingEnabled,
@@ -1283,7 +1303,7 @@ extension PublisherRtcManager on RtcManager {
         red: false,
         stereo: false,
         codec: transceiverCache.publishOption.codec,
-        muted: !(transceiverCache.transceiver.sender.track?.enabled ?? false),
+        muted: _isAnnouncedMuted(transceiverCache),
         layers: encodings.map((it) {
           return RtcVideoLayer(
             rid: it.rid ?? '',
