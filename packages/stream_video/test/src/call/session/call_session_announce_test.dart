@@ -74,6 +74,7 @@ CallSession _buildTestSession({
     stateManager: stateManager,
     dynascaleManager: DynascaleManager(stateManager: stateManager),
     onReconnectionNeeded: onReconnectionNeeded,
+    onIceConnected: (_) {},
     onSuspendedAudioTrackRecorded: (_) {},
     sdpEditor: MockSdpEditor(),
     networkMonitor: setupMockInternetConnection(),
