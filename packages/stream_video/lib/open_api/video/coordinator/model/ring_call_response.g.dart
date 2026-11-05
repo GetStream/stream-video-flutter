@@ -12,10 +12,12 @@ RingCallResponse _$RingCallResponseFromJson(Map<String, dynamic> json) =>
       membersIds: (json['members_ids'] as List<dynamic>)
           .map((e) => e as String)
           .toList(),
+      ringId: json['ring_id'] as String?,
     );
 
 Map<String, dynamic> _$RingCallResponseToJson(RingCallResponse instance) =>
     <String, dynamic>{
       'duration': instance.duration,
       'members_ids': instance.membersIds,
+      'ring_id': instance.ringId,
     };

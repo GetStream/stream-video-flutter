@@ -317,6 +317,7 @@
 - `isMobileLandscape` and `isMobilePortrait` are removed.
 - `StreamScreenSize` is `small` for any window shorter than 480, and `StreamScreenSize.fromSize` buckets a size by both axes.
 - `StreamCallContent.callFastReconnectingOverlayBuilder`, `CallFastReconnectingOverlayBuilder` and `CallFastReconnectingProperties` are removed; use `callConnectionBannerBuilder`, which is drawn for every reconnect and gets the call status through `CallConnectionBannerProperties`. `CallNotConnectedProperties.isMigrating` and `isReconnecting` are removed, since `callNotConnectedBuilder` is only used before the call first connects.
+- The `Sort` and `Filter` typedefs in `call_participants.dart` have been renamed to `CallParticipantSort` and `CallParticipantFilter` respectively.
 - `CallParticipantSort` is a class rather than an alias for `Comparator`. It pairs the comparator with an `identity`, which is what `StreamCallParticipants` compares to notice the sorting has changed — a bare closure is a new function on every build, so comparing those reordered the list every time. Wrap an existing comparator as `CallParticipantSort(compare, identity: 'my-sort')`; without an identity a sort is only equal to itself. The SDK's own sorts are on `CallParticipantSorts`. `PictureInPictureConfiguration.sort` and `StreamPictureInPictureUiKitView.participantSort` take one too.
 - The desktop screen share picker is rebuilt on the design system. `TabbedScreenSelectWidget`, `ThumbnailGrid`, `ScreenSelectorStateNotifier` and `ScreenSelectorState` are gone; `StreamDesktopScreenShareSelector` and `DesktopScreenShareSourceController` replace them. `showDefaultScreenSelectionDialog` keeps its signature.
 - `ScreenShareThumbnailWidget` is `StreamDesktopScreenShareThumbnail` now, and takes the thumbnail from the source it is given rather than subscribing for one.
@@ -569,11 +570,6 @@
 
 - Increased minimum Flutter version to 3.38.1.
 - Participant video fit now defaults per-platform when not explicitly set: `VideoFit.adaptive` on web and desktop (so portrait feeds such as phone cameras are shown in full instead of being cropped) and `VideoFit.cover` on mobile. Set `videoFit` explicitly on `StreamCallParticipantThemeData` (or the renderer widgets) to override.
-
-## ⚠️ Breaking
-
-- The `Sort` and `Filter` typedefs in `call_participants.dart` have been renamed to `CallParticipantSort` and `CallParticipantFilter` respectively.
-
 
 ## 1.4.1
 

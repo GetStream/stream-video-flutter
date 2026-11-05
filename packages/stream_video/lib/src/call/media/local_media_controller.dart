@@ -179,8 +179,7 @@ class LocalMediaController {
         _audioConfigurationPolicy().defaultsToSpeaker ||
         settings.video.cameraDefaultOn ||
         settings.audio.speakerDefaultOn ||
-        settings.audio.defaultDevice ==
-            AudioSettingsRequestDefaultDevice.speaker;
+        settings.audio.defaultDevice == AudioDefaultDevice.speaker;
 
     // Determine default audio output with priority:
     // 1. External device (if available)
@@ -190,7 +189,7 @@ class LocalMediaController {
 
     if (defaultAudioOutput == null) {
       bool isSpeaker(RtcMediaDevice device) => device.id.equalsIgnoreCase(
-        AudioSettingsRequestDefaultDevice.speaker,
+        AudioDefaultDevice.speaker,
       );
 
       // 2. Speaker (if settings indicate it should be used)
@@ -229,8 +228,7 @@ class LocalMediaController {
       ),
       audioInputDevice: defaultAudioInput,
       audioOutputDevice: defaultAudioOutput,
-      cameraFacingMode:
-          settings.video.cameraFacing == VideoSettingsRequestCameraFacing.front
+      cameraFacingMode: settings.video.cameraFacing == CameraFacing.front
           ? FacingMode.user
           : FacingMode.environment,
       speakerDefaultOn:
@@ -394,7 +392,7 @@ class LocalMediaController {
       final rtcManager = _session()?.rtcManager;
       final result = rtcManager == null
           ? failureWithError<None>('no RTC manager')
-          : await rtcManager.setAppleAudioConfiguration(
+          : await rtcManager.configureAudioSession(
               speakerOn: resolveAppleSpeakerOn(
                 policy: policy,
                 speakerRequested: _connectOptions.speakerDefaultOn,

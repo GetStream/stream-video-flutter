@@ -10,7 +10,7 @@ abstract class RTCRtpReceiver {
 
   /// public:
   Function(RTCRtpReceiver rtpReceiver, RTCRtpMediaType mediaType)?
-      onFirstPacketReceived;
+  onFirstPacketReceived;
 
   /// The WebRTC specification only defines RTCRtpParameters in terms of senders,
   /// but this API also applies them to receivers, similar to ORTC:

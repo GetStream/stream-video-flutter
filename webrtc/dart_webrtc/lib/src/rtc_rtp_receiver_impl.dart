@@ -16,20 +16,23 @@ class RTCRtpReceiverWeb extends RTCRtpReceiver {
 
   @override
   Future<List<StatsReport>> getStats() async {
-    var stats = await _jsRtpReceiver.getStats().toDart;
-    var report = <StatsReport>[];
+    final stats = await _jsRtpReceiver.getStats().toDart;
+    final report = <StatsReport>[];
     stats.callMethodVarArgs('forEach'.toJS, [
       (JSObject value, JSAny key) {
-        var map = value.dartify() as LinkedHashMap<Object?, Object?>;
-        var stats = <String, dynamic>{};
-        for (var entry in map.entries) {
+        final map = value.dartify()! as LinkedHashMap<Object?, Object?>;
+        final stats = <String, dynamic>{};
+        for (final entry in map.entries) {
           stats[entry.key.toString()] = entry.value;
         }
-        report.add(StatsReport(
+        report.add(
+          StatsReport(
             value.getProperty<JSString>('id'.toJS).toDart,
             value.getProperty<JSString>('type'.toJS).toDart,
             value.getProperty<JSNumber>('timestamp'.toJS).toDartDouble,
-            stats));
+            stats,
+          ),
+        );
       }.toJS,
     ]);
     return report;
@@ -40,7 +43,7 @@ class RTCRtpReceiverWeb extends RTCRtpReceiver {
   /// http://ortc.org/wp-content/uploads/2016/03/ortc.html#rtcrtpparameters*.
   @override
   RTCRtpParameters get parameters {
-    var parameters = _jsRtpReceiver.getParameters();
+    final parameters = _jsRtpReceiver.getParameters();
     return RTCRtpParametersWeb.fromJsObject(parameters);
   }
 

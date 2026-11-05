@@ -10,8 +10,8 @@ OwnUserResponse _$OwnUserResponseFromJson(Map<String, dynamic> json) =>
     OwnUserResponse(
       avgResponseTime: (json['avg_response_time'] as num?)?.toInt(),
       banned: json['banned'] as bool,
-      blockedUserIds: (json['blocked_user_ids'] as List<dynamic>?)
-          ?.map((e) => e as String)
+      blockedUserIds: (json['blocked_user_ids'] as List<dynamic>)
+          .map((e) => e as String)
           .toList(),
       channelMutes: (json['channel_mutes'] as List<dynamic>)
           .map((e) => ChannelMute.fromJson(e as Map<String, dynamic>))
@@ -57,10 +57,6 @@ OwnUserResponse _$OwnUserResponseFromJson(Map<String, dynamic> json) =>
           : PushPreferencesResponse.fromJson(
               json['push_preferences'] as Map<String, dynamic>,
             ),
-      revokeTokensIssuedBefore: _$JsonConverterFromJson<Object, DateTime>(
-        json['revoke_tokens_issued_before'],
-        const StreamDateTimeConverter().fromJson,
-      ),
       role: json['role'] as String,
       teams: (json['teams'] as List<dynamic>).map((e) => e as String).toList(),
       teamsRole: (json['teams_role'] as Map<String, dynamic>?)?.map(
@@ -110,10 +106,6 @@ Map<String, dynamic> _$OwnUserResponseToJson(OwnUserResponse instance) =>
       'online': instance.online,
       'privacy_settings': instance.privacySettings?.toJson(),
       'push_preferences': instance.pushPreferences?.toJson(),
-      'revoke_tokens_issued_before': _$JsonConverterToJson<Object, DateTime>(
-        instance.revokeTokensIssuedBefore,
-        const StreamDateTimeConverter().toJson,
-      ),
       'role': instance.role,
       'teams': instance.teams,
       'teams_role': instance.teamsRole,

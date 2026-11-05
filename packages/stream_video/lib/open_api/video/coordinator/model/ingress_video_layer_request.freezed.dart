@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$IngressVideoLayerRequest {
   int get bitrate;
-  IngressVideoLayerRequestCodec get codec;
+  VideoCodec get codec;
   int get frameRateLimit;
   int get maxDimension;
   int get minDimension;
@@ -69,7 +69,7 @@ abstract mixin class $IngressVideoLayerRequestCopyWith<$Res> {
   @useResult
   $Res call({
     int bitrate,
-    IngressVideoLayerRequestCodec codec,
+    VideoCodec codec,
     int frameRateLimit,
     int maxDimension,
     int minDimension,
@@ -104,7 +104,7 @@ class _$IngressVideoLayerRequestCopyWithImpl<$Res>
         codec: null == codec
             ? _self.codec
             : codec // ignore: cast_nullable_to_non_nullable
-                  as IngressVideoLayerRequestCodec,
+                  as VideoCodec,
         frameRateLimit: null == frameRateLimit
             ? _self.frameRateLimit
             : frameRateLimit // ignore: cast_nullable_to_non_nullable

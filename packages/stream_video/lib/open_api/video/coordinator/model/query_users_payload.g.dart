@@ -9,6 +9,10 @@ part of 'query_users_payload.dart';
 QueryUsersPayload _$QueryUsersPayloadFromJson(Map<String, dynamic> json) =>
     QueryUsersPayload(
       filterConditions: json['filter_conditions'] as Map<String, dynamic>,
+      idGt: json['id_gt'] as String?,
+      idGte: json['id_gte'] as String?,
+      idLt: json['id_lt'] as String?,
+      idLte: json['id_lte'] as String?,
       includeDeactivatedUsers: json['include_deactivated_users'] as bool?,
       limit: (json['limit'] as num?)?.toInt(),
       offset: (json['offset'] as num?)?.toInt(),
@@ -21,6 +25,10 @@ QueryUsersPayload _$QueryUsersPayloadFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$QueryUsersPayloadToJson(QueryUsersPayload instance) =>
     <String, dynamic>{
       'filter_conditions': instance.filterConditions,
+      'id_gt': instance.idGt,
+      'id_gte': instance.idGte,
+      'id_lt': instance.idLt,
+      'id_lte': instance.idLte,
       'include_deactivated_users': instance.includeDeactivatedUsers,
       'limit': instance.limit,
       'offset': instance.offset,

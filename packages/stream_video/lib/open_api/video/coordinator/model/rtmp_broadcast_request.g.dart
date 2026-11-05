@@ -13,9 +13,7 @@ RTMPBroadcastRequest _$RTMPBroadcastRequestFromJson(
       ? null
       : LayoutSettingsRequest.fromJson(json['layout'] as Map<String, dynamic>),
   name: json['name'] as String,
-  quality: json['quality'] == null
-      ? null
-      : RTMPBroadcastRequestQuality.fromJson(json['quality'] as String),
+  quality: json['quality'] as RTMPBroadcastRequestQuality?,
   streamKey: json['stream_key'] as String?,
   streamUrl: json['stream_url'] as String,
 );
@@ -25,7 +23,7 @@ Map<String, dynamic> _$RTMPBroadcastRequestToJson(
 ) => <String, dynamic>{
   'layout': instance.layout?.toJson(),
   'name': instance.name,
-  'quality': instance.quality?.toJson(),
+  'quality': instance.quality,
   'stream_key': instance.streamKey,
   'stream_url': instance.streamUrl,
 };

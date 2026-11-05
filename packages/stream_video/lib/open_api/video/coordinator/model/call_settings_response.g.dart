@@ -33,6 +33,9 @@ CallSettingsResponse _$CallSettingsResponseFromJson(
       : IngressSettingsResponse.fromJson(
           json['ingress'] as Map<String, dynamic>,
         ),
+  lifecycle: LifecycleSettingsResponse.fromJson(
+    json['lifecycle'] as Map<String, dynamic>,
+  ),
   limits: LimitsSettingsResponse.fromJson(
     json['limits'] as Map<String, dynamic>,
   ),
@@ -69,6 +72,7 @@ Map<String, dynamic> _$CallSettingsResponseToJson(
   'geofencing': instance.geofencing.toJson(),
   'individual_recording': instance.individualRecording.toJson(),
   'ingress': instance.ingress?.toJson(),
+  'lifecycle': instance.lifecycle.toJson(),
   'limits': instance.limits.toJson(),
   'raw_recording': instance.rawRecording.toJson(),
   'recording': instance.recording.toJson(),

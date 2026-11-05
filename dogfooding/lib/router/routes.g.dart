@@ -6,13 +6,7 @@ part of 'routes.dart';
 // GoRouterGenerator
 // **************************************************************************
 
-List<RouteBase> get $appRoutes => [
-  $homeRoute,
-  $loginRoute,
-  $lobbyRoute,
-  $livestreamRoute,
-  $callRoute,
-];
+List<RouteBase> get $appRoutes => [$homeRoute, $loginRoute, $livestreamRoute];
 
 RouteBase get $homeRoute => GoRouteData.$route(
   path: '/',
@@ -97,105 +91,32 @@ mixin $LoginRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $lobbyRoute => GoRouteData.$route(
-  path: '/lobby',
-  name: 'lobby',
-  factory: $LobbyRoute._fromState,
-);
-
-mixin $LobbyRoute on GoRouteData {
-  static LobbyRoute _fromState(GoRouterState state) => LobbyRoute(
-    $extra:
-        state.extra as ({Call call, bool callExists, String? encryptionKey}),
-  );
-
-  LobbyRoute get _self => this as LobbyRoute;
-
-  @override
-  String get location => GoRouteData.$location('/lobby');
-
-  @override
-  void go(BuildContext context) => context.go(location, extra: _self.$extra);
-
-  @override
-  Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: _self.$extra);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: _self.$extra);
-
-  @override
-  void replace(BuildContext context) =>
-      context.replace(location, extra: _self.$extra);
-}
-
 RouteBase get $livestreamRoute => GoRouteData.$route(
-  path: '/livestream',
+  path: '/livestream/:callId',
   name: 'livestream',
   factory: $LivestreamRoute._fromState,
 );
 
 mixin $LivestreamRoute on GoRouteData {
   static LivestreamRoute _fromState(GoRouterState state) =>
-      LivestreamRoute($extra: state.extra as String);
+      LivestreamRoute(callId: state.pathParameters['callId']!);
 
   LivestreamRoute get _self => this as LivestreamRoute;
 
   @override
-  String get location => GoRouteData.$location('/livestream');
+  String get location =>
+      GoRouteData.$location('/livestream/${Uri.encodeComponent(_self.callId)}');
 
   @override
-  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+  void go(BuildContext context) => context.go(location);
 
   @override
-  Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: _self.$extra);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: _self.$extra);
-
-  @override
-  void replace(BuildContext context) =>
-      context.replace(location, extra: _self.$extra);
-}
-
-RouteBase get $callRoute => GoRouteData.$route(
-  path: '/call',
-  name: 'call',
-  factory: $CallRoute._fromState,
-);
-
-mixin $CallRoute on GoRouteData {
-  static CallRoute _fromState(GoRouterState state) => CallRoute(
-    $extra:
-        state.extra
-            as ({
-              Call call,
-              CallConnectOptions? connectOptions,
-              StreamVideoEffectsManager? effectsManager,
-              String? encryptionKey,
-            }),
-  );
-
-  CallRoute get _self => this as CallRoute;
-
-  @override
-  String get location => GoRouteData.$location('/call');
-
-  @override
-  void go(BuildContext context) => context.go(location, extra: _self.$extra);
-
-  @override
-  Future<T?> push<T>(BuildContext context) =>
-      context.push<T>(location, extra: _self.$extra);
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
 
   @override
   void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location, extra: _self.$extra);
+      context.pushReplacement(location);
 
   @override
-  void replace(BuildContext context) =>
-      context.replace(location, extra: _self.$extra);
+  void replace(BuildContext context) => context.replace(location);
 }

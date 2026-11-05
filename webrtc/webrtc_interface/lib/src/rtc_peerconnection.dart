@@ -64,8 +64,9 @@ abstract class RTCPeerConnection {
 
   Future<RTCSessionDescription> createOffer([Map<String, dynamic> constraints]);
 
-  Future<RTCSessionDescription> createAnswer(
-      [Map<String, dynamic> constraints]);
+  Future<RTCSessionDescription> createAnswer([
+    Map<String, dynamic> constraints,
+  ]);
 
   Future<void> addStream(MediaStream stream);
 
@@ -88,7 +89,9 @@ abstract class RTCPeerConnection {
   List<MediaStream?> getRemoteStreams();
 
   Future<RTCDataChannel> createDataChannel(
-      String label, RTCDataChannelInit dataChannelDict);
+    String label,
+    RTCDataChannelInit dataChannelDict,
+  );
 
   Future<void> restartIce();
 
@@ -114,8 +117,9 @@ abstract class RTCPeerConnection {
   Future<bool> removeTrack(RTCRtpSender sender);
 
   /// 'audio|video', { 'direction': 'recvonly|sendonly|sendrecv' }
-  Future<RTCRtpTransceiver> addTransceiver(
-      {MediaStreamTrack track,
-      RTCRtpMediaType kind,
-      RTCRtpTransceiverInit init});
+  Future<RTCRtpTransceiver> addTransceiver({
+    MediaStreamTrack track,
+    RTCRtpMediaType kind,
+    RTCRtpTransceiverInit init,
+  });
 }

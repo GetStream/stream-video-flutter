@@ -33,7 +33,7 @@ const _speaker = RtcMediaDevice(
 );
 
 /// The call settings with noise cancellation in [mode].
-CallSettings _settings(NoiseCancellationSettingsMode mode) => CallSettings(
+CallSettings _settings(FeatureActivationMode mode) => CallSettings(
   audio: StreamAudioSettings(
     noiseCancellation: StreamNoiceCancellingSettings(mode: mode),
   ),
@@ -65,7 +65,7 @@ void main() {
     when(() => call.isAudioProcessorConfigured).thenReturn(true);
     when(
       () => callState.settings,
-    ).thenReturn(_settings(NoiseCancellationSettingsMode.available));
+    ).thenReturn(_settings(FeatureActivationMode.available));
     final emitter = MutableStateEmitter<CallState>(callState, sync: true);
     when(() => call.state).thenAnswer((_) => emitter);
     // Runs the real selectors against the stubbed state.
@@ -201,7 +201,7 @@ void main() {
       ) async {
         when(
           () => callState.settings,
-        ).thenReturn(_settings(NoiseCancellationSettingsMode.disabled));
+        ).thenReturn(_settings(FeatureActivationMode.disabled));
         await pump(tester);
 
         expect(find.text('Noise Cancellation'), findsNothing);

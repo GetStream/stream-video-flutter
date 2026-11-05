@@ -3,10 +3,13 @@
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart'
+    as sfu;
 import 'package:stream_video/src/call/session/call_session.dart';
 import 'package:stream_video/src/call/session/call_session_config.dart';
 import 'package:stream_video/src/call/stats/tracer.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_codec.dart';
+import 'package:stream_video/src/sfu/sfu_client.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_publish_options.dart';
 import 'package:stream_video/src/webrtc/peer_connection.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
@@ -49,6 +52,7 @@ final _publishOption = SfuPublishOptions(
 
 CallSession _buildTestSession({
   required OnReconnectionNeeded onReconnectionNeeded,
+  SfuClient? sfuClient,
 }) {
   final callCid = SampleCallData.defaultCid;
   final stateManager = createTestCallStateManager();
@@ -70,6 +74,7 @@ CallSession _buildTestSession({
     stateManager: stateManager,
     dynascaleManager: DynascaleManager(stateManager: stateManager),
     onReconnectionNeeded: onReconnectionNeeded,
+    onIceConnected: (_) {},
     onSuspendedAudioTrackRecorded: (_) {},
     sdpEditor: MockSdpEditor(),
     networkMonitor: setupMockInternetConnection(),
@@ -80,6 +85,7 @@ CallSession _buildTestSession({
     host: streamVideo,
     tracer: Tracer(null),
     pcFactory: StreamPeerConnectionFactory(callCid: callCid),
+    sfuClient: sfuClient,
   );
 
   // The negotiation bails out early unless the SFU socket is up.
@@ -116,6 +122,7 @@ _wireStalledPublisher(
   CallSession session, {
   required bool sendingTrack,
   bool idleTransceiver = false,
+  String? offerMid,
 }) {
   final publisher = _MockTracedStreamPeerConnection();
   final pc = _MockRTCPeerConnection();
@@ -149,6 +156,7 @@ _wireStalledPublisher(
           'c=IN IP4 0.0.0.0\r\n',
           'a=sendonly\r\n',
           'a=msid:stream-id media-track-id\r\n',
+          if (offerMid != null) 'a=mid:$offerMid\r\n',
         ].join(),
         'offer',
       ),
@@ -174,6 +182,7 @@ _wireStalledPublisher(
     final mediaTrack = _MockMediaStreamTrack();
     when(() => mediaTrack.id).thenReturn('media-track-id');
     when(() => mediaTrack.kind).thenReturn('audio');
+    when(() => mediaTrack.enabled).thenReturn(true);
 
     final sender = _MockSender();
     when(() => sender.track).thenReturn(sendingTrack ? mediaTrack : null);
@@ -203,6 +212,7 @@ void main() {
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
     registerMockFallbackValues();
+    registerFallbackValue(sfu.SetPublisherRequest());
   });
 
   group('publisher negotiation with an unresolvable track mid', () {
@@ -412,6 +422,33 @@ void main() {
 
       verifyNever(wires.publisher.rollbackLocalDescription);
       expect(reconnects, isEmpty);
+    });
+  });
+
+  group('publisher negotiation the SFU accepts', () {
+    test('marks the announced tracks as negotiated', () async {
+      final sfuClient = MockSfuClient();
+      when(() => sfuClient.setPublisher(any())).thenAnswer(
+        (_) async => Result.success(sfu.SetPublisherResponse()),
+      );
+      final session = _buildTestSession(
+        onReconnectionNeeded: (_, _, _) {},
+        sfuClient: sfuClient,
+      );
+
+      final wires = _wireStalledPublisher(
+        session,
+        sendingTrack: true,
+        offerMid: '0',
+      );
+      final cached = wires.rtcManager.transceiversManager.items().single;
+      expect(cached.negotiated, isFalse);
+
+      await session.negotiateOrRecover(wires.publisher);
+
+      verify(() => sfuClient.setPublisher(any())).called(1);
+      expect(cached.negotiated, isTrue);
+      expect(cached.negotiatedMid, '0');
     });
   });
 }

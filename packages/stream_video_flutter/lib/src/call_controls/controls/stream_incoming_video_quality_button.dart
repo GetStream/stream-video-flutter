@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
@@ -62,6 +64,18 @@ class _StreamIncomingVideoQualityButtonState
     };
   }
 
+  /// The horizontal room a padded tap target gives the round icon buttons
+  /// beside this one, which this wider button does not get on its own.
+  EdgeInsets _tapTargetInset(BuildContext context) {
+    final padded =
+        Theme.of(context).materialTapTargetSize == MaterialTapTargetSize.padded;
+    if (!padded) return EdgeInsets.zero;
+
+    final inset =
+        (kMinInteractiveDimension - StreamButtonSize.medium.value) / 2;
+    return EdgeInsets.symmetric(horizontal: math.max(0, inset));
+  }
+
   @override
   Widget build(BuildContext context) {
     final call = widget.call;
@@ -88,15 +102,18 @@ class _StreamIncomingVideoQualityButtonState
               ],
             ),
           ],
-          builder: (context, handle) => Tooltip(
-            message: translations.deviceSettingsIncomingVideoQuality,
-            child: StreamButton(
-              style: StreamButtonStyle.secondary,
-              iconLeft: Icon(context.streamIcons.slidersFill),
-              iconRight: Icon(_caret(context, isOpen: handle.isOpen)),
-              isSelected: handle.isOpen,
-              onPressed: handle.toggle,
-              child: Text(quality.shortLabel(context)),
+          builder: (context, handle) => Padding(
+            padding: _tapTargetInset(context),
+            child: Tooltip(
+              message: translations.deviceSettingsIncomingVideoQuality,
+              child: StreamButton(
+                style: StreamButtonStyle.secondary,
+                iconLeft: Icon(context.streamIcons.slidersFill),
+                iconRight: Icon(_caret(context, isOpen: handle.isOpen)),
+                isSelected: handle.isOpen,
+                onPressed: handle.toggle,
+                child: Text(quality.shortLabel(context)),
+              ),
             ),
           ),
         );

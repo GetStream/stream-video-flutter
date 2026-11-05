@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$VideoSettingsResponse {
   bool get accessRequestEnabled;
   bool get cameraDefaultOn;
-  VideoSettingsResponseCameraFacing get cameraFacing;
+  CameraFacing get cameraFacing;
   bool get enabled;
   TargetResolution get targetResolution;
 
@@ -71,7 +71,7 @@ abstract mixin class $VideoSettingsResponseCopyWith<$Res> {
   $Res call({
     bool accessRequestEnabled,
     bool cameraDefaultOn,
-    VideoSettingsResponseCameraFacing cameraFacing,
+    CameraFacing cameraFacing,
     bool enabled,
     TargetResolution targetResolution,
   });
@@ -109,7 +109,7 @@ class _$VideoSettingsResponseCopyWithImpl<$Res>
         cameraFacing: null == cameraFacing
             ? _self.cameraFacing
             : cameraFacing // ignore: cast_nullable_to_non_nullable
-                  as VideoSettingsResponseCameraFacing,
+                  as CameraFacing,
         enabled: null == enabled
             ? _self.enabled
             : enabled // ignore: cast_nullable_to_non_nullable

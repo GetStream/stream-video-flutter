@@ -27,7 +27,7 @@ class DataPacketCryptorImpl implements DataPacketCryptor {
     required int keyIndex,
     required Uint8List data,
   }) async {
-    var msgId = randomString(12);
+    final msgId = randomString(12);
     worker.postMessage(
       {
         'msgType': 'dataCryptorEncrypt',
@@ -41,12 +41,12 @@ class DataPacketCryptorImpl implements DataPacketCryptor {
       }.jsify(),
     );
 
-    var res = await events.waitFor<WorkerResponse>(
+    final res = await events.waitFor<WorkerResponse>(
       filter: (event) {
         logger.fine('waiting for encrypt on msg: $msgId');
         return event.msgId == msgId;
       },
-      duration: Duration(seconds: 5),
+      duration: const Duration(seconds: 5),
       onTimeout: () => throw Exception('waiting for encrypt on msg timed out'),
     );
 
@@ -62,7 +62,7 @@ class DataPacketCryptorImpl implements DataPacketCryptor {
     required String participantId,
     required EncryptedPacket encryptedPacket,
   }) async {
-    var msgId = randomString(12);
+    final msgId = randomString(12);
     worker.postMessage(
       {
         'msgType': 'dataCryptorDecrypt',
@@ -77,12 +77,12 @@ class DataPacketCryptorImpl implements DataPacketCryptor {
       }.jsify(),
     );
 
-    var res = await events.waitFor<WorkerResponse>(
+    final res = await events.waitFor<WorkerResponse>(
       filter: (event) {
         logger.fine('waiting for decrypt on msg: $msgId');
         return event.msgId == msgId;
       },
-      duration: Duration(seconds: 5),
+      duration: const Duration(seconds: 5),
       onTimeout: () => throw Exception('waiting for decrypt on msg timed out'),
     );
 
@@ -91,12 +91,12 @@ class DataPacketCryptorImpl implements DataPacketCryptor {
 
   @override
   Future<void> dispose() async {
-    var msgId = randomString(12);
+    final msgId = randomString(12);
     worker.postMessage(
       {
         'msgType': 'dataCryptorDispose',
         'msgId': msgId,
-        'dataCryptorId': _dataCryptorId
+        'dataCryptorId': _dataCryptorId,
       }.jsify(),
     );
 
@@ -105,7 +105,7 @@ class DataPacketCryptorImpl implements DataPacketCryptor {
         logger.fine('waiting for dispose on msg: $msgId');
         return event.msgId == msgId;
       },
-      duration: Duration(seconds: 5),
+      duration: const Duration(seconds: 5),
       onTimeout: () => throw Exception('waiting for dispose on msg timed out'),
     );
   }
@@ -117,10 +117,16 @@ class DataPacketCryptorFactoryImpl implements DataPacketCryptorFactory {
   static final DataPacketCryptorFactoryImpl instance =
       DataPacketCryptorFactoryImpl._internal();
   @override
-  Future<DataPacketCryptor> createDataPacketCryptor(
-      {required Algorithm algorithm, required KeyProvider keyProvider}) async {
-    return Future.value(DataPacketCryptorImpl(
-        algorithm: algorithm, keyProvider: keyProvider as KeyProviderImpl));
+  Future<DataPacketCryptor> createDataPacketCryptor({
+    required Algorithm algorithm,
+    required KeyProvider keyProvider,
+  }) async {
+    return Future.value(
+      DataPacketCryptorImpl(
+        algorithm: algorithm,
+        keyProvider: keyProvider as KeyProviderImpl,
+      ),
+    );
   }
 }
 

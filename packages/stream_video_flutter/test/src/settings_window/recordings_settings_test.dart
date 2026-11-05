@@ -11,7 +11,7 @@ CallRecording _recording(String id, String start, String end) {
   return CallRecording(
     endTime: at(end),
     filename: '$id.mp4',
-    recordingType: 'composite',
+    recordingType: CallRecordingType.composite,
     sessionId: 'session',
     startTime: at(start),
     url: 'https://example.com/$id.mp4',

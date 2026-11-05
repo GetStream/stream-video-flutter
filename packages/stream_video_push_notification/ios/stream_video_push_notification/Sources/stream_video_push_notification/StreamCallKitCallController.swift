@@ -4,9 +4,12 @@ import Foundation
 @available(iOS 10.0, *)
 class StreamCallKitCallController: NSObject {
 
-    private let callController = CXCallController()
+    private let callController = CXCallController(queue: .main)
     private var sharedProvider: CXProvider? = nil
     private(set) var calls = [Call]()
+
+    /// Data of outgoing calls whose start action CallKit has not performed yet, by call uuid.
+    private var pendingOutgoingCalls = [UUID: CallData]()
 
     func setSharedProvider(_ sharedProvider: CXProvider) {
         self.sharedProvider = sharedProvider
@@ -27,10 +30,19 @@ class StreamCallKitCallController: NSObject {
         let callTransaction = CXTransaction()
         callTransaction.addAction(startCallAction)
 
+        if self.pendingOutgoingCalls[uuid] == nil {
+            self.pendingOutgoingCalls[uuid] = data
+        }
+
         self.requestCall(
             callTransaction, action: "startCall",
             completion: { started in
-                guard started else { return }
+                guard started else {
+                    if self.pendingOutgoingCalls[uuid] === data {
+                        self.pendingOutgoingCalls[uuid] = nil
+                    }
+                    return
+                }
 
                 let callUpdate = CXCallUpdate()
                 callUpdate.remoteHandle = handle
@@ -76,9 +88,22 @@ class StreamCallKitCallController: NSObject {
     /// Deliberately not recovered automatically, unlike a refused end. There is no safe move here:
     /// the app's own state is not known at this layer, and ending the call to clear the stale ring
     /// would dismiss a ring the user may still be able to answer.
+    ///
+    /// Only an incoming call this plugin is tracking is answered; marking an outgoing call
+    /// connected already reports it to CallKit.
     func connectedCall(call: Call, completion: ((Bool) -> Void)? = nil) {
-        let callItem = self.callWithUUID(uuid: call.uuid)
-        callItem?.connectedCall(completion: nil)
+        guard let callItem = self.callWithUUID(uuid: call.uuid) else {
+            completion?(false)
+            return
+        }
+        if !callItem.hasConnected {
+            callItem.connectedCall(completion: nil)
+        }
+
+        if callItem.isOutGoing {
+            completion?(true)
+            return
+        }
 
         let answerAction = CXAnswerCallAction(call: call.uuid)
         let transaction = CXTransaction(action: answerAction)
@@ -108,7 +133,7 @@ class StreamCallKitCallController: NSObject {
                 item["accepted"] = callItem?.hasConnected
                 json.append(item)
             } else {
-                let item: [String: String] = ["id": call.uuid.uuidString]
+                let item: [String: String] = ["id": self.reportedId(for: call.uuid)]
                 json.append(item)
             }
         }
@@ -182,6 +207,20 @@ class StreamCallKitCallController: NSObject {
     static let callsChangedNotification = Notification.Name("CallsChangedNotification")
     var callsChangedHandler: (() -> Void)?
 
+    /// Returns and forgets the data `startCall` was called with for `uuid`.
+    func takePendingOutgoingCall(uuid: UUID) -> CallData? {
+        return self.pendingOutgoingCalls.removeValue(forKey: uuid)
+    }
+  
+    /// The id the call was started or shown with, or the lowercased uuid if this plugin does not track that call.
+    func reportedId(for uuid: UUID) -> String {
+        let fallback = uuid.uuidString.lowercased()
+        guard let id = self.callWithUUID(uuid: uuid)?.data.uuid, id.lowercased() == fallback else {
+            return fallback
+        }
+        return id
+    }
+
     func callWithUUID(uuid: UUID) -> Call? {
         guard let idx = calls.firstIndex(where: { $0.uuid == uuid }) else { return nil }
         return calls[idx]
@@ -207,6 +246,7 @@ class StreamCallKitCallController: NSObject {
 
     func removeAllCalls() {
         calls.removeAll()
+        pendingOutgoingCalls.removeAll()
         callsChangedHandler?()
         postCallNotification()
     }

@@ -8,6 +8,7 @@ Melos monorepo for the Stream Video Flutter SDK.
 | `packages/stream_video_flutter` | UI toolkit — widgets, themes, call screens. |
 | `packages/stream_video_*` | Filters, noise cancellation, push notifications, screen sharing. |
 | `dogfooding/` | The internal sample app. The first place a UI change gets tried. |
+| `webrtc/` | Our fork of the WebRTC plugin: `stream_webrtc_flutter`, `dart_webrtc` (web) and `webrtc_interface`. The SDK builds against these, not pub.dev. |
 
 ```bash
 melos bootstrap          # after any pubspec change
@@ -15,7 +16,21 @@ melos run analyze        # dart analyze --fatal-infos, every package
 melos run format
 melos run generate:flutter   # build_runner, for *.g.theme.dart and friends
 melos run test:all
+melos run webrtc:analyze     # and webrtc:test, webrtc:format:verify: webrtc/ only
 ```
+
+The `webrtc/` packages include the root `analysis_options.yaml` like the rest,
+but turn off the rules their upstream code doesn't follow yet.
+
+## Releases
+
+The `packages/` packages share one version and release together under one tag,
+`stream-video-vX.Y.Z`. Each `webrtc/` package has its own version and tag, named
+after the package without its `stream_` prefix, in kebab case: `webrtc-flutter-vX.Y.Z`
+for `stream_webrtc_flutter`. A webrtc package
+can take a major bump without the others. Open a release PR with `/release-pr`;
+`release_tag.yml` tags whatever is unpublished once it merges, and
+`release_publish.yml` publishes each tag. Never push a release tag by hand.
 
 ## The design system lives in another repository
 
@@ -245,3 +260,11 @@ Flutter's defaults instead of the pinned theme, platform and locale.
   `sealed` / `final` / `base` modifiers: those are enforced per library, so the
   implementation could not live in its own file and nothing could mock it. A
   test mock in another package adds `// ignore: subtype_of_sealed_class`.
+- **Platform-specific behaviour sits behind an interface.** When only some
+  platforms have a capability, define an interface for it with one
+  implementation per platform that has it and a no-op for the rest, and pick
+  the implementation once, in a factory constructor. Callers hold the
+  interface and never branch on `CurrentPlatform` or a `…Supported` flag
+  themselves; a condition that is not about the platform (which track, which
+  device) stays inside the implementations. Example: `AdmMicrophoneMute`, with
+  `AppleAdmMicrophoneMute` and `NoAdmMicrophoneMute`.

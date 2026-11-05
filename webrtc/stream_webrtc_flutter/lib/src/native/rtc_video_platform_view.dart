@@ -37,8 +37,7 @@ class NativeVideoPlayerViewState extends State<RTCVideoPlatFormView> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) =>
-          _buildVideoView(context, constraints),
+      builder: _buildVideoView,
     );
   }
 
@@ -78,11 +77,11 @@ class NativeVideoPlayerViewState extends State<RTCVideoPlatFormView> {
       return UiKitView(
         viewType: viewType,
         onPlatformViewCreated: onPlatformViewCreated,
-        creationParams: <String, dynamic>{},
+        creationParams: const <String, dynamic>{},
         creationParamsCodec: const StandardMessageCodec(),
       );
     }
-    return Text('RTCVideoPlatformView only support for iOS.');
+    return const Text('RTCVideoPlatformView only support for iOS.');
   }
 
   void showVideoView(bool show) {

@@ -448,7 +448,7 @@ void main() {
           const autoOnSettings = CallSettings(
             audio: StreamAudioSettings(
               noiseCancellation: StreamNoiceCancellingSettings(
-                mode: NoiseCancellationSettingsMode.autoOn,
+                mode: FeatureActivationMode.autoOn,
               ),
             ),
           );
@@ -539,7 +539,7 @@ void main() {
           const availableSettings = CallSettings(
             audio: StreamAudioSettings(
               noiseCancellation: StreamNoiceCancellingSettings(
-                mode: NoiseCancellationSettingsMode.available,
+                mode: FeatureActivationMode.available,
               ),
             ),
           );
@@ -584,7 +584,7 @@ void main() {
           const autoOnSettings = CallSettings(
             audio: StreamAudioSettings(
               noiseCancellation: StreamNoiceCancellingSettings(
-                mode: NoiseCancellationSettingsMode.autoOn,
+                mode: FeatureActivationMode.autoOn,
               ),
             ),
           );
@@ -763,7 +763,7 @@ void main() {
           const autoOnSettings = CallSettings(
             audio: StreamAudioSettings(
               noiseCancellation: StreamNoiceCancellingSettings(
-                mode: NoiseCancellationSettingsMode.autoOn,
+                mode: FeatureActivationMode.autoOn,
               ),
             ),
           );

@@ -31,6 +31,7 @@ class _FakeRtcPeerConnection extends Fake implements rtc.RTCPeerConnection {
   void Function(rtc.RTCIceConnectionState)? capturedOnIceConnectionState;
   void Function(rtc.RTCPeerConnectionState)? capturedOnConnectionState;
   void Function()? capturedOnRenegotiationNeeded;
+  void Function(rtc.RTCIceGatheringState)? capturedOnIceGatheringState;
 
   @override
   set onAddStream(void Function(rtc.MediaStream)? cb) =>
@@ -67,12 +68,13 @@ class _FakeRtcPeerConnection extends Fake implements rtc.RTCPeerConnection {
   set onRenegotiationNeeded(void Function()? cb) =>
       capturedOnRenegotiationNeeded = cb;
 
+  @override
+  set onIceGatheringState(void Function(rtc.RTCIceGatheringState)? cb) =>
+      capturedOnIceGatheringState = cb;
+
   // _dropRtcCallbacks also nulls these — accept the assignment so dispose()
   // doesn't blow up on un-overridden setters. We don't capture them because
   // _initRtcCallbacks never wires them in the first place.
-  @override
-  set onIceGatheringState(void Function(rtc.RTCIceGatheringState)? _) {}
-
   @override
   set onSignalingState(void Function(rtc.RTCSignalingState)? _) {}
 
@@ -159,12 +161,16 @@ class _FakeRtcPeerConnection extends Fake implements rtc.RTCPeerConnection {
   }
 }
 
+/// Builds a [StreamPeerConnection] around [pc]. Unless [iceConnected] is
+/// false, ICE has connected once already, so a failure afterwards takes the
+/// recovery path of a connection that worked.
 StreamPeerConnection _build({
   required _FakeRtcPeerConnection pc,
   required StreamPeerType type,
   SfuClient? sfuClient,
+  bool iceConnected = true,
 }) {
-  return StreamPeerConnection(
+  final peerConnection = StreamPeerConnection(
     sfuClient: sfuClient ?? MockSfuClient(),
     sessionId: 'test-session',
     callCid: SampleCallData.defaultCid,
@@ -172,7 +178,19 @@ StreamPeerConnection _build({
     pc: pc,
     sdpEditor: MockSdpEditor(),
   );
+  if (iceConnected) {
+    pc.capturedOnIceConnectionState!(
+      rtc.RTCIceConnectionState.RTCIceConnectionStateConnected,
+    );
+  }
+  return peerConnection;
 }
+
+rtc.RTCIceCandidate _localCandidate() => rtc.RTCIceCandidate(
+  'candidate:1 1 udp 2122260223 192.168.1.2 54321 typ host',
+  '0',
+  0,
+);
 
 void main() {
   setUpAll(() {
@@ -740,6 +758,238 @@ void main() {
         });
       },
     );
+  });
+
+  group('StreamPeerConnection before ICE has connected', () {
+    test('a failed connection asks for a rejoin as never connected', () {
+      final pc = _FakeRtcPeerConnection();
+      final sp = _build(
+        pc: pc,
+        type: StreamPeerType.publisher,
+        iceConnected: false,
+      );
+
+      final calls = <(SfuReconnectionStrategy, ReconnectionNeededReason)>[];
+      sp.onReconnectionNeeded = (_, strategy, reason) =>
+          calls.add((strategy, reason));
+
+      pc.capturedOnConnectionState!(
+        rtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed,
+      );
+
+      expect(calls, [
+        (
+          SfuReconnectionStrategy.rejoin,
+          ReconnectionNeededReason.iceNeverConnected,
+        ),
+      ]);
+    });
+
+    test('failed ICE asks for a rejoin instead of restarting ICE', () {
+      final pc = _FakeRtcPeerConnection();
+      final sp = _build(
+        pc: pc,
+        type: StreamPeerType.publisher,
+        iceConnected: false,
+      );
+
+      final calls = <(SfuReconnectionStrategy, ReconnectionNeededReason)>[];
+      sp.onReconnectionNeeded = (_, strategy, reason) =>
+          calls.add((strategy, reason));
+
+      pc.capturedOnIceConnectionState!(
+        rtc.RTCIceConnectionState.RTCIceConnectionStateFailed,
+      );
+
+      expect(pc.restartIceCallCount, 0);
+      expect(calls, [
+        (
+          SfuReconnectionStrategy.rejoin,
+          ReconnectionNeededReason.iceNeverConnected,
+        ),
+      ]);
+    });
+
+    test('ICE still disconnected after twice iceRestartDelay asks for a '
+        'rejoin', () {
+      fakeAsync((async) {
+        final pc = _FakeRtcPeerConnection();
+        final sp = _build(
+          pc: pc,
+          type: StreamPeerType.publisher,
+          iceConnected: false,
+        );
+
+        final reasons = <ReconnectionNeededReason>[];
+        sp.onReconnectionNeeded = (_, _, reason) => reasons.add(reason);
+
+        pc.stubbedIceConnectionState =
+            rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected;
+        pc.capturedOnIceConnectionState!(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected,
+        );
+
+        async.elapse(const Duration(milliseconds: 4900));
+        expect(reasons, isEmpty);
+
+        async.elapse(const Duration(milliseconds: 200));
+        expect(reasons, [ReconnectionNeededReason.iceNeverConnected]);
+        expect(pc.restartIceCallCount, 0);
+      });
+    });
+
+    test('ICE that connects while disconnected asks for nothing', () {
+      fakeAsync((async) {
+        final pc = _FakeRtcPeerConnection();
+        final sp = _build(
+          pc: pc,
+          type: StreamPeerType.publisher,
+          iceConnected: false,
+        );
+
+        var calls = 0;
+        sp.onReconnectionNeeded = (_, _, _) => calls++;
+
+        pc.stubbedIceConnectionState =
+            rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected;
+        pc.capturedOnIceConnectionState!(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected,
+        );
+        pc.stubbedIceConnectionState =
+            rtc.RTCIceConnectionState.RTCIceConnectionStateConnected;
+        pc.capturedOnIceConnectionState!(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateConnected,
+        );
+
+        async.elapse(const Duration(seconds: 10));
+        expect(calls, 0);
+      });
+    });
+
+    test('reports the first ICE connection once', () {
+      final pc = _FakeRtcPeerConnection();
+      final sp = _build(
+        pc: pc,
+        type: StreamPeerType.publisher,
+        iceConnected: false,
+      );
+
+      final connected = <StreamPeerConnection>[];
+      sp.onIceConnected = connected.add;
+
+      expect(sp.hasIceEverConnected, isFalse);
+      [
+        rtc.RTCIceConnectionState.RTCIceConnectionStateChecking,
+        rtc.RTCIceConnectionState.RTCIceConnectionStateCompleted,
+        rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected,
+        rtc.RTCIceConnectionState.RTCIceConnectionStateConnected,
+      ].forEach(pc.capturedOnIceConnectionState!);
+
+      expect(connected, [same(sp)]);
+      expect(sp.hasIceEverConnected, isTrue);
+    });
+
+    test('gathering that completes without a local candidate asks for a '
+        'rejoin', () {
+      final pc = _FakeRtcPeerConnection();
+      final sp = _build(
+        pc: pc,
+        type: StreamPeerType.subscriber,
+        iceConnected: false,
+      );
+
+      final calls = <(SfuReconnectionStrategy, ReconnectionNeededReason)>[];
+      sp.onReconnectionNeeded = (_, strategy, reason) =>
+          calls.add((strategy, reason));
+
+      pc.capturedOnIceGatheringState!(
+        rtc.RTCIceGatheringState.RTCIceGatheringStateGathering,
+      );
+      // The end-of-candidates marker carries no candidate.
+      pc.capturedOnIceCandidate!(rtc.RTCIceCandidate('', '0', 0));
+      pc.capturedOnIceGatheringState!(
+        rtc.RTCIceGatheringState.RTCIceGatheringStateComplete,
+      );
+
+      expect(sp.hasNoLocalCandidates, isTrue);
+      expect(calls, [
+        (
+          SfuReconnectionStrategy.rejoin,
+          ReconnectionNeededReason.noLocalCandidates,
+        ),
+      ]);
+    });
+
+    test('gathering that finds a local candidate asks for nothing', () {
+      final pc = _FakeRtcPeerConnection();
+      final sp = _build(
+        pc: pc,
+        type: StreamPeerType.subscriber,
+        iceConnected: false,
+      );
+
+      var calls = 0;
+      sp.onReconnectionNeeded = (_, _, _) => calls++;
+
+      pc.capturedOnIceGatheringState!(
+        rtc.RTCIceGatheringState.RTCIceGatheringStateGathering,
+      );
+      pc.capturedOnIceCandidate!(_localCandidate());
+      pc.capturedOnIceGatheringState!(
+        rtc.RTCIceGatheringState.RTCIceGatheringStateComplete,
+      );
+
+      expect(sp.hasNoLocalCandidates, isFalse);
+      expect(calls, 0);
+    });
+
+    test('a new gathering round counts its candidates afresh', () {
+      final pc = _FakeRtcPeerConnection();
+      final sp = _build(
+        pc: pc,
+        type: StreamPeerType.subscriber,
+        iceConnected: false,
+      );
+
+      final reasons = <ReconnectionNeededReason>[];
+      sp.onReconnectionNeeded = (_, _, reason) => reasons.add(reason);
+
+      pc.capturedOnIceGatheringState!(
+        rtc.RTCIceGatheringState.RTCIceGatheringStateGathering,
+      );
+      pc.capturedOnIceCandidate!(_localCandidate());
+      pc.capturedOnIceGatheringState!(
+        rtc.RTCIceGatheringState.RTCIceGatheringStateComplete,
+      );
+      pc.capturedOnIceGatheringState!(
+        rtc.RTCIceGatheringState.RTCIceGatheringStateGathering,
+      );
+      expect(sp.hasNoLocalCandidates, isFalse);
+      pc.capturedOnIceGatheringState!(
+        rtc.RTCIceGatheringState.RTCIceGatheringStateComplete,
+      );
+
+      expect(reasons, [ReconnectionNeededReason.noLocalCandidates]);
+    });
+  });
+
+  group('StreamPeerConnection after ICE has connected', () {
+    test('gathering without a local candidate asks for nothing', () {
+      final pc = _FakeRtcPeerConnection();
+      final sp = _build(pc: pc, type: StreamPeerType.subscriber);
+
+      var calls = 0;
+      sp.onReconnectionNeeded = (_, _, _) => calls++;
+
+      pc.capturedOnIceGatheringState!(
+        rtc.RTCIceGatheringState.RTCIceGatheringStateGathering,
+      );
+      pc.capturedOnIceGatheringState!(
+        rtc.RTCIceGatheringState.RTCIceGatheringStateComplete,
+      );
+
+      expect(calls, 0);
+    });
   });
 
   group('StreamPeerConnection event forwarding', () {

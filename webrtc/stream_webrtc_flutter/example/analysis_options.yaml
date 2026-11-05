@@ -1,45 +1,18 @@
-include: package:pedantic/analysis_options.yaml
+include: ../../../analysis_options.yaml
 
-linter:
-  rules:
-    - always_declare_return_types
-    - avoid_empty_else
-    - await_only_futures
-    - avoid_returning_null_for_void
-    - cancel_subscriptions
-    - directives_ordering
-    - flutter_style_todos
-    - sort_constructors_first
-    - sort_unnamed_constructors_first
-    - sort_pub_dependencies
-    - type_init_formals
-    - unnecessary_brace_in_string_interps
-    - unnecessary_const
-    - unnecessary_new
-    - unnecessary_getters_setters
-    - unnecessary_null_aware_assignments
-    - unnecessary_null_in_if_null_operators
-    - unnecessary_overrides
-    - unnecessary_parenthesis
-    - unnecessary_statements
-    - unnecessary_string_interpolations
-    - unnecessary_this
-    - unrelated_type_equality_checks
-    - use_rethrow_when_possible
-    - valid_regexps
-    - void_checks
-  
+formatter:
+  trailing_commas: preserve
+  page_width: 80
+
 analyzer:
   errors:
-    # treat missing required parameters as a warning (not a hint)
-    missing_required_param: warning
-    # treat missing returns as a warning (not a hint)
-    missing_return: warning
-    # allow having TODOs in the code
-    todo: ignore
-    # allow self-reference to deprecated members (we do this because otherwise we have
-    # to annotate every member in every test, assert, etc, when we deprecate something)
-    deprecated_member_use_from_same_package: ignore
+    # Upstream code that isn't strictly typed (yet).
+    inference_failure_on_collection_literal: ignore
+    inference_failure_on_function_invocation: ignore
+    inference_failure_on_function_return_type: ignore
+    inference_failure_on_instance_creation: ignore
+    inference_failure_on_untyped_parameter: ignore
+    strict_raw_type: ignore
   exclude:
     - build/**
     - android/**
@@ -48,3 +21,19 @@ analyzer:
     - windows/**
     - macos/**
     - linux/**
+    - elinux/**
+
+linter:
+  rules:
+    ## Disabled rules because the upstream code doesn't respect them (yet)
+    avoid_dynamic_calls: false
+    avoid_print: false
+    avoid_slow_async_io: false
+    avoid_unnecessary_containers: false
+    library_private_types_in_public_api: false
+    non_constant_identifier_names: false
+    only_throw_errors: false
+    unawaited_futures: false
+    unreachable_from_main: false
+    use_build_context_synchronously: false
+    use_named_constants: false

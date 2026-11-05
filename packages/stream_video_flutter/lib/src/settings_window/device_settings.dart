@@ -151,7 +151,7 @@ class _NoiseCancellation extends StatelessWidget {
   static ({bool available, bool on}) _noiseCancellation(CallState state) => (
     available:
         state.settings.audio.noiseCancellation?.mode !=
-        NoiseCancellationSettingsMode.disabled,
+        FeatureActivationMode.disabled,
     on: state.isAudioProcessing,
   );
 

@@ -627,10 +627,18 @@ class _CallScreenState extends State<CallScreen>
 
             context.pop();
 
-            if (reason is DisconnectReasonReconnectionFailed) {
+            final failure = switch (reason) {
+              DisconnectReasonReconnectionFailed() =>
+                "Couldn't restore the connection to the call.",
+              DisconnectReasonUnsupportedNetwork() =>
+                'This network blocks calls. Try another network, or turn '
+                    'off your VPN.',
+              _ => null,
+            };
+            if (failure != null) {
               messenger?.showSnackBar(
-                const SnackBar(
-                  content: Text("Couldn't restore the connection to the call."),
+                SnackBar(
+                  content: Text(failure),
                   behavior: SnackBarBehavior.floating,
                 ),
               );

@@ -13,7 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$BanOptions {
-  BanOptionsDeleteMessages? get deleteMessages;
+  DeleteMessages? get deleteMessages;
   int? get duration;
   bool? get ipBan;
   String? get reason;
@@ -65,7 +65,7 @@ abstract mixin class $BanOptionsCopyWith<$Res> {
   ) = _$BanOptionsCopyWithImpl;
   @useResult
   $Res call({
-    BanOptionsDeleteMessages? deleteMessages,
+    DeleteMessages? deleteMessages,
     int? duration,
     bool? ipBan,
     String? reason,
@@ -96,7 +96,7 @@ class _$BanOptionsCopyWithImpl<$Res> implements $BanOptionsCopyWith<$Res> {
         deleteMessages: freezed == deleteMessages
             ? _self.deleteMessages
             : deleteMessages // ignore: cast_nullable_to_non_nullable
-                  as BanOptionsDeleteMessages?,
+                  as DeleteMessages?,
         duration: freezed == duration
             ? _self.duration
             : duration // ignore: cast_nullable_to_non_nullable

@@ -13,7 +13,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../globals.dart';
-import '../../open_api/video/coordinator/api.dart' hide User;
+import '../../open_api/video/coordinator/api.dart' hide RecordingType, User;
 import '../../protobuf/video/sfu/event/events.pb.dart' show ReconnectDetails;
 import '../call_state.dart';
 import '../coordinator/coordinator_client.dart';
@@ -50,7 +50,6 @@ import '../webrtc/peer_connection.dart';
 import '../webrtc/peer_connection_factory.dart';
 import '../webrtc/peer_type.dart';
 import '../webrtc/rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
-import '../webrtc/rtc_manager.dart';
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
 import '../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../webrtc/rtc_track/rtc_track.dart';
@@ -412,8 +411,12 @@ class Call {
       return;
     }
 
-    final tracks = _session?.rtcManager?.tracks;
-    if (tracks != null) {
+    final rtcManager = _session?.rtcManager;
+    if (rtcManager != null) {
+      final tracks = <String, RtcTrack>{
+        ...rtcManager.localTracks,
+        ...rtcManager.remoteTracks,
+      };
       for (final entry in tracks.entries) {
         final track = entry.value;
         if (track.isAudioTrack) {
@@ -448,7 +451,7 @@ class Call {
     // as the earpiece.
     if (CurrentPlatform.isIos) {
       final result =
-          await _session?.restoreAppleAudioConfiguration() ??
+          await _session?.restoreAudioSession() ??
           failureWithError('no session');
       if (result is Failure) {
         _logger.e(

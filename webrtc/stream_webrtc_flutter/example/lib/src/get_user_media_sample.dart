@@ -12,6 +12,8 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
  * getUserMedia sample
  */
 class GetUserMediaSample extends StatefulWidget {
+  const GetUserMediaSample({super.key});
+
   static String tag = 'get_usermedia_sample';
 
   @override
@@ -51,12 +53,12 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
     navigator.mediaDevices.ondevicechange = null;
   }
 
-  void initRenderers() async {
+  Future<void> initRenderers() async {
     await _localRenderer.initialize();
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
-  void _makeCall() async {
+  Future<void> _makeCall() async {
     final mediaConstraints = <String, dynamic>{
       'audio': false,
       'video': {
@@ -68,16 +70,18 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
         },
         'facingMode': 'user',
         'optional': [],
-      }
+      },
     };
 
     try {
-      var stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+      final stream = await navigator.mediaDevices.getUserMedia(
+        mediaConstraints,
+      );
       _mediaDevicesList = await navigator.mediaDevices.enumerateDevices();
       _localStream = stream;
       _localRenderer.srcObject = _localStream;
     } catch (e) {
-      print(e.toString());
+      print(e);
     }
     if (!mounted) return;
 
@@ -86,7 +90,7 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
     });
   }
 
-  void _hangUp() async {
+  Future<void> _hangUp() async {
     try {
       if (kIsWeb) {
         _localStream?.getTracks().forEach((track) => track.stop());
@@ -97,11 +101,11 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
         _inCalling = false;
       });
     } catch (e) {
-      print(e.toString());
+      print(e);
     }
   }
 
-  void _startRecording() async {
+  Future<void> _startRecording() async {
     if (_localStream == null) throw Exception('Stream is not initialized');
     // TODO(rostopira): request write storage permission
     final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -118,7 +122,7 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
     _mediaRecorderFilePath = '${tempDir.path}/$timestamp.mp4';
 
     if (_mediaRecorderFilePath == null) {
-      throw Exception('Can\'t find storagePath');
+      throw Exception("Can't find storagePath");
     }
 
     final file = File(_mediaRecorderFilePath!);
@@ -128,9 +132,9 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
     _mediaRecorder = MediaRecorder(albumName: 'FlutterWebRTC');
     setState(() {});
 
-    final videoTrack = _localStream!
-        .getVideoTracks()
-        .firstWhere((track) => track.kind == 'video');
+    final videoTrack = _localStream!.getVideoTracks().firstWhere(
+      (track) => track.kind == 'video',
+    );
 
     await _mediaRecorder!.start(
       _mediaRecorderFilePath!,
@@ -139,7 +143,7 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
     );
   }
 
-  void _stopRecording() async {
+  Future<void> _stopRecording() async {
     if (_mediaRecorderFilePath == null) {
       return;
     }
@@ -168,12 +172,12 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
     Helper.setExposurePoint(_localStream!.getVideoTracks().first, point);
   }
 
-  void _toggleTorch() async {
+  Future<void> _toggleTorch() async {
     if (_localStream == null) throw Exception('Stream is not initialized');
 
-    final videoTrack = _localStream!
-        .getVideoTracks()
-        .firstWhere((track) => track.kind == 'video');
+    final videoTrack = _localStream!.getVideoTracks().firstWhere(
+      (track) => track.kind == 'video',
+    );
     final has = await videoTrack.hasTorch();
     if (has) {
       print('[TORCH] Current camera supports torch mode');
@@ -185,55 +189,55 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
     }
   }
 
-  void setZoom(double zoomLevel) async {
+  Future<void> setZoom(double zoomLevel) async {
     if (_localStream == null) throw Exception('Stream is not initialized');
     // await videoTrack.setZoom(zoomLevel); //Use it after published webrtc_interface 1.1.1
 
     // before the release, use can just call native method directly.
-    final videoTrack = _localStream!
-        .getVideoTracks()
-        .firstWhere((track) => track.kind == 'video');
+    final videoTrack = _localStream!.getVideoTracks().firstWhere(
+      (track) => track.kind == 'video',
+    );
     await Helper.setZoom(videoTrack, zoomLevel);
   }
 
-  void _switchCamera() async {
+  Future<void> _switchCamera() async {
     if (_localStream == null) throw Exception('Stream is not initialized');
 
-    final videoTrack = _localStream!
-        .getVideoTracks()
-        .firstWhere((track) => track.kind == 'video');
+    final videoTrack = _localStream!.getVideoTracks().firstWhere(
+      (track) => track.kind == 'video',
+    );
     await Helper.switchCamera(videoTrack);
     setState(() {
       _isFrontCamera = _isFrontCamera;
     });
   }
 
-  void _captureFrame() async {
+  Future<void> _captureFrame() async {
     if (_localStream == null) throw Exception('Stream is not initialized');
 
-    final videoTrack = _localStream!
-        .getVideoTracks()
-        .firstWhere((track) => track.kind == 'video');
+    final videoTrack = _localStream!.getVideoTracks().firstWhere(
+      (track) => track.kind == 'video',
+    );
     final frame = await videoTrack.captureFrame();
     await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              content:
-                  Image.memory(frame.asUint8List(), height: 720, width: 1280),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: Navigator.of(context, rootNavigator: true).pop,
-                  child: Text('OK'),
-                )
-              ],
-            ));
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Image.memory(frame.asUint8List(), height: 720, width: 1280),
+        actions: <Widget>[
+          TextButton(
+            onPressed: Navigator.of(context, rootNavigator: true).pop,
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('GetUserMedia API Test'),
+        title: const Text('GetUserMedia API Test'),
         actions: _inCalling
             ? <Widget>[
                 IconButton(
@@ -241,11 +245,11 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
                   onPressed: _toggleTorch,
                 ),
                 IconButton(
-                  icon: Icon(Icons.switch_video),
+                  icon: const Icon(Icons.switch_video),
                   onPressed: _switchCamera,
                 ),
                 IconButton(
-                  icon: Icon(Icons.camera),
+                  icon: const Icon(Icons.camera),
                   onPressed: _captureFrame,
                 ),
                 IconButton(
@@ -259,11 +263,12 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
                       return _mediaDevicesList!
                           .where((device) => device.kind == 'audiooutput')
                           .map((device) {
-                        return PopupMenuItem<String>(
-                          value: device.deviceId,
-                          child: Text(device.label),
-                        );
-                      }).toList();
+                            return PopupMenuItem<String>(
+                              value: device.deviceId,
+                              child: Text(device.label),
+                            );
+                          })
+                          .toList();
                     }
                     return [];
                   },
@@ -274,26 +279,28 @@ class _GetUserMediaSampleState extends State<GetUserMediaSample> {
       body: OrientationBuilder(
         builder: (context, orientation) {
           return Center(
-              child: Container(
-            margin: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 0.0),
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(color: Colors.black54),
-            child: LayoutBuilder(
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              decoration: const BoxDecoration(color: Colors.black54),
+              child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
-              return GestureDetector(
-                onScaleStart: (details) {},
-                onScaleUpdate: (details) {
-                  if (details.scale != 1.0) {
-                    setZoom(details.scale);
-                  }
+                  return GestureDetector(
+                    onScaleStart: (details) {},
+                    onScaleUpdate: (details) {
+                      if (details.scale != 1.0) {
+                        setZoom(details.scale);
+                      }
+                    },
+                    onTapDown: (TapDownDetails details) =>
+                        onViewFinderTap(details, constraints),
+                    child: RTCVideoView(_localRenderer),
+                  );
                 },
-                onTapDown: (TapDownDetails details) =>
-                    onViewFinderTap(details, constraints),
-                child: RTCVideoView(_localRenderer, mirror: false),
-              );
-            }),
-          ));
+              ),
+            ),
+          );
         },
       ),
       floatingActionButton: FloatingActionButton(

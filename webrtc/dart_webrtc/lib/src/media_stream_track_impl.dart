@@ -11,20 +11,23 @@ import 'utils.dart';
 class MediaStreamTrackWeb extends MediaStreamTrack {
   MediaStreamTrackWeb(this.jsTrack) {
     jsTrack.addEventListener(
-        'ended',
-        (web.Event event) {
-          onEnded?.call();
-        }.toJS);
+      'ended',
+      (web.Event event) {
+        onEnded?.call();
+      }.toJS,
+    );
     jsTrack.addEventListener(
-        'mute',
-        (web.Event event) {
-          onMute?.call();
-        }.toJS);
+      'mute',
+      (web.Event event) {
+        onMute?.call();
+      }.toJS,
+    );
     jsTrack.addEventListener(
-        'unmute',
-        (web.Event event) {
-          onUnMute?.call();
-        }.toJS);
+      'unmute',
+      (web.Event event) {
+        onUnMute?.call();
+      }.toJS,
+    );
   }
 
   final web.MediaStreamTrack jsTrack;
@@ -53,7 +56,7 @@ class MediaStreamTrackWeb extends MediaStreamTrack {
   Map<String, dynamic> getConstraints() {
     final c = jsTrack.getConstraints();
     final jso = (c as JSObject).dartify();
-    return (jso as Map).cast<String, dynamic>();
+    return (jso! as Map).cast<String, dynamic>();
   }
 
   @override
@@ -62,7 +65,7 @@ class MediaStreamTrackWeb extends MediaStreamTrack {
     // to be merged to use jsTrack.applyConstraints() directly
     final arg = (constraints ?? {}).jsify();
 
-    await jsTrack.applyConstraints(arg as web.MediaTrackConstraints).toDart;
+    await jsTrack.applyConstraints(arg! as web.MediaTrackConstraints).toDart;
   }
 
   // TODO(wermathurin): https://github.com/dart-lang/sdk/issues/44319
@@ -75,75 +78,76 @@ class MediaStreamTrackWeb extends MediaStreamTrack {
 
   @override
   Map<String, dynamic> getSettings() {
-    var settings = jsTrack.getSettings();
-    var _converted = <String, dynamic>{};
+    final settings = jsTrack.getSettings();
+    final converted = <String, dynamic>{};
     if (kind == 'audio') {
       if (settings.has('sampleRate')) {
-        _converted['sampleRate'] = settings.sampleRate;
+        converted['sampleRate'] = settings.sampleRate;
       }
       if (settings.has('sampleSize')) {
-        _converted['sampleSize'] = settings.sampleSize;
+        converted['sampleSize'] = settings.sampleSize;
       }
       if (settings.has('echoCancellation')) {
-        _converted['echoCancellation'] = settings.echoCancellation;
+        converted['echoCancellation'] = settings.echoCancellation;
       }
       if (settings.has('autoGainControl')) {
-        _converted['autoGainControl'] = settings.autoGainControl;
+        converted['autoGainControl'] = settings.autoGainControl;
       }
       if (settings.has('noiseSuppression')) {
-        _converted['noiseSuppression'] = settings.noiseSuppression;
+        converted['noiseSuppression'] = settings.noiseSuppression;
       }
-      if (settings.has('latency')) _converted['latency'] = settings.latency;
+      if (settings.has('latency')) converted['latency'] = settings.latency;
       if (settings.has('channelCount')) {
-        _converted['channelCount'] = settings.channelCount;
+        converted['channelCount'] = settings.channelCount;
       }
     } else {
       if (settings.has('width')) {
-        _converted['width'] = settings.width;
+        converted['width'] = settings.width;
       }
       if (settings.has('height')) {
-        _converted['height'] = settings.height;
+        converted['height'] = settings.height;
       }
       if (settings.has('aspectRatio')) {
-        _converted['aspectRatio'] = settings.aspectRatio;
+        converted['aspectRatio'] = settings.aspectRatio;
       }
       if (settings.has('frameRate')) {
-        _converted['frameRate'] = settings.frameRate;
+        converted['frameRate'] = settings.frameRate;
       }
       if (isMobile && settings.has('facingMode')) {
-        _converted['facingMode'] = settings.facingMode;
+        converted['facingMode'] = settings.facingMode;
       }
       if (settings.has('resizeMode')) {
-        _converted['resizeMode'] = settings.resizeMode;
+        converted['resizeMode'] = settings.resizeMode;
       }
     }
-    if (settings.has('deviceId')) _converted['deviceId'] = settings.deviceId;
+    if (settings.has('deviceId')) converted['deviceId'] = settings.deviceId;
     if (settings.has('groupId')) {
-      _converted['groupId'] = settings.groupId;
+      converted['groupId'] = settings.groupId;
     }
-    return _converted;
+    return converted;
   }
 
   @override
   Future<ByteBuffer> captureFrame() async {
     final imageCapture = ImageCapture(jsTrack);
-    final bitmap = await imageCapture.grabFrame().toDart as web.ImageBitmap;
+    final bitmap = (await imageCapture.grabFrame().toDart)! as web.ImageBitmap;
     final canvas = web.HTMLCanvasElement();
     canvas.width = bitmap.width;
     canvas.height = bitmap.height;
     final renderer =
-        canvas.getContext('bitmaprenderer') as web.ImageBitmapRenderingContext;
+        canvas.getContext('bitmaprenderer')! as web.ImageBitmapRenderingContext;
     renderer.transferFromImageBitmap(bitmap);
 
     final blobCompleter = Completer<web.Blob>();
-    final toBlob = (web.Blob blob) {
+    void toBlob(web.Blob blob) {
       blobCompleter.complete(blob);
-    };
+    }
+
     canvas.toBlob(toBlob.toJS);
 
     final blod = await blobCompleter.future;
 
-    var array = await blod.arrayBuffer().toDart;
+    final array = await blod.arrayBuffer().toDart;
     bitmap.close();
     return array.toDart;
   }

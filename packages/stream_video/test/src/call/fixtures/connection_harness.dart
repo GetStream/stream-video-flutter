@@ -52,6 +52,9 @@ class ConnectionHarness {
   /// The state manager of the call [buildCall] built last.
   late CallStateNotifier stateManager;
 
+  /// The network monitor of the call [buildCall] built last.
+  late MockInternetConnection networkMonitor;
+
   final _calls = <Call>[];
 
   Call buildCall({
@@ -73,7 +76,9 @@ class ConnectionHarness {
       streamVideo: streamVideo,
       stateManager: stateManager,
       permissionManager: permissionsManager,
-      networkMonitor: setupMockInternetConnection(statusStream: internetStatus),
+      networkMonitor: networkMonitor = setupMockInternetConnection(
+        statusStream: internetStatus,
+      ),
       retryPolicy: retryPolicy,
       sessionFactory: sessionFactory,
     );
@@ -114,6 +119,10 @@ class ConnectionHarness {
   /// order the sessions were made.
   final reconnectionCallbacks = <OnReconnectionNeeded>[];
 
+  /// The `onIceConnected` callback each session was made with, in the order
+  /// the sessions were made.
+  final iceConnectedCallbacks = <OnIceConnected>[];
+
   /// Asks for a reconnect with [strategy] through the publisher of
   /// `sessions[index]`, the way its peer connection would, and returns that
   /// publisher. It reports itself as not connected until a test stubs
@@ -146,6 +155,7 @@ class ConnectionHarness {
         networkMonitor: any(named: 'networkMonitor'),
         statsOptions: any(named: 'statsOptions'),
         onReconnectionNeeded: any(named: 'onReconnectionNeeded'),
+        onIceConnected: any(named: 'onIceConnected'),
         clientPublishOptions: any(named: 'clientPublishOptions'),
         host: any(named: 'host'),
         leftoverTraceRecords: any(named: 'leftoverTraceRecords'),
@@ -156,6 +166,9 @@ class ConnectionHarness {
       reconnectionCallbacks.add(
         invocation.namedArguments[#onReconnectionNeeded]
             as OnReconnectionNeeded,
+      );
+      iceConnectedCallbacks.add(
+        invocation.namedArguments[#onIceConnected] as OnIceConnected,
       );
       await before();
       return queue.length > 1 ? queue.removeAt(0) : queue.first;
@@ -176,6 +189,7 @@ class ConnectionHarness {
         networkMonitor: any(named: 'networkMonitor'),
         statsOptions: any(named: 'statsOptions'),
         onReconnectionNeeded: any(named: 'onReconnectionNeeded'),
+        onIceConnected: any(named: 'onIceConnected'),
         clientPublishOptions: any(named: 'clientPublishOptions'),
         host: any(named: 'host'),
         leftoverTraceRecords: any(named: 'leftoverTraceRecords'),
@@ -247,6 +261,7 @@ class ConnectionHarness {
         networkMonitor: any(named: 'networkMonitor'),
         statsOptions: any(named: 'statsOptions'),
         onReconnectionNeeded: any(named: 'onReconnectionNeeded'),
+        onIceConnected: any(named: 'onIceConnected'),
         clientPublishOptions: any(named: 'clientPublishOptions'),
         host: any(named: 'host'),
         leftoverTraceRecords: any(named: 'leftoverTraceRecords'),

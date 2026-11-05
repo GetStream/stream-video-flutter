@@ -11,8 +11,8 @@ import 'utils.dart';
 class MediaDeviceNative extends MediaDevices {
   MediaDeviceNative._internal() {
     FlutterWebRTCEventChannel.instance.handleEvents.stream.listen((data) {
-      var event = data.keys.first;
-      Map<dynamic, dynamic> map = data.values.first;
+      final event = data.keys.first;
+      final Map<dynamic, dynamic> map = data.values.first;
       handleEvent(event, map);
     });
   }
@@ -22,7 +22,7 @@ class MediaDeviceNative extends MediaDevices {
   Stream<Map<String, dynamic>> get eventStream =>
       FlutterWebRTCEventChannel.instance.handleEvents.stream;
 
-  void handleEvent(String event, final Map<dynamic, dynamic> map) async {
+  void handleEvent(String event, Map<dynamic, dynamic> map) async {
     switch (map['event']) {
       case 'onDeviceChange':
         ondevicechange?.call(null);
@@ -52,8 +52,8 @@ class MediaDeviceNative extends MediaDevices {
         throw Exception('getUserMedia return null, something wrong');
       }
 
-      String streamId = response['streamId'];
-      var stream = MediaStreamNative(streamId, 'local');
+      final String streamId = response['streamId'];
+      final stream = MediaStreamNative(streamId, 'local');
       stream.setMediaTracks(
         response['audioTracks'] ?? [],
         response['videoTracks'] ?? [],
@@ -76,8 +76,8 @@ class MediaDeviceNative extends MediaDevices {
       if (response == null) {
         throw Exception('getDisplayMedia return null, something wrong');
       }
-      String streamId = response['streamId'];
-      var stream = MediaStreamNative(streamId, 'local');
+      final String streamId = response['streamId'];
+      final stream = MediaStreamNative(streamId, 'local');
       stream.setMediaTracks(response['audioTracks'], response['videoTracks']);
       return stream;
     } on PlatformException catch (e) {
@@ -93,7 +93,7 @@ class MediaDeviceNative extends MediaDevices {
         <String, dynamic>{},
       );
 
-      List<dynamic> sources = response['sources'];
+      final List<dynamic> sources = response['sources'];
 
       return sources;
     } on PlatformException catch (e) {
@@ -103,7 +103,7 @@ class MediaDeviceNative extends MediaDevices {
 
   @override
   Future<List<MediaDeviceInfo>> enumerateDevices() async {
-    var source = await getSources();
+    final source = await getSources();
     return source
         .map(
           (e) => MediaDeviceInfo(

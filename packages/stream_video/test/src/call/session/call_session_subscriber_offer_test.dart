@@ -130,6 +130,7 @@ CallSession _buildTestSession({required SfuClient sfuClient}) {
     stateManager: stateManager,
     dynascaleManager: DynascaleManager(stateManager: stateManager),
     onReconnectionNeeded: (_, _, _) {},
+    onIceConnected: (_) {},
     onSuspendedAudioTrackRecorded: (_) {},
     sdpEditor: MockSdpEditor(),
     networkMonitor: setupMockInternetConnection(),

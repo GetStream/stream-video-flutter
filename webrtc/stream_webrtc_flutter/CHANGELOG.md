@@ -1,15 +1,15 @@
-[Unreleased]
+[4.0.1] - 2026.10.22
 
-* [iOS/macOS] fix: device enumeration (`getSources`) no longer runs on the main thread, which could freeze the app for several hundred milliseconds when it returned from background. It runs on a serial queue of its own, so it also does not wait behind audio session reconfigurations.
-* [Android] fix: a native crash (`SIGSEGV` in `VideoTrack.removeSink`) when a peer connection factory was disposed while a renderer still showed a camera track created through it. The camera track is now attributed to its factory, so the factory's dispose detaches renderers from it and releases it.
-* [Android] fix: a crash (`NullPointerException` in `FlutterRTCVideoRenderer.onFrameResolutionChanged`, followed by a WebRTC JNI abort) when a video renderer's event stream was cancelled while a frame was being rendered. The renderer, peer connection and data channel event sinks are now read once per event, so a concurrent cancel can no longer null them between the check and the call.
-* [Android] fix: plugin events now reach every Flutter engine that listens, not only the one that listened last.
-* [iOS] fix: `createPeerConnectionFactory` now applies its `appleAudioConfiguration` on the serial audio-session queue, in order with the other `AVAudioSession` changes, instead of on the main thread. It still replies once the configuration is applied.
-* [iOS] fix: `setAppleAudioConfiguration` no longer reconfigures the `AVAudioSession` when its category, category options and mode already match the requested configuration.
-* [iOS] fix: `resumeAudioPeerConnectionFactory` now restores the latest `setAppleAudioConfiguration` instead of the configuration the factory was built with, so a speaker or earpiece choice made during the call survives a suspend and resume. A configuration set while a factory is suspended (for example by another active call) is not recorded for it, so it resumes with its own. The configuration is now restored on the audio-session queue, in order with other `AVAudioSession` changes, and only then is the audio device module restarted.
-* [iOS] fix: `selectAudioOutput` and `selectAudioInput` replied twice to the method call, `selectAudioOutput` when overriding the output port failed and `selectAudioInput` on every call.
-* [iOS/macOS] fix: peer connection calls no longer block the main thread. `createOffer`, `createAnswer`, `setLocalDescription`, `setRemoteDescription`, `addCandidate`, `restartIce`, `setConfiguration`, `addTrack`, `removeTrack`, `addStream`, `removeStream`, `addTransceiver`, the transceiver calls (`setDirection`, `getDirection`, `getCurrentDirection`, `stop`, `setCodecPreferences`), the sender calls (`setParameters`, `replaceTrack`, `setTrack`, `setStreams`), `getLocalDescription`, `getRemoteDescription`, `getSenders`, `getReceivers`, `getTransceivers` and `getStats` run on a serial queue per peer connection, in the order they were called, and reply on the main thread; `peerConnectionClose` / `peerConnectionDispose`, and `disposePeerConnectionFactory` for connections left open, close the connection behind them on the same queue. Setting a description could freeze the app for a few hundred milliseconds while it waited for an audio session reconfiguration, e.g. when joining a call or starting to publish, and any of these calls on a connection of the same factory, such as a publish quality change, froze it meanwhile. Calls that are not tied to one peer connection, such as `mediaStreamTrackSetEnable`, still run on the main thread and can still wait for WebRTC's signaling thread while a description is being set. `createPeerConnection` now fails for a factory whose `disposePeerConnectionFactory` is still in progress.
-* [iOS/macOS] fix: remote track bookkeeping (`onTrack`, `onAddStream`, `onRemoveStream`) is now updated on the main thread, where it is read, instead of on WebRTC's signaling thread, and the peer connection and data channel event sinks are read atomically.
+* [iOS/macOS] fix: peer connection operations (SDP, candidates, tracks, transceivers, senders, stats) now run on a serial queue per peer connection instead of the main thread, so joining a call or changing publish quality no longer freezes the app.
+* [iOS/macOS] fix: device enumeration (`getSources`) no longer runs on the main thread.
+* [iOS/macOS] fix: remote track bookkeeping is now updated on the main thread, and peer connection and data channel event sinks are read atomically.
+* [iOS] fix: `createPeerConnectionFactory` applies its `appleAudioConfiguration` on the audio-session queue instead of the main thread.
+* [iOS] fix: `setAppleAudioConfiguration` skips reconfiguring the `AVAudioSession` when it already matches.
+* [iOS] fix: `resumeAudioPeerConnectionFactory` restores the latest `setAppleAudioConfiguration`, so a speaker/earpiece choice survives suspend and resume.
+* [iOS] fix: `selectAudioOutput` and `selectAudioInput` no longer reply twice.
+* [Android] fix: `SIGSEGV` in `VideoTrack.removeSink` when a factory was disposed while a renderer still showed its camera track.
+* [Android] fix: `NullPointerException` in `FlutterRTCVideoRenderer.onFrameResolutionChanged` when an event stream was cancelled mid-frame.
+* [Android] fix: plugin events now reach every listening Flutter engine, not only the last one.
 
 [4.0.0] - 2026.10.09
 
