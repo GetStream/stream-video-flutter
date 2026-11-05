@@ -129,7 +129,7 @@ class SessionSignaling {
   /// The RPC is not awaited: its result is dropped, and nothing orders it
   /// against the next mute state sent.
   void sendMuteState(RtcLocalTrack track, bool muted) {
-    _logger.d(() => '[onPublisherTrackMuted] track: $track');
+    _logger.d(() => '[sendMuteState] track: $track, muted: $muted');
 
     // Send a mute state update to the server.
     _sfuClient.updateMuteState(
@@ -156,6 +156,8 @@ class SessionSignaling {
   }
 
   /// Sends [pc]'s local ICE candidate to the SFU.
+  ///
+  /// The RPC is not awaited; its result is logged when it lands.
   void onLocalIceCandidate(
     StreamPeerConnection pc,
     rtc.RTCIceCandidate candidate,
@@ -169,14 +171,18 @@ class SessionSignaling {
         ? sfu_models.PeerType.PEER_TYPE_PUBLISHER_UNSPECIFIED
         : sfu_models.PeerType.PEER_TYPE_SUBSCRIBER;
 
-    final result = _sfuClient.iceTrickle(
-      sfu_models.ICETrickle(
-        peerType: peerType,
-        sessionId: _sessionId,
-        iceCandidate: encodedIceCandidate,
-      ),
+    unawaited(
+      _sfuClient
+          .iceTrickle(
+            sfu_models.ICETrickle(
+              peerType: peerType,
+              sessionId: _sessionId,
+              iceCandidate: encodedIceCandidate,
+            ),
+          )
+          .then((result) {
+            _logger.v(() => '[onLocalIceCandidate] result: $result');
+          }),
     );
-
-    _logger.v(() => '[onLocalIceCandidate] result: $result');
   }
 }

@@ -138,6 +138,23 @@ void main() {
 
       verifyNever(() => sfuClient.sendAnswer(any()));
     });
+
+    test(
+      'is still answered when only the call disconnected mid-offer',
+      () async {
+        final answer = Completer<String?>();
+        when(
+          () => rtcManager.onSubscriberOffer(any()),
+        ).thenAnswer((_) => answer.future);
+
+        final handled = signaling.onSubscriberOffer(_offer);
+        callDisconnected = true;
+        answer.complete('answer-sdp');
+        await handled;
+
+        verify(() => sfuClient.sendAnswer(any())).called(1);
+      },
+    );
   });
 
   group('ICE candidates', () {
