@@ -523,6 +523,9 @@ class CallSession extends Disposable with _CallSessionMedia {
         return Result.failure(error);
       }
 
+      // Fails before the socket is touched when the SDPs cannot be made.
+      await _joinRequestBuilder.prepareSdps();
+
       _logger.d(() => '[fastReconnect] sfu not connected, recreating');
       final wsResult = await sfuWS.recreate();
       if (wsResult is Failure) {
@@ -534,8 +537,7 @@ class CallSession extends Disposable with _CallSessionMedia {
       }
 
       _logger.d(() => '[fastReconnect] sfu connected, sending join request');
-      // Built after the socket is back, so it carries publish options that
-      // changed meanwhile.
+      // Reads the publish options as they are once the socket is back.
       final joinRequest = await _joinRequestBuilder.build(
         reconnectDetails: reconnectDetails,
         capabilities: capabilities,

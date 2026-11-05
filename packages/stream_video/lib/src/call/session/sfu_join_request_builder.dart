@@ -34,6 +34,13 @@ class SfuJoinRequestBuilder {
   /// The codecs the app prefers, asked for on a first join only.
   final ClientPublishOptions? clientPublishOptions;
 
+  /// Makes the generic SDPs [build] puts in the request. The factory keeps
+  /// them, so a later [build] does not make them again.
+  Future<void> prepareSdps() async {
+    await pcFactory.getGenericSdp(rtc.TransceiverDirection.RecvOnly);
+    await pcFactory.getGenericSdp(rtc.TransceiverDirection.SendOnly);
+  }
+
   /// The join request for [reconnectDetails], or for a first join when it is
   /// `null` or has no strategy.
   ///

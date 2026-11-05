@@ -45,6 +45,17 @@ sfu_events.ReconnectDetails _details(
 void main() {
   setUpAll(registerCallSessionHarnessFallbacks);
 
+  test('prepareSdps makes the subscriber and publisher SDPs', () async {
+    final builder = _builder();
+
+    await builder.prepareSdps();
+
+    verifyInOrder([
+      () => builder.pcFactory.getGenericSdp(rtc.TransceiverDirection.RecvOnly),
+      () => builder.pcFactory.getGenericSdp(rtc.TransceiverDirection.SendOnly),
+    ]);
+  });
+
   group('build', () {
     test('a first join carries the session, the SDPs and the client '
         'options', () async {
