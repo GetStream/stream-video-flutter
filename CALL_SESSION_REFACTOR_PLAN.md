@@ -13,18 +13,15 @@ proposed there; settle them before CS1 starts and do not reopen them after.
 This is the v2 major release, so a ticket may break the public API when that
 makes it safer or simpler. `CallSession` is not exported, so only CS4 (the
 join handshake) is expected to need a changelog line. Tickets marked zero
-behaviour change (CS3, CS5 to CS9) stay that way.
+behaviour change (CS3, CS5 to CS8, and CS9 apart from closing the manager
+subject in `close`) stay that way.
 
 Line numbers in the tickets refer to `v2` at `f4864c3a5` and drift as the stack
 grows; search by symbol name.
 
 ## Standalone or after the RtcManager plan
 
-Standalone. Best started once FLU-1049 (T3 of FLU-1046) is on `v2`: that
-ticket renames the three `RtcManager` calls this plan touches
-(`getGenericSdp` to the factory, `markNegotiated`, `remoteTracks`), so CS3,
-CS5 and CS8 are written against the new names once. Starting before it, or
-alongside T4 to T10, works too. Do not run CS10 at the same time as T12.
+Standalone; the RtcManager stack (FLU-1046) is on `v2`.
 
 ## The stack
 
@@ -54,7 +51,7 @@ people work on this; CS6 needs CS5, CS9 needs CS6 and CS8, CS10 needs all.
 - [ ] 6. **CS6** [FLU-1066](https://linear.app/stream/issue/FLU-1066): `SessionSignaling` (S). Subscriber offer, ICE both ways, ICE restart, mute state. After CS5.
 - [ ] 7. **CS7** [FLU-1067](https://linear.app/stream/issue/FLU-1067): `PublisherConnectionWatchdog` (S).
 - [ ] 8. **CS8** [FLU-1068](https://linear.app/stream/issue/FLU-1068): `SessionTrackController` (M). The suspend-or-start rule written once.
-- [ ] 9. **CS9** [FLU-1069](https://linear.app/stream/issue/FLU-1069): `SfuEventRouter` (M). The events lock, the dispatch, the state forwards and the manager gate; after CS6 and CS8.
+- [ ] 9. **CS9** [FLU-1069](https://linear.app/stream/issue/FLU-1069): `SfuEventRouter` (M). The events lock, the dispatch, the state forwards and the manager gate; after CS6 and CS8. Fixes bug 3, which flips its CS1 pin.
 - [ ] 10. **CS10** [FLU-1070](https://linear.app/stream/issue/FLU-1070): `start` and `fastReconnect` on the new parts (M). One manager branch; device test with the FLU-936 simulator before it is marked ready.
 
 ### After the stack
