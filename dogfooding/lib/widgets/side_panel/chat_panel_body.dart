@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:mime/mime.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'clipboard_image_paste.dart';
 
 /// The call's chat, as the body of a side panel.
 ///
-/// Images pasted while the composer has focus are added as attachments, after
-/// the same checks the composer runs on picked files.
+/// Images pasted into the composer are added as attachments, subject to the
+/// channel's upload permission and the app's attachment limits.
 class ChatPanelBody extends StatefulWidget {
   /// Creates a chat body for [channel].
   const ChatPanelBody({super.key, required this.channel});
@@ -31,6 +32,7 @@ class _ChatPanelBodyState extends State<ChatPanelBody> {
 
   void _onImagesPasted(List<PastedImage> images) {
     if (!mounted || images.isEmpty) return;
+    if (!widget.channel.canUploadFile) return;
     // Commands carry no attachments.
     if (_composerController.message.command != null) return;
 
@@ -73,8 +75,7 @@ class _ChatPanelBodyState extends State<ChatPanelBody> {
     final mimeType = image.mimeType.toLowerCase();
     if (image.name.mediaType?.mimeType == mimeType) return image.name;
 
-    // `image/svg+xml` is stored as `.svg`.
-    final extension = mimeType.split('/').last.split('+').first;
+    final extension = extensionFromMime(mimeType) ?? mimeType.split('/').last;
     return '$fallbackStem.$extension';
   }
 

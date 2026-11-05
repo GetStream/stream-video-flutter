@@ -1,11 +1,13 @@
-import 'dart:typed_data';
+import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:mime/mime.dart';
+import 'package:pasteboard/pasteboard.dart';
 
 import 'clipboard_image_paste_stub.dart'
-    if (dart.library.js_interop) 'clipboard_image_paste_web.dart'
-    if (dart.library.io) 'clipboard_image_paste_native.dart'
-    as platform;
+    if (dart.library.js_interop) 'clipboard_image_paste_web.dart';
 
 /// An image pasted from the clipboard.
 class PastedImage {
@@ -26,14 +28,13 @@ class PastedImage {
   final String name;
 }
 
-/// Reports images pasted while [focusNode] has focus.
+/// A region that reports images pasted into its text field.
 ///
-/// On the web this reads the files of the page's paste event. Elsewhere it
-/// handles the paste shortcut in [child] and reads the image from the system
-/// clipboard, handing the paste on to the text field when there is none.
-/// Text pasted through a context menu is left to the text field.
-class ClipboardImagePaste extends StatelessWidget {
-  /// Creates a paste listener around [child].
+/// Covers the paste shortcut on web and desktop. When the clipboard holds
+/// text, the text is pasted as usual and no image is reported. A paste from
+/// the context menu always pastes text.
+class ClipboardImagePaste extends StatefulWidget {
+  /// Creates a paste region around [child].
   const ClipboardImagePaste({
     super.key,
     required this.focusNode,
@@ -41,7 +42,7 @@ class ClipboardImagePaste extends StatelessWidget {
     required this.child,
   });
 
-  /// The text field whose pastes are read.
+  /// The focus node of the text field whose pastes are read.
   final FocusNode focusNode;
 
   /// Called with the images of a paste, never with an empty list.
@@ -51,11 +52,104 @@ class ClipboardImagePaste extends StatelessWidget {
   final Widget child;
 
   @override
+  State<ClipboardImagePaste> createState() => _ClipboardImagePasteState();
+}
+
+class _ClipboardImagePasteState extends State<ClipboardImagePaste> {
+  late final _pasteImage = _PasteImageAction(
+    (images) => widget.onImages(images),
+  );
+  StreamSubscription<List<PastedImage>>? _webPastes;
+
+  static bool get _isDesktop => switch (defaultTargetPlatform) {
+    TargetPlatform.macOS ||
+    TargetPlatform.windows ||
+    TargetPlatform.linux => !kIsWeb,
+    _ => false,
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    if (kIsWeb) {
+      widget.focusNode.addListener(_onFocusChanged);
+      _onFocusChanged();
+    }
+  }
+
+  @override
+  void didUpdateWidget(ClipboardImagePaste oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (kIsWeb && oldWidget.focusNode != widget.focusNode) {
+      oldWidget.focusNode.removeListener(_onFocusChanged);
+      widget.focusNode.addListener(_onFocusChanged);
+      _onFocusChanged();
+    }
+  }
+
+  @override
+  void dispose() {
+    if (kIsWeb) widget.focusNode.removeListener(_onFocusChanged);
+    _webPastes?.cancel();
+    super.dispose();
+  }
+
+  void _onFocusChanged() {
+    if (widget.focusNode.hasFocus) {
+      _webPastes ??= pastedImages().listen((images) => widget.onImages(images));
+    } else {
+      _webPastes?.cancel();
+      _webPastes = null;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return platform.ClipboardImagePasteRegion(
-      focusNode: focusNode,
-      onImages: onImages,
-      child: child,
+    if (!_isDesktop) return widget.child;
+
+    return Actions(
+      actions: <Type, Action<Intent>>{PasteTextIntent: _pasteImage},
+      child: widget.child,
     );
+  }
+}
+
+// Replaces the text field's paste: an image on the clipboard is reported,
+// anything else is handed back to the text field's own paste.
+class _PasteImageAction extends ContextAction<PasteTextIntent> {
+  _PasteImageAction(this.onImages);
+
+  final ValueChanged<List<PastedImage>> onImages;
+
+  static final _mimeTypes = MimeTypeResolver()
+    // Windows hands over BMP, which the default resolver does not detect.
+    ..addMagicNumber(const [0x42, 0x4D], 'image/bmp');
+
+  @override
+  Future<void> invoke(PasteTextIntent intent, [BuildContext? context]) async {
+    // The framework clears this once the synchronous part of invoke returns.
+    final pasteText = callingAction;
+
+    final image = await _readImage();
+    if (image != null) return onImages([image]);
+
+    if (context != null && !context.mounted) return;
+    pasteText?.invoke(intent);
+  }
+
+  static Future<PastedImage?> _readImage() async {
+    try {
+      // Text wins: a clipboard with text can also carry an image of it.
+      if (await Clipboard.hasStrings()) return null;
+
+      final bytes = await Pasteboard.image;
+      if (bytes == null) return null;
+
+      final mimeType = _mimeTypes.lookup('', headerBytes: bytes);
+      if (mimeType == null || !mimeType.startsWith('image/')) return null;
+      return PastedImage(bytes: bytes, mimeType: mimeType);
+    } on Exception {
+      return null;
+    }
   }
 }
