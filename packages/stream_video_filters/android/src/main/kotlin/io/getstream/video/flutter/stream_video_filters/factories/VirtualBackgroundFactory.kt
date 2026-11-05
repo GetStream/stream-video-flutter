@@ -268,14 +268,18 @@ private class VirtualBackgroundVideoFilter(
             fallbackBlur.blurInPlace(videoFrameBitmap)
             return
         }
+        if (!result.isFromFrameOfSize(videoFrameBitmap.width, videoFrameBitmap.height)) {
+            // The mask comes from a frame of another size (rotation), so it no longer
+            // lines up with this frame. Blur the whole frame until a matching mask
+            // arrives rather than letting the stretched mask expose the background.
+            fallbackBlur.blurInPlace(videoFrameBitmap)
+            return
+        }
         val mask = result.mask
 
         maybeInit(videoFrameBitmap, backgroundImageBitmap, mask)
 
         if (mask !== processedSegmentationMask) {
-            // A mask from a frame of another size (rotation) still covers the frames
-            // until the next one, but is not blended into the smoothing history.
-            val stale = !result.isFromFrameOfSize(videoFrameBitmap.width, videoFrameBitmap.height)
             // Write the person as a soft alpha mask - foregroundMaskBitmap
             writeSoftSegmentMask(
                 segment = Segment.FOREGROUND,
@@ -283,12 +287,9 @@ private class VirtualBackgroundVideoFilter(
                 segmentationMask = mask,
                 confidenceThreshold = foregroundThreshold,
                 edgeSoftness = DEFAULT_MASK_EDGE_SOFTNESS,
-                temporalWeight = if (stale) 1.0 else DEFAULT_MASK_TEMPORAL_WEIGHT,
+                temporalWeight = DEFAULT_MASK_TEMPORAL_WEIGHT,
                 buffers = maskBuffers!!,
             )
-            if (stale) {
-                maskBuffers!!.hasSmoothedConfidence = false
-            }
             val canvas = Canvas(scaledForegroundBitmap!!)
             // Clear the bitmap before drawing (important to avoid artifacts!)
             canvas.drawColor(0, PorterDuff.Mode.CLEAR)

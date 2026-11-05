@@ -6,6 +6,8 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'stream_video_filters.dart';
 
 const _tag = 'SVF:BackgroundFilters';
+const _fullFrameBlurName = 'FullFrameBlur';
+const _virtualBackgroundPrefix = 'VirtualBackground-';
 
 enum BlurIntensity {
   light('BackgroundBlurLight'),
@@ -54,6 +56,9 @@ class StreamVideoEffectsManager {
   // Bumped by every public apply, disable and unregister call, so a call that
   // waits outside the queue can tell whether a later one has superseded it.
   int _requestCount = 0;
+  // The last track passed explicitly to an apply (e.g. a lobby preview), so
+  // unregisterAllFilters can detach it too.
+  String? _explicitTrackId;
   StreamSubscription<bool?>? _localVideoTrackSubscription;
   bool _disposed = false;
 
@@ -84,7 +89,7 @@ class StreamVideoEffectsManager {
     RtcLocalTrack? track,
   }) {
     return _applyBuiltInEffects(
-      ['FullFrameBlur'],
+      [_fullFrameBlurName],
       register: _registerFullFrameBlurEffectIfNeeded,
       track: track,
     );
@@ -102,7 +107,7 @@ class StreamVideoEffectsManager {
     RtcLocalTrack? track,
   }) {
     return _applyBuiltInEffects(
-      ['VirtualBackground-$imageUrl'],
+      ['$_virtualBackgroundPrefix$imageUrl'],
       register: () => _registerImageEffectIfNeeded(imageUrl),
       track: track,
     );
@@ -174,23 +179,25 @@ class StreamVideoEffectsManager {
         return;
       }
       await register();
-      await _applyVideoEffects(names, track: track, register: register);
+      await _applyVideoEffects(names, track: track);
     });
   }
 
   /// Attaches [names] to the local video track and re-attaches them whenever
   /// the camera is turned back on (the track is re-created then). Runs inside
-  /// the registry queue. [register] re-registers a built-in effect before a
-  /// re-attach, in case the registry was cleared meanwhile.
+  /// the registry queue. Built-in effects among [names] are registered again
+  /// before a re-attach, in case the registry was cleared meanwhile.
   Future<void> _applyVideoEffects(
     List<String> names, {
     RtcLocalTrack? track,
-    Future<void> Function()? register,
   }) async {
     if (_disposed) {
       return;
     }
     _appliedVideoEffects = names;
+    if (track != null) {
+      _explicitTrackId = track.mediaTrack.id;
+    }
 
     final trackId = track != null ? track.mediaTrack.id : await _getTrackId();
 
@@ -210,7 +217,7 @@ class StreamVideoEffectsManager {
               if (_disposed || !identical(_appliedVideoEffects, names)) {
                 return;
               }
-              await register?.call();
+              await _registerBuiltInEffectsIfNeeded(names);
               final trackId = await _getTrackId();
               if (trackId != null) {
                 await rtc.setVideoEffects(trackId, names: names);
@@ -264,7 +271,23 @@ class StreamVideoEffectsManager {
     return _runSerially(() => _registerImageEffectIfNeeded(imageUrl));
   }
 
-  // The three below must run inside the registry queue.
+  // The four below must run inside the registry queue.
+
+  /// Registers every built-in effect among [names] that is not registered.
+  /// Other names (custom effects) are left to their own registration.
+  Future<void> _registerBuiltInEffectsIfNeeded(List<String> names) async {
+    for (final name in names) {
+      if (BlurIntensity.values.any((intensity) => intensity.name == name)) {
+        await _registerBlurEffectIfNeeded();
+      } else if (name == _fullFrameBlurName) {
+        await _registerFullFrameBlurEffectIfNeeded();
+      } else if (name.startsWith(_virtualBackgroundPrefix)) {
+        await _registerImageEffectIfNeeded(
+          name.substring(_virtualBackgroundPrefix.length),
+        );
+      }
+    }
+  }
 
   Future<void> _registerBlurEffectIfNeeded() async {
     if (!isBlurRegistered) {
@@ -362,15 +385,18 @@ class StreamVideoEffectsManager {
   /// Custom effects registered through [applyCustomEffect] stay registered,
   /// but are detached from the track like any other effect.
   ///
-  /// Call this once filters are no longer needed, before leaving the call: any
-  /// effect still attached to the local video track is detached first so the
-  /// processors can actually be released, and once the track is torn down that
-  /// native effect chain can no longer be reached.
+  /// Call this once filters are no longer needed, before leaving the call: the
+  /// effects this manager attached are detached first so the processors can
+  /// actually be released, and once the track is torn down that native effect
+  /// chain can no longer be reached. This covers this manager's call track and
+  /// the last track passed explicitly to one of its apply methods.
   ///
   /// The registry is shared by every [StreamVideoEffectsManager] in the
-  /// process, so this detaches the effects of all of them. Another manager
-  /// keeps reporting its [appliedVideoEffects] and re-registers and re-attaches
-  /// them the next time the camera is turned on.
+  /// process, but this does not detach the effects of other managers: their
+  /// effect chains keep running the processors they already hold, so those
+  /// processors are released only once those managers detach them. Another
+  /// manager keeps reporting its [appliedVideoEffects] and registers them again
+  /// before re-attaching them the next time the camera is turned on.
   Future<void> unregisterAllFilters() {
     _requestCount++;
     // Queued behind any apply already in flight, so this never runs between
@@ -388,17 +414,19 @@ class StreamVideoEffectsManager {
       // holds strong references to the processors, so without this they would
       // keep running (and stay alive) while appliedVideoEffects reports
       // nothing.
-      try {
-        final trackId = await _getTrackId();
-        if (trackId != null) {
+      final trackIds = {await _getTrackId(), _explicitTrackId}.nonNulls;
+      _explicitTrackId = null;
+      for (final trackId in trackIds) {
+        try {
           await rtc.setVideoEffects(trackId, names: []);
+        } on PlatformException catch (e, stk) {
+          // Best effort: right after leave() the track's factory is already
+          // gone and the detach fails. The registry is still cleaned up below.
+          _logger.w(
+            () =>
+                'Could not detach video effects from $trackId before unregistering: $e\n$stk',
+          );
         }
-      } on PlatformException catch (e, stk) {
-        // Best effort: right after leave() the track's factory is already
-        // gone and the detach fails. The registry is still cleaned up below.
-        _logger.w(
-          () => 'Could not detach video effects before unregistering: $e\n$stk',
-        );
       }
 
       isBlurRegistered = false;

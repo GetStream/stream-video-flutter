@@ -22,6 +22,8 @@ class MockRtcTrack extends Mock implements RtcTrack {}
 
 class MockMediaStreamTrack extends Mock implements rtc.MediaStreamTrack {}
 
+class MockRtcLocalTrack extends Mock implements RtcLocalTrack {}
+
 /// Records every native call, in order, into the shared [log].
 class FakeStreamVideoFiltersPlatform extends StreamVideoFiltersPlatform {
   FakeStreamVideoFiltersPlatform(this.log);
@@ -66,6 +68,7 @@ void main() {
   const trackId = 'local-video-track';
 
   late List<String> log;
+  late List<String> attachedTrackIds;
   late FakeStreamVideoFiltersPlatform platform;
   late MockCall call;
   late MockCallParticipantState localParticipant;
@@ -78,6 +81,7 @@ void main() {
 
   setUp(() {
     log = [];
+    attachedTrackIds = [];
     platform = FakeStreamVideoFiltersPlatform(log);
     StreamVideoFiltersPlatform.instance = platform;
 
@@ -91,6 +95,7 @@ void main() {
           if (methodCall.method == 'setVideoEffects') {
             final args = methodCall.arguments as Map<Object?, Object?>;
             log.add('setVideoEffects:${args['names']}');
+            attachedTrackIds.add(args['trackId']! as String);
           }
           return null;
         });
@@ -137,6 +142,30 @@ void main() {
 
       expect(log, ['setVideoEffects:[]', 'unregisterAll']);
       expect(manager.appliedVideoEffects, isEmpty);
+    });
+
+    test('also detaches the last explicitly passed track', () async {
+      final manager = StreamVideoEffectsManager(call);
+      final previewMediaTrack = MockMediaStreamTrack();
+      when(() => previewMediaTrack.id).thenReturn('preview-track');
+      final previewTrack = MockRtcLocalTrack();
+      when(() => previewTrack.mediaTrack).thenReturn(previewMediaTrack);
+
+      await manager.applyBackgroundBlurFilter(
+        BlurIntensity.medium,
+        track: previewTrack,
+      );
+      log.clear();
+      attachedTrackIds.clear();
+
+      await manager.unregisterAllFilters();
+
+      expect(log, [
+        'setVideoEffects:[]',
+        'setVideoEffects:[]',
+        'unregisterAll',
+      ]);
+      expect(attachedTrackIds, unorderedEquals([trackId, 'preview-track']));
     });
 
     test('still unregisters when the detach fails', () async {
@@ -288,6 +317,28 @@ void main() {
 
       expect(log, ['setVideoEffects:[BackgroundBlurMedium]']);
     });
+
+    test(
+      'registers built-in effects again when re-applying after an unregister',
+      () async {
+        final manager = StreamVideoEffectsManager(call);
+        await manager.ensureBlurEffectRegistered();
+        await manager.applyVideoEffects(['BackgroundBlurMedium']);
+        // Another manager releases the shared registry.
+        await StreamVideoEffectsManager(call).unregisterAllFilters();
+        log.clear();
+
+        videoEnabled.add(false);
+        videoEnabled.add(true);
+        await pumpEventQueue();
+
+        expect(log, [
+          'registerBlur',
+          'setVideoEffects:[BackgroundBlurMedium]',
+        ]);
+        expect(manager.appliedVideoEffects, ['BackgroundBlurMedium']);
+      },
+    );
 
     test('calls run in the order they were made when not awaited', () async {
       final manager = StreamVideoEffectsManager(call);

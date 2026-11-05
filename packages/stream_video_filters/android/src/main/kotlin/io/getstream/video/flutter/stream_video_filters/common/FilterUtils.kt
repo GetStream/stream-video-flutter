@@ -126,8 +126,8 @@ internal enum class Segment {
 
 /**
  * A finished ML Kit mask together with the size of the frame its input was taken
- * from. A mask from a frame of another size (rotation) is still usable for the
- * frames until the next one arrives, but must not seed the temporal smoothing.
+ * from. A mask from a frame of another size (rotation) does not line up with the
+ * current frame, so the filters blur the whole frame until a matching one arrives.
  */
 internal class SegmentationResult(
     val mask: SegmentationMask,

@@ -133,11 +133,15 @@ class _CallScreenState extends State<CallScreen> {
   /// leaving.
   Future<void> _leaveCall(Call call) async {
     try {
-      await _videoEffectsManager.unregisterAllFilters();
+      // Bounded so a hanging native call cannot keep the call joined.
+      await _videoEffectsManager.unregisterAllFilters().timeout(
+        const Duration(seconds: 3),
+      );
     } catch (e, st) {
       _logger.e(() => 'Failed to release video effects: $e\n$st');
+    } finally {
+      await call.leave();
     }
-    await call.leave();
   }
 
   Future<void> _connectChatChannel() async {
