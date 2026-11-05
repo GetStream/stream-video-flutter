@@ -22,9 +22,36 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     private var isFromPushKit: Bool = false
     private var silenceEvents: Bool = false
 
+    /// Calls CallKit put on hold for another call, such as a cellular call the user answered.
+    /// They are resumed when that other call ends; holds the app requested are not.
+    private var callsHeldForOtherCall = Set<UUID>()
+    /// Holds requested through `holdCall`, until CallKit performs them.
+    private var appRequestedHolds = Set<UUID>()
+
+    /// Where a call taken off hold stands with its audio session, see `reRegister`.
+    private enum ResumeState {
+        /// CallKit has not activated a usable session since the resume: none at all, or one the
+        /// audio engine could not start on.
+        case withoutSession
+        /// CallKit activated the session after the resume.
+        case activated
+    }
+    /// Calls taken off hold, until they are held again, ended or registered with CallKit again.
+    private var resumes = [UUID: ResumeState]()
+    /// Calls being registered with CallKit a second time, by the uuid of the new registration.
+    private var reRegistrations = [UUID: Call]()
+
     private override init() {
         callController = StreamCallKitCallController()
         super.init()
+        callController.setCallObserverDelegate(self)
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(handleApplicationDidBecomeActive(_:)),
+            name: UIApplication.didBecomeActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(handleAudioEngineStartFailed(_:)),
+            name: StreamVideoIncomingCallConstants.AUDIO_ENGINE_START_FAILED_NOTIFICATION,
+            object: nil)
     }
 
     public func setEventHandler(_ handler: EventCallbackHandler) {
@@ -330,6 +357,9 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         if call.isOnHold == onHold {
             self.sendHoldEvent(self.callController.reportedId(for: callId), onHold)
         } else {
+            if onHold {
+                appRequestedHolds.insert(call.uuid)
+            }
             self.callController.holdCall(call: call, onHold: onHold)
         }
     }
@@ -352,15 +382,18 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     }
 
     @objc public func endCall(_ data: CallData) {
-        var call: Call? = nil
+        let uuidString = self.isFromPushKit ? self.data!.uuid : data.uuid
         if self.isFromPushKit {
-            call = Call(uuid: UUID(uuidString: self.data!.uuid)!, data: data)
             self.isFromPushKit = false
             self.sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_ENDED, data.toJSON())
-        } else {
-            call = Call(uuid: UUID(uuidString: data.uuid)!, data: data)
         }
-        self.callController.endCall(call: call!)
+        guard let uuid = UUID(uuidString: uuidString) else { return }
+        // A call registered with CallKit again is ended by the uuid CallKit knows it by.
+        let call = self.callController.callWithUUID(uuid: uuid) ?? Call(uuid: uuid, data: data)
+        if call.originalUUID != nil {
+            setIncludesCallsInRecents(false)
+        }
+        self.callController.endCall(call: call)
     }
 
     @objc public func connectedCall(_ data: CallData) {
@@ -380,6 +413,9 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
     @objc public func endAllCalls() {
         self.isFromPushKit = false
+        if self.callController.calls.contains(where: { $0.originalUUID != nil }) {
+            setIncludesCallsInRecents(false)
+        }
         self.callController.endAllCalls()
     }
 
@@ -397,7 +433,13 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
 
-        self.sharedProvider?.reportCall(with: callUUID, endedAt: Date(), reason: endedReason)
+        // A call registered with CallKit again is reported by the uuid CallKit knows it by.
+        let call = self.callController.callWithUUID(uuid: callUUID)
+        if call?.originalUUID != nil {
+            setIncludesCallsInRecents(false)
+        }
+        self.sharedProvider?.reportCall(
+            with: call?.uuid ?? callUUID, endedAt: Date(), reason: endedReason)
     }
 
     func endCallNotExist(_ data: CallData) {
@@ -556,7 +598,9 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                     ])
 
                 try session.setMode(self.getAudioSessionMode(data?.audioSessionMode))
-                try session.setActive(data?.audioSessionActive ?? true)
+                // Not activated here: CallKit activates the session for its calls and reports
+                // it through `didActivate`. A session the app activates itself is a plain
+                // play-and-record session that keeps CallKit's own from activating.
                 try session.setPreferredSampleRate(data?.audioSessionPreferredSampleRate ?? 44100.0)
                 try session.setPreferredIOBufferDuration(
                     data?.audioSessionPreferredIOBufferDuration ?? 0.005)
@@ -609,6 +653,12 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             call.endCall()
         }
         self.callController.removeAllCalls()
+        callsHeldForOtherCall.removeAll()
+        appRequestedHolds.removeAll()
+        resumes.removeAll()
+        reRegistrations.removeAll()
+        restoreAudioEngineIfIdle()
+        setIncludesCallsInRecents(true)
     }
 
     public func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
@@ -618,6 +668,16 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         else {
             NSLog("startCall: no call data for \(action.callUUID), failing the start action")
             action.fail()
+            return
+        }
+        if let previous = reRegistrations.removeValue(forKey: action.callUUID) {
+            let call = completeReRegistration(
+                of: previous, as: action.callUUID, handle: action.handle.value)
+            action.fulfill()
+            // Reported after the start action, as for any outgoing call.
+            self.sharedProvider?.reportOutgoingCall(
+                with: call.uuid, startedConnectingAt: call.connectData)
+            self.sharedProvider?.reportOutgoingCall(with: call.uuid, connectedAt: call.connectedData)
             return
         }
         let call = Call(uuid: action.callUUID, data: data, isOutGoing: true)
@@ -635,6 +695,138 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         self.callController.addCall(call)
         self.sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_START, data.toJSON())
         action.fulfill()
+    }
+
+    // MARK: - Registering a call with CallKit again
+
+    /// The app came to the foreground: resumed calls without a usable audio session are
+    /// registered with CallKit again, see `reRegister`.
+    @objc private func handleApplicationDidBecomeActive(_ notification: Notification) {
+        DispatchQueue.main.async { [weak self] in
+            self?.reRegisterResumedCallsWithoutSession()
+        }
+    }
+
+    /// The WebRTC plugin could not start the audio engine on the session CallKit activated.
+    /// That happens when the user ends the phone call on this device: CallKit takes this call
+    /// off hold and activates its session at once, while the app is still in the background
+    /// behind the phone app, and iOS refuses microphone input to an app in the background. The
+    /// engine does not recover from that on its own, nor from a later start on the same
+    /// session, so the resumed call is registered with CallKit again for a session it can use.
+    @objc private func handleAudioEngineStartFailed(_ notification: Notification) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            for (uuid, state) in self.resumes where state == .activated {
+                self.resumes[uuid] = .withoutSession
+            }
+            self.reRegisterResumedCallsWithoutSession()
+        }
+    }
+
+    /// Registers the resumed calls without a usable audio session with CallKit again, see
+    /// `reRegister`. Only in the foreground, where the engine can start on the new session;
+    /// in the background they wait for `handleApplicationDidBecomeActive`.
+    private func reRegisterResumedCallsWithoutSession() {
+        guard !hasOtherAppsActiveCall, UIApplication.shared.applicationState == .active else {
+            return
+        }
+        for call in self.callController.calls
+        where !call.hasEnded && !call.isOnHold && resumes[call.uuid] == .withoutSession {
+            reRegister(call)
+        }
+    }
+
+    /// Ends `call` with CallKit and starts it again as a new, connected outgoing call.
+    ///
+    /// CallKit activates the audio session for every call it starts. That is the one way left
+    /// to get a session with audio for a call CallKit took off hold without one: after the
+    /// other party ended the call that interrupted it, CallKit leaves the resumed call's session
+    /// inactive, iOS does not post the interruption end at which the app may activate, a
+    /// session the app activates at any other moment has no audio hardware behind it, and a
+    /// further hold and resume gets no activation either.
+    ///
+    /// The app is not told: the new registration reports the original id, so hold, mute and
+    /// end events keep their id, and requests from the app for the original id resolve to it.
+    /// The system call screen shows the call ending and a new one starting; Recents keeps the
+    /// original call only, see `setIncludesCallsInRecents`.
+    private func reRegister(_ call: Call) {
+        let newUUID = UUID()
+        NSLog("[StreamCallKit] registering \(call.uuid) with CallKit again as \(newUUID)")
+        resumes[call.uuid] = nil
+        reRegistrations[newUUID] = call
+        self.sharedProvider?.reportCall(with: call.uuid, endedAt: nil, reason: .remoteEnded)
+        setIncludesCallsInRecents(false)
+        startReRegistration(of: call, as: newUUID, attempt: 0)
+    }
+
+    /// Keeps a call registered with CallKit a second time out of the system's Recents list,
+    /// where it would show as a second, outgoing call to the same party next to the original
+    /// one. The provider's configuration is replaced with the flag off before the new
+    /// registration is started, and again before a re-registered call ends, in case CallKit
+    /// reads the flag when it writes the entry rather than when the call starts. The app's own
+    /// setting is put back once no call is left; a new call's `initCallkitProvider` restores it
+    /// as well.
+    private func setIncludesCallsInRecents(_ included: Bool) {
+        guard #available(iOS 11.0, *), let provider = self.sharedProvider else { return }
+        let value = included && (self.data?.includesCallsInRecents ?? true)
+        let configuration = provider.configuration
+        guard configuration.includesCallsInRecents != value else { return }
+        configuration.includesCallsInRecents = value
+        provider.configuration = configuration
+    }
+
+    /// Requests the start of the new registration, again when CallKit refuses it. Right after
+    /// the other app's call ended, CallKit refuses a new call with `maximumCallGroupsReached`:
+    /// it still counts that call, and the registration just reported as ended, for a moment.
+    private func startReRegistration(of call: Call, as newUUID: UUID, attempt: Int) {
+        let delays: [TimeInterval] = [0.5, 1, 2]
+        self.callController.startCall(call.data, uuid: newUUID) { [weak self] started in
+            DispatchQueue.main.async {
+                guard let self, !started, self.reRegistrations[newUUID] === call else { return }
+                guard attempt < delays.count, !call.hasEnded else {
+                    NSLog(
+                        "[StreamCallKit] CallKit refused to register \(call.uuid) again as "
+                            + "\(newUUID) \(attempt + 1) times; giving up")
+                    self.reRegistrations[newUUID] = nil
+                    return
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + delays[attempt]) { [weak self] in
+                    guard let self, self.reRegistrations[newUUID] === call, !call.hasEnded else {
+                        return
+                    }
+                    NSLog(
+                        "[StreamCallKit] registering \(call.uuid) again as \(newUUID), "
+                            + "attempt \(attempt + 2)")
+                    self.startReRegistration(of: call, as: newUUID, attempt: attempt + 1)
+                }
+            }
+        }
+    }
+
+    /// CallKit performed the start of the new registration: `previous` is replaced by a call
+    /// that is connected from the start, reports `previous`'s id, and answers to its uuid. The
+    /// activation that follows restarts the audio engine; it is not a first activation, so the
+    /// audio session is not reconfigured under it.
+    private func completeReRegistration(of previous: Call, as uuid: UUID, handle: String) -> Call {
+        let call = Call(uuid: uuid, data: previous.data, isOutGoing: true)
+        call.handle = handle
+        call.originalUUID = previous.originalUUID ?? previous.uuid
+        call.reportedId = previous.reportedId
+            ?? self.callController.reportedId(for: previous.uuid)
+        call.isMuted = previous.isMuted
+        call.hasStartedConnecting = true
+        call.hasConnected = true
+        previous.endCall()
+        self.callController.removeCall(previous)
+        callsHeldForOtherCall.remove(previous.uuid)
+        appRequestedHolds.remove(previous.uuid)
+        if self.answerCall === previous {
+            self.answerCall = nil
+        }
+        self.outgoingCall = call
+        self.callController.addCall(call)
+        NSLog("[StreamCallKit] \(previous.uuid) is now registered as \(uuid)")
+        return call
     }
 
     public func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
@@ -668,8 +860,15 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             action.fail()
             return
         }
+        if call.originalUUID != nil {
+            setIncludesCallsInRecents(false)
+        }
         call.endCall()
         self.callController.removeCall(call)
+        callsHeldForOtherCall.remove(call.uuid)
+        appRequestedHolds.remove(call.uuid)
+        resumes[call.uuid] = nil
+        restoreAudioEngineIfIdle()
         if self.answerCall == nil && self.outgoingCall == nil {
             sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_DECLINE, self.data?.toJSON())
             action.fulfill()
@@ -685,9 +884,25 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             action.fail()
             return
         }
+        NSLog("[StreamCallKit] CXSetHeldCallAction \(action.callUUID), isOnHold: \(action.isOnHold)")
+        // CallKit is telling the app about a hold it already performs (a cellular call, or a
+        // `holdCall` request). Requesting another hold transaction from here made CallKit call
+        // this handler again for it, without end: thousands of hold events per second, and a
+        // flooded main thread for as long as the call was held.
         call.isOnHold = action.isOnHold
         call.isMuted = action.isOnHold
-        self.callController.setHold(call: call, onHold: action.isOnHold)
+        // Remember a hold CallKit made for another call, so it is resumed when that call ends.
+        // CallKit does not resume a held VoIP call by itself once the other call ends.
+        let requestedByApp = appRequestedHolds.remove(call.uuid) != nil
+        if action.isOnHold && !requestedByApp && hasOtherAppsActiveCall {
+            callsHeldForOtherCall.insert(call.uuid)
+        } else {
+            callsHeldForOtherCall.remove(call.uuid)
+        }
+        // CallKit activates the audio session for the resumed call only when the user ended the
+        // other call on this device. When the other party ended it, CallKit leaves the session
+        // inactive, and no activation the app makes carries audio; see `reRegister`.
+        resumes[call.uuid] = action.isOnHold ? nil : .withoutSession
         sendHoldEvent(self.callController.reportedId(for: action.callUUID), action.isOnHold)
         action.fulfill()
     }
@@ -743,42 +958,124 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     }
 
     public func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
-        if self.answerCall?.hasConnected ?? false {
-            sendDefaultAudioInterruptionNofificationToStartAudioResource()
-            return
-        }
-        if self.outgoingCall?.hasConnected ?? false {
-            sendDefaultAudioInterruptionNofificationToStartAudioResource()
-            return
-        }
-        self.outgoingCall?.startCall(withAudioSession: audioSession) { success in
-            if success {
-                self.callController.addCall(self.outgoingCall!)
-                self.outgoingCall?.startAudio()
+        // A call resuming from hold is activated again. Only the first activation of a call
+        // starts it and applies the default audio session configuration: the SDK configures the
+        // session itself once the call is joined, and re-applying the defaults on a resume would
+        // change the category, mode and sample rate under the audio engine while it restarts, and
+        // drop the output route the user chose. `hasConnected` alone is not enough to tell the
+        // two apart, since it is only set by apps that call `setCallConnected`.
+        let hasConnected =
+            (self.answerCall?.hasConnected ?? false) || (self.outgoingCall?.hasConnected ?? false)
+        let hasStartedConnecting =
+            (self.answerCall?.hasStartedConnecting ?? false)
+            || (self.outgoingCall?.hasStartedConnecting ?? false)
+        let isFirstActivation = !hasConnected && !hasStartedConnecting
+        NSLog("[StreamCallKit] didActivate audio session, firstActivation: \(isFirstActivation)")
+        if isFirstActivation {
+            self.outgoingCall?.startCall(withAudioSession: audioSession) { success in
+                if success {
+                    self.callController.addCall(self.outgoingCall!)
+                    self.outgoingCall?.startAudio()
+                }
+            }
+            self.answerCall?.answerCall(withAudioSession: audioSession) { success in
+                if success {
+                    self.answerCall?.startAudio()
+                }
             }
         }
-        self.answerCall?.answerCall(withAudioSession: audioSession) { success in
-            if success {
-                self.answerCall?.startAudio()
-            }
+        for uuid in resumes.keys {
+            resumes[uuid] = .activated
         }
+        // WebRTC is told first, so its own session state matches before the audio engine is
+        // allowed to start on the session.
+        postAudioEngineAvailability(true, audioSessionActive: true)
         sendDefaultAudioInterruptionNofificationToStartAudioResource()
-        configureAudioSession()
-
         self.sendEvent(
             StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION, ["isActive": true]
         )
+        if isFirstActivation {
+            configureAudioSession()
+        }
     }
 
     public func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {
-        if self.outgoingCall?.isOnHold ?? false || self.answerCall?.isOnHold ?? false {
-            print("Call is on hold")
-            return
+        NSLog("[StreamCallKit] didDeactivate audio session, ongoing calls: \(hasOngoingCalls)")
+        // CallKit took the audio session away, for a hold or another call as much as for the end
+        // of this one. The WebRTC audio engine must stay down until `didActivate` hands the
+        // session back: an engine restarted in between runs on a session the app does not own,
+        // plays and records nothing, and never recovers. Once no call is left there is no
+        // activation to wait for, so the gate is lifted instead and a call that starts without
+        // CallKit is not held back.
+        postAudioEngineAvailability(!hasOngoingCalls, audioSessionActive: false)
+        if !hasOngoingCalls {
+            setIncludesCallsInRecents(true)
+        }
+
+        // A deactivation right after a call was taken off hold is CallKit leaving the resumed
+        // call without a session, see `reRegister`. With the app in the foreground already,
+        // nothing else would trigger the new registration until the user left and came back.
+        DispatchQueue.main.async { [weak self] in
+            self?.reRegisterResumedCallsWithoutSession()
         }
 
         self.sendEvent(
             StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION,
             ["isActive": false])
+    }
+
+    // MARK: - Audio engine availability
+
+    private var hasOngoingCalls: Bool {
+        self.callController.calls.contains { !$0.hasEnded }
+    }
+
+    /// Gates the audio engine of every `stream_webrtc_flutter` peer-connection factory, including
+    /// the ones built later, and, when `audioSessionActive` is given, tells WebRTC's audio session
+    /// that CallKit activated or deactivated the app's audio session. See
+    /// `FlutterWebRTCPlugin.setAudioEngineAvailable:` and `setCallKitAudioSessionActive:`.
+    private func postAudioEngineAvailability(_ available: Bool, audioSessionActive: Bool? = nil) {
+        var userInfo: [AnyHashable: Any] = [
+            StreamVideoIncomingCallConstants.AUDIO_ENGINE_AVAILABLE_KEY: available
+        ]
+        if let audioSessionActive {
+            userInfo[StreamVideoIncomingCallConstants.AUDIO_SESSION_ACTIVE_KEY] = audioSessionActive
+        }
+        NotificationCenter.default.post(
+            name: StreamVideoIncomingCallConstants.AUDIO_ENGINE_AVAILABILITY_NOTIFICATION,
+            object: self,
+            userInfo: userInfo)
+    }
+
+    /// Lifts the gate once CallKit has no call left to activate the session for. A call that
+    /// ends while the session is already inactive gets no `didDeactivate`, so this runs when
+    /// calls are removed as well.
+    private func restoreAudioEngineIfIdle() {
+        if !hasOngoingCalls {
+            postAudioEngineAvailability(true)
+        }
+    }
+
+    // MARK: - Resuming after another call
+
+    /// Whether a call this app did not report is still going on, such as a cellular call.
+    private var hasOtherAppsActiveCall: Bool {
+        self.callController.observedCalls.contains {
+            !$0.hasEnded && self.callController.callWithUUID(uuid: $0.uuid) == nil
+        }
+    }
+
+    /// Takes the calls CallKit held for another call off hold once no other call is left.
+    /// CallKit performs the hold action with `isOnHold: false`. It activates the audio session
+    /// only when the user ended the other call on this device; otherwise the call is registered
+    /// with CallKit again, see `reRegister`.
+    private func resumeCallsHeldForOtherCall() {
+        guard !callsHeldForOtherCall.isEmpty, !hasOtherAppsActiveCall else { return }
+        for call in self.callController.calls
+        where !call.hasEnded && call.isOnHold && callsHeldForOtherCall.remove(call.uuid) != nil {
+            NSLog("[StreamCallKit] resuming \(call.uuid), held for a call that has ended")
+            self.callController.holdCall(call: call, onHold: false)
+        }
     }
 
     private func sendMuteEvent(_ id: String, _ isMuted: Bool) {
@@ -793,4 +1090,17 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             ["id": id, "isOnHold": isOnHold])
     }
 
+}
+
+@available(iOS 10.0, *)
+extension StreamVideoCallkitManager: CXCallObserverDelegate {
+    public func callObserver(_ callObserver: CXCallObserver, callChanged call: CXCall) {
+        // Only the end of another app's call matters here: this app's own calls end through
+        // the provider's end action.
+        guard call.hasEnded, self.callController.callWithUUID(uuid: call.uuid) == nil else {
+            return
+        }
+        NSLog("[StreamCallKit] another app's call \(call.uuid) ended")
+        resumeCallsHeldForOtherCall()
+    }
 }

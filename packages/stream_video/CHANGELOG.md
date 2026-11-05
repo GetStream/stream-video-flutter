@@ -1,3 +1,13 @@
+## Upcoming
+
+### 🐞 Fixed
+
+- [iOS] An audio output the user chose is put back when the system re-routes on its own, after a category change or when the audio unit is rebuilt, such as when a call resumes from CallKit hold. Until now the call followed the system's route, so a call resumed after a phone call played through the earpiece although the speaker was still selected. Outputs added or removed, such as headphones, are still followed.
+
+### 🔄 Changed
+
+- `stream_video` now requires `stream_webrtc_flutter` 4.1.0 or newer.
+
 ## 1.7.2
 
 ### ✅ Added

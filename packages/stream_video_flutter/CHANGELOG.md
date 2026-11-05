@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🔄 Changed
+
+- `stream_video_flutter` now requires `stream_webrtc_flutter` 4.1.0 or newer.
+
 ## 1.7.2
 
 ### 🔄 Changed

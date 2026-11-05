@@ -6,6 +6,11 @@ public class Call: NSObject {
     public var data: CallData
     public var isOutGoing: Bool
     public var handle: String?
+    /// For a call registered with CallKit a second time: the uuid it was first registered
+    /// with, which the app still uses for it.
+    var originalUUID: UUID?
+    /// The id this call is reported to the app with when it differs from `uuid`.
+    var reportedId: String?
 
     var stateDidChange: (() -> Void)?
     var hasStartedConnectDidChange: (() -> Void)?

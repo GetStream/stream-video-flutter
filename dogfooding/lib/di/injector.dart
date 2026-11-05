@@ -175,7 +175,11 @@ StreamVideo _initStreamVideo(
         name: 'flutter-firebase',
       ),
       pushConfiguration: const StreamVideoPushConfiguration(
-        ios: IOSPushConfiguration(iconName: 'IconMask'),
+        ios: IOSPushConfiguration(
+          iconName: 'IconMask',
+          // Lets a cellular call put the Stream call on hold instead of ending it.
+          supportsHolding: true,
+        ),
         android: AndroidPushConfiguration(
           defaultAvatar: 'assets/logo.png',
           telecom: TelecomPushConfiguration(

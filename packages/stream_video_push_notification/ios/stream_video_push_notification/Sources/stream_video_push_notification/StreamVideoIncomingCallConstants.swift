@@ -27,4 +27,19 @@ public struct StreamVideoIncomingCallConstants {
     public static let ACTION_CALL_TOGGLE_GROUP = "io.getstream.video.ACTION_CALL_TOGGLE_GROUP"
     public static let ACTION_CALL_TOGGLE_AUDIO_SESSION =
         "io.getstream.video.ACTION_CALL_TOGGLE_AUDIO_SESSION"
+
+    // MARK: - WebRTC plugin notifications
+
+    /// Gates the audio engine of every `stream_webrtc_flutter` peer-connection factory.
+    /// Mirrors `FlutterWebRTCAudioEngineAvailabilityNotification` and
+    /// `FlutterWebRTCAudioEngineAvailableKey` there; posted rather than called so this plugin
+    /// needs no build dependency on the WebRTC plugin.
+    public static let AUDIO_ENGINE_AVAILABILITY_NOTIFICATION = Notification.Name(
+        "io.getstream.webrtc.audioEngineAvailability")
+    public static let AUDIO_ENGINE_AVAILABLE_KEY = "available"
+    public static let AUDIO_SESSION_ACTIVE_KEY = "audioSessionActive"
+    /// Posted by the WebRTC plugin when it could not start the audio engine on the session
+    /// CallKit activated. Mirrors `FlutterWebRTCAudioEngineStartFailedNotification`.
+    public static let AUDIO_ENGINE_START_FAILED_NOTIFICATION = Notification.Name(
+        "io.getstream.webrtc.audioEngineStartFailed")
 }

@@ -37,8 +37,39 @@ class ScreenSharingStartedEvent extends NativeWebRtcEvent {
 /// different output through the native route-selection UI
 /// ([RtcMediaDeviceNotifier.triggeriOSAudioRouteSelectionUI]).
 class AudioRouteChangedEvent extends NativeWebRtcEvent {
-  AudioRouteChangedEvent({required this.device});
+  AudioRouteChangedEvent({
+    required this.device,
+    this.reason = AudioRouteChangeReason.unknown,
+  });
   final RtcMediaDevice device;
+  final AudioRouteChangeReason reason;
+}
+
+/// Why the audio route changed; `AVAudioSessionRouteChangeReason` on iOS.
+enum AudioRouteChangeReason {
+  unknown(0),
+  newDeviceAvailable(1),
+  oldDeviceUnavailable(2),
+  categoryChange(3),
+  override(4),
+  wakeFromSleep(6),
+  noSuitableRouteForCategory(7),
+  routeConfigurationChange(8);
+
+  const AudioRouteChangeReason(this.code);
+  final int code;
+
+  static AudioRouteChangeReason fromCode(int? code) => values.firstWhere(
+    (reason) => reason.code == code,
+    orElse: () => AudioRouteChangeReason.unknown,
+  );
+
+  /// Whether the system re-routed on its own, with no device added or
+  /// removed: after a category change, or when the audio unit was rebuilt,
+  /// after a CallKit hold for example. An output the user chose is put back
+  /// after such a change rather than replaced by whatever the system picked.
+  bool get isSystemReconfiguration =>
+      this == categoryChange || this == routeConfigurationChange;
 }
 
 sealed class SpeechActivityEvent {
@@ -163,6 +194,9 @@ class RtcMediaDeviceNotifier {
                   label: values?['label'] as String? ?? deviceId,
                   groupId: values?['groupId'] as String?,
                   kind: RtcMediaDeviceKind.audioOutput,
+                ),
+                reason: AudioRouteChangeReason.fromCode(
+                  values?['reason'] as int?,
                 ),
               );
             default:

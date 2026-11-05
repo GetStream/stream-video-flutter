@@ -231,6 +231,12 @@ class ActionCallToggleGroup extends RingingEvent {
 
 /// Represents a call toggle audio session event.
 ///
+/// Sent whenever CallKit activates or deactivates the app's audio session:
+/// when a call starts or is answered, when it is put on hold or resumed, and
+/// when it ends. The SDK already keeps the call's audio engine in step with
+/// these changes; apps that suspend their own audio while on hold can resume
+/// it once [isActive] is `true` again.
+///
 /// Note: This event is only available on iOS.
 class ActionCallToggleAudioSession extends RingingEvent {
   /// Creates an [ActionCallToggleAudioSession] event instance with the

@@ -15,12 +15,28 @@ class StreamCallKitCallController: NSObject {
         self.sharedProvider = sharedProvider
     }
 
-    func startCall(_ data: CallData) {
+    /// Every call CallKit knows about on the device, this app's and other apps' alike.
+    var observedCalls: [CXCall] {
+        callController.callObserver.calls
+    }
+
+    /// Delivers `observedCalls` changes to `delegate` on the main queue.
+    func setCallObserverDelegate(_ delegate: CXCallObserverDelegate) {
+        callController.callObserver.setDelegate(delegate, queue: nil)
+    }
+
+    /// `uuid` is the CallKit uuid to start the call with; by default the one in `data`.
+    /// Requests the start of a call from CallKit. `completion` reports whether CallKit took the
+    /// transaction; the call itself is created when CallKit performs the start action.
+    func startCall(
+        _ data: CallData, uuid explicitUUID: UUID? = nil, completion: ((Bool) -> Void)? = nil
+    ) {
         let handle = CXHandle(
             type: self.getHandleType(data.handleType), value: data.getEncryptHandle())
 
-        guard let uuid = UUID(uuidString: data.uuid) else {
+        guard let uuid = explicitUUID ?? UUID(uuidString: data.uuid) else {
             print("Error: Invalid UUID string: \(data.uuid)")
+            completion?(false)
             return
         }
 
@@ -41,6 +57,7 @@ class StreamCallKitCallController: NSObject {
                     if self.pendingOutgoingCalls[uuid] === data {
                         self.pendingOutgoingCalls[uuid] = nil
                     }
+                    completion?(false)
                     return
                 }
 
@@ -53,6 +70,7 @@ class StreamCallKitCallController: NSObject {
                 callUpdate.hasVideo = data.type > 0 ? true : false
                 callUpdate.localizedCallerName = data.callerName
                 self.sharedProvider?.reportCall(with: uuid, updated: callUpdate)
+                completion?(true)
             })
     }
 
@@ -140,14 +158,6 @@ class StreamCallKitCallController: NSObject {
         return json
     }
 
-    func setHold(call: Call, onHold: Bool) {
-        let handleCall = CXSetHeldCallAction(call: call.uuid, onHold: onHold)
-
-        let callTransaction = CXTransaction()
-        callTransaction.addAction(handleCall)
-        self.requestCall(callTransaction, action: "holdCall")
-    }
-
     private func requestCall(
         _ transaction: CXTransaction, action: String, completion: ((Bool) -> Void)? = nil
     ) {
@@ -215,15 +225,19 @@ class StreamCallKitCallController: NSObject {
     /// The id the call was started or shown with, or the lowercased uuid if this plugin does not track that call.
     func reportedId(for uuid: UUID) -> String {
         let fallback = uuid.uuidString.lowercased()
-        guard let id = self.callWithUUID(uuid: uuid)?.data.uuid, id.lowercased() == fallback else {
-            return fallback
+        guard let call = self.callWithUUID(uuid: uuid) else { return fallback }
+        if let reportedId = call.reportedId {
+            return reportedId
         }
-        return id
+        guard call.data.uuid.lowercased() == fallback else { return fallback }
+        return call.data.uuid
     }
 
+    /// The call CallKit knows by `uuid`, or the one the app still knows by it after a second
+    /// registration with CallKit.
     func callWithUUID(uuid: UUID) -> Call? {
-        guard let idx = calls.firstIndex(where: { $0.uuid == uuid }) else { return nil }
-        return calls[idx]
+        if let call = calls.first(where: { $0.uuid == uuid }) { return call }
+        return calls.first(where: { $0.originalUUID == uuid })
     }
 
     func addCall(_ call: Call) {

@@ -778,8 +778,24 @@ class Call {
           if (!CurrentPlatform.isIos) break;
 
           final device = event.device;
-          if (state.value.audioOutputDevice?.id.equalsIgnoreCase(device.id) ??
-              false) {
+          final selected = state.value.audioOutputDevice;
+          _logger.d(
+            () =>
+                '[onAudioRouteChanged] route: ${device.id}, reason: '
+                '${event.reason.name}, selected: ${selected?.id}, '
+                'byUser: ${_stateManager.audioOutputSelectedByUser}',
+          );
+          if (selected?.id.equalsIgnoreCase(device.id) ?? false) {
+            break;
+          }
+
+          // The system re-routed on its own, with no device added or removed,
+          // and the user had chosen an output: put that output back instead
+          // of following the system. The speaker override is lost whenever
+          // the audio unit is rebuilt, after a CallKit hold for example.
+          if (event.reason.isSystemReconfiguration &&
+              _stateManager.audioOutputSelectedByUser) {
+            _session?.applyCurrentAudioOutputDevice();
             break;
           }
 
