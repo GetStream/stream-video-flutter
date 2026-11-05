@@ -115,6 +115,7 @@ void main() {
   Future<void> pumpPip(
     WidgetTester tester, {
     bool includeLocalParticipantVideo = true,
+    Comparator<CallParticipantState>? sort,
   }) async {
     await tester.pumpWidget(
       TestWrapper(
@@ -122,6 +123,7 @@ void main() {
           call: call,
           pictureInPictureConfiguration: PictureInPictureConfiguration(
             enablePictureInPicture: true,
+            sort: sort,
             iOSPiPConfiguration: IOSPictureInPictureConfiguration(
               includeLocalParticipantVideo: includeLocalParticipantVideo,
             ),
@@ -217,6 +219,65 @@ void main() {
 
     await foreground(tester);
 
+    expect(mediaTrack.enabled, isTrue);
+  });
+
+  testWidgets('turns on a track shown in an earlier trip to the background', (
+    tester,
+  ) async {
+    // Speaking, so the app leaves the track alone in the background.
+    when(() => participant.isSpeaking).thenReturn(true);
+    // Bob, without video, comes first in the window once he joins.
+    final bob = MockCallParticipantState();
+    when(() => bob.userId).thenReturn('bob');
+    when(() => bob.sessionId).thenReturn('bob-session');
+    when(() => bob.trackIdPrefix).thenReturn('bob');
+    when(() => bob.name).thenReturn('Bob');
+    when(() => bob.image).thenReturn(null);
+    when(() => bob.isLocal).thenReturn(false);
+    when(() => bob.isSpeaking).thenReturn(false);
+    when(() => bob.isAudioEnabled).thenReturn(true);
+    when(() => bob.isVideoEnabled).thenReturn(false);
+    when(() => bob.isScreenShareEnabled).thenReturn(false);
+    when(() => bob.screenShareTrack).thenReturn(null);
+    when(() => bob.publishedTracks).thenReturn({});
+    when(
+      () => bob.connectionQuality,
+    ).thenReturn(SfuConnectionQuality.excellent);
+    // Like the native side, turn off the track the window moves away from.
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (methodCall) async {
+          nativeCalls.add(methodCall);
+          if (methodCall.method == 'updateParticipant' &&
+              (methodCall.arguments as Map<Object?, Object?>)['trackId'] !=
+                  'alice-video') {
+            mediaTrack.enabled = false;
+          }
+          return null;
+        });
+    await pumpPip(
+      tester,
+      sort: (a, b) => (a.userId == 'bob' ? 0 : 1) - (b.userId == 'bob' ? 0 : 1),
+    );
+
+    // The window is given Alice, and holds her track past resuming.
+    await background(tester);
+    await foreground(tester);
+    expect(mediaTrack.enabled, isTrue);
+
+    // Bob joins while the app is in the foreground, so the window is given
+    // him first on the next trip.
+    final withBob = MockCallState();
+    when(() => withBob.status).thenReturn(CallStatus.connected());
+    when(() => withBob.callParticipants).thenReturn([participant, bob]);
+    when(() => withBob.localParticipant).thenReturn(null);
+    when(() => withBob.iOSMultitaskingCameraAccessEnabled).thenReturn(true);
+    states.add(withBob);
+
+    await background(tester);
+    expect(mediaTrack.enabled, isFalse);
+
+    await foreground(tester);
     expect(mediaTrack.enabled, isTrue);
   });
 
