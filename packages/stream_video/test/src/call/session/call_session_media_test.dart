@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../../../test_helpers.dart';
 import '../fixtures/data.dart';
 import 'fixtures/call_session_harness.dart';
 
@@ -40,6 +41,22 @@ void main() {
       expect(
         await messageOf(session.flipCamera()),
         'Unable to flip camera, Call not connected',
+      );
+      expect(
+        await messageOf(session.setLocalTrack(MockRtcLocalTrack())),
+        'Unable to set local track, Call not connected',
+      );
+      expect(
+        await messageOf(session.setAudioInputDevice(device)),
+        'Unable to set audioInput, Call not connected',
+      );
+      expect(
+        await messageOf(session.setVideoInputDevice(device)),
+        'Unable to set video input, Call not connected',
+      );
+      expect(
+        await messageOf(session.setCameraPosition(CameraPosition.front)),
+        'Unable to set camera position, Call not connected',
       );
     });
 
