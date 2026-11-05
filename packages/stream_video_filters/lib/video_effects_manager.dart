@@ -34,11 +34,8 @@ class StreamVideoEffectsManager {
 
   // Registering, attaching, detaching and unregistering built-in effects, and
   // the flags above that mirror the registry, run one at a time across all
-  // managers. Otherwise an unregister could run between the register and the
-  // attach of an apply that is in flight: the attach would then install a name
-  // that no longer exists (sending the camera image unfiltered while
-  // appliedVideoEffects reports the effect), or, in the other order, attach a
-  // processor right after it was detached for release.
+  // managers, so an unregister never runs between the register and the attach
+  // of an apply in flight.
   static Future<void> _registryQueue = Future.value();
 
   static Future<void> _runSerially(Future<void> Function() action) {
@@ -54,6 +51,9 @@ class StreamVideoEffectsManager {
 
   final _logger = taggedLogger(tag: _tag);
   List<String>? _appliedVideoEffects;
+  // Bumped by every public apply, disable and unregister call, so a call that
+  // waits outside the queue can tell whether a later one has superseded it.
+  int _requestCount = 0;
   StreamSubscription<bool?>? _localVideoTrackSubscription;
   bool _disposed = false;
 
@@ -113,26 +113,31 @@ class StreamVideoEffectsManager {
   /// The [registerEffectProcessorCallback] parameter is is a required callback to register the custom effect processor.
   /// For details on how to implement the custom effect check the documentation.
   ///
-  /// The callback runs inside this manager's effect queue, so it must not call
-  /// back into any apply, disable or unregister method of a
-  /// [StreamVideoEffectsManager]: that call would wait for the queue, which is
-  /// waiting for the callback.
+  /// The callback runs before the effect is queued for attaching. If another
+  /// apply, disable or unregister call is made on this manager while the
+  /// callback runs, that later call wins and the custom effect is not attached.
   Future<void> applyCustomEffect(
     String effectName, {
     required Future<void> Function() registerEffectProcessorCallback,
-  }) {
-    return _runSerially(() async {
-      if (!(await isSupported())) {
-        return;
-      }
+  }) async {
+    final request = ++_requestCount;
 
-      if (!isCustomEffectRegistered.containsKey(effectName)) {
-        await registerEffectProcessorCallback();
-        isCustomEffectRegistered[effectName] = true;
-      }
+    if (!(await isSupported())) {
+      return;
+    }
 
-      await _applyVideoEffects([effectName]);
-    });
+    // Custom effects are never unregistered by this plugin, so registering
+    // them does not need the registry queue.
+    if (!isCustomEffectRegistered.containsKey(effectName)) {
+      await registerEffectProcessorCallback();
+      isCustomEffectRegistered[effectName] = true;
+    }
+
+    if (request != _requestCount) {
+      return;
+    }
+
+    await _runSerially(() => _applyVideoEffects([effectName]));
   }
 
   /// Applies a list of video effects to the local participant video stream.
@@ -142,6 +147,7 @@ class StreamVideoEffectsManager {
     List<String> names, {
     RtcLocalTrack? track,
   }) {
+    _requestCount++;
     return _runSerially(() async {
       if (!(await isSupported())) {
         return;
@@ -153,14 +159,16 @@ class StreamVideoEffectsManager {
   /// Registers a built-in effect and attaches it as one unit of the registry
   /// queue, so no unregister can slip in between the two.
   ///
-  /// Every public apply, disable and unregister method takes its place in the
-  /// queue synchronously, before any await, so calls run in the order they
-  /// were made even when they are not awaited.
+  /// Every public apply, disable and unregister method except
+  /// [applyCustomEffect] takes its place in the queue synchronously, before any
+  /// await, so calls run in the order they were made even when they are not
+  /// awaited.
   Future<void> _applyBuiltInEffects(
     List<String> names, {
     required Future<void> Function() register,
     RtcLocalTrack? track,
   }) {
+    _requestCount++;
     return _runSerially(() async {
       if (!(await isSupported())) {
         return;
@@ -184,13 +192,16 @@ class StreamVideoEffectsManager {
     }
     _appliedVideoEffects = names;
 
+    final trackId = track != null ? track.mediaTrack.id : await _getTrackId();
+
     await _localVideoTrackSubscription?.cancel();
     _localVideoTrackSubscription = call
         .partialState((s) => s.localParticipant?.isVideoEnabled)
-        // The stream replays the current value on subscribe. That is the
-        // track being attached to right below, not a camera-on: re-applying
-        // on it would build a second processor chain on Android.
-        .skip(1)
+        // The stream replays the current value on subscribe. When a track was
+        // found, that value is the track being attached to right below, not a
+        // camera-on: re-applying on it would build a second processor chain on
+        // Android. When none was found, the replayed value retries the attach.
+        .skip(trackId != null ? 1 : 0)
         .where((enabled) => enabled ?? false)
         .listen((_) {
           unawaited(
@@ -204,15 +215,18 @@ class StreamVideoEffectsManager {
               if (trackId != null) {
                 await rtc.setVideoEffects(trackId, names: names);
               }
-            }).catchError((Object e, StackTrace stk) {
-              _logger.w(
+            }).catchError((Object e, StackTrace stk) async {
+              _logger.e(
                 () => 'Could not re-apply video effects $names: $e\n$stk',
               );
+              // The new track is sent without the effects: stop reporting them.
+              if (identical(_appliedVideoEffects, names)) {
+                await _clearAppliedEffects();
+              }
             }),
           );
         });
 
-    final trackId = track != null ? track.mediaTrack.id : await _getTrackId();
     if (trackId == null) {
       _logger.w(
         () =>
@@ -221,10 +235,18 @@ class StreamVideoEffectsManager {
       return;
     }
 
-    await rtc.setVideoEffects(
-      trackId,
-      names: names,
-    );
+    try {
+      await rtc.setVideoEffects(
+        trackId,
+        names: names,
+      );
+    } catch (_) {
+      // Nothing was attached: do not report the effects or re-apply them.
+      if (identical(_appliedVideoEffects, names)) {
+        await _clearAppliedEffects();
+      }
+      rethrow;
+    }
   }
 
   /// Ensures that the blur effect processor is registered.
@@ -271,6 +293,7 @@ class StreamVideoEffectsManager {
   Future<void> disableAllFilters({
     RtcLocalTrack? track,
   }) {
+    _requestCount++;
     // Queued so it cannot run between the register and the attach of an apply
     // in flight, which would leave that effect attached.
     final queued = _runSerially(() async {
@@ -349,6 +372,7 @@ class StreamVideoEffectsManager {
   /// keeps reporting its [appliedVideoEffects] and re-registers and re-attaches
   /// them the next time the camera is turned on.
   Future<void> unregisterAllFilters() {
+    _requestCount++;
     // Queued behind any apply already in flight, so this never runs between
     // its register and its attach; its flag is reset here too, and an apply
     // started meanwhile registers again after the removal.
@@ -369,7 +393,7 @@ class StreamVideoEffectsManager {
         if (trackId != null) {
           await rtc.setVideoEffects(trackId, names: []);
         }
-      } catch (e, stk) {
+      } on PlatformException catch (e, stk) {
         // Best effort: right after leave() the track's factory is already
         // gone and the detach fails. The registry is still cleaned up below.
         _logger.w(

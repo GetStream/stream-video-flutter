@@ -5,6 +5,7 @@ import android.opengl.GLES20
 import android.opengl.GLUtils
 import android.util.Log
 import io.getstream.webrtc.flutter.videoEffects.VideoFrameProcessor
+import org.webrtc.JavaI420Buffer
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.TextureBufferImpl
 import org.webrtc.VideoFrame
@@ -23,6 +24,7 @@ class VideoFrameProcessorWithBitmapFilter(bitmapVideoFilterFunc: () -> BitmapVid
   private var inputBuffer: VideoFrame.TextureBuffer? = null
   private var yuvBuffer: VideoFrame.I420Buffer? = null
   private val textures = IntArray(1)
+  private var blackBuffer: JavaI420Buffer? = null
 
   private val bitmapVideoFilter by lazy {
     bitmapVideoFilterFunc.invoke()
@@ -36,10 +38,9 @@ class VideoFrameProcessorWithBitmapFilter(bitmapVideoFilterFunc: () -> BitmapVid
     // Step 1: Video Frame to Bitmap
     val inputFrameBitmap = yuvFrame.bitmapFromVideoFrame(frame)
     if (inputFrameBitmap == null) {
-      // Pass the frame through. The caller releases both the input and the
-      // returned frame, so the returned one needs its own reference.
-      frame.retain()
-      return frame
+      // The frame could not be converted, so the filter cannot run on it. Send a
+      // black frame of the same size rather than the unfiltered camera image.
+      return blackFrameLike(frame)
     }
 
     // Prepare helpers (runs only once or if the dimensions change)
@@ -68,6 +69,37 @@ class VideoFrameProcessorWithBitmapFilter(bitmapVideoFilterFunc: () -> BitmapVid
     // Convert the buffer back to YUV (VideoFrame needs YUV)
     yuvBuffer = yuvConverter.convert(inputBuffer)
     return VideoFrame(yuvBuffer, 0, frame.timestampNs)
+  }
+
+  /**
+   * A black frame with the size, rotation and timestamp of [frame]. The black buffer is
+   * reused while the size stays the same; every returned frame holds its own reference,
+   * which the caller releases.
+   */
+  private fun blackFrameLike(frame: VideoFrame): VideoFrame {
+    val width = frame.buffer.width
+    val height = frame.buffer.height
+    var buffer = blackBuffer
+    if (buffer == null || buffer.width != width || buffer.height != height) {
+      buffer?.release()
+      buffer = JavaI420Buffer.allocate(width, height).apply {
+        // Y = 0 with neutral chroma (128) is black.
+        fillPlane(dataY, 0)
+        fillPlane(dataU, 128)
+        fillPlane(dataV, 128)
+      }
+      blackBuffer = buffer
+    }
+    buffer.retain()
+    return VideoFrame(buffer, frame.rotation, frame.timestampNs)
+  }
+
+  private fun fillPlane(plane: java.nio.ByteBuffer, value: Int) {
+    val position = plane.position()
+    while (plane.hasRemaining()) {
+      plane.put(value.toByte())
+    }
+    plane.position(position)
   }
 
   private fun initialize(width: Int, height: Int, textureHelper: SurfaceTextureHelper) {

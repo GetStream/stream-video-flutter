@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Matrix
 import android.graphics.Paint
+import android.os.SystemClock
+import android.util.Log
 import com.google.android.renderscript.Toolkit
 import com.google.mlkit.vision.segmentation.SegmentationMask
 
@@ -26,7 +28,9 @@ internal const val DEFAULT_MASK_TEMPORAL_WEIGHT = 0.6
 
 /**
  * Longest side of the frame copy handed to ML Kit. The selfie model works on a
- * 256x256 input, so anything larger only costs time in ML Kit's own resize.
+ * 256x256 input, and ML Kit resizes the copy to that itself. 640 keeps the copy
+ * and that resize cheap while leaving the source at more than twice the model's
+ * resolution, so the resize still averages over enough pixels for a clean edge.
  */
 internal const val SEGMENTATION_INPUT_LONG_SIDE = 640
 
@@ -221,3 +225,33 @@ internal class SegmentationInput(private val maxLongSide: Int = SEGMENTATION_INP
  */
 internal fun getScalingFactors(widths: Pair<Int, Int>, heights: Pair<Int, Int>) =
     Pair(widths.first.toFloat() / widths.second, heights.first.toFloat() / heights.second)
+
+/**
+ * Logs an error at most once per [intervalMs], so a failure that repeats on every
+ * frame does not flood the log. The number of failures that were not logged is
+ * reported with the next message.
+ */
+internal class ThrottledLog(
+    private val tag: String,
+    private val intervalMs: Long = DEFAULT_LOG_INTERVAL_MS,
+) {
+    private var lastLogAt = 0L
+    private var suppressed = 0
+
+    @Synchronized
+    fun e(message: String, throwable: Throwable? = null) {
+        val now = SystemClock.elapsedRealtime()
+        if (lastLogAt != 0L && now - lastLogAt < intervalMs) {
+            suppressed++
+            return
+        }
+        val suffix = if (suppressed > 0) " ($suppressed more since the last report)" else ""
+        Log.e(tag, message + suffix, throwable)
+        lastLogAt = now
+        suppressed = 0
+    }
+
+    companion object {
+        private const val DEFAULT_LOG_INTERVAL_MS = 5_000L
+    }
+}

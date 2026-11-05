@@ -2,11 +2,11 @@
 
 ### ✅ Added
 
-- `StreamVideoEffectsManager.unregisterAllFilters()` to release native effect processors when filters are no longer needed, e.g. before leaving the call.
+- `StreamVideoEffectsManager.unregisterAllFilters()` to release native effect processors.
 
 ### 🔄 Changed
 
-- Improvements to background filters: smoother and more stable edges around the person on Android and iOS, better performance, and the real background is never sent unfiltered while a filter is being set up.
+- Improved the edge quality and performance of background filters.
 
 ### 🐞 Fixed
 

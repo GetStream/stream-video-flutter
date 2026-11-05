@@ -6,7 +6,6 @@ import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
-import android.util.Log
 import com.google.android.renderscript.Toolkit
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.segmentation.Segmentation
@@ -22,6 +21,7 @@ import io.getstream.video.flutter.stream_video_filters.common.SegmentationResult
 import io.getstream.video.flutter.stream_video_filters.common.Segment
 import io.getstream.video.flutter.stream_video_filters.common.SegmentMaskBuffers
 import io.getstream.video.flutter.stream_video_filters.common.SegmentationInput
+import io.getstream.video.flutter.stream_video_filters.common.ThrottledLog
 import io.getstream.video.flutter.stream_video_filters.common.VideoFrameProcessorWithBitmapFilter
 import io.getstream.video.flutter.stream_video_filters.common.getScalingFactors
 import io.getstream.video.flutter.stream_video_filters.common.writeSoftSegmentMask
@@ -72,6 +72,7 @@ private class BlurredBackgroundVideoFilter(
     // The copy of the frame that ML Kit segments; see SegmentationInput.
     private val segmentationInput = SegmentationInput()
     private val fallbackBlur = DownscaledBlur()
+    private val segmentationErrorLog = ThrottledLog("VideoFilters")
 
     // Alpha mask of the background at the raw mask size, and the buffers that build it
     private var backgroundMaskBitmap: Bitmap? = null
@@ -122,7 +123,7 @@ private class BlurredBackgroundVideoFilter(
             segmenter.process(mlImage).addOnSuccessListener { mask ->
                 segmentationResult = SegmentationResult(mask, frameWidth, frameHeight)
             }.addOnFailureListener { e ->
-                Log.e("VideoFilters", "Failed to segment image", e)
+                segmentationErrorLog.e("Failed to segment image", e)
             }.addOnCompleteListener {
                 isProcessing.set(false)
             }
@@ -237,6 +238,6 @@ enum class BlurIntensity(val radius: Int) {
 }
 
 // Midpoint of the soft edge (see DEFAULT_MASK_EDGE_SOFTNESS): with the default softness
-// a pixel is fully foreground from 0.8 up and fully background from 0.4 down. The old
-// hard cut-off at 0.9 eroded hair and accessories, which the model is least sure about.
+// a pixel is fully foreground from 0.8 up and fully background from 0.4 down, so hair
+// and accessories, which the model is least sure about, stay partly visible.
 private const val DEFAULT_FOREGROUND_THRESHOLD: Double = 0.6

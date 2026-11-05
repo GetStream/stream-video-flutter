@@ -116,7 +116,9 @@ class _CallScreenState extends State<CallScreen> {
     _speakingWhileMutedSubscription.cancel();
     _speakingWhileMuted.dispose();
     _chatConnectionRecoverySubscription?.cancel();
-    widget.call.leave();
+    // Covers every way out of the screen (host ended the call, connection
+    // lost, back navigation), not only the leave button.
+    unawaited(_leaveCall(widget.call));
     _userChatRepo.disconnectUser();
     _videoEffectsManager.dispose();
     super.dispose();

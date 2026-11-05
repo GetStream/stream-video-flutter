@@ -25,11 +25,14 @@ import io.getstream.video.flutter.stream_video_filters.common.SegmentationResult
 import io.getstream.video.flutter.stream_video_filters.common.Segment
 import io.getstream.video.flutter.stream_video_filters.common.SegmentMaskBuffers
 import io.getstream.video.flutter.stream_video_filters.common.SegmentationInput
+import io.getstream.video.flutter.stream_video_filters.common.ThrottledLog
 import io.getstream.video.flutter.stream_video_filters.common.VideoFrameProcessorWithBitmapFilter
 import io.getstream.video.flutter.stream_video_filters.common.getScalingFactors
 import io.getstream.video.flutter.stream_video_filters.common.writeSoftSegmentMask
 import io.getstream.webrtc.flutter.videoEffects.VideoFrameProcessor
 import io.getstream.webrtc.flutter.videoEffects.VideoFrameProcessorFactoryInterface
+import java.io.ByteArrayOutputStream
+import java.io.IOException
 import java.io.InputStream
 import java.net.URL
 import java.util.concurrent.atomic.AtomicBoolean
@@ -93,6 +96,7 @@ private class VirtualBackgroundVideoFilter(
     // The copy of the frame that ML Kit segments; see SegmentationInput.
     private val segmentationInput = SegmentationInput()
     private val fallbackBlur = DownscaledBlur()
+    private val segmentationErrorLog = ThrottledLog(TAG)
 
     // Alpha mask of the person at the raw mask size, and the buffers that build it
     private var foregroundMaskBitmap: Bitmap? = null
@@ -133,10 +137,12 @@ private class VirtualBackgroundVideoFilter(
                     connectTimeout = REMOTE_IMAGE_TIMEOUT_MS
                     readTimeout = REMOTE_IMAGE_TIMEOUT_MS
                 }
-                connection.getInputStream().use { input -> input.readBytes() }
+                connection.getInputStream().use { input -> readLimited(input) }
             }
             bytes?.let { decodeDownsampled(it) }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
+            // Throwable, not Exception: this runs on its own thread, where an
+            // OutOfMemoryError from a large image would otherwise crash the app.
             Log.e(TAG, "Failed to load virtual-background image (host=$host)", e)
             null
         }
@@ -161,6 +167,24 @@ private class VirtualBackgroundVideoFilter(
         // source - scaled video background frame
         // DST_OVER - Source pixels are drawn behind the destination pixels
         Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OVER) }
+    }
+
+    /**
+     * Reads [input] fully, failing once it exceeds [MAX_REMOTE_IMAGE_BYTES] so an
+     * unexpectedly large response cannot exhaust memory.
+     */
+    private fun readLimited(input: InputStream): ByteArray {
+        val output = ByteArrayOutputStream()
+        val chunk = ByteArray(DEFAULT_BUFFER_SIZE)
+        while (true) {
+            val read = input.read(chunk)
+            if (read < 0) break
+            if (output.size() + read > MAX_REMOTE_IMAGE_BYTES) {
+                throw IOException("Image is larger than $MAX_REMOTE_IMAGE_BYTES bytes")
+            }
+            output.write(chunk, 0, read)
+        }
+        return output.toByteArray()
     }
 
     private fun readImageAssetBytes(context: Context, assetPath: String): ByteArray? {
@@ -188,8 +212,8 @@ private class VirtualBackgroundVideoFilter(
     }
 
     /**
-     * Decodes [bytes] with the largest power-of-two `inSampleSize` that keeps the
-     * longest side at or above [MAX_DECODED_IMAGE_SIDE], so a large photo does not
+     * Decodes [bytes] with the smallest power-of-two `inSampleSize` that brings the
+     * longest side to at most [MAX_DECODED_IMAGE_SIDE], so a large photo does not
      * cost tens of megabytes (and a possible OOM) only to be scaled to the frame.
      */
     private fun decodeDownsampled(bytes: ByteArray): Bitmap? {
@@ -197,7 +221,7 @@ private class VirtualBackgroundVideoFilter(
         BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
         var sampleSize = 1
         var longSide = maxOf(bounds.outWidth, bounds.outHeight)
-        while (longSide / 2 >= MAX_DECODED_IMAGE_SIDE) {
+        while (longSide > MAX_DECODED_IMAGE_SIDE) {
             sampleSize *= 2
             longSide /= 2
         }
@@ -231,7 +255,7 @@ private class VirtualBackgroundVideoFilter(
                 // callbacks happen in main thread
                 segmentationResult = SegmentationResult(mask, frameWidth, frameHeight)
             }.addOnFailureListener { e ->
-                Log.e(TAG, "Failed to segment image", e)
+                segmentationErrorLog.e("Failed to segment image", e)
             }.addOnCompleteListener {
                 isProcessing.set(false)
             }
@@ -370,10 +394,12 @@ private class VirtualBackgroundVideoFilter(
         // few thousand pixels wide, and a full-resolution decode of a camera photo
         // (12 MP, ~48 MB) is what the capture thread would otherwise scale down.
         private const val MAX_DECODED_IMAGE_SIDE = 2048
+        // Largest remote image downloaded; well above any reasonable background photo.
+        private const val MAX_REMOTE_IMAGE_BYTES = 20 * 1024 * 1024
     }
 }
 
 // Midpoint of the soft edge (see DEFAULT_MASK_EDGE_SOFTNESS): with the default softness
-// a pixel is fully foreground from 0.8 up and fully background from 0.4 down. The old
-// hard cut-off at 0.9 eroded hair and accessories, which the model is least sure about.
+// a pixel is fully foreground from 0.8 up and fully background from 0.4 down, so hair
+// and accessories, which the model is least sure about, stay partly visible.
 private const val DEFAULT_FOREGROUND_THRESHOLD: Double = 0.6

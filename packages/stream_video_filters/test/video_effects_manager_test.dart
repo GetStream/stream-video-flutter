@@ -300,7 +300,7 @@ void main() {
       expect(manager.appliedVideoEffects, ['Custom']);
     });
 
-    test('a custom effect queued before a disable ends up detached', () async {
+    test('a disable made while a custom effect registers wins', () async {
       final manager = StreamVideoEffectsManager(call);
 
       final apply = manager.applyCustomEffect(
@@ -310,12 +310,29 @@ void main() {
       final disable = manager.disableAllFilters();
       await Future.wait([apply, disable]);
 
+      expect(log, ['registerCustom', 'setVideoEffects:[]']);
+      expect(manager.appliedVideoEffects, isEmpty);
+    });
+
+    test('a custom effect callback can call back into a manager', () async {
+      final manager = StreamVideoEffectsManager(call);
+
+      await manager
+          .applyCustomEffect(
+            'Custom',
+            registerEffectProcessorCallback: () async {
+              await manager.ensureBlurEffectRegistered();
+              log.add('registerCustom');
+            },
+          )
+          .timeout(const Duration(seconds: 1));
+
       expect(log, [
+        'registerBlur',
         'registerCustom',
         'setVideoEffects:[Custom]',
-        'setVideoEffects:[]',
       ]);
-      expect(manager.appliedVideoEffects, isEmpty);
+      expect(manager.appliedVideoEffects, ['Custom']);
     });
 
     test('an apply in flight when disposing attaches nothing', () async {
