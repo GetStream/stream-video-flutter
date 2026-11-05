@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import 'clipboard_image_paste.dart';
+
 /// The call's chat, as the body of a side panel.
-class ChatPanelBody extends StatelessWidget {
+///
+/// Images pasted while the composer has focus are added as attachments, after
+/// the same checks the composer runs on picked files.
+class ChatPanelBody extends StatefulWidget {
   /// Creates a chat body for [channel].
   const ChatPanelBody({super.key, required this.channel});
 
@@ -10,13 +15,115 @@ class ChatPanelBody extends StatelessWidget {
   final Channel channel;
 
   @override
+  State<ChatPanelBody> createState() => _ChatPanelBodyState();
+}
+
+class _ChatPanelBodyState extends State<ChatPanelBody> {
+  final _composerController = StreamMessageComposerController();
+  final _composerFocusNode = FocusNode();
+  late final _imagePaste = ClipboardImagePaste(onImages: _onImagesPasted);
+
+  @override
+  void initState() {
+    super.initState();
+    _composerFocusNode.addListener(_onComposerFocusChanged);
+  }
+
+  @override
+  void dispose() {
+    _imagePaste.stop();
+    _composerFocusNode
+      ..removeListener(_onComposerFocusChanged)
+      ..dispose();
+    _composerController.dispose();
+    super.dispose();
+  }
+
+  void _onComposerFocusChanged() {
+    if (_composerFocusNode.hasFocus) {
+      _imagePaste.start();
+    } else {
+      _imagePaste.stop();
+    }
+  }
+
+  void _onImagesPasted(List<PastedImage> images) {
+    if (!mounted || images.isEmpty) return;
+    // Commands carry no attachments.
+    if (_composerController.message.command != null) return;
+
+    final appSettings = StreamChat.of(context).client.appSettings;
+    final validator = StreamAttachmentValidator(
+      fileUploadConfig: appSettings.fileUploadConfig,
+      imageUploadConfig: appSettings.imageUploadConfig,
+    );
+
+    final total = _composerController.attachments.length + images.length;
+    if (validator.validateCount(total) case final error?) {
+      return _showAttachmentError(error);
+    }
+
+    StreamChatError? firstError;
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    for (final (index, image) in images.indexed) {
+      final attachment = Attachment(
+        type: AttachmentType.image,
+        file: AttachmentFile(
+          bytes: image.bytes,
+          size: image.bytes.length,
+          name: _fileName(image, 'paste_${timestamp}_$index'),
+        ),
+      );
+
+      if (validator.validate(attachment) case final error?) {
+        firstError ??= error;
+        continue;
+      }
+      _composerController.addAttachment(attachment);
+    }
+
+    if (firstError != null) _showAttachmentError(firstError);
+  }
+
+  // The name must end in an extension matching the MIME type: the
+  // attachment's MIME type, and so its upload validation, is derived from it.
+  static String _fileName(PastedImage image, String fallbackStem) {
+    final mimeType = image.mimeType.toLowerCase();
+    if (image.name.mediaType?.mimeType == mimeType) return image.name;
+
+    // `image/svg+xml` is stored as `.svg`.
+    final extension = mimeType.split('/').last.split('+').first;
+    return '$fallbackStem.$extension';
+  }
+
+  void _showAttachmentError(StreamChatError error) {
+    final translations = context.translations;
+    final message = switch (error) {
+      AttachmentBlockedError(:final fileExtension) =>
+        translations.fileTypeNotSupportedError(fileExtension),
+      AttachmentTooLargeError(:final maxSize) => translations.fileTooLargeError(
+        maxSize / (1024 * 1024),
+      ),
+      AttachmentLimitReachedError(:final maxCount) =>
+        translations.attachmentLimitExceedError(maxCount),
+      _ => error.message,
+    };
+    ScaffoldMessenger.maybeOf(
+      context,
+    )?.showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
   Widget build(BuildContext context) {
     return StreamChannel(
-      channel: channel,
+      channel: widget.channel,
       child: Column(
         children: <Widget>[
           const Expanded(child: StreamMessageListView()),
-          StreamMessageComposer(),
+          StreamMessageComposer(
+            messageComposerController: _composerController,
+            focusNode: _composerFocusNode,
+          ),
         ],
       ),
     );

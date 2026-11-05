@@ -59,6 +59,7 @@ dependencies:
   stream_video_push_notification: ^2.0.0-alpha
   stream_video_screen_sharing: ^2.0.0-alpha
   url_launcher: ^6.3.2
+  web: ^1.1.1
   yaru: ^10.2.0
 
 dev_dependencies:
