@@ -17,6 +17,9 @@ import 'shad_icons.dart';
 class ShadDesign extends AppDesignSpec {
   const ShadDesign();
 
+  @override
+  List<String> get packages => const ['shad', 'google_fonts'];
+
   static ShadColorScheme _zinc(Brightness brightness) => switch (brightness) {
     Brightness.light => const ShadZincColorScheme.light(),
     Brightness.dark => const ShadZincColorScheme.dark(),

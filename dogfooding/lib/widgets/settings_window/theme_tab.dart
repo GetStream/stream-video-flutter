@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/app_accent_color.dart';
 import '../../app/app_design.dart';
@@ -39,15 +40,24 @@ class _ThemeSettings extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: context.streamSpacing.xl,
         children: [
-          SettingsSelect<AppDesign>(
-            title: l10n.designTitle,
-            description: l10n.designDescription,
-            choices: [
-              for (final design in AppDesign.values)
-                SettingsChoice(value: design, label: design.label(l10n)),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: context.streamSpacing.xs,
+            children: [
+              SettingsSelect<AppDesign>(
+                title: l10n.designTitle,
+                description: l10n.designDescription,
+                choices: [
+                  for (final design in AppDesign.values)
+                    SettingsChoice(value: design, label: design.label(l10n)),
+                ],
+                value: settings.design,
+                onChanged: settings.setDesign,
+              ),
+              if (settings.design.spec.packages case final packages
+                  when packages.isNotEmpty)
+                _DesignPackages(packages: packages),
             ],
-            value: settings.design,
-            onChanged: settings.setDesign,
           ),
           SettingsSelect<ThemeMode>(
             title: l10n.themeTitle,
@@ -78,6 +88,72 @@ class _ThemeSettings extends StatelessWidget {
             onChanged: settings.setAccentColor,
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// The pub.dev packages the chosen design is drawn with, each a link to its
+/// page.
+class _DesignPackages extends StatelessWidget {
+  const _DesignPackages({required this.packages});
+
+  final List<String> packages;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = context.streamColorScheme;
+    final style = context.streamTextTheme.metadataDefault;
+
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text(
+          '${AppLocalizations.of(context).designPackages} ',
+          style: style.copyWith(color: colorScheme.textTertiary),
+        ),
+        for (final (index, package) in packages.indexed) ...[
+          _PackageLink(package: package, style: style),
+          if (index < packages.length - 1)
+            Text(', ', style: style.copyWith(color: colorScheme.textTertiary)),
+        ],
+      ],
+    );
+  }
+}
+
+class _PackageLink extends StatelessWidget {
+  const _PackageLink({required this.package, required this.style});
+
+  final String package;
+  final TextStyle style;
+
+  Future<void> _open() async {
+    final url = Uri.https('pub.dev', '/packages/$package');
+    try {
+      final opened = await launchUrl(url, mode: LaunchMode.externalApplication);
+      if (!opened) debugPrint('Could not open $url');
+    } catch (e) {
+      debugPrint('Could not open $url: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = context.streamColorScheme.accentPrimary;
+
+    return Semantics(
+      link: true,
+      child: InkWell(
+        onTap: _open,
+        child: Text(
+          package,
+          style: style.copyWith(
+            color: color,
+            decoration: TextDecoration.underline,
+            decorationColor: color,
+          ),
+        ),
       ),
     );
   }

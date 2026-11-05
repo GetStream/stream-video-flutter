@@ -21,6 +21,13 @@ import 'm3e_icons.dart';
 class M3EDesign extends AppDesignSpec {
   const M3EDesign();
 
+  @override
+  List<String> get packages => const [
+    'm3e_collection',
+    'dynamic_color',
+    'google_fonts',
+  ];
+
   /// Material's baseline seed.
   static const _baselineSeed = Color(0xFF6750A4);
 

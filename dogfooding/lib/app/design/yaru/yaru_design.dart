@@ -21,6 +21,9 @@ class YaruDesign extends AppDesignSpec {
   const YaruDesign();
 
   @override
+  List<String> get packages => const ['yaru'];
+
+  @override
   Color defaultAccent(Brightness brightness) => YaruColors.orange;
 
   @override

@@ -44,6 +44,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Choose the style of buttons, switches and fields.';
 
   @override
+  String get designPackages => 'Built with';
+
+  @override
   String get designStream => 'Stream';
 
   @override

@@ -11,6 +11,7 @@
   "themeDark": "Donker",
   "designTitle": "Ontwerp",
   "designDescription": "Kies de stijl van knoppen, schakelaars en velden.",
+  "designPackages": "Gemaakt met",
   "designStream": "Stream",
   "designShad": "shadcn/ui",
   "designYaru": "Yaru",

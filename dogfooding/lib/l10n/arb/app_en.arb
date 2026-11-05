@@ -44,6 +44,10 @@
   "@designDescription": {
     "description": "Explains the design select."
   },
+  "designPackages": "Built with",
+  "@designPackages": {
+    "description": "Precedes the pub.dev packages a design is drawn with."
+  },
   "designStream": "Stream",
   "@designStream": {
     "description": "The design choice for Stream's own design system. A product name, not translated."

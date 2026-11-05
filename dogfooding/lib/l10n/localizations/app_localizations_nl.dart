@@ -43,6 +43,9 @@ class AppLocalizationsNl extends AppLocalizations {
       'Kies de stijl van knoppen, schakelaars en velden.';
 
   @override
+  String get designPackages => 'Gemaakt met';
+
+  @override
   String get designStream => 'Stream';
 
   @override

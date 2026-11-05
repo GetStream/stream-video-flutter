@@ -14,6 +14,9 @@ import '../app_accent_color.dart';
 abstract class AppDesignSpec {
   const AppDesignSpec();
 
+  /// The pub.dev packages the design is drawn with, credited in the settings.
+  List<String> get packages => const [];
+
   /// The accent color the design uses when no accent color is picked.
   Color defaultAccent(Brightness brightness);
 

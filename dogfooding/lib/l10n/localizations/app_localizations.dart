@@ -164,6 +164,12 @@ abstract class AppLocalizations {
   /// **'Choose the style of buttons, switches and fields.'**
   String get designDescription;
 
+  /// Precedes the pub.dev packages a design is drawn with.
+  ///
+  /// In en, this message translates to:
+  /// **'Built with'**
+  String get designPackages;
+
   /// The design choice for Stream's own design system. A product name, not translated.
   ///
   /// In en, this message translates to:

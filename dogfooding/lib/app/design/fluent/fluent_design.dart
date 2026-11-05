@@ -20,6 +20,9 @@ class FluentDesign extends AppDesignSpec {
   const FluentDesign();
 
   @override
+  List<String> get packages => const ['fluent_ui', 'fluentui_system_icons'];
+
+  @override
   Color defaultAccent(Brightness brightness) => switch (brightness) {
     Brightness.light => const Color(0xFF005FB8),
     Brightness.dark => const Color(0xFF60CDFF),

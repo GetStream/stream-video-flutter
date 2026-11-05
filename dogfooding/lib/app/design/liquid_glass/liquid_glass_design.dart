@@ -19,6 +19,9 @@ class LiquidGlassDesign extends AppDesignSpec {
   const LiquidGlassDesign();
 
   @override
+  List<String> get packages => const ['liquid_glass_widgets'];
+
+  @override
   Color defaultAccent(Brightness brightness) => switch (brightness) {
     Brightness.light => const Color(0xFF007AFF),
     Brightness.dark => const Color(0xFF0A84FF),

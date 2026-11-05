@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/app/app_accent_color.dart';
+import 'package:flutter_dogfooding/app/app_design.dart';
 import 'package:flutter_dogfooding/app/app_display_settings.dart';
 import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
 import 'package:flutter_dogfooding/di/injector.dart';
@@ -61,6 +62,26 @@ void main() {
 
     expect(find.text('System'), findsOneWidget);
     expect(find.byIcon(const StreamIcons().settings), findsOneWidget);
+  });
+
+  testWidgets('credits the packages of a design other than Stream', (
+    tester,
+  ) async {
+    await pump(tester, const Locale('en'));
+    expect(find.textContaining('Built with'), findsNothing);
+
+    await locator.get<AppDisplaySettings>().setDesign(AppDesign.fluent);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Built with'), findsOneWidget);
+    expect(find.text('fluent_ui'), findsOneWidget);
+    expect(find.text('fluentui_system_icons'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Semantics && w.properties.link == true,
+      ),
+      findsNWidgets(2),
+    );
   });
 
   testWidgets('picking an accent color names it and keeps it', (tester) async {
