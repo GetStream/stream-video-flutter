@@ -457,14 +457,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.9"
-  cupertino_ui:
-    dependency: transitive
-    description:
-      name: cupertino_ui
-      sha256: "369e39a1c5c030a6212589c3da1809920b1c2cfade7b02aade7695bfa4b88c3a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.6"
   dart_style:
     dependency: transitive
     description:
@@ -837,10 +829,10 @@ packages:
     dependency: transitive
     description:
       name: fluent_ui
-      sha256: "4482326e3d4881f59b4a42e9c608b2be3171cd00fa181f51b6b0dd63bd786a0f"
+      sha256: "64c2b9dd208f8e3134d3e38db107235ee30c1dd9b792843274687a7ecc063590"
       url: "https://pub.dev"
     source: hosted
-    version: "4.17.0"
+    version: "4.16.1"
   fluentui_system_icons:
     dependency: transitive
     description:
@@ -1509,14 +1501,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
-  material_ui:
-    dependency: transitive
-    description:
-      name: material_ui
-      sha256: a30f5d0625b6b83770f53ca3f7aafd6fd9d147cb3853f54a70668541046fe5d6
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.10.0"
   math_expressions:
     dependency: transitive
     description:
@@ -2981,5 +2965,5 @@ packages:
     source: hosted
     version: "0.0.4"
 sdks:
-  dart: ">=3.13.0 <3.14.0-z"
-  flutter: ">=3.47.0"
+  dart: ">=3.13.0-107.0.dev <3.14.0-z"
+  flutter: ">=3.44.0"
