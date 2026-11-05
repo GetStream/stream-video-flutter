@@ -78,7 +78,7 @@ void main() {
     expect(find.text('fluentui_system_icons'), findsOneWidget);
     expect(
       find.byWidgetPredicate(
-        (w) => w is Semantics && w.properties.link == true,
+        (w) => w is Semantics && (w.properties.link ?? false),
       ),
       findsNWidgets(2),
     );
