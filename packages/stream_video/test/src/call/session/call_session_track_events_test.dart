@@ -250,10 +250,16 @@ void main() {
   group('ICE restart', () {
     test('the publisher restarts ICE and renegotiates outside the events '
         'lock', () async {
+      final calls = <String>[];
+      when(harness.publisher.restartIce).thenAnswer((_) async {
+        calls.add('restartIce');
+        return const Result.success(null);
+      });
       final negotiation = Completer<bool>();
-      when(
-        harness.rtcManager.isPublisherEmpty,
-      ).thenAnswer((_) => negotiation.future);
+      when(harness.rtcManager.isPublisherEmpty).thenAnswer((_) {
+        calls.add('isPublisherEmpty');
+        return negotiation.future;
+      });
 
       await harness.session
           .debugHandleSfuEvent(
@@ -267,11 +273,8 @@ void main() {
           )
           .timeout(const Duration(seconds: 1));
 
-      verifyInOrder([
-        harness.publisher.restartIce,
-        harness.rtcManager.isPublisherEmpty,
-        () => harness.stateManager.sfuParticipantJoined(any()),
-      ]);
+      expect(calls, ['restartIce', 'isPublisherEmpty']);
+      verify(() => harness.stateManager.sfuParticipantJoined(any())).called(1);
       verifyNever(harness.subscriber.restartIce);
       negotiation.complete(true);
       await pumpEventQueue();

@@ -23,6 +23,7 @@ import 'package:stream_video/src/sfu/data/models/sfu_publish_options.dart';
 import 'package:stream_video/src/sfu/ws/sfu_ws.dart';
 import 'package:stream_video/src/webrtc/peer_connection.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
+import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/rtc_manager_factory.dart';
 import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
 import 'package:stream_video/stream_video.dart';
@@ -364,6 +365,27 @@ class CallSessionHarness {
         e2eeManager: any(named: 'e2eeManager'),
       ),
     ).thenAnswer((_) async => rtcManager);
+  }
+
+  /// Holds `makeRtcManager` until the returned completer is completed.
+  Completer<RtcManager> holdRtcManager() {
+    final completer = Completer<RtcManager>();
+    when(
+      () => rtcManagerFactory.makeRtcManager(
+        sfuClient: any(named: 'sfuClient'),
+        stateManager: any(named: 'stateManager'),
+        host: any(named: 'host'),
+        clientDetails: any(named: 'clientDetails'),
+        publisherId: any(named: 'publisherId'),
+        sessionSequence: any(named: 'sessionSequence'),
+        publishOptions: any(named: 'publishOptions'),
+        statsOptions: any(named: 'statsOptions'),
+        callSessionConfig: any(named: 'callSessionConfig'),
+        clientEventRetryCount: any(named: 'clientEventRetryCount'),
+        e2eeManager: any(named: 'e2eeManager'),
+      ),
+    ).thenAnswer((_) => completer.future);
+    return completer;
   }
 
   /// The `publisherId` the session handed the factory on its only

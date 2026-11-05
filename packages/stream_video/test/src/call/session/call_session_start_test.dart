@@ -119,29 +119,49 @@ void main() {
       ).called(1);
     });
 
-    test('events that arrive before the manager exists are handled once it '
-        'is set, each once', () async {
+    test('events that arrive before the manager exists are held until it '
+        'is set, then handled in order, each once', () async {
       final harness = CallSessionHarness();
-      // The join response is answered before the manager is created.
-      await harness.session.start();
-      await pumpEventQueue();
-
-      verify(
+      final handled = <String>[];
+      when(
         () => harness.stateManager.sfuJoinResponse(
           any(),
           subscriberReused: any(named: 'subscriberReused'),
         ),
-      ).called(1);
+      ).thenAnswer((_) => handled.add('join response'));
+      when(
+        () => harness.stateManager.sfuParticipantJoined(any()),
+      ).thenAnswer((_) => handled.add('joined'));
+      when(
+        () => harness.stateManager.sfuParticipantUpdated(any()),
+      ).thenAnswer((_) => handled.add('updated'));
 
-      harness.events.emit(
-        SfuParticipantJoinedEvent(
-          callCid: 'cid',
-          participant: harnessSfuParticipant(),
-        ),
-      );
+      final manager = harness.holdRtcManager();
+      final started = harness.session.start();
       await pumpEventQueue();
 
-      verify(() => harness.stateManager.sfuParticipantJoined(any())).called(1);
+      harness.events
+        ..emit(
+          SfuParticipantJoinedEvent(
+            callCid: 'cid',
+            participant: harnessSfuParticipant(),
+          ),
+        )
+        ..emit(
+          SfuParticipantUpdatedEvent(
+            callCid: 'cid',
+            participant: harnessSfuParticipant(),
+          ),
+        );
+      await pumpEventQueue();
+
+      expect(handled, isEmpty);
+
+      manager.complete(harness.rtcManager);
+      await started;
+      await pumpEventQueue();
+
+      expect(handled, ['join response', 'joined', 'updated']);
     });
 
     test('a success hands back the call state, applies pins and E2EE, and '
