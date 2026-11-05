@@ -13,6 +13,7 @@ import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_pin.dart';
 import 'package:stream_video/src/telemetry/client_event_types.dart';
 import 'package:stream_video/src/webrtc/peer_connection.dart';
+import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
@@ -29,27 +30,7 @@ void main() {
   setUpAll(registerCallSessionHarnessFallbacks);
 
   group('start wires the manager', () {
-    test('an anonymous user gets a manager without a publisher', () async {
-      final harness = CallSessionHarness();
-
-      final result = await harness.session.start(isAnonymousUser: true);
-
-      expect(result.isSuccess, isTrue);
-      expect(harness.capturedPublisherId(), isNull);
-      verify(
-        () => harness.rtcManager.onRemoteTrackReceived = any(),
-      ).called(1);
-    });
-
-    test('a regular user publishes under the local participant prefix with '
-        'every callback', () async {
-      final harness = CallSessionHarness();
-      final rtcManager = harness.rtcManager;
-
-      final result = await harness.session.start();
-
-      expect(result.isSuccess, isTrue);
-      expect(harness.capturedPublisherId(), 'local-prefix');
+    void expectEveryCallbackWired(RtcManager rtcManager) {
       verify(() => rtcManager.onPublisherIceCandidate = any()).called(1);
       verify(() => rtcManager.onSubscriberIceCandidate = any()).called(1);
       verify(() => rtcManager.onLocalTrackMuted = any()).called(1);
@@ -57,6 +38,28 @@ void main() {
       verify(() => rtcManager.onReconnectionNeeded = any()).called(1);
       verify(() => rtcManager.onRenegotiationNeeded = any()).called(1);
       verify(() => rtcManager.onRemoteTrackReceived = any()).called(1);
+    }
+
+    test('an anonymous user gets a manager without a publisher, with every '
+        'callback', () async {
+      final harness = CallSessionHarness();
+
+      final result = await harness.session.start(isAnonymousUser: true);
+
+      expect(result.isSuccess, isTrue);
+      expect(harness.capturedPublisherId(), isNull);
+      expectEveryCallbackWired(harness.rtcManager);
+    });
+
+    test('a regular user publishes under the local participant prefix with '
+        'every callback', () async {
+      final harness = CallSessionHarness();
+
+      final result = await harness.session.start();
+
+      expect(result.isSuccess, isTrue);
+      expect(harness.capturedPublisherId(), 'local-prefix');
+      expectEveryCallbackWired(harness.rtcManager);
     });
 
     test('the wired callbacks reach the SFU and the call state', () async {
