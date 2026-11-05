@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../../l10n/localization_extension.dart';
 
 /// A widget that allows a user to add a reaction
 class StreamAddReactionButton extends StatefulWidget {
@@ -42,6 +43,7 @@ class _StreamAddReactionButtonState extends State<StreamAddReactionButton> {
         child: CallControlButton(
           key: key,
           icon: Icon(widget.reactionIcon ?? context.streamIcons.emojiAddFill),
+          tooltip: context.translations.callControlsReaction,
           onPressed: _toggleOverlay,
         ),
       ),

@@ -44,6 +44,27 @@ class StreamVideoFlutterLocalizationsEn
   String get layoutSelectTooltip => 'Change layout';
 
   @override
+  String get callControlsToggleCaptions => 'Toggle captions';
+
+  @override
+  String get callControlsToggleScreenShare => 'Toggle screen sharing';
+
+  @override
+  String get callControlsToggleRecording => 'Toggle recording';
+
+  @override
+  String get callControlsToggleSpeakerphone => 'Toggle speakerphone';
+
+  @override
+  String get callControlsFlipCamera => 'Flip camera';
+
+  @override
+  String get callControlsReaction => 'Send a reaction';
+
+  @override
+  String get callControlsLeave => 'Leave call';
+
+  @override
   String get layoutDefault => 'Default';
 
   @override

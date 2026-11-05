@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../../l10n/localization_extension.dart';
 
 /// A call control that turns closed captions on and off.
 class StreamClosedCaptionsButton extends StatelessWidget {
@@ -42,6 +43,7 @@ class StreamClosedCaptionsButton extends StatelessWidget {
               ? enabledClosedCaptionIcon ?? icons.captionFill
               : disabledClosedCaptionIcon ?? icons.captionFill,
         ),
+        tooltip: context.translations.callControlsToggleCaptions,
         selected: enabled,
         onPressed: () {
           if (!enabled) {

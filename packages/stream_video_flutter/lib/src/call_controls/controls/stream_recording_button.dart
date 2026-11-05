@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../../l10n/localization_extension.dart';
 
 /// A call control that starts and stops recording.
 class StreamRecordingButton extends StatelessWidget {
@@ -40,6 +41,7 @@ class StreamRecordingButton extends StatelessWidget {
               ? enabledRecordingIcon ?? icons.recordingStopFill
               : disabledRecordingIcon ?? icons.recordingFill,
         ),
+        tooltip: context.translations.callControlsToggleRecording,
         selected: enabled,
         tone: .destructive,
         onPressed: () {
