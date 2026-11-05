@@ -35,7 +35,7 @@ class _RecordingRtcManager extends RtcManager {
   Result<None> nextResult = const Result.success(none);
 
   @override
-  Future<Result<None>> setAppleAudioConfiguration({
+  Future<Result<None>> configureAudioSession({
     required AudioConfigurationPolicy policy,
     bool speakerOn = false,
   }) async {

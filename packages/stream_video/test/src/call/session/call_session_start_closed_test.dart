@@ -28,13 +28,6 @@ class _MockRtcManagerFactory extends Mock implements RtcManagerFactory {}
 class _MockStreamPeerConnectionFactory extends Mock
     implements StreamPeerConnectionFactory {}
 
-class _MockNativePeerConnectionFactory extends Mock
-    implements rtc.NativePeerConnectionFactory {}
-
-class _MockRTCPeerConnection extends Mock implements rtc.RTCPeerConnection {}
-
-class _MockRTCRtpTransceiver extends Mock implements rtc.RTCRtpTransceiver {}
-
 // A CallSession whose SFU socket answers the join at once, and whose
 // RtcManager is created when rtcManager completes.
 CallSession _buildSession({
@@ -60,25 +53,10 @@ CallSession _buildSession({
     return const Result<void>.success(null);
   });
 
-  final pc = _MockRTCPeerConnection();
-  when(
-    () => pc.addTransceiver(
-      kind: any(named: 'kind'),
-      init: any(named: 'init'),
-    ),
-  ).thenAnswer((_) async => _MockRTCRtpTransceiver());
-  when(
-    pc.createOffer,
-  ).thenAnswer((_) async => rtc.RTCSessionDescription('v=0', 'offer'));
-  when(pc.dispose).thenAnswer((_) async {});
-
-  final nativeFactory = _MockNativePeerConnectionFactory();
-  when(
-    () => nativeFactory.createPeerConnection(any(), any()),
-  ).thenAnswer((_) async => pc);
-
   final pcFactory = _MockStreamPeerConnectionFactory();
-  when(pcFactory.ensureNativeFactory).thenAnswer((_) async => nativeFactory);
+  when(
+    () => pcFactory.getGenericSdp(any()),
+  ).thenAnswer((_) async => 'v=0');
 
   final rtcManagerFactory = _MockRtcManagerFactory();
   when(() => rtcManagerFactory.pcFactory).thenReturn(pcFactory);
@@ -138,10 +116,8 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
     registerMockFallbackValues();
     registerFallbackValue(sfu_events.SfuRequest());
-    registerFallbackValue(rtc.RTCRtpMediaType.RTCRtpMediaTypeAudio);
-    registerFallbackValue(rtc.RTCRtpTransceiverInit());
+    registerFallbackValue(rtc.TransceiverDirection.RecvOnly);
     registerFallbackValue(MockSfuClient());
-    registerFallbackValue(<String, dynamic>{});
   });
 
   test(

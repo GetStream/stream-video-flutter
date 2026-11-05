@@ -300,15 +300,12 @@ class CallSession extends Disposable {
 
       _logger.v(() => '[start] sfu connected');
 
-      final genericSdpFactory = await rtcManagerFactory.pcFactory
-          .ensureNativeFactory();
-      final subscriberSdp = await RtcManager.getGenericSdp(
+      final pcFactory = rtcManagerFactory.pcFactory;
+      final subscriberSdp = await pcFactory.getGenericSdp(
         rtc.TransceiverDirection.RecvOnly,
-        pcFactory: genericSdpFactory,
       );
-      final publisherSdp = await RtcManager.getGenericSdp(
+      final publisherSdp = await pcFactory.getGenericSdp(
         rtc.TransceiverDirection.SendOnly,
-        pcFactory: genericSdpFactory,
       );
 
       _logger.v(
@@ -550,15 +547,12 @@ class CallSession extends Disposable {
 
       _tracer.trace(TraceTag.fastReconnect, reconnectDetails.toJson());
 
-      final genericSdpFactory = await rtcManagerFactory.pcFactory
-          .ensureNativeFactory();
-      final subscriberSdp = await RtcManager.getGenericSdp(
+      final pcFactory = rtcManagerFactory.pcFactory;
+      final subscriberSdp = await pcFactory.getGenericSdp(
         rtc.TransceiverDirection.RecvOnly,
-        pcFactory: genericSdpFactory,
       );
-      final publisherSdp = await RtcManager.getGenericSdp(
+      final publisherSdp = await pcFactory.getGenericSdp(
         rtc.TransceiverDirection.SendOnly,
-        pcFactory: genericSdpFactory,
       );
 
       Result<({SfuCallState callState, Duration fastReconnectDeadline})?>?
@@ -656,9 +650,7 @@ class CallSession extends Disposable {
         }
       }
 
-      final remoteTracks = rtcManager!.tracks.values
-          .whereType<RtcRemoteTrack>()
-          .toList();
+      final remoteTracks = rtcManager!.remoteTracks.values;
 
       for (final track in remoteTracks) {
         await _onRemoteTrackReceived(rtcManager!.subscriber, track);
@@ -1318,7 +1310,7 @@ class CallSession extends Disposable {
           }
         }
 
-        rtcManager?.transceiversManager.markNegotiated(tracksInfo);
+        rtcManager?.markNegotiated(tracksInfo);
 
         return const Result.success(null);
       } catch (e, stk) {
@@ -1380,15 +1372,15 @@ class CallSession extends Disposable {
     );
   }
 
-  /// Re-applies the Apple audio session configuration last applied, if any.
+  /// Re-applies the audio session configuration last applied, if any.
   @internal
-  Future<Result<None>> restoreAppleAudioConfiguration() async {
+  Future<Result<None>> restoreAudioSession() async {
     final rtcManager = this.rtcManager;
     if (rtcManager == null) {
       return failureWithError('Call not connected');
     }
 
-    return rtcManager.restoreAppleAudioConfiguration();
+    return rtcManager.restoreAudioSession();
   }
 
   /// Re-applies the audio output the user selected, if any.
@@ -1443,56 +1435,71 @@ class CallSession extends Disposable {
   Future<void> resumeSuspendedAudioTracks(
     Map<String, SuspendedTrackState> priorStates,
   ) async {
-    final tracks = rtcManager?.tracks;
-    if (tracks == null) return;
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) return;
 
-    for (final entry in tracks.entries) {
-      final track = entry.value;
-      if (!track.isAudioTrack) continue;
+    final tracks = <String, RtcTrack>{
+      ...rtcManager.localTracks,
+      ...rtcManager.remoteTracks,
+    };
+    for (final trackId in tracks.keys) {
+      // Read again: an earlier track's resume awaits, and meanwhile this one
+      // may have been removed or replaced under the same id.
+      final track = rtcManager.getTrack(trackId);
+      if (track == null || !track.isAudioTrack) continue;
 
-      final prior = priorStates[entry.key];
+      final prior = priorStates[trackId];
       if (prior == null) continue;
-      switch (prior) {
-        case SuspendedTrackState.wasEnabled:
-          // [priorStates] is a snapshot, user may have muted since.
-          // Re-enabling could make the mic live while UI/SDK show muted, especially on iOS/macOS.
-          if (_isMutedLocalMicrophoneTrack(track)) {
-            _logger.d(
-              () =>
-                  '[resumeSuspendedAudioTracks] track ${entry.key} was muted '
-                  'during the suspension, leaving disabled',
-            );
-            continue;
-          }
 
-          track.enable();
-          _logger.d(
-            () => '[resumeSuspendedAudioTracks] re-enabled track ${entry.key}',
-          );
-        case SuspendedTrackState.neverStarted:
-          // For local mic tracks published during suspension, starting here
-          // could make the mic live even if muted in the SDK/UI.
-          if (_isMutedLocalMicrophoneTrack(track)) {
-            _logger.d(
-              () =>
-                  '[resumeSuspendedAudioTracks] track ${entry.key} was muted '
-                  'during the suspension, leaving unstarted',
-            );
-            continue;
-          }
+      await _resumeSuspendedAudioTrack(trackId, track, prior);
+    }
+  }
 
-          await track.start();
-          await applyCurrentAudioOutputDevice();
+  Future<void> _resumeSuspendedAudioTrack(
+    String trackId,
+    RtcTrack track,
+    SuspendedTrackState prior,
+  ) async {
+    switch (prior) {
+      case SuspendedTrackState.wasEnabled:
+        // [priorStates] is a snapshot, user may have muted since.
+        // Re-enabling could make the mic live while UI/SDK show muted, especially on iOS/macOS.
+        if (_isMutedLocalMicrophoneTrack(track)) {
           _logger.d(
-            () => '[resumeSuspendedAudioTracks] started track ${entry.key}',
-          );
-        case SuspendedTrackState.wasDisabled:
-          _logger.v(
             () =>
-                '[resumeSuspendedAudioTracks] track ${entry.key} was '
-                'disabled before suspension, leaving disabled',
+                '[resumeSuspendedAudioTracks] track $trackId was muted '
+                'during the suspension, leaving disabled',
           );
-      }
+          return;
+        }
+
+        track.enable();
+        _logger.d(
+          () => '[resumeSuspendedAudioTracks] re-enabled track $trackId',
+        );
+      case SuspendedTrackState.neverStarted:
+        // For local mic tracks published during suspension, starting here
+        // could make the mic live even if muted in the SDK/UI.
+        if (_isMutedLocalMicrophoneTrack(track)) {
+          _logger.d(
+            () =>
+                '[resumeSuspendedAudioTracks] track $trackId was muted '
+                'during the suspension, leaving unstarted',
+          );
+          return;
+        }
+
+        await track.start();
+        await applyCurrentAudioOutputDevice();
+        _logger.d(
+          () => '[resumeSuspendedAudioTracks] started track $trackId',
+        );
+      case SuspendedTrackState.wasDisabled:
+        _logger.v(
+          () =>
+              '[resumeSuspendedAudioTracks] track $trackId was '
+              'disabled before suspension, leaving disabled',
+        );
     }
   }
 

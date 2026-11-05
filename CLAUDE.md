@@ -22,6 +22,16 @@ melos run webrtc:analyze     # and webrtc:test, webrtc:format:verify: webrtc/ on
 The `webrtc/` packages include the root `analysis_options.yaml` like the rest,
 but turn off the rules their upstream code doesn't follow yet.
 
+## Releases
+
+The `packages/` packages share one version and release together under one tag,
+`stream-video-vX.Y.Z`. Each `webrtc/` package has its own version and tag, named
+after the package without its `stream_` prefix, in kebab case: `webrtc-flutter-vX.Y.Z`
+for `stream_webrtc_flutter`. A webrtc package
+can take a major bump without the others. Open a release PR with `/release-pr`;
+`release_tag.yml` tags whatever is unpublished once it merges, and
+`release_publish.yml` publishes each tag. Never push a release tag by hand.
+
 ## The design system lives in another repository
 
 `stream_core_flutter` is the design system and is **not** in this repo. It is a
@@ -250,3 +260,11 @@ Flutter's defaults instead of the pinned theme, platform and locale.
   `sealed` / `final` / `base` modifiers: those are enforced per library, so the
   implementation could not live in its own file and nothing could mock it. A
   test mock in another package adds `// ignore: subtype_of_sealed_class`.
+- **Platform-specific behaviour sits behind an interface.** When only some
+  platforms have a capability, define an interface for it with one
+  implementation per platform that has it and a no-op for the rest, and pick
+  the implementation once, in a factory constructor. Callers hold the
+  interface and never branch on `CurrentPlatform` or a `…Supported` flag
+  themselves; a condition that is not about the platform (which track, which
+  device) stays inside the implementations. Example: `AdmMicrophoneMute`, with
+  `AppleAdmMicrophoneMute` and `NoAdmMicrophoneMute`.
