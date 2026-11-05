@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🐞 Fixed
+
+- [iOS] A participant's video or screen share no longer stays blank after returning from picture-in-picture.
+
 ## 1.7.2
 
 ### 🔄 Changed
