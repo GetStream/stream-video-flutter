@@ -392,8 +392,12 @@ class StreamVideo extends Disposable {
   ConnectionState get _connectionState => _state.connection.value;
 
   /// Connects the user to the Stream Video service.
+  ///
+  /// [includeUserDetails] controls whether the user's name, image and custom
+  /// data are sent when connecting. When omitted, it falls back to
+  /// [StreamVideoOptions.includeUserDetailsForAutoConnect].
   Future<Result<UserToken>> connect({
-    bool includeUserDetails = true,
+    bool? includeUserDetails,
     bool registerPushDevice = true,
   }) async {
     if (currentUserType == UserType.anonymous) {
@@ -404,7 +408,8 @@ class StreamVideo extends Disposable {
     }
 
     _connectOperation ??= _connect(
-      includeUserDetails: includeUserDetails,
+      includeUserDetails:
+          includeUserDetails ?? _options.includeUserDetailsForAutoConnect,
       registerPushDevice: registerPushDevice,
     ).asCancelable();
 

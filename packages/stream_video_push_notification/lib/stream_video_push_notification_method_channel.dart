@@ -265,7 +265,7 @@ class MethodChannelStreamVideoPushNotification
         ),
         Event.actionCallToggleGroup => ActionCallToggleGroup(
           uuid: body['id'] as String,
-          callUUIDToGroupWith: body['callUUIDToGroupWith'] as String,
+          callUUIDToGroupWith: body['callUUIDToGroupWith'] as String?,
         ),
         Event.actionCallToggleAudioSession => ActionCallToggleAudioSession(
           isActive: body['isActive'] as bool,
