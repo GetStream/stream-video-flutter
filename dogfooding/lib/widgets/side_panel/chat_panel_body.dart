@@ -21,30 +21,12 @@ class ChatPanelBody extends StatefulWidget {
 class _ChatPanelBodyState extends State<ChatPanelBody> {
   final _composerController = StreamMessageComposerController();
   final _composerFocusNode = FocusNode();
-  late final _imagePaste = ClipboardImagePaste(onImages: _onImagesPasted);
-
-  @override
-  void initState() {
-    super.initState();
-    _composerFocusNode.addListener(_onComposerFocusChanged);
-  }
 
   @override
   void dispose() {
-    _imagePaste.stop();
-    _composerFocusNode
-      ..removeListener(_onComposerFocusChanged)
-      ..dispose();
+    _composerFocusNode.dispose();
     _composerController.dispose();
     super.dispose();
-  }
-
-  void _onComposerFocusChanged() {
-    if (_composerFocusNode.hasFocus) {
-      _imagePaste.start();
-    } else {
-      _imagePaste.stop();
-    }
   }
 
   void _onImagesPasted(List<PastedImage> images) {
@@ -120,9 +102,13 @@ class _ChatPanelBodyState extends State<ChatPanelBody> {
       child: Column(
         children: <Widget>[
           const Expanded(child: StreamMessageListView()),
-          StreamMessageComposer(
-            messageComposerController: _composerController,
+          ClipboardImagePaste(
             focusNode: _composerFocusNode,
+            onImages: _onImagesPasted,
+            child: StreamMessageComposer(
+              messageComposerController: _composerController,
+              focusNode: _composerFocusNode,
+            ),
           ),
         ],
       ),

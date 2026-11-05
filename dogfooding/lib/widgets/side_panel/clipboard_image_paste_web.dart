@@ -1,30 +1,74 @@
 import 'dart:async';
 import 'dart:js_interop';
 
+import 'package:flutter/widgets.dart';
 import 'package:web/web.dart' as web;
 
 import 'clipboard_image_paste.dart';
 
-/// Creates the listener for the web, which reads the document's paste event.
-ClipboardImagePaste createClipboardImagePaste(
-  void Function(List<PastedImage> images) onImages,
-) => _WebClipboardImagePaste(onImages);
+/// Reads the image files of the page's paste event while the text field has
+/// focus. Text in the same paste is left to the text field.
+class ClipboardImagePasteRegion extends StatefulWidget {
+  /// Creates the region around [child].
+  const ClipboardImagePasteRegion({
+    super.key,
+    required this.focusNode,
+    required this.onImages,
+    required this.child,
+  });
 
-class _WebClipboardImagePaste implements ClipboardImagePaste {
-  _WebClipboardImagePaste(this._onImages);
+  /// The text field whose pastes are read.
+  final FocusNode focusNode;
 
-  final void Function(List<PastedImage> images) _onImages;
+  /// Called with the images of a paste.
+  final ValueChanged<List<PastedImage>> onImages;
+
+  /// The subtree holding the text field.
+  final Widget child;
+
+  @override
+  State<ClipboardImagePasteRegion> createState() =>
+      _ClipboardImagePasteRegionState();
+}
+
+class _ClipboardImagePasteRegionState extends State<ClipboardImagePasteRegion> {
   StreamSubscription<web.ClipboardEvent>? _subscription;
 
   @override
-  void start() {
-    _subscription ??= web.EventStreamProviders.pasteEvent
-        .forTarget(web.document)
-        .listen(_onPaste);
+  void initState() {
+    super.initState();
+    widget.focusNode.addListener(_onFocusChanged);
+    _onFocusChanged();
   }
 
   @override
-  void stop() {
+  void didUpdateWidget(ClipboardImagePasteRegion oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.focusNode != widget.focusNode) {
+      oldWidget.focusNode.removeListener(_onFocusChanged);
+      widget.focusNode.addListener(_onFocusChanged);
+      _onFocusChanged();
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.focusNode.removeListener(_onFocusChanged);
+    _stop();
+    super.dispose();
+  }
+
+  void _onFocusChanged() {
+    if (widget.focusNode.hasFocus) {
+      _subscription ??= web.EventStreamProviders.pasteEvent
+          .forTarget(web.document)
+          .listen(_onPaste);
+    } else {
+      _stop();
+    }
+  }
+
+  void _stop() {
     _subscription?.cancel();
     _subscription = null;
   }
@@ -52,8 +96,11 @@ class _WebClipboardImagePaste implements ClipboardImagePaste {
       );
     }
 
-    // Stopped while the files were being read.
+    // Focus moved away while the files were being read.
     if (_subscription == null) return;
-    _onImages(images);
+    widget.onImages(images);
   }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

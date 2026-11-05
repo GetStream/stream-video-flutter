@@ -1,7 +1,10 @@
 import 'dart:typed_data';
 
+import 'package:flutter/widgets.dart';
+
 import 'clipboard_image_paste_stub.dart'
     if (dart.library.js_interop) 'clipboard_image_paste_web.dart'
+    if (dart.library.io) 'clipboard_image_paste_native.dart'
     as platform;
 
 /// An image pasted from the clipboard.
@@ -10,33 +13,49 @@ class PastedImage {
   const PastedImage({
     required this.bytes,
     required this.mimeType,
-    required this.name,
+    this.name = '',
   });
 
   /// The image data.
   final Uint8List bytes;
 
-  /// The MIME type the clipboard reported, such as `image/png`.
+  /// The MIME type of [bytes], such as `image/png`.
   final String mimeType;
 
   /// The file name the clipboard reported, which can be empty.
   final String name;
 }
 
-/// Reports images pasted into the page while started.
+/// Reports images pasted while [focusNode] has focus.
 ///
-/// Only the web has a page-level paste event carrying files; on the other
-/// platforms this reports nothing. Text in the same paste is left to the
-/// focused text field.
-abstract interface class ClipboardImagePaste {
-  /// Creates the paste listener for the current platform.
-  factory ClipboardImagePaste({
-    required void Function(List<PastedImage> images) onImages,
-  }) => platform.createClipboardImagePaste(onImages);
+/// On the web this reads the files of the page's paste event. Elsewhere it
+/// handles the paste shortcut in [child] and reads the image from the system
+/// clipboard, handing the paste on to the text field when there is none.
+/// Text pasted through a context menu is left to the text field.
+class ClipboardImagePaste extends StatelessWidget {
+  /// Creates a paste listener around [child].
+  const ClipboardImagePaste({
+    super.key,
+    required this.focusNode,
+    required this.onImages,
+    required this.child,
+  });
 
-  /// Starts reporting pasted images. Does nothing when already started.
-  void start();
+  /// The text field whose pastes are read.
+  final FocusNode focusNode;
 
-  /// Stops reporting pasted images.
-  void stop();
+  /// Called with the images of a paste, never with an empty list.
+  final ValueChanged<List<PastedImage>> onImages;
+
+  /// The subtree holding the text field.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return platform.ClipboardImagePasteRegion(
+      focusNode: focusNode,
+      onImages: onImages,
+      child: child,
+    );
+  }
 }

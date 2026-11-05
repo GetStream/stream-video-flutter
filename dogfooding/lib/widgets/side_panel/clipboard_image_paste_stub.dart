@@ -1,16 +1,26 @@
+import 'package:flutter/widgets.dart';
+
 import 'clipboard_image_paste.dart';
 
-/// Creates the listener for platforms without a page paste event.
-ClipboardImagePaste createClipboardImagePaste(
-  void Function(List<PastedImage> images) onImages,
-) => const _NoClipboardImagePaste();
+/// Leaves pastes to the text field, on platforms without a clipboard to read.
+class ClipboardImagePasteRegion extends StatelessWidget {
+  /// Creates the region around [child].
+  const ClipboardImagePasteRegion({
+    super.key,
+    required this.focusNode,
+    required this.onImages,
+    required this.child,
+  });
 
-class _NoClipboardImagePaste implements ClipboardImagePaste {
-  const _NoClipboardImagePaste();
+  /// The text field whose pastes are read.
+  final FocusNode focusNode;
+
+  /// Called with the images of a paste.
+  final ValueChanged<List<PastedImage>> onImages;
+
+  /// The subtree holding the text field.
+  final Widget child;
 
   @override
-  void start() {}
-
-  @override
-  void stop() {}
+  Widget build(BuildContext context) => child;
 }

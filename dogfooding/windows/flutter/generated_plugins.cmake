@@ -11,6 +11,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   firebase_auth
   firebase_core
   gal
+  pasteboard
   permission_handler_windows
   record_windows
   screen_retriever_windows
