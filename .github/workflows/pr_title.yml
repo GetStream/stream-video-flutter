@@ -11,6 +11,7 @@ on:
       - unlabeled
     branches:
       - main
+      - v2
         
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -58,3 +59,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: GetStream/verify-semantic-changelog-update/placement@566b49e5ce5f180280336053428f7e2338a4d496 # main
+        with:
+          # v2 keeps a major and a minor Upcoming section, and merges released
+          # versions in from main.
+          upcoming-heading: ${{ github.base_ref == 'v2' && 'Upcoming \((major|minor)\)' || 'Upcoming' }}
+          released-from: ${{ github.base_ref == 'v2' && 'main' || '' }}
