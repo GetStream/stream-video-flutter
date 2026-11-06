@@ -5,6 +5,7 @@ extension StreamVideoCallkitManager {
     //MARK: - CXProviderDelegate
     public func providerDidReset(_ provider: CXProvider) {
         store.reset()
+        audio.callsRemoved(store)
     }
 
     public func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
@@ -33,6 +34,7 @@ extension StreamVideoCallkitManager {
 
     public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
         let outcome = store.endPerformed(uuid: action.callUUID)
+        audio.callsRemoved(store)
         apply(outcome.effects)
         if outcome.fulfills {
             action.fulfill()
