@@ -233,9 +233,7 @@ class MethodChannelStreamVideoPushNotification
       final name = data['event'];
       final event = name is String ? Event.fromWireName(name) : null;
       if (event == null) {
-        // Dropped rather than thrown: a throw here surfaces as an unhandled
-        // error on the event stream for every such event, and ends the
-        // subscription of any listener that cancels on error.
+        // Unknown event names are logged and dropped.
         _logger.w(() => 'Ignoring unknown ringing event: $name');
         return null;
       }
