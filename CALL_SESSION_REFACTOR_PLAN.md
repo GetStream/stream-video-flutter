@@ -39,7 +39,7 @@ people work on this; CS6 needs CS5, CS9 needs CS6 and CS8, CS10 needs all.
 | 5 | CS5 | `refactor/flu-1065-publisher-negotiator` | #1567 |
 | 6 | CS6 | `refactor/flu-1066-session-signaling` | #1568 |
 | 7 | CS7 | `refactor/flu-1067-publisher-connection-watchdog` | #1569 |
-| 8 | CS8 | `refactor/flu-1068-session-track-controller` | |
+| 8 | CS8 | `refactor/flu-1068-session-track-controller` | #1571 |
 | 9 | CS9 | `refactor/flu-1069-sfu-event-router` | |
 | 10 | CS10 | `refactor/flu-1070-call-session-start-fast-reconnect` | |
 
@@ -50,7 +50,7 @@ people work on this; CS6 needs CS5, CS9 needs CS6 and CS8, CS10 needs all.
 - [x] 5. **CS5** [FLU-1065](https://linear.app/stream/issue/FLU-1065): `PublisherNegotiator` (M). The negotiation lock and the three rollback rules move verbatim.
 - [x] 6. **CS6** [FLU-1066](https://linear.app/stream/issue/FLU-1066): `SessionSignaling` (S). Subscriber offer, ICE both ways, ICE restart, mute state. After CS5.
 - [x] 7. **CS7** [FLU-1067](https://linear.app/stream/issue/FLU-1067): `PublisherConnectionWatchdog` (S).
-- [ ] 8. **CS8** [FLU-1068](https://linear.app/stream/issue/FLU-1068): `SessionTrackController` (M). The suspend-or-start rule written once.
+- [x] 8. **CS8** [FLU-1068](https://linear.app/stream/issue/FLU-1068): `SessionTrackController` (M). The suspend-or-start rule written once.
 - [ ] 9. **CS9** [FLU-1069](https://linear.app/stream/issue/FLU-1069): `SfuEventRouter` (M). The events lock, the dispatch, the state forwards and the manager gate; after CS6 and CS8. Fixes bug 3, which flips its CS1 pin.
 - [ ] 10. **CS10** [FLU-1070](https://linear.app/stream/issue/FLU-1070): `start` and `fastReconnect` on the new parts (M). One manager branch; device test with the FLU-936 simulator before it is marked ready.
 
