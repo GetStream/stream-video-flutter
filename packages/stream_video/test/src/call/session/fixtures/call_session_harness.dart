@@ -70,6 +70,16 @@ void registerCallSessionHarnessFallbacks() {
   registerFallbackValue(CloseCode.normalClosure);
   registerFallbackValue(StreamPeerType.publisher);
   registerFallbackValue(MockTracedPeerConnection());
+  registerFallbackValue(
+    const SfuSubscriberOfferEvent(
+      sdp: '',
+      iceRestart: false,
+      negotiationId: 0,
+    ),
+  );
+  registerFallbackValue(
+    const SfuIceRestartEvent(peerType: StreamPeerType.publisher),
+  );
   final participant = harnessSfuParticipant();
   registerFallbackValue(
     SfuJoinResponseEvent(callState: harnessSfuCallState()),

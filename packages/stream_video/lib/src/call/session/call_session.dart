@@ -1,10 +1,7 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
-import 'package:rxdart/rxdart.dart';
-import 'package:synchronized/synchronized.dart';
 
 import '../../../globals.dart';
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
@@ -32,6 +29,7 @@ import 'publisher_connection_watchdog.dart';
 import 'publisher_negotiator.dart';
 import 'session_signaling.dart';
 import 'session_track_controller.dart';
+import 'sfu_event_router.dart';
 import 'sfu_join_request_builder.dart';
 
 part 'call_session_media.dart';
@@ -165,6 +163,16 @@ class CallSession extends Disposable with _CallSessionMedia {
     logTag: '$_tag-$sessionSeq',
   );
 
+  late final _events = SfuEventRouter(
+    stateManager: stateManager,
+    rtcManager: () => rtcManager,
+    signaling: _signaling,
+    tracks: _tracks,
+    statsReporter: () => statsReporter,
+    tracer: _tracer,
+    logTag: '$_tag-$sessionSeq',
+  );
+
   late final _joinRequestBuilder = SfuJoinRequestBuilder(
     sessionId: sessionId,
     sfuToken: config.sfuToken,
@@ -203,15 +211,11 @@ class CallSession extends Disposable with _CallSessionMedia {
   /// How long a fast reconnect waits for the SFU to answer its join.
   final Duration fastReconnectJoinResponseTimeout;
 
-  final Lock _sfuEventsLock = Lock();
-
   @override
   int zonedTracerSeq = 0;
 
   @override
   RtcManager? rtcManager;
-  BehaviorSubject<RtcManager>? _rtcManagerSubject;
-  StreamSubscription<SfuEvent>? _eventsSubscription;
   StreamSubscription<InternetStatus>? _networkStatusSubscription;
 
   StatsReporter? statsReporter;
@@ -222,9 +226,6 @@ class CallSession extends Disposable with _CallSessionMedia {
   final void Function(String trackId) onSuspendedAudioTrackRecorded;
 
   bool _isLeavingOrClosed = false;
-
-  /// The manager whose subscriber the last join response was applied against.
-  RtcManager? _joinedRtcManager;
 
   SharedEmitter<SfuEvent> get events => sfuWS.events;
 
@@ -289,28 +290,12 @@ class CallSession extends Disposable with _CallSessionMedia {
             'isAnonymousUser: $isAnonymousUser',
       );
 
-      await _eventsSubscription?.cancel();
-      await _rtcManagerSubject?.close();
-
-      _rtcManagerSubject = BehaviorSubject();
-
-      // Buffer sfu events until rtc manager is set
-      final bufferedStream = sfuWS.events
-          .takeWhile((_) => !_rtcManagerSubject!.hasValue)
-          .buffer(_rtcManagerSubject!)
-          .expand((event) => event);
-
-      // Delay rest of the sfu events until rtc manager is set
-      final delayedStream = Rx.combineLatest2(
-        _rtcManagerSubject!,
-        sfuWS.events,
-        (_, event) => event,
-      ).skip(1);
-
-      // Handle buffered events and then listen to sfu events as normal
-      _eventsSubscription = bufferedStream
-          .mergeWith([delayedStream])
-          .listen(_onSfuEvent);
+      await _events.listen(sfuWS.events);
+      // A close during the listen found nothing to dispose yet.
+      if (_isLeavingOrClosed) {
+        await _events.dispose();
+        return _rejectClosedStart('during listen');
+      }
 
       wsJoinStageId = reporter.beginStage(
         callCid,
@@ -448,9 +433,9 @@ class CallSession extends Disposable with _CallSessionMedia {
 
       if (_isLeavingOrClosed) return _rejectClosedStart('after rtcManager');
 
-      _rtcManagerSubject!.add(createdRtcManager);
+      _events.attachManager(createdRtcManager);
 
-      _applyJoinResponse(event);
+      _events.applyJoinedCallState(event.callState);
 
       final environment = ClientEnvironment(
         sfu: config.sfuUrl,
@@ -513,11 +498,6 @@ class CallSession extends Disposable with _CallSessionMedia {
     // Nothing is awaited between sending and subscribing, so the answer
     // cannot slip past.
     return sfuWS.waitForJoinResponse(timeLimit: timeLimit);
-  }
-
-  void _applyJoinResponse(SfuJoinResponseEvent event) {
-    stateManager.sfuPinsUpdated(event.callState.pins);
-    stateManager.sfuE2eeEnabledUpdated(event.callState.e2eeEnabled);
   }
 
   /// Fails the `wsJoin` stage with [error], as a request timeout when the SFU
@@ -630,7 +610,7 @@ class CallSession extends Disposable with _CallSessionMedia {
 
       _logger.v(() => '[fastReconnect] fast-reconnect done');
 
-      _applyJoinResponse(event);
+      _events.applyJoinedCallState(event.callState);
 
       result = Result.success(
         (
@@ -704,7 +684,7 @@ class CallSession extends Disposable with _CallSessionMedia {
 
     _watchdog.cancel();
 
-    await _eventsSubscription?.cancel();
+    await _events.dispose();
     await _networkStatusSubscription?.cancel();
 
     statsReporter?.dispose();
@@ -734,7 +714,7 @@ class CallSession extends Disposable with _CallSessionMedia {
 
       rtcManager = null;
       // Held only to be compared against, so it must not outlive what it names.
-      _joinedRtcManager = null;
+      _events.forgetJoinedManager();
     }
   }
 
@@ -750,116 +730,11 @@ class CallSession extends Disposable with _CallSessionMedia {
   /// Whether the subject that holds SFU events back until `start` sets the
   /// manager is closed; `true` before the first `start`. Tests only.
   @visibleForTesting
-  bool get debugIsRtcManagerSubjectClosed =>
-      _rtcManagerSubject?.isClosed ?? true;
+  bool get debugIsRtcManagerSubjectClosed => _events.isManagerSubjectClosed;
 
   /// Routes [event] through the SFU event handling. Tests only.
   @visibleForTesting
-  Future<void> debugHandleSfuEvent(SfuEvent event) => _onSfuEvent(event);
-
-  Future<void> _onSfuEvent(SfuEvent event) async {
-    _logger.log(event.logPriority, () => '[onSfuEvent] event: $event');
-
-    await _sfuEventsLock.synchronized(() async {
-      if (event is SfuSubscriberOfferEvent) {
-        await _signaling.onSubscriberOffer(event);
-      } else if (event is SfuIceTrickleEvent) {
-        await _signaling.onRemoteIceCandidate(event);
-      } else if (event is SfuParticipantLeftEvent) {
-        await _onParticipantLeft(event);
-      } else if (event is SfuTrackPublishedEvent) {
-        _tracer.trace(TraceTag.trackPublished, event.toJson());
-        await _tracks.onTrackPublished(event);
-      } else if (event is SfuTrackUnpublishedEvent) {
-        _tracer.trace(TraceTag.trackUnpublished, event.toJson());
-        await _tracks.onTrackUnpublished(event);
-      } else if (event is SfuChangePublishQualityEvent) {
-        _tracer.trace(TraceTag.changePublishQuality, event.toJson());
-        await _onPublishQualityChanged(event);
-      } else if (event is SfuChangePublishOptionsEvent) {
-        _tracer.trace(TraceTag.changePublishOptions, event.toJson());
-        await _onPublishOptionsChanged(event);
-      } else if (event is SfuIceRestartEvent) {
-        await _signaling.onIceRestart(event);
-      } else if (event is SfuGoAwayEvent) {
-        _tracer.trace(TraceTag.goAway, event.toJson());
-      } else if (event is SfuErrorEvent) {
-        _tracer.trace(TraceTag.error, event.toJson());
-      } else if (event is SfuCallEndedEvent) {
-        _tracer.trace(TraceTag.callEnded, event.toJson());
-      }
-
-      if (event is SfuJoinResponseEvent) {
-        final manager = rtcManager;
-        stateManager.sfuJoinResponse(
-          event,
-          subscriberReused:
-              event.isReconnected &&
-              manager != null &&
-              identical(manager, _joinedRtcManager),
-        );
-        _joinedRtcManager = manager;
-        // The participant list just landed, so tracks that arrived before it
-        // can finally resolve a user id and attach their decryptor.
-        await rtcManager?.flushPendingDecryptors();
-      } else if (event is SfuParticipantJoinedEvent) {
-        stateManager.sfuParticipantJoined(event);
-        await rtcManager?.flushPendingDecryptors();
-      } else if (event is SfuParticipantUpdatedEvent) {
-        stateManager.sfuParticipantUpdated(event);
-      } else if (event is SfuTrackPublishedEvent) {
-        stateManager.sfuTrackPublished(event);
-        await rtcManager?.flushPendingDecryptors();
-      } else if (event is SfuParticipantLeftEvent) {
-        stateManager.sfuParticipantLeft(event);
-        rtcManager?.discardPendingDecryptors(
-          event.participant.trackLookupPrefix,
-        );
-      } else if (event is SfuConnectionQualityChangedEvent) {
-        _tracer.trace(TraceTag.connectionQualityChanged, event.toJson());
-        stateManager.sfuConnectionQualityChanged(event);
-      } else if (event is SfuAudioLevelChangedEvent) {
-        stateManager.sfuUpdateAudioLevelChanged(event);
-      } else if (event is SfuTrackUnpublishedEvent) {
-        stateManager.sfuTrackUnpublished(event);
-      } else if (event is SfuDominantSpeakerChangedEvent) {
-        stateManager.sfuDominantSpeakerChanged(event);
-      } else if (event is SfuPinsUpdatedEvent) {
-        stateManager.sfuPinsUpdated(event.pins);
-      } else if (event is SfuInboundStateNotificationEvent) {
-        _tracer.trace(TraceTag.inboundVideoState, event.toJson());
-        stateManager.sfuInboundStateNotification(event);
-      }
-    });
-  }
-
-  Future<void> _onParticipantLeft(SfuParticipantLeftEvent event) async {
-    _logger.v(() => '[onParticipantLeft] event: $event');
-    final participant = event.participant;
-    final trackIdPrefix = participant.trackLookupPrefix;
-    await rtcManager?.removeSubscriber(trackIdPrefix);
-  }
-
-  Future<void> _onPublishQualityChanged(
-    SfuChangePublishQualityEvent event,
-  ) async {
-    _logger.d(() => '[onPublishQualityChanged] event: $event');
-
-    final usedCodec =
-        statsReporter?.currentMetrics?.publisher?.videoCodec?.firstOrNull;
-
-    for (final videoSender in event.videoSenders) {
-      await rtcManager?.onPublishQualityChanged(videoSender, usedCodec);
-    }
-  }
-
-  Future<void> _onPublishOptionsChanged(
-    SfuChangePublishOptionsEvent event,
-  ) async {
-    _logger.d(() => '[_onPublishOptionsChanged] event: $event');
-
-    return await rtcManager?.onPublishOptionsChanged(event.publishOptions);
-  }
+  Future<void> debugHandleSfuEvent(SfuEvent event) => _events.onEvent(event);
 
   /// Negotiates [pc], escalating an unresolved track mid.
   @visibleForTesting

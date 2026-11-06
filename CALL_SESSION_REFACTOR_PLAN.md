@@ -40,7 +40,7 @@ people work on this; CS6 needs CS5, CS9 needs CS6 and CS8, CS10 needs all.
 | 6 | CS6 | `refactor/flu-1066-session-signaling` | #1568 |
 | 7 | CS7 | `refactor/flu-1067-publisher-connection-watchdog` | #1569 |
 | 8 | CS8 | `refactor/flu-1068-session-track-controller` | #1571 |
-| 9 | CS9 | `refactor/flu-1069-sfu-event-router` | |
+| 9 | CS9 | `refactor/flu-1069-sfu-event-router` | #1572 |
 | 10 | CS10 | `refactor/flu-1070-call-session-start-fast-reconnect` | |
 
 - [x] 1. **CS1** [FLU-1061](https://linear.app/stream/issue/FLU-1061): characterisation tests for the untested paths (M). Gates every move; pins bugs 1 to 3 and 5 of FLU-1060 as they behave today.
@@ -51,7 +51,7 @@ people work on this; CS6 needs CS5, CS9 needs CS6 and CS8, CS10 needs all.
 - [x] 6. **CS6** [FLU-1066](https://linear.app/stream/issue/FLU-1066): `SessionSignaling` (S). Subscriber offer, ICE both ways, ICE restart, mute state. After CS5.
 - [x] 7. **CS7** [FLU-1067](https://linear.app/stream/issue/FLU-1067): `PublisherConnectionWatchdog` (S).
 - [x] 8. **CS8** [FLU-1068](https://linear.app/stream/issue/FLU-1068): `SessionTrackController` (M). The suspend-or-start rule written once.
-- [ ] 9. **CS9** [FLU-1069](https://linear.app/stream/issue/FLU-1069): `SfuEventRouter` (M). The events lock, the dispatch, the state forwards and the manager gate; after CS6 and CS8. Fixes bug 3, which flips its CS1 pin.
+- [x] 9. **CS9** [FLU-1069](https://linear.app/stream/issue/FLU-1069): `SfuEventRouter` (M). The events lock, the dispatch, the state forwards and the manager gate; after CS6 and CS8. Fixes bug 3, which flips its CS1 pin.
 - [ ] 10. **CS10** [FLU-1070](https://linear.app/stream/issue/FLU-1070): `start` and `fastReconnect` on the new parts (M). One manager branch; device test with the FLU-936 simulator before it is marked ready.
 
 ### After the stack
