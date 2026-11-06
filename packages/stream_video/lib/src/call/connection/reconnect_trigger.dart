@@ -50,6 +50,55 @@ final class PeerConnectionStuck extends ReconnectTrigger {
   String toString() => 'PeerConnectionStuck(${peerConnection.type.name})';
 }
 
+/// No peer connection of [session] has ever connected ICE, and one of them
+/// failed or gathered no local candidates, or the SFU reported a media
+/// transport failure. Repeated, it means the network cannot carry WebRTC.
+@internal
+final class IceNeverConnected extends ReconnectTrigger {
+  const IceNeverConnected(
+    this.session, {
+    required this.otherwise,
+    this.noLocalCandidates = false,
+  });
+
+  final CallSession session;
+
+  /// What asked for the reconnect, judged on its own once a peer connection
+  /// of [session] has connected: the peer connection that failed, or the
+  /// SFU. Null when the cause clears with that connection.
+  final ReconnectTrigger? otherwise;
+
+  /// Whether a peer connection gathered no local candidates.
+  final bool noLocalCandidates;
+
+  /// While no peer connection of [session] has connected: true, or, for
+  /// [noLocalCandidates], until a later gathering round finds candidates.
+  /// Afterwards, what [otherwise] says.
+  @override
+  bool get isStillNeeded {
+    final rtcManager = session.rtcManager;
+    if (rtcManager == null || rtcManager.hasIceEverConnected) {
+      return otherwise?.isStillNeeded ?? false;
+    }
+    return !noLocalCandidates || rtcManager.hasNoLocalCandidates;
+  }
+
+  @override
+  String toString() =>
+      'IceNeverConnected(noLocalCandidates: $noLocalCandidates, '
+      'otherwise: $otherwise)';
+}
+
+/// Whether a [CallSession] has peer connections and none of them has ever
+/// connected ICE.
+@internal
+extension CallSessionIceNeverConnected on CallSession {
+  bool get isIceNeverConnected {
+    final rtcManager = this.rtcManager;
+    return rtcManager != null && !rtcManager.hasIceEverConnected;
+  }
+}
+
 /// The SFU signalling socket of [session] closed or failed.
 @internal
 final class SfuSocketLost extends ReconnectTrigger {

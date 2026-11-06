@@ -109,6 +109,36 @@ void main() {
       expect(button.props.style, StreamButtonStyle.destructive);
     });
 
+    testWidgets('selected marks the button selected', (tester) async {
+      for (final tone in CallFeatureTone.values) {
+        final selected = await pump(tester, selected: true, tone: tone);
+        expect(selected.props.isSelected, isTrue, reason: 'tone $tone');
+
+        final unselected = await pump(tester, selected: false, tone: tone);
+        expect(unselected.props.isSelected, isFalse, reason: 'tone $tone');
+      }
+    });
+
+    testWidgets('selected is announced as selected', (tester) async {
+      final handle = tester.ensureSemantics();
+      await pump(tester, selected: true, tone: .accent);
+
+      expect(
+        tester.getSemantics(find.byType(StreamButton)),
+        matchesSemantics(
+          isButton: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          isFocusable: true,
+          hasTapAction: true,
+          hasFocusAction: true,
+          hasSelectedState: true,
+          isSelected: true,
+        ),
+      );
+      handle.dispose();
+    });
+
     // An unselected feature is the same grey whatever its tone, so a row of
     // them reads as one row until something is switched on.
     testWidgets('unselected is secondary whatever the tone', (tester) async {

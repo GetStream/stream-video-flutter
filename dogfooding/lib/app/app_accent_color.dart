@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import 'app_design.dart';
+
 /// The design system's palettes the app can take its brand color from.
 enum AppAccentColor {
+  /// No palette of its own: each design keeps its own default color.
+  designDefault,
   blue,
   purple,
   violet,
@@ -12,8 +16,9 @@ enum AppAccentColor {
   green,
   cyan;
 
-  /// The palette, ordered light to dark.
-  StreamColorSwatch get palette => switch (this) {
+  /// The palette, ordered light to dark, or null for [designDefault].
+  StreamColorSwatch? get palette => switch (this) {
+    designDefault => null,
     blue => StreamColors.blue,
     purple => StreamColors.purple,
     violet => StreamColors.violet,
@@ -24,20 +29,28 @@ enum AppAccentColor {
     cyan => StreamColors.cyan,
   };
 
-  /// The color a swatch for this palette shows: the accent it gives the
-  /// theme of [brightness].
-  Color swatchColor(Brightness brightness) => switch (brightness) {
-    Brightness.light => palette.shade500,
-    Brightness.dark => palette.shade400,
+  /// The accent this palette gives a theme of [brightness], or null for
+  /// [designDefault].
+  Color? paletteColor(Brightness brightness) => switch (palette) {
+    null => null,
+    final palette => switch (brightness) {
+      Brightness.light => palette.shade500,
+      Brightness.dark => palette.shade400,
+    },
   };
 
-  /// The brand color for a theme of [brightness], or null for blue, which is
-  /// the design system's own brand color.
+  /// The color a swatch for this palette shows: the accent it gives a theme of
+  /// [brightness] in [design].
+  Color swatchColor(Brightness brightness, AppDesign design) =>
+      paletteColor(brightness) ?? design.defaultAccent(brightness);
+
+  /// The brand color for a theme of [brightness], or null for
+  /// [designDefault], which leaves it to the design system.
   ///
   /// A dark theme runs the palette in reverse, as the default brand does.
   StreamColorSwatch? brand(Brightness brightness) {
-    if (this == blue) return null;
     final palette = this.palette;
+    if (palette == null) return null;
 
     return switch (brightness) {
       Brightness.light => palette,

@@ -67,6 +67,12 @@ sealed class DisconnectReason extends Equatable {
     return DisconnectReasonReconnectionFailed();
   }
 
+  /// The network cannot carry WebRTC: the call kept reconnecting without ICE
+  /// ever connecting, up to `CallPreferences.maxIceFailuresWithoutConnect`.
+  factory DisconnectReason.unsupportedNetwork() {
+    return DisconnectReasonUnsupportedNetwork();
+  }
+
   @override
   List<Object?> get props => [];
 }
@@ -240,6 +246,25 @@ final class DisconnectReasonReconnectionFailed extends DisconnectReason {
   @override
   String toString() {
     return 'ReconnectionFailed';
+  }
+}
+
+/// The network cannot carry WebRTC, for example because UDP and TURN are
+/// blocked: the call kept reconnecting without ICE ever connecting, up to
+/// `CallPreferences.maxIceFailuresWithoutConnect`.
+final class DisconnectReasonUnsupportedNetwork extends DisconnectReason {
+  factory DisconnectReasonUnsupportedNetwork() {
+    return _instance;
+  }
+
+  const DisconnectReasonUnsupportedNetwork._internal();
+
+  static const DisconnectReasonUnsupportedNetwork _instance =
+      DisconnectReasonUnsupportedNetwork._internal();
+
+  @override
+  String toString() {
+    return 'UnsupportedNetwork';
   }
 }
 
