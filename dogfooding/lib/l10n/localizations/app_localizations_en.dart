@@ -37,11 +37,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get themeDark => 'Dark';
 
   @override
+  String get designTitle => 'Design';
+
+  @override
+  String get designDescription =>
+      'Choose the style of buttons, switches and fields.';
+
+  @override
+  String get designPackages => 'Built with';
+
+  @override
+  String get designStream => 'Stream';
+
+  @override
+  String get designShad => 'shadcn/ui';
+
+  @override
+  String get designYaru => 'Yaru';
+
+  @override
+  String get designFluent => 'Fluent';
+
+  @override
+  String get designLiquidGlass => 'Liquid Glass';
+
+  @override
+  String get designMaterial3Expressive => 'Material 3 Expressive';
+
+  @override
   String get accentColorTitle => 'Accent Color';
 
   @override
   String get accentColorDescription =>
       'Choose the color of buttons and highlights.';
+
+  @override
+  String get accentColorDefault => 'Default';
 
   @override
   String get accentColorBlue => 'Blue';

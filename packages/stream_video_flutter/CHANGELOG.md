@@ -234,6 +234,8 @@
 
 ### 🐞 Fixed
 
+- Every call control button shows a tooltip.
+- `CallFeatureButton` reports a feature that is on as selected, to assistive technology and to a custom `button` builder.
 - `StreamCallContainer` reports a call's disconnect once. A status the call settled on after it, such as a second disconnect from a race, no longer calls `onCallDisconnected`, or leaves, a second time.
 - The lobby no longer offers a speaker choice on Safari and other WebKit browsers, which play every call on the system default output.
 - The screen share layout puts the participant strip beside or under the share by the space it is given, not by the window.
@@ -402,6 +404,12 @@
 - The participants bar draws 222x125 tiles, centred until they overflow and scaled down only where they would take more than a third of the view.
 - `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
 - Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.
+
+## Upcoming (minor)
+
+### 🐞 Fixed
+
+- [iOS] A participant's video or screen share no longer stays blank after returning from picture-in-picture.
 
 ## 1.7.2
 

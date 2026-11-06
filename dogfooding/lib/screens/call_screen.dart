@@ -190,9 +190,9 @@ class _CallScreenState extends State<CallScreen>
     _devices.dispose();
     _panelAnimation.dispose();
     _panelController.dispose();
-    widget.call.leave(
-      reason: const DisconnectReason.left(initiator: LeaveInitiator.app),
-    );
+    // Covers every way out of the screen (host ended the call, connection
+    // lost, back navigation), not only the leave button.
+    unawaited(_leaveCall(widget.call, initiator: LeaveInitiator.app));
     _userChatRepo.disconnectUser();
     _videoEffectsManager.dispose();
     super.dispose();
@@ -222,6 +222,31 @@ class _CallScreenState extends State<CallScreen>
         behavior: SnackBarBehavior.floating,
       ),
     );
+  }
+
+  /// Releases the natively registered filter processors before leaving the
+  /// call; they are registered again the next time a filter is applied.
+  ///
+  /// This has to happen before [Call.leave]: once the local video track is
+  /// torn down, the effects attached to it can no longer be detached, and the
+  /// processors stay alive. A failed release is logged and does not block
+  /// leaving.
+  Future<void> _leaveCall(
+    Call call, {
+    required LeaveInitiator initiator,
+  }) async {
+    try {
+      // Bounded so a hanging native call cannot keep the call joined.
+      await _videoEffectsManager.unregisterAllFilters().timeout(
+        const Duration(seconds: 3),
+      );
+    } catch (e, st) {
+      _logger.e(() => 'Failed to release video effects: $e\n$st');
+    } finally {
+      await call.leave(
+        reason: DisconnectReason.left(initiator: initiator),
+      );
+    }
   }
 
   Future<void> _connectChatChannel() async {
@@ -551,11 +576,16 @@ class _CallScreenState extends State<CallScreen>
             menuDirection: StreamMenuDirection.up,
           ),
           StreamRecordingButton(call: call),
-          StreamLeaveCallButton(call: call),
+          StreamLeaveCallButton(
+            call: call,
+            onLeaveCallTap: () =>
+                unawaited(_leaveCall(call, initiator: LeaveInitiator.user)),
+          ),
         ],
         trailing: [
           CallFeatureButton(
             icon: Icon(context.streamIcons.statsFill),
+            tooltip: 'Stats',
             selected: _openPanel == CallSidePanel.stats,
             onPressed: () => _togglePanel(CallSidePanel.stats),
           ),
@@ -736,6 +766,9 @@ class _CallScreenState extends State<CallScreen>
                 return CallAppBar(
                   call: call,
                   showLeaveCallAction: isCompact,
+                  onLeaveCallTap: () => unawaited(
+                    _leaveCall(call, initiator: LeaveInitiator.user),
+                  ),
                   leading: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -822,6 +855,7 @@ class __ShowChatButtonState extends State<_ShowChatButton> {
   Widget build(BuildContext context) {
     return CallFeatureButton(
       icon: Icon(context.streamIcons.messageBubblesFill),
+      tooltip: 'Chat',
       selected: widget.selected,
       badge: CallControlNotificationBadge(count: _unreadCount),
       onPressed: widget.channel != null ? widget.onPressed : null,

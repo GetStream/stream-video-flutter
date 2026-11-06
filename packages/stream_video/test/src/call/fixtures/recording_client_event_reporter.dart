@@ -3,10 +3,10 @@ import 'package:stream_video/src/telemetry/client_event_reporter.dart';
 import 'package:stream_video/src/telemetry/client_event_types.dart';
 import 'package:stream_video/stream_video.dart';
 
-/// Reporter that records the aborts and join attempts a call reports.
+/// Reporter that records the aborts, join attempts and stage outcomes a
+/// call reports, then forwards each call to the no-op reporter.
 ///
-/// Every other member delegates to the no-op reporter. Set
-/// [onReportJoinAttempt] to run code, such as a throw, inside
+/// Set [onReportJoinAttempt] to run code, such as a throw, inside
 /// [reportJoinAttempt].
 class RecordingClientEventReporter implements ClientEventReporter {
   RecordingClientEventReporter({this.onReportJoinAttempt});
@@ -36,6 +36,12 @@ class RecordingClientEventReporter implements ClientEventReporter {
   /// The code of every stage failed directly, in order. Aborts are in
   /// [aborts] instead.
   final stageFailures = <ClientEventStandardCode>[];
+
+  /// The error of every stage failed through [failStageWithError], in order.
+  final stageErrors = <Object?>[];
+
+  /// The outcome of every completed stage, in order.
+  final completedStages = <ClientEventOutcome>[];
 
   @override
   void abort(StreamCallCid cid, ClientEventFailure failure) {
@@ -99,13 +105,16 @@ class RecordingClientEventReporter implements ClientEventReporter {
     int retryCount = 0,
     ClientEventFailure? failure,
     ClientEventDetails details = const ClientEventDetails(),
-  }) => _delegate.completeStage(
-    stageId,
-    outcome: outcome,
-    retryCount: retryCount,
-    failure: failure,
-    details: details,
-  );
+  }) {
+    completedStages.add(outcome);
+    _delegate.completeStage(
+      stageId,
+      outcome: outcome,
+      retryCount: retryCount,
+      failure: failure,
+      details: details,
+    );
+  }
 
   @override
   void failStage(
@@ -129,12 +138,15 @@ class RecordingClientEventReporter implements ClientEventReporter {
     Object? error, {
     int retryCount = 0,
     ClientEventDetails details = const ClientEventDetails(),
-  }) => _delegate.failStageWithError(
-    stageId,
-    error,
-    retryCount: retryCount,
-    details: details,
-  );
+  }) {
+    stageErrors.add(error);
+    _delegate.failStageWithError(
+      stageId,
+      error,
+      retryCount: retryCount,
+      details: details,
+    );
+  }
 
   @override
   void reportEvent(

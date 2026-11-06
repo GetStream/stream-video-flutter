@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../stream_video_flutter.dart';
+import '../../l10n/localization_extension.dart';
 
 /// A call control that flips between the front and back camera.
 class StreamFlipCameraButton extends StatelessWidget {
@@ -62,6 +63,7 @@ class StreamFlipCameraButton extends StatelessWidget {
               ? frontCameraIcon ?? icons.cameraFlipFill
               : backCameraIcon ?? icons.cameraFlipFill,
         ),
+        tooltip: context.translations.callControlsFlipCamera,
         onPressed:
             trackState?.muted ==
                 false //

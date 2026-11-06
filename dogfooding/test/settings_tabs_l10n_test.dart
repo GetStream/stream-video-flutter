@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/app/app_accent_color.dart';
+import 'package:flutter_dogfooding/app/app_design.dart';
 import 'package:flutter_dogfooding/app/app_display_settings.dart';
 import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
 import 'package:flutter_dogfooding/di/injector.dart';
@@ -63,9 +64,29 @@ void main() {
     expect(find.byIcon(const StreamIcons().settings), findsOneWidget);
   });
 
+  testWidgets('credits the packages of a design other than Stream', (
+    tester,
+  ) async {
+    await pump(tester, const Locale('en'));
+    expect(find.textContaining('Built with'), findsNothing);
+
+    await locator.get<AppDisplaySettings>().setDesign(AppDesign.fluent);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Built with'), findsOneWidget);
+    expect(find.text('fluent_ui'), findsOneWidget);
+    expect(find.text('fluentui_system_icons'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Semantics && (w.properties.link ?? false),
+      ),
+      findsNWidgets(2),
+    );
+  });
+
   testWidgets('picking an accent color names it and keeps it', (tester) async {
     await pump(tester, const Locale('en'));
-    expect(find.text('Blue'), findsOneWidget);
+    expect(find.text('Default'), findsOneWidget);
 
     // Through the semantics tree, as a screen reader would.
     tester.semantics.tap(find.semantics.byLabel('Violet'));
@@ -76,7 +97,7 @@ void main() {
       AppAccentColor.violet,
     );
     expect(find.text('Violet'), findsOneWidget);
-    expect(find.text('Blue'), findsNothing);
+    expect(find.text('Default'), findsNothing);
   });
 
   testWidgets('the accent colors fit on one line', (tester) async {
@@ -84,12 +105,15 @@ void main() {
 
     final tops = {
       for (final color in AppAccentColor.values)
-        tester.getTopLeft(find.bySemanticsLabel(color.name.capitalized)).dy,
+        tester.getTopLeft(find.bySemanticsLabel(color.label)).dy,
     };
     expect(tops, hasLength(1));
   });
 }
 
-extension on String {
-  String get capitalized => this[0].toUpperCase() + substring(1);
+extension on AppAccentColor {
+  String get label => switch (this) {
+    AppAccentColor.designDefault => 'Default',
+    _ => name[0].toUpperCase() + name.substring(1),
+  };
 }
