@@ -33,6 +33,7 @@ jobs:
             ci
             deps
             repo
+            push
             samples
           requireScope: true
         env:
@@ -47,7 +48,8 @@ jobs:
           scopes: |
             {
               "llc": "packages/stream_video",
-              "ui": "packages/stream_video_flutter"
+              "ui": "packages/stream_video_flutter",
+              "push": "packages/stream_video_push_notification"
             }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
