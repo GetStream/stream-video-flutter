@@ -13,9 +13,9 @@ extension StreamVideoCallkitManager {
             name: AVAudioSession.interruptionNotification, object: self, userInfo: userInfo)
     }
 
-    /// Applies `data`'s audio session options, or the stored call's when `data` is nil.
+    /// Applies `data`'s audio session options, or the last options' when `data` is nil.
     func configureAudioSession(_ data: CallData? = nil) {
-        let data = data ?? self.data
+        let data = data ?? store.lastOptions
         if data?.configureAudioSession != false {
             let session = AVAudioSession.sharedInstance()
             do {
@@ -76,25 +76,11 @@ extension StreamVideoCallkitManager {
     }
 
     public func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
-        if self.answerCall?.hasConnected ?? false {
+        if store.hasConnectedCall {
             sendDefaultAudioInterruptionNofificationToStartAudioResource()
             return
         }
-        if self.outgoingCall?.hasConnected ?? false {
-            sendDefaultAudioInterruptionNofificationToStartAudioResource()
-            return
-        }
-        self.outgoingCall?.startCall(withAudioSession: audioSession) { success in
-            if success {
-                self.callController.addCall(self.outgoingCall!)
-                self.outgoingCall?.startAudio()
-            }
-        }
-        self.answerCall?.answerCall(withAudioSession: audioSession) { success in
-            if success {
-                self.answerCall?.startAudio()
-            }
-        }
+        apply(store.audioActivated())
         sendDefaultAudioInterruptionNofificationToStartAudioResource()
         configureAudioSession()
 
@@ -104,7 +90,7 @@ extension StreamVideoCallkitManager {
     }
 
     public func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {
-        if self.outgoingCall?.isOnHold ?? false || self.answerCall?.isOnHold ?? false {
+        if store.hasHeldCall {
             print("Call is on hold")
             return
         }
