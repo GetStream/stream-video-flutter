@@ -3,31 +3,31 @@ library flutter_webrtc;
 export 'package:stream_webrtc_interface/stream_webrtc_interface.dart'
     hide MediaDevices, MediaRecorder, Navigator;
 
-export 'src/desktop_capturer.dart';
-export 'src/e2ee/encryption_manager.dart';
-export 'src/e2ee/encryption_types.dart';
-export 'src/helper.dart';
-export 'src/media_devices.dart';
-export 'src/media_recorder.dart';
-export 'src/native/adapter_type.dart';
-export 'src/native/android/audio_configuration.dart';
-export 'src/native/audio_management.dart';
-export 'src/native/camera_utils.dart';
-export 'src/native/factory_impl.dart'
-    if (dart.library.js_interop) 'src/web/factory_impl.dart';
-export 'src/native/ios/audio_configuration.dart';
-export 'src/native/ios/audio_management.dart';
-export 'src/native/native_peer_connection_factory.dart'
-    if (dart.library.js_interop) 'src/web/native_peer_connection_factory.dart';
-export 'src/native/rtc_video_platform_view.dart';
-export 'src/native/rtc_video_platform_view_controller.dart';
-export 'src/native/rtc_video_renderer_impl.dart'
-    if (dart.library.js_interop) 'src/web/rtc_video_renderer_impl.dart';
-export 'src/native/rtc_video_view_impl.dart'
-    if (dart.library.js_interop) 'src/web/rtc_video_view_impl.dart';
-export 'src/native/utils.dart'
-    if (dart.library.js_interop) 'src/web/utils.dart';
-export 'src/video_renderer_extension.dart';
+export 'src/third_party/flutter_webrtc/desktop_capturer.dart';
+export 'src/third_party/flutter_webrtc/e2ee/encryption_manager.dart';
+export 'src/third_party/flutter_webrtc/e2ee/encryption_types.dart';
+export 'src/third_party/flutter_webrtc/helper.dart';
+export 'src/third_party/flutter_webrtc/media_devices.dart';
+export 'src/third_party/flutter_webrtc/media_recorder.dart';
+export 'src/third_party/flutter_webrtc/native/adapter_type.dart';
+export 'src/third_party/flutter_webrtc/native/android/audio_configuration.dart';
+export 'src/third_party/flutter_webrtc/native/audio_management.dart';
+export 'src/third_party/flutter_webrtc/native/camera_utils.dart';
+export 'src/third_party/flutter_webrtc/native/factory_impl.dart'
+    if (dart.library.js_interop) 'src/third_party/flutter_webrtc/web/factory_impl.dart';
+export 'src/third_party/flutter_webrtc/native/ios/audio_configuration.dart';
+export 'src/third_party/flutter_webrtc/native/ios/audio_management.dart';
+export 'src/third_party/flutter_webrtc/native/native_peer_connection_factory.dart'
+    if (dart.library.js_interop) 'src/third_party/flutter_webrtc/web/native_peer_connection_factory.dart';
+export 'src/third_party/flutter_webrtc/native/rtc_video_platform_view.dart';
+export 'src/third_party/flutter_webrtc/native/rtc_video_platform_view_controller.dart';
+export 'src/third_party/flutter_webrtc/native/rtc_video_renderer_impl.dart'
+    if (dart.library.js_interop) 'src/third_party/flutter_webrtc/web/rtc_video_renderer_impl.dart';
+export 'src/third_party/flutter_webrtc/native/rtc_video_view_impl.dart'
+    if (dart.library.js_interop) 'src/third_party/flutter_webrtc/web/rtc_video_view_impl.dart';
+export 'src/third_party/flutter_webrtc/native/utils.dart'
+    if (dart.library.js_interop) 'src/third_party/flutter_webrtc/web/utils.dart';
+export 'src/third_party/flutter_webrtc/video_renderer_extension.dart';
 
 const String androidWebRTCVersion = '145.17.0';
 const String iosWebRTCVersion = '145.17.0';

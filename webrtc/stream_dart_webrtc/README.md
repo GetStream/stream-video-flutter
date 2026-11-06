@@ -11,7 +11,7 @@ This library will be used for [flutter-webrtc](https://github.com/flutter-webrtc
 ## compile E2EE worker
 
 ```bash
-dart compile js ./lib/src/e2ee.worker/e2ee.worker.dart -o web/e2ee.worker.dart.js
+dart compile js ./lib/src/third_party/dart_webrtc/e2ee.worker/e2ee.worker.dart -o web/e2ee.worker.dart.js
 ```
 
 ## How to develop
