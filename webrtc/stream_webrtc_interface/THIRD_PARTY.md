@@ -6,7 +6,7 @@ These files in the package root come from [webrtc-interface](https://github.com/
 - Baseline: webrtc-interface v1.5.1 (commit `3ab237b`)
 - Copied into this repository: 2026-10-22
 - Copyright holder: (c) 2021 Flutter WebRTC
-- Licence: MIT, see `LICENSE`
+- Licence: MIT, see `LICENSE-MIT`
 
 This is not a hermetic snapshot: the code keeps being modified in this repository, and those changes stay under the MIT licence.
 
@@ -14,4 +14,9 @@ Files that are not on this list are Stream code, under the licence in the packag
 
 ## Files
 
+- `.gitignore`
+- `CHANGELOG.md`
+- `README.md`
 - `analysis_options.yaml`
+- `lib/stream_webrtc_interface.dart`
+- `pubspec.yaml`
