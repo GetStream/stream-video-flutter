@@ -4,6 +4,7 @@
 [Unreleased]
 
 * First version as `stream_dart_webrtc`, Stream's fork of `dart_webrtc` 1.8.2.
+* Licensed under the Stream licence; the code from upstream keeps its MIT licence (see `LICENSE`).
 
 [1.8.2] - 2026-09-04
 

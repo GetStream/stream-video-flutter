@@ -4,6 +4,7 @@
 [Unreleased]
 
 * First version as `stream_webrtc_interface`, Stream's fork of `webrtc_interface` 1.5.1.
+* Licensed under the Stream licence; the code from upstream keeps its MIT licence (see `LICENSE`).
 
 [1.5.1] - 2026-03-16
 
