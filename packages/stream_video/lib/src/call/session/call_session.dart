@@ -4,7 +4,6 @@ import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:synchronized/synchronized.dart';
 
 import '../../../globals.dart';
@@ -29,6 +28,7 @@ import '../stats/stats_reporter.dart';
 import '../stats/trace_tag.dart';
 import '../stats/tracer.dart';
 import 'call_session_config.dart';
+import 'publisher_connection_watchdog.dart';
 import 'publisher_negotiator.dart';
 import 'session_signaling.dart';
 import 'sfu_join_request_builder.dart';
@@ -38,7 +38,6 @@ part 'call_session_media.dart';
 const _tag = 'SV:CallSession';
 
 const _migrationCompleteEventTimeout = Duration(seconds: 7);
-const _publisherConnectionCheckDelay = Duration(seconds: 15);
 
 /// A fast reconnect the SFU answered with `reconnected: false`.
 ///
@@ -137,6 +136,15 @@ class CallSession extends Disposable with _CallSessionMedia {
     logTag: '$_tag-$sessionSeq',
   );
 
+  late final _watchdog = PublisherConnectionWatchdog(
+    publisher: () => rtcManager?.publisher,
+    negotiator: _negotiator,
+    onReconnectionNeeded: onReconnectionNeeded,
+    tracer: _tracer,
+    isClosed: () => _isLeavingOrClosed,
+    logTag: '$_tag-$sessionSeq',
+  );
+
   late final _joinRequestBuilder = SfuJoinRequestBuilder(
     sessionId: sessionId,
     sfuToken: config.sfuToken,
@@ -192,8 +200,6 @@ class CallSession extends Disposable with _CallSessionMedia {
   /// audio track arrives while audio is suspended. The owning [Call] uses this
   /// to record the track in its tracking map.
   final void Function(String trackId) onSuspendedAudioTrackRecorded;
-
-  Timer? _publisherConnectionCheckTimer;
 
   bool _isLeavingOrClosed = false;
 
@@ -656,86 +662,9 @@ class CallSession extends Disposable with _CallSessionMedia {
     }
   }
 
-  /// Checks after [_publisherConnectionCheckDelay] that the publisher finished
-  /// connecting.
-  ///
-  /// Recovers two stalls: ICE still `new` (likely no SDP answer) → rejoin;
-  /// signaling `have-local-offer` (SetPublisher incomplete, no further
-  /// negotiation) → renegotiate, then rejoin if needed.
-  void startPublisherConnectionCheck() {
-    _publisherConnectionCheckTimer?.cancel();
-
-    _publisherConnectionCheckTimer = Timer(
-      _publisherConnectionCheckDelay,
-      () async {
-        if (_isLeavingOrClosed) return;
-
-        final publisher = rtcManager?.publisher;
-        if (publisher == null) return;
-
-        final iceState = publisher.pc.iceConnectionState;
-        if (iceState == rtc.RTCIceConnectionState.RTCIceConnectionStateNew) {
-          _logger.w(
-            () =>
-                '[publisherConnectionCheck] publisher ICE still in "new" '
-                'state after ${_publisherConnectionCheckDelay.inSeconds}s '
-                '— triggering reconnection',
-          );
-          _tracer.trace(TraceTag.publisherConnectionCheckStalled, {
-            'iceState': iceState.toString(),
-            'timeoutSeconds': _publisherConnectionCheckDelay.inSeconds,
-          });
-
-          onReconnectionNeeded(
-            publisher,
-            SfuReconnectionStrategy.rejoin,
-            ReconnectionNeededReason.stuck,
-          );
-          return;
-        }
-
-        // Signaling stall: local offer created but SetPublisher never completed,
-        // leaving the peer connection wedged in `have-local-offer`. Negotiation
-        // won't resume on its own, so renegotiate and fall back to a reconnect
-        // if the recovery fails.
-        final signalingState = publisher.pc.signalingState;
-        if (signalingState ==
-            rtc.RTCSignalingState.RTCSignalingStateHaveLocalOffer) {
-          _logger.w(
-            () =>
-                '[publisherConnectionCheck] publisher stuck in '
-                '"have-local-offer" after '
-                '${_publisherConnectionCheckDelay.inSeconds}s — renegotiating',
-          );
-          _tracer.trace(TraceTag.publisherConnectionCheckStalled, {
-            'signalingState': signalingState.toString(),
-            'timeoutSeconds': _publisherConnectionCheckDelay.inSeconds,
-          });
-
-          final result = await _negotiator.negotiate(publisher);
-          if (result.isFailure && !_isLeavingOrClosed) {
-            _logger.w(
-              () =>
-                  '[publisherConnectionCheck] recovery renegotiation failed '
-                  '(${result.getErrorOrNull()}) — triggering fast reconnect',
-            );
-            onReconnectionNeeded(
-              publisher,
-              SfuReconnectionStrategy.fast,
-              ReconnectionNeededReason.stuck,
-            );
-          }
-          return;
-        }
-
-        _logger.v(
-          () =>
-              '[publisherConnectionCheck] publisher ICE state: '
-              '$iceState — OK',
-        );
-      },
-    );
-  }
+  /// Arms the [PublisherConnectionWatchdog] check that the publisher
+  /// finished connecting.
+  void startPublisherConnectionCheck() => _watchdog.start();
 
   void leave({String? reason}) {
     _logger.d(() => '[leave] reason: $reason');
@@ -753,7 +682,7 @@ class CallSession extends Disposable with _CallSessionMedia {
     );
     _isLeavingOrClosed = true;
 
-    _publisherConnectionCheckTimer?.cancel();
+    _watchdog.cancel();
 
     await _eventsSubscription?.cancel();
     await _networkStatusSubscription?.cancel();
