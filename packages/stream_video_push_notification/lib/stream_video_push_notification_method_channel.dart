@@ -1,6 +1,5 @@
 // ignore_for_file: avoid_dynamic_calls
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
