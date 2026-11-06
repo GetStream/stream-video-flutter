@@ -22,6 +22,7 @@
 
 - [Register](https://getstream.io/video/) to get an API key for Stream Video
 - [Sample apps](https://github.com/GetStream/flutter-video-samples)
+- [Web Demo](https://flutter.getstream.io/video/) of the [dogfooding app](dogfooding)
 
 This repository contains code for our [Dart](https://dart.dev/) and [Flutter](https://flutter.dev/) video clients.
 
