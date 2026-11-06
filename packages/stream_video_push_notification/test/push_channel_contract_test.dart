@@ -3,16 +3,21 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video_push_notification/src/stream_video_call_event.dart';
 
-// The wire contract between the Dart package and its two native plugins:
+// The names on the wire between the Dart package and its two native plugins:
 // the method names Dart invokes, the method names each platform handles, and
 // the event names each platform declares.
 //
 // The three sides are coupled by bare strings in three languages, so nothing
 // else fails when one of them drifts. This test reads the names out of the
-// Dart, Swift and Kotlin sources and pins them against the sets below, which
-// double as the contract document. A PR that changes the contract on purpose
-// updates these sets in the same change; a PR that changes it by accident
-// fails here.
+// Dart, Swift and Kotlin sources and pins them against the sets below. A PR
+// that renames or drops one on purpose updates these sets in the same change;
+// a PR that does it by accident fails here.
+//
+// What it does not pin: that an event is actually sent (a declared constant
+// passes even when no `sendEvent` uses it), and the keys of method arguments
+// and event bodies. The body of the call events is pinned separately, by the
+// per-platform payloads in `test/fixtures/ringing_events/` that both sides of
+// the channel test against.
 //
 // "Handled" means the native switch has a case for the name, not that the
 // case does anything: a few iOS cases answer `true` and stop.
