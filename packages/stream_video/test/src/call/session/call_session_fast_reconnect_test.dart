@@ -218,6 +218,7 @@ void main() {
         );
 
         expect(result.isFailure, isTrue);
+        verifyNever(harness.sfuWS.recreate);
         expect(harness.takeTraceTags(), [
           TraceTag.fastReconnect,
           TraceTag.fastReconnectFailure,
@@ -249,6 +250,22 @@ void main() {
       expect(request.unifiedSessionId, 'unified');
       expect(request.preferredPublishOptions.single.codec.name, 'vp8');
       expect(request.preferredSubscribeOptions, isEmpty);
+    });
+
+    test('carries the publish options as they are once the socket is '
+        'back', () async {
+      final harness = _connectedHarness();
+      when(harness.sfuWS.recreate).thenAnswer((_) async {
+        when(
+          () => harness.rtcManager.publishOptions,
+        ).thenReturn(harnessPublishOptions);
+        return const Result.success(none);
+      });
+
+      await harness.session.fastReconnect(reconnectDetails: _reconnectDetails);
+
+      final request = harness.joinRequests.single;
+      expect(request.preferredPublishOptions.single.codec.name, 'vp8');
     });
   });
 

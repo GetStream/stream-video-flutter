@@ -11,7 +11,6 @@ import 'package:synchronized/synchronized.dart';
 import '../../../globals.dart';
 import '../../../protobuf/video/sfu/event/events.pb.dart' as sfu_events;
 import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
-import '../../../protobuf/video/sfu/models/models.pbenum.dart';
 import '../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
 import '../../../stream_video.dart';
 import '../../errors/stream_video_exception_composer.dart';
@@ -34,6 +33,7 @@ import '../stats/stats_reporter.dart';
 import '../stats/trace_tag.dart';
 import '../stats/tracer.dart';
 import 'call_session_config.dart';
+import 'sfu_join_request_builder.dart';
 
 part 'call_session_media.dart';
 
@@ -123,6 +123,13 @@ class CallSession extends Disposable with _CallSessionMedia {
   @override
   late final _logger = taggedLogger(tag: '$_tag-$sessionSeq');
 
+  late final _joinRequestBuilder = SfuJoinRequestBuilder(
+    sessionId: sessionId,
+    sfuToken: config.sfuToken,
+    pcFactory: rtcManagerFactory.pcFactory,
+    clientPublishOptions: clientPublishOptions,
+  );
+
   final StreamCallCid callCid;
   final int sessionSeq;
   final String sessionId;
@@ -210,23 +217,15 @@ class CallSession extends Disposable with _CallSessionMedia {
     int? reconnectAttempts,
     String? reason,
   }) async {
-    final announcedTracks = await rtcManager?.getAnnouncedTracksForReconnect();
-
-    final subscribedTracks = dynascaleManager
-        .getTrackSubscriptions(ignoreOverride: true)
-        .values
-        .toList()
-        .toDTO();
-
-    return sfu_events.ReconnectDetails(
-      strategy: strategy.toDto(),
-      announcedTracks: announcedTracks?.toDTO(),
-      subscriptions: subscribedTracks,
-      previousSessionId: strategy == SfuReconnectionStrategy.rejoin
-          ? sessionId
-          : null,
-      fromSfuId: migratingFromSfuId,
-      reconnectAttempt: reconnectAttempts,
+    return _joinRequestBuilder.buildReconnectDetails(
+      strategy,
+      announcedTracks: await rtcManager?.getAnnouncedTracksForReconnect(),
+      subscriptions: dynascaleManager
+          .getTrackSubscriptions(ignoreOverride: true)
+          .values
+          .toList(),
+      migratingFromSfuId: migratingFromSfuId,
+      reconnectAttempts: reconnectAttempts,
       reason: reason,
     );
   }
@@ -296,47 +295,17 @@ class CallSession extends Disposable with _CallSessionMedia {
 
       _logger.v(() => '[start] sfu connected');
 
-      final pcFactory = rtcManagerFactory.pcFactory;
-      final subscriberSdp = await pcFactory.getGenericSdp(
-        rtc.TransceiverDirection.RecvOnly,
-      );
-      final publisherSdp = await pcFactory.getGenericSdp(
-        rtc.TransceiverDirection.SendOnly,
+      final joinRequest = await _joinRequestBuilder.build(
+        reconnectDetails: reconnectDetails,
+        capabilities: capabilities,
+        unifiedSessionId: unifiedSessionId,
+        currentPublishOptions: rtcManager?.publishOptions,
       );
 
       _logger.v(
         () =>
-            '[start] subscriberSdp.len: ${subscriberSdp.length}, '
-            'publisherSdp.len: ${publisherSdp.length}',
-      );
-
-      final isReconnecting =
-          reconnectDetails != null &&
-          reconnectDetails.strategy !=
-              WebsocketReconnectStrategy
-                  .WEBSOCKET_RECONNECT_STRATEGY_UNSPECIFIED;
-
-      final preferredPublishOptions = isReconnecting
-          ? rtcManager?.publishOptions.map((o) => o.toDTO())
-          : clientPublishOptions?.getPreferredPublishOptions();
-
-      final preferredSubscribeOptions = isReconnecting
-          ? null
-          : clientPublishOptions?.getPreferredSubscriberOptions();
-
-      final joinRequest = sfu_events.JoinRequest(
-        clientDetails: clientDetails,
-        token: config.sfuToken,
-        sessionId: sessionId,
-        subscriberSdp: subscriberSdp,
-        publisherSdp: publisherSdp,
-        reconnectDetails: reconnectDetails,
-        preferredPublishOptions: preferredPublishOptions,
-        preferredSubscribeOptions: preferredSubscribeOptions,
-        capabilities: capabilities.map((c) => c.toDTO()).toList(),
-        source:
-            sfu_models.ParticipantSource.PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
-        unifiedSessionId: unifiedSessionId,
+            '[start] subscriberSdp.len: ${joinRequest.subscriberSdp.length}, '
+            'publisherSdp.len: ${joinRequest.publisherSdp.length}',
       );
 
       _tracer.trace(TraceTag.joinRequest, joinRequest.toJson());
@@ -543,14 +512,6 @@ class CallSession extends Disposable with _CallSessionMedia {
 
       _tracer.trace(TraceTag.fastReconnect, reconnectDetails.toJson());
 
-      final pcFactory = rtcManagerFactory.pcFactory;
-      final subscriberSdp = await pcFactory.getGenericSdp(
-        rtc.TransceiverDirection.RecvOnly,
-      );
-      final publisherSdp = await pcFactory.getGenericSdp(
-        rtc.TransceiverDirection.SendOnly,
-      );
-
       Result<({SfuCallState callState, Duration fastReconnectDeadline})?>?
       result;
 
@@ -561,6 +522,9 @@ class CallSession extends Disposable with _CallSessionMedia {
         _tracer.trace(TraceTag.fastReconnectFailure, error.toString());
         return Result.failure(error);
       }
+
+      // Fails before the socket is touched when the SDPs cannot be made.
+      await _joinRequestBuilder.prepareSdps();
 
       _logger.d(() => '[fastReconnect] sfu not connected, recreating');
       final wsResult = await sfuWS.recreate();
@@ -573,25 +537,16 @@ class CallSession extends Disposable with _CallSessionMedia {
       }
 
       _logger.d(() => '[fastReconnect] sfu connected, sending join request');
+      // Reads the publish options as they are once the socket is back.
+      final joinRequest = await _joinRequestBuilder.build(
+        reconnectDetails: reconnectDetails,
+        capabilities: capabilities,
+        unifiedSessionId: unifiedSessionId,
+        currentPublishOptions: rtcManager?.publishOptions,
+      );
+
       final sendResult = sfuWS.send(
-        sfu_events.SfuRequest(
-          joinRequest: sfu_events.JoinRequest(
-            clientDetails: clientDetails,
-            token: config.sfuToken,
-            sessionId: sessionId,
-            subscriberSdp: subscriberSdp,
-            publisherSdp: publisherSdp,
-            reconnectDetails: reconnectDetails,
-            preferredPublishOptions: rtcManager?.publishOptions.map(
-              (o) => o.toDTO(),
-            ),
-            source: sfu_models
-                .ParticipantSource
-                .PARTICIPANT_SOURCE_WEBRTC_UNSPECIFIED,
-            capabilities: capabilities.map((c) => c.toDTO()).toList(),
-            unifiedSessionId: unifiedSessionId,
-          ),
-        ),
+        sfu_events.SfuRequest(joinRequest: joinRequest),
       );
 
       if (sendResult is Failure) {
