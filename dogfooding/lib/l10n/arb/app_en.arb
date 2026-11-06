@@ -36,6 +36,42 @@
   "@themeDark": {
     "description": "The dark theme choice."
   },
+  "designTitle": "Design",
+  "@designTitle": {
+    "description": "The heading over the design select, which picks the design system the app's components are drawn with."
+  },
+  "designDescription": "Choose the style of buttons, switches and fields.",
+  "@designDescription": {
+    "description": "Explains the design select."
+  },
+  "designPackages": "Built with",
+  "@designPackages": {
+    "description": "Precedes the pub.dev packages a design is drawn with."
+  },
+  "designStream": "Stream",
+  "@designStream": {
+    "description": "The design choice for Stream's own design system. A product name, not translated."
+  },
+  "designShad": "shadcn/ui",
+  "@designShad": {
+    "description": "The design choice for the shadcn/ui design system. A product name, not translated."
+  },
+  "designYaru": "Yaru",
+  "@designYaru": {
+    "description": "The design choice for Ubuntu's Yaru design system. A product name, not translated."
+  },
+  "designFluent": "Fluent",
+  "@designFluent": {
+    "description": "The design choice for Microsoft's Fluent design system. A product name, not translated."
+  },
+  "designLiquidGlass": "Liquid Glass",
+  "@designLiquidGlass": {
+    "description": "The design choice for Apple's Liquid Glass design. A product name, not translated."
+  },
+  "designMaterial3Expressive": "Material 3 Expressive",
+  "@designMaterial3Expressive": {
+    "description": "The design choice for Google's Material 3 Expressive design. A product name, not translated."
+  },
   "accentColorTitle": "Accent Color",
   "@accentColorTitle": {
     "description": "The heading over the accent color swatches."
@@ -43,6 +79,10 @@
   "accentColorDescription": "Choose the color of buttons and highlights.",
   "@accentColorDescription": {
     "description": "Explains the accent color swatches."
+  },
+  "accentColorDefault": "Default",
+  "@accentColorDefault": {
+    "description": "The accent color choice that keeps the design's own default color."
   },
   "accentColorBlue": "Blue",
   "@accentColorBlue": {

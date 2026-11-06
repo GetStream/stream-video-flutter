@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../../l10n/localization_extension.dart';
 
 /// A call control that starts and stops screen sharing
 class StreamScreenShareButton extends StatelessWidget {
@@ -71,6 +72,7 @@ class StreamScreenShareButton extends StatelessWidget {
             ? enabledScreenShareIcon ?? presentIcon
             : disabledScreenShareIcon ?? presentIcon,
       ),
+      tooltip: context.translations.callControlsToggleScreenShare,
       selected: enabled,
       onPressed: () => toggleScreenShare(
         context,

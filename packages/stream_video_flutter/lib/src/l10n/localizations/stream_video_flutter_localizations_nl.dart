@@ -44,6 +44,27 @@ class StreamVideoFlutterLocalizationsNl
   String get layoutSelectTooltip => 'Indeling wijzigen';
 
   @override
+  String get callControlsToggleCaptions => 'Ondertiteling aan- of uitzetten';
+
+  @override
+  String get callControlsToggleScreenShare => 'Scherm delen aan- of uitzetten';
+
+  @override
+  String get callControlsToggleRecording => 'Opname aan- of uitzetten';
+
+  @override
+  String get callControlsToggleSpeakerphone => 'Luidspreker aan- of uitzetten';
+
+  @override
+  String get callControlsFlipCamera => 'Camera omdraaien';
+
+  @override
+  String get callControlsReaction => 'Reactie sturen';
+
+  @override
+  String get callControlsLeave => 'Gesprek verlaten';
+
+  @override
   String get layoutDefault => 'Standaard';
 
   @override

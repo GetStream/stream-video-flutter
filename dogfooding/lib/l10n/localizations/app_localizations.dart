@@ -152,6 +152,60 @@ abstract class AppLocalizations {
   /// **'Dark'**
   String get themeDark;
 
+  /// The heading over the design select, which picks the design system the app's components are drawn with.
+  ///
+  /// In en, this message translates to:
+  /// **'Design'**
+  String get designTitle;
+
+  /// Explains the design select.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the style of buttons, switches and fields.'**
+  String get designDescription;
+
+  /// Precedes the pub.dev packages a design is drawn with.
+  ///
+  /// In en, this message translates to:
+  /// **'Built with'**
+  String get designPackages;
+
+  /// The design choice for Stream's own design system. A product name, not translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Stream'**
+  String get designStream;
+
+  /// The design choice for the shadcn/ui design system. A product name, not translated.
+  ///
+  /// In en, this message translates to:
+  /// **'shadcn/ui'**
+  String get designShad;
+
+  /// The design choice for Ubuntu's Yaru design system. A product name, not translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Yaru'**
+  String get designYaru;
+
+  /// The design choice for Microsoft's Fluent design system. A product name, not translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Fluent'**
+  String get designFluent;
+
+  /// The design choice for Apple's Liquid Glass design. A product name, not translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Liquid Glass'**
+  String get designLiquidGlass;
+
+  /// The design choice for Google's Material 3 Expressive design. A product name, not translated.
+  ///
+  /// In en, this message translates to:
+  /// **'Material 3 Expressive'**
+  String get designMaterial3Expressive;
+
   /// The heading over the accent color swatches.
   ///
   /// In en, this message translates to:
@@ -163,6 +217,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose the color of buttons and highlights.'**
   String get accentColorDescription;
+
+  /// The accent color choice that keeps the design's own default color.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get accentColorDefault;
 
   /// An accent color.
   ///

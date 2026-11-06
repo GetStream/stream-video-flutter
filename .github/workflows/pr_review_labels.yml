@@ -3,7 +3,8 @@ name: "PR Review Labels"
 # Keeps three status labels in sync with the review state of a pull request:
 #
 #   ready    - set manually by the PR owner when the PR is ready for review,
-#              and again after review feedback has been addressed.
+#              and again after review feedback has been addressed. Setting
+#              it removes "pending".
 #   pending  - replaces "ready" as soon as a reviewer leaves a comment or
 #              requests changes without approving.
 #   approved - replaces "ready" when a reviewer approves. Removed when a
@@ -15,8 +16,8 @@ name: "PR Review Labels"
 on:
   pull_request_review:
     types: [submitted, dismissed]
-  pull_request_review_comment:
-    types: [created]
+  pull_request:
+    types: [labeled]
 
 permissions:
   contents: read
@@ -24,7 +25,33 @@ permissions:
   pull-requests: write
 
 jobs:
+  # The owner marked the PR "ready" again, so review feedback is addressed.
+  drop_pending:
+    if: github.event_name == 'pull_request' && github.event.label.name == 'ready'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@v9
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            try {
+              await github.rest.issues.removeLabel({
+                owner, repo, issue_number: context.payload.pull_request.number, name: 'pending',
+              });
+              core.info('Removed "pending"');
+            } catch (e) {
+              if (e.status !== 404) throw e;
+              core.info('"pending" not set, nothing to do');
+            }
+
   sync_labels:
+    if: github.event_name == 'pull_request_review'
+    # One run per PR at a time; a newer review event cancels the in-flight run.
+    # Job-level so unrelated label events never cancel a review run.
+    concurrency:
+      group: pr-review-labels-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -130,25 +157,6 @@ jobs:
                   // "commented" or "changes_requested"
                   await markPending({ dropApproved: review.state === 'changes_requested' });
                 }
-                break;
-              }
-
-              case 'pull_request_review_comment': {
-                const comment = context.payload.comment;
-                if (!isExternal(comment.user)) {
-                  core.info('Comment by the PR author or a bot, ignoring');
-                  break;
-                }
-                // Inline comments that belong to an approving review should not
-                // knock the PR back to "pending".
-                const { data: parent } = await github.rest.pulls.getReview({
-                  owner, repo, pull_number: number, review_id: comment.pull_request_review_id,
-                });
-                if (parent.state === 'APPROVED') {
-                  core.info('Comment is part of an approving review, ignoring');
-                  break;
-                }
-                await markPending();
                 break;
               }
             }

@@ -1647,7 +1647,7 @@ class Call {
     return null;
   }
 
-  /// Records a track's viewport visibility and tells the session.
+  /// Records a track's viewport visibility.
   ///
   /// Driven by [viewportVisibility], which every viewport reports to; a
   /// viewport writing here directly is back to overwriting the others.
@@ -1672,22 +1672,17 @@ class Call {
       return const Result.success(none);
     }
 
-    // Recorded before the session is told, which debounces and ends in the UI
-    // reading this same state back, so there is nothing to wait for.
     _stateManager.participantUpdateViewportVisibility(
       sessionId: sessionId,
       userId: userId,
       visibility: visibility,
     );
 
-    final change = VisibilityChange(
-      sessionId: sessionId,
-      userId: userId,
-      visibility: visibility,
-    );
+    // Not applied without a session, so the viewport registry drives it again
+    // once the call has one.
+    if (_session == null) return failureWithError('Session is null');
 
-    return await _session?.updateViewportVisibility(change) ??
-        failureWithError('Session is null');
+    return const Result.success(none);
   }
 
   Future<Result<None>> setSubscriptions(

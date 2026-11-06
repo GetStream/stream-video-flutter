@@ -31,25 +31,6 @@ dependency_overrides:
   # flutter_launcher_icons ^0.14.4 depends on cli_util ^0.4.1
   # melos >=8.7.0 depends on cli_util >=0.5.0 <0.7.0
   cli_util: ^0.5.1
-  # Until a release carries the fix: the 104px avatar sizes added to
-  # stream_core_flutter stop 10.4.0 compiling, whose size switches are
-  # exhaustive. Only the dogfooding app pulls chat in. The chat packages share
-  # one ref so they stay in step.
-  stream_chat:
-    git:
-      url: https://github.com/GetStream/stream-chat-flutter.git
-      path: packages/stream_chat
-      ref: 686a9980966872eee4b64abad2d5e8ffcdb8c29c
-  stream_chat_flutter:
-    git:
-      url: https://github.com/GetStream/stream-chat-flutter.git
-      path: packages/stream_chat_flutter
-      ref: 686a9980966872eee4b64abad2d5e8ffcdb8c29c
-  stream_chat_flutter_core:
-    git:
-      url: https://github.com/GetStream/stream-chat-flutter.git
-      path: packages/stream_chat_flutter_core
-      ref: 686a9980966872eee4b64abad2d5e8ffcdb8c29c
   # A git commit rather than a release: the published 0.5.0 predates
   # CurrentPlatform.debugCurrentPlatformOverride, which the tests need, and
   # the socket close that no longer waits on a handshake still in flight,
@@ -87,7 +68,7 @@ melos:
         package_info_plus: ">=9.0.0 <11.0.0"
         share_plus: ^13.0.0
         stream_core_flutter: ^0.5.1
-        stream_chat_flutter: ^10.0.0
+        stream_chat_flutter: ^10.6.0
         stream_webrtc_flutter: ^4.0.1
         stream_video: ^2.0.0-alpha
         stream_video_filters: ^2.0.0-alpha
