@@ -8,19 +8,19 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
     @objc public static let shared = StreamVideoCallkitManager()
 
-    private var eventHandler: EventCallbackHandler?
-    private var pendingEvents: [(event: String, body: [String: Any?]?)] = []
+    var eventHandler: EventCallbackHandler?
+    var pendingEvents: [(event: String, body: [String: Any?]?)] = []
 
-    private var callController: StreamCallKitCallController
+    var callController: StreamCallKitCallController
 
     private var sharedProvider: CXProvider? = nil
 
-    private var outgoingCall: Call?
-    private var answerCall: Call?
+    var outgoingCall: Call?
+    var answerCall: Call?
 
-    private var data: CallData?
+    var data: CallData?
     private var isFromPushKit: Bool = false
-    private var silenceEvents: Bool = false
+    var silenceEvents: Bool = false
 
     private override init() {
         callController = StreamCallKitCallController()

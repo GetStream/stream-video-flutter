@@ -3,7 +3,7 @@ import XCTest
 @testable import stream_video_push_notification
 
 /// Pins that events sent before Dart listens on the event channel are queued and delivered in
-/// order once it does (R18 of the plan): a VoIP push on a cold start reports to CallKit, and the
+/// order once it does: a VoIP push on a cold start reports to CallKit, and the
 /// user can answer, before the Flutter side has registered its listener.
 final class EventCallbackHandlerTests: XCTestCase {
 

@@ -94,8 +94,7 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
     /// Builds the call to report to CallKit from the `stream` section of a VoIP push.
     ///
     /// `configuration` supplies the CallKit options; `persistedIconName` is the icon saved by the
-    /// last `initData`, which wins over the configuration's. Pure, so it can be tested without
-    /// PushKit: the only state it takes is passed in.
+    /// last `initData`, which wins over the configuration's.
     static func callData(
         fromVoIPPayload streamDict: [String: Any]?,
         configuration: StreamVideoPushConfiguration?,
