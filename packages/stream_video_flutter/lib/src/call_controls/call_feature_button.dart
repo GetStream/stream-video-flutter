@@ -21,7 +21,8 @@ enum CallFeatureTone {
 /// while it is on: screen sharing, closed captions, recording, and the members
 /// and chat panels.
 ///
-/// Selected paints the accent colour, which is what separates a feature from a
+/// Selected marks the button as selected, for assistive technology and for an
+/// app's own button builder, and paints the accent colour, which is what separates a feature from a
 /// [CallControlButton]: a muted microphone is destructive red because the user
 /// has taken something away, while a live screen share is accent blue because
 /// they have added something. A feature whose being on is itself consequential
@@ -76,18 +77,53 @@ class CallFeatureButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final style = switch ((selected, tone)) {
+      (false, _) => StreamButtonStyle.secondary,
+      (true, .accent) => StreamButtonStyle.primary,
+      (true, .destructive) => StreamButtonStyle.destructive,
+    };
+
     return StreamCallButtonBadge(
       badge: badge,
       child: StreamButton.icon(
         icon: icon,
         onPressed: onPressed,
         tooltip: tooltip,
-        style: switch ((selected, tone)) {
-          (false, _) => .secondary,
-          (true, .accent) => .primary,
-          (true, .destructive) => .destructive,
-        },
+        style: style,
+        isSelected: selected,
+        themeStyle: selected ? _selectedStyle(context, style) : null,
       ),
+    );
+  }
+
+  // The tone is what shows the feature is on, so the selected state keeps the
+  // style's own background rather than tinting it: the background the theme
+  // gives the style when not selected, or the design system's default.
+  static StreamButtonThemeStyle _selectedStyle(
+    BuildContext context,
+    StreamButtonStyle style,
+  ) {
+    final colorScheme = context.streamColorScheme;
+    final buttonTheme = StreamButtonTheme.of(context);
+    final themed = switch (style) {
+      .primary => buttonTheme.primary,
+      .secondary => buttonTheme.secondary,
+      .destructive => buttonTheme.destructive,
+    }?.solid?.backgroundColor;
+    final base = switch (style) {
+      .destructive => colorScheme.accentError,
+      _ => colorScheme.accentPrimary,
+    };
+
+    return StreamButtonThemeStyle(
+      backgroundColor: WidgetStateProperty.resolveWith((states) {
+        final unselected = {...states}..remove(WidgetState.selected);
+        if (themed?.resolve(unselected) case final color?) return color;
+        if (unselected.contains(WidgetState.disabled)) {
+          return colorScheme.backgroundDisabled;
+        }
+        return base;
+      }),
     );
   }
 }
