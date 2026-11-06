@@ -29,9 +29,6 @@ enum Event {
 
   /// The event whose [EventX.wireName] is [wireName], or null for a name this
   /// version of the package does not know.
-  ///
-  /// Null rather than a throw: a newer native side may send an event an older
-  /// Dart side has no case for, and that must not break the event stream.
   static Event? fromWireName(String? wireName) {
     for (final event in values) {
       if (event.wireName == wireName) return event;
@@ -42,8 +39,6 @@ enum Event {
 
 /// The names the native sides send on the event channel, one per [Event].
 ///
-/// Kept as an explicit getter rather than shadowing `Enum.name` through an
-/// extension, so the mapping does not depend on extension resolution rules.
 /// The Swift and Kotlin constants these have to match are pinned by
 /// `test/push_channel_contract_test.dart`.
 extension EventX on Event {
