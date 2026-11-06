@@ -219,8 +219,11 @@ lib/src/
                                                   show/end/dismiss/mute/hold pass-throughs
     ringing_sync_observer.dart                    coordinator events + StreamVideo state -> native end/dismiss
     ringing_event_broadcaster.dart                instance, injectable, suppression per type+cid
+  background_push_handler.dart                    StreamVideoPushHandler: the static entry point apps
+                                                  call, over one router per isolate (A-5 makes it take
+                                                  a Map<String, dynamic>)
   background/
-    stream_video_push_handler.dart                entry point; takes Map<String, dynamic>
+    background_push_router.dart                   routing: app isolate vs own session vs existing client
     background_session.dart                       instance (today's _BackgroundSession)
     ring_ledger.dart                              pendingRings / endedRings bookkeeping, pure
   config/  (existing configuration + params files, unchanged until A-6)
