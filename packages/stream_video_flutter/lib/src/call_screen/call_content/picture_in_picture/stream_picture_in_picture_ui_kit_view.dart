@@ -98,9 +98,10 @@ class _StreamPictureInPictureUiKitViewState
       <({String trackIdPrefix, SfuTrackTypeVideo trackType})>{};
 
   // The track the window holds. The native side keeps it until the call ends,
-  // across trips to the foreground, and turns it off once given another one
-  // while picture-in-picture is open. Kept past resuming so a track shown in
-  // an earlier trip is turned back on when the window moves away from it.
+  // across trips to the foreground and through updates without a track, and
+  // turns it off once given another one while picture-in-picture is open.
+  // Kept past resuming so a track shown in an earlier trip is turned back on
+  // when the window moves away from it.
   ({String trackIdPrefix, SfuTrackTypeVideo trackType})?
   _trackInPictureInPicture;
 
@@ -169,16 +170,22 @@ class _StreamPictureInPictureUiKitViewState
               trackType: priorityTrack,
             );
 
-      // Picture-in-picture can be open from as soon as the app is not active.
-      if (WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed) {
-        if (shownTrack != null) _tracksShownInPictureInPicture.add(shownTrack);
-        // The one the window moves away from, which the native side turns off.
-        if (_trackInPictureInPicture case final previous?
-            when previous != shownTrack) {
-          _tracksShownInPictureInPicture.add(previous);
+      // Without a track the native side keeps drawing the one it holds.
+      if (shownTrack != null) {
+        // Picture-in-picture can be open from as soon as the app is not
+        // active.
+        if (WidgetsBinding.instance.lifecycleState !=
+            AppLifecycleState.resumed) {
+          _tracksShownInPictureInPicture.add(shownTrack);
+          // The one the window moves away from, which the native side turns
+          // off.
+          if (_trackInPictureInPicture case final previous?
+              when previous != shownTrack) {
+            _tracksShownInPictureInPicture.add(previous);
+          }
         }
+        _trackInPictureInPicture = shownTrack;
       }
-      _trackInPictureInPicture = shownTrack;
 
       await _channel.invokeMethod(
         'updateParticipant',

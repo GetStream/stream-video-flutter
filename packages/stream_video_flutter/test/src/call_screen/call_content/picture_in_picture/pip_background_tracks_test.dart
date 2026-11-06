@@ -12,12 +12,14 @@ import '../../../mocks.dart';
 class _MockRtcTrack extends Mock implements RtcTrack {}
 
 class _FakeMediaStreamTrack extends Fake implements rtc.MediaStreamTrack {
+  _FakeMediaStreamTrack([this.id = 'alice-video']);
+
   @override
   bool enabled = true;
 
   // Handed to the native window, which draws the track by its id.
   @override
-  String? get id => 'alice-video';
+  final String? id;
 }
 
 // In the background the window turns off the tracks it isn't showing, and
@@ -222,63 +224,121 @@ void main() {
     expect(mediaTrack.enabled, isTrue);
   });
 
-  testWidgets('turns on a track shown in an earlier trip to the background', (
-    tester,
-  ) async {
-    // Speaking, so the app leaves the track alone in the background.
-    when(() => participant.isSpeaking).thenReturn(true);
-    // Bob, without video, comes first in the window once he joins.
-    final bob = MockCallParticipantState();
-    when(() => bob.userId).thenReturn('bob');
-    when(() => bob.sessionId).thenReturn('bob-session');
-    when(() => bob.trackIdPrefix).thenReturn('bob');
-    when(() => bob.name).thenReturn('Bob');
-    when(() => bob.image).thenReturn(null);
-    when(() => bob.isLocal).thenReturn(false);
-    when(() => bob.isSpeaking).thenReturn(false);
-    when(() => bob.isAudioEnabled).thenReturn(true);
-    when(() => bob.isVideoEnabled).thenReturn(false);
-    when(() => bob.isScreenShareEnabled).thenReturn(false);
-    when(() => bob.screenShareTrack).thenReturn(null);
-    when(() => bob.publishedTracks).thenReturn({});
-    when(
-      () => bob.connectionQuality,
-    ).thenReturn(SfuConnectionQuality.excellent);
-    // Like the native side, turn off the track the window moves away from.
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, (methodCall) async {
-          nativeCalls.add(methodCall);
-          if (methodCall.method == 'updateParticipant' &&
-              (methodCall.arguments as Map<Object?, Object?>)['trackId'] !=
-                  'alice-video') {
-            mediaTrack.enabled = false;
-          }
-          return null;
-        });
-    await pumpPip(
+  group('with the window moving between participants', () {
+    late Map<String, _FakeMediaStreamTrack> videoTracks;
+
+    MockCallParticipantState joining(String userId, {required bool video}) {
+      final other = MockCallParticipantState();
+      when(() => other.userId).thenReturn(userId);
+      when(() => other.sessionId).thenReturn('$userId-session');
+      when(() => other.trackIdPrefix).thenReturn(userId);
+      when(() => other.name).thenReturn(userId);
+      when(() => other.image).thenReturn(null);
+      when(() => other.isLocal).thenReturn(false);
+      when(() => other.isSpeaking).thenReturn(false);
+      when(() => other.isAudioEnabled).thenReturn(true);
+      when(() => other.isVideoEnabled).thenReturn(video);
+      when(() => other.isScreenShareEnabled).thenReturn(false);
+      when(() => other.screenShareTrack).thenReturn(null);
+      when(() => other.publishedTracks).thenReturn({
+        if (video)
+          SfuTrackType.video: TrackState.remote(
+            subscribed: true,
+            received: true,
+          ),
+      });
+      when(
+        () => other.connectionQuality,
+      ).thenReturn(SfuConnectionQuality.excellent);
+      if (video) videoTracks[userId] = _FakeMediaStreamTrack('$userId-video');
+      return other;
+    }
+
+    // Puts [first] on top of the window, with Alice still in the call.
+    void rank(CallParticipantState first) {
+      final state = MockCallState();
+      when(() => state.status).thenReturn(CallStatus.connected());
+      when(() => state.callParticipants).thenReturn([participant, first]);
+      when(() => state.localParticipant).thenReturn(null);
+      when(() => state.iOSMultitaskingCameraAccessEnabled).thenReturn(true);
+      states.add(state);
+    }
+
+    setUp(() {
+      videoTracks = {'alice': mediaTrack};
+      when(() => call.getTrack(any(), any())).thenAnswer((invocation) {
+        final [prefix, type] = invocation.positionalArguments;
+        if (type != SfuTrackType.video) return null;
+        final mediaTrack = videoTracks[prefix];
+        if (mediaTrack == null) return null;
+        final track = _MockRtcTrack();
+        when(() => track.mediaTrack).thenReturn(mediaTrack);
+        return track;
+      });
+
+      // Like the native side: it keeps its track through an update without
+      // one, and turns it off once given another.
+      String? heldTrackId;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (methodCall) async {
+            nativeCalls.add(methodCall);
+            if (methodCall.method != 'updateParticipant') return null;
+            final arguments = methodCall.arguments as Map<Object?, Object?>;
+            final trackId = arguments['trackId'] as String?;
+            if (trackId == null || trackId == heldTrackId) return null;
+            for (final track in videoTracks.values) {
+              if (track.id == heldTrackId) track.enabled = false;
+            }
+            heldTrackId = trackId;
+            return null;
+          });
+
+      // Speaking, so the app leaves Alice's track alone in the background.
+      when(() => participant.isSpeaking).thenReturn(true);
+    });
+
+    // Whoever joined last comes first in the window.
+    int lastJoinedFirst(CallParticipantState a, CallParticipantState b) =>
+        (a.userId == 'alice' ? 1 : 0) - (b.userId == 'alice' ? 1 : 0);
+
+    testWidgets('turns on a track shown in an earlier trip', (tester) async {
+      await pumpPip(tester, sort: lastJoinedFirst);
+
+      // The window is given Alice, and holds her track past resuming.
+      await background(tester);
+      await foreground(tester);
+      expect(mediaTrack.enabled, isTrue);
+
+      // Bob joins in the foreground, so he is first on the next trip.
+      rank(joining('bob', video: true));
+      await background(tester);
+      expect(mediaTrack.enabled, isFalse);
+
+      await foreground(tester);
+      expect(mediaTrack.enabled, isTrue);
+    });
+
+    testWidgets('remembers the track kept through a participant without one', (
       tester,
-      sort: (a, b) => (a.userId == 'bob' ? 0 : 1) - (b.userId == 'bob' ? 0 : 1),
-    );
+    ) async {
+      await pumpPip(tester, sort: lastJoinedFirst);
+      await background(tester);
+      await foreground(tester);
 
-    // The window is given Alice, and holds her track past resuming.
-    await background(tester);
-    await foreground(tester);
-    expect(mediaTrack.enabled, isTrue);
+      // Bob has no video, so the window keeps drawing Alice's track.
+      rank(joining('bob', video: false));
+      await background(tester);
+      expect(mediaTrack.enabled, isTrue);
+      await foreground(tester);
 
-    // Bob joins while the app is in the foreground, so the window is given
-    // him first on the next trip.
-    final withBob = MockCallState();
-    when(() => withBob.status).thenReturn(CallStatus.connected());
-    when(() => withBob.callParticipants).thenReturn([participant, bob]);
-    when(() => withBob.localParticipant).thenReturn(null);
-    when(() => withBob.iOSMultitaskingCameraAccessEnabled).thenReturn(true);
-    states.add(withBob);
+      // Carol has video, so the window moves away from Alice's track.
+      rank(joining('carol', video: true));
+      await background(tester);
+      expect(mediaTrack.enabled, isFalse);
 
-    await background(tester);
-    expect(mediaTrack.enabled, isFalse);
-
-    await foreground(tester);
-    expect(mediaTrack.enabled, isTrue);
+      await foreground(tester);
+      expect(mediaTrack.enabled, isTrue);
+    });
   });
 
   testWidgets('leaves the local camera to the LLC when it stopped it', (
