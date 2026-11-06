@@ -119,20 +119,44 @@ bool isMidFlightPublish(TransceiverCache transceiverCache, String? sdp) {
   return !candidateIds.any(sdp.contains);
 }
 
+/// Whether the track behind [transceiverCache] should be announced to the SFU
+/// as muted.
+///
+/// Reads [heldTrack], the SDK's own track that muting and unmuting act on and
+/// report through `UpdateMuteStates`, so the announce agrees with the last
+/// mute state sent. It falls back to [TransceiverCache.track] when there is
+/// none. Neither track reachable from the transceiver is reliable on native:
+/// - `sender.track` is a snapshot built by `addTransceiver`, so its `enabled`
+///   keeps the value from publish time until a `replaceTrack` swaps it.
+/// - [TransceiverCache.track] is not updated when an unmute recaptures a
+///   released track, so after a mute and unmute it still holds the stopped,
+///   disabled original.
+bool _isAnnouncedMuted(
+  TransceiverCache transceiverCache,
+  RtcLocalTrack? heldTrack,
+) {
+  if (transceiverCache.transceiver.sender.track == null) return true;
+
+  final track = heldTrack ?? transceiverCache.track;
+  return !track.mediaTrack.enabled;
+}
+
 /// The [RtcTrackInfo] to announce for [transceiverCache], or null when its
 /// mid cannot be resolved.
 ///
 /// [audioSettings] decide stereo, DTX and RED for audio, and [dimensionOf]
-/// gives the capture size the video layers are worked out from. A track
-/// that is part of the offer but has no mid is reported to
-/// [onMidUnresolved] before null is returned; a publish that is not part of
-/// the offer yet is not.
+/// gives the capture size the video layers are worked out from. [heldTrack]
+/// is the SDK's current track for the transceiver, which decides whether it
+/// is announced as muted. A track that is part of the offer but has no mid is
+/// reported to [onMidUnresolved] before null is returned; a publish that is
+/// not part of the offer yet is not.
 @internal
 RtcTrackInfo? transceiverToTrackInfo(
   TransceiverCache transceiverCache, {
   required List<rtc.RTCRtpTransceiver> liveTransceivers,
   required StreamAudioSettings audioSettings,
   required RtcVideoDimension Function(RtcLocalVideoTrack) dimensionOf,
+  RtcLocalTrack? heldTrack,
   String? sdp,
   void Function(Map<String, Object?> data)? onMidUnresolved,
 }) {
@@ -191,7 +215,7 @@ RtcTrackInfo? transceiverToTrackInfo(
       mid: mid,
       layers: [],
       codec: transceiverCache.publishOption.codec,
-      muted: !(transceiverCache.transceiver.sender.track?.enabled ?? false),
+      muted: _isAnnouncedMuted(transceiverCache, heldTrack),
       stereo: stereo,
       dtx: audioSettings.opusDtxEnabled,
       red: audioSettings.redundantCodingEnabled,
@@ -211,7 +235,7 @@ RtcTrackInfo? transceiverToTrackInfo(
       red: false,
       stereo: false,
       codec: transceiverCache.publishOption.codec,
-      muted: !(transceiverCache.transceiver.sender.track?.enabled ?? false),
+      muted: _isAnnouncedMuted(transceiverCache, heldTrack),
       layers: encodings.map((it) {
         return RtcVideoLayer(
           rid: it.rid ?? '',

@@ -1688,6 +1688,7 @@ extension RtcTracksInfoMapper on List<RtcTrackInfo> {
         dtx: info.dtx,
         stereo: info.stereo,
         red: info.red,
+        muted: info.muted,
         layers: info.layers?.map((layer) {
           return sfu_models.VideoLayer(
             rid: layer.rid,
