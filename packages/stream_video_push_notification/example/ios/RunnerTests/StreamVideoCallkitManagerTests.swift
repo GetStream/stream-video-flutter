@@ -186,4 +186,32 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
         XCTAssertTrue(manager.outgoingCall === outgoing)
     }
+
+    /// Current behaviour, pinned: declining a second ringing call during an answered one is sent
+    /// as ENDED and forgets the answered call, so hanging that one up later is sent as DECLINE
+    /// with the second call's data, and the answered call's end never reaches Dart as its own.
+    func testDecliningASecondCallDuringAnAnsweredOneForgetsTheAnsweredCall() {
+        listen()
+        let answered = track(id: "answered")
+        manager.answerCall = answered
+        let ringing = track(id: "ringing")
+        manager.data = ringing.data
+
+        end(ringing.uuid)
+
+        XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
+        XCTAssertEqual(receivedId(at: 0), "ringing")
+        XCTAssertNil(manager.answerCall)
+
+        end(answered.uuid)
+
+        XCTAssertEqual(
+            receivedNames,
+            [
+                StreamVideoIncomingCallConstants.ACTION_CALL_ENDED,
+                StreamVideoIncomingCallConstants.ACTION_CALL_DECLINE,
+            ])
+        XCTAssertEqual(receivedId(at: 1), "ringing")
+        XCTAssertNil(manager.callController.callWithUUID(uuid: answered.uuid))
+    }
 }
