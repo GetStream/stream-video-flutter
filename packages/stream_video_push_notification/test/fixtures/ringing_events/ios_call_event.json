@@ -1,0 +1,31 @@
+{
+  "uuid": "call-uuid",
+  "id": "call-uuid",
+  "callerName": "Ada",
+  "handle": "ada",
+  "type": 1,
+  "duration": 15000,
+  "isAccepted": false,
+  "extra": {
+    "callCid": "default:ada"
+  },
+  "ios": {
+    "iconName": "CallIcon",
+    "handleType": "",
+    "useComplexHandle": false,
+    "supportsVideo": true,
+    "maximumCallGroups": 2,
+    "maximumCallsPerCallGroup": 1,
+    "supportsDTMF": true,
+    "supportsHolding": false,
+    "supportsGrouping": true,
+    "supportsUngrouping": true,
+    "includesCallsInRecents": true,
+    "ringtonePath": "ring.caf",
+    "configureAudioSession": true,
+    "audioSessionMode": "",
+    "audioSessionActive": true,
+    "audioSessionPreferredSampleRate": 44100.0,
+    "audioSessionPreferredIOBufferDuration": 0.005
+  }
+}
