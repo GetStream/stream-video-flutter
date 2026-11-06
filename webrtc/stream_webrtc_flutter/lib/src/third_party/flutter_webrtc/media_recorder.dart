@@ -1,9 +1,16 @@
-import 'package:stream_webrtc_interface/src/media_recorder.dart' as rtc;
+import 'package:flutter/foundation.dart';
 
-import '../stream_dart_webrtc.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
+
+import '../../../stream_webrtc_flutter.dart';
+import 'native/media_recorder_impl.dart' show MediaRecorderNative;
 
 class MediaRecorder extends rtc.MediaRecorder {
-  MediaRecorder() : _delegate = mediaRecorder();
+  MediaRecorder({String? albumName})
+    : _delegate = (kIsWeb || kIsWasm)
+          ? mediaRecorder()
+          : MediaRecorderNative(albumName: albumName);
+
   final rtc.MediaRecorder _delegate;
 
   @override
@@ -11,8 +18,14 @@ class MediaRecorder extends rtc.MediaRecorder {
     String path, {
     MediaStreamTrack? videoTrack,
     RecorderAudioChannel? audioChannel,
-  }) =>
-      _delegate.start(path, videoTrack: videoTrack, audioChannel: audioChannel);
+    int rotationDegrees = 0,
+  }) {
+    return _delegate.start(
+      path,
+      videoTrack: videoTrack,
+      audioChannel: audioChannel,
+    );
+  }
 
   @override
   Future stop() => _delegate.stop();

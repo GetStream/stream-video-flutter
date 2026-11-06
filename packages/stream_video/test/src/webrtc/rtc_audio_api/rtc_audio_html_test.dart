@@ -6,7 +6,7 @@ library;
 import 'dart:js_interop';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_dart_webrtc/src/media_stream_track_impl.dart';
+import 'package:stream_dart_webrtc/src/third_party/dart_webrtc/media_stream_track_impl.dart';
 import 'package:stream_video/src/call/stats/trace_tag.dart';
 import 'package:stream_video/src/webrtc/rtc_audio_api/rtc_audio_html.dart';
 import 'package:web/web.dart' as web;

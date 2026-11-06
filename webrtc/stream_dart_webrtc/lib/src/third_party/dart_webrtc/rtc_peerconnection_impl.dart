@@ -5,7 +5,7 @@ import 'dart:js_interop_unsafe';
 
 import 'package:web/web.dart' as web;
 
-import '../stream_dart_webrtc.dart';
+import '../../../stream_dart_webrtc.dart';
 import 'rtc_data_channel_impl.dart';
 import 'rtc_dtmf_sender_impl.dart';
 import 'rtc_rtp_receiver_impl.dart';

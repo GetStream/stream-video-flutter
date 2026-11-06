@@ -2,7 +2,7 @@ import 'dart:js_interop';
 
 import 'package:web/web.dart' as web;
 
-import '../stream_dart_webrtc.dart';
+import '../../../stream_dart_webrtc.dart';
 
 class RTCVideoElement {
   RTCVideoElement() {

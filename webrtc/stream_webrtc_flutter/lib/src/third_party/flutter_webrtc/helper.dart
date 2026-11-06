@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:logger/logger.dart';
 
-import '../stream_webrtc_flutter.dart';
+import '../../../stream_webrtc_flutter.dart';
 import 'native_logs_listener.dart';
 
 class Helper {

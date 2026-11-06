@@ -2,7 +2,7 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:stream_webrtc_flutter/src/native/media_stream_track_impl.dart';
+import 'package:stream_webrtc_flutter/src/third_party/flutter_webrtc/native/media_stream_track_impl.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
