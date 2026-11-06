@@ -4,6 +4,20 @@
 
 - Video filters on iOS follow the orientation of the app's window scene, including after it moves to another display.
 
+## Upcoming (minor)
+
+### ✅ Added
+
+- `StreamVideoEffectsManager.unregisterAllFilters()` to release native effect processors.
+
+### 🔄 Changed
+
+- Improved the edge quality and performance of background filters.
+
+### 🐞 Fixed
+
+- Fixed stability issues in background blur and virtual background filters on Android and iOS.
+
 ## 1.7.2
 
 - Updated `stream_video` dependency to [`1.7.2`](https://pub.dev/packages/stream_video/changelog).

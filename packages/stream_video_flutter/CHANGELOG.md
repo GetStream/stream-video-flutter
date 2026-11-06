@@ -405,6 +405,12 @@
 - `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
 - Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.
 
+## Upcoming (minor)
+
+### 🐞 Fixed
+
+- [iOS] A participant's video or screen share no longer stays blank after returning from picture-in-picture.
+
 ## 1.7.2
 
 ### 🔄 Changed
