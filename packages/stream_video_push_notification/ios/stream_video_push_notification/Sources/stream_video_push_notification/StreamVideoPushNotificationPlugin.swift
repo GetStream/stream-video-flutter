@@ -21,7 +21,7 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
         let eventChannel = FlutterEventChannel(
             name: "stream_video_push_notification_events", binaryMessenger: registrar.messenger())
 
-        let eventsHandler = EventCallbackHandler()
+        let eventsHandler = EventCallbackHandler(sink: StreamVideoCallkitManager.shared.eventSink)
         eventChannel.setStreamHandler(eventsHandler)
 
         StreamVideoCallkitManager.shared.setEventHandler(eventsHandler)
@@ -33,9 +33,9 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        switch call.method {
-        case "initData":
-            if let arguments = call.arguments as? [String: Any] {
+        switch PushMethodCallRouter.command(for: call) {
+        case .initData(let arguments):
+            if let arguments = arguments {
                 if let iosData = arguments["ios"] as? [String: Any],
                     let iconName = iosData["iconName"] as? String
                 {
@@ -53,11 +53,10 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
                     FlutterError(
                         code: "INVALID_ARGUMENT", message: "Invalid argument", details: nil))
             }
-        case "getDevicePushTokenVoIP":
+        case .getDevicePushTokenVoIP:
             result(self.getDevicePushTokenVoIP())
-            break
-        default:
-            callKitManager.handle(call, result: result)
+        case let command:
+            callKitManager.handle(command, result: result)
         }
     }
 
@@ -90,44 +89,5 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
 
     @objc public func getDevicePushTokenVoIP() -> String {
         return persistentState.string(forKey: Self.devicePushTokenVoIPKey) ?? ""
-    }
-}
-
-public class EventCallbackHandler: NSObject, FlutterStreamHandler {
-    private var eventSink: FlutterEventSink?
-    private var pendingEvents: [[String: Any]] = []
-
-    public func send(_ event: String, _ body: Any) {
-        let data: [String: Any] = [
-            "event": event,
-            "body": body,
-        ]
-
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            if let eventSink = self.eventSink {
-                eventSink(data)
-            } else {
-                self.pendingEvents.append(data)
-            }
-        }
-    }
-
-    public func onListen(
-        withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink
-    )
-        -> FlutterError?
-    {
-        self.eventSink = events
-        for event in pendingEvents {
-            events(event)
-        }
-        pendingEvents.removeAll()
-        return nil
-    }
-
-    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        self.eventSink = nil
-        return nil
     }
 }

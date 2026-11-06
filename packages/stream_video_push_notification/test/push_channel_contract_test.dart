@@ -30,8 +30,7 @@ const _swiftSources =
     'ios/stream_video_push_notification/Sources/stream_video_push_notification';
 const _swiftConstants = '$_swiftSources/StreamVideoIncomingCallConstants.swift';
 const _swiftMethodHandlers = [
-  '$_swiftSources/StreamVideoPushNotificationPlugin.swift',
-  '$_swiftSources/StreamVideoCallkitManager.swift',
+  '$_swiftSources/Plugin/PushMethodCallRouter.swift',
 ];
 
 const _kotlinSources =
