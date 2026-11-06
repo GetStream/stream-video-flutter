@@ -19,6 +19,7 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		AF021016A67D0594176FBF3F /* CallDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68A8A8F98A5EAE592974D52A /* CallDataTests.swift */; };
+		BBB82CEFC94F67B7F07AE9DF /* StreamVideoCallkitManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9E3C2349EE7C480379409BD /* StreamVideoCallkitManagerTests.swift */; };
 		F30E6AE9D2EA99032D2BD49B /* StreamVideoPushConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78680DB1BA7C1EAE890F1CE /* StreamVideoPushConfigurationTests.swift */; };
 		F743676E7FD4D3EEC5857955 /* VoIPPayloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286AD5FA6170A2DE5F0AA256 /* VoIPPayloadTests.swift */; };
 /* End PBXBuildFile section */
@@ -77,6 +78,7 @@
 		D64030FC8B4D5515328E096E /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		D78680DB1BA7C1EAE890F1CE /* StreamVideoPushConfigurationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StreamVideoPushConfigurationTests.swift; sourceTree = "<group>"; };
 		EB89119FC72295958E939B3C /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
+		F9E3C2349EE7C480379409BD /* StreamVideoCallkitManagerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StreamVideoCallkitManagerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +110,7 @@
 				286AD5FA6170A2DE5F0AA256 /* VoIPPayloadTests.swift */,
 				63F8E6E30A4ADA2AD73BF2D1 /* CallKitMappingTests.swift */,
 				BA3A6821FC2785BA7CBB3554 /* EventCallbackHandlerTests.swift */,
+				F9E3C2349EE7C480379409BD /* StreamVideoCallkitManagerTests.swift */,
 			);
 			path = RunnerTests;
 			sourceTree = "<group>";
@@ -382,6 +385,7 @@
 				F743676E7FD4D3EEC5857955 /* VoIPPayloadTests.swift in Sources */,
 				0B4E3105D82CA3B70D2ED61A /* CallKitMappingTests.swift in Sources */,
 				130BF07F4DCD16CD55654B16 /* EventCallbackHandlerTests.swift in Sources */,
+				BBB82CEFC94F67B7F07AE9DF /* StreamVideoCallkitManagerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

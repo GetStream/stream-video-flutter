@@ -3,8 +3,7 @@ import XCTest
 @testable import stream_video_push_notification
 
 /// Pins how `CallData` is built from the method-channel map: the `ios` sub-map form Dart sends,
-/// the flat form the native API accepts, and the defaults. Written against today's behaviour
-/// before the model is replaced (B-1 and B-2 of FLU-1197).
+/// the flat form the native API accepts, and the defaults.
 final class CallDataTests: XCTestCase {
 
     private let base: [String: Any] = [
@@ -139,6 +138,23 @@ final class CallDataTests: XCTestCase {
         XCTAssertFalse(restored.supportsHolding)
         XCTAssertEqual(restored.ringtonePath, "ring.caf")
         XCTAssertEqual(restored.extra["callCid"] as? String, "default:ada")
+    }
+
+    /// The body iOS sends with every call event must match the fixture the Dart tests decode, so
+    /// a renamed or dropped key fails here as well as there.
+    func testToJSONMatchesTheSharedDartFixture() throws {
+        let fixtureURL = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .appendingPathComponent("../../../test/fixtures/ringing_events/ios_call_event.json")
+        let fixture = try XCTUnwrap(
+            JSONSerialization.jsonObject(with: Data(contentsOf: fixtureURL)) as? NSDictionary)
+        var args = base
+        args["isAccepted"] = false
+        args["ios"] = ["iconName": "CallIcon", "supportsHolding": false, "ringtonePath": "ring.caf"]
+
+        let json = CallData(args: args).toJSON() as NSDictionary
+
+        XCTAssertEqual(json, fixture)
     }
 
     func testTheHandleIsPassedThroughUnlessComplexHandlesAreOn() {

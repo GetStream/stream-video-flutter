@@ -237,7 +237,7 @@ jobs:
   # passed or was skipped by the gate.
   sdk-verified:
     if: always()
-    needs: [gate, analyze, complexity, build, coverage-skipped]
+    needs: [gate, analyze, complexity, build, coverage-skipped, ios-unit-tests]
     timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:

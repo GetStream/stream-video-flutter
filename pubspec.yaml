@@ -281,7 +281,8 @@ melos:
         flutter build ios --config-only --no-codesign &&
         cd ios &&
         DEVICE=$(xcrun simctl list devices available | grep -m1 -oE '^ *iPhone .*\([0-9A-F-]{36}\)' | sed 's/^ *//') &&
-        UDID=$(echo "$DEVICE" | grep -oE '[0-9A-F-]{36}') &&
+        UDID=$(echo "$DEVICE" | grep -oE '[0-9A-F-]{36}' || true) &&
+        if [ -z "$UDID" ]; then echo "No available iPhone simulator"; exit 1; fi &&
         echo "Running RunnerTests on $DEVICE" &&
         xcodebuild test -workspace Runner.xcworkspace -scheme Runner -configuration Debug \
           -destination "platform=iOS Simulator,id=$UDID" -only-testing:RunnerTests \
