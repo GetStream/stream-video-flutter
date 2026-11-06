@@ -186,6 +186,7 @@ class CallSessionHarness {
       dynascaleManager: MockDynascaleManager(),
       onReconnectionNeeded: (pc, strategy, reason) =>
           reconnects.add((pc, strategy, reason)),
+      onIceConnected: (_) {},
       onSuspendedAudioTrackRecorded: suspendedTrackIds.add,
       sdpEditor: MockSdpEditor(),
       networkMonitor: setupMockInternetConnection(
