@@ -278,7 +278,7 @@ jobs:
 
       - name: Build
         working-directory: dogfooding
-        run: flutter build web --release --wasm --base-href /${{ env.WEB_PATH }}/
+        run: flutter build web --release --wasm --base-href /${{ env.WEB_PATH }}/ --dart-define=WEB_FLAVOR=${{ env.FLAVOR }}
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v3

@@ -1,6 +1,7 @@
 // 🐦 Flutter imports:
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 
 // 📦 Package imports:
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
@@ -33,6 +34,9 @@ Future<void> main() async {
   // Reads the device's accent color, which Material 3 Expressive takes by
   // default.
   await M3EDesign.loadDeviceAccent();
+
+  // Web URLs carry the route as a path (`/join/<id>`) rather than after a `#`.
+  usePathUrlStrategy();
 
   runApp(const StreamDogFoodingApp());
 }
