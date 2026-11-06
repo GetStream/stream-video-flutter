@@ -8,19 +8,19 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
     @objc public static let shared = StreamVideoCallkitManager()
 
-    private var eventHandler: EventCallbackHandler?
-    private var pendingEvents: [(event: String, body: [String: Any?]?)] = []
+    var eventHandler: EventCallbackHandler?
+    var pendingEvents: [(event: String, body: [String: Any?]?)] = []
 
-    private var callController: StreamCallKitCallController
+    var callController: StreamCallKitCallController
 
     private var sharedProvider: CXProvider? = nil
 
-    private var outgoingCall: Call?
-    private var answerCall: Call?
+    var outgoingCall: Call?
+    var answerCall: Call?
 
-    private var data: CallData?
+    var data: CallData?
     private var isFromPushKit: Bool = false
-    private var silenceEvents: Bool = false
+    var silenceEvents: Bool = false
 
     private override init() {
         callController = StreamCallKitCallController()
@@ -451,7 +451,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     ///
     /// The values match the names of `IncomingCallFailureReason` on the Dart side, which parses
     /// them by name and falls back to `unknown`.
-    private func incomingCallErrorCode(_ error: Error) -> String {
+    func incomingCallErrorCode(_ error: Error) -> String {
         switch (error as NSError).code {
         case CXErrorCodeIncomingCallError.unentitled.rawValue:
             return "unentitled"

@@ -274,3 +274,20 @@ melos:
       description: |
         Run the Kotlin unit tests of stream_video_push_notification through its
         example app, whose gradle wrapper the config-only build generates.
+
+    test:ios:push:
+      run: |
+        cd ./packages/stream_video_push_notification/example &&
+        flutter build ios --config-only --no-codesign &&
+        cd ios &&
+        DEVICE=$(xcrun simctl list devices available | grep -m1 -oE '^ *iPhone .*\([0-9A-F-]{36}\)' | sed 's/^ *//') &&
+        UDID=$(echo "$DEVICE" | grep -oE '[0-9A-F-]{36}' || true) &&
+        if [ -z "$UDID" ]; then echo "No available iPhone simulator"; exit 1; fi &&
+        echo "Running RunnerTests on $DEVICE" &&
+        xcodebuild test -workspace Runner.xcworkspace -scheme Runner -configuration Debug \
+          -destination "platform=iOS Simulator,id=$UDID" -only-testing:RunnerTests \
+          CODE_SIGNING_ALLOWED=NO
+      description: |
+        Run the Swift unit tests of stream_video_push_notification (the RunnerTests
+        target of its example app) on the first available iPhone simulator, picked
+        by id so the device's iOS version does not have to be the newest installed.
