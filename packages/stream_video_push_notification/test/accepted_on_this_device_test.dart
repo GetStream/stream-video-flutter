@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_push_notification/src/stream_video_push_notification.dart';
+import 'package:stream_video_push_notification/src/manager/ringing_sync_observer.dart';
 
 class _MockCall extends Mock implements Call {}
 

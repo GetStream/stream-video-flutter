@@ -1,72 +1,19 @@
-// ignore_for_file: avoid_dynamic_calls
-
-import 'dart:async';
-
-import 'package:collection/collection.dart';
-import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/stream_video.dart';
 import '../stream_video_push_notification.dart';
 import '../stream_video_push_notification_platform_interface.dart';
+import 'manager/native_call_controller.dart';
 import 'manager/push_device_registrar.dart';
 import 'manager/push_token_source.dart';
 import 'manager/ringing_event_broadcaster.dart';
-
-const _idRinging = 2;
-const _idCallEnded = 3;
-const _idCallAccepted = 4;
-const _idCallRejected = 6;
-const _idCallParticipantCount = 7;
-const _idActiveCall = 8;
-
-/// Decides what [StreamVideoPushNotificationManager.endCallByCid] has to end for [cid].
-///
-/// Pulled out of the method so the choice can be tested. The live path cannot be exercised in a
-/// unit test: `activeCalls` short-circuits to an empty list off-device, which always lands on
-/// `endAll`.
-@visibleForTesting
-({bool endAll, List<CallData> calls}) resolveCallsToEnd(
-  List<CallData> activeCalls,
-  String cid,
-) {
-  final matching = activeCalls
-      .where((call) => call.callCid == cid && call.uuid != null)
-      .toList();
-
-  // Every active call belongs to this cid, so ending them one by one and ending them all are the
-  // same thing. This also covers a platform that reports no calls while still holding one, which
-  // is what the Android Telecom sweep in `endAllCalls` relies on.
-  if (activeCalls.length == matching.length) {
-    return (endAll: true, calls: const []);
-  }
-
-  // Calls the platform still has but that can no longer be identified.
-  //
-  // iOS reports a call the system knows about with nothing but its uuid once the in-process object
-  // describing it is gone — a CallKit call outliving the process that created it, after the app was
-  // killed, ran out of memory or was hot restarted. No cid can ever match those, so they used to
-  // fall through both branches untouched and the CallKit screen stayed up for the rest of the app's
-  // life. Nothing else can address them either, so this is the only chance to clear them.
-  final unidentified = activeCalls
-      .where((call) => call.callCid == null && call.uuid != null)
-      .toList();
-
-  // Anything still identifiable that belongs to another cid is deliberately left alone.
-  return (endAll: false, calls: [...matching, ...unidentified]);
-}
-
-/// Decides whether a `call.accepted` event for the current user describes an acceptance that
-/// happened on this device.
-@visibleForTesting
-bool isAcceptedOnThisDevice({
-  required bool acceptedLocally,
-  required Call? activeCall,
-}) {
-  if (acceptedLocally) return true;
-  return activeCall?.state.value.status is CallStatusActive;
-}
+import 'manager/ringing_sync_observer.dart';
 
 /// Implementation of [PushNotificationManager] for Stream Video.
+///
+/// Composes the parts that do the work: [PushDeviceRegistrar] for the device
+/// tokens, [NativeCallController] for the commands to the native call UI,
+/// [RingingSyncObserver] for keeping that UI in step with the backend and
+/// the app, and the shared [RingingEventBroadcaster] for the native events.
 class StreamVideoPushNotificationManager implements PushNotificationManager {
   StreamVideoPushNotificationManager._({
     required CoordinatorClient client,
@@ -83,178 +30,20 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       registerApnDeviceToken: registerApnDeviceToken,
       currentDeviceToken: getDevicePushTokenVoIP,
     );
+    _controller = NativeCallController(
+      configuration: pushConfiguration,
+      broadcaster: _broadcaster,
+    );
 
     if (!CurrentPlatform.isMobile) return;
 
-    _subscriptions.add(
-      _idActiveCall,
-      streamVideo.state.activeCalls.listen((calls) async {
-        _logger.d(
-          () =>
-              '[activeCall] Active calls changed to [${calls.map((c) => c.callCid).join(', ')}]',
-        );
-
-        for (final previousCall in currentActiveCalls) {
-          if (!calls.any((c) => c.callCid == previousCall.callCid)) {
-            _logger.d(
-              () =>
-                  '[activeCall] Stopping previous call: ${previousCall.callCid}',
-            );
-            await endCallByCid(previousCall.callCid.value);
-          }
-        }
-
-        currentActiveCalls = calls;
-      }),
-    );
-
-    void subscribeToEvents() {
-      _subscriptions.add(
-        _idCallEnded,
-        client.events.on<StreamCallEndedEvent>((event) {
-          _logger.d(
-            () => '[subscribeToEvents] Call ended event: ${event.callCid}',
-          );
-          _broadcaster.suppressEvent();
-          endCallByCid(event.callCid.toString());
-        }),
-      );
-
-      _subscriptions.add(
-        _idCallParticipantCount,
-        client.events.on<StreamCallSessionParticipantCountUpdatedEvent>((
-          event,
-        ) async {
-          final roleCounts = event.participantsCountByRole.values.map((v) => v);
-
-          final totalCount = roleCounts.isEmpty
-              ? 0
-              : roleCounts.reduce((a, b) => a + b);
-
-          _logger.d(
-            () =>
-                '[subscribeToEvents] Participant count updated event: ${event.callCid}, count: $totalCount',
-          );
-          if (totalCount == 0) {
-            _logger.v(
-              () =>
-                  '[subscribeToEvents] No participants left, ending call: ${event.callCid}',
-            );
-
-            _broadcaster.suppressEvent();
-            await endCallByCid(event.callCid.toString());
-          }
-        }),
-      );
-
-      _subscriptions.add(
-        _idCallRejected,
-        client.events.on<StreamCallRejectedEvent>((event) async {
-          _logger.d(
-            () =>
-                '[subscribeToEvents] Call rejected event: ${event.callCid}, rejected by: ${event.rejectedByUserId}',
-          );
-          if (event.rejectedByUserId == event.metadata.details.createdBy.id ||
-              event.rejectedByUserId == streamVideo.currentUser.id) {
-            _logger.v(
-              () =>
-                  '[subscribeToEvents] Call rejected by the current user or call owner, ending call: ${event.callCid}',
-            );
-
-            _broadcaster.suppressEvent();
-            await endCallByCid(event.callCid.toString());
-          }
-        }),
-      );
-
-      _subscriptions.add(
-        _idCallAccepted,
-        client.events.on<StreamCallAcceptedEvent>((event) async {
-          _logger.d(
-            () =>
-                '[subscribeToEvents] Call accepted event: ${event.callCid}, accepted by: ${event.acceptedByUserId}',
-          );
-          if (event.acceptedByUserId != streamVideo.currentUser.id) return;
-
-          final activeCall = streamVideo.activeCalls.firstWhereOrNull(
-            (call) => call.callCid == event.callCid,
-          );
-
-          final acceptedOnThisDevice = isAcceptedOnThisDevice(
-            acceptedLocally: streamVideo.ringing.isCallAcceptedOnThisDevice(
-              event.callCid.toString(),
-            ),
-            activeCall: activeCall,
-          );
-
-          // End the CallKit call on this device if the call was accepted on another device
-          if (!acceptedOnThisDevice) {
-            _logger.v(
-              () =>
-                  '[subscribeToEvents] Call accepted on other device, ending call: ${event.callCid}',
-            );
-            await endCallByCid(event.callCid.toString());
-          }
-          // If the call was accepted on this device, end the Ringing call silently
-          // (useful if the call was accepted via the app instead of the CallKit UI)
-          else {
-            _logger.v(
-              () =>
-                  '[subscribeToEvents] Call accepted on the same device, ending CallKit silently: ${event.callCid}',
-            );
-
-            // The call is live on this device from here on, so only the ringing UI goes away.
-            _broadcaster.suppressEvent();
-            await dismissRingingCallByCid(event.callCid.toString());
-          }
-        }),
-      );
-    }
-
-    //if there are active calls (for iOS) when connecting, subscribe to events as if the call was incoming
-    StreamVideoPushNotificationPlatform.instance.activeCalls().then((calls) {
-      if (calls.isNotEmpty) {
-        subscribeToEvents();
-      }
-    });
-
-    _subscriptions.add(
-      _idRinging,
-      onCallEvent.listen((event) {
-        if (event is ActionCallToggleMute) {
-          {
-            _logger.d(
-              () =>
-                  '[onCallEvent] ActionCallToggleMute received: uuid=${event.uuid}, isMuted=${event.isMuted}',
-            );
-            final call = currentActiveCalls.firstWhereOrNull(
-              (c) => c.state.value.isRingingFlow,
-            );
-            if (call != null) {
-              call.setMicrophoneEnabled(enabled: !event.isMuted);
-            } else {
-              _logger.w(
-                () => '[onCallEvent] Cannot toggle mute: no active call',
-              );
-            }
-          }
-        } else if (event is ActionCallIncoming) {
-          if (!client.isConnected) {
-            client.openConnection();
-          }
-
-          subscribeToEvents();
-        } else if (event is ActionCallAccept ||
-            event is ActionCallDecline ||
-            event is ActionCallTimeout ||
-            event is ActionCallEnded) {
-          _subscriptions.cancel(_idCallAccepted);
-          _subscriptions.cancel(_idCallEnded);
-          _subscriptions.cancel(_idCallRejected);
-          _subscriptions.cancel(_idCallParticipantCount);
-        }
-      }),
-    );
+    _observer = RingingSyncObserver(
+      streamVideo: streamVideo,
+      client: client,
+      controller: _controller,
+      broadcaster: _broadcaster,
+      ringingEvents: onCallEvent,
+    )..start();
   }
 
   /// Preferences key of the last APNs token registered.
@@ -299,15 +88,18 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   /// Registers and unregisters this device's push tokens.
   late final PushDeviceRegistrar _registrar;
 
+  /// Sends the commands to the native call UI.
+  late final NativeCallController _controller;
+
+  /// Keeps the native call UI in step with the backend and the app. Only on
+  /// mobile, where there is a native call UI.
+  RingingSyncObserver? _observer;
+
   /// The one broadcaster of this process's ringing events; see
   /// [RingingEventBroadcaster.shared].
   final _broadcaster = RingingEventBroadcaster.shared;
 
   final _logger = taggedLogger(tag: 'SV:PNManager');
-
-  final Subscriptions _subscriptions = Subscriptions();
-
-  List<Call> currentActiveCalls = [];
 
   @override
   void registerDevice() => _registrar.registerDevice();
@@ -331,18 +123,13 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     String? callerName,
     bool hasVideo = true,
   }) {
-    final params = StreamVideoPushParams.forCall(
-      pushConfiguration,
+    return _controller.showIncomingCall(
       uuid: uuid,
       callCid: callCid,
       avatar: avatar,
       handle: handle,
       callerName: callerName,
       hasVideo: hasVideo,
-    );
-
-    return StreamVideoPushNotificationPlatform.instance.showIncomingCall(
-      params,
     );
   }
 
@@ -355,8 +142,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     String? callerName,
     bool hasVideo = true,
   }) {
-    final params = StreamVideoPushParams.forCall(
-      pushConfiguration,
+    return _controller.showMissedCall(
       uuid: uuid,
       callCid: callCid,
       avatar: avatar,
@@ -364,9 +150,6 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       callerName: callerName,
       hasVideo: hasVideo,
     );
-
-    return StreamVideoPushNotificationPlatform.instance
-        .showMissCallNotification(params);
   }
 
   @override
@@ -378,8 +161,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     String? callerName,
     bool hasVideo = true,
   }) {
-    final params = StreamVideoPushParams.forCall(
-      pushConfiguration,
+    return _controller.startOutgoingCall(
       uuid: uuid,
       callCid: callCid,
       avatar: avatar,
@@ -387,80 +169,33 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       callerName: callerName,
       hasVideo: hasVideo,
     );
-
-    return StreamVideoPushNotificationPlatform.instance.startCall(params);
   }
 
   @override
-  Future<List<CallData>> activeCalls() async {
-    if (!CurrentPlatform.isMobile) return [];
-
-    return StreamVideoPushNotificationPlatform.instance.activeCalls();
-  }
+  Future<List<CallData>> activeCalls() => _controller.activeCalls();
 
   @override
-  Future<void> endAllCalls() =>
-      StreamVideoPushNotificationPlatform.instance.endAllCalls();
+  Future<void> endAllCalls() => _controller.endAllCalls();
 
   @override
-  Future<void> endCall(String uuid) =>
-      StreamVideoPushNotificationPlatform.instance.endCall(uuid);
+  Future<void> endCall(String uuid) => _controller.endCall(uuid);
 
   /// Dismisses the ringing UI of a call that the user accepted and is now in.
   ///
-  /// This is deliberately not [endCallByCid]. On Android the two differ: ending disconnects the
-  /// call from the Telecom stack, while dismissing leaves it registered so in-call controls on a
-  /// watch, headset or car head unit keep working. Only the caller knows which one it means —
-  /// natively an accept and an accept that failed to join look identical.
-  ///
-  /// On iOS there is nothing to keep: CallKit *is* the ring, and ending it is what dismissing it
-  /// means, so this behaves exactly as it always has.
-  Future<void> dismissRingingCallByCid(String cid) {
-    if (CurrentPlatform.isIos) return endCallByCid(cid);
-    return StreamVideoPushNotificationPlatform.instance.dismissRingingCall(cid);
-  }
+  /// Not [endCallByCid]: on Android, ending disconnects the call from the
+  /// Telecom stack, while dismissing leaves it registered so in-call controls
+  /// on a watch, headset or car head unit keep working. On iOS the two are the
+  /// same, since CallKit is the ring.
+  Future<void> dismissRingingCallByCid(String cid) =>
+      _controller.dismissRingingCallByCid(cid);
 
   @override
-  Future<void> endCallByCid(String cid, {bool silent = false}) async {
-    final decision = resolveCallsToEnd(await activeCalls(), cid);
-
-    if (decision.endAll) {
-      if (silent) _broadcaster.suppressEvent();
-      await endAllCalls();
-      return;
-    }
-
-    for (final call in decision.calls) {
-      if (silent) _broadcaster.suppressEvent();
-      await endCall(call.uuid!);
-    }
-  }
+  Future<void> endCallByCid(String cid, {bool silent = false}) =>
+      _controller.endCallByCid(cid, silent: silent);
 
   @override
-  Future<void> setCallMutedByCid(String cid, bool isMuted) async {
-    // Muting call on CallKit screen
-    if (!CurrentPlatform.isIos) {
-      return;
-    }
-
-    final activeCalls = await this.activeCalls();
-    final calls = activeCalls
-        .where((call) => call.callCid == cid && call.uuid != null)
-        .toList();
-
-    for (final call in calls) {
-      // Suppress CallKit event to avoid loop
-      _broadcaster.suppressEvent(
-        eventType: ActionCallToggleMute,
-        valueKey: isMuted.toString(),
-      );
-
-      await StreamVideoPushNotificationPlatform.instance.muteCall(
-        call.uuid!,
-        isMuted: isMuted,
-      );
-    }
-  }
+  Future<void> setCallMutedByCid(String cid, bool isMuted) =>
+      _controller.setCallMutedByCid(cid, isMuted);
 
   @override
   Future<String?> getDevicePushTokenVoIP() async {
@@ -474,25 +209,16 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   }
 
   @override
-  Future<void> holdCall(String uuid, {bool isOnHold = true}) {
-    return StreamVideoPushNotificationPlatform.instance.holdCall(
-      uuid,
-      isOnHold: isOnHold,
-    );
-  }
+  Future<void> holdCall(String uuid, {bool isOnHold = true}) =>
+      _controller.holdCall(uuid, isOnHold: isOnHold);
 
   @override
-  Future<void> muteCall(String uuid, {bool isMuted = true}) {
-    return StreamVideoPushNotificationPlatform.instance.muteCall(
-      uuid,
-      isMuted: isMuted,
-    );
-  }
+  Future<void> muteCall(String uuid, {bool isMuted = true}) =>
+      _controller.muteCall(uuid, isMuted: isMuted);
 
   @override
-  Future<void> setCallConnected(String uuid) {
-    return StreamVideoPushNotificationPlatform.instance.setCallConnected(uuid);
-  }
+  Future<void> setCallConnected(String uuid) =>
+      _controller.setCallConnected(uuid);
 
   /// Reports how a call ended so it shows up correctly in the system call history.
   ///
@@ -502,16 +228,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   Future<void> reportCallEnded(
     String uuid, {
     CallEndedReason reason = CallEndedReason.remoteEnded,
-  }) {
-    return StreamVideoPushNotificationPlatform.instance.reportCallEnded(
-      uuid,
-      reason,
-    );
-  }
+  }) => _controller.reportCallEnded(uuid, reason: reason);
 
   @override
   Future<void> dispose() async {
-    _subscriptions.cancelAll();
+    _observer?.dispose();
     await _registrar.dispose();
   }
 
