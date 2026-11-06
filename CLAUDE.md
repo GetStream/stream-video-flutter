@@ -8,7 +8,7 @@ Melos monorepo for the Stream Video Flutter SDK.
 | `packages/stream_video_flutter` | UI toolkit — widgets, themes, call screens. |
 | `packages/stream_video_*` | Filters, noise cancellation, push notifications, screen sharing. |
 | `dogfooding/` | The internal sample app. The first place a UI change gets tried. |
-| `webrtc/` | Our fork of the WebRTC plugin: `stream_webrtc_flutter`, `dart_webrtc` (web) and `webrtc_interface`. The SDK builds against these, not pub.dev. |
+| `webrtc/` | Our fork of the WebRTC plugin: `stream_webrtc_flutter`, `stream_dart_webrtc` (web) and `stream_webrtc_interface`. The SDK builds against these, not pub.dev. |
 
 ```bash
 melos bootstrap          # after any pubspec change

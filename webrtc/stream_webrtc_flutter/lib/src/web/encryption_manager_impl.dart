@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:webrtc_interface/webrtc_interface.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
 import '../e2ee/encryption_manager.dart';
 import '../e2ee/encryption_types.dart';

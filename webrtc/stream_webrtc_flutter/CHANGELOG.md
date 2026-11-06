@@ -1,3 +1,7 @@
+[Unreleased]
+
+* Depends on `stream_dart_webrtc` and `stream_webrtc_interface` instead of `dart_webrtc` and `webrtc_interface`.
+
 [4.0.1] - 2026.10.22
 
 * [iOS/macOS] fix: peer connection operations (SDP, candidates, tracks, transceivers, senders, stats) now run on a serial queue per peer connection instead of the main thread, so joining a call or changing publish quality no longer freezes the app.

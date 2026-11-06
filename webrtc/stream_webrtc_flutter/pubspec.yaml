@@ -10,13 +10,13 @@ resolution: workspace
 
 dependencies:
   collection: ^1.17.0
-  dart_webrtc: ^1.8.2
   flutter:
     sdk: flutter
   logger: ^2.0.2+1
   path_provider: ^2.0.2
+  stream_dart_webrtc: ^1.0.0
+  stream_webrtc_interface: ^1.0.0
   web: ^1.0.0
-  webrtc_interface: ^1.5.1
 
 dev_dependencies:
   flutter_test:
