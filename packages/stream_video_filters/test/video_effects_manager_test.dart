@@ -117,7 +117,7 @@ void main() {
     videoEnabled = StreamController<bool?>.broadcast();
 
     call = MockCall();
-    when(() => call.state).thenReturn(stateEmitter);
+    when(() => call.state).thenAnswer((_) => stateEmitter);
     when(() => call.getTrack(any(), any())).thenReturn(track);
     // Like the real stream, replays the current value (camera on) on subscribe.
     when(() => call.partialState<bool?>(any())).thenAnswer((_) async* {
