@@ -43,15 +43,16 @@ CallSession _buildSession({
   when(
     () => sfuWS.disconnect(any(), any()),
   ).thenAnswer((_) async => const Result.success(none));
-  when(() => sfuWS.send(any())).thenAnswer((_) {
-    // After the session starts waiting for it.
-    Timer.run(
-      () => events.emit(
-        SfuJoinResponseEvent(callState: createTestSfuCallState()),
-      ),
-    );
-    return const Result<void>.success(null);
-  });
+  when(
+    () => sfuWS.send(any()),
+  ).thenReturn(const Result<void>.success(null));
+  when(
+    () => sfuWS.waitForJoinResponse(timeLimit: any(named: 'timeLimit')),
+  ).thenAnswer(
+    (_) async => Result.success(
+      SfuJoinResponseEvent(callState: createTestSfuCallState()),
+    ),
+  );
 
   final pcFactory = _MockStreamPeerConnectionFactory();
   when(
@@ -118,6 +119,7 @@ void main() {
     registerFallbackValue(sfu_events.SfuRequest());
     registerFallbackValue(rtc.TransceiverDirection.RecvOnly);
     registerFallbackValue(MockSfuClient());
+    registerFallbackValue(Duration.zero);
   });
 
   test(

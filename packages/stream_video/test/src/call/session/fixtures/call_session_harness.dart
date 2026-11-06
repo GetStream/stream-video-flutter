@@ -250,6 +250,13 @@ class CallSessionHarness {
     callState: harnessSfuCallState(),
   );
 
+  /// Answers a fast reconnect's join; the SFU resumes the session unless a
+  /// test says otherwise.
+  SfuEvent? Function()? fastReconnectAnswer = () => SfuJoinResponseEvent(
+    callState: harnessSfuCallState(),
+    isReconnected: true,
+  );
+
   late final _callState = MutableStateEmitter<CallState>(
     createTestCallState(currentUserId: harnessUserId),
     sync: true,
@@ -289,7 +296,16 @@ class CallSessionHarness {
       final request =
           invocation.positionalArguments.single as sfu_events.SfuRequest;
       sentRequests.add(request);
-      final answer = request.hasJoinRequest() ? joinAnswer?.call() : null;
+      final isFastReconnect =
+          request.joinRequest.reconnectDetails.strategy ==
+          sfu_models
+              .WebsocketReconnectStrategy
+              .WEBSOCKET_RECONNECT_STRATEGY_FAST;
+      final answer = !request.hasJoinRequest()
+          ? null
+          : isFastReconnect
+          ? fastReconnectAnswer?.call()
+          : joinAnswer?.call();
       if (answer != null) {
         Timer.run(() => events.emit(answer));
       }
@@ -297,14 +313,51 @@ class CallSessionHarness {
     });
     when(
       () => sfuWS.waitForJoinResponse(timeLimit: any(named: 'timeLimit')),
-    ).thenAnswer(
-      (_) async => Result.success(
-        SfuJoinResponseEvent(
-          callState: harnessSfuCallState(),
-          isReconnected: true,
+    ).thenAnswer((invocation) {
+      final timeLimit = invocation.namedArguments[#timeLimit] as Duration;
+      return _waitForJoinResponse(timeLimit);
+    });
+  }
+
+  /// How many join waits are still listening to [events].
+  int get pendingJoinWaits => _pendingJoinWaits;
+  var _pendingJoinWaits = 0;
+
+  // Settles the way the socket does: on the answer, an SFU error, the socket
+  // closing (an `SfuSocketDisconnected` here) or the time limit. A socket
+  // that is already down when the wait starts is not modelled.
+  Future<Result<SfuJoinResponseEvent>> _waitForJoinResponse(
+    Duration timeLimit,
+  ) {
+    final completer = Completer<Result<SfuJoinResponseEvent>>();
+    void settle(Result<SfuJoinResponseEvent> result) {
+      if (!completer.isCompleted) completer.complete(result);
+    }
+
+    _pendingJoinWaits++;
+    final subscription = events.listen((event) {
+      if (event is SfuJoinResponseEvent) {
+        settle(Result.success(event));
+      } else if (event is SfuErrorEvent) {
+        settle(failureWithError(event.error.message, cause: event.error));
+      } else if (event is SfuSocketDisconnected) {
+        settle(failureWithError('SFU WS closed before the join response'));
+      }
+    });
+    final timer = Timer(timeLimit, () {
+      settle(
+        failureWithError(
+          'No join response within ${timeLimit.inMilliseconds}ms',
+          cause: TimeoutException('No join response', timeLimit),
         ),
-      ),
-    );
+      );
+    });
+
+    return completer.future.whenComplete(() {
+      _pendingJoinWaits--;
+      timer.cancel();
+      unawaited(subscription.cancel());
+    });
   }
 
   void _stubSfuClient() {

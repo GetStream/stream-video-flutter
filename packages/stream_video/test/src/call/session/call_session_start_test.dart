@@ -265,7 +265,14 @@ void main() {
       final result = await harness.session.start();
 
       expect(result.getErrorOrNull()?.message, 'join refused');
-      expect(harness.reporter.stageErrors, [_sfuError]);
+      expect(
+        harness.reporter.stageErrors.single,
+        isA<StreamVideoExceptionWithCause>().having(
+          (e) => e.cause,
+          'cause',
+          _sfuError,
+        ),
+      );
       expect(harness.session.rtcManager, isNull);
     });
 
@@ -288,10 +295,7 @@ void main() {
       });
     });
 
-    // Bug 1 of FLU-1060, pinned as it behaves today: `start` waits only for
-    // a join response or an SFU error, so a socket that closes during the
-    // join fails it only at the timeout. CS4 makes it fail at once.
-    test('only at the timeout when the socket closes during the join', () {
+    test('at once when the socket closes during the join', () {
       fakeAsync((async) {
         final harness = CallSessionHarness(
           joinResponseTimeout: const Duration(seconds: 2),
@@ -307,15 +311,67 @@ void main() {
 
         Result<Object?>? result;
         unawaited(harness.session.start().then((r) => result = r));
-        async.elapse(const Duration(milliseconds: 1900));
-        expect(result, isNull);
+        async.elapse(const Duration(milliseconds: 10));
 
-        async.elapse(const Duration(milliseconds: 100));
-        expect(result?.isFailure, isTrue);
-        expect(harness.reporter.stageFailures, [
-          ClientEventStandardCode.requestTimeout,
-        ]);
+        expect(
+          result?.getErrorOrNull()?.message,
+          contains('closed before the join response'),
+        );
+        expect(harness.reporter.stageErrors, hasLength(1));
+        expect(harness.reporter.stageFailures, isEmpty);
+        expect(
+          harness.takeTraceTags(),
+          isNot(contains(TraceTag.joinRequestTimeout)),
+        );
       });
+    });
+
+    test('at once when the join request cannot be sent', () async {
+      final harness = CallSessionHarness();
+      when(() => harness.sfuWS.send(any())).thenReturn(
+        const Result.failure(StreamVideoException(message: 'not open')),
+      );
+
+      final result = await harness.session.start().timeout(
+        const Duration(seconds: 1),
+      );
+
+      expect(result.getErrorOrNull()?.message, contains('not open'));
+      expect(harness.reporter.stageErrors, hasLength(1));
+      verifyNever(
+        () => harness.sfuWS.waitForJoinResponse(
+          timeLimit: any(named: 'timeLimit'),
+        ),
+      );
+    });
+  });
+
+  group('start leaves no join wait behind', () {
+    test('after a join response', () async {
+      final harness = CallSessionHarness();
+
+      await harness.session.start();
+
+      expect(harness.pendingJoinWaits, 0);
+      verify(
+        () => harness.sfuWS.waitForJoinResponse(
+          timeLimit: const Duration(seconds: 5),
+        ),
+      ).called(1);
+    });
+
+    test('after an SFU error', () async {
+      final harness = CallSessionHarness();
+      harness.joinAnswer = () => const SfuErrorEvent(error: _sfuError);
+
+      await harness.session.start();
+
+      expect(harness.pendingJoinWaits, 0);
+      verify(
+        () => harness.sfuWS.waitForJoinResponse(
+          timeLimit: any(named: 'timeLimit'),
+        ),
+      ).called(1);
     });
   });
 }

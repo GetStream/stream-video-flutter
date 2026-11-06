@@ -310,35 +310,22 @@ class CallSession extends Disposable with _CallSessionMedia {
 
       _tracer.trace(TraceTag.joinRequest, joinRequest.toJson());
 
-      sfuWS.send(
-        sfu_events.SfuRequest(
-          joinRequest: joinRequest,
-        ),
-      );
-
       _logger.v(() => '[start] wait for SfuJoinResponseEvent');
-      final joinResponseFuture = sfuWS.events.waitFor<SfuJoinResponseEvent>(
+      final joined = await _joinSfu(
+        joinRequest,
         timeLimit: joinResponseTimeout,
       );
-
-      final sfuErrorFuture = sfuWS.events.waitFor<SfuErrorEvent>(
-        timeLimit: joinResponseTimeout,
-      );
-
-      final event = await Future.any([joinResponseFuture, sfuErrorFuture]);
-
-      if (event is SfuErrorEvent) {
-        reporter.failStageWithError(
-          wsJoinStageId,
-          event.error,
+      if (joined is Failure) {
+        _failJoinStage(
+          joined.videoError,
+          stageId: wsJoinStageId,
           details: wsJoinDetails,
           retryCount: clientEventRetryCount,
         );
-        _logger.e(() => '[start] sfu error: ${event.error}');
-        return failureWithError(event.error.message, cause: event.error);
+        return Result.failure(joined.videoError);
       }
 
-      final joinResponseEvent = event as SfuJoinResponseEvent;
+      final event = joined.getDataOrNull()!;
 
       reporter.completeStage(
         wsJoinStageId,
@@ -365,7 +352,7 @@ class CallSession extends Disposable with _CallSessionMedia {
                 sessionSequence: sessionSeq,
                 statsOptions: statsOptions,
                 callSessionConfig: config,
-                publishOptions: joinResponseEvent.publishOptions,
+                publishOptions: event.publishOptions,
                 clientEventRetryCount: clientEventRetryCount,
                 e2eeManager: e2eeManager,
               )
@@ -376,10 +363,9 @@ class CallSession extends Disposable with _CallSessionMedia {
               ..onRemoteTrackReceived = _onRemoteTrackReceived;
       } else {
         final currentUserId = stateManager.callState.currentUserId;
-        final localParticipant = joinResponseEvent.callState.participants
-            .firstWhere(
-              (it) => it.userId == currentUserId && it.sessionId == sessionId,
-            );
+        final localParticipant = event.callState.participants.firstWhere(
+          (it) => it.userId == currentUserId && it.sessionId == sessionId,
+        );
         final localTrackId = localParticipant.trackLookupPrefix;
 
         _logger.v(() => '[start] localTrackId: $localTrackId');
@@ -390,7 +376,7 @@ class CallSession extends Disposable with _CallSessionMedia {
                 host: _host,
                 stateManager: stateManager,
                 publisherId: localTrackId,
-                publishOptions: joinResponseEvent.publishOptions,
+                publishOptions: event.publishOptions,
                 clientDetails: clientDetails,
                 sessionSequence: sessionSeq,
                 statsOptions: statsOptions,
@@ -425,8 +411,7 @@ class CallSession extends Disposable with _CallSessionMedia {
 
       _rtcManagerSubject!.add(createdRtcManager);
 
-      stateManager.sfuPinsUpdated(event.callState.pins);
-      stateManager.sfuE2eeEnabledUpdated(event.callState.e2eeEnabled);
+      _applyJoinResponse(event);
 
       final environment = ClientEnvironment(
         sfu: config.sfuUrl,
@@ -453,18 +438,6 @@ class CallSession extends Disposable with _CallSessionMedia {
           fastReconnectDeadline: event.fastReconnectDeadline,
         ),
       );
-    } on TimeoutException catch (e, stk) {
-      final message =
-          'Waiting for "joinResponse" has timed out after ${joinResponseTimeout.inMilliseconds}ms';
-      reporter.failStage(
-        wsJoinStageId,
-        failure: ClientEventFailure.requestTimeout(message),
-        details: wsJoinDetails,
-        retryCount: clientEventRetryCount,
-      );
-      _tracer.trace(TraceTag.joinRequestTimeout, message);
-      _logger.e(() => '[start] failed: $e');
-      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     } catch (e, stk) {
       reporter.failStageWithError(
         wsJoinStageId,
@@ -480,6 +453,63 @@ class CallSession extends Disposable with _CallSessionMedia {
   Result<T> _rejectClosedStart<T>(String step) {
     _logger.w(() => '[start] rejected (session closed $step)');
     return failureWithError<T>('session closed $step');
+  }
+
+  /// Sends [request] and waits up to [timeLimit] for the SFU to answer it.
+  ///
+  /// Fails at once when the request cannot be sent, the SFU answers with an
+  /// error or the socket closes; a timeout fails with a [TimeoutException]
+  /// cause.
+  Future<Result<SfuJoinResponseEvent>> _joinSfu(
+    sfu_events.JoinRequest request, {
+    required Duration timeLimit,
+  }) {
+    final sent = sfuWS.send(sfu_events.SfuRequest(joinRequest: request));
+    if (sent is Failure) {
+      return Future.value(
+        failureWithError('Join request not sent: ${sent.videoError.message}'),
+      );
+    }
+
+    // Nothing is awaited between sending and subscribing, so the answer
+    // cannot slip past.
+    return sfuWS.waitForJoinResponse(timeLimit: timeLimit);
+  }
+
+  void _applyJoinResponse(SfuJoinResponseEvent event) {
+    stateManager.sfuPinsUpdated(event.callState.pins);
+    stateManager.sfuE2eeEnabledUpdated(event.callState.e2eeEnabled);
+  }
+
+  /// Fails the `wsJoin` stage with [error], as a request timeout when the SFU
+  /// did not answer in time.
+  void _failJoinStage(
+    StreamVideoException error, {
+    required String stageId,
+    required ClientEventDetails details,
+    required int retryCount,
+  }) {
+    final reporter = _host.clientEventReporter;
+    final cause = error is StreamVideoExceptionWithCause ? error.cause : null;
+
+    if (cause is TimeoutException) {
+      reporter.failStage(
+        stageId,
+        failure: ClientEventFailure.requestTimeout(error.message),
+        details: details,
+        retryCount: retryCount,
+      );
+      _tracer.trace(TraceTag.joinRequestTimeout, error.message);
+    } else {
+      reporter.failStageWithError(
+        stageId,
+        error,
+        details: details,
+        retryCount: retryCount,
+      );
+    }
+
+    _logger.e(() => '[start] join failed: $error');
   }
 
   Future<Result<None>> waitForMigrationComplete() async {
@@ -545,22 +575,9 @@ class CallSession extends Disposable with _CallSessionMedia {
         currentPublishOptions: rtcManager?.publishOptions,
       );
 
-      final sendResult = sfuWS.send(
-        sfu_events.SfuRequest(joinRequest: joinRequest),
-      );
-
-      if (sendResult is Failure) {
-        return failed(
-          StreamVideoException(
-            message: 'Join request not sent: ${sendResult.videoError.message}',
-          ),
-        );
-      }
-
-      // Nothing is awaited between sending and subscribing, so the answer
-      // cannot slip past.
       _logger.v(() => '[fastReconnect] wait for SfuJoinResponseEvent');
-      final joinResponse = await sfuWS.waitForJoinResponse(
+      final joinResponse = await _joinSfu(
+        joinRequest,
         timeLimit: fastReconnectJoinResponseTimeout,
       );
       if (joinResponse is Failure) {
@@ -574,8 +591,7 @@ class CallSession extends Disposable with _CallSessionMedia {
 
       _logger.v(() => '[fastReconnect] fast-reconnect done');
 
-      stateManager.sfuPinsUpdated(event.callState.pins);
-      stateManager.sfuE2eeEnabledUpdated(event.callState.e2eeEnabled);
+      _applyJoinResponse(event);
 
       result = Result.success(
         (
