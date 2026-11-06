@@ -69,6 +69,7 @@ void registerCallSessionHarnessFallbacks() {
   registerFallbackValue(Duration.zero);
   registerFallbackValue(CloseCode.normalClosure);
   registerFallbackValue(StreamPeerType.publisher);
+  registerFallbackValue(MockTracedPeerConnection());
   final participant = harnessSfuParticipant();
   registerFallbackValue(
     SfuJoinResponseEvent(callState: harnessSfuCallState()),
