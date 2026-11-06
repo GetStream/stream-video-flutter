@@ -30,6 +30,18 @@ runs:
           yq eval '.dependencies.stream_video_flutter = {"path": "../stream_video_flutter"}' -i packages/stream_video_push_notification/pubspec.yaml
           yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
           yq eval '.dependencies.stream_video = {"path": "../stream_video"}' -i packages/stream_video_filters/pubspec.yaml
+          # stream_dart_webrtc and stream_webrtc_interface are not on pub.dev
+          # yet, so every package resolves the webrtc packages from webrtc/.
+          yq eval '.dependencies.stream_dart_webrtc = {"path": "../../webrtc/stream_dart_webrtc"}' -i packages/stream_video/pubspec.yaml
+          yq eval '.dependencies.stream_webrtc_flutter = {"path": "../../webrtc/stream_webrtc_flutter"}' -i packages/stream_video/pubspec.yaml
+          yq eval '.dependencies.stream_webrtc_interface = {"path": "../../webrtc/stream_webrtc_interface"}' -i packages/stream_video/pubspec.yaml
+          yq eval '.dependencies.stream_webrtc_flutter = {"path": "../../webrtc/stream_webrtc_flutter"}' -i packages/stream_video_filters/pubspec.yaml
+          yq eval '.dependencies.stream_webrtc_flutter = {"path": "../../webrtc/stream_webrtc_flutter"}' -i packages/stream_video_flutter/pubspec.yaml
+          yq eval '.dependencies.stream_webrtc_flutter = {"path": "../../webrtc/stream_webrtc_flutter"}' -i packages/stream_video_noise_cancellation/pubspec.yaml
+          yq eval '.dependencies.stream_webrtc_flutter = {"path": "../../webrtc/stream_webrtc_flutter"}' -i packages/stream_video_push_notification/pubspec.yaml
+          yq eval '.dependencies.stream_webrtc_interface = {"path": "../stream_webrtc_interface"}' -i webrtc/stream_dart_webrtc/pubspec.yaml
+          yq eval '.dependencies.stream_dart_webrtc = {"path": "../stream_dart_webrtc"}' -i webrtc/stream_webrtc_flutter/pubspec.yaml
+          yq eval '.dependencies.stream_webrtc_interface = {"path": "../stream_webrtc_interface"}' -i webrtc/stream_webrtc_flutter/pubspec.yaml
 
     - name: Install Flutter
       uses: ./.github/actions/setup-flutter
