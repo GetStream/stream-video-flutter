@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 
-import 'package:webrtc_interface/webrtc_interface.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
 import 'event_channel.dart';
 import 'media_stream_impl.dart';

@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import 'package:webrtc_interface/webrtc_interface.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
 import 'rtc_video_renderer_impl.dart';
 

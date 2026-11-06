@@ -1,6 +1,6 @@
 import '../desktop_capturer.dart';
 
-export 'package:dart_webrtc/dart_webrtc.dart'
+export 'package:stream_dart_webrtc/stream_dart_webrtc.dart'
     hide MediaDevices, MediaRecorder, videoRenderer;
 
 DesktopCapturer get desktopCapturer => throw UnimplementedError();

@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'package:webrtc_interface/webrtc_interface.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
 import 'rtc_video_platform_view_controller.dart';
 

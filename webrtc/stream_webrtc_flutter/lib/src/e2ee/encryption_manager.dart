@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:webrtc_interface/webrtc_interface.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
 import '../native/encryption_manager_impl.dart'
     if (dart.library.js_interop) '../web/encryption_manager_impl.dart';

@@ -5,9 +5,9 @@ import 'dart:js_interop' as jsutil;
 import 'dart:js_interop_unsafe';
 import 'dart:math' as math;
 
-import 'package:dart_webrtc/src/media_stream_track_impl.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_dart_webrtc/src/media_stream_track_impl.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:web/web.dart' as web;
 

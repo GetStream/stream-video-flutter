@@ -1,5 +1,6 @@
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
-import 'package:webrtc_interface/webrtc_interface.dart' as rtc_interface;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart'
+    as rtc_interface;
 
 import '../../call/stats/trace_tag.dart';
 import '../../call/stats/tracer.dart';

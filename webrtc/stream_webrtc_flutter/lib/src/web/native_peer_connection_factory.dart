@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:webrtc_interface/webrtc_interface.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
 /// Web stub. Per-call peer connection factories are a native-only concept —
 /// the browser's WebRTC implementation owns audio device routing

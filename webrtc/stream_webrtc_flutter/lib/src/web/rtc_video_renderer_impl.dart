@@ -3,9 +3,9 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:ui_web' as web_ui;
 
-import 'package:dart_webrtc/dart_webrtc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:stream_dart_webrtc/stream_dart_webrtc.dart';
 import 'package:web/web.dart' as web;
 
 import '../video_renderer_extension.dart' show AudioControl;

@@ -1,6 +1,6 @@
 library flutter_webrtc;
 
-export 'package:webrtc_interface/webrtc_interface.dart'
+export 'package:stream_webrtc_interface/stream_webrtc_interface.dart'
     hide MediaDevices, MediaRecorder, Navigator;
 
 export 'src/desktop_capturer.dart';

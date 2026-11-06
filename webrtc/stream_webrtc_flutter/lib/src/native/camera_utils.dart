@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:webrtc_interface/webrtc_interface.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
 import 'utils.dart';
 
