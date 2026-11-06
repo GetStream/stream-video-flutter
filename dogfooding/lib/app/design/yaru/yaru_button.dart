@@ -140,7 +140,11 @@ class YaruStreamButton extends StatelessWidget {
     }
     return Semantics(
       selected: props.isSelected,
-      child: padToTapTarget(context, button),
+      child: padToTapTarget(
+        context,
+        button,
+        tapTargetSize: props.themeStyle?.tapTargetSize,
+      ),
     );
   }
 }
