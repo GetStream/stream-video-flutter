@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_dynamic_calls
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -11,6 +12,8 @@ import 'stream_video_push_notification_platform_interface.dart';
 /// An implementation of [StreamVideoPushNotificationPlatform] that uses method channels.
 class MethodChannelStreamVideoPushNotification
     extends StreamVideoPushNotificationPlatform {
+  final _logger = taggedLogger(tag: 'SV:PNMethodChannel');
+
   /// The method channel used to interact with the native platform.
   @visibleForTesting
   final methodChannel = const MethodChannel('stream_video_push_notification');
@@ -227,7 +230,14 @@ class MethodChannelStreamVideoPushNotification
 
   RingingEvent? _receiveRingingEvent(dynamic data) {
     if (data is Map) {
-      final event = Event.values.firstWhere((e) => e.name == data['event']);
+      final event = Event.values.firstWhereOrNull(
+        (e) => e.name == data['event'],
+      );
+      if (event == null) {
+        // Unknown event names are logged and dropped.
+        _logger.w(() => 'Ignoring unknown ringing event: ${data['event']}');
+        return null;
+      }
       final body = Map<String, dynamic>.from(data['body']);
       final callData = _callDataFromJson(body);
 
