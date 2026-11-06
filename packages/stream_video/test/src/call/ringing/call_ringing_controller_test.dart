@@ -4,8 +4,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/core/client_state.dart';
 import 'package:stream_video/stream_video.dart';
 
-import '../fixtures/call_test_helpers.dart';
 import '../../logger/impl/test_logger.dart';
+import '../fixtures/call_test_helpers.dart';
 import '../fixtures/connection_harness.dart';
 import '../fixtures/data.dart';
 
