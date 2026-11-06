@@ -22,17 +22,20 @@ import java.io.File
 import java.nio.ByteBuffer
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.android.controller.ServiceController
 
 /**
  * Pins what the broadcast receiver does for each call action: the notification it shows or
  * clears, the event Dart receives, the active-calls list Dart reads back, the ringing service it
- * starts, and the Telecom call it registers or ends.
+ * starts or stops, and the Telecom call it registers or ends.
  *
  * Everything Dart sees is observed through the plugin's real method and event channels, with a
  * fake engine on the other end. The receiver is driven with the intents the plugin and the
@@ -46,6 +49,7 @@ class IncomingCallBroadcastReceiverTest {
         get() = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     private lateinit var dart: FakeDartSide
+    private var ringingService: ServiceController<IncomingCallNotificationService>? = null
 
     @Before
     fun attachPlugin() {
@@ -58,6 +62,8 @@ class IncomingCallBroadcastReceiverTest {
 
     @After
     fun detachPlugin() {
+        ringingService?.destroy()
+        ringingService = null
         unmockkObject(StreamTelecomManager)
         IncomingCallBroadcastReceiver.silenceEvents = false
         resetPlugin()
@@ -91,6 +97,16 @@ class IncomingCallBroadcastReceiverTest {
 
     private fun incoming(bundle: Bundle = data().toBundle()) =
         receive(IncomingCallBroadcastReceiver.getIntentIncoming(context, bundle))
+
+    /** Creates the ringing service as the system would, so a stop request can be observed. */
+    private fun runRingingService() {
+        ringingService = Robolectric.buildService(IncomingCallNotificationService::class.java)
+            .create()
+    }
+
+    private fun ringingServiceWasStopped() =
+        shadowOf(context).nextStoppedService?.component?.className ==
+            IncomingCallNotificationService::class.java.name
 
     private fun shownNotificationIds() = notifications.activeNotifications.map { it.id }
 
@@ -137,10 +153,12 @@ class IncomingCallBroadcastReceiverTest {
     @Test
     fun `declining clears the ring, reports it and forgets the call`() {
         incoming()
+        runRingingService()
 
         receive(IncomingCallBroadcastReceiver.getIntentDecline(context, data().toBundle()))
 
         assertEquals(emptyList<Int>(), shownNotificationIds())
+        assertTrue(ringingServiceWasStopped())
         assertTrue(fullScreenActivityWasToldToClose())
         assertEquals(IncomingCallConstants.ACTION_CALL_DECLINE, eventNames().last())
         assertEquals(emptyList<Any?>(), activeCalls())
@@ -150,10 +168,12 @@ class IncomingCallBroadcastReceiverTest {
     @Test
     fun `ending clears the ring, reports it and disconnects Telecom`() {
         incoming()
+        runRingingService()
 
         receive(IncomingCallBroadcastReceiver.getIntentEnded(context, data().toBundle()))
 
         assertEquals(emptyList<Int>(), shownNotificationIds())
+        assertTrue(ringingServiceWasStopped())
         assertTrue(fullScreenActivityWasToldToClose())
         assertEquals(IncomingCallConstants.ACTION_CALL_ENDED, eventNames().last())
         assertEquals(emptyList<Any?>(), activeCalls())
@@ -193,13 +213,37 @@ class IncomingCallBroadcastReceiverTest {
     @Test
     fun `a timeout clears the ring, reports it and disconnects Telecom as missed`() {
         incoming()
+        runRingingService()
 
         receive(IncomingCallBroadcastReceiver.getIntentTimeout(context, data().toBundle()))
 
         assertEquals(emptyList<Int>(), shownNotificationIds())
+        assertTrue(ringingServiceWasStopped())
         assertEquals(IncomingCallConstants.ACTION_CALL_TIMEOUT, eventNames().last())
         assertEquals(emptyList<Any?>(), activeCalls())
         verify { StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.MISSED) }
+    }
+
+    @Test
+    fun `clearing a call that no longer owns the ring leaves the ringing service running`() {
+        incoming()
+        incoming(data("id" to OTHER_CALL_ID).toBundle())
+        runRingingService()
+
+        receive(IncomingCallBroadcastReceiver.getIntentDecline(context, data().toBundle()))
+
+        assertEquals(listOf(OTHER_CALL_ID.hashCode()), shownNotificationIds())
+        assertFalse(ringingServiceWasStopped())
+
+        receive(
+            IncomingCallBroadcastReceiver.getIntentDecline(
+                context,
+                data("id" to OTHER_CALL_ID).toBundle(),
+            ),
+        )
+
+        assertEquals(emptyList<Int>(), shownNotificationIds())
+        assertTrue(ringingServiceWasStopped())
     }
 
     @Test
@@ -310,6 +354,7 @@ class IncomingCallBroadcastReceiverTest {
 
     private companion object {
         const val CALL_ID = "call-uuid"
+        const val OTHER_CALL_ID = "other-call-uuid"
         const val MISSED_ID = 7
 
         /** Shared with the Dart tests, relative to the module directory the tests run in. */
