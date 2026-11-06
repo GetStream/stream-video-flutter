@@ -174,6 +174,10 @@ jobs:
         run: |
           melos run build:example:android
 
+      - name: Android Unit Tests
+        run: |
+          melos run test:android:push
+
   # codecov/patch is a required check, but Codecov only reports it for a
   # commit with an upload. When the gate skips the tests, an empty upload
   # makes Codecov report it as passed.

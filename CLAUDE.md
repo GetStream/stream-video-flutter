@@ -16,6 +16,7 @@ melos run analyze        # dart analyze --fatal-infos, every package
 melos run format
 melos run generate:flutter   # build_runner, for *.g.theme.dart and friends
 melos run test:all
+melos run test:android:push   # Kotlin unit tests of the push plugin, via its example app
 melos run webrtc:analyze     # and webrtc:test, webrtc:format:verify: webrtc/ only
 ```
 
