@@ -1,3 +1,4 @@
+import AVFoundation
 import CallKit
 import Flutter
 import XCTest
@@ -13,42 +14,31 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
     private let provider = CXProvider(configuration: CXProviderConfiguration())
 
     private var savedEventHandler: EventCallbackHandler?
-    private var savedAnswerCall: Call?
-    private var savedOutgoingCall: Call?
-    private var savedData: CallData?
+    private var savedStore: CallKitCallStore!
     private var savedSilenced = false
-    private var trackedCalls: [Call] = []
     private var received: [[String: Any]] = []
 
     override func setUp() {
         super.setUp()
         // The manager is a singleton the host app also uses, so its state is saved and restored.
         savedEventHandler = manager.eventSink.handler
-        savedAnswerCall = manager.answerCall
-        savedOutgoingCall = manager.outgoingCall
-        savedData = manager.data
+        savedStore = manager.store
         savedSilenced = manager.eventSink.isSilenced
 
         discardHeldEvents()
         // An attached handler Dart does not listen on yet, so events are held.
         manager.setEventHandler(EventCallbackHandler(sink: manager.eventSink))
-        manager.answerCall = nil
-        manager.outgoingCall = nil
-        manager.data = nil
+        manager.store = CallKitCallStore()
         manager.eventSink.isSilenced = false
         received = []
     }
 
     override func tearDown() {
-        trackedCalls.forEach { manager.callController.removeCall($0) }
-        trackedCalls = []
         discardHeldEvents()
         if let savedEventHandler = savedEventHandler {
             manager.setEventHandler(savedEventHandler)
         }
-        manager.answerCall = savedAnswerCall
-        manager.outgoingCall = savedOutgoingCall
-        manager.data = savedData
+        manager.store = savedStore
         manager.eventSink.isSilenced = savedSilenced
         super.tearDown()
     }
@@ -87,11 +77,23 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         (received[index]["body"] as? [String: Any])?["id"] as? String
     }
 
-    private func track(id: String) -> Call {
-        let call = Call(uuid: UUID(), data: CallData(args: ["id": id]))
-        manager.callController.addCall(call)
-        trackedCalls.append(call)
-        return call
+    /// A ringing incoming call CallKit accepted. Its INCOMING event is not sent.
+    private func track(id: String) -> CallKitCall {
+        let uuid = UUID()
+        _ = manager.store.incomingReported(CallData(args: ["id": id]), uuid: uuid, source: .app)
+        return manager.store.call(forCallKit: uuid)!
+    }
+
+    /// Answers `call` in the store. Its ACCEPT event is not sent.
+    private func answer(_ call: CallKitCall) {
+        _ = manager.store.answerPerformed(uuid: call.identity.callKitUUID)
+    }
+
+    /// An outgoing call CallKit started. Its START event is not sent.
+    private func startOutgoing(id: String) -> CallKitCall {
+        let uuid = UUID()
+        manager.store.registerPendingOutgoing(CallData(args: ["id": id]), uuid: uuid)
+        return manager.store.startPerformed(uuid: uuid)!.call
     }
 
     private func end(_ uuid: UUID) {
@@ -138,9 +140,9 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
 
     // MARK: - CXEndCallAction
 
-    func testEndingAnUntrackedCallWithNoActiveCallSendsTimeout() {
+    func testEndingAnUntrackedCallWithNoActiveCallSendsTimeoutWithTheLastOptions() {
         listen()
-        manager.data = CallData(args: ["id": "last-shown"])
+        manager.store.lastOptions = CallData(args: ["id": "last-shown"])
 
         end(UUID())
 
@@ -150,7 +152,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
 
     func testEndingAnUntrackedCallWhileAnotherIsAnsweredSendsEnded() {
         listen()
-        manager.answerCall = Call(uuid: UUID(), data: CallData(args: ["id": "answered"]))
+        answer(track(id: "answered"))
 
         end(UUID())
 
@@ -160,60 +162,79 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
     func testEndingATrackedUnansweredCallSendsDeclineAndRemovesIt() {
         listen()
         let call = track(id: "ringing")
-        manager.data = call.data
 
-        end(call.uuid)
+        end(call.identity.callKitUUID)
 
         XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_DECLINE])
         XCTAssertEqual(receivedId(at: 0), "ringing")
-        XCTAssertTrue(call.hasEnded)
-        XCTAssertNil(manager.callController.callWithUUID(uuid: call.uuid))
+        XCTAssertEqual(call.phase, .ended(nil))
+        XCTAssertNil(manager.store.call(forCallKit: call.identity.callKitUUID))
+    }
+
+    func testDeclineCarriesTheEndedCallsOptionsNotTheLastOnes() {
+        listen()
+        let call = track(id: "ringing")
+        manager.store.lastOptions = CallData(args: ["id": "last-shown"])
+
+        end(call.identity.callKitUUID)
+
+        XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_DECLINE])
+        XCTAssertEqual(receivedId(at: 0), "ringing")
     }
 
     func testEndingTheAnsweredCallSendsEndedWithItsOwnDataAndClearsIt() {
         listen()
         let call = track(id: "answered")
-        manager.answerCall = call
-        manager.data = CallData(args: ["id": "last-shown"])
+        answer(call)
+        manager.store.lastOptions = CallData(args: ["id": "last-shown"])
 
-        end(call.uuid)
+        end(call.identity.callKitUUID)
 
         XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
         XCTAssertEqual(receivedId(at: 0), "answered")
-        XCTAssertNil(manager.answerCall)
-        XCTAssertNil(manager.callController.callWithUUID(uuid: call.uuid))
+        XCTAssertNil(manager.store.answeredCall)
+        XCTAssertNil(manager.store.call(forCallKit: call.identity.callKitUUID))
     }
 
     func testEndingATrackedCallWhileAnOutgoingCallExistsSendsEndedAndKeepsTheOutgoingCall() {
         listen()
-        let outgoing = Call(
-            uuid: UUID(), data: CallData(args: ["id": "outgoing"]), isOutGoing: true)
-        manager.outgoingCall = outgoing
+        let outgoing = startOutgoing(id: "outgoing")
         let call = track(id: "other")
 
-        end(call.uuid)
+        end(call.identity.callKitUUID)
 
         XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
-        XCTAssertTrue(manager.outgoingCall === outgoing)
+        XCTAssertTrue(manager.store.outgoingCall === outgoing)
+    }
+
+    func testTheOutgoingCallIsKeptAfterItEnds() {
+        // Current behaviour, pinned: so every later end is sent as ENDED and no ring times out.
+        listen()
+        let outgoing = startOutgoing(id: "outgoing")
+
+        end(outgoing.identity.callKitUUID)
+
+        XCTAssertTrue(manager.store.outgoingCall === outgoing)
+        let ringing = track(id: "ringing")
+        XCTAssertFalse(manager.store.shouldTimeOut(appId: ringing.identity.appId))
     }
 
     /// Current behaviour, pinned: declining a second ringing call during an answered one is sent
-    /// as ENDED and forgets the answered call, so hanging that one up later is sent as DECLINE
-    /// with the second call's data, and the answered call's end never reaches Dart as its own.
+    /// as ENDED and forgets the answered call, so hanging that one up later is sent as DECLINE,
+    /// and the answered call's end never reaches Dart as ENDED.
     func testDecliningASecondCallDuringAnAnsweredOneForgetsTheAnsweredCall() {
         listen()
         let answered = track(id: "answered")
-        manager.answerCall = answered
+        answer(answered)
         let ringing = track(id: "ringing")
-        manager.data = ringing.data
 
-        end(ringing.uuid)
+        end(ringing.identity.callKitUUID)
 
         XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
         XCTAssertEqual(receivedId(at: 0), "ringing")
-        XCTAssertNil(manager.answerCall)
+        XCTAssertNil(manager.store.answeredCall)
 
-        end(answered.uuid)
+        end(answered.identity.callKitUUID)
 
         XCTAssertEqual(
             receivedNames,
@@ -221,7 +242,161 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
                 StreamVideoIncomingCallConstants.ACTION_CALL_ENDED,
                 StreamVideoIncomingCallConstants.ACTION_CALL_DECLINE,
             ])
-        XCTAssertEqual(receivedId(at: 1), "ringing")
-        XCTAssertNil(manager.callController.callWithUUID(uuid: answered.uuid))
+        XCTAssertEqual(receivedId(at: 1), "answered")
+        XCTAssertNil(manager.store.call(forCallKit: answered.identity.callKitUUID))
+    }
+
+    func testEndingAnUntrackedCallWhileAnOutgoingCallExistsSendsEnded() {
+        listen()
+        _ = startOutgoing(id: "outgoing")
+
+        end(UUID())
+
+        XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
+    }
+
+    // MARK: - Answer
+
+    func testAnswerSendsAcceptWithTheAnsweredCallEvenWithoutLastOptions() {
+        listen()
+        let call = track(id: "ringing")
+        XCTAssertNil(manager.store.lastOptions)
+
+        manager.provider(provider, perform: CXAnswerCallAction(call: call.identity.callKitUUID))
+        drainMainQueue()
+
+        XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_ACCEPT])
+        XCTAssertEqual(receivedId(at: 0), "ringing")
+        XCTAssertTrue(manager.store.answeredCall === call)
+    }
+
+    func testGetAcceptedCallReturnsTheLastOptionsOnlyWhenTheyNameTheAnsweredCall() {
+        let uuid = UUID()
+        let shown = CallData(args: ["id": uuid.uuidString])
+        manager.store.lastOptions = shown
+        _ = manager.store.incomingReported(shown, uuid: uuid, source: .app)
+        XCTAssertNil(manager.getAcceptedCall())
+
+        _ = manager.store.answerPerformed(uuid: uuid)
+        XCTAssertTrue(manager.getAcceptedCall() === shown)
+
+        manager.store.lastOptions = CallData(args: ["id": UUID().uuidString])
+        XCTAssertNil(manager.getAcceptedCall())
+    }
+
+    // MARK: - Audio session
+
+    private var receivedIsActive: Bool? {
+        (received.last?["body"] as? [String: Any])?["isActive"] as? Bool
+    }
+
+    func testAnActivationWithNoConnectedCallReportsTheSessionActive() {
+        listen()
+        let call = track(id: "answered")
+        answer(call)
+
+        manager.provider(provider, didActivate: AVAudioSession.sharedInstance())
+        drainMainQueue()
+
+        XCTAssertEqual(
+            receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION])
+        XCTAssertEqual(receivedIsActive, true)
+        XCTAssertEqual(call.phase, .active)
+    }
+
+    func testAnActivationOnceTheAnsweredCallConnectedSendsNothing() {
+        listen()
+        let call = track(id: "answered")
+        answer(call)
+        _ = manager.store.connected(uuid: call.identity.callKitUUID)
+
+        manager.provider(provider, didActivate: AVAudioSession.sharedInstance())
+        drainMainQueue()
+
+        XCTAssertTrue(received.isEmpty)
+    }
+
+    func testADeactivationReportsTheSessionInactiveUnlessTheAnsweredCallIsHeld() {
+        listen()
+        let call = track(id: "answered")
+        answer(call)
+
+        manager.provider(provider, didDeactivate: AVAudioSession.sharedInstance())
+        drainMainQueue()
+        XCTAssertEqual(
+            receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION])
+        XCTAssertEqual(receivedIsActive, false)
+
+        _ = manager.store.holdPerformed(uuid: call.identity.callKitUUID, onHold: true)
+        manager.provider(provider, didDeactivate: AVAudioSession.sharedInstance())
+        drainMainQueue()
+        XCTAssertEqual(received.count, 1)
+    }
+
+    // MARK: - Calls from Dart
+
+    func testDartEndCallWhileThePushKitFlagIsSetSendsEndedForThePushKitCall() {
+        listen()
+        let pushed = CallData(args: ["id": UUID().uuidString])
+        manager.store.showRequested(pushed, fromPushKit: true)
+
+        manager.handle(.endCall(["id": UUID().uuidString])) { _ in }
+        drainMainQueue()
+
+        XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
+        XCTAssertEqual(receivedId(at: 0), pushed.uuid)
+        XCTAssertFalse(manager.store.isFromPushKit)
+    }
+
+    func testDartCallConnectedWhileThePushKitFlagIsSetConnectsThePushKitCall() {
+        let uuid = UUID()
+        let pushed = CallData(args: ["id": uuid.uuidString])
+        manager.store.showRequested(pushed, fromPushKit: true)
+        _ = manager.store.incomingReported(pushed, uuid: uuid, source: .pushKit)
+
+        manager.handle(.callConnected(["id": UUID().uuidString])) { _ in }
+
+        XCTAssertNotNil(manager.store.call(forCallKit: uuid)?.connectedAt)
+        XCTAssertFalse(manager.store.isFromPushKit)
+    }
+
+    func testDartMuteOrHoldThatMatchesTheCallSendsTheEvent() {
+        listen()
+        let uuid = UUID()
+        _ = manager.store.incomingReported(
+            CallData(args: ["id": uuid.uuidString]), uuid: uuid, source: .app)
+
+        manager.muteCall(uuid.uuidString, isMuted: false)
+        manager.holdCall(uuid.uuidString, onHold: false)
+        drainMainQueue()
+
+        XCTAssertEqual(
+            receivedNames,
+            [
+                StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_MUTE,
+                StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_HOLD,
+            ])
+        XCTAssertEqual(receivedId(at: 0), uuid.uuidString)
+    }
+
+    func testATimedOutRingIsMarkedUnansweredAndSendsTimeout() {
+        listen()
+        let uuid = UUID()
+        let shown = CallData(args: ["id": uuid.uuidString])
+        _ = manager.store.incomingReported(shown, uuid: uuid, source: .app)
+
+        manager.callEndTimeout(shown)
+        drainMainQueue()
+
+        XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_TIMEOUT])
+        XCTAssertEqual(manager.store.call(forCallKit: uuid)?.phase, .ended(.unanswered))
+    }
+
+    func testARefusedEndDropsTheCall() {
+        let call = track(id: "ringing")
+
+        manager.transactions.onEndRefused?(call.identity.callKitUUID)
+
+        XCTAssertNil(manager.store.call(forCallKit: call.identity.callKitUUID))
     }
 }

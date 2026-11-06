@@ -11,21 +11,23 @@ extension StreamVideoCallkitManager {
         eventSink.send(event, body ?? [:])
     }
 
+    /// Carries out the effects of a store transition, in order.
+    func apply(_ effects: [CallKitEffect]) {
+        for effect in effects {
+            switch effect {
+            case .send(let event, let body):
+                sendEvent(event, body)
+            case .reportStartedConnecting(let uuid, let date):
+                sharedProvider?.reportOutgoingCall(with: uuid, startedConnectingAt: date)
+            case .reportConnected(let uuid, let date):
+                sharedProvider?.reportOutgoingCall(with: uuid, connectedAt: date)
+            }
+        }
+    }
+
     @objc public func sendEventCustom(_ event: String, body: NSDictionary?) {
         // Convert NSDictionary to [String: Any?] for queueing if needed
         let bodyDict = body as? [String: Any?]
         sendEvent(event, bodyDict)
-    }
-
-    func sendMuteEvent(_ id: String, _ isMuted: Bool) {
-        self.sendEvent(
-            StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_MUTE,
-            ["id": id, "isMuted": isMuted])
-    }
-
-    func sendHoldEvent(_ id: String, _ isOnHold: Bool) {
-        self.sendEvent(
-            StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_HOLD,
-            ["id": id, "isOnHold": isOnHold])
     }
 }
