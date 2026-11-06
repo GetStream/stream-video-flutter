@@ -1,4 +1,4 @@
-name: 'PR is Conventional and Semantic'
+name: "PR is Conventional and Semantic"
 on:
   pull_request_target:
     types:
@@ -12,7 +12,7 @@ on:
     branches:
       - main
       - v2
-        
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -26,13 +26,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: amannn/action-semantic-pull-request@v6.1.1
-        with: 
+        with:
           scopes: |
             llc
             ui
             ci
             deps
             repo
+            push
             samples
           requireScope: true
         env:
@@ -47,7 +48,8 @@ jobs:
           scopes: |
             {
               "llc": "packages/stream_video",
-              "ui": "packages/stream_video_flutter"
+              "ui": "packages/stream_video_flutter",
+              "push": "packages/stream_video_push_notification"
             }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
