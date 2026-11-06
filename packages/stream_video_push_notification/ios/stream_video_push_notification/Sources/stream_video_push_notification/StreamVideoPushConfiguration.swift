@@ -59,48 +59,24 @@ import Foundation
     public init(args: [String: Any?]) {
         self.headers = args["headers"] as? NSDictionary ?? [:]
 
-        if let ios = args["ios"] as? [String: Any] {
-            self.iconName = ios["iconName"] as? String ?? "CallKitLogo"
-            self.handleType = ios["handleType"] as? String ?? ""
-            self.useComplexHandle = ios["useComplexHandle"] as? Bool ?? false
-            self.supportsVideo = ios["supportsVideo"] as? Bool ?? true
-            self.maximumCallGroups = ios["maximumCallGroups"] as? Int ?? 2
-            self.maximumCallsPerCallGroup = ios["maximumCallsPerCallGroup"] as? Int ?? 1
-            self.audioSessionMode = ios["audioSessionMode"] as? String ?? ""
-            self.audioSessionActive = ios["audioSessionActive"] as? Bool ?? true
-            self.audioSessionPreferredSampleRate =
-                ios["audioSessionPreferredSampleRate"] as? Double ?? 44100.0
-            self.audioSessionPreferredIOBufferDuration =
-                ios["audioSessionPreferredIOBufferDuration"] as? Double ?? 0.005
-            self.configureAudioSession = ios["configureAudioSession"] as? Bool ?? true
-            self.supportsDTMF = ios["supportsDTMF"] as? Bool ?? true
-            self.supportsHolding = ios["supportsHolding"] as? Bool ?? true
-            self.supportsGrouping = ios["supportsGrouping"] as? Bool ?? true
-            self.supportsUngrouping = ios["supportsUngrouping"] as? Bool ?? true
-            self.ringtonePath = ios["ringtonePath"] as? String ?? ""
-            self.includesCallsInRecents = ios["includesCallsInRecents"] as? Bool ?? true
-        } else {
-            // Fallback to top-level properties if ios object doesn't exist
-            self.iconName = args["iconName"] as? String ?? "CallKitLogo"
-            self.handleType = args["handleType"] as? String ?? ""
-            self.useComplexHandle = args["useComplexHandle"] as? Bool ?? false
-            self.supportsVideo = args["supportsVideo"] as? Bool ?? true
-            self.maximumCallGroups = args["maximumCallGroups"] as? Int ?? 2
-            self.maximumCallsPerCallGroup = args["maximumCallsPerCallGroup"] as? Int ?? 1
-            self.audioSessionMode = args["audioSessionMode"] as? String ?? ""
-            self.audioSessionActive = args["audioSessionActive"] as? Bool ?? true
-            self.audioSessionPreferredSampleRate =
-                args["audioSessionPreferredSampleRate"] as? Double ?? 44100.0
-            self.audioSessionPreferredIOBufferDuration =
-                args["audioSessionPreferredIOBufferDuration"] as? Double ?? 0.005
-            self.configureAudioSession = args["configureAudioSession"] as? Bool ?? true
-            self.supportsDTMF = args["supportsDTMF"] as? Bool ?? true
-            self.supportsHolding = args["supportsHolding"] as? Bool ?? true
-            self.supportsGrouping = args["supportsGrouping"] as? Bool ?? true
-            self.supportsUngrouping = args["supportsUngrouping"] as? Bool ?? true
-            self.ringtonePath = args["ringtonePath"] as? String ?? ""
-            self.includesCallsInRecents = args["includesCallsInRecents"] as? Bool ?? true
-        }
+        let options = CallKitOptions(args: args, defaultIconName: "CallKitLogo")
+        self.iconName = options.iconName
+        self.handleType = options.handleType
+        self.useComplexHandle = options.useComplexHandle
+        self.supportsVideo = options.supportsVideo
+        self.maximumCallGroups = options.maximumCallGroups
+        self.maximumCallsPerCallGroup = options.maximumCallsPerCallGroup
+        self.supportsDTMF = options.supportsDTMF
+        self.supportsHolding = options.supportsHolding
+        self.supportsGrouping = options.supportsGrouping
+        self.supportsUngrouping = options.supportsUngrouping
+        self.includesCallsInRecents = options.includesCallsInRecents
+        self.ringtonePath = options.ringtonePath
+        self.configureAudioSession = options.configureAudioSession
+        self.audioSessionMode = options.audioSessionMode
+        self.audioSessionActive = options.audioSessionActive
+        self.audioSessionPreferredSampleRate = options.audioSessionPreferredSampleRate
+        self.audioSessionPreferredIOBufferDuration = options.audioSessionPreferredIOBufferDuration
     }
 
     // MARK: - Persistence
