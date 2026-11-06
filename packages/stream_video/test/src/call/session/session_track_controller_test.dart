@@ -335,6 +335,26 @@ void main() {
     });
   });
 
+  test('replayRemoteTracks hands every remote track over again', () async {
+    final subscriber = MockTracedPeerConnection();
+    final video = _remote(SfuTrackType.video);
+    final audio = _remote(SfuTrackType.audio, prefix: 'bob');
+    when(() => rtcManager.subscriber).thenReturn(subscriber);
+    when(() => rtcManager.remoteTracks).thenReturn({
+      video.trackId: video,
+      audio.trackId: audio,
+    });
+
+    await controller.replayRemoteTracks();
+
+    verify(video.start).called(1);
+    verify(audio.start).called(1);
+    expect(subscriberTracks, [
+      ('alice', SfuTrackType.video),
+      ('bob', SfuTrackType.audio),
+    ]);
+  });
+
   group('resumeSuspendedAudioTracks', () {
     late MockRtcRemoteTrack remoteAudio;
     late MockRtcLocalTrack localMic;
