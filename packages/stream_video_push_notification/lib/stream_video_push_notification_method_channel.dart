@@ -11,6 +11,8 @@ import 'stream_video_push_notification_platform_interface.dart';
 /// An implementation of [StreamVideoPushNotificationPlatform] that uses method channels.
 class MethodChannelStreamVideoPushNotification
     extends StreamVideoPushNotificationPlatform {
+  final _logger = taggedLogger(tag: 'SV:PNMethodChannel');
+
   /// The method channel used to interact with the native platform.
   @visibleForTesting
   final methodChannel = const MethodChannel('stream_video_push_notification');
@@ -227,7 +229,15 @@ class MethodChannelStreamVideoPushNotification
 
   RingingEvent? _receiveRingingEvent(dynamic data) {
     if (data is Map) {
-      final event = Event.values.firstWhere((e) => e.name == data['event']);
+      final name = data['event'];
+      final event = name is String ? Event.fromWireName(name) : null;
+      if (event == null) {
+        // Dropped rather than thrown: a throw here surfaces as an unhandled
+        // error on the event stream for every such event, and ends the
+        // subscription of any listener that cancels on error.
+        _logger.w(() => 'Ignoring unknown ringing event: $name');
+        return null;
+      }
       final body = Map<String, dynamic>.from(data['body']);
       final callData = _callDataFromJson(body);
 
