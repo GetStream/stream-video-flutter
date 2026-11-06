@@ -103,6 +103,7 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
             sections: _sections(context, state),
             builder: (context, handle) => CallFeatureButton(
               icon: Icon(widget.icon),
+              tooltip: 'More',
               selected: handle.isOpen,
               onPressed: handle.toggle,
             ),

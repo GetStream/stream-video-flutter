@@ -43,6 +43,34 @@
   "@layoutSelectTooltip": {
     "description": "Tooltip of the call control that picks a participant layout"
   },
+  "callControlsToggleCaptions": "Toggle captions",
+  "@callControlsToggleCaptions": {
+    "description": "Tooltip of the call control that turns closed captions on and off"
+  },
+  "callControlsToggleScreenShare": "Toggle screen sharing",
+  "@callControlsToggleScreenShare": {
+    "description": "Tooltip of the call control that starts and stops screen sharing"
+  },
+  "callControlsToggleRecording": "Toggle recording",
+  "@callControlsToggleRecording": {
+    "description": "Tooltip of the call control that starts and stops recording"
+  },
+  "callControlsToggleSpeakerphone": "Toggle speakerphone",
+  "@callControlsToggleSpeakerphone": {
+    "description": "Tooltip of the call control that routes audio between the speaker and the earpiece"
+  },
+  "callControlsFlipCamera": "Flip camera",
+  "@callControlsFlipCamera": {
+    "description": "Tooltip of the call control that switches between the front and back camera"
+  },
+  "callControlsReaction": "Send a reaction",
+  "@callControlsReaction": {
+    "description": "Tooltip of the call control that opens the reaction picker"
+  },
+  "callControlsLeave": "Leave call",
+  "@callControlsLeave": {
+    "description": "Tooltip of the call control that leaves the call"
+  },
   "layoutDefault": "Default",
   "@layoutDefault": {
     "description": "The participant layout that follows the call instead of being fixed"

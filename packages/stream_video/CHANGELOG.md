@@ -16,6 +16,7 @@
 - `Call.callEvents` carries only that call's events. It used to also deliver the coordinator events of every other call the user was involved in.
 - `CoordinatorCallUserFeedbackSubmittedEvent.custom` (now `StreamCallUserFeedbackSubmittedEvent.custom`) is non-nullable. A feedback event without custom data carries an empty map rather than `null`.
 - `Call.updateViewportVisibility`, `Call.updateSubscription` and `Call.removeSubscription` are internal; report to `Call.viewportVisibility` instead.
+- `VisibilityChange` is removed.
 - `RetryConfig.callRejoinTimeout` is removed. It was deprecated and had no readers. Use `CallPreferences.networkAvailabilityTimeout`, which is what actually bounds waiting for the network.
 - Generated enum types are named for their values rather than the field they come from, and lose the `Enum` suffix: e.g. `AudioSettingsRequestDefaultDeviceEnum` is now `AudioDefaultDevice`, and the camera-facing, mode, language and codec enums are now `CameraFacing`, `FeatureActivationMode`, `TranscriptionLanguage` and `VideoCodec`. The `…Enum` names remain as deprecated aliases. `StreamAudioSettings.defaultDevice`, `StreamVideoSettings.cameraFacing`, `StreamNoiceCancellingSettings.mode` and `StreamIngressVideoLayer.codec` take the new types.
 - Generated enum types have no `fromJson`/`toJson`; build one with its constructor, e.g. `TranscriptionLanguage('en')`.
@@ -135,6 +136,8 @@
 
 ### 🐞 Fixed
 
+- A muted microphone or camera is announced to the SFU as muted.
+- Joining a call retries sooner when the SFU connection closes before the join response.
 - On iOS, a call that defaults to the loudspeaker now starts on it, instead of switching to it after the microphone is already recording.
 - A fast reconnect no longer hangs when the network drops while it is reopening the SFU connection. The attempt fails after five seconds and the call rejoins, where before it stayed reconnecting until the operating system gave up on the connection.
 - The client reconnects after a network loss again, instead of the coordinator connection staying stuck closing and refusing every reconnect.
@@ -199,6 +202,17 @@
 - On iOS, a broadcast screen share cancelled before it starts no longer keeps its track running.
 - On iOS, a later start of a broadcast screen share no longer publishes its track again.
 - A join or fast reconnect fails when the device makes no generic SDP offer, instead of joining with an empty one.
+
+## Upcoming (minor)
+
+### 🔄 Changed
+
+- `ActionCallToggleGroup.callUUIDToGroupWith` is now nullable. It is null when CallKit ungroups the call.
+- `StreamVideo.connect()` now sends user details according to `StreamVideoOptions.includeUserDetailsForAutoConnect` when `includeUserDetails` isn't passed, instead of always sending them.
+
+### 🐞 Fixed
+
+- Accepting a call from the native ringing screen on a cold start no longer sends user details when `includeUserDetailsForAutoConnect` is `false`. It used to overwrite the user's name set on the server with an empty one.
 
 ## 1.7.2
 

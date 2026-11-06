@@ -580,6 +580,10 @@ class StreamVideo extends Disposable implements CallHost {
 
   /// Connects the user to the Stream Video service.
   ///
+  /// [includeUserDetails] controls whether the user's name, image and custom
+  /// data are sent when connecting. When omitted, it falls back to
+  /// [StreamVideoOptions.includeUserDetailsForAutoConnect].
+  ///
   /// Connects and disconnects run one at a time, in the order they are
   /// called. A connect while the user is connected opens no second connection
   /// and returns the current token, so [includeUserDetails] only applies to
@@ -587,11 +591,12 @@ class StreamVideo extends Disposable implements CallHost {
   /// again itself. [registerPushDevice] registers the push device, also
   /// while the user is connected.
   Future<Result<UserToken>> connect({
-    bool includeUserDetails = true,
+    bool? includeUserDetails,
     bool registerPushDevice = true,
   }) {
     return _connection.connect(
-      includeUserDetails: includeUserDetails,
+      includeUserDetails:
+          includeUserDetails ?? _options.includeUserDetailsForAutoConnect,
       registerPushDevice: registerPushDevice,
     );
   }

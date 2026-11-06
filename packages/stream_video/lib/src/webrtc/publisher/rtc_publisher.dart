@@ -647,6 +647,7 @@ class RtcPublisher {
       sdp: sdp,
       audioSettings: _audioSettings(),
       dimensionOf: _captureDimensionResolver.resolve,
+      heldTrack: tracks[transceiverCache.track.trackId],
       onMidUnresolved: (data) {
         pc?.tracer.trace(TraceTag.trackMidUnresolved, data);
       },

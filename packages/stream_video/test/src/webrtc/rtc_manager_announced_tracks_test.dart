@@ -37,6 +37,25 @@ class _MockMediaStream extends Mock implements rtc.MediaStream {}
 
 class _MockLocalAudioTrack extends Mock implements RtcLocalAudioTrack {}
 
+/// A media track whose `enabled` is a plain field, like `MediaStreamTrackNative`:
+/// setting it on one Dart object leaves every other object for the same native
+/// track untouched.
+class _FakeMediaStreamTrack extends Fake implements rtc.MediaStreamTrack {
+  _FakeMediaStreamTrack(this.id, {this.enabled = true});
+
+  @override
+  final String id;
+
+  @override
+  bool enabled;
+
+  @override
+  String get kind => 'audio';
+
+  @override
+  Future<void> stop() async {}
+}
+
 const _testCodec = SfuCodec(
   name: 'opus',
   payloadType: 111,
@@ -132,6 +151,7 @@ void main() {
     final mediaTrack = _MockMediaStreamTrack();
     when(() => mediaTrack.id).thenReturn(trackId);
     when(() => mediaTrack.kind).thenReturn('audio');
+    when(() => mediaTrack.enabled).thenReturn(true);
 
     final track = _MockLocalAudioTrack();
     when(() => track.trackId).thenReturn('track-$trackId');
@@ -355,6 +375,143 @@ void main() {
         // Skipping it would commit an offer whose m-line keeps sending media
         // the SFU was never told about. Roll back and retry instead.
         expect(announced, isNull);
+      },
+    );
+  });
+
+  group('announced mute state', () {
+    /// Publishes a microphone the way `publishAudioTrack` does on native: the
+    /// SDK keeps the original track, the cache gets a copy holding the clone
+    /// handed to the sender, and the sender reports its own snapshot of that
+    /// clone, with `enabled` copied from it at `addTransceiver` time.
+    ({
+      RtcManager manager,
+      _MockPeerConnection pc,
+      RtcLocalAudioTrack track,
+      _MockSender sender,
+    })
+    publishMicrophone({bool enabled = true, bool stopTrackOnMute = true}) {
+      final wires = buildManager();
+      final option = _option(1);
+
+      final mediaStream = _MockMediaStream();
+      when(mediaStream.dispose).thenAnswer((_) async {});
+
+      final original = _FakeMediaStreamTrack('mic', enabled: enabled);
+      final clone = _FakeMediaStreamTrack('mic-clone', enabled: enabled);
+      final snapshot = _FakeMediaStreamTrack('mic-clone', enabled: enabled);
+
+      final track = RtcLocalAudioTrack(
+        trackIdPrefix: 'pub',
+        trackType: SfuTrackType.audio,
+        mediaStream: mediaStream,
+        mediaTrack: original,
+        mediaConstraints: const AudioConstraints(),
+        stopTrackOnMute: stopTrackOnMute,
+        clonedTracks: [clone],
+      );
+
+      final sender = _MockSender();
+      when(() => sender.track).thenReturn(snapshot);
+      final transceiver = _MockTransceiver();
+      when(() => transceiver.sender).thenReturn(sender);
+      when(() => transceiver.mid).thenReturn('');
+
+      wires.manager.tracks[track.trackId] = track;
+      wires.manager.transceiversManager.add(
+        track.copyWith(mediaTrack: clone),
+        option,
+        transceiver,
+        const RtcTrackPublishOptions(),
+      );
+
+      stubPeerConnection(
+        wires.pc,
+        liveTransceivers: [_transceiver(trackId: 'mic-clone', mid: '0')],
+      );
+
+      return (
+        manager: wires.manager,
+        pc: wires.pc,
+        track: track,
+        sender: sender,
+      );
+    }
+
+    Future<bool> announcedMuted(RtcManager manager) async {
+      final announced = await manager.getAnnouncedTracks();
+      return announced!.single.muted;
+    }
+
+    test('announces a live microphone as unmuted', () async {
+      final published = publishMicrophone();
+
+      expect(await announcedMuted(published.manager), isFalse);
+    });
+
+    test(
+      'announces a microphone muted after publishing as muted, though the '
+      "sender's snapshot still reads enabled",
+      () async {
+        final published = publishMicrophone();
+
+        await published.manager.muteTrack(trackId: published.track.trackId);
+
+        expect(published.sender.track!.enabled, isTrue);
+        expect(await announcedMuted(published.manager), isTrue);
+      },
+    );
+
+    test(
+      'announces a microphone published disabled and then unmuted as '
+      "unmuted, though the sender's snapshot still reads disabled",
+      () async {
+        final published = publishMicrophone(
+          enabled: false,
+          stopTrackOnMute: false,
+        );
+        // Already acknowledged by the SFU, so the unmute just enables it.
+        published.manager.transceiversManager.markNegotiated([
+          _announced(_option(1), trackId: 'mic-clone', mid: '0'),
+        ]);
+
+        await published.manager.unmuteTrack(trackId: published.track.trackId);
+
+        expect(published.sender.track!.enabled, isFalse);
+        expect(await announcedMuted(published.manager), isFalse);
+      },
+    );
+
+    test(
+      'follows the track an unmute recreated, which the transceiver cache '
+      'does not',
+      () async {
+        final published = publishMicrophone();
+        final manager = published.manager;
+        await manager.muteTrack(trackId: published.track.trackId);
+
+        // What `unmuteTrack` does with a released track: `recreate` acquires
+        // a new one and swaps a clone of it onto the sender, and `tracks`
+        // takes the result. The cache keeps the stopped, disabled original.
+        final recreatedClone = _FakeMediaStreamTrack('mic-2-clone');
+        final recreated = published.track.copyWith(
+          mediaTrack: _FakeMediaStreamTrack('mic-2'),
+          clonedTracks: [recreatedClone],
+        );
+        manager.tracks[recreated.trackId] = recreated;
+        when(() => published.sender.track).thenReturn(recreatedClone);
+        stubPeerConnection(
+          published.pc,
+          liveTransceivers: [_transceiver(trackId: 'mic-2-clone', mid: '0')],
+        );
+
+        final cached = manager.transceiversManager.get(_option(1))!;
+        expect(cached.track.mediaTrack.enabled, isFalse);
+        expect(await announcedMuted(manager), isFalse);
+
+        // And it is muted again by the next mute.
+        await manager.muteTrack(trackId: recreated.trackId);
+        expect(await announcedMuted(manager), isTrue);
       },
     );
   });

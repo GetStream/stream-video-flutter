@@ -3,6 +3,8 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import '../../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../../protobuf/video/sfu/models/models.pbenum.dart' as sfu_enums;
 import '../../../../protobuf/video/sfu/signal_rpc/signal.pb.dart' as sfu;
+import '../../../webrtc/model/rtc_model_mapper_extensions.dart';
+import '../../../webrtc/model/rtc_tracks_info.dart';
 import '../../../webrtc/model/rtc_video_encoding.dart';
 import '../../../webrtc/peer_type.dart';
 import 'sfu_audio_bitrate.dart';
@@ -163,5 +165,48 @@ extension SfuDegradationPreferenceMapper on sfu_enums.DegradationPreference {
       default:
         return null;
     }
+  }
+}
+
+extension RtcTrackInfoListMapper on List<RtcTrackInfo> {
+  List<sfu_models.TrackInfo> toDTO() {
+    return map((info) {
+      return sfu_models.TrackInfo(
+        trackId: info.trackId,
+        trackType: info.trackType?.toDTO(),
+        mid: info.mid,
+        publishOptionId: info.publishOptionId,
+        codec: info.codec?.toDTO(),
+        dtx: info.dtx,
+        stereo: info.stereo,
+        red: info.red,
+        muted: info.muted,
+        layers: info.layers?.map((layer) {
+          return sfu_models.VideoLayer(
+            rid: layer.rid,
+            videoDimension: sfu_models.VideoDimension(
+              width: layer.parameters.dimension.width,
+              height: layer.parameters.dimension.height,
+            ),
+            bitrate: layer.parameters.encoding.maxBitrate,
+            fps: layer.parameters.encoding.maxFramerate,
+            quality: layer.parameters.encoding.quality.toDTO(),
+          );
+        }),
+      );
+    }).toList();
+  }
+}
+
+extension SfuSubscriptionDetailsListMapper on List<SfuSubscriptionDetails> {
+  List<sfu.TrackSubscriptionDetails> toDTO() {
+    return map((sub) {
+      return sfu.TrackSubscriptionDetails(
+        userId: sub.userId,
+        sessionId: sub.sessionId,
+        trackType: sub.trackType.toDTO(),
+        dimension: sub.dimension?.toDTO(),
+      );
+    }).toList();
   }
 }
