@@ -21,6 +21,7 @@
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		AF021016A67D0594176FBF3F /* CallDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68A8A8F98A5EAE592974D52A /* CallDataTests.swift */; };
 		BBB82CEFC94F67B7F07AE9DF /* StreamVideoCallkitManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9E3C2349EE7C480379409BD /* StreamVideoCallkitManagerTests.swift */; };
+		BC015EB3D6F689B9A0DEAEC8 /* CallKitAudioSessionCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3970141E66C6030D70182FCD /* CallKitAudioSessionCoordinatorTests.swift */; };
 		D7E14EE1039ABCF975ECBBBA /* CallKitOptionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88A7888558341F53FF1AB2C6 /* CallKitOptionsTests.swift */; };
 		E3BAD45DAAAC7CFE1040DFAC /* PushMethodCallRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D621E34FC23BDF127BA0C30C /* PushMethodCallRouterTests.swift */; };
 		F30E6AE9D2EA99032D2BD49B /* StreamVideoPushConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78680DB1BA7C1EAE890F1CE /* StreamVideoPushConfigurationTests.swift */; };
@@ -57,6 +58,7 @@
 		23946C6D99203FAFD2500ED2 /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		286AD5FA6170A2DE5F0AA256 /* VoIPPayloadTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoIPPayloadTests.swift; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3970141E66C6030D70182FCD /* CallKitAudioSessionCoordinatorTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallKitAudioSessionCoordinatorTests.swift; sourceTree = "<group>"; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		4A60CD3D670E953BD70C9417 /* CallKitCallStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CallKitCallStoreTests.swift; sourceTree = "<group>"; };
 		5D3D4C316FC2E9B699F23C38 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -120,6 +122,7 @@
 				D621E34FC23BDF127BA0C30C /* PushMethodCallRouterTests.swift */,
 				88A7888558341F53FF1AB2C6 /* CallKitOptionsTests.swift */,
 				4A60CD3D670E953BD70C9417 /* CallKitCallStoreTests.swift */,
+				3970141E66C6030D70182FCD /* CallKitAudioSessionCoordinatorTests.swift */,
 			);
 			path = RunnerTests;
 			sourceTree = "<group>";
@@ -398,6 +401,7 @@
 				E3BAD45DAAAC7CFE1040DFAC /* PushMethodCallRouterTests.swift in Sources */,
 				D7E14EE1039ABCF975ECBBBA /* CallKitOptionsTests.swift in Sources */,
 				0311C46C0FA4C904354B4E8A /* CallKitCallStoreTests.swift in Sources */,
+				BC015EB3D6F689B9A0DEAEC8 /* CallKitAudioSessionCoordinatorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

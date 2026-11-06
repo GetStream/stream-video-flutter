@@ -9,6 +9,10 @@ enum CallKitEffect {
     case reportStartedConnecting(UUID, Date)
     /// Tell CallKit the call connected.
     case reportConnected(UUID, Date)
+    /// Post an ended audio interruption that asks audio code to resume.
+    case postAudioInterruptionEnded
+    /// Apply these options to the audio session; nil applies the defaults.
+    case configureAudioSession(CallData?)
 }
 
 /// What CallKit's end action resolves to.
@@ -243,19 +247,33 @@ final class CallKitCallStore {
         ]
     }
 
-    /// Whether the answered or the outgoing call already connected, in which case an audio
-    /// session activation only restarts audio.
-    var hasConnectedCall: Bool {
-        answeredCall?.connectedAt != nil || outgoingCall?.connectedAt != nil
-    }
-
     /// Whether the outgoing or the answered call is on hold.
     var hasHeldCall: Bool {
         outgoingCall?.isOnHold == true || answeredCall?.isOnHold == true
     }
 
-    /// CallKit activated the audio session while neither the answered nor the outgoing call is
-    /// connected.
+    /// Whether a tracked call has not ended.
+    var hasOngoingCall: Bool {
+        calls.contains { !$0.phase.isEnded }
+    }
+
+    /// The answered and the outgoing call, when they have not ended.
+    private var callsUsingAudio: [CallKitCall] {
+        [answeredCall, outgoingCall].compactMap { $0 }.filter { !$0.phase.isEnded }
+    }
+
+    /// Whether neither the answered nor the outgoing call has had the audio session activated.
+    var isFirstAudioActivation: Bool {
+        !callsUsingAudio.contains { $0.hasActivatedAudioSession }
+    }
+
+    /// CallKit activated the audio session for the answered and the outgoing call.
+    func audioSessionActivated() {
+        callsUsingAudio.forEach { $0.hasActivatedAudioSession = true }
+    }
+
+    /// The answered and the outgoing call start connecting, on the first audio session
+    /// activation.
     func audioActivated(at date: Date = Date()) -> [CallKitEffect] {
         var effects: [CallKitEffect] = []
         if let outgoing = outgoingCall {
@@ -302,8 +320,11 @@ final class CallKitCallStore {
         calls.removeAll { $0 === call }
     }
 
-    func remove(uuid: UUID) {
+    /// CallKit refused to end the call it knows as `uuid`, so the call was reported as ended
+    /// remotely instead.
+    func endRefused(uuid: UUID) {
         if let call = call(forCallKit: uuid) {
+            call.move(to: .ended(.remoteEnded))
             remove(call)
         }
     }

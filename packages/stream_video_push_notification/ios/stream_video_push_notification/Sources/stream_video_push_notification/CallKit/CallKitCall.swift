@@ -64,11 +64,13 @@ final class CallKitCall {
     private(set) var phase: CallKitCallPhase
     var isMuted = false
     var isOnHold = false
-    /// When the call last started connecting: set each time an audio session is activated.
+    /// When the call started connecting: set on the first audio session activation.
     var startedConnectingAt: Date?
     var connectedAt: Date?
     /// Whether CallKit is told the call connected: true once CallKit started or answered it.
     var reportsConnection = false
+    /// Whether CallKit activated the audio session since the call was started or answered.
+    var hasActivatedAudioSession = false
 
     init(
         identity: CallKitCallIdentity, direction: Direction, source: Source, options: CallData,
