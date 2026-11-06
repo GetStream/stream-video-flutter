@@ -35,6 +35,7 @@ jobs:
             repo
             push
             samples
+            webrtc
           requireScope: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
