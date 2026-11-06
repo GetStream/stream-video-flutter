@@ -107,7 +107,11 @@ class LiquidGlassStreamButton extends StatelessWidget {
       button: true,
       enabled: enabled,
       selected: props.isSelected,
-      child: padToTapTarget(context, button),
+      child: padToTapTarget(
+        context,
+        button,
+        tapTargetSize: props.themeStyle?.tapTargetSize,
+      ),
     );
   }
 }

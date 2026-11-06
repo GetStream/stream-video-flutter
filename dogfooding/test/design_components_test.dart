@@ -89,6 +89,46 @@ void main() {
       );
     }
 
+    testWidgets('${design.name} lays a shrink-wrapped button out at its size', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildAppTheme(
+            design: design,
+            brightness: Brightness.dark,
+            accent: AppAccentColor.designDefault,
+          ),
+          builder: (context, child) => design.spec.wrap(
+            context,
+            AppAccentColor.designDefault,
+            StreamComponentFactory(
+              builders: design.spec.builders(const []),
+              child: child!,
+            ),
+          ),
+          home: Scaffold(
+            body: Center(
+              child: StreamButton.icon(
+                key: const ValueKey('button'),
+                size: StreamButtonSize.small,
+                themeStyle: const StreamButtonThemeStyle(
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                icon: const Icon(Icons.more_horiz),
+                onPressed: () {},
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(seconds: 1));
+
+      final size = tester.getSize(find.byKey(const ValueKey('button')));
+      expect(size.width, lessThan(kMinInteractiveDimension));
+      expect(size.height, lessThan(kMinInteractiveDimension));
+    });
+
     for (final type in StreamButtonType.values) {
       testWidgets('${design.name} ${type.name} buttons take taps', (
         tester,

@@ -197,8 +197,17 @@ core.StreamTextTheme designTextTheme(
 /// call controls, and what centers a small button against a taller field, such
 /// as the composer's. The constraints from the parent reach [child] unchanged,
 /// so a button its parent stretches still stretches.
-Widget padToTapTarget(BuildContext context, Widget child) =>
-    _TapTargetPadding(child: child);
+///
+/// A button whose [tapTargetSize] is [MaterialTapTargetSize.shrinkWrap] is
+/// returned as is, at its painted size, for a caller that pads it from
+/// outside, such as one anchoring a menu to the button's edge.
+Widget padToTapTarget(
+  BuildContext context,
+  Widget child, {
+  MaterialTapTargetSize? tapTargetSize,
+}) => tapTargetSize == MaterialTapTargetSize.shrinkWrap
+    ? child
+    : _TapTargetPadding(child: child);
 
 class _TapTargetPadding extends SingleChildRenderObjectWidget {
   const _TapTargetPadding({required super.child});
