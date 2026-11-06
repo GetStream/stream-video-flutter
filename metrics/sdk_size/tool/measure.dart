@@ -178,11 +178,11 @@ flutter:
   return app;
 }
 
-/// Path overrides for every repository package, plus the root pubspec's
-/// `dependency_overrides`.
+/// Path overrides for every repository package, the webrtc ones included,
+/// plus the root pubspec's `dependency_overrides`.
 String _dependencyOverrides() {
   final block = ['dependency_overrides:'];
-  for (final package in _packages()) {
+  for (final package in [..._packages(), ..._packages('webrtc')]) {
     block
       ..add('  ${_name(package)}:')
       ..add('    path: ${package.path}');
@@ -212,9 +212,9 @@ String _dependencyOverrides() {
   return '${block.join('\n').trimRight()}\n';
 }
 
-/// Every package under `packages/`.
-List<Directory> _packages() {
-  return Directory('${_root.path}/packages')
+/// Every package under [parent], `packages/` by default.
+List<Directory> _packages([String parent = 'packages']) {
+  return Directory('${_root.path}/$parent')
       .listSync()
       .whereType<Directory>()
       .where((dir) => File('${dir.path}/pubspec.yaml').existsSync())
