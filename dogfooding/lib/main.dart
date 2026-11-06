@@ -3,12 +3,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 // 📦 Package imports:
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:marionette_flutter/marionette_flutter.dart';
 
 // 🌎 Project imports:
 import 'app/app.dart';
+import 'app/design/m3e/m3e_design.dart';
 
-void main() {
+Future<void> main() async {
   // Needed to initialize the plugin bindings.
   //
   // In debug builds we install the Marionette binding instead, which lets an
@@ -19,6 +21,18 @@ void main() {
   } else {
     WidgetsFlutterBinding.ensureInitialized();
   }
+
+  // Loads the Liquid Glass design's shaders, so its first frames draw glass
+  // rather than a placeholder. The app starts without them if they fail.
+  try {
+    await LiquidGlassWidgets.initialize();
+  } catch (e) {
+    debugPrint('Liquid Glass shaders failed to load: $e');
+  }
+
+  // Reads the device's accent color, which Material 3 Expressive takes by
+  // default.
+  await M3EDesign.loadDeviceAccent();
 
   runApp(const StreamDogFoodingApp());
 }

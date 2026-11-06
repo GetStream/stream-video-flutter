@@ -43,15 +43,16 @@ CallSession _buildSession({
   when(
     () => sfuWS.disconnect(any(), any()),
   ).thenAnswer((_) async => const Result.success(none));
-  when(() => sfuWS.send(any())).thenAnswer((_) {
-    // After the session starts waiting for it.
-    Timer.run(
-      () => events.emit(
-        SfuJoinResponseEvent(callState: createTestSfuCallState()),
-      ),
-    );
-    return const Result<void>.success(null);
-  });
+  when(
+    () => sfuWS.send(any()),
+  ).thenReturn(const Result<void>.success(null));
+  when(
+    () => sfuWS.waitForJoinResponse(timeLimit: any(named: 'timeLimit')),
+  ).thenAnswer(
+    (_) async => Result.success(
+      SfuJoinResponseEvent(callState: createTestSfuCallState()),
+    ),
+  );
 
   final pcFactory = _MockStreamPeerConnectionFactory();
   when(
@@ -118,6 +119,7 @@ void main() {
     registerFallbackValue(sfu_events.SfuRequest());
     registerFallbackValue(rtc.TransceiverDirection.RecvOnly);
     registerFallbackValue(MockSfuClient());
+    registerFallbackValue(Duration.zero);
   });
 
   test(
@@ -177,6 +179,24 @@ void main() {
       verify(rtcManager.dispose).called(1);
     },
   );
+
+  for (final (name, end) in <(String, Future<void> Function(CallSession))>[
+    ('close', (session) => session.close(CloseCode.normalClosure)),
+    ('leave', (session) async => session.leave(reason: 'test')),
+  ]) {
+    test('a $name while the events are being listened to ends the start '
+        'before the join', () async {
+      final session = _buildSession(rtcManager: Completer<RtcManager>());
+
+      final start = session.start(isAnonymousUser: true);
+      await end(session);
+      final result = await start;
+
+      expect(result.isFailure, isTrue);
+      expect(session.debugIsRtcManagerSubjectClosed, isTrue);
+      verifyNever(() => session.sfuWS.send(any()));
+    });
+  }
 
   test('a start nothing closes keeps the rtcManager', () async {
     final made = Completer<RtcManager>();

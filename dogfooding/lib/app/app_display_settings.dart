@@ -4,6 +4,7 @@ import 'package:stream_video_flutter/stream_video_flutter_l10n.dart';
 import '../core/repos/app_preferences.dart';
 import '../l10n/localizations/app_localizations.dart';
 import 'app_accent_color.dart';
+import 'app_design.dart';
 
 /// The languages the app can be shown in: those that both the app's own
 /// strings and the SDK's are translated to.
@@ -27,7 +28,8 @@ class AppDisplaySettings extends ChangeNotifier {
         _ => null,
       },
       _themeMode = preferences.themeMode,
-      _accentColor = preferences.accentColor;
+      _accentColor = preferences.accentColor,
+      _design = preferences.design;
 
   final AppPreferences _preferences;
 
@@ -63,5 +65,16 @@ class AppDisplaySettings extends ChangeNotifier {
     _accentColor = accentColor;
     notifyListeners();
     await _preferences.setAccentColor(accentColor);
+  }
+
+  /// The design system the app's components are drawn with.
+  AppDesign get design => _design;
+  AppDesign _design;
+
+  Future<void> setDesign(AppDesign design) async {
+    if (design == _design) return;
+    _design = design;
+    notifyListeners();
+    await _preferences.setDesign(design);
   }
 }

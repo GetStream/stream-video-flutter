@@ -1,6 +1,8 @@
 # stream_video_push_notification v2 refactor plan
 
-Target branch: `v2`. Scope: the Dart layer, the iOS CallKit/PushKit native code and the Android native code of `stream_video_push_notification`, plus the pieces of `stream_video` and `stream_webrtc_flutter` the ringing flow leans on.
+Target branch: `v2`. Scope: the Dart layer, the iOS CallKit/PushKit native code and the Android native code of `stream_video_push_notification`, plus the pieces of `stream_video` and `stream_webrtc_flutter` the ringing flow leans on. Paths are relative to `packages/stream_video_push_notification/` unless they name another package.
+
+This file is deleted by the last PR of the refactor, and the refactor is finished before the next release of the package.
 
 Tickets this plan serves:
 

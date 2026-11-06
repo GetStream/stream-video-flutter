@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/app/app_accent_color.dart';
+import 'package:flutter_dogfooding/app/app_design.dart';
 import 'package:flutter_dogfooding/app/app_display_settings.dart';
 import 'package:flutter_dogfooding/core/repos/app_preferences.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -83,27 +84,72 @@ void main() {
       );
     });
 
-    test('keeps a picked accent color, and forgets it for blue', () async {
+    test(
+      'keeps a picked accent color, and forgets it for the default',
+      () async {
+        final prefs = await preferences();
+        final settings = AppDisplaySettings(preferences: prefs);
+        expect(settings.accentColor, AppAccentColor.designDefault);
+
+        await settings.setAccentColor(AppAccentColor.violet);
+        expect(
+          AppDisplaySettings(preferences: prefs).accentColor,
+          AppAccentColor.violet,
+        );
+
+        await settings.setAccentColor(AppAccentColor.designDefault);
+        expect(prefs.accentColor, AppAccentColor.designDefault);
+      },
+    );
+
+    test('keeps blue as a color of its own', () async {
       final prefs = await preferences();
       final settings = AppDisplaySettings(preferences: prefs);
-      expect(settings.accentColor, AppAccentColor.blue);
-
-      await settings.setAccentColor(AppAccentColor.violet);
-      expect(
-        AppDisplaySettings(preferences: prefs).accentColor,
-        AppAccentColor.violet,
-      );
 
       await settings.setAccentColor(AppAccentColor.blue);
-      expect(prefs.accentColor, AppAccentColor.blue);
+
+      expect(
+        AppDisplaySettings(preferences: prefs).accentColor,
+        AppAccentColor.blue,
+      );
+    });
+
+    test('starts on the Stream design', () async {
+      final settings = AppDisplaySettings(preferences: await preferences());
+
+      expect(settings.design, AppDesign.stream);
+    });
+
+    test('a design no longer offered falls back to Stream', () async {
+      final settings = AppDisplaySettings(
+        preferences: await preferences({'design': 'gone'}),
+      );
+
+      expect(settings.design, AppDesign.stream);
     });
   });
 
   group('AppAccentColor', () {
-    test('blue leaves the brand color to the design system', () {
+    test('the default leaves the brand color to the design system', () {
       for (final brightness in Brightness.values) {
-        expect(AppAccentColor.blue.brand(brightness), isNull);
+        expect(AppAccentColor.designDefault.brand(brightness), isNull);
       }
+    });
+
+    test("the default swatch shows the design's own accent", () {
+      for (final brightness in Brightness.values) {
+        expect(
+          AppAccentColor.designDefault.swatchColor(
+            brightness,
+            AppDesign.stream,
+          ),
+          AppDesign.stream.defaultAccent(brightness),
+        );
+      }
+    });
+
+    test('blue is a palette of its own', () {
+      expect(AppAccentColor.blue.brand(Brightness.light), StreamColors.blue);
     });
 
     test('a light theme takes the palette as it is', () {
