@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_push_notification/src/stream_video_call_event.dart';
@@ -7,16 +10,19 @@ import 'package:stream_video_push_notification/stream_video_push_notification_me
 // channel into `RingingEvent`s: the payload keys each event reads, and that
 // an event name this version does not know is dropped rather than surfacing
 // as an error on the stream.
+//
+// The call events are fed the body each platform actually sends, from the
+// payloads in test/fixtures/ringing_events/ that the Kotlin and Swift tests
+// check their side against.
 
-const _callBody = <String, dynamic>{
-  'id': 'call-uuid',
-  'callerName': 'Ada',
-  'handle': 'ada',
-  'type': 1,
-  'isAccepted': true,
-  'endedBySystem': true,
-  'extra': {'callCid': 'default:ada'},
-};
+/// The body a platform sends for a call event, from the shared fixtures.
+Map<String, dynamic> _payload(String platform) {
+  final file = File('test/fixtures/ringing_events/${platform}_call_event.json');
+  return jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+}
+
+final _androidCallBody = _payload('android');
+final _iosCallBody = _payload('ios');
 
 Map<String, dynamic> _message(Event event, Map<String, dynamic> body) => {
   'event': event.wireName,
@@ -60,7 +66,7 @@ void main() {
           'event': 'io.getstream.video.ACTION_FROM_A_NEWER_PLUGIN',
           'body': <String, dynamic>{},
         },
-        _message(Event.actionCallIncoming, _callBody),
+        _message(Event.actionCallIncoming, _iosCallBody),
       ]);
 
       // The unknown one arrives as null, which the broadcaster filters out;
@@ -71,7 +77,7 @@ void main() {
     test('a message that is not a map is ignored', () async {
       final events = await receive([
         'not a map',
-        _message(Event.actionCallAccept, _callBody),
+        _message(Event.actionCallAccept, _iosCallBody),
       ]);
 
       expect(events, [isNull, isA<ActionCallAccept>()]);
@@ -90,40 +96,79 @@ void main() {
       Event.actionCallConnected: ActionCallConnected,
     };
 
-    for (final entry in callEvents.entries) {
-      test('${entry.key.name} becomes ${entry.value}', () async {
-        final events = await receive([_message(entry.key, _callBody)]);
+    /// The single call event [body] decodes to as [event], and its data.
+    Future<CallData> callDataOf(Event event, Map<String, dynamic> body) async {
+      final events = await receive([_message(event, body)]);
 
-        final event = events.single!;
-        expect(event.runtimeType, entry.value);
-        final data = switch (event) {
-          ActionCallIncoming(:final data) => data,
-          ActionCallStart(:final data) => data,
-          ActionCallAccept(:final data) => data,
-          ActionCallDecline(:final data) => data,
-          ActionCallEnded(:final data) => data,
-          ActionCallTimeout(:final data) => data,
-          ActionCallCallback(:final data) => data,
-          ActionCallConnected(:final data) => data,
-          _ => fail('unexpected event $event'),
-        };
+      final received = events.single!;
+      expect(received.runtimeType, callEvents[event]);
+      return switch (received) {
+        ActionCallIncoming(:final data) => data,
+        ActionCallStart(:final data) => data,
+        ActionCallAccept(:final data) => data,
+        ActionCallDecline(:final data) => data,
+        ActionCallEnded(:final data) => data,
+        ActionCallTimeout(:final data) => data,
+        ActionCallCallback(:final data) => data,
+        ActionCallConnected(:final data) => data,
+        _ => fail('unexpected event $received'),
+      };
+    }
+
+    for (final event in callEvents.keys) {
+      test('${event.name} from iOS becomes ${callEvents[event]}', () async {
+        final data = await callDataOf(event, _iosCallBody);
+
         expect(data.uuid, 'call-uuid');
         expect(data.callCid, 'default:ada');
         expect(data.callerName, 'Ada');
         expect(data.handle, 'ada');
         expect(data.hasVideo, isTrue);
-        expect(data.isAccepted, isTrue);
-        expect(data.endedBySystem, isTrue);
+        expect(data.isAccepted, isFalse);
+        expect(data.endedBySystem, isFalse);
+        expect(data.extraData, {'callCid': 'default:ada'});
+      });
+
+      test('${event.name} from Android becomes ${callEvents[event]}', () async {
+        final data = await callDataOf(event, _androidCallBody);
+
+        expect(data.uuid, 'call-uuid');
+        expect(data.callCid, 'default:ada');
+        expect(data.callerName, 'Ada');
+        // Current behaviour, pinned: Android sends the handle as `number`
+        // and no `isAccepted`, neither of which is read here.
+        expect(data.handle, isNull);
+        expect(data.isAccepted, isFalse);
+        expect(data.hasVideo, isTrue);
+        expect(data.endedBySystem, isFalse);
         expect(data.extraData, {'callCid': 'default:ada'});
       });
     }
 
-    test('missing optional fields fall back to their defaults', () async {
-      final events = await receive([
-        _message(Event.actionCallIncoming, {'id': 'call-uuid', 'type': 0}),
-      ]);
+    test('an end reported by the Android system call UI', () async {
+      final data = await callDataOf(Event.actionCallEnded, {
+        ..._androidCallBody,
+        'endedBySystem': true,
+      });
 
-      final data = (events.single! as ActionCallIncoming).data;
+      expect(data.endedBySystem, isTrue);
+    });
+
+    test('a call iOS reports as accepted', () async {
+      final data = await callDataOf(Event.actionCallAccept, {
+        ..._iosCallBody,
+        'isAccepted': true,
+      });
+
+      expect(data.isAccepted, isTrue);
+    });
+
+    test('missing optional fields fall back to their defaults', () async {
+      final data = await callDataOf(Event.actionCallIncoming, {
+        'id': 'call-uuid',
+        'type': 0,
+      });
+
       expect(data.uuid, 'call-uuid');
       expect(data.callCid, isNull);
       expect(data.hasVideo, isFalse);
@@ -136,7 +181,7 @@ void main() {
     test('incoming failed', () async {
       final events = await receive([
         _message(Event.actionCallIncomingFailed, {
-          ..._callBody,
+          ..._iosCallBody,
           'errorCode': 'filteredByDoNotDisturb',
           'error': 'Do Not Disturb',
         }),
