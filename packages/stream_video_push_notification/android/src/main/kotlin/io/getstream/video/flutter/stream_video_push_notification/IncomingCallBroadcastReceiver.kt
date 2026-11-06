@@ -9,7 +9,6 @@ import android.os.Build
 import android.os.Bundle
 import android.telecom.DisconnectCause
 import android.util.Log
-import androidx.annotation.VisibleForTesting
 import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
 
 class IncomingCallBroadcastReceiver : BroadcastReceiver() {
@@ -239,8 +238,7 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
         }
     }
 
-    @VisibleForTesting
-    internal fun sendEventFlutter(event: String, data: Bundle) {
+    private fun sendEventFlutter(event: String, data: Bundle) {
         if (silenceEvents) return
 
         val missedCallNotification = mapOf(
