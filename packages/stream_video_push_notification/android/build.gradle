@@ -41,9 +41,24 @@ android {
         implementation "io.coil-kt:coil:1.4.0"
         implementation 'androidx.core:core-telecom:1.0.1'
         implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0'
+
+        // Unit tests run on the JUnit Platform: Vintage for the Robolectric tests, which need
+        // JUnit 4's runner (every test so far), Jupiter for plain tests (none yet). The BOM
+        // pins the versions the dependencies would otherwise raise transitively.
+        testImplementation platform('org.junit:junit-bom:5.12.2')
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+        testImplementation 'org.junit.vintage:junit-vintage-engine'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+        testImplementation 'junit:junit:4.13.2'
+        testImplementation 'org.robolectric:robolectric:4.15.1'
+        testImplementation 'androidx.test:core:1.6.1'
+        testImplementation 'io.mockk:mockk:1.14.5'
     }
 
     testOptions {
+        // Deliberately without includeAndroidResources: merging the test manifest pulls in the
+        // app's other plugins (firebase_messaging declares minSdk 23 against this module's 21)
+        // and the tests need no resources, only the framework classes Robolectric provides.
         unitTests.all {
             useJUnitPlatform()
 
