@@ -36,7 +36,7 @@ people work on this; CS6 needs CS5, CS9 needs CS6 and CS8, CS10 needs all.
 | 2 | CS2 | `refactor/flu-1062-call-session-media-part` | #1564 |
 | 3 | CS3 | `refactor/flu-1063-sfu-join-request-builder` | #1565 |
 | 4 | CS4 | `fix/flu-1064-one-join-handshake` | #1566 |
-| 5 | CS5 | `refactor/flu-1065-publisher-negotiator` | |
+| 5 | CS5 | `refactor/flu-1065-publisher-negotiator` | #1567 |
 | 6 | CS6 | `refactor/flu-1066-session-signaling` | |
 | 7 | CS7 | `refactor/flu-1067-publisher-connection-watchdog` | |
 | 8 | CS8 | `refactor/flu-1068-session-track-controller` | |
@@ -47,7 +47,7 @@ people work on this; CS6 needs CS5, CS9 needs CS6 and CS8, CS10 needs all.
 - [x] 2. **CS2** [FLU-1062](https://linear.app/stream/issue/FLU-1062): media pass-throughs to a part file, the dead viewport path out, DTO mappers moved (S).
 - [x] 3. **CS3** [FLU-1063](https://linear.app/stream/issue/FLU-1063): `SfuJoinRequestBuilder` (S). One `JoinRequest` and one `ReconnectDetails` builder for both join paths.
 - [x] 4. **CS4** [FLU-1064](https://linear.app/stream/issue/FLU-1064): one join handshake (S, behaviour change). `start` gains the closed-socket fail-fast; changelog line.
-- [ ] 5. **CS5** [FLU-1065](https://linear.app/stream/issue/FLU-1065): `PublisherNegotiator` (M). The negotiation lock and the three rollback rules move verbatim.
+- [x] 5. **CS5** [FLU-1065](https://linear.app/stream/issue/FLU-1065): `PublisherNegotiator` (M). The negotiation lock and the three rollback rules move verbatim.
 - [ ] 6. **CS6** [FLU-1066](https://linear.app/stream/issue/FLU-1066): `SessionSignaling` (S). Subscriber offer, ICE both ways, ICE restart, mute state. After CS5.
 - [ ] 7. **CS7** [FLU-1067](https://linear.app/stream/issue/FLU-1067): `PublisherConnectionWatchdog` (S).
 - [ ] 8. **CS8** [FLU-1068](https://linear.app/stream/issue/FLU-1068): `SessionTrackController` (M). The suspend-or-start rule written once.
