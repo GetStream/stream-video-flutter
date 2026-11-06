@@ -44,7 +44,7 @@ class TelecomConfigTest {
 
         // The platform default is off on SDK 34, see `below Android 17 the platform default is off`.
         assertFalse(config.enabled)
-        assertEquals(sanitized(context.packageName), config.schema)
+        assertEquals(PACKAGE_SCHEME, config.schema)
     }
 
     @Test
@@ -52,7 +52,7 @@ class TelecomConfigTest {
         val config = TelecomConfig.fromConfiguration(context, null)
 
         assertFalse(config.enabled)
-        assertEquals(sanitized(context.packageName), config.schema)
+        assertEquals(PACKAGE_SCHEME, config.schema)
     }
 
     @Test
@@ -66,7 +66,7 @@ class TelecomConfigTest {
     fun `a blank schema falls back to the package name`() {
         val config = TelecomConfig.fromConfiguration(context, configuration(mapOf("schema" to "  ")))
 
-        assertEquals(sanitized(context.packageName), config.schema)
+        assertEquals(PACKAGE_SCHEME, config.schema)
     }
 
     @Test
@@ -121,19 +121,26 @@ class TelecomConfigTest {
             .edit().clear().commit()
         val loaded = TelecomConfig.load(context)
         assertFalse(loaded.enabled)
-        assertEquals(sanitized(context.packageName), loaded.schema)
+        assertEquals(PACKAGE_SCHEME, loaded.schema)
     }
 
     @Test
-    fun `persist with a null context does nothing`() {
+    fun `persist with a null context stores nothing`() {
         TelecomConfig.persist(null, TelecomConfig(enabled = true, schema = "myapp"))
+
+        // Nothing was stored, so loading gives the defaults, not what was passed.
+        assertEquals(TelecomConfig(enabled = false, schema = PACKAGE_SCHEME), TelecomConfig.load(context))
     }
 
-    /** The schema sanitiser is private; this mirrors its rule for the package name. */
-    private fun sanitized(schema: String): String {
-        val folded = schema.map { char ->
-            if (char.isLetterOrDigit() || char == '+' || char == '-' || char == '.') char else '-'
-        }.joinToString("")
-        return if (folded.firstOrNull()?.isLetter() == true) folded else "stream-$folded"
+    @Test
+    fun `the package name the default scheme comes from`() {
+        // Guards the literal below. The unit tests run as the module's test package, whose
+        // underscores a URI scheme does not allow.
+        assertEquals("io.getstream.video.flutter.stream_video_push_notification.test", context.packageName)
+    }
+
+    private companion object {
+        /** The scheme the package name yields when no schema is configured. */
+        const val PACKAGE_SCHEME = "io.getstream.video.flutter.stream-video-push-notification.test"
     }
 }

@@ -56,9 +56,10 @@ android {
     }
 
     testOptions {
-        // Deliberately without includeAndroidResources: merging the test manifest pulls in the
-        // app's other plugins (firebase_messaging declares minSdk 23 against this module's 21)
-        // and the tests need no resources, only the framework classes Robolectric provides.
+        // The notification code reads androidx resources (CallStyle's action colours), which
+        // Robolectric only has with this on. The test manifest overrides the minSdk check of the
+        // example app's Firebase plugins, which the merge would otherwise trip on.
+        unitTests.includeAndroidResources = true
         unitTests.all {
             useJUnitPlatform()
 

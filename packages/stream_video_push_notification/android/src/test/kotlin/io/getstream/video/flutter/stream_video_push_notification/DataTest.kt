@@ -12,9 +12,8 @@ import org.robolectric.RobolectricTestRunner
 
 /**
  * Pins how [Data] is built from the method-channel map, how it survives a Bundle round trip, and
- * how it is persisted as the active-calls list. Written against today's behaviour before the model
- * is replaced (C-2 of FLU-1197): the defaults that differ between the constructor and
- * [Data.fromBundle] are asserted as they are, with the differing value named in the test.
+ * how it is persisted as the active-calls list. The defaults that differ between the constructor
+ * and [Data.fromBundle] are asserted as they are, with the differing value named in the test.
  */
 @RunWith(RobolectricTestRunner::class)
 class DataTest {
@@ -159,8 +158,8 @@ class DataTest {
 
     @Test
     fun `fromBundle defaults differ from the constructor defaults for a bundle without the keys`() {
-        // Current behaviour, not a target: C-2 unifies these. A bundle that only carries the two
-        // serializable maps (which fromBundle requires) yields other defaults than Data(emptyMap()).
+        // Current behaviour, not a target. A bundle that only carries the two serializable maps
+        // (which fromBundle requires) yields other defaults than Data(emptyMap()).
         val bundle = Bundle().apply {
             putSerializable(IncomingCallConstants.EXTRA_CALL_EXTRA, HashMap<String, Any?>())
             putSerializable(IncomingCallConstants.EXTRA_CALL_HEADERS, HashMap<String, Any?>())
