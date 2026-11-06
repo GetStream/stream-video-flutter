@@ -330,6 +330,24 @@ class CallData extends Equatable {
     this.endedBySystem = false,
   });
 
+  /// Builds a [CallData] from the map the native ringing plugins send: the
+  /// body of a ringing event, or one entry of their active-calls list.
+  ///
+  /// The call cid travels inside `extra`; `type` is 1 for a video call.
+  factory CallData.fromJson(Map<String, dynamic> json) {
+    final extraData = (json['extra'] as Map?)?.cast<String, dynamic>();
+    return CallData(
+      uuid: json['id'] as String?,
+      callCid: extraData?['callCid'] as String?,
+      handle: json['handle'] as String?,
+      callerName: json['callerName'] as String?,
+      hasVideo: json['type'] == 1,
+      extraData: extraData,
+      isAccepted: json['isAccepted'] as bool? ?? false,
+      endedBySystem: json['endedBySystem'] as bool? ?? false,
+    );
+  }
+
   /// Unique identifier for the call.
   final String? uuid;
 

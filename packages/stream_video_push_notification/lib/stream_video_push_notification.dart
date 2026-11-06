@@ -13,7 +13,7 @@ library stream_video_push_notification;
 export 'src/background_push_handler.dart';
 export 'src/stream_video_push_configuration.dart';
 export 'src/stream_video_push_notification.dart'
-    hide RingingEventBroadcaster, StreamTokenProvider, resolveCallsToEnd;
+    hide StreamTokenProvider, resolveCallsToEnd;
 export 'src/stream_video_push_params.dart';
 export 'stream_video_push_notification_platform_interface.dart'
     show CallEndedReason;

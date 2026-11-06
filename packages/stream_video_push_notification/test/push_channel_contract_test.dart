@@ -122,11 +122,12 @@ String _read(String path) {
   return file.readAsStringSync();
 }
 
-/// The method names the Dart channel passes to `invokeMethod`.
+/// The method names the Dart channel passes to `invokeMethod` and its typed
+/// variants, with or without a type argument (nested ones included).
 Set<String> _dartInvokedMethods() {
   final source = _read(_dartMethodChannel);
   return RegExp(
-    r"invokeMethod(?:<[^>]*>)?\(\s*'([A-Za-z]+)'",
+    r"invoke(?:List|Map)?Method(?:<.*?>)?\(\s*'([A-Za-z]+)'",
   ).allMatches(source).map((match) => match.group(1)!).toSet();
 }
 

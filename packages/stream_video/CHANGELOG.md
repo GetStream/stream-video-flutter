@@ -83,6 +83,7 @@
 
 ### ✅ Added
 
+- `CallData.fromJson`, which builds the call data of a ringing event or an active native call from the map the push plugins send.
 - `VideoLifecycleState`, the type of `ClientState.appLifecycleState`, is exported.
 - `StreamVideo.ready` completes once the client has started up: audio configured, environment collected and, with `autoConnect`, the connect attempted.
 - `StreamVideo.configureLogging` sets up the SDK's logging without a singleton client.
