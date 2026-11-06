@@ -38,7 +38,7 @@ kebab case; `release_publish.yml` adds the prefix back to find the package.
 A webrtc package's version is not aligned with the others or with stream-video, and it can take a major bump on its
 own. `stream_dart_webrtc` and `stream_webrtc_interface` are new on pub.dev and not published yet (`lint:pub`,
 `release:pub` and `release_tag.yml` skip them): their first version is published by hand. Until then, refuse a
-release of either, or of a `stream_webrtc_flutter` that depends on them, and tell the user.
+release of either, of `stream_webrtc_flutter` and of `stream-video`, which all depend on them, and tell the user.
 
 `<tag>` below is `<product>-v<version>`, e.g. `stream-video-v2.0.0`.
 
