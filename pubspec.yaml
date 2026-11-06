@@ -264,3 +264,13 @@ melos:
         flutter build apk --release --verbose
       description: |
         Run `flutter build apk` in the example app.
+
+    test:android:push:
+      run: |
+        cd ./packages/stream_video_push_notification/example &&
+        flutter build apk --config-only &&
+        cd android &&
+        ./gradlew :stream_video_push_notification:testDebugUnitTest --console=plain
+      description: |
+        Run the Kotlin unit tests of stream_video_push_notification through its
+        example app, whose gradle wrapper the config-only build generates.
