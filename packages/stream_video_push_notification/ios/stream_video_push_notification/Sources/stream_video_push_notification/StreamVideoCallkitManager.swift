@@ -451,7 +451,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     ///
     /// The values match the names of `IncomingCallFailureReason` on the Dart side, which parses
     /// them by name and falls back to `unknown`.
-    private func incomingCallErrorCode(_ error: Error) -> String {
+    func incomingCallErrorCode(_ error: Error) -> String {
         switch (error as NSError).code {
         case CXErrorCodeIncomingCallError.unentitled.rawValue:
             return "unentitled"

@@ -33,6 +33,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ github.event_name == 'push' || (steps.filter.outputs.relevant == 'true' && github.event.pull_request.draft != true) }}
+      # The iOS unit tests build the push plugin's example app on a macOS
+      # runner, so they run only when something they depend on changed.
+      should_run_ios_tests: ${{ github.event_name == 'push' || (steps.filter.outputs.push_ios == 'true' && github.event.pull_request.draft != true) }}
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v7
@@ -52,7 +55,16 @@ jobs:
               - 'tools/*.dart'
               - '.github/actions/setup-flutter/**'
               - '.github/actions/setup-melos/**'
+              - '.github/actions/select-xcode/**'
               - '.github/workflows/scripts/**'
+              - '.github/workflows/stream_video_flutter_workflow.yml'
+            push_ios:
+              - 'packages/stream_video_push_notification/**'
+              - 'pubspec.yaml'
+              - 'pubspec.lock'
+              - '.github/actions/setup-flutter/**'
+              - '.github/actions/setup-melos/**'
+              - '.github/actions/select-xcode/**'
               - '.github/workflows/stream_video_flutter_workflow.yml'
 
   analyze:
@@ -177,6 +189,29 @@ jobs:
       - name: Android Unit Tests
         run: |
           melos run test:android:push
+
+  # Swift unit tests of the push plugin, run through its example app's
+  # RunnerTests target. The example builds against the local plugin sources.
+  ios-unit-tests:
+    needs: gate
+    if: needs.gate.outputs.should_run_ios_tests == 'true'
+    timeout-minutes: 45
+    runs-on: macos-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+
+      - name: Select Xcode
+        uses: ./.github/actions/select-xcode
+
+      - name: Install Flutter
+        uses: ./.github/actions/setup-flutter
+
+      - name: Install Melos
+        uses: ./.github/actions/setup-melos
+
+      - name: iOS Unit Tests
+        run: melos run test:ios:push
 
   # codecov/patch is a required check, but Codecov only reports it for a
   # commit with an upload. When the gate skips the tests, an empty upload
