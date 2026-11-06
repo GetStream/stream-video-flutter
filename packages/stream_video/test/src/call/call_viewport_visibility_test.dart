@@ -89,13 +89,6 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
     registerMockFallbackValues();
     registerFallbackValue(sfu.UpdateSubscriptionsRequest());
-    registerFallbackValue(
-      const VisibilityChange(
-        sessionId: 'fallback',
-        userId: 'fallback',
-        visibility: ViewportVisibility.unknown,
-      ),
-    );
   });
 
   setUp(() {
@@ -290,42 +283,27 @@ void main() {
     );
   });
 
-  test('a track on screen is told to the session a join creates', () async {
-    final callSession = setupMockCallSession();
-    when(() => callSession.updateViewportVisibility(any())).thenAnswer(
-      (_) async => const Result.success(none),
-    );
-
-    final joining = createTestCall(
-      stateManager: CallStateNotifier(
-        createTestCallState().copyWith(
-          callParticipants: [
-            participant(sessionId: aliceSession, userId: 'alice'),
-          ],
-        ),
+  test('a visibility is recorded without a session but not applied', () async {
+    final noSession = createTestCallWithState(
+      initialState: createActiveCallState().copyWith(
+        callParticipants: [
+          participant(sessionId: aliceSession, userId: 'alice'),
+        ],
       ),
-      sessionFactory: setupMockSessionFactory(callSession: callSession),
     );
-    joining.dynascaleManager.init(
-      sfuClient: sfuClient,
-      sessionId: 'sfu-session',
+
+    final result = await noSession.updateViewportVisibility(
+      sessionId: aliceSession,
+      userId: 'alice',
+      visibility: ViewportVisibility.visible,
+      trackType: SfuTrackType.video,
     );
-    final joiningGrid = joining.viewportVisibility.attach();
 
-    // The tile is already on screen when the call joins. A viewport reports
-    // what changes about it, so it has nothing to say to the new session on
-    // its own.
-    joiningGrid.report(trackOf(aliceSession, 'alice'), showing(640, 360));
-    await settle();
-    clearInteractions(callSession);
-
-    final joined = await joining.join();
-    expect(joined.isSuccess, isTrue);
-    await settle();
-
-    verify(
-      () => callSession.updateViewportVisibility(any()),
-    ).called(greaterThan(0));
+    expect(result.isFailure, isTrue);
+    expect(
+      participantOf(aliceSession, noSession)!.viewportVisibility,
+      ViewportVisibility.visible,
+    );
   });
 
   test('leaving a call forgets what its viewports measured', () async {

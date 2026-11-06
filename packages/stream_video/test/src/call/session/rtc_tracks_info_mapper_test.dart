@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_video/src/call/session/call_session.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_model_mapper_extensions.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_codec.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
 import 'package:stream_video/src/webrtc/model/rtc_tracks_info.dart';
@@ -28,7 +28,7 @@ RtcTrackInfo _trackInfo({required bool muted}) {
 }
 
 void main() {
-  group('RtcTracksInfoMapper.toDTO', () {
+  group('RtcTrackInfoListMapper.toDTO', () {
     // The SFU reads `TrackInfo.muted` from SetPublisher, the join request and
     // UpdatePublish, so a disabled track still attached to its sender has to
     // go out as muted.

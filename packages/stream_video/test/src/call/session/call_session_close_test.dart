@@ -150,33 +150,4 @@ void main() {
 
     expect(harness.session.debugIsRtcManagerSubjectClosed, isFalse);
   });
-
-  // Bug 2 of FLU-1060, pinned as it behaves today: the viewport buffer is
-  // never closed, so a change posted after the close still waits out the
-  // debounce. CS2 deletes the path.
-  test('leaves the viewport visibility buffer open', () {
-    fakeAsync((async) {
-      final harness = CallSessionHarness();
-      unawaited(harness.session.close(CloseCode.normalClosure));
-      async.flushMicrotasks();
-
-      Result<None>? result;
-      unawaited(
-        harness.session
-            .updateViewportVisibility(
-              const VisibilityChange(
-                sessionId: 'alice-session',
-                userId: 'alice',
-                visibility: ViewportVisibility.visible,
-              ),
-            )
-            .then((r) => result = r),
-      );
-      async.elapse(const Duration(milliseconds: 100));
-      expect(result, isNull);
-
-      async.elapse(const Duration(milliseconds: 150));
-      expect(result?.isSuccess, isTrue);
-    });
-  });
 }

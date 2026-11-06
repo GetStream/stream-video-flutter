@@ -16,6 +16,7 @@
 - `Call.callEvents` carries only that call's events. It used to also deliver the coordinator events of every other call the user was involved in.
 - `CoordinatorCallUserFeedbackSubmittedEvent.custom` (now `StreamCallUserFeedbackSubmittedEvent.custom`) is non-nullable. A feedback event without custom data carries an empty map rather than `null`.
 - `Call.updateViewportVisibility`, `Call.updateSubscription` and `Call.removeSubscription` are internal; report to `Call.viewportVisibility` instead.
+- `VisibilityChange` is removed.
 - `RetryConfig.callRejoinTimeout` is removed. It was deprecated and had no readers. Use `CallPreferences.networkAvailabilityTimeout`, which is what actually bounds waiting for the network.
 - Generated enum types are named for their values rather than the field they come from, and lose the `Enum` suffix: e.g. `AudioSettingsRequestDefaultDeviceEnum` is now `AudioDefaultDevice`, and the camera-facing, mode, language and codec enums are now `CameraFacing`, `FeatureActivationMode`, `TranscriptionLanguage` and `VideoCodec`. The `…Enum` names remain as deprecated aliases. `StreamAudioSettings.defaultDevice`, `StreamVideoSettings.cameraFacing`, `StreamNoiceCancellingSettings.mode` and `StreamIngressVideoLayer.codec` take the new types.
 - Generated enum types have no `fromJson`/`toJson`; build one with its constructor, e.g. `TranscriptionLanguage('en')`.
