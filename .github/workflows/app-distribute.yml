@@ -247,7 +247,9 @@ jobs:
     name: Build and Deploy Dogfooding Web (flutter.getstream.io)
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    environment: flutter-web
+    environment:
+      name: flutter-web
+      url: https://flutter.getstream.io/${{ steps.flavor.outputs.web_path }}/
     permissions:
       contents: read
       id-token: write
@@ -257,6 +259,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Set build flavor to Env
+        id: flavor
         run: |
           if [[ ${{ github.event_name == 'workflow_dispatch' }} == true ]]; then
             FLAVOR=${{ inputs.flavor }}
@@ -272,13 +275,14 @@ jobs:
           fi
           echo "FLAVOR=$FLAVOR" >> "$GITHUB_ENV"
           echo "WEB_PATH=$WEB_PATH" >> "$GITHUB_ENV"
+          echo "web_path=$WEB_PATH" >> "$GITHUB_OUTPUT"
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
 
       - name: Build
         working-directory: dogfooding
-        run: flutter build web --release --wasm --base-href /${{ env.WEB_PATH }}/
+        run: flutter build web --release --wasm --base-href /${{ env.WEB_PATH }}/ --dart-define=WEB_FLAVOR=${{ env.FLAVOR }}
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v3

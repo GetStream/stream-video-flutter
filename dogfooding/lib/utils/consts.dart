@@ -13,8 +13,14 @@ const String kMessageChannelType = 'videocall';
 const String kAppName = 'Stream Video Calls';
 const double kMaxWidthRegularScreen = 500;
 
+/// The flavor of a web build, set with `--dart-define=WEB_FLAVOR=<flavor>`.
+///
+/// `flutter build web` takes no `--flavor`, so [appFlavor] is never set on web.
+// ignore: do_not_use_environment
+const String _kWebFlavor = String.fromEnvironment('WEB_FLAVOR');
+
 /// Whether the app runs as the production build.
-bool get kIsProd => !kIsWeb && appFlavor == 'prod';
+bool get kIsProd => (kIsWeb ? _kWebFlavor : appFlavor) == 'prod';
 
 /// Returns the chat channel type to use for [environment].
 ///

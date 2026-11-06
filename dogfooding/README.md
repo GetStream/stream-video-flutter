@@ -111,6 +111,8 @@ The app should now start on your connected device or simulator.
 | `beta` | Internal beta builds. Enables all developer features.                                                                                                       |
 | `prod` | Store builds. Locks the app to the `demo` environment and hides the developer features (environment switcher, developer options in the call settings menu). |
 
+Web builds take no `--flavor`; pass `--dart-define=WEB_FLAVOR=<flavor>` instead. Without it a web build behaves like `beta`. CI deploys `prod` to [flutter.getstream.io/video](https://flutter.getstream.io/video/) on release and `beta` to [flutter.getstream.io/video/beta](https://flutter.getstream.io/video/beta/) on every push to `v2`.
+
 ### 6. Important notes
 
 #### Email-Based Login & User ID Conversion
