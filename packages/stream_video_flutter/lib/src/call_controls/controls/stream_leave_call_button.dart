@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../../l10n/localization_extension.dart';
 
 /// A call control that leaves the call.
 class StreamLeaveCallButton extends StatelessWidget {
@@ -27,6 +28,7 @@ class StreamLeaveCallButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return CallControlButton(
       icon: Icon(icon ?? context.streamIcons.phoneDownFill),
+      tooltip: context.translations.callControlsLeave,
       tone: .negative,
       onPressed: () {
         if (onLeaveCallTap != null) {

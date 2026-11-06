@@ -167,6 +167,48 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'Change layout'**
   String get layoutSelectTooltip;
 
+  /// Tooltip of the call control that turns closed captions on and off
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle captions'**
+  String get callControlsToggleCaptions;
+
+  /// Tooltip of the call control that starts and stops screen sharing
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle screen sharing'**
+  String get callControlsToggleScreenShare;
+
+  /// Tooltip of the call control that starts and stops recording
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle recording'**
+  String get callControlsToggleRecording;
+
+  /// Tooltip of the call control that routes audio between the speaker and the earpiece
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle speakerphone'**
+  String get callControlsToggleSpeakerphone;
+
+  /// Tooltip of the call control that switches between the front and back camera
+  ///
+  /// In en, this message translates to:
+  /// **'Flip camera'**
+  String get callControlsFlipCamera;
+
+  /// Tooltip of the call control that opens the reaction picker
+  ///
+  /// In en, this message translates to:
+  /// **'Send a reaction'**
+  String get callControlsReaction;
+
+  /// Tooltip of the call control that leaves the call
+  ///
+  /// In en, this message translates to:
+  /// **'Leave call'**
+  String get callControlsLeave;
+
   /// The participant layout that follows the call instead of being fixed
   ///
   /// In en, this message translates to:

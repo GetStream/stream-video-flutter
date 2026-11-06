@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../../l10n/localization_extension.dart';
 
 /// A call control that turns the camera on and off.
 class StreamCameraButton extends StatelessWidget {
@@ -112,6 +113,7 @@ class StreamCameraButton extends StatelessWidget {
       ),
       // An absent device is not a user choice, so it is badged rather than
       // drawn as a deliberate mute.
+      tooltip: context.translations.lobbyToggleCamera,
       tone: enabled || unavailable ? .neutral : .negative,
       badge: unavailable ? const CallControlErrorBadge() : null,
       onPressed: unavailable

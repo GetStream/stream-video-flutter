@@ -234,6 +234,7 @@
 
 ### 🐞 Fixed
 
+- Every call control button shows a tooltip.
 - `CallFeatureButton` reports a feature that is on as selected, to assistive technology and to a custom `button` builder.
 - `StreamCallContainer` reports a call's disconnect once. A status the call settled on after it, such as a second disconnect from a race, no longer calls `onCallDisconnected`, or leaves, a second time.
 - The lobby no longer offers a speaker choice on Safari and other WebKit browsers, which play every call on the system default output.

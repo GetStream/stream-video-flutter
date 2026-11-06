@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
+import '../../l10n/localization_extension.dart';
 import '../../utils/extensions.dart';
 
 // These are eyeballed device IDs for the speaker and earpiece.
@@ -125,6 +126,7 @@ class _StreamSpeakerphoneButtonState extends State<StreamSpeakerphoneButton> {
               ? widget.enabledSpeakerphoneIcon ?? icons.audio
               : widget.disabledSpeakerphoneIcon ?? icons.mute,
         ),
+        tooltip: context.translations.callControlsToggleSpeakerphone,
         onPressed: () async {
           try {
             await _setSpeakerphoneEnabled(enabled: !enabled);

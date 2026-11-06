@@ -556,6 +556,7 @@ class _CallScreenState extends State<CallScreen>
         trailing: [
           CallFeatureButton(
             icon: Icon(context.streamIcons.statsFill),
+            tooltip: 'Stats',
             selected: _openPanel == CallSidePanel.stats,
             onPressed: () => _togglePanel(CallSidePanel.stats),
           ),
@@ -822,6 +823,7 @@ class __ShowChatButtonState extends State<_ShowChatButton> {
   Widget build(BuildContext context) {
     return CallFeatureButton(
       icon: Icon(context.streamIcons.messageBubblesFill),
+      tooltip: 'Chat',
       selected: widget.selected,
       badge: CallControlNotificationBadge(count: _unreadCount),
       onPressed: widget.channel != null ? widget.onPressed : null,
