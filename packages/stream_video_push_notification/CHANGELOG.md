@@ -4,6 +4,8 @@
 
 - `StreamVideoPushNotificationPlatform.activeCalls()` returns `Future<List<CallData>>`.
 - `StreamVideoPushNotificationManager.removedStoredTokens` is removed.
+- `StreamVideoPushNotificationManager.currentActiveCalls` is removed; read `StreamVideo.state.activeCalls`.
+- `isAcceptedOnThisDevice` is no longer exported.
 
 ### 🔄 Changed
 
@@ -21,6 +23,7 @@
 
 ### 🐞 Fixed
 
+- A mute from the CallKit screen applies to the call it was made on.
 - `registerDevice` right after `connect`, and `unregisterDevice` on web and desktop, no longer throw.
 - A failing push token read is logged instead of reported as an uncaught error.
 - `unregisterDevice` always stops registering refreshed tokens.

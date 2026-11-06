@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_video_push_notification/src/stream_video_push_notification.dart';
+import 'package:stream_video_push_notification/src/manager/native_call_controller.dart';
 
 CallData _call({String? uuid, String? callCid}) =>
     CallData(uuid: uuid, callCid: callCid);
