@@ -25,12 +25,30 @@ enum Event {
   actionCallToggleDtmf,
   actionCallToggleGroup,
   actionCallToggleAudioSession,
-  actionCallCustom,
+  actionCallCustom;
+
+  /// The event whose [EventX.wireName] is [wireName], or null for a name this
+  /// version of the package does not know.
+  ///
+  /// Null rather than a throw: a newer native side may send an event an older
+  /// Dart side has no case for, and that must not break the event stream.
+  static Event? fromWireName(String? wireName) {
+    for (final event in values) {
+      if (event.wireName == wireName) return event;
+    }
+    return null;
+  }
 }
 
-/// Using extension for backward compatibility Dart SDK 2.17.0 and lower
+/// The names the native sides send on the event channel, one per [Event].
+///
+/// Kept as an explicit getter rather than shadowing `Enum.name` through an
+/// extension, so the mapping does not depend on extension resolution rules.
+/// The Swift and Kotlin constants these have to match are pinned by
+/// `test/push_channel_contract_test.dart`.
 extension EventX on Event {
-  String get name {
+  /// The event name on the wire, as emitted by Swift and Kotlin.
+  String get wireName {
     switch (this) {
       case Event.actionDidUpdateDevicePushTokenVoip:
         return 'io.getstream.video.DID_UPDATE_DEVICE_PUSH_TOKEN_VOIP';

@@ -230,12 +230,13 @@ class MethodChannelStreamVideoPushNotification
 
   RingingEvent? _receiveRingingEvent(dynamic data) {
     if (data is Map) {
-      final event = Event.values.firstWhereOrNull(
-        (e) => e.name == data['event'],
-      );
+      final name = data['event'];
+      final event = name is String ? Event.fromWireName(name) : null;
       if (event == null) {
-        // Unknown event names are logged and dropped.
-        _logger.w(() => 'Ignoring unknown ringing event: ${data['event']}');
+        // Dropped rather than thrown: a throw here surfaces as an unhandled
+        // error on the event stream for every such event, and ends the
+        // subscription of any listener that cancels on error.
+        _logger.w(() => 'Ignoring unknown ringing event: $name');
         return null;
       }
       final body = Map<String, dynamic>.from(data['body']);
