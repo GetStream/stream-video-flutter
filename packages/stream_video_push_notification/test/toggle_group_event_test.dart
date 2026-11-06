@@ -14,7 +14,7 @@ void main() {
           platform.eventChannel,
           MockStreamHandler.inline(
             onListen: (_, sink) => sink.success({
-              'event': Event.actionCallToggleGroup.name,
+              'event': Event.actionCallToggleGroup.wireName,
               'body': body,
             }),
           ),
