@@ -1,3 +1,17 @@
+## Upcoming
+
+### ✅ Added
+
+- `StreamVideoEffectsManager.unregisterAllFilters()` to release native effect processors.
+
+### 🔄 Changed
+
+- Improved the edge quality and performance of background filters.
+
+### 🐞 Fixed
+
+- Fixed stability issues in background blur and virtual background filters on Android and iOS.
+
 ## 1.7.2
 
 - Updated `stream_video` dependency to [`1.7.2`](https://pub.dev/packages/stream_video/changelog).
