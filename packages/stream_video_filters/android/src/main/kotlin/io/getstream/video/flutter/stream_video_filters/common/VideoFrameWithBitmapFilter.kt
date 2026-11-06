@@ -1,11 +1,11 @@
 package io.getstream.video.flutter.stream_video_filters.common
 
-import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.opengl.GLES20
 import android.opengl.GLUtils
 import android.util.Log
 import io.getstream.webrtc.flutter.videoEffects.VideoFrameProcessor
+import org.webrtc.JavaI420Buffer
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.TextureBufferImpl
 import org.webrtc.VideoFrame
@@ -18,12 +18,13 @@ import org.webrtc.YuvConverter
 class VideoFrameProcessorWithBitmapFilter(bitmapVideoFilterFunc: () -> BitmapVideoFilter) :
   VideoFrameProcessor {
   private val yuvConverter = YuvConverter()
+  private val yuvFrame = YuvFrame()
   private var inputWidth = 0
   private var inputHeight = 0
   private var inputBuffer: VideoFrame.TextureBuffer? = null
   private var yuvBuffer: VideoFrame.I420Buffer? = null
   private val textures = IntArray(1)
-  private var inputFrameBitmap: Bitmap? = null
+  private var blackBuffer: JavaI420Buffer? = null
 
   private val bitmapVideoFilter by lazy {
     bitmapVideoFilterFunc.invoke()
@@ -35,7 +36,12 @@ class VideoFrameProcessorWithBitmapFilter(bitmapVideoFilterFunc: () -> BitmapVid
 
   override fun process(frame: VideoFrame, surfaceTextureHelper: SurfaceTextureHelper): VideoFrame {
     // Step 1: Video Frame to Bitmap
-    val inputFrameBitmap = YuvFrame.bitmapFromVideoFrame(frame) ?: return frame
+    val inputFrameBitmap = yuvFrame.bitmapFromVideoFrame(frame)
+    if (inputFrameBitmap == null) {
+      // The frame could not be converted, so the filter cannot run on it. Send a
+      // black frame of the same size rather than the unfiltered camera image.
+      return blackFrameLike(frame)
+    }
 
     // Prepare helpers (runs only once or if the dimensions change)
     initialize(
@@ -65,6 +71,37 @@ class VideoFrameProcessorWithBitmapFilter(bitmapVideoFilterFunc: () -> BitmapVid
     return VideoFrame(yuvBuffer, 0, frame.timestampNs)
   }
 
+  /**
+   * A black frame with the size, rotation and timestamp of [frame]. The black buffer is
+   * reused while the size stays the same; every returned frame holds its own reference,
+   * which the caller releases.
+   */
+  private fun blackFrameLike(frame: VideoFrame): VideoFrame {
+    val width = frame.buffer.width
+    val height = frame.buffer.height
+    var buffer = blackBuffer
+    if (buffer == null || buffer.width != width || buffer.height != height) {
+      buffer?.release()
+      buffer = JavaI420Buffer.allocate(width, height).apply {
+        // Y = 0 with neutral chroma (128) is black.
+        fillPlane(dataY, 0)
+        fillPlane(dataU, 128)
+        fillPlane(dataV, 128)
+      }
+      blackBuffer = buffer
+    }
+    buffer.retain()
+    return VideoFrame(buffer, frame.rotation, frame.timestampNs)
+  }
+
+  private fun fillPlane(plane: java.nio.ByteBuffer, value: Int) {
+    val position = plane.position()
+    while (plane.hasRemaining()) {
+      plane.put(value.toByte())
+    }
+    plane.position(position)
+  }
+
   private fun initialize(width: Int, height: Int, textureHelper: SurfaceTextureHelper) {
     // TODO: temporarily disabled due to crash: java.lang.IllegalStateException: release() called on an object with refcount < 1
 //     yuvBuffer?.release()
@@ -73,7 +110,6 @@ class VideoFrameProcessorWithBitmapFilter(bitmapVideoFilterFunc: () -> BitmapVid
       Log.d(TAG, "initialize - width: $width height: $height")
       this.inputWidth = width
       this.inputHeight = height
-      inputFrameBitmap?.recycle()
       inputBuffer?.release()
 
       val type = VideoFrame.TextureBuffer.Type.RGB
@@ -87,8 +123,6 @@ class VideoFrameProcessorWithBitmapFilter(bitmapVideoFilterFunc: () -> BitmapVid
         inputWidth, inputHeight, type, textures[0], matrix, surfaceTextureHelper.handler,
         yuvConverter, null as Runnable?,
       )
-      this.inputFrameBitmap =
-        Bitmap.createBitmap(this.inputWidth, this.inputHeight, Bitmap.Config.ARGB_8888)
     }
   }
 

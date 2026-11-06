@@ -202,6 +202,17 @@
 - On iOS, a later start of a broadcast screen share no longer publishes its track again.
 - A join or fast reconnect fails when the device makes no generic SDP offer, instead of joining with an empty one.
 
+## Upcoming (minor)
+
+### 🔄 Changed
+
+- `ActionCallToggleGroup.callUUIDToGroupWith` is now nullable. It is null when CallKit ungroups the call.
+- `StreamVideo.connect()` now sends user details according to `StreamVideoOptions.includeUserDetailsForAutoConnect` when `includeUserDetails` isn't passed, instead of always sending them.
+
+### 🐞 Fixed
+
+- Accepting a call from the native ringing screen on a cold start no longer sends user details when `includeUserDetailsForAutoConnect` is `false`. It used to overwrite the user's name set on the server with an empty one.
+
 ## 1.7.2
 
 ### ✅ Added
