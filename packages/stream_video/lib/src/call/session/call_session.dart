@@ -851,6 +851,12 @@ class CallSession extends Disposable {
     return rtcManager?.getTrack(trackId)?.trackType;
   }
 
+  /// Whether the subject that holds SFU events back until `start` sets the
+  /// manager is closed; `true` before the first `start`. Tests only.
+  @visibleForTesting
+  bool get debugIsRtcManagerSubjectClosed =>
+      _rtcManagerSubject?.isClosed ?? true;
+
   /// Routes [event] through the SFU event handling. Tests only.
   @visibleForTesting
   Future<void> debugHandleSfuEvent(SfuEvent event) => _onSfuEvent(event);
