@@ -17,14 +17,18 @@ class ClosedCaptionsWidget extends StatelessWidget {
   /// The height of the captions widget.
   final double? height;
 
+  static bool _isCaptioning(CallState state) => state.isCaptioning;
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = StreamTheme.of(context).colorScheme;
 
-    return StreamBuilder(
-      stream: call.closedCaptions,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
+    return PartialCallStateBuilder(
+      call: call,
+      selector: _isCaptioning,
+      builder: (context, isCaptioning) => StreamBuilder(
+        stream: call.closedCaptions,
+        builder: (context, snapshot) {
           var closedCaptions = snapshot.data != null
               ? snapshot.data!.reversed.toList()
               : <StreamClosedCaption>[];
@@ -35,9 +39,8 @@ class ClosedCaptionsWidget extends StatelessWidget {
 
           return AnimatedContainer(
             duration: const Duration(milliseconds: 300),
-            height: !call.state.value.isCaptioning ? 0 : height,
-            // ignore: deprecated_member_use
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            height: isCaptioning ? height : 0,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
             child: ListView.separated(
               reverse: true,
               shrinkWrap: true,
@@ -47,6 +50,7 @@ class ClosedCaptionsWidget extends StatelessWidget {
                 return Opacity(
                   opacity: closedCaptions.length >= 3 && index >= 2 ? 0.4 : 1,
                   child: RichText(
+                    textAlign: TextAlign.center,
                     text: TextSpan(
                       children: [
                         TextSpan(
@@ -71,9 +75,8 @@ class ClosedCaptionsWidget extends StatelessWidget {
               separatorBuilder: (context, index) => const SizedBox(height: 8),
             ),
           );
-        }
-        return const SizedBox();
-      },
+        },
+      ),
     );
   }
 }
