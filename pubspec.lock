@@ -421,10 +421,10 @@ packages:
     dependency: transitive
     description:
       name: desktop_drop
-      sha256: aa1e797255bfbc76f9eb5aa4f61e5b68dbf69962ab1be6495816d2f251bc0d1f
+      sha256: "47ded09c85909edfed644fd4cbb5051b040d0aed5c79e7e062ea4b3b7156dbe4"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.1"
+    version: "0.8.4"
   device_info_plus:
     dependency: transitive
     description:
@@ -1285,14 +1285,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
-  lottie:
-    dependency: transitive
-    description:
-      name: lottie
-      sha256: "586554b887a00bbec87aa6ec0f69a47af95873b809478192f6c5d61250be5474"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.5.0"
   marionette_flutter:
     dependency: transitive
     description:
@@ -1569,10 +1561,10 @@ packages:
     dependency: transitive
     description:
       name: photo_manager
-      sha256: fb3bc8ea653370f88742b3baa304700107c83d12748aa58b2b9f2ed3ef15e6c2
+      sha256: "2d00a785b501bf1e5f6180bbef772846e767be11d45d11112b63092ef54a419e"
       url: "https://pub.dev"
     source: hosted
-    version: "3.9.0"
+    version: "3.12.0"
   photo_view:
     dependency: transitive
     description:
@@ -2091,32 +2083,29 @@ packages:
     source: hosted
     version: "2.1.4"
   stream_chat:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "packages/stream_chat"
-      ref: "686a9980966872eee4b64abad2d5e8ffcdb8c29c"
-      resolved-ref: "686a9980966872eee4b64abad2d5e8ffcdb8c29c"
-      url: "https://github.com/GetStream/stream-chat-flutter.git"
-    source: git
-    version: "10.4.0"
+      name: stream_chat
+      sha256: "1e200651ffbba39839c17d000f8088fa78f692420b1a284ec2451849072dfd41"
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.6.0"
   stream_chat_flutter:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "packages/stream_chat_flutter"
-      ref: "686a9980966872eee4b64abad2d5e8ffcdb8c29c"
-      resolved-ref: "686a9980966872eee4b64abad2d5e8ffcdb8c29c"
-      url: "https://github.com/GetStream/stream-chat-flutter.git"
-    source: git
-    version: "10.4.0"
+      name: stream_chat_flutter
+      sha256: "628a83fbbf3c3a175acd41b1df7d4ae018163248a17f58e774e7521ea496cd56"
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.6.0"
   stream_chat_flutter_core:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "packages/stream_chat_flutter_core"
-      ref: "686a9980966872eee4b64abad2d5e8ffcdb8c29c"
-      resolved-ref: "686a9980966872eee4b64abad2d5e8ffcdb8c29c"
-      url: "https://github.com/GetStream/stream-chat-flutter.git"
-    source: git
-    version: "10.4.0"
+      name: stream_chat_flutter_core
+      sha256: ffaaffa81ecd62014ba55866d6c57b37d9595da9bc29104d7c8948276f8b8515
+      url: "https://pub.dev"
+    source: hosted
+    version: "10.6.0"
   stream_core:
     dependency: "direct overridden"
     description:
@@ -2138,12 +2127,11 @@ packages:
   stream_thumbnail:
     dependency: transitive
     description:
-      path: "packages/stream_thumbnail"
-      ref: "2aea1413997af886ee951921d71e6b8cb8c5cfbb"
-      resolved-ref: "2aea1413997af886ee951921d71e6b8cb8c5cfbb"
-      url: "https://github.com/GetStream/stream-core-flutter.git"
-    source: git
-    version: "0.1.0+1"
+      name: stream_thumbnail
+      sha256: "3f4879aa55cc08a49f52f36c84c952435cbc73777665047da78e454e0854fe3b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   stream_transform:
     dependency: transitive
     description:
