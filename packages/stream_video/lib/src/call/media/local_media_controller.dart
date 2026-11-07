@@ -628,22 +628,41 @@ class LocalMediaController {
           );
           break;
         case AudioRouteChangedEvent _:
-          if (!CurrentPlatform.isIos) break;
-
-          final device = event.device;
-          if (_state.audioOutputDevice?.id.equalsIgnoreCase(device.id) ??
-              false) {
-            break;
-          }
-
-          _connectOptions = connectOptions.copyWith(audioOutputDevice: device);
-          _stateManager.participantSetAudioOutputDevice(device: device);
-          _stateManager.audioOutputSelectedByUser = false;
+          onAudioRouteChanged(event);
           break;
         default:
           return;
       }
     });
+  }
+
+  /// Follows an iOS audio route change, unless the system re-routed on its
+  /// own and the user had chosen an output: that output is put back instead.
+  @visibleForTesting
+  void onAudioRouteChanged(AudioRouteChangedEvent event) {
+    if (!CurrentPlatform.isIos) return;
+
+    final device = event.device;
+    final selected = _state.audioOutputDevice;
+    _logger.d(
+      () =>
+          '[onAudioRouteChanged] route: ${device.id}, reason: '
+          '${event.reason.name}, selected: ${selected?.id}, '
+          'byUser: ${_stateManager.audioOutputSelectedByUser}',
+    );
+    if (selected?.id.equalsIgnoreCase(device.id) ?? false) {
+      return;
+    }
+
+    if (event.reason.isSystemReconfiguration &&
+        _stateManager.audioOutputSelectedByUser) {
+      unawaited(_session()?.applyCurrentAudioOutputDevice());
+      return;
+    }
+
+    _connectOptions = connectOptions.copyWith(audioOutputDevice: device);
+    _stateManager.participantSetAudioOutputDevice(device: device);
+    _stateManager.audioOutputSelectedByUser = false;
   }
 
   Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) async {
