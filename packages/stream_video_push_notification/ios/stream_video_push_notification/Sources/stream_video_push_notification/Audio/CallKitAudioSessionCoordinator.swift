@@ -22,7 +22,7 @@ final class CallKitAudioSessionCoordinator {
 
     init(
         session: AudioSessionConfiguring = AVAudioSession.sharedInstance(),
-        gate: WebRTCAudioEngineGate = NotificationCenterAudioEngineGate(),
+        gate: WebRTCAudioEngineGate = WebRTCPluginAudioEngineGate(),
         center: NotificationCenter = .default
     ) {
         self.session = session

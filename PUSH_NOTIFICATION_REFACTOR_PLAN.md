@@ -289,7 +289,7 @@ All `AVAudioSession` code and `didActivate`/`didDeactivate` move to the coordina
 `configureAudioSession` stops calling `setActive`. One-line behaviour change kept alone so R1–R4 and R12 can be re-verified and the PR reverted on its own if a plain-ringing regression shows up (the ticket flags this as unverified). ~10 lines.
 
 **W-1. webrtc: audio engine gate and CallKit session forwarding (change, `webrtc/stream_webrtc_flutter`)**
-Port of `fix/ios-audio-engine-availability` (iOS and macOS copies; `darwin_parity_test` keeps them identical) with "engine start failed" exposed as a callback on `FlutterWebRTCAudioEngineControl` next to the notification; route-change `reason` added to `onAudioRouteChange`. Changelog, version bump to 4.1.0 in the pubspec. ~+600 lines (×2 for macOS, parity-checked).
+Port of `fix/ios-audio-engine-availability` (iOS and macOS copies; `darwin_parity_test` keeps them identical) with "engine start failed" exposed as a callback on `FlutterWebRTCAudioEngineControl` next to the notification; route-change `reason` added to `onAudioRouteChange`. Changelog entries under the unreleased 5.0.0 that v2 already carries. ~+600 lines (×2 for macOS, parity-checked).
 
 **B-5. Native link to the webrtc plugin (change; depends on W-1)**
 Podspec and SPM dependency on `stream_webrtc_flutter`; `WebRTCAudioEngineGate` default implementation calls the control object directly and falls back to notifications when `sharedSingleton` is nil. `didActivate`/`didDeactivate` gate the engine (today's R1–R4 behaviour unchanged, since the gate is lifted whenever no call remains). Dogfooding Pods+SPM CI job covers the link. ~+120 lines.
@@ -401,7 +401,7 @@ Outcomes feed B-6's `HoldRecoveryPolicy`: each experiment that passes removes a 
 | A "move" PR silently changes behaviour on a cold-start path nobody runs locally | 0-2/0-3 characterization tests before any move; R3 and R18 are mandatory device checks on every iOS and Android move PR. |
 | B-2 (store) is big | It is the only PR of its size on iOS; its tests are event-sequence tests a reviewer can read as a spec; it changes no method/event payloads. |
 | `configureAudioSession` without `setActive` regresses plain ringing | Alone in B-4, 10 lines, revertable without touching anything else. |
-| webrtc and push plugin ship out of step | Both live in the monorepo on `v2`; B-5 bumps the pubspec constraint to `^4.1.0` in the same PR; the dogfooding Pods+SPM job builds the native link. |
+| webrtc and push plugin ship out of step | Both live in the monorepo on `v2`; every package on v2 already requires `^5.0.0`, the version W-1's changes ship in; the dogfooding Pods+SPM job builds the native link. |
 | Hold still needs re-registration after the spike | The design (2.5) already models it; `HoldRecoveryPolicy` is the only place timing lives, with a fake clock in tests. `supportsHolding` stays off by default. |
 | Dart consolidation (A-6) drops a ring-end path that only one platform relied on | A-6 is last, after C-8 gives Android explicit reasons; R5–R9 are re-run on both platforms; core's existing ringing tests (`ringing_flow_coordinator_test`, `ringing_cancelled_by_caller_test`, `call_accepted_on_this_device_test`) must stay green. |
 | Firebase stage 1 breaks apps that pass `RemoteMessage` | Breaking change documented; migration is `message.data`; one-line fix. |
