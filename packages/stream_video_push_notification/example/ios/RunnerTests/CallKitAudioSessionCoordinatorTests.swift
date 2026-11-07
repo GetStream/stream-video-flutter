@@ -17,10 +17,6 @@ final class FakeAudioSession: AudioSessionConfiguring {
         calls.append("mode \(mode.rawValue)")
     }
 
-    func setActive(_ active: Bool, options: AVAudioSession.SetActiveOptions) throws {
-        calls.append("active \(active)")
-    }
-
     func setPreferredSampleRate(_ sampleRate: Double) throws {
         calls.append("sampleRate \(sampleRate)")
     }
@@ -234,7 +230,6 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
         let options = CallData(args: [
             "ios": [
                 "audioSessionMode": "voiceChat",
-                "audioSessionActive": false,
                 "audioSessionPreferredSampleRate": 48000.0,
                 "audioSessionPreferredIOBufferDuration": 0.01,
             ]
@@ -247,7 +242,6 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
             [
                 "category \(AVAudioSession.Category.playAndRecord.rawValue)",
                 "mode \(AVAudioSession.Mode.voiceChat.rawValue)",
-                "active false",
                 "sampleRate 48000.0",
                 "ioBufferDuration 0.01",
             ])
@@ -261,7 +255,6 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
             [
                 "category \(AVAudioSession.Category.playAndRecord.rawValue)",
                 "mode \(AVAudioSession.Mode.default.rawValue)",
-                "active true",
                 "sampleRate 44100.0",
                 "ioBufferDuration 0.005",
             ])
