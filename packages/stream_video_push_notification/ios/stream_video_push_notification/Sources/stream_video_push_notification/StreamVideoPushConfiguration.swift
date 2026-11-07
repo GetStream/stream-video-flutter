@@ -11,6 +11,7 @@ import Foundation
     @objc public var maximumCallGroups: Int
     @objc public var maximumCallsPerCallGroup: Int
     @objc public var audioSessionMode: String
+    /// Has no effect: CallKit activates the audio session when it needs it.
     @objc public var audioSessionActive: Bool
     @objc public var audioSessionPreferredSampleRate: Double
     @objc public var audioSessionPreferredIOBufferDuration: Double

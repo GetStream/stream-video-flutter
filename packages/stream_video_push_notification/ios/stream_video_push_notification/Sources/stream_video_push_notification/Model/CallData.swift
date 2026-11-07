@@ -24,6 +24,7 @@ import Foundation
     @objc public var ringtonePath: String
     @objc public var configureAudioSession: Bool
     @objc public var audioSessionMode: String
+    /// Has no effect: CallKit activates the audio session when it needs it.
     @objc public var audioSessionActive: Bool
     @objc public var audioSessionPreferredSampleRate: Double
     @objc public var audioSessionPreferredIOBufferDuration: Double
