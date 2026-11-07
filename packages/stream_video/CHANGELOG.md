@@ -135,6 +135,7 @@
 
 ### 🐞 Fixed
 
+- [iOS] An audio output the user chose, such as the speaker, is put back when the system re-routes audio on its own, such as after a CallKit hold, instead of being replaced by the system's choice. A newly connected or disconnected device is still followed. `AudioRouteChangedEvent` carries the route change `reason`.
 - A muted microphone or camera is announced to the SFU as muted.
 - Joining a call retries sooner when the SFU connection closes before the join response.
 - On iOS, a call that defaults to the loudspeaker now starts on it, instead of switching to it after the microphone is already recording.
