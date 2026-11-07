@@ -67,6 +67,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property(nonatomic, assign) BOOL audioSuspended;
 
+/**
+ * Whether voice processing was on when the audio engine was switched to
+ * manual rendering while unavailable; it is put back on leaving that mode.
+ * Read and written on admQueue only.
+ */
+@property(nonatomic, assign) BOOL voiceProcessingBeforeManualRendering;
+
 - (instancetype)initWithFactoryId:(NSString*)factoryId
             bypassVoiceProcessing:(BOOL)bypassVoiceProcessing
                 networkIgnoreMask:(NSArray<NSString*>*)networkIgnoreMask
