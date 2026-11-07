@@ -44,7 +44,7 @@ dependencies:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core
       ref: b11ffa97e6285fe7c15c77ad322142fabe0cdee5
-  stream_webrtc_flutter: ^4.0.1
+  stream_webrtc_flutter: ^4.1.0
   synchronized: ^3.1.0
   system_info2: ^4.0.0
   tart: ^0.6.0
