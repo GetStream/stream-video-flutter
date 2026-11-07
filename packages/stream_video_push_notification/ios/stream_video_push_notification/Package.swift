@@ -12,14 +12,16 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "FlutterFramework", path: "../FlutterFramework"),
-        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.8.2")
+        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.8.2"),
+        .package(name: "stream_webrtc_flutter", path: "../stream_webrtc_flutter"),
     ],
     targets: [
         .target(
             name: "stream_video_push_notification",
             dependencies: [
                 .product(name: "FlutterFramework", package: "FlutterFramework"),
-                .product(name: "CryptoSwift", package: "CryptoSwift")
+                .product(name: "CryptoSwift", package: "CryptoSwift"),
+                .product(name: "stream-webrtc-flutter", package: "stream_webrtc_flutter"),
             ],
             resources: [
                 // If you have PrivacyInfo.xcprivacy or other resources:
