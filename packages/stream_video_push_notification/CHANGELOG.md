@@ -1,5 +1,9 @@
 ## Upcoming (major)
 
+### 🐞 Fixed
+
+- [iOS] The plugin no longer activates the audio session itself when it shows, answers or starts a call. The session it activated kept CallKit from activating its own, so WebRTC could run on a session CallKit did not own. CallKit now activates it. `audioSessionActive` has no effect.
+
 ### 🔄 Changed
 
 - `StreamVideoPushHandler.handleBackgroundMessage` builds a client that sets up no media.

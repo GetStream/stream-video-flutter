@@ -25,6 +25,7 @@ extension StreamVideoCallkitManager {
             return
         }
         self.configureAudioSession()
+        // Applies the options again 1.2 s after answering.
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(1200)) {
             self.configureAudioSession()
         }

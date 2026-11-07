@@ -6,7 +6,6 @@ protocol AudioSessionConfiguring {
     func setCategory(
         _ category: AVAudioSession.Category, options: AVAudioSession.CategoryOptions) throws
     func setMode(_ mode: AVAudioSession.Mode) throws
-    func setActive(_ active: Bool, options: AVAudioSession.SetActiveOptions) throws
     func setPreferredSampleRate(_ sampleRate: Double) throws
     func setPreferredIOBufferDuration(_ duration: TimeInterval) throws
 }
@@ -81,7 +80,8 @@ final class CallKitAudioSessionCoordinator {
 
     // MARK: - Session
 
-    /// Applies `data`'s audio session options; nil applies the defaults.
+    /// Applies `data`'s audio session options; nil applies the defaults. The session is left
+    /// inactive: CallKit activates it.
     func configure(_ data: CallData?) {
         if data?.configureAudioSession != false {
             do {
@@ -94,7 +94,6 @@ final class CallKitAudioSessionCoordinator {
                     ])
 
                 try session.setMode(Self.mode(for: data?.audioSessionMode))
-                try session.setActive(data?.audioSessionActive ?? true, options: [])
                 try session.setPreferredSampleRate(data?.audioSessionPreferredSampleRate ?? 44100.0)
                 try session.setPreferredIOBufferDuration(
                     data?.audioSessionPreferredIOBufferDuration ?? 0.005)
