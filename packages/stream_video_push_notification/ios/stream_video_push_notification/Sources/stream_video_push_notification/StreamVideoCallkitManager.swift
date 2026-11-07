@@ -16,6 +16,9 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
     let transactions = CallKitTransactionRequester()
 
+    /// Configures the audio session and tells WebRTC when it may use it.
+    var audio = CallKitAudioSessionCoordinator()
+
     var sharedProvider: CXProvider? = nil
 
     private override init() {
@@ -198,7 +201,8 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         sharedProvider?.reportCall(with: uuid, endedAt: Date(), reason: .remoteEnded)
         // Reporting the end does not run the `CXEndCallAction` delegate, which is what normally
         // removes the call.
-        store.remove(uuid: uuid)
+        store.endRefused(uuid: uuid)
+        audio.callsRemoved(store)
     }
 
     /// Reports to CallKit how a call ended, which is what decides how it is listed in Recents.
@@ -217,6 +221,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
         self.sharedProvider?.reportCall(with: callUUID, endedAt: Date(), reason: endedReason)
         store.endReported(uuid: callUUID, reason: endedReason)
+        audio.callsRemoved(store)
     }
 
     func endCallNotExist(_ data: CallData) {
