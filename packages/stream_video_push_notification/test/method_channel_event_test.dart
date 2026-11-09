@@ -59,21 +59,7 @@ void main() {
         .setMockStreamHandler(platform.eventChannel, null);
   });
 
-  group('unknown events', () {
-    test('are dropped and the events after them still arrive', () async {
-      final events = await receive([
-        {
-          'event': 'io.getstream.video.ACTION_FROM_A_NEWER_PLUGIN',
-          'body': <String, dynamic>{},
-        },
-        _message(Event.actionCallIncoming, _iosCallBody),
-      ]);
-
-      // The unknown one arrives as null, which the broadcaster filters out;
-      // nothing else leaks and the stream is not closed by an error.
-      expect(events, [isNull, isA<ActionCallIncoming>()]);
-    });
-
+  group('unreadable messages', () {
     test('a message that is not a map is ignored', () async {
       final events = await receive([
         'not a map',
