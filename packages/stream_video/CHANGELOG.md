@@ -7,6 +7,7 @@
 
 ### 🐞 Fixed
 
+- `StreamVideo.disconnect()` now leaves every active call before disconnecting, as the JS SDK does. Before, a call stayed joined and kept publishing audio and video after the user disconnected, also when the connection had already dropped.
 - Accepting a call from the native ringing screen on a cold start no longer sends user details when `includeUserDetailsForAutoConnect` is `false`. It used to overwrite the user's name set on the server with an empty one.
 
 ## 1.7.2
