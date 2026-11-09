@@ -1,3 +1,6 @@
+import 'dart:collection';
+
+import 'package:meta/meta.dart';
 import 'package:stream_video/stream_video.dart';
 
 /// The rings a background session is waiting on, and the ones the backend
@@ -5,13 +8,15 @@ import 'package:stream_video/stream_video.dart';
 ///
 /// Pure bookkeeping: the only outside world it touches is the reader of the
 /// native calls it is given to check a ring against.
+@internal
 class RingLedger {
   RingLedger({required String logTag}) : _tag = logTag;
 
   final String _tag;
 
   /// The ringing flows still waiting on the user, by call cid.
-  final pendingRings = <String>{};
+  Set<String> get pendingRings => UnmodifiableSetView(_pendingRings);
+  final _pendingRings = <String>{};
 
   /// The pending rings the backend says may have ended, by call cid, with how
   /// many times their native call has been checked since.
@@ -22,7 +27,9 @@ class RingLedger {
   /// broadcast, which a backgrounded app may handle well after a release falls
   /// due. So a ring still shown is checked again, up to
   /// [maxEndedRingChecks] times.
-  final endedRings = <String, int>{};
+  @visibleForTesting
+  Map<String, int> get endedRings => UnmodifiableMapView(_endedRings);
+  final _endedRings = <String, int>{};
 
   /// How many times a ring with an end hint is checked before the hint is
   /// dropped and the ring left to its user.
@@ -32,13 +39,13 @@ class RingLedger {
   static const maxEndedRingChecks = 5;
 
   /// Whether nothing is left to wait for.
-  bool get isIdle => pendingRings.isEmpty;
+  bool get isIdle => _pendingRings.isEmpty;
 
   /// Notes that [callCid] rings and the user has to answer it. Rung again, so
   /// an end heard for an earlier ring no longer applies.
   void addRing(String callCid) {
-    pendingRings.add(callCid);
-    endedRings.remove(callCid);
+    _pendingRings.add(callCid);
+    _endedRings.remove(callCid);
   }
 
   /// Marks the flow for [callCid] resolved, and reports whether nothing is
@@ -50,21 +57,21 @@ class RingLedger {
         () => '[resolveRing] no call cid; releasing every pending ring',
       );
 
-      pendingRings.clear();
+      _pendingRings.clear();
     } else {
-      pendingRings.remove(callCid);
+      _pendingRings.remove(callCid);
     }
 
-    return pendingRings.isEmpty;
+    return _pendingRings.isEmpty;
   }
 
   /// Notes that the ring for [callCid] may have ended, and reports whether it
   /// is one being waited on.
   bool markEnded(String? callCid) {
-    if (callCid == null || !pendingRings.contains(callCid)) return false;
+    if (callCid == null || !_pendingRings.contains(callCid)) return false;
 
     // A fresh signal earns the ring a fresh round of checks.
-    endedRings[callCid] = 0;
+    _endedRings[callCid] = 0;
     return true;
   }
 
@@ -77,7 +84,7 @@ class RingLedger {
   Future<bool> dropEndedRings(
     Future<List<CallData>> Function() nativeCalls,
   ) async {
-    final candidates = pendingRings.intersection(endedRings.keys.toSet());
+    final candidates = _pendingRings.intersection(_endedRings.keys.toSet());
     if (candidates.isEmpty) return false;
 
     Set<String?>? shown;
@@ -99,22 +106,22 @@ class RingLedger {
           _tag,
           () => '[dropEndedRings] ring ended without the user: $cid',
         );
-        endedRings.remove(cid);
-        pendingRings.remove(cid);
+        _endedRings.remove(cid);
+        _pendingRings.remove(cid);
         continue;
       }
 
-      final checks = (endedRings[cid] ?? 0) + 1;
+      final checks = (_endedRings[cid] ?? 0) + 1;
       if (checks >= maxEndedRingChecks) {
         streamLog.d(
           _tag,
           () => '[dropEndedRings] ring still up after $checks checks: $cid',
         );
-        endedRings.remove(cid);
+        _endedRings.remove(cid);
         continue;
       }
 
-      endedRings[cid] = checks;
+      _endedRings[cid] = checks;
       recheck = true;
     }
 

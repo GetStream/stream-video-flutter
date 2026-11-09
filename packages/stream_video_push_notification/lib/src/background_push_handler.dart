@@ -52,9 +52,6 @@ export 'background/background_push_router.dart'
 /// purpose. It is the only thing the background isolate can reach, so the
 /// factory must be reachable from inside it—a factory registered at app launch
 /// would simply not be there.
-///
-/// The work is done by one `BackgroundPushRouter` per isolate; this class is
-/// the entry point apps call.
 class StreamVideoPushHandler {
   const StreamVideoPushHandler._();
 
@@ -64,8 +61,6 @@ class StreamVideoPushHandler {
 
   /// How long to wait before tearing the client down, so the flow that is
   /// resolving the notification finishes first.
-  ///
-  /// Not const only so a test does not have to sleep through it.
   @visibleForTesting
   static Duration get resolutionGrace => _router.resolutionGrace;
 
@@ -121,5 +116,7 @@ class StreamVideoPushHandler {
   /// Drops the session this isolate is holding, for tests that run more than
   /// one case in the same isolate.
   @visibleForTesting
-  static Future<void> releaseForTesting() => _router.releaseSession();
+  static Future<void> releaseForTesting() =>
+      // ignore: invalid_use_of_visible_for_testing_member
+      _router.releaseSession();
 }

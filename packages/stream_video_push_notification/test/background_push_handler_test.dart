@@ -95,7 +95,11 @@ Stream<T> _cancellableOnFakeTime<T>(Stream<T> source) {
   late final StreamController<T> controller;
   controller = StreamController<T>(
     sync: true,
-    onListen: () => forwarding = source.listen(controller.add),
+    onListen: () => forwarding = source.listen(
+      controller.add,
+      onError: controller.addError,
+      onDone: controller.close,
+    ),
     onCancel: () {
       unawaited(forwarding?.cancel());
       unawaited(controller.close());

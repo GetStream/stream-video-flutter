@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:synchronized/synchronized.dart';
@@ -7,6 +8,7 @@ import 'package:synchronized/synchronized.dart';
 import 'ring_ledger.dart';
 
 /// One isolate's client, its observers, and how to let go of them.
+@internal
 class BackgroundSession {
   BackgroundSession({
     required this.streamVideo,

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -31,6 +32,7 @@ typedef ResolveExistingClient = StreamVideo? Function();
 /// waits on the user, and tears down again.
 ///
 /// One instance per isolate; `StreamVideoPushHandler` holds it.
+@internal
 class BackgroundPushRouter {
   BackgroundPushRouter({
     this.resolutionGrace = const Duration(seconds: 1),
@@ -94,6 +96,7 @@ class BackgroundPushRouter {
 
   /// Drops the session this isolate is holding, for tests that run more than
   /// one case in the same isolate.
+  @visibleForTesting
   Future<void> releaseSession() => _lock.synchronized(() async {
     await _session?.release();
   });
