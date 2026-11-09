@@ -38,6 +38,26 @@ class _FakeTokenSource extends PushTokenSource {
   Stream<String> get onRefresh => _refreshes.stream;
 }
 
+/// A token source whose reads wait until the test completes or fails them.
+class _PendingTokenSource extends PushTokenSource {
+  var _read = Completer<String?>();
+
+  void fail(Object error) => _read.completeError(error);
+
+  /// Completes the pending read, if it is still pending, and answers later
+  /// reads with [token].
+  void succeed(String token) {
+    if (!_read.isCompleted) _read.complete(token);
+    _read = Completer<String?>()..complete(token);
+  }
+
+  @override
+  Future<String?> token() => _read.future;
+
+  @override
+  Stream<String> get onRefresh => const Stream.empty();
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -103,6 +123,28 @@ void main() {
         PlatformType.android => fcmTokens.token(),
         _ => null,
       },
+      apnsTokenSource: apnsTokens,
+    );
+    addTearDown(instance.dispose);
+    return instance;
+  }
+
+  /// A registrar whose iOS provider reads its tokens from [source], while the
+  /// device token it deletes is the plain VoIP one.
+  PushDeviceRegistrar registrarReading(_PendingTokenSource source) {
+    SharedPreferences.setMockInitialValues({});
+    final instance = PushDeviceRegistrar(
+      client: client,
+      iosPushProvider: StreamVideoPushProvider.apn(
+        name: 'apn',
+        tokenStreamProvider: () => source.tokens,
+      ),
+      androidPushProvider: StreamVideoPushProvider.firebase(
+        name: 'fcm',
+        tokenStreamProvider: () => fcmTokens.tokens,
+      ),
+      registerApnDeviceToken: false,
+      currentDeviceToken: () async => _voipToken,
       apnsTokenSource: apnsTokens,
     );
     addTearDown(instance.dispose);
@@ -270,9 +312,7 @@ void main() {
     );
 
     test('works before the preferences have loaded', () async {
-      // The old manager read a `late` SharedPreferences field that its
-      // constructor filled in asynchronously; registering right after
-      // construction raced it.
+      // Registration waits for the preferences to load.
       final completer = Completer<SharedPreferences>();
       SharedPreferences.setMockInitialValues({});
       final instance = PushDeviceRegistrar(
@@ -311,8 +351,7 @@ void main() {
     test(
       'does not delete the APN token when registerApnDeviceToken is false',
       () async {
-        // The APN token was never registered in this setup, so deleting it
-        // failed with a 404 on every disconnect.
+        // The APN token was never registered, so only the VoIP token goes.
         await registrar().unregisterDevice();
 
         expect(deletedIds(), [_voipToken]);
@@ -410,6 +449,112 @@ void main() {
       expect(createdIds(), [_voipToken]);
     });
 
+    test('works off mobile, where nothing was registered', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.web;
+
+      await registrar(
+        storedValues: {PushDeviceRegistrar.userDeviceTokenKey: _apnToken},
+      ).unregisterDevice();
+
+      // Only what the preferences remember; the platform has no token.
+      expect(deletedIds(), [_apnToken]);
+    });
+
+    test(
+      'stops registering refreshed tokens when no token can be read',
+      () async {
+        final instance = registrar();
+        instance.registerDevice();
+        await pumpEventQueue();
+        voipTokens.current = null;
+
+        await instance.unregisterDevice();
+        voipTokens.refresh('voip-token-2');
+        await pumpEventQueue();
+
+        expect(createdIds(), [_voipToken]);
+      },
+    );
+
+    test(
+      'forgets the stored tokens when the current token read fails',
+      () async {
+        SharedPreferences.setMockInitialValues({
+          PushDeviceRegistrar.userDeviceTokenKey: _apnToken,
+          PushDeviceRegistrar.userDeviceTokenVoIPKey: _voipToken,
+        });
+        final instance = PushDeviceRegistrar(
+          client: client,
+          iosPushProvider: StreamVideoPushProvider.apn(
+            name: 'apn',
+            tokenStreamProvider: () => voipTokens.tokens,
+          ),
+          androidPushProvider: StreamVideoPushProvider.firebase(
+            name: 'fcm',
+            tokenStreamProvider: () => fcmTokens.tokens,
+          ),
+          registerApnDeviceToken: false,
+          currentDeviceToken: () async => throw StateError('offline'),
+          apnsTokenSource: apnsTokens,
+        );
+        addTearDown(instance.dispose);
+
+        await instance.unregisterDevice();
+
+        expect(deletedIds(), [_apnToken]);
+        final preferences = await SharedPreferences.getInstance();
+        expect(preferences.getKeys(), isEmpty);
+      },
+    );
+
+    test('a registration still in flight does not store its token', () async {
+      final created = Completer<Result<None>>();
+      when(
+        () => client.createDevice(
+          id: any(named: 'id'),
+          pushProvider: any(named: 'pushProvider'),
+          pushProviderName: any(named: 'pushProviderName'),
+          voipToken: any(named: 'voipToken'),
+        ),
+      ).thenAnswer((_) => created.future);
+      final instance = registrar();
+      instance.registerDevice();
+      await pumpEventQueue();
+
+      await instance.unregisterDevice();
+      created.complete(const Result.success(none));
+      await pumpEventQueue();
+
+      final preferences = await SharedPreferences.getInstance();
+      expect(
+        preferences.getString(PushDeviceRegistrar.userDeviceTokenVoIPKey),
+        isNull,
+      );
+    });
+
+    test('completes while the first token read is still pending', () async {
+      final pending = _PendingTokenSource();
+      final instance = registrarReading(pending);
+      instance.registerDevice();
+      await pumpEventQueue();
+
+      await instance.unregisterDevice().timeout(const Duration(seconds: 1));
+
+      expect(deletedIds(), [_voipToken]);
+    });
+
+    test('completes when the pending first token read fails', () async {
+      final pending = _PendingTokenSource();
+      final instance = registrarReading(pending);
+      instance.registerDevice();
+      await pumpEventQueue();
+
+      final unregistered = instance.unregisterDevice();
+      pending.fail(StateError('offline'));
+
+      await expectLater(unregistered, completes);
+    });
+
     test('a registration after it subscribes to the tokens again', () async {
       final instance = registrar();
       instance.registerDevice();
@@ -440,15 +585,28 @@ void main() {
       expect(createdIds(), [_voipToken]);
     });
 
-    test('works off mobile, where nothing was registered', () async {
-      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.web;
+    test('completes while the first token read is still pending', () async {
+      final instance = registrarReading(_PendingTokenSource());
+      instance.registerDevice();
+      await pumpEventQueue();
 
-      await registrar(
-        storedValues: {PushDeviceRegistrar.userDeviceTokenKey: _apnToken},
-      ).unregisterDevice();
+      await instance.dispose().timeout(const Duration(seconds: 1));
+    });
+  });
 
-      // Only what the preferences remember; the platform has no token.
-      expect(deletedIds(), [_apnToken]);
+  group('a failing token stream', () {
+    test('is subscribed to again by the next registration', () async {
+      final failing = _PendingTokenSource();
+      final instance = registrarReading(failing);
+      instance.registerDevice();
+      failing.fail(StateError('offline'));
+      await pumpEventQueue();
+
+      instance.registerDevice();
+      failing.succeed(_voipToken);
+      await pumpEventQueue();
+
+      expect(createdIds(), [_voipToken]);
     });
   });
 }

@@ -6,7 +6,9 @@
 
 ### 🐞 Fixed
 
-- `StreamVideoPushNotificationManager.registerDevice` and `unregisterDevice` no longer depend on the shared preferences having loaded: registering right after `connect`, and unregistering on web and desktop, where the manager never loaded them, failed with a `LateInitializationError`.
+- `registerDevice` right after `connect`, and `unregisterDevice` on web and desktop, no longer throw.
+- A push token read that fails, such as while offline, is logged rather than reported as an uncaught error. The next `registerDevice` subscribes to the tokens again, and a device registration the backend refuses is logged.
+- `unregisterDevice` always stops registering refreshed tokens, still deletes the stored tokens when the current token cannot be read, and a registration still in flight no longer stores its token afterwards.
 
 ### 🔄 Changed
 

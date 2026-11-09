@@ -1,4 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -6,9 +7,7 @@ import '../../stream_video_push_notification_platform_interface.dart';
 import 'ringing_event_broadcaster.dart';
 
 /// One kind of device push token: where to read it and when it changes.
-///
-/// The registrar only knows this interface, so where a token comes from (a
-/// method channel, Firebase, a test) is the implementation's business.
+@internal
 abstract class PushTokenSource {
   const PushTokenSource();
 
@@ -28,6 +27,7 @@ abstract class PushTokenSource {
 }
 
 /// The PushKit VoIP token of this device. iOS only; empty elsewhere.
+@internal
 final class VoIPTokenSource extends PushTokenSource {
   const VoIPTokenSource();
 
@@ -55,6 +55,7 @@ final class VoIPTokenSource extends PushTokenSource {
 /// The APNs token of this device, as Firebase Messaging reports it. iOS only;
 /// null elsewhere. Used for the missed-call pushes an app opts into with
 /// `registerApnDeviceToken`. There is no refresh stream for it.
+@internal
 final class ApnsTokenSource extends PushTokenSource {
   const ApnsTokenSource();
 
@@ -73,6 +74,7 @@ final class ApnsTokenSource extends PushTokenSource {
 }
 
 /// The Firebase Cloud Messaging token of this device.
+@internal
 final class FcmTokenSource extends PushTokenSource {
   const FcmTokenSource();
 

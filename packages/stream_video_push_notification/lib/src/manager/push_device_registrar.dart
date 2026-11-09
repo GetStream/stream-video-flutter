@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -14,6 +15,7 @@ import 'push_token_source.dart';
 /// as well when the app asked for it, for missed-call pushes. Everything
 /// here waits for the shared preferences it caches tokens in, so it can be
 /// called straight after construction.
+@internal
 class PushDeviceRegistrar {
   PushDeviceRegistrar({
     required this._client,
@@ -44,13 +46,17 @@ class PushDeviceRegistrar {
   final Future<SharedPreferences>? _preferencesOverride;
 
   /// Loaded on first use, so building a registrar touches no platform
-  /// channel; off mobile nothing ever registers and nothing is loaded.
+  /// channel.
   late final Future<SharedPreferences> _preferences =
       _preferencesOverride ?? SharedPreferences.getInstance();
 
   final _logger = taggedLogger(tag: 'SV:PNRegistrar');
 
   StreamSubscription<String>? _tokenSubscription;
+
+  /// How many times the device was unregistered. A registration that started
+  /// before an unregister neither registers nor remembers its token.
+  int _unregistrations = 0;
 
   /// Whether the APNs token is registered next to the provider's token.
   bool get _registersApnsToken =>
@@ -78,9 +84,22 @@ class PushDeviceRegistrar {
       });
     }
 
-    _tokenSubscription ??= pushProvider.onTokenRefresh.listen(
+    if (_tokenSubscription != null) return;
+    late final StreamSubscription<String> subscription;
+    subscription = pushProvider.onTokenRefresh.listen(
       (token) => _register(token, pushProvider, isVoIP: true),
+      onError: (Object error) {
+        _logger.e(() => 'Reading the push token failed: $error');
+      },
+      // A stream that ended, after an error too, is subscribed to again by
+      // the next registration.
+      onDone: () {
+        if (identical(_tokenSubscription, subscription)) {
+          _tokenSubscription = null;
+        }
+      },
     );
+    _tokenSubscription = subscription;
   }
 
   /// Registers [token] with [pushProvider] unless it is the token registered
@@ -91,10 +110,11 @@ class PushDeviceRegistrar {
     required bool isVoIP,
   }) async {
     final tokenKey = isVoIP ? userDeviceTokenVoIPKey : userDeviceTokenKey;
+    final unregistrations = _unregistrations;
 
     final preferences = await _preferences;
     final storedToken = preferences.getString(tokenKey);
-    if (storedToken == token) return;
+    if (storedToken == token || unregistrations != _unregistrations) return;
 
     final result = await _client.createDevice(
       id: token,
@@ -102,18 +122,28 @@ class PushDeviceRegistrar {
       pushProvider: pushProvider.type,
       pushProviderName: pushProvider.name,
     );
+    if (unregistrations != _unregistrations) return;
     if (result is Success) {
       await preferences.setString(tokenKey, token);
+    } else {
+      _logger.w(() => 'Registering the push token failed: $result');
     }
   }
 
-  /// Deletes the device's tokens from the backend and forgets them.
+  /// Stops registering, deletes the device's tokens from the backend and
+  /// forgets them.
   Future<void> unregisterDevice() async {
-    final token = await _currentDeviceToken();
+    _stopTokenRefreshes();
+    _unregistrations++;
+
+    String? token;
+    try {
+      token = await _currentDeviceToken();
+    } catch (error) {
+      _logger.w(() => 'Reading the push token to delete failed: $error');
+    }
     if (token != null) {
       await _client.deleteDevice(id: token);
-      await _tokenSubscription?.cancel();
-      _tokenSubscription = null;
     }
 
     final preferences = await _preferences;
@@ -142,7 +172,19 @@ class PushDeviceRegistrar {
 
   /// Stops listening for token refreshes.
   Future<void> dispose() async {
-    await _tokenSubscription?.cancel();
+    _stopTokenRefreshes();
+  }
+
+  /// Cancels the token subscription without waiting for the cancel to
+  /// complete.
+  void _stopTokenRefreshes() {
+    final subscription = _tokenSubscription;
     _tokenSubscription = null;
+    unawaited(
+      subscription?.cancel().onError<Object>(
+        (error, _) =>
+            _logger.w(() => 'Stopping the token refreshes failed: $error'),
+      ),
+    );
   }
 }
