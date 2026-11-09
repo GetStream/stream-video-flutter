@@ -7,8 +7,6 @@ import '../stream_video_push_params.dart';
 import 'ringing_event_broadcaster.dart';
 
 /// Decides what [NativeCallController.endCallByCid] has to end for [cid].
-///
-/// Pulled out of the method so the choice can be tested on its own.
 @visibleForTesting
 ({bool endAll, List<CallData> calls}) resolveCallsToEnd(
   List<CallData> activeCalls,
@@ -25,13 +23,8 @@ import 'ringing_event_broadcaster.dart';
     return (endAll: true, calls: const []);
   }
 
-  // Calls the platform still has but that can no longer be identified.
-  //
-  // iOS reports a call the system knows about with nothing but its uuid once the in-process object
-  // describing it is gone — a CallKit call outliving the process that created it, after the app was
-  // killed, ran out of memory or was hot restarted. No cid can ever match those, so they used to
-  // fall through both branches untouched and the CallKit screen stayed up for the rest of the app's
-  // life. Nothing else can address them either, so this is the only chance to clear them.
+  // Calls the platform still has but that can no longer be identified: iOS reports a CallKit call
+  // that outlived the process that created it with its uuid only. They are ended too.
   final unidentified = activeCalls
       .where((call) => call.callCid == null && call.uuid != null)
       .toList();
@@ -44,6 +37,7 @@ import 'ringing_event_broadcaster.dart';
 /// notification and Telecom on Android), with the platform rules that go
 /// with them: which platform a command exists on, how a call is found by its
 /// cid, and which native echo of a command has to be suppressed.
+@internal
 class NativeCallController {
   NativeCallController({
     required this.configuration,
@@ -141,8 +135,7 @@ class NativeCallController {
   /// watch, headset or car head unit keep working. Only the caller knows which one it means —
   /// natively an accept and an accept that failed to join look identical.
   ///
-  /// On iOS there is nothing to keep: CallKit *is* the ring, and ending it is what dismissing it
-  /// means, so this behaves exactly as it always has.
+  /// On iOS this ends the call, since CallKit has nothing else to dismiss.
   Future<void> dismissRingingCallByCid(String cid) {
     if (CurrentPlatform.isIos) return endCallByCid(cid);
     return _resolvedPlatform.dismissRingingCall(cid);

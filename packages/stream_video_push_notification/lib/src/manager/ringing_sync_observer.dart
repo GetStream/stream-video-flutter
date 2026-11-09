@@ -33,7 +33,9 @@ bool isAcceptedOnThisDevice({
 ///
 /// The backend subscriptions live only while a call rings: they start with
 /// the incoming event (or at start-up when the native side still shows a
-/// call) and stop with the user's answer.
+/// call) and stop with the user's answer. Nothing is observed after
+/// [dispose].
+@internal
 class RingingSyncObserver {
   RingingSyncObserver({
     required this._streamVideo,
@@ -56,6 +58,8 @@ class RingingSyncObserver {
   /// The calls the app is in, as of the last state change.
   List<Call> _currentActiveCalls = [];
 
+  bool _disposed = false;
+
   /// Starts observing. Called once, on mobile only.
   void start() {
     _subscriptions.add(
@@ -73,6 +77,7 @@ class RingingSyncObserver {
                   '[activeCall] Stopping previous call: ${previousCall.callCid}',
             );
             await _controller.endCallByCid(previousCall.callCid.value);
+            if (_disposed) return;
           }
         }
 
@@ -81,11 +86,16 @@ class RingingSyncObserver {
     );
 
     // If there are active calls (for iOS) when connecting, subscribe to events as if the call was incoming.
-    _controller.activeCalls().then((calls) {
-      if (calls.isNotEmpty) {
-        _subscribeToEvents();
-      }
-    });
+    _controller
+        .activeCalls()
+        .then((calls) {
+          if (calls.isNotEmpty && !_disposed) {
+            _subscribeToEvents();
+          }
+        })
+        .catchError((Object e) {
+          _logger.w(() => '[start] Could not read the native calls: $e');
+        });
 
     _subscriptions.add(
       _idRinging,
@@ -111,18 +121,17 @@ class RingingSyncObserver {
     );
   }
 
-  /// Applies a CallKit mute to the call it names. The native side reports the
-  /// call's uuid; the matching active call is found through the cid the
-  /// native side holds for that uuid. A uuid the native side no longer knows
-  /// falls back to the call in the ringing flow, as every mute did before.
+  /// Applies a CallKit mute to the call it names, found through the cid the
+  /// native side holds for the event's uuid. When the native side does not
+  /// know the uuid or its cid, or cannot be asked, the mute goes to the call
+  /// in the ringing flow. When the uuid names a call the app is not in, the
+  /// mute is dropped.
   Future<void> _onToggleMute(ActionCallToggleMute event) async {
     _logger.d(
       () =>
           '[onCallEvent] ActionCallToggleMute received: uuid=${event.uuid}, isMuted=${event.isMuted}',
     );
 
-    // The lookup is a method-channel round trip; a failure there must not
-    // cost the mute, so it falls back to the rule below.
     var nativeCalls = const <CallData>[];
     try {
       nativeCalls = await _controller.activeCalls();
@@ -131,22 +140,24 @@ class RingingSyncObserver {
         () => '[onCallEvent] Could not read the native calls: $e\n$stk',
       );
     }
+    if (_disposed) return;
+
     final nativeCall = nativeCalls.firstWhereOrNull(
       (call) => call.uuid?.toLowerCase() == event.uuid.toLowerCase(),
     );
     final cid = nativeCall?.callCid;
-    final call =
-        (cid == null
-            ? null
-            : _currentActiveCalls.firstWhereOrNull(
-                (c) => c.callCid.value == cid,
-              )) ??
-        _currentActiveCalls.firstWhereOrNull(
-          (c) => c.state.value.isRingingFlow,
-        );
+    final call = cid == null
+        ? _currentActiveCalls.firstWhereOrNull(
+            (c) => c.state.value.isRingingFlow,
+          )
+        : _currentActiveCalls.firstWhereOrNull((c) => c.callCid.value == cid);
 
     if (call != null) {
       await call.setMicrophoneEnabled(enabled: !event.isMuted);
+    } else if (cid != null) {
+      _logger.w(
+        () => '[onCallEvent] Mute dropped: the app is not in call $cid',
+      );
     } else {
       _logger.w(() => '[onCallEvent] Cannot toggle mute: no active call');
     }
@@ -257,6 +268,7 @@ class RingingSyncObserver {
 
   /// Stops observing.
   void dispose() {
+    _disposed = true;
     _subscriptions.cancelAll();
   }
 }

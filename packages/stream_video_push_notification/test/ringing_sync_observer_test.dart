@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 // ignore: implementation_imports
@@ -224,6 +225,39 @@ void main() {
       verify(() => controller.endCallByCid(_cid.value)).called(1);
     });
 
+    test(
+      'do not start when disposed before the start-up probe returns',
+      () async {
+        final probe = Completer<List<CallData>>();
+        when(() => controller.activeCalls()).thenAnswer((_) => probe.future);
+        observer.start();
+        observer.dispose();
+        probe.complete([CallData(uuid: 'u1', callCid: _cid.value)]);
+        await pumpEventQueue();
+
+        backendEvents.emit(ended());
+        await pumpEventQueue();
+
+        verifyNever(
+          () => controller.endCallByCid(any(), silent: any(named: 'silent')),
+        );
+      },
+    );
+
+    test('a failing start-up probe is logged, not thrown', () async {
+      when(
+        () => controller.activeCalls(),
+      ).thenAnswer((_) => Future.error(PlatformException(code: 'channel')));
+
+      await start();
+
+      backendEvents.emit(ended());
+      await pumpEventQueue();
+      verifyNever(
+        () => controller.endCallByCid(any(), silent: any(named: 'silent')),
+      );
+    });
+
     test("stop with the user's answer", () async {
       await start();
       await ring();
@@ -381,6 +415,28 @@ void main() {
       verify(() => controller.endCallByCid(_cid.value)).called(1);
       verifyNever(() => controller.endCallByCid('default:other'));
     });
+
+    test('ends no more calls once disposed', () async {
+      await start();
+      final first = call(cid: _cid.value);
+      final second = call(cid: 'default:other');
+      activeCalls.value = [first, second];
+      await pumpEventQueue();
+      final ending = Completer<void>();
+      when(
+        () => controller.endCallByCid(any(), silent: any(named: 'silent')),
+      ).thenAnswer((_) => ending.future);
+
+      activeCalls.value = [];
+      await pumpEventQueue();
+      observer.dispose();
+      ending.complete();
+      await pumpEventQueue();
+
+      verify(
+        () => controller.endCallByCid(any(), silent: any(named: 'silent')),
+      ).called(1);
+    });
   });
 
   group('a CallKit mute', () {
@@ -423,7 +479,7 @@ void main() {
     );
 
     test(
-      'falls back when the native call has no active call behind it',
+      'is dropped when its uuid names a call the app is not in',
       () async {
         await start();
         final ringingCall = call(cid: _cid.value, isRingingFlow: true);
@@ -437,9 +493,10 @@ void main() {
         platform.emit(const ActionCallToggleMute(uuid: 'u1', isMuted: true));
         await pumpEventQueue();
 
-        verify(
-          () => ringingCall.setMicrophoneEnabled(enabled: false),
-        ).called(1);
+        verifyNever(
+          () =>
+              ringingCall.setMicrophoneEnabled(enabled: any(named: 'enabled')),
+        );
         verifyNever(
           () => other.setMicrophoneEnabled(enabled: any(named: 'enabled')),
         );
@@ -451,7 +508,9 @@ void main() {
       final ringingCall = call(cid: _cid.value, isRingingFlow: true);
       activeCalls.value = [ringingCall];
       await pumpEventQueue();
-      when(() => controller.activeCalls()).thenThrow(StateError('channel'));
+      when(
+        () => controller.activeCalls(),
+      ).thenAnswer((_) => Future.error(PlatformException(code: 'channel')));
 
       platform.emit(const ActionCallToggleMute(uuid: 'u1', isMuted: true));
       await pumpEventQueue();
@@ -461,12 +520,55 @@ void main() {
 
     test('does nothing without a call to apply it to', () async {
       await start();
+      final other = call(cid: 'default:other');
+      activeCalls.value = [other];
+      await pumpEventQueue();
 
       platform.emit(const ActionCallToggleMute(uuid: 'u1', isMuted: true));
       await pumpEventQueue();
 
-      // The lookup ran and found nothing; no call was touched, no error.
-      verify(() => controller.activeCalls()).called(greaterThan(1));
+      verifyNever(
+        () => other.setMicrophoneEnabled(enabled: any(named: 'enabled')),
+      );
+    });
+
+    test(
+      'falls back to the call in the ringing flow for a uuid without a cid',
+      () async {
+        when(() => controller.activeCalls()).thenAnswer(
+          (_) async => const [CallData(uuid: 'u1')],
+        );
+        await start();
+        final ringingCall = call(cid: _cid.value, isRingingFlow: true);
+        activeCalls.value = [ringingCall];
+        await pumpEventQueue();
+
+        platform.emit(const ActionCallToggleMute(uuid: 'u1', isMuted: true));
+        await pumpEventQueue();
+
+        verify(
+          () => ringingCall.setMicrophoneEnabled(enabled: false),
+        ).called(1);
+      },
+    );
+
+    test('is dropped when the observer is disposed meanwhile', () async {
+      await start();
+      final ringingCall = call(cid: _cid.value, isRingingFlow: true);
+      activeCalls.value = [ringingCall];
+      await pumpEventQueue();
+      final lookup = Completer<List<CallData>>();
+      when(() => controller.activeCalls()).thenAnswer((_) => lookup.future);
+
+      platform.emit(const ActionCallToggleMute(uuid: 'u1', isMuted: true));
+      await pumpEventQueue();
+      observer.dispose();
+      lookup.complete(const []);
+      await pumpEventQueue();
+
+      verifyNever(
+        () => ringingCall.setMicrophoneEnabled(enabled: any(named: 'enabled')),
+      );
     });
   });
 
