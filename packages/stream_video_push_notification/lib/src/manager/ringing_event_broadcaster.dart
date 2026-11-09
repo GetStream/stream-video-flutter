@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../stream_video_push_notification_platform_interface.dart';
@@ -8,17 +9,20 @@ import '../../stream_video_push_notification_platform_interface.dart';
 /// applies the suppressions the SDK asks for around its own native calls.
 ///
 /// One instance holds the single subscription to
-/// [StreamVideoPushNotificationPlatform.onEvent]; the event channel behind it
-/// must not be listened to twice, so everything that reads ringing events in a
-/// process goes through the same instance, [shared] unless one is injected.
+/// [StreamVideoPushNotificationPlatform.onEvent]. Everything that reads ringing
+/// events in a process goes through [shared].
+@internal
 final class RingingEventBroadcaster {
-  /// Creates a broadcaster over the given platform, or over
-  /// [StreamVideoPushNotificationPlatform.instance] when none is given.
-  RingingEventBroadcaster({this._platform});
+  /// A broadcaster over `platform`, for tests.
+  @visibleForTesting
+  RingingEventBroadcaster({required this._platform});
+
+  RingingEventBroadcaster._shared() : _platform = null;
 
   /// The process-wide broadcaster the manager and the token provider use.
-  /// Built on first use; the platform it reads is resolved on first listen.
-  static final shared = RingingEventBroadcaster();
+  /// Built on first use; it reads [StreamVideoPushNotificationPlatform.instance]
+  /// each time it starts listening.
+  static final shared = RingingEventBroadcaster._shared();
 
   static const _ringingEventSuppressionWindow = Duration(milliseconds: 500);
 
@@ -71,8 +75,10 @@ final class RingingEventBroadcaster {
   }
 
   Future<void> _stopListenEvent() async {
-    await _eventSubscription?.cancel();
+    // Clears the subscription before cancelling it.
+    final cancelled = _eventSubscription?.cancel();
     _eventSubscription = null;
+    await cancelled;
   }
 
   bool _shouldSuppressEvent(RingingEvent event) {

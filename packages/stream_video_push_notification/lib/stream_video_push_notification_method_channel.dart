@@ -150,9 +150,9 @@ class MethodChannelStreamVideoPushNotification
     for (final call in result) {
       try {
         calls.add(CallData.fromJson(call.cast<String, dynamic>()));
-      } catch (_) {
-        // An entry this version cannot read is skipped, as it always was.
-        continue;
+      } catch (error) {
+        // Entries that cannot be read are skipped.
+        _logger.w(() => 'Skipping an active call it cannot read: $error');
       }
     }
     return calls;

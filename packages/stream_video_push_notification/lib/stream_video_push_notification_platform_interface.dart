@@ -121,8 +121,7 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
   /// The calls the native side currently shows or tracks.
   ///
   /// On iOS: the calls CallKit knows about. On Android: the plugin's own
-  /// active-calls list. Entries the platform sends in a shape that cannot be
-  /// read are left out.
+  /// active-calls list. Implementations leave out entries they cannot read.
   Future<List<CallData>> activeCalls() {
     throw UnimplementedError('activeCalls() has not been implemented.');
   }

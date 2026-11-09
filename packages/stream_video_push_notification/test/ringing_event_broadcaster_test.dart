@@ -56,6 +56,23 @@ void main() {
     ]);
   });
 
+  test(
+    'a listener that subscribes while the last one is cancelling gets events',
+    () async {
+      unawaited(subscription.cancel());
+      final again = <RingingEvent>[];
+      final next = broadcaster.onEvent.listen(again.add);
+      addTearDown(next.cancel);
+      await pumpEventQueue();
+
+      platform.emit(ActionCallIncoming(data: _callData()));
+      await pumpEventQueue();
+
+      expect(again, [ActionCallIncoming(data: _callData())]);
+      expect(platform.listens, 2);
+    },
+  );
+
   test('holds one platform subscription for any number of listeners', () async {
     final other = <RingingEvent>[];
     final second = broadcaster.onEvent.listen(other.add);
@@ -118,7 +135,7 @@ void main() {
     );
 
     platform.emit(const ActionCallToggleMute(uuid: 'uuid-1', isMuted: true));
-    platform.emit(const ActionCallToggleMute(uuid: 'uuid-1', isMuted: true));
+    platform.emit(const ActionCallToggleMute(uuid: 'uuid-2', isMuted: true));
     await pumpEventQueue();
 
     expect(events, isEmpty);

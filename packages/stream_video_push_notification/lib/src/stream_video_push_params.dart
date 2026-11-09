@@ -36,8 +36,8 @@ class StreamVideoPushParams {
       _$StreamVideoPushParamsFromJson(json);
 
   /// The params for one call: [configuration]'s defaults with the call's own
-  /// fields on top. The avatar lands in the Android params, since only the
-  /// Android notification shows one; without Android params it is dropped.
+  /// fields on top. The avatar goes into the Android params; without them it
+  /// is dropped.
   @internal
   factory StreamVideoPushParams.forCall(
     StreamVideoPushConfiguration configuration, {
