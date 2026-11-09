@@ -202,7 +202,7 @@ StreamVideo _initStreamVideo(
         name: 'flutter-firebase',
       ),
       pushConfiguration: const StreamVideoPushConfiguration(
-        ios: IOSPushConfiguration(iconName: 'IconMask'),
+        ios: IOSPushConfiguration(iconName: 'IconMask', supportsHolding: true),
         android: AndroidPushConfiguration(
           defaultAvatar: 'assets/logo.png',
           telecom: TelecomPushConfiguration(

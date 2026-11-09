@@ -24,8 +24,8 @@ struct CallKitCallIdentity {
     /// The id events report the call by: the app id when it names the CallKit uuid, otherwise
     /// the lowercased uuid.
     var reportedId: String {
-        let lowercasedUUID = callKitUUID.uuidString.lowercased()
-        return appId.lowercased() == lowercasedUUID ? appId : lowercasedUUID
+        let known = ([callKitUUID] + previousCallKitUUIDs).map { $0.uuidString.lowercased() }
+        return known.contains(appId.lowercased()) ? appId : callKitUUID.uuidString.lowercased()
     }
 }
 

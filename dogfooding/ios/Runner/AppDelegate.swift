@@ -13,6 +13,16 @@ import stream_webrtc_flutter
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
+        // Hold spike (FLU-1213): turn on one experiment at a time, rebuild, then test.
+        // 1. A resume activation in the background keeps the audio engine stopped until the app
+        //    is active.
+        UserDefaults.standard.set(false, forKey: "io.getstream.holdSpike.deferEngineUntilActive")
+        // 2. After an unhold with no activation within a second, the app activates the session.
+        UserDefaults.standard.set(false, forKey: "io.getstream.holdSpike.activateAfterUnhold")
+        // 3. On an engine start failure or an unhold with no activation, the call is registered
+        //    with CallKit again, in the foreground.
+        UserDefaults.standard.set(false, forKey: "io.getstream.holdSpike.reRegister")
+
         // Register for push notifications.
         StreamVideoPKDelegateManager.shared.registerForPushNotifications()
         UNUserNotificationCenter.current().delegate = self

@@ -57,6 +57,9 @@ final class CallKitCallStore {
     }
 
     func call(forAppId id: String) -> CallKitCall? {
+        if let call = calls.first(where: { $0.identity.appId.lowercased() == id.lowercased() }) {
+            return call
+        }
         guard let uuid = UUID(uuidString: id) else { return nil }
         return call(forCallKit: uuid)
     }

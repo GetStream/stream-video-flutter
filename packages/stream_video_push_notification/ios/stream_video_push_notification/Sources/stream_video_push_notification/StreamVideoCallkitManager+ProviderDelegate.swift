@@ -9,6 +9,9 @@ extension StreamVideoCallkitManager {
     }
 
     public func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
+        if completeReRegistration(action) {
+            return
+        }
         guard let (call, effects) = store.startPerformed(uuid: action.callUUID) else {
             NSLog("startCall: no call data for \(action.callUUID), failing the start action")
             action.fail()
@@ -52,6 +55,10 @@ extension StreamVideoCallkitManager {
         }
         apply(effects)
         action.fulfill()
+        NSLog("[HoldSpike] CallKit \(action.isOnHold ? "held" : "resumed") \(action.callUUID)")
+        if !action.isOnHold {
+            audio.callResumed()
+        }
     }
 
     public func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {

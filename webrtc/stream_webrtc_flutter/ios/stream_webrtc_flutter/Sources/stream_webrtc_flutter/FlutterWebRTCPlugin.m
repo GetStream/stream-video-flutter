@@ -122,6 +122,63 @@ NSString* const FlutterWebRTCAudioSessionActiveKey = @"audioSessionActive";
 NSNotificationName const FlutterWebRTCAudioEngineStartFailedNotification =
     @"io.getstream.webrtc.audioEngineStartFailed";
 
+#if TARGET_OS_IPHONE
+/// Hold spike (FLU-1213): logs every change of WebRTC's audio session, with the caller of each
+/// deactivation. Spike code: not for merging.
+@interface HoldSpikeAudioSessionLogger : NSObject <RTCAudioSessionDelegate>
++ (void)start;
+@end
+
+@implementation HoldSpikeAudioSessionLogger
+
+static HoldSpikeAudioSessionLogger* holdSpikeLogger;
+
++ (void)start {
+  if (holdSpikeLogger != nil) {
+    return;
+  }
+  holdSpikeLogger = [HoldSpikeAudioSessionLogger new];
+  [[RTCAudioSession sharedInstance] addDelegate:holdSpikeLogger];
+}
+
+static NSString* HoldSpikeCallers(void) {
+  NSArray<NSString*>* symbols = [NSThread callStackSymbols];
+  NSRange range = NSMakeRange(0, MIN((NSUInteger)14, symbols.count));
+  return [[symbols subarrayWithRange:range] componentsJoinedByString:@"\n"];
+}
+
+- (void)audioSession:(RTCAudioSession*)session willSetActive:(BOOL)active {
+  NSLog(@"[HoldSpike] RTCAudioSession willSetActive %d, isActive %d\n%@", active,
+        session.isActive, active ? @"" : HoldSpikeCallers());
+}
+
+- (void)audioSession:(RTCAudioSession*)session didSetActive:(BOOL)active {
+  NSLog(@"[HoldSpike] RTCAudioSession didSetActive %d, isActive %d", active, session.isActive);
+}
+
+- (void)audioSession:(RTCAudioSession*)session
+    failedToSetActive:(BOOL)active
+                error:(NSError*)error {
+  NSLog(@"[HoldSpike] RTCAudioSession failedToSetActive %d: %@", active, error);
+}
+
+- (void)audioSessionDidBeginInterruption:(RTCAudioSession*)session {
+  NSLog(@"[HoldSpike] RTCAudioSession interruption began, isActive %d", session.isActive);
+}
+
+- (void)audioSessionDidEndInterruption:(RTCAudioSession*)session
+                   shouldResumeSession:(BOOL)shouldResumeSession {
+  NSLog(@"[HoldSpike] RTCAudioSession interruption ended, shouldResume %d, isActive %d",
+        shouldResumeSession, session.isActive);
+}
+
+- (void)audioSession:(RTCAudioSession*)session audioUnitStartFailedWithError:(NSError*)error {
+  NSLog(@"[HoldSpike] RTCAudioSession audio unit start failed: %@", error);
+}
+
+@end
+#endif
+
 @implementation FlutterWebRTCPlugin {
 #pragma clang diagnostic pop
   FlutterMethodChannel* _methodChannel;
@@ -259,6 +316,9 @@ static FlutterWebRTCPlugin* sharedSingleton;
     _eventChannel = eventChannel;
     _audioManager = AudioManager.sharedInstance;
     _audioEngineAvailable = YES;
+#if TARGET_OS_IPHONE
+    [HoldSpikeAudioSessionLogger start];
+#endif
     [[NSNotificationCenter defaultCenter]
         addObserver:self
            selector:@selector(handleAudioEngineAvailabilityNotification:)

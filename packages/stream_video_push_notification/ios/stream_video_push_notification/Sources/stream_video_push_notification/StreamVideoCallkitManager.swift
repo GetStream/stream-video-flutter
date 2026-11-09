@@ -21,11 +21,18 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
     var sharedProvider: CXProvider? = nil
 
+    /// Calls being registered with CallKit again, by their new uuid (hold spike).
+    var holdSpikeReRegistrations: [UUID: CallKitCall] = [:]
+
     private override init() {
         super.init()
         transactions.onEndRefused = { [weak self] uuid in
             self?.clearCallAfterRefusedEnd(uuid)
         }
+        audio.onRecoveryNeeded = { [weak self] reason in
+            self?.reRegisterLiveCall(reason: reason)
+        }
+        HoldSpike.logSwitches()
     }
 
     @objc public func getAcceptedCall() -> CallData? {
@@ -157,11 +164,11 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     @objc public func endCall(_ data: CallData) {
         let uuid: UUID
         if store.isFromPushKit {
-            uuid = UUID(uuidString: store.lastOptions!.uuid)!
+            uuid = currentCallKitUUID(forAppId: store.lastOptions!.uuid)!
             store.isFromPushKit = false
             self.sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_ENDED, data.toJSON())
         } else {
-            uuid = UUID(uuidString: data.uuid)!
+            uuid = currentCallKitUUID(forAppId: data.uuid)!
         }
         transactions.end(uuid: uuid)
     }
@@ -169,10 +176,10 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     @objc public func connectedCall(_ data: CallData) {
         let uuid: UUID
         if store.isFromPushKit {
-            uuid = UUID(uuidString: store.lastOptions!.uuid)!
+            uuid = currentCallKitUUID(forAppId: store.lastOptions!.uuid)!
             store.isFromPushKit = false
         } else {
-            uuid = UUID(uuidString: data.uuid)!
+            uuid = currentCallKitUUID(forAppId: data.uuid)!
         }
         guard let (call, effects) = store.connected(uuid: uuid) else {
             return
@@ -210,7 +217,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     /// `reason` matches the raw values of `CXCallEndedReason`: 1 failed, 2 remoteEnded,
     /// 3 unanswered, 4 answeredElsewhere, 5 declinedElsewhere.
     public func saveEndCall(_ uuid: String, _ reason: Int) {
-        guard let callUUID = UUID(uuidString: uuid) else {
+        guard let callUUID = currentCallKitUUID(forAppId: uuid) else {
             NSLog("saveEndCall: invalid UUID \(uuid)")
             return
         }
