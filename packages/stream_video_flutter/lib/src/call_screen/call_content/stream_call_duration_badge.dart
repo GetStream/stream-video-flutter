@@ -293,16 +293,18 @@ class _StreamCallDurationBadgeStyleDefaults
       );
 
   @override
-  double get contentHeight => _style?.contentHeight ?? indicatorSize;
+  double get contentHeight => _style?.contentHeight ?? 20;
 
   @override
-  double get spacing => _style?.spacing ?? _spacing.xs;
+  double get spacing =>
+      _style?.spacing ?? (isDesktopOrWeb ? _spacing.xxs : _spacing.xs);
 
   @override
   double get indicatorSpacing => _style?.indicatorSpacing ?? _spacing.xxxs;
 
   @override
-  double get indicatorSize => _style?.indicatorSize ?? 20;
+  double get indicatorSize =>
+      _style?.indicatorSize ?? (isDesktopOrWeb ? 16 : 20);
 
   @override
   Color get backgroundColor =>
@@ -312,19 +314,23 @@ class _StreamCallDurationBadgeStyleDefaults
   BorderRadiusGeometry get borderRadius =>
       _style?.borderRadius ?? BorderRadius.all(_context.streamRadius.xxxl);
 
+  // `captionEmphasis` on desktop and web and `bodyEmphasis` on mobile.
   // `height: 1` so the digits centre against the indicators rather than sitting
-  // in the 20pt line box `bodyEmphasis` carries, and tabular figures so the
-  // pill holds still as the seconds tick — a proportional `1` is narrower than
-  // a `9`. A style of the caller's merges onto both, so naming a size or a
-  // colour does not drop them.
+  // in the 20pt line box the style carries, and tabular figures so the pill
+  // holds still as the seconds tick — a proportional `1` is narrower than a
+  // `9`. A style of the caller's merges onto both, so naming a size or a colour
+  // does not drop them.
   @override
-  TextStyle get textStyle => _context.streamTextTheme.bodyEmphasis
-      .copyWith(
-        color: _colorScheme.textTertiary,
-        height: 1,
-        fontFeatures: const [FontFeature.tabularFigures()],
-      )
-      .merge(_style?.textStyle);
+  TextStyle get textStyle =>
+      (isDesktopOrWeb
+              ? _context.streamTextTheme.captionEmphasis
+              : _context.streamTextTheme.bodyEmphasis)
+          .copyWith(
+            color: _colorScheme.textTertiary,
+            height: 1,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          )
+          .merge(_style?.textStyle);
 
   @override
   Color get elapsedTextColor =>

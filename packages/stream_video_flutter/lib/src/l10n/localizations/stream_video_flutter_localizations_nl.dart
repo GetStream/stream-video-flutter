@@ -238,6 +238,25 @@ class StreamVideoFlutterLocalizationsNl
   }
 
   @override
+  String callParticipantsSpoken(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count deelnemers',
+      one: '1 deelnemer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callLatencySpoken(int latency) {
+    return 'Vertraging $latency milliseconden';
+  }
+
+  @override
+  String get callLatencyUnknownSpoken => 'Vertraging nog niet gemeten';
+
+  @override
   String get ringingIncomingCall => 'Inkomende oproep';
 
   @override
