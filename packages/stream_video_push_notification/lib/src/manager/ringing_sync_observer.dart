@@ -64,25 +64,7 @@ class RingingSyncObserver {
   void start() {
     _subscriptions.add(
       _idActiveCall,
-      _streamVideo.state.activeCalls.listen((calls) async {
-        _logger.d(
-          () =>
-              '[activeCall] Active calls changed to [${calls.map((c) => c.callCid).join(', ')}]',
-        );
-
-        for (final previousCall in _currentActiveCalls) {
-          if (!calls.any((c) => c.callCid == previousCall.callCid)) {
-            _logger.d(
-              () =>
-                  '[activeCall] Stopping previous call: ${previousCall.callCid}',
-            );
-            await _controller.endCallByCid(previousCall.callCid.value);
-            if (_disposed) return;
-          }
-        }
-
-        _currentActiveCalls = calls;
-      }),
+      _streamVideo.state.activeCalls.listen(_onActiveCallsChanged),
     );
 
     // If there are active calls (for iOS) when connecting, subscribe to events as if the call was incoming.
@@ -97,28 +79,47 @@ class RingingSyncObserver {
           _logger.w(() => '[start] Could not read the native calls: $e');
         });
 
-    _subscriptions.add(
-      _idRinging,
-      _ringingEvents.listen((event) {
-        if (event is ActionCallToggleMute) {
-          _onToggleMute(event);
-        } else if (event is ActionCallIncoming) {
-          if (!_client.isConnected) {
-            _client.openConnection();
-          }
+    _subscriptions.add(_idRinging, _ringingEvents.listen(_onRingingEvent));
+  }
 
-          _subscribeToEvents();
-        } else if (event is ActionCallAccept ||
-            event is ActionCallDecline ||
-            event is ActionCallTimeout ||
-            event is ActionCallEnded) {
-          _subscriptions.cancel(_idCallAccepted);
-          _subscriptions.cancel(_idCallEnded);
-          _subscriptions.cancel(_idCallRejected);
-          _subscriptions.cancel(_idCallParticipantCount);
-        }
-      }),
+  /// Ends the native call of every call the app left.
+  Future<void> _onActiveCallsChanged(List<Call> calls) async {
+    _logger.d(
+      () =>
+          '[activeCall] Active calls changed to [${calls.map((c) => c.callCid).join(', ')}]',
     );
+
+    for (final previousCall in _currentActiveCalls) {
+      if (calls.any((c) => c.callCid == previousCall.callCid)) continue;
+      _logger.d(
+        () => '[activeCall] Stopping previous call: ${previousCall.callCid}',
+      );
+      await _controller.endCallByCid(previousCall.callCid.value);
+      if (_disposed) return;
+    }
+
+    _currentActiveCalls = calls;
+  }
+
+  /// Starts the backend subscriptions on a ring and stops them with the
+  /// user's answer; mirrors a CallKit mute.
+  void _onRingingEvent(RingingEvent event) {
+    if (event is ActionCallToggleMute) {
+      _onToggleMute(event);
+    } else if (event is ActionCallIncoming) {
+      if (!_client.isConnected) {
+        _client.openConnection();
+      }
+      _subscribeToEvents();
+    } else if (event is ActionCallAccept ||
+        event is ActionCallDecline ||
+        event is ActionCallTimeout ||
+        event is ActionCallEnded) {
+      _subscriptions.cancel(_idCallAccepted);
+      _subscriptions.cancel(_idCallEnded);
+      _subscriptions.cancel(_idCallRejected);
+      _subscriptions.cancel(_idCallParticipantCount);
+    }
   }
 
   /// Applies a CallKit mute to the call it names, found through the cid the
@@ -146,11 +147,10 @@ class RingingSyncObserver {
       (call) => call.uuid?.toLowerCase() == event.uuid.toLowerCase(),
     );
     final cid = nativeCall?.callCid;
+    final activeCalls = _streamVideo.state.activeCalls.value;
     final call = cid == null
-        ? _currentActiveCalls.firstWhereOrNull(
-            (c) => c.state.value.isRingingFlow,
-          )
-        : _currentActiveCalls.firstWhereOrNull((c) => c.callCid.value == cid);
+        ? activeCalls.firstWhereOrNull((c) => c.state.value.isRingingFlow)
+        : activeCalls.firstWhereOrNull((c) => c.callCid.value == cid);
 
     if (call != null) {
       await call.setMicrophoneEnabled(enabled: !event.isMuted);

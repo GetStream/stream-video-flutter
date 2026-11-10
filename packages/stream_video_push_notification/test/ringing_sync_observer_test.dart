@@ -258,19 +258,26 @@ void main() {
       );
     });
 
-    test("stop with the user's answer", () async {
-      await start();
-      await ring();
-      platform.emit(ActionCallAccept(data: CallData(callCid: _cid.value)));
-      await pumpEventQueue();
+    for (final (name, answer) in <(String, RingingEvent Function())>[
+      ('accept', () => ActionCallAccept(data: CallData(callCid: _cid.value))),
+      ('decline', () => ActionCallDecline(data: CallData(callCid: _cid.value))),
+      ('timeout', () => ActionCallTimeout(data: CallData(callCid: _cid.value))),
+      ('ended', () => ActionCallEnded(data: CallData(callCid: _cid.value))),
+    ]) {
+      test("stop with the user's answer: $name", () async {
+        await start();
+        await ring();
+        platform.emit(answer());
+        await pumpEventQueue();
 
-      backendEvents.emit(ended());
-      await pumpEventQueue();
+        backendEvents.emit(ended());
+        await pumpEventQueue();
 
-      verifyNever(
-        () => controller.endCallByCid(any(), silent: any(named: 'silent')),
-      );
-    });
+        verifyNever(
+          () => controller.endCallByCid(any(), silent: any(named: 'silent')),
+        );
+      });
+    }
 
     test(
       'the incoming event opens the backend connection when closed',
@@ -458,6 +465,32 @@ void main() {
         () => other.setMicrophoneEnabled(enabled: any(named: 'enabled')),
       );
     });
+
+    test(
+      'reaches a call just joined while an earlier call is still ending',
+      () async {
+        await start();
+        final left = call(cid: 'default:left');
+        activeCalls.value = [left];
+        await pumpEventQueue();
+        final ending = Completer<void>();
+        when(
+          () => controller.endCallByCid(any(), silent: any(named: 'silent')),
+        ).thenAnswer((_) => ending.future);
+        final joined = call(cid: _cid.value);
+        activeCalls.value = [joined];
+        await pumpEventQueue();
+        when(() => controller.activeCalls()).thenAnswer(
+          (_) async => [CallData(uuid: 'u1', callCid: _cid.value)],
+        );
+
+        platform.emit(const ActionCallToggleMute(uuid: 'u1', isMuted: true));
+        await pumpEventQueue();
+        ending.complete();
+
+        verify(() => joined.setMicrophoneEnabled(enabled: false)).called(1);
+      },
+    );
 
     test(
       'falls back to the call in the ringing flow for an unknown uuid',
