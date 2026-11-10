@@ -84,6 +84,11 @@ class StreamCallParticipantsBadgeThemeData
 
 /// Visual styling properties for a [StreamCallParticipantsBadge].
 ///
+/// When null, [padding], [contentHeight], [spacing], [iconSize],
+/// [backgroundColor], [borderRadius] and [textStyle] fall back to the shared
+/// [StreamCallBadgeStyle] on [StreamCallBadgeTheme], so one theme can restyle
+/// every call badge.
+///
 /// Defaults that differ between desktop and web on one side and mobile on the
 /// other are noted per field.
 @themeGen
